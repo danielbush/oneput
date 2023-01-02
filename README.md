@@ -13,6 +13,16 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
 
 ## Synopsis
 
+To see examples:
+
+```sh
+pnpm --filter sbr-hyper-core run dev
+```
+
+and go to http://127.0.0.1:8080/src/examples/index.html .
+
+To run tests:
+
 ```sh
 pnpm --filter sbr-hyper-core run test:watch
 ```

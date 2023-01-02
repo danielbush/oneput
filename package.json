@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build": "rimraf build && tsc",
+    "build:watch": "rimraf build && tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
-    "dev": "node ../../node_modules/.bin/live-server src/examples/index.html"
+    "dev": "node ./scripts/live-server.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,7 @@
     "@types/marked": "^4.0.8",
     "jsdom": "^20.0.3",
     "live-server": "^1.2.2",
+    "rimraf": "^3.0.2",
     "ts-jest": "^26.5.4",
     "typescript": "^4.9.4"
   },

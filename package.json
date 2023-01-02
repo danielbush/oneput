@@ -8,7 +8,8 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "dev": "node ../../node_modules/.bin/live-server src/examples/index.html"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +19,7 @@
     "@types/jsdom": "^20.0.1",
     "@types/marked": "^4.0.8",
     "jsdom": "^20.0.3",
+    "live-server": "^1.2.2",
     "ts-jest": "^26.5.4",
     "typescript": "^4.9.4"
   },

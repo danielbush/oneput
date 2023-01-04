@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { describe, expect, test } from '@jest/globals';
 import { JSDOM } from 'jsdom';
 import List from '../list';

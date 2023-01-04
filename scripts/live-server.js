@@ -12,9 +12,10 @@ const params = {
   logLevel: 2, // 0 = errors only, 1 = some, 2 = lots
   middleware: [
     function (req, res, next) {
+      const url = req.url;
       if (req.url.startsWith('/build') && !req.url.endsWith('.js')) {
-        console.log(`Rewriting ${req.url}`);
         req.url += '.js';
+        console.log(`Rewriting ${url} -> ${req.url}`);
       } else {
         console.log(`Not rewriting ${req.url}`);
       }

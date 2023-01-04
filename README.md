@@ -16,6 +16,7 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
 To see examples:
 
 ```sh
+pnpm --filter sbr-hyper-core run build:watch # enusres /build/** is available in index.html
 pnpm --filter sbr-hyper-core run dev
 ```
 

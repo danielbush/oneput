@@ -7,9 +7,12 @@
     "check": "tsc --noEmit",
     "build": "rimraf build && tsc",
     "build:watch": "rimraf build && tsc --watch",
+    "build:cjs": "rimraf dist && tsc --module commonjs --target es5 --outDir dist/cjs",
+    "build:cjs:watch": "rimraf dist && tsc --watch --module commonjs --target es5 --outDir dist/cjs",
     "test": "jest",
     "test:watch": "jest --watch",
-    "dev": "node ./scripts/live-server.js"
+    "dev": "node ./scripts/live-server.js",
+    "convert": "node ./dist/cjs/cli/convert.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +26,7 @@
     "live-server": "^1.2.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.5.4",
+    "ts-node": "^10.7.0",
     "typescript": "^4.9.4"
   },
   "dependencies": {

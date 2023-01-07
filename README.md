@@ -22,6 +22,13 @@ pnpm --filter sbr-hyper-core run dev
 
 and go to http://127.0.0.1:8080/src/examples/index.html .
 
+### Convert CLI
+
+```sh
+pnpm --filter sbr-hyper-core run build:cjs:watch
+pnpm --filter sbr-hyper-core run convert src/convert/tmp/ng-ml.md | less
+```
+
 ## Tests
 
 ```sh

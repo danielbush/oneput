@@ -1,8 +1,9 @@
-import { marked } from 'marked';
+import MarkdownIt from 'markdown-it';
 
 function convert(markdown: string): string {
-  const md = marked.parse(markdown, { breaks: false });
-  return md;
+  const md = new MarkdownIt();
+  const result = md.render(markdown);
+  return result;
 }
 
 export { convert };

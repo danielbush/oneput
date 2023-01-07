@@ -15,18 +15,13 @@ describe('convert', () => {
   describe('converting normal markdown', () => {
     test('title', () => {
       const md = convert('# test');
-      expect(md).toEqual(j('<h1 id="test">test</h1>', ''));
+      expect(md).toEqual(j('<h1>test</h1>', ''));
     });
 
     test('title outline', () => {
       const md = convert('# level 1\n\nword\n\n## level 2');
       expect(md).toEqual(
-        j(
-          '<h1 id="level-1">level 1</h1>',
-          '<p>word</p>',
-          '<h2 id="level-2">level 2</h2>',
-          '',
-        ),
+        j('<h1>level 1</h1>', '<p>word</p>', '<h2>level 2</h2>', ''),
       );
     });
   });

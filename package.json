@@ -16,9 +16,9 @@
   "license": "ISC",
   "devDependencies": {
     "@jest/globals": "^29.3.1",
+    "@types/jest": "^26.0.22",
     "@types/jsdom": "^20.0.1",
     "@types/markdown-it": "^12.2.3",
-    "@types/marked": "^4.0.8",
     "jsdom": "^20.0.3",
     "live-server": "^1.2.2",
     "rimraf": "^3.0.2",
@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
-    "markdown-it": "^13.0.1",
-    "marked": "^4.2.5"
+    "markdown-it": "^13.0.1"
   }
 }

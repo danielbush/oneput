@@ -26,10 +26,9 @@ and go to http://127.0.0.1:8080/src/examples/index.html .
 
 ```sh
 pnpm --filter sbr-hyper-core run build:cjs:watch
-pnpm --filter sbr-hyper-core run convert src/convert/tmp/ng-ml.md | less
+pnpm --filter sbr-hyper-core run convert src/convert/tmp/ng-ml.md >ng-ml.html
+live-server --port=8090 .
 ```
-
-## Tests
 
 ```sh
 pnpm --filter sbr-hyper-core run test:watch

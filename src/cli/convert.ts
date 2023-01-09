@@ -14,5 +14,39 @@ if (!fs.existsSync(file)) {
 
 const content = fs.readFileSync(file, 'utf-8');
 const html = convert(content);
-process.stdout.write(html);
+
+// See https://github.com/iktakahiro/markdown-it-katex for <link> tag for katex etc.
+
+const templ = (title: string, content: string) => `<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="Description" content="Put your description here.">
+  <base href="/">
+
+  <style>
+    html,
+    body {
+      /*
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background-color: #ededed;
+      */
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"/>
+  <title>test-app-shell</title>
+</head>
+
+<body>
+  ${content}
+</body>
+
+</html>`;
+
+process.stdout.write(templ(file, html));
 // console.log(html);

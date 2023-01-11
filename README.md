@@ -13,22 +13,17 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
 
 ## Synopsis
 
-To see examples:
-
 ```sh
 pnpm --filter sbr-hyper-core run build:watch # enusres /build/** is available in index.html
 pnpm --filter sbr-hyper-core run dev
 ```
 
-and go to http://127.0.0.1:8080/src/examples/index.html .
-
-### Convert CLI
-
 ```sh
-pnpm --filter sbr-hyper-core run build:cjs:watch
-pnpm --filter sbr-hyper-core run convert src/convert/tmp/ng-ml.md >ng-ml.html
-live-server --port=8090 .
+pnpm --filter sbr-hyper-core run convert:ng-ml
 ```
+
+- http://127.0.0.1:8080/src/examples/ng-ml/
+- http://127.0.0.1:8080/src/examples/index.html .
 
 ```sh
 pnpm --filter sbr-hyper-core run test:watch

@@ -21,35 +21,5 @@ describe('loading', () => {
     load(body);
   });
 
-  it('will focus on the first Element by default', () => {
-    // Arrange
-    const dom = new JSDOM(EXAMPLE.simpleList);
-    const body = dom.window.document.querySelector('body')!;
-
-    // Act
-    load(body);
-
-    // Assert
-    const ul = body.querySelector('ul')!;
-    expect(Array.from(ul.classList)).toEqual(['sbr-focus']);
-    expect(ul.getAttribute('tabindex')).toEqual('0');
-  });
-});
-
-describe('loaded', () => {
-  it('lets me focus on content in source order by tab', () => {
-    // Arrange - load a list and focus on it
-    const dom = new JSDOM(EXAMPLE.simpleList);
-    const body = dom.window.document.querySelector('body')!;
-    load(body);
-    const ul = body.querySelector('ul')!;
-
-    // Act
-    // fire tab event, check element, repeat
-    throw new Error('todo');
-  });
-
-  it.todo('should focus an element if I touch or click it');
-  it.todo('lets me focus on first child by key eg vim keys');
-  it.todo('lets me focus on next sibling');
+  it.todo('does not navigate script elements');
 });

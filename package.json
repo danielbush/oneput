@@ -5,14 +5,14 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "rimraf build && tsc",
-    "build:watch": "rimraf build && tsc --watch",
-    "build:cjs": "rimraf dist && tsc --module commonjs --target es5 --outDir dist/cjs",
-    "build:cjs:watch": "rimraf dist && tsc --watch --module commonjs --target es5 --outDir dist/cjs",
+    "build": "rimraf dist && ( npm run build:es & npm run build:cjs )",
+    "build:watch": "nodemon --exec 'npm run build'",
+    "build:es": "tsc --outDir dist/es --module ES2020 --target ES2018",
+    "build:cjs": "tsc --outDir dist/cjs --module commonjs --target es5",
     "test": "jest",
     "test:watch": "jest --watch",
     "dev": "node ./scripts/live-server.js",
-    "convert": "node ./dist/cjs/cli/convert.js"
+    "convert:ng-ml": "nodemon --exec 'node ./dist/cjs/cli/convert.js src/examples/ng-ml/index.md >src/examples/ng-ml/index.html'"
   },
   "keywords": [],
   "author": "",
@@ -32,5 +32,19 @@
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "markdown-it": "^13.0.1"
+  },
+  "nodemonConfig": {
+    "ext": "ts,js,mjs,yaml,yml,json",
+    "watch": [
+      "src"
+    ],
+    "ignore": [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/test/**",
+      "**/docs/**"
+    ],
+    "delay": 2500
   }
 }

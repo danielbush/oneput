@@ -1,13 +1,10 @@
 function load(root: Element): void {
-  const child: Element | undefined = root.children[0];
-  if (child) {
-    loadElement(child);
-    return;
+  for (const child of root.children) {
+    if (child instanceof HTMLScriptElement) {
+      continue;
+    }
+    child.setAttribute('tabindex', '0');
   }
-}
-
-function loadElement(child: Element): void {
-  child.classList.add('sbr-focus');
 }
 
 export { load };

@@ -44,6 +44,7 @@ const templ = (title: string, content: string) => `<!doctype html>
 
 <body>
   ${content}
+  <script type="module" src="dist/es/sketch.js"></script>
 </body>
 
 </html>`;

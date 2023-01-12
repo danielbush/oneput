@@ -1,9 +1,16 @@
 function load(root: Element): void {
-  for (const child of root.children) {
-    if (child instanceof HTMLScriptElement) {
-      continue;
+  walk(root, (el) => {
+    if (el instanceof HTMLScriptElement) {
+      return;
     }
-    child.setAttribute('tabindex', '0');
+    el.setAttribute('tabindex', '0');
+  });
+}
+
+function walk(root: Element, visit: (el: Element) => void): void {
+  for (const child of root.children) {
+    visit(child);
+    walk(child, visit);
   }
 }
 

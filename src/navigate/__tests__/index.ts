@@ -22,4 +22,5 @@ describe('loading', () => {
   });
 
   it.todo('does not navigate script elements');
+  it.todo('should navigate into chidren first before siblings');
 });

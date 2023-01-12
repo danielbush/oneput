@@ -19,6 +19,7 @@ pnpm --filter sbr-hyper-core run dev
 ```
 
 ```sh
+cp -i ~/work/2br-danb2/.fold/idable/6058d8eb-5ef6-4c22-8bb4-2a15aa2252a7/content.md ~/projects/2br-spaces-dev/packages/sbr-hyper-core/src/examples/ng-ml/index.md
 pnpm --filter sbr-hyper-core run convert:ng-ml
 ```
 

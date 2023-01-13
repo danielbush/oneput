@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`serializing removes tabIndexes 1`] = `"<body><ul><li>item 1</li><li>item 2</li></ul></body>"`;
+exports[`loader can load the document 1`] = `"<body><ul tabindex=\\"0\\"><li tabindex=\\"0\\">item 1</li><li tabindex=\\"0\\">item 2</li></ul></body>"`;
+
+exports[`serializer removes tabIndexes 1`] = `"<body><ul><li>item 1</li><li>item 2</li></ul></body>"`;

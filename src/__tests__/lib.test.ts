@@ -11,7 +11,7 @@ const EXAMPLE = {
   simpleList: makeDoc('<ul><li>item 1</li><li>item 2</li></ul>'),
 };
 
-describe('loading', () => {
+describe('loader', () => {
   it('can load the document', () => {
     // arrange
     const dom = new JSDOM(EXAMPLE.simpleList);
@@ -19,6 +19,8 @@ describe('loading', () => {
 
     // act
     load(body);
+
+    expect(body.outerHTML).toMatchSnapshot();
   });
 });
 
@@ -27,7 +29,7 @@ describe('navigator', () => {
   it.todo('it should keyboard tab depth-first');
 });
 
-describe('serializing', () => {
+describe('serializer', () => {
   it('removes tabIndexes', () => {
     // arrange
     const dom = new JSDOM(EXAMPLE.simpleList);

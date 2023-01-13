@@ -1,4 +1,4 @@
-import { convert } from '../convert/index';
+import { convert } from '../convert';
 import * as fs from 'fs';
 
 const file = process.argv[2];

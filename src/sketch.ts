@@ -1,4 +1,4 @@
-import { load } from './navigate';
+import { load } from './lib';
 
 console.log('start coding here', load);
 document.addEventListener('focusin', (evt) => {

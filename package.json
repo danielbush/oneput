@@ -10,6 +10,7 @@
     "build:es": "tsc --outDir dist/es --module ES2020",
     "build:cjs": "tsc --outDir dist/cjs --module commonjs",
     "test": "jest",
+    "test:update": "jest -u",
     "test:watch": "jest --watch",
     "dev": "node ./scripts/live-server.js",
     "convert:ng-ml": "nodemon --exec 'node ./dist/cjs/cli/convert.js src/examples/ng-ml/index.md >src/examples/ng-ml/index.html'"

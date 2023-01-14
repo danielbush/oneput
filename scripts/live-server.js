@@ -13,7 +13,10 @@ const params = {
   middleware: [
     function (req, res, next) {
       const url = req.url;
-      if (req.url.startsWith('/dist') && !req.url.endsWith('.js')) {
+      if (
+        req.url.startsWith('/dist') &&
+        !(req.url.endsWith('.js') || req.url.endsWith('.css'))
+      ) {
         req.url += '.js';
         console.log(`Rewriting ${url} -> ${req.url}`);
       } else {

@@ -5,6 +5,19 @@ function load(root: Element): void {
     TABS.add(el);
     el.setAttribute('tabindex', '0');
   });
+  root.addEventListener('click', handleElementClick);
+}
+
+function handleElementClick(evt: Event) {
+  const el = evt.target;
+  if (!el) {
+    return;
+  }
+  if (el instanceof HTMLElement) {
+    if (TABS.has(el)) {
+      el.focus();
+    }
+  }
 }
 
 function walk(root: Element, visit: (el: Element) => void): void {
@@ -12,8 +25,10 @@ function walk(root: Element, visit: (el: Element) => void): void {
     if (child instanceof HTMLScriptElement) {
       return;
     }
-    visit(child);
-    walk(child, visit);
+    if (child instanceof HTMLElement) {
+      visit(child);
+      walk(child, visit);
+    }
   }
 }
 

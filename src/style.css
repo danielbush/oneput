@@ -1,0 +1,7 @@
+*:focus {
+  background-color: greenyellow;
+  outline: dotted red 1px;
+}
+*[tabindex='0'] {
+  cursor: pointer;
+}

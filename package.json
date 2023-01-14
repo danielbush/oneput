@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "rimraf dist && ( npm run build:es & npm run build:cjs )",
+    "build": "rimraf dist && mkdir -p dist/es && ( npm run build:es & npm run build:cjs & npm run build:style )",
     "build:watch": "nodemon --exec 'npm run build'",
     "build:es": "tsc --outDir dist/es --module ES2020",
     "build:cjs": "tsc --outDir dist/cjs --module commonjs",
+    "build:style": "cp src/style.css dist/es/",
     "test": "jest",
     "test:update": "jest -u",
     "test:watch": "jest --watch",

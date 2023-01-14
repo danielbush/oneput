@@ -6,10 +6,15 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
   - convert existing markdown (as used by the author in `apps/fold`)
 - `navigate`
   - the idea is to take html (including markdown converted by `convert`) and be able to navigate it
+- `modify`
 - `extend`
   - we want to not just navigate html, we want to extend it; think checkboxes with state on list items
 - `edit`
   - when we get to text, we want to be able to edit it
+- `serialize`
+  - when we save we need to generate a version of the edited content without any any temporary artifacts from the navigator
+- `unload`
+  - be able to leave the html the way we found it if this program is exited
 
 ## Synopsis
 
@@ -29,3 +34,9 @@ pnpm --filter sbr-hyper-core run convert:ng-ml
 ```sh
 pnpm --filter sbr-hyper-core run test:watch
 ```
+
+## Learnings
+
+- `.children` instead of `.childNodes` to focus on `Element`s
+- `HTMLElement` is focusable
+- we can style on `:focus` and set `outline`; setting outline makes the focus ring show on focus() calls made on click events

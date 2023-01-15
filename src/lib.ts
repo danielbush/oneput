@@ -13,7 +13,7 @@ function handleElementClick(evt: Event) {
   if (!el) {
     return;
   }
-  if (el instanceof HTMLElement) {
+  if (el instanceof window.HTMLElement) {
     if (TABS.has(el)) {
       el.focus();
     }
@@ -22,10 +22,10 @@ function handleElementClick(evt: Event) {
 
 function walk(root: Element, visit: (el: Element) => void): void {
   for (const child of root.children) {
-    if (child instanceof HTMLScriptElement) {
+    if (child instanceof window.HTMLScriptElement) {
       return;
     }
-    if (child instanceof HTMLElement) {
+    if (child instanceof window.HTMLElement) {
       visit(child);
       walk(child, visit);
     }

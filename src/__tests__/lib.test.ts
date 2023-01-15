@@ -11,15 +11,29 @@ const EXAMPLE = {
   simpleList: makeDoc('<ul><li>item 1</li><li>item 2</li></ul>'),
 };
 
+/**
+ * globalThis.window.HTMLElement etc !== dom.window.HTMLElement (jsdom)
+ * https://stackoverflow.com/questions/40449434/mocking-globals-in-jest
+ */
+function mockWindow(dom: JSDOM) {
+  const jsdomWindow = dom.window;
+  Object.defineProperty(global, 'window', {
+    value: jsdomWindow,
+    writable: true,
+  });
+}
+
 describe('loader', () => {
   it('can load the document', () => {
     // arrange
     const dom = new JSDOM(EXAMPLE.simpleList);
     const body = dom.window.document.querySelector('body')!;
+    mockWindow(dom);
 
     // act
     load(body);
 
+    // assert
     expect(body.outerHTML).toMatchSnapshot();
   });
 });

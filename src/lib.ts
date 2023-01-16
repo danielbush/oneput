@@ -1,4 +1,5 @@
 const TABS = new Set<Element>();
+const SIB_FOCUS = new Set<Element>();
 
 function load(root: Element): void {
   walk(root, (el) => {
@@ -6,6 +7,35 @@ function load(root: Element): void {
     el.setAttribute('tabindex', '0');
   });
   root.addEventListener('click', handleElementClick);
+  root.addEventListener('focusin', handleNewFocus);
+}
+
+function handleNewFocus(evt: Event) {
+  if (evt instanceof FocusEvent) {
+    showCurrentSiblings();
+    console.log('focus', evt.relatedTarget, evt.target);
+  }
+}
+
+function clearCurrentSiblings(): void {
+  for (const sib of SIB_FOCUS) {
+    sib.classList.remove('sbr-focus-sibling');
+  }
+  SIB_FOCUS.clear();
+}
+
+function showCurrentSiblings(): void {
+  clearCurrentSiblings();
+  const active = document.activeElement;
+  const pnode = active?.parentElement;
+  if (active && pnode && TABS.has(active)) {
+    for (const child of pnode.children) {
+      if (TABS.has(child) && child !== active) {
+        SIB_FOCUS.add(child);
+        child.classList.add('sbr-focus-sibling');
+      }
+    }
+  }
 }
 
 function handleElementClick(evt: Event) {

@@ -40,3 +40,4 @@ pnpm --filter sbr-hyper-core run test:watch
 - `.children` instead of `.childNodes` to focus on `Element`s
 - `HTMLElement` is focusable
 - we can style on `:focus` and set `outline`; setting outline makes the focus ring show on focus() calls made on click events
+- `outline` css rule doesn't affect layout, avoids reflow

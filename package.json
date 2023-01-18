@@ -21,6 +21,9 @@
   "license": "ISC",
   "devDependencies": {
     "@jest/globals": "^29.3.1",
+    "@testing-library/dom": "^8.20.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^26.0.22",
     "@types/jsdom": "^20.0.1",
     "@types/markdown-it": "^12.2.3",

@@ -2,6 +2,8 @@
 import { describe, expect } from '@jest/globals';
 import { JSDOM } from 'jsdom';
 import { load, serialize } from '../lib';
+import { fireEvent } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
 
 function makeDoc(content: string): string {
   return `<!DOCTYPE html><body>${content}</body>`;
@@ -17,8 +19,13 @@ const EXAMPLE = {
  */
 function mockWindow(dom: JSDOM) {
   const jsdomWindow = dom.window;
+  const jsdomDocument = dom.window.document;
   Object.defineProperty(global, 'window', {
     value: jsdomWindow,
+    writable: true,
+  });
+  Object.defineProperty(global, 'document', {
+    value: jsdomDocument,
     writable: true,
   });
 }
@@ -39,8 +46,25 @@ describe('loader', () => {
 });
 
 describe('navigator', () => {
-  // RTL: fire tab key and get active element?
-  it.todo('it should keyboard tab depth-first');
+  it.todo('it will focus next element depth-first when I tab');
+
+  it('will highlight sibling events when I tab', async () => {
+    // arrange
+    const dom = new JSDOM(EXAMPLE.simpleList);
+    const body = dom.window.document.querySelector('body')!;
+    mockWindow(dom);
+    load(body);
+    const user = userEvent.setup({ document: dom.window.document });
+
+    // act
+    await user.tab();
+    await user.tab();
+
+    // assert
+    expect(body.outerHTML).toMatchSnapshot();
+  });
+
+  it.todo('will highlight sibling events when I click');
 });
 
 describe('serializer', () => {

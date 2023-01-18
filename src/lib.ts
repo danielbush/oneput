@@ -7,14 +7,11 @@ function load(root: Element): void {
     el.setAttribute('tabindex', '0');
   });
   root.addEventListener('click', handleElementClick);
-  root.addEventListener('focusin', handleNewFocus);
+  root.addEventListener('focusin', handleFocusChange);
 }
 
-function handleNewFocus(evt: Event) {
-  if (evt instanceof FocusEvent) {
-    showCurrentSiblings();
-    console.log('focus', evt.relatedTarget, evt.target);
-  }
+function handleFocusChange() {
+  showCurrentSiblings();
 }
 
 function clearCurrentSiblings(): void {
@@ -40,11 +37,15 @@ function showCurrentSiblings(): void {
 
 function handleElementClick(evt: Event) {
   const el = evt.target;
+  console.log('here0');
   if (!el) {
     return;
   }
+  console.log('here1');
   if (el instanceof window.HTMLElement) {
+    console.log('here2');
     if (TABS.has(el)) {
+      console.log('here3');
       el.focus();
     }
   }

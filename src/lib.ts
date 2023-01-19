@@ -1,5 +1,7 @@
 const TABS = new Set<Element>();
 const SIB_FOCUS = new Set<Element>();
+// TODO: move to a css constants module?
+const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
 
 function load(root: Element): void {
   walk(root, (el) => {
@@ -29,7 +31,7 @@ function handleElementClick(evt: Event) {
 
 function clearCurrentSiblings(): void {
   for (const sib of SIB_FOCUS) {
-    sib.classList.remove('sbr-focus-sibling');
+    sib.classList.remove(SBR_FOCUS_SIBLING);
   }
   SIB_FOCUS.clear();
 }
@@ -42,7 +44,7 @@ function showCurrentSiblings(): void {
     for (const child of pnode.children) {
       if (TABS.has(child) && child !== active) {
         SIB_FOCUS.add(child);
-        child.classList.add('sbr-focus-sibling');
+        child.classList.add(SBR_FOCUS_SIBLING);
       }
     }
   }

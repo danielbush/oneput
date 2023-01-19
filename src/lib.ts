@@ -14,6 +14,19 @@ function handleFocusChange() {
   showCurrentSiblings();
 }
 
+function handleElementClick(evt: Event) {
+  const el = evt.target;
+  if (!el) {
+    return;
+  }
+  if (el instanceof window.HTMLElement) {
+    if (TABS.has(el)) {
+      el.focus();
+      showCurrentSiblings();
+    }
+  }
+}
+
 function clearCurrentSiblings(): void {
   for (const sib of SIB_FOCUS) {
     sib.classList.remove('sbr-focus-sibling');
@@ -31,22 +44,6 @@ function showCurrentSiblings(): void {
         SIB_FOCUS.add(child);
         child.classList.add('sbr-focus-sibling');
       }
-    }
-  }
-}
-
-function handleElementClick(evt: Event) {
-  const el = evt.target;
-  console.log('here0');
-  if (!el) {
-    return;
-  }
-  console.log('here1');
-  if (el instanceof window.HTMLElement) {
-    console.log('here2');
-    if (TABS.has(el)) {
-      console.log('here3');
-      el.focus();
     }
   }
 }

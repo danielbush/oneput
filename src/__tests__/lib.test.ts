@@ -64,7 +64,20 @@ describe('navigator', () => {
     expect(body.outerHTML).toMatchSnapshot();
   });
 
-  it.todo('will highlight sibling events when I click');
+  it('will highlight sibling events when I click', async () => {
+    // arrange
+    const dom = new JSDOM(EXAMPLE.simpleList);
+    const body = dom.window.document.querySelector('body')!;
+    mockWindow(dom);
+    load(body);
+    const user = userEvent.setup({ document: dom.window.document });
+
+    // act
+    await user.click(dom.window.document.querySelector('li')!);
+
+    // assert
+    expect(body.outerHTML).toMatchSnapshot();
+  });
 });
 
 describe('serializer', () => {

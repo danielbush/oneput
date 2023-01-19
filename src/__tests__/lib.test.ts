@@ -78,6 +78,12 @@ describe('navigator', () => {
     // assert
     expect(body.outerHTML).toMatchSnapshot();
   });
+
+  describe('sib walking', () => {
+    // ie not recursively descending
+    it.todo('can walk to next sibling');
+    it.todo('can walk to previous sibling');
+  });
 });
 
 describe('serializer', () => {

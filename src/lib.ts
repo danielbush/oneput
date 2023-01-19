@@ -3,20 +3,46 @@ const SIB_FOCUS = new Set<Element>();
 // TODO: move to a css constants module?
 const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
 
-function load(root: Element): void {
+function load(root: HTMLElement): void {
   walk(root, (el) => {
     TABS.add(el);
     el.setAttribute('tabindex', '0');
   });
-  root.addEventListener('click', handleElementClick);
-  root.addEventListener('focusin', handleFocusChange);
+  root.addEventListener<'click'>('click', handleElementClick);
+  root.addEventListener<'focusin'>('focusin', handleFocusChange);
+  document.addEventListener<'keydown'>('keydown', handleKeyDown);
+}
+
+const ROOT: HTMLElement = document.body;
+
+function handleKeyDown(kevt: KeyboardEvent) {
+  const active = getCurrentFocus();
+  if (!active) return;
+  if (kevt.ctrlKey && kevt.key === 'j') {
+    const next = getNextSiblingElement(active);
+    if (next) {
+      next.focus();
+    }
+    return;
+  }
+  if (kevt.key === 'j') {
+    for (const next of walkIter(active, ROOT)) {
+      next.focus();
+      break;
+    }
+    return;
+  }
+  if (kevt.key === 'k') {
+    console.log('up');
+    return;
+  }
 }
 
 function handleFocusChange() {
   showCurrentSiblings();
 }
 
-function handleElementClick(evt: Event) {
+function handleElementClick(evt: MouseEvent) {
   const el = evt.target;
   if (!el) {
     return;
@@ -50,7 +76,15 @@ function showCurrentSiblings(): void {
   }
 }
 
-function walk(root: Element, visit: (el: Element) => void): void {
+function getCurrentFocus(): HTMLElement | null {
+  const ae = document.activeElement;
+  if (ae && ae instanceof HTMLElement) {
+    return ae;
+  }
+  return null;
+}
+
+function walk(root: Element, visit: (el: HTMLElement) => void): void {
   for (const child of root.children) {
     if (child instanceof window.HTMLScriptElement) {
       return;
@@ -60,6 +94,89 @@ function walk(root: Element, visit: (el: Element) => void): void {
       walk(child, visit);
     }
   }
+}
+
+function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
+  for (const child of root.children) {
+    if (child instanceof window.HTMLScriptElement) {
+      break;
+    }
+    if (child instanceof window.HTMLElement) {
+      yield child;
+      yield* descendIter(child);
+    }
+  }
+}
+
+function* walkIter(
+  start: HTMLElement,
+  limit: HTMLElement | null,
+): IterableIterator<HTMLElement> {
+  yield* descendIter(start);
+
+  let sib: HTMLElement | null = start;
+  while ((sib = getNextSiblingElement(start))) {
+    console.log('<< sib', sib);
+    yield sib;
+  }
+  let par: HTMLElement | null = start;
+  while ((par = getParent(par, limit))) {
+    console.log('<< par', par);
+    if (par === limit) {
+      break;
+    }
+    // yield par;
+    const nextPar = getNextSiblingElement(par);
+    if (nextPar) {
+      yield nextPar;
+      yield* walkIter(nextPar, limit);
+    }
+  }
+}
+
+function getParent(
+  start: HTMLElement | null,
+  limit: HTMLElement | null,
+): HTMLElement | null {
+  if (start === null) {
+    return null;
+  }
+  let next: HTMLElement | null = start;
+  for (;;) {
+    if (next.parentElement && next.parentElement instanceof HTMLElement) {
+      return next.parentElement;
+    }
+    next = next?.parentElement;
+    if (!next) return null;
+    if (next === limit) {
+      return null;
+    }
+  }
+}
+
+// function getNextElement(start: HTMLElement | null): HTMLElement | null {
+//   if (start === null) {
+//     return null;
+//   }
+//   for (const el of walkIter(start, ROOT)) {
+//     return el;
+//   }
+//   return null;
+// }
+
+function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
+  let next: Element | null = start;
+  for (;;) {
+    next = next?.nextElementSibling;
+    // TODO: this could return script element
+    if (next instanceof HTMLElement) {
+      return next;
+    }
+    if (!next) {
+      break;
+    }
+  }
+  return null;
 }
 
 function serialize(root: Element): string {

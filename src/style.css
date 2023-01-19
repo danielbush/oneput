@@ -1,12 +1,15 @@
 *:focus {
-  outline: dotted red 1px;
+  outline: solid blue 1px;
+  outline-offset: -1px;
 }
 *[tabindex='0'] {
   cursor: pointer;
 }
 
 .sbr-focus-sibling {
-  outline: dotted blue 1px;
+  outline: solid lightblue 1px;
+  outline-offset: -1px;
+  background-color: lightcyan;
   /* border-style: dotted;
   border-width: 1px;
   border-color: blue; */

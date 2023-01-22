@@ -47,6 +47,7 @@ describe('loader', () => {
 
 describe('navigator', () => {
   it.todo('it will focus next element depth-first when I tab');
+  it.todo('can tab through custom elements / web components'); // test this with a real example when/if we make one
 
   it('will highlight sibling events when I tab', async () => {
     // arrange

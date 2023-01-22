@@ -3,11 +3,19 @@ const SIB_FOCUS = new Set<Element>();
 // TODO: move to a css constants module?
 const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
 
-function load(root: HTMLElement): void {
-  walk(root, (el) => {
+export function tabify(start: HTMLElement, includeRoot = false): void {
+  if (includeRoot) {
+    TABS.add(start);
+    start.setAttribute('tabindex', '0');
+  }
+  walk(start, (el) => {
     TABS.add(el);
     el.setAttribute('tabindex', '0');
   });
+}
+
+export function load(root: HTMLElement): void {
+  tabify(root);
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusChange);
   document.addEventListener<'keydown'>('keydown', handleKeyDown);
@@ -154,16 +162,6 @@ function getParent(
   }
 }
 
-// function getNextElement(start: HTMLElement | null): HTMLElement | null {
-//   if (start === null) {
-//     return null;
-//   }
-//   for (const el of walkIter(start, ROOT)) {
-//     return el;
-//   }
-//   return null;
-// }
-
 function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
   let next: Element | null = start;
   for (;;) {
@@ -179,7 +177,7 @@ function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
   return null;
 }
 
-function serialize(root: Element): string {
+export function serialize(root: Element): string {
   walk(root, (el) => {
     if (TABS.has(el)) {
       el.removeAttribute('tabindex');
@@ -187,5 +185,3 @@ function serialize(root: Element): string {
   });
   return root.outerHTML;
 }
-
-export { load, serialize };

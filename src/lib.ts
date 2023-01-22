@@ -40,8 +40,18 @@ function handleKeyDown(kevt: KeyboardEvent) {
     }
     return;
   }
+  if (kevt.ctrlKey && kevt.key === 'k') {
+    const next = getPreviousSiblingElement(active);
+    if (next) {
+      next.focus();
+    }
+    return;
+  }
   if (kevt.key === 'k') {
-    console.log('up');
+    for (const next of walkIterReverse(active, ROOT)) {
+      next.focus();
+      break;
+    }
     return;
   }
 }
@@ -142,6 +152,14 @@ function* walkIter(
   }
 }
 
+function* walkIterReverse(
+  start: HTMLElement,
+  limit: HTMLElement | null,
+): IterableIterator<HTMLElement> {
+  throw new Error('not implemented');
+  yield start;
+}
+
 function getParent(
   start: HTMLElement | null,
   limit: HTMLElement | null,
@@ -171,6 +189,21 @@ function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
       return next;
     }
     if (!next) {
+      break;
+    }
+  }
+  return null;
+}
+
+function getPreviousSiblingElement(start: HTMLElement): HTMLElement | null {
+  let prev: Element | null = start;
+  for (;;) {
+    prev = prev?.previousElementSibling;
+    // TODO: this could return script element
+    if (prev instanceof HTMLElement) {
+      return prev;
+    }
+    if (!prev) {
       break;
     }
   }

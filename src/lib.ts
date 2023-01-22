@@ -126,6 +126,26 @@ function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
   }
 }
 
+function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
+  const revChildren = Array.from(root.children).reverse();
+  // const last = root.lastElementChild;
+  // if (last && last instanceof HTMLElement) {
+  //   const child: HTMLElement | null = last;
+  //   for (;;) {
+  //     yield child;
+  //   }
+  // }
+  for (const child of revChildren) {
+    if (child instanceof window.HTMLScriptElement) {
+      break;
+    }
+    if (child instanceof window.HTMLElement) {
+      yield* descendIterReverse(child);
+      yield child;
+    }
+  }
+}
+
 function* walkIter(
   start: HTMLElement,
   limit: HTMLElement | null,
@@ -134,16 +154,14 @@ function* walkIter(
 
   let sib: HTMLElement | null = start;
   while ((sib = getNextSiblingElement(start))) {
-    console.log('<< sib', sib);
     yield sib;
+    yield* descendIter(sib);
   }
   let par: HTMLElement | null = start;
   while ((par = getParent(par, limit))) {
-    console.log('<< par', par);
     if (par === limit) {
       break;
     }
-    // yield par;
     const nextPar = getNextSiblingElement(par);
     if (nextPar) {
       yield nextPar;
@@ -156,8 +174,24 @@ function* walkIterReverse(
   start: HTMLElement,
   limit: HTMLElement | null,
 ): IterableIterator<HTMLElement> {
-  throw new Error('not implemented');
-  yield start;
+  let sib: HTMLElement | null = start;
+  while ((sib = getPreviousSiblingElement(start))) {
+    console.log('<< sib', sib);
+    yield* descendIterReverse(sib);
+    yield sib;
+  }
+  let par: HTMLElement | null = start;
+  while ((par = getParent(par, limit))) {
+    if (par === limit) {
+      break;
+    }
+    yield par;
+    const prevPar = getPreviousSiblingElement(par);
+    if (prevPar) {
+      yield* walkIterReverse(prevPar, limit);
+      yield prevPar;
+    }
+  }
 }
 
 function getParent(

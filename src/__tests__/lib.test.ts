@@ -4,14 +4,9 @@ import { JSDOM } from 'jsdom';
 import { load, serialize } from '../lib';
 import { fireEvent } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
+import EXAMPLE from '../__fixtures__';
 
-function makeDoc(content: string): string {
-  return `<!DOCTYPE html><body>${content}</body>`;
-}
-
-const EXAMPLE = {
-  simpleList: makeDoc('<ul><li>item 1</li><li>item 2</li></ul>'),
-};
+const REC_DOWN_KEY = 'j';
 
 /**
  * globalThis.window.HTMLElement etc !== dom.window.HTMLElement (jsdom)
@@ -46,7 +41,39 @@ describe('loader', () => {
 });
 
 describe('navigator', () => {
-  it.todo('it will focus next element depth-first when I tab');
+  it('will focus next element depth-first when I tab', async () => {
+    // arrange
+    const dom = new JSDOM(EXAMPLE.simpleList);
+    const body = dom.window.document.querySelector('body')!;
+    mockWindow(dom);
+    load(body);
+    const user = userEvent.setup({ document: dom.window.document });
+
+    // act
+    await user.tab();
+
+    // assert
+    expect(document.activeElement).toEqual(
+      dom.window.document.getElementById('ul'),
+    );
+
+    // act
+    await user.tab();
+
+    // assert
+    expect(document.activeElement).toEqual(
+      dom.window.document.getElementById('li1'),
+    );
+
+    // act
+    await user.tab();
+
+    // assert
+    expect(document.activeElement).toEqual(
+      dom.window.document.getElementById('li2'),
+    );
+  });
+
   it.todo('can tab through custom elements / web components'); // test this with a real example when/if we make one
 
   it('will highlight sibling events when I tab', async () => {
@@ -78,6 +105,27 @@ describe('navigator', () => {
 
     // assert
     expect(body.outerHTML).toMatchSnapshot();
+  });
+
+  describe('rec walking', () => {
+    it('can walk recursively depth-first', async () => {
+      // arrange
+      const dom = new JSDOM(EXAMPLE.recList);
+      const body = dom.window.document.querySelector('body')!;
+      mockWindow(dom);
+      load(body);
+      const user = userEvent.setup({ document: dom.window.document });
+
+      // act
+      await user.click(dom.window.document.getElementById('ul')!);
+      await user.keyboard(REC_DOWN_KEY);
+      await user.keyboard(REC_DOWN_KEY);
+
+      // assert
+      expect(document.activeElement).toEqual(
+        dom.window.document.getElementById('ul2'),
+      );
+    });
   });
 
   describe('sib walking', () => {

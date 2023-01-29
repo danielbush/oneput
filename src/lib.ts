@@ -128,13 +128,6 @@ function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
 
 function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
   const revChildren = Array.from(root.children).reverse();
-  // const last = root.lastElementChild;
-  // if (last && last instanceof HTMLElement) {
-  //   const child: HTMLElement | null = last;
-  //   for (;;) {
-  //     yield child;
-  //   }
-  // }
   for (const child of revChildren) {
     if (child instanceof window.HTMLScriptElement) {
       break;
@@ -219,7 +212,7 @@ function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
   for (;;) {
     next = next?.nextElementSibling;
     // TODO: this could return script element
-    if (next instanceof HTMLElement) {
+    if (next instanceof window.HTMLElement) {
       return next;
     }
     if (!next) {
@@ -234,7 +227,7 @@ function getPreviousSiblingElement(start: HTMLElement): HTMLElement | null {
   for (;;) {
     prev = prev?.previousElementSibling;
     // TODO: this could return script element
-    if (prev instanceof HTMLElement) {
+    if (prev instanceof window.HTMLElement) {
       return prev;
     }
     if (!prev) {

@@ -7,6 +7,17 @@ import userEvent from '@testing-library/user-event';
 import EXAMPLE from '../__fixtures__';
 
 const REC_DOWN_KEY = 'j';
+// const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
+// const SIB_DOWN_KEY = '{ctrl>}j{/ctrl}';
+// const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
+const FE_SIB_DOWN_KEY = {
+  key: 'j',
+  ctrlKey: true,
+};
+
+function makeDoc(content: string): string {
+  return `<!DOCTYPE html><body>${content}</body>`;
+}
 
 /**
  * globalThis.window.HTMLElement etc !== dom.window.HTMLElement (jsdom)
@@ -130,7 +141,36 @@ describe('navigator', () => {
 
   describe('sib walking', () => {
     // ie not recursively descending
-    it.todo('can walk to next sibling');
+    it('can walk to next sibling', async () => {
+      // arrange
+      const recList = makeDoc(
+        `<ul id="ul">` +
+          `<li id="li1">item 1</li>` +
+          `<li id="li2"><ul><li>trap</li></ul></li>` +
+          `<li id="li3">item 3</li>` +
+          `</ul>`,
+      );
+      const dom = new JSDOM(recList);
+      const user = userEvent.setup({ document: dom.window.document });
+      const body = dom.window.document.querySelector('body')!;
+      mockWindow(dom);
+      load(body);
+
+      // act
+      await user.click(dom.window.document.getElementById('li1')!);
+
+      // Almost an hour of my life - wtf? stackoverflow.com/questions/74281534/react-testing-library-user-event-keyboard-not-working
+      // await user.keyboard(SIB_DOWN_KEY);
+      // await user.keyboard(SIB_DOWN_KEY);
+      fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY);
+      fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY);
+
+      // assert
+      expect(document.activeElement).toEqual(
+        dom.window.document.getElementById('li3'),
+      );
+    });
+
     it.todo('can walk to previous sibling');
   });
 });

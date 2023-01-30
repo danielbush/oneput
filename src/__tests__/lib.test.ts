@@ -4,7 +4,6 @@ import { JSDOM } from 'jsdom';
 import { load, serialize } from '../lib';
 import { fireEvent } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import EXAMPLE from '../__fixtures__';
 
 const REC_DOWN_KEY = 'j';
 // const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
@@ -39,7 +38,14 @@ function mockWindow(dom: JSDOM) {
 describe('loader', () => {
   it('can load the document', () => {
     // arrange
-    const dom = new JSDOM(EXAMPLE.simpleList);
+    const dom = new JSDOM(
+      makeDoc(
+        `<ul id="ul">` +
+          `<li id="li1">item 1</li>` +
+          `<li id="li2">item 2</li>` +
+          `</ul>`,
+      ),
+    );
     const body = dom.window.document.querySelector('body')!;
     mockWindow(dom);
 
@@ -54,7 +60,14 @@ describe('loader', () => {
 describe('navigator', () => {
   it('will focus next element depth-first when I tab', async () => {
     // arrange
-    const dom = new JSDOM(EXAMPLE.simpleList);
+    const dom = new JSDOM(
+      makeDoc(
+        `<ul id="ul">` +
+          `<li id="li1">item 1</li>` +
+          `<li id="li2">item 2</li>` +
+          `</ul>`,
+      ),
+    );
     const body = dom.window.document.querySelector('body')!;
     mockWindow(dom);
     load(body);
@@ -89,7 +102,14 @@ describe('navigator', () => {
 
   it('will highlight sibling events when I tab', async () => {
     // arrange
-    const dom = new JSDOM(EXAMPLE.simpleList);
+    const dom = new JSDOM(
+      makeDoc(
+        `<ul id="ul">` +
+          `<li id="li1">item 1</li>` +
+          `<li id="li2">item 2</li>` +
+          `</ul>`,
+      ),
+    );
     const body = dom.window.document.querySelector('body')!;
     mockWindow(dom);
     load(body);
@@ -105,7 +125,14 @@ describe('navigator', () => {
 
   it('will highlight sibling events when I click', async () => {
     // arrange
-    const dom = new JSDOM(EXAMPLE.simpleList);
+    const dom = new JSDOM(
+      makeDoc(
+        `<ul id="ul">` +
+          `<li id="li1">item 1</li>` +
+          `<li id="li2">item 2</li>` +
+          `</ul>`,
+      ),
+    );
     const body = dom.window.document.querySelector('body')!;
     mockWindow(dom);
     load(body);
@@ -121,7 +148,16 @@ describe('navigator', () => {
   describe('rec walking', () => {
     it('can walk recursively depth-first', async () => {
       // arrange
-      const dom = new JSDOM(EXAMPLE.recList);
+      const dom = new JSDOM(
+        makeDoc(
+          `<ul id="ul">` +
+            `<li id="li1">` +
+            `<ul id="ul2"><li>item 1.1</li><li>item 1.2</li></ul>` +
+            `</li>` +
+            `<li id="li2">item 2</li>` +
+            `</ul>`,
+        ),
+      );
       const body = dom.window.document.querySelector('body')!;
       mockWindow(dom);
       load(body);
@@ -178,7 +214,14 @@ describe('navigator', () => {
 describe('serializer', () => {
   it('removes tabIndexes', () => {
     // arrange
-    const dom = new JSDOM(EXAMPLE.simpleList);
+    const dom = new JSDOM(
+      makeDoc(
+        `<ul id="ul">` +
+          `<li id="li1">item 1</li>` +
+          `<li id="li2">item 2</li>` +
+          `</ul>`,
+      ),
+    );
     const body = dom.window.document.querySelector('body')!;
     load(body);
 

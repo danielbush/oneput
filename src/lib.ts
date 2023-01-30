@@ -169,7 +169,6 @@ function* walkIterReverse(
 ): IterableIterator<HTMLElement> {
   let sib: HTMLElement | null = start;
   while ((sib = getPreviousSiblingElement(start))) {
-    console.log('<< sib', sib);
     yield* descendIterReverse(sib);
     yield sib;
   }
@@ -196,7 +195,10 @@ function getParent(
   }
   let next: HTMLElement | null = start;
   for (;;) {
-    if (next.parentElement && next.parentElement instanceof HTMLElement) {
+    if (
+      next.parentElement &&
+      next.parentElement instanceof window.HTMLElement
+    ) {
       return next.parentElement;
     }
     next = next?.parentElement;

@@ -54,3 +54,8 @@ pnpm --filter sbr-hyper-core run convert:ng-ml
 - `HTMLElement` is focusable
 - we can style on `:focus` and set `outline`; setting outline makes the focus ring show on focus() calls made on click events
 - `outline` css rule doesn't affect layout, avoids reflow
+- TEST_FIRE
+  - `await user.keyboard(...)` and ctrl+j (or other key) - doesn't work, had to use `fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY)`
+  - related maybe: <https://stackoverflow.com/questions/74281534/react-testing-library-user-event-keyboard-not-working>
+- TEST_HOTKEY
+  - `await user.keyboard(...)` doesn't trigger `hotkeys`; forced to test with hotkeys.trigger

@@ -1,7 +1,10 @@
+import hotkeys from 'hotkeys-js';
+
 const TABS = new Set<Element>();
 const SIB_FOCUS = new Set<Element>();
 // TODO: move to a css constants module?
 const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
+const ROOT: HTMLElement = document.body;
 
 export function tabify(start: HTMLElement, includeRoot = false): void {
   if (includeRoot) {
@@ -14,46 +17,63 @@ export function tabify(start: HTMLElement, includeRoot = false): void {
   });
 }
 
-export function load(root: HTMLElement): void {
+export function load(root: HTMLElement): () => void {
   tabify(root);
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusChange);
-  document.addEventListener<'keydown'>('keydown', handleKeyDown);
+  hotkeys(
+    'j',
+    withActiveElement((active: HTMLElement) => {
+      for (const next of walkIter(active, ROOT)) {
+        next.focus();
+        break;
+      }
+      return;
+    }),
+  );
+  hotkeys(
+    'k',
+    withActiveElement((active: HTMLElement) => {
+      for (const next of walkIterReverse(active, ROOT)) {
+        next.focus();
+        break;
+      }
+      return;
+    }),
+  );
+  hotkeys(
+    'ctrl+j',
+    withActiveElement((active: HTMLElement) => {
+      const next = getNextSiblingElement(active);
+      if (next) {
+        next.focus();
+      }
+      return;
+    }),
+  );
+  hotkeys(
+    'ctrl+k',
+    withActiveElement((active: HTMLElement) => {
+      const next = getPreviousSiblingElement(active);
+      if (next) {
+        next.focus();
+      }
+      return;
+    }),
+  );
+  const unload = () => {
+    // Unbind everything
+    hotkeys.unbind();
+  };
+  return unload;
 }
 
-const ROOT: HTMLElement = document.body;
-
-function handleKeyDown(kevt: KeyboardEvent) {
-  const active = getCurrentFocus();
-  if (!active) return;
-  if (kevt.ctrlKey && kevt.key === 'j') {
-    const next = getNextSiblingElement(active);
-    if (next) {
-      next.focus();
-    }
-    return;
-  }
-  if (kevt.key === 'j') {
-    for (const next of walkIter(active, ROOT)) {
-      next.focus();
-      break;
-    }
-    return;
-  }
-  if (kevt.ctrlKey && kevt.key === 'k') {
-    const next = getPreviousSiblingElement(active);
-    if (next) {
-      next.focus();
-    }
-    return;
-  }
-  if (kevt.key === 'k') {
-    for (const next of walkIterReverse(active, ROOT)) {
-      next.focus();
-      break;
-    }
-    return;
-  }
+function withActiveElement(fn: (active: HTMLElement) => void): () => void {
+  return () => {
+    const active = getCurrentFocus();
+    if (!active) return;
+    fn(active);
+  };
 }
 
 function handleFocusChange() {

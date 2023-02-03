@@ -27,7 +27,7 @@ const templ = (title: string, content: string) => `<!doctype html>
   <base href="/">
 
   <style></style>
-  <link rel="stylesheet" href="/dist/es/style.css" />
+  <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"/>
   <title>test-app-shell</title>
@@ -35,7 +35,7 @@ const templ = (title: string, content: string) => `<!doctype html>
 
 <body>
   ${content}
-  <script type="module" src="/dist/es/sketch.js"></script>
+  <script type="module" src="/.esbuild/sketch.js"></script>
 </body>
 
 </html>`;

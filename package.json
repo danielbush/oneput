@@ -5,16 +5,16 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "rimraf dist && mkdir -p dist/es && ( npm run build:es & npm run build:cjs & npm run build:style )",
-    "build:watch": "nodemon --exec 'npm run build'",
-    "build:es": "tsc --outDir dist/es --module ES2020",
-    "build:cjs": "tsc --outDir dist/cjs --module commonjs",
-    "build:style": "cp src/style.css dist/es/",
+    "esbuild": "esbuild",
+    "build:prepare": "npm run check && rimraf dist && mkdir dist && cp src/style.css dist",
+    "build:cli": "esbuild src/convert.ts --target=node18 --bundle --outdir=dist/cli",
+    "build": "npm run build:prepare && esbuild src/sketch.ts --bundle --outdir=dist --platform=browser",
     "test": "jest",
     "test:update": "jest -u",
     "test:watch": "jest --watch",
-    "dev": "node ./scripts/live-server.js",
-    "convert:ng-ml": "nodemon --exec 'node ./dist/cjs/cli/convert.js src/examples/ng-ml/index.md >src/examples/ng-ml/index.html'"
+    "dev": "npm run build:prepare && esbuild src/sketch.ts --watch --bundle --servedir=src --outdir=src/.esbuild",
+    "convert:ng-mlold": "npm run build:cli && node ./dist/cli/convert.js src/examples/ng-ml/index.md >src/examples/ng-ml/index.html'",
+    "convert:ng-ml": "ts-node src/cli/convert.ts src/examples/ng-ml/index.md >src/examples/ng-ml/index.html"
   },
   "keywords": [],
   "author": "",
@@ -27,8 +27,9 @@
     "@types/jest": "^26.0.22",
     "@types/jsdom": "^20.0.1",
     "@types/markdown-it": "^12.2.3",
+    "@types/node": "^16.18.8",
+    "esbuild": "^0.17.5",
     "jsdom": "^20.0.3",
-    "live-server": "^1.2.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.5.4",
     "ts-node": "^10.7.0",
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
+    "hotkeys-js": "^3.10.1",
     "markdown-it": "^13.0.1"
   },
   "nodemonConfig": {

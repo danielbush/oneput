@@ -18,22 +18,35 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
 
 ## Synopsis
 
-```sh
-pnpm --filter sbr-hyper-core run build:watch # enusres /build/** is available in index.html
-pnpm --filter sbr-hyper-core run dev
-```
+Build a bundle in dist/ (TODO: not productionized yet).
 
 ```sh
-cp -i ~/work/2br-danb2/.fold/idable/6058d8eb-5ef6-4c22-8bb4-2a15aa2252a7/content.md ~/projects/2br-spaces-dev/packages/sbr-hyper-core/src/examples/ng-ml/index.md
-pnpm --filter sbr-hyper-core run convert:ng-ml
+pnpm --filter sbr-hyper-core run build
 ```
 
-- http://127.0.0.1:8080/src/examples/ng-ml/
-- http://127.0.0.1:8080/src/examples/index.html .
+Tests
 
 ```sh
 pnpm --filter sbr-hyper-core run test:watch
 ```
+
+Run a server and access examples/\*:
+
+```sh
+pnpm --filter sbr-hyper-core run dev
+```
+
+Current examples I'm working on:
+
+```sh
+pnpm --filter sbr-hyper-core run build:cli
+cp -i ~/work/2br-danb2/.fold/idable/6058d8eb-5ef6-4c22-8bb4-2a15aa2252a7/content.md \
+  ~/projects/2br-spaces-dev/packages/sbr-hyper-core/src/examples/ng-ml/index.md
+pnpm --filter sbr-hyper-core run convert:ng-ml
+```
+
+- /examples/ng-ml/
+- /examples/index.html .
 
 ## Learnings
 

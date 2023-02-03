@@ -1,14 +1,20 @@
 {
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
   ],
   "exclude": [
     "build/",
     "**/__tests__/"
   ],
   "compilerOptions": {
-    "target": "es2016",
-    "module": "ES2020",
+    "target": "es2017",
+    "typeRoots": [
+      "src/@types",
+      "node_modules/@types",
+      "../../node_modules/@types"
+    ],
+    "module": "commonjs",
+    // "moduleResolution": "node",
     "outDir": "./build/",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

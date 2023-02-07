@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect } from '@jest/globals';
 import { JSDOM } from 'jsdom';
-import { load, serialize } from '../lib';
-import { fireEvent } from '@testing-library/dom';
+import { load, serialize } from '..';
+// import { fireEvent } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import hotkeys from 'hotkeys-js';
 
@@ -227,9 +227,16 @@ describe('navigator', () => {
       ids.push(document.activeElement?.getAttribute('id'));
       hotkeys.trigger(HK_REC_UP_KEY);
       ids.push(document.activeElement?.getAttribute('id'));
+      hotkeys.trigger(HK_REC_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+      hotkeys.trigger(HK_REC_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+      // Overwalk
+      hotkeys.trigger(HK_REC_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
 
       // assert
-      expect(ids).toEqual(['li2_2', 'li2_1', 'ul2']);
+      expect(ids).toEqual(['li2_2', 'li2_1', 'ul2', 'li1', 'ul', 'ul']);
     });
   });
 
@@ -249,9 +256,10 @@ describe('navigator', () => {
       const body = dom.window.document.querySelector('body')!;
       mockWindow(dom);
       loadWithUnload(body);
+      const ids = [];
+      await user.click(dom.window.document.getElementById('li1')!);
 
       // act
-      await user.click(dom.window.document.getElementById('li1')!);
 
       // TEST_FIRE
       // await user.keyboard(SIB_DOWN_KEY);
@@ -260,12 +268,15 @@ describe('navigator', () => {
       // fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY);
       // fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY);
       hotkeys.trigger(HK_SIB_DOWN_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
       hotkeys.trigger(HK_SIB_DOWN_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+      // Overwalk:
+      hotkeys.trigger(HK_SIB_DOWN_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
 
       // assert
-      expect(document.activeElement).toEqual(
-        dom.window.document.getElementById('li3'),
-      );
+      expect(ids).toEqual(['li2', 'li3', 'li3']);
     });
 
     it('can walk to previous sibling', async () => {
@@ -282,9 +293,10 @@ describe('navigator', () => {
       const body = dom.window.document.querySelector('body')!;
       mockWindow(dom);
       loadWithUnload(body);
+      const ids = [];
+      await user.click(dom.window.document.getElementById('li3')!);
 
       // act
-      await user.click(dom.window.document.getElementById('li3')!);
 
       // TEST_FIRE
       // await user.keyboard(SIB_DOWN_KEY);
@@ -293,12 +305,18 @@ describe('navigator', () => {
       // fireEvent.keyDown(dom.window.document, FE_SIB_UP_KEY);
       // fireEvent.keyDown(dom.window.document, FE_SIB_UP_KEY);
       hotkeys.trigger(HK_SIB_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
       hotkeys.trigger(HK_SIB_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+      // Overwalk
+      hotkeys.trigger(HK_SIB_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
 
       // assert
       expect(document.activeElement).toEqual(
         dom.window.document.getElementById('li1'),
       );
+      expect(ids).toEqual(['li2', 'li1', 'li1']);
     });
   });
 });

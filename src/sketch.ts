@@ -1,4 +1,4 @@
-import { load, tabify } from './lib';
+import { load, tabify } from '.';
 
 console.log('start coding here');
 load(document.body);

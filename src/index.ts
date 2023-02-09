@@ -1,4 +1,5 @@
-import { loadKeys } from './keys';
+import { defaultBindings } from './config/binding';
+import { loadBindings } from './binding';
 import { walk } from './walk';
 
 const TABS = new Set<Element>();
@@ -30,7 +31,7 @@ export function load(root: HTMLElement): () => void {
   tabify(root);
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusChange);
-  const unloadKeys = loadKeys(root);
+  const unloadKeys = loadBindings(defaultBindings, root);
   const unload = () => {
     unloadKeys();
   };

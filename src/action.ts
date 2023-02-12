@@ -1,6 +1,7 @@
 import { getCurrentFocus } from './focus';
 import {
   getNextSiblingElement,
+  getParent,
   getPreviousSiblingElement,
   walkIter,
   walkIterReverse,
@@ -11,7 +12,7 @@ export type ActionContext = {
 };
 
 /**
- * Find next using deptth first recursion.
+ * Find next using depth first recursion.
  */
 export function REC_NEXT(cx: ActionContext): void {
   const active = getCurrentFocus();
@@ -21,6 +22,10 @@ export function REC_NEXT(cx: ActionContext): void {
     break;
   }
 }
+
+/**
+ * Find previous using depth first recursion.
+ */
 export function REC_PREV(cx: ActionContext): void {
   const active = getCurrentFocus();
   if (!active) return;
@@ -30,6 +35,9 @@ export function REC_PREV(cx: ActionContext): void {
   }
 }
 
+/**
+ * Find next sibling element if there is one.
+ */
 export function SIB_NEXT(): void {
   const active = getCurrentFocus();
   if (!active) return;
@@ -40,10 +48,26 @@ export function SIB_NEXT(): void {
   return;
 }
 
+/**
+ * Find previous sibling element if there is one.
+ */
 export function SIB_PREV(): void {
   const active = getCurrentFocus();
   if (!active) return;
   const next = getPreviousSiblingElement(active);
+  if (next) {
+    next.focus();
+  }
+  return;
+}
+
+/**
+ * Find next parent.
+ */
+export function UP(cx: ActionContext): void {
+  const active = getCurrentFocus();
+  if (!active) return;
+  const next = getParent(active, cx.root);
   if (next) {
     next.focus();
   }

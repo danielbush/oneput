@@ -23,6 +23,7 @@ const HK_REC_DOWN_KEY = 'j';
 const HK_REC_UP_KEY = 'k';
 const HK_SIB_DOWN_KEY = 'ctrl+j';
 const HK_SIB_UP_KEY = 'ctrl+k';
+const HK_UP_KEY = 'ctrl+cmd+u';
 
 function makeDoc(content: string): string {
   return `<!DOCTYPE html><body>${content}</body>`;
@@ -169,7 +170,7 @@ describe('navigator', () => {
     expect(body.outerHTML).toMatchSnapshot();
   });
 
-  describe('rec walking', () => {
+  describe('REC_NEXT / REC_PREV', () => {
     it('can walk recursively depth-first to next element', async () => {
       // arrange
       const dom = new JSDOM(
@@ -240,7 +241,7 @@ describe('navigator', () => {
     });
   });
 
-  describe('sib walking', () => {
+  describe('SIB_NEXT / SIB_PREV', () => {
     // ie not recursively descending / ascending
     it('can walk to next sibling', async () => {
       // arrange
@@ -317,6 +318,39 @@ describe('navigator', () => {
         dom.window.document.getElementById('li1'),
       );
       expect(ids).toEqual(['li2', 'li1', 'li1']);
+    });
+  });
+
+  describe('UP', () => {
+    it('can walk up successive parent elements', async () => {
+      // arrange
+      const recList = makeDoc(
+        `<div id="id1">` +
+          `<div id="id2">` +
+          `<div id="id3"></div>` +
+          `</div>` +
+          `</div>`,
+      );
+      const dom = new JSDOM(recList);
+      const user = userEvent.setup({ document: dom.window.document });
+      const body = dom.window.document.querySelector('body')!;
+      mockWindow(dom);
+      loadWithUnload(body);
+      const ids = [];
+      await user.click(dom.window.document.getElementById('id3')!);
+
+      // act
+
+      hotkeys.trigger(HK_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+      hotkeys.trigger(HK_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+      // Overwalk:
+      hotkeys.trigger(HK_UP_KEY);
+      ids.push(document.activeElement?.getAttribute('id'));
+
+      // assert
+      expect(ids).toEqual(['id2', 'id1', 'id1']);
     });
   });
 });

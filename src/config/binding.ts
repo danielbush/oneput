@@ -6,4 +6,6 @@ export const defaultBindings: Bindings = [
   ['k', action.REC_PREV],
   ['ctrl+j', action.SIB_NEXT],
   ['ctrl+k', action.SIB_PREV],
+  ['ctrl+cmd+u', action.UP],
+  ['ctrl+alt+u', action.UP],
 ];

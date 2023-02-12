@@ -82,7 +82,7 @@ export function* walkIterReverse(
   }
 }
 
-function getParent(
+export function getParent(
   start: HTMLElement | null,
   limit: HTMLElement | null,
 ): HTMLElement | null {

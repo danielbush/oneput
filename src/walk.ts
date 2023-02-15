@@ -1,6 +1,13 @@
+function ignoreElement(el: Element | null | undefined): boolean {
+  if (el instanceof window.HTMLScriptElement) {
+    return true;
+  }
+  return false;
+}
+
 export function walk(root: Element, visit: (el: HTMLElement) => void): void {
   for (const child of root.children) {
-    if (child instanceof window.HTMLScriptElement) {
+    if (ignoreElement(child)) {
       return;
     }
     if (child instanceof window.HTMLElement) {
@@ -12,7 +19,7 @@ export function walk(root: Element, visit: (el: HTMLElement) => void): void {
 
 function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
   for (const child of root.children) {
-    if (child instanceof window.HTMLScriptElement) {
+    if (ignoreElement(child)) {
       break;
     }
     if (child instanceof window.HTMLElement) {
@@ -25,7 +32,7 @@ function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
 function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
   const revChildren = Array.from(root.children).reverse();
   for (const child of revChildren) {
-    if (child instanceof window.HTMLScriptElement) {
+    if (ignoreElement(child)) {
       break;
     }
     if (child instanceof window.HTMLElement) {
@@ -40,6 +47,9 @@ export function* walkIter(
   limit: HTMLElement | null,
 ): IterableIterator<HTMLElement> {
   yield* descendIter(start);
+  if (start === limit) {
+    return;
+  }
 
   let sib: HTMLElement | null = start;
   while ((sib = getNextSiblingElement(start))) {
@@ -49,6 +59,7 @@ export function* walkIter(
   let par: HTMLElement | null = start;
   while ((par = par.parentElement)) {
     if (par === limit) {
+      yield par;
       break;
     }
     const nextPar = getNextSiblingElement(par);
@@ -86,10 +97,12 @@ export function* walkIterReverse(
 }
 
 export function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
-  let next: Element | null = start;
+  let next: Element | null | undefined = start;
   for (;;) {
     next = next?.nextElementSibling;
-    // TODO: this could return script element
+    if (ignoreElement(next)) {
+      continue;
+    }
     if (next instanceof window.HTMLElement) {
       return next;
     }
@@ -103,10 +116,12 @@ export function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
 export function getPreviousSiblingElement(
   start: HTMLElement,
 ): HTMLElement | null {
-  let prev: Element | null = start;
+  let prev: Element | null | undefined = start;
   for (;;) {
     prev = prev?.previousElementSibling;
-    // TODO: this could return script element
+    if (ignoreElement(prev)) {
+      continue;
+    }
     if (prev instanceof window.HTMLElement) {
       return prev;
     }

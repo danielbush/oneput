@@ -6,7 +6,7 @@ load(document.body);
 class AppDrawer extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `<b class="app-drawer">I'm an app-drawer!</b>`;
-    tabify(this, true);
+    tabify(this);
   }
 }
 window.customElements.define('app-drawer', AppDrawer);

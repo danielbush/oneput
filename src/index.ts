@@ -7,11 +7,9 @@ const SIB_FOCUS = new Set<Element>();
 // TODO: move to a css constants module?
 const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
 
-export function tabify(start: HTMLElement, includeRoot = false): void {
-  if (includeRoot) {
-    TABS.add(start);
-    start.setAttribute('tabindex', '0');
-  }
+export function tabify(start: HTMLElement): void {
+  TABS.add(start);
+  start.setAttribute('tabindex', '0');
   walk(start, (el) => {
     TABS.add(el);
     el.setAttribute('tabindex', '0');

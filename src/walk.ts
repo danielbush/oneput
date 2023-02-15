@@ -63,6 +63,9 @@ export function* walkIterReverse(
   start: HTMLElement,
   limit: HTMLElement | null,
 ): IterableIterator<HTMLElement> {
+  if (start === limit) {
+    return null;
+  }
   let sib: HTMLElement | null = start;
   while ((sib = getPreviousSiblingElement(start))) {
     yield* descendIterReverse(sib);
@@ -70,10 +73,10 @@ export function* walkIterReverse(
   }
   let par: HTMLElement | null = start;
   while ((par = par.parentElement)) {
+    yield par;
     if (par === limit) {
       break;
     }
-    yield par;
     const prevPar = getPreviousSiblingElement(par);
     if (prevPar) {
       yield* walkIterReverse(prevPar, limit);
@@ -118,9 +121,9 @@ export function getParent(
   start: HTMLElement,
   limit: HTMLElement,
 ): HTMLElement | null {
-  const next = start.parentElement;
-  if (next === limit) {
+  if (start === limit) {
     return null;
   }
+  const next = start.parentElement;
   return next;
 }

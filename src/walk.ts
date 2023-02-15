@@ -47,7 +47,7 @@ export function* walkIter(
     yield* descendIter(sib);
   }
   let par: HTMLElement | null = start;
-  while ((par = getParent(par, limit))) {
+  while ((par = par.parentElement)) {
     if (par === limit) {
       break;
     }
@@ -69,7 +69,7 @@ export function* walkIterReverse(
     yield sib;
   }
   let par: HTMLElement | null = start;
-  while ((par = getParent(par, limit))) {
+  while ((par = par.parentElement)) {
     if (par === limit) {
       break;
     }
@@ -78,29 +78,6 @@ export function* walkIterReverse(
     if (prevPar) {
       yield* walkIterReverse(prevPar, limit);
       yield prevPar;
-    }
-  }
-}
-
-export function getParent(
-  start: HTMLElement | null,
-  limit: HTMLElement | null,
-): HTMLElement | null {
-  if (start === null) {
-    return null;
-  }
-  let next: HTMLElement | null = start;
-  for (;;) {
-    if (
-      next.parentElement &&
-      next.parentElement instanceof window.HTMLElement
-    ) {
-      return next.parentElement;
-    }
-    next = next?.parentElement;
-    if (!next) return null;
-    if (next === limit) {
-      return null;
     }
   }
 }
@@ -135,4 +112,15 @@ export function getPreviousSiblingElement(
     }
   }
   return null;
+}
+
+export function getParent(
+  start: HTMLElement,
+  limit: HTMLElement,
+): HTMLElement | null {
+  const next = start.parentElement;
+  if (next === limit) {
+    return null;
+  }
+  return next;
 }

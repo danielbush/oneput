@@ -2,15 +2,21 @@ function ignoreElement(el: Element | null | undefined): boolean {
   if (el instanceof window.HTMLScriptElement) {
     return true;
   }
-  return false;
+  const isHTMLElement = el instanceof window.HTMLElement;
+  return !isHTMLElement;
+}
+
+function isFocusable(el: Element | null | undefined): el is HTMLElement {
+  if (el instanceof window.HTMLScriptElement) {
+    return false;
+  }
+  const isHTMLElement = el instanceof window.HTMLElement;
+  return isHTMLElement;
 }
 
 export function walk(root: Element, visit: (el: HTMLElement) => void): void {
   for (const child of root.children) {
-    if (ignoreElement(child)) {
-      return;
-    }
-    if (child instanceof window.HTMLElement) {
+    if (isFocusable(child)) {
       visit(child);
       walk(child, visit);
     }
@@ -70,12 +76,32 @@ export function* walkIter(
   }
 }
 
+function lastElement(el: HTMLElement): HTMLElement {
+  if (!el.lastElementChild) {
+    return el;
+  }
+  const lastChild = el.lastElementChild;
+  const prev = isFocusable(lastChild)
+    ? lastChild
+    : getPreviousSiblingElement(lastChild);
+  if (!prev) {
+    return el;
+  }
+  return lastElement(prev);
+}
+
 export function* walkIterReverse(
   start: HTMLElement,
   limit: HTMLElement | null,
 ): IterableIterator<HTMLElement> {
   if (start === limit) {
-    return null;
+    console.log(lastElement(limit).outerHTML);
+    const last = lastElement(limit);
+    if (last === limit) {
+      return;
+    }
+    yield last;
+    return;
   }
   let sib: HTMLElement | null = start;
   while ((sib = getPreviousSiblingElement(start))) {
@@ -96,38 +122,32 @@ export function* walkIterReverse(
   }
 }
 
-export function getNextSiblingElement(start: HTMLElement): HTMLElement | null {
+export function getNextSiblingElement(start: Element): HTMLElement | null {
   let next: Element | null | undefined = start;
   for (;;) {
     next = next?.nextElementSibling;
-    if (ignoreElement(next)) {
-      continue;
-    }
-    if (next instanceof window.HTMLElement) {
+    if (isFocusable(next)) {
       return next;
     }
     if (!next) {
       break;
     }
+    continue;
   }
   return null;
 }
 
-export function getPreviousSiblingElement(
-  start: HTMLElement,
-): HTMLElement | null {
+export function getPreviousSiblingElement(start: Element): HTMLElement | null {
   let prev: Element | null | undefined = start;
   for (;;) {
     prev = prev?.previousElementSibling;
-    if (ignoreElement(prev)) {
-      continue;
-    }
-    if (prev instanceof window.HTMLElement) {
+    if (isFocusable(prev)) {
       return prev;
     }
     if (!prev) {
       break;
     }
+    continue;
   }
   return null;
 }

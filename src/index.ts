@@ -17,6 +17,9 @@ export function tabify(start: HTMLElement): void {
 }
 
 export function serialize(root: Element): string {
+  if (TABS.has(root)) {
+    root.removeAttribute('tabindex');
+  }
   walk(root, (el) => {
     if (TABS.has(el)) {
       el.removeAttribute('tabindex');

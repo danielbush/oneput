@@ -83,7 +83,7 @@ describe('loader', () => {
 });
 
 describe('navigator', () => {
-  it.skip('will focus next element depth-first when I tab', async () => {
+  it('will focus next element depth-first when I tab', async () => {
     // arrange
     const dom = new JSDOM(
       makeDoc(
@@ -93,9 +93,9 @@ describe('navigator', () => {
           `</ul>`,
       ),
     );
-    const body = dom.window.document.querySelector('body')!;
+    const ul = dom.window.document.querySelector('ul')!; // USEREVENT_TAB_BODY
     mockWindow(dom);
-    loadWithUnload(body);
+    loadWithUnload(ul);
     const user = userEvent.setup({ document: dom.window.document });
 
     // act
@@ -125,7 +125,7 @@ describe('navigator', () => {
 
   it.todo('can tab through custom elements / web components'); // test this with a real example when/if we make one
 
-  it.skip('will highlight sibling events when I tab', async () => {
+  it('will highlight sibling events when I tab', async () => {
     // arrange
     const dom = new JSDOM(
       makeDoc(
@@ -135,19 +135,17 @@ describe('navigator', () => {
           `</ul>`,
       ),
     );
-    const body = dom.window.document.querySelector('body')!;
+    const ul = dom.window.document.querySelector('ul')!; // USEREVENT_TAB_BODY
     mockWindow(dom);
-    loadWithUnload(body);
+    loadWithUnload(ul);
     const user = userEvent.setup({ document: dom.window.document });
 
     // act
     await user.tab();
-    console.log(document.activeElement);
     await user.tab();
-    console.log(document.activeElement);
 
     // assert
-    expect(body.outerHTML).toMatchSnapshot();
+    expect(ul.outerHTML).toMatchSnapshot();
   });
 
   it('will highlight sibling events when I click', async () => {

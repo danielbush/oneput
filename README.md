@@ -55,7 +55,14 @@ pnpm --filter sbr-hyper-core run convert:ng-ml
 - we can style on `:focus` and set `outline`; setting outline makes the focus ring show on focus() calls made on click events
 - `outline` css rule doesn't affect layout, avoids reflow
 - TEST_FIRE
-  - `await user.keyboard(...)` and ctrl+j (or other key) - doesn't work, had to use `fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY)`
+  - `await user.keyboard(...)` and ctrl+j (or other key) - doesn't work, had to use `fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY)` where FE_SIB_DOWN_KEY = `{ key: 'j', ctrlKey: true, };`
   - related maybe: <https://stackoverflow.com/questions/74281534/react-testing-library-user-event-keyboard-not-working>
 - TEST_HOTKEY
   - `await user.keyboard(...)` doesn't trigger `hotkeys`; forced to test with hotkeys.trigger
+- USEREVENT_TAB_BODY
+  - adding tabIndex="0" to body and trying to move focus by simulating a tab button
+    - `const user = userEvent.setup({ document: dom.window.document });`
+    - `user.tab()`
+  - ... doesn't work; document.activeElement stays on the body element.
+  - However, if we only tabify the content inside body `user.tab()` works
+  - In a real browser, including the body works as expected

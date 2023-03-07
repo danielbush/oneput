@@ -4,6 +4,6 @@ exports[`loader can load the document 1`] = `"<body id=\\"body\\" tabindex=\\"0\
 
 exports[`navigator will highlight sibling events when I click 1`] = `"<body id=\\"body\\" tabindex=\\"0\\"><ul id=\\"ul\\" tabindex=\\"0\\"><li id=\\"li1\\" tabindex=\\"0\\">item 1</li><li id=\\"li2\\" tabindex=\\"0\\" class=\\"sbr-focus-sibling\\">item 2</li></ul></body>"`;
 
-exports[`navigator will highlight sibling events when I tab 1`] = `"<body><ul id=\\"ul\\" tabindex=\\"0\\"><li id=\\"li1\\" tabindex=\\"0\\">item 1</li><li id=\\"li2\\" tabindex=\\"0\\" class=\\"sbr-focus-sibling\\">item 2</li></ul></body>"`;
+exports[`navigator will highlight sibling events when I tab 1`] = `"<ul id=\\"ul\\" tabindex=\\"0\\"><li id=\\"li1\\" tabindex=\\"0\\">item 1</li><li id=\\"li2\\" tabindex=\\"0\\" class=\\"sbr-focus-sibling\\">item 2</li></ul>"`;
 
 exports[`serializer removes tabIndexes 1`] = `"<body id=\\"body\\"><ul id=\\"ul\\"><li id=\\"li1\\">item 1</li><li id=\\"li2\\">item 2</li></ul></body>"`;

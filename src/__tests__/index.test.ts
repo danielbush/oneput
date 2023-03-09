@@ -352,6 +352,36 @@ describe('navigator', () => {
       expect(ids).toEqual(['id2', 'id1', 'body']);
     });
   });
+
+  describe('islands', () => {
+    it('should ignore katex islands', async () => {
+      // arrange
+      const dom = new JSDOM(
+        makeDoc(
+          `<div id="div1">` +
+            `<div class="katex"><div>should not go here</div></div>` +
+            `<div id="div2">div 2</div>` +
+            `</div>`,
+        ),
+      );
+      const body = dom.window.document.querySelector('body')!;
+      mockWindow(dom);
+      loadWithUnload(body);
+      const user = userEvent.setup({ document: dom.window.document });
+      await user.click(dom.window.document.getElementById('div1')!);
+
+      // act
+      hotkeys.trigger(HK_REC_DOWN_KEY);
+      console.log(dom.window.document.activeElement?.outerHTML);
+      hotkeys.trigger(HK_REC_DOWN_KEY);
+      console.log(dom.window.document.activeElement?.outerHTML);
+
+      // assert
+      expect(document.activeElement).toEqual(
+        dom.window.document.getElementById('div2'),
+      );
+    });
+  });
 });
 
 describe('serializer', () => {

@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`navigator will highlight sibling events when I click 1`] = `"<body id=\\"body\\" tabindex=\\"0\\"><ul id=\\"ul\\" tabindex=\\"0\\"><li id=\\"li1\\" tabindex=\\"0\\">item 1</li><li id=\\"li2\\" tabindex=\\"0\\" class=\\"sbr-focus-sibling\\">item 2</li></ul></body>"`;
+
+exports[`navigator will highlight sibling events when I tab 1`] = `"<ul id=\\"ul\\" tabindex=\\"0\\"><li id=\\"li1\\" tabindex=\\"0\\">item 1</li><li id=\\"li2\\" tabindex=\\"0\\" class=\\"sbr-focus-sibling\\">item 2</li></ul>"`;

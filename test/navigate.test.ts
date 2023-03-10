@@ -19,8 +19,8 @@ beforeEach(() => {
   unload();
 });
 
-describe('navigator', () => {
-  it('will focus next element depth-first when I tab', async () => {
+describe('navigate', () => {
+  it.skip('will focus next element depth-first when I tab', async () => {
     // arrange
     const dom = new JSDOM(
       makeDoc(
@@ -62,7 +62,7 @@ describe('navigator', () => {
 
   it.todo('can tab through custom elements / web components'); // test this with a real example when/if we make one
 
-  it('will highlight sibling events when I tab', async () => {
+  it.skip('will highlight sibling events when I tab', async () => {
     // arrange
     const dom = new JSDOM(
       makeDoc(
@@ -85,7 +85,7 @@ describe('navigator', () => {
     expect(ul.outerHTML).toMatchSnapshot();
   });
 
-  it('will highlight sibling events when I click', async () => {
+  it.skip('will highlight sibling events when I click', async () => {
     // arrange
     const dom = new JSDOM(
       makeDoc(

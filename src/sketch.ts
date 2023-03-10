@@ -1,7 +1,8 @@
-import { load, tabify } from '.';
+import { start } from '.';
+import { tabify } from './load';
 
 console.log('start coding here');
-load(document.body);
+start(document.body);
 
 class AppDrawer extends HTMLElement {
   connectedCallback() {

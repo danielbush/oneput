@@ -1,7 +1,7 @@
 import * as action from '../action';
-import { Bindings } from '../binding';
 
-export const defaultBindings: Bindings = [
+export type Binding = [string, (cx: action.ActionContext) => void];
+export const defaultBindings: Binding[] = [
   ['ctrl+j', action.REC_NEXT],
   ['ctrl+k', action.REC_PREV],
   ['j', action.SIB_NEXT],

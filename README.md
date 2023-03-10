@@ -13,8 +13,8 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
   - when we get to text, we want to be able to edit it
 - `serialize`
   - when we save we need to generate a version of the edited content without any any temporary artifacts from the navigator
-- `unload`
-  - be able to leave the html the way we found it if this program is exited
+- `load` / `unload`
+  - load and unload an html doc; be able to leave the html the way we found it if this program is exited
 
 ## Synopsis
 

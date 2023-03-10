@@ -1,8 +1,13 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  roots: ['<rootDir>/src'],
+  // roots: ['<rootDir>/src'],
   setupFiles: ['<rootDir>/jest.setup.js'],
+  testMatch: [
+    '**/test/**/*.test.[jt]s?(x)',
+    '**/__tests__/**/*.[jt]s?(x)',
+    '**/?(*.)+(spec|test).[tj]s?(x)',
+  ],
   coverageThreshold: {
     global: {
       statements: 79,

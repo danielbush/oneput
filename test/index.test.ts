@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect } from '@jest/globals';
 import { JSDOM } from 'jsdom';
-import { load, serialize } from '..';
+import { load, serialize } from '../src';
 import { fireEvent } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import hotkeys from 'hotkeys-js';

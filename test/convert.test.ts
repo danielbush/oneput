@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { convert } from '../convert';
+import { convert } from '../src/convert';
 
 /**
  * Convenience function for tests to construct multiline html.

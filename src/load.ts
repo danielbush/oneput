@@ -1,6 +1,6 @@
 import { walk } from './walk';
 
-export const TABS = new Set<Element>();
+export const TABS = new Set<HTMLElement>();
 
 export function tabify(start: HTMLElement): void {
   TABS.add(start);
@@ -11,7 +11,7 @@ export function tabify(start: HTMLElement): void {
   });
 }
 
-export function serialize(root: Element): string {
+export function serialize(root: HTMLElement): string {
   if (TABS.has(root)) {
     root.removeAttribute('tabindex');
   }

@@ -96,9 +96,9 @@ export function showCurrentSiblings(): void {
   clearCurrentSiblings();
   const active = document.activeElement;
   const pnode = active?.parentElement;
-  if (active && pnode && TABS.has(active)) {
+  if (active && pnode && TABS.has(active as HTMLElement)) {
     for (const child of pnode.children) {
-      if (TABS.has(child) && child !== active) {
+      if (TABS.has(child as HTMLElement) && child !== active) {
         SIB_FOCUS.add(child);
         child.classList.add(SBR_FOCUS_SIBLING);
       }

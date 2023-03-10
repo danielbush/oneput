@@ -1,0 +1,55 @@
+import { JSDOM } from 'jsdom';
+import { load } from '../src';
+
+// const REC_DOWN_KEY = 'j';
+// const REC_UP_KEY = 'k';
+// const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
+// const SIB_DOWN_KEY = '{ctrl>}j{/ctrl}';
+// const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
+// const FE_SIB_DOWN_KEY = {
+//   key: 'j',
+//   ctrlKey: true,
+// };
+// const FE_SIB_UP_KEY = {
+//   key: 'k',
+//   ctrlKey: true,
+// };
+export const HK_REC_DOWN_KEY = 'j';
+export const HK_REC_UP_KEY = 'k';
+export const HK_SIB_DOWN_KEY = 'ctrl+j';
+export const HK_SIB_UP_KEY = 'ctrl+k';
+export const HK_UP_KEY = 'ctrl+cmd+u';
+export const UNLOADS: Array<() => void> = [];
+
+export function makeDoc(content: string): string {
+  return `<!DOCTYPE html><body id="body">${content}</body>`;
+}
+
+/**
+ * globalThis.window.HTMLElement etc !== dom.window.HTMLElement (jsdom)
+ * https://stackoverflow.com/questions/40449434/mocking-globals-in-jest
+ */
+export function mockWindow(dom: JSDOM): void {
+  const jsdomWindow = dom.window;
+  const jsdomDocument = dom.window.document;
+  Object.defineProperty(global, 'window', {
+    value: jsdomWindow,
+    writable: true,
+  });
+  Object.defineProperty(global, 'document', {
+    value: jsdomDocument,
+    writable: true,
+  });
+}
+
+export function unload(): void {
+  let fun;
+  while ((fun = UNLOADS.pop())) {
+    fun();
+  }
+}
+
+export function loadWithUnload(el: HTMLElement): void {
+  const unload = load(el);
+  UNLOADS.push(unload);
+}

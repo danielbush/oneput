@@ -1,64 +1,24 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect } from '@jest/globals';
 import { JSDOM } from 'jsdom';
-import { load, serialize } from '../src';
-import { fireEvent } from '@testing-library/dom';
+import { serialize } from '../src';
 import userEvent from '@testing-library/user-event';
 import hotkeys from 'hotkeys-js';
-
-// const REC_DOWN_KEY = 'j';
-// const REC_UP_KEY = 'k';
-// const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
-// const SIB_DOWN_KEY = '{ctrl>}j{/ctrl}';
-// const SIB_DOWN_KEY = '{ctrl>}{j}{/ctrl}';
-// const FE_SIB_DOWN_KEY = {
-//   key: 'j',
-//   ctrlKey: true,
-// };
-// const FE_SIB_UP_KEY = {
-//   key: 'k',
-//   ctrlKey: true,
-// };
-const HK_REC_DOWN_KEY = 'j';
-const HK_REC_UP_KEY = 'k';
-const HK_SIB_DOWN_KEY = 'ctrl+j';
-const HK_SIB_UP_KEY = 'ctrl+k';
-const HK_UP_KEY = 'ctrl+cmd+u';
-
-function makeDoc(content: string): string {
-  return `<!DOCTYPE html><body id="body">${content}</body>`;
-}
-
-/**
- * globalThis.window.HTMLElement etc !== dom.window.HTMLElement (jsdom)
- * https://stackoverflow.com/questions/40449434/mocking-globals-in-jest
- */
-function mockWindow(dom: JSDOM) {
-  const jsdomWindow = dom.window;
-  const jsdomDocument = dom.window.document;
-  Object.defineProperty(global, 'window', {
-    value: jsdomWindow,
-    writable: true,
-  });
-  Object.defineProperty(global, 'document', {
-    value: jsdomDocument,
-    writable: true,
-  });
-}
-
-const UNLOADS: Array<() => void> = [];
+import {
+  HK_REC_DOWN_KEY,
+  HK_REC_UP_KEY,
+  HK_SIB_DOWN_KEY,
+  HK_SIB_UP_KEY,
+  HK_UP_KEY,
+  loadWithUnload,
+  makeDoc,
+  mockWindow,
+  unload,
+} from './util';
 
 beforeEach(() => {
-  let unload;
-  while ((unload = UNLOADS.pop())) {
-    unload();
-  }
+  unload();
 });
-
-function loadWithUnload(el: HTMLElement) {
-  const unload = load(el);
-  UNLOADS.push(unload);
-}
 
 describe('loader', () => {
   it('can load the document', () => {

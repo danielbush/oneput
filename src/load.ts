@@ -1,21 +1,30 @@
 import { DocumentContext } from './document';
 import { walk } from './walk';
 
-export function tabrec(cx: DocumentContext, start: HTMLElement): void {
-  cx.TABS.add(start);
-  start.setAttribute('tabindex', '0');
-  walk(start, (el) => {
-    cx.TABS.add(el);
+/**
+ * Make all focusable elements focusable.
+ *
+ * This is used to initialize the document.  But it can be used to recurse
+ * through any subtree.
+ */
+export function tabrec(TABS: DocumentContext['TABS'], root: HTMLElement): void {
+  TABS.add(root);
+  root.setAttribute('tabindex', '0');
+  walk(root, (el) => {
+    TABS.add(el);
     el.setAttribute('tabindex', '0');
   });
 }
 
-export function serialize(cx: DocumentContext, root: HTMLElement): string {
-  if (cx.TABS.has(root)) {
+export function serialize(
+  TABS: DocumentContext['TABS'],
+  root: HTMLElement,
+): string {
+  if (TABS.has(root)) {
     root.removeAttribute('tabindex');
   }
   walk(root, (el) => {
-    if (cx.TABS.has(el)) {
+    if (TABS.has(el)) {
       el.removeAttribute('tabindex');
     }
   });

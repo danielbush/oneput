@@ -54,7 +54,7 @@ export function start(
   function handleFocusIn() {
     action.showCurrentSiblings(documentContext);
   }
-  load.tabify(documentContext, root);
+  load.tabrec(documentContext, root);
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusIn);
   for (const [binding, action] of bindings) {

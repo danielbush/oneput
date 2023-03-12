@@ -1,7 +1,7 @@
 import { DocumentContext } from './document';
 import { walk } from './walk';
 
-export function tabify(cx: DocumentContext, start: HTMLElement): void {
+export function tabrec(cx: DocumentContext, start: HTMLElement): void {
   cx.TABS.add(start);
   start.setAttribute('tabindex', '0');
   walk(start, (el) => {

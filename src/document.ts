@@ -36,6 +36,9 @@ export type DocumentContext = {
   unload: () => void;
 };
 
+/**
+ * Initialize a subtree of the DOM in a browser window for editing.
+ */
 export function start(
   root: HTMLElement,
   bindings: Binding[] = defaultBindings,

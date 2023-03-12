@@ -1,3 +1,8 @@
+/**
+ * This module is the place where we define global state and side-effects and
+ * related things like event handlers so that the rest of the codebase can
+ * remain as stateless as possible.
+ */
 import hotkeys from 'hotkeys-js';
 import { Binding, defaultBindings } from './config/binding';
 import * as load from './load';
@@ -19,7 +24,8 @@ export type DocumentContext = {
    */
   SIB_FOCUS: Set<Element>;
   /**
-   * Tracks which elements have tabIndex="0" ie are focusable.
+   * Tracks which elements had tabIndex="0" added to them to make them
+   * focusable.  Note that some elements may be focusable anyway.
    *
    * This allows for tab navigation of elements in the document.
    */
@@ -42,9 +48,17 @@ export function start(
     SIB_FOCUS: new Set(),
     TABS: new Set(),
     unload: () => {
+      // Placeholder, see below.
       return;
     },
   };
+
+  // Make document focusable
+
+  load.tabrec(documentContext.TABS, root);
+
+  // Set up event handlers and key bindings
+
   function handleElementClick(evt: MouseEvent) {
     if (evt.target instanceof window.HTMLElement) {
       action.CLICK(documentContext, evt.target);
@@ -54,15 +68,20 @@ export function start(
   function handleFocusIn() {
     action.showCurrentSiblings(documentContext);
   }
-  load.tabrec(documentContext.TABS, root);
+
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusIn);
+
   for (const [binding, action] of bindings) {
     hotkeys(binding, () => {
       action(documentContext);
     });
   }
+
+  // Unload
+
   documentContext.unload = () => {
+    load.untab(documentContext.TABS);
     hotkeys.unbind();
     root.removeEventListener('click', handleElementClick);
     root.removeEventListener('focusin', handleFocusIn);

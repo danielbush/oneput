@@ -1,6 +1,5 @@
 import { DocumentContext } from './browser';
 import { SBR_FOCUS_SIBLING } from './constants';
-import { TABS } from './load';
 import {
   getNextSiblingElement,
   getParent,
@@ -68,7 +67,7 @@ export function UP(cx: DocumentContext): void {
 }
 
 export function CLICK(cx: DocumentContext, el: HTMLElement): void {
-  if (TABS.has(el)) {
+  if (cx.TABS.has(el)) {
     el.focus();
     showCurrentSiblings(cx);
   }
@@ -85,9 +84,9 @@ export function showCurrentSiblings(cx: DocumentContext): void {
   clearCurrentSiblings(cx);
   const active = document.activeElement;
   const pnode = active?.parentElement;
-  if (active && pnode && TABS.has(active as HTMLElement)) {
+  if (active && pnode && cx.TABS.has(active as HTMLElement)) {
     for (const child of pnode.children) {
-      if (TABS.has(child as HTMLElement) && child !== active) {
+      if (cx.TABS.has(child as HTMLElement) && child !== active) {
         cx.SIB_FOCUS.add(child);
         child.classList.add(SBR_FOCUS_SIBLING);
       }

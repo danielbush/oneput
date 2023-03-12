@@ -18,13 +18,20 @@ export type DocumentContext = {
    * Handles showCurrentSiblings.
    */
   SIB_FOCUS: Set<Element>;
+  /**
+   * Tracks which elements have tabIndex="0" ie are focusable.
+   *
+   * This allows for tab navigation of elements in the document.
+   */
+  TABS: Set<HTMLElement>;
+  unload: () => void;
 };
 
 export function start(
   root: HTMLElement,
   bindings: Binding[] = defaultBindings,
-): () => void {
-  const documentContext = {
+): DocumentContext {
+  const documentContext: DocumentContext = {
     root,
     get active(): HTMLElement | null {
       if (document.activeElement instanceof window.HTMLElement) {
@@ -32,7 +39,9 @@ export function start(
       }
       return null;
     },
-    SIB_FOCUS: new Set<Element>(),
+    SIB_FOCUS: new Set(),
+    TABS: new Set(),
+    unload: () => {},
   };
   function handleElementClick(evt: MouseEvent) {
     if (evt.target instanceof window.HTMLElement) {
@@ -43,7 +52,7 @@ export function start(
   function handleFocusIn() {
     action.showCurrentSiblings(documentContext);
   }
-  load.tabify(root);
+  load.tabify(documentContext, root);
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusIn);
   for (const [binding, action] of bindings) {
@@ -51,10 +60,10 @@ export function start(
       action(documentContext);
     });
   }
-  const unload = () => {
+  documentContext.unload = () => {
     hotkeys.unbind();
     root.removeEventListener('click', handleElementClick);
     root.removeEventListener('focusin', handleFocusIn);
   };
-  return unload;
+  return documentContext;
 }

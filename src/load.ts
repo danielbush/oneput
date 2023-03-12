@@ -1,47 +1,11 @@
-import { DocumentContext } from './document';
+import { isAlreadyFocusable } from './focus';
 import { walk } from './walk';
-
-function isFocusable(element: Element) {
-  if (
-    (element.hasAttribute('tabindex') && element.getAttribute('tabindex')) ??
-    -2 >= 0
-  ) {
-    return true;
-  }
-  if (
-    [
-      'input',
-      'select',
-      'textarea',
-      'button',
-      'optgroup',
-      'option',
-      'fieldset',
-      'label',
-    ].indexOf(element.tagName.toLowerCase()) !== -1
-  ) {
-    return true;
-  }
-  if (
-    element.hasAttribute('contenteditable') &&
-    element.getAttribute('contenteditable') === 'true'
-  ) {
-    return true;
-  }
-  if (
-    element.hasAttribute('tabindex') &&
-    element.getAttribute('tabindex') === '-1'
-  ) {
-    return true;
-  }
-  return false;
-}
 
 /**
  * Make an element focusable if it is not innately focusable.
  */
-function tab(TABS: DocumentContext['TABS'], el: HTMLElement) {
-  if (!isFocusable(el)) {
+function tab(TABS: Set<HTMLElement>, el: HTMLElement) {
+  if (!isAlreadyFocusable(TABS, el)) {
     TABS.add(el);
     el.setAttribute('tabindex', '0');
   }
@@ -50,10 +14,10 @@ function tab(TABS: DocumentContext['TABS'], el: HTMLElement) {
 /**
  * Make all focusable elements focusable.
  *
- * This is used to initialize the document.  But it can be used to recurse
- * through any subtree.
+ * This can be used to initialize a document (TABS would be an empty set).  But
+ * it can be used to recurse through any subtree.
  */
-export function tabrec(TABS: DocumentContext['TABS'], root: HTMLElement): void {
+export function tabrec(TABS: Set<HTMLElement>, root: HTMLElement): void {
   tab(TABS, root);
   walk(root, (el) => {
     tab(TABS, el);
@@ -63,16 +27,13 @@ export function tabrec(TABS: DocumentContext['TABS'], root: HTMLElement): void {
 /**
  * Remove all tabs
  */
-export function untab(TABS: DocumentContext['TABS']): void {
+export function untab(TABS: Set<HTMLElement>): void {
   for (const el of TABS) {
     el.removeAttribute('tabindex');
   }
 }
 
-export function serialize(
-  TABS: DocumentContext['TABS'],
-  root: HTMLElement,
-): string {
+export function serialize(TABS: Set<HTMLElement>, root: HTMLElement): string {
   if (TABS.has(root)) {
     root.removeAttribute('tabindex');
   }

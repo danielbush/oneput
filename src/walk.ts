@@ -1,25 +1,4 @@
-function ignoreElement(el: Element | null | undefined): boolean {
-  if (el instanceof window.HTMLScriptElement) {
-    return true;
-  }
-  const isHTMLElement = el instanceof window.HTMLElement;
-  return !isHTMLElement;
-}
-
-function ignoreDescendents(el: Element | null | undefined): boolean {
-  if (el?.classList.contains('katex')) {
-    return true;
-  }
-  return false;
-}
-
-function isFocusable(el: Element | null | undefined): el is HTMLElement {
-  if (el instanceof window.HTMLScriptElement) {
-    return false;
-  }
-  const isHTMLElement = el instanceof window.HTMLElement;
-  return isHTMLElement;
-}
+import { ignoreDescendents, isFocusable } from './focus';
 
 export function walk(root: Element, visit: (el: HTMLElement) => void): void {
   if (ignoreDescendents(root)) {
@@ -38,7 +17,7 @@ function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
     return;
   }
   for (const child of root.children) {
-    if (ignoreElement(child)) {
+    if (!isFocusable(child)) {
       break;
     }
     if (child instanceof window.HTMLElement) {
@@ -54,7 +33,7 @@ function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
   }
   const revChildren = Array.from(root.children).reverse();
   for (const child of revChildren) {
-    if (ignoreElement(child)) {
+    if (!isFocusable(child)) {
       break;
     }
     if (child instanceof window.HTMLElement) {

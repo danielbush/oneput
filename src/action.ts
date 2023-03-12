@@ -1,4 +1,5 @@
 import { DocumentContext, SBR_FOCUS_SIBLING } from './document';
+import { isFocusable } from './focus';
 import {
   getNextSiblingElement,
   getParent,
@@ -85,9 +86,11 @@ export function showCurrentSiblings(cx: DocumentContext): void {
   const pnode = active?.parentElement;
   if (active && pnode && cx.TABS.has(active as HTMLElement)) {
     for (const child of pnode.children) {
-      if (cx.TABS.has(child as HTMLElement) && child !== active) {
-        cx.SIB_FOCUS.add(child);
-        child.classList.add(SBR_FOCUS_SIBLING);
+      if (isFocusable(child)) {
+        if (cx.TABS.has(child) && child !== active) {
+          cx.SIB_FOCUS.add(child);
+          child.classList.add(SBR_FOCUS_SIBLING);
+        }
       }
     }
   }

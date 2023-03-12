@@ -1,5 +1,5 @@
+import { DocumentContext } from './browser';
 import { SBR_FOCUS_SIBLING } from './constants';
-import { getCurrentFocus } from './focus';
 import { TABS } from './load';
 import {
   getNextSiblingElement,
@@ -9,17 +9,12 @@ import {
   walkIterReverse,
 } from './walk';
 
-export type ActionContext = {
-  root: HTMLElement;
-};
-
 /**
  * Find next using depth first recursion.
  */
-export function REC_NEXT(cx: ActionContext): void {
-  const active = getCurrentFocus();
-  if (!active) return;
-  for (const next of walkIter(active, cx.root)) {
+export function REC_NEXT(cx: DocumentContext): void {
+  if (!cx.active) return;
+  for (const next of walkIter(cx.active, cx.root)) {
     next.focus();
     break;
   }
@@ -28,10 +23,9 @@ export function REC_NEXT(cx: ActionContext): void {
 /**
  * Find previous using depth first recursion.
  */
-export function REC_PREV(cx: ActionContext): void {
-  const active = getCurrentFocus();
-  if (!active) return;
-  for (const next of walkIterReverse(active, cx.root)) {
+export function REC_PREV(cx: DocumentContext): void {
+  if (!cx.active) return;
+  for (const next of walkIterReverse(cx.active, cx.root)) {
     next.focus();
     break;
   }
@@ -40,10 +34,9 @@ export function REC_PREV(cx: ActionContext): void {
 /**
  * Find next sibling element if there is one.
  */
-export function SIB_NEXT(): void {
-  const active = getCurrentFocus();
-  if (!active) return;
-  const next = getNextSiblingElement(active);
+export function SIB_NEXT(cx: DocumentContext): void {
+  if (!cx.active) return;
+  const next = getNextSiblingElement(cx.active);
   if (next) {
     next.focus();
   }
@@ -53,10 +46,9 @@ export function SIB_NEXT(): void {
 /**
  * Find previous sibling element if there is one.
  */
-export function SIB_PREV(): void {
-  const active = getCurrentFocus();
-  if (!active) return;
-  const next = getPreviousSiblingElement(active);
+export function SIB_PREV(cx: DocumentContext): void {
+  if (!cx.active) return;
+  const next = getPreviousSiblingElement(cx.active);
   if (next) {
     next.focus();
   }
@@ -66,10 +58,9 @@ export function SIB_PREV(): void {
 /**
  * Find next parent.
  */
-export function UP(cx: ActionContext): void {
-  const active = getCurrentFocus();
-  if (!active) return;
-  const next = getParent(active, cx.root);
+export function UP(cx: DocumentContext): void {
+  if (!cx.active) return;
+  const next = getParent(cx.active, cx.root);
   if (next) {
     next.focus();
   }

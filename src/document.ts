@@ -41,7 +41,9 @@ export function start(
     },
     SIB_FOCUS: new Set(),
     TABS: new Set(),
-    unload: () => {},
+    unload: () => {
+      return;
+    },
   };
   function handleElementClick(evt: MouseEvent) {
     if (evt.target instanceof window.HTMLElement) {

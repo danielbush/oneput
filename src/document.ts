@@ -5,8 +5,6 @@ import * as action from './action';
 
 export const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
 
-// TODO: rename this to document.ts?
-
 export type DocumentContext = {
   /**
    * The root node of the subtree of the DOM that is potentially editable.

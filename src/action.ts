@@ -67,30 +67,28 @@ export function UP(cx: DocumentContext): void {
   return;
 }
 
-export function CLICK(el: HTMLElement): void {
+export function CLICK(cx: DocumentContext, el: HTMLElement): void {
   if (TABS.has(el)) {
     el.focus();
-    showCurrentSiblings();
+    showCurrentSiblings(cx);
   }
 }
 
-const SIB_FOCUS = new Set<Element>();
-
-export function clearCurrentSiblings(): void {
-  for (const sib of SIB_FOCUS) {
+export function clearCurrentSiblings(cx: DocumentContext): void {
+  for (const sib of cx.SIB_FOCUS) {
     sib.classList.remove(SBR_FOCUS_SIBLING);
   }
-  SIB_FOCUS.clear();
+  cx.SIB_FOCUS.clear();
 }
 
-export function showCurrentSiblings(): void {
-  clearCurrentSiblings();
+export function showCurrentSiblings(cx: DocumentContext): void {
+  clearCurrentSiblings(cx);
   const active = document.activeElement;
   const pnode = active?.parentElement;
   if (active && pnode && TABS.has(active as HTMLElement)) {
     for (const child of pnode.children) {
       if (TABS.has(child as HTMLElement) && child !== active) {
-        SIB_FOCUS.add(child);
+        cx.SIB_FOCUS.add(child);
         child.classList.add(SBR_FOCUS_SIBLING);
       }
     }

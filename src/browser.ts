@@ -3,16 +3,6 @@ import { Binding, defaultBindings } from './config/binding';
 import * as load from './load';
 import * as action from './action';
 
-function handleElementClick(evt: MouseEvent) {
-  if (evt.target instanceof window.HTMLElement) {
-    action.CLICK(evt.target);
-  }
-}
-
-function handleFocusIn() {
-  action.showCurrentSiblings();
-}
-
 // TODO: rename this to document.ts?
 
 export type DocumentContext = {
@@ -24,6 +14,10 @@ export type DocumentContext = {
    * The focused element (may be none).
    */
   active: HTMLElement | null;
+  /**
+   * Handles showCurrentSiblings.
+   */
+  SIB_FOCUS: Set<Element>;
 };
 
 export function start(
@@ -38,7 +32,17 @@ export function start(
       }
       return null;
     },
+    SIB_FOCUS: new Set<Element>(),
   };
+  function handleElementClick(evt: MouseEvent) {
+    if (evt.target instanceof window.HTMLElement) {
+      action.CLICK(documentContext, evt.target);
+    }
+  }
+
+  function handleFocusIn() {
+    action.showCurrentSiblings(documentContext);
+  }
   load.tabify(root);
   root.addEventListener<'click'>('click', handleElementClick);
   root.addEventListener<'focusin'>('focusin', handleFocusIn);

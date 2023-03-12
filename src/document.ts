@@ -3,6 +3,8 @@ import { Binding, defaultBindings } from './config/binding';
 import * as load from './load';
 import * as action from './action';
 
+export const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
+
 // TODO: rename this to document.ts?
 
 export type DocumentContext = {

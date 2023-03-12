@@ -1,5 +1,4 @@
-import { DocumentContext } from './document';
-import { SBR_FOCUS_SIBLING } from './constants';
+import { DocumentContext, SBR_FOCUS_SIBLING } from './document';
 import {
   getNextSiblingElement,
   getParent,

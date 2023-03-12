@@ -1,4 +1,4 @@
-import { DocumentContext } from './browser';
+import { DocumentContext } from './document';
 import { SBR_FOCUS_SIBLING } from './constants';
 import {
   getNextSiblingElement,

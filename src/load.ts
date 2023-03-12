@@ -1,4 +1,4 @@
-import { DocumentContext } from './browser';
+import { DocumentContext } from './document';
 import { walk } from './walk';
 
 export function tabify(cx: DocumentContext, start: HTMLElement): void {

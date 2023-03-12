@@ -1,3 +1,3 @@
-import { start } from './browser';
+import { start } from './document';
 
 export { start };

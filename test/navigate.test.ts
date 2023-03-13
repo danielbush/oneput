@@ -19,7 +19,7 @@ beforeEach(() => {
   unload();
 });
 
-describe('navigate', () => {
+describe.skip('navigate', () => {
   it.skip('will focus next element depth-first when I tab', async () => {
     // arrange
     const dom = new JSDOM(

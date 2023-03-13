@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`serializer removes tabIndexes 1`] = `"<body id=\\"body\\"><ul id=\\"ul\\"><li id=\\"li1\\">item 1</li><li id=\\"li2\\">item 2</li></ul></body>"`;

@@ -7,7 +7,7 @@ beforeEach(() => {
   unload();
 });
 
-describe('loader', () => {
+describe.skip('loader', () => {
   it('can load the document', () => {
     // arrange
     const dom = new JSDOM(

@@ -1,3 +1,3 @@
-import { start } from './document';
+import { start } from './app/document';
 
 export { start };

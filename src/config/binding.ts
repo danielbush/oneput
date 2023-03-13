@@ -1,4 +1,4 @@
-import { DocumentContext } from '../document';
+import { DocumentContext } from '../app/document';
 import * as action from '../lib/action';
 
 export type Binding = [string, (cx: DocumentContext) => void];

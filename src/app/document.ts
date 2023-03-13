@@ -4,9 +4,9 @@
  * remain as stateless as possible.
  */
 import hotkeys from 'hotkeys-js';
-import { Binding, defaultBindings } from './config/binding';
-import * as load from './lib/load';
-import * as action from './lib/action';
+import { Binding, defaultBindings } from '../config/binding';
+import * as load from '../lib/load';
+import * as action from '../lib/action';
 
 /**
  * CSS class for SIB_FOCUS.

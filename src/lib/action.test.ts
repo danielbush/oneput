@@ -1,5 +1,5 @@
-import { describe, expect } from '@jest/globals';
+test.todo('HI_SIB - showCurrentSiblings');
 
-describe('action', () => {
-  test.todo('foo');
+test('HI_SIB - CLICK shows current siblings', () => {
+  // TODO: test CLICK satisfies HI_SIB
 });

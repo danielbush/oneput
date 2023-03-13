@@ -60,8 +60,6 @@ describe.skip('navigate', () => {
     );
   });
 
-  it.todo('can tab through custom elements / web components'); // test this with a real example when/if we make one
-
   it.skip('will highlight sibling events when I tab', async () => {
     // arrange
     const dom = new JSDOM(

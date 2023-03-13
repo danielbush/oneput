@@ -1,4 +1,5 @@
-import { DocumentContext, SBR_FOCUS_SIBLING } from '../app/document';
+import { SBR_FOCUS_SIBLING } from '../app/document';
+import { DocumentContext } from './DocumentContext';
 import { isFocusable } from './focus';
 import {
   getNextSiblingElement,

@@ -1,5 +1,5 @@
 import { DocumentContext } from '../document';
-import * as action from '../action';
+import * as action from '../lib/action';
 
 export type Binding = [string, (cx: DocumentContext) => void];
 export const defaultBindings: Binding[] = [

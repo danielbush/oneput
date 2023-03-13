@@ -1,5 +1,5 @@
 import { start } from '.';
-import { tabrec } from './load';
+import { tabrec } from './lib/load';
 
 console.log('start coding here');
 const cx = start(document.body);

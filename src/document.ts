@@ -5,8 +5,8 @@
  */
 import hotkeys from 'hotkeys-js';
 import { Binding, defaultBindings } from './config/binding';
-import * as load from './load';
-import * as action from './action';
+import * as load from './lib/load';
+import * as action from './lib/action';
 
 /**
  * CSS class for SIB_FOCUS.

@@ -10,11 +10,6 @@ import * as action from '../lib/action';
 import { DocumentContext } from '../lib/DocumentContext';
 
 /**
- * CSS class for SIB_FOCUS.
- */
-export const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
-
-/**
  * Initialize a subtree of the DOM in a browser window for editing.
  */
 export function start(

@@ -1,4 +1,4 @@
-import { SBR_FOCUS_SIBLING } from '../app/document';
+import { SBR_FOCUS_SIBLING } from './constants';
 import { DocumentContext } from './DocumentContext';
 import { isFocusable } from './focus';
 import {

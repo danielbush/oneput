@@ -24,7 +24,7 @@ export function start(
       }
       return null;
     },
-    SIB_FOCUS: new Set(),
+    SIB_HIGHLIGHT: new Set(),
     TABS: new Set(),
     unload: () => {
       // Placeholder, see below.

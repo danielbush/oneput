@@ -10,7 +10,7 @@ export type DocumentContext = {
   /**
    * Handles showCurrentSiblings.
    */
-  SIB_FOCUS: Set<HTMLElement>;
+  SIB_HIGHLIGHT: Set<HTMLElement>;
   /**
    * Tracks which elements had tabIndex="0" added to them to make them
    * focusable.  Note that some elements may be focusable anyway.

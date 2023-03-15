@@ -75,10 +75,10 @@ export function CLICK(cx: DocumentContext, el: HTMLElement): void {
 }
 
 export function clearCurrentSiblings(cx: DocumentContext): void {
-  for (const sib of cx.SIB_FOCUS) {
+  for (const sib of cx.SIB_HIGHLIGHT) {
     sib.classList.remove(SBR_FOCUS_SIBLING);
   }
-  cx.SIB_FOCUS.clear();
+  cx.SIB_HIGHLIGHT.clear();
 }
 
 export function showCurrentSiblings(cx: DocumentContext): void {
@@ -89,7 +89,7 @@ export function showCurrentSiblings(cx: DocumentContext): void {
     for (const child of pnode.children) {
       if (isFocusable(child)) {
         if (cx.TABS.has(child) && child !== active) {
-          cx.SIB_FOCUS.add(child);
+          cx.SIB_HIGHLIGHT.add(child);
           child.classList.add(SBR_FOCUS_SIBLING);
         }
       }

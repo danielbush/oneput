@@ -1,5 +1,5 @@
-test.todo('HI_SIB - showCurrentSiblings');
+test.todo('SIB_HIGHLIGHT - showCurrentSiblings');
 
-test('HI_SIB - CLICK shows current siblings', () => {
-  // TODO: test CLICK satisfies HI_SIB
+test('SIB_HIGHLIGHT - CLICK shows current siblings', () => {
+  // TODO: test CLICK satisfies SIB_HIGHLIGHT
 });

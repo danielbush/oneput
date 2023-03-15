@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom';
-import { load } from '../src';
+// import load from '../src/lib/load';
 
 // const REC_DOWN_KEY = 'j';
 // const REC_UP_KEY = 'k';
@@ -50,6 +50,6 @@ export function unload(): void {
 }
 
 export function loadWithUnload(el: HTMLElement): void {
-  const unload = load(el);
-  UNLOADS.push(unload);
+  // const unload = load(el);
+  // UNLOADS.push(unload);
 }

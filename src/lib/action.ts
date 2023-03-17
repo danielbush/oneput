@@ -67,25 +67,34 @@ export function UP(cx: DocumentContext): void {
   return;
 }
 
-export function CLICK(cx: DocumentContext, el: HTMLElement): void {
-  if (cx.TABS.has(el)) {
+/**
+ * Focus an element, sets cx.active.
+ *
+ * TODO: cx.active should update.  Should we track it manually?
+ */
+export function FOCUS(cx: DocumentContext, el: HTMLElement): boolean {
+  if (isFocusable(el)) {
     el.focus();
-    showCurrentSiblings(cx);
+    return true;
   }
+  return false;
 }
 
-export function clearCurrentSiblings(cx: DocumentContext): void {
+export function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {
   for (const sib of cx.SIB_HIGHLIGHT) {
     sib.classList.remove(SBR_FOCUS_SIBLING);
   }
   cx.SIB_HIGHLIGHT.clear();
 }
 
-export function showCurrentSiblings(cx: DocumentContext): void {
-  clearCurrentSiblings(cx);
-  const active = document.activeElement;
+/**
+ * Highlight siblings of currently focused element.
+ */
+export function SIB_HIGHLIGHT(cx: DocumentContext): void {
+  SIB_HIGHLIGHT_CLEAR(cx);
+  const active = cx.active;
   const pnode = active?.parentElement;
-  if (active && pnode && cx.TABS.has(active as HTMLElement)) {
+  if (active && pnode && cx.TABS.has(active)) {
     for (const child of pnode.children) {
       if (isFocusable(child)) {
         if (cx.TABS.has(child) && child !== active) {

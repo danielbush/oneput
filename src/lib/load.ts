@@ -1,11 +1,11 @@
-import { isAlreadyFocusable } from './focus';
+import { isAlreadyFocusable, isFocusable } from './focus';
 import { walk } from './walk';
 
 /**
  * Make an element focusable if it is not innately focusable.
  */
 function tab(TABS: Set<HTMLElement>, el: HTMLElement) {
-  if (!isAlreadyFocusable(TABS, el)) {
+  if (!isAlreadyFocusable(TABS, el) && isFocusable(el)) {
     TABS.add(el);
     el.setAttribute('tabindex', '0');
   }

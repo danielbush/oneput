@@ -32,7 +32,7 @@ export function start(
     },
   };
 
-  // Make document focusable
+  // TAB_FOCUS
 
   load.tabrec(documentContext.TABS, root);
 
@@ -40,12 +40,12 @@ export function start(
 
   function handleElementClick(evt: MouseEvent) {
     if (evt.target instanceof window.HTMLElement) {
-      action.CLICK(documentContext, evt.target);
+      action.FOCUS(documentContext, evt.target);
     }
   }
 
   function handleFocusIn() {
-    action.showCurrentSiblings(documentContext);
+    action.SIB_HIGHLIGHT(documentContext);
   }
 
   root.addEventListener<'click'>('click', handleElementClick);

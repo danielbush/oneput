@@ -39,9 +39,7 @@ export function start(
   // Set up event handlers and key bindings
 
   function handleElementClick(evt: MouseEvent) {
-    if (evt.target instanceof window.HTMLElement) {
-      action.FOCUS(documentContext, evt.target);
-    }
+    action.FOCUS(documentContext, evt.target);
   }
 
   function handleFocusIn() {

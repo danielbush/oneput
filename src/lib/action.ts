@@ -72,12 +72,15 @@ export function UP(cx: DocumentContext): void {
  *
  * TODO: cx.active should update.  Should we track it manually?
  */
-export function FOCUS(cx: DocumentContext, el: HTMLElement): boolean {
-  if (isFocusable(el)) {
-    el.focus();
-    return true;
+export function FOCUS(
+  cx: DocumentContext,
+  el: Element | EventTarget | null,
+): boolean {
+  if (!isFocusable(el)) {
+    return false;
   }
-  return false;
+  el.focus();
+  return true;
 }
 
 export function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {

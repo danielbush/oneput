@@ -63,7 +63,9 @@ export function ignoreDescendents(el: Element | null | undefined): boolean {
 /**
  * Governs which elements actions like REC_NEXT should traverse.
  */
-export function isFocusable(el: Element | null | undefined): el is HTMLElement {
+export function isFocusable(
+  el: EventTarget | Element | null | undefined,
+): el is HTMLElement {
   if (el instanceof window.HTMLScriptElement) {
     return false;
   }

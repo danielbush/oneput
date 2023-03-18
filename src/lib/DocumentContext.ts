@@ -4,6 +4,11 @@ export type DocumentContext = {
    */
   root: HTMLElement;
   /**
+   * The document of the root.  This is a convenience, because we can calculate
+   * it at any time.
+   */
+  document: Document;
+  /**
    * The focused element (may be none).
    */
   active: HTMLElement | null;
@@ -21,16 +26,15 @@ export type DocumentContext = {
   unload: () => void;
 };
 
-type MakeDocCxOptions = {
-  root?: HTMLElement;
-};
-
 export function makeDocumentContext(
   document: Document,
-  options?: MakeDocCxOptions,
+  root: HTMLElement,
 ): DocumentContext {
   const documentContext: DocumentContext = {
-    root: options?.root ?? document.createElement('div'),
+    root,
+    get document(): Document {
+      return root.ownerDocument;
+    },
     get active(): HTMLElement | null {
       if (document.activeElement instanceof window.HTMLElement) {
         return document.activeElement;

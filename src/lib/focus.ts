@@ -61,7 +61,7 @@ export function ignoreDescendents(el: Element | null | undefined): boolean {
 }
 
 /**
- * Governs which elements actions like REC_NEXT should traverse.
+ * Governs which elements actions like REC_NEXT should traverse.  This tests for F_ELEM .
  */
 export function isFocusable(
   el: EventTarget | Element | null | undefined,

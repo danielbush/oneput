@@ -1,4 +1,4 @@
-import { DocumentContext, makeDocumentContext } from './../lib/DocumentContext';
+import type { DocumentContext } from './../lib/DocumentContext';
 import hotkeys from 'hotkeys-js';
 import { Binding, defaultBindings } from '../config/binding';
 import * as load from '../lib/load';
@@ -17,11 +17,7 @@ export function start(
   root: HTMLElement,
   bindings: Binding[] = defaultBindings,
 ): DocumentContext {
-  const documentContext = makeDocumentContext(document);
-
-  // TAB_FOCUS
-
-  load.tabrec(documentContext.TABS, root);
+  const documentContext = load.loadDoc(root);
 
   // Set up event handlers and key bindings
 

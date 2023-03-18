@@ -2,6 +2,7 @@
 
 - F_ELEM (focusable element)
   - an F_REC or F_NONREC
+  - not an IF_ELEM
   - an element the user can navigate to and perform operations on
 - IF_ELEM (inherently focusable element)
   - any element that is "already focusable" - eg form controls

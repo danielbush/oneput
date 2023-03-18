@@ -1,5 +1,25 @@
 import { JSDOM } from 'jsdom';
-// import load from '../src/lib/load';
+import { DocumentContext } from '../src/lib/DocumentContext';
+import * as load from '../src/lib/load';
+
+/**
+ * Make a div be the root of the document.
+ *
+ * It calls loadDoc which is part of the app we're testing but this is a
+ * trade-off for convenience.
+ */
+export function makeDivRoot(
+  html: string,
+  document: Document = window.document,
+): DocumentContext {
+  const root = document.createElement('div');
+  root.id = 'root';
+  root.innerHTML = html;
+  // Clear otherwise old jest test fixtures will hang around:
+  document.body.innerHTML = '';
+  document.body.appendChild(root);
+  return load.loadDoc(root);
+}
 
 // const REC_DOWN_KEY = 'j';
 // const REC_UP_KEY = 'k';

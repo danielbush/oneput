@@ -68,7 +68,7 @@ export function UP(cx: DocumentContext): void {
 }
 
 /**
- * Focus an element, sets cx.active.
+ * Focus an element if it is an F_ELEM, sets cx.active.
  *
  * TODO: cx.active should update.  Should we track it manually?
  */

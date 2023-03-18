@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SIB_HIGHLIGHT should highlight current siblings of the active element 1`] = `
+<div>
+  <p
+    class="sbr-focus-sibling"
+  >
+    p1
+  </p>
+  <p
+    id="p2"
+  >
+    p2
+  </p>
+  <p
+    class="sbr-focus-sibling"
+  >
+    p3
+  </p>
+  <p
+    class="sbr-focus-sibling"
+  >
+    p4
+  </p>
+</div>
+`;

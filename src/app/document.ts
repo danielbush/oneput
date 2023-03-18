@@ -1,13 +1,14 @@
+import { DocumentContext, makeDocumentContext } from './../lib/DocumentContext';
+import hotkeys from 'hotkeys-js';
+import { Binding, defaultBindings } from '../config/binding';
+import * as load from '../lib/load';
+import * as action from '../lib/action';
+
 /**
  * This module is the place where we define global state and side-effects and
  * related things like event handlers so that the rest of the codebase can
  * remain as stateless as possible.
  */
-import hotkeys from 'hotkeys-js';
-import { Binding, defaultBindings } from '../config/binding';
-import * as load from '../lib/load';
-import * as action from '../lib/action';
-import { DocumentContext } from '../lib/DocumentContext';
 
 /**
  * Initialize a subtree of the DOM in a browser window for editing.
@@ -16,21 +17,7 @@ export function start(
   root: HTMLElement,
   bindings: Binding[] = defaultBindings,
 ): DocumentContext {
-  const documentContext: DocumentContext = {
-    root,
-    get active(): HTMLElement | null {
-      if (document.activeElement instanceof window.HTMLElement) {
-        return document.activeElement;
-      }
-      return null;
-    },
-    SIB_HIGHLIGHT: new Set(),
-    TABS: new Set(),
-    unload: () => {
-      // Placeholder, see below.
-      return;
-    },
-  };
+  const documentContext = makeDocumentContext(document);
 
   // TAB_FOCUS
 

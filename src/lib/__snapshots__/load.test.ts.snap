@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tabrec should should add tabindex on F_ELEM's but not IF_ELEM's and update TABS index 1`] = `"<div id=\\"root\\" tabindex=\\"0\\"><div id=\\"div1\\" tabindex=\\"0\\"><p id=\\"p1\\" tabindex=\\"0\\">here is some text</p><input type=\\"text\\" id=\\"input\\" name=\\"input\\" size=\\"10\\"><script></script></div></div>"`;

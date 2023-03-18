@@ -20,46 +20,6 @@ beforeEach(() => {
 });
 
 describe.skip('navigate', () => {
-  it.skip('will focus next element depth-first when I tab', async () => {
-    // arrange
-    const dom = new JSDOM(
-      makeDoc(
-        `<ul id="ul">` +
-          `<li id="li1">item 1</li>` +
-          `<li id="li2">item 2</li>` +
-          `</ul>`,
-      ),
-    );
-    const ul = dom.window.document.querySelector('ul')!; // USEREVENT_TAB_BODY
-    mockWindow(dom);
-    loadWithUnload(ul);
-    const user = userEvent.setup({ document: dom.window.document });
-
-    // act
-    await user.tab();
-
-    // assert
-    expect(document.activeElement).toEqual(
-      dom.window.document.getElementById('ul'),
-    );
-
-    // act
-    await user.tab();
-
-    // assert
-    expect(document.activeElement).toEqual(
-      dom.window.document.getElementById('li1'),
-    );
-
-    // act
-    await user.tab();
-
-    // assert
-    expect(document.activeElement).toEqual(
-      dom.window.document.getElementById('li2'),
-    );
-  });
-
   it.skip('will highlight sibling events when I tab', async () => {
     // arrange
     const dom = new JSDOM(

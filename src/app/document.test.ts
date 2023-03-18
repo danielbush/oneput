@@ -26,52 +26,54 @@ test('TAB_FOCUS - start tabIndexes the doc so we can tab', () => {
   expect(load.tabrec).toBeCalledTimes(1);
 });
 
-test('SIB_HIGHLIGHT - start configures click and focus behaviours', async () => {
-  // arrange
-  const root = document.createElement('DIV');
-  const listener = jest.spyOn(root, 'addEventListener');
+describe('SIB_HIGHTLIGHT', () => {
+  test('start() configures click and focus behaviours', async () => {
+    // arrange
+    const root = document.createElement('DIV');
+    const listener = jest.spyOn(root, 'addEventListener');
 
-  // act
-  start(root, []);
+    // act
+    start(root, []);
 
-  // assert
-  const [click, handleElementClick] = listener.mock.calls[0];
-  expect(click).toEqual('click');
-  if (!(handleElementClick instanceof Function)) {
-    throw new Error('handleElementClick not a function');
-  }
-  const [focusin, handleFocusIn] = listener.mock.calls[1];
-  expect(focusin).toEqual('focusin');
-  if (!(handleFocusIn instanceof Function)) {
-    throw new Error('handleFocusIn not a function');
-  }
-});
+    // assert
+    const [click, handleElementClick] = listener.mock.calls[0];
+    expect(click).toEqual('click');
+    if (!(handleElementClick instanceof Function)) {
+      throw new Error('handleElementClick not a function');
+    }
+    const [focusin, handleFocusIn] = listener.mock.calls[1];
+    expect(focusin).toEqual('focusin');
+    if (!(handleFocusIn instanceof Function)) {
+      throw new Error('handleFocusIn not a function');
+    }
+  });
 
-test('SIB_HIGHLIGHT - clicking focuses elements', async () => {
-  // arrange
-  const root = document.createElement('DIV');
-  const focus = jest.spyOn(root, 'focus');
+  test('clicking focuses elements', async () => {
+    // arrange
+    const root = document.createElement('DIV');
+    const focus = jest.spyOn(root, 'focus');
 
-  // act
-  start(root, []);
-  root.dispatchEvent(new MouseEvent('click'));
+    // act
+    start(root, []);
+    root.dispatchEvent(new MouseEvent('click'));
 
-  // assert
-  expect(FOCUS).toBeCalledTimes(1);
-  expect(focus).toBeCalledTimes(1);
-  // Sadly, focus() doesn't trigger focusin.  Testing-library probably does it
-  // but I don't want the hassle.
-  expect(SIB_HIGHLIGHT).toBeCalledTimes(0);
-});
+    // assert
+    expect(FOCUS).toBeCalledTimes(1);
+    expect(focus).toBeCalledTimes(1);
+    // Sadly, focus() doesn't trigger focusin.  Testing-library probably does it
+    // but I don't want the hassle.
+    expect(SIB_HIGHLIGHT).toBeCalledTimes(0);
+  });
 
-test('SIB_HIGHLIGHT - focusing highlights siblings', async () => {
-  // arrange
-  const root = document.createElement('DIV');
+  test('focusing (including tab key) highlights siblings ', async () => {
+    // arrange
+    const root = document.createElement('DIV');
 
-  // act
-  start(root, []);
-  root.dispatchEvent(new FocusEvent('focusin'));
+    // act
+    start(root, []);
+    root.dispatchEvent(new FocusEvent('focusin'));
 
-  // assert
-  expect(SIB_HIGHLIGHT).toBeCalledTimes(1);
+    // assert
+    expect(SIB_HIGHLIGHT).toBeCalledTimes(1);
+  });
 });

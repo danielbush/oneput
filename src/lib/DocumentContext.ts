@@ -20,3 +20,29 @@ export type DocumentContext = {
   TABS: Set<HTMLElement>;
   unload: () => void;
 };
+
+type MakeDocCxOptions = {
+  root?: HTMLElement;
+};
+
+export function makeDocumentContext(
+  document: Document,
+  options?: MakeDocCxOptions,
+): DocumentContext {
+  const documentContext: DocumentContext = {
+    root: options?.root ?? document.createElement('div'),
+    get active(): HTMLElement | null {
+      if (document.activeElement instanceof window.HTMLElement) {
+        return document.activeElement;
+      }
+      return null;
+    },
+    SIB_HIGHLIGHT: new Set(),
+    TABS: new Set(),
+    unload: () => {
+      // Placeholder, see below.
+      return;
+    },
+  };
+  return documentContext;
+}

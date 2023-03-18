@@ -3,6 +3,8 @@
 - F_ELEM (focusable element)
   - an F_REC or F_NONREC
   - an element the user can navigate to and perform operations on
+- IF_ELEM (inherently focusable element)
+  - any element that is "already focusable" - eg form controls
 - F_REC (focusable recursable element)
   - an F_ELEM that we can focus on and navigate into
   - usually an F_REC's text-bearing DOM nodes are editable
@@ -20,7 +22,7 @@
   - describes the ability to hit tab or shift+tab and traverse all F_ELEM's recursively depth-first (for F_NONREC's we don't recurse into their child elements)
   - we can achieve this by just setting but `tabIndex="0"` on elements that are not already focusable
 - TAB_FOCUS_NONREC_FOCUSABLE
-  - F_NONREC's that contain already-focusable elements will still be accessible via the tab key
+  - situation where F_NONREC's that contain IF_ELEM's will still be accessible via the tab key
   - TODO: we may need to handle this situation
 - SIB_HIGHLIGHT
   - when a user focuses on an element via TAB_FOCUS or an action like REC_NEXT etc

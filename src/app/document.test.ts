@@ -65,7 +65,7 @@ describe('start', () => {
       expect(SIB_HIGHLIGHT).toBeCalledTimes(0);
     });
 
-    test('FOCUS (via clicking or tab key) highlights siblings ', async () => {
+    test('FOCUS (via clicking or tab key) calls SIB_HIGHLIGHT', async () => {
       // arrange
       const root = document.createElement('DIV');
 

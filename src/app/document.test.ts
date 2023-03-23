@@ -1,6 +1,8 @@
+import hotkeys from 'hotkeys-js';
 import { start } from './document';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
+import { Binding } from '../config/binding';
 
 // All global state and side-effects are managed in document.ts so we test that
 // it configures things.  The tests here are unashamedly superficial with lots
@@ -26,6 +28,24 @@ describe('start', () => {
     // assert
     expect(load.loadDoc).toBeCalledWith(root);
     expect(load.loadDoc).toBeCalledTimes(1);
+  });
+
+  it('it should configure bindings to take actions', () => {
+    // This tests that actions like REC_NEXT will get called.
+    const action = jest.fn();
+    const binding = 'ctrl+j';
+
+    // arrange
+    const root = document.createElement('DIV');
+    const bindings: Binding[] = [[binding, action]];
+    const cx = start(root, bindings);
+
+    // act
+    hotkeys.trigger(binding);
+
+    // assert
+    expect(action).toBeCalledTimes(1);
+    expect(action).toBeCalledWith(cx);
   });
 
   describe('SIB_HIGHTLIGHT', () => {

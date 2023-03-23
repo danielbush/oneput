@@ -14,7 +14,7 @@ describe('loadDoc', () => {
     ].join('');
 
     // act
-    const cx = util.makeDivRoot(html);
+    const cx = util.makeRoot(html);
 
     // assert
     expect(cx.root.outerHTML).toMatchSnapshot();

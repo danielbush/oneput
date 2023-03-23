@@ -1,11 +1,11 @@
 import * as action from './action';
-import { makeDivRoot } from '../../test/util';
+import { div, makeRoot, p, setFocus } from '../../test/util';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
     // arrange
     const html = ['<p id="p1">p1</p>'].join('');
-    const cx = makeDivRoot(html);
+    const cx = makeRoot(html);
     const p1 = cx.document.getElementById('p1') as HTMLElement;
     const focus = jest.spyOn(p1, 'focus');
 
@@ -19,7 +19,7 @@ describe('FOCUS', () => {
   it('should not focus a non-F_ELEM', () => {
     // arrange
     const html = ['<script id="p1">p1</script>'].join('');
-    const cx = makeDivRoot(html);
+    const cx = makeRoot(html);
     const p1 = cx.document.getElementById('p1') as HTMLElement;
     const focus = jest.spyOn(p1, 'focus');
 
@@ -40,14 +40,36 @@ describe('SIB_HIGHLIGHT', () => {
       '<p>p3</p>',
       '<p>p4</p>',
     ].join('');
-    const cx = makeDivRoot(html);
-    const p2 = cx.document.getElementById('p2');
-    jest.spyOn(cx.document, 'activeElement', 'get').mockReturnValue(p2);
+    const cx = makeRoot(html);
+    setFocus(cx, 'p2');
 
     // act
     action.SIB_HIGHLIGHT(cx);
 
     // assert
     expect(cx.root).toMatchSnapshot();
+  });
+});
+
+describe('REC_NEXT', () => {
+  it('should recurse down', () => {
+    // arrange
+    const cx = makeRoot(
+      div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
+    );
+    setFocus(cx, 'div1');
+
+    // act
+    const ids: Array<string | undefined> = [];
+    // const ids: Array<HTMLElement | null> = [];
+    action.REC_NEXT(cx);
+    ids.push(cx.active?.id);
+    action.REC_NEXT(cx);
+    ids.push(cx.active?.id);
+    action.REC_NEXT(cx);
+    ids.push(cx.active?.id);
+
+    // assert
+    expect(ids).toEqual(['div1', 'div1-1', 'p1']);
   });
 });

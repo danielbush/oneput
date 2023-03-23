@@ -8,7 +8,7 @@ import * as load from '../src/lib/load';
  * It calls loadDoc which is part of the app we're testing but this is a
  * trade-off for convenience.
  */
-export function makeDivRoot(
+export function makeRoot(
   html: string,
   document: Document = window.document,
 ): DocumentContext {
@@ -19,6 +19,47 @@ export function makeDivRoot(
   document.body.innerHTML = '';
   document.body.appendChild(root);
   return load.loadDoc(root);
+}
+
+type Attr = { [key: string]: string };
+
+function tag(tagName: string, attr: Attr, ...children: string[]): string {
+  let attrStr = '';
+  for (const [key, val] of Object.entries(attr)) {
+    attrStr += `${key}="${val}"`;
+  }
+  let result = `<${tagName} ${attrStr}>`;
+  for (const child of children) {
+    result += child;
+  }
+  result += `</${tagName}>`;
+  return result;
+}
+
+function makeTag(tagName: string) {
+  return (first: Attr | string, ...rest: string[]) =>
+    typeof first === 'string'
+      ? tag('div', {}, ...[first].concat(rest))
+      : tag(tagName, first, ...rest);
+}
+
+export const div = makeTag('div');
+export const p = makeTag('p');
+
+export function setFocus(
+  cx: DocumentContext,
+  elOrId: HTMLElement | string,
+): ReturnType<typeof jest.spyOn> {
+  if (typeof elOrId === 'string') {
+    const el = cx.document.getElementById(elOrId);
+    if (!el) {
+      throw new Error(`Could not find id="${elOrId}"`);
+    }
+    return jest.spyOn(cx.document, 'activeElement', 'get').mockReturnValue(el);
+  }
+  return jest
+    .spyOn(cx.document, 'activeElement', 'get')
+    .mockReturnValue(elOrId);
 }
 
 // const REC_DOWN_KEY = 'j';

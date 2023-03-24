@@ -46,20 +46,26 @@ function makeTag(tagName: string) {
 export const div = makeTag('div');
 export const p = makeTag('p');
 
-export function setFocus(
+/**
+ * Let's you spy on a bunch of elements to see if they were focused.
+ */
+export function spyOnIds(
   cx: DocumentContext,
-  elOrId: HTMLElement | string,
-): ReturnType<typeof jest.spyOn> {
-  if (typeof elOrId === 'string') {
-    const el = cx.document.getElementById(elOrId);
+  ids: string[],
+  params: { focus: (id: string) => void },
+): void {
+  for (const id of ids) {
+    const el = cx.document.getElementById(id);
     if (!el) {
-      throw new Error(`Could not find id="${elOrId}"`);
+      throw new Error(`Could not find id="${id}"`);
     }
-    return jest.spyOn(cx.document, 'activeElement', 'get').mockReturnValue(el);
+    const focus = el.focus;
+    el.focus = () => {
+      params.focus(id);
+      focus.call(el);
+    };
   }
-  return jest
-    .spyOn(cx.document, 'activeElement', 'get')
-    .mockReturnValue(elOrId);
+  return;
 }
 
 // const REC_DOWN_KEY = 'j';

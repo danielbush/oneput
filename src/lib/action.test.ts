@@ -1,5 +1,5 @@
 import * as action from './action';
-import { div, makeRoot, p, setFocus } from '../../test/util';
+import { div, makeRoot, p, spyOnIds } from '../../test/util';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
@@ -41,7 +41,7 @@ describe('SIB_HIGHLIGHT', () => {
       '<p>p4</p>',
     ].join('');
     const cx = makeRoot(html);
-    setFocus(cx, 'p2');
+    cx.document.getElementById('p2')?.focus();
 
     // act
     action.SIB_HIGHLIGHT(cx);
@@ -57,19 +57,20 @@ describe('REC_NEXT', () => {
     const cx = makeRoot(
       div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
     );
-    setFocus(cx, 'div1');
+    const ids: string[] = [];
+    spyOnIds(cx, ['div1-1', 'p1'], {
+      focus: (id: string) => {
+        ids.push(id);
+      },
+    });
+    cx.document.getElementById('div1')?.focus();
 
     // act
-    const ids: Array<string | undefined> = [];
-    // const ids: Array<HTMLElement | null> = [];
     action.REC_NEXT(cx);
-    ids.push(cx.active?.id);
     action.REC_NEXT(cx);
-    ids.push(cx.active?.id);
     action.REC_NEXT(cx);
-    ids.push(cx.active?.id);
 
     // assert
-    expect(ids).toEqual(['div1', 'div1-1', 'p1']);
+    expect(ids).toEqual(['div1-1', 'p1']);
   });
 });

@@ -1,29 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`REC_NEXT should recurse down 1`] = `
-<div
-  id="root"
-  tabindex="0"
->
-  <div
-    id="div1"
-    tabindex="0"
-  >
-    <div
-      id="div1-1"
-      tabindex="0"
-    >
-      <p
-        id="p1"
-        tabindex="0"
-      >
-        text-1
-      </p>
-    </div>
-  </div>
-</div>
-`;
-
 exports[`SIB_HIGHLIGHT should highlight current siblings of the active element 1`] = `
 <div
   id="root"

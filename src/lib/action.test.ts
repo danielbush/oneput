@@ -51,8 +51,8 @@ describe('SIB_HIGHLIGHT', () => {
   });
 });
 
-describe('REC_NEXT', () => {
-  it('should recurse down', () => {
+describe('REC functions', () => {
+  test('REC_NEXT should recurse down', () => {
     // arrange
     const cx = makeRoot(
       div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
@@ -70,8 +70,33 @@ describe('REC_NEXT', () => {
     action.REC_NEXT(cx);
     action.REC_NEXT(cx);
     action.REC_NEXT(cx);
+    action.REC_NEXT(cx);
 
     // assert
-    expect(ids).toEqual(['div1-1', 'p1', 'root', 'div1']);
+    expect(ids).toEqual(['div1-1', 'p1', 'root', 'div1', 'div1-1']);
+  });
+
+  test('REC_PREV should recurse up', () => {
+    // arrange
+    const cx = makeRoot(
+      div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
+    );
+    const ids: string[] = [];
+    cx.document.getElementById('div1')?.focus();
+    spyOnAllIds(cx, {
+      focus: (id: string) => {
+        ids.push(id);
+      },
+    });
+
+    // act
+    action.REC_PREV(cx);
+    action.REC_PREV(cx);
+    action.REC_PREV(cx);
+    action.REC_PREV(cx);
+    action.REC_PREV(cx);
+
+    // assert
+    expect(ids).toEqual(['root', 'p1', 'div1-1', 'div1', 'root']);
   });
 });

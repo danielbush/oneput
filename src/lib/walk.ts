@@ -90,7 +90,6 @@ export function* walkIterReverse(
   limit: HTMLElement | null,
 ): IterableIterator<HTMLElement> {
   if (start === limit) {
-    console.log(lastElement(limit).outerHTML);
     const last = lastElement(limit);
     if (last === limit) {
       return;

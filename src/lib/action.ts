@@ -15,7 +15,7 @@ import {
 export function REC_NEXT(cx: DocumentContext): void {
   if (!cx.active) return;
   for (const next of walkIter(cx.active, cx.root)) {
-    next.focus();
+    FOCUS(cx, next);
     break;
   }
 }
@@ -26,7 +26,7 @@ export function REC_NEXT(cx: DocumentContext): void {
 export function REC_PREV(cx: DocumentContext): void {
   if (!cx.active) return;
   for (const next of walkIterReverse(cx.active, cx.root)) {
-    next.focus();
+    FOCUS(cx, next);
     break;
   }
 }

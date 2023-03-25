@@ -40,6 +40,8 @@ function makeTag(tagName: string) {
 export const script = makeTag('script');
 export const div = makeTag('div');
 export const p = makeTag('p');
+export const ul = makeTag('ul');
+export const li = makeTag('li');
 export function frag(...tags: string[]): string {
   return tags.join('');
 }

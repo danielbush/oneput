@@ -38,7 +38,7 @@ export function SIB_NEXT(cx: DocumentContext): void {
   if (!cx.active) return;
   const next = getNextSiblingElement(cx.active);
   if (next) {
-    next.focus();
+    FOCUS(cx, next);
   }
   return;
 }
@@ -50,7 +50,7 @@ export function SIB_PREV(cx: DocumentContext): void {
   if (!cx.active) return;
   const next = getPreviousSiblingElement(cx.active);
   if (next) {
-    next.focus();
+    FOCUS(cx, next);
   }
   return;
 }

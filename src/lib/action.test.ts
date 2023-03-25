@@ -1,5 +1,6 @@
 import * as action from './action';
 import {
+  byId,
   div,
   frag,
   li,
@@ -42,7 +43,7 @@ describe('SIB_HIGHLIGHT', () => {
   it('should highlight current siblings of the active element', () => {
     // arrange
     const cx = makeRoot(frag(p('p1'), p({ id: 'p2' }, 'p2'), p('p3'), p('p4')));
-    cx.document.getElementById('p2')?.focus();
+    byId(cx, 'p2').focus();
 
     // act
     action.SIB_HIGHLIGHT(cx);
@@ -58,7 +59,7 @@ test('REC_NEXT should recurse down', () => {
     div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
   );
   const ids: string[] = [];
-  cx.document.getElementById('div1')?.focus();
+  byId(cx, 'div1').focus();
   spyOnAllIds(cx, {
     focus: (id: string) => {
       ids.push(id);
@@ -82,7 +83,7 @@ test('REC_PREV should recurse up', () => {
     div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
   );
   const ids: string[] = [];
-  cx.document.getElementById('div1')?.focus();
+  byId(cx, 'div1').focus();
   spyOnAllIds(cx, {
     focus: (id: string) => {
       ids.push(id);
@@ -111,7 +112,7 @@ test('SIB_NEXT should walk to next sibling', () => {
     ),
   );
   const ids: string[] = [];
-  cx.document.getElementById('li1')?.focus();
+  byId(cx, 'li1').focus();
   spyOnAllIds(cx, {
     focus: (id: string) => {
       ids.push(id);
@@ -138,7 +139,7 @@ test('SIB_PREV should walk to previous sibling', () => {
     ),
   );
   const ids: string[] = [];
-  cx.document.getElementById('li3')?.focus();
+  byId(cx, 'li3').focus();
   spyOnAllIds(cx, {
     focus: (id: string) => {
       ids.push(id);
@@ -160,7 +161,7 @@ test('UP can walk up successive parent elements', () => {
     div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))),
   );
   const ids: string[] = [];
-  cx.document.getElementById('id3')?.focus();
+  byId(cx, 'id3').focus();
   spyOnAllIds(cx, {
     focus: (id: string) => {
       ids.push(id);
@@ -175,4 +176,25 @@ test('UP can walk up successive parent elements', () => {
 
   // assert
   expect(ids).toEqual(['id2', 'id1', 'root']);
+});
+
+describe('ISLAND', () => {
+  test('KATEX_ISLAND - should ignore katex islands', () => {
+    // arrange
+    const cx = makeRoot(
+      div(
+        { id: 'div1' },
+        div({ class: 'katex' }, div('should not go here')),
+        div({ id: 'div2' }, 'div'),
+      ),
+    );
+    byId(cx, 'div1').focus();
+
+    // act
+    action.REC_NEXT(cx);
+    action.REC_NEXT(cx);
+
+    // assert
+    expect(cx.active).toEqual(cx.document.getElementById('div2'));
+  });
 });

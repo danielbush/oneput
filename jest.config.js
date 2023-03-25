@@ -9,6 +9,7 @@ module.exports = {
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[tj]s?(x)',
   ],
+  coveragePathIgnorePatterns: ['<rootDir>/test/util.ts'],
   coverageThreshold: {
     global: {
       statements: 79,

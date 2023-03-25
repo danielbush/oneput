@@ -37,6 +37,17 @@ function makeTag(tagName: string) {
       : tag(tagName, first, ...rest);
 }
 
+/**
+ * Convenience to get an id ro fail.
+ */
+export function byId(cx: DocumentContext, id: string): HTMLElement {
+  const el = cx.document.getElementById(id);
+  if (!el) {
+    throw new Error(`byId: could not find id="${id}"`);
+  }
+  return el;
+}
+
 export const script = makeTag('script');
 export const div = makeTag('div');
 export const p = makeTag('p');

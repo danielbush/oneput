@@ -1,5 +1,5 @@
 import * as action from './action';
-import { div, makeRoot, p, spyOnIds } from '../../test/util';
+import { div, makeRoot, p, spyOnAllIds } from '../../test/util';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
@@ -58,19 +58,20 @@ describe('REC_NEXT', () => {
       div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
     );
     const ids: string[] = [];
-    spyOnIds(cx, ['div1-1', 'p1'], {
+    cx.document.getElementById('div1')?.focus();
+    spyOnAllIds(cx, {
       focus: (id: string) => {
         ids.push(id);
       },
     });
-    cx.document.getElementById('div1')?.focus();
 
     // act
     action.REC_NEXT(cx);
     action.REC_NEXT(cx);
     action.REC_NEXT(cx);
+    action.REC_NEXT(cx);
 
     // assert
-    expect(ids).toEqual(['div1-1', 'p1']);
+    expect(ids).toEqual(['div1-1', 'p1', 'root', 'div1']);
   });
 });

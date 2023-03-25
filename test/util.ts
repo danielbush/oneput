@@ -46,10 +46,24 @@ function makeTag(tagName: string) {
 export const div = makeTag('div');
 export const p = makeTag('p');
 
+export function spyOnAllIds(
+  cx: DocumentContext,
+  params: { focus: (id: string) => void },
+): Element[] {
+  const ids: string[] = [];
+  const els: Element[] = [];
+  document.querySelectorAll('[id]').forEach((element) => {
+    ids.push(element.id);
+    els.push(element);
+  });
+  spyOnIds(cx, ids, params);
+  return els;
+}
+
 /**
  * Let's you spy on a bunch of elements to see if they were focused.
  */
-export function spyOnIds(
+function spyOnIds(
   cx: DocumentContext,
   ids: string[],
   params: { focus: (id: string) => void },

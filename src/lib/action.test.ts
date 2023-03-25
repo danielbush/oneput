@@ -153,3 +153,26 @@ test('SIB_PREV should walk to previous sibling', () => {
   // assert
   expect(ids).toEqual(['li2', 'li1']);
 });
+
+test('UP can walk up successive parent elements', () => {
+  // arrange
+  const cx = makeRoot(
+    div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))),
+  );
+  const ids: string[] = [];
+  cx.document.getElementById('id3')?.focus();
+  spyOnAllIds(cx, {
+    focus: (id: string) => {
+      ids.push(id);
+    },
+  });
+
+  // act
+  action.UP(cx);
+  action.UP(cx);
+  action.UP(cx);
+  action.UP(cx); // no wrap around
+
+  // assert
+  expect(ids).toEqual(['id2', 'id1', 'root']);
+});

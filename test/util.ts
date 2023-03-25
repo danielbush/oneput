@@ -12,22 +12,16 @@ export function makeRoot(
   html: string,
   document: Document = window.document,
 ): DocumentContext {
-  const root = document.createElement('div');
-  root.id = 'root';
-  root.innerHTML = html;
-  // Clear otherwise old jest test fixtures will hang around:
-  document.body.innerHTML = '';
-  document.body.appendChild(root);
-  return load.loadDoc(root);
+  document.body.innerHTML = `<div id="root">${html}</div>`;
+  return load.loadDoc(document.getElementById('root') as HTMLElement);
 }
 
 type Attr = { [key: string]: string };
 
 function tag(tagName: string, attr: Attr, ...children: string[]): string {
-  let attrStr = '';
-  for (const [key, val] of Object.entries(attr)) {
-    attrStr += `${key}="${val}"`;
-  }
+  const attrStr = Object.entries(attr)
+    .map(([key, val]) => `${key}="${val}"`)
+    .join(' ');
   let result = `<${tagName} ${attrStr}>`;
   for (const child of children) {
     result += child;
@@ -39,12 +33,16 @@ function tag(tagName: string, attr: Attr, ...children: string[]): string {
 function makeTag(tagName: string) {
   return (first: Attr | string, ...rest: string[]) =>
     typeof first === 'string'
-      ? tag('div', {}, ...[first].concat(rest))
+      ? tag(tagName, {}, ...[first].concat(rest))
       : tag(tagName, first, ...rest);
 }
 
+export const script = makeTag('script');
 export const div = makeTag('div');
 export const p = makeTag('p');
+export function frag(...tags: string[]): string {
+  return tags.join('');
+}
 
 export function spyOnAllIds(
   cx: DocumentContext,
@@ -52,34 +50,29 @@ export function spyOnAllIds(
 ): Element[] {
   const ids: string[] = [];
   const els: Element[] = [];
-  document.querySelectorAll('[id]').forEach((element) => {
+  cx.document.querySelectorAll('[id]').forEach((element) => {
     ids.push(element.id);
     els.push(element);
   });
-  spyOnIds(cx, ids, params);
+  els.forEach((el) => spyOnElement(el, { focus: (el) => params.focus(el.id) }));
   return els;
 }
 
-/**
- * Let's you spy on a bunch of elements to see if they were focused.
- */
-function spyOnIds(
-  cx: DocumentContext,
-  ids: string[],
-  params: { focus: (id: string) => void },
+function spyOnElement(
+  el: Element,
+  params: { focus: (el: HTMLElement) => void },
 ): void {
-  for (const id of ids) {
-    const el = cx.document.getElementById(id);
-    if (!el) {
-      throw new Error(`Could not find id="${id}"`);
-    }
+  if (el instanceof HTMLElement) {
     const focus = el.focus;
     el.focus = () => {
-      params.focus(id);
+      params.focus(el);
       focus.call(el);
     };
+  } else {
+    console.warn(
+      `${el.outerHTML} is an Element, not an HTMLElement, cannot spy on focus`,
+    );
   }
-  return;
 }
 
 // const REC_DOWN_KEY = 'j';

@@ -1,11 +1,10 @@
 import * as action from './action';
-import { div, makeRoot, p, spyOnAllIds } from '../../test/util';
+import { div, frag, makeRoot, p, script, spyOnAllIds } from '../../test/util';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
     // arrange
-    const html = ['<p id="p1">p1</p>'].join('');
-    const cx = makeRoot(html);
+    const cx = makeRoot(p({ id: 'p1' }, 'p1'));
     const p1 = cx.document.getElementById('p1') as HTMLElement;
     const focus = jest.spyOn(p1, 'focus');
 
@@ -18,8 +17,7 @@ describe('FOCUS', () => {
 
   it('should not focus a non-F_ELEM', () => {
     // arrange
-    const html = ['<script id="p1">p1</script>'].join('');
-    const cx = makeRoot(html);
+    const cx = makeRoot(frag(script({ id: 'p1' }, 'p1')));
     const p1 = cx.document.getElementById('p1') as HTMLElement;
     const focus = jest.spyOn(p1, 'focus');
 
@@ -34,13 +32,7 @@ describe('FOCUS', () => {
 describe('SIB_HIGHLIGHT', () => {
   it('should highlight current siblings of the active element', () => {
     // arrange
-    const html = [
-      '<p>p1</p>',
-      '<p id="p2">p2</p>',
-      '<p>p3</p>',
-      '<p>p4</p>',
-    ].join('');
-    const cx = makeRoot(html);
+    const cx = makeRoot(frag(p('p1'), p({ id: 'p2' }, 'p2'), p('p3'), p('p4')));
     cx.document.getElementById('p2')?.focus();
 
     // act

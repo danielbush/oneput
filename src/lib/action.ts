@@ -83,7 +83,7 @@ export function FOCUS(
   return true;
 }
 
-export function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {
+function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {
   for (const sib of cx.SIB_HIGHLIGHT) {
     sib.classList.remove(SBR_FOCUS_SIBLING);
   }

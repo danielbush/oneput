@@ -17,24 +17,34 @@ export function makeRoot(
 }
 
 type Attr = { [key: string]: string };
+const SELF_CLOSING = new Set(['input']);
 
 function tag(tagName: string, attr: Attr, ...children: string[]): string {
   const attrStr = Object.entries(attr)
     .map(([key, val]) => `${key}="${val}"`)
     .join(' ');
-  let result = `<${tagName} ${attrStr}>`;
-  for (const child of children) {
-    result += child;
+  const content = children.join('');
+  if (SELF_CLOSING.has(tagName)) {
+    if (children.length > 0) {
+      throw new Error(
+        `Tag ${tagName} is self-closing but was given content: "${content}"`,
+      );
+    }
+    return `<${tagName} ${attrStr} />`;
   }
-  result += `</${tagName}>`;
-  return result;
+  return `<${tagName} ${attrStr}>${content}</${tagName}>`;
 }
 
 function makeTag(tagName: string) {
-  return (first: Attr | string, ...rest: string[]) =>
-    typeof first === 'string'
-      ? tag(tagName, {}, ...[first].concat(rest))
-      : tag(tagName, first, ...rest);
+  return (first?: Attr | string, ...rest: string[]) => {
+    if (!first) {
+      return tag(tagName, {});
+    }
+    if (typeof first === 'string') {
+      return tag(tagName, {}, ...[first].concat(rest));
+    }
+    return tag(tagName, first, ...rest);
+  };
 }
 
 /**
@@ -48,7 +58,6 @@ export function byId(cx: DocumentContext, id: string): HTMLElement {
   return el;
 }
 
-export const script = makeTag('script');
 export const div = makeTag('div');
 export const p = makeTag('p');
 export const ul = makeTag('ul');
@@ -56,6 +65,8 @@ export const li = makeTag('li');
 export function frag(...tags: string[]): string {
   return tags.join('');
 }
+export const script = makeTag('script');
+export const input = makeTag('input');
 
 export function spyOnAllIds(
   cx: DocumentContext,

@@ -62,7 +62,7 @@ export function UP(cx: DocumentContext): void {
   if (!cx.active) return;
   const next = getParent(cx.active, cx.root);
   if (next) {
-    next.focus();
+    FOCUS(cx, next);
   }
   return;
 }

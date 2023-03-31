@@ -1,5 +1,5 @@
-import { makeRoot, div, p, input, script, byId } from '../../test/util';
-import { loadDoc } from './load';
+import { makeRoot, div, p, input, script, byId, ul, li } from '../../test/util';
+import { loadDoc, serialize } from './load';
 
 describe('loadDoc', () => {
   it("should should add tabindex on F_ELEM's but not IF_ELEM's and update TABS index", () => {
@@ -27,5 +27,26 @@ describe('loadDoc', () => {
     expect(cx.TABS).toContain(document.getElementById('root'));
     expect(cx.TABS).toContain(document.getElementById('div1'));
     expect(cx.TABS).toContain(document.getElementById('p1'));
+  });
+});
+
+describe('serialize', () => {
+  it('should remove tabindex from F_ELEM', () => {
+    // arrange
+    const cx = makeRoot(
+      ul(
+        { id: 'ul' },
+        li({ id: 'li1' }, 'item 1'),
+        li({ id: 'li2' }, 'item 2'),
+      ),
+    );
+    loadDoc(cx.root);
+    expect(cx.root.outerHTML).toMatchSnapshot();
+
+    // act
+    const result = serialize(cx.TABS, cx.root);
+
+    // assert
+    expect(result).toMatchSnapshot();
   });
 });

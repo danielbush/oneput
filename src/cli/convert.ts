@@ -8,7 +8,7 @@ if (!file) {
   process.exit(1);
 }
 if (!fs.existsSync(file)) {
-  console.error(`File "${file} doesn't exist.`);
+  console.error(`File "${file}" doesn't exist.`);
   process.exit(1);
 }
 

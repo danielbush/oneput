@@ -60,6 +60,8 @@ export function byId(cx: DocumentContext, id: string): HTMLElement {
 
 export const div = makeTag('div');
 export const p = makeTag('p');
+export const h1 = makeTag('h1');
+export const h2 = makeTag('h2');
 export const ul = makeTag('ul');
 export const li = makeTag('li');
 export function frag(...tags: string[]): string {

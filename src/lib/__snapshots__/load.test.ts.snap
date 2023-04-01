@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`loadDoc should should add tabindex on F_ELEM's but not IF_ELEM's and update TABS index 1`] = `"<div id=\\"root\\" tabindex=\\"0\\"><div id=\\"div1\\" tabindex=\\"0\\"><p id=\\"p1\\" tabindex=\\"0\\">here is some text</p><input id=\\"input\\" type=\\"text\\" name=\\"input\\" size=\\"10\\"><script id=\\"script\\"></script></div></div>"`;
+exports[`loadDoc should ignore katex descendents (F_NONREC) 1`] = `"<div id=\\"root\\" tabindex=\\"0\\"><div id=\\"div1\\" tabindex=\\"0\\"><p id=\\"p1\\" tabindex=\\"0\\">here is some text</p><div id=\\"katex\\" class=\\"katex\\" tabindex=\\"0\\"><div id=\\"katex-1\\">katex-1</div></div><div id=\\"div1-1\\" tabindex=\\"0\\">div1-1</div></div></div>"`;
+
+exports[`loadDoc should should add tabindex on F_ELEM's but not IF_ELEM's 1`] = `"<div id=\\"root\\" tabindex=\\"0\\"><div id=\\"div1\\" tabindex=\\"0\\"><p id=\\"p1\\" tabindex=\\"0\\">here is some text</p><input id=\\"input\\" type=\\"text\\" name=\\"input\\" size=\\"10\\"><script id=\\"script\\"></script></div></div>"`;
 
 exports[`serialize should remove tabindex from F_ELEM 1`] = `"<div id=\\"root\\" tabindex=\\"0\\"><ul id=\\"ul\\" tabindex=\\"0\\"><li id=\\"li1\\" tabindex=\\"0\\">item 1</li><li id=\\"li2\\" tabindex=\\"0\\">item 2</li></ul></div>"`;
 

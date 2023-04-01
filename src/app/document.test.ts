@@ -13,12 +13,13 @@ import { Binding } from '../config/binding';
 // "deterministic" / "stateless" and will be easier to test as a result.
 
 jest.spyOn(load, 'loadDoc');
+jest.spyOn(load, 'untab');
+jest.spyOn(hotkeys, 'unbind');
 const FOCUS = jest.spyOn(action, 'FOCUS');
 const SIB_HIGHLIGHT = jest.spyOn(action, 'SIB_HIGHLIGHT');
 
 describe('start', () => {
-  // TAB_FOCUS - loading means we can tab
-  it('should load the doc', () => {
+  it('should load the doc (TAB_FOCUS)', () => {
     // arrange
     const root = document.createElement('DIV');
 
@@ -28,6 +29,32 @@ describe('start', () => {
     // assert
     expect(load.loadDoc).toBeCalledWith(root);
     expect(load.loadDoc).toBeCalledTimes(1);
+  });
+
+  it('can unload the doc', () => {
+    // arrange
+    const root = document.createElement('DIV');
+    const cx = start(root);
+    jest.spyOn(cx.root, 'removeEventListener');
+
+    // act
+    cx.unload();
+
+    // assert
+    expect(cx.root.outerHTML).toMatchSnapshot();
+    expect(load.untab).toBeCalledTimes(1);
+    expect(load.untab).toBeCalledWith(cx.TABS);
+    expect(hotkeys.unbind).toBeCalledTimes(1);
+    expect(hotkeys.unbind).toBeCalledWith();
+    expect(cx.root.removeEventListener).toBeCalledTimes(2);
+    expect(cx.root.removeEventListener).toBeCalledWith(
+      'click',
+      expect.any(Function),
+    );
+    expect(cx.root.removeEventListener).toBeCalledWith(
+      'focusin',
+      expect.any(Function),
+    );
   });
 
   it('it should configure bindings to take actions', () => {

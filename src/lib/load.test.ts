@@ -1,5 +1,5 @@
 import { makeRoot, div, p, input, script, byId, ul, li } from '../../test/util';
-import { loadDoc, serialize } from './load';
+import { loadDoc, serialize, untab } from './load';
 
 describe('loadDoc', () => {
   it("should should add tabindex on F_ELEM's but not IF_ELEM's", () => {
@@ -63,6 +63,27 @@ describe('loadDoc', () => {
     expect(byId(cx, 'katex').getAttribute('tabIndex')).toEqual('0');
     expect(byId(cx, 'katex-1').getAttribute('tabIndex')).toEqual(null);
     expect(byId(cx, 'div1-1').getAttribute('tabIndex')).toEqual('0');
+  });
+});
+
+describe('untab', () => {
+  it('should untab a document', () => {
+    // arrange
+    const cx = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'here is some text'),
+        input({ id: 'input', type: 'text', name: 'input', size: '10' }),
+        script({ id: 'script' }),
+      ),
+    );
+    loadDoc(cx.root);
+
+    // act
+    untab(cx.TABS);
+
+    // assert
+    expect(cx.root.outerHTML).toMatchSnapshot();
   });
 });
 

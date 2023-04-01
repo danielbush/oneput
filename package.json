@@ -7,7 +7,7 @@
     "check": "tsc --noEmit",
     "esbuild": "esbuild",
     "build:prepare": "npm run check && rimraf dist && mkdir dist && cp src/style.css dist",
-    "build:cli": "esbuild src/convert.ts --target=node18 --bundle --outdir=dist/cli",
+    "build:cli": "esbuild src/cli/convert.ts --platform=node --target=node18 --bundle --outdir=dist/cli",
     "build": "npm run build:prepare && esbuild src/app/sketch.ts --bundle --outdir=dist --platform=browser",
     "test": "jest --coverage",
     "test:update": "jest -u",

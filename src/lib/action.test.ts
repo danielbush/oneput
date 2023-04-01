@@ -56,7 +56,14 @@ describe('SIB_HIGHLIGHT', () => {
 test('REC_NEXT should recurse down', () => {
   // arrange
   const cx = makeRoot(
-    div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
+    div(
+      { id: 'div1' },
+      div(
+        { id: 'div1-1' },
+        p({ id: 'p1' }, 'text-1'),
+        p({ id: 'p2' }, 'text-2'),
+      ),
+    ),
   );
   const ids: string[] = [];
   byId(cx, 'div1').focus();
@@ -72,9 +79,10 @@ test('REC_NEXT should recurse down', () => {
   action.REC_NEXT(cx);
   action.REC_NEXT(cx);
   action.REC_NEXT(cx);
+  action.REC_NEXT(cx);
 
   // assert
-  expect(ids).toEqual(['div1-1', 'p1', 'root', 'div1', 'div1-1']);
+  expect(ids).toEqual(['div1-1', 'p1', 'p2', 'root', 'div1', 'div1-1']);
 });
 
 test('REC_PREV should recurse up', () => {

@@ -5,13 +5,11 @@ import * as load from '../lib/load';
 import * as action from '../lib/action';
 
 /**
- * This module is the place where we define global state and side-effects and
- * related things like event handlers so that the rest of the codebase can
- * remain as stateless as possible.
- */
-
-/**
  * Initialize a subtree of the DOM in a browser window for editing.
+ *
+ * This is where we define global state and side-effects and related things like
+ * event handlers so that the rest of the codebase can remain as stateless as
+ * possible.
  */
 export function start(
   root: HTMLElement,

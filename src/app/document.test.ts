@@ -4,14 +4,6 @@ import * as load from '../lib/load';
 import * as action from '../lib/action';
 import { Binding } from '../config/binding';
 
-// All global state and side-effects are managed in document.ts so we test that
-// it configures things.  The tests here are unashamedly superficial with lots
-// of code mocks that make assumptions about the code.  We can provide more
-// complex tests that test the whole system using cypress or karma, but if we do
-// there will be a lot less of these because live tests are painful.  Note that
-// the code in lib/ (which is configured by document.ts) should be
-// "deterministic" / "stateless" and will be easier to test as a result.
-
 jest.spyOn(load, 'loadDoc');
 jest.spyOn(load, 'untab');
 jest.spyOn(hotkeys, 'unbind');

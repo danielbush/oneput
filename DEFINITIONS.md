@@ -1,3 +1,5 @@
+Definitions and behaviours of the system.
+
 ## Definitions
 
 - F_ELEM (focusable element)
@@ -9,6 +11,7 @@
 - F_REC (focusable recursable element)
   - an F_ELEM that we can focus on and navigate into
   - usually an F_REC's text-bearing DOM nodes are editable
+  - example: a `<div>` element is usually focusable
 - F_NONREC (focusable non-recursable element)
   - an F_ELEM that we cannot navigate within; we can focus on the element itself but not recurse into it or focus on the contents; as a result we cannot edit the text-bearing nodes; these elements may require special edit behaviours
   - example
@@ -30,4 +33,5 @@
 - SIB_HIGHLIGHT
   - when a user focuses on an element via TAB_FOCUS or an action like REC_NEXT etc
 - ISLAND
-  - an "island" is an F_NONREC that we navigate "onto" but never "into"; classic example is a KATEX_ISLAND
+  - an "island" is an F_NONREC that we navigate "onto" but never "into";
+  - example: KATEX_ISLAND `<div class="katex">...</div>`

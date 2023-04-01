@@ -1,0 +1,34 @@
+# ISSUES and DECISIONS
+
+- `.children` instead of `.childNodes` to focus on `Element`s
+- `HTMLElement` is focusable
+- we can style on `:focus` and set `outline`; setting outline makes the focus ring show on focus() calls made on click events
+- `outline` css rule doesn't affect layout, avoids reflow
+- TEST_FIRE
+  - `await user.keyboard(...)` and ctrl+j (or other key) - doesn't work, had to use `fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY)` where FE_SIB_DOWN_KEY = `{ key: 'j', ctrlKey: true, };`
+  - related maybe: <https://stackoverflow.com/questions/74281534/react-testing-library-user-event-keyboard-not-working>
+- TEST_HOTKEY
+  - `await user.keyboard(...)` doesn't trigger `hotkeys`; forced to test with hotkeys.trigger
+- USEREVENT_TAB_BODY
+  - when: Mar-2023
+  - what:
+    - adding tabIndex="0" to body and trying to move focus by simulating a tab button
+      - `const user = userEvent.setup({ document: dom.window.document });`
+      - `user.tab()`
+    - ... doesn't work; document.activeElement stays on the body element.
+    - However, if we only tabify the content inside body `user.tab()` works
+    - In a real browser, including the body works as expected
+  - solution:
+    - don't start from the body
+- RTL_FAIL
+  - when: Mar-2023
+  - what
+    - RTL using jest and jsdom doesn't work; I've tried to test the code by exercising the event handlers as close as possible to a user and it's a massive time suck with mysterious errors like USEREVENT_TAB_BODY .
+  - solution:
+    - I want good test coverage to catch errors and so I can upgrade dependencies with confidence.
+    - The strategy I'm thinking is we can test the functions that act on the dom without the event handlers.
+    - I think we can still write out tests as though a user were doing them but manipulate the dom directly with the these functions.
+    - Then we can test the glue code that connects up the event handling with these functions. These tests would be slightly artificial so I wouldn't go overboard with them.
+    - We can add some real e2e tests to make sure everything hangs together, either karma or cypress, I guess cypress.
+    - I'm hoping this will make the tests mercifully easy to write without the mystery bugs.
+    - I think we should structure the code to separate the glue code from functions that do stuff.

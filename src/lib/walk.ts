@@ -1,15 +1,17 @@
 import { ignoreDescendents, isFocusable } from './focus';
 
-export function walk(root: Element, visit: (el: HTMLElement) => void): void {
-  if (ignoreDescendents(root)) {
-    return;
+function lastElement(el: HTMLElement): HTMLElement {
+  if (!el.lastElementChild) {
+    return el;
   }
-  for (const child of root.children) {
-    if (isFocusable(child)) {
-      visit(child);
-      walk(child, visit);
-    }
+  const lastChild = el.lastElementChild;
+  const prev = isFocusable(lastChild)
+    ? lastChild
+    : getPreviousSiblingElement(lastChild);
+  if (!prev) {
+    return el;
   }
+  return lastElement(prev);
 }
 
 function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
@@ -36,79 +38,6 @@ function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
     }
     yield* descendIterReverse(child);
     yield child;
-  }
-}
-
-export function* walkIter(
-  start: HTMLElement,
-  limit: HTMLElement | null,
-): IterableIterator<HTMLElement> {
-  yield* descendIter(start);
-  if (start === limit) {
-    return;
-  }
-
-  let sib: HTMLElement | null = start;
-  while ((sib = getNextSiblingElement(start))) {
-    yield sib;
-    yield* descendIter(sib);
-  }
-  let par: HTMLElement | null = start;
-  while ((par = par.parentElement)) {
-    if (par === limit) {
-      yield par;
-      break;
-    }
-    const nextPar = getNextSiblingElement(par);
-    if (nextPar) {
-      yield nextPar;
-      yield* walkIter(nextPar, limit);
-    }
-  }
-}
-
-function lastElement(el: HTMLElement): HTMLElement {
-  if (!el.lastElementChild) {
-    return el;
-  }
-  const lastChild = el.lastElementChild;
-  const prev = isFocusable(lastChild)
-    ? lastChild
-    : getPreviousSiblingElement(lastChild);
-  if (!prev) {
-    return el;
-  }
-  return lastElement(prev);
-}
-
-export function* walkIterReverse(
-  start: HTMLElement,
-  limit: HTMLElement | null,
-): IterableIterator<HTMLElement> {
-  if (start === limit) {
-    const last = lastElement(limit);
-    if (last === limit) {
-      return;
-    }
-    yield last;
-    return;
-  }
-  let sib: HTMLElement | null = start;
-  while ((sib = getPreviousSiblingElement(start))) {
-    yield* descendIterReverse(sib);
-    yield sib;
-  }
-  let par: HTMLElement | null = start;
-  while ((par = par.parentElement)) {
-    yield par;
-    if (par === limit) {
-      break;
-    }
-    const prevPar = getPreviousSiblingElement(par);
-    if (prevPar) {
-      yield* walkIterReverse(prevPar, limit);
-      yield prevPar;
-    }
   }
 }
 
@@ -151,4 +80,75 @@ export function getParent(
   }
   const next = start.parentElement;
   return next;
+}
+
+export function walk(root: Element, visit: (el: HTMLElement) => void): void {
+  if (ignoreDescendents(root)) {
+    return;
+  }
+  for (const child of root.children) {
+    if (isFocusable(child)) {
+      visit(child);
+      walk(child, visit);
+    }
+  }
+}
+
+export function* walkIter(
+  start: HTMLElement,
+  limit: HTMLElement | null,
+): IterableIterator<HTMLElement> {
+  yield* descendIter(start);
+  if (start === limit) {
+    return;
+  }
+
+  let sib: HTMLElement | null = start;
+  while ((sib = getNextSiblingElement(start))) {
+    yield sib;
+    yield* descendIter(sib);
+  }
+  let par: HTMLElement | null = start;
+  while ((par = par.parentElement)) {
+    if (par === limit) {
+      yield par;
+      break;
+    }
+    const nextPar = getNextSiblingElement(par);
+    if (nextPar) {
+      yield nextPar;
+      yield* walkIter(nextPar, limit);
+    }
+  }
+}
+
+export function* walkIterReverse(
+  start: HTMLElement,
+  limit: HTMLElement | null,
+): IterableIterator<HTMLElement> {
+  if (start === limit) {
+    const last = lastElement(limit);
+    if (last === limit) {
+      return;
+    }
+    yield last;
+    return;
+  }
+  let sib: HTMLElement | null = start;
+  while ((sib = getPreviousSiblingElement(start))) {
+    yield* descendIterReverse(sib);
+    yield sib;
+  }
+  let par: HTMLElement | null = start;
+  while ((par = par.parentElement)) {
+    yield par;
+    if (par === limit) {
+      break;
+    }
+    const prevPar = getPreviousSiblingElement(par);
+    if (prevPar) {
+      yield* walkIterReverse(prevPar, limit);
+      yield prevPar;
+    }
+  }
 }

@@ -26,11 +26,8 @@ export function isAlreadyFocusable(
   TABS: Set<HTMLElement>,
   el: Element,
 ): boolean {
-  if (el instanceof window.HTMLElement && TABS.has(el)) {
+  if (TABS.has(el as HTMLElement)) {
     return false;
-  }
-  if ((el.hasAttribute('tabindex') && el.getAttribute('tabindex')) ?? -2 >= 0) {
-    return true;
   }
   if (FORM_FOCUSABLE.indexOf(el.tagName.toLowerCase()) !== -1) {
     return true;
@@ -41,7 +38,7 @@ export function isAlreadyFocusable(
   ) {
     return true;
   }
-  if (el.hasAttribute('tabindex') && el.getAttribute('tabindex') === '-1') {
+  if (el.getAttribute('tabindex')) {
     return true;
   }
   return false;

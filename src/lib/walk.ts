@@ -104,7 +104,7 @@ export function* walkIter(
   }
 
   let sib: HTMLElement | null = start;
-  while ((sib = getNextSiblingElement(start))) {
+  while ((sib = getNextSiblingElement(sib))) {
     yield sib;
     yield* descendIter(sib);
   }
@@ -135,7 +135,7 @@ export function* walkIterReverse(
     return;
   }
   let sib: HTMLElement | null = start;
-  while ((sib = getPreviousSiblingElement(start))) {
+  while ((sib = getPreviousSiblingElement(sib))) {
     yield* descendIterReverse(sib);
     yield sib;
   }

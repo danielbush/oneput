@@ -20,10 +20,8 @@ function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
     if (!isFocusable(child)) {
       break;
     }
-    if (child instanceof window.HTMLElement) {
-      yield child;
-      yield* descendIter(child);
-    }
+    yield child;
+    yield* descendIter(child);
   }
 }
 
@@ -36,10 +34,8 @@ function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
     if (!isFocusable(child)) {
       break;
     }
-    if (child instanceof window.HTMLElement) {
-      yield* descendIterReverse(child);
-      yield child;
-    }
+    yield* descendIterReverse(child);
+    yield child;
   }
 }
 

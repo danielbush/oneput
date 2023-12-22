@@ -1,5 +1,5 @@
 tmp/
-src/examples/ng-ml/
+src/examples/**
 .esbuild
 dist
 coverage

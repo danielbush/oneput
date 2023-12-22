@@ -2,16 +2,17 @@
   "name": "jsed",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "private": true,
+  "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "build:prepare": "npm run check && rimraf dist && mkdir dist && cp src/style.css dist",
-    "build": "npm run build:prepare && esbuild src/app/sketch.ts --bundle --outdir=dist --platform=browser",
     "test": "jest --coverage",
     "test:update": "jest -u",
     "test:watch": "jest --watch --coverage",
-    "dev": "npm run build:prepare && esbuild src/app/sketch.ts --watch --bundle --servedir=src --outdir=src/.esbuild",
-    "convert": "bun run src/cli/convert.ts"
+    "convert": "bun run src/cli/convert.ts",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -30,7 +31,8 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^26.5.4",
     "ts-node": "^10.7.0",
-    "typescript": "^4.9.4"
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
   },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",

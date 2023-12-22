@@ -2,3 +2,5 @@ tmp/
 src/examples/ng-ml/
 .esbuild
 dist
+coverage
+node_modules

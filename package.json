@@ -5,16 +5,13 @@
   "main": "index.js",
   "scripts": {
     "check": "tsc --noEmit",
-    "esbuild": "esbuild",
     "build:prepare": "npm run check && rimraf dist && mkdir dist && cp src/style.css dist",
-    "build:cli": "esbuild src/cli/convert.ts --platform=node --target=node18 --bundle --outdir=dist/cli",
     "build": "npm run build:prepare && esbuild src/app/sketch.ts --bundle --outdir=dist --platform=browser",
     "test": "jest --coverage",
     "test:update": "jest -u",
     "test:watch": "jest --watch --coverage",
     "dev": "npm run build:prepare && esbuild src/app/sketch.ts --watch --bundle --servedir=src --outdir=src/.esbuild",
-    "convert:ng-mlold": "npm run build:cli && node ./dist/cli/convert.js src/examples/ng-ml/index.md >src/examples/ng-ml/index.html'",
-    "convert:ng-ml": "ts-node src/cli/convert.ts src/examples/ng-ml/index.md >src/examples/ng-ml/index.html"
+    "convert": "bun run src/cli/convert.ts"
   },
   "keywords": [],
   "author": "",

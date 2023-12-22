@@ -27,29 +27,31 @@ See:
 Build a bundle in dist/ (TODO: not productionized yet).
 
 ```sh
-pnpm --filter sbr-hyper-core run build
+bun run build
 ```
 
 Tests
 
 ```sh
-pnpm --filter sbr-hyper-core run test:watch
+bun run test:watch
 ```
 
-Run a server and access examples/\*:
+Run a dev server to access `src/examples/` or similar:
 
 ```sh
-pnpm --filter sbr-hyper-core run dev
+bun run dev
 ```
+
+### Examples (WIP)
+
+`src/examples` is currently not in version control and is a place where I am building jsed to support existing 2br content (Dec-2023).  At some point we'll create public examples.
 
 Current examples I'm working on:
 
 ```sh
-pnpm --filter sbr-hyper-core run build:cli
-cp -i ~/work/2br-danb2/.fold/idable/6058d8eb-5ef6-4c22-8bb4-2a15aa2252a7/content.md \
-  ~/projects/2br-spaces-dev/packages/sbr-hyper-core/src/examples/ng-ml/index.md
-pnpm --filter sbr-hyper-core run convert:ng-ml
-```
+cp -i /Users/danielbush/work/2br-danb2/tmp.md src/examples/tmpmd/index.md
+bun run convert -- src/examples/tmpmd/index.md >src/examples/ng-ml/index.html
 
-- /examples/ng-ml/
-- /examples/index.html .
+cp -i ~/work/2br-danb2/.fold/idable/6058d8eb-5ef6-4c22-8bb4-2a15aa2252a7/content.md src/examples/ng-ml/index.md
+bun run convert -- src/examples/ng-ml/index.md >src/examples/ng-ml/index.html
+```

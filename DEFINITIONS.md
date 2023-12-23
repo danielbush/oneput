@@ -3,9 +3,9 @@
 ## Definitions
 
 - F_ELEM (focusable element)
-  - an F_REC or F_NONREC
-  - not an IF_ELEM
-  - an element the user can navigate to and perform operations on
+  - an element that we make focusable so that the user can use tab or walking the native browser focus to navigate to and perform operations on content
+  - it can be F_REC or F_NONREC
+  - not an IF_ELEM as these are already focusable
 - IF_ELEM (inherently focusable element)
   - any element that is "already focusable" - eg form controls
 - F_REC (focusable recursable element)
@@ -22,6 +22,8 @@
 
 ### Navigation
 
+- TABS
+  - deontes a set of HTMLElements that have had `tabindex` added to make them focusable
 - TAB_FOCUS
   - describes the ability to hit tab or shift+tab and traverse all F_ELEM's recursively depth-first (for F_NONREC's we don't recurse into their child elements)
   - we can achieve this by just setting but `tabIndex="0"` on elements that are not already focusable

@@ -1,4 +1,3 @@
-import { JSDOM } from 'jsdom';
 import { DocumentContext } from '../src/lib/DocumentContext';
 import * as load from '../src/lib/load';
 

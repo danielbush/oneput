@@ -1,14 +1,15 @@
+import { describe, it, expect, test, vi } from 'vitest';
 import hotkeys from 'hotkeys-js';
 import { start } from './document';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
 import { Binding } from '../config/binding';
 
-jest.spyOn(load, 'loadDoc');
-jest.spyOn(load, 'untab');
-jest.spyOn(hotkeys, 'unbind');
-const FOCUS = jest.spyOn(action, 'FOCUS');
-const SIB_HIGHLIGHT = jest.spyOn(action, 'SIB_HIGHLIGHT');
+vi.spyOn(load, 'loadDoc');
+vi.spyOn(load, 'untab');
+vi.spyOn(hotkeys, 'unbind');
+const FOCUS = vi.spyOn(action, 'FOCUS');
+const SIB_HIGHLIGHT = vi.spyOn(action, 'SIB_HIGHLIGHT');
 
 describe('start', () => {
   it('should load the doc (TAB_FOCUS)', () => {
@@ -27,7 +28,7 @@ describe('start', () => {
     // arrange
     const root = document.createElement('DIV');
     const cx = start(root);
-    jest.spyOn(cx.root, 'removeEventListener');
+    vi.spyOn(cx.root, 'removeEventListener');
 
     // act
     cx.unload();
@@ -51,7 +52,7 @@ describe('start', () => {
 
   it('it should configure bindings to take actions', () => {
     // This tests that actions like REC_NEXT will get called.
-    const action = jest.fn();
+    const action = vi.fn();
     const binding = 'ctrl+j';
 
     // arrange
@@ -71,7 +72,7 @@ describe('start', () => {
     it('should configure click and focus behaviours', async () => {
       // arrange
       const root = document.createElement('DIV');
-      const listener = jest.spyOn(root, 'addEventListener');
+      const listener = vi.spyOn(root, 'addEventListener');
 
       // act
       start(root, []);

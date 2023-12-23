@@ -1,3 +1,4 @@
+import { describe, it, test, expect, vi } from 'vitest';
 import * as action from './action';
 import {
   byId,
@@ -16,7 +17,7 @@ describe('FOCUS', () => {
     // arrange
     const cx = makeRoot(p({ id: 'p1' }, 'p1'));
     const p1 = cx.document.getElementById('p1') as HTMLElement;
-    const focus = jest.spyOn(p1, 'focus');
+    const focus = vi.spyOn(p1, 'focus');
 
     // act
     action.FOCUS(cx, p1);
@@ -29,7 +30,7 @@ describe('FOCUS', () => {
     // arrange
     const cx = makeRoot(frag(script({ id: 'p1' }, 'p1')));
     const p1 = cx.document.getElementById('p1') as HTMLElement;
-    const focus = jest.spyOn(p1, 'focus');
+    const focus = vi.spyOn(p1, 'focus');
 
     // act
     action.FOCUS(cx, p1);

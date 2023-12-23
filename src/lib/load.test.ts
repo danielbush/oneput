@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { makeRoot, div, p, input, script, byId, ul, li } from '../../test/util';
 import { loadDoc, serialize, untab } from './load';
 
@@ -17,7 +18,7 @@ describe('loadDoc', () => {
     loadDoc(cx.root);
 
     // assert
-    expect(cx.root.outerHTML).toMatchSnapshot();
+    expect(cx.root).toMatchSnapshot();
     expect(byId(cx, 'input').getAttribute('tabIndex')).toBe(null);
     expect(byId(cx, 'script').getAttribute('tabIndex')).toBe(null);
     expect(byId(cx, 'div1').getAttribute('tabIndex')).toEqual('0');
@@ -59,7 +60,7 @@ describe('loadDoc', () => {
     loadDoc(cx.root);
 
     // assert
-    expect(cx.root.outerHTML).toMatchSnapshot();
+    expect(cx.root).toMatchSnapshot();
     expect(byId(cx, 'katex').getAttribute('tabIndex')).toEqual('0');
     expect(byId(cx, 'katex-1').getAttribute('tabIndex')).toEqual(null);
     expect(byId(cx, 'div1-1').getAttribute('tabIndex')).toEqual('0');
@@ -83,7 +84,7 @@ describe('untab', () => {
     untab(cx.TABS);
 
     // assert
-    expect(cx.root.outerHTML).toMatchSnapshot();
+    expect(cx.root).toMatchSnapshot();
   });
 });
 
@@ -98,7 +99,7 @@ describe('serialize', () => {
       ),
     );
     loadDoc(cx.root);
-    expect(cx.root.outerHTML).toMatchSnapshot();
+    expect(cx.root).toMatchSnapshot();
 
     // act
     const result = serialize(cx.TABS, cx.root);

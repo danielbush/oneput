@@ -14,8 +14,11 @@ On the flip side, we try to quarantine and keep as small as possible the followi
 
 As an example of the thing we are trying to avoid:  consider a class that performs both deterministic calculations but also side-effects (such as network calls) that could result in unpredictable behaviour or states in the class.  Mixing theses 2 types of code into a class like this makes it harder to read and reason through the class and how it behaves in the context of the rest of the system especially if there are other similar classes.  If side-effects need to be called in a complex sequence, we could do this perhaps in a function always striving to extract and encapsulate any determininstic implementation logic so as to keep it as clear and bare as possible.
 
-- `src/app/` contains "non-deterministic" code.
-- `src/lib/` contains "deterministic" code.
+- "non-deterministic" code
+  - `src/app/`
+  - `src/cli/`
+- "deterministic" code
+  - `src/lib/`
 
 I've had issues following the testing-library philosophy and trying to test the whole system in a behavioural way, including symptoms such as: things not working and exorbitant amounts of time spent arranging and executing tests that try to stand a whole system up as much as possible whether the network is mocked or not. See RTL_FAIL in ISSUES.md. This has led to the above approach to code organisation and leads to the following testing approach:
 

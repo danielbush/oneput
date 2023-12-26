@@ -2,8 +2,10 @@
   "name": "jsed",
   "version": "0.0.1",
   "description": "",
+  "main": "dist/index.js",
   "private": true,
   "type": "module",
+  "types": "dist/src",
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest --run --coverage",
@@ -11,8 +13,15 @@
     "test:watch": "vitest --watch",
     "convert": "bun run src/cli/convert.ts",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build:cli": "bun build ./src/cli/convert.ts --compile --outfile dist/bin/convert",
+    "build:tsdefs": "tsc --emitDeclarationOnly --noEmit false --declaration --outDir dist",
+    "build": "bunx rimraf dist; bun run build:bun && bun run build:tsdefs && bun run build:cli",
+    "build:bun": "bun build --target=node --outdir=dist --root=src src",
+    "build:vite": "tsc && vite build",
     "preview": "vite preview"
+  },
+  "bin": {
+    "convert": "./dist/bin/convert"
   },
   "keywords": [],
   "author": "",

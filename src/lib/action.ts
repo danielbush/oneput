@@ -73,7 +73,7 @@ export function UP(cx: DocumentContext): void {
  * TODO: cx.active should update.  Should we track it manually?
  */
 export function FOCUS(
-  cx: DocumentContext,
+  _cx: DocumentContext,
   el: Element | EventTarget | null,
 ): boolean {
   if (!isFocusable(el)) {

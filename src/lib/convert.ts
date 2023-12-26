@@ -10,9 +10,13 @@ export function convertMd(markdown: string): string {
   return md.render(markdown);
 }
 
-export function convert(markdown: string, title?: string): string {
+export function convert(
+  markdown: string,
+  title?: string,
+  description?: string,
+): string {
   const content = convertMd(markdown);
-  return template(content, title);
+  return template(content, title, description);
 }
 
 // See https://github.com/iktakahiro/markdown-it-katex for <link> tag for katex etc.
@@ -22,7 +26,8 @@ function template(
   title: string = 'Converted',
   description: string = 'Put your description here',
 ) {
-  const appPath = '/src/app/sketch.ts';
+  const appPath = '/src/index.tsx'; // TODO: hard coded for jsed-ui
+  const stylePath = '/src/index.css'; // TODO: hard coded for jsed-ui
   return `<!doctype html>
 <html lang="en">
 
@@ -33,7 +38,7 @@ function template(
   <base href="/">
 
   <style></style>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="${stylePath}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"/>
   <title>${title}</title>
@@ -41,6 +46,7 @@ function template(
 
 <body>
   ${content}
+  <div id="jsed-app"></div>
   <script type="module" src="${appPath}"></script>
 </body>
 

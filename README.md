@@ -23,19 +23,7 @@ See:
 - [DEFINITIONS.md](./DEFINITIONS.md) - key definitions and behaviours of the systems
 - [ISSUES.md](./ISSUES.md) - issues found along the way
 
-## Synopsis
-
-Build a bundle in dist/ (TODO: not productionized yet).
-
-```sh
-bun run build
-```
-
-Tests
-
-```sh
-bun run test:watch
-```
+## Usage
 
 Run a dev server to access `src/examples/` or similar:
 
@@ -43,16 +31,24 @@ Run a dev server to access `src/examples/` or similar:
 bun run dev
 ```
 
-## Examples (WIP)
+## Build
 
-`src/examples` is currently not in version control and is a place where I am building jsed to support existing 2br content (Dec-2023).  At some point we'll create public examples.  The following notes are only applicable to the maintainer.
-
-Current examples I'm working on:
+Build a bundle in dist/ (TODO: not productionized yet).
 
 ```sh
-cp /Users/danielbush/work/2br-danb2/tmp.md src/examples/tmp-md/index.md
-bun run convert -- src/examples/tmp-md/index.md >src/examples/tmp-md/index.html
+bun run build
+```
 
-cp ~/work/2br-danb2/.fold/idable/6058d8eb-5ef6-4c22-8bb4-2a15aa2252a7/content.md src/examples/ng-ml/index.md
-bun run convert -- src/examples/ng-ml/index.md >src/examples/ng-ml/index.html
+Adds a cli to `dist/`.
+
+```sh
+bun run build:cli
+```
+
+## Testing
+
+Tests
+
+```sh
+bun run test:watch
 ```

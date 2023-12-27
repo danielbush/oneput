@@ -46,7 +46,7 @@ function template(
 
 <body>
   ${content}
-  <div id="jsed-app"></div>
+  <div id="jsed-app-root"></div>
   <script type="module" src="${appPath}"></script>
 </body>
 

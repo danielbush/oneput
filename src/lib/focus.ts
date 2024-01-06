@@ -2,6 +2,8 @@
  * What can be edited and focused on.
  */
 
+import { JSED_DOM_ROOT_ID } from './constants';
+
 const FORM_FOCUSABLE = [
   'input',
   'select',
@@ -54,6 +56,9 @@ export function ignoreDescendents(el: Element | null | undefined): boolean {
   if (el?.classList.contains('katex')) {
     return true;
   }
+  if (el?.id === JSED_DOM_ROOT_ID) {
+    return true;
+  }
   return false;
 }
 
@@ -67,5 +72,10 @@ export function isFocusable(
     return false;
   }
   const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    if (el?.id === JSED_DOM_ROOT_ID) {
+      return false;
+    }
+  }
   return isHTMLElement;
 }

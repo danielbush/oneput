@@ -3,6 +3,7 @@ import hotkeys from 'hotkeys-js';
 import { Binding, defaultBindings } from '../config/binding';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
+import { JSED_DOM_ROOT_ID } from '../lib/constants';
 
 /**
  * Initialize a subtree of the DOM in a browser window for editing.
@@ -23,7 +24,16 @@ export function start(
     action.FOCUS(documentContext, evt.target);
   }
 
-  function handleFocusIn() {
+  function handleFocusIn(evt: FocusEvent) {
+    // Prevent unintended focusing if we are touching something in the jsed app
+    // ui sitting over the document:
+    const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
+    if (app_root_node) {
+      const node = evt.target as Element;
+      if (app_root_node.contains(node)) {
+        return;
+      }
+    }
     action.SIB_HIGHLIGHT(documentContext);
   }
 

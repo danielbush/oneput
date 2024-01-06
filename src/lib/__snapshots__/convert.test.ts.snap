@@ -6,12 +6,12 @@ exports[`convert > convert > should return a filled-in template 1`] = `
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="Description" content="Put your description here">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="Description" content="the description">
   <base href="/">
 
   <style></style>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/src/index.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"/>
   <title>the title</title>
@@ -20,7 +20,8 @@ exports[`convert > convert > should return a filled-in template 1`] = `
 <body>
   <p>&lt;h1&gt;test&lt;/h1&gt;</p>
 
-  <script type="module" src="/src/app/sketch.ts"></script>
+  <div id="jsed-app-root"></div>
+  <script type="module" src="/src/index.tsx"></script>
 </body>
 
 </html>"

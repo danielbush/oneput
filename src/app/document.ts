@@ -21,12 +21,6 @@ export function start(
   // Set up event handlers and key bindings
 
   function handleElementClick(evt: MouseEvent) {
-    action.FOCUS(documentContext, evt.target);
-  }
-
-  function handleFocusIn(evt: FocusEvent) {
-    // Prevent unintended focusing if we are touching something in the jsed app
-    // ui sitting over the document:
     const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
     if (app_root_node) {
       const node = evt.target as Element;
@@ -34,11 +28,11 @@ export function start(
         return;
       }
     }
+    action.FOCUS(documentContext, evt.target);
     action.SIB_HIGHLIGHT(documentContext);
   }
 
   root.addEventListener<'click'>('click', handleElementClick);
-  root.addEventListener<'focusin'>('focusin', handleFocusIn);
 
   for (const [binding, action] of bindings) {
     hotkeys(binding, () => {
@@ -52,7 +46,6 @@ export function start(
     load.untab(documentContext.TABS);
     hotkeys.unbind();
     root.removeEventListener('click', handleElementClick);
-    root.removeEventListener('focusin', handleFocusIn);
   };
   return documentContext;
 }

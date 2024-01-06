@@ -8,7 +8,7 @@ import { walk } from './walk';
 function tab(TABS: Set<HTMLElement>, el: HTMLElement) {
   if (!isAlreadyFocusable(TABS, el) && isFocusable(el)) {
     TABS.add(el);
-    el.setAttribute('tabindex', '0');
+    // el.setAttribute('tabindex', '0');
   }
 }
 
@@ -28,19 +28,19 @@ export function tabrec(TABS: Set<HTMLElement>, root: HTMLElement): void {
 /**
  * Remove all tabs
  */
-export function untab(TABS: Set<HTMLElement>): void {
-  for (const el of TABS) {
-    el.removeAttribute('tabindex');
-  }
+export function untab(_TABS: Set<HTMLElement>): void {
+  // for (const el of TABS) {
+  // el.removeAttribute('tabindex');
+  // }
 }
 
 export function serialize(TABS: Set<HTMLElement>, root: HTMLElement): string {
   if (TABS.has(root)) {
-    root.removeAttribute('tabindex');
+    // root.removeAttribute('tabindex');
   }
   walk(root, (el) => {
     if (TABS.has(el)) {
-      el.removeAttribute('tabindex');
+      // el.removeAttribute('tabindex');
     }
   });
   return root.outerHTML;

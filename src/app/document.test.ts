@@ -39,13 +39,9 @@ describe('start', () => {
     expect(load.untab).toBeCalledWith(cx.TABS);
     expect(hotkeys.unbind).toBeCalledTimes(1);
     expect(hotkeys.unbind).toBeCalledWith();
-    expect(cx.root.removeEventListener).toBeCalledTimes(2);
+    expect(cx.root.removeEventListener).toBeCalledTimes(1);
     expect(cx.root.removeEventListener).toBeCalledWith(
       'click',
-      expect.any(Function),
-    );
-    expect(cx.root.removeEventListener).toBeCalledWith(
-      'focusin',
       expect.any(Function),
     );
   });
@@ -83,11 +79,6 @@ describe('start', () => {
       if (!(handleElementClick instanceof Function)) {
         throw new Error('handleElementClick not a function');
       }
-      const [focusin, handleFocusIn] = listener.mock.calls[1];
-      expect(focusin).toEqual('focusin');
-      if (!(handleFocusIn instanceof Function)) {
-        throw new Error('handleFocusIn not a function');
-      }
     });
 
     test('clicking calls FOCUS on elements', async () => {
@@ -100,9 +91,7 @@ describe('start', () => {
 
       // assert
       expect(FOCUS).toBeCalledTimes(1);
-      // Sadly, focus() doesn't trigger focusin.  Testing-library probably does it
-      // but I don't want the hassle.
-      expect(SIB_HIGHLIGHT).toBeCalledTimes(0);
+      expect(SIB_HIGHLIGHT).toBeCalledTimes(1);
     });
 
     test('FOCUS (via clicking or tab key) calls SIB_HIGHLIGHT', async () => {
@@ -111,7 +100,6 @@ describe('start', () => {
 
       // act
       start(root, []);
-      root.dispatchEvent(new FocusEvent('focusin'));
 
       // assert
       expect(SIB_HIGHLIGHT).toBeCalledTimes(1);

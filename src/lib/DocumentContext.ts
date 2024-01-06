@@ -27,7 +27,7 @@ export type DocumentContext = {
 };
 
 export function makeDocumentContext(
-  document: Document,
+  _document: Document,
   root: HTMLElement,
 ): DocumentContext {
   const documentContext: DocumentContext = {
@@ -35,12 +35,7 @@ export function makeDocumentContext(
     get document(): Document {
       return root.ownerDocument;
     },
-    get active(): HTMLElement | null {
-      if (document.activeElement instanceof window.HTMLElement) {
-        return document.activeElement;
-      }
-      return null;
-    },
+    active: null,
     SIB_HIGHLIGHT: new Set(),
     TABS: new Set(),
     unload: () => {

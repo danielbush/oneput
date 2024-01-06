@@ -3,27 +3,6 @@ import { makeRoot, div, p, input, script, byId, ul, li } from '../../test/util';
 import { loadDoc, serialize, untab } from './load';
 
 describe('loadDoc', () => {
-  it("should should add tabindex on F_ELEM's but not IF_ELEM's", () => {
-    // arrange
-    const cx = makeRoot(
-      div(
-        { id: 'div1' },
-        p({ id: 'p1' }, 'here is some text'),
-        input({ id: 'input', type: 'text', name: 'input', size: '10' }),
-        script({ id: 'script' }),
-      ),
-    );
-
-    // act
-    loadDoc(cx.root);
-
-    // assert
-    expect(cx.root).toMatchSnapshot();
-    expect(byId(cx, 'input').getAttribute('tabIndex')).toBe(null);
-    expect(byId(cx, 'script').getAttribute('tabIndex')).toBe(null);
-    expect(byId(cx, 'div1').getAttribute('tabIndex')).toEqual('0');
-  });
-
   it("should should update TABS index for F_ELEM's but not IF_ELEM's", () => {
     // arrange
     const cx = makeRoot(
@@ -61,9 +40,9 @@ describe('loadDoc', () => {
 
     // assert
     expect(cx.root).toMatchSnapshot();
-    expect(byId(cx, 'katex').getAttribute('tabIndex')).toEqual('0');
-    expect(byId(cx, 'katex-1').getAttribute('tabIndex')).toEqual(null);
-    expect(byId(cx, 'div1-1').getAttribute('tabIndex')).toEqual('0');
+    expect(cx.TABS.has(byId(cx, 'katex'))).toBe(true);
+    expect(cx.TABS.has(byId(cx, 'katex-1'))).toBe(false);
+    expect(cx.TABS.has(byId(cx, 'div1-1'))).toBe(true);
   });
 });
 

@@ -73,13 +73,17 @@ export function UP(cx: DocumentContext): void {
  * TODO: cx.active should update.  Should we track it manually?
  */
 export function FOCUS(
-  _cx: DocumentContext,
+  cx: DocumentContext,
   el: Element | EventTarget | null,
 ): boolean {
   if (!isFocusable(el)) {
     return false;
   }
-  el.focus();
+  if (cx.active) {
+    cx.active.classList.remove('jsed-focus');
+  }
+  el.classList.add('jsed-focus');
+  cx.active = el as HTMLElement;
   return true;
 }
 

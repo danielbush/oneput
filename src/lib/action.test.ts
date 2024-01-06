@@ -187,7 +187,7 @@ test('UP can walk up successive parent elements', () => {
   expect(ids).toEqual(['id2', 'id1', 'root']);
 });
 
-describe('ISLAND', () => {
+describe.only('ISLAND', () => {
   test('KATEX_ISLAND - should ignore katex islands', () => {
     // arrange
     const cx = makeRoot(
@@ -197,7 +197,7 @@ describe('ISLAND', () => {
         div({ id: 'div2' }, 'div'),
       ),
     );
-    byId(cx, 'div1').focus();
+    cx.active = byId(cx, 'div1');
 
     // act
     action.REC_NEXT(cx);

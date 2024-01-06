@@ -3,22 +3,18 @@
 exports[`loadDoc > should ignore katex descendents (F_NONREC) 1`] = `
 <div
   id="root"
-  tabindex="0"
 >
   <div
     id="div1"
-    tabindex="0"
   >
     <p
       id="p1"
-      tabindex="0"
     >
       here is some text
     </p>
     <div
       class="katex"
       id="katex"
-      tabindex="0"
     >
       <div
         id="katex-1"
@@ -28,7 +24,6 @@ exports[`loadDoc > should ignore katex descendents (F_NONREC) 1`] = `
     </div>
     <div
       id="div1-1"
-      tabindex="0"
     >
       div1-1
     </div>
@@ -39,15 +34,12 @@ exports[`loadDoc > should ignore katex descendents (F_NONREC) 1`] = `
 exports[`loadDoc > should should add tabindex on F_ELEM's but not IF_ELEM's 1`] = `
 <div
   id="root"
-  tabindex="0"
 >
   <div
     id="div1"
-    tabindex="0"
   >
     <p
       id="p1"
-      tabindex="0"
     >
       here is some text
     </p>
@@ -67,21 +59,17 @@ exports[`loadDoc > should should add tabindex on F_ELEM's but not IF_ELEM's 1`] 
 exports[`serialize > should remove tabindex from F_ELEM 1`] = `
 <div
   id="root"
-  tabindex="0"
 >
   <ul
     id="ul"
-    tabindex="0"
   >
     <li
       id="li1"
-      tabindex="0"
     >
       item 1
     </li>
     <li
       id="li2"
-      tabindex="0"
     >
       item 2
     </li>

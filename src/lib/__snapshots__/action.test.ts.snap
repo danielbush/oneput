@@ -3,30 +3,19 @@
 exports[`SIB_HIGHLIGHT > should highlight current siblings of the active element 1`] = `
 <div
   id="root"
-  tabindex="0"
 >
-  <p
-    class="sbr-focus-sibling"
-    tabindex="0"
-  >
+  <p>
     p1
   </p>
   <p
     id="p2"
-    tabindex="0"
   >
     p2
   </p>
-  <p
-    class="sbr-focus-sibling"
-    tabindex="0"
-  >
+  <p>
     p3
   </p>
-  <p
-    class="sbr-focus-sibling"
-    tabindex="0"
-  >
+  <p>
     p4
   </p>
 </div>

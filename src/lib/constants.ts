@@ -1,7 +1,7 @@
 /**
  * CSS class for SIB_HIGHLIGHT.
  */
-export const SBR_FOCUS_SIBLING = 'sbr-focus-sibling';
+export const SBR_FOCUS_SIBLING = 'jsed-focus-sibling';
 /**
  * Where the jsed app mounts and renders.  It should not be part of the document
  * that is being edited.

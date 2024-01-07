@@ -15,6 +15,7 @@
     "dev": "vite",
     "build:cli": "bun build ./src/cli/convert.ts --compile --outfile dist/bin/convert",
     "build:tsdefs": "tsc --emitDeclarationOnly --noEmit false --declaration --outDir dist",
+    "build:watch": "bunx nodemon --watch src --exec \"bun run build\"",
     "build": "bunx rimraf dist; bun run build:bun && bun run build:tsdefs && bun run build:cli",
     "build:bun": "bun build --target=node --outdir=dist --root=src src",
     "build:vite": "tsc && vite build",

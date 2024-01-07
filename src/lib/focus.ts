@@ -3,6 +3,7 @@
  */
 
 import { JSED_DOM_ROOT_ID } from './constants';
+import { isToken } from './token';
 
 const FORM_FOCUSABLE = [
   'input',
@@ -74,6 +75,10 @@ export function isFocusable(
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     if (el?.id === JSED_DOM_ROOT_ID) {
+      return false;
+    }
+    // Tokens (text) get a cursor and are not treated as focusable.
+    if (isToken(el)) {
       return false;
     }
   }

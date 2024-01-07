@@ -7,3 +7,7 @@ export const SBR_FOCUS_SIBLING = 'jsed-focus-sibling';
  * that is being edited.
  */
 export const JSED_DOM_ROOT_ID = 'jsed-app-root';
+/**
+ * CSS class for tokens (text content that has been tokenized).
+ */
+export const JSED_TOKEN_CLASS = 'jsed-token';

@@ -50,8 +50,7 @@ export function serialize(TABS: Set<HTMLElement>, root: HTMLElement): string {
  * Make root the root of an editable document.
  */
 export function loadDoc(root: HTMLElement): DocumentContext {
-  const document = root.ownerDocument;
-  const documentContext = makeDocumentContext(document, root);
+  const documentContext = makeDocumentContext(root);
   // TAB_FOCUS
   tabrec(documentContext.TABS, root);
   return documentContext;

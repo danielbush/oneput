@@ -20,7 +20,7 @@ function* descendIter(root: HTMLElement): IterableIterator<HTMLElement> {
   }
   for (const child of root.children) {
     if (!isFocusable(child)) {
-      break;
+      continue;
     }
     yield child;
     yield* descendIter(child);
@@ -34,7 +34,7 @@ function* descendIterReverse(root: HTMLElement): IterableIterator<HTMLElement> {
   const revChildren = Array.from(root.children).reverse();
   for (const child of revChildren) {
     if (!isFocusable(child)) {
-      break;
+      continue;
     }
     yield* descendIterReverse(child);
     yield child;

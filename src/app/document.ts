@@ -15,10 +15,11 @@ import { JSED_DOM_ROOT_ID } from '../lib/constants';
 export function start(
   root: HTMLElement,
   params: {
-    bindings: Binding[];
-  } = { bindings: defaultBindings },
+    bindings?: Binding[];
+  } = {},
 ): DocumentContext {
   const documentContext = load.loadDoc(root);
+  const bindings = params.bindings || defaultBindings;
 
   // Set up event handlers and key bindings
 
@@ -36,7 +37,7 @@ export function start(
 
   root.addEventListener<'click'>('click', handleElementClick);
 
-  for (const [binding, action] of params.bindings) {
+  for (const [binding, action] of bindings) {
     hotkeys(binding, () => {
       action(documentContext);
     });

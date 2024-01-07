@@ -54,7 +54,7 @@ describe('start', () => {
     // arrange
     const root = document.createElement('DIV');
     const bindings: Binding[] = [[binding, action]];
-    const cx = start(root, bindings);
+    const cx = start(root, { bindings });
 
     // act
     hotkeys.trigger(binding);
@@ -71,7 +71,7 @@ describe('start', () => {
       const listener = vi.spyOn(root, 'addEventListener');
 
       // act
-      start(root, []);
+      start(root, { bindings: [] });
 
       // assert
       const [click, handleElementClick] = listener.mock.calls[0];
@@ -86,7 +86,7 @@ describe('start', () => {
       const root = document.createElement('DIV');
 
       // act
-      start(root, []);
+      start(root, { bindings: [] });
       root.dispatchEvent(new MouseEvent('click'));
 
       // assert
@@ -99,7 +99,7 @@ describe('start', () => {
       const root = document.createElement('DIV');
 
       // act
-      start(root, []);
+      start(root, { bindings: [] });
 
       // assert
       expect(SIB_HIGHLIGHT).toBeCalledTimes(1);

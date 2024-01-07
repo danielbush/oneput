@@ -31,31 +31,6 @@ exports[`loadDoc > should ignore katex descendents (F_NONREC) 1`] = `
 </div>
 `;
 
-exports[`loadDoc > should should add tabindex on F_ELEM's but not IF_ELEM's 1`] = `
-<div
-  id="root"
->
-  <div
-    id="div1"
-  >
-    <p
-      id="p1"
-    >
-      here is some text
-    </p>
-    <input
-      id="input"
-      name="input"
-      size="10"
-      type="text"
-    />
-    <script
-      id="script"
-    />
-  </div>
-</div>
-`;
-
 exports[`serialize > should remove tabindex from F_ELEM 1`] = `
 <div
   id="root"

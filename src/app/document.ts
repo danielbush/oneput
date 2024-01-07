@@ -32,7 +32,6 @@ export function start(
       }
     }
     action.FOCUS(documentContext, evt.target);
-    action.SIB_HIGHLIGHT(documentContext);
   }
 
   root.addEventListener<'click'>('click', handleElementClick);

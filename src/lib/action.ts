@@ -84,6 +84,7 @@ export function FOCUS(
   }
   el.classList.add('jsed-focus');
   cx.active = el as HTMLElement;
+  SIB_HIGHLIGHT(cx);
   return true;
 }
 

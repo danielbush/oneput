@@ -1,3 +1,5 @@
+import * as actions from './action';
+
 export type DocumentContext = {
   /**
    * The root node of the subtree of the DOM that is potentially editable.
@@ -32,6 +34,7 @@ export type DocumentContext = {
    * nodes as direct descendents.
    */
   tokenized: WeakMap<HTMLElement, boolean>;
+  actions: typeof actions;
   listeners: {
     /**
      * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.
@@ -127,6 +130,7 @@ export function makeDocumentContext(root: HTMLElement): DocumentContext {
     SIB_HIGHLIGHT: new Set(),
     TABS: new Set(),
     tokenized: new WeakMap(),
+    actions,
     listeners: {
       FOCUS: null,
       TOKEN_FOCUS: null,

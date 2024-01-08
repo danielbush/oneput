@@ -70,7 +70,7 @@ export function UP(cx: DocumentContext): void {
 
 /**
  * Apply TOKEN_FOCUS to focus a token and ensure FOCUS is set to the containing F_ELEM .
- * 
+ *
  * Send TOKEN_FOCUS first followed by the FOCUS for the parent.
  */
 export function TOKEN_FOCUS(
@@ -161,7 +161,6 @@ export function FOCUS(
   CLEAR_TOKEN_FOCUS(cx);
   TOKENIZE(cx, el);
   SIB_HIGHLIGHT(cx);
-  SCROLL_INTO_VIEW(cx);
   return true;
 }
 

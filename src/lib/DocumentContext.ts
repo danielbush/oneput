@@ -54,6 +54,7 @@ export type DocumentContext = {
 export type JsedTokenFocusEvent = {
   type: 'FOCUS';
   targetType: 'TOKEN';
+  parent: HTMLElement | null;
   value: string;
   /**
    * Request a cursor for the current token.

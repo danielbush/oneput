@@ -70,43 +70,52 @@ export function UP(cx: DocumentContext): void {
 
 /**
  * Apply TOKEN_FOCUS to focus a token and ensure FOCUS is set to the containing F_ELEM .
+ * 
+ * Send TOKEN_FOCUS first followed by the FOCUS for the parent.
  */
 export function TOKEN_FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
 ): boolean {
-  if (isToken(el)) {
-    if (cx.activeToken) {
-      cx.activeToken.classList.remove('jsed-token-focus');
-      cx.activeToken = null;
-    }
-    cx.activeToken = el;
-    el.classList.add('jsed-token-focus');
-    FOCUS(cx, el.parentElement);
-    if (cx.listeners.TOKEN_FOCUS) {
-      cx.listeners.TOKEN_FOCUS({
-        type: 'FOCUS',
-        targetType: 'TOKEN',
-        value: el.innerText!,
-        requestCursor: () => {
-          return {
-            onChange: (evt) => {
-              console.log(evt);
-            },
-            movePrevious: () => {},
-            moveNext: () => {},
-            replace: () => {},
-            delete: () => {},
-            append: () => {},
-            prepend: () => {},
-            close: () => {},
-          };
-        },
-      });
-    }
-    return true;
+  if (!isToken(el)) {
+    return false;
   }
-  return false;
+  if (cx.listeners.TOKEN_FOCUS) {
+    const ok = cx.listeners.TOKEN_FOCUS({
+      type: 'FOCUS',
+      targetType: 'TOKEN',
+      parent: el.parentElement,
+      value: el.innerText!,
+      requestCursor: () => {
+        return {
+          onChange: (evt) => {
+            console.log(evt);
+          },
+          movePrevious: () => {},
+          moveNext: () => {},
+          replace: () => {},
+          delete: () => {},
+          append: () => {},
+          prepend: () => {},
+          close: () => {},
+        };
+      },
+    });
+    if (!ok) {
+      // Always focus the parent F_ELEM of the token.
+      FOCUS(cx, el.parentNode);
+      return false;
+    }
+  }
+  if (cx.activeToken) {
+    cx.activeToken.classList.remove('jsed-token-focus');
+    cx.activeToken = null;
+  }
+  cx.activeToken = el;
+  el.classList.add('jsed-token-focus');
+  // Always focus the parent F_ELEM of the token.
+  FOCUS(cx, el.parentNode);
+  return true;
 }
 
 /**
@@ -130,11 +139,19 @@ export function FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
 ): boolean {
+  // Attempt TOKEN_FOCUS first.  If true, then TOKEN_FOCUS will handle how we
+  // focus from here.
   if (TOKEN_FOCUS(cx, el)) {
     return false;
   }
   if (!isFocusable(el)) {
     return false;
+  }
+  if (cx.listeners.FOCUS) {
+    const ok = cx.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
+    if (!ok) {
+      return false;
+    }
   }
   if (cx.active) {
     cx.active.classList.remove('jsed-focus');
@@ -144,9 +161,6 @@ export function FOCUS(
   CLEAR_TOKEN_FOCUS(cx);
   TOKENIZE(cx, el);
   SIB_HIGHLIGHT(cx);
-  if (cx.listeners.FOCUS) {
-    cx.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
-  }
   SCROLL_INTO_VIEW(cx);
   return true;
 }

@@ -83,8 +83,8 @@ export function TOKEN_FOCUS(
     cx.activeToken = el;
     el.classList.add('jsed-token-focus');
     FOCUS(cx, el.parentElement);
-    if (cx.handleSelect) {
-      cx.handleSelect({
+    if (cx.listeners.TOKEN_FOCUS) {
+      cx.listeners.TOKEN_FOCUS({
         type: 'FOCUS',
         targetType: 'TOKEN',
         value: el.innerText!,
@@ -144,8 +144,8 @@ export function FOCUS(
   CLEAR_TOKEN_FOCUS(cx);
   TOKENIZE(cx, el);
   SIB_HIGHLIGHT(cx);
-  if (cx.handleSelect) {
-    cx.handleSelect({ type: 'FOCUS', targetType: 'F_ELEM' });
+  if (cx.listeners.FOCUS) {
+    cx.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
   }
   SCROLL_INTO_VIEW(cx);
   return true;

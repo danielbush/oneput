@@ -32,42 +32,42 @@ export type DocumentContext = {
    * nodes as direct descendents.
    */
   tokenized: WeakMap<HTMLElement, boolean>;
-  /**
-   * Register a listener for selection events.  This tells the consumer if a
-   * node is selected or a token that could be edited.
-   */
-  handleSelect: JsedHandleSelect | undefined;
+  listeners: {
+    /**
+     * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.
+     */
+    FOCUS: null | ((evt: JsedFocusEvent) => boolean);
+    /**
+     * Register a listener for TOKEN_FOCUS events.  Consumer can decide if the TOKEN_FOCUS event should occur.
+     */
+    TOKEN_FOCUS: null | ((evt: JsedTokenFocusEvent) => boolean);
+  };
   unload: () => void;
 };
 
 /**
- * A callback provided by the consumer to handle selection events.
- */
-export type JsedHandleSelect = (evt: JsedEvent) => boolean;
-
-/**
  * Events that are emitted due to navigation and selection of elements within the document.
  */
-export type JsedEvent =
-  | {
-      type: 'FOCUS';
-      targetType: 'TOKEN';
-      value: string;
-      /**
-       * Request a cursor for the current token.
-       */
-      requestCursor: () => JsedCursor;
-    }
-  | {
-      type: 'FOCUS';
-      targetType: 'F_ELEM';
-      /**
-       * Lets consumer programmatically move the FOCUS.
-       *
-       * This navigates the structure of the document.  To navigate words, see requestCursor.
-       */
-      // requestFocus: () => JsedFocus;
-    };
+export type JsedTokenFocusEvent = {
+  type: 'FOCUS';
+  targetType: 'TOKEN';
+  value: string;
+  /**
+   * Request a cursor for the current token.
+   */
+  requestCursor: () => JsedCursor;
+};
+
+export type JsedFocusEvent = {
+  type: 'FOCUS';
+  targetType: 'F_ELEM';
+  /**
+   * Lets consumer programmatically move the FOCUS.
+   *
+   * This navigates the structure of the document.  To navigate words, see requestCursor.
+   */
+  // requestFocus: () => JsedFocus;
+};
 
 export type JsedCursor = {
   /**
@@ -127,7 +127,10 @@ export function makeDocumentContext(root: HTMLElement): DocumentContext {
     SIB_HIGHLIGHT: new Set(),
     TABS: new Set(),
     tokenized: new WeakMap(),
-    handleSelect: undefined,
+    listeners: {
+      FOCUS: null,
+      TOKEN_FOCUS: null,
+    },
     unload: () => {
       // Placeholder, see below.
       return;

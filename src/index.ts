@@ -1,9 +1,9 @@
 import {
   DocumentContext,
-  JsedHandleSelect,
-  JsedEvent,
+  JsedFocusEvent,
+  JsedTokenFocusEvent,
 } from './lib/DocumentContext';
 import { start } from './app/document';
 
 export { start };
-export type { DocumentContext, JsedHandleSelect, JsedEvent };
+export type { DocumentContext, JsedFocusEvent, JsedTokenFocusEvent };

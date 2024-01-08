@@ -42,7 +42,6 @@
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "commander": "^11.1.0",
-    "hotkeys-js": "^3.10.1",
     "markdown-it": "^13.0.1"
   },
   "nodemonConfig": {

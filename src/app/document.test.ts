@@ -1,13 +1,10 @@
 import { describe, it, expect, test, vi } from 'vitest';
-import hotkeys from 'hotkeys-js';
 import { start } from './document';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
-import { Binding } from '../config/binding';
 
 vi.spyOn(load, 'loadDoc');
 vi.spyOn(load, 'untab');
-vi.spyOn(hotkeys, 'unbind');
 const FOCUS = vi.spyOn(action, 'FOCUS');
 const SIB_HIGHLIGHT = vi.spyOn(action, 'SIB_HIGHLIGHT');
 
@@ -37,31 +34,11 @@ describe('start', () => {
     expect(cx.root.outerHTML).toMatchSnapshot();
     expect(load.untab).toBeCalledTimes(1);
     expect(load.untab).toBeCalledWith(cx.TABS);
-    expect(hotkeys.unbind).toBeCalledTimes(1);
-    expect(hotkeys.unbind).toBeCalledWith();
     expect(cx.root.removeEventListener).toBeCalledTimes(1);
     expect(cx.root.removeEventListener).toBeCalledWith(
       'click',
       expect.any(Function),
     );
-  });
-
-  it('it should configure bindings to take actions', () => {
-    // This tests that actions like REC_NEXT will get called.
-    const action = vi.fn();
-    const binding = 'ctrl+j';
-
-    // arrange
-    const root = document.createElement('DIV');
-    const bindings: Binding[] = [[binding, action]];
-    const cx = start(root, { bindings });
-
-    // act
-    hotkeys.trigger(binding);
-
-    // assert
-    expect(action).toBeCalledTimes(1);
-    expect(action).toBeCalledWith(cx);
   });
 
   describe('SIB_HIGHTLIGHT', () => {
@@ -71,7 +48,7 @@ describe('start', () => {
       const listener = vi.spyOn(root, 'addEventListener');
 
       // act
-      start(root, { bindings: [] });
+      start(root);
 
       // assert
       const [click, handleElementClick] = listener.mock.calls[0];
@@ -86,7 +63,7 @@ describe('start', () => {
       const root = document.createElement('DIV');
 
       // act
-      start(root, { bindings: [] });
+      start(root);
       root.dispatchEvent(new MouseEvent('click'));
 
       // assert
@@ -99,7 +76,7 @@ describe('start', () => {
       const root = document.createElement('DIV');
 
       // act
-      start(root, { bindings: [] });
+      start(root);
 
       // assert
       expect(SIB_HIGHLIGHT).toBeCalledTimes(1);

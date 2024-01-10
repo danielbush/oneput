@@ -23,10 +23,13 @@ export function start(root: HTMLElement): DocumentContext {
         return;
       }
     }
+    // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
+    evt.preventDefault();
     action.FOCUS(documentContext, evt.target);
   }
 
-  root.addEventListener<'click'>('click', handleElementClick);
+  // root.addEventListener<'click'>('click', handleElementClick);
+  root.addEventListener<'mousedown'>('mousedown', handleElementClick);
 
   // Unload
 

@@ -164,21 +164,6 @@ export function FOCUS(
   return true;
 }
 
-export function SCROLL_INTO_VIEW(cx: DocumentContext): void {
-  if (!cx.active) return;
-  const window = cx.document.defaultView;
-  if (!window) return;
-  const rect = cx.active.getBoundingClientRect();
-  if (rect.y < 0) {
-    cx.active.scrollIntoView(true);
-  } else {
-    const elemBottom = rect.y + rect.height;
-    if (elemBottom > window.visualViewport?.height!) {
-      cx.active.scrollIntoView(true);
-    }
-  }
-}
-
 /**
  * Tokenize the text of an F_ELEM.
  */

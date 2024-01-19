@@ -88,11 +88,12 @@ export function TOKEN_FOCUS(
       value: el.innerText!,
       requestCursor: () => {
         return {
-          onChange: (evt) => {
-            console.log(evt);
+          movePrevious: () => {
+            console.log('<< movePrevious');
           },
-          movePrevious: () => {},
-          moveNext: () => {},
+          moveNext: () => {
+            console.log('<< moveNext');
+          },
           replace: () => {},
           delete: () => {},
           append: () => {},

@@ -75,10 +75,6 @@ export type JsedFocusEvent = {
 
 export type JsedCursor = {
   /**
-   * A way to notify the consumer whenever the cursor (eg the token it points to) changes.
-   */
-  onChange: (evt: JsedCursorEvent) => void;
-  /**
    * Move to previous token if it exists.
    */
   movePrevious: () => void;

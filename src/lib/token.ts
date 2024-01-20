@@ -24,3 +24,26 @@ export function createToken(text: string): HTMLElement {
   el.appendChild(document.createTextNode(text));
   return el;
 }
+
+/**
+ * Tokenize the text of an F_ELEM.
+ */
+export function tokenize(el: HTMLElement): void {
+  if (el.innerText && el.innerText.length > 0) {
+    el.normalize();
+    const first = el.firstChild;
+    if (first?.nodeType === Node.TEXT_NODE) {
+      const tokens = first
+        .nodeValue!.split(/\s+/)
+        .filter(Boolean)
+        .map((s) => createToken(s));
+      const frag = document.createDocumentFragment();
+      for (const token of tokens) {
+        frag.appendChild(token);
+        frag.appendChild(document.createTextNode(' '));
+      }
+      el.insertBefore(frag, first);
+      el.removeChild(first);
+    }
+  }
+}

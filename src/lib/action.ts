@@ -1,7 +1,7 @@
 import { SBR_FOCUS_SIBLING } from './constants';
 import type { DocumentContext } from './DocumentContext';
 import { isFocusable } from './focus';
-import { createToken, isToken } from './token';
+import { isToken, tokenize } from './token';
 import {
   getNextSiblingElement,
   getParent,
@@ -162,34 +162,11 @@ export function FOCUS(
   el.classList.add('jsed-focus');
   cx.active = el as HTMLElement;
   CLEAR_TOKEN_FOCUS(cx);
-  TOKENIZE(cx, el);
-  SIB_HIGHLIGHT(cx);
-}
-
-/**
- * Tokenize the text of an F_ELEM.
- */
-function TOKENIZE(cx: DocumentContext, el: HTMLElement): void {
   if (!cx.tokenized.has(el)) {
     cx.tokenized.set(el, true);
-    if (el.innerText && el.innerText.length > 0) {
-      el.normalize();
-      const first = el.firstChild;
-      if (first?.nodeType === Node.TEXT_NODE) {
-        const tokens = first
-          .nodeValue!.split(/\s+/)
-          .filter(Boolean)
-          .map((s) => createToken(s));
-        const frag = document.createDocumentFragment();
-        for (const token of tokens) {
-          frag.appendChild(token);
-          frag.appendChild(document.createTextNode(' '));
-        }
-        el.insertBefore(frag, first);
-        el.removeChild(first);
-      }
-    }
+    tokenize(el);
   }
+  SIB_HIGHLIGHT(cx);
 }
 
 function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {

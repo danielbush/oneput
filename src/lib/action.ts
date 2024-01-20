@@ -140,17 +140,20 @@ function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
 export function FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
+  params?: { skipNotify: boolean },
 ): void {
   if (token.isToken(el)) {
     TOKEN_FOCUS(cx, el);
     // Always focus the parent F_ELEM of the token.
-    FOCUS(cx, el.parentNode);
+    // Use skipNotify because we won't issue a FOCUS event.  The event generated
+    // by the TOKEN_FOCUS contains all the information we need.
+    FOCUS(cx, el.parentNode, { skipNotify: true });
     return;
   }
   if (!isFocusable(el)) {
     return;
   }
-  if (cx.listeners.FOCUS) {
+  if (cx.listeners.FOCUS && !params?.skipNotify) {
     const ok = cx.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
     if (!ok) {
       return;

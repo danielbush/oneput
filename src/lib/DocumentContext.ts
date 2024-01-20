@@ -65,12 +65,6 @@ export type JsedTokenFocusEvent = {
 export type JsedFocusEvent = {
   type: 'FOCUS';
   targetType: 'F_ELEM';
-  /**
-   * Lets consumer programmatically move the FOCUS.
-   *
-   * This navigates the structure of the document.  To navigate words, see requestCursor.
-   */
-  // requestFocus: () => JsedFocus;
 };
 
 export type JsedCursor = {

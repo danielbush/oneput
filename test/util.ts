@@ -47,7 +47,7 @@ function makeTag(tagName: string) {
 }
 
 /**
- * Convenience to get an id ro fail.
+ * Convenience to get an id or fail.
  */
 export function byId(cx: DocumentContext, id: string): HTMLElement {
   const el = cx.document.getElementById(id);
@@ -68,34 +68,3 @@ export function frag(...tags: string[]): string {
 }
 export const script = makeTag('script');
 export const input = makeTag('input');
-
-export function spyOnAllIds(
-  cx: DocumentContext,
-  params: { focus: (id: string) => void },
-): Element[] {
-  const ids: string[] = [];
-  const els: Element[] = [];
-  cx.document.querySelectorAll('[id]').forEach((element) => {
-    ids.push(element.id);
-    els.push(element);
-  });
-  els.forEach((el) => spyOnElement(el, { focus: (el) => params.focus(el.id) }));
-  return els;
-}
-
-function spyOnElement(
-  el: Element,
-  params: { focus: (el: HTMLElement) => void },
-): void {
-  if (el instanceof HTMLElement) {
-    const focus = el.focus;
-    el.focus = () => {
-      params.focus(el);
-      focus.call(el);
-    };
-  } else {
-    console.warn(
-      `${el.outerHTML} is an Element, not an HTMLElement, cannot spy on focus`,
-    );
-  }
-}

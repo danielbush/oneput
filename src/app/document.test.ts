@@ -6,7 +6,6 @@ import * as action from '../lib/action';
 vi.spyOn(load, 'loadDoc');
 vi.spyOn(load, 'untab');
 const FOCUS = vi.spyOn(action, 'FOCUS');
-const SIB_HIGHLIGHT = vi.spyOn(action, 'SIB_HIGHLIGHT');
 
 describe('start', () => {
   it('should load the doc (TAB_FOCUS)', () => {
@@ -52,7 +51,7 @@ describe('start', () => {
 
       // assert
       const [click, handleElementClick] = listener.mock.calls[0];
-      expect(click).toEqual('click');
+      expect(click).toEqual('mousedown');
       if (!(handleElementClick instanceof Function)) {
         throw new Error('handleElementClick not a function');
       }
@@ -64,22 +63,10 @@ describe('start', () => {
 
       // act
       start(root);
-      root.dispatchEvent(new MouseEvent('click'));
+      root.dispatchEvent(new MouseEvent('mousedown'));
 
       // assert
       expect(FOCUS).toBeCalledTimes(1);
-      expect(SIB_HIGHLIGHT).toBeCalledTimes(1);
-    });
-
-    test('FOCUS (via clicking or tab key) calls SIB_HIGHLIGHT', async () => {
-      // arrange
-      const root = document.createElement('DIV');
-
-      // act
-      start(root);
-
-      // assert
-      expect(SIB_HIGHLIGHT).toBeCalledTimes(1);
     });
   });
 });

@@ -69,11 +69,13 @@ export function UP(cx: DocumentContext): void {
 }
 
 /**
- * Apply TOKEN_FOCUS to focus a token and ensure FOCUS is set to the containing F_ELEM .
+ * Apply TOKEN_FOCUS to focus a token and ensure FOCUS is set to the containing F_ELEM .  This is usually called by FOCUS and may end up handling both TOKEN_FOCUS and FOCUS .
+ *
+ * @returns {boolean} If true, signifies that FOCUS is handled by this function.  cx.listeners.TOKEN_FOCUS should return false if the listener is not interested in performing a TOKEN_FOCUS , in which the system will then check with listener.FOCUS .
  *
  * Send TOKEN_FOCUS first followed by the FOCUS for the parent.
  */
-export function TOKEN_FOCUS(
+function TOKEN_FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
 ): boolean {
@@ -122,7 +124,7 @@ export function TOKEN_FOCUS(
 /**
  * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
  */
-export function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
+function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
   if (cx.activeToken) {
     if (cx.activeToken.parentNode !== cx.active) {
       cx.activeToken.classList.remove('jsed-token-focus');
@@ -139,19 +141,19 @@ export function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
 export function FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
-): boolean {
+): void {
   // Attempt TOKEN_FOCUS first.  If true, then TOKEN_FOCUS will handle how we
   // focus from here.
   if (TOKEN_FOCUS(cx, el)) {
-    return false;
+    return;
   }
   if (!isFocusable(el)) {
-    return false;
+    return;
   }
   if (cx.listeners.FOCUS) {
     const ok = cx.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
     if (!ok) {
-      return false;
+      return;
     }
   }
   if (cx.active) {
@@ -162,7 +164,6 @@ export function FOCUS(
   CLEAR_TOKEN_FOCUS(cx);
   TOKENIZE(cx, el);
   SIB_HIGHLIGHT(cx);
-  return true;
 }
 
 /**

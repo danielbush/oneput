@@ -169,7 +169,7 @@ export function FOCUS(
 /**
  * Tokenize the text of an F_ELEM.
  */
-export function TOKENIZE(cx: DocumentContext, el: HTMLElement): void {
+function TOKENIZE(cx: DocumentContext, el: HTMLElement): void {
   if (!cx.tokenized.has(el)) {
     cx.tokenized.set(el, true);
     if (el.innerText && el.innerText.length > 0) {

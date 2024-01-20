@@ -69,21 +69,12 @@ export function UP(cx: DocumentContext): void {
 }
 
 /**
- * Apply TOKEN_FOCUS to focus a token and ensure FOCUS is set to the containing F_ELEM .  This is usually called by FOCUS and may end up handling both TOKEN_FOCUS and FOCUS .
- *
- * @returns {boolean} If true, signifies that FOCUS is handled by this function.  cx.listeners.TOKEN_FOCUS should return false if the listener is not interested in performing a TOKEN_FOCUS , in which the system will then check with listener.FOCUS .
- *
- * Send TOKEN_FOCUS first followed by the FOCUS for the parent.
+ * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
  */
-function TOKEN_FOCUS(
-  cx: DocumentContext,
-  el: Element | EventTarget | null,
-): boolean {
-  if (!isToken(el)) {
-    return false;
-  }
+function TOKEN_FOCUS(cx: DocumentContext, el: HTMLElement): void {
+  let ok = false;
   if (cx.listeners.TOKEN_FOCUS) {
-    const ok = cx.listeners.TOKEN_FOCUS({
+    ok = cx.listeners.TOKEN_FOCUS({
       type: 'FOCUS',
       targetType: 'TOKEN',
       parent: el.parentElement,
@@ -104,21 +95,15 @@ function TOKEN_FOCUS(
         };
       },
     });
-    if (!ok) {
-      // Always focus the parent F_ELEM of the token.
-      FOCUS(cx, el.parentNode);
-      return false;
+  }
+  if (ok) {
+    if (cx.activeToken) {
+      cx.activeToken.classList.remove('jsed-token-focus');
+      cx.activeToken = null;
     }
+    cx.activeToken = el;
+    el.classList.add('jsed-token-focus');
   }
-  if (cx.activeToken) {
-    cx.activeToken.classList.remove('jsed-token-focus');
-    cx.activeToken = null;
-  }
-  cx.activeToken = el;
-  el.classList.add('jsed-token-focus');
-  // Always focus the parent F_ELEM of the token.
-  FOCUS(cx, el.parentNode);
-  return true;
 }
 
 /**
@@ -136,15 +121,18 @@ function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
 /**
  * Focus an element if it is an F_ELEM, sets cx.active.
  *
+ * TOKEN_FOCUS is checked first.
+ *
  * TODO: cx.active should update.  Should we track it manually?
  */
 export function FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
 ): void {
-  // Attempt TOKEN_FOCUS first.  If true, then TOKEN_FOCUS will handle how we
-  // focus from here.
-  if (TOKEN_FOCUS(cx, el)) {
+  if (isToken(el)) {
+    TOKEN_FOCUS(cx, el);
+    // Always focus the parent F_ELEM of the token.
+    FOCUS(cx, el.parentNode);
     return;
   }
   if (!isFocusable(el)) {

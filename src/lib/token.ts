@@ -26,14 +26,13 @@ export function createToken(text: string): HTMLElement {
 }
 
 /**
- * Tokenize the text of an F_ELEM.
+ * Tokenize the text of an F_ELEM.  Only direct descendent text.
  */
 export function tokenize(el: HTMLElement): void {
-  if (el.innerText && el.innerText.length > 0) {
-    el.normalize();
-    const first = el.firstChild;
-    if (first?.nodeType === Node.TEXT_NODE) {
-      const tokens = first
+  el.normalize();
+  for (let child = el.firstChild; child; child = child.nextSibling) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      const tokens = child
         .nodeValue!.split(/\s+/)
         .filter(Boolean)
         .map((s) => createToken(s));
@@ -42,8 +41,8 @@ export function tokenize(el: HTMLElement): void {
         frag.appendChild(token);
         frag.appendChild(document.createTextNode(' '));
       }
-      el.insertBefore(frag, first);
-      el.removeChild(first);
+      el.insertBefore(frag, child);
+      el.removeChild(child);
     }
   }
 }

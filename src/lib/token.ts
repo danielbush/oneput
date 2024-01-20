@@ -46,3 +46,19 @@ export function tokenize(el: HTMLElement): void {
     }
   }
 }
+
+export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
+  const prev = el.previousElementSibling;
+  if (prev && isToken(prev)) {
+    return prev;
+  }
+  return null;
+}
+
+export function getNextSibling(el: HTMLElement): HTMLElement | null {
+  const next = el.nextElementSibling;
+  if (next && isToken(next)) {
+    return next;
+  }
+  return null;
+}

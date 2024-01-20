@@ -1,7 +1,7 @@
 import { SBR_FOCUS_SIBLING } from './constants';
 import type { DocumentContext } from './DocumentContext';
 import { isFocusable } from './focus';
-import { isToken, tokenize } from './token';
+import * as token from './token';
 import {
   getNextSiblingElement,
   getParent,
@@ -81,11 +81,23 @@ function TOKEN_FOCUS(cx: DocumentContext, el: HTMLElement): void {
       value: el.innerText!,
       requestCursor: () => {
         return {
-          movePrevious: () => {
-            console.log('<< movePrevious');
-          },
           moveNext: () => {
-            console.log('<< moveNext');
+            if (!cx.activeToken) {
+              return;
+            }
+            const prevToken = token.getNextSibling(cx.activeToken);
+            if (prevToken) {
+              TOKEN_FOCUS(cx, prevToken);
+            }
+          },
+          movePrevious: () => {
+            if (!cx.activeToken) {
+              return;
+            }
+            const prevToken = token.getPreviousSibling(cx.activeToken);
+            if (prevToken) {
+              TOKEN_FOCUS(cx, prevToken);
+            }
           },
           replace: () => {},
           delete: () => {},
@@ -129,7 +141,7 @@ export function FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
 ): void {
-  if (isToken(el)) {
+  if (token.isToken(el)) {
     TOKEN_FOCUS(cx, el);
     // Always focus the parent F_ELEM of the token.
     FOCUS(cx, el.parentNode);
@@ -152,7 +164,7 @@ export function FOCUS(
   CLEAR_TOKEN_FOCUS(cx);
   if (!cx.tokenized.has(el)) {
     cx.tokenized.set(el, true);
-    tokenize(el);
+    token.tokenize(el);
   }
   SIB_HIGHLIGHT(cx);
 }

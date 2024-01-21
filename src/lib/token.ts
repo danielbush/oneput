@@ -39,7 +39,9 @@ export function tokenize(el: HTMLElement): void {
       const frag = document.createDocumentFragment();
       for (const token of tokens) {
         frag.appendChild(token);
-        frag.appendChild(document.createTextNode(' '));
+        // We don't include a space.
+        // We can use an ::after pseudo-element in CSS to show the space.
+        // frag.appendChild(document.createTextNode(' '));
       }
       el.insertBefore(frag, child);
       el.removeChild(child);

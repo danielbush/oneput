@@ -79,7 +79,7 @@ export type IJsedCursor = {
   /**
    * Replace the value of the current token with a new value.
    */
-  replace: () => void;
+  replace: (val: string) => void;
   /**
    * Delete the current token.
    */

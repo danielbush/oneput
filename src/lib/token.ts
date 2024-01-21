@@ -77,3 +77,20 @@ export function insertAfter(
   existing.parentNode.insertBefore(spc, existing.nextSibling);
   existing.parentNode.insertBefore(toInsert, spc.nextSibling);
 }
+
+/**
+ * Assumes `isToken` is true, but checks for weird invalid states that might occur
+ */
+function validate(token: HTMLElement): void {
+  if (!token.firstChild) {
+    throw new Error('token has not text');
+  }
+  if (token.firstChild.nodeType !== Node.TEXT_NODE) {
+    throw new Error('first child should be a text node');
+  }
+}
+
+export function replaceText(token: HTMLElement, val: string) {
+  validate(token);
+  token.firstChild!.nodeValue = val;
+}

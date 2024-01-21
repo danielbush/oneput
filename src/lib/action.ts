@@ -97,7 +97,10 @@ class JsedCursor implements IJsedCursor {
       TOKEN_FOCUS(this.#context, prevToken);
     }
   }
-  replace() {}
+  replace(val: string) {
+    const tok = this.#getActiveTokenOrDie();
+    token.replaceText(tok, val);
+  }
   delete() {}
   append(val: string): HTMLElement {
     const tok = token.createToken(val);

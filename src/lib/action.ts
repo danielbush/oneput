@@ -1,5 +1,5 @@
 import { SBR_FOCUS_SIBLING } from './constants';
-import type { DocumentContext } from './DocumentContext';
+import type { DocumentContext, IJsedCursor } from './DocumentContext';
 import { isFocusable } from './focus';
 import * as token from './token';
 import {
@@ -67,6 +67,53 @@ export function UP(cx: DocumentContext): void {
   }
   return;
 }
+class JsedCursor implements IJsedCursor {
+  #context: DocumentContext;
+  constructor(params: { context: DocumentContext }) {
+    this.#context = params.context;
+  }
+  #getActiveTokenOrDie(): HTMLElement {
+    if (this.#context.activeToken) {
+      return this.#context.activeToken;
+    }
+    const err = new Error('activeToken not set');
+    throw err;
+  }
+  moveNext() {
+    if (!this.#context.activeToken) {
+      return;
+    }
+    const prevToken = token.getNextSibling(this.#context.activeToken);
+    if (prevToken) {
+      TOKEN_FOCUS(this.#context, prevToken);
+    }
+  }
+  movePrevious() {
+    if (!this.#context.activeToken) {
+      return;
+    }
+    const prevToken = token.getPreviousSibling(this.#context.activeToken);
+    if (prevToken) {
+      TOKEN_FOCUS(this.#context, prevToken);
+    }
+  }
+  replace() {}
+  delete() {}
+  append(val: string): HTMLElement {
+    const tok = token.createToken(val);
+    token.insertAfter(tok, this.#getActiveTokenOrDie());
+    return tok;
+  }
+  focus(el: HTMLElement): boolean {
+    if (token.isToken(el)) {
+      TOKEN_FOCUS(this.#context, el);
+      return true;
+    }
+    return false;
+  }
+  prepend() {}
+  close() {}
+}
 
 /**
  * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
@@ -80,31 +127,7 @@ function TOKEN_FOCUS(cx: DocumentContext, el: HTMLElement): void {
       parent: el.parentElement,
       value: el.innerText!,
       requestCursor: () => {
-        return {
-          moveNext: () => {
-            if (!cx.activeToken) {
-              return;
-            }
-            const prevToken = token.getNextSibling(cx.activeToken);
-            if (prevToken) {
-              TOKEN_FOCUS(cx, prevToken);
-            }
-          },
-          movePrevious: () => {
-            if (!cx.activeToken) {
-              return;
-            }
-            const prevToken = token.getPreviousSibling(cx.activeToken);
-            if (prevToken) {
-              TOKEN_FOCUS(cx, prevToken);
-            }
-          },
-          replace: () => {},
-          delete: () => {},
-          append: () => {},
-          prepend: () => {},
-          close: () => {},
-        };
+        return new JsedCursor({ context: cx });
       },
     });
   }

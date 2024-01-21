@@ -25,6 +25,9 @@ export function createToken(text: string): HTMLElement {
   return el;
 }
 
+function createSpace(): Text {
+  return document.createTextNode(' ');
+}
 /**
  * Tokenize the text of an F_ELEM.  Only direct descendent text.
  */
@@ -61,4 +64,16 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
     return next;
   }
   return null;
+}
+
+export function insertAfter(
+  toInsert: HTMLElement,
+  existing: HTMLElement,
+): void {
+  const spc = createSpace();
+  if (!existing.parentNode) {
+    throw new Error('parentNode not found');
+  }
+  existing.parentNode.insertBefore(spc, existing.nextSibling);
+  existing.parentNode.insertBefore(toInsert, spc.nextSibling);
 }

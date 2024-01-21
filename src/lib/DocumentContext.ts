@@ -59,7 +59,7 @@ export type JsedTokenFocusEvent = {
   /**
    * Request a cursor for the current token.
    */
-  requestCursor: () => JsedCursor;
+  requestCursor: () => IJsedCursor;
 };
 
 export type JsedFocusEvent = {
@@ -67,7 +67,7 @@ export type JsedFocusEvent = {
   targetType: 'F_ELEM';
 };
 
-export type JsedCursor = {
+export type IJsedCursor = {
   /**
    * Move to previous token if it exists.
    */
@@ -87,15 +87,17 @@ export type JsedCursor = {
   /**
    * Append a new token after the current one.
    */
-  append: () => void;
+  append: (val: string) => HTMLElement;
   /**
    * Prepend a new token after the current one.
    */
   prepend: () => void;
   /**
-   * Tell the consumer of events it might wish to heed and close the current edit session.
+   * Request the cursor do a new focus.
+   *
+   * Normally this is to do a TOKEN_FOCUS on another token under the same F_ELEM eg created as a result of calling `append`.
    */
-  // onInterrupt: (evt) => void;
+  focus: (el: HTMLElement) => boolean;
   /**
    * Close the current edit session.
    */

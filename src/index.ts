@@ -1,6 +1,6 @@
 import {
   DocumentContext,
-  JsedCursor,
+  IJsedCursor,
   JsedFocusEvent,
   JsedTokenFocusEvent,
 } from './lib/DocumentContext';
@@ -11,5 +11,5 @@ export type {
   DocumentContext,
   JsedFocusEvent,
   JsedTokenFocusEvent,
-  JsedCursor,
+  IJsedCursor as JsedCursor,
 };

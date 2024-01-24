@@ -10,6 +10,7 @@ export type DocumentContext = {
    * it at any time.
    */
   document: Document;
+  window: Window;
   /**
    * The focused element (may be none).  Should not be a TOKEN .
    */
@@ -117,6 +118,12 @@ export function makeDocumentContext(root: HTMLElement): DocumentContext {
     root,
     get document(): Document {
       return root.ownerDocument;
+    },
+    get window(): Window {
+      if (!root.ownerDocument.defaultView) {
+        throw new Error('defaultView not set');
+      }
+      return root.ownerDocument.defaultView!;
     },
     active: null,
     activeToken: null,

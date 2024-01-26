@@ -1,4 +1,4 @@
-import { makeDocumentContext, type JsedDocument } from './document';
+import { makeDocument, type JsedDocument } from './document';
 import * as action from '../lib/action';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
 
@@ -10,7 +10,7 @@ import { JSED_DOM_ROOT_ID } from '../lib/constants';
  * possible.
  */
 export function start(root: HTMLElement): JsedDocument {
-  const doc = makeDocumentContext(root);
+  const doc = makeDocument(root);
 
   // Set up event handlers
 

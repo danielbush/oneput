@@ -115,7 +115,7 @@ export type JsedCursorEvent = {
   value: string;
 };
 
-export function makeDocumentContext(root: HTMLElement): JsedDocument {
+export function makeDocument(root: HTMLElement): JsedDocument {
   const document: JsedDocument = {
     root,
     get document(): Document {

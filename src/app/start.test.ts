@@ -1,5 +1,5 @@
 import { describe, it, expect, test, vi } from 'vitest';
-import { start } from './document';
+import { start } from './start';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
 

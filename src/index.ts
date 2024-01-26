@@ -4,7 +4,7 @@ import {
   JsedFocusEvent,
   JsedTokenFocusEvent,
 } from './app/DocumentContext';
-import { start } from './app/document';
+import { start } from './app/start';
 
 export {
   JSED_PLACEHOLDER_TOKEN_CLASS,

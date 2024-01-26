@@ -123,7 +123,7 @@ export type JsedCursorEvent = {
 };
 
 export function makeDocumentContext(root: HTMLElement): JsedDocument {
-  const documentContext: JsedDocument = {
+  const document: JsedDocument = {
     root,
     get document(): Document {
       return root.ownerDocument;
@@ -149,8 +149,8 @@ export function makeDocumentContext(root: HTMLElement): JsedDocument {
       return;
     },
     requestCursor: () => {
-      return new JsedCursor({ context: documentContext });
+      return new JsedCursor({ document: document });
     },
   };
-  return documentContext;
+  return document;
 }

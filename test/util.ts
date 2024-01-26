@@ -1,5 +1,4 @@
-import { JsedDocument } from '../src/app/document';
-import * as load from '../src/lib/load';
+import { type JsedDocument, makeDocumentContext } from '../src/app/document';
 
 /**
  * Make a div be the root of the document.
@@ -12,7 +11,7 @@ export function makeRoot(
   document: Document = window.document,
 ): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
-  return load.loadDoc(document.getElementById('root') as HTMLElement);
+  return makeDocumentContext(document.getElementById('root') as HTMLElement);
 }
 
 type Attr = { [key: string]: string };

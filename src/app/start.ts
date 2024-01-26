@@ -1,5 +1,4 @@
-import type { JsedDocument } from './document';
-import * as load from '../lib/load';
+import { makeDocumentContext, type JsedDocument } from './document';
 import * as action from '../lib/action';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
 
@@ -11,7 +10,7 @@ import { JSED_DOM_ROOT_ID } from '../lib/constants';
  * possible.
  */
 export function start(root: HTMLElement): JsedDocument {
-  const documentContext = load.loadDoc(root);
+  const doc = makeDocumentContext(root);
 
   // Set up event handlers
 
@@ -25,7 +24,7 @@ export function start(root: HTMLElement): JsedDocument {
     }
     // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
     evt.preventDefault();
-    action.FOCUS(documentContext, evt.target);
+    action.FOCUS(doc, evt.target);
   }
 
   // root.addEventListener<'click'>('click', handleElementClick);
@@ -33,8 +32,8 @@ export function start(root: HTMLElement): JsedDocument {
 
   // Unload
 
-  documentContext.unload = () => {
+  doc.unload = () => {
     root.removeEventListener('click', handleElementClick);
   };
-  return documentContext;
+  return doc;
 }

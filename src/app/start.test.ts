@@ -1,24 +1,10 @@
 import { describe, it, expect, test, vi } from 'vitest';
 import { start } from './start';
-import * as load from '../lib/load';
 import * as action from '../lib/action';
 
-vi.spyOn(load, 'loadDoc');
 const FOCUS = vi.spyOn(action, 'FOCUS');
 
 describe('start', () => {
-  it('should load the doc (TAB_FOCUS)', () => {
-    // arrange
-    const root = document.createElement('DIV');
-
-    // act
-    start(root);
-
-    // assert
-    expect(load.loadDoc).toBeCalledWith(root);
-    expect(load.loadDoc).toBeCalledTimes(1);
-  });
-
   it('can unload the doc', () => {
     // arrange
     const root = document.createElement('DIV');

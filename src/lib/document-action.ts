@@ -1,5 +1,5 @@
+import { JsedDocument } from '../types';
 import { SBR_FOCUS_SIBLING } from './constants';
-import type { JsedDocument } from '../app/document';
 import { isFocusable } from './focus';
 import * as token from './token';
 import {
@@ -79,7 +79,7 @@ export class DocumentAction {
   /**
    * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
    */
-  TOKEN_FOCUS(
+  #TOKEN_FOCUS(
     el: HTMLElement,
     params: {
       replaced: boolean;
@@ -108,7 +108,7 @@ export class DocumentAction {
   /**
    * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
    */
-  CLEAR_TOKEN_FOCUS() {
+  #CLEAR_TOKEN_FOCUS() {
     if (this.#document.activeToken) {
       if (this.#document.activeToken.parentNode !== this.#document.active) {
         this.#document.activeToken.classList.remove('jsed-token-focus');
@@ -129,7 +129,7 @@ export class DocumentAction {
     params?: { skipNotify?: boolean; replaced?: boolean },
   ): void {
     if (token.isToken(el)) {
-      this.TOKEN_FOCUS(el, { replaced: !!params?.replaced });
+      this.#TOKEN_FOCUS(el, { replaced: !!params?.replaced });
       // Always focus the parent F_ELEM of the token.
       // Use skipNotify because we won't issue a FOCUS event.  The event generated
       // by the TOKEN_FOCUS contains all the information we need.
@@ -153,7 +153,7 @@ export class DocumentAction {
     }
     el.classList.add('jsed-focus');
     this.#document.active = el as HTMLElement;
-    this.CLEAR_TOKEN_FOCUS();
+    this.#CLEAR_TOKEN_FOCUS();
     if (!this.#document.tokenized.has(el)) {
       this.#document.tokenized.set(el, true);
       token.tokenize(el);
@@ -161,7 +161,7 @@ export class DocumentAction {
     this.SIB_HIGHLIGHT();
   }
 
-  SIB_HIGHLIGHT_CLEAR(): void {
+  #SIB_HIGHLIGHT_CLEAR(): void {
     for (const sib of this.#document.SIB_HIGHLIGHT) {
       sib.classList.remove(SBR_FOCUS_SIBLING);
     }
@@ -172,7 +172,7 @@ export class DocumentAction {
    * Highlight siblings of currently focused element.
    */
   SIB_HIGHLIGHT(): void {
-    this.SIB_HIGHLIGHT_CLEAR();
+    this.#SIB_HIGHLIGHT_CLEAR();
     const active = this.#document.active;
     const pnode = active?.parentElement;
     if (active && pnode && isFocusable(active)) {

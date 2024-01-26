@@ -1,4 +1,5 @@
-import { type JsedDocument, makeDocument } from '../src/app/document';
+import { makeDocument } from '../src/app/document';
+import { type JsedDocument } from '../src/types';
 
 /**
  * Make a div be the root of the document.

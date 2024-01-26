@@ -1,5 +1,6 @@
-import { makeDocument, type JsedDocument } from './document';
+import { makeDocument } from './document';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
+import { JsedDocument } from '../types';
 
 /**
  * Initialize a subtree of the DOM in a browser window for editing.

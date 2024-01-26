@@ -1,5 +1,5 @@
-import { JsedDocument, IJsedCursor } from './document';
-import * as token from '../lib/token';
+import type { JsedDocument, IJsedCursor } from '../types';
+import * as token from './token';
 
 export class JsedCursor implements IJsedCursor {
   #document: JsedDocument;

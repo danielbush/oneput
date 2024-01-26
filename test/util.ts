@@ -1,4 +1,4 @@
-import { DocumentContext } from '../src/lib/DocumentContext';
+import { DocumentContext } from '../src/app/DocumentContext';
 import * as load from '../src/lib/load';
 
 /**

@@ -3,7 +3,7 @@ import {
   IJsedCursor,
   JsedFocusEvent,
   JsedTokenFocusEvent,
-} from './lib/DocumentContext';
+} from './app/DocumentContext';
 import { start } from './app/document';
 
 export {

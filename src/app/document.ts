@@ -1,4 +1,4 @@
-import type { DocumentContext } from './../lib/DocumentContext';
+import type { DocumentContext } from './DocumentContext';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';

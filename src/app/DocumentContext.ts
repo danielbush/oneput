@@ -1,4 +1,5 @@
-import * as actions from './action';
+import * as actions from '../lib/action';
+import { JsedCursor } from './cursor';
 
 export type DocumentContext = {
   /**
@@ -47,6 +48,10 @@ export type DocumentContext = {
     TOKEN_FOCUS: null | ((evt: JsedTokenFocusEvent) => boolean);
   };
   unload: () => void;
+  /**
+   * Request a cursor for the current token.
+   */
+  requestCursor: () => IJsedCursor;
 };
 
 /**
@@ -61,10 +66,6 @@ export type JsedTokenFocusEvent = {
    * The focused TOKEN is a new token but it has replaced the previously focused token.
    */
   replaced: boolean;
-  /**
-   * Request a cursor for the current token.
-   */
-  requestCursor: () => IJsedCursor;
 };
 
 export type JsedFocusEvent = {
@@ -146,6 +147,9 @@ export function makeDocumentContext(root: HTMLElement): DocumentContext {
     unload: () => {
       // Placeholder, see below.
       return;
+    },
+    requestCursor: () => {
+      return new JsedCursor({ context: documentContext });
     },
   };
   return documentContext;

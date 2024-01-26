@@ -1,5 +1,5 @@
 import { SBR_FOCUS_SIBLING } from './constants';
-import type { DocumentContext, IJsedCursor } from './DocumentContext';
+import type { DocumentContext } from '../app/DocumentContext';
 import { isFocusable } from './focus';
 import * as token from './token';
 import {
@@ -67,70 +67,6 @@ export function UP(cx: DocumentContext): void {
   }
   return;
 }
-class JsedCursor implements IJsedCursor {
-  #context: DocumentContext;
-  constructor(params: { context: DocumentContext }) {
-    this.#context = params.context;
-  }
-  #getActiveTokenOrDie(): HTMLElement {
-    if (this.#context.activeToken) {
-      return this.#context.activeToken;
-    }
-    const err = new Error('JsedCursor: activeToken not set when it should be!');
-    throw err;
-  }
-  getToken() {
-    return this.#getActiveTokenOrDie();
-  }
-  moveNext() {
-    if (!this.#context.activeToken) {
-      return;
-    }
-    const prevToken = token.getNextSibling(this.#context.activeToken);
-    if (prevToken) {
-      TOKEN_FOCUS(this.#context, prevToken);
-    }
-  }
-  movePrevious() {
-    if (!this.#context.activeToken) {
-      return;
-    }
-    const prevToken = token.getPreviousSibling(this.#context.activeToken);
-    if (prevToken) {
-      TOKEN_FOCUS(this.#context, prevToken);
-    }
-  }
-  replace(val: string) {
-    const tok = this.#getActiveTokenOrDie();
-    const maybeNewTok = token.replaceText(tok, val);
-    if (tok !== maybeNewTok) {
-      // We don't want to cause a focus event unless the TOKEN has changed.  Set
-      // the replaced flag to indicate to the consumer that the activeToken is
-      // in fact replaced.
-      TOKEN_FOCUS(this.#context, maybeNewTok, { replaced: true });
-    }
-  }
-  delete() {
-    const tok = this.#getActiveTokenOrDie();
-    const newToken = token.remove(tok);
-    TOKEN_FOCUS(this.#context, newToken);
-    return;
-  }
-  append(val: string): HTMLElement {
-    const tok = token.createToken(val);
-    token.insertAfter(tok, this.#getActiveTokenOrDie());
-    return tok;
-  }
-  focus(el: HTMLElement): boolean {
-    if (token.isToken(el)) {
-      TOKEN_FOCUS(this.#context, el);
-      return true;
-    }
-    return false;
-  }
-  prepend() {}
-  close() {}
-}
 
 /**
  * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
@@ -150,9 +86,6 @@ function TOKEN_FOCUS(
       parent: el.parentElement,
       value: el.innerText!,
       replaced: params.replaced,
-      requestCursor: () => {
-        return new JsedCursor({ context: cx });
-      },
     });
   }
   if (ok) {
@@ -187,10 +120,10 @@ function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
 export function FOCUS(
   cx: DocumentContext,
   el: Element | EventTarget | null,
-  params?: { skipNotify: boolean },
+  params?: { skipNotify?: boolean; replaced?: boolean },
 ): void {
   if (token.isToken(el)) {
-    TOKEN_FOCUS(cx, el);
+    TOKEN_FOCUS(cx, el, { replaced: !!params?.replaced });
     // Always focus the parent F_ELEM of the token.
     // Use skipNotify because we won't issue a FOCUS event.  The event generated
     // by the TOKEN_FOCUS contains all the information we need.

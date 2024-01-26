@@ -1,4 +1,4 @@
-import { DocumentContext, makeDocumentContext } from './DocumentContext';
+import { DocumentContext, makeDocumentContext } from '../app/DocumentContext';
 import { isAlreadyFocusable, isFocusable } from './focus';
 import { walk } from './walk';
 

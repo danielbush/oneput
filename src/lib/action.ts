@@ -76,8 +76,11 @@ class JsedCursor implements IJsedCursor {
     if (this.#context.activeToken) {
       return this.#context.activeToken;
     }
-    const err = new Error('activeToken not set');
+    const err = new Error('JsedCursor: activeToken not set when it should be!');
     throw err;
+  }
+  getToken() {
+    return this.#getActiveTokenOrDie();
   }
   moveNext() {
     if (!this.#context.activeToken) {
@@ -101,7 +104,23 @@ class JsedCursor implements IJsedCursor {
     const tok = this.#getActiveTokenOrDie();
     token.replaceText(tok, val);
   }
-  delete() {}
+  delete() {
+    const tok = this.#getActiveTokenOrDie();
+    const prev = token.getPreviousSibling(tok);
+    if (prev) {
+      TOKEN_FOCUS(this.#context, prev);
+      tok.parentNode?.removeChild(tok);
+      return;
+    }
+    const next = token.getNextSibling(tok);
+    if (next) {
+      TOKEN_FOCUS(this.#context, next);
+      tok.parentNode?.removeChild(tok);
+      return;
+    }
+    console.log('allowing empty token');
+    return;
+  }
   append(val: string): HTMLElement {
     const tok = token.createToken(val);
     token.insertAfter(tok, this.#getActiveTokenOrDie());

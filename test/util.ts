@@ -49,8 +49,8 @@ function makeTag(tagName: string) {
 /**
  * Convenience to get an id or fail.
  */
-export function byId(cx: JsedDocument, id: string): HTMLElement {
-  const el = cx.document.getElementById(id);
+export function byId(doc: JsedDocument, id: string): HTMLElement {
+  const el = doc.document.getElementById(id);
   if (!el) {
     throw new Error(`byId: could not find id="${id}"`);
   }

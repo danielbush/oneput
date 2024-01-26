@@ -5,7 +5,7 @@ import { loadDoc, serialize, untab } from './load';
 describe('loadDoc', () => {
   it("should should update TABS index for F_ELEM's but not IF_ELEM's", () => {
     // arrange
-    const cx = makeRoot(
+    const doc = makeRoot(
       div(
         { id: 'div1' },
         p({ id: 'p1' }, 'here is some text'),
@@ -15,18 +15,18 @@ describe('loadDoc', () => {
     );
 
     // act
-    loadDoc(cx.root);
+    loadDoc(doc.root);
 
     // assert
-    expect(cx.TABS.size).toEqual(3);
-    expect(cx.TABS).toContain(document.getElementById('root'));
-    expect(cx.TABS).toContain(document.getElementById('div1'));
-    expect(cx.TABS).toContain(document.getElementById('p1'));
+    expect(doc.TABS.size).toEqual(3);
+    expect(doc.TABS).toContain(document.getElementById('root'));
+    expect(doc.TABS).toContain(document.getElementById('div1'));
+    expect(doc.TABS).toContain(document.getElementById('p1'));
   });
 
   it('should ignore katex descendents (F_NONREC)', () => {
     // arrange
-    const cx = makeRoot(
+    const doc = makeRoot(
       div(
         { id: 'div1' },
         p({ id: 'p1' }, 'here is some text'),
@@ -36,20 +36,20 @@ describe('loadDoc', () => {
     );
 
     // act
-    loadDoc(cx.root);
+    loadDoc(doc.root);
 
     // assert
-    expect(cx.root).toMatchSnapshot();
-    expect(cx.TABS.has(byId(cx, 'katex'))).toBe(true);
-    expect(cx.TABS.has(byId(cx, 'katex-1'))).toBe(false);
-    expect(cx.TABS.has(byId(cx, 'div1-1'))).toBe(true);
+    expect(doc.root).toMatchSnapshot();
+    expect(doc.TABS.has(byId(doc, 'katex'))).toBe(true);
+    expect(doc.TABS.has(byId(doc, 'katex-1'))).toBe(false);
+    expect(doc.TABS.has(byId(doc, 'div1-1'))).toBe(true);
   });
 });
 
 describe('untab', () => {
   it('should untab a document', () => {
     // arrange
-    const cx = makeRoot(
+    const doc = makeRoot(
       div(
         { id: 'div1' },
         p({ id: 'p1' }, 'here is some text'),
@@ -57,31 +57,31 @@ describe('untab', () => {
         script({ id: 'script' }),
       ),
     );
-    loadDoc(cx.root);
+    loadDoc(doc.root);
 
     // act
-    untab(cx.TABS);
+    untab(doc.TABS);
 
     // assert
-    expect(cx.root).toMatchSnapshot();
+    expect(doc.root).toMatchSnapshot();
   });
 });
 
 describe('serialize', () => {
   it('should remove tabindex from F_ELEM', () => {
     // arrange
-    const cx = makeRoot(
+    const doc = makeRoot(
       ul(
         { id: 'ul' },
         li({ id: 'li1' }, 'item 1'),
         li({ id: 'li2' }, 'item 2'),
       ),
     );
-    loadDoc(cx.root);
-    expect(cx.root).toMatchSnapshot();
+    loadDoc(doc.root);
+    expect(doc.root).toMatchSnapshot();
 
     // act
-    const result = serialize(cx.TABS, cx.root);
+    const result = serialize(doc.TABS, doc.root);
 
     // assert
     expect(result).toMatchSnapshot();

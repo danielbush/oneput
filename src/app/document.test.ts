@@ -23,18 +23,18 @@ describe('start', () => {
   it('can unload the doc', () => {
     // arrange
     const root = document.createElement('DIV');
-    const cx = start(root);
-    vi.spyOn(cx.root, 'removeEventListener');
+    const doc = start(root);
+    vi.spyOn(doc.root, 'removeEventListener');
 
     // act
-    cx.unload();
+    doc.unload();
 
     // assert
-    expect(cx.root.outerHTML).toMatchSnapshot();
+    expect(doc.root.outerHTML).toMatchSnapshot();
     expect(load.untab).toBeCalledTimes(1);
-    expect(load.untab).toBeCalledWith(cx.TABS);
-    expect(cx.root.removeEventListener).toBeCalledTimes(1);
-    expect(cx.root.removeEventListener).toBeCalledWith(
+    expect(load.untab).toBeCalledWith(doc.TABS);
+    expect(doc.root.removeEventListener).toBeCalledTimes(1);
+    expect(doc.root.removeEventListener).toBeCalledWith(
       'click',
       expect.any(Function),
     );

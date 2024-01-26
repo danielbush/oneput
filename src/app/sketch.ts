@@ -2,12 +2,12 @@ import { start } from '..';
 import { tabrec } from '../lib/load';
 
 console.log('start coding here');
-const cx = start(document.body);
+const doc = start(document.body);
 
 class AppDrawer extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `<b class="app-drawer">I'm an app-drawer!</b>`;
-    tabrec(cx.TABS, this);
+    tabrec(doc.TABS, this);
   }
 }
 window.customElements.define('app-drawer', AppDrawer);

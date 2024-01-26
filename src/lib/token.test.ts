@@ -5,13 +5,13 @@ import { tokenize } from './token';
 describe('tokenize', () => {
   it('should token a node with text', () => {
     // arrange
-    const cx = makeRoot(p({ id: 'p1' }, 'Here is a sentence'));
-    const p1 = cx.document.getElementById('p1') as HTMLElement;
+    const doc = makeRoot(p({ id: 'p1' }, 'Here is a sentence'));
+    const p1 = doc.document.getElementById('p1') as HTMLElement;
 
     // act
     tokenize(p1);
 
     // assert
-    expect(byId(cx, 'p1')).toMatchSnapshot();
+    expect(byId(doc, 'p1')).toMatchSnapshot();
   });
 });

@@ -13,10 +13,10 @@ import {
 /**
  * Find next using depth first recursion.
  */
-export function REC_NEXT(cx: JsedDocument): void {
-  if (!cx.active) return;
-  for (const next of walkIter(cx.active, cx.root)) {
-    FOCUS(cx, next);
+export function REC_NEXT(doc: JsedDocument): void {
+  if (!doc.active) return;
+  for (const next of walkIter(doc.active, doc.root)) {
+    FOCUS(doc, next);
     break;
   }
 }
@@ -24,10 +24,10 @@ export function REC_NEXT(cx: JsedDocument): void {
 /**
  * Find previous using depth first recursion.
  */
-export function REC_PREV(cx: JsedDocument): void {
-  if (!cx.active) return;
-  for (const next of walkIterReverse(cx.active, cx.root)) {
-    FOCUS(cx, next);
+export function REC_PREV(doc: JsedDocument): void {
+  if (!doc.active) return;
+  for (const next of walkIterReverse(doc.active, doc.root)) {
+    FOCUS(doc, next);
     break;
   }
 }
@@ -35,11 +35,11 @@ export function REC_PREV(cx: JsedDocument): void {
 /**
  * Find next sibling element if there is one.
  */
-export function SIB_NEXT(cx: JsedDocument): void {
-  if (!cx.active) return;
-  const next = getNextSiblingElement(cx.active);
+export function SIB_NEXT(doc: JsedDocument): void {
+  if (!doc.active) return;
+  const next = getNextSiblingElement(doc.active);
   if (next) {
-    FOCUS(cx, next);
+    FOCUS(doc, next);
   }
   return;
 }
@@ -47,11 +47,11 @@ export function SIB_NEXT(cx: JsedDocument): void {
 /**
  * Find previous sibling element if there is one.
  */
-export function SIB_PREV(cx: JsedDocument): void {
-  if (!cx.active) return;
-  const next = getPreviousSiblingElement(cx.active);
+export function SIB_PREV(doc: JsedDocument): void {
+  if (!doc.active) return;
+  const next = getPreviousSiblingElement(doc.active);
   if (next) {
-    FOCUS(cx, next);
+    FOCUS(doc, next);
   }
   return;
 }
@@ -59,11 +59,11 @@ export function SIB_PREV(cx: JsedDocument): void {
 /**
  * Find next parent.
  */
-export function UP(cx: JsedDocument): void {
-  if (!cx.active) return;
-  const next = getParent(cx.active, cx.root);
+export function UP(doc: JsedDocument): void {
+  if (!doc.active) return;
+  const next = getParent(doc.active, doc.root);
   if (next) {
-    FOCUS(cx, next);
+    FOCUS(doc, next);
   }
   return;
 }
@@ -72,15 +72,15 @@ export function UP(cx: JsedDocument): void {
  * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
  */
 function TOKEN_FOCUS(
-  cx: JsedDocument,
+  doc: JsedDocument,
   el: HTMLElement,
   params: {
     replaced: boolean;
   } = { replaced: false },
 ): void {
   let ok = false;
-  if (cx.listeners.TOKEN_FOCUS) {
-    ok = cx.listeners.TOKEN_FOCUS({
+  if (doc.listeners.TOKEN_FOCUS) {
+    ok = doc.listeners.TOKEN_FOCUS({
       type: 'FOCUS',
       targetType: 'TOKEN',
       parent: el.parentElement,
@@ -89,11 +89,11 @@ function TOKEN_FOCUS(
     });
   }
   if (ok) {
-    if (cx.activeToken) {
-      cx.activeToken.classList.remove('jsed-token-focus');
-      cx.activeToken = null;
+    if (doc.activeToken) {
+      doc.activeToken.classList.remove('jsed-token-focus');
+      doc.activeToken = null;
     }
-    cx.activeToken = el;
+    doc.activeToken = el;
     el.classList.add('jsed-token-focus');
   }
 }
@@ -101,76 +101,76 @@ function TOKEN_FOCUS(
 /**
  * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
  */
-function CLEAR_TOKEN_FOCUS(cx: JsedDocument) {
-  if (cx.activeToken) {
-    if (cx.activeToken.parentNode !== cx.active) {
-      cx.activeToken.classList.remove('jsed-token-focus');
-      cx.activeToken = null;
+function CLEAR_TOKEN_FOCUS(doc: JsedDocument) {
+  if (doc.activeToken) {
+    if (doc.activeToken.parentNode !== doc.active) {
+      doc.activeToken.classList.remove('jsed-token-focus');
+      doc.activeToken = null;
     }
   }
 }
 
 /**
- * Focus an element if it is an F_ELEM, sets cx.active.
+ * Focus an element if it is an F_ELEM, sets doc.active.
  *
  * TOKEN_FOCUS is checked first.
  *
- * TODO: cx.active should update.  Should we track it manually?
+ * TODO: doc.active should update.  Should we track it manually?
  */
 export function FOCUS(
-  cx: JsedDocument,
+  doc: JsedDocument,
   el: Element | EventTarget | null,
   params?: { skipNotify?: boolean; replaced?: boolean },
 ): void {
   if (token.isToken(el)) {
-    TOKEN_FOCUS(cx, el, { replaced: !!params?.replaced });
+    TOKEN_FOCUS(doc, el, { replaced: !!params?.replaced });
     // Always focus the parent F_ELEM of the token.
     // Use skipNotify because we won't issue a FOCUS event.  The event generated
     // by the TOKEN_FOCUS contains all the information we need.
-    FOCUS(cx, el.parentNode, { skipNotify: true });
+    FOCUS(doc, el.parentNode, { skipNotify: true });
     return;
   }
   if (!isFocusable(el)) {
     return;
   }
-  if (cx.listeners.FOCUS && !params?.skipNotify) {
-    const ok = cx.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
+  if (doc.listeners.FOCUS && !params?.skipNotify) {
+    const ok = doc.listeners.FOCUS({ type: 'FOCUS', targetType: 'F_ELEM' });
     if (!ok) {
       return;
     }
   }
-  if (cx.active) {
-    cx.active.classList.remove('jsed-focus');
+  if (doc.active) {
+    doc.active.classList.remove('jsed-focus');
   }
   el.classList.add('jsed-focus');
-  cx.active = el as HTMLElement;
-  CLEAR_TOKEN_FOCUS(cx);
-  if (!cx.tokenized.has(el)) {
-    cx.tokenized.set(el, true);
+  doc.active = el as HTMLElement;
+  CLEAR_TOKEN_FOCUS(doc);
+  if (!doc.tokenized.has(el)) {
+    doc.tokenized.set(el, true);
     token.tokenize(el);
   }
-  SIB_HIGHLIGHT(cx);
+  SIB_HIGHLIGHT(doc);
 }
 
-function SIB_HIGHLIGHT_CLEAR(cx: JsedDocument): void {
-  for (const sib of cx.SIB_HIGHLIGHT) {
+function SIB_HIGHLIGHT_CLEAR(doc: JsedDocument): void {
+  for (const sib of doc.SIB_HIGHLIGHT) {
     sib.classList.remove(SBR_FOCUS_SIBLING);
   }
-  cx.SIB_HIGHLIGHT.clear();
+  doc.SIB_HIGHLIGHT.clear();
 }
 
 /**
  * Highlight siblings of currently focused element.
  */
-export function SIB_HIGHLIGHT(cx: JsedDocument): void {
-  SIB_HIGHLIGHT_CLEAR(cx);
-  const active = cx.active;
+export function SIB_HIGHLIGHT(doc: JsedDocument): void {
+  SIB_HIGHLIGHT_CLEAR(doc);
+  const active = doc.active;
   const pnode = active?.parentElement;
-  if (active && pnode && cx.TABS.has(active)) {
+  if (active && pnode && doc.TABS.has(active)) {
     for (const child of pnode.children) {
       if (isFocusable(child)) {
-        if (cx.TABS.has(child) && child !== active) {
-          cx.SIB_HIGHLIGHT.add(child);
+        if (doc.TABS.has(child) && child !== active) {
+          doc.SIB_HIGHLIGHT.add(child);
           child.classList.add(SBR_FOCUS_SIBLING);
         }
       }

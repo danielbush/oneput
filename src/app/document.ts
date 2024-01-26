@@ -1,4 +1,4 @@
-import * as actions from '../lib/action';
+import { DocumentAction } from '../lib/document-action';
 import { JsedCursor } from './cursor';
 
 export type JsedDocument = {
@@ -29,7 +29,7 @@ export type JsedDocument = {
    * nodes as direct descendents.
    */
   tokenized: WeakMap<HTMLElement, boolean>;
-  actions: typeof actions;
+  actions: DocumentAction;
   listeners: {
     /**
      * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.
@@ -116,7 +116,9 @@ export type JsedCursorEvent = {
 };
 
 export function makeDocument(root: HTMLElement): JsedDocument {
-  const document: JsedDocument = {
+  let ACTIVE: HTMLElement | null = null;
+  let document: JsedDocument | null = null;
+  const base: Omit<JsedDocument, 'actions'> = {
     root,
     get document(): Document {
       return root.ownerDocument;
@@ -127,11 +129,15 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       }
       return root.ownerDocument.defaultView!;
     },
-    active: null,
+    get active(): HTMLElement | null {
+      return ACTIVE;
+    },
+    set active(el: HTMLElement | null) {
+      ACTIVE = el;
+    },
     activeToken: null,
     SIB_HIGHLIGHT: new Set(),
     tokenized: new WeakMap(),
-    actions,
     listeners: {
       FOCUS: null,
       TOKEN_FOCUS: null,
@@ -141,8 +147,9 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       return;
     },
     requestCursor: () => {
-      return new JsedCursor({ document: document });
+      return new JsedCursor({ document: document! });
     },
   };
+  document = Object.assign(base, { actions: new DocumentAction(base) });
   return document;
 }

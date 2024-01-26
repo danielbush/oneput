@@ -1,8 +1,5 @@
 import { describe, it, expect, test, vi } from 'vitest';
 import { start } from './start';
-import * as action from '../lib/action';
-
-const FOCUS = vi.spyOn(action, 'FOCUS');
 
 describe('start', () => {
   it('can unload the doc', () => {
@@ -43,9 +40,10 @@ describe('start', () => {
     test('clicking calls FOCUS on elements', async () => {
       // arrange
       const root = document.createElement('DIV');
+      const doc = start(root);
+      const FOCUS = vi.spyOn(doc.actions, 'FOCUS');
 
       // act
-      start(root);
       root.dispatchEvent(new MouseEvent('mousedown'));
 
       // assert

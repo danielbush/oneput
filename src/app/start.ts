@@ -1,5 +1,4 @@
 import { makeDocument, type JsedDocument } from './document';
-import * as action from '../lib/action';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
 
 /**
@@ -24,7 +23,7 @@ export function start(root: HTMLElement): JsedDocument {
     }
     // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
     evt.preventDefault();
-    action.FOCUS(doc, evt.target);
+    doc.actions.FOCUS(evt.target);
   }
 
   // root.addEventListener<'click'>('click', handleElementClick);

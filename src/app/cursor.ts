@@ -1,6 +1,5 @@
 import { JsedDocument, IJsedCursor } from './document';
 import * as token from '../lib/token';
-import * as action from '../lib/action';
 
 export class JsedCursor implements IJsedCursor {
   #document: JsedDocument;
@@ -23,7 +22,7 @@ export class JsedCursor implements IJsedCursor {
     }
     const prevToken = token.getNextSibling(this.#document.activeToken);
     if (prevToken) {
-      action.FOCUS(this.#document, prevToken);
+      this.#document.actions.FOCUS(prevToken);
     }
   }
   movePrevious() {
@@ -32,7 +31,7 @@ export class JsedCursor implements IJsedCursor {
     }
     const prevToken = token.getPreviousSibling(this.#document.activeToken);
     if (prevToken) {
-      action.FOCUS(this.#document, prevToken);
+      this.#document.actions.FOCUS(prevToken);
     }
   }
   replace(val: string) {
@@ -42,13 +41,13 @@ export class JsedCursor implements IJsedCursor {
       // We don't want to cause a focus event unless the TOKEN has changed.  Set
       // the replaced flag to indicate to the consumer that the activeToken is
       // in fact replaced.
-      action.FOCUS(this.#document, maybeNewTok, { replaced: true });
+      this.#document.actions.FOCUS(maybeNewTok, { replaced: true });
     }
   }
   delete() {
     const tok = this.#getActiveTokenOrDie();
     const newToken = token.remove(tok);
-    action.FOCUS(this.#document, newToken);
+    this.#document.actions.FOCUS(newToken);
     return;
   }
   append(val: string): HTMLElement {
@@ -58,7 +57,7 @@ export class JsedCursor implements IJsedCursor {
   }
   focus(el: HTMLElement): boolean {
     if (token.isToken(el)) {
-      action.FOCUS(this.#document, el);
+      this.#document.actions.FOCUS(el);
       return true;
     }
     return false;

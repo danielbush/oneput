@@ -33,8 +33,8 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       // Placeholder, see below.
       return;
     },
-    requestCursor: () => {
-      return new JsedCursor({ document: document! });
+    requestCursor: ({ token, ceiling }) => {
+      return new JsedCursor({ document: document!, token, ceiling });
     },
   };
   document = Object.assign(base, { actions: new DocumentAction(base) });

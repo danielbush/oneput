@@ -3,7 +3,11 @@ import * as token from './token';
 
 export class JsedCursor implements IJsedCursor {
   #document: JsedDocument;
-  constructor(params: { document: JsedDocument }) {
+  constructor(params: {
+    document: JsedDocument;
+    token: HTMLElement;
+    ceiling: HTMLElement | null;
+  }) {
     this.#document = params.document;
   }
   #getActiveTokenOrDie(): HTMLElement {

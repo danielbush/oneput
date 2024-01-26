@@ -90,8 +90,8 @@ export class DocumentAction {
       ok = this.#document.listeners.TOKEN_FOCUS({
         type: 'FOCUS',
         targetType: 'TOKEN',
-        parent: el.parentElement,
-        value: el.innerText!,
+        token: el,
+        value: token.getValue(el),
         replaced: params.replaced,
       });
     }

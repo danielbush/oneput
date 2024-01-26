@@ -43,7 +43,10 @@ export type JsedDocument = {
   /**
    * Request a cursor for the current token.
    */
-  requestCursor: () => IJsedCursor;
+  requestCursor: (params: {
+    token: HTMLElement;
+    ceiling: HTMLElement | null;
+  }) => IJsedCursor;
 };
 
 /**
@@ -52,7 +55,13 @@ export type JsedDocument = {
 export type JsedTokenFocusEvent = {
   type: 'FOCUS';
   targetType: 'TOKEN';
-  parent: HTMLElement | null;
+  /**
+   * The TOKEN (usually a span element).
+   */
+  token: HTMLElement;
+  /**
+   * The string value of the TOKEN .
+   */
   value: string;
   /**
    * The focused TOKEN is a new token but it has replaced the previously focused token.

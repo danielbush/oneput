@@ -42,6 +42,7 @@ export function createToken(text: string): HTMLElement {
 export function createPlaceholderToken(): HTMLElement {
   const el = document.createElement('span');
   el.classList.add(JSED_PLACEHOLDER_TOKEN_CLASS);
+  el.appendChild(document.createTextNode('§'));
   return el;
 }
 
@@ -83,6 +84,7 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
   if (next && isToken(next)) {
     return next;
   }
+  // here
   return null;
 }
 
@@ -101,9 +103,12 @@ export function insertAfter(
 /**
  * Assumes `isToken` is true, but checks for weird invalid states that might occur
  */
-function validate(token: HTMLElement): void {
-  if (isPlaceholderToken(token)) {
-    if (token.firstChild) {
+function validate(token: HTMLElement, allowPlaceholder: boolean = false): void {
+  if (!allowPlaceholder && isPlaceholderToken(token)) {
+    throw new Error('placeholder tokens not allowed');
+  }
+  if (allowPlaceholder && isPlaceholderToken(token)) {
+    if (token.firstChild?.nodeValue !== '§') {
       throw new Error('placeholder token should be empty');
     }
     return;
@@ -117,7 +122,7 @@ function validate(token: HTMLElement): void {
 }
 
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
-  validate(token);
+  validate(token, true);
   if (isPlaceholderToken(token)) {
     const tok = createToken(val);
     token.replaceWith(tok);
@@ -143,4 +148,12 @@ export function remove(token: HTMLElement) {
   const pholder = createPlaceholderToken();
   parentNode.appendChild(pholder);
   return pholder;
+}
+
+export function getValue(token: HTMLElement): string {
+  validate(token, true);
+  if (isPlaceholderToken(token)) {
+    return '';
+  }
+  return token.firstChild!.nodeValue as string;
 }

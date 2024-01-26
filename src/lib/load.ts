@@ -1,57 +1,9 @@
 import { JsedDocument, makeDocumentContext } from '../app/document';
-import { isAlreadyFocusable, isFocusable } from './focus';
-import { walk } from './walk';
-
-/**
- * Make an element focusable if it is not innately focusable.
- */
-function tab(TABS: Set<HTMLElement>, el: HTMLElement) {
-  if (!isAlreadyFocusable(TABS, el) && isFocusable(el)) {
-    TABS.add(el);
-    // el.setAttribute('tabindex', '0');
-  }
-}
-
-/**
- * Make all focusable elements focusable.
- *
- * This can be used to initialize a document (TABS would be an empty set).  But
- * it can be used to recurse through any subtree.
- */
-export function tabrec(TABS: Set<HTMLElement>, root: HTMLElement): void {
-  tab(TABS, root);
-  walk(root, (el) => {
-    tab(TABS, el);
-  });
-}
-
-/**
- * Remove all tabs
- */
-export function untab(_TABS: Set<HTMLElement>): void {
-  // for (const el of TABS) {
-  // el.removeAttribute('tabindex');
-  // }
-}
-
-export function serialize(TABS: Set<HTMLElement>, root: HTMLElement): string {
-  if (TABS.has(root)) {
-    // root.removeAttribute('tabindex');
-  }
-  walk(root, (el) => {
-    if (TABS.has(el)) {
-      // el.removeAttribute('tabindex');
-    }
-  });
-  return root.outerHTML;
-}
 
 /**
  * Make root the root of an editable document.
  */
 export function loadDoc(root: HTMLElement): JsedDocument {
   const documentContext = makeDocumentContext(root);
-  // TAB_FOCUS
-  tabrec(documentContext.TABS, root);
   return documentContext;
 }

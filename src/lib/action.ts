@@ -166,10 +166,10 @@ export function SIB_HIGHLIGHT(doc: JsedDocument): void {
   SIB_HIGHLIGHT_CLEAR(doc);
   const active = doc.active;
   const pnode = active?.parentElement;
-  if (active && pnode && doc.TABS.has(active)) {
+  if (active && pnode && isFocusable(active)) {
     for (const child of pnode.children) {
       if (isFocusable(child)) {
-        if (doc.TABS.has(child) && child !== active) {
+        if (child !== active) {
           doc.SIB_HIGHLIGHT.add(child);
           child.classList.add(SBR_FOCUS_SIBLING);
         }

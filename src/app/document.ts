@@ -25,13 +25,6 @@ export type JsedDocument = {
    */
   SIB_HIGHLIGHT: Set<HTMLElement>;
   /**
-   * Tracks which elements had tabIndex="0" added to them to make them
-   * focusable.  Note that some elements may be focusable anyway.
-   *
-   * This allows for tab navigation of elements in the document.
-   */
-  TABS: Set<HTMLElement>;
-  /**
    * Track which elements have been tokenized.  Such elements must have text
    * nodes as direct descendents.
    */
@@ -137,7 +130,6 @@ export function makeDocumentContext(root: HTMLElement): JsedDocument {
     active: null,
     activeToken: null,
     SIB_HIGHLIGHT: new Set(),
-    TABS: new Set(),
     tokenized: new WeakMap(),
     actions,
     listeners: {

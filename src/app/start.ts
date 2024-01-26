@@ -34,7 +34,6 @@ export function start(root: HTMLElement): JsedDocument {
   // Unload
 
   documentContext.unload = () => {
-    load.untab(documentContext.TABS);
     root.removeEventListener('click', handleElementClick);
   };
   return documentContext;

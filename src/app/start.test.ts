@@ -4,7 +4,6 @@ import * as load from '../lib/load';
 import * as action from '../lib/action';
 
 vi.spyOn(load, 'loadDoc');
-vi.spyOn(load, 'untab');
 const FOCUS = vi.spyOn(action, 'FOCUS');
 
 describe('start', () => {
@@ -31,8 +30,6 @@ describe('start', () => {
 
     // assert
     expect(doc.root.outerHTML).toMatchSnapshot();
-    expect(load.untab).toBeCalledTimes(1);
-    expect(load.untab).toBeCalledWith(doc.TABS);
     expect(doc.root.removeEventListener).toBeCalledTimes(1);
     expect(doc.root.removeEventListener).toBeCalledWith(
       'click',

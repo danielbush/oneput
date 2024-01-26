@@ -22,16 +22,8 @@ const FORM_FOCUSABLE = [
  * innately focusable.  We don't want to mess with the browser tab focus
  * settings on these.
  *
- * TABS is assumed to track elements that were manually made focusable by us
- * because they were not "already-focusable".
  */
-export function isAlreadyFocusable(
-  TABS: Set<HTMLElement>,
-  el: Element,
-): boolean {
-  if (TABS.has(el as HTMLElement)) {
-    return false;
-  }
+export function isAlreadyFocusable(el: Element): boolean {
   if (FORM_FOCUSABLE.indexOf(el.tagName.toLowerCase()) !== -1) {
     return true;
   }

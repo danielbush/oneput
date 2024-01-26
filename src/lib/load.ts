@@ -1,4 +1,4 @@
-import { JsedDocument, makeDocumentContext } from '../app/DocumentContext';
+import { JsedDocument, makeDocumentContext } from '../app/document';
 import { isAlreadyFocusable, isFocusable } from './focus';
 import { walk } from './walk';
 

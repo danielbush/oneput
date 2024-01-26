@@ -1,4 +1,4 @@
-import { JsedDocument, IJsedCursor } from './DocumentContext';
+import { JsedDocument, IJsedCursor } from './document';
 import * as token from '../lib/token';
 import * as action from '../lib/action';
 

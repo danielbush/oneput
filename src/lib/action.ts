@@ -1,5 +1,5 @@
 import { SBR_FOCUS_SIBLING } from './constants';
-import type { JsedDocument } from '../app/DocumentContext';
+import type { JsedDocument } from '../app/document';
 import { isFocusable } from './focus';
 import * as token from './token';
 import {

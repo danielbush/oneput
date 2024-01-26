@@ -1,4 +1,4 @@
-import { JsedDocument } from '../src/app/DocumentContext';
+import { JsedDocument } from '../src/app/document';
 import * as load from '../src/lib/load';
 
 /**

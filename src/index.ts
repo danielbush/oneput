@@ -6,7 +6,11 @@ import {
 } from './lib/DocumentContext';
 import { start } from './app/document';
 
-export { JSED_TOKEN_CLASS, JSED_DOM_ROOT_ID } from './lib/constants'
+export {
+  JSED_PLACEHOLDER_TOKEN_CLASS,
+  JSED_TOKEN_CLASS,
+  JSED_DOM_ROOT_ID,
+} from './lib/constants';
 export { start };
 export type {
   DocumentContext,

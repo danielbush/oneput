@@ -102,23 +102,18 @@ class JsedCursor implements IJsedCursor {
   }
   replace(val: string) {
     const tok = this.#getActiveTokenOrDie();
-    token.replaceText(tok, val);
+    const maybeNewTok = token.replaceText(tok, val);
+    if (tok !== maybeNewTok) {
+      // We don't want to cause a focus event unless the TOKEN has changed.  Set
+      // the replaced flag to indicate to the consumer that the activeToken is
+      // in fact replaced.
+      TOKEN_FOCUS(this.#context, maybeNewTok, { replaced: true });
+    }
   }
   delete() {
     const tok = this.#getActiveTokenOrDie();
-    const prev = token.getPreviousSibling(tok);
-    if (prev) {
-      TOKEN_FOCUS(this.#context, prev);
-      tok.parentNode?.removeChild(tok);
-      return;
-    }
-    const next = token.getNextSibling(tok);
-    if (next) {
-      TOKEN_FOCUS(this.#context, next);
-      tok.parentNode?.removeChild(tok);
-      return;
-    }
-    console.log('allowing empty token');
+    const newToken = token.remove(tok);
+    TOKEN_FOCUS(this.#context, newToken);
     return;
   }
   append(val: string): HTMLElement {
@@ -140,7 +135,13 @@ class JsedCursor implements IJsedCursor {
 /**
  * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
  */
-function TOKEN_FOCUS(cx: DocumentContext, el: HTMLElement): void {
+function TOKEN_FOCUS(
+  cx: DocumentContext,
+  el: HTMLElement,
+  params: {
+    replaced: boolean;
+  } = { replaced: false },
+): void {
   let ok = false;
   if (cx.listeners.TOKEN_FOCUS) {
     ok = cx.listeners.TOKEN_FOCUS({
@@ -148,6 +149,7 @@ function TOKEN_FOCUS(cx: DocumentContext, el: HTMLElement): void {
       targetType: 'TOKEN',
       parent: el.parentElement,
       value: el.innerText!,
+      replaced: params.replaced,
       requestCursor: () => {
         return new JsedCursor({ context: cx });
       },

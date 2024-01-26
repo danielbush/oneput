@@ -58,6 +58,10 @@ export type JsedTokenFocusEvent = {
   parent: HTMLElement | null;
   value: string;
   /**
+   * The focused TOKEN is a new token but it has replaced the previously focused token.
+   */
+  replaced: boolean;
+  /**
    * Request a cursor for the current token.
    */
   requestCursor: () => IJsedCursor;

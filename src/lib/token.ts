@@ -1,4 +1,4 @@
-import { JSED_TOKEN_CLASS } from './constants';
+import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
 
 /**
  * Detect if the element is a TOKEN .
@@ -8,7 +8,18 @@ export function isToken(
 ): el is HTMLElement {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
-    return el.classList.contains(JSED_TOKEN_CLASS);
+    return (
+      el.classList.contains(JSED_TOKEN_CLASS) ||
+      el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS)
+    );
+  }
+  return false;
+}
+
+export function isPlaceholderToken(el: HTMLElement): boolean {
+  const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    return el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS);
   }
   return false;
 }
@@ -22,6 +33,15 @@ export function createToken(text: string): HTMLElement {
   const el = document.createElement('span');
   el.classList.add(JSED_TOKEN_CLASS);
   el.appendChild(document.createTextNode(text));
+  return el;
+}
+
+/**
+ * Create a PLACHOLDER_TOKEN
+ */
+export function createPlaceholderToken(): HTMLElement {
+  const el = document.createElement('span');
+  el.classList.add(JSED_PLACEHOLDER_TOKEN_CLASS);
   return el;
 }
 
@@ -82,15 +102,45 @@ export function insertAfter(
  * Assumes `isToken` is true, but checks for weird invalid states that might occur
  */
 function validate(token: HTMLElement): void {
+  if (isPlaceholderToken(token)) {
+    if (token.firstChild) {
+      throw new Error('placeholder token should be empty');
+    }
+    return;
+  }
   if (!token.firstChild) {
-    throw new Error('token has not text');
+    throw new Error('token has no text');
   }
   if (token.firstChild.nodeType !== Node.TEXT_NODE) {
     throw new Error('first child should be a text node');
   }
 }
 
-export function replaceText(token: HTMLElement, val: string) {
+export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token);
+  if (isPlaceholderToken(token)) {
+    const tok = createToken(val);
+    token.replaceWith(tok);
+    return tok;
+  }
   token.firstChild!.nodeValue = val;
+  return token;
+}
+
+export function remove(token: HTMLElement) {
+  const parentNode = token.parentNode;
+  if (!parentNode) {
+    throw new Error('remove: token has no parentNode');
+  }
+  let other = getPreviousSibling(token);
+  if (!other) {
+    other = getNextSibling(token);
+  }
+  parentNode.removeChild(token);
+  if (other) {
+    return other;
+  }
+  const pholder = createPlaceholderToken();
+  parentNode.appendChild(pholder);
+  return pholder;
 }

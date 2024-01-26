@@ -1,4 +1,4 @@
-import { DocumentContext, makeDocumentContext } from '../app/DocumentContext';
+import { JsedDocument, makeDocumentContext } from '../app/DocumentContext';
 import { isAlreadyFocusable, isFocusable } from './focus';
 import { walk } from './walk';
 
@@ -49,7 +49,7 @@ export function serialize(TABS: Set<HTMLElement>, root: HTMLElement): string {
 /**
  * Make root the root of an editable document.
  */
-export function loadDoc(root: HTMLElement): DocumentContext {
+export function loadDoc(root: HTMLElement): JsedDocument {
   const documentContext = makeDocumentContext(root);
   // TAB_FOCUS
   tabrec(documentContext.TABS, root);

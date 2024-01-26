@@ -1,7 +1,7 @@
 import * as actions from '../lib/action';
 import { JsedCursor } from './cursor';
 
-export type DocumentContext = {
+export type JsedDocument = {
   /**
    * The root node of the subtree of the DOM that is potentially editable.
    */
@@ -122,8 +122,8 @@ export type JsedCursorEvent = {
   value: string;
 };
 
-export function makeDocumentContext(root: HTMLElement): DocumentContext {
-  const documentContext: DocumentContext = {
+export function makeDocumentContext(root: HTMLElement): JsedDocument {
+  const documentContext: JsedDocument = {
     root,
     get document(): Document {
       return root.ownerDocument;

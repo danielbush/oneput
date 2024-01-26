@@ -1,10 +1,10 @@
-import { DocumentContext, IJsedCursor } from './DocumentContext';
+import { JsedDocument, IJsedCursor } from './DocumentContext';
 import * as token from '../lib/token';
 import * as action from '../lib/action';
 
 export class JsedCursor implements IJsedCursor {
-  #context: DocumentContext;
-  constructor(params: { context: DocumentContext }) {
+  #context: JsedDocument;
+  constructor(params: { context: JsedDocument }) {
     this.#context = params.context;
   }
   #getActiveTokenOrDie(): HTMLElement {

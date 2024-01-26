@@ -1,5 +1,5 @@
 import {
-  DocumentContext,
+  JsedDocument,
   IJsedCursor,
   JsedFocusEvent,
   JsedTokenFocusEvent,
@@ -13,7 +13,7 @@ export {
 } from './lib/constants';
 export { start };
 export type {
-  DocumentContext,
+  JsedDocument,
   JsedFocusEvent,
   JsedTokenFocusEvent,
   IJsedCursor as JsedCursor,

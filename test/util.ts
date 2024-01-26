@@ -1,4 +1,4 @@
-import { DocumentContext } from '../src/app/DocumentContext';
+import { JsedDocument } from '../src/app/DocumentContext';
 import * as load from '../src/lib/load';
 
 /**
@@ -10,7 +10,7 @@ import * as load from '../src/lib/load';
 export function makeRoot(
   html: string,
   document: Document = window.document,
-): DocumentContext {
+): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
   return load.loadDoc(document.getElementById('root') as HTMLElement);
 }
@@ -49,7 +49,7 @@ function makeTag(tagName: string) {
 /**
  * Convenience to get an id or fail.
  */
-export function byId(cx: DocumentContext, id: string): HTMLElement {
+export function byId(cx: JsedDocument, id: string): HTMLElement {
   const el = cx.document.getElementById(id);
   if (!el) {
     throw new Error(`byId: could not find id="${id}"`);

@@ -1,4 +1,4 @@
-import type { DocumentContext } from './DocumentContext';
+import type { JsedDocument } from './DocumentContext';
 import * as load from '../lib/load';
 import * as action from '../lib/action';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
@@ -10,7 +10,7 @@ import { JSED_DOM_ROOT_ID } from '../lib/constants';
  * event handlers so that the rest of the codebase can remain as stateless as
  * possible.
  */
-export function start(root: HTMLElement): DocumentContext {
+export function start(root: HTMLElement): JsedDocument {
   const documentContext = load.loadDoc(root);
 
   // Set up event handlers

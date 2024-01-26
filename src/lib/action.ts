@@ -1,5 +1,5 @@
 import { SBR_FOCUS_SIBLING } from './constants';
-import type { DocumentContext } from '../app/DocumentContext';
+import type { JsedDocument } from '../app/DocumentContext';
 import { isFocusable } from './focus';
 import * as token from './token';
 import {
@@ -13,7 +13,7 @@ import {
 /**
  * Find next using depth first recursion.
  */
-export function REC_NEXT(cx: DocumentContext): void {
+export function REC_NEXT(cx: JsedDocument): void {
   if (!cx.active) return;
   for (const next of walkIter(cx.active, cx.root)) {
     FOCUS(cx, next);
@@ -24,7 +24,7 @@ export function REC_NEXT(cx: DocumentContext): void {
 /**
  * Find previous using depth first recursion.
  */
-export function REC_PREV(cx: DocumentContext): void {
+export function REC_PREV(cx: JsedDocument): void {
   if (!cx.active) return;
   for (const next of walkIterReverse(cx.active, cx.root)) {
     FOCUS(cx, next);
@@ -35,7 +35,7 @@ export function REC_PREV(cx: DocumentContext): void {
 /**
  * Find next sibling element if there is one.
  */
-export function SIB_NEXT(cx: DocumentContext): void {
+export function SIB_NEXT(cx: JsedDocument): void {
   if (!cx.active) return;
   const next = getNextSiblingElement(cx.active);
   if (next) {
@@ -47,7 +47,7 @@ export function SIB_NEXT(cx: DocumentContext): void {
 /**
  * Find previous sibling element if there is one.
  */
-export function SIB_PREV(cx: DocumentContext): void {
+export function SIB_PREV(cx: JsedDocument): void {
   if (!cx.active) return;
   const next = getPreviousSiblingElement(cx.active);
   if (next) {
@@ -59,7 +59,7 @@ export function SIB_PREV(cx: DocumentContext): void {
 /**
  * Find next parent.
  */
-export function UP(cx: DocumentContext): void {
+export function UP(cx: JsedDocument): void {
   if (!cx.active) return;
   const next = getParent(cx.active, cx.root);
   if (next) {
@@ -72,7 +72,7 @@ export function UP(cx: DocumentContext): void {
  * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
  */
 function TOKEN_FOCUS(
-  cx: DocumentContext,
+  cx: JsedDocument,
   el: HTMLElement,
   params: {
     replaced: boolean;
@@ -101,7 +101,7 @@ function TOKEN_FOCUS(
 /**
  * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
  */
-function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
+function CLEAR_TOKEN_FOCUS(cx: JsedDocument) {
   if (cx.activeToken) {
     if (cx.activeToken.parentNode !== cx.active) {
       cx.activeToken.classList.remove('jsed-token-focus');
@@ -118,7 +118,7 @@ function CLEAR_TOKEN_FOCUS(cx: DocumentContext) {
  * TODO: cx.active should update.  Should we track it manually?
  */
 export function FOCUS(
-  cx: DocumentContext,
+  cx: JsedDocument,
   el: Element | EventTarget | null,
   params?: { skipNotify?: boolean; replaced?: boolean },
 ): void {
@@ -152,7 +152,7 @@ export function FOCUS(
   SIB_HIGHLIGHT(cx);
 }
 
-function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {
+function SIB_HIGHLIGHT_CLEAR(cx: JsedDocument): void {
   for (const sib of cx.SIB_HIGHLIGHT) {
     sib.classList.remove(SBR_FOCUS_SIBLING);
   }
@@ -162,7 +162,7 @@ function SIB_HIGHLIGHT_CLEAR(cx: DocumentContext): void {
 /**
  * Highlight siblings of currently focused element.
  */
-export function SIB_HIGHLIGHT(cx: DocumentContext): void {
+export function SIB_HIGHLIGHT(cx: JsedDocument): void {
   SIB_HIGHLIGHT_CLEAR(cx);
   const active = cx.active;
   const pnode = active?.parentElement;

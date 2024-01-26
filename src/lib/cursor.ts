@@ -17,19 +17,15 @@ export class JsedCursor implements IJsedCursor {
     return this.#getActiveTokenOrDie();
   }
   moveNext() {
-    if (!this.#document.activeToken) {
-      return;
-    }
-    const prevToken = token.getNextSibling(this.#document.activeToken);
+    const tok = this.#getActiveTokenOrDie();
+    const prevToken = token.getNextSibling(tok);
     if (prevToken) {
       this.#document.actions.FOCUS(prevToken);
     }
   }
   movePrevious() {
-    if (!this.#document.activeToken) {
-      return;
-    }
-    const prevToken = token.getPreviousSibling(this.#document.activeToken);
+    const tok = this.#getActiveTokenOrDie();
+    const prevToken = token.getPreviousSibling(tok);
     if (prevToken) {
       this.#document.actions.FOCUS(prevToken);
     }

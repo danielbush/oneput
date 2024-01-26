@@ -5,7 +5,7 @@ import mk from '@iktakahiro/markdown-it-katex';
  * Convert markdown content to html but handle katex.
  */
 export function convertMd(markdown: string): string {
-  const md = new MarkdownIt();
+  const md = new MarkdownIt({ html: true });
   md.use(mk);
   return md.render(markdown);
 }

@@ -1,6 +1,17 @@
 import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
 import { isFocusable } from './focus';
-import { walkIter } from './walk';
+// import { walkIter } from './walk';
+
+export function isInline(el: ChildNode): boolean {
+  if (!isFocusable(el)) return false;
+  const styles = window.getComputedStyle(el);
+  if (styles.float !== 'none') {
+    return false;
+  }
+  if (styles.display === 'inline') return true;
+  if (styles.display === 'inline flow') return true;
+  return false;
+}
 
 export function isToken2(
   el: EventTarget | Element | null | undefined,
@@ -58,6 +69,11 @@ function createSpace(): Text {
 
 function replaceTextNode(child: ChildNode): boolean {
   const el = child.parentNode;
+  if (isToken(el)) {
+    throw new Error(
+      'replaceTextNode: called on existing token - this should not happen we should track what has been tokenized.',
+    );
+  }
   if (child.nodeType === Node.TEXT_NODE) {
     const tokens = child
       .nodeValue!.split(/\s+/)
@@ -78,7 +94,21 @@ function replaceTextNode(child: ChildNode): boolean {
 /**
  * Tokenize all the child text nodes in an F_ELEM .
  */
-function tokenizeShallow(
+// function tokenizeShallow(
+//   el: HTMLElement,
+//   tokenized?: WeakMap<HTMLElement, boolean>,
+// ): void {
+//   if (tokenized?.has(el)) {
+//     return;
+//   }
+//   el.normalize();
+//   tokenized?.set(el, true);
+//   for (let child = el.firstChild; child; child = child.nextSibling) {
+//     replaceTextNode(child);
+//   }
+// }
+
+function tokenizeInline(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
@@ -88,24 +118,31 @@ function tokenizeShallow(
   el.normalize();
   tokenized?.set(el, true);
   for (let child = el.firstChild; child; child = child.nextSibling) {
+    if (isInline(child)) {
+      // Recurse
+      tokenizeInline(child as HTMLElement);
+    }
     replaceTextNode(child);
   }
 }
 
-function tokenizeRec(
-  root: HTMLElement,
-  tokenized?: WeakMap<HTMLElement, boolean>,
-): void {
-  if (!isFocusable(root)) {
-    throw new Error('Can only tokenize an F_ELEM');
-  }
-  tokenizeShallow(root, tokenized);
-  tokenized?.set(root, true);
-  for (const el of walkIter(root, root)) {
-    tokenizeShallow(el, tokenized);
-    tokenized?.set(el, true);
-  }
-}
+/**
+ * Depth first traversal of F_ELEM's, each F_ELEM is horizontally tokenized with tokenizeShallow.
+ */
+// function tokenizeRec(
+//   root: HTMLElement,
+//   tokenized?: WeakMap<HTMLElement, boolean>,
+// ): void {
+//   if (!isFocusable(root)) {
+//     throw new Error('Can only tokenize an F_ELEM');
+//   }
+//   tokenizeShallow(root, tokenized);
+//   tokenized?.set(root, true);
+//   for (const el of walkIter(root, root)) {
+//     tokenizeShallow(el, tokenized);
+//     tokenized?.set(el, true);
+//   }
+// }
 
 /**
  * Tokenize the text of an F_ELEM.  Only direct descendent text.
@@ -114,8 +151,8 @@ export function tokenize(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
-  // tokenizeShallow(el, tokenized);
-  tokenizeRec(el, tokenized);
+  // tokenizeRec(el, tokenized);
+  tokenizeInline(el, tokenized);
 }
 
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {

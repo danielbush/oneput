@@ -28,6 +28,12 @@
   - If someone clicks or touches a TOKEN, we should FOCUS the contianing F_ELEM and then highlight the TOKEN.
   - To distinguish this from FOCUS, we will call this the TOKEN_FOCUS .
   - To move around tokens we use a cursor and move the TOKEN_FOCUS whereas to move around F_ELEM's we move the FOCUS.
+- NEGATIVE_SPACE
+  - mdn: "Sequences of white space are collapsed. Newline characters in the source are handled the same as other white space. Lines are broken as necessary to fill line boxes."
+  - By default in a lot of html tags such as the p-tag, the spaces between the text is treated as a single space.  Multiple spaces have no effect on the gap.
+- POSITIVE_SPACE
+  - For some tags notable the pre-tag and for certain css rules (white-space:pre) spacing becomes significant.
+  - mdn: "Sequences of white space are preserved. Lines are only broken at newline characters in the source and at <br> elements."
 
 ## Behaviours
 

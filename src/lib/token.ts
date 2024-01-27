@@ -63,9 +63,9 @@ export function createPlaceholderToken(): HTMLElement {
   return el;
 }
 
-function createSpace(): Text {
-  return document.createTextNode(' ');
-}
+// function createSpace(): Text {
+//   return document.createTextNode(' ');
+// }
 
 function replaceTextNode(child: ChildNode): boolean {
   const el = child.parentNode;
@@ -82,7 +82,7 @@ function replaceTextNode(child: ChildNode): boolean {
     const frag = document.createDocumentFragment();
     for (const token of tokens) {
       frag.appendChild(token);
-      frag.appendChild(createSpace());
+      // frag.appendChild(createSpace());
     }
     el?.insertBefore(frag, child);
     el?.removeChild(child);
@@ -180,9 +180,10 @@ export function insertAfter(
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
-  const spc = createSpace();
-  existing.parentNode.insertBefore(spc, existing.nextSibling);
-  existing.parentNode.insertBefore(toInsert, spc.nextSibling);
+  existing.parentNode.insertBefore(toInsert, existing.nextSibling);
+  // const spc = createSpace();
+  // existing.parentNode.insertBefore(spc, existing.nextSibling);
+  // existing.parentNode.insertBefore(toInsert, spc.nextSibling);
 }
 
 /**

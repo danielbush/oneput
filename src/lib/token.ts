@@ -117,12 +117,13 @@ function tokenizeInline(
   }
   el.normalize();
   tokenized?.set(el, true);
-  for (let child = el.firstChild; child; child = child.nextSibling) {
+  for (let child = el.firstChild; child; ) {
     if (isInline(child)) {
-      // Recurse
       tokenizeInline(child as HTMLElement);
     }
+    const next = child.nextSibling;
     replaceTextNode(child);
+    child = next;
   }
 }
 

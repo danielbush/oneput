@@ -1,4 +1,6 @@
 import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
+import { isFocusable } from './focus';
+import { walkIter } from './walk';
 
 /**
  * Detect if the element is a TOKEN .
@@ -50,7 +52,7 @@ function createSpace(): Text {
   return document.createTextNode(' ');
 }
 
-function replaceTextNode(child: ChildNode) {
+function replaceTextNode(child: ChildNode): boolean {
   const el = child.parentNode;
   if (child.nodeType === Node.TEXT_NODE) {
     const tokens = child
@@ -64,9 +66,14 @@ function replaceTextNode(child: ChildNode) {
     }
     el?.insertBefore(frag, child);
     el?.removeChild(child);
+    return true;
   }
+  return false;
 }
 
+/**
+ * Tokenize all the child text nodes in an F_ELEM .
+ */
 function tokenizeShallow(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
@@ -81,6 +88,21 @@ function tokenizeShallow(
   }
 }
 
+function tokenizeRec(
+  root: HTMLElement,
+  tokenized?: WeakMap<HTMLElement, boolean>,
+): void {
+  if (!isFocusable(root)) {
+    throw new Error('Can only tokenize an F_ELEM');
+  }
+  tokenizeShallow(root, tokenized);
+  tokenized?.set(root, true);
+  for (const el of walkIter(root, root)) {
+    tokenizeShallow(el, tokenized);
+    tokenized?.set(el, true);
+  }
+}
+
 /**
  * Tokenize the text of an F_ELEM.  Only direct descendent text.
  */
@@ -88,7 +110,8 @@ export function tokenize(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
-  tokenizeShallow(el, tokenized);
+  // tokenizeShallow(el, tokenized);
+  tokenizeRec(el, tokenized);
 }
 
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {

@@ -94,6 +94,13 @@ export function walk(root: Element, visit: (el: HTMLElement) => void): void {
   }
 }
 
+/**
+ * Recursively walk F_ELEM's.  TOKEN's will be ignored.
+ *
+ * @param start Is not yielded
+ * @param limit If limit is after start (using pre-order) then nodes will be walked up to but excluding limit.
+ * @returns
+ */
 export function* walkIter(
   start: HTMLElement,
   limit: HTMLElement | null,

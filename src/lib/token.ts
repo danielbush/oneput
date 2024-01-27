@@ -49,11 +49,16 @@ export function createPlaceholderToken(): HTMLElement {
 function createSpace(): Text {
   return document.createTextNode(' ');
 }
-/**
- * Tokenize the text of an F_ELEM.  Only direct descendent text.
- */
-export function tokenize(el: HTMLElement): void {
+
+function tokenizeShallow(
+  el: HTMLElement,
+  tokenized?: WeakMap<HTMLElement, boolean>,
+): void {
+  if (tokenized?.has(el)) {
+    return;
+  }
   el.normalize();
+  tokenized?.set(el, true);
   for (let child = el.firstChild; child; child = child.nextSibling) {
     if (child.nodeType === Node.TEXT_NODE) {
       const tokens = child
@@ -69,6 +74,16 @@ export function tokenize(el: HTMLElement): void {
       el.removeChild(child);
     }
   }
+}
+
+/**
+ * Tokenize the text of an F_ELEM.  Only direct descendent text.
+ */
+export function tokenize(
+  el: HTMLElement,
+  tokenized?: WeakMap<HTMLElement, boolean>,
+): void {
+  tokenizeShallow(el, tokenized);
 }
 
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {

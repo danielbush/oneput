@@ -154,10 +154,7 @@ export class DocumentAction {
     el.classList.add('jsed-focus');
     this.#document.active = el as HTMLElement;
     this.#CLEAR_TOKEN_FOCUS();
-    if (!this.#document.tokenized.has(el)) {
-      this.#document.tokenized.set(el, true);
-      token.tokenize(el);
-    }
+    token.tokenize(el, this.#document.tokenized);
     this.SIB_HIGHLIGHT();
   }
 

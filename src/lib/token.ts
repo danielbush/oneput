@@ -177,10 +177,10 @@ export function insertAfter(
   toInsert: HTMLElement,
   existing: HTMLElement,
 ): void {
-  const spc = createSpace();
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
+  const spc = createSpace();
   existing.parentNode.insertBefore(spc, existing.nextSibling);
   existing.parentNode.insertBefore(toInsert, spc.nextSibling);
 }

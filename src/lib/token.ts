@@ -50,6 +50,23 @@ function createSpace(): Text {
   return document.createTextNode(' ');
 }
 
+function replaceTextNode(child: ChildNode) {
+  const el = child.parentNode;
+  if (child.nodeType === Node.TEXT_NODE) {
+    const tokens = child
+      .nodeValue!.split(/\s+/)
+      .filter(Boolean)
+      .map((s) => createToken(s));
+    const frag = document.createDocumentFragment();
+    for (const token of tokens) {
+      frag.appendChild(token);
+      frag.appendChild(createSpace());
+    }
+    el?.insertBefore(frag, child);
+    el?.removeChild(child);
+  }
+}
+
 function tokenizeShallow(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
@@ -60,19 +77,7 @@ function tokenizeShallow(
   el.normalize();
   tokenized?.set(el, true);
   for (let child = el.firstChild; child; child = child.nextSibling) {
-    if (child.nodeType === Node.TEXT_NODE) {
-      const tokens = child
-        .nodeValue!.split(/\s+/)
-        .filter(Boolean)
-        .map((s) => createToken(s));
-      const frag = document.createDocumentFragment();
-      for (const token of tokens) {
-        frag.appendChild(token);
-        frag.appendChild(createSpace());
-      }
-      el.insertBefore(frag, child);
-      el.removeChild(child);
-    }
+    replaceTextNode(child);
   }
 }
 

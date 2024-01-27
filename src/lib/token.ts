@@ -2,12 +2,16 @@ import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
 import { isFocusable } from './focus';
 import { walkIter } from './walk';
 
+export function isToken2(
+  el: EventTarget | Element | null | undefined,
+): el is HTMLElement {
+  return isToken(el);
+}
+
 /**
  * Detect if the element is a TOKEN .
  */
-export function isToken(
-  el: EventTarget | Element | null | undefined,
-): el is HTMLElement {
+export function isToken(el: EventTarget | Element | null | undefined): boolean {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     return (
@@ -116,7 +120,7 @@ export function tokenize(
 
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
   const prev = el.previousElementSibling;
-  if (prev && isToken(prev)) {
+  if (prev && isToken2(prev)) {
     return prev;
   }
   return null;
@@ -124,7 +128,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
 
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
   const next = el.nextElementSibling;
-  if (next && isToken(next)) {
+  if (next && isToken2(next)) {
     return next;
   }
   // here

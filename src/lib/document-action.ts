@@ -128,7 +128,7 @@ export class DocumentAction {
     el: Element | EventTarget | null,
     params?: { skipNotify?: boolean; replaced?: boolean },
   ): void {
-    if (token.isToken(el)) {
+    if (token.isToken2(el)) {
       this.#TOKEN_FOCUS(el, { replaced: !!params?.replaced });
       // Always focus the parent F_ELEM of the token.
       // Use skipNotify because we won't issue a FOCUS event.  The event generated

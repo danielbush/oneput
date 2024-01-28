@@ -1,6 +1,6 @@
 import { JsedDocument } from '../types';
 import { SBR_FOCUS_SIBLING } from './constants';
-import { isFocusable } from './focus';
+import { ignoreDescendents, isFocusable, notIsFocusable } from './focus';
 import * as token from './token';
 import {
   getNextSiblingElement,
@@ -20,7 +20,10 @@ export class DocumentAction {
    */
   REC_NEXT(): void {
     if (!this.#document.active) return;
-    for (const next of walkIter(this.#document.active, this.#document.root)) {
+    for (const next of walkIter(this.#document.active, this.#document.root, {
+      ignore: notIsFocusable,
+      ignoreDescendents,
+    })) {
       this.FOCUS(next);
       break;
     }
@@ -34,6 +37,7 @@ export class DocumentAction {
     for (const next of walkIterReverse(
       this.#document.active,
       this.#document.root,
+      { ignore: notIsFocusable, ignoreDescendents },
     )) {
       this.FOCUS(next);
       break;
@@ -45,7 +49,10 @@ export class DocumentAction {
    */
   SIB_NEXT(): void {
     if (!this.#document.active) return;
-    const next = getNextSiblingElement(this.#document.active);
+    const next = getNextSiblingElement(this.#document.active, {
+      ignore: notIsFocusable,
+      ignoreDescendents,
+    });
     if (next) {
       this.FOCUS(next);
     }
@@ -57,7 +64,10 @@ export class DocumentAction {
    */
   SIB_PREV(): void {
     if (!this.#document.active) return;
-    const next = getPreviousSiblingElement(this.#document.active);
+    const next = getPreviousSiblingElement(this.#document.active, {
+      ignore: notIsFocusable,
+      ignoreDescendents,
+    });
     if (next) {
       this.FOCUS(next);
     }

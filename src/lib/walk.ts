@@ -82,18 +82,6 @@ export function getParent(
   return next;
 }
 
-export function walk(root: Element, visit: (el: HTMLElement) => void): void {
-  if (ignoreDescendents(root)) {
-    return;
-  }
-  for (const child of root.children) {
-    if (isFocusable(child)) {
-      visit(child);
-      walk(child, visit);
-    }
-  }
-}
-
 /**
  * Recursively walk F_ELEM's.  TOKEN's will be ignored.
  *

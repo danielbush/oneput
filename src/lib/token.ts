@@ -1,8 +1,11 @@
 import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
 import { isFocusable } from './focus';
-// import { walkIter } from './walk';
+import { walkIter, walkIterReverse } from './walk';
 
-export function isInline(el: ChildNode): boolean {
+/**
+ * Detect if an F_ELEM is an inline element.
+ */
+export function isInline(el: ChildNode | ParentNode): boolean {
   if (!isFocusable(el)) return false;
   const styles = window.getComputedStyle(el);
   if (styles.float !== 'none') {
@@ -41,6 +44,8 @@ export function isPlaceholderToken(el: HTMLElement): boolean {
   return false;
 }
 
+// #region Tokenization
+
 /**
  * Create a TOKEN .
  *
@@ -67,6 +72,9 @@ export function createPlaceholderToken(): HTMLElement {
 //   return document.createTextNode(' ');
 // }
 
+/**
+ * Used by tokenizer to convert text nodes to TOKEN's.
+ */
 function replaceTextNode(child: ChildNode): boolean {
   const el = child.parentNode;
   if (isToken(el)) {
@@ -156,20 +164,33 @@ export function tokenize(
   tokenizeInline(el, tokenized);
 }
 
+// #endregion
+
+// #region Operations on tokenized F_ELEM's
+
+/**
+ * Get previous contiguous or inline TOKEN.
+ */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
-  const prev = el.previousElementSibling;
-  if (prev && isToken2(prev)) {
-    return prev;
+  // This will walk TOKEN's because we're not setting ignore / ignoreDescendents
+  for (const prev of walkIterReverse(el, getLine(el))) {
+    if (isToken2(prev)) {
+      return prev;
+    }
   }
   return null;
 }
 
+/**
+ * Get next contiguous or inline TOKEN.
+ */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
-  const next = el.nextElementSibling;
-  if (next && isToken2(next)) {
-    return next;
+  // This will walk TOKEN's because we're not setting ignore / ignoreDescendents
+  for (const next of walkIter(el, getLine(el))) {
+    if (isToken2(next)) {
+      return next;
+    }
   }
-  // here
   return null;
 }
 
@@ -243,3 +264,26 @@ export function getValue(token: HTMLElement): string {
   }
   return token.firstChild!.nodeValue as string;
 }
+
+/**
+ * Find the LINE associated with `el`.  Usually `el` should be a text node, TOKEN or inline F_ELEM .  May return `el` itself if not.
+ */
+export function getLine(el: ChildNode): HTMLElement {
+  if (!el) {
+    throw new Error(`getLine: parentElement is null`);
+  }
+  for (let p: ParentNode | ChildNode | null = el; ; p = p?.parentNode) {
+    if (!p) {
+      throw new Error(`getLine: expected parentNode to exist`);
+    }
+    if (isFocusable(p)) {
+      if (isInline(p)) {
+        continue;
+      }
+      return p;
+    }
+  }
+  throw new Error(`getLine: end of for-loop`);
+}
+
+// #endregion

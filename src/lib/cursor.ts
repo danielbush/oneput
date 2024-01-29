@@ -22,9 +22,10 @@ export class JsedCursor implements IJsedCursor {
   }
   moveNext() {
     const tok = this.#getActiveTokenOrDie();
-    const prevToken = token.getNextSibling(tok);
-    if (prevToken) {
-      this.#document.actions.FOCUS(prevToken);
+    const nextToken = token.getNextSibling(tok);
+    if (nextToken) {
+      this.#document.actions.FOCUS(nextToken);
+      this.#document.actions.FOCUS(nextToken, { keepTokenFocus: true });
     }
   }
   movePrevious() {
@@ -32,6 +33,7 @@ export class JsedCursor implements IJsedCursor {
     const prevToken = token.getPreviousSibling(tok);
     if (prevToken) {
       this.#document.actions.FOCUS(prevToken);
+      this.#document.actions.FOCUS(prevToken, { keepTokenFocus: true });
     }
   }
   replace(val: string) {

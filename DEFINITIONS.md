@@ -34,6 +34,8 @@
 - POSITIVE_SPACE
   - For some tags notable the pre-tag and for certain css rules (white-space:pre) spacing becomes significant.
   - mdn: "Sequences of white space are preserved. Lines are only broken at newline characters in the source and at <br> elements."
+- LINE
+  - The text nodes or TOKEN's that have the same parent or belong to an inline parent or chain of inline parents with the top-most having the same F_ELEM as parent.
 
 ## Behaviours
 

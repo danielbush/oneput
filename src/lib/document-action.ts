@@ -103,6 +103,10 @@ export class DocumentAction {
         token: el,
         value: token.getValue(el),
         replaced: params.replaced,
+        // lineChange: el.parentElement !== this.#document.active,
+        lineChange:
+          !!this.#document.active &&
+          token.getLine(el) !== token.getLine(this.#document.active),
       });
     }
     if (ok) {
@@ -119,6 +123,7 @@ export class DocumentAction {
    * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
    */
   #CLEAR_TOKEN_FOCUS() {
+    // debugger;
     if (this.#document.activeToken) {
       if (this.#document.activeToken.parentNode !== this.#document.active) {
         this.#document.activeToken.classList.remove('jsed-token-focus');
@@ -136,14 +141,20 @@ export class DocumentAction {
    */
   FOCUS(
     el: Element | EventTarget | null,
-    params?: { skipNotify?: boolean; replaced?: boolean },
+    params?: {
+      skipNotify?: boolean;
+      replaced?: boolean;
+      keepTokenFocus?: boolean;
+    },
   ): void {
+    const keepTokenFocus = !!params?.keepTokenFocus;
     if (token.isToken2(el)) {
-      this.#TOKEN_FOCUS(el, { replaced: !!params?.replaced });
+      const replaced = !!params?.replaced;
+      this.#TOKEN_FOCUS(el, { replaced });
       // Always focus the parent F_ELEM of the token.
       // Use skipNotify because we won't issue a FOCUS event.  The event generated
       // by the TOKEN_FOCUS contains all the information we need.
-      this.FOCUS(el.parentNode, { skipNotify: true });
+      this.FOCUS(el.parentNode, { skipNotify: true, keepTokenFocus });
       return;
     }
     if (!isFocusable(el)) {
@@ -163,7 +174,9 @@ export class DocumentAction {
     }
     el.classList.add('jsed-focus');
     this.#document.active = el as HTMLElement;
-    this.#CLEAR_TOKEN_FOCUS();
+    if (!keepTokenFocus) {
+      this.#CLEAR_TOKEN_FOCUS();
+    }
     token.tokenize(el, this.#document.tokenized);
     this.SIB_HIGHLIGHT();
   }

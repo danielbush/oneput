@@ -3,9 +3,9 @@ import { SBR_FOCUS_SIBLING } from './constants';
 import { ignoreDescendents, isFocusable, notIsFocusable } from './focus';
 import * as token from './token';
 import {
-  getNextSiblingElement,
+  getNextSiblingNode,
   getParent,
-  getPreviousSiblingElement,
+  getPreviousSiblingNode,
   walkIter,
   walkIterReverse,
 } from './walk';
@@ -49,7 +49,7 @@ export class DocumentAction {
    */
   SIB_NEXT(): void {
     if (!this.#document.active) return;
-    const next = getNextSiblingElement(this.#document.active, {
+    const next = getNextSiblingNode(this.#document.active, {
       ignore: notIsFocusable,
       ignoreDescendents,
     });
@@ -64,7 +64,7 @@ export class DocumentAction {
    */
   SIB_PREV(): void {
     if (!this.#document.active) return;
-    const next = getPreviousSiblingElement(this.#document.active, {
+    const next = getPreviousSiblingNode(this.#document.active, {
       ignore: notIsFocusable,
       ignoreDescendents,
     });

@@ -4,8 +4,8 @@ type WalkParams = {
   /**
    * !isFocusable
    */
-  ignore: (el: Element | null) => boolean;
-  ignoreDescendents: (el: Element) => boolean;
+  ignore: (el: ParentNode | ChildNode | null) => boolean;
+  ignoreDescendents: (el: ParentNode | ChildNode) => boolean;
 };
 
 function getWalkParams(params?: Partial<WalkParams>): WalkParams {
@@ -18,31 +18,34 @@ function getWalkParams(params?: Partial<WalkParams>): WalkParams {
   };
 }
 
-function lastElement(el: Element, params?: Partial<WalkParams>): Element {
+function lastNode(
+  el: ParentNode | ChildNode,
+  params?: Partial<WalkParams>,
+): ParentNode | ChildNode {
   const _params = getWalkParams(params);
-  if (!el.lastElementChild) {
+  if (!el.lastChild) {
     return el;
   }
-  const lastChild = el.lastElementChild;
+  const lastChild = el.lastChild;
   // const prev = isFocusable(lastChild)
   const prev = !_params.ignore(lastChild)
     ? lastChild
-    : getPreviousSiblingElement(lastChild);
+    : getPreviousSiblingNode(lastChild);
   if (!prev) {
     return el;
   }
-  return lastElement(prev, _params);
+  return lastNode(prev, _params);
 }
 
 function* descendIter(
-  root: Element,
+  root: ParentNode | ChildNode,
   params?: Partial<WalkParams>,
-): IterableIterator<Element> {
+): IterableIterator<ParentNode | ChildNode> {
   const _params = getWalkParams(params);
   if (_params.ignoreDescendents(root)) {
     return;
   }
-  for (const child of root.children) {
+  for (const child of root.childNodes) {
     // if (!isFocusable(child)) {
     if (_params.ignore(child)) {
       continue;
@@ -53,14 +56,14 @@ function* descendIter(
 }
 
 function* descendIterReverse(
-  root: Element,
+  root: ParentNode | ChildNode,
   params?: Partial<WalkParams>,
-): IterableIterator<Element> {
+): IterableIterator<ParentNode | ChildNode> {
   const _params = getWalkParams(params);
   if (_params.ignoreDescendents(root)) {
     return;
   }
-  const revChildren = Array.from(root.children).reverse();
+  const revChildren = Array.from(root.childNodes).reverse();
   for (const child of revChildren) {
     // if (!isFocusable(child)) {
     if (_params.ignore(child)) {
@@ -71,14 +74,14 @@ function* descendIterReverse(
   }
 }
 
-export function getNextSiblingElement(
-  start: Element,
+export function getNextSiblingNode(
+  start: ParentNode | ChildNode,
   params?: Partial<WalkParams>,
-): Element | null {
+): ParentNode | ChildNode | null {
   const _params = getWalkParams(params);
-  let next: Element | null | undefined = start;
+  let next: ParentNode | ChildNode | null | undefined = start;
   for (;;) {
-    next = next?.nextElementSibling;
+    next = next?.nextSibling;
     // if (isFocusable(next)) {
     if (!_params.ignore(next)) {
       return next;
@@ -91,14 +94,14 @@ export function getNextSiblingElement(
   return null;
 }
 
-export function getPreviousSiblingElement(
-  start: Element,
+export function getPreviousSiblingNode(
+  start: ParentNode | ChildNode,
   params?: Partial<WalkParams>,
-): Element | null {
+): ParentNode | ChildNode | null {
   const _params = getWalkParams(params);
-  let prev: Element | null | undefined = start;
+  let prev: ParentNode | ChildNode | null | undefined = start;
   for (;;) {
-    prev = prev?.previousElementSibling;
+    prev = prev?.previousSibling;
     // if (isFocusable(prev)) {
     if (!_params.ignore(prev)) {
       return prev;
@@ -112,13 +115,13 @@ export function getPreviousSiblingElement(
 }
 
 export function getParent(
-  start: Element,
-  limit: Element,
-): Element | null {
+  start: ParentNode,
+  limit: ParentNode,
+): ParentNode | null {
   if (start === limit) {
     return null;
   }
-  const next = start.parentElement;
+  const next = start.parentNode;
   return next;
 }
 
@@ -130,27 +133,27 @@ export function getParent(
  * @returns
  */
 export function* walkIter(
-  start: Element,
-  limit: Element | null,
+  start: ParentNode | ChildNode,
+  limit: ParentNode | ChildNode | null,
   params?: Partial<WalkParams>,
-): IterableIterator<Element> {
+): IterableIterator<ParentNode | ChildNode> {
   yield* descendIter(start, params);
   if (start === limit) {
     return;
   }
 
-  let sib: Element | null = start;
-  while ((sib = getNextSiblingElement(sib, params))) {
+  let sib: ParentNode | ChildNode | null = start;
+  while ((sib = getNextSiblingNode(sib, params))) {
     yield sib;
     yield* descendIter(sib, params);
   }
-  let par: Element | null = start;
-  while ((par = par.parentElement)) {
+  let par: ParentNode | ChildNode | null = start;
+  while ((par = par.parentNode)) {
     if (par === limit) {
       yield par;
       break;
     }
-    const nextPar = getNextSiblingElement(par, params);
+    const nextPar = getNextSiblingNode(par, params);
     if (nextPar) {
       yield nextPar;
       yield* walkIter(nextPar, limit, params);
@@ -159,30 +162,30 @@ export function* walkIter(
 }
 
 export function* walkIterReverse(
-  start: Element,
-  limit: Element | null,
+  start: ParentNode | ChildNode,
+  limit: ParentNode | ChildNode | null,
   params?: Partial<WalkParams>,
-): IterableIterator<Element> {
+): IterableIterator<ParentNode | ChildNode> {
   if (start === limit) {
-    const last = lastElement(limit, params);
+    const last = lastNode(limit, params);
     if (last === limit) {
       return;
     }
     yield last;
     return;
   }
-  let sib: Element | null = start;
-  while ((sib = getPreviousSiblingElement(sib, params))) {
+  let sib: ParentNode | ChildNode | null = start;
+  while ((sib = getPreviousSiblingNode(sib, params))) {
     yield* descendIterReverse(sib, params);
     yield sib;
   }
-  let par: Element | null = start;
-  while ((par = par.parentElement)) {
+  let par: ParentNode | ChildNode | null = start;
+  while ((par = par.parentNode)) {
     yield par;
     if (par === limit) {
       break;
     }
-    const prevPar = getPreviousSiblingElement(par, params);
+    const prevPar = getPreviousSiblingNode(par, params);
     if (prevPar) {
       yield* walkIterReverse(prevPar, limit, params);
       yield prevPar;

@@ -177,7 +177,7 @@ export class DocumentAction {
     if (!keepTokenFocus) {
       this.#CLEAR_TOKEN_FOCUS();
     }
-    token.tokenize(el, this.#document.tokenized);
+    // token.tokenize(el, this.#document.tokenized);
     this.SIB_HIGHLIGHT();
   }
 

@@ -75,7 +75,7 @@ export function createPlaceholderToken(): HTMLElement {
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.
  */
-function replaceTextNode(child: ChildNode): boolean {
+function replaceTextNode(child: ParentNode | ChildNode): boolean {
   const el = child.parentNode;
   if (isToken(el)) {
     throw new Error(
@@ -102,7 +102,21 @@ function replaceTextNode(child: ChildNode): boolean {
 /**
  * Tokenize all the child text nodes in an F_ELEM .
  */
-// function tokenizeShallow(
+function tokenizeShallow(
+  el: ParentNode | ChildNode,
+  tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
+): void {
+  if (tokenized?.has(el)) {
+    return;
+  }
+  // el.normalize();
+  tokenized?.set(el, true);
+  for (let child = el.firstChild; child; child = child.nextSibling) {
+    replaceTextNode(child);
+  }
+}
+
+// function tokenizeInline(
 //   el: HTMLElement,
 //   tokenized?: WeakMap<HTMLElement, boolean>,
 // ): void {
@@ -111,29 +125,15 @@ function replaceTextNode(child: ChildNode): boolean {
 //   }
 //   el.normalize();
 //   tokenized?.set(el, true);
-//   for (let child = el.firstChild; child; child = child.nextSibling) {
+//   for (let child = el.firstChild; child; ) {
+//     if (isInline(child)) {
+//       tokenizeInline(child as HTMLElement);
+//     }
+//     const next = child.nextSibling;
 //     replaceTextNode(child);
+//     child = next;
 //   }
 // }
-
-function tokenizeInline(
-  el: HTMLElement,
-  tokenized?: WeakMap<HTMLElement, boolean>,
-): void {
-  if (tokenized?.has(el)) {
-    return;
-  }
-  el.normalize();
-  tokenized?.set(el, true);
-  for (let child = el.firstChild; child; ) {
-    if (isInline(child)) {
-      tokenizeInline(child as HTMLElement);
-    }
-    const next = child.nextSibling;
-    replaceTextNode(child);
-    child = next;
-  }
-}
 
 /**
  * Depth first traversal of F_ELEM's, each F_ELEM is horizontally tokenized with tokenizeShallow.
@@ -153,6 +153,43 @@ function tokenizeInline(
 //   }
 // }
 
+function tokenizeRec(
+  root: HTMLElement,
+  tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
+): void {
+  if (!isFocusable(root)) {
+    throw new Error('Can only tokenize an F_ELEM');
+  }
+  root.normalize();
+  // debugger;
+  for (const el of walkIter(root, root, {
+    // ignore: (el) => {
+    //   if (!el) {
+    //     return true;
+    //   }
+    //   return (
+    //     el.nodeType !== Node.ELEMENT_NODE && el.nodeType !== Node.TEXT_NODE
+    //   );
+    // },
+  })) {
+    // console.log('el', el.nodeType);
+    if (el.nodeType === Node.ELEMENT_NODE && !isToken(el)) {
+      tokenizeShallow(el, tokenized);
+    }
+    // if (el.nodeType === Node.TEXT_NODE) {
+    //   // console.log('<< replace', el);
+    //   if (!el.parentNode) {
+    //     const msg = `tokenizeRec: element doesn't have a parentNode`;
+    //     console.error(msg, el);
+    //     throw new Error(msg);
+    //   }
+    //   tokenized?.set(el.parentNode, true);
+    //   replaceTextNode(el);
+    // }
+  }
+  tokenized?.set(root, true);
+}
+
 /**
  * Tokenize the text of an F_ELEM.  Only direct descendent text.
  */
@@ -160,8 +197,8 @@ export function tokenize(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
-  // tokenizeRec(el, tokenized);
-  tokenizeInline(el, tokenized);
+  tokenizeRec(el, tokenized);
+  // tokenizeInline(el, tokenized);
 }
 
 // #endregion

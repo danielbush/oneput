@@ -112,9 +112,9 @@ export function getPreviousSiblingElement(
 }
 
 export function getParent(
-  start: HTMLElement,
-  limit: HTMLElement,
-): HTMLElement | null {
+  start: Element,
+  limit: Element,
+): Element | null {
   if (start === limit) {
     return null;
   }

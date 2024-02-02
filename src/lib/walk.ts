@@ -134,9 +134,10 @@ export function getParent(
  */
 export function* walkIter(
   start: ParentNode | ChildNode,
-  limit: ParentNode | ChildNode | null,
+  limit: ParentNode | ChildNode | Node | null,
   params?: Partial<WalkParams>,
 ): IterableIterator<ParentNode | ChildNode> {
+  yield start;
   yield* descendIter(start, params);
   if (start === limit) {
     return;

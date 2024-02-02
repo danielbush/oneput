@@ -1,7 +1,6 @@
 import { makeDocument } from './document';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
 import { JsedDocument } from '../types';
-import { tokenize } from '../lib/token';
 
 /**
  * Initialize a subtree of the DOM in a browser window for editing.
@@ -12,9 +11,6 @@ import { tokenize } from '../lib/token';
  */
 export function start(root: HTMLElement): JsedDocument {
   const doc = makeDocument(root);
-  console.time('Tokenizing');
-  tokenize(root);
-  console.timeEnd('Tokenizing');
 
   // Set up event handlers
 

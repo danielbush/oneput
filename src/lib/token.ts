@@ -155,27 +155,31 @@ function tokenizeShallow(
 
 function tokenizeRec(
   root: HTMLElement,
+  ceiling: Node,
   tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
 ): void {
   if (!isFocusable(root)) {
     throw new Error('Can only tokenize an F_ELEM');
   }
   root.normalize();
-  // debugger;
-  for (const el of walkIter(root, root, {
-    // ignore: (el) => {
-    //   if (!el) {
-    //     return true;
-    //   }
-    //   return (
-    //     el.nodeType !== Node.ELEMENT_NODE && el.nodeType !== Node.TEXT_NODE
-    //   );
-    // },
+  debugger;
+  for (const el of walkIter(root, ceiling, {
+    ignore: (el) => {
+      if (!el) {
+        return true;
+      }
+      if (isToken(el)) {
+        return true;
+      }
+      if (el.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return el.nodeType !== Node.ELEMENT_NODE;
+    },
   })) {
-    // console.log('el', el.nodeType);
-    if (el.nodeType === Node.ELEMENT_NODE && !isToken(el)) {
-      tokenizeShallow(el, tokenized);
-    }
+    // if (el.nodeType === Node.ELEMENT_NODE && !isToken(el)) {
+    tokenizeShallow(el, tokenized);
+    // }
     // if (el.nodeType === Node.TEXT_NODE) {
     //   // console.log('<< replace', el);
     //   if (!el.parentNode) {
@@ -197,7 +201,9 @@ export function tokenize(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
-  tokenizeRec(el, tokenized);
+  const ceiling = getLine(el);
+  console.log('ceiling', ceiling);
+  tokenizeRec(ceiling, ceiling, tokenized);
   // tokenizeInline(el, tokenized);
 }
 
@@ -307,7 +313,7 @@ export function getValue(token: HTMLElement): string {
  */
 export function getLine(el: ChildNode): HTMLElement {
   if (!el) {
-    throw new Error(`getLine: parentElement is null`);
+    throw new Error(`getLine: element is null`);
   }
   for (let p: ParentNode | ChildNode | null = el; ; p = p?.parentNode) {
     if (!p) {

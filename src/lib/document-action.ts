@@ -127,7 +127,6 @@ export class DocumentAction {
    * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
    */
   #CLEAR_TOKEN_FOCUS() {
-    // debugger;
     if (this.#document.activeToken) {
       if (this.#document.activeToken.parentNode !== this.#document.active) {
         this.#document.activeToken.classList.remove('jsed-token-focus');

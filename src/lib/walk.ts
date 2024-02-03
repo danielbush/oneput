@@ -82,12 +82,12 @@ export function getNextSiblingNode(
   let next: ParentNode | ChildNode | null | undefined = start;
   for (;;) {
     next = next?.nextSibling;
+    if (!next) {
+      break;
+    }
     // if (isFocusable(next)) {
     if (!_params.ignore(next)) {
       return next;
-    }
-    if (!next) {
-      break;
     }
     continue;
   }
@@ -102,12 +102,12 @@ export function getPreviousSiblingNode(
   let prev: ParentNode | ChildNode | null | undefined = start;
   for (;;) {
     prev = prev?.previousSibling;
+    if (!prev) {
+      break;
+    }
     // if (isFocusable(prev)) {
     if (!_params.ignore(prev)) {
       return prev;
-    }
-    if (!prev) {
-      break;
     }
     continue;
   }

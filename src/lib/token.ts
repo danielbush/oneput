@@ -3,9 +3,13 @@ import { isFocusable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
 
 /**
- * Detect if an F_ELEM is an inline element.
+ * Detect if an F_ELEM is acting like an inline element eg an em-tag - such
+ * elements are considered part of the visual line of text.
  */
-export function isInline(el: ChildNode | ParentNode): boolean {
+export function isPartOfLine(el: ChildNode | ParentNode | null): boolean {
+  if (!el) {
+    throw new Error(`isInline called on null or undefined`);
+  }
   if (!isFocusable(el)) return false;
   const styles = window.getComputedStyle(el);
   if (styles.float !== 'none') {
@@ -14,6 +18,10 @@ export function isInline(el: ChildNode | ParentNode): boolean {
   if (styles.display === 'inline') return true;
   if (styles.display === 'inline flow') return true;
   return false;
+}
+
+export function notIsPartOfLine(el: ChildNode | ParentNode | null): boolean {
+  return !isPartOfLine(el);
 }
 
 export function isToken2(
@@ -167,8 +175,9 @@ export function tokenize(
  * Get previous contiguous or inline TOKEN.
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
-  // This will walk TOKEN's because we're not setting ignore / ignoreDescendents
-  for (const prev of findPreviousNode(el, getLine(el))) {
+  for (const prev of findPreviousNode(el, getLine(el), {
+    ignore: notIsPartOfLine,
+  })) {
     if (isToken2(prev)) {
       return prev;
     }
@@ -180,8 +189,9 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
  * Get next contiguous or inline TOKEN.
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
-  // This will walk TOKEN's because we're not setting ignore / ignoreDescendents
-  for (const next of findNextNode(el, getLine(el))) {
+  for (const next of findNextNode(el, getLine(el), {
+    ignore: notIsPartOfLine,
+  })) {
     if (isToken2(next)) {
       return next;
     }
@@ -272,7 +282,7 @@ export function getLine(el: ChildNode): HTMLElement {
       throw new Error(`getLine: expected parentNode to exist`);
     }
     if (isFocusable(p)) {
-      if (isInline(p)) {
+      if (isPartOfLine(p)) {
         continue;
       }
       return p;

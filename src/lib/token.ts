@@ -116,43 +116,9 @@ function tokenizeShallow(
   }
 }
 
-// function tokenizeInline(
-//   el: HTMLElement,
-//   tokenized?: WeakMap<HTMLElement, boolean>,
-// ): void {
-//   if (tokenized?.has(el)) {
-//     return;
-//   }
-//   el.normalize();
-//   tokenized?.set(el, true);
-//   for (let child = el.firstChild; child; ) {
-//     if (isInline(child)) {
-//       tokenizeInline(child as HTMLElement);
-//     }
-//     const next = child.nextSibling;
-//     replaceTextNode(child);
-//     child = next;
-//   }
-// }
-
 /**
  * Depth first traversal of F_ELEM's, each F_ELEM is horizontally tokenized with tokenizeShallow.
  */
-// function tokenizeRec(
-//   root: HTMLElement,
-//   tokenized?: WeakMap<HTMLElement, boolean>,
-// ): void {
-//   if (!isFocusable(root)) {
-//     throw new Error('Can only tokenize an F_ELEM');
-//   }
-//   tokenizeShallow(root, tokenized);
-//   tokenized?.set(root, true);
-//   for (const el of walkIter(root, root)) {
-//     tokenizeShallow(el, tokenized);
-//     tokenized?.set(el, true);
-//   }
-// }
-
 function tokenizeRec(
   root: HTMLElement,
   ceiling: Node,
@@ -162,7 +128,7 @@ function tokenizeRec(
     throw new Error('Can only tokenize an F_ELEM');
   }
   root.normalize();
-  debugger;
+  tokenizeShallow(root);
   for (const el of findNextNode(root, ceiling, {
     ignore: (el) => {
       if (!el) {
@@ -177,19 +143,7 @@ function tokenizeRec(
       return el.nodeType !== Node.ELEMENT_NODE;
     },
   })) {
-    // if (el.nodeType === Node.ELEMENT_NODE && !isToken(el)) {
     tokenizeShallow(el, tokenized);
-    // }
-    // if (el.nodeType === Node.TEXT_NODE) {
-    //   // console.log('<< replace', el);
-    //   if (!el.parentNode) {
-    //     const msg = `tokenizeRec: element doesn't have a parentNode`;
-    //     console.error(msg, el);
-    //     throw new Error(msg);
-    //   }
-    //   tokenized?.set(el.parentNode, true);
-    //   replaceTextNode(el);
-    // }
   }
   tokenized?.set(root, true);
 }
@@ -202,9 +156,7 @@ export function tokenize(
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
   const ceiling = getLine(el);
-  console.log('ceiling', ceiling);
   tokenizeRec(ceiling, ceiling, tokenized);
-  // tokenizeInline(el, tokenized);
 }
 
 // #endregion

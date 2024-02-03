@@ -6,8 +6,8 @@ import {
   getNextSiblingNode,
   getParent,
   getPreviousSiblingNode,
-  walkIter,
-  walkIterReverse,
+  findNextNode,
+  findPreviousNode,
 } from './walk';
 
 export class DocumentAction {
@@ -20,10 +20,14 @@ export class DocumentAction {
    */
   REC_NEXT(): void {
     if (!this.#document.active) return;
-    for (const next of walkIter(this.#document.active, this.#document.root, {
-      ignore: notIsFocusable,
-      ignoreDescendents,
-    })) {
+    for (const next of findNextNode(
+      this.#document.active,
+      this.#document.root,
+      {
+        ignore: notIsFocusable,
+        ignoreDescendents,
+      },
+    )) {
       this.FOCUS(next);
       break;
     }
@@ -34,7 +38,7 @@ export class DocumentAction {
    */
   REC_PREV(): void {
     if (!this.#document.active) return;
-    for (const next of walkIterReverse(
+    for (const next of findPreviousNode(
       this.#document.active,
       this.#document.root,
       { ignore: notIsFocusable, ignoreDescendents },

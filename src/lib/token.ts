@@ -1,6 +1,6 @@
 import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
 import { isFocusable } from './focus';
-import { walkIter, walkIterReverse } from './walk';
+import { findNextNode, findPreviousNode } from './walk';
 
 /**
  * Detect if an F_ELEM is an inline element.
@@ -163,7 +163,7 @@ function tokenizeRec(
   }
   root.normalize();
   debugger;
-  for (const el of walkIter(root, ceiling, {
+  for (const el of findNextNode(root, ceiling, {
     ignore: (el) => {
       if (!el) {
         return true;
@@ -216,7 +216,7 @@ export function tokenize(
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
   // This will walk TOKEN's because we're not setting ignore / ignoreDescendents
-  for (const prev of walkIterReverse(el, getLine(el))) {
+  for (const prev of findPreviousNode(el, getLine(el))) {
     if (isToken2(prev)) {
       return prev;
     }
@@ -229,7 +229,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
   // This will walk TOKEN's because we're not setting ignore / ignoreDescendents
-  for (const next of walkIter(el, getLine(el))) {
+  for (const next of findNextNode(el, getLine(el))) {
     if (isToken2(next)) {
       return next;
     }

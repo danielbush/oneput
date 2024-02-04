@@ -7,6 +7,11 @@ export class JsedCursor implements IJsedCursor {
    * The token the cursor is currently on.
    */
   #token: HTMLElement;
+  #setToken(el: HTMLElement) {
+    this.#token.classList.remove('jsed-token-focus');
+    el.classList.add('jsed-token-focus');
+    this.#token = el;
+  }
   constructor(params: {
     document: JsedDocument;
     token: HTMLElement;
@@ -21,7 +26,7 @@ export class JsedCursor implements IJsedCursor {
   moveNext() {
     const nextToken = token.getNextSibling(this.#token);
     if (nextToken) {
-      this.#token = nextToken;
+      this.#setToken(nextToken);
       this.#document.actions.FOCUS(nextToken);
       // this.#document.actions.FOCUS(nextToken, { keepTokenFocus: true });
     }
@@ -29,19 +34,20 @@ export class JsedCursor implements IJsedCursor {
   movePrevious() {
     const prevToken = token.getPreviousSibling(this.#token);
     if (prevToken) {
-      this.#token = prevToken;
+      this.#setToken(prevToken);
       this.#document.actions.FOCUS(prevToken);
       // this.#document.actions.FOCUS(prevToken, { keepTokenFocus: true });
     }
   }
   replace(val: string) {
-    const maybeNewTok = token.replaceText(this.#token, val);
-    if (this.#token !== maybeNewTok) {
-      // We don't want to cause a focus event unless the TOKEN has changed.  Set
-      // the replaced flag to indicate to the consumer that the activeToken is
-      // in fact replaced.
-      this.#document.actions.FOCUS(maybeNewTok, { replaced: true });
-    }
+    token.replaceText(this.#token, val);
+    // const maybeNewTok = token.replaceText(this.#token, val);
+    // if (this.#token !== maybeNewTok) {
+    //   // We don't want to cause a focus event unless the TOKEN has changed.  Set
+    //   // the replaced flag to indicate to the consumer that the activeToken is
+    //   // in fact replaced.
+    //   this.#document.actions.FOCUS(maybeNewTok, { replaced: true });
+    // }
   }
   delete() {
     const newToken = token.remove(this.#token);

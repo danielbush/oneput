@@ -160,7 +160,16 @@ export class DocumentAction {
     //   this.FOCUS(el.parentNode, { skipNotify: true, keepTokenFocus });
     //   return;
     // }
-    if (!isFocusable(el)) {
+    if (token.isToken2(el) && this.#document.listeners.FOCUS) {
+      this.#document.listeners.FOCUS({
+        type: 'FOCUS',
+        targetType: 'TOKEN',
+        token: el,
+        value: token.getValue(el),
+      });
+      // this.FOCUS(el.parentNode);  // don't do this?
+      return;
+    } else if (!isFocusable(el)) {
       return;
     }
     if (this.#document.listeners.FOCUS && !params?.skipNotify) {

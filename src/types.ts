@@ -54,40 +54,40 @@ export type JsedDocument = {
  *
  * The listener to this event will decide if the TOKEN in this event should become the active token based on this event.
  */
-// export type JsedTokenFocusEvent = {
-//   type: 'FOCUS';
-//   targetType: 'TOKEN';
-//   /**
-//    * The TOKEN (usually a span element).
-//    */
-//   token: HTMLElement;
-//   /**
-//    * The string value of the TOKEN .
-//    */
-//   value: string;
-//   /**
-//    * The focused TOKEN is a new token but it has replaced the previously focused token.
-//    */
-//   replaced: boolean;
-//   /**
-//    * True if `token` is on a different line to the currently active `token`.  If there is no previously active token, return true.
-//    *
-//    * A line is defined as LINE (see DEFINITIONS.md) .
-//    *
-//    * This flag also supports TOKEN_FOCUS_PARENT_ONLY which allows us to focus on an F_ELEM on the first click/touch rather than focusing on a token.
-//    */
-//   lineChange: boolean;
-// };
-
 /**
  * Events that are emitted due to navigation and selection of F_ELEM's within the document (aka the FOCUS action).
  *
  * The listener to this event will decide if the F_ELEM should become the active FOCUS based on this event.
  */
-export type JsedFocusEvent = {
-  type: 'FOCUS';
-  targetType: 'F_ELEM';
-};
+export type JsedFocusEvent =
+  | {
+      type: 'FOCUS';
+      targetType: 'F_ELEM';
+    }
+  | {
+      type: 'FOCUS';
+      targetType: 'TOKEN';
+      /**
+       * The TOKEN (usually a span element).
+       */
+      token: HTMLElement;
+      /**
+       * The string value of the TOKEN .
+       */
+      value: string;
+      /**
+       * The focused TOKEN is a new token but it has replaced the previously focused token.
+       */
+      // replaced: boolean;
+      /**
+       * True if `token` is on a different line to the currently active `token`.  If there is no previously active token, return true.
+       *
+       * A line is defined as LINE (see DEFINITIONS.md) .
+       *
+       * This flag also supports TOKEN_FOCUS_PARENT_ONLY which allows us to focus on an F_ELEM on the first click/touch rather than focusing on a token.
+       */
+      // lineChange: boolean;
+    };
 
 export type IJsedCursor = {
   /**

@@ -1,5 +1,5 @@
 import { JsedDocument } from '../types';
-import { SBR_FOCUS_SIBLING } from './constants';
+import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './constants';
 import { ignoreDescendents, isFocusable, notIsFocusable } from './focus';
 import * as token from './token';
 import {
@@ -12,6 +12,11 @@ import {
 
 export class DocumentAction {
   #document: Omit<JsedDocument, 'actions'>;
+  /**
+   * The focus F_ELEM .  If a TOKEN is focused, this will be set to the parent
+   * F_ELEM for that TOKEN.
+   */
+  #FOCUS?: HTMLElement;
   constructor(doc: Omit<JsedDocument, 'actions'>) {
     this.#document = doc;
   }
@@ -135,6 +140,17 @@ export class DocumentAction {
   //   }
   // }
 
+  #updateFocus(el: HTMLElement) {
+    if (!isFocusable(el)) {
+      throw new Error('#updateFocus: expects an F_ELEM');
+    }
+    if (this.#FOCUS) {
+      this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
+    }
+    this.#FOCUS = el;
+    this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
+  }
+
   /**
    * Focus an element if it is an F_ELEM, sets doc.active.
    *
@@ -167,7 +183,8 @@ export class DocumentAction {
         token: el,
         value: token.getValue(el),
       });
-      // this.FOCUS(el.parentNode);  // don't do this?
+      // Update the F_ELEM that contains the TOKEN.
+      this.#updateFocus(el.parentNode as HTMLElement);
       return;
     } else if (!isFocusable(el)) {
       return;
@@ -181,11 +198,13 @@ export class DocumentAction {
         return;
       }
     }
-    if (this.#document.active) {
-      this.#document.active.classList.remove('jsed-focus');
-    }
-    el.classList.add('jsed-focus');
-    this.#document.active = el as HTMLElement;
+    this.#updateFocus(el);
+    // if (this.#document.active) {
+    //   this.#document.active.classList.remove('jsed-focus');
+    // }
+    // el.classList.add('jsed-focus');
+    // this.#document.active = el as HTMLElement;
+    // ---
     // if (!keepTokenFocus) {
     //   this.#CLEAR_TOKEN_FOCUS();
     // }

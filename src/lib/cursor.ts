@@ -1,4 +1,5 @@
 import type { JsedDocument, IJsedCursor } from '../types';
+import { JSED_TOKEN_FOCUS_CLASS } from './constants';
 import * as token from './token';
 
 export class JsedCursor implements IJsedCursor {
@@ -7,9 +8,9 @@ export class JsedCursor implements IJsedCursor {
    * The token the cursor is currently on.
    */
   #token: HTMLElement;
-  #setToken(el: HTMLElement) {
-    this.#token.classList.remove('jsed-token-focus');
-    el.classList.add('jsed-token-focus');
+  setToken(el: HTMLElement) {
+    this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
+    el.classList.add(JSED_TOKEN_FOCUS_CLASS);
     this.#token = el;
   }
   constructor(params: {
@@ -17,8 +18,10 @@ export class JsedCursor implements IJsedCursor {
     token: HTMLElement;
     ceiling: HTMLElement | null;
   }) {
+    console.log('<< created cursor');
     this.#document = params.document;
-    this.#token = params.token;
+    this.#token = params.token; // ts
+    this.setToken(params.token);
   }
   getToken() {
     return this.#token;
@@ -26,7 +29,7 @@ export class JsedCursor implements IJsedCursor {
   moveNext() {
     const nextToken = token.getNextSibling(this.#token);
     if (nextToken) {
-      this.#setToken(nextToken);
+      this.setToken(nextToken);
       this.#document.actions.FOCUS(nextToken);
       // this.#document.actions.FOCUS(nextToken, { keepTokenFocus: true });
     }
@@ -34,7 +37,7 @@ export class JsedCursor implements IJsedCursor {
   movePrevious() {
     const prevToken = token.getPreviousSibling(this.#token);
     if (prevToken) {
-      this.#setToken(prevToken);
+      this.setToken(prevToken);
       this.#document.actions.FOCUS(prevToken);
       // this.#document.actions.FOCUS(prevToken, { keepTokenFocus: true });
     }
@@ -68,5 +71,7 @@ export class JsedCursor implements IJsedCursor {
     return false;
   }
   prepend() {}
-  close() {}
+  close() {
+    this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
+  }
 }

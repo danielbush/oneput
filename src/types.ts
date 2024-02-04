@@ -90,6 +90,7 @@ export type JsedFocusEvent =
     };
 
 export type IJsedCursor = {
+  setToken: (token: HTMLElement) => void;
   /**
    * Return the active TOKEN that the cursor is on.
    */

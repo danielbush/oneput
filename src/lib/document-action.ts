@@ -93,47 +93,47 @@ export class DocumentAction {
   /**
    * Determine if TOKEN_FOCUS is applicable to the element and if so (1) focus the parent F_ELEM adn (2) determine if the listener wants to do a TOKEN_FOCUS.
    */
-  #TOKEN_FOCUS(
-    el: HTMLElement,
-    params: {
-      replaced: boolean;
-    } = { replaced: false },
-  ): void {
-    let ok = false;
-    if (this.#document.listeners.TOKEN_FOCUS) {
-      ok = this.#document.listeners.TOKEN_FOCUS({
-        type: 'FOCUS',
-        targetType: 'TOKEN',
-        token: el,
-        value: token.getValue(el),
-        replaced: params.replaced,
-        // lineChange: el.parentElement !== this.#document.active,
-        lineChange:
-          !!this.#document.active &&
-          token.getLine(el) !== token.getLine(this.#document.active),
-      });
-    }
-    if (ok) {
-      if (this.#document.activeToken) {
-        this.#document.activeToken.classList.remove('jsed-token-focus');
-        this.#document.activeToken = null;
-      }
-      this.#document.activeToken = el;
-      el.classList.add('jsed-token-focus');
-    }
-  }
+  // #TOKEN_FOCUS(
+  //   el: HTMLElement,
+  //   params: {
+  //     replaced: boolean;
+  //   } = { replaced: false },
+  // ): void {
+  //   let ok = false;
+  //   if (this.#document.listeners.TOKEN_FOCUS) {
+  //     ok = this.#document.listeners.TOKEN_FOCUS({
+  //       type: 'FOCUS',
+  //       targetType: 'TOKEN',
+  //       token: el,
+  //       value: token.getValue(el),
+  //       replaced: params.replaced,
+  //       // lineChange: el.parentElement !== this.#document.active,
+  //       lineChange:
+  //         !!this.#document.active &&
+  //         token.getLine(el) !== token.getLine(this.#document.active),
+  //     });
+  //   }
+  //   if (ok) {
+  //     if (this.#document.activeToken) {
+  //       this.#document.activeToken.classList.remove('jsed-token-focus');
+  //       this.#document.activeToken = null;
+  //     }
+  //     this.#document.activeToken = el;
+  //     el.classList.add('jsed-token-focus');
+  //   }
+  // }
 
   /**
    * Clean up an old TOKEN_FOCUS for situations where FOCUS is called on an unrelated F_ELEM.
    */
-  #CLEAR_TOKEN_FOCUS() {
-    if (this.#document.activeToken) {
-      if (this.#document.activeToken.parentNode !== this.#document.active) {
-        this.#document.activeToken.classList.remove('jsed-token-focus');
-        this.#document.activeToken = null;
-      }
-    }
-  }
+  // #CLEAR_TOKEN_FOCUS() {
+  //   if (this.#document.activeToken) {
+  //     if (this.#document.activeToken.parentNode !== this.#document.active) {
+  //       this.#document.activeToken.classList.remove('jsed-token-focus');
+  //       this.#document.activeToken = null;
+  //     }
+  //   }
+  // }
 
   /**
    * Focus an element if it is an F_ELEM, sets doc.active.
@@ -147,19 +147,19 @@ export class DocumentAction {
     params?: {
       skipNotify?: boolean;
       replaced?: boolean;
-      keepTokenFocus?: boolean;
+      // keepTokenFocus?: boolean;
     },
   ): void {
-    const keepTokenFocus = !!params?.keepTokenFocus;
-    if (token.isToken2(el)) {
-      const replaced = !!params?.replaced;
-      this.#TOKEN_FOCUS(el, { replaced });
-      // Always focus the parent F_ELEM of the token.
-      // Use skipNotify because we won't issue a FOCUS event.  The event generated
-      // by the TOKEN_FOCUS contains all the information we need.
-      this.FOCUS(el.parentNode, { skipNotify: true, keepTokenFocus });
-      return;
-    }
+    // const keepTokenFocus = !!params?.keepTokenFocus;
+    // if (token.isToken2(el)) {
+    //   const replaced = !!params?.replaced;
+    //   // this.#TOKEN_FOCUS(el, { replaced });
+    //   // Always focus the parent F_ELEM of the token.
+    //   // Use skipNotify because we won't issue a FOCUS event.  The event generated
+    //   // by the TOKEN_FOCUS contains all the information we need.
+    //   this.FOCUS(el.parentNode, { skipNotify: true, keepTokenFocus });
+    //   return;
+    // }
     if (!isFocusable(el)) {
       return;
     }
@@ -177,9 +177,9 @@ export class DocumentAction {
     }
     el.classList.add('jsed-focus');
     this.#document.active = el as HTMLElement;
-    if (!keepTokenFocus) {
-      this.#CLEAR_TOKEN_FOCUS();
-    }
+    // if (!keepTokenFocus) {
+    //   this.#CLEAR_TOKEN_FOCUS();
+    // }
     token.tokenize(el, this.#document.tokenized);
     this.SIB_HIGHLIGHT();
   }

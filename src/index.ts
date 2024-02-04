@@ -2,7 +2,7 @@ import {
   JsedDocument,
   IJsedCursor,
   JsedFocusEvent,
-  JsedTokenFocusEvent,
+  // JsedTokenFocusEvent,
 } from './types';
 import { start } from './app/start';
 
@@ -15,6 +15,6 @@ export { start };
 export type {
   JsedDocument,
   JsedFocusEvent,
-  JsedTokenFocusEvent,
+  // JsedTokenFocusEvent,
   IJsedCursor as JsedCursor,
 };

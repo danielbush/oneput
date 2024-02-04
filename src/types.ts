@@ -18,7 +18,7 @@ export type JsedDocument = {
   /**
    * The currently selected TOKEN (may be none).
    */
-  activeToken: HTMLElement | null;
+  // activeToken: HTMLElement | null;
   /**
    * Handles showCurrentSiblings.
    */
@@ -37,7 +37,7 @@ export type JsedDocument = {
     /**
      * Register a listener for TOKEN_FOCUS events.  Consumer can decide if the TOKEN_FOCUS event should occur.
      */
-    TOKEN_FOCUS: null | ((evt: JsedTokenFocusEvent) => boolean);
+    // TOKEN_FOCUS: null | ((evt: JsedTokenFocusEvent) => boolean);
   };
   unload: () => void;
   /**
@@ -51,33 +51,33 @@ export type JsedDocument = {
 
 /**
  * Events that are emitted due to navigation and selection of TOKEN's within the document (aka the TOKEN_FOCUS action).
- * 
+ *
  * The listener to this event will decide if the TOKEN in this event should become the active token based on this event.
  */
-export type JsedTokenFocusEvent = {
-  type: 'FOCUS';
-  targetType: 'TOKEN';
-  /**
-   * The TOKEN (usually a span element).
-   */
-  token: HTMLElement;
-  /**
-   * The string value of the TOKEN .
-   */
-  value: string;
-  /**
-   * The focused TOKEN is a new token but it has replaced the previously focused token.
-   */
-  replaced: boolean;
-  /**
-   * True if `token` is on a different line to the currently active `token`.  If there is no previously active token, return true.
-   *
-   * A line is defined as LINE (see DEFINITIONS.md) .
-   *
-   * This flag also supports TOKEN_FOCUS_PARENT_ONLY which allows us to focus on an F_ELEM on the first click/touch rather than focusing on a token.
-   */
-  lineChange: boolean;
-};
+// export type JsedTokenFocusEvent = {
+//   type: 'FOCUS';
+//   targetType: 'TOKEN';
+//   /**
+//    * The TOKEN (usually a span element).
+//    */
+//   token: HTMLElement;
+//   /**
+//    * The string value of the TOKEN .
+//    */
+//   value: string;
+//   /**
+//    * The focused TOKEN is a new token but it has replaced the previously focused token.
+//    */
+//   replaced: boolean;
+//   /**
+//    * True if `token` is on a different line to the currently active `token`.  If there is no previously active token, return true.
+//    *
+//    * A line is defined as LINE (see DEFINITIONS.md) .
+//    *
+//    * This flag also supports TOKEN_FOCUS_PARENT_ONLY which allows us to focus on an F_ELEM on the first click/touch rather than focusing on a token.
+//    */
+//   lineChange: boolean;
+// };
 
 /**
  * Events that are emitted due to navigation and selection of F_ELEM's within the document (aka the FOCUS action).

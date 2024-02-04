@@ -22,12 +22,12 @@ export function makeDocument(root: HTMLElement): JsedDocument {
     set active(el: HTMLElement | null) {
       ACTIVE = el;
     },
-    activeToken: null,
+    // activeToken: null,
     SIB_HIGHLIGHT: new Set(),
     tokenized: new WeakMap(),
     listeners: {
       FOCUS: null,
-      TOKEN_FOCUS: null,
+      // TOKEN_FOCUS: null,
     },
     unload: () => {
       // Placeholder, see below.

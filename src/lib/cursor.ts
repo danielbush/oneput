@@ -3,43 +3,40 @@ import * as token from './token';
 
 export class JsedCursor implements IJsedCursor {
   #document: JsedDocument;
+  /**
+   * The token the cursor is currently on.
+   */
+  #token: HTMLElement;
   constructor(params: {
     document: JsedDocument;
     token: HTMLElement;
     ceiling: HTMLElement | null;
   }) {
     this.#document = params.document;
-  }
-  #getActiveTokenOrDie(): HTMLElement {
-    if (this.#document.activeToken) {
-      return this.#document.activeToken;
-    }
-    const err = new Error('JsedCursor: activeToken not set when it should be!');
-    throw err;
+    this.#token = params.token;
   }
   getToken() {
-    return this.#getActiveTokenOrDie();
+    return this.#token;
   }
   moveNext() {
-    const tok = this.#getActiveTokenOrDie();
-    const nextToken = token.getNextSibling(tok);
+    const nextToken = token.getNextSibling(this.#token);
     if (nextToken) {
+      this.#token = nextToken;
       this.#document.actions.FOCUS(nextToken);
       this.#document.actions.FOCUS(nextToken, { keepTokenFocus: true });
     }
   }
   movePrevious() {
-    const tok = this.#getActiveTokenOrDie();
-    const prevToken = token.getPreviousSibling(tok);
+    const prevToken = token.getPreviousSibling(this.#token);
     if (prevToken) {
+      this.#token = prevToken;
       this.#document.actions.FOCUS(prevToken);
       this.#document.actions.FOCUS(prevToken, { keepTokenFocus: true });
     }
   }
   replace(val: string) {
-    const tok = this.#getActiveTokenOrDie();
-    const maybeNewTok = token.replaceText(tok, val);
-    if (tok !== maybeNewTok) {
+    const maybeNewTok = token.replaceText(this.#token, val);
+    if (this.#token !== maybeNewTok) {
       // We don't want to cause a focus event unless the TOKEN has changed.  Set
       // the replaced flag to indicate to the consumer that the activeToken is
       // in fact replaced.
@@ -47,14 +44,14 @@ export class JsedCursor implements IJsedCursor {
     }
   }
   delete() {
-    const tok = this.#getActiveTokenOrDie();
-    const newToken = token.remove(tok);
+    const newToken = token.remove(this.#token);
+    this.#token = newToken;
     this.#document.actions.FOCUS(newToken);
     return;
   }
   append(val: string): HTMLElement {
     const tok = token.createToken(val);
-    token.insertAfter(tok, this.#getActiveTokenOrDie());
+    token.insertAfter(tok, this.#token);
     return tok;
   }
   focus(el: HTMLElement): boolean {

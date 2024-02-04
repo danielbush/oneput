@@ -10,6 +10,7 @@ export function isPartOfLine(el: ChildNode | ParentNode | null): boolean {
   if (!el) {
     throw new Error(`isInline called on null or undefined`);
   }
+  if (isToken(el)) return true;
   if (!isFocusable(el)) return false;
   const styles = window.getComputedStyle(el);
   if (styles.float !== 'none') {
@@ -175,7 +176,8 @@ export function tokenize(
  * Get previous contiguous or inline TOKEN.
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
-  for (const prev of findPreviousNode(el, getLine(el), {
+  const line = getLine(el);
+  for (const prev of findPreviousNode(el, line, {
     ignore: notIsPartOfLine,
   })) {
     if (isToken2(prev)) {
@@ -189,7 +191,8 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
  * Get next contiguous or inline TOKEN.
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
-  for (const next of findNextNode(el, getLine(el), {
+  const line = getLine(el);
+  for (const next of findNextNode(el, line, {
     ignore: notIsPartOfLine,
   })) {
     if (isToken2(next)) {

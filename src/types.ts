@@ -1,4 +1,4 @@
-import type { DocumentAction } from './lib/document-action';
+import type { Navigator } from './lib/navigator';
 
 export type JsedDocument = {
   /**
@@ -24,7 +24,7 @@ export type JsedDocument = {
    * nodes as direct descendents.
    */
   tokenized: WeakMap<HTMLElement, boolean>;
-  actions: DocumentAction;
+  actions: Navigator;
   listeners: {
     /**
      * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.

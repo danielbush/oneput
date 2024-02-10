@@ -10,7 +10,7 @@ import {
   findPreviousNode,
 } from './walk';
 
-export class DocumentAction {
+export class Navigator {
   #document: Omit<JsedDocument, 'actions'>;
   /**
    * The focus F_ELEM .  If a TOKEN is focused, this will be set to the parent

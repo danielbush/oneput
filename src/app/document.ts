@@ -1,4 +1,4 @@
-import { DocumentAction } from '../lib/document-action';
+import { Navigator } from '../lib/navigator';
 import { JsedCursor } from '../lib/cursor';
 import { JsedDocument } from '../types';
 
@@ -30,6 +30,6 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       return new JsedCursor({ document: document!, token, ceiling });
     },
   };
-  document = Object.assign(base, { actions: new DocumentAction(base) });
+  document = Object.assign(base, { actions: new Navigator(base) });
   return document;
 }

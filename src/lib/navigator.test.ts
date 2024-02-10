@@ -1,13 +1,13 @@
 import { describe, it, test, expect, vi } from 'vitest';
 import { byId, div, frag, li, makeRoot, p, script, ul } from '../../test/util';
-import { DocumentAction } from './document-action';
+import { Navigator } from './navigator';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'p1'));
     const p1 = doc.document.getElementById('p1') as HTMLElement;
-    const action = new DocumentAction(doc);
+    const action = new Navigator(doc);
 
     // act
     action.FOCUS(p1);
@@ -21,7 +21,7 @@ describe('FOCUS', () => {
     const doc = makeRoot(frag(script({ id: 'p1' }, 'p1')));
     const p1 = doc.document.getElementById('p1') as HTMLElement;
     const focus = vi.spyOn(p1, 'focus');
-    const action = new DocumentAction(doc);
+    const action = new Navigator(doc);
 
     // act
     action.FOCUS(p1);
@@ -38,7 +38,7 @@ describe('SIB_HIGHLIGHT', () => {
       frag(p('p1'), p({ id: 'p2' }, 'p2'), p('p3'), p('p4')),
     );
     byId(doc, 'p2').focus();
-    const action = new DocumentAction(doc);
+    const action = new Navigator(doc);
 
     // act
     action.SIB_HIGHLIGHT();
@@ -60,7 +60,7 @@ test('REC_NEXT should recurse down', () => {
       ),
     ),
   );
-  const action = new DocumentAction(doc);
+  const action = new Navigator(doc);
 
   // act
   action.REC_NEXT();
@@ -87,7 +87,7 @@ test('REC_PREV should recurse up', () => {
   const doc = makeRoot(
     div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))),
   );
-  const action = new DocumentAction(doc);
+  const action = new Navigator(doc);
 
   // act
   action.REC_PREV();
@@ -116,7 +116,7 @@ test('SIB_NEXT should walk to next sibling', () => {
       li({ id: 'li3' }, 'item 3'),
     ),
   );
-  const action = new DocumentAction(doc);
+  const action = new Navigator(doc);
 
   // act
   action.SIB_NEXT();
@@ -139,7 +139,7 @@ test('SIB_PREV should walk to previous sibling', () => {
       li({ id: 'li3' }, 'item 3'),
     ),
   );
-  const action = new DocumentAction(doc);
+  const action = new Navigator(doc);
 
   // act
   action.SIB_PREV();
@@ -157,7 +157,7 @@ test('UP can walk up successive parent elements', () => {
   const doc = makeRoot(
     div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))),
   );
-  const action = new DocumentAction(doc);
+  const action = new Navigator(doc);
   action.FOCUS(byId(doc, 'id3'));
 
   // act
@@ -185,7 +185,7 @@ describe('ISLAND', () => {
       ),
     );
     // doc.active = byId(doc, 'div1');
-    const action = new DocumentAction(doc);
+    const action = new Navigator(doc);
 
     // act
     action.REC_NEXT();

@@ -2,6 +2,7 @@ import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
 import { isFocusable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
 
+// #region utils
 /**
  * Detect if an F_ELEM is acting like an inline element eg an em-tag - such
  * elements are considered part of the visual line of text.
@@ -52,6 +53,7 @@ export function isPlaceholderToken(el: HTMLElement): boolean {
   }
   return false;
 }
+// #endregion
 
 // #region Tokenization
 
@@ -146,9 +148,6 @@ function tokenizeRec(
       if (isToken(el)) {
         return true;
       }
-      if (el.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
       return el.nodeType !== Node.ELEMENT_NODE;
     },
   })) {
@@ -158,7 +157,7 @@ function tokenizeRec(
 }
 
 /**
- * Tokenize the text of an F_ELEM.  Only direct descendent text.
+ * Tokenize the text of an F_ELEM.
  */
 export function tokenize(
   el: HTMLElement,

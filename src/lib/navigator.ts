@@ -39,7 +39,6 @@ export class Navigator {
    */
   REC_PREV(): HTMLElement | void {
     if (!this.#FOCUS) return;
-    debugger;
     for (const next of findPreviousNode(this.#FOCUS, this.#document.root, {
       ignore: notIsFocusable,
       ignoreDescendents,

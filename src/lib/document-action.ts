@@ -194,11 +194,13 @@ export class DocumentAction {
         type: 'FOCUS',
         targetType: 'F_ELEM',
       });
+      if (ok) {
+        this.#updateFocus(el);
+      }
       if (!ok) {
         return;
       }
     }
-    this.#updateFocus(el);
     // if (this.#document.active) {
     //   this.#document.active.classList.remove('jsed-focus');
     // }

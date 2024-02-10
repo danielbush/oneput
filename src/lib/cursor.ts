@@ -18,7 +18,6 @@ export class JsedCursor implements IJsedCursor {
     token: HTMLElement;
     ceiling: HTMLElement | null;
   }) {
-    console.log('<< created cursor');
     this.#document = params.document;
     this.#token = params.token; // ts
     this.setToken(params.token);

@@ -30,10 +30,6 @@ export type JsedDocument = {
      * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.
      */
     FOCUS: null | ((evt: JsedFocusEvent) => boolean);
-    /**
-     * Register a listener for TOKEN_FOCUS events.  Consumer can decide if the TOKEN_FOCUS event should occur.
-     */
-    // TOKEN_FOCUS: null | ((evt: JsedTokenFocusEvent) => boolean);
   };
   unload: () => void;
   /**
@@ -71,18 +67,6 @@ export type JsedFocusEvent =
        * The string value of the TOKEN .
        */
       value: string;
-      /**
-       * The focused TOKEN is a new token but it has replaced the previously focused token.
-       */
-      // replaced: boolean;
-      /**
-       * True if `token` is on a different line to the currently active `token`.  If there is no previously active token, return true.
-       *
-       * A line is defined as LINE (see DEFINITIONS.md) .
-       *
-       * This flag also supports TOKEN_FOCUS_PARENT_ONLY which allows us to focus on an F_ELEM on the first click/touch rather than focusing on a token.
-       */
-      // lineChange: boolean;
     };
 
 export type IJsedCursor = {

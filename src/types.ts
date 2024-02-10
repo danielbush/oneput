@@ -12,10 +12,6 @@ export type JsedDocument = {
   document: Document;
   window: Window;
   /**
-   * The focused element (may be none).  Should not be a TOKEN .
-   */
-  active: HTMLElement | null;
-  /**
    * The currently selected TOKEN (may be none).
    */
   // activeToken: HTMLElement | null;

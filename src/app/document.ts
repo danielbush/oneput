@@ -3,7 +3,6 @@ import { JsedCursor } from '../lib/cursor';
 import { JsedDocument } from '../types';
 
 export function makeDocument(root: HTMLElement): JsedDocument {
-  let ACTIVE: HTMLElement | null = null;
   let document: JsedDocument | null = null;
   const base: Omit<JsedDocument, 'actions'> = {
     root,
@@ -15,12 +14,6 @@ export function makeDocument(root: HTMLElement): JsedDocument {
         throw new Error('defaultView not set');
       }
       return root.ownerDocument.defaultView!;
-    },
-    get active(): HTMLElement | null {
-      return ACTIVE;
-    },
-    set active(el: HTMLElement | null) {
-      ACTIVE = el;
     },
     // activeToken: null,
     SIB_HIGHLIGHT: new Set(),

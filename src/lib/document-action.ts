@@ -23,33 +23,29 @@ export class DocumentAction {
   /**
    * Find next using depth first recursion.
    */
-  REC_NEXT(): void {
-    if (!this.#document.active) return;
-    for (const next of findNextNode(
-      this.#document.active,
-      this.#document.root,
-      {
-        ignore: notIsFocusable,
-        ignoreDescendents,
-      },
-    )) {
+  REC_NEXT(): HTMLElement | void {
+    if (!this.#FOCUS) return;
+    for (const next of findNextNode(this.#FOCUS, this.#document.root, {
+      ignore: notIsFocusable,
+      ignoreDescendents,
+    })) {
       this.FOCUS(next);
-      break;
+      return next as HTMLElement;
     }
   }
 
   /**
    * Find previous using depth first recursion.
    */
-  REC_PREV(): void {
-    if (!this.#document.active) return;
-    for (const next of findPreviousNode(
-      this.#document.active,
-      this.#document.root,
-      { ignore: notIsFocusable, ignoreDescendents },
-    )) {
+  REC_PREV(): HTMLElement | void {
+    if (!this.#FOCUS) return;
+    debugger;
+    for (const next of findPreviousNode(this.#FOCUS, this.#document.root, {
+      ignore: notIsFocusable,
+      ignoreDescendents,
+    })) {
       this.FOCUS(next);
-      break;
+      return next as HTMLElement;
     }
   }
 
@@ -57,8 +53,8 @@ export class DocumentAction {
    * Find next sibling element if there is one.
    */
   SIB_NEXT(): void {
-    if (!this.#document.active) return;
-    const next = getNextSiblingNode(this.#document.active, {
+    if (!this.#FOCUS) return;
+    const next = getNextSiblingNode(this.#FOCUS, {
       ignore: notIsFocusable,
       ignoreDescendents,
     });
@@ -72,8 +68,8 @@ export class DocumentAction {
    * Find previous sibling element if there is one.
    */
   SIB_PREV(): void {
-    if (!this.#document.active) return;
-    const next = getPreviousSiblingNode(this.#document.active, {
+    if (!this.#FOCUS) return;
+    const next = getPreviousSiblingNode(this.#FOCUS, {
       ignore: notIsFocusable,
       ignoreDescendents,
     });
@@ -87,8 +83,8 @@ export class DocumentAction {
    * Find next parent.
    */
   UP(): void {
-    if (!this.#document.active) return;
-    const next = getParent(this.#document.active, this.#document.root);
+    if (!this.#FOCUS) return;
+    const next = getParent(this.#FOCUS, this.#document.root);
     if (next) {
       this.FOCUS(next);
     }
@@ -155,7 +151,7 @@ export class DocumentAction {
    */
   SIB_HIGHLIGHT(): void {
     this.#SIB_HIGHLIGHT_CLEAR();
-    const active = this.#document.active;
+    const active = this.#FOCUS;
     const pnode = active?.parentElement;
     if (active && pnode && isFocusable(active)) {
       for (const child of pnode.children) {

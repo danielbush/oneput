@@ -58,6 +58,7 @@ export function byId(doc: JsedDocument, id: string): HTMLElement {
 }
 
 export const div = makeTag('div');
+export const em = makeTag('em');
 export const p = makeTag('p');
 export const h1 = makeTag('h1');
 export const h2 = makeTag('h2');

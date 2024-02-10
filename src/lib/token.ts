@@ -122,7 +122,9 @@ function tokenizeShallow(
   }
   // el.normalize();
   tokenized?.set(el, true);
-  for (let child = el.firstChild; child; child = child.nextSibling) {
+  const childNodes = el.childNodes; // record this before we mutate!
+  for (const child of childNodes) {
+    console.log('replace', child);
     replaceTextNode(child);
   }
 }
@@ -148,7 +150,10 @@ function tokenizeRec(
       if (isToken(el)) {
         return true;
       }
-      return el.nodeType !== Node.ELEMENT_NODE;
+      return !(
+        // Allow text nodes to ensure we capture things like 'foo <em>bar</em> baz'.
+        (el.nodeType === Node.ELEMENT_NODE || el.nodeType === Node.TEXT_NODE)
+      );
     },
   })) {
     tokenizeShallow(el, tokenized);

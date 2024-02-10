@@ -1,32 +1,25 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`tokenize > should token a node with text 1`] = `
+exports[`tokenize > <p>foo <em>bar</em> baz</p> 1`] = `
 <p
   id="p1"
 >
   <span
     class="jsed-token"
   >
-    Here
+    foo
   </span>
-   
+  <em>
+    <span
+      class="jsed-token"
+    >
+      bar
+    </span>
+  </em>
   <span
     class="jsed-token"
   >
-    is
+    baz
   </span>
-   
-  <span
-    class="jsed-token"
-  >
-    a
-  </span>
-   
-  <span
-    class="jsed-token"
-  >
-    sentence
-  </span>
-   
 </p>
 `;

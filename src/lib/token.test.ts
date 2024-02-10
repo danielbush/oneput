@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { byId, makeRoot, p } from '../../test/util';
+import { describe, test, expect } from 'vitest';
+import { byId, makeRoot, p, em } from '../../test/util';
 import { tokenize } from './token';
 
 describe('tokenize', () => {
-  it('should token a node with text', () => {
+  test('<p>foo <em>bar</em> baz</p>', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'Here is a sentence'));
+    const doc = makeRoot(p({ id: 'p1' }, 'foo ', em('bar'), ' baz'));
     const p1 = doc.document.getElementById('p1') as HTMLElement;
 
     // act

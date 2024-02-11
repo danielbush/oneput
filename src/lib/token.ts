@@ -7,7 +7,9 @@ import { findNextNode, findPreviousNode } from './walk';
  * Detect if an F_ELEM is acting like an inline element eg an em-tag - such
  * elements are considered part of the visual line of text.
  */
-export function isPartOfLine(el: ChildNode | ParentNode | null): boolean {
+export function isPartOfLine(
+  el: Node | ChildNode | ParentNode | null,
+): boolean {
   if (!el) {
     throw new Error(`isInline called on null or undefined`);
   }
@@ -161,6 +163,51 @@ function tokenizeLine(root: HTMLElement): void {
 export function tokenize(el: HTMLElement): void {
   const line = getLine(el);
   tokenizeLine(line);
+}
+
+/**
+ * Find and handle IMPLICIT_LINE's.
+ *
+ * Run this on the whole doc at the beginning BEFORE any tokenization occurs.
+ */
+export function tokenizeImplicitLine(root: HTMLElement) {
+  const buildImplicitLine = (node: Node) => {
+    if (!node.parentNode) {
+      throw new Error(`Expected node to have parent.`);
+    }
+    const implicitLine = document.createElement('span');
+    implicitLine.className = 'jsed-implicit-line';
+    node.parentNode.insertBefore(implicitLine, node);
+    for (let sib: Node | null = node; sib; ) {
+      const foo = isPartOfLine(sib);
+      console.log(sib, foo);
+      if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
+        const nextSib: ChildNode | null = sib.nextSibling;
+        implicitLine.appendChild(sib);
+        sib = nextSib;
+      } else {
+        break;
+      }
+    }
+    return implicitLine;
+  };
+  for (const node of findNextNode(root, root, {
+    filter: (node) => node?.nodeType === Node.ELEMENT_NODE,
+  })) {
+    for (let sib = node.firstChild; sib; ) {
+      if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
+        const prev = sib.previousSibling;
+        if (prev) {
+          if (isFocusable(prev) && !isPartOfLine(prev)) {
+            const implicitLine = buildImplicitLine(sib);
+            sib = implicitLine.nextSibling;
+            continue;
+          }
+        }
+      }
+      sib = sib.nextSibling;
+    }
+  }
 }
 
 // #endregion

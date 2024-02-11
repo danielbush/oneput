@@ -3,9 +3,10 @@
 ## Definitions
 
 - F_ELEM (focusable element)
-  - an element that we make focusable so that the user can use tab or walking the native browser focus to navigate to and perform operations on content
+  - an element that the user can navigate to and focus on in order perform operations
   - it can be F_REC or F_NONREC
   - not an IF_ELEM as these are already focusable
+  - not a TOKEN
 - IF_ELEM (inherently focusable element)
   - any element that is "already focusable" - eg form controls
 - F_REC (focusable recursable element)
@@ -35,11 +36,17 @@
   - For some tags notable the pre-tag and for certain css rules (white-space:pre) spacing becomes significant.
   - mdn: "Sequences of white space are preserved. Lines are only broken at newline characters in the source and at <br> elements."
 - LINE
-  - The text nodes or TOKEN's that have the same parent or belong to an inline parent or chain of inline parents with the top-most having the same F_ELEM as parent.
+  - A non-inline parent node that directly contains text nodes that will be tokenized.  If this node contains inline or inline-flow elements, these are treated as part of the same LINE and should be recursed into and tokenized.  Floats and other types of inlines eg inline-block or inline-flex or tables or list items are treated as new LINE's.
+- IMPLICIT_LINE
+  - Text nodes in the DOM that belong to a LINE F_ELEM that also contains nested LINE F_ELEM's.  Example: `<div><p>nested, not implicit</p> this text needs an implicit LINE<div>` .  Ideally, in the above example the "loose" text should be in a p-tag.  We could prompt the user to do this.  But at the very least, we can inject an inline span tag that wraps these and acts as an "implicit line of text".
+  - In practice we look for text nodes that have a LINE (non-inline element) as a previous sibling.
+- SIB_HIGHLIGHT - when a user focuses on an element via TAB_FOCUS or an action like REC_NEXT etc
+- ISLAND
+  - an "island" is an F_NONREC that we navigate "onto" but never "into";
+  - example: KATEX_ISLAND `<div class="katex">...</div>`
 
-## Behaviours
 
-### Navigation
+## Outdated
 
 - TABS
   - deontes a set of HTMLElements that have had `tabindex` added to make them focusable
@@ -49,8 +56,3 @@
 - TAB_FOCUS_NONREC_FOCUSABLE
   - situation where F_NONREC's that contain IF_ELEM's will still be accessible via the tab key
   - TODO: we may need to handle this situation
-- SIB_HIGHLIGHT
-  - when a user focuses on an element via TAB_FOCUS or an action like REC_NEXT etc
-- ISLAND
-  - an "island" is an F_NONREC that we navigate "onto" but never "into";
-  - example: KATEX_ISLAND `<div class="katex">...</div>`

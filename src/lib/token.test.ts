@@ -1,11 +1,15 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../test/util';
-import { tokenize } from './token';
+import { tokenize, tokenizeImplicitLine } from './token';
 
 /**
  * See INLINE_COMPUTED_STYLE
  */
 const inlineStyleHack = { style: 'display:inline;' };
+/**
+ * See INLINE_COMPUTED_STYLE
+ */
+const inlineStyleHackVal = 'display:inline;';
 
 describe('tokenize', () => {
   test('<p>foo <em>bar</em> baz</p>', () => {
@@ -39,7 +43,7 @@ describe('tokenize', () => {
       console.log(div1.outerHTML);
     });
 
-    test.only('case 2', () => {
+    test('case 2', () => {
       // arrange
       const doc = makeRoot(
         div(
@@ -54,5 +58,41 @@ describe('tokenize', () => {
       tokenize(p1);
       console.log(p1.outerHTML);
     });
+  });
+});
+
+describe('tokenizeImplicitLine', () => {
+  test('case 1 - simple', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+        'this is the implicit line',
+      ),
+    );
+
+    // act
+    tokenizeImplicitLine(doc.root);
+
+    // assert
+    expect(byId(doc, 'div1')).toMatchSnapshot();
+  });
+
+  test('case 2 - implicit line with nested inline tag', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+        `this is the <em id="em2" style="${inlineStyleHackVal}">implicit</em> line`,
+      ),
+    );
+
+    // act
+    tokenizeImplicitLine(doc.root);
+
+    // assert
+    expect(byId(doc, 'div1')).toMatchSnapshot();
   });
 });

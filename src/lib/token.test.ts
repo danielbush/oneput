@@ -2,10 +2,17 @@ import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../test/util';
 import { tokenize } from './token';
 
+/**
+ * See INLINE_COMPUTED_STYLE
+ */
+const inlineStyleHack = { style: 'display:inline;' };
+
 describe('tokenize', () => {
   test('<p>foo <em>bar</em> baz</p>', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo ', em('bar'), ' baz'));
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+    );
     const p1 = byId(doc, 'p1');
 
     // act
@@ -21,8 +28,8 @@ describe('tokenize', () => {
       const doc = makeRoot(
         div(
           { id: 'div1' },
-          p({ id: 'p1' }, 'foo ', em('bar'), ' baz'),
-          p({ id: 'p2' }, 'foo ', em('bar'), ' baz'),
+          p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+          p({ id: 'p2' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
         ),
       );
       const div1 = byId(doc, 'div1');
@@ -37,8 +44,8 @@ describe('tokenize', () => {
       const doc = makeRoot(
         div(
           { id: 'div1' },
-          p({ id: 'p1' }, 'foo ', em('bar'), ' baz'),
-          p({ id: 'p2' }, 'foo ', em('bar'), ' baz'),
+          p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+          p({ id: 'p2' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
         ),
       );
       const p1 = byId(doc, 'p1');

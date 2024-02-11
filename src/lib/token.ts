@@ -14,7 +14,7 @@ export function isPartOfLine(el: ChildNode | ParentNode | null): boolean {
   if (isToken(el)) return true;
   if (!isFocusable(el)) return false;
   const styles = window.getComputedStyle(el);
-  if (styles.float !== 'none') {
+  if (!['none', ''].includes(styles.float)) {
     return false;
   }
   if (styles.display === 'inline') return true;
@@ -118,22 +118,27 @@ function tokenizeShallow(
   }
   // el.normalize();
   tokenized?.set(el, true);
-  const childNodes = el.childNodes; // record this before we mutate!
+  // Record childNodes before we mutate and convert to array as the NodeList is
+  // live!
+  const childNodes = Array.from(el.childNodes);
   for (const child of childNodes) {
-    console.log('replace', child);
-    replaceTextNode(child);
+    // Recurse into inline tags eg em-tag.
+    // Be aware of INLINE_COMPUTED_STYLE .
+    if (isPartOfLine(child)) {
+      tokenizeShallow(child, tokenized);
+    } else {
+      replaceTextNode(child);
+    }
   }
 }
 
 /**
  * Depth first traversal of F_ELEM's, each F_ELEM is horizontally tokenized with tokenizeShallow.
  */
-function tokenizeRec(
+function tokenizeLine(
   root: HTMLElement,
-  ceiling: Node,
   tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
 ): void {
-  ceiling;
   if (!isFocusable(root)) {
     throw new Error('Can only tokenize an F_ELEM');
   }
@@ -165,8 +170,8 @@ export function tokenize(
   el: HTMLElement,
   tokenized?: WeakMap<HTMLElement, boolean>,
 ): void {
-  const ceiling = getLine(el);
-  tokenizeRec(ceiling, ceiling, tokenized);
+  const line = getLine(el);
+  tokenizeLine(line, tokenized);
 }
 
 // #endregion

@@ -32,3 +32,7 @@
     - We can add some real e2e tests to make sure everything hangs together, either karma or cypress, I guess cypress.
     - I'm hoping this will make the tests mercifully easy to write without the mystery bugs.
     - I think we should structure the code to separate the glue code from functions that do stuff.
+- INLINE_COMPUTED_STYLE
+  - when: Feb-2024
+  - what:
+    - The style in jsdom for the display of a tag like 'em' is '' which breaks functions like `isPartOfLine`.  AFAICT the node is attached to the document and window.getComputedStyle(em)['display'] returns `inline` in safari, chrome, firefox and edge.  So we'll hack it into tests here.

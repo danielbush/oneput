@@ -122,6 +122,9 @@ function tokenizeShallow(
   // live!
   const childNodes = Array.from(el.childNodes);
   for (const child of childNodes) {
+    if (isToken(el)) {
+      continue;
+    }
     // Recurse into inline tags eg em-tag.
     // Be aware of INLINE_COMPUTED_STYLE .
     if (isPartOfLine(child)) {

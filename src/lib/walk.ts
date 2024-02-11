@@ -1,19 +1,21 @@
-// import { ignoreDescendents, isFocusable } from './focus';
-
 type WalkParams = {
   /**
-   * !isFocusable
+   * Only visit Nodes that pass this filter.
    */
-  ignore: (el: ParentNode | ChildNode | null) => boolean;
+  filter: (el: ParentNode | ChildNode | null) => boolean;
+  /**
+   * For nodes that pass `filter` and are visited, avoid descending into their
+   * children on this condition.
+   */
   ignoreDescendents: (el: ParentNode | ChildNode) => boolean;
 };
 
 function getWalkParams(params?: Partial<WalkParams>): WalkParams {
-  if (params?.ignore && params.ignoreDescendents) {
+  if (params?.filter && params.ignoreDescendents) {
     return params as WalkParams;
   }
   return {
-    ignore: params?.ignore ?? (() => false),
+    filter: params?.filter ?? (() => true),
     ignoreDescendents: params?.ignoreDescendents ?? (() => false),
   };
 }
@@ -27,8 +29,7 @@ function lastNode(
     return el;
   }
   const lastChild = el.lastChild;
-  // const prev = isFocusable(lastChild)
-  const prev = !_params.ignore(lastChild)
+  const prev = _params.filter(lastChild)
     ? lastChild
     : getPreviousSiblingNode(lastChild);
   if (!prev) {
@@ -46,8 +47,7 @@ function* descendIter(
     return;
   }
   for (const child of root.childNodes) {
-    // if (!isFocusable(child)) {
-    if (_params.ignore(child)) {
+    if (!_params.filter(child)) {
       continue;
     }
     yield child;
@@ -65,8 +65,7 @@ function* descendIterReverse(
   }
   const revChildren = Array.from(root.childNodes).reverse();
   for (const child of revChildren) {
-    // if (!isFocusable(child)) {
-    if (_params.ignore(child)) {
+    if (!_params.filter(child)) {
       continue;
     }
     yield* descendIterReverse(child, params);
@@ -85,8 +84,7 @@ export function getNextSiblingNode(
     if (!next) {
       break;
     }
-    // if (isFocusable(next)) {
-    if (!_params.ignore(next)) {
+    if (_params.filter(next)) {
       return next;
     }
     continue;
@@ -105,8 +103,7 @@ export function getPreviousSiblingNode(
     if (!prev) {
       break;
     }
-    // if (isFocusable(prev)) {
-    if (!_params.ignore(prev)) {
+    if (_params.filter(prev)) {
       return prev;
     }
     continue;

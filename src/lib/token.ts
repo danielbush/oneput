@@ -22,10 +22,6 @@ export function isPartOfLine(el: ChildNode | ParentNode | null): boolean {
   return false;
 }
 
-export function notIsPartOfLine(el: ChildNode | ParentNode | null): boolean {
-  return !isPartOfLine(el);
-}
-
 export function isToken2(
   el: EventTarget | Element | null | undefined,
 ): el is HTMLElement {
@@ -137,27 +133,28 @@ function tokenizeRec(
   ceiling: Node,
   tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
 ): void {
+  ceiling;
   if (!isFocusable(root)) {
     throw new Error('Can only tokenize an F_ELEM');
   }
   root.normalize();
   tokenizeShallow(root);
-  for (const el of findNextNode(root, ceiling, {
-    ignore: (el) => {
-      if (!el) {
-        return true;
-      }
-      if (isToken(el)) {
-        return true;
-      }
-      return !(
-        // Allow text nodes to ensure we capture things like 'foo <em>bar</em> baz'.
-        (el.nodeType === Node.ELEMENT_NODE || el.nodeType === Node.TEXT_NODE)
-      );
-    },
-  })) {
-    tokenizeShallow(el, tokenized);
-  }
+  // for (const el of findNextNode(root, ceiling, {
+  //   filter: (el) => {
+  //     if (!el) {
+  //       return false;
+  //     }
+  //     if (isToken(el)) {
+  //       return false;
+  //     }
+  //     return (
+  //       // Allow text nodes to ensure we capture things like 'foo <em>bar</em> baz'.
+  //       el.nodeType === Node.ELEMENT_NODE || el.nodeType === Node.TEXT_NODE
+  //     );
+  //   },
+  // })) {
+  //   tokenizeShallow(el, tokenized);
+  // }
   tokenized?.set(root, true);
 }
 
@@ -182,7 +179,7 @@ export function tokenize(
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   for (const prev of findPreviousNode(el, line, {
-    ignore: notIsPartOfLine,
+    filter: isPartOfLine,
   })) {
     if (isToken2(prev)) {
       return prev;
@@ -197,7 +194,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   for (const next of findNextNode(el, line, {
-    ignore: notIsPartOfLine,
+    filter: isPartOfLine,
   })) {
     if (isToken2(next)) {
       return next;

@@ -80,9 +80,3 @@ export function isFocusable(
   }
   return isHTMLElement;
 }
-
-export function notIsFocusable(
-  el: EventTarget | Element | null | undefined,
-): el is HTMLElement {
-  return !isFocusable(el);
-}

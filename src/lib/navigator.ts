@@ -1,6 +1,6 @@
 import { JsedDocument } from '../types';
 import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './constants';
-import { ignoreDescendents, isFocusable, notIsFocusable } from './focus';
+import { ignoreDescendents, isFocusable } from './focus';
 import * as token from './token';
 import {
   getNextSiblingNode,
@@ -26,7 +26,7 @@ export class Navigator {
   REC_NEXT(): HTMLElement | void {
     if (!this.#FOCUS) return;
     for (const next of findNextNode(this.#FOCUS, this.#document.root, {
-      ignore: notIsFocusable,
+      filter: isFocusable,
       ignoreDescendents,
     })) {
       this.FOCUS(next);
@@ -40,7 +40,7 @@ export class Navigator {
   REC_PREV(): HTMLElement | void {
     if (!this.#FOCUS) return;
     for (const next of findPreviousNode(this.#FOCUS, this.#document.root, {
-      ignore: notIsFocusable,
+      filter: isFocusable,
       ignoreDescendents,
     })) {
       this.FOCUS(next);
@@ -54,7 +54,7 @@ export class Navigator {
   SIB_NEXT(): void {
     if (!this.#FOCUS) return;
     const next = getNextSiblingNode(this.#FOCUS, {
-      ignore: notIsFocusable,
+      filter: isFocusable,
       ignoreDescendents,
     });
     if (next) {
@@ -69,7 +69,7 @@ export class Navigator {
   SIB_PREV(): void {
     if (!this.#FOCUS) return;
     const next = getPreviousSiblingNode(this.#FOCUS, {
-      ignore: notIsFocusable,
+      filter: isFocusable,
       ignoreDescendents,
     });
     if (next) {

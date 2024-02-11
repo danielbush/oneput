@@ -109,15 +109,8 @@ function replaceTextNode(child: ParentNode | ChildNode): boolean {
 /**
  * Tokenize all the child text nodes in an F_ELEM .
  */
-function tokenizeShallow(
-  el: ParentNode | ChildNode,
-  tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
-): void {
-  if (tokenized?.has(el)) {
-    return;
-  }
+function tokenizeShallow(el: ParentNode | ChildNode): void {
   // el.normalize();
-  tokenized?.set(el, true);
   // Record childNodes before we mutate and convert to array as the NodeList is
   // live!
   const childNodes = Array.from(el.childNodes);
@@ -128,7 +121,7 @@ function tokenizeShallow(
     // Recurse into inline tags eg em-tag.
     // Be aware of INLINE_COMPUTED_STYLE .
     if (isPartOfLine(child)) {
-      tokenizeShallow(child, tokenized);
+      tokenizeShallow(child);
     } else {
       replaceTextNode(child);
     }
@@ -138,10 +131,7 @@ function tokenizeShallow(
 /**
  * Depth first traversal of F_ELEM's, each F_ELEM is horizontally tokenized with tokenizeShallow.
  */
-function tokenizeLine(
-  root: HTMLElement,
-  tokenized?: WeakMap<ParentNode | ChildNode, boolean>,
-): void {
+function tokenizeLine(root: HTMLElement): void {
   if (!isFocusable(root)) {
     throw new Error('Can only tokenize an F_ELEM');
   }
@@ -161,20 +151,16 @@ function tokenizeLine(
   //     );
   //   },
   // })) {
-  //   tokenizeShallow(el, tokenized);
+  //   tokenizeShallow(el);
   // }
-  tokenized?.set(root, true);
 }
 
 /**
  * Tokenize the text of an F_ELEM.
  */
-export function tokenize(
-  el: HTMLElement,
-  tokenized?: WeakMap<HTMLElement, boolean>,
-): void {
+export function tokenize(el: HTMLElement): void {
   const line = getLine(el);
-  tokenizeLine(line, tokenized);
+  tokenizeLine(line);
 }
 
 // #endregion

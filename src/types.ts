@@ -19,11 +19,6 @@ export type JsedDocument = {
    * Handles showCurrentSiblings.
    */
   SIB_HIGHLIGHT: Set<HTMLElement>;
-  /**
-   * Track which elements have been tokenized.  Such elements must have text
-   * nodes as direct descendents.
-   */
-  tokenized: WeakMap<HTMLElement, boolean>;
   actions: Navigator;
   listeners: {
     /**

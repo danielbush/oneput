@@ -17,7 +17,6 @@ export function makeDocument(root: HTMLElement): JsedDocument {
     },
     // activeToken: null,
     SIB_HIGHLIGHT: new Set(),
-    tokenized: new WeakMap(),
     listeners: {
       FOCUS: null,
       // TOKEN_FOCUS: null,

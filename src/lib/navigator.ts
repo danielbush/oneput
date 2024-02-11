@@ -134,7 +134,7 @@ export class Navigator {
         return;
       }
     }
-    token.tokenize(el, this.#document.tokenized);
+    token.tokenize(el);
     this.SIB_HIGHLIGHT();
   }
 

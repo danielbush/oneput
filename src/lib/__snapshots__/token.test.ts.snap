@@ -78,3 +78,32 @@ exports[`tokenizeImplicitLine > case 2 - implicit line with nested inline tag 1`
   </span>
 </div>
 `;
+
+exports[`tokenizeImplicitLine > case 3 - leaded nested inline tag 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+  <span
+    class="jsed-implicit-line"
+  >
+    <em
+      id="em2"
+      style="display:inline;"
+    >
+      implicit
+    </em>
+     line
+  </span>
+</div>
+`;

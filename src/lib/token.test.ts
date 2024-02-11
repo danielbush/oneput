@@ -95,4 +95,20 @@ describe('tokenizeImplicitLine', () => {
     // assert
     expect(byId(doc, 'div1')).toMatchSnapshot();
   });
+  test('case 3 - leaded nested inline tag', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+        `<em id="em2" style="${inlineStyleHackVal}">implicit</em> line`,
+      ),
+    );
+
+    // act
+    tokenizeImplicitLine(doc.root);
+
+    // assert
+    expect(byId(doc, 'div1')).toMatchSnapshot();
+  });
 });

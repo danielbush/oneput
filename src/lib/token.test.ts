@@ -26,7 +26,7 @@ describe('tokenize', () => {
     expect(byId(doc, 'p1')).toMatchSnapshot();
   });
 
-  describe('localized tokenizaation (not everything)', () => {
+  describe('localized tokenization (not everything)', () => {
     test('case 1', () => {
       // arrange
       const doc = makeRoot(
@@ -40,7 +40,9 @@ describe('tokenize', () => {
 
       // act
       tokenize(div1);
+
       console.log(div1.outerHTML);
+      expect(div1).toMatchSnapshot();
     });
 
     test('case 2', () => {
@@ -57,6 +59,7 @@ describe('tokenize', () => {
       // act
       tokenize(p1);
       console.log(p1.outerHTML);
+      expect(p1).toMatchSnapshot();
     });
   });
 });

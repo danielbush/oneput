@@ -179,8 +179,6 @@ export function tokenizeImplicitLine(root: HTMLElement) {
     implicitLine.className = 'jsed-implicit-line';
     node.parentNode.insertBefore(implicitLine, node);
     for (let sib: Node | null = node; sib; ) {
-      const foo = isPartOfLine(sib);
-      console.log(sib, foo);
       if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
         const nextSib: ChildNode | null = sib.nextSibling;
         implicitLine.appendChild(sib);

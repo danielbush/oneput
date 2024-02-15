@@ -50,6 +50,7 @@ export type JsedFocusEvent =
   | {
       type: 'FOCUS';
       targetType: 'F_ELEM';
+      element: HTMLElement;
     }
   | {
       type: 'FOCUS';
@@ -104,6 +105,7 @@ export type IJsedCursor = {
    * Close the current edit session.
    */
   close: () => void;
+  onChange: (fn: () => void) => void;
 };
 
 /**

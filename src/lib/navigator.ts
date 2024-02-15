@@ -23,8 +23,8 @@ export class Navigator {
   /**
    * Find next using depth first recursion.
    */
-  REC_NEXT(): HTMLElement | void {
-    if (!this.#FOCUS) return;
+  REC_NEXT(): HTMLElement | null {
+    if (!this.#FOCUS) return null;
     for (const next of findNextNode(this.#FOCUS, this.#document.root, {
       filter: isFocusable,
       ignoreDescendents,
@@ -32,13 +32,14 @@ export class Navigator {
       this.FOCUS(next);
       return next as HTMLElement;
     }
+    return null;
   }
 
   /**
    * Find previous using depth first recursion.
    */
-  REC_PREV(): HTMLElement | void {
-    if (!this.#FOCUS) return;
+  REC_PREV(): HTMLElement | null {
+    if (!this.#FOCUS) return null;
     for (const next of findPreviousNode(this.#FOCUS, this.#document.root, {
       filter: isFocusable,
       ignoreDescendents,
@@ -46,6 +47,7 @@ export class Navigator {
       this.FOCUS(next);
       return next as HTMLElement;
     }
+    return null;
   }
 
   /**
@@ -126,6 +128,7 @@ export class Navigator {
       const ok = this.#document.listeners.FOCUS({
         type: 'FOCUS',
         targetType: 'F_ELEM',
+        element: el,
       });
       if (ok) {
         this.#updateFocus(el);

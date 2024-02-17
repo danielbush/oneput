@@ -41,8 +41,8 @@ describe('tokenize', () => {
       // act
       tokenize(div1);
 
-      console.log(div1.outerHTML);
-      expect(div1).toMatchSnapshot();
+      // assert
+      expect(div1).toMatchSnapshot('Should not tokenize p1 and p2');
     });
 
     test('case 2', () => {
@@ -55,11 +55,13 @@ describe('tokenize', () => {
         ),
       );
       const p1 = byId(doc, 'p1');
+      const div1 = byId(doc, 'div1');
 
       // act
       tokenize(p1);
-      console.log(p1.outerHTML);
-      expect(p1).toMatchSnapshot();
+
+      // assert
+      expect(div1).toMatchSnapshot('Should only tokenize p1');
     });
   });
 });
@@ -98,6 +100,7 @@ describe('tokenizeImplicitLine', () => {
     // assert
     expect(byId(doc, 'div1')).toMatchSnapshot();
   });
+
   test('case 3 - leaded nested inline tag', () => {
     // arrange
     const doc = makeRoot(
@@ -113,5 +116,28 @@ describe('tokenizeImplicitLine', () => {
 
     // assert
     expect(byId(doc, 'div1')).toMatchSnapshot();
+  });
+
+  test('case 4 - it should ignore spaces', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'foo'),
+        //
+        ' ', // should not create implicit line
+        //
+        p({ id: 'p2' }, 'foo'),
+      ),
+    );
+
+    // act
+    tokenizeImplicitLine(doc.root);
+
+    // assert
+    expect(byId(doc, 'p1').nextSibling).toHaveProperty('nodeType', 3);
+    expect(byId(doc, 'div1')).toMatchSnapshot(
+      'There should be no implicit line.',
+    );
   });
 });

@@ -171,13 +171,21 @@ export function tokenize(el: HTMLElement): void {
  * Run this on the whole doc at the beginning BEFORE any tokenization occurs.
  */
 export function tokenizeImplicitLine(root: HTMLElement) {
-  const buildImplicitLine = (node: Node) => {
+  const buildImplicitLine = (node: Node): HTMLElement | null => {
     if (!node.parentNode) {
       throw new Error(`Expected node to have parent.`);
     }
+    node.parentNode.normalize(); // ok, so really there is just one text node now...
+    if (!node.nodeValue || /^\s+$/.test(node.nodeValue)) {
+      // Space nodes are generated between tags as an artifact of the html source.
+      // Ignore these.
+      return null;
+    }
+
     const implicitLine = document.createElement('span');
     implicitLine.className = 'jsed-implicit-line';
     node.parentNode.insertBefore(implicitLine, node);
+
     for (let sib: Node | null = node; sib; ) {
       if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
         const nextSib: ChildNode | null = sib.nextSibling;
@@ -198,8 +206,11 @@ export function tokenizeImplicitLine(root: HTMLElement) {
         if (prev) {
           if (isFocusable(prev) && !isPartOfLine(prev)) {
             const implicitLine = buildImplicitLine(sib);
-            sib = implicitLine.nextSibling;
-            continue;
+            if (implicitLine) {
+              // An implicit line was created and sucked up continguous text tokens.
+              sib = implicitLine.nextSibling;
+              continue;
+            }
           }
         }
       }

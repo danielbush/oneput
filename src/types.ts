@@ -19,7 +19,7 @@ export type JsedDocument = {
    * Handles showCurrentSiblings.
    */
   SIB_HIGHLIGHT: Set<HTMLElement>;
-  actions: Navigator;
+  nav: Navigator;
   listeners: {
     /**
      * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.

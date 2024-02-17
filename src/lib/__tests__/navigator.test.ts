@@ -1,6 +1,15 @@
 import { describe, it, test, expect, vi } from 'vitest';
-import { byId, div, frag, li, makeRoot, p, script, ul } from '../../test/util';
-import { Navigator } from './navigator';
+import {
+  byId,
+  div,
+  frag,
+  li,
+  makeRoot,
+  p,
+  script,
+  ul,
+} from '../../../test/util';
+import { Navigator } from '../navigator';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {

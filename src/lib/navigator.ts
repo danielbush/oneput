@@ -11,13 +11,13 @@ import {
 } from './walk';
 
 export class Navigator {
-  #document: Omit<JsedDocument, 'actions'>;
+  #document: Omit<JsedDocument, 'nav'>;
   /**
    * The focus F_ELEM .  If a TOKEN is focused, this will be set to the parent
    * F_ELEM for that TOKEN.
    */
   #FOCUS?: HTMLElement;
-  constructor(doc: Omit<JsedDocument, 'actions'>) {
+  constructor(doc: Omit<JsedDocument, 'nav'>) {
     this.#document = doc;
   }
   /**

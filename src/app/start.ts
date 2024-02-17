@@ -26,7 +26,7 @@ export function start(root: HTMLElement): JsedDocument {
     }
     // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
     evt.preventDefault();
-    doc.actions.FOCUS(evt.target);
+    doc.nav.FOCUS(evt.target);
   }
 
   // root.addEventListener<'click'>('click', handleElementClick);

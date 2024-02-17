@@ -1,5 +1,5 @@
 import { describe, it, expect, test, vi } from 'vitest';
-import { start } from './start';
+import { start } from '../start';
 
 describe('start', () => {
   it('can unload the doc', () => {
@@ -41,7 +41,7 @@ describe('start', () => {
       // arrange
       const root = document.createElement('DIV');
       const doc = start(root);
-      const FOCUS = vi.spyOn(doc.actions, 'FOCUS');
+      const FOCUS = vi.spyOn(doc.nav, 'FOCUS');
 
       // act
       root.dispatchEvent(new MouseEvent('mousedown'));

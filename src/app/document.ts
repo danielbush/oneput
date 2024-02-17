@@ -4,7 +4,7 @@ import { JsedDocument } from '../types';
 
 export function makeDocument(root: HTMLElement): JsedDocument {
   let document: JsedDocument | null = null;
-  const base: Omit<JsedDocument, 'actions'> = {
+  const base: Omit<JsedDocument, 'nav'> = {
     root,
     get document(): Document {
       return root.ownerDocument;
@@ -15,11 +15,9 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       }
       return root.ownerDocument.defaultView!;
     },
-    // activeToken: null,
     SIB_HIGHLIGHT: new Set(),
     listeners: {
       FOCUS: null,
-      // TOKEN_FOCUS: null,
     },
     unload: () => {
       // Placeholder, see below.
@@ -29,6 +27,6 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       return new JsedCursor({ document: document!, token, ceiling });
     },
   };
-  document = Object.assign(base, { actions: new Navigator(base) });
+  document = Object.assign(base, { nav: new Navigator(base) });
   return document;
 }

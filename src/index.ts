@@ -15,6 +15,7 @@ export {
 const utils = {
   token: {
     getValue: token.getValue,
+    getLine: token.getLine,
   },
 };
 export { start, utils };

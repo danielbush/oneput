@@ -60,7 +60,6 @@ export class JsedCursor implements IJsedCursor {
     }
     return false;
   }
-  prepend() {}
   close() {
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
   }

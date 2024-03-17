@@ -92,10 +92,6 @@ export type IJsedCursor = {
    */
   append: (val: string) => HTMLElement;
   /**
-   * Prepend a new token after the current one.
-   */
-  prepend: () => void;
-  /**
    * Request the cursor do a new focus.
    *
    * Normally this is to do a TOKEN_FOCUS on another token under the same F_ELEM eg created as a result of calling `append`.
@@ -105,7 +101,6 @@ export type IJsedCursor = {
    * Close the current edit session.
    */
   close: () => void;
-  onChange: (fn: () => void) => void;
 };
 
 /**

@@ -1,27 +1,19 @@
-import {
-  JsedDocument,
-  IJsedCursor,
-  JsedFocusEvent,
-  // JsedTokenFocusEvent,
-} from './types';
+import { JsedDocument, IJsedCursor, JsedFocusEvent } from './types';
 import { start } from './app/start';
 import * as token from './lib/token';
+
+const utils = {
+  token: {
+    getValue: token.getValue,
+    getLine: token.getLine,
+    isToken: token.isToken,
+  },
+};
 
 export {
   JSED_PLACEHOLDER_TOKEN_CLASS,
   JSED_TOKEN_CLASS,
   JSED_DOM_ROOT_ID,
 } from './lib/constants';
-const utils = {
-  token: {
-    getValue: token.getValue,
-    getLine: token.getLine,
-  },
-};
 export { start, utils };
-export type {
-  JsedDocument,
-  JsedFocusEvent,
-  // JsedTokenFocusEvent,
-  IJsedCursor as JsedCursor,
-};
+export type { JsedDocument, JsedFocusEvent, IJsedCursor as JsedCursor };

@@ -68,7 +68,7 @@ export function createToken(text: string): HTMLElement {
 }
 
 /**
- * Create a PLACHOLDER_TOKEN
+ * Create a PLACEHOLDER_TOKEN
  */
 export function createPlaceholderToken(): HTMLElement {
   const el = document.createElement('span');

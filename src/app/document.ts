@@ -14,7 +14,7 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       if (!root.ownerDocument.defaultView) {
         throw new Error('defaultView not set');
       }
-      return root.ownerDocument.defaultView!;
+      return root.ownerDocument.defaultView;
     },
     SIB_HIGHLIGHT: new Set(),
     listeners: {

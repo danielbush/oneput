@@ -1,5 +1,9 @@
-import { JSED_PLACEHOLDER_TOKEN_CLASS, JSED_TOKEN_CLASS } from './constants';
-import { isFocusable } from './focus';
+import {
+  JSED_IMPLICIT_CLASS,
+  JSED_PLACEHOLDER_TOKEN_CLASS,
+  JSED_TOKEN_CLASS,
+} from './constants';
+import { ignoreDescendents, isFocusable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
 
 // #region utils
@@ -15,6 +19,10 @@ export function isPartOfLine(
   }
   if (isToken(el)) return true;
   if (!isFocusable(el)) return false;
+
+  // This is an implicit line, it may be inline, but we treat it like a separate LINE.
+  if (el.classList.contains(JSED_IMPLICIT_CLASS)) return false;
+
   const styles = window.getComputedStyle(el);
   if (!['none', ''].includes(styles.float)) {
     return false;
@@ -183,7 +191,7 @@ export function tokenizeImplicitLine(root: HTMLElement) {
     }
 
     const implicitLine = document.createElement('span');
-    implicitLine.className = 'jsed-implicit-line';
+    implicitLine.className = JSED_IMPLICIT_CLASS;
     node.parentNode.insertBefore(implicitLine, node);
 
     for (let sib: Node | null = node; sib; ) {

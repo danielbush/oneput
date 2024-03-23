@@ -28,3 +28,8 @@ export const JSED_PLACEHOLDER_TOKEN_CLASS = 'jsed-placeholder-token';
  * Elements with this class will not respond to FOCUS .
  */
 export const JSED_IGNORE_CLASS = 'jsed-ignore';
+
+/**
+ * CSS class for IMPLICIT_LINE.
+ */
+export const JSED_IMPLICIT_CLASS = 'jsed-implicit-line';

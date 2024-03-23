@@ -232,7 +232,7 @@ export function tokenizeImplicitLine(root: HTMLElement) {
 // #region Operations on tokenized F_ELEM's
 
 /**
- * Get previous contiguous or inline TOKEN.
+ * Get previous contiguous or inline TOKEN (ie get previous token in a LINE).
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
@@ -247,7 +247,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Get next contiguous or inline TOKEN.
+ * Get next contiguous or inline TOKEN (ie get next token in a LINE).
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
@@ -351,6 +351,36 @@ export function getLine(el: ChildNode): HTMLElement {
     }
   }
   throw new Error(`getLine: end of for-loop`);
+}
+
+/**
+ * Walks el (an F_ELEM usually) and looks for the first text token we can focus
+ * on.  This will tokenize as it recurses down depth-first.
+ */
+export function getFirstToken(el: HTMLElement): HTMLElement | null {
+  if (isToken(el)) {
+    return el;
+  }
+  if (!isFocusable(el)) {
+    throw new Error('getFirstToken: expects an F_ELEM');
+  }
+  const line = getLine(el);
+  tokenize(line);
+  const sib = getNextSibling(line);
+  if (sib) {
+    return sib;
+  }
+  for (const next of findNextNode(line, line, {
+    filter: isFocusable,
+    ignoreDescendents,
+  })) {
+    tokenize(next as HTMLElement);
+    const sib = getNextSibling(next as HTMLElement);
+    if (sib) {
+      return sib;
+    }
+  }
+  return null;
 }
 
 // #endregion

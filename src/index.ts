@@ -14,6 +14,7 @@ export {
   JSED_PLACEHOLDER_TOKEN_CLASS,
   JSED_TOKEN_CLASS,
   JSED_DOM_ROOT_ID,
+  JSED_IGNORE_CLASS,
 } from './lib/constants';
 export { start, utils };
 export type { JsedDocument, JsedFocusEvent, IJsedCursor as JsedCursor };

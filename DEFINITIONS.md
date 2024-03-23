@@ -23,12 +23,11 @@
 - PLACEHOLDER_TOKEN
   - When an F_ELEM that can contain TOKEN's has none, we can insert a PLACEHOLDER_TOKEN .  This can act as a visual marker or placeholder to show that text could be inserted at this point in the DOM.
 - FOCUS
-  - Both the action "FOCUS" but also the idea of highlighting the current F_ELEM that the user has clicked, touched or navigated to.  This is not a native browser focus because this will conflict with the focus of the input element used in jsed-ui.
+  - The current F_ELEM that the user has clicked, touched or navigated to.  This is not a native browser focus because this will conflict with the focus of the input element used in jsed-ui.
 - TOKEN_FOCUS
-  - An additional focus that may apply when FOCUS on an F_ELEM applies.
-  - If someone clicks or touches a TOKEN, we should FOCUS the contianing F_ELEM and then highlight the TOKEN.
-  - To distinguish this from FOCUS, we will call this the TOKEN_FOCUS .
-  - To move around tokens we use a cursor and move the TOKEN_FOCUS whereas to move around F_ELEM's we move the FOCUS.
+  - TOKEN's have their own focus to distinguish from FOCUS .
+  - If someone clicks or touches a TOKEN, we should FOCUS the containing F_ELEM and then focus the TOKEN using TOKEN_FOCUS.
+  - To move around tokens the cursor updates the TOKEN_FOCUS whereas to move around F_ELEM's the document navigator updates the FOCUS.
 - NEGATIVE_SPACE
   - mdn: "Sequences of white space are collapsed. Newline characters in the source are handled the same as other white space. Lines are broken as necessary to fill line boxes."
   - By default in a lot of html tags such as the p-tag, the spaces between the text is treated as a single space.  Multiple spaces have no effect on the gap.

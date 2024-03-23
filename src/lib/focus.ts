@@ -2,7 +2,7 @@
  * What can be edited and focused on.
  */
 
-import { JSED_DOM_ROOT_ID } from './constants';
+import { JSED_DOM_ROOT_ID, JSED_IGNORE_CLASS } from './constants';
 import { isToken } from './token';
 
 const FORM_FOCUSABLE = [
@@ -59,6 +59,13 @@ export function ignoreDescendents(
   return false;
 }
 
+export function isIgnorable(el: Element): boolean {
+  if (el.classList.contains(JSED_IGNORE_CLASS)) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * Governs which elements actions like REC_NEXT should traverse.  This tests for F_ELEM .
  */
@@ -75,6 +82,9 @@ export function isFocusable(
     }
     // Tokens (text) get a cursor and are not treated as focusable.
     if (isToken(el)) {
+      return false;
+    }
+    if (isIgnorable(el)) {
       return false;
     }
   }

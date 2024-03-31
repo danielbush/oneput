@@ -59,6 +59,19 @@ export function isPlaceholderToken(el: HTMLElement): boolean {
   }
   return false;
 }
+
+export function getParent(el: HTMLElement): HTMLElement {
+  if (!isToken(el)) {
+    throw new Error('getParent: called on non-token');
+  }
+  const par = el.parentElement;
+  if (!par) {
+    throw new Error(
+      'getParent: token has no parentElement is it attached to the dom or is it an HTML element?',
+    );
+  }
+  return par;
+}
 // #endregion
 
 // #region Tokenization

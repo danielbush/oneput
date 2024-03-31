@@ -27,7 +27,7 @@ export class Navigator {
 
   #updateFocus(el: HTMLElement) {
     if (token.isToken(el)) {
-      el = el.parentElement!;
+      el = token.getParent(el);
     }
     if (!isFocusable(el)) {
       throw new Error('#updateFocus: expects an F_ELEM');

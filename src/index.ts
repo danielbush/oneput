@@ -8,6 +8,7 @@ const utils = {
     getLine: token.getLine,
     isToken: token.isToken,
     getFirstToken: token.getFirstToken,
+    getParent: token.getParent,
   },
 };
 

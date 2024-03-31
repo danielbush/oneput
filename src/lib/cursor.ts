@@ -13,11 +13,7 @@ export class JsedCursor implements IJsedCursor {
     el.classList.add(JSED_TOKEN_FOCUS_CLASS);
     this.#token = el;
   }
-  constructor(params: {
-    document: JsedDocument;
-    token: HTMLElement;
-    ceiling: HTMLElement | null;
-  }) {
+  constructor(params: { document: JsedDocument; token: HTMLElement }) {
     this.#document = params.document;
     this.#token = params.token; // ts
     this.setToken(params.token);

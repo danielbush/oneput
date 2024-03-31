@@ -30,10 +30,7 @@ export type JsedDocument = {
   /**
    * Request a cursor for the current token.
    */
-  requestCursor: (params: {
-    token: HTMLElement;
-    ceiling: HTMLElement | null;
-  }) => IJsedCursor;
+  requestCursor: (params: { token: HTMLElement }) => IJsedCursor;
 };
 
 /**

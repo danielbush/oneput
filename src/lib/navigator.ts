@@ -20,6 +20,25 @@ export class Navigator {
   constructor(doc: Omit<JsedDocument, 'nav'>) {
     this.#document = doc;
   }
+
+  getFocus(): HTMLElement | null {
+    return this.#FOCUS ?? null;
+  }
+
+  #updateFocus(el: HTMLElement) {
+    if (token.isToken(el)) {
+      el = el.parentElement!;
+    }
+    if (!isFocusable(el)) {
+      throw new Error('#updateFocus: expects an F_ELEM');
+    }
+    if (this.#FOCUS) {
+      this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
+    }
+    this.#FOCUS = el;
+    this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
+  }
+
   /**
    * Find next using depth first recursion.
    */
@@ -92,17 +111,6 @@ export class Navigator {
     return;
   }
 
-  #updateFocus(el: HTMLElement) {
-    if (!isFocusable(el)) {
-      throw new Error('#updateFocus: expects an F_ELEM');
-    }
-    if (this.#FOCUS) {
-      this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
-    }
-    this.#FOCUS = el;
-    this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
-  }
-
   /**
    * Focus an element if it is an F_ELEM, sets doc.active.
    *
@@ -111,34 +119,35 @@ export class Navigator {
    * TODO: doc.active should update.  Should we track it manually?
    */
   FOCUS(el: Element | EventTarget | null): void {
-    if (token.isToken2(el) && this.#document.listeners.FOCUS) {
-      this.#document.listeners.FOCUS({
-        type: 'FOCUS',
-        targetType: 'TOKEN',
-        token: el,
-        value: token.getValue(el),
-      });
-      // Update the F_ELEM that contains the TOKEN.
-      this.#updateFocus(el.parentNode as HTMLElement);
-      return;
-    } else if (!isFocusable(el)) {
+    if (!el) {
       return;
     }
-    if (this.#document.listeners.FOCUS) {
-      const ok = this.#document.listeners.FOCUS({
+    // If there are no listeners, we'll assume ok = true.
+    const listener = this.#document.listeners.FOCUS ?? (() => true);
+    if (isFocusable(el)) {
+      const ok = listener({
         type: 'FOCUS',
         targetType: 'F_ELEM',
         element: el,
       });
       if (ok) {
+        token.tokenize(el);
         this.#updateFocus(el);
-      }
-      if (!ok) {
-        return;
+        this.SIB_HIGHLIGHT();
       }
     }
-    token.tokenize(el);
-    this.SIB_HIGHLIGHT();
+    if (token.isToken2(el)) {
+      const ok = listener({
+        type: 'FOCUS',
+        targetType: 'TOKEN',
+        token: el,
+        value: token.getValue(el),
+      });
+      if (ok) {
+        this.#updateFocus(el);
+        this.SIB_HIGHLIGHT();
+      }
+    }
   }
 
   #SIB_HIGHLIGHT_CLEAR(): void {

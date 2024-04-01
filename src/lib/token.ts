@@ -377,7 +377,8 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
   if (!isFocusable(el)) {
     throw new Error('getFirstToken: expects an F_ELEM');
   }
-  const line = getLine(el);
+  const line = el;
+  // const line = getLine(el);
   tokenize(line);
   const sib = getNextSibling(line);
   if (sib) {

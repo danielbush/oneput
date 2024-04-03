@@ -337,18 +337,21 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
   return token;
 }
 
+/**
+ * Remove the token.  If the token has no immediate siblings around it under the same parent element, then insert a PLACEHOLDER_TOKEN .
+ */
 export function remove(token: HTMLElement) {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
-  let other = getPreviousLineSibling(token);
-  if (!other) {
-    other = getNextLineSibling(token);
+  let immediateSibling = getPreviousSibling(token);
+  if (!immediateSibling) {
+    immediateSibling = getNextSibling(token);
   }
   parentNode.removeChild(token);
-  if (other) {
-    return other;
+  if (immediateSibling) {
+    return immediateSibling;
   }
   const pholder = createPlaceholderToken();
   parentNode.appendChild(pholder);

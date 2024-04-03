@@ -22,14 +22,14 @@ export class JsedCursor implements IJsedCursor {
     return this.#token;
   }
   moveNext() {
-    const nextToken = token.getNextSibling(this.#token);
+    const nextToken = token.getNextLineSibling(this.#token);
     if (nextToken) {
       this.setToken(nextToken);
       this.#document.nav.FOCUS(nextToken);
     }
   }
   movePrevious() {
-    const prevToken = token.getPreviousSibling(this.#token);
+    const prevToken = token.getPreviousLineSibling(this.#token);
     if (prevToken) {
       this.setToken(prevToken);
       this.#document.nav.FOCUS(prevToken);

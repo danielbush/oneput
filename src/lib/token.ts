@@ -245,9 +245,27 @@ export function tokenizeImplicitLine(root: HTMLElement) {
 // #region Operations on tokenized F_ELEM's
 
 /**
- * Get previous contiguous or inline TOKEN (ie get previous token in a LINE).
+ * Get the previous token sibling if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
+ *
+ * This is basically a souped up version of the DOM's
+ * node.previousElementSibling.  We may need to handle undo and other weird
+ * stuff, so we use a wrapper here.
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
+  return el.previousElementSibling as HTMLElement | null;
+}
+
+/**
+ * Similar to getPreviousSibling but for the next sibling.
+ */
+export function getNextSibling(el: HTMLElement): HTMLElement | null {
+  return el.nextElementSibling as HTMLElement | null;
+}
+
+/**
+ * Get previous contiguous or inline TOKEN (ie get previous token in a LINE).
+ */
+export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   for (const prev of findPreviousNode(el, line, {
     filter: isPartOfLine,
@@ -262,7 +280,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
 /**
  * Get next contiguous or inline TOKEN (ie get next token in a LINE).
  */
-export function getNextSibling(el: HTMLElement): HTMLElement | null {
+export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   for (const next of findNextNode(el, line, {
     filter: isPartOfLine,
@@ -324,9 +342,9 @@ export function remove(token: HTMLElement) {
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
-  let other = getPreviousSibling(token);
+  let other = getPreviousLineSibling(token);
   if (!other) {
-    other = getNextSibling(token);
+    other = getNextLineSibling(token);
   }
   parentNode.removeChild(token);
   if (other) {
@@ -380,7 +398,7 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
   const line = el;
   // const line = getLine(el);
   tokenize(line);
-  const sib = getNextSibling(line);
+  const sib = getNextLineSibling(line);
   if (sib) {
     return sib;
   }
@@ -389,7 +407,7 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
     ignoreDescendents,
   })) {
     tokenize(next as HTMLElement);
-    const sib = getNextSibling(next as HTMLElement);
+    const sib = getNextLineSibling(next as HTMLElement);
     if (sib) {
       return sib;
     }

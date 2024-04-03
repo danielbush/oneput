@@ -72,31 +72,33 @@ export class Navigator {
   /**
    * Find next sibling element if there is one.
    */
-  SIB_NEXT(): void {
-    if (!this.#FOCUS) return;
+  SIB_NEXT(): HTMLElement | null {
+    if (!this.#FOCUS) return null;
     const next = getNextSiblingNode(this.#FOCUS, {
       filter: isFocusable,
       ignoreDescendents,
     });
     if (next) {
       this.FOCUS(next);
+      return next as HTMLElement;
     }
-    return;
+    return null;
   }
 
   /**
    * Find previous sibling element if there is one.
    */
-  SIB_PREV(): void {
-    if (!this.#FOCUS) return;
+  SIB_PREV(): HTMLElement | null {
+    if (!this.#FOCUS) return null;
     const next = getPreviousSiblingNode(this.#FOCUS, {
       filter: isFocusable,
       ignoreDescendents,
     });
     if (next) {
       this.FOCUS(next);
+      return next as HTMLElement;
     }
-    return;
+    return null;
   }
 
   /**

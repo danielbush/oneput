@@ -1,9 +1,11 @@
 # jsed
 
-Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-aliases. Convert takes markdown files (used in the prototype project apps/fold) and converts them and the 2br constructs into html that can then be navigated and edited. The conversion is one-way, there is no going back.
+STATUS: Apr-2024 This code is under development.  Not ready for use yet.  Come back in a few months.
 
-- `convert`
-  - convert existing markdown files which is a format used in an early prototype of the 2br system
+The core library behind jsed.  To use the editor you need jsed-ui which has this code as a dependency.
+
+Some of the key things the core library handles:
+
 - `navigate`
   - the idea is to take html (including markdown converted by `convert`) and be able to navigate it or the outline or any other technique that make navigating potentially large documents easier
 - `modify`
@@ -16,6 +18,9 @@ Convert, navigate and edit html docs using 2br (2nd brain) constructs such as i-
   - when we save we need to generate a version of the edited content without any any temporary artifacts from the navigator
 - `load` / `unload`
   - load and unload an html doc within the browser environment; be able to leave the html the way we found it if this program unloads
+- `convert`
+  - convert existing markdown files which is a format used in an early prototype of the 2br system (a separate piece of software that motivated the creation of jsed and jsed-ui)
+  - convert takes markdown files (used in the prototype project "fold") and converts them and the 2br constructs into html that can then be navigated and edited. The conversion is one-way, there is no going back.
 
 See:
 
@@ -25,11 +30,7 @@ See:
 
 ## Usage
 
-Run a dev server to access `src/examples/` or similar:
-
-```sh
-bun run dev
-```
+This is a library.  It's intended to be used as dependency by jsed-ui.
 
 ## Build
 

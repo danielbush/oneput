@@ -13,6 +13,7 @@
     "test:watch": "vitest --watch",
     "convert": "bun run src/cli/convert.ts",
     "dev": "vite",
+    "build:check": "tsc --noEmit",
     "build:cli": "bun build ./src/cli/convert.ts --compile --outfile dist/bin/convert",
     "build:tsdefs": "tsc --emitDeclarationOnly --noEmit false --declaration --outDir dist",
     "build:watch": "bunx nodemon --ext js,jsx,ts,tsx,cjs,mjs,json --watch src --exec \"bun run build\"",

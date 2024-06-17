@@ -5,6 +5,7 @@ exports[`FOCUS > should focus an F_ELEM (SIB_HIGHLIGHT) 1`] = `
   id="root"
 >
   <p
+    class="jsed-focus"
     id="p1"
   >
     <span
@@ -475,9 +476,11 @@ exports[`UP can walk up successive parent elements 1`] = `
     id="id1"
   >
     <div
+      class="jsed-focus"
       id="id2"
     >
       <div
+        class=""
         id="id3"
       >
         <span
@@ -496,12 +499,15 @@ exports[`UP can walk up successive parent elements 2`] = `
   id="root"
 >
   <div
+    class="jsed-focus"
     id="id1"
   >
     <div
+      class=""
       id="id2"
     >
       <div
+        class=""
         id="id3"
       >
         <span
@@ -517,15 +523,19 @@ exports[`UP can walk up successive parent elements 2`] = `
 
 exports[`UP can walk up successive parent elements 3`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
+    class=""
     id="id1"
   >
     <div
+      class=""
       id="id2"
     >
       <div
+        class=""
         id="id3"
       >
         <span
@@ -541,15 +551,19 @@ exports[`UP can walk up successive parent elements 3`] = `
 
 exports[`UP can walk up successive parent elements 4`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
+    class=""
     id="id1"
   >
     <div
+      class=""
       id="id2"
     >
       <div
+        class=""
         id="id3"
       >
         <span

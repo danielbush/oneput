@@ -252,14 +252,22 @@ export function tokenizeImplicitLine(root: HTMLElement) {
  * stuff, so we use a wrapper here.
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
-  return el.previousElementSibling as HTMLElement | null;
+  const prev = el.previousElementSibling;
+  if (isToken2(prev)) {
+    return prev;
+  }
+  return null;
 }
 
 /**
  * Similar to getPreviousSibling but for the next sibling.
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
-  return el.nextElementSibling as HTMLElement | null;
+  const next = el.nextElementSibling as HTMLElement | null;
+  if (isToken2(next)) {
+    return next;
+  }
+  return null;
 }
 
 /**

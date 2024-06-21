@@ -91,18 +91,18 @@ describe('findNextNode - visit order', () => {
 
 describe('findPreviousNode - visit order', () => {
   // Test visit order assuming we visit everything here...
-  test('simple case', () => {
+  test('simple case 2', () => {
     // arrange
     const doc = makeRoot(
       div(
         { id: '1' },
-        //
         div({ id: '2' }),
         div({ id: '3' }),
+        div({ id: '4' }, div({ id: '4-1' }), div({ id: '4-2' })),
       ),
     );
     const visited = [];
-    const start = byId(doc, '3');
+    const start = byId(doc, '4-2');
     const limit = byId(doc, '1');
 
     // act
@@ -111,6 +111,6 @@ describe('findPreviousNode - visit order', () => {
     }
 
     // assert
-    expect(visited).toEqual(['2']);
+    expect(visited).toEqual(['4-1', '4', '3', '2']);
   });
 });

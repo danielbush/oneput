@@ -195,8 +195,8 @@ export function* findPreviousNode(
     yield par;
     const prevPar = getPreviousSiblingNode(par, params);
     if (prevPar) {
-      yield* findPreviousNode(prevPar, limit, params);
       yield prevPar;
+      yield* findPreviousNode(prevPar, limit, params);
     }
   }
 }

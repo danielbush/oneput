@@ -313,6 +313,16 @@ export function insertAfter(
   // existing.parentNode.insertBefore(toInsert, spc.nextSibling);
 }
 
+export function insertBefore(
+  toInsert: HTMLElement,
+  existing: HTMLElement,
+): void {
+  if (!existing.parentNode) {
+    throw new Error('parentNode not found');
+  }
+  existing.parentNode.insertBefore(toInsert, existing);
+}
+
 /**
  * Assumes `isToken` is true, but checks for weird invalid states that might occur
  */

@@ -1,5 +1,6 @@
 import {
   JSED_IMPLICIT_CLASS,
+  JSED_PLACEHOLDER_CHAR,
   JSED_PLACEHOLDER_TOKEN_CLASS,
   JSED_TOKEN_CLASS,
 } from './constants';
@@ -356,22 +357,35 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
 }
 
 /**
- * Remove the token.  If the token has no immediate siblings around it under the same parent element, then insert a PLACEHOLDER_TOKEN .
+ * Remove the token and return the nearest token in the same LINE.
+ *
+ * If the token has no immediate siblings around it under the same parent element, then insert a PLACEHOLDER_TOKEN .
  */
-export function remove(token: HTMLElement) {
+export function remove(token: HTMLElement): HTMLElement {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
-  let immediateSibling = getPreviousSibling(token);
-  if (!immediateSibling) {
-    immediateSibling = getNextSibling(token);
-  }
+  const prevTok = getPreviousSibling(token);
+  const nextTok = getNextSibling(token);
+  const prevEl = token.previousElementSibling;
+  const nextEl = token.nextElementSibling;
   parentNode.removeChild(token);
-  if (immediateSibling) {
-    return immediateSibling;
+  if (prevTok) {
+    return prevTok;
+  }
+  if (nextTok) {
+    return nextTok;
   }
   const pholder = createPlaceholderToken();
+  if (prevEl) {
+    insertAfter(pholder, prevEl as HTMLElement);
+    return pholder;
+  }
+  if (nextEl) {
+    insertBefore(pholder, nextEl as HTMLElement);
+    return pholder;
+  }
   parentNode.appendChild(pholder);
   return pholder;
 }
@@ -379,7 +393,7 @@ export function remove(token: HTMLElement) {
 export function getValue(token: HTMLElement): string {
   validate(token, true);
   if (isPlaceholderToken(token)) {
-    return '';
+    return JSED_PLACEHOLDER_CHAR;
   }
   return token.firstChild!.nodeValue as string;
 }

@@ -22,6 +22,7 @@
   - A "jsed token" - usually a span tag that wraps consecutive non-whitespace text.  A cursor deals with TOKEN's (not individual characters).
 - PLACEHOLDER_TOKEN
   - When an F_ELEM that can contain TOKEN's has none, we can insert a PLACEHOLDER_TOKEN .  This can act as a visual marker or placeholder to show that text could be inserted at this point in the DOM.
+  - In fact we add PLACEHOLDER_TOKEN's to any LINE_SEGMENT if it is exhausted of TOKEN's
 - FOCUS
   - The current F_ELEM that the user has clicked, touched or navigated to.  This is not a native browser focus because this will conflict with the focus of the input element used in jsed-ui.
 - TOKEN_FOCUS
@@ -39,6 +40,9 @@
 - IMPLICIT_LINE
   - Text nodes in the DOM that belong to a LINE F_ELEM that also contains nested LINE F_ELEM's.  Example: `<div><p>nested, not implicit</p> this text needs an implicit LINE<div>` .  Ideally, in the above example the "loose" text should be in a p-tag.  We could prompt the user to do this.  But at the very least, we can inject an inline span tag that wraps these and acts as an "implicit line of text".
   - In practice we look for text nodes that have a LINE (non-inline element) as a previous sibling.
+- LINE_SEGMENT
+  - a LINE is divided up into segements if it contains non-TOKEN elements
+  - eg `<div>...<em>...</em>...</div>` has 3 segments where `...` are just TOKEN's
 - SIB_HIGHLIGHT - when a user focuses on an element via TAB_FOCUS or an action like REC_NEXT etc
 - ISLAND
   - an "island" is an F_NONREC that we navigate "onto" but never "into";

@@ -392,7 +392,8 @@ export function uncollapse(token: HTMLElement): HTMLElement {
 /**
  * Remove the token and return the nearest token in the same LINE.
  *
- * If the token has no immediate siblings around it under the same parent element, then insert a PLACEHOLDER_TOKEN .
+ * If the token has no immediate siblings around it under the same parent
+ * element, then insert a PLACEHOLDER_TOKEN .
  */
 export function remove(token: HTMLElement): HTMLElement {
   const parentNode = token.parentNode;
@@ -410,6 +411,8 @@ export function remove(token: HTMLElement): HTMLElement {
   if (nextTok) {
     return nextTok;
   }
+  // We're out of text, we need to add a PLACEHOLDER_TOKEN for the appropriate
+  // LINE_SEGMENT .
   const pholder = createPlaceholderToken();
   if (prevEl) {
     insertAfter(pholder, prevEl as HTMLElement);

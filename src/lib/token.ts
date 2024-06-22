@@ -3,6 +3,7 @@ import {
   JSED_PLACEHOLDER_CHAR,
   JSED_PLACEHOLDER_TOKEN_CLASS,
   JSED_TOKEN_CLASS,
+  JSED_TOKEN_COLLAPSED,
 } from './constants';
 import { ignoreDescendents, isFocusable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
@@ -78,7 +79,9 @@ export function getParent(el: HTMLElement): HTMLElement {
 export function createToken(text: string): HTMLElement {
   const el = document.createElement('span');
   el.classList.add(JSED_TOKEN_CLASS);
-  el.appendChild(document.createTextNode(text));
+  // Create uncollapsed by default:
+  const content = text.endsWith(' ') ? text : text + ' ';
+  el.appendChild(document.createTextNode(content));
   return el;
 }
 
@@ -308,9 +311,6 @@ export function insertAfter(
     throw new Error('parentNode not found');
   }
   existing.parentNode.insertBefore(toInsert, existing.nextSibling);
-  // const spc = createSpace();
-  // existing.parentNode.insertBefore(spc, existing.nextSibling);
-  // existing.parentNode.insertBefore(toInsert, spc.nextSibling);
 }
 
 export function insertBefore(
@@ -326,16 +326,7 @@ export function insertBefore(
 /**
  * Assumes `isToken` is true, but checks for weird invalid states that might occur
  */
-function validate(token: HTMLElement, allowPlaceholder: boolean = false): void {
-  if (!allowPlaceholder && isPlaceholderToken(token)) {
-    throw new Error('placeholder tokens not allowed');
-  }
-  if (allowPlaceholder && isPlaceholderToken(token)) {
-    if (token.firstChild?.nodeValue !== '§') {
-      throw new Error('placeholder token should be empty');
-    }
-    return;
-  }
+function validate(token: HTMLElement): void {
   if (!token.firstChild) {
     throw new Error('token has no text');
   }
@@ -354,9 +345,47 @@ function validate(token: HTMLElement, allowPlaceholder: boolean = false): void {
  * these situations will focus get called triggering a "select-all" in jsed-ui.
  */
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
-  validate(token, true);
+  validate(token);
   placeholder2Token(token);
-  token.firstChild!.nodeValue = val;
+  let content = val;
+  if (isCollapsed(token)) {
+    content = val.trim();
+  } else {
+    content = val.endsWith(' ') ? val : val + ' ';
+  }
+  token.firstChild!.nodeValue = content;
+  return token;
+}
+
+export function isCollapsed(token: HTMLElement): boolean {
+  return token.classList.contains(JSED_TOKEN_COLLAPSED);
+}
+export function collapse(token: HTMLElement): HTMLElement {
+  const val = token.firstChild!.nodeValue;
+  if (!val) {
+    throw new Error(`Invalid token: no string content detected`);
+  }
+  token.classList.add(JSED_TOKEN_COLLAPSED);
+  if (val.endsWith(' ')) {
+    token.firstChild!.nodeValue = val.trim();
+    return token;
+  }
+  return token;
+}
+
+/**
+ * Tokens should be uncollapsed by default.  We can then choose to collapse.
+ */
+export function uncollapse(token: HTMLElement): HTMLElement {
+  const val = token.firstChild!.nodeValue;
+  if (!val) {
+    throw new Error(`Invalid token: no string content detected`);
+  }
+  token.classList.remove(JSED_TOKEN_COLLAPSED);
+  if (val.endsWith(' ')) {
+    return token;
+  }
+  token.firstChild!.nodeValue += ' ';
   return token;
 }
 
@@ -395,11 +424,11 @@ export function remove(token: HTMLElement): HTMLElement {
 }
 
 export function getValue(token: HTMLElement): string {
-  validate(token, true);
+  validate(token);
   if (isPlaceholderToken(token)) {
     return JSED_PLACEHOLDER_CHAR;
   }
-  return token.firstChild!.nodeValue as string;
+  return token.firstChild!.nodeValue?.trim() as string;
 }
 
 /**

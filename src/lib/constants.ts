@@ -19,6 +19,7 @@ export const JSED_TOKEN_CLASS = 'jsed-token';
  * The focus CSS class for TOKEN's.
  */
 export const JSED_TOKEN_FOCUS_CLASS = 'jsed-token-focus';
+export const JSED_TOKEN_COLLAPSED = 'jsed-token-collapsed';
 /**
  * CSS class for PLACEHOLDER_TOKEN .
  */

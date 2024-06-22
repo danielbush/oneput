@@ -43,6 +43,12 @@
 - ISLAND
   - an "island" is an F_NONREC that we navigate "onto" but never "into";
   - example: KATEX_ISLAND `<div class="katex">...</div>`
+- COLLAPSED_TOKEN
+  - a TOKEN that will not have any spaces between it an other tokens
+  - we create spaces between tokens by appending a space after the text content
+  - to get a collapsed state we simply remove the trailing space
+  - we add a class to identify the token is collapsed in case we want to highlight it
+  - most of the time we want uncollapsed tokens in NEGATIVE_SPACE .  But we can toggle them to collapse them if we want.  eg `<em>foo<strong>bar</strong>baz</em>` have `foo`, `bar` and `baz` in collapsed states.  `<em>foo <strong>bar </strong>baz </em>` are in uncollapsed states.
 
 
 ## Outdated

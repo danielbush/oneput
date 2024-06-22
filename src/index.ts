@@ -18,6 +18,9 @@ const utils = {
     isToken: token.isToken,
     getFirstToken: token.getFirstToken,
     getParent: token.getParent,
+    collapse: token.collapse,
+    uncollapse: token.uncollapse,
+    isCollapsed: token.isCollapsed,
   },
 };
 

@@ -43,6 +43,7 @@
 - LINE_SEGMENT
   - a LINE is divided up into segements if it contains non-TOKEN elements
   - eg `<div>...<em>...</em>...</div>` has 3 segments where `...` are just TOKEN's
+  - the middle LINE_SEGMENT represents all possible text for the `em` whereas the other 2 LINE_SEGMENT's are parts belonging to `div`.  We might call the latter PARTITION's.
 - SIB_HIGHLIGHT - when a user focuses on an element via TAB_FOCUS or an action like REC_NEXT etc
 - ISLAND
   - an "island" is an F_NONREC that we navigate "onto" but never "into";

@@ -94,6 +94,9 @@ export function createPlaceholderToken(): HTMLElement {
   return el;
 }
 
+/**
+ * It's easier to replaceText on a placeholder (we don't have to call focus and trigger a select-all in jsed-ui).
+ */
 export function placeholder2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_PLACEHOLDER_TOKEN_CLASS);
   return token;

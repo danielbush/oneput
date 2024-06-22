@@ -51,11 +51,7 @@ export function isToken(el: EventTarget | Element | null | undefined): boolean {
 }
 
 export function isPlaceholderToken(el: HTMLElement): boolean {
-  const isHTMLElement = el instanceof window.HTMLElement;
-  if (isHTMLElement) {
-    return el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS);
-  }
-  return false;
+  return isToken(el) && el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS);
 }
 
 export function getParent(el: HTMLElement): HTMLElement {

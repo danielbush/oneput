@@ -93,15 +93,15 @@ export function createToken(text: string): HTMLElement {
  * Create a PLACEHOLDER_TOKEN
  */
 export function createPlaceholderToken(): HTMLElement {
-  const el = document.createElement('span');
+  const el = createToken('§');
   el.classList.add(JSED_PLACEHOLDER_TOKEN_CLASS);
-  el.appendChild(document.createTextNode('§'));
   return el;
 }
 
-// function createSpace(): Text {
-//   return document.createTextNode(' ');
-// }
+export function placeholder2Token(token: HTMLElement): HTMLElement {
+  token.classList.remove(JSED_PLACEHOLDER_TOKEN_CLASS);
+  return token;
+}
 
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.
@@ -347,11 +347,7 @@ function validate(token: HTMLElement, allowPlaceholder: boolean = false): void {
 
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token, true);
-  if (isPlaceholderToken(token)) {
-    const tok = createToken(val);
-    token.replaceWith(tok);
-    return tok;
-  }
+  placeholder2Token(token);
   token.firstChild!.nodeValue = val;
   return token;
 }

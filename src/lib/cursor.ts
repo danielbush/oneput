@@ -36,6 +36,7 @@ export class JsedCursor implements IJsedCursor {
     }
   }
   replace(val: string) {
+    // Because we re-use the existing token, we do NOT focus.
     this.#token = token.replaceText(this.#token, val);
   }
   delete() {

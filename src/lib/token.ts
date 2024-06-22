@@ -45,10 +45,7 @@ export function isToken2(
 export function isToken(el: EventTarget | Element | null | undefined): boolean {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
-    return (
-      el.classList.contains(JSED_TOKEN_CLASS) ||
-      el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS)
-    );
+    return el.classList.contains(JSED_TOKEN_CLASS);
   }
   return false;
 }
@@ -91,6 +88,9 @@ export function createToken(text: string): HTMLElement {
 
 /**
  * Create a PLACEHOLDER_TOKEN
+ *
+ * This is a token that contains text that represents a text anchor.  We add an
+ * additional class to help detect it.
  */
 export function createPlaceholderToken(): HTMLElement {
   const el = createToken('§');
@@ -345,6 +345,15 @@ function validate(token: HTMLElement, allowPlaceholder: boolean = false): void {
   }
 }
 
+/**
+ * Replaces the text of the existing token.
+ *
+ * If the token is a placeholder, we convert it in-place to a regular token and
+ * replace the placeholder character with the text.  This makes it easy to
+ * manage the TOKEN_FOCUS and cursor operations - we only call focus when we
+ * create a new token eg after deleting the current TOKEN_FOCUS and only in
+ * these situations will focus get called triggering a "select-all" in jsed-ui.
+ */
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token, true);
   placeholder2Token(token);

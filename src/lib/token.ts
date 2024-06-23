@@ -98,7 +98,7 @@ function createAnchor(): HTMLElement {
 }
 
 /**
- * It's easier to replaceText on a placeholder (we don't have to call focus and trigger a select-all in jsed-ui).
+ * It's easier to replaceText on an ANCHOR (we don't have to call focus and trigger a select-all in jsed-ui).
  */
 function anchor2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_ANCHOR_CLASS);
@@ -338,8 +338,8 @@ function validate(token: HTMLElement): void {
 /**
  * Replaces the text of the existing token.
  *
- * If the token is a placeholder, we convert it in-place to a regular token and
- * replace the placeholder character with the text.  This makes it easy to
+ * If the token is an ANCHOR, we convert it in-place to a regular token and
+ * replace the ANCHOR character with the text.  This makes it easy to
  * manage the TOKEN_FOCUS and cursor operations - we only call focus when we
  * create a new token eg after deleting the current TOKEN_FOCUS and only in
  * these situations will focus get called triggering a "select-all" in jsed-ui.
@@ -493,14 +493,14 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Add text placeholders where applicable to the F_ELEM.
+ * Add ANCHOR's where applicable to the F_ELEM.
  *
- * Existing placeholders are unchanged.  Only direct descendant placeholders of
+ * Existing ANCHOR's are unchanged.  Only direct descendant ANCHOR's of
  * the F_ELEM are inserted (no recursion).
  */
 export function addAnchors(el: HTMLElement): HTMLElement[] {
   if (isToken(el)) {
-    throw new Error('addPlaceholders: expects an F_ELEM');
+    throw new Error('addAnchors: expects an F_ELEM');
   }
   let segment = { hasTokens: false };
   const anchors: HTMLElement[] = [];

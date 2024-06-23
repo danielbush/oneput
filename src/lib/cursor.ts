@@ -9,9 +9,9 @@ export class JsedCursor implements IJsedCursor {
    */
   #token: HTMLElement;
   /**
-   * In the situation where we delete all LINE siblings AND we don't keep a
-   * placeholder, we will have no more tokens.  We will set this flag to true
-   * and send a callback to the consumer of the cursor.
+   * In the situation where we delete all LINE siblings AND we don't keep an
+   * ANCHOR, we will have no more tokens.  We will set this flag to true and
+   * send a callback to the consumer of the cursor.
    */
   #exhausted: boolean = false;
   #setExhausted() {

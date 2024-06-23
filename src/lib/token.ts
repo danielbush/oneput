@@ -503,7 +503,7 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
     throw new Error('addPlaceholders: expects an F_ELEM');
   }
   let segment = { hasTokens: false };
-  const placeholders: HTMLElement[] = [];
+  const anchors: HTMLElement[] = [];
   const children = Array.from(el.children); // avoid infinite loops
   for (const child of children) {
     if (isToken(child)) {
@@ -512,19 +512,19 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
     }
     // We've hit a non-token...
     if (!segment.hasTokens) {
-      const placeholder = createAnchor();
-      placeholders.push(placeholder);
-      child.insertAdjacentElement('beforebegin', placeholder);
+      const anchor = createAnchor();
+      anchors.push(anchor);
+      child.insertAdjacentElement('beforebegin', anchor);
     }
     // Start new segment...
     segment = { hasTokens: false };
   }
   if (!segment.hasTokens) {
-    const placeholder = createAnchor();
-    placeholders.push(placeholder);
-    el.appendChild(placeholder);
+    const anchor = createAnchor();
+    anchors.push(anchor);
+    el.appendChild(anchor);
   }
-  return placeholders;
+  return anchors;
 }
 
 // #endregion

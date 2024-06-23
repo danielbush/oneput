@@ -397,7 +397,7 @@ export function uncollapse(token: HTMLElement): HTMLElement {
  */
 export function remove(
   token: HTMLElement,
-  params: { keepPlaceholder: boolean } = { keepPlaceholder: true },
+  params: { keepAnchor: boolean } = { keepAnchor: true },
 ): HTMLElement | null {
   const parentNode = token.parentNode;
   if (!parentNode) {
@@ -414,7 +414,7 @@ export function remove(
   if (nextTok) {
     return nextTok;
   }
-  if (!params?.keepPlaceholder) {
+  if (!params?.keepAnchor) {
     return null;
   }
   // We're out of text, we need to add a ANCHOR for the appropriate

@@ -64,13 +64,13 @@ export class JsedCursor implements IJsedCursor {
     this.#token = token.replaceText(this.#token, val);
   }
   delete(
-    { keepPlaceholder }: { keepPlaceholder: boolean } = {
-      keepPlaceholder: true,
+    { keepAnchor }: { keepAnchor: boolean } = {
+      keepAnchor: true,
     },
   ) {
     this.#failIfExhausted();
     const newToken = token.remove(this.#token, {
-      keepPlaceholder,
+      keepAnchor,
     });
     if (!newToken) {
       console.log(`we're exhausted!`);

@@ -91,7 +91,7 @@ export function createToken(text: string): HTMLElement {
  * This is a token that contains text that represents a text anchor.  We add an
  * additional class to help detect it.
  */
-export function createAnchor(): HTMLElement {
+function createAnchor(): HTMLElement {
   const el = createToken('§');
   el.classList.add(JSED_PLACEHOLDER_TOKEN_CLASS);
   return el;
@@ -100,7 +100,7 @@ export function createAnchor(): HTMLElement {
 /**
  * It's easier to replaceText on a placeholder (we don't have to call focus and trigger a select-all in jsed-ui).
  */
-export function placeholder2Token(token: HTMLElement): HTMLElement {
+function anchor2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_PLACEHOLDER_TOKEN_CLASS);
   return token;
 }
@@ -346,7 +346,7 @@ function validate(token: HTMLElement): void {
  */
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token);
-  placeholder2Token(token);
+  anchor2Token(token);
   let content = val;
   if (isCollapsed(token)) {
     content = val.trim();

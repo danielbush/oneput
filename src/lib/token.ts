@@ -1,6 +1,6 @@
 import {
   JSED_IMPLICIT_CLASS,
-  JSED_PLACEHOLDER_CHAR,
+  JSED_ANCHOR_CHAR,
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
@@ -435,7 +435,7 @@ export function remove(
 export function getValue(token: HTMLElement): string {
   validate(token);
   if (isAnchor(token)) {
-    return JSED_PLACEHOLDER_CHAR;
+    return JSED_ANCHOR_CHAR;
   }
   return token.firstChild!.nodeValue?.trim() as string;
 }

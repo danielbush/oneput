@@ -23,8 +23,8 @@ export const JSED_TOKEN_COLLAPSED = 'jsed-token-collapsed';
 /**
  * CSS class for ANCHOR .
  */
-export const JSED_ANCHOR_CLASS = 'jsed-placeholder-token';
-export const JSED_PLACEHOLDER_CHAR = '§';
+export const JSED_ANCHOR_CLASS = 'jsed-anchor-token';
+export const JSED_ANCHOR_CHAR = '\u004A';
 
 /**
  * Elements with this class will not respond to FOCUS .

@@ -83,7 +83,7 @@ export type IJsedCursor = {
   /**
    * Delete the current token.
    */
-  delete: () => void; // go back to previous word or next if no previous
+  delete: (params?: { keepPlaceholder: boolean }) => void; // go back to previous word or next if no previous
   /**
    * Append a new token after the current one.
    */
@@ -98,6 +98,14 @@ export type IJsedCursor = {
    * Close the current edit session.
    */
   close: () => void;
+  /**
+   * Notify the consumer that the cursor has to close.
+   *
+   * Example might be that we have run out of tokens and we are not replacing
+   * the last deleted token with a placholder token - see `delete` and
+   * `keepPlaceholder`.
+   */
+  onClose: (fn: () => void) => void;
 };
 
 /**

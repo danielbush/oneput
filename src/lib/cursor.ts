@@ -8,6 +8,26 @@ export class JsedCursor implements IJsedCursor {
    * The token the cursor is currently on.
    */
   #token: HTMLElement;
+  /**
+   * In the situation where we delete all LINE siblings AND we don't keep a
+   * placeholder, we will have no more tokens.  We will set this flag to true
+   * and send a callback to the consumer of the cursor.
+   */
+  #exhausted: boolean = false;
+  #setExhausted() {
+    this.close();
+    this.#exhausted = true;
+    if (this.#onClose) {
+      this.#onClose();
+    }
+  }
+  #failIfExhausted() {
+    if (this.#exhausted) {
+      throw new Error(
+        `Cursor is exhausted.  No more tokens.  There is a callback that should have notified you of this.`,
+      );
+    }
+  }
   setToken(el: HTMLElement) {
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     el.classList.add(JSED_TOKEN_FOCUS_CLASS);
@@ -19,9 +39,11 @@ export class JsedCursor implements IJsedCursor {
     this.setToken(params.token);
   }
   getToken() {
+    this.#failIfExhausted();
     return this.#token;
   }
   moveNext() {
+    this.#failIfExhausted();
     const nextToken = token.getNextLineSibling(this.#token);
     if (nextToken) {
       this.setToken(nextToken);
@@ -29,6 +51,7 @@ export class JsedCursor implements IJsedCursor {
     }
   }
   movePrevious() {
+    this.#failIfExhausted();
     const prevToken = token.getPreviousLineSibling(this.#token);
     if (prevToken) {
       this.setToken(prevToken);
@@ -36,16 +59,32 @@ export class JsedCursor implements IJsedCursor {
     }
   }
   replace(val: string) {
+    this.#failIfExhausted();
     // Because we re-use the existing token, we do NOT focus.
     this.#token = token.replaceText(this.#token, val);
   }
-  delete() {
-    const newToken = token.remove(this.#token);
+  delete(
+    { keepPlaceholder }: { keepPlaceholder: boolean } = {
+      keepPlaceholder: true,
+    },
+  ) {
+    this.#failIfExhausted();
+    const newToken = token.remove(this.#token, {
+      keepPlaceholder,
+    });
+    if (!newToken) {
+      console.log(`we're exhausted!`);
+      this.#setExhausted();
+      // TBC: we have to send an exit event to the owner of this cursor because
+      // we've run out of tokens and we're not keeping a placeholder..
+      return;
+    }
     this.#token = newToken;
     this.#document.nav.FOCUS(newToken);
     return;
   }
   append(val: string): HTMLElement {
+    this.#failIfExhausted();
     const tok = token.createToken(val);
     token.insertAfter(tok, this.#token);
     return tok;
@@ -58,6 +97,11 @@ export class JsedCursor implements IJsedCursor {
     return false;
   }
   close() {
+    this.#failIfExhausted();
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
+  }
+  #onClose?: () => void;
+  onClose(fn: () => void) {
+    this.#onClose = fn;
   }
 }

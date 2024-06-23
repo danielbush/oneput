@@ -1,7 +1,7 @@
 import {
   JSED_IMPLICIT_CLASS,
   JSED_PLACEHOLDER_CHAR,
-  JSED_PLACEHOLDER_TOKEN_CLASS,
+  JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
 } from './constants';
@@ -52,7 +52,7 @@ export function isToken(el: EventTarget | Element | null | undefined): boolean {
 }
 
 export function isAnchor(el: HTMLElement): boolean {
-  return isToken(el) && el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS);
+  return isToken(el) && el.classList.contains(JSED_ANCHOR_CLASS);
 }
 
 export function getParent(el: HTMLElement): HTMLElement {
@@ -86,14 +86,14 @@ export function createToken(text: string): HTMLElement {
 }
 
 /**
- * Create a PLACEHOLDER_TOKEN
+ * Create a ANCHOR
  *
  * This is a token that contains text that represents a text anchor.  We add an
  * additional class to help detect it.
  */
 function createAnchor(): HTMLElement {
   const el = createToken('§');
-  el.classList.add(JSED_PLACEHOLDER_TOKEN_CLASS);
+  el.classList.add(JSED_ANCHOR_CLASS);
   return el;
 }
 
@@ -101,7 +101,7 @@ function createAnchor(): HTMLElement {
  * It's easier to replaceText on a placeholder (we don't have to call focus and trigger a select-all in jsed-ui).
  */
 function anchor2Token(token: HTMLElement): HTMLElement {
-  token.classList.remove(JSED_PLACEHOLDER_TOKEN_CLASS);
+  token.classList.remove(JSED_ANCHOR_CLASS);
   return token;
 }
 
@@ -393,7 +393,7 @@ export function uncollapse(token: HTMLElement): HTMLElement {
  * Remove the token and return the nearest token in the same LINE.
  *
  * If the token has no immediate siblings around it under the same parent
- * element, then insert a PLACEHOLDER_TOKEN .
+ * element, then insert a ANCHOR .
  */
 export function remove(
   token: HTMLElement,
@@ -417,7 +417,7 @@ export function remove(
   if (!params?.keepPlaceholder) {
     return null;
   }
-  // We're out of text, we need to add a PLACEHOLDER_TOKEN for the appropriate
+  // We're out of text, we need to add a ANCHOR for the appropriate
   // LINE_SEGMENT .
   const anchor = createAnchor();
   if (prevEl) {

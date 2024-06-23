@@ -21,9 +21,9 @@ export const JSED_TOKEN_CLASS = 'jsed-token';
 export const JSED_TOKEN_FOCUS_CLASS = 'jsed-token-focus';
 export const JSED_TOKEN_COLLAPSED = 'jsed-token-collapsed';
 /**
- * CSS class for PLACEHOLDER_TOKEN .
+ * CSS class for ANCHOR .
  */
-export const JSED_PLACEHOLDER_TOKEN_CLASS = 'jsed-placeholder-token';
+export const JSED_ANCHOR_CLASS = 'jsed-placeholder-token';
 export const JSED_PLACEHOLDER_CHAR = '§';
 
 /**

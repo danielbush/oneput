@@ -1,3 +1,6 @@
+import { createWithAnchor } from './dom-rules';
+import { addAnchors } from './token';
+
 export function copyElement(el: HTMLElement, newTagName?: string): HTMLElement {
   newTagName = newTagName || el.tagName;
   const newElement = document.createElement(newTagName);
@@ -27,7 +30,11 @@ export function replaceElement(
 }
 
 export function createElement(tagName: string): HTMLElement {
-  return document.createElement(tagName);
+  const el = document.createElement(tagName);
+  if (createWithAnchor(tagName)) {
+    addAnchors(el);
+  }
+  return el;
 }
 
 export function insertAfter(el: HTMLElement, newElement: HTMLElement): void {

@@ -419,17 +419,17 @@ export function remove(
   }
   // We're out of text, we need to add a PLACEHOLDER_TOKEN for the appropriate
   // LINE_SEGMENT .
-  const pholder = createPlaceholderToken();
+  const anchor = createPlaceholderToken();
   if (prevEl) {
-    insertAfter(pholder, prevEl as HTMLElement);
-    return pholder;
+    insertAfter(anchor, prevEl as HTMLElement);
+    return anchor;
   }
   if (nextEl) {
-    insertBefore(pholder, nextEl as HTMLElement);
-    return pholder;
+    insertBefore(anchor, nextEl as HTMLElement);
+    return anchor;
   }
-  parentNode.appendChild(pholder);
-  return pholder;
+  parentNode.appendChild(anchor);
+  return anchor;
 }
 
 export function getValue(token: HTMLElement): string {

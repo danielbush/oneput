@@ -51,7 +51,7 @@ export function isToken(el: EventTarget | Element | null | undefined): boolean {
   return false;
 }
 
-export function isPlaceholderToken(el: HTMLElement): boolean {
+export function isAnchor(el: HTMLElement): boolean {
   return isToken(el) && el.classList.contains(JSED_PLACEHOLDER_TOKEN_CLASS);
 }
 
@@ -434,7 +434,7 @@ export function remove(
 
 export function getValue(token: HTMLElement): string {
   validate(token);
-  if (isPlaceholderToken(token)) {
+  if (isAnchor(token)) {
     return JSED_PLACEHOLDER_CHAR;
   }
   return token.firstChild!.nodeValue?.trim() as string;

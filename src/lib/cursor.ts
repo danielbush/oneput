@@ -73,10 +73,7 @@ export class JsedCursor implements IJsedCursor {
       keepAnchor,
     });
     if (!newToken) {
-      console.log(`we're exhausted!`);
       this.#setExhausted();
-      // TBC: we have to send an exit event to the owner of this cursor because
-      // we've run out of tokens and we're not keeping a placeholder..
       return;
     }
     this.#token = newToken;

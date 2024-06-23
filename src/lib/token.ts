@@ -492,4 +492,39 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
   return null;
 }
 
+/**
+ * Add text placeholders where applicable to the F_ELEM.
+ *
+ * Existing placeholders are unchanged.  Only direct descendant placeholders of
+ * the F_ELEM are inserted (no recursion).
+ */
+export function addPlaceholders(el: HTMLElement): HTMLElement[] {
+  if (isToken(el)) {
+    throw new Error('addPlaceholders: expects an F_ELEM');
+  }
+  let segment = { hasTokens: false };
+  const placeholders: HTMLElement[] = [];
+  const children = Array.from(el.children); // avoid infinite loops
+  for (const child of children) {
+    if (isToken(child)) {
+      segment.hasTokens = true;
+      continue;
+    }
+    // We've hit a non-token...
+    if (!segment.hasTokens) {
+      const placeholder = createPlaceholderToken();
+      placeholders.push(placeholder);
+      child.insertAdjacentElement('beforebegin', placeholder);
+    }
+    // Start new segment...
+    segment = { hasTokens: false };
+  }
+  if (!segment.hasTokens) {
+    const placeholder = createPlaceholderToken();
+    placeholders.push(placeholder);
+    el.appendChild(placeholder);
+  }
+  return placeholders;
+}
+
 // #endregion

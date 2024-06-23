@@ -17,6 +17,7 @@ const utils = {
     getLine: token.getLine,
     isToken: token.isToken,
     isPlaceholderToken: token.isPlaceholderToken,
+    addPlaceholders: token.addPlaceholders,
     getFirstToken: token.getFirstToken,
     getParent: token.getParent,
     collapse: token.collapse,

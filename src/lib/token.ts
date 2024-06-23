@@ -498,7 +498,7 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
  * Existing placeholders are unchanged.  Only direct descendant placeholders of
  * the F_ELEM are inserted (no recursion).
  */
-export function addPlaceholders(el: HTMLElement): HTMLElement[] {
+export function addAnchors(el: HTMLElement): HTMLElement[] {
   if (isToken(el)) {
     throw new Error('addPlaceholders: expects an F_ELEM');
   }

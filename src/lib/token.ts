@@ -91,7 +91,7 @@ export function createToken(text: string): HTMLElement {
  * This is a token that contains text that represents a text anchor.  We add an
  * additional class to help detect it.
  */
-export function createPlaceholderToken(): HTMLElement {
+export function createAnchor(): HTMLElement {
   const el = createToken('§');
   el.classList.add(JSED_PLACEHOLDER_TOKEN_CLASS);
   return el;
@@ -419,7 +419,7 @@ export function remove(
   }
   // We're out of text, we need to add a PLACEHOLDER_TOKEN for the appropriate
   // LINE_SEGMENT .
-  const anchor = createPlaceholderToken();
+  const anchor = createAnchor();
   if (prevEl) {
     insertAfter(anchor, prevEl as HTMLElement);
     return anchor;
@@ -512,7 +512,7 @@ export function addPlaceholders(el: HTMLElement): HTMLElement[] {
     }
     // We've hit a non-token...
     if (!segment.hasTokens) {
-      const placeholder = createPlaceholderToken();
+      const placeholder = createAnchor();
       placeholders.push(placeholder);
       child.insertAdjacentElement('beforebegin', placeholder);
     }
@@ -520,7 +520,7 @@ export function addPlaceholders(el: HTMLElement): HTMLElement[] {
     segment = { hasTokens: false };
   }
   if (!segment.hasTokens) {
-    const placeholder = createPlaceholderToken();
+    const placeholder = createAnchor();
     placeholders.push(placeholder);
     el.appendChild(placeholder);
   }

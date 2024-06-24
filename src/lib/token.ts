@@ -92,7 +92,7 @@ export function createToken(text: string): HTMLElement {
  * additional class to help detect it.
  */
 function createAnchor(): HTMLElement {
-  const el = createToken('§');
+  const el = createToken(JSED_ANCHOR_CHAR);
   el.classList.add(JSED_ANCHOR_CLASS);
   return el;
 }

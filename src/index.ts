@@ -2,6 +2,7 @@ import { JsedDocument, IJsedCursor, JsedFocusEvent } from './types';
 import { start } from './app/start';
 import * as token from './lib/token';
 import * as dom from './lib/dom';
+import * as domRules from './lib/dom-rules';
 
 const utils = {
   dom: {
@@ -11,6 +12,7 @@ const utils = {
     insertAfter: dom.insertAfter,
     insertBefore: dom.insertBefore,
     deleteElement: dom.deleteElement,
+    rules: domRules,
   },
   token: {
     getValue: token.getValue,

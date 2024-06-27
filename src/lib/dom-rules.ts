@@ -1,3 +1,5 @@
+import type { JsedDocument } from '../types';
+
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories
 const LEAF = ['br', 'img'];
 const PHRASING_CONTENT = [
@@ -106,4 +108,17 @@ export function canCreateWithAnchor(tagName: string): boolean {
     return true;
   }
   return false;
+}
+
+export function canDelete(el: HTMLElement, doc: JsedDocument): boolean {
+  if (el === doc.root) {
+    return false;
+  }
+  if (el === doc.document.body) {
+    return false;
+  }
+  if (el.contains(doc.document.body)) {
+    return false;
+  }
+  return true;
 }

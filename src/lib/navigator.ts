@@ -25,6 +25,13 @@ export class Navigator {
     return this.#FOCUS ?? null;
   }
 
+  clearFocus(): void {
+    if (this.#FOCUS) {
+      this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
+      this.#FOCUS = undefined;
+    }
+  }
+
   #updateFocus(el: HTMLElement) {
     if (token.isToken(el)) {
       el = token.getParent(el);

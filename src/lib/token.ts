@@ -5,7 +5,7 @@ import {
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
 } from './constants';
-import { ignoreDescendents, isFocusable } from './focus';
+import { ignoreDescendents, isFocusable, isIgnorable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
 
 // #region utils
@@ -255,7 +255,10 @@ export function tokenizeImplicitLine(root: HTMLElement) {
  * stuff, so we use a wrapper here.
  */
 export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
-  const prev = el.previousElementSibling;
+  let prev = el.previousElementSibling;
+  while (prev && isIgnorable(prev)) {
+    prev = prev.previousElementSibling;
+  }
   if (isToken2(prev)) {
     return prev;
   }
@@ -266,7 +269,10 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
  * Similar to getPreviousSibling but for the next sibling.
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
-  const next = el.nextElementSibling as HTMLElement | null;
+  let next = el.nextElementSibling as HTMLElement | null;
+  while (next && isIgnorable(next)) {
+    next = next.nextElementSibling as HTMLElement | null;
+  }
   if (isToken2(next)) {
     return next;
   }
@@ -506,6 +512,10 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
   const anchors: HTMLElement[] = [];
   const children = Array.from(el.children); // avoid infinite loops
   for (const child of children) {
+    if (isIgnorable(child)) {
+      // eg element indicator in jsed-ui
+      continue;
+    }
     if (isToken(child)) {
       segment.hasTokens = true;
       continue;

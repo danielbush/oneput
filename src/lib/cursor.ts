@@ -118,4 +118,29 @@ export class JsedCursor implements IJsedCursor {
   }
 
   // #endregion
+
+  // #region Dom (non-token)
+
+  /**
+   * Focus on the new element anchor if there is one, else keep focused on
+   * current token.
+   */
+  insertElementAfter(el: HTMLElement) {
+    if (token.isToken(el)) {
+      throw new Error(`Expected non-token element.`);
+    }
+    token.insertAfter(el, this.#token);
+    const nexttok = token.getNextSibling(el);
+    if (!nexttok) {
+      const anchor = token.createAnchor();
+      token.insertAfter(anchor, el);
+    }
+    const first = token.getFirstToken(el);
+    if (first) {
+      this.setToken(first);
+      this.#document.nav.FOCUS(first);
+    }
+  }
+
+  // #endregion
 }

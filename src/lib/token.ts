@@ -91,7 +91,7 @@ export function createToken(text: string): HTMLElement {
  * This is a token that contains text that represents a text anchor.  We add an
  * additional class to help detect it.
  */
-function createAnchor(): HTMLElement {
+export function createAnchor(): HTMLElement {
   const el = createToken(JSED_ANCHOR_CHAR);
   el.classList.add(JSED_ANCHOR_CLASS);
   return el;
@@ -248,7 +248,9 @@ export function tokenizeImplicitLine(root: HTMLElement) {
 // #region Operations on tokenized F_ELEM's
 
 /**
- * Get the previous token sibling if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
+ * Get the previous TOKEN sibling if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
+ *
+ * `el` may or may not be a TOKEN .  `el` might be an inline tag eg an em-tag.
  *
  * This is basically a souped up version of the DOM's
  * node.previousElementSibling.  We may need to handle undo and other weird

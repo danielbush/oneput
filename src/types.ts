@@ -100,6 +100,8 @@ export type IJsedCursor = {
    * `keepAnchor`.
    */
   onClose: (fn: () => void) => void;
+
+  insertElementAfter: (el: HTMLElement) => void;
 };
 
 /**

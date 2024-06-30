@@ -63,6 +63,12 @@ const RULES: { [tagName: string]: string[] } = {
   footer: [...FLOW_CONTENT],
   //
   hgroup: [...FLOW_CONTENT, ...PHRASING_CONTENT],
+  h1: [...PHRASING_CONTENT],
+  h2: [...PHRASING_CONTENT],
+  h3: [...PHRASING_CONTENT],
+  h4: [...PHRASING_CONTENT],
+  h5: [...PHRASING_CONTENT],
+  h6: [...PHRASING_CONTENT],
   //
   ul: ['li'],
   ol: ['li'],

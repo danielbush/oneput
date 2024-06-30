@@ -503,6 +503,8 @@ export function getFirstToken(el: HTMLElement): HTMLElement | null {
  *
  * Existing ANCHOR's are unchanged.  Only direct descendant ANCHOR's of
  * the F_ELEM are inserted (no recursion).
+ *
+ * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
  */
 export function addAnchors(el: HTMLElement): HTMLElement[] {
   if (isToken(el)) {

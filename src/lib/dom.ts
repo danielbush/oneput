@@ -1,5 +1,5 @@
 import { canCreateWithAnchor } from './dom-rules';
-import { addAnchors } from './token';
+import * as token from './token';
 
 export function copyElement(el: HTMLElement, newTagName?: string): HTMLElement {
   newTagName = newTagName || el.tagName;
@@ -32,7 +32,7 @@ export function replaceElement(
 export function createElement(tagName: string): HTMLElement {
   const el = document.createElement(tagName);
   if (canCreateWithAnchor(tagName)) {
-    addAnchors(el);
+    token.addAnchors(el);
   }
   return el;
 }

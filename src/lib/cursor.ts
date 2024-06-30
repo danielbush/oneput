@@ -29,6 +29,9 @@ export class JsedCursor implements IJsedCursor {
     }
   }
   setToken(el: HTMLElement) {
+    if (!token.isToken(el)) {
+      throw new Error(`Not a token`);
+    }
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     el.classList.add(JSED_TOKEN_FOCUS_CLASS);
     this.#token = el;

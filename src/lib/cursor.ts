@@ -89,13 +89,6 @@ export class JsedCursor implements IJsedCursor {
     token.insertAfter(tok, this.#token);
     return tok;
   }
-  focus(el: HTMLElement): boolean {
-    if (token.isToken(el)) {
-      this.#document.nav.FOCUS(el);
-      return true;
-    }
-    return false;
-  }
   close() {
     this.#failIfExhausted();
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);

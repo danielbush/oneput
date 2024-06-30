@@ -89,12 +89,6 @@ export type IJsedCursor = {
    */
   append: (val: string) => HTMLElement;
   /**
-   * Request the cursor do a new focus.
-   *
-   * Normally this is to do a TOKEN_FOCUS on another token under the same F_ELEM eg created as a result of calling `append`.
-   */
-  focus: (el: HTMLElement) => boolean;
-  /**
    * Close the current edit session.
    */
   close: () => void;

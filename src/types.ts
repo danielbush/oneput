@@ -22,9 +22,13 @@ export type JsedDocument = {
   nav: Navigator;
   listeners: {
     /**
-     * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.
+     * Register a listener for FOCUS request events.  Consumer can decide if the FOCUS event should occur.
      */
-    REQUEST_FOCUS: null | ((evt: JsedFocusEvent) => boolean);
+    REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
+    /**
+     * Register a listener for FOCUS events that have occurred.
+     */
+    FOCUS: null | ((evt: JsedFocusEvent) => void);
   };
   unload: () => void;
   /**
@@ -33,24 +37,22 @@ export type JsedDocument = {
   requestCursor: (params: { token: HTMLElement }) => IJsedCursor;
 };
 
-/**
- * Events that are emitted due to navigation and selection of TOKEN's within the document (aka the TOKEN_FOCUS action).
- *
- * The listener to this event will decide if the TOKEN in this event should become the active token based on this event.
- */
+export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
+export type JsedFocusRequestEvent = JsedFocusEventBase<'FOCUS_REQUEST'>;
+
 /**
  * Events that are emitted due to navigation and selection of F_ELEM's within the document (aka the FOCUS action).
  *
  * The listener to this event will decide if the F_ELEM should become the active FOCUS based on this event.
  */
-export type JsedFocusEvent =
+type JsedFocusEventBase<T> =
   | {
-      type: 'FOCUS';
+      type: T;
       targetType: 'F_ELEM';
       element: HTMLElement;
     }
   | {
-      type: 'FOCUS';
+      type: T;
       targetType: 'TOKEN';
       /**
        * The TOKEN (usually a span element).

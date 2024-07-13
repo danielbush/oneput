@@ -1,4 +1,9 @@
-import { JsedDocument, IJsedCursor, JsedFocusEvent } from './types';
+import type {
+  JsedDocument,
+  IJsedCursor,
+  JsedFocusRequestEvent,
+  JsedFocusEvent,
+} from './types';
 import { start } from './app/start';
 import * as token from './lib/token';
 import * as dom from './lib/dom';
@@ -35,4 +40,9 @@ export {
   JSED_IGNORE_CLASS,
 } from './lib/constants';
 export { start, utils };
-export type { JsedDocument, JsedFocusEvent, IJsedCursor as JsedCursor };
+export type {
+  JsedDocument,
+  JsedFocusRequestEvent,
+  JsedFocusEvent,
+  IJsedCursor as JsedCursor,
+};

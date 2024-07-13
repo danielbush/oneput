@@ -33,17 +33,38 @@ export class Navigator {
   }
 
   #updateFocus(el: HTMLElement) {
+    const flistener = this.#document.listeners.FOCUS ?? (() => {});
+    let tok: HTMLElement | null = null;
     if (token.isToken(el)) {
+      tok = el;
       el = token.getParent(el);
     }
     if (!isFocusable(el)) {
       throw new Error('#updateFocus: expects an F_ELEM');
+    }
+    if (!tok) {
+      // We're on an F_ELEM (not a token), tokenize it.
+      token.tokenize(el);
     }
     if (this.#FOCUS) {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
     }
     this.#FOCUS = el;
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
+    if (tok) {
+      flistener({
+        type: 'FOCUS',
+        targetType: 'TOKEN',
+        token: tok,
+        value: token.getValue(tok),
+      });
+    } else {
+      flistener({
+        type: 'FOCUS',
+        targetType: 'F_ELEM',
+        element: el,
+      });
+    }
   }
 
   /**
@@ -150,21 +171,18 @@ export class Navigator {
     const listener = this.#document.listeners.REQUEST_FOCUS ?? (() => true);
     if (isFocusable(el)) {
       const ok = listener({
-        type: 'FOCUS',
+        type: 'FOCUS_REQUEST',
         targetType: 'F_ELEM',
         element: el,
       });
       if (ok) {
-        token.tokenize(el);
-        this.#updateFocus(el);
-        this.SIB_HIGHLIGHT();
+        this.FOCUS(el);
       }
-      this.FOCUS(el);
       return;
     }
     if (token.isToken2(el)) {
       const ok = listener({
-        type: 'FOCUS',
+        type: 'FOCUS_REQUEST',
         targetType: 'TOKEN',
         token: el,
         value: token.getValue(el),

@@ -19,6 +19,7 @@ export function makeDocument(root: HTMLElement): JsedDocument {
     SIB_HIGHLIGHT: new Set(),
     listeners: {
       REQUEST_FOCUS: null,
+      FOCUS: null,
     },
     unload: () => {
       // Placeholder, see below.

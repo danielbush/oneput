@@ -3,14 +3,12 @@ import { JSED_TOKEN_FOCUS_CLASS } from './constants';
 import * as token from './token';
 
 export class JsedCursor implements IJsedCursor {
-  #document: JsedDocument;
   /**
    * The token the cursor is currently on.
    */
   #token: HTMLElement;
 
   constructor(params: { document: JsedDocument; token: HTMLElement }) {
-    this.#document = params.document;
     this.#token = params.token; // ts
     this.setToken(params.token);
   }
@@ -52,7 +50,6 @@ export class JsedCursor implements IJsedCursor {
     const nextToken = token.getNextLineSibling(this.#token);
     if (nextToken) {
       this.setToken(nextToken);
-      this.#document.nav.REQUEST_FOCUS(nextToken);
     }
   }
   movePrevious() {
@@ -60,7 +57,6 @@ export class JsedCursor implements IJsedCursor {
     const prevToken = token.getPreviousLineSibling(this.#token);
     if (prevToken) {
       this.setToken(prevToken);
-      this.#document.nav.REQUEST_FOCUS(prevToken);
     }
   }
 
@@ -87,7 +83,7 @@ export class JsedCursor implements IJsedCursor {
       return;
     }
     this.#token = newToken;
-    this.#document.nav.REQUEST_FOCUS(newToken);
+    this.setToken(newToken);
     return;
   }
   append(val: string): HTMLElement {
@@ -151,7 +147,6 @@ export class JsedCursor implements IJsedCursor {
     const first = token.getFirstToken(el);
     if (first) {
       this.setToken(first);
-      this.#document.nav.REQUEST_FOCUS(first);
     }
   }
 

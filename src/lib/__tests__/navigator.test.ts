@@ -19,7 +19,7 @@ describe('FOCUS', () => {
     const action = new Navigator(doc);
 
     // act
-    action.FOCUS(p1);
+    action.REQUEST_FOCUS(p1);
 
     // assert
     expect(doc.root).toMatchSnapshot();
@@ -33,7 +33,7 @@ describe('FOCUS', () => {
     const action = new Navigator(doc);
 
     // act
-    action.FOCUS(p1);
+    action.REQUEST_FOCUS(p1);
 
     // assert
     expect(focus).toBeCalledTimes(0);
@@ -167,7 +167,7 @@ test('UP can walk up successive parent elements', () => {
     div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))),
   );
   const action = new Navigator(doc);
-  action.FOCUS(byId(doc, 'id3'));
+  action.REQUEST_FOCUS(byId(doc, 'id3'));
 
   // act
   action.UP();

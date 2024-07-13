@@ -55,7 +55,7 @@ export class Navigator {
       filter: isFocusable,
       ignoreDescendents,
     })) {
-      this.FOCUS(next);
+      this.REQUEST_FOCUS(next);
       return next as HTMLElement;
     }
     return null;
@@ -70,7 +70,7 @@ export class Navigator {
       filter: isFocusable,
       ignoreDescendents,
     })) {
-      this.FOCUS(next);
+      this.REQUEST_FOCUS(next);
       return next as HTMLElement;
     }
     return null;
@@ -86,7 +86,7 @@ export class Navigator {
       ignoreDescendents,
     });
     if (next) {
-      this.FOCUS(next);
+      this.REQUEST_FOCUS(next);
       return next as HTMLElement;
     }
     return null;
@@ -102,7 +102,7 @@ export class Navigator {
       ignoreDescendents,
     });
     if (next) {
-      this.FOCUS(next);
+      this.REQUEST_FOCUS(next);
       return next as HTMLElement;
     }
     return null;
@@ -115,19 +115,34 @@ export class Navigator {
     if (!this.#FOCUS) return;
     const next = getParent(this.#FOCUS, this.#document.root);
     if (next) {
-      this.FOCUS(next);
+      this.REQUEST_FOCUS(next);
     }
     return;
   }
 
   /**
-   * Focus an element if it is an F_ELEM, sets doc.active.
+   * Focus an element if it is an F_ELEM .
+   */
+  FOCUS(el: HTMLElement): void {
+    this.#updateFocus(el);
+    this.SIB_HIGHLIGHT();
+  }
+
+  /**
+   * Request FOCUS for an element `el`.
    *
    * TOKEN_FOCUS is checked first.
    *
-   * TODO: doc.active should update.  Should we track it manually?
+   * The FOCUS listener will be called and its response checked to determine if
+   * the FOCUS will occur or not.
+   *
+   * This can be called by something outside of the listener that is registered
+   * to document.listeners.FOCUS .   The listener is probably some sort of
+   * editor that controls the focus and cursor and it can decide to accept or
+   * reject the focus request.  This editor will usually call FOCUS directly.
+   *
    */
-  FOCUS(el: Element | EventTarget | null): void {
+  REQUEST_FOCUS(el: Element | EventTarget | null): void {
     if (!el) {
       return;
     }
@@ -144,6 +159,8 @@ export class Navigator {
         this.#updateFocus(el);
         this.SIB_HIGHLIGHT();
       }
+      this.FOCUS(el);
+      return;
     }
     if (token.isToken2(el)) {
       const ok = listener({
@@ -153,8 +170,7 @@ export class Navigator {
         value: token.getValue(el),
       });
       if (ok) {
-        this.#updateFocus(el);
-        this.SIB_HIGHLIGHT();
+        this.FOCUS(el);
       }
     }
   }

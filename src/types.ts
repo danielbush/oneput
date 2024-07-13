@@ -101,6 +101,11 @@ export type IJsedCursor = {
    */
   onClose: (fn: () => void) => void;
 
+  /**
+   * Notify the consumer when the cursor moves.
+   */
+  onSetToken: (fn: (el: HTMLElement) => void) => void;
+
   insertElementAfter: (el: HTMLElement) => void;
 };
 

@@ -15,12 +15,22 @@ export class JsedCursor implements IJsedCursor {
     this.setToken(params.token);
   }
 
+  // #region Events
+
+  #onSetToken?: (token: HTMLElement) => void;
+  onSetToken(fn: (token: HTMLElement) => void) {
+    this.#onSetToken = fn;
+  }
+
+  // #endregion
+
   // #region Setting
 
   getToken() {
     this.#failIfExhausted();
     return this.#token;
   }
+
   setToken(el: HTMLElement) {
     if (!token.isToken(el)) {
       throw new Error(`Not a token`);
@@ -28,6 +38,9 @@ export class JsedCursor implements IJsedCursor {
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     el.classList.add(JSED_TOKEN_FOCUS_CLASS);
     this.#token = el;
+    if (this.#onSetToken) {
+      this.#onSetToken(el);
+    }
   }
 
   // #endregion

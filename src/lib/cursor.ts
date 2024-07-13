@@ -128,6 +128,14 @@ export class JsedCursor implements IJsedCursor {
 
   // #endregion
 
+  // #region Other
+
+  isSameLine(tok: HTMLElement) {
+    return token.isSameLine(this.#token, tok);
+  }
+
+  // #endregion
+
   // #region Dom (non-token)
 
   /**

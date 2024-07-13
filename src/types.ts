@@ -108,6 +108,11 @@ export type IJsedCursor = {
    */
   onSetToken: (fn: (el: HTMLElement) => void) => void;
 
+  /**
+   * Whether `tok` is on the same line as the cursor's token.
+   */
+  isSameLine: (tok: HTMLElement) => boolean;
+
   insertElementAfter: (el: HTMLElement) => void;
 };
 

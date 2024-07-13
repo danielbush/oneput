@@ -9,6 +9,13 @@ import { ignoreDescendents, isFocusable, isIgnorable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
 
 // #region utils
+
+export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
+  const line1 = getLine(tok1);
+  const line2 = getLine(tok2);
+  return line1 === line2;
+}
+
 /**
  * Detect if an F_ELEM is acting like an inline element eg an em-tag - such
  * elements are considered part of the visual line of text.

@@ -147,7 +147,7 @@ export class Navigator {
       return;
     }
     // If there are no listeners, we'll assume ok = true.
-    const listener = this.#document.listeners.FOCUS ?? (() => true);
+    const listener = this.#document.listeners.REQUEST_FOCUS ?? (() => true);
     if (isFocusable(el)) {
       const ok = listener({
         type: 'FOCUS',

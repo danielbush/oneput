@@ -24,7 +24,7 @@ export type JsedDocument = {
     /**
      * Register a listener for FOCUS events.  Consumer can decide if the FOCUS event should occur.
      */
-    FOCUS: null | ((evt: JsedFocusEvent) => boolean);
+    REQUEST_FOCUS: null | ((evt: JsedFocusEvent) => boolean);
   };
   unload: () => void;
   /**

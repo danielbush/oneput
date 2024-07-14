@@ -113,6 +113,12 @@ export type IJsedCursor = {
    */
   isSameLine: (tok: HTMLElement) => boolean;
 
+  /**
+   * "focus classes" will get cleared the moment the cursor moves on or gets closed.
+   */
+  addFocusClasses: (...classNames: string[]) => void;
+  removeFocusClasses: (...classNames: string[]) => void;
+
   insertElementAfter: (el: HTMLElement) => void;
   insertElementBefore: (el: HTMLElement) => void;
 };

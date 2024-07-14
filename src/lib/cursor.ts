@@ -33,6 +33,7 @@ export class JsedCursor implements IJsedCursor {
     if (!token.isToken(el)) {
       throw new Error(`Not a token`);
     }
+    this.#removeAllFocusClasses();
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     el.classList.add(JSED_TOKEN_FOCUS_CLASS);
     this.#token = el;
@@ -100,6 +101,7 @@ export class JsedCursor implements IJsedCursor {
   close() {
     this.#failIfExhausted();
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
+    this.#removeAllFocusClasses();
   }
   #onClose?: () => void;
   onClose(fn: () => void) {
@@ -132,6 +134,26 @@ export class JsedCursor implements IJsedCursor {
 
   isSameLine(tok: HTMLElement) {
     return token.isSameLine(this.#token, tok);
+  }
+
+  // #endregion
+
+  // #region Styling
+
+  #focusClasses: string[] = [];
+  addFocusClasses(...classNames: string[]) {
+    this.#token.classList.add(...classNames);
+    this.#focusClasses.push(...classNames);
+  }
+  removeFocusClasses(...classNames: string[]) {
+    this.#token.classList.remove(...classNames);
+    this.#focusClasses = this.#focusClasses.filter(
+      (c) => !classNames.includes(c),
+    );
+  }
+  #removeAllFocusClasses() {
+    this.#token.classList.remove(...this.#focusClasses);
+    this.#focusClasses = [];
   }
 
   // #endregion

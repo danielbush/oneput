@@ -91,9 +91,13 @@ export type IJsedCursor = {
    */
   append: (val: string) => HTMLElement;
   /**
-   * Create COLLAPSED_TOKEN from the current token and the next one.
+   * Collapse the token with what is next to it.
    */
   toggleCollapseNext: () => boolean;
+  /**
+   * Collapse the token with what is previous to it.
+   */
+  toggleCollapsePrevious: () => boolean;
   /**
    * Merge with next adjacent token if it exists.
    */

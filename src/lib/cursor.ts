@@ -105,6 +105,21 @@ export class JsedCursor implements IJsedCursor {
     }
   }
 
+  toggleCollapsePrevious() {
+    this.#failIfExhausted();
+    const prev = token.getPreviousLineSibling(this.#token);
+    if (!prev) {
+      return false;
+    }
+    if (token.isCollapsed(prev)) {
+      token.uncollapse(prev);
+      return false;
+    } else {
+      token.collapse(prev);
+      return true;
+    }
+  }
+
   joinNext() {
     this.#failIfExhausted();
     const next = token.getNextSibling(this.#token);

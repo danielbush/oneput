@@ -95,9 +95,13 @@ export type IJsedCursor = {
    */
   toggleCollapseNext: () => boolean;
   /**
-   * Merge with next token if it exists.
+   * Merge with next adjacent token if it exists.
    */
   joinNext: () => void;
+  /**
+   * Merge with previous adjacent token if it exists.
+   */
+  joinPrevious: () => void;
   /**
    * Close the current edit session.
    */

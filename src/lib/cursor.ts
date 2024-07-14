@@ -116,6 +116,18 @@ export class JsedCursor implements IJsedCursor {
     this.replace(token.getValue(this.#token) + nextValue);
     token.remove(next, { keepAnchor: true });
   }
+
+  joinPrevious() {
+    this.#failIfExhausted();
+    const prev = token.getPreviousSibling(this.#token);
+    if (!prev) {
+      return;
+    }
+    const prevValue = token.getValue(prev);
+    this.replace(prevValue + token.getValue(this.#token));
+    token.remove(prev, { keepAnchor: true });
+  }
+
   // #endregion
 
   // #region Closing

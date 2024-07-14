@@ -37,11 +37,11 @@ export function createElement(tagName: string): HTMLElement {
   return el;
 }
 
-export function insertAfter(el: HTMLElement, newElement: HTMLElement): void {
+export function insertAfter(newElement: HTMLElement, el: HTMLElement): void {
   el.insertAdjacentElement('afterend', newElement);
 }
 
-export function insertBefore(el: HTMLElement, newElement: HTMLElement): void {
+export function insertBefore(newElement: HTMLElement, el: HTMLElement): void {
   el.insertAdjacentElement('beforebegin', newElement);
 }
 

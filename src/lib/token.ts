@@ -421,8 +421,7 @@ export function uncollapse(token: HTMLElement): HTMLElement {
 /**
  * Remove the token and return the nearest token in the same LINE.
  *
- * If the token has no immediate siblings around it under the same parent
- * element, then insert a ANCHOR .
+ * @param params.keepAnchor If the token has no immediate siblings around it under the same parent element, then insert a ANCHOR .
  */
 export function remove(
   token: HTMLElement,

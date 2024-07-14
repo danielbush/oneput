@@ -95,6 +95,7 @@ export class JsedCursor implements IJsedCursor {
   }
 
   toggleCollapseNext() {
+    this.#failIfExhausted();
     if (token.isCollapsed(this.#token)) {
       token.uncollapse(this.#token);
       return false;
@@ -102,6 +103,18 @@ export class JsedCursor implements IJsedCursor {
       token.collapse(this.#token);
       return true;
     }
+  }
+
+  joinNext() {
+    this.#failIfExhausted();
+    const next = token.getNextSibling(this.#token);
+    // const next = token.getNextLineSibling(this.#token);
+    if (!next) {
+      return;
+    }
+    const nextValue = token.getValue(next);
+    this.replace(token.getValue(this.#token) + nextValue);
+    token.remove(next, { keepAnchor: true });
   }
   // #endregion
 

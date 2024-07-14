@@ -90,7 +90,14 @@ export type IJsedCursor = {
    * Append a new token after the current one.
    */
   append: (val: string) => HTMLElement;
+  /**
+   * Create COLLAPSED_TOKEN from the current token and the next one.
+   */
   toggleCollapseNext: () => boolean;
+  /**
+   * Merge with next token if it exists.
+   */
+  joinNext: () => void;
   /**
    * Close the current edit session.
    */

@@ -94,6 +94,15 @@ export class JsedCursor implements IJsedCursor {
     return tok;
   }
 
+  toggleCollapseNext() {
+    if (token.isCollapsed(this.#token)) {
+      token.uncollapse(this.#token);
+      return false;
+    } else {
+      token.collapse(this.#token);
+      return true;
+    }
+  }
   // #endregion
 
   // #region Closing

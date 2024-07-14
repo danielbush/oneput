@@ -147,11 +147,39 @@ export class JsedCursor implements IJsedCursor {
       throw new Error(`Expected non-token element.`);
     }
     token.insertAfter(el, this.#token);
+
+    // Need to add an anchor?
     const nexttok = token.getNextSibling(el);
     if (!nexttok) {
       const anchor = token.createAnchor();
       token.insertAfter(anchor, el);
     }
+
+    // Focus on token in el?
+    const first = token.getFirstToken(el);
+    if (first) {
+      this.setToken(first);
+    }
+  }
+
+  /**
+   * Focus on the new element anchor if there is one, else keep focused on
+   * current token.
+   */
+  insertElementBefore(el: HTMLElement) {
+    if (token.isToken(el)) {
+      throw new Error(`Expected non-token element.`);
+    }
+    token.insertBefore(el, this.#token);
+
+    // Need to add an anchor?
+    const prevtok = token.getPreviousSibling(el);
+    if (!prevtok) {
+      const anchor = token.createAnchor();
+      token.insertBefore(anchor, el);
+    }
+
+    // Focus on token in el?
     const first = token.getFirstToken(el);
     if (first) {
       this.setToken(first);

@@ -114,6 +114,7 @@ export type IJsedCursor = {
   isSameLine: (tok: HTMLElement) => boolean;
 
   insertElementAfter: (el: HTMLElement) => void;
+  insertElementBefore: (el: HTMLElement) => void;
 };
 
 /**

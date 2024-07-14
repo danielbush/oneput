@@ -325,7 +325,14 @@ export function insertAfter(
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
-  existing.parentNode.insertBefore(toInsert, existing.nextSibling);
+  existing.insertAdjacentElement('afterend', toInsert);
+
+  // Need to add an anchor?
+  const nexttok = getNextSibling(toInsert);
+  if (!nexttok) {
+    const anchor = createAnchor();
+    toInsert.insertAdjacentElement('afterend', anchor);
+  }
 }
 
 export function insertBefore(
@@ -335,7 +342,14 @@ export function insertBefore(
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
-  existing.parentNode.insertBefore(toInsert, existing);
+  existing.insertAdjacentElement('beforebegin', toInsert);
+
+  // Need to add an anchor?
+  const prevtok = getPreviousSibling(toInsert);
+  if (!prevtok) {
+    const anchor = createAnchor();
+    toInsert.insertAdjacentElement('beforebegin', anchor);
+  }
 }
 
 /**

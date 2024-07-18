@@ -23,6 +23,7 @@
 - ANCHOR
   - When an F_ELEM that can contain TOKEN's has none, we can insert a ANCHOR .  This can act as a visual marker or placeholder to show that text could be inserted at this point in the DOM.
   - In fact we add ANCHOR's to any LINE_SEGMENT if it is exhausted of TOKEN's
+  - ANCHOR's are empty TOKEN's.
 - FOCUS
   - The current F_ELEM that the user has clicked, touched or navigated to.  This is not a native browser focus because this will conflict with the focus of the input element used in jsed-ui.
 - TOKEN_FOCUS
@@ -37,6 +38,10 @@
   - mdn: "Sequences of white space are preserved. Lines are only broken at newline characters in the source and at <br> elements."
 - LINE
   - A non-inline parent node that directly contains text nodes that will be tokenized.  If this node contains inline or inline-flow elements, these are treated as part of the same LINE and should be recursed into and tokenized.  Floats and other types of inlines eg inline-block or inline-flex or tables or list items are treated as new LINE's.
+- SIBLING
+  - the next or previous (DOM) siblings for TOKEN's and F_ELEM's; we may have to negotiate hidden editing artifacts like undo or markers etc that are not intended to be part of the document's content.
+- LINE_SIBLING
+  - for TOKEN's in a LINE, LINE_SIBLING's are the next or previous TOKEN in the LINE.  This may or may not be a (TOKEN) SIBLING as the LINE may contain inline F_ELEM's such as an em-tag.
 - IMPLICIT_LINE
   - Text nodes in the DOM that belong to a LINE F_ELEM that also contains nested LINE F_ELEM's.  Example: `<div><p>nested, not implicit</p> this text needs an implicit LINE<div>` .  Ideally, in the above example the "loose" text should be in a p-tag.  We could prompt the user to do this.  But at the very least, we can inject an inline span tag that wraps these and acts as an "implicit line of text".
   - In practice we look for text nodes that have a LINE (non-inline element) as a previous sibling.
@@ -54,7 +59,13 @@
   - to get a collapsed state we simply remove the trailing space
   - we add a class to identify the token is collapsed in case we want to highlight it
   - most of the time we want uncollapsed tokens in NEGATIVE_SPACE .  But we can toggle them to COLLAPSE them if we want.  eg `<em>foo<strong>bar</strong>baz</em>` have `foo`, `bar` and `baz` in collapsed states.  `<em>foo <strong>bar </strong>baz </em>` are in uncollapsed states.
-
+- JOIN
+  - when a TOKEN (t) is JOIN'ed with the next or previous (p), p is remove and its text is appended or prepended respectively to t.
+- LINE_SPLIT
+  - the operation of splitting a LINE before or after the current TOKEN
+- LINE_PARENT_SPLIT
+  - the operation of splitting a LINE's parent element (F_ELEM) before or after the LINE.
+  - an example might be splitting an `li` before the `p` where the user's currently selected TOKEN lies in `p`.
 
 ## Outdated
 

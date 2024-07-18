@@ -418,6 +418,28 @@ export function uncollapse(token: HTMLElement): HTMLElement {
   return token;
 }
 
+export function joinNext(token: HTMLElement): void {
+  const next = getNextSibling(token);
+  if (!next) {
+    return;
+  }
+  const val = getValue(token);
+  const nextVal = getValue(next);
+  replaceText(token, val + nextVal);
+  remove(next);
+}
+
+export function joinPrevious(token: HTMLElement): void {
+  const prev = getPreviousSibling(token);
+  if (!prev) {
+    return;
+  }
+  const val = getValue(token);
+  const prevVal = getValue(prev);
+  replaceText(token, prevVal + val);
+  remove(prev);
+}
+
 /**
  * Remove the token and return the nearest token in the same LINE.
  *

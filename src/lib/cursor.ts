@@ -94,6 +94,9 @@ export class JsedCursor implements IJsedCursor {
     return tok;
   }
 
+  /**
+   * COLLAPSE the current token.
+   */
   toggleCollapseNext() {
     this.#failIfExhausted();
     if (token.isCollapsed(this.#token)) {
@@ -105,6 +108,9 @@ export class JsedCursor implements IJsedCursor {
     }
   }
 
+  /**
+   * COLLAPSE the token previous to the current token.
+   */
   toggleCollapsePrevious() {
     this.#failIfExhausted();
     const prev = token.getPreviousLineSibling(this.#token);
@@ -122,25 +128,12 @@ export class JsedCursor implements IJsedCursor {
 
   joinNext() {
     this.#failIfExhausted();
-    const next = token.getNextSibling(this.#token);
-    // const next = token.getNextLineSibling(this.#token);
-    if (!next) {
-      return;
-    }
-    const nextValue = token.getValue(next);
-    this.replace(token.getValue(this.#token) + nextValue);
-    token.remove(next, { keepAnchor: true });
+    token.joinNext(this.#token);
   }
 
   joinPrevious() {
     this.#failIfExhausted();
-    const prev = token.getPreviousSibling(this.#token);
-    if (!prev) {
-      return;
-    }
-    const prevValue = token.getValue(prev);
-    this.replace(prevValue + token.getValue(this.#token));
-    token.remove(prev, { keepAnchor: true });
+    token.joinPrevious(this.#token);
   }
 
   // #endregion

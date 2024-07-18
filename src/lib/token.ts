@@ -255,7 +255,7 @@ export function tokenizeImplicitLine(root: HTMLElement) {
 // #region Operations on tokenized F_ELEM's
 
 /**
- * Get the previous TOKEN sibling if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
+ * Get the previous TOKEN SIBLING if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
  *
  * `el` may or may not be a TOKEN .  `el` might be an inline tag eg an em-tag.
  *
@@ -275,7 +275,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Similar to getPreviousSibling but for the next sibling.
+ * Similar to getPreviousSibling but for the next SIBLING.
  */
 export function getNextSibling(el: HTMLElement): HTMLElement | null {
   let next = el.nextElementSibling as HTMLElement | null;
@@ -289,7 +289,7 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Get previous contiguous or inline TOKEN (ie get previous token in a LINE).
+ * Get previous LINE_SIBLING.
  */
 export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
@@ -304,7 +304,7 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Get next contiguous or inline TOKEN (ie get next token in a LINE).
+ * Get next LINE_SIBLING.
  */
 export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
@@ -389,6 +389,12 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
 export function isCollapsed(token: HTMLElement): boolean {
   return token.classList.contains(JSED_TOKEN_COLLAPSED);
 }
+
+/**
+ * Perform COLLAPSE on token.
+ *
+ * Tokens should be uncollapsed by default.  We can then choose to collapse.
+ */
 export function collapse(token: HTMLElement): HTMLElement {
   const val = token.firstChild!.nodeValue;
   if (!val) {
@@ -403,7 +409,7 @@ export function collapse(token: HTMLElement): HTMLElement {
 }
 
 /**
- * Tokens should be uncollapsed by default.  We can then choose to collapse.
+ * Un-COLLAPSE token.
  */
 export function uncollapse(token: HTMLElement): HTMLElement {
   const val = token.firstChild!.nodeValue;

@@ -61,11 +61,16 @@
   - most of the time we want uncollapsed tokens in NEGATIVE_SPACE .  But we can toggle them to COLLAPSE them if we want.  eg `<em>foo<strong>bar</strong>baz</em>` have `foo`, `bar` and `baz` in collapsed states.  `<em>foo <strong>bar </strong>baz </em>` are in uncollapsed states.
 - JOIN
   - when a TOKEN (t) is JOIN'ed with the next or previous (p), p is remove and its text is appended or prepended respectively to t.
-- LINE_SPLIT
-  - the operation of splitting a LINE before or after the current TOKEN
-- LINE_PARENT_SPLIT
+- SPLIT_BY_TOKEN
+  - the operation of splitting before or after a TOKEN
+  - the split applies to the parent which may be the LINE of the TOKEN, but it could also be an inline element eg an em-tag
+  - SPLIT_BY_TOKEN let's us split LINE's and anything below
+  - but LINE itself is always the parent of the TOKEN we're splitting at, so we can never split beyond LINE; this leads to SPLIT_BY_LINE
+- SPLIT_BY_LINE
   - the operation of splitting a LINE's parent element (F_ELEM) before or after the LINE.
-  - an example might be splitting an `li` before the `p` where the user's currently selected TOKEN lies in `p`.
+  - SPLIT_BY_LINE can be executed with or without reference to a TOKEN
+    - if our cursor is on a TOKEN we might SPLIT_BY_LINE by finding the LINE of the token and splitting it's parent before the line (or after).  An example might be splitting an `li` before the `p` where the user's currently selected TOKEN lies in `p`.
+    - if we're just focued on the LINE as an F_ELEM, could also elect to split the parent before or after the LINE.
 
 ## Outdated
 

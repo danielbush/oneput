@@ -91,21 +91,25 @@ export type IJsedCursor = {
    */
   append: (val: string) => HTMLElement;
   /**
-   * Collapse the token with what is next to it.
+   * Toggle COLLAPSE state of token with what is next to it.
    */
   toggleCollapseNext: () => boolean;
   /**
-   * Collapse the token with what is previous to it.
+   * Toggle COLLAPSE state of token with what is previous to it.
    */
   toggleCollapsePrevious: () => boolean;
   /**
-   * Merge with next adjacent token if it exists.
+   * Merge with next adjacent token if it exists (JOIN).
    */
   joinNext: () => void;
   /**
-   * Merge with previous adjacent token if it exists.
+   * Merge with previous adjacent token if it exists (JOIN).
    */
   joinPrevious: () => void;
+  /**
+   * Perform SPLIT_BY_TOKEN .
+   */
+  splitBefore: () => void;
   /**
    * Close the current edit session.
    */

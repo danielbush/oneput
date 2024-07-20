@@ -103,6 +103,7 @@ export function getAllowableChildTags(tagName: string): string[] {
  * Return true if new created tagName should have an ANCHOR.
  */
 export function canCreateWithAnchor(tagName: string): boolean {
+  tagName = tagName.toLowerCase();
   if (PHRASING_CONTENT.includes(tagName)) {
     return true;
   }

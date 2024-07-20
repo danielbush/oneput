@@ -136,6 +136,11 @@ export class JsedCursor implements IJsedCursor {
     token.joinPrevious(this.#token);
   }
 
+  splitBefore() {
+    this.#failIfExhausted();
+    token.splitBefore(this.#token);
+  }
+
   // #endregion
 
   // #region Closing

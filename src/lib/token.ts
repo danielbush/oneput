@@ -5,6 +5,7 @@ import {
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
 } from './constants';
+import { canCreateWithAnchor } from './dom-rules';
 import { ignoreDescendents, isFocusable, isIgnorable } from './focus';
 import { findNextNode, findPreviousNode } from './walk';
 
@@ -444,6 +445,29 @@ export function joinPrevious(token: HTMLElement): void {
   const prevVal = getValue(prev);
   replaceText(token, prevVal + val);
   remove(prev);
+}
+
+/**
+ * Perform SPLIT_BY_TOKEN previous to `token`.
+ */
+export function splitBefore(token: HTMLElement): void {
+  const prevTok = getPreviousSibling(token);
+  const par = getParent(token);
+  if (!prevTok) {
+    // Create empty copy of parent and insert before.
+    const prevPar = document.createElement(par.tagName);
+    par.insertAdjacentElement('beforebegin', prevPar);
+    if (canCreateWithAnchor(prevPar.tagName)) {
+      addAnchors(prevPar);
+    }
+    // We may need to put an anchor between par and prevPar.
+    const line = getLine(token);
+    if (line !== par) {
+      const anchor = createAnchor();
+      par.insertAdjacentElement('beforebegin', anchor);
+    }
+    return;
+  }
 }
 
 /**

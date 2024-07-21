@@ -20,7 +20,10 @@ function getWalkParams(params?: Partial<WalkParams>): WalkParams {
   };
 }
 
-function lastNode(
+/**
+ * Get the last node to be pre-order visited.
+ */
+export function lastNode(
   el: ParentNode | ChildNode,
   params?: Partial<WalkParams>,
 ): ParentNode | ChildNode {
@@ -31,7 +34,7 @@ function lastNode(
   const lastChild = el.lastChild;
   const prev = _params.filter(lastChild)
     ? lastChild
-    : getPreviousSiblingNode(lastChild);
+    : getPreviousSiblingNode(lastChild, params);
   if (!prev) {
     return el;
   }
@@ -112,8 +115,8 @@ export function getPreviousSiblingNode(
 }
 
 export function getParent(
-  start: ParentNode,
-  limit: ParentNode,
+  start: ParentNode | ChildNode,
+  limit: ParentNode | null,
 ): ParentNode | null {
   if (start === limit) {
     return null;
@@ -124,79 +127,72 @@ export function getParent(
 
 /**
  * Find the next node after start but never visit start or the ceiling.
+ *
+ * @param start The last node visited in reverse pre-order
+ * @param limit The ceiling node we don't visit or exceed
+ *
+ * In words:
+ *
+ * - we assume start is already visited
+ * - because we're moving pre-order we need to visit `start`'s children
+ * - we iterate thru each of the start's next siblings (c)
+ *   - we visit c
+ *   - we descend and visit c's children (descendIter)
+ *   - repeat until we run out of next siblings
+ * - we then go to start's parent (which would have been visited in the past)
+ * - recurse on start's parent but include a flag to skip descending start
  */
 export function* findNextNode(
   start: ParentNode | ChildNode,
-  limit: ParentNode | ChildNode | Node | null,
+  limit: ParentNode | null,
   params?: Partial<WalkParams>,
+  _recurse = false,
 ): IterableIterator<ParentNode | ChildNode> {
-  // (1) pre-order visit below start
-  yield* descendIter(start, params);
-
-  // (2) Stop if ceiling
-  if (start === limit) {
-    return;
+  const par = getParent(start, limit);
+  if (!_recurse) {
+    yield* descendIter(start, params);
   }
-
-  // (3) pre-order visit start's next siblings and their descendents...
   let sib: ParentNode | ChildNode | null = start;
   while ((sib = getNextSiblingNode(sib, params))) {
     yield sib;
     yield* descendIter(sib, params);
   }
-
-  // (3) walk start's parents
-  let par: ParentNode | ChildNode | null = start;
-  while ((par = par.parentNode)) {
-    // (3-1) If parent is limit, we've walked all its children incl start so we stop here
-    if (par === limit) {
-      // yield par;
-      break;
-    }
-
-    // (3-2) We don't visit par because it is pre-order and would have been visited before we got here.
-
-    // (3-3) visit par's siblings and descendents in pre-order
-    const nextPar = getNextSiblingNode(par, params);
-    if (nextPar) {
-      yield nextPar;
-      yield* findNextNode(nextPar, limit, params);
-    }
+  if (par && par !== limit) {
+    yield* findNextNode(par, limit, params, true);
   }
 }
 
 /**
  * Find the previous node before start but never visit start or the ceiling.  The order is the reverse of pre-order.
+ *
+ * @param start The last node visited in reverse pre-order
+ * @param limit The ceiling node we don't visit or exceed
+ *
+ * In words:
+ *
+ * - we assume start is already visited
+ * - because we're moving reverse pre-order and `start` is the last thing we visited after its descendents, we've already visited `start`'s children
+ * - therefore we iterate thru each of the previous siblings (c)
+ *   - we descend and visit c's children (descendIterReverse)
+ *   - we then visit c
+ *   - repeat until we run out of previous siblings
+ * - we then get the parent of these siblings
+ * - we visit the parent (p) (if allowed eg limit etc)
+ * - recurse on the above procedure treating this parent as `start` (if allowed)
  */
 export function* findPreviousNode(
   start: ParentNode | ChildNode,
-  limit: ParentNode | ChildNode | null,
+  limit: ParentNode | null,
   params?: Partial<WalkParams>,
 ): IterableIterator<ParentNode | ChildNode> {
-  if (start === limit) {
-    const last = lastNode(limit, params);
-    if (last === limit) {
-      return;
-    }
-    yield last;
-    return;
-  }
+  const par = getParent(start, limit);
   let sib: ParentNode | ChildNode | null = start;
   while ((sib = getPreviousSiblingNode(sib, params))) {
     yield* descendIterReverse(sib, params);
     yield sib;
   }
-  let par: ParentNode | ChildNode | null = start;
-  while ((par = par.parentNode)) {
-    // yield par;
-    if (par === limit) {
-      break;
-    }
+  if (par && par !== limit) {
     yield par;
-    const prevPar = getPreviousSiblingNode(par, params);
-    if (prevPar) {
-      yield prevPar;
-      yield* findPreviousNode(prevPar, limit, params);
-    }
+    yield* findPreviousNode(par, limit, params);
   }
 }

@@ -498,8 +498,11 @@ export function remove(
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
+  // TODO: hm, this seems expensive having to calculate all these up front...
   const prevTok = getPreviousSibling(token);
   const nextTok = getNextSibling(token);
+  const prevLineTok = getPreviousLineSibling(token);
+  const nextLineTok = getNextLineSibling(token);
   const prevEl = token.previousElementSibling;
   const nextEl = token.nextElementSibling;
   parentNode.removeChild(token);
@@ -509,11 +512,17 @@ export function remove(
   if (nextTok) {
     return nextTok;
   }
-  if (!params?.keepAnchor) {
-    return null;
-  }
   // We're out of text, we need to add a ANCHOR for the appropriate
   // LINE_SEGMENT .
+  if (!params?.keepAnchor) {
+    if (prevLineTok) {
+      return prevLineTok;
+    }
+    if (nextLineTok) {
+      return nextLineTok;
+    }
+    return null;
+  }
   const anchor = createAnchor();
   if (prevEl) {
     insertAfter(anchor, prevEl as HTMLElement);

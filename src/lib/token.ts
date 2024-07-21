@@ -453,20 +453,35 @@ export function joinPrevious(token: HTMLElement): void {
 export function splitBefore(token: HTMLElement): void {
   const prevTok = getPreviousSibling(token);
   const par = getParent(token);
+  const line = getLine(token);
   if (!prevTok) {
-    // Create empty copy of parent and insert before.
+    // Create empty copy of parent (prevPar) and insert before.
     const prevPar = document.createElement(par.tagName);
     par.insertAdjacentElement('beforebegin', prevPar);
+    // Put an anchor in prevPar.
     if (canCreateWithAnchor(prevPar.tagName)) {
       addAnchors(prevPar);
     }
-    // We may need to put an anchor between par and prevPar.
-    const line = getLine(token);
+    // We may need to put an anchor between prevPar and par.
     if (line !== par) {
       const anchor = createAnchor();
       par.insertAdjacentElement('beforebegin', anchor);
     }
     return;
+  }
+  // Create a new parent next to us,
+  const nextPar = document.createElement(par.tagName);
+  par.insertAdjacentElement('afterend', nextPar);
+  // Move our token and everything after it into nextPar.
+  for (let sib: ChildNode | null = token; sib; ) {
+    const nextSib: ChildNode | null = sib.nextSibling;
+    nextPar.appendChild(sib);
+    sib = nextSib;
+  }
+  // We may need to put an anchor between prevPar and par.
+  if (line !== par) {
+    const anchor = createAnchor();
+    nextPar.insertAdjacentElement('beforebegin', anchor);
   }
 }
 

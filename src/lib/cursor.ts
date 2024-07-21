@@ -139,6 +139,8 @@ export class JsedCursor implements IJsedCursor {
   splitBefore() {
     this.#failIfExhausted();
     token.splitBefore(this.#token);
+    // We may end up in a new token, so we need to update the focus.
+    this.setToken(this.#token);
   }
 
   // #endregion

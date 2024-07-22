@@ -76,15 +76,17 @@ export class JsedCursor implements IJsedCursor {
     },
   ) {
     this.#failIfExhausted();
-    const newToken = token.remove(this.#token, {
+    const landOnTok =
+      token.getPreviousLineSibling(this.#token) ||
+      token.getNextLineSibling(this.#token);
+    token.remove(this.#token, {
       keepAnchor,
     });
-    if (!newToken) {
+    if (!landOnTok) {
       this.#setExhausted();
       return;
     }
-    this.#token = newToken;
-    this.setToken(newToken);
+    this.setToken(landOnTok);
     return;
   }
   append(val: string): HTMLElement {

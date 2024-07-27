@@ -329,11 +329,11 @@ export function insertAfter(
   existing.insertAdjacentElement('afterend', toInsert);
 
   // Need to add an anchor?
-  const nexttok = getNextSibling(toInsert);
-  if (!nexttok) {
-    const anchor = createAnchor();
-    toInsert.insertAdjacentElement('afterend', anchor);
-  }
+  // const nexttok = getNextSibling(toInsert);
+  // if (!nexttok) {
+  //   const anchor = createAnchor();
+  //   toInsert.insertAdjacentElement('afterend', anchor);
+  // }
 }
 
 export function insertBefore(
@@ -346,11 +346,11 @@ export function insertBefore(
   existing.insertAdjacentElement('beforebegin', toInsert);
 
   // Need to add an anchor?
-  const prevtok = getPreviousSibling(toInsert);
-  if (!prevtok) {
-    const anchor = createAnchor();
-    toInsert.insertAdjacentElement('beforebegin', anchor);
-  }
+  // const prevtok = getPreviousSibling(toInsert);
+  // if (!prevtok) {
+  //   const anchor = createAnchor();
+  //   toInsert.insertAdjacentElement('beforebegin', anchor);
+  // }
 }
 
 /**

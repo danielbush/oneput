@@ -448,46 +448,35 @@ export function joinPrevious(token: HTMLElement): void {
 }
 
 /**
- * Perform SPLIT_BY_TOKEN previous to `token`.
+ * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
  */
 export function splitBefore(token: HTMLElement): HTMLElement[] {
   const prevTok = getPreviousSibling(token);
   const par = getParent(token);
   const line = getLine(token);
-  // Create empty copy of parent (prevPar) and insert before.
-  if (!prevTok) {
-    const prevPar = document.createElement(par.tagName);
-    par.insertAdjacentElement('beforebegin', prevPar);
-    // Put an anchor in.
-    if (canCreateWithAnchor(prevPar.tagName)) {
-      addAnchors(prevPar);
-    }
-    // We may need to put an anchor between prevPar and par.
-    if (line !== par) {
-      const anchor = createAnchor();
-      par.insertAdjacentElement('beforebegin', anchor);
-    }
-    return [prevPar, par];
-  }
-  // Create a new parent next to us,
-  const nextPar = document.createElement(par.tagName);
-  par.insertAdjacentElement('afterend', nextPar);
-  // Move our token and everything after it into nextPar.
-  for (let sib: ChildNode | null = token; sib; ) {
-    const nextSib: ChildNode | null = sib.nextSibling;
-    nextPar.appendChild(sib);
-    sib = nextSib;
-  }
+  const prevPar = document.createElement(par.tagName);
+  par.insertAdjacentElement('beforebegin', prevPar);
   // We may need to put an anchor between prevPar and par.
   if (line !== par) {
     const anchor = createAnchor();
-    nextPar.insertAdjacentElement('beforebegin', anchor);
+    par.insertAdjacentElement('beforebegin', anchor);
   }
-  return [par, nextPar];
+  if (!prevTok) {
+    if (canCreateWithAnchor(prevPar.tagName)) {
+      addAnchors(prevPar);
+    }
+  }
+  // Move tokens and non-tokens across.
+  for (let sib: ChildNode | null = token.previousSibling; sib; ) {
+    const prevSib: ChildNode | null = sib.previousSibling;
+    prevPar.insertBefore(sib, prevPar.firstChild);
+    sib = prevSib;
+  }
+  return [prevPar, par];
 }
 
 /**
- * Perform SPLIT_BY_TOKEN next of `token`.
+ * Move anything after `token` to a new parent after the current parent (SPLIT_BY_TOKEN).
  */
 export function splitAfter(token: HTMLElement): HTMLElement[] {
   const nextTok = getNextSibling(token);
@@ -501,12 +490,12 @@ export function splitAfter(token: HTMLElement): HTMLElement[] {
     par.insertAdjacentElement('afterend', anchor);
   }
   if (!nextTok) {
-    // Put an anchor in.
     if (canCreateWithAnchor(nextPar.tagName)) {
       addAnchors(nextPar);
     }
   }
-  for (let sib: ChildNode | null = nextTok; sib; ) {
+  // Move tokens and non-tokens across.
+  for (let sib: ChildNode | null = token.nextSibling; sib; ) {
     const nextSib: ChildNode | null = sib.nextSibling;
     nextPar.appendChild(sib);
     sib = nextSib;

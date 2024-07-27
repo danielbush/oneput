@@ -2,6 +2,7 @@
 
 ## Definitions
 
+- (bidi) terms like "next" / "after" or "previous" / "before" refer to (respectively) the next or previous bit of data in memory or a data-structure like the DOM (logical order) and make no assumptions about how that is perceived directionally (visual order).  In an rtl context (eg arabic), the visual order of next/after is leftward, and previous/before is rightward .  In an ltr context (eg english) it is vice versa.
 - F_ELEM (focusable element)
   - an element that the user can navigate to and focus on in order perform operations
   - it can be F_REC or F_NONREC

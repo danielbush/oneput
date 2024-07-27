@@ -63,7 +63,7 @@
 - JOIN
   - when a TOKEN (t) is JOIN'ed with the next or previous (p), p is remove and its text is appended or prepended respectively to t.
 - SPLIT_BY_TOKEN
-  - the operation of splitting before or after a TOKEN
+  - the operation of splitting a TOKEN's parent before or after a TOKEN
   - the split applies to the parent which may be the LINE of the TOKEN, but it could also be an inline element eg an em-tag
   - SPLIT_BY_TOKEN let's us split LINE's and anything below
   - but LINE itself is always the parent of the TOKEN we're splitting at, so we can never split beyond LINE; this leads to SPLIT_BY_LINE

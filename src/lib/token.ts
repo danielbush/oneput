@@ -450,15 +450,15 @@ export function joinPrevious(token: HTMLElement): void {
 /**
  * Perform SPLIT_BY_TOKEN previous to `token`.
  */
-export function splitBefore(token: HTMLElement): void {
+export function splitBefore(token: HTMLElement): HTMLElement[] {
   const prevTok = getPreviousSibling(token);
   const par = getParent(token);
   const line = getLine(token);
+  // Create empty copy of parent (prevPar) and insert before.
   if (!prevTok) {
-    // Create empty copy of parent (prevPar) and insert before.
     const prevPar = document.createElement(par.tagName);
     par.insertAdjacentElement('beforebegin', prevPar);
-    // Put an anchor in prevPar.
+    // Put an anchor in.
     if (canCreateWithAnchor(prevPar.tagName)) {
       addAnchors(prevPar);
     }
@@ -467,7 +467,7 @@ export function splitBefore(token: HTMLElement): void {
       const anchor = createAnchor();
       par.insertAdjacentElement('beforebegin', anchor);
     }
-    return;
+    return [prevPar, par];
   }
   // Create a new parent next to us,
   const nextPar = document.createElement(par.tagName);
@@ -483,6 +483,35 @@ export function splitBefore(token: HTMLElement): void {
     const anchor = createAnchor();
     nextPar.insertAdjacentElement('beforebegin', anchor);
   }
+  return [par, nextPar];
+}
+
+/**
+ * Perform SPLIT_BY_TOKEN next of `token`.
+ */
+export function splitAfter(token: HTMLElement): HTMLElement[] {
+  const nextTok = getNextSibling(token);
+  const par = getParent(token);
+  const line = getLine(token);
+  const nextPar = document.createElement(par.tagName);
+  par.insertAdjacentElement('afterend', nextPar);
+  // We may need to put an anchor between prevPar and par.
+  if (line !== par) {
+    const anchor = createAnchor();
+    par.insertAdjacentElement('afterend', anchor);
+  }
+  if (!nextTok) {
+    // Put an anchor in.
+    if (canCreateWithAnchor(nextPar.tagName)) {
+      addAnchors(nextPar);
+    }
+  }
+  for (let sib: ChildNode | null = nextTok; sib; ) {
+    const nextSib: ChildNode | null = sib.nextSibling;
+    nextPar.appendChild(sib);
+    sib = nextSib;
+  }
+  return [par, nextPar];
 }
 
 /**

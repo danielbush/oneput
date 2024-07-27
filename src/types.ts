@@ -111,6 +111,10 @@ export type IJsedCursor = {
    */
   splitBefore: () => void;
   /**
+   * Perform SPLIT_BY_TOKEN .
+   */
+  splitAfter: () => void;
+  /**
    * Close the current edit session.
    */
   close: () => void;

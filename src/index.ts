@@ -17,6 +17,7 @@ const utils = {
     insertAfter: dom.insertAfter,
     insertBefore: dom.insertBefore,
     deleteElement: dom.deleteElement,
+    splitParentBefore: dom.splitParentBefore,
     rules: domRules,
   },
   token: {

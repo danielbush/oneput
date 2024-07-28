@@ -29,9 +29,12 @@ export function replaceElement(
   old.parentNode.replaceChild(newElement, old);
 }
 
-export function createElement(tagName: string): HTMLElement {
+export function createElement(
+  tagName: string,
+  options: { addAnchors: boolean } = { addAnchors: true },
+): HTMLElement {
   const el = document.createElement(tagName);
-  if (canCreateWithAnchor(tagName)) {
+  if (options.addAnchors && canCreateWithAnchor(tagName)) {
     token.addAnchors(el);
   }
   return el;
@@ -47,4 +50,20 @@ export function insertBefore(newElement: HTMLElement, el: HTMLElement): void {
 
 export function deleteElement(el: HTMLElement): void {
   el.remove();
+}
+
+export function splitParentBefore(el: HTMLElement): void {
+  const parent = el.parentElement;
+  if (!parent) {
+    throw new Error('splitParentBefore: Element has no parent');
+  }
+  const prevPar = createElement(parent.tagName, {
+    addAnchors: false,
+  }) as HTMLElement;
+  parent.insertAdjacentElement('beforebegin', prevPar);
+  for (let sib = el.previousSibling; sib; ) {
+    const prevSib = sib.previousSibling;
+    prevPar.insertBefore(sib, prevPar.firstChild);
+    sib = prevSib;
+  }
 }

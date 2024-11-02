@@ -1,4 +1,4 @@
-import { JsedDocument } from '../types';
+import type { JsedDocument } from '../types';
 import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './constants';
 import { ignoreDescendents, isFocusable } from './focus';
 import * as token from './token';

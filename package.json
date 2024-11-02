@@ -2,10 +2,18 @@
   "name": "jsed",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/index.js",
-  "private": true,
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
   "type": "module",
-  "types": "dist/src",
+  "files": [
+    "src",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "private": true,
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest --run --reporter dot",
@@ -14,13 +22,11 @@
     "test:watch": "vitest --watch",
     "convert": "bun run src/cli/convert.ts",
     "dev": "vite",
-    "build:check": "tsc --noEmit",
+    "build:check": "tsc",
+    "build:types": "tsc -p tsconfig.d.json",
     "build:cli": "bun build ./src/cli/convert.ts --compile --outfile dist/bin/convert",
-    "build:tsdefs": "tsc --emitDeclarationOnly --noEmit false --declaration --outDir dist",
     "build:watch": "bunx nodemon --ext js,jsx,ts,tsx,cjs,mjs,json --watch src --exec \"bun run build\"",
-    "build": "bunx rimraf dist; bun run build:bun && bun run build:tsdefs && bun run build:cli",
-    "build:bun": "bun build --target=node --outdir=dist --root=src src",
-    "build:vite": "tsc && vite build",
+    "build": "bunx rimraf dist; bun run build:check && vite build && bun run build:types && bun run build:cli",
     "preview": "vite preview"
   },
   "bin": {
@@ -39,6 +45,7 @@
     "jsdom": "^20.0.3",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
+    "vite-plugin-dts": "^4.3.0",
     "vitest": "^1.1.0"
   },
   "dependencies": {

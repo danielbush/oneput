@@ -1,6 +1,6 @@
 import { Navigator } from '../lib/navigator';
 import { JsedCursor } from '../lib/cursor';
-import { JsedDocument } from '../types';
+import type { JsedDocument } from '../types';
 import { tokenizeImplicitLine } from '../lib/token';
 
 export function makeDocument(root: HTMLElement): JsedDocument {

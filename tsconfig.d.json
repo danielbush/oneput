@@ -1,0 +1,19 @@
+// Generate declaration files for the vite-generated bundle.
+// We can generate separate .d.ts files,
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "dist",
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "files": [
+    "src/index.ts"
+  ],
+  "exclude": [
+    "src/cli",
+    "**/__tests__"
+  ]
+}

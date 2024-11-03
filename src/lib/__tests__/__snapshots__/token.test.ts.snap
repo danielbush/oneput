@@ -7,7 +7,7 @@ exports[`tokenize > <p>foo <em>bar</em> baz</p> 1`] = `
   <span
     class="jsed-token"
   >
-    foo
+    foo 
   </span>
   <em
     style="display:inline;"
@@ -15,13 +15,13 @@ exports[`tokenize > <p>foo <em>bar</em> baz</p> 1`] = `
     <span
       class="jsed-token"
     >
-      bar
+      bar 
     </span>
   </em>
   <span
     class="jsed-token"
   >
-    baz
+    baz 
   </span>
 </p>
 `;
@@ -65,7 +65,7 @@ exports[`tokenize > localized tokenization (not everything) > case 2 > Should on
     <span
       class="jsed-token"
     >
-      foo
+      foo 
     </span>
     <em
       style="display:inline;"
@@ -73,13 +73,13 @@ exports[`tokenize > localized tokenization (not everything) > case 2 > Should on
       <span
         class="jsed-token"
       >
-        bar
+        bar 
       </span>
     </em>
     <span
       class="jsed-token"
     >
-      baz
+      baz 
     </span>
   </p>
   <p

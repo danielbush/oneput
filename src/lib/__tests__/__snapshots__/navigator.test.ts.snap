@@ -11,7 +11,7 @@ exports[`FOCUS > should focus an F_ELEM (SIB_HIGHLIGHT) 1`] = `
     <span
       class="jsed-token"
     >
-      p1
+      p1 
     </span>
   </p>
 </div>
@@ -486,7 +486,7 @@ exports[`UP can walk up successive parent elements 1`] = `
         <span
           class="jsed-token"
         >
-          id3
+          id3 
         </span>
       </div>
     </div>
@@ -513,7 +513,7 @@ exports[`UP can walk up successive parent elements 2`] = `
         <span
           class="jsed-token"
         >
-          id3
+          id3 
         </span>
       </div>
     </div>
@@ -541,7 +541,7 @@ exports[`UP can walk up successive parent elements 3`] = `
         <span
           class="jsed-token"
         >
-          id3
+          id3 
         </span>
       </div>
     </div>
@@ -569,7 +569,7 @@ exports[`UP can walk up successive parent elements 4`] = `
         <span
           class="jsed-token"
         >
-          id3
+          id3 
         </span>
       </div>
     </div>

@@ -4,7 +4,7 @@
 	import '../lib/oneput/oneput-user-defined.css';
 	import * as lucide from 'lucide';
 	import Oneput from '../lib/oneput/Oneput.svelte';
-	import * as data from './oneput.js';
+	import * as data from '../lib/oneput/examples/demo/index.js';
 	$effect(() => {
 		lucide.createIcons({
 			icons: {

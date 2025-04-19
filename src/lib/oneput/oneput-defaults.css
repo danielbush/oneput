@@ -1,0 +1,267 @@
+/* -----------------------------------
+ * oneput defaults
+ *
+ * There are provided by oneput.
+ */
+
+/* Core default oneput styling */
+.oneput__container,
+.oneput__container * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.oneput__container {
+  /* Standard units */
+  /* The apparent height of the input or technically oneput__input-inner. */
+  --oneput-input-height: 36px;
+  /* Use this for width and height. */
+  --oneput-icon-width: 28px;
+  /* For more compact elements. */
+  --oneput-icon-width-small: 18px;
+
+  /* Dimensions */
+  --oneput-min-width: 320px;
+  --oneput-max-width: 500px;
+  --oneput-menu-max-height: 300px;
+
+  /* These let you control how compact the whole ui is. */
+  --oneput-area-padding: 0px;
+  --oneput-hflex-padding: 6px;
+  --oneput-hflex-gap: 4px;
+  --oneput-vflex-gap: 6px;
+  --oneput-fchild-padding: 4px;
+  --oneput-input-padding-x: 6px;
+  --oneput-input-padding-y: 0px;
+
+  /* Misc */
+  /* Separates significant areas like the menubody vs input / status area. */
+  --oneput-strong-border: solid 1px rgba(0, 0, 0, 0.3);
+  /* Separates sections with something eg sections within the menu body */
+  --oneput-soft-border: 0.5px solid rgba(0, 0, 0, 0.4);
+}
+
+/* #region resets */
+@layer reset {
+  .oneput__container hr,
+  .oneput__container fieldset,
+  .oneput__container button {
+    background-color: transparent;
+    border-width: 0.5px;
+    border-color: rgba(0, 0, 0, 0);
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    text-align: left;
+  }
+
+  .oneput__container hr {
+    border-top: var(--oneput-soft-border);
+  }
+}
+/* #endregion */
+
+/* container */
+.oneput__container {
+  min-width: var(--oneput-min-width);
+  max-width: var(--oneput-max-width);
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-row-gap: 0;
+}
+
+/* hflex */
+
+.oneput__hflex {
+  display: flex;
+  flex-direction: row;
+  gap: var(--oneput-hflex-gap);
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--oneput-hflex-padding);
+}
+
+/* Don't pad nested hflexes as this creates padding on padding within complex UI's. */
+.oneput__hflex .oneput__hflex {
+  padding: 0;
+}
+
+.oneput__vflex {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oneput-vflex-gap);
+  align-items: stretch;
+  flex: 1 1 auto;
+}
+
+/* fchild */
+
+.oneput__fchild {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1 1 auto;
+}
+
+/* menu */
+
+.oneput__menu-area {
+  margin: 0;
+  padding: 0;
+  border-bottom: var(--oneput-strong-border);
+}
+.oneput__menu-body {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: var(--oneput-menu-max-height);
+}
+button.oneput__menu-item {
+  cursor: pointer;
+}
+button.oneput__menu-item:hover {
+  background-color: rgba(100, 100, 100, 0.1);
+}
+button.oneput__menu-item:active {
+  background-color: rgba(100, 100, 100, 0.2);
+}
+
+/* input */
+
+.oneput__input-area {
+  width: 100%;
+  display: flex;
+  /* grid-template-columns: auto 1fr auto; */
+  align-items: center;
+
+  margin: 0;
+  padding: var(--oneput-area-padding);
+}
+
+.oneput__input-outer {
+  width: 100%;
+  gap: var(--oneput-hflex-padding);
+}
+
+.oneput__input-inner {
+  height: var(--oneput-input-height);
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.oneput__input-left {
+  margin-left: var(--oneput-hflex-gap);
+}
+.oneput__input-right {
+  margin-right: var(--oneput-hflex-gap);
+}
+.oneput__input {
+  flex: 1 1 auto;
+  width: 100%;
+  padding: var(--oneput-input-padding-y) var(--oneput-input-padding-x);
+}
+
+/* #region icons and icon-buttons */
+
+/*
+ * These are included to get you useful defaults out of the box for icons and
+ * icon buttons as these make up 80%+ of the interactive UI.
+ *
+ * We define an icon-width var.
+ *
+ * - icons look like icon-buttons but are just decorative
+ * - icon-buttons are interactive
+ * - icon-toggle-buttons are icon buttons with binary persistent state
+ */
+
+.oneput__button,
+.oneput__icon-toggle-button,
+.oneput__icon-button,
+.oneput__icon {
+  flex: 0 0 var(--oneput-icon-width);
+  min-width: var(--oneput-icon-width);
+  min-height: var(--oneput-icon-width);
+  max-width: var(--oneput-icon-width);
+  max-height: var(--oneput-icon-width);
+  justify-content: center;
+  align-self: flex-start;
+  border-radius: 4px;
+  padding: 4px;
+}
+.oneput__button:focus,
+.oneput__icon-button:focus {
+  outline: 0.5px solid rgba(0, 0, 0, 0.5);
+  background-color: rgba(100, 100, 100, 0.1);
+  border-width: 0.5px;
+  border-color: rgba(0, 0, 0, 0.8);
+}
+.oneput__button:hover,
+.oneput__icon-button:hover {
+  background-color: rgba(100, 100, 100, 0.2);
+  border-width: 0.5px;
+  border-color: rgba(0, 0, 0, 0.8);
+}
+.oneput__button:active,
+.oneput__icon-button:active {
+  background-color: rgba(100, 100, 100, 0.3);
+  border-width: 0.5px;
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
+.oneput__icon-toggle-button.oneput__icon-toggle-button--on {
+  color: dodgerblue;
+}
+
+.oneput__menu-header .oneput__button,
+.oneput__menu-header .oneput__icon-toggle-button,
+.oneput__menu-header .oneput__icon-button,
+.oneput__menu-footer .oneput__button,
+.oneput__menu-footer .oneput__icon-toggle-button,
+.oneput__menu-footer .oneput__icon-button {
+  max-height: var(--oneput-icon-width-small);
+  min-height: var(--oneput-icon-width-small);
+  max-width: var(--oneput-icon-width-small);
+  min-width: var(--oneput-icon-width-small);
+  padding: 1px;
+}
+
+.oneput__icon-button-group-right {
+  justify-content: flex-end;
+}
+.oneput__icon-button-group {
+  justify-content: flex-start;
+}
+
+/* spacer */
+/* Can act like an invisible icon or button to help balance your layouts sometimes. */
+.oneput__spacer {
+  min-width: var(--oneput-icon-width);
+  max-width: var(--oneput-icon-width);
+}
+
+/* #endregion */
+
+/* #region debug */
+.oneput__debug .oneput__hflex {
+  outline-style: solid;
+  outline-width: 1px;
+  outline-offset: 0.5px;
+  outline-color: rgba(0, 200, 0, 1);
+}
+.oneput__debug .oneput__hflex .oneput__hflex {
+  outline-color: rgba(0, 255, 0, 0.5);
+  outline-width: 2px;
+}
+.oneput__debug .oneput__vflex {
+  outline: solid blue 1px;
+  outline-offset: 1px;
+}
+.oneput__debug .oneput__fchild {
+  outline: solid orchid 1px;
+  outline-offset: -0.5px;
+}
+/* #endregion */

@@ -63,5 +63,9 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"lucide": "^0.501.0",
+		"tinykeys": "^3.0.0"
+	}
 }

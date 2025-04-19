@@ -1,0 +1,49 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task: dev
+    silent: true
+  dev:
+    cmds:
+      - npm run dev
+
+  build:clear:
+    desc: Clear the .build/ area!
+    cmds:
+      - rm -rf .build/sveltekit
+      - rm -rf .build/build-wc
+
+  build:test-package:
+    desc: Create a test sveltekit application and import a locally packaged version of Oneput.
+    dir: .build/sveltekit
+    cmds:
+      - npx -y sv create --template minimal --types ts --no-add-ons --install npm .
+      - npm pack ../..
+      - npm i *.tgz
+      - cp  ../files/sveltekit/+page.svelte src/routes/
+      - echo "We can now run sveltekit in $(pwd) using locally packaged version of oneput."
+
+  build:wc:
+    desc: Create an iife with oneput as a webcomponent.  Load this at the bottom of body tag?
+    summary: |
+      Based on https://www.youtube.com/watch?v=T4zwmtUW7Gw .
+      TODO: we might be able to do this directly in sveltekit using a secondary vite config file eg: https://www.devgem.io/posts/building-web-components-with-sveltekit-2-and-svelte-5 .
+    dir: .build/build-wc
+    cmds:
+      - echo "Creating or re-using .build/build-wc to build a web component"
+      - npm create -y vite@latest . -- --template svelte
+      - test ! -a .git && git init && git add .  && git commit -am "initial" || true
+      - npm i
+      - npm pack ../..
+      - npm i *.tgz
+      - cp  ../files/wc/main.js src/main.js
+      - cp  ../files/wc/svelte.config.js svelte.config.js
+      - cp  ../files/wc/vite.config.js vite.config.js
+      - cp  ../files/wc/OneputWC.svelte src/lib/OneputWC.svelte
+      - ./node_modules/.bin/vite build --config vite.config.js    
+      - cp dist/oneput-wc.iife.js ../../dist
+      - echo "Created dist/oneput-wc.iife.js - this contains Oneput webcomponent powered by Svelte."

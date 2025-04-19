@@ -1,3 +1,11 @@
+# Oneput
+
+This is a sveltekit app which isused to publish the Oneput component using <https://svelte.dev/docs/kit/packaging>.
+
+## Packaging
+
+To test packaging see `test:package` task in `Taskfile.yml`.
+
 # Svelte library
 
 Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).

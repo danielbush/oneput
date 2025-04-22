@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../lib/oneput/oneput-defaults.css';
-	import '../lib/oneput/oneput-user.css';
 	import '../lib/oneput/oneput-user-defined.css';
 	import * as lucide from 'lucide';
 	import Oneput from '../lib/oneput/Oneput.svelte';

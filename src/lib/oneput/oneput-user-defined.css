@@ -4,60 +4,73 @@
  * Classes created by the user
  */
 
+.oneput__menu-header .oneput__button,
+.oneput__menu-header .oneput__icon-toggle-button,
+.oneput__menu-header .oneput__icon-button,
+.oneput__menu-footer .oneput__button,
+.oneput__menu-footer .oneput__icon-toggle-button,
+.oneput__menu-footer .oneput__icon-button {
+	max-height: var(--oneput-icon-width-small);
+	min-height: var(--oneput-icon-width-small);
+	max-width: var(--oneput-icon-width-small);
+	min-width: var(--oneput-icon-width-small);
+	padding: 1px;
+}
+
 .myapp__menu-item {
-  margin-left: 0.6em;
+	margin-left: 0.6em;
 }
 
 .myapp__menu-item-header {
-  margin-left: 0.6em;
-  margin-right: 0.6em;
-  flex: 0 auto;
+	margin-left: 0.6em;
+	margin-right: 0.6em;
+	flex: 0 auto;
 }
 
 .myapp__menu-item-description {
-  font: 100 0.8em sans-serif;
-  color: rgba(0, 0, 0, 0.7);
+	font: 100 0.8em sans-serif;
+	color: rgba(0, 0, 0, 0.7);
 }
 
 .myapp__kbd code {
-  display: flex;
-  gap: 6px;
-  border-radius: 2px;
-  padding: 4px;
-  background-color: rgba(0, 0, 0, 0.1);
+	display: flex;
+	gap: 6px;
+	border-radius: 2px;
+	padding: 4px;
+	background-color: rgba(0, 0, 0, 0.1);
 }
 .myapp__kbd kbd {
-  border-radius: 2px;
-  border-color: rgba(0, 0, 0, 0.1);
-  border-style: solid;
-  border-width: 0.5px;
-  min-width: 1rem;
-  padding: 2px;
-  font-size: 0.6rem;
-  text-align: center;
-  background-color: #eee;
+	border-radius: 2px;
+	border-color: rgba(0, 0, 0, 0.1);
+	border-style: solid;
+	border-width: 0.5px;
+	min-width: 1rem;
+	padding: 2px;
+	font-size: 0.6rem;
+	text-align: center;
+	background-color: #eee;
 }
 
 /* Divider */
 
 .oneput__hflex.myapp__divider {
-  border: none;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.4);
-  margin-top: 2px;
-  padding-top: 0;
-  padding-bottom: 0;
+	border: none;
+	border-top: 0.5px solid rgba(0, 0, 0, 0.4);
+	margin-top: 2px;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 .oneput__vflex.myapp__divider-container {
-  padding-top: 6px;
-  padding-bottom: 2px;
-  gap: 0;
+	padding-top: 6px;
+	padding-bottom: 2px;
+	gap: 0;
 }
 
 .myapp__divider-title {
-  font-size: 0.7em;
-  letter-spacing: 0.6px;
-  color: rgba(0, 0, 0, 0.5);
-  text-align: center;
-  text-transform: uppercase;
+	font-size: 0.7em;
+	letter-spacing: 0.6px;
+	color: rgba(0, 0, 0, 0.5);
+	text-align: center;
+	text-transform: uppercase;
 }

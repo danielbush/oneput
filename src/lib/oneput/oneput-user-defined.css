@@ -1,9 +1,20 @@
 /* -----------------------------------
  * User-defined styling
  *
- * Classes created by the user
+ * Classes created by the user.
+ * Load or put this after oneput-defaults.css.
  */
 
+.oneput__container {
+	/* You can override css variables here: */
+	/* --oneput-background: none; */
+}
+
+.oneput__icon-toggle-button.oneput__icon-toggle-button--on {
+	color: dodgerblue;
+}
+
+/* Shows how we can target menu header and footer reduce their size. */
 .oneput__menu-header .oneput__button,
 .oneput__menu-header .oneput__icon-toggle-button,
 .oneput__menu-header .oneput__icon-button,
@@ -16,6 +27,14 @@
 	min-width: var(--oneput-icon-width-small);
 	padding: 1px;
 }
+
+/*
+For UI you inject within oneput.
+
+You can think of oneput__ classes as defining the skeleton of oneput.  At some
+point, the flesh you put on the bones may be its own thing with its own classes
+/ styling.
+*/
 
 .myapp__menu-item {
 	margin-left: 0.6em;

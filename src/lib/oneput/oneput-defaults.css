@@ -5,6 +5,7 @@
  */
 
 /* #region resets */
+
 @layer reset {
 	.oneput__container hr,
 	.oneput__container fieldset,
@@ -19,6 +20,7 @@
 		align-items: center;
 		flex-wrap: nowrap;
 		text-align: left;
+		color: unset;
 	}
 
 	.oneput__container hr {
@@ -32,24 +34,19 @@
 		padding: 0;
 	}
 }
+
 /* #endregion */
 
 /* #region variables */
+
 .oneput__container {
-	/* Standard units */
-	/* The apparent height of the input or technically oneput__input-inner. */
-	--oneput-input-height: 36px;
-	/* Use this for width and height. */
-	--oneput-icon-width: 28px;
-	/* For more compact elements. */
-	--oneput-icon-width-small: 18px;
+	/* Styles */
+	/* Separates significant areas like the menubody vs input / status area. */
+	--oneput-strong-border: solid 1px rgba(0, 0, 0, 0.3);
+	/* Separates sections with something eg sections within the menu body */
+	--oneput-soft-border: 0.5px solid rgba(0, 0, 0, 0.4);
 
-	/* Dimensions */
-	--oneput-min-width: 320px;
-	--oneput-max-width: 500px;
-	--oneput-menu-max-height: 300px;
-
-	/* These let you control how compact the whole ui is. */
+	/* Internal spacing: paddings, gaps, margins */
 	--oneput-area-padding: 0px;
 	--oneput-hflex-padding: 6px;
 	--oneput-hflex-gap: 4px;
@@ -58,11 +55,81 @@
 	--oneput-input-padding-x: 6px;
 	--oneput-input-padding-y: 0px;
 
-	/* Misc */
-	/* Separates significant areas like the menubody vs input / status area. */
-	--oneput-strong-border: solid 1px rgba(0, 0, 0, 0.3);
-	/* Separates sections with something eg sections within the menu body */
-	--oneput-soft-border: 0.5px solid rgba(0, 0, 0, 0.4);
+	/* Specific parts of oneput... */
+
+	/* Container */
+	--oneput-min-width: 320px;
+	--oneput-max-width: 500px;
+	--oneput-menu-max-height: 300px;
+	--oneput-background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
+	--oneput-border-radius: 5px;
+	--oneput-border: rgba(0, 0, 0, 0.3) solid 0.5px;
+	--oneput-border-top: 0.5px;
+	--oneput-border-bottom: 0.5px;
+	--oneput-border-left: 0.5px;
+	--oneput-border-right: 0.5px;
+	--oneput-box-shadow: 0px 0px 20px 4px rgba(0, 0, 0, 0.3);
+	--oneput-font: 14px sans-serif;
+	--oneput-font-color: #222;
+
+	/* Menu */
+	/* These apply when the menu item is a button */
+	--oneput-menu-item-background: none;
+	--oneput-menu-item-background-hover: rgba(100, 100, 100, 0.1);
+	--oneput-menu-item-background-active: rgba(100, 100, 100, 0.2);
+	--oneput-menu-header-background: rgba(255, 255, 255, 0.4);
+	--oneput-menu-footer-background: rgba(255, 255, 255, 0.4);
+	/* These serve to subtly distinguish menu header/footer from menu items. */
+	--oneput-menu-header-box-shadow: 0 -13px 10px 10px rgba(0, 0, 0, 0.5);
+	--oneput-menu-header-clip-path: inset(0 0 -20px 0);
+	--oneput-menu-footer-box-shadow: 0 13px 10px 10px rgba(0, 0, 0, 0.5);
+	--oneput-menu-footer-clip-path: inset(-20px 0 0 0);
+
+	/* Input */
+	/* The apparent height of the input or technically oneput__input-inner. */
+	--oneput-input-height: 36px;
+	--oneput-input-outline: 3px solid rgba(255, 179, 2, 0.5);
+	--oneput-input-background: #fff;
+	--oneput-input-text-color: #111;
+	--oneput-input-font: 14px sans-serif;
+	--oneput-input-border-radius: 5px;
+	--oneput-input-border: solid rgba(0, 0, 0, 0.3) 1px;
+	--oneput-input-border-top: 0.5px;
+	--oneput-input-border-bottom: 0.5px;
+	--oneput-input-border-left: 0.5px;
+	--oneput-input-border-right: 0.5px;
+
+	/* Spacers, icons, buttons etc */
+	/* Use this for width and height. */
+	--oneput-icon-width: 28px;
+	/* For more compact elements. */
+	--oneput-icon-width-small: 18px;
+	/* 22px works well with svg eg lucide and emojis. */
+	--oneput-icon-font: 22px sans-serif;
+	--oneput-icon-border-radius: 4px;
+	--oneput-icon-padding: 4px;
+	--oneput-button-background: none;
+	--oneput-button-border: none;
+	--oneput-button-outline: none;
+	--oneput-button-outline-focus: 0.5px solid rgba(0, 0, 0, 0.5);
+	--oneput-button-background-focus: rgba(100, 100, 100, 0.1);
+	--oneput-button-border-focus: none;
+	--oneput-button-outline-hover: 0.5px solid rgba(0, 0, 0, 0.8);
+	--oneput-button-background-hover: rgba(100, 100, 100, 0.2);
+	--oneput-button-border-hover: none;
+	--oneput-button-outline-active: 0.5px solid rgba(0, 0, 0, 0.8);
+	--oneput-button-background-active: rgba(100, 100, 100, 0.3);
+	--oneput-button-border-active: none;
+
+	/* Visual Debug */
+	--oneput-debug-hflex-outline: 1px solid rgba(0, 200, 0, 0.5);
+	--oneput-debug-hflex-outline-nested: 1px dotted rgba(0, 200, 0, 0.5);
+	--oneput-debug-hflex-outline-offset: -0.5px;
+	--oneput-debug-vflex-outline: 1px solid red;
+	--oneput-debug-vflex-outline-nested: 1px dotted red;
+	--oneput-debug-vflex-outline-offset: -0.5px;
+	--oneput-debug-fchild-outline: solid orchid 1px;
+	--oneput-debug-fchild-offset: -0.5px;
 }
 
 /* #endregion */
@@ -103,6 +170,7 @@
 /* #endregion */
 
 /* #region container */
+
 .oneput__container {
 	min-width: var(--oneput-min-width);
 	max-width: var(--oneput-max-width);
@@ -112,26 +180,26 @@
 	grid-row-gap: 0;
 
 	/* --- */
-	background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
-	border-radius: 5px;
-	border-color: rgba(0, 0, 0, 0.3);
-	border-style: solid;
-	border-top-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-right-width: 1px;
+	background: var(--oneput-background);
+	border-radius: var(--oneput-border-radius);
+	border: var(--oneput-border);
+	border-top-width: var(--oneput-border-top);
+	border-bottom-width: var(--oneput-border-bottom);
+	border-left-width: var(--oneput-border-left);
+	border-right-width: var(--oneput-border-right);
 
-	font-family: sans-serif;
-	font-size: 14px;
-	box-shadow: 0px 0px 20px 4px rgba(0, 0, 0, 0.3);
+	font: var(--oneput-font);
+	color: var(--oneput-font-color);
+	box-shadow: var(--oneput-box-shadow);
 }
+
 /* #endregion */
 
 /* #region menu */
 
 .oneput__menu-area {
 	margin: 0;
-	padding: 0;
+	padding: var(--oneput-area-padding);
 	border-bottom: var(--oneput-strong-border);
 }
 .oneput__menu-body {
@@ -140,26 +208,29 @@
 	overflow-y: auto;
 	max-height: var(--oneput-menu-max-height);
 }
+.oneput__menu-item {
+	background: var(--oneput-menu-item-background);
+}
 button.oneput__menu-item {
 	cursor: pointer;
 }
 button.oneput__menu-item:hover {
-	background-color: rgba(100, 100, 100, 0.1);
+	background: var(--oneput-menu-item-background-hover);
 }
 button.oneput__menu-item:active {
-	background-color: rgba(100, 100, 100, 0.2);
+	background: var(--oneput-menu-item-background-active);
 }
 
 .oneput__menu-header {
-	background-color: rgba(255, 255, 255, 0.4);
-	box-shadow: 0 -13px 10px 10px rgba(0, 0, 0, 0.5);
-	clip-path: inset(0 0 -20px 0);
+	background: var(--oneput-menu-header-background);
+	box-shadow: var(--oneput-menu-header-box-shadow);
+	clip-path: var(--oneput-menu-header-clip-path);
 }
 
 .oneput__menu-footer {
-	background-color: rgba(255, 255, 255, 0.4);
-	box-shadow: 0 13px 10px 10px rgba(0, 0, 0, 0.5);
-	clip-path: inset(-20px 0 0 0);
+	background: var(--oneput-menu-footer-background);
+	box-shadow: var(--oneput-menu-footer-box-shadow);
+	clip-path: var(--oneput-menu-footer-clip-path);
 }
 
 /* #endregion */
@@ -169,7 +240,6 @@ button.oneput__menu-item:active {
 .oneput__input-area {
 	width: 100%;
 	display: flex;
-	/* grid-template-columns: auto 1fr auto; */
 	align-items: center;
 
 	margin: 0;
@@ -199,12 +269,8 @@ button.oneput__menu-item:active {
 	padding: var(--oneput-input-padding-y) var(--oneput-input-padding-x);
 }
 
-/* --- */
 .oneput__input-inner:focus-within {
-	outline-offset: 0px;
-	outline-width: 3px;
-	outline-color: rgba(255, 179, 2, 0.5);
-	outline-style: solid;
+	outline: var(--oneput-input-outline);
 }
 
 .oneput__input-inner {
@@ -212,22 +278,21 @@ button.oneput__menu-item:active {
 	display: flex;
 	flex: 1;
 
-	background-color: #fff;
+	background: var(--oneput-input-background);
 
 	margin: 0;
-	border-radius: 5px;
-	border-color: rgba(0, 0, 0, 0.3);
-	border-style: solid;
-	border-top-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-right-width: 1px;
+	border-radius: var(--oneput-input-border-radius);
+	border: var(--oneput-input-border);
+	border-top-width: var(--oneput-input-border-top);
+	border-bottom-width: var(--oneput-input-border-bottom);
+	border-left-width: var(--oneput-input-border-left);
+	border-right-width: var(--oneput-input-border-right);
 }
 
 .oneput__input {
-	color: #111;
-	font-family: sans-serif;
-	font-size: 14px;
+	background: var(--oneput-area-padding);
+	color: var(--oneput-input-text-color);
+	font: var(--oneput-input-font);
 
 	flex: 1;
 
@@ -241,6 +306,7 @@ button.oneput__menu-item:active {
 	align-items: center;
 	justify-content: center;
 }
+
 /* #endregion */
 
 /* #region spacers, icons and icon-buttons */
@@ -263,13 +329,6 @@ button.oneput__menu-item:active {
 	max-width: var(--oneput-icon-width);
 }
 
-.oneput__icon-toggle-button,
-.oneput__icon-button,
-.oneput__icon {
-	/* This works well with svg eg lucide and emojis. */
-	font-size: 22px;
-}
-
 .oneput__button,
 .oneput__icon-toggle-button,
 .oneput__icon-button,
@@ -281,34 +340,35 @@ button.oneput__menu-item:active {
 	max-height: var(--oneput-icon-width);
 	justify-content: center;
 	align-self: flex-start;
-	border-radius: 4px;
-	padding: 4px;
+	border-radius: var(--oneput-icon-border-radius);
+	padding: var(--oneput-icon-padding);
+}
+
+.oneput__icon-toggle-button,
+.oneput__icon-button,
+.oneput__icon {
+	font: var(--oneput-icon-font);
 }
 
 /* states */
 
 .oneput__button:focus,
 .oneput__icon-button:focus {
-	outline: 0.5px solid rgba(0, 0, 0, 0.5);
-	background-color: rgba(100, 100, 100, 0.1);
-	border-width: 0.5px;
-	border-color: rgba(0, 0, 0, 0.8);
+	outline: var(--oneput-button-outline-focus);
+	background: var(--oneput-button-background-focus);
+	border: var(--oneput-button-border-focus);
 }
 .oneput__button:hover,
 .oneput__icon-button:hover {
-	background-color: rgba(100, 100, 100, 0.2);
-	border-width: 0.5px;
-	border-color: rgba(0, 0, 0, 0.8);
+	outline: var(--oneput-button-outline-hover);
+	background: var(--oneput-button-background-hover);
+	border: var(--oneput-button-border-hover);
 }
 .oneput__button:active,
 .oneput__icon-button:active {
-	background-color: rgba(100, 100, 100, 0.3);
-	border-width: 0.5px;
-	border-color: rgba(0, 0, 0, 0.8);
-}
-
-.oneput__icon-toggle-button.oneput__icon-toggle-button--on {
-	color: dodgerblue;
+	outline: var(--oneput-button-outline-active);
+	background: var(--oneput-button-background-active);
+	border: var(--oneput-button-border-active);
 }
 
 .oneput__icon-button-group-right {
@@ -321,22 +381,24 @@ button.oneput__menu-item:active {
 /* #endregion */
 
 /* #region debug */
+
 .oneput__debug .oneput__hflex {
-	outline-style: solid;
-	outline-width: 1px;
-	outline-offset: 0.5px;
-	outline-color: rgba(0, 200, 0, 1);
+	outline: var(--oneput-debug-hflex-outline);
+	outline-offset: var(--oneput-debug-hflex-outline-offset);
 }
 .oneput__debug .oneput__hflex .oneput__hflex {
-	outline-color: rgba(0, 255, 0, 0.5);
-	outline-width: 2px;
+	outline: var(--oneput-debug-hflex-outline-nested);
 }
 .oneput__debug .oneput__vflex {
-	outline: solid blue 1px;
-	outline-offset: 1px;
+	outline: var(--oneput-debug-vflex-outline);
+	outline-offset: var(--oneput-debug-vflex-outline-offset);
+}
+.oneput__debug .oneput__vflex .oneput__vflex {
+	outline: var(--oneput-debug-vflex-outline-nested);
 }
 .oneput__debug .oneput__fchild {
-	outline: solid orchid 1px;
-	outline-offset: -0.5px;
+	outline: var(--oneput-debug-fchild-outline);
+	outline-offset: var(--oneput-debug-fchild-offset);
 }
+
 /* #endregion */

@@ -2,9 +2,54 @@
 
 This is a sveltekit app which isused to publish the Oneput component using <https://svelte.dev/docs/kit/packaging>.
 
+There is a tasfile `Taskfile.yml` for various tasks.
+
 ## Packaging
 
-To test packaging see `test:package` task in `Taskfile.yml`.
+To test packaging see task `build:test-package` 
+
+## Webcomponent
+
+Can we use oneput as webcomponent?
+
+This is a WIP.  See task `build:wc`.
+
+## Styling
+
+Oneput consists of a container within which we have "areas".
+
+The menu and input areas have additional structures.
+
+- .oneput__container
+  - .oneput__menu-area
+    - .oneput__menu-header
+    - .oneput__menu-body
+      - .oneput__menu-item (several)
+    - .oneput__menu-footer
+  - .oneput__inner-area
+    - represents the content between the menu area and the input area; eg a status bar
+  - .oneput__input-area
+    - .oneput__input-outer
+      - .oneput__input-outer-left
+      - .oneput__input-inner
+        - .oneput__input-left
+        - .oneput__input
+        - .oneput__input-right
+      - .oneput__input-outer-right
+  - .oneput__outer-area
+    - comes "after" the input-area
+
+If the above is the skeleton, then the following are the ribs of the skeleton (ok this analogy isn't maybe holding up as well I would like...):
+
+- .oneput__hflex,
+  - lets you define horizontal blocks of content that usually fit into the above areas
+- .oneput__vflex,
+  - a convenience class to let you stack vertically; often used within an hflex to vertically structure something eg a complex menu item
+- .oneput__fchild
+  - represents a flex child that lives within an hflex or vflex
+  - especially intended for your icons and icon buttons
+
+Each of these 3 structures has a programmatic counterpart which you use to populate oneput with content and which you pass as props to oneput.  See `src/lib/oneput/examples/demo/index.ts` for an example.
 
 # Svelte library
 

@@ -6,18 +6,19 @@ tasks:
   default:
     cmds:
       - task: dev
-    silent: true
+
   dev:
     cmds:
       - npm run dev
 
-  build:clear:
+  build:clean:
     desc: Clear the .build/ area!
     cmds:
       - rm -rf .build/sveltekit
       - rm -rf .build/build-wc
+      - rm -rf .build/vite-wc
 
-  build:test-package:
+  test:package:
     desc: Create a test sveltekit application and import a locally packaged version of Oneput.
     dir: .build/sveltekit
     cmds:
@@ -27,8 +28,21 @@ tasks:
       - cp  ../files/sveltekit/+page.svelte src/routes/
       - echo "We can now run sveltekit in $(pwd) using locally packaged version of oneput."
 
+  test:wc:
+    desc: Create a vanilla TypeScript Vite app in .build/vite-wc and demo loading Oneput as a webcomponent.
+    dir: .build/vite-wc
+    deps:
+      - build:wc
+    cmds:
+      - echo "Creating or re-using .build/vite-wc for vanilla TS Vite app"
+      - npm create -y vite@latest . -- --template vanilla-ts
+      - npm i
+      - cp  ../files/vite-wc/index.html index.html
+      - cp  ../../dist/oneput-wc.iife.js public/
+      - echo "You can now edit .build/vite-wc in a new editor and start it up"
+
   build:wc:
-    desc: Create an iife with oneput as a webcomponent.  Load this at the bottom of body tag?
+    desc: Create an iife with Oneput as a webcomponent.
     summary: |
       Based on https://www.youtube.com/watch?v=T4zwmtUW7Gw .
       TODO: we might be able to do this directly in sveltekit using a secondary vite config file eg: https://www.devgem.io/posts/building-web-components-with-sveltekit-2-and-svelte-5 .
@@ -40,11 +54,12 @@ tasks:
       - npm i
       - npm pack ../..
       - npm i *.tgz
-      - cp  ../files/wc/main.js src/main.js
-      - cp  ../files/wc/svelte.config.js svelte.config.js
-      - cp  ../files/wc/vite.config.js vite.config.js
-      - cp  ../files/wc/OneputWC.svelte src/lib/OneputWC.svelte
+      - cp  ../files/build-wc/main.js src/main.js
+      - cp  ../files/build-wc/svelte.config.js svelte.config.js
+      - cp  ../files/build-wc/vite.config.js vite.config.js
+      - cp  ../files/build-wc/OneputWC.svelte src/lib/OneputWC.svelte
       - ./node_modules/.bin/vite build --config vite.config.js    
-      - echo "Built a wc for Oneput using .build/build-wc"
+      - echo "Built a webcomponent for Oneput in the dist directory of .build/build-wc"
       - cp dist/oneput-wc.iife.js ../../dist
-      - echo "Created dist/oneput-wc.iife.js - this contains Oneput webcomponent powered by Svelte."
+      - echo "Copied webcomponent to dist/oneput-wc.iife.js"
+

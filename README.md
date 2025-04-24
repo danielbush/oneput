@@ -6,13 +6,13 @@ There is a tasfile `Taskfile.yml` for various tasks.
 
 ## Packaging
 
-To test packaging see task `build:test-package` 
+To test packaging see task `test:package` 
 
 ## Webcomponent
 
 Can we use oneput as webcomponent?
 
-This is a WIP.  See task `build:wc`.
+This is a WIP.  See task `test:wc`.
 
 ## Styling
 

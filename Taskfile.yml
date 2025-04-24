@@ -45,5 +45,6 @@ tasks:
       - cp  ../files/wc/vite.config.js vite.config.js
       - cp  ../files/wc/OneputWC.svelte src/lib/OneputWC.svelte
       - ./node_modules/.bin/vite build --config vite.config.js    
+      - echo "Built a wc for Oneput using .build/build-wc"
       - cp dist/oneput-wc.iife.js ../../dist
       - echo "Created dist/oneput-wc.iife.js - this contains Oneput webcomponent powered by Svelte."

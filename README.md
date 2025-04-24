@@ -51,6 +51,15 @@ If the above is the skeleton, then the following are the ribs of the skeleton (o
 
 Each of these 3 structures has a programmatic counterpart which you use to populate oneput with content and which you pass as props to oneput.  See `src/lib/oneput/examples/demo/index.ts` for an example.
 
+### Dark mode
+
+- Your web page should set `color-scheme` to `light dark` to allow dark mode.
+- use `media (prefers-color-scheme: dark) {...}` to theme oneput in dark mode for users that request it via their OS settings
+  - `...` will take the form of: `.oneput__container { --oneput-...: ...; ... }`
+  - see `src/lib/oneput/oneput-defaults.css` for the available css variable settings.
+- to force dark mode via a toggle, use JavaScript to add a class (e.g., `.dark-mode`) to the html element or a wrapper. Inside the media query for `prefers-color-scheme: dark` (above), target `.dark-mode` to set your dark mode variable values instead of setting them untargeted as above. This allows the class to force dark mode even if the system is set to light.
+
+
 # Svelte library
 
 Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).

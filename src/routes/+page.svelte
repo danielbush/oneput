@@ -45,23 +45,25 @@
 <main>
 	<h1>Oneput Visual States</h1>
 	<p>Demo visual states for Oneput component</p>
-	<fieldset>
-		<button type="button" onclick={() => (visualDebug = !visualDebug)}>
-			Toggle visual debug
-		</button>
-		<ul>
-			<li>Highlights hflex, vflex and fchild</li>
-			<li>
-				You can adjust the debug styling in oneput-defaults.css - look for the
-				<code>.oneput__debug</code> class.
-			</li>
-		</ul>
-	</fieldset>
-	<fieldset>
-		<button type="button" onclick={() => (forceDarkMode = !forceDarkMode)}>
-			Toggle force dark mode on page
-		</button>
-	</fieldset>
+	<div class="controls">
+		<fieldset>
+			<button type="button" onclick={() => (visualDebug = !visualDebug)}>
+				Toggle visual debug
+			</button>
+			<ul>
+				<li>Highlights hflex, vflex and fchild</li>
+				<li>
+					You can adjust the debug styling in oneput-defaults.css - look for the
+					<code>.oneput__debug</code> class.
+				</li>
+			</ul>
+		</fieldset>
+		<fieldset>
+			<button type="button" onclick={() => (forceDarkMode = !forceDarkMode)}>
+				Toggle force dark mode on page
+			</button>
+		</fieldset>
+	</div>
 
 	<br />
 
@@ -119,11 +121,47 @@
 </main>
 
 <style>
-	:global(:root) {
-		/* This just allows dark mode. */
-		color-scheme: light dark;
-		color-scheme: light;
+	:global(html.dark-mode) {
+		background: #333;
+		color: #ccc;
 	}
+
+	button {
+		border: solid 0.5px #999;
+		border-radius: 5px;
+		padding: 6px;
+
+		&:hover {
+			background: #ddd;
+			color: #333;
+		}
+		&:active {
+			background: #ccc;
+			color: #333;
+		}
+		&:focus {
+			outline: none;
+			box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+		}
+
+		:global(html.dark-mode) & {
+			background: #444;
+			color: #ccc;
+
+			&:hover {
+				background: #555;
+				color: #fff;
+			}
+			&:active {
+				background: #666;
+				color: #fff;
+			}
+			&:focus {
+				box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.3);
+			}
+		}
+	}
+
 	h2 {
 		margin: 0;
 	}
@@ -147,5 +185,21 @@
 		flex-direction: column;
 		gap: 1.2rem;
 		box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+	}
+
+	fieldset {
+		padding: 0.5rem;
+		border-radius: 5px;
+		border: 0.5px solid rgba(0, 0, 0, 0.3);
+		:global(html.dark-mode) & {
+			background: rgba(0, 0, 0, 0.1);
+		}
+	}
+
+	.controls {
+		margin: 1rem 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+		gap: 1rem;
 	}
 </style>

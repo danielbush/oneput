@@ -2,6 +2,11 @@
 
 version: '3'
 
+vars:
+  BUILD_WC: .build/build-wc
+  VITE_WC: .build/vite-wc
+  BUILD_PACKAGE: .build/sveltekit
+
 tasks:
   default:
     cmds:
@@ -9,57 +14,59 @@ tasks:
 
   dev:
     cmds:
-      - npm run dev
+      - pnpm run dev
 
   build:clean:
     desc: Clear the .build/ area!
     cmds:
-      - rm -rf .build/sveltekit
-      - rm -rf .build/build-wc
-      - rm -rf .build/vite-wc
+      - rm -rf {{ .BUILD_PACKAGE }}
+      - rm -rf {{ .BUILD_WC }}
+      - rm -rf {{ .VITE_WC }}
 
   test:package:
     desc: Create a test sveltekit application and import a locally packaged version of Oneput.
-    dir: .build/sveltekit
+    dir: '{{ .BUILD_PACKAGE }}'
     cmds:
-      - npx -y sv create --template minimal --types ts --no-add-ons --install npm .
-      - npm pack ../..
-      - npm i *.tgz
+      - pnpx sv create --template minimal --types ts --no-add-ons --install pnpm .
+      - cd ../.. && pnpm pack --pack-destination {{ .BUILD_PACKAGE }}
+      - pnpm add ./*.tgz
       - cp  ../files/sveltekit/+page.svelte src/routes/
-      - echo "We can now run sveltekit in $(pwd) using locally packaged version of oneput."
+      - echo "We can now visit {{ .BUILD_PACKAGE }} in a new editor and start it up to test a locally packaged version of oneput."
 
   test:wc:
-    desc: Create a vanilla TypeScript Vite app in .build/vite-wc and demo loading Oneput as a webcomponent.
-    dir: .build/vite-wc
+    desc: Create a vanilla TypeScript Vite app in {{ .VITE_WC }} and demo loading Oneput as a webcomponent.
+    dir: '{{ .VITE_WC }}'
     deps:
       - build:wc
     cmds:
-      - echo "Creating or re-using .build/vite-wc for vanilla TS Vite app"
-      - npm create -y vite@latest . -- --template vanilla-ts
-      - npm i
+      - echo "Creating or re-using {{ .VITE_WC }} for vanilla TS Vite app"
+      - pnpm create vite@latest --template vanilla-ts .
+      - pnpm i
       - cp  ../files/vite-wc/index.html index.html
       - cp  ../../dist/oneput-wc.iife.js public/
-      - echo "You can now edit .build/vite-wc in a new editor and start it up"
+      - echo "You can now visit {{ .VITE_WC }} in a new editor and start it up"
 
   build:wc:
     desc: Create an iife with Oneput as a webcomponent.
     summary: |
       Based on https://www.youtube.com/watch?v=T4zwmtUW7Gw .
-      TODO: we might be able to do this directly in sveltekit using a secondary vite config file eg: https://www.devgem.io/posts/building-web-components-with-sveltekit-2-and-svelte-5 .
-    dir: .build/build-wc
+
+      - TODO: we might be able to do this directly in sveltekit using a secondary vite config file eg: https://www.devgem.io/posts/building-web-components-with-sveltekit-2-and-svelte-5 .
+      - Use es instead of iife?
+    dir: '{{ .BUILD_WC }}'
     cmds:
-      - echo "Creating or re-using .build/build-wc to build a web component"
-      - npm create -y vite@latest . -- --template svelte
+      - echo "Using {{ .BUILD_WC }} to build a web component"
+      - pnpm create vite@latest --template svelte .
       - test ! -a .git && git init && git add .  && git commit -am "initial" || true
-      - npm i
-      - npm pack ../..
-      - npm i *.tgz
+      - pnpm i
+      - cd ../.. && pnpm pack --pack-destination {{ .BUILD_WC }}
+      - pnpm add ./*.tgz
       - cp  ../files/build-wc/main.js src/main.js
       - cp  ../files/build-wc/svelte.config.js svelte.config.js
       - cp  ../files/build-wc/vite.config.js vite.config.js
       - cp  ../files/build-wc/OneputWC.svelte src/lib/OneputWC.svelte
       - ./node_modules/.bin/vite build --config vite.config.js    
-      - echo "Built a webcomponent for Oneput in the dist directory of .build/build-wc"
+      - echo "Built a webcomponent for Oneput in the dist directory of {{ .BUILD_WC }}"
       - cp dist/oneput-wc.iife.js ../../dist
       - echo "Copied webcomponent to dist/oneput-wc.iife.js"
 

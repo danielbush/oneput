@@ -6,6 +6,13 @@ export type FlexParams = {
   classes?: Array<string>;
   style?: Partial<CSSStyleDeclaration>;
   type: 'hflex' | 'vflex';
+  /**
+   * By default, top-level hflex items are rendered to hold content and use oneput__menu-item.
+   * If true, then the item acts as a divider of other menu items instead.
+   * Only applies to top level with the oneput menu body.
+   */
+  divider?: boolean;
+  // subtype?: string;
   children?: Array<FlexParams | FChildParams>;
   /** List of HTML void elements. */
   voidElements?: Set<string | undefined>;

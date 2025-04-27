@@ -10,6 +10,44 @@
 	/* --oneput-background: none; */
 }
 
+/* For the visual demo, we set dark mode explicitly using .dark-mode.  Here's how you
+ * can style it.  You will still need to ensure your injected content is also
+ * styled. */
+.dark-mode .oneput__container {
+	/* backgrounds */
+	--oneput-background: #444;
+	--oneput-input-background: #333;
+
+	/* text */
+	--oneput-font-color: #ddd;
+	--oneput-input-text-color: #ddd;
+	--oneput-placeholder-text-color: #bbb;
+
+	/* divider color */
+	--oneput-divider-border: 1px solid rgb(255 255 255 / 0.2);
+	--oneput-divider-text-color: #ddd;
+
+	/* menu item states */
+	--oneput-menu-item-background: none;
+	--oneput-menu-item-background-hover: rgb(200 200 200 / 0.1);
+	--oneput-menu-item-background-active: rgb(200 200 200 / 0.2);
+
+	/* button states */
+	--oneput-button-outline-focus: 0.5px solid rgb(255 255 255 / 0.5);
+	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
+	--oneput-button-border-focus: none;
+	--oneput-button-outline-hover: 0.5px solid rgb(255 255 255 / 0.8);
+	--oneput-button-background-hover: rgb(150 150 150 / 0.2);
+	--oneput-button-border-hover: none;
+	--oneput-button-outline-active: 0.5px solid rgb(255 255 255 / 0.8);
+	--oneput-button-background-active: rgb(150 150 150 / 0.3);
+	--oneput-button-border-active: none;
+
+	.oneput__menu-item + .oneput__menu-item {
+		border-top: 0.5px solid rgb(255 255 255 / 0.1);
+	}
+}
+
 .oneput__icon-toggle-button.oneput__icon-toggle-button--on {
 	color: dodgerblue;
 }
@@ -36,10 +74,6 @@ point, the flesh you put on the bones may be its own thing with its own classes
 / styling.
 */
 
-.myapp__menu-item {
-	margin-left: 0.6em;
-}
-
 .myapp__menu-item-header {
 	margin-left: 0.6em;
 	margin-right: 0.6em;
@@ -48,7 +82,7 @@ point, the flesh you put on the bones may be its own thing with its own classes
 
 .myapp__menu-item-description {
 	font: 100 0.8em sans-serif;
-	color: rgba(0, 0, 0, 0.7);
+	color: rgb(0 0 0 / 0.7);
 }
 
 .myapp__kbd code {
@@ -56,11 +90,11 @@ point, the flesh you put on the bones may be its own thing with its own classes
 	gap: 6px;
 	border-radius: 2px;
 	padding: 4px;
-	background-color: rgba(0, 0, 0, 0.1);
+	background-color: rgb(0 0 0 / 0.1);
 }
 .myapp__kbd kbd {
 	border-radius: 2px;
-	border-color: rgba(0, 0, 0, 0.1);
+	border-color: rgb(0 0 0 / 0.1);
 	border-style: solid;
 	border-width: 0.5px;
 	min-width: 1rem;
@@ -68,28 +102,4 @@ point, the flesh you put on the bones may be its own thing with its own classes
 	font-size: 0.6rem;
 	text-align: center;
 	background-color: #eee;
-}
-
-/* Divider */
-
-.oneput__hflex.myapp__divider {
-	border: none;
-	border-top: 0.5px solid rgba(0, 0, 0, 0.4);
-	margin-top: 2px;
-	padding-top: 0;
-	padding-bottom: 0;
-}
-
-.oneput__vflex.myapp__divider-container {
-	padding-top: 6px;
-	padding-bottom: 2px;
-	gap: 0;
-}
-
-.myapp__divider-title {
-	font-size: 0.7em;
-	letter-spacing: 0.6px;
-	color: rgba(0, 0, 0, 0.5);
-	text-align: center;
-	text-transform: uppercase;
 }

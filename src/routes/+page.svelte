@@ -141,7 +141,7 @@
 		}
 		&:focus {
 			outline: none;
-			box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+			box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 0.3);
 		}
 
 		:global(html.dark-mode) & {
@@ -157,7 +157,7 @@
 				color: #fff;
 			}
 			&:focus {
-				box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.3);
+				box-shadow: 0px 0px 5px 0px rgb(255 255 255 / 0.3);
 			}
 		}
 	}
@@ -184,15 +184,15 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.2rem;
-		box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+		box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 0.3);
 	}
 
 	fieldset {
 		padding: 0.5rem;
 		border-radius: 5px;
-		border: 0.5px solid rgba(0, 0, 0, 0.3);
+		border: 0.5px solid rgb(0 0 0 / 0.3);
 		:global(html.dark-mode) & {
-			background: rgba(0, 0, 0, 0.1);
+			background: rgb(0 0 0 / 0.1);
 		}
 	}
 

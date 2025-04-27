@@ -41,7 +41,11 @@
 			{/if}
 			<div class="oneput__menu-body">
 				{#each props.menu?.items || [] as item (getMenuId(item))}
-					<Flex class="oneput__menu-item" {...item} />
+					{#if item.divider}
+						<Flex class="oneput__menu-divider" {...item} />
+					{:else}
+						<Flex class="oneput__menu-item" {...item} />
+					{/if}
 				{/each}
 			</div>
 			{#if props.menu?.footer}

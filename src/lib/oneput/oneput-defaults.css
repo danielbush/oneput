@@ -12,7 +12,7 @@
 	.oneput__container button {
 		background-color: transparent;
 		border-width: 0.5px;
-		border-color: rgba(0, 0, 0, 0);
+		border-color: rgb(0 0 0 / 0);
 		font: inherit;
 		cursor: pointer;
 		outline: inherit;
@@ -42,9 +42,9 @@
 .oneput__container {
 	/* Styles */
 	/* Separates significant areas like the menubody vs input / status area. */
-	--oneput-strong-border: solid 1px rgba(0, 0, 0, 0.3);
+	--oneput-strong-border: solid 1px rgb(0 0 0 / 0.3);
 	/* Separates sections with something eg sections within the menu body */
-	--oneput-soft-border: 0.5px solid rgba(0, 0, 0, 0.4);
+	--oneput-soft-border: 0.5px solid rgb(0 0 0 / 0.4);
 
 	/* Internal spacing: paddings, gaps, margins */
 	--oneput-area-padding: 0px;
@@ -63,37 +63,44 @@
 	--oneput-menu-max-height: 300px;
 	--oneput-background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
 	--oneput-border-radius: 5px;
-	--oneput-border: rgba(0, 0, 0, 0.3) solid 0.5px;
+	--oneput-border: rgb(0 0 0 / 0.3) solid 0.5px;
 	--oneput-border-top: 0.5px;
 	--oneput-border-bottom: 0.5px;
 	--oneput-border-left: 0.5px;
 	--oneput-border-right: 0.5px;
-	--oneput-box-shadow: 0px 0px 20px 4px rgba(0, 0, 0, 0.3);
+	--oneput-box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 0.3);
 	--oneput-font: 14px sans-serif;
 	--oneput-font-color: #222;
 
 	/* Menu */
 	/* These apply when the menu item is a button */
 	--oneput-menu-item-background: none;
-	--oneput-menu-item-background-hover: rgba(100, 100, 100, 0.1);
-	--oneput-menu-item-background-active: rgba(100, 100, 100, 0.2);
-	--oneput-menu-header-background: rgba(255, 255, 255, 0.4);
-	--oneput-menu-footer-background: rgba(255, 255, 255, 0.4);
+	--oneput-menu-item-background-hover: rgb(100 100 100 / 0.1);
+	--oneput-menu-item-background-active: rgb(100 100 100 / 0.2);
+	--oneput-menu-header-background: rgb(255 255 255 / 0.2);
+	--oneput-menu-footer-background: rgb(255 255 255 / 0.2);
 	/* These serve to subtly distinguish menu header/footer from menu items. */
-	--oneput-menu-header-box-shadow: 0 -13px 10px 10px rgba(0, 0, 0, 0.5);
+	--oneput-menu-header-box-shadow: 0 -13px 10px 10px rgb(0 0 0 / 0.5);
 	--oneput-menu-header-clip-path: inset(0 0 -20px 0);
-	--oneput-menu-footer-box-shadow: 0 13px 10px 10px rgba(0, 0, 0, 0.5);
+	--oneput-menu-footer-box-shadow: 0 13px 10px 10px rgb(0 0 0 / 0.5);
 	--oneput-menu-footer-clip-path: inset(-20px 0 0 0);
+
+	/* divider */
+	--oneput-divider-border: rgb(0 0 0 / 0.3) solid 0.5px;
+	--oneput-divider-text-color: #333;
+	--oneput-divider-font: sans-serif;
+	--oneput-divider-margin: 6px 0 2px 0;
 
 	/* Input */
 	/* The apparent height of the input or technically oneput__input-inner. */
 	--oneput-input-height: 36px;
-	--oneput-input-outline: 3px solid rgba(255, 179, 2, 0.5);
+	--oneput-input-outline: 3px solid rgb(255 179 2 / 0.5);
 	--oneput-input-background: #fff;
 	--oneput-input-text-color: #111;
+	--oneput-placeholder-text-color: #888;
 	--oneput-input-font: 14px sans-serif;
 	--oneput-input-border-radius: 5px;
-	--oneput-input-border: solid rgba(0, 0, 0, 0.3) 1px;
+	--oneput-input-border: solid rgb(0 0 0 / 0.3) 1px;
 	--oneput-input-border-top: 0.5px;
 	--oneput-input-border-bottom: 0.5px;
 	--oneput-input-border-left: 0.5px;
@@ -111,19 +118,19 @@
 	--oneput-button-background: none;
 	--oneput-button-border: none;
 	--oneput-button-outline: none;
-	--oneput-button-outline-focus: 0.5px solid rgba(0, 0, 0, 0.5);
-	--oneput-button-background-focus: rgba(100, 100, 100, 0.1);
+	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.5);
+	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
 	--oneput-button-border-focus: none;
-	--oneput-button-outline-hover: 0.5px solid rgba(0, 0, 0, 0.8);
-	--oneput-button-background-hover: rgba(100, 100, 100, 0.2);
+	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-background-hover: rgb(100 100 100 / 0.2);
 	--oneput-button-border-hover: none;
-	--oneput-button-outline-active: 0.5px solid rgba(0, 0, 0, 0.8);
-	--oneput-button-background-active: rgba(100, 100, 100, 0.3);
+	--oneput-button-outline-active: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-background-active: rgb(100 100 100 / 0.3);
 	--oneput-button-border-active: none;
 
 	/* Visual Debug */
-	--oneput-debug-hflex-outline: 1px solid rgba(0, 200, 0, 0.5);
-	--oneput-debug-hflex-outline-nested: 1px dotted rgba(0, 200, 0, 0.5);
+	--oneput-debug-hflex-outline: 1px solid rgb(0 200 0 / 0.5);
+	--oneput-debug-hflex-outline-nested: 1px dotted rgb(0 200 0 / 0.5);
 	--oneput-debug-hflex-outline-offset: -0.5px;
 	--oneput-debug-vflex-outline: 1px solid red;
 	--oneput-debug-vflex-outline-nested: 1px dotted red;
@@ -221,6 +228,10 @@ button.oneput__menu-item:active {
 	background: var(--oneput-menu-item-background-active);
 }
 
+.oneput__menu-item-body {
+	margin-left: 0.6em;
+}
+
 .oneput__menu-header {
 	background: var(--oneput-menu-header-background);
 	box-shadow: var(--oneput-menu-header-box-shadow);
@@ -231,6 +242,33 @@ button.oneput__menu-item:active {
 	background: var(--oneput-menu-footer-background);
 	box-shadow: var(--oneput-menu-footer-box-shadow);
 	clip-path: var(--oneput-menu-footer-clip-path);
+}
+
+/* #endregion */
+
+/* #region divider */
+
+/* Sits alongside menu items and acts purely to divide other menu items.  Use normally with an hr. */
+.oneput__menu-divider {
+	border-top: var(--oneput-divider-border);
+	margin: var(--oneput-divider-margin);
+	color: var(--oneput-divider-text-color);
+	font: var(--oneput-divider-font);
+	padding-top: 0;
+	padding-bottom: 0;
+}
+/* For a divider that has a title. */
+.oneput__menu-divider-body {
+	margin-left: 0.6em;
+	padding-top: 6px;
+	padding-bottom: 2px;
+	gap: 0;
+}
+.oneput__menu-divider-title {
+	font-size: 0.7em;
+	letter-spacing: 0.6px;
+	text-align: center;
+	text-transform: uppercase;
 }
 
 /* #endregion */
@@ -298,6 +336,9 @@ button.oneput__menu-item:active {
 
 	border: none;
 	outline: none;
+}
+.oneput__input::placeholder {
+	color: var(--oneput-placeholder-text-color, --oneput-input-text-color);
 }
 
 .oneput__input-left,

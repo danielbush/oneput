@@ -67,7 +67,7 @@ export const menuItems1: FlexParams[] = [
 		tag: 'button',
 		children: [
 			{ classes: ['oneput__icon'], textContent: '📆' },
-			{ classes: ['myapp__menu-item'], textContent: 'Menu Item 1' },
+			{ classes: ['oneput__menu-item-body'], textContent: 'Menu Item 1' },
 			{
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
@@ -80,7 +80,7 @@ export const menuItems1: FlexParams[] = [
 		tag: 'button',
 		children: [
 			{ classes: ['oneput__icon'], textContent: '🍔' },
-			{ classes: ['myapp__menu-item'], textContent: 'Menu Item 2' },
+			{ classes: ['oneput__menu-item-body'], textContent: 'Menu Item 2' },
 			{
 				type: 'hflex',
 				children: [
@@ -103,7 +103,7 @@ export const menuItems1: FlexParams[] = [
 		children: [
 			{ classes: ['oneput__icon'] },
 			{
-				classes: ['myapp__menu-item'],
+				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
 		]
@@ -111,7 +111,9 @@ export const menuItems1: FlexParams[] = [
 	{
 		tag: 'hr',
 		type: 'hflex',
-		classes: ['myapp__divider']
+		divider: true,
+		// subtype: 'menu-divider'
+		// classes: ['oneput__menu-divider']
 	},
 	{
 		id: 'menu-item-3',
@@ -124,7 +126,7 @@ export const menuItems1: FlexParams[] = [
 				classes: ['oneput__icon-button'],
 				innerHTMLUnsafe: '<i data-lucide="search"></i>'
 			},
-			{ classes: ['myapp__menu-item'], textContent: 'Interactive menu item' },
+			{ classes: ['oneput__menu-item-body'], textContent: 'Interactive menu item' },
 			{
 				type: 'hflex',
 				children: [
@@ -158,7 +160,7 @@ export const menuItems1: FlexParams[] = [
 			{ classes: ['oneput__icon'], textContent: '🍔' },
 			{
 				type: 'vflex',
-				classes: ['myapp__menu-item'],
+				classes: ['oneput__menu-item-body'],
 				children: [
 					{ textContent: 'Complex menu item' },
 					{ tag: 'hr' },
@@ -183,7 +185,7 @@ export const menuItems1: FlexParams[] = [
 			{ classes: ['oneput__icon'], textContent: '🍔' },
 			{
 				type: 'vflex',
-				classes: ['myapp__menu-item'],
+				classes: ['oneput__menu-item-body'],
 				children: [
 					{ textContent: 'Interactive complex menu item' },
 					{ tag: 'hr', style: { padding: '0' } },
@@ -223,18 +225,18 @@ export const menuItems1: FlexParams[] = [
 	},
 	{
 		type: 'hflex',
-		// classes might be better, this is just to illustrate how flexible we can be
-		// You dont' have to use hflex/vflex/fchild to create bespoke divider and section title; you could just define the html and css as required.
-		classes: ['myapp__divider'],
+		divider: true,
+		// subtype: 'menu-divider',
+		// classes: ['oneput__menu-divider'],
 		children: [
 			{ classes: ['oneput__spacer'] },
 			{
 				type: 'vflex',
-				classes: ['myapp__menu-item', 'myapp__divider-container'],
+				classes: ['oneput__menu-divider-body'],
 				children: [
 					{
 						textContent: 'Divider title',
-						classes: ['myapp__divider-title']
+						classes: ['oneput__menu-divider-title']
 					}
 				]
 			}
@@ -247,7 +249,7 @@ export const menuItems1: FlexParams[] = [
 		children: [
 			{ classes: ['oneput__icon'] },
 			{
-				classes: ['myapp__menu-item'],
+				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
 		]
@@ -259,7 +261,7 @@ export const menuItems1: FlexParams[] = [
 		children: [
 			{ classes: ['oneput__icon'] },
 			{
-				classes: ['myapp__menu-item'],
+				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
 		]
@@ -271,7 +273,7 @@ export const menuItems1: FlexParams[] = [
 		children: [
 			{ classes: ['oneput__icon'] },
 			{
-				classes: ['myapp__menu-item'],
+				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
 		]
@@ -279,7 +281,9 @@ export const menuItems1: FlexParams[] = [
 	{
 		tag: 'hr',
 		type: 'hflex',
-		classes: ['myapp__divider']
+		divider: true,
+		// subtype: 'menu-divider',
+		// classes: ['oneput__menu-divider']
 	}
 ];
 

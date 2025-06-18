@@ -3,6 +3,10 @@
 	"description": "Who needs forms?  Use oneput.",
 	"version": "0.0.1",
 	"license": "MIT",
+	"engines": {
+		"node": ">=24.0.0",
+		"npm": ">=10.8.2"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && pnpm run prepack",

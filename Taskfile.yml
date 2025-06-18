@@ -2,6 +2,11 @@
 
 version: '3'
 
+set:
+  - errexit
+  - nounset
+  - pipefail
+
 vars:
   BUILD_WC: .build/build-wc
   VITE_WC: .build/vite-wc
@@ -12,7 +17,16 @@ tasks:
     cmds:
       - task: dev
 
+  install:
+    cmds:
+      - . "$NVM_DIR/nvm.sh" && nvm use 24
+      - echo "Installing pnpm globally"
+      - npm install -g pnpm
+      - pnpm install
+
   dev:
+    deps:
+      - install
     cmds:
       - pnpm run dev
 

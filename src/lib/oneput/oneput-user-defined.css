@@ -84,13 +84,19 @@ point, the flesh you put on the bones may be its own thing with its own classes
 	font: 100 0.8em sans-serif;
 	color: rgb(0 0 0 / 0.7);
 }
+.dark-mode .myapp__menu-item-description {
+	color: rgb(255 255 255 / 0.7);
+}
 
 .myapp__kbd code {
 	display: flex;
 	gap: 6px;
 	border-radius: 2px;
 	padding: 4px;
-	background-color: rgb(0 0 0 / 0.1);
+	background-color: rgb(0 0 0 / 0.2);
+}
+.dark-mode .myapp__kbd kbd {
+	background-color: #555;
 }
 .myapp__kbd kbd {
 	border-radius: 2px;

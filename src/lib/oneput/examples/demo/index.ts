@@ -111,7 +111,7 @@ export const menuItems1: FlexParams[] = [
 	{
 		tag: 'hr',
 		type: 'hflex',
-		divider: true,
+		divider: true
 		// subtype: 'menu-divider'
 		// classes: ['oneput__menu-divider']
 	},
@@ -163,7 +163,7 @@ export const menuItems1: FlexParams[] = [
 				classes: ['oneput__menu-item-body'],
 				children: [
 					{ textContent: 'Complex menu item' },
-					{ tag: 'hr' },
+					{ tag: 'hr', classes: ['oneput__menu-divider'] },
 					{
 						classes: ['myapp__menu-item-description'],
 						textContent:
@@ -188,7 +188,7 @@ export const menuItems1: FlexParams[] = [
 				classes: ['oneput__menu-item-body'],
 				children: [
 					{ textContent: 'Interactive complex menu item' },
-					{ tag: 'hr', style: { padding: '0' } },
+					{ tag: 'hr', classes: ['oneput__menu-divider'], style: { padding: '0' } },
 					{
 						type: 'hflex',
 						style: { gap: '0.3rem' },
@@ -281,7 +281,7 @@ export const menuItems1: FlexParams[] = [
 	{
 		tag: 'hr',
 		type: 'hflex',
-		divider: true,
+		divider: true
 		// subtype: 'menu-divider',
 		// classes: ['oneput__menu-divider']
 	}

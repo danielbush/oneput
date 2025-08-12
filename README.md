@@ -65,7 +65,7 @@ The menu and input areas have additional structures.
   - .oneput__outer-area
     - comes "after" the input-area
 
-If the above is the skeleton, then the following are the ribs of the skeleton (ok this analogy isn't maybe holding up as well I would like...):
+If the above is the skeleton, then the following are the ribs of the skeleton ...
 
 - .oneput__hflex,
   - lets you define horizontal blocks of content that usually fit into the above areas

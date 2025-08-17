@@ -15,6 +15,12 @@ vars:
 
 tasks:
 
+  dev:
+    deps:
+      - install
+    cmds:
+      - pnpm run dev
+
   upgrade:
     desc: |
       Upgrade a sveltekit project to the latest version of sveltekit boilerplate.
@@ -24,17 +30,22 @@ tasks:
       task upgrade:sveltekit
       task upgrade:sveltekit TARGET=~/projects/sveltekit.new SOURCE=~/projects/oneput
 
+      Then...
+
+      cd TARGET
       # Inspect commits, run tests, make sure all code and configs have been
       # successfully injected back and integrated with boilerplate changes.
-      cd TARGET
+      git push origin upgrade-boilerplate
 
-      # Replicate via PR:
+      cd SOURCE
+      # you should still be on the upgrade-boilerplate branch
+      git pull origin upgrade-boilerplate
+      # PR etc
       git checkout main
       git merge upgrade-boilerplate --squash
+      # inspect for any code loss, etc
       git branch -d upgrade-boilerplate
-      git push ...
-
-      # Delete TARGET, go back to SOURCE and pull
+      git push origin :upgrade-boilerplate
       ```
     vars:
       # SOURCE should usually be the root of the current project
@@ -54,6 +65,7 @@ tasks:
       - git diff --exit-code
       # branch must be master or main
       - git branch --show-current | grep -E '^(master|main)$'
+      - test -e {{.TARGET}} && echo "{{.TARGET}} already exists - aborting" && exit 1
     cmds:
       - git checkout -b {{.BRANCH}}
       - echo "TARGET is {{.TARGET}}"
@@ -72,12 +84,6 @@ tasks:
       - echo "Installing pnpm globally"
       - npm install -g pnpm
       - pnpm install
-
-  dev:
-    deps:
-      - install
-    cmds:
-      - pnpm run dev
 
   # build
 
@@ -172,7 +178,7 @@ tasks:
     dir: "{{.TARGET}}"
     status:
       - test -d src
-      - test -d static
+      - test -d svelte.config.js
     cmds:
       - echo "Creating sveltekit in {{.TARGET}}..."
       - pnpx sv create --types ts --template library --install pnpm --no-add-ons .

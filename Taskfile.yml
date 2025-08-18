@@ -64,7 +64,8 @@ tasks:
       # successfully injected back and integrated with boilerplate changes.
       #
       # - package.json - merge boilerplate; keep later versions of deps
-      # - gitignore - may have customisations
+      # - .gitignore - may have customisations
+      # - .prettierignore - may have customisations
 
       git push origin upgrade-boilerplate
 

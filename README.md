@@ -15,6 +15,11 @@ There is a tasfile `Taskfile.yml` for various tasks.
 
 Tests
 
+- task check - types, linting + formatting
+- task test - cli unit tests (fast)
+- task test:browser - browser / component tests
+- task test:e2e
+
 ## Packaging
 
 To test packaging see task `test:package`

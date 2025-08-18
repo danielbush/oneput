@@ -8,6 +8,8 @@ There is a tasfile `Taskfile.yml` for various tasks.
 
 ## Development
 
+- Live demo
+  - src/routes/live/+page.svelte
 - Visual states
   - src/routes/visual/+page.svelte
 

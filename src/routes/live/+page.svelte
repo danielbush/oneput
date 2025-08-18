@@ -42,9 +42,8 @@
 	});
 </script>
 
-<main>
-	<h1>Oneput Visual States</h1>
-	<p>Demo visual states for Oneput component</p>
+<main class={[visualDebug && 'oneput__debug']}>
+	<h1>Oneput Demo</h1>
 	<div class="demo-controls">
 		<fieldset>
 			<button type="button" onclick={() => (visualDebug = !visualDebug)}>
@@ -67,55 +66,25 @@
 
 	<br />
 
-	<section class={['demo-grid', visualDebug && 'oneput__debug']}>
-		<section class="demo-example">
-			<h2>Everything showing</h2>
-			{#snippet demo1(menuOpen: boolean)}
-				<Oneput
-					{menuOpen}
-					menu={{
-						header: data.menuHeader1,
-						items: data.menuItems1,
-						footer: data.menuFooter1
-					}}
-					inner={data.inner1}
-					outer={data.outer1}
-					input={{
-						left: data.inputLeft1,
-						right: data.inputRight1,
-						outerLeft: data.inputOuterLeft1,
-						outerRight: data.inputOuterRight1
-					}}
-					placeholder="Placeholder..."
-					inputValue={''}
-					handleInputChange={() => {
-						console.log('handleInputChange');
-					}}
-				/>
-			{/snippet}
-			{@render demo1(false)}
-			<p>Menu open</p>
-			{@render demo1(true)}
-		</section>
-
-		<section class="demo-example">
-			<h2>Minimal</h2>
-			{#snippet demo1(menuOpen: boolean)}
-				<Oneput
-					{menuOpen}
-					menu={{
-						items: data.menuItems1
-					}}
-					placeholder="Placeholder..."
-					inputValue={''}
-					handleInputChange={() => {
-						console.log('handleInputChange');
-					}}
-				/>
-			{/snippet}
-			{@render demo1(false)}
-			<p>Menu open</p>
-			{@render demo1(true)}
-		</section>
-	</section>
+	<Oneput
+		menuOpen={true}
+		menu={{
+			header: data.menuHeader1,
+			items: data.menuItems1,
+			footer: data.menuFooter1
+		}}
+		inner={data.inner1}
+		outer={data.outer1}
+		input={{
+			left: data.inputLeft1,
+			right: data.inputRight1,
+			outerLeft: data.inputOuterLeft1,
+			outerRight: data.inputOuterRight1
+		}}
+		placeholder="Placeholder..."
+		inputValue={''}
+		handleInputChange={() => {
+			console.log('handleInputChange');
+		}}
+	/>
 </main>

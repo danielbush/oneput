@@ -130,10 +130,10 @@
 	--oneput-button-border-active: none;
 
 	/* Visual Debug */
-	--oneput-debug-hflex-outline: 1px solid rgb(0 200 0 / 0.5);
-	--oneput-debug-hflex-outline-nested: 1px dotted rgb(0 200 0 / 0.5);
+	--oneput-debug-hflex-outline: 1px solid rgb(0 200 0 / 0.2);
+	--oneput-debug-hflex-outline-nested: 1px dotted rgb(0 200 0 / 0.2);
 	--oneput-debug-hflex-outline-offset: -0.5px;
-	--oneput-debug-vflex-outline: 1px solid red;
+	--oneput-debug-vflex-outline: 2px solid rgb(0 0 200 / 0.2);
 	--oneput-debug-vflex-outline-nested: 1px dotted red;
 	--oneput-debug-vflex-outline-offset: -0.5px;
 	--oneput-debug-fchild-outline: solid orchid 1px;

@@ -31,7 +31,7 @@
 			outerRight: data.inputOuterRight1
 		}}
 		placeholder="Placeholder..."
-		inputValue={''}
+		inputValue=""
 		handleInputChange={() => {
 			console.log('handleInputChange');
 		}}

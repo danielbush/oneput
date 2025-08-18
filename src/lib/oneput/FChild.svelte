@@ -38,7 +38,9 @@
 		{#if props.textContent}
 			{props.textContent}
 		{:else if props.innerHTMLUnsafe}
+			<!-- eslint-disable svelte/no-at-html-tags -->
 			{@html props.innerHTMLUnsafe}
+			<!-- eslint-enable svelte/no-at-html-tags -->
 		{/if}
 	</svelte:element>
 {/if}

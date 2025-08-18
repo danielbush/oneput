@@ -1,11 +1,10 @@
 <!-- TODO: rename to Flex.svelte -->
 <script lang="ts">
 	import FChild from './FChild.svelte';
-	import { defaultVoidElements, type FChildParams, type FlexParams } from './lib.js';
+	import { type FChildParams, type FlexParams } from './lib.js';
 
 	type Props = { class: string } & FlexParams;
-	let { voidElements, class: topLevelClass, ...props }: Props = $props();
-	voidElements = voidElements || defaultVoidElements;
+	let { class: topLevelClass, ...props }: Props = $props();
 
 	function createStyle(style: Partial<CSSStyleDeclaration>) {
 		const browserOnly = globalThis.document;

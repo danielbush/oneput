@@ -4,27 +4,14 @@
 	import Oneput from '../../lib/oneput/Oneput.svelte';
 	import * as data from '../../lib/oneput/examples/demo/index.js';
 	import { demoState } from '$lib/demo-state.svelte.js';
+	import VisualDebugControls from '$lib/components/VisualDebugControls.svelte';
+	import ForceDarkModeControls from '$lib/components/ForceDarkMode.svelte';
 </script>
 
 <main class={[demoState.visualDebug && 'oneput__debug']}>
 	<h1>Oneput Demo</h1>
-	<div class="demo-controls">
-		<fieldset>
-			<button type="button" onclick={demoState.toggleVisualDebug}> Toggle visual debug </button>
-			<ul>
-				<li>Highlights hflex, vflex and fchild</li>
-				<li>
-					You can adjust the debug styling in oneput-defaults.css - look for the
-					<code>.oneput__debug</code> class.
-				</li>
-			</ul>
-		</fieldset>
-		<fieldset>
-			<button type="button" onclick={demoState.toggleForceDarkMode}>
-				Toggle force dark mode on page
-			</button>
-		</fieldset>
-	</div>
+	<VisualDebugControls />
+	<ForceDarkModeControls />
 
 	<br />
 

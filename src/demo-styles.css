@@ -28,12 +28,8 @@ section.demo-example {
     padding: 1rem;
 }
 
-.demo-controls {
-    margin: 1rem 0;
-    display: flex;
-    /* display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-    gap: 1rem; */
+fieldset {
+    border: none;
 
     button {
         border: solid 0.5px #999;

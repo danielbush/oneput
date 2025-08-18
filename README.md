@@ -9,7 +9,7 @@ There is a tasfile `Taskfile.yml` for various tasks.
 ## Development
 
 - Visual states
-  - src/routes/+page.svelte
+  - src/routes/visual/+page.svelte
 
 Tests
 

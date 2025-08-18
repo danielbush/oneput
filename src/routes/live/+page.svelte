@@ -4,8 +4,8 @@
 	import Oneput from '../../lib/oneput/Oneput.svelte';
 	import * as data from '../../lib/oneput/examples/demo/index.js';
 	import { demoState } from '$lib/demo-state.svelte.js';
-	import VisualDebugControls from '$lib/components/VisualDebugControls.svelte';
-	import ForceDarkModeControls from '$lib/components/ForceDarkMode.svelte';
+	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
+	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 </script>
 
 <main class={[demoState.visualDebug && 'oneput__debug']}>

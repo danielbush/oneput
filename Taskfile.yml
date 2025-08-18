@@ -14,7 +14,15 @@ vars:
   BUILD_PACKAGE: .build/sveltekit
 
 tasks:
-
+  format:
+    desc: run prettier
+    cmds:
+      - pnpm run format
+  check:
+    desc: linting, formatting, types
+    cmds:
+      - pnpm run check
+      - pnpm run lint
   dev:
     desc: Run dev server
     deps:
@@ -48,13 +56,16 @@ tasks:
       task upgrade:sveltekit
       task upgrade:sveltekit TARGET=~/projects/sveltekit.new SOURCE=~/projects/oneput
 
-      Then...
+      # Then...
 
       cd TARGET
+
       # Inspect commits, run tests, make sure all code and configs have been
       # successfully injected back and integrated with boilerplate changes.
       #
       # - package.json - merge boilerplate; keep later versions of deps
+      # - gitignore - may have customisations
+
       git push origin upgrade-boilerplate
 
       cd SOURCE
@@ -75,7 +86,7 @@ tasks:
       BRANCH: '{{.BRANCH | default "upgrade-boilerplate"}}'
     deps:
       - setup:nvm
-    dir: "{{.SOURCE}}"
+    dir: '{{.SOURCE}}'
     preconditions:
       # sanity check
       - test -f {{.SOURCE}}/svelte.config.js
@@ -92,11 +103,11 @@ tasks:
       - echo "TARGET is {{.TARGET}}"
       - task: create:sveltekit
         vars:
-          TARGET: "{{.TARGET}}"
+          TARGET: '{{.TARGET}}'
       - task: configure:sveltekit
         vars:
-          SOURCE: "{{.SOURCE}}"
-          TARGET: "{{.TARGET}}"
+          SOURCE: '{{.SOURCE}}'
+          TARGET: '{{.TARGET}}'
 
   install:
     deps:
@@ -196,7 +207,7 @@ tasks:
     requires:
       vars:
         - TARGET
-    dir: "{{.TARGET}}"
+    dir: '{{.TARGET}}'
     status:
       - test -d src
       - test -d svelte.config.js

@@ -1,4 +1,4 @@
-import * as lucide from "lucide";
+import * as lucide from 'lucide';
 
 export const demoState = $state({
 	visualDebug: false,
@@ -8,15 +8,15 @@ export const demoState = $state({
 	},
 	toggleForceDarkMode: () => {
 		demoState.forceDarkMode = !demoState.forceDarkMode;
-	},
+	}
 });
 
 export function setupDemoState() {
 	$effect(() => {
 		if (demoState.forceDarkMode) {
-			document.documentElement.classList.add("dark-mode");
+			document.documentElement.classList.add('dark-mode');
 		} else {
-			document.documentElement.classList.remove("dark-mode");
+			document.documentElement.classList.remove('dark-mode');
 		}
 	});
 
@@ -41,8 +41,8 @@ export function setupDemoState() {
 				Info: lucide.icons.Info,
 				Play: lucide.icons.Play,
 				Pause: lucide.icons.Pause,
-				Square: lucide.icons.Square,
-			},
+				Square: lucide.icons.Square
+			}
 		});
 	});
 

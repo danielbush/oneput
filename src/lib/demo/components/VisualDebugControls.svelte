@@ -4,9 +4,7 @@
 </script>
 
 <fieldset>
-	<button type="button" onclick={demoState.toggleVisualDebug}>
-		Toggle visual debug
-	</button>
+	<button type="button" onclick={demoState.toggleVisualDebug}> Toggle visual debug </button>
 	<ul>
 		<li>Highlights hflex, vflex and fchild</li>
 		<li>

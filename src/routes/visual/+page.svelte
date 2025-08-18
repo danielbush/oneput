@@ -4,6 +4,8 @@
 	import * as lucide from 'lucide';
 	import Oneput from '../../lib/oneput/Oneput.svelte';
 	import * as data from '../../lib/oneput/examples/demo/index.js';
+	import { demoState } from '$lib/demo-state.svelte.js';
+
 	$effect(() => {
 		lucide.createIcons({
 			icons: {
@@ -30,16 +32,6 @@
 		});
 	});
 
-	let visualDebug = $state(false);
-	let forceDarkMode = $state(false);
-
-	$effect(() => {
-		if (forceDarkMode) {
-			document.documentElement.classList.add('dark-mode');
-		} else {
-			document.documentElement.classList.remove('dark-mode');
-		}
-	});
 </script>
 
 <main>
@@ -47,7 +39,7 @@
 	<p>Demo visual states for Oneput component</p>
 	<div class="demo-controls">
 		<fieldset>
-			<button type="button" onclick={() => (visualDebug = !visualDebug)}>
+			<button type="button" onclick={demoState.toggleVisualDebug}>
 				Toggle visual debug
 			</button>
 			<ul>
@@ -59,7 +51,7 @@
 			</ul>
 		</fieldset>
 		<fieldset>
-			<button type="button" onclick={() => (forceDarkMode = !forceDarkMode)}>
+			<button type="button" onclick={demoState.toggleForceDarkMode}>
 				Toggle force dark mode on page
 			</button>
 		</fieldset>
@@ -67,7 +59,7 @@
 
 	<br />
 
-	<section class={['demo-grid', visualDebug && 'oneput__debug']}>
+	<section class={['demo-grid', demoState.visualDebug && 'oneput__debug']}>
 		<section class="demo-example">
 			<h2>Everything showing</h2>
 			{#snippet demo1(menuOpen: boolean)}

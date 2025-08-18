@@ -4,6 +4,8 @@
 	import * as lucide from 'lucide';
 	import Oneput from '../../lib/oneput/Oneput.svelte';
 	import * as data from '../../lib/oneput/examples/demo/index.js';
+	import { demoState } from '$lib/demo-state.svelte.js';
+
 	$effect(() => {
 		lucide.createIcons({
 			icons: {
@@ -30,25 +32,13 @@
 		});
 	});
 
-	let visualDebug = $state(false);
-	let forceDarkMode = $state(false);
-
-	$effect(() => {
-		if (forceDarkMode) {
-			document.documentElement.classList.add('dark-mode');
-		} else {
-			document.documentElement.classList.remove('dark-mode');
-		}
-	});
 </script>
 
-<main class={[visualDebug && 'oneput__debug']}>
+<main class={[demoState.visualDebug && 'oneput__debug']}>
 	<h1>Oneput Demo</h1>
 	<div class="demo-controls">
 		<fieldset>
-			<button type="button" onclick={() => (visualDebug = !visualDebug)}>
-				Toggle visual debug
-			</button>
+			<button type="button" onclick={demoState.toggleVisualDebug}> Toggle visual debug </button>
 			<ul>
 				<li>Highlights hflex, vflex and fchild</li>
 				<li>
@@ -58,7 +48,7 @@
 			</ul>
 		</fieldset>
 		<fieldset>
-			<button type="button" onclick={() => (forceDarkMode = !forceDarkMode)}>
+			<button type="button" onclick={demoState.toggleForceDarkMode}>
 				Toggle force dark mode on page
 			</button>
 		</fieldset>

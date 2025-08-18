@@ -35,6 +35,8 @@ tasks:
       cd TARGET
       # Inspect commits, run tests, make sure all code and configs have been
       # successfully injected back and integrated with boilerplate changes.
+      #
+      # - package.json - merge boilerplate; keep later versions of deps
       git push origin upgrade-boilerplate
 
       cd SOURCE
@@ -43,6 +45,7 @@ tasks:
       # PR etc
       git checkout main
       git merge upgrade-boilerplate --squash
+      pnpm i
       # inspect for any code loss, etc
       git branch -d upgrade-boilerplate
       git push origin :upgrade-boilerplate

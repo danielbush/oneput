@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '../../demo-styles.css';
+	import '../../../demo-styles.css';
 	import { demoState } from '$lib/demo-state.svelte.js';
 </script>
 

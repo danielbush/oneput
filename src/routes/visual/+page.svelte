@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../../demo-styles.css';
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';

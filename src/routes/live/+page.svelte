@@ -3,20 +3,37 @@
 	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
 	import * as data from '$lib/oneput/examples/demo/index.js';
-	import { demoState } from '$lib/demo-state.svelte.js';
+	import { demoState, setupDemoState } from '$lib/demo-state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
+	import { tinykeys } from 'tinykeys';
+
+	setupDemoState();
+
+	const oneputState = $state({
+		menuOpen: false
+	});
+
+	$effect(() => {
+		console.log('load tinykeys');
+		tinykeys(document.body, {
+			"$mod+k": () => {
+				oneputState.menuOpen = !oneputState.menuOpen;
+			}
+		});
+	});
 </script>
 
 <main class={[demoState.visualDebug && 'oneput__debug']}>
 	<h1>Oneput Demo</h1>
 	<VisualDebugControls />
 	<ForceDarkModeControls />
+	<p>Here we pretend we are an app that oneput is managing.</p>
 
 	<br />
 
 	<Oneput
-		menuOpen={true}
+		menuOpen={oneputState.menuOpen}
 		menu={{
 			header: data.menuHeader1,
 			items: data.menuItems1,

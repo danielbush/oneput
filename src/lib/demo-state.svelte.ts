@@ -21,6 +21,7 @@ export function setupDemoState() {
 	});
 
 	$effect(() => {
+		console.log('load lucide');
 		lucide.createIcons({
 			icons: {
 				ChevronUp: lucide.icons.ChevronUp,

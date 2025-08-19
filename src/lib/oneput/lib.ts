@@ -1,8 +1,7 @@
-// TODO: rename FlexParams
 export type FlexParams = {
 	tag?: string;
 	attr?: Record<string, string | boolean>;
-	id?: string;
+	id: string;
 	classes?: Array<string>;
 	style?: Partial<CSSStyleDeclaration>;
 	type: 'hflex' | 'vflex';
@@ -19,7 +18,7 @@ export type FlexParams = {
 };
 
 export type FChildParams = {
-	id?: string;
+	id: string;
 	tag?: string;
 	/**
 	 * Use boolean for boolean attributes, like `disabled`, `checked`, etc.
@@ -55,3 +54,10 @@ export const defaultVoidElements = new Set([
 	'track',
 	'wbr'
 ]);
+
+/**
+ * Generate a unique id.
+ */
+export function id(): string {
+	return crypto.randomUUID();
+}

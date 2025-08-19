@@ -1,4 +1,4 @@
-import { type FlexParams } from '../../lib.js';
+import { id, type FlexParams } from '../../lib.js';
 
 export const appState = {
 	/**
@@ -33,22 +33,26 @@ export const menuHeader1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
+			id: id(),
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
 			innerHTMLUnsafe: '<i data-lucide="chevron-left"></i>'
 		},
-		{ classes: ['myapp__menu-item-header'], textContent: 'Menu Header' },
+		{ id: id(), classes: ['myapp__menu-item-header'], textContent: 'Menu Header' },
 		{
+			id: id(),
 			type: 'hflex',
 			children: [
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'Options' },
 					classes: ['oneput__icon-button'],
 					innerHTMLUnsafe: '<i data-lucide="x"></i>'
 				},
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'Options' },
 					classes: ['oneput__icon-button'],
@@ -66,9 +70,10 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'], textContent: '📆' },
-			{ classes: ['oneput__menu-item-body'], textContent: 'Menu Item 1' },
+			{ id: id(), classes: ['oneput__icon'], textContent: '📆' },
+			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Menu Item 1' },
 			{
+				id: id(),
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 			}
@@ -79,16 +84,19 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'], textContent: '🍔' },
-			{ classes: ['oneput__menu-item-body'], textContent: 'Menu Item 2' },
+			{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
+			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Menu Item 2' },
 			{
+				id: id(),
 				type: 'hflex',
 				children: [
 					{
+						id: id(),
 						innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 						classes: ['myapp__kbd']
 					},
 					{
+						id: id(),
 						classes: ['oneput__icon'],
 						innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 					}
@@ -101,14 +109,16 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'] },
+			{ id: id(), classes: ['oneput__icon'] },
 			{
+				id: id(),
 				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
 		]
 	},
 	{
+		id: id(),
 		tag: 'hr',
 		type: 'hflex',
 		divider: true
@@ -121,28 +131,33 @@ export const menuItems1: FlexParams[] = [
 		tag: 'div',
 		children: [
 			{
+				id: id(),
 				tag: 'button',
 				attr: { type: 'button', title: 'Search' },
 				classes: ['oneput__icon-button'],
 				innerHTMLUnsafe: '<i data-lucide="search"></i>'
 			},
-			{ classes: ['oneput__menu-item-body'], textContent: 'Interactive menu item' },
+			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Interactive menu item' },
 			{
+				id: id(),
 				type: 'hflex',
 				children: [
 					{
+						id: id(),
 						tag: 'button',
 						attr: { type: 'button', title: 'Play' },
 						classes: ['oneput__icon-button'],
 						innerHTMLUnsafe: '<i data-lucide="play"></i>'
 					},
 					{
+						id: id(),
 						tag: 'button',
 						attr: { type: 'button', title: 'Pause' },
 						classes: ['oneput__icon-button'],
 						innerHTMLUnsafe: '<i data-lucide="pause"></i>'
 					},
 					{
+						id: id(),
 						tag: 'button',
 						attr: { type: 'button', title: 'Stop' },
 						classes: ['oneput__icon-button'],
@@ -157,14 +172,16 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'], textContent: '🍔' },
+			{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
 			{
+				id: id(),
 				type: 'vflex',
 				classes: ['oneput__menu-item-body'],
 				children: [
-					{ textContent: 'Complex menu item' },
-					{ tag: 'hr', classes: ['oneput__menu-divider'] },
+					{ id: id(), textContent: 'Complex menu item' },
+					{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'] },
 					{
+						id: id(),
 						classes: ['myapp__menu-item-description'],
 						textContent:
 							'This is some sort of description for this menu item.  This is some sort of description for this menu item.'
@@ -172,6 +189,7 @@ export const menuItems1: FlexParams[] = [
 				]
 			},
 			{
+				id: id(),
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 			}
@@ -182,34 +200,40 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'div',
 		children: [
-			{ classes: ['oneput__icon'], textContent: '🍔' },
+			{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
 			{
+				id: id(),
 				type: 'vflex',
 				classes: ['oneput__menu-item-body'],
 				children: [
-					{ textContent: 'Interactive complex menu item' },
-					{ tag: 'hr', classes: ['oneput__menu-divider'], style: { padding: '0' } },
+					{ id: id(), textContent: 'Interactive complex menu item' },
+					{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'], style: { padding: '0' } },
 					{
+						id: id(),
 						type: 'hflex',
 						style: { gap: '0.3rem' },
 						children: [
 							{
+								id: id(),
 								classes: ['myapp__menu-item-description'],
 								textContent:
 									'This is some sort of description for this menu item. This is some sort of description for this menu item.  This is some sort of description for this menu item.'
 							},
 							{
+								id: id(),
 								type: 'hflex',
 								classes: ['oneput__icon-button-group'],
 								style: { alignSelf: 'flex-start' },
 								children: [
 									{
+										id: id(),
 										tag: 'button',
 										attr: { type: 'button', title: 'database' },
 										classes: ['oneput__icon-button'],
 										innerHTMLUnsafe: '<i data-lucide="info"></i>'
 									},
 									{
+										id: id(),
 										tag: 'button',
 										attr: { type: 'button', title: 'share' },
 										classes: ['oneput__icon-button'],
@@ -224,17 +248,20 @@ export const menuItems1: FlexParams[] = [
 		]
 	},
 	{
+		id: id(),
 		type: 'hflex',
 		divider: true,
 		// subtype: 'menu-divider',
 		// classes: ['oneput__menu-divider'],
 		children: [
-			{ classes: ['oneput__spacer'] },
+			{ id: id(), classes: ['oneput__spacer'] },
 			{
+				id: id(),
 				type: 'vflex',
 				classes: ['oneput__menu-divider-body'],
 				children: [
 					{
+						id: id(),
 						textContent: 'Divider title',
 						classes: ['oneput__menu-divider-title']
 					}
@@ -247,8 +274,9 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'] },
+			{ id: id(), classes: ['oneput__icon'] },
 			{
+				id: id(),
 				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
@@ -259,8 +287,9 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'] },
+			{ id: id(), classes: ['oneput__icon'] },
 			{
+				id: id(),
 				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
@@ -271,14 +300,16 @@ export const menuItems1: FlexParams[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ classes: ['oneput__icon'] },
+			{ id: id(), classes: ['oneput__icon'] },
 			{
+				id: id(),
 				classes: ['oneput__menu-item-body'],
 				textContent: 'Plain Item 1...'
 			}
 		]
 	},
 	{
+		id: id(),
 		tag: 'hr',
 		type: 'hflex',
 		divider: true
@@ -294,16 +325,19 @@ export const menuFooter1: FlexParams = {
 	children: [
 		// Here we use an hflex as a child:
 		{
+			id: id(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group'],
 			children: [
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'database' },
 					classes: ['oneput__icon-button'],
 					innerHTMLUnsafe: '<i data-lucide="database"></i>'
 				},
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'share' },
 					classes: ['oneput__icon-button'],
@@ -312,10 +346,12 @@ export const menuFooter1: FlexParams = {
 			]
 		},
 		{
+			id: id(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group-right'],
 			children: [
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'zap' },
 					classes: ['oneput__icon-toggle-button'],
@@ -340,6 +376,7 @@ export const inner1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
+			id: id(),
 			type: 'hflex',
 			children: [
 				// Here we're using an hflex to create a breadcrumb-like widget.  It may
@@ -347,31 +384,37 @@ export const inner1: FlexParams = {
 				// hflex/vflex/fchild system.  It's up to you.  The hflex/vflex/fchild
 				// system is for laying out the skeleton of oneput.
 				{
+					id: id(),
 					type: 'hflex',
 					classes: ['oneput__icon-button-group'],
 					style: { gap: '0.1rem' }, // or a class
 					children: [
 						{
+							id: id(),
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
 							classes: ['oneput__button'],
 							innerHTMLUnsafe: 'div'
 						},
 						{
+							id: id(),
 							classes: ['oneput__icon'],
 							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 						},
 						{
+							id: id(),
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
 							classes: ['oneput__icon-button'],
 							innerHTMLUnsafe: '<i data-lucide="ellipsis"></i>'
 						},
 						{
+							id: id(),
 							classes: ['oneput__icon'],
 							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 						},
 						{
+							id: id(),
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
 							classes: ['oneput__button'],
@@ -382,18 +425,22 @@ export const inner1: FlexParams = {
 			]
 		},
 		{
+			id: id(),
 			type: 'hflex',
 			children: []
 		},
 		{
+			id: id(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group-right'],
 			children: [
 				{
+					id: id(),
 					style: { whiteSpace: 'pre' },
 					textContent: '-- NORMAL --'
 				},
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'commit' },
 					classes: ['oneput__icon-button'],
@@ -410,16 +457,19 @@ export const outer1: FlexParams = {
 	children: [
 		// Here we use an hflex as a child:
 		{
+			id: id(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group'],
 			children: [
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'database' },
 					classes: ['oneput__icon-button'],
 					innerHTMLUnsafe: '<i data-lucide="database"></i>'
 				},
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'share' },
 					classes: ['oneput__icon-button'],
@@ -428,10 +478,12 @@ export const outer1: FlexParams = {
 			]
 		},
 		{
+			id: id(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group-right'],
 			children: [
 				{
+					id: id(),
 					tag: 'button',
 					attr: { type: 'button', title: 'zap' },
 					classes: ['oneput__icon-toggle-button'],
@@ -456,6 +508,7 @@ export const inputLeft1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
+			id: id(),
 			tag: 'button',
 			attr: { type: 'button', title: 'Search' },
 			classes: ['oneput__icon-button'],
@@ -469,6 +522,7 @@ export const inputOuterLeft1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
+			id: id(),
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
@@ -482,6 +536,7 @@ export const inputOuterRight1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
+			id: id(),
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
@@ -495,12 +550,14 @@ export const inputRight1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
+			id: id(),
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
 			innerHTMLUnsafe: '<i data-lucide="chevron-up"></i>'
 		},
 		{
+			id: id(),
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],

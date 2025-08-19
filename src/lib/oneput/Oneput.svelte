@@ -1,18 +1,6 @@
 <script lang="ts">
 	import Flex from './Flex.svelte';
 	import { type FlexParams } from './lib.js';
-	/**
-	 * Guarantee a unique key for rendering menu items.
-	 *
-	 * Ideally you should set a menu id.
-	 * @param menuItem
-	 */
-	function getMenuItemKey(menuItem: FlexParams) {
-		if (menuItem.id) {
-			return menuItem.id;
-		}
-		return `oneput__menu-item-${Math.random().toString(36).slice(2)}-${Date.now()}`;
-	}
 
 	let {
 		inputElement,
@@ -46,7 +34,7 @@
 				<Flex class="oneput__menu-header" {...props.menu.header} />
 			{/if}
 			<div class="oneput__menu-body">
-				{#each props.menu?.items || [] as item (getMenuItemKey(item))}
+				{#each props.menu?.items || [] as item (item.id)}
 					{#if item.divider}
 						<Flex class="oneput__menu-divider" {...item} />
 					{:else}

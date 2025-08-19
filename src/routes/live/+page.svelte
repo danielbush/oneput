@@ -1,31 +1,12 @@
 <script lang="ts">
-	import '../../demo-styles.css';
-	import '$lib/oneput/oneput-defaults.css';
-	import '$lib/oneput/oneput-user-defined.css';
-	import Oneput from '$lib/oneput/Oneput.svelte';
-	import * as data from '$lib/oneput/examples/demo/index.js';
-	import { demoState, setupDemoState } from '$lib/demo-state.svelte.js';
+	import { setupDemoState } from '$lib/demo-state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
-	import { tinykeys } from 'tinykeys';
 
 	setupDemoState();
-
-	const oneputState = $state({
-		menuOpen: false
-	});
-
-	$effect(() => {
-		console.log('load tinykeys');
-		tinykeys(document.body, {
-			'$mod+k': () => {
-				oneputState.menuOpen = !oneputState.menuOpen;
-			}
-		});
-	});
 </script>
 
-<main class={[demoState.visualDebug && 'oneput__debug']}>
+<main>
 	<h1>Oneput Demo</h1>
 	<VisualDebugControls />
 	<ForceDarkModeControls />
@@ -33,25 +14,17 @@
 
 	<br />
 
-	<Oneput
-		menuOpen={oneputState.menuOpen}
-		menu={{
-			header: data.menuHeader1,
-			items: data.menuItems1,
-			footer: data.menuFooter1
-		}}
-		inner={data.inner1}
-		outer={data.outer1}
-		input={{
-			left: data.inputLeft1,
-			right: data.inputRight1,
-			outerLeft: data.inputOuterLeft1,
-			outerRight: data.inputOuterRight1
-		}}
-		placeholder="Placeholder..."
-		inputValue=""
-		handleInputChange={() => {
-			console.log('handleInputChange');
-		}}
-	/>
+	<!-- Additional content can go here -->
+	<p>
+		The command bar is now anchored to the bottom of the screen and will stay visible while this
+		content scrolls.
+	</p>
+
+	<!-- Add some demo content to show scrolling behavior -->
+	{#each Array(20), i (i)}
+		<p>
+			Demo content line {i + 1} - This content will scroll while the command bar stays anchored at the
+			bottom.
+		</p>
+	{/each}
 </main>

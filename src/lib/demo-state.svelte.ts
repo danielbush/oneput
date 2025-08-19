@@ -21,6 +21,14 @@ export function setupDemoState() {
 	});
 
 	$effect(() => {
+		if (demoState.visualDebug) {
+			document.documentElement.classList.add('oneput__debug');
+		} else {
+			document.documentElement.classList.remove('oneput__debug');
+		}
+	});
+
+	$effect(() => {
 		console.log('load lucide');
 		lucide.createIcons({
 			icons: {

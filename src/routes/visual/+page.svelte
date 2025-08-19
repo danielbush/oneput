@@ -1,10 +1,7 @@
 <script lang="ts">
-	import '../../demo-styles.css';
-	import '$lib/oneput/oneput-defaults.css';
-	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
 	import * as data from '$lib/oneput/examples/demo/index.js';
-	import { demoState, setupDemoState } from '$lib/demo-state.svelte.js';
+	import { setupDemoState } from '$lib/demo-state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 
@@ -19,7 +16,7 @@
 
 	<br />
 
-	<section class={['demo-grid', demoState.visualDebug && 'oneput__debug']}>
+	<section class="demo-grid">
 		<section class="demo-example">
 			<h2>Everything showing</h2>
 			{#snippet demo1(menuOpen: boolean)}

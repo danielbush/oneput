@@ -38,6 +38,8 @@ export type FChildParams = {
 	voidElements?: Set<string | undefined>;
 };
 
+export type OneputController = Record<string, (...args: unknown[]) => void>;
+
 export const defaultVoidElements = new Set([
 	'area',
 	'base',

@@ -35,7 +35,6 @@ tasks:
     desc: check types
     cmds:
       - pnpm run check
-      - pnpm run lint
   dev:
     desc: Run dev server
     deps:

@@ -3,8 +3,9 @@
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
-	import * as data from '$lib/demo/state.js';
-	import { refreshIcons, setupDemoState } from '$lib/demo/state.svelte.js';
+	import * as data from '$lib/demo/visual/state.js';
+	import * as ui from '$lib/demo/ui.js';
+	import { refreshIcons, setupDemoState } from '$lib/demo/visual/state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
@@ -31,17 +32,17 @@
 				<Oneput
 					{menuOpen}
 					menu={{
-						header: data.menuHeader1,
-						items: data.menuItems1,
-						footer: data.menuFooter1
+						header: ui.menuHeader1,
+						items: ui.menuItems1,
+						footer: ui.menuFooter1(data.appState.zap)
 					}}
-					inner={data.inner1}
-					outer={data.outer1}
+					inner={ui.inner1}
+					outer={ui.outer1(data.appState.zap)}
 					input={{
-						left: data.inputLeft1,
-						right: data.inputRight1,
-						outerLeft: data.inputOuterLeft1,
-						outerRight: data.inputOuterRight1
+						left: ui.inputLeft1,
+						right: ui.inputRight1,
+						outerLeft: ui.inputOuterLeft1,
+						outerRight: ui.inputOuterRight1
 					}}
 					placeholder="Placeholder..."
 					inputValue=""
@@ -61,7 +62,7 @@
 				<Oneput
 					{menuOpen}
 					menu={{
-						items: data.menuItems1
+						items: ui.menuItems1
 					}}
 					placeholder="Placeholder..."
 					inputValue=""

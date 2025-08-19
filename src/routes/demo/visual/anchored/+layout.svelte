@@ -1,20 +1,13 @@
 <script lang="ts">
-	// Pretend the code here could be something outside of svelte.
-	// We create a layout and we add OneputWrapper eg as a web component.
-	// We then get the controller from OneputWrapper and bootstrap our
-	// oneput-based world.
-
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
-	import OneputWrapper from '$lib/oneput/OneputWrapper.svelte';
-	import type { OneputController } from '$lib/oneput/lib.js';
+	import Oneput from '$lib/oneput/Oneput.svelte';
+	import * as ui from '$lib/demo/ui.js';
+	import * as data from '$lib/demo/visual/state.js';
+	import { setupDemoState } from '$lib/demo/visual/state.svelte.js';
 
-	let controller: OneputController | null = null;
-	const setController = (c: OneputController) => {
-		controller = c;
-		controller.doSomething();
-	};
+	const oneputState = setupDemoState();
 
 	let { children } = $props();
 </script>
@@ -25,7 +18,27 @@
 	</div>
 
 	<div class="command-bar">
-		<OneputWrapper controllerRef={setController} />
+		<Oneput
+			menuOpen={oneputState.menuOpen}
+			menu={{
+				header: ui.menuHeader1,
+				items: ui.menuItems1,
+				footer: ui.menuFooter1(data.appState.zap)
+			}}
+			inner={ui.inner1}
+			outer={ui.outer1(data.appState.zap)}
+			input={{
+				left: ui.inputLeft1,
+				right: ui.inputRight1,
+				outerLeft: ui.inputOuterLeft1,
+				outerRight: ui.inputOuterRight1
+			}}
+			placeholder="Placeholder..."
+			inputValue=""
+			handleInputChange={() => {
+				console.log('handleInputChange');
+			}}
+		/>
 	</div>
 </div>
 

@@ -10,10 +10,12 @@ Oneput was created using sveltekit "library" option which means `src/routes` is 
 
 ## Development
 
-- Live demo
-  - src/routes/demo/live/+page.svelte
-- Visual states
-  - src/routes/demo/visual/+page.svelte
+- /demo/visual
+  - Visual states
+  - src/routes/demo/visual/
+  - src/lib/demo/visual/
+- Visual demo using oneput anchored to bottom of screen
+  - src/routes/demo/visual/anchored/+page.svelte
 
 Tests
 

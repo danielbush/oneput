@@ -1,4 +1,6 @@
 import * as lucide from 'lucide';
+import { tinykeys } from 'tinykeys';
+import { onMount } from 'svelte';
 
 export const demoState = $state({
 	visualDebug: false,
@@ -42,6 +44,40 @@ export function refreshIcons() {
 }
 
 export function setupDemoState() {
+	const oneputState = $state({
+		menuOpen: false
+	});
+
+	onMount(() => {
+		refreshIcons();
+	});
+
+	$effect(() => {
+		if (oneputState.menuOpen) {
+			refreshIcons();
+		}
+	});
+
+	// Global keybindings
+
+	$effect(() => {
+		tinykeys(document.body, {
+			'$mod+k': () => {
+				oneputState.menuOpen = !oneputState.menuOpen;
+			}
+		});
+	});
+
+	// Oneput keybindings
+
+	$effect(() => {
+		tinykeys(document.body, {
+			'control+n': () => {
+				//
+			}
+		});
+	});
+
 	$effect(() => {
 		if (demoState.forceDarkMode) {
 			document.documentElement.classList.add('dark-mode');
@@ -58,5 +94,5 @@ export function setupDemoState() {
 		}
 	});
 
-	return demoState;
+	return oneputState;
 }

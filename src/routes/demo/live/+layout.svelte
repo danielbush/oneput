@@ -1,39 +1,14 @@
 <script lang="ts">
-	import { tinykeys } from 'tinykeys';
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
 	import * as data from '$lib/demo/state.js';
-	import { refreshIcons, setupDemoState } from '$lib/demo/state.svelte.js';
-	import { onMount } from 'svelte';
+	import { setupDemoState } from '$lib/demo/state.svelte.js';
 
-	setupDemoState();
+	const oneputState = setupDemoState();
 
 	let { children } = $props();
-
-	const oneputState = $state({
-		menuOpen: false
-	});
-
-	onMount(() => {
-		refreshIcons();
-	});
-
-	$effect(() => {
-		if (oneputState.menuOpen) {
-			refreshIcons();
-		}
-	});
-
-	$effect(() => {
-		console.log('load tinykeys');
-		tinykeys(document.body, {
-			'$mod+k': () => {
-				oneputState.menuOpen = !oneputState.menuOpen;
-			}
-		});
-	});
 </script>
 
 <div class="app-container">

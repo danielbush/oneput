@@ -4,7 +4,7 @@
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
-	import * as data from '$lib/oneput/examples/demo/index.js';
+	import * as data from '$lib/demo/index.js';
 	import { refreshIcons, setupDemoState } from '$lib/demo/demo-state.svelte.js';
 	import { onMount } from 'svelte';
 

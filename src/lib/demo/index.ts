@@ -1,4 +1,4 @@
-import { id, type FlexParams } from '../../lib.js';
+import { id, type FlexParams } from '$lib/oneput/lib.js';
 
 export const appState = {
 	/**

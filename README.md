@@ -9,9 +9,9 @@ There is a tasfile `Taskfile.yml` for various tasks.
 ## Development
 
 - Live demo
-  - src/routes/live/+page.svelte
+  - src/routes/demo/live/+page.svelte
 - Visual states
-  - src/routes/visual/+page.svelte
+  - src/routes/demo/visual/+page.svelte
 
 Tests
 

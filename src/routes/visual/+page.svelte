@@ -1,8 +1,8 @@
 <script lang="ts">
-	import '../../lib/oneput/oneput-defaults.css';
-	import '../../lib/oneput/oneput-user-defined.css';
-	import Oneput from '../../lib/oneput/Oneput.svelte';
-	import * as data from '../../lib/oneput/examples/demo/index.js';
+	import '$lib/oneput/oneput-defaults.css';
+	import '$lib/oneput/oneput-user-defined.css';
+	import Oneput from '$lib/oneput/Oneput.svelte';
+	import * as data from '$lib/oneput/examples/demo/index.js';
 	import { demoState } from '$lib/demo-state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';

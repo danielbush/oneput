@@ -14,10 +14,23 @@ vars:
   BUILD_PACKAGE: .build/sveltekit
 
 tasks:
+  fix:
+    desc: prettier eslin
+    cmds:
+      - task: format
+      - task: eslint:fix
   format:
     desc: run prettier
     cmds:
       - pnpm run format
+  eslint:fix:
+    desc: run eslint
+    cmds:
+      - ./node_modules/.bin/eslint . --fix
+  eslint:
+    desc: run eslint
+    cmds:
+      - ./node_modules/.bin/eslint .
   check:
     desc: check types, then linting, formatting,
     cmds:

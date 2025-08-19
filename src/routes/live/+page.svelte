@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { setupDemoState } from '$lib/demo-state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
-
-	setupDemoState();
 </script>
 
 <main>

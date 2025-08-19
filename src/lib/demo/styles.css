@@ -28,7 +28,7 @@ section.demo-example {
 	padding: 1rem;
 }
 
-fieldset {
+fieldset.demo {
 	border: none;
 
 	button {

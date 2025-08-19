@@ -2,7 +2,7 @@
 	import { demoState } from '$lib/demo/state.svelte.js';
 </script>
 
-<fieldset>
+<fieldset class="demo">
 	<button type="button" onclick={demoState.toggleVisualDebug}> Toggle visual debug </button>
 	<ul>
 		<li>Highlights hflex, vflex and fchild</li>

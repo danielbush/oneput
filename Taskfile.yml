@@ -19,7 +19,7 @@ tasks:
     cmds:
       - pnpm run format
   check:
-    desc: linting, formatting, types
+    desc: check types, then linting, formatting,
     cmds:
       - pnpm run check
       - pnpm run lint

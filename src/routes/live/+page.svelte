@@ -18,7 +18,7 @@
 	$effect(() => {
 		console.log('load tinykeys');
 		tinykeys(document.body, {
-			"$mod+k": () => {
+			'$mod+k': () => {
 				oneputState.menuOpen = !oneputState.menuOpen;
 			}
 		});

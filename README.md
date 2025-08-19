@@ -6,6 +6,8 @@ This is a sveltekit app which isused to publish the Oneput component using <http
 
 There is a tasfile `Taskfile.yml` for various tasks.
 
+Oneput was created using sveltekit "library" option which means `src/routes` is for demo purposes and `src/lib` is the main thing we export from this codebase.
+
 ## Development
 
 - Live demo
@@ -96,5 +98,3 @@ Oneput's structure (it's skeleton so to speak) is flex-based. You could argue th
 Oneput's content and structure (the skeleton) is controlled programmatically.
 
 Key parts of Oneput's styling can be controlled using css custom properties. All parts of oneput are delineated with class names that you can also target.
-
-Oneput was created using sveltekit and the "library" option which means `src/routes` is for demo purposes and `src/lib` is the main thing we export from this codebase.

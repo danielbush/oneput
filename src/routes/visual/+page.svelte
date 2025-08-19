@@ -4,7 +4,7 @@
 	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
 	import * as data from '$lib/demo/index.js';
-	import { refreshIcons, setupDemoState } from '$lib/demo/demo-state.svelte.js';
+	import { refreshIcons, setupDemoState } from '$lib/demo/state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';

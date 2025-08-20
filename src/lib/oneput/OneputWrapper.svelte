@@ -26,11 +26,13 @@
 				currentProps.input = options.input;
 			}
 			handleGlobalKeys(options.globalKeys);
+			if (options.menuOpen !== undefined) {
+				currentProps.menuOpen = options.menuOpen;
+			}
 		},
-		openMenu() {
-			console.log('openMenu', !currentProps.menuOpen);
-			currentProps.menuOpen = !currentProps.menuOpen;
-		}
+		get menuOpen() {
+			return currentProps.menuOpen ?? false;
+		},
 	};
 
 	const { controllerRef }: { controllerRef: (c: typeof controller) => void } = $props();

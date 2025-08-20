@@ -21,17 +21,18 @@ export type OneputProps = {
 
 export type Controller = {
 	update(options: OneputControllerParams): void;
-	openMenu: () => void;
+	get menuOpen(): boolean;
 };
 
 export type OneputControllerParams = {
-	globalKeys: {
+	globalKeys?: {
 		keys?: {
 			[key: string]: (() => void) | undefined;
 		};
 	};
 	input?: OneputProps['input'];
 	menu?: OneputProps['menu'];
+	menuOpen?: boolean;
 };
 
 export type FlexParams = {

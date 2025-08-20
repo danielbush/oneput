@@ -15,7 +15,8 @@
 			globalKeys: {
 				keys: {
 					'$mod+k': () => {
-						c.openMenu();
+						console.log('menuOpen', !c.menuOpen);
+						c.update({ menuOpen: !c.menuOpen });
 					}
 				}
 			},

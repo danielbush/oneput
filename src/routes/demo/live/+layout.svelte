@@ -10,6 +10,8 @@
 	import OneputWrapper from '$lib/oneput/OneputWrapper.svelte';
 	import type { Controller } from '$lib/oneput/lib.js';
 
+	// Our app starts in this callback.  We get the controller and we can set
+	// keys and configure oneput.
 	const setController = (c: Controller) => {
 		c.update({
 			globalKeys: {
@@ -20,6 +22,7 @@
 					}
 				}
 			},
+			// Setting input will show the input part of Oneput.
 			input: {}
 		});
 	};

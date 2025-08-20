@@ -25,6 +25,7 @@ export type Controller = {
 
 export type OneputControllerParams = {
 	input?: OneputProps['input'];
+	menu?: OneputProps['menu'];
 };
 
 export type FlexParams = {

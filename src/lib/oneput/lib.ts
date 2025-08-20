@@ -1,3 +1,32 @@
+export type OneputProps = {
+	menuOpen?: boolean;
+	menu?: {
+		header?: FlexParams;
+		items: FlexParams[];
+		footer?: FlexParams;
+	};
+	inner?: FlexParams;
+	outer?: FlexParams;
+	inputElement?: HTMLInputElement;
+	inputValue: string;
+	placeholder: string;
+	handleInputChange: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
+	input?: {
+		left?: FlexParams;
+		right?: FlexParams;
+		outerLeft?: FlexParams;
+		outerRight?: FlexParams;
+	};
+};
+
+export type Controller = {
+	update(options: OneputControllerParams): void;
+};
+
+export type OneputControllerParams = {
+	input?: OneputProps['input'];
+};
+
 export type FlexParams = {
 	tag?: string;
 	attr?: Record<string, string | boolean>;
@@ -37,8 +66,6 @@ export type FChildParams = {
 	/** List of HTML void elements. */
 	voidElements?: Set<string | undefined>;
 };
-
-export type OneputController = Record<string, (...args: unknown[]) => void>;
 
 export const defaultVoidElements = new Set([
 	'area',

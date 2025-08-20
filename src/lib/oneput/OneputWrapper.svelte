@@ -1,15 +1,23 @@
 <script lang="ts">
 	import Oneput from './Oneput.svelte';
-	import type { OneputController } from './lib.js';
+	import type { OneputControllerParams, OneputProps } from './lib.js';
 
-	const controller: OneputController = {
-		/** a test action provided by oneput */
-		doSomething: () => {
-			console.log('did something');
+	const currentProps = $state<OneputProps>({
+		inputValue: '',
+		placeholder: 'Type here...',
+		handleInputChange: () => {},
+		menu: { items: [] }
+	});
+
+	export const controller = {
+		update(options: OneputControllerParams) {
+			if (options.input) {
+				currentProps.input = options.input;
+			}
 		}
 	};
 
-	let { controllerRef }: { controllerRef: (controller: OneputController) => void } = $props();
+	const { controllerRef }: { controllerRef: (c: typeof controller) => void } = $props();
 
 	$effect(() => {
 		if (controllerRef) {
@@ -19,5 +27,5 @@
 </script>
 
 <div>
-	<Oneput inputValue="" menu={{ items: [] }} placeholder="wrapper" handleInputChange={() => {}} />
+	<Oneput {...currentProps} />
 </div>

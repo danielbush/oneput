@@ -1,30 +1,7 @@
 <script lang="ts">
 	import Flex from './Flex.svelte';
-	import { type FlexParams } from './lib.js';
-
-	let {
-		inputElement,
-		...props
-	}: {
-		menuOpen?: boolean;
-		menu?: {
-			header?: FlexParams;
-			items: FlexParams[];
-			footer?: FlexParams;
-		};
-		inner?: FlexParams;
-		outer?: FlexParams;
-		inputElement?: HTMLInputElement;
-		inputValue: string;
-		placeholder: string;
-		handleInputChange: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
-		input?: {
-			left?: FlexParams;
-			right?: FlexParams;
-			outerLeft?: FlexParams;
-			outerRight?: FlexParams;
-		};
-	} = $props();
+	import { type OneputProps } from './lib.js';
+	let { inputElement, ...props }: OneputProps = $props();
 </script>
 
 <div class="oneput__container">

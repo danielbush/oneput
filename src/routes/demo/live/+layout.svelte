@@ -8,12 +8,10 @@
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import OneputWrapper from '$lib/oneput/OneputWrapper.svelte';
-	import type { OneputController } from '$lib/oneput/lib.js';
+	import type { Controller } from '$lib/oneput/lib.js';
 
-	let controller: OneputController | null = null;
-	const setController = (c: OneputController) => {
-		controller = c;
-		controller.doSomething();
+	const setController = (c: Controller) => {
+		c.update({ input: {} });
 	};
 
 	let { children } = $props();

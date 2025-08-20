@@ -35,6 +35,9 @@ export class Controller {
 		if (options.menuOpen !== undefined) {
 			this.currentProps.menuOpen = options.menuOpen;
 		}
+		if (options.menu) {
+			this.currentProps.menu = options.menu;
+		}
 	}
 
 	get menuOpen() {

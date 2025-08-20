@@ -1,5 +1,16 @@
 import { tinykeys } from 'tinykeys';
-import type { OneputControllerParams, OneputProps } from './lib.js';
+import type { OneputProps } from './lib.js';
+
+export type OneputControllerParams = {
+	globalKeys?: {
+		keys?: {
+			[key: string]: (() => void) | undefined;
+		};
+	};
+	input?: OneputProps['input'];
+	menu?: OneputProps['menu'];
+	menuOpen?: boolean;
+};
 
 export class Controller {
 	/**

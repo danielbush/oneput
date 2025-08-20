@@ -8,7 +8,7 @@
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import OneputWrapper from '$lib/oneput/OneputWrapper.svelte';
-	import type { Controller } from '$lib/oneput/lib.js';
+	import type { Controller } from '$lib/oneput/controller.js';
 
 	// Our app starts in this callback.  We get the controller and we can set
 	// keys and configure oneput.

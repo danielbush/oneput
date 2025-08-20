@@ -90,7 +90,8 @@
 	}
 
 	.command-bar {
-		position: sticky;
+		width: 100%;
+		position: absolute;
 		bottom: 0;
 		z-index: 1000;
 		padding-bottom: 8px;

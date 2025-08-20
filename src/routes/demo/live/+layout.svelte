@@ -11,7 +11,16 @@
 	import type { Controller } from '$lib/oneput/lib.js';
 
 	const setController = (c: Controller) => {
-		c.update({ input: {} });
+		c.update({
+			globalKeys: {
+				keys: {
+					'$mod+k': () => {
+						c.openMenu();
+					}
+				}
+			},
+			input: {}
+		});
 	};
 
 	let { children } = $props();

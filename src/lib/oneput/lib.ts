@@ -21,9 +21,15 @@ export type OneputProps = {
 
 export type Controller = {
 	update(options: OneputControllerParams): void;
+	openMenu: () => void;
 };
 
 export type OneputControllerParams = {
+	globalKeys: {
+		keys?: {
+			[key: string]: (() => void) | undefined;
+		};
+	};
 	input?: OneputProps['input'];
 	menu?: OneputProps['menu'];
 };

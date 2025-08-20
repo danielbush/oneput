@@ -52,37 +52,39 @@
 			<Flex class="oneput__inner" {...props.inner} />
 		</section>
 	{/if}
-	<section class="oneput__input-area">
-		<!-- Render as an hflex to get default hflex styling. -->
-		<div class="oneput__hflex oneput__input-outer">
-			{#if props.input?.outerLeft}
-				<Flex class="oneput__input-outer-left" {...props.input.outerLeft} />
-			{/if}
-			<label for="oneput__input" class="oneput__hflex oneput__input-inner">
-				{#if props.input?.left}
-					<Flex class="oneput__input-left" {...props.input.left} />
+	{#if props.input}
+		<section class="oneput__input-area">
+			<!-- Render as an hflex to get default hflex styling. -->
+			<div class="oneput__hflex oneput__input-outer">
+				{#if props.input?.outerLeft}
+					<Flex class="oneput__input-outer-left" {...props.input.outerLeft} />
 				{/if}
-				<input
-					id="oneput__input"
-					bind:this={inputElement}
-					value={props.inputValue}
-					oninput={props.handleInputChange}
-					class="oneput__input"
-					type="text"
-					placeholder={props.placeholder}
-					autocorrect="off"
-					autocomplete="off"
-					spellcheck="false"
-				/>
-				{#if props.input?.right}
-					<Flex class="oneput__input-right" {...props.input.right} />
+				<label for="oneput__input" class="oneput__hflex oneput__input-inner">
+					{#if props.input?.left}
+						<Flex class="oneput__input-left" {...props.input.left} />
+					{/if}
+					<input
+						id="oneput__input"
+						bind:this={inputElement}
+						value={props.inputValue}
+						oninput={props.handleInputChange}
+						class="oneput__input"
+						type="text"
+						placeholder={props.placeholder}
+						autocorrect="off"
+						autocomplete="off"
+						spellcheck="false"
+					/>
+					{#if props.input?.right}
+						<Flex class="oneput__input-right" {...props.input.right} />
+					{/if}
+				</label>
+				{#if props.input?.outerRight}
+					<Flex class="oneput__input-outer-right" {...props.input.outerRight} />
 				{/if}
-			</label>
-			{#if props.input?.outerRight}
-				<Flex class="oneput__input-outer-right" {...props.input.outerRight} />
-			{/if}
-		</div>
-	</section>
+			</div>
+		</section>
+	{/if}
 	{#if props.outer}
 		<section class="oneput__outer-area">
 			<Flex class="oneput__outer" {...props.outer} />

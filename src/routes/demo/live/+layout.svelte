@@ -7,7 +7,7 @@
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
-	import OneputWrapper from '$lib/oneput/OneputWrapper.svelte';
+	import OneputController from '$lib/oneput/OneputController.svelte';
 	import type { Controller } from '$lib/oneput/controller.js';
 	import { id } from '$lib/oneput/lib.js';
 
@@ -61,7 +61,7 @@
 	</div>
 
 	<div class="command-bar">
-		<OneputWrapper controllerRef={setController} />
+		<OneputController controllerRef={setController} />
 	</div>
 </div>
 

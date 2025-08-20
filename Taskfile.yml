@@ -15,10 +15,11 @@ vars:
 
 tasks:
   fix:
-    desc: format + eslint fixes
+    desc: format + eslint (fix) + check types (no fix)
     cmds:
       - task: format
       - task: eslint:fix
+      - task: check
   format:
     desc: format files
     cmds:

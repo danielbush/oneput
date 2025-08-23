@@ -4,7 +4,7 @@ import type { OneputProps } from './lib.js';
 export type OneputControllerParams = {
 	globalKeys?: {
 		keys?: {
-			[key: string]: (() => void) | undefined;
+			[key: string]: () => void;
 		};
 	};
 	input?: OneputProps['input'];
@@ -16,14 +16,16 @@ export class Controller {
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
 	 */
-	constructor(private currentProps: OneputProps) {}
+	constructor(
+		private currentProps: OneputProps,
+		private unsubscribeGlobalKeys: () => void = () => {}
+	) {}
 
 	private handleGlobalKeys(keys?: OneputControllerParams['globalKeys']) {
 		if (keys?.keys) {
-			for (const [key, thunk] of Object.entries(keys.keys)) {
-				console.log('setting up key', key, thunk);
-				tinykeys(document.body, { [key]: thunk });
-			}
+			this.unsubscribeGlobalKeys();
+			const unsubscribe = tinykeys(window, keys.keys);
+			this.unsubscribeGlobalKeys = unsubscribe;
 		}
 	}
 

@@ -13,7 +13,7 @@
 
 	const controller = new Controller(currentProps);
 
-	const { controllerRef }: { controllerRef: (c: typeof controller) => void } = $props();
+	const { controllerRef }: { controllerRef: (c: Controller) => void } = $props();
 
 	$effect(() => {
 		if (controllerRef) {

@@ -41,8 +41,17 @@
 			globalKeys: {
 				keys: {
 					'$mod+k': () => {
-						console.log('menuOpen', !c.menuOpen);
-						c.update({ menuOpen: !c.menuOpen });
+						c.update({ menuOpen: true });
+					}
+				}
+			},
+			localKeys: {
+				keys: {
+					'$mod+k': () => {
+						console.log('move up');
+					},
+					'$mod+j': () => {
+						console.log('move down');
 					}
 				}
 			},

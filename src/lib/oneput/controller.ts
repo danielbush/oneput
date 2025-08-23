@@ -10,6 +10,11 @@ export type OneputControllerParams = {
 	input?: OneputProps['input'];
 	menu?: OneputProps['menu'];
 	menuOpen?: boolean;
+	localKeys?: {
+		keys?: {
+			[key: string]: () => void;
+		};
+	};
 };
 
 export class Controller {
@@ -18,14 +23,17 @@ export class Controller {
 	 */
 	constructor(
 		private currentProps: OneputProps,
-		private unsubscribeGlobalKeys: () => void = () => {}
+		private unsubscribeGlobalKeys: () => void = () => {},
+		private unsubscribeLocalKeys: () => void = () => {}
 	) {}
 
 	private handleGlobalKeys(keys?: OneputControllerParams['globalKeys']) {
 		if (keys?.keys) {
 			this.unsubscribeGlobalKeys();
 			const adjustedBindings = Object.fromEntries(
-				Object.entries(keys.keys).map(([key, thunk]) => [key, () => {
+				Object.entries(keys.keys).map(([key, thunk]) => [
+					key,
+					() => {
 						if (!this.currentProps.menuOpen) {
 							thunk();
 						}
@@ -37,11 +45,30 @@ export class Controller {
 		}
 	}
 
+	private handleLocalKeys(keys?: OneputControllerParams['localKeys']) {
+		if (keys?.keys) {
+			this.unsubscribeLocalKeys();
+			const adjustedBindings = Object.fromEntries(
+				Object.entries(keys.keys).map(([key, thunk]) => [
+					key,
+					() => {
+						if (this.currentProps.menuOpen) {
+							thunk();
+						}
+					}
+				])
+			);
+			const unsubscribe = tinykeys(document.body, adjustedBindings);
+			this.unsubscribeLocalKeys = unsubscribe;
+		}
+	}
+
 	update(options: OneputControllerParams) {
 		if (options.input) {
 			this.currentProps.input = options.input;
 		}
 		this.handleGlobalKeys(options.globalKeys);
+		this.handleLocalKeys(options.localKeys);
 		if (options.menuOpen !== undefined) {
 			this.currentProps.menuOpen = options.menuOpen;
 		}

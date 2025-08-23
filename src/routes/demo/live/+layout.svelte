@@ -62,6 +62,12 @@
 			},
 			localKeys: {
 				keys: {
+					'Escape': () => {
+						c.update({ menuOpen: false });
+					},
+					'Control+[': () => {
+						c.update({ menuOpen: false });
+					},
 					'$mod+k': () => {
 						console.log('move up');
 					},

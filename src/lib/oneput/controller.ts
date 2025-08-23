@@ -24,7 +24,15 @@ export class Controller {
 	private handleGlobalKeys(keys?: OneputControllerParams['globalKeys']) {
 		if (keys?.keys) {
 			this.unsubscribeGlobalKeys();
-			const unsubscribe = tinykeys(window, keys.keys);
+			const adjustedBindings = Object.fromEntries(
+				Object.entries(keys.keys).map(([key, thunk]) => [key, () => {
+						if (!this.currentProps.menuOpen) {
+							thunk();
+						}
+					}
+				])
+			);
+			const unsubscribe = tinykeys(window, adjustedBindings);
 			this.unsubscribeGlobalKeys = unsubscribe;
 		}
 	}

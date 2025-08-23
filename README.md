@@ -16,6 +16,7 @@ Oneput was created using sveltekit "library" option which means `src/routes` is 
   - Visual demo using oneput anchored to bottom of screen
 - /demo/live
   - Uses fully functioning oneput to demo various functionality.
+  - `src/routes/demo/live/+layout.svelte` shows how oneput can be used
 
 Tests
 

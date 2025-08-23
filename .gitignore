@@ -29,3 +29,5 @@ vite.config.ts.timestamp-*
 !.build/gitignore
 !.build/files/
 !.build/files/**
+
+.vscode/settings.json

@@ -10,6 +10,13 @@ Oneput was created using sveltekit "library" option which means `src/routes` is 
 
 ## Development
 
+When adding a new behaviour to Oneput...
+
+- (1) create a visual for it in /demo/visual state
+- (2) then demo behaviour in /demo/live.
+
+Here are current demo routes:
+
 - /demo/visual
   - Visual states
 - /demo/visual/anchored

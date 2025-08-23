@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Oneput from './Oneput.svelte';
 	import type { OneputProps } from './lib.js';
-	import { Controller } from './controller.js';
+	import { Controller } from './Controller.js';
 
 	const currentProps = $state<OneputProps>({
 		inputValue: '',

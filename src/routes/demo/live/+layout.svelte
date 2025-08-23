@@ -8,7 +8,7 @@
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import OneputController from '$lib/oneput/OneputController.svelte';
-	import type { Controller } from '$lib/oneput/controller.js';
+	import type { Controller } from '$lib/oneput/Controller.js';
 	import { id as randomId, type FlexParams } from '$lib/oneput/lib.js';
 
 	const piIcon =

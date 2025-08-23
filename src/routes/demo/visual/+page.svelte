@@ -64,6 +64,7 @@
 					menu={{
 						items: ui.menuItems1
 					}}
+					input={{}}
 					placeholder="Placeholder..."
 					inputValue=""
 					handleInputChange={() => {

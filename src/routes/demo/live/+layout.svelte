@@ -83,10 +83,10 @@
 						}
 					}),
 					menuItemWithIcon({
-						id: 'some-action-1',
-						text: 'Some action 1...',
+						id: 'close-menu',
+						text: 'Close menu',
 						action: () => {
-							console.log('some action 1');
+							c.update({ menuOpen: false });
 						}
 					}),
 					menuItemWithIcon({

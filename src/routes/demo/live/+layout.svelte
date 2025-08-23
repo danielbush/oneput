@@ -62,7 +62,7 @@
 			},
 			localKeys: {
 				keys: {
-					'Escape': () => {
+					Escape: () => {
 						c.update({ menuOpen: false });
 					},
 					'Control+[': () => {

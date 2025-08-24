@@ -298,3 +298,14 @@ tasks:
       - cd {{.TARGET}} && pnpm i
       - "cd {{.TARGET}} && git add . && git commit -m 'chore: applied configs and code from {{.SOURCE}} -- review these more carefully'"
       - echo "Done {{.SOURCE}} -> {{.TARGET}} - check the commits, run tests and then squash merge"
+
+  hooks:install:
+    desc: Install git hooks from scripts/ directory
+    cmds:
+      - mkdir -p .git/hooks
+      - cp scripts/pre-commit .git/hooks/pre-commit
+      - chmod +x .git/hooks/pre-commit
+      - echo "✅ Git hooks installed successfully!"
+      - echo ""
+      - echo "Current hooks:"
+      - ls -la .git/hooks/* 2>/dev/null | grep -v sample || echo "No hooks found"

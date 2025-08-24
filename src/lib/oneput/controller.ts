@@ -106,9 +106,6 @@ export class Controller {
 		if (options.localKeys?.keys) {
 			this.handleLocalKeys(options.localKeys.keys);
 		}
-		if (options.menuOpen !== undefined) {
-			this.currentProps.menuOpen = options.menuOpen;
-		}
 		if (options.menu) {
 			this.currentProps.menu = options.menu;
 		}

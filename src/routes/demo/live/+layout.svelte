@@ -98,7 +98,7 @@
 						id: 'close-menu',
 						text: 'Close menu',
 						action: () => {
-							c.update({ menuOpen: false });
+							c.closeMenu();
 						}
 					}),
 					menuItemWithIcon({

@@ -1,4 +1,3 @@
-<!-- TODO: rename to Flex.svelte -->
 <script lang="ts">
 	import FChild from './FChild.svelte';
 	import { type FChildParams, type FlexParams } from './lib.js';

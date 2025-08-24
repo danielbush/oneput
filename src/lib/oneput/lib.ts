@@ -1,4 +1,5 @@
 export type OneputProps = {
+	menuItemFocus?: number;
 	menuOpen?: boolean;
 	menu?: {
 		header?: FlexParams;
@@ -23,7 +24,7 @@ export type FlexParams = {
 	tag?: string;
 	attr?: Record<string, string | boolean | ((event: Event) => void)>;
 	id: string;
-	classes?: Array<string>;
+	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;
 	type: 'hflex' | 'vflex';
 	/**

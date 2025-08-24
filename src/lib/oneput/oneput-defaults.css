@@ -222,7 +222,8 @@
 button.oneput__menu-item {
 	cursor: pointer;
 }
-button.oneput__menu-item:hover {
+button.oneput__menu-item--focused {
+	/* hover state is handled by the pointer */
 	background: var(--oneput-menu-item-background-hover);
 }
 button.oneput__menu-item:active {

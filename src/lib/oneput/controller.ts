@@ -2,6 +2,7 @@ import { tinykeys } from 'tinykeys';
 import type { OneputProps } from './lib.js';
 
 export type OneputControllerParams = {
+	menuItemFocus?: number;
 	globalKeys?: {
 		keys?: {
 			[key: string]: () => void;
@@ -27,13 +28,38 @@ export class Controller {
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {}
 
+	get menuOpen() {
+		return this.currentProps.menuOpen ?? false;
+	}
+
+	get menuItemFocus() {
+		return this.currentProps.menuItemFocus ?? 0;
+	}
+
+	get menuItemsCount() {
+		return this.currentProps.menu?.items?.length ?? 1;
+	}
+
+	focusNextMenuItem() {
+		this.currentProps.menuItemFocus =
+			(this.menuItemFocus + 1 + this.menuItemsCount) % this.menuItemsCount;
+	}
+
+	focusPreviousMenuItem() {
+		this.currentProps.menuItemFocus =
+			(this.menuItemFocus - 1 + this.menuItemsCount) % this.menuItemsCount;
+	}
+
+	/**
+	 * Only run globals when menu is closed.
+	 */
 	private handleGlobalKeys(keys: { [key: string]: () => void }) {
 		this.unsubscribeGlobalKeys();
 		const adjustedBindings = Object.fromEntries(
 			Object.entries(keys).map(([key, thunk]) => [
 				key,
 				() => {
-					if (!this.currentProps.menuOpen) {
+					if (!this.menuOpen) {
 						thunk();
 					}
 				}
@@ -43,13 +69,16 @@ export class Controller {
 		this.unsubscribeGlobalKeys = unsubscribe;
 	}
 
+	/**
+	 * Only run locals when menu is open.
+	 */
 	private handleLocalKeys(keys: { [key: string]: () => void }) {
 		this.unsubscribeLocalKeys();
 		const adjustedBindings = Object.fromEntries(
 			Object.entries(keys).map(([key, thunk]) => [
 				key,
 				() => {
-					if (this.currentProps.menuOpen) {
+					if (this.menuOpen) {
 						thunk();
 					}
 				}
@@ -75,9 +104,5 @@ export class Controller {
 		if (options.menu) {
 			this.currentProps.menu = options.menu;
 		}
-	}
-
-	get menuOpen() {
-		return this.currentProps.menuOpen ?? false;
 	}
 }

@@ -8,7 +8,7 @@
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
 	import OneputController from '$lib/oneput/OneputController.svelte';
-	import type { Controller } from '$lib/oneput/Controller.js';
+	import type { Controller } from '$lib/oneput/controller.js';
 	import { id as randomId, type FlexParams } from '$lib/oneput/lib.js';
 
 	const piIcon =
@@ -25,7 +25,13 @@
 		text: string;
 		action?: (event: Event) => void;
 	}) => {
-		const attr: FlexParams['attr'] = {};
+		const attr: FlexParams['attr'] = {
+			// Demo hover handling.  Oneput injects a pointer event to handle
+			// menu item focus in addition to this.
+			onpointerenter: () => {
+				console.log('client onpointerenter', id);
+			}
+		};
 		if (action) {
 			attr.onpointerdown = action;
 		}
@@ -69,10 +75,10 @@
 						c.update({ menuOpen: false });
 					},
 					'$mod+k': () => {
-						console.log('move up');
+						c.focusPreviousMenuItem();
 					},
 					'$mod+j': () => {
-						console.log('move down');
+						c.focusNextMenuItem();
 					}
 				}
 			},

@@ -20,24 +20,34 @@ export type OneputProps = {
 	};
 };
 
+/**
+ * Represents a either a horizontal or vertical flex container which is used to
+ * represent top-level menu items or dividers but can also be used to structure
+ * and layout content both within these top-level items and other parts of
+ * oneput outside of the menu area.
+ */
 export type FlexParams = {
 	tag?: string;
-	attr?: Record<string, string | boolean | ((event: Event) => void)>;
+	attr?: Record<string, string | boolean | (() => void)>;
 	id: string;
 	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;
 	type: 'hflex' | 'vflex';
 	/**
-	 * By default, top-level hflex items are rendered to hold content and use
-	 * oneput__menu-item.  If true, then the item acts as a divider of other
-	 * menu items instead.  Only applies to top level within the oneput menu
-	 * body.
+	 * Instructs Oneput renderer to render this item as a divider rather than a
+	 * menu item.  Only applies to top level items.
 	 */
 	divider?: boolean;
-	// subtype?: string;
 	children?: Array<FlexParams | FChildParams>;
-	/** List of HTML void elements. */
+	/**
+	 * Instructs Oneput rendered to override default list of HTML void elements.
+	 */
 	voidElements?: Set<string | undefined>;
+	/**
+	 * Instructs Oneput renderer to add a pointerdown handler to run this action
+	 * on top-level menu items.
+	 */
+	action?: () => void;
 };
 
 export type FChildParams = {

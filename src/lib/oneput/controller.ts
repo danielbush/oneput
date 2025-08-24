@@ -40,6 +40,10 @@ export class Controller {
 		return this.currentProps.menu?.items?.length ?? 1;
 	}
 
+	get currentMenuItem() {
+		return this.currentProps.menu?.items?.[this.menuItemFocus];
+	}
+
 	openMenu() {
 		this.currentProps.menuOpen = true;
 	}
@@ -56,6 +60,14 @@ export class Controller {
 	focusPreviousMenuItem() {
 		this.currentProps.menuItemFocus =
 			(this.menuItemFocus - 1 + this.menuItemsCount) % this.menuItemsCount;
+	}
+
+	doAction() {
+		if (this.currentMenuItem) {
+			if (this.currentMenuItem.action) {
+				this.currentMenuItem.action();
+			}
+		}
 	}
 
 	/**

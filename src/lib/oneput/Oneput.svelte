@@ -2,18 +2,31 @@
 	import Flex from './Flex.svelte';
 	import { type FlexParams, type OneputProps } from './lib.js';
 	let { inputElement, menuItemFocus = $bindable(0), ...props }: OneputProps = $props();
-	function rewriteAttr(index: number, attr: FlexParams['attr']): FlexParams['attr'] {
-		return {
+	function rewriteAttr(
+		index: number,
+		attr: FlexParams['attr'],
+		action?: FlexParams['action']
+	): FlexParams['attr'] {
+		const newAttr: FlexParams['attr'] = {
 			...attr,
-			onpointerenter: (event: Event) => {
+			onpointerenter: () => {
 				// Inject menu item focus handling...
 				menuItemFocus = index;
 				// ...then run any client onpointerenter handlers.
 				if (typeof attr?.onpointerenter === 'function') {
-					attr.onpointerenter(event);
+					attr.onpointerenter();
 				}
 			}
 		};
+		if (action) {
+			newAttr.onpointerdown = () => {
+				action();
+				if (typeof attr?.onpointerdown === 'function') {
+					attr.onpointerdown();
+				}
+			};
+		}
+		return newAttr;
 	}
 </script>
 
@@ -32,7 +45,7 @@
 							class="oneput__menu-item"
 							classes={[index === menuItemFocus && 'oneput__menu-item--focused']}
 							{...item}
-							attr={rewriteAttr(index, item.attr)}
+							attr={rewriteAttr(index, item.attr, item.action)}
 						/>
 					{/if}
 				{/each}

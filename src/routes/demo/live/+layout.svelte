@@ -23,18 +23,20 @@
 		id: string;
 		icon?: string;
 		text: string;
-		action?: (event: Event) => void;
+		action?: () => void;
 	}) => {
 		const attr: FlexParams['attr'] = {
 			// Demo hover handling.  Oneput injects a pointer event to handle
 			// menu item focus in addition to this.
 			onpointerenter: () => {
 				console.log('client onpointerenter', id);
+			},
+			// Similarly here, oneput will both run `action` with pointerdown
+			// and run this additional event handler here:
+			onpointerdown: () => {
+				console.log('client onpointerdown', id);
 			}
 		};
-		if (action) {
-			attr.onpointerdown = action;
-		}
 		return {
 			id,
 			type: 'hflex',
@@ -51,7 +53,8 @@
 					textContent: text
 				}
 			],
-			attr
+			attr,
+			action
 		} satisfies FlexParams;
 	};
 
@@ -68,6 +71,9 @@
 			},
 			localKeys: {
 				keys: {
+					Enter: () => {
+						c.doAction();
+					},
 					Escape: () => {
 						c.closeMenu();
 					},

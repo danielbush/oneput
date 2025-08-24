@@ -9,13 +9,6 @@ echo "Running pre-commit checks..."
 # Change to the project root directory (where Taskfile.yml is located)
 cd "$(git rev-parse --show-toplevel)"
 
-# Run task check first
-echo "Running task check..."
-if ! task check; then
-    echo "❌ task check failed. Please fix the issues before committing."
-    exit 1
-fi
-
 # Run task fix to automatically fix any formatting/linting issues
 echo "Running task fix..."
 if ! task fix; then

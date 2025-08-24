@@ -62,17 +62,17 @@
 			globalKeys: {
 				keys: {
 					'$mod+k': () => {
-						c.update({ menuOpen: true });
+						c.openMenu();
 					}
 				}
 			},
 			localKeys: {
 				keys: {
 					Escape: () => {
-						c.update({ menuOpen: false });
+						c.closeMenu();
 					},
 					'Control+[': () => {
-						c.update({ menuOpen: false });
+						c.closeMenu();
 					},
 					'$mod+k': () => {
 						c.focusPreviousMenuItem();

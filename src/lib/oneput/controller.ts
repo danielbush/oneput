@@ -40,6 +40,14 @@ export class Controller {
 		return this.currentProps.menu?.items?.length ?? 1;
 	}
 
+	openMenu() {
+		this.currentProps.menuOpen = true;
+	}
+
+	closeMenu() {
+		this.currentProps.menuOpen = false;
+	}
+
 	focusNextMenuItem() {
 		this.currentProps.menuItemFocus =
 			(this.menuItemFocus + 1 + this.menuItemsCount) % this.menuItemsCount;

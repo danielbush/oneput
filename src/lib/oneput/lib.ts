@@ -28,7 +28,7 @@ export type OneputProps = {
  */
 export type FlexParams = {
 	tag?: string;
-	attr?: Record<string, string | boolean | (() => void)>;
+	attr?: Record<string, string | boolean | ((event: Event) => void)>;
 	id: string;
 	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;

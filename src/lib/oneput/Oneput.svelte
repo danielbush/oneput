@@ -9,20 +9,20 @@
 	): FlexParams['attr'] {
 		const newAttr: FlexParams['attr'] = {
 			...attr,
-			onpointerenter: () => {
+			onpointerenter: (event: Event) => {
 				// Inject menu item focus handling...
 				menuItemFocus = index;
 				// ...then run any client onpointerenter handlers.
 				if (typeof attr?.onpointerenter === 'function') {
-					attr.onpointerenter();
+					attr.onpointerenter(event);
 				}
 			}
 		};
 		if (action) {
-			newAttr.onpointerdown = () => {
+			newAttr.onpointerdown = (event: Event) => {
 				action();
 				if (typeof attr?.onpointerdown === 'function') {
-					attr.onpointerdown();
+					attr.onpointerdown(event);
 				}
 			};
 		}

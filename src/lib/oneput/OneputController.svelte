@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Oneput from './Oneput.svelte';
-	import type { OneputProps } from './lib.js';
+	import type { OneputControllerProps } from './lib.js';
 	import { Controller } from './controller.js';
 
-	const currentProps = $state<OneputProps>({
+	const currentProps = $state<OneputControllerProps>({
 		menuItemFocus: 0,
 		inputValue: '',
 		placeholder: 'Type here...',
@@ -22,5 +22,5 @@
 </script>
 
 <div>
-	<Oneput {...currentProps} bind:menuItemFocus={currentProps.menuItemFocus} />
+	<Oneput {...currentProps} {controller} bind:menuItemFocus={currentProps.menuItemFocus} />
 </div>

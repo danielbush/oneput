@@ -5,7 +5,7 @@
 	type Props = FChildParams;
 	let node: HTMLElement | null = $state(null);
 	let { voidElements, ...props }: Props = $props();
-	voidElements = voidElements || defaultVoidElements;
+	let voidElementsSet = $derived(voidElements || defaultVoidElements);
 
 	onMount(() => {
 		if (props.style) {
@@ -17,7 +17,7 @@
 	});
 </script>
 
-{#if voidElements.has(props.tag)}
+{#if voidElementsSet.has(props.tag)}
 	<svelte:element
 		this={props.tag}
 		id={props.id}

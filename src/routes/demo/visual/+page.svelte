@@ -9,6 +9,7 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
+	import { NullController } from '$lib/oneput/controller.js';
 
 	setupDemoState();
 
@@ -30,6 +31,7 @@
 			<h2>Everything showing</h2>
 			{#snippet demo1(menuOpen: boolean)}
 				<Oneput
+					controller={new NullController()}
 					{menuOpen}
 					menu={{
 						header: ui.menuHeader1,
@@ -60,6 +62,7 @@
 			<h2>Minimal</h2>
 			{#snippet demo1(menuOpen: boolean)}
 				<Oneput
+					controller={new NullController()}
 					{menuOpen}
 					menu={{
 						items: ui.menuItems1

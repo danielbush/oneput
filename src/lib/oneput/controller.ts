@@ -1,29 +1,35 @@
 import { tinykeys } from 'tinykeys';
-import type { OneputProps } from './lib.js';
+import type { OneputControllerProps, OneputProps } from './lib.js';
+
+export type KeyBinding = {
+	action: (c: Controller) => void;
+	description: string;
+	/**
+	 * Bindings in tinykeys format eg "Control+D" .
+	 * Each item in the array is a complete binding.
+	 */
+	bindings: string[];
+};
+
+export type KeyBindingMap = {
+	[actionId: string]: KeyBinding;
+};
 
 export type OneputControllerParams = {
 	menuItemFocus?: number;
-	globalKeys?: {
-		keys?: {
-			[key: string]: () => void;
-		};
-	};
+	globalKeys?: KeyBindingMap;
 	input?: OneputProps['input'];
 	menu?: OneputProps['menu'];
 	menuOpen?: boolean;
-	localKeys?: {
-		keys?: {
-			[key: string]: () => void;
-		};
-	};
+	localKeys?: KeyBindingMap;
 };
 
 export class Controller {
 	/**
-	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
+	 * @param currentProps Should be reactive eg $state<OneputControllerProps>({...})
 	 */
 	constructor(
-		private currentProps: OneputProps,
+		private currentProps: OneputControllerProps,
 		private unsubscribeGlobalKeys: () => void = () => {},
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {}
@@ -65,7 +71,7 @@ export class Controller {
 	doAction() {
 		if (this.currentMenuItem) {
 			if (this.currentMenuItem.action) {
-				this.currentMenuItem.action();
+				this.currentMenuItem.action(this);
 			}
 		}
 	}
@@ -73,17 +79,20 @@ export class Controller {
 	/**
 	 * Only run globals when menu is closed.
 	 */
-	private handleGlobalKeys(keys: { [key: string]: () => void }) {
+	private handleGlobalKeys(keys: KeyBindingMap) {
 		this.unsubscribeGlobalKeys();
-		const adjustedBindings = Object.fromEntries(
-			Object.entries(keys).map(([key, thunk]) => [
-				key,
-				() => {
-					if (!this.menuOpen) {
-						thunk();
-					}
-				}
-			])
+		const adjustedBindings = Object.entries(keys).reduce<{ [key: string]: () => void }>(
+			(acc, [, { action, bindings }]) => {
+				bindings.forEach((binding) => {
+					acc[binding] = () => {
+						if (!this.menuOpen) {
+							action(this);
+						}
+					};
+				});
+				return acc;
+			},
+			{}
 		);
 		const unsubscribe = tinykeys(window, adjustedBindings);
 		this.unsubscribeGlobalKeys = unsubscribe;
@@ -92,17 +101,20 @@ export class Controller {
 	/**
 	 * Only run locals when menu is open.
 	 */
-	private handleLocalKeys(keys: { [key: string]: () => void }) {
+	private handleLocalKeys(keys: KeyBindingMap) {
 		this.unsubscribeLocalKeys();
-		const adjustedBindings = Object.fromEntries(
-			Object.entries(keys).map(([key, thunk]) => [
-				key,
-				() => {
-					if (this.menuOpen) {
-						thunk();
-					}
-				}
-			])
+		const adjustedBindings = Object.entries(keys).reduce<{ [key: string]: () => void }>(
+			(acc, [, { action, bindings }]) => {
+				bindings.forEach((binding) => {
+					acc[binding] = () => {
+						if (this.menuOpen) {
+							action(this);
+						}
+					};
+				});
+				return acc;
+			},
+			{}
 		);
 		const unsubscribe = tinykeys(document.body, adjustedBindings);
 		this.unsubscribeLocalKeys = unsubscribe;
@@ -112,14 +124,32 @@ export class Controller {
 		if (options.input) {
 			this.currentProps.input = options.input;
 		}
-		if (options.globalKeys?.keys) {
-			this.handleGlobalKeys(options.globalKeys.keys);
+		if (options.globalKeys) {
+			this.handleGlobalKeys(options.globalKeys);
 		}
-		if (options.localKeys?.keys) {
-			this.handleLocalKeys(options.localKeys.keys);
+		if (options.localKeys) {
+			this.handleLocalKeys(options.localKeys);
 		}
 		if (options.menu) {
 			this.currentProps.menu = options.menu;
+			this.currentProps.menuItemFocus = 0;
 		}
+	}
+}
+
+/**
+ * For demoing visual state, possibly also tests.
+ */
+export class NullController extends Controller {
+	constructor() {
+		super({
+			menuOpen: false,
+			menuItemFocus: 0,
+			menu: { items: [] },
+			input: {},
+			placeholder: 'Type here...',
+			inputValue: '',
+			handleInputChange: () => {}
+		});
 	}
 }

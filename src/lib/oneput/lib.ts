@@ -1,4 +1,7 @@
+import type { Controller } from './controller.js';
+
 export type OneputProps = {
+	controller: Controller;
 	menuItemFocus?: number;
 	menuOpen?: boolean;
 	menu?: {
@@ -20,6 +23,8 @@ export type OneputProps = {
 	};
 };
 
+export type OneputControllerProps = Omit<OneputProps, 'controller'>;
+
 /**
  * Represents a either a horizontal or vertical flex container which is used to
  * represent top-level menu items or dividers but can also be used to structure
@@ -38,7 +43,7 @@ export type FlexParams = {
 	 * Instructs Oneput rendered to override default list of HTML void elements.
 	 */
 	voidElements?: Set<string | undefined>;
-	action?: () => void;
+	action?: (c: Controller) => void;
 };
 
 export type MenuItem = FlexParams & {
@@ -46,7 +51,7 @@ export type MenuItem = FlexParams & {
 	 * Instructs Oneput renderer to add a pointerdown handler to run this action
 	 * on top-level menu items.
 	 */
-	action?: () => void;
+	action?: (c: Controller) => void;
 };
 
 export type MenuItemDivider = FlexParams & {

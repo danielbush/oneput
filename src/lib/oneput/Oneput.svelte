@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Flex from './Flex.svelte';
-	import { type FlexParams, type OneputProps } from './lib.js';
-	let { inputElement, menuItemFocus = $bindable(0), ...props }: OneputProps = $props();
+	import { type MenuItem, type MenuItemAny, type OneputProps } from './lib.js';
+	let { inputElement, menuItemFocus = $bindable(0), controller, ...props }: OneputProps = $props();
 	function rewriteAttr(
 		index: number,
-		attr: FlexParams['attr'],
-		action?: FlexParams['action']
-	): FlexParams['attr'] {
-		const newAttr: FlexParams['attr'] = {
+		attr: MenuItemAny['attr'],
+		action?: MenuItem['action']
+	): MenuItemAny['attr'] {
+		const newAttr: MenuItemAny['attr'] = {
 			...attr,
 			onpointerenter: (event: Event) => {
 				// Inject menu item focus handling...
@@ -20,7 +20,8 @@
 		};
 		if (action) {
 			newAttr.onpointerdown = (event: Event) => {
-				action();
+				// Run the MenuItem['action'].
+				action(controller);
 				if (typeof attr?.onpointerdown === 'function') {
 					attr.onpointerdown(event);
 				}

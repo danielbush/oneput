@@ -79,6 +79,9 @@
 	"pnpm": {
 		"onlyBuiltDependencies": [
 			"esbuild"
-		]
+		],
+		"patchedDependencies": {
+			"tinykeys": "patches/tinykeys.patch"
+		}
 	}
 }

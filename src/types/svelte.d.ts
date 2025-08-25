@@ -8,9 +8,3 @@ declare module '*.svelte' {
 	const component: Component;
 	export default component;
 }
-
-declare module 'tinykeys' {
-	import { TinyKeys } from 'tinykeys';
-	const tinykeys: TinyKeys;
-	export { tinykeys };
-}

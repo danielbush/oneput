@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  tinykeys:
+    hash: 6855931e9590b29110de8402432514ff7aa294934a067557e96dc7eb46f365e3
+    path: patches/tinykeys.patch
+
 importers:
 
   .:
@@ -13,7 +18,7 @@ importers:
         version: 0.501.0
       tinykeys:
         specifier: ^3.0.0
-        version: 3.0.0
+        version: 3.0.0(patch_hash=6855931e9590b29110de8402432514ff7aa294934a067557e96dc7eb46f365e3)
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -2923,7 +2928,7 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
-  tinykeys@3.0.0: {}
+  tinykeys@3.0.0(patch_hash=6855931e9590b29110de8402432514ff7aa294934a067557e96dc7eb46f365e3): {}
 
   tinypool@1.1.1: {}
 

@@ -38,7 +38,7 @@
 			{/if}
 			<div class="oneput__menu-body">
 				{#each props.menu?.items || [] as item, index (item.id)}
-					{#if item.divider}
+					{#if 'divider' in item && item.divider}
 						<Flex class="oneput__menu-divider" {...item} />
 					{:else}
 						<Flex

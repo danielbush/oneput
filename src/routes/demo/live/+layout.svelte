@@ -9,22 +9,17 @@
 	import '$lib/oneput/oneput-user-defined.css';
 	import OneputController from '$lib/oneput/OneputController.svelte';
 	import type { Controller } from '$lib/oneput/controller.js';
-	import { id as randomId, type FlexParams } from '$lib/oneput/lib.js';
+	import { id as randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
 
 	const piIcon =
 		'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pi-icon lucide-pi"><line x1="9" x2="9" y1="4" y2="20"/><path d="M4 7c0-1.7 1.3-3 3-3h13"/><path d="M18 20c-1.7 0-3-1.3-3-3V4"/></svg>';
 
-	const menuItemWithIcon = ({
-		id,
-		icon,
-		text,
-		action
-	}: {
+	const menuItemWithIcon: (params: {
 		id: string;
 		icon?: string;
 		text: string;
 		action?: () => void;
-	}) => {
+	}) => MenuItem = ({ id, icon, text, action }) => {
 		const attr: FlexParams['attr'] = {
 			// Demo hover handling.  Oneput injects a pointer event to handle
 			// menu item focus in addition to this.
@@ -55,7 +50,7 @@
 			],
 			attr,
 			action
-		} satisfies FlexParams;
+		};
 	};
 
 	// Our app starts in this callback.  We get the controller and we can set

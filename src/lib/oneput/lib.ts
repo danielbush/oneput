@@ -3,7 +3,7 @@ export type OneputProps = {
 	menuOpen?: boolean;
 	menu?: {
 		header?: FlexParams;
-		items: FlexParams[];
+		items: Array<MenuItem | MenuItemDivider>;
 		footer?: FlexParams;
 	};
 	inner?: FlexParams;
@@ -33,22 +33,31 @@ export type FlexParams = {
 	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;
 	type: 'hflex' | 'vflex';
-	/**
-	 * Instructs Oneput renderer to render this item as a divider rather than a
-	 * menu item.  Only applies to top level items.
-	 */
-	divider?: boolean;
 	children?: Array<FlexParams | FChildParams>;
 	/**
 	 * Instructs Oneput rendered to override default list of HTML void elements.
 	 */
 	voidElements?: Set<string | undefined>;
+	action?: () => void;
+};
+
+export type MenuItem = FlexParams & {
 	/**
 	 * Instructs Oneput renderer to add a pointerdown handler to run this action
 	 * on top-level menu items.
 	 */
 	action?: () => void;
 };
+
+export type MenuItemDivider = FlexParams & {
+	/**
+	 * Instructs Oneput renderer to render this item as a divider rather than a
+	 * menu item.  Only applies to top level items.
+	 */
+	divider: true;
+};
+
+export type MenuItemAny = MenuItem | MenuItemDivider;
 
 export type FChildParams = {
 	id: string;

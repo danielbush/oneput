@@ -2,7 +2,7 @@
  * Some fake ui data we can use to populate oneput for demos.
  */
 
-import { id, type FlexParams } from '$lib/oneput/lib.js';
+import { id, type FlexParams, type MenuItemAny } from '$lib/oneput/lib.js';
 import type { appState } from './visual/state.js';
 
 export const menuHeader1: FlexParams = {
@@ -41,7 +41,7 @@ export const menuHeader1: FlexParams = {
 	]
 };
 
-export const menuItems1: FlexParams[] = [
+export const menuItems1: MenuItemAny[] = [
 	{
 		id: 'menu-item-1',
 		type: 'hflex',

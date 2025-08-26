@@ -70,7 +70,7 @@ export type FChildParams = {
 	/**
 	 * Use boolean for boolean attributes, like `disabled`, `checked`, etc.
 	 */
-	attr?: Record<string, string | boolean>;
+	attr?: Record<string, string | boolean | ((event: Event) => void)>;
 	/**
 	 * This is optional.  It also makes satisfying the type-checker easier.
 	 */

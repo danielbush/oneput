@@ -19,6 +19,8 @@ export type OneputControllerParams = {
 	menuItemFocus?: number;
 	globalKeys?: KeyBindingMap;
 	input?: OneputProps['input'];
+	inputValue?: OneputProps['inputValue'];
+	placeholder?: OneputProps['placeholder'];
 	menu?: OneputProps['menu'];
 	menuOpen?: boolean;
 	localKeys?: KeyBindingMap;
@@ -30,9 +32,14 @@ export class Controller {
 	 */
 	constructor(
 		private currentProps: OneputControllerProps,
+		private defaultPlaceholder: string = 'Type here...',
 		private unsubscribeGlobalKeys: () => void = () => {},
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {}
+
+	setDefaultPlaceholder(placeholder: string) {
+		this.defaultPlaceholder = placeholder;
+	}
 
 	get menuOpen() {
 		return this.currentProps.menuOpen ?? false;
@@ -81,19 +88,22 @@ export class Controller {
 	 */
 	private handleGlobalKeys(keys: KeyBindingMap) {
 		this.unsubscribeGlobalKeys();
-		const adjustedBindings = Object.entries(keys).reduce<{ [key: string]: () => void }>(
-			(acc, [, { action, bindings }]) => {
-				bindings.forEach((binding) => {
-					acc[binding] = () => {
-						if (!this.menuOpen) {
-							action(this);
-						}
-					};
-				});
-				return acc;
-			},
-			{}
-		);
+		const adjustedBindings = Object.entries(keys).reduce<{
+			[key: string]: (evt: KeyboardEvent) => void;
+		}>((acc, [, { action, bindings }]) => {
+			bindings.forEach((binding) => {
+				acc[binding] = (evt) => {
+					evt.preventDefault();
+					if (this.keysDisabled) {
+						return;
+					}
+					if (!this.menuOpen) {
+						action(this);
+					}
+				};
+			});
+			return acc;
+		}, {});
 		const unsubscribe = tinykeys(window, adjustedBindings);
 		this.unsubscribeGlobalKeys = unsubscribe;
 	}
@@ -103,26 +113,45 @@ export class Controller {
 	 */
 	private handleLocalKeys(keys: KeyBindingMap) {
 		this.unsubscribeLocalKeys();
-		const adjustedBindings = Object.entries(keys).reduce<{ [key: string]: () => void }>(
-			(acc, [, { action, bindings }]) => {
-				bindings.forEach((binding) => {
-					acc[binding] = () => {
-						if (this.menuOpen) {
-							action(this);
-						}
-					};
-				});
-				return acc;
-			},
-			{}
-		);
+		const adjustedBindings = Object.entries(keys).reduce<{
+			[key: string]: (evt: KeyboardEvent) => void;
+		}>((acc, [, { action, bindings }]) => {
+			bindings.forEach((binding) => {
+				acc[binding] = (evt) => {
+					evt.preventDefault();
+					if (this.keysDisabled) {
+						return;
+					}
+					if (this.menuOpen) {
+						action(this);
+					}
+				};
+			});
+			return acc;
+		}, {});
 		const unsubscribe = tinykeys(document.body, adjustedBindings);
 		this.unsubscribeLocalKeys = unsubscribe;
 	}
 
+	private keysDisabled = false;
+
+	disableKeys() {
+		this.keysDisabled = true;
+	}
+
+	enableKeys() {
+		this.keysDisabled = false;
+	}
+
 	update(options: OneputControllerParams) {
+		if ('placeholder' in options) {
+			this.currentProps.placeholder = options.placeholder || this.defaultPlaceholder;
+		}
 		if (options.input) {
 			this.currentProps.input = options.input;
+		}
+		if ('inputValue' in options) {
+			this.currentProps.inputValue = options.inputValue || '';
 		}
 		if (options.globalKeys) {
 			this.handleGlobalKeys(options.globalKeys);

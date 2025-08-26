@@ -4,6 +4,7 @@ import {
 	keyboardIcon,
 	menuItemWithIcon,
 	piIcon,
+	tickIcon,
 	xIcon
 } from '$lib/demo/live/ui.js';
 import type { OneputProps } from '$lib/oneput/lib.js';
@@ -158,7 +159,118 @@ const bindingsMenu = (
 				id: 'add-binding',
 				text: 'Add binding...',
 				action: () => {
-					//
+					c.update({
+						placeholder: 'Type the keys...',
+						input: {
+							right: {
+								id: 'input-right-1',
+								type: 'hflex',
+								children: [
+									{
+										id: 'accept-key-capture',
+										tag: 'button',
+										attr: {
+											type: 'button',
+											title: 'Options',
+											onclick: () => {
+												const keyMap = local ? localKeys : globalKeys;
+												keyMap[actionId].bindings.push(toBinding(keys));
+												c.update(local ? { localKeys: keyMap } : { globalKeys: keyMap });
+												window.removeEventListener('keydown', keyListener);
+												c.enableKeys();
+												c.update(
+													bindingsMenu(c, {
+														actionId,
+														description,
+														bindings: keyMap[actionId].bindings,
+														local: true
+													})
+												);
+												c.update({ placeholder: '', inputValue: '' });
+											}
+										},
+										classes: ['oneput__icon-button'],
+										innerHTMLUnsafe: tickIcon
+									},
+									{
+										id: 'reject-key-capture',
+										tag: 'button',
+										attr: {
+											type: 'button',
+											title: 'Options',
+											onclick: () => {
+												const keyMap = local ? localKeys : globalKeys;
+												window.removeEventListener('keydown', keyListener);
+												c.enableKeys();
+												c.update(
+													bindingsMenu(c, {
+														actionId,
+														description,
+														bindings: keyMap[actionId].bindings,
+														local: true
+													})
+												);
+												c.update({ placeholder: '', inputValue: '' });
+											}
+										},
+										classes: ['oneput__icon-button'],
+										innerHTMLUnsafe: xIcon
+									}
+								]
+							}
+						}
+					});
+					c.disableKeys();
+					// disable input?
+					const keys: {
+						key: string;
+						metaKey: boolean;
+						shiftKey: boolean;
+						altKey: boolean;
+						controlKey: boolean;
+					}[] = [];
+					const toBinding = (
+						keys: {
+							key: string;
+							metaKey: boolean;
+							shiftKey: boolean;
+							altKey: boolean;
+							controlKey: boolean;
+						}[]
+					) => {
+						return keys
+							.map((k) => {
+								const modifier = `${k.metaKey ? 'Meta' : ''}${k.altKey ? 'Alt' : ''}${k.shiftKey ? 'Shift' : ''}${k.controlKey ? 'Control' : ''}`;
+								return modifier ? modifier + '+' + k.key.toUpperCase() : k.key.toUpperCase();
+							})
+							.join(' ');
+					};
+					const keyListener = (evt: KeyboardEvent) => {
+						// Ignore modifier only key presses.
+						if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(evt.key)) {
+							return;
+						}
+						evt.preventDefault();
+						evt.stopPropagation();
+						keys.push({
+							key: evt.key,
+							metaKey: evt.metaKey,
+							shiftKey: evt.shiftKey,
+							altKey: evt.altKey,
+							controlKey: evt.ctrlKey
+						});
+						c.update({
+							inputValue: keys
+								.map(
+									(k) =>
+										`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${k.altKey ? '⌥' : ''}${k.key}`
+								)
+								.join(' + ')
+						});
+					};
+					setTimeout(() => {
+						window.addEventListener('keydown', keyListener);
+					});
 				}
 			}),
 			...bindings.map((binding) => {

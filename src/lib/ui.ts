@@ -1,3 +1,6 @@
+/**
+ * This is some ui that you can use.  You don't have to use it.
+ */
 import { id as randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
 
 export const piIcon =

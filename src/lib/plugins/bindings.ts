@@ -52,7 +52,7 @@ export const globalKeysMenu = (c: Controller) => ({
 				bindings,
 				action: () => {
 					c.update(
-						singleKeyMenu(c, {
+						configureBindingsForActionMenu(c, {
 							actionId: id,
 							description,
 							bindings,
@@ -74,7 +74,7 @@ export const localKeysMenu = (c: Controller) => ({
 				bindings,
 				action: () => {
 					c.update(
-						singleKeyMenu(c, {
+						configureBindingsForActionMenu(c, {
 							actionId: id,
 							description,
 							bindings,
@@ -149,9 +149,13 @@ class KeyBindingsController {
 			window.addEventListener('keydown', this.keyListener);
 		});
 		this.controller.disableKeys();
+		return {
+			accept: () => this.acceptKeyBindings(),
+			reject: () => this.rejectKeyBindings()
+		};
 	}
 
-	acceptKeyBindings() {
+	private acceptKeyBindings() {
 		const keyMap = this.local ? localKeys : globalKeys;
 		if (this.capturedKeys.length > 0) {
 			keyMap[this.actionId].bindings.push(toBinding(this.capturedKeys));
@@ -161,7 +165,7 @@ class KeyBindingsController {
 		window.removeEventListener('keydown', this.keyListener);
 		this.controller.enableKeys();
 		this.controller.update(
-			singleKeyMenu(this.controller, {
+			configureBindingsForActionMenu(this.controller, {
 				actionId: this.actionId,
 				description: this.description,
 				bindings: keyMap[this.actionId].bindings,
@@ -171,13 +175,13 @@ class KeyBindingsController {
 		this.controller.update({ placeholder: '', inputValue: '' });
 	}
 
-	rejectKeyBindings() {
+	private rejectKeyBindings() {
 		const keyMap = this.local ? localKeys : globalKeys;
 		this.capturedKeys = [];
 		window.removeEventListener('keydown', this.keyListener);
 		this.controller.enableKeys();
 		this.controller.update(
-			singleKeyMenu(this.controller, {
+			configureBindingsForActionMenu(this.controller, {
 				actionId: this.actionId,
 				description: this.description,
 				bindings: keyMap[this.actionId].bindings,
@@ -191,7 +195,7 @@ class KeyBindingsController {
 /**
  * A menu for managing the key bindings for a given action.
  */
-const singleKeyMenu = (
+const configureBindingsForActionMenu = (
 	c: Controller,
 	{
 		description,
@@ -212,8 +216,7 @@ const singleKeyMenu = (
 			children: [
 				{
 					id: 'bindings-header-icon',
-					type: 'fchild',
-					innerHTMLUnsafe: ''
+					type: 'fchild'
 				},
 				{
 					id: 'bindings-header-text',
@@ -222,8 +225,7 @@ const singleKeyMenu = (
 				},
 				{
 					id: 'bindings-header-close',
-					type: 'fchild',
-					innerHTMLUnsafe: ''
+					type: 'fchild'
 				}
 			]
 		},
@@ -233,7 +235,7 @@ const singleKeyMenu = (
 				text: 'Add binding...',
 				action: () => {
 					const handler = new KeyBindingsController(c, local, actionId, description);
-					handler.startKeyCapture();
+					const { accept, reject } = handler.startKeyCapture();
 					c.update({
 						placeholder: 'Type the keys...',
 						input: {
@@ -247,9 +249,7 @@ const singleKeyMenu = (
 										attr: {
 											type: 'button',
 											title: 'Options',
-											onclick: () => {
-												handler.acceptKeyBindings();
-											}
+											onclick: accept
 										},
 										classes: ['oneput__icon-button'],
 										innerHTMLUnsafe: tickIcon
@@ -260,9 +260,7 @@ const singleKeyMenu = (
 										attr: {
 											type: 'button',
 											title: 'Options',
-											onclick: () => {
-												handler.rejectKeyBindings();
-											}
+											onclick: reject
 										},
 										classes: ['oneput__icon-button'],
 										innerHTMLUnsafe: xIcon
@@ -286,7 +284,7 @@ const singleKeyMenu = (
 							keyMap[actionId].bindings = keyMap[actionId].bindings.filter((b) => b !== binding);
 							c.update(local ? { localKeys: keyMap } : { globalKeys: keyMap });
 							c.update(
-								singleKeyMenu(c, {
+								configureBindingsForActionMenu(c, {
 									actionId,
 									description,
 									bindings: keyMap[actionId].bindings,

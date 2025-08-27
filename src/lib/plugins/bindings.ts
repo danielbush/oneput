@@ -2,50 +2,15 @@ import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import type { OneputProps } from '$lib/oneput/lib.js';
 import { keybindingMenuItem, keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '../ui.js';
 
-export const globalKeys: KeyBindingMap = {
-	openMenu: {
-		bindings: ['$mod+k'],
-		description: 'Open Oneput menu...',
-		action: (c) => {
-			c.openMenu();
-		}
-	}
-};
-
-export const localKeys: KeyBindingMap = {
-	doAction: {
-		bindings: ['Enter'],
-		action: (c) => {
-			c.doAction();
-		},
-		description: 'Do action'
-	},
-	closeMenu: {
-		bindings: ['Escape', 'Control+['],
-		description: 'Close menu',
-		action: (c) => {
-			c.closeMenu();
-		}
-	},
-	focusPreviousMenuItem: {
-		bindings: ['$mod+k'],
-		description: 'Focus previous menu item',
-		action: (c) => {
-			c.focusPreviousMenuItem();
-		}
-	},
-	focusNextMenuItem: {
-		bindings: ['$mod+j'],
-		description: 'Focus next menu item',
-		action: (c) => {
-			c.focusNextMenuItem();
-		}
-	}
-};
-
-export const globalKeysMenu = (c: Controller) => ({
+/**
+ * UI for managing a set of action bindings.
+ */
+export const keysMenu = (
+	c: Controller,
+	{ local, keyMap }: { local: boolean; keyMap: KeyBindingMap }
+) => ({
 	menu: {
-		items: Object.entries(globalKeys).map(([id, { description, bindings }]) =>
+		items: Object.entries(keyMap).map(([id, { description, bindings }]) =>
 			keybindingMenuItem({
 				id,
 				text: description,
@@ -53,32 +18,11 @@ export const globalKeysMenu = (c: Controller) => ({
 				action: () => {
 					c.update(
 						configureBindingsForActionMenu(c, {
+							keyMap,
 							actionId: id,
 							description,
 							bindings,
-							local: false
-						})
-					);
-				}
-			})
-		)
-	}
-});
-
-export const localKeysMenu = (c: Controller) => ({
-	menu: {
-		items: Object.entries(localKeys).map(([id, { description, bindings }]) =>
-			keybindingMenuItem({
-				id,
-				text: description,
-				bindings,
-				action: () => {
-					c.update(
-						configureBindingsForActionMenu(c, {
-							actionId: id,
-							description,
-							bindings,
-							local: true
+							local
 						})
 					);
 				}
@@ -107,6 +51,7 @@ const toBinding = (
 class KeyBindingsController {
 	constructor(
 		private controller: Controller,
+		private keyMap: KeyBindingMap,
 		private local: boolean,
 		private actionId: string,
 		private description: string
@@ -156,19 +101,19 @@ class KeyBindingsController {
 	}
 
 	private acceptKeyBindings() {
-		const keyMap = this.local ? localKeys : globalKeys;
 		if (this.capturedKeys.length > 0) {
-			keyMap[this.actionId].bindings.push(toBinding(this.capturedKeys));
-			this.controller.update(this.local ? { localKeys: keyMap } : { globalKeys: keyMap });
+			this.keyMap[this.actionId].bindings.push(toBinding(this.capturedKeys));
+			this.controller.update(this.local ? { localKeys: this.keyMap } : { globalKeys: this.keyMap });
 		}
 		this.capturedKeys = [];
 		window.removeEventListener('keydown', this.keyListener);
 		this.controller.enableKeys();
 		this.controller.update(
 			configureBindingsForActionMenu(this.controller, {
+				keyMap: this.keyMap,
 				actionId: this.actionId,
 				description: this.description,
-				bindings: keyMap[this.actionId].bindings,
+				bindings: this.keyMap[this.actionId].bindings,
 				local: this.local
 			})
 		);
@@ -176,15 +121,15 @@ class KeyBindingsController {
 	}
 
 	private rejectKeyBindings() {
-		const keyMap = this.local ? localKeys : globalKeys;
 		this.capturedKeys = [];
 		window.removeEventListener('keydown', this.keyListener);
 		this.controller.enableKeys();
 		this.controller.update(
 			configureBindingsForActionMenu(this.controller, {
+				keyMap: this.keyMap,
 				actionId: this.actionId,
 				description: this.description,
-				bindings: keyMap[this.actionId].bindings,
+				bindings: this.keyMap[this.actionId].bindings,
 				local: this.local
 			})
 		);
@@ -201,8 +146,10 @@ const configureBindingsForActionMenu = (
 		description,
 		bindings,
 		local,
-		actionId
+		actionId,
+		keyMap
 	}: {
+		keyMap: KeyBindingMap;
 		actionId: string;
 		description: string;
 		bindings: string[];
@@ -234,7 +181,7 @@ const configureBindingsForActionMenu = (
 				id: 'add-binding',
 				text: 'Add binding...',
 				action: () => {
-					const handler = new KeyBindingsController(c, local, actionId, description);
+					const handler = new KeyBindingsController(c, keyMap, local, actionId, description);
 					const { accept, reject } = handler.startKeyCapture();
 					c.update({
 						placeholder: 'Type the keys...',
@@ -280,11 +227,11 @@ const configureBindingsForActionMenu = (
 					action: () => {
 						const yes = confirm('Remove binding?');
 						if (yes) {
-							const keyMap = local ? localKeys : globalKeys;
 							keyMap[actionId].bindings = keyMap[actionId].bindings.filter((b) => b !== binding);
 							c.update(local ? { localKeys: keyMap } : { globalKeys: keyMap });
 							c.update(
 								configureBindingsForActionMenu(c, {
+									keyMap,
 									actionId,
 									description,
 									bindings: keyMap[actionId].bindings,

@@ -1,6 +1,47 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import { menuItemWithIcon, piIcon } from '$lib/ui.js';
-import { globalKeys, globalKeysMenu, localKeys, localKeysMenu } from '$lib/plugins/bindings.js';
+import { keysMenu } from '$lib/plugins/bindings.js';
+
+export const globalKeys: KeyBindingMap = {
+	openMenu: {
+		bindings: ['$mod+k'],
+		description: 'Open Oneput menu...',
+		action: (c) => {
+			c.openMenu();
+		}
+	}
+};
+
+export const localKeys: KeyBindingMap = {
+	doAction: {
+		bindings: ['Enter'],
+		action: (c) => {
+			c.doAction();
+		},
+		description: 'Do action'
+	},
+	closeMenu: {
+		bindings: ['Escape', 'Control+['],
+		description: 'Close menu',
+		action: (c) => {
+			c.closeMenu();
+		}
+	},
+	focusPreviousMenuItem: {
+		bindings: ['$mod+k'],
+		description: 'Focus previous menu item',
+		action: (c) => {
+			c.focusPreviousMenuItem();
+		}
+	},
+	focusNextMenuItem: {
+		bindings: ['$mod+j'],
+		description: 'Focus next menu item',
+		action: (c) => {
+			c.focusNextMenuItem();
+		}
+	}
+};
 
 const rootMenu = (c: Controller) => ({
 	input: {},
@@ -44,16 +85,16 @@ const settingsMenu = (c: Controller) => ({
 		items: [
 			menuItemWithIcon({
 				id: 'global-keys',
-				text: 'Set global key-bindings...',
+				text: 'Set global key bindings...',
 				action: () => {
-					c.update(globalKeysMenu(c));
+					c.update(keysMenu(c, { local: false, keyMap: globalKeys }));
 				}
 			}),
 			menuItemWithIcon({
 				id: 'local-keys',
-				text: 'Set local key-bindings...',
+				text: 'Set local key bindings...',
 				action: () => {
-					c.update(localKeysMenu(c));
+					c.update(keysMenu(c, { local: true, keyMap: localKeys }));
 				}
 			})
 		]

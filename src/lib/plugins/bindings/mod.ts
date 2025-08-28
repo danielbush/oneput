@@ -115,7 +115,7 @@ export class KeyBindingsController {
 				inputValue: capturedKeys
 					.map(
 						(k) =>
-							`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${k.altKey ? '⌥' : ''}${k.key}`
+							`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${k.altKey ? '⌥' : ''}${k.key.toUpperCase()}`
 					)
 					.join(' + ')
 			});

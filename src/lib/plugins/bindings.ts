@@ -2,35 +2,6 @@ import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import type { OneputProps } from '$lib/oneput/lib.js';
 import { keybindingMenuItem, keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '../ui.js';
 
-/**
- * UI for managing a set of action bindings.
- */
-export const keysMenu = (
-	c: Controller,
-	{ local, keyMap }: { local: boolean; keyMap: KeyBindingMap }
-) => ({
-	menu: {
-		items: Object.entries(keyMap).map(([id, { description, bindings }]) =>
-			keybindingMenuItem({
-				id,
-				text: description,
-				bindings,
-				action: () => {
-					c.update(
-						configureBindingsForActionMenu(c, {
-							keyMap,
-							actionId: id,
-							description,
-							bindings,
-							local
-						})
-					);
-				}
-			})
-		)
-	}
-});
-
 const toBinding = (
 	keys: {
 		key: string;
@@ -64,7 +35,7 @@ export type ConfigureBindingsForActionMenu = (
  *
  * configureBindingsForActionMenu should render a Oneput menu of bindings for a given action.
  */
-class KeyBindingsController {
+export class KeyBindingsController {
 	constructor(
 		private controller: Controller,
 		private keyMap: KeyBindingMap,
@@ -73,6 +44,34 @@ class KeyBindingsController {
 		private description: string,
 		private configureBindingsForActionMenu: ConfigureBindingsForActionMenu
 	) {}
+
+	/**
+	 * UI for managing a set of action bindings.
+	 */
+	get keysMenu() {
+		return {
+			menu: {
+				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
+					keybindingMenuItem({
+						id,
+						text: description,
+						bindings,
+						action: () => {
+							this.controller.update(
+								this.configureBindingsForActionMenu(this.controller, {
+									keyMap: this.keyMap,
+									actionId: id,
+									description,
+									bindings,
+									local: this.local
+								})
+							);
+						}
+					})
+				)
+			}
+		};
+	}
 
 	private capturedKeys: {
 		key: string;
@@ -157,7 +156,7 @@ class KeyBindingsController {
 /**
  * A menu for managing the key bindings for a given action.
  */
-const configureBindingsForActionMenu: ConfigureBindingsForActionMenu = (
+export const configureBindingsForActionMenu: ConfigureBindingsForActionMenu = (
 	c,
 	{ description, bindings, local, actionId, keyMap }
 ) => ({

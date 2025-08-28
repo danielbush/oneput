@@ -66,7 +66,7 @@ export const keybindingMenuItem: (params: {
 	 * To display to the user.
 	 */
 	bindings: string[];
-	action?: () => void;
+	action: () => void;
 }) => MenuItem = ({ id, text, action, bindings }) => {
 	let bindingHTML = '<code><kbd>-</kbd></code>';
 	if (bindings.length > 0) {

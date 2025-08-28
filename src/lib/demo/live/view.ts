@@ -1,6 +1,7 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import { menuItemWithIcon, piIcon } from '$lib/ui.js';
-import { configureBindingsForActionMenu, KeyBindingsController } from '$lib/plugins/bindings.js';
+import { keybindingMenuItem, menuItemWithIcon, piIcon } from '$lib/ui.js';
+import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
+import { configureBindingsForActionMenu } from '$lib/plugins/bindings/ui.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -91,8 +92,7 @@ const settingsMenu = (c: Controller) => ({
 						c,
 						globalKeys,
 						false,
-						'global-keys',
-						'Global key bindings',
+						keybindingMenuItem,
 						configureBindingsForActionMenu
 					);
 					c.update(handler.keysMenu);
@@ -106,8 +106,7 @@ const settingsMenu = (c: Controller) => ({
 						c,
 						localKeys,
 						true,
-						'global-keys',
-						'Global key bindings',
+						keybindingMenuItem,
 						configureBindingsForActionMenu
 					);
 					c.update(handler.keysMenu);

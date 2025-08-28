@@ -2,6 +2,7 @@ import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import { keybindingMenuItem, menuItemWithIcon, piIcon } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { configureBindingsForActionMenu } from '$lib/plugins/bindings/ui.js';
+import { id } from '$lib/oneput/lib.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -49,6 +50,41 @@ const rootMenu = (c: Controller) => ({
 	menu: {
 		items: [
 			menuItemWithIcon({
+				id: 'settings',
+				text: 'Settings...',
+				action: () => {
+					c.update(settingsMenu(c));
+				}
+			}),
+			menuItemWithIcon({
+				id: 'navigate-outline',
+				text: 'Navigate outline...',
+				action: () => {
+					const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+					c.update({
+						menu: {
+							items: headings.map((h) => ({
+								id: id(),
+								tag: 'button',
+								type: 'hflex',
+								children: [
+									{
+										id: id(),
+										classes: ['oneput__menu-item-body'],
+										type: 'fchild',
+										textContent: h.textContent
+									}
+								],
+								action: () => {
+									h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+									c.closeMenu();
+								}
+							}))
+						}
+					});
+				}
+			}),
+			menuItemWithIcon({
 				id: 'insert-katex',
 				leftIcon: piIcon,
 				text: 'Insert katex...',
@@ -61,20 +97,6 @@ const rootMenu = (c: Controller) => ({
 				text: 'Close menu',
 				action: () => {
 					c.closeMenu();
-				}
-			}),
-			menuItemWithIcon({
-				id: 'settings',
-				text: 'Settings...',
-				action: () => {
-					c.update(settingsMenu(c));
-				}
-			}),
-			menuItemWithIcon({
-				id: 'some-action-3',
-				text: 'Some action 3...',
-				action: () => {
-					console.log('some action 3');
 				}
 			})
 		]

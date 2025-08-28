@@ -48,13 +48,30 @@ const toBinding = (
 		.join(' ');
 };
 
+export type ConfigureBindingsForActionMenu = (
+	c: Controller,
+	params: {
+		keyMap: KeyBindingMap;
+		actionId: string;
+		description: string;
+		bindings: string[];
+		local: boolean;
+	}
+) => { menu: OneputProps['menu'] };
+
+/**
+ * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
+ *
+ * configureBindingsForActionMenu should render a Oneput menu of bindings for a given action.
+ */
 class KeyBindingsController {
 	constructor(
 		private controller: Controller,
 		private keyMap: KeyBindingMap,
 		private local: boolean,
 		private actionId: string,
-		private description: string
+		private description: string,
+		private configureBindingsForActionMenu: ConfigureBindingsForActionMenu
 	) {}
 
 	private capturedKeys: {
@@ -109,7 +126,7 @@ class KeyBindingsController {
 		window.removeEventListener('keydown', this.keyListener);
 		this.controller.enableKeys();
 		this.controller.update(
-			configureBindingsForActionMenu(this.controller, {
+			this.configureBindingsForActionMenu(this.controller, {
 				keyMap: this.keyMap,
 				actionId: this.actionId,
 				description: this.description,
@@ -125,7 +142,7 @@ class KeyBindingsController {
 		window.removeEventListener('keydown', this.keyListener);
 		this.controller.enableKeys();
 		this.controller.update(
-			configureBindingsForActionMenu(this.controller, {
+			this.configureBindingsForActionMenu(this.controller, {
 				keyMap: this.keyMap,
 				actionId: this.actionId,
 				description: this.description,
@@ -140,21 +157,9 @@ class KeyBindingsController {
 /**
  * A menu for managing the key bindings for a given action.
  */
-const configureBindingsForActionMenu = (
-	c: Controller,
-	{
-		description,
-		bindings,
-		local,
-		actionId,
-		keyMap
-	}: {
-		keyMap: KeyBindingMap;
-		actionId: string;
-		description: string;
-		bindings: string[];
-		local: boolean;
-	}
+const configureBindingsForActionMenu: ConfigureBindingsForActionMenu = (
+	c,
+	{ description, bindings, local, actionId, keyMap }
 ) => ({
 	menu: {
 		header: {
@@ -181,7 +186,14 @@ const configureBindingsForActionMenu = (
 				id: 'add-binding',
 				text: 'Add binding...',
 				action: () => {
-					const handler = new KeyBindingsController(c, keyMap, local, actionId, description);
+					const handler = new KeyBindingsController(
+						c,
+						keyMap,
+						local,
+						actionId,
+						description,
+						configureBindingsForActionMenu
+					);
 					const { accept, reject } = handler.startKeyCapture();
 					c.update({
 						placeholder: 'Type the keys...',

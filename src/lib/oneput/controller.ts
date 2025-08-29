@@ -83,6 +83,16 @@ export class Controller {
 		}
 	}
 
+	private inputElement: HTMLInputElement | undefined;
+
+	setInputElement(inputElement: HTMLInputElement | undefined) {
+		this.inputElement = inputElement;
+	}
+
+	focusInput() {
+		this.inputElement?.focus();
+	}
+
 	/**
 	 * Only run globals when menu is closed.
 	 */
@@ -98,7 +108,8 @@ export class Controller {
 						return;
 					}
 					if (!this.menuOpen) {
-						action(this);
+						// MENU_OPEN_CLOSE_RACE
+						setTimeout(() => action(this));
 					}
 				};
 			});
@@ -123,7 +134,8 @@ export class Controller {
 						return;
 					}
 					if (this.menuOpen) {
-						action(this);
+						// MENU_OPEN_CLOSE_RACE
+						setTimeout(() => action(this));
 					}
 				};
 			});

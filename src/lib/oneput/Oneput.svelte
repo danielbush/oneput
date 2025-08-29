@@ -1,7 +1,12 @@
 <script lang="ts">
 	import Flex from './Flex.svelte';
 	import { type MenuItem, type MenuItemAny, type OneputProps } from './lib.js';
-	let { inputElement, menuItemFocus = $bindable(0), controller, ...props }: OneputProps = $props();
+	let {
+		inputElement = $bindable(),
+		menuItemFocus = $bindable(0),
+		controller,
+		...props
+	}: OneputProps = $props();
 	function rewriteAttr(
 		index: number,
 		attr: MenuItemAny['attr'],

@@ -13,6 +13,10 @@
 	});
 	const { controllerRef }: { controllerRef: (c: Controller) => void } = $props();
 	const controller = new Controller(currentProps);
+	let inputElement: HTMLInputElement | undefined = $state(undefined);
+	$effect(() => {
+		controller.setInputElement(inputElement);
+	});
 
 	$effect(() => {
 		if (controllerRef) {
@@ -22,5 +26,10 @@
 </script>
 
 <div>
-	<Oneput {...currentProps} {controller} bind:menuItemFocus={currentProps.menuItemFocus} />
+	<Oneput
+		{...currentProps}
+		{controller}
+		bind:inputElement
+		bind:menuItemFocus={currentProps.menuItemFocus}
+	/>
 </div>

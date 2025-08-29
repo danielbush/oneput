@@ -6,11 +6,18 @@ import { id } from '$lib/oneput/lib.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
-		bindings: ['$mod+k'],
+		bindings: ['$mod+Shift+k'],
 		description: 'Open Oneput menu...',
 		action: (c) => {
 			c.openMenu();
 		}
+	},
+	focusInput: {
+		bindings: ['$mod+[', 'Control+['],
+		action: (c) => {
+			c.focusInput();
+		},
+		description: 'Focus input'
 	}
 };
 
@@ -22,8 +29,15 @@ export const localKeys: KeyBindingMap = {
 		},
 		description: 'Do action'
 	},
+	focusInput: {
+		bindings: ['$mod+[', 'Control+['],
+		action: (c) => {
+			c.focusInput();
+		},
+		description: 'Focus input'
+	},
 	closeMenu: {
-		bindings: ['Escape', 'Control+['],
+		bindings: ['Escape', '$mod+Shift+k'],
 		description: 'Close menu',
 		action: (c) => {
 			c.closeMenu();

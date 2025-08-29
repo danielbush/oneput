@@ -34,6 +34,9 @@
 		}
 		return newAttr;
 	}
+
+	// See UNWANTED_AUTOCOMPLETE
+	const autocomplete = 'one-time-code';
 </script>
 
 <div class="oneput__container">
@@ -87,7 +90,7 @@
 						type="text"
 						placeholder={props.placeholder}
 						autocorrect="off"
-						autocomplete="off"
+						{autocomplete}
 						spellcheck="false"
 					/>
 					{#if props.input?.right}

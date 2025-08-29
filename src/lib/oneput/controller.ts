@@ -20,6 +20,7 @@ export type OneputControllerParams = {
 	globalKeys?: KeyBindingMap;
 	input?: OneputProps['input'];
 	inputValue?: OneputProps['inputValue'];
+	handleInputChange?: OneputProps['handleInputChange'];
 	placeholder?: OneputProps['placeholder'];
 	menu?: OneputProps['menu'];
 	menuOpen?: boolean;
@@ -161,6 +162,9 @@ export class Controller {
 		}
 		if (options.input) {
 			this.currentProps.input = options.input;
+		}
+		if (options.handleInputChange) {
+			this.currentProps.handleInputChange = options.handleInputChange;
 		}
 		if ('inputValue' in options) {
 			this.currentProps.inputValue = options.inputValue || '';

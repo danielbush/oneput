@@ -75,25 +75,38 @@ const rootMenu = (c: Controller) => ({
 				text: 'Navigate outline...',
 				action: () => {
 					const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-					c.update({
-						menu: {
-							items: headings.map((h) => ({
-								id: id(),
-								tag: 'button',
-								type: 'hflex',
-								children: [
-									{
-										id: id(),
-										classes: ['oneput__menu-item-body'],
-										type: 'fchild',
-										textContent: h.textContent
+					const updateMenu = (headings: Element[]) => {
+						c.update({
+							menu: {
+								items: headings.map((h) => ({
+									id: id(),
+									tag: 'button',
+									type: 'hflex',
+									children: [
+										{
+											id: id(),
+											classes: ['oneput__menu-item-body'],
+											type: 'fchild',
+											textContent: h.textContent
+										}
+									],
+									action: () => {
+										h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+										c.closeMenu();
 									}
-								],
-								action: () => {
-									h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-									c.closeMenu();
-								}
-							}))
+								}))
+							}
+						});
+					};
+					updateMenu(headings);
+					c.update({
+						handleInputChange: (evt) => {
+							const text = (evt.target as HTMLInputElement).value;
+							updateMenu(
+								headings.filter((heading) => {
+									return heading.textContent.includes(text);
+								})
+							);
 						}
 					});
 				}

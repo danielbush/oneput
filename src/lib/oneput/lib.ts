@@ -106,5 +106,17 @@ export const defaultVoidElements = new Set([
  * Generate a unique id.
  */
 export function id(): string {
+	if (!window.crypto.randomUUID) {
+		window.crypto.randomUUID = function () {
+			// RFC4122 version 4 UUID generator using crypto.getRandomValues
+			const bytes = new Uint8Array(16);
+			window.crypto.getRandomValues(bytes);
+			// Set version bits (4) and variant bits (RFC4122)
+			bytes[6] = (bytes[6] & 0x0f) | 0x40;
+			bytes[8] = (bytes[8] & 0x3f) | 0x80;
+			const hexBytes = [...bytes].map((b) => b.toString(16).padStart(2, '0'));
+			return `${hexBytes.slice(0, 4).join('')}-${hexBytes.slice(4, 6).join('')}-${hexBytes.slice(6, 8).join('')}-${hexBytes.slice(8, 10).join('')}-${hexBytes.slice(10, 16).join('')}`;
+		};
+	}
 	return crypto.randomUUID();
 }

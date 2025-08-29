@@ -42,6 +42,12 @@ tasks:
       - install
     cmds:
       - pnpm run dev
+  dev:public:
+    desc: Run dev server
+    deps:
+      - install
+    cmds:
+      - pnpm run dev --host=0.0.0.0
   test:
     desc: |
       Run unit tests; but avoid triggering browser tests.

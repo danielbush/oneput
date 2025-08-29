@@ -51,11 +51,11 @@
 						<Flex class="oneput__menu-divider" {...item} />
 					{:else}
 						<Flex
+							{...item}
 							class="oneput__menu-item"
 							classes={[index === menuItemFocus && 'oneput__menu-item--focused']}
 							focused={index === menuItemFocus}
 							attr={rewriteAttr(index, item.attr, item.action)}
-							{...item}
 						/>
 					{/if}
 				{/each}

@@ -1,4 +1,4 @@
-import type { Controller, KeyBindingMap, OneputControllerParams } from '$lib/oneput/controller.js';
+import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import type { MenuItem } from '$lib/oneput/lib.js';
 import { keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '$lib/ui.js';
 
@@ -47,14 +47,14 @@ export class KeyBindingsController {
 		private local: boolean,
 		private keybindingMenuItem: KeybindingMenuItem
 	) {
-		this.controller.update(this.actionsMenu());
+		this.actionsMenu();
 	}
 
 	/**
 	 * UI for managing a set of action bindings.
 	 */
 	private actionsMenu() {
-		return {
+		this.controller.update({
 			menu: {
 				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
 					this.keybindingMenuItem({
@@ -62,17 +62,19 @@ export class KeyBindingsController {
 						text: description,
 						bindings,
 						action: () => {
-							this.controller.update(this.actionMenu(id));
+							this.actionMenu(id);
 						}
 					})
 				)
 			}
-		};
+		});
 	}
 
-	private actionMenu(actionId: string): OneputControllerParams {
+	private actionMenu(actionId: string) {
 		const { description, bindings } = this.keyMap[actionId];
-		return {
+		this.controller.update({
+			placeholder: '',
+			inputValue: '',
 			menu: {
 				header: {
 					id: 'bindings-header',
@@ -98,40 +100,7 @@ export class KeyBindingsController {
 						id: 'add-binding',
 						text: 'Add binding...',
 						action: () => {
-							const { accept, reject } = this.startKeyCapture(actionId);
-							this.controller.update({
-								placeholder: 'Type the keys...',
-								input: {
-									right: {
-										id: 'input-right-1',
-										type: 'hflex',
-										children: [
-											{
-												id: 'accept-key-capture',
-												tag: 'button',
-												attr: {
-													type: 'button',
-													title: 'Options',
-													onclick: accept
-												},
-												classes: ['oneput__icon-button'],
-												innerHTMLUnsafe: tickIcon
-											},
-											{
-												id: 'reject-key-capture',
-												tag: 'button',
-												attr: {
-													type: 'button',
-													title: 'Options',
-													onclick: reject
-												},
-												classes: ['oneput__icon-button'],
-												innerHTMLUnsafe: xIcon
-											}
-										]
-									}
-								}
-							});
+							this.captureBindingMenu(actionId);
 						}
 					}),
 					...bindings.map((binding) => {
@@ -147,7 +116,44 @@ export class KeyBindingsController {
 					})
 				]
 			}
-		};
+		});
+	}
+
+	private captureBindingMenu(actionId: string) {
+		const { accept, reject } = this.startKeyCapture(actionId);
+		this.controller.update({
+			placeholder: 'Type the keys...',
+			input: {
+				right: {
+					id: 'input-right-1',
+					type: 'hflex',
+					children: [
+						{
+							id: 'accept-key-capture',
+							tag: 'button',
+							attr: {
+								type: 'button',
+								title: 'Options',
+								onclick: accept
+							},
+							classes: ['oneput__icon-button'],
+							innerHTMLUnsafe: tickIcon
+						},
+						{
+							id: 'reject-key-capture',
+							tag: 'button',
+							attr: {
+								type: 'button',
+								title: 'Options',
+								onclick: reject
+							},
+							classes: ['oneput__icon-button'],
+							innerHTMLUnsafe: xIcon
+						}
+					]
+				}
+			}
+		});
 	}
 
 	private startKeyCapture = (actionId: string) => {
@@ -199,14 +205,12 @@ export class KeyBindingsController {
 				}
 				window.removeEventListener('keydown', keyListener);
 				this.controller.enableKeys();
-				this.controller.update(this.actionMenu(actionId));
-				this.controller.update({ placeholder: '', inputValue: '' });
+				this.actionMenu(actionId);
 			},
 			reject: () => {
 				window.removeEventListener('keydown', keyListener);
 				this.controller.enableKeys();
-				this.controller.update(this.actionMenu(actionId));
-				this.controller.update({ placeholder: '', inputValue: '' });
+				this.actionMenu(actionId);
 			}
 		};
 	};
@@ -218,6 +222,6 @@ export class KeyBindingsController {
 		}
 		this.keyMap[actionId].bindings = this.keyMap[actionId].bindings.filter((b) => b !== binding);
 		this.controller.update(this.local ? { localKeys: this.keyMap } : { globalKeys: this.keyMap });
-		this.controller.update(this.actionMenu(actionId));
+		this.actionMenu(actionId);
 	};
 }

@@ -1,5 +1,6 @@
-import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import type { MenuItem, OneputProps } from '$lib/oneput/lib.js';
+import type { Controller, KeyBindingMap, OneputControllerParams } from '$lib/oneput/controller.js';
+import type { MenuItem } from '$lib/oneput/lib.js';
+import { keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '$lib/ui.js';
 
 const toBinding = (
 	keys: {
@@ -12,7 +13,9 @@ const toBinding = (
 ) => {
 	return keys
 		.map((k) => {
-			const modifier = `${k.metaKey ? 'Meta' : ''}${k.altKey ? 'Alt' : ''}${k.shiftKey ? 'Shift' : ''}${k.controlKey ? 'Control' : ''}`;
+			const modifier = `${k.metaKey ? 'Meta' : ''}${
+				k.altKey ? 'Alt' : ''
+			}${k.shiftKey ? 'Shift' : ''}${k.controlKey ? 'Control' : ''}`;
 			return modifier ? modifier + '+' + k.key.toUpperCase() : k.key.toUpperCase();
 		})
 		.join(' ');
@@ -25,58 +28,32 @@ export type KeybindingMenuItem = (params: {
 	action: () => void;
 }) => MenuItem;
 
-export type ConfigureBindingsForActionMenu = (
-	c: Controller,
-	params: {
-		keyMap: KeyBindingMap;
-		actionId: string;
-		description: string;
-		bindings: string[];
-		local: boolean;
-		startKeyCapture: (actionId: string) => {
-			accept: () => void;
-			reject: () => void;
-		};
-		removeBinding: (actionId: string, binding: string) => void;
-	}
-) => { menu: OneputProps['menu'] };
-
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
- *
- * configureBindingsForActionMenu should render a Oneput menu of bindings for a given action.
  */
 export class KeyBindingsController {
 	static create(
 		controller: Controller,
 		keyMap: KeyBindingMap,
 		local: boolean,
-		keybindingMenuItem: KeybindingMenuItem,
-		configureBindingsForActionMenu: ConfigureBindingsForActionMenu
+		keybindingMenuItem: KeybindingMenuItem
 	) {
-		return new KeyBindingsController(
-			controller,
-			keyMap,
-			local,
-			keybindingMenuItem,
-			configureBindingsForActionMenu
-		);
+		return new KeyBindingsController(controller, keyMap, local, keybindingMenuItem);
 	}
 
 	private constructor(
 		private controller: Controller,
 		private keyMap: KeyBindingMap,
 		private local: boolean,
-		private keybindingMenuItem: KeybindingMenuItem,
-		private configureBindingsForActionMenu: ConfigureBindingsForActionMenu
+		private keybindingMenuItem: KeybindingMenuItem
 	) {
-		this.controller.update(this.keysMenu);
+		this.controller.update(this.actionsMenu());
 	}
 
 	/**
 	 * UI for managing a set of action bindings.
 	 */
-	private get keysMenu() {
+	private actionsMenu() {
 		return {
 			menu: {
 				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
@@ -93,18 +70,84 @@ export class KeyBindingsController {
 		};
 	}
 
-	private actionMenu(actionId: string) {
+	private actionMenu(actionId: string): OneputControllerParams {
 		const { description, bindings } = this.keyMap[actionId];
-		const params = {
-			keyMap: this.keyMap,
-			actionId,
-			description,
-			bindings,
-			local: this.local,
-			startKeyCapture: this.startKeyCapture,
-			removeBinding: this.removeBinding
+		return {
+			menu: {
+				header: {
+					id: 'bindings-header',
+					type: 'hflex',
+					children: [
+						{
+							id: 'bindings-header-icon',
+							type: 'fchild'
+						},
+						{
+							id: 'bindings-header-text',
+							type: 'fchild',
+							textContent: `Key bindings for "${description}"`
+						},
+						{
+							id: 'bindings-header-close',
+							type: 'fchild'
+						}
+					]
+				},
+				items: [
+					menuItemWithIcon({
+						id: 'add-binding',
+						text: 'Add binding...',
+						action: () => {
+							const { accept, reject } = this.startKeyCapture(actionId);
+							this.controller.update({
+								placeholder: 'Type the keys...',
+								input: {
+									right: {
+										id: 'input-right-1',
+										type: 'hflex',
+										children: [
+											{
+												id: 'accept-key-capture',
+												tag: 'button',
+												attr: {
+													type: 'button',
+													title: 'Options',
+													onclick: accept
+												},
+												classes: ['oneput__icon-button'],
+												innerHTMLUnsafe: tickIcon
+											},
+											{
+												id: 'reject-key-capture',
+												tag: 'button',
+												attr: {
+													type: 'button',
+													title: 'Options',
+													onclick: reject
+												},
+												classes: ['oneput__icon-button'],
+												innerHTMLUnsafe: xIcon
+											}
+										]
+									}
+								}
+							});
+						}
+					}),
+					...bindings.map((binding) => {
+						return menuItemWithIcon({
+							id: binding,
+							text: binding,
+							leftIcon: keyboardIcon,
+							rightIcon: xIcon,
+							action: () => {
+								this.removeBinding(actionId, binding);
+							}
+						});
+					})
+				]
+			}
 		};
-		return this.configureBindingsForActionMenu(this.controller, params);
 	}
 
 	private startKeyCapture = (actionId: string) => {
@@ -133,7 +176,9 @@ export class KeyBindingsController {
 				inputValue: capturedKeys
 					.map(
 						(k) =>
-							`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${k.altKey ? '⌥' : ''}${k.key.toUpperCase()}`
+							`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${
+								k.altKey ? '⌥' : ''
+							}${k.key.toUpperCase()}`
 					)
 					.join(' + ')
 			});

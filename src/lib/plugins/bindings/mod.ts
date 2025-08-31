@@ -47,18 +47,36 @@ export type ConfigureBindingsForActionMenu = (
  * configureBindingsForActionMenu should render a Oneput menu of bindings for a given action.
  */
 export class KeyBindingsController {
-	constructor(
+	static create(
+		controller: Controller,
+		keyMap: KeyBindingMap,
+		local: boolean,
+		keybindingMenuItem: KeybindingMenuItem,
+		configureBindingsForActionMenu: ConfigureBindingsForActionMenu
+	) {
+		return new KeyBindingsController(
+			controller,
+			keyMap,
+			local,
+			keybindingMenuItem,
+			configureBindingsForActionMenu
+		);
+	}
+
+	private constructor(
 		private controller: Controller,
 		private keyMap: KeyBindingMap,
 		private local: boolean,
 		private keybindingMenuItem: KeybindingMenuItem,
 		private configureBindingsForActionMenu: ConfigureBindingsForActionMenu
-	) {}
+	) {
+		this.controller.update(this.keysMenu);
+	}
 
 	/**
 	 * UI for managing a set of action bindings.
 	 */
-	get keysMenu() {
+	private get keysMenu() {
 		return {
 			menu: {
 				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>

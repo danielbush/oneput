@@ -103,28 +103,26 @@ const settingsMenu = (c: Controller) => ({
 				id: 'global-keys',
 				text: 'Set global key bindings...',
 				action: () => {
-					const handler = new KeyBindingsController(
+					KeyBindingsController.create(
 						c,
 						globalKeys,
 						false,
 						keybindingMenuItem,
 						configureBindingsForActionMenu
 					);
-					c.update(handler.keysMenu);
 				}
 			}),
 			menuItemWithIcon({
 				id: 'local-keys',
 				text: 'Set local key bindings...',
 				action: () => {
-					const handler = new KeyBindingsController(
+					KeyBindingsController.create(
 						c,
 						localKeys,
 						true,
 						keybindingMenuItem,
 						configureBindingsForActionMenu
 					);
-					c.update(handler.keysMenu);
 				}
 			})
 		]

@@ -83,13 +83,6 @@ const toBinding = (
 		.join(' ');
 };
 
-export type KeybindingMenuItem = (params: {
-	id: string;
-	text: string;
-	bindings: string[];
-	action: () => void;
-}) => MenuItem;
-
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  */

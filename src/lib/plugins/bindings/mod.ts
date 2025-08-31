@@ -1,7 +1,14 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import { id as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
-import { chevronRightIcon, keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '$lib/ui.js';
+import {
+	chevronRightIcon,
+	keyboardIcon,
+	menuItemWithIcon,
+	squareFunctionIcon,
+	tickIcon,
+	xIcon
+} from '$lib/ui.js';
 
 export const keybindingMenuItem: (params: {
 	id: string;
@@ -24,7 +31,7 @@ export const keybindingMenuItem: (params: {
 			{
 				id: randomId(),
 				classes: ['oneput__icon'],
-				innerHTMLUnsafe: keyboardIcon
+				innerHTMLUnsafe: squareFunctionIcon
 			},
 			{
 				id: randomId(),

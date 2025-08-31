@@ -25,13 +25,13 @@ export class NavigateHeadings {
 				this.filteredHeadings = this.headings.filter((heading) => {
 					return heading.textContent.includes(text);
 				});
-				this.updateMenu();
+				this.updateUI();
 			}
 		});
-		this.updateMenu();
+		this.updateUI();
 	}
 
-	private updateMenu = () => {
+	private updateUI = () => {
 		this.controller.update({
 			menu: {
 				items: this.filteredHeadings.map((h) =>
@@ -44,7 +44,7 @@ export class NavigateHeadings {
 							// Reset the input and menu:
 							this.controller.update({ inputValue: '' });
 							this.filteredHeadings = this.headings;
-							this.updateMenu();
+							this.updateUI();
 						}
 					})
 				)

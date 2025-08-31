@@ -38,10 +38,6 @@ export class Controller {
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {}
 
-	setDefaultPlaceholder(placeholder: string) {
-		this.defaultPlaceholder = placeholder;
-	}
-
 	get menuOpen() {
 		return this.currentProps.menuOpen ?? false;
 	}

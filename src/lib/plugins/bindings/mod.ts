@@ -47,13 +47,13 @@ export class KeyBindingsController {
 		private local: boolean,
 		private keybindingMenuItem: KeybindingMenuItem
 	) {
-		this.actionsMenu();
+		this.actionsUI();
 	}
 
 	/**
 	 * UI for managing a set of action bindings.
 	 */
-	private actionsMenu() {
+	private actionsUI() {
 		this.controller.update({
 			menu: {
 				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
@@ -62,7 +62,7 @@ export class KeyBindingsController {
 						text: description,
 						bindings,
 						action: () => {
-							this.actionMenu(id);
+							this.actionUI(id);
 						}
 					})
 				)
@@ -70,7 +70,7 @@ export class KeyBindingsController {
 		});
 	}
 
-	private actionMenu(actionId: string) {
+	private actionUI(actionId: string) {
 		const { description, bindings } = this.keyMap[actionId];
 		this.controller.update({
 			placeholder: '',
@@ -101,7 +101,7 @@ export class KeyBindingsController {
 						id: 'add-binding',
 						text: 'Add binding...',
 						action: () => {
-							this.captureBindingMenu(actionId);
+							this.captureBindingUI(actionId);
 						}
 					}),
 					...bindings.map((binding) => {
@@ -120,7 +120,7 @@ export class KeyBindingsController {
 		});
 	}
 
-	private captureBindingMenu(actionId: string) {
+	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
 		this.controller.update({
 			placeholder: 'Type the keys...',
@@ -206,12 +206,12 @@ export class KeyBindingsController {
 				}
 				window.removeEventListener('keydown', keyListener);
 				this.controller.enableKeys();
-				this.actionMenu(actionId);
+				this.actionUI(actionId);
 			},
 			reject: () => {
 				window.removeEventListener('keydown', keyListener);
 				this.controller.enableKeys();
-				this.actionMenu(actionId);
+				this.actionUI(actionId);
 			}
 		};
 	};
@@ -223,6 +223,6 @@ export class KeyBindingsController {
 		}
 		this.keyMap[actionId].bindings = this.keyMap[actionId].bindings.filter((b) => b !== binding);
 		this.controller.update(this.local ? { localKeys: this.keyMap } : { globalKeys: this.keyMap });
-		this.actionMenu(actionId);
+		this.actionUI(actionId);
 	};
 }

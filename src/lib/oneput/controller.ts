@@ -46,7 +46,7 @@ export class Controller {
 		return this.currentProps.menuItemFocus ?? 0;
 	}
 
-	get menuItemsCount() {
+	get menuItemCount() {
 		return this.currentProps.menu?.items?.length ?? 1;
 	}
 
@@ -64,12 +64,12 @@ export class Controller {
 
 	focusNextMenuItem() {
 		this.currentProps.menuItemFocus =
-			(this.menuItemFocus + 1 + this.menuItemsCount) % this.menuItemsCount;
+			(this.menuItemFocus + 1 + this.menuItemCount) % this.menuItemCount;
 	}
 
 	focusPreviousMenuItem() {
 		this.currentProps.menuItemFocus =
-			(this.menuItemFocus - 1 + this.menuItemsCount) % this.menuItemsCount;
+			(this.menuItemFocus - 1 + this.menuItemCount) % this.menuItemCount;
 	}
 
 	doAction() {

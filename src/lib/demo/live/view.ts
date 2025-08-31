@@ -58,7 +58,7 @@ export const localKeys: KeyBindingMap = {
 	}
 };
 
-const rootMenu = (c: Controller) => ({
+const rootUI = (c: Controller) => ({
 	input: {},
 	menu: {
 		items: [
@@ -66,7 +66,7 @@ const rootMenu = (c: Controller) => ({
 				id: 'settings',
 				text: 'Settings...',
 				action: () => {
-					c.update(settingsMenu(c));
+					c.update(settingsUI(c));
 				}
 			}),
 			menuItemWithIcon({
@@ -95,7 +95,7 @@ const rootMenu = (c: Controller) => ({
 	}
 });
 
-const settingsMenu = (c: Controller) => ({
+const settingsUI = (c: Controller) => ({
 	menu: {
 		items: [
 			menuItemWithIcon({
@@ -123,6 +123,6 @@ export const setController = (c: Controller) => {
 		globalKeys: globalKeys,
 		localKeys: localKeys,
 		// Setting input will show the input part of Oneput.
-		...rootMenu(c)
+		...rootUI(c)
 	});
 };

@@ -2,7 +2,7 @@ import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import { keybindingMenuItem, menuItemWithIcon, piIcon } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { configureBindingsForActionMenu } from '$lib/plugins/bindings/ui.js';
-import { id } from '$lib/oneput/lib.js';
+import { NavigateHeadings } from './NavigateHeadings.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -74,42 +74,7 @@ const rootMenu = (c: Controller) => ({
 				id: 'navigate-outline',
 				text: 'Navigate outline...',
 				action: () => {
-					const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-					const updateMenu = (headings: Element[]) => {
-						c.update({
-							menu: {
-								items: headings.map((h) => ({
-									id: id(),
-									tag: 'button',
-									type: 'hflex',
-									children: [
-										{
-											id: id(),
-											classes: ['oneput__menu-item-body'],
-											type: 'fchild',
-											textContent: h.textContent
-										}
-									],
-									action: () => {
-										h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-										c.closeMenu();
-										c.update({ inputValue: '' });
-									}
-								}))
-							}
-						});
-					};
-					updateMenu(headings);
-					c.update({
-						handleInputChange: (evt) => {
-							const text = (evt.target as HTMLInputElement).value;
-							updateMenu(
-								headings.filter((heading) => {
-									return heading.textContent.includes(text);
-								})
-							);
-						}
-					});
+					NavigateHeadings.create(c, document);
 				}
 			}),
 			menuItemWithIcon({

@@ -1,5 +1,5 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import { keybindingMenuItem, menuItemWithIcon, piIcon } from '$lib/ui.js';
+import { menuItemWithIcon, piIcon } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 
@@ -102,14 +102,14 @@ const settingsUI = (c: Controller) => ({
 				id: 'global-keys',
 				text: 'Set global key bindings...',
 				action: () => {
-					KeyBindingsController.create(c, globalKeys, false, keybindingMenuItem);
+					KeyBindingsController.create(c, globalKeys, false);
 				}
 			}),
 			menuItemWithIcon({
 				id: 'local-keys',
 				text: 'Set local key bindings...',
 				action: () => {
-					KeyBindingsController.create(c, localKeys, true, keybindingMenuItem);
+					KeyBindingsController.create(c, localKeys, true);
 				}
 			})
 		]

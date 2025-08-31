@@ -1,6 +1,61 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import type { MenuItem } from '$lib/oneput/lib.js';
-import { keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '$lib/ui.js';
+import { id as randomId } from '$lib/oneput/lib.js';
+import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
+import { chevronRightIcon, keyboardIcon, menuItemWithIcon, tickIcon, xIcon } from '$lib/ui.js';
+
+export const keybindingMenuItem: (params: {
+	id: string;
+	text: string;
+	/**
+	 * To display to the user.
+	 */
+	bindings: string[];
+	action: () => void;
+}) => MenuItem = ({ id, text, action, bindings }) => {
+	let bindingHTML = '<code><kbd>-</kbd></code>';
+	if (bindings.length > 0) {
+		bindingHTML = '<code><kbd>' + bindings[0] + '</kbd></code>';
+	}
+	return {
+		id,
+		type: 'hflex',
+		tag: 'button',
+		children: [
+			{
+				id: randomId(),
+				classes: ['oneput__icon'],
+				innerHTMLUnsafe: keyboardIcon
+			},
+			{
+				id: randomId(),
+				classes: ['oneput__menu-item-body'],
+				textContent: text
+			},
+			{
+				id: randomId(),
+				type: 'hflex',
+				children: [
+					bindings.length > 1 && {
+						id: randomId(),
+						innerHTMLUnsafe: `(${bindings.length})`
+					},
+					{
+						id: randomId(),
+						innerHTMLUnsafe: bindingHTML,
+						classes: ['myapp__kbd']
+					},
+					{
+						id: randomId(),
+						classes: ['oneput__icon'],
+						innerHTMLUnsafe: chevronRightIcon
+					}
+				].filter(Boolean) as FlexParams['children']
+			}
+		],
+		attr: {},
+		action
+	};
+};
 
 const toBinding = (
 	keys: {
@@ -32,20 +87,14 @@ export type KeybindingMenuItem = (params: {
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  */
 export class KeyBindingsController {
-	static create(
-		controller: Controller,
-		keyMap: KeyBindingMap,
-		local: boolean,
-		keybindingMenuItem: KeybindingMenuItem
-	) {
-		return new KeyBindingsController(controller, keyMap, local, keybindingMenuItem);
+	static create(controller: Controller, keyMap: KeyBindingMap, local: boolean) {
+		return new KeyBindingsController(controller, keyMap, local);
 	}
 
 	private constructor(
 		private controller: Controller,
 		private keyMap: KeyBindingMap,
-		private local: boolean,
-		private keybindingMenuItem: KeybindingMenuItem
+		private local: boolean
 	) {
 		this.actionsUI();
 	}
@@ -57,7 +106,7 @@ export class KeyBindingsController {
 		this.controller.update({
 			menu: {
 				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
-					this.keybindingMenuItem({
+					keybindingMenuItem({
 						id,
 						text: description,
 						bindings,

@@ -13,6 +13,8 @@ export const xIcon =
 	'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
 export const tickIcon =
 	'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>';
+export const squareFunctionIcon =
+	'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-function-icon lucide-square-function"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3"/><path d="M9 11.2h5.7"/></svg>';
 
 /**
  * Menu item with no left icon, give more room for main content.
@@ -93,60 +95,6 @@ export const menuItemWithIcon: (params: {
 			}
 		],
 		attr,
-		action
-	};
-};
-
-export const keybindingMenuItem: (params: {
-	id: string;
-	text: string;
-	/**
-	 * To display to the user.
-	 */
-	bindings: string[];
-	action: () => void;
-}) => MenuItem = ({ id, text, action, bindings }) => {
-	let bindingHTML = '<code><kbd>-</kbd></code>';
-	if (bindings.length > 0) {
-		bindingHTML = '<code><kbd>' + bindings[0] + '</kbd></code>';
-	}
-	return {
-		id,
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{
-				id: randomId(),
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: keyboardIcon
-			},
-			{
-				id: randomId(),
-				classes: ['oneput__menu-item-body'],
-				textContent: text
-			},
-			{
-				id: randomId(),
-				type: 'hflex',
-				children: [
-					bindings.length > 1 && {
-						id: randomId(),
-						innerHTMLUnsafe: `(${bindings.length})`
-					},
-					{
-						id: randomId(),
-						innerHTMLUnsafe: bindingHTML,
-						classes: ['myapp__kbd']
-					},
-					{
-						id: randomId(),
-						classes: ['oneput__icon'],
-						innerHTMLUnsafe: chevronRightIcon
-					}
-				].filter(Boolean) as FlexParams['children']
-			}
-		],
-		attr: {},
 		action
 	};
 };

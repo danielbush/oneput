@@ -75,6 +75,7 @@ export class KeyBindingsController {
 		this.controller.update({
 			placeholder: '',
 			inputValue: '',
+			input: {},
 			menu: {
 				header: {
 					id: 'bindings-header',

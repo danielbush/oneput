@@ -2,6 +2,7 @@ import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import { id as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
+	arrowLeftIcon,
 	chevronRightIcon,
 	keyboardIcon,
 	menuItemWithIcon,
@@ -87,14 +88,15 @@ const toBinding = (
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  */
 export class KeyBindingsController {
-	static create(controller: Controller, keyMap: KeyBindingMap, local: boolean) {
-		return new KeyBindingsController(controller, keyMap, local);
+	static create(controller: Controller, keyMap: KeyBindingMap, local: boolean, back: () => void) {
+		return new KeyBindingsController(controller, keyMap, local, back);
 	}
 
 	private constructor(
 		private controller: Controller,
 		private keyMap: KeyBindingMap,
-		private local: boolean
+		private local: boolean,
+		private back: () => void
 	) {
 		this.actionsUI();
 	}
@@ -102,25 +104,35 @@ export class KeyBindingsController {
 	/**
 	 * UI for managing a set of action bindings.
 	 */
-	private actionsUI() {
+	private actionsUI = () => {
+		this.controller.setBackBinding(this.back);
 		this.controller.update({
 			menu: {
-				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
-					keybindingMenuItem({
-						id,
-						text: description,
-						bindings,
-						action: () => {
-							this.actionUI(id);
-						}
-					})
-				)
+				items: [
+					menuItemWithIcon({
+						id: randomId(),
+						text: 'Back...',
+						leftIcon: arrowLeftIcon,
+						action: this.back
+					}),
+					...Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
+						keybindingMenuItem({
+							id,
+							text: description,
+							bindings,
+							action: () => {
+								this.actionUI(id);
+							}
+						})
+					)
+				]
 			}
 		});
-	}
+	};
 
-	private actionUI(actionId: string) {
+	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyMap[actionId];
+		this.controller.setBackBinding(this.actionsUI);
 		this.controller.update({
 			placeholder: '',
 			inputValue: '',
@@ -147,6 +159,12 @@ export class KeyBindingsController {
 				},
 				items: [
 					menuItemWithIcon({
+						id: randomId(),
+						text: 'Back...',
+						leftIcon: arrowLeftIcon,
+						action: this.back
+					}),
+					menuItemWithIcon({
 						id: 'add-binding',
 						text: 'Add binding...',
 						action: () => {
@@ -167,7 +185,7 @@ export class KeyBindingsController {
 				]
 			}
 		});
-	}
+	};
 
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);

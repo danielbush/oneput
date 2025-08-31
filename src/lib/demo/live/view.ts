@@ -1,5 +1,5 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import { menuItemWithIcon, piIcon } from '$lib/ui.js';
+import { arrowLeftIcon, menuItemWithIcon, piIcon } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 
@@ -27,6 +27,13 @@ export const localKeys: KeyBindingMap = {
 			c.doAction();
 		},
 		description: 'Do action'
+	},
+	back: {
+		bindings: ['Meta+B'],
+		action: (c) => {
+			c.goBack();
+		},
+		description: 'Back'
 	},
 	focusInput: {
 		bindings: ['$mod+[', 'Control+['],
@@ -58,71 +65,92 @@ export const localKeys: KeyBindingMap = {
 	}
 };
 
-const rootUI = (c: Controller) => ({
-	input: {},
-	menu: {
-		items: [
-			menuItemWithIcon({
-				id: 'settings',
-				text: 'Settings...',
-				action: () => {
-					c.update(settingsUI(c));
-				}
-			}),
-			menuItemWithIcon({
-				id: 'navigate-outline',
-				text: 'Navigate outline...',
-				action: () => {
-					NavigateHeadings.create(c, document);
-				}
-			}),
-			menuItemWithIcon({
-				id: 'insert-katex',
-				leftIcon: piIcon,
-				text: 'Insert katex...',
-				action: () => {
-					console.log('insert katex');
-				}
-			}),
-			menuItemWithIcon({
-				id: 'close-menu',
-				text: 'Close menu',
-				action: () => {
-					c.closeMenu();
-				}
-			})
-		]
-	}
-});
+const rootUI = (c: Controller) => {
+	c.setBackBinding(() => {
+		c.closeMenu();
+	});
+	c.update({
+		input: {},
+		menu: {
+			items: [
+				menuItemWithIcon({
+					id: 'settings',
+					text: 'Settings...',
+					action: () => {
+						settingsUI(c, () => {
+							rootUI(c);
+						});
+					}
+				}),
+				menuItemWithIcon({
+					id: 'navigate-outline',
+					text: 'Navigate outline...',
+					action: () => {
+						NavigateHeadings.create(c, document, () => {
+							rootUI(c);
+						});
+					}
+				}),
+				menuItemWithIcon({
+					id: 'insert-katex',
+					leftIcon: piIcon,
+					text: 'Insert katex...',
+					action: () => {
+						console.log('insert katex');
+					}
+				}),
+				menuItemWithIcon({
+					id: 'close-menu',
+					text: 'Close menu',
+					action: () => {
+						c.closeMenu();
+					}
+				})
+			]
+		}
+	});
+};
 
-const settingsUI = (c: Controller) => ({
-	menu: {
-		items: [
-			menuItemWithIcon({
-				id: 'global-keys',
-				text: 'Set global key bindings...',
-				action: () => {
-					KeyBindingsController.create(c, globalKeys, false);
-				}
-			}),
-			menuItemWithIcon({
-				id: 'local-keys',
-				text: 'Set local key bindings...',
-				action: () => {
-					KeyBindingsController.create(c, localKeys, true);
-				}
-			})
-		]
-	}
-});
+const settingsUI = (c: Controller, back: () => void) => {
+	c.setBackBinding(back);
+	c.update({
+		menu: {
+			items: [
+				menuItemWithIcon({
+					id: 'back',
+					text: 'Back...',
+					leftIcon: arrowLeftIcon,
+					action: back
+				}),
+				menuItemWithIcon({
+					id: 'global-keys',
+					text: 'Set global key bindings...',
+					action: () => {
+						KeyBindingsController.create(c, globalKeys, false, () => {
+							settingsUI(c, back);
+						});
+					}
+				}),
+				menuItemWithIcon({
+					id: 'local-keys',
+					text: 'Set local key bindings...',
+					action: () => {
+						KeyBindingsController.create(c, localKeys, true, () => {
+							settingsUI(c, back);
+						});
+					}
+				})
+			]
+		}
+	});
+};
 
 // Our app starts in this callback.  We get the controller and we can set
 // keys and configure oneput.
 export const setController = (c: Controller) => {
 	c.update({
 		globalKeys: globalKeys,
-		localKeys: localKeys,
-		// Setting input will show the input part of Oneput.
-		...rootUI(c)
+		localKeys: localKeys
 	});
+	rootUI(c);
 };

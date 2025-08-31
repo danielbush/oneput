@@ -176,6 +176,12 @@ export class Controller {
 			this.currentProps.menuItemFocus = 0;
 		}
 	}
+
+	goBack: () => void = () => {};
+
+	setBackBinding(back?: () => void) {
+		this.goBack = back || (() => {});
+	}
 }
 
 /**

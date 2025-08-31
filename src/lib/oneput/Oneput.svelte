@@ -3,6 +3,7 @@
 	import { type MenuItem, type MenuItemAny, type OneputProps } from './lib.js';
 	let {
 		inputElement = $bindable(),
+		inputValue = $bindable(''),
 		menuItemFocus = $bindable(0),
 		controller,
 		...props
@@ -37,6 +38,14 @@
 
 	// See UNWANTED_AUTOCOMPLETE
 	const autocomplete = 'one-time-code';
+
+	function handleInputChange(evt: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+		// Keep inputValue in sync with what the user types:
+		inputValue = evt.currentTarget.value;
+		// Let the user response to what was typed:
+		props.handleInputChange(evt);
+		// Note: the user can set inputValue directly and it will pass down to this component also.
+	}
 </script>
 
 <div class="oneput__container">
@@ -84,8 +93,8 @@
 					<input
 						id="oneput__input"
 						bind:this={inputElement}
-						value={props.inputValue}
-						oninput={props.handleInputChange}
+						value={inputValue}
+						oninput={handleInputChange}
 						class="oneput__input"
 						type="text"
 						placeholder={props.placeholder}

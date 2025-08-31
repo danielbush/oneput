@@ -93,6 +93,7 @@ const rootMenu = (c: Controller) => ({
 									action: () => {
 										h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 										c.closeMenu();
+										c.update({ inputValue: '' });
 									}
 								}))
 							}

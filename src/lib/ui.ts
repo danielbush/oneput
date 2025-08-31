@@ -14,6 +14,41 @@ export const xIcon =
 export const tickIcon =
 	'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>';
 
+/**
+ * Menu item with no left icon, give more room for main content.
+ */
+export const menuItemNoIcon: (params: {
+	id: string;
+	rightIcon?: string;
+	text: string;
+	action?: () => void;
+}) => MenuItem = ({ id, rightIcon, text, action }) => {
+	const attr: FlexParams['attr'] = {};
+	return {
+		id,
+		type: 'hflex',
+		tag: 'button',
+		children: [
+			{
+				id: randomId(),
+				classes: ['oneput__menu-item-body'],
+				textContent: text
+			},
+			{
+				id: randomId(),
+				classes: ['oneput__icon'],
+				innerHTMLUnsafe: rightIcon
+			}
+		],
+		attr,
+		action
+	};
+};
+
+/**
+ * This is a menu item with a left icon and a right icon.  If no left icon is
+ * given, there will be a blank space.
+ */
 export const menuItemWithIcon: (params: {
 	id: string;
 	leftIcon?: string;
@@ -21,6 +56,8 @@ export const menuItemWithIcon: (params: {
 	text: string;
 	action?: () => void;
 }) => MenuItem = ({ id, leftIcon, rightIcon, text, action }) => {
+	const attr: FlexParams['attr'] = {};
+	/*
 	const attr: FlexParams['attr'] = {
 		// Demo hover handling.  Oneput injects a pointer event to handle
 		// menu item focus in addition to this.
@@ -33,6 +70,7 @@ export const menuItemWithIcon: (params: {
 			console.log('client onpointerdown', id);
 		}
 	};
+	*/
 	return {
 		id,
 		type: 'hflex',

@@ -149,7 +149,12 @@ export const menuItems1: MenuItemAny[] = [
 		type: 'hflex',
 		tag: 'button',
 		children: [
-			{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
+			{
+				id: id(),
+				classes: ['oneput__icon'],
+				style: { alignSelf: 'flex-start' },
+				textContent: '🍔'
+			},
 			{
 				id: id(),
 				type: 'vflex',
@@ -178,7 +183,12 @@ export const menuItems1: MenuItemAny[] = [
 		type: 'hflex',
 		tag: 'div',
 		children: [
-			{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
+			{
+				id: id(),
+				classes: ['oneput__icon'],
+				style: { alignSelf: 'flex-start' },
+				textContent: '🍔'
+			},
 			{
 				id: id(),
 				type: 'vflex',

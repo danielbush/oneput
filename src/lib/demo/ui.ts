@@ -109,9 +109,8 @@ export const menuItems1: MenuItemAny[] = [
 		children: [
 			{
 				id: id(),
-				tag: 'button',
-				attr: { type: 'button', title: 'Search' },
-				classes: ['oneput__icon-button'],
+				classes: ['oneput__icon'],
+				style: { alignSelf: 'flex-start' },
 				innerHTMLUnsafe: '<i data-lucide="search"></i>'
 			},
 			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Interactive menu item' },

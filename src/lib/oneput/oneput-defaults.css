@@ -385,7 +385,7 @@ button.oneput__menu-item:active {
 	border: var(--oneput-button-border);
 	border-radius: var(--oneput-icon-border-radius);
 	padding: var(--oneput-icon-padding);
-	min-width: 10rem;
+	min-width: 7rem;
 	box-shadow: 0 0 5px 1px rgb(0 0 0 / 0.3);
 	outline: none !important;
 }

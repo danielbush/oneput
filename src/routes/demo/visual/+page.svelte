@@ -115,7 +115,63 @@
 					outerLeft: ui.inputOuterLeft1,
 					outerRight: ui.inputOuterRight1
 				}}
-				placeholder="Placeholder..."
+				placeholder="Type enter to continue..."
+				inputValue=""
+				handleInputChange={() => {
+					console.log('handleInputChange');
+				}}
+			/>
+		</section>
+		<section class="demo-example">
+			<h2>Confirm</h2>
+			<Oneput
+				controller={new NullController()}
+				menuOpen={true}
+				menu={{
+					items: [
+						{
+							id: 'alert',
+							type: 'vflex',
+							classes: ['oneput__menu-body-content'],
+							children: [
+								{
+									id: 'alert-title',
+									innerHTMLUnsafe: '<h2>Confirm?</h2>'
+								},
+								{
+									id: 'alert-message',
+									innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
+								},
+								{
+									id: 'confirm-button-group',
+									type: 'hflex',
+									style: { gap: '1rem' },
+									children: [
+										{
+											id: 'confirm-yes-button',
+											tag: 'button',
+											classes: ['oneput__primary-button'],
+											textContent: 'Yes'
+										},
+										{
+											id: 'confirm-no-button',
+											tag: 'button',
+											classes: ['oneput__primary-button'],
+											textContent: 'No'
+										}
+									]
+								}
+							]
+						}
+					]
+				}}
+				input={{
+					left: ui.inputLeft1,
+					right: ui.inputRight1,
+					outerLeft: ui.inputOuterLeft1,
+					outerRight: ui.inputOuterRight1
+				}}
+				placeholder="Type y or n..."
 				inputValue=""
 				handleInputChange={() => {
 					console.log('handleInputChange');

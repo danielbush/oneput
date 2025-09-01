@@ -403,6 +403,12 @@ button.oneput__menu-item:active {
 	border-radius: var(--oneput-icon-border-radius);
 	padding: var(--oneput-icon-padding);
 }
+.oneput__checkbox {
+	padding: 1rem;
+	flex: 0 0 var(--oneput-icon-width);
+	justify-content: center;
+	margin: 7.5px 0;
+}
 
 .oneput__icon-toggle-button,
 .oneput__icon-button,

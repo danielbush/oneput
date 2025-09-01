@@ -24,7 +24,7 @@
 			menuOpen={oneputState.menuOpen}
 			menu={{
 				header: ui.menuHeader1,
-				items: ui.menuItems1,
+				items: ui.menuItems1(),
 				footer: ui.menuFooter1(data.appState.zap)
 			}}
 			inner={ui.inner1}

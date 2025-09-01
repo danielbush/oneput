@@ -41,261 +41,298 @@ export const menuHeader1: FlexParams = {
 	]
 };
 
-export const menuItems1: MenuItemAny[] = [
-	{
-		id: 'menu-item-1',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{ id: id(), classes: ['oneput__icon'], textContent: '📆' },
-			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Menu Item 1' },
-			{
-				id: id(),
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
-			}
-		]
-	},
-	{
-		id: 'menu-item-2',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
-			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Menu Item 2' },
-			{
-				id: id(),
-				type: 'hflex',
-				children: [
-					{
-						id: id(),
-						innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
-						classes: ['myapp__kbd']
+export const menuItems1: () => MenuItemAny[] = () => {
+	const prefix = id();
+	const items: MenuItemAny[] = [
+		{
+			id: 'menu-item-1',
+			type: 'hflex',
+			tag: 'button',
+			children: [
+				{ id: id(), classes: ['oneput__icon'], textContent: '📆' },
+				{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Menu Item 1' },
+				{
+					id: id(),
+					classes: ['oneput__icon'],
+					innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+				}
+			]
+		},
+		{
+			id: 'menu-item-2',
+			type: 'hflex',
+			tag: 'button',
+			children: [
+				{ id: id(), classes: ['oneput__icon'], textContent: '🍔' },
+				{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Menu Item 2' },
+				{
+					id: id(),
+					type: 'hflex',
+					children: [
+						{
+							id: id(),
+							innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+							classes: ['myapp__kbd']
+						},
+						{
+							id: id(),
+							classes: ['oneput__icon'],
+							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+						}
+					]
+				}
+			]
+		},
+		{
+			id: 'menu-item-no-icon-1',
+			type: 'hflex',
+			tag: 'button',
+			children: [
+				{ id: id(), classes: ['oneput__icon'] },
+				{
+					id: id(),
+					classes: ['oneput__menu-item-body'],
+					textContent: 'Plain Item 1...'
+				}
+			]
+		},
+		{
+			id: id(),
+			tag: 'hr',
+			type: 'hflex',
+			divider: true
+			// subtype: 'menu-divider'
+			// classes: ['oneput__menu-divider']
+		},
+		{
+			id: 'menu-item-3',
+			type: 'hflex',
+			tag: 'div',
+			children: [
+				{
+					id: id(),
+					classes: ['oneput__icon'],
+					style: { alignSelf: 'flex-start' },
+					innerHTMLUnsafe: '<i data-lucide="search"></i>'
+				},
+				{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Interactive menu item' },
+				{
+					id: id(),
+					type: 'hflex',
+					children: [
+						{
+							id: id(),
+							tag: 'button',
+							attr: { type: 'button', title: 'Play' },
+							classes: ['oneput__icon-button'],
+							innerHTMLUnsafe: '<i data-lucide="play"></i>'
+						},
+						{
+							id: id(),
+							tag: 'button',
+							attr: { type: 'button', title: 'Pause' },
+							classes: ['oneput__icon-button'],
+							innerHTMLUnsafe: '<i data-lucide="pause"></i>'
+						},
+						{
+							id: id(),
+							tag: 'button',
+							attr: { type: 'button', title: 'Stop' },
+							classes: ['oneput__icon-button'],
+							innerHTMLUnsafe: '<i data-lucide="square"></i>'
+						}
+					]
+				}
+			]
+		},
+		{
+			id: 'menu-item-4',
+			type: 'hflex',
+			tag: 'button',
+			children: [
+				{
+					id: id(),
+					classes: ['oneput__icon'],
+					style: { alignSelf: 'flex-start' },
+					textContent: '🍔'
+				},
+				{
+					id: id(),
+					type: 'vflex',
+					classes: ['oneput__menu-item-body'],
+					children: [
+						{ id: id(), textContent: 'Complex menu item' },
+						{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'] },
+						{
+							id: id(),
+							classes: ['myapp__menu-item-description'],
+							textContent:
+								'This is some sort of description for this menu item.  This is some sort of description for this menu item.'
+						}
+					]
+				},
+				{
+					id: id(),
+					classes: ['oneput__icon'],
+					style: { alignSelf: 'flex-start' },
+					innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+				}
+			]
+		},
+		{
+			id: 'menu-item-5',
+			type: 'hflex',
+			tag: 'div',
+			children: [
+				{
+					id: id(),
+					classes: ['oneput__icon'],
+					style: { alignSelf: 'flex-start' },
+					textContent: '🍔'
+				},
+				{
+					id: id(),
+					type: 'vflex',
+					classes: ['oneput__menu-item-body'],
+					children: [
+						{ id: id(), textContent: 'Interactive complex menu item' },
+						{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'], style: { padding: '0' } },
+						{
+							id: id(),
+							type: 'hflex',
+							style: { gap: '0.3rem' },
+							children: [
+								{
+									id: id(),
+									classes: ['myapp__menu-item-description'],
+									textContent:
+										'This is some sort of description for this menu item. This is some sort of description for this menu item.  This is some sort of description for this menu item.'
+								},
+								{
+									id: id(),
+									type: 'hflex',
+									classes: ['oneput__icon-button-group'],
+									style: { alignSelf: 'flex-start' },
+									children: [
+										{
+											id: id(),
+											tag: 'button',
+											attr: { type: 'button', title: 'database' },
+											classes: ['oneput__icon-button'],
+											innerHTMLUnsafe: '<i data-lucide="info"></i>'
+										},
+										{
+											id: id(),
+											tag: 'button',
+											attr: { type: 'button', title: 'share' },
+											classes: ['oneput__icon-button'],
+											innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			id: id(),
+			type: 'hflex',
+			divider: true,
+			// subtype: 'menu-divider',
+			// classes: ['oneput__menu-divider'],
+			children: [
+				{ id: id(), classes: ['oneput__spacer'] },
+				{
+					id: id(),
+					type: 'vflex',
+					classes: ['oneput__menu-divider-body'],
+					children: [
+						{
+							id: id(),
+							textContent: 'Divider title',
+							classes: ['oneput__menu-divider-title']
+						}
+					]
+				}
+			]
+		},
+		{
+			id: 'menu-item-no-icon-2',
+			type: 'hflex',
+			tag: 'button',
+			children: [
+				{ id: id(), classes: ['oneput__icon'] },
+				{
+					id: id(),
+					classes: ['oneput__menu-item-body'],
+					textContent: 'Plain Item 1...'
+				}
+			]
+		},
+		{
+			id: 'menu-item-no-icon-3',
+			type: 'hflex',
+			tag: 'button',
+			children: [
+				{ id: id(), classes: ['oneput__icon'] },
+				{
+					id: id(),
+					classes: ['oneput__menu-item-body'],
+					textContent: 'Plain Item 2...'
+				}
+			]
+		},
+		{
+			id: 'menu-item-no-icon-4',
+			type: 'hflex',
+			tag: 'button',
+			attr: { type: 'button' },
+			children: [
+				{
+					id: prefix + 'checkbox-1',
+					tag: 'input',
+					attr: { type: 'checkbox', title: 'checkbox-1' },
+					classes: ['oneput__checkbox']
+				},
+				{
+					id: id(),
+					tag: 'label',
+					attr: {
+						for: prefix + 'checkbox-1'
 					},
-					{
-						id: id(),
-						classes: ['oneput__icon'],
-						innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
-					}
-				]
-			}
-		]
-	},
-	{
-		id: 'menu-item-no-icon-1',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{ id: id(), classes: ['oneput__icon'] },
-			{
-				id: id(),
-				classes: ['oneput__menu-item-body'],
-				textContent: 'Plain Item 1...'
-			}
-		]
-	},
-	{
-		id: id(),
-		tag: 'hr',
-		type: 'hflex',
-		divider: true
-		// subtype: 'menu-divider'
-		// classes: ['oneput__menu-divider']
-	},
-	{
-		id: 'menu-item-3',
-		type: 'hflex',
-		tag: 'div',
-		children: [
-			{
-				id: id(),
-				classes: ['oneput__icon'],
-				style: { alignSelf: 'flex-start' },
-				innerHTMLUnsafe: '<i data-lucide="search"></i>'
-			},
-			{ id: id(), classes: ['oneput__menu-item-body'], textContent: 'Interactive menu item' },
-			{
-				id: id(),
-				type: 'hflex',
-				children: [
-					{
-						id: id(),
-						tag: 'button',
-						attr: { type: 'button', title: 'Play' },
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: '<i data-lucide="play"></i>'
+					classes: ['oneput__menu-item-body'],
+					textContent: 'Checkbox Item 1...'
+				}
+			]
+		},
+		{
+			id: 'menu-item-no-icon-5',
+			type: 'hflex',
+			tag: 'button',
+			attr: { type: 'button' },
+			children: [
+				{
+					id: prefix + 'checkbox-2',
+					tag: 'input',
+					attr: { type: 'checkbox', title: 'checkbox-2', checked: true },
+					classes: ['oneput__checkbox']
+				},
+				{
+					id: id(),
+					tag: 'label',
+					attr: {
+						for: prefix + 'checkbox-2'
 					},
-					{
-						id: id(),
-						tag: 'button',
-						attr: { type: 'button', title: 'Pause' },
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: '<i data-lucide="pause"></i>'
-					},
-					{
-						id: id(),
-						tag: 'button',
-						attr: { type: 'button', title: 'Stop' },
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: '<i data-lucide="square"></i>'
-					}
-				]
-			}
-		]
-	},
-	{
-		id: 'menu-item-4',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{
-				id: id(),
-				classes: ['oneput__icon'],
-				style: { alignSelf: 'flex-start' },
-				textContent: '🍔'
-			},
-			{
-				id: id(),
-				type: 'vflex',
-				classes: ['oneput__menu-item-body'],
-				children: [
-					{ id: id(), textContent: 'Complex menu item' },
-					{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'] },
-					{
-						id: id(),
-						classes: ['myapp__menu-item-description'],
-						textContent:
-							'This is some sort of description for this menu item.  This is some sort of description for this menu item.'
-					}
-				]
-			},
-			{
-				id: id(),
-				classes: ['oneput__icon'],
-				style: { alignSelf: 'flex-start' },
-				innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
-			}
-		]
-	},
-	{
-		id: 'menu-item-5',
-		type: 'hflex',
-		tag: 'div',
-		children: [
-			{
-				id: id(),
-				classes: ['oneput__icon'],
-				style: { alignSelf: 'flex-start' },
-				textContent: '🍔'
-			},
-			{
-				id: id(),
-				type: 'vflex',
-				classes: ['oneput__menu-item-body'],
-				children: [
-					{ id: id(), textContent: 'Interactive complex menu item' },
-					{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'], style: { padding: '0' } },
-					{
-						id: id(),
-						type: 'hflex',
-						style: { gap: '0.3rem' },
-						children: [
-							{
-								id: id(),
-								classes: ['myapp__menu-item-description'],
-								textContent:
-									'This is some sort of description for this menu item. This is some sort of description for this menu item.  This is some sort of description for this menu item.'
-							},
-							{
-								id: id(),
-								type: 'hflex',
-								classes: ['oneput__icon-button-group'],
-								style: { alignSelf: 'flex-start' },
-								children: [
-									{
-										id: id(),
-										tag: 'button',
-										attr: { type: 'button', title: 'database' },
-										classes: ['oneput__icon-button'],
-										innerHTMLUnsafe: '<i data-lucide="info"></i>'
-									},
-									{
-										id: id(),
-										tag: 'button',
-										attr: { type: 'button', title: 'share' },
-										classes: ['oneput__icon-button'],
-										innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
-									}
-								]
-							}
-						]
-					}
-				]
-			}
-		]
-	},
-	{
-		id: id(),
-		type: 'hflex',
-		divider: true,
-		// subtype: 'menu-divider',
-		// classes: ['oneput__menu-divider'],
-		children: [
-			{ id: id(), classes: ['oneput__spacer'] },
-			{
-				id: id(),
-				type: 'vflex',
-				classes: ['oneput__menu-divider-body'],
-				children: [
-					{
-						id: id(),
-						textContent: 'Divider title',
-						classes: ['oneput__menu-divider-title']
-					}
-				]
-			}
-		]
-	},
-	{
-		id: 'menu-item-no-icon-2',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{ id: id(), classes: ['oneput__icon'] },
-			{
-				id: id(),
-				classes: ['oneput__menu-item-body'],
-				textContent: 'Plain Item 1...'
-			}
-		]
-	},
-	{
-		id: 'menu-item-no-icon-3',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{ id: id(), classes: ['oneput__icon'] },
-			{
-				id: id(),
-				classes: ['oneput__menu-item-body'],
-				textContent: 'Plain Item 1...'
-			}
-		]
-	},
-	{
-		id: 'menu-item-no-icon-4',
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{ id: id(), classes: ['oneput__icon'] },
-			{
-				id: id(),
-				classes: ['oneput__menu-item-body'],
-				textContent: 'Plain Item 1...'
-			}
-		]
-	}
-];
+					classes: ['oneput__menu-item-body'],
+					textContent: 'Checkbox Item 2...'
+				}
+			]
+		}
+	];
+	return items;
+};
 
 export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 	id: 'menu-footer-1',

@@ -168,6 +168,7 @@ export const menuItems1: MenuItemAny[] = [
 			{
 				id: id(),
 				classes: ['oneput__icon'],
+				style: { alignSelf: 'flex-start' },
 				innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 			}
 		]
@@ -284,14 +285,6 @@ export const menuItems1: MenuItemAny[] = [
 				textContent: 'Plain Item 1...'
 			}
 		]
-	},
-	{
-		id: id(),
-		tag: 'hr',
-		type: 'hflex',
-		divider: true
-		// subtype: 'menu-divider',
-		// classes: ['oneput__menu-divider']
 	}
 ];
 

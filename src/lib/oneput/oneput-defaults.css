@@ -216,6 +216,12 @@
 	overflow-y: auto;
 	max-height: var(--oneput-menu-max-height);
 }
+.oneput__menu-body-content {
+	justify-content: center;
+	align-items: center;
+	margin: 1rem;
+	min-height: 8rem;
+}
 .oneput__menu-item {
 	background: var(--oneput-menu-item-background);
 }
@@ -361,15 +367,27 @@ button.oneput__menu-item:active {
  * We can treat --oneput-icon-width like a standard unit for width and even height.
  *
  * - oneput__icon : look like icon-buttons but are just decorative
- * - oneput__icon-button : are interactive
+ * - oneput__icon-button : are interactive icon-only buttons
  * - oneput__icon-toggle-button : are icon buttons with binary persistent state
- * - oneput__button : a button usually with text in it
+ * - oneput__button : a button usually with text in it instead of an icon
+ * - oneput__primary-button : a standalone button with a bit more heft to it
  */
 
 /* Spacers can act like an invisible icon or button to help balance your layouts */
 .oneput__spacer {
 	min-width: var(--oneput-icon-width);
 	max-width: var(--oneput-icon-width);
+}
+
+.oneput__primary-button {
+	flex: 0 0 var(--oneput-icon-width);
+	justify-content: center;
+	border: var(--oneput-button-border);
+	border-radius: var(--oneput-icon-border-radius);
+	padding: var(--oneput-icon-padding);
+	min-width: 10rem;
+	box-shadow: 0 0 5px 1px rgb(0 0 0 / 0.3);
+	outline: none !important;
 }
 
 .oneput__button,
@@ -382,7 +400,6 @@ button.oneput__menu-item:active {
 	max-width: var(--oneput-icon-width);
 	max-height: var(--oneput-icon-width);
 	justify-content: center;
-	align-self: flex-start;
 	border-radius: var(--oneput-icon-border-radius);
 	padding: var(--oneput-icon-padding);
 }
@@ -395,18 +412,21 @@ button.oneput__menu-item:active {
 
 /* states */
 
+.oneput__primary-button:focus,
 .oneput__button:focus,
 .oneput__icon-button:focus {
 	outline: var(--oneput-button-outline-focus);
 	background: var(--oneput-button-background-focus);
 	border: var(--oneput-button-border-focus);
 }
+.oneput__primary-button:hover,
 .oneput__button:hover,
 .oneput__icon-button:hover {
 	outline: var(--oneput-button-outline-hover);
 	background: var(--oneput-button-background-hover);
 	border: var(--oneput-button-border-hover);
 }
+.oneput__primary-button:active,
 .oneput__button:active,
 .oneput__icon-button:active {
 	outline: var(--oneput-button-outline-active);

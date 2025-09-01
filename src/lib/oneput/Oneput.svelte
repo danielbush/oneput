@@ -62,7 +62,10 @@
 						<Flex
 							{...item}
 							class="oneput__menu-item"
-							classes={[index === menuItemFocus && 'oneput__menu-item--focused']}
+							classes={[
+								index === menuItemFocus && 'oneput__menu-item--focused',
+								...(item.classes ?? [])
+							]}
 							focused={index === menuItemFocus}
 							attr={rewriteAttr(index, item.attr, item.action)}
 						/>

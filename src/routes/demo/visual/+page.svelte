@@ -79,5 +79,48 @@
 			<p>Menu open</p>
 			{@render demo1(true)}
 		</section>
+		<section class="demo-example">
+			<h2>Alert</h2>
+			<Oneput
+				controller={new NullController()}
+				menuOpen={true}
+				menu={{
+					items: [
+						{
+							id: 'alert',
+							type: 'vflex',
+							classes: ['oneput__menu-body-content'],
+							children: [
+								{
+									id: 'alert-title',
+									innerHTMLUnsafe: '<h2>Alert Title!</h2>'
+								},
+								{
+									id: 'alert-message',
+									innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
+								},
+								{
+									id: 'alert-button',
+									tag: 'button',
+									classes: ['oneput__primary-button'],
+									textContent: 'OK'
+								}
+							]
+						}
+					]
+				}}
+				input={{
+					left: ui.inputLeft1,
+					right: ui.inputRight1,
+					outerLeft: ui.inputOuterLeft1,
+					outerRight: ui.inputOuterRight1
+				}}
+				placeholder="Placeholder..."
+				inputValue=""
+				handleInputChange={() => {
+					console.log('handleInputChange');
+				}}
+			/>
+		</section>
 	</section>
 </main>

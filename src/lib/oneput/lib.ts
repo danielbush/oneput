@@ -3,6 +3,7 @@ import type { Controller } from './controller.js';
 export type OneputProps = {
 	controller: Controller;
 	menuItemFocus?: number;
+	menuItemFocusOrigin?: 'pointer' | 'keyboard';
 	menuOpen?: boolean;
 	menu?: {
 		header?: FlexParams;
@@ -44,6 +45,8 @@ export type FlexParams = {
 	 */
 	voidElements?: Set<string | undefined>;
 	action?: (c: Controller) => void;
+	focused?: boolean;
+	focusedOrigin?: 'pointer' | 'keyboard';
 };
 
 export type MenuItem = FlexParams & {

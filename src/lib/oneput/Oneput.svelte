@@ -5,6 +5,7 @@
 		inputElement = $bindable(),
 		inputValue = $bindable(''),
 		menuItemFocus = $bindable(0),
+		menuItemFocusOrigin = $bindable(undefined),
 		controller,
 		...props
 	}: OneputProps = $props();
@@ -18,6 +19,7 @@
 			onpointerenter: (event: Event) => {
 				// Inject menu item focus handling...
 				menuItemFocus = index;
+				menuItemFocusOrigin = 'pointer';
 				// ...then run any client onpointerenter handlers.
 				if (typeof attr?.onpointerenter === 'function') {
 					attr.onpointerenter(event);
@@ -67,6 +69,7 @@
 								...(item.classes ?? [])
 							]}
 							focused={index === menuItemFocus}
+							focusedOrigin={menuItemFocusOrigin}
 							attr={rewriteAttr(index, item.attr, item.action)}
 						/>
 					{/if}

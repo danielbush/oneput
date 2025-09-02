@@ -49,9 +49,6 @@
 		body {
 			margin: 0;
 		}
-		.oneput__container {
-			--oneput-max-width: 600px;
-		}
 	}
 
 	.app-container {

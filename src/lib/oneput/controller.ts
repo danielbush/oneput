@@ -16,7 +16,7 @@ export type KeyBindingMap = {
 };
 
 export type OneputControllerParams = {
-	menuItemFocus?: number;
+	menuItemFocus?: OneputProps['menuItemFocus'];
 	globalKeys?: KeyBindingMap;
 	input?: OneputProps['input'];
 	inputValue?: OneputProps['inputValue'];
@@ -63,11 +63,13 @@ export class Controller {
 	}
 
 	focusNextMenuItem() {
+		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		this.currentProps.menuItemFocus =
 			(this.menuItemFocus + 1 + this.menuItemCount) % this.menuItemCount;
 	}
 
 	focusPreviousMenuItem() {
+		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		this.currentProps.menuItemFocus =
 			(this.menuItemFocus - 1 + this.menuItemCount) % this.menuItemCount;
 	}

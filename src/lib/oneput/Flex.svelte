@@ -3,8 +3,8 @@
 	import FChild from './FChild.svelte';
 	import { type FChildParams, type FlexParams } from './lib.js';
 
-	type Props = { class: string; focused?: boolean } & FlexParams;
-	let { class: topLevelClass, focused, ...props }: Props = $props();
+	type Props = { class: string } & FlexParams;
+	let { class: topLevelClass, focused, focusedOrigin, ...props }: Props = $props();
 
 	function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
 		const browserOnly = globalThis.document;
@@ -17,7 +17,7 @@
 
 	function scrollIntoView(): Attachment {
 		return (element) => {
-			if (focused) {
+			if (focused && focusedOrigin === 'keyboard') {
 				const elemRect = element.getBoundingClientRect();
 				const containerRect = element.parentElement!.getBoundingClientRect();
 				if (elemRect.top < containerRect.top || elemRect.bottom > containerRect.bottom) {

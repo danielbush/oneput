@@ -47,7 +47,7 @@ export class Controller {
 	}
 
 	get menuItemCount() {
-		return this.currentProps.menu?.items?.length ?? 1;
+		return this.currentProps.menu?.items?.length ?? 0;
 	}
 
 	get currentMenuItem() {
@@ -62,16 +62,40 @@ export class Controller {
 		this.currentProps.menuOpen = false;
 	}
 
+	private nextMenuItemIndex(index: number) {
+		return (index + 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);
+	}
+
+	private previousMenuItemIndex(index: number) {
+		return (index - 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);
+	}
+
 	focusNextMenuItem() {
 		this.currentProps.menuItemFocusOrigin = 'keyboard';
-		this.currentProps.menuItemFocus =
-			(this.menuItemFocus + 1 + this.menuItemCount) % this.menuItemCount;
+		for (
+			let i = this.nextMenuItemIndex(this.menuItemFocus), c = 0;
+			c < this.menuItemCount;
+			c++, i = this.nextMenuItemIndex(i)
+		) {
+			if (!this.currentProps.menu?.items?.[i].ignored) {
+				this.currentProps.menuItemFocus = i;
+				break;
+			}
+		}
 	}
 
 	focusPreviousMenuItem() {
 		this.currentProps.menuItemFocusOrigin = 'keyboard';
-		this.currentProps.menuItemFocus =
-			(this.menuItemFocus - 1 + this.menuItemCount) % this.menuItemCount;
+		for (
+			let i = this.previousMenuItemIndex(this.menuItemFocus), c = 0;
+			c < this.menuItemCount;
+			c++, i = this.previousMenuItemIndex(i)
+		) {
+			if (!this.currentProps.menu?.items?.[i].ignored) {
+				this.currentProps.menuItemFocus = i;
+				break;
+			}
+		}
 	}
 
 	doAction() {

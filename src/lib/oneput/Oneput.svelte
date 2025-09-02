@@ -60,14 +60,14 @@
 			{/if}
 			<div class="oneput__menu-body">
 				{#each props.menu?.items || [] as item, index (item.id)}
-					{#if 'divider' in item && item.divider}
-						<Flex class="oneput__menu-divider" {...item} />
+					{#if item.ignored}
+						<Flex class={item.class ?? ''} {...item} />
 					{:else}
 						<Flex
 							{...item}
-							class="oneput__menu-item"
+							class={item.class ?? 'oneput__menu-item'}
 							classes={[
-								index === menuItemFocus && 'oneput__menu-item--focused',
+								index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
 								...(item.classes ?? [])
 							]}
 							focused={index === menuItemFocus}

@@ -70,7 +70,8 @@ export class NavigateHeadings {
 						id: id(),
 						tag: 'hr',
 						type: 'hflex',
-						divider: true
+						class: 'oneput__menu-divider',
+						ignored: true
 					},
 					...this.filteredHeadings.map((h) =>
 						menuItemNoIcon({

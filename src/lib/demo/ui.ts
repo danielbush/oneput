@@ -100,9 +100,8 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			id: id(),
 			tag: 'hr',
 			type: 'hflex',
-			divider: true
-			// subtype: 'menu-divider'
-			// classes: ['oneput__menu-divider']
+			ignored: true,
+			class: 'oneput__menu-divider'
 		},
 		{
 			id: 'menu-item-3',
@@ -239,9 +238,8 @@ export const menuItems1: () => MenuItemAny[] = () => {
 		{
 			id: id(),
 			type: 'hflex',
-			divider: true,
-			// subtype: 'menu-divider',
-			// classes: ['oneput__menu-divider'],
+			class: 'oneput__menu-divider',
+			ignored: true,
 			children: [
 				{ id: id(), classes: ['oneput__spacer'] },
 				{

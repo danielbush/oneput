@@ -55,14 +55,25 @@ export type MenuItem = FlexParams & {
 	 * on top-level menu items.
 	 */
 	action?: (c: Controller) => void;
+	/**
+	 * ignored = false means tem can be focused and is interactive.
+	 */
+	ignored?: false;
+	/**
+	 * Primary css class.  Defaults to oneput__menu-item.
+	 */
+	class?: string;
 };
 
 export type MenuItemDivider = FlexParams & {
 	/**
-	 * Instructs Oneput renderer to render this item as a divider rather than a
-	 * menu item.  Only applies to top level items.
+	 * ignored = true means Item is not meant to be interactive with eg a divider.
 	 */
-	divider: true;
+	ignored: true;
+	/**
+	 * Primary css class.  You might want to use oneput__menu-divider etc.
+	 */
+	class?: string;
 };
 
 export type MenuItemAny = MenuItem | MenuItemDivider;

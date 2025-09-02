@@ -4,7 +4,7 @@
 	import { type FChildParams, type FlexParams } from './lib.js';
 
 	type Props = { class: string } & FlexParams;
-	let { class: topLevelClass, focused, focusedOrigin, ...props }: Props = $props();
+	let { class: topLevelClass, focused, shouldScrollIntoView, ...props }: Props = $props();
 
 	function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
 		const browserOnly = globalThis.document;
@@ -17,7 +17,7 @@
 
 	function scrollIntoView(): Attachment {
 		return (element) => {
-			if (focused && focusedOrigin === 'keyboard') {
+			if (focused && shouldScrollIntoView) {
 				const elemRect = element.getBoundingClientRect();
 				const containerRect = element.parentElement!.getBoundingClientRect();
 				if (elemRect.top < containerRect.top || elemRect.bottom > containerRect.bottom) {

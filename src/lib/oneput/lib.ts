@@ -46,7 +46,7 @@ export type FlexParams = {
 	voidElements?: Set<string | undefined>;
 	action?: (c: Controller) => void;
 	focused?: boolean;
-	focusedOrigin?: 'pointer' | 'keyboard';
+	shouldScrollIntoView?: boolean;
 };
 
 export type MenuItem = FlexParams & {

@@ -69,7 +69,7 @@
 								...(item.classes ?? [])
 							]}
 							focused={index === menuItemFocus}
-							focusedOrigin={menuItemFocusOrigin}
+							shouldScrollIntoView={menuItemFocusOrigin === 'keyboard'}
 							attr={rewriteAttr(index, item.attr, item.action)}
 						/>
 					{/if}

@@ -6,7 +6,6 @@
 	import * as ui from '$lib/demo/ui.js';
 	import * as data from '$lib/demo/visual/state.js';
 	import { setupDemoState } from '$lib/demo/visual/state.svelte.js';
-	import { NullController } from '$lib/oneput/controller.js';
 
 	const oneputState = setupDemoState();
 
@@ -20,7 +19,6 @@
 
 	<div class="command-bar">
 		<Oneput
-			controller={new NullController()}
 			menuOpen={oneputState.menuOpen}
 			menu={{
 				header: ui.menuHeader1,

@@ -185,20 +185,3 @@ export class Controller {
 		this.goBack = back || (() => {});
 	}
 }
-
-/**
- * For demoing visual state, possibly also tests.
- */
-export class NullController extends Controller {
-	constructor() {
-		super({
-			menuOpen: false,
-			menuItemFocus: 0,
-			menu: { items: [] },
-			input: {},
-			placeholder: 'Type here...',
-			inputValue: '',
-			handleInputChange: () => {}
-		});
-	}
-}

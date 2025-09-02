@@ -29,7 +29,9 @@
 		if (action) {
 			newAttr.onpointerdown = (event: Event) => {
 				// Run the MenuItem['action'].
-				action(controller);
+				if (controller) {
+					action(controller);
+				}
 				if (typeof attr?.onpointerdown === 'function') {
 					attr.onpointerdown(event);
 				}

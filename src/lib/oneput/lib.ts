@@ -1,7 +1,7 @@
 import type { Controller } from './controller.js';
 
 export type OneputProps = {
-	controller: Controller;
+	controller?: Controller;
 	menuItemFocus?: number;
 	menuItemFocusOrigin?: 'pointer' | 'keyboard';
 	menuOpen?: boolean;

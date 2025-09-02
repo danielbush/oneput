@@ -42,6 +42,15 @@ Can we use oneput as webcomponent?
 
 This is a WIP. See task `test:wc`.
 
+## Technical Description
+
+Attempt to explain how the system is constructed in plain english:
+
+- `<Oneput>` displays the main parts and the menu items of Oneput (a command-bar like interface with input) within a container element; it handles pointer events on the menu items; lets consumers bind menu item focus index and input element and input value allowing the consummer programmatic control and keyboard control. It's the skeleton of Oneput, representing key areas of the UI on which we hang Flex of FChild elements.
+- `<Flex>` is a general purpose flex container; you control whether it is row or column flex by setting the `type` to `hflex` or `vflex`. Depending on the `type` it sets either `oneput__hflex` or `oneput__vflex` class. It takes a data-structure `FlexParams` as props which includes a `children` property that itself is composed of either `FlexParams` or `FChild` resulting in a recursive structure. This recursive structure allows us to build complex menu or menu-adjacent UI's.
+- `<OneputController>` wraps `<Oneput>`, feeds props to `<Oneput>` and manages them as state; creates a `Controller` object that encapsulates access to this state and then provides this to the consumer via a callback called `controllerRef`. This is the thing most consumers will see and use.
+- `Controller` - consumers use the `Controller` instance to control Oneput. It affords conveniences such as opening/closing menu, setting global/local keybindings (including keyboard-based focus of menu items), updating the ui.
+
 ## Styling
 
 Oneput consists of a container within which we have "areas".

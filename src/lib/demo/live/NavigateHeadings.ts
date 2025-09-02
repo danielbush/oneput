@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { id } from '$lib/oneput/lib.js';
-import { arrowLeftIcon, menuItemNoIcon, menuItemWithIcon } from '$lib/ui.js';
+import { arrowLeftIcon, menuItemNoIcon, menuItemWithIcon, tocIcon } from '$lib/ui.js';
 
 /**
  * Demonstates how we navigate the headings in an html document using Oneput.
@@ -36,6 +36,29 @@ export class NavigateHeadings {
 		this.controller.setBackBinding(this.back);
 		this.controller.update({
 			menu: {
+				header: {
+					id: 'bindings-header',
+					type: 'hflex',
+					children: [
+						{
+							id: 'bindings-header-icon',
+							type: 'fchild',
+							style: { flex: '1' },
+							innerHTMLUnsafe: tocIcon
+						},
+						{
+							id: 'bindings-header-text',
+							type: 'fchild',
+							style: { justifyContent: 'center', flex: '3' },
+							textContent: `Navigate headings`
+						},
+						{
+							id: 'bindings-header-close',
+							type: 'fchild',
+							style: { flex: '1' }
+						}
+					]
+				},
 				items: [
 					menuItemWithIcon({
 						id: 'back',
@@ -43,6 +66,12 @@ export class NavigateHeadings {
 						leftIcon: arrowLeftIcon,
 						action: this.back
 					}),
+					{
+						id: id(),
+						tag: 'hr',
+						type: 'hflex',
+						divider: true
+					},
 					...this.filteredHeadings.map((h) =>
 						menuItemNoIcon({
 							id: id(),

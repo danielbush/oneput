@@ -149,6 +149,7 @@ export class KeyBindingsController {
 						{
 							id: 'bindings-header-text',
 							type: 'fchild',
+							style: { justifyContent: 'center', flex: '3' },
 							textContent: `Key bindings for "${description}"`
 						},
 						{

@@ -1,5 +1,5 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import { arrowLeftIcon, menuItemWithIcon, piIcon } from '$lib/ui.js';
+import { arrowLeftIcon, menuItemWithIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 
@@ -75,6 +75,7 @@ const rootUI = (c: Controller) => {
 			items: [
 				menuItemWithIcon({
 					id: 'settings',
+					leftIcon: settingsIcon,
 					text: 'Settings...',
 					action: () => {
 						settingsUI(c, () => {
@@ -84,6 +85,7 @@ const rootUI = (c: Controller) => {
 				}),
 				menuItemWithIcon({
 					id: 'navigate-outline',
+					leftIcon: tocIcon,
 					text: 'Navigate outline...',
 					action: () => {
 						NavigateHeadings.create(c, document, () => {
@@ -93,7 +95,7 @@ const rootUI = (c: Controller) => {
 				}),
 				menuItemWithIcon({
 					id: 'insert-katex',
-					leftIcon: piIcon,
+					leftIcon: sigmaIcon,
 					text: 'Insert katex...',
 					action: () => {
 						console.log('insert katex');

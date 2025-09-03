@@ -54,33 +54,35 @@
 
 <div class="oneput__container">
 	{#if props.menuOpen}
-		<section class="oneput__menu-area">
-			{#if props.menu?.header}
-				<Flex class="oneput__menu-header" {...props.menu.header} />
-			{/if}
-			<div class="oneput__menu-body">
-				{#each props.menu?.items || [] as item, index (item.id)}
-					{#if item.ignored}
-						<Flex class={item.class ?? ''} {...item} />
-					{:else}
-						<Flex
-							{...item}
-							class={item.class ?? 'oneput__menu-item'}
-							classes={[
-								index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
-								...(item.classes ?? [])
-							]}
-							focused={index === menuItemFocus}
-							shouldScrollIntoView={menuItemFocusOrigin === 'keyboard'}
-							attr={rewriteAttr(index, item.attr, item.action)}
-						/>
-					{/if}
-				{/each}
-			</div>
-			{#if props.menu?.footer}
-				<Flex class="oneput__menu-footer" {...props.menu.footer} />
-			{/if}
-		</section>
+		<div class="oneput__menu-anchor">
+			<section class="oneput__menu-area">
+				{#if props.menu?.header}
+					<Flex class="oneput__menu-header" {...props.menu.header} />
+				{/if}
+				<div class="oneput__menu-body">
+					{#each props.menu?.items || [] as item, index (item.id)}
+						{#if item.ignored}
+							<Flex class={item.class ?? ''} {...item} />
+						{:else}
+							<Flex
+								{...item}
+								class={item.class ?? 'oneput__menu-item'}
+								classes={[
+									index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
+									...(item.classes ?? [])
+								]}
+								focused={index === menuItemFocus}
+								shouldScrollIntoView={menuItemFocusOrigin === 'keyboard'}
+								attr={rewriteAttr(index, item.attr, item.action)}
+							/>
+						{/if}
+					{/each}
+				</div>
+				{#if props.menu?.footer}
+					<Flex class="oneput__menu-footer" {...props.menu.footer} />
+				{/if}
+			</section>
+		</div>
 	{/if}
 	{#if props.inner}
 		<section class="oneput__inner-area">

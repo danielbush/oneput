@@ -205,10 +205,24 @@
 
 /* #region menu */
 
+.oneput__menu-anchor {
+	position: relative;
+}
 .oneput__menu-area {
 	margin: 0;
 	padding: var(--oneput-area-padding);
 	border-bottom: var(--oneput-strong-border);
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+
+	background: var(--oneput-background);
+	border-radius: var(--oneput-border-radius);
+	border: var(--oneput-border);
+	border-top-width: var(--oneput-border-top);
+	border-bottom-width: var(--oneput-border-bottom);
+	border-left-width: var(--oneput-border-left);
+	border-right-width: var(--oneput-border-right);
 }
 .oneput__menu-body {
 	display: flex;

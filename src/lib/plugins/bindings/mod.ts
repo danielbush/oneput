@@ -4,6 +4,7 @@ import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
 	arrowLeftIcon,
 	chevronRightIcon,
+	inputUI,
 	keyboardIcon,
 	menuItemWithIcon,
 	squareFunctionIcon,
@@ -107,6 +108,7 @@ export class KeyBindingsController {
 	private actionsUI = () => {
 		this.controller.setBackBinding(this.back);
 		this.controller.update({
+			input: inputUI(this.controller),
 			menu: {
 				items: [
 					menuItemWithIcon({
@@ -136,7 +138,7 @@ export class KeyBindingsController {
 		this.controller.update({
 			placeholder: '',
 			inputValue: '',
-			input: {},
+			input: inputUI(this.controller),
 			menu: {
 				header: {
 					id: 'bindings-header',

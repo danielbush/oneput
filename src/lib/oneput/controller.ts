@@ -54,13 +54,13 @@ export class Controller {
 		return this.currentProps.menu?.items?.[this.menuItemFocus];
 	}
 
-	openMenu() {
+	openMenu = () => {
 		this.currentProps.menuOpen = true;
-	}
+	};
 
-	closeMenu() {
+	closeMenu = () => {
 		this.currentProps.menuOpen = false;
-	}
+	};
 
 	private nextMenuItemIndex(index: number) {
 		return (index + 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);

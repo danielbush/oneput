@@ -15,7 +15,7 @@ export type OneputProps = {
 	inputElement?: HTMLInputElement;
 	inputValue: string;
 	placeholder: string;
-	handleInputChange: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
+	handleInputChange?: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 	input?: {
 		left?: FlexParams;
 		right?: FlexParams;

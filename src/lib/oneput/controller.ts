@@ -185,7 +185,7 @@ export class Controller {
 		if (options.input) {
 			this.currentProps.input = options.input;
 		}
-		if (options.handleInputChange) {
+		if ('handleInputChange' in options) {
 			this.currentProps.handleInputChange = options.handleInputChange;
 		}
 		if ('inputValue' in options) {
@@ -203,6 +203,9 @@ export class Controller {
 		}
 	}
 
+	/**
+	 * This is intended for triggering a back action via keyboard.
+	 */
 	goBack: () => void = () => {};
 
 	setBackBinding(back?: () => void) {

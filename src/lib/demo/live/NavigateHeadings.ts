@@ -29,11 +29,22 @@ export class NavigateHeadings {
 				this.updateUI();
 			}
 		});
+		this.controller.setBackBinding(this.exit);
 		this.updateUI();
 	}
 
+	/**
+	 * It's important to clean up once we exit this mini-app.
+	 */
+	private exit = () => {
+		this.controller.update({
+			handleInputChange: undefined,
+			inputValue: undefined
+		});
+		this.back();
+	};
+
 	private updateUI = () => {
-		this.controller.setBackBinding(this.back);
 		this.controller.update({
 			menu: {
 				header: {
@@ -64,7 +75,7 @@ export class NavigateHeadings {
 						id: 'back',
 						text: 'Back...',
 						leftIcon: arrowLeftIcon,
-						action: this.back
+						action: this.exit
 					}),
 					{
 						id: id(),

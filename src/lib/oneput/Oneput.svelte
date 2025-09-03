@@ -47,7 +47,7 @@
 		// Keep inputValue in sync with what the user types:
 		inputValue = evt.currentTarget.value;
 		// Let the user response to what was typed:
-		props.handleInputChange(evt);
+		props.handleInputChange?.(evt);
 		// Note: the user can set inputValue directly and it will pass down to this component also.
 	}
 </script>

@@ -11,7 +11,7 @@
 		menuItemFocus: 0,
 		inputValue: '',
 		placeholder: 'Type here...',
-		handleInputChange: () => {},
+		onInputChange: () => {},
 		menu: { items: [] },
 		menuOpen: false
 	});

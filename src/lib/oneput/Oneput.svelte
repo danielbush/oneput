@@ -48,10 +48,10 @@
 	const autocomplete = 'one-time-code';
 
 	function handleInputChange(evt: Event & { currentTarget: EventTarget & HTMLInputElement }) {
-		// Keep inputValue in sync with what the user types:
+		// Keep inputValue in sync with what the user typeonInputChange
 		inputValue = evt.currentTarget.value;
 		// Let the user response to what was typed:
-		props.handleInputChange?.(evt);
+		props.onInputChange?.(evt);
 		// Note: the user can set inputValue directly and it will pass down to this component also.
 	}
 </script>

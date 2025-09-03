@@ -46,8 +46,8 @@
 					}}
 					placeholder="Placeholder..."
 					inputValue=""
-					handleInputChange={() => {
-						console.log('handleInputChange');
+					onInputChange={() => {
+						console.log('onInputChange');
 					}}
 				/>
 			{/snippet}
@@ -67,8 +67,8 @@
 					input={{}}
 					placeholder="Placeholder..."
 					inputValue=""
-					handleInputChange={() => {
-						console.log('handleInputChange');
+					onInputChange={() => {
+						console.log('onInputChange');
 					}}
 				/>
 			{/snippet}
@@ -113,8 +113,8 @@
 				}}
 				placeholder="Type enter to continue..."
 				inputValue=""
-				handleInputChange={() => {
-					console.log('handleInputChange');
+				onInputChange={() => {
+					console.log('onInputChange');
 				}}
 			/>
 		</section>
@@ -168,8 +168,8 @@
 				}}
 				placeholder="Type y or n..."
 				inputValue=""
-				handleInputChange={() => {
-					console.log('handleInputChange');
+				onInputChange={() => {
+					console.log('onInputChange');
 				}}
 			/>
 		</section>

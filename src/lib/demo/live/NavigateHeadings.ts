@@ -21,7 +21,7 @@ export class NavigateHeadings {
 		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
 		this.filteredHeadings = this.headings;
 		this.controller.update({
-			handleInputChange: (evt) => {
+			onInputChange: (evt) => {
 				const text = (evt.target as HTMLInputElement).value;
 				this.filteredHeadings = this.headings.filter((heading) => {
 					return heading.textContent.includes(text);
@@ -38,7 +38,7 @@ export class NavigateHeadings {
 	 */
 	private exit = () => {
 		this.controller.update({
-			handleInputChange: undefined,
+			onInputChange: undefined,
 			inputValue: undefined
 		});
 		this.back();

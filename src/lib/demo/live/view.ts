@@ -75,44 +75,48 @@ export const localKeys: KeyBindingMap = {
 	}
 };
 
+/**
+ * Standard input UI for use in most situations.
+ */
+const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
+	return {
+		right: {
+			id: 'root-input-right',
+			type: 'hflex',
+			children: [
+				{
+					id: id(),
+					tag: 'button',
+					attr: {
+						type: 'button',
+						title: 'Options',
+						onclick: () => {
+							if (c.menuOpen) {
+								c.closeMenu();
+							} else {
+								c.openMenu();
+							}
+						}
+					},
+					classes: ['oneput__icon-button'],
+					innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
+				}
+			]
+		}
+	};
+};
+
 const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.closeMenu();
 	});
-	const input: (c: Controller, menuOpen: boolean) => OneputProps['input'] = (c, menuOpen) => {
-		return {
-			right: {
-				id: 'root-input-right',
-				type: 'hflex',
-				children: [
-					{
-						id: id(),
-						tag: 'button',
-						attr: {
-							type: 'button',
-							title: 'Options',
-							onclick: () => {
-								if (menuOpen) {
-									c.closeMenu();
-								} else {
-									c.openMenu();
-								}
-							}
-						},
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
-					}
-				]
-			}
-		};
-	};
 	c.update({
-		onMenuOpenChange: (menuOpen) => {
-			c.update({ input: input(c, menuOpen) });
+		onMenuOpenChange: () => {
+			c.update({ input: inputUI(c) });
 		}
 	});
 	c.update({
-		input: input(c, c.menuOpen),
+		input: inputUI(c),
 		menu: {
 			items: [
 				menuItemWithIcon({
@@ -158,6 +162,7 @@ const rootUI = (c: Controller) => {
 const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
 	c.update({
+		input: inputUI(c),
 		menu: {
 			items: [
 				menuItemWithIcon({

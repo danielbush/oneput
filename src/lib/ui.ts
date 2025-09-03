@@ -1,7 +1,14 @@
 /**
  * This is some ui that you can use.  You don't have to use it.
  */
-import { id as randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
+import {
+	id,
+	id as randomId,
+	type FlexParams,
+	type MenuItem,
+	type OneputProps
+} from '$lib/oneput/lib.js';
+import type { Controller } from './oneput/controller.js';
 
 export const settingsIcon =
 	'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -106,5 +113,36 @@ export const menuItemWithIcon: (params: {
 		],
 		attr,
 		action
+	};
+};
+
+/**
+ * Standard input UI for use in most situations.
+ */
+export const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
+	return {
+		right: {
+			id: 'root-input-right',
+			type: 'hflex',
+			children: [
+				{
+					id: id(),
+					tag: 'button',
+					attr: {
+						type: 'button',
+						title: 'Options',
+						onclick: () => {
+							if (c.menuOpen) {
+								c.closeMenu();
+							} else {
+								c.openMenu();
+							}
+						}
+					},
+					classes: ['oneput__icon-button'],
+					innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
+				}
+			]
+		}
 	};
 };

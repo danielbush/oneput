@@ -1,9 +1,7 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import type { OneputProps } from '$lib/oneput/lib.js';
 import {
 	arrowLeftIcon,
-	chevronDown,
-	chevronUp,
+	inputUI,
 	menuItemWithIcon,
 	settingsIcon,
 	sigmaIcon,
@@ -11,7 +9,6 @@ import {
 } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
-import { id } from '$lib/oneput/lib.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -73,37 +70,6 @@ export const localKeys: KeyBindingMap = {
 			c.focusNextMenuItem();
 		}
 	}
-};
-
-/**
- * Standard input UI for use in most situations.
- */
-const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
-	return {
-		right: {
-			id: 'root-input-right',
-			type: 'hflex',
-			children: [
-				{
-					id: id(),
-					tag: 'button',
-					attr: {
-						type: 'button',
-						title: 'Options',
-						onclick: () => {
-							if (c.menuOpen) {
-								c.closeMenu();
-							} else {
-								c.openMenu();
-							}
-						}
-					},
-					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
-				}
-			]
-		}
-	};
 };
 
 const rootUI = (c: Controller) => {

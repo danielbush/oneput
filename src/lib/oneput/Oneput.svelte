@@ -40,6 +40,10 @@
 		return newAttr;
 	}
 
+	$effect(() => {
+		props.onMenuOpenChange?.(props.menuOpen ?? false);
+	});
+
 	// See UNWANTED_AUTOCOMPLETE
 	const autocomplete = 'one-time-code';
 

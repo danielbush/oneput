@@ -1,7 +1,17 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
-import { arrowLeftIcon, menuItemWithIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/ui.js';
+import type { OneputProps } from '$lib/oneput/lib.js';
+import {
+	arrowLeftIcon,
+	chevronDown,
+	chevronUp,
+	menuItemWithIcon,
+	settingsIcon,
+	sigmaIcon,
+	tocIcon
+} from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
+import { id } from '$lib/oneput/lib.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -69,8 +79,40 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.closeMenu();
 	});
+	const input: (menuOpen: boolean) => OneputProps['input'] = (menuOpen) => {
+		return {
+			right: {
+				id: 'root-input-right',
+				type: 'hflex',
+				children: [
+					{
+						id: id(),
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: () => {
+								if (menuOpen) {
+									c.closeMenu();
+								} else {
+									c.openMenu();
+								}
+							}
+						},
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
+					}
+				]
+			}
+		};
+	};
 	c.update({
-		input: {},
+		onMenuOpenChange: (menuOpen) => {
+			c.update({ input: input(menuOpen) });
+		}
+	});
+	c.update({
+		input: input(c.menuOpen),
 		menu: {
 			items: [
 				menuItemWithIcon({

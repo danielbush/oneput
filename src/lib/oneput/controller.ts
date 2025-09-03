@@ -21,6 +21,7 @@ export type OneputControllerParams = {
 	input?: OneputProps['input'];
 	inputValue?: OneputProps['inputValue'];
 	handleInputChange?: OneputProps['handleInputChange'];
+	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
 	placeholder?: OneputProps['placeholder'];
 	menu?: OneputProps['menu'];
 	menuOpen?: boolean;
@@ -187,6 +188,9 @@ export class Controller {
 		}
 		if ('handleInputChange' in options) {
 			this.currentProps.handleInputChange = options.handleInputChange;
+		}
+		if ('onMenuOpenChange' in options) {
+			this.currentProps.onMenuOpenChange = options.onMenuOpenChange;
 		}
 		if ('inputValue' in options) {
 			this.currentProps.inputValue = options.inputValue || '';

@@ -16,6 +16,7 @@ export type OneputProps = {
 	inputValue: string;
 	placeholder: string;
 	handleInputChange?: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
+	onMenuOpenChange?: (menuOpen: boolean) => void;
 	input?: {
 		left?: FlexParams;
 		right?: FlexParams;

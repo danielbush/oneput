@@ -267,7 +267,10 @@ export class KeyBindingsController {
 		this.controller.disableKeys();
 
 		return {
-			accept: () => {
+			accept: (evt: Event) => {
+				// If this is a button in input.right then preventDefault stops
+				// the input from being focused.
+				evt.preventDefault();
 				if (capturedKeys.length > 0) {
 					this.keyMap[actionId].bindings.push(toBinding(capturedKeys));
 					this.controller.update(
@@ -278,7 +281,8 @@ export class KeyBindingsController {
 				this.controller.enableKeys();
 				this.actionUI(actionId);
 			},
-			reject: () => {
+			reject: (evt: Event) => {
+				evt.preventDefault();
 				window.removeEventListener('keydown', keyListener);
 				this.controller.enableKeys();
 				this.actionUI(actionId);

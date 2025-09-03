@@ -79,7 +79,7 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.closeMenu();
 	});
-	const input: (menuOpen: boolean) => OneputProps['input'] = (menuOpen) => {
+	const input: (c: Controller, menuOpen: boolean) => OneputProps['input'] = (c, menuOpen) => {
 		return {
 			right: {
 				id: 'root-input-right',
@@ -108,11 +108,11 @@ const rootUI = (c: Controller) => {
 	};
 	c.update({
 		onMenuOpenChange: (menuOpen) => {
-			c.update({ input: input(menuOpen) });
+			c.update({ input: input(c, menuOpen) });
 		}
 	});
 	c.update({
-		input: input(c.menuOpen),
+		input: input(c, c.menuOpen),
 		menu: {
 			items: [
 				menuItemWithIcon({

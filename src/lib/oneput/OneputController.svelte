@@ -36,6 +36,7 @@
 		bind:inputValue={currentProps.inputValue}
 		bind:inputElement
 		bind:menuItemFocus={currentProps.menuItemFocus}
+		bind:menuItemFocusOrigin={currentProps.menuItemFocusOrigin}
 	/>
 {/snippet}
 

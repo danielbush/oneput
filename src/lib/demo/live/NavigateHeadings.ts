@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { id } from '$lib/oneput/lib.js';
-import { arrowLeftIcon, menuItemNoIcon, menuItemWithIcon, tocIcon } from '$lib/ui.js';
+import { arrowLeftIcon, menuItemNoIcon } from '$lib/ui.js';
 
 /**
  * Demonstates how we navigate the headings in an html document using Oneput.
@@ -52,10 +52,11 @@ export class NavigateHeadings {
 					type: 'hflex',
 					children: [
 						{
-							id: 'bindings-header-icon',
-							type: 'fchild',
+							id: id(),
+							tag: 'button',
+							attr: { type: 'button', title: 'Options', onclick: this.exit },
 							style: { flex: '1' },
-							innerHTMLUnsafe: tocIcon
+							innerHTMLUnsafe: arrowLeftIcon
 						},
 						{
 							id: 'bindings-header-text',
@@ -66,39 +67,25 @@ export class NavigateHeadings {
 						{
 							id: 'bindings-header-close',
 							type: 'fchild',
-							style: { flex: '1' }
+							style: { flex: '1' },
+							textContent: ''
 						}
 					]
 				},
-				items: [
-					menuItemWithIcon({
-						id: 'back',
-						text: 'Back...',
-						leftIcon: arrowLeftIcon,
-						action: this.exit
-					}),
-					{
+				items: this.filteredHeadings.map((h) =>
+					menuItemNoIcon({
 						id: id(),
-						tag: 'hr',
-						type: 'hflex',
-						class: 'oneput__menu-divider',
-						ignored: true
-					},
-					...this.filteredHeadings.map((h) =>
-						menuItemNoIcon({
-							id: id(),
-							text: h.textContent,
-							action: () => {
-								h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-								this.controller.closeMenu();
-								// Reset the input and menu:
-								this.controller.update({ inputValue: '' });
-								this.filteredHeadings = this.headings;
-								this.updateUI();
-							}
-						})
-					)
-				]
+						text: h.textContent,
+						action: () => {
+							h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+							this.controller.closeMenu();
+							// Reset the input and menu:
+							this.controller.update({ inputValue: '' });
+							this.filteredHeadings = this.headings;
+							this.updateUI();
+						}
+					})
+				)
 			}
 		});
 	};

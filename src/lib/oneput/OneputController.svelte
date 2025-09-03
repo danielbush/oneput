@@ -4,6 +4,7 @@
 	import Oneput from './Oneput.svelte';
 	import type { OneputControllerProps } from './lib.js';
 	import { Controller } from './controller.js';
+	import { onMount } from 'svelte';
 
 	let inputElement: HTMLInputElement | undefined = $state(undefined);
 	const currentProps = $state<OneputControllerProps>({
@@ -22,10 +23,8 @@
 		controller.setInputElement(inputElement);
 	});
 
-	$effect(() => {
-		if (controllerRef) {
-			controllerRef(controller);
-		}
+	onMount(() => {
+		controllerRef(controller);
 	});
 </script>
 

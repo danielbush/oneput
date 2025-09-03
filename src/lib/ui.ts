@@ -121,7 +121,7 @@ export const menuItemWithIcon: (params: {
  */
 export const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
 	return {
-		right: {
+		outerRight: {
 			id: 'root-input-right',
 			type: 'hflex',
 			children: [

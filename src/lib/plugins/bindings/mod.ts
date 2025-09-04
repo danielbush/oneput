@@ -134,7 +134,10 @@ export class KeyBindingsController {
 
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyMap[actionId];
-		this.controller.setBackBinding(this.actionsUI);
+		const back = () => {
+			this.actionsUI();
+		}
+		this.controller.setBackBinding(back);
 		this.controller.update({
 			placeholder: '',
 			inputValue: '',
@@ -165,7 +168,7 @@ export class KeyBindingsController {
 						id: randomId(),
 						text: 'Back...',
 						leftIcon: arrowLeftIcon,
-						action: this.back
+						action: back
 					}),
 					menuItemWithIcon({
 						id: 'add-binding',

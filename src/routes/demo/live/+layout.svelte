@@ -50,9 +50,10 @@
 
 	.command-bar {
 		position: fixed;
+		left: 0;
 		bottom: 0;
 		width: 100%;
-		padding-bottom: 8px;
+		padding-bottom: env(safe-area-inset-bottom, 8px);
 		display: flex;
 		justify-content: center;
 	}

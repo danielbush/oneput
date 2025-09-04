@@ -25,3 +25,8 @@ How do we use lucide.createIcons but avoid icons flashing into existence when a 
 - solution
   - https://stackoverflow.com/questions/2989263/disable-auto-zoom-in-input-text-tag-safari-on-iphone
     - Add `maximum-scale=1` to meta.name = "viewport" tag.
+
+## VISUAL_VIEWPORT_ZOOM
+
+- what: the viewport on mobile phones can be pinch zoomed. This will blow up or shrink the input.
+- solution: do a css `transform` and `scale(1/visualViewport.scale)` . A version of this is here: https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API .

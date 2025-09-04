@@ -17,14 +17,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 </svelte:head>
 
-<div class="app-container">
-	<div class="content-area">
-		{@render children()}
-	</div>
-
-	<div class="command-bar">
-		<OneputController controllerRef={setController} />
-	</div>
+{@render children()}
+<div class="command-bar">
+	<OneputController controllerRef={setController} />
 </div>
 
 <style>
@@ -32,20 +27,6 @@
 		body {
 			margin: 0;
 		}
-	}
-
-	.app-container {
-		display: flex;
-		flex-direction: column;
-		height: 100vh;
-		width: 100vw;
-		overflow: hidden;
-	}
-
-	.content-area {
-		flex: 1;
-		overflow-y: auto;
-		padding: 1rem;
 	}
 
 	.command-bar {

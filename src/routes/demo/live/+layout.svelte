@@ -53,7 +53,6 @@
 		left: 0;
 		bottom: 0;
 		width: 100%;
-		padding-bottom: env(safe-area-inset-bottom, 8px);
 		display: flex;
 		justify-content: center;
 	}

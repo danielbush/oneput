@@ -60,8 +60,9 @@
 	// VISUAL_VIEWPORT_ZOOM
 	function ensureScaleInvariance(element: HTMLElement) {
 		const window = element.ownerDocument.defaultView!;
-		const visualViewport = window.visualViewport!;
-		element.style.transformOrigin = 'top left';
+		const visualViewport = window.visualViewport;
+		if (!visualViewport) return;
+		element.style.transformOrigin = 'bottom left';
 		element.style.transform = `scale(${1 / visualViewport.scale})`;
 	}
 

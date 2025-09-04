@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { setController } from '$lib/demo/live/app.js';
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/oneput-defaults.css';
 	import '$lib/oneput/oneput-user-defined.css';
-	import { setController } from '$lib/demo/live/view.js';
 	import OneputController from '$lib/oneput/OneputController.svelte';
 
 	// Pretend the code here could be something outside of svelte.

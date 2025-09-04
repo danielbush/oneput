@@ -12,6 +12,11 @@
 	let { children } = $props();
 </script>
 
+<svelte:head>
+	<!-- IOS_CLICK_ZOOM -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+</svelte:head>
+
 <div class="app-container">
 	<div class="content-area">
 		{@render children()}

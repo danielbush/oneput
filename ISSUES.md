@@ -11,3 +11,7 @@ If we add a global binding to open a menu and then a local binding of the same k
 ## UNWANTED_AUTOCOMPLETE
 
 Edge will often show a "Save Info" popup when clicking on the input element, even with `autocomplete="off"`. Current hack is to use an actual value eg "one-time-code" or something random. A random choice unfortunately is an unrecognised value and will cause a lint issue.
+
+## POINTER_UP
+
+On mobile we may want to scroll through the menu items rather than activate the particular item our finger comes into contact with. Therefore use pointer up events for menu item actions as the mobile browser will cancel the pointer up if it detects that you are dragging instead of tapping.

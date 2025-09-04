@@ -27,13 +27,14 @@
 			}
 		};
 		if (action) {
-			newAttr.onpointerdown = (event: Event) => {
+			newAttr.onpointerup = (event: Event) => {
 				// Run the MenuItem['action'].
+				// See POINTER_UP .
 				if (controller) {
 					action(controller);
 				}
-				if (typeof attr?.onpointerdown === 'function') {
-					attr.onpointerdown(event);
+				if (typeof attr?.onpointerup === 'function') {
+					attr.onpointerup(event);
 				}
 			};
 		}

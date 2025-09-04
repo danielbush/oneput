@@ -136,7 +136,7 @@ export class KeyBindingsController {
 		const { description, bindings } = this.keyMap[actionId];
 		const back = () => {
 			this.actionsUI();
-		}
+		};
 		this.controller.setBackBinding(back);
 		this.controller.update({
 			placeholder: '',

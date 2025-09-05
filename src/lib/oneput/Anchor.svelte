@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	let { children } = $props();
 
-	onMount(() => {
+	const adjustPosition: Attachment<HTMLElement> = (fixed) => {
 		const vv = window.visualViewport;
 		if (!vv) return;
-		const fixed = document.getElementById('command-bar')!;
-		if (!fixed) return;
 
 		const layoutViewport = document.createElement('div');
 		layoutViewport.style.position = 'fixed';
@@ -34,7 +32,7 @@
 		window.onresize = viewportHandler;
 		window.onscroll = viewportHandler;
 		// window.onscrollend = ...
-	});
+	};
 </script>
 
 <svelte:head>
@@ -42,17 +40,11 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 </svelte:head>
 
-<div id="command-bar" class="command-bar">
+<div id="command-bar" class="command-bar" {@attach adjustPosition}>
 	{@render children()}
 </div>
 
 <style>
-	:global {
-		body {
-			margin: 0;
-		}
-	}
-
 	.command-bar {
 		position: fixed;
 		left: 0;

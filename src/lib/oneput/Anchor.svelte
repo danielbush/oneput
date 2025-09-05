@@ -48,18 +48,18 @@
 			fixed.style.transform = 'translate(' + offsetX + 'px,' + offsetY + 'px) ';
 		}
 
-		vv.onresize = viewportHandler;
-		vv.onscroll = viewportHandler;
-		// vv.onscrollend = ...; // too new
-		window.onresize = viewportHandler;
-		window.onscroll = viewportHandler;
-		// window.onscrollend = ...
+		vv.addEventListener('resize', viewportHandler);
+		vv.addEventListener('scroll', viewportHandler);
+		// onscrollend = ...; // too new
+		window.addEventListener('resize', viewportHandler);
+		window.addEventListener('scroll', viewportHandler);
+		// onscrollend = ...
 
 		return () => {
-			vv.onresize = null;
-			vv.onscroll = null;
-			window.onresize = null;
-			window.onscroll = null;
+			vv.removeEventListener('resize', viewportHandler);
+			vv.removeEventListener('scroll', viewportHandler);
+			window.removeEventListener('resize', viewportHandler);
+			window.removeEventListener('scroll', viewportHandler);
 		};
 	};
 </script>

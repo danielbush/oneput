@@ -54,6 +54,13 @@
 		window.onresize = viewportHandler;
 		window.onscroll = viewportHandler;
 		// window.onscrollend = ...
+
+		return () => {
+			vv.onresize = null;
+			vv.onscroll = null;
+			window.onresize = null;
+			window.onscroll = null;
+		};
 	};
 </script>
 

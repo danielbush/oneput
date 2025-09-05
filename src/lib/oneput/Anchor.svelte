@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { Attachment } from 'svelte/attachments';
 
-	let { children } = $props();
+	let { children, id = 'oneput__command-bar' } = $props();
 
-	// VISUAL_VIEWPORT_ZOOM
+	/**
+	 * VISUAL_VIEWPORT_ZOOM
+	 */
 	const ensureScaleInvariance: Attachment<HTMLElement> = (fixed) => {
 		const fn = () => {
 			const vv = window.visualViewport;
@@ -21,6 +23,9 @@
 		};
 	};
 
+	/**
+	 * OSK_VISUAL_VIEWPORT
+	 */
 	const adjustPosition: Attachment<HTMLElement> = (fixed) => {
 		const vv = window.visualViewport;
 		if (!vv) return;
@@ -32,7 +37,6 @@
 		layoutViewport.style.visibility = 'hidden';
 		document.body.appendChild(layoutViewport);
 
-		// See OSK_VISUAL_VIEWPORT
 		function viewportHandler() {
 			// Since the bar is position: fixed we need to offset it by the visual
 			// viewport's offset from the layout viewport origin.
@@ -58,16 +62,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 </svelte:head>
 
-<div id="command-bar" class="command-bar" {@attach adjustPosition}>
-	<div class="command-bar-inner">
+<div {id} class="oneput__command-bar" {@attach adjustPosition}>
+	<div class="oneput__command-bar-inner">
 		<div {@attach ensureScaleInvariance}>
+			<!-- Oneput goes here -->
 			{@render children()}
 		</div>
 	</div>
 </div>
 
 <style>
-	.command-bar {
+	.oneput__command-bar {
 		position: fixed;
 		left: 0;
 		bottom: 0;
@@ -75,7 +80,7 @@
 		height: 0;
 	}
 
-	.command-bar-inner {
+	.oneput__command-bar-inner {
 		position: absolute;
 		bottom: 0;
 		left: 50%;

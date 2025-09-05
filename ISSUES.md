@@ -29,5 +29,18 @@ How do we use lucide.createIcons but avoid icons flashing into existence when a 
 ## VISUAL_VIEWPORT_ZOOM
 
 - what: the viewport on mobile phones can be pinch zoomed. This will blow up or shrink the input.
-- solution: do a css `transform` and `scale(1/visualViewport.scale)` . A version of this is here: https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API .
-- use `element.style.transformOrigin = 'bottom left'` to prevent drift for bottom-anchored input
+- solution:
+  - do a css `transform` and `scale(1/visualViewport.scale)` . A version of this is here: https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API .
+  - use `element.style.transformOrigin = 'bottom left'` to prevent drift for bottom-anchored input
+
+## OSK_VISUAL_VIEWPORT
+
+- what: when the on-screen keyboard (OSK) comes up it may hide a position fixed elements (eg Oneput). In a simple scrollable html page with a floating fixed position element at the bottom of the layout viewport, when the OSK is triggered, the element may retain its position, but scrolling up the page will cause the fixed element to go under the OSK; scrolling down again causes the element to come back
+- solution: we listen to both the window and the visual viewport for resize and scroll events and adjust the position of the fixed element taking into account the weird things that happen to the visual viewport relative to the layout viewport when the OSK is present; see <https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport#simulating_position_device-fixed> . This correction can be a bit janky although it seems to have improved even in IOS safari (as at Sep-2025).
+- possible future solution: https://developer.mozilla.org/en-US/docs/Web/API/VirtualKeyboard_API - does not appear to be well enough supported yet
+
+## IOS_SAFARI_OSK_DEAD_SPACE
+
+- what: when the OSK is up in IOS safari, scrolling past the bottom of the layout viewport results in a bunch of dead space outside of the layout viewport; nothing can occupy this space or be positioned there, it's a void.
+- see: <https://www.reddit.com/r/webdev/comments/xaksu6/on_ios_safari_whenever_the_keyboard_opens_up_for/>
+- solution: don't use IOS safari :D - not going to try to fix this for the moment, possibly <https://developer.mozilla.org/en-US/docs/Web/API/VirtualKeyboard_API> may provide a fix at some point.

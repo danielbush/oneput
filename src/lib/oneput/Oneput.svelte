@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Attachment } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
 	import { type MenuItem, type MenuItemAny, type OneputProps } from './lib.js';
 	let {
@@ -56,28 +55,9 @@
 		props.onInputChange?.(evt);
 		// Note: the user can set inputValue directly and it will pass down to this component also.
 	}
-
-	// VISUAL_VIEWPORT_ZOOM
-	function ensureScaleInvariance(element: HTMLElement) {
-		const window = element.ownerDocument.defaultView!;
-		const visualViewport = window.visualViewport;
-		if (!visualViewport) return;
-		element.style.transformOrigin = 'bottom left';
-		element.style.transform = `scale(${1 / visualViewport.scale})`;
-	}
-
-	const a: Attachment<HTMLElement> = (element) => {
-		console.log('add');
-		const fn = ensureScaleInvariance.bind(null, element);
-		document.addEventListener('touchend', fn);
-		return () => {
-			console.log('remove');
-			document.removeEventListener('touchend', fn);
-		};
-	};
 </script>
 
-<div id="oneput__container" class="oneput__container" {@attach a}>
+<div id="oneput__container" class="oneput__container">
 	{#if props.menuOpen}
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">

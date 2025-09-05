@@ -3,6 +3,24 @@
 
 	let { children } = $props();
 
+	// VISUAL_VIEWPORT_ZOOM
+	const ensureScaleInvariance: Attachment<HTMLElement> = (fixed) => {
+		const fn = () => {
+			const vv = window.visualViewport;
+			if (!vv) return;
+			fixed.style.transform = `scale(${1 / vv!.scale})`;
+			fixed.style.transformOrigin = 'bottom left';
+		};
+		document.addEventListener('touchend', fn);
+		document.addEventListener('scroll', fn);
+		document.addEventListener('resize', fn);
+		return () => {
+			document.removeEventListener('touchend', fn);
+			document.removeEventListener('scroll', fn);
+			document.removeEventListener('resize', fn);
+		};
+	};
+
 	const adjustPosition: Attachment<HTMLElement> = (fixed) => {
 		const vv = window.visualViewport;
 		if (!vv) return;
@@ -42,7 +60,9 @@
 
 <div id="command-bar" class="command-bar" {@attach adjustPosition}>
 	<div class="command-bar-inner">
-		{@render children()}
+		<div {@attach ensureScaleInvariance}>
+			{@render children()}
+		</div>
 	</div>
 </div>
 

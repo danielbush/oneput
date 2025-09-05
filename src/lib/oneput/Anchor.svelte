@@ -41,7 +41,9 @@
 </svelte:head>
 
 <div id="command-bar" class="command-bar" {@attach adjustPosition}>
-	{@render children()}
+	<div class="command-bar-inner">
+		{@render children()}
+	</div>
 </div>
 
 <style>
@@ -50,7 +52,16 @@
 		left: 0;
 		bottom: 0;
 		width: 100%;
-		display: flex;
-		justify-content: center;
+		height: 0;
+	}
+
+	.command-bar-inner {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100%;
+		min-width: var(--oneput-min-width, 320px);
+		max-width: var(--oneput-max-width, 500px);
 	}
 </style>

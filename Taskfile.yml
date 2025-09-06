@@ -176,8 +176,9 @@ tasks:
     summary: |
       Based on https://www.youtube.com/watch?v=T4zwmtUW7Gw .
 
-      - TODO: we might be able to do this directly in sveltekit using a secondary vite config file eg: https://www.devgem.io/posts/building-web-components-with-sveltekit-2-and-svelte-5 .
-      - Use es instead of iife?
+      - TODO:
+        - try https://github.com/svebcomponents/template ?  ( https://www.youtube.com/watch?v=lDWfdfTH3e8 )
+        - Use es instead of iife?
     dir: '{{ .BUILD_WC }}'
     cmds:
       - echo "Using {{ .BUILD_WC }} to build a web component"

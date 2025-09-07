@@ -3,7 +3,7 @@
  */
 
 import { id, type FlexParams, type MenuItemAny } from '$lib/oneput/lib.js';
-import type { appState } from './visual/state.js';
+import type { appState } from './state.js';
 
 export const menuHeader1: FlexParams = {
 	id: 'menu-header-1',

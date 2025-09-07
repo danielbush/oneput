@@ -75,8 +75,8 @@
 	/* Menu */
 	/* These apply when the menu item is a button */
 	--oneput-menu-item-background: none;
-	--oneput-menu-item-background-hover: rgb(100 100 100 / 0.1);
-	--oneput-menu-item-background-active: rgb(100 100 100 / 0.2);
+	--oneput-menu-item-background-hover: rgb(100 100 100 / 0.2);
+	--oneput-menu-item-background-active: rgb(100 100 100 / 0.3);
 	--oneput-menu-item-body-margin: 0 0.6em;
 	--oneput-menu-header-background: rgb(255 255 255 / 0.2);
 	--oneput-menu-footer-background: rgb(255 255 255 / 0.2);

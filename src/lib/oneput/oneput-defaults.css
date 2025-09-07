@@ -201,6 +201,11 @@
 	box-shadow: var(--oneput-box-shadow);
 }
 
+.oneput__container:has(.oneput__menu-area) {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
 /* #endregion */
 
 /* #region menu */
@@ -218,6 +223,8 @@
 
 	background: var(--oneput-background);
 	border-radius: var(--oneput-border-radius);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 	border: var(--oneput-border);
 	border-top-width: var(--oneput-border-top);
 	border-bottom-width: var(--oneput-border-bottom);
@@ -295,7 +302,7 @@ button.oneput__menu-item:active {
 
 /* #endregion */
 
-/* #region input */
+/* #region input area */
 
 .oneput__input-area {
 	width: 100%;

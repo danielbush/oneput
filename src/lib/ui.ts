@@ -147,6 +147,12 @@ export const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
 	};
 };
 
+/**
+ * Provides 2 types of header for open menus: one with a back button (type='back') or one with an exit button (type='exit').
+ *
+ * @param options.exit - The function to call when the back or exit button is clicked.
+ * @param options.type - The type of header to use.
+ */
 export const menuHeaderUI: ({
 	title,
 	exit,

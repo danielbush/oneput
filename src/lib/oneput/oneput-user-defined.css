@@ -42,10 +42,6 @@
 	--oneput-button-outline-active: 0.5px solid rgb(255 255 255 / 0.8);
 	--oneput-button-background-active: rgb(150 150 150 / 0.3);
 	--oneput-button-border-active: none;
-
-	.oneput__menu-item + .oneput__menu-item {
-		border-top: 0.5px solid rgb(255 255 255 / 0.1);
-	}
 }
 
 .oneput__icon-toggle-button.oneput__icon-toggle-button--on {

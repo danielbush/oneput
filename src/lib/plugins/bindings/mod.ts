@@ -2,10 +2,10 @@ import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import { id as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
-	arrowLeftIcon,
 	chevronRightIcon,
 	inputUI,
 	keyboardIcon,
+	menuHeaderUI,
 	menuItemWithIcon,
 	squareFunctionIcon,
 	tickIcon,
@@ -110,24 +110,17 @@ export class KeyBindingsController {
 		this.controller.update({
 			input: inputUI(this.controller),
 			menu: {
-				items: [
-					menuItemWithIcon({
-						id: randomId(),
-						text: 'Back...',
-						leftIcon: arrowLeftIcon,
-						action: this.back
-					}),
-					...Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
-						keybindingMenuItem({
-							id,
-							text: description,
-							bindings,
-							action: () => {
-								this.actionUI(id);
-							}
-						})
-					)
-				]
+				header: menuHeaderUI({ title: 'Key bindings', exit: this.back }),
+				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
+					keybindingMenuItem({
+						id,
+						text: description,
+						bindings,
+						action: () => {
+							this.actionUI(id);
+						}
+					})
+				)
 			}
 		});
 	};
@@ -143,33 +136,8 @@ export class KeyBindingsController {
 			inputValue: '',
 			input: inputUI(this.controller),
 			menu: {
-				header: {
-					id: 'bindings-header',
-					type: 'hflex',
-					children: [
-						{
-							id: 'bindings-header-icon',
-							type: 'fchild'
-						},
-						{
-							id: 'bindings-header-text',
-							type: 'fchild',
-							style: { justifyContent: 'center', flex: '3' },
-							textContent: `Key bindings for "${description}"`
-						},
-						{
-							id: 'bindings-header-close',
-							type: 'fchild'
-						}
-					]
-				},
+				header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back }),
 				items: [
-					menuItemWithIcon({
-						id: randomId(),
-						text: 'Back...',
-						leftIcon: arrowLeftIcon,
-						action: back
-					}),
 					menuItemWithIcon({
 						id: 'add-binding',
 						text: 'Add binding...',

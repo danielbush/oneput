@@ -146,3 +146,39 @@ export const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
 		}
 	};
 };
+
+export const menuHeaderUI: ({
+	title,
+	exit,
+	type
+}: {
+	title: string;
+	exit: () => void;
+	type?: 'back' | 'exit';
+}) => FlexParams = ({ title, exit, type = 'back' }) => {
+	return {
+		id: 'bindings-header',
+		type: 'hflex',
+		children: [
+			{
+				id: id(),
+				tag: 'button',
+				attr: { type: 'button', title: 'Options', onclick: exit },
+				style: { flex: '1' },
+				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
+			},
+			{
+				id: 'bindings-header-text',
+				type: 'fchild',
+				style: { justifyContent: 'center', flex: '3' },
+				textContent: title
+			},
+			{
+				id: 'bindings-header-close',
+				type: 'fchild',
+				style: { flex: '1' },
+				textContent: ''
+			}
+		]
+	};
+};

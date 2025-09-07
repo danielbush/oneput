@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { id } from '$lib/oneput/lib.js';
-import { arrowLeftIcon, menuItemNoIcon } from '$lib/ui.js';
+import { menuHeaderUI, menuItemNoIcon } from '$lib/ui.js';
 
 /**
  * Demonstates how we navigate the headings in an html document using Oneput.
@@ -47,31 +47,7 @@ export class NavigateHeadings {
 	private updateUI = () => {
 		this.controller.update({
 			menu: {
-				header: {
-					id: 'bindings-header',
-					type: 'hflex',
-					children: [
-						{
-							id: id(),
-							tag: 'button',
-							attr: { type: 'button', title: 'Options', onclick: this.exit },
-							style: { flex: '1' },
-							innerHTMLUnsafe: arrowLeftIcon
-						},
-						{
-							id: 'bindings-header-text',
-							type: 'fchild',
-							style: { justifyContent: 'center', flex: '3' },
-							textContent: `Navigate headings`
-						},
-						{
-							id: 'bindings-header-close',
-							type: 'fchild',
-							style: { flex: '1' },
-							textContent: ''
-						}
-					]
-				},
+				header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit }),
 				items: this.filteredHeadings.map((h) =>
 					menuItemNoIcon({
 						id: id(),

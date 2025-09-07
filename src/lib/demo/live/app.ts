@@ -1,7 +1,7 @@
 import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
 import {
-	arrowLeftIcon,
 	inputUI,
+	menuHeaderUI,
 	menuItemWithIcon,
 	settingsIcon,
 	sigmaIcon,
@@ -84,6 +84,13 @@ const rootUI = (c: Controller) => {
 	c.update({
 		input: inputUI(c),
 		menu: {
+			header: menuHeaderUI({
+				title: 'Root',
+				type: 'exit',
+				exit: () => {
+					c.closeMenu();
+				}
+			}),
 			items: [
 				menuItemWithIcon({
 					id: 'settings',
@@ -112,13 +119,6 @@ const rootUI = (c: Controller) => {
 					action: () => {
 						console.log('insert katex');
 					}
-				}),
-				menuItemWithIcon({
-					id: 'close-menu',
-					text: 'Close menu',
-					action: () => {
-						c.closeMenu();
-					}
 				})
 			]
 		}
@@ -130,13 +130,8 @@ const settingsUI = (c: Controller, back: () => void) => {
 	c.update({
 		input: inputUI(c),
 		menu: {
+			header: menuHeaderUI({ title: 'Settings', exit: back }),
 			items: [
-				menuItemWithIcon({
-					id: 'back',
-					text: 'Back...',
-					leftIcon: arrowLeftIcon,
-					action: back
-				}),
 				menuItemWithIcon({
 					id: 'global-keys',
 					text: 'Set global key bindings...',

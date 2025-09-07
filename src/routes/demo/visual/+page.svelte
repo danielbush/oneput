@@ -51,13 +51,9 @@
 					}}
 				/>
 			{/snippet}
-			<section>
-				{@render demo1(false)}
-			</section>
-			<section style="padding-top: 400px;">
-				<p>Menu open</p>
-				{@render demo1(true)}
-			</section>
+			{@render demo1(false)}
+			<p>Menu open</p>
+			{@render demo1(true)}
 		</section>
 
 		<section class="demo-example">
@@ -77,12 +73,10 @@
 				/>
 			{/snippet}
 			{@render demo1(false)}
-			<section style="padding-top: 400px;">
-				<p>Menu open</p>
-				{@render demo1(true)}
-			</section>
+			<p>Menu open</p>
+			{@render demo1(true)}
 		</section>
-		<section class="demo-example" style="padding-top: 200px;">
+		<section class="demo-example">
 			<h2>Alert</h2>
 			<Oneput
 				menuOpen={true}
@@ -124,7 +118,7 @@
 				}}
 			/>
 		</section>
-		<section class="demo-example" style="padding-top: 200px;">
+		<section class="demo-example">
 			<h2>Confirm</h2>
 			<Oneput
 				menuOpen={true}

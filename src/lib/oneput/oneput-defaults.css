@@ -201,11 +201,6 @@
 	box-shadow: var(--oneput-box-shadow);
 }
 
-.oneput__container:has(.oneput__menu-area) {
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
-}
-
 /* #endregion */
 
 /* #region menu */
@@ -213,13 +208,12 @@
 .oneput__menu-anchor {
 	position: relative;
 }
+
 .oneput__menu-area {
 	margin: 0;
 	padding: var(--oneput-area-padding);
 	border-bottom: var(--oneput-strong-border);
 	width: 100%;
-	position: absolute;
-	bottom: 0;
 
 	background: var(--oneput-background);
 	border-radius: var(--oneput-border-radius);

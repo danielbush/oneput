@@ -1,3 +1,4 @@
+import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
 
 export type OneputProps = {
@@ -46,8 +47,7 @@ export type FlexParams = {
 	 */
 	voidElements?: Set<string | undefined>;
 	action?: (c: Controller) => void;
-	focused?: boolean;
-	shouldScrollIntoView?: boolean;
+	attachments?: Record<string, Attachment>;
 };
 
 export type MenuItem = FlexParams & {

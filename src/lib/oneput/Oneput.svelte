@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
 	import { type MenuItem, type MenuItemAny, type OneputProps } from './lib.js';
 	let {
@@ -76,9 +77,21 @@
 									index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
 									...(item.classes ?? [])
 								]}
-								focused={index === menuItemFocus}
-								shouldScrollIntoView={menuItemFocusOrigin === 'keyboard'}
 								attr={rewriteAttr(index, item.attr, item.action)}
+								attachments={{
+									[createAttachmentKey()]: (element: HTMLElement) => {
+										if (index === menuItemFocus && menuItemFocusOrigin === 'keyboard') {
+											const elemRect = element.getBoundingClientRect();
+											const containerRect = element.parentElement!.getBoundingClientRect();
+											if (
+												elemRect.top < containerRect.top ||
+												elemRect.bottom > containerRect.bottom
+											) {
+												element.scrollIntoView(false);
+											}
+										}
+									}
+								}}
 							/>
 						{/if}
 					{/each}

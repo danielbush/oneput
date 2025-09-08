@@ -9,6 +9,7 @@
 
 <button
 	id="oneput__corner-button"
+	title="Hide Oneput"
 	type="button"
 	onclick={handleClick}
 	{@attach hideShowListener(false)}

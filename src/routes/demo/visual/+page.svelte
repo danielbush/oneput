@@ -17,6 +17,11 @@
 	});
 </script>
 
+<svelte:head>
+	<!-- IOS_CLICK_ZOOM -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+</svelte:head>
+
 <main>
 	<h1>Oneput Visual States</h1>
 	<p>Demo visual states for Oneput component</p>

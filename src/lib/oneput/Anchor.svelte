@@ -70,7 +70,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 </svelte:head>
 
-<div {id} class="oneput__command-bar" {@attach adjustPosition} {@attach hideShowListener()}>
+<div {id} class="oneput__command-bar" {@attach adjustPosition} {@attach hideShowListener(true)}>
 	<div class="oneput__command-bar-inner">
 		<div {@attach ensureScaleInvariance}>
 			<!-- Oneput goes here -->

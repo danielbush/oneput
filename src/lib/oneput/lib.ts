@@ -136,14 +136,9 @@ export function id(): string {
 	return crypto.randomUUID();
 }
 
-export function hideShowListener(show?: boolean): Attachment<HTMLElement> {
+export function hideShowListener(show: boolean): Attachment<HTMLElement> {
 	return (btn: HTMLElement) => {
-		if (show === false) {
-			btn.style.display = 'none';
-		}
-		if (show === true) {
-			btn.style.display = '';
-		}
+		btn.style.display = show ? '' : 'none';
 		window.addEventListener('oneput-toggle-hide', () => {
 			btn.style.display = btn.style.display === 'none' ? '' : 'none';
 		});

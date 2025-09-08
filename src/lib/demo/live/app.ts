@@ -7,7 +7,7 @@ import {
 	sigmaIcon,
 	tocIcon
 } from '$lib/ui.js';
-import { KeyBindingsController } from '$lib/plugins/bindings/mod.js';
+import { KeyBindingsController } from '$lib/oneput/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 
 export const globalKeys: KeyBindingMap = {

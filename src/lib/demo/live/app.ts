@@ -91,11 +91,6 @@ const rootUI = (c: Controller) => {
 		c.closeMenu();
 	});
 	c.update({
-		onMenuOpenChange: () => {
-			c.update({ input: inputUI(c) });
-		}
-	});
-	c.update({
 		input: inputUI(c),
 		menu: {
 			header: menuHeaderUI({

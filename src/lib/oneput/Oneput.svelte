@@ -56,6 +56,16 @@
 		props.onInputChange?.(evt);
 		// Note: the user can set inputValue directly and it will pass down to this component also.
 	}
+
+	const scrollIntoView = (index: number) => (element: HTMLElement) => {
+		if (index === menuItemFocus && menuItemFocusOrigin === 'keyboard') {
+			const elemRect = element.getBoundingClientRect();
+			const containerRect = element.parentElement!.getBoundingClientRect();
+			if (elemRect.top < containerRect.top || elemRect.bottom > containerRect.bottom) {
+				element.scrollIntoView(false);
+			}
+		}
+	};
 </script>
 
 <div id="oneput__container" class="oneput__container">
@@ -79,18 +89,7 @@
 								]}
 								attr={rewriteAttr(index, item.attr, item.action)}
 								attachments={{
-									[createAttachmentKey()]: (element: HTMLElement) => {
-										if (index === menuItemFocus && menuItemFocusOrigin === 'keyboard') {
-											const elemRect = element.getBoundingClientRect();
-											const containerRect = element.parentElement!.getBoundingClientRect();
-											if (
-												elemRect.top < containerRect.top ||
-												elemRect.bottom > containerRect.bottom
-											) {
-												element.scrollIntoView(false);
-											}
-										}
-									}
+									[createAttachmentKey()]: scrollIntoView(index)
 								}}
 							/>
 						{/if}

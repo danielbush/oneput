@@ -1,38 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
+	import { hideShowListener } from './lib.js';
 
 	let { children, id = 'oneput__command-bar' } = $props();
-
-	onMount(() => {
-		const commandBar = document.getElementById(id);
-		const hide = () => {
-			commandBar!.style.display = 'none';
-		};
-		const show = () => {
-			commandBar!.style.display = '';
-		};
-		window.addEventListener('oneput-hide', () => {
-			hide();
-		});
-		window.addEventListener('oneput-show', () => {
-			show();
-		});
-		window.addEventListener('oneput-toggle-hide', () => {
-			commandBar!.style.display = commandBar!.style.display === 'none' ? '' : 'none';
-		});
-		return () => {
-			window.removeEventListener('oneput-hide', () => {
-				hide();
-			});
-			window.removeEventListener('oneput-show', () => {
-				show();
-			});
-			window.removeEventListener('oneput-toggle-hide', () => {
-				commandBar!.style.display = commandBar!.style.display === 'none' ? '' : 'none';
-			});
-		};
-	});
 
 	/**
 	 * VISUAL_VIEWPORT_ZOOM
@@ -100,7 +70,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 </svelte:head>
 
-<div {id} class="oneput__command-bar" {@attach adjustPosition}>
+<div {id} class="oneput__command-bar" {@attach adjustPosition} {@attach hideShowListener()}>
 	<div class="oneput__command-bar-inner">
 		<div {@attach ensureScaleInvariance}>
 			<!-- Oneput goes here -->

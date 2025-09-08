@@ -136,30 +136,19 @@ export function id(): string {
 	return crypto.randomUUID();
 }
 
-export function hideShowListener(showing: boolean): Attachment<HTMLElement> {
+export function hideShowListener(show?: boolean): Attachment<HTMLElement> {
 	return (btn: HTMLElement) => {
-		btn.style.display = showing ? '' : 'none';
-
-		const hide = () => {
-			btn.style.display = '';
-		};
-		const show = () => {
+		if (show === false) {
 			btn.style.display = 'none';
-		};
-
-		window.addEventListener('oneput-hide', hide);
-		window.addEventListener('oneput-show', show);
+		}
+		if (show === true) {
+			btn.style.display = '';
+		}
 		window.addEventListener('oneput-toggle-hide', () => {
 			btn.style.display = btn.style.display === 'none' ? '' : 'none';
 		});
 
 		return () => {
-			window.removeEventListener('oneput-hide', () => {
-				hide();
-			});
-			window.removeEventListener('oneput-show', () => {
-				show();
-			});
 			window.removeEventListener('oneput-toggle-hide', () => {
 				btn.style.display = btn.style.display === 'none' ? '' : 'none';
 			});

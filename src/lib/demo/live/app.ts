@@ -139,7 +139,7 @@ const rootUI = (c: Controller) => {
 					// leftIcon: commandIcon,
 					text: 'Hide',
 					action: () => {
-						window.dispatchEvent(new Event('oneput-hide'));
+						window.dispatchEvent(new Event('oneput-toggle-hide'));
 					}
 				})
 			]

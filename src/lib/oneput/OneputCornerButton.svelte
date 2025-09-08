@@ -2,8 +2,6 @@
 	import { commandIcon } from '$lib/ui.js';
 	import { hideShowListener } from './lib.js';
 
-	const { show: showing = false }: { show?: boolean } = $props();
-
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-show'));
 	};
@@ -13,7 +11,7 @@
 	id="oneput__corner-button"
 	type="button"
 	onclick={handleClick}
-	{@attach hideShowListener(showing)}
+	{@attach hideShowListener(false)}
 >
 	<!-- eslint-disable svelte/no-at-html-tags -->
 	{@html commandIcon}

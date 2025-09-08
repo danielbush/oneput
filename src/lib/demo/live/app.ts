@@ -24,10 +24,24 @@ export const globalKeys: KeyBindingMap = {
 			c.focusInput();
 		},
 		description: 'Focus input'
+	},
+	hideOneput: {
+		bindings: ['$mod+h'],
+		description: 'Hide Oneput',
+		action: () => {
+			window.dispatchEvent(new Event('oneput-toggle-hide'));
+		}
 	}
 };
 
 export const localKeys: KeyBindingMap = {
+	hideOneput: {
+		bindings: ['$mod+h'],
+		description: 'Hide Oneput',
+		action: () => {
+			window.dispatchEvent(new Event('oneput-toggle-hide'));
+		}
+	},
 	doAction: {
 		bindings: ['Enter'],
 		action: (c) => {
@@ -118,6 +132,14 @@ const rootUI = (c: Controller) => {
 					text: 'Insert katex...',
 					action: () => {
 						console.log('insert katex');
+					}
+				}),
+				menuItemWithIcon({
+					id: 'hide-oneput',
+					// leftIcon: commandIcon,
+					text: 'Hide',
+					action: () => {
+						window.dispatchEvent(new Event('oneput-hide'));
 					}
 				})
 			]

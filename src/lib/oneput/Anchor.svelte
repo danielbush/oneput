@@ -1,7 +1,38 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 
 	let { children, id = 'oneput__command-bar' } = $props();
+
+	onMount(() => {
+		const commandBar = document.getElementById(id);
+		const hide = () => {
+			commandBar!.style.display = 'none';
+		};
+		const show = () => {
+			commandBar!.style.display = '';
+		};
+		window.addEventListener('oneput-hide', () => {
+			hide();
+		});
+		window.addEventListener('oneput-show', () => {
+			show();
+		});
+		window.addEventListener('oneput-toggle-hide', () => {
+			commandBar!.style.display = commandBar!.style.display === 'none' ? '' : 'none';
+		});
+		return () => {
+			window.removeEventListener('oneput-hide', () => {
+				hide();
+			});
+			window.removeEventListener('oneput-show', () => {
+				show();
+			});
+			window.removeEventListener('oneput-toggle-hide', () => {
+				commandBar!.style.display = commandBar!.style.display === 'none' ? '' : 'none';
+			});
+		};
+	});
 
 	/**
 	 * VISUAL_VIEWPORT_ZOOM

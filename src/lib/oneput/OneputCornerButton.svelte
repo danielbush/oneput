@@ -1,50 +1,46 @@
 <script lang="ts">
 	import { commandIcon } from '$lib/ui.js';
-	import { onMount } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	const { show: showing = false }: { show?: boolean } = $props();
 
-	onMount(() => {
-		const btn = document.getElementById('oneput__corner-button');
-		if (!btn) {
-			console.error('oneput__corner-button not found');
-			return;
-		}
+	function listener(): Attachment<HTMLElement> {
+		return (btn: HTMLElement) => {
+			btn.style.display = showing ? '' : 'none';
 
-		btn.style.display = showing ? '' : 'none';
+			const hide = () => {
+				btn.style.display = '';
+			};
+			const show = () => {
+				btn.style.display = 'none';
+			};
 
-		const hide = () => {
-			btn.style.display = '';
-		};
-		const show = () => {
-			btn.style.display = 'none';
-		};
-
-		window.addEventListener('oneput-hide', hide);
-		window.addEventListener('oneput-show', show);
-		window.addEventListener('oneput-toggle-hide', () => {
-			btn.style.display = btn.style.display === 'none' ? '' : 'none';
-		});
-
-		return () => {
-			window.removeEventListener('oneput-hide', () => {
-				hide();
-			});
-			window.removeEventListener('oneput-show', () => {
-				show();
-			});
-			window.removeEventListener('oneput-toggle-hide', () => {
+			window.addEventListener('oneput-hide', hide);
+			window.addEventListener('oneput-show', show);
+			window.addEventListener('oneput-toggle-hide', () => {
 				btn.style.display = btn.style.display === 'none' ? '' : 'none';
 			});
+
+			return () => {
+				window.removeEventListener('oneput-hide', () => {
+					hide();
+				});
+				window.removeEventListener('oneput-show', () => {
+					show();
+				});
+				window.removeEventListener('oneput-toggle-hide', () => {
+					btn.style.display = btn.style.display === 'none' ? '' : 'none';
+				});
+			};
 		};
-	});
+	}
 
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-show'));
 	};
 </script>
 
-<button id="oneput__corner-button" type="button" onclick={handleClick}>
+<button id="oneput__corner-button" type="button" onclick={handleClick} {@attach listener()}>
 	<!-- eslint-disable svelte/no-at-html-tags -->
 	{@html commandIcon}
 	<!-- eslint-enable svelte/no-at-html-tags -->

@@ -1,3 +1,4 @@
+import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
 
 export type OneputProps = {
@@ -133,4 +134,35 @@ export function id(): string {
 		};
 	}
 	return crypto.randomUUID();
+}
+
+export function hideShowListener(showing: boolean): Attachment<HTMLElement> {
+	return (btn: HTMLElement) => {
+		btn.style.display = showing ? '' : 'none';
+
+		const hide = () => {
+			btn.style.display = '';
+		};
+		const show = () => {
+			btn.style.display = 'none';
+		};
+
+		window.addEventListener('oneput-hide', hide);
+		window.addEventListener('oneput-show', show);
+		window.addEventListener('oneput-toggle-hide', () => {
+			btn.style.display = btn.style.display === 'none' ? '' : 'none';
+		});
+
+		return () => {
+			window.removeEventListener('oneput-hide', () => {
+				hide();
+			});
+			window.removeEventListener('oneput-show', () => {
+				show();
+			});
+			window.removeEventListener('oneput-toggle-hide', () => {
+				btn.style.display = btn.style.display === 'none' ? '' : 'none';
+			});
+		};
+	};
 }

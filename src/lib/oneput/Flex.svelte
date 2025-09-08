@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Attachment } from 'svelte/attachments';
+	import { createAttachmentKey, type Attachment } from 'svelte/attachments';
 	import FChild from './FChild.svelte';
 	import { type FChildParams, type FlexParams } from './lib.js';
 
 	type Props = { class: string } & FlexParams;
-	let { class: topLevelClass, focused, shouldScrollIntoView, ...props }: Props = $props();
+	let { class: topLevelClass, ...props }: Props = $props();
 
 	function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
 		const browserOnly = globalThis.document;
@@ -17,7 +17,7 @@
 
 	function scrollIntoView(): Attachment {
 		return (element) => {
-			if (focused && shouldScrollIntoView) {
+			if (props.focused && props.shouldScrollIntoView) {
 				const elemRect = element.getBoundingClientRect();
 				const containerRect = element.parentElement!.getBoundingClientRect();
 				if (elemRect.top < containerRect.top || elemRect.bottom > containerRect.bottom) {
@@ -42,6 +42,9 @@
 			{...params.attr}
 		/>
 	{:else}
+		{@const otherProps = params.shouldScrollIntoView
+			? { [createAttachmentKey()]: scrollIntoView() }
+			: {}}
 		<svelte:element
 			this={params.tag || 'div'}
 			id={params.id}
@@ -52,7 +55,7 @@
 				...(params.classes || [])
 			]}
 			{...params.attr}
-			{@attach scrollIntoView()}
+			{...otherProps}
 		>
 			{#if params.children}
 				{#each params.children as child (child.id)}

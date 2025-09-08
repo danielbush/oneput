@@ -1,4 +1,3 @@
-import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
 
 export type OneputProps = {
@@ -47,7 +46,7 @@ export type FlexParams = {
 	 */
 	voidElements?: Set<string | undefined>;
 	action?: (c: Controller) => void;
-	attachments?: Record<string, Attachment>;
+	attachments?: Record<symbol, (element: HTMLElement) => void>;
 };
 
 export type MenuItem = FlexParams & {

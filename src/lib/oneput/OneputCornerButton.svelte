@@ -33,20 +33,19 @@
 		border: 0;
 		color: rgb(100 100 100 / 1);
 		background: rgb(240 240 240 / 1);
-		border: 0.5px solid rgb(0 0 0 / 0.5);
+		border: 1px solid rgb(0 0 0 / 0.3);
 		box-shadow: var(--oneput-box-shadow);
 		box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 0.3);
 
 		&:hover {
-			outline: 1px solid rgb(255 179 2 / 0.5);
 			background: rgb(230 230 230 / 1);
 		}
 		&:active {
-			outline: 1px solid rgb(255 179 2 / 0.5);
 			background: rgb(210 210 210 / 1);
+			outline: 3px solid rgb(255 179 2 / 0.5);
 		}
 		&:focus {
-			outline: 0.5px solid rgb(255 179 2 / 0.5);
+			outline: 3px solid rgb(255 179 2 / 0.5);
 		}
 	}
 </style>

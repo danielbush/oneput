@@ -48,20 +48,6 @@
 	color: dodgerblue;
 }
 
-/* Shows how we can target menu header and footer reduce their size. */
-.oneput__menu-header .oneput__button,
-.oneput__menu-header .oneput__icon-toggle-button,
-.oneput__menu-header .oneput__icon-button,
-.oneput__menu-footer .oneput__button,
-.oneput__menu-footer .oneput__icon-toggle-button,
-.oneput__menu-footer .oneput__icon-button {
-	max-height: var(--oneput-icon-width-small);
-	min-height: var(--oneput-icon-width-small);
-	max-width: var(--oneput-icon-width-small);
-	min-width: var(--oneput-icon-width-small);
-	padding: 1px;
-}
-
 /*
 For UI you inject within oneput.
 

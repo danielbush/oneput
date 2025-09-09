@@ -172,6 +172,7 @@ export const menuHeaderUI: ({
 				id: id(),
 				tag: 'button',
 				attr: { type: 'button', title: 'Options', onclick: exit },
+				classes: ['oneput__icon-button'],
 				style: { flex: '1' },
 				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
 			},

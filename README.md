@@ -84,6 +84,11 @@ A slice of functionality that a oneput app can use. Usually the plugin will take
 
 ### Styling
 
+There are 2 stylesheets. You can modify these to suit your requirements.
+
+- src/lib/oneput/oneput-defaults.css
+- src/lib/oneput/oneput-user-defined.css
+
 Oneput consists of a container within which we have "areas".
 
 The menu and input areas have additional structures.

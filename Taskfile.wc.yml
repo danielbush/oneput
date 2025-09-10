@@ -1,0 +1,59 @@
+# https://taskfile.dev
+
+# Attempt to build web components (WIP).
+
+version: '3'
+dotenv: ['.env']
+silent: false
+set:
+  - errexit
+  - nounset
+  - pipefail
+
+vars:
+  BUILD_WC: .build/build-wc
+  VITE_WC: .build/vite-wc
+
+tasks:
+  build:clean:
+    desc: Clear the .build/ area!
+    cmds:
+      - rm -rf {{ .BUILD_WC }}
+      - rm -rf {{ .VITE_WC }}
+  build:wc:
+    desc: Create an iife with Oneput as a webcomponent.
+    summary: |
+      Based on https://www.youtube.com/watch?v=T4zwmtUW7Gw .
+
+      - TODO:
+        - try https://github.com/svebcomponents/template ?  ( https://www.youtube.com/watch?v=lDWfdfTH3e8 )
+        - Use es instead of iife?
+    dir: '{{ .BUILD_WC }}'
+    cmds:
+      - echo "Using {{ .BUILD_WC }} to build a web component"
+      - pnpm create vite@latest --template svelte .
+      - test ! -a .git && git init && git add .  && git commit -am "initial" || true
+      - pnpm i
+      - cd ../.. && pnpm pack --pack-destination {{ .BUILD_WC }}
+      - pnpm add ./*.tgz
+      - cp  ../files/build-wc/main.js src/main.js
+      - cp  ../files/build-wc/svelte.config.js svelte.config.js
+      - cp  ../files/build-wc/vite.config.js vite.config.js
+      - cp  ../files/build-wc/OneputWC.svelte src/lib/OneputWC.svelte
+      - ./node_modules/.bin/vite build --config vite.config.js
+      - echo "Built a webcomponent for Oneput in the dist directory of {{ .BUILD_WC }}"
+      - cp dist/oneput-wc.iife.js ../../dist
+      - echo "Copied webcomponent to dist/oneput-wc.iife.js"
+
+  test:wc:
+    desc: Create a vanilla TypeScript Vite app in {{ .VITE_WC }} and demo loading Oneput as a webcomponent.
+    dir: '{{ .VITE_WC }}'
+    deps:
+      - build:wc
+    cmds:
+      - echo "Creating or re-using {{ .VITE_WC }} for vanilla TS Vite app"
+      - pnpm create vite@latest --template vanilla-ts .
+      - pnpm i
+      - cp  ../files/vite-wc/index.html index.html
+      - cp  ../../dist/oneput-wc.iife.js public/
+      - echo "You can now visit {{ .VITE_WC }} in a new editor and start it up"

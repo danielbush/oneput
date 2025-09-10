@@ -9,8 +9,6 @@ set:
   - pipefail
 
 vars:
-  BUILD_WC: .build/build-wc
-  VITE_WC: .build/vite-wc
   BUILD_PACKAGE: .build/sveltekit
 
 tasks:
@@ -66,69 +64,6 @@ tasks:
     cmds:
       - pnpm run test:e2e
 
-  upgrade:
-    desc: |
-      Upgrade a sveltekit project to the latest version of sveltekit boilerplate.
-
-      eg
-      ```
-      task upgrade:sveltekit
-      task upgrade:sveltekit TARGET=~/projects/sveltekit.new SOURCE=~/projects/oneput
-
-      # Then...
-
-      cd TARGET
-
-      # Inspect commits, run tests, make sure all code and configs have been
-      # successfully injected back and integrated with boilerplate changes.
-      #
-      # - package.json - merge boilerplate; keep later versions of deps
-      # - .gitignore - may have customisations
-      # - .prettierignore - may have customisations
-
-      git push origin upgrade-boilerplate
-
-      cd SOURCE
-      # you should still be on the upgrade-boilerplate branch
-      git pull origin upgrade-boilerplate
-      # PR etc
-      git checkout main
-      git merge upgrade-boilerplate --squash
-      pnpm i
-      # inspect for any code loss, etc
-      git branch -d upgrade-boilerplate
-      git push origin :upgrade-boilerplate
-      ```
-    vars:
-      # SOURCE should usually be the root of the current project
-      SOURCE: '{{.SOURCE | default "."}}'
-      TARGET: '{{.TARGET | default "/Users/danb/projects/oneput.upgrade"}}'
-      BRANCH: '{{.BRANCH | default "upgrade-boilerplate"}}'
-    deps:
-      - setup:nvm
-    dir: '{{.SOURCE}}'
-    preconditions:
-      # sanity check
-      - test -f {{.SOURCE}}/svelte.config.js
-      - test -f {{.SOURCE}}/Taskfile.yml
-      - test -d {{.SOURCE}}/src
-      - test -f {{.SOURCE}}/README.md
-      # git working tree must be clean
-      - git diff --exit-code
-      # branch must be master or main
-      - git branch --show-current | grep -E '^(master|main)$'
-      - test -e {{.TARGET}} && echo "{{.TARGET}} already exists - aborting" && exit 1
-    cmds:
-      - git checkout -b {{.BRANCH}}
-      - echo "TARGET is {{.TARGET}}"
-      - task: create:sveltekit
-        vars:
-          TARGET: '{{.TARGET}}'
-      - task: configure:sveltekit
-        vars:
-          SOURCE: '{{.SOURCE}}'
-          TARGET: '{{.TARGET}}'
-
   install:
     deps:
       - setup:nvm
@@ -143,8 +78,6 @@ tasks:
     desc: Clear the .build/ area!
     cmds:
       - rm -rf {{ .BUILD_PACKAGE }}
-      - rm -rf {{ .BUILD_WC }}
-      - rm -rf {{ .VITE_WC }}
 
   test:package:
     desc: Create a test sveltekit application and import a locally packaged version of Oneput.
@@ -156,46 +89,6 @@ tasks:
       - cp  ../files/sveltekit/+page.svelte src/routes/
       - echo "We can now visit {{ .BUILD_PACKAGE }} in a new editor and start it up to test a locally packaged version of oneput."
 
-  # build wc
-
-  test:wc:
-    desc: Create a vanilla TypeScript Vite app in {{ .VITE_WC }} and demo loading Oneput as a webcomponent.
-    dir: '{{ .VITE_WC }}'
-    deps:
-      - build:wc
-    cmds:
-      - echo "Creating or re-using {{ .VITE_WC }} for vanilla TS Vite app"
-      - pnpm create vite@latest --template vanilla-ts .
-      - pnpm i
-      - cp  ../files/vite-wc/index.html index.html
-      - cp  ../../dist/oneput-wc.iife.js public/
-      - echo "You can now visit {{ .VITE_WC }} in a new editor and start it up"
-
-  build:wc:
-    desc: Create an iife with Oneput as a webcomponent.
-    summary: |
-      Based on https://www.youtube.com/watch?v=T4zwmtUW7Gw .
-
-      - TODO:
-        - try https://github.com/svebcomponents/template ?  ( https://www.youtube.com/watch?v=lDWfdfTH3e8 )
-        - Use es instead of iife?
-    dir: '{{ .BUILD_WC }}'
-    cmds:
-      - echo "Using {{ .BUILD_WC }} to build a web component"
-      - pnpm create vite@latest --template svelte .
-      - test ! -a .git && git init && git add .  && git commit -am "initial" || true
-      - pnpm i
-      - cd ../.. && pnpm pack --pack-destination {{ .BUILD_WC }}
-      - pnpm add ./*.tgz
-      - cp  ../files/build-wc/main.js src/main.js
-      - cp  ../files/build-wc/svelte.config.js svelte.config.js
-      - cp  ../files/build-wc/vite.config.js vite.config.js
-      - cp  ../files/build-wc/OneputWC.svelte src/lib/OneputWC.svelte
-      - ./node_modules/.bin/vite build --config vite.config.js
-      - echo "Built a webcomponent for Oneput in the dist directory of {{ .BUILD_WC }}"
-      - cp dist/oneput-wc.iife.js ../../dist
-      - echo "Copied webcomponent to dist/oneput-wc.iife.js"
-
   # low level
 
   setup:nvm:
@@ -203,108 +96,6 @@ tasks:
       - test -d "$NVM_DIR"
     cmds:
       - . "$NVM_DIR/nvm.sh" && nvm use 24
-
-  create:sveltekit:
-    desc: |
-      Install new version of sveltekit in TARGET.
-
-      eg `task create:sveltekit TARGET=~/projects/sveltekit.test`
-
-      add-ons may ask questions:
-
-      - vitest = unit, component tests
-      - sveltekit-adapter = auto
-
-      Issues
-
-      - `pnpm run test:unit` works but has scary error message: "Error when evaluating SSR module ... Cannot read properties of undefined (reading 'wrapDynamicImport')"
-        - when: 12-Aug-2025
-        - what
-          - https://github.com/sveltejs/kit/issues/14149
-          - https://www.reddit.com/r/sveltejs/comments/1md0vx2/cannot_read_properties_of_undefined_reading/
-          - https://stackoverflow.com/questions/79719644/cannot-read-properties-of-undefined-reading-wrapdynamicimport-getting-this
-        - solution
-          - posted to https://github.com/sveltejs/kit/issues/14149 - 12-Aug-2025
-    requires:
-      vars:
-        - TARGET
-    dir: '{{.TARGET}}'
-    status:
-      - test -d src
-      - test -d svelte.config.js
-    cmds:
-      - echo "Creating sveltekit in {{.TARGET}}..."
-      - pnpx sv create --types ts --template library --install pnpm --no-add-ons .
-      # `sv add` - See https://svelte.dev/blog/sv-the-svelte-cli
-      - pnpx sv add --install pnpm prettier
-      - pnpx sv add --install pnpm eslint
-      - pnpx sv add --install pnpm vitest
-      - pnpx sv add --install pnpm playwright
-      - pnpx sv add --install pnpm sveltekit-adapter
-      - pnpx sv add --install pnpm devtools-json
-      # These seem to be an omission by the sveltekit install? - Aug-2025
-      # They show up as errors when you run "test:unit" or possibly also "dev" tasks.
-      - pnpm add -D vite-plugin-devtools-json vitest-browser-svelte
-      - pnpm add -D @testing-library/user-event @testing-library/dom
-      - pnpm i
-      - echo "Install headless chrome for @vitest/browser tests (testing-library)..."
-      - pnpm exec playwright install
-      - echo "Created {{.TARGET}}"
-
-  configure:sveltekit:
-    desc: |
-      Takes a blank sveltekit and transfers our code and customisations to it.
-
-      You could do this on a branch and squash merge it (etc).
-
-      Be aware of the following:
-
-      In src/routes:
-      svelte creates: +layout.svelte      +page.svelte        page.svelte.spec.ts
-
-      In src/lib:
-      svelte creates: src/lib/index.ts (placeholder)
-
-      In src:
-      svelte creates: app.css      app.d.ts     app.html     demo.spec.ts
-    requires:
-      vars:
-        - TARGET
-    vars:
-      SOURCE: '{{.SOURCE | default "."}}'
-    cmds:
-      - echo "Configuring sveltekit in {{.TARGET}} from {{.SOURCE}}..."
-      - |
-        if test -e {{.TARGET}}/.git; then
-          echo "{{.TARGET}}/ exists - you'll need to delete it and only run this on a clean boilerplate (task create:sveltekit)"
-          exit 1
-        fi
-      # Configs that don't interfere with sveltekit's boilerplate configs:
-      - cp -a {{.SOURCE}}/.git {{.TARGET}}/
-      - cd {{.TARGET}} && pnpm i
-      - "cd {{.TARGET}} && git add . && git commit -am 'chore: new sveltekit boilerplate'"
-      - cp {{.SOURCE}}/Taskfile.yml {{.TARGET}}/
-      - cp -a {{.SOURCE}}/.env {{.TARGET}}/
-      - cp -a {{.SOURCE}}/.nvmrc {{.TARGET}}/
-      - cp -a {{.SOURCE}}/.vscode {{.TARGET}}/
-      - cp -a {{.SOURCE}}/LICENSE.txt {{.TARGET}}/
-      - if ! test -f {{.TARGET}}/sveltekit.md; then mv {{.TARGET}}/README.md {{.TARGET}}/sveltekit.md; fi
-      - cp -a {{.SOURCE}}/README.md {{.TARGET}}/
-      - echo "Committing additional customisations first.."
-      - cd {{.TARGET}} && pnpm i
-      - "cd {{.TARGET}} && git add . && git commit -am 'chore: applied configs from {{.SOURCE}}'"
-      # Configs that we might need to resolve:
-      - echo "Copy code and also configs which (1) may squash new configs from the upgrade but (2) include our customisations..."
-      - cp {{.SOURCE}}/.gitignore {{.TARGET}}/
-      - cp {{.SOURCE}}/package.json {{.TARGET}}/
-      # These seem to be an omission by the sveltekit install? - Aug-2025
-      # They show up as errors when you run "test:unit" or possibly also "dev" tasks.
-      - cd {{.TARGET}} && pnpm add -D vite-plugin-devtools-json vitest-browser-svelte
-      - cd {{.TARGET}} && pnpm add -D @testing-library/user-event @testing-library/dom
-      - cp -a {{.SOURCE}}/src/ {{.TARGET}}/src/
-      - cd {{.TARGET}} && pnpm i
-      - "cd {{.TARGET}} && git add . && git commit -m 'chore: applied configs and code from {{.SOURCE}} -- review these more carefully'"
-      - echo "Done {{.SOURCE}} -> {{.TARGET}} - check the commits, run tests and then squash merge"
 
   hooks:install:
     desc: Install git hooks from scripts/ directory

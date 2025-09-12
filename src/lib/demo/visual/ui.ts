@@ -16,7 +16,7 @@ export const menuHeader1: FlexParams = {
 			classes: ['oneput__icon-button'],
 			innerHTMLUnsafe: '<i data-lucide="chevron-left"></i>'
 		},
-		{ id: id(), classes: ['myapp__menu-item-header'], textContent: 'Menu Header' },
+		{ id: id(), classes: ['oneput__menu-item-header'], textContent: 'Menu Header' },
 		{
 			id: id(),
 			type: 'hflex',

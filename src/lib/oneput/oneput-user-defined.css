@@ -56,12 +56,6 @@ point, the flesh you put on the bones may be its own thing with its own classes
 / styling.
 */
 
-.myapp__menu-item-header {
-	margin-left: 0.6em;
-	margin-right: 0.6em;
-	flex: 0 auto;
-}
-
 .myapp__menu-item-description {
 	font: 100 0.8em sans-serif;
 	color: rgb(0 0 0 / 0.7);

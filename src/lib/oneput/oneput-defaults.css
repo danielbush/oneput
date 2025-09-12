@@ -250,6 +250,11 @@ button.oneput__menu-item--focused {
 button.oneput__menu-item:active {
 	background: var(--oneput-menu-item-background-active);
 }
+.oneput__menu-item-header {
+	margin-left: 0.6em;
+	margin-right: 0.6em;
+	flex: 0 auto;
+}
 
 .oneput__menu-item-body {
 	margin-left: 0.6em;

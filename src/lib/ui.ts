@@ -177,7 +177,7 @@ export const menuHeaderUI: ({
 			},
 			{
 				id: id(),
-				classes: ['myapp__menu-item-header'],
+				classes: ['oneput__menu-item-header'],
 				textContent: title
 			},
 			{

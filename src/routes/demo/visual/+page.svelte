@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/oneput-defaults.css';
-	import '$lib/oneput/oneput-user-defined.css';
 	import Oneput from '$lib/oneput/Oneput.svelte';
 	import * as data from '$lib/demo/visual/state.js';
 	import * as ui from '$lib/demo/visual/ui.js';

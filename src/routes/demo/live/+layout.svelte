@@ -4,7 +4,6 @@
 	import { setController } from '$lib/demo/live/app.js';
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/oneput-defaults.css';
-	import '$lib/oneput/oneput-user-defined.css';
 	import OneputCornerButton from '$lib/oneput/OneputCornerButton.svelte';
 
 	// Pretend the code here could be something outside of svelte.

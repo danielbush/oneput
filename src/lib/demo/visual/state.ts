@@ -17,11 +17,15 @@ export const appState = {
 			this.on = !this.on;
 			if (this.on) {
 				this.nodes.forEach((node) => {
-					node.classList.add('oneput__icon-toggle-button--on');
+					node.style.color = 'dodgerblue';
+					// or set class
+					// node.classList.add('oneput__icon-toggle-button--on');
 				});
 			} else {
 				this.nodes.forEach((node) => {
-					node.classList.remove('oneput__icon-toggle-button--on');
+					node.style.color = '';
+					// or set class
+					// node.classList.remove('oneput__icon-toggle-button--on');
 				});
 			}
 		},

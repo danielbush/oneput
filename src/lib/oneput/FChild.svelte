@@ -24,7 +24,6 @@
 		bind:this={node}
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
-		onpointerdown={(evt) => props.onPointerDown?.(evt, node!)}
 	/>
 {:else}
 	<svelte:element
@@ -33,7 +32,6 @@
 		bind:this={node}
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
-		onpointerdown={(evt) => props.onPointerDown?.(evt, node!)}
 	>
 		{#if props.textContent}
 			{props.textContent}

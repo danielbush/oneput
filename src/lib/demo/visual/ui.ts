@@ -499,7 +499,13 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 				{
 					id: id(),
 					tag: 'button',
-					attr: { type: 'button', title: 'zap' },
+					attr: {
+						type: 'button',
+						title: 'zap',
+						onpointerdown: () => {
+							zap.toggle();
+						}
+					},
 					classes: ['oneput__icon-toggle-button'],
 					innerHTMLUnsafe: '<i data-lucide="zap"></i>',
 					onMount: (node) => {
@@ -507,9 +513,6 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 						return () => {
 							zap.remove(node);
 						};
-					},
-					onPointerDown: () => {
-						zap.toggle();
 					}
 				}
 			]

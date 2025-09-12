@@ -95,7 +95,6 @@ export type FChildParams = {
 	textContent?: string;
 	innerHTMLUnsafe?: string;
 	onMount?: (node: HTMLElement) => void | (() => void);
-	onPointerDown?: (event: PointerEvent, node: HTMLElement) => void;
 	/** List of HTML void elements. */
 	voidElements?: Set<string | undefined>;
 };

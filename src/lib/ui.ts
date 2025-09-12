@@ -170,29 +170,19 @@ export const menuHeaderUI: ({
 		children: [
 			{
 				id: id(),
-				type: 'hflex',
-				style: { flex: '1' },
-				children: [
-					{
-						id: id(),
-						tag: 'button',
-						attr: { type: 'button', title: 'Options', onclick: exit },
-						classes: ['oneput__icon-button'],
-						style: { flex: '1' },
-						innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
-					}
-				]
+				tag: 'button',
+				attr: { type: 'button', title: 'Options', onclick: exit },
+				classes: ['oneput__icon-button'],
+				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
 			},
 			{
-				id: 'bindings-header-text',
-				type: 'fchild',
-				style: { justifyContent: 'center', flex: '3' },
+				id: id(),
+				classes: ['myapp__menu-item-header'],
 				textContent: title
 			},
 			{
-				id: 'bindings-header-close',
-				type: 'fchild',
-				style: { flex: '1' },
+				id: id(),
+				classes: ['oneput__icon-button'],
 				textContent: ''
 			}
 		]

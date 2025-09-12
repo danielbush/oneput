@@ -5,46 +5,6 @@
  * Load or put this after oneput-defaults.css.
  */
 
-.oneput__container {
-	/* You can override css variables here: */
-	/* --oneput-background: none; */
-}
-
-/* For the visual demo, we set dark mode explicitly using .dark-mode.  Here's how you
- * can style it.  You will still need to ensure your injected content is also
- * styled. */
-.dark-mode .oneput__container {
-	/* backgrounds */
-	--oneput-background: #444;
-	--oneput-input-background: #333;
-
-	/* text */
-	--oneput-font-color: #ddd;
-	--oneput-input-text-color: #ddd;
-	--oneput-placeholder-text-color: #bbb;
-	--oneput-text-muted: rgb(255 255 255 / 0.7);
-
-	/* divider color */
-	--oneput-divider-border: 1px solid rgb(255 255 255 / 0.2);
-	--oneput-divider-text-color: #ddd;
-
-	/* menu item states */
-	--oneput-menu-item-background: none;
-	--oneput-menu-item-background-hover: rgb(200 200 200 / 0.1);
-	--oneput-menu-item-background-active: rgb(200 200 200 / 0.2);
-
-	/* button states */
-	--oneput-button-outline-focus: 0.5px solid rgb(255 255 255 / 0.5);
-	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
-	--oneput-button-border-focus: none;
-	--oneput-button-outline-hover: 0.5px solid rgb(255 255 255 / 0.8);
-	--oneput-button-background-hover: rgb(150 150 150 / 0.2);
-	--oneput-button-border-hover: none;
-	--oneput-button-outline-active: 0.5px solid rgb(255 255 255 / 0.8);
-	--oneput-button-background-active: rgb(150 150 150 / 0.3);
-	--oneput-button-border-active: none;
-}
-
 .oneput__icon-toggle-button.oneput__icon-toggle-button--on {
 	color: dodgerblue;
 }

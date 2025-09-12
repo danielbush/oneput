@@ -170,11 +170,18 @@ export const menuHeaderUI: ({
 		children: [
 			{
 				id: id(),
-				tag: 'button',
-				attr: { type: 'button', title: 'Options', onclick: exit },
-				classes: ['oneput__icon-button'],
+				type: 'hflex',
 				style: { flex: '1' },
-				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
+				children: [
+					{
+						id: id(),
+						tag: 'button',
+						attr: { type: 'button', title: 'Options', onclick: exit },
+						classes: ['oneput__icon-button'],
+						style: { flex: '1' },
+						innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
+					}
+				]
 			},
 			{
 				id: 'bindings-header-text',

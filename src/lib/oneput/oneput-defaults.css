@@ -71,6 +71,7 @@
 	--oneput-box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 0.3);
 	--oneput-font: 14px sans-serif;
 	--oneput-font-color: #222;
+	--oneput-text-muted: color: rgb(0 0 0 / 0.7);
 
 	/* Menu */
 	/* These apply when the menu item is a button */
@@ -254,6 +255,12 @@ button.oneput__menu-item:active {
 	margin-left: 0.6em;
 	margin-right: 0.6em;
 	flex: 0 auto;
+}
+
+/* Smaller descriptive text that might be present in a menu item... */
+.oneput__menu-item-description {
+	font: 100 0.8em sans-serif;
+	color: var(--oneput-text-muted);
 }
 
 .oneput__menu-item-body {

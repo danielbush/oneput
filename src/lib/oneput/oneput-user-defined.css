@@ -22,6 +22,7 @@
 	--oneput-font-color: #ddd;
 	--oneput-input-text-color: #ddd;
 	--oneput-placeholder-text-color: #bbb;
+	--oneput-text-muted: rgb(255 255 255 / 0.7);
 
 	/* divider color */
 	--oneput-divider-border: 1px solid rgb(255 255 255 / 0.2);
@@ -55,14 +56,6 @@ You can think of oneput__ classes as defining the skeleton of oneput.  At some
 point, the flesh you put on the bones may be its own thing with its own classes
 / styling.
 */
-
-.myapp__menu-item-description {
-	font: 100 0.8em sans-serif;
-	color: rgb(0 0 0 / 0.7);
-}
-.dark-mode .myapp__menu-item-description {
-	color: rgb(255 255 255 / 0.7);
-}
 
 .myapp__kbd code {
 	display: flex;

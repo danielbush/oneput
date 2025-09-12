@@ -164,7 +164,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 						{ id: id(), tag: 'hr', classes: ['oneput__menu-divider'] },
 						{
 							id: id(),
-							classes: ['myapp__menu-item-description'],
+							classes: ['oneput__menu-item-description'],
 							textContent:
 								'This is some sort of description for this menu item.  This is some sort of description for this menu item.'
 						}
@@ -203,7 +203,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							children: [
 								{
 									id: id(),
-									classes: ['myapp__menu-item-description'],
+									classes: ['oneput__menu-item-description'],
 									textContent:
 										'This is some sort of description for this menu item. This is some sort of description for this menu item.  This is some sort of description for this menu item.'
 								},

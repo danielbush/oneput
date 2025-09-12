@@ -51,7 +51,7 @@ export const keybindingMenuItem: (params: {
 					{
 						id: randomId(),
 						innerHTMLUnsafe: bindingHTML,
-						classes: ['myapp__kbd']
+						classes: ['oneput__kbd']
 					},
 					{
 						id: randomId(),

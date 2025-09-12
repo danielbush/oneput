@@ -72,7 +72,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 						{
 							id: id(),
 							innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
-							classes: ['myapp__kbd']
+							classes: ['oneput__kbd']
 						},
 						{
 							id: id(),

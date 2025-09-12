@@ -530,3 +530,29 @@ button.oneput__menu-item:active {
 }
 
 /* #endregion */
+
+/* #region kbd */
+
+.oneput__kbd code {
+	display: flex;
+	gap: 6px;
+	border-radius: 2px;
+	padding: 4px;
+	background-color: rgb(0 0 0 / 0.2);
+}
+.dark-mode .oneput__kbd kbd {
+	background-color: #555;
+}
+.oneput__kbd kbd {
+	border-radius: 2px;
+	border-color: rgb(0 0 0 / 0.1);
+	border-style: solid;
+	border-width: 0.5px;
+	min-width: 1rem;
+	padding: 2px;
+	font-size: 0.6rem;
+	text-align: center;
+	background-color: #eee;
+}
+
+/* #endregion */

@@ -556,3 +556,15 @@ button.oneput__menu-item:active {
 }
 
 /* #endregion */
+
+/* #region menu button */
+
+.oneput__menu-button svg {
+	transition: transform 0.4s;
+	transform: rotate(0deg);
+}
+.oneput__menu--open .oneput__menu-button svg {
+	transform: rotate(180deg);
+}
+
+/* #endregion */

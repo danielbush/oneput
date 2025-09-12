@@ -91,12 +91,6 @@ const rootUI = (c: Controller) => {
 		c.closeMenu();
 	});
 	c.update({
-		onMenuOpenChange: () => {
-			// This ensures the open/close icon updates:
-			c.update({ input: inputUI(c) });
-		}
-	});
-	c.update({
 		input: inputUI(c),
 		menu: {
 			header: menuHeaderUI({

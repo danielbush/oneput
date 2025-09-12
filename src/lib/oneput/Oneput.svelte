@@ -68,7 +68,7 @@
 	};
 </script>
 
-<div id="oneput__container" class="oneput__container">
+<div id="oneput__container" class={['oneput__container', props.menuOpen && 'oneput__menu--open']}>
 	{#if props.menuOpen}
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">

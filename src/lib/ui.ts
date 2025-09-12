@@ -141,8 +141,9 @@ export const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
 							}
 						}
 					},
-					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
+					classes: ['oneput__icon-button', 'oneput__menu-button'],
+					// innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
+					innerHTMLUnsafe: chevronDown
 				}
 			]
 		}

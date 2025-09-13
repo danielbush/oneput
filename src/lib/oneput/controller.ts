@@ -21,6 +21,8 @@ export type OneputControllerParams = {
 	input?: OneputProps['input'];
 	inputValue?: OneputProps['inputValue'];
 	onInputChange?: OneputProps['onInputChange'];
+	inner?: OneputProps['inner'];
+	outer?: OneputProps['outer'];
 	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
 	placeholder?: OneputProps['placeholder'];
 	menu?: OneputProps['menu'];
@@ -177,6 +179,10 @@ export class Controller {
 
 	enableKeys() {
 		this.keysDisabled = false;
+	}
+
+	setOuter(outer: OneputControllerParams['outer']) {
+		this.currentProps.outer = outer;
 	}
 
 	update(options: OneputControllerParams) {

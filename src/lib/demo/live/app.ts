@@ -9,6 +9,7 @@ import {
 } from '$lib/ui.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
+import { TimeDisplay } from './TimeDisplay.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -89,6 +90,18 @@ export const localKeys: KeyBindingMap = {
 const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.closeMenu();
+	});
+	c.setOuter({
+		id: 'root-outer',
+		type: 'hflex',
+		children: [
+			{ id: 'root-outer-left', style: { flex: '1' } },
+			{
+				id: 'root-outer-right',
+				style: { flex: '1', justifyContent: 'flex-end' },
+				onMount: TimeDisplay.onMount
+			}
+		]
 	});
 	c.update({
 		input: inputUI(c),

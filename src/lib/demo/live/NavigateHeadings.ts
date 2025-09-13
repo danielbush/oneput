@@ -45,24 +45,22 @@ export class NavigateHeadings {
 	};
 
 	private updateUI = () => {
-		this.controller.update({
-			menu: {
-				header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit }),
-				items: this.filteredHeadings.map((h) =>
-					menuItemNoIcon({
-						id: id(),
-						text: h.textContent,
-						action: () => {
-							h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-							this.controller.closeMenu();
-							// Reset the input and menu:
-							this.controller.update({ inputValue: '' });
-							this.filteredHeadings = this.headings;
-							this.updateUI();
-						}
-					})
-				)
-			}
+		this.controller.setMenuUI({
+			header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit }),
+			items: this.filteredHeadings.map((h) =>
+				menuItemNoIcon({
+					id: id(),
+					text: h.textContent,
+					action: () => {
+						h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+						this.controller.closeMenu();
+						// Reset the input and menu:
+						this.controller.update({ inputValue: '' });
+						this.filteredHeadings = this.headings;
+						this.updateUI();
+					}
+				})
+			)
 		});
 	};
 }

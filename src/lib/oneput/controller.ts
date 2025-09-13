@@ -1,5 +1,5 @@
 import { tinykeys } from 'tinykeys';
-import type { FlexParams, OneputControllerProps, OneputProps } from './lib.js';
+import type { FlexParams, MenuItemAny, OneputControllerProps, OneputProps } from './lib.js';
 
 export type KeyBinding = {
 	action: (c: Controller) => void;
@@ -16,13 +16,10 @@ export type KeyBindingMap = {
 };
 
 export type OneputControllerParams = {
-	menuItemFocus?: OneputProps['menuItemFocus'];
 	inputValue?: OneputProps['inputValue'];
 	onInputChange?: OneputProps['onInputChange'];
 	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
 	placeholder?: OneputProps['placeholder'];
-	menu?: OneputProps['menu'];
-	menuOpen?: boolean;
 };
 
 /**
@@ -59,6 +56,12 @@ export class Controller {
 	) {}
 
 	// #region menu
+
+	setMenuUI(menu?: { header?: FlexParams; items: Array<MenuItemAny>; footer?: FlexParams }) {
+		this.currentProps.menu = menu;
+		// Reset the focus index.
+		this.currentProps.menuItemFocus = 0;
+	}
 
 	get menuOpen() {
 		return this.currentProps.menuOpen ?? false;
@@ -263,10 +266,6 @@ export class Controller {
 		}
 		if ('inputValue' in options) {
 			this.currentProps.inputValue = options.inputValue || '';
-		}
-		if (options.menu) {
-			this.currentProps.menu = options.menu;
-			this.currentProps.menuItemFocus = 0;
 		}
 	}
 }

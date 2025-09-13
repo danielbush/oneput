@@ -108,20 +108,18 @@ export class KeyBindingsController {
 	private actionsUI = () => {
 		this.controller.setBackBinding(this.back);
 		this.controller.setInputUI(inputUI(this.controller));
-		this.controller.update({
-			menu: {
-				header: menuHeaderUI({ title: 'Key bindings', exit: this.back }),
-				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
-					keybindingMenuItem({
-						id,
-						text: description,
-						bindings,
-						action: () => {
-							this.actionUI(id);
-						}
-					})
-				)
-			}
+		this.controller.setMenuUI({
+			header: menuHeaderUI({ title: 'Key bindings', exit: this.back }),
+			items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
+				keybindingMenuItem({
+					id,
+					text: description,
+					bindings,
+					action: () => {
+						this.actionUI(id);
+					}
+				})
+			)
 		});
 	};
 
@@ -134,30 +132,30 @@ export class KeyBindingsController {
 		this.controller.setInputUI(inputUI(this.controller));
 		this.controller.update({
 			placeholder: '',
-			inputValue: '',
-			menu: {
-				header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back }),
-				items: [
-					menuItemWithIcon({
-						id: 'add-binding',
-						text: 'Add binding...',
+			inputValue: ''
+		});
+		this.controller.setMenuUI({
+			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back }),
+			items: [
+				menuItemWithIcon({
+					id: 'add-binding',
+					text: 'Add binding...',
+					action: () => {
+						this.captureBindingUI(actionId);
+					}
+				}),
+				...bindings.map((binding) => {
+					return menuItemWithIcon({
+						id: binding,
+						text: binding,
+						leftIcon: keyboardIcon,
+						rightIcon: xIcon,
 						action: () => {
-							this.captureBindingUI(actionId);
+							this.removeBinding(actionId, binding);
 						}
-					}),
-					...bindings.map((binding) => {
-						return menuItemWithIcon({
-							id: binding,
-							text: binding,
-							leftIcon: keyboardIcon,
-							rightIcon: xIcon,
-							action: () => {
-								this.removeBinding(actionId, binding);
-							}
-						});
-					})
-				]
-			}
+					});
+				})
+			]
 		});
 	};
 

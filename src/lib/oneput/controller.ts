@@ -16,7 +16,6 @@ export type KeyBindingMap = {
 };
 
 export type OneputControllerParams = {
-	onInputChange?: OneputProps['onInputChange'];
 	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
 };
 
@@ -166,6 +165,10 @@ export class Controller {
 		this.currentProps.inputValue = val || '';
 	}
 
+	onInputChange(handler?: OneputProps['onInputChange']) {
+		this.currentProps.onInputChange = handler;
+	}
+
 	// #endregion
 
 	// #region keys
@@ -264,9 +267,6 @@ export class Controller {
 	// #endregion
 
 	update(options: OneputControllerParams) {
-		if ('onInputChange' in options) {
-			this.currentProps.onInputChange = options.onInputChange;
-		}
 		if ('onMenuOpenChange' in options) {
 			this.currentProps.onMenuOpenChange = options.onMenuOpenChange;
 		}

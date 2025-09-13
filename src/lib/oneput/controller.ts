@@ -15,10 +15,6 @@ export type KeyBindingMap = {
 	[actionId: string]: KeyBinding;
 };
 
-export type OneputControllerParams = {
-	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
-};
-
 /**
  * Key things you want to manage when Oneput goes from one mode to another...
  *
@@ -126,6 +122,10 @@ export class Controller {
 				this.currentMenuItem.action(this);
 			}
 		}
+	}
+
+	onMenuOpenChange(handler?: OneputProps['onMenuOpenChange']) {
+		this.currentProps.onMenuOpenChange = handler;
 	}
 
 	// #endregion
@@ -265,10 +265,4 @@ export class Controller {
 	}
 
 	// #endregion
-
-	update(options: OneputControllerParams) {
-		if ('onMenuOpenChange' in options) {
-			this.currentProps.onMenuOpenChange = options.onMenuOpenChange;
-		}
-	}
 }

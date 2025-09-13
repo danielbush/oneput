@@ -130,8 +130,8 @@ export class KeyBindingsController {
 		};
 		this.controller.setBackBinding(back);
 		this.controller.setInputUI(inputUI(this.controller));
+		this.controller.setPlaceholder();
 		this.controller.update({
-			placeholder: '',
 			inputValue: ''
 		});
 		this.controller.setMenuUI({
@@ -191,9 +191,7 @@ export class KeyBindingsController {
 				]
 			}
 		});
-		this.controller.update({
-			placeholder: 'Type the keys...'
-		});
+		this.controller.setPlaceholder('Type the keys...');
 	}
 
 	private startKeyCapture = (actionId: string) => {

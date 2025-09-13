@@ -19,7 +19,6 @@ export type OneputControllerParams = {
 	inputValue?: OneputProps['inputValue'];
 	onInputChange?: OneputProps['onInputChange'];
 	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
-	placeholder?: OneputProps['placeholder'];
 };
 
 /**
@@ -157,6 +156,10 @@ export class Controller {
 		this.currentProps.input = input;
 	}
 
+	setPlaceholder(msg?: string) {
+		this.currentProps.placeholder = msg || this.defaultPlaceholder;
+	}
+
 	// #endregion
 
 	// #region keys
@@ -255,9 +258,6 @@ export class Controller {
 	// #endregion
 
 	update(options: OneputControllerParams) {
-		if ('placeholder' in options) {
-			this.currentProps.placeholder = options.placeholder || this.defaultPlaceholder;
-		}
 		if ('onInputChange' in options) {
 			this.currentProps.onInputChange = options.onInputChange;
 		}

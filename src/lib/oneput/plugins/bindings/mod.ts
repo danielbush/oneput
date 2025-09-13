@@ -107,8 +107,8 @@ export class KeyBindingsController {
 	 */
 	private actionsUI = () => {
 		this.controller.setBackBinding(this.back);
+		this.controller.setInputUI(inputUI(this.controller));
 		this.controller.update({
-			input: inputUI(this.controller),
 			menu: {
 				header: menuHeaderUI({ title: 'Key bindings', exit: this.back }),
 				items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
@@ -131,10 +131,10 @@ export class KeyBindingsController {
 			this.actionsUI();
 		};
 		this.controller.setBackBinding(back);
+		this.controller.setInputUI(inputUI(this.controller));
 		this.controller.update({
 			placeholder: '',
 			inputValue: '',
-			input: inputUI(this.controller),
 			menu: {
 				header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back }),
 				items: [
@@ -163,38 +163,38 @@ export class KeyBindingsController {
 
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
-		this.controller.update({
-			placeholder: 'Type the keys...',
-			input: {
-				right: {
-					id: 'input-right-1',
-					type: 'hflex',
-					children: [
-						{
-							id: 'accept-key-capture',
-							tag: 'button',
-							attr: {
-								type: 'button',
-								title: 'Options',
-								onclick: accept
-							},
-							classes: ['oneput__icon-button'],
-							innerHTMLUnsafe: tickIcon
+		this.controller.setInputUI({
+			right: {
+				id: 'input-right-1',
+				type: 'hflex',
+				children: [
+					{
+						id: 'accept-key-capture',
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: accept
 						},
-						{
-							id: 'reject-key-capture',
-							tag: 'button',
-							attr: {
-								type: 'button',
-								title: 'Options',
-								onclick: reject
-							},
-							classes: ['oneput__icon-button'],
-							innerHTMLUnsafe: xIcon
-						}
-					]
-				}
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: tickIcon
+					},
+					{
+						id: 'reject-key-capture',
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: reject
+						},
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: xIcon
+					}
+				]
 			}
+		});
+		this.controller.update({
+			placeholder: 'Type the keys...'
 		});
 	}
 

@@ -17,11 +17,8 @@ export type KeyBindingMap = {
 
 export type OneputControllerParams = {
 	menuItemFocus?: OneputProps['menuItemFocus'];
-	input?: OneputProps['input'];
 	inputValue?: OneputProps['inputValue'];
 	onInputChange?: OneputProps['onInputChange'];
-	inner?: OneputProps['inner'];
-	outer?: OneputProps['outer'];
 	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
 	placeholder?: OneputProps['placeholder'];
 	menu?: OneputProps['menu'];
@@ -148,6 +145,15 @@ export class Controller {
 		this.inputElement?.focus();
 	}
 
+	setInputUI(input?: {
+		left?: FlexParams;
+		right?: FlexParams;
+		outerLeft?: FlexParams;
+		outerRight?: FlexParams;
+	}) {
+		this.currentProps.input = input;
+	}
+
 	// #endregion
 
 	// #region keys
@@ -248,9 +254,6 @@ export class Controller {
 	update(options: OneputControllerParams) {
 		if ('placeholder' in options) {
 			this.currentProps.placeholder = options.placeholder || this.defaultPlaceholder;
-		}
-		if (options.input) {
-			this.currentProps.input = options.input;
 		}
 		if ('onInputChange' in options) {
 			this.currentProps.onInputChange = options.onInputChange;

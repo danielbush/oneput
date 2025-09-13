@@ -123,8 +123,8 @@ const rootUI = (c: Controller) => {
 			}
 		]
 	});
+	c.setInputUI(inputUI(c));
 	c.update({
-		input: inputUI(c),
 		menu: {
 			header: menuHeaderUI({
 				title: 'Root',
@@ -177,8 +177,8 @@ const rootUI = (c: Controller) => {
 
 const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
+	c.setInputUI(inputUI(c));
 	c.update({
-		input: inputUI(c),
 		menu: {
 			header: menuHeaderUI({ title: 'Settings', exit: back }),
 			items: [

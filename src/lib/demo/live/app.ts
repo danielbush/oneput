@@ -92,6 +92,25 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.closeMenu();
 	});
+	c.setInnerUI({
+		id: 'root-inner',
+		type: 'hflex',
+		children: [
+			{
+				id: 'root-inner-left',
+				style: { flex: '1' }
+			},
+			{
+				id: 'root-inner-middle',
+				style: { justifyContent: 'center' },
+				onMount: TimeDisplay.onMount
+			},
+			{
+				id: 'root-inner-right',
+				style: { flex: '1' }
+			}
+		]
+	});
 	c.setOuterUI({
 		id: 'root-outer',
 		type: 'hflex',
@@ -100,22 +119,7 @@ const rootUI = (c: Controller) => {
 			{
 				id: 'root-outer-right',
 				style: { flex: '1', justifyContent: 'flex-end' },
-				onMount: TimeDisplay.onMount
-			}
-		]
-	});
-	c.setInnerUI({
-		id: 'root-inner',
-		type: 'hflex',
-		children: [
-			{
-				id: 'root-inner-left',
-				style: { flex: '1', justifyContent: 'flex-start' },
 				onMount: DateDisplay.onMount
-			},
-			{
-				id: 'root-inner-right',
-				style: { flex: '1' }
 			}
 		]
 	});

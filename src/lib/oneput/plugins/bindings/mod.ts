@@ -131,9 +131,7 @@ export class KeyBindingsController {
 		this.controller.setBackBinding(back);
 		this.controller.setInputUI(inputUI(this.controller));
 		this.controller.setPlaceholder();
-		this.controller.update({
-			inputValue: ''
-		});
+		this.controller.setInputValue('');
 		this.controller.setMenuUI({
 			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back }),
 			items: [
@@ -216,8 +214,8 @@ export class KeyBindingsController {
 				altKey: evt.altKey,
 				controlKey: evt.ctrlKey
 			});
-			this.controller.update({
-				inputValue: capturedKeys
+			this.controller.setInputValue(
+				capturedKeys
 					.map(
 						(k) =>
 							`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${
@@ -225,7 +223,7 @@ export class KeyBindingsController {
 							}${k.key.toUpperCase()}`
 					)
 					.join(' + ')
-			});
+			);
 		};
 
 		setTimeout(() => {

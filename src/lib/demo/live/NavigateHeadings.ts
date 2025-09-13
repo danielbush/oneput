@@ -37,9 +37,9 @@ export class NavigateHeadings {
 	 * It's important to clean up once we exit this mini-app.
 	 */
 	private exit = () => {
+		this.controller.setInputValue();
 		this.controller.update({
-			onInputChange: undefined,
-			inputValue: undefined
+			onInputChange: undefined
 		});
 		this.back();
 	};
@@ -55,7 +55,7 @@ export class NavigateHeadings {
 						h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 						this.controller.closeMenu();
 						// Reset the input and menu:
-						this.controller.update({ inputValue: '' });
+						this.controller.setInputValue();
 						this.filteredHeadings = this.headings;
 						this.updateUI();
 					}

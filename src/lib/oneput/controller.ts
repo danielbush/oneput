@@ -16,7 +16,6 @@ export type KeyBindingMap = {
 };
 
 export type OneputControllerParams = {
-	inputValue?: OneputProps['inputValue'];
 	onInputChange?: OneputProps['onInputChange'];
 	onMenuOpenChange?: OneputProps['onMenuOpenChange'];
 };
@@ -26,7 +25,7 @@ export type OneputControllerParams = {
  *
  * UI
  *
- * - setMenu - controls menu and menu header / footer
+ * - setMenuUI - controls menu and menu header / footer
  * - setInputUI - set the ui around the input and placeholder
  * - setInnerUI - controls the ui between input and menu
  * - setOuterUI - controls ui on the open side of the input
@@ -160,6 +159,13 @@ export class Controller {
 		this.currentProps.placeholder = msg || this.defaultPlaceholder;
 	}
 
+	/**
+	 * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
+	 */
+	setInputValue(val?: string) {
+		this.currentProps.inputValue = val || '';
+	}
+
 	// #endregion
 
 	// #region keys
@@ -263,9 +269,6 @@ export class Controller {
 		}
 		if ('onMenuOpenChange' in options) {
 			this.currentProps.onMenuOpenChange = options.onMenuOpenChange;
-		}
-		if ('inputValue' in options) {
-			this.currentProps.inputValue = options.inputValue || '';
 		}
 	}
 }

@@ -91,7 +91,7 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.closeMenu();
 	});
-	c.setOuter({
+	c.setOuterUI({
 		id: 'root-outer',
 		type: 'hflex',
 		children: [

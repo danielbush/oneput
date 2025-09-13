@@ -39,6 +39,8 @@ export class Controller {
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {}
 
+	// #region menu
+
 	get menuOpen() {
 		return this.currentProps.menuOpen ?? false;
 	}
@@ -107,6 +109,10 @@ export class Controller {
 		}
 	}
 
+	// #endregion
+
+	// #region input
+
 	private inputElement: HTMLInputElement | undefined;
 
 	setInputElement(inputElement: HTMLInputElement | undefined) {
@@ -116,6 +122,10 @@ export class Controller {
 	focusInput() {
 		this.inputElement?.focus();
 	}
+
+	// #endregion
+
+	// #region keys
 
 	/**
 	 * Only run globals when menu is closed.
@@ -179,16 +189,27 @@ export class Controller {
 		this.keysDisabled = false;
 	}
 
-	setOuter(outer: FlexParams) {
-		this.currentProps.outer = outer;
-	}
-
 	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
 			this.handleLocalKeys(bindings);
 		} else {
 			this.handleGlobalKeys(bindings);
 		}
+	}
+
+	/**
+	 * This is intended for triggering a back action via keyboard.
+	 */
+	goBack: () => void = () => {};
+
+	setBackBinding(back?: () => void) {
+		this.goBack = back || (() => {});
+	}
+
+	// #endregion
+
+	setOuterUI(outer: FlexParams) {
+		this.currentProps.outer = outer;
 	}
 
 	update(options: OneputControllerParams) {
@@ -211,14 +232,5 @@ export class Controller {
 			this.currentProps.menu = options.menu;
 			this.currentProps.menuItemFocus = 0;
 		}
-	}
-
-	/**
-	 * This is intended for triggering a back action via keyboard.
-	 */
-	goBack: () => void = () => {};
-
-	setBackBinding(back?: () => void) {
-		this.goBack = back || (() => {});
 	}
 }

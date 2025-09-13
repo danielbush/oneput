@@ -28,6 +28,28 @@ export type OneputControllerParams = {
 	menuOpen?: boolean;
 };
 
+/**
+ * Key things you want to manage when Oneput goes from one mode to another...
+ *
+ * UI
+ *
+ * - setMenu - controls menu and menu header / footer
+ * - setInputUI - set the ui around the input and placeholder
+ * - setInnerUI - controls the ui between input and menu
+ * - setOuterUI - controls ui on the open side of the input
+ *
+ * Key bindings
+ *
+ * - setBackBinding - controls the back action that you can set a keybinding for
+ * - setKeys - controls global and local keybindings
+ *
+ * Events
+ *
+ * - onInputChange
+ * - onMenuOpenChange
+ *
+ * Input Control
+ */
 export class Controller {
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputControllerProps>({...})
@@ -115,6 +137,9 @@ export class Controller {
 
 	private inputElement: HTMLInputElement | undefined;
 
+	/**
+	 * Used by Oneput to tell the controller what the input element is.
+	 */
 	setInputElement(inputElement: HTMLInputElement | undefined) {
 		this.inputElement = inputElement;
 	}
@@ -208,9 +233,17 @@ export class Controller {
 
 	// #endregion
 
+	// #region ui
+
 	setOuterUI(outer: FlexParams) {
 		this.currentProps.outer = outer;
 	}
+
+	setInnerUI(inner: FlexParams) {
+		this.currentProps.inner = inner;
+	}
+
+	// #endregion
 
 	update(options: OneputControllerParams) {
 		if ('placeholder' in options) {

@@ -10,6 +10,7 @@ import {
 import { KeyBindingsController } from '$lib/oneput/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { TimeDisplay } from './TimeDisplay.js';
+import { DateDisplay } from './DateDisplay.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -100,6 +101,21 @@ const rootUI = (c: Controller) => {
 				id: 'root-outer-right',
 				style: { flex: '1', justifyContent: 'flex-end' },
 				onMount: TimeDisplay.onMount
+			}
+		]
+	});
+	c.setInnerUI({
+		id: 'root-inner',
+		type: 'hflex',
+		children: [
+			{
+				id: 'root-inner-left',
+				style: { flex: '1', justifyContent: 'flex-start' },
+				onMount: DateDisplay.onMount
+			},
+			{
+				id: 'root-inner-right',
+				style: { flex: '1' }
 			}
 		]
 	});

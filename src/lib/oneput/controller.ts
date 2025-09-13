@@ -241,11 +241,11 @@ export class Controller {
 
 	// #region ui
 
-	setOuterUI(outer: FlexParams) {
+	setOuterUI(outer?: FlexParams) {
 		this.currentProps.outer = outer;
 	}
 
-	setInnerUI(inner: FlexParams) {
+	setInnerUI(inner?: FlexParams) {
 		this.currentProps.inner = inner;
 	}
 

@@ -188,9 +188,7 @@ const settingsUI = (c: Controller, back: () => void) => {
 // Our app starts in this callback.  We get the controller and we can set
 // keys and configure oneput.
 export const setController = (c: Controller) => {
-	c.update({
-		globalKeys: globalKeys,
-		localKeys: localKeys
-	});
+	c.setKeys(globalKeys);
+	c.setKeys(localKeys, true);
 	rootUI(c);
 };

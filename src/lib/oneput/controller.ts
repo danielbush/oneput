@@ -1,5 +1,5 @@
 import { tinykeys } from 'tinykeys';
-import type { OneputControllerProps, OneputProps } from './lib.js';
+import type { FlexParams, OneputControllerProps, OneputProps } from './lib.js';
 
 export type KeyBinding = {
 	action: (c: Controller) => void;
@@ -17,7 +17,6 @@ export type KeyBindingMap = {
 
 export type OneputControllerParams = {
 	menuItemFocus?: OneputProps['menuItemFocus'];
-	globalKeys?: KeyBindingMap;
 	input?: OneputProps['input'];
 	inputValue?: OneputProps['inputValue'];
 	onInputChange?: OneputProps['onInputChange'];
@@ -27,7 +26,6 @@ export type OneputControllerParams = {
 	placeholder?: OneputProps['placeholder'];
 	menu?: OneputProps['menu'];
 	menuOpen?: boolean;
-	localKeys?: KeyBindingMap;
 };
 
 export class Controller {
@@ -181,8 +179,16 @@ export class Controller {
 		this.keysDisabled = false;
 	}
 
-	setOuter(outer: OneputControllerParams['outer']) {
+	setOuter(outer: FlexParams) {
 		this.currentProps.outer = outer;
+	}
+
+	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
+		if (isLocal) {
+			this.handleLocalKeys(bindings);
+		} else {
+			this.handleGlobalKeys(bindings);
+		}
 	}
 
 	update(options: OneputControllerParams) {
@@ -200,12 +206,6 @@ export class Controller {
 		}
 		if ('inputValue' in options) {
 			this.currentProps.inputValue = options.inputValue || '';
-		}
-		if (options.globalKeys) {
-			this.handleGlobalKeys(options.globalKeys);
-		}
-		if (options.localKeys) {
-			this.handleLocalKeys(options.localKeys);
 		}
 		if (options.menu) {
 			this.currentProps.menu = options.menu;

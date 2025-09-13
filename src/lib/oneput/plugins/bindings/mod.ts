@@ -244,9 +244,7 @@ export class KeyBindingsController {
 				evt.preventDefault();
 				if (capturedKeys.length > 0) {
 					this.keyMap[actionId].bindings.push(toBinding(capturedKeys));
-					this.controller.update(
-						this.local ? { localKeys: this.keyMap } : { globalKeys: this.keyMap }
-					);
+					this.controller.setKeys(this.keyMap, this.local);
 				}
 				window.removeEventListener('keydown', keyListener);
 				this.controller.enableKeys();
@@ -267,7 +265,7 @@ export class KeyBindingsController {
 			return;
 		}
 		this.keyMap[actionId].bindings = this.keyMap[actionId].bindings.filter((b) => b !== binding);
-		this.controller.update(this.local ? { localKeys: this.keyMap } : { globalKeys: this.keyMap });
+		this.controller.setKeys(this.keyMap, this.local);
 		this.actionUI(actionId);
 	};
 }

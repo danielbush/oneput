@@ -11,6 +11,7 @@ import { KeyBindingsController } from '$lib/oneput/plugins/bindings/mod.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { TimeDisplay } from './TimeDisplay.js';
 import { DateDisplay } from './DateDisplay.js';
+import { SvelteExample } from './SvelteExample.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -115,7 +116,11 @@ const rootUI = (c: Controller) => {
 		id: 'root-outer',
 		type: 'hflex',
 		children: [
-			{ id: 'root-outer-left', style: { flex: '1' } },
+			{
+				id: 'root-outer-left',
+				style: { flex: '1', position: 'relative' },
+				onMount: (node) => SvelteExample.onMount(node, c)
+			},
 			{
 				id: 'root-outer-right',
 				style: { flex: '1', justifyContent: 'flex-end' },

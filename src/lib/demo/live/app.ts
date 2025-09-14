@@ -99,15 +99,18 @@ const rootUI = (c: Controller) => {
 		children: [
 			{
 				id: 'root-inner-left',
+				type: 'fchild',
 				style: { flex: '1' }
 			},
 			{
 				id: 'root-inner-middle',
+				type: 'fchild',
 				style: { justifyContent: 'center' },
 				onMount: TimeDisplay.onMount
 			},
 			{
 				id: 'root-inner-right',
+				type: 'fchild',
 				style: { flex: '1' }
 			}
 		]
@@ -118,11 +121,13 @@ const rootUI = (c: Controller) => {
 		children: [
 			{
 				id: 'root-outer-left',
+				type: 'fchild',
 				style: { flex: '1', position: 'relative' },
 				onMount: (node) => SvelteExample.onMount(node, c)
 			},
 			{
 				id: 'root-outer-right',
+				type: 'fchild',
 				style: { flex: '1', justifyContent: 'flex-end' },
 				onMount: DateDisplay.onMount
 			}

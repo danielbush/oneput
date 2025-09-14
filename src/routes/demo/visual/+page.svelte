@@ -90,14 +90,17 @@
 						children: [
 							{
 								id: 'alert-title',
+								type: 'fchild',
 								innerHTMLUnsafe: '<h2>Alert Title!</h2>'
 							},
 							{
 								id: 'alert-message',
+								type: 'fchild',
 								innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
 							},
 							{
 								id: 'alert-button',
+								type: 'fchild',
 								tag: 'button',
 								classes: ['oneput__primary-button'],
 								textContent: 'OK'
@@ -130,10 +133,12 @@
 						children: [
 							{
 								id: 'alert-title',
+								type: 'fchild',
 								innerHTMLUnsafe: '<h2>Confirm?</h2>'
 							},
 							{
 								id: 'alert-message',
+								type: 'fchild',
 								innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
 							},
 							{
@@ -143,12 +148,14 @@
 								children: [
 									{
 										id: 'confirm-yes-button',
+										type: 'fchild',
 										tag: 'button',
 										classes: ['oneput__primary-button'],
 										textContent: 'Yes'
 									},
 									{
 										id: 'confirm-no-button',
+										type: 'fchild',
 										tag: 'button',
 										classes: ['oneput__primary-button'],
 										textContent: 'No'

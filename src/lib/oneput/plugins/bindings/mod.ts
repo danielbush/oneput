@@ -32,11 +32,13 @@ export const keybindingMenuItem: (params: {
 		children: [
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: squareFunctionIcon
 			},
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
@@ -46,15 +48,18 @@ export const keybindingMenuItem: (params: {
 				children: [
 					bindings.length > 1 && {
 						id: randomId(),
+						type: 'fchild',
 						innerHTMLUnsafe: `(${bindings.length})`
 					},
 					{
 						id: randomId(),
+						type: 'fchild',
 						innerHTMLUnsafe: bindingHTML,
 						classes: ['oneput__kbd']
 					},
 					{
 						id: randomId(),
+						type: 'fchild',
 						classes: ['oneput__icon'],
 						innerHTMLUnsafe: chevronRightIcon
 					}
@@ -168,6 +173,7 @@ export class KeyBindingsController {
 				children: [
 					{
 						id: 'accept-key-capture',
+						type: 'fchild',
 						tag: 'button',
 						attr: {
 							type: 'button',
@@ -179,6 +185,7 @@ export class KeyBindingsController {
 					},
 					{
 						id: 'reject-key-capture',
+						type: 'fchild',
 						tag: 'button',
 						attr: {
 							type: 'button',

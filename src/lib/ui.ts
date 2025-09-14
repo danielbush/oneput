@@ -52,11 +52,13 @@ export const menuItemNoIcon: (params: {
 		children: [
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: rightIcon
 			}
@@ -99,16 +101,19 @@ export const menuItemWithIcon: (params: {
 		children: [
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: leftIcon
 			},
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
 			{
 				id: randomId(),
+				type: 'fchild',
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: rightIcon
 			}
@@ -129,6 +134,7 @@ export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 			children: [
 				{
 					id: id(),
+					type: 'fchild',
 					tag: 'button',
 					attr: {
 						type: 'button',
@@ -171,6 +177,7 @@ export const menuHeaderUI: ({
 		children: [
 			{
 				id: id(),
+				type: 'fchild',
 				tag: 'button',
 				attr: { type: 'button', title: 'Options', onclick: exit },
 				classes: ['oneput__icon-button'],
@@ -178,11 +185,13 @@ export const menuHeaderUI: ({
 			},
 			{
 				id: id(),
+				type: 'fchild',
 				classes: ['oneput__menu-item-header'],
 				textContent: title
 			},
 			{
 				id: id(),
+				type: 'fchild',
 				classes: ['oneput__icon-button'],
 				textContent: ''
 			}

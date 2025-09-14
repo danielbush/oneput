@@ -1,6 +1,10 @@
 import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
 
+export type InputChangeListener = (
+	evt: Event & { currentTarget: EventTarget & HTMLInputElement }
+) => void;
+
 export type OneputProps = {
 	controller?: Controller;
 	menuItemFocus?: number;
@@ -10,7 +14,7 @@ export type OneputProps = {
 	inputElement?: HTMLInputElement;
 	inputValue: string;
 	placeholder: string;
-	onInputChange?: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
+	onInputChange?: InputChangeListener;
 	onMenuOpenChange?: (menuOpen: boolean) => void;
 	menuUI?: {
 		header?: FlexParams;

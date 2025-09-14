@@ -12,15 +12,17 @@ export class NavigateHeadings {
 
 	private headings: HTMLElement[] = [];
 	private filteredHeadings: HTMLElement[] = [];
+	private clearInputChangeListener: () => void;
 
 	private constructor(
 		private controller: Controller,
 		private document: Document,
 		private back: () => void
 	) {
+		this.controller.disableDefaultMenuItemsFn = true;
 		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
 		this.filteredHeadings = this.headings;
-		this.controller.onInputChange((evt) => {
+		this.clearInputChangeListener = this.controller.onInputChange((evt) => {
 			const text = (evt.target as HTMLInputElement).value;
 			this.filteredHeadings = this.headings.filter((heading) => {
 				return heading.textContent.includes(text);
@@ -35,8 +37,9 @@ export class NavigateHeadings {
 	 * It's important to clean up once we exit this mini-app.
 	 */
 	private exit = () => {
+		this.controller.disableDefaultMenuItemsFn = false;
 		this.controller.setInputValue();
-		this.controller.onInputChange();
+		this.clearInputChangeListener();
 		this.back();
 	};
 

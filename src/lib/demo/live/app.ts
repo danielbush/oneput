@@ -143,7 +143,7 @@ const rootUI = (c: Controller) => {
 			}
 		})
 	});
-	c.setMenuItems([
+	const items = [
 		menuItemWithIcon({
 			id: 'settings',
 			leftIcon: settingsIcon,
@@ -180,7 +180,18 @@ const rootUI = (c: Controller) => {
 				window.dispatchEvent(new Event('oneput-toggle-hide'));
 			}
 		})
-	]);
+	];
+	c.setDefaultMenuItemsFn((input, menuItems) => {
+		return menuItems.filter((item) => {
+			return item.children?.some((child) => {
+				if (child.type === 'fchild') {
+					return child.textContent?.toLowerCase().includes(input.toLowerCase());
+				}
+				return false;
+			});
+		});
+	});
+	c.setMenuItems(items);
 };
 
 const settingsUI = (c: Controller, back: () => void) => {

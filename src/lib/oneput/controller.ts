@@ -1,5 +1,11 @@
 import { tinykeys } from 'tinykeys';
-import type { FlexParams, MenuItemAny, OneputControllerProps, OneputProps } from './lib.js';
+import type {
+	FlexParams,
+	InputChangeListener,
+	MenuItemAny,
+	OneputControllerProps,
+	OneputProps
+} from './lib.js';
 
 export type KeyBinding = {
 	action: (c: Controller) => void;
@@ -14,6 +20,8 @@ export type KeyBinding = {
 export type KeyBindingMap = {
 	[actionId: string]: KeyBinding;
 };
+
+export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny>;
 
 /**
  * Key things you want to manage when Oneput goes from one mode to another...
@@ -46,7 +54,11 @@ export class Controller {
 		private defaultPlaceholder: string = 'Type here...',
 		private unsubscribeGlobalKeys: () => void = () => {},
 		private unsubscribeLocalKeys: () => void = () => {}
-	) {}
+	) {
+		this.currentProps.onInputChange = (evt) => {
+			this.runInputChangeListeners(evt);
+		};
+	}
 
 	// #region menu
 
@@ -54,8 +66,62 @@ export class Controller {
 		this.currentProps.menuUI = menuUI;
 	}
 
+	/**
+	 * If a plugin doesn't want to use the defaultMenuItemsFn it can either:
+	 *
+	 * (1) call setMenuItemsFn which will override any default
+	 * OR
+	 * (2) disable the default menuItemsFn using this property and then use
+	 * controller.onInputchange with a custom function that modifies menuItems
+	 *
+	 */
+	public disableDefaultMenuItemsFn = false;
+	private removeDefaultMenuItemsFn: () => void = () => {};
+	private removeMenuItemsFn: () => void = () => {};
+	private menuItemsFn?: MenuItemsFn;
+	private menuItems: Array<MenuItemAny> = [];
+
+	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
+		this.removeDefaultMenuItemsFn();
+		this.removeDefaultMenuItemsFn = this.onInputChange((evt) => {
+			if (this.disableDefaultMenuItemsFn) {
+				return;
+			}
+			if (this.menuItemsFn) {
+				return;
+			}
+			this.currentProps.menuItems = menuItemsFn(evt.currentTarget.value, this.menuItems);
+			// Note menuItemsFn can set menuItemFocus to 0 which should be maintained.
+			// If not, then this logic will set it to
+			this.currentProps.menuItemFocus = Math.min(
+				this.currentProps.menuItemFocus ?? 0,
+				Math.max(0, this.currentProps.menuItems.length - 1)
+			);
+		});
+	}
+
+	setMenuItemsFn(menuItemsFn?: MenuItemsFn) {
+		this.removeMenuItemsFn();
+		if (menuItemsFn) {
+			this.menuItemsFn = menuItemsFn;
+			this.removeMenuItemsFn = this.onInputChange((evt) => {
+				this.currentProps.menuItems = menuItemsFn(
+					evt.currentTarget.value,
+					this.currentProps.menuItems || []
+				);
+				// Note menuItemsFn can set menuItemFocus to 0 which should be maintained.
+				// If not, then this logic will set it to
+				this.currentProps.menuItemFocus = Math.min(
+					this.currentProps.menuItemFocus ?? 0,
+					Math.max(0, this.currentProps.menuItems.length - 1)
+				);
+			});
+		}
+	}
+
 	setMenuItems(items: Array<MenuItemAny>) {
 		this.currentProps.menuItems = items;
+		this.menuItems = items;
 		// Reset the focus index.
 		this.currentProps.menuItemFocus = 0;
 	}
@@ -169,8 +235,17 @@ export class Controller {
 		this.currentProps.inputValue = val || '';
 	}
 
-	onInputChange(handler?: OneputProps['onInputChange']) {
-		this.currentProps.onInputChange = handler;
+	private inputChangeListeners: InputChangeListener[] = [];
+	onInputChange(handler: InputChangeListener): () => void {
+		this.inputChangeListeners.push(handler);
+		return () => {
+			this.inputChangeListeners = this.inputChangeListeners.filter((l) => l !== handler);
+		};
+	}
+	private runInputChangeListeners(evt: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+		this.inputChangeListeners.forEach((listener) => {
+			listener(evt);
+		});
 	}
 
 	// #endregion

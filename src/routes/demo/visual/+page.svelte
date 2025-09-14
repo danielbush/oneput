@@ -40,9 +40,9 @@
 						header: ui.menuHeader1,
 						footer: ui.menuFooter1(data.appState.zap)
 					}}
-					inner={ui.inner1}
-					outer={ui.outer1(data.appState.zap)}
-					input={{
+					innerUI={ui.inner1}
+					outerUI={ui.outer1(data.appState.zap)}
+					inputUI={{
 						left: ui.inputLeft1,
 						right: ui.inputRight1,
 						outerLeft: ui.inputOuterLeft1,
@@ -66,7 +66,7 @@
 				<Oneput
 					{menuOpen}
 					menuItems={ui.menuItems1()}
-					input={{}}
+					inputUI={{}}
 					placeholder="Placeholder..."
 					inputValue=""
 					onInputChange={() => {
@@ -105,7 +105,7 @@
 						]
 					}
 				]}
-				input={{
+				inputUI={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,
 					outerLeft: ui.inputOuterLeft1,
@@ -158,7 +158,7 @@
 						]
 					}
 				]}
-				input={{
+				inputUI={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,
 					outerLeft: ui.inputOuterLeft1,

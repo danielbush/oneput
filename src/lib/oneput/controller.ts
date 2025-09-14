@@ -155,7 +155,7 @@ export class Controller {
 		outerLeft?: FlexParams;
 		outerRight?: FlexParams;
 	}) {
-		this.currentProps.input = input;
+		this.currentProps.inputUI = input;
 	}
 
 	setPlaceholder(msg?: string) {
@@ -261,11 +261,11 @@ export class Controller {
 	// #region ui
 
 	setOuterUI(outer?: FlexParams) {
-		this.currentProps.outer = outer;
+		this.currentProps.outerUI = outer;
 	}
 
 	setInnerUI(inner?: FlexParams) {
-		this.currentProps.inner = inner;
+		this.currentProps.innerUI = inner;
 	}
 
 	// #endregion

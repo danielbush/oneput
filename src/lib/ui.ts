@@ -121,7 +121,7 @@ export const menuItemWithIcon: (params: {
 /**
  * Standard input UI for use in most situations.
  */
-export const inputUI: (c: Controller) => OneputProps['input'] = (c) => {
+export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 	return {
 		outerRight: {
 			id: 'root-input-right',

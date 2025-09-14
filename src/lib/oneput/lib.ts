@@ -7,18 +7,18 @@ export type OneputProps = {
 	menuItemFocusOrigin?: 'pointer' | 'keyboard';
 	menuOpen?: boolean;
 	menuItems?: Array<MenuItem | MenuItemDivider>;
-	menuUI?: {
-		header?: FlexParams;
-		footer?: FlexParams;
-	};
-	inner?: FlexParams;
-	outer?: FlexParams;
 	inputElement?: HTMLInputElement;
 	inputValue: string;
 	placeholder: string;
 	onInputChange?: (evt: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 	onMenuOpenChange?: (menuOpen: boolean) => void;
-	input?: {
+	menuUI?: {
+		header?: FlexParams;
+		footer?: FlexParams;
+	};
+	innerUI?: FlexParams;
+	outerUI?: FlexParams;
+	inputUI?: {
 		left?: FlexParams;
 		right?: FlexParams;
 		outerLeft?: FlexParams;

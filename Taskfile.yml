@@ -34,6 +34,10 @@ tasks:
     desc: check types
     cmds:
       - pnpm run check
+  check:watch:
+    desc: check types
+    cmds:
+      - pnpm run check --watch
   dev:
     desc: Run dev server
     deps:

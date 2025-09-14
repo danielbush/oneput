@@ -101,21 +101,21 @@
 			</section>
 		</div>
 	{/if}
-	{#if props.inner}
+	{#if props.innerUI}
 		<section class="oneput__inner-area">
-			<Flex class="oneput__inner" {...props.inner} />
+			<Flex class="oneput__inner" {...props.innerUI} />
 		</section>
 	{/if}
-	{#if props.input}
+	{#if props.inputUI}
 		<section class="oneput__input-area">
 			<!-- Render as an hflex to get default hflex styling. -->
 			<div class="oneput__hflex oneput__input-outer">
-				{#if props.input?.outerLeft}
-					<Flex class="oneput__input-outer-left" {...props.input.outerLeft} />
+				{#if props.inputUI?.outerLeft}
+					<Flex class="oneput__input-outer-left" {...props.inputUI.outerLeft} />
 				{/if}
 				<label for="oneput__input" class="oneput__hflex oneput__input-inner">
-					{#if props.input?.left}
-						<Flex class="oneput__input-left" {...props.input.left} />
+					{#if props.inputUI?.left}
+						<Flex class="oneput__input-left" {...props.inputUI.left} />
 					{/if}
 					<input
 						id="oneput__input"
@@ -129,19 +129,19 @@
 						{autocomplete}
 						spellcheck="false"
 					/>
-					{#if props.input?.right}
-						<Flex class="oneput__input-right" {...props.input.right} />
+					{#if props.inputUI?.right}
+						<Flex class="oneput__input-right" {...props.inputUI.right} />
 					{/if}
 				</label>
-				{#if props.input?.outerRight}
-					<Flex class="oneput__input-outer-right" {...props.input.outerRight} />
+				{#if props.inputUI?.outerRight}
+					<Flex class="oneput__input-outer-right" {...props.inputUI.outerRight} />
 				{/if}
 			</div>
 		</section>
 	{/if}
-	{#if props.outer}
+	{#if props.outerUI}
 		<section class="oneput__outer-area">
-			<Flex class="oneput__outer" {...props.outer} />
+			<Flex class="oneput__outer" {...props.outerUI} />
 		</section>
 	{/if}
 </div>

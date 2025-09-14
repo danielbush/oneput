@@ -136,74 +136,74 @@ const rootUI = (c: Controller) => {
 			exit: () => {
 				c.closeMenu();
 			}
-		}),
-		items: [
-			menuItemWithIcon({
-				id: 'settings',
-				leftIcon: settingsIcon,
-				text: 'Settings...',
-				action: () => {
-					settingsUI(c, () => {
-						rootUI(c);
-					});
-				}
-			}),
-			menuItemWithIcon({
-				id: 'navigate-outline',
-				leftIcon: tocIcon,
-				text: 'Navigate outline...',
-				action: () => {
-					NavigateHeadings.create(c, document, () => {
-						rootUI(c);
-					});
-				}
-			}),
-			menuItemWithIcon({
-				id: 'insert-katex',
-				leftIcon: sigmaIcon,
-				text: 'Insert katex...',
-				action: () => {
-					console.log('insert katex');
-				}
-			}),
-			menuItemWithIcon({
-				id: 'hide-oneput',
-				// leftIcon: commandIcon,
-				text: 'Hide',
-				action: () => {
-					window.dispatchEvent(new Event('oneput-toggle-hide'));
-				}
-			})
-		]
+		})
 	});
+	c.setMenuItems([
+		menuItemWithIcon({
+			id: 'settings',
+			leftIcon: settingsIcon,
+			text: 'Settings...',
+			action: () => {
+				settingsUI(c, () => {
+					rootUI(c);
+				});
+			}
+		}),
+		menuItemWithIcon({
+			id: 'navigate-outline',
+			leftIcon: tocIcon,
+			text: 'Navigate outline...',
+			action: () => {
+				NavigateHeadings.create(c, document, () => {
+					rootUI(c);
+				});
+			}
+		}),
+		menuItemWithIcon({
+			id: 'insert-katex',
+			leftIcon: sigmaIcon,
+			text: 'Insert katex...',
+			action: () => {
+				console.log('insert katex');
+			}
+		}),
+		menuItemWithIcon({
+			id: 'hide-oneput',
+			// leftIcon: commandIcon,
+			text: 'Hide',
+			action: () => {
+				window.dispatchEvent(new Event('oneput-toggle-hide'));
+			}
+		})
+	]);
 };
 
 const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
 	c.setInputUI(inputUI(c));
 	c.setMenuUI({
-		header: menuHeaderUI({ title: 'Settings', exit: back }),
-		items: [
-			menuItemWithIcon({
-				id: 'global-keys',
-				text: 'Set global key bindings...',
-				action: () => {
-					KeyBindingsController.create(c, globalKeys, false, () => {
-						settingsUI(c, back);
-					});
-				}
-			}),
-			menuItemWithIcon({
-				id: 'local-keys',
-				text: 'Set local key bindings...',
-				action: () => {
-					KeyBindingsController.create(c, localKeys, true, () => {
-						settingsUI(c, back);
-					});
-				}
-			})
-		]
+		header: menuHeaderUI({ title: 'Settings', exit: back })
 	});
+	c.setMenuItems([
+		menuItemWithIcon({
+			id: 'global-keys',
+			text: 'Set global key bindings...',
+			action: () => {
+				KeyBindingsController.create(c, globalKeys, false, () => {
+					settingsUI(c, back);
+				});
+			}
+		}),
+		menuItemWithIcon({
+			id: 'local-keys',
+			text: 'Set local key bindings...',
+			action: () => {
+				KeyBindingsController.create(c, localKeys, true, () => {
+					settingsUI(c, back);
+				});
+			}
+		})
+	]);
 };
 
 // Our app starts in this callback.  We get the controller and we can set

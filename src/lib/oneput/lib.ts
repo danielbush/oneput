@@ -8,7 +8,7 @@ export type OneputProps = {
 	menuOpen?: boolean;
 	menu?: {
 		header?: FlexParams;
-		items: Array<MenuItem | MenuItemDivider>;
+		items?: Array<MenuItem | MenuItemDivider>;
 		footer?: FlexParams;
 	};
 	inner?: FlexParams;

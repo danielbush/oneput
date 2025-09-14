@@ -109,8 +109,10 @@ export class KeyBindingsController {
 		this.controller.setBackBinding(this.back);
 		this.controller.setInputUI(inputUI(this.controller));
 		this.controller.setMenuUI({
-			header: menuHeaderUI({ title: 'Key bindings', exit: this.back }),
-			items: Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
+			header: menuHeaderUI({ title: 'Key bindings', exit: this.back })
+		});
+		this.controller.setMenuItems(
+			Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
 					id,
 					text: description,
@@ -120,7 +122,7 @@ export class KeyBindingsController {
 					}
 				})
 			)
-		});
+		);
 	};
 
 	private actionUI = (actionId: string) => {
@@ -133,28 +135,28 @@ export class KeyBindingsController {
 		this.controller.setPlaceholder();
 		this.controller.setInputValue('');
 		this.controller.setMenuUI({
-			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back }),
-			items: [
-				menuItemWithIcon({
-					id: 'add-binding',
-					text: 'Add binding...',
-					action: () => {
-						this.captureBindingUI(actionId);
-					}
-				}),
-				...bindings.map((binding) => {
-					return menuItemWithIcon({
-						id: binding,
-						text: binding,
-						leftIcon: keyboardIcon,
-						rightIcon: xIcon,
-						action: () => {
-							this.removeBinding(actionId, binding);
-						}
-					});
-				})
-			]
+			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back })
 		});
+		this.controller.setMenuItems([
+			menuItemWithIcon({
+				id: 'add-binding',
+				text: 'Add binding...',
+				action: () => {
+					this.captureBindingUI(actionId);
+				}
+			}),
+			...bindings.map((binding) => {
+				return menuItemWithIcon({
+					id: binding,
+					text: binding,
+					leftIcon: keyboardIcon,
+					rightIcon: xIcon,
+					action: () => {
+						this.removeBinding(actionId, binding);
+					}
+				});
+			})
+		]);
 	};
 
 	private captureBindingUI(actionId: string) {

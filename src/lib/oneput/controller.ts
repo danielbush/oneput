@@ -50,10 +50,18 @@ export class Controller {
 
 	// #region menu
 
-	setMenuUI(menu?: { header?: FlexParams; items: Array<MenuItemAny>; footer?: FlexParams }) {
-		this.currentProps.menu = menu;
+	setMenuUI(menu?: { header?: FlexParams; footer?: FlexParams }) {
+		this.currentProps.menu = {
+			...this.currentProps.menu,
+			header: menu?.header,
+			footer: menu?.footer
+		};
 		// Reset the focus index.
 		this.currentProps.menuItemFocus = 0;
+	}
+
+	setMenuItems(items: Array<MenuItemAny>) {
+		this.currentProps.menu = { ...this.currentProps.menu, items };
 	}
 
 	get menuOpen() {

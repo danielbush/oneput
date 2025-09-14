@@ -42,8 +42,10 @@ export class NavigateHeadings {
 
 	private updateUI = () => {
 		this.controller.setMenuUI({
-			header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit }),
-			items: this.filteredHeadings.map((h) =>
+			header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit })
+		});
+		this.controller.setMenuItems(
+			this.filteredHeadings.map((h) =>
 				menuItemNoIcon({
 					id: id(),
 					text: h.textContent,
@@ -57,6 +59,6 @@ export class NavigateHeadings {
 					}
 				})
 			)
-		});
+		);
 	};
 }

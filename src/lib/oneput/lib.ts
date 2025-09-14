@@ -6,9 +6,9 @@ export type OneputProps = {
 	menuItemFocus?: number;
 	menuItemFocusOrigin?: 'pointer' | 'keyboard';
 	menuOpen?: boolean;
-	menu?: {
+	menuItems?: Array<MenuItem | MenuItemDivider>;
+	menuUI?: {
 		header?: FlexParams;
-		items?: Array<MenuItem | MenuItemDivider>;
 		footer?: FlexParams;
 	};
 	inner?: FlexParams;

@@ -12,7 +12,7 @@
 		inputValue: '',
 		placeholder: 'Type here...',
 		onInputChange: () => {},
-		menu: { items: [] },
+		menuItems: [],
 		menuOpen: false
 	});
 	const { controllerRef }: { controllerRef: (c: Controller) => void } = $props();

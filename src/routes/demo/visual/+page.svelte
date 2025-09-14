@@ -35,9 +35,9 @@
 			{#snippet demo1(menuOpen: boolean)}
 				<Oneput
 					{menuOpen}
-					menu={{
+					menuItems={ui.menuItems1()}
+					menuUI={{
 						header: ui.menuHeader1,
-						items: ui.menuItems1(),
 						footer: ui.menuFooter1(data.appState.zap)
 					}}
 					inner={ui.inner1}
@@ -65,9 +65,7 @@
 			{#snippet demo1(menuOpen: boolean)}
 				<Oneput
 					{menuOpen}
-					menu={{
-						items: ui.menuItems1()
-					}}
+					menuItems={ui.menuItems1()}
 					input={{}}
 					placeholder="Placeholder..."
 					inputValue=""
@@ -84,31 +82,29 @@
 			<h2>Alert</h2>
 			<Oneput
 				menuOpen={true}
-				menu={{
-					items: [
-						{
-							id: 'alert',
-							type: 'vflex',
-							classes: ['oneput__menu-body-content'],
-							children: [
-								{
-									id: 'alert-title',
-									innerHTMLUnsafe: '<h2>Alert Title!</h2>'
-								},
-								{
-									id: 'alert-message',
-									innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
-								},
-								{
-									id: 'alert-button',
-									tag: 'button',
-									classes: ['oneput__primary-button'],
-									textContent: 'OK'
-								}
-							]
-						}
-					]
-				}}
+				menuItems={[
+					{
+						id: 'alert',
+						type: 'vflex',
+						classes: ['oneput__menu-body-content'],
+						children: [
+							{
+								id: 'alert-title',
+								innerHTMLUnsafe: '<h2>Alert Title!</h2>'
+							},
+							{
+								id: 'alert-message',
+								innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
+							},
+							{
+								id: 'alert-button',
+								tag: 'button',
+								classes: ['oneput__primary-button'],
+								textContent: 'OK'
+							}
+						]
+					}
+				]}
 				input={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,
@@ -126,44 +122,42 @@
 			<h2>Confirm</h2>
 			<Oneput
 				menuOpen={true}
-				menu={{
-					items: [
-						{
-							id: 'alert',
-							type: 'vflex',
-							classes: ['oneput__menu-body-content'],
-							children: [
-								{
-									id: 'alert-title',
-									innerHTMLUnsafe: '<h2>Confirm?</h2>'
-								},
-								{
-									id: 'alert-message',
-									innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
-								},
-								{
-									id: 'confirm-button-group',
-									type: 'hflex',
-									style: { gap: '1rem' },
-									children: [
-										{
-											id: 'confirm-yes-button',
-											tag: 'button',
-											classes: ['oneput__primary-button'],
-											textContent: 'Yes'
-										},
-										{
-											id: 'confirm-no-button',
-											tag: 'button',
-											classes: ['oneput__primary-button'],
-											textContent: 'No'
-										}
-									]
-								}
-							]
-						}
-					]
-				}}
+				menuItems={[
+					{
+						id: 'alert',
+						type: 'vflex',
+						classes: ['oneput__menu-body-content'],
+						children: [
+							{
+								id: 'alert-title',
+								innerHTMLUnsafe: '<h2>Confirm?</h2>'
+							},
+							{
+								id: 'alert-message',
+								innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
+							},
+							{
+								id: 'confirm-button-group',
+								type: 'hflex',
+								style: { gap: '1rem' },
+								children: [
+									{
+										id: 'confirm-yes-button',
+										tag: 'button',
+										classes: ['oneput__primary-button'],
+										textContent: 'Yes'
+									},
+									{
+										id: 'confirm-no-button',
+										tag: 'button',
+										classes: ['oneput__primary-button'],
+										textContent: 'No'
+									}
+								]
+							}
+						]
+					}
+				]}
 				input={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,

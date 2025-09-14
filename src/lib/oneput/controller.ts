@@ -50,18 +50,14 @@ export class Controller {
 
 	// #region menu
 
-	setMenuUI(menu?: { header?: FlexParams; footer?: FlexParams }) {
-		this.currentProps.menu = {
-			...this.currentProps.menu,
-			header: menu?.header,
-			footer: menu?.footer
-		};
-		// Reset the focus index.
-		this.currentProps.menuItemFocus = 0;
+	setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {
+		this.currentProps.menuUI = menuUI;
 	}
 
 	setMenuItems(items: Array<MenuItemAny>) {
-		this.currentProps.menu = { ...this.currentProps.menu, items };
+		this.currentProps.menuItems = items;
+		// Reset the focus index.
+		this.currentProps.menuItemFocus = 0;
 	}
 
 	get menuOpen() {
@@ -73,11 +69,11 @@ export class Controller {
 	}
 
 	get menuItemCount() {
-		return this.currentProps.menu?.items?.length ?? 0;
+		return this.currentProps.menuItems?.length ?? 0;
 	}
 
 	get currentMenuItem() {
-		return this.currentProps.menu?.items?.[this.menuItemFocus];
+		return this.currentProps.menuItems?.[this.menuItemFocus];
 	}
 
 	openMenu = () => {
@@ -103,7 +99,7 @@ export class Controller {
 			c < this.menuItemCount;
 			c++, i = this.nextMenuItemIndex(i)
 		) {
-			if (!this.currentProps.menu?.items?.[i].ignored) {
+			if (!this.currentProps.menuItems?.[i].ignored) {
 				this.currentProps.menuItemFocus = i;
 				break;
 			}
@@ -117,7 +113,7 @@ export class Controller {
 			c < this.menuItemCount;
 			c++, i = this.previousMenuItemIndex(i)
 		) {
-			if (!this.currentProps.menu?.items?.[i].ignored) {
+			if (!this.currentProps.menuItems?.[i].ignored) {
 				this.currentProps.menuItemFocus = i;
 				break;
 			}

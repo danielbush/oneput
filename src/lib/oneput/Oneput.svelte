@@ -72,11 +72,11 @@
 	{#if props.menuOpen}
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">
-				{#if props.menu?.header}
-					<Flex class="oneput__menu-header" {...props.menu.header} />
+				{#if props.menuUI?.header}
+					<Flex class="oneput__menu-header" {...props.menuUI.header} />
 				{/if}
 				<div class="oneput__menu-body">
-					{#each props.menu?.items || [] as item, index (item.id)}
+					{#each props.menuItems || [] as item, index (item.id)}
 						{#if item.ignored}
 							<Flex class={item.class ?? ''} {...item} />
 						{:else}
@@ -95,8 +95,8 @@
 						{/if}
 					{/each}
 				</div>
-				{#if props.menu?.footer}
-					<Flex class="oneput__menu-footer" {...props.menu.footer} />
+				{#if props.menuUI?.footer}
+					<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
 				{/if}
 			</section>
 		</div>

@@ -14,7 +14,7 @@ export class AsyncSearchExample {
 		private back: () => void
 	) {
 		this.ctl.setBackBinding(this.exit);
-		this.ctl.setMenuItemsFnAsync(async (input) => {
+		this.ctl.menu.setMenuItemsFnAsync(async (input) => {
 			try {
 				const results = await this.testService.fetchData(input);
 				return results.map((result) => {
@@ -36,7 +36,7 @@ export class AsyncSearchExample {
 		});
 		this.ctl.setInputValue();
 		this.ctl.setPlaceholder('Start typing...');
-		this.ctl.setMenuItems([
+		this.ctl.menu.setMenuItems([
 			menuItemWithIcon({
 				id: 'initial',
 				text: 'Waiting...'

@@ -19,7 +19,7 @@ export class NavigateHeadings {
 		private document: Document,
 		private back: () => void
 	) {
-		this.controller.disableDefaultMenuItemsFn = true;
+		this.controller.menu.disableDefaultMenuItemsFn = true;
 		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
 		this.filteredHeadings = this.headings;
 		this.clearInputChangeListener = this.controller.onInputChange((evt) => {
@@ -37,7 +37,7 @@ export class NavigateHeadings {
 	 * It's important to clean up once we exit this mini-app.
 	 */
 	private exit = () => {
-		this.controller.disableDefaultMenuItemsFn = false;
+		this.controller.menu.disableDefaultMenuItemsFn = false;
 		this.controller.setInputValue();
 		this.clearInputChangeListener();
 		this.back();
@@ -47,14 +47,14 @@ export class NavigateHeadings {
 		this.controller.setMenuUI({
 			header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit })
 		});
-		this.controller.setMenuItems(
+		this.controller.menu.setMenuItems(
 			this.filteredHeadings.map((h) =>
 				menuItemNoIcon({
 					id: id(),
 					text: h.textContent,
 					action: () => {
 						h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-						this.controller.closeMenu();
+						this.controller.menu.closeMenu();
 						// Reset the input and menu:
 						this.controller.setInputValue();
 						this.filteredHeadings = this.headings;

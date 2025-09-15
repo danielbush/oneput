@@ -20,7 +20,7 @@ export const globalKeys: KeyBindingMap = {
 		bindings: ['$mod+Shift+k'],
 		description: 'Open Oneput menu...',
 		action: (c) => {
-			c.openMenu();
+			c.menu.openMenu();
 		}
 	},
 	focusInput: {
@@ -72,28 +72,28 @@ export const localKeys: KeyBindingMap = {
 		bindings: ['Escape', '$mod+Shift+k'],
 		description: 'Close menu',
 		action: (c) => {
-			c.closeMenu();
+			c.menu.closeMenu();
 		}
 	},
 	focusPreviousMenuItem: {
 		bindings: ['$mod+k'],
 		description: 'Focus previous menu item',
 		action: (c) => {
-			c.focusPreviousMenuItem();
+			c.menu.focusPreviousMenuItem();
 		}
 	},
 	focusNextMenuItem: {
 		bindings: ['$mod+j'],
 		description: 'Focus next menu item',
 		action: (c) => {
-			c.focusNextMenuItem();
+			c.menu.focusNextMenuItem();
 		}
 	}
 };
 
 const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
-		c.closeMenu();
+		c.menu.closeMenu();
 	});
 	c.setInnerUI({
 		id: 'root-inner',
@@ -141,7 +141,7 @@ const rootUI = (c: Controller) => {
 			title: 'Root',
 			type: 'exit',
 			exit: () => {
-				c.closeMenu();
+				c.menu.closeMenu();
 			}
 		})
 	});
@@ -193,7 +193,7 @@ const rootUI = (c: Controller) => {
 			}
 		})
 	];
-	c.setDefaultMenuItemsFn((input, menuItems) => {
+	c.menu.setDefaultMenuItemsFn((input, menuItems) => {
 		return menuItems.filter((item) => {
 			return item.children?.some((child) => {
 				if (child.type === 'fchild') {
@@ -203,7 +203,7 @@ const rootUI = (c: Controller) => {
 			});
 		});
 	});
-	c.setMenuItems(items);
+	c.menu.setMenuItems(items);
 };
 
 const settingsUI = (c: Controller, back: () => void) => {
@@ -212,7 +212,7 @@ const settingsUI = (c: Controller, back: () => void) => {
 	c.setMenuUI({
 		header: menuHeaderUI({ title: 'Settings', exit: back })
 	});
-	c.setMenuItems([
+	c.menu.setMenuItems([
 		menuItemWithIcon({
 			id: 'global-keys',
 			text: 'Set global key bindings...',

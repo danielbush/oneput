@@ -142,10 +142,10 @@ export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 						type: 'button',
 						title: 'Options',
 						onclick: () => {
-							if (c.menuOpen) {
-								c.closeMenu();
+							if (c.menu.menuOpen) {
+								c.menu.closeMenu();
 							} else {
-								c.openMenu();
+								c.menu.openMenu();
 							}
 						}
 					},

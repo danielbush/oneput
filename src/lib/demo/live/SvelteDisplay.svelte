@@ -5,7 +5,7 @@
 	const { controller }: { controller: Controller } = $props();
 </script>
 
-{#if controller.menuOpen}
+{#if controller.menu.menuOpen}
 	<div><FolderOpen /></div>
 {:else}
 	<div><Folder /></div>

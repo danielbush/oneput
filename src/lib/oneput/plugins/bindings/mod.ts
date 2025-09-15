@@ -116,7 +116,7 @@ export class KeyBindingsController {
 		this.controller.setMenuUI({
 			header: menuHeaderUI({ title: 'Key bindings', exit: this.back })
 		});
-		this.controller.setMenuItems(
+		this.controller.menu.setMenuItems(
 			Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
 					id,
@@ -142,7 +142,7 @@ export class KeyBindingsController {
 		this.controller.setMenuUI({
 			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back })
 		});
-		this.controller.setMenuItems([
+		this.controller.menu.setMenuItems([
 			menuItemWithIcon({
 				id: 'add-binding',
 				text: 'Add binding...',

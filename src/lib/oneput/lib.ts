@@ -1,9 +1,10 @@
 import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
 
-export type InputChangeListener = (
-	evt: Event & { currentTarget: EventTarget & HTMLInputElement }
-) => void;
+export type InputChangeEvent = Event & {
+	target: (EventTarget & HTMLInputElement) | null;
+};
+export type InputChangeListener = (evt: InputChangeEvent) => void;
 
 export type OneputProps = {
 	controller?: Controller;

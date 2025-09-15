@@ -3,6 +3,7 @@ import {
 	inputUI,
 	menuHeaderUI,
 	menuItemWithIcon,
+	searchIcon,
 	settingsIcon,
 	sigmaIcon,
 	tocIcon
@@ -12,6 +13,7 @@ import { NavigateHeadings } from './NavigateHeadings.js';
 import { TimeDisplay } from './TimeDisplay.js';
 import { DateDisplay } from './DateDisplay.js';
 import { SvelteExample } from './SvelteExample.js';
+import { AsyncSearchExample } from './AsyncSearchExample.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -178,6 +180,16 @@ const rootUI = (c: Controller) => {
 			text: 'Hide',
 			action: () => {
 				window.dispatchEvent(new Event('oneput-toggle-hide'));
+			}
+		}),
+		menuItemWithIcon({
+			id: 'async-search',
+			text: 'Demo: slow async menu items...',
+			leftIcon: searchIcon,
+			action: () => {
+				AsyncSearchExample.create(c, () => {
+					rootUI(c);
+				});
 			}
 		})
 	];

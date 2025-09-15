@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
-	import { type MenuItem, type MenuItemAny, type OneputProps } from './lib.js';
+	import {
+		type InputChangeEvent,
+		type MenuItem,
+		type MenuItemAny,
+		type OneputProps
+	} from './lib.js';
 	let {
 		inputElement = $bindable(),
 		inputValue = $bindable(''),
@@ -49,11 +54,11 @@
 	// See UNWANTED_AUTOCOMPLETE
 	const autocomplete = 'one-time-code';
 
-	function handleInputChange(evt: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+	function handleInputChange(evt: Event) {
 		// Keep inputValue in sync with what the user typeonInputChange
-		inputValue = evt.currentTarget.value;
+		inputValue = (evt.target as HTMLInputElement)?.value ?? '';
 		// Let the user response to what was typed:
-		props.onInputChange?.(evt);
+		props.onInputChange?.(evt as InputChangeEvent);
 		// Note: the user can set inputValue directly and it will pass down to this component also.
 	}
 

@@ -9,6 +9,30 @@ import type {
 } from './lib.js';
 import { debounce } from '@std/async';
 
+// Internal event system for decoupled communication
+type InternalEvent = { type: 'input-change'; payload: InputChangeEvent };
+
+class InternalEventEmitter {
+	private listeners = new Map<string, ((payload: InputChangeEvent) => void)[]>();
+
+	emit(event: InternalEvent) {
+		this.listeners.get(event.type)?.forEach((fn) => fn(event.payload));
+	}
+
+	on(type: 'input-change', handler: (payload: InputChangeEvent) => void): () => void {
+		if (!this.listeners.has(type)) {
+			this.listeners.set(type, []);
+		}
+		this.listeners.get(type)!.push(handler);
+
+		return () => {
+			const handlers = this.listeners.get(type)!;
+			const index = handlers.indexOf(handler);
+			if (index > -1) handlers.splice(index, 1);
+		};
+	}
+}
+
 export type KeyBinding = {
 	action: (c: Controller) => void;
 	description: string;
@@ -47,6 +71,8 @@ export type MenuItemsFnAsync = (input: string) => Promise<Array<MenuItemAny>>;
  * Input Control
  */
 export class Controller {
+	private events = new InternalEventEmitter();
+
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputControllerProps>({...})
 	 */
@@ -58,6 +84,8 @@ export class Controller {
 	) {
 		this.currentProps.onInputChange = (evt) => {
 			this.runInputChangeListeners(evt);
+			// Emit internal event for decoupled communication
+			this.events.emit({ type: 'input-change', payload: evt });
 		};
 	}
 
@@ -85,7 +113,7 @@ export class Controller {
 
 	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
 		this.removeDefaultMenuItemsFn();
-		this.removeDefaultMenuItemsFn = this.onInputChange((evt) => {
+		this.removeDefaultMenuItemsFn = this.events.on('input-change', (evt) => {
 			if (this.disableDefaultMenuItemsFn) {
 				return;
 			}
@@ -106,7 +134,7 @@ export class Controller {
 		this.removeMenuItemsFn();
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
-			this.removeMenuItemsFn = this.onInputChange((evt) => {
+			this.removeMenuItemsFn = this.events.on('input-change', (evt) => {
 				this.currentProps.menuItems = menuItemsFn(
 					evt.target?.value ?? '',
 					this.currentProps.menuItems || []
@@ -151,7 +179,7 @@ export class Controller {
 				);
 			};
 			const debouncedHandler = debounce(handler, 500);
-			this.removeMenuItemsFn = this.onInputChange((evt) => {
+			this.removeMenuItemsFn = this.events.on('input-change', (evt) => {
 				debouncedHandler(evt);
 			});
 		}

@@ -15,6 +15,82 @@ import { TimeDisplay } from './TimeDisplay.js';
 import { DateDisplay } from './DateDisplay.js';
 import { SvelteExample } from './SvelteExample.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
+import type { DefaultUI } from '$lib/oneput/UIController.js';
+import type { FlexParams } from '$lib/oneput/lib.js';
+
+type MyDefaultUIValues = { exit?: () => void; menuHeader?: string };
+
+class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
+	constructor(private c: Controller) {}
+	values = {
+		exit: () => {
+			this.c.menu.closeMenu();
+		},
+		menuHeader: 'Menu'
+	};
+
+	get input() {
+		return inputUI(this.c);
+	}
+	get menu() {
+		return {
+			header: menuHeaderUI({
+				title: this.values.menuHeader || 'Menu',
+				exit:
+					this.values.exit ||
+					(() => {
+						this.c.menu.closeMenu();
+					})
+			})
+		};
+	}
+
+	get inner() {
+		return {
+			id: 'root-inner',
+			type: 'hflex' as const,
+			children: [
+				{
+					id: 'root-inner-left',
+					type: 'fchild' as const,
+					style: { flex: '1' }
+				},
+				{
+					id: 'root-inner-middle',
+					type: 'fchild' as const,
+					style: { justifyContent: 'center' },
+					onMount: TimeDisplay.onMount
+				},
+				{
+					id: 'root-inner-right',
+					type: 'fchild' as const,
+					style: { flex: '1' }
+				}
+			]
+		};
+	}
+
+	get outer() {
+		return {
+			id: 'root-outer',
+			type: 'hflex' as const,
+			children: [
+				{
+					id: 'root-outer-left',
+					type: 'fchild' as const,
+					style: { flex: '1', position: 'relative' },
+					onMount: (node) => SvelteExample.onMount(node, this.c)
+				},
+				{
+					id: 'root-outer-right',
+					type: 'fchild' as const,
+					style: { flex: '1', justifyContent: 'flex-end' },
+					onMount: DateDisplay.onMount
+				}
+			]
+		} as FlexParams;
+	}
+}
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -96,55 +172,8 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.menu.closeMenu();
 	});
-	c.ui.setInnerUI({
-		id: 'root-inner',
-		type: 'hflex',
-		children: [
-			{
-				id: 'root-inner-left',
-				type: 'fchild',
-				style: { flex: '1' }
-			},
-			{
-				id: 'root-inner-middle',
-				type: 'fchild',
-				style: { justifyContent: 'center' },
-				onMount: TimeDisplay.onMount
-			},
-			{
-				id: 'root-inner-right',
-				type: 'fchild',
-				style: { flex: '1' }
-			}
-		]
-	});
-	c.ui.setOuterUI({
-		id: 'root-outer',
-		type: 'hflex',
-		children: [
-			{
-				id: 'root-outer-left',
-				type: 'fchild',
-				style: { flex: '1', position: 'relative' },
-				onMount: (node) => SvelteExample.onMount(node, c)
-			},
-			{
-				id: 'root-outer-right',
-				type: 'fchild',
-				style: { flex: '1', justifyContent: 'flex-end' },
-				onMount: DateDisplay.onMount
-			}
-		]
-	});
-	c.ui.setInputUI(inputUI(c));
-	c.ui.setMenuUI({
-		header: menuHeaderUI({
-			title: 'Root',
-			type: 'exit',
-			exit: () => {
-				c.menu.closeMenu();
-			}
-		})
+	c.ui.setDefaultValues<MyDefaultUIValues>({
+		menuHeader: 'Home'
 	});
 	const items = [
 		menuItemWithIcon({
@@ -240,5 +269,13 @@ const settingsUI = (c: Controller, back: () => void) => {
 export const setController = (c: Controller) => {
 	c.keys.setKeys(globalKeys);
 	c.keys.setKeys(localKeys, true);
+	const ui = new MyDefaultUI(c);
+	c.ui.setDefaultUI(ui);
+	c.ui.setDefaultValues<MyDefaultUIValues>({
+		menuHeader: 'Menu',
+		exit: () => {
+			c.menu.closeMenu();
+		}
+	});
 	rootUI(c);
 };

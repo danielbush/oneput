@@ -1,5 +1,13 @@
 import type { FlexParams, OneputControllerProps } from './lib.js';
 
+export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
+	values?: V;
+	input?: OneputControllerProps['inputUI'];
+	menu?: OneputControllerProps['menuUI'];
+	inner?: OneputControllerProps['innerUI'];
+	outer?: OneputControllerProps['outerUI'];
+}
+
 export class UIController {
 	static create(currentProps: OneputControllerProps) {
 		return new UIController(currentProps);
@@ -35,5 +43,37 @@ export class UIController {
 
 	setInnerUI(inner?: FlexParams) {
 		this.currentProps.innerUI = inner;
+	}
+
+	/**
+	 * Reverts the different ui areas in Oneput back to defaults.
+	 *
+	 * If setDefaultUI has not been called, the ui will be set to nothing.
+	 */
+	clearUI() {
+		this.currentProps.inputUI = this.defaultUI?.input;
+		this.currentProps.menuUI = this.defaultUI?.menu;
+		this.currentProps.innerUI = this.defaultUI?.inner;
+		this.currentProps.outerUI = this.defaultUI?.outer;
+	}
+
+	private defaultUI?: DefaultUI;
+
+	setDefaultUI(defaultUI: DefaultUI) {
+		this.defaultUI = defaultUI;
+	}
+
+	applyDefaultUI() {
+		this.currentProps.inputUI = this.defaultUI?.input;
+		this.currentProps.menuUI = this.defaultUI?.menu;
+		this.currentProps.innerUI = this.defaultUI?.inner;
+		this.currentProps.outerUI = this.defaultUI?.outer;
+	}
+
+	setDefaultValues<T extends Record<string, unknown>>(values: T) {
+		if (this.defaultUI) {
+			this.defaultUI.values = values;
+			this.applyDefaultUI();
+		}
 	}
 }

@@ -96,7 +96,7 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.menu.closeMenu();
 	});
-	c.setInnerUI({
+	c.ui.setInnerUI({
 		id: 'root-inner',
 		type: 'hflex',
 		children: [
@@ -118,7 +118,7 @@ const rootUI = (c: Controller) => {
 			}
 		]
 	});
-	c.setOuterUI({
+	c.ui.setOuterUI({
 		id: 'root-outer',
 		type: 'hflex',
 		children: [
@@ -136,8 +136,8 @@ const rootUI = (c: Controller) => {
 			}
 		]
 	});
-	c.setInputUI(inputUI(c));
-	c.setMenuUI({
+	c.ui.setInputUI(inputUI(c));
+	c.ui.setMenuUI({
 		header: menuHeaderUI({
 			title: 'Root',
 			type: 'exit',
@@ -209,8 +209,8 @@ const rootUI = (c: Controller) => {
 
 const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
-	c.setInputUI(inputUI(c));
-	c.setMenuUI({
+	c.ui.setInputUI(inputUI(c));
+	c.ui.setMenuUI({
 		header: menuHeaderUI({ title: 'Settings', exit: back })
 	});
 	c.menu.setMenuItems([

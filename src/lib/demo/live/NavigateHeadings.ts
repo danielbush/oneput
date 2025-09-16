@@ -44,7 +44,7 @@ export class NavigateHeadings {
 	};
 
 	private updateUI = () => {
-		this.controller.setMenuUI({
+		this.controller.ui.setMenuUI({
 			header: menuHeaderUI({ title: 'Navigate Headings', exit: this.exit })
 		});
 		this.controller.menu.setMenuItems(

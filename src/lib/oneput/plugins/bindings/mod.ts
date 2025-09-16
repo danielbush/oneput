@@ -113,8 +113,8 @@ export class KeyBindingsController {
 	 */
 	private actionsUI = () => {
 		this.controller.setBackBinding(this.back);
-		this.controller.setInputUI(inputUI(this.controller));
-		this.controller.setMenuUI({
+		this.controller.ui.setInputUI(inputUI(this.controller));
+		this.controller.ui.setMenuUI({
 			header: menuHeaderUI({ title: 'Key bindings', exit: this.back })
 		});
 		this.controller.menu.setMenuItems(
@@ -137,10 +137,10 @@ export class KeyBindingsController {
 			this.actionsUI();
 		};
 		this.controller.setBackBinding(back);
-		this.controller.setInputUI(inputUI(this.controller));
+		this.controller.ui.setInputUI(inputUI(this.controller));
 		this.controller.input.setPlaceholder();
 		this.controller.input.setInputValue('');
-		this.controller.setMenuUI({
+		this.controller.ui.setMenuUI({
 			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back })
 		});
 		this.controller.menu.setMenuItems([
@@ -167,7 +167,7 @@ export class KeyBindingsController {
 
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
-		this.controller.setInputUI({
+		this.controller.ui.setInputUI({
 			right: {
 				id: 'input-right-1',
 				type: 'hflex',

@@ -5,8 +5,11 @@ export class UIController {
 		return new UIController(currentProps);
 	}
 
-	constructor(private currentProps: OneputControllerProps) {
-		//
+	constructor(
+		private currentProps: OneputControllerProps,
+		private defaultPlaceholder: string = 'Type here...'
+	) {
+		this.currentProps.placeholder = this.defaultPlaceholder;
 	}
 
 	setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {
@@ -20,6 +23,10 @@ export class UIController {
 		outerRight?: FlexParams;
 	}) {
 		this.currentProps.inputUI = input;
+	}
+
+	setPlaceholder(msg?: string) {
+		this.currentProps.placeholder = msg || this.defaultPlaceholder;
 	}
 
 	setOuterUI(outer?: FlexParams) {

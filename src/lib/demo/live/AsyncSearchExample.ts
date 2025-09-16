@@ -35,7 +35,7 @@ export class AsyncSearchExample {
 			}
 		});
 		this.ctl.input.setInputValue();
-		this.ctl.input.setPlaceholder('Start typing...');
+		this.ctl.ui.setPlaceholder('Start typing...');
 		this.ctl.menu.setMenuItems([
 			menuItemWithIcon({
 				id: 'initial',

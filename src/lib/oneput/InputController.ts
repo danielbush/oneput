@@ -8,10 +8,8 @@ export class InputController {
 
 	constructor(
 		private currentProps: OneputControllerProps,
-		private events: InternalEventEmitter,
-		private defaultPlaceholder: string = 'Type here...'
+		private events: InternalEventEmitter
 	) {
-		this.currentProps.placeholder = this.defaultPlaceholder;
 		this.currentProps.onInputChange = (evt) => {
 			this.runInputChangeListeners(evt);
 			// Emit internal event for decoupled communication
@@ -20,6 +18,7 @@ export class InputController {
 	}
 
 	private inputElement: HTMLInputElement | undefined;
+	private inputChangeListeners: InputChangeListener[] = [];
 
 	/**
 	 * Used by Oneput to tell the controller what the input element is.
@@ -32,10 +31,6 @@ export class InputController {
 		this.inputElement?.focus();
 	}
 
-	setPlaceholder(msg?: string) {
-		this.currentProps.placeholder = msg || this.defaultPlaceholder;
-	}
-
 	/**
 	 * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
 	 */
@@ -43,13 +38,13 @@ export class InputController {
 		this.currentProps.inputValue = val || '';
 	}
 
-	private inputChangeListeners: InputChangeListener[] = [];
 	onInputChange(handler: InputChangeListener): () => void {
 		this.inputChangeListeners.push(handler);
 		return () => {
 			this.inputChangeListeners = this.inputChangeListeners.filter((l) => l !== handler);
 		};
 	}
+
 	private runInputChangeListeners(evt: InputChangeEvent) {
 		this.inputChangeListeners.forEach((listener) => {
 			listener(evt);

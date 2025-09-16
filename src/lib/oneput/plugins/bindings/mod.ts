@@ -138,7 +138,7 @@ export class KeyBindingsController {
 		};
 		this.controller.setBackBinding(back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
-		this.controller.input.setPlaceholder();
+		this.controller.ui.setPlaceholder();
 		this.controller.input.setInputValue('');
 		this.controller.ui.setMenuUI({
 			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back })
@@ -199,7 +199,7 @@ export class KeyBindingsController {
 				]
 			}
 		});
-		this.controller.input.setPlaceholder('Type the keys...');
+		this.controller.ui.setPlaceholder('Type the keys...');
 	}
 
 	private startKeyCapture = (actionId: string) => {

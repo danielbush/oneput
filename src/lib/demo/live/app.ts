@@ -1,4 +1,5 @@
-import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controller.js';
+import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
 import {
 	inputUI,
 	menuHeaderUI,
@@ -237,7 +238,7 @@ const settingsUI = (c: Controller, back: () => void) => {
 // Our app starts in this callback.  We get the controller and we can set
 // keys and configure oneput.
 export const setController = (c: Controller) => {
-	c.setKeys(globalKeys);
-	c.setKeys(localKeys, true);
+	c.keys.setKeys(globalKeys);
+	c.keys.setKeys(localKeys, true);
 	rootUI(c);
 };

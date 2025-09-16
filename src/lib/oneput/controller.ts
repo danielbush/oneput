@@ -1,21 +1,8 @@
-import { tinykeys } from 'tinykeys';
 import type { FlexParams, OneputControllerProps } from './lib.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
 import { InputController } from './InputController.js';
-
-export type KeyBinding = {
-	action: (c: Controller) => void;
-	description: string;
-	/**
-	 * Bindings in tinykeys format eg "Control+D" .
-	 * Each item in the array is a complete binding.
-	 */
-	bindings: string[];
-};
-export type KeyBindingMap = {
-	[actionId: string]: KeyBinding;
-};
+import { KeysController } from './KeysController.js';
 
 /**
  * Key things you want to manage when Oneput goes from one mode to another...
@@ -43,23 +30,32 @@ export class Controller {
 	private events = new InternalEventEmitter();
 	public menu: MenuController;
 	public input: InputController;
+	public keys: KeysController;
 
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputControllerProps>({...})
 	 */
-	constructor(
-		private currentProps: OneputControllerProps,
-		private unsubscribeGlobalKeys: () => void = () => {},
-		private unsubscribeLocalKeys: () => void = () => {}
-	) {
+	constructor(private currentProps: OneputControllerProps) {
 		this.menu = MenuController.create(this.currentProps, this.events);
 		this.input = InputController.create(this.currentProps, this.events);
+		this.keys = KeysController.create(this.events, this);
 	}
 
 	// #region menu
 
 	setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {
 		this.currentProps.menuUI = menuUI;
+	}
+
+	// #endregion
+
+	/**
+	 * This is intended for triggering a back action via keyboard.
+	 */
+	goBack: () => void = () => {};
+
+	setBackBinding(back?: () => void) {
+		this.goBack = back || (() => {});
 	}
 
 	doAction() {
@@ -69,8 +65,6 @@ export class Controller {
 			}
 		}
 	}
-
-	// #endregion
 
 	// #region input
 
@@ -86,85 +80,6 @@ export class Controller {
 	// #endregion
 
 	// #region keys
-
-	/**
-	 * Only run globals when menu is closed.
-	 */
-	private handleGlobalKeys(keys: KeyBindingMap) {
-		this.unsubscribeGlobalKeys();
-		const adjustedBindings = Object.entries(keys).reduce<{
-			[key: string]: (evt: KeyboardEvent) => void;
-		}>((acc, [, { action, bindings }]) => {
-			bindings.forEach((binding) => {
-				acc[binding] = (evt) => {
-					evt.preventDefault();
-					if (this.keysDisabled) {
-						return;
-					}
-					if (!this.menu.menuOpen) {
-						// MENU_OPEN_CLOSE_RACE
-						setTimeout(() => action(this));
-					}
-				};
-			});
-			return acc;
-		}, {});
-		const unsubscribe = tinykeys(window, adjustedBindings);
-		this.unsubscribeGlobalKeys = unsubscribe;
-	}
-
-	/**
-	 * Only run locals when menu is open.
-	 */
-	private handleLocalKeys(keys: KeyBindingMap) {
-		this.unsubscribeLocalKeys();
-		const adjustedBindings = Object.entries(keys).reduce<{
-			[key: string]: (evt: KeyboardEvent) => void;
-		}>((acc, [, { action, bindings }]) => {
-			bindings.forEach((binding) => {
-				acc[binding] = (evt) => {
-					evt.preventDefault();
-					if (this.keysDisabled) {
-						return;
-					}
-					if (this.menu.menuOpen) {
-						// MENU_OPEN_CLOSE_RACE
-						setTimeout(() => action(this));
-					}
-				};
-			});
-			return acc;
-		}, {});
-		const unsubscribe = tinykeys(document.body, adjustedBindings);
-		this.unsubscribeLocalKeys = unsubscribe;
-	}
-
-	private keysDisabled = false;
-
-	disableKeys() {
-		this.keysDisabled = true;
-	}
-
-	enableKeys() {
-		this.keysDisabled = false;
-	}
-
-	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
-		if (isLocal) {
-			this.handleLocalKeys(bindings);
-		} else {
-			this.handleGlobalKeys(bindings);
-		}
-	}
-
-	/**
-	 * This is intended for triggering a back action via keyboard.
-	 */
-	goBack: () => void = () => {};
-
-	setBackBinding(back?: () => void) {
-		this.goBack = back || (() => {});
-	}
 
 	// #endregion
 

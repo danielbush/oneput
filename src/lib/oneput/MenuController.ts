@@ -1,11 +1,6 @@
 import { debounce } from '@std/async';
-import type { InternalEventEmitter } from './InternalEventEmitter.js';
-import type {
-	InputChangeListener,
-	MenuItemAny,
-	OneputControllerProps,
-	OneputProps
-} from './lib.js';
+import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmitter.js';
+import type { InputChangeListener, MenuItemAny, OneputControllerProps } from './lib.js';
 
 export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny>;
 export type MenuItemsFnAsync = (input: string) => Promise<Array<MenuItemAny>>;
@@ -18,7 +13,12 @@ export class MenuController {
 	constructor(
 		private currentProps: OneputControllerProps,
 		private events: InternalEventEmitter
-	) {}
+	) {
+		this.currentProps.onMenuOpenChange = (menuOpen) => {
+			this.events.emit({ type: 'menu-open-change', payload: menuOpen });
+		};
+	}
+
 	/**
 	 * If a plugin doesn't want to use the defaultMenuItemsFn it can either:
 	 *
@@ -37,7 +37,7 @@ export class MenuController {
 
 	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
 		this.removeDefaultMenuItemsFn();
-		this.removeDefaultMenuItemsFn = this.events.on('input-change', (evt) => {
+		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
 			if (this.disableDefaultMenuItemsFn) {
 				return;
 			}
@@ -58,7 +58,7 @@ export class MenuController {
 		this.removeMenuItemsFn();
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
-			this.removeMenuItemsFn = this.events.on('input-change', (evt) => {
+			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
 				this.currentProps.menuItems = menuItemsFn(
 					evt.target?.value ?? '',
 					this.currentProps.menuItems || []
@@ -103,7 +103,7 @@ export class MenuController {
 				);
 			};
 			const debouncedHandler = debounce(handler, 500);
-			this.removeMenuItemsFn = this.events.on('input-change', (evt) => {
+			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
 				debouncedHandler(evt);
 			});
 		}
@@ -174,9 +174,5 @@ export class MenuController {
 				break;
 			}
 		}
-	}
-
-	onMenuOpenChange(handler?: OneputProps['onMenuOpenChange']) {
-		this.currentProps.onMenuOpenChange = handler;
 	}
 }

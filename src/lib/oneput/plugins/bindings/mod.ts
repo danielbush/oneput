@@ -1,4 +1,5 @@
-import type { Controller, KeyBindingMap } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controller.js';
+import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
 import { id as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
@@ -238,7 +239,7 @@ export class KeyBindingsController {
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
-		this.controller.disableKeys();
+		this.controller.keys.disableKeys();
 
 		return {
 			accept: (evt: Event) => {
@@ -247,16 +248,16 @@ export class KeyBindingsController {
 				evt.preventDefault();
 				if (capturedKeys.length > 0) {
 					this.keyMap[actionId].bindings.push(toBinding(capturedKeys));
-					this.controller.setKeys(this.keyMap, this.local);
+					this.controller.keys.setKeys(this.keyMap, this.local);
 				}
 				window.removeEventListener('keydown', keyListener);
-				this.controller.enableKeys();
+				this.controller.keys.enableKeys();
 				this.actionUI(actionId);
 			},
 			reject: (evt: Event) => {
 				evt.preventDefault();
 				window.removeEventListener('keydown', keyListener);
-				this.controller.enableKeys();
+				this.controller.keys.enableKeys();
 				this.actionUI(actionId);
 			}
 		};
@@ -268,7 +269,7 @@ export class KeyBindingsController {
 			return;
 		}
 		this.keyMap[actionId].bindings = this.keyMap[actionId].bindings.filter((b) => b !== binding);
-		this.controller.setKeys(this.keyMap, this.local);
+		this.controller.keys.setKeys(this.keyMap, this.local);
 		this.actionUI(actionId);
 	};
 }

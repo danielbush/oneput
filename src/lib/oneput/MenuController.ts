@@ -44,13 +44,7 @@ export class MenuController {
 			if (this.menuItemsFn) {
 				return;
 			}
-			this.currentProps.menuItems = menuItemsFn(evt.target?.value ?? '', this.menuItems);
-			// Note menuItemsFn can set menuItemFocus to 0 which should be maintained.
-			// If not, then this logic will set it to
-			this.currentProps.menuItemFocus = Math.min(
-				this.currentProps.menuItemFocus ?? 0,
-				Math.max(0, this.currentProps.menuItems.length - 1)
-			);
+			this.setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems));
 		});
 	}
 
@@ -59,15 +53,9 @@ export class MenuController {
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
-				this.currentProps.menuItems = menuItemsFn(
-					evt.target?.value ?? '',
-					this.currentProps.menuItems || []
-				);
-				// Note menuItemsFn can set menuItemFocus to 0 which should be maintained.
-				// If not, then this logic will set it to
-				this.currentProps.menuItemFocus = Math.min(
-					this.currentProps.menuItemFocus ?? 0,
-					Math.max(0, this.currentProps.menuItems.length - 1)
+				this.setMenuItems(
+					menuItemsFn(evt.target?.value ?? '', this.currentProps.menuItems || []),
+					true
 				);
 			});
 		}
@@ -96,11 +84,7 @@ export class MenuController {
 					return;
 				}
 				console.warn(`got ${value}...`);
-				this.currentProps.menuItems = menuItems;
-				this.currentProps.menuItemFocus = Math.min(
-					this.currentProps.menuItemFocus ?? 0,
-					Math.max(0, this.currentProps.menuItems.length - 1)
-				);
+				this.setMenuItems(menuItems, true);
 			};
 			const debouncedHandler = debounce(handler, 500);
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
@@ -109,11 +93,18 @@ export class MenuController {
 		}
 	}
 
-	setMenuItems(items: Array<MenuItemAny>) {
+	setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {
 		this.currentProps.menuItems = items;
 		this.menuItems = items;
-		// Reset the focus index.
-		this.currentProps.menuItemFocus = 0;
+
+		if (preserveFocusIndex) {
+			this.currentProps.menuItemFocus = Math.min(
+				this.currentProps.menuItemFocus ?? 0,
+				Math.max(0, this.currentProps.menuItems.length - 1)
+			);
+		} else {
+			this.currentProps.menuItemFocus = 0;
+		}
 	}
 
 	get menuOpen() {

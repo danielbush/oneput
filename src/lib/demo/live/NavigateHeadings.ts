@@ -22,7 +22,7 @@ export class NavigateHeadings {
 		this.controller.menu.disableDefaultMenuItemsFn = true;
 		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
 		this.filteredHeadings = this.headings;
-		this.clearInputChangeListener = this.controller.onInputChange((evt) => {
+		this.clearInputChangeListener = this.controller.input.onInputChange((evt) => {
 			const text = (evt.target as HTMLInputElement).value;
 			this.filteredHeadings = this.headings.filter((heading) => {
 				return heading.textContent.includes(text);
@@ -38,7 +38,7 @@ export class NavigateHeadings {
 	 */
 	private exit = () => {
 		this.controller.menu.disableDefaultMenuItemsFn = false;
-		this.controller.setInputValue();
+		this.controller.input.setInputValue();
 		this.clearInputChangeListener();
 		this.back();
 	};
@@ -56,7 +56,7 @@ export class NavigateHeadings {
 						h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 						this.controller.menu.closeMenu();
 						// Reset the input and menu:
-						this.controller.setInputValue();
+						this.controller.input.setInputValue();
 						this.filteredHeadings = this.headings;
 						this.updateUI();
 					}

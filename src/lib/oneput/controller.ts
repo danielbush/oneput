@@ -1,12 +1,8 @@
 import { tinykeys } from 'tinykeys';
-import type {
-	FlexParams,
-	InputChangeEvent,
-	InputChangeListener,
-	OneputControllerProps
-} from './lib.js';
+import type { FlexParams, OneputControllerProps } from './lib.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
+import { InputController } from './InputController.js';
 
 export type KeyBinding = {
 	action: (c: Controller) => void;
@@ -46,22 +42,18 @@ export type KeyBindingMap = {
 export class Controller {
 	private events = new InternalEventEmitter();
 	public menu: MenuController;
+	public input: InputController;
 
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputControllerProps>({...})
 	 */
 	constructor(
 		private currentProps: OneputControllerProps,
-		private defaultPlaceholder: string = 'Type here...',
 		private unsubscribeGlobalKeys: () => void = () => {},
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {
-		this.currentProps.onInputChange = (evt) => {
-			this.runInputChangeListeners(evt);
-			// Emit internal event for decoupled communication
-			this.events.emit({ type: 'input-change', payload: evt });
-		};
 		this.menu = MenuController.create(this.currentProps, this.events);
+		this.input = InputController.create(this.currentProps, this.events);
 	}
 
 	// #region menu
@@ -82,19 +74,6 @@ export class Controller {
 
 	// #region input
 
-	private inputElement: HTMLInputElement | undefined;
-
-	/**
-	 * Used by Oneput to tell the controller what the input element is.
-	 */
-	setInputElement(inputElement: HTMLInputElement | undefined) {
-		this.inputElement = inputElement;
-	}
-
-	focusInput() {
-		this.inputElement?.focus();
-	}
-
 	setInputUI(input?: {
 		left?: FlexParams;
 		right?: FlexParams;
@@ -102,30 +81,6 @@ export class Controller {
 		outerRight?: FlexParams;
 	}) {
 		this.currentProps.inputUI = input;
-	}
-
-	setPlaceholder(msg?: string) {
-		this.currentProps.placeholder = msg || this.defaultPlaceholder;
-	}
-
-	/**
-	 * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
-	 */
-	setInputValue(val?: string) {
-		this.currentProps.inputValue = val || '';
-	}
-
-	private inputChangeListeners: InputChangeListener[] = [];
-	onInputChange(handler: InputChangeListener): () => void {
-		this.inputChangeListeners.push(handler);
-		return () => {
-			this.inputChangeListeners = this.inputChangeListeners.filter((l) => l !== handler);
-		};
-	}
-	private runInputChangeListeners(evt: InputChangeEvent) {
-		this.inputChangeListeners.forEach((listener) => {
-			listener(evt);
-		});
 	}
 
 	// #endregion

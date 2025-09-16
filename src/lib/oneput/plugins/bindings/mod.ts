@@ -137,8 +137,8 @@ export class KeyBindingsController {
 		};
 		this.controller.setBackBinding(back);
 		this.controller.setInputUI(inputUI(this.controller));
-		this.controller.setPlaceholder();
-		this.controller.setInputValue('');
+		this.controller.input.setPlaceholder();
+		this.controller.input.setInputValue('');
 		this.controller.setMenuUI({
 			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back })
 		});
@@ -198,7 +198,7 @@ export class KeyBindingsController {
 				]
 			}
 		});
-		this.controller.setPlaceholder('Type the keys...');
+		this.controller.input.setPlaceholder('Type the keys...');
 	}
 
 	private startKeyCapture = (actionId: string) => {
@@ -223,7 +223,7 @@ export class KeyBindingsController {
 				altKey: evt.altKey,
 				controlKey: evt.ctrlKey
 			});
-			this.controller.setInputValue(
+			this.controller.input.setInputValue(
 				capturedKeys
 					.map(
 						(k) =>

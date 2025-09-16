@@ -34,19 +34,19 @@ export class AsyncSearchExample {
 				];
 			}
 		});
-		this.ctl.setInputValue();
-		this.ctl.setPlaceholder('Start typing...');
+		this.ctl.input.setInputValue();
+		this.ctl.input.setPlaceholder('Start typing...');
 		this.ctl.menu.setMenuItems([
 			menuItemWithIcon({
 				id: 'initial',
 				text: 'Waiting...'
 			})
 		]);
-		this.ctl.focusInput();
+		this.ctl.input.focusInput();
 	}
 
 	private exit = () => {
-		this.ctl.setInputValue();
+		this.ctl.input.setInputValue();
 		this.back();
 	};
 }

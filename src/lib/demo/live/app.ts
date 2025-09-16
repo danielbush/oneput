@@ -26,7 +26,7 @@ export const globalKeys: KeyBindingMap = {
 	focusInput: {
 		bindings: ['$mod+[', 'Control+['],
 		action: (c) => {
-			c.focusInput();
+			c.input.focusInput();
 		},
 		description: 'Focus input'
 	},
@@ -64,7 +64,7 @@ export const localKeys: KeyBindingMap = {
 	focusInput: {
 		bindings: ['$mod+[', 'Control+['],
 		action: (c) => {
-			c.focusInput();
+			c.input.focusInput();
 		},
 		description: 'Focus input'
 	},

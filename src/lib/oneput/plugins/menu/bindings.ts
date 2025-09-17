@@ -91,18 +91,43 @@ const toBinding = (
 
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
+ *
+ * The assumption is that keyMap is stored somewhere by the consumer.
  */
 export class KeyBindingsController {
-	static create(controller: Controller, keyMap: KeyBindingMap, local: boolean, back: () => void) {
-		return new KeyBindingsController(controller, keyMap, local, back);
+	static create(params: {
+		controller: Controller;
+		onChange: (keyMap: KeyBindingMap) => void;
+		keyMap: KeyBindingMap;
+		local: boolean;
+		back: () => void;
+	}) {
+		return new KeyBindingsController(params);
 	}
 
-	private constructor(
-		private controller: Controller,
-		private keyMap: KeyBindingMap,
-		private local: boolean,
-		private back: () => void
-	) {
+	private controller: Controller;
+	private onChange: (keyMap: KeyBindingMap) => void;
+	private keyMap: KeyBindingMap;
+	private local: boolean;
+	private back: () => void;
+
+	private constructor(params: {
+		controller: Controller;
+		onChange: (keyMap: KeyBindingMap) => void;
+		keyMap: KeyBindingMap;
+		local: boolean;
+		back: () => void;
+	}) {
+		this.controller = params.controller;
+		this.onChange = params.onChange;
+		this.keyMap = params.keyMap;
+		this.local = params.local;
+		this.back = params.back;
+		this.actionsUI();
+	}
+
+	setKeys(keyMap: KeyBindingMap) {
+		this.keyMap = keyMap;
 		this.actionsUI();
 	}
 
@@ -245,8 +270,13 @@ export class KeyBindingsController {
 				// the input from being focused.
 				evt.preventDefault();
 				if (capturedKeys.length > 0) {
-					this.keyMap[actionId].bindings.push(toBinding(capturedKeys));
-					this.controller.keys.setKeys(this.keyMap, this.local);
+					this.onChange({
+						...this.keyMap,
+						[actionId]: {
+							...this.keyMap[actionId],
+							bindings: [...this.keyMap[actionId].bindings, toBinding(capturedKeys)]
+						}
+					});
 				}
 				window.removeEventListener('keydown', keyListener);
 				this.controller.keys.enableKeys();

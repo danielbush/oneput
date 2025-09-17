@@ -7,9 +7,9 @@ import { localKeys } from './config/keys.js';
 // Our app starts in this callback.  We get the controller and we can set
 // keys and configure oneput.
 export const setController = (c: Controller) => {
-	c.keys.setKeys(globalKeys);
-	c.keys.setKeys(localKeys, true);
 	const ui = new MyDefaultUI(c);
 	c.ui.configureDefaultUI(ui);
+	c.keys.setDefaultKeys(globalKeys);
+	c.keys.setDefaultKeys(localKeys, true);
 	rootUI(c);
 };

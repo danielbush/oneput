@@ -56,7 +56,7 @@ export const rootUI = (c: Controller) => {
 			// leftIcon: commandIcon,
 			text: 'Hide',
 			action: () => {
-				window.dispatchEvent(new Event('oneput-toggle-hide'));
+				c.toggleHide();
 			}
 		}),
 		menuItemWithIcon({

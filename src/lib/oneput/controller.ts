@@ -22,6 +22,10 @@ export class Controller {
 		this.ui = UIController.create(this.currentProps);
 	}
 
+	toggleHide() {
+		window.dispatchEvent(new Event('oneput-toggle-hide'));
+	}
+
 	/**
 	 * This is intended for triggering a back action via keyboard.
 	 */

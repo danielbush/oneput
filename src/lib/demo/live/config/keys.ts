@@ -18,8 +18,8 @@ export const globalKeys: KeyBindingMap = {
 	hideOneput: {
 		bindings: ['$mod+h'],
 		description: 'Hide Oneput',
-		action: () => {
-			window.dispatchEvent(new Event('oneput-toggle-hide'));
+		action: (c) => {
+			c.toggleHide();
 		}
 	}
 };
@@ -28,8 +28,8 @@ export const localKeys: KeyBindingMap = {
 	hideOneput: {
 		bindings: ['$mod+h'],
 		description: 'Hide Oneput',
-		action: () => {
-			window.dispatchEvent(new Event('oneput-toggle-hide'));
+		action: (c) => {
+			c.toggleHide();
 		}
 	},
 	doAction: {

@@ -8,6 +8,8 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
+	import { randomId } from '$lib/oneput/lib.js';
+	import { xIcon } from '$lib/oneput/shared/icons.js';
 
 	setupDemoState();
 
@@ -17,6 +19,7 @@
 
 	let toggleConfirm = $state(true);
 	let toggleAlert = $state(true);
+	let toggleNotification = $state(true);
 </script>
 
 <svelte:head>
@@ -187,6 +190,55 @@
 												}
 											}
 										]
+									}
+								]
+							}
+						}}
+				inputUI={{
+					left: ui.inputLeft1,
+					right: ui.inputRight1,
+					outerLeft: ui.inputOuterLeft1,
+					outerRight: ui.inputOuterRight1
+				}}
+				placeholder="Type y or n..."
+				inputValue=""
+				onInputChange={() => {
+					console.log('onInputChange');
+				}}
+			/>
+		</section>
+		<section class="demo-example">
+			<h2>Notification</h2>
+			<button onclick={() => (toggleNotification = !toggleNotification)}>Toggle Notification</button
+			>
+			<Oneput
+				menuOpen={true}
+				menuItems={ui.menuItems1()}
+				injectUI={toggleNotification
+					? undefined
+					: {
+							inner: {
+								id: randomId(),
+								type: 'hflex',
+								classes: ['oneput__notification'],
+								style: { width: '100%' },
+								children: [
+									{
+										id: randomId(),
+										type: 'fchild',
+										classes: ['oneput__menu-item-body'],
+										textContent: 'This is a notification'
+									},
+									{
+										id: randomId(),
+										type: 'fchild',
+										classes: ['oneput__icon-button'],
+										innerHTMLUnsafe: xIcon,
+										attr: {
+											onclick: () => {
+												toggleNotification = true;
+											}
+										}
 									}
 								]
 							}

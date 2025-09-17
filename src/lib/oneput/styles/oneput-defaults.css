@@ -139,6 +139,9 @@
 	--oneput-debug-vflex-outline-offset: -0.5px;
 	--oneput-debug-fchild-outline: solid orchid 1px;
 	--oneput-debug-fchild-offset: -0.5px;
+
+	/* notification */
+	--oneput-notification-background: rgb(255 210 0 / 0.4);
 }
 
 .dark-mode .oneput__container {
@@ -461,6 +464,7 @@ button.oneput__menu-item:active {
 	justify-content: center;
 	border-radius: var(--oneput-icon-border-radius);
 	padding: var(--oneput-icon-padding);
+	cursor: pointer;
 }
 .oneput__checkbox {
 	padding: 1rem;
@@ -565,6 +569,14 @@ button.oneput__menu-item:active {
 }
 .oneput__menu--open .oneput__menu-button svg {
 	transform: rotate(180deg);
+}
+
+/* #endregion */
+
+/* #region notification */
+
+.oneput__notification {
+	background: var(--oneput-notification-background);
 }
 
 /* #endregion */

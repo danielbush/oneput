@@ -115,6 +115,11 @@
 			</section>
 		</div>
 	{/if}
+	{#if props.injectUI?.inner}
+		<section in:fade={{ duration: 1000 }} class="oneput__inject-area">
+			<Flex class="oneput__inject" {...props.injectUI.inner} />
+		</section>
+	{/if}
 	{#if props.innerUI}
 		<section class="oneput__inner-area">
 			<Flex class="oneput__inner" {...props.innerUI} />

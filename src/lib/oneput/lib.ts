@@ -20,6 +20,9 @@ export type OneputProps = {
 	replaceUI?: {
 		menu?: FlexParams;
 	};
+	injectUI?: {
+		inner?: FlexParams;
+	};
 	menuUI?: {
 		header?: FlexParams;
 		footer?: FlexParams;

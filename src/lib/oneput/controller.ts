@@ -1,9 +1,10 @@
-import type { OneputControllerProps } from './lib.js';
+import { randomId, type OneputControllerProps } from './lib.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
 import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
+import { xIcon } from './shared/icons.js';
 
 export class Controller {
 	private events = new InternalEventEmitter();
@@ -41,5 +42,35 @@ export class Controller {
 				this.menu.currentMenuItem.action(this);
 			}
 		}
+	}
+
+	notify(message: string) {
+		this.currentProps.injectUI = {
+			inner: {
+				id: randomId(),
+				type: 'hflex',
+				classes: ['oneput__notification'],
+				style: { width: '100%' },
+				children: [
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__menu-item-body'],
+						textContent: message
+					},
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: xIcon,
+						attr: {
+							onclick: () => {
+								this.currentProps.injectUI = undefined;
+							}
+						}
+					}
+				]
+			}
+		};
 	}
 }

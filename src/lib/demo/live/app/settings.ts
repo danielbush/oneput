@@ -1,22 +1,33 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
+import { randomId } from '$lib/oneput/lib.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/menu/editBindings.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 
 const testKeyService = {
+	simulateError: false,
 	setGlobalKeys: async (keyMap: KeyBindingMap) => {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
 			setTimeout(() => {
+				if (testKeyService.simulateError) {
+					reject(new Error('Simulate error'));
+				}
 				resolve(keyMap);
 			}, 1000);
 		});
 	},
 	setLocalKeys: async (keyMap: KeyBindingMap) => {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
+			if (testKeyService.simulateError) {
+				reject(new Error('Simulate error'));
+			}
 			setTimeout(() => {
 				resolve(keyMap);
 			}, 1000);
 		});
+	},
+	toggleSimulateError: (on: boolean) => {
+		testKeyService.simulateError = on;
 	}
 };
 
@@ -27,6 +38,42 @@ export const settingsUI = (c: Controller, back: () => void) => {
 		exitAction: back
 	});
 	c.menu.setMenuItems([
+		{
+			id: 'toggle-simulate-error',
+			type: 'hflex',
+			tag: 'button',
+			attr: { type: 'button' },
+			action: () => {
+				testKeyService.toggleSimulateError(!testKeyService.simulateError);
+				settingsUI(c, back);
+			},
+			children: [
+				{
+					id: 'simulate-error-storing-bindings',
+					type: 'fchild',
+					tag: 'input',
+					attr: {
+						type: 'checkbox',
+						title: 'simulate-error-storing-bindings',
+						checked: testKeyService.simulateError,
+						onchange: (evt) => {
+							testKeyService.toggleSimulateError((evt.target as HTMLInputElement).checked);
+						}
+					},
+					classes: ['oneput__checkbox']
+				},
+				{
+					id: randomId(),
+					type: 'fchild',
+					tag: 'label',
+					attr: {
+						for: 'simulate-error-storing-bindings'
+					},
+					classes: ['oneput__menu-item-body'],
+					textContent: 'Toggle simulate error storing bindings'
+				}
+			]
+		},
 		menuItemWithIcon({
 			id: 'global-keys',
 			text: 'Set global default key bindings...',
@@ -43,13 +90,13 @@ export const settingsUI = (c: Controller, back: () => void) => {
 							.setGlobalKeys(newKeyMap)
 							.then(() => {
 								keyMap = newKeyMap;
-								// c.notify(...)
+								c.notify('It worked!');
 							})
-							.catch(() => {
-								// c.notify(...)
+							.catch((err) => {
+								c.notify(err.message);
 								// Revert optimistic update...
 								k.setKeys(keyMap);
-								// c.setDefaultKeys(keyMap)
+								c.keys.setDefaultKeys(keyMap, false);
 							});
 					},
 					keyMap,
@@ -75,13 +122,13 @@ export const settingsUI = (c: Controller, back: () => void) => {
 							.setLocalKeys(newKeyMap)
 							.then(() => {
 								keyMap = newKeyMap;
-								// c.notify(...)
+								c.notify('It worked!');
 							})
-							.catch(() => {
-								// c.notify(...)
+							.catch((err) => {
+								c.notify(err.message);
 								// Revert optimistic update...
 								k.setKeys(keyMap);
-								// c.setDefaultKeys(localKeys)
+								c.keys.setDefaultKeys(keyMap, true);
 							});
 					},
 					keyMap,

@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import SvelteDisplay from './SvelteDisplay.svelte';
 import { mount } from 'svelte';
+import SvelteDisplay from './SvelteDisplay.svelte';
 
 /**
  * This example shows how to mount a svelte component into Oneput.

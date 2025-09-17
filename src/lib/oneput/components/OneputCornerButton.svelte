@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { commandIcon } from '$lib/ui.js';
+	import { commandIcon } from '$lib/oneput/shared/icons.js';
 	import { hideShowListener } from '../lib.js';
 
 	const handleClick = () => {

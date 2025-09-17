@@ -4,14 +4,12 @@ import { id as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
 	chevronRightIcon,
-	inputUI,
 	keyboardIcon,
-	menuHeaderUI,
-	menuItemWithIcon,
 	squareFunctionIcon,
 	tickIcon,
 	xIcon
-} from '$lib/ui.js';
+} from '$lib/oneput/shared/icons.js';
+import { inputUI, menuHeaderUI, menuItemWithIcon } from '$lib/ui.js';
 
 export const keybindingMenuItem: (params: {
 	id: string;

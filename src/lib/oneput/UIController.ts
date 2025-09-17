@@ -50,7 +50,7 @@ export class UIController {
 	 *
 	 * If setDefaultUI has not been called, the ui will be set to nothing.
 	 */
-	clearUI() {
+	clear() {
 		this.currentProps.inputUI = this.defaultUI?.input;
 		this.currentProps.menuUI = this.defaultUI?.menu;
 		this.currentProps.innerUI = this.defaultUI?.inner;
@@ -59,21 +59,14 @@ export class UIController {
 
 	private defaultUI?: DefaultUI;
 
-	setDefaultUI(defaultUI: DefaultUI) {
+	configureDefaultUI(defaultUI: DefaultUI) {
 		this.defaultUI = defaultUI;
 	}
 
-	applyDefaultUI() {
-		this.currentProps.inputUI = this.defaultUI?.input;
-		this.currentProps.menuUI = this.defaultUI?.menu;
-		this.currentProps.innerUI = this.defaultUI?.inner;
-		this.currentProps.outerUI = this.defaultUI?.outer;
-	}
-
-	setDefaultValues<T extends Record<string, unknown>>(values: T) {
-		if (this.defaultUI) {
+	setDefaultUI<T extends Record<string, unknown>>(values?: T) {
+		if (this.defaultUI && values) {
 			this.defaultUI.values = values;
-			this.applyDefaultUI();
 		}
+		this.clear();
 	}
 }

@@ -172,10 +172,20 @@ const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.menu.closeMenu();
 	});
-	c.ui.setDefaultValues<MyDefaultUIValues>({
+	c.ui.setDefaultUI<MyDefaultUIValues>({
 		menuHeader: 'Home'
 	});
-	const items = [
+	c.menu.setDefaultMenuItemsFn((input, menuItems) => {
+		return menuItems.filter((item) => {
+			return item.children?.some((child) => {
+				if (child.type === 'fchild') {
+					return child.textContent?.toLowerCase().includes(input.toLowerCase());
+				}
+				return false;
+			});
+		});
+	});
+	c.menu.setMenuItems([
 		menuItemWithIcon({
 			id: 'settings',
 			leftIcon: settingsIcon,
@@ -222,25 +232,14 @@ const rootUI = (c: Controller) => {
 				});
 			}
 		})
-	];
-	c.menu.setDefaultMenuItemsFn((input, menuItems) => {
-		return menuItems.filter((item) => {
-			return item.children?.some((child) => {
-				if (child.type === 'fchild') {
-					return child.textContent?.toLowerCase().includes(input.toLowerCase());
-				}
-				return false;
-			});
-		});
-	});
-	c.menu.setMenuItems(items);
+	]);
 };
 
 const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
-	c.ui.setInputUI(inputUI(c));
-	c.ui.setMenuUI({
-		header: menuHeaderUI({ title: 'Settings', exit: back })
+	c.ui.setDefaultUI<MyDefaultUIValues>({
+		menuHeader: 'Settings',
+		exit: back
 	});
 	c.menu.setMenuItems([
 		menuItemWithIcon({
@@ -270,12 +269,6 @@ export const setController = (c: Controller) => {
 	c.keys.setKeys(globalKeys);
 	c.keys.setKeys(localKeys, true);
 	const ui = new MyDefaultUI(c);
-	c.ui.setDefaultUI(ui);
-	c.ui.setDefaultValues<MyDefaultUIValues>({
-		menuHeader: 'Menu',
-		exit: () => {
-			c.menu.closeMenu();
-		}
-	});
+	c.ui.configureDefaultUI(ui);
 	rootUI(c);
 };

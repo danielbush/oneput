@@ -3,7 +3,7 @@
 	import OneputController from '$lib/oneput/components/OneputController.svelte';
 	import { setController } from '$lib/demo/live/app.js';
 	import '$lib/demo/styles.css';
-	import '$lib/oneput/oneput-defaults.css';
+	import '$lib/oneput/styles/oneput-defaults.css';
 	import OneputCornerButton from '$lib/oneput/components/OneputCornerButton.svelte';
 
 	// Pretend the code here could be something outside of svelte.

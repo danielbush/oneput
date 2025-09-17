@@ -170,17 +170,28 @@ export const menuHeaderUI: ({
 	};
 };
 
-export type MyDefaultUIValues = { exitAction?: () => void; menuHeader?: string };
+export type MyDefaultUIValues = {
+	exitAction?: () => void;
+	menuHeader?: string;
+	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
+};
 
 export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
-	constructor(private c: Controller) {}
+	constructor(
+		private c: Controller,
+		private _values: MyDefaultUIValues = {}
+	) {}
 
-	values: MyDefaultUIValues = {
-		exitAction: () => {
-			this.c.menu.closeMenu();
-		},
-		menuHeader: 'Menu'
-	};
+	setValues(values: MyDefaultUIValues) {
+		this._values = {
+			exitAction: () => {
+				this.c.menu.closeMenu();
+			},
+			menuHeader: 'Menu',
+			exitType: 'back',
+			...values
+		};
+	}
 
 	get input() {
 		return inputUI(this.c);
@@ -188,12 +199,13 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 	get menu() {
 		return {
 			header: menuHeaderUI({
-				title: this.values.menuHeader || 'Menu',
+				title: this._values.menuHeader || 'Menu',
 				exitAction:
-					this.values.exitAction ||
+					this._values.exitAction ||
 					(() => {
 						this.c.menu.closeMenu();
-					})
+					}),
+				type: this._values.exitType
 			})
 		};
 	}

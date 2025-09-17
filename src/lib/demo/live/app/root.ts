@@ -10,7 +10,8 @@ export const rootUI = (c: Controller) => {
 		c.menu.closeMenu();
 	});
 	c.ui.setDefaultUI<MyDefaultUIValues>({
-		menuHeader: 'Home'
+		menuHeader: 'Home',
+		exitType: 'exit'
 	});
 	c.menu.setDefaultMenuItemsFn((input, menuItems) => {
 		return menuItems.filter((item) => {

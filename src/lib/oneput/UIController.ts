@@ -1,7 +1,7 @@
 import type { FlexParams, OneputControllerProps } from './lib.js';
 
 export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
-	values?: V;
+	setValues?(values: V): void;
 	input?: OneputControllerProps['inputUI'];
 	menu?: OneputControllerProps['menuUI'];
 	inner?: OneputControllerProps['innerUI'];
@@ -65,7 +65,7 @@ export class UIController {
 
 	setDefaultUI<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
-			this.defaultUI.values = values;
+			this.defaultUI.setValues?.(values);
 		}
 		this.clear();
 	}

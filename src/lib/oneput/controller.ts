@@ -18,7 +18,7 @@ export class Controller {
 	constructor(private currentProps: OneputControllerProps) {
 		this.menu = MenuController.create(this.currentProps, this.events);
 		this.input = InputController.create(this.currentProps, this.events);
-		this.keys = KeysController.create(this.events, this);
+		this.keys = KeysController.create(this.events, this, this.menu.menuOpen);
 		this.ui = UIController.create(this.currentProps);
 	}
 

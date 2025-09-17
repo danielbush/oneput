@@ -16,21 +16,21 @@ export type KeyBindingMap = {
 };
 
 export class KeysController {
-	public static create(events: InternalEventEmitter, actionArg: Controller) {
-		return new KeysController(events, actionArg);
+	public static create(events: InternalEventEmitter, actionArg: Controller, menuOpen: boolean) {
+		return new KeysController(events, actionArg, menuOpen);
 	}
-	private menuOpen = false;
 
 	constructor(
 		private events: InternalEventEmitter,
 		private actionArg: Controller,
+		private menuOpen: boolean,
 		private unsubscribeGlobalKeys: () => void = () => {},
 		private unsubscribeLocalKeys: () => void = () => {}
 	) {
-		//
 		this.events.on<MenuOpenChangeEvent>('menu-open-change', (menuOpen: boolean) => {
 			this.menuOpen = menuOpen;
 		});
+		this.menuOpen = menuOpen;
 	}
 	/**
 	 * Only run globals when menu is closed.

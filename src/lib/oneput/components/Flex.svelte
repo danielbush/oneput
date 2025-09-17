@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FChild from './FChild.svelte';
-	import { type FChildParams, type FlexParams } from './lib.js';
+	import { type FChildParams, type FlexParams } from '../lib.js';
 
 	type Props = { class: string } & FlexParams;
 	let { class: topLevelClass, ...props }: Props = $props();

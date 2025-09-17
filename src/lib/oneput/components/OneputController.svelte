@@ -2,8 +2,8 @@
 	// Wraps Oneput and creates and exposes a controller that lets you
 	// programmatically control Oneput.
 	import Oneput from './Oneput.svelte';
-	import type { OneputControllerProps } from './lib.js';
-	import { Controller } from './controller.js';
+	import type { OneputControllerProps } from '../lib.js';
+	import { Controller } from '../controller.js';
 	import { onMount } from 'svelte';
 
 	let inputElement: HTMLInputElement | undefined = $state(undefined);

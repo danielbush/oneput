@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { defaultVoidElements, type FChildParams } from './lib.js';
+	import { defaultVoidElements, type FChildParams } from '../lib.js';
 
 	type Props = FChildParams;
 	let node: HTMLElement | null = $state(null);

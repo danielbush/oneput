@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { commandIcon } from '$lib/ui.js';
-	import { hideShowListener } from './lib.js';
+	import { hideShowListener } from '../lib.js';
 
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));

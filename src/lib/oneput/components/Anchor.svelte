@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Attachment } from 'svelte/attachments';
-	import { hideShowListener } from './lib.js';
+	import { hideShowListener } from '../lib.js';
 
 	let { children, id = 'oneput__command-bar' } = $props();
 

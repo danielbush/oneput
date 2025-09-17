@@ -6,7 +6,7 @@
 		type MenuItem,
 		type MenuItemAny,
 		type OneputProps
-	} from './lib.js';
+	} from '../lib.js';
 	let {
 		inputElement = $bindable(),
 		inputValue = $bindable(''),

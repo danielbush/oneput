@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { KeyBindingsController } from '$lib/oneput/plugins/menu/bindings/mod.js';
+import { KeyBindingsController } from '$lib/oneput/plugins/menu/bindings.js';
 import { menuItemWithIcon } from '$lib/ui.js';
 import { globalKeys, localKeys } from '../config/keys.js';
 import type { MyDefaultUIValues } from '../config/ui.js';

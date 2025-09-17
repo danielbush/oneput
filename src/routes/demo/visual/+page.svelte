@@ -82,8 +82,8 @@
 			<h2>Alert</h2>
 			<Oneput
 				menuOpen={true}
-				menuItems={[
-					{
+				replaceUI={{
+					menu: {
 						id: 'alert',
 						type: 'vflex',
 						classes: ['oneput__menu-body-content'],
@@ -107,7 +107,7 @@
 							}
 						]
 					}
-				]}
+				}}
 				inputUI={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,
@@ -125,8 +125,8 @@
 			<h2>Confirm</h2>
 			<Oneput
 				menuOpen={true}
-				menuItems={[
-					{
+				replaceUI={{
+					menu: {
 						id: 'alert',
 						type: 'vflex',
 						classes: ['oneput__menu-body-content'],
@@ -164,7 +164,7 @@
 							}
 						]
 					}
-				]}
+				}}
 				inputUI={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,

@@ -7,6 +7,7 @@
 		type MenuItemAny,
 		type OneputProps
 	} from '../lib.js';
+	import { fade } from 'svelte/transition';
 	let {
 		inputElement = $bindable(),
 		inputValue = $bindable(''),
@@ -78,34 +79,38 @@
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">
 				{#if props.replaceUI?.menu}
-					<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
-				{:else}
-					{#if props.menuUI?.header}
-						<Flex class="oneput__menu-header" {...props.menuUI.header} />
-					{/if}
-					<div class="oneput__menu-body">
-						{#each props.menuItems || [] as item, index (item.id)}
-							{#if item.ignored}
-								<Flex class={item.class ?? ''} {...item} />
-							{:else}
-								<Flex
-									{...item}
-									class={item.class ?? 'oneput__menu-item'}
-									classes={[
-										index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
-										...(item.classes ?? [])
-									]}
-									attr={rewriteAttr(index, item.attr, item.action)}
-									attachments={{
-										[createAttachmentKey()]: scrollIntoView(index)
-									}}
-								/>
-							{/if}
-						{/each}
+					<div in:fade={{ duration: 1000 }}>
+						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
 					</div>
-					{#if props.menuUI?.footer}
-						<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
-					{/if}
+				{:else}
+					<div in:fade={{ duration: 1000 }}>
+						{#if props.menuUI?.header}
+							<Flex class="oneput__menu-header" {...props.menuUI.header} />
+						{/if}
+						<div class="oneput__menu-body">
+							{#each props.menuItems || [] as item, index (item.id)}
+								{#if item.ignored}
+									<Flex class={item.class ?? ''} {...item} />
+								{:else}
+									<Flex
+										{...item}
+										class={item.class ?? 'oneput__menu-item'}
+										classes={[
+											index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
+											...(item.classes ?? [])
+										]}
+										attr={rewriteAttr(index, item.attr, item.action)}
+										attachments={{
+											[createAttachmentKey()]: scrollIntoView(index)
+										}}
+									/>
+								{/if}
+							{/each}
+						</div>
+						{#if props.menuUI?.footer}
+							<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
+						{/if}
+					</div>
 				{/if}
 			</section>
 		</div>

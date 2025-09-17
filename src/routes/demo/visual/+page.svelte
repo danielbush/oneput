@@ -14,6 +14,9 @@
 	onMount(() => {
 		refreshIcons();
 	});
+
+	let toggleConfirm = $state(true);
+	let toggleAlert = $state(true);
 </script>
 
 <svelte:head>
@@ -80,34 +83,43 @@
 		</section>
 		<section class="demo-example">
 			<h2>Alert</h2>
+			<button onclick={() => (toggleAlert = !toggleAlert)}>Toggle Alert</button>
 			<Oneput
 				menuOpen={true}
-				replaceUI={{
-					menu: {
-						id: 'alert',
-						type: 'vflex',
-						classes: ['oneput__menu-body-content'],
-						children: [
-							{
-								id: 'alert-title',
-								type: 'fchild',
-								innerHTMLUnsafe: '<h2>Alert Title!</h2>'
-							},
-							{
-								id: 'alert-message',
-								type: 'fchild',
-								innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
-							},
-							{
-								id: 'alert-button',
-								type: 'fchild',
-								tag: 'button',
-								classes: ['oneput__primary-button'],
-								textContent: 'OK'
+				menuItems={ui.menuItems1()}
+				replaceUI={toggleAlert
+					? undefined
+					: {
+							menu: {
+								id: 'alert',
+								type: 'vflex',
+								classes: ['oneput__menu-body-content'],
+								children: [
+									{
+										id: 'alert-title',
+										type: 'fchild',
+										innerHTMLUnsafe: '<h2>Alert Title!</h2>'
+									},
+									{
+										id: 'alert-message',
+										type: 'fchild',
+										innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
+									},
+									{
+										id: 'alert-button',
+										type: 'fchild',
+										tag: 'button',
+										classes: ['oneput__primary-button'],
+										textContent: 'OK',
+										attr: {
+											onclick: () => {
+												toggleAlert = true;
+											}
+										}
+									}
+								]
 							}
-						]
-					}
-				}}
+						}}
 				inputUI={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,
@@ -123,48 +135,62 @@
 		</section>
 		<section class="demo-example">
 			<h2>Confirm</h2>
+			<button onclick={() => (toggleConfirm = !toggleConfirm)}>Toggle Confirm</button>
 			<Oneput
 				menuOpen={true}
-				replaceUI={{
-					menu: {
-						id: 'alert',
-						type: 'vflex',
-						classes: ['oneput__menu-body-content'],
-						children: [
-							{
-								id: 'alert-title',
-								type: 'fchild',
-								innerHTMLUnsafe: '<h2>Confirm?</h2>'
-							},
-							{
-								id: 'alert-message',
-								type: 'fchild',
-								innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
-							},
-							{
-								id: 'confirm-button-group',
-								type: 'hflex',
-								style: { gap: '1rem' },
+				menuItems={ui.menuItems1()}
+				replaceUI={toggleConfirm
+					? undefined
+					: {
+							menu: {
+								id: 'alert',
+								type: 'vflex',
+								classes: ['oneput__menu-body-content'],
 								children: [
 									{
-										id: 'confirm-yes-button',
+										id: 'alert-title',
 										type: 'fchild',
-										tag: 'button',
-										classes: ['oneput__primary-button'],
-										textContent: 'Yes'
+										innerHTMLUnsafe: '<h2>Confirm?</h2>'
 									},
 									{
-										id: 'confirm-no-button',
+										id: 'alert-message',
 										type: 'fchild',
-										tag: 'button',
-										classes: ['oneput__primary-button'],
-										textContent: 'No'
+										innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
+									},
+									{
+										id: 'confirm-button-group',
+										type: 'hflex',
+										style: { gap: '1rem' },
+										children: [
+											{
+												id: 'confirm-yes-button',
+												type: 'fchild',
+												tag: 'button',
+												classes: ['oneput__primary-button'],
+												textContent: 'Yes',
+												attr: {
+													onclick: () => {
+														toggleConfirm = true;
+													}
+												}
+											},
+											{
+												id: 'confirm-no-button',
+												type: 'fchild',
+												tag: 'button',
+												classes: ['oneput__primary-button'],
+												textContent: 'No',
+												attr: {
+													onclick: () => {
+														toggleConfirm = true;
+													}
+												}
+											}
+										]
 									}
 								]
 							}
-						]
-					}
-				}}
+						}}
 				inputUI={{
 					left: ui.inputLeft1,
 					right: ui.inputRight1,

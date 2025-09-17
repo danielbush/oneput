@@ -1,10 +1,9 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { searchIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/oneput/shared/icons.js';
 import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
-import type { MyDefaultUIValues } from '../config/ui.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
 import { settingsUI } from './settings.js';
-import { menuItemWithIcon } from '$lib/ui.js';
 
 export const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {

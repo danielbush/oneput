@@ -1,8 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/menu/bindings.js';
-import { menuItemWithIcon } from '$lib/ui.js';
 import { globalKeys, localKeys } from '../config/keys.js';
-import type { MyDefaultUIValues } from '../config/ui.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 
 export const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);

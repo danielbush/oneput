@@ -124,7 +124,7 @@ export const defaultVoidElements = new Set([
 /**
  * Generate a unique id.
  */
-export function id(): string {
+export function randomId(): string {
 	if (!window.crypto.randomUUID) {
 		window.crypto.randomUUID = function () {
 			// RFC4122 version 4 UUID generator using crypto.getRandomValues

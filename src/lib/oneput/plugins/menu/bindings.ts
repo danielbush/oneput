@@ -1,6 +1,7 @@
+import { inputUI, menuHeaderUI, menuItemWithIcon } from '$lib/demo/live/config/ui.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
-import { id as randomId } from '$lib/oneput/lib.js';
+import { randomId as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
 	chevronRightIcon,
@@ -9,7 +10,6 @@ import {
 	tickIcon,
 	xIcon
 } from '$lib/oneput/shared/icons.js';
-import { inputUI, menuHeaderUI, menuItemWithIcon } from '$lib/ui.js';
 
 export const keybindingMenuItem: (params: {
 	id: string;

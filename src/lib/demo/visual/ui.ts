@@ -2,7 +2,7 @@
  * Some fake ui data we can use to populate oneput for demos.
  */
 
-import { id, type FlexParams, type MenuItemAny } from '$lib/oneput/lib.js';
+import { randomId, type FlexParams, type MenuItemAny } from '$lib/oneput/lib.js';
 import type { appState } from './state.js';
 
 export const menuHeader1: FlexParams = {
@@ -10,20 +10,25 @@ export const menuHeader1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
-			id: id(),
+			id: randomId(),
 			type: 'fchild',
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
 			innerHTMLUnsafe: '<i data-lucide="chevron-left"></i>'
 		},
-		{ id: id(), type: 'fchild', classes: ['oneput__menu-item-header'], textContent: 'Menu Header' },
 		{
-			id: id(),
+			id: randomId(),
+			type: 'fchild',
+			classes: ['oneput__menu-item-header'],
+			textContent: 'Menu Header'
+		},
+		{
+			id: randomId(),
 			type: 'hflex',
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'Options' },
@@ -31,7 +36,7 @@ export const menuHeader1: FlexParams = {
 					innerHTMLUnsafe: '<i data-lucide="x"></i>'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'Options' },
@@ -45,22 +50,22 @@ export const menuHeader1: FlexParams = {
 };
 
 export const menuItems1: () => MenuItemAny[] = () => {
-	const prefix = id();
+	const prefix = randomId();
 	const items: MenuItemAny[] = [
 		{
 			id: 'menu-item-1',
 			type: 'hflex',
 			tag: 'button',
 			children: [
-				{ id: id(), type: 'fchild', classes: ['oneput__icon'], textContent: '📆' },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'], textContent: '📆' },
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__menu-item-body'],
 					textContent: 'Menu Item 1'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
@@ -72,25 +77,25 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			type: 'hflex',
 			tag: 'button',
 			children: [
-				{ id: id(), type: 'fchild', classes: ['oneput__icon'], textContent: '🍔' },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'], textContent: '🍔' },
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__menu-item-body'],
 					textContent: 'Menu Item 2'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'hflex',
 					children: [
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 							classes: ['oneput__kbd']
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__icon'],
 							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
@@ -104,9 +109,9 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			type: 'hflex',
 			tag: 'button',
 			children: [
-				{ id: id(), type: 'fchild', classes: ['oneput__icon'] },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'] },
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__menu-item-body'],
 					textContent: 'Plain Item 1...'
@@ -114,7 +119,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			]
 		},
 		{
-			id: id(),
+			id: randomId(),
 			tag: 'hr',
 			type: 'hflex',
 			ignored: true,
@@ -126,24 +131,24 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			tag: 'div',
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					style: { alignSelf: 'flex-start' },
 					innerHTMLUnsafe: '<i data-lucide="search"></i>'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__menu-item-body'],
 					textContent: 'Interactive menu item'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'hflex',
 					children: [
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'button',
 							attr: { type: 'button', title: 'Play' },
@@ -151,7 +156,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							innerHTMLUnsafe: '<i data-lucide="play"></i>'
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'button',
 							attr: { type: 'button', title: 'Pause' },
@@ -159,7 +164,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							innerHTMLUnsafe: '<i data-lucide="pause"></i>'
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'button',
 							attr: { type: 'button', title: 'Stop' },
@@ -176,21 +181,21 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			tag: 'button',
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					style: { alignSelf: 'flex-start' },
 					textContent: '🍔'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'vflex',
 					classes: ['oneput__menu-item-body'],
 					children: [
-						{ id: id(), type: 'fchild', textContent: 'Complex menu item' },
-						{ id: id(), type: 'fchild', tag: 'hr', classes: ['oneput__menu-divider'] },
+						{ id: randomId(), type: 'fchild', textContent: 'Complex menu item' },
+						{ id: randomId(), type: 'fchild', tag: 'hr', classes: ['oneput__menu-divider'] },
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__menu-item-description'],
 							textContent:
@@ -199,7 +204,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					]
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					style: { alignSelf: 'flex-start' },
@@ -213,45 +218,45 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			tag: 'div',
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					style: { alignSelf: 'flex-start' },
 					textContent: '🍔'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'vflex',
 					classes: ['oneput__menu-item-body'],
 					children: [
-						{ id: id(), type: 'fchild', textContent: 'Interactive complex menu item' },
+						{ id: randomId(), type: 'fchild', textContent: 'Interactive complex menu item' },
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'hr',
 							classes: ['oneput__menu-divider'],
 							style: { padding: '0' }
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'hflex',
 							style: { gap: '0.3rem' },
 							children: [
 								{
-									id: id(),
+									id: randomId(),
 									type: 'fchild',
 									classes: ['oneput__menu-item-description'],
 									textContent:
 										'This is some sort of description for this menu item. This is some sort of description for this menu item.  This is some sort of description for this menu item.'
 								},
 								{
-									id: id(),
+									id: randomId(),
 									type: 'hflex',
 									classes: ['oneput__icon-button-group'],
 									style: { alignSelf: 'flex-start' },
 									children: [
 										{
-											id: id(),
+											id: randomId(),
 											type: 'fchild',
 											tag: 'button',
 											attr: { type: 'button', title: 'database' },
@@ -259,7 +264,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 											innerHTMLUnsafe: '<i data-lucide="info"></i>'
 										},
 										{
-											id: id(),
+											id: randomId(),
 											type: 'fchild',
 											tag: 'button',
 											attr: { type: 'button', title: 'share' },
@@ -275,19 +280,19 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			]
 		},
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			class: 'oneput__menu-divider',
 			ignored: true,
 			children: [
-				{ id: id(), type: 'fchild', classes: ['oneput__spacer'] },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__spacer'] },
 				{
-					id: id(),
+					id: randomId(),
 					type: 'vflex',
 					classes: ['oneput__menu-divider-body'],
 					children: [
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							textContent: 'Divider title',
 							classes: ['oneput__menu-divider-title']
@@ -301,9 +306,9 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			type: 'hflex',
 			tag: 'button',
 			children: [
-				{ id: id(), type: 'fchild', classes: ['oneput__icon'] },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'] },
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__menu-item-body'],
 					textContent: 'Plain Item 1...'
@@ -315,9 +320,9 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			type: 'hflex',
 			tag: 'button',
 			children: [
-				{ id: id(), type: 'fchild', classes: ['oneput__icon'] },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'] },
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__menu-item-body'],
 					textContent: 'Plain Item 2...'
@@ -338,7 +343,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					classes: ['oneput__checkbox']
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'label',
 					attr: {
@@ -363,7 +368,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					classes: ['oneput__checkbox']
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'label',
 					attr: {
@@ -385,12 +390,12 @@ export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 	children: [
 		// Here we use an hflex as a child:
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group'],
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'database' },
@@ -398,7 +403,7 @@ export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					innerHTMLUnsafe: '<i data-lucide="database"></i>'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'share' },
@@ -408,12 +413,12 @@ export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 			]
 		},
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group-right'],
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'zap' },
@@ -439,7 +444,7 @@ export const inner1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			children: [
 				// Here we're using an hflex to create a breadcrumb-like widget.  It may
@@ -447,13 +452,13 @@ export const inner1: FlexParams = {
 				// hflex/vflex/fchild system.  It's up to you.  The hflex/vflex/fchild
 				// system is for laying out the skeleton of oneput.
 				{
-					id: id(),
+					id: randomId(),
 					type: 'hflex',
 					classes: ['oneput__icon-button-group'],
 					style: { gap: '0.1rem' }, // or a class
 					children: [
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
@@ -461,13 +466,13 @@ export const inner1: FlexParams = {
 							innerHTMLUnsafe: 'div'
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__icon'],
 							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
@@ -475,13 +480,13 @@ export const inner1: FlexParams = {
 							innerHTMLUnsafe: '<i data-lucide="ellipsis"></i>'
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__icon'],
 							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
 						},
 						{
-							id: id(),
+							id: randomId(),
 							type: 'fchild',
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
@@ -493,23 +498,23 @@ export const inner1: FlexParams = {
 			]
 		},
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			children: []
 		},
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group-right'],
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					style: { whiteSpace: 'pre' },
 					textContent: '-- NORMAL --'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'commit' },
@@ -527,12 +532,12 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 	children: [
 		// Here we use an hflex as a child:
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group'],
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'database' },
@@ -540,7 +545,7 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					innerHTMLUnsafe: '<i data-lucide="database"></i>'
 				},
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: { type: 'button', title: 'share' },
@@ -550,12 +555,12 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 			]
 		},
 		{
-			id: id(),
+			id: randomId(),
 			type: 'hflex',
 			classes: ['oneput__icon-button-group-right'],
 			children: [
 				{
-					id: id(),
+					id: randomId(),
 					type: 'fchild',
 					tag: 'button',
 					attr: {
@@ -584,7 +589,7 @@ export const inputLeft1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
-			id: id(),
+			id: randomId(),
 			type: 'fchild',
 			tag: 'button',
 			attr: { type: 'button', title: 'Search' },
@@ -599,7 +604,7 @@ export const inputOuterLeft1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
-			id: id(),
+			id: randomId(),
 			type: 'fchild',
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
@@ -614,7 +619,7 @@ export const inputOuterRight1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
-			id: id(),
+			id: randomId(),
 			type: 'fchild',
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
@@ -629,7 +634,7 @@ export const inputRight1: FlexParams = {
 	type: 'hflex',
 	children: [
 		{
-			id: id(),
+			id: randomId(),
 			type: 'fchild',
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
@@ -637,7 +642,7 @@ export const inputRight1: FlexParams = {
 			innerHTMLUnsafe: '<i data-lucide="chevron-up"></i>'
 		},
 		{
-			id: id(),
+			id: randomId(),
 			type: 'fchild',
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },

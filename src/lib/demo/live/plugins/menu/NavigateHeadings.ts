@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { id } from '$lib/oneput/lib.js';
-import { menuHeaderUI, menuItemNoIcon } from '$lib/ui.js';
+import { randomId } from '$lib/oneput/lib.js';
+import { menuHeaderUI, menuItemNoIcon } from '../../config/ui.js';
 
 /**
  * Demonstates how we navigate the headings in an html document using Oneput.
@@ -50,7 +50,7 @@ export class NavigateHeadings {
 		this.controller.menu.setMenuItems(
 			this.filteredHeadings.map((h) =>
 				menuItemNoIcon({
-					id: id(),
+					id: randomId(),
 					text: h.textContent,
 					action: () => {
 						h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });

@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { menuItemWithIcon } from '$lib/ui.js';
+import { menuItemWithIcon } from '../../config/ui.js';
 import { TestService } from '../../lib/TestService.js';
 
 export class AsyncSearchExample {

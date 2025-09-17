@@ -7,7 +7,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
 	c.ui.setDefaultUI<MyDefaultUIValues>({
 		menuHeader: 'Settings',
-		exit: back
+		exitAction: back
 	});
 	c.menu.setMenuItems([
 		menuItemWithIcon({

@@ -113,7 +113,7 @@ export class KeyBindingsController {
 		this.controller.setBackBinding(this.back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
 		this.controller.ui.setMenuUI({
-			header: menuHeaderUI({ title: 'Key bindings', exit: this.back })
+			header: menuHeaderUI({ title: 'Key bindings', exitAction: this.back })
 		});
 		this.controller.menu.setMenuItems(
 			Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
@@ -139,7 +139,7 @@ export class KeyBindingsController {
 		this.controller.ui.setPlaceholder();
 		this.controller.input.setInputValue('');
 		this.controller.ui.setMenuUI({
-			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exit: back })
+			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exitAction: back })
 		});
 		this.controller.menu.setMenuItems([
 			menuItemWithIcon({

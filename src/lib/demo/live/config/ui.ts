@@ -130,18 +130,18 @@ export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 /**
  * Provides 2 types of header for open menus: one with a back button (type='back') or one with an exit button (type='exit').
  *
- * @param options.exit - The function to call when the back or exit button is clicked.
+ * @param options.exitAction - The function to call when the back or exit button is clicked.
  * @param options.type - The type of header to use.
  */
 export const menuHeaderUI: ({
 	title,
-	exit,
+	exitAction,
 	type
 }: {
 	title: string;
-	exit: () => void;
+	exitAction: () => void;
 	type?: 'back' | 'exit';
-}) => FlexParams = ({ title, exit, type = 'back' }) => {
+}) => FlexParams = ({ title, exitAction: exit, type = 'back' }) => {
 	return {
 		id: 'bindings-header',
 		type: 'hflex',
@@ -170,12 +170,13 @@ export const menuHeaderUI: ({
 	};
 };
 
-export type MyDefaultUIValues = { exit?: () => void; menuHeader?: string };
+export type MyDefaultUIValues = { exitAction?: () => void; menuHeader?: string };
 
 export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 	constructor(private c: Controller) {}
-	values = {
-		exit: () => {
+
+	values: MyDefaultUIValues = {
+		exitAction: () => {
 			this.c.menu.closeMenu();
 		},
 		menuHeader: 'Menu'
@@ -188,8 +189,8 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 		return {
 			header: menuHeaderUI({
 				title: this.values.menuHeader || 'Menu',
-				exit:
-					this.values.exit ||
+				exitAction:
+					this.values.exitAction ||
 					(() => {
 						this.c.menu.closeMenu();
 					})

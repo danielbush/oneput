@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
-import { KeyBindingsController } from '$lib/oneput/plugins/menu/bindings.js';
+import { KeyBindingsController } from '$lib/oneput/plugins/menu/editBindings.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 
 const testKeyService = {

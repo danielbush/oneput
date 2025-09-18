@@ -28,6 +28,7 @@ const testKeyService = {
 	},
 	toggleSimulateError: (on: boolean) => {
 		testKeyService.simulateError = on;
+		console.log('simulate error when storing keybindings set to', on);
 	}
 };
 
@@ -44,8 +45,12 @@ export const settingsUI = (c: Controller, back: () => void) => {
 			tag: 'button',
 			attr: { type: 'button' },
 			action: () => {
-				testKeyService.toggleSimulateError(!testKeyService.simulateError);
-				settingsUI(c, back);
+				const checkbox: HTMLInputElement = document.querySelector(
+					'#simulate-error-storing-bindings'
+				)! as HTMLInputElement;
+				const enable = !testKeyService.simulateError;
+				testKeyService.toggleSimulateError(enable);
+				checkbox.checked = enable;
 			},
 			children: [
 				{
@@ -55,10 +60,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 					attr: {
 						type: 'checkbox',
 						title: 'simulate-error-storing-bindings',
-						checked: testKeyService.simulateError,
-						onchange: (evt) => {
-							testKeyService.toggleSimulateError((evt.target as HTMLInputElement).checked);
-						}
+						checked: testKeyService.simulateError
 					},
 					classes: ['oneput__checkbox']
 				},

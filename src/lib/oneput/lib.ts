@@ -59,6 +59,7 @@ export type FlexParams = {
 	voidElements?: Set<string | undefined>;
 	action?: (c: Controller) => void;
 	attachments?: Record<symbol, (element: HTMLElement) => void>;
+	onMount?: (node: HTMLElement) => void | (() => void);
 };
 
 export type MenuItem = FlexParams & {

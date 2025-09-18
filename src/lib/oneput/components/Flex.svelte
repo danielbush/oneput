@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FChild from './FChild.svelte';
 	import { type FChildParams, type FlexParams } from '../lib.js';
+	import { onMount } from 'svelte';
 
 	type Props = { class: string } & FlexParams;
 	let { class: topLevelClass, ...props }: Props = $props();
@@ -13,6 +14,13 @@
 			return tmp.style.cssText;
 		}
 	}
+
+	let node: HTMLElement | null = $state(null);
+	onMount(() => {
+		if (props.onMount) {
+			return props.onMount(node!);
+		}
+	});
 </script>
 
 {#snippet flex(params: FlexParams, nested: boolean = false)}
@@ -31,6 +39,7 @@
 	{:else}
 		<svelte:element
 			this={params.tag || 'div'}
+			bind:this={node}
 			id={params.id}
 			style={params.style && createStyleAttribute(params.style)}
 			class={[

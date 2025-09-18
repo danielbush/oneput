@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
-import { randomId } from '$lib/oneput/lib.js';
+import { randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/menu/editBindings.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 
@@ -32,6 +32,84 @@ const testKeyService = {
 	}
 };
 
+class CheckboxMenuItem implements MenuItem {
+	static create(params: {
+		action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
+		textContent: string;
+		checked: boolean;
+	}): CheckboxMenuItem {
+		return new CheckboxMenuItem(params);
+	}
+
+	id: string;
+	inputId: string;
+	inputElement?: HTMLInputElement;
+	type = 'hflex' as const;
+	tag = 'button';
+	attr = { type: 'button' };
+	#action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
+	children: FlexParams['children'];
+
+	constructor(params: {
+		action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
+		textContent: string;
+		checked: boolean;
+	}) {
+		this.id = randomId();
+		this.inputId = randomId();
+		this.#action = params.action;
+		this.children = [
+			{
+				id: this.inputId,
+				type: 'fchild',
+				tag: 'input',
+				attr: {
+					type: 'checkbox',
+					title: params.textContent,
+					checked: params.checked,
+					onclick: (event: Event) => {
+						event.preventDefault();
+					}
+				},
+				classes: ['oneput__checkbox']
+			},
+			{
+				id: randomId(),
+				type: 'fchild',
+				tag: 'label',
+				attr: {
+					for: this.inputId,
+					onclick: (event: Event) => {
+						event.preventDefault();
+					}
+				},
+				classes: ['oneput__menu-item-body'],
+				textContent: params.textContent
+			}
+		];
+	}
+
+	onMount = (node: HTMLElement) => {
+		this.inputElement = node.querySelector(`#${this.inputId}`) as HTMLInputElement;
+	};
+
+	action = (c: Controller) => {
+		if (!this.inputElement) {
+			return;
+		}
+		this.inputElement.checked = !this.inputElement.checked;
+		this.#action(c, this.inputElement.checked, this.inputElement!);
+	};
+}
+
+function checkboxMenuItem(params: {
+	action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
+	textContent: string;
+	checked: boolean;
+}): CheckboxMenuItem {
+	return CheckboxMenuItem.create(params);
+}
+
 export const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
 	c.ui.setDefaultUI<MyDefaultUIValues>({
@@ -39,43 +117,13 @@ export const settingsUI = (c: Controller, back: () => void) => {
 		exitAction: back
 	});
 	c.menu.setMenuItems([
-		{
-			id: 'toggle-simulate-error',
-			type: 'hflex',
-			tag: 'button',
-			attr: { type: 'button' },
-			action: () => {
-				const checkbox: HTMLInputElement = document.querySelector(
-					'#simulate-error-storing-bindings'
-				)! as HTMLInputElement;
-				const enable = !testKeyService.simulateError;
-				testKeyService.toggleSimulateError(enable);
-				checkbox.checked = enable;
-			},
-			children: [
-				{
-					id: 'simulate-error-storing-bindings',
-					type: 'fchild',
-					tag: 'input',
-					attr: {
-						type: 'checkbox',
-						title: 'simulate-error-storing-bindings',
-						checked: testKeyService.simulateError
-					},
-					classes: ['oneput__checkbox']
-				},
-				{
-					id: randomId(),
-					type: 'fchild',
-					tag: 'label',
-					attr: {
-						for: 'simulate-error-storing-bindings'
-					},
-					classes: ['oneput__menu-item-body'],
-					textContent: 'Toggle simulate error storing bindings'
-				}
-			]
-		},
+		checkboxMenuItem({
+			textContent: 'Toggle simulate error storing bindings',
+			checked: testKeyService.simulateError,
+			action: (c, checked) => {
+				testKeyService.toggleSimulateError(checked);
+			}
+		}),
 		menuItemWithIcon({
 			id: 'global-keys',
 			text: 'Set global default key bindings...',

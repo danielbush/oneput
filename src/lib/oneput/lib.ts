@@ -143,7 +143,7 @@ export function randomId(): string {
 			return `${hexBytes.slice(0, 4).join('')}-${hexBytes.slice(4, 6).join('')}-${hexBytes.slice(6, 8).join('')}-${hexBytes.slice(8, 10).join('')}-${hexBytes.slice(10, 16).join('')}`;
 		};
 	}
-	return crypto.randomUUID();
+	return 'id-' + crypto.randomUUID();
 }
 
 export function hideShowListener(show: boolean): Attachment<HTMLElement> {

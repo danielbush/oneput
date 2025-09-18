@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
-	import {
-		type InputChangeEvent,
-		type MenuItem,
-		type MenuItemAny,
-		type OneputProps
-	} from '../lib.js';
+	import { type InputChangeEvent, type OneputProps } from '../lib.js';
 	import { fade } from 'svelte/transition';
 	let {
 		inputElement = $bindable(),
@@ -16,37 +11,6 @@
 		controller,
 		...props
 	}: OneputProps = $props();
-	function rewriteAttr(
-		index: number,
-		attr: MenuItemAny['attr'],
-		action?: MenuItem['action']
-	): MenuItemAny['attr'] {
-		const newAttr: MenuItemAny['attr'] = {
-			...attr,
-			onpointerenter: (event: Event) => {
-				// Inject menu item focus handling...
-				menuItemFocus = index;
-				menuItemFocusOrigin = 'pointer';
-				// ...then run any client onpointerenter handlers.
-				if (typeof attr?.onpointerenter === 'function') {
-					attr.onpointerenter(event);
-				}
-			}
-		};
-		if (action) {
-			newAttr.onpointerup = (event: Event) => {
-				// Run the MenuItem['action'].
-				// See POINTER_UP .
-				if (controller) {
-					action(controller);
-				}
-				if (typeof attr?.onpointerup === 'function') {
-					attr.onpointerup(event);
-				}
-			};
-		}
-		return newAttr;
-	}
 
 	$effect(() => {
 		props.onMenuOpenChange?.(props.menuOpen ?? false);
@@ -99,7 +63,28 @@
 											index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
 											...(item.classes ?? [])
 										]}
-										attr={rewriteAttr(index, item.attr, item.action)}
+										attr={{
+											...item.attr,
+											onpointerenter: (event: Event) => {
+												// Inject menu item focus handling...
+												menuItemFocus = index;
+												menuItemFocusOrigin = 'pointer';
+												// ...then run any client onpointerenter handlers.
+												if (typeof item.attr?.onpointerenter === 'function') {
+													item.attr.onpointerenter(event);
+												}
+											},
+											onpointerup: (event: Event) => {
+												// Run the MenuItem['action'].
+												// See POINTER_UP .
+												if (controller) {
+													item.action?.(controller);
+												}
+												if (typeof item.attr?.onpointerup === 'function') {
+													item.attr.onpointerup(event);
+												}
+											}
+										}}
 										attachments={{
 											[createAttachmentKey()]: scrollIntoView(index)
 										}}

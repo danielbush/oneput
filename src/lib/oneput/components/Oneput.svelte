@@ -9,6 +9,8 @@
 		menuItemFocus = $bindable(0),
 		menuItemFocusOrigin = $bindable(undefined),
 		controller,
+		injectDuration = 300,
+		replaceDuration = 300,
 		...props
 	}: OneputProps = $props();
 
@@ -43,11 +45,11 @@
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">
 				{#if props.replaceUI?.menu}
-					<div in:fade={{ duration: 1000 }}>
+					<div in:fade={{ duration: replaceDuration }}>
 						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
 					</div>
 				{:else}
-					<div in:fade={{ duration: 1000 }}>
+					<div in:fade={{ duration: replaceDuration }}>
 						{#if props.menuUI?.header}
 							<Flex class="oneput__menu-header" {...props.menuUI.header} />
 						{/if}
@@ -101,7 +103,7 @@
 		</div>
 	{/if}
 	{#if props.injectUI?.inner}
-		<section in:fade={{ duration: 1000 }} class="oneput__inject-area">
+		<section in:fade={{ duration: injectDuration }} class="oneput__inject-area">
 			<Flex class="oneput__inject" {...props.injectUI.inner} />
 		</section>
 	{/if}

@@ -31,10 +31,10 @@ class Notification {
 	}
 
 	show(params: NotificationParams = {}) {
+		if (this.timeoutHandle) {
+			clearTimeout(this.timeoutHandle);
+		}
 		if (params.duration) {
-			if (this.timeoutHandle) {
-				clearTimeout(this.timeoutHandle);
-			}
 			this.timeoutHandle = setTimeout(() => {
 				this.currentProps.injectUI = undefined;
 			}, params.duration);

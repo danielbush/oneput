@@ -141,7 +141,9 @@ export class KeyBindingsController {
 	 * UI for managing a set of action bindings.
 	 */
 	private actionsUI = () => {
-		this.reloadUI = this.actionsUI;
+		this.reloadUI = () => {
+			this.actionsUI();
+		};
 		this.controller.setBackBinding(this.back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
 		this.controller.ui.setMenuUI({
@@ -199,11 +201,6 @@ export class KeyBindingsController {
 	};
 
 	private captureBindingUI(actionId: string) {
-		this.reloadUI = () => {
-			// Reload using the parent ui.
-			// This initiates a capture.
-			this.actionUI(actionId);
-		};
 		const { accept, reject } = this.startKeyCapture(actionId);
 		this.controller.ui.setInputUI({
 			right: {

@@ -36,7 +36,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 							.setGlobalKeys(newKeyMap)
 							.then(() => {
 								keyMap = newKeyMap;
-								c.notify('It worked!');
+								c.notify('It worked!', { duration: 3000 });
 							})
 							.catch((err) => {
 								c.notify(err.message);
@@ -68,7 +68,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 							.setLocalKeys(newKeyMap)
 							.then(() => {
 								keyMap = newKeyMap;
-								c.notify('It worked!');
+								c.notify('It worked!', { duration: 3000 });
 							})
 							.catch((err) => {
 								c.notify(err.message);

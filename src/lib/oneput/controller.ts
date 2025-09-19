@@ -6,6 +6,10 @@ import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { xIcon } from './shared/icons.js';
 
+type NotificationParams = {
+	duration?: number;
+};
+
 class Notification {
 	static create(currentProps: Controller['currentProps'], message: string) {
 		return new Notification(currentProps, message);
@@ -13,10 +17,19 @@ class Notification {
 
 	constructor(
 		private currentProps: Controller['currentProps'],
-		private message: string
+		private message: string,
+		private timeoutHandle: ReturnType<typeof setTimeout> | null = null
 	) {}
 
-	show() {
+	show(params: NotificationParams = {}) {
+		if (params.duration) {
+			if (this.timeoutHandle) {
+				clearTimeout(this.timeoutHandle);
+			}
+			this.timeoutHandle = setTimeout(() => {
+				this.currentProps.injectUI = undefined;
+			}, params.duration);
+		}
 		this.currentProps.injectUI = {
 			inner: {
 				id: randomId(),
@@ -85,7 +98,7 @@ export class Controller {
 		}
 	}
 
-	notify(message: string) {
-		Notification.create(this.currentProps, message).show();
+	notify(message: string, params: NotificationParams = {}) {
+		Notification.create(this.currentProps, message).show(params);
 	}
 }

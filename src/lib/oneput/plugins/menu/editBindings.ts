@@ -97,7 +97,7 @@ const toBinding = (
 export class KeyBindingsController {
 	static create(params: {
 		controller: Controller;
-		onChange: (keyMap: KeyBindingMap) => void;
+		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		keyMap: KeyBindingMap;
 		local: boolean;
 		back: () => void;
@@ -106,14 +106,14 @@ export class KeyBindingsController {
 	}
 
 	private controller: Controller;
-	private onChange: (keyMap: KeyBindingMap) => void;
+	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	private keyMap: KeyBindingMap;
 	private local: boolean;
 	private back: () => void;
 
 	private constructor(params: {
 		controller: Controller;
-		onChange: (keyMap: KeyBindingMap) => void;
+		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		keyMap: KeyBindingMap;
 		local: boolean;
 		back: () => void;
@@ -281,13 +281,20 @@ export class KeyBindingsController {
 				// If this is a button in input.right then preventDefault stops
 				// the input from being focused.
 				evt.preventDefault();
+				const oldKeyMap = this.keyMap;
+				const newKeyMap = {
+					...this.keyMap,
+					[actionId]: {
+						...this.keyMap[actionId],
+						bindings: [...this.keyMap[actionId].bindings, toBinding(capturedKeys)]
+					}
+				};
 				if (capturedKeys.length > 0) {
-					this.onChange({
-						...this.keyMap,
-						[actionId]: {
-							...this.keyMap[actionId],
-							bindings: [...this.keyMap[actionId].bindings, toBinding(capturedKeys)]
-						}
+					// Optimistic update...
+					this.setKeys(newKeyMap);
+					this.onChange(newKeyMap).catch(() => {
+						// Revert optimistic update...
+						this.setKeys(oldKeyMap);
 					});
 				}
 				window.removeEventListener('keydown', keyListener);

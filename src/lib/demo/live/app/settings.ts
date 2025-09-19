@@ -3,8 +3,39 @@ import { KeyBindingsController } from '$lib/oneput/plugins/menu/editBindings.js'
 import { checkboxMenuItem } from '$lib/oneput/plugins/menu/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 import { TestKeyService } from '../service/TestKeyService.js';
+import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
 
 const testKeyService = new TestKeyService();
+
+class KeysManager {
+	static create(c: Controller, keyMap: KeyBindingMap) {
+		return new KeysManager(c, keyMap);
+	}
+
+	private constructor(
+		private ctl: Controller,
+		private keyMap: KeyBindingMap
+	) {}
+
+	updateKeys(newKeyMap: KeyBindingMap, isLocal: boolean) {
+		// Optimistic update
+		const notification = this.ctl.notify('Updating...', { duration: 3000 });
+		this.ctl.keys.setDefaultKeys(newKeyMap, false);
+		// Push to store
+		return testKeyService
+			.setGlobalKeys(newKeyMap)
+			.then(() => {
+				this.keyMap = newKeyMap;
+				notification.updateMessage('It worked!', { duration: 3000 });
+			})
+			.catch((err) => {
+				notification.updateMessage(err.message);
+				// Revert optimistic update...
+				this.ctl.keys.setDefaultKeys(this.keyMap, isLocal);
+				throw err;
+			});
+	}
+}
 
 export const settingsUI = (c: Controller, back: () => void) => {
 	c.setBackBinding(back);
@@ -24,28 +55,11 @@ export const settingsUI = (c: Controller, back: () => void) => {
 			id: 'global-keys',
 			text: 'Set global default key bindings...',
 			action: () => {
-				let keyMap = c.keys.globalDefaultKeys;
-				const k = KeyBindingsController.create({
+				const keyMap = c.keys.globalDefaultKeys;
+				const km = KeysManager.create(c, keyMap);
+				KeyBindingsController.create({
 					controller: c,
-					onChange: (newKeyMap) => {
-						// Optimistic update
-						const notification = c.notify('Updating...', { duration: 3000 });
-						c.keys.setDefaultKeys(newKeyMap, false);
-						k.setKeys(newKeyMap);
-						// Push to store
-						testKeyService
-							.setGlobalKeys(newKeyMap)
-							.then(() => {
-								keyMap = newKeyMap;
-								notification.updateMessage('It worked!', { duration: 3000 });
-							})
-							.catch((err) => {
-								notification.updateMessage(err.message);
-								// Revert optimistic update...
-								k.setKeys(keyMap);
-								c.keys.setDefaultKeys(keyMap, false);
-							});
-					},
+					onChange: (newKeyMap) => km.updateKeys(newKeyMap, false),
 					keyMap,
 					local: false,
 					back: () => {
@@ -58,27 +72,11 @@ export const settingsUI = (c: Controller, back: () => void) => {
 			id: 'local-keys',
 			text: 'Set local default key bindings...',
 			action: () => {
-				let keyMap = c.keys.localDefaultKeys;
-				const k = KeyBindingsController.create({
+				const keyMap = c.keys.localDefaultKeys;
+				const km = KeysManager.create(c, keyMap);
+				KeyBindingsController.create({
 					controller: c,
-					onChange: (newKeyMap) => {
-						const notification = c.notify('Updating...', { duration: 3000 });
-						c.keys.setDefaultKeys(newKeyMap, true);
-						k.setKeys(newKeyMap);
-						// See global above....
-						testKeyService
-							.setLocalKeys(newKeyMap)
-							.then(() => {
-								keyMap = newKeyMap;
-								notification.updateMessage('It worked!', { duration: 3000 });
-							})
-							.catch((err) => {
-								notification.updateMessage(err.message);
-								// Revert optimistic update...
-								k.setKeys(keyMap);
-								c.keys.setDefaultKeys(keyMap, true);
-							});
-					},
+					onChange: (newKeyMap) => km.updateKeys(newKeyMap, true),
 					keyMap,
 					local: true,
 					back: () => {

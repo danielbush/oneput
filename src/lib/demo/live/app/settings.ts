@@ -1,36 +1,8 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
 import { randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/menu/editBindings.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
-
-const testKeyService = {
-	simulateError: false,
-	setGlobalKeys: async (keyMap: KeyBindingMap) => {
-		return new Promise((resolve, reject) => {
-			setTimeout(() => {
-				if (testKeyService.simulateError) {
-					reject(new Error('Simulate error'));
-				}
-				resolve(keyMap);
-			}, 1000);
-		});
-	},
-	setLocalKeys: async (keyMap: KeyBindingMap) => {
-		return new Promise((resolve, reject) => {
-			if (testKeyService.simulateError) {
-				reject(new Error('Simulate error'));
-			}
-			setTimeout(() => {
-				resolve(keyMap);
-			}, 1000);
-		});
-	},
-	toggleSimulateError: (on: boolean) => {
-		testKeyService.simulateError = on;
-		console.log('simulate error when storing keybindings set to', on);
-	}
-};
+import { testKeyService } from '../service/TestKeyService.js';
 
 class CheckboxMenuItem implements MenuItem {
 	static create(params: {

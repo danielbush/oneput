@@ -6,6 +6,47 @@ import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { xIcon } from './shared/icons.js';
 
+class Notification {
+	static create(currentProps: Controller['currentProps'], message: string) {
+		return new Notification(currentProps, message);
+	}
+
+	constructor(
+		private currentProps: Controller['currentProps'],
+		private message: string
+	) {}
+
+	show() {
+		this.currentProps.injectUI = {
+			inner: {
+				id: randomId(),
+				type: 'hflex',
+				classes: ['oneput__notification'],
+				style: { width: '100%' },
+				children: [
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__menu-item-body'],
+						textContent: this.message
+					},
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: xIcon,
+						attr: {
+							onclick: () => {
+								this.currentProps.injectUI = undefined;
+							}
+						}
+					}
+				]
+			}
+		};
+	}
+}
+
 export class Controller {
 	private events = new InternalEventEmitter();
 	public menu: MenuController;
@@ -45,32 +86,6 @@ export class Controller {
 	}
 
 	notify(message: string) {
-		this.currentProps.injectUI = {
-			inner: {
-				id: randomId(),
-				type: 'hflex',
-				classes: ['oneput__notification'],
-				style: { width: '100%' },
-				children: [
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__menu-item-body'],
-						textContent: message
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: xIcon,
-						attr: {
-							onclick: () => {
-								this.currentProps.injectUI = undefined;
-							}
-						}
-					}
-				]
-			}
-		};
+		Notification.create(this.currentProps, message).show();
 	}
 }

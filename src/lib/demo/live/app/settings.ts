@@ -29,6 +29,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 					controller: c,
 					onChange: (newKeyMap) => {
 						// Optimistic update
+						const notification = c.notify('Updating...', { duration: 3000 });
 						c.keys.setDefaultKeys(newKeyMap, false);
 						k.setKeys(newKeyMap);
 						// Push to store
@@ -36,10 +37,10 @@ export const settingsUI = (c: Controller, back: () => void) => {
 							.setGlobalKeys(newKeyMap)
 							.then(() => {
 								keyMap = newKeyMap;
-								c.notify('It worked!', { duration: 3000 });
+								notification.updateMessage('It worked!', { duration: 3000 });
 							})
 							.catch((err) => {
-								c.notify(err.message);
+								notification.updateMessage(err.message);
 								// Revert optimistic update...
 								k.setKeys(keyMap);
 								c.keys.setDefaultKeys(keyMap, false);
@@ -61,6 +62,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 				const k = KeyBindingsController.create({
 					controller: c,
 					onChange: (newKeyMap) => {
+						const notification = c.notify('Updating...', { duration: 3000 });
 						c.keys.setDefaultKeys(newKeyMap, true);
 						k.setKeys(newKeyMap);
 						// See global above....
@@ -68,10 +70,10 @@ export const settingsUI = (c: Controller, back: () => void) => {
 							.setLocalKeys(newKeyMap)
 							.then(() => {
 								keyMap = newKeyMap;
-								c.notify('It worked!', { duration: 3000 });
+								notification.updateMessage('It worked!', { duration: 3000 });
 							})
 							.catch((err) => {
-								c.notify(err.message);
+								notification.updateMessage(err.message);
 								// Revert optimistic update...
 								k.setKeys(keyMap);
 								c.keys.setDefaultKeys(keyMap, true);

@@ -21,6 +21,15 @@ class Notification {
 		private timeoutHandle: ReturnType<typeof setTimeout> | null = null
 	) {}
 
+	/**
+	 * Use this to update a message on an existing notification that presumably
+	 * is already showing.
+	 */
+	updateMessage(message: string, params: NotificationParams = {}) {
+		this.message = message;
+		this.show(params);
+	}
+
 	show(params: NotificationParams = {}) {
 		if (params.duration) {
 			if (this.timeoutHandle) {
@@ -98,7 +107,9 @@ export class Controller {
 		}
 	}
 
-	notify(message: string, params: NotificationParams = {}) {
-		Notification.create(this.currentProps, message).show(params);
+	notify(message: string, params: NotificationParams = {}): Notification {
+		const notification = Notification.create(this.currentProps, message);
+		notification.show(params);
+		return notification;
 	}
 }

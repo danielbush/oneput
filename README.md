@@ -1,6 +1,6 @@
 # Oneput
 
-A cheat code for ux. Also a command bar.
+A cheat code for web ui's. Also a command bar.
 
 Oneput is a set of svelte components. But the intention is to generate web components from these allowing you to use them without needing to use svelte explicitly. Note that svelte-based web components run svelte internally which is fine because svelte is awesome.
 
@@ -31,7 +31,7 @@ Maybe you could use Oneput as an initial scaffold, allowing you to quickly sketc
 Oneput was created using sveltekit "library" option which means `src/routes` is for demo purposes and `src/lib` is the main thing we export from this codebase.
 We publish Oneput as a component using <https://svelte.dev/docs/kit/packaging>.
 
-There is a [tasfile](https://taskfile.dev/docs/guide) `Taskfile.yml` for various tasks.
+There is a [taskfile](https://taskfile.dev/docs/guide) `Taskfile.yml` for various tasks.
 
 When adding a new behaviour to Oneput...
 
@@ -67,7 +67,7 @@ To test packaging see task `test:package`
 
 Can we use oneput as webcomponent?
 
-This is a WIP. See task `test:wc`.
+This is a WIP. See `Taskfile.wc.yml`.
 
 ### Technical Description
 

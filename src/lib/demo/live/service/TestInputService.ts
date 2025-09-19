@@ -1,4 +1,4 @@
-export class TestService {
+export class TestInputService {
 	counter = 0;
 	fetchData = async (input: string) => {
 		const results = [];

@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { menuItemWithIcon } from '../../config/ui.js';
-import { TestService } from '../../lib/TestService.js';
+import { TestService } from '../../service/TestService.js';
 
 export class AsyncSearchExample {
 	static create(c: Controller, back: () => void) {

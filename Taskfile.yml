@@ -1,0 +1,17 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  sv:create:
+    desc: Run `sv create` using pnpm.  Creates a library template by default, set TEMPLATE to override.
+    summary: |
+      eg `task sv:create
+    cmds:
+      - pnpx sv create --types ts --template {{.TEMPLATE | default "library"}} --install pnpm --no-add-ons .
+      - task: sv:addons
+  sv:addons:
+    desc: Run `sv add` to add addons used in this project.
+    cmds:
+      - pnpx sv add prettier eslint vitest playwright sveltekit-adapter
+

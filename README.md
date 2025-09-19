@@ -1,66 +1,58 @@
-# jsed
+# Svelte library
 
-STATUS: Apr-2024 This code is under development.  Not ready for use yet.  Come back in a few months.
+Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
 
-The core library behind jsed.  To use the editor you need jsed-ui which has this code as a dependency.
+Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
 
-Some of the key things the core library handles:
+## Creating a project
 
-- `navigate`
-  - the idea is to take html (including markdown converted by `convert`) and be able to navigate it or the outline or any other technique that make navigating potentially large documents easier
-- `modify`
-  - modify the structure of the html document
-- `extend`
-  - we want to not just navigate html, we want to extend it; think: checkboxes with state on list items
-- `edit`
-  - when we get to text, we want to be able to edit it
-- `serialize`
-  - when we save we need to generate a version of the edited content without any any temporary artifacts from the navigator
-- `load` / `unload`
-  - load and unload an html doc within the browser environment; be able to leave the html the way we found it if this program unloads
-- `convert`
-  - convert existing markdown files which is a format used in an early prototype of the 2br system (a separate piece of software that motivated the creation of jsed and jsed-ui)
-  - convert takes markdown files (used in the prototype project "fold") and converts them and the 2br constructs into html that can then be navigated and edited. The conversion is one-way, there is no going back.
-
-See:
-
-- [CODE.md](./CODE.md) - how code and tests are organised
-- [DEFINITIONS.md](./DEFINITIONS.md) - key definitions and behaviours of the systems
-- [ISSUES.md](./ISSUES.md) - issues found along the way
-
-## Usage
-
-This is a library.  It's intended to be used as dependency by jsed-ui.
-
-## Build
-
-Build a bundle in dist/ (TODO: not productionized yet).
+If you're seeing this, you've probably already done this step. Congrats!
 
 ```sh
-bun run build
+# create a new project in the current directory
+npx sv create
+
+# create a new project in my-app
+npx sv create my-app
 ```
 
-Adds a cli to `dist/`.
+## Developing
+
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```sh
-bun run build:cli
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
 
-## Testing
+Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
 
-Tests
+## Building
+
+To build your library:
 
 ```sh
-bun run test:watch
+npm pack
 ```
 
-## How it works
+To create a production version of your showcase app:
 
-- document is initialized using `src/app/start.ts`
-  - some modifications may occur at this point such as `tokenizeImplicitLine`
-- at this point the user can use `src/lib/navigator.ts` to navigate the document
-- `Navigator#FOCUS` on each F_ELEM as we navigate
-- the text nodes of the focused F_ELEM are tokenized using `tokenize` in `src/lib/token.ts`
-  - currently `tokenize` tokenizes the LINE associated with the F_ELEM which is all text nodes and text nodes of inline child nodes of the F_ELEM
-  - TBC: we know that if we `tokenize` all text in a large doc we will run into performance issues in the browser; so we may need to consider untokenizing text once the user has navigated past the F_ELEM .  However if they edit the text, we may leave it tokenized.
-- if the user stops to edit the tokneized text, they are using the cursor in `src/lib/cursor.ts`
+```sh
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+## Publishing
+
+Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+
+To publish your library to [npm](https://www.npmjs.com):
+
+```sh
+npm publish
+```

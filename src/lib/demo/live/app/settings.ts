@@ -2,7 +2,9 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/menu/editBindings.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
-import { testKeyService } from '../service/TestKeyService.js';
+import { TestKeyService } from '../service/TestKeyService.js';
+
+const testKeyService = new TestKeyService();
 
 class CheckboxMenuItem implements MenuItem {
 	static create(params: {

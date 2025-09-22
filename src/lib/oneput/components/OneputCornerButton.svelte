@@ -1,11 +1,12 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { hideShowListener } from '../lib.js';
 
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	};
 
-	let { icon }: { icon: string } = $props();
+	let { icon }: { icon: string | (() => ReturnType<Snippet>) } = $props();
 </script>
 
 <button
@@ -15,9 +16,13 @@
 	onclick={handleClick}
 	{@attach hideShowListener(false)}
 >
-	<!-- eslint-disable svelte/no-at-html-tags -->
-	{@html icon}
-	<!-- eslint-enable svelte/no-at-html-tags -->
+	{#if typeof icon === 'string'}
+		<!-- eslint-disable svelte/no-at-html-tags -->
+		{@html icon}
+		<!-- eslint-enable svelte/no-at-html-tags -->
+	{:else}
+		{@render icon()}
+	{/if}
 </button>
 
 <style>

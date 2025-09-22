@@ -14,4 +14,4 @@
 	});
 </script>
 
-<div>Test sentence.</div>
+<div bind:this={root}>Test sentence.</div>

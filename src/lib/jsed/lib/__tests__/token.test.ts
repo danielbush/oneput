@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em } from '../../../test/util';
-import { tokenize, tokenizeImplicitLine } from '../token';
+import { byId, makeRoot, div, p, em } from '../../test/util.js';
+import { tokenize, tokenizeImplicitLine } from '../token.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

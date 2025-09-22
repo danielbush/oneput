@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { convertMd, convert } from '../convert';
+import { convertMd, convert } from '../convert.js';
 
 describe('convert', () => {
   describe('convert', () => {

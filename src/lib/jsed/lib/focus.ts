@@ -2,8 +2,8 @@
  * What can be edited and focused on.
  */
 
-import { JSED_DOM_ROOT_ID, JSED_IGNORE_CLASS } from './constants';
-import { isToken } from './token';
+import { JSED_DOM_ROOT_ID, JSED_IGNORE_CLASS } from './constants.js';
+import { isToken } from './token.js';
 
 const FORM_FOCUSABLE = [
   'input',

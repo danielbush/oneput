@@ -4,10 +4,10 @@ import {
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
-} from './constants';
-import { canCreateWithAnchor } from './dom-rules';
-import { ignoreDescendents, isFocusable, isIgnorable } from './focus';
-import { findNextNode, findPreviousNode } from './walk';
+} from './constants.js';
+import { canCreateWithAnchor } from './dom-rules.js';
+import { ignoreDescendents, isFocusable, isIgnorable } from './focus.js';
+import { findNextNode, findPreviousNode } from './walk.js';
 
 // #region utils
 

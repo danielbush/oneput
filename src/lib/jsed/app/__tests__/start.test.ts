@@ -1,5 +1,5 @@
 import { describe, it, expect, test, vi } from 'vitest';
-import { start } from '../start';
+import { start } from '../start.js';
 
 describe('start', () => {
   it('can unload the doc', () => {

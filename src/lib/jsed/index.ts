@@ -4,10 +4,10 @@ import type {
   JsedFocusRequestEvent,
   JsedFocusEvent,
 } from './types.js';
-import { start } from './src/app/start.js';
-import * as token from './src/lib/token.js';
-import * as dom from './src/lib/dom.js';
-import * as domRules from './src/lib/dom-rules.js';
+import { start } from './app/start.js';
+import * as token from './lib/token.js';
+import * as dom from './lib/dom.js';
+import * as domRules from './lib/dom-rules.js';
 
 const utils = {
   dom: {
@@ -39,7 +39,7 @@ export {
   JSED_TOKEN_CLASS,
   JSED_DOM_ROOT_ID,
   JSED_IGNORE_CLASS,
-} from './src/lib/constants.js';
+} from './lib/constants.js';
 export { start, utils };
 export type {
   JsedDocument,

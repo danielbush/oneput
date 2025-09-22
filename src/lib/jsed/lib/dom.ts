@@ -1,5 +1,5 @@
-import { canCreateWithAnchor } from './dom-rules';
-import * as token from './token';
+import { canCreateWithAnchor } from './dom-rules.js';
+import * as token from './token.js';
 
 export function copyElement(el: HTMLElement, newTagName?: string): HTMLElement {
   newTagName = newTagName || el.tagName;

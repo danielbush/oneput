@@ -1,4 +1,4 @@
-import type { Navigator } from './src/lib/navigator.js';
+import type { Navigator } from './lib/navigator.js';
 
 export type JsedDocument = {
   /**

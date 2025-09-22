@@ -8,8 +8,8 @@ import {
   p,
   script,
   ul,
-} from '../../../test/util';
-import { Navigator } from '../navigator';
+} from '../../test/util.js';
+import { Navigator } from '../navigator.js';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {

@@ -1,4 +1,4 @@
-import { makeDocument } from './document';
+import { makeDocument } from './document.js';
 import { JSED_DOM_ROOT_ID } from '../lib/constants';
 import type { JsedDocument } from '../types';
 

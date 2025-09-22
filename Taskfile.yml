@@ -39,6 +39,10 @@ tasks:
     desc: format files
     cmds:
       - pnpm run format
+  eslint:fix:
+    desc: run eslint fixes
+    cmds:
+      - ./node_modules/.bin/eslint . --fix
   eslint:
     desc: run eslint
     cmds:
@@ -62,4 +66,3 @@ tasks:
     desc: Run `sv add` to add addons used in this project.
     cmds:
       - pnpx sv add prettier eslint vitest playwright sveltekit-adapter
-

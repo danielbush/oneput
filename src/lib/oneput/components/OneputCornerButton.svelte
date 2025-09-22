@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { commandIcon } from '../shared/icons.js';
 	import { hideShowListener } from '../lib.js';
 
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	};
+
+	let { icon }: { icon: string } = $props();
 </script>
 
 <button
@@ -15,7 +16,7 @@
 	{@attach hideShowListener(false)}
 >
 	<!-- eslint-disable svelte/no-at-html-tags -->
-	{@html commandIcon}
+	{@html icon}
 	<!-- eslint-enable svelte/no-at-html-tags -->
 </button>
 

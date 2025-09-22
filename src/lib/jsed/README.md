@@ -1,8 +1,8 @@
 # jsed
 
-STATUS: Apr-2024 This code is under development.  Not ready for use yet.  Come back in a few months.
+STATUS: Apr-2024 This code is under development. Not ready for use yet. Come back in a few months.
 
-The core library behind jsed.  To use the editor you need jsed-ui which has this code as a dependency.
+The core library behind jsed. To use the editor you need jsed-ui which has this code as a dependency.
 
 Some of the key things the core library handles:
 
@@ -30,7 +30,7 @@ See:
 
 ## Usage
 
-This is a library.  It's intended to be used as dependency by jsed-ui.
+This is a library. It's intended to be used as dependency by jsed-ui.
 
 ## Build
 
@@ -62,5 +62,5 @@ bun run test:watch
 - `Navigator#FOCUS` on each F_ELEM as we navigate
 - the text nodes of the focused F_ELEM are tokenized using `tokenize` in `src/lib/token.ts`
   - currently `tokenize` tokenizes the LINE associated with the F_ELEM which is all text nodes and text nodes of inline child nodes of the F_ELEM
-  - TBC: we know that if we `tokenize` all text in a large doc we will run into performance issues in the browser; so we may need to consider untokenizing text once the user has navigated past the F_ELEM .  However if they edit the text, we may leave it tokenized.
+  - TBC: we know that if we `tokenize` all text in a large doc we will run into performance issues in the browser; so we may need to consider untokenizing text once the user has navigated past the F_ELEM . However if they edit the text, we may leave it tokenized.
 - if the user stops to edit the tokneized text, they are using the cursor in `src/lib/cursor.ts`

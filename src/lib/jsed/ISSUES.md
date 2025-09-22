@@ -35,4 +35,4 @@
 - INLINE_COMPUTED_STYLE
   - when: Feb-2024
   - what:
-    - The style in jsdom for the display of a tag like 'em' is '' which breaks functions like `isPartOfLine`.  AFAICT the node is attached to the document and window.getComputedStyle(em)['display'] returns `inline` in safari, chrome, firefox and edge.  So we'll hack it into tests here.
+    - The style in jsdom for the display of a tag like 'em' is '' which breaks functions like `isPartOfLine`. AFAICT the node is attached to the document and window.getComputedStyle(em)['display'] returns `inline` in safari, chrome, firefox and edge. So we'll hack it into tests here.

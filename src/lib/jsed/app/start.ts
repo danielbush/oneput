@@ -10,30 +10,30 @@ import type { JsedDocument } from '../types.js';
  * possible.
  */
 export function start(root: HTMLElement): JsedDocument {
-  const doc = makeDocument(root);
+	const doc = makeDocument(root);
 
-  // Set up event handlers
+	// Set up event handlers
 
-  function handleElementClick(evt: MouseEvent) {
-    const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
-    if (app_root_node) {
-      const node = evt.target as Element;
-      if (app_root_node.contains(node)) {
-        return;
-      }
-    }
-    // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
-    evt.preventDefault();
-    doc.nav.REQUEST_FOCUS(evt.target);
-  }
+	function handleElementClick(evt: MouseEvent) {
+		const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
+		if (app_root_node) {
+			const node = evt.target as Element;
+			if (app_root_node.contains(node)) {
+				return;
+			}
+		}
+		// Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
+		evt.preventDefault();
+		doc.nav.REQUEST_FOCUS(evt.target);
+	}
 
-  // root.addEventListener<'click'>('click', handleElementClick);
-  root.addEventListener<'mousedown'>('mousedown', handleElementClick);
+	// root.addEventListener<'click'>('click', handleElementClick);
+	root.addEventListener<'mousedown'>('mousedown', handleElementClick);
 
-  // Unload
+	// Unload
 
-  doc.unload = () => {
-    root.removeEventListener('click', handleElementClick);
-  };
-  return doc;
+	doc.unload = () => {
+		root.removeEventListener('click', handleElementClick);
+	};
+	return doc;
 }

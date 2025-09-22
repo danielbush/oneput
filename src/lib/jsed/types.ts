@@ -1,40 +1,40 @@
 import type { Navigator } from './lib/navigator.js';
 
 export type JsedDocument = {
-  /**
-   * The root node of the subtree of the DOM that is potentially editable.
-   */
-  root: HTMLElement;
-  /**
-   * The document of the root.  This is a convenience, because we can calculate
-   * it at any time.
-   */
-  document: Document;
-  window: Window;
-  /**
-   * The currently selected TOKEN (may be none).
-   */
-  // activeToken: HTMLElement | null;
-  /**
-   * Handles showCurrentSiblings.
-   */
-  SIB_HIGHLIGHT: Set<HTMLElement>;
-  nav: Navigator;
-  listeners: {
-    /**
-     * Register a listener for FOCUS request events.  Consumer can decide if the FOCUS event should occur.
-     */
-    REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
-    /**
-     * Register a listener for FOCUS events that have occurred.
-     */
-    FOCUS: null | ((evt: JsedFocusEvent) => void);
-  };
-  unload: () => void;
-  /**
-   * Request a cursor for the current token.
-   */
-  requestCursor: (params: { token: HTMLElement }) => IJsedCursor;
+	/**
+	 * The root node of the subtree of the DOM that is potentially editable.
+	 */
+	root: HTMLElement;
+	/**
+	 * The document of the root.  This is a convenience, because we can calculate
+	 * it at any time.
+	 */
+	document: Document;
+	window: Window;
+	/**
+	 * The currently selected TOKEN (may be none).
+	 */
+	// activeToken: HTMLElement | null;
+	/**
+	 * Handles showCurrentSiblings.
+	 */
+	SIB_HIGHLIGHT: Set<HTMLElement>;
+	nav: Navigator;
+	listeners: {
+		/**
+		 * Register a listener for FOCUS request events.  Consumer can decide if the FOCUS event should occur.
+		 */
+		REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
+		/**
+		 * Register a listener for FOCUS events that have occurred.
+		 */
+		FOCUS: null | ((evt: JsedFocusEvent) => void);
+	};
+	unload: () => void;
+	/**
+	 * Request a cursor for the current token.
+	 */
+	requestCursor: (params: { token: HTMLElement }) => IJsedCursor;
 };
 
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
@@ -46,111 +46,111 @@ export type JsedFocusRequestEvent = JsedFocusEventBase<'FOCUS_REQUEST'>;
  * The listener to this event will decide if the F_ELEM should become the active FOCUS based on this event.
  */
 type JsedFocusEventBase<T> =
-  | {
-      type: T;
-      targetType: 'F_ELEM';
-      element: HTMLElement;
-    }
-  | {
-      type: T;
-      targetType: 'TOKEN';
-      /**
-       * The TOKEN (usually a span element).
-       */
-      token: HTMLElement;
-      /**
-       * The string value of the TOKEN .
-       */
-      value: string;
-    };
+	| {
+			type: T;
+			targetType: 'F_ELEM';
+			element: HTMLElement;
+	  }
+	| {
+			type: T;
+			targetType: 'TOKEN';
+			/**
+			 * The TOKEN (usually a span element).
+			 */
+			token: HTMLElement;
+			/**
+			 * The string value of the TOKEN .
+			 */
+			value: string;
+	  };
 
 export type IJsedCursor = {
-  setToken: (token: HTMLElement) => void;
-  /**
-   * Return the active TOKEN that the cursor is on.
-   */
-  getToken: () => HTMLElement;
-  /**
-   * Move to previous token if it exists.
-   */
-  movePrevious: () => void;
-  /**
-   * Move to next token if it exists.
-   */
-  moveNext: () => void;
-  /**
-   * Replace the value of the current token with a new value.
-   */
-  replace: (val: string) => void;
-  /**
-   * Delete the current token.
-   */
-  delete: (params?: { keepAnchor: boolean }) => void; // go back to previous word or next if no previous
-  /**
-   * Append a new token after the current one.
-   */
-  append: (val: string) => HTMLElement;
-  /**
-   * Toggle COLLAPSE state of token with what is next to it.
-   */
-  toggleCollapseNext: () => boolean;
-  /**
-   * Toggle COLLAPSE state of token with what is previous to it.
-   */
-  toggleCollapsePrevious: () => boolean;
-  /**
-   * Merge with next adjacent token if it exists (JOIN).
-   */
-  joinNext: () => void;
-  /**
-   * Merge with previous adjacent token if it exists (JOIN).
-   */
-  joinPrevious: () => void;
-  /**
-   * Perform SPLIT_BY_TOKEN .
-   */
-  splitBefore: () => void;
-  /**
-   * Perform SPLIT_BY_TOKEN .
-   */
-  splitAfter: () => void;
-  /**
-   * Close the current edit session.
-   */
-  close: () => void;
-  /**
-   * Notify the consumer that the cursor has to close.
-   *
-   * Example might be that we have run out of tokens and we are not replacing
-   * the last deleted token with an anchor token - see `delete` and
-   * `keepAnchor`.
-   */
-  onClose: (fn: () => void) => void;
+	setToken: (token: HTMLElement) => void;
+	/**
+	 * Return the active TOKEN that the cursor is on.
+	 */
+	getToken: () => HTMLElement;
+	/**
+	 * Move to previous token if it exists.
+	 */
+	movePrevious: () => void;
+	/**
+	 * Move to next token if it exists.
+	 */
+	moveNext: () => void;
+	/**
+	 * Replace the value of the current token with a new value.
+	 */
+	replace: (val: string) => void;
+	/**
+	 * Delete the current token.
+	 */
+	delete: (params?: { keepAnchor: boolean }) => void; // go back to previous word or next if no previous
+	/**
+	 * Append a new token after the current one.
+	 */
+	append: (val: string) => HTMLElement;
+	/**
+	 * Toggle COLLAPSE state of token with what is next to it.
+	 */
+	toggleCollapseNext: () => boolean;
+	/**
+	 * Toggle COLLAPSE state of token with what is previous to it.
+	 */
+	toggleCollapsePrevious: () => boolean;
+	/**
+	 * Merge with next adjacent token if it exists (JOIN).
+	 */
+	joinNext: () => void;
+	/**
+	 * Merge with previous adjacent token if it exists (JOIN).
+	 */
+	joinPrevious: () => void;
+	/**
+	 * Perform SPLIT_BY_TOKEN .
+	 */
+	splitBefore: () => void;
+	/**
+	 * Perform SPLIT_BY_TOKEN .
+	 */
+	splitAfter: () => void;
+	/**
+	 * Close the current edit session.
+	 */
+	close: () => void;
+	/**
+	 * Notify the consumer that the cursor has to close.
+	 *
+	 * Example might be that we have run out of tokens and we are not replacing
+	 * the last deleted token with an anchor token - see `delete` and
+	 * `keepAnchor`.
+	 */
+	onClose: (fn: () => void) => void;
 
-  /**
-   * Notify the consumer when the cursor moves.
-   */
-  onSetToken: (fn: (el: HTMLElement) => void) => void;
+	/**
+	 * Notify the consumer when the cursor moves.
+	 */
+	onSetToken: (fn: (el: HTMLElement) => void) => void;
 
-  /**
-   * Whether `tok` is on the same line as the cursor's token.
-   */
-  isSameLine: (tok: HTMLElement) => boolean;
+	/**
+	 * Whether `tok` is on the same line as the cursor's token.
+	 */
+	isSameLine: (tok: HTMLElement) => boolean;
 
-  /**
-   * "focus classes" will get cleared the moment the cursor moves on or gets closed.
-   */
-  addFocusClasses: (...classNames: string[]) => void;
-  removeFocusClasses: (...classNames: string[]) => void;
+	/**
+	 * "focus classes" will get cleared the moment the cursor moves on or gets closed.
+	 */
+	addFocusClasses: (...classNames: string[]) => void;
+	removeFocusClasses: (...classNames: string[]) => void;
 
-  insertElementAfter: (el: HTMLElement) => void;
-  insertElementBefore: (el: HTMLElement) => void;
+	insertElementAfter: (el: HTMLElement) => void;
+	insertElementBefore: (el: HTMLElement) => void;
 };
 
 /**
  * Events generated by a JsedCursor instance.
  */
 export type JsedCursorEvent = {
-  type: 'CHANGE';
-  value: string;
+	type: 'CHANGE';
+	value: string;
 };

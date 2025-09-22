@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { start } from '../lib/jsed/src/index.js';
+    import { start } from '../lib/jsed/index.js';
     import { onMount } from 'svelte';
 
     let root: HTMLElement | null = null;

@@ -1,4 +1,4 @@
-import type { JsedDocument } from '../types';
+import type { JsedDocument } from '../types.js';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories
 const LEAF = ['br', 'img'];

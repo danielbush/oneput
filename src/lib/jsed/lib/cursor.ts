@@ -1,4 +1,4 @@
-import type { JsedDocument, IJsedCursor } from '../types';
+import type { JsedDocument, IJsedCursor } from '../types.js';
 import { JSED_TOKEN_FOCUS_CLASS } from './constants.js';
 import * as token from './token.js';
 

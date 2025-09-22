@@ -1,7 +1,7 @@
-import { Navigator } from '../lib/navigator';
-import { JsedCursor } from '../lib/cursor';
-import type { JsedDocument } from '../types';
-import { tokenizeImplicitLine } from '../lib/token';
+import { Navigator } from '../lib/navigator.js';
+import { JsedCursor } from '../lib/cursor.js';
+import type { JsedDocument } from '../types.js';
+import { tokenizeImplicitLine } from '../lib/token.js';
 
 export function makeDocument(root: HTMLElement): JsedDocument {
   let document: JsedDocument | null = null;

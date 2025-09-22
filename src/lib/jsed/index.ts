@@ -3,7 +3,7 @@ import type {
   IJsedCursor,
   JsedFocusRequestEvent,
   JsedFocusEvent,
-} from './src/types.js';
+} from './types.js';
 import { start } from './src/app/start.js';
 import * as token from './src/lib/token.js';
 import * as dom from './src/lib/dom.js';

@@ -1,5 +1,3 @@
 <script lang="ts"></script>
 
-<div>
-    world
-</div>
+<div>world</div>

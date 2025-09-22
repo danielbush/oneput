@@ -1,7 +1,21 @@
 <script lang="ts">
-    let { children } = $props();
+	import { Anchor, OneputCornerButton, OneputController, Controller } from '$oneput';
+	let { children } = $props();
+	let controller: Controller | null = null;
+	function setController(controller: Controller) {
+		controller = controller;
+		console.log('controller', controller);
+	}
+	import { Command } from '@lucide/svelte';
+	setTimeout(() => {
+		window.dispatchEvent(new Event('oneput-toggle-hide'));
+	}, 10);
 </script>
 
-<div>
-    hello {@render children()}
-</div>
+{@render children()}
+<Anchor>
+	<OneputController controllerRef={setController} />
+</Anchor>
+<OneputCornerButton>
+	{#snippet icon()}<Command />{/snippet}
+</OneputCornerButton>

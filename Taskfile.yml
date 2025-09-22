@@ -3,6 +3,54 @@
 version: '3'
 
 tasks:
+  dev:
+    cmds:
+      - pnpm run dev
+  dev:public:
+    desc: Run dev server
+    deps:
+      - install
+    cmds:
+      - pnpm run dev --host=0.0.0.0
+  test:
+    desc: |
+      Run unit tests; but avoid triggering browser tests.
+      See vite.config.js
+    cmds:
+      - ./node_modules/.bin/vitest run --project=server
+  test:browser:
+    desc: |
+      Test using browser mode, defaults to watch mode
+      See https://vitest.dev/guide/browser/
+      This was introduced by sveltekit boilerplate in place of jsdom.
+    cmds:
+      - ./node_modules/.bin/vitest run --project=client --watch
+  test:e2e:
+    desc: Run end-to-end tests (headless)
+    cmds:
+      - pnpm run test:e2e
+  fix:
+    desc: format + eslint (fix) + check types (no fix)
+    cmds:
+      - task: format
+      - task: eslint:fix
+      - task: check
+  format:
+    desc: format files
+    cmds:
+      - pnpm run format
+  eslint:
+    desc: run eslint
+    cmds:
+      - ./node_modules/.bin/eslint .
+  check:
+    desc: check types
+    cmds:
+      - pnpm run check
+  check:watch:
+    desc: check types
+    cmds:
+      - pnpm run check --watch
   sv:create:
     desc: Run `sv create` using pnpm.  Creates a library template by default, set TEMPLATE to override.
     summary: |

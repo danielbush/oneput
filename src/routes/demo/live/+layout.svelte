@@ -2,8 +2,8 @@
 	import { Anchor, OneputCornerButton, OneputController, Controller } from '$oneput';
 	let { children } = $props();
 	let controller: Controller | null = null;
-	function setController(controller: Controller) {
-		controller = controller;
+	function setController(ctl: Controller) {
+		controller = ctl;
 		console.log('controller', controller);
 	}
 	import { Command } from '@lucide/svelte';

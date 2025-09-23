@@ -146,7 +146,7 @@ export class JsedCursor implements IJsedCursor {
 
 	splitAfter() {
 		this.#failIfExhausted();
-		const [_, after] = token.splitAfter(this.#token);
+		const [, after] = token.splitAfter(this.#token);
 		const firstTok = token.getFirstToken(after);
 		if (firstTok) {
 			this.setToken(firstTok);

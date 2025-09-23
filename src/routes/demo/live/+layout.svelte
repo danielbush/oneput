@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { Anchor, OneputCornerButton, OneputController, Controller } from '$oneput';
 	import '../../../lib/jsed/styles/oneput-defaults.css';
 	import '../../../lib/jsed/styles/jsed-defaults.css';
+	import { Command } from '@lucide/svelte';
+	import { Anchor, OneputCornerButton, OneputController } from '$oneput';
+	import { setController } from '$lib/demo/live/app.js';
 
 	let { children } = $props();
-	let controller: Controller | null = null;
-	function setController(ctl: Controller) {
-		controller = ctl;
-		console.log('controller', controller);
-	}
-	import { Command } from '@lucide/svelte';
 	setTimeout(() => {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	}, 10);

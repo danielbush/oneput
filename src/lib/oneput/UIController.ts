@@ -50,7 +50,7 @@ export class UIController {
 	 *
 	 * If setDefaultUI has not been called, the ui will be set to nothing.
 	 */
-	clear() {
+	clearUI() {
 		this.currentProps.inputUI = this.defaultUI?.input;
 		this.currentProps.menuUI = this.defaultUI?.menu;
 		this.currentProps.innerUI = this.defaultUI?.inner;
@@ -59,7 +59,7 @@ export class UIController {
 
 	private defaultUI?: DefaultUI;
 
-	setDefaultUI(defaultUI: DefaultUI) {
+	setDefaultUI(defaultUI?: DefaultUI) {
 		this.defaultUI = defaultUI;
 	}
 
@@ -67,6 +67,6 @@ export class UIController {
 		if (this.defaultUI && values) {
 			this.defaultUI.setValues?.(values);
 		}
-		this.clear();
+		this.clearUI();
 	}
 }

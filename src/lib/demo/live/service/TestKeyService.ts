@@ -1,11 +1,22 @@
 import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
 
+export const config = {
+	simulateError: false,
+	toggleSimulateError: (on: boolean) => {
+		config.simulateError = on;
+		console.log('simulate error when storing keybindings set to', on);
+	}
+};
+
 export class TestKeyService {
-	simulateError = false;
+	static create() {
+		return new TestKeyService();
+	}
+
 	setGlobalKeys = async (keyMap: KeyBindingMap) => {
 		return new Promise((resolve, reject) => {
 			setTimeout(() => {
-				if (this.simulateError) {
+				if (config.simulateError) {
 					reject(new Error('Simulate error'));
 				}
 				resolve(keyMap);
@@ -14,16 +25,12 @@ export class TestKeyService {
 	};
 	setLocalKeys = async (keyMap: KeyBindingMap) => {
 		return new Promise((resolve, reject) => {
-			if (this.simulateError) {
+			if (config.simulateError) {
 				reject(new Error('Simulate error'));
 			}
 			setTimeout(() => {
 				resolve(keyMap);
 			}, 1000);
 		});
-	};
-	toggleSimulateError = (on: boolean) => {
-		this.simulateError = on;
-		console.log('simulate error when storing keybindings set to', on);
 	};
 }

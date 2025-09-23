@@ -2,7 +2,19 @@
 
 version: '3'
 
+vars:
+  # Where oneput lives so we can get the oneput-defaults.css file .
+  ONEPUT_DIR: ../oneput
+  # Where the oneput default css file lives.
+  # We will use this for now and extend it in a separate file we load after.
+  ONEPUT_CSS_FILE: src/lib/jsed/styles/oneput-defaults.css
+
 tasks:
+  setup:styles:
+    desc: Copy oneput defaults into this repo.
+    cmds:
+      - cp {{.ONEPUT_DIR}}/src/lib/oneput/styles/oneput-defaults.css {{.ONEPUT_CSS_FILE}}
+      - echo "Commit any changes."
   dev:
     cmds:
       - pnpm run dev

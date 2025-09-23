@@ -1,0 +1,582 @@
+/*
+ * oneput defaults
+ *
+ * Override them in a separate file after this one.
+ */
+
+/* #region resets */
+
+@layer reset {
+	.oneput__container hr,
+	.oneput__container fieldset,
+	.oneput__container button {
+		background-color: transparent;
+		border-width: 0.5px;
+		border-color: rgb(0 0 0 / 0);
+		font: inherit;
+		cursor: pointer;
+		outline: inherit;
+		display: flex;
+		align-items: center;
+		flex-wrap: nowrap;
+		text-align: left;
+		color: unset;
+	}
+
+	.oneput__container hr {
+		border-top: var(--oneput-soft-border);
+	}
+
+	.oneput__container,
+	.oneput__container * {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+}
+
+/* #endregion */
+
+/* #region variables */
+
+.oneput__container {
+	/* Styles */
+	/* Separates significant areas like the menubody vs input / status area. */
+	--oneput-strong-border: solid 1px rgb(0 0 0 / 0.3);
+	/* Separates sections with something eg sections within the menu body */
+	--oneput-soft-border: 0.5px solid rgb(0 0 0 / 0.4);
+
+	/* Internal spacing: paddings, gaps, margins */
+	--oneput-area-padding: 0px;
+	--oneput-hflex-padding: 6px;
+	--oneput-hflex-gap: 4px;
+	--oneput-vflex-gap: 6px;
+	--oneput-fchild-padding: 4px;
+	--oneput-input-padding-x: 6px;
+	--oneput-input-padding-y: 0px;
+
+	/* Specific parts of oneput... */
+
+	/* Container */
+	--oneput-min-width: 320px;
+	--oneput-max-width: 500px;
+	--oneput-menu-max-height: 300px;
+	--oneput-background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
+	--oneput-border-radius: 5px;
+	--oneput-border: rgb(0 0 0 / 0.3) solid 0.5px;
+	--oneput-border-top: 0.5px;
+	--oneput-border-bottom: 0.5px;
+	--oneput-border-left: 0.5px;
+	--oneput-border-right: 0.5px;
+	--oneput-box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 0.3);
+	--oneput-font: 14px sans-serif;
+	--oneput-font-color: #222;
+	--oneput-text-muted: color: rgb(0 0 0 / 0.7);
+
+	/* Menu */
+	/* These apply when the menu item is a button */
+	--oneput-menu-item-background: none;
+	--oneput-menu-item-background-hover: rgb(100 100 100 / 0.2);
+	--oneput-menu-item-background-active: rgb(100 100 100 / 0.3);
+	--oneput-menu-item-body-margin: 0 0.6em;
+	--oneput-menu-header-background: rgb(255 255 255 / 0.2);
+	--oneput-menu-footer-background: rgb(255 255 255 / 0.2);
+	/* These serve to subtly distinguish menu header/footer from menu items. */
+	--oneput-menu-header-box-shadow: 0 -13px 10px 10px rgb(0 0 0 / 0.5);
+	--oneput-menu-header-clip-path: inset(0 0 -20px 0);
+	--oneput-menu-footer-box-shadow: 0 13px 10px 10px rgb(0 0 0 / 0.5);
+	--oneput-menu-footer-clip-path: inset(-20px 0 0 0);
+
+	/* divider */
+	--oneput-divider-border: rgb(0 0 0 / 0.3) solid 0.5px;
+	--oneput-divider-text-color: #333;
+	--oneput-divider-font: sans-serif;
+	--oneput-divider-margin: 6px 0 2px 0;
+
+	/* Input */
+	/* The apparent height of the input or technically oneput__input-inner. */
+	--oneput-input-height: 36px;
+	--oneput-input-outline: 2px solid rgb(0255 179 2 / 0.5);
+	--oneput-input-background: #fff;
+	--oneput-input-text-color: #111;
+	--oneput-placeholder-text-color: #888;
+	--oneput-input-font: 14px sans-serif;
+	--oneput-input-border-radius: 5px;
+	--oneput-input-border: solid rgb(0 0 0 / 0.3) 1px;
+	--oneput-input-border-top: 0.5px;
+	--oneput-input-border-bottom: 0.5px;
+	--oneput-input-border-left: 0.5px;
+	--oneput-input-border-right: 0.5px;
+
+	/* Spacers, icons, buttons etc */
+	/* Use this for width and height. */
+	--oneput-icon-width: 28px;
+	/* For more compact elements. */
+	--oneput-icon-width-small: 18px;
+	/* 22px works well with svg eg lucide and emojis. */
+	--oneput-icon-font: 22px sans-serif;
+	--oneput-icon-border-radius: 4px;
+	--oneput-icon-padding: 4px;
+	--oneput-button-background: none;
+	--oneput-button-border: none;
+	--oneput-button-outline: none;
+	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.5);
+	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
+	--oneput-button-border-focus: none;
+	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-background-hover: rgb(100 100 100 / 0.2);
+	--oneput-button-border-hover: none;
+	--oneput-button-outline-active: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-background-active: rgb(100 100 100 / 0.3);
+	--oneput-button-border-active: none;
+
+	/* Visual Debug */
+	--oneput-debug-hflex-outline: 1px solid rgb(0 200 0 / 0.2);
+	--oneput-debug-hflex-outline-nested: 1px dotted rgb(0 200 0 / 0.2);
+	--oneput-debug-hflex-outline-offset: -0.5px;
+	--oneput-debug-vflex-outline: 2px solid rgb(0 0 200 / 0.2);
+	--oneput-debug-vflex-outline-nested: 1px dotted red;
+	--oneput-debug-vflex-outline-offset: -0.5px;
+	--oneput-debug-fchild-outline: solid orchid 1px;
+	--oneput-debug-fchild-offset: -0.5px;
+
+	/* notification */
+	--oneput-notification-background: rgb(255 210 0 / 0.4);
+}
+
+.dark-mode .oneput__container {
+	/* backgrounds */
+	--oneput-background: #444;
+	--oneput-input-background: #333;
+
+	/* text */
+	--oneput-font-color: #ddd;
+	--oneput-input-text-color: #ddd;
+	--oneput-placeholder-text-color: #bbb;
+	--oneput-text-muted: rgb(255 255 255 / 0.7);
+
+	/* divider color */
+	--oneput-divider-border: 1px solid rgb(255 255 255 / 0.2);
+	--oneput-divider-text-color: #ddd;
+
+	/* menu item states */
+	--oneput-menu-item-background: none;
+	--oneput-menu-item-background-hover: rgb(200 200 200 / 0.1);
+	--oneput-menu-item-background-active: rgb(200 200 200 / 0.2);
+
+	/* button states */
+	--oneput-button-outline-focus: 0.5px solid rgb(255 255 255 / 0.5);
+	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
+	--oneput-button-border-focus: none;
+	--oneput-button-outline-hover: 0.5px solid rgb(255 255 255 / 0.8);
+	--oneput-button-background-hover: rgb(150 150 150 / 0.2);
+	--oneput-button-border-hover: none;
+	--oneput-button-outline-active: 0.5px solid rgb(255 255 255 / 0.8);
+	--oneput-button-background-active: rgb(150 150 150 / 0.3);
+	--oneput-button-border-active: none;
+}
+
+/* #endregion */
+
+/* #region hflex, vflex, fchild */
+
+.oneput__hflex {
+	display: flex;
+	flex-direction: row;
+	gap: var(--oneput-hflex-gap);
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--oneput-hflex-padding);
+}
+
+/* Don't pad nested hflexes as this creates padding on padding within complex UI's. */
+.oneput__hflex .oneput__hflex {
+	padding: 0;
+}
+
+.oneput__vflex {
+	display: flex;
+	flex-direction: column;
+	gap: var(--oneput-vflex-gap);
+	align-items: stretch;
+	flex: 1 1 auto;
+}
+
+/* fchild */
+
+.oneput__fchild {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	flex: 1 1 auto;
+}
+
+/* #endregion */
+
+/* #region container */
+
+.oneput__container {
+	min-width: var(--oneput-min-width);
+	max-width: var(--oneput-max-width);
+	width: 100%;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-row-gap: 0;
+
+	/* --- */
+	background: var(--oneput-background);
+	border-radius: var(--oneput-border-radius);
+	border: var(--oneput-border);
+	border-top-width: var(--oneput-border-top);
+	border-bottom-width: var(--oneput-border-bottom);
+	border-left-width: var(--oneput-border-left);
+	border-right-width: var(--oneput-border-right);
+
+	font: var(--oneput-font);
+	color: var(--oneput-font-color);
+	box-shadow: var(--oneput-box-shadow);
+}
+
+/* #endregion */
+
+/* #region menu */
+
+.oneput__menu-anchor {
+	position: relative;
+}
+
+.oneput__menu-area {
+	margin: 0;
+	padding: var(--oneput-area-padding);
+	border-bottom: var(--oneput-strong-border);
+	width: 100%;
+
+	background: var(--oneput-background);
+	border-radius: var(--oneput-border-radius);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	border: var(--oneput-border);
+	border-top-width: var(--oneput-border-top);
+	border-bottom-width: var(--oneput-border-bottom);
+	border-left-width: var(--oneput-border-left);
+	border-right-width: var(--oneput-border-right);
+}
+.oneput__menu-body {
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	max-height: var(--oneput-menu-max-height);
+}
+.oneput__menu-body-content {
+	justify-content: center;
+	align-items: center;
+	margin: 1rem;
+	min-height: 8rem;
+}
+.oneput__menu-item {
+	background: var(--oneput-menu-item-background);
+}
+button.oneput__menu-item {
+	cursor: pointer;
+}
+button.oneput__menu-item--focused {
+	/* hover state is handled by the pointer */
+	background: var(--oneput-menu-item-background-hover);
+}
+button.oneput__menu-item:active {
+	background: var(--oneput-menu-item-background-active);
+}
+.oneput__menu-item-header {
+	margin-left: 0.6em;
+	margin-right: 0.6em;
+	flex: 0 auto;
+}
+
+/* Smaller descriptive text that might be present in a menu item... */
+.oneput__menu-item-description {
+	font: 100 0.8em sans-serif;
+	color: var(--oneput-text-muted);
+}
+
+.oneput__menu-item-body {
+	margin-left: 0.6em;
+}
+
+.oneput__menu-header {
+	background: var(--oneput-menu-header-background);
+	box-shadow: var(--oneput-menu-header-box-shadow);
+	clip-path: var(--oneput-menu-header-clip-path);
+}
+
+.oneput__menu-footer {
+	background: var(--oneput-menu-footer-background);
+	box-shadow: var(--oneput-menu-footer-box-shadow);
+	clip-path: var(--oneput-menu-footer-clip-path);
+}
+
+/* #endregion */
+
+/* #region divider */
+
+/* Sits alongside menu items and acts purely to divide other menu items.  Use normally with an hr. */
+.oneput__menu-divider {
+	border-top: var(--oneput-divider-border);
+	margin: var(--oneput-divider-margin);
+	color: var(--oneput-divider-text-color);
+	font: var(--oneput-divider-font);
+	padding-top: 0;
+	padding-bottom: 0;
+}
+/* For a divider that has a title. */
+.oneput__menu-divider-body {
+	margin-left: 0.6em;
+	padding-top: 6px;
+	padding-bottom: 2px;
+	gap: 0;
+}
+.oneput__menu-divider-title {
+	font-size: 0.7em;
+	letter-spacing: 0.6px;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+/* #endregion */
+
+/* #region input area */
+
+.oneput__input-area {
+	width: 100%;
+	display: flex;
+	align-items: center;
+
+	margin: 0;
+	padding: var(--oneput-area-padding);
+}
+
+.oneput__input-outer {
+	width: 100%;
+	gap: var(--oneput-hflex-padding);
+}
+
+.oneput__input-inner {
+	height: var(--oneput-input-height);
+	justify-content: space-between;
+	padding: 0 4px;
+}
+
+.oneput__input-left {
+	margin-left: var(--oneput-hflex-gap);
+}
+.oneput__input-right {
+	margin-right: var(--oneput-hflex-gap);
+}
+.oneput__input {
+	flex: 1 1 auto;
+	width: 100%;
+	padding: var(--oneput-input-padding-y) var(--oneput-input-padding-x);
+}
+
+.oneput__input-inner:focus-within {
+	outline: var(--oneput-input-outline);
+}
+
+.oneput__input-inner {
+	width: auto;
+	display: flex;
+	flex: 1;
+
+	background: var(--oneput-input-background);
+
+	margin: 0;
+	border-radius: var(--oneput-input-border-radius);
+	border: var(--oneput-input-border);
+	border-top-width: var(--oneput-input-border-top);
+	border-bottom-width: var(--oneput-input-border-bottom);
+	border-left-width: var(--oneput-input-border-left);
+	border-right-width: var(--oneput-input-border-right);
+}
+
+.oneput__input {
+	background: var(--oneput-area-padding);
+	color: var(--oneput-input-text-color);
+	font: var(--oneput-input-font);
+
+	flex: 1;
+
+	border: none;
+	outline: none;
+}
+.oneput__input::placeholder {
+	color: var(--oneput-placeholder-text-color, --oneput-input-text-color);
+}
+
+.oneput__input-left,
+.oneput__input-right {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* #endregion */
+
+/* #region spacers, icons and icon-buttons */
+
+/*
+ * These are included to get you useful defaults out of the box for icons and
+ * icon buttons as these make up 80%+ of the interactive UI.
+ *
+ * We can treat --oneput-icon-width like a standard unit for width and even height.
+ *
+ * - oneput__icon : look like icon-buttons but are just decorative
+ * - oneput__icon-button : are interactive icon-only buttons
+ * - oneput__icon-toggle-button : are icon buttons with binary persistent state
+ * - oneput__button : a button usually with text in it instead of an icon
+ * - oneput__primary-button : a standalone button with a bit more heft to it
+ */
+
+/* Spacers can act like an invisible icon or button to help balance your layouts */
+.oneput__spacer {
+	min-width: var(--oneput-icon-width);
+	max-width: var(--oneput-icon-width);
+}
+
+.oneput__primary-button {
+	flex: 0 0 var(--oneput-icon-width);
+	justify-content: center;
+	border: var(--oneput-button-border);
+	border-radius: var(--oneput-icon-border-radius);
+	padding: var(--oneput-icon-padding);
+	min-width: 7rem;
+	box-shadow: 0 0 5px 1px rgb(0 0 0 / 0.3);
+	outline: none !important;
+}
+
+.oneput__button,
+.oneput__icon-toggle-button,
+.oneput__icon-button,
+.oneput__icon {
+	flex: 0 0 var(--oneput-icon-width);
+	min-width: var(--oneput-icon-width);
+	min-height: var(--oneput-icon-width);
+	max-width: var(--oneput-icon-width);
+	max-height: var(--oneput-icon-width);
+	justify-content: center;
+	border-radius: var(--oneput-icon-border-radius);
+	padding: var(--oneput-icon-padding);
+	cursor: pointer;
+}
+.oneput__checkbox {
+	padding: 1rem;
+	flex: 0 0 var(--oneput-icon-width);
+	justify-content: center;
+	margin: 7.5px 0;
+}
+
+.oneput__icon-toggle-button,
+.oneput__icon-button,
+.oneput__icon {
+	font: var(--oneput-icon-font);
+}
+
+/* states */
+
+.oneput__primary-button:focus,
+.oneput__button:focus,
+.oneput__icon-button:focus {
+	outline: var(--oneput-button-outline-focus);
+	background: var(--oneput-button-background-focus);
+	border: var(--oneput-button-border-focus);
+}
+.oneput__primary-button:hover,
+.oneput__button:hover,
+.oneput__icon-button:hover {
+	outline: var(--oneput-button-outline-hover);
+	background: var(--oneput-button-background-hover);
+	border: var(--oneput-button-border-hover);
+}
+.oneput__primary-button:active,
+.oneput__button:active,
+.oneput__icon-button:active {
+	outline: var(--oneput-button-outline-active);
+	background: var(--oneput-button-background-active);
+	border: var(--oneput-button-border-active);
+}
+
+.oneput__icon-button-group-right {
+	justify-content: flex-end;
+}
+.oneput__icon-button-group {
+	justify-content: flex-start;
+}
+
+/* #endregion */
+
+/* #region debug */
+
+.oneput__debug .oneput__hflex {
+	outline: var(--oneput-debug-hflex-outline);
+	outline-offset: var(--oneput-debug-hflex-outline-offset);
+}
+.oneput__debug .oneput__hflex .oneput__hflex {
+	outline: var(--oneput-debug-hflex-outline-nested);
+}
+.oneput__debug .oneput__vflex {
+	outline: var(--oneput-debug-vflex-outline);
+	outline-offset: var(--oneput-debug-vflex-outline-offset);
+}
+.oneput__debug .oneput__vflex .oneput__vflex {
+	outline: var(--oneput-debug-vflex-outline-nested);
+}
+.oneput__debug .oneput__fchild {
+	outline: var(--oneput-debug-fchild-outline);
+	outline-offset: var(--oneput-debug-fchild-offset);
+}
+
+/* #endregion */
+
+/* #region kbd */
+
+.oneput__kbd code {
+	display: flex;
+	gap: 6px;
+	border-radius: 2px;
+	padding: 4px;
+	background-color: rgb(0 0 0 / 0.2);
+}
+.dark-mode .oneput__kbd kbd {
+	background-color: #555;
+}
+.oneput__kbd kbd {
+	border-radius: 2px;
+	border-color: rgb(0 0 0 / 0.1);
+	border-style: solid;
+	border-width: 0.5px;
+	min-width: 1rem;
+	padding: 2px;
+	font-size: 0.6rem;
+	text-align: center;
+	background-color: #eee;
+}
+
+/* #endregion */
+
+/* #region menu button */
+
+.oneput__menu-button svg {
+	transition: transform 0.4s;
+	transform: rotate(0deg);
+}
+.oneput__menu--open .oneput__menu-button svg {
+	transform: rotate(180deg);
+}
+
+/* #endregion */
+
+/* #region notification */
+
+.oneput__notification {
+	background: var(--oneput-notification-background);
+}
+
+/* #endregion */

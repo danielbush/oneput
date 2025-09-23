@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Anchor, OneputCornerButton, OneputController, Controller } from '$oneput';
+	import '../../../lib/jsed/styles/oneput-defaults.css';
 	import '../../../lib/jsed/styles/jsed-defaults.css';
 
 	let { children } = $props();

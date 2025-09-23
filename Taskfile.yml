@@ -101,7 +101,7 @@ tasks:
     cmds:
       - . "$NVM_DIR/nvm.sh" && nvm use 24
 
-  hooks:install:
+  git:hooks:install:
     desc: Install git hooks from scripts/ directory
     cmds:
       - mkdir -p .git/hooks

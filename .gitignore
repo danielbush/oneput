@@ -31,3 +31,5 @@ vite.config.ts.timestamp-*
 !.build/files/**
 
 .vscode/settings.json
+# Temporary whilst trying out some rules:
+.cursor/rules

@@ -55,6 +55,9 @@ tasks:
     desc: check types
     cmds:
       - pnpm run check --watch
+
+  # boilerplate / install / setup
+
   sv:create:
     desc: Run `sv create` using pnpm.  Creates a library template by default, set TEMPLATE to override.
     summary: |
@@ -66,3 +69,13 @@ tasks:
     desc: Run `sv add` to add addons used in this project.
     cmds:
       - pnpx sv add prettier eslint vitest playwright sveltekit-adapter
+  git:hooks:install:
+    desc: Install git hooks from scripts/ directory
+    cmds:
+      - mkdir -p .git/hooks
+      - cp scripts/pre-commit .git/hooks/pre-commit
+      - chmod +x .git/hooks/pre-commit
+      - echo "✅ Git hooks installed successfully!"
+      - echo ""
+      - echo "Current hooks:"
+      - ls -la .git/hooks/* 2>/dev/null | grep -v sample || echo "No hooks found"

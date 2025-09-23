@@ -9,7 +9,7 @@ export const rootUI = (c: Controller) => {
 	c.setBackBinding(() => {
 		c.menu.closeMenu();
 	});
-	c.ui.setDefaultUI<MyDefaultUIValues>({
+	c.ui.configureDefaultUI<MyDefaultUIValues>({
 		menuHeader: 'Home',
 		exitType: 'exit'
 	});

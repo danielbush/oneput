@@ -8,7 +8,7 @@ import { localKeys } from './config/keys.js';
 // keys and configure oneput.
 export const setController = (c: Controller) => {
 	const ui = new MyDefaultUI(c);
-	c.ui.configureDefaultUI(ui);
+	c.ui.setDefaultUI(ui);
 	c.keys.setDefaultKeys(globalKeys);
 	c.keys.setDefaultKeys(localKeys, true);
 	rootUI(c);

@@ -59,11 +59,11 @@ export class UIController {
 
 	private defaultUI?: DefaultUI;
 
-	configureDefaultUI(defaultUI: DefaultUI) {
+	setDefaultUI(defaultUI: DefaultUI) {
 		this.defaultUI = defaultUI;
 	}
 
-	setDefaultUI<T extends Record<string, unknown>>(values?: T) {
+	configureDefaultUI<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
 			this.defaultUI.setValues?.(values);
 		}

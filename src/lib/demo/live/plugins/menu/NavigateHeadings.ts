@@ -44,7 +44,7 @@ export class NavigateHeadings {
 	};
 
 	private updateUI = () => {
-		this.controller.ui.setDefaultUI({
+		this.controller.ui.configureDefaultUI({
 			menuHeader: 'Navigate Headings',
 			exitAction: this.exit
 		});

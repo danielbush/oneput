@@ -33,7 +33,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 					back: () => {
 						settingsUI(c, back);
 					}
-				});
+				}).run();
 			}
 		}),
 		menuItemWithIcon({
@@ -50,7 +50,7 @@ export const settingsUI = (c: Controller, back: () => void) => {
 					back: () => {
 						settingsUI(c, back);
 					}
-				});
+				}).run();
 			}
 		})
 	]);

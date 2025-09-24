@@ -123,6 +123,9 @@ export class KeyBindingsController {
 		this.keyMap = params.keyMap;
 		this.local = params.local;
 		this.back = params.back;
+	}
+
+	run() {
 		this.actionsUI();
 	}
 

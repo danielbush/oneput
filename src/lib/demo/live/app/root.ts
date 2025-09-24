@@ -47,7 +47,7 @@ export class RootUI {
 				leftIcon: tocIcon,
 				text: 'Navigate outline...',
 				action: () => {
-					NavigateHeadings.create(this.ctl, document, reload);
+					NavigateHeadings.create(this.ctl, document, reload).run();
 				}
 			}),
 			menuItemWithIcon({
@@ -68,10 +68,10 @@ export class RootUI {
 			}),
 			menuItemWithIcon({
 				id: 'async-search',
-				text: 'Demo: slow async menu items...',
+				text: 'Async menu items demo...',
 				leftIcon: searchIcon,
 				action: () => {
-					AsyncSearchExample.create(this.ctl, reload);
+					AsyncSearchExample.create(this.ctl, reload).run();
 				}
 			})
 		]);

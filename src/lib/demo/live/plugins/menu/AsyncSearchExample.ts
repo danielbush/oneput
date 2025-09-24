@@ -4,15 +4,17 @@ import { TestInputService } from '../../service/TestInputService.js';
 
 export class AsyncSearchExample {
 	static create(c: Controller, back: () => void) {
-		return new AsyncSearchExample(c, back);
+		const testService = TestInputService.create();
+		return new AsyncSearchExample(c, back, testService);
 	}
-
-	private testService = new TestInputService();
 
 	constructor(
 		private ctl: Controller,
-		private back: () => void
-	) {
+		private back: () => void,
+		private testService: TestInputService
+	) {}
+
+	run() {
 		this.ctl.setBackBinding(this.exit);
 		this.ctl.menu.setMenuItemsFnAsync(async (input) => {
 			try {
@@ -35,11 +37,11 @@ export class AsyncSearchExample {
 			}
 		});
 		this.ctl.input.setInputValue();
-		this.ctl.ui.setPlaceholder('Start typing...');
+		this.ctl.ui.setPlaceholder('Start typing something...');
 		this.ctl.menu.setMenuItems([
 			menuItemWithIcon({
 				id: 'initial',
-				text: 'Waiting...'
+				text: 'Start typing something...'
 			})
 		]);
 		this.ctl.input.focusInput();

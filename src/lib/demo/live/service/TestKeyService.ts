@@ -13,22 +13,14 @@ export class TestKeyService {
 		return new TestKeyService();
 	}
 
-	setGlobalKeys = async (keyMap: KeyBindingMap) => {
+	setKeys = async (keyMap: KeyBindingMap, isLocal: boolean) => {
 		return new Promise((resolve, reject) => {
 			setTimeout(() => {
 				if (config.simulateError) {
-					reject(new Error('Simulate error'));
+					reject(
+						new Error(`A simulated error occurred for ${isLocal ? 'local' : 'global'} key bindings`)
+					);
 				}
-				resolve(keyMap);
-			}, 1000);
-		});
-	};
-	setLocalKeys = async (keyMap: KeyBindingMap) => {
-		return new Promise((resolve, reject) => {
-			if (config.simulateError) {
-				reject(new Error('Simulate error'));
-			}
-			setTimeout(() => {
 				resolve(keyMap);
 			}, 1000);
 		});

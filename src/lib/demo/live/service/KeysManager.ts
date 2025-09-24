@@ -17,10 +17,10 @@ export class KeysManager {
 	updateKeys(newKeyMap: KeyBindingMap, isLocal: boolean) {
 		// Optimistic update
 		const notification = this.ctl.notify('Updating...', { duration: 3000 });
-		this.ctl.keys.setDefaultKeys(newKeyMap, false);
+		this.ctl.keys.setDefaultKeys(newKeyMap, isLocal);
 		// Push to store
 		return this.testKeyService
-			.setGlobalKeys(newKeyMap)
+			.setKeys(newKeyMap, isLocal)
 			.then(() => {
 				this.keyMap = newKeyMap;
 				notification.updateMessage('It worked!', { duration: 3000 });

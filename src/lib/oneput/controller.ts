@@ -1,73 +1,10 @@
-import { randomId, type OneputControllerProps } from './lib.js';
+import { type OneputControllerProps } from './lib.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
 import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
-import { xIcon } from './shared/icons.js';
-
-type NotificationParams = {
-	duration?: number;
-};
-
-class Notification {
-	static create(currentProps: Controller['currentProps'], message: string) {
-		return new Notification(currentProps, message);
-	}
-
-	constructor(
-		private currentProps: Controller['currentProps'],
-		private message: string,
-		private timeoutHandle: ReturnType<typeof setTimeout> | null = null
-	) {}
-
-	/**
-	 * Use this to update a message on an existing notification that presumably
-	 * is already showing.
-	 */
-	updateMessage(message: string, params: NotificationParams = {}) {
-		this.message = message;
-		this.run(params);
-	}
-
-	run(params: NotificationParams = {}) {
-		if (this.timeoutHandle) {
-			clearTimeout(this.timeoutHandle);
-		}
-		if (params.duration) {
-			this.timeoutHandle = setTimeout(() => {
-				this.currentProps.injectUI = undefined;
-			}, params.duration);
-		}
-		this.currentProps.injectUI = {
-			inner: {
-				id: randomId(),
-				type: 'hflex',
-				classes: ['oneput__notification'],
-				style: { width: '100%' },
-				children: [
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__menu-item-body'],
-						textContent: this.message
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: xIcon,
-						attr: {
-							onclick: () => {
-								this.currentProps.injectUI = undefined;
-							}
-						}
-					}
-				]
-			}
-		};
-	}
-}
+import { Notification, type NotificationParams } from './plugins/ui/Notification.js';
 
 export class Controller {
 	private events = new InternalEventEmitter();

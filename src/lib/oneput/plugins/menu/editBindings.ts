@@ -70,6 +70,19 @@ export const keybindingMenuItem: (params: {
 	};
 };
 
+function isMacOS() {
+	return (
+		// Extend the Navigator type to include userAgentData if it exists
+		(typeof navigator !== 'undefined' &&
+			// @ts-expect-error: userAgentData is not yet in all TS DOM types
+			navigator.userAgentData &&
+			// @ts-expect-error: userAgentData is not yet in all TS DOM types
+			navigator.userAgentData.platform === 'macOS') ||
+		(navigator.platform && navigator.platform.toLowerCase().includes('mac')) ||
+		/mac/i.test(navigator.userAgent)
+	);
+}
+
 const toBinding = (
 	keys: {
 		key: string;
@@ -79,11 +92,14 @@ const toBinding = (
 		controlKey: boolean;
 	}[]
 ) => {
+	const CONTROL_KEY = !isMacOS() ? '$mod' : 'Control';
+	const META_KEY = '$mod';
+
 	return keys
 		.map((k) => {
-			const modifier = `${k.metaKey ? 'Meta' : ''}${
+			const modifier = `${k.metaKey ? META_KEY : ''}${
 				k.altKey ? 'Alt' : ''
-			}${k.shiftKey ? 'Shift' : ''}${k.controlKey ? 'Control' : ''}`;
+			}${k.shiftKey ? 'Shift' : ''}${k.controlKey ? CONTROL_KEY : ''}`;
 			return modifier ? modifier + '+' + k.key.toUpperCase() : k.key.toUpperCase();
 		})
 		.join(' ');

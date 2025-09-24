@@ -21,10 +21,10 @@ export class SettingsUI {
 	) {}
 
 	run() {
-		this.ctl.setBackBinding(this.back);
 		const reload = () => {
 			this.run();
 		};
+		this.ctl.setBackBinding(this.back);
 		this.ctl.ui.configureDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Settings',
 			exitAction: this.back

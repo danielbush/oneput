@@ -2,14 +2,14 @@
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
 	import { type InputChangeEvent, type OneputProps } from '../lib.js';
-	import { fade } from 'svelte/transition';
+	import { elasticIn, elasticOut } from 'svelte/easing';
+
 	let {
 		inputElement = $bindable(),
 		inputValue = $bindable(''),
 		menuItemFocus = $bindable(0),
 		menuItemFocusOrigin = $bindable(undefined),
 		controller,
-		injectDuration = 300,
 		...props
 	}: OneputProps = $props();
 
@@ -37,6 +37,21 @@
 			}
 		}
 	};
+
+	function whoosh(
+		node: HTMLElement,
+		params: { delay?: number; duration?: number; easing?: (t: number) => number }
+	) {
+		const c = getComputedStyle(node);
+		const height = parseInt(c.height);
+
+		return {
+			delay: params.delay || 0,
+			duration: params.duration || 400,
+			easing: params.easing || elasticOut,
+			css: (t: number) => `height: ${t * height}px; opacity: ${t};`
+		};
+	}
 </script>
 
 <div id="oneput__container" class={['oneput__container', props.menuOpen && 'oneput__menu--open']}>
@@ -98,7 +113,11 @@
 		</div>
 	{/if}
 	{#if props.injectUI?.inner}
-		<section in:fade={{ duration: injectDuration }} class="oneput__inject-area">
+		<section
+			in:whoosh={{ duration: 1200, easing: elasticOut }}
+			out:whoosh={{ duration: 1200, easing: elasticIn }}
+			class="oneput__inject-area"
+		>
 			<Flex class="oneput__inject" {...props.injectUI.inner} />
 		</section>
 	{/if}

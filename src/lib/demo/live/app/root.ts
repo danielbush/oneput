@@ -79,6 +79,20 @@ export class RootUI {
 			}),
 			menuItemWithIcon({
 				id: randomId(),
+				text: 'Show permanent inline notification',
+				action: () => {
+					this.ctl.notify('This is a transient inline notification');
+				}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: 'Show transient inline notification',
+				action: () => {
+					this.ctl.notify('This is a transient inline notification', { duration: 3000 });
+				}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
 				text: `blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),

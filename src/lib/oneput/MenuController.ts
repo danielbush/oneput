@@ -3,7 +3,7 @@ import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmit
 import type { InputChangeListener, MenuItemAny, OneputControllerProps } from './lib.js';
 
 export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny>;
-export type MenuItemsFnAsync = (input: string) => Promise<Array<MenuItemAny>>;
+export type MenuItemsFnAsync = (input: string, items: MenuItemAny[]) => Promise<Array<MenuItemAny>>;
 
 export class MenuController {
 	public static create(currentProps: OneputControllerProps, events: InternalEventEmitter) {
@@ -44,7 +44,7 @@ export class MenuController {
 			if (this.menuItemsFn) {
 				return;
 			}
-			this.setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems));
+			this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems));
 		});
 	}
 
@@ -53,10 +53,7 @@ export class MenuController {
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
-				this.setMenuItems(
-					menuItemsFn(evt.target?.value ?? '', this.currentProps.menuItems || []),
-					true
-				);
+				this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems || []), true);
 			});
 		}
 	}
@@ -78,13 +75,13 @@ export class MenuController {
 				this.menuItemsSeqId = (this.menuItemsSeqId + 1) % 1000000;
 				const seqId = this.menuItemsSeqId;
 				const value = evt.target?.value ?? '';
-				const menuItems = await menuItemsFnAsync(value);
+				const menuItems = await menuItemsFnAsync(value, this.menuItems);
 				if (seqId !== this.menuItemsSeqId) {
 					console.warn(`discarded ${value}...`);
 					return;
 				}
 				console.warn(`got ${value}...`);
-				this.setMenuItems(menuItems, true);
+				this._setMenuItems(menuItems, true);
 			};
 			const debouncedHandler = debounce(handler, 500);
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
@@ -93,9 +90,8 @@ export class MenuController {
 		}
 	}
 
-	setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {
+	private _setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {
 		this.currentProps.menuItems = items;
-		this.menuItems = items;
 
 		if (preserveFocusIndex) {
 			this.currentProps.menuItemFocus = Math.min(
@@ -105,6 +101,11 @@ export class MenuController {
 		} else {
 			this.currentProps.menuItemFocus = 0;
 		}
+	}
+
+	setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {
+		this.menuItems = items;
+		this._setMenuItems(items, preserveFocusIndex);
 	}
 
 	get menuOpen() {

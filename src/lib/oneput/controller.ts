@@ -27,10 +27,10 @@ class Notification {
 	 */
 	updateMessage(message: string, params: NotificationParams = {}) {
 		this.message = message;
-		this.show(params);
+		this.run(params);
 	}
 
-	show(params: NotificationParams = {}) {
+	run(params: NotificationParams = {}) {
 		if (this.timeoutHandle) {
 			clearTimeout(this.timeoutHandle);
 		}
@@ -109,7 +109,7 @@ export class Controller {
 
 	notify(message: string, params: NotificationParams = {}): Notification {
 		const notification = Notification.create(this.currentProps, message);
-		notification.show(params);
+		notification.run(params);
 		return notification;
 	}
 }

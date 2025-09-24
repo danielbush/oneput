@@ -248,26 +248,28 @@
 .oneput__menu-area {
 	margin: 0;
 	padding: var(--oneput-area-padding);
-	border-bottom: var(--oneput-strong-border);
 	width: 100%;
-
-	background: var(--oneput-background);
-	border-radius: var(--oneput-border-radius);
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
-	border: var(--oneput-border);
-	border-top-width: var(--oneput-border-top);
-	border-bottom-width: var(--oneput-border-bottom);
-	border-left-width: var(--oneput-border-left);
-	border-right-width: var(--oneput-border-right);
 	max-height: 0;
 	transition: max-height 0.3s ease-in-out;
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 
+	background: var(--oneput-background);
+	border: 0;
+
 	.oneput__menu--open & {
 		max-height: var(--oneput-menu-max-height);
+
+		border: var(--oneput-border);
+		border-top-width: var(--oneput-border-top);
+		border-bottom-width: var(--oneput-border-bottom);
+		border-left-width: var(--oneput-border-left);
+		border-right-width: var(--oneput-border-right);
+		border-radius: var(--oneput-border-radius);
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+		border-bottom: var(--oneput-strong-border);
 	}
 }
 .oneput__menu-body {

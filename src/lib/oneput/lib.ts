@@ -36,7 +36,6 @@ export type OneputProps = {
 		outerRight?: FlexParams;
 	};
 	injectDuration?: number;
-	replaceDuration?: number;
 };
 
 export type OneputControllerProps = Omit<OneputProps, 'controller'>;

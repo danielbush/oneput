@@ -10,7 +10,6 @@
 		menuItemFocusOrigin = $bindable(undefined),
 		controller,
 		injectDuration = 300,
-		replaceDuration = 300,
 		...props
 	}: OneputProps = $props();
 
@@ -41,63 +40,59 @@
 </script>
 
 <div id="oneput__container" class={['oneput__container', props.menuOpen && 'oneput__menu--open']}>
-	{#if props.menuOpen}
+	{#if true}
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">
 				{#if props.replaceUI?.menu}
-					<div in:fade={{ duration: replaceDuration }}>
-						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
-					</div>
+					<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
 				{:else}
-					<div in:fade={{ duration: replaceDuration }}>
-						{#if props.menuUI?.header}
-							<Flex class="oneput__menu-header" {...props.menuUI.header} />
-						{/if}
-						<div class="oneput__menu-body">
-							{#each props.menuItems || [] as item, index (item.id)}
-								{#if item.ignored}
-									<Flex class={item.class ?? ''} {...item} />
-								{:else}
-									<Flex
-										{...item}
-										class={item.class ?? 'oneput__menu-item'}
-										classes={[
-											index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
-											...(item.classes ?? [])
-										]}
-										attr={{
-											...item.attr,
-											onpointerenter: (event: Event) => {
-												// Inject menu item focus handling...
-												menuItemFocus = index;
-												menuItemFocusOrigin = 'pointer';
-												// ...then run any client onpointerenter handlers.
-												if (typeof item.attr?.onpointerenter === 'function') {
-													item.attr.onpointerenter(event);
-												}
-											},
-											onpointerup: (event: Event) => {
-												// Run the MenuItem['action'].
-												// See POINTER_UP .
-												if (controller) {
-													item.action?.(controller);
-												}
-												if (typeof item.attr?.onpointerup === 'function') {
-													item.attr.onpointerup(event);
-												}
+					{#if props.menuUI?.header}
+						<Flex class="oneput__menu-header" {...props.menuUI.header} />
+					{/if}
+					<div class="oneput__menu-body">
+						{#each props.menuItems || [] as item, index (item.id)}
+							{#if item.ignored}
+								<Flex class={item.class ?? ''} {...item} />
+							{:else}
+								<Flex
+									{...item}
+									class={item.class ?? 'oneput__menu-item'}
+									classes={[
+										index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
+										...(item.classes ?? [])
+									]}
+									attr={{
+										...item.attr,
+										onpointerenter: (event: Event) => {
+											// Inject menu item focus handling...
+											menuItemFocus = index;
+											menuItemFocusOrigin = 'pointer';
+											// ...then run any client onpointerenter handlers.
+											if (typeof item.attr?.onpointerenter === 'function') {
+												item.attr.onpointerenter(event);
 											}
-										}}
-										attachments={{
-											[createAttachmentKey()]: scrollIntoView(index)
-										}}
-									/>
-								{/if}
-							{/each}
-						</div>
-						{#if props.menuUI?.footer}
-							<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
-						{/if}
+										},
+										onpointerup: (event: Event) => {
+											// Run the MenuItem['action'].
+											// See POINTER_UP .
+											if (controller) {
+												item.action?.(controller);
+											}
+											if (typeof item.attr?.onpointerup === 'function') {
+												item.attr.onpointerup(event);
+											}
+										}
+									}}
+									attachments={{
+										[createAttachmentKey()]: scrollIntoView(index)
+									}}
+								/>
+							{/if}
+						{/each}
 					</div>
+					{#if props.menuUI?.footer}
+						<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
+					{/if}
 				{/if}
 			</section>
 		</div>

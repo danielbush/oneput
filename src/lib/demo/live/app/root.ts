@@ -4,6 +4,7 @@ import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
 import { SettingsUI } from './settings.js';
+import { randomId } from '$lib/oneput/lib.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
@@ -33,6 +34,7 @@ export class RootUI {
 				});
 			});
 		});
+		let blankItemCounter = 0;
 		this.ctl.menu.setMenuItems([
 			menuItemWithIcon({
 				id: 'settings',
@@ -73,6 +75,46 @@ export class RootUI {
 				action: () => {
 					AsyncSearchExample.create(this.ctl, reload).run();
 				}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: `blank item ${++blankItemCounter}`,
+				action: () => {}
 			})
 		]);
 	}

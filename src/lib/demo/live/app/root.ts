@@ -3,17 +3,20 @@ import { searchIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/oneput/shared
 import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
-import { settingsUI } from './settings.js';
+import { SettingsUI } from './settings.js';
 
-export const rootUI = (c: Controller) => {
-	c.setBackBinding(() => {
-		c.menu.closeMenu();
+export const rootUI = (ctl: Controller) => {
+	ctl.setBackBinding(() => {
+		ctl.menu.closeMenu();
 	});
-	c.ui.configureDefaultUI<MyDefaultUIValues>({
+	ctl.ui.configureDefaultUI<MyDefaultUIValues>({
 		menuHeader: 'Home',
 		exitType: 'exit'
 	});
-	c.menu.setDefaultMenuItemsFn((input, menuItems) => {
+	const reload = () => {
+		rootUI(ctl);
+	};
+	ctl.menu.setDefaultMenuItemsFn((input, menuItems) => {
 		return menuItems.filter((item) => {
 			return item.children?.some((child) => {
 				if (child.type === 'fchild') {
@@ -23,15 +26,13 @@ export const rootUI = (c: Controller) => {
 			});
 		});
 	});
-	c.menu.setMenuItems([
+	ctl.menu.setMenuItems([
 		menuItemWithIcon({
 			id: 'settings',
 			leftIcon: settingsIcon,
 			text: 'Settings...',
 			action: () => {
-				settingsUI(c, () => {
-					rootUI(c);
-				});
+				SettingsUI.create(ctl, reload).run();
 			}
 		}),
 		menuItemWithIcon({
@@ -39,9 +40,7 @@ export const rootUI = (c: Controller) => {
 			leftIcon: tocIcon,
 			text: 'Navigate outline...',
 			action: () => {
-				NavigateHeadings.create(c, document, () => {
-					rootUI(c);
-				});
+				NavigateHeadings.create(ctl, document, reload);
 			}
 		}),
 		menuItemWithIcon({
@@ -57,7 +56,7 @@ export const rootUI = (c: Controller) => {
 			// leftIcon: commandIcon,
 			text: 'Hide',
 			action: () => {
-				c.toggleHide();
+				ctl.toggleHide();
 			}
 		}),
 		menuItemWithIcon({
@@ -65,9 +64,7 @@ export const rootUI = (c: Controller) => {
 			text: 'Demo: slow async menu items...',
 			leftIcon: searchIcon,
 			action: () => {
-				AsyncSearchExample.create(c, () => {
-					rootUI(c);
-				});
+				AsyncSearchExample.create(ctl, reload);
 			}
 		})
 	]);

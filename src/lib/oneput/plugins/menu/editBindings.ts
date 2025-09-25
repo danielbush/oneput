@@ -282,7 +282,7 @@ export class KeyBindingsController {
 				capturedKeys
 					.map(
 						(k) =>
-							`${k.controlKey ? 'Ctrl-' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${
+							`${k.controlKey ? '⌃' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${
 								k.altKey ? '⌥' : ''
 							}${k.key.toUpperCase()}`
 					)

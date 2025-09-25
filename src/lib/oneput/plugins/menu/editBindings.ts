@@ -294,6 +294,7 @@ export class KeyBindingsController {
 		this.controller.menu.disableMenuActions();
 		this.controller.menu.disableMenuOpenClose();
 		this.controller.menu.disableAllMenuItemsFn();
+		this.controller.input.disableInputElement();
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
@@ -324,6 +325,7 @@ export class KeyBindingsController {
 				this.controller.menu.enableMenuActions();
 				this.controller.menu.enableMenuOpenClose();
 				this.controller.menu.enableAllMenuItemsFn();
+				this.controller.input.enableInputElement();
 				this.actionUI(actionId);
 			},
 			reject: (evt: Event) => {
@@ -333,6 +335,7 @@ export class KeyBindingsController {
 				this.controller.menu.enableMenuActions();
 				this.controller.menu.enableMenuOpenClose();
 				this.controller.menu.enableAllMenuItemsFn();
+				this.controller.input.enableInputElement();
 				this.actionUI(actionId);
 			}
 		};

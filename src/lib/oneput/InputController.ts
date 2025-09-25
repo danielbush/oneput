@@ -50,4 +50,18 @@ export class InputController {
 			listener(evt);
 		});
 	}
+
+	disableInputElement() {
+		if (!this.inputElement) {
+			return;
+		}
+		this.inputElement.disabled = true;
+	}
+
+	enableInputElement() {
+		if (!this.inputElement) {
+			return;
+		}
+		this.inputElement.disabled = false;
+	}
 }

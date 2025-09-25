@@ -145,24 +145,10 @@ export class KeyBindingsController {
 		this.actionsUI();
 	}
 
-	private setKeys(keyMap: KeyBindingMap) {
-		this.keyBindingMap = keyMap;
-		if (this.reloadUI) {
-			this.reloadUI();
-		} else {
-			this.actionsUI();
-		}
-	}
-
-	private reloadUI?: () => void;
-
 	/**
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
-		this.reloadUI = () => {
-			this.actionsUI();
-		};
 		this.controller.setBackBinding(this.back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
 		this.controller.ui.setMenuUI({
@@ -186,9 +172,6 @@ export class KeyBindingsController {
 	 * UI displays bindings for a given action and lets you add/remove bindings.
 	 */
 	private actionUI = (actionId: string) => {
-		this.reloadUI = () => {
-			this.actionUI(actionId);
-		};
 		const { description, bindings } = this.keyBindingMap[actionId];
 		const back = () => {
 			this.actionsUI();
@@ -320,10 +303,10 @@ export class KeyBindingsController {
 				};
 				if (capturedKeys.length > 0) {
 					// Optimistic update...
-					this.setKeys(newKeyMap);
+					this.keyBindingMap = newKeyMap;
 					this.onChange(newKeyMap).catch(() => {
 						// Revert optimistic update...
-						this.setKeys(oldKeyMap);
+						this.keyBindingMap = oldKeyMap;
 					});
 				}
 				window.removeEventListener('keydown', keyListener);

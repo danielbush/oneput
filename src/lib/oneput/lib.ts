@@ -16,7 +16,8 @@ export type OneputProps = {
 	placeholder: string;
 	onInputChange?: InputChangeListener;
 	onMenuOpenChange?: (menuOpen: boolean) => void;
-	onMenuAction?: (evt: Event, item: MenuItem) => void;
+	onMenuAction?: (evt: Event, item: MenuItem, index: number) => void;
+	onMenuItemEnter?: (evt: Event, item: MenuItem, index: number) => void;
 	replaceUI?: {
 		menu?: FlexParams;
 	};

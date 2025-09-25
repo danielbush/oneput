@@ -78,18 +78,14 @@
 									attr={{
 										...item.attr,
 										onpointerenter: (event: Event) => {
-											// Inject menu item focus handling...
-											menuItemFocus = index;
-											menuItemFocusOrigin = 'pointer';
-											// ...then run any client onpointerenter handlers.
+											props.onMenuItemEnter?.(event, item, index);
 											if (typeof item.attr?.onpointerenter === 'function') {
 												item.attr.onpointerenter(event);
 											}
 										},
 										onpointerup: (event: Event) => {
-											// Run the MenuItem['action'].
 											// See POINTER_UP .
-											props.onMenuAction?.(event, item);
+											props.onMenuAction?.(event, item, index);
 											if (typeof item.attr?.onpointerup === 'function') {
 												item.attr.onpointerup(event);
 											}

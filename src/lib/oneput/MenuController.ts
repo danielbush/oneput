@@ -29,6 +29,13 @@ export class MenuController {
 			}
 			this.doMenuAction();
 		};
+		this.currentProps.onMenuItemEnter = (_, __, index) => {
+			if (this.menuDisabled) {
+				return;
+			}
+			this.currentProps.menuItemFocusOrigin = 'pointer';
+			this.currentProps.menuItemFocus = index;
+		};
 	}
 
 	/**

@@ -291,8 +291,9 @@ export class KeyBindingsController {
 		};
 
 		this.controller.keys.disableKeys();
-		this.controller.menu.disable();
-		// this.controller.input.disable();
+		this.controller.menu.disableMenuActions();
+		this.controller.menu.disableMenuOpenClose();
+		this.controller.menu.disableAllMenuItemsFn();
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
@@ -320,14 +321,18 @@ export class KeyBindingsController {
 				}
 				window.removeEventListener('keydown', keyListener);
 				this.controller.keys.enableKeys();
-				this.controller.menu.enable();
+				this.controller.menu.enableMenuActions();
+				this.controller.menu.enableMenuOpenClose();
+				this.controller.menu.enableAllMenuItemsFn();
 				this.actionUI(actionId);
 			},
 			reject: (evt: Event) => {
 				evt.preventDefault();
 				window.removeEventListener('keydown', keyListener);
 				this.controller.keys.enableKeys();
-				this.controller.menu.enable();
+				this.controller.menu.enableMenuActions();
+				this.controller.menu.enableMenuOpenClose();
+				this.controller.menu.enableAllMenuItemsFn();
 				this.actionUI(actionId);
 			}
 		};

@@ -24,15 +24,12 @@ export class MenuController {
 			this.events.emit({ type: 'menu-open-change', payload: menuOpen });
 		};
 		this.currentProps.onMenuAction = () => {
-			if (this.menuDisabled) {
+			if (this.disableActions) {
 				return;
 			}
 			this.doMenuAction();
 		};
 		this.currentProps.onMenuItemEnter = (_, __, index) => {
-			if (this.menuDisabled) {
-				return;
-			}
 			this.currentProps.menuItemFocusOrigin = 'pointer';
 			this.currentProps.menuItemFocus = index;
 		};
@@ -48,16 +45,22 @@ export class MenuController {
 	 *
 	 */
 	public disableDefaultMenuItemsFn = false;
+	/**
+	 * Disable ALL menuItemsFn calls.
+	 */
+	private disableMenuItemsFn = false;
 	private removeDefaultMenuItemsFn: () => void = () => {};
 	private removeMenuItemsFn: () => void = () => {};
 	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
 	private menuItems: Array<MenuItemAny> = [];
 	private menuItemsSeqId = 0;
-	private menuDisabled = false;
+	private disableActions = false;
+	private disableOpenClose = false;
+
 	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
 		this.removeDefaultMenuItemsFn();
-		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
-			if (this.menuDisabled) {
+		const handler: InputChangeListener = (evt) => {
+			if (this.disableMenuItemsFn) {
 				return;
 			}
 			if (this.disableDefaultMenuItemsFn) {
@@ -67,10 +70,14 @@ export class MenuController {
 				return;
 			}
 			this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems));
-		});
+		};
+		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
 	}
 
 	doMenuAction() {
+		if (this.disableActions) {
+			return;
+		}
 		if (this.currentMenuItem) {
 			if (this.currentMenuItem.action) {
 				this.currentMenuItem.action(this.controller);
@@ -82,12 +89,13 @@ export class MenuController {
 		this.removeMenuItemsFn();
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
-			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
-				if (this.menuDisabled) {
+			const handler: InputChangeListener = (evt) => {
+				if (this.disableMenuItemsFn) {
 					return;
 				}
 				this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems || []), true);
-			});
+			};
+			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
 		}
 	}
 
@@ -101,7 +109,7 @@ export class MenuController {
 		if (menuItemsFnAsync) {
 			this.menuItemsFn = menuItemsFnAsync;
 			const handler: InputChangeListener = async (evt) => {
-				if (this.menuDisabled) {
+				if (this.disableMenuItemsFn) {
 					return;
 				}
 				// TODO: something cleaner than use modulus?
@@ -161,14 +169,14 @@ export class MenuController {
 	}
 
 	openMenu = () => {
-		if (this.menuDisabled) {
+		if (this.disableOpenClose) {
 			return;
 		}
 		this.currentProps.menuOpen = true;
 	};
 
 	closeMenu = () => {
-		if (this.menuDisabled) {
+		if (this.disableOpenClose) {
 			return;
 		}
 		this.currentProps.menuOpen = false;
@@ -183,9 +191,6 @@ export class MenuController {
 	}
 
 	focusNextMenuItem() {
-		if (this.menuDisabled) {
-			return;
-		}
 		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		for (
 			let i = this.nextMenuItemIndex(this.menuItemFocus), c = 0;
@@ -200,9 +205,6 @@ export class MenuController {
 	}
 
 	focusPreviousMenuItem() {
-		if (this.menuDisabled) {
-			return;
-		}
 		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		for (
 			let i = this.previousMenuItemIndex(this.menuItemFocus), c = 0;
@@ -216,11 +218,26 @@ export class MenuController {
 		}
 	}
 
-	disable() {
-		this.menuDisabled = true;
+	disableMenuActions() {
+		this.disableActions = true;
 	}
 
-	enable() {
-		this.menuDisabled = false;
+	disableMenuOpenClose() {
+		this.disableOpenClose = true;
+	}
+	disableAllMenuItemsFn() {
+		this.disableMenuItemsFn = true;
+	}
+
+	enableMenuActions() {
+		this.disableActions = false;
+	}
+
+	enableMenuOpenClose() {
+		this.disableOpenClose = false;
+	}
+
+	enableAllMenuItemsFn() {
+		this.disableMenuItemsFn = false;
 	}
 }

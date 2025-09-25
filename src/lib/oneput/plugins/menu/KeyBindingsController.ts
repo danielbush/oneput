@@ -11,6 +11,20 @@ import {
 	xIcon
 } from '$lib/oneput/shared/icons.js';
 
+/**
+ * Captures certain fields from a browser KeyboardEvent.
+ *
+ * We use this to avoid holding references to actual KeyboardEvents as there may
+ * be issues doing this.
+ */
+export type KeyEvent = {
+	key: string;
+	metaKey: boolean;
+	shiftKey: boolean;
+	altKey: boolean;
+	controlKey: boolean;
+};
+
 const keybindingMenuItem: (params: {
 	id: string;
 	text: string;
@@ -83,15 +97,7 @@ function isMacOS() {
 	);
 }
 
-const toBinding = (
-	keys: {
-		key: string;
-		metaKey: boolean;
-		shiftKey: boolean;
-		altKey: boolean;
-		controlKey: boolean;
-	}[]
-) => {
+const keyEventToBinding = (keys: KeyEvent[]) => {
 	const CONTROL_KEY = !isMacOS() ? '$mod' : 'Control';
 	const META_KEY = '$mod';
 
@@ -246,13 +252,7 @@ export class KeyBindingsController {
 	}
 
 	private startKeyCapture = (actionId: string) => {
-		const capturedKeys: {
-			key: string;
-			metaKey: boolean;
-			shiftKey: boolean;
-			altKey: boolean;
-			controlKey: boolean;
-		}[] = [];
+		const capturedKeys: KeyEvent[] = [];
 		const keyListener = (evt: KeyboardEvent) => {
 			// Ignore modifier only key presses.
 			if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(evt.key)) {
@@ -298,7 +298,7 @@ export class KeyBindingsController {
 					...this.keyBindingMap,
 					[actionId]: {
 						...this.keyBindingMap[actionId],
-						bindings: [...this.keyBindingMap[actionId].bindings, toBinding(capturedKeys)]
+						bindings: [...this.keyBindingMap[actionId].bindings, keyEventToBinding(capturedKeys)]
 					}
 				};
 				if (capturedKeys.length > 0) {

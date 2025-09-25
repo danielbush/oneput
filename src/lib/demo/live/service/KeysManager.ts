@@ -35,22 +35,20 @@ export class KeysManager {
 		}).run();
 	}
 
-	updateKeys(newKeyMap: KeyBindingMap) {
+	async updateKeys(newKeyMap: KeyBindingMap) {
 		// Optimistic update
 		const notification = this.ctl.notify('Updating...', { duration: 3000 });
 		this.ctl.keys.setDefaultKeys(newKeyMap, this.isLocal);
 		// Push to store
-		return this.testKeyService
-			.setKeys(newKeyMap, this.isLocal)
-			.then(() => {
-				this.keyMap = newKeyMap;
-				notification.updateMessage('It worked!', { duration: 3000 });
-			})
-			.catch((err) => {
-				notification.updateMessage(err.message);
-				// Revert optimistic update...
-				this.ctl.keys.setDefaultKeys(this.keyMap, this.isLocal);
-				throw err;
-			});
+		try {
+			await this.testKeyService.setKeys(newKeyMap, this.isLocal);
+			this.keyMap = newKeyMap;
+			notification.updateMessage('It worked!', { duration: 3000 });
+		} catch (err) {
+			notification.updateMessage((err as Error).message);
+			// Revert optimistic update...
+			this.ctl.keys.setDefaultKeys(this.keyMap, this.isLocal);
+			throw err;
+		}
 	}
 }

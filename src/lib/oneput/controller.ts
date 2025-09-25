@@ -36,14 +36,6 @@ export class Controller {
 		this.goBack = back || (() => {});
 	}
 
-	doAction() {
-		if (this.menu.currentMenuItem) {
-			if (this.menu.currentMenuItem.action) {
-				this.menu.currentMenuItem.action(this);
-			}
-		}
-	}
-
 	notify(message: string, params: NotificationParams = {}): Notification {
 		const notification = Notification.create(this.currentProps, message);
 		notification.run(params);

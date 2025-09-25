@@ -35,7 +35,7 @@ export const localKeys: KeyBindingMap = {
 	doAction: {
 		bindings: ['Enter'],
 		action: (c) => {
-			c.doAction();
+			c.menu.doMenuAction();
 		},
 		description: 'Do action'
 	},

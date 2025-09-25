@@ -23,8 +23,8 @@ export class MenuController {
 		this.currentProps.onMenuOpenChange = (menuOpen) => {
 			this.events.emit({ type: 'menu-open-change', payload: menuOpen });
 		};
-		this.currentProps.onMenuAction = (evt, item) => {
-			item.action?.(this.controller);
+		this.currentProps.onMenuAction = () => {
+			this.doMenuAction();
 		};
 	}
 
@@ -58,6 +58,14 @@ export class MenuController {
 			}
 			this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems));
 		});
+	}
+
+	doMenuAction() {
+		if (this.currentMenuItem) {
+			if (this.currentMenuItem.action) {
+				this.currentMenuItem.action(this.controller);
+			}
+		}
 	}
 
 	setMenuItemsFn(menuItemsFn?: MenuItemsFn) {

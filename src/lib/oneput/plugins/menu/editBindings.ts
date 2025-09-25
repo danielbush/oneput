@@ -123,7 +123,7 @@ export class KeyBindingsController {
 
 	private controller: Controller;
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
-	private keyMap: KeyBindingMap;
+	private keyBindingMap: KeyBindingMap;
 	private local: boolean;
 	private back: () => void;
 
@@ -136,7 +136,7 @@ export class KeyBindingsController {
 	}) {
 		this.controller = params.controller;
 		this.onChange = params.onChange;
-		this.keyMap = params.keyMap;
+		this.keyBindingMap = params.keyMap;
 		this.local = params.local;
 		this.back = params.back;
 	}
@@ -145,8 +145,8 @@ export class KeyBindingsController {
 		this.actionsUI();
 	}
 
-	setKeys(keyMap: KeyBindingMap) {
-		this.keyMap = keyMap;
+	private setKeys(keyMap: KeyBindingMap) {
+		this.keyBindingMap = keyMap;
 		if (this.reloadUI) {
 			this.reloadUI();
 		} else {
@@ -157,7 +157,7 @@ export class KeyBindingsController {
 	private reloadUI?: () => void;
 
 	/**
-	 * UI for managing a set of action bindings.
+	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
 		this.reloadUI = () => {
@@ -169,7 +169,7 @@ export class KeyBindingsController {
 			header: menuHeaderUI({ title: 'Key bindings', exitAction: this.back })
 		});
 		this.controller.menu.setMenuItems(
-			Object.entries(this.keyMap).map(([id, { description, bindings }]) =>
+			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
 					id,
 					text: description,
@@ -182,11 +182,14 @@ export class KeyBindingsController {
 		);
 	};
 
+	/**
+	 * UI displays bindings for a given action and lets you add/remove bindings.
+	 */
 	private actionUI = (actionId: string) => {
 		this.reloadUI = () => {
 			this.actionUI(actionId);
 		};
-		const { description, bindings } = this.keyMap[actionId];
+		const { description, bindings } = this.keyBindingMap[actionId];
 		const back = () => {
 			this.actionsUI();
 		};
@@ -219,6 +222,9 @@ export class KeyBindingsController {
 		]);
 	};
 
+	/**
+	 * Triggered by actionUI when a new binding is being created for a given action.
+	 */
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
 		this.controller.ui.setInputUI({
@@ -304,12 +310,12 @@ export class KeyBindingsController {
 				// If this is a button in input.right then preventDefault stops
 				// the input from being focused.
 				evt.preventDefault();
-				const oldKeyMap = this.keyMap;
+				const oldKeyMap = this.keyBindingMap;
 				const newKeyMap = {
-					...this.keyMap,
+					...this.keyBindingMap,
 					[actionId]: {
-						...this.keyMap[actionId],
-						bindings: [...this.keyMap[actionId].bindings, toBinding(capturedKeys)]
+						...this.keyBindingMap[actionId],
+						bindings: [...this.keyBindingMap[actionId].bindings, toBinding(capturedKeys)]
 					}
 				};
 				if (capturedKeys.length > 0) {
@@ -346,8 +352,10 @@ export class KeyBindingsController {
 		if (!yes) {
 			return;
 		}
-		this.keyMap[actionId].bindings = this.keyMap[actionId].bindings.filter((b) => b !== binding);
-		this.controller.keys.setKeys(this.keyMap, this.local);
+		this.keyBindingMap[actionId].bindings = this.keyBindingMap[actionId].bindings.filter(
+			(b) => b !== binding
+		);
+		this.controller.keys.setKeys(this.keyBindingMap, this.local);
 		this.actionUI(actionId);
 	};
 }

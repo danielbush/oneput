@@ -9,7 +9,6 @@
 		inputValue = $bindable(''),
 		menuItemFocus = $bindable(0),
 		menuItemFocusOrigin = $bindable(undefined),
-		controller,
 		...props
 	}: OneputProps = $props();
 
@@ -90,9 +89,7 @@
 										onpointerup: (event: Event) => {
 											// Run the MenuItem['action'].
 											// See POINTER_UP .
-											if (controller) {
-												item.action?.(controller);
-											}
+											props.onMenuAction?.(event, item);
 											if (typeof item.attr?.onpointerup === 'function') {
 												item.attr.onpointerup(event);
 											}

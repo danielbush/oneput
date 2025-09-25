@@ -25,6 +25,23 @@ export type KeyEvent = {
 	controlKey: boolean;
 };
 
+class KeyBindings {
+	constructor(private keyBindingMap: KeyBindingMap) {}
+
+	addBinding(actionId: string, keyEvents: KeyEvent[]) {
+		this.keyBindingMap = {
+			...this.keyBindingMap,
+			[actionId]: {
+				...this.keyBindingMap[actionId],
+				bindings: [...this.keyBindingMap[actionId].bindings, keyEventToBinding(keyEvents)]
+			}
+		};
+	}
+	get keyBindingsMap() {
+		return this.keyBindingMap;
+	}
+}
+
 const keybindingMenuItem: (params: {
 	id: string;
 	text: string;
@@ -293,18 +310,13 @@ export class KeyBindingsController {
 				// If this is a button in input.right then preventDefault stops
 				// the input from being focused.
 				evt.preventDefault();
-				const oldKeyMap = this.keyBindingMap;
-				const newKeyMap = {
-					...this.keyBindingMap,
-					[actionId]: {
-						...this.keyBindingMap[actionId],
-						bindings: [...this.keyBindingMap[actionId].bindings, keyEventToBinding(capturedKeys)]
-					}
-				};
 				if (capturedKeys.length > 0) {
+					const oldKeyMap = this.keyBindingMap;
+					const keyBindings = new KeyBindings(oldKeyMap);
+					keyBindings.addBinding(actionId, capturedKeys);
 					// Optimistic update...
-					this.keyBindingMap = newKeyMap;
-					this.onChange(newKeyMap).catch(() => {
+					this.keyBindingMap = keyBindings.keyBindingsMap;
+					this.onChange(keyBindings.keyBindingsMap).catch(() => {
 						// Revert optimistic update...
 						this.keyBindingMap = oldKeyMap;
 					});

@@ -24,6 +24,9 @@ export class MenuController {
 			this.events.emit({ type: 'menu-open-change', payload: menuOpen });
 		};
 		this.currentProps.onMenuAction = () => {
+			if (this.menuDisabled) {
+				return;
+			}
 			this.doMenuAction();
 		};
 	}

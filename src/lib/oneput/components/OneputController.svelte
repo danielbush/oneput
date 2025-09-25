@@ -2,12 +2,12 @@
 	// Wraps Oneput and creates and exposes a controller that lets you
 	// programmatically control Oneput.
 	import Oneput from './Oneput.svelte';
-	import type { OneputControllerProps } from '../lib.js';
 	import { Controller } from '../controller.js';
 	import { onMount } from 'svelte';
+	import type { OneputProps } from '../lib.js';
 
 	let inputElement: HTMLInputElement | undefined = $state(undefined);
-	const currentProps = $state<OneputControllerProps>({
+	const currentProps = $state<OneputProps>({
 		menuItemFocus: 0,
 		inputValue: '',
 		placeholder: 'Type here...',
@@ -30,7 +30,6 @@
 
 <Oneput
 	{...currentProps}
-	{controller}
 	bind:inputValue={currentProps.inputValue}
 	bind:inputElement
 	bind:menuItemFocus={currentProps.menuItemFocus}

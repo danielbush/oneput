@@ -1,6 +1,6 @@
 import { debounce } from '@std/async';
 import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmitter.js';
-import type { InputChangeListener, MenuItemAny, OneputControllerProps } from './lib.js';
+import type { InputChangeListener, MenuItemAny, OneputProps } from './lib.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny>;
@@ -9,7 +9,7 @@ export type MenuItemsFnAsync = (input: string, items: MenuItemAny[]) => Promise<
 export class MenuController {
 	public static create(
 		controller: Controller,
-		currentProps: OneputControllerProps,
+		currentProps: OneputProps,
 		events: InternalEventEmitter
 	) {
 		return new MenuController(controller, currentProps, events);
@@ -17,7 +17,7 @@ export class MenuController {
 
 	constructor(
 		private controller: Controller,
-		private currentProps: OneputControllerProps,
+		private currentProps: OneputProps,
 		private events: InternalEventEmitter
 	) {
 		this.currentProps.onMenuOpenChange = (menuOpen) => {

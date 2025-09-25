@@ -1,13 +1,13 @@
 import type { InternalEventEmitter } from './InternalEventEmitter.js';
-import type { InputChangeEvent, InputChangeListener, OneputControllerProps } from './lib.js';
+import type { InputChangeEvent, InputChangeListener, OneputProps } from './lib.js';
 
 export class InputController {
-	public static create(currentProps: OneputControllerProps, events: InternalEventEmitter) {
+	public static create(currentProps: OneputProps, events: InternalEventEmitter) {
 		return new InputController(currentProps, events);
 	}
 
 	constructor(
-		private currentProps: OneputControllerProps,
+		private currentProps: OneputProps,
 		private events: InternalEventEmitter
 	) {
 		this.currentProps.onInputChange = (evt) => {

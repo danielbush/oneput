@@ -7,7 +7,6 @@ export type InputChangeEvent = Event & {
 export type InputChangeListener = (evt: InputChangeEvent) => void;
 
 export type OneputProps = {
-	controller?: Controller;
 	menuItemFocus?: number;
 	menuItemFocusOrigin?: 'pointer' | 'keyboard';
 	menuOpen?: boolean;
@@ -37,8 +36,6 @@ export type OneputProps = {
 		outerRight?: FlexParams;
 	};
 };
-
-export type OneputControllerProps = Omit<OneputProps, 'controller'>;
 
 /**
  * Represents a either a horizontal or vertical flex container which is used to

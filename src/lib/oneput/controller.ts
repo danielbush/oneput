@@ -1,10 +1,10 @@
-import { type OneputControllerProps } from './lib.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
 import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/ui/Notification.js';
+import type { OneputProps } from './lib.js';
 
 export class Controller {
 	private events = new InternalEventEmitter();
@@ -14,9 +14,9 @@ export class Controller {
 	public ui: UIController;
 
 	/**
-	 * @param currentProps Should be reactive eg $state<OneputControllerProps>({...})
+	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
 	 */
-	constructor(private currentProps: OneputControllerProps) {
+	constructor(private currentProps: OneputProps) {
 		this.menu = MenuController.create(this, this.currentProps, this.events);
 		this.input = InputController.create(this.currentProps, this.events);
 		this.keys = KeysController.create(this.events, this, this.menu.menuOpen);

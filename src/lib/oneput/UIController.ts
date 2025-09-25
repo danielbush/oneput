@@ -1,20 +1,20 @@
-import type { FlexParams, OneputControllerProps } from './lib.js';
+import type { FlexParams, OneputProps } from './lib.js';
 
 export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
 	setValues?(values: V): void;
-	input?: OneputControllerProps['inputUI'];
-	menu?: OneputControllerProps['menuUI'];
-	inner?: OneputControllerProps['innerUI'];
-	outer?: OneputControllerProps['outerUI'];
+	input?: OneputProps['inputUI'];
+	menu?: OneputProps['menuUI'];
+	inner?: OneputProps['innerUI'];
+	outer?: OneputProps['outerUI'];
 }
 
 export class UIController {
-	static create(currentProps: OneputControllerProps) {
+	static create(currentProps: OneputProps) {
 		return new UIController(currentProps);
 	}
 
 	constructor(
-		private currentProps: OneputControllerProps,
+		private currentProps: OneputProps,
 		private defaultPlaceholder: string = 'Type here...'
 	) {
 		this.currentProps.placeholder = this.defaultPlaceholder;

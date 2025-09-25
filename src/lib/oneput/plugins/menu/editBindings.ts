@@ -11,7 +11,7 @@ import {
 	xIcon
 } from '$lib/oneput/shared/icons.js';
 
-export const keybindingMenuItem: (params: {
+const keybindingMenuItem: (params: {
 	id: string;
 	text: string;
 	/**

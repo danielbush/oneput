@@ -34,10 +34,13 @@ export class MenuController {
 	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
 	private menuItems: Array<MenuItemAny> = [];
 	private menuItemsSeqId = 0;
-
+	private menuDisabled = false;
 	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
 		this.removeDefaultMenuItemsFn();
 		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
+			if (this.menuDisabled) {
+				return;
+			}
 			if (this.disableDefaultMenuItemsFn) {
 				return;
 			}
@@ -53,6 +56,9 @@ export class MenuController {
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
+				if (this.menuDisabled) {
+					return;
+				}
 				this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems || []), true);
 			});
 		}
@@ -68,6 +74,9 @@ export class MenuController {
 		if (menuItemsFnAsync) {
 			this.menuItemsFn = menuItemsFnAsync;
 			const handler: InputChangeListener = async (evt) => {
+				if (this.menuDisabled) {
+					return;
+				}
 				// TODO: something cleaner than use modulus?
 				// The probability that an old call a million calls back is
 				// received just after a call with the same id a million later
@@ -125,10 +134,16 @@ export class MenuController {
 	}
 
 	openMenu = () => {
+		if (this.menuDisabled) {
+			return;
+		}
 		this.currentProps.menuOpen = true;
 	};
 
 	closeMenu = () => {
+		if (this.menuDisabled) {
+			return;
+		}
 		this.currentProps.menuOpen = false;
 	};
 
@@ -141,6 +156,9 @@ export class MenuController {
 	}
 
 	focusNextMenuItem() {
+		if (this.menuDisabled) {
+			return;
+		}
 		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		for (
 			let i = this.nextMenuItemIndex(this.menuItemFocus), c = 0;
@@ -155,6 +173,9 @@ export class MenuController {
 	}
 
 	focusPreviousMenuItem() {
+		if (this.menuDisabled) {
+			return;
+		}
 		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		for (
 			let i = this.previousMenuItemIndex(this.menuItemFocus), c = 0;
@@ -166,5 +187,13 @@ export class MenuController {
 				break;
 			}
 		}
+	}
+
+	disable() {
+		this.menuDisabled = true;
+	}
+
+	enable() {
+		this.menuDisabled = false;
 	}
 }

@@ -290,10 +290,12 @@ export class KeyBindingsController {
 			);
 		};
 
+		this.controller.keys.disableKeys();
+		this.controller.menu.disable();
+		// this.controller.input.disable();
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
-		this.controller.keys.disableKeys();
 
 		return {
 			accept: (evt: Event) => {
@@ -318,12 +320,14 @@ export class KeyBindingsController {
 				}
 				window.removeEventListener('keydown', keyListener);
 				this.controller.keys.enableKeys();
+				this.controller.menu.enable();
 				this.actionUI(actionId);
 			},
 			reject: (evt: Event) => {
 				evt.preventDefault();
 				window.removeEventListener('keydown', keyListener);
 				this.controller.keys.enableKeys();
+				this.controller.menu.enable();
 				this.actionUI(actionId);
 			}
 		};

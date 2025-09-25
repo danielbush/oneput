@@ -25,7 +25,6 @@ export class RootUI {
 			exitType: 'exit'
 		});
 		this.ctl.menu.setDefaultMenuItemsFn((input, menuItems) => {
-			console.log('root got', menuItems.length);
 			return menuItems.filter((item) => {
 				return item.children?.some((child) => {
 					if (child.type === 'fchild') {

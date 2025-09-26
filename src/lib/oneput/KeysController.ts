@@ -6,11 +6,15 @@ export type KeyBinding = {
 	action: (c: Controller) => void;
 	description: string;
 	/**
-	 * Bindings in tinykeys format eg "Control+D" .
-	 * Each item in the array is a complete binding.
+	 * Bindings in tinykeys format eg ["Control+D", "Alt+Shift+X"] .
+	 *
+	 * Each item in the array is a key with optional modifier.
+	 * The array represents a sequential series of key presses over time.
+	 * Think "g i" in gmail means "go to inbox".
 	 */
 	bindings: string[];
 };
+
 export type KeyBindingMap = {
 	[actionId: string]: KeyBinding;
 };

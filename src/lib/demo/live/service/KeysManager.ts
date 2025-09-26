@@ -3,6 +3,10 @@ import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { KeyBindingsController } from '$lib/oneput/plugins/menu/KeyBindingsController.js';
 import { TestKeyService } from './TestKeyService.js';
 
+/**
+ * Combines the ui (KeyBindingsController) with the storage (TestKeyService) to
+ * let you manage your key bindings..
+ */
 export class KeysManager {
 	static create(c: Controller, keyMap: KeyBindingMap, isLocal: boolean) {
 		const testKeyService = TestKeyService.create();

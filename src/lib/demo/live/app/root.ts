@@ -92,6 +92,13 @@ export class RootUI {
 			}),
 			menuItemWithIcon({
 				id: randomId(),
+				text: 'Show alert',
+				action: () => {
+					this.ctl.alert('Heading', 'This is the alert message');
+				}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
 				text: `blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),

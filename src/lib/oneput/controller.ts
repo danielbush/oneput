@@ -5,6 +5,7 @@ import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/ui/Notification.js';
 import type { OneputProps } from './lib.js';
+import { Alert } from './plugins/ui/Alert.js';
 
 export class Controller {
 	private events = new InternalEventEmitter();
@@ -42,7 +43,8 @@ export class Controller {
 		return notification;
 	}
 
-	alert(message: string) {
-		alert(message);
+	alert(title: string, message: string, onClose?: () => void) {
+		const alert = Alert.create(this.currentProps, title, message);
+		alert.run(onClose);
 	}
 }

@@ -2,7 +2,7 @@
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
 	import { type InputChangeEvent, type OneputProps } from '../lib.js';
-	import { elasticIn, elasticOut } from 'svelte/easing';
+	import { elasticOut, linear } from 'svelte/easing';
 
 	let {
 		inputElement = $bindable(),
@@ -58,7 +58,12 @@
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">
 				{#if props.replaceUI?.menu}
-					<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
+					<section
+						in:whoosh={{ duration: 800, easing: elasticOut }}
+						class="oneput__replace-menu-area"
+					>
+						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
+					</section>
 				{:else}
 					{#if props.menuUI?.header}
 						<Flex class="oneput__menu-header" {...props.menuUI.header} />
@@ -107,8 +112,8 @@
 	{/if}
 	{#if props.injectUI?.inner}
 		<section
-			in:whoosh={{ duration: 1200, easing: elasticOut }}
-			out:whoosh={{ duration: 1200, easing: elasticIn }}
+			in:whoosh={{ duration: 800, easing: elasticOut }}
+			out:whoosh={{ duration: 400, easing: linear }}
 			class="oneput__inject-area"
 		>
 			<Flex class="oneput__inject" {...props.injectUI.inner} />

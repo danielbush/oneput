@@ -258,8 +258,11 @@ export class KeyBindingsController {
 					const oldKeyMap = this.keyBindingMap;
 					const keyBindings = new KeyEventBindings(oldKeyMap);
 					if (keyBindings.bindingExists(capturedKeys)) {
-						this.controller.alert('Binding already exists');
-						exit();
+						this.controller.alert(
+							'Binding already exists',
+							'This binding is already in use by another action.  Please choose a different binding.',
+							exit
+						);
 						return;
 					}
 					keyBindings.addBinding(actionId, capturedKeys);

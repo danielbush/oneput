@@ -46,7 +46,7 @@ export function keyEventIsEqual(keyEvent1: KeyEvent, keyEvent2: KeyEvent) {
 export function keyEventToHumanReadableString(k: KeyEvent): string {
 	return `${k.controlKey ? '⌃' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${
 		k.altKey ? '⌥' : ''
-	}${k.key.toLowerCase()}`;
+	}${k.key.toUpperCase()}`;
 }
 
 export function keyEventBindingIsEqual(binding1: KeyEvent[], binding2: KeyEvent[]) {

@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
+import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 import { KeysManager } from '../service/KeysManager.js';

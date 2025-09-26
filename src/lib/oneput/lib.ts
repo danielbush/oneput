@@ -160,3 +160,16 @@ export function hideShowListener(show: boolean): Attachment<HTMLElement> {
 		};
 	};
 }
+
+export function isMacOS() {
+	return (
+		// Extend the Navigator type to include userAgentData if it exists
+		(typeof navigator !== 'undefined' &&
+			// @ts-expect-error: userAgentData is not yet in all TS DOM types
+			navigator.userAgentData &&
+			// @ts-expect-error: userAgentData is not yet in all TS DOM types
+			navigator.userAgentData.platform === 'macOS') ||
+		(navigator.platform && navigator.platform.toLowerCase().includes('mac')) ||
+		/mac/i.test(navigator.userAgent)
+	);
+}

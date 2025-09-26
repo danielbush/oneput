@@ -1,4 +1,4 @@
-import type { KeyBindingMap } from '$lib/oneput/KeysController.js';
+import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {

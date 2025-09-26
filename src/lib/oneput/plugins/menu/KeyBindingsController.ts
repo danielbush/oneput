@@ -1,6 +1,12 @@
 import { inputUI, menuHeaderUI, menuItemWithIcon } from '$lib/demo/live/config/ui.js';
 import type { Controller } from '$lib/oneput/controller.js';
-import type { KeyBinding, KeyBindingMap } from '$lib/oneput/KeysController.js';
+import { type KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import {
+	keyboardEventToKeyEvent,
+	keyEventToHumanReadableString,
+	type KeyEvent
+} from '$lib/oneput/KeyEvent.js';
+import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { randomId as randomId } from '$lib/oneput/lib.js';
 import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
 import {
@@ -10,197 +16,6 @@ import {
 	tickIcon,
 	xIcon
 } from '$lib/oneput/shared/icons.js';
-
-// Example:
-//
-// binding : "control+y e e t"
-// (1) there are 4 key events separated by a space.
-// (2) the first key event has modifiers separated by a plus.
-// (3) A KeyBindingMap will have a list of bindings; each binding is an alternative
-//
-// binding = one or more key events
-
-function isMacOS() {
-	return (
-		// Extend the Navigator type to include userAgentData if it exists
-		(typeof navigator !== 'undefined' &&
-			// @ts-expect-error: userAgentData is not yet in all TS DOM types
-			navigator.userAgentData &&
-			// @ts-expect-error: userAgentData is not yet in all TS DOM types
-			navigator.userAgentData.platform === 'macOS') ||
-		(navigator.platform && navigator.platform.toLowerCase().includes('mac')) ||
-		/mac/i.test(navigator.userAgent)
-	);
-}
-
-/**
- * Captures certain fields from a browser KeyboardEvent.
- *
- * We use this to avoid holding references to actual KeyboardEvents as there may
- * be issues doing this.
- */
-export type KeyEvent = {
-	key: string;
-	metaKey: boolean;
-	shiftKey: boolean;
-	altKey: boolean;
-	controlKey: boolean;
-};
-
-function keyEventIsEqual(keyEvent1: KeyEvent, keyEvent2: KeyEvent) {
-	return (
-		keyEvent1.key === keyEvent2.key &&
-		keyEvent1.metaKey === keyEvent2.metaKey &&
-		keyEvent1.shiftKey === keyEvent2.shiftKey &&
-		keyEvent1.altKey === keyEvent2.altKey &&
-		keyEvent1.controlKey === keyEvent2.controlKey
-	);
-}
-
-function keyEventToHumanReadableString(k: KeyEvent): string {
-	return `${k.controlKey ? '⌃' : ''}${k.metaKey ? '⌘' : ''}${k.shiftKey ? '⇧' : ''}${
-		k.altKey ? '⌥' : ''
-	}${k.key.toLowerCase()}`;
-}
-
-function keyEventBindingIsEqual(binding1: KeyEvent[], binding2: KeyEvent[]) {
-	return binding1.every((keyEvent, index) => keyEventIsEqual(keyEvent, binding2[index]));
-}
-
-function keyboardEventToKeyEvent(event: KeyboardEvent): KeyEvent {
-	return {
-		key: event.key,
-		metaKey: event.metaKey,
-		shiftKey: event.shiftKey,
-		altKey: event.altKey,
-		controlKey: event.ctrlKey
-	};
-}
-
-/**
- * Takes a single KeyEvent and generates tinykey binding.
- *
- * The output is suitable for using by tinykeys and this format is also the one
- * that users will use when hand-coding key configs.  Internally though, we may
- * use a KeyEvents format so that we have a canonical representation that we can
- * compare easily.
- */
-function keyEventsToBinding(keyEvents: KeyEvent[]): KeyBinding['bindings'][number] {
-	const CONTROL_KEY = !isMacOS() ? '$mod' : 'Control';
-	const META_KEY = '$mod';
-
-	return keyEvents
-		.map((keyEvent) => {
-			const modifiers = [
-				keyEvent.metaKey ? META_KEY : '',
-				keyEvent.altKey ? 'Alt' : '',
-				keyEvent.shiftKey ? 'Shift' : '',
-				keyEvent.controlKey ? CONTROL_KEY : ''
-			]
-				.filter(Boolean)
-				.join('+');
-
-			return modifiers ? modifiers + '+' + keyEvent.key : keyEvent.key;
-		})
-		.join(' ');
-}
-
-/**
- * Turns any tinykeys key binding into a KeyEvent which is a canonical form that we
- * can safely compare against.
- */
-function keyBindingToKeyEvents(binding: KeyBinding['bindings'][number]): KeyEvent[] {
-	const keys = binding.split(' ');
-	return keys.map((key) => {
-		const keyEvent: KeyEvent = {
-			key: '',
-			metaKey: true,
-			shiftKey: true,
-			altKey: true,
-			controlKey: true
-		};
-		const parts = key.split('+');
-		keyEvent.key = parts.pop()?.toLowerCase() ?? '';
-		const modifiers = parts.join('+');
-		keyEvent.metaKey = modifiers.includes('Meta');
-		keyEvent.shiftKey = modifiers.includes('Shift');
-		keyEvent.altKey = modifiers.includes('Alt');
-		keyEvent.controlKey = modifiers.includes('Control');
-		if (modifiers.includes('$mod')) {
-			if (isMacOS()) {
-				keyEvent.metaKey = true;
-			} else {
-				keyEvent.controlKey = true;
-			}
-		}
-		return keyEvent;
-	});
-}
-
-type KeyEventBinding = {
-	action: (c: Controller) => void;
-	description: string;
-	/**
-	 * KeyEvent[] is a single binding eg "control+y e e t"
-	 */
-	bindings: KeyEvent[][];
-};
-type KeyEventsMap = { [actionId: string]: KeyEventBinding };
-
-function keyBindingMapToKeyEventsMap(keyBindingMap: KeyBindingMap): KeyEventsMap {
-	return Object.entries(keyBindingMap).reduce((acc, [actionId, keyBinding]) => {
-		acc[actionId] = {
-			action: keyBinding.action,
-			description: keyBinding.description,
-			bindings: keyBinding.bindings.map(keyBindingToKeyEvents)
-		};
-		return acc;
-	}, {} as KeyEventsMap);
-}
-
-function keyEventsMapToKeyBindingMap(keyEventsMap: KeyEventsMap): KeyBindingMap {
-	return Object.entries(keyEventsMap).reduce((acc, [actionId, keyEventBinding]) => {
-		acc[actionId] = {
-			action: keyEventBinding.action,
-			description: keyEventBinding.description,
-			bindings: keyEventBinding.bindings.map(keyEventsToBinding)
-		};
-		return acc;
-	}, {} as KeyBindingMap);
-}
-
-class KeyBindings {
-	/**
-	 * Store bindings in a canonical KeyEventsformat that we can easily compare against.
-	 */
-	private keyEventsMap: KeyEventsMap;
-
-	constructor(keyBindingMap: KeyBindingMap) {
-		this.keyEventsMap = keyBindingMapToKeyEventsMap(keyBindingMap);
-	}
-
-	addBinding(actionId: string, keyEvents: KeyEvent[]) {
-		this.keyEventsMap[actionId].bindings.push(keyEvents);
-	}
-
-	/**
-	 * Check if key presses have been used for another action already.
-	 */
-	bindingExists(keyEvents: KeyEvent[]) {
-		const allBindings: KeyEvent[][] = Object.values(this.keyEventsMap).flatMap(
-			(keyEventBinding) => keyEventBinding.bindings
-		);
-		return allBindings.some((binding) => keyEventBindingIsEqual(binding, keyEvents));
-	}
-
-	/**
-	 * Convert the key events map back to a key binding map - this is the format
-	 * that is usually written by users in configs etc.
-	 */
-	get keyBindingsMap() {
-		return keyEventsMapToKeyBindingMap(this.keyEventsMap);
-	}
-}
 
 const keybindingMenuItem: (params: {
 	id: string;
@@ -441,7 +256,7 @@ export class KeyBindingsController {
 				evt.preventDefault();
 				if (capturedKeys.length > 0) {
 					const oldKeyMap = this.keyBindingMap;
-					const keyBindings = new KeyBindings(oldKeyMap);
+					const keyBindings = new KeyEventBindings(oldKeyMap);
 					if (keyBindings.bindingExists(capturedKeys)) {
 						this.controller.alert('Binding already exists');
 						exit();

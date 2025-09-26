@@ -41,4 +41,8 @@ export class Controller {
 		notification.run(params);
 		return notification;
 	}
+
+	alert(message: string) {
+		alert(message);
+	}
 }

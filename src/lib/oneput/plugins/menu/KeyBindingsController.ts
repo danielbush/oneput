@@ -37,6 +37,13 @@ class KeyBindings {
 			}
 		};
 	}
+
+	bindingExists(keyEvents: KeyEvent[]) {
+		return Object.values(this.keyBindingMap).some((binding) => {
+			return binding.bindings.includes(keyEventToBinding(keyEvents));
+		});
+	}
+
 	get keyBindingsMap() {
 		return this.keyBindingMap;
 	}
@@ -120,10 +127,16 @@ const keyEventToBinding = (keys: KeyEvent[]) => {
 
 	return keys
 		.map((k) => {
-			const modifier = `${k.metaKey ? META_KEY : ''}${
-				k.altKey ? 'Alt' : ''
-			}${k.shiftKey ? 'Shift' : ''}${k.controlKey ? CONTROL_KEY : ''}`;
-			return modifier ? modifier + '+' + k.key.toUpperCase() : k.key.toUpperCase();
+			const modifiers = [
+				k.metaKey ? META_KEY : '',
+				k.altKey ? 'Alt' : '',
+				k.shiftKey ? 'Shift' : '',
+				k.controlKey ? CONTROL_KEY : ''
+			]
+				.filter(Boolean)
+				.join('+');
+
+			return modifiers ? modifiers + '+' + k.key : k.key;
 		})
 		.join(' ');
 };
@@ -304,6 +317,15 @@ export class KeyBindingsController {
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
+		const exit = () => {
+			window.removeEventListener('keydown', keyListener);
+			this.controller.keys.enableKeys();
+			this.controller.menu.enableMenuActions();
+			this.controller.menu.enableMenuOpenClose();
+			this.controller.menu.enableAllMenuItemsFn();
+			this.controller.input.enableInputElement();
+			this.actionUI(actionId);
+		};
 
 		return {
 			accept: (evt: Event) => {
@@ -313,6 +335,11 @@ export class KeyBindingsController {
 				if (capturedKeys.length > 0) {
 					const oldKeyMap = this.keyBindingMap;
 					const keyBindings = new KeyBindings(oldKeyMap);
+					if (keyBindings.bindingExists(capturedKeys)) {
+						this.controller.alert('Binding already exists');
+						exit();
+						return;
+					}
 					keyBindings.addBinding(actionId, capturedKeys);
 					// Optimistic update...
 					this.keyBindingMap = keyBindings.keyBindingsMap;
@@ -321,23 +348,11 @@ export class KeyBindingsController {
 						this.keyBindingMap = oldKeyMap;
 					});
 				}
-				window.removeEventListener('keydown', keyListener);
-				this.controller.keys.enableKeys();
-				this.controller.menu.enableMenuActions();
-				this.controller.menu.enableMenuOpenClose();
-				this.controller.menu.enableAllMenuItemsFn();
-				this.controller.input.enableInputElement();
-				this.actionUI(actionId);
+				exit();
 			},
 			reject: (evt: Event) => {
 				evt.preventDefault();
-				window.removeEventListener('keydown', keyListener);
-				this.controller.keys.enableKeys();
-				this.controller.menu.enableMenuActions();
-				this.controller.menu.enableMenuOpenClose();
-				this.controller.menu.enableAllMenuItemsFn();
-				this.controller.input.enableInputElement();
-				this.actionUI(actionId);
+				exit();
 			}
 		};
 	};

@@ -80,7 +80,7 @@ export class RootUI {
 				id: randomId(),
 				text: 'Show permanent inline notification',
 				action: () => {
-					this.ctl.notify('This is a transient inline notification');
+					this.ctl.notify('This is a permanent inline notification');
 				}
 			}),
 			menuItemWithIcon({

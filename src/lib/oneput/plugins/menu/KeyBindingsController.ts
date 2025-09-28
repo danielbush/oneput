@@ -258,10 +258,11 @@ export class KeyBindingsController {
 					const oldKeyMap = this.keyBindingMap;
 					const keyBindings = new KeyEventBindings(oldKeyMap);
 					if (keyBindings.bindingExists(capturedKeys)) {
+						// Exit to get out of capture mode, then show the alert.
+						exit();
 						this.controller.alert(
 							'Binding already exists',
-							'This binding is already in use by another action.  Please choose a different binding.',
-							exit
+							'This binding is already in use by another action.  Please choose a different binding.'
 						);
 						return;
 					}

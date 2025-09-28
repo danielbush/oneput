@@ -2,18 +2,23 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
 
 export class Alert {
-	static create(currentProps: Controller['currentProps'], title: string, message: string) {
-		return new Alert(currentProps, title, message);
+	static create(controller: Controller, title: string, message: string) {
+		return new Alert(controller, title, message);
 	}
 
 	constructor(
-		private currentProps: Controller['currentProps'],
+		private controller: Controller,
 		private title: string,
 		private message: string
 	) {}
 
 	run(onClose?: () => void) {
-		this.currentProps.replaceUI = {
+		this.controller.keys.disableKeys();
+		this.controller.menu.disableMenuActions();
+		this.controller.menu.disableMenuOpenClose();
+		this.controller.menu.disableAllMenuItemsFn();
+		this.controller.input.disableInputElement();
+		this.controller.ui.replaceUI({
 			menu: {
 				id: randomId(),
 				type: 'vflex',
@@ -35,15 +40,23 @@ export class Alert {
 						tag: 'button',
 						classes: ['oneput__primary-button'],
 						textContent: 'OK',
+						onMount: (node) => {
+							node.focus();
+						},
 						attr: {
 							onclick: () => {
 								onClose?.();
-								this.currentProps.replaceUI = undefined;
+								this.controller.ui.replaceUI();
+								this.controller.keys.enableKeys();
+								this.controller.menu.enableMenuActions();
+								this.controller.menu.enableMenuOpenClose();
+								this.controller.menu.enableAllMenuItemsFn();
+								this.controller.input.enableInputElement();
 							}
 						}
 					}
 				]
 			}
-		};
+		});
 	}
 }

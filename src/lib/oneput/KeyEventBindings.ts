@@ -4,6 +4,7 @@ import {
 	keyEventBindingIsEqual,
 	keyEventsMapToKeyBindingMap,
 	type KeyEvent,
+	type KeyEventBinding,
 	type KeyEventsMap
 } from './KeyEvent.js';
 
@@ -29,11 +30,10 @@ export class KeyEventBindings {
 	/**
 	 * Check if key presses have been used for another action already.
 	 */
-	bindingExists(keyEvents: KeyEvent[]) {
-		const allBindings: KeyEvent[][] = Object.values(this.keyEventsMap).flatMap(
-			(keyEventBinding) => keyEventBinding.bindings
+	find(keyEvents: KeyEvent[]): KeyEventBinding[] {
+		return Object.values(this.keyEventsMap).filter((keyEventBinding) =>
+			keyEventBinding.bindings.some((binding) => keyEventBindingIsEqual(binding, keyEvents))
 		);
-		return allBindings.some((binding) => keyEventBindingIsEqual(binding, keyEvents));
 	}
 
 	/**

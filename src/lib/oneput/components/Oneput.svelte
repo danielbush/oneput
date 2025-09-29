@@ -9,6 +9,9 @@
 		inputValue = $bindable(''),
 		menuItemFocus = $bindable(0),
 		menuItemFocusOrigin = $bindable(undefined),
+		menuAnimationDuration = 200,
+		injectAnimationDuration = 400,
+		replaceAnimationDuration = 600,
 		...props
 	}: OneputProps = $props();
 
@@ -39,14 +42,14 @@
 
 	function whoosh(
 		node: HTMLElement,
-		params: { delay?: number; duration?: number; easing?: (t: number) => number }
+		params: { delay?: number; duration: number; easing?: (t: number) => number }
 	) {
 		const c = getComputedStyle(node);
 		const height = parseInt(c.height);
 
 		return {
 			delay: params.delay || 0,
-			duration: params.duration || 400,
+			duration: params.duration,
 			easing: params.easing || elasticOut,
 			css: (t: number) => `height: ${t * height}px; opacity: ${t};`
 		};
@@ -64,12 +67,12 @@
 	{#if props.menuOpen || props.replaceUI?.menu}
 		<div class="oneput__menu-anchor">
 			<section
-				in:whoosh={{ duration: 200, easing: linear }}
-				out:whoosh={{ duration: 200, easing: linear }}
+				in:whoosh={{ duration: menuAnimationDuration, easing: linear }}
+				out:whoosh={{ duration: menuAnimationDuration, easing: linear }}
 				class="oneput__menu-area"
 			>
 				{#if props.replaceUI?.menu}
-					<section in:whoosh={{ duration: 800, easing: elasticOut }}>
+					<section in:whoosh={{ duration: replaceAnimationDuration, easing: elasticOut }}>
 						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
 					</section>
 				{:else}
@@ -120,8 +123,8 @@
 	{/if}
 	{#if props.injectUI?.inner}
 		<section
-			in:whoosh={{ duration: 800, easing: elasticOut }}
-			out:whoosh={{ duration: 400, easing: linear }}
+			in:whoosh={{ duration: injectAnimationDuration, easing: linear }}
+			out:whoosh={{ duration: injectAnimationDuration, easing: linear }}
 			class="oneput__inject-area"
 		>
 			<Flex class="oneput__inject" {...props.injectUI.inner} />

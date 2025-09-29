@@ -36,6 +36,9 @@ export type OneputProps = {
 		outerLeft?: FlexParams;
 		outerRight?: FlexParams;
 	};
+	menuAnimationDuration?: number;
+	injectAnimationDuration?: number;
+	replaceAnimationDuration?: number;
 };
 
 /**

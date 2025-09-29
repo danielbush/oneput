@@ -20,6 +20,7 @@ export class Alert {
 		this.controller.input.enableInputElement();
 		this.controller.ui.replaceUI();
 		this.controller.keys.restoreKeys(true);
+		this.controller.ui.setPlaceholder();
 		this.onClose?.();
 	};
 
@@ -38,6 +39,7 @@ export class Alert {
 		this.controller.menu.disableMenuOpenClose();
 		this.controller.menu.disableAllMenuItemsFn();
 		this.controller.input.disableInputElement();
+		this.controller.ui.setPlaceholder('Click "ok" or type enter to continue...');
 		this.controller.ui.replaceUI({
 			menu: {
 				id: randomId(),

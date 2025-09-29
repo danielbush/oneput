@@ -38,7 +38,7 @@ export class Controller {
 	}
 
 	notify(message: string, params: NotificationParams = {}): Notification {
-		const notification = Notification.create(this.currentProps, message);
+		const notification = Notification.create(this, message);
 		notification.run(params);
 		return notification;
 	}

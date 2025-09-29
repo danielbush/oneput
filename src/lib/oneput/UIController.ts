@@ -85,4 +85,8 @@ export class UIController {
 	replaceUI(ui?: OneputProps['replaceUI']) {
 		this.currentProps.replaceUI = ui;
 	}
+
+	injectUI(ui?: OneputProps['injectUI']) {
+		this.currentProps.injectUI = ui;
+	}
 }

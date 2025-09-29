@@ -7,12 +7,12 @@ export type NotificationParams = {
 };
 
 export class Notification {
-	static create(currentProps: Controller['currentProps'], message: string) {
-		return new Notification(currentProps, message);
+	static create(controller: Controller, message: string) {
+		return new Notification(controller, message);
 	}
 
 	constructor(
-		private currentProps: Controller['currentProps'],
+		private controller: Controller,
 		private message: string,
 		private timeoutHandle: ReturnType<typeof setTimeout> | null = null
 	) {}
@@ -32,10 +32,10 @@ export class Notification {
 		}
 		if (params.duration) {
 			this.timeoutHandle = setTimeout(() => {
-				this.currentProps.injectUI = undefined;
+				this.controller.ui.injectUI();
 			}, params.duration);
 		}
-		this.currentProps.injectUI = {
+		this.controller.ui.injectUI({
 			inner: {
 				id: randomId(),
 				type: 'hflex',
@@ -55,12 +55,12 @@ export class Notification {
 						innerHTMLUnsafe: xIcon,
 						attr: {
 							onclick: () => {
-								this.currentProps.injectUI = undefined;
+								this.controller.ui.injectUI();
 							}
 						}
 					}
 				]
 			}
-		};
+		});
 	}
 }

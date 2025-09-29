@@ -44,7 +44,7 @@ export class Alert {
 			menu: {
 				id: randomId(),
 				type: 'vflex',
-				classes: ['oneput__menu-body-content'],
+				classes: ['oneput__menu-body-content', 'oneput__alert'],
 				children: [
 					{
 						id: 'alert-title',

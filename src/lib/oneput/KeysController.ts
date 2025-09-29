@@ -6,8 +6,10 @@ import type { KeyBindingMap } from './KeyBinding.js';
 /**
  * Manages key bindings.
  *
- * - c.keys.setKeys(bindings, isLocal) sets a set of key bindings and replaces any previous call
- * - c.keys.setKeys({], isLocal} clears bindings
+ * - setKeys(bindings, isLocal) : sets a set of key bindings; these will be replaced by the next call
+ * - setKeys({], isLocal} : clears bindings
+ * - setTempKeys(...) : lets you temporarily set bindings in place of the previous call to setKeys
+ * - restoreKeys(...) : use this to restore remove setTempKeys and restore the previous setKeys call
  *
  */
 export class KeysController {
@@ -91,9 +93,30 @@ export class KeysController {
 
 	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
+			this.restoreLocalBindings = bindings;
+			this.handleLocalKeys(bindings);
+		} else {
+			this.restoreGlobalBindings = bindings;
+			this.handleGlobalKeys(bindings);
+		}
+	}
+
+	private restoreLocalBindings: KeyBindingMap = {};
+	private restoreGlobalBindings: KeyBindingMap = {};
+
+	setTempKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
+		if (isLocal) {
 			this.handleLocalKeys(bindings);
 		} else {
 			this.handleGlobalKeys(bindings);
+		}
+	}
+
+	restoreKeys(isLocal: boolean = false) {
+		if (isLocal) {
+			this.setKeys(this.restoreLocalBindings, true);
+		} else {
+			this.setKeys(this.restoreGlobalBindings, false);
 		}
 	}
 }

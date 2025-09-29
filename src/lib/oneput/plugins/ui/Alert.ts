@@ -19,13 +19,12 @@ export class Alert {
 		this.controller.menu.enableAllMenuItemsFn();
 		this.controller.input.enableInputElement();
 		this.controller.ui.replaceUI();
-		// We'll blank the keys.
-		this.controller.keys.setKeys({});
+		this.controller.keys.restoreKeys(true);
 		this.onClose?.();
 	};
 
 	private start = () => {
-		this.controller.keys.setKeys(
+		this.controller.keys.setTempKeys(
 			{
 				ok: {
 					description: 'OK',

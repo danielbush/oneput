@@ -595,7 +595,7 @@ button.oneput__menu-item:active {
 	background: var(--oneput-notification-background);
 }
 
-.oneput__menu-area:has(.oneput__alert) {
+.oneput__menu--replaced .oneput__menu-area {
 	background: var(--oneput-alert-background);
 }
 

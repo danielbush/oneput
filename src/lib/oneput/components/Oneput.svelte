@@ -53,15 +53,19 @@
 	}
 </script>
 
-<div id="oneput__container" class={['oneput__container', props.menuOpen && 'oneput__menu--open']}>
+<div
+	id="oneput__container"
+	class={[
+		'oneput__container',
+		props.menuOpen && 'oneput__menu--open',
+		props.replaceUI?.menu && 'oneput__menu--replaced'
+	]}
+>
 	{#if true}
 		<div class="oneput__menu-anchor">
 			<section class="oneput__menu-area">
 				{#if props.replaceUI?.menu}
-					<section
-						in:whoosh={{ duration: 800, easing: elasticOut }}
-						class="oneput__replace-menu-area"
-					>
+					<section in:whoosh={{ duration: 800, easing: elasticOut }}>
 						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
 					</section>
 				{:else}

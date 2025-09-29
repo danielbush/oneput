@@ -2,18 +2,39 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
 
 export class Alert {
-	static create(controller: Controller, title: string, message: string) {
-		return new Alert(controller, title, message);
+	static create(controller: Controller, title: string, message: string, onClose?: () => void) {
+		return new Alert(controller, title, message, onClose);
 	}
 
 	constructor(
 		private controller: Controller,
 		private title: string,
-		private message: string
+		private message: string,
+		private onClose?: () => void
 	) {}
 
-	run(onClose?: () => void) {
-		this.controller.keys.disableKeys();
+	private stop = () => {
+		this.controller.menu.enableMenuActions();
+		this.controller.menu.enableMenuOpenClose();
+		this.controller.menu.enableAllMenuItemsFn();
+		this.controller.input.enableInputElement();
+		this.controller.ui.replaceUI();
+		// We'll blank the keys.
+		this.controller.keys.setKeys({});
+		this.onClose?.();
+	};
+
+	private start = () => {
+		this.controller.keys.setKeys(
+			{
+				ok: {
+					description: 'OK',
+					bindings: ['Enter'],
+					action: this.stop
+				}
+			},
+			true
+		);
 		this.controller.menu.disableMenuActions();
 		this.controller.menu.disableMenuOpenClose();
 		this.controller.menu.disableAllMenuItemsFn();
@@ -44,19 +65,15 @@ export class Alert {
 							node.focus();
 						},
 						attr: {
-							onclick: () => {
-								onClose?.();
-								this.controller.ui.replaceUI();
-								this.controller.keys.enableKeys();
-								this.controller.menu.enableMenuActions();
-								this.controller.menu.enableMenuOpenClose();
-								this.controller.menu.enableAllMenuItemsFn();
-								this.controller.input.enableInputElement();
-							}
+							onclick: this.stop
 						}
 					}
 				]
 			}
 		});
+	};
+
+	run() {
+		this.start();
 	}
 }

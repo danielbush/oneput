@@ -13,14 +13,11 @@ export class RootUI {
 
 	constructor(private ctl: Controller) {}
 
-	run() {
-		const reload = () => {
-			this.run();
-		};
+	run = () => {
 		this.ctl.setBackBinding(() => {
 			this.ctl.menu.closeMenu();
 		});
-		this.ctl.ui.configureDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Home',
 			exitType: 'exit'
 		});
@@ -41,7 +38,7 @@ export class RootUI {
 				leftIcon: settingsIcon,
 				text: 'Settings...',
 				action: () => {
-					SettingsUI.create(this.ctl, reload).run();
+					SettingsUI.create(this.ctl, this.run).run();
 				}
 			}),
 			menuItemWithIcon({
@@ -49,7 +46,7 @@ export class RootUI {
 				leftIcon: tocIcon,
 				text: 'Navigate outline...',
 				action: () => {
-					NavigateHeadings.create(this.ctl, document, reload).run();
+					NavigateHeadings.create(this.ctl, document, this.run).run();
 				}
 			}),
 			menuItemWithIcon({
@@ -73,7 +70,7 @@ export class RootUI {
 				text: 'Async menu items demo...',
 				leftIcon: searchIcon,
 				action: () => {
-					AsyncSearchExample.create(this.ctl, reload).run();
+					AsyncSearchExample.create(this.ctl, this.run).run();
 				}
 			}),
 			menuItemWithIcon({
@@ -138,5 +135,5 @@ export class RootUI {
 				action: () => {}
 			})
 		]);
-	}
+	};
 }

@@ -291,6 +291,7 @@ export class KeyBindingsController {
 		this.keyBindingMap[actionId].bindings = this.keyBindingMap[actionId].bindings.filter(
 			(b) => b !== binding
 		);
+		// should we be calling setKeys here???
 		this.controller.keys.setKeys(this.keyBindingMap, this.local);
 		this.actionUI(actionId);
 	};

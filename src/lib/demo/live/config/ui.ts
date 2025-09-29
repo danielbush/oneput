@@ -5,6 +5,8 @@ import type { DefaultUI } from '$lib/oneput/UIController.js';
 import { DateDisplay } from '../plugins/ui/DateDisplay.js';
 import { SvelteExample } from '../plugins/ui/SvelteDisplay/SvelteExample.js';
 import { TimeDisplay } from '../plugins/ui/TimeDisplay.js';
+import * as keys from './keys.js';
+import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 
 /**
  * Menu item with no left icon, give more room for main content.
@@ -176,16 +178,35 @@ export type MyDefaultUIValues = {
 	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
 };
 
+/**
+ * This is just how we want to manage keys in the demo.  It's convenient to add
+ * them to the DefaultUI mechanism.  You don't have to do it this way or have a
+ * concept of default keys.
+ */
+class MyKeys {
+	public defaultGlobalKeys: KeyBindingMap = keys.globalKeys;
+	public defaultLocalKeys: KeyBindingMap = keys.localKeys;
+
+	public setDefaultKeys(keys: KeyBindingMap, isLocal: boolean) {
+		if (isLocal) {
+			this.defaultLocalKeys = keys;
+		} else {
+			this.defaultGlobalKeys = keys;
+		}
+	}
+}
+
 export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 	constructor(
-		private c: Controller,
-		private _values: MyDefaultUIValues = {}
+		private ctl: Controller,
+		private values: MyDefaultUIValues = {},
+		public keys: MyKeys = new MyKeys()
 	) {}
 
 	setValues(values: MyDefaultUIValues) {
-		this._values = {
+		this.values = {
 			exitAction: () => {
-				this.c.menu.closeMenu();
+				this.ctl.menu.closeMenu();
 			},
 			menuHeader: 'Menu',
 			exitType: 'back',
@@ -194,18 +215,18 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 	}
 
 	get input() {
-		return inputUI(this.c);
+		return inputUI(this.ctl);
 	}
 	get menu() {
 		return {
 			header: menuHeaderUI({
-				title: this._values.menuHeader || 'Menu',
+				title: this.values.menuHeader || 'Menu',
 				exitAction:
-					this._values.exitAction ||
+					this.values.exitAction ||
 					(() => {
-						this.c.menu.closeMenu();
+						this.ctl.menu.closeMenu();
 					}),
-				type: this._values.exitType
+				type: this.values.exitType
 			})
 		};
 	}
@@ -244,7 +265,7 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 					id: 'root-outer-left',
 					type: 'fchild' as const,
 					style: { flex: '1', position: 'relative' },
-					onMount: (node) => SvelteExample.onMount(node, this.c)
+					onMount: (node) => SvelteExample.onMount(node, this.ctl)
 				},
 				{
 					id: 'root-outer-right',

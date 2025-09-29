@@ -63,7 +63,12 @@ export class UIController {
 		this.defaultUI = defaultUI;
 	}
 
-	configureDefaultUI<T extends Record<string, unknown>>(values?: T) {
+	getDefaultUI<D extends DefaultUI = DefaultUI>(): D | undefined {
+		// We'll assume you know what subtype of DefaultUI you are using.
+		return this.defaultUI as D;
+	}
+
+	applyDefaultUI<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
 			this.defaultUI.setValues?.(values);
 		}

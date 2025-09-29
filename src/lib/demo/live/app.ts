@@ -1,15 +1,17 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { MyDefaultUI } from './config/ui.js';
 import { RootUI } from './app/root.js';
-import { globalKeys } from './config/keys.js';
-import { localKeys } from './config/keys.js';
 
-// Our app starts in this callback.  We get the controller and we can set
-// keys and configure oneput.
+// Our app starts in this callback.  We get the controller and we can set keys
+// and configure oneput.
+//
+// Here we are relying on defaultUI to have some default settings including keys
+// set for us.  But we could fetch settings asynchronously here, update
+// defaultUI accordingly
 export const setController = (c: Controller) => {
-	const ui = new MyDefaultUI(c);
-	c.ui.setDefaultUI(ui);
-	c.keys.setDefaultKeys(globalKeys);
-	c.keys.setDefaultKeys(localKeys, true);
+	const defaultUI = new MyDefaultUI(c);
+	c.ui.setDefaultUI(defaultUI);
+	c.keys.setKeys(defaultUI.keys.defaultGlobalKeys, false);
+	c.keys.setKeys(defaultUI.keys.defaultLocalKeys, true);
 	RootUI.create(c).run();
 };

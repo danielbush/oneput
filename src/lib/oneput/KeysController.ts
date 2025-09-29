@@ -6,10 +6,8 @@ import type { KeyBindingMap } from './KeyBinding.js';
 /**
  * Manages key bindings.
  *
- * - Set default global/local keys using setDefaultKeys(bindings, isLocal).
- * - c.keys.setKeys(bindings, isLocal) replaces all bindings;
- * - c.keys.addKeys(bindings, isLocal) adds to existing bindings
- * - c.keys.clear() will restore the defaults
+ * - c.keys.setKeys(bindings, isLocal) sets a set of key bindings and replaces any previous call
+ * - c.keys.setKeys({], isLocal} clears bindings
  *
  */
 export class KeysController {
@@ -91,45 +89,11 @@ export class KeysController {
 		this.keysDisabled = false;
 	}
 
-	private defaultGlobalKeys: KeyBindingMap = {};
-	private defaultLocalKeys: KeyBindingMap = {};
-
-	setDefaultKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
-		if (isLocal) {
-			this.defaultLocalKeys = bindings;
-			this.handleLocalKeys(bindings);
-		} else {
-			this.defaultGlobalKeys = bindings;
-			this.handleGlobalKeys(bindings);
-		}
-	}
-
-	get localDefaultKeys(): KeyBindingMap {
-		return this.defaultLocalKeys;
-	}
-
-	get globalDefaultKeys(): KeyBindingMap {
-		return this.defaultGlobalKeys;
-	}
-
-	clear() {
-		this.handleGlobalKeys(this.defaultGlobalKeys);
-		this.handleLocalKeys(this.defaultLocalKeys);
-	}
-
 	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
 			this.handleLocalKeys(bindings);
 		} else {
 			this.handleGlobalKeys(bindings);
-		}
-	}
-
-	addKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
-		if (isLocal) {
-			this.handleLocalKeys({ ...this.defaultLocalKeys, ...bindings });
-		} else {
-			this.handleGlobalKeys({ ...this.defaultGlobalKeys, ...bindings });
 		}
 	}
 }

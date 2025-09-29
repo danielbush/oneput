@@ -61,59 +61,57 @@
 		props.replaceUI?.menu && 'oneput__menu--replaced'
 	]}
 >
-	{#if true}
-		<div class="oneput__menu-anchor">
-			<section class="oneput__menu-area">
-				{#if props.replaceUI?.menu}
-					<section in:whoosh={{ duration: 800, easing: elasticOut }}>
-						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
-					</section>
-				{:else}
-					{#if props.menuUI?.header}
-						<Flex class="oneput__menu-header" {...props.menuUI.header} />
-					{/if}
-					<div class="oneput__menu-body">
-						{#each props.menuItems || [] as item, index (item.id)}
-							{#if item.ignored}
-								<Flex class={item.class ?? ''} {...item} />
-							{:else}
-								<Flex
-									{...item}
-									class={item.class ?? 'oneput__menu-item'}
-									classes={[
-										index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
-										...(item.classes ?? [])
-									]}
-									attr={{
-										...item.attr,
-										onpointerenter: (event: Event) => {
-											props.onMenuItemEnter?.(event, item, index);
-											if (typeof item.attr?.onpointerenter === 'function') {
-												item.attr.onpointerenter(event);
-											}
-										},
-										onpointerup: (event: Event) => {
-											// See POINTER_UP .
-											props.onMenuAction?.(event, item, index);
-											if (typeof item.attr?.onpointerup === 'function') {
-												item.attr.onpointerup(event);
-											}
-										}
-									}}
-									attachments={{
-										[createAttachmentKey()]: scrollIntoView(index)
-									}}
-								/>
-							{/if}
-						{/each}
-					</div>
-					{#if props.menuUI?.footer}
-						<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
-					{/if}
+	<div class="oneput__menu-anchor">
+		<section class="oneput__menu-area">
+			{#if props.replaceUI?.menu}
+				<section in:whoosh={{ duration: 800, easing: elasticOut }}>
+					<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
+				</section>
+			{:else}
+				{#if props.menuUI?.header}
+					<Flex class="oneput__menu-header" {...props.menuUI.header} />
 				{/if}
-			</section>
-		</div>
-	{/if}
+				<div class="oneput__menu-body">
+					{#each props.menuItems || [] as item, index (item.id)}
+						{#if item.ignored}
+							<Flex class={item.class ?? ''} {...item} />
+						{:else}
+							<Flex
+								{...item}
+								class={item.class ?? 'oneput__menu-item'}
+								classes={[
+									index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
+									...(item.classes ?? [])
+								]}
+								attr={{
+									...item.attr,
+									onpointerenter: (event: Event) => {
+										props.onMenuItemEnter?.(event, item, index);
+										if (typeof item.attr?.onpointerenter === 'function') {
+											item.attr.onpointerenter(event);
+										}
+									},
+									onpointerup: (event: Event) => {
+										// See POINTER_UP .
+										props.onMenuAction?.(event, item, index);
+										if (typeof item.attr?.onpointerup === 'function') {
+											item.attr.onpointerup(event);
+										}
+									}
+								}}
+								attachments={{
+									[createAttachmentKey()]: scrollIntoView(index)
+								}}
+							/>
+						{/if}
+					{/each}
+				</div>
+				{#if props.menuUI?.footer}
+					<Flex class="oneput__menu-footer" {...props.menuUI.footer} />
+				{/if}
+			{/if}
+		</section>
+	</div>
 	{#if props.injectUI?.inner}
 		<section
 			in:whoosh={{ duration: 800, easing: elasticOut }}

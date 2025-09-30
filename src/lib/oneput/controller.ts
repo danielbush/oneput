@@ -34,6 +34,9 @@ export class Controller {
 	 */
 	goBack: () => void = () => {};
 
+	/**
+	 * Sets the back action to run the supplied function - this can be triggered if given a keybinding.
+	 */
 	setBackBinding(back?: () => void) {
 		this.goBack = back || (() => {});
 	}

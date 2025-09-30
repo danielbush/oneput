@@ -176,3 +176,9 @@ export function isMacOS() {
 		/mac/i.test(navigator.userAgent)
 	);
 }
+
+export type NullishChildren = Array<FlexParams | FChildParams | '' | false | null | undefined>;
+
+export function filterChildren(children: NullishChildren): FlexParams['children'] {
+	return children.filter(Boolean) as FlexParams['children'];
+}

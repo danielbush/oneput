@@ -280,8 +280,8 @@ export class KeyBindingsController {
 		};
 	};
 
-	private removeBinding = (actionId: string, binding: string) => {
-		const yes = this.controller.confirm({ message: 'Remove binding?' });
+	private removeBinding = async (actionId: string, binding: string) => {
+		const yes = await this.controller.confirm({ message: 'Remove binding?' });
 		if (!yes) {
 			return;
 		}

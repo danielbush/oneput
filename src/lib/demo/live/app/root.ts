@@ -98,11 +98,12 @@ export class RootUI {
 				id: randomId(),
 				text: 'Confirm',
 				action: async () => {
+					console.log('before confirm...');
 					const yes = await this.ctl.confirm({
 						message: 'Main message',
 						additional: 'This is some additional info'
 					});
-					console.log('yes', yes);
+					console.log('after confirm...', yes);
 				}
 			}),
 			menuItemWithIcon({

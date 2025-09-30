@@ -119,6 +119,8 @@
 	--oneput-icon-padding: 4px;
 	--oneput-primary-button-background: rgb(255 255 255 / 0.6);
 	--oneput-primary-button-background-hover: rgb(255 255 255 / 0.8);
+	--oneput-secondary-button-background: rgb(255 255 255 / 0.22);
+	--oneput-secondary-button-background-hover: rgb(255 255 255 / 0.22);
 	--oneput-button-border: 0.5px solid rgb(0 0 0 / 0.4);
 	--oneput-button-outline: none;
 	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.5);
@@ -450,7 +452,8 @@ button.oneput__menu-item:active {
 	max-width: var(--oneput-icon-width);
 }
 
-.oneput__primary-button {
+.oneput__primary-button,
+.oneput__secondary-button {
 	flex: 0 0 var(--oneput-icon-width);
 	justify-content: center;
 	border: var(--oneput-button-border);
@@ -460,6 +463,13 @@ button.oneput__menu-item:active {
 	/* box-shadow: 0 0 5px 1px rgb(0 0 0 / 0.3); */
 	outline: none !important;
 	background: var(--oneput-primary-button-background);
+}
+
+.oneput__secondary-button {
+	background: var(--oneput-secondary-button-background);
+}
+.oneput__secondary-button:hover {
+	background: var(--oneput-secondary-button-background-hover);
 }
 
 .oneput__button,
@@ -499,6 +509,14 @@ button.oneput__menu-item:active {
 	background: var(--oneput-primary-button-background-hover);
 }
 
+.oneput__secondary-button:focus {
+	outline: var(--oneput-button-outline-focus);
+}
+.oneput__secondary-button:hover {
+	outline: var(--oneput-button-outline-hover);
+	background: var(--oneput-secondary-button-background-hover);
+}
+
 .oneput__button:focus,
 .oneput__icon-button:focus {
 	outline: var(--oneput-button-outline-focus);
@@ -510,6 +528,7 @@ button.oneput__menu-item:active {
 	background: var(--oneput-button-background-hover);
 }
 .oneput__primary-button:active,
+.oneput__secondary-button:active,
 .oneput__button:active,
 .oneput__icon-button:active {
 	outline: var(--oneput-button-outline-active);

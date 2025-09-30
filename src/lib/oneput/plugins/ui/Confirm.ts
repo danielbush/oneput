@@ -77,11 +77,8 @@ export class Confirm {
 								id: randomId(),
 								type: 'fchild',
 								tag: 'button',
-								classes: ['oneput__primary-button'],
+								classes: ['oneput__secondary-button'],
 								textContent: 'Cancel',
-								onMount: (node) => {
-									node.focus();
-								},
 								attr: {
 									onclick: () => this.stop(false)
 								}

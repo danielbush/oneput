@@ -23,7 +23,6 @@ export class KeysManager {
 			controller: Controller;
 			onChange: (newKeyMap: KeyBindingMap) => Promise<void>;
 			keyMap: KeyBindingMap;
-			local: boolean;
 			back: () => void;
 		}) => KeyBindingsController
 	) {
@@ -35,7 +34,6 @@ export class KeysManager {
 			controller: this.ctl,
 			onChange: (newKeyMap) => this.updateKeys(newKeyMap),
 			keyMap: this.keyMap,
-			local: this.isLocal,
 			back
 		}).run();
 	}
@@ -52,7 +50,7 @@ export class KeysManager {
 		try {
 			await this.testKeyService.setKeys(newKeyMap, this.isLocal);
 			this.keyMap = newKeyMap;
-			notification.updateMessage('It worked!', { duration: 3000 });
+			notification.updateMessage('Key bindings saved', { duration: 3000 });
 		} catch (err) {
 			notification.updateMessage((err as Error).message);
 			// Revert optimistic update...

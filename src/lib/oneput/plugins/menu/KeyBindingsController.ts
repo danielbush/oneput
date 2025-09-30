@@ -86,7 +86,6 @@ export class KeyBindingsController {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		keyMap: KeyBindingMap;
-		local: boolean;
 		back: () => void;
 	}) {
 		return new KeyBindingsController(params);
@@ -95,20 +94,17 @@ export class KeyBindingsController {
 	private controller: Controller;
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	private keyBindingMap: KeyBindingMap;
-	private local: boolean;
 	private back: () => void;
 
 	private constructor(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		keyMap: KeyBindingMap;
-		local: boolean;
 		back: () => void;
 	}) {
 		this.controller = params.controller;
 		this.onChange = params.onChange;
 		this.keyBindingMap = params.keyMap;
-		this.local = params.local;
 		this.back = params.back;
 	}
 
@@ -289,11 +285,20 @@ export class KeyBindingsController {
 		if (!yes) {
 			return;
 		}
-		this.keyBindingMap[actionId].bindings = this.keyBindingMap[actionId].bindings.filter(
-			(b) => b !== binding
-		);
-		// should we be calling setKeys here???
-		this.controller.keys.setKeys(this.keyBindingMap, this.local);
+		const oldBindings = this.keyBindingMap;
+		const newBindings = {
+			...oldBindings,
+			[actionId]: {
+				...this.keyBindingMap[actionId],
+				bindings: this.keyBindingMap[actionId].bindings.filter((b) => b !== binding)
+			}
+		};
+		// Optimistic update
+		this.keyBindingMap = newBindings;
+		this.onChange(this.keyBindingMap).catch(() => {
+			// Revert optimistic update...
+			this.keyBindingMap = oldBindings;
+		});
 		this.actionUI(actionId);
 	};
 }

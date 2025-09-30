@@ -1,17 +1,21 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { filterChildren, randomId } from '$lib/oneput/lib.js';
 
+/**
+ * Alert.run returns a promise.
+ *
+ * You can await it if you wish to treat the alert as part of the flow in your code.
+ * Or you can just run and forget.
+ */
 export class Alert {
-	static create(
-		controller: Controller,
-		params: { additional?: string; message: string; onClose?: () => void }
-	) {
+	static create(controller: Controller, params: { additional?: string; message: string }) {
 		return new Alert(controller, params);
 	}
 
 	constructor(
 		private controller: Controller,
-		private params: { additional?: string; message: string; onClose?: () => void }
+		private params: { additional?: string; message: string },
+		private resolve?: () => void
 	) {}
 
 	private stop = () => {
@@ -22,7 +26,7 @@ export class Alert {
 		this.controller.ui.replaceUI();
 		this.controller.keys.restoreKeys(true);
 		this.controller.ui.setPlaceholder();
-		this.params.onClose?.();
+		this.resolve?.();
 	};
 
 	private start = () => {
@@ -73,9 +77,13 @@ export class Alert {
 				])
 			}
 		});
+		const promise = new Promise<void>((resolve: () => void) => {
+			this.resolve = resolve;
+		});
+		return promise;
 	};
 
-	run() {
-		this.start();
+	run(): Promise<void> {
+		return this.start();
 	}
 }

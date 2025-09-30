@@ -90,8 +90,13 @@ export class RootUI {
 			menuItemWithIcon({
 				id: randomId(),
 				text: 'Show alert',
-				action: () => {
-					this.ctl.alert({ message: 'Main message', additional: 'This is some additional info' });
+				action: async () => {
+					console.log('before alert...');
+					await this.ctl.alert({
+						message: 'Main message',
+						additional: 'This is some additional info'
+					});
+					console.log('after alert...');
 				}
 			}),
 			menuItemWithIcon({

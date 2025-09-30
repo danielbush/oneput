@@ -6,6 +6,7 @@ import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/ui/Notification.js';
 import type { OneputProps } from './lib.js';
 import { Alert } from './plugins/ui/Alert.js';
+import { Confirm } from './plugins/ui/Confirm.js';
 
 export class Controller {
 	private events = new InternalEventEmitter();
@@ -46,6 +47,10 @@ export class Controller {
 	alert(title: string, message: string, onClose?: () => void) {
 		const alert = Alert.create(this, title, message, onClose);
 		alert.run();
-		// keys are blanked out, what's a good way to handle this?
+	}
+
+	confirm(params: { additional?: string; message: string }): boolean {
+		const confirm = Confirm.create(this, params);
+		return confirm.run();
 	}
 }

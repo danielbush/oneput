@@ -285,7 +285,7 @@ export class KeyBindingsController {
 	};
 
 	private removeBinding = (actionId: string, binding: string) => {
-		const yes = confirm('Remove binding?');
+		const yes = this.controller.confirm({ message: 'Remove binding?' });
 		if (!yes) {
 			return;
 		}

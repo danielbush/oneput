@@ -3,22 +3,22 @@ import { menuItemWithIcon } from '../../config/ui.js';
 import { TestInputService } from '../../service/TestInputService.js';
 
 export class AsyncSearchExample {
-	static create(c: Controller, back: () => void) {
-		const testService = TestInputService.create();
-		return new AsyncSearchExample(c, back, testService);
+	static create(ctl: Controller, back: () => void) {
+		const testInputService = TestInputService.create();
+		return new AsyncSearchExample(ctl, back, testInputService);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
-		private testService: TestInputService
+		private testInputService: TestInputService
 	) {}
 
 	run() {
 		this.ctl.setBackBinding(this.exit);
 		this.ctl.menu.setMenuItemsFnAsync(async (input) => {
 			try {
-				const results = await this.testService.fetchData(input);
+				const results = await this.testInputService.fetchData(input);
 				return results.map((result) => {
 					return menuItemWithIcon({
 						id: result,

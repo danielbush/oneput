@@ -3,8 +3,11 @@ import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmit
 import type { InputChangeListener, MenuItemAny, OneputProps } from './lib.js';
 import type { Controller } from './controller.js';
 
-export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny>;
-export type MenuItemsFnAsync = (input: string, items: MenuItemAny[]) => Promise<Array<MenuItemAny>>;
+export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny> | undefined;
+export type MenuItemsFnAsync = (
+	input: string,
+	items: MenuItemAny[]
+) => Promise<Array<MenuItemAny> | undefined>;
 
 export class MenuController {
 	public static create(
@@ -69,7 +72,11 @@ export class MenuController {
 			if (this.menuItemsFn) {
 				return;
 			}
-			this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems));
+			const items = menuItemsFn(evt.target?.value ?? '', this.menuItems);
+			if (!items) {
+				return;
+			}
+			this._setMenuItems(items, true);
 		};
 		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
 	}
@@ -85,6 +92,11 @@ export class MenuController {
 		}
 	}
 
+	/**
+	 * Set a function that will be triggered on input change.
+	 *
+	 * If this function returns undefined, the menu will not be updated.
+	 */
 	setMenuItemsFn(menuItemsFn?: MenuItemsFn) {
 		this.removeMenuItemsFn();
 		if (menuItemsFn) {
@@ -93,7 +105,11 @@ export class MenuController {
 				if (this.disableMenuItemsFn) {
 					return;
 				}
-				this._setMenuItems(menuItemsFn(evt.target?.value ?? '', this.menuItems || []), true);
+				const items = menuItemsFn(evt.target?.value ?? '', this.menuItems || []);
+				if (!items) {
+					return;
+				}
+				this._setMenuItems(items, true);
 			};
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
 		}
@@ -119,13 +135,16 @@ export class MenuController {
 				this.menuItemsSeqId = (this.menuItemsSeqId + 1) % 1000000;
 				const seqId = this.menuItemsSeqId;
 				const value = evt.target?.value ?? '';
-				const menuItems = await menuItemsFnAsync(value, this.menuItems);
+				const items = await menuItemsFnAsync(value, this.menuItems);
+				if (!items) {
+					return;
+				}
 				if (seqId !== this.menuItemsSeqId) {
 					console.warn(`discarded ${value}...`);
 					return;
 				}
 				console.warn(`got ${value}...`);
-				this._setMenuItems(menuItems, true);
+				this._setMenuItems(items, true);
 			};
 			const debouncedHandler = debounce(handler, 500);
 			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {

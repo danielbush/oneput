@@ -91,7 +91,7 @@ export class RootUI {
 				id: randomId(),
 				text: 'Show alert',
 				action: () => {
-					this.ctl.alert('Heading', 'This is the alert message');
+					this.ctl.alert({ message: 'Main message', additional: 'This is some additional info' });
 				}
 			}),
 			menuItemWithIcon({

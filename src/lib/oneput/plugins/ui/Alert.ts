@@ -1,16 +1,17 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { randomId } from '$lib/oneput/lib.js';
+import { filterChildren, randomId } from '$lib/oneput/lib.js';
 
 export class Alert {
-	static create(controller: Controller, title: string, message: string, onClose?: () => void) {
-		return new Alert(controller, title, message, onClose);
+	static create(
+		controller: Controller,
+		params: { additional?: string; message: string; onClose?: () => void }
+	) {
+		return new Alert(controller, params);
 	}
 
 	constructor(
 		private controller: Controller,
-		private title: string,
-		private message: string,
-		private onClose?: () => void
+		private params: { additional?: string; message: string; onClose?: () => void }
 	) {}
 
 	private stop = () => {
@@ -21,7 +22,7 @@ export class Alert {
 		this.controller.ui.replaceUI();
 		this.controller.keys.restoreKeys(true);
 		this.controller.ui.setPlaceholder();
-		this.onClose?.();
+		this.params.onClose?.();
 	};
 
 	private start = () => {
@@ -45,16 +46,16 @@ export class Alert {
 				id: randomId(),
 				type: 'vflex',
 				classes: ['oneput__menu-body-content', 'oneput__alert'],
-				children: [
+				children: filterChildren([
 					{
 						id: 'alert-title',
 						type: 'fchild',
-						innerHTMLUnsafe: `<h2>${this.title}</h2>`
+						innerHTMLUnsafe: `<h2>${this.params.message}</h2>`
 					},
-					{
-						id: 'alert-message',
+					this.params.additional && {
+						id: 'alert-additional',
 						type: 'fchild',
-						innerHTMLUnsafe: `<p>${this.message}</p>`
+						innerHTMLUnsafe: `<p>${this.params.additional}</p>`
 					},
 					{
 						id: 'alert-button',
@@ -69,7 +70,7 @@ export class Alert {
 							onclick: this.stop
 						}
 					}
-				]
+				])
 			}
 		});
 	};

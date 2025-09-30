@@ -44,8 +44,8 @@ export class Controller {
 		return notification;
 	}
 
-	alert(title: string, message: string, onClose?: () => void) {
-		const alert = Alert.create(this, title, message, onClose);
+	alert(params: { message: string; additional: string; onClose?: () => void }) {
+		const alert = Alert.create(this, params);
 		alert.run();
 	}
 

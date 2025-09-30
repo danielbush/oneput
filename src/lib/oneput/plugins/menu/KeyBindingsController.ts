@@ -261,10 +261,10 @@ export class KeyBindingsController {
 					if (existing.length > 0) {
 						// Exit to get out of capture mode, then show the alert.
 						exit();
-						this.controller.alert(
-							'Binding already exists',
-							`This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
-						);
+						this.controller.alert({
+							message: 'Binding already exists',
+							additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
+						});
 						return;
 					}
 					keyBindings.addBinding(actionId, capturedKeys);

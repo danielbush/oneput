@@ -49,7 +49,7 @@ export class Controller {
 		alert.run();
 	}
 
-	confirm(params: { additional?: string; message: string }): boolean {
+	confirm(params: { additional?: string; message: string }): Promise<boolean> {
 		const confirm = Confirm.create(this, params);
 		return confirm.run();
 	}

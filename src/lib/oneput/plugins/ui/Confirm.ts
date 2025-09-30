@@ -13,7 +13,7 @@ export class Confirm {
 		private params: { additional?: string; message: string }
 	) {}
 
-	run(): boolean {
-		return confirm(this.params.message);
+	run(): Promise<boolean> {
+		return Promise.resolve(true);
 	}
 }

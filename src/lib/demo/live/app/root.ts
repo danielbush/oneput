@@ -97,8 +97,12 @@ export class RootUI {
 			menuItemWithIcon({
 				id: randomId(),
 				text: 'Confirm',
-				action: () => {
-					this.ctl.confirm({ message: 'Main message', additional: 'This is some additional info' });
+				action: async () => {
+					const yes = await this.ctl.confirm({
+						message: 'Main message',
+						additional: 'This is some additional info'
+					});
+					console.log('yes', yes);
 				}
 			}),
 			menuItemWithIcon({

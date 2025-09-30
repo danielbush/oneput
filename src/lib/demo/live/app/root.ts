@@ -96,6 +96,13 @@ export class RootUI {
 			}),
 			menuItemWithIcon({
 				id: randomId(),
+				text: 'Confirm',
+				action: () => {
+					this.ctl.confirm({ message: 'Main message', additional: 'This is some additional info' });
+				}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
 				text: `blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),

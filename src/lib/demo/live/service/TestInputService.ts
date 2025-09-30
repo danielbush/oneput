@@ -9,8 +9,13 @@ export class TestInputService {
 		const results = [];
 		// Put a large delay for the first item.
 		const delay = this.counter === 0 ? 3000 : 1000;
+		if (Math.random() < 0.1) {
+			throw new Error('TestInputService: simulated error');
+		}
 		this.counter += 1;
-		results.push(`Result for input: '${input}'`);
+		for (let i = 0; i < input.length; i++) {
+			results.push(`Result for input: '${input[i]}'`);
+		}
 		console.warn(`${input} will fetch with delay of ${delay}ms`);
 		await new Promise((resolve) => setTimeout(resolve, delay));
 		return results;

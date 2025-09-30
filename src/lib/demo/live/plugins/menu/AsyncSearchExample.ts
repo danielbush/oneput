@@ -1,4 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
+import { randomId } from '$lib/oneput/lib.js';
 import { menuItemWithIcon } from '../../config/ui.js';
 import { TestInputService } from '../../service/TestInputService.js';
 
@@ -21,19 +22,20 @@ export class AsyncSearchExample {
 				const results = await this.testInputService.fetchData(input);
 				return results.map((result) => {
 					return menuItemWithIcon({
-						id: result,
+						id: randomId(),
 						text: result
 					});
 				});
 			} catch (error) {
 				console.error(error);
-				return [
-					// TODO: use an alert?
-					menuItemWithIcon({
-						id: 'error',
-						text: 'Error'
-					})
-				];
+				const message =
+					error instanceof Error
+						? error.message
+						: typeof error === 'string'
+							? error
+							: 'Unknown error';
+				this.ctl.notify(`Error fetching data: ${message}`, { duration: 10000 });
+				return;
 			}
 		});
 		this.ctl.input.setInputValue();

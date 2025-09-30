@@ -19,7 +19,8 @@ export class RootUI {
 		});
 		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Home',
-			exitType: 'exit'
+			exitType: 'exit',
+			placeholder: 'This is root...'
 		});
 		this.ctl.menu.setDefaultMenuItemsFn((input, menuItems) => {
 			return menuItems.filter((item) => {

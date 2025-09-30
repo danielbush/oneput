@@ -176,6 +176,7 @@ export type MyDefaultUIValues = {
 	exitAction?: () => void;
 	menuHeader?: string;
 	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
+	placeholder?: string;
 };
 
 /**
@@ -210,8 +211,13 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 			},
 			menuHeader: 'Menu',
 			exitType: 'back',
+			placeholder: 'Type here...',
 			...values
 		};
+	}
+
+	get placeholder() {
+		return this.values.placeholder;
 	}
 
 	get input() {

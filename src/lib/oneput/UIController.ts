@@ -6,6 +6,7 @@ export interface DefaultUI<V extends Record<string, unknown> = Record<string, un
 	menu?: OneputProps['menuUI'];
 	inner?: OneputProps['innerUI'];
 	outer?: OneputProps['outerUI'];
+	placeholder?: OneputProps['placeholder'];
 }
 
 export class UIController {
@@ -13,11 +14,10 @@ export class UIController {
 		return new UIController(currentProps);
 	}
 
-	constructor(
-		private currentProps: OneputProps,
-		private defaultPlaceholder: string = 'Type here...'
-	) {
-		this.currentProps.placeholder = this.defaultPlaceholder;
+	private fallbackPlaceholder: string = 'Type here...';
+
+	constructor(private currentProps: OneputProps) {
+		this.currentProps.placeholder = this.fallbackPlaceholder;
 	}
 
 	setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {
@@ -34,7 +34,7 @@ export class UIController {
 	}
 
 	setPlaceholder(msg?: string) {
-		this.currentProps.placeholder = msg || this.defaultPlaceholder;
+		this.currentProps.placeholder = msg || this.defaultUI?.placeholder || this.fallbackPlaceholder;
 	}
 
 	setOuterUI(outer?: FlexParams) {
@@ -55,6 +55,7 @@ export class UIController {
 		this.currentProps.menuUI = this.defaultUI?.menu;
 		this.currentProps.innerUI = this.defaultUI?.inner;
 		this.currentProps.outerUI = this.defaultUI?.outer;
+		this.currentProps.placeholder = this.defaultUI?.placeholder || this.fallbackPlaceholder;
 	}
 
 	private defaultUI?: DefaultUI;

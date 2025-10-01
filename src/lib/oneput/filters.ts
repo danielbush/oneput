@@ -37,12 +37,44 @@ function getTextContent(item: FlexParams | FChildParams) {
 	return result;
 }
 
+function getContentItems(item: FlexParams | FChildParams) {
+	const result: { item: FChildParams; root: FlexParams | FChildParams; textContent: string }[] = [];
+	walk(item, (child) => {
+		if (child.type === 'fchild') {
+			if (child.textContent) {
+				result.push({ item: child, root: item, textContent: child.textContent });
+			}
+		}
+	});
+	return result;
+}
+
 const ufuzzy = new uFuzzy({});
-export function fuzzy(input: string, menuItems: MenuItemAny[]) {
+
+export function fuzzyNoHighlight(input: string, menuItems: MenuItemAny[]) {
 	const haystack = menuItems.map(getTextContent);
 	const idxs = ufuzzy.filter(haystack, input);
 	if (!idxs) {
 		return menuItems;
 	}
 	return idxs.map((idx) => menuItems[idx]);
+}
+
+export function fuzzy(input: string, menuItems: MenuItemAny[]) {
+	// Explode each menuItem into array of text-bearing parts, so menuItems
+	// becomes an array of arrays.
+	//   exploded menuItem => [{ item, root: menuItem, textContent }, ...]
+	const haystack = menuItems.map(getContentItems);
+	// Now establish "index" that links back to the menuItem.
+	const haystackText = haystack
+		.map((item, index) => item.map((child) => ({ index, textContent: child.textContent })))
+		.flat();
+	const idxs = ufuzzy.filter(
+		haystackText.map((item) => item.textContent),
+		input
+	);
+	if (!idxs) {
+		return menuItems;
+	}
+	return idxs.map((idx) => menuItems[haystackText[idx].index]);
 }

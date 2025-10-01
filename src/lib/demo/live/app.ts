@@ -1,18 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { MyDefaultUI } from './config/ui.js';
 import { RootUI } from './app/root.js';
-import type { MenuItemAny } from '$lib/oneput/lib.js';
-
-function simpleFilter(input: string, menuItems: MenuItemAny[]) {
-	return menuItems.filter((item) => {
-		return item.children?.some((child) => {
-			if (child.type === 'fchild') {
-				return child.textContent?.toLowerCase().includes(input.toLowerCase());
-			}
-			return false;
-		});
-	});
-}
+import { simpleFilter } from '$lib/oneput/filters.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.

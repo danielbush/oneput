@@ -69,11 +69,11 @@ export function fuzzy(input: string, menuItems: MenuItemAny[]) {
 			}
 		});
 	});
+
 	const idxs = ufuzzy.filter(haystack, input);
 	if (!idxs) {
 		return menuItems;
 	}
-
 	const info = ufuzzy.info(idxs, haystack, input);
 	const order = ufuzzy.sort(info, haystack, input);
 
@@ -81,5 +81,16 @@ export function fuzzy(input: string, menuItems: MenuItemAny[]) {
 	console.log('info', info); // info.ranges[idx]
 	console.log('order', order); // [1, 0]
 
-	return idxs.map((idx) => explodedMenuItems[idx].menuItem);
+	const sortedMenuItems: MenuItemAny[] = [];
+	const ids: Record<string, boolean> = {};
+	for (let i = 0; i < order.length; i++) {
+		const infoIdx = order[i];
+		const menuItem = explodedMenuItems[info.idx[infoIdx]].menuItem;
+		if (ids[menuItem.id]) {
+			continue;
+		}
+		ids[menuItem.id] = true;
+		sortedMenuItems.push(menuItem);
+	}
+	return sortedMenuItems;
 }

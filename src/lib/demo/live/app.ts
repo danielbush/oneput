@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { MyDefaultUI } from './config/ui.js';
 import { RootUI } from './app/root.js';
-import { simpleFilter } from '$lib/oneput/filters.js';
+import { fuzzy } from '$lib/oneput/filters.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.
@@ -14,6 +14,6 @@ export const setController = (ctl: Controller) => {
 	ctl.ui.setDefaultUI(defaultUI);
 	ctl.keys.setDefaultKeys(defaultUI.keys.defaultGlobalKeys, false);
 	ctl.keys.setDefaultKeys(defaultUI.keys.defaultLocalKeys, true);
-	ctl.menu.setDefaultMenuItemsFn(simpleFilter);
+	ctl.menu.setDefaultMenuItemsFn(fuzzy);
 	RootUI.create(ctl).run();
 };

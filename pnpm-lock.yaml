@@ -13,6 +13,9 @@ importers:
 
   .:
     dependencies:
+      '@leeoniya/ufuzzy':
+        specifier: ^1.0.19
+        version: 1.0.19
       '@std/async':
         specifier: npm:@jsr/std__async@^1.0.14
         version: '@jsr/std__async@1.0.14'
@@ -391,6 +394,9 @@ packages:
 
   '@jsr/std__async@1.0.14':
     resolution: {integrity: sha512-aIG8W3TOmW+lKdAJA5w56qASu9EiUmBXbhW6eAlSEUBid+KVESGqQygFFg+awt/c8K+qobVM6M/u3SbIy0NyUQ==, tarball: https://npm.jsr.io/~/11/@jsr/std__async/1.0.14.tgz}
+
+  '@leeoniya/ufuzzy@1.0.19':
+    resolution: {integrity: sha512-0pikDeYt0IHEUPza5RTCDXc/17S1pTrYnReEMp8Aa6k1ovzw5QdZLwicW8TjljwEZRb6oYag0xmALohrcq/yOQ==}
 
   '@lucide/svelte@0.544.0':
     resolution: {integrity: sha512-9f9O6uxng2pLB01sxNySHduJN3HTl5p0HDu4H26VR51vhZfiMzyOMe9Mhof3XAk4l813eTtl+/DYRvGyoRR+yw==}
@@ -1868,6 +1874,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@jsr/std__async@1.0.14': {}
+
+  '@leeoniya/ufuzzy@1.0.19': {}
 
   '@lucide/svelte@0.544.0(svelte@5.38.1)':
     dependencies:

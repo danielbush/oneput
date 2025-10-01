@@ -64,17 +64,17 @@ export function fuzzy(input: string, menuItems: MenuItemAny[]) {
 	// Explode each menuItem into array of text-bearing parts, so menuItems
 	// becomes an array of arrays.
 	//   exploded menuItem => [{ item, root: menuItem, textContent }, ...]
-	const haystack = menuItems.map(getContentItems);
+	const explodedMenuItems = menuItems.map(getContentItems);
 	// Now establish "index" that links back to the menuItem.
-	const haystackText = haystack
+	const haystackText = explodedMenuItems
 		.map((item, index) => item.map((child) => ({ index, textContent: child.textContent })))
 		.flat();
-	const idxs = ufuzzy.filter(
-		haystackText.map((item) => item.textContent),
-		input
-	);
+	const haystack = haystackText.map((item) => item.textContent);
+	const idxs = ufuzzy.filter(haystack, input);
 	if (!idxs) {
 		return menuItems;
 	}
+	const info = ufuzzy.info(idxs, haystack, input);
+	console.log(info);
 	return idxs.map((idx) => menuItems[haystackText[idx].index]);
 }

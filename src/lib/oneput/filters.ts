@@ -37,18 +37,6 @@ function getTextContent(item: FlexParams | FChildParams) {
 	return result;
 }
 
-function getContentItems(item: FlexParams | FChildParams) {
-	const result: { item: FChildParams; root: FlexParams | FChildParams; textContent: string }[] = [];
-	walk(item, (child) => {
-		if (child.type === 'fchild') {
-			if (child.textContent) {
-				result.push({ item: child, root: item, textContent: child.textContent });
-			}
-		}
-	});
-	return result;
-}
-
 const ufuzzy = new uFuzzy({});
 
 export function fuzzyNoHighlight(input: string, menuItems: MenuItemAny[]) {
@@ -61,20 +49,37 @@ export function fuzzyNoHighlight(input: string, menuItems: MenuItemAny[]) {
 }
 
 export function fuzzy(input: string, menuItems: MenuItemAny[]) {
-	// Explode each menuItem into array of text-bearing parts, so menuItems
-	// becomes an array of arrays.
-	//   exploded menuItem => [{ item, root: menuItem, textContent }, ...]
-	const explodedMenuItems = menuItems.map(getContentItems);
-	// Now establish "index" that links back to the menuItem.
-	const haystackText = explodedMenuItems
-		.map((item, index) => item.map((child) => ({ index, textContent: child.textContent })))
-		.flat();
-	const haystack = haystackText.map((item) => item.textContent);
+	const explodedMenuItems: {
+		fchild: FChildParams;
+		menuItemIndex: number;
+		menuItem: MenuItemAny;
+		textContent: string;
+	}[] = [];
+	const haystack: string[] = [];
+	menuItems.forEach((item, index) => {
+		walk(item, (child) => {
+			if (child.type === 'fchild' && child.textContent) {
+				explodedMenuItems.push({
+					menuItemIndex: index,
+					menuItem: item,
+					fchild: child,
+					textContent: child.textContent
+				});
+				haystack.push(child.textContent);
+			}
+		});
+	});
 	const idxs = ufuzzy.filter(haystack, input);
 	if (!idxs) {
 		return menuItems;
 	}
+
 	const info = ufuzzy.info(idxs, haystack, input);
-	console.log(info);
-	return idxs.map((idx) => menuItems[haystackText[idx].index]);
+	const order = ufuzzy.sort(info, haystack, input);
+
+	console.log('idxs', idxs); // [0, 1]
+	console.log('info', info); // info.ranges[idx]
+	console.log('order', order); // [1, 0]
+
+	return idxs.map((idx) => explodedMenuItems[idx].menuItem);
 }

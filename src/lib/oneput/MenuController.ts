@@ -44,16 +44,6 @@ export class MenuController {
 	}
 
 	/**
-	 * If a plugin doesn't want to use the defaultMenuItemsFn it can either:
-	 *
-	 * (1) call setMenuItemsFn which will override any default
-	 * OR
-	 * (2) disable the default menuItemsFn using this property and then use
-	 * controller.onInputchange with a custom function that modifies menuItems
-	 *
-	 */
-	public disableDefaultMenuItemsFn = false;
-	/**
 	 * Disable ALL menuItemsFn calls.
 	 */
 	private disableMenuItemsFn = false;
@@ -65,13 +55,29 @@ export class MenuController {
 	private disableActions = false;
 	private disableOpenClose = false;
 
+	doMenuAction() {
+		if (this.disableActions) {
+			return;
+		}
+		if (this.currentMenuItem) {
+			if (this.currentMenuItem.action) {
+				this.currentMenuItem.action(this.controller);
+			}
+		}
+	}
+
+	/**
+	 * Sets a default menuItemsFn - see setMenuItemsFn for more details.
+	 *
+	 * If set, this is always present.  It can be disabled and re-enabled using
+	 * disableAllMenuItemsFn / enableAllMenuItemsFn.  It can be replaced by a
+	 * different menuItemsFn using setMenuItemsFn and restored by calling
+	 * setMenuItemsFn with no arguments.
+	 */
 	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
 		this.removeDefaultMenuItemsFn();
 		const handler: InputChangeListener = (evt) => {
 			if (this.disableMenuItemsFn) {
-				return;
-			}
-			if (this.disableDefaultMenuItemsFn) {
 				return;
 			}
 			if (this.menuItemsFn) {
@@ -84,17 +90,6 @@ export class MenuController {
 			this._setMenuItems(items, true);
 		};
 		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
-	}
-
-	doMenuAction() {
-		if (this.disableActions) {
-			return;
-		}
-		if (this.currentMenuItem) {
-			if (this.currentMenuItem.action) {
-				this.currentMenuItem.action(this.controller);
-			}
-		}
 	}
 
 	/**

@@ -21,9 +21,13 @@ export class NavigateHeadings {
 	) {}
 
 	run() {
-		this.controller.menu.disableDefaultMenuItemsFn = true;
 		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
 		this.filteredHeadings = this.headings;
+		this.controller.setBackBinding(this.exit);
+
+		// We demo here how to handle typed input by handling onInputChange
+		// directly and disable menuItemsFn...
+		this.controller.menu.disableAllMenuItemsFn();
 		this.clearInputChangeListener = this.controller.input.onInputChange((evt) => {
 			const text = (evt.target as HTMLInputElement).value;
 			this.filteredHeadings = this.headings.filter((heading) => {
@@ -31,7 +35,7 @@ export class NavigateHeadings {
 			});
 			this.updateUI();
 		});
-		this.controller.setBackBinding(this.exit);
+
 		this.updateUI();
 	}
 
@@ -39,7 +43,7 @@ export class NavigateHeadings {
 	 * It's important to clean up once we exit this mini-app.
 	 */
 	private exit = () => {
-		this.controller.menu.disableDefaultMenuItemsFn = false;
+		this.controller.menu.enableAllMenuItemsFn();
 		this.controller.input.setInputValue();
 		this.clearInputChangeListener?.();
 		this.back();

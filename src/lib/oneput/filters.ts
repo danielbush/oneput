@@ -76,21 +76,24 @@ export function fuzzy(input: string, menuItems: MenuItemAny[]) {
 	}
 	const info = ufuzzy.info(idxs, haystack, input);
 	const order = ufuzzy.sort(info, haystack, input);
-
-	console.log('idxs', idxs); // [0, 1]
-	console.log('info', info); // info.ranges[idx]
-	console.log('order', order); // [1, 0]
-
 	const sortedMenuItems: MenuItemAny[] = [];
 	const ids: Record<string, boolean> = {};
 	for (let i = 0; i < order.length; i++) {
 		const infoIdx = order[i];
-		const menuItem = explodedMenuItems[info.idx[infoIdx]].menuItem;
-		if (ids[menuItem.id]) {
+		const item = explodedMenuItems[info.idx[infoIdx]];
+		// We need the p-tags because fchild's are flexed by default and this
+		// will do weird things to spaces for text interspersed with markup.
+		item.fchild.innerHTMLUnsafe =
+			'<p>' +
+			uFuzzy.highlight(item.textContent, info.ranges[infoIdx], (part, matched) =>
+				matched ? '<b>' + part + '</b>' : part
+			) +
+			'</p>';
+		if (ids[item.menuItem.id]) {
 			continue;
 		}
-		ids[menuItem.id] = true;
-		sortedMenuItems.push(menuItem);
+		ids[item.menuItem.id] = true;
+		sortedMenuItems.push(item.menuItem);
 	}
 	return sortedMenuItems;
 }

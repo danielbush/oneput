@@ -33,12 +33,12 @@
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
 	>
-		{#if props.textContent}
-			{props.textContent}
-		{:else if props.innerHTMLUnsafe}
+		{#if props.innerHTMLUnsafe}
 			<!-- eslint-disable svelte/no-at-html-tags -->
 			{@html props.innerHTMLUnsafe}
 			<!-- eslint-enable svelte/no-at-html-tags -->
+		{:else if props.textContent}
+			{props.textContent}
 		{/if}
 	</svelte:element>
 {/if}

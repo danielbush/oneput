@@ -37,7 +37,7 @@ export class Confirm {
 		);
 		this.controller.menu.disableMenuActions();
 		this.controller.menu.disableMenuOpenClose();
-		this.controller.menu.disableAllMenuItemsFn();
+		this.controller.menu.disableMenuItemsFn();
 		this.controller.input.disableInputElement();
 		this.controller.ui.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
 		this.controller.ui.replaceUI({
@@ -97,7 +97,7 @@ export class Confirm {
 	private stop = (ok: boolean) => {
 		this.controller.menu.enableMenuActions();
 		this.controller.menu.enableMenuOpenClose();
-		this.controller.menu.enableAllMenuItemsFn();
+		this.controller.menu.enableMenuItemsFn();
 		this.controller.input.enableInputElement();
 		this.controller.ui.replaceUI();
 		this.controller.keys.restoreKeys(true);

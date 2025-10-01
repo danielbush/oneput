@@ -32,7 +32,7 @@ export class MenuController {
 			}
 		};
 		this.currentProps.onMenuAction = () => {
-			if (this.disableActions) {
+			if (this._disableActions) {
 				return;
 			}
 			this.doMenuAction();
@@ -46,17 +46,17 @@ export class MenuController {
 	/**
 	 * Disable ALL menuItemsFn calls.
 	 */
-	private disableMenuItemsFn = false;
+	private _disableMenuItemsFn = false;
 	private removeDefaultMenuItemsFn: () => void = () => {};
 	private removeMenuItemsFn: () => void = () => {};
 	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
 	private menuItems: Array<MenuItemAny> = [];
 	private menuItemsSeqId = 0;
-	private disableActions = false;
-	private disableOpenClose = false;
+	private _disableActions = false;
+	private _disableOpenClose = false;
 
 	doMenuAction() {
-		if (this.disableActions) {
+		if (this._disableActions) {
 			return;
 		}
 		if (this.currentMenuItem) {
@@ -77,7 +77,7 @@ export class MenuController {
 	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
 		this.removeDefaultMenuItemsFn();
 		const handler: InputChangeListener = (evt) => {
-			if (this.disableMenuItemsFn) {
+			if (this._disableMenuItemsFn) {
 				return;
 			}
 			if (this.menuItemsFn) {
@@ -102,7 +102,7 @@ export class MenuController {
 		if (menuItemsFn) {
 			this.menuItemsFn = menuItemsFn;
 			const handler: InputChangeListener = (evt) => {
-				if (this.disableMenuItemsFn) {
+				if (this._disableMenuItemsFn) {
 					return;
 				}
 				const items = menuItemsFn(evt.target?.value ?? '', this.menuItems || []);
@@ -125,7 +125,7 @@ export class MenuController {
 		if (menuItemsFnAsync) {
 			this.menuItemsFn = menuItemsFnAsync;
 			const handler: InputChangeListener = async (evt) => {
-				if (this.disableMenuItemsFn) {
+				if (this._disableMenuItemsFn) {
 					return;
 				}
 				// TODO: something cleaner than use modulus?
@@ -188,14 +188,14 @@ export class MenuController {
 	}
 
 	openMenu = () => {
-		if (this.disableOpenClose) {
+		if (this._disableOpenClose) {
 			return;
 		}
 		this.currentProps.menuOpen = true;
 	};
 
 	closeMenu = () => {
-		if (this.disableOpenClose) {
+		if (this._disableOpenClose) {
 			return;
 		}
 		this.currentProps.menuOpen = false;
@@ -238,25 +238,25 @@ export class MenuController {
 	}
 
 	disableMenuActions() {
-		this.disableActions = true;
+		this._disableActions = true;
 	}
 
 	disableMenuOpenClose() {
-		this.disableOpenClose = true;
+		this._disableOpenClose = true;
 	}
-	disableAllMenuItemsFn() {
-		this.disableMenuItemsFn = true;
+	disableMenuItemsFn() {
+		this._disableMenuItemsFn = true;
 	}
 
 	enableMenuActions() {
-		this.disableActions = false;
+		this._disableActions = false;
 	}
 
 	enableMenuOpenClose() {
-		this.disableOpenClose = false;
+		this._disableOpenClose = false;
 	}
 
-	enableAllMenuItemsFn() {
-		this.disableMenuItemsFn = false;
+	enableMenuItemsFn() {
+		this._disableMenuItemsFn = false;
 	}
 }

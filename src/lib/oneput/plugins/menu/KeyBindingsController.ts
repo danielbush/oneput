@@ -230,7 +230,7 @@ export class KeyBindingsController {
 		this.controller.keys.disableKeys();
 		this.controller.menu.disableMenuActions();
 		this.controller.menu.disableMenuOpenClose();
-		this.controller.menu.disableAllMenuItemsFn();
+		this.controller.menu.disableMenuItemsFn();
 		this.controller.input.disableInputElement();
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
@@ -240,7 +240,7 @@ export class KeyBindingsController {
 			this.controller.keys.enableKeys();
 			this.controller.menu.enableMenuActions();
 			this.controller.menu.enableMenuOpenClose();
-			this.controller.menu.enableAllMenuItemsFn();
+			this.controller.menu.enableMenuItemsFn();
 			this.controller.input.enableInputElement();
 			this.actionUI(actionId);
 		};

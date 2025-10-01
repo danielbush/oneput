@@ -21,7 +21,7 @@ export class Alert {
 	private stop = () => {
 		this.controller.menu.enableMenuActions();
 		this.controller.menu.enableMenuOpenClose();
-		this.controller.menu.enableAllMenuItemsFn();
+		this.controller.menu.enableMenuItemsFn();
 		this.controller.input.enableInputElement();
 		this.controller.ui.replaceUI();
 		this.controller.keys.restoreKeys(true);
@@ -42,7 +42,7 @@ export class Alert {
 		);
 		this.controller.menu.disableMenuActions();
 		this.controller.menu.disableMenuOpenClose();
-		this.controller.menu.disableAllMenuItemsFn();
+		this.controller.menu.disableMenuItemsFn();
 		this.controller.input.disableInputElement();
 		this.controller.ui.setPlaceholder('Click "ok" or type enter to continue...');
 		this.controller.ui.replaceUI({

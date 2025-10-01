@@ -25,6 +25,11 @@ export class MenuController {
 	) {
 		this.currentProps.onMenuOpenChange = (menuOpen) => {
 			this.events.emit({ type: 'menu-open-change', payload: menuOpen });
+			if (menuOpen) {
+				// Focusing input when menu opens seems like a sensible default.
+				// We could have a setting to disable this if needed.
+				this.events.emit({ type: 'request-input-focus' });
+			}
 		};
 		this.currentProps.onMenuAction = () => {
 			if (this.disableActions) {

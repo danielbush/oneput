@@ -1,4 +1,4 @@
-import type { InternalEventEmitter } from './InternalEventEmitter.js';
+import type { InternalEventEmitter, RequestInputFocusEvent } from './InternalEventEmitter.js';
 import type { InputChangeEvent, InputChangeListener, OneputProps } from './lib.js';
 
 export class InputController {
@@ -15,6 +15,9 @@ export class InputController {
 			// Emit internal event for decoupled communication
 			this.events.emit({ type: 'input-change', payload: evt });
 		};
+		this.events.on<RequestInputFocusEvent>('request-input-focus', () => {
+			this.focusInput();
+		});
 	}
 
 	private inputElement: HTMLInputElement | undefined;

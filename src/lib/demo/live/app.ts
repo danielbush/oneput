@@ -8,10 +8,20 @@ import { RootUI } from './app/root.js';
 // Here we are relying on defaultUI to have some default settings including keys
 // set for us.  But we could fetch settings asynchronously here, update
 // defaultUI accordingly
-export const setController = (c: Controller) => {
-	const defaultUI = new MyDefaultUI(c);
-	c.ui.setDefaultUI(defaultUI);
-	c.keys.setKeys(defaultUI.keys.defaultGlobalKeys, false);
-	c.keys.setKeys(defaultUI.keys.defaultLocalKeys, true);
-	RootUI.create(c).run();
+export const setController = (ctl: Controller) => {
+	const defaultUI = new MyDefaultUI(ctl);
+	ctl.ui.setDefaultUI(defaultUI);
+	ctl.keys.setKeys(defaultUI.keys.defaultGlobalKeys, false);
+	ctl.keys.setKeys(defaultUI.keys.defaultLocalKeys, true);
+	ctl.menu.setDefaultMenuItemsFn((input, menuItems) => {
+		return menuItems.filter((item) => {
+			return item.children?.some((child) => {
+				if (child.type === 'fchild') {
+					return child.textContent?.toLowerCase().includes(input.toLowerCase());
+				}
+				return false;
+			});
+		});
+	});
+	RootUI.create(ctl).run();
 };

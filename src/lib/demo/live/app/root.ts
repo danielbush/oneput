@@ -22,16 +22,6 @@ export class RootUI {
 			exitType: 'exit',
 			placeholder: 'This is root...'
 		});
-		this.ctl.menu.setDefaultMenuItemsFn((input, menuItems) => {
-			return menuItems.filter((item) => {
-				return item.children?.some((child) => {
-					if (child.type === 'fchild') {
-						return child.textContent?.toLowerCase().includes(input.toLowerCase());
-					}
-					return false;
-				});
-			});
-		});
 		let blankItemCounter = 0;
 		this.ctl.menu.setMenuItems([
 			menuItemWithIcon({

@@ -12,12 +12,13 @@ export class AsyncSearchExample {
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
-		private testInputService: TestInputService
+		private testInputService: TestInputService,
+		private unsetMenuItemsFn?: () => void
 	) {}
 
 	run() {
 		this.ctl.setBackBinding(this.exit);
-		this.ctl.menu.setMenuItemsFnAsync(async (input) => {
+		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(async (input) => {
 			try {
 				const results = await this.testInputService.fetchData(input);
 				return results.map((result) => {
@@ -51,6 +52,7 @@ export class AsyncSearchExample {
 
 	private exit = () => {
 		this.ctl.input.setInputValue();
+		this.unsetMenuItemsFn?.();
 		this.back();
 	};
 }

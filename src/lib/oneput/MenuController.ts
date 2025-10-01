@@ -48,7 +48,6 @@ export class MenuController {
 	 */
 	private _disableMenuItemsFn = false;
 	private removeDefaultMenuItemsFn: () => void = () => {};
-	private removeMenuItemsFn: () => void = () => {};
 	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
 	private menuItems: Array<MenuItemAny> = [];
 	private menuItemsSeqId = 0;
@@ -97,22 +96,19 @@ export class MenuController {
 	 *
 	 * If this function returns undefined, the menu will not be updated.
 	 */
-	setMenuItemsFn(menuItemsFn?: MenuItemsFn) {
-		this.removeMenuItemsFn();
-		if (menuItemsFn) {
-			this.menuItemsFn = menuItemsFn;
-			const handler: InputChangeListener = (evt) => {
-				if (this._disableMenuItemsFn) {
-					return;
-				}
-				const items = menuItemsFn(evt.target?.value ?? '', this.menuItems || []);
-				if (!items) {
-					return;
-				}
-				this._setMenuItems(items, true);
-			};
-			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
-		}
+	setMenuItemsFn(menuItemsFn: MenuItemsFn) {
+		this.menuItemsFn = menuItemsFn;
+		const handler: InputChangeListener = (evt) => {
+			if (this._disableMenuItemsFn) {
+				return;
+			}
+			const items = menuItemsFn(evt.target?.value ?? '', this.menuItems || []);
+			if (!items) {
+				return;
+			}
+			this._setMenuItems(items, true);
+		};
+		return this.events.on<InputChangeEvent>('input-change', handler);
 	}
 
 	/**
@@ -121,36 +117,33 @@ export class MenuController {
 	 * discarded.
 	 */
 	setMenuItemsFnAsync(menuItemsFnAsync: MenuItemsFnAsync) {
-		this.removeMenuItemsFn();
-		if (menuItemsFnAsync) {
-			this.menuItemsFn = menuItemsFnAsync;
-			const handler: InputChangeListener = async (evt) => {
-				if (this._disableMenuItemsFn) {
-					return;
-				}
-				// TODO: something cleaner than use modulus?
-				// The probability that an old call a million calls back is
-				// received just after a call with the same id a million later
-				// is pretty low.
-				this.menuItemsSeqId = (this.menuItemsSeqId + 1) % 1000000;
-				const seqId = this.menuItemsSeqId;
-				const value = evt.target?.value ?? '';
-				const items = await menuItemsFnAsync(value, this.menuItems);
-				if (!items) {
-					return;
-				}
-				if (seqId !== this.menuItemsSeqId) {
-					console.warn(`discarded ${value}...`);
-					return;
-				}
-				console.warn(`got ${value}...`);
-				this._setMenuItems(items, true);
-			};
-			const debouncedHandler = debounce(handler, 500);
-			this.removeMenuItemsFn = this.events.on<InputChangeEvent>('input-change', (evt) => {
-				debouncedHandler(evt);
-			});
-		}
+		this.menuItemsFn = menuItemsFnAsync;
+		const handler: InputChangeListener = async (evt) => {
+			if (this._disableMenuItemsFn) {
+				return;
+			}
+			// TODO: something cleaner than use modulus?
+			// The probability that an old call a million calls back is
+			// received just after a call with the same id a million later
+			// is pretty low.
+			this.menuItemsSeqId = (this.menuItemsSeqId + 1) % 1000000;
+			const seqId = this.menuItemsSeqId;
+			const value = evt.target?.value ?? '';
+			const items = await menuItemsFnAsync(value, this.menuItems);
+			if (!items) {
+				return;
+			}
+			if (seqId !== this.menuItemsSeqId) {
+				console.warn(`discarded ${value}...`);
+				return;
+			}
+			console.warn(`got ${value}...`);
+			this._setMenuItems(items, true);
+		};
+		const debouncedHandler = debounce(handler, 500);
+		return this.events.on<InputChangeEvent>('input-change', (evt) => {
+			debouncedHandler(evt);
+		});
 	}
 
 	private _setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {

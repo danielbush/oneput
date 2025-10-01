@@ -24,13 +24,13 @@ export class Alert {
 		this.controller.menu.enableMenuItemsFn();
 		this.controller.input.enableInputElement();
 		this.controller.ui.replaceUI();
-		this.controller.keys.restoreKeys(true);
+		this.controller.keys.unsetKeys(true);
 		this.controller.ui.setPlaceholder();
 		this.resolve?.();
 	};
 
 	private start = () => {
-		this.controller.keys.setTempKeys(
+		this.controller.keys.setKeys(
 			{
 				ok: {
 					description: 'OK',

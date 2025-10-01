@@ -5,12 +5,6 @@ import type { KeyBindingMap } from './KeyBinding.js';
 
 /**
  * Manages key bindings.
- *
- * - setKeys(bindings, isLocal) : sets a set of key bindings; these will be replaced by the next call
- * - setKeys({], isLocal} : clears bindings
- * - setTempKeys(...) : lets you temporarily set bindings in place of the previous call to setKeys
- * - restoreKeys(...) : use this to restore remove setTempKeys and restore the previous setKeys call
- *
  */
 export class KeysController {
 	public static create(events: InternalEventEmitter, actionArg: Controller, menuOpen: boolean) {
@@ -91,7 +85,7 @@ export class KeysController {
 		this.keysDisabled = false;
 	}
 
-	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
+	setDefaultKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
 			this.restoreLocalBindings = bindings;
 			this.handleLocalKeys(bindings);
@@ -104,7 +98,7 @@ export class KeysController {
 	private restoreLocalBindings: KeyBindingMap = {};
 	private restoreGlobalBindings: KeyBindingMap = {};
 
-	setTempKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
+	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
 			this.handleLocalKeys(bindings);
 		} else {
@@ -112,11 +106,11 @@ export class KeysController {
 		}
 	}
 
-	restoreKeys(isLocal: boolean = false) {
+	unsetKeys(isLocal: boolean = false) {
 		if (isLocal) {
-			this.setKeys(this.restoreLocalBindings, true);
+			this.setDefaultKeys(this.restoreLocalBindings, true);
 		} else {
-			this.setKeys(this.restoreGlobalBindings, false);
+			this.setDefaultKeys(this.restoreGlobalBindings, false);
 		}
 	}
 }

@@ -44,7 +44,7 @@ export class KeysManager {
 		// default ui.  In more complicated setups you might be setting bindings
 		// for a particular mode.
 		const notification = this.ctl.notify('Updating...', { duration: 3000 });
-		this.ctl.keys.setKeys(newKeyMap, this.isLocal);
+		this.ctl.keys.setDefaultKeys(newKeyMap, this.isLocal);
 		this.ctl.ui.getDefaultUI<MyDefaultUI>()?.keys.setDefaultKeys(newKeyMap, this.isLocal);
 		// Push to store
 		try {
@@ -54,7 +54,7 @@ export class KeysManager {
 		} catch (err) {
 			notification.updateMessage((err as Error).message);
 			// Revert optimistic update...
-			this.ctl.keys.setKeys(this.keyMap, this.isLocal);
+			this.ctl.keys.setDefaultKeys(this.keyMap, this.isLocal);
 			this.ctl.ui.getDefaultUI<MyDefaultUI>()?.keys.setDefaultKeys(this.keyMap, this.isLocal);
 			throw err;
 		}

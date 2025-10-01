@@ -23,8 +23,8 @@ function simpleFilter(input: string, menuItems: MenuItemAny[]) {
 export const setController = (ctl: Controller) => {
 	const defaultUI = new MyDefaultUI(ctl);
 	ctl.ui.setDefaultUI(defaultUI);
-	ctl.keys.setKeys(defaultUI.keys.defaultGlobalKeys, false);
-	ctl.keys.setKeys(defaultUI.keys.defaultLocalKeys, true);
+	ctl.keys.setDefaultKeys(defaultUI.keys.defaultGlobalKeys, false);
+	ctl.keys.setDefaultKeys(defaultUI.keys.defaultLocalKeys, true);
 	ctl.menu.setDefaultMenuItemsFn(simpleFilter);
 	RootUI.create(ctl).run();
 };

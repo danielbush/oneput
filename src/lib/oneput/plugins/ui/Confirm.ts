@@ -20,7 +20,7 @@ export class Confirm {
 	}
 
 	private start = () => {
-		this.controller.keys.setTempKeys(
+		this.controller.keys.setKeys(
 			{
 				ok: {
 					description: 'OK',
@@ -100,7 +100,7 @@ export class Confirm {
 		this.controller.menu.enableMenuItemsFn();
 		this.controller.input.enableInputElement();
 		this.controller.ui.replaceUI();
-		this.controller.keys.restoreKeys(true);
+		this.controller.keys.unsetKeys(true);
 		this.controller.ui.setPlaceholder();
 		this.resolve?.(ok);
 	};

@@ -33,7 +33,11 @@
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
 	>
-		{#if props.innerHTMLUnsafe}
+		{#if props.derivedHTML}
+			<!-- eslint-disable svelte/no-at-html-tags -->
+			{@html props.derivedHTML}
+			<!-- eslint-enable svelte/no-at-html-tags -->
+		{:else if props.innerHTMLUnsafe}
 			<!-- eslint-disable svelte/no-at-html-tags -->
 			{@html props.innerHTMLUnsafe}
 			<!-- eslint-enable svelte/no-at-html-tags -->

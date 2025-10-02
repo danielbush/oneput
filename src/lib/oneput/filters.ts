@@ -59,6 +59,10 @@ export function fuzzy(input: string, menuItems: MenuItemAny[]) {
 	menuItems.forEach((item, index) => {
 		walk(item, (child) => {
 			if (child.type === 'fchild' && child.textContent) {
+				// Important: clean up previous derivedHTML.
+				if (child.derivedHTML) {
+					child.derivedHTML = undefined;
+				}
 				explodedMenuItems.push({
 					menuItemIndex: index,
 					menuItem: item,
@@ -83,7 +87,7 @@ export function fuzzy(input: string, menuItems: MenuItemAny[]) {
 		const item = explodedMenuItems[info.idx[infoIdx]];
 		// We need the p-tags because fchild's are flexed by default and this
 		// will do weird things to spaces for text interspersed with markup.
-		item.fchild.innerHTMLUnsafe =
+		item.fchild.derivedHTML =
 			'<p>' +
 			uFuzzy.highlight(item.textContent, info.ranges[infoIdx], (part, matched) =>
 				matched ? '<b>' + part + '</b>' : part

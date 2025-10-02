@@ -108,6 +108,11 @@ export type FChildParams = {
 	style?: Partial<CSSStyleDeclaration>;
 	textContent?: string;
 	innerHTMLUnsafe?: string;
+	/**
+	 * Is set by a menuItemsFn (via Oneput controller) usually to show
+	 * highlighted text when user is filtering menu items by typing.
+	 */
+	derivedHTML?: string;
 	onMount?: (node: HTMLElement) => void | (() => void);
 	/** List of HTML void elements. */
 	voidElements?: Set<string | undefined>;

@@ -1,5 +1,6 @@
 import { walk, type FChildParams, type MenuItemAny } from '$lib/oneput/lib.js';
 import uFuzzy from '@leeoniya/ufuzzy';
+import type { MenuItemsFn } from './MenuController.js';
 
 export function simpleFilter(input: string, menuItems: MenuItemAny[]) {
 	return menuItems.filter((item) => {
@@ -23,7 +24,7 @@ export class FuzzyFilter {
 		this.ufuzzy = new uFuzzy({});
 	}
 
-	menuItemsFn = (input: string, menuItems: MenuItemAny[]): MenuItemAny[] => {
+	menuItemsFn: MenuItemsFn = (input, menuItems) => {
 		const explodedMenuItems: {
 			fchild: FChildParams;
 			menuItemIndex: number;

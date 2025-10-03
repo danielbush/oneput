@@ -30,6 +30,7 @@ export class NavigateHeadings {
 			this.ctl.menu.closeMenu();
 			// Reset the input and menu:
 			this.ctl.input.setInputValue();
+			this.ctl.menu.setMenuItems(menuItems);
 		};
 		const menuItem = (heading: HTMLElement) =>
 			menuItemNoIcon({
@@ -52,6 +53,9 @@ export class NavigateHeadings {
 		this.clearInputChangeListener = this.ctl.input.onInputChange((evt) => {
 			const input = (evt.target as HTMLInputElement).value;
 			const sortedMenuItems = this.fuzzyFilter.menuItemsFn(input, menuItems);
+			if (!sortedMenuItems) {
+				return;
+			}
 			this.ctl.menu.setMenuItems(sortedMenuItems);
 		});
 	}

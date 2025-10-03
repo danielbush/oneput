@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
-import { menuItemWithIcon } from '../../config/ui.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { TestInputService } from '../../service/TestInputService.js';
 
 export class AsyncSearchExample {
@@ -18,6 +18,10 @@ export class AsyncSearchExample {
 
 	run() {
 		this.ctl.setBackBinding(this.exit);
+		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
+			menuHeader: 'Async Search Example',
+			exitAction: this.exit
+		});
 		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(async (input) => {
 			try {
 				const results = await this.testInputService.fetchData(input);

@@ -24,22 +24,25 @@ export class NavigateHeadings {
 			menuHeader: 'Navigate Headings',
 			exitAction: this.exit
 		});
-		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+		const menuAction = (heading: HTMLElement) => {
+			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+			this.controller.menu.closeMenu();
+			// Reset the input and menu:
+			this.controller.input.setInputValue();
+		};
+		const menuItem = (heading: HTMLElement) =>
+			menuItemNoIcon({
+				id: randomId(),
+				text: heading.textContent,
+				action: () => {
+					menuAction(heading);
+				}
+			});
 		this.controller.setBackBinding(this.exit);
-		this.controller.menu.setMenuItems(
-			this.headings.map((h) =>
-				menuItemNoIcon({
-					id: randomId(),
-					text: h.textContent,
-					action: () => {
-						h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-						this.controller.menu.closeMenu();
-						// Reset the input and menu:
-						this.controller.input.setInputValue();
-					}
-				})
-			)
-		);
+
+		// Initialise headings and menu items...
+		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+		this.controller.menu.setMenuItems(this.headings.map((h) => menuItem(h)));
 
 		// We demo here how to handle typed input by handling onInputChange
 		// directly and disable menuItemsFn...
@@ -49,20 +52,7 @@ export class NavigateHeadings {
 			const filteredHeadings = this.headings.filter((heading) => {
 				return heading.textContent.includes(text);
 			});
-			this.controller.menu.setMenuItems(
-				filteredHeadings.map((h) =>
-					menuItemNoIcon({
-						id: randomId(),
-						text: h.textContent,
-						action: () => {
-							h.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-							this.controller.menu.closeMenu();
-							// Reset the input and menu:
-							this.controller.input.setInputValue();
-						}
-					})
-				)
-			);
+			this.controller.menu.setMenuItems(filteredHeadings.map((h) => menuItem(h)));
 		});
 	}
 

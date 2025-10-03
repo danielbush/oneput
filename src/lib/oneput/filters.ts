@@ -25,28 +25,7 @@ function walk(item: FlexParams | FChildParams, cb: (item: FlexParams | FChildPar
 	}
 }
 
-function getTextContent(item: FlexParams | FChildParams) {
-	let result = '';
-	walk(item, (item) => {
-		if (item.type === 'fchild') {
-			if (item.textContent) {
-				result += item.textContent;
-			}
-		}
-	});
-	return result;
-}
-
 const ufuzzy = new uFuzzy({});
-
-export function fuzzyNoHighlight(input: string, menuItems: MenuItemAny[]) {
-	const haystack = menuItems.map(getTextContent);
-	const idxs = ufuzzy.filter(haystack, input);
-	if (!idxs) {
-		return menuItems;
-	}
-	return idxs.map((idx) => menuItems[idx]);
-}
 
 export function fuzzy(input: string, menuItems: MenuItemAny[]): MenuItemAny[] {
 	const explodedMenuItems: {

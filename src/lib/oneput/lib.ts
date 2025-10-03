@@ -187,3 +187,20 @@ export type NullishChildren = Array<FlexParams | FChildParams | '' | false | nul
 export function filterChildren(children: NullishChildren): FlexParams['children'] {
 	return children.filter(Boolean) as FlexParams['children'];
 }
+
+export function walk(
+	item: FlexParams | FChildParams,
+	cb: (item: FlexParams | FChildParams) => void
+) {
+	if (item.type === 'hflex' || item.type === 'vflex') {
+		cb(item);
+		for (const child of item.children || []) {
+			walk(child, cb);
+		}
+		return;
+	}
+	if (item.type === 'fchild') {
+		cb(item);
+		return;
+	}
+}

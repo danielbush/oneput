@@ -1,4 +1,4 @@
-import type { FChildParams, FlexParams, MenuItemAny } from '$lib/oneput/lib.js';
+import { walk, type FChildParams, type MenuItemAny } from '$lib/oneput/lib.js';
 import uFuzzy from '@leeoniya/ufuzzy';
 
 export function simpleFilter(input: string, menuItems: MenuItemAny[]) {
@@ -10,19 +10,6 @@ export function simpleFilter(input: string, menuItems: MenuItemAny[]) {
 			return false;
 		});
 	});
-}
-
-function walk(item: FlexParams | FChildParams, cb: (item: FlexParams | FChildParams) => void) {
-	if (item.type === 'hflex' || item.type === 'vflex') {
-		for (const child of item.children || []) {
-			walk(child, cb);
-		}
-		return;
-	}
-	if (item.type === 'fchild') {
-		cb(item);
-		return;
-	}
 }
 
 const ufuzzy = new uFuzzy({});

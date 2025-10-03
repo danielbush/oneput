@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { fuzzy } from '$lib/oneput/filters.js';
+import { FuzzyFilter } from '$lib/oneput/filters.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { menuItemNoIcon } from '../../config/ui.js';
 
@@ -8,7 +8,7 @@ import { menuItemNoIcon } from '../../config/ui.js';
  */
 export class NavigateHeadings {
 	static create(ctl: Controller, document: Document, back: () => void) {
-		return new NavigateHeadings(ctl, document, back);
+		return new NavigateHeadings(ctl, document, back, FuzzyFilter.create());
 	}
 
 	private clearInputChangeListener?: () => void;
@@ -16,7 +16,8 @@ export class NavigateHeadings {
 	private constructor(
 		private ctl: Controller,
 		private document: Document,
-		private back: () => void
+		private back: () => void,
+		private fuzzyFilter: FuzzyFilter
 	) {}
 
 	run() {
@@ -50,7 +51,7 @@ export class NavigateHeadings {
 		this.ctl.menu.disableMenuItemsFn();
 		this.clearInputChangeListener = this.ctl.input.onInputChange((evt) => {
 			const input = (evt.target as HTMLInputElement).value;
-			const sortedMenuItems = fuzzy(input, menuItems);
+			const sortedMenuItems = this.fuzzyFilter.menuItemsFn(input, menuItems);
 			this.ctl.menu.setMenuItems(sortedMenuItems);
 		});
 	}

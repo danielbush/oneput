@@ -11,7 +11,6 @@ export class NavigateHeadings {
 		return new NavigateHeadings(controller, document, back);
 	}
 
-	private headings: HTMLElement[] = [];
 	private clearInputChangeListener?: () => void;
 
 	private constructor(
@@ -41,13 +40,13 @@ export class NavigateHeadings {
 			});
 		this.controller.setBackBinding(this.exit);
 
-		// Initialise headings and menu items...
-		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-		const menuItems = this.headings.map((h) => menuItem(h));
+		// Initialize headings and menu items...
+		const headings: HTMLElement[] = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+		const menuItems = headings.map((h) => menuItem(h));
 		this.controller.menu.setMenuItems(menuItems);
 
-		// We demo here how to handle typed input by handling onInputChange
-		// directly and disable menuItemsFn...
+		// Demo how to handle typed input by handling onInputChange directly and
+		// disable menuItemsFn...
 		this.controller.menu.disableMenuItemsFn();
 		this.clearInputChangeListener = this.controller.input.onInputChange((evt) => {
 			const input = (evt.target as HTMLInputElement).value;

@@ -48,7 +48,7 @@ export function fuzzyNoHighlight(input: string, menuItems: MenuItemAny[]) {
 	return idxs.map((idx) => menuItems[idx]);
 }
 
-export function fuzzy(input: string, menuItems: MenuItemAny[]) {
+export function fuzzy(input: string, menuItems: MenuItemAny[]): MenuItemAny[] {
 	const explodedMenuItems: {
 		fchild: FChildParams;
 		menuItemIndex: number;

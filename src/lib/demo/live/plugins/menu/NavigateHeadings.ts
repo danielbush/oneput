@@ -1,4 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
+import { fuzzy } from '$lib/oneput/filters.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { menuItemNoIcon } from '../../config/ui.js';
 
@@ -42,17 +43,16 @@ export class NavigateHeadings {
 
 		// Initialise headings and menu items...
 		this.headings = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-		this.controller.menu.setMenuItems(this.headings.map((h) => menuItem(h)));
+		const menuItems = this.headings.map((h) => menuItem(h));
+		this.controller.menu.setMenuItems(menuItems);
 
 		// We demo here how to handle typed input by handling onInputChange
 		// directly and disable menuItemsFn...
 		this.controller.menu.disableMenuItemsFn();
 		this.clearInputChangeListener = this.controller.input.onInputChange((evt) => {
-			const text = (evt.target as HTMLInputElement).value;
-			const filteredHeadings = this.headings.filter((heading) => {
-				return heading.textContent.includes(text);
-			});
-			this.controller.menu.setMenuItems(filteredHeadings.map((h) => menuItem(h)));
+			const input = (evt.target as HTMLInputElement).value;
+			const sortedMenuItems = fuzzy(input, menuItems);
+			this.controller.menu.setMenuItems(sortedMenuItems);
 		});
 	}
 

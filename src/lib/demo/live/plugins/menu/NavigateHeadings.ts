@@ -7,28 +7,28 @@ import { menuItemNoIcon } from '../../config/ui.js';
  * Demonstrates how we navigate the headings in an html document using Oneput.
  */
 export class NavigateHeadings {
-	static create(controller: Controller, document: Document, back: () => void) {
-		return new NavigateHeadings(controller, document, back);
+	static create(ctl: Controller, document: Document, back: () => void) {
+		return new NavigateHeadings(ctl, document, back);
 	}
 
 	private clearInputChangeListener?: () => void;
 
 	private constructor(
-		private controller: Controller,
+		private ctl: Controller,
 		private document: Document,
 		private back: () => void
 	) {}
 
 	run() {
-		this.controller.ui.applyDefaultUI({
+		this.ctl.ui.applyDefaultUI({
 			menuHeader: 'Navigate Headings',
 			exitAction: this.exit
 		});
 		const menuAction = (heading: HTMLElement) => {
 			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-			this.controller.menu.closeMenu();
+			this.ctl.menu.closeMenu();
 			// Reset the input and menu:
-			this.controller.input.setInputValue();
+			this.ctl.input.setInputValue();
 		};
 		const menuItem = (heading: HTMLElement) =>
 			menuItemNoIcon({
@@ -38,20 +38,20 @@ export class NavigateHeadings {
 					menuAction(heading);
 				}
 			});
-		this.controller.setBackBinding(this.exit);
+		this.ctl.setBackBinding(this.exit);
 
 		// Initialize headings and menu items...
 		const headings: HTMLElement[] = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
 		const menuItems = headings.map((h) => menuItem(h));
-		this.controller.menu.setMenuItems(menuItems);
+		this.ctl.menu.setMenuItems(menuItems);
 
 		// Demo how to handle typed input by handling onInputChange directly and
 		// disable menuItemsFn...
-		this.controller.menu.disableMenuItemsFn();
-		this.clearInputChangeListener = this.controller.input.onInputChange((evt) => {
+		this.ctl.menu.disableMenuItemsFn();
+		this.clearInputChangeListener = this.ctl.input.onInputChange((evt) => {
 			const input = (evt.target as HTMLInputElement).value;
 			const sortedMenuItems = fuzzy(input, menuItems);
-			this.controller.menu.setMenuItems(sortedMenuItems);
+			this.ctl.menu.setMenuItems(sortedMenuItems);
 		});
 	}
 
@@ -59,8 +59,8 @@ export class NavigateHeadings {
 	 * It's important to clean up once we exit this mini-app.
 	 */
 	private exit = () => {
-		this.controller.menu.enableMenuItemsFn();
-		this.controller.input.setInputValue();
+		this.ctl.menu.enableMenuItemsFn();
+		this.ctl.input.setInputValue();
 		this.clearInputChangeListener?.();
 		this.back();
 	};

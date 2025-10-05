@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { FuzzyFilter } from '$lib/oneput/filters.js';
+import { FuzzyFilter } from '$lib/oneput/filters/FuzzyFilter.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { menuItemNoIcon } from '../../config/ui.js';
 

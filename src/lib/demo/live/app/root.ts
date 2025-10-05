@@ -102,44 +102,66 @@ export class RootUI {
 					console.log('after confirm...', yes);
 				}
 			}),
+			{
+				id: randomId(),
+				type: 'hflex',
+				tag: 'button',
+				children: [
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__icon']
+					},
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__menu-item-body'],
+						innerHTMLUnsafe: '<p>Html blank item</p>'
+					},
+					{
+						id: randomId(),
+						type: 'fchild'
+					}
+				]
+			},
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			}),
 			menuItemWithIcon({
 				id: randomId(),
-				text: `blank item ${++blankItemCounter}`,
+				text: `Blank item ${++blankItemCounter}`,
 				action: () => {}
 			})
 		]);

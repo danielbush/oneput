@@ -51,6 +51,8 @@ export class FuzzyFilter {
 		});
 
 		const idxs = this.ufuzzy.filter(haystack, input);
+		// See: https://github.com/leeoniya/uFuzzy/issues/79
+		// const [idxs] = this.ufuzzy.search(haystack, input, 1);
 		if (!idxs) {
 			return menuItems;
 		}

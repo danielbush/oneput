@@ -108,7 +108,11 @@ export class MenuController {
 			}
 			this._setMenuItems(items, true);
 		};
-		return this.events.on<InputChangeEvent>('input-change', handler);
+		const removeListner = this.events.on<InputChangeEvent>('input-change', handler);
+		return () => {
+			removeListner();
+			this.menuItemsFn = undefined;
+		};
 	}
 
 	/**
@@ -141,9 +145,13 @@ export class MenuController {
 			this._setMenuItems(items, true);
 		};
 		const debouncedHandler = debounce(handler, 500);
-		return this.events.on<InputChangeEvent>('input-change', (evt) => {
+		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
 			debouncedHandler(evt);
 		});
+		return () => {
+			removeListner();
+			this.menuItemsFn = undefined;
+		};
 	}
 
 	private _setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {

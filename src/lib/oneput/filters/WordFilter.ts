@@ -18,6 +18,8 @@ function getHaystack(menuItems: MenuItemAny[]): HaystackInfo {
 		const children: FChildParams[] = [];
 		walk(menuItem, (child) => {
 			if (child.type === 'fchild') {
+				// IMPORTANT remove stale highlighting.
+				child.derivedHTML = undefined;
 				children.push(child);
 			}
 		});
@@ -41,36 +43,34 @@ export class WordFilter {
 	}
 
 	menuItemsFn: MenuItemsFn = (input, menuItems) => {
+		// ALWAYS call haystack because it clears derivedHTML in FChild
+		// elements.  Example: user types some text, then deletes all of it
+		// using backspace, the last character to be deleted (which is the first
+		// one) will remain highlighted.
+		const haystack = getHaystack(menuItems);
 		if (!input || !/\S/.test(input)) {
 			return menuItems;
 		}
 		const words = input.split(/\s+/).filter(Boolean);
-		const haystack = getHaystack(menuItems);
 		const matchingItems: MenuItemAny[] = [];
 		const tokenInfo: Record<string, { tokens: string[]; derived: string[] }> = {};
 		const pushed: Record<string, boolean> = {};
-		let index = -1; // debug
 		for (const menuItemData of haystack.menuItems) {
-			index += 1; // debug
 			// For the given menu item, check all words match at least somewhere...
 			let allWordsMatchSomething = true;
 			for (const word of words) {
 				let wordMatchesSomething = false;
-				if (index === 10) console.log('word', word); // debug
 				for (const child of menuItemData.children) {
-					// For a given menu item and a given word, try to match on non-svg html...
-					// TODO: checking svg like this is horrible.  Some way to exclude some html as decorative?
 					if (child.innerHTMLUnsafe && !child.innerHTMLUnsafe.toLowerCase().includes('<svg')) {
-						if (index === 10) console.log('  html', child.innerHTMLUnsafe); // debug
+						// For a given menu item and a given word, try to match on non-svg html...
+						// TODO: checking svg like this is horrible.  Some way to exclude some html as decorative?
 						const matches = child.innerHTMLUnsafe.toLowerCase().includes(word.toLowerCase());
 						if (matches) {
 							wordMatchesSomething = true;
 							break;
 						}
-
-						// For a given menu item and a given word, try to match on text...
 					} else if (child.textContent) {
-						if (index === 10) console.log('  textContent', child.textContent); // debug
+						// For a given menu item and a given word, try to match on text...
 						if (!tokenInfo[child.id]) {
 							const tokens = child.textContent.split(/\b/);
 							tokenInfo[child.id] = { tokens, derived: Array(tokens.length).fill(null) };
@@ -83,8 +83,6 @@ export class WordFilter {
 								tinfo.derived[i] =
 									`<b>${tinfo.tokens[i].slice(0, word.length)}</b>${tinfo.tokens[i].slice(word.length)}`;
 							}
-							if (index === 10)
-								console.log('    token:', tinfo.tokens[i], 'derived:', tinfo.derived[i]); // debug
 						}
 						if (matches) {
 							wordMatchesSomething = true;
@@ -95,7 +93,6 @@ export class WordFilter {
 					}
 				}
 				if (!wordMatchesSomething) {
-					console.log('word', word, 'does not match anything'); // debug
 					allWordsMatchSomething = false;
 					break;
 				}

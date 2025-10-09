@@ -178,6 +178,7 @@ export type MyDefaultUIValues = {
 	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
 	placeholder?: string;
 	backBinding?: () => void;
+	clearInput?: boolean;
 };
 
 /**
@@ -215,6 +216,11 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 			placeholder: 'Type here...',
 			...values
 		};
+		// Clear the input.
+		// You can set `clearInput: false` to disable this behaviour.
+		if (this.values.clearInput || !('clearInput' in this.values)) {
+			this.ctl.input.setInputValue();
+		}
 		// We set exitAction to the backBinding so that the back key (whatever
 		// it is set to) will trigger this action.
 		this.ctl.setBackBinding(this.values.exitAction);

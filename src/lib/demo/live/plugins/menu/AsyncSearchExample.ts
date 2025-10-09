@@ -25,7 +25,6 @@ export class AsyncSearchExample {
 			try {
 				this.setBusy(true);
 				const results = await this.testInputService.fetchData(input);
-				this.setBusy(false);
 				return results.map((result) => {
 					return menuItemWithIcon({
 						id: randomId(),
@@ -42,6 +41,8 @@ export class AsyncSearchExample {
 							: 'Unknown error';
 				this.ctl.notify(`Error fetching data: ${message}`, { duration: 10000 });
 				return;
+			} finally {
+				this.setBusy(false);
 			}
 		});
 		this.ctl.input.setInputValue();
@@ -57,7 +58,8 @@ export class AsyncSearchExample {
 
 	private setBusy(busy: boolean) {
 		if (busy) {
-			this.ctl.ui.setInputUI({
+			this.ctl.ui.setInputUI((current) => ({
+				...current,
 				right: {
 					id: 'input-right-1',
 					type: 'hflex',
@@ -69,11 +71,12 @@ export class AsyncSearchExample {
 						}
 					]
 				}
-			});
+			}));
 		} else {
-			this.ctl.ui.setInputUI({
+			this.ctl.ui.setInputUI((current) => ({
+				...current,
 				right: undefined
-			});
+			}));
 		}
 	}
 

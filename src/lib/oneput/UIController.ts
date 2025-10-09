@@ -24,13 +24,11 @@ export class UIController {
 		this.currentProps.menuUI = menuUI;
 	}
 
-	setInputUI(input?: {
-		left?: FlexParams;
-		right?: FlexParams;
-		outerLeft?: FlexParams;
-		outerRight?: FlexParams;
-	}) {
-		this.currentProps.inputUI = input;
+	setInputUI(
+		input?: OneputProps['inputUI'] | ((current: OneputProps['inputUI']) => OneputProps['inputUI'])
+	) {
+		this.currentProps.inputUI =
+			typeof input === 'function' ? input(this.currentProps.inputUI) : input;
 	}
 
 	setPlaceholder(msg?: string) {

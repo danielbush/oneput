@@ -1,5 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
+import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { TestInputService } from '../../service/TestInputService.js';
 
@@ -21,30 +22,34 @@ export class AsyncSearchExample {
 			menuHeader: 'Async Search Example',
 			exitAction: this.exit
 		});
-		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(async (input) => {
-			try {
-				this.setBusy(true);
-				const results = await this.testInputService.fetchData(input);
-				return results.map((result) => {
-					return menuItemWithIcon({
-						id: randomId(),
-						text: result
+		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(
+			async (input) => {
+				try {
+					const results = await this.testInputService.fetchData(input);
+					return results.map((result) => {
+						return menuItemWithIcon({
+							id: randomId(),
+							text: result
+						});
 					});
-				});
-			} catch (error) {
-				console.error(error);
-				const message =
-					error instanceof Error
-						? error.message
-						: typeof error === 'string'
-							? error
-							: 'Unknown error';
-				this.ctl.notify(`Error fetching data: ${message}`, { duration: 10000 });
-				return;
-			} finally {
-				this.setBusy(false);
+				} catch (error) {
+					console.error(error);
+					const message =
+						error instanceof Error
+							? error.message
+							: typeof error === 'string'
+								? error
+								: 'Unknown error';
+					this.ctl.notify(`Error fetching data: ${message}`, { duration: 10000 });
+					return;
+				}
+			},
+			{
+				onDebounce: (isDebouncing) => {
+					this.setBusy(isDebouncing);
+				}
 			}
-		});
+		);
 		this.ctl.input.setInputValue();
 		this.ctl.ui.setPlaceholder('Start typing something...');
 		this.ctl.menu.setMenuItems([
@@ -66,8 +71,9 @@ export class AsyncSearchExample {
 					children: [
 						{
 							id: 'input-right-1-child',
+							classes: ['oneput__icon'],
 							type: 'fchild',
-							innerHTMLUnsafe: 'busy...'
+							innerHTMLUnsafe: refreshCwIcon
 						}
 					]
 				}

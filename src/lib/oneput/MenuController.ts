@@ -120,10 +120,12 @@ export class MenuController {
 	 * the user types.  If an older call comes in AFTER a later call it will be
 	 * discarded.
 	 */
-	setMenuItemsFnAsync(menuItemsFnAsync: MenuItemsFnAsync) {
+	setMenuItemsFnAsync(
+		menuItemsFnAsync: MenuItemsFnAsync,
+		options: { onDebounce?: (isDebouncing: boolean) => void } = {}
+	) {
 		this.menuItemsFn = menuItemsFnAsync;
 		const handler: InputChangeListener = async (evt) => {
-			console.log('handler START');
 			if (this._disableMenuItemsFn) {
 				return;
 			}
@@ -135,6 +137,7 @@ export class MenuController {
 			const seqId = this.menuItemsSeqId;
 			const value = evt.target?.value ?? '';
 			const items = await menuItemsFnAsync(value, this.menuItems);
+			options.onDebounce?.(false);
 			if (!items) {
 				return;
 			}
@@ -145,8 +148,9 @@ export class MenuController {
 			console.warn(`got ${value}...`);
 			this._setMenuItems(items, true);
 		};
-		const debouncedHandler = debounce(handler, 500, { immediate: true });
+		const debouncedHandler = debounce(handler, 500, { immediate: false });
 		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
+			options.onDebounce?.(true);
 			debouncedHandler(evt);
 		});
 		return () => {

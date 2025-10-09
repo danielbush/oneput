@@ -125,10 +125,11 @@ export class MenuController {
 		options: { onDebounce?: (isDebouncing: boolean) => void } = {}
 	) {
 		this.menuItemsFn = menuItemsFnAsync;
+		let inFlight = 0;
 		const handler: InputChangeListener = async (evt) => {
-			if (this._disableMenuItemsFn) {
-				return;
-			}
+			inFlight += 1;
+			inFlight %= 1000;
+			options.onDebounce?.(true);
 			// TODO: something cleaner than use modulus?
 			// The probability that an old call a million calls back is
 			// received just after a call with the same id a million later
@@ -136,8 +137,22 @@ export class MenuController {
 			this.menuItemsSeqId = (this.menuItemsSeqId + 1) % 1000000;
 			const seqId = this.menuItemsSeqId;
 			const value = evt.target?.value ?? '';
-			const items = await menuItemsFnAsync(value, this.menuItems);
-			options.onDebounce?.(false);
+			const thisInFlight = inFlight;
+			let items: MenuItemAny[] | undefined;
+			try {
+				items = await menuItemsFnAsync(value, this.menuItems);
+			} catch (err) {
+				console.error(
+					'menuItemsFnAsync rejected - we recommend you catch your errors.  Error:',
+					err
+				);
+			}
+			if (thisInFlight === inFlight) {
+				// Another debounce call may have triggered during the above
+				// await.
+				// If not, then we can make the callback.
+				options.onDebounce?.(false);
+			}
 			if (!items) {
 				return;
 			}
@@ -150,6 +165,9 @@ export class MenuController {
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
 		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
+			if (this._disableMenuItemsFn) {
+				return;
+			}
 			options.onDebounce?.(true);
 			debouncedHandler(evt);
 		});

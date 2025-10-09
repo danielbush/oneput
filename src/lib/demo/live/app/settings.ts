@@ -6,8 +6,7 @@ import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
 import { menuItemWithIcon, MyDefaultUI, type MyDefaultUIValues } from '../config/ui.js';
 import { KeysManager } from '../service/KeysManager.js';
 import { config } from '../service/TestKeyService.js';
-import { FuzzyFilter } from '$lib/oneput/filters/FuzzyFilter.js';
-import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
+import { SettingsManager } from '../service/SettingsManager.js';
 
 export class SettingsUI {
 	static create(ctl: Controller, back: () => void) {
@@ -67,30 +66,6 @@ export class SettingsUI {
 			})
 		]);
 	};
-}
-
-class SettingsManager {
-	static create(ctl: Controller) {
-		return new SettingsManager(ctl);
-	}
-
-	constructor(private ctl: Controller) {}
-
-	FILTER_TYPE = {
-		FUZZY: 'fuzzy',
-		WORD: 'word'
-	} as const;
-
-	setFilter(filter: string) {
-		switch (filter) {
-			case this.FILTER_TYPE.FUZZY:
-				this.ctl.menu.setDefaultMenuItemsFn(FuzzyFilter.create().menuItemsFn);
-				break;
-			case this.FILTER_TYPE.WORD:
-				this.ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
-				break;
-		}
-	}
 }
 
 export class FiltersUI {

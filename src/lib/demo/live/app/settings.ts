@@ -1,9 +1,13 @@
 import type { Controller } from '$lib/oneput/controller.js';
+import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import { randomId } from '$lib/oneput/lib.js';
 import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
 import { menuItemWithIcon, MyDefaultUI, type MyDefaultUIValues } from '../config/ui.js';
 import { KeysManager } from '../service/KeysManager.js';
 import { config } from '../service/TestKeyService.js';
+import { FuzzyFilter } from '$lib/oneput/filters/FuzzyFilter.js';
+import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
 
 export class SettingsUI {
 	static create(ctl: Controller, back: () => void) {
@@ -34,6 +38,14 @@ export class SettingsUI {
 				}
 			}),
 			menuItemWithIcon({
+				id: 'default-filter',
+				leftIcon: listFilterIcon,
+				text: 'Set default typing filter...',
+				action: () => {
+					FiltersUI.create(this.ctl, this.run).run();
+				}
+			}),
+			menuItemWithIcon({
 				id: 'global-keys',
 				text: 'Set global default key bindings...',
 				action: () => {
@@ -55,4 +67,69 @@ export class SettingsUI {
 			})
 		]);
 	};
+}
+
+class SettingsManager {
+	static create(ctl: Controller) {
+		return new SettingsManager(ctl);
+	}
+
+	constructor(private ctl: Controller) {}
+
+	FILTER_TYPE = {
+		FUZZY: 'fuzzy',
+		WORD: 'word'
+	} as const;
+
+	setFilter(filter: string) {
+		switch (filter) {
+			case this.FILTER_TYPE.FUZZY:
+				this.ctl.menu.setDefaultMenuItemsFn(FuzzyFilter.create().menuItemsFn);
+				break;
+			case this.FILTER_TYPE.WORD:
+				this.ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
+				break;
+		}
+	}
+}
+
+export class FiltersUI {
+	static create(ctl: Controller, back: () => void) {
+		return new FiltersUI(ctl, back);
+	}
+
+	constructor(
+		private ctl: Controller,
+		private back: () => void
+	) {}
+
+	run() {
+		this.ctl.ui.applyDefaultUI({
+			menuHeader: 'Filters',
+			exitAction: this.back
+		});
+
+		this.ctl.menu.setMenuItems([
+			menuItemWithIcon({
+				id: randomId(),
+				leftIcon: listFilterIcon,
+				text: 'Fuzzy Filter',
+				action: () => {
+					SettingsManager.create(this.ctl).setFilter('fuzzy');
+					this.ctl.notify('Fuzzy Filter set', { duration: 3000 });
+					this.back();
+				}
+			}),
+			menuItemWithIcon({
+				id: randomId(),
+				leftIcon: listFilterIcon,
+				text: 'Word Filter',
+				action: () => {
+					SettingsManager.create(this.ctl).setFilter('word');
+					this.ctl.notify('Word Filter set', { duration: 3000 });
+					this.back();
+				}
+			})
+		]);
+	}
 }

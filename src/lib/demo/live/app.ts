@@ -14,7 +14,6 @@ export const setController = (ctl: Controller) => {
 	ctl.ui.setDefaultUI(defaultUI);
 	ctl.keys.setDefaultKeys(defaultUI.keys.defaultGlobalKeys, false);
 	ctl.keys.setDefaultKeys(defaultUI.keys.defaultLocalKeys, true);
-	// ctl.menu.setDefaultMenuItemsFn(FuzzyFilter.create().menuItemsFn);
 	ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 	RootUI.create(ctl).run();
 };

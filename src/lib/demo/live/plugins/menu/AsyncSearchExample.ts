@@ -71,7 +71,7 @@ export class AsyncSearchExample {
 					children: [
 						{
 							id: 'input-right-1-child',
-							classes: ['oneput__icon'],
+							classes: ['oneput__icon', 'oneput__rotate'],
 							type: 'fchild',
 							innerHTMLUnsafe: refreshCwIcon
 						}

@@ -616,3 +616,18 @@ button.oneput__menu-item:active {
 }
 
 /* #endregion */
+
+/* #region rotate */
+
+/* For icons that need to rotate. */
+.oneput__rotate {
+	animation: oneput-spin 2s linear infinite;
+}
+
+@keyframes oneput-spin {
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* #endregion */

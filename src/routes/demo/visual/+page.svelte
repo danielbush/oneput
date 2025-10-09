@@ -101,12 +101,12 @@
 									{
 										id: 'alert-title',
 										type: 'fchild',
-										innerHTMLUnsafe: '<h2>Alert Title!</h2>'
+										htmlContentUnsafe: '<h2>Alert Title!</h2>'
 									},
 									{
 										id: 'alert-message',
 										type: 'fchild',
-										innerHTMLUnsafe: '<p>This is the sentence below the alert title.</p>'
+										htmlContentUnsafe: '<p>This is the sentence below the alert title.</p>'
 									},
 									{
 										id: 'alert-button',
@@ -153,12 +153,12 @@
 									{
 										id: 'alert-title',
 										type: 'fchild',
-										innerHTMLUnsafe: '<h2>Confirm?</h2>'
+										htmlContentUnsafe: '<h2>Confirm?</h2>'
 									},
 									{
 										id: 'alert-message',
 										type: 'fchild',
-										innerHTMLUnsafe: '<p>This is the sentence below the confirm title.</p>'
+										htmlContentUnsafe: '<p>This is the sentence below the confirm title.</p>'
 									},
 									{
 										id: 'confirm-button-group',

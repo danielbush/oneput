@@ -61,10 +61,10 @@ export class WordFilter {
 			for (const word of words) {
 				let wordMatchesSomething = false;
 				for (const child of menuItemData.children) {
-					if (child.innerHTMLUnsafe && !child.innerHTMLUnsafe.toLowerCase().includes('<svg')) {
+					if (child.htmlContentUnsafe) {
 						// For a given menu item and a given word, try to match on non-svg html...
 						// TODO: checking svg like this is horrible.  Some way to exclude some html as decorative?
-						const matches = child.innerHTMLUnsafe.toLowerCase().includes(word.toLowerCase());
+						const matches = child.htmlContentUnsafe.toLowerCase().includes(word.toLowerCase());
 						if (matches) {
 							wordMatchesSomething = true;
 							break;

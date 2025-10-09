@@ -54,12 +54,12 @@ export class Alert {
 					{
 						id: 'alert-title',
 						type: 'fchild',
-						innerHTMLUnsafe: `<h2>${this.params.message}</h2>`
+						htmlContentUnsafe: `<h2>${this.params.message}</h2>`
 					},
 					this.params.additional && {
 						id: 'alert-additional',
 						type: 'fchild',
-						innerHTMLUnsafe: `<p>${this.params.additional}</p>`
+						htmlContentUnsafe: `<p>${this.params.additional}</p>`
 					},
 					{
 						id: 'alert-button',

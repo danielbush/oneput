@@ -107,6 +107,11 @@ export type FChildParams = {
 	classes?: Array<string>;
 	style?: Partial<CSSStyleDeclaration>;
 	textContent?: string;
+	htmlContentUnsafe?: string;
+	/**
+	 * Use innerHTMLUnsafe for icons or decorative content.  Use
+	 * htmlContentUnsafe for actual content.
+	 */
 	innerHTMLUnsafe?: string;
 	/**
 	 * Is set by a menuItemsFn (via Oneput controller) usually to show

@@ -16,7 +16,7 @@ export type HaystackData =
 			fchild: FChildParams;
 			menuItemIndex: number;
 			menuItem: MenuItemAny;
-			innerHTMLUnsafe: string;
+			htmlContentUnsafe: string;
 	  };
 
 function getHaystack(menuItems: MenuItemAny[]) {
@@ -24,16 +24,16 @@ function getHaystack(menuItems: MenuItemAny[]) {
 	const haystackInfo: HaystackData[] = [];
 	menuItems.forEach((item, index) => {
 		walk(item, (child) => {
-			if (child.type === 'fchild' && child.innerHTMLUnsafe) {
+			if (child.type === 'fchild' && child.htmlContentUnsafe) {
 				haystackInfo.push({
 					type: 'html',
 					menuItemIndex: index,
 					menuItem: item,
 					fchild: child,
-					innerHTMLUnsafe: child.innerHTMLUnsafe
+					htmlContentUnsafe: child.htmlContentUnsafe
 				});
 				// TODO: we should probably strip the tags:
-				haystack.push(child.innerHTMLUnsafe);
+				haystack.push(child.htmlContentUnsafe);
 			} else if (child.type === 'fchild' && child.textContent) {
 				// Important: clean up previous derivedHTML.
 				if (child.derivedHTML) {
@@ -66,7 +66,7 @@ function getHaystack(menuItems: MenuItemAny[]) {
  * least one single child needs to satisfy the fuzzy search rather than the
  * totality of text in the menu item.  We could search against the totality of
  * text but that would make highlighting harder.  If we assume that most
- * important visible text is in a single textContent property or innerHTMLUnsafe
+ * important visible text is in a single textContent property or htmlContentUnsafe
  * then the first approach works well and is relatively simple.
  */
 export class FuzzyFilter {

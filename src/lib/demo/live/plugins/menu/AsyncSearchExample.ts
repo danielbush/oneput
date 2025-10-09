@@ -17,7 +17,6 @@ export class AsyncSearchExample {
 	) {}
 
 	run() {
-		this.ctl.setBackBinding(this.exit);
 		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Async Search Example',
 			exitAction: this.exit

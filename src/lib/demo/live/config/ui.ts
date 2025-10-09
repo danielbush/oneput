@@ -177,6 +177,7 @@ export type MyDefaultUIValues = {
 	menuHeader?: string;
 	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
 	placeholder?: string;
+	backBinding?: () => void;
 };
 
 /**
@@ -214,6 +215,9 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 			placeholder: 'Type here...',
 			...values
 		};
+		// We set exitAction to the backBinding so that the back key (whatever
+		// it is set to) will trigger this action.
+		this.ctl.setBackBinding(this.values.exitAction);
 	}
 
 	get placeholder() {

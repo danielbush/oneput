@@ -21,7 +21,6 @@ export class SettingsUI {
 	) {}
 
 	run = () => {
-		this.ctl.setBackBinding(this.back);
 		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Settings',
 			exitAction: this.back

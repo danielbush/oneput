@@ -14,9 +14,6 @@ export class RootUI {
 	constructor(private ctl: Controller) {}
 
 	run = () => {
-		this.ctl.setBackBinding(() => {
-			this.ctl.menu.closeMenu();
-		});
 		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Home',
 			exitType: 'exit',

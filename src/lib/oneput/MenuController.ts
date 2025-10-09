@@ -1,4 +1,4 @@
-import { debounce } from '@std/async';
+import debounce from 'debounce';
 import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmitter.js';
 import type { InputChangeListener, MenuItemAny, OneputProps } from './lib.js';
 import type { Controller } from './controller.js';
@@ -123,6 +123,7 @@ export class MenuController {
 	setMenuItemsFnAsync(menuItemsFnAsync: MenuItemsFnAsync) {
 		this.menuItemsFn = menuItemsFnAsync;
 		const handler: InputChangeListener = async (evt) => {
+			console.log('handler START');
 			if (this._disableMenuItemsFn) {
 				return;
 			}
@@ -144,7 +145,7 @@ export class MenuController {
 			console.warn(`got ${value}...`);
 			this._setMenuItems(items, true);
 		};
-		const debouncedHandler = debounce(handler, 500);
+		const debouncedHandler = debounce(handler, 500, { immediate: true });
 		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
 			debouncedHandler(evt);
 		});

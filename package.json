@@ -75,7 +75,7 @@
 	],
 	"dependencies": {
 		"@leeoniya/ufuzzy": "^1.0.19",
-		"@std/async": "npm:@jsr/std__async@^1.0.14",
+		"debounce": "^2.2.0",
 		"lucide": "^0.501.0",
 		"tinykeys": "^3.0.0"
 	},

@@ -23,7 +23,9 @@ export class AsyncSearchExample {
 		});
 		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(async (input) => {
 			try {
+				this.setBusy(true);
 				const results = await this.testInputService.fetchData(input);
+				this.setBusy(false);
 				return results.map((result) => {
 					return menuItemWithIcon({
 						id: randomId(),
@@ -51,6 +53,28 @@ export class AsyncSearchExample {
 			})
 		]);
 		this.ctl.input.focusInput();
+	}
+
+	private setBusy(busy: boolean) {
+		if (busy) {
+			this.ctl.ui.setInputUI({
+				right: {
+					id: 'input-right-1',
+					type: 'hflex',
+					children: [
+						{
+							id: 'input-right-1-child',
+							type: 'fchild',
+							innerHTMLUnsafe: 'busy...'
+						}
+					]
+				}
+			});
+		} else {
+			this.ctl.ui.setInputUI({
+				right: undefined
+			});
+		}
 	}
 
 	private exit = () => {

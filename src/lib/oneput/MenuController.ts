@@ -50,7 +50,6 @@ export class MenuController {
 	private removeDefaultMenuItemsFn: () => void = () => {};
 	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
 	private menuItems: Array<MenuItemAny> = [];
-	private menuItemsSeqId = 0;
 	private _disableActions = false;
 	private _disableOpenClose = false;
 
@@ -127,15 +126,8 @@ export class MenuController {
 		this.menuItemsFn = menuItemsFnAsync;
 		let inFlight = 0;
 		const handler: InputChangeListener = async (evt) => {
-			inFlight += 1;
-			inFlight %= 1000;
+			inFlight = (inFlight + 1) % 100000;
 			options.onDebounce?.(true);
-			// TODO: something cleaner than use modulus?
-			// The probability that an old call a million calls back is
-			// received just after a call with the same id a million later
-			// is pretty low.
-			this.menuItemsSeqId = (this.menuItemsSeqId + 1) % 1000000;
-			const seqId = this.menuItemsSeqId;
 			const value = evt.target?.value ?? '';
 			const thisInFlight = inFlight;
 			let items: MenuItemAny[] | undefined;
@@ -148,19 +140,20 @@ export class MenuController {
 				);
 			}
 			if (thisInFlight === inFlight) {
-				// Another debounce call may have triggered during the above
-				// await.
-				// If not, then we can make the callback.
+				// No new call has come in during the await...
 				options.onDebounce?.(false);
+			} else {
+				// Another call was triggered...
+				// We discard to avoid out of sequence.
+				// An older call may come in later than a newer call.
+				// The older call's thisInFlight will be out of date.
+				// console.warn(`DISCARDED ${value}...`);
+				return;
 			}
 			if (!items) {
 				return;
 			}
-			if (seqId !== this.menuItemsSeqId) {
-				console.warn(`discarded ${value}...`);
-				return;
-			}
-			console.warn(`got ${value}...`);
+			// console.warn(`got ${value}...`);
 			this._setMenuItems(items, true);
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });

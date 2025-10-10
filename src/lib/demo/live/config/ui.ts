@@ -3,7 +3,7 @@ import { randomId, type FlexParams, type MenuItem, type OneputProps } from '$lib
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import type { DefaultUI } from '$lib/oneput/UIController.js';
 import { DateDisplay } from '../plugins/ui/DateDisplay.js';
-import { SvelteExample } from '../plugins/ui/SvelteDisplay/SvelteExample.js';
+import { MenuStatus } from '../plugins/ui/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../plugins/ui/TimeDisplay.js';
 import * as keys from './keys.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
@@ -281,7 +281,8 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 					id: 'root-outer-left',
 					type: 'fchild' as const,
 					style: { flex: '1', position: 'relative' },
-					onMount: (node) => SvelteExample.onMount(node, this.ctl)
+					// Example of a svelte-based ui widget:
+					onMount: (node) => MenuStatus.onMount(node, this.ctl)
 				},
 				{
 					id: 'root-outer-right',

@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { mount } from 'svelte';
-import SvelteDisplay from './SvelteDisplay.svelte';
+import MenuStatusDisplay from './MenuStatus.svelte';
 
 /**
  * This example shows how to mount a svelte component into Oneput.
@@ -19,9 +19,9 @@ import SvelteDisplay from './SvelteDisplay.svelte';
  * build them into artifacts.  But if you're doing that then you might want to
  * consider running svelte.
  */
-export class SvelteExample {
+export class MenuStatus {
 	static onMount = (node: HTMLElement, ctl: Controller) => {
-		const td = new SvelteExample(node, ctl);
+		const td = new MenuStatus(node, ctl);
 		return () => {
 			td.destroy();
 		};
@@ -31,7 +31,7 @@ export class SvelteExample {
 		private node: HTMLElement,
 		private ctl: Controller
 	) {
-		mount(SvelteDisplay, { target: node, props: { controller: this.ctl } });
+		mount(MenuStatusDisplay, { target: node, props: { controller: this.ctl } });
 	}
 
 	destroy = () => {

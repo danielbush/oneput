@@ -127,7 +127,6 @@ export class MenuController {
 		let inFlight = 0;
 		const handler: InputChangeListener = async (evt) => {
 			inFlight = (inFlight + 1) % 100000;
-			options.onDebounce?.(true);
 			const value = evt.target?.value ?? '';
 			const thisInFlight = inFlight;
 			let items: MenuItemAny[] | undefined;

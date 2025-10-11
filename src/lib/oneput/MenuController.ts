@@ -85,7 +85,7 @@ export class MenuController {
 			if (!items) {
 				return;
 			}
-			this._setMenuItems(items, true);
+			this._setMenuItems(items, { preserveFocusIndex: true });
 		};
 		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
 	}
@@ -105,7 +105,7 @@ export class MenuController {
 			if (!items) {
 				return;
 			}
-			this._setMenuItems(items, true);
+			this._setMenuItems(items, { preserveFocusIndex: true });
 		};
 		const removeListner = this.events.on<InputChangeEvent>('input-change', handler);
 		return () => {
@@ -153,7 +153,7 @@ export class MenuController {
 				return;
 			}
 			// console.warn(`got ${value}...`);
-			this._setMenuItems(items, true, true);
+			this._setMenuItems(items, { preserveFocusIndex: true, focusLastItem: true });
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
 		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
@@ -171,12 +171,14 @@ export class MenuController {
 
 	private _setMenuItems(
 		items: Array<MenuItemAny>,
-		preserveFocusIndex = false,
-		focusLastItem = false
+		params: {
+			preserveFocusIndex?: boolean;
+			focusLastItem?: boolean;
+		} = {}
 	) {
 		this.currentProps.menuItems = items;
 
-		if (preserveFocusIndex) {
+		if (params.preserveFocusIndex) {
 			this.currentProps.menuItemFocus = Math.min(
 				this.currentProps.menuItemFocus ?? 0,
 				Math.max(0, this.currentProps.menuItems.length - 1)
@@ -185,15 +187,18 @@ export class MenuController {
 			this.currentProps.menuItemFocus = 0;
 		}
 
-		if (focusLastItem) {
+		if (params.focusLastItem) {
 			this.currentProps.menuItemFocusOrigin = 'keyboard';
 			this.currentProps.menuItemFocus = this.currentProps.menuItems.length - 1;
 		}
 	}
 
-	setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {
+	setMenuItems(
+		items: Array<MenuItemAny>,
+		params: { preserveFocusIndex?: boolean; focusLastItem?: boolean } = {}
+	) {
 		this.menuItems = items;
-		this._setMenuItems(items, preserveFocusIndex);
+		this._setMenuItems(items, params);
 	}
 
 	get menuOpen() {

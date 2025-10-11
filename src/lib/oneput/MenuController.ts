@@ -153,7 +153,7 @@ export class MenuController {
 				return;
 			}
 			// console.warn(`got ${value}...`);
-			this._setMenuItems(items, true);
+			this._setMenuItems(items, true, true);
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
 		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
@@ -169,7 +169,11 @@ export class MenuController {
 		};
 	}
 
-	private _setMenuItems(items: Array<MenuItemAny>, preserveFocusIndex = false) {
+	private _setMenuItems(
+		items: Array<MenuItemAny>,
+		preserveFocusIndex = false,
+		focusLastItem = false
+	) {
 		this.currentProps.menuItems = items;
 
 		if (preserveFocusIndex) {
@@ -179,6 +183,11 @@ export class MenuController {
 			);
 		} else {
 			this.currentProps.menuItemFocus = 0;
+		}
+
+		if (focusLastItem) {
+			this.currentProps.menuItemFocusOrigin = 'keyboard';
+			this.currentProps.menuItemFocus = this.currentProps.menuItems.length - 1;
 		}
 	}
 

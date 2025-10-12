@@ -47,11 +47,46 @@ export class MenuController {
 	 * Disable ALL menuItemsFn calls.
 	 */
 	private _disableMenuItemsFn = false;
-	private removeDefaultMenuItemsFn: () => void = () => {};
-	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
-	private menuItems: Array<MenuItemAny> = [];
 	private _disableActions = false;
 	private _disableOpenClose = false;
+	private removeDefaultMenuItemsFn: () => void = () => {};
+	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
+	/**
+	 * Represents the current list of available menu items which is usually used
+	 * to set currentProps.menuItems.
+	 *
+	 * - setMenuItems updates this list.
+	 * - _setMenuItems only updates currentProps.menuItems.
+	 * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
+	 *
+	 * For filtering, menuItemsFn* are passed this.menuItems so they can filter on it.
+	 * For dynamic menu item generation, this.menuItems can be ignored.
+	 */
+	private menuItems: Array<MenuItemAny> = [];
+
+	// #region menu open/close
+
+	get menuOpen() {
+		return this.currentProps.menuOpen ?? false;
+	}
+
+	openMenu = () => {
+		if (this._disableOpenClose) {
+			return;
+		}
+		this.currentProps.menuOpen = true;
+	};
+
+	closeMenu = () => {
+		if (this._disableOpenClose) {
+			return;
+		}
+		this.currentProps.menuOpen = false;
+	};
+
+	// #endregion
+
+	// #region menu actions
 
 	doMenuAction() {
 		if (this._disableActions) {
@@ -63,6 +98,10 @@ export class MenuController {
 			}
 		}
 	}
+
+	// #endregion
+
+	// #region setting menu items
 
 	/**
 	 * Sets a default menuItemsFn - see setMenuItemsFn for more details.
@@ -201,14 +240,6 @@ export class MenuController {
 		this._setMenuItems(items, params);
 	}
 
-	get menuOpen() {
-		return this.currentProps.menuOpen ?? false;
-	}
-
-	get menuItemFocus() {
-		return this.currentProps.menuItemFocus ?? 0;
-	}
-
 	get menuItemCount() {
 		return this.currentProps.menuItems?.length ?? 0;
 	}
@@ -217,19 +248,13 @@ export class MenuController {
 		return this.currentProps.menuItems?.[this.menuItemFocus];
 	}
 
-	openMenu = () => {
-		if (this._disableOpenClose) {
-			return;
-		}
-		this.currentProps.menuOpen = true;
-	};
+	// #endregion
 
-	closeMenu = () => {
-		if (this._disableOpenClose) {
-			return;
-		}
-		this.currentProps.menuOpen = false;
-	};
+	// #region menu item focus
+
+	get menuItemFocus() {
+		return this.currentProps.menuItemFocus ?? 0;
+	}
 
 	private nextMenuItemIndex(index: number) {
 		return (index + 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);
@@ -267,6 +292,15 @@ export class MenuController {
 		}
 	}
 
+	// #endregion
+
+	// #region Disable/enable
+
+	// We can disable/enable:
+	// - menu actions
+	// - menu open/close
+	// - mennItemsFn
+
 	disableMenuActions() {
 		this._disableActions = true;
 	}
@@ -289,4 +323,6 @@ export class MenuController {
 	enableMenuItemsFn() {
 		this._disableMenuItemsFn = false;
 	}
+
+	// #endregion
 }

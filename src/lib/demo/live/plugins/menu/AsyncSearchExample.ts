@@ -47,7 +47,8 @@ export class AsyncSearchExample {
 			{
 				onDebounce: (isDebouncing) => {
 					this.setBusy(isDebouncing);
-				}
+				},
+				focusBehaviour: 'last'
 			}
 		);
 		this.ctl.input.setInputValue();

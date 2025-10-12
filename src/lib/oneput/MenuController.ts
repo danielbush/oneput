@@ -9,6 +9,8 @@ export type MenuItemsFnAsync = (
 	items: MenuItemAny[]
 ) => Promise<Array<MenuItemAny> | undefined>;
 
+type FocusBehaviour = 'first' | 'last' | 'preserve';
+
 export class MenuController {
 	public static create(
 		controller: Controller,
@@ -63,6 +65,7 @@ export class MenuController {
 	 * For dynamic menu item generation, this.menuItems can be ignored.
 	 */
 	private menuItems: Array<MenuItemAny> = [];
+	private focusBehaviour: FocusBehaviour = 'first';
 
 	// #region menu open/close
 
@@ -111,7 +114,10 @@ export class MenuController {
 	 * different menuItemsFn using setMenuItemsFn and restored by calling
 	 * setMenuItemsFn with no arguments.
 	 */
-	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
+	setDefaultMenuItemsFn(
+		menuItemsFn: MenuItemsFn,
+		options: { focusBehaviour?: FocusBehaviour } = {}
+	) {
 		this.removeDefaultMenuItemsFn();
 		const handler: InputChangeListener = (evt) => {
 			if (this._disableMenuItemsFn) {
@@ -124,7 +130,7 @@ export class MenuController {
 			if (!items) {
 				return;
 			}
-			this._setMenuItems(items, { preserveFocusIndex: true });
+			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
 	}
@@ -134,7 +140,7 @@ export class MenuController {
 	 *
 	 * If this function returns undefined, the menu will not be updated.
 	 */
-	setMenuItemsFn(menuItemsFn: MenuItemsFn) {
+	setMenuItemsFn(menuItemsFn: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
 		this.menuItemsFn = menuItemsFn;
 		const handler: InputChangeListener = (evt) => {
 			if (this._disableMenuItemsFn) {
@@ -144,7 +150,7 @@ export class MenuController {
 			if (!items) {
 				return;
 			}
-			this._setMenuItems(items, { preserveFocusIndex: true });
+			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		const removeListner = this.events.on<InputChangeEvent>('input-change', handler);
 		return () => {
@@ -160,7 +166,7 @@ export class MenuController {
 	 */
 	setMenuItemsFnAsync(
 		menuItemsFnAsync: MenuItemsFnAsync,
-		options: { onDebounce?: (isDebouncing: boolean) => void } = {}
+		options: { onDebounce?: (isDebouncing: boolean) => void; focusBehaviour?: FocusBehaviour } = {}
 	) {
 		this.menuItemsFn = menuItemsFnAsync;
 		let inFlight = 0;
@@ -192,7 +198,7 @@ export class MenuController {
 				return;
 			}
 			// console.warn(`got ${value}...`);
-			this._setMenuItems(items, { preserveFocusIndex: true, focusLastItem: true });
+			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
 		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
@@ -210,34 +216,15 @@ export class MenuController {
 
 	private _setMenuItems(
 		items: Array<MenuItemAny>,
-		params: {
-			preserveFocusIndex?: boolean;
-			focusLastItem?: boolean;
-		} = {}
+		options: { focusBehaviour?: FocusBehaviour } = {}
 	) {
 		this.currentProps.menuItems = items;
-
-		if (params.preserveFocusIndex) {
-			this.currentProps.menuItemFocus = Math.min(
-				this.currentProps.menuItemFocus ?? 0,
-				Math.max(0, this.currentProps.menuItems.length - 1)
-			);
-		} else {
-			this.currentProps.menuItemFocus = 0;
-		}
-
-		if (params.focusLastItem) {
-			this.currentProps.menuItemFocusOrigin = 'keyboard';
-			this.currentProps.menuItemFocus = this.currentProps.menuItems.length - 1;
-		}
+		this.runFocusBehaviour(options.focusBehaviour);
 	}
 
-	setMenuItems(
-		items: Array<MenuItemAny>,
-		params: { preserveFocusIndex?: boolean; focusLastItem?: boolean } = {}
-	) {
+	setMenuItems(items: Array<MenuItemAny>, options: { focusBehaviour?: FocusBehaviour } = {}) {
 		this.menuItems = items;
-		this._setMenuItems(items, params);
+		this._setMenuItems(items, options);
 	}
 
 	get menuItemCount() {
@@ -289,6 +276,29 @@ export class MenuController {
 				this.currentProps.menuItemFocus = i;
 				break;
 			}
+		}
+	}
+
+	setFocusBehaviour(behaviour: 'first' | 'last' | 'preserve') {
+		this.focusBehaviour = behaviour;
+	}
+
+	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
+		const behaviour = focusBehaviour ?? this.focusBehaviour;
+		this.currentProps.menuItemFocusOrigin = 'keyboard'; // TODO
+		if (behaviour === 'preserve') {
+			this.currentProps.menuItemFocus = Math.min(
+				this.currentProps.menuItemFocus ?? 0,
+				Math.max(0, (this.currentProps.menuItems?.length ?? 0) - 1)
+			);
+		}
+
+		if (behaviour === 'first') {
+			this.currentProps.menuItemFocus = 0;
+		}
+
+		if (behaviour === 'last') {
+			this.currentProps.menuItemFocus = (this.currentProps.menuItems?.length ?? 0) - 1;
 		}
 	}
 

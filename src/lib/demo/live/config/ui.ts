@@ -206,7 +206,7 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 		public keys: MyKeys = new MyKeys()
 	) {}
 
-	setValues(values: MyDefaultUIValues) {
+	run(values: MyDefaultUIValues) {
 		this.values = {
 			exitAction: () => {
 				this.ctl.menu.closeMenu();

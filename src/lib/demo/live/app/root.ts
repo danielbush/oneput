@@ -14,7 +14,7 @@ export class RootUI {
 	constructor(private ctl: Controller) {}
 
 	run = () => {
-		this.ctl.ui.applyDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.run<MyDefaultUIValues>({
 			menuHeader: 'Home',
 			exitType: 'exit',
 			placeholder: 'This is root...'

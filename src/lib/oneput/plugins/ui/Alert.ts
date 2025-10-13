@@ -13,12 +13,15 @@ export class Alert {
 	}
 
 	private okPromise: Promise<void> | null = null;
+	private previousActiveElement: HTMLElement;
 
 	constructor(
 		private controller: Controller,
 		private params: { additional?: string; message: string },
 		private resolve?: () => void
-	) {}
+	) {
+		this.previousActiveElement = document.activeElement as HTMLElement;
+	}
 
 	private stop = () => {
 		this.controller.menu.enableMenuActions();
@@ -29,6 +32,7 @@ export class Alert {
 		this.controller.keys.unsetKeys(true);
 		this.controller.ui.setPlaceholder();
 		this.resolve?.();
+		this.previousActiveElement.focus();
 	};
 
 	private start = () => {

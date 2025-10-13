@@ -42,17 +42,9 @@ export class AsyncSearchExample {
 				} catch (error) {
 					this.ctl.alert({
 						message: 'An error!',
-						additional: 'This is probably a simulated error.  Check the browser console...'
+						additional: 'This is probably a simulated error.  Check the browser console...  ' + error
 					});
 					this.setError();
-					console.error(error);
-					const message =
-						error instanceof Error
-							? error.message
-							: typeof error === 'string'
-								? error
-								: 'Unknown error';
-					this.ctl.notify(`Error fetching data: ${message}`, { duration: 10000 });
 					return;
 				}
 			},

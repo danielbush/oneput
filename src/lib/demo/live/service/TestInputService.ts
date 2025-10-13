@@ -9,10 +9,11 @@ export class TestInputService {
 		const results = [];
 		// Put a large delay for the first item.
 		const delay = this.counter === 0 ? 3000 : 1000;
-		if (Math.random() < 0.1) {
+		this.counter += 1;
+		// if (Math.random() < 0.1) {
+		if (this.counter % 4 === 3) {
 			throw new Error('TestInputService: simulated error');
 		}
-		this.counter += 1;
 		for (let i = 0; i < input.length; i++) {
 			results.push(`Result for input: '${input[i]}'`);
 		}

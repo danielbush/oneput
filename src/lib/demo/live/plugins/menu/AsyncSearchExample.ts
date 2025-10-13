@@ -44,6 +44,7 @@ export class AsyncSearchExample {
 						message: 'An error!',
 						additional: 'This is probably a simulated error.  Check the browser console...'
 					});
+					this.setError();
 					console.error(error);
 					const message =
 						error instanceof Error
@@ -57,6 +58,9 @@ export class AsyncSearchExample {
 			},
 			{
 				onDebounce: (isDebouncing) => {
+					if (this.isError && !isDebouncing) {
+						return;
+					}
 					this.notify?.updateMessage(isDebouncing ? 'Debouncing...' : 'Ready...');
 					this.setBusy(isDebouncing);
 				},
@@ -69,7 +73,36 @@ export class AsyncSearchExample {
 		this.ctl.input.focusInput();
 	}
 
+	private isError = false;
+	private setError() {
+		this.notify?.updateMessage('Try hitting the refresh button to re-run the last input...');
+		this.isError = true;
+		this.ctl.ui.setInputUI((current) => ({
+			...current,
+			right: {
+				id: 'input-right-1',
+				type: 'hflex',
+				children: [
+					{
+						id: 'input-right-1-child',
+						tag: 'button',
+						attr: {
+							title: 'Error',
+							onclick: () => {
+								console.log('TODO: refresh');
+							}
+						},
+						classes: ['oneput__icon-button'],
+						type: 'fchild',
+						innerHTMLUnsafe: refreshCwIcon
+					}
+				]
+			}
+		}));
+	}
+
 	private setBusy(busy: boolean) {
+		this.isError = false;
 		if (busy) {
 			this.ctl.ui.setInputUI((current) => ({
 				...current,

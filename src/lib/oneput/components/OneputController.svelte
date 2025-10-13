@@ -8,7 +8,7 @@
 
 	let inputElement: HTMLInputElement | undefined = $state(undefined);
 	const currentProps = $state<OneputProps>({
-		menuItemFocus: 0,
+		menuItemFocus: [0, true],
 		inputValue: '',
 		placeholder: 'Type here...',
 		onInputChange: () => {},
@@ -33,5 +33,4 @@
 	bind:inputValue={currentProps.inputValue}
 	bind:inputElement
 	bind:menuItemFocus={currentProps.menuItemFocus}
-	bind:menuItemFocusOrigin={currentProps.menuItemFocusOrigin}
 />

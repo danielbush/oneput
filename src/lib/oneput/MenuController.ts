@@ -40,8 +40,7 @@ export class MenuController {
 			this.doMenuAction();
 		};
 		this.currentProps.onMenuItemEnter = (_, __, index) => {
-			this.currentProps.menuItemFocusOrigin = 'pointer';
-			this.currentProps.menuItemFocus = index;
+			this.currentProps.menuItemFocus = [index, false];
 		};
 	}
 
@@ -240,7 +239,7 @@ export class MenuController {
 	// #region menu item focus
 
 	get menuItemFocus() {
-		return this.currentProps.menuItemFocus ?? 0;
+		return this.currentProps.menuItemFocus?.[0] ?? 0;
 	}
 
 	private nextMenuItemIndex(index: number) {
@@ -252,28 +251,26 @@ export class MenuController {
 	}
 
 	focusNextMenuItem() {
-		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		for (
 			let i = this.nextMenuItemIndex(this.menuItemFocus), c = 0;
 			c < this.menuItemCount;
 			c++, i = this.nextMenuItemIndex(i)
 		) {
 			if (!this.currentProps.menuItems?.[i].ignored) {
-				this.currentProps.menuItemFocus = i;
+				this.currentProps.menuItemFocus = [i, true];
 				break;
 			}
 		}
 	}
 
 	focusPreviousMenuItem() {
-		this.currentProps.menuItemFocusOrigin = 'keyboard';
 		for (
 			let i = this.previousMenuItemIndex(this.menuItemFocus), c = 0;
 			c < this.menuItemCount;
 			c++, i = this.previousMenuItemIndex(i)
 		) {
 			if (!this.currentProps.menuItems?.[i].ignored) {
-				this.currentProps.menuItemFocus = i;
+				this.currentProps.menuItemFocus = [i, true];
 				break;
 			}
 		}
@@ -285,20 +282,22 @@ export class MenuController {
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
-		this.currentProps.menuItemFocusOrigin = 'keyboard'; // TODO
 		if (behaviour === 'preserve') {
-			this.currentProps.menuItemFocus = Math.min(
-				this.currentProps.menuItemFocus ?? 0,
-				Math.max(0, (this.currentProps.menuItems?.length ?? 0) - 1)
-			);
+			this.currentProps.menuItemFocus = [
+				Math.min(
+					this.currentProps.menuItemFocus?.[0] ?? 0,
+					Math.max(0, (this.currentProps.menuItems?.length ?? 0) - 1)
+				),
+				true
+			];
 		}
 
 		if (behaviour === 'first') {
-			this.currentProps.menuItemFocus = 0;
+			this.currentProps.menuItemFocus = [0, true];
 		}
 
 		if (behaviour === 'last') {
-			this.currentProps.menuItemFocus = (this.currentProps.menuItems?.length ?? 0) - 1;
+			this.currentProps.menuItemFocus = [(this.currentProps.menuItems?.length ?? 0) - 1, true];
 		}
 	}
 

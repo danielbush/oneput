@@ -7,8 +7,7 @@ export type InputChangeEvent = Event & {
 export type InputChangeListener = (evt: InputChangeEvent) => void;
 
 export type OneputProps = {
-	menuItemFocus?: number;
-	menuItemFocusOrigin?: 'pointer' | 'keyboard';
+	menuItemFocus?: [number, boolean?];
 	menuOpen?: boolean;
 	menuItems?: Array<MenuItem | MenuItemDivider>;
 	inputElement?: HTMLInputElement;

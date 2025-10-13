@@ -7,8 +7,7 @@
 	let {
 		inputElement = $bindable(),
 		inputValue = $bindable(''),
-		menuItemFocus = $bindable(0),
-		menuItemFocusOrigin = $bindable(undefined),
+		menuItemFocus = $bindable([0, true]),
 		menuAnimationDuration = 200,
 		injectAnimationDuration = 400,
 		replaceAnimationDuration = 600,
@@ -31,7 +30,7 @@
 	}
 
 	const scrollIntoView = (index: number) => (element: HTMLElement) => {
-		if (index === menuItemFocus && menuItemFocusOrigin === 'keyboard') {
+		if (index === menuItemFocus[0] && menuItemFocus[1]) {
 			const elemRect = element.getBoundingClientRect();
 			const containerRect = element.parentElement!.getBoundingClientRect();
 			if (elemRect.top < containerRect.top || elemRect.bottom > containerRect.bottom) {
@@ -88,7 +87,7 @@
 									{...item}
 									class={item.class ?? 'oneput__menu-item'}
 									classes={[
-										index === menuItemFocus && `${item.class ?? 'oneput__menu-item'}--focused`,
+										index === menuItemFocus[0] && `${item.class ?? 'oneput__menu-item'}--focused`,
 										...(item.classes ?? [])
 									]}
 									attr={{

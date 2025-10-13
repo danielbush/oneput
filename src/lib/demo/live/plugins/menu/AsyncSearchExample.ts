@@ -14,7 +14,8 @@ export class AsyncSearchExample {
 		private ctl: Controller,
 		private back: () => void,
 		private testInputService: TestInputService,
-		private unsetMenuItemsFn?: () => void
+		private unsetMenuItemsFn?: () => void,
+		private notify?: ReturnType<Controller['notify']>
 	) {}
 
 	runUI() {
@@ -22,9 +23,15 @@ export class AsyncSearchExample {
 			menuHeader: 'Async Search Example',
 			exitAction: this.exit
 		});
+		this.notify = this.ctl.notify(
+			'Start typing something and inspect the browser console.  ' +
+				'Items are delayed but only latest items should show when debounce times out.  ' +
+				'The service will randomly fail 10% of the time.'
+		);
 		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {
+					this.notify?.updateMessage('Fetching data...');
 					const results = await this.testInputService.fetchData(input);
 					return results.map((result) => {
 						return menuItemWithIcon({
@@ -33,6 +40,10 @@ export class AsyncSearchExample {
 						});
 					});
 				} catch (error) {
+					this.ctl.alert({
+						message: 'An error!',
+						additional: 'This is probably a simulated error.  Check the browser console...'
+					});
 					console.error(error);
 					const message =
 						error instanceof Error
@@ -46,6 +57,7 @@ export class AsyncSearchExample {
 			},
 			{
 				onDebounce: (isDebouncing) => {
+					this.notify?.updateMessage(isDebouncing ? 'Debouncing...' : 'Ready...');
 					this.setBusy(isDebouncing);
 				},
 				focusBehaviour: 'last'
@@ -53,12 +65,7 @@ export class AsyncSearchExample {
 		);
 		this.ctl.input.setInputValue();
 		this.ctl.ui.setPlaceholder('Start typing something...');
-		this.ctl.menu.setMenuItems([
-			menuItemWithIcon({
-				id: 'initial',
-				text: 'Start typing something...'
-			})
-		]);
+		this.ctl.menu.setMenuItems([]);
 		this.ctl.input.focusInput();
 	}
 

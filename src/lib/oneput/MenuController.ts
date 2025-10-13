@@ -213,6 +213,10 @@ export class MenuController {
 		};
 	}
 
+	triggerMenuItemsFn() {
+		this.controller.input.triggerInputEvent();
+	}
+
 	private _setMenuItems(
 		items: Array<MenuItemAny>,
 		options: { focusBehaviour?: FocusBehaviour } = {}

@@ -89,7 +89,7 @@ export class AsyncSearchExample {
 						attr: {
 							title: 'Error',
 							onclick: () => {
-								this.ctl.input.triggerInputEvent();
+								this.ctl.menu.triggerMenuItemsFn();
 							}
 						},
 						classes: ['oneput__icon-button'],

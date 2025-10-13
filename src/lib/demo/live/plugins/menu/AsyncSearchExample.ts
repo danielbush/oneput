@@ -1,5 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
+import type { Alert } from '$lib/oneput/plugins/ui/Alert.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { TestInputService } from '../../service/TestInputService.js';
@@ -40,11 +41,14 @@ export class AsyncSearchExample {
 						});
 					});
 				} catch (error) {
-					this.ctl.alert({
+					this.notify?.updateMessage('An error!  Check the browser console...');
+					const alert = this.ctl.alert({
 						message: 'An error!',
-						additional: 'This is probably a simulated error.  Check the browser console...  ' + error
+						additional:
+							'This is a simulated error.  Check the browser console...  Try hitting the refresh icon in the input area to re-run your last input.  Or you can hit ok here and not re-run the input.  Here was the error:' +
+							error
 					});
-					this.setError();
+					this.setError(alert);
 					return;
 				}
 			},
@@ -66,8 +70,8 @@ export class AsyncSearchExample {
 	}
 
 	private isError = false;
-	private setError() {
-		this.notify?.updateMessage('Try hitting the refresh button to re-run the last input...');
+	private setError(alert: Alert) {
+		// this.notify?.updateMessage('Hit ok above OR hit the refresh button in the input to re-run the last input...');
 		this.isError = true;
 		this.ctl.ui.setInputUI((current) => ({
 			...current,
@@ -81,6 +85,7 @@ export class AsyncSearchExample {
 						attr: {
 							title: 'Error',
 							onclick: () => {
+								alert.cancel();
 								this.ctl.menu.triggerMenuItemsFn();
 							}
 						},

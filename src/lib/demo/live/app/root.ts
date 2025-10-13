@@ -80,10 +80,11 @@ export class RootUI {
 				text: 'Show alert',
 				action: async () => {
 					console.log('before alert...');
-					await this.ctl.alert({
+					const alert = this.ctl.alert({
 						message: 'Main message',
 						additional: 'This is some additional info'
 					});
+					await alert.userClicksOk();
 					console.log('after alert...');
 				}
 			}),

@@ -8,10 +8,10 @@ export class TestInputService {
 		console.warn(`Fetching input: "${input}"`);
 		const results = [];
 		// Put a large delay for the first item.
-		const delay = this.counter === 0 ? 3000 : 1000;
+		const delay = this.counter === 0 ? 2000 : 1000;
 		this.counter += 1;
-		// if (Math.random() < 0.1) {
-		if (this.counter % 4 === 3) {
+		if (Math.random() < 0.2) {
+			// if (this.counter % 4 === 3) {
 			throw new Error('TestInputService: simulated error');
 		}
 		for (let i = 0; i < input.length; i++) {

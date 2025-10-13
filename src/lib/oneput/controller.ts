@@ -47,9 +47,10 @@ export class Controller {
 		return notification;
 	}
 
-	alert(params: { message: string; additional: string }): Promise<void> {
+	alert(params: { message: string; additional: string }): Alert {
 		const alert = Alert.create(this, params);
-		return alert.run();
+		alert.run();
+		return alert;
 	}
 
 	confirm(params: { additional?: string; message: string }): Promise<boolean> {

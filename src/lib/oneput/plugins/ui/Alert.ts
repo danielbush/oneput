@@ -12,6 +12,8 @@ export class Alert {
 		return new Alert(controller, params);
 	}
 
+	private okPromise: Promise<void> | null = null;
+
 	constructor(
 		private controller: Controller,
 		private params: { additional?: string; message: string },
@@ -77,13 +79,21 @@ export class Alert {
 				])
 			}
 		});
-		const promise = new Promise<void>((resolve: () => void) => {
+		this.okPromise = new Promise<void>((resolve: () => void) => {
 			this.resolve = resolve;
 		});
-		return promise;
+		return this.okPromise;
 	};
 
-	run(): Promise<void> {
+	async userClicksOk() {
+		return this.okPromise;
+	}
+
+	cancel() {
+		this.stop();
+	}
+
+	run() {
 		return this.start();
 	}
 }

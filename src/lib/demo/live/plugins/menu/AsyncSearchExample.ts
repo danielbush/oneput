@@ -126,6 +126,7 @@ export class AsyncSearchExample {
 
 	private exit = () => {
 		this.ctl.input.setInputValue();
+		this.notify?.clear();
 		this.unsetMenuItemsFn?.();
 		this.back();
 	};

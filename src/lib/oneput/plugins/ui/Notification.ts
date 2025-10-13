@@ -63,4 +63,12 @@ export class Notification {
 			}
 		});
 	}
+
+	clear() {
+		if (this.timeoutHandle) {
+			clearTimeout(this.timeoutHandle);
+		}
+		this.timeoutHandle = null;
+		this.controller.ui.injectUI();
+	}
 }

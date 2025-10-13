@@ -12,7 +12,8 @@ export class Confirm {
 	constructor(
 		private controller: Controller,
 		private params: { additional?: string; message: string },
-		private resolve?: (value: boolean) => void
+		private resolve?: (value: boolean) => void,
+		private promise?: Promise<boolean>
 	) {}
 
 	run(): Promise<boolean> {
@@ -88,10 +89,10 @@ export class Confirm {
 				])
 			}
 		});
-		const promise = new Promise<boolean>((resolve: (value: boolean) => void) => {
+		this.promise = new Promise<boolean>((resolve: (value: boolean) => void) => {
 			this.resolve = resolve;
 		});
-		return promise;
+		return this.promise;
 	};
 
 	private stop = (ok: boolean) => {
@@ -104,4 +105,8 @@ export class Confirm {
 		this.controller.ui.setPlaceholder();
 		this.resolve?.(ok);
 	};
+
+	async userChooses() {
+		return this.promise;
+	}
 }

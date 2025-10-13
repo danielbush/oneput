@@ -93,10 +93,11 @@ export class RootUI {
 				text: 'Confirm',
 				action: async () => {
 					console.log('before confirm...');
-					const yes = await this.ctl.confirm({
+					const confirm = this.ctl.confirm({
 						message: 'Main message',
 						additional: 'This is some additional info'
 					});
+					const yes = await confirm.userChooses();
 					console.log('after confirm...', yes);
 				}
 			}),

@@ -53,8 +53,9 @@ export class Controller {
 		return alert;
 	}
 
-	confirm(params: { additional?: string; message: string }): Promise<boolean> {
+	confirm(params: { additional?: string; message: string }): Confirm {
 		const confirm = Confirm.create(this, params);
-		return confirm.run();
+		confirm.run();
+		return confirm;
 	}
 }

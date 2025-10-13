@@ -10,7 +10,7 @@ export class TestInputService {
 		// Put a large delay for the first item.
 		const delay = this.counter === 0 ? 2000 : 1000;
 		this.counter += 1;
-		if (Math.random() < 0.2) {
+		if (Math.random() < 0.15) {
 			// if (this.counter % 4 === 3) {
 			throw new Error('TestInputService: simulated error');
 		}

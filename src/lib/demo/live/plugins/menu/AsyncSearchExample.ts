@@ -89,7 +89,7 @@ export class AsyncSearchExample {
 						attr: {
 							title: 'Error',
 							onclick: () => {
-								console.log('TODO: refresh');
+								this.ctl.input.triggerInputEvent();
 							}
 						},
 						classes: ['oneput__icon-button'],

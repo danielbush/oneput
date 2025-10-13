@@ -20,6 +20,10 @@ export class InputController {
 		});
 	}
 
+	triggerInputEvent() {
+		this.inputElement?.dispatchEvent(new Event('input', { bubbles: true }));
+	}
+
 	private inputElement: HTMLInputElement | undefined;
 	private inputChangeListeners: InputChangeListener[] = [];
 

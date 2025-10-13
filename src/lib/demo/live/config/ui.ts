@@ -230,10 +230,10 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 		return this.values.placeholder;
 	}
 
-	get input() {
+	get inputUI() {
 		return inputUI(this.ctl);
 	}
-	get menu() {
+	get menuUI() {
 		return {
 			header: menuHeaderUI({
 				title: this.values.menuHeader || 'Menu',
@@ -247,7 +247,7 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 		};
 	}
 
-	get inner() {
+	get innerUI() {
 		return {
 			id: 'root-inner',
 			type: 'hflex' as const,
@@ -272,7 +272,7 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 		};
 	}
 
-	get outer() {
+	get outerUI() {
 		return {
 			id: 'root-outer',
 			type: 'hflex' as const,

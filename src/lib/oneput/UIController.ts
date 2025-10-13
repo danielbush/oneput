@@ -2,10 +2,10 @@ import type { FlexParams, OneputProps } from './lib.js';
 
 export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
 	runUI?(values: V): void;
-	input?: OneputProps['inputUI'];
-	menu?: OneputProps['menuUI'];
-	inner?: OneputProps['innerUI'];
-	outer?: OneputProps['outerUI'];
+	inputUI?: OneputProps['inputUI'];
+	menuUI?: OneputProps['menuUI'];
+	innerUI?: OneputProps['innerUI'];
+	outerUI?: OneputProps['outerUI'];
 	placeholder?: OneputProps['placeholder'];
 }
 
@@ -49,10 +49,10 @@ export class UIController {
 	 * If setDefaultUI has not been called, the ui will be set to nothing.
 	 */
 	resetUI() {
-		this.currentProps.inputUI = this.defaultUI?.input;
-		this.currentProps.menuUI = this.defaultUI?.menu;
-		this.currentProps.innerUI = this.defaultUI?.inner;
-		this.currentProps.outerUI = this.defaultUI?.outer;
+		this.currentProps.inputUI = this.defaultUI?.inputUI;
+		this.currentProps.menuUI = this.defaultUI?.menuUI;
+		this.currentProps.innerUI = this.defaultUI?.innerUI;
+		this.currentProps.outerUI = this.defaultUI?.outerUI;
 		this.currentProps.placeholder = this.defaultUI?.placeholder || this.fallbackPlaceholder;
 	}
 

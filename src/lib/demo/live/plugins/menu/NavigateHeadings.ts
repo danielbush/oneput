@@ -20,8 +20,8 @@ export class NavigateHeadings {
 		private fuzzyFilter: FuzzyFilter
 	) {}
 
-	run() {
-		this.ctl.ui.run({
+	runUI() {
+		this.ctl.ui.runUI({
 			menuHeader: 'Navigate Headings',
 			exitAction: this.exit
 		});

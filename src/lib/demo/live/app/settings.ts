@@ -23,8 +23,8 @@ export class SettingsUI {
 		) => KeysManager
 	) {}
 
-	run = () => {
-		this.ctl.ui.run<MyDefaultUIValues>({
+	runUI = () => {
+		this.ctl.ui.runUI<MyDefaultUIValues>({
 			menuHeader: 'Settings',
 			exitAction: this.back
 		});
@@ -41,7 +41,7 @@ export class SettingsUI {
 				leftIcon: listFilterIcon,
 				text: 'Set default typing filter...',
 				action: () => {
-					FiltersUI.create(this.ctl, this.run).run();
+					FiltersUI.create(this.ctl, this.runUI).runUI();
 				}
 			}),
 			menuItemWithIcon({
@@ -49,8 +49,8 @@ export class SettingsUI {
 				text: 'Set global default key bindings...',
 				action: () => {
 					const defaultUI = this.ctl.ui.getDefaultUI<MyDefaultUI>();
-					this.createKeysManager(this.ctl, defaultUI?.keys.defaultGlobalKeys || {}, false).run(
-						this.run
+					this.createKeysManager(this.ctl, defaultUI?.keys.defaultGlobalKeys || {}, false).runUI(
+						this.runUI
 					);
 				}
 			}),
@@ -59,8 +59,8 @@ export class SettingsUI {
 				text: 'Set local default key bindings...',
 				action: () => {
 					const defaultUI = this.ctl.ui.getDefaultUI<MyDefaultUI>();
-					this.createKeysManager(this.ctl, defaultUI?.keys.defaultLocalKeys || {}, true).run(
-						this.run
+					this.createKeysManager(this.ctl, defaultUI?.keys.defaultLocalKeys || {}, true).runUI(
+						this.runUI
 					);
 				}
 			})
@@ -78,8 +78,8 @@ export class FiltersUI {
 		private back: () => void
 	) {}
 
-	run() {
-		this.ctl.ui.run({
+	runUI() {
+		this.ctl.ui.runUI({
 			menuHeader: 'Filters',
 			exitAction: this.back
 		});

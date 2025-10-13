@@ -17,8 +17,8 @@ export class AsyncSearchExample {
 		private unsetMenuItemsFn?: () => void
 	) {}
 
-	run() {
-		this.ctl.ui.run<MyDefaultUIValues>({
+	runUI() {
+		this.ctl.ui.runUI<MyDefaultUIValues>({
 			menuHeader: 'Async Search Example',
 			exitAction: this.exit
 		});

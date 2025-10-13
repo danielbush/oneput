@@ -108,7 +108,7 @@ export class KeyBindingsController {
 		this.back = params.back;
 	}
 
-	run() {
+	runUI() {
 		this.actionsUI();
 	}
 

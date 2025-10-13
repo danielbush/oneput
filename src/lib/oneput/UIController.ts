@@ -1,7 +1,7 @@
 import type { FlexParams, OneputProps } from './lib.js';
 
 export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
-	run?(values: V): void;
+	runUI?(values: V): void;
 	input?: OneputProps['inputUI'];
 	menu?: OneputProps['menuUI'];
 	inner?: OneputProps['innerUI'];
@@ -67,9 +67,9 @@ export class UIController {
 		return this.defaultUI as D;
 	}
 
-	run<T extends Record<string, unknown>>(values?: T) {
+	runUI<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
-			this.defaultUI.run?.(values);
+			this.defaultUI.runUI?.(values);
 		}
 		this.resetUI();
 	}

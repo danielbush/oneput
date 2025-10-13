@@ -13,8 +13,8 @@ export class RootUI {
 
 	constructor(private ctl: Controller) {}
 
-	run = () => {
-		this.ctl.ui.run<MyDefaultUIValues>({
+	runUI = () => {
+		this.ctl.ui.runUI<MyDefaultUIValues>({
 			menuHeader: 'Home',
 			exitType: 'exit',
 			placeholder: 'This is root...'
@@ -26,7 +26,7 @@ export class RootUI {
 				leftIcon: settingsIcon,
 				text: 'Settings...',
 				action: () => {
-					SettingsUI.create(this.ctl, this.run).run();
+					SettingsUI.create(this.ctl, this.runUI).runUI();
 				}
 			}),
 			menuItemWithIcon({
@@ -34,7 +34,7 @@ export class RootUI {
 				leftIcon: tocIcon,
 				text: 'Navigate outline...',
 				action: () => {
-					NavigateHeadings.create(this.ctl, document, this.run).run();
+					NavigateHeadings.create(this.ctl, document, this.runUI).runUI();
 				}
 			}),
 			menuItemWithIcon({
@@ -58,7 +58,7 @@ export class RootUI {
 				text: 'Async menu items demo...',
 				leftIcon: searchIcon,
 				action: () => {
-					AsyncSearchExample.create(this.ctl, this.run).run();
+					AsyncSearchExample.create(this.ctl, this.runUI).runUI();
 				}
 			}),
 			menuItemWithIcon({

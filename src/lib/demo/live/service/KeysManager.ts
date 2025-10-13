@@ -29,13 +29,13 @@ export class KeysManager {
 		this.createKeyBindingsController = createKeyBindingsController;
 	}
 
-	run(back: () => void) {
+	runUI(back: () => void) {
 		this.createKeyBindingsController({
 			controller: this.ctl,
 			onChange: (newKeyMap) => this.updateKeys(newKeyMap),
 			keyMap: this.keyMap,
 			back
-		}).run();
+		}).runUI();
 	}
 
 	async updateKeys(newKeyMap: KeyBindingMap) {

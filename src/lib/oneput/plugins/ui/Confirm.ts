@@ -10,7 +10,7 @@ export class Confirm {
 	}
 
 	constructor(
-		private controller: Controller,
+		private ctl: Controller,
 		private params: { additional?: string; message: string },
 		private resolve?: (value: boolean) => void,
 		private promise?: Promise<boolean>
@@ -21,7 +21,7 @@ export class Confirm {
 	}
 
 	private start = () => {
-		this.controller.keys.setKeys(
+		this.ctl.keys.setKeys(
 			{
 				ok: {
 					description: 'OK',
@@ -36,12 +36,12 @@ export class Confirm {
 			},
 			true
 		);
-		this.controller.menu.disableMenuActions();
-		this.controller.menu.disableMenuOpenClose();
-		this.controller.menu.disableMenuItemsFn();
-		this.controller.input.disableInputElement();
-		this.controller.ui.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
-		this.controller.ui.replaceUI({
+		this.ctl.menu.disableMenuActions();
+		this.ctl.menu.disableMenuOpenClose();
+		this.ctl.menu.disableMenuItemsFn();
+		this.ctl.input.disableInputElement();
+		this.ctl.ui.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
+		this.ctl.ui.replaceUI({
 			menu: {
 				id: randomId(),
 				type: 'vflex',
@@ -96,13 +96,13 @@ export class Confirm {
 	};
 
 	private stop = (ok: boolean) => {
-		this.controller.menu.enableMenuActions();
-		this.controller.menu.enableMenuOpenClose();
-		this.controller.menu.enableMenuItemsFn();
-		this.controller.input.enableInputElement();
-		this.controller.ui.replaceUI();
-		this.controller.keys.unsetKeys(true);
-		this.controller.ui.setPlaceholder();
+		this.ctl.menu.enableMenuActions();
+		this.ctl.menu.enableMenuOpenClose();
+		this.ctl.menu.enableMenuItemsFn();
+		this.ctl.input.enableInputElement();
+		this.ctl.ui.replaceUI();
+		this.ctl.keys.unsetKeys(true);
+		this.ctl.ui.setPlaceholder();
 		this.resolve?.(ok);
 	};
 

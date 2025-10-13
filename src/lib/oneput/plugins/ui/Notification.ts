@@ -12,7 +12,7 @@ export class Notification {
 	}
 
 	constructor(
-		private controller: Controller,
+		private ctl: Controller,
 		private message: string,
 		private timeoutHandle: ReturnType<typeof setTimeout> | null = null
 	) {}
@@ -32,10 +32,10 @@ export class Notification {
 		}
 		if (params.duration) {
 			this.timeoutHandle = setTimeout(() => {
-				this.controller.ui.injectUI();
+				this.ctl.ui.injectUI();
 			}, params.duration);
 		}
-		this.controller.ui.injectUI({
+		this.ctl.ui.injectUI({
 			inner: {
 				id: randomId(),
 				type: 'hflex',
@@ -55,7 +55,7 @@ export class Notification {
 						innerHTMLUnsafe: xIcon,
 						attr: {
 							onclick: () => {
-								this.controller.ui.injectUI();
+								this.ctl.ui.injectUI();
 							}
 						}
 					}
@@ -69,6 +69,6 @@ export class Notification {
 			clearTimeout(this.timeoutHandle);
 		}
 		this.timeoutHandle = null;
-		this.controller.ui.injectUI();
+		this.ctl.ui.injectUI();
 	}
 }

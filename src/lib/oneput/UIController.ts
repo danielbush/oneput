@@ -1,13 +1,4 @@
-import type { FlexParams, OneputProps } from './lib.js';
-
-export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
-	runUI?(values: V): void;
-	inputUI?: OneputProps['inputUI'];
-	menuUI?: OneputProps['menuUI'];
-	innerUI?: OneputProps['innerUI'];
-	outerUI?: OneputProps['outerUI'];
-	placeholder?: OneputProps['placeholder'];
-}
+import type { DefaultUI, FlexParams, OneputProps } from './lib.js';
 
 export class UIController {
 	static create(currentProps: OneputProps) {

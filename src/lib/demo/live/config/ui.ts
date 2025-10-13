@@ -1,7 +1,12 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { randomId, type FlexParams, type MenuItem, type OneputProps } from '$lib/oneput/lib.js';
+import {
+	randomId,
+	type DefaultUI,
+	type FlexParams,
+	type MenuItem,
+	type OneputProps
+} from '$lib/oneput/lib.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
-import type { DefaultUI } from '$lib/oneput/UIController.js';
 import { DateDisplay } from '../plugins/ui/DateDisplay.js';
 import { MenuStatus } from '../plugins/ui/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../plugins/ui/TimeDisplay.js';

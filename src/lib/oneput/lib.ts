@@ -208,3 +208,12 @@ export function walk(
 		return;
 	}
 }
+
+export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
+	runUI?(values: V): void;
+	inputUI?: OneputProps['inputUI'];
+	menuUI?: OneputProps['menuUI'];
+	innerUI?: OneputProps['innerUI'];
+	outerUI?: OneputProps['outerUI'];
+	placeholder?: OneputProps['placeholder'];
+}

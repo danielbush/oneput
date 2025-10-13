@@ -151,9 +151,9 @@ export class MenuController {
 			}
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
-		const removeListner = this.events.on<InputChangeEvent>('input-change', handler);
+		const removeListener = this.events.on<InputChangeEvent>('input-change', handler);
 		return () => {
-			removeListner();
+			removeListener();
 			this.menuItemsFn = undefined;
 		};
 	}
@@ -200,7 +200,7 @@ export class MenuController {
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
-		const removeListner = this.events.on<InputChangeEvent>('input-change', (evt) => {
+		const removeListener = this.events.on<InputChangeEvent>('input-change', (evt) => {
 			if (this._disableMenuItemsFn) {
 				return;
 			}
@@ -208,7 +208,7 @@ export class MenuController {
 			debouncedHandler(evt);
 		});
 		return () => {
-			removeListner();
+			removeListener();
 			this.menuItemsFn = undefined;
 		};
 	}

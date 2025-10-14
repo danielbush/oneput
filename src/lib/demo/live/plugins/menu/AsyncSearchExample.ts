@@ -1,6 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
-import type { Alert } from '$lib/oneput/plugins/ui/Alert.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { TestInputService } from '../../service/TestInputService.js';
@@ -41,14 +40,7 @@ export class AsyncSearchExample {
 						});
 					});
 				} catch (error) {
-					this.notify?.updateMessage('An error!  Check the browser console...');
-					const alert = this.ctl.alert({
-						message: 'An error!',
-						additional:
-							'This is a simulated error.  Check the browser console...  Try hitting the refresh icon in the input area to re-run your last input.  Or you can hit ok here and not re-run the input.  Here was the error:' +
-							error
-					});
-					this.setError(alert);
+					this.setError(error as Error);
 					return;
 				}
 			},
@@ -56,9 +48,10 @@ export class AsyncSearchExample {
 				onDebounce: (isDebouncing) => {
 					if (this.isError && !isDebouncing) {
 						return;
+					} else {
+						this.notify?.updateMessage(isDebouncing ? 'Debouncing...' : 'Ready...');
+						this.setBusy(isDebouncing);
 					}
-					this.notify?.updateMessage(isDebouncing ? 'Debouncing...' : 'Ready...');
-					this.setBusy(isDebouncing);
 				},
 				focusBehaviour: 'last'
 			}
@@ -70,9 +63,16 @@ export class AsyncSearchExample {
 	}
 
 	private isError = false;
-	private setError(alert: Alert) {
-		// this.notify?.updateMessage('Hit ok above OR hit the refresh button in the input to re-run the last input...');
+	private setError(error: Error) {
+		console.error(error);
 		this.isError = true;
+		this.notify?.updateMessage('An error!  Check the browser console...');
+		const alert = this.ctl.alert({
+			message: 'An error!',
+			additional:
+				'This is a simulated error.  Check the browser console...  Try hitting the refresh icon in the input area to re-run your last input.  Or you can hit ok here and not re-run the input.  Here was the error:' +
+				error
+		});
 		this.ctl.ui.setInputUI((current) => ({
 			...current,
 			right: {

@@ -70,7 +70,8 @@
 	--oneput-border-right: 0.5px;
 	--oneput-box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 0.3);
 	--oneput-font: 14px sans-serif;
-	--oneput-font-color: #222;
+	--oneput-text-color: #222;
+	--oneput-button-text-color: #222;
 	--oneput-text-muted: color: rgb(0 0 0 / 0.7);
 
 	/* Menu */
@@ -122,13 +123,17 @@
 	--oneput-secondary-button-background: rgb(255 255 255 / 0.22);
 	--oneput-secondary-button-background-hover: rgb(255 255 255 / 0.22);
 	--oneput-button-border: 0.5px solid rgb(0 0 0 / 0.4);
-	--oneput-button-outline: 0.5px solid rgb(0 0 0 / 0.5);
-	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.7);
 	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
-	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
 	--oneput-button-background-hover: rgb(100 100 100 / 0.2);
-	--oneput-button-outline-active: 0.5px solid rgb(0 0 0 / 0.8);
 	--oneput-button-background-active: rgb(100 100 100 / 0.3);
+	--oneput-button-outline: 2px solid rgb(0255 179 2 / 0.5);
+	/* --oneput-button-outline: 0.5px solid rgb(0 0 0 / 0.5); */
+	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.7);
+	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-outline-active: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-outline-focus: var(--oneput-button-outline);
+	--oneput-button-outline-hover: var(--oneput-button-outline);
+	--oneput-button-outline-active: var(--oneput-button-outline);
 
 	/* Visual Debug */
 	--oneput-debug-hflex-outline: 1px solid rgb(0 200 0 / 0.2);
@@ -145,6 +150,7 @@
 
 	/* alert */
 	--oneput-alert-background: rgb(255 210 0 / 0.4);
+	--oneput-alert-text-color: #222;
 }
 
 .dark-mode .oneput__container {
@@ -153,8 +159,9 @@
 	--oneput-input-background: #333;
 
 	/* text */
-	--oneput-font-color: #ddd;
+	--oneput-text-color: #ddd;
 	--oneput-input-text-color: #ddd;
+	--oneput-button-text-color: #222;
 	--oneput-placeholder-text-color: #bbb;
 	--oneput-text-muted: rgb(255 255 255 / 0.7);
 
@@ -168,15 +175,23 @@
 	--oneput-menu-item-background-active: rgb(200 200 200 / 0.2);
 
 	/* button states */
-	--oneput-button-outline-focus: 0.5px solid rgb(255 255 255 / 0.5);
-	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
 	--oneput-button-border-focus: none;
-	--oneput-button-outline-hover: 0.5px solid rgb(255 255 255 / 0.8);
+	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
 	--oneput-button-background-hover: rgb(150 150 150 / 0.2);
 	--oneput-button-border-hover: none;
-	--oneput-button-outline-active: 0.5px solid rgb(255 255 255 / 0.8);
 	--oneput-button-background-active: rgb(150 150 150 / 0.3);
 	--oneput-button-border-active: none;
+	--oneput-button-outline: 2px solid rgb(0255 179 2 / 0.5);
+	--oneput-button-outline-focus: var(--oneput-button-outline);
+	--oneput-button-outline-hover: var(--oneput-button-outline);
+	--oneput-button-outline-active: var(--oneput-button-outline);
+
+	/* notification */
+	--oneput-notification-background: rgb(255 210 0 / 0.2);
+
+	/* alert */
+	--oneput-alert-background: rgb(255 210 0 / 0.7);
+	--oneput-alert-text-color: #222;
 }
 
 /* #endregion */
@@ -236,7 +251,7 @@
 	border-right-width: var(--oneput-border-right);
 
 	font: var(--oneput-font);
-	color: var(--oneput-font-color);
+	color: var(--oneput-text-color);
 	box-shadow: var(--oneput-box-shadow);
 }
 
@@ -452,8 +467,9 @@ button.oneput__menu-item:active {
 	max-width: var(--oneput-icon-width);
 }
 
-.oneput__primary-button,
-.oneput__secondary-button {
+.oneput__container .oneput__primary-button,
+.oneput__container .oneput__secondary-button {
+	color: var(--oneput-button-text-color);
 	flex: 0 0 var(--oneput-icon-width);
 	justify-content: center;
 	border: var(--oneput-button-border);
@@ -464,10 +480,10 @@ button.oneput__menu-item:active {
 	background: var(--oneput-primary-button-background);
 }
 
-.oneput__secondary-button {
+.oneput__container .oneput__secondary-button {
 	background: var(--oneput-secondary-button-background);
 }
-.oneput__secondary-button:hover {
+.oneput__container .oneput__secondary-button:hover {
 	background: var(--oneput-secondary-button-background-hover);
 }
 
@@ -612,6 +628,7 @@ button.oneput__menu-item:active {
 
 .oneput__menu--replaced .oneput__menu-area {
 	background: var(--oneput-alert-background);
+	color: var(--oneput-alert-text-color);
 }
 
 /* #endregion */

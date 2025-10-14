@@ -13,7 +13,9 @@ export class Confirm {
 		private ctl: Controller,
 		private params: { additional?: string; message: string },
 		private resolve?: (value: boolean) => void,
-		private promise?: Promise<boolean>
+		private promise?: Promise<boolean>,
+		private okButton?: HTMLElement,
+		private cancelButton?: HTMLElement
 	) {}
 
 	run(): Promise<boolean> {
@@ -26,7 +28,17 @@ export class Confirm {
 				ok: {
 					description: 'OK',
 					bindings: ['Enter'],
-					action: () => this.stop(true)
+					action: () => {
+						// Support if the user tabs to the cancel button and
+						// hits enter.
+						if (document.activeElement === this.cancelButton) {
+							this.stop(false);
+						} else if (document.activeElement === this.okButton) {
+							this.stop(true);
+						} else {
+							this.stop(true);
+						}
+					}
 				},
 				cancel: {
 					description: 'Cancel',
@@ -66,8 +78,9 @@ export class Confirm {
 								type: 'fchild',
 								tag: 'button',
 								classes: ['oneput__primary-button'],
-								textContent: 'Ok',
+								textContent: 'OK',
 								onMount: (node) => {
+									this.okButton = node;
 									node.focus();
 								},
 								attr: {
@@ -82,6 +95,9 @@ export class Confirm {
 								textContent: 'Cancel',
 								attr: {
 									onclick: () => this.stop(false)
+								},
+								onMount: (node) => {
+									this.cancelButton = node;
 								}
 							}
 						]

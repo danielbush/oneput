@@ -122,8 +122,8 @@
 	--oneput-secondary-button-background: rgb(255 255 255 / 0.22);
 	--oneput-secondary-button-background-hover: rgb(255 255 255 / 0.22);
 	--oneput-button-border: 0.5px solid rgb(0 0 0 / 0.4);
-	--oneput-button-outline: none;
-	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.5);
+	--oneput-button-outline: 0.5px solid rgb(0 0 0 / 0.5);
+	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.7);
 	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
 	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
 	--oneput-button-background-hover: rgb(100 100 100 / 0.2);
@@ -461,7 +461,6 @@ button.oneput__menu-item:active {
 	padding: var(--oneput-icon-padding);
 	min-width: 7rem;
 	/* box-shadow: 0 0 5px 1px rgb(0 0 0 / 0.3); */
-	outline: none !important;
 	background: var(--oneput-primary-button-background);
 }
 

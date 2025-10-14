@@ -101,6 +101,35 @@ export class RootUI {
 					console.log('after confirm...', yes);
 				}
 			}),
+			menuItemWithIcon({
+				id: randomId(),
+				text: 'Test Notification API...',
+				action: () => {
+					this.ctl.notify(
+						'You may need to (1) use https; (2) allow notifications for your browser in your OS; (3) allow notifications in the browser for this origin.'
+					);
+					if (!('Notification' in window)) {
+						// Check if the browser supports notifications
+						this.ctl.alert({
+							message: 'Not Supported',
+							additional: 'Notification API is not supported in this browser.'
+						});
+					} else if (Notification.permission === 'granted') {
+						// Check whether notification permissions have already been granted;
+						// if so, create a notification
+						new Notification('Hi there!');
+						// …
+					} else if (Notification.permission !== 'denied') {
+						// We need to ask the user for permission
+						Notification.requestPermission().then((permission) => {
+							// If the user accepts, let's create a notification
+							if (permission === 'granted') {
+								new Notification('Hi there!');
+							}
+						});
+					}
+				}
+			}),
 			{
 				id: randomId(),
 				type: 'hflex',

@@ -70,7 +70,7 @@ export type MenuItem = FlexParams & {
 	 */
 	action?: (c: Controller) => void;
 	/**
-	 * ignored = false means tem can be focused and is interactive.
+	 * ignored = false means menu item can be focused and is interactive.
 	 */
 	ignored?: false;
 	/**

@@ -280,6 +280,23 @@ export class MenuController {
 		}
 	}
 
+	focusFirstMenuItem() {
+		for (let i = 0; i < this.menuItemCount; i++) {
+			if (!this.currentProps.menuItems?.[i].ignored) {
+				this.currentProps.menuItemFocus = [i, true];
+				break;
+			}
+		}
+	}
+
+	focusLastMenuItem() {
+		for (let i = this.menuItemCount - 1; i >= 0; i--) {
+			if (!this.currentProps.menuItems?.[i].ignored) {
+				this.currentProps.menuItemFocus = [i, true];
+				break;
+			}
+		}
+	}
 	setFocusBehaviour(behaviour: 'first' | 'last' | 'preserve') {
 		this.focusBehaviour = behaviour;
 	}
@@ -297,11 +314,11 @@ export class MenuController {
 		}
 
 		if (behaviour === 'first') {
-			this.currentProps.menuItemFocus = [0, true];
+			this.focusFirstMenuItem();
 		}
 
 		if (behaviour === 'last') {
-			this.currentProps.menuItemFocus = [(this.currentProps.menuItems?.length ?? 0) - 1, true];
+			this.focusLastMenuItem();
 		}
 	}
 

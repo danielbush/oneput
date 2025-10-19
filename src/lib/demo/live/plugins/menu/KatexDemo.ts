@@ -28,6 +28,7 @@ export class KatexDemo {
 			{
 				id: 'katex-preview-pane',
 				type: 'vflex',
+				ignored: true,
 				children: [
 					{
 						id: 'katex-preview',

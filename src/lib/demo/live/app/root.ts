@@ -1,10 +1,11 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { searchIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/oneput/shared/icons.js';
-import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
-import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
-import { SettingsUI } from './settings.js';
 import { randomId } from '$lib/oneput/lib.js';
+import { searchIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/oneput/shared/icons.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
+import { SettingsUI } from './settings.js';
+import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
+import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
+import { KatexDemo } from '../plugins/menu/KatexDemo.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
@@ -42,10 +43,7 @@ export class RootUI {
 				leftIcon: sigmaIcon,
 				text: 'Insert katex...',
 				action: () => {
-					// @ts-expect-error - dynamic import from CDN, types not available at compile time
-					import('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.mjs').then((katex) => {
-						console.log(katex);
-					});
+					KatexDemo.create(this.ctl, this.runUI).runUI();
 				}
 			}),
 			menuItemWithIcon({

@@ -59,10 +59,10 @@ export class UIController {
 	}
 
 	runUI<T extends Record<string, unknown>>(values?: T) {
+		this.resetUI();
 		if (this.defaultUI && values) {
 			this.defaultUI.runUI?.(values);
 		}
-		this.resetUI();
 	}
 
 	/**

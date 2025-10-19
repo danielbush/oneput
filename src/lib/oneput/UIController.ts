@@ -58,7 +58,7 @@ export class UIController {
 		return this.defaultUI as D;
 	}
 
-	runUI<T extends Record<string, unknown>>(values?: T) {
+	runDefaultUI<T extends Record<string, unknown>>(values?: T) {
 		this.resetUI();
 		if (this.defaultUI && values) {
 			this.defaultUI.runUI?.(values);

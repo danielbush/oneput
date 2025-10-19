@@ -21,7 +21,7 @@ export class NavigateHeadings {
 	) {}
 
 	runUI() {
-		this.ctl.ui.runUI({
+		this.ctl.ui.runDefaultUI({
 			menuHeader: 'Navigate Headings',
 			exitAction: this.exit
 		});

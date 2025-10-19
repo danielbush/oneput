@@ -19,7 +19,7 @@ export class AsyncSearchExample {
 	) {}
 
 	runUI() {
-		this.ctl.ui.runUI<MyDefaultUIValues>({
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Async Search Example',
 			exitAction: this.exit
 		});

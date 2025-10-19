@@ -19,7 +19,7 @@ export class KatexDemo {
 	}
 
 	runUI() {
-		this.ctl.ui.runUI<MyDefaultUIValues>({
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Katex Demo',
 			exitAction: this.back
 		});

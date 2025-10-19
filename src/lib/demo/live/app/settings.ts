@@ -24,7 +24,7 @@ export class SettingsUI {
 	) {}
 
 	runUI = () => {
-		this.ctl.ui.runUI<MyDefaultUIValues>({
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Settings',
 			exitAction: this.back
 		});
@@ -79,7 +79,7 @@ export class FiltersUI {
 	) {}
 
 	runUI() {
-		this.ctl.ui.runUI({
+		this.ctl.ui.runDefaultUI({
 			menuHeader: 'Filters',
 			exitAction: this.back
 		});

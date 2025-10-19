@@ -42,7 +42,10 @@ export class RootUI {
 				leftIcon: sigmaIcon,
 				text: 'Insert katex...',
 				action: () => {
-					console.log('insert katex');
+					// @ts-expect-error - dynamic import from CDN, types not available at compile time
+					import('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.mjs').then((katex) => {
+						console.log(katex);
+					});
 				}
 			}),
 			menuItemWithIcon({

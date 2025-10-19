@@ -256,5 +256,24 @@
 				}}
 			/>
 		</section>
+		<section class="demo-example">
+			<h2>Textarea (multiline)</h2>
+			<Oneput
+				menuOpen={false}
+				menuItems={ui.menuItems1()}
+				inputUI={{
+					multiline: 5,
+					left: ui.inputLeft1,
+					right: ui.inputRight1,
+					outerLeft: ui.inputOuterLeft1,
+					outerRight: ui.inputOuterRight1
+				}}
+				placeholder="Type multiple lines..."
+				inputValue=""
+				onInputChange={() => {
+					console.log('onInputChange');
+				}}
+			/>
+		</section>
 	</section>
 </main>

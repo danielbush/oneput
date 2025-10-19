@@ -10,7 +10,7 @@ export type OneputProps = {
 	menuItemFocus?: [number, boolean?];
 	menuOpen?: boolean;
 	menuItems?: Array<MenuItem | MenuItemDivider>;
-	inputElement?: HTMLInputElement;
+	inputElement?: HTMLInputElement | HTMLTextAreaElement;
 	inputValue: string;
 	placeholder: string;
 	onInputChange?: InputChangeListener;
@@ -30,6 +30,7 @@ export type OneputProps = {
 	innerUI?: FlexParams;
 	outerUI?: FlexParams;
 	inputUI?: {
+		multiline?: number;
 		left?: FlexParams;
 		right?: FlexParams;
 		outerLeft?: FlexParams;

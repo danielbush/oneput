@@ -9,7 +9,7 @@ export type MenuItemsFnAsync = (
 	items: MenuItemAny[]
 ) => Promise<Array<MenuItemAny> | undefined>;
 
-type FocusBehaviour = 'first' | 'last' | 'preserve';
+type FocusBehaviour = 'first' | 'last';
 
 export class MenuController {
 	public static create(
@@ -297,22 +297,12 @@ export class MenuController {
 			}
 		}
 	}
-	setFocusBehaviour(behaviour: 'first' | 'last' | 'preserve') {
+	setFocusBehaviour(behaviour: FocusBehaviour) {
 		this.focusBehaviour = behaviour;
 	}
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
-		if (behaviour === 'preserve') {
-			this.currentProps.menuItemFocus = [
-				Math.min(
-					this.currentProps.menuItemFocus?.[0] ?? 0,
-					Math.max(0, (this.currentProps.menuItems?.length ?? 0) - 1)
-				),
-				true
-			];
-		}
-
 		if (behaviour === 'first') {
 			this.focusFirstMenuItem();
 		}

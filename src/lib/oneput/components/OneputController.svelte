@@ -20,7 +20,7 @@
 	const controller = new Controller(currentProps);
 
 	$effect(() => {
-		controller.input.setInputElement(inputElement);
+		controller.input.handleInputElementChange(inputElement);
 	});
 
 	onMount(() => {

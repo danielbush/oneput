@@ -30,7 +30,7 @@ export class InputController {
 	/**
 	 * Used by Oneput to tell the controller what the input element is.
 	 */
-	setInputElement(inputElement: HTMLInputElement | undefined) {
+	handleInputElementChange(inputElement: HTMLInputElement | undefined) {
 		this.inputElement = inputElement;
 	}
 

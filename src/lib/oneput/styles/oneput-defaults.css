@@ -444,7 +444,7 @@ button.oneput__menu-item:active {
 	justify-content: center;
 }
 
-.oneput__input-area--multiline {
+.oneput--multiline {
 	/* For multiline textarea, align widges around it to the top. */
 	.oneput__input-inner {
 		align-items: start;

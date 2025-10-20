@@ -62,7 +62,8 @@
 	class={[
 		'oneput__container',
 		props.menuOpen && 'oneput__menu--open',
-		props.replaceUI?.menu && 'oneput__menu--replaced'
+		props.replaceUI?.menu && 'oneput__menu--replaced',
+		multiline > 1 && 'oneput--multiline'
 	]}
 >
 	{#if props.menuOpen || props.replaceUI?.menu}
@@ -137,8 +138,7 @@
 		</section>
 	{/if}
 	{#if props.inputUI}
-		<!-- <section class="oneput__input-area"> -->
-		<section class={['oneput__input-area', multiline > 1 && 'oneput__input-area--multiline']}>
+		<section class="oneput__input-area">
 			<!-- Render as an hflex to get default hflex styling. -->
 			<div class="oneput__hflex oneput__input-outer">
 				{#if props.inputUI?.outerLeft}

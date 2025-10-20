@@ -137,7 +137,8 @@
 		</section>
 	{/if}
 	{#if props.inputUI}
-		<section class="oneput__input-area">
+		<!-- <section class="oneput__input-area"> -->
+		<section class={['oneput__input-area', multiline > 1 && 'oneput__input-area--multiline']}>
 			<!-- Render as an hflex to get default hflex styling. -->
 			<div class="oneput__hflex oneput__input-outer">
 				{#if props.inputUI?.outerLeft}

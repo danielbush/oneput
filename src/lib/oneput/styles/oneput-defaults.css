@@ -444,6 +444,16 @@ button.oneput__menu-item:active {
 	justify-content: center;
 }
 
+.oneput__input-area--multiline {
+	/* For multiline textarea, align widges around it to the top. */
+	.oneput__input-inner {
+		align-items: start;
+	}
+	.oneput__input-outer {
+		align-items: start;
+	}
+}
+
 /* #endregion */
 
 /* #region spacers, icons and icon-buttons */

@@ -9,19 +9,24 @@ export class KatexDemo {
 		return new KatexDemo(ctl, back);
 	}
 
-	private ctl: Controller;
-	private back: () => void;
+	unsetMenuItemsFn?: () => void;
 
-	constructor(ctl: Controller, back: () => void) {
-		this.ctl = ctl;
-		this.back = back;
+	private exit = () => {
+		this.unsetMenuItemsFn?.();
+		this.back();
+	};
+
+	constructor(
+		private ctl: Controller,
+		private back: () => void
+	) {
 		console.log(katex);
 	}
 
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Katex Demo',
-			exitAction: this.back
+			exitAction: this.exit
 		});
 		this.ctl.ui.setPlaceholder('Type some katex-flavoured latex...');
 		this.ctl.ui.setInputUI((inputUI) => {
@@ -57,5 +62,8 @@ export class KatexDemo {
 			})
 		]);
 		this.ctl.input.focusInput();
+		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFn(() => {
+			return undefined;
+		});
 	}
 }

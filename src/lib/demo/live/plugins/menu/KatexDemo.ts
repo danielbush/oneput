@@ -24,6 +24,12 @@ export class KatexDemo {
 			exitAction: this.back
 		});
 		this.ctl.ui.setPlaceholder('Type some katex-flavoured latex...');
+		this.ctl.ui.setInputUI((inputUI) => {
+			return {
+				...inputUI,
+				inputLines: 5
+			};
+		});
 		this.ctl.menu.setMenuItems([
 			{
 				id: 'katex-preview-pane',
@@ -50,5 +56,6 @@ export class KatexDemo {
 				}
 			})
 		]);
+		this.ctl.input.focusInput();
 	}
 }

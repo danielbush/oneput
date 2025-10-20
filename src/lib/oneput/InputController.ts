@@ -35,7 +35,13 @@ export class InputController {
 	}
 
 	focusInput() {
-		this.inputElement?.focus();
+		// Edge case: we set multiline from 1 to n > 1; the input element
+		// changes to textarea.  We call focus synchronously after this change.
+		// It's very possible the inputElement will still be pointing to the old
+		// input element.
+		setTimeout(() => {
+			this.inputElement?.focus();
+		}, 0);
 	}
 
 	/**

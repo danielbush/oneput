@@ -14,7 +14,7 @@
 		...props
 	}: OneputProps = $props();
 
-	let multiline = $derived(Math.max(1, props.inputUI?.multiline ?? 1));
+	let inputLines = $derived(Math.max(1, props.inputUI?.inputLines ?? 1));
 
 	$effect(() => {
 		props.onMenuOpenChange?.(props.menuOpen ?? false);
@@ -63,7 +63,7 @@
 		'oneput__container',
 		props.menuOpen && 'oneput__menu--open',
 		props.replaceUI?.menu && 'oneput__menu--replaced',
-		multiline > 1 && 'oneput--multiline'
+		inputLines > 1 && 'oneput--multiline'
 	]}
 >
 	{#if props.menuOpen || props.replaceUI?.menu}
@@ -148,7 +148,7 @@
 					{#if props.inputUI?.left}
 						<Flex class="oneput__input-left" {...props.inputUI.left} />
 					{/if}
-					{#if multiline === 1}
+					{#if inputLines === 1}
 						<input
 							id="oneput__input"
 							bind:this={inputElement}
@@ -162,14 +162,14 @@
 							spellcheck="false"
 						/>
 					{/if}
-					{#if multiline > 1}
+					{#if inputLines > 1}
 						<textarea
 							id="oneput__input"
 							bind:this={inputElement}
 							oninput={handleInputChange}
 							class="oneput__input"
 							placeholder={props.placeholder}
-							rows={multiline}
+							rows={inputLines}
 							spellcheck="false">{inputValue}</textarea
 						>
 					{/if}

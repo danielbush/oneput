@@ -30,7 +30,7 @@ export type OneputProps = {
 	innerUI?: FlexParams;
 	outerUI?: FlexParams;
 	inputUI?: {
-		multiline?: number;
+		inputLines?: number;
 		left?: FlexParams;
 		right?: FlexParams;
 		outerLeft?: FlexParams;

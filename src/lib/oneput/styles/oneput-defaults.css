@@ -96,7 +96,7 @@
 
 	/* Input */
 	/* The apparent height of the input or technically oneput__input-inner. */
-	--oneput-input-height: 36px;
+	--oneput-input-min-height: 36px;
 	--oneput-input-outline: 2px solid rgb(0255 179 2 / 0.5);
 	--oneput-input-background: #fff;
 	--oneput-input-text-color: #111;
@@ -386,7 +386,7 @@ button.oneput__menu-item:active {
 }
 
 .oneput__input-inner {
-	height: var(--oneput-input-height);
+	min-height: var(--oneput-input-min-height);
 	justify-content: space-between;
 	padding: 0 4px;
 }

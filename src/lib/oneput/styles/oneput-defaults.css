@@ -153,6 +153,10 @@
 	--oneput-alert-text-color: #222;
 }
 
+.oneput--multiline.oneput__container {
+	--oneput-input-padding-y: 6px;
+}
+
 .dark-mode .oneput__container {
 	/* backgrounds */
 	--oneput-background: #444;

@@ -14,6 +14,7 @@ export class KatexDemo {
 
 	private exit = () => {
 		this.unsetMenuItemsFn?.();
+		this.ctl.menu.enableMenuOpenClose();
 		this.back();
 	};
 
@@ -28,6 +29,7 @@ export class KatexDemo {
 			menuHeader: 'Katex Demo',
 			exitAction: this.exit
 		});
+		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.ui.setPlaceholder('Type some katex-flavoured latex...');
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {

@@ -204,14 +204,14 @@ class MyKeys {
 	}
 }
 
-export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
+export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implements DefaultUI<V> {
 	constructor(
 		private ctl: Controller,
-		private values: MyDefaultUIValues = {},
+		private values: V = {} as V,
 		public keys: MyKeys = new MyKeys()
 	) {}
 
-	setValues(values: MyDefaultUIValues) {
+	setValues(values: V) {
 		this.values = {
 			exitAction: () => {
 				this.ctl.menu.closeMenu();

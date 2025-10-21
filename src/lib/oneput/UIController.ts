@@ -59,10 +59,11 @@ export class UIController {
 	}
 
 	runDefaultUI<T extends Record<string, unknown>>(values?: T) {
-		this.resetUI();
 		if (this.defaultUI && values) {
 			this.defaultUI.runUI?.(values);
 		}
+		// TODO: runUI is partially running the ui but then relying on reset here:
+		this.resetUI();
 	}
 
 	/**

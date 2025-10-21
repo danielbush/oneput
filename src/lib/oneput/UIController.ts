@@ -45,6 +45,7 @@ export class UIController {
 		this.currentProps.innerUI = this.defaultUI?.innerUI;
 		this.currentProps.outerUI = this.defaultUI?.outerUI;
 		this.currentProps.placeholder = this.defaultUI?.placeholder || this.fallbackPlaceholder;
+		this.defaultUI?.afterUpdate?.();
 	}
 
 	private defaultUI?: DefaultUI;
@@ -60,9 +61,8 @@ export class UIController {
 
 	runDefaultUI<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
-			this.defaultUI.runUI?.(values);
+			this.defaultUI.setValues?.(values);
 		}
-		// TODO: runUI is partially running the ui but then relying on reset here:
 		this.resetUI();
 	}
 

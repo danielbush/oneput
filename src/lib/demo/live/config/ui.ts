@@ -211,7 +211,7 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 		public keys: MyKeys = new MyKeys()
 	) {}
 
-	runUI(values: MyDefaultUIValues) {
+	setValues(values: MyDefaultUIValues) {
 		this.values = {
 			exitAction: () => {
 				this.ctl.menu.closeMenu();
@@ -221,6 +221,9 @@ export class MyDefaultUI implements DefaultUI<MyDefaultUIValues> {
 			placeholder: 'Type here...',
 			...values
 		};
+	}
+
+	afterUpdate() {
 		// Clear the input.
 		// You can set `clearInput: false` to disable this behaviour.
 		if (this.values.clearInput || !('clearInput' in this.values)) {

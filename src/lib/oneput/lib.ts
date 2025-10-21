@@ -211,7 +211,14 @@ export function walk(
 }
 
 export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
-	runUI?(values: V): void;
+	setValues?(values: V): void;
+	/**
+	 * Called after the ui controller has updated the ui using the ui values
+	 * provided by this instance.
+	 *
+	 * You can use this to do any imperative updates.
+	 */
+	afterUpdate?(): void;
 	inputUI?: OneputProps['inputUI'];
 	menuUI?: OneputProps['menuUI'];
 	innerUI?: OneputProps['innerUI'];

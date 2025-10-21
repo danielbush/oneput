@@ -3,6 +3,7 @@ import katex from 'katex';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { settingsIcon } from '$lib/oneput/shared/icons.js';
+import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
 
 export class KatexDemo {
 	static create(ctl: Controller, back: () => void) {
@@ -18,10 +19,9 @@ export class KatexDemo {
 
 	constructor(
 		private ctl: Controller,
-		private back: () => void
-	) {
-		console.log(katex);
-	}
+		private back: () => void,
+		private previewDisplayMode: boolean = false
+	) {}
 
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
@@ -59,11 +59,32 @@ export class KatexDemo {
 				action: () => {
 					console.log('do something');
 				}
+			}),
+			checkboxMenuItem({
+				action: (_, checked) => {
+					this.previewDisplayMode = checked;
+					this.renderPreview();
+				},
+				textContent: 'Display mode',
+				checked: this.previewDisplayMode
 			})
 		]);
 		this.ctl.input.focusInput();
+		this.ctl.notify('Use shift+enter for newlines; enter will trigger the active menu item item');
 		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFn(() => {
-			return undefined;
+			this.renderPreview();
+		});
+	}
+
+	private renderPreview() {
+		const el = document.getElementById('katex-preview');
+		if (!el) {
+			return;
+		}
+		el.innerHTML = katex.renderToString(this.ctl.input.getInputValue(), {
+			displayMode: this.previewDisplayMode,
+			throwOnError: false,
+			output: 'mathml'
 		});
 	}
 }

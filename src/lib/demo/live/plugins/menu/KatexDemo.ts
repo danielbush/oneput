@@ -78,15 +78,23 @@ export class KatexDemo {
 		});
 	}
 
+	private katexIsValid = true;
+
 	private renderPreview() {
 		const el = document.getElementById('katex-preview');
 		if (!el) {
 			return;
 		}
-		el.innerHTML = katex.renderToString(this.ctl.input.getInputValue(), {
-			displayMode: this.previewDisplayMode,
-			throwOnError: false,
-			output: 'mathml'
-		});
+		try {
+			el.innerHTML = katex.renderToString(this.ctl.input.getInputValue(), {
+				displayMode: this.previewDisplayMode,
+				throwOnError: true,
+				output: 'mathml',
+				errorColor: 'red'
+			});
+			this.katexIsValid = true;
+		} catch {
+			this.katexIsValid = false;
+		}
 	}
 }

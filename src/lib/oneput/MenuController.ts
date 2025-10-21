@@ -3,7 +3,7 @@ import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmit
 import type { InputChangeListener, MenuItemAny, OneputProps } from './lib.js';
 import type { Controller } from './controller.js';
 
-export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny> | undefined;
+export type MenuItemsFn = (input: string, items: MenuItemAny[]) => Array<MenuItemAny> | undefined | void;
 export type MenuItemsFnAsync = (
 	input: string,
 	items: MenuItemAny[]

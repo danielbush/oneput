@@ -232,6 +232,11 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		// We set exitAction to the backBinding so that the back key (whatever
 		// it is set to) will trigger this action.
 		this.ctl.setBackBinding(this.values.exitAction);
+		// Enable various standard things by default.
+		// You can then override if you need to.
+		this.ctl.menu.enableMenuActions();
+		this.ctl.menu.enableMenuOpenClose();
+		this.ctl.menu.enableMenuItemsFn();
 	}
 
 	get placeholder() {

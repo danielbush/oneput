@@ -56,26 +56,23 @@ export const menuItemWithIcon: (params: {
 	rightIcon?: string;
 	text: string;
 	action?: () => void;
-}) => MenuItem = ({ id, leftIcon, rightIcon, text, action }) => {
-	const attr: FlexParams['attr'] = {};
-	/*
-	const attr: FlexParams['attr'] = {
-		// Demo hover handling.  Oneput injects a pointer event to handle
-		// menu item focus in addition to this.
-		onpointerenter: () => {
-			console.log('client onpointerenter', id);
-		},
-		// Similarly here, oneput will both run `action` with pointerdown
-		// and run this additional event handler here:
-		onpointerdown: () => {
-			console.log('client onpointerdown', id);
-		}
-	};
-	*/
+	attr?: FlexParams['attr'];
+}) => MenuItem = ({ id, leftIcon, rightIcon, text, action, attr }) => {
 	return {
 		id,
 		type: 'hflex',
 		tag: 'button',
+		attr: {
+			...attr
+			// Hovering...
+			// onpointerenter: () => {
+			// 	console.log('client onpointerenter', id);
+			// },
+			// Custom pointer down / click - generally however you should us action
+			// onpointerdown: () => {
+			// 	console.log('client onpointerdown', id);
+			// }
+		},
 		children: [
 			{
 				id: randomId(),
@@ -96,7 +93,6 @@ export const menuItemWithIcon: (params: {
 				innerHTMLUnsafe: rightIcon
 			}
 		],
-		attr,
 		action
 	};
 };

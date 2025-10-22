@@ -1,6 +1,11 @@
 import debounce from 'debounce';
 import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmitter.js';
-import type { InputChangeListener, MenuItemAny, OneputProps } from './lib.js';
+import {
+	isFocusable,
+	type InputChangeListener,
+	type MenuItemAny,
+	type OneputProps
+} from './lib.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (
@@ -270,7 +275,7 @@ export class MenuController {
 			c < this.menuItemCount;
 			c++, i = this.nextMenuItemIndex(i)
 		) {
-			if (!this.currentProps.menuItems?.[i].ignored) {
+			if (isFocusable(this.currentProps.menuItems?.[i])) {
 				this.currentProps.menuItemFocus = [i, true];
 				break;
 			}
@@ -283,7 +288,7 @@ export class MenuController {
 			c < this.menuItemCount;
 			c++, i = this.previousMenuItemIndex(i)
 		) {
-			if (!this.currentProps.menuItems?.[i].ignored) {
+			if (isFocusable(this.currentProps.menuItems?.[i])) {
 				this.currentProps.menuItemFocus = [i, true];
 				break;
 			}
@@ -292,7 +297,7 @@ export class MenuController {
 
 	focusFirstMenuItem() {
 		for (let i = 0; i < this.menuItemCount; i++) {
-			if (!this.currentProps.menuItems?.[i].ignored) {
+			if (isFocusable(this.currentProps.menuItems?.[i])) {
 				this.currentProps.menuItemFocus = [i, true];
 				break;
 			}
@@ -301,7 +306,7 @@ export class MenuController {
 
 	focusLastMenuItem() {
 		for (let i = this.menuItemCount - 1; i >= 0; i--) {
-			if (!this.currentProps.menuItems?.[i].ignored) {
+			if (isFocusable(this.currentProps.menuItems?.[i])) {
 				this.currentProps.menuItemFocus = [i, true];
 				break;
 			}

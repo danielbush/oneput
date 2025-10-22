@@ -32,7 +32,7 @@ export class KatexDemo {
 			menuHeader: 'Katex Demo',
 			exitAction: this.exit
 		});
-		this.setMenuItems(true, '');
+		this.setMenuItems(true, '', 'first');
 		this.setInputUI(true);
 		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.ui.setPlaceholder('Type some katex-flavoured latex...');
@@ -49,7 +49,11 @@ export class KatexDemo {
 		});
 	}
 
-	private setMenuItems(katexIsValid: boolean, katexResult?: string): void {
+	private setMenuItems(
+		katexIsValid: boolean,
+		katexResult?: string,
+		focusBehaviour?: 'none' | 'first' | 'last'
+	): void {
 		this.ctl.menu.setMenuItems(
 			[
 				{
@@ -88,6 +92,8 @@ export class KatexDemo {
 								errorColor: 'red'
 							}
 						)}</p>`;
+						this.ctl.input.setInputValue('');
+						this.renderPreview();
 					}
 				}),
 				checkboxMenuItem({
@@ -101,7 +107,7 @@ export class KatexDemo {
 			],
 			// This will ensure the menuItemFocus index won't change when we hit the
 			// checkbox above or any other action.
-			{ focusBehaviour: 'none' }
+			{ focusBehaviour: focusBehaviour ?? 'none' }
 		);
 	}
 
@@ -109,7 +115,7 @@ export class KatexDemo {
 	private renderPreview() {
 		if (this.ctl.input.getInputValue().trim() === '') {
 			this.setInputUI(true);
-			this.setMenuItems(true, '');
+			this.setMenuItems(true, '', 'none');
 			this.currentResult = '';
 			return;
 		}
@@ -121,11 +127,11 @@ export class KatexDemo {
 				errorColor: 'red'
 			});
 			this.setInputUI(true);
-			this.setMenuItems(true, this.currentResult);
+			this.setMenuItems(true, this.currentResult, 'none');
 			this.notify?.updateMessage(helpMessage);
 		} catch (err) {
 			this.setInputUI(false);
-			this.setMenuItems(false, this.currentResult);
+			this.setMenuItems(false, this.currentResult, 'none');
 			this.notify?.updateMessage('Invalid LaTeX: ' + (err as Error).message);
 		}
 	}

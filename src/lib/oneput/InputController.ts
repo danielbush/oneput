@@ -21,7 +21,11 @@ export class InputController {
 	}
 
 	triggerInputEvent() {
-		this.inputElement?.dispatchEvent(new Event('input', { bubbles: true }));
+		// If you call setInputValue(...) and then trigger, the value in
+		// setInputValue may not get applied.
+		setTimeout(() => {
+			this.inputElement?.dispatchEvent(new Event('input', { bubbles: true }));
+		}, 0);
 	}
 
 	private inputElement: HTMLInputElement | undefined;

@@ -216,6 +216,13 @@ export class MenuController {
 		};
 	}
 
+	/**
+	 * Clear any non-default menu items fn.
+	 */
+	clearMenuItemsFn() {
+		this.menuItemsFn = undefined;
+	}
+
 	triggerMenuItemsFn() {
 		this.controller.input.triggerInputEvent();
 	}

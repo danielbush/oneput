@@ -1,8 +1,8 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
-import { randomId } from '$lib/oneput/lib.js';
-import { settingsIcon } from '$lib/oneput/shared/icons.js';
+import { randomId, type OneputProps } from '$lib/oneput/lib.js';
+import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
 
 export class KatexDemo {
@@ -77,8 +77,6 @@ export class KatexDemo {
 		});
 	}
 
-	private katexIsValid = true;
-
 	private renderPreview() {
 		const el = document.getElementById('katex-preview');
 		if (!el) {
@@ -91,9 +89,34 @@ export class KatexDemo {
 				output: 'mathml',
 				errorColor: 'red'
 			});
-			this.katexIsValid = true;
+			this.setKatexValid(true);
 		} catch {
-			this.katexIsValid = false;
+			this.setKatexValid(false);
 		}
+	}
+
+	private setKatexValid(valid: boolean) {
+		this.ctl.ui.setInputUI((current) => {
+			return {
+				...current,
+				right: valid
+					? undefined
+					: {
+							id: randomId(),
+							type: 'hflex',
+							children: [
+								{
+									id: randomId(),
+									type: 'fchild',
+									classes: ['oneput__icon'],
+									style: {
+										color: 'var(--your-var, #c44)'
+									},
+									innerHTMLUnsafe: circleAlertIcon
+								}
+							]
+						}
+			} as OneputProps['inputUI'];
+		});
 	}
 }

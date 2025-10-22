@@ -1,55 +1,14 @@
 <script lang="ts">
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
-
-	/**
-	 * Taken from https://www.devtoolsdaily.com/blog/random-text-javascript/ .
-	 */
-	function generateRandomText(numParagraphs: number, numSentencesPerParagraph: number) {
-		const words = [
-			'lorem',
-			'ipsum',
-			'dolor',
-			'sit',
-			'amet',
-			'consectetur',
-			'adipiscing',
-			'elit',
-			'sed',
-			'do',
-			'eiusmod',
-			'tempor',
-			'incididunt',
-			'ut',
-			'labore',
-			'et',
-			'dolore',
-			'magna',
-			'aliqua'
-		];
-		const paragraphs = [];
-		for (let p = 0; p < numParagraphs; p++) {
-			const sentences = [];
-			for (let i = 0; i < numSentencesPerParagraph; i++) {
-				const numWords = Math.floor(Math.random() * 10) + 5;
-				const sentenceWords = [];
-				for (let j = 0; j < numWords; j++) {
-					const randomIndex = Math.floor(Math.random() * words.length);
-					sentenceWords.push(words[randomIndex]);
-				}
-				const sentence = sentenceWords.join(' ') + '.';
-				sentences.push(sentence.charAt(0).toUpperCase() + sentence.slice(1));
-			}
-			paragraphs.push(sentences.join(' '));
-		}
-		return paragraphs.join('\n\n');
-	}
+	import { generateRandomText } from '$lib/demo/utils.js';
 </script>
 
 <main>
 	<h1>Oneput Demo</h1>
 	<VisualDebugControls />
 	<ForceDarkModeControls />
+	<section id="page-content"></section>
 	<p>
 		Here we pretend we are an app that oneput is managing. The command bar is now anchored to the
 		bottom of the screen and will stay visible while this content scrolls.

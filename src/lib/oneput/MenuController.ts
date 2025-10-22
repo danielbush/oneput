@@ -17,7 +17,7 @@ export type MenuItemsFnAsync = (
 	items: MenuItemAny[]
 ) => Promise<Array<MenuItemAny> | undefined>;
 
-type FocusBehaviour = 'first' | 'last';
+type FocusBehaviour = 'first' | 'last' | 'none';
 
 export class MenuController {
 	public static create(
@@ -318,6 +318,9 @@ export class MenuController {
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
+		if (behaviour === 'none') {
+			return;
+		}
 		if (behaviour === 'first') {
 			this.focusFirstMenuItem();
 		}

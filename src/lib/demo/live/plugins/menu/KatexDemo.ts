@@ -46,51 +46,56 @@ export class KatexDemo {
 	}
 
 	private setMenuItems(katexIsValid: boolean, katexResult?: string): void {
-		this.ctl.menu.setMenuItems([
-			{
-				id: 'katex-preview-pane',
-				type: 'vflex',
-				ignored: true,
-				children: [
-					{
-						id: 'katex-preview',
-						type: 'fchild',
-						style: {
-							padding: '1rem',
-							alignSelf: 'center'
-						},
-						innerHTMLUnsafe: katexResult || '(preview)'
-					}
-				]
-			},
-			menuItemWithIcon({
-				id: 'insert-katex-btn',
-				leftIcon: settingsIcon,
-				text: 'Insert...',
-				attr: {
-					disabled: !katexIsValid
-				},
-				action: () => {
-					document.getElementById('page-content')!.innerHTML += `<p>${katex.renderToString(
-						this.ctl.input.getInputValue(),
+		this.ctl.menu.setMenuItems(
+			[
+				{
+					id: 'katex-preview-pane',
+					type: 'vflex',
+					ignored: true,
+					children: [
 						{
-							displayMode: false,
-							throwOnError: true,
-							output: 'mathml',
-							errorColor: 'red'
+							id: 'katex-preview',
+							type: 'fchild',
+							style: {
+								padding: '1rem',
+								alignSelf: 'center'
+							},
+							innerHTMLUnsafe: katexResult || '(preview)'
 						}
-					)}</p>`;
-				}
-			}),
-			checkboxMenuItem({
-				action: (_, checked) => {
-					this.previewDisplayMode = checked;
-					this.renderPreview();
+					]
 				},
-				textContent: 'Display mode',
-				checked: this.previewDisplayMode
-			})
-		]);
+				menuItemWithIcon({
+					id: 'insert-katex-btn',
+					leftIcon: settingsIcon,
+					text: 'Insert...',
+					attr: {
+						disabled: !katexIsValid
+					},
+					action: () => {
+						document.getElementById('page-content')!.innerHTML += `<p>${katex.renderToString(
+							this.ctl.input.getInputValue(),
+							{
+								displayMode: false,
+								throwOnError: true,
+								output: 'mathml',
+								errorColor: 'red'
+							}
+						)}</p>`;
+					}
+				}),
+				checkboxMenuItem({
+					action: (_, checked) => {
+						this.previewDisplayMode = checked;
+						this.renderPreview();
+					},
+					textContent: 'Display mode',
+					checked: this.previewDisplayMode
+				})
+			],
+			// This will ensure the menuItemFocus index won't change when we hit the
+			// checkbox above or any other action.
+			{ focusBehaviour: 'none' }
+		);
 	}
 
 	private currentResult = '';

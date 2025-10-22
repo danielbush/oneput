@@ -93,27 +93,26 @@ export class KatexDemo {
 		]);
 	}
 
-	private previousValidResult = '';
+	private currentResult = '';
 	private renderPreview() {
 		if (this.ctl.input.getInputValue().trim() === '') {
 			this.setInputUI(true);
 			this.setMenuItems(true, '');
-			this.previousValidResult = '';
+			this.currentResult = '';
 			return;
 		}
 		try {
-			const result = katex.renderToString(this.ctl.input.getInputValue(), {
+			this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
 				displayMode: this.previewDisplayMode,
 				throwOnError: true,
 				output: 'mathml',
 				errorColor: 'red'
 			});
 			this.setInputUI(true);
-			this.previousValidResult = result;
-			this.setMenuItems(true, result);
+			this.setMenuItems(true, this.currentResult);
 		} catch {
 			this.setInputUI(false);
-			this.setMenuItems(false, this.previousValidResult);
+			this.setMenuItems(false, this.currentResult);
 		}
 	}
 

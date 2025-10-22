@@ -62,7 +62,10 @@ export class KatexDemo {
 							type: 'fchild',
 							style: {
 								padding: '1rem',
-								alignSelf: 'center'
+								alignSelf: 'center',
+								// TODO: we could make scale dynamic, with ui
+								// buttons or a slider in the menu etc etc
+								scale: '1.5'
 							},
 							innerHTMLUnsafe: katexResult || '(preview)'
 						}

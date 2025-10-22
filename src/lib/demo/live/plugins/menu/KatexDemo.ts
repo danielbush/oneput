@@ -1,9 +1,12 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
+import type { Notification } from '$lib/oneput/plugins/ui/Notification.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { randomId, type OneputProps } from '$lib/oneput/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
+
+const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
 
 export class KatexDemo {
 	static create(ctl: Controller, back: () => void) {
@@ -20,7 +23,8 @@ export class KatexDemo {
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
-		private previewDisplayMode: boolean = false
+		private previewDisplayMode: boolean = false,
+		private notify?: Notification
 	) {}
 
 	runUI() {
@@ -39,7 +43,7 @@ export class KatexDemo {
 			};
 		});
 		this.ctl.input.focusInput();
-		this.ctl.notify('Use shift+enter for newlines; enter will trigger the active menu item item');
+		this.notify = this.ctl.notify(helpMessage);
 		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFn(() => {
 			this.renderPreview();
 		});
@@ -115,9 +119,11 @@ export class KatexDemo {
 			});
 			this.setInputUI(true);
 			this.setMenuItems(true, this.currentResult);
-		} catch {
+			this.notify?.updateMessage(helpMessage);
+		} catch (err) {
 			this.setInputUI(false);
 			this.setMenuItems(false, this.currentResult);
+			this.notify?.updateMessage('Invalid LaTeX: ' + (err as Error).message);
 		}
 	}
 

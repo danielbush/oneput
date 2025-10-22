@@ -228,7 +228,7 @@ export interface DefaultUI<V extends Record<string, unknown> = Record<string, un
 
 /**
  * Used by menu controller to determine if the menu item is focusable.
- * 
+ *
  * Handles ignored and disabled attribute for buttons/form controls.
  *
  * For convenience, you can pass undefined - helps with indexed optional chained

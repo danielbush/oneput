@@ -28,6 +28,8 @@ export class KatexDemo {
 			menuHeader: 'Katex Demo',
 			exitAction: this.exit
 		});
+		this.setMenuItems(true, '');
+		this.setInputUI(true);
 		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.ui.setPlaceholder('Type some katex-flavoured latex...');
 		this.ctl.ui.setInputUI((inputUI) => {
@@ -36,6 +38,14 @@ export class KatexDemo {
 				inputLines: 5
 			};
 		});
+		this.ctl.input.focusInput();
+		this.ctl.notify('Use shift+enter for newlines; enter will trigger the active menu item item');
+		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFn(() => {
+			this.renderPreview();
+		});
+	}
+
+	private setMenuItems(katexIsValid: boolean, katexResult?: string): void {
 		this.ctl.menu.setMenuItems([
 			{
 				id: 'katex-preview-pane',
@@ -49,16 +59,27 @@ export class KatexDemo {
 							padding: '1rem',
 							alignSelf: 'center'
 						},
-						textContent: 'Preview'
+						innerHTMLUnsafe: katexResult || '(preview)'
 					}
 				]
 			},
 			menuItemWithIcon({
-				id: randomId(),
+				id: 'insert-katex-btn',
 				leftIcon: settingsIcon,
-				text: 'Do something...',
+				text: 'Insert...',
+				attr: {
+					disabled: !katexIsValid
+				},
 				action: () => {
-					console.log('do something');
+					document.getElementById('page-content')!.innerHTML += `<p>${katex.renderToString(
+						this.ctl.input.getInputValue(),
+						{
+							displayMode: false,
+							throwOnError: true,
+							output: 'mathml',
+							errorColor: 'red'
+						}
+					)}</p>`;
 				}
 			}),
 			checkboxMenuItem({
@@ -70,36 +91,38 @@ export class KatexDemo {
 				checked: this.previewDisplayMode
 			})
 		]);
-		this.ctl.input.focusInput();
-		this.ctl.notify('Use shift+enter for newlines; enter will trigger the active menu item item');
-		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFn(() => {
-			this.renderPreview();
-		});
 	}
 
+	private previousValidResult = '';
 	private renderPreview() {
-		const el = document.getElementById('katex-preview');
-		if (!el) {
+		if (this.ctl.input.getInputValue().trim() === '') {
+			this.setInputUI(true);
+			this.setMenuItems(true, '');
+			this.previousValidResult = '';
 			return;
 		}
 		try {
-			el.innerHTML = katex.renderToString(this.ctl.input.getInputValue(), {
+			const result = katex.renderToString(this.ctl.input.getInputValue(), {
 				displayMode: this.previewDisplayMode,
 				throwOnError: true,
 				output: 'mathml',
 				errorColor: 'red'
 			});
-			this.setKatexValid(true);
+			this.setInputUI(true);
+			this.previousValidResult = result;
+			this.setMenuItems(true, result);
 		} catch {
-			this.setKatexValid(false);
+			this.setInputUI(false);
+			this.setMenuItems(false, this.previousValidResult);
 		}
 	}
 
-	private setKatexValid(valid: boolean) {
+	private setInputUI(katexIsValid: boolean) {
 		this.ctl.ui.setInputUI((current) => {
 			return {
 				...current,
-				right: valid
+				inputLines: 5,
+				right: katexIsValid
 					? undefined
 					: {
 							id: randomId(),

@@ -155,6 +155,11 @@
 	/* alert */
 	--oneput-alert-background: rgb(255 210 0 / 0.4);
 	--oneput-alert-text-color: #222;
+
+	/* disabled button states */
+	--oneput-button-background-disabled: red;
+	--oneput-menu-item-text-color-disabled: green;
+	--oneput-button-border-disabled: none;
 }
 
 .oneput--multiline.oneput__container {
@@ -193,6 +198,14 @@
 	--oneput-button-outline-focus: var(--oneput-button-outline);
 	--oneput-button-outline-hover: var(--oneput-button-outline);
 	--oneput-button-outline-active: var(--oneput-button-outline);
+
+	/* disabled button states */
+	--oneput-button-background-disabled: rgb(100 100 100 / 0.1);
+	--oneput-button-text-color-disabled: rgb(255 255 255 / 0.5);
+	--oneput-button-border-disabled: 0.5px solid rgb(255 255 255 / 0.2);
+	--oneput-button-background-disabled: red;
+	--oneput-menu-item-text-color-disabled: green;
+	--oneput-button-border-disabled: none;
 
 	/* notification */
 	--oneput-notification-background: rgb(255 210 0 / 0.2);
@@ -319,6 +332,11 @@ button.oneput__menu-item--focused {
 }
 button.oneput__menu-item:active {
 	background: var(--oneput-menu-item-background-active);
+}
+button:disabled.oneput__menu-item {
+	background: var(--oneput-button-background-disabled);
+	color: var(--oneput-button-text-color-disabled);
+	border: var(--oneput-button-border-disabled);
 }
 .oneput__menu-item-header {
 	margin-left: 0.6em;

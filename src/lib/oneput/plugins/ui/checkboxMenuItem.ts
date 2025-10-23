@@ -72,6 +72,7 @@ export class CheckboxMenuItem implements MenuItem {
 }
 
 export function checkboxMenuItem(params: {
+	id: string;
 	action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
 	textContent: string;
 	checked: boolean;

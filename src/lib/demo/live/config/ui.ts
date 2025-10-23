@@ -75,19 +75,20 @@ export const menuItemWithIcon: (params: {
 		},
 		children: [
 			{
-				id: randomId(),
+				// Fixed id's are re-rendered more efficiently in svelte.
+				id: id + '-1',
 				type: 'fchild',
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: leftIcon
 			},
 			{
-				id: randomId(),
+				id: id + '-2',
 				type: 'fchild',
 				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
 			{
-				id: randomId(),
+				id: id + '-3',
 				type: 'fchild',
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: rightIcon

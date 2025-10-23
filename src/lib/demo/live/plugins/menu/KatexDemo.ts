@@ -97,6 +97,7 @@ export class KatexDemo {
 					}
 				}),
 				checkboxMenuItem({
+					id: 'katex-display-mode-checkbox',
 					action: (_, checked) => {
 						this.previewDisplayMode = checked;
 						this.renderPreview();

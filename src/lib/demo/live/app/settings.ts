@@ -30,6 +30,7 @@ export class SettingsUI {
 		});
 		this.ctl.menu.setMenuItems([
 			checkboxMenuItem({
+				id: 'simulate-error',
 				textContent: 'Toggle simulate error storing bindings',
 				checked: config.simulateError,
 				action: (_, checked) => {

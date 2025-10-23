@@ -240,3 +240,68 @@ export function isFocusable(item?: MenuItemAny) {
 	}
 	return !item.ignored && !('disabled' in (item.attr ?? {}) && item.attr?.disabled);
 }
+
+function flex(params: Partial<FlexParams>): FlexParams {
+	const result: FlexParams = {
+		...params,
+		id: params.id ?? randomId(),
+		type: params.type || 'hflex'
+	};
+	return result;
+}
+
+export function hflex(params: Partial<FlexParams>): FlexParams {
+	return flex({ ...params, type: 'hflex' });
+}
+
+export function vflex(params: Partial<FlexParams>): FlexParams {
+	return flex({ ...params, type: 'vflex' });
+}
+
+export function fchild(params: Partial<FChildParams>): FChildParams {
+	const result: FChildParams = {
+		...params,
+		id: params.id ?? randomId(),
+		type: 'fchild'
+	};
+	return result;
+}
+
+export function menuItem(params: Partial<MenuItem>): MenuItem {
+	const result: MenuItem = {
+		...params,
+		id: params.id ?? randomId(),
+		type: params.type ?? 'hflex'
+	};
+	return result;
+}
+
+export function stdMenuItem(
+	params: Partial<MenuItem> & {
+		htmlContentUnsafe?: string;
+		textContent?: string;
+		leftIcon?: string;
+		rightIcon?: string;
+	}
+): MenuItem {
+	const result: MenuItem = hflex({
+		...params,
+		children: [
+			fchild({
+				classes: ['oneput__icon'],
+				innerHTMLUnsafe: params.leftIcon
+			}),
+			fchild({
+				classes: ['oneput__menu-item-body'],
+				// TODO: favor html then text...
+				textContent: params.textContent,
+				htmlContentUnsafe: params.htmlContentUnsafe
+			}),
+			fchild({
+				classes: ['oneput__icon'],
+				innerHTMLUnsafe: params.rightIcon
+			})
+		]
+	});
+	return result;
+}

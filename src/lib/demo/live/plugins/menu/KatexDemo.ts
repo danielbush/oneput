@@ -83,7 +83,7 @@ export class KatexDemo {
 						disabled: !katexIsValid
 					},
 					action: () => {
-						document.getElementById('page-content')!.innerHTML += `<p>${katex.renderToString(
+						document.getElementById('katex-demo')!.innerHTML += `<p>${katex.renderToString(
 							this.ctl.input.getInputValue(),
 							{
 								displayMode: false,

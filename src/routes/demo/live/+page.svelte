@@ -8,7 +8,7 @@
 	<h1>Oneput Demo</h1>
 	<VisualDebugControls />
 	<ForceDarkModeControls />
-	<section id="page-content"></section>
+	<section id="katex-demo"></section>
 	<p>
 		Here we pretend we are an app that oneput is managing. The command bar is now anchored to the
 		bottom of the screen and will stay visible while this content scrolls.

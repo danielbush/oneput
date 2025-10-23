@@ -1,4 +1,5 @@
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import { GlobalFilter } from '$lib/oneput/plugins/menu/GlobalFilter.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {
@@ -72,6 +73,13 @@ export const localKeys: KeyBindingMap = {
 		description: 'Focus next menu item',
 		action: (c) => {
 			c.menu.focusNextMenuItem();
+		}
+	},
+	globalFilter: {
+		bindings: ['$mod+e'],
+		description: 'Global filter',
+		action: (c) => {
+			GlobalFilter.create(c).runUI();
 		}
 	}
 };

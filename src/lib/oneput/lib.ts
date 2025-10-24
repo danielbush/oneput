@@ -11,8 +11,8 @@ export type OneputProps = {
 	menuOpen?: boolean;
 	menuItems?: Array<MenuItem | MenuItemDivider>;
 	inputElement?: HTMLInputElement | HTMLTextAreaElement;
-	inputValue: string;
-	placeholder: string;
+	inputValue?: string;
+	placeholder?: string;
 	onInputChange?: InputChangeListener;
 	onMenuOpenChange?: (menuOpen: boolean) => void;
 	onMenuAction?: (evt: Event, item: MenuItem, index: number) => void;

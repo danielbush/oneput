@@ -56,7 +56,7 @@ export class InputController {
 	}
 
 	getInputValue() {
-		return this.currentProps.inputValue;
+		return this.currentProps.inputValue || '';
 	}
 
 	onInputChange(handler: InputChangeListener): () => void {

@@ -8,6 +8,7 @@
 		inputElement = $bindable(),
 		inputValue = $bindable(''),
 		menuItemFocus = $bindable([0, true]),
+		placeholder = '',
 		menuAnimationDuration = 200,
 		injectAnimationDuration = 400,
 		replaceAnimationDuration = 600,
@@ -156,7 +157,7 @@
 							oninput={handleInputChange}
 							class="oneput__input"
 							type="text"
-							placeholder={props.placeholder}
+							{placeholder}
 							autocorrect="off"
 							{autocomplete}
 							spellcheck="false"
@@ -168,7 +169,7 @@
 							bind:this={inputElement}
 							oninput={handleInputChange}
 							class="oneput__input"
-							placeholder={props.placeholder}
+							{placeholder}
 							rows={inputLines}
 							spellcheck="false">{inputValue}</textarea
 						>

@@ -40,14 +40,10 @@ tasks:
       - pnpm run check --watch
   dev:
     desc: Run dev server
-    deps:
-      - install
     cmds:
       - pnpm run dev
   dev:public:
     desc: Run dev server
-    deps:
-      - install
     cmds:
       - pnpm run dev --host=0.0.0.0
   test:

@@ -8,7 +8,7 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
-	import { randomId } from '$lib/oneput/lib.js';
+	import { randomId, stdMenuItem } from '$lib/oneput/lib.js';
 	import { xIcon } from '$lib/oneput/shared/icons.js';
 
 	setupDemoState();
@@ -273,6 +273,36 @@
 				onInputChange={() => {
 					console.log('onInputChange');
 				}}
+			/>
+		</section>
+	</section>
+
+	<section class="demo-grid">
+		<section class="demo-example">
+			<h2>stdMenuItem</h2>
+			<p>
+				This template function handles a wide variety of menu item appearances. It's just a
+				convenience so you don't have to keep writing the same flex/child data-structures.
+			</p>
+			<Oneput menuOpen={true} menuItems={[stdMenuItem({ textContent: 'No icons...' })]} />
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						textContent: 'Left icon only...',
+						leftIcon: '<i data-lucide="search"></i>'
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						textContent: 'Both left/right icons...',
+						leftIcon: '<i data-lucide="search"></i>',
+						rightIcon: '<i data-lucide="chevron-right"></i>'
+					})
+				]}
 			/>
 		</section>
 	</section>

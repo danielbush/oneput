@@ -1,5 +1,5 @@
-import type { Controller } from '$lib/oneput/controller.js';
-import { filterChildren, randomId } from '$lib/oneput/lib.js';
+import type { Controller } from '../../controller.js';
+import { filterChildren, randomId } from '../../lib.js';
 
 /**
  * Alert.run returns a promise.

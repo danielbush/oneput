@@ -1,6 +1,6 @@
-import type { Controller } from '$lib/oneput/controller.js';
-import { randomId } from '$lib/oneput/lib.js';
-import { xIcon } from '$lib/oneput/shared/icons.js';
+import type { Controller } from '../../controller.js';
+import { randomId } from '../../lib.js';
+import { xIcon } from '../../shared/icons.js';
 
 export type NotificationParams = {
 	duration?: number;

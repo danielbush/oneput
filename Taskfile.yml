@@ -72,6 +72,7 @@ tasks:
     deps:
       - setup:nvm
     cmds:
+      - rm -rf node_modules
       - echo "Installing pnpm globally"
       - npm install -g pnpm
       - pnpm install

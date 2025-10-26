@@ -337,6 +337,8 @@ button:disabled.oneput__menu-item {
 }
 
 .oneput__menu-item-body {
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
 	margin-left: 0.6em;
 }
 
@@ -368,8 +370,8 @@ button:disabled.oneput__menu-item {
 /* For a divider that has a title. */
 .oneput__menu-divider-body {
 	margin-left: 0.6em;
-	padding-top: 6px;
-	padding-bottom: 2px;
+	padding-top: 0.4em;
+	padding-bottom: 0.15em;
 	gap: 0;
 }
 .oneput__menu-divider-title {

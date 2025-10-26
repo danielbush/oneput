@@ -276,30 +276,64 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
 	return result;
 }
 
+/**
+ * Represents a menu item with optional left/right icons, ability to float
+ * additional content to the right and an optional bottom section where you can
+ * put more detail.
+ *
+ * See demo/visual for examples.
+ */
 export function stdMenuItem(
+	// TODO: smooshing these types together is a bit messy...
 	params: Partial<MenuItem> & {
 		htmlContentUnsafe?: string;
 		textContent?: string;
-		leftIcon?: string;
-		rightIcon?: string;
+		left?: string;
+		right?: string;
+		bottom?: {
+			/**
+			 * Matches the leftIcon.
+			 */
+			left?: string;
+			right?: string;
+			htmlContentUnsafe?: string;
+			textContent?: string;
+		};
 	}
 ): MenuItem {
+	const center: FlexParams['children'] = [
+		fchild({
+			// TODO: favor html then text...
+			textContent: params.textContent,
+			htmlContentUnsafe: params.htmlContentUnsafe
+		})
+	];
+	if (params.bottom) {
+		center.push(
+			fchild({
+				type: 'fchild',
+				tag: 'hr',
+				classes: ['oneput__menu-divider']
+			}),
+			fchild({ textContent: 'Some description here.', classes: ['oneput__menu-item-description'] })
+		);
+	}
 	const result: MenuItem = hflex({
 		...params,
 		children: [
 			fchild({
 				classes: ['oneput__icon'],
-				innerHTMLUnsafe: params.leftIcon
+				innerHTMLUnsafe: params.left,
+				style: params.bottom && { alignSelf: 'flex-start' }
 			}),
-			fchild({
+			vflex({
 				classes: ['oneput__menu-item-body'],
-				// TODO: favor html then text...
-				textContent: params.textContent,
-				htmlContentUnsafe: params.htmlContentUnsafe
+				children: center
 			}),
 			fchild({
 				classes: ['oneput__icon'],
-				innerHTMLUnsafe: params.rightIcon
+				innerHTMLUnsafe: params.right,
+				style: params.bottom && { alignSelf: 'flex-start' }
 			})
 		]
 	});

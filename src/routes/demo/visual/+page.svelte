@@ -289,8 +289,8 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						textContent: 'Left icon only...',
-						leftIcon: '<i data-lucide="search"></i>'
+						left: '<i data-lucide="search"></i>',
+						textContent: 'Left icon only...'
 					})
 				]}
 			/>
@@ -298,9 +298,22 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
 						textContent: 'Both left/right icons...',
-						leftIcon: '<i data-lucide="search"></i>',
-						rightIcon: '<i data-lucide="chevron-right"></i>'
+						right: '<i data-lucide="chevron-right"></i>'
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
+						textContent: 'With bottom section...',
+						right: '<i data-lucide="chevron-right"></i>',
+						bottom: {
+							textContent: 'Here is a more detailed description.'
+						}
 					})
 				]}
 			/>

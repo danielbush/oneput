@@ -289,7 +289,7 @@ export function stdMenuItem(
 		htmlContentUnsafe?: string;
 		textContent?: string;
 		left?: string;
-		right?: string;
+		right?: string | Array<FChildParams | string>;
 		bottom?: {
 			/**
 			 * Matches the leftIcon.
@@ -318,6 +318,24 @@ export function stdMenuItem(
 			fchild({ textContent: 'Some description here.', classes: ['oneput__menu-item-description'] })
 		);
 	}
+	const right = Array.isArray(params.right)
+		? hflex({
+				style: { alignSelf: 'flex-start' },
+				children: params.right.map((r) =>
+					typeof r === 'string'
+						? fchild({
+								classes: ['oneput__icon'],
+								innerHTMLUnsafe: r,
+								style: params.bottom
+							})
+						: r
+				)
+			})
+		: fchild({
+				classes: ['oneput__icon'],
+				innerHTMLUnsafe: params.right,
+				style: params.bottom && { alignSelf: 'flex-start' }
+			});
 	const result: MenuItem = hflex({
 		...params,
 		children: [
@@ -330,11 +348,7 @@ export function stdMenuItem(
 				classes: ['oneput__menu-item-body'],
 				children: center
 			}),
-			fchild({
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: params.right,
-				style: params.bottom && { alignSelf: 'flex-start' }
-			})
+			right
 		]
 	});
 	return result;

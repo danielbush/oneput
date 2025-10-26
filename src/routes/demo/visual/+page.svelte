@@ -8,7 +8,7 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
-	import { randomId, stdMenuItem } from '$lib/oneput/lib.js';
+	import { fchild, randomId, stdMenuItem } from '$lib/oneput/lib.js';
 	import { xIcon } from '$lib/oneput/shared/icons.js';
 
 	setupDemoState();
@@ -282,7 +282,8 @@
 			<h2>stdMenuItem</h2>
 			<p>
 				This template function handles a wide variety of menu item appearances. It's just a
-				convenience so you don't have to keep writing the same flex/child data-structures.
+				convenience so you don't have to keep writing the same flex/child data-structures. You can
+				of course build your own to suit your needs.
 			</p>
 			<Oneput menuOpen={true} menuItems={[stdMenuItem({ textContent: 'No icons...' })]} />
 			<Oneput
@@ -311,6 +312,29 @@
 						left: '<i data-lucide="search"></i>',
 						textContent: 'With bottom section...',
 						right: '<i data-lucide="chevron-right"></i>',
+						bottom: {
+							textContent: 'Here is a more detailed description.'
+						}
+					})
+				]}
+			/>
+			<p>
+				This next one maybe isn't ideal because it reduces the center content area - see how the
+				divider is pushed back.
+			</p>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
+						textContent: "hflex'd right content...",
+						right: [
+							fchild({
+								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+								classes: ['oneput__kbd']
+							}),
+							'<i data-lucide="chevron-right"></i>'
+						],
 						bottom: {
 							textContent: 'Here is a more detailed description.'
 						}

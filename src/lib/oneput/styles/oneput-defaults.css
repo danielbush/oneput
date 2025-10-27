@@ -51,13 +51,13 @@
 	--oneput-soft-border: 0.5px solid rgb(0 0 0 / 0.4);
 
 	/* Internal spacing: paddings, gaps, margins */
-	--oneput-area-padding: 0px;
-	--oneput-hflex-padding: 6px;
-	--oneput-hflex-gap: 4px;
-	--oneput-vflex-gap: 6px;
-	--oneput-fchild-padding: 4px;
-	--oneput-input-padding-x: 6px;
-	--oneput-input-padding-y: 0px;
+	--oneput-area-padding: 0em;
+	--oneput-hflex-padding: 0.375em;
+	--oneput-hflex-gap: 0.625em;
+	--oneput-vflex-gap: 0.375em;
+	--oneput-fchild-padding: 0.25em;
+	--oneput-input-padding-x: 0.375em;
+	--oneput-input-padding-y: 0em;
 
 	/* Specific parts of oneput... */
 
@@ -334,10 +334,10 @@ button:disabled.oneput__menu-item {
 .oneput__menu-item-description {
 	font: 100 0.8em sans-serif;
 	color: var(--oneput-text-muted);
+	margin-bottom: 0.4em;
 }
 
 .oneput__menu-item-body {
-	margin-left: 0.6em;
 }
 
 .oneput__menu-header {

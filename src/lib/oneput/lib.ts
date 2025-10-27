@@ -286,44 +286,51 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
  *   hflex { <left>  <center>  <right> }
  *
  * where:
- * <center> = vflex{ <centerTop>  ...<centerBottom> }
- * <centerTop> = hflex{ <mainContent>  <centerRight> }
- * <centerBottom> = [ <divider>, <fchild> ]
+ * <center> = vflex{ <top>  ...<bottom> }
+ * <top> = hflex{ <mainContent>  <innerRight> }
+ * <bottom> = [ <divider>, <fchild> ]
  *
  * See demo/visual for examples.
  */
 export function stdMenuItem(
 	// TODO: smooshing these types together is a bit messy...
 	params: Partial<MenuItem> & {
-		center: {
+		htmlContentUnsafe?: string;
+		textContent?: string;
+		innerRight?: FChildParams | Array<FChildParams>;
+		bottom?: {
+			/**
+			 * Matches the leftIcon.
+			 */
+			left?: string;
+			right?: string;
 			htmlContentUnsafe?: string;
 			textContent?: string;
-			right?: FChildParams | Array<FChildParams>;
-			bottom?: {
-				/**
-				 * Matches the leftIcon.
-				 */
-				left?: string;
-				right?: string;
-				htmlContentUnsafe?: string;
-				textContent?: string;
-			};
 		};
 		left?: string;
 		right?: FChildParams | Array<FChildParams>;
 	}
 ): MenuItem {
-	const centerTop = hflex({
+	const top = hflex({
 		children: [
 			fchild({
 				// TODO: favor html then text...
-				textContent: params.center.textContent,
-				htmlContentUnsafe: params.center.htmlContentUnsafe
+				textContent: params.textContent,
+				htmlContentUnsafe: params.htmlContentUnsafe
 			})
 		],
 		style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 	});
-	const centerBottom = params.center.bottom
+	const innerRight = params.innerRight
+		? Array.isArray(params.innerRight)
+			? params.innerRight
+			: [params.innerRight]
+		: undefined;
+	if (innerRight) {
+		top.children?.push(...innerRight);
+	}
+
+	const bottom = params.bottom
 		? [
 				fchild({
 					type: 'fchild',
@@ -331,27 +338,21 @@ export function stdMenuItem(
 					classes: ['oneput__menu-divider']
 				}),
 				fchild({
-					textContent: params.center.bottom.textContent,
-					htmlContentUnsafe: params.center.bottom.htmlContentUnsafe,
+					textContent: params.bottom.textContent,
+					htmlContentUnsafe: params.bottom.htmlContentUnsafe,
 					classes: ['oneput__menu-item-description']
 				})
 			]
 		: undefined;
+
 	const center = vflex({
 		classes: ['oneput__menu-item-body'],
 		style: { marginTop: '0' },
-		children: [centerTop]
+		children: [top]
 	});
-	const centerRight = params.center.right
-		? Array.isArray(params.center.right)
-			? params.center.right
-			: [params.center.right]
-		: undefined;
-	if (centerRight) {
-		centerTop.children?.push(...centerRight);
-	}
-	if (centerBottom) {
-		center.children?.push(...centerBottom);
+
+	if (bottom) {
+		center.children?.push(...bottom);
 	}
 	const right = Array.isArray(params.right)
 		? hflex({
@@ -360,7 +361,7 @@ export function stdMenuItem(
 					typeof r === 'string'
 						? icon({
 								innerHTMLUnsafe: r,
-								style: params.center.bottom
+								style: params.bottom
 							})
 						: r
 				)
@@ -371,7 +372,7 @@ export function stdMenuItem(
 		children: [
 			icon({
 				innerHTMLUnsafe: params.left,
-				style: params.center.bottom && { alignSelf: 'flex-start' }
+				style: params.bottom && { alignSelf: 'flex-start' }
 			}),
 			center
 		]

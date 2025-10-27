@@ -285,18 +285,13 @@
 				convenience so you don't have to keep writing the same flex/child data-structures. You can
 				of course build your own to suit your needs.
 			</p>
-			<Oneput
-				menuOpen={true}
-				menuItems={[stdMenuItem({ center: { textContent: 'No icons...' } })]}
-			/>
+			<Oneput menuOpen={true} menuItems={[stdMenuItem({ textContent: 'No icons...' })]} />
 			<Oneput
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
 						left: '<i data-lucide="search"></i>',
-						center: {
-							textContent: 'Left icon only...'
-						}
+						textContent: 'Left icon only...'
 					})
 				]}
 			/>
@@ -305,8 +300,35 @@
 				menuItems={[
 					stdMenuItem({
 						left: '<i data-lucide="search"></i>',
-						center: {
-							textContent: 'Both left/right icons...'
+						textContent: 'Both left/right icons...',
+						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
+						textContent: 'Both left/right icons + kbd...',
+						innerRight: fchild({
+							style: { flex: '0' },
+							innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+							classes: ['oneput__kbd']
+						}),
+
+						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
+						textContent: 'With bottom section...',
+						bottom: {
+							textContent: 'Here is a more detailed description.'
 						},
 						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 					})
@@ -317,49 +339,15 @@
 				menuItems={[
 					stdMenuItem({
 						left: '<i data-lucide="search"></i>',
-						center: {
-							textContent: 'Both left/right icons + kbd...',
-							right: fchild({
-								style: { flex: '0' },
-								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
-								classes: ['oneput__kbd']
-							})
-						},
-						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
-					})
-				]}
-			/>
-			<Oneput
-				menuOpen={true}
-				menuItems={[
-					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
-						center: {
-							textContent: 'With bottom section...',
-							bottom: {
-								textContent: 'Here is a more detailed description.'
-							}
-						},
-						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
-					})
-				]}
-			/>
-			<Oneput
-				menuOpen={true}
-				menuItems={[
-					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
-						center: {
-							textContent: "hflex'd right content...",
-							right: fchild({
-								style: { flex: '0' },
-								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
-								classes: ['oneput__kbd']
-							}),
-							bottom: {
-								textContent:
-									'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
-							}
+						textContent: "hflex'd right content...",
+						innerRight: fchild({
+							style: { flex: '0' },
+							innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+							classes: ['oneput__kbd']
+						}),
+						bottom: {
+							textContent:
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 						},
 						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})

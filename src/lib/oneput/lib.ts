@@ -283,12 +283,18 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
  *
  * The layout:
  *
- *   hflex { <left>  <center>  <right> }
+ * <menuItem> = hflex{ <left>  <center>  <right> }
  *
  * where:
- * <center> = vflex{ <top>  ...<bottom> }
- * <top> = hflex{ <mainContent>  <innerRight> }
- * <bottom> = [ <divider>, <fchild> ]
+ *
+ * <center> = vflex{ <topHFlex>  ...<bottom> }
+ * <bottom> = [ <divider>, <bottomHFlex> ]
+ *
+ * and:
+ *
+ * <topHFlex> = hflex{ <mainContent>  <innerRight> }
+ * <bottomHFlex> = hflex{ <bottomContent>  <bottomRight> }
+ * <bottomRight> = [ fchild, ... ]
  *
  * See demo/visual for examples.
  */
@@ -311,7 +317,7 @@ export function stdMenuItem(
 		innerHTMLUnsafe: params.left,
 		style: params.bottom && { alignSelf: 'flex-start' }
 	});
-	const top = hflex({
+	const topHFlex = hflex({
 		children: [
 			fchild({
 				// TODO: favor html then text...
@@ -372,7 +378,7 @@ export function stdMenuItem(
 	const center = vflex({
 		classes: ['oneput__menu-item-body'],
 		style: { marginTop: '0' },
-		children: [top]
+		children: [topHFlex]
 	});
 
 	if (bottom) {
@@ -382,7 +388,7 @@ export function stdMenuItem(
 		bottomHFlex?.children?.push(...bottomRight);
 	}
 	if (innerRight) {
-		top.children?.push(...innerRight);
+		topHFlex.children?.push(...innerRight);
 	}
 
 	const menuItem: MenuItem = hflex({

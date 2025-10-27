@@ -281,12 +281,20 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
  * additional content to the right and an optional bottom section where you can
  * put more detail.
  *
+ * The layout:
+ *
+ *   hflex { <left>  <center>  <right> }
+ *
+ * where:
+ * <center> = vflex{ <centerTop>  ...<centerBottom> }
+ * <centerTop> = hflex{ <mainContent>  <centerRight> }
+ * <centerBottom> = [ <divider>, <fchild> ]
+ *
  * See demo/visual for examples.
  */
 export function stdMenuItem(
 	// TODO: smooshing these types together is a bit messy...
 	params: Partial<MenuItem> & {
-		htmlContentUnsafe?: string;
 		center: {
 			htmlContentUnsafe?: string;
 			textContent?: string;
@@ -305,25 +313,45 @@ export function stdMenuItem(
 		right?: FChildParams | Array<FChildParams>;
 	}
 ): MenuItem {
-	const center = vflex({
-		classes: ['oneput__menu-item-body'],
+	const centerTop = hflex({
 		children: [
 			fchild({
 				// TODO: favor html then text...
 				textContent: params.center.textContent,
-				htmlContentUnsafe: params.htmlContentUnsafe
+				htmlContentUnsafe: params.center.htmlContentUnsafe
 			})
-		]
+		],
+		style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 	});
-	if (params.center.bottom) {
-		center.children?.push(
-			fchild({
-				type: 'fchild',
-				tag: 'hr',
-				classes: ['oneput__menu-divider']
-			}),
-			fchild({ textContent: 'Some description here.', classes: ['oneput__menu-item-description'] })
-		);
+	const centerBottom = params.center.bottom
+		? [
+				fchild({
+					type: 'fchild',
+					tag: 'hr',
+					classes: ['oneput__menu-divider']
+				}),
+				fchild({
+					textContent: params.center.bottom.textContent,
+					htmlContentUnsafe: params.center.bottom.htmlContentUnsafe,
+					classes: ['oneput__menu-item-description']
+				})
+			]
+		: undefined;
+	const center = vflex({
+		classes: ['oneput__menu-item-body'],
+		style: { marginTop: '0' },
+		children: [centerTop]
+	});
+	const centerRight = params.center.right
+		? Array.isArray(params.center.right)
+			? params.center.right
+			: [params.center.right]
+		: undefined;
+	if (centerRight) {
+		centerTop.children?.push(...centerRight);
+	}
+	if (centerBottom) {
+		center.children?.push(...centerBottom);
 	}
 	const right = Array.isArray(params.right)
 		? hflex({
@@ -338,7 +366,7 @@ export function stdMenuItem(
 				)
 			})
 		: params.right;
-	const result: MenuItem = hflex({
+	const menuItem: MenuItem = hflex({
 		...params,
 		children: [
 			icon({
@@ -349,9 +377,9 @@ export function stdMenuItem(
 		]
 	});
 	if (right) {
-		result.children?.push(right);
+		menuItem.children?.push(right);
 	}
-	return result;
+	return menuItem;
 }
 
 // TODO: set htmlContentUnsafe to never?

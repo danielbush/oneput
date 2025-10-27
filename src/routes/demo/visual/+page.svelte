@@ -318,6 +318,23 @@
 					stdMenuItem({
 						left: '<i data-lucide="search"></i>',
 						center: {
+							textContent: 'Both left/right icons + kbd...',
+							right: fchild({
+								style: { flex: '0' },
+								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+								classes: ['oneput__kbd']
+							})
+						},
+						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
+						center: {
 							textContent: 'With bottom section...',
 							bottom: {
 								textContent: 'Here is a more detailed description.'
@@ -327,10 +344,6 @@
 					})
 				]}
 			/>
-			<p>
-				This next one maybe isn't ideal because it reduces the center content area - see how the
-				divider is pushed back.
-			</p>
 			<Oneput
 				menuOpen={true}
 				menuItems={[
@@ -338,38 +351,17 @@
 						left: '<i data-lucide="search"></i>',
 						center: {
 							textContent: "hflex'd right content...",
-							bottom: {
-								textContent: 'Here is a more detailed description.'
-							}
-						},
-						right: [
-							fchild({
+							right: fchild({
+								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
-						]
-					})
-				]}
-			/>
-			<Oneput
-				menuOpen={true}
-				menuItems={[
-					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
-						center: {
-							textContent: "hflex'd right content...",
 							bottom: {
-								textContent: 'Here is a more detailed description.'
+								textContent:
+									'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 							}
 						},
-						right: [
-							fchild({
-								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
-								classes: ['oneput__kbd']
-							}),
-							icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
-						]
+						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>

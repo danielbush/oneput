@@ -311,6 +311,10 @@ export function stdMenuItem(
 		right?: FChildParams | Array<FChildParams>;
 	}
 ): MenuItem {
+	const left = icon({
+		innerHTMLUnsafe: params.left,
+		style: params.bottom && { alignSelf: 'flex-start' }
+	});
 	const top = hflex({
 		children: [
 			fchild({
@@ -321,21 +325,31 @@ export function stdMenuItem(
 		],
 		style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 	});
+	const right = Array.isArray(params.right)
+		? hflex({
+				style: { alignSelf: 'flex-start' },
+				children: params.right.map((r) =>
+					typeof r === 'string'
+						? icon({
+								innerHTMLUnsafe: r,
+								style: params.bottom
+							})
+						: r
+				)
+			})
+		: params.right;
+
 	const innerRight = params.innerRight
 		? Array.isArray(params.innerRight)
 			? params.innerRight
 			: [params.innerRight]
 		: undefined;
-	if (innerRight) {
-		top.children?.push(...innerRight);
-	}
 
 	const bottom = params.bottom
 		? [
 				fchild({
 					type: 'fchild',
-					tag: 'hr',
-					classes: ['oneput__menu-divider']
+					tag: 'hr'
 				}),
 				fchild({
 					textContent: params.bottom.textContent,
@@ -351,31 +365,15 @@ export function stdMenuItem(
 		children: [top]
 	});
 
+	if (innerRight) {
+		top.children?.push(...innerRight);
+	}
 	if (bottom) {
 		center.children?.push(...bottom);
 	}
-	const right = Array.isArray(params.right)
-		? hflex({
-				style: { alignSelf: 'flex-start' },
-				children: params.right.map((r) =>
-					typeof r === 'string'
-						? icon({
-								innerHTMLUnsafe: r,
-								style: params.bottom
-							})
-						: r
-				)
-			})
-		: params.right;
 	const menuItem: MenuItem = hflex({
 		...params,
-		children: [
-			icon({
-				innerHTMLUnsafe: params.left,
-				style: params.bottom && { alignSelf: 'flex-start' }
-			}),
-			center
-		]
+		children: [left, center]
 	});
 	if (right) {
 		menuItem.children?.push(right);

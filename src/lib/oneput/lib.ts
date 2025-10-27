@@ -288,7 +288,9 @@ export function stdMenuItem(
 	params: Partial<MenuItem> & {
 		htmlContentUnsafe?: string;
 		center: {
+			htmlContentUnsafe?: string;
 			textContent?: string;
+			right?: FChildParams | Array<FChildParams>;
 			bottom?: {
 				/**
 				 * Matches the leftIcon.
@@ -352,6 +354,7 @@ export function stdMenuItem(
 	return result;
 }
 
+// TODO: set htmlContentUnsafe to never?
 export function icon(params: Partial<FChildParams>): FChildParams {
 	return fchild({
 		classes: ['oneput__icon'],

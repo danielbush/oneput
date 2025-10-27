@@ -192,12 +192,12 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					type: 'vflex',
 					classes: ['oneput__menu-item-body'],
 					children: [
-						{ id: randomId(), type: 'fchild', textContent: 'Here Complex menu item' },
+						{ id: randomId(), type: 'fchild', textContent: 'Complex menu item' },
 						{ id: randomId(), type: 'fchild', tag: 'hr', classes: ['oneput__menu-divider'] },
 						{
 							id: randomId(),
 							type: 'fchild',
-							classes: ['oneput__menu-item-description'],
+							classes: ['oneput__menu-item-bottom'],
 							textContent:
 								'This is some sort of description for this menu item.  This is some sort of description for this menu item.'
 						}
@@ -245,7 +245,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 								{
 									id: randomId(),
 									type: 'fchild',
-									classes: ['oneput__menu-item-description'],
+									classes: ['oneput__menu-item-bottom'],
 									textContent:
 										'This is some sort of description for this menu item. This is some sort of description for this menu item.  This is some sort of description for this menu item.'
 								},

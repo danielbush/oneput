@@ -338,7 +338,7 @@ button:disabled.oneput__menu-item {
 }
 
 /* Smaller descriptive text that might be present in a menu item... */
-.oneput__menu-item-description {
+.oneput__menu-item-bottom {
 	font: 100 0.8em sans-serif;
 	color: var(--oneput-text-muted);
 	margin-bottom: 0.4em;

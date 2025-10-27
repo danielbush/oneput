@@ -302,7 +302,7 @@ export function stdMenuItem(
 		innerRight?: FChildParams | Array<FChildParams>;
 		bottom?: {
 			left?: string;
-			right?: string;
+			right?: FChildParams | Array<FChildParams>;
 			htmlContentUnsafe?: string;
 			textContent?: string;
 		};
@@ -329,7 +329,7 @@ export function stdMenuItem(
 					typeof r === 'string'
 						? icon({
 								innerHTMLUnsafe: r,
-								style: params.bottom
+								style: params.bottom && { alignSelf: 'flex-start' }
 							})
 						: r
 				)
@@ -342,18 +342,32 @@ export function stdMenuItem(
 			: [params.innerRight]
 		: undefined;
 
+	const bottomHFlex = params.bottom
+		? hflex({
+				children: [
+					fchild({
+						textContent: params.bottom.textContent,
+						htmlContentUnsafe: params.bottom.htmlContentUnsafe,
+						classes: ['oneput__menu-item-bottom']
+					})
+				]
+			})
+		: undefined;
+
 	const bottom = params.bottom
 		? [
 				fchild({
 					type: 'fchild',
 					tag: 'hr'
 				}),
-				fchild({
-					textContent: params.bottom.textContent,
-					htmlContentUnsafe: params.bottom.htmlContentUnsafe,
-					classes: ['oneput__menu-item-description']
-				})
+				bottomHFlex
 			]
+		: undefined;
+
+	const bottomRight = params.bottom?.right
+		? Array.isArray(params.bottom.right)
+			? params.bottom.right
+			: [params.bottom.right]
 		: undefined;
 
 	const center = vflex({
@@ -362,12 +376,16 @@ export function stdMenuItem(
 		children: [top]
 	});
 
+	if (bottom) {
+		center.children?.push(...(bottom as FlexParams[]));
+	}
+	if (bottomRight) {
+		bottomHFlex?.children?.push(...bottomRight);
+	}
 	if (innerRight) {
 		top.children?.push(...innerRight);
 	}
-	if (bottom) {
-		center.children?.push(...bottom);
-	}
+
 	const menuItem: MenuItem = hflex({
 		...params,
 		children: [left, center]
@@ -384,7 +402,19 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 		classes: ['oneput__icon'],
 		textContent: params.textContent,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
+		...params,
+		style: { alignSelf: 'flex-start', ...params.style }
+	});
+}
+
+export function iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
+	return fchild({
+		classes: ['oneput__icon-button'],
+		tag: 'button',
+		textContent: params.textContent,
+		innerHTMLUnsafe: params.innerHTMLUnsafe,
+		...params,
 		style: { alignSelf: 'flex-start', ...params.style },
-		...params
+		attr: { type: 'button', title: params.title, ...params.attr }
 	});
 }

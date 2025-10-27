@@ -8,7 +8,7 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
-	import { fchild, icon, randomId, stdMenuItem } from '$lib/oneput/lib.js';
+	import { fchild, icon, iconButton, randomId, stdMenuItem } from '$lib/oneput/lib.js';
 	import { xIcon } from '$lib/oneput/shared/icons.js';
 
 	setupDemoState();
@@ -310,6 +310,20 @@
 				menuItems={[
 					stdMenuItem({
 						left: '<i data-lucide="search"></i>',
+						textContent: 'Both left/right icons...',
+						right: [
+							iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
+							iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
+							iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
+						]
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
 						textContent: 'Both left/right icons + kbd...',
 						innerRight: fchild({
 							style: { flex: '0' },
@@ -339,6 +353,24 @@
 				menuItems={[
 					stdMenuItem({
 						left: '<i data-lucide="search"></i>',
+						textContent: 'Right + innerRight + bottom...',
+						bottom: {
+							textContent: 'Here is a more detailed description.'
+						},
+						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' }),
+						innerRight: [
+							iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
+							iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
+							iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
+						]
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
 						textContent: "hflex'd right content...",
 						innerRight: fchild({
 							style: { flex: '0' },
@@ -348,6 +380,32 @@
 						bottom: {
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
+						},
+						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: '<i data-lucide="search"></i>',
+						textContent: "hflex'd right content...",
+						innerRight: fchild({
+							style: { flex: '0' },
+							innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+							classes: ['oneput__kbd']
+						}),
+						bottom: {
+							textContent:
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
+							right: [
+								iconButton({ title: 'Info', innerHTMLUnsafe: '<i data-lucide="info"></i>' }),
+								iconButton({
+									title: 'More...',
+									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
+								})
+							]
 						},
 						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})

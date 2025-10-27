@@ -300,7 +300,7 @@ export function stdMenuItem(
 			};
 		};
 		left?: string;
-		right?: string | Array<FChildParams | string>;
+		right?: FChildParams | Array<FChildParams>;
 	}
 ): MenuItem {
 	const center = vflex({
@@ -328,30 +328,36 @@ export function stdMenuItem(
 				style: { alignSelf: 'flex-start' },
 				children: params.right.map((r) =>
 					typeof r === 'string'
-						? fchild({
-								classes: ['oneput__icon'],
+						? icon({
 								innerHTMLUnsafe: r,
 								style: params.center.bottom
 							})
 						: r
 				)
 			})
-		: fchild({
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: params.right,
-				style: params.center.bottom && { alignSelf: 'flex-start' }
-			});
+		: params.right;
 	const result: MenuItem = hflex({
 		...params,
 		children: [
-			fchild({
-				classes: ['oneput__icon'],
+			icon({
 				innerHTMLUnsafe: params.left,
 				style: params.center.bottom && { alignSelf: 'flex-start' }
 			}),
-			center,
-			right
+			center
 		]
 	});
+	if (right) {
+		result.children?.push(right);
+	}
 	return result;
+}
+
+export function icon(params: Partial<FChildParams>): FChildParams {
+	return fchild({
+		classes: ['oneput__icon'],
+		textContent: params.textContent,
+		innerHTMLUnsafe: params.innerHTMLUnsafe,
+		style: { alignSelf: 'flex-start', ...params.style },
+		...params
+	});
 }

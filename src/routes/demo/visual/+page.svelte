@@ -8,7 +8,7 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
-	import { fchild, randomId, stdMenuItem } from '$lib/oneput/lib.js';
+	import { fchild, icon, randomId, stdMenuItem } from '$lib/oneput/lib.js';
 	import { xIcon } from '$lib/oneput/shared/icons.js';
 
 	setupDemoState();
@@ -308,7 +308,7 @@
 						center: {
 							textContent: 'Both left/right icons...'
 						},
-						right: '<i data-lucide="chevron-right"></i>'
+						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 					})
 				]}
 			/>
@@ -323,7 +323,7 @@
 								textContent: 'Here is a more detailed description.'
 							}
 						},
-						right: '<i data-lucide="chevron-right"></i>'
+						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 					})
 				]}
 			/>
@@ -347,7 +347,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							'<i data-lucide="chevron-right"></i>'
+							icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 						]
 					})
 				]}
@@ -368,7 +368,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							'<i data-lucide="chevron-right"></i>'
+							icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 						]
 					})
 				]}

@@ -303,15 +303,18 @@ export function stdMenuItem(
 		right?: string | Array<FChildParams | string>;
 	}
 ): MenuItem {
-	const center: FlexParams['children'] = [
-		fchild({
-			// TODO: favor html then text...
-			textContent: params.center.textContent,
-			htmlContentUnsafe: params.htmlContentUnsafe
-		})
-	];
+	const center = vflex({
+		classes: ['oneput__menu-item-body'],
+		children: [
+			fchild({
+				// TODO: favor html then text...
+				textContent: params.center.textContent,
+				htmlContentUnsafe: params.htmlContentUnsafe
+			})
+		]
+	});
 	if (params.center.bottom) {
-		center.push(
+		center.children?.push(
 			fchild({
 				type: 'fchild',
 				tag: 'hr',
@@ -346,10 +349,7 @@ export function stdMenuItem(
 				innerHTMLUnsafe: params.left,
 				style: params.center.bottom && { alignSelf: 'flex-start' }
 			}),
-			vflex({
-				classes: ['oneput__menu-item-body'],
-				children: center
-			}),
+			center,
 			right
 		]
 	});

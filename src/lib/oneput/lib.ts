@@ -287,28 +287,30 @@ export function stdMenuItem(
 	// TODO: smooshing these types together is a bit messy...
 	params: Partial<MenuItem> & {
 		htmlContentUnsafe?: string;
-		textContent?: string;
+		center: {
+			textContent?: string;
+			bottom?: {
+				/**
+				 * Matches the leftIcon.
+				 */
+				left?: string;
+				right?: string;
+				htmlContentUnsafe?: string;
+				textContent?: string;
+			};
+		};
 		left?: string;
 		right?: string | Array<FChildParams | string>;
-		bottom?: {
-			/**
-			 * Matches the leftIcon.
-			 */
-			left?: string;
-			right?: string;
-			htmlContentUnsafe?: string;
-			textContent?: string;
-		};
 	}
 ): MenuItem {
 	const center: FlexParams['children'] = [
 		fchild({
 			// TODO: favor html then text...
-			textContent: params.textContent,
+			textContent: params.center.textContent,
 			htmlContentUnsafe: params.htmlContentUnsafe
 		})
 	];
-	if (params.bottom) {
+	if (params.center.bottom) {
 		center.push(
 			fchild({
 				type: 'fchild',
@@ -326,7 +328,7 @@ export function stdMenuItem(
 						? fchild({
 								classes: ['oneput__icon'],
 								innerHTMLUnsafe: r,
-								style: params.bottom
+								style: params.center.bottom
 							})
 						: r
 				)
@@ -334,7 +336,7 @@ export function stdMenuItem(
 		: fchild({
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: params.right,
-				style: params.bottom && { alignSelf: 'flex-start' }
+				style: params.center.bottom && { alignSelf: 'flex-start' }
 			});
 	const result: MenuItem = hflex({
 		...params,
@@ -342,7 +344,7 @@ export function stdMenuItem(
 			fchild({
 				classes: ['oneput__icon'],
 				innerHTMLUnsafe: params.left,
-				style: params.bottom && { alignSelf: 'flex-start' }
+				style: params.center.bottom && { alignSelf: 'flex-start' }
 			}),
 			vflex({
 				classes: ['oneput__menu-item-body'],

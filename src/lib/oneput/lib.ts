@@ -297,18 +297,15 @@ export function stdMenuItem(
 	params: Partial<MenuItem> & {
 		htmlContentUnsafe?: string;
 		textContent?: string;
+		left?: string;
+		right?: FChildParams | Array<FChildParams>;
 		innerRight?: FChildParams | Array<FChildParams>;
 		bottom?: {
-			/**
-			 * Matches the leftIcon.
-			 */
 			left?: string;
 			right?: string;
 			htmlContentUnsafe?: string;
 			textContent?: string;
 		};
-		left?: string;
-		right?: FChildParams | Array<FChildParams>;
 	}
 ): MenuItem {
 	const left = icon({

@@ -54,6 +54,9 @@
 	--oneput-area-padding: 0em;
 	--oneput-hflex-padding: 0.375em;
 	--oneput-hflex-gap: 0.625em;
+	/* Internal gap for separation between horizontally flexed buttons or other
+	 * widgets.  Should be less than --oneput-hflex-padding. */
+	--oneput-hflex-internal-gap: 0.25em;
 	--oneput-vflex-gap: 0.375em;
 	--oneput-fchild-padding: 0.25em;
 	--oneput-input-padding-x: 0.375em;
@@ -209,10 +212,14 @@
 .oneput__hflex {
 	display: flex;
 	flex-direction: row;
-	gap: var(--oneput-hflex-gap);
+	gap: var(--oneput-hflex-internal-gap);
 	justify-content: space-between;
 	align-items: center;
 	padding: var(--oneput-hflex-padding);
+}
+
+.oneput__menu-item {
+	gap: var(--oneput-hflex-gap);
 }
 
 /* Don't pad nested hflexes as this creates padding on padding within complex UI's. */
@@ -404,10 +411,10 @@ button:disabled.oneput__menu-item {
 }
 
 .oneput__input-left {
-	margin-left: var(--oneput-hflex-gap);
+	margin-left: var(--oneput-hflex-internal-gap);
 }
 .oneput__input-right {
-	margin-right: var(--oneput-hflex-gap);
+	margin-right: var(--oneput-hflex-internal-gap);
 }
 .oneput__input {
 	flex: 1 1 auto;

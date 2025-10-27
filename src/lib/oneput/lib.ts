@@ -301,7 +301,6 @@ export function stdMenuItem(
 		right?: FChildParams | Array<FChildParams>;
 		innerRight?: FChildParams | Array<FChildParams>;
 		bottom?: {
-			left?: string;
 			right?: FChildParams | Array<FChildParams>;
 			htmlContentUnsafe?: string;
 			textContent?: string;

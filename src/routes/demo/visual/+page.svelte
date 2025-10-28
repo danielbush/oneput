@@ -290,7 +290,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Left icon only...'
 					})
 				]}
@@ -299,7 +299,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Both left/right icons...',
 						right: icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 					})
@@ -309,7 +309,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Both left/right icons...',
 						right: [
 							iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
@@ -323,7 +323,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Both left/right icons + kbd...',
 						innerRight: fchild({
 							style: { flex: '0' },
@@ -339,7 +339,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'With bottom section...',
 						bottom: {
 							textContent: 'Here is a more detailed description.'
@@ -352,7 +352,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Right + innerRight + bottom...',
 						bottom: {
 							textContent: 'Here is a more detailed description.'
@@ -370,7 +370,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: "hflex'd right content...",
 						innerRight: fchild({
 							style: { flex: '0' },
@@ -389,7 +389,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: '<i data-lucide="search"></i>',
+						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: "hflex'd right content...",
 						innerRight: fchild({
 							style: { flex: '0' },

@@ -303,7 +303,7 @@ export function stdMenuItem(
 	params: Partial<MenuItem> & {
 		htmlContentUnsafe?: string;
 		textContent?: string;
-		left?: string;
+		left?: FChildParams;
 		right?: FChildParams | Array<FChildParams>;
 		innerRight?: FChildParams | Array<FChildParams>;
 		bottom?: {
@@ -313,14 +313,10 @@ export function stdMenuItem(
 		};
 	}
 ): MenuItem {
-	const left = icon({
-		innerHTMLUnsafe: params.left,
-		style: params.bottom && { alignSelf: 'flex-start' }
-	});
+	const left = params.left ?? icon({});
 	const topHFlex = hflex({
 		children: [
 			fchild({
-				// TODO: favor html then text...
 				textContent: params.textContent,
 				htmlContentUnsafe: params.htmlContentUnsafe
 			})

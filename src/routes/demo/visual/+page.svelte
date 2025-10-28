@@ -397,10 +397,10 @@
 							classes: ['oneput__kbd']
 						}),
 						bottom: {
+							left: icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' }),
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
 							right: [
-								iconButton({ title: 'Info', innerHTMLUnsafe: '<i data-lucide="info"></i>' }),
 								iconButton({
 									title: 'More...',
 									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'

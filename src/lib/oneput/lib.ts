@@ -307,6 +307,7 @@ export function stdMenuItem(
 		right?: FChildParams | Array<FChildParams>;
 		innerRight?: FChildParams | Array<FChildParams>;
 		bottom?: {
+			left?: FChildParams;
 			right?: FChildParams | Array<FChildParams>;
 			htmlContentUnsafe?: string;
 			textContent?: string;
@@ -343,17 +344,22 @@ export function stdMenuItem(
 			: [params.innerRight]
 		: undefined;
 
-	const bottomHFlex = params.bottom
-		? hflex({
-				children: [
-					fchild({
-						textContent: params.bottom.textContent,
-						htmlContentUnsafe: params.bottom.htmlContentUnsafe,
-						classes: ['oneput__menu-item-bottom']
-					})
-				]
-			})
-		: undefined;
+	const bottomLeft = params.bottom?.left;
+	const bottomChildren = [];
+	if (bottomLeft) {
+		bottomChildren.push(bottomLeft);
+	}
+	bottomChildren.push(
+		fchild({
+			textContent: params.bottom?.textContent,
+			htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+			classes: ['oneput__menu-item-bottom']
+		})
+	);
+
+	const bottomHFlex = hflex({
+		children: bottomChildren
+	});
 
 	const bottom = params.bottom
 		? [

@@ -278,7 +278,7 @@
 	</section>
 
 	<section class="demo-grid">
-		<section class="demo-example">
+		<section class="demo-example demo-buttons">
 			<h2>stdMenuItem</h2>
 			<p>
 				This template function handles a wide variety of menu item appearances. It's just a

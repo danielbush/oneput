@@ -388,7 +388,7 @@ export function stdMenuItem(
 	const center = vflex({
 		classes: ['oneput__menu-item-body'],
 		style: { marginTop: '0' },
-		children: [topHFlex, ...(bottom as FlexParams[])]
+		children: [topHFlex, ...bottom]
 	});
 
 	const menuItem: MenuItem = hflex({

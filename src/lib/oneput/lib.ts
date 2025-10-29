@@ -322,44 +322,11 @@ export function stdMenuItem(
 		};
 	}
 ): MenuItem {
-	const left = params.left ?? icon({});
 	const innerRight = params.innerRight
 		? Array.isArray(params.innerRight)
 			? params.innerRight
 			: [params.innerRight]
 		: [];
-	const topHFlex = hflex({
-		children: [
-			fchild({
-				textContent: params.textContent,
-				htmlContentUnsafe: params.htmlContentUnsafe
-			}),
-			...innerRight
-		],
-		style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
-	});
-	const right = Array.isArray(params.right)
-		? hflex({
-				style: { alignSelf: 'flex-start' },
-				children: params.right.map((r) =>
-					typeof r === 'string'
-						? icon({
-								innerHTMLUnsafe: r,
-								style: params.bottom && { alignSelf: 'flex-start' }
-							})
-						: r
-				)
-			})
-		: params.right;
-
-	const bottomChildren = [
-		params.bottom?.left,
-		fchild({
-			textContent: params.bottom?.textContent,
-			htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
-			classes: ['oneput__menu-item-bottom']
-		})
-	];
 
 	const bottomRight = params.bottom?.right
 		? Array.isArray(params.bottom.right)
@@ -367,30 +334,68 @@ export function stdMenuItem(
 			: [params.bottom.right]
 		: [];
 
-	const bottomHFlex = hflex({
-		children: [...bottomChildren, ...bottomRight]
-	});
-
 	const bottom = params.bottom
 		? [
 				fchild({
 					type: 'fchild',
 					tag: 'hr'
 				}),
-				bottomHFlex
+				hflex({
+					children: [
+						params.bottom?.left,
+						fchild({
+							textContent: params.bottom?.textContent,
+							htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+							classes: ['oneput__menu-item-bottom']
+						}),
+						...bottomRight
+					]
+				})
 			]
 		: [];
 
-	const center = vflex({
-		classes: ['oneput__menu-item-body'],
-		style: { marginTop: '0' },
-		children: [topHFlex, ...bottom]
-	});
-
 	const menuItem: MenuItem = hflex({
 		...params,
-		children: [left, center, right]
+		children: [
+			// left
+			params.left ?? icon({}),
+
+			// center
+			vflex({
+				classes: ['oneput__menu-item-body'],
+				style: { marginTop: '0' },
+				children: [
+					hflex({
+						children: [
+							fchild({
+								textContent: params.textContent,
+								htmlContentUnsafe: params.htmlContentUnsafe
+							}),
+							...innerRight
+						],
+						style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
+					}),
+					...bottom
+				]
+			}),
+
+			// right
+			Array.isArray(params.right)
+				? hflex({
+						style: { alignSelf: 'flex-start' },
+						children: params.right.map((r) =>
+							typeof r === 'string'
+								? icon({
+										innerHTMLUnsafe: r,
+										style: params.bottom && { alignSelf: 'flex-start' }
+									})
+								: r
+						)
+					})
+				: params.right
+		]
 	});
+
 	return menuItem;
 }
 

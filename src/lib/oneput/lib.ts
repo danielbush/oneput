@@ -334,26 +334,6 @@ export function stdMenuItem(
 			: [params.bottom.right]
 		: [];
 
-	const bottom = params.bottom
-		? [
-				fchild({
-					type: 'fchild',
-					tag: 'hr'
-				}),
-				hflex({
-					children: [
-						params.bottom?.left,
-						fchild({
-							textContent: params.bottom?.textContent,
-							htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
-							classes: ['oneput__menu-item-bottom']
-						}),
-						...bottomRight
-					]
-				})
-			]
-		: [];
-
 	const menuItem: MenuItem = hflex({
 		...params,
 		children: [
@@ -375,7 +355,27 @@ export function stdMenuItem(
 						],
 						style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 					}),
-					...bottom
+
+					// bottom
+					...(params.bottom
+						? [
+								fchild({
+									type: 'fchild',
+									tag: 'hr'
+								}),
+								hflex({
+									children: [
+										params.bottom?.left,
+										fchild({
+											textContent: params.bottom?.textContent,
+											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+											classes: ['oneput__menu-item-bottom']
+										}),
+										...bottomRight
+									]
+								})
+							]
+						: [])
 				]
 			}),
 

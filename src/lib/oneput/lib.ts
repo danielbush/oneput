@@ -322,18 +322,6 @@ export function stdMenuItem(
 		};
 	}
 ): MenuItem {
-	const innerRight = params.innerRight
-		? Array.isArray(params.innerRight)
-			? params.innerRight
-			: [params.innerRight]
-		: [];
-
-	const bottomRight = params.bottom?.right
-		? Array.isArray(params.bottom.right)
-			? params.bottom.right
-			: [params.bottom.right]
-		: [];
-
 	const menuItem: MenuItem = hflex({
 		...params,
 		children: [
@@ -351,7 +339,13 @@ export function stdMenuItem(
 								textContent: params.textContent,
 								htmlContentUnsafe: params.htmlContentUnsafe
 							}),
-							...innerRight
+
+							// innerRight
+							...(params.innerRight
+								? Array.isArray(params.innerRight)
+									? params.innerRight
+									: [params.innerRight]
+								: [])
 						],
 						style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 					}),
@@ -371,7 +365,13 @@ export function stdMenuItem(
 											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
 											classes: ['oneput__menu-item-bottom']
 										}),
-										...bottomRight
+
+										// bottomRight
+										...(params.bottom?.right
+											? Array.isArray(params.bottom.right)
+												? params.bottom.right
+												: [params.bottom.right]
+											: [])
 									]
 								})
 							]

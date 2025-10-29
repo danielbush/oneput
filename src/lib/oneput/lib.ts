@@ -54,7 +54,12 @@ export type FlexParams = {
 	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;
 	type: 'hflex' | 'vflex';
-	children?: Array<FlexParams | FChildParams>;
+	/**
+	 * Allow null/undefined children - it makes writing the flex/child
+	 * data-structures easier without adding extra array filter loops to remove
+	 * them.
+	 */
+	children?: Array<FlexParams | FChildParams | undefined | null>;
 	/**
 	 * Instructs Oneput rendered to override default list of HTML void elements.
 	 */
@@ -200,6 +205,9 @@ export function walk(
 	if (item.type === 'hflex' || item.type === 'vflex') {
 		cb(item);
 		for (const child of item.children || []) {
+			if (!child) {
+				continue;
+			}
 			walk(child, cb);
 		}
 		return;

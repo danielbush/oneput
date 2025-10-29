@@ -51,13 +51,15 @@
 			{...params.attachments}
 		>
 			{#if params.children}
-				{#each params.children as child (child.id)}
-					{#if child.type === 'hflex'}
-						{@render flex(child, true)}
-					{:else if child.type === 'vflex'}
-						{@render flex(child, true)}
-					{:else}
-						<FChild {...child as FChildParams} />
+				{#each params.children as child (child?.id)}
+					{#if child}
+						{#if child.type === 'hflex'}
+							{@render flex(child, true)}
+						{:else if child.type === 'vflex'}
+							{@render flex(child, true)}
+						{:else}
+							<FChild {...child as FChildParams} />
+						{/if}
 					{/if}
 				{/each}
 			{/if}

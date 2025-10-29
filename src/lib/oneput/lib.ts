@@ -352,18 +352,14 @@ export function stdMenuItem(
 			})
 		: params.right;
 
-	const bottomLeft = params.bottom?.left;
-	const bottomChildren = [];
-	if (bottomLeft) {
-		bottomChildren.push(bottomLeft);
-	}
-	bottomChildren.push(
+	const bottomChildren = [
+		params.bottom?.left,
 		fchild({
 			textContent: params.bottom?.textContent,
 			htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
 			classes: ['oneput__menu-item-bottom']
 		})
-	);
+	];
 
 	const bottomRight = params.bottom?.right
 		? Array.isArray(params.bottom.right)

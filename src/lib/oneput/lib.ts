@@ -323,12 +323,18 @@ export function stdMenuItem(
 	}
 ): MenuItem {
 	const left = params.left ?? icon({});
+	const innerRight = params.innerRight
+		? Array.isArray(params.innerRight)
+			? params.innerRight
+			: [params.innerRight]
+		: [];
 	const topHFlex = hflex({
 		children: [
 			fchild({
 				textContent: params.textContent,
 				htmlContentUnsafe: params.htmlContentUnsafe
-			})
+			}),
+			...innerRight
 		],
 		style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 	});
@@ -345,12 +351,6 @@ export function stdMenuItem(
 				)
 			})
 		: params.right;
-
-	const innerRight = params.innerRight
-		? Array.isArray(params.innerRight)
-			? params.innerRight
-			: [params.innerRight]
-		: undefined;
 
 	const bottomLeft = params.bottom?.left;
 	const bottomChildren = [];
@@ -390,10 +390,6 @@ export function stdMenuItem(
 		style: { marginTop: '0' },
 		children: [topHFlex, ...(bottom as FlexParams[])]
 	});
-
-	if (innerRight) {
-		topHFlex.children?.push(...innerRight);
-	}
 
 	const menuItem: MenuItem = hflex({
 		...params,

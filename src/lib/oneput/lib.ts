@@ -289,21 +289,6 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
  * additional content to the right and an optional bottom section where you can
  * put more detail.
  *
- * The layout:
- *
- * <menuItem> = hflex{ <left>  <center>  <right> }
- *
- * where:
- *
- * <center> = vflex{ <topHFlex>  ...<bottom> }
- * <bottom> = [ <divider>, <bottomHFlex> ]
- *
- * and:
- *
- * <topHFlex> = hflex{ <mainContent>  <innerRight> }
- * <bottomHFlex> = hflex{ <bottomContent>  <bottomRight> }
- * <bottomRight> = [ fchild, ... ]
- *
  * See demo/visual for examples.
  */
 export function stdMenuItem(
@@ -312,11 +297,11 @@ export function stdMenuItem(
 		htmlContentUnsafe?: string;
 		textContent?: string;
 		left?: FChildParams;
-		right?: FChildParams | Array<FChildParams>;
-		innerRight?: FChildParams | Array<FChildParams>;
+		right?: Array<FChildParams>;
+		innerRight?: Array<FChildParams>;
 		bottom?: {
 			left?: FChildParams;
-			right?: FChildParams | Array<FChildParams>;
+			right?: Array<FChildParams>;
 			htmlContentUnsafe?: string;
 			textContent?: string;
 		};
@@ -341,11 +326,7 @@ export function stdMenuItem(
 							}),
 
 							// innerRight
-							...(params.innerRight
-								? Array.isArray(params.innerRight)
-									? params.innerRight
-									: [params.innerRight]
-								: [])
+							...(params.innerRight ?? [])
 						],
 						style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 					}),
@@ -353,13 +334,17 @@ export function stdMenuItem(
 					// bottom
 					...(params.bottom
 						? [
+								// divider
 								fchild({
 									type: 'fchild',
 									tag: 'hr'
 								}),
+
 								hflex({
 									children: [
+										// bottomLeft
 										params.bottom?.left,
+
 										fchild({
 											textContent: params.bottom?.textContent,
 											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
@@ -367,11 +352,7 @@ export function stdMenuItem(
 										}),
 
 										// bottomRight
-										...(params.bottom?.right
-											? Array.isArray(params.bottom.right)
-												? params.bottom.right
-												: [params.bottom.right]
-											: [])
+										...(params.bottom?.right ?? [])
 									]
 								})
 							]
@@ -380,7 +361,7 @@ export function stdMenuItem(
 			}),
 
 			// right
-			Array.isArray(params.right)
+			params.right
 				? hflex({
 						style: { alignSelf: 'flex-start' },
 						children: params.right.map((r) =>
@@ -392,7 +373,7 @@ export function stdMenuItem(
 								: r
 						)
 					})
-				: params.right
+				: icon({})
 		]
 	});
 

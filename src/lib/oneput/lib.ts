@@ -377,7 +377,7 @@ export function stdMenuItem(
 				}),
 				bottomHFlex
 			]
-		: undefined;
+		: [];
 
 	const bottomRight = params.bottom?.right
 		? Array.isArray(params.bottom.right)
@@ -388,12 +388,9 @@ export function stdMenuItem(
 	const center = vflex({
 		classes: ['oneput__menu-item-body'],
 		style: { marginTop: '0' },
-		children: [topHFlex]
+		children: [topHFlex, ...(bottom as FlexParams[])]
 	});
 
-	if (bottom) {
-		center.children?.push(...(bottom as FlexParams[]));
-	}
 	if (bottomRight) {
 		bottomHFlex?.children?.push(...bottomRight);
 	}
@@ -403,11 +400,8 @@ export function stdMenuItem(
 
 	const menuItem: MenuItem = hflex({
 		...params,
-		children: [left, center]
+		children: [left, center, right]
 	});
-	if (right) {
-		menuItem.children?.push(right);
-	}
 	return menuItem;
 }
 

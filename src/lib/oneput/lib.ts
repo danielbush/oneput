@@ -365,8 +365,14 @@ export function stdMenuItem(
 		})
 	);
 
+	const bottomRight = params.bottom?.right
+		? Array.isArray(params.bottom.right)
+			? params.bottom.right
+			: [params.bottom.right]
+		: [];
+
 	const bottomHFlex = hflex({
-		children: bottomChildren
+		children: [...bottomChildren, ...bottomRight]
 	});
 
 	const bottom = params.bottom
@@ -379,21 +385,12 @@ export function stdMenuItem(
 			]
 		: [];
 
-	const bottomRight = params.bottom?.right
-		? Array.isArray(params.bottom.right)
-			? params.bottom.right
-			: [params.bottom.right]
-		: undefined;
-
 	const center = vflex({
 		classes: ['oneput__menu-item-body'],
 		style: { marginTop: '0' },
 		children: [topHFlex, ...(bottom as FlexParams[])]
 	});
 
-	if (bottomRight) {
-		bottomHFlex?.children?.push(...bottomRight);
-	}
 	if (innerRight) {
 		topHFlex.children?.push(...innerRight);
 	}

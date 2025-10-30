@@ -284,6 +284,25 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
 	return result;
 }
 
+export type StdMenuItemParams = {
+	tag?: string;
+	attr?: Record<string, string | boolean | ((event: Event) => void)>;
+	id?: string;
+	classes?: Array<string | false | undefined>;
+	style?: Partial<CSSStyleDeclaration>;
+	htmlContentUnsafe?: string;
+	textContent?: string;
+	left?: FChildParams;
+	right?: Array<FChildParams>;
+	innerRight?: Array<FChildParams>;
+	bottom?: {
+		left?: FChildParams;
+		right?: Array<FChildParams>;
+		htmlContentUnsafe?: string;
+		textContent?: string;
+	};
+};
+
 /**
  * Represents a menu item with optional left/right icons, ability to float
  * additional content to the right and an optional bottom section where you can
@@ -291,22 +310,7 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
  *
  * See demo/visual for examples.
  */
-export function stdMenuItem(
-	// TODO: smooshing these types together is a bit messy...
-	params: Partial<MenuItem> & {
-		htmlContentUnsafe?: string;
-		textContent?: string;
-		left?: FChildParams;
-		right?: Array<FChildParams>;
-		innerRight?: Array<FChildParams>;
-		bottom?: {
-			left?: FChildParams;
-			right?: Array<FChildParams>;
-			htmlContentUnsafe?: string;
-			textContent?: string;
-		};
-	}
-): MenuItem {
+export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 	const menuItem: MenuItem = hflex({
 		...params,
 		children: [

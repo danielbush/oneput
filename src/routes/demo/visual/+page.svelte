@@ -277,6 +277,8 @@
 		</section>
 	</section>
 
+	<hr/>
+
 	<section class="demo-grid">
 		<section class="demo-example demo-buttons">
 			<h2>stdMenuItem</h2>

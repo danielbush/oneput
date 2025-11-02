@@ -249,20 +249,67 @@ export function isFocusable(item?: MenuItemAny) {
 	return !item.ignored && !('disabled' in (item.attr ?? {}) && item.attr?.disabled);
 }
 
-function flex(params: Partial<FlexParams>): FlexParams {
+type HFlexParams = Partial<Omit<FlexParams, 'children'>> & {
+	children?:
+		| Array<FlexParams | FChildParams | undefined | null>
+		| ((b: FlexChildBuilder) => Array<FlexParams | FChildParams | undefined | null>);
+};
+
+type VFlexParams = Partial<Omit<FlexParams, 'children'>> & {
+	children?:
+		| Array<FlexParams | FChildParams | undefined | null>
+		| ((b: FlexChildBuilder) => Array<FlexParams | FChildParams | undefined | null>);
+};
+
+function flex(params: HFlexParams | VFlexParams): FlexParams {
+	const id = params.id ?? randomId();
+	let children: Array<FlexParams | FChildParams | undefined | null> | undefined;
+	if (typeof params.children === 'function') {
+		children = params.children(new FlexChildBuilder(id));
+	} else {
+		children = params.children;
+	}
 	const result: FlexParams = {
 		...params,
-		id: params.id ?? randomId(),
-		type: params.type || 'hflex'
+		id,
+		children,
+		type: params.type ?? 'hflex'
 	};
 	return result;
 }
 
-export function hflex(params: Partial<FlexParams>): FlexParams {
+export class FlexChildBuilder {
+	constructor(
+		private id: string,
+		private counter: number = 0
+	) {}
+
+	hflex(params: HFlexParams): FlexParams {
+		return hflex({ ...params, id: this.id + '-' + this.counter++ });
+	}
+
+	vflex(params: VFlexParams): FlexParams {
+		return vflex({ ...params, id: this.id + '-' + this.counter++ });
+	}
+
+	fchild(params: Partial<FChildParams>): FChildParams {
+		return fchild({ ...params, id: this.id + '-' + this.counter++ });
+	}
+
+	icon(params: Partial<FChildParams>): FChildParams {
+		return icon({ ...params, id: this.id + '-' + this.counter++ });
+	}
+
+	iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
+		return iconButton({ ...params, id: this.id + '-' + this.counter++ });
+	}
+}
+
+export function hflex(params: HFlexParams): FlexParams {
 	return flex({ ...params, type: 'hflex' });
 }
 
-export function vflex(params: Partial<FlexParams>): FlexParams {
+export function vflex(params: VFlexParams): FlexParams {
 	return flex({ ...params, type: 'vflex' });
 }
 
@@ -313,18 +360,18 @@ export type StdMenuItemParams = {
 export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 	const menuItem: MenuItem = hflex({
 		...params,
-		children: [
+		children: (b) => [
 			// left
-			params.left ?? icon({}),
+			params.left ?? b.icon({}),
 
 			// center
-			vflex({
+			b.vflex({
 				classes: ['oneput__menu-item-body'],
 				style: { marginTop: '0' },
-				children: [
-					hflex({
-						children: [
-							fchild({
+				children: (b) => [
+					b.hflex({
+						children: (b) => [
+							b.fchild({
 								textContent: params.textContent,
 								htmlContentUnsafe: params.htmlContentUnsafe
 							}),
@@ -339,17 +386,17 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 					...(params.bottom
 						? [
 								// divider
-								fchild({
+								b.fchild({
 									type: 'fchild',
 									tag: 'hr'
 								}),
 
-								hflex({
-									children: [
+								b.hflex({
+									children: (b) => [
 										// bottomLeft
 										params.bottom?.left,
 
-										fchild({
+										b.fchild({
 											textContent: params.bottom?.textContent,
 											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
 											classes: ['oneput__menu-item-bottom']
@@ -366,18 +413,19 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 
 			// right
 			params.right
-				? hflex({
+				? b.hflex({
 						style: { alignSelf: 'flex-start' },
-						children: params.right.map((r) =>
-							typeof r === 'string'
-								? icon({
-										innerHTMLUnsafe: r,
-										style: params.bottom && { alignSelf: 'flex-start' }
-									})
-								: r
-						)
+						children: (b) =>
+							(params.right ?? []).map((r) =>
+								typeof r === 'string'
+									? b.icon({
+											innerHTMLUnsafe: r,
+											style: params.bottom && { alignSelf: 'flex-start' }
+										})
+									: r
+							)
 					})
-				: icon({})
+				: b.icon({})
 		]
 	});
 

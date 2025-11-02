@@ -277,7 +277,7 @@
 		</section>
 	</section>
 
-	<hr/>
+	<hr />
 
 	<section class="demo-grid">
 		<section class="demo-example demo-buttons">
@@ -395,6 +395,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
+						id: 'std-0',
 						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Left + right + innerRight + bottom (left + right)...',
 						innerRight: [

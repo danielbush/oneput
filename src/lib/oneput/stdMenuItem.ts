@@ -45,15 +45,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						? b.hflex({
 								id: params.id + '-left',
 								classes: ['oneput__std-menu-item-left'],
-								children: (b) =>
-									(params.left?.(b) ?? []).map((r) =>
-										typeof r === 'string'
-											? b.icon({
-													innerHTMLUnsafe: r,
-													style: params.innerBottom && { alignSelf: 'flex-start' }
-												})
-											: r
-									)
+								children: (b) => params.left?.(b) ?? []
 							})
 						: b.icon({ id: params.id + '-left' }),
 

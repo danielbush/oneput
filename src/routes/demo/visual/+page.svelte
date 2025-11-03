@@ -438,7 +438,7 @@
 						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
-								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
 							right: (b) => [
 								b.iconButton({
 									title: 'More...',

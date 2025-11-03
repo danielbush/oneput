@@ -721,4 +721,8 @@ button:disabled.oneput__menu-item {
 	min-height: 2em;
 }
 
+.oneput__std-menu-item-top {
+	gap: var(--oneput-hflex-gap);
+}
+
 /* #endregion */

@@ -37,10 +37,11 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 	const menuItem: MenuItem = vflex({
 		...params,
 		id,
+		classes: ['oneput-std-menu-item'],
 		children: (b) => [
 			b.hflex({
 				id: id + '-top',
-				classes: ['oneput__menu-item'],
+				classes: ['oneput__std-menu-item-top'],
 				children: (b) => [
 					// left
 					params.left

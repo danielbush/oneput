@@ -37,6 +37,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 		...params,
 		children: (b) => [
 			b.hflex({
+				id: params.id + '-top',
 				classes: ['oneput__menu-item'],
 				children: (b) => [
 					// left
@@ -58,6 +59,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 
 					// center
 					b.vflex({
+						id: params.id + '-center',
 						classes: ['oneput__menu-item-body'],
 						style: { marginTop: '0' },
 						children: (b) => [
@@ -84,6 +86,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										}),
 
 										b.hflex({
+											id: params.id + '-inner-bottom',
 											children: (b) => [
 												// innerBottomLeft
 												...(params.innerBottom?.left?.(b) ?? []),
@@ -123,6 +126,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 			}),
 			params.bottom &&
 				b.vflex({
+					id: params.id + '-bottom',
 					children: (b) => [
 						// divider
 						b.fchild({

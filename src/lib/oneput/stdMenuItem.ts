@@ -106,15 +106,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						? b.hflex({
 								id: id + '-right',
 								classes: ['oneput__std-menu-item-right'],
-								children: (b) =>
-									(params.right?.(b) ?? []).map((r) =>
-										typeof r === 'string'
-											? b.icon({
-													innerHTMLUnsafe: r,
-													style: params.innerBottom && { alignSelf: 'flex-start' }
-												})
-											: r
-									)
+								children: (b) => params.right?.(b) ?? []
 							})
 						: b.icon({ id: id + '-right' })
 				]

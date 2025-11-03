@@ -342,7 +342,7 @@ export type StdMenuItemParams = {
 	left?: (b: FlexChildBuilder) => Array<FChildParams>;
 	right?: (b: FlexChildBuilder) => Array<FChildParams>;
 	innerRight?: (b: FlexChildBuilder) => Array<FChildParams>;
-	bottom?: {
+	innerBottom?: {
 		left?: (b: FlexChildBuilder) => Array<FChildParams>;
 		right?: (b: FlexChildBuilder) => Array<FChildParams>;
 		htmlContentUnsafe?: string;
@@ -380,7 +380,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										typeof r === 'string'
 											? b.icon({
 													innerHTMLUnsafe: r,
-													style: params.bottom && { alignSelf: 'flex-start' }
+													style: params.innerBottom && { alignSelf: 'flex-start' }
 												})
 											: r
 									)
@@ -406,7 +406,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							}),
 
 							// bottom
-							...(params.bottom
+							...(params.innerBottom
 								? [
 										// divider
 										b.fchild({
@@ -417,16 +417,16 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										b.hflex({
 											children: (b) => [
 												// bottomLeft
-												...(params.bottom?.left?.(b) ?? []),
+												...(params.innerBottom?.left?.(b) ?? []),
 
 												b.fchild({
-													textContent: params.bottom?.textContent,
-													htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+													textContent: params.innerBottom?.textContent,
+													htmlContentUnsafe: params.innerBottom?.htmlContentUnsafe,
 													classes: ['oneput__menu-item-bottom']
 												}),
 
 												// bottomRight
-												...(params.bottom?.right?.(b) ?? [])
+												...(params.innerBottom?.right?.(b) ?? [])
 											]
 										})
 									]
@@ -444,7 +444,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										typeof r === 'string'
 											? b.icon({
 													innerHTMLUnsafe: r,
-													style: params.bottom && { alignSelf: 'flex-start' }
+													style: params.innerBottom && { alignSelf: 'flex-start' }
 												})
 											: r
 									)

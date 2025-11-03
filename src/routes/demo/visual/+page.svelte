@@ -344,8 +344,8 @@
 				menuItems={[
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + bottom section...',
-						bottom: {
+						textContent: 'Left + right + innerBottom section...',
+						innerBottom: {
 							textContent: 'Here is a more detailed description.'
 						},
 						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
@@ -357,8 +357,8 @@
 				menuItems={[
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight + bottom...',
-						bottom: {
+						textContent: 'Left + right + innerRight + innerBottom...',
+						innerBottom: {
 							textContent: 'Here is a more detailed description.'
 						},
 						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
@@ -375,7 +375,7 @@
 				menuItems={[
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight (kbd) + bottom...',
+						textContent: 'Left + right + innerRight (kbd) + innerBottom...',
 						innerRight: (b) => [
 							b.fchild({
 								style: { flex: '0' },
@@ -383,7 +383,7 @@
 								classes: ['oneput__kbd']
 							})
 						],
-						bottom: {
+						innerBottom: {
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 						},
@@ -397,7 +397,7 @@
 					stdMenuItem({
 						id: 'std-0',
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight + bottom (left + right)...',
+						textContent: 'Left + right + innerRight + innerBottom (left + right)...',
 						innerRight: (b) => [
 							b.fchild({
 								style: { flex: '0' },
@@ -405,7 +405,7 @@
 								classes: ['oneput__kbd']
 							})
 						],
-						bottom: {
+						innerBottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',

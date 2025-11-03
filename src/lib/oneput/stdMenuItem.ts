@@ -129,15 +129,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 									? b.hflex({
 											id: id + '-bottom-left',
 											style: { alignSelf: 'flex-start' },
-											children: (b) =>
-												(params.bottom?.left?.(b) ?? []).map((r) =>
-													typeof r === 'string'
-														? b.icon({
-																innerHTMLUnsafe: r,
-																style: params.bottom && { alignSelf: 'flex-start' }
-															})
-														: r
-												)
+											children: (b) => params.bottom?.left?.(b) ?? []
 										})
 									: b.icon({ id: id + '-bottom-left' }),
 
@@ -160,15 +152,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 									? b.hflex({
 											id: id + '-bottom-right',
 											style: { alignSelf: 'flex-start' },
-											children: (b) =>
-												(params.bottom?.right?.(b) ?? []).map((r) =>
-													typeof r === 'string'
-														? b.icon({
-																innerHTMLUnsafe: r,
-																style: params.bottom && { alignSelf: 'flex-start' }
-															})
-														: r
-												)
+											children: (b) => params.bottom?.right?.(b) ?? []
 										})
 									: b.icon({ id: id + '-bottom-right' })
 							]

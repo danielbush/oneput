@@ -434,7 +434,7 @@
 								classes: ['oneput__kbd']
 							})
 						],
-						outerBottom: {
+						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',

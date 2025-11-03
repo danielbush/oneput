@@ -348,7 +348,7 @@ export type StdMenuItemParams = {
 		htmlContentUnsafe?: string;
 		textContent?: string;
 	};
-	outerBottom?: {
+	bottom?: {
 		left?: (b: FlexChildBuilder) => Array<FChildParams>;
 		right?: (b: FlexChildBuilder) => Array<FChildParams>;
 		htmlContentUnsafe?: string;
@@ -405,7 +405,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 							}),
 
-							// bottom
+							// innerBottom
 							...(params.innerBottom
 								? [
 										// divider
@@ -416,7 +416,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 
 										b.hflex({
 											children: (b) => [
-												// bottomLeft
+												// innerBottomLeft
 												...(params.innerBottom?.left?.(b) ?? []),
 
 												b.fchild({
@@ -425,7 +425,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 													classes: ['oneput__menu-item-bottom']
 												}),
 
-												// bottomRight
+												// innerBottomRight
 												...(params.innerBottom?.right?.(b) ?? [])
 											]
 										})
@@ -452,7 +452,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						: b.icon({ id: params.id + '-right' })
 				]
 			}),
-			params.outerBottom &&
+			params.bottom &&
 				b.vflex({
 					children: (b) => [
 						// divider
@@ -465,52 +465,52 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							classes: ['oneput__menu-item'],
 							children: (b) => [
 								// left
-								params.outerBottom?.left
+								params.bottom?.left
 									? b.hflex({
-											id: params.id + '-outer-bottom-left',
+											id: params.id + '-bottom-left',
 											style: { alignSelf: 'flex-start' },
 											children: (b) =>
-												(params.outerBottom?.left?.(b) ?? []).map((r) =>
+												(params.bottom?.left?.(b) ?? []).map((r) =>
 													typeof r === 'string'
 														? b.icon({
 																innerHTMLUnsafe: r,
-																style: params.outerBottom && { alignSelf: 'flex-start' }
+																style: params.bottom && { alignSelf: 'flex-start' }
 															})
 														: r
 												)
 										})
-									: b.icon({ id: params.id + '-outer-bottom-left' }),
+									: b.icon({ id: params.id + '-bottom-left' }),
 
 								// center
 								b.vflex({
-									id: params.id + '-outer-bottom-center',
+									id: params.id + '-bottom-center',
 									classes: ['oneput__menu-item-body'],
 									style: { marginTop: '0' },
 									children: (b) => [
 										b.fchild({
-											textContent: params.outerBottom?.textContent,
-											htmlContentUnsafe: params.outerBottom?.htmlContentUnsafe,
+											textContent: params.bottom?.textContent,
+											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
 											classes: ['oneput__menu-item-bottom']
 										})
 									]
 								}),
 
 								// right
-								params.outerBottom?.right
+								params.bottom?.right
 									? b.hflex({
-											id: params.id + '-outer-bottom-right',
+											id: params.id + '-bottom-right',
 											style: { alignSelf: 'flex-start' },
 											children: (b) =>
-												(params.outerBottom?.right?.(b) ?? []).map((r) =>
+												(params.bottom?.right?.(b) ?? []).map((r) =>
 													typeof r === 'string'
 														? b.icon({
 																innerHTMLUnsafe: r,
-																style: params.outerBottom && { alignSelf: 'flex-start' }
+																style: params.bottom && { alignSelf: 'flex-start' }
 															})
 														: r
 												)
 										})
-									: b.icon({ id: params.id + '-outer-bottom-right' })
+									: b.icon({ id: params.id + '-bottom-right' })
 							]
 						})
 					]

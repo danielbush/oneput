@@ -419,13 +419,7 @@
 						innerBottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
-								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
-							right: (b) => [
-								b.iconButton({
-									title: 'More...',
-									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
-								})
-							]
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 						}
 						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})

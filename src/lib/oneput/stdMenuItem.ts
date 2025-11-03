@@ -128,7 +128,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								params.bottom?.left
 									? b.hflex({
 											id: id + '-bottom-left',
-											style: { alignSelf: 'flex-start' },
+											classes: ['oneput__std-menu-item-bottom-left'],
 											children: (b) => params.bottom?.left?.(b) ?? []
 										})
 									: b.icon({ id: id + '-bottom-left' }),

@@ -734,4 +734,8 @@ button:disabled.oneput__menu-item {
 	margin-right: 0.5em;
 }
 
+.oneput__std-menu-item-bottom-left {
+	align-self: flex-start;
+}
+
 /* #endregion */

@@ -729,4 +729,9 @@ button:disabled.oneput__menu-item {
 	gap: var(--oneput-hflex-gap);
 }
 
+.oneput__std-menu-item-divider {
+	margin-left: 0.5em;
+	margin-right: 0.5em;
+}
+
 /* #endregion */

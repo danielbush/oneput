@@ -118,7 +118,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						// divider
 						b.fchild({
 							type: 'fchild',
-							style: { marginLeft: '0.5em', marginRight: '0.5em' },
+							classes: ['oneput__std-menu-item-divider'],
 							tag: 'hr'
 						}),
 						b.hflex({

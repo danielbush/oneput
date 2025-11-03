@@ -362,7 +362,21 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 		...params,
 		children: (b) => [
 			// left
-			...(params.left?.(b) ?? [b.icon({})]),
+			params.left
+				? b.hflex({
+						id: params.id + '-left',
+						style: { alignSelf: 'flex-start' },
+						children: (b) =>
+							(params.left?.(b) ?? []).map((r) =>
+								typeof r === 'string'
+									? b.icon({
+											innerHTMLUnsafe: r,
+											style: params.bottom && { alignSelf: 'flex-start' }
+										})
+									: r
+							)
+					})
+				: b.icon({ id: params.id + '-left' }),
 
 			// center
 			b.vflex({
@@ -426,7 +440,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 									: r
 							)
 					})
-				: b.icon({})
+				: b.icon({ id: params.id + '-right' })
 		]
 	});
 

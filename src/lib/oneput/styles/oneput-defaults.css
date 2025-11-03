@@ -302,35 +302,43 @@
 		border-bottom: var(--oneput-strong-border);
 	}
 }
+
 .oneput__menu-body {
 	display: flex;
 	flex-direction: column;
 	overflow-y: auto;
 	/* max-height: var(--oneput-menu-max-height); */
 }
+
 .oneput__menu-body-content {
 	justify-content: center;
 	align-items: center;
 	margin: 1rem;
 	min-height: 8rem;
 }
+
 .oneput__menu-item {
 	background: var(--oneput-menu-item-background);
 }
+
 button.oneput__menu-item {
 	cursor: pointer;
 }
+
 button.oneput__menu-item--focused {
 	/* hover state is handled by the pointer */
 	background: var(--oneput-menu-item-background-hover);
 }
+
 button.oneput__menu-item:active {
 	background: var(--oneput-menu-item-background-active);
 }
+
 button:disabled.oneput__menu-item {
 	opacity: 0.5;
 	font-style: italic;
 }
+
 .oneput__menu-item-header {
 	margin-left: 0.6em;
 	margin-right: 0.6em;
@@ -372,6 +380,7 @@ button:disabled.oneput__menu-item {
 	padding-top: 0;
 	padding-bottom: 0;
 }
+
 /* For a divider that has a title. */
 .oneput__menu-divider-body {
 	margin-left: 0.6em;
@@ -379,6 +388,7 @@ button:disabled.oneput__menu-item {
 	padding-bottom: 0.15em;
 	gap: 0;
 }
+
 .oneput__menu-divider-title {
 	font-size: 0.7em;
 	letter-spacing: 0.6px;
@@ -413,9 +423,11 @@ button:disabled.oneput__menu-item {
 .oneput__input-left {
 	margin-left: var(--oneput-hflex-internal-gap);
 }
+
 .oneput__input-right {
 	margin-right: var(--oneput-hflex-internal-gap);
 }
+
 .oneput__input {
 	flex: 1 1 auto;
 	width: 100%;
@@ -452,6 +464,7 @@ button:disabled.oneput__menu-item {
 	border: none;
 	outline: none;
 }
+
 .oneput__input::placeholder {
 	color: var(--oneput-placeholder-text-color, --oneput-input-text-color);
 }
@@ -468,6 +481,7 @@ button:disabled.oneput__menu-item {
 	.oneput__input-inner {
 		align-items: start;
 	}
+
 	.oneput__input-outer {
 		align-items: start;
 	}
@@ -512,6 +526,7 @@ button:disabled.oneput__menu-item {
 .oneput__container .oneput__secondary-button {
 	background: var(--oneput-secondary-button-background);
 }
+
 .oneput__container .oneput__secondary-button:hover {
 	background: var(--oneput-secondary-button-background-hover);
 }
@@ -530,6 +545,7 @@ button:disabled.oneput__menu-item {
 	padding: var(--oneput-icon-padding);
 	cursor: pointer;
 }
+
 .oneput__checkbox {
 	padding: 1rem;
 	flex: 0 0 var(--oneput-icon-width);
@@ -548,6 +564,7 @@ button:disabled.oneput__menu-item {
 .oneput__primary-button:focus {
 	outline: var(--oneput-button-outline-focus);
 }
+
 .oneput__primary-button:hover {
 	outline: var(--oneput-button-outline-hover);
 	background: var(--oneput-primary-button-background-hover);
@@ -556,6 +573,7 @@ button:disabled.oneput__menu-item {
 .oneput__secondary-button:focus {
 	outline: var(--oneput-button-outline-focus);
 }
+
 .oneput__secondary-button:hover {
 	outline: var(--oneput-button-outline-hover);
 	background: var(--oneput-secondary-button-background-hover);
@@ -566,11 +584,13 @@ button:disabled.oneput__menu-item {
 	outline: var(--oneput-button-outline-focus);
 	background: var(--oneput-button-background-focus);
 }
+
 .oneput__button:hover,
 .oneput__icon-button:hover {
 	outline: var(--oneput-button-outline-hover);
 	background: var(--oneput-button-background-hover);
 }
+
 .oneput__primary-button:active,
 .oneput__secondary-button:active,
 .oneput__button:active,
@@ -582,6 +602,7 @@ button:disabled.oneput__menu-item {
 .oneput__icon-button-group-right {
 	justify-content: flex-end;
 }
+
 .oneput__icon-button-group {
 	justify-content: flex-start;
 }
@@ -594,16 +615,20 @@ button:disabled.oneput__menu-item {
 	outline: var(--oneput-debug-hflex-outline);
 	outline-offset: var(--oneput-debug-hflex-outline-offset);
 }
+
 .oneput__debug .oneput__hflex .oneput__hflex {
 	outline: var(--oneput-debug-hflex-outline-nested);
 }
+
 .oneput__debug .oneput__vflex {
 	outline: var(--oneput-debug-vflex-outline);
 	outline-offset: var(--oneput-debug-vflex-outline-offset);
 }
+
 .oneput__debug .oneput__vflex .oneput__vflex {
 	outline: var(--oneput-debug-vflex-outline-nested);
 }
+
 .oneput__debug .oneput__fchild {
 	outline: var(--oneput-debug-fchild-outline);
 	outline-offset: var(--oneput-debug-fchild-offset);
@@ -620,9 +645,11 @@ button:disabled.oneput__menu-item {
 	padding: 4px;
 	background-color: rgb(0 0 0 / 0.2);
 }
+
 .dark-mode .oneput__kbd kbd {
 	background-color: #555;
 }
+
 .oneput__kbd kbd {
 	border-radius: 2px;
 	border-color: rgb(0 0 0 / 0.1);
@@ -643,6 +670,7 @@ button:disabled.oneput__menu-item {
 	transition: transform 0.4s;
 	transform: rotate(0deg);
 }
+
 .oneput__menu--open .oneput__menu-button svg {
 	transform: rotate(180deg);
 }
@@ -673,6 +701,14 @@ button:disabled.oneput__menu-item {
 	100% {
 		transform: rotate(360deg);
 	}
+}
+
+/* #endregion */
+
+/* #region stdMenuItem */
+
+.oneput__std-menu-item-left {
+	align-self: flex-start;
 }
 
 /* #endregion */

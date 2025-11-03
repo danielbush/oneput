@@ -44,7 +44,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 					params.left
 						? b.hflex({
 								id: params.id + '-left',
-								style: { alignSelf: 'flex-start' },
+								classes: ['oneput__std-menu-item-left'],
 								children: (b) =>
 									(params.left?.(b) ?? []).map((r) =>
 										typeof r === 'string'

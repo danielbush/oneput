@@ -1,4 +1,4 @@
-import { vflex, type FChildParams, type FlexChildBuilder, type MenuItem } from './lib.js';
+import { randomId, vflex, type FChildParams, type FlexChildBuilder, type MenuItem } from './lib.js';
 
 export type StdMenuItemParams = {
 	tag?: string;
@@ -33,28 +33,32 @@ export type StdMenuItemParams = {
  * See demo/visual for examples.
  */
 export function stdMenuItem(params: StdMenuItemParams): MenuItem {
+	const id = params.id ?? randomId();
 	const menuItem: MenuItem = vflex({
 		...params,
+		id,
 		children: (b) => [
 			b.hflex({
-				id: params.id + '-top',
+				id: id + '-top',
 				classes: ['oneput__menu-item'],
 				children: (b) => [
 					// left
 					params.left
 						? b.hflex({
-								id: params.id + '-left',
+								id: id + '-left',
 								classes: ['oneput__std-menu-item-left'],
 								children: (b) => params.left?.(b) ?? []
 							})
-						: b.icon({ id: params.id + '-left' }),
+						: b.icon({ id: id + '-left' }),
 
 					// center
 					b.vflex({
-						id: params.id + '-center',
-						classes: ['oneput__menu-item-body'],
+						id: id + '-center',
+						classes: ['oneput__std-menu-item-center'],
 						children: (b) => [
 							b.hflex({
+								id: id + '-center-top',
+								classes: ['oneput-std-menu-item-center-top'],
 								children: (b) => [
 									b.fchild({
 										textContent: params.textContent,
@@ -63,8 +67,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 
 									// innerRight
 									...(params.innerRight?.(b) ?? [])
-								],
-								style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
+								]
 							}),
 
 							// innerBottom
@@ -77,7 +80,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										}),
 
 										b.hflex({
-											id: params.id + '-inner-bottom',
+											id: id + '-inner-bottom',
 											children: (b) => [
 												// innerBottomLeft
 												...(params.innerBottom?.left?.(b) ?? []),
@@ -100,7 +103,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 					// right
 					params.right
 						? b.hflex({
-								id: params.id + '-right',
+								id: id + '-right',
 								style: { alignSelf: 'flex-start' },
 								children: (b) =>
 									(params.right?.(b) ?? []).map((r) =>
@@ -112,12 +115,12 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 											: r
 									)
 							})
-						: b.icon({ id: params.id + '-right' })
+						: b.icon({ id: id + '-right' })
 				]
 			}),
 			params.bottom &&
 				b.vflex({
-					id: params.id + '-bottom',
+					id: id + '-bottom',
 					children: (b) => [
 						// divider
 						b.fchild({
@@ -131,7 +134,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								// left
 								params.bottom?.left
 									? b.hflex({
-											id: params.id + '-bottom-left',
+											id: id + '-bottom-left',
 											style: { alignSelf: 'flex-start' },
 											children: (b) =>
 												(params.bottom?.left?.(b) ?? []).map((r) =>
@@ -143,11 +146,11 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 														: r
 												)
 										})
-									: b.icon({ id: params.id + '-bottom-left' }),
+									: b.icon({ id: id + '-bottom-left' }),
 
 								// center
 								b.vflex({
-									id: params.id + '-bottom-center',
+									id: id + '-bottom-center',
 									classes: ['oneput__menu-item-body'],
 									style: { marginTop: '0' },
 									children: (b) => [
@@ -162,7 +165,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								// right
 								params.bottom?.right
 									? b.hflex({
-											id: params.id + '-bottom-right',
+											id: id + '-bottom-right',
 											style: { alignSelf: 'flex-start' },
 											children: (b) =>
 												(params.bottom?.right?.(b) ?? []).map((r) =>
@@ -174,7 +177,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 														: r
 												)
 										})
-									: b.icon({ id: params.id + '-bottom-right' })
+									: b.icon({ id: id + '-bottom-right' })
 							]
 						})
 					]

@@ -711,4 +711,14 @@ button:disabled.oneput__menu-item {
 	align-self: flex-start;
 }
 
+.oneput__std-menu-item-center {
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+}
+
+.oneput-std-menu-item-center-top {
+	min-height: 2em;
+}
+
 /* #endregion */

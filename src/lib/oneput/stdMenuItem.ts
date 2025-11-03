@@ -136,8 +136,6 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								// center
 								b.vflex({
 									id: id + '-bottom-center',
-									classes: ['oneput__menu-item-body'],
-									style: { marginTop: '0' },
 									children: (b) => [
 										b.fchild({
 											textContent: params.bottom?.textContent,

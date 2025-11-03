@@ -339,11 +339,11 @@ export type StdMenuItemParams = {
 	style?: Partial<CSSStyleDeclaration>;
 	htmlContentUnsafe?: string;
 	textContent?: string;
-	left?: FChildParams;
+	left?: (b: FlexChildBuilder) => Array<FChildParams>;
 	right?: (b: FlexChildBuilder) => Array<FChildParams>;
 	innerRight?: (b: FlexChildBuilder) => Array<FChildParams>;
 	bottom?: {
-		left?: FChildParams;
+		left?: (b: FlexChildBuilder) => Array<FChildParams>;
 		right?: (b: FlexChildBuilder) => Array<FChildParams>;
 		htmlContentUnsafe?: string;
 		textContent?: string;
@@ -362,7 +362,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 		...params,
 		children: (b) => [
 			// left
-			params.left ?? b.icon({}),
+			...(params.left?.(b) ?? [b.icon({})]),
 
 			// center
 			b.vflex({
@@ -394,7 +394,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								b.hflex({
 									children: (b) => [
 										// bottomLeft
-										params.bottom?.left,
+										...(params.bottom?.left?.(b) ?? []),
 
 										b.fchild({
 											textContent: params.bottom?.textContent,

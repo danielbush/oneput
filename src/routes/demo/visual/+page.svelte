@@ -8,7 +8,7 @@
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
-	import { fchild, icon, iconButton, randomId, stdMenuItem } from '$lib/oneput/lib.js';
+	import { icon, randomId, stdMenuItem } from '$lib/oneput/lib.js';
 	import { xIcon } from '$lib/oneput/shared/icons.js';
 
 	setupDemoState();
@@ -303,7 +303,7 @@
 					stdMenuItem({
 						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Both left + right icons...',
-						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>
@@ -313,10 +313,10 @@
 					stdMenuItem({
 						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Left + multiple right icons...',
-						right: [
-							iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
-							iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
-							iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
+						right: (b) => [
+							b.iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
+							b.iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
+							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
 						]
 					})
 				]}
@@ -327,15 +327,15 @@
 					stdMenuItem({
 						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Left + right + innerRight (kbd) ...',
-						innerRight: [
-							fchild({
+						innerRight: (b) => [
+							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							})
 						],
 
-						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>
@@ -348,7 +348,7 @@
 						bottom: {
 							textContent: 'Here is a more detailed description.'
 						},
-						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>
@@ -361,11 +361,11 @@
 						bottom: {
 							textContent: 'Here is a more detailed description.'
 						},
-						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
-						innerRight: [
-							iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
-							iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
-							iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
+						innerRight: (b) => [
+							b.iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
+							b.iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
+							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
 						]
 					})
 				]}
@@ -376,8 +376,8 @@
 					stdMenuItem({
 						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Left + right + innerRight (kbd) + bottom...',
-						innerRight: [
-							fchild({
+						innerRight: (b) => [
+							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
@@ -387,7 +387,7 @@
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 						},
-						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>
@@ -398,8 +398,8 @@
 						id: 'std-0',
 						left: icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' }),
 						textContent: 'Left + right + innerRight + bottom (left + right)...',
-						innerRight: [
-							fchild({
+						innerRight: (b) => [
+							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
@@ -409,14 +409,14 @@
 							left: icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' }),
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
-							right: [
-								iconButton({
+							right: (b) => [
+								b.iconButton({
 									title: 'More...',
 									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
 								})
 							]
 						},
-						right: [icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>

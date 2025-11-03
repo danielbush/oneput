@@ -285,23 +285,23 @@ export class FlexChildBuilder {
 	) {}
 
 	hflex(params: HFlexParams): FlexParams {
-		return hflex({ ...params, id: this.id + '-' + this.counter++ });
+		return hflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
 	vflex(params: VFlexParams): FlexParams {
-		return vflex({ ...params, id: this.id + '-' + this.counter++ });
+		return vflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
 	fchild(params: Partial<FChildParams>): FChildParams {
-		return fchild({ ...params, id: this.id + '-' + this.counter++ });
+		return fchild({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
 	icon(params: Partial<FChildParams>): FChildParams {
-		return icon({ ...params, id: this.id + '-' + this.counter++ });
+		return icon({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
 	iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
-		return iconButton({ ...params, id: this.id + '-' + this.counter++ });
+		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 }
 
@@ -340,11 +340,11 @@ export type StdMenuItemParams = {
 	htmlContentUnsafe?: string;
 	textContent?: string;
 	left?: FChildParams;
-	right?: Array<FChildParams>;
-	innerRight?: Array<FChildParams>;
+	right?: (b: FlexChildBuilder) => Array<FChildParams>;
+	innerRight?: (b: FlexChildBuilder) => Array<FChildParams>;
 	bottom?: {
 		left?: FChildParams;
-		right?: Array<FChildParams>;
+		right?: (b: FlexChildBuilder) => Array<FChildParams>;
 		htmlContentUnsafe?: string;
 		textContent?: string;
 	};
@@ -377,7 +377,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							}),
 
 							// innerRight
-							...(params.innerRight ?? [])
+							...(params.innerRight?.(b) ?? [])
 						],
 						style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 					}),
@@ -403,7 +403,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										}),
 
 										// bottomRight
-										...(params.bottom?.right ?? [])
+										...(params.bottom?.right?.(b) ?? [])
 									]
 								})
 							]
@@ -414,9 +414,10 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 			// right
 			params.right
 				? b.hflex({
+						id: params.id + '-right',
 						style: { alignSelf: 'flex-start' },
 						children: (b) =>
-							(params.right ?? []).map((r) =>
+							(params.right?.(b) ?? []).map((r) =>
 								typeof r === 'string'
 									? b.icon({
 											innerHTMLUnsafe: r,

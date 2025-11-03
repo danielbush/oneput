@@ -11,12 +11,6 @@ export type StdMenuItemParams = {
 	left?: (b: FlexChildBuilder) => Array<FChildParams>;
 	right?: (b: FlexChildBuilder) => Array<FChildParams>;
 	innerRight?: (b: FlexChildBuilder) => Array<FChildParams>;
-	innerBottom?: {
-		left?: (b: FlexChildBuilder) => Array<FChildParams>;
-		right?: (b: FlexChildBuilder) => Array<FChildParams>;
-		htmlContentUnsafe?: string;
-		textContent?: string;
-	};
 	bottom?: {
 		left?: (b: FlexChildBuilder) => Array<FChildParams>;
 		right?: (b: FlexChildBuilder) => Array<FChildParams>;
@@ -70,35 +64,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 									// innerRight
 									...(params.innerRight?.(b) ?? [])
 								]
-							}),
-
-							// innerBottom
-							...(params.innerBottom
-								? [
-										// divider
-										b.fchild({
-											type: 'fchild',
-											tag: 'hr'
-										}),
-
-										b.hflex({
-											id: id + '-inner-bottom',
-											children: (b) => [
-												// innerBottomLeft
-												...(params.innerBottom?.left?.(b) ?? []),
-
-												b.fchild({
-													textContent: params.innerBottom?.textContent,
-													htmlContentUnsafe: params.innerBottom?.htmlContentUnsafe,
-													classes: ['oneput__menu-item-bottom']
-												}),
-
-												// innerBottomRight
-												...(params.innerBottom?.right?.(b) ?? [])
-											]
-										})
-									]
-								: [])
+							})
 						]
 					}),
 

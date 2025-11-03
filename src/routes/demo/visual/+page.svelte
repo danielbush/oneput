@@ -356,10 +356,10 @@
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
 						textContent: 'Left + right + innerBottom section...',
-						innerBottom: {
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
+						bottom: {
 							textContent: 'Here is a more detailed description.'
-						},
-						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						}
 					})
 				]}
 			/>
@@ -369,15 +369,15 @@
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
 						textContent: 'Left + right + innerRight + innerBottom...',
-						innerBottom: {
-							textContent: 'Here is a more detailed description.'
-						},
 						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
 						innerRight: (b) => [
 							b.iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
 							b.iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
 							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
-						]
+						],
+						bottom: {
+							textContent: 'Here is a more detailed description.'
+						}
 					})
 				]}
 			/>
@@ -394,11 +394,11 @@
 								classes: ['oneput__kbd']
 							})
 						],
-						innerBottom: {
+						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
+						bottom: {
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
-						},
-						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						}
 					})
 				]}
 			/>
@@ -416,12 +416,12 @@
 								classes: ['oneput__kbd']
 							})
 						],
-						innerBottom: {
+						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
+						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 						}
-						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>
@@ -439,6 +439,7 @@
 								classes: ['oneput__kbd']
 							})
 						],
+						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
@@ -450,7 +451,6 @@
 								})
 							]
 						}
-						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>

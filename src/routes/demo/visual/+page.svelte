@@ -293,6 +293,16 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
+						textContent:
+							'This is a very long line that should get cut off with an ellipsis but does it, lets see...' +
+							'This is a very long line that should get cut off with an ellipsis but does it, lets see...'
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
 						textContent: 'Left icon only...'
 					})

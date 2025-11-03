@@ -276,6 +276,7 @@
 
 .oneput__menu-anchor {
 	position: relative;
+	overflow: hidden;
 }
 
 .oneput__menu-area {
@@ -721,8 +722,15 @@ button:disabled.oneput__menu-item {
 	overflow-y: auto;
 }
 
-.oneput-std-menu-item-center-top {
+.oneput__std-menu-item-center-top {
 	min-height: 2em;
+}
+
+.oneput__std-menu-item-main {
+	flex: 1 1 0;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 .oneput__std-menu-item-top {

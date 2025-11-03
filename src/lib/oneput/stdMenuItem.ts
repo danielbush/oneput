@@ -59,9 +59,10 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						children: (b) => [
 							b.hflex({
 								id: id + '-center-top',
-								classes: ['oneput-std-menu-item-center-top'],
+								classes: ['oneput__std-menu-item-center-top'],
 								children: (b) => [
 									b.fchild({
+										classes: ['oneput__std-menu-item-main'],
 										textContent: params.textContent,
 										htmlContentUnsafe: params.htmlContentUnsafe
 									}),

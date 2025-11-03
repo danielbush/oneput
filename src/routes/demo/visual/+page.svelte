@@ -415,8 +415,37 @@
 									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
 								})
 							]
-						},
-						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+						}
+						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						id: 'std-1',
+						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
+						textContent: 'Left + right + innerRight + bottom (left + right)...',
+						innerRight: (b) => [
+							b.fchild({
+								style: { flex: '0' },
+								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+								classes: ['oneput__kbd']
+							})
+						],
+						outerBottom: {
+							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
+							textContent:
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
+							right: (b) => [
+								b.iconButton({
+									title: 'More...',
+									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
+								})
+							]
+						}
+						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 					})
 				]}
 			/>

@@ -348,6 +348,12 @@ export type StdMenuItemParams = {
 		htmlContentUnsafe?: string;
 		textContent?: string;
 	};
+	outerBottom?: {
+		left?: (b: FlexChildBuilder) => Array<FChildParams>;
+		right?: (b: FlexChildBuilder) => Array<FChildParams>;
+		htmlContentUnsafe?: string;
+		textContent?: string;
+	};
 };
 
 /**
@@ -445,7 +451,70 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							})
 						: b.icon({ id: params.id + '-right' })
 				]
-			})
+			}),
+			params.outerBottom &&
+				b.vflex({
+					children: (b) => [
+						// divider
+						b.fchild({
+							type: 'fchild',
+							style: { marginLeft: '0.5em', marginRight: '0.5em' },
+							tag: 'hr'
+						}),
+						b.hflex({
+							classes: ['oneput__menu-item'],
+							children: (b) => [
+								// left
+								params.outerBottom?.left
+									? b.hflex({
+											id: params.id + '-outer-bottom-left',
+											style: { alignSelf: 'flex-start' },
+											children: (b) =>
+												(params.outerBottom?.left?.(b) ?? []).map((r) =>
+													typeof r === 'string'
+														? b.icon({
+																innerHTMLUnsafe: r,
+																style: params.outerBottom && { alignSelf: 'flex-start' }
+															})
+														: r
+												)
+										})
+									: b.icon({ id: params.id + '-outer-bottom-left' }),
+
+								// center
+								b.vflex({
+									id: params.id + '-outer-bottom-center',
+									classes: ['oneput__menu-item-body'],
+									style: { marginTop: '0' },
+									children: (b) => [
+										b.fchild({
+											textContent: params.outerBottom?.textContent,
+											htmlContentUnsafe: params.outerBottom?.htmlContentUnsafe,
+											classes: ['oneput__menu-item-bottom']
+										})
+									]
+								}),
+
+								// right
+								params.outerBottom?.right
+									? b.hflex({
+											id: params.id + '-outer-bottom-right',
+											style: { alignSelf: 'flex-start' },
+											children: (b) =>
+												(params.outerBottom?.right?.(b) ?? []).map((r) =>
+													typeof r === 'string'
+														? b.icon({
+																innerHTMLUnsafe: r,
+																style: params.outerBottom && { alignSelf: 'flex-start' }
+															})
+														: r
+												)
+										})
+									: b.icon({ id: params.id + '-outer-bottom-right' })
+							]
+						})
+					]
+				})
 		]
 	});
 

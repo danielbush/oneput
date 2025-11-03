@@ -53,7 +53,6 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 					b.vflex({
 						id: params.id + '-center',
 						classes: ['oneput__menu-item-body'],
-						style: { marginTop: '0' },
 						children: (b) => [
 							b.hflex({
 								children: (b) => [

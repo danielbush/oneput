@@ -358,89 +358,94 @@ export type StdMenuItemParams = {
  * See demo/visual for examples.
  */
 export function stdMenuItem(params: StdMenuItemParams): MenuItem {
-	const menuItem: MenuItem = hflex({
+	const menuItem: MenuItem = vflex({
 		...params,
 		children: (b) => [
-			// left
-			params.left
-				? b.hflex({
-						id: params.id + '-left',
-						style: { alignSelf: 'flex-start' },
-						children: (b) =>
-							(params.left?.(b) ?? []).map((r) =>
-								typeof r === 'string'
-									? b.icon({
-											innerHTMLUnsafe: r,
-											style: params.bottom && { alignSelf: 'flex-start' }
-										})
-									: r
-							)
-					})
-				: b.icon({ id: params.id + '-left' }),
-
-			// center
-			b.vflex({
-				classes: ['oneput__menu-item-body'],
-				style: { marginTop: '0' },
+			b.hflex({
+				classes: ['oneput__menu-item'],
 				children: (b) => [
-					b.hflex({
+					// left
+					params.left
+						? b.hflex({
+								id: params.id + '-left',
+								style: { alignSelf: 'flex-start' },
+								children: (b) =>
+									(params.left?.(b) ?? []).map((r) =>
+										typeof r === 'string'
+											? b.icon({
+													innerHTMLUnsafe: r,
+													style: params.bottom && { alignSelf: 'flex-start' }
+												})
+											: r
+									)
+							})
+						: b.icon({ id: params.id + '-left' }),
+
+					// center
+					b.vflex({
+						classes: ['oneput__menu-item-body'],
+						style: { marginTop: '0' },
 						children: (b) => [
-							b.fchild({
-								textContent: params.textContent,
-								htmlContentUnsafe: params.htmlContentUnsafe
+							b.hflex({
+								children: (b) => [
+									b.fchild({
+										textContent: params.textContent,
+										htmlContentUnsafe: params.htmlContentUnsafe
+									}),
+
+									// innerRight
+									...(params.innerRight?.(b) ?? [])
+								],
+								style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
 							}),
 
-							// innerRight
-							...(params.innerRight?.(b) ?? [])
-						],
-						style: { alignItems: 'center', justifyContent: 'space-between', minHeight: '2em' }
-					}),
-
-					// bottom
-					...(params.bottom
-						? [
-								// divider
-								b.fchild({
-									type: 'fchild',
-									tag: 'hr'
-								}),
-
-								b.hflex({
-									children: (b) => [
-										// bottomLeft
-										...(params.bottom?.left?.(b) ?? []),
-
+							// bottom
+							...(params.bottom
+								? [
+										// divider
 										b.fchild({
-											textContent: params.bottom?.textContent,
-											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
-											classes: ['oneput__menu-item-bottom']
+											type: 'fchild',
+											tag: 'hr'
 										}),
 
-										// bottomRight
-										...(params.bottom?.right?.(b) ?? [])
-									]
-								})
-							]
-						: [])
-				]
-			}),
+										b.hflex({
+											children: (b) => [
+												// bottomLeft
+												...(params.bottom?.left?.(b) ?? []),
 
-			// right
-			params.right
-				? b.hflex({
-						id: params.id + '-right',
-						style: { alignSelf: 'flex-start' },
-						children: (b) =>
-							(params.right?.(b) ?? []).map((r) =>
-								typeof r === 'string'
-									? b.icon({
-											innerHTMLUnsafe: r,
-											style: params.bottom && { alignSelf: 'flex-start' }
+												b.fchild({
+													textContent: params.bottom?.textContent,
+													htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+													classes: ['oneput__menu-item-bottom']
+												}),
+
+												// bottomRight
+												...(params.bottom?.right?.(b) ?? [])
+											]
 										})
-									: r
-							)
-					})
-				: b.icon({ id: params.id + '-right' })
+									]
+								: [])
+						]
+					}),
+
+					// right
+					params.right
+						? b.hflex({
+								id: params.id + '-right',
+								style: { alignSelf: 'flex-start' },
+								children: (b) =>
+									(params.right?.(b) ?? []).map((r) =>
+										typeof r === 'string'
+											? b.icon({
+													innerHTMLUnsafe: r,
+													style: params.bottom && { alignSelf: 'flex-start' }
+												})
+											: r
+									)
+							})
+						: b.icon({ id: params.id + '-right' })
+				]
+			})
 		]
 	});
 

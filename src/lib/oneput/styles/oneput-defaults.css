@@ -711,6 +711,10 @@ button:disabled.oneput__menu-item {
 	align-self: flex-start;
 }
 
+.oneput__std-menu-item-right {
+	align-self: flex-start;
+}
+
 .oneput__std-menu-item-center {
 	display: flex;
 	flex-direction: column;

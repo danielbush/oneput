@@ -105,7 +105,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 					params.right
 						? b.hflex({
 								id: id + '-right',
-								style: { alignSelf: 'flex-start' },
+								classes: ['oneput__std-menu-item-right'],
 								children: (b) =>
 									(params.right?.(b) ?? []).map((r) =>
 										typeof r === 'string'

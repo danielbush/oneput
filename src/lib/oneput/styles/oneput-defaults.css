@@ -375,9 +375,6 @@ button:disabled.oneput__menu-item {
 	margin-bottom: 0.4em;
 }
 
-.oneput__menu-item-body {
-}
-
 .oneput__menu-header {
 	background: var(--oneput-menu-header-background);
 	box-shadow: var(--oneput-menu-header-box-shadow);
@@ -545,7 +542,8 @@ button:disabled.oneput__menu-item {
 	max-height: var(--oneput-icon-width);
 	justify-content: center;
 	border-radius: var(--oneput-icon-border-radius);
-	padding: var(--oneput-icon-padding);
+	padding: 0 var(--oneput-icon-padding);
+	align-items: flex-start;
 	cursor: pointer;
 }
 

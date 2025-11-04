@@ -45,7 +45,6 @@ export class Notification {
 					{
 						id: randomId(),
 						type: 'fchild',
-						classes: ['oneput__menu-item-body'],
 						textContent: this.message
 					},
 					{

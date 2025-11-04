@@ -144,7 +144,6 @@ export class RootUI {
 					{
 						id: randomId(),
 						type: 'fchild',
-						classes: ['oneput__menu-item-body'],
 						htmlContentUnsafe: '<p>Html blank item</p>'
 					},
 					{

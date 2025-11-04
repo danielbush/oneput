@@ -31,7 +31,6 @@ export const menuItemNoIcon: (params: {
 			{
 				id: randomId(),
 				type: 'fchild',
-				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
 			{
@@ -84,7 +83,6 @@ export const menuItemWithIcon: (params: {
 			{
 				id: id + '-2',
 				type: 'fchild',
-				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
 			{

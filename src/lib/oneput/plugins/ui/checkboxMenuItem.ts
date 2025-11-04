@@ -52,7 +52,6 @@ export class CheckboxMenuItem implements MenuItem {
 						event.preventDefault();
 					}
 				},
-				classes: ['oneput__menu-item-body'],
 				textContent: params.textContent
 			}
 		];

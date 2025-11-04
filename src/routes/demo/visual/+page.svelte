@@ -227,7 +227,6 @@
 									{
 										id: randomId(),
 										type: 'fchild',
-										classes: ['oneput__menu-item-body'],
 										textContent: 'This is a notification'
 									},
 									{

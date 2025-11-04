@@ -44,7 +44,6 @@ const keybindingMenuItem: (params: {
 			{
 				id: randomId(),
 				type: 'fchild',
-				classes: ['oneput__menu-item-body'],
 				textContent: text
 			},
 			{

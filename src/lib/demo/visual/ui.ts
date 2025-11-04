@@ -61,7 +61,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'fchild',
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Menu Item 1'
 				},
 				{
@@ -81,7 +80,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'fchild',
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Menu Item 2'
 				},
 				{
@@ -113,7 +111,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'fchild',
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Plain Item 1...'
 				}
 			]
@@ -140,7 +137,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'fchild',
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Interactive menu item'
 				},
 				{
@@ -191,7 +187,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'vflex',
-					classes: ['oneput__menu-item-body'],
 					children: [
 						{ id: randomId(), type: 'fchild', textContent: 'Complex menu item' },
 						{ id: randomId(), type: 'fchild', tag: 'hr', classes: ['oneput__menu-divider'] },
@@ -228,7 +223,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'vflex',
-					classes: ['oneput__menu-item-body'],
 					children: [
 						{ id: randomId(), type: 'fchild', textContent: 'Interactive complex menu item' },
 						{
@@ -312,7 +306,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'fchild',
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Plain Item 1...'
 				}
 			]
@@ -327,7 +320,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'fchild',
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Plain Item 2...'
 				}
 			]
@@ -352,7 +344,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					attr: {
 						for: prefix + 'checkbox-1'
 					},
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Checkbox Item 1...'
 				}
 			]
@@ -377,7 +368,6 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					attr: {
 						for: prefix + 'checkbox-2'
 					},
-					classes: ['oneput__menu-item-body'],
 					textContent: 'Checkbox Item 2...'
 				}
 			]

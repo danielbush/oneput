@@ -757,4 +757,8 @@ button:disabled.oneput__menu-item {
 	align-self: flex-start;
 }
 
+.oneput__std-menu-item-bottom {
+	gap: var(--oneput-hflex-gap);
+}
+
 /* #endregion */

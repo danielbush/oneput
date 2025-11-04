@@ -77,7 +77,8 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							tag: 'hr'
 						}),
 						b.hflex({
-							classes: ['oneput__menu-item'],
+							id: id + '-bottom',
+							classes: ['oneput__std-menu-item-bottom'],
 							children: (b) => [
 								// left
 								params.bottom?.left

@@ -335,7 +335,11 @@ export function menuItem(params: Partial<MenuItem>): MenuItem {
 	return result;
 }
 
-// TODO: set htmlContentUnsafe to never?
+/**
+ * Represents a square icon.
+ *
+ * TODO: set htmlContentUnsafe to never?
+ */
 export function icon(params: Partial<FChildParams>): FChildParams {
 	return fchild({
 		classes: ['oneput__icon'],
@@ -346,12 +350,18 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 	});
 }
 
+/**
+ * Acts like a square icon but is blank.
+ */
 export function blank(): FChildParams {
 	return fchild({
 		classes: ['oneput__icon']
 	});
 }
 
+/**
+ * Like icon but turns the icon into a button.
+ */
 export function iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
 	return fchild({
 		classes: ['oneput__icon-button'],

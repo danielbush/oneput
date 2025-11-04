@@ -708,6 +708,10 @@ button:disabled.oneput__menu-item {
 
 /* #region stdMenuItem */
 
+.oneput__std-menu-item {
+	gap: 0;
+}
+
 .oneput__std-menu-item-top {
 	gap: var(--oneput-hflex-gap);
 	min-height: calc(var(--oneput-icon-width) + var(--oneput-hflex-padding) * 2);

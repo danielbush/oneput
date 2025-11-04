@@ -187,6 +187,17 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'vflex',
+					style: {
+						// MENU_ALIGNMENT : The problem with vflex here is that
+						// the main textContent doesn't quite line up well with
+						// the left/right icons.  We can patch the problem with
+						// marign or padding like here.  Or, arguably better, we
+						// fix the underlying alignment issue by using flex
+						// center alignment and putting the hr and the
+						// description content in a separate hflex underneath
+						// this hflex.  This is what stdMenuItem does.
+						paddingTop: '5px'
+					},
 					children: [
 						{ id: randomId(), type: 'fchild', textContent: 'Complex menu item' },
 						{ id: randomId(), type: 'fchild', tag: 'hr', classes: ['oneput__menu-divider'] },
@@ -223,6 +234,9 @@ export const menuItems1: () => MenuItemAny[] = () => {
 				{
 					id: randomId(),
 					type: 'vflex',
+					style: {
+						paddingTop: '5px' // MENU_ALIGNMENT
+					},
 					children: [
 						{ id: randomId(), type: 'fchild', textContent: 'Interactive complex menu item' },
 						{

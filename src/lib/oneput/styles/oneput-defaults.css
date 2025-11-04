@@ -542,8 +542,8 @@ button:disabled.oneput__menu-item {
 	max-height: var(--oneput-icon-width);
 	justify-content: center;
 	border-radius: var(--oneput-icon-border-radius);
-	padding: 0 var(--oneput-icon-padding);
-	align-items: flex-start;
+	padding: var(--oneput-icon-padding);
+	align-items: center;
 	cursor: pointer;
 }
 

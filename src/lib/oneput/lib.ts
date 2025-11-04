@@ -278,6 +278,12 @@ function flex(params: HFlexParams | VFlexParams): FlexParams {
 	return result;
 }
 
+/**
+ * This is intended for flex children in a hflex or vflex whose numerical
+ * position has layout significance.
+ *
+ * Used when doing layouts within Oneput or within menu items.
+ */
 export class FlexChildBuilder {
 	constructor(
 		private id: string,

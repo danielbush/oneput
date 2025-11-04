@@ -179,6 +179,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			id: 'menu-item-4',
 			type: 'hflex',
 			tag: 'button',
+			attr: { type: 'button', title: 'Complex menu item' },
 			children: [
 				{
 					id: randomId(),
@@ -305,6 +306,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			id: 'menu-item-no-icon-2',
 			type: 'hflex',
 			tag: 'button',
+			attr: { type: 'button', title: 'Plain Item 1...' },
 			children: [
 				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'] },
 				{
@@ -319,6 +321,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			id: 'menu-item-no-icon-3',
 			type: 'hflex',
 			tag: 'button',
+			attr: { type: 'button', title: 'Plain Item 2...' },
 			children: [
 				{ id: randomId(), type: 'fchild', classes: ['oneput__icon'] },
 				{
@@ -333,7 +336,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			id: 'menu-item-no-icon-4',
 			type: 'hflex',
 			tag: 'button',
-			attr: { type: 'button' },
+			attr: { type: 'button', title: 'Checkbox Item 1...' },
 			children: [
 				{
 					id: prefix + 'checkbox-1',
@@ -358,7 +361,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			id: 'menu-item-no-icon-5',
 			type: 'hflex',
 			tag: 'button',
-			attr: { type: 'button' },
+			attr: { type: 'button', title: 'Checkbox Item 2...' },
 			children: [
 				{
 					id: prefix + 'checkbox-2',

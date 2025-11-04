@@ -41,16 +41,30 @@
 
 /* #endregion */
 
+/*
+ * - oneput__icon : look like icon-buttons but are just decorative
+ * - oneput__icon-button : are interactive icon-only buttons
+ * - oneput__icon-toggle-button : are icon buttons with binary persistent state
+ * - oneput__button : a button usually with text in it instead of an icon
+ * - oneput__primary-button : a standalone button with a bit more heft to it
+ */
+
 /* #region variables */
 
 .oneput__container {
-	/* Styles */
-	/* Separates significant areas like the menubody vs input / status area. */
-	--oneput-strong-border: solid 1px rgb(0 0 0 / 0.3);
-	/* Separates sections with something eg sections within the menu body */
-	--oneput-soft-border: 0.5px solid rgb(0 0 0 / 0.4);
+	/* Internal Widths, paddings, gaps */
+	/*
+	* These are included to get you useful defaults out of the box for icons and
+	* icon buttons as these make up 80%+ of the interactive UI.
+	*
+	* We can treat --oneput-std-width like a standard unit for width and even height.
+	*
+	*/
 
-	/* Internal spacing: paddings, gaps, margins */
+	/* Use this for width and height. */
+	--oneput-std-width: 28px;
+	/* For more compact elements. */
+	--oneput-std-width-small: 18px;
 	--oneput-area-padding: 0em;
 	--oneput-hflex-padding: 0.375em;
 	--oneput-hflex-gap: 0.625em;
@@ -62,7 +76,47 @@
 	--oneput-input-padding-x: 0.375em;
 	--oneput-input-padding-y: 0em;
 
-	/* Specific parts of oneput... */
+	/* Borders and dividers*/
+
+	/* Separates significant areas like the menubody vs input / status area. */
+	--oneput-strong-border: solid 1px rgb(0 0 0 / 0.3);
+	/* Separates sections with something eg sections within the menu body */
+	--oneput-soft-border: 0.5px solid rgb(0 0 0 / 0.4);
+	--oneput-divider-border: rgb(0 0 0 / 0.3) solid 0.5px;
+	--oneput-divider-text-color: #333;
+	--oneput-divider-font: sans-serif;
+	--oneput-divider-margin: 6px 0 2px 0;
+
+	/* Icon buttons */
+
+	--oneput-icon-border-radius: 4px;
+	--oneput-icon-width: calc(var(--oneput-std-width) - 0px);
+	--oneput-icon-width-small: calc(var(--oneput-std-width-small) - 0px);
+	/* 22px works well with svg eg lucide and emojis. */
+	--oneput-icon-font: 22px sans-serif;
+	/* Esp. important for icon buttons otherwise the icon will be up hard against
+	 * the button border.. */
+	--oneput-icon-padding: 4px;
+
+	/* Primary / secondary buttons eg alets, confirmations */
+
+	--oneput-primary-button-background: rgb(255 255 255 / 0.6);
+	--oneput-primary-button-background-hover: rgb(255 255 255 / 0.8);
+	--oneput-secondary-button-background: rgb(255 255 255 / 0.22);
+	--oneput-secondary-button-background-hover: rgb(255 255 255 / 0.22);
+	--oneput-button-border: 0.5px solid rgb(0 0 0 / 0.4);
+	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
+	--oneput-button-background-hover: rgb(100 100 100 / 0.2);
+	--oneput-button-background-active: rgb(100 100 100 / 0.3);
+	--oneput-button-outline: 2px solid rgb(0255 179 2 / 0.5);
+	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.7);
+	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-outline-active: 0.5px solid rgb(0 0 0 / 0.8);
+	--oneput-button-outline-focus: var(--oneput-button-outline);
+	--oneput-button-outline-hover: var(--oneput-button-outline);
+	--oneput-button-outline-active: var(--oneput-button-outline);
+
+	/* Specific areas within Oneput... */
 
 	/* Container */
 	--oneput-min-width: 320px;
@@ -95,12 +149,6 @@
 	--oneput-menu-footer-box-shadow: 0 13px 10px 10px rgb(0 0 0 / 0.5);
 	--oneput-menu-footer-clip-path: inset(-20px 0 0 0);
 
-	/* divider */
-	--oneput-divider-border: rgb(0 0 0 / 0.3) solid 0.5px;
-	--oneput-divider-text-color: #333;
-	--oneput-divider-font: sans-serif;
-	--oneput-divider-margin: 6px 0 2px 0;
-
 	/* Input */
 	/* The apparent height of the input or technically oneput__input-inner. */
 	--oneput-input-min-height: 36px;
@@ -115,32 +163,6 @@
 	--oneput-input-border-bottom: 0.5px;
 	--oneput-input-border-left: 0.5px;
 	--oneput-input-border-right: 0.5px;
-
-	/* Spacers, icons, buttons etc */
-	/* Use this for width and height. */
-	--oneput-icon-width: 28px;
-	/* For more compact elements. */
-	--oneput-icon-width-small: 18px;
-	/* 22px works well with svg eg lucide and emojis. */
-	--oneput-icon-font: 22px sans-serif;
-	--oneput-icon-border-radius: 4px;
-	--oneput-icon-padding: 4px;
-	--oneput-primary-button-background: rgb(255 255 255 / 0.6);
-	--oneput-primary-button-background-hover: rgb(255 255 255 / 0.8);
-	--oneput-secondary-button-background: rgb(255 255 255 / 0.22);
-	--oneput-secondary-button-background-hover: rgb(255 255 255 / 0.22);
-	--oneput-button-border: 0.5px solid rgb(0 0 0 / 0.4);
-	--oneput-button-background-focus: rgb(100 100 100 / 0.1);
-	--oneput-button-background-hover: rgb(100 100 100 / 0.2);
-	--oneput-button-background-active: rgb(100 100 100 / 0.3);
-	--oneput-button-outline: 2px solid rgb(0255 179 2 / 0.5);
-	/* --oneput-button-outline: 0.5px solid rgb(0 0 0 / 0.5); */
-	--oneput-button-outline-focus: 0.5px solid rgb(0 0 0 / 0.7);
-	--oneput-button-outline-hover: 0.5px solid rgb(0 0 0 / 0.8);
-	--oneput-button-outline-active: 0.5px solid rgb(0 0 0 / 0.8);
-	--oneput-button-outline-focus: var(--oneput-button-outline);
-	--oneput-button-outline-hover: var(--oneput-button-outline);
-	--oneput-button-outline-active: var(--oneput-button-outline);
 
 	/* Visual Debug */
 	--oneput-debug-hflex-outline: 1px solid rgb(0 200 0 / 0.2);
@@ -492,29 +514,16 @@ button:disabled.oneput__menu-item {
 
 /* #region spacers, icons and icon-buttons */
 
-/*
- * These are included to get you useful defaults out of the box for icons and
- * icon buttons as these make up 80%+ of the interactive UI.
- *
- * We can treat --oneput-icon-width like a standard unit for width and even height.
- *
- * - oneput__icon : look like icon-buttons but are just decorative
- * - oneput__icon-button : are interactive icon-only buttons
- * - oneput__icon-toggle-button : are icon buttons with binary persistent state
- * - oneput__button : a button usually with text in it instead of an icon
- * - oneput__primary-button : a standalone button with a bit more heft to it
- */
-
 /* Spacers can act like an invisible icon or button to help balance your layouts */
 .oneput__spacer {
-	min-width: var(--oneput-icon-width);
-	max-width: var(--oneput-icon-width);
+	min-width: var(--oneput-std-width);
+	max-width: var(--oneput-std-width);
 }
 
 .oneput__container .oneput__primary-button,
 .oneput__container .oneput__secondary-button {
 	color: var(--oneput-button-text-color);
-	flex: 0 0 var(--oneput-icon-width);
+	flex: 0 0 var(--oneput-std-width);
 	justify-content: center;
 	border: var(--oneput-button-border);
 	border-radius: var(--oneput-icon-border-radius);
@@ -549,7 +558,7 @@ button:disabled.oneput__menu-item {
 
 .oneput__checkbox {
 	padding: 1rem;
-	flex: 0 0 var(--oneput-icon-width);
+	flex: 0 0 var(--oneput-std-width);
 	justify-content: center;
 	margin: 7.5px 0;
 }
@@ -714,18 +723,18 @@ button:disabled.oneput__menu-item {
 
 .oneput__std-menu-item-top {
 	gap: var(--oneput-hflex-gap);
-	min-height: calc(var(--oneput-icon-width) + var(--oneput-hflex-padding) * 2);
+	min-height: calc(var(--oneput-std-width) + var(--oneput-hflex-padding) * 2);
 	justify-content: space-between;
 }
 
 .oneput__std-menu-item-left {
 	flex: 0 0 auto;
-	min-width: var(--oneput-icon-width);
+	min-width: var(--oneput-std-width);
 }
 
 .oneput__std-menu-item-right {
 	flex: 0 0 auto;
-	min-width: var(--oneput-icon-width);
+	min-width: var(--oneput-std-width);
 }
 
 .oneput__std-menu-item-center {

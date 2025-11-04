@@ -512,13 +512,75 @@ button:disabled.oneput__menu-item {
 
 /* #endregion */
 
-/* #region spacers, icons and icon-buttons */
+/* #region spacers */
 
 /* Spacers can act like an invisible icon or button to help balance your layouts */
 .oneput__spacer {
 	min-width: var(--oneput-std-width);
 	max-width: var(--oneput-std-width);
 }
+
+/* #endregion */
+
+/* #region checkbox */
+
+.oneput__checkbox {
+	padding: 1rem;
+	flex: 0 0 var(--oneput-std-width);
+	justify-content: center;
+	margin: 7.5px 0;
+}
+
+/* #endregion */
+
+/* #region icons and icon-buttons */
+
+.oneput__icon-toggle-button,
+.oneput__icon-button,
+.oneput__icon {
+	flex: 0 0 var(--oneput-icon-width);
+	min-width: var(--oneput-icon-width);
+	min-height: var(--oneput-icon-width);
+	max-width: var(--oneput-icon-width);
+	max-height: var(--oneput-icon-width);
+	justify-content: center;
+	border-radius: var(--oneput-icon-border-radius);
+	padding: var(--oneput-icon-padding);
+	cursor: pointer;
+}
+
+.oneput__icon-toggle-button,
+.oneput__icon-button,
+.oneput__icon {
+	font: var(--oneput-icon-font);
+}
+
+.oneput__icon-button:focus {
+	outline: var(--oneput-button-outline-focus);
+	background: var(--oneput-button-background-focus);
+}
+
+.oneput__icon-button:hover {
+	outline: var(--oneput-button-outline-hover);
+	background: var(--oneput-button-background-hover);
+}
+
+.oneput__icon-button:active {
+	outline: var(--oneput-button-outline-active);
+	background: var(--oneput-button-background-active);
+}
+
+.oneput__icon-button-group-right {
+	justify-content: flex-end;
+}
+
+.oneput__icon-button-group {
+	justify-content: flex-start;
+}
+
+/* #endregion */
+
+/* #region buttons */
 
 .oneput__container .oneput__primary-button,
 .oneput__container .oneput__secondary-button {
@@ -541,10 +603,7 @@ button:disabled.oneput__menu-item {
 	background: var(--oneput-secondary-button-background-hover);
 }
 
-.oneput__button,
-.oneput__icon-toggle-button,
-.oneput__icon-button,
-.oneput__icon {
+.oneput__button {
 	flex: 0 0 var(--oneput-icon-width);
 	min-width: var(--oneput-icon-width);
 	min-height: var(--oneput-icon-width);
@@ -555,21 +614,6 @@ button:disabled.oneput__menu-item {
 	padding: var(--oneput-icon-padding);
 	cursor: pointer;
 }
-
-.oneput__checkbox {
-	padding: 1rem;
-	flex: 0 0 var(--oneput-std-width);
-	justify-content: center;
-	margin: 7.5px 0;
-}
-
-.oneput__icon-toggle-button,
-.oneput__icon-button,
-.oneput__icon {
-	font: var(--oneput-icon-font);
-}
-
-/* states */
 
 .oneput__primary-button:focus {
 	outline: var(--oneput-button-outline-focus);
@@ -589,32 +633,21 @@ button:disabled.oneput__menu-item {
 	background: var(--oneput-secondary-button-background-hover);
 }
 
-.oneput__button:focus,
-.oneput__icon-button:focus {
+.oneput__button:focus {
 	outline: var(--oneput-button-outline-focus);
 	background: var(--oneput-button-background-focus);
 }
 
-.oneput__button:hover,
-.oneput__icon-button:hover {
+.oneput__button:hover {
 	outline: var(--oneput-button-outline-hover);
 	background: var(--oneput-button-background-hover);
 }
 
 .oneput__primary-button:active,
 .oneput__secondary-button:active,
-.oneput__button:active,
-.oneput__icon-button:active {
+.oneput__button:active {
 	outline: var(--oneput-button-outline-active);
 	background: var(--oneput-button-background-active);
-}
-
-.oneput__icon-button-group-right {
-	justify-content: flex-end;
-}
-
-.oneput__icon-button-group {
-	justify-content: flex-start;
 }
 
 /* #endregion */
@@ -674,7 +707,7 @@ button:disabled.oneput__menu-item {
 
 /* #endregion */
 
-/* #region menu button */
+/* #region open/close menu button */
 
 .oneput__menu-button svg {
 	transition: transform 0.4s;

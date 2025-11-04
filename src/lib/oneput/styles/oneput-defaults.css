@@ -708,33 +708,36 @@ button:disabled.oneput__menu-item {
 
 /* #region stdMenuItem */
 
+.oneput__std-menu-item-top {
+	gap: var(--oneput-hflex-gap);
+	min-height: calc(var(--oneput-icon-width) + var(--oneput-hflex-padding) * 2);
+	justify-content: space-between;
+}
+
 .oneput__std-menu-item-left {
-	align-self: flex-start;
+	flex: 0 0 auto;
+	min-width: var(--oneput-icon-width);
 }
 
 .oneput__std-menu-item-right {
-	align-self: flex-start;
+	flex: 0 0 auto;
+	min-width: var(--oneput-icon-width);
 }
 
 .oneput__std-menu-item-center {
-	display: flex;
-	flex-direction: column;
-	overflow-y: auto;
-}
-
-.oneput__std-menu-item-center-top {
-	min-height: 2em;
-}
-
-.oneput__std-menu-item-main {
 	flex: 1 1 0;
-	white-space: nowrap;
-	text-overflow: ellipsis;
 	overflow: hidden;
 }
 
-.oneput__std-menu-item-top {
-	gap: var(--oneput-hflex-gap);
+.oneput__std-menu-item-main {
+	flex: 1 1;
+	display: -webkit-box;
+	line-clamp: 1;
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	/* white-space: nowrap; */
+	/* text-overflow: ellipsis; */
 }
 
 .oneput__std-menu-item-divider {

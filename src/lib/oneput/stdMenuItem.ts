@@ -31,7 +31,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 	const menuItem: MenuItem = vflex({
 		...params,
 		id,
-		classes: ['oneput-std-menu-item'],
+		classes: ['oneput__std-menu-item'],
 		children: (b) => [
 			b.hflex({
 				id: id + '-top',
@@ -44,27 +44,21 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								classes: ['oneput__std-menu-item-left'],
 								children: (b) => params.left?.(b) ?? []
 							})
-						: b.icon({ id: id + '-left' }),
+						: b.icon({ id: id + '-left', classes: ['oneput__std-menu-item-left'] }),
 
 					// center
-					b.vflex({
+					b.hflex({
 						id: id + '-center',
 						classes: ['oneput__std-menu-item-center'],
 						children: (b) => [
-							b.hflex({
-								id: id + '-center-top',
-								classes: ['oneput__std-menu-item-center-top'],
-								children: (b) => [
-									b.fchild({
-										classes: ['oneput__std-menu-item-main'],
-										textContent: params.textContent,
-										htmlContentUnsafe: params.htmlContentUnsafe
-									}),
+							b.fchild({
+								classes: ['oneput__std-menu-item-main'],
+								textContent: params.textContent,
+								htmlContentUnsafe: params.htmlContentUnsafe
+							}),
 
-									// innerRight
-									...(params.innerRight?.(b) ?? [])
-								]
-							})
+							// innerRight
+							...(params.innerRight?.(b) ?? [])
 						]
 					}),
 
@@ -75,7 +69,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								classes: ['oneput__std-menu-item-right'],
 								children: (b) => params.right?.(b) ?? []
 							})
-						: b.icon({ id: id + '-right' })
+						: b.icon({ id: id + '-right', classes: ['oneput__std-menu-item-right'] })
 				]
 			}),
 			...(params.bottom

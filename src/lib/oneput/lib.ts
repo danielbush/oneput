@@ -304,8 +304,8 @@ export class FlexChildBuilder {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	blank(): FChildParams {
-		return blank();
+	blankIcon(): FChildParams {
+		return blankIcon();
 	}
 }
 
@@ -353,7 +353,7 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 /**
  * Acts like a square icon but is blank.
  */
-export function blank(): FChildParams {
+export function blankIcon(): FChildParams {
 	return fchild({
 		classes: ['oneput__icon']
 	});

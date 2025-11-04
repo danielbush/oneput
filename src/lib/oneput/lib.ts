@@ -303,6 +303,10 @@ export class FlexChildBuilder {
 	iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
+
+	blank(): FChildParams {
+		return blank();
+	}
 }
 
 export function hflex(params: HFlexParams): FlexParams {
@@ -339,6 +343,12 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		style: { alignSelf: 'flex-start', ...params.style }
+	});
+}
+
+export function blank(): FChildParams {
+	return fchild({
+		classes: ['oneput__icon']
 	});
 }
 

@@ -337,16 +337,15 @@
 				menuItems={[
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight (kbd) ...',
-						innerRight: (b) => [
+						textContent: 'Left + right (kbd) ...',
+						right: (b) => [
 							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
-							})
-						],
-
-						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
+							}),
+							b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
+						]
 					})
 				]}
 			/>
@@ -368,12 +367,12 @@
 				menuItems={[
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight + innerBottom...',
-						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
-						innerRight: (b) => [
+						textContent: 'Left + right + right + bottom...',
+						right: (b) => [
 							b.iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
 							b.iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
-							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
+							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' }),
+							b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 						],
 						bottom: {
 							textContent: 'Here is a more detailed description.'
@@ -386,15 +385,15 @@
 				menuItems={[
 					stdMenuItem({
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight (kbd) + innerBottom...',
-						innerRight: (b) => [
+						textContent: 'Left + right (kbd) + bottom...',
+						right: (b) => [
 							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
-							})
+							}),
+							b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })
 						],
-						right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
 						bottom: {
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
@@ -408,15 +407,15 @@
 					stdMenuItem({
 						id: 'std-0',
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight + innerBottom (left + right)...',
-						innerRight: (b) => [
+						textContent: 'Left + right + bottom (left)...',
+						right: (b) => [
 							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
-							})
+							}),
+							b.blank()
 						],
-						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })],
 						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:
@@ -431,15 +430,15 @@
 					stdMenuItem({
 						id: 'std-1',
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
-						textContent: 'Left + right + innerRight + bottom (left + right)...',
-						innerRight: (b) => [
+						textContent: 'Left + right + bottom (left + right)...',
+						right: (b) => [
 							b.fchild({
 								style: { flex: '0' },
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
-							})
+							}),
+							b.blank()
 						],
-						// right: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>' })]
 						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
 							textContent:

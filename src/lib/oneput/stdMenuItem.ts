@@ -10,7 +10,6 @@ export type StdMenuItemParams = {
 	textContent?: string;
 	left?: (b: FlexChildBuilder) => Array<FChildParams>;
 	right?: (b: FlexChildBuilder) => Array<FChildParams>;
-	innerRight?: (b: FlexChildBuilder) => Array<FChildParams>;
 	bottom?: {
 		left?: (b: FlexChildBuilder) => Array<FChildParams>;
 		right?: (b: FlexChildBuilder) => Array<FChildParams>;
@@ -55,10 +54,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 								classes: ['oneput__std-menu-item-main'],
 								textContent: params.textContent,
 								htmlContentUnsafe: params.htmlContentUnsafe
-							}),
-
-							// innerRight
-							...(params.innerRight?.(b) ?? [])
+							})
 						]
 					}),
 

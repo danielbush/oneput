@@ -78,10 +78,8 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						: b.icon({ id: id + '-right' })
 				]
 			}),
-			params.bottom &&
-				b.vflex({
-					id: id + '-bottom',
-					children: (b) => [
+			...(params.bottom
+				? [
 						// divider
 						b.fchild({
 							type: 'fchild',
@@ -123,7 +121,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							]
 						})
 					]
-				})
+				: [])
 		]
 	});
 

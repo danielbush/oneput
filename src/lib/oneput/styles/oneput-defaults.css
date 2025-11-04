@@ -749,16 +749,17 @@ button:disabled.oneput__menu-item {
 	margin-right: 0.5em;
 }
 
+.oneput__std-menu-item-bottom {
+	gap: var(--oneput-hflex-gap);
+	align-items: flex-start;
+}
+
 .oneput__std-menu-item-bottom-left {
 	align-self: flex-start;
 }
 
 .oneput__std-menu-item-bottom-right {
 	align-self: flex-start;
-}
-
-.oneput__std-menu-item-bottom {
-	gap: var(--oneput-hflex-gap);
 }
 
 /* #endregion */

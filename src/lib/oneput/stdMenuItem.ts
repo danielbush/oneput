@@ -90,15 +90,10 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 									: b.icon({ id: id + '-bottom-left' }),
 
 								// center
-								b.vflex({
-									id: id + '-bottom-center',
-									children: (b) => [
-										b.fchild({
-											textContent: params.bottom?.textContent,
-											htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
-											classes: ['oneput__menu-item-bottom']
-										})
-									]
+								b.fchild({
+									textContent: params.bottom?.textContent,
+									htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+									classes: ['oneput__menu-item-bottom']
 								}),
 
 								// right

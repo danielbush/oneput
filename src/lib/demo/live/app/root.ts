@@ -1,11 +1,18 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
-import { searchIcon, settingsIcon, sigmaIcon, tocIcon } from '$lib/oneput/shared/icons.js';
+import {
+	searchIcon,
+	settingsIcon,
+	sigmaIcon,
+	timerIcon,
+	tocIcon
+} from '$lib/oneput/shared/icons.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
 import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
 import { KatexDemo } from '../plugins/menu/KatexDemo.js';
+import { Pomodoro } from '../plugins/menu/Pomodoro.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
@@ -36,6 +43,14 @@ export class RootUI {
 				text: 'Navigate outline...',
 				action: () => {
 					NavigateHeadings.create(this.ctl, document, this.runUI).runUI();
+				}
+			}),
+			menuItemWithIcon({
+				id: 'pomodoro',
+				leftIcon: timerIcon,
+				text: 'Pomodoro...',
+				action: () => {
+					Pomodoro.create(this.ctl, this.runUI).runUI();
 				}
 			}),
 			menuItemWithIcon({

@@ -64,7 +64,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							})
 						: params.left === false
 							? null
-							: b.spacer(),
+							: b.hspacer(),
 
 					// center
 					b.hflex({
@@ -88,7 +88,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							})
 						: params.right === false
 							? null
-							: b.spacer()
+							: b.hspacer()
 				]
 			}),
 			...(params.bottom
@@ -112,7 +112,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										})
 									: params.bottom?.left === false
 										? null
-										: b.spacer(),
+										: b.hspacer(),
 
 								// center
 								b.fchild({
@@ -130,7 +130,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										})
 									: params.bottom?.right === false
 										? null
-										: b.spacer()
+										: b.hspacer()
 							]
 						})
 					]

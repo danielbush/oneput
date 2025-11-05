@@ -310,8 +310,8 @@ export class FlexChildBuilder {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	spacer(): FChildParams {
-		return spacer();
+	hspacer(): FChildParams {
+		return hspacer();
 	}
 }
 
@@ -357,11 +357,11 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 }
 
 /**
- * Acts like a square icon but is blank.
+ * Acts like a horizontal spacing with width equivalent ot a square icon (--oneput-std-width).
  */
-export function spacer(): FChildParams {
+export function hspacer(): FChildParams {
 	return fchild({
-		classes: ['oneput__spacer']
+		classes: ['oneput__hspacer']
 	});
 }
 

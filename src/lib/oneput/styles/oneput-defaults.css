@@ -512,7 +512,7 @@ button:disabled.oneput__menu-item {
 /* #region spacers */
 
 /* Spacers can act like an invisible icon or button to help balance your layouts */
-.oneput__spacer {
+.oneput__hspacer {
 	min-width: var(--oneput-std-width);
 	max-width: var(--oneput-std-width);
 }

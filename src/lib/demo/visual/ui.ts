@@ -45,7 +45,6 @@ export const menuHeader1: FlexParams = {
 				}
 			]
 		}
-		// { classes: ['oneput__spacer'] }
 	]
 };
 
@@ -294,7 +293,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 			class: 'oneput__menu-divider',
 			ignored: true,
 			children: [
-				{ id: randomId(), type: 'fchild', classes: ['oneput__spacer'] },
+				{ id: randomId(), type: 'fchild', classes: ['oneput__hspacer'] },
 				{
 					id: randomId(),
 					type: 'vflex',

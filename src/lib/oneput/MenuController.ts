@@ -312,6 +312,11 @@ export class MenuController {
 			}
 		}
 	}
+
+	/**
+	 * The behaviour after menu items have been set and the index may or may not
+	 * have been invalidated.
+	 */
 	setFocusBehaviour(behaviour: FocusBehaviour) {
 		this.focusBehaviour = behaviour;
 	}

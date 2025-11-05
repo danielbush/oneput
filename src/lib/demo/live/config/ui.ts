@@ -232,6 +232,7 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		this.ctl.menu.enableMenuActions();
 		this.ctl.menu.enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();
+		this.ctl.menu.setFocusBehaviour('first');
 	}
 
 	get placeholder() {

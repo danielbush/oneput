@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FChild from './FChild.svelte';
-	import { type FChildParams, type FlexParams } from '../lib.js';
+	import { randomId, type FChildParams, type FlexParams } from '../lib.js';
 	import { onMount } from 'svelte';
 
 	type Props = { class: string } & FlexParams;
@@ -51,7 +51,11 @@
 			{...params.attachments}
 		>
 			{#if params.children}
-				{#each params.children as child (child?.id)}
+				<!-- Hack: Have to use randomId() in the case of 2 undefined
+			children otherwise even though they won't get rendered we will still
+			trigger svelte's dupliate key error and get a whitescreen because 2
+			keys both have undefined as the id. -->
+				{#each params.children as child (child?.id || randomId())}
 					{#if child}
 						{#if child.type === 'hflex'}
 							{@render flex(child, true)}

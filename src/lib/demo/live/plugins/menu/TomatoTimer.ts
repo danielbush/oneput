@@ -2,9 +2,9 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { stdMenuItem } from '$lib/oneput/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/ui.js';
 
-export class Pomodoro {
+export class TomatoTimer {
 	static create(ctl: Controller, back: () => void) {
-		return new Pomodoro(ctl, back);
+		return new TomatoTimer(ctl, back);
 	}
 
 	private exit = () => {
@@ -18,7 +18,7 @@ export class Pomodoro {
 
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
-			menuHeader: 'Pomodoro',
+			menuHeader: 'Tomato Timer',
 			exitAction: this.exit
 		});
 		this.ctl.menu.setMenuItems([

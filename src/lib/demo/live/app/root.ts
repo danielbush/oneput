@@ -12,7 +12,8 @@ import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from '../plugins/menu/AsyncSearchExample.js';
 import { NavigateHeadings } from '../plugins/menu/NavigateHeadings.js';
 import { KatexDemo } from '../plugins/menu/KatexDemo.js';
-import { Pomodoro } from '../plugins/menu/Pomodoro.js';
+import { TomatoTimer } from '../plugins/menu/TomatoTimer.js';
+import { stdMenuItem } from '$lib/oneput/stdMenuItem.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
@@ -45,12 +46,15 @@ export class RootUI {
 					NavigateHeadings.create(this.ctl, document, this.runUI).runUI();
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'pomodoro',
-				leftIcon: timerIcon,
-				text: 'Pomodoro...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: timerIcon })],
+				textContent: 'Tomato timer...',
 				action: () => {
-					Pomodoro.create(this.ctl, this.runUI).runUI();
+					TomatoTimer.create(this.ctl, this.runUI).runUI();
+				},
+				bottom: {
+					textContent: 'A Pomodoro-like timer to demo timer widgets and state managmeent...'
 				}
 			}),
 			menuItemWithIcon({

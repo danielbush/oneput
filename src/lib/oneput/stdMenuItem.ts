@@ -64,7 +64,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							})
 						: params.left === false
 							? null
-							: b.icon({ id: id + '-left', classes: ['oneput__std-menu-item-left'] }),
+							: b.spacer(),
 
 					// center
 					b.hflex({
@@ -88,7 +88,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 							})
 						: params.right === false
 							? null
-							: b.icon({ id: id + '-right', classes: ['oneput__std-menu-item-right'] })
+							: b.spacer()
 				]
 			}),
 			...(params.bottom
@@ -112,7 +112,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										})
 									: params.bottom?.left === false
 										? null
-										: b.icon({ id: id + '-bottom-left' }),
+										: b.spacer(),
 
 								// center
 								b.fchild({
@@ -130,7 +130,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 										})
 									: params.bottom?.right === false
 										? null
-										: b.icon({ id: id + '-bottom-right' })
+										: b.spacer()
 							]
 						})
 					]

@@ -420,7 +420,6 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						id: 'std-0',
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
 						textContent: 'Left + right + bottom (left)...',
 						right: (b) => [
@@ -443,7 +442,6 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						id: 'std-1',
 						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
 						textContent: 'Left + right + bottom (left + right)...',
 						right: (b) => [
@@ -464,6 +462,51 @@
 									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
 								})
 							]
+						}
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="search"></i>' })],
+						textContent: 'No bottom (left + right)...',
+						right: (b) => [
+							b.fchild({
+								style: { flex: '0' },
+								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+								classes: ['oneput__kbd']
+							}),
+							b.spacer()
+						],
+						bottom: {
+							left: false,
+							textContent:
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
+							right: false
+						}
+					})
+				]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						left: false,
+						textContent: 'No Left + no bottom (left + right)...',
+						right: (b) => [
+							b.fchild({
+								style: { flex: '0' },
+								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
+								classes: ['oneput__kbd']
+							})
+						],
+						bottom: {
+							left: false,
+							textContent:
+								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
+							right: false
 						}
 					})
 				]}

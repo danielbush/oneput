@@ -773,8 +773,12 @@ button:disabled.oneput__menu-item {
 	overflow: hidden;
 }
 
-.oneput__std-menu-item-title--padded {
+.oneput__std-menu-item--no-left .oneput__std-menu-item-title {
+	/* Aligns the start of the title text more with the left icon. */
 	padding-left: var(--oneput-icon-padding);
+}
+
+.oneput__std-menu-item--no-right .oneput__std-menu-item-title {
 	padding-right: var(--oneput-icon-padding);
 }
 
@@ -797,6 +801,17 @@ button:disabled.oneput__menu-item {
 .oneput__std-menu-item-bottom {
 	gap: var(--oneput-hflex-gap);
 	align-items: flex-start;
+	font: 100 0.9em sans-serif;
+	color: var(--oneput-text-muted);
+	margin-bottom: 0.4em;
+}
+
+.oneput__std-menu-item--no-bottom-left .oneput__std-menu-item-bottom {
+	padding-left: var(--oneput-icon-padding);
+}
+
+.oneput__std-menu-item--no-bottom-right .oneput__std-menu-item-bottom {
+	padding-right: var(--oneput-icon-padding);
 }
 
 .oneput__std-menu-item-bottom-left {

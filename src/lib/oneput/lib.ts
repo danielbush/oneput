@@ -109,7 +109,7 @@ export type FChildParams = {
 	 * This is optional.  It also makes satisfying the type-checker easier.
 	 */
 	type: 'fchild';
-	classes?: Array<string>;
+	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;
 	textContent?: string;
 	htmlContentUnsafe?: string;

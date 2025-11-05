@@ -287,6 +287,22 @@
 				convenience so you don't have to keep writing the same flex/child data-structures. You can
 				of course build your own to suit your needs.
 			</p>
+			<Oneput
+				menuOpen={true}
+				menuItems={[stdMenuItem({ textContent: 'No left icons space...', left: false })]}
+			/>
+			<Oneput
+				menuOpen={true}
+				menuItems={[
+					stdMenuItem({
+						textContent:
+							'No left+right space. This is a very long line that should get cut off with an ellipsis but does it, lets see.' +
+							'This is a very long line that should get cut off with an ellipsis but does it, lets see.',
+						left: false,
+						right: false
+					})
+				]}
+			/>
 			<Oneput menuOpen={true} menuItems={[stdMenuItem({ textContent: 'No icons...' })]} />
 			<Oneput
 				menuOpen={true}
@@ -455,4 +471,3 @@
 		</section>
 	</section>
 </main>
-spacerspacer

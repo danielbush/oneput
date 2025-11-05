@@ -8,8 +8,8 @@ export type StdMenuItemParams = {
 	style?: Partial<CSSStyleDeclaration>;
 	htmlContentUnsafe?: string;
 	textContent?: string;
-	left?: (b: FlexChildBuilder) => Array<FChildParams>;
-	right?: (b: FlexChildBuilder) => Array<FChildParams>;
+	left?: false | ((b: FlexChildBuilder) => Array<FChildParams>);
+	right?: false | ((b: FlexChildBuilder) => Array<FChildParams>);
 	bottom?: {
 		left?: (b: FlexChildBuilder) => Array<FChildParams>;
 		right?: (b: FlexChildBuilder) => Array<FChildParams>;
@@ -41,9 +41,11 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						? b.hflex({
 								id: id + '-left',
 								classes: ['oneput__std-menu-item-left'],
-								children: (b) => params.left?.(b) ?? []
+								children: (b) => (params.left ? params.left(b) : [])
 							})
-						: b.icon({ id: id + '-left', classes: ['oneput__std-menu-item-left'] }),
+						: params.left === false
+							? null
+							: b.icon({ id: id + '-left', classes: ['oneput__std-menu-item-left'] }),
 
 					// center
 					b.hflex({
@@ -51,7 +53,10 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						classes: ['oneput__std-menu-item-center'],
 						children: (b) => [
 							b.fchild({
-								classes: ['oneput__std-menu-item-main'],
+								classes: [
+									'oneput__std-menu-item-title',
+									params.left === false && 'oneput__std-menu-item-title--padded'
+								],
 								textContent: params.textContent,
 								htmlContentUnsafe: params.htmlContentUnsafe
 							})
@@ -63,9 +68,11 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						? b.hflex({
 								id: id + '-right',
 								classes: ['oneput__std-menu-item-right'],
-								children: (b) => params.right?.(b) ?? []
+								children: (b) => (params.right ? params.right(b) : [])
 							})
-						: b.icon({ id: id + '-right', classes: ['oneput__std-menu-item-right'] })
+						: params.right === false
+							? null
+							: b.icon({ id: id + '-right', classes: ['oneput__std-menu-item-right'] })
 				]
 			}),
 			...(params.bottom

@@ -773,7 +773,12 @@ button:disabled.oneput__menu-item {
 	overflow: hidden;
 }
 
-.oneput__std-menu-item-main {
+.oneput__std-menu-item-title--padded {
+	padding-left: var(--oneput-icon-padding);
+	padding-right: var(--oneput-icon-padding);
+}
+
+.oneput__std-menu-item-title {
 	flex: 1 1;
 	display: -webkit-box;
 	line-clamp: 1;

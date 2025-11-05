@@ -17,7 +17,6 @@ export class Pomodoro {
 	) {}
 
 	runUI() {
-		console.log('start pomodoro app');
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Pomodoro',
 			exitAction: this.exit
@@ -26,16 +25,9 @@ export class Pomodoro {
 			stdMenuItem({
 				id: 'pomodoro-start',
 				textContent: 'Start',
-				tag: 'button',
-				attr: {
-					type: 'button',
-					onclick: () => {
-						console.log('start');
-					}
+				action: () => {
+					console.log('start');
 				}
-				// action: () => {
-				// 	console.log('start');
-				// }
 			})
 		]);
 	}

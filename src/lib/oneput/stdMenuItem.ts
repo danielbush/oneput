@@ -1,9 +1,14 @@
 import { randomId, vflex, type FChildParams, type FlexChildBuilder, type MenuItem } from './lib.js';
 
+/**
+ * If action is specified, tag will be set to button.
+ * If tag is set to button, type="button" will be set.
+ */
 export type StdMenuItemParams = {
 	tag?: string;
 	attr?: Record<string, string | boolean | ((event: Event) => void)>;
 	id?: string;
+	action?: () => void;
 	classes?: Array<string | false | undefined>;
 	style?: Partial<CSSStyleDeclaration>;
 	htmlContentUnsafe?: string;
@@ -27,9 +32,17 @@ export type StdMenuItemParams = {
  */
 export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 	const id = params.id ?? randomId();
+	if (params.action) {
+		params.tag = params.tag ?? 'button';
+		params.attr = {
+			type: 'button',
+			...params.attr
+		};
+	}
 	const menuItem: MenuItem = vflex({
 		...params,
 		id,
+		action: params.action,
 		classes: [
 			'oneput__std-menu-item',
 			params.left === false && 'oneput__std-menu-item--no-left',

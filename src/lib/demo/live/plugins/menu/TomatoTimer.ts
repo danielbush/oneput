@@ -28,7 +28,6 @@ export class TomatoTimer {
 				textContent: 'Start',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					console.log('start');
 					this.ctl.menu.setMenuItems([
 						stdMenuItem({
 							id: 'tomato-stop',

@@ -59,22 +59,24 @@
 	*
 	* We can treat --oneput-std-width like a standard unit for width and even height.
 	*
+	* Don't use em's as font changes will cause alignment issues.
+	*
 	*/
 
 	/* Use this for width and height. */
 	--oneput-std-width: 28px;
 	/* For more compact elements. */
 	--oneput-std-width-small: 18px;
-	--oneput-area-padding: 0em;
-	--oneput-hflex-padding: 0.375em;
-	--oneput-hflex-gap: 0.625em;
+	--oneput-area-padding: 0px;
+	--oneput-hflex-padding: 5.25px;
+	--oneput-hflex-gap: 8.75px;
 	/* Internal gap for separation between horizontally flexed buttons or other
 	 * widgets.  Should be less than --oneput-hflex-padding. */
-	--oneput-hflex-internal-gap: 0.25em;
-	--oneput-vflex-gap: 0.375em;
-	--oneput-fchild-padding: 0.25em;
-	--oneput-input-padding-x: 0.375em;
-	--oneput-input-padding-y: 0em;
+	--oneput-hflex-internal-gap: 4px;
+	--oneput-vflex-gap: 6px;
+	--oneput-fchild-padding: 4px;
+	--oneput-input-padding-x: 6px;
+	--oneput-input-padding-y: 0px;
 
 	/* Borders and dividers*/
 

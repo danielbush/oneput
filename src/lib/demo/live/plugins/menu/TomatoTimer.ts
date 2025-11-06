@@ -29,6 +29,25 @@ export class TomatoTimer {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
 					console.log('start');
+					this.ctl.menu.setMenuItems([
+						stdMenuItem({
+							id: 'tomato-stop',
+							textContent: 'Stop',
+							left: (b) => [b.icon({ innerHTMLUnsafe: icons.stopIcon })],
+							action: () => {
+								this.ctl.menu.setMenuItems([
+									stdMenuItem({
+										id: 'tomato-start',
+										textContent: 'Start',
+										left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+										action: () => {
+											console.log('start');
+										}
+									})
+								]);
+							}
+						})
+					]);
 				}
 			})
 		]);

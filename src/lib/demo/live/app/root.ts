@@ -54,7 +54,7 @@ export class RootUI {
 					TomatoTimer.create(this.ctl, this.runUI).runUI();
 				},
 				bottom: {
-					textContent: 'A Pomodoro-like timer to demo timer widgets and state managmeent...'
+					textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
 				}
 			}),
 			menuItemWithIcon({

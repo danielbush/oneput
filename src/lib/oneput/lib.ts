@@ -311,7 +311,7 @@ export class FlexChildBuilder {
 	}
 
 	hspacer(): FChildParams {
-		return hspacer();
+		return hspacer({ id: this.id + '-' + this.counter++ });
 	}
 }
 
@@ -359,9 +359,10 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 /**
  * Acts like a horizontal spacing with width equivalent ot a square icon (--oneput-std-width).
  */
-export function hspacer(): FChildParams {
+export function hspacer(params: Partial<FChildParams>): FChildParams {
 	return fchild({
-		classes: ['oneput__hspacer']
+		classes: ['oneput__hspacer'],
+		...params
 	});
 }
 

@@ -3,6 +3,7 @@ import { stdMenuItem } from '$lib/oneput/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/ui.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { hflex } from '$lib/oneput/lib.js';
 
 interface TomatoTimerDB extends DBSchema {
 	timers: {
@@ -38,7 +39,7 @@ idb()
 
 export class TomatoTimer {
 	static create(ctl: Controller, back: () => void) {
-		return new TomatoTimer(ctl, back);
+		return new TomatoTimer(ctl, back, idb());
 	}
 
 	private exit = () => {
@@ -47,7 +48,8 @@ export class TomatoTimer {
 
 	constructor(
 		private ctl: Controller,
-		private back: () => void
+		private back: () => void,
+		private db: Promise<IDBPDatabase<TomatoTimerDB>>
 	) {}
 
 	private timerIsRunning: boolean = false;
@@ -113,6 +115,22 @@ export class TomatoTimer {
 	 */
 	private timerUI() {
 		this.ctl.menu.setMenuItems([
+			hflex({
+				id: 'tomato-timer-display',
+				type: 'hflex',
+				style: {
+					justifyContent: 'center'
+				},
+				children: (b) => [
+					b.fchild({
+						style: {
+							flex: '0',
+							fontSize: '300%'
+						},
+						textContent: '1:00:00'
+					})
+				]
+			}),
 			stdMenuItem({
 				id: 'tomato-stop',
 				textContent: 'Stop',

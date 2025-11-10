@@ -215,9 +215,17 @@ export class TomatoTimer {
 					]
 				}),
 				stdMenuItem({
+					id: 'tomato-pause',
+					textContent: 'Pause',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.pauseIcon })],
+					action: () => {
+						this.timer?.stop();
+					}
+				}),
+				stdMenuItem({
 					id: 'tomato-stop',
-					textContent: 'Stop',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.stopIcon })],
+					textContent: 'Cancel',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
 					action: () => {
 						this.stopTimer();
 						this.runUI();

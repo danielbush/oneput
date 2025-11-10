@@ -3,7 +3,7 @@ import { stdMenuItem } from '$lib/oneput/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/ui.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import { hflex } from '$lib/oneput/lib.js';
+import { menuItem } from '$lib/oneput/lib.js';
 
 interface TomatoTimerDB extends DBSchema {
 	timers: {
@@ -148,6 +148,7 @@ export class TomatoTimer {
 		});
 		if (this.timer) {
 			this.timerUI({ secondsRemaining: this.timer.secondsRemaining });
+			this.ctl.menu.focusFirstMenuItem();
 		} else {
 			this.noTimerUI();
 		}
@@ -197,9 +198,9 @@ export class TomatoTimer {
 	private timerUI(params: { secondsRemaining: number }) {
 		this.ctl.menu.setMenuItems(
 			[
-				hflex({
+				menuItem({
 					id: 'tomato-timer-display',
-					type: 'hflex',
+					ignored: true,
 					style: {
 						justifyContent: 'center'
 					},

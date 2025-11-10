@@ -78,7 +78,7 @@ export type MenuItem = FlexParams & {
 	/**
 	 * ignored = false means menu item can be focused and selected and triggered.
 	 */
-	ignored?: false;
+	ignored?: boolean;
 	/**
 	 * Primary css class.  Defaults to oneput__menu-item.
 	 */
@@ -249,19 +249,19 @@ export function isFocusable(item?: MenuItemAny) {
 	return !item.ignored && !('disabled' in (item.attr ?? {}) && item.attr?.disabled);
 }
 
-type HFlexParams = Partial<Omit<FlexParams, 'children'>> & {
+export type BuilderFlexParams = Partial<Omit<FlexParams, 'children'>> & {
 	children?:
 		| Array<FlexParams | FChildParams | undefined | null>
 		| ((b: FlexChildBuilder) => Array<FlexParams | FChildParams | undefined | null>);
 };
 
-type VFlexParams = Partial<Omit<FlexParams, 'children'>> & {
+export type BuilderMenuItem = Partial<Omit<MenuItem, 'children'>> & {
 	children?:
 		| Array<FlexParams | FChildParams | undefined | null>
 		| ((b: FlexChildBuilder) => Array<FlexParams | FChildParams | undefined | null>);
 };
 
-function flex(params: HFlexParams | VFlexParams): FlexParams {
+function flex(params: BuilderFlexParams): FlexParams {
 	const id = params.id ?? randomId();
 	let children: Array<FlexParams | FChildParams | undefined | null> | undefined;
 	if (typeof params.children === 'function') {
@@ -278,6 +278,32 @@ function flex(params: HFlexParams | VFlexParams): FlexParams {
 	return result;
 }
 
+export function hflex(params: BuilderFlexParams): FlexParams {
+	return flex({ ...params, type: 'hflex' });
+}
+
+export function vflex(params: BuilderFlexParams): FlexParams {
+	return flex({ ...params, type: 'vflex' });
+}
+
+export function fchild(params: Partial<FChildParams>): FChildParams {
+	const result: FChildParams = {
+		...params,
+		id: params.id ?? randomId(),
+		type: 'fchild'
+	};
+	return result;
+}
+
+export function menuItem(params: Partial<BuilderMenuItem>): MenuItem {
+	const result: MenuItem = flex({
+		...params,
+		id: params.id ?? randomId(),
+		type: params.type ?? 'hflex'
+	});
+	return result;
+}
+
 /**
  * This is intended for flex children in a hflex or vflex whose numerical
  * position has layout significance.
@@ -290,11 +316,11 @@ export class FlexChildBuilder {
 		private counter: number = 0
 	) {}
 
-	hflex(params: HFlexParams): FlexParams {
+	hflex(params: BuilderFlexParams): FlexParams {
 		return hflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	vflex(params: VFlexParams): FlexParams {
+	vflex(params: BuilderFlexParams): FlexParams {
 		return vflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
@@ -313,32 +339,6 @@ export class FlexChildBuilder {
 	hspacer(): FChildParams {
 		return hspacer({ id: this.id + '-' + this.counter++ });
 	}
-}
-
-export function hflex(params: HFlexParams): FlexParams {
-	return flex({ ...params, type: 'hflex' });
-}
-
-export function vflex(params: VFlexParams): FlexParams {
-	return flex({ ...params, type: 'vflex' });
-}
-
-export function fchild(params: Partial<FChildParams>): FChildParams {
-	const result: FChildParams = {
-		...params,
-		id: params.id ?? randomId(),
-		type: 'fchild'
-	};
-	return result;
-}
-
-export function menuItem(params: Partial<MenuItem>): MenuItem {
-	const result: MenuItem = {
-		...params,
-		id: params.id ?? randomId(),
-		type: params.type ?? 'hflex'
-	};
-	return result;
 }
 
 /**

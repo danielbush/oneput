@@ -3,7 +3,7 @@ import { stdMenuItem } from '$lib/oneput/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/ui.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import { menuItem } from '$lib/oneput/lib.js';
+import { menuItem } from '$lib/oneput/builder.js';
 
 interface TomatoTimerDB extends DBSchema {
 	timers: {

@@ -13,30 +13,104 @@ interface TomatoTimerDB extends DBSchema {
 }
 
 /**
- * Without any pauses:
+ * Suppose we receive this data from storage and want to reconstitute the timer:
  *
- *   end-time = start-time + duration
- *   time-left = end-time - Date.now()/1000
+ *   projectedEndTime = startTime + duration + pauseDuration
+ *   secondsRemaining = projectedEndTime - Date.now()/1000
  *
- * If we pause, that's like extending the end-time.
+ * We can then display secondsRemaining in a timer and decrement every second
+ * (if we in an unpaused state).
  *
- *   end-time = start-time + duration + ( pause-time + ... )
  */
-export type TomatoTimerData = {
-	id: string;
-	startTime: number; // unix-time
-	duration: number; // secs
-	stopTime: number | null; // unix-time
+export type TomatoTimerData =
+	| {
+			// Represents an active timer session.  If pauseTime is not null, we
+			// are in a paused state.
+
+			id: string;
+			startTime: number; // unix-time
+			/**
+			 * This is the initial duration specified by the user.
+			 * It doesn't change.
+			 */
+			duration: number; // secs
+			/**
+			 * Records the total amount of pausing by the user.
+			 */
+			pauseDuration: number; // secs
+			stopTime: null; // unix-time
+			/**
+			 * If not undefined, timer is currently paused.
+			 *
+			 * When unpausing:
+			 * - compute: diff = Date.now()/1000 - pauseTime
+			 * - set: pauseTime to null
+			 * - add: diff to pauseDuration
+			 */
+			pauseTime: number | null; // unix-time
+	  }
+	| {
+			// Represents a completed timer session.
+
+			id: string;
+			startTime: number;
+			/**
+			 * The final stopping time by the user.
+			 */
+			duration: number;
+			pauseDuration: number;
+			stopTime: number;
+			pauseTime: null;
+	  };
+
+/**
+ * A value object for timer data.
+ *
+ * It's not immutable because we'll use a class that mutates its state
+ * rather than several logic functions generating immutable values.
+ */
+class TomatoTimerValue {
+	static create(data: TomatoTimerData) {
+		return new TomatoTimerValue(data);
+	}
+
+	private constructor(private data: TomatoTimerData) {}
+
+	pause(on: boolean = true) {
+		if (on) {
+			this.data.pauseTime = Date.now() / 1000;
+			return this;
+		}
+		const diff = this.data.pauseTime ? Date.now() / 1000 - this.data.pauseTime : 0;
+		this.data.pauseTime = null;
+		this.data.pauseDuration += diff;
+		return this;
+	}
+
+	stop() {
+		this.data.stopTime = Date.now() / 1000;
+		this.data.pauseTime = null;
+		return this;
+	}
+
 	/**
-	 * If not undefined, timer is currently paused.
-	 *
-	 * When unpaused,
-	 * - compute: diff = calc current time - pause time
-	 * - set: pauseTime to null
-	 * - add: diff to duration
+	 * This could be negative ("overtime").
 	 */
-	pauseTime: number | null; // unix-time
-};
+	get secondsRemaining() {
+		const now = Date.now() / 1000;
+		const pauseTime = this.data.pauseTime ?? 0;
+		const endTime = this.data.startTime + this.data.duration + pauseTime;
+		return endTime - now;
+	}
+
+	get isPaused() {
+		return this.data.pauseTime !== null;
+	}
+
+	get isCompleted() {
+		return this.data.stopTime !== null;
+	}
+}
 
 const DB_NAME = 'tomato-timer';
 const CURRENT_TIMER_KEY = 'current-timer';
@@ -59,7 +133,7 @@ idb()
 function formatSecondsToHHMMSS(totalSeconds: number): string {
 	const hours = Math.floor(totalSeconds / 3600);
 	const minutes = Math.floor((totalSeconds % 3600) / 60);
-	const seconds = totalSeconds % 60;
+	const seconds = Math.floor(totalSeconds % 60);
 
 	const HH = hours.toString().padStart(2, '0');
 	const MM = minutes.toString().padStart(2, '0');
@@ -106,7 +180,15 @@ class Timer {
 
 export class TomatoTimer {
 	static create(ctl: Controller, back: () => void) {
-		return new TomatoTimer(ctl, back);
+		const timerValue = TomatoTimerValue.create({
+			id: CURRENT_TIMER_KEY,
+			startTime: Date.now() / 1000,
+			duration: 30 * 60,
+			stopTime: null,
+			pauseTime: null,
+			pauseDuration: 0
+		});
+		return new TomatoTimer(ctl, back, timerValue);
 	}
 
 	private exit = () => {
@@ -115,14 +197,15 @@ export class TomatoTimer {
 
 	constructor(
 		private ctl: Controller,
-		private back: () => void
+		private back: () => void,
+		private timerValue: TomatoTimerValue
 	) {}
 
 	private timer: Timer | null = null;
 
 	private startTimer() {
-		this.timer = Timer.create().start(60 * 60);
-		this.timer.onTick((secondsRemaining) => {
+		this.timer = Timer.create().start(this.timerValue.secondsRemaining);
+		this.timer.onTick((/*secondsRemaining*/) => {
 			// Note that if we've set id's for all menu items and used builders
 			// for descendents, then the only dom update will be the timer
 			// display.  So it's ok to run timerUI and setMenuItems every
@@ -132,7 +215,7 @@ export class TomatoTimer {
 			// component into the menu item.  This component will update itself
 			// and we won't have to call timerUI every second.
 			//
-			this.timerUI({ secondsRemaining });
+			this.timerUI();
 		});
 	}
 
@@ -147,7 +230,7 @@ export class TomatoTimer {
 			exitAction: this.exit
 		});
 		if (this.timer) {
-			this.timerUI({ secondsRemaining: this.timer.secondsRemaining });
+			this.timerUI();
 			this.ctl.menu.focusFirstMenuItem();
 		} else {
 			this.noTimerUI();
@@ -183,7 +266,8 @@ export class TomatoTimer {
 							startTime: Date.now() / 1000,
 							duration: 30 * 60,
 							stopTime: null,
-							pauseTime: null
+							pauseTime: null,
+							pauseDuration: 0
 						})
 						.catch((err) => this.ctl.notify(`Error adding test data: ${err}`));
 					this.ctl.notify('Test data set', { duration: 3000 });
@@ -195,7 +279,7 @@ export class TomatoTimer {
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI(params: { secondsRemaining: number }) {
+	private timerUI() {
 		this.ctl.menu.setMenuItems(
 			[
 				menuItem({
@@ -210,7 +294,7 @@ export class TomatoTimer {
 								flex: '0',
 								fontSize: '300%'
 							},
-							textContent: formatSecondsToHHMMSS(params.secondsRemaining)
+							textContent: formatSecondsToHHMMSS(this.timerValue.secondsRemaining)
 						})
 					]
 				}),
@@ -233,12 +317,12 @@ export class TomatoTimer {
 				})
 			],
 
-			// This is really important otherwise the stop button may not work.
+			// This is really important otherwise the cancel button may not work.
 			// This is because we are re-rendering menu items every second, and
-			// the focusBehaviour may be changing the focused item when we call
-			// setMenuItems.  This will trigger an update to the DOM for the
-			// items whose focus state has changed.  And this update appears to
-			// cancel or prevent the stop action.
+			// the focusBehaviour may be changing the old and new focused items
+			// when we call setMenuItems.  This will trigger an update to the
+			// DOM for these items.  And this update can cause the cancel action
+			// to not work.
 			{ focusBehaviour: 'none' }
 		);
 	}

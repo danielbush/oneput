@@ -87,7 +87,7 @@ class TomatoTimerValue {
 		return this;
 	}
 
-	stop() {
+	finish() {
 		this.data.stopTime = Date.now() / 1000;
 		this.data.pauseTime = null;
 		return this;
@@ -98,8 +98,8 @@ class TomatoTimerValue {
 	 */
 	get secondsRemaining() {
 		const now = Date.now() / 1000;
-		const pauseTime = this.data.pauseTime ?? 0;
-		const endTime = this.data.startTime + this.data.duration + pauseTime;
+		const pauseDuration = this.data.pauseDuration ?? 0;
+		const endTime = this.data.startTime + this.data.duration + pauseDuration;
 		return endTime - now;
 	}
 
@@ -107,7 +107,7 @@ class TomatoTimerValue {
 		return this.data.pauseTime !== null;
 	}
 
-	get isCompleted() {
+	get isFinished() {
 		return this.data.stopTime !== null;
 	}
 }
@@ -143,30 +143,27 @@ function formatSecondsToHHMMSS(totalSeconds: number): string {
 }
 
 /**
- * Powers the timer display.
+ * Glorified setInterval.
  */
-class Timer {
+class Clock {
 	static create() {
-		return new Timer();
+		return new Clock();
 	}
 	private constructor() {}
 	private intervalId: ReturnType<typeof setInterval> | null = null;
-	private tickFn: (secondsRemaining: number) => void = () => {};
-	secondsRemaining: number = 0;
+	private tickFn: () => void = () => {};
 
-	start(secondsRemaining: number) {
+	start() {
 		if (this.intervalId !== null) {
 			clearInterval(this.intervalId);
 		}
-		this.secondsRemaining = secondsRemaining;
 		this.intervalId = setInterval(() => {
-			this.secondsRemaining--;
-			this.tickFn(this.secondsRemaining);
+			this.tickFn();
 		}, 1000);
 		return this;
 	}
 
-	onTick(tickFn: (secondsRemaining: number) => void) {
+	onTick(tickFn: () => void) {
 		this.tickFn = tickFn;
 	}
 
@@ -191,21 +188,21 @@ export class TomatoTimer {
 		return new TomatoTimer(ctl, back, timerValue);
 	}
 
-	private exit = () => {
-		this.back();
-	};
-
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
 		private timerValue: TomatoTimerValue
 	) {}
 
-	private timer: Timer | null = null;
+	private clock: Clock | null = null;
 
-	private startTimer() {
-		this.timer = Timer.create().start(this.timerValue.secondsRemaining);
-		this.timer.onTick((/*secondsRemaining*/) => {
+	private exit = () => {
+		this.back();
+	};
+
+	private startTimer = () => {
+		this.clock = Clock.create().start();
+		this.clock.onTick((/*secondsRemaining*/) => {
 			// Note that if we've set id's for all menu items and used builders
 			// for descendents, then the only dom update will be the timer
 			// display.  So it's ok to run timerUI and setMenuItems every
@@ -215,21 +212,45 @@ export class TomatoTimer {
 			// component into the menu item.  This component will update itself
 			// and we won't have to call timerUI every second.
 			//
-			this.timerUI();
+			this.runUI();
 		});
-	}
+		this.runUI();
+	};
 
-	private stopTimer() {
-		this.timer?.stop();
-		this.timer = null;
-	}
+	private cancelTimer = () => {
+		this.timerValue.finish();
+		this.clock?.stop();
+		this.clock = null;
+		// TODO: discard any record of this session
+		this.runUI();
+	};
+
+	private pauseTimer = () => {
+		this.timerValue.pause();
+		this.clock?.stop();
+		this.runUI();
+	};
+
+	private resumeTimer = () => {
+		this.timerValue.pause(false);
+		this.clock?.start();
+		this.runUI();
+	};
+
+	private finishTimer = () => {
+		this.timerValue.finish();
+		this.clock?.stop();
+		this.clock = null;
+		// TODO: record the final time
+		this.runUI();
+	};
 
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Tomato Timer',
 			exitAction: this.exit
 		});
-		if (this.timer) {
+		if (this.clock) {
 			this.timerUI();
 			this.ctl.menu.focusFirstMenuItem();
 		} else {
@@ -246,10 +267,7 @@ export class TomatoTimer {
 				id: 'tomato-start',
 				textContent: 'Start',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-				action: () => {
-					this.startTimer();
-					this.runUI();
-				}
+				action: this.startTimer
 			}),
 			stdMenuItem({
 				id: 'tomato-set-test-data',
@@ -298,22 +316,30 @@ export class TomatoTimer {
 						})
 					]
 				}),
+				this.timerValue.isPaused
+					? stdMenuItem({
+							id: 'tomato-resume',
+							textContent: 'Resume',
+							left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+							action: this.resumeTimer
+						})
+					: stdMenuItem({
+							id: 'tomato-pause',
+							textContent: 'Pause',
+							left: (b) => [b.icon({ innerHTMLUnsafe: icons.pauseIcon })],
+							action: this.pauseTimer
+						}),
 				stdMenuItem({
-					id: 'tomato-pause',
-					textContent: 'Pause',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.pauseIcon })],
-					action: () => {
-						this.timer?.stop();
-					}
+					id: 'tomato-finish',
+					textContent: 'Finish',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
+					action: this.finishTimer
 				}),
 				stdMenuItem({
 					id: 'tomato-stop',
 					textContent: 'Cancel',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
-					action: () => {
-						this.stopTimer();
-						this.runUI();
-					}
+					action: this.cancelTimer
 				})
 			],
 

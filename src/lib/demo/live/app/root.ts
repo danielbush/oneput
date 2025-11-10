@@ -47,7 +47,7 @@ export class RootUI {
 				}
 			}),
 			stdMenuItem({
-				id: 'pomodoro',
+				id: 'tomato-timer',
 				left: (b) => [b.icon({ innerHTMLUnsafe: timerIcon })],
 				textContent: 'Tomato timer...',
 				action: () => {

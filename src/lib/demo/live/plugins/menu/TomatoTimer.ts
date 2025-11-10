@@ -97,7 +97,9 @@ class TomatoTimerValue {
 	 * This could be negative ("overtime").
 	 */
 	get secondsRemaining() {
-		const now = Date.now() / 1000;
+		// TODO: Seems to prevent a 2sec skip ie jumping from 00:30:00 to
+		// 00:29:58 instead of 00:28:59
+		const now = Math.floor(Date.now() / 1000);
 		const pauseDuration = this.data.pauseDuration ?? 0;
 		const endTime = this.data.startTime + this.data.duration + pauseDuration;
 		return endTime - now;
@@ -198,11 +200,14 @@ export class TomatoTimer {
 	}
 
 	private exit = () => {
+		this.clock.stop();
+		// TODO: persist the timer data.
 		this.back();
 	};
 
 	private startTimer = () => {
 		this.timerValue = TomatoTimerValue.create({
+			// TODO: let the manager set id's, we shouldn't care about it here?
 			id: CURRENT_TIMER_KEY,
 			startTime: Date.now() / 1000,
 			duration: 30 * 60,
@@ -250,6 +255,7 @@ export class TomatoTimer {
 			menuHeader: 'Tomato Timer',
 			exitAction: this.exit
 		});
+		// TODO: check if there is an active timer...
 		this.reloadUI(true);
 	}
 
@@ -262,7 +268,11 @@ export class TomatoTimer {
 			this.noTimerUI();
 			return;
 		}
-		this.timerUI(initial);
+		// Calculate this now, before any slow UI updates.  This tends to show
+		// the timer right at the beginning whereas if we do it buried within
+		// the menu item we may see t - 1 second.
+		const secondsRemaining = formatSecondsToHHMMSS(this.timerValue.secondsRemaining);
+		this.timerUI(initial, secondsRemaining);
 	}
 
 	/**
@@ -304,7 +314,7 @@ export class TomatoTimer {
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI(initial = false) {
+	private timerUI(initial = false, secondsRemaining: string) {
 		this.ctl.menu.setMenuItems(
 			[
 				menuItem({
@@ -319,9 +329,7 @@ export class TomatoTimer {
 								flex: '0',
 								fontSize: '300%'
 							},
-							textContent: this.timerValue?.secondsRemaining
-								? formatSecondsToHHMMSS(this.timerValue.secondsRemaining)
-								: '00:00:00'
+							textContent: secondsRemaining
 						})
 					]
 				}),

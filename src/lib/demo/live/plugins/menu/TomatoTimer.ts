@@ -118,7 +118,7 @@ export class TomatoTimer {
 		private back: () => void
 	) {}
 
-	private timer?: Timer;
+	private timer: Timer | null = null;
 
 	private startTimer() {
 		this.timer = Timer.create().start(60 * 60);
@@ -138,7 +138,7 @@ export class TomatoTimer {
 
 	private stopTimer() {
 		this.timer?.stop();
-		this.timer = undefined;
+		this.timer = null;
 	}
 
 	runUI() {

@@ -154,9 +154,6 @@ class Clock {
 	private tickFn: () => void = () => {};
 
 	start() {
-		if (this.intervalId !== null) {
-			clearInterval(this.intervalId);
-		}
 		this.intervalId = setInterval(() => {
 			this.tickFn();
 		}, 1000);
@@ -177,32 +174,16 @@ class Clock {
 
 export class TomatoTimer {
 	static create(ctl: Controller, back: () => void) {
-		const timerValue = TomatoTimerValue.create({
-			id: CURRENT_TIMER_KEY,
-			startTime: Date.now() / 1000,
-			duration: 30 * 60,
-			stopTime: null,
-			pauseTime: null,
-			pauseDuration: 0
-		});
-		return new TomatoTimer(ctl, back, timerValue);
+		return new TomatoTimer(ctl, back, Clock.create());
 	}
 
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
-		private timerValue: TomatoTimerValue
-	) {}
-
-	private clock: Clock | null = null;
-
-	private exit = () => {
-		this.back();
-	};
-
-	private startTimer = () => {
-		this.clock = Clock.create().start();
-		this.clock.onTick((/*secondsRemaining*/) => {
+		private clock: Clock,
+		private timerValue: TomatoTimerValue | null = null
+	) {
+		this.clock.onTick(() => {
 			// Note that if we've set id's for all menu items and used builders
 			// for descendents, then the only dom update will be the timer
 			// display.  So it's ok to run timerUI and setMenuItems every
@@ -212,50 +193,76 @@ export class TomatoTimer {
 			// component into the menu item.  This component will update itself
 			// and we won't have to call timerUI every second.
 			//
-			this.runUI();
+			this.reloadUI();
 		});
-		this.runUI();
+	}
+
+	private exit = () => {
+		this.back();
+	};
+
+	private startTimer = () => {
+		this.timerValue = TomatoTimerValue.create({
+			id: CURRENT_TIMER_KEY,
+			startTime: Date.now() / 1000,
+			duration: 30 * 60,
+			stopTime: null,
+			pauseTime: null,
+			pauseDuration: 0
+		});
+		this.reloadUI(true);
+		this.clock.start();
 	};
 
 	private cancelTimer = () => {
-		this.timerValue.finish();
+		this.timerValue?.finish();
 		this.clock?.stop();
-		this.clock = null;
+		this.timerValue = null;
 		// TODO: discard any record of this session
-		this.runUI();
+		this.reloadUI();
 	};
 
 	private pauseTimer = () => {
-		this.timerValue.pause();
+		this.timerValue?.pause();
 		this.clock?.stop();
-		this.runUI();
+		this.reloadUI();
 	};
 
 	private resumeTimer = () => {
-		this.timerValue.pause(false);
+		this.timerValue?.pause(false);
 		this.clock?.start();
-		this.runUI();
+		this.reloadUI();
 	};
 
 	private finishTimer = () => {
-		this.timerValue.finish();
+		this.timerValue?.finish();
 		this.clock?.stop();
-		this.clock = null;
+		this.timerValue = null;
 		// TODO: record the final time
-		this.runUI();
+		this.reloadUI();
 	};
 
+	/**
+	 * This is the entry point that loads the tomato timer ui.
+	 */
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Tomato Timer',
 			exitAction: this.exit
 		});
-		if (this.clock) {
-			this.timerUI();
-			this.ctl.menu.focusFirstMenuItem();
-		} else {
+		this.reloadUI(true);
+	}
+
+	private reloadUI(initial = false) {
+		if (!this.timerValue) {
 			this.noTimerUI();
+			return;
 		}
+		if (this.timerValue.isFinished) {
+			this.noTimerUI();
+			return;
+		}
+		this.timerUI(initial);
 	}
 
 	/**
@@ -297,7 +304,7 @@ export class TomatoTimer {
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI() {
+	private timerUI(initial = false) {
 		this.ctl.menu.setMenuItems(
 			[
 				menuItem({
@@ -312,11 +319,13 @@ export class TomatoTimer {
 								flex: '0',
 								fontSize: '300%'
 							},
-							textContent: formatSecondsToHHMMSS(this.timerValue.secondsRemaining)
+							textContent: this.timerValue?.secondsRemaining
+								? formatSecondsToHHMMSS(this.timerValue.secondsRemaining)
+								: '00:00:00'
 						})
 					]
 				}),
-				this.timerValue.isPaused
+				this.timerValue?.isPaused
 					? stdMenuItem({
 							id: 'tomato-resume',
 							textContent: 'Resume',
@@ -351,5 +360,8 @@ export class TomatoTimer {
 			// to not work.
 			{ focusBehaviour: 'none' }
 		);
+		if (initial) {
+			this.ctl.menu.focusFirstMenuItem();
+		}
 	}
 }

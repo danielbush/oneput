@@ -123,6 +123,15 @@ export class TomatoTimer {
 	private startTimer() {
 		this.timer = Timer.create().start(60 * 60);
 		this.timer.onTick((secondsRemaining) => {
+			// Note that if we've set id's for all menu items and used builders
+			// for descendents, then the only dom update will be the timer
+			// display.  So it's ok to run timerUI and setMenuItems every
+			// second as long as we don't update the focus (focusBehaviour).
+			//
+			// TODO: Another way to do the timer is to mount a svelte timer
+			// component into the menu item.  This component will update itself
+			// and we won't have to call timerUI every second.
+			//
 			this.timerUI({ secondsRemaining });
 		});
 	}
@@ -156,11 +165,6 @@ export class TomatoTimer {
 				action: () => {
 					this.startTimer();
 					this.runUI();
-					// TODO: This works, but the stop button doesn't.
-					setTimeout(() => {
-						this.stopTimer();
-						this.runUI();
-					}, 5000);
 				}
 			}),
 			stdMenuItem({
@@ -191,33 +195,42 @@ export class TomatoTimer {
 	 * The UI we see if there is an existing timer.
 	 */
 	private timerUI(params: { secondsRemaining: number }) {
-		this.ctl.menu.setMenuItems([
-			hflex({
-				id: 'tomato-timer-display',
-				type: 'hflex',
-				style: {
-					justifyContent: 'center'
-				},
-				children: (b) => [
-					b.fchild({
-						style: {
-							flex: '0',
-							fontSize: '300%'
-						},
-						// textContent: '1:00:00'
-						textContent: formatSecondsToHHMMSS(params.secondsRemaining)
-					})
-				]
-			}),
-			stdMenuItem({
-				id: 'tomato-stop',
-				textContent: 'Stop',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.stopIcon })],
-				action: () => {
-					this.stopTimer();
-					this.runUI();
-				}
-			})
-		]);
+		this.ctl.menu.setMenuItems(
+			[
+				hflex({
+					id: 'tomato-timer-display',
+					type: 'hflex',
+					style: {
+						justifyContent: 'center'
+					},
+					children: (b) => [
+						b.fchild({
+							style: {
+								flex: '0',
+								fontSize: '300%'
+							},
+							textContent: formatSecondsToHHMMSS(params.secondsRemaining)
+						})
+					]
+				}),
+				stdMenuItem({
+					id: 'tomato-stop',
+					textContent: 'Stop',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.stopIcon })],
+					action: () => {
+						this.stopTimer();
+						this.runUI();
+					}
+				})
+			],
+
+			// This is really important otherwise the stop button may not work.
+			// This is because we are re-rendering menu items every second, and
+			// the focusBehaviour may be changing the focused item when we call
+			// setMenuItems.  This will trigger an update to the DOM for the
+			// items whose focus state has changed.  And this update appears to
+			// cancel or prevent the stop action.
+			{ focusBehaviour: 'none' }
+		);
 	}
 }

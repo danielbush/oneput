@@ -27,7 +27,6 @@ export type TomatoTimerData =
 			// Represents an active timer session.  If pauseTime is not null, we
 			// are in a paused state.
 
-			id: string;
 			startTime: number; // unix-time
 			/**
 			 * This is the initial duration specified by the user.
@@ -52,7 +51,6 @@ export type TomatoTimerData =
 	| {
 			// Represents a completed timer session.
 
-			id: string;
 			startTime: number;
 			/**
 			 * The final stopping time by the user.
@@ -120,7 +118,7 @@ const CURRENT_TIMER_KEY = 'current-timer';
 async function idb(): Promise<IDBPDatabase<TomatoTimerDB>> {
 	const db = await openDB<TomatoTimerDB>(DB_NAME, undefined, {
 		upgrade(db) {
-			db.createObjectStore('timers', { keyPath: 'id' });
+			db.createObjectStore('timers');
 		}
 	});
 	return db;
@@ -207,8 +205,6 @@ export class TomatoTimer {
 
 	private startTimer = () => {
 		this.timerValue = TomatoTimerValue.create({
-			// TODO: let the manager set id's, we shouldn't care about it here?
-			id: CURRENT_TIMER_KEY,
 			startTime: Date.now() / 1000,
 			duration: 30 * 60,
 			stopTime: null,
@@ -295,15 +291,17 @@ export class TomatoTimer {
 						.delete('timers', CURRENT_TIMER_KEY)
 						.catch((err) => this.ctl.notify(`Error deleting test data: ${err}`));
 					await db
-						.put('timers', {
-							id: CURRENT_TIMER_KEY,
-							// startTime: Math.floor(Date.now() / 1000) + 1,
-							startTime: Date.now() / 1000,
-							duration: 30 * 60,
-							stopTime: null,
-							pauseTime: null,
-							pauseDuration: 0
-						})
+						.put(
+							'timers',
+							{
+								startTime: Date.now() / 1000,
+								duration: 30 * 60,
+								stopTime: null,
+								pauseTime: null,
+								pauseDuration: 0
+							},
+							CURRENT_TIMER_KEY
+						)
 						.catch((err) => this.ctl.notify(`Error adding test data: ${err}`));
 					this.ctl.notify('Test data set', { duration: 3000 });
 				}

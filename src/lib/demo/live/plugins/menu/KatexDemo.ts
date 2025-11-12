@@ -17,6 +17,7 @@ export class KatexDemo {
 
 	private exit = () => {
 		this.unsetMenuItemsFn?.();
+		this.notify?.clear();
 		this.back();
 	};
 

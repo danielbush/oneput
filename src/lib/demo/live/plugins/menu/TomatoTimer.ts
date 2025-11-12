@@ -3,7 +3,7 @@ import { stdMenuItem } from '$lib/oneput/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/ui.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import { menuItem } from '$lib/oneput/builder.js';
+import { hflex, menuItem } from '$lib/oneput/builder.js';
 
 interface TomatoTimerDB extends DBSchema {
 	timers: {
@@ -211,8 +211,9 @@ export class TomatoTimer {
 			pauseTime: null,
 			pauseDuration: 0
 		});
-		this.reloadUI(true);
-		this.clock.start();
+		this.createTimerUI();
+		// this.reloadUI(true);
+		// this.clock.start();
 	};
 
 	private cancelTimer = () => {
@@ -369,5 +370,24 @@ export class TomatoTimer {
 		if (initial) {
 			this.ctl.menu.focusFirstMenuItem();
 		}
+	}
+
+	private createTimerUI() {
+		this.ctl.ui.setPlaceholder('Add a label or hit enter to start with no label...');
+		this.ctl.menu.setMenuItems([]);
+		this.ctl.ui.setInputUI((inputUI) => {
+			return {
+				...inputUI,
+				right: hflex({
+					children: (b) => [
+						b.iconButton({
+							title: 'Add',
+							innerHTMLUnsafe: icons.tickIcon
+						}),
+						b.iconButton({ title: 'Cancel', innerHTMLUnsafe: icons.xIcon })
+					]
+				})
+			};
+		});
 	}
 }

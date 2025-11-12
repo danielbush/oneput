@@ -371,7 +371,7 @@ export class TomatoTimer {
 	}
 
 	private createTimerUI() {
-		this.ctl.ui.setPlaceholder('Add a label or select start with no label...');
+		this.ctl.ui.setPlaceholder('Type a label and hit shift+enter...');
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-timer-no-label',
@@ -383,6 +383,43 @@ export class TomatoTimer {
 				}
 			})
 		]);
+		this.ctl.keys.setKeys(
+			{
+				// startWithNoLabel: {
+				// 	description: 'start with no label',
+				// 	bindings: ['Shift+Enter'],
+				// 	action: () => {
+				// 		this.reloadUI(true);
+				// 		this.clock.start();
+				// 	}
+				// },
+				// doAction: {
+				// 	bindings: ['Enter'],
+				// 	action: (c) => {
+				// 		c.menu.doMenuAction();
+				// 	},
+				// 	description: 'Do action'
+				// },
+				submit: {
+					bindings: ['Shift+Enter'],
+					action: () => {
+						const label = this.ctl.input.getInputValue();
+						if (!label) {
+							// Start with no label.
+							this.reloadUI(true);
+							this.clock.start();
+							return;
+						}
+						// TODO: record the label.
+						this.reloadUI(true);
+						this.clock.start();
+					},
+					description: 'Submit input'
+				}
+			},
+
+			true
+		);
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {
 				...inputUI,

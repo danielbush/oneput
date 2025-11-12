@@ -212,8 +212,6 @@ export class TomatoTimer {
 			pauseDuration: 0
 		});
 		this.createTimerUI();
-		// this.reloadUI(true);
-		// this.clock.start();
 	};
 
 	private cancelTimer = () => {
@@ -373,8 +371,18 @@ export class TomatoTimer {
 	}
 
 	private createTimerUI() {
-		this.ctl.ui.setPlaceholder('Add a label or hit enter to start with no label...');
-		this.ctl.menu.setMenuItems([]);
+		this.ctl.ui.setPlaceholder('Add a label or select start with no label...');
+		this.ctl.menu.setMenuItems([
+			stdMenuItem({
+				id: 'tomato-timer-no-label',
+				textContent: 'Start with no label',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+				action: () => {
+					this.reloadUI(true);
+					this.clock.start();
+				}
+			})
+		]);
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {
 				...inputUI,

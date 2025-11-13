@@ -87,16 +87,16 @@ export class KeysController {
 
 	setDefaultKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
-			this.restoreLocalBindings = bindings;
+			this.defaultLocalBindings = bindings;
 			this.handleLocalKeys(bindings);
 		} else {
-			this.restoreGlobalBindings = bindings;
+			this.defaultGlobalBindings = bindings;
 			this.handleGlobalKeys(bindings);
 		}
 	}
 
-	private restoreLocalBindings: KeyBindingMap = {};
-	private restoreGlobalBindings: KeyBindingMap = {};
+	private defaultLocalBindings: KeyBindingMap = {};
+	private defaultGlobalBindings: KeyBindingMap = {};
 
 	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
@@ -108,9 +108,9 @@ export class KeysController {
 
 	unsetKeys(isLocal: boolean = false) {
 		if (isLocal) {
-			this.setDefaultKeys(this.restoreLocalBindings, true);
+			this.setDefaultKeys(this.defaultLocalBindings, true);
 		} else {
-			this.setDefaultKeys(this.restoreGlobalBindings, false);
+			this.setDefaultKeys(this.defaultGlobalBindings, false);
 		}
 	}
 }

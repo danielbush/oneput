@@ -201,6 +201,14 @@ class MyKeys {
 }
 
 export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implements DefaultUI<V> {
+	static create<V extends MyDefaultUIValues = MyDefaultUIValues>(
+		ctl: Controller,
+		values: V = {} as V
+	) {
+		const keys = new MyKeys();
+		return new MyDefaultUI(ctl, values, keys);
+	}
+
 	constructor(
 		private ctl: Controller,
 		private values: V = {} as V,

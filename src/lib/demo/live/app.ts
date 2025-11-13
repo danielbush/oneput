@@ -9,7 +9,6 @@ import { RootUI } from './app/root.js';
 // set for us.  But we could fetch settings asynchronously here, update
 // defaultUI accordingly
 export const setController = (ctl: Controller) => {
-	const defaultUI = new MyDefaultUI(ctl);
-	ctl.ui.setDefaultUI(defaultUI);
+	ctl.ui.setDefaultUI(MyDefaultUI.create(ctl));
 	RootUI.create(ctl).runUI();
 };

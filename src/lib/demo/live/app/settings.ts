@@ -1,26 +1,21 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
-import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
 import { menuItemWithIcon, MyDefaultUI, type MyDefaultUIValues } from '../config/ui.js';
-import { KeysManager } from '../service/KeysManager.js';
+import { KeysManagerFactory } from '../service/KeysManager.js';
 import { config } from '../service/TestKeyService.js';
 import { SettingsManager } from '../service/SettingsManager.js';
 
 export class SettingsUI {
 	static create(ctl: Controller, back: () => void) {
-		return new SettingsUI(ctl, back, KeysManager.create);
+		return new SettingsUI(ctl, back, KeysManagerFactory.create(ctl, back));
 	}
 
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
-		private createKeysManager: (
-			ctl: Controller,
-			keyMap: KeyBindingMap,
-			isLocal: boolean
-		) => KeysManager
+		private keysManager: KeysManagerFactory
 	) {}
 
 	runUI = () => {
@@ -50,9 +45,8 @@ export class SettingsUI {
 				text: 'Set global default key bindings...',
 				action: () => {
 					const defaultUI = this.ctl.ui.getDefaultUI<MyDefaultUI>();
-					this.createKeysManager(this.ctl, defaultUI?.keys.defaultGlobalKeys || {}, false).runUI(
-						this.runUI
-					);
+					const km = this.keysManager.create(false, defaultUI?.keys.defaultGlobalKeys || {});
+					km.runUI();
 				}
 			}),
 			menuItemWithIcon({
@@ -60,9 +54,8 @@ export class SettingsUI {
 				text: 'Set local default key bindings...',
 				action: () => {
 					const defaultUI = this.ctl.ui.getDefaultUI<MyDefaultUI>();
-					this.createKeysManager(this.ctl, defaultUI?.keys.defaultLocalKeys || {}, true).runUI(
-						this.runUI
-					);
+					const km = this.keysManager.create(true, defaultUI?.keys.defaultLocalKeys || {});
+					km.runUI();
 				}
 			})
 		]);

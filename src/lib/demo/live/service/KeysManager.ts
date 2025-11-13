@@ -1,41 +1,53 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { KeyBindingsController } from '$lib/oneput/plugins/menu/KeyBindingsController.js';
+import { KeyBindingsUI } from '$lib/oneput/plugins/menu/KeyBindingsUI.js';
 import type { MyDefaultUI } from '../config/ui.js';
 import { TestKeyService } from './TestKeyService.js';
 
 /**
- * Combines the ui (KeyBindingsController) with the storage (TestKeyService) to
+ * Combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
  * let you manage your key bindings..
  */
-export class KeysManager {
-	static create(c: Controller, keyMap: KeyBindingMap, isLocal: boolean) {
-		const testKeyService = TestKeyService.create();
-		return new KeysManager(c, keyMap, testKeyService, isLocal, KeyBindingsController.create);
+export class KeysManagerFactory {
+	static create(ctl: Controller, back: () => void) {
+		return new KeysManagerFactory(ctl, back);
 	}
 
 	private constructor(
 		private ctl: Controller,
-		private keyMap: KeyBindingMap,
+		private back: () => void
+	) {}
+
+	create = (isLocal: boolean, keyMap: KeyBindingMap) => {
+		const km: KeysManager = new KeysManager(
+			this.ctl,
+			TestKeyService.create(),
+			isLocal,
+			KeyBindingsUI.create({
+				controller: this.ctl,
+				back: this.back,
+				onChange: (newKeyMap) => km.updateKeys(newKeyMap)
+			}),
+			keyMap
+		);
+		return km;
+	};
+}
+
+/**
+ * Instantiate to manage updates to a single set of keys eg local or global bindings.
+ */
+export class KeysManager {
+	constructor(
+		private ctl: Controller,
 		private testKeyService: TestKeyService,
 		private isLocal: boolean,
-		private createKeyBindingsController: (params: {
-			controller: Controller;
-			onChange: (newKeyMap: KeyBindingMap) => Promise<void>;
-			keyMap: KeyBindingMap;
-			back: () => void;
-		}) => KeyBindingsController
-	) {
-		this.createKeyBindingsController = createKeyBindingsController;
-	}
+		private keyBindingsUI: KeyBindingsUI,
+		private keyMap: KeyBindingMap = {}
+	) {}
 
-	runUI(back: () => void) {
-		this.createKeyBindingsController({
-			controller: this.ctl,
-			onChange: (newKeyMap) => this.updateKeys(newKeyMap),
-			keyMap: this.keyMap,
-			back
-		}).runUI();
+	runUI() {
+		this.keyBindingsUI.runUI(this.keyMap);
 	}
 
 	async updateKeys(newKeyMap: KeyBindingMap) {

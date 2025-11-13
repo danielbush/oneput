@@ -80,34 +80,32 @@ const keybindingMenuItem: (params: {
  *
  * The assumption is that keyMap is stored somewhere by the consumer.
  */
-export class KeyBindingsController {
+export class KeyBindingsUI {
 	static create(params: {
 		controller: Controller;
-		onChange: (keyMap: KeyBindingMap) => Promise<void>;
-		keyMap: KeyBindingMap;
 		back: () => void;
+		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	}) {
-		return new KeyBindingsController(params);
+		return new KeyBindingsUI(params);
 	}
 
 	private controller: Controller;
-	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
-	private keyBindingMap: KeyBindingMap;
+	private onChange?: (keyMap: KeyBindingMap) => Promise<void>;
+	private keyBindingMap: KeyBindingMap = {};
 	private back: () => void;
 
 	private constructor(params: {
 		controller: Controller;
-		onChange: (keyMap: KeyBindingMap) => Promise<void>;
-		keyMap: KeyBindingMap;
 		back: () => void;
+		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	}) {
 		this.controller = params.controller;
-		this.onChange = params.onChange;
-		this.keyBindingMap = params.keyMap;
 		this.back = params.back;
+		this.onChange = params.onChange;
 	}
 
-	runUI() {
+	runUI(keyMap: KeyBindingMap) {
+		this.keyBindingMap = keyMap;
 		this.actionsUI();
 	}
 
@@ -265,7 +263,7 @@ export class KeyBindingsController {
 					keyBindings.addBinding(actionId, capturedKeys);
 					// Optimistic update...
 					this.keyBindingMap = keyBindings.keyBindingsMap;
-					this.onChange(keyBindings.keyBindingsMap).catch(() => {
+					this.onChange?.(keyBindings.keyBindingsMap).catch(() => {
 						// Revert optimistic update...
 						this.keyBindingMap = oldKeyMap;
 					});
@@ -294,7 +292,7 @@ export class KeyBindingsController {
 		};
 		// Optimistic update
 		this.keyBindingMap = newBindings;
-		this.onChange(this.keyBindingMap).catch(() => {
+		this.onChange?.(this.keyBindingMap).catch(() => {
 			// Revert optimistic update...
 			this.keyBindingMap = oldBindings;
 		});

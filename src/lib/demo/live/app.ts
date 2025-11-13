@@ -1,7 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { MyDefaultUI } from './config/ui.js';
 import { RootUI } from './app/root.js';
-import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.
@@ -12,8 +11,5 @@ import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
 export const setController = (ctl: Controller) => {
 	const defaultUI = new MyDefaultUI(ctl);
 	ctl.ui.setDefaultUI(defaultUI);
-	ctl.keys.setDefaultKeys(defaultUI.keys.defaultGlobalKeys, false);
-	ctl.keys.setDefaultKeys(defaultUI.keys.defaultLocalKeys, true);
-	ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 	RootUI.create(ctl).runUI();
 };

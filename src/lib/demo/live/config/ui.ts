@@ -12,6 +12,7 @@ import { MenuStatus } from '../plugins/ui/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../plugins/ui/TimeDisplay.js';
 import * as keys from './keys.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
 
 /**
  * Menu item with no left icon, give more room for main content.
@@ -232,6 +233,9 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		this.ctl.menu.enableMenuActions();
 		this.ctl.menu.enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();
+		this.ctl.keys.setDefaultKeys(this.keys.defaultGlobalKeys, false);
+		this.ctl.keys.setDefaultKeys(this.keys.defaultLocalKeys, true);
+		this.ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 		this.ctl.menu.setFocusBehaviour('first');
 	}
 

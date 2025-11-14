@@ -1,5 +1,6 @@
 import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
+import type { KeyBindingMap } from './KeyBinding.js';
 
 export type InputChangeEvent = Event & {
 	target: (EventTarget & HTMLInputElement) | null;
@@ -232,6 +233,7 @@ export interface DefaultUI<V extends Record<string, unknown> = Record<string, un
 	innerUI?: OneputProps['innerUI'];
 	outerUI?: OneputProps['outerUI'];
 	placeholder?: OneputProps['placeholder'];
+	getDefaultKeys?(isLocal: boolean): KeyBindingMap;
 }
 
 /**

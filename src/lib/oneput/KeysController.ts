@@ -95,6 +95,15 @@ export class KeysController {
 		}
 	}
 
+	/**
+	 * Returns the default key bindings for current default ui.
+	 *
+	 * @param isLocal
+	 */
+	getDefaultKeys(isLocal: boolean = false) {
+		return isLocal ? this.defaultLocalBindings : this.defaultGlobalBindings;
+	}
+
 	private defaultLocalBindings: KeyBindingMap = {};
 	private defaultGlobalBindings: KeyBindingMap = {};
 

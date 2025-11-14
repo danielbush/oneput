@@ -219,7 +219,7 @@ export function walk(
 }
 
 export interface DefaultUI<V extends Record<string, unknown> = Record<string, unknown>> {
-	setValues?(values: V): void;
+	configureUI?(values: V): void;
 	/**
 	 * Called after the ui controller has updated the ui using the ui provided
 	 * by this instance.

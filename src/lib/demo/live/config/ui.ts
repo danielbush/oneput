@@ -215,7 +215,7 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		public keys: MyKeys = new MyKeys()
 	) {}
 
-	setValues(values: V) {
+	configureUI(values: V) {
 		this.values = {
 			exitAction: () => {
 				this.ctl.menu.closeMenu();

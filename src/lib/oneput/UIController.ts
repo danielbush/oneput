@@ -34,20 +34,6 @@ export class UIController {
 		this.currentProps.innerUI = inner;
 	}
 
-	/**
-	 * Reverts the different ui areas in Oneput back to defaults.
-	 *
-	 * If setDefaultUI has not been called, the ui will be set to nothing.
-	 */
-	resetUI() {
-		this.currentProps.inputUI = this.defaultUI?.inputUI;
-		this.currentProps.menuUI = this.defaultUI?.menuUI;
-		this.currentProps.innerUI = this.defaultUI?.innerUI;
-		this.currentProps.outerUI = this.defaultUI?.outerUI;
-		this.currentProps.placeholder = this.defaultUI?.placeholder || this.fallbackPlaceholder;
-		this.defaultUI?.afterUpdate?.();
-	}
-
 	private defaultUI?: DefaultUI;
 
 	setDefaultUI(defaultUI?: DefaultUI) {
@@ -61,9 +47,14 @@ export class UIController {
 
 	runDefaultUI<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
-			this.defaultUI.setValues?.(values);
+			this.defaultUI.configureUI?.(values);
 		}
-		this.resetUI();
+		this.currentProps.inputUI = this.defaultUI?.inputUI;
+		this.currentProps.menuUI = this.defaultUI?.menuUI;
+		this.currentProps.innerUI = this.defaultUI?.innerUI;
+		this.currentProps.outerUI = this.defaultUI?.outerUI;
+		this.currentProps.placeholder = this.defaultUI?.placeholder || this.fallbackPlaceholder;
+		this.defaultUI?.afterUpdate?.();
 	}
 
 	/**

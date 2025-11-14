@@ -9,13 +9,19 @@ import { SettingsManager } from '../service/SettingsManager.js';
 
 export class SettingsUI {
 	static create(ctl: Controller, back: () => void) {
-		return new SettingsUI(ctl, back, KeysManagerFactory.create(ctl, back));
+		return new SettingsUI(
+			ctl,
+			back,
+			KeysManagerFactory.create(ctl, back),
+			FiltersUI.create(ctl, back)
+		);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private back: () => void,
-		private keysManager: KeysManagerFactory
+		private keysManager: KeysManagerFactory,
+		private filtersUI: FiltersUI
 	) {}
 
 	runUI = () => {
@@ -37,7 +43,7 @@ export class SettingsUI {
 				leftIcon: listFilterIcon,
 				text: 'Set default typing filter...',
 				action: () => {
-					FiltersUI.create(this.ctl, this.runUI).runUI();
+					this.filtersUI.runUI();
 				}
 			}),
 			menuItemWithIcon({

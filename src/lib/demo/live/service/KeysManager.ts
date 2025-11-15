@@ -4,7 +4,9 @@ import { KeyBindingsUI } from '$lib/oneput/plugins/menu/KeyBindingsUI.js';
 import { TestKeyService } from './TestKeyService.js';
 
 /**
- * Combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
+ * This factory lets you create a key manager for either local or global keys.
+ *
+ * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
  * let you manage your key bindings..
  */
 export class KeysManagerFactory {

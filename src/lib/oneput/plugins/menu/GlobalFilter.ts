@@ -3,6 +3,8 @@ import type { Controller } from '$lib/oneput/controller.js';
 import type { OneputProps } from '$lib/oneput/lib.js';
 import { globeIcon } from '$lib/oneput/shared/icons.js';
 
+// TODO: implement a global items / filter mechanism.
+
 export class GlobalFilter {
 	static create(ctl: Controller) {
 		return new GlobalFilter(ctl);

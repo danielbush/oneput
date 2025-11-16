@@ -76,7 +76,13 @@ const keybindingMenuItem: (params: {
 };
 
 export type UIChangeParams = {
+	/**
+	 * If not specified, then use a main title provided by the parent.
+	 */
 	title?: string;
+	/**
+	 * If not specified, parent should use its back action which will exit this plugin.
+	 */
 	back?: () => void;
 };
 
@@ -95,8 +101,8 @@ export class KeyBindingsUI {
 	}
 
 	private controller: Controller;
-	private onChange?: (keyMap: KeyBindingMap) => Promise<void>;
-	private onUIChange?: (ui: UIChangeParams) => void;
+	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
+	private onUIChange: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
 
 	private constructor(params: {
@@ -118,8 +124,7 @@ export class KeyBindingsUI {
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
-		this.controller.ui.setInputUI(inputUI(this.controller));
-		this.onUIChange?.({});
+		this.onUIChange({});
 		this.controller.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({

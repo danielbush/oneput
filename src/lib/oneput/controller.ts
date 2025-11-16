@@ -5,7 +5,7 @@ import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/ui/Notification.js';
 import type { OneputProps } from './lib.js';
-import { Alert } from './plugins/ui/Alert.js';
+import { Alert } from './plugins/Alert.js';
 import { Confirm } from './plugins/ui/Confirm.js';
 
 export class Controller {

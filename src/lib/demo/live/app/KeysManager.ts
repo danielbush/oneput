@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { KeyBindingsUI } from '$lib/oneput/plugins/KeyBindingsUI.js';
+import { KeyBindingsUI, type UIChangeParams } from '$lib/oneput/plugins/KeyBindingsUI.js';
 import type { MyDefaultUIValues } from '../config/ui.js';
 import { TestKeyService } from '../service/TestKeyService.js';
 
@@ -55,9 +55,11 @@ export class KeysManager {
 			KeyBindingsUI.create({
 				controller: params.ctl,
 				back: params.back,
-				onChange: (newKeyMap) => km.updateKeys(newKeyMap)
+				onChange: (newKeyMap) => km.updateKeys(newKeyMap),
+				onUIChange: (ui) => km.handleUIChange(ui)
 			}),
-			params.keyMap
+			params.keyMap,
+			params.back
 		);
 		return km;
 	}
@@ -67,15 +69,22 @@ export class KeysManager {
 		private testKeyService: TestKeyService,
 		private isLocal: boolean,
 		private keyBindingsUI: KeyBindingsUI,
-		private keyMap: KeyBindingMap = {}
+		private keyMap: KeyBindingMap = {},
+		private back: () => void
 	) {}
 
 	runUI() {
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
-			menuHeader: `Manage ${this.isLocal ? 'local' : 'global'} key bindings`,
-			exitType: 'exit'
-		});
 		this.keyBindingsUI.runUI(this.keyMap);
+	}
+
+	handleUIChange(ui: UIChangeParams) {
+		const title =
+			ui.ui === 'actionsUI' ? `Manage ${this.isLocal ? 'local' : 'global'} key bindings` : ui.title;
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+			menuHeader: title,
+			exitAction: this.back,
+			exitType: 'back'
+		});
 	}
 
 	async updateKeys(newKeyMap: KeyBindingMap) {

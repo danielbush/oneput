@@ -75,6 +75,11 @@ const keybindingMenuItem: (params: {
 	};
 };
 
+export type UIChangeParams = {
+	ui: 'actionsUI' | 'actionUI' | 'captureBindingUI';
+	title: string;
+};
+
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  *
@@ -85,12 +90,14 @@ export class KeyBindingsUI {
 		controller: Controller;
 		back: () => void;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
+		onUIChange: (ui: UIChangeParams) => void;
 	}) {
 		return new KeyBindingsUI(params);
 	}
 
 	private controller: Controller;
 	private onChange?: (keyMap: KeyBindingMap) => Promise<void>;
+	private onUIChange?: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
 	private back: () => void;
 
@@ -98,10 +105,12 @@ export class KeyBindingsUI {
 		controller: Controller;
 		back: () => void;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
+		onUIChange: (ui: UIChangeParams) => void;
 	}) {
 		this.controller = params.controller;
 		this.back = params.back;
 		this.onChange = params.onChange;
+		this.onUIChange = params.onUIChange;
 	}
 
 	runUI(keyMap: KeyBindingMap) {
@@ -115,9 +124,7 @@ export class KeyBindingsUI {
 	private actionsUI = () => {
 		this.controller.setBackBinding(this.back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
-		// this.controller.ui.setMenuUI({
-		// 	header: menuHeaderUI({ title: 'Key bindings', exitAction: this.back })
-		// });
+		this.onUIChange?.({ ui: 'actionsUI', title: 'Key bindings' });
 		this.controller.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({

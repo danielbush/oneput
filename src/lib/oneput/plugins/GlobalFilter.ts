@@ -1,7 +1,7 @@
-import { menuItemWithIcon } from '$lib/demo/live/config/ui.js';
-import type { Controller } from '$lib/oneput/controller.js';
-import type { OneputProps } from '$lib/oneput/lib.js';
-import { globeIcon } from '$lib/oneput/shared/icons.js';
+import { stdMenuItem } from '../shared/stdMenuItem.js';
+import type { Controller } from '../controller.js';
+import type { OneputProps } from '../lib.js';
+import { globeIcon } from '../shared/icons.js';
 
 // TODO: implement a global items / filter mechanism.
 
@@ -37,9 +37,9 @@ export class GlobalFilter {
 		}, 10);
 		this.ctl.ui.setPlaceholder('Filter across all menu items...');
 		this.ctl.menu.setMenuItems([
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'global-filter-1',
-				text: 'first item',
+				textContent: 'first item',
 				action: () => {
 					alert('some action');
 				}

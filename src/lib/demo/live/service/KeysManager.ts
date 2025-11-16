@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { KeyBindingsUI } from '$lib/oneput/plugins/menu/KeyBindingsUI.js';
+import { KeyBindingsUI } from '$lib/oneput/plugins/KeyBindingsUI.js';
 import { TestKeyService } from './TestKeyService.js';
 
 /**

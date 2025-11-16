@@ -1,5 +1,5 @@
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { GlobalFilter } from '$lib/oneput/plugins/menu/GlobalFilter.js';
+import { GlobalFilter } from '$lib/oneput/plugins/GlobalFilter.js';
 
 export const globalKeys: KeyBindingMap = {
 	openMenu: {

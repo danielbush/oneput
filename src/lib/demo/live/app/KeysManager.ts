@@ -1,6 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { KeyBindingsUI } from '$lib/oneput/plugins/KeyBindingsUI.js';
+import type { MyDefaultUIValues } from '../config/ui.js';
 import { TestKeyService } from '../service/TestKeyService.js';
 
 /**
@@ -70,6 +71,10 @@ export class KeysManager {
 	) {}
 
 	runUI() {
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+			menuHeader: `Manage ${this.isLocal ? 'local' : 'global'} key bindings`,
+			exitType: 'exit'
+		});
 		this.keyBindingsUI.runUI(this.keyMap);
 	}
 

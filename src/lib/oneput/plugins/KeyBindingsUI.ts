@@ -115,9 +115,9 @@ export class KeyBindingsUI {
 	private actionsUI = () => {
 		this.controller.setBackBinding(this.back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
-		this.controller.ui.setMenuUI({
-			header: menuHeaderUI({ title: 'Key bindings', exitAction: this.back })
-		});
+		// this.controller.ui.setMenuUI({
+		// 	header: menuHeaderUI({ title: 'Key bindings', exitAction: this.back })
+		// });
 		this.controller.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({

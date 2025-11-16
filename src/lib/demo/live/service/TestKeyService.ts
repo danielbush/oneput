@@ -8,10 +8,28 @@ export const config = {
 	}
 };
 
+export type KeyService = TestKeyService;
+
 export class TestKeyService {
 	static create() {
 		return new TestKeyService();
 	}
+
+	private localKeys: KeyBindingMap = {};
+	private globalKeys: KeyBindingMap = {};
+
+	getKeys = async (isLocal: boolean) => {
+		return new Promise<KeyBindingMap>((resolve, reject) => {
+			setTimeout(() => {
+				if (config.simulateError) {
+					reject(
+						new Error(`A simulated error occurred for ${isLocal ? 'local' : 'global'} key bindings`)
+					);
+				}
+				resolve(isLocal ? this.localKeys : this.globalKeys);
+			}, 1000);
+		});
+	};
 
 	setKeys = async (keyMap: KeyBindingMap, isLocal: boolean) => {
 		return new Promise((resolve, reject) => {

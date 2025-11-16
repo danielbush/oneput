@@ -1,6 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { MyDefaultUI } from './config/ui.js';
 import { RootUI } from './app/root.js';
+import { globalKeys, localKeys } from './config/keys.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.
@@ -10,5 +11,9 @@ import { RootUI } from './app/root.js';
 // defaultUI accordingly
 export const setController = (ctl: Controller) => {
 	ctl.ui.setDefaultUI(MyDefaultUI.create(ctl));
+	// This demo app will start with preset default keys.
+	// You could fetch these from a key service here.
+	ctl.keys.setDefaultKeys(globalKeys, false);
+	ctl.keys.setDefaultKeys(localKeys, true);
 	RootUI.create(ctl).runUI();
 };

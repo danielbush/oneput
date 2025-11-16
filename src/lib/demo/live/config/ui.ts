@@ -10,7 +10,6 @@ import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '../plugins/ui/DateDisplay.js';
 import { MenuStatus } from '../plugins/ui/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../plugins/ui/TimeDisplay.js';
-import * as keys from './keys.js';
 import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
 
 /**
@@ -206,7 +205,7 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		};
 	}
 
-	afterUpdate() {
+	async afterUpdate() {
 		// Clear the input.
 		// You can set `clearInput: false` to disable this behaviour.
 		if (this.values.clearInput || !('clearInput' in this.values)) {
@@ -220,19 +219,10 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		this.ctl.menu.enableMenuActions();
 		this.ctl.menu.enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();
-		this.ctl.keys.setDefaultKeys(keys.globalKeys, false);
-		this.ctl.keys.setDefaultKeys(keys.localKeys, true);
+		this.ctl.keys.unsetKeys();
+		this.ctl.keys.unsetKeys(true);
 		this.ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 		this.ctl.menu.setFocusBehaviour('first');
-	}
-
-	/**
-	 * Returns the default key bindings for this particular ui.
-	 *
-	 * @param isLocal - Whether to return the local or global key bindings.
-	 */
-	getDefaultKeys(isLocal: boolean) {
-		return isLocal ? keys.localKeys : keys.globalKeys;
 	}
 
 	get placeholder() {

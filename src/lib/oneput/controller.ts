@@ -3,7 +3,7 @@ import { InternalEventEmitter } from './InternalEventEmitter.js';
 import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
-import { Notification, type NotificationParams } from './plugins/ui/Notification.js';
+import { Notification, type NotificationParams } from './plugins/Notification.js';
 import type { OneputProps } from './lib.js';
 import { Alert } from './plugins/Alert.js';
 import { Confirm } from './plugins/ui/Confirm.js';

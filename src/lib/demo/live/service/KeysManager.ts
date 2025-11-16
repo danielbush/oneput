@@ -6,8 +6,10 @@ import { TestKeyService } from './TestKeyService.js';
 /**
  * This factory lets you create a key manager for either local or global keys.
  *
- * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
- * let you manage your key bindings..
+ * A null version of the parent ui can create a null version of this factory
+ * which will then produce a null version of the KeyManager when the menu action
+ * in the null parent ui is triggered in a test.
+ *
  */
 export class KeysManagerFactory {
 	static create(ctl: Controller, back: () => void) {
@@ -19,26 +21,46 @@ export class KeysManagerFactory {
 		private back: () => void
 	) {}
 
+	/**
+	 * Can be called dynamically eg within a menu item action.
+	 */
 	create = (isLocal: boolean, keyMap: KeyBindingMap) => {
-		const km: KeysManager = new KeysManager(
-			this.ctl,
-			TestKeyService.create(),
-			isLocal,
-			KeyBindingsUI.create({
-				controller: this.ctl,
-				back: this.back,
-				onChange: (newKeyMap) => km.updateKeys(newKeyMap)
-			}),
-			keyMap
-		);
+		const km: KeysManager = KeysManager.create({
+			ctl: this.ctl,
+			back: this.back,
+			isLocal: isLocal,
+			keyMap: keyMap
+		});
 		return km;
 	};
 }
 
 /**
- * Instantiate to manage updates to a single set of keys eg local or global bindings.
+ * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
+ * let you manage a single set of key bindings eg local or global.
  */
 export class KeysManager {
+	static create(params: {
+		ctl: Controller;
+		back: () => void;
+		isLocal: boolean;
+		keyMap: KeyBindingMap;
+	}) {
+		const testKeyService = TestKeyService.create();
+		const km: KeysManager = new KeysManager(
+			params.ctl,
+			testKeyService,
+			params.isLocal,
+			KeyBindingsUI.create({
+				controller: params.ctl,
+				back: params.back,
+				onChange: (newKeyMap) => km.updateKeys(newKeyMap)
+			}),
+			params.keyMap
+		);
+		return km;
+	}
+
 	constructor(
 		private ctl: Controller,
 		private testKeyService: TestKeyService,

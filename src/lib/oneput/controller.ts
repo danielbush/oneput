@@ -6,7 +6,7 @@ import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/Notification.js';
 import type { OneputProps } from './lib.js';
 import { Alert } from './plugins/Alert.js';
-import { Confirm } from './plugins/ui/Confirm.js';
+import { Confirm } from './plugins/Confirm.js';
 
 export class Controller {
 	private events = new InternalEventEmitter();

@@ -1,5 +1,5 @@
-import type { Controller } from '../../controller.js';
-import { filterChildren, randomId } from '../../lib.js';
+import type { Controller } from '../controller.js';
+import { filterChildren, randomId } from '../lib.js';
 
 export class Confirm {
 	static create(

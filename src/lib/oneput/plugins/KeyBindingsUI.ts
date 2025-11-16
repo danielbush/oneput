@@ -76,8 +76,8 @@ const keybindingMenuItem: (params: {
 };
 
 export type UIChangeParams = {
-	ui: 'actionsUI' | 'actionUI' | 'captureBindingUI';
-	title: string;
+	title?: string;
+	back?: () => void;
 };
 
 /**
@@ -88,7 +88,6 @@ export type UIChangeParams = {
 export class KeyBindingsUI {
 	static create(params: {
 		controller: Controller;
-		back: () => void;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
 	}) {
@@ -99,16 +98,13 @@ export class KeyBindingsUI {
 	private onChange?: (keyMap: KeyBindingMap) => Promise<void>;
 	private onUIChange?: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
-	private back: () => void;
 
 	private constructor(params: {
 		controller: Controller;
-		back: () => void;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
 	}) {
 		this.controller = params.controller;
-		this.back = params.back;
 		this.onChange = params.onChange;
 		this.onUIChange = params.onUIChange;
 	}
@@ -122,9 +118,8 @@ export class KeyBindingsUI {
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
-		this.controller.setBackBinding(this.back);
 		this.controller.ui.setInputUI(inputUI(this.controller));
-		this.onUIChange?.({ ui: 'actionsUI', title: 'Key bindings' });
+		this.onUIChange?.({});
 		this.controller.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({

@@ -54,7 +54,6 @@ export class KeysManager {
 			params.isLocal,
 			KeyBindingsUI.create({
 				controller: params.ctl,
-				back: params.back,
 				onChange: (newKeyMap) => km.updateKeys(newKeyMap),
 				onUIChange: (ui) => km.handleUIChange(ui)
 			}),
@@ -78,11 +77,10 @@ export class KeysManager {
 	}
 
 	handleUIChange(ui: UIChangeParams) {
-		const title =
-			ui.ui === 'actionsUI' ? `Manage ${this.isLocal ? 'local' : 'global'} key bindings` : ui.title;
+		const title = ui.title ?? `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: title,
-			exitAction: this.back,
+			exitAction: ui.back ?? this.back,
 			exitType: 'back'
 		});
 	}

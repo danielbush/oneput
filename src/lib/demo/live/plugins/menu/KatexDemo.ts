@@ -4,7 +4,7 @@ import type { Notification } from '$lib/oneput/plugins/Notification.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
 import { randomId, type OneputProps } from '$lib/oneput/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
-import { checkboxMenuItem } from '$lib/oneput/plugins/ui/checkboxMenuItem.js';
+import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 
 const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
 

@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { FuzzyFilter } from '$lib/oneput/filters/FuzzyFilter.js';
 import { randomId } from '$lib/oneput/lib.js';
-import { menuItemNoIcon } from '../../config/ui.js';
+import { menuItemNoIcon } from '../config/ui.js';
 
 /**
  * Demonstrates how we navigate the headings in an html document using Oneput.

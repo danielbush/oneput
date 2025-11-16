@@ -3,7 +3,7 @@ import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
-import { KeysManagerFactory } from '../plugins/KeysManager.js';
+import { KeysManagerFactory } from './KeysManager.js';
 import { config } from '../service/TestKeyService.js';
 import { SettingsManager } from '../service/SettingsManager.js';
 

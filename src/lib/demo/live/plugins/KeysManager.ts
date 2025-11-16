@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { KeyBindingsUI } from '$lib/oneput/plugins/KeyBindingsUI.js';
-import { TestKeyService } from './TestKeyService.js';
+import { TestKeyService } from '../service/TestKeyService.js';
 
 /**
  * This factory lets you create a key manager for either local or global keys.

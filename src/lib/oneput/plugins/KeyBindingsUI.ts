@@ -1,4 +1,3 @@
-import { inputUI, menuHeaderUI, menuItemWithIcon } from '$lib/demo/live/config/ui.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { type KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import {
@@ -16,6 +15,7 @@ import {
 	tickIcon,
 	xIcon
 } from '$lib/oneput/shared/icons.js';
+import { stdMenuItem } from '../shared/stdMenuItem.js';
 
 const keybindingMenuItem: (params: {
 	id: string;
@@ -89,6 +89,11 @@ export type UIChangeParams = {
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  *
+ * This is written to be re-usable.  It calls onUIChange to tell the parent ui
+ * what to update in the ui and sticks to only changing the input.  It doesn't
+ * have to be done this way we could just have one ui object that knows about
+ * whatever our default ui is; this is just exploring how reusable a ui object can be.
+ *
  * The assumption is that keyMap is stored somewhere by the consumer.
  */
 export class KeyBindingsUI {
@@ -144,30 +149,26 @@ export class KeyBindingsUI {
 	 */
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
-		const back = () => {
-			this.actionsUI();
-		};
-		this.controller.setBackBinding(back);
-		this.controller.ui.setInputUI(inputUI(this.controller));
+		this.onUIChange({ title: `Key bindings for "${description}"`, back: this.actionsUI });
+		// TODO: should placeholder be handled by onUIChange?
+		// TOOD: or move placeholder into .input and keep it here; convention: input is controlled ?
 		this.controller.ui.setPlaceholder();
 		this.controller.input.setInputValue('');
-		this.controller.ui.setMenuUI({
-			header: menuHeaderUI({ title: `Key bindings for "${description}"`, exitAction: back })
-		});
+
 		this.controller.menu.setMenuItems([
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'add-binding',
-				text: 'Add binding...',
+				textContent: 'Add binding...',
 				action: () => {
 					this.captureBindingUI(actionId);
 				}
 			}),
 			...bindings.map((binding) => {
-				return menuItemWithIcon({
+				return stdMenuItem({
 					id: binding,
-					text: binding,
-					leftIcon: keyboardIcon,
-					rightIcon: xIcon,
+					textContent: binding,
+					left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
+					right: (b) => [b.icon({ innerHTMLUnsafe: xIcon })],
 					action: () => {
 						this.removeBinding(actionId, binding);
 					}

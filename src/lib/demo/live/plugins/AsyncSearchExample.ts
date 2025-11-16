@@ -1,8 +1,8 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../../config/ui.js';
-import { TestInputService } from '../../service/TestInputService.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
+import { TestInputService } from '../service/TestInputService.js';
 
 export class AsyncSearchExample {
 	static create(ctl: Controller, back: () => void) {

@@ -10,7 +10,7 @@ import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '../../../oneput/shared/widgets/DateDisplay.js';
 import { MenuStatus } from '../../../oneput/shared/widgets/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../../../oneput/shared/widgets/TimeDisplay.js';
-import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
+import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 
 /**
  * Menu item with no left icon, give more room for main content.

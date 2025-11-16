@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import type { MyDefaultUIValues } from '../../config/ui.js';
+import type { MyDefaultUIValues } from '../config/ui.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import { hflex, menuItem } from '$lib/oneput/builder.js';

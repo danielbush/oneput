@@ -9,7 +9,7 @@ import {
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '../../../oneput/shared/DateDisplay.js';
 import { MenuStatus } from '../../../oneput/shared/MenuStatus/MenuStatus.js';
-import { TimeDisplay } from '../plugins/ui/TimeDisplay.js';
+import { TimeDisplay } from '../../../oneput/shared/TimeDisplay.js';
 import { WordFilter } from '$lib/oneput/filters/WordFilter.js';
 
 /**

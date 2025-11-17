@@ -21,7 +21,6 @@ export class MenuController {
 
 	constructor(private ctl: Controller) {
 		this.ctl.currentProps.onMenuOpenChange = (menuOpen) => {
-			this.ctl.events.emit({ type: 'menu-open-change', payload: menuOpen });
 			if (menuOpen) {
 				// Focusing input when menu opens seems like a sensible default.
 				// We could have a setting to disable this if needed.

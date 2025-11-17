@@ -76,7 +76,7 @@ export class MenuController {
 
 	// #region menu open/close
 
-	get menuOpen() {
+	get isMenuOpen() {
 		return this.currentProps.menuOpen ?? false;
 	}
 

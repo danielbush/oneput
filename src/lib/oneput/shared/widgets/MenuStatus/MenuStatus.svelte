@@ -4,7 +4,7 @@
 	const { controller }: { controller: Controller } = $props();
 </script>
 
-{#if controller.menu.menuOpen}
+{#if controller.menu.isMenuOpen}
 	<div class="open">
 		{controller.menu.menuItemCount}
 		{controller.menu.menuItemCount === 1 ? 'item' : 'items'}

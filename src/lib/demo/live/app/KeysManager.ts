@@ -3,6 +3,7 @@ import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { KeyBindingsUI, type UIChangeParams } from '$lib/oneput/plugins/KeyBindingsUI.js';
 import type { MyDefaultUIValues } from '../config/ui.js';
 import { TestKeyService } from '../service/TestKeyService.js';
+import * as icons from '$lib/oneput/shared/icons.js';
 
 /**
  * This factory lets you create a key manager for either local or global keys.
@@ -82,6 +83,45 @@ export class KeysManager {
 			menuHeader: title,
 			exitAction: ui.back ?? this.back,
 			exitType: 'back'
+		});
+		if (ui.captureAction) {
+			this.inputCaptureUI(ui.captureAction);
+		}
+	}
+
+	inputCaptureUI(captureAction: { accept: (evt: Event) => void; reject: (evt: Event) => void }) {
+		const { accept, reject } = captureAction;
+		this.ctl.ui.setInputUI({
+			right: {
+				id: 'input-right-1',
+				type: 'hflex',
+				children: [
+					{
+						id: 'accept-key-capture',
+						type: 'fchild',
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: accept
+						},
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: icons.tickIcon
+					},
+					{
+						id: 'reject-key-capture',
+						type: 'fchild',
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: reject
+						},
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: icons.xIcon
+					}
+				]
+			}
 		});
 	}
 

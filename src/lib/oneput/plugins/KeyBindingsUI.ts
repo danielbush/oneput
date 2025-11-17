@@ -12,7 +12,6 @@ import {
 	chevronRightIcon,
 	keyboardIcon,
 	squareFunctionIcon,
-	tickIcon,
 	xIcon
 } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '../shared/stdMenuItem.js';
@@ -84,6 +83,10 @@ export type UIChangeParams = {
 	 * If not specified, parent should use its back action which will exit this plugin.
 	 */
 	back?: () => void;
+	captureAction?: {
+		accept: (evt: Event) => void;
+		reject: (evt: Event) => void;
+	};
 };
 
 /**
@@ -154,7 +157,6 @@ export class KeyBindingsUI {
 		// TOOD: or move placeholder into .input and keep it here; convention: input is controlled ?
 		this.controller.ui.setPlaceholder();
 		this.controller.input.setInputValue('');
-
 		this.controller.menu.setMenuItems([
 			stdMenuItem({
 				id: 'add-binding',
@@ -182,38 +184,7 @@ export class KeyBindingsUI {
 	 */
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
-		this.controller.ui.setInputUI({
-			right: {
-				id: 'input-right-1',
-				type: 'hflex',
-				children: [
-					{
-						id: 'accept-key-capture',
-						type: 'fchild',
-						tag: 'button',
-						attr: {
-							type: 'button',
-							title: 'Options',
-							onclick: accept
-						},
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: tickIcon
-					},
-					{
-						id: 'reject-key-capture',
-						type: 'fchild',
-						tag: 'button',
-						attr: {
-							type: 'button',
-							title: 'Options',
-							onclick: reject
-						},
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: xIcon
-					}
-				]
-			}
-		});
+		this.onUIChange({ captureAction: { accept, reject } });
 		this.controller.ui.setPlaceholder('Type the keys...');
 	}
 

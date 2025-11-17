@@ -1,10 +1,9 @@
 import type { InputChangeEvent as InputChangeEventLib } from './lib.js';
 
 // Internal event system for decoupled communication
-export type InternalEvent = InputChangeEvent | RequestInputFocusEvent;
+export type InternalEvent = InputChangeEvent;
 
 export type InputChangeEvent = { type: 'input-change'; payload: InputChangeEventLib };
-export type RequestInputFocusEvent = { type: 'request-input-focus'; payload?: undefined };
 
 export class InternalEventEmitter {
 	private listeners = new Map<string, ((payload: unknown) => void)[]>();

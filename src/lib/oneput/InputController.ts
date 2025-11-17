@@ -1,4 +1,3 @@
-import type { RequestInputFocusEvent } from './InternalEventEmitter.js';
 import type { InputChangeEvent, InputChangeListener } from './lib.js';
 import type { Controller } from './controller.js';
 
@@ -13,9 +12,6 @@ export class InputController {
 			// Emit internal event for decoupled communication
 			this.ctl.events.emit({ type: 'input-change', payload: evt });
 		};
-		this.ctl.events.on<RequestInputFocusEvent>('request-input-focus', () => {
-			this.focusInput();
-		});
 	}
 
 	triggerInputEvent() {

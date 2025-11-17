@@ -24,7 +24,7 @@ export class MenuController {
 			if (menuOpen) {
 				// Focusing input when menu opens seems like a sensible default.
 				// We could have a setting to disable this if needed.
-				this.ctl.events.emit({ type: 'request-input-focus' });
+				this.ctl.input.focusInput();
 			}
 		};
 		this.ctl.currentProps.onMenuAction = () => {

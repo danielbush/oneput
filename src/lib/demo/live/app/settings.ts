@@ -9,12 +9,13 @@ import { SettingsManager } from '../service/SettingsManager.js';
 
 export class SettingsUI {
 	static create(ctl: Controller, back: () => void) {
-		return new SettingsUI(
+		const ui = new SettingsUI(
 			ctl,
 			back,
-			KeysManagerFactory.create(ctl, back),
-			FiltersUI.create(ctl, back)
+			KeysManagerFactory.create(ctl, () => ui.runUI()),
+			FiltersUI.create(ctl, () => ui.runUI())
 		);
+		return ui;
 	}
 
 	constructor(

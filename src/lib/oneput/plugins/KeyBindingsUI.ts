@@ -92,6 +92,8 @@ export type UIChangeParams = {
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  *
+ * It controls inputValue and placeholder.
+ *
  * This is written to be re-usable.  It calls onUIChange to tell the parent ui
  * what to update in the ui and sticks to only changing the input.  It doesn't
  * have to be done this way we could just have one ui object that knows about
@@ -257,7 +259,8 @@ export class KeyBindingsUI {
 	};
 
 	private removeBinding = async (actionId: string, binding: string) => {
-		const yes = await this.controller.confirm({ message: 'Remove binding?' });
+		const confirm = this.controller.confirm({ message: 'Remove binding?' });
+		const yes = await confirm.userChooses();
 		if (!yes) {
 			return;
 		}

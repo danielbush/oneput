@@ -1,37 +1,30 @@
+import type { Controller } from './controller.js';
 import type { DefaultUI, FlexParams, OneputProps } from './lib.js';
 
 export class UIController {
-	static create(currentProps: OneputProps) {
-		return new UIController(currentProps);
+	static create(ctl: Controller) {
+		return new UIController(ctl);
 	}
 
-	private fallbackPlaceholder: string = 'Type here...';
-
-	constructor(private currentProps: OneputProps) {
-		this.currentProps.placeholder = this.fallbackPlaceholder;
-	}
+	constructor(private ctl: Controller) {}
 
 	setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {
-		this.currentProps.menuUI = menuUI;
+		this.ctl.currentProps.menuUI = menuUI;
 	}
 
 	setInputUI(
 		input?: OneputProps['inputUI'] | ((current: OneputProps['inputUI']) => OneputProps['inputUI'])
 	) {
-		this.currentProps.inputUI =
-			typeof input === 'function' ? input(this.currentProps.inputUI) : input;
-	}
-
-	setPlaceholder(msg?: string) {
-		this.currentProps.placeholder = msg || this.defaultUI?.placeholder || this.fallbackPlaceholder;
+		this.ctl.currentProps.inputUI =
+			typeof input === 'function' ? input(this.ctl.currentProps.inputUI) : input;
 	}
 
 	setOuterUI(outer?: FlexParams) {
-		this.currentProps.outerUI = outer;
+		this.ctl.currentProps.outerUI = outer;
 	}
 
 	setInnerUI(inner?: FlexParams) {
-		this.currentProps.innerUI = inner;
+		this.ctl.currentProps.innerUI = inner;
 	}
 
 	private defaultUI?: DefaultUI;
@@ -49,11 +42,12 @@ export class UIController {
 		if (this.defaultUI && values) {
 			this.defaultUI.configureUI?.(values);
 		}
-		this.currentProps.inputUI = this.defaultUI?.inputUI;
-		this.currentProps.menuUI = this.defaultUI?.menuUI;
-		this.currentProps.innerUI = this.defaultUI?.innerUI;
-		this.currentProps.outerUI = this.defaultUI?.outerUI;
-		this.currentProps.placeholder = this.defaultUI?.placeholder || this.fallbackPlaceholder;
+		this.ctl.currentProps.inputUI = this.defaultUI?.inputUI;
+		this.ctl.currentProps.menuUI = this.defaultUI?.menuUI;
+		this.ctl.currentProps.innerUI = this.defaultUI?.innerUI;
+		this.ctl.currentProps.outerUI = this.defaultUI?.outerUI;
+		this.ctl.currentProps.placeholder =
+			this.defaultUI?.placeholder || this.ctl.input.defaultPlaceHolder;
 		this.defaultUI?.afterUpdate?.();
 	}
 
@@ -65,10 +59,10 @@ export class UIController {
 	 * It's up to the caller to decide everything else.
 	 */
 	replaceUI(ui?: OneputProps['replaceUI']) {
-		this.currentProps.replaceUI = ui;
+		this.ctl.currentProps.replaceUI = ui;
 	}
 
 	injectUI(ui?: OneputProps['injectUI']) {
-		this.currentProps.injectUI = ui;
+		this.ctl.currentProps.injectUI = ui;
 	}
 }

@@ -57,7 +57,7 @@ export class AsyncSearchExample {
 			}
 		);
 		this.ctl.input.setInputValue();
-		this.ctl.ui.setPlaceholder('Start typing something...');
+		this.ctl.input.setPlaceholder('Start typing something...');
 		this.ctl.menu.setMenuItems([]);
 		this.ctl.input.focusInput();
 	}

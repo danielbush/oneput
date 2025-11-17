@@ -155,7 +155,7 @@ export class KeyBindingsUI {
 		this.onUIChange({ title: `Key bindings for "${description}"`, back: this.actionsUI });
 		// TODO: should placeholder be handled by onUIChange?
 		// TOOD: or move placeholder into .input and keep it here; convention: input is controlled ?
-		this.controller.ui.setPlaceholder();
+		this.controller.input.setPlaceholder();
 		this.controller.input.setInputValue('');
 		this.controller.menu.setMenuItems([
 			stdMenuItem({
@@ -185,7 +185,7 @@ export class KeyBindingsUI {
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
 		this.onUIChange({ captureAction: { accept, reject } });
-		this.controller.ui.setPlaceholder('Type the keys...');
+		this.controller.input.setPlaceholder('Type the keys...');
 	}
 
 	private startKeyCapture = (actionId: string) => {

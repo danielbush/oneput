@@ -371,7 +371,7 @@ export class TomatoTimer {
 	}
 
 	private createTimerUI() {
-		this.ctl.ui.setPlaceholder('Type a label and hit shift+enter...');
+		this.ctl.input.setPlaceholder('Type a label and hit shift+enter...');
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-timer-no-label',

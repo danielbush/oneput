@@ -9,7 +9,7 @@ import { Alert } from './plugins/Alert.js';
 import { Confirm } from './plugins/Confirm.js';
 
 export class Controller {
-	private events = new InternalEventEmitter();
+	public events = new InternalEventEmitter();
 	public menu: MenuController;
 	public input: InputController;
 	public keys: KeysController;
@@ -18,11 +18,11 @@ export class Controller {
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
 	 */
-	constructor(private currentProps: OneputProps) {
+	constructor(public currentProps: OneputProps) {
 		this.menu = MenuController.create(this, this.currentProps, this.events);
-		this.input = InputController.create(this.currentProps, this.events);
+		this.input = InputController.create(this);
 		this.keys = KeysController.create(this.events, this, this.menu.isMenuOpen);
-		this.ui = UIController.create(this.currentProps);
+		this.ui = UIController.create(this);
 	}
 
 	toggleHide() {

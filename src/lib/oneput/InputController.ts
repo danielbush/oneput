@@ -1,21 +1,19 @@
-import type { InternalEventEmitter, RequestInputFocusEvent } from './InternalEventEmitter.js';
-import type { InputChangeEvent, InputChangeListener, OneputProps } from './lib.js';
+import type { RequestInputFocusEvent } from './InternalEventEmitter.js';
+import type { InputChangeEvent, InputChangeListener } from './lib.js';
+import type { Controller } from './controller.js';
 
 export class InputController {
-	public static create(currentProps: OneputProps, events: InternalEventEmitter) {
-		return new InputController(currentProps, events);
+	public static create(ctl: Controller) {
+		return new InputController(ctl);
 	}
 
-	constructor(
-		private currentProps: OneputProps,
-		private events: InternalEventEmitter
-	) {
-		this.currentProps.onInputChange = (evt) => {
+	constructor(private ctl: Controller) {
+		this.ctl.currentProps.onInputChange = (evt) => {
 			this.runInputChangeListeners(evt);
 			// Emit internal event for decoupled communication
-			this.events.emit({ type: 'input-change', payload: evt });
+			this.ctl.events.emit({ type: 'input-change', payload: evt });
 		};
-		this.events.on<RequestInputFocusEvent>('request-input-focus', () => {
+		this.ctl.events.on<RequestInputFocusEvent>('request-input-focus', () => {
 			this.focusInput();
 		});
 	}
@@ -28,6 +26,7 @@ export class InputController {
 		}, 0);
 	}
 
+	public defaultPlaceHolder: string = 'Type here...';
 	private inputElement: HTMLInputElement | undefined;
 	private inputChangeListeners: InputChangeListener[] = [];
 
@@ -52,11 +51,16 @@ export class InputController {
 	 * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
 	 */
 	setInputValue(val?: string) {
-		this.currentProps.inputValue = val || '';
+		this.ctl.currentProps.inputValue = val || '';
+	}
+
+	setPlaceholder(msg?: string) {
+		this.ctl.currentProps.placeholder =
+			msg || this.ctl.ui.getDefaultUI()?.placeholder || this.defaultPlaceHolder;
 	}
 
 	getInputValue() {
-		return this.currentProps.inputValue || '';
+		return this.ctl.currentProps.inputValue || '';
 	}
 
 	onInputChange(handler: InputChangeListener): () => void {

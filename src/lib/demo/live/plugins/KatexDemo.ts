@@ -36,7 +36,7 @@ export class KatexDemo {
 		this.setMenuItems(true, '', 'first');
 		this.setInputUI(true);
 		this.ctl.menu.disableMenuOpenClose();
-		this.ctl.ui.setPlaceholder('Type some katex-flavoured latex...');
+		this.ctl.input.setPlaceholder('Type some katex-flavoured latex...');
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {
 				...inputUI,

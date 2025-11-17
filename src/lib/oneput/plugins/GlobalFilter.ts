@@ -35,7 +35,7 @@ export class GlobalFilter {
 				} as const satisfies OneputProps['inputUI'];
 			});
 		}, 10);
-		this.ctl.ui.setPlaceholder('Filter across all menu items...');
+		this.ctl.input.setPlaceholder('Filter across all menu items...');
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'global-filter-1',

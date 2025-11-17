@@ -30,7 +30,7 @@ export class Alert {
 		this.ctl.input.enableInputElement();
 		this.ctl.ui.replaceUI();
 		this.ctl.keys.unsetKeys(true);
-		this.ctl.ui.setPlaceholder();
+		this.ctl.input.setPlaceholder();
 		this.resolve?.();
 		this.previousActiveElement.focus();
 	};
@@ -50,7 +50,7 @@ export class Alert {
 		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.menu.disableMenuItemsFn();
 		this.ctl.input.disableInputElement();
-		this.ctl.ui.setPlaceholder('Click "ok" or type enter to continue...');
+		this.ctl.input.setPlaceholder('Click "ok" or type enter to continue...');
 		this.ctl.ui.replaceUI({
 			menu: {
 				id: randomId(),

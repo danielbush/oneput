@@ -52,7 +52,7 @@ export class Confirm {
 		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.menu.disableMenuItemsFn();
 		this.ctl.input.disableInputElement();
-		this.ctl.ui.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
+		this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
 		this.ctl.ui.replaceUI({
 			menu: {
 				id: randomId(),
@@ -118,7 +118,7 @@ export class Confirm {
 		this.ctl.input.enableInputElement();
 		this.ctl.ui.replaceUI();
 		this.ctl.keys.unsetKeys(true);
-		this.ctl.ui.setPlaceholder();
+		this.ctl.input.setPlaceholder();
 		this.resolve?.(ok);
 	};
 

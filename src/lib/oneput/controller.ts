@@ -19,7 +19,7 @@ export class Controller {
 	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
 	 */
 	constructor(public currentProps: OneputProps) {
-		this.menu = MenuController.create(this, this.currentProps, this.events);
+		this.menu = MenuController.create(this);
 		this.input = InputController.create(this);
 		this.keys = KeysController.create(this.events, this, this.menu.isMenuOpen);
 		this.ui = UIController.create(this);

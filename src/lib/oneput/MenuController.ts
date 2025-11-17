@@ -1,11 +1,6 @@
 import debounce from 'debounce';
-import type { InputChangeEvent, InternalEventEmitter } from './InternalEventEmitter.js';
-import {
-	isFocusable,
-	type InputChangeListener,
-	type MenuItemAny,
-	type OneputProps
-} from './lib.js';
+import type { InputChangeEvent } from './InternalEventEmitter.js';
+import { isFocusable, type InputChangeListener, type MenuItemAny } from './lib.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (
@@ -20,35 +15,27 @@ export type MenuItemsFnAsync = (
 type FocusBehaviour = 'first' | 'last' | 'none';
 
 export class MenuController {
-	public static create(
-		controller: Controller,
-		currentProps: OneputProps,
-		events: InternalEventEmitter
-	) {
-		return new MenuController(controller, currentProps, events);
+	public static create(controller: Controller) {
+		return new MenuController(controller);
 	}
 
-	constructor(
-		private controller: Controller,
-		private currentProps: OneputProps,
-		private events: InternalEventEmitter
-	) {
-		this.currentProps.onMenuOpenChange = (menuOpen) => {
-			this.events.emit({ type: 'menu-open-change', payload: menuOpen });
+	constructor(private ctl: Controller) {
+		this.ctl.currentProps.onMenuOpenChange = (menuOpen) => {
+			this.ctl.events.emit({ type: 'menu-open-change', payload: menuOpen });
 			if (menuOpen) {
 				// Focusing input when menu opens seems like a sensible default.
 				// We could have a setting to disable this if needed.
-				this.events.emit({ type: 'request-input-focus' });
+				this.ctl.events.emit({ type: 'request-input-focus' });
 			}
 		};
-		this.currentProps.onMenuAction = () => {
+		this.ctl.currentProps.onMenuAction = () => {
 			if (this._disableActions) {
 				return;
 			}
 			this.doMenuAction();
 		};
-		this.currentProps.onMenuItemEnter = (_, __, index) => {
-			this.currentProps.menuItemFocus = [index, false];
+		this.ctl.currentProps.onMenuItemEnter = (_, __, index) => {
+			this.ctl.currentProps.menuItemFocus = [index, false];
 		};
 	}
 
@@ -77,21 +64,21 @@ export class MenuController {
 	// #region menu open/close
 
 	get isMenuOpen() {
-		return this.currentProps.menuOpen ?? false;
+		return this.ctl.currentProps.menuOpen ?? false;
 	}
 
 	openMenu = () => {
 		if (this._disableOpenClose) {
 			return;
 		}
-		this.currentProps.menuOpen = true;
+		this.ctl.currentProps.menuOpen = true;
 	};
 
 	closeMenu = () => {
 		if (this._disableOpenClose) {
 			return;
 		}
-		this.currentProps.menuOpen = false;
+		this.ctl.currentProps.menuOpen = false;
 	};
 
 	// #endregion
@@ -104,7 +91,7 @@ export class MenuController {
 		}
 		if (this.currentMenuItem) {
 			if (this.currentMenuItem.action) {
-				this.currentMenuItem.action(this.controller);
+				this.currentMenuItem.action(this.ctl);
 			}
 		}
 	}
@@ -139,7 +126,7 @@ export class MenuController {
 			}
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
-		this.removeDefaultMenuItemsFn = this.events.on<InputChangeEvent>('input-change', handler);
+		this.removeDefaultMenuItemsFn = this.ctl.events.on<InputChangeEvent>('input-change', handler);
 	}
 
 	/**
@@ -159,7 +146,7 @@ export class MenuController {
 			}
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
-		const removeListener = this.events.on<InputChangeEvent>('input-change', handler);
+		const removeListener = this.ctl.events.on<InputChangeEvent>('input-change', handler);
 		return () => {
 			removeListener();
 			this.menuItemsFn = undefined;
@@ -208,7 +195,7 @@ export class MenuController {
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
-		const removeListener = this.events.on<InputChangeEvent>('input-change', (evt) => {
+		const removeListener = this.ctl.events.on<InputChangeEvent>('input-change', (evt) => {
 			if (this._disableMenuItemsFn) {
 				return;
 			}
@@ -229,14 +216,14 @@ export class MenuController {
 	}
 
 	triggerMenuItemsFn() {
-		this.controller.input.triggerInputEvent();
+		this.ctl.input.triggerInputEvent();
 	}
 
 	private _setMenuItems(
 		items: Array<MenuItemAny>,
 		options: { focusBehaviour?: FocusBehaviour } = {}
 	) {
-		this.currentProps.menuItems = items;
+		this.ctl.currentProps.menuItems = items;
 		this.runFocusBehaviour(options.focusBehaviour);
 	}
 
@@ -246,11 +233,11 @@ export class MenuController {
 	}
 
 	get menuItemCount() {
-		return this.currentProps.menuItems?.length ?? 0;
+		return this.ctl.currentProps.menuItems?.length ?? 0;
 	}
 
 	get currentMenuItem() {
-		return this.currentProps.menuItems?.[this.menuItemFocus];
+		return this.ctl.currentProps.menuItems?.[this.menuItemFocus];
 	}
 
 	// #endregion
@@ -258,7 +245,7 @@ export class MenuController {
 	// #region menu item focus
 
 	get menuItemFocus() {
-		return this.currentProps.menuItemFocus?.[0] ?? 0;
+		return this.ctl.currentProps.menuItemFocus?.[0] ?? 0;
 	}
 
 	private nextMenuItemIndex(index: number) {
@@ -275,8 +262,8 @@ export class MenuController {
 			c < this.menuItemCount;
 			c++, i = this.nextMenuItemIndex(i)
 		) {
-			if (isFocusable(this.currentProps.menuItems?.[i])) {
-				this.currentProps.menuItemFocus = [i, true];
+			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+				this.ctl.currentProps.menuItemFocus = [i, true];
 				break;
 			}
 		}
@@ -288,8 +275,8 @@ export class MenuController {
 			c < this.menuItemCount;
 			c++, i = this.previousMenuItemIndex(i)
 		) {
-			if (isFocusable(this.currentProps.menuItems?.[i])) {
-				this.currentProps.menuItemFocus = [i, true];
+			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+				this.ctl.currentProps.menuItemFocus = [i, true];
 				break;
 			}
 		}
@@ -297,8 +284,8 @@ export class MenuController {
 
 	focusFirstMenuItem() {
 		for (let i = 0; i < this.menuItemCount; i++) {
-			if (isFocusable(this.currentProps.menuItems?.[i])) {
-				this.currentProps.menuItemFocus = [i, true];
+			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+				this.ctl.currentProps.menuItemFocus = [i, true];
 				break;
 			}
 		}
@@ -306,8 +293,8 @@ export class MenuController {
 
 	focusLastMenuItem() {
 		for (let i = this.menuItemCount - 1; i >= 0; i--) {
-			if (isFocusable(this.currentProps.menuItems?.[i])) {
-				this.currentProps.menuItemFocus = [i, true];
+			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+				this.ctl.currentProps.menuItemFocus = [i, true];
 				break;
 			}
 		}

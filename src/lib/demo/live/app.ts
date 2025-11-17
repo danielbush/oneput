@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { MyDefaultUI } from './config/ui.js';
+import { MyDefaultUI } from './config/defaultUI.js';
 import { RootUI } from './app/root.js';
 import { globalKeys, localKeys } from './config/keys.js';
 
@@ -15,5 +15,5 @@ export const setController = (ctl: Controller) => {
 	// You could fetch these from a key service here.
 	ctl.keys.setDefaultKeys(globalKeys, false);
 	ctl.keys.setDefaultKeys(localKeys, true);
-	RootUI.create(ctl).runUI();
+	ctl.runUI(RootUI);
 };

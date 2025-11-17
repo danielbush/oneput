@@ -142,7 +142,7 @@ export const menuHeaderUI: ({
 	title: string;
 	exitAction: () => void;
 	type?: 'back' | 'exit';
-}) => FlexParams = ({ title, exitAction: exit, type = 'back' }) => {
+}) => FlexParams = ({ title, exitAction, type = 'back' }) => {
 	return {
 		id: 'bindings-header',
 		type: 'hflex',
@@ -151,7 +151,7 @@ export const menuHeaderUI: ({
 				id: randomId(),
 				type: 'fchild',
 				tag: 'button',
-				attr: { type: 'button', title: 'Options', onclick: exit },
+				attr: { type: 'button', title: 'Options', onclick: exitAction },
 				classes: ['oneput__icon-button'],
 				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
 			},
@@ -211,9 +211,6 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		if (this.values.clearInput || !('clearInput' in this.values)) {
 			this.ctl.input.setInputValue();
 		}
-		// We set exitAction to the backBinding so that the back key (whatever
-		// it is set to) will trigger this action.
-		this.ctl.setBackBinding(this.values.exitAction);
 		// Enable various standard things by default.
 		// You can then override if you need to.
 		this.ctl.menu.enableMenuActions();

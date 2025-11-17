@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import type { Notification } from '$lib/oneput/plugins/Notification.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
 import { randomId, type OneputProps } from '$lib/oneput/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
@@ -9,21 +9,19 @@ import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
 
 export class KatexDemo {
-	static create(ctl: Controller, back: () => void) {
-		return new KatexDemo(ctl, back);
+	static create(ctl: Controller) {
+		return new KatexDemo(ctl);
 	}
+
+	beforeExit = () => {
+		this.unsetMenuItemsFn?.();
+		this.notify?.clear();
+	};
 
 	unsetMenuItemsFn?: () => void;
 
-	private exit = () => {
-		this.unsetMenuItemsFn?.();
-		this.notify?.clear();
-		this.back();
-	};
-
 	constructor(
 		private ctl: Controller,
-		private back: () => void,
 		private previewDisplayMode: boolean = false,
 		private notify?: Notification
 	) {}
@@ -31,7 +29,7 @@ export class KatexDemo {
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Katex Demo',
-			exitAction: this.exit
+			exitAction: this.ctl.goBack
 		});
 		this.setMenuItems(true, '', 'first');
 		this.setInputUI(true);

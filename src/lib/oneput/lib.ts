@@ -128,6 +128,15 @@ export type FChildParams = {
 	voidElements?: Set<string | undefined>;
 };
 
+export type UIClass<V extends Record<string, unknown> = Record<string, unknown>> = {
+	create: (ctl: Controller, values: V) => UIObject;
+};
+
+export type UIObject = {
+	runUI: () => void;
+	beforeExit?: () => void;
+};
+
 export const defaultVoidElements = new Set([
 	'area',
 	'base',

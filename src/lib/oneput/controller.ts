@@ -4,7 +4,7 @@ import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/Notification.js';
-import type { OneputProps } from './lib.js';
+import type { OneputProps, UIClass, UIObject } from './lib.js';
 import { Alert } from './plugins/Alert.js';
 import { Confirm } from './plugins/Confirm.js';
 
@@ -29,17 +29,44 @@ export class Controller {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	}
 
+	private uiParents: UIObject[] = [];
+	private currentUI: UIObject | null = null;
+
+	runUI<V extends Record<string, unknown>>(uiClass: UIClass<V>, values?: V) {
+		if (this.currentUI) {
+			this.uiParents.push(this.currentUI);
+		}
+		console.log(this.uiParents);
+		const ui = uiClass.create(this, values ?? ({} as V));
+		this.currentUI = ui;
+		ui.runUI();
+		return ui;
+	}
+
+	runInlineUI(ui: UIObject) {
+		if (this.currentUI) {
+			this.uiParents.push(this.currentUI);
+		}
+		console.log(this.uiParents);
+		this.currentUI = ui;
+		ui.runUI();
+		return ui;
+	}
+
 	/**
 	 * This is intended for triggering a back action via keyboard.
 	 */
-	goBack: () => void = () => {};
-
-	/**
-	 * Sets the back action to run the supplied function - this can be triggered if given a keybinding.
-	 */
-	setBackBinding(back?: () => void) {
-		this.goBack = back || (() => {});
-	}
+	readonly goBack = () => {
+		this.currentUI?.beforeExit?.();
+		const lastUI = this.uiParents.pop();
+		console.log(this.uiParents);
+		if (lastUI) {
+			this.currentUI = lastUI;
+			lastUI.runUI();
+			return lastUI;
+		}
+		return null;
+	};
 
 	notify(message: string, params: NotificationParams = {}): Notification {
 		const notification = Notification.create(this, message);

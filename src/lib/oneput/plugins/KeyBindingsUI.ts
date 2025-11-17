@@ -110,7 +110,7 @@ export class KeyBindingsUI {
 		return new KeyBindingsUI(params);
 	}
 
-	private controller: Controller;
+	private ctl: Controller;
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	private onUIChange: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
@@ -120,7 +120,7 @@ export class KeyBindingsUI {
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
 	}) {
-		this.controller = params.controller;
+		this.ctl = params.controller;
 		this.onChange = params.onChange;
 		this.onUIChange = params.onUIChange;
 	}
@@ -135,14 +135,14 @@ export class KeyBindingsUI {
 	 */
 	private actionsUI = () => {
 		this.onUIChange({});
-		this.controller.menu.setMenuItems(
+		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
 					id,
 					text: description,
 					bindings,
 					action: () => {
-						this.actionUI(id);
+						this.ctl.runInlineUI({ runUI: () => this.actionUI(id) });
 					}
 				})
 			)
@@ -157,14 +157,14 @@ export class KeyBindingsUI {
 		this.onUIChange({ title: `Key bindings for "${description}"`, back: this.actionsUI });
 		// TODO: should placeholder be handled by onUIChange?
 		// TOOD: or move placeholder into .input and keep it here; convention: input is controlled ?
-		this.controller.input.setPlaceholder();
-		this.controller.input.setInputValue('');
-		this.controller.menu.setMenuItems([
+		this.ctl.input.setPlaceholder();
+		this.ctl.input.setInputValue('');
+		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'add-binding',
 				textContent: 'Add binding...',
 				action: () => {
-					this.captureBindingUI(actionId);
+					this.ctl.runInlineUI({ runUI: () => this.captureBindingUI(actionId) });
 				}
 			}),
 			...bindings.map((binding) => {
@@ -187,7 +187,7 @@ export class KeyBindingsUI {
 	private captureBindingUI(actionId: string) {
 		const { accept, reject } = this.startKeyCapture(actionId);
 		this.onUIChange({ captureAction: { accept, reject } });
-		this.controller.input.setPlaceholder('Type the keys...');
+		this.ctl.input.setPlaceholder('Type the keys...');
 	}
 
 	private startKeyCapture = (actionId: string) => {
@@ -200,26 +200,24 @@ export class KeyBindingsUI {
 			evt.preventDefault();
 			evt.stopPropagation();
 			capturedKeys.push(keyboardEventToKeyEvent(evt));
-			this.controller.input.setInputValue(
-				capturedKeys.map(keyEventToHumanReadableString).join(' + ')
-			);
+			this.ctl.input.setInputValue(capturedKeys.map(keyEventToHumanReadableString).join(' + '));
 		};
 
-		this.controller.keys.disableKeys();
-		this.controller.menu.disableMenuActions();
-		this.controller.menu.disableMenuOpenClose();
-		this.controller.menu.disableMenuItemsFn();
-		this.controller.input.disableInputElement();
+		this.ctl.keys.disableKeys();
+		this.ctl.menu.disableMenuActions();
+		this.ctl.menu.disableMenuOpenClose();
+		this.ctl.menu.disableMenuItemsFn();
+		this.ctl.input.disableInputElement();
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
 		const exit = () => {
 			window.removeEventListener('keydown', keyListener);
-			this.controller.keys.enableKeys();
-			this.controller.menu.enableMenuActions();
-			this.controller.menu.enableMenuOpenClose();
-			this.controller.menu.enableMenuItemsFn();
-			this.controller.input.enableInputElement();
+			this.ctl.keys.enableKeys();
+			this.ctl.menu.enableMenuActions();
+			this.ctl.menu.enableMenuOpenClose();
+			this.ctl.menu.enableMenuItemsFn();
+			this.ctl.input.enableInputElement();
 			this.actionUI(actionId);
 		};
 
@@ -235,7 +233,7 @@ export class KeyBindingsUI {
 					if (existing.length > 0) {
 						// Exit to get out of capture mode, then show the alert.
 						exit();
-						this.controller.alert({
+						this.ctl.alert({
 							message: 'Binding already exists',
 							additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
 						});
@@ -259,7 +257,7 @@ export class KeyBindingsUI {
 	};
 
 	private removeBinding = async (actionId: string, binding: string) => {
-		const confirm = this.controller.confirm({ message: 'Remove binding?' });
+		const confirm = this.ctl.confirm({ message: 'Remove binding?' });
 		const yes = await confirm.userChooses();
 		if (!yes) {
 			return;

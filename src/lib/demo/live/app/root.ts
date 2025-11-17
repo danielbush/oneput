@@ -7,7 +7,7 @@ import {
 	timerIcon,
 	tocIcon
 } from '$lib/oneput/shared/icons.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from '../plugins/AsyncSearchExample.js';
 import { NavigateHeadings } from '../plugins/NavigateHeadings.js';
@@ -35,7 +35,7 @@ export class RootUI {
 				leftIcon: settingsIcon,
 				text: 'Settings...',
 				action: () => {
-					SettingsUI.create(this.ctl, this.runUI).runUI();
+					this.ctl.runUI(SettingsUI);
 				}
 			}),
 			menuItemWithIcon({
@@ -43,7 +43,7 @@ export class RootUI {
 				leftIcon: tocIcon,
 				text: 'Navigate outline...',
 				action: () => {
-					NavigateHeadings.create(this.ctl, document, this.runUI).runUI();
+					this.ctl.runUI(NavigateHeadings);
 				}
 			}),
 			stdMenuItem({
@@ -51,7 +51,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: timerIcon })],
 				textContent: 'Tomato timer...',
 				action: () => {
-					TomatoTimer.create(this.ctl, this.runUI).runUI();
+					this.ctl.runUI(TomatoTimer);
 				},
 				bottom: {
 					textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
@@ -62,7 +62,7 @@ export class RootUI {
 				leftIcon: sigmaIcon,
 				text: 'Insert katex...',
 				action: () => {
-					KatexDemo.create(this.ctl, this.runUI).runUI();
+					this.ctl.runUI(KatexDemo);
 				}
 			}),
 			menuItemWithIcon({
@@ -78,7 +78,7 @@ export class RootUI {
 				text: 'Async menu items demo...',
 				leftIcon: searchIcon,
 				action: () => {
-					AsyncSearchExample.create(this.ctl, this.runUI).runUI();
+					this.ctl.runUI(AsyncSearchExample);
 				}
 			}),
 			menuItemWithIcon({

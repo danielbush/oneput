@@ -1,14 +1,14 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { FuzzyFilter } from '$lib/oneput/shared/filters/FuzzyFilter.js';
 import { randomId } from '$lib/oneput/lib.js';
-import { menuItemNoIcon } from '../config/ui.js';
+import { menuItemNoIcon } from '../config/defaultUI.js';
 
 /**
  * Demonstrates how we navigate the headings in an html document using Oneput.
  */
 export class NavigateHeadings {
-	static create(ctl: Controller, document: Document, back: () => void) {
-		return new NavigateHeadings(ctl, document, back, FuzzyFilter.create());
+	static create(ctl: Controller) {
+		return new NavigateHeadings(ctl, document, FuzzyFilter.create());
 	}
 
 	private clearInputChangeListener?: () => void;
@@ -16,14 +16,13 @@ export class NavigateHeadings {
 	private constructor(
 		private ctl: Controller,
 		private document: Document,
-		private back: () => void,
 		private fuzzyFilter: FuzzyFilter
 	) {}
 
 	runUI() {
 		this.ctl.ui.runDefaultUI({
 			menuHeader: 'Navigate Headings',
-			exitAction: this.exit
+			exitAction: this.ctl.goBack
 		});
 		const menuAction = (heading: HTMLElement) => {
 			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -40,7 +39,6 @@ export class NavigateHeadings {
 					menuAction(heading);
 				}
 			});
-		this.ctl.setBackBinding(this.exit);
 
 		// Initialize headings and menu items...
 		const headings: HTMLElement[] = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
@@ -63,10 +61,10 @@ export class NavigateHeadings {
 	/**
 	 * It's important to clean up once we exit this mini-app.
 	 */
-	private exit = () => {
+	beforeExit = () => {
 		this.ctl.menu.enableMenuItemsFn();
 		this.ctl.input.setInputValue();
 		this.clearInputChangeListener?.();
-		this.back();
+		// this.ctl.goBack();
 	};
 }

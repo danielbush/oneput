@@ -1,65 +1,28 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { KeyBindingsUI, type UIChangeParams } from '$lib/oneput/plugins/KeyBindingsUI.js';
-import type { MyDefaultUIValues } from '../config/ui.js';
+import type { MyDefaultUIValues } from '../config/defaultUI.js';
 import { TestKeyService } from '../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';
-
-/**
- * This factory lets you create a key manager for either local or global keys.
- *
- * A null version of the parent ui can create a null version of this factory
- * which will then produce a null version of the KeyManager when the menu action
- * in the null parent ui is triggered in a test.
- *
- */
-export class KeysManagerFactory {
-	static create(ctl: Controller, back: () => void) {
-		return new KeysManagerFactory(ctl, back);
-	}
-
-	private constructor(
-		private ctl: Controller,
-		private back: () => void
-	) {}
-
-	/**
-	 * Can be called dynamically eg within a menu item action.
-	 */
-	create = (isLocal: boolean, keyMap: KeyBindingMap) => {
-		const km: KeysManager = KeysManager.create({
-			ctl: this.ctl,
-			back: this.back,
-			isLocal: isLocal,
-			keyMap: keyMap
-		});
-		return km;
-	};
-}
 
 /**
  * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
  * let you manage a single set of key bindings eg local or global.
  */
 export class KeysManager {
-	static create(params: {
-		ctl: Controller;
-		back: () => void;
-		isLocal: boolean;
-		keyMap: KeyBindingMap;
-	}) {
+	static create(ctl: Controller, values: { isLocal: boolean }) {
+		const keyMap = ctl.keys.getDefaultKeys(values.isLocal);
 		const testKeyService = TestKeyService.create();
 		const km: KeysManager = new KeysManager(
-			params.ctl,
+			ctl,
 			testKeyService,
-			params.isLocal,
+			values.isLocal,
 			KeyBindingsUI.create({
-				controller: params.ctl,
+				controller: ctl,
 				onChange: (newKeyMap) => km.updateKeys(newKeyMap),
 				onUIChange: (ui) => km.handleUIChange(ui)
 			}),
-			params.keyMap,
-			params.back
+			keyMap
 		);
 		return km;
 	}
@@ -69,8 +32,7 @@ export class KeysManager {
 		private testKeyService: TestKeyService,
 		private isLocal: boolean,
 		private keyBindingsUI: KeyBindingsUI,
-		private keyMap: KeyBindingMap = {},
-		private back: () => void
+		private keyMap: KeyBindingMap = {}
 	) {}
 
 	runUI() {
@@ -81,7 +43,7 @@ export class KeysManager {
 		const title = ui.title ?? `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: title,
-			exitAction: ui.back ?? this.back,
+			exitAction: this.ctl.goBack,
 			exitType: 'back'
 		});
 		if (ui.captureAction) {

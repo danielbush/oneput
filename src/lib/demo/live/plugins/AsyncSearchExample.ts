@@ -1,18 +1,17 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { randomId } from '$lib/oneput/lib.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/ui.js';
+import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
 import { TestInputService } from '../service/TestInputService.js';
 
 export class AsyncSearchExample {
-	static create(ctl: Controller, back: () => void) {
+	static create(ctl: Controller) {
 		const testInputService = TestInputService.create();
-		return new AsyncSearchExample(ctl, back, testInputService);
+		return new AsyncSearchExample(ctl, testInputService);
 	}
 
 	constructor(
 		private ctl: Controller,
-		private back: () => void,
 		private testInputService: TestInputService,
 		private unsetMenuItemsFn?: () => void,
 		private notify?: ReturnType<Controller['notify']>
@@ -21,7 +20,7 @@ export class AsyncSearchExample {
 	runUI() {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: 'Async Search Example',
-			exitAction: this.exit
+			exitAction: this.ctl.goBack
 		});
 		this.notify = this.ctl.notify(
 			'Start typing something and inspect the browser console.  ' +
@@ -124,10 +123,9 @@ export class AsyncSearchExample {
 		}
 	}
 
-	private exit = () => {
+	beforeExit = () => {
 		this.ctl.input.setInputValue();
 		this.notify?.clear();
 		this.unsetMenuItemsFn?.();
-		this.back();
 	};
 }

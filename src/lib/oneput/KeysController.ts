@@ -1,28 +1,21 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import type { InternalEventEmitter, MenuOpenChangeEvent } from './InternalEventEmitter.js';
 import type { KeyBindingMap } from './KeyBinding.js';
 
 /**
  * Manages key bindings.
  */
 export class KeysController {
-	public static create(events: InternalEventEmitter, actionArg: Controller, menuOpen: boolean) {
-		return new KeysController(events, actionArg, menuOpen);
+	public static create(ctl: Controller) {
+		return new KeysController(ctl);
 	}
 
 	constructor(
-		private events: InternalEventEmitter,
-		private actionArg: Controller,
-		private menuOpen: boolean,
+		private ctl: Controller,
 		private unsubscribeGlobalKeys: () => void = () => {},
 		private unsubscribeLocalKeys: () => void = () => {}
-	) {
-		this.events.on<MenuOpenChangeEvent>('menu-open-change', (menuOpen: boolean) => {
-			this.menuOpen = menuOpen;
-		});
-		this.menuOpen = menuOpen;
-	}
+	) {}
+
 	/**
 	 * Only run globals when menu is closed.
 	 */
@@ -37,9 +30,9 @@ export class KeysController {
 					if (this.keysDisabled) {
 						return;
 					}
-					if (!this.menuOpen) {
+					if (!this.ctl.menu.isMenuOpen) {
 						// MENU_OPEN_CLOSE_RACE
-						setTimeout(() => action(this.actionArg));
+						setTimeout(() => action(this.ctl));
 					}
 				};
 			});
@@ -63,9 +56,9 @@ export class KeysController {
 					if (this.keysDisabled) {
 						return;
 					}
-					if (this.menuOpen) {
+					if (this.ctl.menu.isMenuOpen) {
 						// MENU_OPEN_CLOSE_RACE
-						setTimeout(() => action(this.actionArg));
+						setTimeout(() => action(this.ctl));
 					}
 				};
 			});

@@ -8,7 +8,7 @@ import {
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import type { MenuItem } from '../lib.js';
-import { stdMenuItem } from '../shared/stdMenuItem.js';
+import { type StdMenuItemParams } from '../shared/stdMenuItem.js';
 
 export type KeybindingMenuItem = {
 	id: string;
@@ -53,6 +53,7 @@ export class KeyBindingsUI {
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
 		keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
+		stdMenuItem: (params: StdMenuItemParams) => MenuItem;
 	}) {
 		return new KeyBindingsUI(params);
 	}
@@ -62,17 +63,20 @@ export class KeyBindingsUI {
 	private onUIChange: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
 	private keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
+	private stdMenuItem: (params: StdMenuItemParams) => MenuItem;
 
 	private constructor(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
 		keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
+		stdMenuItem: (params: StdMenuItemParams) => MenuItem;
 	}) {
 		this.ctl = params.controller;
 		this.onChange = params.onChange;
 		this.onUIChange = params.onUIChange;
 		this.keybindingMenuItem = params.keybindingMenuItem;
+		this.stdMenuItem = params.stdMenuItem;
 	}
 
 	runUI(keyMap: KeyBindingMap) {
@@ -110,7 +114,7 @@ export class KeyBindingsUI {
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
 		this.ctl.menu.setMenuItems([
-			stdMenuItem({
+			this.stdMenuItem({
 				id: 'add-binding',
 				textContent: 'Add binding...',
 				action: () => {
@@ -118,7 +122,7 @@ export class KeyBindingsUI {
 				}
 			}),
 			...bindings.map((binding) => {
-				return stdMenuItem({
+				return this.stdMenuItem({
 					id: binding,
 					textContent: binding,
 					left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],

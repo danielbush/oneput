@@ -32,7 +32,8 @@ export class KeysManager {
 				// of a reusable ui object that you can plug into your own ui
 				// setup in Oneput.
 				onUIChange: (ui) => km.handleUIChange(ui),
-				keybindingMenuItem: keybindingMenuItem
+				keybindingMenuItem: keybindingMenuItem,
+				stdMenuItem: stdMenuItem
 			}),
 			keyMap
 		);

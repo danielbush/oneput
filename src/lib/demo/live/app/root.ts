@@ -1,13 +1,13 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { randomId } from '$lib/oneput/lib.js';
 import {
+	commandIcon,
 	searchIcon,
 	settingsIcon,
 	sigmaIcon,
 	timerIcon,
 	tocIcon
 } from '$lib/oneput/shared/icons.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
+import { type MyDefaultUIValues } from '../config/defaultUI.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from '../plugins/AsyncSearchExample.js';
 import { NavigateHeadings } from '../plugins/NavigateHeadings.js';
@@ -28,20 +28,26 @@ export class RootUI {
 			exitType: 'exit',
 			placeholder: 'This is root...'
 		});
-		let blankItemCounter = 0;
+		const blankItems = [...Array(10)].map((_, i) => {
+			return stdMenuItem({
+				id: `blank-item-${i}`,
+				textContent: `Blank item ${i}`,
+				action: () => {}
+			});
+		});
 		this.ctl.menu.setMenuItems([
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'settings',
-				leftIcon: settingsIcon,
-				text: 'Settings...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
+				textContent: 'Settings...',
 				action: () => {
 					this.ctl.runUI(SettingsUI);
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'navigate-outline',
-				leftIcon: tocIcon,
-				text: 'Navigate outline...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: tocIcon })],
+				textContent: 'Navigate outline...',
 				action: () => {
 					this.ctl.runUI(NavigateHeadings);
 				}
@@ -57,47 +63,47 @@ export class RootUI {
 					textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'insert-katex',
-				leftIcon: sigmaIcon,
-				text: 'Insert katex...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: sigmaIcon })],
+				textContent: 'Insert katex...',
 				action: () => {
 					this.ctl.runUI(KatexDemo);
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'hide-oneput',
-				// leftIcon: commandIcon,
-				text: 'Hide',
+				left: (b) => [b.icon({ innerHTMLUnsafe: commandIcon })],
+				textContent: 'Hide',
 				action: () => {
 					this.ctl.toggleHide();
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'async-search',
-				text: 'Async menu items demo...',
-				leftIcon: searchIcon,
+				left: (b) => [b.icon({ innerHTMLUnsafe: searchIcon })],
+				textContent: 'Async menu items demo...',
 				action: () => {
 					this.ctl.runUI(AsyncSearchExample);
 				}
 			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: 'Show permanent inline notification',
+			stdMenuItem({
+				id: 'inline-notification-permanent',
+				textContent: 'Show permanent inline notification',
 				action: () => {
 					this.ctl.notify('This is a permanent inline notification');
 				}
 			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: 'Show transient inline notification',
+			stdMenuItem({
+				id: 'transient-inline-notification',
+				textContent: 'Show transient inline notification',
 				action: () => {
 					this.ctl.notify('This is a transient inline notification', { duration: 3000 });
 				}
 			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: 'Show alert',
+			stdMenuItem({
+				id: 'alert',
+				textContent: 'Show alert',
 				action: async () => {
 					console.log('before alert...');
 					const alert = this.ctl.alert({
@@ -108,9 +114,9 @@ export class RootUI {
 					console.log('after alert...');
 				}
 			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: 'Confirm',
+			stdMenuItem({
+				id: 'confirm',
+				textContent: 'Confirm',
 				action: async () => {
 					console.log('before confirm...');
 					const confirm = this.ctl.confirm({
@@ -121,9 +127,9 @@ export class RootUI {
 					console.log('after confirm...', yes);
 				}
 			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: 'Test Notification API...',
+			stdMenuItem({
+				id: 'test-notification-api',
+				textContent: 'Test Notification API...',
 				action: () => {
 					this.ctl.notify(
 						'You may need to (1) use https; (2) allow notifications for your browser in your OS; (3) allow notifications in the browser for this origin.'
@@ -150,67 +156,12 @@ export class RootUI {
 					}
 				}
 			}),
-			{
-				id: randomId(),
-				type: 'hflex',
-				tag: 'button',
-				children: [
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__icon']
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						htmlContentUnsafe: '<p>Html blank item</p>'
-					},
-					{
-						id: randomId(),
-						type: 'fchild'
-					}
-				]
-			},
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
+			stdMenuItem({
+				id: 'blank-html-item',
+				htmlContentUnsafe: '<p>Html <b>item</b></p>',
 				action: () => {}
 			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			}),
-			menuItemWithIcon({
-				id: randomId(),
-				text: `Blank item ${++blankItemCounter}`,
-				action: () => {}
-			})
+			...blankItems
 		]);
 	};
 }

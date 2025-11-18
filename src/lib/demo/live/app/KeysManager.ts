@@ -8,7 +8,8 @@ import {
 import type { MyDefaultUIValues } from '../config/defaultUI.js';
 import { TestKeyService } from '../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';
-import { randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
+import { type MenuItem } from '$lib/oneput/lib.js';
+import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 
 /**
  * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
@@ -133,47 +134,22 @@ const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
 	if (bindings.length > 0) {
 		bindingHTML = '<code><kbd>' + bindings[0] + '</kbd></code>';
 	}
-	return {
+	return stdMenuItem({
 		id,
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{
-				id: randomId(),
-				type: 'fchild',
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: icons.squareFunctionIcon
-			},
-			{
-				id: randomId(),
-				type: 'fchild',
-				textContent: text
-			},
-			{
-				id: randomId(),
-				type: 'hflex',
-				children: [
-					bindings.length > 1 && {
-						id: randomId(),
-						type: 'fchild',
-						innerHTMLUnsafe: `(${bindings.length})`
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						innerHTMLUnsafe: bindingHTML,
-						classes: ['oneput__kbd']
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__icon'],
-						innerHTMLUnsafe: icons.chevronRightIcon
-					}
-				].filter(Boolean) as FlexParams['children']
-			}
-		],
-		attr: {},
-		action
-	};
+		// htmlContentUnsafe: bindingHTML,
+		textContent: text,
+		action,
+		left: (b) => [b.icon({ innerHTMLUnsafe: icons.squareFunctionIcon })],
+		right: (b) => [
+			bindings.length > 1 &&
+				b.fchild({
+					innerHTMLUnsafe: `(${bindings.length})`
+				}),
+			b.fchild({
+				htmlContentUnsafe: bindingHTML,
+				classes: ['oneput__kbd']
+			}),
+			b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
+		]
+	});
 };

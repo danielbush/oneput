@@ -1,14 +1,9 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { type KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import {
-	keyboardEventToKeyEvent,
-	keyEventToHumanReadableString,
-	type KeyEvent
-} from '$lib/oneput/KeyEvent.js';
-import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import type { MenuItem } from '../../../../oneput/lib.js';
 import { type StdMenuItemParams } from '../../../../oneput/shared/stdMenuItem.js';
+import { startKeyCapture } from './keyCapture.js';
 
 export type KeybindingMenuItem = {
 	id: string;
@@ -139,77 +134,22 @@ export class KeyBindingsUI {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private captureBindingUI(actionId: string) {
-		const { accept, reject } = this.startKeyCapture(actionId);
+		const oldKeyBindingMap = this.keyBindingMap;
+		const { accept, reject } = startKeyCapture(
+			this.ctl,
+			actionId,
+			this.keyBindingMap,
+			(newKeyBindingMap) => {
+				// Optimistic update...
+				this.keyBindingMap = newKeyBindingMap;
+				return this.onChange(newKeyBindingMap).catch(() => {
+					this.keyBindingMap = oldKeyBindingMap;
+				});
+			}
+		);
 		this.onUIChange({ captureAction: { accept, reject } });
 		this.ctl.input.setPlaceholder('Type the keys...');
 	}
-
-	private startKeyCapture = (actionId: string) => {
-		const capturedKeys: KeyEvent[] = [];
-		const keyListener = (evt: KeyboardEvent) => {
-			// Ignore modifier only key presses.
-			if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(evt.key)) {
-				return;
-			}
-			evt.preventDefault();
-			evt.stopPropagation();
-			capturedKeys.push(keyboardEventToKeyEvent(evt));
-			this.ctl.input.setInputValue(capturedKeys.map(keyEventToHumanReadableString).join(' + '));
-		};
-
-		this.ctl.keys.disableKeys();
-		this.ctl.menu.disableMenuActions();
-		this.ctl.menu.disableMenuOpenClose();
-		this.ctl.menu.disableMenuItemsFn();
-		this.ctl.input.disableInputElement();
-		setTimeout(() => {
-			window.addEventListener('keydown', keyListener);
-		});
-		const exit = () => {
-			window.removeEventListener('keydown', keyListener);
-			this.ctl.keys.enableKeys();
-			this.ctl.menu.enableMenuActions();
-			this.ctl.menu.enableMenuOpenClose();
-			this.ctl.menu.enableMenuItemsFn();
-			this.ctl.input.enableInputElement();
-			this.ctl.goBack();
-			// this.actionUI(actionId);
-		};
-
-		return {
-			accept: (evt: Event) => {
-				// If this is a button in input.right then preventDefault stops
-				// the input from being focused.
-				evt.preventDefault();
-				if (capturedKeys.length > 0) {
-					const oldKeyMap = this.keyBindingMap;
-					const keyBindings = new KeyEventBindings(oldKeyMap);
-					const existing = keyBindings.find(capturedKeys);
-					if (existing.length > 0) {
-						// Exit to get out of capture mode, then show the alert.
-						exit();
-						this.ctl.alert({
-							message: 'Binding already exists',
-							additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
-						});
-						return;
-					}
-					keyBindings.addBinding(actionId, capturedKeys);
-					// Optimistic update...
-					this.keyBindingMap = keyBindings.keyBindingsMap;
-					this.onChange?.(keyBindings.keyBindingsMap).catch(() => {
-						// Revert optimistic update...
-						this.keyBindingMap = oldKeyMap;
-					});
-				}
-				exit();
-			},
-			reject: (evt: Event) => {
-				evt.preventDefault();
-				exit();
-			}
-		};
-	};
 
 	private removeBinding = async (actionId: string, binding: string) => {
 		const confirm = this.ctl.confirm({ message: 'Remove binding?' });

@@ -7,8 +7,8 @@ import {
 } from '$lib/oneput/KeyEvent.js';
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
-import type { MenuItem } from '../lib.js';
-import { type StdMenuItemParams } from '../shared/stdMenuItem.js';
+import type { MenuItem } from '../../../../oneput/lib.js';
+import { type StdMenuItemParams } from '../../../../oneput/shared/stdMenuItem.js';
 
 export type KeybindingMenuItem = {
 	id: string;

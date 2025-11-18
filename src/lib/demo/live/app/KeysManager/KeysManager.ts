@@ -4,7 +4,7 @@ import {
 	KeyBindingsUI,
 	type KeybindingMenuItem,
 	type UIChangeParams
-} from '$lib/oneput/plugins/KeyBindingsUI.js';
+} from '$lib/demo/live/app/KeysManager/KeyBindingsUI.js';
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
 import { TestKeyService } from '../../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';

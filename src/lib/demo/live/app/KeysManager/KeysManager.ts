@@ -7,7 +7,6 @@ import {
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
 import { TestKeyService } from '../../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';
-import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { keybindingMenuItem } from './menuItems.js';
 
 /**
@@ -31,8 +30,7 @@ export class KeysManager {
 				// of a reusable ui object that you can plug into your own ui
 				// setup in Oneput.
 				onUIChange: (ui) => km.handleUIChange(ui),
-				keybindingMenuItem: keybindingMenuItem,
-				stdMenuItem: stdMenuItem
+				keybindingMenuItem: keybindingMenuItem
 			}),
 			keyMap
 		);

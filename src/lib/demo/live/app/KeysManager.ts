@@ -1,9 +1,14 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { KeyBindingsUI, type UIChangeParams } from '$lib/oneput/plugins/KeyBindingsUI.js';
+import {
+	KeyBindingsUI,
+	type KeybindingMenuItem,
+	type UIChangeParams
+} from '$lib/oneput/plugins/KeyBindingsUI.js';
 import type { MyDefaultUIValues } from '../config/defaultUI.js';
 import { TestKeyService } from '../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';
+import { randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
 
 /**
  * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
@@ -20,7 +25,13 @@ export class KeysManager {
 			KeyBindingsUI.create({
 				controller: ctl,
 				onChange: (newKeyMap) => km.updateKeys(newKeyMap),
-				onUIChange: (ui) => km.handleUIChange(ui)
+				// KeyBindingsUI tries to be agnostic as possible regarding the
+				// UI, so it passes data back to us via a callback.  You don't
+				// have to structure things this way, just palying with the idea
+				// of a reusable ui object that you can plug into your own ui
+				// setup in Oneput.
+				onUIChange: (ui) => km.handleUIChange(ui),
+				keybindingMenuItem: keybindingMenuItem
 			}),
 			keyMap
 		);
@@ -111,3 +122,58 @@ export class KeysManager {
 		notification.updateMessage('Key bindings saved', { duration: 3000 });
 	}
 }
+
+const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
+	id,
+	text,
+	action,
+	bindings
+}) => {
+	let bindingHTML = '<code><kbd>-</kbd></code>';
+	if (bindings.length > 0) {
+		bindingHTML = '<code><kbd>' + bindings[0] + '</kbd></code>';
+	}
+	return {
+		id,
+		type: 'hflex',
+		tag: 'button',
+		children: [
+			{
+				id: randomId(),
+				type: 'fchild',
+				classes: ['oneput__icon'],
+				innerHTMLUnsafe: icons.squareFunctionIcon
+			},
+			{
+				id: randomId(),
+				type: 'fchild',
+				textContent: text
+			},
+			{
+				id: randomId(),
+				type: 'hflex',
+				children: [
+					bindings.length > 1 && {
+						id: randomId(),
+						type: 'fchild',
+						innerHTMLUnsafe: `(${bindings.length})`
+					},
+					{
+						id: randomId(),
+						type: 'fchild',
+						innerHTMLUnsafe: bindingHTML,
+						classes: ['oneput__kbd']
+					},
+					{
+						id: randomId(),
+						type: 'fchild',
+						classes: ['oneput__icon'],
+						innerHTMLUnsafe: icons.chevronRightIcon
+					}
+				].filter(Boolean) as FlexParams['children']
+			}
+		],
+		attr: {},
+		action
+	};
+};

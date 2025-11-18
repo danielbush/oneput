@@ -6,17 +6,11 @@ import {
 	type KeyEvent
 } from '$lib/oneput/KeyEvent.js';
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
-import { randomId as randomId } from '$lib/oneput/lib.js';
-import type { FlexParams, MenuItem } from '$lib/oneput/lib.js';
-import {
-	chevronRightIcon,
-	keyboardIcon,
-	squareFunctionIcon,
-	xIcon
-} from '$lib/oneput/shared/icons.js';
+import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
+import type { MenuItem } from '../lib.js';
 import { stdMenuItem } from '../shared/stdMenuItem.js';
 
-const keybindingMenuItem: (params: {
+export type KeybindingMenuItem = {
 	id: string;
 	text: string;
 	/**
@@ -24,54 +18,6 @@ const keybindingMenuItem: (params: {
 	 */
 	bindings: string[];
 	action: () => void;
-}) => MenuItem = ({ id, text, action, bindings }) => {
-	let bindingHTML = '<code><kbd>-</kbd></code>';
-	if (bindings.length > 0) {
-		bindingHTML = '<code><kbd>' + bindings[0] + '</kbd></code>';
-	}
-	return {
-		id,
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{
-				id: randomId(),
-				type: 'fchild',
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: squareFunctionIcon
-			},
-			{
-				id: randomId(),
-				type: 'fchild',
-				textContent: text
-			},
-			{
-				id: randomId(),
-				type: 'hflex',
-				children: [
-					bindings.length > 1 && {
-						id: randomId(),
-						type: 'fchild',
-						innerHTMLUnsafe: `(${bindings.length})`
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						innerHTMLUnsafe: bindingHTML,
-						classes: ['oneput__kbd']
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
-						classes: ['oneput__icon'],
-						innerHTMLUnsafe: chevronRightIcon
-					}
-				].filter(Boolean) as FlexParams['children']
-			}
-		],
-		attr: {},
-		action
-	};
 };
 
 export type UIChangeParams = {
@@ -106,6 +52,7 @@ export class KeyBindingsUI {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
+		keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
 	}) {
 		return new KeyBindingsUI(params);
 	}
@@ -114,15 +61,18 @@ export class KeyBindingsUI {
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	private onUIChange: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
+	private keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
 
 	private constructor(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
+		keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
 	}) {
 		this.ctl = params.controller;
 		this.onChange = params.onChange;
 		this.onUIChange = params.onUIChange;
+		this.keybindingMenuItem = params.keybindingMenuItem;
 	}
 
 	runUI(keyMap: KeyBindingMap) {
@@ -137,7 +87,7 @@ export class KeyBindingsUI {
 		this.onUIChange({});
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
-				keybindingMenuItem({
+				this.keybindingMenuItem({
 					id,
 					text: description,
 					bindings,

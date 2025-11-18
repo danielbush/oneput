@@ -2,14 +2,13 @@ import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import {
 	KeyBindingsUI,
-	type KeybindingMenuItem,
 	type UIChangeParams
 } from '$lib/demo/live/app/KeysManager/KeyBindingsUI.js';
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
 import { TestKeyService } from '../../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';
-import { type MenuItem } from '$lib/oneput/lib.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
+import { keybindingMenuItem } from './menuItems.js';
 
 /**
  * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
@@ -124,33 +123,3 @@ export class KeysManager {
 		notification.updateMessage('Key bindings saved', { duration: 3000 });
 	}
 }
-
-const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
-	id,
-	text,
-	action,
-	bindings
-}) => {
-	let bindingHTML = '<code><kbd>-</kbd></code>';
-	if (bindings.length > 0) {
-		bindingHTML = '<code><kbd>' + bindings[0] + '</kbd></code>';
-	}
-	return stdMenuItem({
-		id,
-		// htmlContentUnsafe: bindingHTML,
-		textContent: text,
-		action,
-		left: (b) => [b.icon({ innerHTMLUnsafe: icons.squareFunctionIcon })],
-		right: (b) => [
-			bindings.length > 1 &&
-				b.fchild({
-					innerHTMLUnsafe: `(${bindings.length})`
-				}),
-			b.fchild({
-				htmlContentUnsafe: bindingHTML,
-				classes: ['oneput__kbd']
-			}),
-			b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
-		]
-	});
-};

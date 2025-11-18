@@ -1,5 +1,5 @@
 import { vflex, type FlexChildBuilder } from '../builder.js';
-import { randomId, type FChildParams, type MenuItem } from '../lib.js';
+import { randomId, type FlexChildren, type MenuItem } from '../lib.js';
 
 /**
  * If action is specified, tag will be set to button.
@@ -14,11 +14,11 @@ export type StdMenuItemParams = {
 	style?: Partial<CSSStyleDeclaration>;
 	htmlContentUnsafe?: string;
 	textContent?: string;
-	left?: false | ((b: FlexChildBuilder) => Array<FChildParams>);
-	right?: false | ((b: FlexChildBuilder) => Array<FChildParams>);
+	left?: false | ((b: FlexChildBuilder) => FlexChildren);
+	right?: false | ((b: FlexChildBuilder) => FlexChildren);
 	bottom?: {
-		left?: false | ((b: FlexChildBuilder) => Array<FChildParams>);
-		right?: false | ((b: FlexChildBuilder) => Array<FChildParams>);
+		left?: false | ((b: FlexChildBuilder) => FlexChildren);
+		right?: false | ((b: FlexChildBuilder) => FlexChildren);
 		htmlContentUnsafe?: string;
 		textContent?: string;
 	};
@@ -85,7 +85,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 						? b.hflex({
 								id: id + '-right',
 								classes: ['oneput__std-menu-item-right'],
-								children: (b) => (params.right ? params.right(b) : [])
+								children: (b) => (params.right ? params.right?.(b) || [] : [])
 							})
 						: params.right === false
 							? null

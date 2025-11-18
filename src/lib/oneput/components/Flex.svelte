@@ -55,7 +55,7 @@
 			children otherwise even though they won't get rendered we will still
 			trigger svelte's dupliate key error and get a whitescreen because 2
 			keys both have undefined as the id. -->
-				{#each params.children as child (child?.id || randomId())}
+				{#each params.children as child ((child && child.id) || randomId())}
 					{#if child}
 						{#if child.type === 'hflex'}
 							{@render flex(child, true)}

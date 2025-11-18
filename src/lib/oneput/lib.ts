@@ -41,6 +41,8 @@ export type OneputProps = {
 	replaceAnimationDuration?: number;
 };
 
+export type FlexChildren = Array<FlexParams | FChildParams | undefined | null | false>;
+
 /**
  * Represents a either a horizontal or vertical flex container which is used to
  * represent top-level menu items or dividers but can also be used to structure
@@ -59,7 +61,7 @@ export type FlexParams = {
 	 * data-structures easier without adding extra array filter loops to remove
 	 * them.
 	 */
-	children?: Array<FlexParams | FChildParams | undefined | null>;
+	children?: FlexChildren;
 	/**
 	 * Instructs Oneput rendered to override default list of HTML void elements.
 	 */

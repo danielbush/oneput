@@ -1,20 +1,22 @@
-import { randomId, type FChildParams, type FlexParams, type MenuItem } from './lib.js';
+import {
+	randomId,
+	type FChildParams,
+	type FlexChildren,
+	type FlexParams,
+	type MenuItem
+} from './lib.js';
 
 export type BuilderFlexParams = Partial<Omit<FlexParams, 'children'>> & {
-	children?:
-		| Array<FlexParams | FChildParams | undefined | null>
-		| ((b: FlexChildBuilder) => Array<FlexParams | FChildParams | undefined | null>);
+	children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);
 };
 
 export type BuilderMenuItem = Partial<Omit<MenuItem, 'children'>> & {
-	children?:
-		| Array<FlexParams | FChildParams | undefined | null>
-		| ((b: FlexChildBuilder) => Array<FlexParams | FChildParams | undefined | null>);
+	children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);
 };
 
 function flex(params: BuilderFlexParams): FlexParams {
 	const id = params.id ?? randomId();
-	let children: Array<FlexParams | FChildParams | undefined | null> | undefined;
+	let children: FlexChildren | undefined;
 	if (typeof params.children === 'function') {
 		children = params.children(new FlexChildBuilder(id));
 	} else {

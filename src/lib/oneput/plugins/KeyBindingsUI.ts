@@ -168,7 +168,8 @@ export class KeyBindingsUI {
 			this.ctl.menu.enableMenuOpenClose();
 			this.ctl.menu.enableMenuItemsFn();
 			this.ctl.input.enableInputElement();
-			this.actionUI(actionId);
+			this.ctl.goBack();
+			// this.actionUI(actionId);
 		};
 
 		return {

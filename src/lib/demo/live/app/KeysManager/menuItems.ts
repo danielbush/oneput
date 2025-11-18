@@ -1,7 +1,16 @@
 import type { MenuItem } from '$lib/oneput/lib.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import type { KeybindingMenuItem } from './KeyBindingsUI.js';
 import * as icons from '$lib/oneput/shared/icons.js';
+
+export type KeybindingMenuItem = {
+	id: string;
+	text: string;
+	/**
+	 * To display to the user.
+	 */
+	bindings: string[];
+	action: () => void;
+};
 
 export const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
 	id,

@@ -2,18 +2,8 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { type KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import type { MenuItem } from '../../../../oneput/lib.js';
 import { startKeyCapture } from './keyCapture.js';
-
-export type KeybindingMenuItem = {
-	id: string;
-	text: string;
-	/**
-	 * To display to the user.
-	 */
-	bindings: string[];
-	action: () => void;
-};
+import { keybindingMenuItem } from './menuItems.js';
 
 export type UIChangeParams = {
 	/**
@@ -47,7 +37,6 @@ export class KeyBindingsUI {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
-		keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
 	}) {
 		return new KeyBindingsUI(params);
 	}
@@ -56,18 +45,15 @@ export class KeyBindingsUI {
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	private onUIChange: (ui: UIChangeParams) => void;
 	private keyBindingMap: KeyBindingMap = {};
-	private keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
 
 	private constructor(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
-		keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem;
 	}) {
 		this.ctl = params.controller;
 		this.onChange = params.onChange;
 		this.onUIChange = params.onUIChange;
-		this.keybindingMenuItem = params.keybindingMenuItem;
 	}
 
 	runUI(keyMap: KeyBindingMap) {
@@ -82,7 +68,7 @@ export class KeyBindingsUI {
 		this.onUIChange({});
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
-				this.keybindingMenuItem({
+				keybindingMenuItem({
 					id,
 					text: description,
 					bindings,

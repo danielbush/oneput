@@ -2,7 +2,7 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
-import { KeysManager } from './KeysManager.js';
+import { KeysManager } from './KeysManager/KeysManager.js';
 import { config } from '../service/TestKeyService.js';
 import { FiltersUI } from './FiltersUI.js';
 

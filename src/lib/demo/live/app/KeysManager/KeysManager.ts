@@ -5,8 +5,8 @@ import {
 	type KeybindingMenuItem,
 	type UIChangeParams
 } from '$lib/oneput/plugins/KeyBindingsUI.js';
-import type { MyDefaultUIValues } from '../config/defaultUI.js';
-import { TestKeyService } from '../service/TestKeyService.js';
+import type { MyDefaultUIValues } from '../../config/defaultUI.js';
+import { TestKeyService } from '../../service/TestKeyService.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { type MenuItem } from '$lib/oneput/lib.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';

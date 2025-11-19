@@ -40,6 +40,7 @@ export class KeyBindingsUI {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
+		isLocal: boolean;
 	}) {
 		return new KeyBindingsUI(params);
 	}
@@ -47,16 +48,19 @@ export class KeyBindingsUI {
 	private ctl: Controller;
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
 	private onUIChange: (ui: UIChangeParams) => void;
+	private isLocal: boolean;
 	private keyBindingMap: KeyBindingMap = {};
 
 	private constructor(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
 		onUIChange: (ui: UIChangeParams) => void;
+		isLocal: boolean;
 	}) {
 		this.ctl = params.controller;
 		this.onChange = params.onChange;
 		this.onUIChange = params.onUIChange;
+		this.isLocal = params.isLocal;
 	}
 
 	runUI(keyMap: KeyBindingMap) {
@@ -68,7 +72,12 @@ export class KeyBindingsUI {
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
-		this.onUIChange({});
+		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+			menuHeader: title,
+			exitAction: this.ctl.goBack,
+			exitType: 'back'
+		});
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
@@ -180,7 +189,8 @@ export class KeysManager {
 				// have to structure things this way, just palying with the idea
 				// of a reusable ui object that you can plug into your own ui
 				// setup in Oneput.
-				onUIChange: (ui) => km.handleUIChange(ui)
+				onUIChange: (ui) => km.handleUIChange(ui),
+				isLocal: values.isLocal
 			}),
 			keyMap
 		);

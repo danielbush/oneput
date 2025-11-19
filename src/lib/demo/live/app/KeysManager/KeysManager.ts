@@ -1,10 +1,10 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import * as icons from '$lib/oneput/shared/icons.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
 import { TestKeyService } from '../../service/TestKeyService.js';
+import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
 
@@ -28,18 +28,12 @@ export type UIChangeParams = {
  *
  * It controls inputValue and placeholder.
  *
- * This is written to be re-usable.  It calls onUIChange to tell the parent ui
- * what to update in the ui and sticks to only changing the input.  It doesn't
- * have to be done this way we could just have one ui object that knows about
- * whatever our default ui is; this is just exploring how reusable a ui object can be.
- *
  * The assumption is that keyMap is stored somewhere by the consumer.
  */
 export class KeyBindingsUI {
 	static create(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
-		onUIChange: (ui: UIChangeParams) => void;
 		isLocal: boolean;
 	}) {
 		return new KeyBindingsUI(params);
@@ -47,19 +41,16 @@ export class KeyBindingsUI {
 
 	private ctl: Controller;
 	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
-	private onUIChange: (ui: UIChangeParams) => void;
 	private isLocal: boolean;
 	private keyBindingMap: KeyBindingMap = {};
 
 	private constructor(params: {
 		controller: Controller;
 		onChange: (keyMap: KeyBindingMap) => Promise<void>;
-		onUIChange: (ui: UIChangeParams) => void;
 		isLocal: boolean;
 	}) {
 		this.ctl = params.controller;
 		this.onChange = params.onChange;
-		this.onUIChange = params.onUIChange;
 		this.isLocal = params.isLocal;
 	}
 
@@ -97,14 +88,11 @@ export class KeyBindingsUI {
 	 */
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
-		// this.onUIChange({ title: `Key bindings for "${description}"`, back: this.actionsUI });
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 			menuHeader: `Key bindings for "${description}"`,
 			exitAction: this.ctl.goBack,
 			exitType: 'back'
 		});
-		// TODO: should placeholder be handled by onUIChange?
-		// TOOD: or move placeholder into .input and keep it here; convention: input is controlled ?
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
 		this.ctl.menu.setMenuItems([
@@ -146,7 +134,7 @@ export class KeyBindingsUI {
 				});
 			}
 		);
-		this.onUIChange({ captureAction: { accept, reject } });
+		inputCaptureUI(this.ctl, { accept, reject });
 		this.ctl.input.setPlaceholder('Type the keys...');
 	}
 
@@ -189,12 +177,6 @@ export class KeysManager {
 			KeyBindingsUI.create({
 				controller: ctl,
 				onChange: (newKeyMap) => km.updateKeys(newKeyMap),
-				// KeyBindingsUI tries to be agnostic as possible regarding the
-				// UI, so it passes data back to us via a callback.  You don't
-				// have to structure things this way, just palying with the idea
-				// of a reusable ui object that you can plug into your own ui
-				// setup in Oneput.
-				onUIChange: (ui) => km.handleUIChange(ui),
 				isLocal: values.isLocal
 			}),
 			keyMap
@@ -222,44 +204,8 @@ export class KeysManager {
 			exitType: 'back'
 		});
 		if (ui.captureAction) {
-			this.inputCaptureUI(ui.captureAction);
+			inputCaptureUI(this.ctl, ui.captureAction);
 		}
-	}
-
-	inputCaptureUI(captureAction: { accept: (evt: Event) => void; reject: (evt: Event) => void }) {
-		const { accept, reject } = captureAction;
-		this.ctl.ui.setInputUI({
-			right: {
-				id: 'input-right-1',
-				type: 'hflex',
-				children: [
-					{
-						id: 'accept-key-capture',
-						type: 'fchild',
-						tag: 'button',
-						attr: {
-							type: 'button',
-							title: 'Options',
-							onclick: accept
-						},
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: icons.tickIcon
-					},
-					{
-						id: 'reject-key-capture',
-						type: 'fchild',
-						tag: 'button',
-						attr: {
-							type: 'button',
-							title: 'Options',
-							onclick: reject
-						},
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: icons.xIcon
-					}
-				]
-			}
-		});
 	}
 
 	async updateKeys(newKeyMap: KeyBindingMap) {

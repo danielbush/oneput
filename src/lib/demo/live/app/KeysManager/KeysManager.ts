@@ -1,5 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
@@ -99,10 +100,20 @@ export class KeysManager {
 			this.ctl,
 			actionId,
 			this.keyBindingMap,
-			(newKeyBindingMap) => {
+			(capturedKeys) => {
 				// Optimistic update...
-				this.keyBindingMap = newKeyBindingMap;
-				return this.updateKeys(newKeyBindingMap).catch(() => {
+				const keyBindings = new KeyEventBindings(this.keyBindingMap);
+				const existing = keyBindings.find(capturedKeys);
+				if (existing.length > 0) {
+					this.ctl.alert({
+						message: 'Binding already exists',
+						additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
+					});
+					return Promise.resolve();
+				}
+				keyBindings.addBinding(actionId, capturedKeys);
+				this.keyBindingMap = keyBindings.keyBindingsMap;
+				return this.updateKeys(this.keyBindingMap).catch(() => {
 					this.keyBindingMap = oldKeyBindingMap;
 				});
 			}

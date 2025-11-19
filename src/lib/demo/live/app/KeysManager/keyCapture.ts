@@ -5,13 +5,12 @@ import {
 	keyEventToHumanReadableString,
 	type KeyEvent
 } from '$lib/oneput/KeyEvent.js';
-import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 
 export const startKeyCapture = (
 	ctl: Controller,
 	actionId: string,
 	keyBindingMap: KeyBindingMap,
-	onChange: (keyMap: KeyBindingMap) => Promise<void>
+	onChange: (keyEvents: KeyEvent[]) => Promise<void>
 ) => {
 	const capturedKeys: KeyEvent[] = [];
 	const keyListener = (evt: KeyboardEvent) => {
@@ -50,24 +49,7 @@ export const startKeyCapture = (
 			// the input from being focused.
 			evt.preventDefault();
 			if (capturedKeys.length > 0) {
-				const keyBindings = new KeyEventBindings(keyBindingMap);
-				const existing = keyBindings.find(capturedKeys);
-				if (existing.length > 0) {
-					// Exit to get out of capture mode, then show the alert.
-					exit();
-					ctl.alert({
-						message: 'Binding already exists',
-						additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
-					});
-					return;
-				}
-				keyBindings.addBinding(actionId, capturedKeys);
-				// Optimistic update...
-				// this.keyBindingMap = keyBindings.keyBindingsMap;
-				onChange(keyBindings.keyBindingsMap).catch(() => {
-					// Revert optimistic update...
-					// this.keyBindingMap = oldKeyMap;
-				});
+				onChange(capturedKeys);
 			}
 			exit();
 		},

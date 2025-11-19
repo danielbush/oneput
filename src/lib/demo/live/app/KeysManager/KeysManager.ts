@@ -105,6 +105,7 @@ export class KeysManager {
 		if (capturedKeys) {
 			this.addBinding(actionId, capturedKeys);
 		}
+		this.ctl.goBack();
 	}
 
 	private removeBinding = async (actionId: string, binding: string) => {

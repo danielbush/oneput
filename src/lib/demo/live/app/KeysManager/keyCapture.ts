@@ -37,7 +37,6 @@ export const startKeyCapture = (ctl: Controller) => {
 		ctl.menu.enableMenuOpenClose();
 		ctl.menu.enableMenuItemsFn();
 		ctl.input.enableInputElement();
-		ctl.goBack();
 	};
 
 	return {

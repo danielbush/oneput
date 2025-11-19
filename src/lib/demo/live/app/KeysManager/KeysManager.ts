@@ -8,21 +8,6 @@ import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
 
-export type UIChangeParams = {
-	/**
-	 * If not specified, then use a main title provided by the parent.
-	 */
-	title?: string;
-	/**
-	 * If not specified, parent should use its back action which will exit this plugin.
-	 */
-	back?: () => void;
-	captureAction?: {
-		accept: (evt: Event) => void;
-		reject: (evt: Event) => void;
-	};
-};
-
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  *
@@ -194,18 +179,6 @@ export class KeysManager {
 
 	runUI() {
 		this.keyBindingsUI.runUI(this.keyMap);
-	}
-
-	handleUIChange(ui: UIChangeParams) {
-		const title = ui.title ?? `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
-			menuHeader: title,
-			exitAction: this.ctl.goBack,
-			exitType: 'back'
-		});
-		if (ui.captureAction) {
-			inputCaptureUI(this.ctl, ui.captureAction);
-		}
 	}
 
 	async updateKeys(newKeyMap: KeyBindingMap) {

@@ -11,36 +11,24 @@ import { keybindingMenuItem } from './menuItems.js';
 /**
  * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
  *
- * It controls inputValue and placeholder.
- *
  * The assumption is that keyMap is stored somewhere by the consumer.
  */
-export class KeyBindingsUI {
-	static create(params: {
-		controller: Controller;
-		onChange: (keyMap: KeyBindingMap) => Promise<void>;
-		isLocal: boolean;
-	}) {
-		return new KeyBindingsUI(params);
+export class KeysManager {
+	static create(ctl: Controller, values: { isLocal: boolean }) {
+		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
+		const testKeyService = TestKeyService.create();
+		const km: KeysManager = new KeysManager(ctl, testKeyService, values.isLocal, keyBindingMap);
+		return km;
 	}
 
-	private ctl: Controller;
-	private onChange: (keyMap: KeyBindingMap) => Promise<void>;
-	private isLocal: boolean;
-	private keyBindingMap: KeyBindingMap = {};
+	constructor(
+		private ctl: Controller,
+		private testKeyService: TestKeyService,
+		private isLocal: boolean,
+		private keyBindingMap: KeyBindingMap
+	) {}
 
-	private constructor(params: {
-		controller: Controller;
-		onChange: (keyMap: KeyBindingMap) => Promise<void>;
-		isLocal: boolean;
-	}) {
-		this.ctl = params.controller;
-		this.onChange = params.onChange;
-		this.isLocal = params.isLocal;
-	}
-
-	runUI(keyMap: KeyBindingMap) {
-		this.keyBindingMap = keyMap;
+	runUI() {
 		this.actionsUI();
 	}
 
@@ -114,7 +102,7 @@ export class KeyBindingsUI {
 			(newKeyBindingMap) => {
 				// Optimistic update...
 				this.keyBindingMap = newKeyBindingMap;
-				return this.onChange(newKeyBindingMap).catch(() => {
+				return this.updateKeys(newKeyBindingMap).catch(() => {
 					this.keyBindingMap = oldKeyBindingMap;
 				});
 			}
@@ -139,49 +127,14 @@ export class KeyBindingsUI {
 		};
 		// Optimistic update
 		this.keyBindingMap = newBindings;
-		this.onChange?.(this.keyBindingMap).catch(() => {
+		this.updateKeys(this.keyBindingMap).catch(() => {
 			// Revert optimistic update...
 			this.keyBindingMap = oldBindings;
 		});
 		this.actionUI(actionId);
 	};
-}
 
-/**
- * A key manager combines the ui (KeyBindingsUI) with the storage (TestKeyService) to
- * let you manage a single set of key bindings eg local or global.
- */
-export class KeysManager {
-	static create(ctl: Controller, values: { isLocal: boolean }) {
-		const keyMap = ctl.keys.getDefaultKeys(values.isLocal);
-		const testKeyService = TestKeyService.create();
-		const km: KeysManager = new KeysManager(
-			ctl,
-			testKeyService,
-			values.isLocal,
-			KeyBindingsUI.create({
-				controller: ctl,
-				onChange: (newKeyMap) => km.updateKeys(newKeyMap),
-				isLocal: values.isLocal
-			}),
-			keyMap
-		);
-		return km;
-	}
-
-	constructor(
-		private ctl: Controller,
-		private testKeyService: TestKeyService,
-		private isLocal: boolean,
-		private keyBindingsUI: KeyBindingsUI,
-		private keyMap: KeyBindingMap = {}
-	) {}
-
-	runUI() {
-		this.keyBindingsUI.runUI(this.keyMap);
-	}
-
-	async updateKeys(newKeyMap: KeyBindingMap) {
+	async updateKeys(newKeyBindingMap: KeyBindingMap) {
 		// Optimistic update
 		// For this demo, we'll just set the keys straight away and update the
 		// default ui.  In more complicated setups you might be setting bindings
@@ -191,15 +144,15 @@ export class KeysManager {
 		// whatever the current default keys are for the current default ui.
 		// What we really want to do is edit the keys for a particular ui and
 		// persist it somewhere.
-		this.ctl.keys.setDefaultKeys(newKeyMap, this.isLocal);
+		this.ctl.keys.setDefaultKeys(newKeyBindingMap, this.isLocal);
 		// Push to store
 		try {
-			await this.testKeyService.setKeys(newKeyMap, this.isLocal);
-			this.keyMap = newKeyMap;
+			await this.testKeyService.setKeys(newKeyBindingMap, this.isLocal);
+			this.keyBindingMap = newKeyBindingMap;
 		} catch (err) {
 			notification.updateMessage((err as Error).message);
 			// Revert optimistic update...
-			this.ctl.keys.setDefaultKeys(this.keyMap, this.isLocal);
+			this.ctl.keys.setDefaultKeys(this.keyBindingMap, this.isLocal);
 			throw err;
 		}
 		notification.updateMessage('Key bindings saved', { duration: 3000 });

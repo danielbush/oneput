@@ -136,19 +136,23 @@ export class KeysManager {
 	private async update(actionId: string, keyBindingMap: KeyBindingMap) {
 		const notification = this.ctl.notify('Updating...', { duration: 3000 });
 		const oldKeyBindingMap = this.keyBindingMap;
+
 		// Optimistic update
 		this.keyBindingMap = keyBindingMap;
 		this.ctl.keys.setDefaultKeys(keyBindingMap, this.isLocal);
 		this.actionUI(actionId);
-		try {
-			await this.testKeyService.setKeys(keyBindingMap, this.isLocal);
+
+		// Real update
+		const result = await this.testKeyService.setKeys(keyBindingMap, this.isLocal);
+		result.map(() => {
 			notification.updateMessage('Key bindings saved', { duration: 3000 });
-		} catch (err) {
-			notification.updateMessage((err as Error).message);
+		});
+		result.mapErr((err) => {
+			notification.updateMessage(err.message);
 			// Revert optimistic update...
 			this.keyBindingMap = oldKeyBindingMap;
 			this.ctl.keys.setDefaultKeys(oldKeyBindingMap, this.isLocal);
 			this.actionUI(actionId);
-		}
+		});
 	}
 }

@@ -95,12 +95,16 @@ export class KeysManager {
 	/**
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
-	private captureBindingUI(actionId: string) {
-		const { accept, reject } = startKeyCapture(this.ctl, (capturedKeys) =>
-			this.addBinding(actionId, capturedKeys)
-		);
+	private async captureBindingUI(actionId: string) {
+		// TODO: The way we've broken up key capture and related ui is a bit
+		// artificial here.
+		const { accept, reject, capturingKeys } = startKeyCapture(this.ctl);
 		inputCaptureUI(this.ctl, { accept, reject });
 		this.ctl.input.setPlaceholder('Type the keys...');
+		const capturedKeys = await capturingKeys;
+		if (capturedKeys) {
+			this.addBinding(actionId, capturedKeys);
+		}
 	}
 
 	private removeBinding = async (actionId: string, binding: string) => {

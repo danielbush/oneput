@@ -5,10 +5,11 @@ import {
 	type KeyEvent
 } from '$lib/oneput/KeyEvent.js';
 
-export const startKeyCapture = (
-	ctl: Controller,
-	onChange: (keyEvents: KeyEvent[]) => Promise<void>
-) => {
+export const startKeyCapture = (ctl: Controller) => {
+	let resolve: (r: KeyEvent[] | null) => void;
+	const capturingKeys = new Promise<KeyEvent[] | null>((_resolve) => {
+		resolve = _resolve;
+	});
 	const capturedKeys: KeyEvent[] = [];
 	const keyListener = (evt: KeyboardEvent) => {
 		// Ignore modifier only key presses.
@@ -45,13 +46,15 @@ export const startKeyCapture = (
 			// the input from being focused.
 			evt.preventDefault();
 			if (capturedKeys.length > 0) {
-				onChange(capturedKeys);
+				resolve(capturedKeys);
 			}
 			exit();
 		},
 		reject: (evt: Event) => {
 			evt.preventDefault();
+			resolve(null);
 			exit();
-		}
+		},
+		capturingKeys
 	};
 };

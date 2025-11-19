@@ -116,7 +116,7 @@ export class KeysManager {
 		}
 		const keyEventBindings = new KeyEventBindings(this.keyBindingMap);
 		keyEventBindings.removeBinding(actionId, binding);
-		this.update(actionId, keyEventBindings.keyBindingsMap);
+		this.update(actionId, keyEventBindings.keyBindingMap);
 	};
 
 	private addBinding = async (actionId: string, capturedKeys: KeyEvent[]) => {
@@ -130,7 +130,7 @@ export class KeysManager {
 			return Promise.reject(new Error('Binding already exists'));
 		}
 		keyEventBindings.addBinding(actionId, capturedKeys);
-		this.update(actionId, keyEventBindings.keyBindingsMap);
+		this.update(actionId, keyEventBindings.keyBindingMap);
 	};
 
 	private async update(actionId: string, keyBindingMap: KeyBindingMap) {

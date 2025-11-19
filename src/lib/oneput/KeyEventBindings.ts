@@ -34,12 +34,12 @@ export class KeyEventBindings {
 	 * Remove binding using binding string represention of KeyEvent's.
 	 */
 	removeBinding(actionId: string, binding: string) {
-		const keyBindingsMap = this.keyBindingsMap;
+		const keyBindingMap = this.keyBindingMap;
 		const newBindings = {
-			...keyBindingsMap,
+			...keyBindingMap,
 			[actionId]: {
-				...keyBindingsMap[actionId],
-				bindings: keyBindingsMap[actionId].bindings.filter((b) => b !== binding)
+				...keyBindingMap[actionId],
+				bindings: keyBindingMap[actionId].bindings.filter((b) => b !== binding)
 			}
 		};
 		this.keyEventsMap = keyBindingMapToKeyEventsMap(newBindings);
@@ -58,7 +58,7 @@ export class KeyEventBindings {
 	 * Convert the key events map back to a key binding map - this is the format
 	 * that is usually written by users in configs etc.
 	 */
-	get keyBindingsMap() {
+	get keyBindingMap() {
 		return keyEventsMapToKeyBindingMap(this.keyEventsMap);
 	}
 }

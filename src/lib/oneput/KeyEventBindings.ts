@@ -23,8 +23,26 @@ export class KeyEventBindings {
 		this.keyEventsMap = keyBindingMapToKeyEventsMap(keyBindingMap);
 	}
 
+	/**
+	 * Add binding using KeyEvent's since this is what we capture.
+	 */
 	addBinding(actionId: string, keyEvents: KeyEvent[]) {
 		this.keyEventsMap[actionId].bindings.push(keyEvents);
+	}
+
+	/**
+	 * Remove binding using binding string represention of KeyEvent's.
+	 */
+	removeBinding(actionId: string, binding: string) {
+		const keyBindingsMap = this.keyBindingsMap;
+		const newBindings = {
+			...keyBindingsMap,
+			[actionId]: {
+				...keyBindingsMap[actionId],
+				bindings: keyBindingsMap[actionId].bindings.filter((b) => b !== binding)
+			}
+		};
+		this.keyEventsMap = keyBindingMapToKeyEventsMap(newBindings);
 	}
 
 	/**

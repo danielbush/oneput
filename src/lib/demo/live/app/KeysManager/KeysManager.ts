@@ -114,20 +114,14 @@ export class KeysManager {
 		if (!yes) {
 			return;
 		}
-		const oldBindings = this.keyBindingMap;
-		const newBindings = {
-			...oldBindings,
-			[actionId]: {
-				...this.keyBindingMap[actionId],
-				bindings: this.keyBindingMap[actionId].bindings.filter((b) => b !== binding)
-			}
-		};
-		this.updateStore(actionId, newBindings);
+		const keyEventBindings = new KeyEventBindings(this.keyBindingMap);
+		keyEventBindings.removeBinding(actionId, binding);
+		this.update(actionId, keyEventBindings.keyBindingsMap);
 	};
 
 	private addBinding = async (actionId: string, capturedKeys: KeyEvent[]) => {
-		const keyBindings = new KeyEventBindings(this.keyBindingMap);
-		const existing = keyBindings.find(capturedKeys);
+		const keyEventBindings = new KeyEventBindings(this.keyBindingMap);
+		const existing = keyEventBindings.find(capturedKeys);
 		if (existing.length > 0) {
 			this.ctl.alert({
 				message: 'Binding already exists',
@@ -135,35 +129,26 @@ export class KeysManager {
 			});
 			return Promise.reject(new Error('Binding already exists'));
 		}
-		keyBindings.addBinding(actionId, capturedKeys);
-		this.updateStore(actionId, keyBindings.keyBindingsMap);
+		keyEventBindings.addBinding(actionId, capturedKeys);
+		this.update(actionId, keyEventBindings.keyBindingsMap);
 	};
 
-	/**
-	 * Optimistically store key bindings map with immediate update, handle any
-	 * rejections from the backend.
-	 */
-	private updateStore = async (actionId: string, keyBindingMap: KeyBindingMap) => {
-		const oldKeyBindingMap = this.keyBindingMap;
+	private async update(actionId: string, keyBindingMap: KeyBindingMap) {
 		const notification = this.ctl.notify('Updating...', { duration: 3000 });
+		const oldKeyBindingMap = this.keyBindingMap;
 		// Optimistic update
 		this.keyBindingMap = keyBindingMap;
 		this.ctl.keys.setDefaultKeys(keyBindingMap, this.isLocal);
 		this.actionUI(actionId);
-		// Push to store
 		try {
 			await this.testKeyService.setKeys(keyBindingMap, this.isLocal);
+			notification.updateMessage('Key bindings saved', { duration: 3000 });
 		} catch (err) {
 			notification.updateMessage((err as Error).message);
-
 			// Revert optimistic update...
 			this.keyBindingMap = oldKeyBindingMap;
 			this.ctl.keys.setDefaultKeys(oldKeyBindingMap, this.isLocal);
 			this.actionUI(actionId);
-
-			throw err;
 		}
-		notification.updateMessage('Key bindings saved', { duration: 3000 });
-		return Promise.resolve();
-	};
+	}
 }

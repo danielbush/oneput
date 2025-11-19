@@ -97,7 +97,12 @@ export class KeyBindingsUI {
 	 */
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
-		this.onUIChange({ title: `Key bindings for "${description}"`, back: this.actionsUI });
+		// this.onUIChange({ title: `Key bindings for "${description}"`, back: this.actionsUI });
+		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+			menuHeader: `Key bindings for "${description}"`,
+			exitAction: this.ctl.goBack,
+			exitType: 'back'
+		});
 		// TODO: should placeholder be handled by onUIChange?
 		// TOOD: or move placeholder into .input and keep it here; convention: input is controlled ?
 		this.ctl.input.setPlaceholder();

@@ -1,5 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import type { KeyEvent } from '$lib/oneput/KeyEvent.js';
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
@@ -95,28 +96,8 @@ export class KeysManager {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private captureBindingUI(actionId: string) {
-		const oldKeyBindingMap = this.keyBindingMap;
-		const { accept, reject } = startKeyCapture(
-			this.ctl,
-			actionId,
-			this.keyBindingMap,
-			(capturedKeys) => {
-				// Optimistic update...
-				const keyBindings = new KeyEventBindings(this.keyBindingMap);
-				const existing = keyBindings.find(capturedKeys);
-				if (existing.length > 0) {
-					this.ctl.alert({
-						message: 'Binding already exists',
-						additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
-					});
-					return Promise.resolve();
-				}
-				keyBindings.addBinding(actionId, capturedKeys);
-				this.keyBindingMap = keyBindings.keyBindingsMap;
-				return this.updateKeys(this.keyBindingMap).catch(() => {
-					this.keyBindingMap = oldKeyBindingMap;
-				});
-			}
+		const { accept, reject } = startKeyCapture(this.ctl, (capturedKeys) =>
+			this.addBinding(actionId, capturedKeys)
 		);
 		inputCaptureUI(this.ctl, { accept, reject });
 		this.ctl.input.setPlaceholder('Type the keys...');
@@ -136,36 +117,48 @@ export class KeysManager {
 				bindings: this.keyBindingMap[actionId].bindings.filter((b) => b !== binding)
 			}
 		};
-		// Optimistic update
-		this.keyBindingMap = newBindings;
-		this.updateKeys(this.keyBindingMap).catch(() => {
-			// Revert optimistic update...
-			this.keyBindingMap = oldBindings;
-		});
-		this.actionUI(actionId);
+		this.updateStore(actionId, newBindings);
 	};
 
-	async updateKeys(newKeyBindingMap: KeyBindingMap) {
-		// Optimistic update
-		// For this demo, we'll just set the keys straight away and update the
-		// default ui.  In more complicated setups you might be setting bindings
-		// for a particular mode.
+	private addBinding = async (actionId: string, capturedKeys: KeyEvent[]) => {
+		const keyBindings = new KeyEventBindings(this.keyBindingMap);
+		const existing = keyBindings.find(capturedKeys);
+		if (existing.length > 0) {
+			this.ctl.alert({
+				message: 'Binding already exists',
+				additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
+			});
+			return Promise.reject(new Error('Binding already exists'));
+		}
+		keyBindings.addBinding(actionId, capturedKeys);
+		this.updateStore(actionId, keyBindings.keyBindingsMap);
+	};
+
+	/**
+	 * Optimistically store key bindings map with immediate update, handle any
+	 * rejections from the backend.
+	 */
+	private updateStore = async (actionId: string, keyBindingMap: KeyBindingMap) => {
+		const oldKeyBindingMap = this.keyBindingMap;
 		const notification = this.ctl.notify('Updating...', { duration: 3000 });
-		// TODO: this just sets the keys controller default keys which is basic
-		// whatever the current default keys are for the current default ui.
-		// What we really want to do is edit the keys for a particular ui and
-		// persist it somewhere.
-		this.ctl.keys.setDefaultKeys(newKeyBindingMap, this.isLocal);
+		// Optimistic update
+		this.keyBindingMap = keyBindingMap;
+		this.ctl.keys.setDefaultKeys(keyBindingMap, this.isLocal);
+		this.actionUI(actionId);
 		// Push to store
 		try {
-			await this.testKeyService.setKeys(newKeyBindingMap, this.isLocal);
-			this.keyBindingMap = newKeyBindingMap;
+			await this.testKeyService.setKeys(keyBindingMap, this.isLocal);
 		} catch (err) {
 			notification.updateMessage((err as Error).message);
+
 			// Revert optimistic update...
-			this.ctl.keys.setDefaultKeys(this.keyBindingMap, this.isLocal);
+			this.keyBindingMap = oldKeyBindingMap;
+			this.ctl.keys.setDefaultKeys(oldKeyBindingMap, this.isLocal);
+			this.actionUI(actionId);
+
 			throw err;
 		}
 		notification.updateMessage('Key bindings saved', { duration: 3000 });
-	}
+		return Promise.resolve();
+	};
 }

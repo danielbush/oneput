@@ -1,5 +1,4 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import {
 	keyboardEventToKeyEvent,
 	keyEventToHumanReadableString,
@@ -8,8 +7,6 @@ import {
 
 export const startKeyCapture = (
 	ctl: Controller,
-	actionId: string,
-	keyBindingMap: KeyBindingMap,
 	onChange: (keyEvents: KeyEvent[]) => Promise<void>
 ) => {
 	const capturedKeys: KeyEvent[] = [];
@@ -40,7 +37,6 @@ export const startKeyCapture = (
 		ctl.menu.enableMenuItemsFn();
 		ctl.input.enableInputElement();
 		ctl.goBack();
-		// this.actionUI(actionId);
 	};
 
 	return {

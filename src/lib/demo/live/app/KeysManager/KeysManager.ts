@@ -5,7 +5,7 @@ import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
-import { TestKeyService } from '../../service/TestKeyService.js';
+import { TestBindingsStore } from '../../service/TestBindingsStore.js';
 import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
@@ -18,14 +18,14 @@ import { keybindingMenuItem } from './menuItems.js';
 export class KeysManager {
 	static create(ctl: Controller, values: { isLocal: boolean }) {
 		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
-		const testKeyService = TestKeyService.create();
+		const testKeyService = TestBindingsStore.create();
 		const km: KeysManager = new KeysManager(ctl, testKeyService, values.isLocal, keyBindingMap);
 		return km;
 	}
 
 	constructor(
 		private ctl: Controller,
-		private testKeyService: TestKeyService,
+		private testKeyService: TestBindingsStore,
 		private isLocal: boolean,
 		private keyBindingMap: KeyBindingMap
 	) {}

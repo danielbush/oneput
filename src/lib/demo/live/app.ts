@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { MyDefaultUI } from './config/defaultUI.js';
 import { RootUI } from './app/root.js';
-import { globalKeys, localKeys } from './config/keys.js';
+import { globalKeys, localKeys } from '../../oneput/shared/keys.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.

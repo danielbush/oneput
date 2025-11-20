@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { keyBindingMapToSerializable, type KeyEvent } from '$lib/oneput/KeyEvent.js';
+import { keyBindingMapToSerializable, type KeyEvent } from '$lib/oneput/bindings.js';
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';

@@ -6,7 +6,7 @@ import {
 	type KeyEvent,
 	type KeyEventBinding,
 	type KeyEventsMap
-} from './KeyEvent.js';
+} from './bindings.js';
 
 /**
  * Let's you edit / validate a set of key bindings.

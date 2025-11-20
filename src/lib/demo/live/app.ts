@@ -7,7 +7,7 @@ import {
 	defaultLocalActions,
 	defaultLocalBindings
 } from '../../oneput/shared/defaultBindings.js';
-import { keyBindingMapFromSerializable } from '$lib/oneput/KeyEvent.js';
+import { keyBindingMapFromSerializable } from '$lib/oneput/bindings.js';
 import { BindingsIDB } from '$lib/oneput/shared/BindingsIDB.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys

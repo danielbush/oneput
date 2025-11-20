@@ -4,7 +4,7 @@
 import type { Controller } from '$lib/index.js';
 import type { KeyBindingMapSerializable } from '$lib/oneput/KeyBinding.js';
 import { GlobalFilter } from '$lib/oneput/plugins/GlobalFilter.js';
-import { keyBindingMapFromSerializable } from '../KeyEvent.js';
+import { keyBindingMapFromSerializable } from '../bindings.js';
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
 	openMenu: (c) => {

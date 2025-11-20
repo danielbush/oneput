@@ -3,7 +3,7 @@ import {
 	keyboardEventToKeyEvent,
 	keyEventToHumanReadableString,
 	type KeyEvent
-} from '$lib/oneput/KeyEvent.js';
+} from '$lib/oneput/bindings.js';
 
 export const startKeyCapture = (ctl: Controller) => {
 	let resolve: (r: KeyEvent[] | null) => void;

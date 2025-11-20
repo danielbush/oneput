@@ -46,57 +46,6 @@ export const menuItemNoIcon: (params: {
 };
 
 /**
- * This is a menu item with a left icon and a right icon.  If no left icon is
- * given, there will be a blank space.
- */
-export const menuItemWithIcon: (params: {
-	id: string;
-	leftIcon?: string;
-	rightIcon?: string;
-	text: string;
-	action?: () => void;
-	attr?: FlexParams['attr'];
-}) => MenuItem = ({ id, leftIcon, rightIcon, text, action, attr }) => {
-	return {
-		id,
-		type: 'hflex',
-		tag: 'button',
-		attr: {
-			...attr
-			// Hovering...
-			// onpointerenter: () => {
-			// 	console.log('client onpointerenter', id);
-			// },
-			// Custom pointer down / click - generally however you should us action
-			// onpointerdown: () => {
-			// 	console.log('client onpointerdown', id);
-			// }
-		},
-		children: [
-			{
-				// Fixed id's are re-rendered more efficiently in svelte.
-				id: id + '-1',
-				type: 'fchild',
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: leftIcon
-			},
-			{
-				id: id + '-2',
-				type: 'fchild',
-				textContent: text
-			},
-			{
-				id: id + '-3',
-				type: 'fchild',
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: rightIcon
-			}
-		],
-		action
-	};
-};
-
-/**
  * Standard input UI for use in most situations.
  */
 export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {

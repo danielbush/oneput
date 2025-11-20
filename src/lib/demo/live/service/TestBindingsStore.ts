@@ -1,16 +1,7 @@
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { BindingsIDB } from '$lib/oneput/shared/BindingsIDB.js';
-import { ok, Result, ResultAsync } from 'neverthrow';
-
-export class SimulatedError extends Error {
-	constructor(
-		public service: string,
-		message: string
-	) {
-		super(message);
-		this.name = 'SimulatedError';
-	}
-}
+import { maybeSimulateError } from '$lib/oneput/shared/simulateError.js';
+import { ResultAsync } from 'neverthrow';
 
 export const config = {
 	simulateError: false,
@@ -38,20 +29,10 @@ export class TestBindingsStore {
 	setKeys = (keyMap: KeyBindingMap, isLocal: boolean) => {
 		const msg = `A simulated error occurred for setKeys: ${isLocal ? 'local' : 'global'} key bindings`;
 		return simulateDelay(1000)
-			.andThen(() => maybeSimulateError(msg, 'TestKeyService'))
+			.andThen(() => maybeSimulateError(config.simulateError, msg, 'TestKeyService'))
 			.andThen(() => this.db.setKeys(keyMap, isLocal));
 	};
 }
-
-const maybeSimulateError = Result.fromThrowable(
-	(msg: string, service: string) => {
-		if (config.simulateError) {
-			throw new SimulatedError(service, msg);
-		}
-		return ok();
-	},
-	(error) => error as SimulatedError
-);
 
 const simulateDelay = (ms: number = 1000) =>
 	ResultAsync.fromSafePromise(

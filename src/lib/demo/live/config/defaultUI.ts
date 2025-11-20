@@ -176,7 +176,6 @@ export type MyDefaultUIValues = {
 	menuHeader?: string;
 	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
 	placeholder?: string;
-	backBinding?: () => void;
 	clearInput?: boolean;
 };
 

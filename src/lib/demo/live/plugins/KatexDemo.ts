@@ -1,10 +1,11 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import type { Notification } from '$lib/oneput/plugins/Notification.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
+import { type MyDefaultUIValues } from '../config/defaultUI.js';
 import { randomId, type OneputProps } from '$lib/oneput/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
+import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 
 const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
 
@@ -74,10 +75,10 @@ export class KatexDemo {
 						}
 					]
 				},
-				menuItemWithIcon({
+				stdMenuItem({
 					id: 'insert-katex-btn',
-					leftIcon: settingsIcon,
-					text: 'Insert...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
+					textContent: 'Insert...',
 					attr: {
 						disabled: !katexIsValid
 					},

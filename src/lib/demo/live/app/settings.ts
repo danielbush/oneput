@@ -3,7 +3,7 @@ import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
 import { KeysManager } from './KeysManager/KeysManager.js';
-import { config } from '../service/TestBindingsStore.js';
+import { config, TestBindingsStore } from '../service/TestBindingsStore.js';
 import { FiltersUI } from './FiltersUI.js';
 
 export class SettingsUI {
@@ -40,14 +40,17 @@ export class SettingsUI {
 				id: 'global-keys',
 				text: 'Set global default key bindings...',
 				action: () => {
-					this.ctl.runUI(KeysManager, { isLocal: false }); // false
+					this.ctl.runUI(KeysManager, {
+						isLocal: false,
+						bindingsStore: TestBindingsStore.create()
+					});
 				}
 			}),
 			menuItemWithIcon({
 				id: 'local-keys',
 				text: 'Set local default key bindings...',
 				action: () => {
-					this.ctl.runUI(KeysManager, { isLocal: true }); // true
+					this.ctl.runUI(KeysManager, { isLocal: true, bindingsStore: TestBindingsStore.create() });
 				}
 			})
 		]);

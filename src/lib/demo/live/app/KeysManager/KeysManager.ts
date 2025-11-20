@@ -2,10 +2,10 @@ import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import type { KeyEvent } from '$lib/oneput/KeyEvent.js';
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
+import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import type { MyDefaultUIValues } from '../../config/defaultUI.js';
-import { TestBindingsStore } from '../../service/TestBindingsStore.js';
 import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
@@ -16,16 +16,16 @@ import { keybindingMenuItem } from './menuItems.js';
  * The assumption is that keyMap is stored somewhere by the consumer.
  */
 export class KeysManager {
-	static create(ctl: Controller, values: { isLocal: boolean }) {
+	static create(ctl: Controller, values: { isLocal: boolean; bindingsStore?: BindingsStore }) {
 		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
-		const testKeyService = TestBindingsStore.create();
-		const km: KeysManager = new KeysManager(ctl, testKeyService, values.isLocal, keyBindingMap);
+		const bindingStore = values.bindingsStore || BindingsIDB.create();
+		const km: KeysManager = new KeysManager(ctl, bindingStore, values.isLocal, keyBindingMap);
 		return km;
 	}
 
 	constructor(
 		private ctl: Controller,
-		private testKeyService: TestBindingsStore,
+		private bindingStore: BindingsStore,
 		private isLocal: boolean,
 		private keyBindingMap: KeyBindingMap
 	) {}
@@ -143,7 +143,7 @@ export class KeysManager {
 		this.actionUI(actionId);
 
 		// Real update
-		const result = await this.testKeyService.setKeys(keyBindingMap, this.isLocal);
+		const result = await this.bindingStore.setKeys(keyBindingMap, this.isLocal);
 		result.map(() => {
 			notification.updateMessage('Key bindings saved', { duration: 3000 });
 		});

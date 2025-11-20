@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { randomId } from '$lib/oneput/lib.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
+import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
+import { type MyDefaultUIValues } from '../config/defaultUI.js';
 import { TestInputService } from '../service/TestInputService.js';
 
 export class AsyncSearchExample {
@@ -33,9 +33,9 @@ export class AsyncSearchExample {
 					this.notify?.updateMessage('Fetching data...');
 					const results = await this.testInputService.fetchData(input);
 					return results.map((result) => {
-						return menuItemWithIcon({
-							id: randomId(),
-							text: result
+						return stdMenuItem({
+							id: `async-search-example-${result}`,
+							textContent: result
 						});
 					});
 				} catch (error) {

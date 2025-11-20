@@ -1,7 +1,7 @@
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
 import { BindingsIDB } from '$lib/oneput/shared/BindingsIDB.js';
+import { simulateDelay } from '$lib/oneput/shared/simulateDelay.js';
 import { maybeSimulateError } from '$lib/oneput/shared/simulateError.js';
-import { ResultAsync } from 'neverthrow';
 
 export const config = {
 	simulateError: false,
@@ -33,12 +33,3 @@ export class TestBindingsStore {
 			.andThen(() => this.db.setKeys(keyMap, isLocal));
 	};
 }
-
-const simulateDelay = (ms: number = 1000) =>
-	ResultAsync.fromSafePromise(
-		new Promise<void>((resolve) => {
-			setTimeout(() => {
-				resolve(void 0);
-			}, ms);
-		})
-	);

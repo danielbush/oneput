@@ -2,8 +2,8 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
-import { BindingsEditor } from '../../../oneput/plugins/BindingsEditor.js';
-import { config, TestBindingsStore } from '../../../oneput/shared/TestBindingsStore.js';
+import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
+import { config, TestBindingsStore } from '$lib/oneput/shared/TestBindingsStore.js';
 import { FiltersUI } from './FiltersUI.js';
 
 export class SettingsUI {

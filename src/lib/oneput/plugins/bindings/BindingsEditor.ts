@@ -5,10 +5,10 @@ import { KeyEventBindings } from '$lib/oneput/bindings.js';
 import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import type { MyDefaultUIValues } from '../../demo/live/config/defaultUI.js';
-import { inputCaptureUI } from '../../demo/live/app/KeysManager/inputCaptureUI.js';
-import { startKeyCapture } from '../../demo/live/app/KeysManager/keyCapture.js';
-import { keybindingMenuItem } from '../../demo/live/app/KeysManager/menuItems.js';
+import type { MyDefaultUIValues } from '../../../demo/live/config/defaultUI.js';
+import { inputCaptureUI } from './inputCaptureUI.js';
+import { startKeyCapture } from './keyCapture.js';
+import { keybindingMenuItem } from './menuItems.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.

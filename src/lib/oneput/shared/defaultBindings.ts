@@ -1,9 +1,12 @@
+/**
+ * These can be used as defaults.  You can set your own defaults instead if you prefer.
+ */
 import type { Controller } from '$lib/index.js';
 import type { KeyBindingMapSerializable } from '$lib/oneput/KeyBinding.js';
 import { GlobalFilter } from '$lib/oneput/plugins/GlobalFilter.js';
 import { keyBindingMapFromSerializable } from '../KeyEvent.js';
 
-export const globalActionMap: Record<string, (c: Controller) => void> = {
+export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
 	openMenu: (c) => {
 		c.menu.openMenu();
 	},
@@ -15,7 +18,7 @@ export const globalActionMap: Record<string, (c: Controller) => void> = {
 	}
 };
 
-export const localActionMap: Record<string, (c: Controller) => void> = {
+export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 	hideOneput: (c) => {
 		c.toggleHide();
 	},
@@ -42,7 +45,7 @@ export const localActionMap: Record<string, (c: Controller) => void> = {
 	}
 };
 
-export const globalKeysSerializable: KeyBindingMapSerializable = {
+export const defaultGlobalBindings: KeyBindingMapSerializable = {
 	openMenu: {
 		bindings: ['$mod+Shift+k'],
 		description: 'Open Oneput menu...'
@@ -57,7 +60,7 @@ export const globalKeysSerializable: KeyBindingMapSerializable = {
 	}
 };
 
-export const localKeysSerializable: KeyBindingMapSerializable = {
+export const defaultLocalBindings: KeyBindingMapSerializable = {
 	hideOneput: {
 		bindings: ['$mod+h'],
 		description: 'Hide Oneput'
@@ -92,5 +95,8 @@ export const localKeysSerializable: KeyBindingMapSerializable = {
 	}
 };
 
-export const globalKeys = keyBindingMapFromSerializable(globalKeysSerializable, globalActionMap);
-export const localKeys = keyBindingMapFromSerializable(localKeysSerializable, localActionMap);
+export const globalKeys = keyBindingMapFromSerializable(
+	defaultGlobalBindings,
+	defaultGlobalActions
+);
+export const localKeys = keyBindingMapFromSerializable(defaultLocalBindings, defaultLocalActions);

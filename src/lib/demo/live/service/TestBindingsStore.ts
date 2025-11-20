@@ -1,5 +1,5 @@
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import { BindingsIDB } from '$lib/oneput/shared/BindingsIDB.js';
+import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { simulateDelay } from '$lib/oneput/shared/simulateDelay.js';
 import { maybeSimulateError } from '$lib/oneput/shared/simulateError.js';
 
@@ -15,7 +15,7 @@ export const config = {
  * Simulates delays and errors for live demos; on success stores bindings in
  * oneput's binding idb store.
  */
-export class TestBindingsStore {
+export class TestBindingsStore implements BindingsStore {
 	static create() {
 		return new TestBindingsStore(BindingsIDB.create());
 	}

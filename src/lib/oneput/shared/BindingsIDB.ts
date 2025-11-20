@@ -14,7 +14,12 @@ export class IDBStoreError extends Error {
 	}
 }
 
-export class BindingsIDB {
+export interface BindingsStore {
+	getKeys: (isLocal: boolean) => ResultAsync<KeyBindingMap, IDBStoreError>;
+	setKeys: (keyMap: KeyBindingMap, isLocal: boolean) => ResultAsync<string, IDBStoreError>;
+}
+
+export class BindingsIDB implements BindingsStore {
 	static create() {
 		return new BindingsIDB(getOneputIDB());
 	}

@@ -1,6 +1,6 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import type { KeyBindingMap } from './KeyBinding.js';
+import type { KeyBindingMap } from './bindings.js';
 
 /**
  * Manages key bindings.

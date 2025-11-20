@@ -2,7 +2,7 @@
  * These can be used as defaults.  You can set your own defaults instead if you prefer.
  */
 import type { Controller } from '$lib/index.js';
-import type { KeyBindingMapSerializable } from '$lib/oneput/KeyBinding.js';
+import type { KeyBindingMapSerializable } from '$lib/oneput/bindings.js';
 import { GlobalFilter } from '$lib/oneput/plugins/GlobalFilter.js';
 import { keyBindingMapFromSerializable } from '../bindings.js';
 

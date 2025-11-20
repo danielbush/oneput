@@ -1,11 +1,33 @@
 import type { Controller } from './controller.js';
-import type {
-	KeyBinding,
-	KeyBindingMap,
-	KeyBindingMapSerializable,
-	KeyBindingSerializable
-} from './KeyBinding.js';
 import { isMacOS } from './lib.js';
+
+export type KeyBinding = {
+	action: (c: Controller) => void;
+	description: string;
+	/**
+	 * A list of bindings in tinykeys format.  Each binding represents one ore more key presses.
+	 *
+	 * Each binding is a string eg "control+y e e t".  The spaces separate keys,
+	 * the pluses separate modifiers.
+	 */
+	bindings: string[];
+};
+
+export type KeyBindingSerializable = {
+	description: string;
+	bindings: string[];
+	/**
+	 * If action is passed an its is js it will cause an exception in some stores.
+	 */
+	action?: never;
+};
+
+export type KeyBindingMap = {
+	[actionId: string]: KeyBinding;
+};
+export type KeyBindingMapSerializable = {
+	[actionId: string]: KeyBindingSerializable;
+};
 
 /**
  * Captures certain fields from a browser KeyboardEvent.
@@ -186,4 +208,59 @@ export function keyBindingFromSerializable(
 		bindings: kbSerializable.bindings,
 		action: action ?? (() => {})
 	};
+}
+
+/**
+ * Let's you edit / validate a set of key bindings.
+ *
+ * Internally we use KeyEvent's not KeyBinding since these are easier to compare.
+ */
+export class KeyEventBindings {
+	/**
+	 * Store bindings in a canonical KeyEventsformat that we can easily compare against.
+	 */
+	private keyEventsMap: KeyEventsMap;
+
+	constructor(keyBindingMap: KeyBindingMap) {
+		this.keyEventsMap = keyBindingMapToKeyEventsMap(keyBindingMap);
+	}
+
+	/**
+	 * Add binding using KeyEvent's since this is what we capture.
+	 */
+	addBinding(actionId: string, keyEvents: KeyEvent[]) {
+		this.keyEventsMap[actionId].bindings.push(keyEvents);
+	}
+
+	/**
+	 * Remove binding using binding string represention of KeyEvent's.
+	 */
+	removeBinding(actionId: string, binding: string) {
+		const keyBindingMap = this.keyBindingMap;
+		const newBindings = {
+			...keyBindingMap,
+			[actionId]: {
+				...keyBindingMap[actionId],
+				bindings: keyBindingMap[actionId].bindings.filter((b) => b !== binding)
+			}
+		};
+		this.keyEventsMap = keyBindingMapToKeyEventsMap(newBindings);
+	}
+
+	/**
+	 * Check if key presses have been used for another action already.
+	 */
+	find(keyEvents: KeyEvent[]): KeyEventBinding[] {
+		return Object.values(this.keyEventsMap).filter((keyEventBinding) =>
+			keyEventBinding.bindings.some((binding) => keyEventBindingIsEqual(binding, keyEvents))
+		);
+	}
+
+	/**
+	 * Convert the key events map back to a key binding map - this is the format
+	 * that is usually written by users in configs etc.
+	 */
+	get keyBindingMap() {
+		return keyEventsMapToKeyBindingMap(this.keyEventsMap);
+	}
 }

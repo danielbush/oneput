@@ -2,7 +2,7 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
-import { KeysManager } from '../../../oneput/plugins/KeysManager.js';
+import { BindingsEditor } from '../../../oneput/plugins/BindingsEditor.js';
 import { config, TestBindingsStore } from '../../../oneput/shared/TestBindingsStore.js';
 import { FiltersUI } from './FiltersUI.js';
 
@@ -40,7 +40,7 @@ export class SettingsUI {
 				id: 'global-keys',
 				text: 'Set global default key bindings...',
 				action: () => {
-					this.ctl.runUI(KeysManager, {
+					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
 						bindingsStore: TestBindingsStore.create()
 					});
@@ -50,7 +50,10 @@ export class SettingsUI {
 				id: 'local-keys',
 				text: 'Set local default key bindings...',
 				action: () => {
-					this.ctl.runUI(KeysManager, { isLocal: true, bindingsStore: TestBindingsStore.create() });
+					this.ctl.runUI(BindingsEditor, {
+						isLocal: true,
+						bindingsStore: TestBindingsStore.create()
+					});
 				}
 			})
 		]);

@@ -11,15 +11,15 @@ import { startKeyCapture } from '../../demo/live/app/KeysManager/keyCapture.js';
 import { keybindingMenuItem } from '../../demo/live/app/KeysManager/menuItems.js';
 
 /**
- * Let's you add / remove bindings to actions in keyMap via the Oneput interface.
+ * Let's you add / remove bindings to actions via the Oneput interface.
  *
- * The assumption is that keyMap is stored somewhere by the consumer.
+ * A binding store is required to persist the bindings.
  */
-export class KeysManager {
+export class BindingsEditor {
 	static create(ctl: Controller, values: { isLocal: boolean; bindingsStore?: BindingsStore }) {
 		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
 		const bindingStore = values.bindingsStore || BindingsIDB.create();
-		const km: KeysManager = new KeysManager(ctl, bindingStore, values.isLocal, keyBindingMap);
+		const km: BindingsEditor = new BindingsEditor(ctl, bindingStore, values.isLocal, keyBindingMap);
 		return km;
 	}
 

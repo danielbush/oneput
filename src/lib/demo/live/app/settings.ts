@@ -1,10 +1,11 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
-import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
 import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
 import { config, TestBindingsStore } from '$lib/oneput/shared/TestBindingsStore.js';
+import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
+import { type MyDefaultUIValues } from '../config/defaultUI.js';
 
 export class SettingsUI {
 	static create(ctl: Controller) {
@@ -28,17 +29,17 @@ export class SettingsUI {
 					config.toggleSimulateError(checked);
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'default-filter',
-				leftIcon: listFilterIcon,
-				text: 'Set default typing filter...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
+				textContent: 'Set default typing filter...',
 				action: () => {
 					this.ctl.runUI(FiltersUI);
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'global-keys',
-				text: 'Set global default key bindings...',
+				textContent: 'Set global default key bindings...',
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
@@ -46,9 +47,9 @@ export class SettingsUI {
 					});
 				}
 			}),
-			menuItemWithIcon({
+			stdMenuItem({
 				id: 'local-keys',
-				text: 'Set local default key bindings...',
+				textContent: 'Set local default key bindings...',
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: true,

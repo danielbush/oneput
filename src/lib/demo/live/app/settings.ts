@@ -3,7 +3,7 @@ import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { menuItemWithIcon, type MyDefaultUIValues } from '../config/defaultUI.js';
 import { KeysManager } from './KeysManager/KeysManager.js';
-import { config, TestBindingsStore } from '../service/TestBindingsStore.js';
+import { config, TestBindingsStore } from '../../../oneput/shared/TestBindingsStore.js';
 import { FiltersUI } from './FiltersUI.js';
 
 export class SettingsUI {

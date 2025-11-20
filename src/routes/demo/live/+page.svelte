@@ -16,33 +16,33 @@
 
 	<br />
 
-	<h2>&sect; 1</h2>
+	<h2>Heading 2</h2>
 	<p>{generateRandomText(1, 5)}</p>
-	<h2>&sect; 2</h2>
+	<h2>Heading 3</h2>
 	<p>{generateRandomText(1, 5)}</p>
-	<h3>&sect; 2.1</h3>
+	<h3>Heading 3.1</h3>
 	<p>{generateRandomText(1, 5)}</p>
-	<h2>&sect; 3</h2>
+	<h2>Heading 4</h2>
 	<p>{generateRandomText(1, 5)}</p>
-	<h3>&sect; 3.1</h3>
+	<h3>Heading 4.1</h3>
 	<p>{generateRandomText(1, 5)}</p>
-	<h3>&sect; 3.2</h3>
+	<h3>Heading 4.2</h3>
 	<p>{generateRandomText(1, 5)}</p>
-	<h4>&sect; 3.2.1</h4>
+	<h4>Heading 4.2.1</h4>
 	<p>{generateRandomText(1, 5)}</p>
-	<h2>&sect; 4</h2>
+	<h2>Heading 5</h2>
 	<p>{generateRandomText(1, 5)}</p>
-	<h3>&sect; 4.1</h3>
+	<h3>Heading 5.1</h3>
 	<p>{generateRandomText(1, 5)}</p>
-	<h3>&sect; 4.2</h3>
+	<h3>Heading 5.2</h3>
 	<p>{generateRandomText(1, 5)}</p>
-	<h3>&sect; 4.3</h3>
+	<h3>Heading 5.3</h3>
 	<p>{generateRandomText(1, 5)}</p>
-	<h2>&sect; 5</h2>
+	<h2>Heading 6</h2>
 	<p>{generateRandomText(1, 5)}</p>
-	<h2>&sect; 6</h2>
+	<h2>Heading 7</h2>
 	<p>{generateRandomText(1, 5)}</p>
-	<h2>&sect; 7</h2>
+	<h2>Heading 8</h2>
 	<p>{generateRandomText(1, 5)}</p>
 </main>
 

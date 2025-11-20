@@ -1,49 +1,11 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import {
-	randomId,
-	type DefaultUI,
-	type FlexParams,
-	type MenuItem,
-	type OneputProps
-} from '$lib/oneput/lib.js';
+import { type DefaultUI, type FlexParams, type OneputProps } from '$lib/oneput/lib.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '../../../oneput/shared/widgets/DateDisplay.js';
 import { MenuStatus } from '../../../oneput/shared/widgets/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../../../oneput/shared/widgets/TimeDisplay.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 import { hflex } from '$lib/oneput/builder.js';
-
-/**
- * Menu item with no left icon, give more room for main content.
- */
-export const menuItemNoIcon: (params: {
-	id: string;
-	rightIcon?: string;
-	text: string;
-	action?: () => void;
-}) => MenuItem = ({ id, rightIcon, text, action }) => {
-	const attr: FlexParams['attr'] = {};
-	return {
-		id,
-		type: 'hflex',
-		tag: 'button',
-		children: [
-			{
-				id: randomId(),
-				type: 'fchild',
-				textContent: text
-			},
-			{
-				id: randomId(),
-				type: 'fchild',
-				classes: ['oneput__icon'],
-				innerHTMLUnsafe: rightIcon
-			}
-		],
-		attr,
-		action
-	};
-};
 
 /**
  * Standard input UI for use in most situations.

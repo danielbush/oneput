@@ -11,6 +11,7 @@ import { DateDisplay } from '../../../oneput/shared/widgets/DateDisplay.js';
 import { MenuStatus } from '../../../oneput/shared/widgets/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '../../../oneput/shared/widgets/TimeDisplay.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
+import { hflex } from '$lib/oneput/builder.js';
 
 /**
  * Menu item with no left icon, give more room for main content.
@@ -100,13 +101,10 @@ export const menuItemWithIcon: (params: {
  */
 export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 	return {
-		outerRight: {
+		outerRight: hflex({
 			id: 'root-input-right',
-			type: 'hflex',
-			children: [
-				{
-					id: randomId(),
-					type: 'fchild',
+			children: (b) => [
+				b.fchild({
 					tag: 'button',
 					attr: {
 						type: 'button',
@@ -122,9 +120,9 @@ export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 					classes: ['oneput__icon-button', 'oneput__menu-button'],
 					// innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
 					innerHTMLUnsafe: chevronDown
-				}
+				})
 			]
-		}
+		})
 	};
 };
 
@@ -143,32 +141,25 @@ export const menuHeaderUI: ({
 	exitAction: () => void;
 	type?: 'back' | 'exit';
 }) => FlexParams = ({ title, exitAction, type = 'back' }) => {
-	return {
+	return hflex({
 		id: 'bindings-header',
-		type: 'hflex',
-		children: [
-			{
-				id: randomId(),
-				type: 'fchild',
+		children: (b) => [
+			b.fchild({
 				tag: 'button',
-				attr: { type: 'button', title: 'Options', onclick: exitAction },
+				attr: { type: 'button', title: 'Back', onclick: exitAction },
 				classes: ['oneput__icon-button'],
 				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
-			},
-			{
-				id: randomId(),
-				type: 'fchild',
+			}),
+			b.fchild({
 				classes: ['oneput__menu-item-header'],
 				textContent: title
-			},
-			{
-				id: randomId(),
-				type: 'fchild',
+			}),
+			b.fchild({
 				classes: ['oneput__icon-button'],
 				textContent: ''
-			}
+			})
 		]
-	};
+	});
 };
 
 export type MyDefaultUIValues = {
@@ -243,49 +234,37 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 	}
 
 	get innerUI() {
-		return {
+		return hflex({
 			id: 'root-inner',
-			type: 'hflex' as const,
-			children: [
-				{
-					id: 'root-inner-left',
-					type: 'fchild' as const,
+			children: (b) => [
+				b.fchild({
 					style: { flex: '1' }
-				},
-				{
-					id: 'root-inner-middle',
-					type: 'fchild' as const,
+				}),
+				b.fchild({
 					style: { justifyContent: 'center' },
 					onMount: TimeDisplay.onMount
-				},
-				{
-					id: 'root-inner-right',
-					type: 'fchild' as const,
+				}),
+				b.fchild({
 					style: { flex: '1' }
-				}
+				})
 			]
-		};
+		});
 	}
 
 	get outerUI() {
-		return {
+		return hflex({
 			id: 'root-outer',
-			type: 'hflex' as const,
-			children: [
-				{
-					id: 'root-outer-left',
-					type: 'fchild' as const,
+			children: (b) => [
+				b.fchild({
 					style: { flex: '1', position: 'relative' },
 					// Example of a svelte-based ui widget:
 					onMount: (node) => MenuStatus.onMount(node, this.ctl)
-				},
-				{
-					id: 'root-outer-right',
-					type: 'fchild' as const,
+				}),
+				b.fchild({
 					style: { flex: '1', justifyContent: 'flex-end' },
 					onMount: DateDisplay.onMount
-				}
+				})
 			]
-		} as FlexParams;
+		});
 	}
 }

@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
-import type { KeyEvent } from '$lib/oneput/KeyEvent.js';
+import { keyBindingMapToSerializable, type KeyEvent } from '$lib/oneput/KeyEvent.js';
 import { KeyEventBindings } from '$lib/oneput/KeyEventBindings.js';
 import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
@@ -143,7 +143,10 @@ export class KeysManager {
 		this.actionUI(actionId);
 
 		// Real update
-		const result = await this.bindingStore.setKeys(keyBindingMap, this.isLocal);
+		const result = await this.bindingStore.setKeys(
+			keyBindingMapToSerializable(keyBindingMap),
+			this.isLocal
+		);
 		result.map(() => {
 			notification.updateMessage('Key bindings saved', { duration: 3000 });
 		});

@@ -1,5 +1,10 @@
 import type { Controller } from './controller.js';
-import type { KeyBinding, KeyBindingMap } from './KeyBinding.js';
+import type {
+	KeyBinding,
+	KeyBindingMap,
+	KeyBindingMapSerializable,
+	KeyBindingSerializable
+} from './KeyBinding.js';
 import { isMacOS } from './lib.js';
 
 /**
@@ -143,4 +148,42 @@ export function keyBindingMapToKeyEventsMap(keyBindingMap: KeyBindingMap): KeyEv
 		};
 		return acc;
 	}, {} as KeyEventsMap);
+}
+
+export function keyBindingToSerializable(keyBinding: KeyBinding): KeyBindingSerializable {
+	return {
+		description: keyBinding.description,
+		bindings: keyBinding.bindings,
+		action: undefined as never
+	};
+}
+
+export function keyBindingMapToSerializable(
+	keyBindingMap: KeyBindingMap
+): KeyBindingMapSerializable {
+	return Object.entries(keyBindingMap).reduce((acc, [actionId, keyBinding]) => {
+		acc[actionId] = keyBindingToSerializable(keyBinding);
+		return acc;
+	}, {} as KeyBindingMapSerializable);
+}
+
+export function keyBindingMapFromSerializable(
+	kbMapSerializable: KeyBindingMapSerializable,
+	actionMap: Record<string, (c: Controller) => void>
+): KeyBindingMap {
+	return Object.entries(kbMapSerializable).reduce((acc, [actionId, kbSerializable]) => {
+		acc[actionId] = keyBindingFromSerializable(kbSerializable, actionMap[actionId]);
+		return acc;
+	}, {} as KeyBindingMap);
+}
+
+export function keyBindingFromSerializable(
+	kbSerializable: KeyBindingSerializable,
+	action?: (c: Controller) => void
+): KeyBinding {
+	return {
+		description: kbSerializable.description,
+		bindings: kbSerializable.bindings,
+		action: action ?? (() => {})
+	};
 }

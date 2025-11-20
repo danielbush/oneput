@@ -12,6 +12,18 @@ export type KeyBinding = {
 	bindings: string[];
 };
 
+export type KeyBindingSerializable = {
+	description: string;
+	bindings: string[];
+	/**
+	 * If action is passed an its is js it will cause an exception in some stores.
+	 */
+	action?: never;
+};
+
 export type KeyBindingMap = {
 	[actionId: string]: KeyBinding;
+};
+export type KeyBindingMapSerializable = {
+	[actionId: string]: KeyBindingSerializable;
 };

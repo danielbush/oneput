@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, deleteDB } from 'idb';
 import { okAsync, ResultAsync } from 'neverthrow';
-import type { KeyBindingMap } from '../KeyBinding.js';
+import type { KeyBindingMapSerializable } from '../KeyBinding.js';
 
 /*
 The best practice for modular applications is to define your entire database
@@ -22,7 +22,7 @@ export class IDBError extends Error {
 export interface OneputDBSchema extends DBSchema {
 	bindings: {
 		key: string;
-		value: KeyBindingMap;
+		value: KeyBindingMapSerializable;
 	};
 }
 
@@ -43,7 +43,7 @@ export function getOneputIDB(params: { reset?: boolean } = {}) {
 		ResultAsync.fromPromise(
 			openDB<OneputDBSchema>(ONEPUT_DB_NAME, undefined, {
 				upgrade(db) {
-					db.createObjectStore('bindings', { keyPath: 'key' });
+					db.createObjectStore('bindings');
 				}
 			}),
 			(err) => new IDBError('getOneputIDB', err as Error)

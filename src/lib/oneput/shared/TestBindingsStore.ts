@@ -1,4 +1,4 @@
-import type { KeyBindingMap } from '$lib/oneput/KeyBinding.js';
+import type { KeyBindingMapSerializable } from '$lib/oneput/KeyBinding.js';
 import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { simulateDelay } from '$lib/oneput/shared/simulateDelay.js';
 import { maybeSimulateError } from '$lib/oneput/shared/simulateError.js';
@@ -26,7 +26,7 @@ export class TestBindingsStore implements BindingsStore {
 		return this.db.getKeys(isLocal);
 	};
 
-	setKeys = (keyMap: KeyBindingMap, isLocal: boolean) => {
+	setKeys = (keyMap: KeyBindingMapSerializable, isLocal: boolean) => {
 		const msg = `A simulated error occurred for setKeys: ${isLocal ? 'local' : 'global'} key bindings`;
 		return simulateDelay(1000)
 			.andThen(() => maybeSimulateError(config.simulateError, msg, 'TestKeyService'))

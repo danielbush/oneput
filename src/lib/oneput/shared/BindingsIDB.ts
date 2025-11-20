@@ -1,7 +1,6 @@
 import { ResultAsync } from 'neverthrow';
-import type { KeyBindingMap } from '../KeyBinding.js';
+import type { KeyBindingMapSerializable } from '../KeyBinding.js';
 import { getOneputIDB, type GetOneputIDB } from './idb.js';
-import { globalKeys, localKeys } from './keys.js';
 
 export class IDBStoreError extends Error {
 	constructor(
@@ -15,18 +14,21 @@ export class IDBStoreError extends Error {
 }
 
 export interface BindingsStore {
-	getKeys: (isLocal: boolean) => ResultAsync<KeyBindingMap, IDBStoreError>;
-	setKeys: (keyMap: KeyBindingMap, isLocal: boolean) => ResultAsync<string, IDBStoreError>;
+	getKeys: (isLocal: boolean) => ResultAsync<KeyBindingMapSerializable, IDBStoreError>;
+	setKeys: (
+		keyMap: KeyBindingMapSerializable,
+		isLocal: boolean
+	) => ResultAsync<string, IDBStoreError>;
 }
 
 export class BindingsIDB implements BindingsStore {
 	static create() {
-		return new BindingsIDB(getOneputIDB());
+		return new BindingsIDB(getOneputIDB({ reset: false }));
 	}
 
 	private constructor(private dbp: GetOneputIDB) {}
 
-	getKeys = (isLocal: boolean) =>
+	getKeys = (isLocal: boolean, defaultKeys: KeyBindingMapSerializable = {}) =>
 		this.dbp
 			.andThen((db) =>
 				ResultAsync.fromPromise(
@@ -34,9 +36,9 @@ export class BindingsIDB implements BindingsStore {
 					(err) => new IDBStoreError('getKeys', err as Error)
 				)
 			)
-			.map((value) => value || (isLocal ? localKeys : globalKeys));
+			.map((value) => value || defaultKeys);
 
-	setKeys = (keyMap: KeyBindingMap, isLocal: boolean) =>
+	setKeys = (keyMap: KeyBindingMapSerializable, isLocal: boolean) =>
 		this.dbp.andThen((db) =>
 			ResultAsync.fromPromise(
 				db.put('bindings', keyMap, isLocal ? 'local' : 'global'),

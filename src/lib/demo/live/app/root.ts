@@ -9,7 +9,7 @@ import {
 } from '$lib/oneput/shared/icons.js';
 import { type MyDefaultUIValues } from '../config/defaultUI.js';
 import { SettingsUI } from './settings.js';
-import { AsyncSearchExample } from '../plugins/AsyncSearchExample.js';
+import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from '../plugins/NavigateHeadings.js';
 import { KatexDemo } from '../plugins/KatexDemo.js';
 import { TomatoTimer } from '../plugins/TomatoTimer.js';

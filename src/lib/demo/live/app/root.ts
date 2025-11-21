@@ -12,7 +12,7 @@ import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
-import { TomatoTimer } from '../plugins/TomatoTimer.js';
+import { TomatoTimer } from './TomatoTimer.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 
 export class RootUI {

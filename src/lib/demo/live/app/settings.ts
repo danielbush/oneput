@@ -9,11 +9,14 @@ import { type MyDefaultUIValues } from '../config/defaultUI.js';
 
 export class SettingsUI {
 	static create(ctl: Controller) {
-		const ui = new SettingsUI(ctl);
+		const ui = new SettingsUI(ctl, TestBindingsStore.create());
 		return ui;
 	}
 
-	constructor(private ctl: Controller) {}
+	constructor(
+		private ctl: Controller,
+		private bindingsStore: TestBindingsStore
+	) {}
 
 	runUI = () => {
 		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
@@ -43,7 +46,7 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
-						bindingsStore: TestBindingsStore.create(),
+						bindingsStore: this.bindingsStore,
 						ui: ({ menuHeader, backAction }) => {
 							this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 								menuHeader,
@@ -60,7 +63,7 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: true,
-						bindingsStore: TestBindingsStore.create(),
+						bindingsStore: this.bindingsStore,
 						ui: ({ menuHeader, backAction }) => {
 							this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
 								menuHeader,

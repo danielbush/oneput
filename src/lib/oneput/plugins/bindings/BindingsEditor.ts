@@ -1,10 +1,5 @@
 import type { Controller } from '../../controller.js';
-import {
-	keyBindingMapToSerializable,
-	KeyEventBindings,
-	type KeyBindingMap,
-	type KeyEvent
-} from '../../bindings.js';
+import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../bindings.js';
 import { BindingsIDB, type BindingsStore } from '../../shared/bindings/BindingsIDB.js';
 import { keyboardIcon, xIcon } from '../../shared/icons.js';
 import { stdMenuItem } from '../../shared/stdMenuItem.js';
@@ -152,7 +147,7 @@ export class BindingsEditor {
 
 		// Real update
 		const result = await this.bindingStore.setKeys(
-			keyBindingMapToSerializable(keyBindingMap),
+			KeyEventBindings.create(keyBindingMap).toSerializable(),
 			this.isLocal
 		);
 		result.map(() => {

@@ -5,7 +5,7 @@ import {
 	defaultLocalActions,
 	defaultLocalBindings
 } from '$lib/oneput/shared/bindings/defaultBindings.js';
-import { keyBindingMapFromSerializable } from '$lib/oneput/bindings.js';
+import { KeyEventBindings } from '$lib/oneput/bindings.js';
 import { BindingsIDB } from '$lib/oneput/shared/bindings/BindingsIDB.js';
 import { MyDefaultUI } from './config/defaultUI.js';
 import { RootUI } from './app/root.js';
@@ -23,7 +23,10 @@ export const setController = async (ctl: Controller) => {
 		.getKeys(false, defaultGlobalBindings)
 		.map((kbMapSerializable) => {
 			console.log('getting global keys', kbMapSerializable);
-			const keyBindingMap = keyBindingMapFromSerializable(kbMapSerializable, defaultGlobalActions);
+			const keyBindingMap = KeyEventBindings.fromSerializable(
+				kbMapSerializable,
+				defaultGlobalActions
+			).keyBindingMap;
 			ctl.keys.setDefaultKeys(keyBindingMap, false);
 		})
 		.orTee((err) => ctl.notify(`Error getting global keys: ${err.message}`));
@@ -31,7 +34,10 @@ export const setController = async (ctl: Controller) => {
 		.getKeys(true, defaultLocalBindings)
 		.map((kbMapSerializable) => {
 			console.log('getting local keys', kbMapSerializable);
-			const keyBindingMap = keyBindingMapFromSerializable(kbMapSerializable, defaultLocalActions);
+			const keyBindingMap = KeyEventBindings.fromSerializable(
+				kbMapSerializable,
+				defaultLocalActions
+			).keyBindingMap;
 			ctl.keys.setDefaultKeys(keyBindingMap, true);
 		})
 		.orTee((err) => ctl.notify(`Error getting local keys: ${err.message}`));

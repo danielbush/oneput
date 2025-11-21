@@ -4,7 +4,7 @@
 import type { KeyBindingMapSerializable } from '../../bindings.js';
 import type { Controller } from '../../controller.js';
 import { GlobalFilter } from '../../plugins/GlobalFilter.js';
-import { keyBindingMapFromSerializable } from '../../bindings.js';
+import { KeyEventBindings } from '../../bindings.js';
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
 	openMenu: (c) => {
@@ -95,8 +95,11 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
 	}
 };
 
-export const globalKeys = keyBindingMapFromSerializable(
+export const globalKeys = KeyEventBindings.fromSerializable(
 	defaultGlobalBindings,
 	defaultGlobalActions
-);
-export const localKeys = keyBindingMapFromSerializable(defaultLocalBindings, defaultLocalActions);
+).keyBindingMap;
+export const localKeys = KeyEventBindings.fromSerializable(
+	defaultLocalBindings,
+	defaultLocalActions
+).keyBindingMap;

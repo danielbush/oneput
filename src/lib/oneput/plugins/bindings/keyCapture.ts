@@ -1,9 +1,5 @@
 import type { Controller } from '../../controller.js';
-import {
-	keyboardEventToKeyEvent,
-	keyEventToHumanReadableString,
-	type KeyEvent
-} from '../../bindings.js';
+import { toKeyEvent, toDisplayString, type KeyEvent } from '../../bindings.js';
 
 export const startKeyCapture = (ctl: Controller) => {
 	let resolve: (r: KeyEvent[] | null) => void;
@@ -18,8 +14,8 @@ export const startKeyCapture = (ctl: Controller) => {
 		}
 		evt.preventDefault();
 		evt.stopPropagation();
-		capturedKeys.push(keyboardEventToKeyEvent(evt));
-		ctl.input.setInputValue(capturedKeys.map(keyEventToHumanReadableString).join(' + '));
+		capturedKeys.push(toKeyEvent(evt));
+		ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
 	};
 
 	ctl.keys.disableKeys();

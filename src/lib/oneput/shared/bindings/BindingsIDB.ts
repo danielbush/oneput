@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow';
-import type { KeyBindingMapSerializable } from '../bindings.js';
-import { getOneputIDB, type GetOneputIDB } from './idb.js';
+import type { KeyBindingMapSerializable } from '../../bindings.js';
+import { getOneputIDB, type GetOneputIDB } from '../idb.js';
 
 export class IDBStoreError extends Error {
 	constructor(

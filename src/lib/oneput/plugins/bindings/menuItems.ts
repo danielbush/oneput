@@ -1,6 +1,6 @@
-import type { MenuItem } from '$lib/oneput/lib.js';
-import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import * as icons from '$lib/oneput/shared/icons.js';
+import type { MenuItem } from '../../lib.js';
+import { stdMenuItem } from '../../shared/stdMenuItem.js';
+import * as icons from '../../shared/icons.js';
 
 export type KeybindingMenuItem = {
 	id: string;

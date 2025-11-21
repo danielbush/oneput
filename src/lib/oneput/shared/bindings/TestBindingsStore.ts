@@ -1,7 +1,7 @@
-import type { KeyBindingMapSerializable } from '$lib/oneput/bindings.js';
-import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
-import { simulateDelay } from '$lib/oneput/shared/simulateDelay.js';
-import { maybeSimulateError } from '$lib/oneput/shared/simulateError.js';
+import type { KeyBindingMapSerializable } from '../../bindings.js';
+import { BindingsIDB, type BindingsStore } from '../bindings/BindingsIDB.js';
+import { simulateDelay } from '../simulateDelay.js';
+import { maybeSimulateError } from '../simulateError.js';
 
 export const config = {
 	simulateError: false,

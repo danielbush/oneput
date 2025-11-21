@@ -1,10 +1,13 @@
-import type { Controller } from '$lib/oneput/controller.js';
-import type { KeyBindingMap } from '$lib/oneput/bindings.js';
-import { keyBindingMapToSerializable, type KeyEvent } from '$lib/oneput/bindings.js';
-import { KeyEventBindings } from '$lib/oneput/bindings.js';
-import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
-import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
-import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
+import type { Controller } from '../../controller.js';
+import {
+	keyBindingMapToSerializable,
+	KeyEventBindings,
+	type KeyBindingMap,
+	type KeyEvent
+} from '../../bindings.js';
+import { BindingsIDB, type BindingsStore } from '../../shared/bindings/BindingsIDB.js';
+import { keyboardIcon, xIcon } from '../../shared/icons.js';
+import { stdMenuItem } from '../../shared/stdMenuItem.js';
 import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';

@@ -1,9 +1,9 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '../../controller.js';
 import {
 	keyboardEventToKeyEvent,
 	keyEventToHumanReadableString,
 	type KeyEvent
-} from '$lib/oneput/bindings.js';
+} from '../../bindings.js';
 
 export const startKeyCapture = (ctl: Controller) => {
 	let resolve: (r: KeyEvent[] | null) => void;

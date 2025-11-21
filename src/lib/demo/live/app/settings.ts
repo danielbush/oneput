@@ -2,7 +2,7 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
-import { config, TestBindingsStore } from '$lib/oneput/shared/TestBindingsStore.js';
+import { config, TestBindingsStore } from '$lib/oneput/shared/bindings/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { type MyDefaultUIValues } from '../config/defaultUI.js';

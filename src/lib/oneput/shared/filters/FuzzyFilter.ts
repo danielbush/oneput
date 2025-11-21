@@ -1,6 +1,6 @@
 import uFuzzy from '@leeoniya/ufuzzy';
-import { walk, type FChildParams, type MenuItemAny } from '$lib/oneput/lib.js';
-import type { MenuItemsFn } from '$lib/oneput/MenuController.js';
+import { walk, type FChildParams, type MenuItemAny } from '../../lib.js';
+import type { MenuItemsFn } from '../../MenuController.js';
 
 export type HaystackData =
 	| {

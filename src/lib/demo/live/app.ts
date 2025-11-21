@@ -1,14 +1,14 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { MyDefaultUI } from './config/defaultUI.js';
-import { RootUI } from './app/root.js';
 import {
 	defaultGlobalActions,
 	defaultGlobalBindings,
 	defaultLocalActions,
 	defaultLocalBindings
-} from '../../oneput/shared/defaultBindings.js';
+} from '$lib/oneput/shared/bindings/defaultBindings.js';
 import { keyBindingMapFromSerializable } from '$lib/oneput/bindings.js';
-import { BindingsIDB } from '$lib/oneput/shared/BindingsIDB.js';
+import { BindingsIDB } from '$lib/oneput/shared/bindings/BindingsIDB.js';
+import { MyDefaultUI } from './config/defaultUI.js';
+import { RootUI } from './app/root.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.

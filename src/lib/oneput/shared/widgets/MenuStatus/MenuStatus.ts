@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '../../../controller.js';
 import { mount } from 'svelte';
 import MenuStatusDisplay from './MenuStatus.svelte';
 

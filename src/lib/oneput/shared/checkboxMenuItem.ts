@@ -1,5 +1,5 @@
-import type { Controller } from '$lib/oneput/controller.js';
-import { randomId, type FlexParams, type MenuItem } from '$lib/oneput/lib.js';
+import type { Controller } from '../controller.js';
+import { randomId, type FlexParams, type MenuItem } from '../lib.js';
 
 export class CheckboxMenuItem implements MenuItem {
 	static create(params: {

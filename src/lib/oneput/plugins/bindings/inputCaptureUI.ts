@@ -1,5 +1,5 @@
-import type { Controller } from '$lib/oneput/controller.js';
-import * as icons from '$lib/oneput/shared/icons.js';
+import type { Controller } from '../../controller.js';
+import * as icons from '../../shared/icons.js';
 
 export const inputCaptureUI = (
 	ctl: Controller,

@@ -10,7 +10,7 @@ import {
 import { type MyDefaultUIValues } from '../config/defaultUI.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
-import { NavigateHeadings } from '../plugins/NavigateHeadings.js';
+import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from '../plugins/TomatoTimer.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';

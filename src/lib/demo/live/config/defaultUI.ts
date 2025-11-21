@@ -1,19 +1,19 @@
+import { type DefaultUI, type FlexParams, type OneputProps } from '$lib/oneput/lib.js';
+import type { Controller } from '$lib/oneput/controller.js';
+import { hflex } from '$lib/oneput/builder.js';
+import { KeyEventBindings } from '$lib/oneput/bindings.js';
+import { BindingsIDB } from '$lib/oneput/shared/bindings/BindingsIDB.js';
+import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
+import { DateDisplay } from '$lib/oneput/shared/widgets/DateDisplay.js';
+import { MenuStatus } from '$lib/oneput/shared/widgets/MenuStatus/MenuStatus.js';
+import { TimeDisplay } from '$lib/oneput/shared/widgets/TimeDisplay.js';
+import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 import {
 	defaultGlobalActions,
 	defaultGlobalBindings,
 	defaultLocalActions,
 	defaultLocalBindings
 } from '$lib/oneput/shared/bindings/defaultBindings.js';
-import { KeyEventBindings } from '$lib/oneput/bindings.js';
-import { BindingsIDB } from '$lib/oneput/shared/bindings/BindingsIDB.js';
-import type { Controller } from '$lib/oneput/controller.js';
-import { type DefaultUI, type FlexParams, type OneputProps } from '$lib/oneput/lib.js';
-import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
-import { DateDisplay } from '../../../oneput/shared/widgets/DateDisplay.js';
-import { MenuStatus } from '../../../oneput/shared/widgets/MenuStatus/MenuStatus.js';
-import { TimeDisplay } from '../../../oneput/shared/widgets/TimeDisplay.js';
-import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
-import { hflex } from '$lib/oneput/builder.js';
 
 /**
  * Standard input UI for use in most situations.

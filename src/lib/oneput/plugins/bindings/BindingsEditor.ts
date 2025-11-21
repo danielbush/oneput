@@ -5,7 +5,6 @@ import { KeyEventBindings } from '$lib/oneput/bindings.js';
 import { BindingsIDB, type BindingsStore } from '$lib/oneput/shared/BindingsIDB.js';
 import { keyboardIcon, xIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import type { MyDefaultUIValues } from '../../../demo/live/config/defaultUI.js';
 import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
@@ -16,10 +15,23 @@ import { keybindingMenuItem } from './menuItems.js';
  * A binding store is required to persist the bindings.
  */
 export class BindingsEditor {
-	static create(ctl: Controller, values: { isLocal: boolean; bindingsStore?: BindingsStore }) {
+	static create(
+		ctl: Controller,
+		values: {
+			isLocal: boolean;
+			bindingsStore?: BindingsStore;
+			ui: (values: { menuHeader: string; backAction: () => void }) => void;
+		}
+	) {
 		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
 		const bindingStore = values.bindingsStore || BindingsIDB.create();
-		const km: BindingsEditor = new BindingsEditor(ctl, bindingStore, values.isLocal, keyBindingMap);
+		const km: BindingsEditor = new BindingsEditor(
+			ctl,
+			bindingStore,
+			values.isLocal,
+			keyBindingMap,
+			values.ui
+		);
 		return km;
 	}
 
@@ -27,7 +39,8 @@ export class BindingsEditor {
 		private ctl: Controller,
 		private bindingStore: BindingsStore,
 		private isLocal: boolean,
-		private keyBindingMap: KeyBindingMap
+		private keyBindingMap: KeyBindingMap,
+		private ui: (values: { menuHeader: string; backAction: () => void }) => void
 	) {}
 
 	runUI() {
@@ -39,11 +52,7 @@ export class BindingsEditor {
 	 */
 	private actionsUI = () => {
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
-			menuHeader: title,
-			exitAction: this.ctl.goBack,
-			exitType: 'back'
-		});
+		this.ui({ menuHeader: title, backAction: this.ctl.goBack });
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
@@ -63,11 +72,7 @@ export class BindingsEditor {
 	 */
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
-			menuHeader: `Key bindings for "${description}"`,
-			exitAction: this.ctl.goBack,
-			exitType: 'back'
-		});
+		this.ui({ menuHeader: `Key bindings for "${description}"`, backAction: this.ctl.goBack });
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
 		this.ctl.menu.setMenuItems([

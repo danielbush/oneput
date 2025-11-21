@@ -43,7 +43,14 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
-						bindingsStore: TestBindingsStore.create()
+						bindingsStore: TestBindingsStore.create(),
+						ui: ({ menuHeader, backAction }) => {
+							this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+								menuHeader,
+								exitAction: backAction,
+								exitType: 'back'
+							});
+						}
 					});
 				}
 			}),
@@ -53,7 +60,14 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: true,
-						bindingsStore: TestBindingsStore.create()
+						bindingsStore: TestBindingsStore.create(),
+						ui: ({ menuHeader, backAction }) => {
+							this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+								menuHeader,
+								exitAction: backAction,
+								exitType: 'back'
+							});
+						}
 					});
 				}
 			})

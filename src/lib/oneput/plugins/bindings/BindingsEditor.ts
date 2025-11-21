@@ -122,13 +122,13 @@ export class BindingsEditor {
 		if (!yes) {
 			return;
 		}
-		const keyEventBindings = new KeyEventBindings(this.keyBindingMap);
+		const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
 		keyEventBindings.removeBinding(actionId, binding);
 		this.update(actionId, keyEventBindings.keyBindingMap);
 	};
 
 	private addBinding = async (actionId: string, capturedKeys: KeyEvent[]) => {
-		const keyEventBindings = new KeyEventBindings(this.keyBindingMap);
+		const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
 		const existing = keyEventBindings.find(capturedKeys);
 		if (existing.length > 0) {
 			this.ctl.alert({

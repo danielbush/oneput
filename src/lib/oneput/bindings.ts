@@ -216,6 +216,9 @@ export function keyBindingFromSerializable(
  * Internally we use KeyEvent's not KeyBinding since these are easier to compare.
  */
 export class KeyEventBindings {
+	static create(keyBindingMap: KeyBindingMap) {
+		return new KeyEventBindings(keyBindingMap);
+	}
 	/**
 	 * Store bindings in a canonical KeyEventsformat that we can easily compare against.
 	 */

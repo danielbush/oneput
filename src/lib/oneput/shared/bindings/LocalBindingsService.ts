@@ -1,12 +1,13 @@
-import { KeyEventBindings } from '$lib/oneput/bindings.js';
-import type { Controller } from '$lib/oneput/controller.js';
-import { BindingsIDB } from '$lib/oneput/shared/bindings/BindingsIDB.js';
+import { KeyEventBindings } from '../../bindings.js';
+import type { Controller } from '../../controller.js';
+import { BindingsIDB } from './BindingsIDB.js';
 import {
 	defaultGlobalBindings,
 	defaultGlobalActions,
 	defaultLocalBindings,
 	defaultLocalActions
-} from '$lib/oneput/shared/bindings/defaultBindings.js';
+} from './defaultBindings.js';
+import { ResultAsync } from 'neverthrow';
 
 /**
  * Stores bindings in indexeddb.
@@ -22,28 +23,28 @@ export class LocalBindingsService {
 		private bindingsStore: BindingsIDB
 	) {}
 
-	async setDefaultBindings() {
-		this.bindingsStore
+	getBindings() {
+		const globalBindings = this.bindingsStore
 			.getKeys(false, defaultGlobalBindings)
 			.map((kbMapSerializable) => {
-				console.log('getting global keys', kbMapSerializable);
-				const keyBindingMap = KeyEventBindings.fromSerializable(
-					kbMapSerializable,
-					defaultGlobalActions
-				).keyBindingMap;
-				this.ctl.keys.setDefaultKeys(keyBindingMap, false);
+				return KeyEventBindings.fromSerializable(kbMapSerializable, defaultGlobalActions)
+					.keyBindingMap;
 			})
 			.orTee((err) => this.ctl.notify(`Error getting global keys: ${err.message}`));
-		this.bindingsStore
+		const localBindings = this.bindingsStore
 			.getKeys(true, defaultLocalBindings)
 			.map((kbMapSerializable) => {
-				console.log('getting local keys', kbMapSerializable);
-				const keyBindingMap = KeyEventBindings.fromSerializable(
-					kbMapSerializable,
-					defaultLocalActions
-				).keyBindingMap;
-				this.ctl.keys.setDefaultKeys(keyBindingMap, true);
+				return KeyEventBindings.fromSerializable(kbMapSerializable, defaultLocalActions)
+					.keyBindingMap;
 			})
 			.orTee((err) => this.ctl.notify(`Error getting local keys: ${err.message}`));
+		return ResultAsync.combine([globalBindings, localBindings]).map(
+			([globalBindings, localBindings]) => {
+				return {
+					globalBindings,
+					localBindings
+				};
+			}
+		);
 	}
 }

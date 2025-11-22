@@ -1,4 +1,4 @@
-import type { KeyBindingMapSerializable } from '$lib/oneput/bindings.js';
+import type { KeyBindingMapSerializable } from '../../bindings.js';
 import type { ResultAsync } from 'neverthrow';
 
 export interface BindingsStore {

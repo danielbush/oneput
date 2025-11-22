@@ -91,10 +91,6 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 		private values: V = {} as V
 	) {}
 
-	setLayout() {
-		this.ctl.ui.setLayout(this);
-	}
-
 	configure(values: V) {
 		this.values = {
 			exitAction: () => {

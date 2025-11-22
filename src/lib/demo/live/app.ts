@@ -9,8 +9,13 @@ import { RootUI } from './app/root.js';
 // Here we are relying on defaultUI to have some default settings including keys
 // set for us.  But we could fetch settings asynchronously here, update
 // defaultUI accordingly
-export const setController = async (ctl: Controller) => {
-	Layout.create(ctl).setLayout();
-	LocalBindingsService.create(ctl).setDefaultBindings();
+export const setController = (ctl: Controller) => {
+	ctl.ui.setLayout(Layout.create(ctl));
+	LocalBindingsService.create(ctl)
+		.getBindings()
+		.map((bindings) => {
+			ctl.keys.setDefaultKeys(bindings.globalBindings, false);
+			ctl.keys.setDefaultKeys(bindings.localBindings, true);
+		});
 	ctl.runUI(RootUI);
 };

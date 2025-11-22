@@ -81,6 +81,9 @@ export type LayoutSettings = {
 	clearInput?: boolean;
 };
 
+/**
+ * Defines a standard layout.
+ */
 export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayout<V> {
 	static create<V extends LayoutSettings = LayoutSettings>(ctl: Controller, values: V = {} as V) {
 		return new Layout(ctl, values);

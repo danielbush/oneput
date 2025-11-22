@@ -5,7 +5,7 @@ import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
 import { config, TestBindingsStore } from '$lib/demo/live/service/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
-import { type LayoutSettings } from '../config/Layout.js';
+import { type LayoutSettings } from '../layout.js';
 
 export class SettingsUI {
 	static create(ctl: Controller) {

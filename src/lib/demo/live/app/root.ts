@@ -7,7 +7,7 @@ import {
 	timerIcon,
 	tocIcon
 } from '$lib/oneput/shared/icons.js';
-import { type LayoutSettings } from '../config/Layout.js';
+import { type LayoutSettings } from '../layout.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';

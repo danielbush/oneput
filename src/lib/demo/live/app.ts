@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { Layout } from './config/Layout.js';
+import { Layout } from './layout.js';
 import { LocalBindingsService } from '../../oneput/shared/bindings/LocalBindingsService.js';
 import { RootUI } from './app/root.js';
 

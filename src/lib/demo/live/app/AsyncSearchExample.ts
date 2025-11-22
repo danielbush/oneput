@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import { type LayoutSettings } from '../config/Layout.js';
+import { type LayoutSettings } from '../layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 
 export class AsyncSearchExample {

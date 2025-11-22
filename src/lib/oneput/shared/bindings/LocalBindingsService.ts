@@ -8,10 +8,13 @@ import {
 	defaultLocalActions
 } from '$lib/oneput/shared/bindings/defaultBindings.js';
 
-export class DefaultBindings {
+/**
+ * Stores bindings in indexeddb.
+ */
+export class LocalBindingsService {
 	static create(ctl: Controller) {
 		const bindingsStore = BindingsIDB.create();
-		return new DefaultBindings(ctl, bindingsStore);
+		return new LocalBindingsService(ctl, bindingsStore);
 	}
 
 	constructor(

@@ -1,6 +1,7 @@
 import type { Controller } from '../../controller.js';
 import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../bindings.js';
-import { BindingsIDB, type BindingsStore } from '../../shared/bindings/BindingsIDB.js';
+import { BindingsIDB } from '../../shared/bindings/BindingsIDB.js';
+import type { BindingsStore } from '../../shared/bindings/BindingsStore.js';
 import { keyboardIcon, xIcon } from '../../shared/icons.js';
 import { stdMenuItem } from '../../shared/stdMenuItem.js';
 import { inputCaptureUI } from './inputCaptureUI.js';

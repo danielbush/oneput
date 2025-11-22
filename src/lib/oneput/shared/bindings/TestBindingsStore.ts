@@ -1,5 +1,6 @@
 import type { KeyBindingMapSerializable } from '../../bindings.js';
-import { BindingsIDB, type BindingsStore } from '../bindings/BindingsIDB.js';
+import { BindingsIDB } from '../bindings/BindingsIDB.js';
+import type { BindingsStore } from './BindingsStore.js';
 import { simulateDelay } from '../simulateDelay.js';
 import { maybeSimulateError } from '../simulateError.js';
 

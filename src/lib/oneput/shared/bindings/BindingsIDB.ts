@@ -1,6 +1,7 @@
 import { ResultAsync } from 'neverthrow';
 import type { KeyBindingMapSerializable } from '../../bindings.js';
 import { getOneputIDB, type GetOneputIDB } from '../idb.js';
+import type { BindingsStore } from './BindingsStore.js';
 
 export class IDBStoreError extends Error {
 	constructor(
@@ -11,14 +12,6 @@ export class IDBStoreError extends Error {
 		this.name = error.name || 'IDBStoreError';
 		this.stack = error.stack;
 	}
-}
-
-export interface BindingsStore {
-	getKeys: (isLocal: boolean) => ResultAsync<KeyBindingMapSerializable, IDBStoreError>;
-	setKeys: (
-		keyMap: KeyBindingMapSerializable,
-		isLocal: boolean
-	) => ResultAsync<string, IDBStoreError>;
 }
 
 export class BindingsIDB implements BindingsStore {

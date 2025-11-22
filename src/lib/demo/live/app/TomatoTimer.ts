@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import type { MyDefaultUIValues } from '../config/defaultUI.js';
+import type { LayoutSettings } from '../config/Layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import { hflex, menuItem } from '$lib/oneput/builder.js';
@@ -244,7 +244,7 @@ export class TomatoTimer {
 	 * This is the entry point that loads the tomato timer ui.
 	 */
 	runUI() {
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Tomato Timer',
 			exitAction: this.ctl.goBack
 		});

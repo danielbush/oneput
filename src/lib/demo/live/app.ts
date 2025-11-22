@@ -1,5 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { DefaultBindings, MyDefaultUI } from './config/defaultUI.js';
+import { Layout } from './config/Layout.js';
+import { DefaultBindings } from './config/DefaultBindings.js';
 import { RootUI } from './app/root.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
@@ -9,7 +10,7 @@ import { RootUI } from './app/root.js';
 // set for us.  But we could fetch settings asynchronously here, update
 // defaultUI accordingly
 export const setController = async (ctl: Controller) => {
-	MyDefaultUI.create(ctl).setDefaultUI();
+	Layout.create(ctl).setLayout();
 	DefaultBindings.create(ctl).setDefaultBindings();
 	ctl.runUI(RootUI);
 };

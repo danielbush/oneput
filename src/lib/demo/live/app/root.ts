@@ -7,7 +7,7 @@ import {
 	timerIcon,
 	tocIcon
 } from '$lib/oneput/shared/icons.js';
-import { type MyDefaultUIValues } from '../config/defaultUI.js';
+import { type LayoutSettings } from '../config/Layout.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
@@ -23,7 +23,7 @@ export class RootUI {
 	constructor(private ctl: Controller) {}
 
 	runUI = () => {
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Home',
 			exitType: 'exit',
 			placeholder: 'This is root...'

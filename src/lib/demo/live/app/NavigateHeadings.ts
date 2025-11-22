@@ -20,7 +20,7 @@ export class NavigateHeadings {
 	) {}
 
 	runUI() {
-		this.ctl.ui.runDefaultUI({
+		this.ctl.ui.runLayout({
 			menuHeader: 'Navigate Headings',
 			exitAction: this.ctl.goBack
 		});

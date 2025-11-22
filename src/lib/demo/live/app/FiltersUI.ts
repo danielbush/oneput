@@ -11,7 +11,7 @@ export class FiltersUI {
 	constructor(private ctl: Controller) {}
 
 	runUI() {
-		this.ctl.ui.runDefaultUI({
+		this.ctl.ui.runLayout({
 			menuHeader: 'Filters',
 			exitAction: this.ctl.goBack
 		});

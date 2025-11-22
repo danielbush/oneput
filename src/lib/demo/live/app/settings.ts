@@ -5,7 +5,7 @@ import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
 import { config, TestBindingsStore } from '$lib/oneput/shared/bindings/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
-import { type MyDefaultUIValues } from '../config/defaultUI.js';
+import { type LayoutSettings } from '../config/Layout.js';
 
 export class SettingsUI {
 	static create(ctl: Controller) {
@@ -19,7 +19,7 @@ export class SettingsUI {
 	) {}
 
 	runUI = () => {
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Settings',
 			exitAction: this.ctl.goBack
 		});
@@ -49,7 +49,7 @@ export class SettingsUI {
 						isLocal: false,
 						bindingsStore: this.bindingsStore,
 						ui: ({ menuHeader, backAction }) => {
-							this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
 								exitAction: backAction,
 								exitType: 'back'
@@ -67,7 +67,7 @@ export class SettingsUI {
 						isLocal: true,
 						bindingsStore: this.bindingsStore,
 						ui: ({ menuHeader, backAction }) => {
-							this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
 								exitAction: backAction,
 								exitType: 'back'

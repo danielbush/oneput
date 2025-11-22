@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import type { Notification } from '$lib/oneput/plugins/Notification.js';
-import { type MyDefaultUIValues } from '../config/defaultUI.js';
+import { type LayoutSettings } from '../config/Layout.js';
 import { randomId, type OneputProps } from '$lib/oneput/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
@@ -28,7 +28,7 @@ export class KatexDemo {
 	) {}
 
 	runUI() {
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Katex Demo',
 			exitAction: this.ctl.goBack
 		});

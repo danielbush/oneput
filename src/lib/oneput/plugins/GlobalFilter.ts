@@ -13,7 +13,7 @@ export class GlobalFilter {
 	constructor(private ctl: Controller) {}
 
 	runUI() {
-		this.ctl.ui.runDefaultUI({
+		this.ctl.ui.runLayout({
 			menuHeader: 'Global Filter'
 		});
 		setTimeout(() => {

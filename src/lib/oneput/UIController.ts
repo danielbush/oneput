@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { DefaultUI, FlexParams, OneputProps } from './lib.js';
+import type { UILayout, FlexParams, OneputProps } from './lib.js';
 
 export class UIController {
 	static create(ctl: Controller) {
@@ -27,20 +27,20 @@ export class UIController {
 		this.ctl.currentProps.innerUI = inner;
 	}
 
-	private defaultUI?: DefaultUI;
+	private defaultUI?: UILayout;
 
-	setDefaultUI(defaultUI?: DefaultUI) {
+	setLayout(defaultUI?: UILayout) {
 		this.defaultUI = defaultUI;
 	}
 
-	getDefaultUI<D extends DefaultUI = DefaultUI>(): D | undefined {
+	getLayout<D extends UILayout = UILayout>(): D | undefined {
 		// We'll assume you know what subtype of DefaultUI you are using.
 		return this.defaultUI as D;
 	}
 
-	runDefaultUI<T extends Record<string, unknown>>(values?: T) {
+	runLayout<T extends Record<string, unknown>>(values?: T) {
 		if (this.defaultUI && values) {
-			this.defaultUI.configureUI?.(values);
+			this.defaultUI.configure?.(values);
 		}
 		this.ctl.currentProps.inputUI = this.defaultUI?.inputUI;
 		this.ctl.currentProps.menuUI = this.defaultUI?.menuUI;

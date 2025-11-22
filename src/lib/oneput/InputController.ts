@@ -52,7 +52,7 @@ export class InputController {
 
 	setPlaceholder(msg?: string) {
 		this.ctl.currentProps.placeholder =
-			msg || this.ctl.ui.getDefaultUI()?.placeholder || this.defaultPlaceHolder;
+			msg || this.ctl.ui.getLayout()?.placeholder || this.defaultPlaceHolder;
 	}
 
 	getInputValue() {

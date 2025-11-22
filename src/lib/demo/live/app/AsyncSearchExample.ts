@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
-import { type MyDefaultUIValues } from '../config/defaultUI.js';
+import { type LayoutSettings } from '../config/Layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 
 export class AsyncSearchExample {
@@ -18,7 +18,7 @@ export class AsyncSearchExample {
 	) {}
 
 	runUI() {
-		this.ctl.ui.runDefaultUI<MyDefaultUIValues>({
+		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Async Search Example',
 			exitAction: this.ctl.goBack
 		});

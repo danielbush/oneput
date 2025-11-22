@@ -1,19 +1,11 @@
-import { type DefaultUI, type FlexParams, type OneputProps } from '$lib/oneput/lib.js';
+import { type UILayout, type FlexParams, type OneputProps } from '$lib/oneput/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/builder.js';
-import { KeyEventBindings } from '$lib/oneput/bindings.js';
-import { BindingsIDB } from '$lib/oneput/shared/bindings/BindingsIDB.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/widgets/DateDisplay.js';
 import { MenuStatus } from '$lib/oneput/shared/widgets/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '$lib/oneput/shared/widgets/TimeDisplay.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
-import {
-	defaultGlobalActions,
-	defaultGlobalBindings,
-	defaultLocalActions,
-	defaultLocalBindings
-} from '$lib/oneput/shared/bindings/defaultBindings.js';
 
 /**
  * Standard input UI for use in most situations.
@@ -81,7 +73,7 @@ export const menuHeaderUI: ({
 	});
 };
 
-export type MyDefaultUIValues = {
+export type LayoutSettings = {
 	exitAction?: () => void;
 	menuHeader?: string;
 	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
@@ -89,12 +81,9 @@ export type MyDefaultUIValues = {
 	clearInput?: boolean;
 };
 
-export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implements DefaultUI<V> {
-	static create<V extends MyDefaultUIValues = MyDefaultUIValues>(
-		ctl: Controller,
-		values: V = {} as V
-	) {
-		return new MyDefaultUI(ctl, values);
+export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayout<V> {
+	static create<V extends LayoutSettings = LayoutSettings>(ctl: Controller, values: V = {} as V) {
+		return new Layout(ctl, values);
 	}
 
 	constructor(
@@ -102,11 +91,11 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 		private values: V = {} as V
 	) {}
 
-	setDefaultUI() {
-		this.ctl.ui.setDefaultUI(this);
+	setLayout() {
+		this.ctl.ui.setLayout(this);
 	}
 
-	configureUI(values: V) {
+	configure(values: V) {
 		this.values = {
 			exitAction: () => {
 				this.ctl.menu.closeMenu();
@@ -189,42 +178,5 @@ export class MyDefaultUI<V extends MyDefaultUIValues = MyDefaultUIValues> implem
 				})
 			]
 		});
-	}
-}
-
-export class DefaultBindings {
-	static create(ctl: Controller) {
-		const bindingsStore = BindingsIDB.create();
-		return new DefaultBindings(ctl, bindingsStore);
-	}
-
-	constructor(
-		private ctl: Controller,
-		private bindingsStore: BindingsIDB
-	) {}
-
-	async setDefaultBindings() {
-		this.bindingsStore
-			.getKeys(false, defaultGlobalBindings)
-			.map((kbMapSerializable) => {
-				console.log('getting global keys', kbMapSerializable);
-				const keyBindingMap = KeyEventBindings.fromSerializable(
-					kbMapSerializable,
-					defaultGlobalActions
-				).keyBindingMap;
-				this.ctl.keys.setDefaultKeys(keyBindingMap, false);
-			})
-			.orTee((err) => this.ctl.notify(`Error getting global keys: ${err.message}`));
-		this.bindingsStore
-			.getKeys(true, defaultLocalBindings)
-			.map((kbMapSerializable) => {
-				console.log('getting local keys', kbMapSerializable);
-				const keyBindingMap = KeyEventBindings.fromSerializable(
-					kbMapSerializable,
-					defaultLocalActions
-				).keyBindingMap;
-				this.ctl.keys.setDefaultKeys(keyBindingMap, true);
-			})
-			.orTee((err) => this.ctl.notify(`Error getting local keys: ${err.message}`));
 	}
 }

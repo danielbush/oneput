@@ -27,28 +27,25 @@ export class UIController {
 		this.ctl.currentProps.innerUI = inner;
 	}
 
-	private defaultUI?: UILayout;
+	private layout?: UILayout;
 
-	setLayout(defaultUI?: UILayout) {
-		this.defaultUI = defaultUI;
+	setLayout(layout: UILayout) {
+		this.layout = layout;
 	}
 
 	getLayout<D extends UILayout = UILayout>(): D | undefined {
-		// We'll assume you know what subtype of DefaultUI you are using.
-		return this.defaultUI as D;
+		return this.layout as D;
 	}
 
-	runLayout<T extends Record<string, unknown>>(values?: T) {
-		if (this.defaultUI && values) {
-			this.defaultUI.configure?.(values);
-		}
-		this.ctl.currentProps.inputUI = this.defaultUI?.inputUI;
-		this.ctl.currentProps.menuUI = this.defaultUI?.menuUI;
-		this.ctl.currentProps.innerUI = this.defaultUI?.innerUI;
-		this.ctl.currentProps.outerUI = this.defaultUI?.outerUI;
+	runLayout<T extends Record<string, unknown>>(values: T) {
+		this.layout?.configure(values);
+		this.ctl.currentProps.inputUI = this.layout?.inputUI;
+		this.ctl.currentProps.menuUI = this.layout?.menuUI;
+		this.ctl.currentProps.innerUI = this.layout?.innerUI;
+		this.ctl.currentProps.outerUI = this.layout?.outerUI;
 		this.ctl.currentProps.placeholder =
-			this.defaultUI?.placeholder || this.ctl.input.defaultPlaceHolder;
-		this.defaultUI?.afterUpdate?.();
+			this.layout?.placeholder || this.ctl.input.defaultPlaceHolder;
+		this.layout?.afterUpdate?.();
 	}
 
 	/**

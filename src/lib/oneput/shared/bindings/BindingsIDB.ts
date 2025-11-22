@@ -14,6 +14,9 @@ export class IDBStoreError extends Error {
 	}
 }
 
+/**
+ * Stores your bindings in indexeddb.
+ */
 export class BindingsIDB implements BindingsStore {
 	static create() {
 		return new BindingsIDB(getOneputIDB({ reset: false }));
@@ -21,7 +24,7 @@ export class BindingsIDB implements BindingsStore {
 
 	private constructor(private dbp: GetOneputIDB) {}
 
-	getKeys = (isLocal: boolean, defaultKeys: KeyBindingMapSerializable = {}) =>
+	getBindings = (isLocal: boolean, defaultKeys: KeyBindingMapSerializable = {}) =>
 		this.dbp
 			.andThen((db) =>
 				ResultAsync.fromPromise(
@@ -31,7 +34,7 @@ export class BindingsIDB implements BindingsStore {
 			)
 			.map((value) => value || defaultKeys);
 
-	setKeys = (keyMap: KeyBindingMapSerializable, isLocal: boolean) =>
+	updateBindings = (keyMap: KeyBindingMapSerializable, isLocal: boolean) =>
 		this.dbp.andThen((db) =>
 			ResultAsync.fromPromise(
 				db.put('bindings', keyMap, isLocal ? 'local' : 'global'),

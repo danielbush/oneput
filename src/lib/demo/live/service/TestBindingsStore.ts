@@ -23,14 +23,14 @@ export class TestBindingsStore implements BindingsStore {
 
 	private constructor(private db: BindingsIDB) {}
 
-	getKeys = (isLocal: boolean) => {
-		return this.db.getKeys(isLocal);
+	getBindings = (isLocal: boolean) => {
+		return this.db.getBindings(isLocal);
 	};
 
-	setKeys = (keyMap: KeyBindingMapSerializable, isLocal: boolean) => {
+	updateBindings = (keyMap: KeyBindingMapSerializable, isLocal: boolean) => {
 		const msg = `A simulated error occurred for setKeys: ${isLocal ? 'local' : 'global'} key bindings`;
 		return simulateDelay(1000)
 			.andThen(() => maybeSimulateError(config.simulateError, msg, 'TestKeyService'))
-			.andThen(() => this.db.setKeys(keyMap, isLocal));
+			.andThen(() => this.db.updateBindings(keyMap, isLocal));
 	};
 }

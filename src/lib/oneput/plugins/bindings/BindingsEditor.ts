@@ -147,7 +147,7 @@ export class BindingsEditor {
 		this.actionUI(actionId);
 
 		// Real update
-		const result = await this.bindingStore.setKeys(
+		const result = await this.bindingStore.updateBindings(
 			KeyEventBindings.create(keyBindingMap).toSerializable(),
 			this.isLocal
 		);

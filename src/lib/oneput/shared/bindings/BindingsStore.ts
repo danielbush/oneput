@@ -2,6 +2,9 @@ import type { KeyBindingMapSerializable } from '../../bindings.js';
 import type { ResultAsync } from 'neverthrow';
 
 export interface BindingsStore {
-	getKeys: (isLocal: boolean) => ResultAsync<KeyBindingMapSerializable, Error>;
-	setKeys: (keyMap: KeyBindingMapSerializable, isLocal: boolean) => ResultAsync<string, Error>;
+	getBindings: (isLocal: boolean) => ResultAsync<KeyBindingMapSerializable, Error>;
+	updateBindings: (
+		keyMap: KeyBindingMapSerializable,
+		isLocal: boolean
+	) => ResultAsync<string, Error>;
 }

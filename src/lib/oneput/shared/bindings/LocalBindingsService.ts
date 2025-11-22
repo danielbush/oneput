@@ -25,14 +25,14 @@ export class LocalBindingsService {
 
 	getBindings() {
 		const globalBindings = this.bindingsStore
-			.getKeys(false, defaultGlobalBindings)
+			.getBindings(false, defaultGlobalBindings)
 			.map((kbMapSerializable) => {
 				return KeyEventBindings.fromSerializable(kbMapSerializable, defaultGlobalActions)
 					.keyBindingMap;
 			})
 			.orTee((err) => this.ctl.notify(`Error getting global keys: ${err.message}`));
 		const localBindings = this.bindingsStore
-			.getKeys(true, defaultLocalBindings)
+			.getBindings(true, defaultLocalBindings)
 			.map((kbMapSerializable) => {
 				return KeyEventBindings.fromSerializable(kbMapSerializable, defaultLocalActions)
 					.keyBindingMap;

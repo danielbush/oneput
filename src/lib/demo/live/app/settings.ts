@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { listFilterIcon } from '$lib/oneput/shared/icons.js';
+import { keyboardIcon, listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
 import { config, TestBindingsStore } from '$lib/oneput/shared/bindings/TestBindingsStore.js';
@@ -43,6 +43,7 @@ export class SettingsUI {
 			stdMenuItem({
 				id: 'global-keys',
 				textContent: 'Set global default key bindings...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
@@ -60,6 +61,7 @@ export class SettingsUI {
 			stdMenuItem({
 				id: 'local-keys',
 				textContent: 'Set local default key bindings...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: true,

@@ -1,12 +1,13 @@
 import type { Controller } from '../../controller.js';
 import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../bindings.js';
-import { BindingsIDB } from './BindingsIDB.js';
-import type { BindingsStore } from './BindingsStore.js';
 import { keyboardIcon, xIcon } from '../icons.js';
 import { stdMenuItem } from '../stdMenuItem.js';
 import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
+import type { ResultAsync } from 'neverthrow';
+import type { IDBError } from '../idb.js';
+import type { IDBStoreError } from './BindingsIDB.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
@@ -18,17 +19,20 @@ export class BindingsEditor {
 		ctl: Controller,
 		values: {
 			isLocal: boolean;
-			bindingsStore?: BindingsStore;
+			keyBindingMap: KeyBindingMap;
 			ui: (values: { menuHeader: string; backAction: () => void }) => void;
+			onUpdate: (
+				keyBindingMap: KeyBindingMap,
+				isLocal: boolean
+			) => ResultAsync<string, IDBError | IDBStoreError>;
 		}
 	) {
 		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
-		const bindingStore = values.bindingsStore || BindingsIDB.create();
 		const km: BindingsEditor = new BindingsEditor(
 			ctl,
-			bindingStore,
 			values.isLocal,
 			keyBindingMap,
+			values.onUpdate,
 			values.ui
 		);
 		return km;
@@ -36,9 +40,12 @@ export class BindingsEditor {
 
 	constructor(
 		private ctl: Controller,
-		private bindingStore: BindingsStore,
 		private isLocal: boolean,
 		private keyBindingMap: KeyBindingMap,
+		private onUpdate: (
+			keyBindingMap: KeyBindingMap,
+			isLocal: boolean
+		) => ResultAsync<string, IDBError | IDBStoreError>,
 		private ui: (values: { menuHeader: string; backAction: () => void }) => void
 	) {}
 
@@ -118,12 +125,30 @@ export class BindingsEditor {
 		if (!yes) {
 			return;
 		}
+
+		const oldKeyBindingMap = this.keyBindingMap;
 		const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
 		keyEventBindings.removeBinding(actionId, binding);
-		this.update(actionId, keyEventBindings.keyBindingMap);
+		const res = this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal);
+
+		// Optimistic update:
+		this.keyBindingMap = keyEventBindings.keyBindingMap;
+		this.actionUI(actionId);
+
+		res.map(() => {
+			this.ctl.notify('Binding removed', { duration: 3000 });
+		});
+		res.mapErr((err) => {
+			this.keyBindingMap = oldKeyBindingMap;
+			this.actionUI(actionId);
+			this.ctl.alert({ message: 'Could not remove binding', additional: err.message });
+		});
 	};
 
 	private addBinding = async (actionId: string, capturedKeys: KeyEvent[]) => {
+		this.ctl.notify('Updating...', { duration: 3000 });
+
+		const oldKeyBindingMap = this.keyBindingMap;
 		const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
 		const existing = keyEventBindings.find(capturedKeys);
 		if (existing.length > 0) {
@@ -134,32 +159,19 @@ export class BindingsEditor {
 			return Promise.reject(new Error('Binding already exists'));
 		}
 		keyEventBindings.addBinding(actionId, capturedKeys);
-		this.update(actionId, keyEventBindings.keyBindingMap);
-	};
+		const res = this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal);
 
-	private async update(actionId: string, keyBindingMap: KeyBindingMap) {
-		const notification = this.ctl.notify('Updating...', { duration: 3000 });
-		const oldKeyBindingMap = this.keyBindingMap;
-
-		// Optimistic update
-		this.keyBindingMap = keyBindingMap;
-		this.ctl.keys.setDefaultKeys(keyBindingMap, this.isLocal);
+		// Optimistic update:
+		this.keyBindingMap = keyEventBindings.keyBindingMap;
 		this.actionUI(actionId);
 
-		// Real update
-		const result = await this.bindingStore.updateBindings(
-			KeyEventBindings.create(keyBindingMap).toSerializable(),
-			this.isLocal
-		);
-		result.map(() => {
-			notification.updateMessage('Key bindings saved', { duration: 3000 });
+		res.map(() => {
+			this.ctl.notify('Binding added', { duration: 3000 });
 		});
-		result.mapErr((err) => {
-			notification.updateMessage(err.message);
-			// Revert optimistic update...
+		res.mapErr((err) => {
 			this.keyBindingMap = oldKeyBindingMap;
-			this.ctl.keys.setDefaultKeys(oldKeyBindingMap, this.isLocal);
 			this.actionUI(actionId);
+			this.ctl.alert({ message: 'Could not add binding', additional: err.message });
 		});
-	}
+	};
 }

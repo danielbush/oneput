@@ -2,20 +2,21 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { keyboardIcon, listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
 import { BindingsEditor } from '$lib/oneput/shared/bindings/BindingsEditor.js';
-import { config, TestBindingsStore } from '$lib/demo/live/service/TestBindingsStore.js';
+import { config } from '$lib/demo/live/service/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { type LayoutSettings } from '../layout.js';
+import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
 
 export class SettingsUI {
 	static create(ctl: Controller) {
-		const ui = new SettingsUI(ctl, TestBindingsStore.create());
+		const ui = new SettingsUI(ctl, LocalBindingsService.create(ctl));
 		return ui;
 	}
 
 	constructor(
 		private ctl: Controller,
-		private bindingsStore: TestBindingsStore
+		private bindingsService: LocalBindingsService
 	) {}
 
 	runUI = () => {
@@ -47,7 +48,10 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
-						bindingsStore: this.bindingsStore,
+						keyBindingMap: this.ctl.keys.getDefaultKeys(false),
+						onUpdate: (keyBindingMap, isLocal) => {
+							return this.bindingsService.update(keyBindingMap, isLocal);
+						},
 						ui: ({ menuHeader, backAction }) => {
 							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
@@ -65,7 +69,10 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: true,
-						bindingsStore: this.bindingsStore,
+						keyBindingMap: this.ctl.keys.getDefaultKeys(true),
+						onUpdate: (keyBindingMap, isLocal) => {
+							return this.bindingsService.update(keyBindingMap, isLocal);
+						},
 						ui: ({ menuHeader, backAction }) => {
 							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,

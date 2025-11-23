@@ -1,4 +1,4 @@
-import { KeyEventBindings } from '../../bindings.js';
+import { KeyEventBindings, type KeyBindingMap } from '../../bindings.js';
 import type { Controller } from '../../controller.js';
 import { BindingsIDB } from './BindingsIDB.js';
 import {
@@ -46,5 +46,20 @@ export class LocalBindingsService {
 				};
 			}
 		);
+	}
+
+	update(keyBindingMap: KeyBindingMap, isLocal: boolean) {
+		const oldKeyBindingMap = keyBindingMap;
+
+		this.ctl.keys.setDefaultKeys(keyBindingMap, isLocal);
+
+		const result = this.bindingsStore.updateBindings(
+			KeyEventBindings.create(keyBindingMap).toSerializable(),
+			isLocal
+		);
+		result.orTee(() => {
+			this.ctl.keys.setDefaultKeys(oldKeyBindingMap, isLocal);
+		});
+		return result;
 	}
 }

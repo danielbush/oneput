@@ -39,14 +39,6 @@ export class MenuController {
 	}
 
 	/**
-	 * Disable ALL menuItemsFn calls.
-	 */
-	private _disableMenuItemsFn = false;
-	private _disableActions = false;
-	private _disableOpenClose = false;
-	private removeDefaultMenuItemsFn: () => void = () => {};
-	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
-	/**
 	 * Represents the current list of available menu items which is usually used
 	 * to set currentProps.menuItems.
 	 *
@@ -58,7 +50,17 @@ export class MenuController {
 	 * For dynamic menu item generation, this.menuItems can be ignored.
 	 */
 	private menuItems: Array<MenuItemAny> = [];
-	private focusBehaviour: FocusBehaviour = 'first';
+	/**
+	 * Disable ALL menuItemsFn calls.
+	 */
+	private _disableMenuItemsFn = false;
+	private _disableActions = false;
+	private _disableOpenClose = false;
+	private defaultMenuItemsFn?: MenuItemsFn;
+	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
+	private removeMenuItemsListener?: () => void;
+	private defaultFocusBehaviour: FocusBehaviour = 'first';
+	private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
 
 	// #region menu open/close
 
@@ -132,25 +134,15 @@ export class MenuController {
 	 * different menuItemsFn using setMenuItemsFn and restored by calling
 	 * setMenuItemsFn with no arguments.
 	 */
-	setDefaultMenuItemsFn(
-		menuItemsFn: MenuItemsFn,
-		options: { focusBehaviour?: FocusBehaviour } = {}
-	) {
-		this.removeDefaultMenuItemsFn();
-		const handler: InputChangeListener = (evt) => {
-			if (this._disableMenuItemsFn) {
-				return;
-			}
-			if (this.menuItemsFn) {
-				return;
-			}
-			const items = menuItemsFn(evt.target?.value ?? '', this.menuItems);
-			if (!items) {
-				return;
-			}
-			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
-		};
-		this.removeDefaultMenuItemsFn = this.ctl.events.on<InputChangeEvent>('input-change', handler);
+	setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
+		this.defaultMenuItemsFn = menuItemsFn;
+	}
+
+	resetMenuItemsFn() {
+		this.menuItemsFn = this.defaultMenuItemsFn;
+		if (this.defaultMenuItemsFn) {
+			this.setMenuItemsFn(this.defaultMenuItemsFn, { focusBehaviour: this.defaultFocusBehaviour });
+		}
 	}
 
 	/**
@@ -159,6 +151,7 @@ export class MenuController {
 	 * If this function returns undefined, the menu will not be updated.
 	 */
 	setMenuItemsFn(menuItemsFn: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+		this.removeMenuItemsListener?.();
 		this.menuItemsFn = menuItemsFn;
 		const handler: InputChangeListener = (evt) => {
 			if (this._disableMenuItemsFn) {
@@ -170,11 +163,7 @@ export class MenuController {
 			}
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
-		const removeListener = this.ctl.events.on<InputChangeEvent>('input-change', handler);
-		return () => {
-			removeListener();
-			this.menuItemsFn = undefined;
-		};
+		this.removeMenuItemsListener = this.ctl.events.on<InputChangeEvent>('input-change', handler);
 	}
 
 	/**
@@ -219,23 +208,20 @@ export class MenuController {
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
-		const removeListener = this.ctl.events.on<InputChangeEvent>('input-change', (evt) => {
+		this.removeMenuItemsListener = this.ctl.events.on<InputChangeEvent>('input-change', (evt) => {
 			if (this._disableMenuItemsFn) {
 				return;
 			}
 			options.onDebounce?.(true);
 			debouncedHandler(evt);
 		});
-		return () => {
-			removeListener();
-			this.menuItemsFn = undefined;
-		};
 	}
 
 	/**
 	 * Clear any non-default menu items fn.
 	 */
 	clearMenuItemsFn() {
+		this.removeMenuItemsListener?.();
 		this.menuItemsFn = undefined;
 	}
 
@@ -302,8 +288,6 @@ export class MenuController {
 			}
 		}
 	}
-
-	private defaultFocusBehaviour: FocusBehaviour = 'first';
 
 	setDefaultFocusBehaviour(behaviour: FocusBehaviour) {
 		this.defaultFocusBehaviour = behaviour;

@@ -44,6 +44,7 @@ export class Controller {
 		this.menu.enableMenuItemsFn();
 
 		this.menu.resetFocusBehaviour();
+		this.menu.resetMenuItemsFn();
 		this.input.setInputValue();
 	}
 

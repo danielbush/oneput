@@ -2,6 +2,7 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { Layout } from './layout.js';
 import { LocalBindingsService } from '../../oneput/shared/bindings/LocalBindingsService.js';
 import { RootUI } from './app/root.js';
+import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.
@@ -11,6 +12,7 @@ import { RootUI } from './app/root.js';
 // defaultUI accordingly
 export const setController = (ctl: Controller) => {
 	ctl.ui.setLayout(Layout.create(ctl));
+	ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 	LocalBindingsService.create(ctl)
 		.getBindings()
 		.map((bindings) => {

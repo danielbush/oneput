@@ -15,11 +15,8 @@ export class KatexDemo {
 	}
 
 	beforeExit = () => {
-		this.unsetMenuItemsFn?.();
 		this.notify?.clear();
 	};
-
-	unsetMenuItemsFn?: () => void;
 
 	constructor(
 		private ctl: Controller,
@@ -44,7 +41,7 @@ export class KatexDemo {
 		});
 		this.ctl.input.focusInput();
 		this.notify = this.ctl.notify(helpMessage);
-		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFn(() => {
+		this.ctl.menu.setMenuItemsFn(() => {
 			this.renderPreview();
 		});
 	}

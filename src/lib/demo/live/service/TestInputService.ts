@@ -15,7 +15,7 @@ export class TestInputService {
 			throw new Error('TestInputService: simulated error');
 		}
 		for (let i = 0; i < input.length; i++) {
-			results.push(`Result for input: '${input[i]}'`);
+			results.push(input[i]);
 		}
 		console.warn(`${input} will fetch with delay of ${delay}ms`);
 		await new Promise((resolve) => setTimeout(resolve, delay));

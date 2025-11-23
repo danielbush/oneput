@@ -13,7 +13,6 @@ export class AsyncSearchExample {
 	constructor(
 		private ctl: Controller,
 		private testInputService: TestInputService,
-		private unsetMenuItemsFn?: () => void,
 		private notify?: ReturnType<Controller['notify']>
 	) {}
 
@@ -27,7 +26,7 @@ export class AsyncSearchExample {
 				'Items are delayed but only latest items should show when debounce times out.  ' +
 				'The service will randomly fail 10% of the time.'
 		);
-		this.unsetMenuItemsFn = this.ctl.menu.setMenuItemsFnAsync(
+		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {
 					this.notify?.updateMessage('Fetching data...');
@@ -35,7 +34,10 @@ export class AsyncSearchExample {
 					return results.map((result) => {
 						return stdMenuItem({
 							id: `async-search-example-${result}`,
-							textContent: result
+							textContent: `Result for input: '${result}'`,
+							action: () => {
+								this.notify?.updateMessage(`Selected: ${result}`);
+							}
 						});
 					});
 				} catch (error) {
@@ -55,7 +57,6 @@ export class AsyncSearchExample {
 				focusBehaviour: 'last'
 			}
 		);
-		this.ctl.input.setInputValue();
 		this.ctl.input.setPlaceholder('Start typing something...');
 		this.ctl.menu.setMenuItems([]);
 		this.ctl.input.focusInput();
@@ -124,8 +125,7 @@ export class AsyncSearchExample {
 	}
 
 	beforeExit = () => {
-		this.ctl.input.setInputValue();
+		// TODO: make this a beforeRunUI ?
 		this.notify?.clear();
-		this.unsetMenuItemsFn?.();
 	};
 }

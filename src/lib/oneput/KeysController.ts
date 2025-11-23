@@ -4,6 +4,9 @@ import type { KeyBindingMap } from './bindings.js';
 
 /**
  * Manages key bindings.
+ *
+ * local bindings = keys that are only active when the menu is open
+ * global bindings = keys that are active when the menu is closed
  */
 export class KeysController {
 	public static create(ctl: Controller) {
@@ -89,7 +92,7 @@ export class KeysController {
 	}
 
 	/**
-	 * Returns the default key bindings for current default ui.
+	 * Returns the default key bindings.
 	 *
 	 * @param isLocal
 	 */

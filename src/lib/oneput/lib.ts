@@ -231,13 +231,6 @@ export function walk(
 
 export interface UILayout<V extends Record<string, unknown> = Record<string, unknown>> {
 	configure(values: V): void;
-	/**
-	 * Called after the ui controller has updated the ui using the ui provided
-	 * by this instance.
-	 *
-	 * You can use this to do any imperative updates.
-	 */
-	afterUpdate?(): void;
 	inputUI?: OneputProps['inputUI'];
 	menuUI?: OneputProps['menuUI'];
 	innerUI?: OneputProps['innerUI'];

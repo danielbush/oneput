@@ -7,6 +7,7 @@ import { Notification, type NotificationParams } from './plugins/Notification.js
 import type { OneputProps, UIClass, UIObject } from './lib.js';
 import { Alert } from './plugins/Alert.js';
 import { Confirm } from './plugins/Confirm.js';
+import { WordFilter } from './shared/filters/WordFilter.js';
 
 export class Controller {
 	public events = new InternalEventEmitter();
@@ -32,13 +33,31 @@ export class Controller {
 	private uiParents: UIObject[] = [];
 	private currentUI: UIObject | null = null;
 
+	/**
+	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
+	 */
+	private beforeRunUI() {
+		this.keys.unsetKeys();
+		this.keys.unsetKeys(true);
+
+		this.menu.enableMenuActions();
+		this.menu.enableMenuOpenClose();
+		this.menu.enableMenuItemsFn();
+
+		// TODO: set a default filter and remember it
+		this.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
+		// TODO: set a default filter and remember it
+		this.menu.setFocusBehaviour('first');
+		this.input.setInputValue();
+	}
+
 	runUI<V extends Record<string, unknown>>(uiClass: UIClass<V>, values?: V) {
 		if (this.currentUI) {
 			this.uiParents.push(this.currentUI);
 		}
-		console.log(this.uiParents);
 		const ui = uiClass.create(this, values ?? ({} as V));
 		this.currentUI = ui;
+		this.beforeRunUI();
 		ui.runUI();
 		return ui;
 	}
@@ -47,8 +66,8 @@ export class Controller {
 		if (this.currentUI) {
 			this.uiParents.push(this.currentUI);
 		}
-		console.log(this.uiParents);
 		this.currentUI = ui;
+		this.beforeRunUI();
 		ui.runUI();
 		return ui;
 	}
@@ -59,9 +78,9 @@ export class Controller {
 	readonly goBack = () => {
 		this.currentUI?.beforeExit?.();
 		const lastUI = this.uiParents.pop();
-		console.log(this.uiParents);
 		if (lastUI) {
 			this.currentUI = lastUI;
+			this.beforeRunUI();
 			lastUI.runUI();
 			return lastUI;
 		}

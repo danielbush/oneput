@@ -5,7 +5,6 @@ import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/widgets/DateDisplay.js';
 import { MenuStatus } from '$lib/oneput/shared/widgets/MenuStatus/MenuStatus.js';
 import { TimeDisplay } from '$lib/oneput/shared/widgets/TimeDisplay.js';
-import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 
 /**
  * Standard input UI for use in most situations.
@@ -104,23 +103,6 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 			placeholder: 'Type here...',
 			...values
 		};
-	}
-
-	async afterUpdate() {
-		// Clear the input.
-		// You can set `clearInput: false` to disable this behaviour.
-		if (this.values.clearInput || !('clearInput' in this.values)) {
-			this.ctl.input.setInputValue();
-		}
-		// Enable various standard things by default.
-		// You can then override if you need to.
-		this.ctl.menu.enableMenuActions();
-		this.ctl.menu.enableMenuOpenClose();
-		this.ctl.menu.enableMenuItemsFn();
-		this.ctl.keys.unsetKeys();
-		this.ctl.keys.unsetKeys(true);
-		this.ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
-		this.ctl.menu.setFocusBehaviour('first');
 	}
 
 	get placeholder() {

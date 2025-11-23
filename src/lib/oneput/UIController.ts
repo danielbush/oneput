@@ -45,7 +45,6 @@ export class UIController {
 		this.ctl.currentProps.outerUI = this.layout?.outerUI;
 		this.ctl.currentProps.placeholder =
 			this.layout?.placeholder || this.ctl.input.defaultPlaceHolder;
-		this.layout?.afterUpdate?.();
 	}
 
 	/**

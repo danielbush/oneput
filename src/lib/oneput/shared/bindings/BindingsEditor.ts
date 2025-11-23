@@ -5,7 +5,7 @@ import { stdMenuItem } from '../stdMenuItem.js';
 import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
-import type { ResultAsync } from 'neverthrow';
+import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from './BindingsIDB.js';
 
@@ -129,49 +129,48 @@ export class BindingsEditor {
 		const oldKeyBindingMap = this.keyBindingMap;
 		const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
 		keyEventBindings.removeBinding(actionId, binding);
-		const res = this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal);
 
 		// Optimistic update:
 		this.keyBindingMap = keyEventBindings.keyBindingMap;
 		this.actionUI(actionId);
 
-		res.map(() => {
-			this.ctl.notify('Binding removed', { duration: 3000 });
-		});
-		res.mapErr((err) => {
-			this.keyBindingMap = oldKeyBindingMap;
-			this.actionUI(actionId);
-			this.ctl.alert({ message: 'Could not remove binding', additional: err.message });
-		});
+		this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal)
+			.andTee(() => {
+				this.ctl.notify('Binding removed', { duration: 3000 });
+			})
+			.orTee((err) => {
+				this.keyBindingMap = oldKeyBindingMap;
+				this.actionUI(actionId);
+				this.ctl.alert({ message: 'Could not remove binding', additional: err.message });
+			});
 	};
 
-	private addBinding = async (actionId: string, capturedKeys: KeyEvent[]) => {
-		this.ctl.notify('Updating...', { duration: 3000 });
-
+	private addBinding = (actionId: string, capturedKeys: KeyEvent[]) => {
 		const oldKeyBindingMap = this.keyBindingMap;
 		const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
-		const existing = keyEventBindings.find(capturedKeys);
-		if (existing.length > 0) {
+
+		const added = keyEventBindings.addBinding(actionId, capturedKeys);
+
+		if (added.isErr()) {
 			this.ctl.alert({
 				message: 'Binding already exists',
-				additional: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
+				additional: added.error.details
 			});
-			return Promise.reject(new Error('Binding already exists'));
+			return;
 		}
-		keyEventBindings.addBinding(actionId, capturedKeys);
-		const res = this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal);
 
 		// Optimistic update:
 		this.keyBindingMap = keyEventBindings.keyBindingMap;
 		this.actionUI(actionId);
 
-		res.map(() => {
-			this.ctl.notify('Binding added', { duration: 3000 });
-		});
-		res.mapErr((err) => {
-			this.keyBindingMap = oldKeyBindingMap;
-			this.actionUI(actionId);
-			this.ctl.alert({ message: 'Could not add binding', additional: err.message });
-		});
+		this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal)
+			.andTee(() => {
+				this.ctl.notify('Binding added', { duration: 3000 });
+			})
+			.orTee((err) => {
+				this.keyBindingMap = oldKeyBindingMap;
+				this.actionUI(actionId);
+				this.ctl.alert({ message: 'Could not add binding', additional: err.message });
+			});
 	};
 }

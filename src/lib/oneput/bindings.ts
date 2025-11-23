@@ -1,5 +1,8 @@
+import { Result, ok, err } from 'neverthrow';
 import type { Controller } from './controller.js';
 import { isMacOS } from './lib.js';
+
+export type DuplicateBindingError = { message: string; details: string };
 
 export type KeyBinding = {
 	action: (c: Controller) => void;
@@ -235,9 +238,17 @@ export class KeyEventBindings {
 	/**
 	 * Add binding using KeyEvent's since this is what we capture.
 	 */
-	addBinding(actionId: string, keyEvents: KeyEvent[]) {
+	addBinding = (actionId: string, keyEvents: KeyEvent[]): Result<void, DuplicateBindingError> => {
+		const existing = this.find(keyEvents);
+		if (existing.length > 0) {
+			return err({
+				message: 'Binding already exists',
+				details: `This binding is already in use by another action: ${existing.map((e) => e.description).join(', ')}.  Please choose a different binding.`
+			});
+		}
 		this.keyEventsMap[actionId].bindings.push(keyEvents);
-	}
+		return ok();
+	};
 
 	/**
 	 * Remove binding using binding string represention of KeyEvent's.

@@ -43,8 +43,7 @@ export class Controller {
 		this.menu.enableMenuOpenClose();
 		this.menu.enableMenuItemsFn();
 
-		// TODO: set a default filter and remember it
-		this.menu.setFocusBehaviour('first');
+		this.menu.resetFocusBehaviour();
 		this.input.setInputValue();
 	}
 

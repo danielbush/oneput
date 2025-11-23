@@ -13,6 +13,7 @@ import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 export const setController = (ctl: Controller) => {
 	ctl.ui.setLayout(Layout.create(ctl));
 	ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
+	ctl.menu.setDefaultFocusBehaviour('first');
 	LocalBindingsService.create(ctl)
 		.getBindings()
 		.map((bindings) => {

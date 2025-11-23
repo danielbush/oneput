@@ -299,12 +299,22 @@ export class MenuController {
 		}
 	}
 
+	private defaultFocusBehaviour: FocusBehaviour = 'first';
+
+	setDefaultFocusBehaviour(behaviour: FocusBehaviour) {
+		this.defaultFocusBehaviour = behaviour;
+	}
+
 	/**
 	 * The behaviour after menu items have been set and the index may or may not
 	 * have been invalidated.
 	 */
 	setFocusBehaviour(behaviour: FocusBehaviour) {
 		this.focusBehaviour = behaviour;
+	}
+
+	resetFocusBehaviour() {
+		this.focusBehaviour = this.defaultFocusBehaviour;
 	}
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {

@@ -99,6 +99,31 @@ export class MenuController {
 
 	// #region setting menu items
 
+	private _setMenuItems(
+		items: Array<MenuItemAny>,
+		options: { focusBehaviour?: FocusBehaviour } = {}
+	) {
+		this.ctl.currentProps.menuItems = items;
+		this.runFocusBehaviour(options.focusBehaviour);
+	}
+
+	setMenuItems(items: Array<MenuItemAny>, options: { focusBehaviour?: FocusBehaviour } = {}) {
+		this.menuItems = items;
+		this._setMenuItems(items, options);
+	}
+
+	get menuItemCount() {
+		return this.ctl.currentProps.menuItems?.length ?? 0;
+	}
+
+	get currentMenuItem() {
+		return this.ctl.currentProps.menuItems?.[this.menuItemFocus];
+	}
+
+	// #endregion
+
+	// #region menuItemsFn
+
 	/**
 	 * Sets a default menuItemsFn - see setMenuItemsFn for more details.
 	 *
@@ -216,27 +241,6 @@ export class MenuController {
 
 	triggerMenuItemsFn() {
 		this.ctl.input.triggerInputEvent();
-	}
-
-	private _setMenuItems(
-		items: Array<MenuItemAny>,
-		options: { focusBehaviour?: FocusBehaviour } = {}
-	) {
-		this.ctl.currentProps.menuItems = items;
-		this.runFocusBehaviour(options.focusBehaviour);
-	}
-
-	setMenuItems(items: Array<MenuItemAny>, options: { focusBehaviour?: FocusBehaviour } = {}) {
-		this.menuItems = items;
-		this._setMenuItems(items, options);
-	}
-
-	get menuItemCount() {
-		return this.ctl.currentProps.menuItems?.length ?? 0;
-	}
-
-	get currentMenuItem() {
-		return this.ctl.currentProps.menuItems?.[this.menuItemFocus];
 	}
 
 	// #endregion

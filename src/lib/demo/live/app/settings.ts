@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { keyboardIcon, listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/checkboxMenuItem.js';
-import { BindingsEditor } from '$lib/oneput/plugins/bindings/BindingsEditor.js';
+import { BindingsEditor } from '$lib/oneput/shared/bindings/BindingsEditor.js';
 import { config, TestBindingsStore } from '$lib/demo/live/service/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';

@@ -1,3 +1,4 @@
+import { hflex } from '../../builder.js';
 import type { Controller } from '../../controller.js';
 import * as icons from '../../shared/icons.js';
 
@@ -7,13 +8,10 @@ export const inputCaptureUI = (
 ) => {
 	const { accept, reject } = captureAction;
 	ctl.ui.setInputUI({
-		right: {
+		right: hflex({
 			id: 'input-right-1',
-			type: 'hflex',
-			children: [
-				{
-					id: 'accept-key-capture',
-					type: 'fchild',
+			children: (b) => [
+				b.fchild({
 					tag: 'button',
 					attr: {
 						type: 'button',
@@ -22,10 +20,8 @@ export const inputCaptureUI = (
 					},
 					classes: ['oneput__icon-button'],
 					innerHTMLUnsafe: icons.tickIcon
-				},
-				{
-					id: 'reject-key-capture',
-					type: 'fchild',
+				}),
+				b.fchild({
 					tag: 'button',
 					attr: {
 						type: 'button',
@@ -34,8 +30,8 @@ export const inputCaptureUI = (
 					},
 					classes: ['oneput__icon-button'],
 					innerHTMLUnsafe: icons.xIcon
-				}
+				})
 			]
-		}
+		})
 	});
 };

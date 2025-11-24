@@ -96,7 +96,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 	configure(values: V) {
 		this.values = {
 			exitAction: () => {
-				this.ctl.menu.closeMenu();
+				this.ctl.goBack();
 			},
 			menuHeader: 'Menu',
 			exitType: 'back',

@@ -1,5 +1,6 @@
 import type { Attachment } from 'svelte/attachments';
 import type { Controller } from './controller.js';
+import { mount, type Component } from 'svelte';
 
 export type InputChangeEvent = Event & {
 	target: (EventTarget & HTMLInputElement) | null;
@@ -251,4 +252,11 @@ export function isFocusable(item?: MenuItemAny) {
 		return false;
 	}
 	return !item.ignored && !('disabled' in (item.attr ?? {}) && item.attr?.disabled);
+}
+
+export function mountSvelte<P extends Record<string, unknown>>(
+	component: Component<P>,
+	{ target, props }: { target: HTMLElement; props: P }
+) {
+	mount(component, { target, props });
 }

@@ -52,7 +52,7 @@ export class SettingsUI {
 						onUpdate: (keyBindingMap, isLocal) => {
 							return this.bindingsService.update(keyBindingMap, isLocal);
 						},
-						ui: ({ menuHeader, backAction }) => {
+						runLayout: ({ menuHeader, backAction }) => {
 							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
 								exitAction: backAction,
@@ -73,7 +73,7 @@ export class SettingsUI {
 						onUpdate: (keyBindingMap, isLocal) => {
 							return this.bindingsService.update(keyBindingMap, isLocal);
 						},
-						ui: ({ menuHeader, backAction }) => {
+						runLayout: ({ menuHeader, backAction }) => {
 							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
 								exitAction: backAction,

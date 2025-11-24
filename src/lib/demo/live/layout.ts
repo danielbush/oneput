@@ -116,11 +116,13 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 		return {
 			header: menuHeaderUI({
 				title: this.values.menuHeader || 'Menu',
-				exitAction:
-					this.values.exitAction ||
-					(() => {
-						this.ctl.menu.closeMenu();
-					}),
+				exitAction: () => {
+					if (this.values.exitAction) {
+						this.values.exitAction();
+					} else {
+						this.ctl.goBack();
+					}
+				},
 				type: this.values.exitType
 			})
 		};

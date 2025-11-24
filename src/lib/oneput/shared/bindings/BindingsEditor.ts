@@ -20,7 +20,7 @@ export class BindingsEditor {
 		values: {
 			isLocal: boolean;
 			keyBindingMap: KeyBindingMap;
-			ui: (values: { menuHeader: string; backAction: () => void }) => void;
+			runLayout: (values: { menuHeader: string; backAction: () => void }) => void;
 			onUpdate: (
 				keyBindingMap: KeyBindingMap,
 				isLocal: boolean
@@ -33,7 +33,7 @@ export class BindingsEditor {
 			values.isLocal,
 			keyBindingMap,
 			values.onUpdate,
-			values.ui
+			values.runLayout
 		);
 		return km;
 	}
@@ -46,7 +46,7 @@ export class BindingsEditor {
 			keyBindingMap: KeyBindingMap,
 			isLocal: boolean
 		) => ResultAsync<string, IDBError | IDBStoreError>,
-		private ui: (values: { menuHeader: string; backAction: () => void }) => void
+		private runLayout: (values: { menuHeader: string; backAction: () => void }) => void
 	) {}
 
 	runUI() {
@@ -58,7 +58,7 @@ export class BindingsEditor {
 	 */
 	private actionsUI = () => {
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.ui({ menuHeader: title, backAction: this.ctl.goBack });
+		this.runLayout({ menuHeader: title, backAction: this.ctl.goBack });
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
@@ -78,7 +78,10 @@ export class BindingsEditor {
 	 */
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
-		this.ui({ menuHeader: `Key bindings for "${description}"`, backAction: this.ctl.goBack });
+		this.runLayout({
+			menuHeader: `Key bindings for "${description}"`,
+			backAction: this.ctl.goBack
+		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
 		this.ctl.menu.setMenuItems([
@@ -109,6 +112,10 @@ export class BindingsEditor {
 	private async captureBindingUI(actionId: string) {
 		// TODO: The way we've broken up key capture and related ui is a bit
 		// artificial here.
+		this.runLayout({
+			menuHeader: `Capturing...`,
+			backAction: this.ctl.goBack
+		});
 		const { accept, reject, capturingKeys } = startKeyCapture(this.ctl);
 		inputCaptureUI(this.ctl, { accept, reject });
 		this.ctl.input.setPlaceholder('Type the keys...');

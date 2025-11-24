@@ -1,9 +1,9 @@
-import { type UILayout, type FlexParams, type OneputProps } from '$lib/oneput/lib.js';
+import { type UILayout, type FlexParams, type OneputProps, mountSvelte } from '$lib/oneput/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/widgets/DateDisplay.js';
-import { MenuStatus } from '$lib/oneput/shared/widgets/MenuStatus/MenuStatus.js';
+import MenuStatus from '$lib/oneput/shared/widgets/MenuStatus.svelte';
 import { TimeDisplay } from '$lib/oneput/shared/widgets/TimeDisplay.js';
 
 /**
@@ -151,7 +151,8 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 				b.fchild({
 					style: { flex: '1', position: 'relative' },
 					// Example of a svelte-based ui widget:
-					onMount: (node) => MenuStatus.onMount(node, this.ctl)
+					onMount: (node) =>
+						mountSvelte(MenuStatus, { target: node, props: { controller: this.ctl } })
 				}),
 				b.fchild({
 					style: { flex: '1', justifyContent: 'flex-end' },

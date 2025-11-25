@@ -14,6 +14,7 @@ export const setController = (ctl: Controller) => {
 	ctl.ui.setLayout(Layout.create(ctl));
 	ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 	ctl.menu.setDefaultFocusBehaviour('first');
+	ctl.input.setDefaultPlaceholder('Type here...');
 	LocalBindingsService.create(ctl)
 		.getBindings()
 		.map((bindings) => {

@@ -43,8 +43,6 @@ export class UIController {
 		this.ctl.currentProps.menuUI = this.layout?.menuUI;
 		this.ctl.currentProps.innerUI = this.layout?.innerUI;
 		this.ctl.currentProps.outerUI = this.layout?.outerUI;
-		this.ctl.currentProps.placeholder =
-			this.layout?.placeholder || this.ctl.input.defaultPlaceHolder;
 	}
 
 	/**

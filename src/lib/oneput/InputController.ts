@@ -22,7 +22,7 @@ export class InputController {
 		}, 0);
 	}
 
-	public defaultPlaceHolder: string = 'Type here...';
+	private defaultPlaceHolder: string = 'Type here...';
 	private inputElement: HTMLInputElement | undefined;
 	private inputChangeListeners: InputChangeListener[] = [];
 
@@ -50,9 +50,17 @@ export class InputController {
 		this.ctl.currentProps.inputValue = val || '';
 	}
 
+	setDefaultPlaceholder(msg?: string) {
+		this.defaultPlaceHolder = msg || 'Type here...';
+	}
+
 	setPlaceholder(msg?: string) {
 		this.ctl.currentProps.placeholder =
 			msg || this.ctl.ui.getLayout()?.placeholder || this.defaultPlaceHolder;
+	}
+
+	resetPlaceholder() {
+		this.setPlaceholder(this.defaultPlaceHolder);
 	}
 
 	getInputValue() {

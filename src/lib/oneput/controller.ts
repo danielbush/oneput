@@ -45,6 +45,7 @@ export class Controller {
 		// Reset stuff...
 		this.keys.resetBindings();
 		this.keys.resetBindings(true);
+		this.input.resetPlaceholder();
 		this.menu.resetFocusBehaviour();
 		this.menu.resetMenuItemsFn();
 		this.input.setInputValue();

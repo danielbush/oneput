@@ -10,7 +10,6 @@ export type LayoutSettings = {
 	exitAction?: boolean | (() => void);
 	backAction?: boolean | (() => void);
 	menuHeader?: string;
-	placeholder?: string;
 };
 
 /**
@@ -29,7 +28,6 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 	configure(values: V) {
 		this.values = {
 			menuHeader: 'Menu',
-			placeholder: 'Type here...',
 			...values
 		};
 		// Make our life easier, if we don't specify back or exit, we'll show
@@ -64,10 +62,6 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 
 	private get menuTitle() {
 		return this.values.menuHeader || 'Menu';
-	}
-
-	get placeholder() {
-		return this.values.placeholder;
 	}
 
 	get inputUI() {

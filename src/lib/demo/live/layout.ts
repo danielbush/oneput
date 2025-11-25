@@ -99,7 +99,6 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 	}
 
 	get menuUI() {
-		console.log(hflex({ children: (b) => [b.hspacer({ style: { minHeight: '100px' } })] }));
 		return {
 			header: hflex({
 				id: 'menu-header',

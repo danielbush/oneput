@@ -23,7 +23,7 @@ export class Confirm {
 	}
 
 	private start = () => {
-		this.ctl.keys.setKeys(
+		this.ctl.keys.setBindings(
 			{
 				ok: {
 					description: 'OK',

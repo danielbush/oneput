@@ -36,7 +36,7 @@ export class Alert {
 	};
 
 	private start = () => {
-		this.ctl.keys.setKeys(
+		this.ctl.keys.setBindings(
 			{
 				ok: {
 					description: 'OK',

@@ -103,7 +103,7 @@ export class KeysController {
 	private defaultLocalBindings: KeyBindingMap = {};
 	private defaultGlobalBindings: KeyBindingMap = {};
 
-	setKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
+	setBindings(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
 			this.handleLocalKeys(bindings);
 		} else {

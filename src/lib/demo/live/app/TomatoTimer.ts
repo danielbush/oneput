@@ -380,7 +380,7 @@ export class TomatoTimer {
 				}
 			})
 		]);
-		this.ctl.keys.setKeys(
+		this.ctl.keys.setBindings(
 			{
 				// startWithNoLabel: {
 				// 	description: 'start with no label',

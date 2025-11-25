@@ -36,8 +36,8 @@ export class Controller {
 	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
 	 */
 	private beforeRunUI() {
-		this.keys.unsetKeys();
-		this.keys.unsetKeys(true);
+		this.keys.resetKeys();
+		this.keys.resetKeys(true);
 
 		this.menu.enableMenuActions();
 		this.menu.enableMenuOpenClose();

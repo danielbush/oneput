@@ -111,7 +111,10 @@ export class KeysController {
 		}
 	}
 
-	unsetKeys(isLocal: boolean = false) {
+	/**
+	 * Reset bindings to default values or nothing if no default values are set.
+	 */
+	resetKeys(isLocal: boolean = false) {
 		if (isLocal) {
 			this.setDefaultKeys(this.defaultLocalBindings, true);
 		} else {

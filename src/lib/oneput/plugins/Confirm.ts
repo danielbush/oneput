@@ -117,7 +117,7 @@ export class Confirm {
 		this.ctl.menu.enableMenuItemsFn();
 		this.ctl.input.enableInputElement();
 		this.ctl.ui.replaceUI();
-		this.ctl.keys.unsetKeys(true);
+		this.ctl.keys.resetKeys(true);
 		this.ctl.input.setPlaceholder();
 		this.resolve?.(ok);
 	};

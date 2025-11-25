@@ -2,12 +2,14 @@ import type { Controller } from '../../controller.js';
 import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../bindings.js';
 import { keyboardIcon, xIcon } from '../icons.js';
 import { stdMenuItem } from '../stdMenuItem.js';
-import { inputCaptureUI } from './inputCaptureUI.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from './BindingsIDB.js';
+import { hflex } from '../../builder.js';
+import { mountSvelte } from '../../lib.js';
+import AcceptButton from './AcceptButton.svelte';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
@@ -118,15 +120,45 @@ export class BindingsEditor {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
-		// TODO: The way we've broken up key capture and related ui is a bit
-		// artificial here.
 		this.runLayout({
 			menuHeader: `Capturing...`,
 			backAction: false,
 			exitAction: false
 		});
 		const { accept, reject, capturingKeys } = startKeyCapture(this.ctl);
-		inputCaptureUI(this.ctl, { accept, reject });
+		this.ctl.ui.setInputUI({
+			right: hflex({
+				id: 'input-right-1',
+				children: (b) => [
+					// Here we mount a svelte component and rely on the reactivity
+					// of controller.currentProps which is reactive; also see
+					// OneputController.svelte .  We can't pass
+					// controller.currentProps.inputValue directly (even though
+					// we're not destructuring), probably because onMount is not in
+					// a reactive context.   Alternatively, we could also listen to
+					// input value changes via ctl.input and call setInputUI again
+					// if we didn't want to use svelte.
+					b.fchild({
+						onMount: (node) =>
+							mountSvelte(AcceptButton, {
+								target: node,
+								props: { controller: this.ctl, onClick: accept }
+							})
+					}),
+					b.fchild({
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: reject
+						},
+						classes: ['oneput__icon-button'],
+						innerHTMLUnsafe: xIcon
+					})
+				]
+			})
+		});
+
 		this.ctl.input.setPlaceholder('Type the keys...');
 		const capturedKeys = await capturingKeys;
 		if (capturedKeys) {

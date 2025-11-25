@@ -245,8 +245,7 @@ export class TomatoTimer {
 	 */
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Tomato Timer',
-			exitAction: this.ctl.goBack
+			menuHeader: 'Tomato Timer'
 		});
 		// TODO: check if there is an active timer...
 		this.reloadUI(true);

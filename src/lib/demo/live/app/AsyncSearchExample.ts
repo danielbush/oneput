@@ -18,8 +18,7 @@ export class AsyncSearchExample {
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Async Search Example',
-			exitAction: this.ctl.goBack
+			menuHeader: 'Async Search Example'
 		});
 		this.notify = this.ctl.notify(
 			'Start typing something and inspect the browser console.  ' +

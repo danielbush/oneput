@@ -20,7 +20,11 @@ export class BindingsEditor {
 		values: {
 			isLocal: boolean;
 			keyBindingMap: KeyBindingMap;
-			runLayout: (values: { menuHeader: string; backAction: () => void }) => void;
+			runLayout: (values: {
+				menuHeader: string;
+				backAction?: false | (() => void);
+				exitAction?: false | (() => void);
+			}) => void;
 			onUpdate: (
 				keyBindingMap: KeyBindingMap,
 				isLocal: boolean
@@ -46,7 +50,11 @@ export class BindingsEditor {
 			keyBindingMap: KeyBindingMap,
 			isLocal: boolean
 		) => ResultAsync<string, IDBError | IDBStoreError>,
-		private runLayout: (values: { menuHeader: string; backAction: () => void }) => void
+		private runLayout: (values: {
+			menuHeader: string;
+			backAction?: false | (() => void);
+			exitAction?: false | (() => void);
+		}) => void
 	) {}
 
 	runUI() {
@@ -114,7 +122,8 @@ export class BindingsEditor {
 		// artificial here.
 		this.runLayout({
 			menuHeader: `Capturing...`,
-			backAction: this.ctl.goBack
+			backAction: false,
+			exitAction: false
 		});
 		const { accept, reject, capturingKeys } = startKeyCapture(this.ctl);
 		inputCaptureUI(this.ctl, { accept, reject });

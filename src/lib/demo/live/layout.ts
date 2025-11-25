@@ -1,4 +1,4 @@
-import { type UILayout, type FlexParams, type OneputProps, mountSvelte } from '$lib/oneput/lib.js';
+import { type UILayout, type OneputProps, mountSvelte } from '$lib/oneput/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
@@ -36,48 +36,11 @@ export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
 	};
 };
 
-/**
- * Provides 2 types of header for open menus: one with a back button (type='back') or one with an exit button (type='exit').
- *
- * @param options.exitAction - The function to call when the back or exit button is clicked.
- * @param options.type - The type of header to use.
- */
-export const menuHeaderUI: ({
-	title,
-	exitAction,
-	type
-}: {
-	title: string;
-	exitAction: () => void;
-	type?: 'back' | 'exit';
-}) => FlexParams = ({ title, exitAction, type = 'back' }) => {
-	return hflex({
-		id: 'bindings-header',
-		children: (b) => [
-			b.fchild({
-				tag: 'button',
-				attr: { type: 'button', title: 'Back', onclick: exitAction },
-				classes: ['oneput__icon-button'],
-				innerHTMLUnsafe: type === 'back' ? arrowLeftIcon : xIcon
-			}),
-			b.fchild({
-				classes: ['oneput__menu-item-header'],
-				textContent: title
-			}),
-			b.fchild({
-				classes: ['oneput__icon-button'],
-				textContent: ''
-			})
-		]
-	});
-};
-
 export type LayoutSettings = {
-	exitAction?: () => void;
+	exitAction?: boolean | (() => void);
+	backAction?: boolean | (() => void);
 	menuHeader?: string;
-	exitType?: Parameters<typeof menuHeaderUI>[0]['type'];
 	placeholder?: string;
-	clearInput?: boolean;
 };
 
 /**
@@ -95,14 +58,42 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 
 	configure(values: V) {
 		this.values = {
-			exitAction: () => {
-				this.ctl.goBack();
-			},
 			menuHeader: 'Menu',
-			exitType: 'back',
 			placeholder: 'Type here...',
 			...values
 		};
+		// Make our life easier, if we don't specify back or exit, we'll show
+		// them with sane defaults.
+		if (this.values.exitAction === undefined) {
+			this.values.exitAction = this.ctl.menu.closeMenu;
+		}
+		if (this.values.backAction === undefined) {
+			this.values.backAction = this.ctl.goBack;
+		}
+	}
+
+	private get exitAction() {
+		if (this.values.exitAction === true) {
+			return this.ctl.goBack;
+		}
+		if (typeof this.values.exitAction === 'function') {
+			return this.values.exitAction;
+		}
+		return;
+	}
+
+	private get backAction() {
+		if (this.values.backAction === true) {
+			return this.ctl.goBack;
+		}
+		if (typeof this.values.backAction === 'function') {
+			return this.values.backAction;
+		}
+		return;
+	}
+
+	private get menuTitle() {
+		return this.values.menuHeader || 'Menu';
 	}
 
 	get placeholder() {
@@ -113,17 +104,32 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 		return inputUI(this.ctl);
 	}
 	get menuUI() {
+		console.log(hflex({ children: (b) => [b.hspacer({ style: { minHeight: '100px' } })] }));
 		return {
-			header: menuHeaderUI({
-				title: this.values.menuHeader || 'Menu',
-				exitAction: () => {
-					if (this.values.exitAction) {
-						this.values.exitAction();
-					} else {
-						this.ctl.goBack();
-					}
-				},
-				type: this.values.exitType
+			header: hflex({
+				id: 'menu-header',
+				children: (b) => [
+					this.backAction
+						? b.fchild({
+								tag: 'button',
+								attr: { type: 'button', title: 'Back', onclick: this.backAction },
+								classes: ['oneput__icon-button'],
+								innerHTMLUnsafe: arrowLeftIcon
+							})
+						: b.hspacer({ style: { minHeight: 'var(--oneput-std-width)' } }),
+					b.fchild({
+						classes: ['oneput__menu-item-header'],
+						textContent: this.menuTitle
+					}),
+					this.exitAction
+						? b.fchild({
+								tag: 'button',
+								classes: ['oneput__icon-button'],
+								attr: { type: 'button', title: 'Exit', onclick: this.exitAction },
+								innerHTMLUnsafe: xIcon
+							})
+						: b.hspacer({ style: { minHeight: 'var(--oneput-std-width)' } })
+				]
 			})
 		};
 	}

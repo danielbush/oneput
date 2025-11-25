@@ -25,7 +25,6 @@ export class RootUI {
 	runUI = () => {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Home',
-			exitType: 'exit',
 			placeholder: 'This is root...'
 		});
 		const blankItems = [...Array(10)].map((_, i) => {

@@ -15,6 +15,15 @@
 			return props.onMount(node!);
 		}
 	});
+
+	function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
+		const browserOnly = globalThis.document;
+		if (browserOnly) {
+			const tmp = document.createElement('div');
+			Object.assign(tmp.style, style);
+			return tmp.style.cssText;
+		}
+	}
 </script>
 
 {#if voidElementsSet.has(props.tag)}
@@ -22,6 +31,7 @@
 		this={props.tag}
 		id={props.id}
 		bind:this={node}
+		style={props.style && createStyleAttribute(props.style)}
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
 	/>
@@ -30,6 +40,7 @@
 		this={props.tag || 'div'}
 		id={props.id}
 		bind:this={node}
+		style={props.style && createStyleAttribute(props.style)}
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
 	>

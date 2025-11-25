@@ -26,8 +26,7 @@ export class KatexDemo {
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Katex Demo',
-			exitAction: this.ctl.goBack
+			menuHeader: 'Katex Demo'
 		});
 		this.setMenuItems(true, '', 'first');
 		this.setInputUI(true);

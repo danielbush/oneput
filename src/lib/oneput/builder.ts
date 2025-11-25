@@ -89,8 +89,8 @@ export class FlexChildBuilder {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	hspacer(): FChildParams {
-		return hspacer({ id: this.id + '-' + this.counter++ });
+	hspacer(params?: Partial<FChildParams>): FChildParams {
+		return hspacer({ id: this.id + '-' + this.counter++, ...(params ?? {}) });
 	}
 }
 

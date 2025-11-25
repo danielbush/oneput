@@ -21,8 +21,7 @@ export class SettingsUI {
 
 	runUI = () => {
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Settings',
-			exitAction: this.ctl.goBack
+			menuHeader: 'Settings'
 		});
 		this.ctl.menu.setMenuItems([
 			checkboxMenuItem({
@@ -52,11 +51,11 @@ export class SettingsUI {
 						onUpdate: (keyBindingMap, isLocal) => {
 							return this.bindingsService.update(keyBindingMap, isLocal);
 						},
-						runLayout: ({ menuHeader, backAction }) => {
+						runLayout: ({ menuHeader, backAction, exitAction }) => {
 							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
-								exitAction: backAction,
-								exitType: 'back'
+								exitAction,
+								backAction
 							});
 						}
 					});
@@ -73,11 +72,11 @@ export class SettingsUI {
 						onUpdate: (keyBindingMap, isLocal) => {
 							return this.bindingsService.update(keyBindingMap, isLocal);
 						},
-						runLayout: ({ menuHeader, backAction }) => {
+						runLayout: ({ menuHeader, backAction, exitAction }) => {
 							this.ctl.ui.runLayout<LayoutSettings>({
 								menuHeader,
-								exitAction: backAction,
-								exitType: 'back'
+								exitAction,
+								backAction
 							});
 						}
 					});

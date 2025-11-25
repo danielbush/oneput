@@ -12,8 +12,7 @@ export class FiltersUI {
 
 	runUI() {
 		this.ctl.ui.runLayout({
-			menuHeader: 'Filters',
-			exitAction: this.ctl.goBack
+			menuHeader: 'Filters'
 		});
 
 		this.ctl.menu.setMenuItems([

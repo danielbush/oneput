@@ -1,19 +1,10 @@
 <script lang="ts">
 	import FChild from './FChild.svelte';
-	import { randomId, type FChildParams, type FlexParams } from '../lib.js';
+	import { createStyleAttribute, randomId, type FChildParams, type FlexParams } from '../lib.js';
 	import { onMount } from 'svelte';
 
 	type Props = { class: string } & FlexParams;
 	let { class: topLevelClass, ...props }: Props = $props();
-
-	function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
-		const browserOnly = globalThis.document;
-		if (browserOnly) {
-			const tmp = document.createElement('div');
-			Object.assign(tmp.style, style);
-			return tmp.style.cssText;
-		}
-	}
 
 	let node: HTMLElement | null = $state(null);
 	onMount(() => {

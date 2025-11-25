@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { defaultVoidElements, type FChildParams } from '../lib.js';
+	import { createStyleAttribute, defaultVoidElements, type FChildParams } from '../lib.js';
 
 	type Props = FChildParams;
 	let node: HTMLElement | null = $state(null);
@@ -15,15 +15,6 @@
 			return props.onMount(node!);
 		}
 	});
-
-	function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
-		const browserOnly = globalThis.document;
-		if (browserOnly) {
-			const tmp = document.createElement('div');
-			Object.assign(tmp.style, style);
-			return tmp.style.cssText;
-		}
-	}
 </script>
 
 {#if voidElementsSet.has(props.tag)}

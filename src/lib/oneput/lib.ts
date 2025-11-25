@@ -260,3 +260,12 @@ export function mountSvelte<P extends Record<string, unknown>>(
 ) {
 	mount(component, { target, props });
 }
+
+export function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
+	const browserOnly = globalThis.document;
+	if (browserOnly) {
+		const tmp = document.createElement('div');
+		Object.assign(tmp.style, style);
+		return tmp.style.cssText;
+	}
+}

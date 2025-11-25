@@ -1,3 +1,4 @@
+import { hflex } from '$lib/oneput/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
@@ -74,26 +75,21 @@ export class AsyncSearchExample {
 		});
 		this.ctl.ui.setInputUI((current) => ({
 			...current,
-			right: {
+			right: hflex({
 				id: 'input-right-1',
-				type: 'hflex',
-				children: [
-					{
-						id: 'input-right-1-child',
-						tag: 'button',
+				children: (b) => [
+					b.iconButton({
+						title: 'Error',
+						innerHTMLUnsafe: refreshCwIcon,
 						attr: {
-							title: 'Error',
 							onclick: () => {
 								alert.cancel();
 								this.ctl.menu.triggerMenuItemsFn();
 							}
-						},
-						classes: ['oneput__icon-button'],
-						type: 'fchild',
-						innerHTMLUnsafe: refreshCwIcon
-					}
+						}
+					})
 				]
-			}
+			})
 		}));
 	}
 
@@ -102,18 +98,10 @@ export class AsyncSearchExample {
 		if (busy) {
 			this.ctl.ui.setInputUI((current) => ({
 				...current,
-				right: {
+				right: hflex({
 					id: 'input-right-1',
-					type: 'hflex',
-					children: [
-						{
-							id: 'input-right-1-child',
-							classes: ['oneput__icon', 'oneput__rotate'],
-							type: 'fchild',
-							innerHTMLUnsafe: refreshCwIcon
-						}
-					]
-				}
+					children: (b) => [b.icon({ innerHTMLUnsafe: refreshCwIcon, classes: ['oneput__rotate'] })]
+				})
 			}));
 		} else {
 			this.ctl.ui.setInputUI((current) => ({

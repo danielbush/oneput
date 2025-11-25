@@ -101,10 +101,10 @@ export class FlexChildBuilder {
  */
 export function icon(params: Partial<FChildParams>): FChildParams {
 	return fchild({
-		classes: ['oneput__icon'],
 		textContent: params.textContent,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
+		classes: ['oneput__icon', ...(params.classes ?? [])],
 		style: { alignSelf: 'flex-start', ...params.style }
 	});
 }
@@ -130,8 +130,8 @@ export function spacer(
 		classes.push('oneput__vspacer');
 	}
 	return fchild({
-		classes,
-		...params
+		...params,
+		classes: [...classes, ...(params?.classes ?? [])]
 	});
 }
 
@@ -140,11 +140,11 @@ export function spacer(
  */
 export function iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
 	return fchild({
-		classes: ['oneput__icon-button'],
 		tag: 'button',
 		textContent: params.textContent,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
+		classes: ['oneput__icon-button', ...(params.classes ?? [])],
 		style: { alignSelf: 'flex-start', ...params.style },
 		attr: { type: 'button', title: params.title, ...params.attr }
 	});

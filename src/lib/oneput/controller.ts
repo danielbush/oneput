@@ -36,13 +36,15 @@ export class Controller {
 	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
 	 */
 	private beforeRunUI() {
-		this.keys.resetBindings();
-		this.keys.resetBindings(true);
-
+		// Re-enable stuff...
 		this.menu.enableMenuActions();
 		this.menu.enableMenuOpenClose();
 		this.menu.enableMenuItemsFn();
+		this.input.enableInputElement();
 
+		// Reset stuff...
+		this.keys.resetBindings();
+		this.keys.resetBindings(true);
 		this.menu.resetFocusBehaviour();
 		this.menu.resetMenuItemsFn();
 		this.input.setInputValue();

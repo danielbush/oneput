@@ -10,91 +10,18 @@ import { ResultAsync } from 'neverthrow';
 import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 
-function formatSecondsToHHMMSS(totalSeconds: number): string {
-	const hours = Math.floor(totalSeconds / 3600);
-	const minutes = Math.floor((totalSeconds % 3600) / 60);
-	const seconds = Math.floor(totalSeconds % 60);
-
-	const HH = hours.toString().padStart(2, '0');
-	const MM = minutes.toString().padStart(2, '0');
-	const SS = seconds.toString().padStart(2, '0');
-
-	return `${HH}:${MM}:${SS}`;
-}
-
-/**
- * Glorified setInterval.
- */
-class Clock {
-	static create() {
-		return new Clock();
-	}
-	private constructor() {}
-	private intervalId: ReturnType<typeof setInterval> | null = null;
-	private tickFn: () => void = () => {};
-
-	start() {
-		this.intervalId = setInterval(() => {
-			this.tickFn();
-		}, 1000);
-		return this;
-	}
-
-	onTick(tickFn: () => void) {
-		this.tickFn = tickFn;
-	}
-
-	stop() {
-		if (this.intervalId !== null) {
-			clearInterval(this.intervalId);
-		}
-		return this;
-	}
-}
-
 export class TomatoTimer {
 	static create(ctl: Controller) {
-		return new TomatoTimer(ctl, Clock.create());
+		return new TomatoTimer(ctl);
 	}
 
 	constructor(
 		private ctl: Controller,
-		private clock: Clock,
 		private timerValue: TomatoTimerValue | null = null
-	) {
-		this.clock.onTick(() => {
-			// Note that if we've set id's for all menu items and used builders
-			// for descendents, then the only dom update will be the timer
-			// display.  So it's ok to run timerUI and setMenuItems every
-			// second as long as we don't update the focus (focusBehaviour).
-			//
-			// TODO: Another way to do the timer is to mount a svelte timer
-			// component into the menu item.  This component will update itself
-			// and we won't have to call timerUI every second.
-			//
-			this.reloadUI();
-		});
-	}
-
-	beforeExit = () => {
-		this.clock.stop();
-		// TODO: persist the timer data.
-	};
-
-	private startTimer = () => {
-		this.timerValue = TomatoTimerValue.create({
-			startTime: Date.now() / 1000,
-			duration: 30 * 60,
-			stopTime: null,
-			pauseTime: null,
-			pauseDuration: 0
-		});
-		this.createTimerUI();
-	};
+	) {}
 
 	private cancelTimer = () => {
 		this.timerValue?.finish();
-		this.clock?.stop();
 		this.timerValue = null;
 		// TODO: discard any record of this session
 		this.reloadUI();
@@ -102,19 +29,16 @@ export class TomatoTimer {
 
 	private pauseTimer = () => {
 		this.timerValue?.pause();
-		this.clock?.stop();
 		this.reloadUI();
 	};
 
 	private resumeTimer = () => {
 		this.timerValue?.pause(false);
-		this.clock?.start();
 		this.reloadUI();
 	};
 
 	private finishTimer = () => {
 		this.timerValue?.finish();
-		this.clock?.stop();
 		this.timerValue = null;
 		// TODO: record the final time
 		this.reloadUI();
@@ -140,11 +64,7 @@ export class TomatoTimer {
 			this.noTimerUI();
 			return;
 		}
-		// Calculate this now, before any slow UI updates.  This tends to show
-		// the timer right at the beginning whereas if we do it buried within
-		// the menu item we may see t - 1 second.
-		const secondsRemaining = formatSecondsToHHMMSS(this.timerValue.secondsRemaining);
-		this.timerUI(initial, secondsRemaining);
+		this.timerUI(initial);
 	}
 
 	/**
@@ -154,9 +74,11 @@ export class TomatoTimer {
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-start',
-				textContent: 'Start',
+				textContent: '30 Minutes',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-				action: this.startTimer
+				action: () => {
+					this.createTimerUI({ duration: 30 * 60 });
+				}
 			}),
 			stdMenuItem({
 				id: 'tomato-set-test-data',
@@ -200,10 +122,76 @@ export class TomatoTimer {
 		]);
 	}
 
+	private createTimerUI({ duration }: { duration: number }) {
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: `Timer for ${Math.round(duration / 60)} minutes`
+		});
+		this.ctl.input.setPlaceholder('Type a label and/or hit shift+enter...');
+		this.ctl.menu.setMenuItems([
+			stdMenuItem({
+				id: 'tomato-timer-no-label',
+				textContent: 'Start with no label',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+				action: () => {
+					this.timerValue = TomatoTimerValue.create({
+						startTime: Date.now() / 1000,
+						duration,
+						stopTime: null,
+						pauseTime: null,
+						pauseDuration: 0
+					});
+					this.reloadUI(true);
+				}
+			})
+		]);
+
+		this.ctl.keys.setBindings(
+			{
+				submit: {
+					bindings: ['Shift+Enter'],
+					action: () => {
+						const label = this.ctl.input.getInputValue();
+						if (!label) {
+							// Start with no label.
+							this.timerValue = TomatoTimerValue.create({
+								startTime: Date.now() / 1000,
+								duration,
+								stopTime: null,
+								pauseTime: null,
+								pauseDuration: 0
+							});
+							this.reloadUI(true);
+							return;
+						}
+						// TODO: record the label.
+						this.reloadUI(true);
+					},
+					description: 'Submit input'
+				}
+			},
+			true
+		);
+
+		this.ctl.ui.setInputUI((inputUI) => {
+			return {
+				...inputUI,
+				right: hflex({
+					children: (b) => [
+						b.iconButton({
+							title: 'Add',
+							innerHTMLUnsafe: icons.tickIcon
+						}),
+						b.iconButton({ title: 'Cancel', innerHTMLUnsafe: icons.xIcon })
+					]
+				})
+			};
+		});
+	}
+
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI(initial = false, secondsRemaining: string) {
+	private timerUI(initial = false) {
 		this.ctl.menu.setMenuItems(
 			[
 				// It is possible to have a timer without mounting a svelte
@@ -213,8 +201,11 @@ export class TomatoTimer {
 				// menu items and their constituents, then only part of the DOM
 				// that will change is the timer element inside the menu item
 				// thanks to the svelte reactivity that powers the core of
-				// oneput.  So it is reasonably performant.  But it's far nicer
-				// to just mount an element that has a self-contained timer.
+				// oneput.  Another way might be to use onMount on an fchild and
+				// manage the setInterval in there; make sure to return a
+				// function that clears the interval.  But if you're using
+				// svelte just mount a svelte element that has a self-contained
+				// timer like here.
 				menuItem({
 					id: 'tomato-timer-display-2',
 					ignored: true,
@@ -223,27 +214,14 @@ export class TomatoTimer {
 					},
 					children: (b) => [
 						b.fchild({
+							style: {
+								flex: '0'
+							},
 							onMount: (node) =>
 								mountSvelte(Timer, {
 									target: node,
-									props: { initialSecondsLeft: 30 * 60 }
+									props: { initialSecondsLeft: this.timerValue?.secondsRemaining ?? 0 }
 								})
-						})
-					]
-				}),
-				menuItem({
-					id: 'tomato-timer-display',
-					ignored: true,
-					style: {
-						justifyContent: 'center'
-					},
-					children: (b) => [
-						b.fchild({
-							style: {
-								flex: '0',
-								fontSize: '300%'
-							},
-							textContent: secondsRemaining
 						})
 					]
 				}),
@@ -285,71 +263,5 @@ export class TomatoTimer {
 		if (initial) {
 			this.ctl.menu.focusFirstMenuItem();
 		}
-	}
-
-	private createTimerUI() {
-		this.ctl.input.setPlaceholder('Type a label and hit shift+enter...');
-		this.ctl.menu.setMenuItems([
-			stdMenuItem({
-				id: 'tomato-timer-no-label',
-				textContent: 'Start with no label',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-				action: () => {
-					this.reloadUI(true);
-					this.clock.start();
-				}
-			})
-		]);
-		this.ctl.keys.setBindings(
-			{
-				// startWithNoLabel: {
-				// 	description: 'start with no label',
-				// 	bindings: ['Shift+Enter'],
-				// 	action: () => {
-				// 		this.reloadUI(true);
-				// 		this.clock.start();
-				// 	}
-				// },
-				// doAction: {
-				// 	bindings: ['Enter'],
-				// 	action: (c) => {
-				// 		c.menu.doMenuAction();
-				// 	},
-				// 	description: 'Do action'
-				// },
-				submit: {
-					bindings: ['Shift+Enter'],
-					action: () => {
-						const label = this.ctl.input.getInputValue();
-						if (!label) {
-							// Start with no label.
-							this.reloadUI(true);
-							this.clock.start();
-							return;
-						}
-						// TODO: record the label.
-						this.reloadUI(true);
-						this.clock.start();
-					},
-					description: 'Submit input'
-				}
-			},
-
-			true
-		);
-		this.ctl.ui.setInputUI((inputUI) => {
-			return {
-				...inputUI,
-				right: hflex({
-					children: (b) => [
-						b.iconButton({
-							title: 'Add',
-							innerHTMLUnsafe: icons.tickIcon
-						}),
-						b.iconButton({ title: 'Cancel', innerHTMLUnsafe: icons.xIcon })
-					]
-				})
-			};
-		});
 	}
 }

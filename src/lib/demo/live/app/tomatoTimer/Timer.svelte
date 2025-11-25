@@ -30,7 +30,6 @@
 
 <style>
 	.timer {
-		flex: 0;
 		font-size: 300%;
 	}
 </style>

@@ -57,7 +57,6 @@ export class MenuController {
 	private _disableActions = false;
 	private _disableOpenClose = false;
 	private defaultMenuItemsFn?: MenuItemsFn;
-	private menuItemsFn?: MenuItemsFn | MenuItemsFnAsync;
 	private removeMenuItemsListener?: () => void;
 	private defaultFocusBehaviour: FocusBehaviour = 'first';
 	private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
@@ -139,7 +138,6 @@ export class MenuController {
 	}
 
 	resetMenuItemsFn() {
-		this.menuItemsFn = this.defaultMenuItemsFn;
 		if (this.defaultMenuItemsFn) {
 			this.setMenuItemsFn(this.defaultMenuItemsFn, { focusBehaviour: this.defaultFocusBehaviour });
 		}
@@ -152,7 +150,6 @@ export class MenuController {
 	 */
 	setMenuItemsFn(menuItemsFn: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
 		this.removeMenuItemsListener?.();
-		this.menuItemsFn = menuItemsFn;
 		const handler: InputChangeListener = (evt) => {
 			if (this._disableMenuItemsFn) {
 				return;
@@ -175,7 +172,6 @@ export class MenuController {
 		menuItemsFnAsync: MenuItemsFnAsync,
 		options: { onDebounce?: (isDebouncing: boolean) => void; focusBehaviour?: FocusBehaviour } = {}
 	) {
-		this.menuItemsFn = menuItemsFnAsync;
 		let inFlight = 0;
 		const handler: InputChangeListener = async (evt) => {
 			inFlight = (inFlight + 1) % 100000;
@@ -222,7 +218,6 @@ export class MenuController {
 	 */
 	clearMenuItemsFn() {
 		this.removeMenuItemsListener?.();
-		this.menuItemsFn = undefined;
 	}
 
 	triggerMenuItemsFn() {

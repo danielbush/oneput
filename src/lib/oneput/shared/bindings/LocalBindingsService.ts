@@ -51,14 +51,14 @@ export class LocalBindingsService {
 	update(keyBindingMap: KeyBindingMap, isLocal: boolean) {
 		const oldKeyBindingMap = keyBindingMap;
 
-		this.ctl.keys.setDefaultKeys(keyBindingMap, isLocal);
+		this.ctl.keys.setDefaultBindings(keyBindingMap, isLocal);
 
 		const result = this.bindingsStore.updateBindings(
 			KeyEventBindings.create(keyBindingMap).toSerializable(),
 			isLocal
 		);
 		result.orTee(() => {
-			this.ctl.keys.setDefaultKeys(oldKeyBindingMap, isLocal);
+			this.ctl.keys.setDefaultBindings(oldKeyBindingMap, isLocal);
 		});
 		return result;
 	}

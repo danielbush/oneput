@@ -81,7 +81,7 @@ export class KeysController {
 		this.keysDisabled = false;
 	}
 
-	setDefaultKeys(bindings: KeyBindingMap, isLocal: boolean = false) {
+	setDefaultBindings(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
 			this.defaultLocalBindings = bindings;
 			this.handleLocalKeys(bindings);
@@ -116,9 +116,9 @@ export class KeysController {
 	 */
 	resetKeys(isLocal: boolean = false) {
 		if (isLocal) {
-			this.setDefaultKeys(this.defaultLocalBindings, true);
+			this.setDefaultBindings(this.defaultLocalBindings, true);
 		} else {
-			this.setDefaultKeys(this.defaultGlobalBindings, false);
+			this.setDefaultBindings(this.defaultGlobalBindings, false);
 		}
 	}
 }

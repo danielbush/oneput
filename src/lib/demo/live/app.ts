@@ -17,8 +17,8 @@ export const setController = (ctl: Controller) => {
 	LocalBindingsService.create(ctl)
 		.getBindings()
 		.map((bindings) => {
-			ctl.keys.setDefaultKeys(bindings.globalBindings, false);
-			ctl.keys.setDefaultKeys(bindings.localBindings, true);
+			ctl.keys.setDefaultBindings(bindings.globalBindings, false);
+			ctl.keys.setDefaultBindings(bindings.localBindings, true);
 		});
 	ctl.runUI(RootUI);
 };

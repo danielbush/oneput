@@ -7,6 +7,8 @@ import { TomatoTimerValue } from './value.js';
 import { IDBError, openIDB } from '$lib/oneput/shared/idb.js';
 import { DB_NAME, TIMER_STORE, CURRENT_TIMER_KEY, type TomatoTimerDB } from './idb.js';
 import { ResultAsync } from 'neverthrow';
+import { mountSvelte } from '$lib/oneput/lib.js';
+import Timer from './Timer.svelte';
 
 function formatSecondsToHHMMSS(totalSeconds: number): string {
 	const hours = Math.floor(totalSeconds / 3600);
@@ -204,6 +206,31 @@ export class TomatoTimer {
 	private timerUI(initial = false, secondsRemaining: string) {
 		this.ctl.menu.setMenuItems(
 			[
+				// It is possible to have a timer without mounting a svelte
+				// component that handles the timer.  We just render timerUI
+				// every second, and pass in seconds remaining and have a menu
+				// item render it.  If we use consistent non-random id's for
+				// menu items and their constituents, then only part of the DOM
+				// that will change is the timer element inside the menu item
+				// thanks to the svelte reactivity that powers the core of
+				// oneput.  So it is reasonably performant.  But it's far nicer
+				// to just mount an element that has a self-contained timer.
+				menuItem({
+					id: 'tomato-timer-display-2',
+					ignored: true,
+					style: {
+						justifyContent: 'center'
+					},
+					children: (b) => [
+						b.fchild({
+							onMount: (node) =>
+								mountSvelte(Timer, {
+									target: node,
+									props: { initialSecondsLeft: 30 * 60 }
+								})
+						})
+					]
+				}),
 				menuItem({
 					id: 'tomato-timer-display',
 					ignored: true,

@@ -10,6 +10,7 @@ import type { IDBStoreError } from './BindingsIDB.js';
 import { hflex } from '../../builder.js';
 import { mountSvelte } from '../../lib.js';
 import AcceptButton from './AcceptButton.svelte';
+import CancelButton from './CancelButton.svelte';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
@@ -146,14 +147,11 @@ export class BindingsEditor {
 							})
 					}),
 					b.fchild({
-						tag: 'button',
-						attr: {
-							type: 'button',
-							title: 'Options',
-							onclick: reject
-						},
-						classes: ['oneput__icon-button'],
-						innerHTMLUnsafe: xIcon
+						onMount: (node) =>
+							mountSvelte(CancelButton, {
+								target: node,
+								props: { controller: this.ctl, onClick: reject }
+							})
 					})
 				]
 			})

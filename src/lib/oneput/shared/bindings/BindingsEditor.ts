@@ -34,7 +34,7 @@ export class BindingsEditor {
 			) => ResultAsync<string, IDBError | IDBStoreError>;
 		}
 	) {
-		const keyBindingMap = ctl.keys.getDefaultKeys(values.isLocal);
+		const keyBindingMap = ctl.keys.getDefaultBindings(values.isLocal);
 		const km: BindingsEditor = new BindingsEditor(
 			ctl,
 			values.isLocal,

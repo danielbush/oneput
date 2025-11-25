@@ -47,7 +47,7 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: false,
-						keyBindingMap: this.ctl.keys.getDefaultKeys(false),
+						keyBindingMap: this.ctl.keys.getDefaultBindings(false),
 						onUpdate: (keyBindingMap, isLocal) => {
 							return this.bindingsService.update(keyBindingMap, isLocal);
 						},
@@ -68,7 +68,7 @@ export class SettingsUI {
 				action: () => {
 					this.ctl.runUI(BindingsEditor, {
 						isLocal: true,
-						keyBindingMap: this.ctl.keys.getDefaultKeys(true),
+						keyBindingMap: this.ctl.keys.getDefaultBindings(true),
 						onUpdate: (keyBindingMap, isLocal) => {
 							return this.bindingsService.update(keyBindingMap, isLocal);
 						},

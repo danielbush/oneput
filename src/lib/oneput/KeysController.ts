@@ -96,7 +96,7 @@ export class KeysController {
 	 *
 	 * @param isLocal
 	 */
-	getDefaultKeys(isLocal: boolean = false) {
+	getDefaultBindings(isLocal: boolean = false) {
 		return isLocal ? this.defaultLocalBindings : this.defaultGlobalBindings;
 	}
 

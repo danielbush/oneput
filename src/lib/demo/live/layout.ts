@@ -1,40 +1,10 @@
-import { type UILayout, type OneputProps, mountSvelte } from '$lib/oneput/lib.js';
+import { type UILayout, mountSvelte } from '$lib/oneput/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/widgets/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/widgets/MenuStatus.svelte';
 import { TimeDisplay } from '$lib/oneput/shared/widgets/TimeDisplay.js';
-
-/**
- * Standard input UI for use in most situations.
- */
-export const inputUI: (c: Controller) => OneputProps['inputUI'] = (c) => {
-	return {
-		outerRight: hflex({
-			id: 'root-input-right',
-			children: (b) => [
-				b.fchild({
-					tag: 'button',
-					attr: {
-						type: 'button',
-						title: 'Options',
-						onclick: () => {
-							if (c.menu.isMenuOpen) {
-								c.menu.closeMenu();
-							} else {
-								c.menu.openMenu();
-							}
-						}
-					},
-					classes: ['oneput__icon-button', 'oneput__menu-button'],
-					// innerHTMLUnsafe: c.menuOpen ? chevronUp : chevronDown
-					innerHTMLUnsafe: chevronDown
-				})
-			]
-		})
-	};
-};
 
 export type LayoutSettings = {
 	exitAction?: boolean | (() => void);
@@ -101,8 +71,33 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 	}
 
 	get inputUI() {
-		return inputUI(this.ctl);
+		return {
+			outerRight: hflex({
+				id: 'root-input-right',
+				children: (b) => [
+					b.fchild({
+						tag: 'button',
+						attr: {
+							type: 'button',
+							title: 'Options',
+							onclick: () => {
+								if (this.ctl.menu.isMenuOpen) {
+									this.ctl.menu.closeMenu();
+								} else {
+									this.ctl.menu.openMenu();
+								}
+							}
+						},
+						classes: ['oneput__icon-button', 'oneput__menu-button'],
+						// We use css to rotate the chevron which relies on
+						// Oneput to set a class depending on the menu state.
+						innerHTMLUnsafe: chevronDown
+					})
+				]
+			})
+		};
 	}
+
 	get menuUI() {
 		console.log(hflex({ children: (b) => [b.hspacer({ style: { minHeight: '100px' } })] }));
 		return {

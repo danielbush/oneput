@@ -2,133 +2,11 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
-import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import { hflex, menuItem } from '$lib/oneput/builder.js';
-
-interface TomatoTimerDB extends DBSchema {
-	timers: {
-		key: string;
-		value: TomatoTimerData;
-	};
-}
-
-/**
- * Suppose we receive this data from storage and want to reconstitute the timer:
- *
- *   projectedEndTime = startTime + duration + pauseDuration
- *   secondsRemaining = projectedEndTime - Date.now()/1000
- *
- * We can then display secondsRemaining in a timer and decrement every second
- * (if we in an unpaused state).
- *
- */
-export type TomatoTimerData =
-	| {
-			// Represents an active timer session.  If pauseTime is not null, we
-			// are in a paused state.
-
-			startTime: number; // unix-time
-			/**
-			 * This is the initial duration specified by the user.
-			 * It doesn't change.
-			 */
-			duration: number; // secs
-			/**
-			 * Records the total amount of pausing by the user.
-			 */
-			pauseDuration: number; // secs
-			stopTime: null; // unix-time
-			/**
-			 * If not undefined, timer is currently paused.
-			 *
-			 * When unpausing:
-			 * - compute: diff = Date.now()/1000 - pauseTime
-			 * - set: pauseTime to null
-			 * - add: diff to pauseDuration
-			 */
-			pauseTime: number | null; // unix-time
-	  }
-	| {
-			// Represents a completed timer session.
-
-			startTime: number;
-			/**
-			 * The final stopping time by the user.
-			 */
-			duration: number;
-			pauseDuration: number;
-			stopTime: number;
-			pauseTime: null;
-	  };
-
-/**
- * A value object for timer data.
- *
- * It's not immutable because we'll use a class that mutates its state
- * rather than several logic functions generating immutable values.
- */
-class TomatoTimerValue {
-	static create(data: TomatoTimerData) {
-		return new TomatoTimerValue(data);
-	}
-
-	private constructor(private data: TomatoTimerData) {}
-
-	pause(on: boolean = true) {
-		if (on) {
-			this.data.pauseTime = Date.now() / 1000;
-			return this;
-		}
-		const diff = this.data.pauseTime ? Date.now() / 1000 - this.data.pauseTime : 0;
-		this.data.pauseTime = null;
-		this.data.pauseDuration += diff;
-		return this;
-	}
-
-	finish() {
-		this.data.stopTime = Date.now() / 1000;
-		this.data.pauseTime = null;
-		return this;
-	}
-
-	/**
-	 * This could be negative ("overtime").
-	 */
-	get secondsRemaining() {
-		// TODO: Seems to prevent a 2sec skip ie jumping from 00:30:00 to
-		// 00:29:58 instead of 00:28:59
-		const now = Math.floor(Date.now() / 1000);
-		const pauseDuration = this.data.pauseDuration ?? 0;
-		const endTime = this.data.startTime + this.data.duration + pauseDuration;
-		return endTime - now;
-	}
-
-	get isPaused() {
-		return this.data.pauseTime !== null;
-	}
-
-	get isFinished() {
-		return this.data.stopTime !== null;
-	}
-}
-
-const DB_NAME = 'tomato-timer';
-const CURRENT_TIMER_KEY = 'current-timer';
-
-async function idb(): Promise<IDBPDatabase<TomatoTimerDB>> {
-	const db = await openDB<TomatoTimerDB>(DB_NAME, undefined, {
-		upgrade(db) {
-			db.createObjectStore('timers');
-		}
-	});
-	return db;
-}
-
-idb()
-	.then((db) => db.get('timers', CURRENT_TIMER_KEY))
-	.then((data) => console.log(data));
-
-// -------- view ---------------------------------------
+import { TomatoTimerValue } from './value.js';
+import { IDBError, openIDB } from '$lib/oneput/shared/idb.js';
+import { DB_NAME, TIMER_STORE, CURRENT_TIMER_KEY, type TomatoTimerDB } from './idb.js';
+import { ResultAsync } from 'neverthrow';
 
 function formatSecondsToHHMMSS(totalSeconds: number): string {
 	const hours = Math.floor(totalSeconds / 3600);
@@ -281,25 +159,40 @@ export class TomatoTimer {
 			stdMenuItem({
 				id: 'tomato-set-test-data',
 				textContent: 'Set test data',
-				action: async () => {
-					const db = await idb();
-					await db
-						.delete('timers', CURRENT_TIMER_KEY)
-						.catch((err) => this.ctl.notify(`Error deleting test data: ${err}`));
-					await db
-						.put(
-							'timers',
-							{
-								startTime: Date.now() / 1000,
-								duration: 30 * 60,
-								stopTime: null,
-								pauseTime: null,
-								pauseDuration: 0
-							},
-							CURRENT_TIMER_KEY
+				action: () => {
+					openIDB<TomatoTimerDB>(DB_NAME, undefined, {
+						upgrade(db) {
+							db.createObjectStore(TIMER_STORE);
+						}
+					})
+						.andThrough((db) =>
+							ResultAsync.fromPromise(
+								db.delete(TIMER_STORE, CURRENT_TIMER_KEY),
+								(err) => new IDBError('deleteCurrentTimer', err as Error)
+							)
 						)
-						.catch((err) => this.ctl.notify(`Error adding test data: ${err}`));
-					this.ctl.notify('Test data set', { duration: 3000 });
+						.andThen((db) =>
+							ResultAsync.fromPromise(
+								db.put(
+									TIMER_STORE,
+									{
+										startTime: Date.now() / 1000,
+										duration: 30 * 60,
+										stopTime: null,
+										pauseTime: null,
+										pauseDuration: 0
+									},
+									CURRENT_TIMER_KEY
+								),
+								(err) => new IDBError('addCurrentTimer', err as Error)
+							)
+						)
+						.andTee(() => {
+							this.ctl.notify('Test data set', { duration: 3000 });
+						})
+						.orTee((err) =>
+							this.ctl.alert({ message: 'Error adding test data', additional: err.message })
+						);
 				}
 			})
 		]);

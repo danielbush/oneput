@@ -19,7 +19,7 @@ export class IDBStoreError extends Error {
  */
 export class BindingsIDB implements BindingsStore {
 	static create() {
-		return new BindingsIDB(getOneputIDB({ reset: false }));
+		return new BindingsIDB(getOneputIDB({ remove: false }));
 	}
 
 	private constructor(private dbp: GetOneputIDB) {}

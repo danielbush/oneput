@@ -1,5 +1,5 @@
-import { openDB, type DBSchema, deleteDB } from 'idb';
-import { okAsync, ResultAsync } from 'neverthrow';
+import { openDB, type DBSchema, deleteDB, type IDBPDatabase } from 'idb';
+import { ResultAsync } from 'neverthrow';
 import type { KeyBindingMapSerializable } from '../bindings.js';
 
 /*
@@ -28,18 +28,11 @@ export interface OneputDBSchema extends DBSchema {
 
 export const ONEPUT_DB_NAME = 'oneput';
 
-function maybeDeleteDB(bool?: boolean) {
-	if (!bool) {
-		return okAsync();
-	}
+export function getOneputIDB(params: { remove?: boolean } = {}) {
 	return ResultAsync.fromPromise(
-		deleteDB(ONEPUT_DB_NAME),
+		params.remove ? deleteDB(ONEPUT_DB_NAME) : Promise.resolve(),
 		(err) => new IDBError('maybeDeleteDB', err as Error)
-	);
-}
-
-export function getOneputIDB(params: { reset?: boolean } = {}) {
-	return maybeDeleteDB(params.reset).andThen(() =>
+	).andThen(() =>
 		ResultAsync.fromPromise(
 			openDB<OneputDBSchema>(ONEPUT_DB_NAME, undefined, {
 				upgrade(db) {
@@ -53,3 +46,29 @@ export function getOneputIDB(params: { reset?: boolean } = {}) {
 
 export type OneputDB = Awaited<ReturnType<typeof getOneputIDB>>;
 export type GetOneputIDB = ReturnType<typeof getOneputIDB>;
+export type OpenDBParams<D extends DBSchema> = Parameters<typeof openDB<D>>[2];
+
+/**
+ * Open an indexeddb database.  Use getOneputIDB instead to open Oneput db.
+ *
+ * @param version
+ * @param params use params.upgrade to create stores within this db via db.createObjectStore
+ * @param remove
+ * @returns
+ */
+export function openIDB<D extends DBSchema>(
+	dbName: string,
+	version: number | undefined,
+	params: OpenDBParams<D>,
+	remove = false
+): ResultAsync<IDBPDatabase<D>, IDBError> {
+	return ResultAsync.fromPromise(
+		remove ? deleteDB(dbName) : Promise.resolve(),
+		(err) => new IDBError(`Could not delete database ${dbName}`, err as Error)
+	).andThen(() =>
+		ResultAsync.fromPromise(
+			openDB<D>(dbName, version, params),
+			(err) => new IDBError('openIDB', err as Error)
+		)
+	);
+}

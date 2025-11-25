@@ -428,7 +428,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							b.hspacer()
+							b.spacer()
 						],
 						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
@@ -450,7 +450,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							b.hspacer()
+							b.spacer()
 						],
 						bottom: {
 							left: (b) => [b.icon({ innerHTMLUnsafe: '<i data-lucide="info"></i>' })],
@@ -478,7 +478,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							b.hspacer()
+							b.spacer()
 						],
 						bottom: {
 							left: false,
@@ -514,3 +514,4 @@
 		</section>
 	</section>
 </main>
+spacerspacerspacer

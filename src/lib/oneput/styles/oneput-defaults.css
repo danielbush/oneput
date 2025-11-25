@@ -519,6 +519,11 @@ button:disabled.oneput__menu-item {
 	max-width: var(--oneput-std-width);
 }
 
+.oneput__vspacer {
+	min-height: var(--oneput-std-width);
+	max-height: var(--oneput-std-width);
+}
+
 /* #endregion */
 
 /* #region checkbox */

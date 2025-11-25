@@ -110,7 +110,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 								classes: ['oneput__icon-button'],
 								innerHTMLUnsafe: arrowLeftIcon
 							})
-						: b.hspacer({ style: { minHeight: 'var(--oneput-std-width)' } }),
+						: b.spacer(),
 					b.fchild({
 						classes: ['oneput__menu-item-header'],
 						textContent: this.menuTitle
@@ -122,7 +122,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 								attr: { type: 'button', title: 'Exit', onclick: this.exitAction },
 								innerHTMLUnsafe: xIcon
 							})
-						: b.hspacer({ style: { minHeight: 'var(--oneput-std-width)' } })
+						: b.spacer()
 				]
 			})
 		};

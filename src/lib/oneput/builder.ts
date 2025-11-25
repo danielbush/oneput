@@ -89,8 +89,8 @@ export class FlexChildBuilder {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	hspacer(params?: Partial<FChildParams>): FChildParams {
-		return hspacer({ id: this.id + '-' + this.counter++, ...(params ?? {}) });
+	spacer(h: boolean = true, v: boolean = true, params?: Partial<FChildParams>): FChildParams {
+		return spacer(h, v, { id: this.id + '-' + this.counter++, ...(params ?? {}) });
 	}
 }
 
@@ -110,11 +110,27 @@ export function icon(params: Partial<FChildParams>): FChildParams {
 }
 
 /**
- * Acts like a horizontal spacing with width equivalent ot a square icon (--oneput-std-width).
+ * By default takes up --oneput-std-width of width and height.
+ *
+ * --oneput-std-width generally matches the size of an icon or icon button.
+ *
+ * If h is false, it will not take up width.
+ * If v is false, it will not take up height.
  */
-export function hspacer(params: Partial<FChildParams>): FChildParams {
+export function spacer(
+	h: boolean = true,
+	v: boolean = true,
+	params?: Partial<FChildParams>
+): FChildParams {
+	const classes = [];
+	if (h) {
+		classes.push('oneput__hspacer');
+	}
+	if (v) {
+		classes.push('oneput__vspacer');
+	}
 	return fchild({
-		classes: ['oneput__hspacer'],
+		classes,
 		...params
 	});
 }

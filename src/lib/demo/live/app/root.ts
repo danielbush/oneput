@@ -25,7 +25,8 @@ export class RootUI {
 	runUI = () => {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Home',
-			placeholder: 'This is root...'
+			placeholder: 'This is root...',
+			backAction: false
 		});
 		const blankItems = [...Array(10)].map((_, i) => {
 			return stdMenuItem({

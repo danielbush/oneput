@@ -29,7 +29,7 @@ export class Alert {
 		this.ctl.menu.enableMenuItemsFn();
 		this.ctl.input.enableInputElement();
 		this.ctl.ui.replaceUI();
-		this.ctl.keys.resetKeys(true);
+		this.ctl.keys.resetBindings(true);
 		this.ctl.input.setPlaceholder();
 		this.resolve?.();
 		this.previousActiveElement.focus();

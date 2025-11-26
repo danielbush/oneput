@@ -36,6 +36,7 @@ export class Controller {
 	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
 	 */
 	private beforeRunUI() {
+		console.log(this.uiParents, this.currentUI);
 		// Re-enable stuff...
 		this.menu.enableMenuActions();
 		this.menu.enableMenuOpenClose();
@@ -63,14 +64,14 @@ export class Controller {
 		return ui;
 	}
 
-	runInlineUI(ui: UIObject) {
+	runInlineUI(runUI: () => void) {
 		if (this.currentUI) {
 			this.uiParents.push(this.currentUI);
 		}
-		this.currentUI = ui;
+		this.currentUI = { runUI };
 		this.beforeRunUI();
-		ui.runUI();
-		return ui;
+		runUI();
+		return this.currentUI;
 	}
 
 	/**

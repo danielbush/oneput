@@ -36,6 +36,10 @@ export class TomatoTimer {
 		this.timerUI();
 	}
 
+	onBack(exit: () => void) {
+		exit();
+	}
+
 	/**
 	 * The UI we see if there is no existing timer.
 	 */

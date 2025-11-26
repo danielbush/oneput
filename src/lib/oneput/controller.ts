@@ -74,19 +74,28 @@ export class Controller {
 		return this.currentUI;
 	}
 
-	/**
-	 * This is intended for triggering a back action via keyboard.
-	 */
-	readonly goBack = () => {
-		this.currentUI?.beforeExit?.();
+	private popUI = () => {
 		const lastUI = this.uiParents.pop();
 		if (lastUI) {
 			this.currentUI = lastUI;
 			this.beforeRunUI();
 			lastUI.runUI();
-			return lastUI;
+			return;
 		}
-		return null;
+		return;
+	};
+
+	/**
+	 * This is intended for triggering a back action via keyboard.
+	 */
+	readonly goBack = () => {
+		this.currentUI?.beforeExit?.();
+		if (this.currentUI?.onBack) {
+			this.currentUI.onBack(this.popUI);
+			return;
+		}
+		this.popUI();
+		return;
 	};
 
 	notify(message: string, params: NotificationParams = {}): Notification {

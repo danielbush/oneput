@@ -138,6 +138,7 @@ export type UIClass<V extends Record<string, unknown> = Record<string, unknown>>
 export type UIObject = {
 	runUI: () => void;
 	beforeExit?: () => void;
+	onBack?: (exit: () => void) => void;
 };
 
 export const defaultVoidElements = new Set([

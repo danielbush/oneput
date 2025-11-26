@@ -56,6 +56,9 @@ export class TomatoTimer {
 	}
 
 	private reloadUI(initial = false) {
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Tomato Timer'
+		});
 		if (!this.timerValue) {
 			this.noTimerUI();
 			return;
@@ -145,32 +148,18 @@ export class TomatoTimer {
 			})
 		]);
 
-		this.ctl.keys.setBindings(
-			{
-				submit: {
-					bindings: ['Shift+Enter'],
-					action: () => {
-						const label = this.ctl.input.getInputValue();
-						if (!label) {
-							// Start with no label.
-							this.timerValue = TomatoTimerValue.create({
-								startTime: Date.now() / 1000,
-								duration,
-								stopTime: null,
-								pauseTime: null,
-								pauseDuration: 0
-							});
-							this.reloadUI(true);
-							return;
-						}
-						// TODO: record the label.
-						this.reloadUI(true);
-					},
-					description: 'Submit input'
-				}
-			},
-			true
-		);
+		this.ctl.input.setSubmitHandlerOnce((label) => {
+			this.timerValue = TomatoTimerValue.create({
+				startTime: Date.now() / 1000,
+				duration,
+				stopTime: null,
+				pauseTime: null,
+				pauseDuration: 0
+			});
+			// TODO: record a label or anonymous label.
+			console.log(label);
+			this.reloadUI(true);
+		});
 
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {

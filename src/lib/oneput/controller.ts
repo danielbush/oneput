@@ -49,6 +49,7 @@ export class Controller {
 		this.menu.resetFocusBehaviour();
 		this.menu.resetMenuItemsFn();
 		this.input.setInputValue();
+		this.input.resetSubmitHandler();
 	}
 
 	runUI<V extends Record<string, unknown>>(uiClass: UIClass<V>, values?: V) {

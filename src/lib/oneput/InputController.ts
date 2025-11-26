@@ -93,4 +93,28 @@ export class InputController {
 		}
 		this.inputElement.disabled = false;
 	}
+
+	private submitHandler?: (input: string) => void;
+	private submitOnce = false;
+
+	setSubmitHandler(fn: (input: string) => void) {
+		this.submitHandler = fn;
+	}
+
+	setSubmitHandlerOnce(fn: (input: string) => void) {
+		this.submitHandler = fn;
+		this.submitOnce = true;
+	}
+
+	runSubmitHandler() {
+		this.submitHandler?.(this.getInputValue());
+		if (this.submitOnce) {
+			this.submitHandler = undefined;
+			this.submitOnce = false;
+		}
+	}
+
+	resetSubmitHandler() {
+		this.submitHandler = undefined;
+	}
 }

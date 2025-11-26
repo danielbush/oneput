@@ -42,6 +42,9 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 	},
 	globalFilter: (c) => {
 		GlobalFilter.create(c).runUI();
+	},
+	submit: (c) => {
+		c.input.runSubmitHandler();
 	}
 };
 
@@ -92,6 +95,10 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
 	globalFilter: {
 		bindings: ['$mod+e'],
 		description: 'Global filter'
+	},
+	submit: {
+		bindings: ['Shift+Enter'],
+		description: 'Submit input'
 	}
 };
 

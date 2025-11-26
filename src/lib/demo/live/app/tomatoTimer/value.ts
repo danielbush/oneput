@@ -7,8 +7,26 @@ import type { TomatoTimerData } from './idb.js';
  * rather than several logic functions generating immutable values.
  */
 export class TomatoTimerValue {
-	static create(data: TomatoTimerData) {
-		return new TomatoTimerValue(data);
+	static create({
+		startTime,
+		duration,
+		pauseDuration = 0,
+		stopTime = null,
+		pauseTime = null
+	}: {
+		startTime: number;
+		duration: number;
+		pauseDuration?: number;
+		stopTime?: number | null;
+		pauseTime?: number | null;
+	}) {
+		return new TomatoTimerValue({
+			startTime,
+			duration,
+			pauseDuration,
+			stopTime,
+			pauseTime
+		});
 	}
 
 	private constructor(private data: TomatoTimerData) {}

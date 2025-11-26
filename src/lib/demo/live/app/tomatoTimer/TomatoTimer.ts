@@ -114,10 +114,7 @@ export class TomatoTimer {
 				action: () => {
 					this.timerValue = TomatoTimerValue.create({
 						startTime: Date.now() / 1000,
-						duration,
-						stopTime: null,
-						pauseTime: null,
-						pauseDuration: 0
+						duration
 					});
 					this.reloadUI(true);
 				}
@@ -127,10 +124,7 @@ export class TomatoTimer {
 		this.ctl.input.setSubmitHandlerOnce((label) => {
 			this.timerValue = TomatoTimerValue.create({
 				startTime: Date.now() / 1000,
-				duration,
-				stopTime: null,
-				pauseTime: null,
-				pauseDuration: 0
+				duration
 			});
 			// TODO: record a label or anonymous label.
 			console.log(label);

@@ -99,6 +99,7 @@ export class InputController {
 
 	setSubmitHandler(fn: (input: string) => void) {
 		this.submitHandler = fn;
+		this.submitOnce = false;
 	}
 
 	setSubmitHandlerOnce(fn: (input: string) => void) {

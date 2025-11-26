@@ -46,9 +46,7 @@ export class TomatoTimer {
 				textContent: '30 Minutes',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					this.ctl.runInlineUI(() => {
-						this.startTimerUI({ duration: 30 * 60 });
-					});
+					this.startTimerUI({ duration: 30 * 60 });
 				}
 			})
 		]);
@@ -56,9 +54,7 @@ export class TomatoTimer {
 			'Enter a time in minutes and shift+enter OR select from the menu...'
 		);
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.ctl.runInlineUI(() => {
-				this.startTimerUI({ duration: parseFloat(duration) * 60 });
-			});
+			this.startTimerUI({ duration: parseFloat(duration) * 60 });
 		});
 	}
 
@@ -77,9 +73,7 @@ export class TomatoTimer {
 						startTime: Date.now() / 1000,
 						duration
 					});
-					this.ctl.runInlineUI(() => {
-						this.timerUI();
-					});
+					this.timerUI();
 				}
 			})
 		]);
@@ -91,9 +85,7 @@ export class TomatoTimer {
 			});
 			// TODO: record a label or anonymous label.
 			console.log(label);
-			this.ctl.runInlineUI(() => {
-				this.timerUI();
-			});
+			this.timerUI();
 		});
 
 		this.ctl.ui.setInputUI((inputUI) => {

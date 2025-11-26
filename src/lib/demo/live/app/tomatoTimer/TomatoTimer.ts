@@ -53,7 +53,7 @@ export class TomatoTimer {
 				textContent: '30 Minutes',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					this.createTimerUI({ duration: 30 * 60 });
+					this.startTimerUI({ duration: 30 * 60 });
 				}
 			})
 		]);
@@ -61,11 +61,11 @@ export class TomatoTimer {
 			'Enter a time in minutes and shift+enter OR select from the menu...'
 		);
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.createTimerUI({ duration: parseFloat(duration) * 60 });
+			this.startTimerUI({ duration: parseFloat(duration) * 60 });
 		});
 	}
 
-	private createTimerUI({ duration }: { duration: number }) {
+	private startTimerUI({ duration }: { duration: number }) {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: `Timer for ${Math.round(duration / 60)} minutes`
 		});

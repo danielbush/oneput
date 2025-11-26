@@ -17,6 +17,8 @@ export class TomatoTimer {
 		private timerValue: TomatoTimerValue | null = null
 	) {}
 
+	private currentUI: 'noTimerUI' | 'timerUI' | 'startTimerUI' = 'noTimerUI';
+
 	/**
 	 * This is the entry point that loads the tomato timer ui.
 	 */
@@ -37,6 +39,14 @@ export class TomatoTimer {
 	}
 
 	onBack(exit: () => void) {
+		if (this.currentUI === 'noTimerUI') {
+			exit();
+			return;
+		}
+		if (this.currentUI === 'startTimerUI') {
+			this.noTimerUI();
+			return;
+		}
 		exit();
 	}
 
@@ -44,6 +54,7 @@ export class TomatoTimer {
 	 * The UI we see if there is no existing timer.
 	 */
 	private noTimerUI() {
+		this.currentUI = 'noTimerUI';
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-start',
@@ -63,6 +74,7 @@ export class TomatoTimer {
 	}
 
 	private startTimerUI({ duration }: { duration: number }) {
+		this.currentUI = 'startTimerUI';
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: `Timer for ${Math.round(duration / 60)} minutes`
 		});
@@ -112,6 +124,7 @@ export class TomatoTimer {
 	 * The UI we see if there is an existing timer.
 	 */
 	private timerUI() {
+		this.currentUI = 'timerUI';
 		this.ctl.menu.setMenuItems(
 			[
 				// It is possible to have a timer without mounting a svelte

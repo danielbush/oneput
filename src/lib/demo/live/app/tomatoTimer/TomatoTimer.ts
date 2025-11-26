@@ -4,9 +4,6 @@ import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue } from './value.js';
-import { IDBError, openIDB } from '$lib/oneput/shared/idb.js';
-import { DB_NAME, TIMER_STORE, CURRENT_TIMER_KEY, type TomatoTimerDB } from './idb.js';
-import { ResultAsync } from 'neverthrow';
 import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 
@@ -58,47 +55,14 @@ export class TomatoTimer {
 				action: () => {
 					this.createTimerUI({ duration: 30 * 60 });
 				}
-			}),
-			stdMenuItem({
-				id: 'tomato-set-test-data',
-				textContent: 'Set test data',
-				action: () => {
-					openIDB<TomatoTimerDB>(DB_NAME, undefined, {
-						upgrade(db) {
-							db.createObjectStore(TIMER_STORE);
-						}
-					})
-						.andThrough((db) =>
-							ResultAsync.fromPromise(
-								db.delete(TIMER_STORE, CURRENT_TIMER_KEY),
-								(err) => new IDBError('deleteCurrentTimer', err as Error)
-							)
-						)
-						.andThen((db) =>
-							ResultAsync.fromPromise(
-								db.put(
-									TIMER_STORE,
-									{
-										startTime: Date.now() / 1000,
-										duration: 30 * 60,
-										stopTime: null,
-										pauseTime: null,
-										pauseDuration: 0
-									},
-									CURRENT_TIMER_KEY
-								),
-								(err) => new IDBError('addCurrentTimer', err as Error)
-							)
-						)
-						.andTee(() => {
-							this.ctl.notify('Test data set', { duration: 3000 });
-						})
-						.orTee((err) =>
-							this.ctl.alert({ message: 'Error adding test data', additional: err.message })
-						);
-				}
 			})
 		]);
+		this.ctl.input.setPlaceholder(
+			'Enter a time in minutes and shift+enter OR select from the menu...'
+		);
+		this.ctl.input.setSubmitHandlerOnce((duration) => {
+			this.createTimerUI({ duration: parseFloat(duration) * 60 });
+		});
 	}
 
 	private createTimerUI({ duration }: { duration: number }) {

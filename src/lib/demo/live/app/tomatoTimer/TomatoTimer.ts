@@ -20,30 +20,6 @@ export class TomatoTimer {
 		private timerValue: TomatoTimerValue | null = null
 	) {}
 
-	private cancelTimer = () => {
-		this.timerValue?.finish();
-		this.timerValue = null;
-		// TODO: discard any record of this session
-		this.reloadUI();
-	};
-
-	private pauseTimer = () => {
-		this.timerValue?.pause();
-		this.reloadUI();
-	};
-
-	private resumeTimer = () => {
-		this.timerValue?.pause(false);
-		this.reloadUI();
-	};
-
-	private finishTimer = () => {
-		this.timerValue?.finish();
-		this.timerValue = null;
-		// TODO: record the final time
-		this.reloadUI();
-	};
-
 	/**
 	 * This is the entry point that loads the tomato timer ui.
 	 */
@@ -196,7 +172,7 @@ export class TomatoTimer {
 				// svelte just mount a svelte element that has a self-contained
 				// timer like here.
 				menuItem({
-					id: 'tomato-timer-display-2',
+					id: 'tomato-timer-display',
 					ignored: true,
 					style: {
 						justifyContent: 'center'
@@ -214,32 +190,38 @@ export class TomatoTimer {
 						})
 					]
 				}),
-				this.timerValue?.isPaused
-					? stdMenuItem({
-							id: 'tomato-resume',
-							textContent: 'Resume',
-							left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-							action: this.resumeTimer
+				stdMenuItem({
+					id: 'tomato-pause',
+					textContent: this.timerValue?.isPaused ? 'Resume' : 'Pause',
+					left: (b) => [
+						b.icon({
+							innerHTMLUnsafe: this.timerValue?.isPaused ? icons.playIcon : icons.pauseIcon
 						})
-					: stdMenuItem({
-							id: 'tomato-pause',
-							textContent: 'Pause',
-							left: (b) => [b.icon({ innerHTMLUnsafe: icons.pauseIcon })],
-							action: this.pauseTimer
-						}),
+					],
+					action: () => {
+						this.timerValue?.pause(!this.timerValue?.isPaused);
+					}
+				}),
 				stdMenuItem({
 					id: 'tomato-finish',
 					textContent: 'Finish',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
-					action: this.finishTimer
+					action: () => {
+						this.timerValue?.finish();
+					}
 				}),
 				stdMenuItem({
 					id: 'tomato-stop',
 					textContent: 'Cancel',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
-					action: this.cancelTimer
+					action: () => {
+						this.timerValue?.finish();
+						this.timerValue = null;
+						// TODO: discard any record of this session
+						this.reloadUI();
+					}
 				})
-			],
+			]
 
 			// This is really important otherwise the cancel button may not work.
 			// This is because we are re-rendering menu items every second, and
@@ -247,7 +229,7 @@ export class TomatoTimer {
 			// when we call setMenuItems.  This will trigger an update to the
 			// DOM for these items.  And this update can cause the cancel action
 			// to not work.
-			{ focusBehaviour: 'none' }
+			// { focusBehaviour: 'none' }
 		);
 		if (initial) {
 			this.ctl.menu.focusFirstMenuItem();

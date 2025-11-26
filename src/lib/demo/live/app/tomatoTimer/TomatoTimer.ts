@@ -25,13 +25,6 @@ export class TomatoTimer {
 			menuHeader: 'Tomato Timer'
 		});
 		// TODO: check if there is an active timer...
-		this.reloadUI(true);
-	}
-
-	private reloadUI(initial = false) {
-		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Tomato Timer'
-		});
 		if (!this.timerValue) {
 			this.noTimerUI();
 			return;
@@ -40,7 +33,7 @@ export class TomatoTimer {
 			this.noTimerUI();
 			return;
 		}
-		this.timerUI(initial);
+		this.timerUI();
 	}
 
 	/**
@@ -53,7 +46,9 @@ export class TomatoTimer {
 				textContent: '30 Minutes',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					this.startTimerUI({ duration: 30 * 60 });
+					this.ctl.runInlineUI(() => {
+						this.startTimerUI({ duration: 30 * 60 });
+					});
 				}
 			})
 		]);
@@ -61,7 +56,9 @@ export class TomatoTimer {
 			'Enter a time in minutes and shift+enter OR select from the menu...'
 		);
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.startTimerUI({ duration: parseFloat(duration) * 60 });
+			this.ctl.runInlineUI(() => {
+				this.startTimerUI({ duration: parseFloat(duration) * 60 });
+			});
 		});
 	}
 
@@ -80,7 +77,9 @@ export class TomatoTimer {
 						startTime: Date.now() / 1000,
 						duration
 					});
-					this.reloadUI(true);
+					this.ctl.runInlineUI(() => {
+						this.timerUI();
+					});
 				}
 			})
 		]);
@@ -92,7 +91,9 @@ export class TomatoTimer {
 			});
 			// TODO: record a label or anonymous label.
 			console.log(label);
-			this.reloadUI(true);
+			this.ctl.runInlineUI(() => {
+				this.timerUI();
+			});
 		});
 
 		this.ctl.ui.setInputUI((inputUI) => {
@@ -114,7 +115,7 @@ export class TomatoTimer {
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI(initial = false) {
+	private timerUI() {
 		this.ctl.menu.setMenuItems(
 			[
 				// It is possible to have a timer without mounting a svelte
@@ -176,7 +177,6 @@ export class TomatoTimer {
 						this.timerValue?.finish();
 						this.timerValue = null;
 						// TODO: discard any record of this session
-						this.reloadUI();
 					}
 				})
 			]
@@ -189,8 +189,8 @@ export class TomatoTimer {
 			// to not work.
 			// { focusBehaviour: 'none' }
 		);
-		if (initial) {
-			this.ctl.menu.focusFirstMenuItem();
-		}
+		// if (initial) {
+		// 	this.ctl.menu.focusFirstMenuItem();
+		// }
 	}
 }

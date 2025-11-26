@@ -77,7 +77,7 @@ export class BindingsEditor {
 					text: description,
 					bindings,
 					action: () => {
-						this.ctl.runInlineUI({ runUI: () => this.actionUI(id) });
+						this.ctl.runInlineUI(() => this.actionUI(id));
 					}
 				})
 			)
@@ -100,7 +100,7 @@ export class BindingsEditor {
 				id: 'add-binding',
 				textContent: 'Add binding...',
 				action: () => {
-					this.ctl.runInlineUI({ runUI: () => this.captureBindingUI(actionId) });
+					this.ctl.runInlineUI(() => this.captureBindingUI(actionId));
 				}
 			}),
 			...bindings.map((binding) => {

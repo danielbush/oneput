@@ -60,3 +60,7 @@ openIDB<TomatoTimerDB>(
 	.orTee((err) => {
 		console.error(err);
 	});
+
+export type Store = {
+	putCurrentSession: (session: UnfinishedSession) => ResultAsync<void, IDBStoreError>;
+};

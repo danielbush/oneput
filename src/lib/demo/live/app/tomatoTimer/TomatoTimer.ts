@@ -6,27 +6,8 @@ import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
 import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
-import './idb.js';
-import { ResultAsync } from 'neverthrow';
-import { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
-
-type Store = {
-	putCurrentSession: (session: UnfinishedSession) => ResultAsync<void, IDBStoreError>;
-};
-
-class IDBStore implements Store {
-	static create() {
-		return new IDBStore();
-	}
-
-	putCurrentSession = (session: UnfinishedSession) => {
-		console.log('put', session);
-		return ResultAsync.fromPromise(
-			Promise.resolve(),
-			(err) => new IDBStoreError('putCurrentSession', err as Error)
-		);
-	};
-}
+import { IDBStore } from './IDBStore.js';
+import type { Store } from './idb.js';
 
 export class TomatoTimer {
 	static create(ctl: Controller) {

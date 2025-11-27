@@ -1,14 +1,30 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { formatSecondsToHHMMSS } from './utils.js';
+	import type { createSubscriber } from 'svelte/reactivity';
 
-	const { initialSecondsLeft }: { initialSecondsLeft: number } = $props();
+	const {
+		initialSecondsLeft,
+		subscribe
+	}: {
+		initialSecondsLeft: number;
+		subscribe: ReturnType<typeof createSubscriber>;
+	} = $props();
 
 	let secondsRemaining = $state(initialSecondsLeft);
 	let formattedSecondsRemaining = $derived(formatSecondsToHHMMSS(secondsRemaining));
 
+	$effect(() => {
+		subscribe();
+		if (interval) {
+			clearInterval(interval);
+		}
+	});
+
+	let interval: ReturnType<typeof setInterval> | undefined;
+
 	onMount(() => {
-		const interval = setInterval(() => {
+		interval = setInterval(() => {
 			secondsRemaining -= 1;
 		}, 1000);
 		return () => clearInterval(interval);

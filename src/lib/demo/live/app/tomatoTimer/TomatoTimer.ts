@@ -9,16 +9,23 @@ import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
+import { createSubscriber } from 'svelte/reactivity';
 
 export class TomatoTimer {
 	static create(ctl: Controller) {
 		return new TomatoTimer(ctl, IDBStore.create());
 	}
+	private stopTimer?: () => void;
+	private subscribe: ReturnType<typeof createSubscriber>;
 
 	constructor(
 		private ctl: Controller,
 		private store: Store
-	) {}
+	) {
+		this.subscribe = createSubscriber((update) => {
+			this.stopTimer = update;
+		});
+	}
 
 	private currentUI: 'noTimerUI' | 'timerUI' | 'startTimerUI' = 'noTimerUI';
 	private timerValue: TomatoTimerValue | null = null;
@@ -175,7 +182,10 @@ export class TomatoTimer {
 							onMount: (node) =>
 								mountSvelte(Timer, {
 									target: node,
-									props: { initialSecondsLeft: timerValue.secondsRemaining }
+									props: {
+										initialSecondsLeft: timerValue.secondsRemaining,
+										subscribe: this.subscribe
+									}
 								})
 						})
 					]
@@ -190,6 +200,7 @@ export class TomatoTimer {
 					],
 					action: () => {
 						timerValue.pause(!timerValue.isPaused);
+						this.stopTimer?.();
 					}
 				}),
 				stdMenuItem({

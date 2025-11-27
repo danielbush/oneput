@@ -6,6 +6,7 @@ import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue } from './value.js';
 import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
+import './idb.js';
 
 export class TomatoTimer {
 	static create(ctl: Controller) {

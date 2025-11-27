@@ -1,58 +1,62 @@
+import { openIDB } from '$lib/oneput/shared/idb.js';
 import { type DBSchema } from 'idb';
+import { TomatoTimerValue, type FinishedSession, type UnfinishedSession } from './value.js';
+import { ok, ResultAsync } from 'neverthrow';
+import { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
 
-/**
- * We have to be able to compute time left and know if the timer is paused or
- * not then feed this into a timer display.
- *
- * If the user pauses a timer, we record the start time of the pause by setting
- * pauseStartTime to the current time.
- *
- * If the user unpauses, we calculate the duration using current time and
- * pauseStartTime and add it to pauseDuration and set pauseStartTime back
- * to null.
- *
- * If endTime is set, timer is finished; if pauseStartTime is not null, we treat
- * endTime as the end of the pause.  Update pauseDuration accordingly and
- * set pauseStartTime to null.
- *
- * To calculate timeRemaining:
- *
- *   duration - (currentTime - startTime) - pauseDuration - currentPause.
- *
- * If endTime is set
- *
- *   duration - (endTime - startTime) - pauseDuration
- *
- * where
- * - currentTime is the current time at which we calculate time remaining
- * - currentPause is 0 if timer is not paused and (currentTime - pauseStartTime) otherwise.
- * pauseDuration and currentPause are corrections for pausing and are relative to currentTime.
- */
-export type TomatoTimerData = {
-	startTime: number; // unix-time
-	/**
-	 * Records when the timer is stopped.
-	 *
-	 * This could be at or even after duration.  We'll allow overtime.
-	 */
-	endTime: number | null; // unix-time
-	/**
-	 * This is the initial duration specified by the user.
-	 *
-	 * startTiem + duration may not equal endTime because of pausing and overtime.
-	 */
-	duration: number; // secs
-	pauseStartTime: number | null; // unix-time
-	pauseDuration: number; // secs
-};
+export type FinishedSessionRecord = FinishedSession & { id: number };
 
 export interface TomatoTimerDB extends DBSchema {
-	timers: {
+	currentSession: {
+		value: UnfinishedSession;
 		key: string;
-		value: TomatoTimerData;
+	};
+	completedSessions: {
+		value: FinishedSessionRecord;
+		key: number;
 	};
 }
 
 export const DB_NAME = 'tomato-timer';
-export const TIMER_STORE = 'timers';
-export const CURRENT_TIMER_KEY = 'current-timer';
+export const CURRENT_SESSION_STORE = 'currentSession';
+export const CURRENT_SESSION_KEY = 'currentSession';
+export const COMPLETED_SESSIONS_STORE = 'completedSessions';
+
+openIDB<TomatoTimerDB>(
+	DB_NAME,
+	1,
+	{
+		upgrade(db) {
+			db.createObjectStore(CURRENT_SESSION_STORE);
+			db.createObjectStore(COMPLETED_SESSIONS_STORE, { keyPath: 'id', autoIncrement: true });
+		}
+	},
+	true
+)
+	.andThrough((db) => {
+		db.get(CURRENT_SESSION_STORE, 'current-session');
+		const v = TomatoTimerValue.start({
+			duration: 25 * 60
+		});
+		return ResultAsync.fromPromise(
+			db.put(CURRENT_SESSION_STORE, v.record as UnfinishedSession, CURRENT_SESSION_KEY),
+			(err) => new IDBStoreError('putCurrentSession', err as Error)
+		);
+	})
+	.andThen((db) => {
+		return ResultAsync.fromPromise(
+			db.get(CURRENT_SESSION_STORE, CURRENT_SESSION_KEY),
+			(err) => new IDBStoreError('getCurrentSession', err as Error)
+		);
+	})
+	.andThen((rec) => {
+		if (rec) {
+			const v = TomatoTimerValue.create(rec);
+			console.log('v', v.secondsRemaining);
+			return ok(v);
+		}
+		return ok(null);
+	})
+	.orTee((err) => {
+		console.error(err);
+	});

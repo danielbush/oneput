@@ -7,7 +7,7 @@ import { TomatoTimerValue, type UnfinishedSession } from './value.js';
 import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
-import type { Store } from './idb.js';
+import type { Store } from './Store.js';
 
 export class TomatoTimer {
 	static create(ctl: Controller) {

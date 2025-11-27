@@ -5,4 +5,5 @@ import type { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
 export type Store = {
 	putCurrentSession(session: UnfinishedSession): ResultAsync<void, IDBStoreError>;
 	getCurrentSession(): ResultAsync<UnfinishedSession | null, IDBStoreError>;
+	deleteCurrentSession(): ResultAsync<void, IDBStoreError>;
 };

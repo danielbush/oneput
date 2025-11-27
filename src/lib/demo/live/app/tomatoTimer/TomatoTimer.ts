@@ -201,12 +201,14 @@ export class TomatoTimer {
 					}
 				}),
 				stdMenuItem({
-					id: 'tomato-stop',
+					id: 'tomato-cancel',
 					textContent: 'Cancel',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
 					action: () => {
-						timerValue.finish();
-						// TODO: discard any record of this session
+						this.store.deleteCurrentSession().orTee((err) => {
+							this.ctl.notify(`Error deleting current session: ${err.message}`);
+						});
+						this.noTimerUI();
 					}
 				})
 			]

@@ -45,4 +45,12 @@ export class IDBStore implements Store {
 				(err) => new IDBStoreError('getCurrentSession', err as Error)
 			).map((rec) => (rec ? rec : null))
 		);
+
+	deleteCurrentSession = () =>
+		this.db.andThen((db) =>
+			ResultAsync.fromPromise(
+				db.delete(CURRENT_SESSION_STORE, CURRENT_SESSION_KEY),
+				(err) => new IDBStoreError('deleteCurrentSession', err as Error)
+			).map(() => undefined)
+		);
 }

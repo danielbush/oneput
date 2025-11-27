@@ -1,5 +1,5 @@
 import { ResultAsync } from 'neverthrow';
-import { TomatoTimerValue, type UnfinishedSession } from './value.js';
+import { type UnfinishedSession } from './value.js';
 import { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
 import {
 	COMPLETED_SESSIONS_STORE,
@@ -23,28 +23,26 @@ export class IDBStore implements Store {
 					db.createObjectStore(COMPLETED_SESSIONS_STORE, { keyPath: 'id', autoIncrement: true });
 				}
 			},
-			true
+			false
 		);
 		return new IDBStore(db);
 	}
 
 	constructor(private db: ResultAsync<IDBPDatabase<TomatoTimerDB>, IDBError>) {}
 
-	putCurrentSession = (session: UnfinishedSession) => {
-		return this.db.andThen((db) => {
-			return ResultAsync.fromPromise(
+	putCurrentSession = (session: UnfinishedSession) =>
+		this.db.andThen((db) =>
+			ResultAsync.fromPromise(
 				db.put(CURRENT_SESSION_STORE, session, CURRENT_SESSION_KEY),
 				(err) => new IDBStoreError('putCurrentSession', err as Error)
-			).map(() => undefined);
-		});
-	};
+			).map(() => undefined)
+		);
 
-	getCurrentSession = () => {
-		return this.db.andThen((db) =>
+	getCurrentSession = () =>
+		this.db.andThen((db) =>
 			ResultAsync.fromPromise(
 				db.get(CURRENT_SESSION_STORE, CURRENT_SESSION_KEY),
 				(err) => new IDBStoreError('getCurrentSession', err as Error)
-			).map((rec) => (rec ? TomatoTimerValue.create(rec) : null))
+			).map((rec) => (rec ? rec : null))
 		);
-	};
 }

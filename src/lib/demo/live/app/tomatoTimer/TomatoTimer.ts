@@ -30,15 +30,24 @@ export class TomatoTimer {
 			menuHeader: 'Tomato Timer'
 		});
 		// TODO: check if there is an active timer...
-		if (!this.timerValue) {
-			this.noTimerUI();
-			return;
-		}
-		if (this.timerValue.isFinished) {
-			this.noTimerUI();
-			return;
-		}
-		this.timerUI();
+		this.store
+			.getCurrentSession()
+			.orTee((err) => {
+				this.ctl.notify(`Error getting current session: ${err.message}`);
+			})
+			.andTee((rec) => {
+				if (!rec) {
+					this.noTimerUI();
+					return;
+				}
+				const timerValue = TomatoTimerValue.create(rec);
+				if (timerValue.isFinished) {
+					this.ctl.notify('Timer is finished');
+					this.noTimerUI();
+					return;
+				}
+				this.timerUI(timerValue);
+			});
 	}
 
 	onBack(exit: () => void) {
@@ -82,16 +91,23 @@ export class TomatoTimer {
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
 		this.ctl.input.setPlaceholder('Type a label and/or hit shift+enter...');
+
 		const startTimer = (label?: string) => {
-			this.timerValue = TomatoTimerValue.start({
+			const timerValue = TomatoTimerValue.start({
 				duration,
 				label
 			});
-			this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee((err) => {
-				this.ctl.notify(`Error saving timer: ${err.message}`);
-			});
-			this.timerUI();
+			this.store
+				.putCurrentSession(timerValue.record as UnfinishedSession)
+				.andTee(() => {
+					this.timerUI(timerValue);
+				})
+				.orTee((err) => {
+					this.ctl.notify(`Error saving timer: ${err.message}`);
+					this.noTimerUI();
+				});
 		};
+
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-timer-no-label',
@@ -126,7 +142,7 @@ export class TomatoTimer {
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI() {
+	private timerUI(timerValue: TomatoTimerValue) {
 		this.currentUI = 'timerUI';
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Running timer... Seize the day!'
@@ -159,21 +175,21 @@ export class TomatoTimer {
 							onMount: (node) =>
 								mountSvelte(Timer, {
 									target: node,
-									props: { initialSecondsLeft: this.timerValue?.secondsRemaining ?? 0 }
+									props: { initialSecondsLeft: timerValue.secondsRemaining ?? 0 }
 								})
 						})
 					]
 				}),
 				stdMenuItem({
 					id: 'tomato-pause',
-					textContent: this.timerValue?.isPaused ? 'Resume' : 'Pause',
+					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
 					left: (b) => [
 						b.icon({
-							innerHTMLUnsafe: this.timerValue?.isPaused ? icons.playIcon : icons.pauseIcon
+							innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
 						})
 					],
 					action: () => {
-						this.timerValue?.pause(!this.timerValue?.isPaused);
+						timerValue.pause(!timerValue.isPaused);
 					}
 				}),
 				stdMenuItem({
@@ -181,7 +197,8 @@ export class TomatoTimer {
 					textContent: 'Finish',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
 					action: () => {
-						this.timerValue?.finish();
+						timerValue.finish();
+						// TODO: save the session
 					}
 				}),
 				stdMenuItem({
@@ -189,8 +206,7 @@ export class TomatoTimer {
 					textContent: 'Cancel',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
 					action: () => {
-						this.timerValue?.finish();
-						this.timerValue = null;
+						timerValue.finish();
 						// TODO: discard any record of this session
 					}
 				})

@@ -3,22 +3,43 @@ import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
 import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/builder.js';
-import { TomatoTimerValue } from './value.js';
+import { TomatoTimerValue, type UnfinishedSession } from './value.js';
 import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 import './idb.js';
+import { ResultAsync } from 'neverthrow';
+import { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
+
+type Store = {
+	putCurrentSession: (session: UnfinishedSession) => ResultAsync<void, IDBStoreError>;
+};
+
+class IDBStore implements Store {
+	static create() {
+		return new IDBStore();
+	}
+
+	putCurrentSession = (session: UnfinishedSession) => {
+		console.log('put', session);
+		return ResultAsync.fromPromise(
+			Promise.resolve(),
+			(err) => new IDBStoreError('putCurrentSession', err as Error)
+		);
+	};
+}
 
 export class TomatoTimer {
 	static create(ctl: Controller) {
-		return new TomatoTimer(ctl);
+		return new TomatoTimer(ctl, IDBStore.create());
 	}
 
 	constructor(
 		private ctl: Controller,
-		private timerValue: TomatoTimerValue | null = null
+		private store: Store
 	) {}
 
 	private currentUI: 'noTimerUI' | 'timerUI' | 'startTimerUI' = 'noTimerUI';
+	private timerValue: TomatoTimerValue | null = null;
 
 	/**
 	 * This is the entry point that loads the tomato timer ui.
@@ -77,32 +98,32 @@ export class TomatoTimer {
 	private startTimerUI({ duration }: { duration: number }) {
 		this.currentUI = 'startTimerUI';
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: `Timer for ${Math.round(duration / 60)} minutes`
+			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
 		this.ctl.input.setPlaceholder('Type a label and/or hit shift+enter...');
+		const startTimer = (label?: string) => {
+			this.timerValue = TomatoTimerValue.start({
+				duration,
+				label
+			});
+			this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee((err) => {
+				this.ctl.notify(`Error saving timer: ${err.message}`);
+			});
+			this.timerUI();
+		};
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-timer-no-label',
 				textContent: 'Start with no label',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					this.timerValue = TomatoTimerValue.create({
-						startTime: Date.now() / 1000,
-						duration
-					});
-					this.timerUI();
+					startTimer();
 				}
 			})
 		]);
 
 		this.ctl.input.setSubmitHandlerOnce((label) => {
-			this.timerValue = TomatoTimerValue.create({
-				startTime: Date.now() / 1000,
-				duration
-			});
-			// TODO: record a label or anonymous label.
-			console.log(label);
-			this.timerUI();
+			startTimer(label);
 		});
 
 		this.ctl.ui.setInputUI((inputUI) => {
@@ -126,6 +147,9 @@ export class TomatoTimer {
 	 */
 	private timerUI() {
 		this.currentUI = 'timerUI';
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Running timer... Seize the day!'
+		});
 		this.ctl.menu.setMenuItems(
 			[
 				// It is possible to have a timer without mounting a svelte

@@ -42,7 +42,6 @@ export class TomatoTimer {
 				}
 				const timerValue = TomatoTimerValue.create(rec);
 				if (timerValue.isFinished) {
-					this.ctl.notify('Timer is finished');
 					this.noTimerUI();
 					return;
 				}

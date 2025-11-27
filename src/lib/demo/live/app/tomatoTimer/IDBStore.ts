@@ -6,6 +6,7 @@ import {
 	CURRENT_SESSION_KEY,
 	CURRENT_SESSION_STORE,
 	DB_NAME,
+	type FinishedSessionRecord,
 	type TomatoTimerDB
 } from './idb.js';
 import { IDBError, openIDB } from '$lib/oneput/shared/idb.js';
@@ -51,6 +52,14 @@ export class IDBStore implements Store {
 			ResultAsync.fromPromise(
 				db.delete(CURRENT_SESSION_STORE, CURRENT_SESSION_KEY),
 				(err) => new IDBStoreError('deleteCurrentSession', err as Error)
+			).map(() => undefined)
+		);
+
+	putSession = (session: FinishedSessionRecord) =>
+		this.db.andThen((db) =>
+			ResultAsync.fromPromise(
+				db.put(COMPLETED_SESSIONS_STORE, session),
+				(err) => new IDBStoreError('putSession', err as Error)
 			).map(() => undefined)
 		);
 }

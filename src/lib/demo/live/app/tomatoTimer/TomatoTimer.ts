@@ -8,6 +8,7 @@ import { mountSvelte } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
+import type { FinishedSessionRecord } from './idb.js';
 
 export class TomatoTimer {
 	static create(ctl: Controller) {
@@ -197,7 +198,16 @@ export class TomatoTimer {
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
 					action: () => {
 						timerValue.finish();
-						// TODO: save the session
+						this.store
+							.putSession(timerValue.record as FinishedSessionRecord)
+							.andTee(() => {
+								this.ctl.notify('Session saved', { duration: 3000 });
+								this.noTimerUI();
+							})
+							.orTee((err) => {
+								this.ctl.notify(`Error saving session: ${err.message}`);
+								this.noTimerUI();
+							});
 					}
 				}),
 				stdMenuItem({
@@ -205,10 +215,16 @@ export class TomatoTimer {
 					textContent: 'Cancel',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
 					action: () => {
-						this.store.deleteCurrentSession().orTee((err) => {
-							this.ctl.notify(`Error deleting current session: ${err.message}`);
-						});
-						this.noTimerUI();
+						this.store
+							.deleteCurrentSession()
+							.orTee((err) => {
+								this.ctl.notify(`Error deleting current session: ${err.message}`);
+								this.noTimerUI();
+							})
+							.andTee(() => {
+								this.ctl.notify('Current session deleted', { duration: 3000 });
+								this.noTimerUI();
+							});
 					}
 				})
 			]

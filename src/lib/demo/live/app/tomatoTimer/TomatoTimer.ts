@@ -4,28 +4,41 @@ import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
-import { mountSvelte } from '$lib/oneput/lib.js';
+import { mountSvelte, type UIObject } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { createSubscriber } from 'svelte/reactivity';
 
-export class TomatoTimer {
+export class TomatoTimer implements UIObject {
 	static create(ctl: Controller) {
 		return new TomatoTimer(ctl, IDBStore.create());
 	}
-	private stopTimer?: () => void;
-	private subscribe: ReturnType<typeof createSubscriber>;
+	private notifyTimerDisplay?: () => void;
+	private subscribeTimerChanges: () => TomatoTimerValue | null;
 
 	constructor(
 		private ctl: Controller,
 		private store: Store
 	) {
-		this.subscribe = createSubscriber((update) => {
-			this.stopTimer = update;
+		const subscribe = createSubscriber((update) => {
+			this.notifyTimerDisplay = update;
 		});
+
+		this.subscribeTimerChanges = () => {
+			subscribe();
+			return this.timerValue;
+		};
 	}
+
+	beforeExit = () => {
+		if (this.timerValue && !this.timerValue.isFinished) {
+			this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee(() => {
+				this.ctl.notify('Error saving timer');
+			});
+		}
+	};
 
 	private currentUI: 'noTimerUI' | 'timerUI' | 'startTimerUI' = 'noTimerUI';
 	private timerValue: TomatoTimerValue | null = null;
@@ -48,12 +61,12 @@ export class TomatoTimer {
 					this.noTimerUI();
 					return;
 				}
-				const timerValue = TomatoTimerValue.create(rec);
-				if (timerValue.isFinished) {
+				this.timerValue = TomatoTimerValue.create(rec);
+				if (this.timerValue.isFinished) {
 					this.noTimerUI();
 					return;
 				}
-				this.timerUI(timerValue);
+				this.timerUI(this.timerValue);
 			});
 	}
 
@@ -183,8 +196,8 @@ export class TomatoTimer {
 								mountSvelte(Timer, {
 									target: node,
 									props: {
-										initialSecondsLeft: timerValue.secondsRemaining,
-										subscribe: this.subscribe
+										timerValue,
+										subscribeTimerChanges: this.subscribeTimerChanges
 									}
 								})
 						})
@@ -192,15 +205,19 @@ export class TomatoTimer {
 				}),
 				stdMenuItem({
 					id: 'tomato-pause',
-					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
+					textContent: timerValue?.isPaused ? 'Resume' : 'Pause',
 					left: (b) => [
 						b.icon({
-							innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
+							innerHTMLUnsafe: timerValue?.isPaused ? icons.playIcon : icons.pauseIcon
 						})
 					],
 					action: () => {
-						timerValue.pause(!timerValue.isPaused);
-						this.stopTimer?.();
+						timerValue?.pause(!timerValue?.isPaused);
+						this.notifyTimerDisplay?.();
+						this.store.putCurrentSession(timerValue?.record as UnfinishedSession).orTee(() => {
+							this.ctl.notify('Error saving timer');
+						});
+						this.timerUI(timerValue);
 					}
 				}),
 				stdMenuItem({
@@ -208,9 +225,9 @@ export class TomatoTimer {
 					textContent: 'Finish',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
 					action: () => {
-						timerValue.finish();
+						timerValue?.finish();
 						this.store
-							.putSession(timerValue.record as FinishedSessionRecord)
+							.putSession(timerValue?.record as FinishedSessionRecord)
 							.andTee(() => {
 								this.ctl.notify('Session saved', { duration: 3000 });
 								this.noTimerUI();

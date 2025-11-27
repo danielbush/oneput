@@ -1,33 +1,47 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { formatSecondsToHHMMSS } from './utils.js';
-	import type { createSubscriber } from 'svelte/reactivity';
+	import type { TomatoTimerValue } from './value.js';
 
 	const {
-		initialSecondsLeft,
-		subscribe
+		timerValue,
+		subscribeTimerChanges
 	}: {
-		initialSecondsLeft: number;
-		subscribe: ReturnType<typeof createSubscriber>;
+		timerValue: TomatoTimerValue;
+		subscribeTimerChanges: () => TomatoTimerValue | null;
 	} = $props();
 
-	let secondsRemaining = $state(initialSecondsLeft);
+	let secondsRemaining = $state(timerValue.secondsRemaining);
 	let formattedSecondsRemaining = $derived(formatSecondsToHHMMSS(secondsRemaining));
+	let interval: ReturnType<typeof setInterval> | undefined;
 
-	$effect(() => {
-		subscribe();
+	const stopTimer = () => {
 		if (interval) {
 			clearInterval(interval);
 		}
-	});
+	};
 
-	let interval: ReturnType<typeof setInterval> | undefined;
-
-	onMount(() => {
+	const startTimer = () => {
 		interval = setInterval(() => {
 			secondsRemaining -= 1;
 		}, 1000);
-		return () => clearInterval(interval);
+	};
+
+	$effect(() => {
+		subscribeTimerChanges();
+
+		if (timerValue.isPaused || timerValue.isFinished) {
+			stopTimer();
+			return;
+		}
+
+		if (!interval) {
+			startTimer();
+		}
+	});
+
+	onMount(() => {
+		return stopTimer;
 	});
 </script>
 

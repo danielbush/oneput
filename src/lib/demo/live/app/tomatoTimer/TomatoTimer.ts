@@ -175,7 +175,7 @@ export class TomatoTimer {
 							onMount: (node) =>
 								mountSvelte(Timer, {
 									target: node,
-									props: { initialSecondsLeft: timerValue.secondsRemaining ?? 0 }
+									props: { initialSecondsLeft: timerValue.secondsRemaining }
 								})
 						})
 					]

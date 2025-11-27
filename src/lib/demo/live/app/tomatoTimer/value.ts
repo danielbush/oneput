@@ -148,10 +148,10 @@ export class TomatoTimerValue {
 	get secondsRemaining() {
 		const { startTime, duration, pauseDuration, pauseStartTime, endTime } = this.data;
 		if (endTime) {
-			return duration - (endTime - startTime) - pauseDuration;
+			return duration - (endTime - startTime - pauseDuration);
 		}
 		const now = Date.now() / 1000;
 		const currentPause = pauseStartTime ? now - pauseStartTime : 0;
-		return duration - (now - startTime) - pauseDuration - currentPause;
+		return duration - (now - startTime - pauseDuration - currentPause);
 	}
 }

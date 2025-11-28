@@ -45,6 +45,10 @@ export type TomatoTimerData = {
 	pauseDuration: number; // secs
 };
 
+export type TimerDisplayProps = {
+	timerValue: TomatoTimerValue;
+};
+
 export type UnfinishedSession = TomatoTimerData & { endTime: null };
 export type FinishedSession = TomatoTimerData & { endTime: number };
 

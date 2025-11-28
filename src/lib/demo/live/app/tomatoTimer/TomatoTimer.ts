@@ -6,31 +6,57 @@ import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
 import { mountSvelte, type UIObject } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
+import SubscribedProps from './SubscribedProps.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { createSubscriber } from 'svelte/reactivity';
+import type { Component } from 'svelte';
+
+export type SubscribedPropsProps = {
+	createProps: () => Record<string, unknown>;
+	subscribe: ReturnType<typeof createSubscriber>;
+	Child: Component;
+};
+
+class Subscriber {
+	static create<P extends Record<string, unknown>>(Child: Component<P>) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return new Subscriber(Child as any); // TODO I am defeated for now
+	}
+
+	private subscribe: ReturnType<typeof createSubscriber>;
+	public notify?: () => void;
+
+	constructor(private Child: Component) {
+		this.subscribe = createSubscriber((update) => {
+			this.notify = update;
+		});
+	}
+
+	mount = (node: HTMLElement, createProps: () => Record<string, unknown>) => {
+		return mountSvelte(SubscribedProps, {
+			target: node,
+			props: {
+				createProps,
+				subscribe: this.subscribe,
+				Child: this.Child
+			}
+		});
+	};
+}
 
 export class TomatoTimer implements UIObject {
 	static create(ctl: Controller) {
-		return new TomatoTimer(ctl, IDBStore.create());
+		const subscriber = Subscriber.create(Timer);
+		return new TomatoTimer(ctl, IDBStore.create(), subscriber);
 	}
-	private notifyTimerDisplay?: () => void;
-	private subscribeTimerChanges: () => TomatoTimerValue | null;
 
 	constructor(
 		private ctl: Controller,
-		private store: Store
-	) {
-		const subscribe = createSubscriber((update) => {
-			this.notifyTimerDisplay = update;
-		});
-
-		this.subscribeTimerChanges = () => {
-			subscribe();
-			return this.timerValue;
-		};
-	}
+		private store: Store,
+		private subscriber: Subscriber
+	) {}
 
 	beforeExit = () => {
 		if (this.timerValue && !this.timerValue.isFinished) {
@@ -190,31 +216,28 @@ export class TomatoTimer implements UIObject {
 					children: (b) => [
 						b.fchild({
 							style: {
-								flex: '0'
+								justifyContent: 'center',
+								flex: '0 0 100%'
 							},
 							onMount: (node) =>
-								mountSvelte(Timer, {
-									target: node,
-									props: {
-										timerValue,
-										subscribeTimerChanges: this.subscribeTimerChanges
-									}
+								this.subscriber.mount(node, () => {
+									return { timerValue };
 								})
 						})
 					]
 				}),
 				stdMenuItem({
 					id: 'tomato-pause',
-					textContent: timerValue?.isPaused ? 'Resume' : 'Pause',
+					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
 					left: (b) => [
 						b.icon({
-							innerHTMLUnsafe: timerValue?.isPaused ? icons.playIcon : icons.pauseIcon
+							innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
 						})
 					],
 					action: () => {
-						timerValue?.pause(!timerValue?.isPaused);
-						this.notifyTimerDisplay?.();
-						this.store.putCurrentSession(timerValue?.record as UnfinishedSession).orTee(() => {
+						timerValue.pause(!timerValue.isPaused);
+						this.subscriber.notify?.();
+						this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee(() => {
 							this.ctl.notify('Error saving timer');
 						});
 						this.timerUI(timerValue);
@@ -225,9 +248,9 @@ export class TomatoTimer implements UIObject {
 					textContent: 'Finish',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
 					action: () => {
-						timerValue?.finish();
+						timerValue.finish();
 						this.store
-							.putSession(timerValue?.record as FinishedSessionRecord)
+							.putSession(timerValue.record as FinishedSessionRecord)
 							.andTee(() => {
 								this.ctl.notify('Session saved', { duration: 3000 });
 								this.noTimerUI();
@@ -255,7 +278,7 @@ export class TomatoTimer implements UIObject {
 							});
 					}
 				})
-			]
+			],
 
 			// This is really important otherwise the cancel button may not work.
 			// This is because we are re-rendering menu items every second, and
@@ -263,7 +286,7 @@ export class TomatoTimer implements UIObject {
 			// when we call setMenuItems.  This will trigger an update to the
 			// DOM for these items.  And this update can cause the cancel action
 			// to not work.
-			// { focusBehaviour: 'none' }
+			{ focusBehaviour: 'none' }
 		);
 		// if (initial) {
 		// 	this.ctl.menu.focusFirstMenuItem();

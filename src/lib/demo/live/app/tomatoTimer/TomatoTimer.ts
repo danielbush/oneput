@@ -4,43 +4,46 @@ import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
-import { mountSvelte, type UIObject } from '$lib/oneput/lib.js';
+import { type UIObject } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
 import SubscribedProps from './SubscribedProps.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { createSubscriber } from 'svelte/reactivity';
-import type { Component } from 'svelte';
+import { mount, type Component } from 'svelte';
 
-export type SubscribedPropsProps = {
-	createProps: () => Record<string, unknown>;
+export type SProps<P extends Record<string, unknown>> = {
+	createProps: () => P;
 	subscribe: ReturnType<typeof createSubscriber>;
-	Child: Component;
+	Child: Component<P>;
 };
 
 class Subscriber {
-	static create<P extends Record<string, unknown>>(Child: Component<P>) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return new Subscriber(Child as any); // TODO I am defeated for now
+	static create(): Subscriber {
+		return new Subscriber();
 	}
 
 	private subscribe: ReturnType<typeof createSubscriber>;
 	public notify?: () => void;
 
-	constructor(private Child: Component) {
+	constructor() {
 		this.subscribe = createSubscriber((update) => {
 			this.notify = update;
 		});
 	}
 
-	mount = (node: HTMLElement, createProps: () => Record<string, unknown>) => {
-		return mountSvelte(SubscribedProps, {
+	mount = <P extends Record<string, unknown>>(
+		node: HTMLElement,
+		Child: Component<P>,
+		createProps: () => P
+	) => {
+		return mount(SubscribedProps as Component<SProps<P>>, {
 			target: node,
 			props: {
 				createProps,
 				subscribe: this.subscribe,
-				Child: this.Child
+				Child
 			}
 		});
 	};
@@ -48,7 +51,7 @@ class Subscriber {
 
 export class TomatoTimer implements UIObject {
 	static create(ctl: Controller) {
-		const subscriber = Subscriber.create(Timer);
+		const subscriber: Subscriber = Subscriber.create();
 		return new TomatoTimer(ctl, IDBStore.create(), subscriber);
 	}
 
@@ -219,10 +222,11 @@ export class TomatoTimer implements UIObject {
 								justifyContent: 'center',
 								flex: '0 0 100%'
 							},
-							onMount: (node) =>
-								this.subscriber.mount(node, () => {
+							onMount: (node) => {
+								this.subscriber.mount(node, Timer, () => {
 									return { timerValue };
-								})
+								});
+							}
 						})
 					]
 				}),

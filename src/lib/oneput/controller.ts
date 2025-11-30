@@ -5,8 +5,8 @@ import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './plugins/Notification.js';
 import type { OneputProps, UIClass, UIObject } from './lib.js';
-import { Alert } from './plugins/Alert.js';
-import { Confirm } from './plugins/Confirm.js';
+import { Alert } from './shared/ui/Alert.js';
+import { Confirm } from './shared/ui/Confirm.js';
 
 export class Controller {
 	public events = new InternalEventEmitter();

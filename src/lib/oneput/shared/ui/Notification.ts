@@ -1,6 +1,6 @@
-import type { Controller } from '../controller.js';
-import { randomId } from '../lib.js';
-import { xIcon } from '../shared/icons.js';
+import type { Controller } from '../../controller.js';
+import { randomId } from '../../lib.js';
+import { xIcon } from '../../shared/icons.js';
 
 export type NotificationParams = {
 	duration?: number;

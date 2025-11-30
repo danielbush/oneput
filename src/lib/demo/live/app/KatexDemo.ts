@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
-import type { Notification } from '$lib/oneput/plugins/Notification.js';
+import type { Notification } from '$lib/oneput/shared/ui/Notification.js';
 import { type LayoutSettings } from '../layout.js';
 import { randomId, type OneputProps } from '$lib/oneput/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';

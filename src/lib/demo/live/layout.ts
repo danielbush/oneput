@@ -2,9 +2,9 @@ import { type UILayout, mountSvelte } from '$lib/oneput/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
-import { DateDisplay } from '$lib/oneput/shared/widgets/DateDisplay.js';
-import MenuStatus from '$lib/oneput/shared/widgets/MenuStatus.svelte';
-import { TimeDisplay } from '$lib/oneput/shared/widgets/TimeDisplay.js';
+import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
+import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
+import { TimeDisplay } from '$lib/oneput/shared/components/TimeDisplay.js';
 
 export type LayoutSettings = {
 	exitAction?: boolean | (() => void);

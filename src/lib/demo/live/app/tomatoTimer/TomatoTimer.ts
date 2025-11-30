@@ -6,7 +6,7 @@ import { hflex, menuItem } from '$lib/oneput/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
 import { type UIObject } from '$lib/oneput/lib.js';
 import Timer from './Timer.svelte';
-import SubscribedProps from './InjectedProps.svelte';
+import SubscribedProps from '../../../../oneput/components/InjectedProps.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';

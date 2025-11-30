@@ -6,48 +6,10 @@ import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
 import { type AppObject } from '$lib/oneput/lib/lib.js';
 import Timer from './Timer.svelte';
-import SubscribedProps from '../../../../oneput/components/InjectedProps.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
-import { createSubscriber } from 'svelte/reactivity';
-import { mount, type Component } from 'svelte';
-
-export type SveltePropInjectorProps<P extends Record<string, unknown>> = {
-	createProps: () => P;
-	subscribe: ReturnType<typeof createSubscriber>;
-	Child: Component<P>;
-};
-
-class SveltePropInjector {
-	static create(): SveltePropInjector {
-		return new SveltePropInjector();
-	}
-
-	private subscribe: ReturnType<typeof createSubscriber>;
-	public notify?: () => void;
-
-	constructor() {
-		this.subscribe = createSubscriber((update) => {
-			this.notify = update;
-		});
-	}
-
-	mount = <P extends Record<string, unknown>>(
-		node: HTMLElement,
-		Child: Component<P>,
-		createProps: () => P
-	) => {
-		return mount(SubscribedProps as Component<SveltePropInjectorProps<P>>, {
-			target: node,
-			props: {
-				createProps,
-				subscribe: this.subscribe,
-				Child
-			}
-		});
-	};
-}
+import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
 
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {

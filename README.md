@@ -38,12 +38,32 @@ When adding a new behaviour to Oneput...
 - (1) create a visual for it in /demo/visual state
 - (2) then demo behaviour in /demo/live.
 
-Key locations
+Naming schemes...
 
-- `lib/oneput`
-  - core oneput, code
-- `lib/oneput/plugins`
-  - some standard plugins (tentative)
+- `components/`
+  - DOM (js-based components), svelte components, web components
+  - these can be plugged into Oneput via its "ui"
+- `ui/`
+  - data structures that you use to populate Oneput's areas eg menu item objects like stdMenuItem populate the menu area; an Alert instance populates the replaceUI area etc
+  - menuItems eg stdMenuItem
+  - Alert
+  - Confirm
+  - Notification
+  - etc
+- `app/` "apps"
+  - an object that has a runUI, may set keybindings, may affect the back action etc
+- `plugins/`
+  - like apps in app/ but is reusable or not part of the main application
+- `shared/`
+  - not core; core code is not replaceable; shared can be replaced or used as reference to implement your own
+  - note tha we can have shared/compoennts , shared/ui etc
+
+Particular locations:
+
+- `lib/oneput` and `lib/oneput/lib`
+  - core code
+- `lib/oneput/shared`
+  - non-core code
 - `{routes,lib}/demo/visual`
   - Visual states
 - `{routes,lib}/demo/live`

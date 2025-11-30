@@ -9,8 +9,8 @@ import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from './BindingsIDB.js';
 import { hflex } from '../../lib/builder.js';
 import { mountSvelte } from '../../lib/lib.js';
-import AcceptButton from './AcceptButton.svelte';
-import CancelButton from './CancelButton.svelte';
+import AcceptButton from '../components/AcceptButton.svelte';
+import CancelButton from '../components/CancelButton.svelte';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.

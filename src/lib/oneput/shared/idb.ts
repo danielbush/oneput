@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, deleteDB, type IDBPDatabase } from 'idb';
 import { ResultAsync } from 'neverthrow';
-import type { KeyBindingMapSerializable } from '../bindings.js';
+import type { KeyBindingMapSerializable } from '../lib/bindings.js';
 
 /*
 The best practice for modular applications is to define your entire database

@@ -1,5 +1,5 @@
 import type { Controller } from '../../controller.js';
-import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../bindings.js';
+import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../lib/bindings.js';
 import { keyboardIcon, xIcon } from '../icons.js';
 import { stdMenuItem } from '../ui/stdMenuItem.js';
 import { startKeyCapture } from './keyCapture.js';

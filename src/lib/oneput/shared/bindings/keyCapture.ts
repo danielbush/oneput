@@ -1,5 +1,5 @@
 import type { Controller } from '../../controller.js';
-import { toKeyEvent, toDisplayString, type KeyEvent } from '../../bindings.js';
+import { toKeyEvent, toDisplayString, type KeyEvent } from '../../lib/bindings.js';
 
 export const startKeyCapture = (ctl: Controller) => {
 	let resolve: (r: KeyEvent[] | null) => void;

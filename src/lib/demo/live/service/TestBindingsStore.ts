@@ -1,4 +1,4 @@
-import type { KeyBindingMapSerializable } from '../../../oneput/bindings.js';
+import type { KeyBindingMapSerializable } from '../../../oneput/lib/bindings.js';
 import { BindingsIDB } from '../../../oneput/shared/bindings/BindingsIDB.js';
 import type { BindingsStore } from '../../../oneput/shared/bindings/BindingsStore.js';
 import { simulateDelay } from '../../../oneput/shared/simulateDelay.js';

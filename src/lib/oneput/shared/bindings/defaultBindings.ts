@@ -1,10 +1,9 @@
 /**
  * These can be used as defaults.  You can set your own defaults instead if you prefer.
  */
-import type { KeyBindingMapSerializable } from '../../bindings.js';
+import { KeyEventBindings, type KeyBindingMapSerializable } from '../../lib/bindings.js';
 import type { Controller } from '../../controller.js';
 import { GlobalFilter } from '../plugins/GlobalFilter.js';
-import { KeyEventBindings } from '../../bindings.js';
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
 	openMenu: (c) => {

@@ -1,5 +1,5 @@
 import { ResultAsync } from 'neverthrow';
-import type { KeyBindingMapSerializable } from '../../bindings.js';
+import type { KeyBindingMapSerializable } from '../../lib/bindings.js';
 import { getOneputIDB, type GetOneputIDB } from '../idb.js';
 import type { BindingsStore } from './BindingsStore.js';
 

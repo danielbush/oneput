@@ -1,4 +1,4 @@
-import { KeyEventBindings, type KeyBindingMap } from '../../bindings.js';
+import { KeyEventBindings, type KeyBindingMap } from '../../lib/bindings.js';
 import type { Controller } from '../../controller.js';
 import { BindingsIDB } from './BindingsIDB.js';
 import {

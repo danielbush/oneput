@@ -4,7 +4,7 @@ import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { TomatoTimerValue, type UnfinishedSession } from './value.js';
-import { type UIObject } from '$lib/oneput/lib/lib.js';
+import { type AppObject } from '$lib/oneput/lib/lib.js';
 import Timer from './Timer.svelte';
 import SubscribedProps from '../../../../oneput/components/InjectedProps.svelte';
 import { IDBStore } from './IDBStore.js';
@@ -49,7 +49,7 @@ class SveltePropInjector {
 	};
 }
 
-export class TomatoTimer implements UIObject {
+export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
 		const timerDisplay: SveltePropInjector = SveltePropInjector.create();
 		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay);

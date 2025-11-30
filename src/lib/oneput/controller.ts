@@ -4,7 +4,7 @@ import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './shared/ui/Notification.js';
-import type { OneputProps, UIClass, UIObject } from './lib/lib.js';
+import type { OneputProps, AppClass, AppObject } from './lib/lib.js';
 import { Alert } from './shared/ui/Alert.js';
 import { Confirm } from './shared/ui/Confirm.js';
 
@@ -29,8 +29,8 @@ export class Controller {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	}
 
-	private uiParents: UIObject[] = [];
-	private currentUI: UIObject | null = null;
+	private uiParents: AppObject[] = [];
+	private currentUI: AppObject | null = null;
 
 	/**
 	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
@@ -53,7 +53,7 @@ export class Controller {
 		this.input.resetSubmitHandler();
 	}
 
-	runUI<V extends Record<string, unknown>>(uiClass: UIClass<V>, values?: V) {
+	runUI<V extends Record<string, unknown>>(uiClass: AppClass<V>, values?: V) {
 		if (this.currentUI) {
 			this.uiParents.push(this.currentUI);
 		}

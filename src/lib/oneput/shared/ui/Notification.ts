@@ -1,5 +1,5 @@
 import type { Controller } from '../../controller.js';
-import { randomId } from '../../lib.js';
+import { randomId } from '../../lib/lib.js';
 import { xIcon } from '../../shared/icons.js';
 
 export type NotificationParams = {

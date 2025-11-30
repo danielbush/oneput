@@ -1,6 +1,6 @@
 import debounce from 'debounce';
 import type { InputChangeEvent } from './InternalEventEmitter.js';
-import { isFocusable, type InputChangeListener, type MenuItemAny } from './lib.js';
+import { isFocusable, type InputChangeListener, type MenuItemAny } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (

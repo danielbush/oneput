@@ -1,5 +1,5 @@
 import type { MenuItemsFn } from '../../MenuController.js';
-import { walk, type FChildParams, type MenuItemAny } from '../../lib.js';
+import { walk, type FChildParams, type MenuItemAny } from '../../lib/lib.js';
 
 export type MenuItemData = {
 	children: FChildParams[];

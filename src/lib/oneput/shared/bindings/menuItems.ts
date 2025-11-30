@@ -1,4 +1,4 @@
-import type { MenuItem } from '../../lib.js';
+import type { MenuItem } from '../../lib/lib.js';
 import { stdMenuItem } from '../../shared/ui/stdMenuItem.js';
 import * as icons from '../../shared/icons.js';
 

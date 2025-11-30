@@ -1,6 +1,6 @@
-import { type UILayout, mountSvelte } from '$lib/oneput/lib.js';
+import { type UILayout, mountSvelte } from '$lib/oneput/lib/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
-import { hflex } from '$lib/oneput/builder.js';
+import { hflex } from '$lib/oneput/lib/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';

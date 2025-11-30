@@ -1,4 +1,4 @@
-import type { InputChangeEvent as InputChangeEventLib } from './lib.js';
+import type { InputChangeEvent as InputChangeEventLib } from './lib/lib.js';
 
 // Internal event system for decoupled communication
 export type InternalEvent = InputChangeEvent;

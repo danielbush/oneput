@@ -1,5 +1,5 @@
 import type { Controller } from '../../controller.js';
-import { filterChildren, randomId } from '../../lib.js';
+import { filterChildren, randomId } from '../../lib/lib.js';
 
 /**
  * Alert.run returns a promise.

@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { UILayout, FlexParams, OneputProps } from './lib.js';
+import type { UILayout, FlexParams, OneputProps } from './lib/lib.js';
 
 export class UIController {
 	static create(ctl: Controller) {

@@ -7,8 +7,8 @@ import { keybindingMenuItem } from './menuItems.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from './BindingsIDB.js';
-import { hflex } from '../../builder.js';
-import { mountSvelte } from '../../lib.js';
+import { hflex } from '../../lib/builder.js';
+import { mountSvelte } from '../../lib/lib.js';
 import AcceptButton from './AcceptButton.svelte';
 import CancelButton from './CancelButton.svelte';
 

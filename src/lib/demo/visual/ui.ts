@@ -2,7 +2,7 @@
  * Some fake ui data we can use to populate oneput for demos.
  */
 
-import { randomId, type FlexParams, type MenuItemAny } from '$lib/oneput/lib.js';
+import { randomId, type FlexParams, type MenuItemAny } from '$lib/oneput/lib/lib.js';
 import type { appState } from './state.js';
 
 export const menuHeader1: FlexParams = {

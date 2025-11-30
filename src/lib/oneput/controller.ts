@@ -4,7 +4,7 @@ import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './shared/ui/Notification.js';
-import type { OneputProps, UIClass, UIObject } from './lib.js';
+import type { OneputProps, UIClass, UIObject } from './lib/lib.js';
 import { Alert } from './shared/ui/Alert.js';
 import { Confirm } from './shared/ui/Confirm.js';
 

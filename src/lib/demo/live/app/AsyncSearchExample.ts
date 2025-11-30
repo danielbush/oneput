@@ -1,4 +1,4 @@
-import { hflex } from '$lib/oneput/builder.js';
+import { hflex } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';

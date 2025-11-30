@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
-	import { type InputChangeEvent, type OneputProps } from '../lib.js';
+	import { type InputChangeEvent, type OneputProps } from '../lib/lib.js';
 	import { elasticOut, linear } from 'svelte/easing';
 
 	let {

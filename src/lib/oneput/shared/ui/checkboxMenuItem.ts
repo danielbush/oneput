@@ -1,5 +1,5 @@
 import type { Controller } from '../../controller.js';
-import { randomId, type FlexParams, type MenuItem } from '../../lib.js';
+import { randomId, type FlexParams, type MenuItem } from '../../lib/lib.js';
 
 export class CheckboxMenuItem implements MenuItem {
 	static create(params: {

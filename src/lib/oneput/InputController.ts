@@ -1,4 +1,4 @@
-import type { InputChangeEvent, InputChangeListener } from './lib.js';
+import type { InputChangeEvent, InputChangeListener } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export class InputController {

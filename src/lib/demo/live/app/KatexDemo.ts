@@ -2,7 +2,7 @@ import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import type { Notification } from '$lib/oneput/shared/ui/Notification.js';
 import { type LayoutSettings } from '../layout.js';
-import { randomId, type OneputProps } from '$lib/oneput/lib.js';
+import { randomId, type OneputProps } from '$lib/oneput/lib/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';

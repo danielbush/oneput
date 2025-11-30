@@ -3,7 +3,7 @@
  */
 import type { KeyBindingMapSerializable } from '../../bindings.js';
 import type { Controller } from '../../controller.js';
-import { GlobalFilter } from '../../plugins/GlobalFilter.js';
+import { GlobalFilter } from '../plugins/GlobalFilter.js';
 import { KeyEventBindings } from '../../bindings.js';
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {

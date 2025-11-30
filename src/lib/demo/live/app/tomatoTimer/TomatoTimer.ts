@@ -13,15 +13,15 @@ import type { FinishedSessionRecord } from './idb.js';
 import { createSubscriber } from 'svelte/reactivity';
 import { mount, type Component } from 'svelte';
 
-export type SProps<P extends Record<string, unknown>> = {
+export type SveltePropInjectorProps<P extends Record<string, unknown>> = {
 	createProps: () => P;
 	subscribe: ReturnType<typeof createSubscriber>;
 	Child: Component<P>;
 };
 
-class Subscriber {
-	static create(): Subscriber {
-		return new Subscriber();
+class SveltePropInjector {
+	static create(): SveltePropInjector {
+		return new SveltePropInjector();
 	}
 
 	private subscribe: ReturnType<typeof createSubscriber>;
@@ -38,7 +38,7 @@ class Subscriber {
 		Child: Component<P>,
 		createProps: () => P
 	) => {
-		return mount(SubscribedProps as Component<SProps<P>>, {
+		return mount(SubscribedProps as Component<SveltePropInjectorProps<P>>, {
 			target: node,
 			props: {
 				createProps,
@@ -51,14 +51,14 @@ class Subscriber {
 
 export class TomatoTimer implements UIObject {
 	static create(ctl: Controller) {
-		const subscriber: Subscriber = Subscriber.create();
-		return new TomatoTimer(ctl, IDBStore.create(), subscriber);
+		const timerDisplay: SveltePropInjector = SveltePropInjector.create();
+		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private store: Store,
-		private subscriber: Subscriber
+		private timerDisplay: SveltePropInjector
 	) {}
 
 	beforeExit = () => {
@@ -223,7 +223,7 @@ export class TomatoTimer implements UIObject {
 								flex: '0 0 100%'
 							},
 							onMount: (node) => {
-								this.subscriber.mount(node, Timer, () => {
+								this.timerDisplay.mount(node, Timer, () => {
 									return { timerValue };
 								});
 							}
@@ -240,7 +240,7 @@ export class TomatoTimer implements UIObject {
 					],
 					action: () => {
 						timerValue.pause(!timerValue.isPaused);
-						this.subscriber.notify?.();
+						this.timerDisplay.notify?.();
 						this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee(() => {
 							this.ctl.notify('Error saving timer');
 						});

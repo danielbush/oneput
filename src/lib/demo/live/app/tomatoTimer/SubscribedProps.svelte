@@ -1,6 +1,6 @@
 <script lang="ts" generics="P extends Record<string, unknown>">
-	import type { SProps } from './TomatoTimer.js';
-	const { createProps, subscribe, Child }: SProps<P> = $props();
+	import type { SveltePropInjectorProps } from './TomatoTimer.js';
+	const { createProps, subscribe, Child }: SveltePropInjectorProps<P> = $props();
 
 	let createdProps = $state(createProps());
 	$effect(() => {

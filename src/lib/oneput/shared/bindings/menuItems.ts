@@ -1,5 +1,5 @@
 import type { MenuItem } from '../../lib.js';
-import { stdMenuItem } from '../../shared/stdMenuItem.js';
+import { stdMenuItem } from '../../shared/ui/stdMenuItem.js';
 import * as icons from '../../shared/icons.js';
 
 export type KeybindingMenuItem = {

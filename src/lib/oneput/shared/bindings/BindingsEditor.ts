@@ -1,7 +1,7 @@
 import type { Controller } from '../../controller.js';
 import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../bindings.js';
 import { keyboardIcon, xIcon } from '../icons.js';
-import { stdMenuItem } from '../stdMenuItem.js';
+import { stdMenuItem } from '../ui/stdMenuItem.js';
 import { startKeyCapture } from './keyCapture.js';
 import { keybindingMenuItem } from './menuItems.js';
 import { type ResultAsync } from 'neverthrow';

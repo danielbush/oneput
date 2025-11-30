@@ -1,7 +1,7 @@
 import { hflex } from '$lib/oneput/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
-import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
+import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { type LayoutSettings } from '../layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 

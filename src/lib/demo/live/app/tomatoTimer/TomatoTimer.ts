@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
+import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/builder.js';

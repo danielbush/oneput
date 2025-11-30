@@ -13,7 +13,7 @@ import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
-import { stdMenuItem } from '$lib/oneput/shared/stdMenuItem.js';
+import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 
 export class RootUI {
 	static create(ctl: Controller) {

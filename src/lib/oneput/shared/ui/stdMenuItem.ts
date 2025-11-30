@@ -1,5 +1,5 @@
-import { vflex, type FlexChildBuilder } from '../builder.js';
-import { randomId, type FlexChildren, type MenuItem } from '../lib.js';
+import { vflex, type FlexChildBuilder } from '../../builder.js';
+import { randomId, type FlexChildren, type MenuItem } from '../../lib.js';
 
 /**
  * If action is specified, tag will be set to button.

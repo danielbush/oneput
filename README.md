@@ -86,7 +86,7 @@ A slice of functionality that a oneput app can use. Usually the plugin will take
 
 There is a stylesheet with some default / demo styling. Feel free to extend and modify it to suit your requirements.
 
-- src/lib/oneput/styles/oneput-defaults.css
+- src/lib/oneput/shared/styles/oneput-defaults.css
 
 Oneput consists of a container within which we have "areas".
 
@@ -132,5 +132,5 @@ Each of these 3 structures has a programmatic counterpart which you use to popul
 - Your web page should set `color-scheme` to `light dark` to allow dark mode.
 - use `media (prefers-color-scheme: dark) {...}` to theme oneput in dark mode for users that request it via their OS settings
   - `...` will take the form of: `.oneput__container { --oneput-...: ...; ... }`
-  - see `src/lib/oneput/styles/oneput-defaults.css` for the available css variable settings.
+  - see `src/lib/oneput/shared/styles/oneput-defaults.css` for the available css variable settings.
 - to force dark mode via a toggle, use JavaScript to add a class (e.g., `.dark-mode`) to the html element or a wrapper. Inside the media query for `prefers-color-scheme: dark` (above), target `.dark-mode` to set your dark mode variable values instead of setting them untargeted as above. This allows the class to force dark mode even if the system is set to light.

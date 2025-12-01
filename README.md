@@ -44,7 +44,7 @@ Naming schemes...
   - DOM (js-based components), svelte components, web components
   - these can be plugged into Oneput via its "ui"
 - `ui/`
-  - data structures that you use to populate Oneput's areas eg menu item objects like stdMenuItem populate the menu area; an Alert instance populates the replaceUI area etc
+  - data structures that you use to populate Oneput's areas eg menu item objects like stdMenuItem populate the menu area; an Alert instance populates the replaceMenuUI area etc
   - menuItems eg stdMenuItem
   - Alert
   - Confirm

@@ -30,7 +30,7 @@ export class Alert {
 
 		// Restore
 		this.ctl.keys.resetBindings(true);
-		this.ctl.ui.replaceUI();
+		this.ctl.ui.replaceMenuUI();
 		this.ctl.input.setPlaceholder(this.previousPlaceholder);
 		this.resolve?.();
 		this.previousActiveElement.focus();
@@ -51,7 +51,7 @@ export class Alert {
 		this.ctl.keys.enableKeys();
 
 		this.ctl.input.setPlaceholder('Click "ok" or type enter to continue...');
-		this.ctl.ui.replaceUI({
+		this.ctl.ui.replaceMenuUI({
 			menu: {
 				id: randomId(),
 				type: 'vflex',

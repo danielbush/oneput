@@ -56,7 +56,7 @@ export class Confirm {
 		this.ctl.keys.enableKeys();
 
 		this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
-		this.ctl.ui.replaceUI({
+		this.ctl.ui.replaceMenuUI({
 			menu: {
 				id: randomId(),
 				type: 'vflex',
@@ -119,7 +119,7 @@ export class Confirm {
 
 		// Restore
 		this.ctl.keys.resetBindings(true);
-		this.ctl.ui.replaceUI();
+		this.ctl.ui.replaceMenuUI();
 		this.ctl.input.setPlaceholder(this.previousPlaceholder);
 		this.resolve?.(ok);
 	};

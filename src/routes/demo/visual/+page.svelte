@@ -91,7 +91,7 @@
 			<Oneput
 				menuOpen={true}
 				menuItems={ui.menuItems1()}
-				replaceUI={toggleAlert
+				replaceMenuUI={toggleAlert
 					? undefined
 					: {
 							menu: {
@@ -143,7 +143,7 @@
 			<Oneput
 				menuOpen={true}
 				menuItems={ui.menuItems1()}
-				replaceUI={toggleConfirm
+				replaceMenuUI={toggleConfirm
 					? undefined
 					: {
 							menu: {

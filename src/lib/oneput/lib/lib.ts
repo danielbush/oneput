@@ -18,7 +18,7 @@ export type OneputProps = {
 	onMenuOpenChange?: (menuOpen: boolean) => void;
 	onMenuAction?: (evt: Event, item: MenuItem, index: number) => void;
 	onMenuItemEnter?: (evt: Event, item: MenuItem, index: number) => void;
-	replaceUI?: {
+	replaceMenuUI?: {
 		menu?: FlexParams;
 	};
 	injectUI?: {

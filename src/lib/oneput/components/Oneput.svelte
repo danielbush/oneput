@@ -63,20 +63,20 @@
 	class={[
 		'oneput__container',
 		props.menuOpen && 'oneput__menu--open',
-		props.replaceUI?.menu && 'oneput__menu--replaced',
+		props.replaceMenuUI?.menu && 'oneput__menu--replaced',
 		inputLines > 1 && 'oneput--multiline'
 	]}
 >
-	{#if props.menuOpen || props.replaceUI?.menu}
+	{#if props.menuOpen || props.replaceMenuUI?.menu}
 		<div class="oneput__menu-anchor">
 			<section
 				in:whoosh={{ duration: menuAnimationDuration, easing: linear }}
 				out:whoosh={{ duration: menuAnimationDuration, easing: linear }}
 				class="oneput__menu-area"
 			>
-				{#if props.replaceUI?.menu}
+				{#if props.replaceMenuUI?.menu}
 					<section in:whoosh={{ duration: replaceAnimationDuration, easing: elasticOut }}>
-						<Flex class="oneput__replace-menu" {...props.replaceUI.menu} />
+						<Flex class="oneput__replace-menu" {...props.replaceMenuUI.menu} />
 					</section>
 				{:else}
 					{#if props.menuUI?.header}

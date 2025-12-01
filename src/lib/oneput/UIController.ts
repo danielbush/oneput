@@ -46,14 +46,14 @@ export class UIController {
 	}
 
 	/**
-	 * Activates the replaceUI mechanism in the Oneput component.
+	 * Activates the replaceMenuUI mechanism in the Oneput component.
 	 *
 	 * This will replace the menu.
 	 * To restore ui, just call again with no argument.
 	 * It's up to the caller to decide everything else.
 	 */
-	replaceUI(ui?: OneputProps['replaceUI']) {
-		this.ctl.currentProps.replaceUI = ui;
+	replaceMenuUI(ui?: OneputProps['replaceMenuUI']) {
+		this.ctl.currentProps.replaceMenuUI = ui;
 	}
 
 	injectUI(ui?: OneputProps['injectUI']) {

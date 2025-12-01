@@ -8,7 +8,7 @@ import {
 } from '../../lib/bindings.js';
 import { keyboardIcon, xIcon } from '../icons.js';
 import { stdMenuItem } from '../ui/stdMenuItem.js';
-import { keybindingMenuItem } from '../bindings/menuItems.js';
+import { keybindingMenuItem } from '../ui/KeybindingMenuItem.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from '../bindings/BindingsIDB.js';

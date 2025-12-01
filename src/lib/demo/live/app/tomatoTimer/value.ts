@@ -46,7 +46,9 @@ export type TomatoTimerData = {
 };
 
 export type TimerDisplayProps = {
-	timerValue: TomatoTimerValue;
+	initialSecondsRemaining: number;
+	isPaused: boolean;
+	isFinished: boolean;
 };
 
 export type UnfinishedSession = TomatoTimerData & { endTime: null };
@@ -150,12 +152,12 @@ export class TomatoTimerValue {
 	 * This could be negative ("overtime").
 	 */
 	get secondsRemaining() {
-		const { startTime, duration, pauseDuration, pauseStartTime, endTime } = this.data;
-		if (endTime) {
-			return duration - (endTime - startTime - pauseDuration);
+		const d = this.data;
+		if (d.endTime) {
+			return d.duration - (d.endTime - d.startTime - d.pauseDuration);
 		}
 		const now = Date.now() / 1000;
-		const currentPause = pauseStartTime ? now - pauseStartTime : 0;
-		return duration - (now - startTime - pauseDuration - currentPause);
+		const currentPause = d.pauseStartTime ? now - d.pauseStartTime : 0;
+		return d.duration - (now - d.startTime - d.pauseDuration - currentPause);
 	}
 }

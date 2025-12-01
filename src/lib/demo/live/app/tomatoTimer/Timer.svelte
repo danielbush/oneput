@@ -4,10 +4,9 @@
 	import type { TimerDisplayProps } from './value.js';
 	import { icons } from '@lucide/svelte';
 
-	const { timerValue }: TimerDisplayProps = $props();
+	const { initialSecondsRemaining, isPaused, isFinished }: TimerDisplayProps = $props();
 
-	let secondsRemaining = $state(timerValue.secondsRemaining);
-	let formattedSecondsRemaining = $derived(formatSecondsToHHMMSS(secondsRemaining));
+	let secondsRemaining = $state(initialSecondsRemaining);
 	let interval: ReturnType<typeof setInterval> | undefined;
 
 	const stopTimer = () => {
@@ -24,7 +23,7 @@
 	};
 
 	$effect(() => {
-		if (timerValue.isPaused || timerValue.isFinished) {
+		if (isPaused || isFinished) {
 			stopTimer();
 			return;
 		}
@@ -40,9 +39,9 @@
 </script>
 
 <div class={['timer', secondsRemaining < 0 ? 'negative' : '']}>
-	{formattedSecondsRemaining}
+	{formatSecondsToHHMMSS(secondsRemaining)}
 
-	{#if timerValue.isPaused}
+	{#if isPaused}
 		<div class="pause">
 			<icons.Pause />
 		</div>

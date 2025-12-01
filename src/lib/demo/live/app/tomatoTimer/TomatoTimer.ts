@@ -158,104 +158,95 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Running timer... Seize the day!'
 		});
-		this.ctl.menu.setMenuItems(
-			[
-				// It is possible to have a timer without mounting a svelte
-				// component that handles the timer.  We just render timerUI
-				// every second, and pass in seconds remaining and have a menu
-				// item render it.  If we use consistent non-random id's for
-				// menu items and their constituents, then only part of the DOM
-				// that will change is the timer element inside the menu item
-				// thanks to the svelte reactivity that powers the core of
-				// oneput.  Another way might be to use onMount on an fchild and
-				// manage the setInterval in there; make sure to return a
-				// function that clears the interval.  But if you're using
-				// svelte just mount a svelte element that has a self-contained
-				// timer like here.
-				menuItem({
-					id: 'tomato-timer-display',
-					ignored: true,
-					style: {
-						justifyContent: 'center'
-					},
-					children: (b) => [
-						b.fchild({
-							style: {
-								justifyContent: 'center',
-								flex: '0 0 100%'
-							},
-							onMount: (node) => {
-								this.timerDisplay.mount(node, Timer, () => {
-									return { timerValue };
-								});
-							}
+		this.ctl.menu.setMenuItems([
+			// It is possible to have a timer without mounting a svelte
+			// component that handles the timer.  We just render timerUI
+			// every second, and pass in seconds remaining and have a menu
+			// item render it.  If we use consistent non-random id's for
+			// menu items and their constituents, then only part of the DOM
+			// that will change is the timer element inside the menu item
+			// thanks to the svelte reactivity that powers the core of
+			// oneput.  Another way might be to use onMount on an fchild and
+			// manage the setInterval in there; make sure to return a
+			// function that clears the interval.  But if you're using
+			// svelte just mount a svelte element that has a self-contained
+			// timer like here.
+			menuItem({
+				id: 'tomato-timer-display',
+				ignored: true,
+				style: {
+					justifyContent: 'center'
+				},
+				children: (b) => [
+					b.fchild({
+						style: {
+							justifyContent: 'center',
+							flex: '0 0 100%'
+						},
+						onMount: (node) => {
+							this.timerDisplay.mount(node, Timer, () => {
+								return {
+									initialSecondsRemaining: timerValue.secondsRemaining,
+									isPaused: timerValue.isPaused,
+									isFinished: timerValue.isFinished
+								};
+							});
+						}
+					})
+				]
+			}),
+			stdMenuItem({
+				id: 'tomato-pause',
+				textContent: timerValue.isPaused ? 'Resume' : 'Pause',
+				left: (b) => [
+					b.icon({
+						innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
+					})
+				],
+				action: () => {
+					timerValue.pause(!timerValue.isPaused);
+					this.timerDisplay.notify?.();
+					this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee(() => {
+						this.ctl.notify('Error saving timer');
+					});
+					this.timerUI(timerValue);
+				}
+			}),
+			stdMenuItem({
+				id: 'tomato-finish',
+				textContent: 'Finish',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
+				action: () => {
+					timerValue.finish();
+					this.store
+						.putSession(timerValue.record as FinishedSessionRecord)
+						.andTee(() => {
+							this.ctl.notify('Session saved', { duration: 3000 });
+							this.noTimerUI();
 						})
-					]
-				}),
-				stdMenuItem({
-					id: 'tomato-pause',
-					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
-					left: (b) => [
-						b.icon({
-							innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
-						})
-					],
-					action: () => {
-						timerValue.pause(!timerValue.isPaused);
-						this.timerDisplay.notify?.();
-						this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee(() => {
-							this.ctl.notify('Error saving timer');
+						.orTee((err) => {
+							this.ctl.notify(`Error saving session: ${err.message}`);
+							this.noTimerUI();
 						});
-						this.timerUI(timerValue);
-					}
-				}),
-				stdMenuItem({
-					id: 'tomato-finish',
-					textContent: 'Finish',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
-					action: () => {
-						timerValue.finish();
-						this.store
-							.putSession(timerValue.record as FinishedSessionRecord)
-							.andTee(() => {
-								this.ctl.notify('Session saved', { duration: 3000 });
-								this.noTimerUI();
-							})
-							.orTee((err) => {
-								this.ctl.notify(`Error saving session: ${err.message}`);
-								this.noTimerUI();
-							});
-					}
-				}),
-				stdMenuItem({
-					id: 'tomato-cancel',
-					textContent: 'Cancel',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
-					action: () => {
-						this.store
-							.deleteCurrentSession()
-							.orTee((err) => {
-								this.ctl.notify(`Error deleting current session: ${err.message}`);
-								this.noTimerUI();
-							})
-							.andTee(() => {
-								this.ctl.notify('Current session deleted', { duration: 3000 });
-								this.noTimerUI();
-							});
-					}
-				})
-			],
-
-			// This is really important otherwise the cancel button may not work.
-			// This is because we are re-rendering menu items every second, and
-			// the focusBehaviour may be changing the old and new focused items
-			// when we call setMenuItems.  This will trigger an update to the
-			// DOM for these items.  And this update can cause the cancel action
-			// to not work.
-			{ focusBehaviour: 'none' }
-		);
-		// if (initial) {
-		// 	this.ctl.menu.focusFirstMenuItem();
-		// }
+				}
+			}),
+			stdMenuItem({
+				id: 'tomato-cancel',
+				textContent: 'Cancel',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
+				action: () => {
+					this.store
+						.deleteCurrentSession()
+						.orTee((err) => {
+							this.ctl.notify(`Error deleting current session: ${err.message}`);
+							this.noTimerUI();
+						})
+						.andTee(() => {
+							this.ctl.notify('Current session deleted', { duration: 3000 });
+							this.noTimerUI();
+						});
+				}
+			})
+		]);
 	}
 }

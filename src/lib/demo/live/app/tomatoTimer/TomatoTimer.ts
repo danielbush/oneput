@@ -25,8 +25,8 @@ export class TomatoTimer implements AppObject {
 
 	beforeExit = () => {
 		if (this.timerValue && !this.timerValue.isFinished) {
-			this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee(() => {
-				this.ctl.notify('Error saving timer');
+			this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee((err) => {
+				this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 			});
 		}
 	};
@@ -45,7 +45,7 @@ export class TomatoTimer implements AppObject {
 		this.store
 			.getCurrentSession()
 			.orTee((err) => {
-				this.ctl.notify(`Error getting current session: ${err.message}`);
+				this.ctl.alert({ message: 'Error getting current session', additional: err.message });
 			})
 			.andTee((rec) => {
 				if (!rec) {
@@ -114,7 +114,7 @@ export class TomatoTimer implements AppObject {
 					this.timerUI(timerValue);
 				})
 				.orTee((err) => {
-					this.ctl.notify(`Error saving timer: ${err.message}`);
+					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 					this.noTimerUI();
 				});
 		};
@@ -206,8 +206,8 @@ export class TomatoTimer implements AppObject {
 				action: () => {
 					timerValue.pause(!timerValue.isPaused);
 					this.timerDisplay.notify?.();
-					this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee(() => {
-						this.ctl.notify('Error saving timer');
+					this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
+						this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 					});
 					this.timerUI(timerValue);
 				}
@@ -225,7 +225,7 @@ export class TomatoTimer implements AppObject {
 							this.noTimerUI();
 						})
 						.orTee((err) => {
-							this.ctl.notify(`Error saving session: ${err.message}`);
+							this.ctl.alert({ message: 'Error saving session', additional: err.message });
 							this.noTimerUI();
 						});
 				}
@@ -238,7 +238,10 @@ export class TomatoTimer implements AppObject {
 					this.store
 						.deleteCurrentSession()
 						.orTee((err) => {
-							this.ctl.notify(`Error deleting current session: ${err.message}`);
+							this.ctl.alert({
+								message: 'Error deleting current session',
+								additional: err.message
+							});
 							this.noTimerUI();
 						})
 						.andTee(() => {

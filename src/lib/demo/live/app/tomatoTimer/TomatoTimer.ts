@@ -31,7 +31,12 @@ export class TomatoTimer implements AppObject {
 		}
 	};
 
-	private currentUI: 'noTimerUI' | 'timerUI' | 'startTimerUI' = 'noTimerUI';
+	private currentUI:
+		| 'noTimerUI'
+		| 'timerUI'
+		| 'startTimerUI'
+		| 'previousSessionsUI'
+		| 'editSessionUI' = 'noTimerUI';
 	private timerValue: TomatoTimerValue | null = null;
 
 	/**
@@ -62,15 +67,27 @@ export class TomatoTimer implements AppObject {
 	}
 
 	onBack(exit: () => void) {
-		if (this.currentUI === 'noTimerUI') {
-			exit();
-			return;
+		switch (this.currentUI) {
+			case 'noTimerUI':
+				exit();
+				return;
+			case 'startTimerUI':
+				this.noTimerUI();
+				return;
+			case 'previousSessionsUI':
+				if (this.timerValue) {
+					this.timerUI(this.timerValue);
+					return;
+				}
+				this.noTimerUI();
+				return;
+			case 'editSessionUI':
+				this.previousSessionsUI();
+				return;
+			default:
+				exit();
+				return;
 		}
-		if (this.currentUI === 'startTimerUI') {
-			this.noTimerUI();
-			return;
-		}
-		exit();
 	}
 
 	/**
@@ -79,6 +96,14 @@ export class TomatoTimer implements AppObject {
 	private noTimerUI() {
 		this.currentUI = 'noTimerUI';
 		this.ctl.menu.setMenuItems([
+			stdMenuItem({
+				id: 'tomato-previous-sessions',
+				textContent: 'Previous sessions...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+				action: () => {
+					this.previousSessionsUI();
+				}
+			}),
 			stdMenuItem({
 				id: 'tomato-start',
 				textContent: '30 Minutes',
@@ -196,6 +221,14 @@ export class TomatoTimer implements AppObject {
 				]
 			}),
 			stdMenuItem({
+				id: 'tomato-previous-sessions',
+				textContent: 'Previous sessions...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+				action: () => {
+					this.previousSessionsUI();
+				}
+			}),
+			stdMenuItem({
 				id: 'tomato-pause',
 				textContent: timerValue.isPaused ? 'Resume' : 'Pause',
 				left: (b) => [
@@ -218,8 +251,10 @@ export class TomatoTimer implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
 				action: () => {
 					timerValue.finish();
+					this.timerValue = null;
 					this.store
 						.putSession(timerValue.record as FinishedSessionRecord)
+						.andThen(() => this.store.deleteCurrentSession())
 						.andTee(() => {
 							this.ctl.notify('Session saved', { duration: 3000 });
 							this.noTimerUI();
@@ -248,6 +283,61 @@ export class TomatoTimer implements AppObject {
 							this.ctl.notify('Current session deleted', { duration: 3000 });
 							this.noTimerUI();
 						});
+				}
+			})
+		]);
+	}
+
+	private previousSessionsUI() {
+		this.currentUI = 'previousSessionsUI';
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Previous sessions...'
+		});
+		this.ctl.input.setPlaceholder('Search sessions...');
+		this.store.getFinishedSessions().andTee((sessions) => {
+			this.ctl.menu.setMenuItems(
+				sessions.map((session) => {
+					return stdMenuItem({
+						id: `tomato-previous-session-${session.id}`,
+						textContent: `${session.label ?? 'Untitled'} (${Math.round(session.duration / 60)} minutes)`,
+						left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
+						right: (b) => [
+							b.fchild({ textContent: `${new Date(session.startTime * 1000).toLocaleString()}` }),
+							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
+						],
+						action: () => {
+							this.editSessionUI(session);
+						},
+						bottom: {
+							textContent: `${new Date(session.startTime * 1000).toLocaleString()} - ${new Date(session.endTime * 1000).toLocaleString()} (${Math.round(session.duration / 60)} minutes)`
+						}
+					});
+				})
+			);
+		});
+	}
+
+	private editSessionUI(session: FinishedSessionRecord) {
+		this.currentUI = 'editSessionUI';
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Edit session...'
+		});
+		this.ctl.menu.setMenuItems([
+			stdMenuItem({
+				id: 'tomato-edit-session-save',
+				textContent: 'Delete...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.xIcon })],
+				action: async () => {
+					const confirm = this.ctl.confirm({
+						message: 'Are you sure you want to delete this session?'
+					});
+					const yes = await confirm.userChooses();
+					if (yes) {
+						this.store.deleteSession(session).andTee(() => {
+							this.ctl.notify('Session deleted', { duration: 3000 });
+						});
+					}
+					this.previousSessionsUI();
 				}
 			})
 		]);

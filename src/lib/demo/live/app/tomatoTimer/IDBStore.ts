@@ -62,4 +62,20 @@ export class IDBStore implements Store {
 				(err) => new IDBStoreError('putSession', err as Error)
 			).map(() => undefined)
 		);
+
+	deleteSession = (session: FinishedSessionRecord) =>
+		this.db.andThen((db) =>
+			ResultAsync.fromPromise(
+				db.delete(COMPLETED_SESSIONS_STORE, session.id),
+				(err) => new IDBStoreError('deleteSession', err as Error)
+			).map(() => undefined)
+		);
+
+	getFinishedSessions = () =>
+		this.db.andThen((db) =>
+			ResultAsync.fromPromise(
+				db.getAll(COMPLETED_SESSIONS_STORE),
+				(err) => new IDBStoreError('getAllSessions', err as Error)
+			)
+		);
 }

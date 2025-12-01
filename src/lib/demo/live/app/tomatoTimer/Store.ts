@@ -8,4 +8,6 @@ export type Store = {
 	getCurrentSession(): ResultAsync<UnfinishedSession | null, IDBStoreError>;
 	deleteCurrentSession(): ResultAsync<void, IDBStoreError>;
 	putSession(session: FinishedSessionRecord): ResultAsync<void, IDBStoreError>;
+	deleteSession(session: FinishedSessionRecord): ResultAsync<void, IDBStoreError>;
+	getFinishedSessions(): ResultAsync<FinishedSessionRecord[], IDBStoreError>;
 };

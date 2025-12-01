@@ -9,6 +9,8 @@ export class Confirm {
 		return new Confirm(controller, { additional, message });
 	}
 
+	private previousPlaceholder: string;
+
 	constructor(
 		private ctl: Controller,
 		private params: { additional?: string; message: string },
@@ -16,13 +18,16 @@ export class Confirm {
 		private promise?: Promise<boolean>,
 		private okButton?: HTMLElement,
 		private cancelButton?: HTMLElement
-	) {}
+	) {
+		this.previousPlaceholder = this.ctl.input.getPlaceholder();
+	}
 
 	run(): Promise<boolean> {
 		return this.start();
 	}
 
 	private start = () => {
+		this.ctl.setModal();
 		this.ctl.keys.setBindings(
 			{
 				ok: {
@@ -48,11 +53,8 @@ export class Confirm {
 			},
 			true
 		);
-		this.ctl.enableGoBack(false);
-		this.ctl.menu.enableMenuActions(false);
-		this.ctl.menu.enableMenuOpenClose(false);
-		this.ctl.menu.enableMenuItemsFn(false);
-		this.ctl.input.enableInputElement(false);
+		this.ctl.keys.enableKeys();
+
 		this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
 		this.ctl.ui.replaceUI({
 			menu: {
@@ -61,12 +63,12 @@ export class Confirm {
 				classes: ['oneput__menu-body-content', 'oneput__alert'],
 				children: filterChildren([
 					{
-						id: 'alert-title',
+						id: 'confirm-title',
 						type: 'fchild',
 						htmlContentUnsafe: `<h2>${this.params.message}</h2>`
 					},
 					this.params.additional && {
-						id: 'alert-additional',
+						id: 'confirm-additional',
 						type: 'fchild',
 						htmlContentUnsafe: `<p>${this.params.additional}</p>`
 					},
@@ -113,14 +115,12 @@ export class Confirm {
 	};
 
 	private stop = (ok: boolean) => {
-		this.ctl.enableGoBack();
-		this.ctl.menu.enableMenuActions();
-		this.ctl.menu.enableMenuOpenClose();
-		this.ctl.menu.enableMenuItemsFn();
-		this.ctl.input.enableInputElement();
-		this.ctl.ui.replaceUI();
+		this.ctl.setModal(false);
+
+		// Restore
 		this.ctl.keys.resetBindings(true);
-		this.ctl.input.setPlaceholder();
+		this.ctl.ui.replaceUI();
+		this.ctl.input.setPlaceholder(this.previousPlaceholder);
 		this.resolve?.(ok);
 	};
 

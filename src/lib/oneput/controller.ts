@@ -124,4 +124,13 @@ export class Controller {
 		confirm.run();
 		return confirm;
 	}
+
+	setModal(isModal: boolean = true) {
+		this.enableGoBack(!isModal);
+		this.keys.enableKeys(!isModal);
+		this.menu.enableMenuActions(!isModal);
+		this.menu.enableMenuOpenClose(!isModal);
+		this.menu.enableMenuItemsFn(!isModal);
+		this.input.enableInputElement(!isModal);
+	}
 }

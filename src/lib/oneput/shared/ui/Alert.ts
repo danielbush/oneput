@@ -14,6 +14,7 @@ export class Alert {
 
 	private okPromise: Promise<void> | null = null;
 	private previousActiveElement: HTMLElement;
+	private previousPlaceholder: string;
 
 	constructor(
 		private ctl: Controller,
@@ -21,22 +22,22 @@ export class Alert {
 		private resolve?: () => void
 	) {
 		this.previousActiveElement = document.activeElement as HTMLElement;
+		this.previousPlaceholder = this.ctl.input.getPlaceholder();
 	}
 
 	private stop = () => {
-		this.ctl.enableGoBack();
-		this.ctl.menu.enableMenuActions();
-		this.ctl.menu.enableMenuOpenClose();
-		this.ctl.menu.enableMenuItemsFn();
-		this.ctl.input.enableInputElement();
-		this.ctl.ui.replaceUI();
+		this.ctl.setModal(false);
+
+		// Restore
 		this.ctl.keys.resetBindings(true);
-		this.ctl.input.setPlaceholder();
+		this.ctl.ui.replaceUI();
+		this.ctl.input.setPlaceholder(this.previousPlaceholder);
 		this.resolve?.();
 		this.previousActiveElement.focus();
 	};
 
 	private start = () => {
+		this.ctl.setModal();
 		this.ctl.keys.setBindings(
 			{
 				ok: {
@@ -47,11 +48,8 @@ export class Alert {
 			},
 			true
 		);
-		this.ctl.enableGoBack(false);
-		this.ctl.menu.enableMenuActions(false);
-		this.ctl.menu.enableMenuOpenClose(false);
-		this.ctl.menu.enableMenuItemsFn(false);
-		this.ctl.input.enableInputElement(false);
+		this.ctl.keys.enableKeys();
+
 		this.ctl.input.setPlaceholder('Click "ok" or type enter to continue...');
 		this.ctl.ui.replaceUI({
 			menu: {

@@ -187,23 +187,14 @@ export class BindingsEditor {
 			this.ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
 		};
 
-		this.ctl.enableGoBack(false);
-		this.ctl.keys.enableKeys(false);
-		this.ctl.menu.enableMenuActions(false);
-		this.ctl.menu.enableMenuOpenClose(false);
-		this.ctl.menu.enableMenuItemsFn(false);
-		this.ctl.input.enableInputElement(false);
+		this.ctl.setModal(true);
+
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
 		const exit = () => {
 			window.removeEventListener('keydown', keyListener);
-			this.ctl.enableGoBack();
-			this.ctl.keys.enableKeys();
-			this.ctl.menu.enableMenuActions();
-			this.ctl.menu.enableMenuOpenClose();
-			this.ctl.menu.enableMenuItemsFn();
-			this.ctl.input.enableInputElement();
+			this.ctl.setModal(false);
 		};
 
 		return {

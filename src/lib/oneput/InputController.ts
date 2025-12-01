@@ -54,6 +54,13 @@ export class InputController {
 		this.defaultPlaceHolder = msg || 'Type here...';
 	}
 
+	/**
+	 * Get the current placeholder.
+	 */
+	getPlaceholder() {
+		return this.ctl.currentProps.placeholder || '';
+	}
+
 	setPlaceholder(msg?: string) {
 		this.ctl.currentProps.placeholder =
 			msg || this.ctl.ui.getLayout()?.placeholder || this.defaultPlaceHolder;

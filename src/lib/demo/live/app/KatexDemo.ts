@@ -30,7 +30,7 @@ export class KatexDemo {
 		});
 		this.setMenuItems(true, '', 'first');
 		this.setInputUI(true);
-		this.ctl.menu.disableMenuOpenClose();
+		this.ctl.menu.enableMenuOpenClose(false);
 		this.ctl.input.setPlaceholder('Type some katex-flavoured latex...');
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {

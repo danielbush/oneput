@@ -28,7 +28,7 @@ export class MenuController {
 			}
 		};
 		this.ctl.currentProps.onMenuAction = () => {
-			if (this._disableActions) {
+			if (this.disableActions) {
 				return;
 			}
 			this.doMenuAction();
@@ -53,9 +53,9 @@ export class MenuController {
 	/**
 	 * Disable ALL menuItemsFn calls.
 	 */
-	private _disableMenuItemsFn = false;
-	private _disableActions = false;
-	private _disableOpenClose = false;
+	private disableMenuItemsFn = false;
+	private disableActions = false;
+	private disableOpenClose = false;
 	private defaultMenuItemsFn?: MenuItemsFn;
 	private removeMenuItemsListener?: () => void;
 	private defaultFocusBehaviour: FocusBehaviour = 'first';
@@ -68,14 +68,14 @@ export class MenuController {
 	}
 
 	openMenu = () => {
-		if (this._disableOpenClose) {
+		if (this.disableOpenClose) {
 			return;
 		}
 		this.ctl.currentProps.menuOpen = true;
 	};
 
 	closeMenu = () => {
-		if (this._disableOpenClose) {
+		if (this.disableOpenClose) {
 			return;
 		}
 		this.ctl.currentProps.menuOpen = false;
@@ -86,7 +86,7 @@ export class MenuController {
 	// #region menu actions
 
 	doMenuAction() {
-		if (this._disableActions) {
+		if (this.disableActions) {
 			return;
 		}
 		if (this.currentMenuItem) {
@@ -151,7 +151,7 @@ export class MenuController {
 	setMenuItemsFn(menuItemsFn: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
 		this.removeMenuItemsListener?.();
 		const handler: InputChangeListener = (evt) => {
-			if (this._disableMenuItemsFn) {
+			if (this.disableMenuItemsFn) {
 				return;
 			}
 			const items = menuItemsFn(evt.target?.value ?? '', this.menuItems || []);
@@ -205,7 +205,7 @@ export class MenuController {
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
 		this.removeMenuItemsListener = this.ctl.events.on<InputChangeEvent>('input-change', (evt) => {
-			if (this._disableMenuItemsFn) {
+			if (this.disableMenuItemsFn) {
 				return;
 			}
 			options.onDebounce?.(true);
@@ -323,27 +323,16 @@ export class MenuController {
 	// - menu open/close
 	// - mennItemsFn
 
-	disableMenuActions() {
-		this._disableActions = true;
+	enableMenuActions(on: boolean = true) {
+		this.disableActions = !on;
 	}
 
-	disableMenuOpenClose() {
-		this._disableOpenClose = true;
-	}
-	disableMenuItemsFn() {
-		this._disableMenuItemsFn = true;
+	enableMenuOpenClose(on: boolean = true) {
+		this.disableOpenClose = !on;
 	}
 
-	enableMenuActions() {
-		this._disableActions = false;
-	}
-
-	enableMenuOpenClose() {
-		this._disableOpenClose = false;
-	}
-
-	enableMenuItemsFn() {
-		this._disableMenuItemsFn = false;
+	enableMenuItemsFn(on: boolean = true) {
+		this.disableMenuItemsFn = !on;
 	}
 
 	// #endregion

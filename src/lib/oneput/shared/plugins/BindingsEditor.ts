@@ -188,11 +188,11 @@ export class BindingsEditor {
 		};
 
 		this.ctl.enableGoBack(false);
-		this.ctl.keys.disableKeys();
-		this.ctl.menu.disableMenuActions();
-		this.ctl.menu.disableMenuOpenClose();
-		this.ctl.menu.disableMenuItemsFn();
-		this.ctl.input.disableInputElement();
+		this.ctl.keys.enableKeys(false);
+		this.ctl.menu.enableMenuActions(false);
+		this.ctl.menu.enableMenuOpenClose(false);
+		this.ctl.menu.enableMenuItemsFn(false);
+		this.ctl.input.enableInputElement(false);
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});

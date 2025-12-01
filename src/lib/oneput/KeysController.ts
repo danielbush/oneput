@@ -73,12 +73,8 @@ export class KeysController {
 
 	private keysDisabled = false;
 
-	disableKeys() {
-		this.keysDisabled = true;
-	}
-
-	enableKeys() {
-		this.keysDisabled = false;
+	enableKeys(on: boolean = true) {
+		this.keysDisabled = !on;
 	}
 
 	setDefaultBindings(bindings: KeyBindingMap, isLocal: boolean = false) {

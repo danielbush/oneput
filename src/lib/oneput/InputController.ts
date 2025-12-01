@@ -80,18 +80,11 @@ export class InputController {
 		});
 	}
 
-	disableInputElement() {
+	enableInputElement(on: boolean = true) {
 		if (!this.inputElement) {
 			return;
 		}
-		this.inputElement.disabled = true;
-	}
-
-	enableInputElement() {
-		if (!this.inputElement) {
-			return;
-		}
-		this.inputElement.disabled = false;
+		this.inputElement.disabled = !on;
 	}
 
 	private submitHandler?: (input: string) => void;

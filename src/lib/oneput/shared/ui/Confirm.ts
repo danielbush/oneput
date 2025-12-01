@@ -49,10 +49,10 @@ export class Confirm {
 			true
 		);
 		this.ctl.enableGoBack(false);
-		this.ctl.menu.disableMenuActions();
-		this.ctl.menu.disableMenuOpenClose();
-		this.ctl.menu.disableMenuItemsFn();
-		this.ctl.input.disableInputElement();
+		this.ctl.menu.enableMenuActions(false);
+		this.ctl.menu.enableMenuOpenClose(false);
+		this.ctl.menu.enableMenuItemsFn(false);
+		this.ctl.input.enableInputElement(false);
 		this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
 		this.ctl.ui.replaceUI({
 			menu: {

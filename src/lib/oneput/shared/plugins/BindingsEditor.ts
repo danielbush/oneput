@@ -1,8 +1,13 @@
 import type { Controller } from '../../controller.js';
-import { KeyEventBindings, type KeyBindingMap, type KeyEvent } from '../../lib/bindings.js';
+import {
+	KeyEventBindings,
+	toDisplayString,
+	toKeyEvent,
+	type KeyBindingMap,
+	type KeyEvent
+} from '../../lib/bindings.js';
 import { keyboardIcon, xIcon } from '../icons.js';
 import { stdMenuItem } from '../ui/stdMenuItem.js';
-import { startKeyCapture } from '../bindings/keyCapture.js';
 import { keybindingMenuItem } from '../bindings/menuItems.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
@@ -126,7 +131,7 @@ export class BindingsEditor {
 			backAction: false,
 			exitAction: false
 		});
-		const { accept, reject, capturingKeys } = startKeyCapture(this.ctl);
+		const { accept, reject, capturingKeys } = this.startKeyCapture();
 		this.ctl.ui.setInputUI({
 			right: hflex({
 				id: 'input-right-1',
@@ -164,6 +169,59 @@ export class BindingsEditor {
 		}
 		this.ctl.goBack();
 	}
+
+	private startKeyCapture = () => {
+		let resolve: (r: KeyEvent[] | null) => void;
+		const capturingKeys = new Promise<KeyEvent[] | null>((_resolve) => {
+			resolve = _resolve;
+		});
+		const capturedKeys: KeyEvent[] = [];
+		const keyListener = (evt: KeyboardEvent) => {
+			// Ignore modifier only key presses.
+			if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(evt.key)) {
+				return;
+			}
+			evt.preventDefault();
+			evt.stopPropagation();
+			capturedKeys.push(toKeyEvent(evt));
+			this.ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
+		};
+
+		this.ctl.keys.disableKeys();
+		this.ctl.menu.disableMenuActions();
+		this.ctl.menu.disableMenuOpenClose();
+		this.ctl.menu.disableMenuItemsFn();
+		this.ctl.input.disableInputElement();
+		setTimeout(() => {
+			window.addEventListener('keydown', keyListener);
+		});
+		const exit = () => {
+			window.removeEventListener('keydown', keyListener);
+			this.ctl.keys.enableKeys();
+			this.ctl.menu.enableMenuActions();
+			this.ctl.menu.enableMenuOpenClose();
+			this.ctl.menu.enableMenuItemsFn();
+			this.ctl.input.enableInputElement();
+		};
+
+		return {
+			accept: (evt: Event) => {
+				// If this is a button in input.right then preventDefault stops
+				// the input from being focused.
+				evt.preventDefault();
+				if (capturedKeys.length > 0) {
+					resolve(capturedKeys);
+				}
+				exit();
+			},
+			reject: (evt: Event) => {
+				evt.preventDefault();
+				resolve(null);
+				exit();
+			},
+			capturingKeys
+		};
+	};
 
 	private removeBinding = async (actionId: string, binding: string) => {
 		const confirm = this.ctl.confirm({ message: 'Remove binding?' });

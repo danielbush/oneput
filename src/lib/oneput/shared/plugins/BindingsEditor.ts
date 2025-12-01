@@ -187,6 +187,7 @@ export class BindingsEditor {
 			this.ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
 		};
 
+		this.ctl.enableGoBack(false);
 		this.ctl.keys.disableKeys();
 		this.ctl.menu.disableMenuActions();
 		this.ctl.menu.disableMenuOpenClose();
@@ -197,6 +198,7 @@ export class BindingsEditor {
 		});
 		const exit = () => {
 			window.removeEventListener('keydown', keyListener);
+			this.ctl.enableGoBack();
 			this.ctl.keys.enableKeys();
 			this.ctl.menu.enableMenuActions();
 			this.ctl.menu.enableMenuOpenClose();

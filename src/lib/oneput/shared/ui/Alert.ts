@@ -24,6 +24,7 @@ export class Alert {
 	}
 
 	private stop = () => {
+		this.ctl.enableGoBack();
 		this.ctl.menu.enableMenuActions();
 		this.ctl.menu.enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();
@@ -46,6 +47,7 @@ export class Alert {
 			},
 			true
 		);
+		this.ctl.enableGoBack(false);
 		this.ctl.menu.disableMenuActions();
 		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.menu.disableMenuItemsFn();

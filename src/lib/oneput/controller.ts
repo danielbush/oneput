@@ -31,6 +31,11 @@ export class Controller {
 
 	private uiParents: AppObject[] = [];
 	private currentUI: AppObject | null = null;
+	private disableGoBack = false;
+
+	enableGoBack(on: boolean = true) {
+		this.disableGoBack = !on;
+	}
 
 	/**
 	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
@@ -42,6 +47,7 @@ export class Controller {
 		this.menu.enableMenuOpenClose();
 		this.menu.enableMenuItemsFn();
 		this.input.enableInputElement();
+		this.enableGoBack();
 
 		// Reset stuff...
 		this.keys.resetBindings();
@@ -89,6 +95,9 @@ export class Controller {
 	 * This is intended for triggering a back action via keyboard.
 	 */
 	readonly goBack = () => {
+		if (this.disableGoBack) {
+			return;
+		}
 		this.currentUI?.beforeExit?.();
 		if (this.currentUI?.onBack) {
 			this.currentUI.onBack(this.popUI);

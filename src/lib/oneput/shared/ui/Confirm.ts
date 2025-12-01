@@ -48,6 +48,7 @@ export class Confirm {
 			},
 			true
 		);
+		this.ctl.enableGoBack(false);
 		this.ctl.menu.disableMenuActions();
 		this.ctl.menu.disableMenuOpenClose();
 		this.ctl.menu.disableMenuItemsFn();
@@ -112,6 +113,7 @@ export class Confirm {
 	};
 
 	private stop = (ok: boolean) => {
+		this.ctl.enableGoBack();
 		this.ctl.menu.enableMenuActions();
 		this.ctl.menu.enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();

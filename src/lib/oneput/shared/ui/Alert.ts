@@ -1,5 +1,5 @@
+import { vflex } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '../../controller.js';
-import { filterChildren, randomId } from '../../lib/lib.js';
 
 /**
  * Alert.run returns a promise.
@@ -52,24 +52,18 @@ export class Alert {
 
 		this.ctl.input.setPlaceholder('Click "ok" or type enter to continue...');
 		this.ctl.ui.replaceMenuUI({
-			menu: {
-				id: randomId(),
-				type: 'vflex',
+			menu: vflex({
+				id: 'oneput-alert',
 				classes: ['oneput__menu-body-content', 'oneput__alert'],
-				children: filterChildren([
-					{
-						id: 'alert-title',
-						type: 'fchild',
+				children: (b) => [
+					b.fchild({
 						htmlContentUnsafe: `<h2>${this.params.message}</h2>`
-					},
-					this.params.additional && {
-						id: 'alert-additional',
-						type: 'fchild',
-						htmlContentUnsafe: `<p>${this.params.additional}</p>`
-					},
-					{
-						id: 'alert-button',
-						type: 'fchild',
+					}),
+					!!this.params.additional &&
+						b.fchild({
+							htmlContentUnsafe: `<p>${this.params.additional}</p>`
+						}),
+					b.fchild({
 						tag: 'button',
 						classes: ['oneput__primary-button'],
 						textContent: 'OK',
@@ -79,9 +73,9 @@ export class Alert {
 						attr: {
 							onclick: this.stop
 						}
-					}
-				])
-			}
+					})
+				]
+			})
 		});
 		this.okPromise = new Promise<void>((resolve: () => void) => {
 			this.resolve = resolve;

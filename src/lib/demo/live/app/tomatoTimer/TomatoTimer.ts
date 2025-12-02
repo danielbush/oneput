@@ -329,7 +329,7 @@ export class TomatoTimer implements AppObject {
 							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
 						],
 						action: () => {
-							this.editSessionUI(session);
+							this.editEntryUI(session);
 						}
 					});
 				})
@@ -337,7 +337,7 @@ export class TomatoTimer implements AppObject {
 		});
 	}
 
-	private editSessionUI(session: FinishedSessionRecord) {
+	private editEntryUI(session: FinishedSessionRecord) {
 		this.currentUI = 'editSessionUI';
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.runLayout<LayoutSettings>({

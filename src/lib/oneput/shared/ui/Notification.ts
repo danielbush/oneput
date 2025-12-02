@@ -44,8 +44,9 @@ export class Notification {
 					b.fchild({
 						textContent: this.message
 					}),
-					b.fchild({
+					b.iconButton({
 						classes: ['oneput__icon-button'],
+						title: 'Close',
 						innerHTMLUnsafe: xIcon,
 						attr: {
 							onclick: () => {

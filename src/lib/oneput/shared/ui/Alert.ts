@@ -63,9 +63,9 @@ export class Alert {
 						b.fchild({
 							htmlContentUnsafe: `<p>${this.params.additional}</p>`
 						}),
-					b.fchild({
-						tag: 'button',
+					b.button({
 						classes: ['oneput__primary-button'],
+						title: 'Ok',
 						textContent: 'OK',
 						onMount: (node) => {
 							node.focus();

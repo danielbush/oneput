@@ -77,13 +77,17 @@ export class KeysController {
 		this.keysDisabled = !on;
 	}
 
-	setDefaultBindings(bindings: KeyBindingMap, isLocal: boolean = false) {
+	setDefaultBindings(bindings: KeyBindingMap, isLocal: boolean = false, apply = false) {
 		if (isLocal) {
 			this.defaultLocalBindings = bindings;
-			this.handleLocalKeys(bindings);
+			if (apply) {
+				this.setBindings(bindings, true);
+			}
 		} else {
 			this.defaultGlobalBindings = bindings;
-			this.handleGlobalKeys(bindings);
+			if (apply) {
+				this.setBindings(bindings, false);
+			}
 		}
 	}
 
@@ -96,13 +100,21 @@ export class KeysController {
 		return isLocal ? this.defaultLocalBindings : this.defaultGlobalBindings;
 	}
 
+	getCurrentBindings(isLocal: boolean = false) {
+		return isLocal ? this.currentLocalBindings : this.currentGlobalBindings;
+	}
+
 	private defaultLocalBindings: KeyBindingMap = {};
 	private defaultGlobalBindings: KeyBindingMap = {};
+	private currentLocalBindings: KeyBindingMap = {};
+	private currentGlobalBindings: KeyBindingMap = {};
 
 	setBindings(bindings: KeyBindingMap, isLocal: boolean = false) {
 		if (isLocal) {
+			this.currentLocalBindings = bindings;
 			this.handleLocalKeys(bindings);
 		} else {
+			this.currentGlobalBindings = bindings;
 			this.handleGlobalKeys(bindings);
 		}
 	}
@@ -112,9 +124,9 @@ export class KeysController {
 	 */
 	resetBindings(isLocal: boolean = false) {
 		if (isLocal) {
-			this.setDefaultBindings(this.defaultLocalBindings, true);
+			this.setBindings(this.defaultLocalBindings, true);
 		} else {
-			this.setDefaultBindings(this.defaultGlobalBindings, false);
+			this.setBindings(this.defaultGlobalBindings, false);
 		}
 	}
 }

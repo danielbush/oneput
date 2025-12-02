@@ -58,6 +58,8 @@ export class LocalBindingsService {
 			isLocal
 		);
 		result.orTee(() => {
+			// Reset default bindings in event of error.
+			// The caller of this method will show error message.
 			this.ctl.keys.setDefaultBindings(oldKeyBindingMap, isLocal);
 		});
 		return result;

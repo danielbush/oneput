@@ -138,12 +138,16 @@ export class TomatoTimerValue {
 	 * This could be negative ("overtime").
 	 */
 	get secondsRemaining() {
+		return this.data.duration - this.elapsed;
+	}
+
+	get elapsed() {
 		const d = this.data;
 		if (d.endTime) {
-			return d.duration - (d.endTime - d.startTime - d.pauseDuration);
+			return d.endTime - d.startTime - d.pauseDuration;
 		}
 		const now = Date.now() / 1000;
 		const currentPause = d.pauseStartTime ? now - d.pauseStartTime : 0;
-		return d.duration - (now - d.startTime - d.pauseDuration - currentPause);
+		return now - d.startTime - d.pauseDuration - currentPause;
 	}
 }

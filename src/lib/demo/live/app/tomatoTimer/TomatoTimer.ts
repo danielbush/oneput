@@ -10,6 +10,7 @@ import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
+import { formatSecondsToHHMMSS } from './utils.js';
 
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
@@ -96,6 +97,9 @@ export class TomatoTimer implements AppObject {
 	 */
 	private noTimerUI() {
 		this.currentUI = 'noTimerUI';
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'No timer running'
+		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'tomato-previous-sessions',
@@ -293,15 +297,16 @@ export class TomatoTimer implements AppObject {
 	private previousSessionsUI() {
 		this.currentUI = 'previousSessionsUI';
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Previous sessions...'
+			menuHeader: 'Previous sessions'
 		});
-		this.ctl.input.setPlaceholder('Search sessions...');
+		this.ctl.input.setPlaceholder('Select a session...');
 		this.store.getFinishedSessions().andTee((sessions) => {
 			this.ctl.menu.setMenuItems(
 				sessions.map((session) => {
+					const v = TomatoTimerValue.create(session);
 					return stdMenuItem({
 						id: `tomato-previous-session-${session.id}`,
-						textContent: `${session.label ?? 'Untitled'} (${Math.round(session.duration / 60)} minutes)`,
+						textContent: `${session.label ?? ''} (${formatSecondsToHHMMSS(v.elapsed / 60)})`,
 						left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 						right: (b) => [
 							b.fchild({ textContent: `${new Date(session.startTime * 1000).toLocaleString()}` }),
@@ -309,9 +314,6 @@ export class TomatoTimer implements AppObject {
 						],
 						action: () => {
 							this.editSessionUI(session);
-						},
-						bottom: {
-							textContent: `${new Date(session.startTime * 1000).toLocaleString()} - ${new Date(session.endTime * 1000).toLocaleString()} (${Math.round(session.duration / 60)} minutes)`
 						}
 					});
 				})
@@ -321,9 +323,11 @@ export class TomatoTimer implements AppObject {
 
 	private editSessionUI(session: FinishedSessionRecord) {
 		this.currentUI = 'editSessionUI';
+		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Edit session...'
 		});
+		this.ctl.input.setPlaceholder('Select an action...');
 		this.ctl.menu.setMenuItems([
 			menuItem({
 				id: 'tomato-timer-session-details',
@@ -339,7 +343,7 @@ export class TomatoTimer implements AppObject {
 						},
 						// TODO: We could mount a component here...
 						innerHTMLUnsafe: `<div>
-							<h3>${session.label ?? 'Untitled'} (${Math.round(session.duration / 60)} minutes)</h3>
+							<h3>${session.label ? session.label + ' - ' : ''}${formatSecondsToHHMMSS(v.elapsed / 60)}</h3>
 							<table>
 								<tr><td>Start</td> <td>${new Date(session.startTime * 1000).toLocaleString()}</td></tr>
 								<tr><td>End</td> <td>${new Date(session.endTime * 1000).toLocaleString()}</td></tr>

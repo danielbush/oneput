@@ -207,10 +207,6 @@ export function isMacOS() {
 
 export type NullishChildren = Array<FlexParams | FChildParams | '' | false | null | undefined>;
 
-export function filterChildren(children: NullishChildren): FlexParams['children'] {
-	return children.filter(Boolean) as FlexParams['children'];
-}
-
 export function walk(
 	item: FlexParams | FChildParams,
 	cb: (item: FlexParams | FChildParams) => void

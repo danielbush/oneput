@@ -3,7 +3,11 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
-import { TomatoTimerValue, type UnfinishedSession } from './TomatoTimerValue.js';
+import {
+	TomatoTimerValue,
+	type FinishedSession,
+	type UnfinishedSession
+} from './TomatoTimerValue.js';
 import { type AppObject } from '$lib/oneput/lib/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
@@ -37,7 +41,8 @@ export class TomatoTimer implements AppObject {
 		| 'timerUI'
 		| 'startTimerUI'
 		| 'previousSessionsUI'
-		| 'editSessionUI' = 'noTimerUI';
+		| 'editSessionUI'
+		| 'addEntryUI' = 'noTimerUI';
 	private timerValue: TomatoTimerValue | null = null;
 
 	/**
@@ -70,6 +75,9 @@ export class TomatoTimer implements AppObject {
 
 	onBack(exit: () => void) {
 		switch (this.currentUI) {
+			case 'addEntryUI':
+				this.noTimerUI();
+				return;
 			case 'noTimerUI':
 				exit();
 				return;
@@ -116,6 +124,14 @@ export class TomatoTimer implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
 					this.startTimerUI({ duration: 30 * 60 });
+				}
+			}),
+			stdMenuItem({
+				id: 'tomato-add-entry',
+				textContent: 'Add entry...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
+				action: () => {
+					this.addEntryUI();
 				}
 			})
 		]);
@@ -389,6 +405,37 @@ export class TomatoTimer implements AppObject {
 						this.previousSessionsUI();
 						return;
 					}
+				}
+			})
+		]);
+	}
+
+	private addEntryUI() {
+		this.currentUI = 'addEntryUI';
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Add entry...'
+		});
+		this.ctl.input.setPlaceholder('Select a field to edit...');
+		const session: Partial<FinishedSession> = {};
+		this.ctl.menu.setMenuItems([
+			stdMenuItem({
+				id: 'tomato-add-entry-label',
+				textContent: 'Label...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+				action: () => {
+					// this.editEntryLabelUI();
+					this.ctl.input.setPlaceholder('Enter new label...');
+					this.ctl.input.setSubmitHandlerOnce((label) => {
+						session.label = label;
+					});
+				}
+			}),
+			stdMenuItem({
+				id: 'tomato-add-entry-duration',
+				textContent: 'Duration...',
+				// left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
+				action: () => {
+					// this.editEntryDurationUI();
 				}
 			})
 		]);

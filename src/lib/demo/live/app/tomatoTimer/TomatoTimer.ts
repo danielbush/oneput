@@ -324,6 +324,27 @@ export class TomatoTimer implements AppObject {
 		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
+				id: 'tomato-edit-session-edit-label',
+				textContent: 'Edit label...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+				action: () => {
+					this.ctl.input.setPlaceholder('Enter new label...');
+					this.ctl.input.setSubmitHandlerOnce((label) => {
+						this.store
+							.putSession({ ...session, label })
+							.andTee(() => {
+								this.ctl.notify('Session label updated', { duration: 3000 });
+							})
+							.orTee((err) => {
+								this.ctl.alert({
+									message: 'Error updating session label',
+									additional: err.message
+								});
+							});
+					});
+				}
+			}),
+			stdMenuItem({
 				id: 'tomato-edit-session-save',
 				textContent: 'Delete...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.xIcon })],

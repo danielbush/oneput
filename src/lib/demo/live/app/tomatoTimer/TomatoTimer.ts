@@ -46,6 +46,7 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Tomato Timer'
 		});
+		this.ctl.menu.clearMenuItemsFn();
 		// TODO: check if there is an active timer...
 		this.store
 			.getCurrentSession()
@@ -100,6 +101,7 @@ export class TomatoTimer implements AppObject {
 				id: 'tomato-previous-sessions',
 				textContent: 'Previous sessions...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
 					this.previousSessionsUI();
 				}

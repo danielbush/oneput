@@ -1,5 +1,5 @@
 import { type DBSchema } from 'idb';
-import { type FinishedSession, type UnfinishedSession } from './value.js';
+import { type FinishedSession, type UnfinishedSession } from './TomatoTimerValue.js';
 
 export type FinishedSessionRecord = FinishedSession & { id: number };
 

@@ -3,7 +3,7 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
-import { TomatoTimerValue, type UnfinishedSession } from './value.js';
+import { TomatoTimerValue, type UnfinishedSession } from './TomatoTimerValue.js';
 import { type AppObject } from '$lib/oneput/lib/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';

@@ -1,5 +1,5 @@
 import type { ResultAsync } from 'neverthrow';
-import type { UnfinishedSession } from './value.js';
+import type { UnfinishedSession } from './TomatoTimerValue.js';
 import type { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
 import type { FinishedSessionRecord } from './idb.js';
 

@@ -375,10 +375,15 @@ export class TomatoTimer implements AppObject {
 				action: () => {
 					this.ctl.input.setPlaceholder('Enter new label...');
 					this.ctl.input.setSubmitHandlerOnce((label) => {
+						const newSession = { ...session, label };
 						this.store
-							.putSession({ ...session, label })
+							.putSession(newSession)
 							.andTee(() => {
 								this.ctl.notify('Session label updated', { duration: 3000 });
+								// Refresh this ui to update the display.
+								// We could just call setMenuItems again.
+								// Using consistent id's will mean only a small part of the DOM will change.
+								this.editEntryUI(newSession);
 							})
 							.orTee((err) => {
 								this.ctl.alert({

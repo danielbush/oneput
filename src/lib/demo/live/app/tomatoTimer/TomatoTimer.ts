@@ -336,8 +336,9 @@ export class TomatoTimer implements AppObject {
 						this.store.deleteSession(session).andTee(() => {
 							this.ctl.notify('Session deleted', { duration: 3000 });
 						});
+						this.previousSessionsUI();
+						return;
 					}
-					this.previousSessionsUI();
 				}
 			})
 		]);

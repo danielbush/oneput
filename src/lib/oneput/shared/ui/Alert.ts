@@ -59,7 +59,7 @@ export class Alert {
 					b.fchild({
 						htmlContentUnsafe: `<h2>${this.params.message}</h2>`
 					}),
-					!!this.params.additional &&
+					this.params.additional &&
 						b.fchild({
 							htmlContentUnsafe: `<p>${this.params.additional}</p>`
 						}),

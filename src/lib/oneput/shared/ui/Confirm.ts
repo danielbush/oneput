@@ -1,5 +1,5 @@
+import { vflex } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '../../controller.js';
-import { filterChildren, randomId } from '../../lib/lib.js';
 
 export class Confirm {
 	static create(
@@ -57,28 +57,20 @@ export class Confirm {
 
 		this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
 		this.ctl.ui.replaceMenuUI({
-			menu: {
-				id: randomId(),
-				type: 'vflex',
+			menu: vflex({
+				id: 'oneput-confirm',
 				classes: ['oneput__menu-body-content', 'oneput__alert'],
-				children: filterChildren([
-					{
-						id: 'confirm-title',
-						type: 'fchild',
+				children: (b) => [
+					b.fchild({
 						htmlContentUnsafe: `<h2>${this.params.message}</h2>`
-					},
-					this.params.additional && {
-						id: 'confirm-additional',
-						type: 'fchild',
-						htmlContentUnsafe: `<p>${this.params.additional}</p>`
-					},
-					{
-						id: randomId(),
-						type: 'hflex',
-						children: [
-							{
-								id: randomId(),
-								type: 'fchild',
+					}),
+					this.params.additional &&
+						b.fchild({
+							htmlContentUnsafe: `<p>${this.params.additional}</p>`
+						}),
+					b.hflex({
+						children: (b) => [
+							b.fchild({
 								tag: 'button',
 								classes: ['oneput__primary-button'],
 								textContent: 'OK',
@@ -89,9 +81,8 @@ export class Confirm {
 								attr: {
 									onclick: () => this.stop(true)
 								}
-							},
-							{
-								id: randomId(),
+							}),
+							b.fchild({
 								type: 'fchild',
 								tag: 'button',
 								classes: ['oneput__secondary-button'],
@@ -102,11 +93,11 @@ export class Confirm {
 								onMount: (node) => {
 									this.cancelButton = node;
 								}
-							}
+							})
 						]
-					}
-				])
-			}
+					})
+				]
+			})
 		});
 		this.promise = new Promise<boolean>((resolve: (value: boolean) => void) => {
 			this.resolve = resolve;

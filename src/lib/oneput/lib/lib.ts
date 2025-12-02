@@ -42,7 +42,7 @@ export type OneputProps = {
 	replaceAnimationDuration?: number;
 };
 
-export type FlexChildren = Array<FlexParams | FChildParams | undefined | null | false>;
+export type FlexChildren = Array<FlexParams | FChildParams | undefined | null | false | ''>;
 
 /**
  * Represents a either a horizontal or vertical flex container which is used to

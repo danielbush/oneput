@@ -48,10 +48,8 @@ export class Notification {
 						classes: ['oneput__icon-button'],
 						title: 'Close',
 						innerHTMLUnsafe: xIcon,
-						attr: {
-							onclick: () => {
-								this.ctl.ui.injectUI();
-							}
+						onClick: () => {
+							this.ctl.ui.injectUI();
 						}
 					})
 				]

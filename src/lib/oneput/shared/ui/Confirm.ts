@@ -78,17 +78,13 @@ export class Confirm {
 									this.okButton = node;
 									node.focus();
 								},
-								attr: {
-									onclick: () => this.stop(true)
-								}
+								onClick: () => this.stop(true)
 							}),
 							b.button({
 								classes: ['oneput__secondary-button'],
 								title: 'Cancel',
 								textContent: 'Cancel',
-								attr: {
-									onclick: () => this.stop(false)
-								},
+								onClick: () => this.stop(false),
 								onMount: (node) => {
 									this.cancelButton = node;
 								}

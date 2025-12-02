@@ -85,11 +85,15 @@ export class FlexChildBuilder {
 		return icon({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
+	iconButton(
+		params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+	): FChildParams {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	button(params: Partial<FChildParams> & { title: string }): FChildParams {
+	button(
+		params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+	): FChildParams {
 		return button({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
@@ -142,7 +146,9 @@ export function spacer(
 /**
  * Like icon but turns the icon into a button.
  */
-export function iconButton(params: Partial<FChildParams> & { title: string }): FChildParams {
+export function iconButton(
+	params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+): FChildParams {
 	return fchild({
 		tag: 'button',
 		textContent: params.textContent,
@@ -150,20 +156,32 @@ export function iconButton(params: Partial<FChildParams> & { title: string }): F
 		...params,
 		classes: ['oneput__icon-button', ...(params.classes ?? [])],
 		style: { alignSelf: 'flex-start', ...params.style },
-		attr: { type: 'button', title: params.title, ...params.attr }
+		attr: {
+			type: 'button',
+			title: params.title,
+			onclick: params.onClick ?? (() => {}),
+			...params.attr
+		}
 	});
 }
 
 /**
  * A non-icon button - the sort of thing you might see on a form or alert or confirmation dialog etc.
  */
-export function button(params: Partial<FChildParams> & { title: string }): FChildParams {
+export function button(
+	params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+): FChildParams {
 	return fchild({
 		tag: 'button',
 		textContent: params.textContent,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		classes: ['oneput__button', ...(params.classes ?? [])],
-		attr: { type: 'button', title: params.title, ...params.attr }
+		attr: {
+			type: 'button',
+			title: params.title,
+			onclick: params.onClick ?? (() => {}),
+			...params.attr
+		}
 	});
 }

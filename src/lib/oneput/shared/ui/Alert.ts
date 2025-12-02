@@ -70,9 +70,7 @@ export class Alert {
 						onMount: (node) => {
 							node.focus();
 						},
-						attr: {
-							onclick: this.stop
-						}
+						onClick: this.stop
 					})
 				]
 			})

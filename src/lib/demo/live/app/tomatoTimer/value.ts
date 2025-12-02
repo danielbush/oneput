@@ -54,14 +54,6 @@ export type TimerDisplayProps = {
 export type UnfinishedSession = TomatoTimerData & { endTime: null };
 export type FinishedSession = TomatoTimerData & { endTime: number };
 
-export function isUnfinishedSession(session: TomatoTimerData): session is UnfinishedSession {
-	return session.endTime === null;
-}
-
-export function isFinishedSession(session: TomatoTimerData): session is FinishedSession {
-	return session.endTime !== null;
-}
-
 /**
  * A mutable value object for timer data.
  *

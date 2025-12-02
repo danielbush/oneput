@@ -89,6 +89,10 @@ export class FlexChildBuilder {
 		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
+	button(params: Partial<FChildParams> & { title: string }): FChildParams {
+		return button({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+	}
+
 	spacer(h: boolean = true, v: boolean = true, params?: Partial<FChildParams>): FChildParams {
 		return spacer(h, v, { id: this.id + '-' + this.counter++, ...(params ?? {}) });
 	}
@@ -146,6 +150,20 @@ export function iconButton(params: Partial<FChildParams> & { title: string }): F
 		...params,
 		classes: ['oneput__icon-button', ...(params.classes ?? [])],
 		style: { alignSelf: 'flex-start', ...params.style },
+		attr: { type: 'button', title: params.title, ...params.attr }
+	});
+}
+
+/**
+ * A non-icon button - the sort of thing you might see on a form or alert or confirmation dialog etc.
+ */
+export function button(params: Partial<FChildParams> & { title: string }): FChildParams {
+	return fchild({
+		tag: 'button',
+		textContent: params.textContent,
+		innerHTMLUnsafe: params.innerHTMLUnsafe,
+		...params,
+		classes: ['oneput__button', ...(params.classes ?? [])],
 		attr: { type: 'button', title: params.title, ...params.attr }
 	});
 }

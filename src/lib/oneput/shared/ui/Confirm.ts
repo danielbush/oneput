@@ -70,9 +70,9 @@ export class Confirm {
 						}),
 					b.hflex({
 						children: (b) => [
-							b.fchild({
-								tag: 'button',
+							b.button({
 								classes: ['oneput__primary-button'],
+								title: 'Ok',
 								textContent: 'OK',
 								onMount: (node) => {
 									this.okButton = node;
@@ -82,10 +82,9 @@ export class Confirm {
 									onclick: () => this.stop(true)
 								}
 							}),
-							b.fchild({
-								type: 'fchild',
-								tag: 'button',
+							b.button({
 								classes: ['oneput__secondary-button'],
+								title: 'Cancel',
 								textContent: 'Cancel',
 								attr: {
 									onclick: () => this.stop(false)

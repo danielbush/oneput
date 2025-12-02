@@ -1,5 +1,5 @@
+import { hflex } from '../../lib/builder.js';
 import type { Controller } from '../../controller.js';
-import { randomId } from '../../lib/lib.js';
 import { xIcon } from '../../shared/icons.js';
 
 export type NotificationParams = {
@@ -36,20 +36,15 @@ export class Notification {
 			}, params.duration);
 		}
 		this.ctl.ui.injectUI({
-			inner: {
-				id: randomId(),
-				type: 'hflex',
+			inner: hflex({
+				id: 'oneput-notification',
 				classes: ['oneput__notification'],
 				style: { width: '100%' },
-				children: [
-					{
-						id: randomId(),
-						type: 'fchild',
+				children: (b) => [
+					b.fchild({
 						textContent: this.message
-					},
-					{
-						id: randomId(),
-						type: 'fchild',
+					}),
+					b.fchild({
 						classes: ['oneput__icon-button'],
 						innerHTMLUnsafe: xIcon,
 						attr: {
@@ -57,9 +52,9 @@ export class Notification {
 								this.ctl.ui.injectUI();
 							}
 						}
-					}
+					})
 				]
-			}
+			})
 		});
 	}
 

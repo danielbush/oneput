@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { formatSecondsToHHMMSS } from './utils.js';
-	import type { TimerDisplayProps } from './value.js';
 	import { icons } from '@lucide/svelte';
 
-	const { initialSecondsRemaining, isPaused, isFinished }: TimerDisplayProps = $props();
+	interface Props {
+		initialSecondsRemaining: number;
+		isPaused: boolean;
+		isFinished: boolean;
+	}
+
+	const { initialSecondsRemaining, isPaused, isFinished }: Props = $props();
 
 	let secondsRemaining = $state(initialSecondsRemaining);
 	let interval: ReturnType<typeof setInterval> | undefined;

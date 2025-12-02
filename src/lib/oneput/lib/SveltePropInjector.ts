@@ -1,6 +1,6 @@
 import SubscribedProps from '../components/InjectedProps.svelte';
 import { createSubscriber } from 'svelte/reactivity';
-import { mount, type Component } from 'svelte';
+import { mount, type Component, type ComponentProps } from 'svelte';
 
 export type SveltePropInjectorProps<P extends Record<string, unknown>> = {
 	createProps: () => P;
@@ -22,12 +22,13 @@ export class SveltePropInjector {
 		});
 	}
 
-	mount = <P extends Record<string, unknown>>(
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	mount = <C extends Component<any>>(
 		node: HTMLElement,
-		Child: Component<P>,
-		createProps: () => P
+		Child: C,
+		createProps: () => ComponentProps<C>
 	) => {
-		return mount(SubscribedProps as Component<SveltePropInjectorProps<P>>, {
+		return mount(SubscribedProps as Component<SveltePropInjectorProps<ComponentProps<C>>>, {
 			target: node,
 			props: {
 				createProps,

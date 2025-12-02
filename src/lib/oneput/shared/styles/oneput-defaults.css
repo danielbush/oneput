@@ -177,7 +177,7 @@
 	--oneput-debug-fchild-offset: -0.5px;
 
 	/* notification */
-	--oneput-notification-background: rgb(255 210 0 / 0.4);
+	--oneput-notification-background: rgb(255 210 0 / 1);
 
 	/* alert */
 	--oneput-alert-background: rgb(255 210 0 / 0.4);
@@ -734,6 +734,15 @@ button:disabled.oneput__menu-item {
 .oneput__menu--replaced .oneput__menu-area {
 	background: var(--oneput-alert-background);
 	color: var(--oneput-alert-text-color);
+}
+
+.oneput__inject-area {
+	position: relative;
+}
+
+.oneput__inject {
+	position: absolute;
+	bottom: 0;
 }
 
 /* #endregion */

@@ -148,7 +148,19 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
-		this.ctl.input.setPlaceholder('Type a label and/or hit shift+enter...');
+		this.ctl.input.setPlaceholder((setPlaceholder) => {
+			let count = 0;
+			setPlaceholder(`Type a label and/or hit shift+enter... (${count})`);
+			const unsubscribe = this.ctl.events.on('input-change', () => {
+				console.log('hit');
+				count += 1;
+				setPlaceholder(`Type a label and/or hit shift+enter... (${count})`);
+			});
+			return () => {
+				console.log('unsubscribing');
+				unsubscribe();
+			};
+		});
 
 		const startTimer = (label?: string) => {
 			const timerValue = TomatoTimerValue.start({

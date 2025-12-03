@@ -61,9 +61,23 @@ export class InputController {
 		return this.ctl.currentProps.placeholder || '';
 	}
 
-	setPlaceholder(msg?: string) {
+	private placeholderUnsubscribe?: () => void;
+
+	private _setPlaceholder = (msg?: string) => {
 		this.ctl.currentProps.placeholder =
 			msg || this.ctl.ui.getLayout()?.placeholder || this.defaultPlaceHolder;
+	};
+
+	setPlaceholder(msg?: string | ((setter: (msg?: string) => void) => () => void)) {
+		if (this.placeholderUnsubscribe) {
+			this.placeholderUnsubscribe();
+			this.placeholderUnsubscribe = undefined;
+		}
+		if (typeof msg === 'function') {
+			this.placeholderUnsubscribe = msg(this._setPlaceholder);
+			return;
+		}
+		this._setPlaceholder(msg);
 	}
 
 	resetPlaceholder() {

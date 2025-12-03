@@ -138,6 +138,10 @@ export type AppClass<V extends Record<string, unknown> = Record<string, unknown>
 export type AppObject = {
 	runUI: () => void;
 	beforeExit?: () => void;
+	/**
+	 * If you set an onBack it will override the push/pop behavior of runUI and
+	 * runInlineUI.  To exit, use the exit callback that is passed in.
+	 */
 	onBack?: (exit: () => void) => void;
 };
 

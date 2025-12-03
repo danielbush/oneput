@@ -41,7 +41,7 @@ export class Controller {
 	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
 	 */
 	private beforeRunUI() {
-		console.log(this.uiParents, this.currentUI);
+		console.log(this.uiParents, 'current:', this.currentUI);
 		// Re-enable stuff...
 		this.menu.enableMenuActions();
 		this.menu.enableMenuOpenClose();
@@ -59,25 +59,37 @@ export class Controller {
 		this.input.resetSubmitHandler();
 	}
 
+	/**
+	 * If the currentUI defines onBack, we disable push/pop and let it decide
+	 * what to do.
+	 */
+	private get trackUIChange() {
+		return !this.currentUI?.onBack;
+	}
+
 	runUI<V extends Record<string, unknown>>(uiClass: AppClass<V>, values?: V) {
-		if (this.currentUI) {
+		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
 		}
 		const ui = uiClass.create(this, values ?? ({} as V));
-		this.currentUI = ui;
+		if (this.trackUIChange) {
+			this.currentUI = ui;
+		}
 		this.beforeRunUI();
 		ui.runUI();
 		return ui;
 	}
 
 	runInlineUI(runUI: () => void) {
-		if (this.currentUI) {
+		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
 		}
-		this.currentUI = { runUI };
+		if (this.trackUIChange) {
+			this.currentUI = { runUI };
+		}
 		this.beforeRunUI();
 		runUI();
-		return this.currentUI;
+		return { runUI };
 	}
 
 	private popUI = () => {
@@ -92,9 +104,9 @@ export class Controller {
 	};
 
 	/**
-	 * This is intended for triggering a back action via keyboard.
+	 * Goes back to previous appObject.
 	 */
-	readonly goBack = () => {
+	goBack = () => {
 		if (this.disableGoBack) {
 			return;
 		}

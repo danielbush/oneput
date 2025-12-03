@@ -266,3 +266,8 @@ export function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
 		return tmp.style.cssText;
 	}
 }
+
+export abstract class Placeholder {
+	abstract enable(setPlaceholder: (msg?: string) => void): void;
+	abstract disable(): void;
+}

@@ -15,18 +15,22 @@ import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
 import { formatSecondsToHHMMSS } from './utils.js';
-import { submitPlaceholder } from '../../placeholders.js';
+import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
 
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
 		const timerDisplay: SveltePropInjector = SveltePropInjector.create();
-		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay);
+		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
+			return binding ? `Type a label and/or hit ${binding}...` : 'Type a label...';
+		});
+		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, submitPlaceholder);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private store: Store,
-		private timerDisplay: SveltePropInjector
+		private timerDisplay: SveltePropInjector,
+		private submitPlaceholder: SubmitPlaceholder
 	) {}
 
 	beforeExit = () => {
@@ -149,7 +153,7 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
-		this.ctl.input.setBindingsPlaceholder(true, submitPlaceholder);
+		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 
 		const startTimer = (label?: string) => {
 			const timerValue = TomatoTimerValue.start({

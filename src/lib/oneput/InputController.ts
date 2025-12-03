@@ -1,6 +1,5 @@
-import type { InputChangeEvent, InputChangeListener } from './lib/lib.js';
+import { type InputChangeEvent, type InputChangeListener, Placeholder } from './lib/lib.js';
 import type { Controller } from './controller.js';
-import type { KeyBindingMap } from './lib/bindings.js';
 
 export class InputController {
 	public static create(ctl: Controller) {
@@ -62,20 +61,20 @@ export class InputController {
 		return this.ctl.currentProps.placeholder || '';
 	}
 
-	private placeholderUnsubscribe?: () => void;
-
+	private placeholderObject?: Placeholder;
 	private _setPlaceholder = (msg?: string) => {
 		this.ctl.currentProps.placeholder =
 			msg || this.ctl.ui.getLayout()?.placeholder || this.defaultPlaceHolder;
 	};
 
-	setPlaceholder(msg?: string | ((setter: (msg?: string) => void) => () => void)) {
-		if (this.placeholderUnsubscribe) {
-			this.placeholderUnsubscribe();
-			this.placeholderUnsubscribe = undefined;
+	setPlaceholder(msg?: string | Placeholder) {
+		if (this.placeholderObject) {
+			this.placeholderObject.disable();
+			this.placeholderObject = undefined;
 		}
-		if (typeof msg === 'function') {
-			this.placeholderUnsubscribe = msg(this._setPlaceholder);
+		if (msg instanceof Placeholder) {
+			this.placeholderObject = msg;
+			this.placeholderObject.enable(this._setPlaceholder);
 			return;
 		}
 		this._setPlaceholder(msg);
@@ -133,15 +132,4 @@ export class InputController {
 	resetSubmitHandler() {
 		this.submitHandler = undefined;
 	}
-
-	setBindingsPlaceholder = (isLocal: boolean, updater: (bindings: KeyBindingMap) => string) => {
-		this.ctl.input.setPlaceholder((setPlaceholder) => {
-			setPlaceholder(updater(this.ctl.keys.getCurrentBindings(isLocal)));
-			return this.ctl.events.on('bindings-change', ({ bindings, isLocal: isLocalChange }) => {
-				if (isLocalChange === isLocal) {
-					setPlaceholder(updater(bindings));
-				}
-			});
-		});
-	};
 }

@@ -23,7 +23,6 @@ export class MenuPlaceholder extends Placeholder {
 	}
 
 	enable(setPlaceholder: (msg?: string) => void) {
-		console.log('enable');
 		setPlaceholder(this.msg(this.ctl.menu.isMenuOpen, this.getBinding(this.ctl.menu.isMenuOpen)));
 		// Update bindings when menu state changes...
 		if (!this.unsubscribeMenuOpenChange) {
@@ -43,7 +42,6 @@ export class MenuPlaceholder extends Placeholder {
 	}
 
 	disable() {
-		console.log('disable');
 		this.unsubscribeMenuOpenChange?.();
 		this.unsubscribeMenuOpenChange = undefined;
 		this.unsubscribeBindingsChange?.();

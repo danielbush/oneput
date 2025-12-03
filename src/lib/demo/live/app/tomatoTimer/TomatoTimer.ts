@@ -78,31 +78,29 @@ export class TomatoTimer implements AppObject {
 			});
 	}
 
+	/**
+	 * If we start a timer, we don't want to go back to the "noTimer" ui, so we
+	 * use onBack to handle all back actions.
+	 */
 	onBack(exit: () => void) {
+		const mainUI = () => {
+			if (this.timerValue) {
+				this.timerUI(this.timerValue);
+				return;
+			}
+			this.noTimerUI();
+		};
 		switch (this.currentUI) {
-			case 'addEntryUI':
-				this.noTimerUI();
-				return;
-			case 'noTimerUI':
-				exit();
-				return;
 			case 'createTimerUI':
-				this.noTimerUI();
-				return;
+			case 'addEntryUI':
 			case 'previousSessionsUI':
-				if (this.timerValue) {
-					this.timerUI(this.timerValue);
-					return;
-				}
-				this.noTimerUI();
+				mainUI();
 				return;
 			case 'editSessionUI':
 				this.previousSessionsUI();
 				return;
-			default:
-				exit();
-				return;
 		}
+		exit();
 	}
 
 	/**

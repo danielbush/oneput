@@ -76,6 +76,10 @@ export class InputController {
 		this.ctl.currentProps.placeholder = msg || '';
 	};
 
+	/**
+	 * - setPlaceholder('') => empty placeholder
+	 * - setPlaceholder()   => default placeholder
+	 */
 	setPlaceholder(msg?: string | Placeholder) {
 		if (this.placeholderObject) {
 			this.placeholderObject.disable();
@@ -86,7 +90,7 @@ export class InputController {
 			this.placeholderObject.enable(this._setPlaceholder);
 			return;
 		}
-		if (msg) {
+		if (msg || msg === '') {
 			this._setPlaceholder(msg);
 			return;
 		}

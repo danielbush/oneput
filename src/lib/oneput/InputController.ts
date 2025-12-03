@@ -102,6 +102,12 @@ export class InputController {
 		this._setPlaceholder(this.defaultPlaceholder);
 	}
 
+	refreshPlaceholder() {
+		if (this.placeholderObject) {
+			this.placeholderObject.enable(this._setPlaceholder);
+		}
+	}
+
 	resetPlaceholder() {
 		this.setPlaceholder(this.getDefaultPlaceholder());
 	}

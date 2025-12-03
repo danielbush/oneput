@@ -22,7 +22,7 @@ export class InputController {
 		}, 0);
 	}
 
-	private defaultPlaceholder: string | Placeholder = 'Type here...';
+	private defaultPlaceholder?: string | Placeholder;
 	private inputElement: HTMLInputElement | undefined;
 	private inputChangeListeners: InputChangeListener[] = [];
 
@@ -50,12 +50,22 @@ export class InputController {
 		this.ctl.currentProps.inputValue = val || '';
 	}
 
-	setDefaultPlaceholder(msg?: string | Placeholder) {
-		this.defaultPlaceholder = msg || '';
+	setDefaultPlaceholder(msg?: string | Placeholder, apply = false) {
+		this.defaultPlaceholder = msg;
+		if (apply) {
+			this.resetPlaceholder();
+		}
+	}
+
+	getDefaultPlaceholder() {
+		return this.defaultPlaceholder || '';
 	}
 
 	/**
 	 * Get the current placeholder.
+	 *
+	 * If default or current placeholder is a Placeholder instance, it will
+	 * return the last value set by this instance.
 	 */
 	getPlaceholder() {
 		return this.ctl.currentProps.placeholder || '';
@@ -80,11 +90,6 @@ export class InputController {
 			this._setPlaceholder(msg);
 			return;
 		}
-		const layoutPlaceholder = this.ctl.ui.getLayout()?.placeholder;
-		if (layoutPlaceholder) {
-			this._setPlaceholder(layoutPlaceholder);
-			return;
-		}
 		if (this.defaultPlaceholder instanceof Placeholder) {
 			this.placeholderObject = this.defaultPlaceholder;
 			this.placeholderObject.enable(this._setPlaceholder);
@@ -94,8 +99,7 @@ export class InputController {
 	}
 
 	resetPlaceholder() {
-		console.log('resetPlaceholder', this.defaultPlaceholder);
-		this.setPlaceholder(this.defaultPlaceholder);
+		this.setPlaceholder(this.getDefaultPlaceholder());
 	}
 
 	getInputValue() {

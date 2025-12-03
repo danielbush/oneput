@@ -80,7 +80,7 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
 		description: 'Focus input'
 	},
 	closeMenu: {
-		bindings: ['Escape', '$mod+Shift+k'],
+		bindings: ['$mod+Shift+k', 'Escape'],
 		description: 'Close menu'
 	},
 	focusPreviousMenuItem: {

@@ -233,7 +233,6 @@ export interface UILayout<V extends Record<string, unknown> = Record<string, unk
 	menuUI?: OneputProps['menuUI'];
 	innerUI?: OneputProps['innerUI'];
 	outerUI?: OneputProps['outerUI'];
-	placeholder?: OneputProps['placeholder'];
 }
 
 /**

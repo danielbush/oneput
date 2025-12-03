@@ -1,10 +1,13 @@
-import { type UILayout, mountSvelte } from '$lib/oneput/lib/lib.js';
+import { Placeholder, type UILayout, mountSvelte } from '$lib/oneput/lib/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/lib/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
 import { TimeDisplay } from '$lib/oneput/shared/components/TimeDisplay.js';
+import { MenuPlaceholder } from '$lib/oneput/shared/placeholders/MenuPlaceholder.js';
+import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
+import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 
 export type LayoutSettings = {
 	exitAction?: boolean | (() => void);
@@ -20,10 +23,37 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 		return new Layout(ctl, values);
 	}
 
+	defaultPlaceholder?: Placeholder;
+
 	constructor(
 		private ctl: Controller,
 		private values: V = {} as V
-	) {}
+	) {
+		ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
+		ctl.menu.setDefaultFocusBehaviour('first');
+		LocalBindingsService.create(ctl)
+			.getBindings()
+			.andTee((bindings) => {
+				ctl.keys.setDefaultBindings(bindings.globalBindings, false, true);
+				ctl.keys.setDefaultBindings(bindings.localBindings, true, true);
+			})
+			.orTee((err) => {
+				ctl.alert({ message: 'Error getting bindings', additional: err.message });
+			})
+			.map(() => {
+				// Wait till default bindings have been set above.
+				ctl.input.setDefaultPlaceholder(
+					MenuPlaceholder.create(ctl, (menuOpen, binding) =>
+						binding
+							? menuOpen
+								? `Close menu with ${binding}...`
+								: `Open menu with ${binding}...`
+							: 'Type here...'
+					),
+					true
+				);
+			});
+	}
 
 	configure(values: V) {
 		this.values = {

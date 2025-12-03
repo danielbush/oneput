@@ -117,6 +117,7 @@ export class KeysController {
 			this.currentGlobalBindings = bindings;
 			this.handleGlobalKeys(bindings);
 		}
+		this.ctl.events.emit({ type: 'bindings-change', payload: { bindings, isLocal } });
 	}
 
 	/**

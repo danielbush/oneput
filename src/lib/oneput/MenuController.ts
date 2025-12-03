@@ -1,5 +1,4 @@
 import debounce from 'debounce';
-import type { InputChangeEvent } from './InternalEventEmitter.js';
 import { isFocusable, type InputChangeListener, type MenuItemAny } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
@@ -160,7 +159,7 @@ export class MenuController {
 			}
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
-		this.removeMenuItemsListener = this.ctl.events.on<InputChangeEvent>('input-change', handler);
+		this.removeMenuItemsListener = this.ctl.events.on('input-change', handler);
 	}
 
 	/**
@@ -204,7 +203,7 @@ export class MenuController {
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
 		};
 		const debouncedHandler = debounce(handler, 500, { immediate: false });
-		this.removeMenuItemsListener = this.ctl.events.on<InputChangeEvent>('input-change', (evt) => {
+		this.removeMenuItemsListener = this.ctl.events.on('input-change', (evt) => {
 			if (this.disableMenuItemsFn) {
 				return;
 			}

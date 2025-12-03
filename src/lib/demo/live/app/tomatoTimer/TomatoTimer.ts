@@ -149,15 +149,24 @@ export class TomatoTimer implements AppObject {
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
 		this.ctl.input.setPlaceholder((setPlaceholder) => {
-			let count = 0;
-			setPlaceholder(`Type a label and/or hit shift+enter... (${count})`);
-			const unsubscribe = this.ctl.events.on('input-change', () => {
-				console.log('hit');
-				count += 1;
-				setPlaceholder(`Type a label and/or hit shift+enter... (${count})`);
+			const bindings = this.ctl.keys.getCurrentBindings(true);
+			const submitBinding = bindings['submit'];
+			const binding = submitBinding?.bindings[0];
+			if (binding) {
+				setPlaceholder(`Type a label and/or hit ${binding}...`);
+			} else {
+				setPlaceholder(`Type a label...`);
+			}
+			const unsubscribe = this.ctl.events.on('bindings-change', ({ bindings }) => {
+				const submitBinding = bindings['submit'];
+				const binding = submitBinding?.bindings[0] + '!!!';
+				if (binding) {
+					setPlaceholder(`Type a label and/or hit ${binding}...`);
+				} else {
+					setPlaceholder(`Type a label...`);
+				}
 			});
 			return () => {
-				console.log('unsubscribing');
 				unsubscribe();
 			};
 		});

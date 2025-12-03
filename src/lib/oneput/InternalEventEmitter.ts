@@ -1,9 +1,14 @@
+import type { KeyBindingMap } from './lib/bindings.js';
 import type { InputChangeEvent as InputChangeEventLib } from './lib/lib.js';
 
 // Internal event system for decoupled communication
-export type InternalEvent = InputChangeEvent;
+export type InternalEvent = InputChangeEvent | BindingsChangeEvent;
 
 export type InputChangeEvent = { type: 'input-change'; payload: InputChangeEventLib };
+export type BindingsChangeEvent = {
+	type: 'bindings-change';
+	payload: { bindings: KeyBindingMap; isLocal: boolean };
+};
 
 export class InternalEventEmitter {
 	private listeners = new Map<string, ((payload: unknown) => void)[]>();
@@ -12,9 +17,11 @@ export class InternalEventEmitter {
 		this.listeners.get(event.type)?.forEach((fn) => fn(event.payload));
 	}
 
-	on<T extends InternalEvent>(
-		type: T['type'],
-		handler: (payload: T['payload']) => void
+	on<T extends InternalEvent['type']>(
+		type: T,
+		// TODO: need T in on<T> to enforce type, using T extends InternalEvent
+		// doesn't do that ... or my IDE typescript is out of date(?)
+		handler: (payload: Extract<InternalEvent, { type: T }>['payload']) => void
 	): () => void {
 		if (!this.listeners.has(type)) {
 			this.listeners.set(type, []);

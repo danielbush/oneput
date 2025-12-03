@@ -24,6 +24,11 @@ export class SubmitPlaceholder extends Placeholder {
 		return binding;
 	}
 
+	update(msg: (submitBinding?: string) => string) {
+		this.msg = msg;
+		this.ctl.input.refreshPlaceholder();
+	}
+
 	enable(setPlaceholder: (msg?: string) => void) {
 		setPlaceholder(this.msg(this.getSubmitBinding()));
 		if (!this.unsubscribe) {

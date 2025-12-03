@@ -21,7 +21,7 @@ export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
 		const timerDisplay: SveltePropInjector = SveltePropInjector.create();
 		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
-			return binding ? `Type a label and/or hit ${binding}...` : 'Type a label...';
+			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
 		});
 		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, submitPlaceholder);
 	}
@@ -44,7 +44,7 @@ export class TomatoTimer implements AppObject {
 	private currentUI:
 		| 'noTimerUI'
 		| 'timerUI'
-		| 'startTimerUI'
+		| 'createTimerUI'
 		| 'previousSessionsUI'
 		| 'editSessionUI'
 		| 'addEntryUI' = 'noTimerUI';
@@ -86,7 +86,7 @@ export class TomatoTimer implements AppObject {
 			case 'noTimerUI':
 				exit();
 				return;
-			case 'startTimerUI':
+			case 'createTimerUI':
 				this.noTimerUI();
 				return;
 			case 'previousSessionsUI':
@@ -115,20 +115,13 @@ export class TomatoTimer implements AppObject {
 		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
-				id: 'tomato-previous-sessions',
-				textContent: 'Previous sessions...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
-				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
-				action: () => {
-					this.previousSessionsUI();
-				}
-			}),
-			stdMenuItem({
 				id: 'tomato-start',
 				textContent: '30 Minutes',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					this.startTimerUI({ duration: 30 * 60 });
+					this.ctl.runInlineUI(() => {
+						this.createTimerUI({ duration: 30 * 60 });
+					});
 				}
 			}),
 			stdMenuItem({
@@ -138,20 +131,37 @@ export class TomatoTimer implements AppObject {
 				action: () => {
 					this.addEntryUI();
 				}
+			}),
+			stdMenuItem({
+				id: 'tomato-previous-sessions',
+				textContent: 'Previous sessions...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+				action: () => {
+					this.ctl.runInlineUI(() => {
+						this.previousSessionsUI();
+					});
+				}
 			})
 		]);
-		this.ctl.input.setPlaceholder(
-			'Enter a time in minutes and shift+enter OR select from the menu...'
-		);
+		this.submitPlaceholder.update((binding) => {
+			return binding ? `Enter time in minutes and hit ${binding}...` : 'Enter value and submit...';
+		});
+		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.startTimerUI({ duration: parseFloat(duration) * 60 });
+			this.ctl.runInlineUI(() => {
+				this.createTimerUI({ duration: parseFloat(duration) * 60 });
+			});
 		});
 	}
 
-	private startTimerUI({ duration }: { duration: number }) {
-		this.currentUI = 'startTimerUI';
+	private createTimerUI({ duration }: { duration: number }) {
+		this.currentUI = 'createTimerUI';
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
+		});
+		this.submitPlaceholder.update((binding) => {
+			return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
 		});
 		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 
@@ -163,11 +173,15 @@ export class TomatoTimer implements AppObject {
 			this.store
 				.putCurrentSession(timerValue.record as UnfinishedSession)
 				.andTee(() => {
-					this.timerUI(timerValue);
+					this.ctl.runInlineUI(() => {
+						this.timerUI(timerValue);
+					});
 				})
 				.orTee((err) => {
 					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-					this.noTimerUI();
+					this.ctl.runInlineUI(() => {
+						this.noTimerUI();
+					});
 				});
 		};
 
@@ -252,7 +266,9 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Previous sessions...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 				action: () => {
-					this.previousSessionsUI();
+					this.ctl.runInlineUI(() => {
+						this.previousSessionsUI();
+					});
 				}
 			}),
 			stdMenuItem({
@@ -269,7 +285,9 @@ export class TomatoTimer implements AppObject {
 					this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
 						this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 					});
-					this.timerUI(timerValue);
+					this.ctl.runInlineUI(() => {
+						this.timerUI(timerValue);
+					});
 				}
 			}),
 			stdMenuItem({
@@ -284,11 +302,15 @@ export class TomatoTimer implements AppObject {
 						.andThen(() => this.store.deleteCurrentSession())
 						.andTee(() => {
 							this.ctl.notify('Session saved', { duration: 3000 });
-							this.noTimerUI();
+							this.ctl.runInlineUI(() => {
+								this.noTimerUI();
+							});
 						})
 						.orTee((err) => {
 							this.ctl.alert({ message: 'Error saving session', additional: err.message });
-							this.noTimerUI();
+							this.ctl.runInlineUI(() => {
+								this.noTimerUI();
+							});
 						});
 				}
 			}),
@@ -304,11 +326,15 @@ export class TomatoTimer implements AppObject {
 								message: 'Error deleting current session',
 								additional: err.message
 							});
-							this.noTimerUI();
+							this.ctl.runInlineUI(() => {
+								this.noTimerUI();
+							});
 						})
 						.andTee(() => {
 							this.ctl.notify('Current session deleted', { duration: 3000 });
-							this.noTimerUI();
+							this.ctl.runInlineUI(() => {
+								this.noTimerUI();
+							});
 						});
 				}
 			})
@@ -334,7 +360,9 @@ export class TomatoTimer implements AppObject {
 							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
 						],
 						action: () => {
-							this.editEntryUI(session);
+							this.ctl.runInlineUI(() => {
+								this.editEntryUI(session);
+							});
 						}
 					});
 				})
@@ -378,7 +406,10 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Edit label...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
 				action: () => {
-					this.ctl.input.setPlaceholder('Enter new label...');
+					this.submitPlaceholder.update((binding) => {
+						return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
+					});
+					this.ctl.input.setPlaceholder(this.submitPlaceholder);
 					this.ctl.input.setSubmitHandlerOnce((label) => {
 						const newSession = { ...session, label };
 						this.store
@@ -388,7 +419,9 @@ export class TomatoTimer implements AppObject {
 								// Refresh this ui to update the display.
 								// We could just call setMenuItems again.
 								// Using consistent id's will mean only a small part of the DOM will change.
-								this.editEntryUI(newSession);
+								this.ctl.runInlineUI(() => {
+									this.editEntryUI(newSession);
+								});
 							})
 							.orTee((err) => {
 								this.ctl.alert({
@@ -412,7 +445,9 @@ export class TomatoTimer implements AppObject {
 						this.store.deleteSession(session).andTee(() => {
 							this.ctl.notify('Session deleted', { duration: 3000 });
 						});
-						this.previousSessionsUI();
+						this.ctl.runInlineUI(() => {
+							this.previousSessionsUI();
+						});
 						return;
 					}
 				}
@@ -433,8 +468,10 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Label...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
 				action: () => {
-					// this.editEntryLabelUI();
-					this.ctl.input.setPlaceholder('Enter new label...');
+					this.submitPlaceholder.update((binding) => {
+						return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
+					});
+					this.ctl.input.setPlaceholder(this.submitPlaceholder);
 					this.ctl.input.setSubmitHandlerOnce((label) => {
 						session.label = label;
 					});
@@ -445,7 +482,7 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Duration...',
 				// left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				action: () => {
-					// this.editEntryDurationUI();
+					//
 				}
 			})
 		]);

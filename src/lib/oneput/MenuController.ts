@@ -63,7 +63,7 @@ export class MenuController {
 	// #region menu open/close
 
 	get isMenuOpen() {
-		return this.ctl.currentProps.menuOpen ?? false;
+		return this.ctl.currentProps.menuOpen;
 	}
 
 	openMenu = () => {
@@ -71,6 +71,7 @@ export class MenuController {
 			return;
 		}
 		this.ctl.currentProps.menuOpen = true;
+		this.ctl.events.emit({ type: 'menu-open-change', payload: true });
 	};
 
 	closeMenu = () => {
@@ -78,6 +79,7 @@ export class MenuController {
 			return;
 		}
 		this.ctl.currentProps.menuOpen = false;
+		this.ctl.events.emit({ type: 'menu-open-change', payload: false });
 	};
 
 	// #endregion

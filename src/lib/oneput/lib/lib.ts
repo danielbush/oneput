@@ -9,7 +9,7 @@ export type InputChangeListener = (evt: InputChangeEvent) => void;
 
 export type OneputProps = {
 	menuItemFocus?: [number, boolean?];
-	menuOpen?: boolean;
+	menuOpen: boolean;
 	menuItems?: Array<MenuItem | MenuItemDivider>;
 	inputElement?: HTMLInputElement | HTMLTextAreaElement;
 	inputValue?: string;

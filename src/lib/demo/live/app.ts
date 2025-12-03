@@ -3,6 +3,7 @@ import { Layout } from './layout.js';
 import { LocalBindingsService } from '../../oneput/shared/bindings/LocalBindingsService.js';
 import { RootUI } from './app/root.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
+import { MenuPlaceholder } from '$lib/oneput/shared/placeholders/MenuPlaceholder.js';
 
 // Our app starts in this callback.  We get the controller and we can set keys
 // and configure oneput.
@@ -10,16 +11,24 @@ import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 // Here we are relying on defaultUI to have some default settings including keys
 // set for us.  But we could fetch settings asynchronously here, update
 // defaultUI accordingly
-export const setController = (ctl: Controller) => {
+export const setController = async (ctl: Controller) => {
 	ctl.ui.setLayout(Layout.create(ctl));
 	ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 	ctl.menu.setDefaultFocusBehaviour('first');
-	ctl.input.setDefaultPlaceholder('Type here...');
-	LocalBindingsService.create(ctl)
+	await LocalBindingsService.create(ctl)
 		.getBindings()
 		.map((bindings) => {
 			ctl.keys.setDefaultBindings(bindings.globalBindings, false, true);
 			ctl.keys.setDefaultBindings(bindings.localBindings, true, true);
+			ctl.input.setDefaultPlaceholder(
+				MenuPlaceholder.create(ctl, (menuOpen, binding) =>
+					binding
+						? menuOpen
+							? `Close menu with ${binding}...`
+							: `Open menu with ${binding}...`
+						: 'Type here...'
+				)
+			);
 		});
 	ctl.runUI(RootUI);
 };

@@ -2,12 +2,16 @@ import type { KeyBindingMap } from './lib/bindings.js';
 import type { InputChangeEvent as InputChangeEventLib } from './lib/lib.js';
 
 // Internal event system for decoupled communication
-export type InternalEvent = InputChangeEvent | BindingsChangeEvent;
+export type InternalEvent = InputChangeEvent | BindingsChangeEvent | MenuOpenChangeEvent;
 
 export type InputChangeEvent = { type: 'input-change'; payload: InputChangeEventLib };
 export type BindingsChangeEvent = {
 	type: 'bindings-change';
 	payload: { bindings: KeyBindingMap; isLocal: boolean };
+};
+export type MenuOpenChangeEvent = {
+	type: 'menu-open-change';
+	payload: boolean;
 };
 
 export class InternalEventEmitter {

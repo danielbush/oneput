@@ -14,6 +14,8 @@ export class KatexDemo {
 		return new KatexDemo(ctl);
 	}
 
+	private currentResult = '';
+
 	constructor(
 		private ctl: Controller,
 		private previewDisplayMode: boolean = false
@@ -36,6 +38,9 @@ export class KatexDemo {
 		this.ctl.input.focusInput();
 		this.ctl.menu.setMenuItemsFn(() => {
 			this.renderPreview();
+		});
+		this.ctl.input.setSubmitHandler(() => {
+			this.insertKatex();
 		});
 	}
 
@@ -93,17 +98,7 @@ export class KatexDemo {
 						disabled: !katexIsValid
 					},
 					action: () => {
-						document.getElementById('katex-demo')!.innerHTML += `<p>${katex.renderToString(
-							this.ctl.input.getInputValue(),
-							{
-								displayMode: false,
-								throwOnError: true,
-								output: 'mathml',
-								errorColor: 'red'
-							}
-						)}</p>`;
-						this.ctl.input.setInputValue('');
-						this.renderPreview();
+						this.insertKatex();
 					}
 				}),
 				checkboxMenuItem({
@@ -122,7 +117,6 @@ export class KatexDemo {
 		);
 	}
 
-	private currentResult = '';
 	private renderPreview() {
 		if (this.ctl.input.getInputValue().trim() === '') {
 			this.renderInputUI(true);
@@ -168,4 +162,18 @@ export class KatexDemo {
 			} as OneputProps['inputUI'];
 		});
 	}
+
+	private insertKatex = () => {
+		document.getElementById('katex-demo')!.innerHTML += `<p>${katex.renderToString(
+			this.ctl.input.getInputValue(),
+			{
+				displayMode: false,
+				throwOnError: true,
+				output: 'mathml',
+				errorColor: 'red'
+			}
+		)}</p>`;
+		this.ctl.input.setInputValue('');
+		this.renderPreview();
+	};
 }

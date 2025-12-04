@@ -53,7 +53,8 @@ export function menuItem(params: Partial<BuilderMenuItem>): MenuItem {
 	const result: MenuItem = flex({
 		...params,
 		id: params.id ?? randomId(),
-		type: params.type ?? 'hflex'
+		type: params.type ?? 'hflex',
+		classes: ['oneput__menu-item', ...(params.classes ?? [])]
 	});
 	return result;
 }

@@ -59,7 +59,7 @@ export class KatexDemo {
 								alignSelf: 'center',
 								// TODO: we could make scale dynamic, with ui
 								// buttons or a slider in the menu etc etc
-								scale: '1.5'
+								scale: katexResult ? '2.0' : '1'
 							},
 							innerHTMLUnsafe: katexResult || '(preview)'
 						}
@@ -68,6 +68,9 @@ export class KatexDemo {
 				menuItem({
 					id: 'katex-instructions',
 					ignored: true,
+					style: {
+						color: '#777'
+					},
 					children: (b) => [
 						b.icon({
 							innerHTMLUnsafe: infoIcon

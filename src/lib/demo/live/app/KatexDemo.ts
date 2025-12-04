@@ -50,16 +50,19 @@ export class KatexDemo {
 					id: 'katex-preview-pane',
 					type: 'vflex',
 					ignored: true,
+					style: {
+						overflow: 'auto',
+						display: 'block',
+						textAlign: 'center'
+					},
 					children: [
 						{
 							id: 'katex-preview',
 							type: 'fchild',
 							style: {
 								padding: '1rem',
-								alignSelf: 'center',
-								// TODO: we could make scale dynamic, with ui
-								// buttons or a slider in the menu etc etc
-								scale: katexResult ? '2.0' : '1'
+								fontSize: katexResult ? '150%' : '100%',
+								display: 'inline-block'
 							},
 							innerHTMLUnsafe: katexResult || '(preview)'
 						}

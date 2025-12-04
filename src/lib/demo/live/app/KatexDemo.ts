@@ -1,11 +1,11 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
-import type { Notification } from '$lib/oneput/shared/ui/Notification.js';
 import { type LayoutSettings } from '../layout.js';
-import { randomId, type OneputProps } from '$lib/oneput/lib/lib.js';
-import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
+import { type OneputProps } from '$lib/oneput/lib/lib.js';
+import { circleAlertIcon, infoIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
+import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 
 const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
 
@@ -14,22 +14,17 @@ export class KatexDemo {
 		return new KatexDemo(ctl);
 	}
 
-	beforeExit = () => {
-		this.notify?.clear();
-	};
-
 	constructor(
 		private ctl: Controller,
-		private previewDisplayMode: boolean = false,
-		private notify?: Notification
+		private previewDisplayMode: boolean = false
 	) {}
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Katex Demo'
 		});
-		this.setMenuItems(true, '', 'first');
-		this.setInputUI(true);
+		this.renderMenuItems(true, '', 'first');
+		this.renderInputUI(true);
 		this.ctl.menu.enableMenuOpenClose(false);
 		this.ctl.input.setPlaceholder('Type some katex-flavoured latex...');
 		this.ctl.ui.setInputUI((inputUI) => {
@@ -39,20 +34,19 @@ export class KatexDemo {
 			};
 		});
 		this.ctl.input.focusInput();
-		this.notify = this.ctl.notify(helpMessage);
 		this.ctl.menu.setMenuItemsFn(() => {
 			this.renderPreview();
 		});
 	}
 
-	private setMenuItems(
+	private renderMenuItems(
 		katexIsValid: boolean,
 		katexResult?: string,
 		focusBehaviour?: 'none' | 'first' | 'last'
 	): void {
 		this.ctl.menu.setMenuItems(
 			[
-				{
+				menuItem({
 					id: 'katex-preview-pane',
 					type: 'vflex',
 					ignored: true,
@@ -70,7 +64,21 @@ export class KatexDemo {
 							innerHTMLUnsafe: katexResult || '(preview)'
 						}
 					]
-				},
+				}),
+				menuItem({
+					id: 'katex-instructions',
+					ignored: true,
+					children: (b) => [
+						b.icon({
+							innerHTMLUnsafe: infoIcon
+						}),
+						b.fchild({
+							textContent: helpMessage
+						}),
+						b.spacer()
+					]
+				}),
+				divider(),
 				stdMenuItem({
 					id: 'insert-katex-btn',
 					left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
@@ -111,8 +119,8 @@ export class KatexDemo {
 	private currentResult = '';
 	private renderPreview() {
 		if (this.ctl.input.getInputValue().trim() === '') {
-			this.setInputUI(true);
-			this.setMenuItems(true, '', 'none');
+			this.renderInputUI(true);
+			this.renderMenuItems(true, '', 'none');
 			this.currentResult = '';
 			return;
 		}
@@ -123,38 +131,34 @@ export class KatexDemo {
 				output: 'mathml',
 				errorColor: 'red'
 			});
-			this.setInputUI(true);
-			this.setMenuItems(true, this.currentResult, 'none');
-			this.notify?.updateMessage(helpMessage);
+			this.renderInputUI(true);
+			this.renderMenuItems(true, this.currentResult, 'none');
 		} catch (err) {
-			this.setInputUI(false);
-			this.setMenuItems(false, this.currentResult, 'none');
-			this.notify?.updateMessage('Invalid LaTeX: ' + (err as Error).message);
+			this.renderInputUI(false);
+			this.renderMenuItems(false, this.currentResult, 'none');
+			this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
 		}
 	}
 
-	private setInputUI(katexIsValid: boolean) {
+	private renderInputUI(katexIsValid: boolean) {
 		this.ctl.ui.setInputUI((current) => {
 			return {
 				...current,
 				inputLines: 5,
 				right: katexIsValid
 					? undefined
-					: {
-							id: randomId(),
-							type: 'hflex',
-							children: [
-								{
-									id: randomId(),
-									type: 'fchild',
+					: hflex({
+							id: 'katex-indicator',
+							children: (b) => [
+								b.fchild({
 									classes: ['oneput__icon'],
 									style: {
-										color: 'var(--your-var, #c44)'
+										color: '#c44'
 									},
 									innerHTMLUnsafe: circleAlertIcon
-								}
+								})
 							]
-						}
+						})
 			} as OneputProps['inputUI'];
 		});
 	}

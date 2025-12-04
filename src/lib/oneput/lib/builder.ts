@@ -3,7 +3,8 @@ import {
 	type FChildParams,
 	type FlexChildren,
 	type FlexParams,
-	type MenuItem
+	type MenuItem,
+	type MenuItemDivider
 } from './lib.js';
 
 export type BuilderFlexParams = Partial<Omit<FlexParams, 'children'>> & {
@@ -184,4 +185,15 @@ export function button(
 			...params.attr
 		}
 	});
+}
+
+export function divider(params?: Partial<BuilderMenuItem>): MenuItemDivider {
+	const result = menuItem({
+		id: params?.id || randomId(),
+		tag: 'hr',
+		...params,
+		classes: ['oneput__divider', ...(params?.classes ?? [])],
+		ignored: true
+	});
+	return result as MenuItemDivider;
 }

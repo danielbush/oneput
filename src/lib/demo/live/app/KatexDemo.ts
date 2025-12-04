@@ -39,7 +39,7 @@ export class KatexDemo {
 			this.helpMessage = binding
 				? `Type some katex and hit ${binding} to insert... `
 				: 'Type some katex...';
-			this.renderPreview();
+			this.renderUI();
 		});
 	}
 
@@ -47,22 +47,39 @@ export class KatexDemo {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Katex Demo'
 		});
-		this.renderPreview();
 		this.ctl.menu.enableMenuOpenClose(false);
 		this.ctl.input.setPlaceholder(this.submitPlaceholder);
-		this.ctl.ui.setInputUI((inputUI) => {
-			return {
-				...inputUI,
-				inputLines: 5
-			};
-		});
 		this.ctl.input.focusInput();
 		this.ctl.menu.setMenuItemsFn(() => {
-			this.renderPreview();
+			this.renderUI();
 		});
 		this.ctl.input.setSubmitHandler(() => {
 			this.insertKatex();
 		});
+		this.renderUI();
+	}
+
+	private renderUI() {
+		if (this.ctl.input.getInputValue().trim() === '') {
+			this.renderInputUI(true);
+			this.renderMenuItems(true, '', 'none');
+			this.currentResult = '';
+			return;
+		}
+		try {
+			this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
+				displayMode: this.previewDisplayMode,
+				throwOnError: true,
+				output: 'mathml',
+				errorColor: 'red'
+			});
+			this.renderInputUI(true);
+			this.renderMenuItems(true, this.currentResult, 'none');
+		} catch (err) {
+			this.renderInputUI(false);
+			this.renderMenuItems(false, this.currentResult, 'none');
+			this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
+		}
 	}
 
 	private renderMenuItems(
@@ -126,7 +143,7 @@ export class KatexDemo {
 					id: 'katex-display-mode-checkbox',
 					action: (_, checked) => {
 						this.previewDisplayMode = checked;
-						this.renderPreview();
+						this.renderUI();
 					},
 					textContent: 'Display mode',
 					checked: this.previewDisplayMode
@@ -136,29 +153,6 @@ export class KatexDemo {
 			// checkbox above or any other action.
 			{ focusBehaviour: focusBehaviour ?? 'none' }
 		);
-	}
-
-	private renderPreview() {
-		if (this.ctl.input.getInputValue().trim() === '') {
-			this.renderInputUI(true);
-			this.renderMenuItems(true, '', 'none');
-			this.currentResult = '';
-			return;
-		}
-		try {
-			this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
-				displayMode: this.previewDisplayMode,
-				throwOnError: true,
-				output: 'mathml',
-				errorColor: 'red'
-			});
-			this.renderInputUI(true);
-			this.renderMenuItems(true, this.currentResult, 'none');
-		} catch (err) {
-			this.renderInputUI(false);
-			this.renderMenuItems(false, this.currentResult, 'none');
-			this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
-		}
 	}
 
 	private renderInputUI(katexIsValid: boolean) {
@@ -195,6 +189,6 @@ export class KatexDemo {
 			}
 		)}</p>`;
 		this.ctl.input.setInputValue('');
-		this.renderPreview();
+		this.renderUI();
 	};
 }

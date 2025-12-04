@@ -1,4 +1,4 @@
-import { Placeholder, type UILayout, mountSvelte } from '$lib/oneput/lib/lib.js';
+import { DynamicPlaceholder, type UILayout, mountSvelte } from '$lib/oneput/lib/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { hflex } from '$lib/oneput/lib/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
@@ -23,7 +23,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 		return new Layout(ctl, values);
 	}
 
-	defaultPlaceholder?: Placeholder;
+	defaultPlaceholder?: DynamicPlaceholder;
 
 	constructor(
 		private ctl: Controller,

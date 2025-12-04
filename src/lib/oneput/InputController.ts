@@ -1,4 +1,4 @@
-import { type InputChangeEvent, type InputChangeListener, Placeholder } from './lib/lib.js';
+import { type InputChangeEvent, type InputChangeListener, DynamicPlaceholder } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export class InputController {
@@ -22,7 +22,7 @@ export class InputController {
 		}, 0);
 	}
 
-	private defaultPlaceholder?: string | Placeholder;
+	private defaultPlaceholder?: string | DynamicPlaceholder;
 	private inputElement: HTMLInputElement | undefined;
 	private inputChangeListeners: InputChangeListener[] = [];
 
@@ -50,7 +50,7 @@ export class InputController {
 		this.ctl.currentProps.inputValue = val || '';
 	}
 
-	setDefaultPlaceholder(msg?: string | Placeholder, apply = false) {
+	setDefaultPlaceholder(msg?: string | DynamicPlaceholder, apply = false) {
 		this.defaultPlaceholder = msg;
 		if (apply) {
 			this.resetPlaceholder();
@@ -71,7 +71,7 @@ export class InputController {
 		return this.ctl.currentProps.placeholder || '';
 	}
 
-	private placeholderObject?: Placeholder;
+	private placeholderObject?: DynamicPlaceholder;
 	private _setPlaceholder = (msg?: string) => {
 		this.ctl.currentProps.placeholder = msg || '';
 	};
@@ -80,12 +80,12 @@ export class InputController {
 	 * - setPlaceholder('') => empty placeholder
 	 * - setPlaceholder()   => default placeholder
 	 */
-	setPlaceholder(msg?: string | Placeholder) {
+	setPlaceholder(msg?: string | DynamicPlaceholder) {
 		if (this.placeholderObject) {
 			this.placeholderObject.disable();
 			this.placeholderObject = undefined;
 		}
-		if (msg instanceof Placeholder) {
+		if (msg instanceof DynamicPlaceholder) {
 			this.placeholderObject = msg;
 			this.placeholderObject.enable(this._setPlaceholder);
 			return;
@@ -94,7 +94,7 @@ export class InputController {
 			this._setPlaceholder(msg);
 			return;
 		}
-		if (this.defaultPlaceholder instanceof Placeholder) {
+		if (this.defaultPlaceholder instanceof DynamicPlaceholder) {
 			this.placeholderObject = this.defaultPlaceholder;
 			this.placeholderObject.enable(this._setPlaceholder);
 			return;

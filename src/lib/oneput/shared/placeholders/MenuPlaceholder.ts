@@ -1,7 +1,7 @@
 import type { Controller } from '../../controller.js';
-import { Placeholder } from '../../lib/lib.js';
+import { DynamicPlaceholder } from '../../lib/lib.js';
 
-export class MenuPlaceholder extends Placeholder {
+export class MenuPlaceholder extends DynamicPlaceholder {
 	static create(ctl: Controller, msg: (menuOpen: boolean, binding: string) => string) {
 		return new MenuPlaceholder(ctl, msg);
 	}

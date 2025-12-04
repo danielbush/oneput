@@ -270,7 +270,7 @@ export function createStyleAttribute(style: Partial<CSSStyleDeclaration>) {
 	}
 }
 
-export abstract class Placeholder {
+export abstract class DynamicPlaceholder {
 	abstract enable(setPlaceholder: (msg?: string) => void): void;
 	abstract disable(): void;
 }

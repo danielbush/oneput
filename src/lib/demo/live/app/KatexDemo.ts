@@ -6,18 +6,23 @@ import { circleAlertIcon, infoIcon, settingsIcon } from '$lib/oneput/shared/icon
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
+import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
 
 const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
 
 export class KatexDemo {
 	static create(ctl: Controller) {
-		return new KatexDemo(ctl);
+		return new KatexDemo(
+			ctl,
+			SubmitPlaceholder.create(ctl, (binding) => `Type some katex and hit ${binding}...`)
+		);
 	}
 
 	private currentResult = '';
 
 	constructor(
 		private ctl: Controller,
+		private submitPlaceholder: SubmitPlaceholder,
 		private previewDisplayMode: boolean = false
 	) {}
 
@@ -28,7 +33,7 @@ export class KatexDemo {
 		this.renderMenuItems(true, '', 'first');
 		this.renderInputUI(true);
 		this.ctl.menu.enableMenuOpenClose(false);
-		this.ctl.input.setPlaceholder('Type some katex-flavoured latex...');
+		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 		this.ctl.ui.setInputUI((inputUI) => {
 			return {
 				...inputUI,

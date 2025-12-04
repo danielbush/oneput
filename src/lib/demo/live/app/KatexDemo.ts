@@ -47,8 +47,7 @@ export class KatexDemo {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Katex Demo'
 		});
-		this.renderMenuItems(true, '', 'first');
-		this.renderInputUI(true);
+		this.renderPreview();
 		this.ctl.menu.enableMenuOpenClose(false);
 		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 		this.ctl.ui.setInputUI((inputUI) => {

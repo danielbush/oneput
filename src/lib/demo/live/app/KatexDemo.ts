@@ -8,8 +8,6 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
 
-const helpMessage = 'Use shift+enter for newlines; enter will trigger the active menu item item';
-
 export class KatexDemo {
 	static create(ctl: Controller) {
 		return new KatexDemo(
@@ -20,11 +18,30 @@ export class KatexDemo {
 
 	private currentResult = '';
 
+	beforeExit = () => {
+		this.unsubscribeBindingsChange?.();
+	};
+
+	private unsubscribeBindingsChange?: () => void;
+	private helpMessage = 'Type some katex...';
+
 	constructor(
 		private ctl: Controller,
 		private submitPlaceholder: SubmitPlaceholder,
 		private previewDisplayMode: boolean = false
-	) {}
+	) {
+		this.unsubscribeBindingsChange = ctl.events.on('bindings-change', ({ isLocal }) => {
+			if (!isLocal) {
+				return;
+			}
+			const bindings = this.ctl.keys.getCurrentBindings(true);
+			const binding = bindings['submit']?.bindings[0];
+			this.helpMessage = binding
+				? `Type some katex and hit ${binding} to insert... `
+				: 'Type some katex...';
+			this.renderPreview();
+		});
+	}
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
@@ -89,7 +106,7 @@ export class KatexDemo {
 							innerHTMLUnsafe: infoIcon
 						}),
 						b.fchild({
-							textContent: helpMessage
+							textContent: this.helpMessage
 						}),
 						b.spacer()
 					]

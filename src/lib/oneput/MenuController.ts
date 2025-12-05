@@ -173,6 +173,7 @@ export class MenuController {
 		menuItemsFnAsync: MenuItemsFnAsync,
 		options: { onDebounce?: (isDebouncing: boolean) => void; focusBehaviour?: FocusBehaviour } = {}
 	) {
+		this.removeMenuItemsListener?.();
 		let inFlight = 0;
 		const handler: InputChangeListener = async (evt) => {
 			inFlight = (inFlight + 1) % 100000;

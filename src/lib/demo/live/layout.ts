@@ -20,18 +20,20 @@ export type LayoutSettings = {
  */
 export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayout<V> {
 	static create<V extends LayoutSettings = LayoutSettings>(ctl: Controller, values: V = {} as V) {
-		return new Layout(ctl, values);
+		const bindingService = LocalBindingsService.create(ctl);
+		return new Layout(ctl, values, bindingService);
 	}
 
 	defaultPlaceholder?: DynamicPlaceholder;
 
 	constructor(
 		private ctl: Controller,
-		private values: V = {} as V
+		private values: V = {} as V,
+		private bindingService: LocalBindingsService
 	) {
 		ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
 		ctl.menu.setDefaultFocusBehaviour('first');
-		LocalBindingsService.create(ctl)
+		this.bindingService
 			.getBindings()
 			.andTee((bindings) => {
 				ctl.keys.setDefaultBindings(bindings.globalBindings, false, true);

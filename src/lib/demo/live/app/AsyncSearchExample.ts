@@ -1,6 +1,6 @@
-import { hflex } from '$lib/oneput/lib/builder.js';
+import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
-import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
+import { infoIcon, refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { type LayoutSettings } from '../layout.js';
 import { TestInputService } from '../service/TestInputService.js';
@@ -52,11 +52,6 @@ export class AsyncSearchExample {
 					onMount: this.outerRightStatus.onMount
 				})
 		});
-		this.ctl.notify(
-			'Start typing something and inspect the browser console.  ' +
-				'Items are delayed but only latest items should show when debounce times out.  ' +
-				'The service will randomly fail 10% of the time.'
-		);
 		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {
@@ -90,7 +85,27 @@ export class AsyncSearchExample {
 			}
 		);
 		this.ctl.input.setPlaceholder('Start typing something...');
-		this.ctl.menu.setMenuItems([]);
+		this.ctl.menu.setMenuItems([
+			menuItem({
+				id: 'instructions',
+				ignored: true,
+				style: {
+					color: '#777'
+				},
+				children: (b) => [
+					b.icon({
+						innerHTMLUnsafe: infoIcon
+					}),
+					b.fchild({
+						textContent:
+							'Start typing something and inspect the browser console.  ' +
+							'Items are delayed but only latest items should show when debounce times out.  ' +
+							'The service will randomly fail 10% of the time.'
+					}),
+					b.spacer()
+				]
+			})
+		]);
 		this.ctl.input.focusInput();
 	}
 

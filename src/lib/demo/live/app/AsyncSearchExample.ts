@@ -32,6 +32,7 @@ export class AsyncSearchExample {
 					this.ctl.notify('Fetching data...');
 					const results = await this.testInputService.fetchData(input);
 					return results.map((result) => {
+						this.ctl.clearNotifications();
 						return stdMenuItem({
 							id: `async-search-example-${result}`,
 							textContent: `Result for input: '${result}'`,
@@ -111,6 +112,6 @@ export class AsyncSearchExample {
 	}
 
 	beforeExit = () => {
-		this.notify?.clear();
+		this.ctl.clearNotifications();
 	};
 }

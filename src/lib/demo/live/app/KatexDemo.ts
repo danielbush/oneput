@@ -73,6 +73,7 @@ export class KatexDemo {
 				output: 'mathml',
 				errorColor: 'red'
 			});
+			this.ctl.clearNotifications();
 			this.renderInputUI(true);
 			this.renderMenuItems(true, this.currentResult, 'none');
 		} catch (err) {

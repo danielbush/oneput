@@ -127,6 +127,9 @@ export class Controller {
 		this.notification.run(message, params);
 		return this.notification;
 	}
+	clearNotifications() {
+		this.notification.clear();
+	}
 
 	alert(params: { message: string; additional: string }): Alert {
 		const alert = Alert.create(this, params);

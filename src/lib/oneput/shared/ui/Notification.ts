@@ -7,26 +7,19 @@ export type NotificationParams = {
 };
 
 export class Notification {
-	static create(controller: Controller, message: string) {
-		return new Notification(controller, message);
+	static create(controller: Controller) {
+		return new Notification(controller);
 	}
 
 	constructor(
 		private ctl: Controller,
-		private message: string,
 		private timeoutHandle: ReturnType<typeof setTimeout> | null = null
 	) {}
 
 	/**
-	 * Use this to update a message on an existing notification that presumably
-	 * is already showing.
+	 * Run the notification.
 	 */
-	updateMessage(message: string, params: NotificationParams = {}) {
-		this.message = message;
-		this.run(params);
-	}
-
-	run(params: NotificationParams = {}) {
+	run(message: string, params: NotificationParams = {}) {
 		if (this.timeoutHandle) {
 			clearTimeout(this.timeoutHandle);
 		}
@@ -42,7 +35,7 @@ export class Notification {
 				style: { width: '100%' },
 				children: (b) => [
 					b.fchild({
-						textContent: this.message
+						textContent: message
 					}),
 					b.iconButton({
 						classes: ['oneput__icon-button'],

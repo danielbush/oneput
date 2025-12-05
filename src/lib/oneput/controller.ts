@@ -119,10 +119,11 @@ export class Controller {
 		return;
 	};
 
+	private notification = Notification.create(this);
+
 	notify(message: string, params: NotificationParams = {}): Notification {
-		const notification = Notification.create(this, message);
-		notification.run(params);
-		return notification;
+		this.notification.run(message, params);
+		return this.notification;
 	}
 
 	alert(params: { message: string; additional: string }): Alert {

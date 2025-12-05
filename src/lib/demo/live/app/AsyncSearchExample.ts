@@ -29,14 +29,14 @@ export class AsyncSearchExample {
 		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {
-					this.notify?.updateMessage('Fetching data...');
+					this.ctl.notify('Fetching data...');
 					const results = await this.testInputService.fetchData(input);
 					return results.map((result) => {
 						return stdMenuItem({
 							id: `async-search-example-${result}`,
 							textContent: `Result for input: '${result}'`,
 							action: () => {
-								this.notify?.updateMessage(`Selected: ${result}`);
+								this.ctl.notify(`Selected: ${result}`);
 							}
 						});
 					});
@@ -50,7 +50,7 @@ export class AsyncSearchExample {
 					if (this.isError && !isDebouncing) {
 						return;
 					} else {
-						this.notify?.updateMessage(isDebouncing ? 'Debouncing...' : 'Ready...');
+						this.ctl.notify(isDebouncing ? 'Debouncing...' : 'Ready...');
 						this.setBusy(isDebouncing);
 					}
 				},
@@ -66,7 +66,6 @@ export class AsyncSearchExample {
 	private setError(error: Error) {
 		console.error(error);
 		this.isError = true;
-		this.notify?.updateMessage('An error!  Check the browser console...');
 		const alert = this.ctl.alert({
 			message: 'An error!',
 			additional:

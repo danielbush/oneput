@@ -2,11 +2,12 @@ import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import { type LayoutSettings } from '../layout.js';
 import { type OneputProps } from '$lib/oneput/lib/lib.js';
-import { circleAlertIcon, infoIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
+import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
+import { infoMenuItem } from '$lib/oneput/shared/ui/infoMenuItem.js';
 
 export class KatexDemo {
 	static create(ctl: Controller) {
@@ -59,10 +60,10 @@ export class KatexDemo {
 		this.renderUI();
 	}
 
-	private renderUI() {
+	private renderUI(focusBehaviour: 'none' | 'first' | 'last' = 'first') {
 		if (this.ctl.input.getInputValue().trim() === '') {
 			this.renderInputUI(true);
-			this.renderMenuItems(true, '', 'none');
+			this.renderMenuItems(true, '', focusBehaviour);
 			this.currentResult = '';
 			return;
 		}
@@ -75,10 +76,10 @@ export class KatexDemo {
 			});
 			this.ctl.clearNotifications();
 			this.renderInputUI(true);
-			this.renderMenuItems(true, this.currentResult, 'none');
+			this.renderMenuItems(true, this.currentResult, focusBehaviour);
 		} catch (err) {
 			this.renderInputUI(false);
-			this.renderMenuItems(false, this.currentResult, 'none');
+			this.renderMenuItems(false, this.currentResult, focusBehaviour);
 			this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
 		}
 	}
@@ -112,22 +113,7 @@ export class KatexDemo {
 						}
 					]
 				}),
-				menuItem({
-					id: 'katex-instructions',
-					ignored: true,
-					style: {
-						color: '#777'
-					},
-					children: (b) => [
-						b.icon({
-							innerHTMLUnsafe: infoIcon
-						}),
-						b.fchild({
-							textContent: this.helpMessage
-						}),
-						b.spacer()
-					]
-				}),
+				infoMenuItem('katex-instructions', this.helpMessage),
 				divider(),
 				stdMenuItem({
 					id: 'insert-katex-btn',
@@ -144,7 +130,10 @@ export class KatexDemo {
 					id: 'katex-display-mode-checkbox',
 					action: (_, checked) => {
 						this.previewDisplayMode = checked;
-						this.renderUI();
+						// TODO: a better solution is to mount the katex
+						// previewer with an updater that we can trigger here.
+						// See AsyncSearchExample for an example.
+						this.renderUI('none');
 					},
 					textContent: 'Display mode',
 					checked: this.previewDisplayMode
@@ -152,7 +141,8 @@ export class KatexDemo {
 			],
 			// This will ensure the menuItemFocus index won't change when we hit the
 			// checkbox above or any other action.
-			{ focusBehaviour: focusBehaviour ?? 'none' }
+			// { focusBehaviour: focusBehaviour ?? 'first' }
+			{ focusBehaviour: focusBehaviour }
 		);
 	}
 

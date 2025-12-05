@@ -111,7 +111,6 @@ export class AsyncSearchExample {
 	}
 
 	beforeExit = () => {
-		// TODO: make this a beforeRunUI ?
 		this.notify?.clear();
 	};
 }

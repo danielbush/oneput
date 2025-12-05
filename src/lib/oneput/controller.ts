@@ -57,6 +57,8 @@ export class Controller {
 		this.menu.resetMenuItemsFn();
 		this.input.setInputValue();
 		this.input.resetSubmitHandler();
+
+		// We don't clear notifications or alerts or confirmations.
 	}
 
 	/**

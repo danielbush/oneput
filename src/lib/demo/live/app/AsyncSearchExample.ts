@@ -1,48 +1,23 @@
 import { hflex } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
-import { refreshCwIcon } from '$lib/oneput/shared/icons.js';
+import { dotIcon, refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { type LayoutSettings } from '../layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/infoMenuItem.js';
-
-class OuterRightStatus {
-	static create = () => {
-		const status = new OuterRightStatus();
-		return status;
-	};
-
-	onMount = (node: HTMLElement) => {
-		this.node = node;
-		return () => {
-			this.destroy();
-		};
-	};
-
-	private node?: HTMLElement;
-
-	constructor() {}
-
-	update = (msg: string) => {
-		if (this.node) {
-			this.node.innerHTML = msg;
-		}
-	};
-
-	destroy = () => {};
-}
+import { DOMUpdater } from '$lib/oneput/lib/DOMUpdater.js';
 
 export class AsyncSearchExample {
 	static create(ctl: Controller) {
 		const testInputService = TestInputService.create();
-		const outerRightStatus = OuterRightStatus.create();
+		const outerRightStatus = DOMUpdater.create();
 		return new AsyncSearchExample(ctl, testInputService, outerRightStatus);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private testInputService: TestInputService,
-		private outerRightStatus: OuterRightStatus
+		private outerRightStatus: DOMUpdater
 	) {}
 
 	runUI() {
@@ -56,15 +31,20 @@ export class AsyncSearchExample {
 		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {
-					this.outerRightStatus.update('Fetching data...');
+					this.outerRightStatus.withNode((node) => {
+						node.innerHTML = 'Fetching data...';
+					});
 					const results = await this.testInputService.fetchData(input);
 					return results.map((result) => {
 						this.ctl.clearNotifications();
 						return stdMenuItem({
 							id: result.id,
 							textContent: `Result: '${result.text}'`,
+							left: (b) => [b.icon({ innerHTMLUnsafe: dotIcon })],
 							action: () => {
-								this.outerRightStatus.update(`Selected: ${result}`);
+								this.outerRightStatus.withNode((node) => {
+									node.innerHTML = `Selected: ${result}`;
+								});
 							}
 						});
 					});
@@ -78,7 +58,9 @@ export class AsyncSearchExample {
 					if (this.isError && !isDebouncing) {
 						return;
 					} else {
-						this.outerRightStatus.update(isDebouncing ? 'Debouncing...' : 'Ready');
+						this.outerRightStatus.withNode((node) => {
+							node.innerHTML = isDebouncing ? 'Debouncing...' : 'Ready';
+						});
 						this.setBusy(isDebouncing);
 					}
 				},
@@ -100,7 +82,9 @@ export class AsyncSearchExample {
 	private isError = false;
 	private setError(error: Error) {
 		console.error(error);
-		this.outerRightStatus.update('⚠️ Error');
+		this.outerRightStatus.withNode((node) => {
+			node.innerHTML = '⚠️ Error';
+		});
 		this.isError = true;
 		const alert = this.ctl.alert({
 			message: 'An error!',

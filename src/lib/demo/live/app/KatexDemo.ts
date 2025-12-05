@@ -131,8 +131,9 @@ export class KatexDemo {
 					action: (_, checked) => {
 						this.previewDisplayMode = checked;
 						// TODO: a better solution is to mount the katex
-						// previewer with an updater that we can trigger here.
-						// See AsyncSearchExample for an example.
+						// previewer with a DOMUpdater or SveltePropInjector we
+						// can trigger here.  See AsyncSearchExample for an
+						// example.
 						this.renderUI('none');
 					},
 					textContent: 'Display mode',

@@ -1,6 +1,12 @@
-import { DynamicPlaceholder, type UILayout, mountSvelte } from '$lib/oneput/lib/lib.js';
+import {
+	DynamicPlaceholder,
+	type FChildParams,
+	type UILayout,
+	mountSvelte,
+	randomId
+} from '$lib/oneput/lib/lib.js';
 import type { Controller } from '$lib/oneput/controller.js';
-import { hflex } from '$lib/oneput/lib/builder.js';
+import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
 import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
@@ -13,6 +19,10 @@ export type LayoutSettings = {
 	exitAction?: boolean | (() => void);
 	backAction?: boolean | (() => void);
 	menuHeader?: string;
+	/**
+	 * Expose the bottom right corner of the layout.
+	 */
+	outerRight?: (b: FlexChildBuilder) => FChildParams;
 };
 
 /**
@@ -60,6 +70,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 	configure(values: V) {
 		this.values = {
 			menuHeader: 'Menu',
+			outerRight: undefined,
 			...values
 		};
 		// Make our life easier, if we don't specify back or exit, we'll show
@@ -182,10 +193,21 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 					onMount: (node) =>
 						mountSvelte(MenuStatus, { target: node, props: { controller: this.ctl } })
 				}),
-				b.fchild({
-					style: { flex: '1', justifyContent: 'flex-end' },
-					onMount: DateDisplay.onMount
-				})
+				this.values.outerRight
+					? {
+							style: { flex: '1', justifyContent: 'flex-end' },
+							...this.values.outerRight(b)
+						}
+					: b.fchild({
+							// GOTCHA: if outerRight is invoked above but has the same id
+							// then any onMount destructor callback will not get called!
+							// If we use a random id here, there is practically
+							// no way for outerRight to re-use the same it.
+							// id: 'root-outer-default-right',
+							id: randomId(),
+							style: { flex: '1', justifyContent: 'flex-end' },
+							onMount: DateDisplay.onMount
+						})
 			]
 		});
 	}

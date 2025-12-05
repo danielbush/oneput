@@ -5,20 +5,52 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { type LayoutSettings } from '../layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 
+class OuterRightStatus {
+	static create = () => {
+		const status = new OuterRightStatus();
+		return status;
+	};
+
+	onMount = (node: HTMLElement) => {
+		this.node = node;
+		return () => {
+			this.destroy();
+		};
+	};
+
+	private node?: HTMLElement;
+
+	constructor() {}
+
+	update = (msg: string) => {
+		if (this.node) {
+			this.node.innerHTML = msg;
+		}
+	};
+
+	destroy = () => {};
+}
+
 export class AsyncSearchExample {
 	static create(ctl: Controller) {
 		const testInputService = TestInputService.create();
-		return new AsyncSearchExample(ctl, testInputService);
+		const outerRightStatus = OuterRightStatus.create();
+		return new AsyncSearchExample(ctl, testInputService, outerRightStatus);
 	}
 
 	constructor(
 		private ctl: Controller,
-		private testInputService: TestInputService
+		private testInputService: TestInputService,
+		private outerRightStatus: OuterRightStatus
 	) {}
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Async Search Example'
+			menuHeader: 'Async Search Example',
+			outerRight: (b) =>
+				b.fchild({
+					onMount: this.outerRightStatus.onMount
+				})
 		});
 		this.ctl.notify(
 			'Start typing something and inspect the browser console.  ' +
@@ -28,15 +60,15 @@ export class AsyncSearchExample {
 		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {
-					this.ctl.notify('Fetching data...');
+					this.outerRightStatus.update('Fetching data...');
 					const results = await this.testInputService.fetchData(input);
 					return results.map((result) => {
 						this.ctl.clearNotifications();
 						return stdMenuItem({
-							id: `async-search-example-${result}`,
-							textContent: `Result for input: '${result}'`,
+							id: result.id,
+							textContent: `Result: '${result.text}'`,
 							action: () => {
-								this.ctl.notify(`Selected: ${result}`);
+								this.outerRightStatus.update(`Selected: ${result}`);
 							}
 						});
 					});
@@ -50,7 +82,7 @@ export class AsyncSearchExample {
 					if (this.isError && !isDebouncing) {
 						return;
 					} else {
-						this.ctl.notify(isDebouncing ? 'Debouncing...' : 'Ready...');
+						this.outerRightStatus.update(isDebouncing ? 'Debouncing...' : 'Ready');
 						this.setBusy(isDebouncing);
 					}
 				},
@@ -65,6 +97,7 @@ export class AsyncSearchExample {
 	private isError = false;
 	private setError(error: Error) {
 		console.error(error);
+		this.outerRightStatus.update('⚠️ Error');
 		this.isError = true;
 		const alert = this.ctl.alert({
 			message: 'An error!',

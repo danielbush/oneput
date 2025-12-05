@@ -1,3 +1,5 @@
+import { randomId } from '$lib/oneput/lib/lib.js';
+
 export class TestInputService {
 	static create() {
 		return new TestInputService();
@@ -15,7 +17,7 @@ export class TestInputService {
 			throw new Error('TestInputService: simulated error');
 		}
 		for (let i = 0; i < input.length; i++) {
-			results.push(input[i]);
+			results.push({ id: randomId(), text: input[i] });
 		}
 		console.warn(`${input} will fetch with delay of ${delay}ms`);
 		await new Promise((resolve) => setTimeout(resolve, delay));

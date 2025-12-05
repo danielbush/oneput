@@ -127,7 +127,9 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Add entry...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
-					this.addEntryUI();
+					this.ctl.runInlineUI(() => {
+						this.addEntryUI({}, 'first');
+					});
 				}
 			}),
 			stdMenuItem({
@@ -453,36 +455,61 @@ export class TomatoTimer implements AppObject {
 		]);
 	}
 
-	private addEntryUI() {
+	private addEntryUI(
+		session: Partial<FinishedSession> = {},
+		focusBehaviour: 'none' | 'first' | 'last' = 'none'
+	) {
 		this.currentUI = 'addEntryUI';
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Add entry...'
 		});
 		this.ctl.input.setPlaceholder('Select a field to edit...');
-		const session: Partial<FinishedSession> = {};
-		this.ctl.menu.setMenuItems([
-			stdMenuItem({
-				id: 'tomato-add-entry-label',
-				textContent: 'Label...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
-				action: () => {
-					this.submitPlaceholder.update((binding) => {
-						return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
-					});
-					this.ctl.input.setPlaceholder(this.submitPlaceholder);
-					this.ctl.input.setSubmitHandlerOnce((label) => {
-						session.label = label;
-					});
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-add-entry-duration',
-				textContent: 'Duration...',
-				// left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
-				action: () => {
-					//
-				}
-			})
-		]);
+		this.ctl.menu.setMenuItems(
+			[
+				stdMenuItem({
+					id: 'add-label',
+					textContent: session.label ? `Label: ${session.label}` : 'Label...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+					action: () => {
+						this.ctl.menu.clearMenuItemsFn();
+						this.submitPlaceholder.update((binding) => {
+							return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
+						});
+						this.ctl.input.setPlaceholder(this.submitPlaceholder);
+						this.ctl.input.setSubmitHandlerOnce((label) => {
+							session.label = label;
+							this.ctl.input.setInputValue();
+							this.ctl.menu.focusNextMenuItem();
+							this.addEntryUI(session, 'none');
+						});
+					}
+				}),
+				stdMenuItem({
+					id: 'add-duration',
+					textContent: session.duration ? `Duration: ${session.duration} minutes` : 'Duration...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
+					action: () => {
+						this.ctl.menu.clearMenuItemsFn();
+						this.submitPlaceholder.update((binding) => {
+							return binding
+								? `Enter a duration in minutes and hit ${binding}...`
+								: 'Enter duration in minutes and submit...';
+						});
+						this.ctl.input.setPlaceholder(this.submitPlaceholder);
+						this.ctl.input.setSubmitHandlerOnce((duration) => {
+							session.duration = parseInt(duration);
+							if (isNaN(session.duration)) {
+								session.duration = undefined;
+								this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
+							}
+							this.ctl.input.setInputValue();
+							this.ctl.menu.focusNextMenuItem();
+							this.addEntryUI(session, 'none');
+						});
+					}
+				})
+			],
+			{ focusBehaviour }
+		);
 	}
 }

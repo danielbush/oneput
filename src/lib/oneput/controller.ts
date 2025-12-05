@@ -38,7 +38,7 @@ export class Controller {
 	}
 
 	/**
-	 *  Resets things to sane defaults.  You can then set things in your UIObject.runUI.
+	 *  Resets things to sane defaults.  You can then set things in your AppObject.runUI.
 	 */
 	private beforeRunUI() {
 		console.log(this.uiParents, 'current:', this.currentUI);

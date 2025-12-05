@@ -13,15 +13,14 @@ export class AsyncSearchExample {
 
 	constructor(
 		private ctl: Controller,
-		private testInputService: TestInputService,
-		private notify?: ReturnType<Controller['notify']>
+		private testInputService: TestInputService
 	) {}
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Async Search Example'
 		});
-		this.notify = this.ctl.notify(
+		this.ctl.notify(
 			'Start typing something and inspect the browser console.  ' +
 				'Items are delayed but only latest items should show when debounce times out.  ' +
 				'The service will randomly fail 10% of the time.'

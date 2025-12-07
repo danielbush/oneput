@@ -50,7 +50,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 				ctl.keys.setDefaultBindings(bindings.localBindings, true, true);
 			})
 			.orTee((err) => {
-				ctl.alert({ message: 'Error getting bindings', additional: err.message });
+				ctl.alert({ message: 'Could not set default bindings!', additional: err.message });
 			})
 			.map(() => {
 				// Wait till default bindings have been set above.

@@ -70,7 +70,6 @@ export class Controller {
 	}
 
 	private runBeforeExit() {
-		console.log('runBeforeExit', this.currentUI, this.inlineUIExit);
 		this.currentUI?.beforeExit?.();
 		this.inlineUIExit?.();
 		this.inlineUIExit = undefined;

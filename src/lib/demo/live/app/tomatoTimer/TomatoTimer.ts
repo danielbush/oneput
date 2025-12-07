@@ -505,10 +505,11 @@ export class TomatoTimer implements AppObject {
 						if (isNaN(session.duration)) {
 							session.duration = undefined;
 							this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
+							return;
 						}
-						this.ctl.input.setInputValue();
 						this.ctl.menu.focusNextMenuItem();
 						this.addEntryUI(session, 'none');
+						this.ctl.input.setInputValue();
 					});
 					break;
 			}

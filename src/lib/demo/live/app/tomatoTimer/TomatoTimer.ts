@@ -125,7 +125,8 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Add entry...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
-					this.ctl.runInlineUI(() => this.addEntryUI({}, 'first'));
+					// this.ctl.runInlineUI(() => this.addEntryUI({}, 'first'));
+					this.ctl.runUI(AddEntryUI, { session: {} as Partial<FinishedSession> });
 				}
 			}),
 			stdMenuItem({
@@ -421,20 +422,96 @@ export class TomatoTimer implements AppObject {
 			})
 		]);
 	}
+}
 
-	private addEntryUI(
-		session: Partial<FinishedSession> = {},
-		focusBehaviour: 'none' | 'first' | 'last' = 'none'
+class AddEntryUI implements AppObject {
+	static create(ctl: Controller, values: { session: Partial<FinishedSession> }) {
+		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
+			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
+		});
+		return new AddEntryUI(ctl, values.session, submitPlaceholder);
+	}
+
+	private unsubscribeInputChange?: () => void;
+	private unsubscribeMenuItemFocus?: () => void;
+
+	constructor(
+		private ctl: Controller,
+		private session: Partial<FinishedSession>,
+		private submitPlaceholder: SubmitPlaceholder
 	) {
-		this.currentUI = 'addEntryUI';
+		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
+			const item = this.menuItems[index];
+			this.unsubscribeInputChange?.();
+			switch (item.id) {
+				case 'add-label':
+					this.submitPlaceholder.setPlaceholder((binding) => {
+						return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
+					});
+					this.ctl.input.setInputValue(this.session.label ?? '');
+					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+						this.session.label = value;
+						// this.ctl.input.setInputValue();
+						// this.ctl.menu.focusNextMenuItem();
+						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+					});
+					// this.ctl.input.setSubmitHandlerOnce((label) => {
+					// 	session.label = label;
+					// 	this.ctl.input.setInputValue();
+					// 	this.ctl.menu.focusNextMenuItem();
+					// 	this.addEntryUI(session, 'none');
+					// });
+					break;
+				case 'add-duration':
+					this.submitPlaceholder.setPlaceholder((binding) => {
+						return binding
+							? `Enter a duration in minutes and hit ${binding}...`
+							: 'Enter duration in minutes and submit...';
+					});
+					this.ctl.input.setInputValue(this.session.duration?.toString() ?? '');
+					// this.ctl.input.setSubmitHandlerOnce((duration) => {
+					// 	session.duration = parseInt(duration);
+					// 	if (isNaN(session.duration)) {
+					// 		session.duration = undefined;
+					// 		this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
+					// 		return;
+					// 	}
+					// 	this.ctl.menu.focusNextMenuItem();
+					// 	this.addEntryUI(session, 'none');
+					// 	this.ctl.input.setInputValue();
+					// });
+					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+						this.ctl.clearNotifications();
+						this.session.duration = value === '' ? undefined : parseInt(value);
+						if (this.session.duration !== undefined && isNaN(this.session.duration)) {
+							this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
+							return;
+						}
+						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+					});
+					break;
+			}
+		});
+	}
+
+	beforeExit() {
+		this.unsubscribeInputChange?.();
+		this.unsubscribeMenuItemFocus?.();
+	}
+
+	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Add entry...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
-		const menuItems = [
+		this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'first' });
+	}
+
+	get menuItems() {
+		return [
 			stdMenuItem({
 				id: 'add-label',
-				textContent: session.label ? `Label: ${session.label}` : 'Label...',
+				textContent: this.session.label ? `Label: ${this.session.label}` : 'Label...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
 				action: () => {
 					// this.ctl.menu.clearMenuItemsFn();
@@ -453,7 +530,9 @@ export class TomatoTimer implements AppObject {
 			}),
 			stdMenuItem({
 				id: 'add-duration',
-				textContent: session.duration ? `Duration: ${session.duration} minutes` : 'Duration...',
+				textContent: this.session.duration
+					? `Duration: ${this.session.duration} minutes`
+					: 'Duration...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
 				action: () => {
 					// this.ctl.menu.clearMenuItemsFn();
@@ -477,63 +556,5 @@ export class TomatoTimer implements AppObject {
 				}
 			})
 		];
-		let unsubscribeInputChange: () => void;
-		const unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
-			const item = menuItems[index];
-			unsubscribeInputChange?.();
-			switch (item.id) {
-				case 'add-label':
-					this.submitPlaceholder.setPlaceholder((binding) => {
-						return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
-					});
-					this.ctl.input.setInputValue(session.label ?? '');
-					unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-						session.label = value;
-						// this.ctl.input.setInputValue();
-						// this.ctl.menu.focusNextMenuItem();
-						this.addEntryUI(session, 'none');
-					});
-					// this.ctl.input.setSubmitHandlerOnce((label) => {
-					// 	session.label = label;
-					// 	this.ctl.input.setInputValue();
-					// 	this.ctl.menu.focusNextMenuItem();
-					// 	this.addEntryUI(session, 'none');
-					// });
-					break;
-				case 'add-duration':
-					this.submitPlaceholder.setPlaceholder((binding) => {
-						return binding
-							? `Enter a duration in minutes and hit ${binding}...`
-							: 'Enter duration in minutes and submit...';
-					});
-					this.ctl.input.setInputValue(session.duration?.toString() ?? '');
-					// this.ctl.input.setSubmitHandlerOnce((duration) => {
-					// 	session.duration = parseInt(duration);
-					// 	if (isNaN(session.duration)) {
-					// 		session.duration = undefined;
-					// 		this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
-					// 		return;
-					// 	}
-					// 	this.ctl.menu.focusNextMenuItem();
-					// 	this.addEntryUI(session, 'none');
-					// 	this.ctl.input.setInputValue();
-					// });
-					unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-						this.ctl.clearNotifications();
-						session.duration = value === '' ? undefined : parseInt(value);
-						if (session.duration !== undefined && isNaN(session.duration)) {
-							this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
-							return;
-						}
-						this.addEntryUI(session, 'none');
-					});
-					break;
-			}
-		});
-		this.ctl.menu.setMenuItems(menuItems, { focusBehaviour });
-		return () => {
-			unsubscribeInputChange?.();
-			unsubscribeMenuItemFocus();
-		};
 	}
 }

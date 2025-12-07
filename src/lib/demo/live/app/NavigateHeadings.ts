@@ -47,7 +47,8 @@ export class NavigateHeadings {
 		// Demo how to handle typed input by handling onInputChange directly and
 		// disable menuItemsFn...
 		this.ctl.menu.enableMenuItemsFn(false);
-		this.clearInputChangeListener = this.ctl.input.onInputChange((evt) => {
+
+		this.clearInputChangeListener = this.ctl.events.on('input-change', (evt) => {
 			const input = (evt.target as HTMLInputElement).value;
 			const sortedMenuItems = this.fuzzyFilter.menuItemsFn(input, menuItems);
 			if (!sortedMenuItems) {

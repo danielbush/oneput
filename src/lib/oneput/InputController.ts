@@ -1,4 +1,4 @@
-import { type InputChangeEvent, type InputChangeListener, DynamicPlaceholder } from './lib/lib.js';
+import { DynamicPlaceholder } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export class InputController {
@@ -8,7 +8,6 @@ export class InputController {
 
 	constructor(private ctl: Controller) {
 		this.ctl.currentProps.onInputChange = (evt) => {
-			this.runInputChangeListeners(evt);
 			// Emit internal event for decoupled communication
 			this.ctl.events.emit({ type: 'input-change', payload: evt });
 		};
@@ -24,7 +23,6 @@ export class InputController {
 
 	private defaultPlaceholder?: string | DynamicPlaceholder;
 	private inputElement: HTMLInputElement | undefined;
-	private inputChangeListeners: InputChangeListener[] = [];
 
 	/**
 	 * Used by Oneput to tell the controller what the input element is.
@@ -114,19 +112,6 @@ export class InputController {
 
 	getInputValue() {
 		return this.ctl.currentProps.inputValue || '';
-	}
-
-	onInputChange(handler: InputChangeListener): () => void {
-		this.inputChangeListeners.push(handler);
-		return () => {
-			this.inputChangeListeners = this.inputChangeListeners.filter((l) => l !== handler);
-		};
-	}
-
-	private runInputChangeListeners(evt: InputChangeEvent) {
-		this.inputChangeListeners.forEach((listener) => {
-			listener(evt);
-		});
 	}
 
 	enableInputElement(on: boolean = true) {

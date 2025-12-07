@@ -24,9 +24,10 @@ export class SubmitPlaceholder extends DynamicPlaceholder {
 		return binding;
 	}
 
-	update(msg: (submitBinding?: string) => string) {
+	setPlaceholder(msg: (submitBinding?: string) => string) {
 		this.msg = msg;
 		this.ctl.input.refreshPlaceholder();
+		this.ctl.input.setPlaceholder(this);
 	}
 
 	enable(setPlaceholder: (msg?: string) => void) {

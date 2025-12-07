@@ -8,6 +8,11 @@ export type InputChangeEvent = Event & {
 export type InputChangeListener = (evt: InputChangeEvent) => void;
 
 export type OneputProps = {
+	/**
+	 * The index of the menu item that is focused.
+	 * If the boolean is set to true the item will be scrolled into view which
+	 * is desirable if the focus was triggered by a keybinding.
+	 */
 	menuItemFocus?: [number, boolean?];
 	menuOpen: boolean;
 	menuItems?: Array<MenuItem | MenuItemDivider>;

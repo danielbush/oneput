@@ -144,10 +144,9 @@ export class TomatoTimer implements AppObject {
 				}
 			})
 		]);
-		this.submitPlaceholder.update((binding) => {
+		this.submitPlaceholder.setPlaceholder((binding) => {
 			return binding ? `Enter time in minutes and hit ${binding}...` : 'Enter value and submit...';
 		});
-		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
 			this.ctl.runInlineUI(() => {
 				this.createTimerUI({ duration: parseFloat(duration) * 60 });
@@ -160,10 +159,9 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
-		this.submitPlaceholder.update((binding) => {
+		this.submitPlaceholder.setPlaceholder((binding) => {
 			return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
 		});
-		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 
 		const startTimer = (label?: string) => {
 			const timerValue = TomatoTimerValue.start({
@@ -406,10 +404,9 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Edit label...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
 				action: () => {
-					this.submitPlaceholder.update((binding) => {
+					this.submitPlaceholder.setPlaceholder((binding) => {
 						return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
 					});
-					this.ctl.input.setPlaceholder(this.submitPlaceholder);
 					this.ctl.input.setSubmitHandlerOnce((label) => {
 						const newSession = { ...session, label };
 						this.store
@@ -463,53 +460,90 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Add entry...'
 		});
+		this.ctl.menu.clearMenuItemsFn();
 		this.ctl.input.setPlaceholder('Select a field to edit...');
-		this.ctl.menu.setMenuItems(
-			[
-				stdMenuItem({
-					id: 'add-label',
-					textContent: session.label ? `Label: ${session.label}` : 'Label...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
-					action: () => {
-						this.ctl.menu.clearMenuItemsFn();
-						this.submitPlaceholder.update((binding) => {
-							return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
-						});
-						this.ctl.input.setPlaceholder(this.submitPlaceholder);
-						this.ctl.input.setSubmitHandlerOnce((label) => {
-							session.label = label;
-							this.ctl.input.setInputValue();
-							this.ctl.menu.focusNextMenuItem();
-							this.addEntryUI(session, 'none');
-						});
-					}
-				}),
-				stdMenuItem({
-					id: 'add-duration',
-					textContent: session.duration ? `Duration: ${session.duration} minutes` : 'Duration...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
-					action: () => {
-						this.ctl.menu.clearMenuItemsFn();
-						this.submitPlaceholder.update((binding) => {
-							return binding
-								? `Enter a duration in minutes and hit ${binding}...`
-								: 'Enter duration in minutes and submit...';
-						});
-						this.ctl.input.setPlaceholder(this.submitPlaceholder);
-						this.ctl.input.setSubmitHandlerOnce((duration) => {
-							session.duration = parseInt(duration);
-							if (isNaN(session.duration)) {
-								session.duration = undefined;
-								this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
-							}
-							this.ctl.input.setInputValue();
-							this.ctl.menu.focusNextMenuItem();
-							this.addEntryUI(session, 'none');
-						});
-					}
-				})
-			],
-			{ focusBehaviour }
-		);
+		const menuItems = [
+			stdMenuItem({
+				id: 'add-label',
+				textContent: session.label ? `Label: ${session.label}` : 'Label...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+				action: () => {
+					// this.ctl.menu.clearMenuItemsFn();
+					// this.submitPlaceholder.update((binding) => {
+					// 	return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
+					// });
+					// this.ctl.input.setPlaceholder(this.submitPlaceholder);
+					// this.ctl.input.setSubmitHandlerOnce((label) => {
+					// 	session.label = label;
+					// 	this.ctl.input.setInputValue();
+					// 	this.ctl.menu.focusNextMenuItem();
+					// 	this.addEntryUI(session, 'none');
+					// });
+					this.ctl.menu.focusNextMenuItem();
+				}
+			}),
+			stdMenuItem({
+				id: 'add-duration',
+				textContent: session.duration ? `Duration: ${session.duration} minutes` : 'Duration...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
+				action: () => {
+					// this.ctl.menu.clearMenuItemsFn();
+					// this.submitPlaceholder.update((binding) => {
+					// 	return binding
+					// 		? `Enter a duration in minutes and hit ${binding}...`
+					// 		: 'Enter duration in minutes and submit...';
+					// });
+					// this.ctl.input.setPlaceholder(this.submitPlaceholder);
+					// this.ctl.input.setSubmitHandlerOnce((duration) => {
+					// 	session.duration = parseInt(duration);
+					// 	if (isNaN(session.duration)) {
+					// 		session.duration = undefined;
+					// 		this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
+					// 	}
+					// 	this.ctl.input.setInputValue();
+					// 	this.ctl.menu.focusNextMenuItem();
+					// 	this.addEntryUI(session, 'none');
+					// });
+					this.ctl.menu.focusNextMenuItem();
+				}
+			})
+		];
+		const unsubscribe = this.ctl.events.on('menu-item-focus', ({ index }) => {
+			const item = menuItems[index];
+			switch (item.id) {
+				case 'add-label':
+					this.submitPlaceholder.setPlaceholder((binding) => {
+						return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
+					});
+					this.ctl.input.setInputValue(session.label ?? '');
+					this.ctl.input.setSubmitHandlerOnce((label) => {
+						session.label = label;
+						this.ctl.input.setInputValue();
+						this.ctl.menu.focusNextMenuItem();
+						this.addEntryUI(session, 'none');
+					});
+					break;
+				case 'add-duration':
+					this.submitPlaceholder.setPlaceholder((binding) => {
+						return binding
+							? `Enter a duration in minutes and hit ${binding}...`
+							: 'Enter duration in minutes and submit...';
+					});
+					this.ctl.input.setInputValue(session.duration?.toString() ?? '');
+					this.ctl.input.setSubmitHandlerOnce((duration) => {
+						session.duration = parseInt(duration);
+						if (isNaN(session.duration)) {
+							session.duration = undefined;
+							this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
+						}
+						this.ctl.input.setInputValue();
+						this.ctl.menu.focusNextMenuItem();
+						this.addEntryUI(session, 'none');
+					});
+					break;
+			}
+		});
+		this.ctl.menu.setMenuItems(menuItems, { focusBehaviour });
+		return () => unsubscribe();
 	}
 }

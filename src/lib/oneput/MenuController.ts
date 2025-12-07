@@ -34,6 +34,7 @@ export class MenuController {
 		};
 		this.ctl.currentProps.onMenuItemEnter = (_, __, index) => {
 			this.ctl.currentProps.menuItemFocus = [index, false];
+			this.ctl.events.emit({ type: 'menu-item-focus', payload: { index } });
 		};
 	}
 
@@ -250,6 +251,7 @@ export class MenuController {
 		) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
+				this.ctl.events.emit({ type: 'menu-item-focus', payload: { index: i } });
 				break;
 			}
 		}
@@ -263,6 +265,7 @@ export class MenuController {
 		) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
+				this.ctl.events.emit({ type: 'menu-item-focus', payload: { index: i } });
 				break;
 			}
 		}
@@ -272,6 +275,7 @@ export class MenuController {
 		for (let i = 0; i < this.menuItemCount; i++) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
+				this.ctl.events.emit({ type: 'menu-item-focus', payload: { index: i } });
 				break;
 			}
 		}
@@ -281,6 +285,7 @@ export class MenuController {
 		for (let i = this.menuItemCount - 1; i >= 0; i--) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
+				this.ctl.events.emit({ type: 'menu-item-focus', payload: { index: i } });
 				break;
 			}
 		}

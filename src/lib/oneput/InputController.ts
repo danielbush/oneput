@@ -137,23 +137,34 @@ export class InputController {
 	}
 
 	private submitHandler?: (input: string) => void;
-	private submitOnce = false;
+	private submitOnce?: typeof this.submitHandler;
 
 	setSubmitHandler(fn: (input: string) => void) {
 		this.submitHandler = fn;
-		this.submitOnce = false;
+		this.submitOnce = undefined;
 	}
 
 	setSubmitHandlerOnce(fn: (input: string) => void) {
+		console.log('setSubmitHandlerOnce', fn);
 		this.submitHandler = fn;
-		this.submitOnce = true;
+		this.submitOnce = fn;
 	}
 
 	runSubmitHandler() {
-		this.submitHandler?.(this.getInputValue());
-		if (this.submitOnce) {
+		const currHandler = this.submitHandler?.(this.getInputValue());
+		// If setSubmitHandlerOnce or setSubmitHandler are called within the
+		// current submit handler invocation above we will end up unsetting
+		// them!
+		//
+		// To avoid this:
+		// Store the reference to the original handler in currHandler then we
+		// can use submitOnce to check:
+		// (1) we are doing "submit once" logic
+		// (2) the submit handler has not changed
+		//
+		if (this.submitOnce === currHandler) {
 			this.submitHandler = undefined;
-			this.submitOnce = false;
+			this.submitOnce = undefined;
 		}
 	}
 

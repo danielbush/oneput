@@ -26,12 +26,14 @@ export class SubmitPlaceholder extends DynamicPlaceholder {
 
 	setPlaceholder(msg: (submitBinding?: string) => string) {
 		this.msg = msg;
-		this.ctl.input.refreshPlaceholder();
-		this.ctl.input.setPlaceholder(this);
+		this.ctl.input.setPlaceholder(this); // this should trigger enable(...)
 	}
 
-	enable(setPlaceholder: (msg?: string) => void) {
+	enable(setPlaceholder: (submitBinding?: string) => void) {
 		setPlaceholder(this.msg(this.getSubmitBinding()));
+
+		// Only subscribe once.  disable() will be called by the controller
+		// whenever a new setPlaceholder call is made.
 		if (!this.unsubscribe) {
 			this.unsubscribe = this.ctl.events.on('bindings-change', () => {
 				// NOTE: we could allow submit whether menu is open (local=true)

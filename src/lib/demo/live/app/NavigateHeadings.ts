@@ -48,9 +48,8 @@ export class NavigateHeadings {
 		// disable menuItemsFn...
 		this.ctl.menu.enableMenuItemsFn(false);
 
-		this.clearInputChangeListener = this.ctl.events.on('input-change', (evt) => {
-			const input = (evt.target as HTMLInputElement).value;
-			const sortedMenuItems = this.fuzzyFilter.menuItemsFn(input, menuItems);
+		this.clearInputChangeListener = this.ctl.events.on('input-change', ({ value }) => {
+			const sortedMenuItems = this.fuzzyFilter.menuItemsFn(value, menuItems);
 			if (!sortedMenuItems) {
 				return;
 			}

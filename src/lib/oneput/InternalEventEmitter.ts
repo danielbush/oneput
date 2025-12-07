@@ -1,5 +1,4 @@
 import type { KeyBindingMap } from './lib/bindings.js';
-import type { InputChangeEvent as InputChangeEventLib } from './lib/lib.js';
 
 // Internal event system for decoupled communication
 export type InternalEvent =
@@ -8,7 +7,10 @@ export type InternalEvent =
 	| MenuOpenChangeEvent
 	| MenuItemFocusEvent;
 
-export type InputChangeEvent = { type: 'input-change'; payload: InputChangeEventLib };
+export type InputChangeEvent = {
+	type: 'input-change';
+	payload: { evt: InputEvent; value: string };
+};
 export type BindingsChangeEvent = {
 	type: 'bindings-change';
 	payload: { bindings: KeyBindingMap; isLocal: boolean };

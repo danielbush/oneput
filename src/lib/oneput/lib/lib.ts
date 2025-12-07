@@ -2,10 +2,7 @@ import type { Attachment } from 'svelte/attachments';
 import type { Controller } from '../controller.js';
 import { mount, type Component } from 'svelte';
 
-export type InputChangeEvent = Event & {
-	target: (EventTarget & HTMLInputElement) | null;
-};
-export type InputChangeListener = (evt: InputChangeEvent) => void;
+export type InputChangeListener = (evt: InputEvent) => void;
 
 export type OneputProps = {
 	/**

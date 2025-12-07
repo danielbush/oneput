@@ -9,7 +9,10 @@ export class InputController {
 	constructor(private ctl: Controller) {
 		this.ctl.currentProps.onInputChange = (evt) => {
 			// Emit internal event for decoupled communication
-			this.ctl.events.emit({ type: 'input-change', payload: evt });
+			this.ctl.events.emit({
+				type: 'input-change',
+				payload: { evt: evt as InputEvent, value: (evt.target as HTMLInputElement)?.value ?? '' }
+			});
 		};
 	}
 

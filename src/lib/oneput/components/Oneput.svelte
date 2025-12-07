@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
-	import { type InputChangeEvent, type OneputProps } from '../lib/lib.js';
+	import { type OneputProps } from '../lib/lib.js';
 	import { elasticOut, linear } from 'svelte/easing';
 
 	let {
@@ -28,7 +28,7 @@
 		// Keep inputValue in sync with what the user typeonInputChange
 		inputValue = (evt.target as HTMLInputElement)?.value ?? '';
 		// Let the user response to what was typed:
-		props.onInputChange?.(evt as InputChangeEvent);
+		props.onInputChange?.(evt as InputEvent);
 		// Note: the user can set inputValue directly and it will pass down to this component also.
 	}
 

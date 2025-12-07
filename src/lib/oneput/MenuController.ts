@@ -1,5 +1,5 @@
 import debounce from 'debounce';
-import { isFocusable, type InputChangeListener, type MenuItemAny } from './lib/lib.js';
+import { isFocusable, type MenuItemAny } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (
@@ -152,17 +152,16 @@ export class MenuController {
 	 */
 	setMenuItemsFn(menuItemsFn: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
 		this.removeMenuItemsListener?.();
-		const handler: InputChangeListener = (evt) => {
+		this.removeMenuItemsListener = this.ctl.events.on('input-change', ({ value }) => {
 			if (this.disableMenuItemsFn) {
 				return;
 			}
-			const items = menuItemsFn(evt.target?.value ?? '', this.menuItems || []);
+			const items = menuItemsFn(value, this.menuItems || []);
 			if (!items) {
 				return;
 			}
 			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
-		};
-		this.removeMenuItemsListener = this.ctl.events.on('input-change', handler);
+		});
 	}
 
 	/**
@@ -176,43 +175,45 @@ export class MenuController {
 	) {
 		this.removeMenuItemsListener?.();
 		let inFlight = 0;
-		const handler: InputChangeListener = async (evt) => {
-			inFlight = (inFlight + 1) % 100000;
-			const value = evt.target?.value ?? '';
-			const thisInFlight = inFlight;
-			let items: MenuItemAny[] | undefined;
-			try {
-				items = await menuItemsFnAsync(value, this.menuItems);
-			} catch (err) {
-				console.error(
-					'menuItemsFnAsync rejected - we recommend you catch your errors.  Error:',
-					err
-				);
-			}
-			if (thisInFlight === inFlight) {
-				// No new call has come in during the await...
-				options.onDebounce?.(false);
-			} else {
-				// Another call was triggered...
-				// We discard to avoid out of sequence.
-				// An older call may come in later than a newer call.
-				// The older call's thisInFlight will be out of date.
-				// console.warn(`DISCARDED ${value}...`);
-				return;
-			}
-			if (!items) {
-				return;
-			}
-			// console.warn(`got ${value}...`);
-			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
-		};
-		const debouncedHandler = debounce(handler, 500, { immediate: false });
-		this.removeMenuItemsListener = this.ctl.events.on('input-change', (evt) => {
+		const debouncedHandler = debounce(
+			async ({ value }: { value: string }) => {
+				inFlight = (inFlight + 1) % 100000;
+				const thisInFlight = inFlight;
+				let items: MenuItemAny[] | undefined;
+				try {
+					items = await menuItemsFnAsync(value, this.menuItems);
+				} catch (err) {
+					console.error(
+						'menuItemsFnAsync rejected - we recommend you catch your errors.  Error:',
+						err
+					);
+				}
+				if (thisInFlight === inFlight) {
+					// No new call has come in during the await...
+					options.onDebounce?.(false);
+				} else {
+					// Another call was triggered...
+					// We discard to avoid out of sequence.
+					// An older call may come in later than a newer call.
+					// The older call's thisInFlight will be out of date.
+					// console.warn(`DISCARDED ${value}...`);
+					return;
+				}
+				if (!items) {
+					return;
+				}
+				// console.warn(`got ${value}...`);
+				this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
+			},
+			500,
+			{ immediate: false }
+		);
+		this.removeMenuItemsListener = this.ctl.events.on('input-change', (payload) => {
 			if (this.disableMenuItemsFn) {
 				return;
 			}
 			options.onDebounce?.(true);
-			debouncedHandler(evt);
+			debouncedHandler(payload);
 		});
 	}
 

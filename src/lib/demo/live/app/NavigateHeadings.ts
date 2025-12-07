@@ -61,9 +61,6 @@ export class NavigateHeadings {
 	 * It's important to clean up once we exit this mini-app.
 	 */
 	beforeExit = () => {
-		this.ctl.menu.enableMenuItemsFn();
-		this.ctl.input.setInputValue();
 		this.clearInputChangeListener?.();
-		// this.ctl.goBack();
 	};
 }

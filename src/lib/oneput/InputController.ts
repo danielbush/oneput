@@ -145,7 +145,6 @@ export class InputController {
 	}
 
 	setSubmitHandlerOnce(fn: (input: string) => void) {
-		console.log('setSubmitHandlerOnce', fn);
 		this.submitHandler = fn;
 		this.submitOnce = fn;
 	}

@@ -69,7 +69,15 @@ export class Controller {
 		return !this.currentUI?.onBack;
 	}
 
+	private runBeforeExit() {
+		console.log('runBeforeExit', this.currentUI, this.inlineUIExit);
+		this.currentUI?.beforeExit?.();
+		this.inlineUIExit?.();
+		this.inlineUIExit = undefined;
+	}
+
 	runUI<V extends Record<string, unknown>>(uiClass: AppClass<V>, values?: V) {
+		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
 		}
@@ -82,7 +90,10 @@ export class Controller {
 		return ui;
 	}
 
-	runInlineUI(runUI: () => void) {
+	private inlineUIExit: (() => void) | undefined = undefined;
+
+	runInlineUI(runUI: () => (() => void) | void | Promise<(() => void) | void>) {
+		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
 		}
@@ -90,11 +101,21 @@ export class Controller {
 			this.currentUI = { runUI };
 		}
 		this.beforeRunUI();
-		runUI();
+		const result = runUI();
+		if (typeof result === 'function') {
+			this.inlineUIExit = result;
+		} else if (result instanceof Promise) {
+			result.then((fn) => {
+				if (typeof fn === 'function') {
+					this.inlineUIExit = fn;
+				}
+			});
+		}
 		return { runUI };
 	}
 
 	private popUI = () => {
+		this.runBeforeExit();
 		const lastUI = this.uiParents.pop();
 		if (lastUI) {
 			this.currentUI = lastUI;
@@ -112,7 +133,6 @@ export class Controller {
 		if (this.disableGoBack) {
 			return;
 		}
-		this.currentUI?.beforeExit?.();
 		if (this.currentUI?.onBack) {
 			this.currentUI.onBack(this.popUI);
 			return;

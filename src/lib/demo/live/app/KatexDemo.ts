@@ -1,7 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import { type LayoutSettings } from '../layout.js';
-import { type OneputProps } from '$lib/oneput/lib/lib.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
@@ -166,7 +165,7 @@ export class KatexDemo {
 								})
 							]
 						})
-			} as OneputProps['inputUI'];
+			};
 		});
 	}
 

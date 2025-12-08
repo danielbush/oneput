@@ -28,6 +28,7 @@
  */
 export type TomatoTimerData = {
 	label: string | null;
+	note: string | null;
 	startTime: number; // unix-time
 	/**
 	 * Records when the timer is stopped.
@@ -59,11 +60,13 @@ export class TomatoTimerValue {
 		startTime,
 		duration,
 		label = null,
+		note = null,
 		pauseDuration = 0,
 		endTime = null,
 		pauseStartTime = null
 	}: {
 		label?: string | null;
+		note?: string | null;
 		startTime: number;
 		duration: number;
 		pauseDuration?: number;
@@ -72,6 +75,7 @@ export class TomatoTimerValue {
 	}) {
 		return new TomatoTimerValue({
 			label,
+			note,
 			startTime,
 			duration,
 			pauseDuration,

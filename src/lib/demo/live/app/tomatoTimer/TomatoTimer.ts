@@ -443,6 +443,13 @@ class AddEntryUI implements AppObject {
 		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
 			const item = this.menuItems[index];
 			this.unsubscribeInputChange?.();
+			this.ctl.ui.setInputUI((current) => {
+				return {
+					...current,
+					inputLines: 1
+				};
+			});
+			this.ctl.input.focusInput();
 			switch (item.id) {
 				case 'add-label':
 					this.submitPlaceholder.setPlaceholder((binding) => {
@@ -461,6 +468,22 @@ class AddEntryUI implements AppObject {
 					// 	this.ctl.menu.focusNextMenuItem();
 					// 	this.addEntryUI(session, 'none');
 					// });
+					break;
+				case 'add-note':
+					this.ctl.input.setInputValue(this.session.note ?? '');
+					this.submitPlaceholder.setPlaceholder((binding) => {
+						return binding ? `Enter a note and hit ${binding}...` : 'Enter label and submit...';
+					});
+					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+						this.session.note = value;
+						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+					});
+					this.ctl.ui.setInputUI((current) => {
+						return {
+							...current,
+							inputLines: 3
+						};
+					});
 					break;
 				case 'add-duration':
 					this.submitPlaceholder.setPlaceholder((binding) => {
@@ -514,17 +537,16 @@ class AddEntryUI implements AppObject {
 				textContent: this.session.label ? `Label: ${this.session.label}` : 'Label...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
 				action: () => {
-					// this.ctl.menu.clearMenuItemsFn();
-					// this.submitPlaceholder.update((binding) => {
-					// 	return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
-					// });
-					// this.ctl.input.setPlaceholder(this.submitPlaceholder);
-					// this.ctl.input.setSubmitHandlerOnce((label) => {
-					// 	session.label = label;
-					// 	this.ctl.input.setInputValue();
-					// 	this.ctl.menu.focusNextMenuItem();
-					// 	this.addEntryUI(session, 'none');
-					// });
+					this.ctl.menu.focusNextMenuItem();
+				}
+			}),
+			stdMenuItem({
+				id: 'add-note',
+				textContent: this.session.note
+					? `Note: ${this.session.note.replace(/\n/g, ' ').substring(0, 10)}...`
+					: 'Note...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.notebookPen })],
+				action: () => {
 					this.ctl.menu.focusNextMenuItem();
 				}
 			}),
@@ -535,23 +557,6 @@ class AddEntryUI implements AppObject {
 					: 'Duration...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
 				action: () => {
-					// this.ctl.menu.clearMenuItemsFn();
-					// this.submitPlaceholder.update((binding) => {
-					// 	return binding
-					// 		? `Enter a duration in minutes and hit ${binding}...`
-					// 		: 'Enter duration in minutes and submit...';
-					// });
-					// this.ctl.input.setPlaceholder(this.submitPlaceholder);
-					// this.ctl.input.setSubmitHandlerOnce((duration) => {
-					// 	session.duration = parseInt(duration);
-					// 	if (isNaN(session.duration)) {
-					// 		session.duration = undefined;
-					// 		this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
-					// 	}
-					// 	this.ctl.input.setInputValue();
-					// 	this.ctl.menu.focusNextMenuItem();
-					// 	this.addEntryUI(session, 'none');
-					// });
 					this.ctl.menu.focusNextMenuItem();
 				}
 			})

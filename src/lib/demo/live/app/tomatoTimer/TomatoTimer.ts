@@ -82,7 +82,7 @@ export class TomatoTimer implements AppObject {
 	 * If we start a timer, we don't want to go back to the "noTimer" ui, so we
 	 * use onBack to handle all back actions.
 	 */
-	onBack(exit: () => void) {
+	onBack = (exit: () => void) => {
 		const mainUI = () => {
 			if (this.timerValue) {
 				this.timerUI(this.timerValue);
@@ -101,7 +101,7 @@ export class TomatoTimer implements AppObject {
 				return;
 		}
 		exit();
-	}
+	};
 
 	/**
 	 * The UI we see if there is no existing timer.
@@ -126,7 +126,11 @@ export class TomatoTimer implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
 					// this.ctl.runInlineUI(() => this.addEntryUI({}, 'first'));
-					this.ctl.runUI(AddEntryUI, { session: {} as Partial<FinishedSession> });
+					this.currentUI = 'addEntryUI';
+					this.ctl.runUI(AddEntryUI, {
+						onBack: this.onBack,
+						session: {} as Partial<FinishedSession>
+					});
 				}
 			}),
 			stdMenuItem({
@@ -425,11 +429,17 @@ export class TomatoTimer implements AppObject {
 }
 
 class AddEntryUI implements AppObject {
-	static create(ctl: Controller, values: { session: Partial<FinishedSession> }) {
+	static create(
+		ctl: Controller,
+		values: {
+			onBack: (exit: () => void) => void;
+			session: Partial<FinishedSession>;
+		}
+	) {
 		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
 			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
 		});
-		return new AddEntryUI(ctl, values.session, submitPlaceholder);
+		return new AddEntryUI(ctl, values.onBack, values.session, submitPlaceholder);
 	}
 
 	private unsubscribeInputChange?: () => void;
@@ -437,6 +447,7 @@ class AddEntryUI implements AppObject {
 
 	constructor(
 		private ctl: Controller,
+		public onBack: (exit: () => void) => void,
 		private session: Partial<FinishedSession>,
 		private submitPlaceholder: SubmitPlaceholder
 	) {
@@ -450,6 +461,7 @@ class AddEntryUI implements AppObject {
 				};
 			});
 			this.ctl.input.focusInput();
+			this.ctl.input.enableInputElement(true);
 			switch (item.id) {
 				case 'add-label':
 					this.submitPlaceholder.setPlaceholder((binding) => {
@@ -458,16 +470,8 @@ class AddEntryUI implements AppObject {
 					this.ctl.input.setInputValue(this.session.label ?? '');
 					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 						this.session.label = value;
-						// this.ctl.input.setInputValue();
-						// this.ctl.menu.focusNextMenuItem();
 						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
 					});
-					// this.ctl.input.setSubmitHandlerOnce((label) => {
-					// 	session.label = label;
-					// 	this.ctl.input.setInputValue();
-					// 	this.ctl.menu.focusNextMenuItem();
-					// 	this.addEntryUI(session, 'none');
-					// });
 					break;
 				case 'add-note':
 					this.ctl.input.setInputValue(this.session.note ?? '');
@@ -478,12 +482,6 @@ class AddEntryUI implements AppObject {
 						this.session.note = value;
 						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
 					});
-					this.ctl.ui.setInputUI((current) => {
-						return {
-							...current,
-							inputLines: 3
-						};
-					});
 					break;
 				case 'add-duration':
 					this.submitPlaceholder.setPlaceholder((binding) => {
@@ -492,17 +490,6 @@ class AddEntryUI implements AppObject {
 							: 'Enter duration in minutes and submit...';
 					});
 					this.ctl.input.setInputValue(this.session.duration?.toString() ?? '');
-					// this.ctl.input.setSubmitHandlerOnce((duration) => {
-					// 	session.duration = parseInt(duration);
-					// 	if (isNaN(session.duration)) {
-					// 		session.duration = undefined;
-					// 		this.ctl.notify('Could not parse a number for duration', { duration: 3000 });
-					// 		return;
-					// 	}
-					// 	this.ctl.menu.focusNextMenuItem();
-					// 	this.addEntryUI(session, 'none');
-					// 	this.ctl.input.setInputValue();
-					// });
 					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 						this.ctl.clearNotifications();
 						this.session.duration = value === '' ? undefined : parseInt(value);
@@ -513,14 +500,19 @@ class AddEntryUI implements AppObject {
 						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
 					});
 					break;
+				case 'add-startTime':
+					this.ctl.input.setPlaceholder('Set start time and date...');
+					this.ctl.input.enableInputElement(false);
+					this.ctl.input.setInputValue(String(this.session.startTime ?? ''));
+					break;
 			}
 		});
 	}
 
-	beforeExit() {
+	beforeExit = () => {
 		this.unsubscribeInputChange?.();
 		this.unsubscribeMenuItemFocus?.();
-	}
+	};
 
 	runUI() {
 		this.ctl.ui.runLayout<LayoutSettings>({
@@ -535,9 +527,9 @@ class AddEntryUI implements AppObject {
 			stdMenuItem({
 				id: 'add-label',
 				textContent: this.session.label ? `Label: ${this.session.label}` : 'Label...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.tagIcon })],
 				action: () => {
-					this.ctl.menu.focusNextMenuItem();
+					this.ctl.input.focusInput();
 				}
 			}),
 			stdMenuItem({
@@ -545,9 +537,18 @@ class AddEntryUI implements AppObject {
 				textContent: this.session.note
 					? `Note: ${this.session.note.replace(/\n/g, ' ').substring(0, 10)}...`
 					: 'Note...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.notebookPen })],
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.notebookPenIcon })],
 				action: () => {
-					this.ctl.menu.focusNextMenuItem();
+					this.ctl.ui.setInputUI((current) => {
+						return {
+							...current,
+							inputLines: 3
+						};
+					});
+					this.ctl.input.focusInput();
+				},
+				bottom: {
+					textContent: 'Press enter to expand the input...'
 				}
 			}),
 			stdMenuItem({
@@ -557,7 +558,18 @@ class AddEntryUI implements AppObject {
 					: 'Duration...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
 				action: () => {
-					this.ctl.menu.focusNextMenuItem();
+					this.ctl.input.focusInput();
+				}
+			}),
+			stdMenuItem({
+				id: 'add-startTime',
+				textContent: this.session.startTime
+					? String(this.session.startTime ?? '')
+					: 'Start time...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
+				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+				action: () => {
+					console.log('load data and time widget');
 				}
 			})
 		];

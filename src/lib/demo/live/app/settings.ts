@@ -80,7 +80,7 @@ export class SettingsUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
 				textContent: 'Set default typing filter...',
 				action: () => {
-					this.ctl.run(this.createFiltersUI());
+					this.ctl.app.run(this.createFiltersUI());
 				}
 			}),
 			stdMenuItem({
@@ -88,7 +88,7 @@ export class SettingsUI {
 				textContent: 'Set global default key bindings...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
-					this.ctl.run(this.createGlobalBindingsEditor());
+					this.ctl.app.run(this.createGlobalBindingsEditor());
 				}
 			}),
 			stdMenuItem({
@@ -96,7 +96,7 @@ export class SettingsUI {
 				textContent: 'Set local default key bindings...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
-					this.ctl.run(this.createLocalBindingsEditor());
+					this.ctl.app.run(this.createLocalBindingsEditor());
 				}
 			})
 		]);

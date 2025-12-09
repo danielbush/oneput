@@ -74,7 +74,7 @@ export class BindingsEditor {
 	 */
 	private actionsUI = () => {
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.runLayout({ menuHeader: title, backAction: this.ctl.goBack });
+		this.runLayout({ menuHeader: title, backAction: this.ctl.app.goBack });
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
@@ -82,7 +82,7 @@ export class BindingsEditor {
 					text: description,
 					bindings,
 					action: () => {
-						this.ctl.runInline(() => this.actionUI(id));
+						this.ctl.app.runInline(() => this.actionUI(id));
 					}
 				})
 			)
@@ -96,7 +96,7 @@ export class BindingsEditor {
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.runLayout({
 			menuHeader: `Key bindings for "${description}"`,
-			backAction: this.ctl.goBack
+			backAction: this.ctl.app.goBack
 		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
@@ -105,7 +105,7 @@ export class BindingsEditor {
 				id: 'add-binding',
 				textContent: 'Add binding...',
 				action: () => {
-					this.ctl.runInline(() => this.captureBindingUI(actionId));
+					this.ctl.app.runInline(() => this.captureBindingUI(actionId));
 				}
 			}),
 			...bindings.map((binding) => {
@@ -167,7 +167,7 @@ export class BindingsEditor {
 		if (capturedKeys) {
 			this.addBinding(actionId, capturedKeys);
 		}
-		this.ctl.goBack();
+		this.ctl.app.goBack();
 	}
 
 	private startKeyCapture = () => {

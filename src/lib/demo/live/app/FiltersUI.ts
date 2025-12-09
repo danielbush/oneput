@@ -23,7 +23,7 @@ export class FiltersUI {
 				action: () => {
 					SettingsManager.create(this.ctl).setFilter('fuzzy');
 					this.ctl.notify('Fuzzy Filter set', { duration: 3000 });
-					this.ctl.goBack();
+					this.ctl.app.goBack();
 				}
 			}),
 			stdMenuItem({
@@ -33,7 +33,7 @@ export class FiltersUI {
 				action: () => {
 					SettingsManager.create(this.ctl).setFilter('word');
 					this.ctl.notify('Word Filter set', { duration: 3000 });
-					this.ctl.goBack();
+					this.ctl.app.goBack();
 				}
 			})
 		]);

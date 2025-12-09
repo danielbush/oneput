@@ -4,9 +4,10 @@ import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './shared/ui/Notification.js';
-import type { OneputProps, AppObject } from './lib/lib.js';
+import type { OneputProps } from './lib/lib.js';
 import { Alert } from './shared/ui/Alert.js';
 import { Confirm } from './shared/ui/Confirm.js';
+import { AppController } from './AppController.js';
 
 export class Controller {
 	public events = new InternalEventEmitter();
@@ -14,6 +15,7 @@ export class Controller {
 	public input: InputController;
 	public keys: KeysController;
 	public ui: UIController;
+	public app: AppController;
 
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
@@ -23,121 +25,12 @@ export class Controller {
 		this.input = InputController.create(this);
 		this.keys = KeysController.create(this);
 		this.ui = UIController.create(this);
+		this.app = AppController.create(this);
 	}
 
 	toggleHide() {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	}
-
-	private uiParents: AppObject[] = [];
-	private currentUI: AppObject | null = null;
-	private disableGoBack = false;
-
-	enableGoBack(on: boolean = true) {
-		this.disableGoBack = !on;
-	}
-
-	/**
-	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
-	 */
-	private beforeRun() {
-		console.log(this.uiParents, 'current:', this.currentUI);
-		// Re-enable stuff...
-		this.menu.enableMenuActions();
-		this.menu.enableMenuOpenClose();
-		this.menu.enableMenuItemsFn();
-		this.input.enableInputElement();
-		this.enableGoBack();
-
-		// Reset stuff...
-		this.keys.resetBindings();
-		this.keys.resetBindings(true);
-		this.input.resetPlaceholder();
-		this.menu.resetFocusBehaviour();
-		this.menu.resetMenuItemsFn();
-		this.input.setInputValue();
-		this.input.resetSubmitHandler();
-
-		// We don't clear notifications or alerts or confirmations.
-	}
-
-	/**
-	 * If the currentUI defines onBack, we disable push/pop and let it decide
-	 * what to do.
-	 */
-	private get trackUIChange() {
-		return !this.currentUI?.onBack;
-	}
-
-	private runBeforeExit() {
-		this.currentUI?.beforeExit?.();
-		this.inlineUIExit?.();
-		this.inlineUIExit = undefined;
-	}
-
-	run(appObject: AppObject) {
-		this.runBeforeExit();
-		if (this.currentUI && this.trackUIChange) {
-			this.uiParents.push(this.currentUI);
-		}
-		if (this.trackUIChange) {
-			this.currentUI = appObject;
-		}
-		this.beforeRun();
-		appObject.run();
-		return appObject;
-	}
-
-	private inlineUIExit: (() => void) | undefined = undefined;
-
-	runInline(run: () => (() => void) | void | Promise<(() => void) | void>) {
-		this.runBeforeExit();
-		if (this.currentUI && this.trackUIChange) {
-			this.uiParents.push(this.currentUI);
-		}
-		if (this.trackUIChange) {
-			this.currentUI = { run: run };
-		}
-		this.beforeRun();
-		const result = run();
-		if (typeof result === 'function') {
-			this.inlineUIExit = result;
-		} else if (result instanceof Promise) {
-			result.then((fn) => {
-				if (typeof fn === 'function') {
-					this.inlineUIExit = fn;
-				}
-			});
-		}
-		return { run };
-	}
-
-	private popUI = () => {
-		this.runBeforeExit();
-		const lastUI = this.uiParents.pop();
-		if (lastUI) {
-			this.currentUI = lastUI;
-			this.beforeRun();
-			lastUI.run();
-			return;
-		}
-		return;
-	};
-
-	/**
-	 * Goes back to previous appObject.
-	 */
-	goBack = () => {
-		if (this.disableGoBack) {
-			return;
-		}
-		if (this.currentUI?.onBack) {
-			this.currentUI.onBack(this.popUI);
-			return;
-		}
-		this.popUI();
-		return;
-	};
 
 	private notification = Notification.create(this);
 
@@ -162,7 +55,7 @@ export class Controller {
 	}
 
 	setModal(isModal: boolean = true) {
-		this.enableGoBack(!isModal);
+		this.app.enableGoBack(!isModal);
 		this.keys.enableKeys(!isModal);
 		this.menu.enableMenuActions(!isModal);
 		this.menu.enableMenuOpenClose(!isModal);

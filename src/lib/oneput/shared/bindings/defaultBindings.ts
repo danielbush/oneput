@@ -25,7 +25,7 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 		c.menu.doMenuAction();
 	},
 	back: (c) => {
-		c.goBack();
+		c.app.goBack();
 	},
 	focusInput: (c) => {
 		c.input.focusInput();

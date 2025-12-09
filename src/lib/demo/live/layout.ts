@@ -79,13 +79,13 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 			this.values.exitAction = this.ctl.menu.closeMenu;
 		}
 		if (this.values.backAction === undefined) {
-			this.values.backAction = this.ctl.goBack;
+			this.values.backAction = this.ctl.app.goBack;
 		}
 	}
 
 	private get exitAction() {
 		if (this.values.exitAction === true) {
-			return this.ctl.goBack;
+			return this.ctl.app.goBack;
 		}
 		if (typeof this.values.exitAction === 'function') {
 			return this.values.exitAction;
@@ -95,7 +95,7 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 
 	private get backAction() {
 		if (this.values.backAction === true) {
-			return this.ctl.goBack;
+			return this.ctl.app.goBack;
 		}
 		if (typeof this.values.backAction === 'function') {
 			return this.values.backAction;

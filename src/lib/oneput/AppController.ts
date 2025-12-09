@@ -40,55 +40,55 @@ export class AppController {
 		// We don't clear notifications or alerts or confirmations.
 	}
 
-	/**
-	 * If the currentUI defines onBack, we disable push/pop and let it decide
-	 * what to do.
-	 */
-	private get trackUIChange() {
-		return !this.currentUI?.onBack;
-	}
-
 	private runBeforeExit() {
 		this.currentUI?.beforeExit?.();
-		this.inlineUIExit?.();
-		this.inlineUIExit = undefined;
+	}
+
+	private replaceApp(appObject: AppObject) {
+		this.currentUI = appObject;
+	}
+
+	private pushApp(appObject: AppObject) {
+		if (this.currentUI) {
+			this.uiParents.push(this.currentUI);
+		}
+		this.currentUI = appObject;
+	}
+
+	run(appObject: AppObject) {
+		this.runBeforeExit();
+		if (this.currentUI?.onBack) {
+			if (appObject.onBack) {
+				this.replaceApp(appObject);
+			} else {
+				// Don't replace, appObject will run but we don't track it.
+				// This allows an onBack app to run nested apps but stay in
+				// control and handle any back actions.
+			}
+		} else {
+			if (appObject.onBack) {
+				this.replaceApp(appObject);
+			} else {
+				this.replaceApp(appObject);
+			}
+		}
+		this.beforeRun();
+		appObject.run();
+	}
+
+	runInline(run: () => void) {
+		this.run({ run });
 	}
 
 	push(appObject: AppObject) {
 		this.runBeforeExit();
-		if (this.currentUI && this.trackUIChange) {
-			this.uiParents.push(this.currentUI);
-		}
-		if (this.trackUIChange) {
-			this.currentUI = appObject;
-		}
+		this.pushApp(appObject);
 		this.beforeRun();
 		appObject.run();
-		return appObject;
 	}
 
-	private inlineUIExit: (() => void) | undefined = undefined;
-
-	runInline(run: () => (() => void) | void | Promise<(() => void) | void>) {
-		this.runBeforeExit();
-		if (this.currentUI && this.trackUIChange) {
-			this.uiParents.push(this.currentUI);
-		}
-		if (this.trackUIChange) {
-			this.currentUI = { run: run };
-		}
-		this.beforeRun();
-		const result = run();
-		if (typeof result === 'function') {
-			this.inlineUIExit = result;
-		} else if (result instanceof Promise) {
-			result.then((fn) => {
-				if (typeof fn === 'function') {
-					this.inlineUIExit = fn;
-				}
-			});
-		}
-		return { run };
+	pushInline(run: () => void) {
+		this.push({ run });
 	}
 
 	private pop = () => {

@@ -13,7 +13,7 @@ export class SettingsUI {
 		const createGlobalBindingsEditor = () => {
 			const bindingsService = LocalBindingsService.create(ctl);
 			return BindingsEditor.create(ctl, {
-				isLocal: true,
+				isLocal: false,
 				keyBindingMap: ctl.keys.getDefaultBindings(true),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
@@ -30,7 +30,7 @@ export class SettingsUI {
 		const createLocalBindingsEditor = () => {
 			const bindingsService = LocalBindingsService.create(ctl);
 			return BindingsEditor.create(ctl, {
-				isLocal: false,
+				isLocal: true,
 				keyBindingMap: ctl.keys.getDefaultBindings(false),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);

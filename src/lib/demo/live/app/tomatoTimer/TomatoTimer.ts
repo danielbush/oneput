@@ -129,7 +129,6 @@ export class TomatoTimer implements AppObject {
 					this.currentUI = 'addEntryUI';
 					this.ctl.app.push(
 						AddEntryUI.create(this.ctl, {
-							onBack: this.onBack,
 							session: {} as Partial<FinishedSession>
 						})
 					);
@@ -434,14 +433,13 @@ class AddEntryUI implements AppObject {
 	static create(
 		ctl: Controller,
 		values: {
-			onBack: (exit: () => void) => void;
 			session: Partial<FinishedSession>;
 		}
 	) {
 		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
 			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
 		});
-		return new AddEntryUI(ctl, values.onBack, values.session, submitPlaceholder);
+		return new AddEntryUI(ctl, values.session, submitPlaceholder);
 	}
 
 	private unsubscribeInputChange?: () => void;
@@ -449,7 +447,6 @@ class AddEntryUI implements AppObject {
 
 	constructor(
 		private ctl: Controller,
-		public onBack: (exit: () => void) => void,
 		private session: Partial<FinishedSession>,
 		private submitPlaceholder: SubmitPlaceholder
 	) {

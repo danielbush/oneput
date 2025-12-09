@@ -17,10 +17,39 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
-		return new RootUI(ctl);
+		const createSettingsUI = () => {
+			return SettingsUI.create(ctl);
+		};
+		const createNavigateHeadings = () => {
+			return NavigateHeadings.create(ctl);
+		};
+		const createTomatoTimer = () => {
+			return TomatoTimer.create(ctl);
+		};
+		const createKatexDemo = () => {
+			return KatexDemo.create(ctl);
+		};
+		const createAsyncSearchExample = () => {
+			return AsyncSearchExample.create(ctl);
+		};
+		return new RootUI(
+			ctl,
+			createSettingsUI,
+			createNavigateHeadings,
+			createTomatoTimer,
+			createKatexDemo,
+			createAsyncSearchExample
+		);
 	}
 
-	constructor(private ctl: Controller) {}
+	constructor(
+		private ctl: Controller,
+		private createSettingsUI: () => SettingsUI,
+		private createNavigateHeadings: () => NavigateHeadings,
+		private createTomatoTimer: () => TomatoTimer,
+		private createKatexDemo: () => KatexDemo,
+		private createAsyncSearchExample: () => AsyncSearchExample
+	) {}
 
 	runUI = () => {
 		this.ctl.ui.runLayout<LayoutSettings>({
@@ -40,7 +69,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
 				textContent: 'Settings...',
 				action: () => {
-					this.ctl.runUI(SettingsUI);
+					this.ctl.runUI(this.createSettingsUI());
 				}
 			}),
 			stdMenuItem({
@@ -48,7 +77,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: tocIcon })],
 				textContent: 'Navigate outline...',
 				action: () => {
-					this.ctl.runUI(NavigateHeadings);
+					this.ctl.runUI(this.createNavigateHeadings());
 				}
 			}),
 			stdMenuItem({
@@ -56,7 +85,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: timerIcon })],
 				textContent: 'Tomato timer...',
 				action: () => {
-					this.ctl.runUI(TomatoTimer);
+					this.ctl.runUI(this.createTomatoTimer());
 				},
 				bottom: {
 					textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
@@ -67,7 +96,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: sigmaIcon })],
 				textContent: 'Insert katex...',
 				action: () => {
-					this.ctl.runUI(KatexDemo);
+					this.ctl.runUI(this.createKatexDemo());
 				}
 			}),
 			stdMenuItem({
@@ -83,7 +112,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: searchIcon })],
 				textContent: 'Async menu items demo...',
 				action: () => {
-					this.ctl.runUI(AsyncSearchExample);
+					this.ctl.runUI(this.createAsyncSearchExample());
 				}
 			}),
 			stdMenuItem({

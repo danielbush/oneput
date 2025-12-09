@@ -4,7 +4,7 @@ import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from './shared/ui/Notification.js';
-import type { OneputProps, AppClass, AppObject } from './lib/lib.js';
+import type { OneputProps, AppObject } from './lib/lib.js';
 import { Alert } from './shared/ui/Alert.js';
 import { Confirm } from './shared/ui/Confirm.js';
 
@@ -75,18 +75,17 @@ export class Controller {
 		this.inlineUIExit = undefined;
 	}
 
-	runUI<V extends Record<string, unknown>>(uiClass: AppClass<V>, values?: V) {
+	runUI(appObject: AppObject) {
 		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
 		}
-		const ui = uiClass.create(this, values ?? ({} as V));
 		if (this.trackUIChange) {
-			this.currentUI = ui;
+			this.currentUI = appObject;
 		}
 		this.beforeRunUI();
-		ui.runUI();
-		return ui;
+		appObject.runUI();
+		return appObject;
 	}
 
 	private inlineUIExit: (() => void) | undefined = undefined;

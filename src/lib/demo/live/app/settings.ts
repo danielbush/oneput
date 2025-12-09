@@ -10,13 +10,56 @@ import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsS
 
 export class SettingsUI {
 	static create(ctl: Controller) {
-		const ui = new SettingsUI(ctl, LocalBindingsService.create(ctl));
-		return ui;
+		const createGlobalBindingsEditor = () => {
+			const bindingsService = LocalBindingsService.create(ctl);
+			return BindingsEditor.create(ctl, {
+				isLocal: true,
+				keyBindingMap: ctl.keys.getDefaultBindings(true),
+				onUpdate: (keyBindingMap, isLocal) => {
+					return bindingsService.update(keyBindingMap, isLocal);
+				},
+				runLayout: ({ menuHeader, backAction, exitAction }) => {
+					ctl.ui.runLayout<LayoutSettings>({
+						menuHeader,
+						exitAction,
+						backAction
+					});
+				}
+			});
+		};
+		const createLocalBindingsEditor = () => {
+			const bindingsService = LocalBindingsService.create(ctl);
+			return BindingsEditor.create(ctl, {
+				isLocal: false,
+				keyBindingMap: ctl.keys.getDefaultBindings(false),
+				onUpdate: (keyBindingMap, isLocal) => {
+					return bindingsService.update(keyBindingMap, isLocal);
+				},
+				runLayout: ({ menuHeader, backAction, exitAction }) => {
+					ctl.ui.runLayout<LayoutSettings>({
+						menuHeader,
+						exitAction,
+						backAction
+					});
+				}
+			});
+		};
+		const createFiltersUI = () => {
+			return FiltersUI.create(ctl);
+		};
+		return new SettingsUI(
+			ctl,
+			createGlobalBindingsEditor,
+			createLocalBindingsEditor,
+			createFiltersUI
+		);
 	}
 
 	constructor(
 		private ctl: Controller,
-		private bindingsService: LocalBindingsService
+		private createGlobalBindingsEditor: () => BindingsEditor,
+		private createLocalBindingsEditor: () => BindingsEditor,
+		private createFiltersUI: () => FiltersUI
 	) {}
 
 	runUI = () => {
@@ -37,7 +80,7 @@ export class SettingsUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
 				textContent: 'Set default typing filter...',
 				action: () => {
-					this.ctl.runUI(FiltersUI);
+					this.ctl.runUI(this.createFiltersUI());
 				}
 			}),
 			stdMenuItem({
@@ -45,20 +88,7 @@ export class SettingsUI {
 				textContent: 'Set global default key bindings...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
-					this.ctl.runUI(BindingsEditor, {
-						isLocal: false,
-						keyBindingMap: this.ctl.keys.getDefaultBindings(false),
-						onUpdate: (keyBindingMap, isLocal) => {
-							return this.bindingsService.update(keyBindingMap, isLocal);
-						},
-						runLayout: ({ menuHeader, backAction, exitAction }) => {
-							this.ctl.ui.runLayout<LayoutSettings>({
-								menuHeader,
-								exitAction,
-								backAction
-							});
-						}
-					});
+					this.ctl.runUI(this.createGlobalBindingsEditor());
 				}
 			}),
 			stdMenuItem({
@@ -66,20 +96,7 @@ export class SettingsUI {
 				textContent: 'Set local default key bindings...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
-					this.ctl.runUI(BindingsEditor, {
-						isLocal: true,
-						keyBindingMap: this.ctl.keys.getDefaultBindings(true),
-						onUpdate: (keyBindingMap, isLocal) => {
-							return this.bindingsService.update(keyBindingMap, isLocal);
-						},
-						runLayout: ({ menuHeader, backAction, exitAction }) => {
-							this.ctl.ui.runLayout<LayoutSettings>({
-								menuHeader,
-								exitAction,
-								backAction
-							});
-						}
-					});
+					this.ctl.runUI(this.createLocalBindingsEditor());
 				}
 			})
 		]);

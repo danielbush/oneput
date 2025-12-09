@@ -133,10 +133,6 @@ export type FChildParams = {
 	voidElements?: Set<string | undefined>;
 };
 
-export type AppClass<V extends Record<string, unknown> = Record<string, unknown>> = {
-	create: (ctl: Controller, values: V) => AppObject;
-};
-
 export type AppObject = {
 	runUI: () => void;
 	beforeExit?: () => void;

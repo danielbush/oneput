@@ -244,6 +244,12 @@ export class MenuController {
 		return (index - 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);
 	}
 
+	setMenuItemFocus(index: number, focus: boolean) {
+		const safeIndex = Math.max(0, Math.min(index, this.menuItemCount - 1));
+		this.ctl.currentProps.menuItemFocus = [safeIndex, focus];
+		this.ctl.events.emit({ type: 'menu-item-focus', payload: { index: safeIndex } });
+	}
+
 	focusNextMenuItem() {
 		for (
 			let i = this.nextMenuItemIndex(this.menuItemFocus), c = 0;

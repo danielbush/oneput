@@ -90,7 +90,7 @@ export class Controller {
 
 	private inlineUIExit: (() => void) | undefined = undefined;
 
-	runInlineUI(run: () => (() => void) | void | Promise<(() => void) | void>) {
+	runInline(run: () => (() => void) | void | Promise<(() => void) | void>) {
 		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);

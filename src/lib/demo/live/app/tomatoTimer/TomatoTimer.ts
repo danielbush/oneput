@@ -94,10 +94,10 @@ export class TomatoTimer implements AppObject {
 			case 'createTimerUI':
 			case 'addEntryUI':
 			case 'previousSessionsUI':
-				this.ctl.runInlineUI(() => mainUI());
+				this.ctl.runInline(() => mainUI());
 				return;
 			case 'editSessionUI':
-				this.ctl.runInlineUI(() => this.previousSessionsUI());
+				this.ctl.runInline(() => this.previousSessionsUI());
 				return;
 		}
 		exit();
@@ -117,7 +117,7 @@ export class TomatoTimer implements AppObject {
 				textContent: '30 Minutes',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 				action: () => {
-					this.ctl.runInlineUI(() => this.createTimerUI({ duration: 30 * 60 }));
+					this.ctl.runInline(() => this.createTimerUI({ duration: 30 * 60 }));
 				}
 			}),
 			stdMenuItem({
@@ -125,7 +125,7 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Add entry...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
-					// this.ctl.runInlineUI(() => this.addEntryUI({}, 'first'));
+					// this.ctl.runInline(() => this.addEntryUI({}, 'first'));
 					this.currentUI = 'addEntryUI';
 					this.ctl.run(
 						AddEntryUI.create(this.ctl, {
@@ -141,7 +141,7 @@ export class TomatoTimer implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.runInlineUI(() => this.previousSessionsUI());
+					this.ctl.runInline(() => this.previousSessionsUI());
 				}
 			})
 		]);
@@ -149,7 +149,7 @@ export class TomatoTimer implements AppObject {
 			return binding ? `Enter time in minutes and hit ${binding}...` : 'Enter value and submit...';
 		});
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.ctl.runInlineUI(() => this.createTimerUI({ duration: parseFloat(duration) * 60 }));
+			this.ctl.runInline(() => this.createTimerUI({ duration: parseFloat(duration) * 60 }));
 		});
 	}
 
@@ -170,11 +170,11 @@ export class TomatoTimer implements AppObject {
 			this.store
 				.putCurrentSession(timerValue.record as UnfinishedSession)
 				.andTee(() => {
-					this.ctl.runInlineUI(() => this.timerUI(timerValue));
+					this.ctl.runInline(() => this.timerUI(timerValue));
 				})
 				.orTee((err) => {
 					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-					this.ctl.runInlineUI(() => this.noTimerUI());
+					this.ctl.runInline(() => this.noTimerUI());
 				});
 		};
 
@@ -259,7 +259,7 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Previous sessions...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 				action: () => {
-					this.ctl.runInlineUI(() => this.previousSessionsUI());
+					this.ctl.runInline(() => this.previousSessionsUI());
 				}
 			}),
 			stdMenuItem({
@@ -276,7 +276,7 @@ export class TomatoTimer implements AppObject {
 					this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
 						this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 					});
-					this.ctl.runInlineUI(() => this.timerUI(timerValue));
+					this.ctl.runInline(() => this.timerUI(timerValue));
 				}
 			}),
 			stdMenuItem({
@@ -291,11 +291,11 @@ export class TomatoTimer implements AppObject {
 						.andThen(() => this.store.deleteCurrentSession())
 						.andTee(() => {
 							this.ctl.notify('Session saved', { duration: 3000 });
-							this.ctl.runInlineUI(() => this.noTimerUI());
+							this.ctl.runInline(() => this.noTimerUI());
 						})
 						.orTee((err) => {
 							this.ctl.alert({ message: 'Error saving session', additional: err.message });
-							this.ctl.runInlineUI(() => this.noTimerUI());
+							this.ctl.runInline(() => this.noTimerUI());
 						});
 				}
 			}),
@@ -311,11 +311,11 @@ export class TomatoTimer implements AppObject {
 								message: 'Error deleting current session',
 								additional: err.message
 							});
-							this.ctl.runInlineUI(() => this.noTimerUI());
+							this.ctl.runInline(() => this.noTimerUI());
 						})
 						.andTee(() => {
 							this.ctl.notify('Current session deleted', { duration: 3000 });
-							this.ctl.runInlineUI(() => this.noTimerUI());
+							this.ctl.runInline(() => this.noTimerUI());
 						});
 				}
 			})
@@ -341,7 +341,7 @@ export class TomatoTimer implements AppObject {
 							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
 						],
 						action: () => {
-							this.ctl.runInlineUI(() => this.editEntryUI(session));
+							this.ctl.runInline(() => this.editEntryUI(session));
 						}
 					});
 				})
@@ -397,7 +397,7 @@ export class TomatoTimer implements AppObject {
 								// Refresh this ui to update the display.
 								// We could just call setMenuItems again.
 								// Using consistent id's will mean only a small part of the DOM will change.
-								this.ctl.runInlineUI(() => this.editEntryUI(newSession));
+								this.ctl.runInline(() => this.editEntryUI(newSession));
 							})
 							.orTee((err) => {
 								this.ctl.alert({
@@ -421,7 +421,7 @@ export class TomatoTimer implements AppObject {
 						this.store.deleteSession(session).andTee(() => {
 							this.ctl.notify('Session deleted', { duration: 3000 });
 						});
-						this.ctl.runInlineUI(() => this.previousSessionsUI());
+						this.ctl.runInline(() => this.previousSessionsUI());
 						return;
 					}
 				}

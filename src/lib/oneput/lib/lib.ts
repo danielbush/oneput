@@ -138,7 +138,7 @@ export type AppObject = {
 	beforeExit?: () => void;
 	/**
 	 * If you set an onBack it will override the push/pop behavior of `run` and
-	 * runInlineUI.  To exit, use the exit callback that is passed in.
+	 * runInline.  To exit, use the exit callback that is passed in.
 	 */
 	onBack?: (exit: () => void) => void;
 };

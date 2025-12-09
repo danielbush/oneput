@@ -509,7 +509,6 @@ class AddEntryUI implements AppObject {
 	}
 
 	beforeExit = () => {
-		// TODO: this is not being called when we go into the date ui (setting start date).
 		this.unsubscribeInputChange?.();
 		this.unsubscribeMenuItemFocus?.();
 	};
@@ -581,10 +580,7 @@ class SetDateTime implements AppObject {
 		return new SetDateTime(ctl);
 	}
 
-	constructor(
-		private ctl: Controller
-		// public onBack: (exit: () => void) => void
-	) {}
+	constructor(private ctl: Controller) {}
 
 	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({

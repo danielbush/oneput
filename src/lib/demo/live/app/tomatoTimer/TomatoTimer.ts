@@ -8,7 +8,7 @@ import {
 	type FinishedSession,
 	type UnfinishedSession
 } from './TomatoTimerValue.js';
-import { type AppObject } from '$lib/oneput/lib/lib.js';
+import { type AppObject, type MenuItem } from '$lib/oneput/lib/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
@@ -510,6 +510,7 @@ class AddEntryUI implements AppObject {
 	}
 
 	beforeExit = () => {
+		// TODO: this is not being called when we go into the date ui (setting start date).
 		this.unsubscribeInputChange?.();
 		this.unsubscribeMenuItemFocus?.();
 	};
@@ -569,9 +570,77 @@ class AddEntryUI implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					console.log('load data and time widget');
+					this.ctl.runUI(SetDateTime);
 				}
 			})
 		];
+	}
+}
+
+class SetDateTime implements AppObject {
+	static create(ctl: Controller) {
+		return new SetDateTime(ctl);
+	}
+
+	constructor(
+		private ctl: Controller
+		// public onBack: (exit: () => void) => void
+	) {}
+
+	runUI() {
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Set date and time...'
+		});
+		this.ctl.menu.setMenuItems([
+			stdMenuItem({
+				id: 'set-date',
+				textContent: 'Set date...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
+				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+				action: () => {
+					this.ctl.runUI(SetDate);
+				}
+			}),
+			stdMenuItem({
+				id: 'set-time',
+				textContent: 'Set time...',
+				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
+				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+				action: () => {
+					console.log('set time');
+				}
+			})
+		]);
+	}
+}
+
+class SetDate implements AppObject {
+	static create(ctl: Controller) {
+		return new SetDate(ctl);
+	}
+
+	constructor(private ctl: Controller) {}
+
+	runUI() {
+		this.ctl.ui.runLayout<LayoutSettings>({
+			menuHeader: 'Set date...'
+		});
+		const currentYear = new Date().getFullYear();
+		const menuItems: MenuItem[] = [];
+		for (let year = currentYear - 5; year < currentYear + 5; year++) {
+			menuItems.push(
+				stdMenuItem({
+					id: `set-date-${year}`,
+					textContent: year.toString(),
+					action: () => {
+						console.log('set date');
+					}
+				})
+			);
+		}
+		this.ctl.menu.setMenuItems(menuItems);
+		this.ctl.menu.setMenuItemFocus(5, true);
+		this.ctl.input.setPlaceholder('Select or type in a year...');
+		this.ctl.input.setInputValue(currentYear.toString());
 	}
 }

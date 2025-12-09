@@ -20,7 +20,7 @@ export class AsyncSearchExample {
 		private outerRightStatus: DOMUpdater
 	) {}
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Async Search Example',
 			outerRight: (b) =>

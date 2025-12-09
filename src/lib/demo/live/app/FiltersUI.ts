@@ -10,7 +10,7 @@ export class FiltersUI {
 
 	constructor(private ctl: Controller) {}
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout({
 			menuHeader: 'Filters'
 		});

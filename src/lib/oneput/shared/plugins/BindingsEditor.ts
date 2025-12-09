@@ -65,7 +65,7 @@ export class BindingsEditor {
 		}) => void
 	) {}
 
-	runUI() {
+	run() {
 		this.actionsUI();
 	}
 

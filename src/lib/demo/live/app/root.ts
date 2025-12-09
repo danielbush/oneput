@@ -51,7 +51,7 @@ export class RootUI {
 		private createAsyncSearchExample: () => AsyncSearchExample
 	) {}
 
-	runUI = () => {
+	run = () => {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Home',
 			backAction: false
@@ -69,7 +69,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
 				textContent: 'Settings...',
 				action: () => {
-					this.ctl.runUI(this.createSettingsUI());
+					this.ctl.run(this.createSettingsUI());
 				}
 			}),
 			stdMenuItem({
@@ -77,7 +77,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: tocIcon })],
 				textContent: 'Navigate outline...',
 				action: () => {
-					this.ctl.runUI(this.createNavigateHeadings());
+					this.ctl.run(this.createNavigateHeadings());
 				}
 			}),
 			stdMenuItem({
@@ -85,7 +85,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: timerIcon })],
 				textContent: 'Tomato timer...',
 				action: () => {
-					this.ctl.runUI(this.createTomatoTimer());
+					this.ctl.run(this.createTomatoTimer());
 				},
 				bottom: {
 					textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
@@ -96,7 +96,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: sigmaIcon })],
 				textContent: 'Insert katex...',
 				action: () => {
-					this.ctl.runUI(this.createKatexDemo());
+					this.ctl.run(this.createKatexDemo());
 				}
 			}),
 			stdMenuItem({
@@ -112,7 +112,7 @@ export class RootUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: searchIcon })],
 				textContent: 'Async menu items demo...',
 				action: () => {
-					this.ctl.runUI(this.createAsyncSearchExample());
+					this.ctl.run(this.createAsyncSearchExample());
 				}
 			}),
 			stdMenuItem({

@@ -43,7 +43,7 @@ export class KatexDemo {
 		});
 	}
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Katex Demo'
 		});

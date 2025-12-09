@@ -53,7 +53,7 @@ export class TomatoTimer implements AppObject {
 	/**
 	 * This is the entry point that loads the tomato timer ui.
 	 */
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Tomato Timer'
 		});
@@ -127,7 +127,7 @@ export class TomatoTimer implements AppObject {
 				action: () => {
 					// this.ctl.runInlineUI(() => this.addEntryUI({}, 'first'));
 					this.currentUI = 'addEntryUI';
-					this.ctl.runUI(
+					this.ctl.run(
 						AddEntryUI.create(this.ctl, {
 							onBack: this.onBack,
 							session: {} as Partial<FinishedSession>
@@ -517,7 +517,7 @@ class AddEntryUI implements AppObject {
 		this.unsubscribeMenuItemFocus?.();
 	};
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Add entry...'
 		});
@@ -572,7 +572,7 @@ class AddEntryUI implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.runUI(SetDateTime.create(this.ctl));
+					this.ctl.run(SetDateTime.create(this.ctl));
 				}
 			})
 		];
@@ -589,7 +589,7 @@ class SetDateTime implements AppObject {
 		// public onBack: (exit: () => void) => void
 	) {}
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Set date and time...'
 		});
@@ -600,7 +600,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.runUI(SetDate.create(this.ctl));
+					this.ctl.run(SetDate.create(this.ctl));
 				}
 			}),
 			stdMenuItem({
@@ -623,7 +623,7 @@ class SetDate implements AppObject {
 
 	constructor(private ctl: Controller) {}
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Set date...'
 		});

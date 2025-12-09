@@ -134,10 +134,10 @@ export type FChildParams = {
 };
 
 export type AppObject = {
-	runUI: () => void;
+	run: () => void;
 	beforeExit?: () => void;
 	/**
-	 * If you set an onBack it will override the push/pop behavior of runUI and
+	 * If you set an onBack it will override the push/pop behavior of `run` and
 	 * runInlineUI.  To exit, use the exit callback that is passed in.
 	 */
 	onBack?: (exit: () => void) => void;

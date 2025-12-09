@@ -19,7 +19,7 @@ export class NavigateHeadings {
 		private fuzzyFilter: FuzzyFilter
 	) {}
 
-	runUI() {
+	run() {
 		this.ctl.ui.runLayout({
 			menuHeader: 'Navigate Headings'
 		});

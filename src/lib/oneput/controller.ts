@@ -38,9 +38,9 @@ export class Controller {
 	}
 
 	/**
-	 *  Resets things to sane defaults.  You can then set things in your AppObject.runUI.
+	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
-	private beforeRunUI() {
+	private beforeRun() {
 		console.log(this.uiParents, 'current:', this.currentUI);
 		// Re-enable stuff...
 		this.menu.enableMenuActions();
@@ -75,7 +75,7 @@ export class Controller {
 		this.inlineUIExit = undefined;
 	}
 
-	runUI(appObject: AppObject) {
+	run(appObject: AppObject) {
 		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
@@ -83,23 +83,23 @@ export class Controller {
 		if (this.trackUIChange) {
 			this.currentUI = appObject;
 		}
-		this.beforeRunUI();
-		appObject.runUI();
+		this.beforeRun();
+		appObject.run();
 		return appObject;
 	}
 
 	private inlineUIExit: (() => void) | undefined = undefined;
 
-	runInlineUI(runUI: () => (() => void) | void | Promise<(() => void) | void>) {
+	runInlineUI(run: () => (() => void) | void | Promise<(() => void) | void>) {
 		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
 		}
 		if (this.trackUIChange) {
-			this.currentUI = { runUI };
+			this.currentUI = { run: run };
 		}
-		this.beforeRunUI();
-		const result = runUI();
+		this.beforeRun();
+		const result = run();
 		if (typeof result === 'function') {
 			this.inlineUIExit = result;
 		} else if (result instanceof Promise) {
@@ -109,7 +109,7 @@ export class Controller {
 				}
 			});
 		}
-		return { runUI };
+		return { run };
 	}
 
 	private popUI = () => {
@@ -117,8 +117,8 @@ export class Controller {
 		const lastUI = this.uiParents.pop();
 		if (lastUI) {
 			this.currentUI = lastUI;
-			this.beforeRunUI();
-			lastUI.runUI();
+			this.beforeRun();
+			lastUI.run();
 			return;
 		}
 		return;

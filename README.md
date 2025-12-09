@@ -51,7 +51,7 @@ Naming schemes...
   - Notification
   - etc
 - `app/` "apps"
-  - an object that has a runUI, may set keybindings, may affect the back action etc
+  - an object that has a `run`, may set keybindings, may affect the back action etc
 - `plugins/`
   - like apps in app/ but is reusable or not part of the main application
 - `shared/`

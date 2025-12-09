@@ -62,7 +62,7 @@ export class SettingsUI {
 		private createFiltersUI: () => FiltersUI
 	) {}
 
-	runUI = () => {
+	run = () => {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Settings'
 		});
@@ -80,7 +80,7 @@ export class SettingsUI {
 				left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
 				textContent: 'Set default typing filter...',
 				action: () => {
-					this.ctl.runUI(this.createFiltersUI());
+					this.ctl.run(this.createFiltersUI());
 				}
 			}),
 			stdMenuItem({
@@ -88,7 +88,7 @@ export class SettingsUI {
 				textContent: 'Set global default key bindings...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
-					this.ctl.runUI(this.createGlobalBindingsEditor());
+					this.ctl.run(this.createGlobalBindingsEditor());
 				}
 			}),
 			stdMenuItem({
@@ -96,7 +96,7 @@ export class SettingsUI {
 				textContent: 'Set local default key bindings...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
 				action: () => {
-					this.ctl.runUI(this.createLocalBindingsEditor());
+					this.ctl.run(this.createLocalBindingsEditor());
 				}
 			})
 		]);

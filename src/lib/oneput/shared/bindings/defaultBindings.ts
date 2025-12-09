@@ -40,7 +40,7 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 		c.menu.focusNextMenuItem();
 	},
 	globalFilter: (c) => {
-		GlobalFilter.create(c).runUI();
+		GlobalFilter.create(c).run();
 	},
 	submit: (c) => {
 		c.input.runSubmitHandler();

@@ -54,7 +54,7 @@ export class AppController {
 		this.inlineUIExit = undefined;
 	}
 
-	run(appObject: AppObject) {
+	push(appObject: AppObject) {
 		this.runBeforeExit();
 		if (this.currentUI && this.trackUIChange) {
 			this.uiParents.push(this.currentUI);
@@ -91,7 +91,7 @@ export class AppController {
 		return { run };
 	}
 
-	private popUI = () => {
+	private pop = () => {
 		this.runBeforeExit();
 		const lastUI = this.uiParents.pop();
 		if (lastUI) {
@@ -111,10 +111,10 @@ export class AppController {
 			return;
 		}
 		if (this.currentUI?.onBack) {
-			this.currentUI.onBack(this.popUI);
+			this.currentUI.onBack(this.pop);
 			return;
 		}
-		this.popUI();
+		this.pop();
 		return;
 	};
 }

@@ -8,8 +8,8 @@ export class AppController {
 
 	constructor(private ctl: Controller) {}
 
-	private uiParents: AppObject[] = [];
-	private currentUI: AppObject | null = null;
+	private appParents: AppObject[] = [];
+	private currentApp: AppObject | null = null;
 	private disableGoBack = false;
 
 	enableGoBack(on: boolean = true) {
@@ -20,7 +20,7 @@ export class AppController {
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {
-		console.log(this.uiParents, 'current:', this.currentUI);
+		console.log(this.appParents, 'current:', this.currentApp);
 		// Re-enable stuff...
 		this.ctl.menu.enableMenuActions();
 		this.ctl.menu.enableMenuOpenClose();
@@ -41,23 +41,23 @@ export class AppController {
 	}
 
 	private runBeforeExit() {
-		this.currentUI?.beforeExit?.();
+		this.currentApp?.beforeExit?.();
 	}
 
 	private replaceApp(appObject: AppObject) {
-		this.currentUI = appObject;
+		this.currentApp = appObject;
 	}
 
 	private pushApp(appObject: AppObject) {
-		if (this.currentUI) {
-			this.uiParents.push(this.currentUI);
+		if (this.currentApp) {
+			this.appParents.push(this.currentApp);
 		}
-		this.currentUI = appObject;
+		this.currentApp = appObject;
 	}
 
 	run(appObject: AppObject) {
 		this.runBeforeExit();
-		if (this.currentUI?.onBack) {
+		if (this.currentApp?.onBack) {
 			if (appObject.onBack) {
 				this.replaceApp(appObject);
 			} else {
@@ -93,11 +93,11 @@ export class AppController {
 
 	private pop = () => {
 		this.runBeforeExit();
-		const lastUI = this.uiParents.pop();
-		if (lastUI) {
-			this.currentUI = lastUI;
+		const lastApp = this.appParents.pop();
+		if (lastApp) {
+			this.currentApp = lastApp;
 			this.beforeRun();
-			lastUI.run();
+			lastApp.run();
 			return;
 		}
 		return;
@@ -110,8 +110,8 @@ export class AppController {
 		if (this.disableGoBack) {
 			return;
 		}
-		if (this.currentUI?.onBack) {
-			this.currentUI.onBack(this.pop);
+		if (this.currentApp?.onBack) {
+			this.currentApp.onBack(this.pop);
 			return;
 		}
 		this.pop();

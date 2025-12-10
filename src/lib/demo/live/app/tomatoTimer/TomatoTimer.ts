@@ -615,6 +615,23 @@ class SetDateTime implements AppObject {
 	}
 }
 
+function ordinal(n: number): string {
+	const mod100 = n % 100;
+	if (mod100 >= 11 && mod100 <= 13) {
+		return n + 'th';
+	}
+	switch (n % 10) {
+		case 1:
+			return n + 'st';
+		case 2:
+			return n + 'nd';
+		case 3:
+			return n + 'rd';
+		default:
+			return n + 'th';
+	}
+}
+
 class SetDate implements AppObject {
 	static create(ctl: Controller) {
 		return new SetDate(ctl);
@@ -626,6 +643,10 @@ class SetDate implements AppObject {
 		this.ctl.ui.runLayout<LayoutSettings>({
 			menuHeader: 'Set date...'
 		});
+		this.setYear();
+	}
+
+	private setYear() {
 		const currentYear = new Date().getFullYear();
 		const menuItems: MenuItem[] = [];
 		for (let year = currentYear - 5; year < currentYear + 5; year++) {
@@ -633,8 +654,9 @@ class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-date-${year}`,
 					textContent: year.toString(),
+					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						console.log('set date');
+						this.ctl.app.pushInline(() => this.setMonth(year));
 					}
 				})
 			);
@@ -643,5 +665,52 @@ class SetDate implements AppObject {
 		this.ctl.menu.setMenuItemFocus(5, true);
 		this.ctl.input.setPlaceholder('Select or type in a year...');
 		this.ctl.input.setInputValue(currentYear.toString());
+	}
+
+	private setMonth(year: number) {
+		const currentMonth = new Date().getMonth();
+		const menuItems: MenuItem[] = [];
+		for (let jsmonth = 0; jsmonth < 12; jsmonth++) {
+			menuItems.push(
+				stdMenuItem({
+					id: `set-date-${year}-${jsmonth}`,
+					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
+					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					action: () => {
+						this.ctl.app.pushInline(() => this.setDay(year, jsmonth));
+					}
+				})
+			);
+		}
+		this.ctl.menu.setMenuItems(menuItems);
+		if (year === new Date().getFullYear()) {
+			this.ctl.menu.setMenuItemFocus(currentMonth, true);
+		} else {
+			this.ctl.menu.setMenuItemFocus(0, true);
+		}
+		this.ctl.input.setPlaceholder('Select or type in a month...');
+	}
+
+	private setDay(year: number, jsmonth: number) {
+		const currentDay = new Date().getDate();
+		const menuItems: MenuItem[] = [];
+		for (let day = 1; day <= new Date(year, jsmonth + 1, 0).getDate(); day++) {
+			menuItems.push(
+				stdMenuItem({
+					id: `set-date-${year}-${jsmonth}-${day}`,
+					textContent: `${ordinal(day)}`,
+					action: () => {
+						// this.setHour(year, month, day);
+					}
+				})
+			);
+		}
+		this.ctl.menu.setMenuItems(menuItems);
+		if (year === new Date().getFullYear() && jsmonth === new Date().getMonth()) {
+			this.ctl.menu.setMenuItemFocus(currentDay - 1, true);
+		} else {
+			this.ctl.menu.setMenuItemFocus(0, true);
+		}
+		this.ctl.input.setPlaceholder('Select or type in a day...');
 	}
 }

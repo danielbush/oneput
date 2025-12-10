@@ -33,7 +33,7 @@ export type OneputProps = {
 	innerUI?: FlexParams;
 	outerUI?: FlexParams;
 	inputUI?: {
-		inputLines?: number;
+		textArea?: boolean | { rows: number };
 		left?: FlexParams;
 		right?: FlexParams;
 		outerLeft?: FlexParams;

@@ -262,7 +262,7 @@
 				menuOpen={false}
 				menuItems={ui.menuItems1()}
 				inputUI={{
-					inputLines: 5,
+					textArea: { rows: 5 },
 					left: ui.inputLeft1,
 					right: ui.inputRight1,
 					outerLeft: ui.inputOuterLeft1,

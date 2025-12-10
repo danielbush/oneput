@@ -7,6 +7,7 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/infoMenuItem.js';
+import type { OneputProps } from '$lib/oneput/lib/lib.js';
 
 export class KatexDemo {
 	static create(ctl: Controller) {
@@ -150,7 +151,7 @@ export class KatexDemo {
 		this.ctl.ui.setInputUI((current) => {
 			return {
 				...current,
-				inputLines: 5,
+				textArea: { rows: 5 },
 				right: katexIsValid
 					? undefined
 					: hflex({
@@ -165,7 +166,7 @@ export class KatexDemo {
 								})
 							]
 						})
-			};
+			} satisfies OneputProps['inputUI'];
 		});
 	}
 

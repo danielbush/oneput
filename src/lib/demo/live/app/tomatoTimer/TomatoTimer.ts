@@ -8,7 +8,7 @@ import {
 	type FinishedSession,
 	type UnfinishedSession
 } from './TomatoTimerValue.js';
-import { type AppObject, type MenuItem } from '$lib/oneput/lib/lib.js';
+import { type AppObject, type MenuItem, type OneputProps } from '$lib/oneput/lib/lib.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
@@ -456,8 +456,8 @@ class AddEntryUI implements AppObject {
 			this.ctl.ui.setInputUI((current) => {
 				return {
 					...current,
-					inputLines: 1
-				};
+					textArea: false
+				} satisfies OneputProps['inputUI'];
 			});
 			this.ctl.input.focusInput();
 			this.ctl.input.enableInputElement(true);
@@ -473,6 +473,12 @@ class AddEntryUI implements AppObject {
 					});
 					break;
 				case 'add-note':
+					this.ctl.ui.setInputUI((current) => {
+						return {
+							...current,
+							textArea: { rows: 1 }
+						} satisfies OneputProps['inputUI'];
+					});
 					this.ctl.input.setInputValue(this.session.note ?? '');
 					this.submitPlaceholder.setPlaceholder((binding) => {
 						return binding ? `Enter a note and hit ${binding}...` : 'Enter label and submit...';
@@ -541,8 +547,8 @@ class AddEntryUI implements AppObject {
 					this.ctl.ui.setInputUI((current) => {
 						return {
 							...current,
-							inputLines: 3
-						};
+							textArea: { rows: 3 }
+						} satisfies OneputProps['inputUI'];
 					});
 					this.ctl.input.focusInput();
 				},

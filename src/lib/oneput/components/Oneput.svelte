@@ -15,7 +15,13 @@
 		...props
 	}: OneputProps = $props();
 
-	let inputLines = $derived(Math.max(1, props.inputUI?.inputLines ?? 1));
+	let { inputLines, isTextArea } = $derived.by(() => {
+		const textArea = props.inputUI?.textArea;
+		return {
+			inputLines: Math.max(1, typeof textArea === 'object' ? textArea.rows : 1),
+			isTextArea: !!textArea
+		};
+	});
 
 	$effect(() => {
 		props.onMenuOpenChange?.(props.menuOpen ?? false);
@@ -149,7 +155,7 @@
 					{#if props.inputUI?.left}
 						<Flex class="oneput__input-left" {...props.inputUI.left} />
 					{/if}
-					{#if inputLines === 1}
+					{#if !isTextArea}
 						<input
 							id="oneput__input"
 							bind:this={inputElement}
@@ -162,8 +168,7 @@
 							{autocomplete}
 							spellcheck="false"
 						/>
-					{/if}
-					{#if inputLines > 1}
+					{:else}
 						<textarea
 							id="oneput__input"
 							bind:this={inputElement}

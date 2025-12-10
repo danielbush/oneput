@@ -187,14 +187,14 @@ export class BindingsEditor {
 			this.ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
 		};
 
-		this.ctl.setModal(true);
+		this.ctl.enableModal(true);
 
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
 		const exit = () => {
 			window.removeEventListener('keydown', keyListener);
-			this.ctl.setModal(false);
+			this.ctl.enableModal(false);
 		};
 
 		return {

@@ -54,7 +54,7 @@ export class Controller {
 		return confirm;
 	}
 
-	setModal(isModal: boolean = true) {
+	enableModal(isModal: boolean = true) {
 		this.app.enableGoBack(!isModal);
 		this.keys.enableKeys(!isModal);
 		this.menu.enableMenuActions(!isModal);

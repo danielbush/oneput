@@ -27,7 +27,7 @@ export class Confirm {
 	}
 
 	private start = () => {
-		this.ctl.setModal();
+		this.ctl.enableModal();
 		this.ctl.keys.setBindings(
 			{
 				ok: {
@@ -101,7 +101,7 @@ export class Confirm {
 	};
 
 	private stop = (ok: boolean) => {
-		this.ctl.setModal(false);
+		this.ctl.enableModal(false);
 
 		// Restore
 		this.ctl.keys.resetBindings(true);

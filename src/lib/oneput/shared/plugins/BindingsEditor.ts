@@ -28,11 +28,6 @@ export class BindingsEditor {
 		values: {
 			isLocal: boolean;
 			keyBindingMap: KeyBindingMap;
-			runLayout: (values: {
-				menuHeader: string;
-				backAction?: false | (() => void);
-				exitAction?: false | (() => void);
-			}) => void;
 			onUpdate: (
 				keyBindingMap: KeyBindingMap,
 				isLocal: boolean
@@ -44,8 +39,7 @@ export class BindingsEditor {
 			ctl,
 			values.isLocal,
 			keyBindingMap,
-			values.onUpdate,
-			values.runLayout
+			values.onUpdate
 		);
 		return km;
 	}
@@ -57,12 +51,7 @@ export class BindingsEditor {
 		private onUpdate: (
 			keyBindingMap: KeyBindingMap,
 			isLocal: boolean
-		) => ResultAsync<string, IDBError | IDBStoreError>,
-		private runLayout: (values: {
-			menuHeader: string;
-			backAction?: false | (() => void);
-			exitAction?: false | (() => void);
-		}) => void
+		) => ResultAsync<string, IDBError | IDBStoreError>
 	) {}
 
 	run() {
@@ -74,7 +63,7 @@ export class BindingsEditor {
 	 */
 	private actionsUI = () => {
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.runLayout({ menuHeader: title, backAction: this.ctl.app.goBack });
+		this.ctl.ui.update({ menuHeader: title, enableGoBack: true });
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
@@ -94,9 +83,9 @@ export class BindingsEditor {
 	 */
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
-		this.runLayout({
+		this.ctl.ui.update({
 			menuHeader: `Key bindings for "${description}"`,
-			backAction: this.ctl.app.goBack
+			enableGoBack: true
 		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
@@ -126,10 +115,10 @@ export class BindingsEditor {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
-		this.runLayout({
+		this.ctl.ui.update({
 			menuHeader: `Capturing...`,
-			backAction: false,
-			exitAction: false
+			enableGoBack: false,
+			enableMenuOpenClose: false
 		});
 		const { accept, reject, capturingKeys } = this.startKeyCapture();
 		this.ctl.ui.setInputUI({

@@ -2,6 +2,7 @@ import {
 	DynamicPlaceholder,
 	type FChildParams,
 	type UILayout,
+	type UILayoutSettings,
 	mountSvelte,
 	randomId
 } from '$lib/oneput/lib/lib.js';
@@ -16,9 +17,6 @@ import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsS
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 
 export type LayoutSettings = {
-	exitAction?: boolean | (() => void);
-	backAction?: boolean | (() => void);
-	menuHeader?: string;
 	/**
 	 * Expose the bottom right corner of the layout.
 	 */
@@ -28,17 +26,18 @@ export type LayoutSettings = {
 /**
  * Defines a standard layout.
  */
-export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayout<V> {
-	static create<V extends LayoutSettings = LayoutSettings>(ctl: Controller, values: V = {} as V) {
+export class Layout implements UILayout {
+	static create(ctl: Controller, values: UILayoutSettings = {}) {
 		const bindingService = LocalBindingsService.create(ctl);
-		return new Layout(ctl, values, bindingService);
+		return new Layout(ctl, values, {}, bindingService);
 	}
 
 	defaultPlaceholder?: DynamicPlaceholder;
 
 	constructor(
 		private ctl: Controller,
-		private values: V = {} as V,
+		private values: UILayoutSettings = {},
+		private additional: LayoutSettings = {},
 		private bindingService: LocalBindingsService
 	) {
 		ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
@@ -67,38 +66,26 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 			});
 	}
 
-	configure(values: V) {
+	configure(values: UILayoutSettings, additional: LayoutSettings) {
 		this.values = {
 			menuHeader: 'Menu',
-			outerRight: undefined,
 			...values
 		};
-		// Make our life easier, if we don't specify back or exit, we'll show
-		// them with sane defaults.
-		if (this.values.exitAction === undefined) {
-			this.values.exitAction = this.ctl.menu.closeMenu;
-		}
-		if (this.values.backAction === undefined) {
-			this.values.backAction = this.ctl.app.goBack;
-		}
+		this.additional = {
+			...additional
+		};
 	}
 
 	private get exitAction() {
-		if (this.values.exitAction === true) {
-			return this.ctl.app.goBack;
-		}
-		if (typeof this.values.exitAction === 'function') {
-			return this.values.exitAction;
+		if (this.values.enableMenuOpenClose === true) {
+			return this.ctl.menu.closeMenu;
 		}
 		return;
 	}
 
 	private get backAction() {
-		if (this.values.backAction === true) {
+		if (this.values.enableGoBack === true) {
 			return this.ctl.app.goBack;
-		}
-		if (typeof this.values.backAction === 'function') {
-			return this.values.backAction;
 		}
 		return;
 	}
@@ -193,10 +180,10 @@ export class Layout<V extends LayoutSettings = LayoutSettings> implements UILayo
 					onMount: (node) =>
 						mountSvelte(MenuStatus, { target: node, props: { controller: this.ctl } })
 				}),
-				this.values.outerRight
+				this.additional.outerRight
 					? {
 							style: { flex: '1', justifyContent: 'flex-end' },
-							...this.values.outerRight(b)
+							...this.additional.outerRight(b)
 						}
 					: b.fchild({
 							// GOTCHA: if outerRight is invoked above but has the same id

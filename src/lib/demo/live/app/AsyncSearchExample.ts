@@ -21,13 +21,17 @@ export class AsyncSearchExample {
 	) {}
 
 	run() {
-		this.ctl.ui.runLayout<LayoutSettings>({
-			menuHeader: 'Async Search Example',
-			outerRight: (b) =>
-				b.fchild({
-					onMount: this.outerRightStatus.onMount
-				})
-		});
+		this.ctl.ui.update<LayoutSettings>(
+			{
+				menuHeader: 'Async Search Example'
+			},
+			{
+				outerRight: (b) =>
+					b.fchild({
+						onMount: this.outerRightStatus.onMount
+					})
+			}
+		);
 		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {

@@ -7,7 +7,6 @@ import {
 	timerIcon,
 	tocIcon
 } from '$lib/oneput/shared/icons.js';
-import { type LayoutSettings } from '../layout.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
@@ -52,9 +51,9 @@ export class RootUI {
 	) {}
 
 	run = () => {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Home',
-			backAction: false
+			enableGoBack: false
 		});
 		const blankItems = [...Array(10)].map((_, i) => {
 			return stdMenuItem({

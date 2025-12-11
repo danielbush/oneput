@@ -229,8 +229,14 @@ export function walk(
 	}
 }
 
-export interface UILayout<V extends Record<string, unknown> = Record<string, unknown>> {
-	configure(values: V): void;
+export type UILayoutSettings = {
+	menuHeader?: string;
+	enableGoBack?: boolean;
+	enableMenuOpenClose?: boolean;
+};
+
+export interface UILayout {
+	configure(values: UILayoutSettings, additional?: Record<string, unknown>): void;
 	inputUI?: OneputProps['inputUI'];
 	menuUI?: OneputProps['menuUI'];
 	innerUI?: OneputProps['innerUI'];

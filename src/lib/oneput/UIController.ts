@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { UILayout, FlexParams, OneputProps } from './lib/lib.js';
+import type { UILayout, FlexParams, OneputProps, UILayoutSettings } from './lib/lib.js';
 
 export class UIController {
 	static create(ctl: Controller) {
@@ -37,8 +37,20 @@ export class UIController {
 		return this.layout as D;
 	}
 
-	runLayout<T extends Record<string, unknown>>(values: T) {
-		this.layout?.configure(values);
+	update<A extends Record<string, unknown> = Record<never, never>>(
+		settings: UILayoutSettings,
+		additional?: A
+	) {
+		this.ctl.app.enableGoBack(settings.enableGoBack ?? true);
+		this.ctl.menu.enableMenuOpenClose(settings.enableMenuOpenClose ?? true);
+		this.layout?.configure(
+			{
+				...settings,
+				enableGoBack: settings.enableGoBack ?? true,
+				enableMenuOpenClose: settings.enableMenuOpenClose ?? true
+			},
+			additional
+		);
 		this.ctl.currentProps.inputUI = this.layout?.inputUI;
 		this.ctl.currentProps.menuUI = this.layout?.menuUI;
 		this.ctl.currentProps.innerUI = this.layout?.innerUI;

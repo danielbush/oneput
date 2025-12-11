@@ -11,7 +11,7 @@ export class FiltersUI {
 	constructor(private ctl: Controller) {}
 
 	run() {
-		this.ctl.ui.runLayout({
+		this.ctl.ui.update({
 			menuHeader: 'Filters'
 		});
 

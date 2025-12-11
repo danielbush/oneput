@@ -20,7 +20,7 @@ export class NavigateHeadings {
 	) {}
 
 	run() {
-		this.ctl.ui.runLayout({
+		this.ctl.ui.update({
 			menuHeader: 'Navigate Headings'
 		});
 		const menuAction = (heading: HTMLElement) => {

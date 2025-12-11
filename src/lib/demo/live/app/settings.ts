@@ -5,7 +5,6 @@ import { BindingsEditor } from '$lib/oneput/shared/plugins/BindingsEditor.js';
 import { config } from '$lib/demo/live/service/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
-import { type LayoutSettings } from '../layout.js';
 import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
 
 export class SettingsUI {
@@ -17,13 +16,6 @@ export class SettingsUI {
 				keyBindingMap: ctl.keys.getDefaultBindings(true),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
-				},
-				runLayout: ({ menuHeader, backAction, exitAction }) => {
-					ctl.ui.runLayout<LayoutSettings>({
-						menuHeader,
-						exitAction,
-						backAction
-					});
 				}
 			});
 		};
@@ -34,13 +26,6 @@ export class SettingsUI {
 				keyBindingMap: ctl.keys.getDefaultBindings(false),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
-				},
-				runLayout: ({ menuHeader, backAction, exitAction }) => {
-					ctl.ui.runLayout<LayoutSettings>({
-						menuHeader,
-						exitAction,
-						backAction
-					});
 				}
 			});
 		};
@@ -63,7 +48,7 @@ export class SettingsUI {
 	) {}
 
 	run = () => {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Settings'
 		});
 		this.ctl.menu.setMenuItems([

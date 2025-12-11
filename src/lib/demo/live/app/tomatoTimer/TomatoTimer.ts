@@ -1,6 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
-import type { LayoutSettings } from '../../layout.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import {
@@ -54,7 +53,7 @@ export class TomatoTimer implements AppObject {
 	 * This is the entry point that loads the tomato timer ui.
 	 */
 	run() {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Tomato Timer'
 		});
 		this.ctl.menu.clearMenuItemsFn();
@@ -108,7 +107,7 @@ export class TomatoTimer implements AppObject {
 	 */
 	private noTimerUI() {
 		this.currentUI = 'noTimerUI';
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'No timer running'
 		});
 		this.ctl.menu.setMenuItems([
@@ -154,7 +153,7 @@ export class TomatoTimer implements AppObject {
 
 	private createTimerUI({ duration }: { duration: number }) {
 		this.currentUI = 'createTimerUI';
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
 		this.submitPlaceholder.setPlaceholder((binding) => {
@@ -213,7 +212,7 @@ export class TomatoTimer implements AppObject {
 	 */
 	private timerUI(timerValue: TomatoTimerValue) {
 		this.currentUI = 'timerUI';
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Running timer... Seize the day!'
 		});
 		this.ctl.menu.setMenuItems([
@@ -323,7 +322,7 @@ export class TomatoTimer implements AppObject {
 
 	private previousSessionsUI() {
 		this.currentUI = 'previousSessionsUI';
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Previous sessions'
 		});
 		this.ctl.input.setPlaceholder('Select a session...');
@@ -351,7 +350,7 @@ export class TomatoTimer implements AppObject {
 	private editEntryUI(session: FinishedSessionRecord) {
 		this.currentUI = 'editSessionUI';
 		const v = TomatoTimerValue.create(session);
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Edit session...'
 		});
 		this.ctl.input.setPlaceholder('Select an action...');
@@ -520,7 +519,7 @@ class AddEntryUI implements AppObject {
 	};
 
 	run() {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Add entry...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
@@ -589,7 +588,7 @@ class SetDateTime implements AppObject {
 	constructor(private ctl: Controller) {}
 
 	run() {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Set date and time...'
 		});
 		this.ctl.menu.setMenuItems([
@@ -640,7 +639,7 @@ class SetDate implements AppObject {
 	constructor(private ctl: Controller) {}
 
 	run() {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Set date...'
 		});
 		this.setYear();

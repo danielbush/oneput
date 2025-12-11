@@ -1,6 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
-import { type LayoutSettings } from '../layout.js';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
@@ -45,7 +44,7 @@ export class KatexDemo {
 	}
 
 	run() {
-		this.ctl.ui.runLayout<LayoutSettings>({
+		this.ctl.ui.update({
 			menuHeader: 'Katex Demo'
 		});
 		this.ctl.menu.enableMenuOpenClose(false);

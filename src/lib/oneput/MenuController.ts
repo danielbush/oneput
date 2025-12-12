@@ -341,7 +341,7 @@ export class MenuController {
 		this.disableActions = !on;
 	}
 
-	enableMenuOpenClose(on: boolean = true) {
+	_enableMenuOpenClose(on: boolean = true) {
 		this.disableOpenClose = !on;
 	}
 

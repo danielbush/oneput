@@ -23,7 +23,7 @@ export class AppController {
 		console.log(this.appParents, 'current:', this.currentApp);
 		// Re-enable stuff...
 		this.ctl.menu.enableMenuActions();
-		this.ctl.menu.enableMenuOpenClose();
+		this.ctl.menu._enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();
 		this.ctl.input.enableInputElement();
 		this._enableGoBack();

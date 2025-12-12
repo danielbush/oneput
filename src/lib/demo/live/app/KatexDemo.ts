@@ -45,9 +45,9 @@ export class KatexDemo {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Katex Demo'
+			menuTitle: 'Katex Demo',
+			enableMenuOpenClose: false
 		});
-		this.ctl.menu.enableMenuOpenClose(false);
 		this.ctl.input.setPlaceholder(this.submitPlaceholder);
 		this.ctl.input.focusInput();
 		this.ctl.menu.setMenuItemsFn(() => {

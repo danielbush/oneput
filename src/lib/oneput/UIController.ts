@@ -39,12 +39,12 @@ export class UIController {
 
 	private calcLayoutFlags(settings: UILayoutSettings) {
 		const flags = {
-			enableGoBack: settings.enableModal || (settings.enableGoBack ?? true),
-			enableMenuOpenClose: settings.enableModal || (settings.enableMenuOpenClose ?? true),
-			enableKeys: settings.enableModal || (settings.enableKeys ?? true),
-			enableMenuActions: settings.enableModal || (settings.enableMenuActions ?? true),
-			enableMenuItemsFn: settings.enableModal || (settings.enableMenuItemsFn ?? true),
-			enableInputElement: settings.enableModal || (settings.enableInputElement ?? true)
+			enableGoBack: settings.enableGoBack || !settings.enableModal,
+			enableMenuOpenClose: settings.enableMenuOpenClose || !settings.enableModal,
+			enableKeys: settings.enableKeys || !settings.enableModal,
+			enableMenuActions: settings.enableMenuActions || !settings.enableModal,
+			enableMenuItemsFn: settings.enableMenuItemsFn || !settings.enableModal,
+			enableInputElement: settings.enableInputElement || !settings.enableModal
 		};
 		return flags;
 	}

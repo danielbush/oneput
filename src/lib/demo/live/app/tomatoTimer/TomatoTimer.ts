@@ -459,7 +459,7 @@ class AddEntryUI implements AppObject {
 				} satisfies OneputProps['inputUI'];
 			});
 			this.ctl.input.focusInput();
-			this.ctl.input.enableInputElement(true);
+			this.ctl.ui.update({ enableInputElement: true });
 			switch (item.id) {
 				case 'add-label':
 					this.submitPlaceholder.setPlaceholder((binding) => {
@@ -506,7 +506,7 @@ class AddEntryUI implements AppObject {
 					break;
 				case 'add-startTime':
 					this.ctl.input.setPlaceholder('Set start time and date...');
-					this.ctl.input.enableInputElement(false);
+					this.ctl.ui.update({ enableInputElement: false });
 					this.ctl.input.setInputValue(String(this.session.startTime ?? ''));
 					break;
 			}

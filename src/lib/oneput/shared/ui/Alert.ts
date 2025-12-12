@@ -40,7 +40,9 @@ export class Alert {
 
 	private start = () => {
 		this.ctl.ui.update({
-			enableModal: true
+			enableModal: true,
+			// Re-enable keys...
+			enableKeys: true
 		});
 		this.ctl.keys.setBindings(
 			{
@@ -52,7 +54,6 @@ export class Alert {
 			},
 			true
 		);
-		this.ctl.keys.enableKeys();
 
 		this.ctl.input.setPlaceholder('Click "ok" or type enter to continue...');
 		this.ctl.ui.replaceMenuUI({

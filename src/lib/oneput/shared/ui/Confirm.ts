@@ -30,7 +30,9 @@ export class Confirm {
 
 	private start = () => {
 		this.ctl.ui.update({
-			enableModal: true
+			enableModal: true,
+			// Re-enable keys...
+			enableKeys: true
 		});
 		this.ctl.keys.setBindings(
 			{
@@ -57,7 +59,6 @@ export class Confirm {
 			},
 			true
 		);
-		this.ctl.keys.enableKeys();
 
 		this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
 		this.ctl.ui.replaceMenuUI({

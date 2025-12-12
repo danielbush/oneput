@@ -73,7 +73,7 @@ export class KeysController {
 
 	private keysDisabled = false;
 
-	enableKeys(on: boolean = true) {
+	_enableKeys(on: boolean = true) {
 		this.keysDisabled = !on;
 	}
 

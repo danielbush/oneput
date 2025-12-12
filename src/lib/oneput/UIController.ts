@@ -39,21 +39,13 @@ export class UIController {
 
 	private calcLayoutFlags(settings: UILayoutSettings) {
 		const flags = {
-			enableGoBack: settings.enableGoBack ?? true,
-			enableMenuOpenClose: settings.enableMenuOpenClose ?? true,
-			enableKeys: settings.enableKeys ?? true,
-			enableMenuActions: settings.enableMenuActions ?? true,
-			enableMenuItemsFn: settings.enableMenuItemsFn ?? true,
-			enableInputElement: settings.enableInputElement ?? true
+			enableGoBack: settings.enableModal || (settings.enableGoBack ?? true),
+			enableMenuOpenClose: settings.enableModal || (settings.enableMenuOpenClose ?? true),
+			enableKeys: settings.enableModal || (settings.enableKeys ?? true),
+			enableMenuActions: settings.enableModal || (settings.enableMenuActions ?? true),
+			enableMenuItemsFn: settings.enableModal || (settings.enableMenuItemsFn ?? true),
+			enableInputElement: settings.enableModal || (settings.enableInputElement ?? true)
 		};
-		if (settings.enableModal) {
-			flags.enableGoBack = false;
-			flags.enableKeys = false;
-			flags.enableMenuActions = false;
-			flags.enableMenuOpenClose = false;
-			flags.enableMenuItemsFn = false;
-			flags.enableInputElement = false;
-		}
 		return flags;
 	}
 
@@ -64,7 +56,7 @@ export class UIController {
 		const flags = this.calcLayoutFlags(settings);
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
-		this.ctl.keys.enableKeys(flags.enableKeys);
+		this.ctl.keys._enableKeys(flags.enableKeys);
 		this.ctl.menu.enableMenuActions(flags.enableMenuActions);
 		this.ctl.menu.enableMenuItemsFn(flags.enableMenuItemsFn);
 		this.ctl.input.enableInputElement(flags.enableInputElement);

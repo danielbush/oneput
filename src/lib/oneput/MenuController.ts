@@ -337,14 +337,23 @@ export class MenuController {
 	// - menu open/close
 	// - mennItemsFn
 
+	/**
+	 * Prefer ctl.ui.update({ enableMenuActions: true }) instead.
+	 */
 	_enableMenuActions(on: boolean = true) {
 		this.disableActions = !on;
 	}
 
+	/**
+	 * Prefer ctl.ui.update({ enableMenuOpenClose: true }) instead.
+	 */
 	_enableMenuOpenClose(on: boolean = true) {
 		this.disableOpenClose = !on;
 	}
 
+	/**
+	 * Prefer ctl.ui.update({ enableMenuItemsFn: true }) instead.
+	 */
 	_enableMenuItemsFn(on: boolean = true) {
 		this.disableMenuItemsFn = !on;
 	}

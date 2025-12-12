@@ -12,6 +12,9 @@ export class AppController {
 	private currentApp: AppObject | null = null;
 	private disableGoBack = false;
 
+	/**
+	 * Prefer ctl.ui.update({ enableGoBack: true }) instead.
+	 */
 	_enableGoBack(on: boolean = true) {
 		this.disableGoBack = !on;
 	}

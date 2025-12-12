@@ -117,6 +117,9 @@ export class InputController {
 		return this.ctl.currentProps.inputValue || '';
 	}
 
+	/**
+	 * Prefer ctl.ui.update({ enableInputElement: true }) instead.
+	 */
 	_enableInputElement(on: boolean = true) {
 		if (!this.inputElement) {
 			return;

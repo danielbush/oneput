@@ -63,7 +63,7 @@ export class BindingsEditor {
 	 */
 	private actionsUI = () => {
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.ctl.ui.update({ menuTitle: title, enableGoBack: true });
+		this.ctl.ui.update({ menuTitle: title });
 		this.ctl.menu.setMenuItems(
 			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
@@ -84,8 +84,7 @@ export class BindingsEditor {
 	private actionUI = (actionId: string) => {
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
-			menuTitle: `Key bindings for "${description}"`,
-			enableGoBack: true
+			menuTitle: `Key bindings for "${description}"`
 		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');

@@ -21,7 +21,7 @@ export class NavigateHeadings {
 
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Navigate Headings'
+			menuTitle: 'Navigate Headings'
 		});
 		const menuAction = (heading: HTMLElement) => {
 			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });

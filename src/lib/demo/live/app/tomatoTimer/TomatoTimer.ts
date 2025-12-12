@@ -54,7 +54,7 @@ export class TomatoTimer implements AppObject {
 	 */
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Tomato Timer'
+			menuTitle: 'Tomato Timer'
 		});
 		this.ctl.menu.clearMenuItemsFn();
 		// TODO: check if there is an active timer...
@@ -108,7 +108,7 @@ export class TomatoTimer implements AppObject {
 	private noTimerUI() {
 		this.currentUI = 'noTimerUI';
 		this.ctl.ui.update({
-			menuHeader: 'No timer running'
+			menuTitle: 'No timer running'
 		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
@@ -154,7 +154,7 @@ export class TomatoTimer implements AppObject {
 	private createTimerUI({ duration }: { duration: number }) {
 		this.currentUI = 'createTimerUI';
 		this.ctl.ui.update({
-			menuHeader: `Create timer: ${Math.round(duration / 60)} minutes`
+			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
 		this.submitPlaceholder.setPlaceholder((binding) => {
 			return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
@@ -213,7 +213,7 @@ export class TomatoTimer implements AppObject {
 	private timerUI(timerValue: TomatoTimerValue) {
 		this.currentUI = 'timerUI';
 		this.ctl.ui.update({
-			menuHeader: 'Running timer... Seize the day!'
+			menuTitle: 'Running timer... Seize the day!'
 		});
 		this.ctl.menu.setMenuItems([
 			// It is possible to have a timer without mounting a svelte
@@ -323,7 +323,7 @@ export class TomatoTimer implements AppObject {
 	private previousSessionsUI() {
 		this.currentUI = 'previousSessionsUI';
 		this.ctl.ui.update({
-			menuHeader: 'Previous sessions'
+			menuTitle: 'Previous sessions'
 		});
 		this.ctl.input.setPlaceholder('Select a session...');
 		this.store.getFinishedSessions().andTee((sessions) => {
@@ -351,7 +351,7 @@ export class TomatoTimer implements AppObject {
 		this.currentUI = 'editSessionUI';
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
-			menuHeader: 'Edit session...'
+			menuTitle: 'Edit session...'
 		});
 		this.ctl.input.setPlaceholder('Select an action...');
 		this.ctl.menu.setMenuItems([
@@ -520,7 +520,7 @@ class AddEntryUI implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Add entry...'
+			menuTitle: 'Add entry...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
 		this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'first' });
@@ -589,7 +589,7 @@ class SetDateTime implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Set date and time...'
+			menuTitle: 'Set date and time...'
 		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
@@ -640,7 +640,7 @@ class SetDate implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Set date...'
+			menuTitle: 'Set date...'
 		});
 		this.setYear();
 	}

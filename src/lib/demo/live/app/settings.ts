@@ -49,7 +49,7 @@ export class SettingsUI {
 
 	run = () => {
 		this.ctl.ui.update({
-			menuHeader: 'Settings'
+			menuTitle: 'Settings'
 		});
 		this.ctl.menu.setMenuItems([
 			checkboxMenuItem({

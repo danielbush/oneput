@@ -14,7 +14,7 @@ export class GlobalFilter {
 
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Global Filter'
+			menuTitle: 'Global Filter'
 		});
 		setTimeout(() => {
 			this.ctl.ui.setInputUI((current) => {

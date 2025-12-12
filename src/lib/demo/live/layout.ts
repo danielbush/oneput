@@ -68,7 +68,7 @@ export class Layout implements UILayout {
 
 	configure(values: UILayoutSettings, additional: LayoutSettings) {
 		this.values = {
-			menuHeader: 'Menu',
+			menuTitle: 'Menu',
 			...values
 		};
 		this.additional = {
@@ -91,7 +91,7 @@ export class Layout implements UILayout {
 	}
 
 	private get menuTitle() {
-		return this.values.menuHeader || 'Menu';
+		return this.values.menuTitle || 'Menu';
 	}
 
 	get inputUI() {

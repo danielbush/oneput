@@ -12,7 +12,7 @@ export class FiltersUI {
 
 	run() {
 		this.ctl.ui.update({
-			menuHeader: 'Filters'
+			menuTitle: 'Filters'
 		});
 
 		this.ctl.menu.setMenuItems([

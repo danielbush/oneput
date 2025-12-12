@@ -23,7 +23,7 @@ export class AsyncSearchExample {
 	run() {
 		this.ctl.ui.update<LayoutSettings>(
 			{
-				menuHeader: 'Async Search Example'
+				menuTitle: 'Async Search Example'
 			},
 			{
 				outerRight: (b) =>

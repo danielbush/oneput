@@ -70,7 +70,7 @@ export class UIController {
 		this.ctl.input.enableInputElement(flags.enableInputElement);
 		this.layout?.configure(
 			{
-				menuHeader: settings.menuHeader,
+				menuTitle: settings.menuTitle,
 				...flags
 			},
 			additional

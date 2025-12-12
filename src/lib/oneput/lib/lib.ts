@@ -230,7 +230,7 @@ export function walk(
 }
 
 export type UILayoutSettings = {
-	menuHeader?: string;
+	menuTitle?: string;
 	enableGoBack?: boolean;
 	enableMenuOpenClose?: boolean;
 	enableKeys?: boolean;

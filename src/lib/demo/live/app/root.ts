@@ -52,7 +52,7 @@ export class RootUI {
 
 	run = () => {
 		this.ctl.ui.update({
-			menuHeader: 'Home',
+			menuTitle: 'Home',
 			enableGoBack: false
 		});
 		const blankItems = [...Array(10)].map((_, i) => {

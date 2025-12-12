@@ -10,6 +10,7 @@ export class Confirm {
 	}
 
 	private previousPlaceholder: string;
+	private previousActiveElement: HTMLElement | null = null;
 
 	constructor(
 		private ctl: Controller,
@@ -19,6 +20,7 @@ export class Confirm {
 		private okButton?: HTMLElement,
 		private cancelButton?: HTMLElement
 	) {
+		this.previousActiveElement = document.activeElement as HTMLElement;
 		this.previousPlaceholder = this.ctl.input.getPlaceholder();
 	}
 
@@ -112,6 +114,7 @@ export class Confirm {
 		this.ctl.ui.replaceMenuUI();
 		this.ctl.input.setPlaceholder(this.previousPlaceholder);
 		this.resolve?.(ok);
+		this.previousActiveElement?.focus();
 	};
 
 	async userChooses() {

@@ -13,7 +13,7 @@ export class Alert {
 	}
 
 	private okPromise: Promise<void> | null = null;
-	private previousActiveElement: HTMLElement;
+	private previousActiveElement: HTMLElement | null = null;
 	private previousPlaceholder: string;
 
 	constructor(
@@ -35,7 +35,7 @@ export class Alert {
 		this.ctl.ui.replaceMenuUI();
 		this.ctl.input.setPlaceholder(this.previousPlaceholder);
 		this.resolve?.();
-		this.previousActiveElement.focus();
+		this.previousActiveElement?.focus();
 	};
 
 	private start = () => {

@@ -117,8 +117,7 @@ export class BindingsEditor {
 	private async captureBindingUI(actionId: string) {
 		this.ctl.ui.update({
 			menuHeader: `Capturing...`,
-			enableGoBack: false,
-			enableMenuOpenClose: false
+			enableModal: true
 		});
 		const { accept, reject, capturingKeys } = this.startKeyCapture();
 		this.ctl.ui.setInputUI({
@@ -176,14 +175,12 @@ export class BindingsEditor {
 			this.ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
 		};
 
-		this.ctl.enableModal(true);
-
 		setTimeout(() => {
 			window.addEventListener('keydown', keyListener);
 		});
 		const exit = () => {
 			window.removeEventListener('keydown', keyListener);
-			this.ctl.enableModal(false);
+			this.ctl.ui.update({ enableModal: false });
 		};
 
 		return {

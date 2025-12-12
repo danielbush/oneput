@@ -53,13 +53,4 @@ export class Controller {
 		confirm.run();
 		return confirm;
 	}
-
-	enableModal(isModal: boolean = true) {
-		this.app.enableGoBack(!isModal);
-		this.keys.enableKeys(!isModal);
-		this.menu.enableMenuActions(!isModal);
-		this.menu.enableMenuOpenClose(!isModal);
-		this.menu.enableMenuItemsFn(!isModal);
-		this.input.enableInputElement(!isModal);
-	}
 }

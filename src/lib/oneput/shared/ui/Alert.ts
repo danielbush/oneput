@@ -26,7 +26,9 @@ export class Alert {
 	}
 
 	private stop = () => {
-		this.ctl.enableModal(false);
+		this.ctl.ui.update({
+			enableModal: false
+		});
 
 		// Restore
 		this.ctl.keys.resetBindings(true);
@@ -37,7 +39,9 @@ export class Alert {
 	};
 
 	private start = () => {
-		this.ctl.enableModal();
+		this.ctl.ui.update({
+			enableModal: true
+		});
 		this.ctl.keys.setBindings(
 			{
 				ok: {

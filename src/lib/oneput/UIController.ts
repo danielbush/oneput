@@ -37,17 +37,41 @@ export class UIController {
 		return this.layout as D;
 	}
 
+	private calcLayoutFlags(settings: UILayoutSettings) {
+		const flags = {
+			enableGoBack: settings.enableGoBack ?? true,
+			enableMenuOpenClose: settings.enableMenuOpenClose ?? true,
+			enableKeys: settings.enableKeys ?? true,
+			enableMenuActions: settings.enableMenuActions ?? true,
+			enableMenuItemsFn: settings.enableMenuItemsFn ?? true,
+			enableInputElement: settings.enableInputElement ?? true
+		};
+		if (settings.enableModal) {
+			flags.enableGoBack = false;
+			flags.enableKeys = false;
+			flags.enableMenuActions = false;
+			flags.enableMenuOpenClose = false;
+			flags.enableMenuItemsFn = false;
+			flags.enableInputElement = false;
+		}
+		return flags;
+	}
+
 	update<A extends Record<string, unknown> = Record<never, never>>(
 		settings: UILayoutSettings,
 		additional?: A
 	) {
-		this.ctl.app.enableGoBack(settings.enableGoBack ?? true);
-		this.ctl.menu.enableMenuOpenClose(settings.enableMenuOpenClose ?? true);
+		const flags = this.calcLayoutFlags(settings);
+		this.ctl.app.enableGoBack(flags.enableGoBack);
+		this.ctl.menu.enableMenuOpenClose(flags.enableMenuOpenClose);
+		this.ctl.keys.enableKeys(flags.enableKeys);
+		this.ctl.menu.enableMenuActions(flags.enableMenuActions);
+		this.ctl.menu.enableMenuItemsFn(flags.enableMenuItemsFn);
+		this.ctl.input.enableInputElement(flags.enableInputElement);
 		this.layout?.configure(
 			{
-				...settings,
-				enableGoBack: settings.enableGoBack ?? true,
-				enableMenuOpenClose: settings.enableMenuOpenClose ?? true
+				menuHeader: settings.menuHeader,
+				...flags
 			},
 			additional
 		);

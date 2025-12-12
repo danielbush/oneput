@@ -233,6 +233,11 @@ export type UILayoutSettings = {
 	menuHeader?: string;
 	enableGoBack?: boolean;
 	enableMenuOpenClose?: boolean;
+	enableKeys?: boolean;
+	enableMenuActions?: boolean;
+	enableMenuItemsFn?: boolean;
+	enableInputElement?: boolean;
+	enableModal?: boolean;
 };
 
 export interface UILayout {

@@ -337,7 +337,7 @@ export class MenuController {
 	// - menu open/close
 	// - mennItemsFn
 
-	enableMenuActions(on: boolean = true) {
+	_enableMenuActions(on: boolean = true) {
 		this.disableActions = !on;
 	}
 

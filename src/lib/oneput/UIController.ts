@@ -57,7 +57,7 @@ export class UIController {
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
 		this.ctl.keys._enableKeys(flags.enableKeys);
-		this.ctl.menu.enableMenuActions(flags.enableMenuActions);
+		this.ctl.menu._enableMenuActions(flags.enableMenuActions);
 		this.ctl.menu.enableMenuItemsFn(flags.enableMenuItemsFn);
 		this.ctl.input.enableInputElement(flags.enableInputElement);
 		this.layout?.configure(

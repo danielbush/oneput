@@ -21,14 +21,16 @@ export class NavigateHeadings {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Navigate Headings'
+			menuTitle: 'Navigate Headings',
+			// Demo how to handle typed input by handling onInputChange directly and
+			// disable menuItemsFn...
+			enableMenuItemsFn: false
 		});
 		const menuAction = (heading: HTMLElement) => {
 			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-			this.ctl.menu.closeMenu();
 			// Reset the input and menu:
 			this.ctl.input.setInputValue();
-			this.ctl.menu.setMenuItems(menuItems);
+			this.ctl.menu.setMenuItems(menuItems, { focusBehaviour: 'none' });
 		};
 		const menuItem = (heading: HTMLElement) =>
 			stdMenuItem({
@@ -44,10 +46,8 @@ export class NavigateHeadings {
 		const menuItems = headings.map((h) => menuItem(h));
 		this.ctl.menu.setMenuItems(menuItems);
 
-		// Demo how to handle typed input by handling onInputChange directly and
-		// disable menuItemsFn...
-		this.ctl.menu.enableMenuItemsFn(false);
-
+		// Normally you should use setMenuItemsFn / setDefaultMenuItemsFn or
+		// related functions.
 		this.clearInputChangeListener = this.ctl.events.on('input-change', ({ value }) => {
 			const sortedMenuItems = this.fuzzyFilter.menuItemsFn(value, menuItems);
 			if (!sortedMenuItems) {

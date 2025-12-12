@@ -345,7 +345,7 @@ export class MenuController {
 		this.disableOpenClose = !on;
 	}
 
-	enableMenuItemsFn(on: boolean = true) {
+	_enableMenuItemsFn(on: boolean = true) {
 		this.disableMenuItemsFn = !on;
 	}
 

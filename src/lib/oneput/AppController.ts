@@ -24,7 +24,7 @@ export class AppController {
 		// Re-enable stuff...
 		this.ctl.menu._enableMenuActions();
 		this.ctl.menu._enableMenuOpenClose();
-		this.ctl.menu.enableMenuItemsFn();
+		this.ctl.menu._enableMenuItemsFn();
 		this.ctl.input.enableInputElement();
 		this._enableGoBack();
 

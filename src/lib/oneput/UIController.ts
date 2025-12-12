@@ -62,7 +62,7 @@ export class UIController {
 		additional?: A
 	) {
 		const flags = this.calcLayoutFlags(settings);
-		this.ctl.app.enableGoBack(flags.enableGoBack);
+		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu.enableMenuOpenClose(flags.enableMenuOpenClose);
 		this.ctl.keys.enableKeys(flags.enableKeys);
 		this.ctl.menu.enableMenuActions(flags.enableMenuActions);

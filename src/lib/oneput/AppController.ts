@@ -12,7 +12,7 @@ export class AppController {
 	private currentApp: AppObject | null = null;
 	private disableGoBack = false;
 
-	enableGoBack(on: boolean = true) {
+	_enableGoBack(on: boolean = true) {
 		this.disableGoBack = !on;
 	}
 
@@ -26,7 +26,7 @@ export class AppController {
 		this.ctl.menu.enableMenuOpenClose();
 		this.ctl.menu.enableMenuItemsFn();
 		this.ctl.input.enableInputElement();
-		this.enableGoBack();
+		this._enableGoBack();
 
 		// Reset stuff...
 		this.ctl.keys.resetBindings();

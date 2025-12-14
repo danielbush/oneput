@@ -124,7 +124,6 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Add entry...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
-					// this.ctl.runInline(() => this.addEntryUI({}, 'first'));
 					this.currentUI = 'addEntryUI';
 					this.ctl.app.push(
 						AddEntryUI.create(this.ctl, {

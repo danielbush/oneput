@@ -430,7 +430,8 @@ class AddEntryUI implements AppObject {
 		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
 			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
 		});
-		return new AddEntryUI(ctl, session, submitPlaceholder);
+		const setDateTime = SetDateTime.create(ctl);
+		return new AddEntryUI(ctl, session, submitPlaceholder, setDateTime);
 	}
 
 	private unsubscribeInputChange?: () => void;
@@ -439,7 +440,8 @@ class AddEntryUI implements AppObject {
 	constructor(
 		private ctl: Controller,
 		private session: Partial<FinishedSession>,
-		private submitPlaceholder: SubmitPlaceholder
+		private submitPlaceholder: SubmitPlaceholder,
+		private setDateTime: SetDateTime
 	) {
 		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
 			const item = this.menuItems[index];
@@ -565,7 +567,7 @@ class AddEntryUI implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(SetDateTime.create(this.ctl));
+					this.ctl.app.push(this.setDateTime);
 				}
 			})
 		];

@@ -23,7 +23,7 @@ export class AppController {
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {
-		console.log(this.appParents, 'current:', this.currentApp);
+		// console.log(this.appParents, 'current:', this.currentApp);
 		// Re-enable stuff...
 		this.ctl.menu._enableMenuActions();
 		this.ctl.menu._enableMenuOpenClose();

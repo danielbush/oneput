@@ -576,7 +576,19 @@ class AddEntryUI implements AppObject {
 
 class SetDateTime implements AppObject {
 	static create(ctl: Controller) {
-		const setDate = SetDate.create(ctl);
+		const date = {
+			year: new Date().getFullYear(),
+			month: new Date().getMonth() + 1,
+			jsmonth: new Date().getMonth(),
+			day: new Date().getDate()
+		};
+		const setDate = SetDate.create(ctl, ({ year, month, jsmonth, day }) => {
+			date.year = year;
+			date.month = month;
+			date.jsmonth = jsmonth;
+			date.day = day;
+			console.log('date', date, 'now we need to update the ui and get the user to set the time');
+		});
 		return new SetDateTime(ctl, setDate);
 	}
 
@@ -630,11 +642,17 @@ function ordinal(n: number): string {
 }
 
 class SetDate implements AppObject {
-	static create(ctl: Controller) {
-		return new SetDate(ctl);
+	static create(
+		ctl: Controller,
+		onFinish: (date: { year: number; month: number; jsmonth: number; day: number }) => void
+	) {
+		return new SetDate(ctl, onFinish);
 	}
 
-	constructor(private ctl: Controller) {}
+	constructor(
+		private ctl: Controller,
+		private onFinish: (date: { year: number; month: number; jsmonth: number; day: number }) => void
+	) {}
 
 	run() {
 		this.ctl.ui.update({
@@ -697,7 +715,8 @@ class SetDate implements AppObject {
 					id: `set-date-${year}-${jsmonth}-${day}`,
 					textContent: `${ordinal(day)}`,
 					action: () => {
-						// this.setHour(year, month, day);
+						this.onFinish({ year, month: jsmonth + 1, jsmonth, day });
+						// It's up to the callback to update the ui...
 					}
 				})
 			);

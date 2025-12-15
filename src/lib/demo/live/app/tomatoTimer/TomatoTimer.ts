@@ -583,6 +583,11 @@ class SetDateTime implements AppObject {
 			day: new Date().getDate(),
 			isSet: false
 		};
+		const time = {
+			hour: new Date().getHours(),
+			minute: new Date().getMinutes(),
+			isSet: false
+		};
 		const createSetDate = (onUpdate: () => void) => {
 			return SetDate.create(ctl, ({ year, month, jsmonth, day }) => {
 				date.year = year;
@@ -593,13 +598,23 @@ class SetDateTime implements AppObject {
 				onUpdate();
 			});
 		};
-		return new SetDateTime(ctl, date, createSetDate);
+		const createSetTime = (onUpdate: () => void) => {
+			return SetTime.create(ctl, ({ hour, minute }) => {
+				time.hour = hour;
+				time.minute = minute;
+				time.isSet = true;
+				onUpdate();
+			});
+		};
+		return new SetDateTime(ctl, date, time, createSetDate, createSetTime);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private date: { year: number; month: number; jsmonth: number; day: number; isSet: boolean },
-		private createSetDate: (onUpdate: () => void) => SetDate
+		private time: { hour: number; minute: number; isSet: boolean },
+		private createSetDate: (onUpdate: () => void) => SetDate,
+		private createSetTime: (onUpdate: () => void) => SetTime
 	) {}
 
 	run() {
@@ -608,7 +623,7 @@ class SetDateTime implements AppObject {
 			{ year: 'numeric', month: 'long', day: 'numeric' }
 		);
 		this.ctl.ui.update({
-			menuTitle: this.date.isSet ? `Set time...` : 'Set date and time...'
+			menuTitle: 'Set date and time...'
 		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
@@ -629,11 +644,20 @@ class SetDateTime implements AppObject {
 			}),
 			stdMenuItem({
 				id: 'set-time',
-				textContent: 'Set time...',
+				textContent: this.time.isSet
+					? `Time: ${this.time.hour.toString().padStart(2, '0')}:${this.time.minute.toString().padStart(2, '0')}...`
+					: 'Set time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					console.log('set time');
+					this.ctl.app.push(
+						this.createSetTime(() => {
+							this.ctl.app.runInline(() => {
+								this.run();
+								this.ctl.app.runInline(() => this.ctl.menu.focusNextMenuItem());
+							});
+						})
+					);
 				}
 			})
 		]);
@@ -744,5 +768,50 @@ class SetDate implements AppObject {
 			this.ctl.menu.setMenuItemFocus(0, true);
 		}
 		this.ctl.input.setPlaceholder('Select or type in a day...');
+	}
+}
+
+class SetTime implements AppObject {
+	static create(ctl: Controller, onFinish: (time: { hour: number; minute: number }) => void) {
+		return new SetTime(ctl, onFinish);
+	}
+
+	constructor(
+		private ctl: Controller,
+		private onFinish: (time: { hour: number; minute: number }) => void
+	) {}
+
+	run() {
+		this.ctl.ui.update({
+			menuTitle: 'Set time...'
+		});
+		const menuItems: MenuItem[] = [];
+		let currentTimeIndex = 0;
+		let menuItemIndex = -1;
+		// Iterate over 15 minute intervals from midnight to next 11:45pm
+		for (let minute = 0; minute < 23 * 60 + 45; minute += 15) {
+			const hour = Math.floor(minute / 60);
+			const paddedHour = hour.toString().padStart(2, '0');
+			const paddedMinute = (minute % 60).toString().padStart(2, '0');
+			menuItemIndex++;
+			const diff = (minute % 60) - new Date().getMinutes();
+			if (hour === new Date().getHours() && diff < 7.5 && diff > -7.5) {
+				currentTimeIndex = menuItemIndex;
+				console.log(minute, minute % 60, new Date().getMinutes(), diff);
+				console.log(hour, new Date().getHours());
+			}
+			menuItems.push(
+				stdMenuItem({
+					id: `set-time-${minute}`,
+					textContent: `${paddedHour}:${paddedMinute}`,
+					action: () => {
+						this.onFinish({ hour: Math.floor(minute / 60), minute: minute % 60 });
+					}
+				})
+			);
+		}
+		this.ctl.menu.setMenuItems(menuItems);
+		this.ctl.menu.setMenuItemFocus(Math.max(currentTimeIndex, 0), true);
+		this.ctl.input.setPlaceholder('Select or type in a time...');
 	}
 }

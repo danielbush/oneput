@@ -53,20 +53,17 @@ export class UIController {
 		settings: UILayoutSettings,
 		additional?: A
 	) {
-		const flags = this.calcLayoutFlags(settings);
+		const flags: UILayoutSettings = this.calcLayoutFlags(settings);
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
 		this.ctl.keys._enableKeys(flags.enableKeys);
 		this.ctl.menu._enableMenuActions(flags.enableMenuActions);
 		this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn);
 		this.ctl.input._enableInputElement(flags.enableInputElement);
-		this.layout?.configure(
-			{
-				menuTitle: settings.menuTitle,
-				...flags
-			},
-			additional
-		);
+		if (settings.menuTitle) {
+			flags['menuTitle'] = settings.menuTitle;
+		}
+		this.layout?.configure(flags, additional);
 		this.ctl.currentProps.inputUI = this.layout?.inputUI;
 		this.ctl.currentProps.menuUI = this.layout?.menuUI;
 		this.ctl.currentProps.innerUI = this.layout?.innerUI;

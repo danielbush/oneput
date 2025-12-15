@@ -68,7 +68,7 @@ export class Layout implements UILayout {
 
 	configure(values: UILayoutSettings, additional: LayoutSettings) {
 		this.values = {
-			menuTitle: 'Menu',
+			menuTitle: this.values.menuTitle || 'Menu',
 			...values
 		};
 		this.additional = {

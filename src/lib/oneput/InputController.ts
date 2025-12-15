@@ -152,7 +152,7 @@ export class InputController {
 		// (1) we are doing "submit once" logic
 		// (2) the submit handler has not changed
 		//
-		if (this.submitOnce === currHandler) {
+		if (currHandler && this.submitOnce === currHandler) {
 			this.submitHandler = undefined;
 			this.submitOnce = undefined;
 		}
@@ -160,5 +160,6 @@ export class InputController {
 
 	resetSubmitHandler() {
 		this.submitHandler = undefined;
+		this.submitOnce = undefined;
 	}
 }

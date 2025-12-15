@@ -696,10 +696,15 @@ class SetDate implements AppObject {
 		private onFinish: (date: { year: number; month: number; jsmonth: number; day: number }) => void
 	) {}
 
+	private unwindStackToParent?: () => void;
+
 	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Set date...'
 		});
+		// When we call restore it will unwind any pushes / pops and pushes made
+		// and render the parent app.
+		this.unwindStackToParent = this.ctl.app.setUnwindPointToParent();
 		this.setYear();
 	}
 
@@ -766,7 +771,7 @@ class SetDate implements AppObject {
 					textContent: `${ordinal(day)}`,
 					action: () => {
 						this.onFinish({ year, month: jsmonth + 1, jsmonth, day });
-						// It's up to the callback to update the ui...
+						this.unwindStackToParent?.();
 					}
 				})
 			);
@@ -796,6 +801,7 @@ class SetTime implements AppObject {
 		this.unsubscribeMenuItemFocus?.();
 	};
 
+	private unwindStackToParent?: () => void;
 	private menuItems: MenuItem[] = [];
 
 	constructor(
@@ -812,6 +818,7 @@ class SetTime implements AppObject {
 					textContent: t,
 					action: () => {
 						this.onFinish({ hour, minute: minute % 60 });
+						this.unwindStackToParent?.();
 					},
 					data: {
 						hour,
@@ -823,6 +830,7 @@ class SetTime implements AppObject {
 	}
 
 	run() {
+		this.unwindStackToParent = this.ctl.app.setUnwindPointToParent();
 		this.unsubscribeMenuItemFocus?.();
 		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
 			const item = this.menuItems[index];
@@ -836,6 +844,7 @@ class SetTime implements AppObject {
 		this.ctl.input.setSubmitHandler((time) => {
 			const [hour, minute] = time.split(':');
 			this.onFinish({ hour: parseInt(hour), minute: parseInt(minute) });
+			this.unwindStackToParent?.();
 		});
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();

@@ -788,17 +788,17 @@ class SetTime implements AppObject {
 		const menuItems: MenuItem[] = [];
 		let currentTimeIndex = 0;
 		let menuItemIndex = -1;
+		const currentHour = new Date().getHours();
+		const currentMinute = new Date().getMinutes();
 		// Iterate over 15 minute intervals from midnight to next 11:45pm
 		for (let minute = 0; minute < 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
 			const paddedHour = hour.toString().padStart(2, '0');
 			const paddedMinute = (minute % 60).toString().padStart(2, '0');
 			menuItemIndex++;
-			const diff = (minute % 60) - new Date().getMinutes();
-			if (hour === new Date().getHours() && diff < 7.5 && diff > -7.5) {
+			const diff = currentMinute - (minute % 60);
+			if (hour === currentHour && diff >= 0) {
 				currentTimeIndex = menuItemIndex;
-				console.log(minute, minute % 60, new Date().getMinutes(), diff);
-				console.log(hour, new Date().getHours());
 			}
 			menuItems.push(
 				stdMenuItem({

@@ -628,7 +628,7 @@ class SetDateTime implements AppObject {
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'set-date',
-				textContent: this.date.isSet ? `Date: ${dateString}...` : 'Set date...',
+				textContent: this.date.isSet ? `Date: ${dateString}` : 'Set date...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
@@ -645,7 +645,7 @@ class SetDateTime implements AppObject {
 			stdMenuItem({
 				id: 'set-time',
 				textContent: this.time.isSet
-					? `Time: ${this.time.hour.toString().padStart(2, '0')}:${this.time.minute.toString().padStart(2, '0')}...`
+					? `Time: ${this.time.hour.toString().padStart(2, '0')}:${this.time.minute.toString().padStart(2, '0')}`
 					: 'Set time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
@@ -821,6 +821,10 @@ class SetTime implements AppObject {
 	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Set time...'
+		});
+		this.ctl.input.setSubmitHandler((time) => {
+			const [hour, minute] = time.split(':');
+			this.onFinish({ hour: parseInt(hour), minute: parseInt(minute) });
 		});
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();

@@ -22,14 +22,16 @@ export class TomatoTimer implements AppObject {
 		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
 			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
 		});
-		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, submitPlaceholder);
+		const addEntryUI = AddEntryUI.create(ctl, {} as Partial<FinishedSession>);
+		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, submitPlaceholder, addEntryUI);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private store: Store,
 		private timerDisplay: SveltePropInjector,
-		private submitPlaceholder: SubmitPlaceholder
+		private submitPlaceholder: SubmitPlaceholder,
+		private addEntryUI: AddEntryUI
 	) {}
 
 	beforeExit = () => {
@@ -125,11 +127,7 @@ export class TomatoTimer implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
 					this.currentUI = 'addEntryUI';
-					this.ctl.app.push(
-						AddEntryUI.create(this.ctl, {
-							session: {} as Partial<FinishedSession>
-						})
-					);
+					this.ctl.app.push(this.addEntryUI);
 				}
 			}),
 			stdMenuItem({
@@ -428,16 +426,11 @@ export class TomatoTimer implements AppObject {
 }
 
 class AddEntryUI implements AppObject {
-	static create(
-		ctl: Controller,
-		values: {
-			session: Partial<FinishedSession>;
-		}
-	) {
+	static create(ctl: Controller, session: Partial<FinishedSession>) {
 		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
 			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
 		});
-		return new AddEntryUI(ctl, values.session, submitPlaceholder);
+		return new AddEntryUI(ctl, session, submitPlaceholder);
 	}
 
 	private unsubscribeInputChange?: () => void;

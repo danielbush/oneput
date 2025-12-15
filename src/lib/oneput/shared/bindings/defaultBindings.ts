@@ -71,6 +71,11 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
 		bindings: ['Enter'],
 		description: 'Do action'
 	},
+	submit: {
+		bindings: ['$mod+Enter'],
+		description: 'Submit input'
+	},
+	// NOTE: reserve 'Shift+Enter' for newlines in text area input.
 	back: {
 		bindings: ['Meta+B'],
 		description: 'Back'
@@ -94,10 +99,6 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
 	globalFilter: {
 		bindings: ['$mod+e'],
 		description: 'Global filter'
-	},
-	submit: {
-		bindings: ['Shift+Enter'],
-		description: 'Submit input'
 	}
 };
 

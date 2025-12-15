@@ -576,10 +576,14 @@ class AddEntryUI implements AppObject {
 
 class SetDateTime implements AppObject {
 	static create(ctl: Controller) {
-		return new SetDateTime(ctl);
+		const setDate = SetDate.create(ctl);
+		return new SetDateTime(ctl, setDate);
 	}
 
-	constructor(private ctl: Controller) {}
+	constructor(
+		private ctl: Controller,
+		private setDate: SetDate
+	) {}
 
 	run() {
 		this.ctl.ui.update({
@@ -592,7 +596,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(SetDate.create(this.ctl));
+					this.ctl.app.push(this.setDate);
 				}
 			}),
 			stdMenuItem({

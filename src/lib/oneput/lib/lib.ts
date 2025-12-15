@@ -74,7 +74,7 @@ export type FlexParams = {
 	onMount?: (node: HTMLElement) => void | (() => void);
 };
 
-export type MenuItem = FlexParams & {
+export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>> = FlexParams & {
 	/**
 	 * Instructs Oneput renderer to add a pointerdown handler to run this action
 	 * on top-level menu items.
@@ -88,6 +88,11 @@ export type MenuItem = FlexParams & {
 	 * Primary css class.  Defaults to oneput__menu-item.
 	 */
 	class?: string;
+	/**
+	 * Intended to store temporary data when displaying and processing menu
+	 * items in AppObjects.
+	 */
+	data?: D;
 };
 
 export type MenuItemDivider = FlexParams & {

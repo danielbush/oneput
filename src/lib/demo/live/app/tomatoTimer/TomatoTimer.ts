@@ -795,18 +795,23 @@ class SetTime implements AppObject {
 		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
 			const item = this.menuItems[index];
 			this.ctl.input.focusInput();
-			this.ctl.input.setInputValue(item.id);
+			const { hour, minute } = item.data as { hour: number; minute: number };
+			this.ctl.input.setInputValue(formatTime(hour, minute));
 		});
 		this.menuItems = [];
-		for (let minute = 0; minute < 23 * 60 + 45; minute += 15) {
+		for (let minute = 0; minute <= 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
 			const t = formatTime(hour, minute % 60);
 			this.menuItems.push(
 				stdMenuItem({
-					id: t,
+					id: `set-time-${minute}`,
 					textContent: t,
 					action: () => {
-						this.onFinish({ hour: Math.floor(minute / 60), minute: minute % 60 });
+						this.onFinish({ hour, minute: minute % 60 });
+					},
+					data: {
+						hour,
+						minute: minute % 60
 					}
 				})
 			);
@@ -822,10 +827,9 @@ class SetTime implements AppObject {
 		this.ctl.menu.setMenuItems(this.menuItems);
 		this.ctl.menu.setMenuItemFocus(
 			this.menuItems.findIndex((item) => {
-				const [hour, minute] = item.id.split(':');
-				if (hour === currentHour.toString()) {
-					const m = parseInt(minute);
-					return currentMinute - m >= 0;
+				const { hour, minute } = item.data as { hour: number; minute: number };
+				if (hour === currentHour) {
+					return currentMinute - minute < 15;
 				}
 			}) || 0,
 			true

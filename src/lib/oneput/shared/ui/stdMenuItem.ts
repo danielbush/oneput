@@ -5,7 +5,7 @@ import { randomId, type FlexChildren, type MenuItem } from '../../lib/lib.js';
  * If action is specified, tag will be set to button.
  * If tag is set to button, type="button" will be set.
  */
-export type StdMenuItemParams = {
+export type StdMenuItemParams<D extends Record<string, unknown> = Record<string, unknown>> = {
 	tag?: string;
 	attr?: Record<string, string | boolean | ((event: Event) => void)>;
 	id?: string;
@@ -22,6 +22,7 @@ export type StdMenuItemParams = {
 		htmlContentUnsafe?: string;
 		textContent?: string;
 	};
+	data?: D;
 };
 
 /**

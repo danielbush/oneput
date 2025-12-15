@@ -580,35 +580,51 @@ class SetDateTime implements AppObject {
 			year: new Date().getFullYear(),
 			month: new Date().getMonth() + 1,
 			jsmonth: new Date().getMonth(),
-			day: new Date().getDate()
+			day: new Date().getDate(),
+			isSet: false
 		};
-		const setDate = SetDate.create(ctl, ({ year, month, jsmonth, day }) => {
-			date.year = year;
-			date.month = month;
-			date.jsmonth = jsmonth;
-			date.day = day;
-			console.log('date', date, 'now we need to update the ui and get the user to set the time');
-		});
-		return new SetDateTime(ctl, setDate);
+		const createSetDate = (onUpdate: () => void) => {
+			return SetDate.create(ctl, ({ year, month, jsmonth, day }) => {
+				date.year = year;
+				date.month = month;
+				date.jsmonth = jsmonth;
+				date.day = day;
+				date.isSet = true;
+				onUpdate();
+			});
+		};
+		return new SetDateTime(ctl, date, createSetDate);
 	}
 
 	constructor(
 		private ctl: Controller,
-		private setDate: SetDate
+		private date: { year: number; month: number; jsmonth: number; day: number; isSet: boolean },
+		private createSetDate: (onUpdate: () => void) => SetDate
 	) {}
 
 	run() {
+		const dateString = new Date(this.date.year, this.date.month - 1, this.date.day).toLocaleString(
+			'default',
+			{ year: 'numeric', month: 'long', day: 'numeric' }
+		);
 		this.ctl.ui.update({
-			menuTitle: 'Set date and time...'
+			menuTitle: this.date.isSet ? `Set time...` : 'Set date and time...'
 		});
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'set-date',
-				textContent: 'Set date...',
+				textContent: this.date.isSet ? `Date: ${dateString}...` : 'Set date...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(this.setDate);
+					this.ctl.app.push(
+						this.createSetDate(() => {
+							this.ctl.app.runInline(() => {
+								this.run();
+								this.ctl.menu.focusNextMenuItem();
+							});
+						})
+					);
 				}
 			}),
 			stdMenuItem({

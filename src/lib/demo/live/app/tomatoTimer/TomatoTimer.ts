@@ -839,11 +839,17 @@ class SetTime implements AppObject {
 			this.ctl.input.setInputValue(formatTime(hour, minute));
 		});
 		this.ctl.ui.update({
-			menuTitle: 'Set time...'
+			menuTitle: 'Select a time or type in HH:MM...'
 		});
 		this.ctl.input.setSubmitHandler((time) => {
 			const [hour, minute] = time.split(':');
-			this.onFinish({ hour: parseInt(hour), minute: parseInt(minute) });
+			const parsedHour = parseInt(hour);
+			const parsedMinute = parseInt(minute);
+			if (isNaN(parsedHour) || isNaN(parsedMinute)) {
+				this.ctl.notify('Could not parse a number for hour or minute', { duration: 3000 });
+				return;
+			}
+			this.onFinish({ hour: parsedHour, minute: parsedMinute });
 			this.unwindStackToParent?.();
 		});
 		const currentHour = new Date().getHours();

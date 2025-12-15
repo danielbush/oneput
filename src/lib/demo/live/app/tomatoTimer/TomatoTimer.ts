@@ -722,6 +722,14 @@ class SetDate implements AppObject {
 		this.ctl.menu.setMenuItemFocus(5, true);
 		this.ctl.input.setPlaceholder('Select or type in a year...');
 		this.ctl.input.setInputValue(currentYear.toString());
+		this.ctl.input.setSubmitHandler((year) => {
+			const parsedYear = parseInt(year);
+			if (isNaN(parsedYear)) {
+				this.ctl.notify('Could not parse a number for year', { duration: 3000 });
+				return;
+			}
+			this.ctl.app.pushInline(() => this.setMonth(parsedYear));
+		});
 	}
 
 	private setMonth(year: number) {

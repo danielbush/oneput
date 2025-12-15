@@ -442,7 +442,20 @@ class AddEntryUI implements AppObject {
 		private session: Partial<FinishedSession>,
 		private submitPlaceholder: SubmitPlaceholder,
 		private setDateTime: SetDateTime
-	) {
+	) {}
+
+	beforeExit = () => {
+		this.unsubscribeInputChange?.();
+		this.unsubscribeMenuItemFocus?.();
+	};
+
+	run() {
+		this.ctl.ui.update({
+			menuTitle: 'Add entry...'
+		});
+		this.ctl.menu.clearMenuItemsFn();
+		this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'first' });
+		this.unsubscribeMenuItemFocus?.();
 		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
 			const item = this.menuItems[index];
 			this.unsubscribeInputChange?.();
@@ -505,19 +518,8 @@ class AddEntryUI implements AppObject {
 					break;
 			}
 		});
-	}
-
-	beforeExit = () => {
-		this.unsubscribeInputChange?.();
-		this.unsubscribeMenuItemFocus?.();
-	};
-
-	run() {
-		this.ctl.ui.update({
-			menuTitle: 'Add entry...'
-		});
-		this.ctl.menu.clearMenuItemsFn();
-		this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'first' });
+		// IMPORTANT: This triggers men-item-focus handler above and puts us into edit mode.
+		this.ctl.menu.focusFirstMenuItem();
 	}
 
 	get menuItems() {
@@ -792,12 +794,6 @@ class SetTime implements AppObject {
 		private ctl: Controller,
 		private onFinish: (time: { hour: number; minute: number }) => void
 	) {
-		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
-			const item = this.menuItems[index];
-			this.ctl.input.focusInput();
-			const { hour, minute } = item.data as { hour: number; minute: number };
-			this.ctl.input.setInputValue(formatTime(hour, minute));
-		});
 		this.menuItems = [];
 		for (let minute = 0; minute <= 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
@@ -819,6 +815,13 @@ class SetTime implements AppObject {
 	}
 
 	run() {
+		this.unsubscribeMenuItemFocus?.();
+		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
+			const item = this.menuItems[index];
+			this.ctl.input.focusInput();
+			const { hour, minute } = item.data as { hour: number; minute: number };
+			this.ctl.input.setInputValue(formatTime(hour, minute));
+		});
 		this.ctl.ui.update({
 			menuTitle: 'Set time...'
 		});

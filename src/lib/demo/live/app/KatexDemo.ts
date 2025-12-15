@@ -29,8 +29,11 @@ export class KatexDemo {
 		private ctl: Controller,
 		private submitPlaceholder: SubmitPlaceholder,
 		private previewDisplayMode: boolean = false
-	) {
-		this.unsubscribeBindingsChange = ctl.events.on('bindings-change', ({ isLocal }) => {
+	) {}
+
+	run() {
+		this.unsubscribeBindingsChange?.();
+		this.unsubscribeBindingsChange = this.ctl.events.on('bindings-change', ({ isLocal }) => {
 			if (!isLocal) {
 				return;
 			}
@@ -41,9 +44,6 @@ export class KatexDemo {
 				: 'Type some katex...';
 			this.renderUI();
 		});
-	}
-
-	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Katex Demo',
 			enableMenuOpenClose: false

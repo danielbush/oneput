@@ -771,47 +771,65 @@ class SetDate implements AppObject {
 	}
 }
 
+function formatTime(hour: number, minute: number): string {
+	return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+}
+
 class SetTime implements AppObject {
 	static create(ctl: Controller, onFinish: (time: { hour: number; minute: number }) => void) {
 		return new SetTime(ctl, onFinish);
 	}
 
+	private unsubscribeMenuItemFocus?: () => void;
+
+	beforeExit = () => {
+		this.unsubscribeMenuItemFocus?.();
+	};
+
+	private menuItems: MenuItem[] = [];
+
 	constructor(
 		private ctl: Controller,
 		private onFinish: (time: { hour: number; minute: number }) => void
-	) {}
-
-	run() {
-		this.ctl.ui.update({
-			menuTitle: 'Set time...'
+	) {
+		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
+			const item = this.menuItems[index];
+			this.ctl.input.focusInput();
+			this.ctl.input.setInputValue(item.id);
 		});
-		const menuItems: MenuItem[] = [];
-		let currentTimeIndex = 0;
-		let menuItemIndex = -1;
-		const currentHour = new Date().getHours();
-		const currentMinute = new Date().getMinutes();
-		// Iterate over 15 minute intervals from midnight to next 11:45pm
+		this.menuItems = [];
 		for (let minute = 0; minute < 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
-			const paddedHour = hour.toString().padStart(2, '0');
-			const paddedMinute = (minute % 60).toString().padStart(2, '0');
-			menuItemIndex++;
-			const diff = currentMinute - (minute % 60);
-			if (hour === currentHour && diff >= 0) {
-				currentTimeIndex = menuItemIndex;
-			}
-			menuItems.push(
+			const t = formatTime(hour, minute % 60);
+			this.menuItems.push(
 				stdMenuItem({
-					id: `set-time-${minute}`,
-					textContent: `${paddedHour}:${paddedMinute}`,
+					id: t,
+					textContent: t,
 					action: () => {
 						this.onFinish({ hour: Math.floor(minute / 60), minute: minute % 60 });
 					}
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems(menuItems);
-		this.ctl.menu.setMenuItemFocus(Math.max(currentTimeIndex, 0), true);
+	}
+
+	run() {
+		this.ctl.ui.update({
+			menuTitle: 'Set time...'
+		});
+		const currentHour = new Date().getHours();
+		const currentMinute = new Date().getMinutes();
+		this.ctl.menu.setMenuItems(this.menuItems);
+		this.ctl.menu.setMenuItemFocus(
+			this.menuItems.findIndex((item) => {
+				const [hour, minute] = item.id.split(':');
+				if (hour === currentHour.toString()) {
+					const m = parseInt(minute);
+					return currentMinute - m >= 0;
+				}
+			}) || 0,
+			true
+		);
 		this.ctl.input.setPlaceholder('Select or type in a time...');
 	}
 }

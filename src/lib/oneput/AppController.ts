@@ -139,6 +139,7 @@ export class AppController {
 			app = this.appParents.pop()
 		) {
 			if (app === parent) {
+				this.currentApp = app;
 				break;
 			}
 			app.beforeExit?.();

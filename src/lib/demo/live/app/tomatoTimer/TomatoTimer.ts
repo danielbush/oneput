@@ -14,24 +14,26 @@ import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
 import { formatSecondsToHHMMSS } from './utils.js';
-import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
 import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
+import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
 		const timerDisplay: SveltePropInjector = SveltePropInjector.create();
-		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
-			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
+		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) => {
+			return params.submitBinding
+				? `Hit ${params.submitBinding} to submit...`
+				: 'Enter value and submit...';
 		});
 		const addEntryUI = AddEntryUI.create(ctl, {} as Partial<FinishedSession>);
-		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, submitPlaceholder, addEntryUI);
+		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, dynamicPlaceholder, addEntryUI);
 	}
 
 	constructor(
 		private ctl: Controller,
 		private store: Store,
 		private timerDisplay: SveltePropInjector,
-		private submitPlaceholder: SubmitPlaceholder,
+		private dynamicPlaceholder: DynamicPlaceholder,
 		private addEntryUI: AddEntryUI
 	) {}
 
@@ -141,8 +143,10 @@ export class TomatoTimer implements AppObject {
 				}
 			})
 		]);
-		this.submitPlaceholder.setPlaceholder((binding) => {
-			return binding ? `Enter time in minutes and hit ${binding}...` : 'Enter value and submit...';
+		this.dynamicPlaceholder.setPlaceholder((params) => {
+			return params.submitBinding
+				? `Enter time in minutes and hit ${params.submitBinding}...`
+				: 'Enter value and submit...';
 		});
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
 			this.ctl.app.runInline(() => this.createTimerUI({ duration: parseFloat(duration) * 60 }));
@@ -154,8 +158,10 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
-		this.submitPlaceholder.setPlaceholder((binding) => {
-			return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
+		this.dynamicPlaceholder.setPlaceholder((params) => {
+			return params.submitBinding
+				? `Enter a label and hit ${params.submitBinding}...`
+				: 'Enter value and submit...';
 		});
 
 		const startTimer = (label?: string) => {
@@ -381,8 +387,10 @@ export class TomatoTimer implements AppObject {
 				textContent: 'Edit label...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
 				action: () => {
-					this.submitPlaceholder.setPlaceholder((binding) => {
-						return binding ? `Enter a label and hit ${binding}...` : 'Enter value and submit...';
+					this.dynamicPlaceholder.setPlaceholder((params) => {
+						return params.submitBinding
+							? `Enter a label and hit ${params.submitBinding}...`
+							: 'Enter value and submit...';
 					});
 					this.ctl.input.setSubmitHandlerOnce((label) => {
 						const newSession = { ...session, label };
@@ -428,11 +436,13 @@ export class TomatoTimer implements AppObject {
 
 class AddEntryUI implements AppObject {
 	static create(ctl: Controller, session: Partial<FinishedSession>) {
-		const submitPlaceholder = SubmitPlaceholder.create(ctl, (binding) => {
-			return binding ? `Hit ${binding} to submit...` : 'Enter value and submit...';
+		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) => {
+			return params.submitBinding
+				? `Hit ${params.submitBinding} to submit...`
+				: 'Enter value and submit...';
 		});
 		const setDateTime = SetDateTime.create(ctl);
-		return new AddEntryUI(ctl, session, submitPlaceholder, setDateTime);
+		return new AddEntryUI(ctl, session, dynamicPlaceholder, setDateTime);
 	}
 
 	private unsubscribeInputChange?: () => void;
@@ -441,7 +451,7 @@ class AddEntryUI implements AppObject {
 	constructor(
 		private ctl: Controller,
 		private session: Partial<FinishedSession>,
-		private submitPlaceholder: SubmitPlaceholder,
+		private dynamicPlaceholder: DynamicPlaceholder,
 		private setDateTime: SetDateTime
 	) {}
 
@@ -470,8 +480,10 @@ class AddEntryUI implements AppObject {
 			this.ctl.ui.update({ enableInputElement: true });
 			switch (item.id) {
 				case 'add-label':
-					this.submitPlaceholder.setPlaceholder((binding) => {
-						return binding ? `Enter a label and hit ${binding}...` : 'Enter label and submit...';
+					this.dynamicPlaceholder.setPlaceholder((params) => {
+						return params.submitBinding
+							? `Enter a label and hit ${params.submitBinding}...`
+							: 'Enter label and submit...';
 					});
 					this.ctl.input.setInputValue(this.session.label ?? '');
 					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
@@ -487,8 +499,10 @@ class AddEntryUI implements AppObject {
 						} satisfies OneputProps['inputUI'];
 					});
 					this.ctl.input.setInputValue(this.session.note ?? '');
-					this.submitPlaceholder.setPlaceholder((binding) => {
-						return binding ? `Enter a note and hit ${binding}...` : 'Enter label and submit...';
+					this.dynamicPlaceholder.setPlaceholder((params) => {
+						return params.submitBinding
+							? `Enter a note and hit ${params.submitBinding}...`
+							: 'Enter label and submit...';
 					});
 					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 						this.session.note = value;
@@ -496,9 +510,9 @@ class AddEntryUI implements AppObject {
 					});
 					break;
 				case 'add-duration':
-					this.submitPlaceholder.setPlaceholder((binding) => {
-						return binding
-							? `Enter a duration in minutes and hit ${binding}...`
+					this.dynamicPlaceholder.setPlaceholder((params) => {
+						return params.submitBinding
+							? `Enter a duration in minutes and hit ${params.submitBinding}...`
 							: 'Enter duration in minutes and submit...';
 					});
 					this.ctl.input.setInputValue(this.session.duration?.toString() ?? '');

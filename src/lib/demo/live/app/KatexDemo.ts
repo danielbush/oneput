@@ -4,15 +4,19 @@ import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
-import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/infoMenuItem.js';
 import type { OneputProps } from '$lib/oneput/lib/lib.js';
+import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 
 export class KatexDemo {
 	static create(ctl: Controller) {
 		return new KatexDemo(
 			ctl,
-			SubmitPlaceholder.create(ctl, (binding) => `Type some katex and hit ${binding}...`)
+			DynamicPlaceholder.create(ctl, (params) =>
+				params.submitBinding
+					? `Type some katex and hit ${params.submitBinding}...`
+					: 'Type some katex...'
+			)
 		);
 	}
 
@@ -27,7 +31,7 @@ export class KatexDemo {
 
 	constructor(
 		private ctl: Controller,
-		private submitPlaceholder: SubmitPlaceholder,
+		private dynamicPlaceholder: DynamicPlaceholder,
 		private previewDisplayMode: boolean = false
 	) {}
 
@@ -48,7 +52,7 @@ export class KatexDemo {
 			menuTitle: 'Katex Demo',
 			enableMenuOpenClose: false
 		});
-		this.ctl.input.setPlaceholder(this.submitPlaceholder);
+		this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
 		this.ctl.input.focusInput();
 		this.ctl.menu.setMenuItemsFn(() => {
 			this.renderUI();

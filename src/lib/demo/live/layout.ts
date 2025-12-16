@@ -12,9 +12,9 @@ import { arrowLeftIcon, chevronDown, xIcon } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
 import { TimeDisplay } from '$lib/oneput/shared/components/TimeDisplay.js';
-import { MenuPlaceholder } from '$lib/oneput/shared/placeholders/MenuPlaceholder.js';
 import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
+import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 
 export type LayoutSettings = {
 	/**
@@ -29,7 +29,14 @@ export type LayoutSettings = {
 export class Layout implements UILayout {
 	static create(ctl: Controller, values: UILayoutSettings = {}) {
 		const bindingService = LocalBindingsService.create(ctl);
-		return new Layout(ctl, values, {}, bindingService);
+		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
+			params.menuOpenBinding
+				? params.isMenuOpen
+					? `Close menu with ${params.menuOpenBinding}...`
+					: `Open menu with ${params.menuOpenBinding}...`
+				: 'Type here...'
+		);
+		return new Layout(ctl, values, {}, dynamicPlaceholder, bindingService);
 	}
 
 	defaultPlaceholder?: DynamicPlaceholderBase;
@@ -38,6 +45,7 @@ export class Layout implements UILayout {
 		private ctl: Controller,
 		private values: UILayoutSettings = {},
 		private additional: LayoutSettings = {},
+		private dynamicPlaceholder: DynamicPlaceholder,
 		private bindingService: LocalBindingsService
 	) {
 		ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
@@ -53,16 +61,7 @@ export class Layout implements UILayout {
 			})
 			.map(() => {
 				// Wait till default bindings have been set above.
-				ctl.input.setDefaultPlaceholder(
-					MenuPlaceholder.create(ctl, (menuOpen, binding) =>
-						binding
-							? menuOpen
-								? `Close menu with ${binding}...`
-								: `Open menu with ${binding}...`
-							: 'Type here...'
-					),
-					true
-				);
+				ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
 			});
 	}
 

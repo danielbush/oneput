@@ -15,6 +15,7 @@ import type { FinishedSessionRecord } from './idb.js';
 import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
 import { formatSecondsToHHMMSS } from './utils.js';
 import { SubmitPlaceholder } from '$lib/oneput/shared/placeholders/SubmitPlaceholder.js';
+import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
 
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
@@ -548,7 +549,9 @@ class AddEntryUI implements AppObject {
 					this.ctl.input.focusInput();
 				},
 				bottom: {
-					textContent: 'Press enter to expand the input...'
+					textContent: DynamicText.create(this.ctl).text(
+						(t) => `Press ${t.doActionBinding} to expand the input...`
+					)
 				}
 			}),
 			stdMenuItem({

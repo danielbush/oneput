@@ -1,5 +1,5 @@
 import {
-	DynamicPlaceholder,
+	DynamicPlaceholderBase,
 	type FChildParams,
 	type UILayout,
 	type UILayoutSettings,
@@ -32,7 +32,7 @@ export class Layout implements UILayout {
 		return new Layout(ctl, values, {}, bindingService);
 	}
 
-	defaultPlaceholder?: DynamicPlaceholder;
+	defaultPlaceholder?: DynamicPlaceholderBase;
 
 	constructor(
 		private ctl: Controller,

@@ -1,10 +1,10 @@
-import { DynamicPlaceholder } from '../../lib/lib.js';
+import { DynamicPlaceholderBase } from '../../lib/lib.js';
 import type { Controller } from '../../controller.js';
 
 /**
  * A placeholder that lets you show the submit binding.
  */
-export class SubmitPlaceholder extends DynamicPlaceholder {
+export class SubmitPlaceholder extends DynamicPlaceholderBase {
 	static create(ctl: Controller, msg: (submitBinding?: string) => string) {
 		return new SubmitPlaceholder(ctl, msg);
 	}

@@ -1,4 +1,4 @@
-import { DynamicPlaceholder } from './lib/lib.js';
+import { DynamicPlaceholderBase } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export class InputController {
@@ -24,7 +24,7 @@ export class InputController {
 		}, 0);
 	}
 
-	private defaultPlaceholder?: string | DynamicPlaceholder;
+	private defaultPlaceholder?: string | DynamicPlaceholderBase;
 	private inputElement: HTMLInputElement | undefined;
 
 	/**
@@ -51,7 +51,7 @@ export class InputController {
 		this.ctl.currentProps.inputValue = val || '';
 	}
 
-	setDefaultPlaceholder(msg?: string | DynamicPlaceholder, apply = false) {
+	setDefaultPlaceholder(msg?: string | DynamicPlaceholderBase, apply = false) {
 		this.defaultPlaceholder = msg;
 		if (apply) {
 			this.resetPlaceholder();
@@ -72,7 +72,7 @@ export class InputController {
 		return this.ctl.currentProps.placeholder || '';
 	}
 
-	private placeholderObject?: DynamicPlaceholder;
+	private placeholderObject?: DynamicPlaceholderBase;
 	private _setPlaceholder = (msg?: string) => {
 		this.ctl.currentProps.placeholder = msg || '';
 	};
@@ -81,12 +81,12 @@ export class InputController {
 	 * - setPlaceholder('') => empty placeholder
 	 * - setPlaceholder()   => default placeholder
 	 */
-	setPlaceholder(msg?: string | DynamicPlaceholder) {
+	setPlaceholder(msg?: string | DynamicPlaceholderBase) {
 		if (this.placeholderObject) {
 			this.placeholderObject.disable();
 			this.placeholderObject = undefined;
 		}
-		if (msg instanceof DynamicPlaceholder) {
+		if (msg instanceof DynamicPlaceholderBase) {
 			this.placeholderObject = msg;
 			this.placeholderObject.enable(this._setPlaceholder);
 			return;
@@ -95,7 +95,7 @@ export class InputController {
 			this._setPlaceholder(msg);
 			return;
 		}
-		if (this.defaultPlaceholder instanceof DynamicPlaceholder) {
+		if (this.defaultPlaceholder instanceof DynamicPlaceholderBase) {
 			this.placeholderObject = this.defaultPlaceholder;
 			this.placeholderObject.enable(this._setPlaceholder);
 			return;

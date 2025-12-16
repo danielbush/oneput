@@ -627,6 +627,7 @@ class SetDateTime implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: 'Set date and time...'
 		});
+		this.ctl.menu.clearMenuItemsFn();
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'set-date',

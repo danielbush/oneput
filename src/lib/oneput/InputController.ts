@@ -141,7 +141,8 @@ export class InputController {
 	}
 
 	runSubmitHandler() {
-		const currHandler = this.submitHandler?.(this.getInputValue());
+		const currHandler = this.submitHandler;
+		this.submitHandler?.(this.getInputValue());
 		// If setSubmitHandlerOnce or setSubmitHandler are called within the
 		// current submit handler invocation above we will end up unsetting
 		// them!

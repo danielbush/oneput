@@ -1,5 +1,5 @@
 import debounce from 'debounce';
-import { isFocusable, type MenuItemAny } from './lib/lib.js';
+import { isFocusable, type MenuItem, type MenuItemAny } from './lib/lib.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (
@@ -359,4 +359,31 @@ export class MenuController {
 	}
 
 	// #endregion
+
+	private fillHandler?: (item: MenuItem | undefined) => void;
+	private fillOnce?: typeof this.fillHandler;
+
+	setFillHandler(fn: (item: MenuItem | undefined) => void) {
+		this.fillHandler = fn;
+		this.fillOnce = undefined;
+	}
+
+	// setFillHandlerOnce(fn: (input: string) => void) {
+	// 	this.fillHandler = fn;
+	// 	this.fillOnce = fn;
+	// }
+
+	runFillHandler() {
+		const currHandler = this.fillHandler;
+		this.fillHandler?.(this.currentMenuItem);
+		if (currHandler && this.fillOnce === currHandler) {
+			this.fillHandler = undefined;
+			this.fillOnce = undefined;
+		}
+	}
+
+	resetFillHandler() {
+		this.fillHandler = undefined;
+		this.fillOnce = undefined;
+	}
 }

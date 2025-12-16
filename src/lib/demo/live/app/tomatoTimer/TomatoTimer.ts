@@ -831,15 +831,15 @@ class SetTime implements AppObject {
 
 	run() {
 		this.unwindStackToParent = this.ctl.app.setUnwindPointToParent();
-		this.unsubscribeMenuItemFocus?.();
-		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
-			const item = this.menuItems[index];
-			this.ctl.input.focusInput();
-			const { hour, minute } = item.data as { hour: number; minute: number };
+		this.ctl.menu.setFillHandler((menuItem) => {
+			if (!menuItem) {
+				return;
+			}
+			const { hour, minute } = menuItem?.data as { hour: number; minute: number };
 			this.ctl.input.setInputValue(formatTime(hour, minute));
 		});
 		this.ctl.ui.update({
-			menuTitle: 'Select a time or type in HH:MM...'
+			menuTitle: 'Set a time...'
 		});
 		this.ctl.input.setSubmitHandler((time) => {
 			const [hour, minute] = time.split(':');
@@ -864,6 +864,6 @@ class SetTime implements AppObject {
 			}) || 0,
 			true
 		);
-		this.ctl.input.setPlaceholder('Select or type in a time...');
+		this.ctl.input.setPlaceholder('Tab to fill input with a time or type in HH:MM...');
 	}
 }

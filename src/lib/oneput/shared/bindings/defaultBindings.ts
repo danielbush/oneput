@@ -42,6 +42,9 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 	globalFilter: (c) => {
 		GlobalFilter.create(c).run();
 	},
+	fill: (c) => {
+		c.menu.runFillHandler();
+	},
 	submit: (c) => {
 		c.input.runSubmitHandler();
 	}
@@ -74,6 +77,10 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
 	submit: {
 		bindings: ['$mod+Enter'],
 		description: 'Submit input'
+	},
+	fill: {
+		bindings: ['Tab'],
+		description: 'Fill input using current menu item'
 	},
 	// NOTE: reserve 'Shift+Enter' for newlines in text area input.
 	back: {

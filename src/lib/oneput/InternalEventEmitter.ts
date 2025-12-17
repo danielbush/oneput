@@ -1,4 +1,5 @@
 import type { KeyBindingMap } from './lib/bindings.js';
+import type { MenuItem } from './lib/lib.js';
 
 // Internal event system for decoupled communication
 export type InternalEvent =
@@ -21,7 +22,12 @@ export type MenuOpenChangeEvent = {
 };
 export type MenuItemFocusEvent = {
 	type: 'menu-item-focus';
-	payload: { index: number };
+	/**
+	 * We have to allow for index 0 and empty menu items.
+	 * But we require the key to exist to help type emit logic, so use "|
+	 * undefined" instead of "?".
+	 */
+	payload: { index: number; menuItem: MenuItem | undefined };
 };
 
 export class InternalEventEmitter {

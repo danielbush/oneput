@@ -19,11 +19,25 @@ export class AppController {
 		this.disableGoBack = !on;
 	}
 
+	private unsubscribeMenuItemFocus?: () => void;
+
 	/**
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {
 		// console.log(this.appParents, 'current:', this.currentApp);
+
+		// Events
+		this.unsubscribeMenuItemFocus?.();
+		if (this.currentApp?.onMenuItemFocus) {
+			this.unsubscribeMenuItemFocus = this.ctl.events.on(
+				'menu-item-focus',
+				({ index, menuItem }) => {
+					this.currentApp?.onMenuItemFocus?.({ index, menuItem });
+				}
+			);
+		}
+
 		// Re-enable stuff...
 		this.ctl.menu._enableMenuActions();
 		this.ctl.menu._enableMenuOpenClose();

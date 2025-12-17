@@ -446,7 +446,6 @@ class AddEntryUI implements AppObject {
 	}
 
 	private unsubscribeInputChange?: () => void;
-	private unsubscribeMenuItemFocus?: () => void;
 
 	constructor(
 		private ctl: Controller,
@@ -457,7 +456,76 @@ class AddEntryUI implements AppObject {
 
 	beforeExit = () => {
 		this.unsubscribeInputChange?.();
-		this.unsubscribeMenuItemFocus?.();
+	};
+
+	onMenuItemFocus = ({ menuItem }: { menuItem: MenuItem | undefined }) => {
+		const item = menuItem;
+		if (!item) {
+			return;
+		}
+		this.unsubscribeInputChange?.();
+		this.ctl.ui.setInputUI((current) => {
+			return {
+				...current,
+				textArea: false
+			} satisfies OneputProps['inputUI'];
+		});
+		this.ctl.input.focusInput();
+		this.ctl.ui.update({ enableInputElement: true });
+		switch (item.id) {
+			case 'add-label':
+				this.dynamicPlaceholder.setPlaceholder((params) => {
+					return params.submitBinding
+						? `Enter a label and hit ${params.submitBinding}...`
+						: 'Enter label and submit...';
+				});
+				this.ctl.input.setInputValue(this.session.label ?? '');
+				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+					this.session.label = value;
+					this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+				});
+				break;
+			case 'add-note':
+				this.ctl.ui.setInputUI((current) => {
+					return {
+						...current,
+						textArea: { rows: 1 }
+					} satisfies OneputProps['inputUI'];
+				});
+				this.ctl.input.setInputValue(this.session.note ?? '');
+				this.dynamicPlaceholder.setPlaceholder((params) => {
+					return params.submitBinding
+						? `Enter a note and hit ${params.submitBinding}...`
+						: 'Enter label and submit...';
+				});
+				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+					this.session.note = value;
+					this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+				});
+				break;
+			case 'add-duration':
+				this.dynamicPlaceholder.setPlaceholder((params) => {
+					return params.submitBinding
+						? `Enter a duration in minutes and hit ${params.submitBinding}...`
+						: 'Enter duration in minutes and submit...';
+				});
+				this.ctl.input.setInputValue(this.session.duration?.toString() ?? '');
+				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+					this.ctl.clearNotifications();
+					this.session.duration = value === '' ? undefined : parseInt(value);
+					if (this.session.duration !== undefined && isNaN(this.session.duration)) {
+						this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
+						return;
+					}
+					this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+				});
+				break;
+			case 'add-startTime':
+				this.ctl.input.setPlaceholder('Set start time and date...');
+				this.ctl.ui.update({ enableInputElement: false });
+				this.ctl.input.setInputValue(String(this.session.startTime ?? ''));
+				break;
+		}
 	};
 
 	run() {
@@ -466,73 +534,6 @@ class AddEntryUI implements AppObject {
 		});
 		this.ctl.menu.clearMenuItemsFn();
 		this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'first' });
-		this.unsubscribeMenuItemFocus?.();
-		this.unsubscribeMenuItemFocus = this.ctl.events.on('menu-item-focus', ({ index }) => {
-			const item = this.menuItems[index];
-			this.unsubscribeInputChange?.();
-			this.ctl.ui.setInputUI((current) => {
-				return {
-					...current,
-					textArea: false
-				} satisfies OneputProps['inputUI'];
-			});
-			this.ctl.input.focusInput();
-			this.ctl.ui.update({ enableInputElement: true });
-			switch (item.id) {
-				case 'add-label':
-					this.dynamicPlaceholder.setPlaceholder((params) => {
-						return params.submitBinding
-							? `Enter a label and hit ${params.submitBinding}...`
-							: 'Enter label and submit...';
-					});
-					this.ctl.input.setInputValue(this.session.label ?? '');
-					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-						this.session.label = value;
-						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
-					});
-					break;
-				case 'add-note':
-					this.ctl.ui.setInputUI((current) => {
-						return {
-							...current,
-							textArea: { rows: 1 }
-						} satisfies OneputProps['inputUI'];
-					});
-					this.ctl.input.setInputValue(this.session.note ?? '');
-					this.dynamicPlaceholder.setPlaceholder((params) => {
-						return params.submitBinding
-							? `Enter a note and hit ${params.submitBinding}...`
-							: 'Enter label and submit...';
-					});
-					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-						this.session.note = value;
-						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
-					});
-					break;
-				case 'add-duration':
-					this.dynamicPlaceholder.setPlaceholder((params) => {
-						return params.submitBinding
-							? `Enter a duration in minutes and hit ${params.submitBinding}...`
-							: 'Enter duration in minutes and submit...';
-					});
-					this.ctl.input.setInputValue(this.session.duration?.toString() ?? '');
-					this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-						this.ctl.clearNotifications();
-						this.session.duration = value === '' ? undefined : parseInt(value);
-						if (this.session.duration !== undefined && isNaN(this.session.duration)) {
-							this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
-							return;
-						}
-						this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
-					});
-					break;
-				case 'add-startTime':
-					this.ctl.input.setPlaceholder('Set start time and date...');
-					this.ctl.ui.update({ enableInputElement: false });
-					this.ctl.input.setInputValue(String(this.session.startTime ?? ''));
-					break;
-			}
-		});
 		// IMPORTANT: This triggers men-item-focus handler above and puts us into edit mode.
 		this.ctl.menu.focusFirstMenuItem();
 	}

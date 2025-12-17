@@ -146,6 +146,7 @@ export type AppObject = {
 	 * runInline.  To exit, use the exit callback that is passed in.
 	 */
 	onBack?: (exit: () => void) => void;
+	onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
 };
 
 export const defaultVoidElements = new Set([

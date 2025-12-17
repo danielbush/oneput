@@ -9,7 +9,17 @@ export class AppController {
 	constructor(private ctl: Controller) {}
 
 	private appParents: AppObject[] = [];
-	private currentApp: AppObject | null = null;
+	private _currentApp: AppObject | null = null;
+
+	private get currentApp() {
+		return this._currentApp;
+	}
+
+	private set currentApp(app: AppObject | null) {
+		// console.warn('currentApp is now', app);
+		this._currentApp = app;
+	}
+
 	private disableGoBack = false;
 
 	/**
@@ -25,8 +35,6 @@ export class AppController {
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {
-		// console.log(this.appParents, 'current:', this.currentApp);
-
 		// Events
 		this.unsubscribeMenuItemFocus?.();
 		if (this.currentApp?.onMenuItemFocus) {
@@ -139,6 +147,7 @@ export class AppController {
 		if (!parent) {
 			return;
 		}
+
 		for (
 			let app: AppObject | undefined | null = this.currentApp;
 			app;

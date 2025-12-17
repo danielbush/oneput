@@ -62,22 +62,11 @@ export class AppController {
 		this.currentApp?.beforeExit?.();
 	}
 
-	private replaceApp(appObject: AppObject) {
-		this.currentApp = appObject;
-	}
-
-	private pushApp(appObject: AppObject) {
-		if (this.currentApp) {
-			this.appParents.push(this.currentApp);
-		}
-		this.currentApp = appObject;
-	}
-
 	run(appObject: AppObject) {
 		this.runBeforeExit();
 		if (this.currentApp?.onBack) {
 			if (appObject.onBack) {
-				this.replaceApp(appObject);
+				this.currentApp = appObject;
 			} else {
 				// Don't replace, appObject will run but we don't track it.
 				// This allows an onBack app to run nested apps but stay in
@@ -85,9 +74,9 @@ export class AppController {
 			}
 		} else {
 			if (appObject.onBack) {
-				this.replaceApp(appObject);
+				this.currentApp = appObject;
 			} else {
-				this.replaceApp(appObject);
+				this.currentApp = appObject;
 			}
 		}
 		this.beforeRun();
@@ -100,7 +89,10 @@ export class AppController {
 
 	push(appObject: AppObject) {
 		this.runBeforeExit();
-		this.pushApp(appObject);
+		if (this.currentApp) {
+			this.appParents.push(this.currentApp);
+		}
+		this.currentApp = appObject;
 		this.beforeRun();
 		appObject.run();
 	}
@@ -111,11 +103,11 @@ export class AppController {
 
 	private pop = () => {
 		this.runBeforeExit();
-		const lastApp = this.appParents.pop();
-		if (lastApp) {
-			this.currentApp = lastApp;
+		const appObject = this.appParents.pop();
+		if (appObject) {
+			this.currentApp = appObject;
 			this.beforeRun();
-			lastApp.run();
+			appObject.run();
 			return;
 		}
 		return;

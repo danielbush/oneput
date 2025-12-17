@@ -596,46 +596,59 @@ class AddEntryUI implements AppObject {
 
 class SetDateTime implements AppObject {
 	static create(ctl: Controller) {
-		const date = {
-			year: new Date().getFullYear(),
-			month: new Date().getMonth() + 1,
-			jsmonth: new Date().getMonth(),
-			day: new Date().getDate(),
-			isSet: false
-		};
-		const time = {
-			hour: new Date().getHours(),
-			minute: new Date().getMinutes(),
-			isSet: false
-		};
-		const createSetDate = (onUpdate: () => void) => {
+		const createSetDate = (instance: SetDateTime) => {
 			return SetDate.create(ctl, ({ year, month, jsmonth, day }) => {
-				date.year = year;
-				date.month = month;
-				date.jsmonth = jsmonth;
-				date.day = day;
-				date.isSet = true;
-				onUpdate();
+				instance.updateDate({ year, month, jsmonth, day });
 			});
 		};
-		const createSetTime = (onUpdate: () => void) => {
+		const createSetTime = (instance: SetDateTime) => {
 			return SetTime.create(ctl, ({ hour, minute }) => {
-				time.hour = hour;
-				time.minute = minute;
-				time.isSet = true;
-				onUpdate();
+				instance.updateTime({ hour, minute });
 			});
 		};
-		return new SetDateTime(ctl, date, time, createSetDate, createSetTime);
+		return new SetDateTime(ctl, createSetDate, createSetTime);
 	}
+
+	private date: { year: number; month: number; jsmonth: number; day: number; isSet: boolean } = {
+		year: new Date().getFullYear(),
+		month: new Date().getMonth() + 1,
+		jsmonth: new Date().getMonth(),
+		day: new Date().getDate(),
+		isSet: false
+	};
+	private time: { hour: number; minute: number; isSet: boolean } = {
+		hour: new Date().getHours(),
+		minute: new Date().getMinutes(),
+		isSet: false
+	};
 
 	constructor(
 		private ctl: Controller,
-		private date: { year: number; month: number; jsmonth: number; day: number; isSet: boolean },
-		private time: { hour: number; minute: number; isSet: boolean },
-		private createSetDate: (onUpdate: () => void) => SetDate,
-		private createSetTime: (onUpdate: () => void) => SetTime
+		private createSetDate: (instance: SetDateTime) => SetDate,
+		private createSetTime: (instance: SetDateTime) => SetTime
 	) {}
+
+	updateDate({
+		year,
+		month,
+		jsmonth,
+		day
+	}: {
+		year: number;
+		month: number;
+		jsmonth: number;
+		day: number;
+	}) {
+		this.date = { year, month, jsmonth, day, isSet: true };
+		this.ctl.menu.focusNextMenuItem();
+		this.run();
+	}
+
+	updateTime({ hour, minute }: { hour: number; minute: number }) {
+		this.time = { hour, minute, isSet: true };
+		this.ctl.menu.focusNextMenuItem();
+		this.run();
+	}
 
 	run() {
 		const dateString = new Date(this.date.year, this.date.month - 1, this.date.day).toLocaleString(
@@ -653,14 +666,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(
-						this.createSetDate(() => {
-							this.ctl.app.runInline(() => {
-								this.run();
-								this.ctl.menu.focusNextMenuItem();
-							});
-						})
-					);
+					this.ctl.app.push(this.createSetDate(this));
 				}
 			}),
 			stdMenuItem({
@@ -671,14 +677,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(
-						this.createSetTime(() => {
-							this.ctl.app.runInline(() => {
-								this.run();
-								this.ctl.app.runInline(() => this.ctl.menu.focusNextMenuItem());
-							});
-						})
-					);
+					this.ctl.app.push(this.createSetTime(this));
 				}
 			})
 		]);

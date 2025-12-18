@@ -141,10 +141,6 @@ export type FChildParams = {
 export type AppObject = {
 	run: () => void;
 	beforeExit?: () => void;
-	/**
-	 * If you set an onBack it will override the push/pop behavior of `run` and
-	 * runInline.  To exit, use the exit callback that is passed in.
-	 */
 	onBack?: (exit: () => void) => void;
 	onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
 };

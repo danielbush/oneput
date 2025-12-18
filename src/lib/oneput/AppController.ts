@@ -98,10 +98,6 @@ export class AppController {
 		appObject.run();
 	}
 
-	runInline(run: () => void) {
-		this.run({ run });
-	}
-
 	push(appObject: AppObject) {
 		this.runBeforeExit();
 		if (this.currentApp) {
@@ -110,10 +106,6 @@ export class AppController {
 		this.currentApp = appObject;
 		this.beforeRun();
 		appObject.run();
-	}
-
-	pushInline(run: () => void) {
-		this.push({ run });
 	}
 
 	private pop = () => {

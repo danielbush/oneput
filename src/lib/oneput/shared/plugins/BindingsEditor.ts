@@ -58,10 +58,28 @@ export class BindingsEditor {
 		this.actionsUI();
 	}
 
+	onBack = (exit: () => void) => {
+		switch (this.currentUI) {
+			case 'actionUI':
+				this.actionsUI();
+				break;
+			case 'captureBindingUI':
+				this.actionUI(this.actionId!);
+				break;
+			default:
+				exit();
+		}
+	};
+
+	private currentUI = 'actionsUI';
+	private actionId?: string;
+
 	/**
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
+		this.currentUI = 'actionsUI';
+		this.ctl.app.reset();
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
 		this.ctl.ui.update({ menuTitle: title });
 		this.ctl.menu.setMenuItems(
@@ -71,7 +89,8 @@ export class BindingsEditor {
 					text: description,
 					bindings,
 					action: () => {
-						this.ctl.app.pushInline(() => this.actionUI(id));
+						this.actionId = id;
+						this.actionUI(id);
 					}
 				})
 			)
@@ -82,6 +101,8 @@ export class BindingsEditor {
 	 * UI displays bindings for a given action and lets you add/remove bindings.
 	 */
 	private actionUI = (actionId: string) => {
+		this.currentUI = 'actionUI';
+		this.ctl.app.reset();
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
 			menuTitle: `Key bindings for "${description}"`
@@ -93,7 +114,7 @@ export class BindingsEditor {
 				id: 'add-binding',
 				textContent: 'Add binding...',
 				action: () => {
-					this.ctl.app.pushInline(() => this.captureBindingUI(actionId));
+					this.captureBindingUI(actionId);
 				}
 			}),
 			...bindings.map((binding) => {
@@ -114,6 +135,8 @@ export class BindingsEditor {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
+		this.currentUI = 'captureBindingUI';
+		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: `Capturing...`,
 			enableModal: true

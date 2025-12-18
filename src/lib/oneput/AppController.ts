@@ -32,6 +32,13 @@ export class AppController {
 	private unsubscribeMenuItemFocus?: () => void;
 
 	/**
+	 * Performs resets similar to what is called before a new AppObject is run.
+	 */
+	public reset() {
+		this.beforeRun();
+	}
+
+	/**
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {

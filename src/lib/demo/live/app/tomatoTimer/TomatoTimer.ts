@@ -731,6 +731,22 @@ class SetDate implements AppObject {
 	) {}
 
 	private unwindStackToParent?: () => void;
+	private currentUI: 'setYear' | 'setMonth' | 'setDay' = 'setYear';
+	private exit?: () => void;
+	private data?: Partial<{ year: number; month: number; jsmonth: number; day: number }>;
+
+	onBack = () => {
+		switch (this.currentUI) {
+			case 'setMonth':
+				this.setYear();
+				break;
+			case 'setDay':
+				this.setMonth();
+				break;
+			default:
+				this.exit?.();
+		}
+	};
 
 	run() {
 		this.ctl.ui.update({
@@ -743,6 +759,7 @@ class SetDate implements AppObject {
 	}
 
 	private setYear() {
+		this.currentUI = 'setYear';
 		const currentYear = new Date().getFullYear();
 		const menuItems: MenuItem[] = [];
 		for (let year = currentYear - 5; year < currentYear + 5; year++) {
@@ -752,7 +769,9 @@ class SetDate implements AppObject {
 					textContent: year.toString(),
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.ctl.app.pushInline(() => this.setMonth(year));
+						this.ctl.app.reset();
+						this.data = { year };
+						this.setMonth();
 					}
 				})
 			);
@@ -767,11 +786,15 @@ class SetDate implements AppObject {
 				this.ctl.notify('Could not parse a number for year', { duration: 3000 });
 				return;
 			}
-			this.ctl.app.pushInline(() => this.setMonth(parsedYear));
+			this.ctl.app.reset();
+			this.data = { year: parsedYear };
+			this.setMonth();
 		});
 	}
 
-	private setMonth(year: number) {
+	private setMonth() {
+		const { year } = this.data as { year: number };
+		this.currentUI = 'setMonth';
 		const currentMonth = new Date().getMonth();
 		const menuItems: MenuItem[] = [];
 		for (let jsmonth = 0; jsmonth < 12; jsmonth++) {
@@ -781,7 +804,9 @@ class SetDate implements AppObject {
 					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.ctl.app.pushInline(() => this.setDay(year, jsmonth));
+						this.ctl.app.reset();
+						this.data = { year, jsmonth };
+						this.setDay();
 					}
 				})
 			);
@@ -795,7 +820,9 @@ class SetDate implements AppObject {
 		this.ctl.input.setPlaceholder('Select or type in a month...');
 	}
 
-	private setDay(year: number, jsmonth: number) {
+	private setDay() {
+		const { year, jsmonth } = this.data as { year: number; jsmonth: number };
+		this.currentUI = 'setDay';
 		const currentDay = new Date().getDate();
 		const menuItems: MenuItem[] = [];
 		for (let day = 1; day <= new Date(year, jsmonth + 1, 0).getDate(); day++) {

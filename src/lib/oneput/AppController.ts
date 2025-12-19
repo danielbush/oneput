@@ -79,27 +79,6 @@ export class AppController {
 
 	run(appObject: AppObject) {
 		this.runBeforeExit();
-		if (this.currentApp?.onBack) {
-			if (appObject.onBack) {
-				this.currentApp = appObject;
-			} else {
-				// Don't replace, appObject will run but we don't track it.
-				// This allows an onBack app to run nested apps but stay in
-				// control and handle any back actions.
-			}
-		} else {
-			if (appObject.onBack) {
-				this.currentApp = appObject;
-			} else {
-				this.currentApp = appObject;
-			}
-		}
-		this.beforeRun();
-		appObject.run();
-	}
-
-	push(appObject: AppObject) {
-		this.runBeforeExit();
 		if (this.currentApp) {
 			this.appParents.push(this.currentApp);
 		}

@@ -133,7 +133,7 @@ export class TomatoTimer implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 				action: () => {
 					this.currentUI = 'addEntryUI';
-					this.ctl.app.push(this.addEntryUI);
+					this.ctl.app.run(this.addEntryUI);
 				}
 			}),
 			stdMenuItem({
@@ -603,7 +603,7 @@ class AddEntryUI implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(this.setDateTime);
+					this.ctl.app.run(this.setDateTime);
 				}
 			})
 		];
@@ -682,7 +682,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(this.createSetDate(this));
+					this.ctl.app.run(this.createSetDate(this));
 				}
 			}),
 			stdMenuItem({
@@ -693,7 +693,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.push(this.createSetTime(this));
+					this.ctl.app.run(this.createSetTime(this));
 				}
 			})
 		]);

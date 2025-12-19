@@ -87,7 +87,7 @@ export class AppController {
 		appObject.run();
 	}
 
-	private pop = () => {
+	public pop = () => {
 		this.runBeforeExit();
 		const appObject = this.appParents.pop();
 		if (appObject) {
@@ -107,7 +107,7 @@ export class AppController {
 			return;
 		}
 		if (this.currentApp?.onBack) {
-			this.currentApp.onBack(this.pop);
+			this.currentApp.onBack();
 			return;
 		}
 		this.pop();

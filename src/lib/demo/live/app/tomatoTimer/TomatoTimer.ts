@@ -86,7 +86,7 @@ export class TomatoTimer implements AppObject {
 	 * If we start a timer, we don't want to go back to the "noTimer" ui, so we
 	 * use onBack to handle all back actions.
 	 */
-	onBack = (exit: () => void) => {
+	onBack = () => {
 		const mainUI = () => {
 			if (this.timerValue) {
 				this.timerUI(this.timerValue);
@@ -106,7 +106,7 @@ export class TomatoTimer implements AppObject {
 				this.previousSessionsUI();
 				return;
 		}
-		exit();
+		this.ctl.app.pop();
 	};
 
 	/**

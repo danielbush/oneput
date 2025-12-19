@@ -58,7 +58,7 @@ export class BindingsEditor {
 		this.actionsUI();
 	}
 
-	onBack = (exit: () => void) => {
+	onBack = () => {
 		switch (this.currentUI) {
 			case 'actionUI':
 				this.actionsUI();
@@ -67,7 +67,7 @@ export class BindingsEditor {
 				this.actionUI(this.actionId!);
 				break;
 			default:
-				exit();
+				this.ctl.app.pop();
 		}
 	};
 

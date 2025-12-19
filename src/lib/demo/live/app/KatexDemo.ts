@@ -5,10 +5,10 @@ import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/infoMenuItem.js';
-import type { OneputProps } from '$lib/oneput/lib/lib.js';
+import type { AppObject, OneputProps } from '$lib/oneput/lib/lib.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 
-export class KatexDemo {
+export class KatexDemo implements AppObject {
 	static create(ctl: Controller) {
 		return new KatexDemo(
 			ctl,

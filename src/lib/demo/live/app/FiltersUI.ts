@@ -1,9 +1,10 @@
 import type { Controller } from '$lib/oneput/controller.js';
+import type { AppObject } from '$lib/oneput/lib/lib.js';
 import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { SettingsManager } from '../service/SettingsManager.js';
 
-export class FiltersUI {
+export class FiltersUI implements AppObject {
 	static create(ctl: Controller) {
 		return new FiltersUI(ctl);
 	}

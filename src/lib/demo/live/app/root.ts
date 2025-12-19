@@ -50,6 +50,10 @@ export class RootUI {
 		private createAsyncSearchExample: () => AsyncSearchExample
 	) {}
 
+	onStart = () => {
+		this.run();
+	};
+
 	run = () => {
 		this.ctl.ui.update({
 			menuTitle: 'Home',

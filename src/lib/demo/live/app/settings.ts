@@ -47,6 +47,10 @@ export class SettingsUI {
 		private createFiltersUI: () => FiltersUI
 	) {}
 
+	onStart = () => {
+		this.run();
+	};
+
 	run = () => {
 		this.ctl.ui.update({
 			menuTitle: 'Settings'

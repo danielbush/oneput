@@ -11,6 +11,10 @@ export class FiltersUI implements AppObject {
 
 	constructor(private ctl: Controller) {}
 
+	onStart() {
+		this.run();
+	}
+
 	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Filters'

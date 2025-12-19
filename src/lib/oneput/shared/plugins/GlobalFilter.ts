@@ -12,7 +12,7 @@ export class GlobalFilter implements AppObject {
 
 	constructor(private ctl: Controller) {}
 
-	run() {
+	onStart() {
 		this.ctl.ui.update({
 			menuTitle: 'Global Filter'
 		});

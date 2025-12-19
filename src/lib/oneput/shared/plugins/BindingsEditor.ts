@@ -54,7 +54,7 @@ export class BindingsEditor implements AppObject {
 		) => ResultAsync<string, IDBError | IDBStoreError>
 	) {}
 
-	run() {
+	onStart() {
 		this.actionsUI();
 	}
 

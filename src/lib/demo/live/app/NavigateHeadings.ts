@@ -20,6 +20,10 @@ export class NavigateHeadings implements AppObject {
 		private fuzzyFilter: FuzzyFilter
 	) {}
 
+	onStart() {
+		this.run();
+	}
+
 	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Navigate Headings',

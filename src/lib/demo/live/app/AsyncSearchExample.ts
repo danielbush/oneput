@@ -21,6 +21,10 @@ export class AsyncSearchExample implements AppObject {
 		private outerRightStatus: DOMUpdater
 	) {}
 
+	onStart() {
+		this.run();
+	}
+
 	run() {
 		this.ctl.ui.update<LayoutSettings>(
 			{

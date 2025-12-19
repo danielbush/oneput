@@ -139,7 +139,7 @@ export type FChildParams = {
 };
 
 export type AppObject = {
-	run: () => void;
+	onStart: () => void;
 	beforeExit?: () => void;
 	onBack?: () => void;
 	onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;

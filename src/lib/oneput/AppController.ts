@@ -84,7 +84,7 @@ export class AppController {
 		}
 		this.currentApp = appObject;
 		this.beforeRun();
-		appObject.run();
+		appObject.onStart();
 	}
 
 	public pop = () => {
@@ -93,7 +93,7 @@ export class AppController {
 		if (appObject) {
 			this.currentApp = appObject;
 			this.beforeRun();
-			appObject.run();
+			appObject.onStart();
 			return;
 		}
 		return;

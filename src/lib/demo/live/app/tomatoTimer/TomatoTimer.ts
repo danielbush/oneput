@@ -54,6 +54,10 @@ export class TomatoTimer implements AppObject {
 		| 'addEntryUI' = 'noTimerUI';
 	private timerValue: TomatoTimerValue | null = null;
 
+	onStart() {
+		this.run();
+	}
+
 	/**
 	 * This is the entry point that loads the tomato timer ui.
 	 */
@@ -544,6 +548,10 @@ class AddEntryUI implements AppObject {
 		}
 	};
 
+	onStart() {
+		this.run();
+	}
+
 	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Add entry...'
@@ -657,12 +665,16 @@ class SetDateTime implements AppObject {
 	}) {
 		this.date = { year, month, jsmonth, day, isSet: true };
 		this.ctl.menu.focusNextMenuItem();
-		this.run();
+		this.onStart();
 	}
 
 	updateTime({ hour, minute }: { hour: number; minute: number }) {
 		this.time = { hour, minute, isSet: true };
 		this.ctl.menu.focusNextMenuItem();
+		this.onStart();
+	}
+
+	onStart() {
 		this.run();
 	}
 
@@ -747,6 +759,10 @@ class SetDate implements AppObject {
 				this.exit?.();
 		}
 	};
+
+	onStart() {
+		this.run();
+	}
 
 	run() {
 		this.ctl.ui.update({
@@ -888,6 +904,10 @@ class SetTime implements AppObject {
 				})
 			);
 		}
+	}
+
+	onStart() {
+		this.run();
 	}
 
 	run() {

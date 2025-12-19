@@ -35,6 +35,10 @@ export class KatexDemo implements AppObject {
 		private previewDisplayMode: boolean = false
 	) {}
 
+	onStart() {
+		this.run();
+	}
+
 	run() {
 		this.unsubscribeBindingsChange?.();
 		this.unsubscribeBindingsChange = this.ctl.events.on('bindings-change', ({ isLocal }) => {

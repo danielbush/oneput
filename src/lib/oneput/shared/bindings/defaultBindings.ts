@@ -40,7 +40,7 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 		c.menu.focusNextMenuItem();
 	},
 	globalFilter: (c) => {
-		GlobalFilter.create(c).run();
+		GlobalFilter.create(c).onStart();
 	},
 	fill: (c) => {
 		c.menu.runFillHandler();

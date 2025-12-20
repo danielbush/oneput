@@ -620,10 +620,8 @@ class AddEntryUI implements AppObject {
 
 class SetDateTime implements AppObject {
 	static create(ctl: Controller) {
-		const createSetDate = (instance: SetDateTime) => {
-			return SetDate.create(ctl, ({ year, month, jsmonth, day }) => {
-				instance.updateDate({ year, month, jsmonth, day });
-			});
+		const createSetDate = () => {
+			return SetDate.create(ctl);
 		};
 		const createSetTime = (instance: SetDateTime) => {
 			return SetTime.create(ctl, ({ hour, minute }) => {
@@ -652,22 +650,6 @@ class SetDateTime implements AppObject {
 		private createSetTime: (instance: SetDateTime) => SetTime
 	) {}
 
-	updateDate({
-		year,
-		month,
-		jsmonth,
-		day
-	}: {
-		year: number;
-		month: number;
-		jsmonth: number;
-		day: number;
-	}) {
-		this.date = { year, month, jsmonth, day, isSet: true };
-		this.ctl.menu.focusNextMenuItem();
-		this.onStart();
-	}
-
 	updateTime({ hour, minute }: { hour: number; minute: number }) {
 		this.time = { hour, minute, isSet: true };
 		this.ctl.menu.focusNextMenuItem();
@@ -677,6 +659,24 @@ class SetDateTime implements AppObject {
 	onStart() {
 		this.run();
 	}
+
+	onResume = (result?: { payload?: unknown }) => {
+		if (result?.payload) {
+			const { type, year, month, jsmonth, day } = result.payload as {
+				type: 'date';
+				year: number;
+				month: number;
+				jsmonth: number;
+				day: number;
+			};
+			if (type === 'date') {
+				this.date = { year, month, jsmonth, day, isSet: true };
+				this.ctl.menu.focusNextMenuItem();
+				this.run();
+			}
+			return;
+		}
+	};
 
 	run() {
 		const dateString = new Date(this.date.year, this.date.month - 1, this.date.day).toLocaleString(
@@ -730,21 +730,13 @@ function ordinal(n: number): string {
 }
 
 class SetDate implements AppObject {
-	static create(
-		ctl: Controller,
-		onFinish: (date: { year: number; month: number; jsmonth: number; day: number }) => void
-	) {
-		return new SetDate(ctl, onFinish);
+	static create(ctl: Controller) {
+		return new SetDate(ctl);
 	}
 
-	constructor(
-		private ctl: Controller,
-		private onFinish: (date: { year: number; month: number; jsmonth: number; day: number }) => void
-	) {}
+	constructor(private ctl: Controller) {}
 
-	private unwindStackToParent?: () => void;
 	private currentUI: 'setYear' | 'setMonth' | 'setDay' = 'setYear';
-	private exit?: () => void;
 	private data?: Partial<{ year: number; month: number; jsmonth: number; day: number }>;
 
 	onBack = () => {
@@ -756,7 +748,7 @@ class SetDate implements AppObject {
 				this.setMonth();
 				break;
 			default:
-				this.exit?.();
+				this.ctl.app.exit();
 		}
 	};
 
@@ -770,7 +762,6 @@ class SetDate implements AppObject {
 		});
 		// When we call restore it will unwind any pushes / pops and pushes made
 		// and render the parent app.
-		this.unwindStackToParent = this.ctl.app.setUnwindPointToParent();
 		this.setYear();
 	}
 
@@ -847,8 +838,7 @@ class SetDate implements AppObject {
 					id: `set-date-${year}-${jsmonth}-${day}`,
 					textContent: `${ordinal(day)}`,
 					action: () => {
-						this.onFinish({ year, month: jsmonth + 1, jsmonth, day });
-						this.unwindStackToParent?.();
+						this.ctl.app.exit({ type: 'date', year, month: jsmonth + 1, jsmonth, day });
 					}
 				})
 			);

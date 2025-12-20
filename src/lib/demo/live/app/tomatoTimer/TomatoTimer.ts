@@ -110,7 +110,7 @@ export class TomatoTimer implements AppObject {
 				this.previousSessionsUI();
 				return;
 		}
-		this.ctl.app.pop();
+		this.ctl.app.exit();
 	};
 
 	/**

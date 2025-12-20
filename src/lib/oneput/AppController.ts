@@ -87,7 +87,11 @@ export class AppController {
 		appObject.onStart();
 	}
 
-	public pop = () => {
+	public exit = () => {
+		this.pop();
+	};
+
+	private pop = () => {
 		this.runBeforeExit();
 		const appObject = this.appParents.pop();
 		if (appObject) {

@@ -67,7 +67,7 @@ export class BindingsEditor implements AppObject {
 				this.actionUI(this.actionId!);
 				break;
 			default:
-				this.ctl.app.pop();
+				this.ctl.app.exit();
 		}
 	};
 

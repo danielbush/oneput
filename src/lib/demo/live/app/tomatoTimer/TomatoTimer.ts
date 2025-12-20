@@ -643,18 +643,8 @@ class SetDateTime implements AppObject {
 		return new SetDateTime(ctl, createSetDate, createSetTime);
 	}
 
-	private date: { year: number; month: number; jsmonth: number; day: number; isSet: boolean } = {
-		year: new Date().getFullYear(),
-		month: new Date().getMonth() + 1,
-		jsmonth: new Date().getMonth(),
-		day: new Date().getDate(),
-		isSet: false
-	};
-	private time: { hour: number; minute: number; isSet: boolean } = {
-		hour: new Date().getHours(),
-		minute: new Date().getMinutes(),
-		isSet: false
-	};
+	private date?: { year: number; month: number; jsmonth: number; day: number; isSet: boolean };
+	private time?: { hour: number; minute: number; isSet: boolean };
 
 	constructor(
 		private ctl: Controller,
@@ -683,11 +673,21 @@ class SetDateTime implements AppObject {
 		this.run();
 	};
 
+	private get dateString() {
+		return this.date?.isSet
+			? new Date(this.date.year, this.date.month - 1, this.date.day).toLocaleString('default', {
+					year: 'numeric',
+					month: 'long',
+					day: 'numeric'
+				})
+			: '';
+	}
+
+	private get timeString() {
+		return this.time?.isSet ? formatTime(this.time.hour, this.time.minute) : '';
+	}
+
 	run() {
-		const dateString = new Date(this.date.year, this.date.month - 1, this.date.day).toLocaleString(
-			'default',
-			{ year: 'numeric', month: 'long', day: 'numeric' }
-		);
 		this.ctl.ui.update({
 			menuTitle: 'Set date and time...'
 		});
@@ -695,7 +695,7 @@ class SetDateTime implements AppObject {
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'set-date',
-				textContent: this.date.isSet ? `Date: ${dateString}` : 'Set date...',
+				textContent: this.dateString ? `Date: ${this.dateString}` : 'Set date...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
@@ -704,9 +704,7 @@ class SetDateTime implements AppObject {
 			}),
 			stdMenuItem({
 				id: 'set-time',
-				textContent: this.time.isSet
-					? `Time: ${this.time.hour.toString().padStart(2, '0')}:${this.time.minute.toString().padStart(2, '0')}`
-					: 'Set time...',
+				textContent: this.timeString ? `Time: ${this.timeString}` : 'Set time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {

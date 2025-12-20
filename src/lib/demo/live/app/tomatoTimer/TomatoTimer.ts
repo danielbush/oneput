@@ -658,8 +658,8 @@ class SetDateTime implements AppObject {
 
 	constructor(
 		private ctl: Controller,
-		private createSetDate: (instance: SetDateTime) => SetDate,
-		private createSetTime: (instance: SetDateTime) => SetTime
+		private createSetDate: () => SetDate,
+		private createSetTime: () => SetTime
 	) {}
 
 	onStart() {
@@ -698,7 +698,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.run(this.createSetDate(this));
+					this.ctl.app.run(this.createSetDate());
 				}
 			}),
 			stdMenuItem({
@@ -709,7 +709,7 @@ class SetDateTime implements AppObject {
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
-					this.ctl.app.run(this.createSetTime(this));
+					this.ctl.app.run(this.createSetTime());
 				}
 			})
 		]);

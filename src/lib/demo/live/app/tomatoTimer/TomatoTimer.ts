@@ -618,15 +618,27 @@ class AddEntryUI implements AppObject {
 	}
 }
 
+export type SetDateTimeResult =
+	| {
+			type: 'date';
+			year: number;
+			month: number;
+			jsmonth: number;
+			day: number;
+	  }
+	| {
+			type: 'time';
+			hour: number;
+			minute: number;
+	  };
+
 class SetDateTime implements AppObject {
 	static create(ctl: Controller) {
 		const createSetDate = () => {
 			return SetDate.create(ctl);
 		};
-		const createSetTime = (instance: SetDateTime) => {
-			return SetTime.create(ctl, ({ hour, minute }) => {
-				instance.updateTime({ hour, minute });
-			});
+		const createSetTime = () => {
+			return SetTime.create(ctl);
 		};
 		return new SetDateTime(ctl, createSetDate, createSetTime);
 	}
@@ -650,27 +662,19 @@ class SetDateTime implements AppObject {
 		private createSetTime: (instance: SetDateTime) => SetTime
 	) {}
 
-	updateTime({ hour, minute }: { hour: number; minute: number }) {
-		this.time = { hour, minute, isSet: true };
-		this.ctl.menu.focusNextMenuItem();
-		this.onStart();
-	}
-
 	onStart() {
 		this.run();
 	}
 
 	onResume = (result?: { payload?: unknown }) => {
 		if (result?.payload) {
-			const { type, year, month, jsmonth, day } = result.payload as {
-				type: 'date';
-				year: number;
-				month: number;
-				jsmonth: number;
-				day: number;
-			};
-			if (type === 'date') {
-				this.date = { year, month, jsmonth, day, isSet: true };
+			const payload = result.payload as SetDateTimeResult;
+			if (payload.type === 'date') {
+				this.date = { ...payload, isSet: true };
+				this.ctl.menu.focusNextMenuItem();
+				this.run();
+			} else if (payload.type === 'time') {
+				this.time = { ...payload, isSet: true };
 				this.ctl.menu.focusNextMenuItem();
 				this.run();
 			}
@@ -858,8 +862,8 @@ function formatTime(hour: number, minute: number): string {
 }
 
 class SetTime implements AppObject {
-	static create(ctl: Controller, onFinish: (time: { hour: number; minute: number }) => void) {
-		return new SetTime(ctl, onFinish);
+	static create(ctl: Controller) {
+		return new SetTime(ctl);
 	}
 
 	private unsubscribeMenuItemFocus?: () => void;
@@ -868,13 +872,9 @@ class SetTime implements AppObject {
 		this.unsubscribeMenuItemFocus?.();
 	};
 
-	private unwindStackToParent?: () => void;
 	private menuItems: MenuItem[] = [];
 
-	constructor(
-		private ctl: Controller,
-		private onFinish: (time: { hour: number; minute: number }) => void
-	) {
+	constructor(private ctl: Controller) {
 		this.menuItems = [];
 		for (let minute = 0; minute <= 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
@@ -884,8 +884,7 @@ class SetTime implements AppObject {
 					id: `set-time-${minute}`,
 					textContent: t,
 					action: () => {
-						this.onFinish({ hour, minute: minute % 60 });
-						this.unwindStackToParent?.();
+						this.ctl.app.exit({ type: 'time', hour, minute: minute % 60 });
 					},
 					data: {
 						hour,
@@ -901,7 +900,6 @@ class SetTime implements AppObject {
 	}
 
 	run() {
-		this.unwindStackToParent = this.ctl.app.setUnwindPointToParent();
 		this.ctl.menu.setFillHandler((menuItem) => {
 			if (!menuItem) {
 				return;
@@ -920,8 +918,7 @@ class SetTime implements AppObject {
 				this.ctl.notify('Could not parse a number for hour or minute', { duration: 3000 });
 				return;
 			}
-			this.onFinish({ hour: parsedHour, minute: parsedMinute });
-			this.unwindStackToParent?.();
+			this.ctl.app.exit({ type: 'time', hour: parsedHour, minute: parsedMinute });
 		});
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();

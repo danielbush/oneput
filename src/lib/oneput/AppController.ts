@@ -87,17 +87,21 @@ export class AppController {
 		appObject.onStart();
 	}
 
-	public exit = () => {
-		this.pop();
+	public exit = (payload?: unknown) => {
+		this.pop({ payload });
 	};
 
-	private pop = () => {
+	private pop = (result?: { payload: unknown }) => {
 		this.runBeforeExit();
 		const appObject = this.appParents.pop();
 		if (appObject) {
 			this.currentApp = appObject;
 			this.beforeRun();
-			appObject.onStart();
+			if (appObject.onResume) {
+				appObject.onResume?.(result);
+			} else {
+				appObject.onStart();
+			}
 			return;
 		}
 		return;

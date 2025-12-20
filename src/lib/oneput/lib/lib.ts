@@ -140,7 +140,22 @@ export type FChildParams = {
 
 export type AppObject = {
 	onStart: () => void;
+	/**
+	 * Called when a child AppObject that is run with ctl.app.run(...) calls
+	 * ctl.app.exit to return to this instance.
+	 *
+	 * The child can return a payload via ctl.app.exit({ payload }) which will be
+	 * passed to this method.
+	 *
+	 * If not implemented, onStart will be called instead.  onStart will not be
+	 * passed the result.  So you should implement onResume if you want to pass a
+	 * result back to this instance.
+	 */
+	onResume?: (result?: { payload?: unknown }) => void;
 	beforeExit?: () => void;
+	/**
+	 * Handles a user or programmatic to go back to the parent appObject that ran this instance.
+	 */
 	onBack?: () => void;
 	onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
 };

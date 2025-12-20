@@ -55,6 +55,10 @@ export class BindingsEditor implements AppObject {
 	) {}
 
 	onStart() {
+		this.run();
+	}
+
+	run() {
 		this.actionsUI();
 	}
 

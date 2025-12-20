@@ -680,6 +680,7 @@ class SetDateTime implements AppObject {
 			}
 			return;
 		}
+		this.run();
 	};
 
 	run() {

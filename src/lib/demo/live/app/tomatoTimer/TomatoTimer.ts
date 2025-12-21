@@ -873,12 +873,6 @@ class SetTime implements AppObject {
 		return new SetTime(ctl);
 	}
 
-	private unsubscribeMenuItemFocus?: () => void;
-
-	beforeExit = () => {
-		this.unsubscribeMenuItemFocus?.();
-	};
-
 	private menuItems: MenuItem[] = [];
 
 	constructor(private ctl: Controller) {

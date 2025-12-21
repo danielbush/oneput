@@ -668,7 +668,7 @@ class TimeVal {
 	}
 }
 
-class SetDateTime implements AppObject {
+class SetDateTime implements AppObject<TimeVal | DateVal> {
 	static create(ctl: Controller) {
 		const createSetDate = () => {
 			return SetDate.create(ctl);
@@ -692,7 +692,7 @@ class SetDateTime implements AppObject {
 		this.run();
 	}
 
-	onResume = (result?: { payload?: unknown }) => {
+	onResume = (result?: { payload?: TimeVal | DateVal }) => {
 		if (result?.payload) {
 			if (result.payload instanceof DateVal) {
 				this.date = result.payload;
@@ -705,7 +705,6 @@ class SetDateTime implements AppObject {
 				this.run();
 				return;
 			}
-			return;
 		}
 		this.run();
 	};

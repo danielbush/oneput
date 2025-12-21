@@ -138,7 +138,7 @@ export type FChildParams = {
 	voidElements?: Set<string | undefined>;
 };
 
-export type AppObject = {
+export type AppObject<R = unknown> = {
 	onStart: () => void;
 	/**
 	 * Called when a child AppObject that is run with ctl.app.run(...) calls
@@ -151,7 +151,7 @@ export type AppObject = {
 	 * passed the result.  So you should implement onResume if you want to pass a
 	 * result back to this instance.
 	 */
-	onResume?: (result?: { payload?: unknown }) => void;
+	onResume?: (result?: { payload?: R }) => void;
 	beforeExit?: () => void;
 	/**
 	 * Handles a user or programmatic to go back to the parent appObject that ran this instance.

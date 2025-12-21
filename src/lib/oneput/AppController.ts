@@ -77,12 +77,12 @@ export class AppController {
 		this.currentApp?.beforeExit?.();
 	}
 
-	run(appObject: AppObject) {
+	run<R = unknown>(appObject: AppObject<R>) {
 		this.runBeforeExit();
 		if (this.currentApp) {
 			this.appParents.push(this.currentApp);
 		}
-		this.currentApp = appObject;
+		this.currentApp = appObject as AppObject;
 		this.beforeRun();
 		appObject.onStart();
 	}

@@ -632,6 +632,42 @@ export type SetDateTimeResult =
 			minute: number;
 	  };
 
+class DateVal {
+	year: number;
+	month: number;
+	jsmonth: number;
+	day: number;
+
+	constructor(year: number, month: number, jsmonth: number, day: number) {
+		this.year = year;
+		this.month = month;
+		this.jsmonth = jsmonth;
+		this.day = day;
+	}
+
+	get dateString() {
+		return new Date(this.year, this.month - 1, this.day).toLocaleString('default', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
+}
+
+class TimeVal {
+	hour: number;
+	minute: number;
+
+	constructor(hour: number, minute: number) {
+		this.hour = hour;
+		this.minute = minute;
+	}
+
+	get timeString() {
+		return formatTime(this.hour, this.minute);
+	}
+}
+
 class SetDateTime implements AppObject {
 	static create(ctl: Controller) {
 		const createSetDate = () => {
@@ -643,8 +679,8 @@ class SetDateTime implements AppObject {
 		return new SetDateTime(ctl, createSetDate, createSetTime);
 	}
 
-	private date?: { year: number; month: number; jsmonth: number; day: number; isSet: boolean };
-	private time?: { hour: number; minute: number; isSet: boolean };
+	private date?: DateVal;
+	private time?: TimeVal;
 
 	constructor(
 		private ctl: Controller,
@@ -660,11 +696,11 @@ class SetDateTime implements AppObject {
 		if (result?.payload) {
 			const payload = result.payload as SetDateTimeResult;
 			if (payload.type === 'date') {
-				this.date = { ...payload, isSet: true };
+				this.date = new DateVal(payload.year, payload.month, payload.jsmonth, payload.day);
 				this.ctl.menu.focusNextMenuItem();
 				this.run();
 			} else if (payload.type === 'time') {
-				this.time = { ...payload, isSet: true };
+				this.time = new TimeVal(payload.hour, payload.minute);
 				this.ctl.menu.focusNextMenuItem();
 				this.run();
 			}
@@ -672,20 +708,6 @@ class SetDateTime implements AppObject {
 		}
 		this.run();
 	};
-
-	private get dateString() {
-		return this.date?.isSet
-			? new Date(this.date.year, this.date.month - 1, this.date.day).toLocaleString('default', {
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric'
-				})
-			: '';
-	}
-
-	private get timeString() {
-		return this.time?.isSet ? formatTime(this.time.hour, this.time.minute) : '';
-	}
 
 	run() {
 		this.ctl.ui.update({
@@ -695,7 +717,7 @@ class SetDateTime implements AppObject {
 		this.ctl.menu.setMenuItems([
 			stdMenuItem({
 				id: 'set-date',
-				textContent: this.dateString ? `Date: ${this.dateString}` : 'Set date...',
+				textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {
@@ -704,7 +726,7 @@ class SetDateTime implements AppObject {
 			}),
 			stdMenuItem({
 				id: 'set-time',
-				textContent: this.timeString ? `Time: ${this.timeString}` : 'Set time...',
+				textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 				action: () => {

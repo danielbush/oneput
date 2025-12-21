@@ -618,20 +618,6 @@ class AddEntryUI implements AppObject {
 	}
 }
 
-export type SetDateTimeResult =
-	| {
-			type: 'date';
-			year: number;
-			month: number;
-			jsmonth: number;
-			day: number;
-	  }
-	| {
-			type: 'time';
-			hour: number;
-			minute: number;
-	  };
-
 class DateVal {
 	year: number;
 	month: number;

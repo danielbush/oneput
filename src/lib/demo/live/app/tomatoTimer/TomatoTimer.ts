@@ -641,6 +641,10 @@ class DateVal {
 }
 
 class TimeVal {
+	static create(hour: number, minute: number) {
+		return new TimeVal(hour, minute);
+	}
+
 	hour: number;
 	minute: number;
 
@@ -879,11 +883,10 @@ class SetTime implements AppObject {
 		this.menuItems = [];
 		for (let minute = 0; minute <= 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
-			const t = formatTime(hour, minute % 60);
 			this.menuItems.push(
 				stdMenuItem({
 					id: `set-time-${minute}`,
-					textContent: t,
+					textContent: TimeVal.create(hour, minute % 60).timeString,
 					action: () => {
 						this.ctl.app.exit({ type: 'time', hour, minute: minute % 60 });
 					},

@@ -638,10 +638,10 @@ class DateVal {
 	jsmonth: number;
 	day: number;
 
-	constructor(year: number, month: number, jsmonth: number, day: number) {
+	constructor(year: number, month: number, day: number) {
 		this.year = year;
 		this.month = month;
-		this.jsmonth = jsmonth;
+		this.jsmonth = month - 1;
 		this.day = day;
 	}
 
@@ -694,15 +694,16 @@ class SetDateTime implements AppObject {
 
 	onResume = (result?: { payload?: unknown }) => {
 		if (result?.payload) {
-			const payload = result.payload as SetDateTimeResult;
-			if (payload.type === 'date') {
-				this.date = new DateVal(payload.year, payload.month, payload.jsmonth, payload.day);
+			if (result.payload instanceof DateVal) {
+				this.date = result.payload;
 				this.ctl.menu.focusNextMenuItem();
 				this.run();
-			} else if (payload.type === 'time') {
-				this.time = new TimeVal(payload.hour, payload.minute);
+				return;
+			} else if (result.payload instanceof TimeVal) {
+				this.time = result.payload;
 				this.ctl.menu.focusNextMenuItem();
 				this.run();
+				return;
 			}
 			return;
 		}
@@ -863,7 +864,7 @@ class SetDate implements AppObject {
 					id: `set-date-${year}-${jsmonth}-${day}`,
 					textContent: `${ordinal(day)}`,
 					action: () => {
-						this.ctl.app.exit({ type: 'date', year, month: jsmonth + 1, jsmonth, day });
+						this.ctl.app.exit(new DateVal(year, jsmonth + 1, day));
 					}
 				})
 			);
@@ -939,7 +940,7 @@ class SetTime implements AppObject {
 				this.ctl.notify('Could not parse a number for hour or minute', { duration: 3000 });
 				return;
 			}
-			this.ctl.app.exit({ type: 'time', hour: parsedHour, minute: parsedMinute });
+			this.ctl.app.exit(new TimeVal(parsedHour, parsedMinute));
 		});
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();

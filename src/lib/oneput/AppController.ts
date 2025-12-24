@@ -121,29 +121,4 @@ export class AppController {
 		this.pop();
 		return;
 	};
-
-	setUnwindPointToParent() {
-		const parent: AppObject | undefined = this.appParents[this.appParents.length - 1];
-		return () => {
-			this.unwindTo(parent);
-		};
-	}
-
-	private unwindTo(parent: AppObject | undefined) {
-		if (!parent) {
-			return;
-		}
-
-		for (
-			let app: AppObject | undefined | null = this.currentApp;
-			app;
-			app = this.appParents.pop()
-		) {
-			if (app === parent) {
-				this.currentApp = app;
-				break;
-			}
-			app.beforeExit?.();
-		}
-	}
 }

@@ -888,7 +888,7 @@ class SetTime implements AppObject {
 					id: `set-time-${minute}`,
 					textContent: TimeVal.create(hour, minute % 60).timeString,
 					action: () => {
-						this.ctl.app.exit({ type: 'time', hour, minute: minute % 60 });
+						this.ctl.app.exit(new TimeVal(hour, minute % 60));
 					},
 					data: {
 						hour,

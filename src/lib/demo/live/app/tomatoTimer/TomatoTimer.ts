@@ -121,36 +121,39 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: 'No timer running'
 		});
-		this.ctl.menu.setMenuItems([
-			stdMenuItem({
-				id: 'tomato-start',
-				textContent: '30 Minutes',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-				action: () => {
-					this.ctl.app.reset();
-					this.createTimerUI({ duration: 30 * 60 });
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-add-entry',
-				textContent: 'Add entry...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
-				action: () => {
-					this.currentUI = 'addEntryUI';
-					this.ctl.app.run(this.addEntryUI);
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-previous-sessions',
-				textContent: 'Previous sessions...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
-				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
-				action: () => {
-					this.ctl.app.reset();
-					this.previousSessionsUI();
-				}
-			})
-		]);
+		this.ctl.menu.setMenuItems({
+			id: 'no-timer',
+			items: [
+				stdMenuItem({
+					id: 'tomato-start',
+					textContent: '30 Minutes',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+					action: () => {
+						this.ctl.app.reset();
+						this.createTimerUI({ duration: 30 * 60 });
+					}
+				}),
+				stdMenuItem({
+					id: 'tomato-add-entry',
+					textContent: 'Add entry...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
+					action: () => {
+						this.currentUI = 'addEntryUI';
+						this.ctl.app.run(this.addEntryUI);
+					}
+				}),
+				stdMenuItem({
+					id: 'tomato-previous-sessions',
+					textContent: 'Previous sessions...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					action: () => {
+						this.ctl.app.reset();
+						this.previousSessionsUI();
+					}
+				})
+			]
+		});
 		this.dynamicPlaceholder.setPlaceholder((params) => {
 			return params.submitBinding
 				? `Enter time in minutes and hit ${params.submitBinding}...`
@@ -191,16 +194,19 @@ export class TomatoTimer implements AppObject {
 				});
 		};
 
-		this.ctl.menu.setMenuItems([
-			stdMenuItem({
-				id: 'tomato-timer-no-label',
-				textContent: 'Start with no label',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-				action: () => {
-					startTimer();
-				}
-			})
-		]);
+		this.ctl.menu.setMenuItems({
+			id: 'create-timer',
+			items: [
+				stdMenuItem({
+					id: 'tomato-timer-no-label',
+					textContent: 'Start with no label',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+					action: () => {
+						startTimer();
+					}
+				})
+			]
+		});
 
 		this.ctl.input.setSubmitHandlerOnce((label) => {
 			startTimer(label);
@@ -230,115 +236,118 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: 'Running timer... Seize the day!'
 		});
-		this.ctl.menu.setMenuItems([
-			// It is possible to have a timer without mounting a svelte
-			// component that handles the timer.  We just render timerUI
-			// every second, and pass in seconds remaining and have a menu
-			// item render it.  If we use consistent non-random id's for
-			// menu items and their constituents, then only part of the DOM
-			// that will change is the timer element inside the menu item
-			// thanks to the svelte reactivity that powers the core of
-			// oneput.  Another way might be to use onMount on an fchild and
-			// manage the setInterval in there; make sure to return a
-			// function that clears the interval.  But if you're using
-			// svelte just mount a svelte element that has a self-contained
-			// timer like here.
-			menuItem({
-				id: 'tomato-timer-display',
-				ignored: true,
-				style: {
-					justifyContent: 'center'
-				},
-				children: (b) => [
-					b.fchild({
-						style: {
-							justifyContent: 'center',
-							flex: '0 0 100%'
-						},
-						onMount: (node) => {
-							this.timerDisplay.mount(node, Timer, () => {
-								return {
-									initialSecondsRemaining: timerValue.secondsRemaining,
-									isPaused: timerValue.isPaused,
-									isFinished: timerValue.isFinished
-								};
-							});
-						}
-					})
-				]
-			}),
-			stdMenuItem({
-				id: 'tomato-previous-sessions',
-				textContent: 'Previous sessions...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
-				action: () => {
-					this.ctl.app.reset();
-					this.previousSessionsUI();
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-pause',
-				textContent: timerValue.isPaused ? 'Resume' : 'Pause',
-				left: (b) => [
-					b.icon({
-						innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
-					})
-				],
-				action: () => {
-					timerValue.pause(!timerValue.isPaused);
-					this.timerDisplay.notify?.();
-					this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
-						this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-					});
-					this.ctl.app.reset();
-					this.timerUI(timerValue);
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-finish',
-				textContent: 'Finish',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
-				action: () => {
-					timerValue.finish();
-					this.timerValue = null;
-					this.store
-						.putSession(timerValue.record as FinishedSessionRecord)
-						.andThen(() => this.store.deleteCurrentSession())
-						.andTee(() => {
-							this.ctl.notify('Session saved', { duration: 3000 });
-							this.ctl.app.reset();
-							this.noTimerUI();
+		this.ctl.menu.setMenuItems({
+			id: 'timer',
+			items: [
+				// It is possible to have a timer without mounting a svelte
+				// component that handles the timer.  We just render timerUI
+				// every second, and pass in seconds remaining and have a menu
+				// item render it.  If we use consistent non-random id's for
+				// menu items and their constituents, then only part of the DOM
+				// that will change is the timer element inside the menu item
+				// thanks to the svelte reactivity that powers the core of
+				// oneput.  Another way might be to use onMount on an fchild and
+				// manage the setInterval in there; make sure to return a
+				// function that clears the interval.  But if you're using
+				// svelte just mount a svelte element that has a self-contained
+				// timer like here.
+				menuItem({
+					id: 'tomato-timer-display',
+					ignored: true,
+					style: {
+						justifyContent: 'center'
+					},
+					children: (b) => [
+						b.fchild({
+							style: {
+								justifyContent: 'center',
+								flex: '0 0 100%'
+							},
+							onMount: (node) => {
+								this.timerDisplay.mount(node, Timer, () => {
+									return {
+										initialSecondsRemaining: timerValue.secondsRemaining,
+										isPaused: timerValue.isPaused,
+										isFinished: timerValue.isFinished
+									};
+								});
+							}
 						})
-						.orTee((err) => {
-							this.ctl.alert({ message: 'Error saving session', additional: err.message });
-							this.ctl.app.reset();
-							this.noTimerUI();
-						});
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-cancel',
-				textContent: 'Cancel',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
-				action: () => {
-					this.store
-						.deleteCurrentSession()
-						.orTee((err) => {
-							this.ctl.alert({
-								message: 'Error deleting current session',
-								additional: err.message
-							});
-							this.ctl.app.reset();
-							this.noTimerUI();
+					]
+				}),
+				stdMenuItem({
+					id: 'tomato-previous-sessions',
+					textContent: 'Previous sessions...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+					action: () => {
+						this.ctl.app.reset();
+						this.previousSessionsUI();
+					}
+				}),
+				stdMenuItem({
+					id: 'tomato-pause',
+					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
+					left: (b) => [
+						b.icon({
+							innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
 						})
-						.andTee(() => {
-							this.ctl.notify('Current session deleted', { duration: 3000 });
-							this.ctl.app.reset();
-							this.noTimerUI();
+					],
+					action: () => {
+						timerValue.pause(!timerValue.isPaused);
+						this.timerDisplay.notify?.();
+						this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
+							this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 						});
-				}
-			})
-		]);
+						this.ctl.app.reset();
+						this.timerUI(timerValue);
+					}
+				}),
+				stdMenuItem({
+					id: 'tomato-finish',
+					textContent: 'Finish',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
+					action: () => {
+						timerValue.finish();
+						this.timerValue = null;
+						this.store
+							.putSession(timerValue.record as FinishedSessionRecord)
+							.andThen(() => this.store.deleteCurrentSession())
+							.andTee(() => {
+								this.ctl.notify('Session saved', { duration: 3000 });
+								this.ctl.app.reset();
+								this.noTimerUI();
+							})
+							.orTee((err) => {
+								this.ctl.alert({ message: 'Error saving session', additional: err.message });
+								this.ctl.app.reset();
+								this.noTimerUI();
+							});
+					}
+				}),
+				stdMenuItem({
+					id: 'tomato-cancel',
+					textContent: 'Cancel',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
+					action: () => {
+						this.store
+							.deleteCurrentSession()
+							.orTee((err) => {
+								this.ctl.alert({
+									message: 'Error deleting current session',
+									additional: err.message
+								});
+								this.ctl.app.reset();
+								this.noTimerUI();
+							})
+							.andTee(() => {
+								this.ctl.notify('Current session deleted', { duration: 3000 });
+								this.ctl.app.reset();
+								this.noTimerUI();
+							});
+					}
+				})
+			]
+		});
 	}
 
 	private previousSessionsUI() {
@@ -348,8 +357,9 @@ export class TomatoTimer implements AppObject {
 		});
 		this.ctl.input.setPlaceholder('Select a session...');
 		this.store.getFinishedSessions().andTee((sessions) => {
-			this.ctl.menu.setMenuItems(
-				sessions.map((session) => {
+			this.ctl.menu.setMenuItems({
+				id: 'previous-session',
+				items: sessions.map((session) => {
 					const v = TomatoTimerValue.create(session);
 					return stdMenuItem({
 						id: `tomato-previous-session-${session.id}`,
@@ -365,7 +375,7 @@ export class TomatoTimer implements AppObject {
 						}
 					});
 				})
-			);
+			});
 		});
 	}
 
@@ -376,81 +386,84 @@ export class TomatoTimer implements AppObject {
 			menuTitle: 'Edit session...'
 		});
 		this.ctl.input.setPlaceholder('Select an action...');
-		this.ctl.menu.setMenuItems([
-			menuItem({
-				id: 'tomato-timer-session-details',
-				ignored: true,
-				style: {
-					justifyContent: 'center'
-				},
-				children: (b) => [
-					b.fchild({
-						style: {
-							justifyContent: 'center',
-							flex: '0 0 100%'
-						},
-						// TODO: We could mount a component here...
-						innerHTMLUnsafe: `<div>
+		this.ctl.menu.setMenuItems({
+			id: 'edit-entry',
+			items: [
+				menuItem({
+					id: 'tomato-timer-session-details',
+					ignored: true,
+					style: {
+						justifyContent: 'center'
+					},
+					children: (b) => [
+						b.fchild({
+							style: {
+								justifyContent: 'center',
+								flex: '0 0 100%'
+							},
+							// TODO: We could mount a component here...
+							innerHTMLUnsafe: `<div>
 							<h3>${session.label ? session.label + ' - ' : ''}${formatSecondsToHHMMSS(v.elapsed / 60)}</h3>
 							<table>
 								<tr><td>Start</td> <td>${new Date(session.startTime * 1000).toLocaleString()}</td></tr>
 								<tr><td>End</td> <td>${new Date(session.endTime * 1000).toLocaleString()}</td></tr>
 							</table>
 							</div>`
-					})
-				]
-			}),
-			stdMenuItem({
-				id: 'tomato-edit-session-edit-label',
-				textContent: 'Edit label...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
-				action: () => {
-					this.dynamicPlaceholder.setPlaceholder((params) => {
-						return params.submitBinding
-							? `Enter a label and hit ${params.submitBinding}...`
-							: 'Enter value and submit...';
-					});
-					this.ctl.input.setSubmitHandlerOnce((label) => {
-						const newSession = { ...session, label };
-						this.store
-							.putSession(newSession)
-							.andTee(() => {
-								this.ctl.notify('Session label updated', { duration: 3000 });
-								// Refresh this ui to update the display.
-								// We could just call setMenuItems again.
-								// Using consistent id's will mean only a small part of the DOM will change.
-								this.ctl.app.reset();
-								this.editEntryUI(newSession);
-							})
-							.orTee((err) => {
-								this.ctl.alert({
-									message: 'Error updating session label',
-									additional: err.message
-								});
-							});
-					});
-				}
-			}),
-			stdMenuItem({
-				id: 'tomato-edit-session-save',
-				textContent: 'Delete...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.xIcon })],
-				action: async () => {
-					const confirm = this.ctl.confirm({
-						message: 'Are you sure you want to delete this session?'
-					});
-					const yes = await confirm.userChooses();
-					if (yes) {
-						this.store.deleteSession(session).andTee(() => {
-							this.ctl.notify('Session deleted', { duration: 3000 });
+						})
+					]
+				}),
+				stdMenuItem({
+					id: 'tomato-edit-session-edit-label',
+					textContent: 'Edit label...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+					action: () => {
+						this.dynamicPlaceholder.setPlaceholder((params) => {
+							return params.submitBinding
+								? `Enter a label and hit ${params.submitBinding}...`
+								: 'Enter value and submit...';
 						});
-						this.ctl.app.reset();
-						this.previousSessionsUI();
-						return;
+						this.ctl.input.setSubmitHandlerOnce((label) => {
+							const newSession = { ...session, label };
+							this.store
+								.putSession(newSession)
+								.andTee(() => {
+									this.ctl.notify('Session label updated', { duration: 3000 });
+									// Refresh this ui to update the display.
+									// We could just call setMenuItems again.
+									// Using consistent id's will mean only a small part of the DOM will change.
+									this.ctl.app.reset();
+									this.editEntryUI(newSession);
+								})
+								.orTee((err) => {
+									this.ctl.alert({
+										message: 'Error updating session label',
+										additional: err.message
+									});
+								});
+						});
 					}
-				}
-			})
-		]);
+				}),
+				stdMenuItem({
+					id: 'tomato-edit-session-save',
+					textContent: 'Delete...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.xIcon })],
+					action: async () => {
+						const confirm = this.ctl.confirm({
+							message: 'Are you sure you want to delete this session?'
+						});
+						const yes = await confirm.userChooses();
+						if (yes) {
+							this.store.deleteSession(session).andTee(() => {
+								this.ctl.notify('Session deleted', { duration: 3000 });
+							});
+							this.ctl.app.reset();
+							this.previousSessionsUI();
+							return;
+						}
+					}
+				})
+			]
+		});
 	}
 }
 
@@ -502,7 +515,7 @@ class AddEntryUI implements AppObject {
 				this.ctl.input.setInputValue(this.session.label ?? '');
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.session.label = value;
-					this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+					this.ctl.menu.setMenuItems({ focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-note':
@@ -520,7 +533,7 @@ class AddEntryUI implements AppObject {
 				});
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.session.note = value;
-					this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+					this.ctl.menu.setMenuItems({ focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-duration':
@@ -537,7 +550,7 @@ class AddEntryUI implements AppObject {
 						this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
 						return;
 					}
-					this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'none' });
+					this.ctl.menu.setMenuItems({ focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-startTime':
@@ -557,7 +570,7 @@ class AddEntryUI implements AppObject {
 			menuTitle: 'Add entry...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
-		this.ctl.menu.setMenuItems(this.menuItems, { focusBehaviour: 'first' });
+		this.ctl.menu.setMenuItems({ focusBehaviour: 'first', items: this.menuItems });
 		// IMPORTANT: This triggers men-item-focus handler above and puts us into edit mode.
 		this.ctl.menu.focusFirstMenuItem();
 	}
@@ -704,26 +717,28 @@ class SetDateTime implements AppObject<TimeVal | DateVal> {
 			menuTitle: 'Set date and time...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
-		this.ctl.menu.setMenuItems([
-			stdMenuItem({
-				id: 'set-date',
-				textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
-				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
-				action: () => {
-					this.ctl.app.run(this.createSetDate());
-				}
-			}),
-			stdMenuItem({
-				id: 'set-time',
-				textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
-				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
-				action: () => {
-					this.ctl.app.run(this.createSetTime());
-				}
-			})
-		]);
+		this.ctl.menu.setMenuItems({
+			items: [
+				stdMenuItem({
+					id: 'set-date',
+					textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
+					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					action: () => {
+						this.ctl.app.run(this.createSetDate());
+					}
+				}),
+				stdMenuItem({
+					id: 'set-time',
+					textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
+					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					action: () => {
+						this.ctl.app.run(this.createSetTime());
+					}
+				})
+			]
+		});
 	}
 }
 
@@ -798,7 +813,7 @@ class SetDate implements AppObject {
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems(menuItems);
+		this.ctl.menu.setMenuItems({ id: 'set-year', items: menuItems });
 		this.ctl.menu.setMenuItemFocus(5, true);
 		this.ctl.input.setPlaceholder('Select or type in a year...');
 		this.ctl.input.setInputValue(currentYear.toString());
@@ -833,7 +848,7 @@ class SetDate implements AppObject {
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems(menuItems);
+		this.ctl.menu.setMenuItems({ id: 'set-month', items: menuItems });
 		if (year === new Date().getFullYear()) {
 			this.ctl.menu.setMenuItemFocus(currentMonth, true);
 		} else {
@@ -858,7 +873,7 @@ class SetDate implements AppObject {
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems(menuItems);
+		this.ctl.menu.setMenuItems({ id: 'set-day', items: menuItems });
 		if (year === new Date().getFullYear() && jsmonth === new Date().getMonth()) {
 			this.ctl.menu.setMenuItemFocus(currentDay - 1, true);
 		} else {
@@ -926,7 +941,7 @@ class SetTime implements AppObject {
 		});
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();
-		this.ctl.menu.setMenuItems(this.menuItems);
+		this.ctl.menu.setMenuItems({ items: this.menuItems });
 		this.ctl.menu.setMenuItemFocus(
 			this.menuItems.findIndex((item) => {
 				const { hour, minute } = item.data as { hour: number; minute: number };

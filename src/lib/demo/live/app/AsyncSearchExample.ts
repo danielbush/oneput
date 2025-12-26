@@ -77,14 +77,16 @@ export class AsyncSearchExample implements AppObject {
 			}
 		);
 		this.ctl.input.setPlaceholder('Start typing something...');
-		this.ctl.menu.setMenuItems([
-			infoMenuItem(
-				'instructions',
-				'Start typing something and inspect the browser console.  ' +
-					'Items are delayed but only latest items should show when debounce times out.  ' +
-					'The service will randomly fail 10% of the time.'
-			)
-		]);
+		this.ctl.menu.setMenuItems({
+			items: [
+				infoMenuItem(
+					'instructions',
+					'Start typing something and inspect the browser console.  ' +
+						'Items are delayed but only latest items should show when debounce times out.  ' +
+						'The service will randomly fail 10% of the time.'
+				)
+			]
+		});
 		this.ctl.input.focusInput();
 	}
 

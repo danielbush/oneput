@@ -96,8 +96,12 @@ export class KatexDemo implements AppObject {
 		katexResult?: string,
 		focusBehaviour?: 'none' | 'first' | 'last'
 	): void {
-		this.ctl.menu.setMenuItems(
-			[
+		this.ctl.menu.setMenuItems({
+			// This will ensure the menuItemFocus index won't change when we hit the
+			// checkbox above or any other action.
+			// { focusBehaviour: focusBehaviour ?? 'first' }
+			focusBehaviour,
+			items: [
 				menuItem({
 					id: 'katex-preview-pane',
 					type: 'vflex',
@@ -146,12 +150,8 @@ export class KatexDemo implements AppObject {
 					textContent: 'Display mode',
 					checked: this.previewDisplayMode
 				})
-			],
-			// This will ensure the menuItemFocus index won't change when we hit the
-			// checkbox above or any other action.
-			// { focusBehaviour: focusBehaviour ?? 'first' }
-			{ focusBehaviour: focusBehaviour }
-		);
+			]
+		});
 	}
 
 	private renderInputUI(katexIsValid: boolean) {

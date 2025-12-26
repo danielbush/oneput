@@ -86,8 +86,9 @@ export class BindingsEditor implements AppObject {
 		this.ctl.app.reset();
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
 		this.ctl.ui.update({ menuTitle: title });
-		this.ctl.menu.setMenuItems(
-			Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
+		this.ctl.menu.setMenuItems({
+			id: 'actions',
+			items: Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
 					id,
 					text: description,
@@ -98,7 +99,7 @@ export class BindingsEditor implements AppObject {
 					}
 				})
 			)
-		);
+		});
 	};
 
 	/**
@@ -113,26 +114,29 @@ export class BindingsEditor implements AppObject {
 		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
-		this.ctl.menu.setMenuItems([
-			stdMenuItem({
-				id: 'add-binding',
-				textContent: 'Add binding...',
-				action: () => {
-					this.captureBindingUI(actionId);
-				}
-			}),
-			...bindings.map((binding) => {
-				return stdMenuItem({
-					id: binding,
-					textContent: binding,
-					left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
-					right: (b) => [b.icon({ innerHTMLUnsafe: xIcon })],
+		this.ctl.menu.setMenuItems({
+			id: 'action',
+			items: [
+				stdMenuItem({
+					id: 'add-binding',
+					textContent: 'Add binding...',
 					action: () => {
-						this.removeBinding(actionId, binding);
+						this.captureBindingUI(actionId);
 					}
-				});
-			})
-		]);
+				}),
+				...bindings.map((binding) => {
+					return stdMenuItem({
+						id: binding,
+						textContent: binding,
+						left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
+						right: (b) => [b.icon({ innerHTMLUnsafe: xIcon })],
+						action: () => {
+							this.removeBinding(actionId, binding);
+						}
+					});
+				})
+			]
+		});
 	};
 
 	/**

@@ -55,39 +55,41 @@ export class SettingsUI {
 		this.ctl.ui.update({
 			menuTitle: 'Settings'
 		});
-		this.ctl.menu.setMenuItems([
-			checkboxMenuItem({
-				id: 'simulate-error',
-				textContent: 'Toggle simulate error storing bindings',
-				checked: config.simulateError,
-				action: (_, checked) => {
-					config.toggleSimulateError(checked);
-				}
-			}),
-			stdMenuItem({
-				id: 'default-filter',
-				left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
-				textContent: 'Set default typing filter...',
-				action: () => {
-					this.ctl.app.run(this.createFiltersUI());
-				}
-			}),
-			stdMenuItem({
-				id: 'global-keys',
-				textContent: 'Set global default key bindings...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
-				action: () => {
-					this.ctl.app.run(this.createGlobalBindingsEditor());
-				}
-			}),
-			stdMenuItem({
-				id: 'local-keys',
-				textContent: 'Set local default key bindings...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
-				action: () => {
-					this.ctl.app.run(this.createLocalBindingsEditor());
-				}
-			})
-		]);
+		this.ctl.menu.setMenuItems({
+			items: [
+				checkboxMenuItem({
+					id: 'simulate-error',
+					textContent: 'Toggle simulate error storing bindings',
+					checked: config.simulateError,
+					action: (_, checked) => {
+						config.toggleSimulateError(checked);
+					}
+				}),
+				stdMenuItem({
+					id: 'default-filter',
+					left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
+					textContent: 'Set default typing filter...',
+					action: () => {
+						this.ctl.app.run(this.createFiltersUI());
+					}
+				}),
+				stdMenuItem({
+					id: 'global-keys',
+					textContent: 'Set global default key bindings...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
+					action: () => {
+						this.ctl.app.run(this.createGlobalBindingsEditor());
+					}
+				}),
+				stdMenuItem({
+					id: 'local-keys',
+					textContent: 'Set local default key bindings...',
+					left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
+					action: () => {
+						this.ctl.app.run(this.createLocalBindingsEditor());
+					}
+				})
+			]
+		});
 	};
 }

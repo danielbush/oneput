@@ -102,17 +102,22 @@ export class MenuController {
 
 	// #region setting menu items
 
-	private _setMenuItems(
-		items: Array<MenuItemAny>,
-		options: { focusBehaviour?: FocusBehaviour } = {}
-	) {
-		this.ctl.currentProps.menuItems = items;
-		this.runFocusBehaviour(options.focusBehaviour);
+	private _setMenuItems(params: {
+		id?: string;
+		focusBehaviour?: FocusBehaviour;
+		items: Array<MenuItemAny>;
+	}) {
+		this.ctl.currentProps.menuItems = params.items;
+		this.runFocusBehaviour(params.focusBehaviour);
 	}
 
-	setMenuItems(items: Array<MenuItemAny>, options: { focusBehaviour?: FocusBehaviour } = {}) {
-		this.menuItems = items;
-		this._setMenuItems(items, options);
+	setMenuItems(params: {
+		id?: string;
+		focusBehaviour?: FocusBehaviour;
+		items: Array<MenuItemAny>;
+	}) {
+		this.menuItems = params.items;
+		this._setMenuItems(params);
 	}
 
 	get menuItemCount() {
@@ -160,7 +165,7 @@ export class MenuController {
 			if (!items) {
 				return;
 			}
-			this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
+			this._setMenuItems({ items, focusBehaviour: options.focusBehaviour });
 		});
 	}
 
@@ -203,7 +208,7 @@ export class MenuController {
 					return;
 				}
 				// console.warn(`got ${value}...`);
-				this._setMenuItems(items, { focusBehaviour: options.focusBehaviour });
+				this._setMenuItems({ items, focusBehaviour: options.focusBehaviour });
 			},
 			500,
 			{ immediate: false }

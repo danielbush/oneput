@@ -6,7 +6,9 @@ export type InternalEvent =
 	| InputChangeEvent
 	| BindingsChangeEvent
 	| MenuOpenChangeEvent
-	| MenuItemFocusEvent;
+	| MenuItemFocusEvent
+	| MenuActionEvent
+	| MenuSetItemsEvent;
 
 export type InputChangeEvent = {
 	type: 'input-change';
@@ -28,6 +30,14 @@ export type MenuItemFocusEvent = {
 	 * undefined" instead of "?".
 	 */
 	payload: { index: number; menuItem: MenuItem | undefined };
+};
+export type MenuActionEvent = {
+	type: 'menu-action';
+	payload: { menuId?: string; menuActionId: string };
+};
+export type MenuSetItemsEvent = {
+	type: 'set-menu-items';
+	payload: { menuId?: string };
 };
 
 export class InternalEventEmitter {

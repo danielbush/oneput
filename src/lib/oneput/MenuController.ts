@@ -60,6 +60,7 @@ export class MenuController {
 	private removeMenuItemsListener?: () => void;
 	private defaultFocusBehaviour: FocusBehaviour = 'first';
 	private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
+	private currentMenuId?: string;
 
 	// #region menu open/close
 
@@ -94,6 +95,10 @@ export class MenuController {
 		if (this.currentMenuItem) {
 			if (this.currentMenuItem.action) {
 				this.currentMenuItem.action(this.ctl);
+				this.ctl.events.emit({
+					type: 'menu-action',
+					payload: { menuId: this.currentMenuId, menuActionId: this.currentMenuItem.id }
+				});
 			}
 		}
 	}
@@ -102,11 +107,7 @@ export class MenuController {
 
 	// #region setting menu items
 
-	private _setMenuItems(params: {
-		id?: string;
-		focusBehaviour?: FocusBehaviour;
-		items: Array<MenuItemAny>;
-	}) {
+	private _setMenuItems(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
 		this.ctl.currentProps.menuItems = params.items;
 		this.runFocusBehaviour(params.focusBehaviour);
 	}
@@ -118,6 +119,8 @@ export class MenuController {
 	}) {
 		this.menuItems = params.items;
 		this._setMenuItems(params);
+		this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
+		this.currentMenuId = params.id;
 	}
 
 	get menuItemCount() {

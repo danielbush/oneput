@@ -95,10 +95,12 @@ export class MenuController {
 		if (this.currentMenuItem) {
 			if (this.currentMenuItem.action) {
 				this.currentMenuItem.action(this.ctl);
-				this.ctl.events.emit({
-					type: 'menu-action',
-					payload: { menuId: this.currentMenuId, menuActionId: this.currentMenuItem.id }
-				});
+				if (this.currentMenuId) {
+					this.ctl.events.emit({
+						type: 'menu-action',
+						payload: { menuId: this.currentMenuId, menuActionId: this.currentMenuItem.id }
+					});
+				}
 			}
 		}
 	}
@@ -112,11 +114,7 @@ export class MenuController {
 		this.runFocusBehaviour(params.focusBehaviour);
 	}
 
-	setMenuItems(params: {
-		id?: string;
-		focusBehaviour?: FocusBehaviour;
-		items: Array<MenuItemAny>;
-	}) {
+	setMenuItems(params: { id: string; focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
 		this.menuItems = params.items;
 		this._setMenuItems(params);
 		this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });

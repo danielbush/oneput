@@ -56,6 +56,7 @@ export class SettingsUI {
 			menuTitle: 'Settings'
 		});
 		this.ctl.menu.setMenuItems({
+			id: 'main',
 			items: [
 				checkboxMenuItem({
 					id: 'simulate-error',

@@ -21,6 +21,7 @@ export class FiltersUI implements AppObject {
 		});
 
 		this.ctl.menu.setMenuItems({
+			id: 'main',
 			items: [
 				stdMenuItem({
 					id: 'fuzzy-filter',

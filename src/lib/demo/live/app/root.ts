@@ -67,6 +67,7 @@ export class RootUI {
 			});
 		});
 		this.ctl.menu.setMenuItems({
+			id: 'main',
 			items: [
 				stdMenuItem({
 					id: 'settings',

@@ -97,6 +97,7 @@ export class KatexDemo implements AppObject {
 		focusBehaviour?: 'none' | 'first' | 'last'
 	): void {
 		this.ctl.menu.setMenuItems({
+			id: 'main',
 			// This will ensure the menuItemFocus index won't change when we hit the
 			// checkbox above or any other action.
 			// { focusBehaviour: focusBehaviour ?? 'first' }

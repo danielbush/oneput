@@ -33,11 +33,11 @@ export type MenuItemFocusEvent = {
 };
 export type MenuActionEvent = {
 	type: 'menu-action';
-	payload: { menuId?: string; menuActionId: string };
+	payload: { menuId: string; menuActionId: string };
 };
 export type MenuSetItemsEvent = {
 	type: 'set-menu-items';
-	payload: { menuId?: string };
+	payload: { menuId: string };
 };
 
 export class InternalEventEmitter {

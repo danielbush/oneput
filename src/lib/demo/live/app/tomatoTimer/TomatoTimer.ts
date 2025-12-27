@@ -515,7 +515,7 @@ class AddEntryUI implements AppObject {
 				this.ctl.input.setInputValue(this.session.label ?? '');
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.session.label = value;
-					this.ctl.menu.setMenuItems({ focusBehaviour: 'none', items: this.menuItems });
+					this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-note':
@@ -533,7 +533,7 @@ class AddEntryUI implements AppObject {
 				});
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.session.note = value;
-					this.ctl.menu.setMenuItems({ focusBehaviour: 'none', items: this.menuItems });
+					this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-duration':
@@ -550,7 +550,7 @@ class AddEntryUI implements AppObject {
 						this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
 						return;
 					}
-					this.ctl.menu.setMenuItems({ focusBehaviour: 'none', items: this.menuItems });
+					this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-startTime':
@@ -570,7 +570,7 @@ class AddEntryUI implements AppObject {
 			menuTitle: 'Add entry...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
-		this.ctl.menu.setMenuItems({ focusBehaviour: 'first', items: this.menuItems });
+		this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'first', items: this.menuItems });
 		// IMPORTANT: This triggers men-item-focus handler above and puts us into edit mode.
 		this.ctl.menu.focusFirstMenuItem();
 	}
@@ -718,6 +718,7 @@ class SetDateTime implements AppObject<TimeVal | DateVal> {
 		});
 		this.ctl.menu.clearMenuItemsFn();
 		this.ctl.menu.setMenuItems({
+			id: 'main',
 			items: [
 				stdMenuItem({
 					id: 'set-date',
@@ -941,7 +942,7 @@ class SetTime implements AppObject {
 		});
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();
-		this.ctl.menu.setMenuItems({ items: this.menuItems });
+		this.ctl.menu.setMenuItems({ id: 'main', items: this.menuItems });
 		this.ctl.menu.setMenuItemFocus(
 			this.menuItems.findIndex((item) => {
 				const { hour, minute } = item.data as { hour: number; minute: number };

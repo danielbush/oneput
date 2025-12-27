@@ -13,12 +13,84 @@ export type MenuItemsFnAsync = (
 
 type FocusBehaviour = 'first' | 'last' | 'none';
 
-export class MenuController {
-	public static create(controller: Controller) {
-		return new MenuController(controller);
+class CurrentMenuVal {
+	static create(ctl: Controller, menuId: string) {
+		return new CurrentMenuVal(ctl, menuId);
 	}
 
-	constructor(private ctl: Controller) {
+	constructor(
+		private ctl: Controller,
+		private _menuId: string
+	) {}
+
+	/**
+	 * Represents the current list of available menu items which is usually used
+	 * to set currentProps.menuItems.
+	 *
+	 * - setMenuItems updates this list.
+	 * - _setMenuItems only updates currentProps.menuItems.
+	 * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
+	 *
+	 * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
+	 * For dynamic menu item generation, menuItems can be ignored.
+	 */
+	allMenuItems: Array<MenuItemAny> = [];
+
+	get focusedMenuItemIndex() {
+		return this.ctl.currentProps.menuItemFocus?.[0] ?? 0;
+	}
+
+	get displayedMenuItemCount() {
+		return this.ctl.currentProps.menuItems?.length ?? 0;
+	}
+
+	get focusedMenuItem() {
+		return this.ctl.currentProps.menuItems?.[this.focusedMenuItemIndex];
+	}
+
+	get displayedMenuItems() {
+		return this.ctl.currentProps.menuItems;
+	}
+
+	get menuId() {
+		return this._menuId;
+	}
+
+	getSafeIndex(index: number) {
+		return Math.max(0, Math.min(index, this.displayedMenuItemCount - 1));
+	}
+
+	getSafe(index: number) {
+		const safeIndex = this.getSafeIndex(index);
+		return { index: safeIndex, menuItem: this.ctl.currentProps.menuItems?.[safeIndex] };
+	}
+
+	nextMenuItemIndex(index?: number) {
+		index = index ?? this.focusedMenuItemIndex;
+		return (index + 1 + this.displayedMenuItemCount) % Math.max(1, this.displayedMenuItemCount);
+	}
+
+	previousMenuItemIndex(index?: number) {
+		index = index ?? this.focusedMenuItemIndex;
+		return (index - 1 + this.displayedMenuItemCount) % Math.max(1, this.displayedMenuItemCount);
+	}
+
+	setNewMenu(menuId: string, menuItems: Array<MenuItemAny>) {
+		this._menuId = menuId;
+		this.allMenuItems = menuItems;
+	}
+}
+
+export class MenuController {
+	public static create(ctl: Controller) {
+		const currentMenu = CurrentMenuVal.create(ctl, '');
+		return new MenuController(ctl, currentMenu);
+	}
+
+	constructor(
+		private ctl: Controller,
+		public currentMenu: CurrentMenuVal
+	) {
 		this.ctl.currentProps.onMenuOpenChange = (menuOpen) => {
 			if (menuOpen) {
 				// Focusing input when menu opens seems like a sensible default.
@@ -39,18 +111,6 @@ export class MenuController {
 	}
 
 	/**
-	 * Represents the current list of available menu items which is usually used
-	 * to set currentProps.menuItems.
-	 *
-	 * - setMenuItems updates this list.
-	 * - _setMenuItems only updates currentProps.menuItems.
-	 * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
-	 *
-	 * For filtering, menuItemsFn* are passed this.menuItems so they can filter on it.
-	 * For dynamic menu item generation, this.menuItems can be ignored.
-	 */
-	private menuItems: Array<MenuItemAny> = [];
-	/**
 	 * Disable ALL menuItemsFn calls.
 	 */
 	private disableMenuItemsFn = false;
@@ -60,9 +120,8 @@ export class MenuController {
 	private removeMenuItemsListener?: () => void;
 	private defaultFocusBehaviour: FocusBehaviour = 'first';
 	private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
-	private currentMenuId?: string;
 
-	// #region menu open/close
+	// #region menu open/close + action
 
 	get isMenuOpen() {
 		return this.ctl.currentProps.menuOpen;
@@ -84,24 +143,20 @@ export class MenuController {
 		this.ctl.events.emit({ type: 'menu-open-change', payload: false });
 	};
 
-	// #endregion
-
-	// #region menu actions
-
 	doMenuAction() {
 		if (this.disableActions) {
 			return;
 		}
-		const current = this.current;
-		if (current?.menuItem.action) {
+		const current = this.currentMenu;
+		if (current.focusedMenuItem?.action) {
 			// GOTCHA - call this before calling the action.  If the action
 			// runs a new appObject, we'll break the tracking logic in
 			// AppController.
 			this.ctl.events.emit({
 				type: 'menu-action',
-				payload: { menuId: current.menuId, menuActionId: current.menuItem.id }
+				payload: { menuId: current.menuId, menuActionId: current.focusedMenuItem.id }
 			});
-			current.menuItem.action(this.ctl);
+			current.focusedMenuItem.action(this.ctl);
 		}
 	}
 
@@ -115,34 +170,9 @@ export class MenuController {
 	}
 
 	setMenuItems(params: { id: string; focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
-		this.menuItems = params.items;
-		this.currentMenuId = params.id;
+		this.currentMenu.setNewMenu(params.id, params.items);
 		this._setMenuItems(params);
 		this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
-	}
-
-	get menuItemCount() {
-		return this.ctl.currentProps.menuItems?.length ?? 0;
-	}
-
-	get currentMenuItem() {
-		return this.ctl.currentProps.menuItems?.[this.menuItemFocus];
-	}
-
-	/**
-	 * Get current menu and focused item.
-	 *
-	 * Uses an all or nothing approach.
-	 */
-	get current() {
-		const currentMenuItem = this.currentMenuItem;
-		if (currentMenuItem && this.currentMenuId) {
-			return {
-				menuItem: currentMenuItem,
-				menuId: this.currentMenuId
-			};
-		}
-		return null;
 	}
 
 	// #endregion
@@ -178,7 +208,7 @@ export class MenuController {
 			if (this.disableMenuItemsFn) {
 				return;
 			}
-			const items = menuItemsFn(value, this.menuItems || []);
+			const items = menuItemsFn(value, this.currentMenu.allMenuItems);
 			if (!items) {
 				return;
 			}
@@ -203,7 +233,7 @@ export class MenuController {
 				const thisInFlight = inFlight;
 				let items: MenuItemAny[] | undefined;
 				try {
-					items = await menuItemsFnAsync(value, this.menuItems);
+					items = await menuItemsFnAsync(value, this.currentMenu.allMenuItems);
 				} catch (err) {
 					console.error(
 						'menuItemsFnAsync rejected - we recommend you catch your errors.  Error:',
@@ -254,35 +284,23 @@ export class MenuController {
 
 	// #region menu item focus
 
-	get menuItemFocus() {
-		return this.ctl.currentProps.menuItemFocus?.[0] ?? 0;
-	}
-
-	private nextMenuItemIndex(index: number) {
-		return (index + 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);
-	}
-
-	private previousMenuItemIndex(index: number) {
-		return (index - 1 + this.menuItemCount) % Math.max(1, this.menuItemCount);
-	}
-
-	setMenuItemFocus(index: number, focus: boolean) {
-		const safeIndex = Math.max(0, Math.min(index, this.menuItemCount - 1));
+	focusMenuItemByIndex(index: number, focus: boolean) {
+		const { index: safeIndex, menuItem } = this.currentMenu.getSafe(index);
 		this.ctl.currentProps.menuItemFocus = [safeIndex, focus];
 		this.ctl.events.emit({
 			type: 'menu-item-focus',
 			payload: {
 				index: safeIndex,
-				menuItem: this.ctl.currentProps.menuItems?.[safeIndex]
+				menuItem: menuItem
 			}
 		});
 	}
 
 	focusNextMenuItem() {
 		for (
-			let i = this.nextMenuItemIndex(this.menuItemFocus), c = 0;
-			c < this.menuItemCount;
-			c++, i = this.nextMenuItemIndex(i)
+			let i = this.currentMenu.nextMenuItemIndex(), c = 0;
+			c < this.currentMenu.displayedMenuItemCount;
+			c++, i = this.currentMenu.nextMenuItemIndex(i)
 		) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
@@ -297,9 +315,9 @@ export class MenuController {
 
 	focusPreviousMenuItem() {
 		for (
-			let i = this.previousMenuItemIndex(this.menuItemFocus), c = 0;
-			c < this.menuItemCount;
-			c++, i = this.previousMenuItemIndex(i)
+			let i = this.currentMenu.previousMenuItemIndex(), c = 0;
+			c < this.currentMenu.displayedMenuItemCount;
+			c++, i = this.currentMenu.previousMenuItemIndex(i)
 		) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
@@ -313,7 +331,7 @@ export class MenuController {
 	}
 
 	focusFirstMenuItem() {
-		for (let i = 0; i < this.menuItemCount; i++) {
+		for (let i = 0; i < this.currentMenu.displayedMenuItemCount; i++) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
 				this.ctl.events.emit({
@@ -326,7 +344,7 @@ export class MenuController {
 	}
 
 	focusLastMenuItem() {
-		for (let i = this.menuItemCount - 1; i >= 0; i--) {
+		for (let i = this.currentMenu.displayedMenuItemCount - 1; i >= 0; i--) {
 			if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
 				this.ctl.currentProps.menuItemFocus = [i, true];
 				this.ctl.events.emit({
@@ -341,7 +359,7 @@ export class MenuController {
 	focusMenuItemById(id: string) {
 		const index = this.ctl.currentProps.menuItems?.findIndex((item) => item.id === id);
 		if (index !== undefined && index !== -1) {
-			this.setMenuItemFocus(index, true);
+			this.focusMenuItemByIndex(index, true);
 		}
 	}
 
@@ -362,12 +380,10 @@ export class MenuController {
 	}
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
-		if (this.currentMenuId) {
-			const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenuId);
-			if (lastActionId) {
-				this.focusMenuItemById(lastActionId);
-				return;
-			}
+		const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenu.menuId);
+		if (lastActionId) {
+			this.focusMenuItemById(lastActionId);
+			return;
 		}
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
 		if (behaviour === 'none') {
@@ -429,7 +445,7 @@ export class MenuController {
 
 	runFillHandler() {
 		const currHandler = this.fillHandler;
-		this.fillHandler?.(this.currentMenuItem);
+		this.fillHandler?.(this.currentMenu.focusedMenuItem);
 		if (currHandler && this.fillOnce === currHandler) {
 			this.fillHandler = undefined;
 			this.fillOnce = undefined;

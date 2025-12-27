@@ -2,12 +2,14 @@
 	import type { Controller } from '../../controller.js';
 
 	const { controller }: { controller: Controller } = $props();
+	let label = $derived.by(() => {
+		return `${controller.menu.currentMenu.displayedMenuItemCount} ${controller.menu.currentMenu.displayedMenuItemCount === 1 ? 'item' : 'items'}`;
+	});
 </script>
 
 {#if controller.menu.isMenuOpen}
 	<div class="open">
-		{controller.menu.menuItemCount}
-		{controller.menu.menuItemCount === 1 ? 'item' : 'items'}
+		{label}
 	</div>
 {:else}
 	<div class="closed">--</div>

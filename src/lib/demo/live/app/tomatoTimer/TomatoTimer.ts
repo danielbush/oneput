@@ -815,7 +815,7 @@ class SetDate implements AppObject {
 			);
 		}
 		this.ctl.menu.setMenuItems({ id: 'set-year', items: menuItems });
-		this.ctl.menu.setMenuItemFocus(5, true);
+		this.ctl.menu.focusMenuItemByIndex(5, true);
 		this.ctl.input.setPlaceholder('Select or type in a year...');
 		this.ctl.input.setInputValue(currentYear.toString());
 		this.ctl.input.setSubmitHandler((year) => {
@@ -851,9 +851,9 @@ class SetDate implements AppObject {
 		}
 		this.ctl.menu.setMenuItems({ id: 'set-month', items: menuItems });
 		if (year === new Date().getFullYear()) {
-			this.ctl.menu.setMenuItemFocus(currentMonth, true);
+			this.ctl.menu.focusMenuItemByIndex(currentMonth, true);
 		} else {
-			this.ctl.menu.setMenuItemFocus(0, true);
+			this.ctl.menu.focusMenuItemByIndex(0, true);
 		}
 		this.ctl.input.setPlaceholder('Select or type in a month...');
 	}
@@ -876,9 +876,9 @@ class SetDate implements AppObject {
 		}
 		this.ctl.menu.setMenuItems({ id: 'set-day', items: menuItems });
 		if (year === new Date().getFullYear() && jsmonth === new Date().getMonth()) {
-			this.ctl.menu.setMenuItemFocus(currentDay - 1, true);
+			this.ctl.menu.focusMenuItemByIndex(currentDay - 1, true);
 		} else {
-			this.ctl.menu.setMenuItemFocus(0, true);
+			this.ctl.menu.focusMenuItemByIndex(0, true);
 		}
 		this.ctl.input.setPlaceholder('Select or type in a day...');
 	}
@@ -943,7 +943,7 @@ class SetTime implements AppObject {
 		const currentHour = new Date().getHours();
 		const currentMinute = new Date().getMinutes();
 		this.ctl.menu.setMenuItems({ id: 'main', items: this.menuItems });
-		this.ctl.menu.setMenuItemFocus(
+		this.ctl.menu.focusMenuItemByIndex(
 			this.menuItems.findIndex((item) => {
 				const { hour, minute } = item.data as { hour: number; minute: number };
 				if (hour === currentHour) {

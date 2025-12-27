@@ -92,19 +92,16 @@ export class MenuController {
 		if (this.disableActions) {
 			return;
 		}
-		if (this.currentMenuItem) {
-			if (this.currentMenuItem.action) {
-				// GOTCHA - call this before calling the action.  If the action
-				// runs a new appObject, we'll break the tracking logic in
-				// AppController.
-				if (this.currentMenuId) {
-					this.ctl.events.emit({
-						type: 'menu-action',
-						payload: { menuId: this.currentMenuId, menuActionId: this.currentMenuItem.id }
-					});
-				}
-				this.currentMenuItem.action(this.ctl);
-			}
+		const current = this.current;
+		if (current?.menuItem.action) {
+			// GOTCHA - call this before calling the action.  If the action
+			// runs a new appObject, we'll break the tracking logic in
+			// AppController.
+			this.ctl.events.emit({
+				type: 'menu-action',
+				payload: { menuId: current.menuId, menuActionId: current.menuItem.id }
+			});
+			current.menuItem.action(this.ctl);
 		}
 	}
 
@@ -130,6 +127,22 @@ export class MenuController {
 
 	get currentMenuItem() {
 		return this.ctl.currentProps.menuItems?.[this.menuItemFocus];
+	}
+
+	/**
+	 * Get current menu and focused item.
+	 *
+	 * Uses an all or nothing approach.
+	 */
+	get current() {
+		const currentMenuItem = this.currentMenuItem;
+		if (currentMenuItem && this.currentMenuId) {
+			return {
+				menuItem: currentMenuItem,
+				menuId: this.currentMenuId
+			};
+		}
+		return null;
 	}
 
 	// #endregion

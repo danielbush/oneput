@@ -94,13 +94,16 @@ export class MenuController {
 		}
 		if (this.currentMenuItem) {
 			if (this.currentMenuItem.action) {
-				this.currentMenuItem.action(this.ctl);
+				// GOTCHA - call this before calling the action.  If the action
+				// runs a new appObject, we'll break the tracking logic in
+				// AppController.
 				if (this.currentMenuId) {
 					this.ctl.events.emit({
 						type: 'menu-action',
 						payload: { menuId: this.currentMenuId, menuActionId: this.currentMenuItem.id }
 					});
 				}
+				this.currentMenuItem.action(this.ctl);
 			}
 		}
 	}
@@ -116,9 +119,9 @@ export class MenuController {
 
 	setMenuItems(params: { id: string; focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
 		this.menuItems = params.items;
+		this.currentMenuId = params.id;
 		this._setMenuItems(params);
 		this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
-		this.currentMenuId = params.id;
 	}
 
 	get menuItemCount() {
@@ -322,6 +325,13 @@ export class MenuController {
 		}
 	}
 
+	focusMenuItemById(id: string) {
+		const index = this.ctl.currentProps.menuItems?.findIndex((item) => item.id === id);
+		if (index !== undefined && index !== -1) {
+			this.setMenuItemFocus(index, true);
+		}
+	}
+
 	setDefaultFocusBehaviour(behaviour: FocusBehaviour) {
 		this.defaultFocusBehaviour = behaviour;
 	}
@@ -339,6 +349,13 @@ export class MenuController {
 	}
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
+		if (this.currentMenuId) {
+			const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenuId);
+			if (lastActionId) {
+				this.focusMenuItemById(lastActionId);
+				return;
+			}
+		}
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
 		if (behaviour === 'none') {
 			return;

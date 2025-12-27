@@ -1,23 +1,48 @@
 import type { Controller } from './controller.js';
 import type { AppObject } from './lib/lib.js';
 
+class AppVal {
+	static create(app: AppObject) {
+		return new AppVal(app);
+	}
+
+	constructor(app: AppObject) {
+		this.app = app;
+	}
+
+	app: AppObject;
+	lastMenuActions: Record<string, string> = {};
+
+	setLastMenuActionId(menuId: string, menuActionId: string) {
+		this.lastMenuActions[menuId] = menuActionId;
+	}
+
+	getLastMenuActionId(menuId: string) {
+		return this.lastMenuActions[menuId];
+	}
+}
+
 export class AppController {
 	public static create(ctl: Controller) {
 		return new AppController(ctl);
 	}
 
-	constructor(private ctl: Controller) {}
-
-	private appParents: AppObject[] = [];
-	private _currentApp: AppObject | null = null;
-
-	private get currentApp() {
-		return this._currentApp;
+	constructor(private ctl: Controller) {
+		ctl.events.on('menu-action', ({ menuId, menuActionId }) => {
+			this.current?.setLastMenuActionId(menuId, menuActionId);
+		});
 	}
 
-	private set currentApp(app: AppObject | null) {
+	private appParents: AppVal[] = [];
+	private _current: AppVal | null = null;
+
+	private get current() {
+		return this._current || null;
+	}
+
+	private set current(appVal: AppVal | null) {
 		// console.warn('currentApp is now', app);
-		this._currentApp = app;
+		this._current = appVal;
 	}
 
 	private disableGoBack = false;
@@ -44,11 +69,11 @@ export class AppController {
 	private beforeRun() {
 		// Events
 		this.unsubscribeMenuItemFocus?.();
-		if (this.currentApp?.onMenuItemFocus) {
+		if (this.current?.app.onMenuItemFocus) {
 			this.unsubscribeMenuItemFocus = this.ctl.events.on(
 				'menu-item-focus',
 				({ index, menuItem }) => {
-					this.currentApp?.onMenuItemFocus?.({ index, menuItem });
+					this.current?.app.onMenuItemFocus?.({ index, menuItem });
 				}
 			);
 		}
@@ -74,15 +99,16 @@ export class AppController {
 	}
 
 	private runBeforeExit() {
-		this.currentApp?.beforeExit?.();
+		this.current?.app.beforeExit?.();
 	}
 
 	run<R = unknown>(appObject: AppObject<R>) {
+		console.log('run', { appObject });
 		this.runBeforeExit();
-		if (this.currentApp) {
-			this.appParents.push(this.currentApp);
+		if (this.current) {
+			this.appParents.push(this.current);
 		}
-		this.currentApp = appObject as AppObject;
+		this.current = AppVal.create(appObject as AppObject);
 		this.beforeRun();
 		appObject.onStart();
 	}
@@ -93,14 +119,14 @@ export class AppController {
 
 	private pop = (result?: { payload: unknown }) => {
 		this.runBeforeExit();
-		const appObject = this.appParents.pop();
-		if (appObject) {
-			this.currentApp = appObject;
+		const appVal = this.appParents.pop();
+		if (appVal) {
+			this.current = appVal;
 			this.beforeRun();
-			if (appObject.onResume) {
-				appObject.onResume?.(result);
+			if (appVal.app.onResume) {
+				appVal.app.onResume(result);
 			} else {
-				appObject.onStart();
+				appVal.app.onStart();
 			}
 			return;
 		}
@@ -114,11 +140,15 @@ export class AppController {
 		if (this.disableGoBack) {
 			return;
 		}
-		if (this.currentApp?.onBack) {
-			this.currentApp.onBack();
+		if (this.current?.app.onBack) {
+			this.current.app.onBack();
 			return;
 		}
 		this.pop();
 		return;
 	};
+
+	getLastMenuActionId(menuId: string) {
+		return this.current?.getLastMenuActionId(menuId);
+	}
 }

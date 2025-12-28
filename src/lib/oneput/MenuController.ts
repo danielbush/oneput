@@ -391,7 +391,7 @@ export class MenuController {
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
 		switch (behaviour) {
 			case 'last-action,first': {
-				const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenu.menuId);
+				const { lastActionId } = this.ctl.app.getCurrentMenu();
 				if (lastActionId) {
 					this.focusMenuItemById(lastActionId);
 					return;

@@ -12,9 +12,14 @@ class AppVal {
 
 	app: AppObject;
 	lastMenuActions: Record<string, string> = {};
+	menuId: string | null = null;
 
 	setLastMenuActionId(menuId: string, menuActionId: string) {
 		this.lastMenuActions[menuId] = menuActionId;
+	}
+
+	setMenuId(menuId: string) {
+		this.menuId = menuId;
 	}
 
 	getLastMenuActionId(menuId: string) {
@@ -28,6 +33,9 @@ export class AppController {
 	}
 
 	constructor(private ctl: Controller) {
+		ctl.events.on('set-menu-items', ({ menuId }) => {
+			this.current?.setMenuId(menuId);
+		});
 		ctl.events.on('menu-action', ({ menuId, menuActionId }) => {
 			this.current?.setLastMenuActionId(menuId, menuActionId);
 		});
@@ -148,7 +156,18 @@ export class AppController {
 		return;
 	};
 
-	getLastMenuActionId(menuId: string) {
-		return this.current?.getLastMenuActionId(menuId);
+	/**
+	 * Returns the menu id for the last call to setMenuItems within the current
+	 * appObject.
+	 *
+	 * NOTE: it seems easier to put this in menu controller, but for the fact
+	 * that menu id's and actions are scoped by appObjects.   So we implement it
+	 * here and return values only for the current appObject.
+	 */
+	getCurrentMenu() {
+		return {
+			menuId: this.current?.menuId,
+			lastActionId: this.current?.menuId && this.current?.getLastMenuActionId(this.current.menuId)
+		};
 	}
 }

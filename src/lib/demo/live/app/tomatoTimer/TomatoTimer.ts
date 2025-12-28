@@ -548,9 +548,11 @@ class AddEntryUI implements AppObject {
 			menuTitle: 'Add entry...'
 		});
 		this.ctl.menu.clearMenuItemsFn();
-		this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'first', items: this.menuItems });
-		// IMPORTANT: This triggers men-item-focus handler above and puts us into edit mode.
-		this.ctl.menu.focusFirstMenuItem();
+		this.ctl.menu.setMenuItems({
+			id: 'main',
+			focusBehaviour: 'last-action,first',
+			items: this.menuItems
+		});
 	}
 
 	get menuItems() {

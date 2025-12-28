@@ -12,7 +12,7 @@ class AppVal {
 
 	app: AppObject;
 	lastMenuActions: Record<string, string> = {};
-	menuId: string | null = null;
+	menuId?: string;
 
 	setLastMenuActionId(menuId: string, menuActionId: string) {
 		this.lastMenuActions[menuId] = menuActionId;
@@ -149,7 +149,8 @@ export class AppController {
 			return;
 		}
 		if (this.current?.app.onBack) {
-			this.current.app.onBack();
+			const menu = this.getCurrentMenu();
+			this.current.app.onBack({ menu });
 			return;
 		}
 		this.pop();

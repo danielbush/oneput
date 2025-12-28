@@ -90,33 +90,34 @@ export class TomatoTimer implements AppObject {
 	 * If we start a timer, we don't want to go back to the "noTimer" ui, so we
 	 * use onBack to handle all back actions.
 	 */
-	onBack = () => {
-		const mainUI = () => {
-			if (this.timerValue) {
-				this.timerUI(this.timerValue);
-				return;
-			}
-			this.noTimerUI();
-		};
+	onBack: AppObject['onBack'] = ({ menu }) => {
+		console.log('onBack', { menu });
 		switch (this.currentUI) {
 			case 'createTimerUI':
 			case 'addEntryUI':
 			case 'previousSessionsUI':
-				this.ctl.app.reset();
-				mainUI();
+				this.mainUI();
 				return;
 			case 'editSessionUI':
-				this.ctl.app.reset();
 				this.previousSessionsUI();
 				return;
 		}
 		this.ctl.app.exit();
 	};
 
+	private mainUI = () => {
+		if (this.timerValue) {
+			this.timerUI(this.timerValue);
+			return;
+		}
+		this.noTimerUI();
+	};
+
 	/**
 	 * The UI we see if there is no existing timer.
 	 */
 	private noTimerUI() {
+		this.ctl.app.reset();
 		this.currentUI = 'noTimerUI';
 		this.ctl.ui.update({
 			menuTitle: 'No timer running'
@@ -129,7 +130,6 @@ export class TomatoTimer implements AppObject {
 					textContent: '30 Minutes',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 					action: () => {
-						this.ctl.app.reset();
 						this.createTimerUI({ duration: 30 * 60 });
 					}
 				}),
@@ -148,7 +148,6 @@ export class TomatoTimer implements AppObject {
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.ctl.app.reset();
 						this.previousSessionsUI();
 					}
 				})
@@ -160,12 +159,12 @@ export class TomatoTimer implements AppObject {
 				: 'Enter value and submit...';
 		});
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.ctl.app.reset();
 			this.createTimerUI({ duration: parseFloat(duration) * 60 });
 		});
 	}
 
 	private createTimerUI({ duration }: { duration: number }) {
+		this.ctl.app.reset();
 		this.currentUI = 'createTimerUI';
 		this.ctl.ui.update({
 			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
@@ -184,12 +183,10 @@ export class TomatoTimer implements AppObject {
 			this.store
 				.putCurrentSession(timerValue.record as UnfinishedSession)
 				.andTee(() => {
-					this.ctl.app.reset();
 					this.timerUI(timerValue);
 				})
 				.orTee((err) => {
 					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-					this.ctl.app.reset();
 					this.noTimerUI();
 				});
 		};
@@ -232,6 +229,7 @@ export class TomatoTimer implements AppObject {
 	 * The UI we see if there is an existing timer.
 	 */
 	private timerUI(timerValue: TomatoTimerValue) {
+		this.ctl.app.reset();
 		this.currentUI = 'timerUI';
 		this.ctl.ui.update({
 			menuTitle: 'Running timer... Seize the day!'
@@ -280,7 +278,6 @@ export class TomatoTimer implements AppObject {
 					textContent: 'Previous sessions...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 					action: () => {
-						this.ctl.app.reset();
 						this.previousSessionsUI();
 					}
 				}),
@@ -298,7 +295,6 @@ export class TomatoTimer implements AppObject {
 						this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
 							this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 						});
-						this.ctl.app.reset();
 						this.timerUI(timerValue);
 					}
 				}),
@@ -314,12 +310,10 @@ export class TomatoTimer implements AppObject {
 							.andThen(() => this.store.deleteCurrentSession())
 							.andTee(() => {
 								this.ctl.notify('Session saved', { duration: 3000 });
-								this.ctl.app.reset();
 								this.noTimerUI();
 							})
 							.orTee((err) => {
 								this.ctl.alert({ message: 'Error saving session', additional: err.message });
-								this.ctl.app.reset();
 								this.noTimerUI();
 							});
 					}
@@ -329,6 +323,7 @@ export class TomatoTimer implements AppObject {
 					textContent: 'Cancel',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
 					action: () => {
+						this.timerValue = null;
 						this.store
 							.deleteCurrentSession()
 							.orTee((err) => {
@@ -336,13 +331,11 @@ export class TomatoTimer implements AppObject {
 									message: 'Error deleting current session',
 									additional: err.message
 								});
-								this.ctl.app.reset();
-								this.noTimerUI();
+								this.mainUI();
 							})
 							.andTee(() => {
 								this.ctl.notify('Current session deleted', { duration: 3000 });
-								this.ctl.app.reset();
-								this.noTimerUI();
+								this.mainUI();
 							});
 					}
 				})
@@ -351,6 +344,7 @@ export class TomatoTimer implements AppObject {
 	}
 
 	private previousSessionsUI() {
+		this.ctl.app.reset();
 		this.currentUI = 'previousSessionsUI';
 		this.ctl.ui.update({
 			menuTitle: 'Previous sessions'
@@ -370,7 +364,6 @@ export class TomatoTimer implements AppObject {
 							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
 						],
 						action: () => {
-							this.ctl.app.reset();
 							this.editEntryUI(session);
 						}
 					});
@@ -380,6 +373,7 @@ export class TomatoTimer implements AppObject {
 	}
 
 	private editEntryUI(session: FinishedSessionRecord) {
+		this.ctl.app.reset();
 		this.currentUI = 'editSessionUI';
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
@@ -431,7 +425,6 @@ export class TomatoTimer implements AppObject {
 									// Refresh this ui to update the display.
 									// We could just call setMenuItems again.
 									// Using consistent id's will mean only a small part of the DOM will change.
-									this.ctl.app.reset();
 									this.editEntryUI(newSession);
 								})
 								.orTee((err) => {
@@ -456,7 +449,6 @@ export class TomatoTimer implements AppObject {
 							this.store.deleteSession(session).andTee(() => {
 								this.ctl.notify('Session deleted', { duration: 3000 });
 							});
-							this.ctl.app.reset();
 							this.previousSessionsUI();
 							return;
 						}
@@ -797,6 +789,7 @@ class SetDate implements AppObject {
 	}
 
 	private setYear() {
+		this.ctl.app.reset();
 		this.currentUI = 'setYear';
 		const currentYear = new Date().getFullYear();
 		const menuItems: MenuItem[] = [];
@@ -807,7 +800,6 @@ class SetDate implements AppObject {
 					textContent: year.toString(),
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.ctl.app.reset();
 						this.data = { year };
 						this.setMonth();
 					}
@@ -824,13 +816,13 @@ class SetDate implements AppObject {
 				this.ctl.notify('Could not parse a number for year', { duration: 3000 });
 				return;
 			}
-			this.ctl.app.reset();
 			this.data = { year: parsedYear };
 			this.setMonth();
 		});
 	}
 
 	private setMonth() {
+		this.ctl.app.reset();
 		const { year } = this.data as { year: number };
 		this.currentUI = 'setMonth';
 		const currentMonth = new Date().getMonth();
@@ -842,7 +834,6 @@ class SetDate implements AppObject {
 					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.ctl.app.reset();
 						this.data = { year, jsmonth };
 						this.setDay();
 					}
@@ -859,6 +850,7 @@ class SetDate implements AppObject {
 	}
 
 	private setDay() {
+		this.ctl.app.reset();
 		const { year, jsmonth } = this.data as { year: number; jsmonth: number };
 		this.currentUI = 'setDay';
 		const currentDay = new Date().getDate();

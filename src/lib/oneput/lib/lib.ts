@@ -138,7 +138,7 @@ export type FChildParams = {
 	voidElements?: Set<string | undefined>;
 };
 
-export type AppObject<R = unknown> = {
+export interface AppObject<R = unknown> {
 	onStart: () => void;
 	/**
 	 * Called when a child AppObject that is run with ctl.app.run(...) calls
@@ -156,9 +156,9 @@ export type AppObject<R = unknown> = {
 	/**
 	 * Handles a user or programmatic to go back to the parent appObject that ran this instance.
 	 */
-	onBack?: () => void;
+	onBack?: (params: { menu: { menuId?: string; lastActionId?: string } }) => void;
 	onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
-};
+}
 
 export const defaultVoidElements = new Set([
 	'area',

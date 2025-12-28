@@ -185,7 +185,7 @@ export class Layout implements UILayout {
 							...this.additional.outerRight(b)
 						}
 					: b.fchild({
-							// GOTCHA: if outerRight is invoked above but has the same id
+							// TODO: if outerRight is invoked above but has the same id
 							// then any onMount destructor callback will not get called!
 							// If we use a random id here, there is practically
 							// no way for outerRight to re-use the same it.

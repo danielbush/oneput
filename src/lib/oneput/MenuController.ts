@@ -157,7 +157,7 @@ export class MenuController {
 		}
 		const current = this.currentMenu;
 		if (current.focusedMenuItem?.action) {
-			// GOTCHA - call this before calling the action.  If the action
+			// TODO: call this before calling the action.  If the action
 			// runs a new appObject, we'll break the tracking logic in
 			// AppController.
 			this.ctl.events.emit({

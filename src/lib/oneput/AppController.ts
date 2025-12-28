@@ -25,6 +25,10 @@ class AppVal {
 	getLastMenuActionId(menuId: string) {
 		return this.lastMenuActions[menuId];
 	}
+
+	menuExists(menuId: string) {
+		return Object.keys(this.lastMenuActions).includes(menuId);
+	}
 }
 
 export class AppController {
@@ -149,7 +153,7 @@ export class AppController {
 			return;
 		}
 		if (this.current?.app.onBack) {
-			const menu = this.getCurrentMenu();
+			const menu = this.getMenu();
 			this.current.app.onBack({ menu });
 			return;
 		}
@@ -158,17 +162,25 @@ export class AppController {
 	};
 
 	/**
-	 * Returns the menu id for the last call to setMenuItems within the current
-	 * appObject.
+	 * Returns details about the menu with menuId including the last action that
+	 * was fired.  If menuId is not provided, it will return details about the
+	 * last menu that was set via setMenuItems.
+	 *
+	 * Assumes you have called setMenuItems within the current appObject with
+	 * the given id.
 	 *
 	 * NOTE: it seems easier to put this in menu controller, but for the fact
 	 * that menu id's and actions are scoped by appObjects.   So we implement it
 	 * here and return values only for the current appObject.
 	 */
-	getCurrentMenu() {
+	getMenu(menuId?: string) {
+		if (!menuId) {
+			menuId = this.current?.menuId;
+		}
 		return {
-			menuId: this.current?.menuId,
-			lastActionId: this.current?.menuId && this.current?.getLastMenuActionId(this.current.menuId)
+			menuId,
+			lastActionId: menuId && this.current?.getLastMenuActionId(menuId),
+			exists: !!menuId && this.current?.menuExists(menuId)
 		};
 	}
 }

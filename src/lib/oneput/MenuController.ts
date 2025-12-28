@@ -365,7 +365,9 @@ export class MenuController {
 	}
 
 	focusMenuItemById(id: string) {
-		const index = this.ctl.currentProps.menuItems?.findIndex((item) => item.id === id);
+		const index = this.ctl.currentProps.menuItems?.findIndex((item) => {
+			return item.id === id;
+		});
 		if (index !== undefined && index !== -1) {
 			this.focusMenuItemByIndex(index, true);
 		}
@@ -391,7 +393,7 @@ export class MenuController {
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
 		switch (behaviour) {
 			case 'last-action,first': {
-				const { lastActionId } = this.ctl.app.getCurrentMenu();
+				const { lastActionId } = this.ctl.app.getMenu(this.currentMenu.menuId);
 				if (lastActionId) {
 					this.focusMenuItemById(lastActionId);
 					return;

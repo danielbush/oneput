@@ -45,13 +45,6 @@ export class TomatoTimer implements AppObject {
 		}
 	};
 
-	private currentUI:
-		| 'noTimerUI'
-		| 'timerUI'
-		| 'createTimerUI'
-		| 'previousSessionsUI'
-		| 'editSessionUI'
-		| 'addEntryUI' = 'noTimerUI';
 	private timerValue: TomatoTimerValue | null = null;
 
 	onStart() {
@@ -91,8 +84,7 @@ export class TomatoTimer implements AppObject {
 	 * use onBack to handle all back actions.
 	 */
 	onBack: AppObject['onBack'] = ({ menu }) => {
-		console.log('onBack', { menu });
-		switch (this.currentUI) {
+		switch (menu.menuId) {
 			case 'createTimerUI':
 			case 'addEntryUI':
 			case 'previousSessionsUI':
@@ -118,12 +110,11 @@ export class TomatoTimer implements AppObject {
 	 */
 	private noTimerUI() {
 		this.ctl.app.reset();
-		this.currentUI = 'noTimerUI';
 		this.ctl.ui.update({
 			menuTitle: 'No timer running'
 		});
 		this.ctl.menu.setMenuItems({
-			id: 'no-timer',
+			id: 'noTimerUI',
 			items: [
 				stdMenuItem({
 					id: 'tomato-start',
@@ -138,7 +129,6 @@ export class TomatoTimer implements AppObject {
 					textContent: 'Add entry...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 					action: () => {
-						this.currentUI = 'addEntryUI';
 						this.ctl.app.run(this.addEntryUI);
 					}
 				}),
@@ -165,7 +155,6 @@ export class TomatoTimer implements AppObject {
 
 	private createTimerUI({ duration }: { duration: number }) {
 		this.ctl.app.reset();
-		this.currentUI = 'createTimerUI';
 		this.ctl.ui.update({
 			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
@@ -192,7 +181,7 @@ export class TomatoTimer implements AppObject {
 		};
 
 		this.ctl.menu.setMenuItems({
-			id: 'create-timer',
+			id: 'createTimerUI',
 			items: [
 				stdMenuItem({
 					id: 'tomato-timer-no-label',
@@ -230,12 +219,11 @@ export class TomatoTimer implements AppObject {
 	 */
 	private timerUI(timerValue: TomatoTimerValue) {
 		this.ctl.app.reset();
-		this.currentUI = 'timerUI';
 		this.ctl.ui.update({
 			menuTitle: 'Running timer... Seize the day!'
 		});
 		this.ctl.menu.setMenuItems({
-			id: 'timer',
+			id: 'timerUI',
 			items: [
 				// It is possible to have a timer without mounting a svelte
 				// component that handles the timer.  We just render timerUI
@@ -345,14 +333,13 @@ export class TomatoTimer implements AppObject {
 
 	private previousSessionsUI() {
 		this.ctl.app.reset();
-		this.currentUI = 'previousSessionsUI';
 		this.ctl.ui.update({
 			menuTitle: 'Previous sessions'
 		});
 		this.ctl.input.setPlaceholder('Select a session...');
 		this.store.getFinishedSessions().andTee((sessions) => {
 			this.ctl.menu.setMenuItems({
-				id: 'previous-session',
+				id: 'previousSessionsUI',
 				items: sessions.map((session) => {
 					const v = TomatoTimerValue.create(session);
 					return stdMenuItem({
@@ -374,14 +361,13 @@ export class TomatoTimer implements AppObject {
 
 	private editEntryUI(session: FinishedSessionRecord) {
 		this.ctl.app.reset();
-		this.currentUI = 'editSessionUI';
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
 			menuTitle: 'Edit session...'
 		});
 		this.ctl.input.setPlaceholder('Select an action...');
 		this.ctl.menu.setMenuItems({
-			id: 'edit-entry',
+			id: 'editSessionUI',
 			items: [
 				menuItem({
 					id: 'tomato-timer-session-details',
@@ -759,11 +745,10 @@ class SetDate implements AppObject {
 
 	constructor(private ctl: Controller) {}
 
-	private currentUI: 'setYear' | 'setMonth' | 'setDay' = 'setYear';
 	private data?: Partial<{ year: number; month: number; jsmonth: number; day: number }>;
 
-	onBack = () => {
-		switch (this.currentUI) {
+	onBack: AppObject['onBack'] = ({ menu }) => {
+		switch (menu.menuId) {
 			case 'setMonth':
 				this.setYear();
 				break;
@@ -790,7 +775,6 @@ class SetDate implements AppObject {
 
 	private setYear() {
 		this.ctl.app.reset();
-		this.currentUI = 'setYear';
 		const currentYear = new Date().getFullYear();
 		const menuItems: MenuItem[] = [];
 		for (let year = currentYear - 5; year < currentYear + 5; year++) {
@@ -806,7 +790,7 @@ class SetDate implements AppObject {
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems({ id: 'set-year', items: menuItems });
+		this.ctl.menu.setMenuItems({ id: 'setYear', items: menuItems });
 		this.ctl.menu.focusMenuItemByIndex(5, true);
 		this.ctl.input.setPlaceholder('Select or type in a year...');
 		this.ctl.input.setInputValue(currentYear.toString());
@@ -824,7 +808,6 @@ class SetDate implements AppObject {
 	private setMonth() {
 		this.ctl.app.reset();
 		const { year } = this.data as { year: number };
-		this.currentUI = 'setMonth';
 		const currentMonth = new Date().getMonth();
 		const menuItems: MenuItem[] = [];
 		for (let jsmonth = 0; jsmonth < 12; jsmonth++) {
@@ -840,7 +823,7 @@ class SetDate implements AppObject {
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems({ id: 'set-month', items: menuItems });
+		this.ctl.menu.setMenuItems({ id: 'setMonth', items: menuItems });
 		if (year === new Date().getFullYear()) {
 			this.ctl.menu.focusMenuItemByIndex(currentMonth, true);
 		} else {
@@ -852,7 +835,6 @@ class SetDate implements AppObject {
 	private setDay() {
 		this.ctl.app.reset();
 		const { year, jsmonth } = this.data as { year: number; jsmonth: number };
-		this.currentUI = 'setDay';
 		const currentDay = new Date().getDate();
 		const menuItems: MenuItem[] = [];
 		for (let day = 1; day <= new Date(year, jsmonth + 1, 0).getDate(); day++) {
@@ -866,7 +848,7 @@ class SetDate implements AppObject {
 				})
 			);
 		}
-		this.ctl.menu.setMenuItems({ id: 'set-day', items: menuItems });
+		this.ctl.menu.setMenuItems({ id: 'setDay', items: menuItems });
 		if (year === new Date().getFullYear() && jsmonth === new Date().getMonth()) {
 			this.ctl.menu.focusMenuItemByIndex(currentDay - 1, true);
 		} else {

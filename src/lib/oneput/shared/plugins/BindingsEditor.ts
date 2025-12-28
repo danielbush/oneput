@@ -62,32 +62,29 @@ export class BindingsEditor implements AppObject {
 		this.actionsUI();
 	}
 
-	onBack = () => {
-		switch (this.currentUI) {
-			case 'actionUI':
-				this.actionsUI();
-				break;
-			case 'captureBindingUI':
-				this.actionUI(this.actionId!);
-				break;
-			default:
-				this.ctl.app.exit();
+	onBack: AppObject['onBack'] = ({ menu }) => {
+		if (menu.menuId?.startsWith('actionUI-')) {
+			this.actionsUI();
+			return;
 		}
+		if (menu.menuId === 'captureBindingUI') {
+			this.actionUI(this.actionId!);
+			return;
+		}
+		this.ctl.app.exit();
 	};
 
-	private currentUI = 'actionsUI';
 	private actionId?: string;
 
 	/**
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
-		this.currentUI = 'actionsUI';
 		this.ctl.app.reset();
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
 		this.ctl.ui.update({ menuTitle: title });
 		this.ctl.menu.setMenuItems({
-			id: 'actions',
+			id: 'actionsUI',
 			items: Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
 				keybindingMenuItem({
 					id,
@@ -106,7 +103,6 @@ export class BindingsEditor implements AppObject {
 	 * UI displays bindings for a given action and lets you add/remove bindings.
 	 */
 	private actionUI = (actionId: string) => {
-		this.currentUI = 'actionUI';
 		this.ctl.app.reset();
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
@@ -115,7 +111,8 @@ export class BindingsEditor implements AppObject {
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
 		this.ctl.menu.setMenuItems({
-			id: 'action',
+			id: `actionUI-${actionId}`,
+			focusBehaviour: 'first',
 			items: [
 				stdMenuItem({
 					id: 'add-binding',
@@ -143,7 +140,6 @@ export class BindingsEditor implements AppObject {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
-		this.currentUI = 'captureBindingUI';
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: `Capturing...`,

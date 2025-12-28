@@ -11,7 +11,15 @@ export type MenuItemsFnAsync = (
 	items: MenuItemAny[]
 ) => Promise<Array<MenuItemAny> | undefined>;
 
-type FocusBehaviour = 'first' | 'last' | 'none';
+/**
+ * Focus behaviours decide which item to focus on when a menu is displayed.
+ *
+ * - Comma separated values means: try the first value first, then fall back to the next, etc.
+ * - "last-action" = Try to focus on the last executed action item for a given menu
+ *   - menus are identified by an id in setMenuItems
+ *   - menu id's are scoped to the current appObject
+ */
+type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
 
 class CurrentMenuVal {
 	static create(ctl: Controller, menuId: string) {
@@ -118,7 +126,7 @@ export class MenuController {
 	private disableOpenClose = false;
 	private defaultMenuItemsFn?: MenuItemsFn;
 	private removeMenuItemsListener?: () => void;
-	private defaultFocusBehaviour: FocusBehaviour = 'first';
+	private defaultFocusBehaviour: FocusBehaviour = 'last-action,first';
 	private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
 
 	// #region menu open/close + action
@@ -380,21 +388,25 @@ export class MenuController {
 	}
 
 	private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
-		const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenu.menuId);
-		if (lastActionId) {
-			this.focusMenuItemById(lastActionId);
-			return;
-		}
 		const behaviour = focusBehaviour ?? this.focusBehaviour;
-		if (behaviour === 'none') {
-			return;
-		}
-		if (behaviour === 'first') {
-			this.focusFirstMenuItem();
-		}
-
-		if (behaviour === 'last') {
-			this.focusLastMenuItem();
+		switch (behaviour) {
+			case 'last-action,first': {
+				const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenu.menuId);
+				if (lastActionId) {
+					this.focusMenuItemById(lastActionId);
+					return;
+				}
+				this.focusFirstMenuItem();
+				break;
+			}
+			case 'first':
+				this.focusFirstMenuItem();
+				break;
+			case 'last':
+				this.focusLastMenuItem();
+				break;
+			case 'none':
+				break;
 		}
 	}
 

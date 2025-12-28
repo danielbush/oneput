@@ -49,7 +49,7 @@ export class Layout implements UILayout {
 		private bindingService: LocalBindingsService
 	) {
 		ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
-		ctl.menu.setDefaultFocusBehaviour('first');
+		ctl.menu.setDefaultFocusBehaviour('last-action,first');
 		this.bindingService
 			.getBindings()
 			.andTee((bindings) => {

@@ -168,7 +168,9 @@ export class AddEntry implements AppObject {
 			stdMenuItem({
 				id: 'add-startTime',
 				textContent: this.session.startTime
-					? DateTimeVal.createFromUnixTime(this.session.startTime).dateTimeString + '... (edit)'
+					? 'Start: ' +
+						DateTimeVal.createFromUnixTime(this.session.startTime).dateTimeString +
+						'...'
 					: 'Start time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],

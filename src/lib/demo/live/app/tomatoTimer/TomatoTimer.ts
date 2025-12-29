@@ -25,8 +25,8 @@ export class TomatoTimer implements AppObject {
 				? `Hit ${params.submitBinding} to submit...`
 				: 'Enter value and submit...';
 		});
-		const addEntryUI = AddEntry.create(ctl, {} as Partial<FinishedSession>);
-		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, dynamicPlaceholder, addEntryUI);
+		const addEntry = AddEntry.create(ctl, {} as Partial<FinishedSession>);
+		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, dynamicPlaceholder, addEntry);
 	}
 
 	constructor(
@@ -34,7 +34,7 @@ export class TomatoTimer implements AppObject {
 		private store: Store,
 		private timerDisplay: SveltePropInjector,
 		private dynamicPlaceholder: DynamicPlaceholder,
-		private addEntryUI: AddEntry
+		private addEntry: AddEntry
 	) {}
 
 	beforeExit = () => {
@@ -79,7 +79,6 @@ export class TomatoTimer implements AppObject {
 	onBack: AppObject['onBack'] = ({ menu }) => {
 		switch (menu.menuId) {
 			case 'runCreateTimer':
-			case 'addEntryUI':
 			case 'runPreviousSessions':
 				this.runMain();
 				return;
@@ -122,7 +121,7 @@ export class TomatoTimer implements AppObject {
 					textContent: 'Add entry...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
 					action: () => {
-						this.ctl.app.run(this.addEntryUI);
+						this.ctl.app.run(this.addEntry);
 					}
 				}),
 				stdMenuItem({

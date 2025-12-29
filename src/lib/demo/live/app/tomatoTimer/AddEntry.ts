@@ -6,7 +6,8 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
-import { DateVal } from '$lib/oneput/shared/values/DateVal.js';
+import { TimeVal } from '$lib/oneput/shared/values/TimeVal.js';
+import { DateTimeVal } from '$lib/oneput/shared/values/DateTimeVal.js';
 
 export class AddEntry implements AppObject {
 	static create(ctl: Controller, session: Partial<FinishedSession>) {
@@ -83,10 +84,15 @@ export class AddEntry implements AppObject {
 						? `Enter a duration in minutes and hit ${params.submitBinding}...`
 						: 'Enter duration in minutes and submit...';
 				});
-				this.ctl.input.setInputValue(this.session.duration?.toString() ?? '');
+				if (this.session.duration) {
+					this.ctl.input.setInputValue(TimeVal.createFromSeconds(this.session.duration).timeString);
+				} else {
+					this.ctl.input.setInputValue('');
+				}
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.ctl.clearNotifications();
-					this.session.duration = value === '' ? undefined : parseInt(value);
+					this.session.duration =
+						value === '' ? undefined : TimeVal.createFromTimeString(value).totalSeconds;
 					if (this.session.duration !== undefined && isNaN(this.session.duration)) {
 						this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
 						return;
@@ -152,7 +158,7 @@ export class AddEntry implements AppObject {
 			stdMenuItem({
 				id: 'add-duration',
 				textContent: this.session.duration
-					? `Duration: ${this.session.duration} minutes`
+					? `Duration: ${TimeVal.createFromSeconds(this.session.duration).longTimeString}`
 					: 'Duration...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
 				action: () => {
@@ -162,7 +168,7 @@ export class AddEntry implements AppObject {
 			stdMenuItem({
 				id: 'add-startTime',
 				textContent: this.session.startTime
-					? DateVal.createFromUnixTime(this.session.startTime).dateString + '... (edit)'
+					? DateTimeVal.createFromUnixTime(this.session.startTime).dateTimeString + '... (edit)'
 					: 'Start time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],

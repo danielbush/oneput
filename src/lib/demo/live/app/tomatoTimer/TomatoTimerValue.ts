@@ -29,19 +29,22 @@
 export type TomatoTimerData = {
 	label: string | null;
 	note: string | null;
-	startTime: number; // unix-time
 	/**
-	 * Records when the timer is stopped.
+	 * Records when the timer is started (unix-time).
+	 */
+	startTime: number;
+	/**
+	 * Records when the timer is stopped (unix-time).
 	 *
 	 * This could be at or even after duration because of pausing and overtime.
 	 */
-	endTime: number | null; // unix-time
+	endTime: number | null;
 	/**
-	 * This is the initial duration specified by the user.
+	 * This is the initial duration specified by the user (seconds).
 	 *
-	 * startTiem + duration may not equal endTime because of pausing and overtime.
+	 * startTime + duration may not equal endTime because of pausing and overtime.
 	 */
-	duration: number; // secs
+	duration: number;
 	pauseStartTime: number | null; // unix-time
 	pauseDuration: number; // secs
 };

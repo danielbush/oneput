@@ -1,47 +1,9 @@
 import type { Controller } from '../../controller.js';
 import type { AppObject, MenuItem } from '../../lib/lib.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import * as icons from '$lib/oneput/shared/icons.js';
-
-class DateVal {
-	year: number;
-	month: number;
-	jsmonth: number;
-	day: number;
-
-	constructor(year: number, month: number, day: number) {
-		this.year = year;
-		this.month = month;
-		this.jsmonth = month - 1;
-		this.day = day;
-	}
-
-	get dateString() {
-		return new Date(this.year, this.month - 1, this.day).toLocaleString('default', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		});
-	}
-}
-
-class TimeVal {
-	static create(hour: number, minute: number) {
-		return new TimeVal(hour, minute);
-	}
-
-	hour: number;
-	minute: number;
-
-	constructor(hour: number, minute: number) {
-		this.hour = hour;
-		this.minute = minute;
-	}
-
-	get timeString() {
-		return formatTime(this.hour, this.minute);
-	}
-}
+import * as icons from '../../shared/icons.js';
+import { DateVal } from '../values/DateVal.js';
+import { TimeVal } from '../values/TimeVal.js';
 
 export class SetDateTime implements AppObject<TimeVal | DateVal> {
 	static create(ctl: Controller) {
@@ -252,10 +214,6 @@ class SetDate implements AppObject {
 	}
 }
 
-function formatTime(hour: number, minute: number): string {
-	return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-}
-
 class SetTime implements AppObject {
 	static create(ctl: Controller) {
 		return new SetTime(ctl);
@@ -293,7 +251,7 @@ class SetTime implements AppObject {
 				return;
 			}
 			const { hour, minute } = menuItem?.data as { hour: number; minute: number };
-			this.ctl.input.setInputValue(formatTime(hour, minute));
+			this.ctl.input.setInputValue(TimeVal.create(hour, minute).timeString);
 		});
 		this.ctl.ui.update({
 			menuTitle: 'Set a time...'

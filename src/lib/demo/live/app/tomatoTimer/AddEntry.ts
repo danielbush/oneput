@@ -6,6 +6,7 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import * as icons from '$lib/oneput/shared/icons.js';
 import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
+import { DateVal } from '$lib/oneput/shared/values/DateVal.js';
 
 export class AddEntry implements AppObject {
 	static create(ctl: Controller, session: Partial<FinishedSession>) {
@@ -96,7 +97,7 @@ export class AddEntry implements AppObject {
 			case 'add-startTime':
 				this.ctl.input.setPlaceholder('Set start time and date...');
 				this.ctl.ui.update({ enableInputElement: false });
-				this.ctl.input.setInputValue(String(this.session.startTime ?? ''));
+				this.ctl.input.setInputValue();
 				break;
 		}
 	};
@@ -161,7 +162,7 @@ export class AddEntry implements AppObject {
 			stdMenuItem({
 				id: 'add-startTime',
 				textContent: this.session.startTime
-					? String(this.session.startTime ?? '')
+					? DateVal.createFromUnixTime(this.session.startTime).dateString + '... (edit)'
 					: 'Start time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],

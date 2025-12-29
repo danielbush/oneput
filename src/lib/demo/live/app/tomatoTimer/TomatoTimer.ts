@@ -20,12 +20,21 @@ import { AddEntry } from './AddEntry.js';
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
 		const timerDisplay: SveltePropInjector = SveltePropInjector.create();
+		const entry: FinishedSession = {
+			label: null,
+			note: null,
+			startTime: Date.now() / 1000,
+			duration: 30 * 60,
+			endTime: Date.now() / 1000 + 30 * 60,
+			pauseStartTime: null,
+			pauseDuration: 0
+		};
 		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) => {
 			return params.submitBinding
 				? `Hit ${params.submitBinding} to submit...`
 				: 'Enter value and submit...';
 		});
-		const addEntry = AddEntry.create(ctl, {} as Partial<FinishedSession>);
+		const addEntry = AddEntry.create(ctl, entry);
 		return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, dynamicPlaceholder, addEntry);
 	}
 

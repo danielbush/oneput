@@ -33,7 +33,7 @@ export type TomatoTimerData = {
 	/**
 	 * Records when the timer is stopped.
 	 *
-	 * This could be at or even after duration.  We'll allow overtime.
+	 * This could be at or even after duration because of pausing and overtime.
 	 */
 	endTime: number | null; // unix-time
 	/**

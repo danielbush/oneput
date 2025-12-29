@@ -3,7 +3,7 @@
  */
 import { KeyEventBindings, type KeyBindingMapSerializable } from '../../lib/bindings.js';
 import type { Controller } from '../../controller.js';
-import { GlobalFilter } from '../plugins/GlobalFilter.js';
+import { GlobalFilter } from '../appObjects/GlobalFilter.js';
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
 	openMenu: (c) => {

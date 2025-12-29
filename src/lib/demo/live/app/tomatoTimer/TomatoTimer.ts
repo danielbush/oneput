@@ -48,13 +48,6 @@ export class TomatoTimer implements AppObject {
 	private timerValue: TomatoTimerValue | null = null;
 
 	onStart() {
-		this.run();
-	}
-
-	/**
-	 * This is the entry point that loads the tomato timer ui.
-	 */
-	run() {
 		this.ctl.ui.update({
 			menuTitle: 'Tomato Timer'
 		});
@@ -150,67 +143,6 @@ export class TomatoTimer implements AppObject {
 		});
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
 			this.runCreateTimer({ duration: parseFloat(duration) * 60 });
-		});
-	}
-
-	private runCreateTimer({ duration }: { duration: number }) {
-		this.ctl.app.reset();
-		this.ctl.ui.update({
-			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
-		});
-		this.dynamicPlaceholder.setPlaceholder((params) => {
-			return params.submitBinding
-				? `Enter a label and hit ${params.submitBinding}...`
-				: 'Enter value and submit...';
-		});
-
-		const startTimer = (label?: string) => {
-			const timerValue = TomatoTimerValue.start({
-				duration,
-				label
-			});
-			this.store
-				.putCurrentSession(timerValue.record as UnfinishedSession)
-				.andTee(() => {
-					this.runMainWithTimer(timerValue);
-				})
-				.orTee((err) => {
-					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-					this.runMainNoTimer();
-				});
-		};
-
-		this.ctl.menu.setMenuItems({
-			id: 'runCreateTimer',
-			items: [
-				stdMenuItem({
-					id: 'tomato-timer-no-label',
-					textContent: 'Start with no label',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
-					action: () => {
-						startTimer();
-					}
-				})
-			]
-		});
-
-		this.ctl.input.setSubmitHandlerOnce((label) => {
-			startTimer(label);
-		});
-
-		this.ctl.ui.setInputUI((inputUI) => {
-			return {
-				...inputUI,
-				right: hflex({
-					children: (b) => [
-						b.iconButton({
-							title: 'Add',
-							innerHTMLUnsafe: icons.tickIcon
-						}),
-						b.iconButton({ title: 'Cancel', innerHTMLUnsafe: icons.xIcon })
-					]
-				})
-			};
 		});
 	}
 
@@ -328,6 +260,67 @@ export class TomatoTimer implements AppObject {
 					}
 				})
 			]
+		});
+	}
+
+	private runCreateTimer({ duration }: { duration: number }) {
+		this.ctl.app.reset();
+		this.ctl.ui.update({
+			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
+		});
+		this.dynamicPlaceholder.setPlaceholder((params) => {
+			return params.submitBinding
+				? `Enter a label and hit ${params.submitBinding}...`
+				: 'Enter value and submit...';
+		});
+
+		const startTimer = (label?: string) => {
+			const timerValue = TomatoTimerValue.start({
+				duration,
+				label
+			});
+			this.store
+				.putCurrentSession(timerValue.record as UnfinishedSession)
+				.andTee(() => {
+					this.runMainWithTimer(timerValue);
+				})
+				.orTee((err) => {
+					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
+					this.runMainNoTimer();
+				});
+		};
+
+		this.ctl.menu.setMenuItems({
+			id: 'runCreateTimer',
+			items: [
+				stdMenuItem({
+					id: 'tomato-timer-no-label',
+					textContent: 'Start with no label',
+					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+					action: () => {
+						startTimer();
+					}
+				})
+			]
+		});
+
+		this.ctl.input.setSubmitHandlerOnce((label) => {
+			startTimer(label);
+		});
+
+		this.ctl.ui.setInputUI((inputUI) => {
+			return {
+				...inputUI,
+				right: hflex({
+					children: (b) => [
+						b.iconButton({
+							title: 'Add',
+							innerHTMLUnsafe: icons.tickIcon
+						}),
+						b.iconButton({ title: 'Cancel', innerHTMLUnsafe: icons.xIcon })
+					]
+				})
+			};
 		});
 	}
 

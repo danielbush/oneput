@@ -1,7 +1,7 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
 import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
-import { checkboxMenuItem } from '$lib/oneput/shared/ui/checkboxMenuItem.js';
+import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/infoMenuItem.js';

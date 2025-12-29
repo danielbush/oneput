@@ -1,6 +1,6 @@
-import type { MenuItem } from '../../lib/lib.js';
-import { menuItem, type BuilderMenuItem } from '../../lib/builder.js';
-import { infoIcon } from '../icons.js';
+import type { MenuItem } from '../../../lib/lib.js';
+import { menuItem, type BuilderMenuItem } from '../../../lib/builder.js';
+import { infoIcon } from '../../icons.js';
 
 export function infoMenuItem(
 	id: string,

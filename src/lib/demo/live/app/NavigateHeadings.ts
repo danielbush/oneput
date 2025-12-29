@@ -35,7 +35,11 @@ export class NavigateHeadings implements AppObject {
 			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 			// Reset the input and menu:
 			this.ctl.input.setInputValue();
-			this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: menuItems });
+			this.ctl.menu.setMenuItems({
+				id: 'main',
+				focusBehaviour: 'last-action,first',
+				items: menuItems
+			});
 		};
 		const menuItem = (heading: HTMLElement) =>
 			stdMenuItem({

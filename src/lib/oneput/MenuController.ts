@@ -370,7 +370,9 @@ export class MenuController {
 		});
 		if (index !== undefined && index !== -1) {
 			this.focusMenuItemByIndex(index, true);
+			return true;
 		}
+		return false;
 	}
 
 	setDefaultFocusBehaviour(behaviour: FocusBehaviour) {
@@ -395,8 +397,9 @@ export class MenuController {
 			case 'last-action,first': {
 				const { lastActionId } = this.ctl.app.getMenu(this.currentMenu.menuId);
 				if (lastActionId) {
-					this.focusMenuItemById(lastActionId);
-					return;
+					if (this.focusMenuItemById(lastActionId)) {
+						return;
+					}
 				}
 				this.focusFirstMenuItem();
 				break;

@@ -37,14 +37,15 @@ export class UIController {
 		return this.layout as D;
 	}
 
-	private calcLayoutFlags(settings: UILayoutSettings) {
-		const flags = {
-			enableGoBack: settings.enableGoBack || !settings.enableModal,
-			enableMenuOpenClose: settings.enableMenuOpenClose || !settings.enableModal,
-			enableKeys: settings.enableKeys || !settings.enableModal,
-			enableMenuActions: settings.enableMenuActions || !settings.enableModal,
-			enableMenuItemsFn: settings.enableMenuItemsFn || !settings.enableModal,
-			enableInputElement: settings.enableInputElement || !settings.enableModal
+	private calcLayoutFlags(settings: Omit<UILayoutSettings, 'menuTitle'>) {
+		const enableModal = settings.enableModal ?? false;
+		const flags: UILayoutSettings = {
+			enableGoBack: settings.enableGoBack ?? !enableModal,
+			enableMenuOpenClose: settings.enableMenuOpenClose ?? !enableModal,
+			enableKeys: settings.enableKeys ?? !enableModal,
+			enableMenuActions: settings.enableMenuActions ?? !enableModal,
+			enableMenuItemsFn: settings.enableMenuItemsFn ?? !enableModal,
+			enableInputElement: settings.enableInputElement ?? !enableModal
 		};
 		return flags;
 	}

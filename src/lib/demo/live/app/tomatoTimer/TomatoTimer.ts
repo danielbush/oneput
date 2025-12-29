@@ -67,15 +67,15 @@ export class TomatoTimer implements AppObject {
 			})
 			.andTee((rec) => {
 				if (!rec) {
-					this.noTimerUI();
+					this.runMainNoTimer();
 					return;
 				}
 				this.timerValue = TomatoTimerValue.create(rec);
 				if (this.timerValue.isFinished) {
-					this.noTimerUI();
+					this.runMainNoTimer();
 					return;
 				}
-				this.timerUI(this.timerValue);
+				this.runMainWithTimer(this.timerValue);
 			});
 	}
 
@@ -85,43 +85,43 @@ export class TomatoTimer implements AppObject {
 	 */
 	onBack: AppObject['onBack'] = ({ menu }) => {
 		switch (menu.menuId) {
-			case 'createTimerUI':
+			case 'runCreateTimer':
 			case 'addEntryUI':
-			case 'previousSessionsUI':
-				this.mainUI();
+			case 'runPreviousSessions':
+				this.runMain();
 				return;
-			case 'editSessionUI':
-				this.previousSessionsUI();
+			case 'runEditEntry':
+				this.runPreviousSessions();
 				return;
 		}
 		this.ctl.app.exit();
 	};
 
-	private mainUI = () => {
+	private runMain = () => {
 		if (this.timerValue) {
-			this.timerUI(this.timerValue);
+			this.runMainWithTimer(this.timerValue);
 			return;
 		}
-		this.noTimerUI();
+		this.runMainNoTimer();
 	};
 
 	/**
 	 * The UI we see if there is no existing timer.
 	 */
-	private noTimerUI() {
+	private runMainNoTimer() {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: 'No timer running'
 		});
 		this.ctl.menu.setMenuItems({
-			id: 'noTimerUI',
+			id: 'runMainNoTimer',
 			items: [
 				stdMenuItem({
 					id: 'tomato-start',
 					textContent: '30 Minutes',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
 					action: () => {
-						this.createTimerUI({ duration: 30 * 60 });
+						this.runCreateTimer({ duration: 30 * 60 });
 					}
 				}),
 				stdMenuItem({
@@ -138,7 +138,7 @@ export class TomatoTimer implements AppObject {
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.previousSessionsUI();
+						this.runPreviousSessions();
 					}
 				})
 			]
@@ -149,11 +149,11 @@ export class TomatoTimer implements AppObject {
 				: 'Enter value and submit...';
 		});
 		this.ctl.input.setSubmitHandlerOnce((duration) => {
-			this.createTimerUI({ duration: parseFloat(duration) * 60 });
+			this.runCreateTimer({ duration: parseFloat(duration) * 60 });
 		});
 	}
 
-	private createTimerUI({ duration }: { duration: number }) {
+	private runCreateTimer({ duration }: { duration: number }) {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
@@ -172,16 +172,16 @@ export class TomatoTimer implements AppObject {
 			this.store
 				.putCurrentSession(timerValue.record as UnfinishedSession)
 				.andTee(() => {
-					this.timerUI(timerValue);
+					this.runMainWithTimer(timerValue);
 				})
 				.orTee((err) => {
 					this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-					this.noTimerUI();
+					this.runMainNoTimer();
 				});
 		};
 
 		this.ctl.menu.setMenuItems({
-			id: 'createTimerUI',
+			id: 'runCreateTimer',
 			items: [
 				stdMenuItem({
 					id: 'tomato-timer-no-label',
@@ -217,13 +217,13 @@ export class TomatoTimer implements AppObject {
 	/**
 	 * The UI we see if there is an existing timer.
 	 */
-	private timerUI(timerValue: TomatoTimerValue) {
+	private runMainWithTimer(timerValue: TomatoTimerValue) {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: 'Running timer... Seize the day!'
 		});
 		this.ctl.menu.setMenuItems({
-			id: 'timerUI',
+			id: 'runMainWithTimer',
 			items: [
 				// It is possible to have a timer without mounting a svelte
 				// component that handles the timer.  We just render timerUI
@@ -266,7 +266,7 @@ export class TomatoTimer implements AppObject {
 					textContent: 'Previous sessions...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
 					action: () => {
-						this.previousSessionsUI();
+						this.runPreviousSessions();
 					}
 				}),
 				stdMenuItem({
@@ -283,7 +283,7 @@ export class TomatoTimer implements AppObject {
 						this.store.putCurrentSession(timerValue.record as UnfinishedSession).orTee((err) => {
 							this.ctl.alert({ message: 'Error saving timer', additional: err.message });
 						});
-						this.timerUI(timerValue);
+						this.runMainWithTimer(timerValue);
 					}
 				}),
 				stdMenuItem({
@@ -298,11 +298,11 @@ export class TomatoTimer implements AppObject {
 							.andThen(() => this.store.deleteCurrentSession())
 							.andTee(() => {
 								this.ctl.notify('Session saved', { duration: 3000 });
-								this.noTimerUI();
+								this.runMainNoTimer();
 							})
 							.orTee((err) => {
 								this.ctl.alert({ message: 'Error saving session', additional: err.message });
-								this.noTimerUI();
+								this.runMainNoTimer();
 							});
 					}
 				}),
@@ -319,11 +319,11 @@ export class TomatoTimer implements AppObject {
 									message: 'Error deleting current session',
 									additional: err.message
 								});
-								this.mainUI();
+								this.runMain();
 							})
 							.andTee(() => {
 								this.ctl.notify('Current session deleted', { duration: 3000 });
-								this.mainUI();
+								this.runMain();
 							});
 					}
 				})
@@ -331,7 +331,7 @@ export class TomatoTimer implements AppObject {
 		});
 	}
 
-	private previousSessionsUI() {
+	private runPreviousSessions() {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: 'Previous sessions'
@@ -339,7 +339,7 @@ export class TomatoTimer implements AppObject {
 		this.ctl.input.setPlaceholder('Select a session...');
 		this.store.getFinishedSessions().andTee((sessions) => {
 			this.ctl.menu.setMenuItems({
-				id: 'previousSessionsUI',
+				id: 'runPreviousSessions',
 				items: sessions.map((session) => {
 					const v = TomatoTimerValue.create(session);
 					return stdMenuItem({
@@ -351,7 +351,7 @@ export class TomatoTimer implements AppObject {
 							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
 						],
 						action: () => {
-							this.editEntryUI(session);
+							this.runEditEntry(session);
 						}
 					});
 				})
@@ -359,7 +359,7 @@ export class TomatoTimer implements AppObject {
 		});
 	}
 
-	private editEntryUI(session: FinishedSessionRecord) {
+	private runEditEntry(session: FinishedSessionRecord) {
 		this.ctl.app.reset();
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
@@ -367,7 +367,7 @@ export class TomatoTimer implements AppObject {
 		});
 		this.ctl.input.setPlaceholder('Select an action...');
 		this.ctl.menu.setMenuItems({
-			id: 'editSessionUI',
+			id: 'runEditEntry',
 			items: [
 				menuItem({
 					id: 'tomato-timer-session-details',
@@ -411,7 +411,7 @@ export class TomatoTimer implements AppObject {
 									// Refresh this ui to update the display.
 									// We could just call setMenuItems again.
 									// Using consistent id's will mean only a small part of the DOM will change.
-									this.editEntryUI(newSession);
+									this.runEditEntry(newSession);
 								})
 								.orTee((err) => {
 									this.ctl.alert({
@@ -435,7 +435,7 @@ export class TomatoTimer implements AppObject {
 							this.store.deleteSession(session).andTee(() => {
 								this.ctl.notify('Session deleted', { duration: 3000 });
 							});
-							this.previousSessionsUI();
+							this.runPreviousSessions();
 							return;
 						}
 					}

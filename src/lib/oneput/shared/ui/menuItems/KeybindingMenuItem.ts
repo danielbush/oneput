@@ -1,6 +1,6 @@
-import type { MenuItem } from '../../lib/lib.js';
-import { stdMenuItem } from './menuItems/stdMenuItem.js';
-import * as icons from '../icons.js';
+import type { MenuItem } from '../../../lib/lib.js';
+import { stdMenuItem } from './stdMenuItem.js';
+import * as icons from '../../icons.js';
 
 export type KeybindingMenuItem = {
 	id: string;

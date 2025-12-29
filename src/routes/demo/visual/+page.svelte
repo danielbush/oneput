@@ -10,7 +10,7 @@
 	import { onMount } from 'svelte';
 	import { randomId } from '$lib/oneput/lib/lib.js';
 	import { xIcon } from '$lib/oneput/shared/icons.js';
-	import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
+	import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 
 	setupDemoState();
 

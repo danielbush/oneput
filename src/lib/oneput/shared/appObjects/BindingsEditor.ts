@@ -7,7 +7,7 @@ import {
 	type KeyEvent
 } from '../../lib/bindings.js';
 import { keyboardIcon, xIcon } from '../icons.js';
-import { stdMenuItem } from '../ui/stdMenuItem.js';
+import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { keybindingMenuItem } from '../ui/KeybindingMenuItem.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';

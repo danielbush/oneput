@@ -1,4 +1,4 @@
-import { stdMenuItem } from '../ui/stdMenuItem.js';
+import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import type { Controller } from '../../controller.js';
 import type { AppObject, OneputProps } from '../../lib/lib.js';
 import { globeIcon } from '../icons.js';

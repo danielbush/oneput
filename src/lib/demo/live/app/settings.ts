@@ -3,7 +3,7 @@ import { keyboardIcon, listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { BindingsEditor } from '$lib/oneput/shared/appObjects/BindingsEditor.js';
 import { config } from '$lib/demo/live/service/TestBindingsStore.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/stdMenuItem.js';
+import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
 

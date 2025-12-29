@@ -402,16 +402,16 @@ export class MenuController {
 					}
 				}
 				this.focusFirstMenuItem();
-				break;
+				return;
 			}
 			case 'first':
 				this.focusFirstMenuItem();
-				break;
+				return;
 			case 'last':
 				this.focusLastMenuItem();
-				break;
+				return;
 			case 'none':
-				break;
+				return;
 		}
 	}
 

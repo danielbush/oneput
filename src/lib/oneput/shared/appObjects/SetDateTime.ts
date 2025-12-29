@@ -6,14 +6,14 @@ import { DateVal } from '../values/DateVal.js';
 import { TimeVal } from '../values/TimeVal.js';
 
 export class SetDateTime implements AppObject<TimeVal | DateVal> {
-	static create(ctl: Controller) {
+	static create(ctl: Controller, initial?: { date?: DateVal; time?: TimeVal }) {
 		const createSetDate = () => {
 			return SetDate.create(ctl);
 		};
 		const createSetTime = () => {
 			return SetTime.create(ctl);
 		};
-		return new SetDateTime(ctl, createSetDate, createSetTime);
+		return new SetDateTime(ctl, createSetDate, createSetTime, initial);
 	}
 
 	private date?: DateVal;
@@ -22,8 +22,14 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 	constructor(
 		private ctl: Controller,
 		private createSetDate: () => SetDate,
-		private createSetTime: () => SetTime
-	) {}
+		private createSetTime: () => SetTime,
+		initial?: { date?: DateVal; time?: TimeVal }
+	) {
+		if (initial) {
+			this.date = initial.date;
+			this.time = initial.time;
+		}
+	}
 
 	onStart() {
 		this.run();

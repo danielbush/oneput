@@ -3,6 +3,11 @@ export class TimeVal {
 		return new TimeVal(hour, minute);
 	}
 
+	static createFromUnixTime(unixTime: number) {
+		const date = new Date(unixTime * 1000);
+		return new TimeVal(date.getHours(), date.getMinutes());
+	}
+
 	static createFromMinutes(minutes: number) {
 		const hour = Math.floor(minutes / 60);
 		const minute = minutes % 60;

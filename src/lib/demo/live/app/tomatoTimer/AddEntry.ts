@@ -8,6 +8,7 @@ import * as icons from '$lib/oneput/shared/icons.js';
 import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
 import { TimeVal } from '$lib/oneput/shared/values/TimeVal.js';
 import { DateTimeVal } from '$lib/oneput/shared/values/DateTimeVal.js';
+import { DateVal } from '$lib/oneput/shared/values/DateVal.js';
 
 export class AddEntry implements AppObject {
 	static create(ctl: Controller, session: Partial<FinishedSession>) {
@@ -16,7 +17,12 @@ export class AddEntry implements AppObject {
 				? `Hit ${params.submitBinding} to submit...`
 				: 'Enter value and submit...';
 		});
-		const setDateTime = SetDateTime.create(ctl);
+		const setDateTime = SetDateTime.create(ctl, {
+			date:
+				session.startTime === undefined ? undefined : DateVal.createFromUnixTime(session.startTime),
+			time:
+				session.startTime === undefined ? undefined : TimeVal.createFromUnixTime(session.startTime)
+		});
 		return new AddEntry(ctl, session, dynamicPlaceholder, setDateTime);
 	}
 

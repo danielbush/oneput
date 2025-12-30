@@ -87,8 +87,8 @@ export class AddEntry implements AppObject {
 			case 'add-duration':
 				this.dynamicPlaceholder.setPlaceholder((params) => {
 					return params.submitBinding
-						? `Enter a duration in minutes and hit ${params.submitBinding}...`
-						: 'Enter duration in minutes and submit...';
+						? `Enter a duration in hh:mm and hit ${params.submitBinding}...`
+						: 'Enter duration in hh:mm and submit...';
 				});
 				if (this.session.duration) {
 					this.ctl.input.setInputValue(TimeVal.createFromSeconds(this.session.duration).timeString);
@@ -98,7 +98,7 @@ export class AddEntry implements AppObject {
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.ctl.clearNotifications();
 					this.session.duration =
-						value === '' ? undefined : TimeVal.createFromTimeString(value).totalSeconds;
+						value === '' ? undefined : TimeVal.createFromTimeString(value, /[: ]/).totalSeconds;
 					if (this.session.duration !== undefined && isNaN(this.session.duration)) {
 						this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
 						return;

@@ -21,8 +21,8 @@ export class TimeVal {
 		return new TimeVal(hour, minute);
 	}
 
-	static createFromTimeString(timeString: string) {
-		const [hour, minute] = timeString.split(':');
+	static createFromTimeString(timeString: string, sep: string | RegExp = ':') {
+		const [hour, minute] = timeString.split(sep);
 		return new TimeVal(parseInt(hour || '0'), parseInt(minute || '0'));
 	}
 

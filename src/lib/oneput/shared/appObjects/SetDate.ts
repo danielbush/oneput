@@ -22,21 +22,33 @@ function ordinal(n: number): string {
 }
 
 export class SetDate implements AppObject {
-	static create(ctl: Controller) {
-		return new SetDate(ctl);
+	static create(ctl: Controller, initial?: DateVal) {
+		return new SetDate(ctl, initial);
 	}
 
-	constructor(private ctl: Controller) {}
+	constructor(
+		private ctl: Controller,
+		initial?: DateVal
+	) {
+		if (initial) {
+			this.data = {
+				year: initial.year,
+				month: initial.month,
+				jsmonth: initial.jsmonth,
+				day: initial.day
+			};
+		}
+	}
 
 	private data?: Partial<{ year: number; month: number; jsmonth: number; day: number }>;
 
 	onBack: AppObject['onBack'] = ({ menu }) => {
 		switch (menu.menuId) {
 			case 'setMonth':
-				this.setYear();
+				this.runSetYear();
 				break;
 			case 'setDay':
-				this.setMonth();
+				this.runSetMonth();
 				break;
 			default:
 				this.ctl.app.exit();
@@ -51,30 +63,36 @@ export class SetDate implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: 'Set date...'
 		});
-		// When we call restore it will unwind any pushes / pops and pushes made
-		// and render the parent app.
-		this.setYear();
+		this.runSetYear();
 	}
 
-	private setYear() {
+	private runSetYear() {
 		this.ctl.app.reset();
 		const currentYear = new Date().getFullYear();
 		const menuItems: MenuItem[] = [];
-		for (let year = currentYear - 5; year < currentYear + 5; year++) {
+		const span = 5;
+		const currentYearIndex = span;
+		for (let year = currentYear - span; year < currentYear + span; year++) {
 			menuItems.push(
 				stdMenuItem({
 					id: `set-date-${year}`,
 					textContent: year.toString(),
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.data = { year };
-						this.setMonth();
-					}
+						this.data = { ...this.data, year };
+						this.runSetMonth();
+					},
+					data: { year }
 				})
 			);
 		}
 		this.ctl.menu.setMenuItems({ id: 'setYear', items: menuItems });
-		this.ctl.menu.focusMenuItemByIndex(5, true);
+		this.ctl.menu.focusMenuItemByIndex(
+			this.data?.year
+				? menuItems.findIndex((item) => item.data?.year === this.data!.year) || 5
+				: currentYearIndex,
+			true
+		);
 		this.ctl.input.setPlaceholder('Select or type in a year...');
 		this.ctl.input.setInputValue(currentYear.toString());
 		this.ctl.input.setSubmitHandler((year) => {
@@ -83,12 +101,12 @@ export class SetDate implements AppObject {
 				this.ctl.notify('Could not parse a number for year', { duration: 3000 });
 				return;
 			}
-			this.data = { year: parsedYear };
-			this.setMonth();
+			this.data = { ...this.data, year: parsedYear };
+			this.runSetMonth();
 		});
 	}
 
-	private setMonth() {
+	private runSetMonth() {
 		this.ctl.app.reset();
 		const { year } = this.data as { year: number };
 		const currentMonth = new Date().getMonth();
@@ -96,18 +114,24 @@ export class SetDate implements AppObject {
 		for (let jsmonth = 0; jsmonth < 12; jsmonth++) {
 			menuItems.push(
 				stdMenuItem({
-					id: `set-date-${year}-${jsmonth}`,
+					id: `set-month-${jsmonth}`,
 					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
 					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
 					action: () => {
-						this.data = { year, jsmonth };
-						this.setDay();
-					}
+						this.data = { ...this.data, jsmonth };
+						this.runSetDay();
+					},
+					data: { jsmonth }
 				})
 			);
 		}
 		this.ctl.menu.setMenuItems({ id: 'setMonth', items: menuItems });
-		if (year === new Date().getFullYear()) {
+		if (this.data?.year && this.data?.jsmonth) {
+			this.ctl.menu.focusMenuItemByIndex(
+				menuItems.findIndex((item) => item.data?.jsmonth === this.data!.jsmonth) || 0,
+				true
+			);
+		} else if (year === new Date().getFullYear()) {
 			this.ctl.menu.focusMenuItemByIndex(currentMonth, true);
 		} else {
 			this.ctl.menu.focusMenuItemByIndex(0, true);
@@ -115,7 +139,7 @@ export class SetDate implements AppObject {
 		this.ctl.input.setPlaceholder('Select or type in a month...');
 	}
 
-	private setDay() {
+	private runSetDay() {
 		this.ctl.app.reset();
 		const { year, jsmonth } = this.data as { year: number; jsmonth: number };
 		const currentDay = new Date().getDate();
@@ -123,16 +147,22 @@ export class SetDate implements AppObject {
 		for (let day = 1; day <= new Date(year, jsmonth + 1, 0).getDate(); day++) {
 			menuItems.push(
 				stdMenuItem({
-					id: `set-date-${year}-${jsmonth}-${day}`,
+					id: `set-day-${day}`,
 					textContent: `${ordinal(day)}`,
 					action: () => {
 						this.ctl.app.exit(new DateVal(year, jsmonth + 1, day));
-					}
+					},
+					data: { day }
 				})
 			);
 		}
 		this.ctl.menu.setMenuItems({ id: 'setDay', items: menuItems });
-		if (year === new Date().getFullYear() && jsmonth === new Date().getMonth()) {
+		if (this.data?.year && this.data?.jsmonth && this.data?.day) {
+			this.ctl.menu.focusMenuItemByIndex(
+				menuItems.findIndex((item) => item.data?.day === this.data!.day) || 0,
+				true
+			);
+		} else if (year === new Date().getFullYear() && jsmonth === new Date().getMonth()) {
 			this.ctl.menu.focusMenuItemByIndex(currentDay - 1, true);
 		} else {
 			this.ctl.menu.focusMenuItemByIndex(0, true);

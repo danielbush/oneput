@@ -10,7 +10,7 @@ import { SetTime } from './SetTime.js';
 export class SetDateTime implements AppObject<TimeVal | DateVal> {
 	static create(ctl: Controller, initial?: { date?: DateVal; time?: TimeVal }) {
 		const createSetDate = () => {
-			return SetDate.create(ctl);
+			return SetDate.create(ctl, initial?.date);
 		};
 		const createSetTime = () => {
 			return SetTime.create(ctl);

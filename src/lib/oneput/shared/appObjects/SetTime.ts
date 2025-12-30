@@ -4,13 +4,16 @@ import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { TimeVal } from '../values/TimeVal.js';
 
 export class SetTime implements AppObject {
-	static create(ctl: Controller) {
-		return new SetTime(ctl);
+	static create(ctl: Controller, initial?: TimeVal) {
+		return new SetTime(ctl, initial);
 	}
 
 	private menuItems: MenuItem[] = [];
 
-	constructor(private ctl: Controller) {
+	constructor(
+		private ctl: Controller,
+		private initial?: TimeVal
+	) {
 		this.menuItems = [];
 		for (let minute = 0; minute <= 23 * 60 + 45; minute += 15) {
 			const hour = Math.floor(minute / 60);
@@ -41,6 +44,7 @@ export class SetTime implements AppObject {
 			}
 			const { hour, minute } = menuItem?.data as { hour: number; minute: number };
 			this.ctl.input.setInputValue(TimeVal.create(hour, minute).timeString);
+			this.ctl.input.focusInput();
 		});
 		this.ctl.ui.update({
 			menuTitle: 'Set a time...'
@@ -55,9 +59,11 @@ export class SetTime implements AppObject {
 			}
 			this.ctl.app.exit(new TimeVal(parsedHour, parsedMinute));
 		});
-		const currentHour = new Date().getHours();
-		const currentMinute = new Date().getMinutes();
+		this.ctl.input.setPlaceholder('Tab to fill input with a time or type in HH:MM...');
 		this.ctl.menu.setMenuItems({ id: 'main', items: this.menuItems });
+
+		const currentHour = this.initial?.hour ?? new Date().getHours();
+		const currentMinute = this.initial?.minute ?? new Date().getMinutes();
 		this.ctl.menu.focusMenuItemByIndex(
 			this.menuItems.findIndex((item) => {
 				const { hour, minute } = item.data as { hour: number; minute: number };
@@ -67,6 +73,5 @@ export class SetTime implements AppObject {
 			}) || 0,
 			true
 		);
-		this.ctl.input.setPlaceholder('Tab to fill input with a time or type in HH:MM...');
 	}
 }

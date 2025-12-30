@@ -13,7 +13,7 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 			return SetDate.create(ctl, initial?.date);
 		};
 		const createSetTime = () => {
-			return SetTime.create(ctl);
+			return SetTime.create(ctl, initial?.time);
 		};
 		return new SetDateTime(ctl, createSetDate, createSetTime, initial);
 	}

@@ -10,18 +10,21 @@ vars:
   ONEPUT_CSS_FILE: src/lib/jsed/styles/oneput-defaults.css
 
 tasks:
+  install:
+    cmds:
+      - rm -rf node_modules
+      - pnpm i
   setup:styles:
     desc: Copy oneput defaults into this repo.
     cmds:
       - cp {{.ONEPUT_DIR}}/src/lib/oneput/styles/oneput-defaults.css {{.ONEPUT_CSS_FILE}}
       - echo "Commit any changes."
   dev:
+    desc: Run dev server
     cmds:
       - pnpm run dev
   dev:public:
     desc: Run dev server
-    deps:
-      - install
     cmds:
       - pnpm run dev --host=0.0.0.0
   test:

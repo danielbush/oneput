@@ -55,11 +55,7 @@ export class AddEntry implements AppObject {
 		this.ctl.ui.update({ enableInputElement: true });
 		switch (item.id) {
 			case 'add-label':
-				this.dynamicPlaceholder.setPlaceholder((params) => {
-					return params.submitBinding
-						? `Enter a label and hit ${params.submitBinding}...`
-						: 'Enter label and submit...';
-				});
+				this.ctl.input.setPlaceholder('Enter label...');
 				this.ctl.input.setInputValue(this.session.label ?? '');
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.session.label = value;
@@ -74,22 +70,14 @@ export class AddEntry implements AppObject {
 					} satisfies OneputProps['inputUI'];
 				});
 				this.ctl.input.setInputValue(this.session.note ?? '');
-				this.dynamicPlaceholder.setPlaceholder((params) => {
-					return params.submitBinding
-						? `Enter a note and hit ${params.submitBinding}...`
-						: 'Enter label and submit...';
-				});
+				this.ctl.input.setPlaceholder('Enter note...');
 				this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
 					this.session.note = value;
 					this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
 				});
 				break;
 			case 'add-duration':
-				this.dynamicPlaceholder.setPlaceholder((params) => {
-					return params.submitBinding
-						? `Enter a duration in hh:mm and hit ${params.submitBinding}...`
-						: 'Enter duration in hh:mm and submit...';
-				});
+				this.ctl.input.setPlaceholder('Enter duration in hh:mm...');
 				if (this.session.duration) {
 					this.ctl.input.setInputValue(TimeVal.createFromSeconds(this.session.duration).timeString);
 				} else {

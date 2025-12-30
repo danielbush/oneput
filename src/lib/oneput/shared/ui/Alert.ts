@@ -1,4 +1,4 @@
-import { vflex } from '$lib/oneput/lib/builder.js';
+import { vflex } from '../../lib/builder.js';
 import type { Controller } from '../../controller.js';
 
 /**

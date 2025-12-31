@@ -1,15 +1,14 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { registerIcons, svg } from '$lib/oneput/lib/icons.js';
-import { xIcon } from '$lib/oneput/shared/icons.js';
+import { registerIcons, lucide } from '$lib/oneput/lib/icons.js';
+import { createElement, X } from 'lucide';
 import { Layout } from './layout.js';
 import { RootUI } from './app/root.js';
 
 // Register all icons used by the app upfront.
-// This uses the legacy SVG strings from icons.ts, but you can also use:
-// - lucide(X) for Lucide icons
-// - { type: 'element', create: () => yourElement } for custom factories
+// Using vanilla Lucide icons - createElement returns an SVG element.
 registerIcons({
-	x: svg(xIcon)
+	// x: svg(xIcon) // legacy approach
+	x: lucide(() => createElement(X) as SVGElement)
 });
 
 // Our app starts in this callback.  We get the controller and we can set keys

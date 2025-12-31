@@ -10,7 +10,7 @@
 // Icon source types - supports multiple icon libraries
 export type IconSource =
 	| { type: 'svg'; svg: string } // Raw SVG string
-	| { type: 'lucide'; icon: (props?: Record<string, unknown>) => SVGElement } // Lucide icon
+	| { type: 'lucide'; icon: () => SVGElement } // Lucide icon (props baked in at registration)
 	| { type: 'element'; create: () => Element }; // Custom factory function
 
 // Registry for icons - webapp registers icons upfront
@@ -69,9 +69,9 @@ export function renderIcon(name: string, target: HTMLElement): void {
 
 /**
  * Helper to create a lucide icon source.
- * Usage: lucide(X) where X is imported from 'lucide'
+ * Usage: lucide(() => createElement(X)) where X is imported from 'lucide'
  */
-export function lucide(icon: (props?: Record<string, unknown>) => SVGElement): IconSource {
+export function lucide(icon: () => SVGElement): IconSource {
 	return { type: 'lucide', icon };
 }
 

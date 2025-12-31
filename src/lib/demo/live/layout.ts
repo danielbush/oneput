@@ -27,7 +27,7 @@ export type LayoutSettings = {
  * Defines a standard layout.
  */
 export class Layout implements UILayout {
-	static create(ctl: Controller, values: UILayoutSettings = {}) {
+	static create(ctl: Controller, settings: UILayoutSettings = {}) {
 		const bindingService = LocalBindingsService.create(ctl);
 		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
 			params.menuOpenBinding
@@ -36,14 +36,14 @@ export class Layout implements UILayout {
 					: `Open menu with ${params.menuOpenBinding}...`
 				: 'Type here...'
 		);
-		return new Layout(ctl, values, {}, dynamicPlaceholder, bindingService);
+		return new Layout(ctl, settings, {}, dynamicPlaceholder, bindingService);
 	}
 
 	defaultPlaceholder?: DynamicPlaceholderBase;
 
 	constructor(
 		private ctl: Controller,
-		private values: UILayoutSettings = {},
+		private settings: UILayoutSettings = {},
 		private additional: LayoutSettings = {},
 		private dynamicPlaceholder: DynamicPlaceholder,
 		private bindingService: LocalBindingsService
@@ -66,8 +66,8 @@ export class Layout implements UILayout {
 	}
 
 	configure(values: UILayoutSettings, additional: LayoutSettings) {
-		this.values = {
-			menuTitle: this.values.menuTitle || 'Menu',
+		this.settings = {
+			menuTitle: this.settings.menuTitle || 'Menu',
 			...values
 		};
 		this.additional = {
@@ -76,21 +76,21 @@ export class Layout implements UILayout {
 	}
 
 	private get exitAction() {
-		if (this.values.enableMenuOpenClose === true) {
+		if (this.settings.enableMenuOpenClose === true) {
 			return this.ctl.menu.closeMenu;
 		}
 		return;
 	}
 
 	private get backAction() {
-		if (this.values.enableGoBack === true) {
+		if (this.settings.enableGoBack === true) {
 			return this.ctl.app.goBack;
 		}
 		return;
 	}
 
 	private get menuTitle() {
-		return this.values.menuTitle || 'Menu';
+		return this.settings.menuTitle || 'Menu';
 	}
 
 	get inputUI() {

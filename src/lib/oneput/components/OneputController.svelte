@@ -17,7 +17,7 @@
 	});
 	const { controllerRef }: { controllerRef: (c: Controller) => void } = $props();
 
-	const controller = new Controller(currentProps);
+	const controller = Controller.create(currentProps);
 
 	$effect(() => {
 		controller.input.handleInputElementChange(inputElement);

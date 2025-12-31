@@ -10,6 +10,17 @@ import { Confirm } from './shared/ui/Confirm.js';
 import { AppController } from './AppController.js';
 
 export class Controller {
+	static create(currentProps: OneputProps) {
+		const createControllers = (controller: Controller) => ({
+			menu: MenuController.create(controller),
+			input: InputController.create(controller),
+			keys: KeysController.create(controller),
+			ui: UIController.create(controller),
+			app: AppController.create(controller)
+		});
+		return new Controller(currentProps, createControllers);
+	}
+
 	public events = new InternalEventEmitter();
 	public menu: MenuController;
 	public input: InputController;
@@ -20,12 +31,22 @@ export class Controller {
 	/**
 	 * @param currentProps Should be reactive eg $state<OneputProps>({...})
 	 */
-	constructor(public currentProps: OneputProps) {
-		this.menu = MenuController.create(this);
-		this.input = InputController.create(this);
-		this.keys = KeysController.create(this);
-		this.ui = UIController.create(this);
-		this.app = AppController.create(this);
+	constructor(
+		public currentProps: OneputProps,
+		createControllers: (ctl: Controller) => {
+			menu: MenuController;
+			input: InputController;
+			keys: KeysController;
+			ui: UIController;
+			app: AppController;
+		}
+	) {
+		const controllers = createControllers(this);
+		this.menu = controllers.menu;
+		this.input = controllers.input;
+		this.keys = controllers.keys;
+		this.ui = controllers.ui;
+		this.app = controllers.app;
 	}
 
 	toggleHide() {

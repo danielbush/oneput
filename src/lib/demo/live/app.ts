@@ -8,7 +8,7 @@ import { RootUI } from './app/root.js';
 // Using vanilla Lucide icons - createElement returns an SVG element.
 registerIcons({
 	// x: svg(xIcon) // legacy approach
-	x: lucide(() => createElement(X) as SVGElement)
+	x: lucide(() => createElement(X))
 });
 
 // Our app starts in this callback.  We get the controller and we can set keys

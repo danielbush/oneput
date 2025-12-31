@@ -2,23 +2,6 @@ import type { Attachment } from 'svelte/attachments';
 import { mount, type Component } from 'svelte';
 import type { FChildParams, FlexParams, MenuItemAny } from '../types.js';
 
-export const defaultVoidElements = new Set([
-	'area',
-	'base',
-	'br',
-	'col',
-	'embed',
-	'hr',
-	'img',
-	'input',
-	'link',
-	'meta',
-	'param',
-	'source',
-	'track',
-	'wbr'
-]);
-
 /**
  * Generate a unique id.
  */

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createStyleAttribute, defaultVoidElements } from '../lib/lib.js';
+	import { createStyleAttribute } from '../lib/lib.js';
+	import { defaultVoidElements } from '../lib/defaultVoidElements.js';
 	import type { FChildParams } from '../types.js';
 
 	type Props = FChildParams;

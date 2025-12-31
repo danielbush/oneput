@@ -1,5 +1,5 @@
 import uFuzzy from '@leeoniya/ufuzzy';
-import { walk } from '../../lib/lib.js';
+import { walk } from '../../lib/utils.js';
 import type { FChildParams, MenuItemAny } from '../../types.js';
 import type { MenuItemsFn } from '../../MenuController.js';
 

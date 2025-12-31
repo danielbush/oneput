@@ -1,4 +1,4 @@
-import { randomId } from './lib.js';
+import { randomId } from './utils.js';
 import type {
 	FChildParams,
 	FlexChildren,

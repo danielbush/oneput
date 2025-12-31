@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FChild from './FChild.svelte';
-	import { createStyleAttribute, randomId } from '../lib/lib.js';
+	import { randomId, createStyleAttribute } from '../lib/utils.js';
 	import { onMount } from 'svelte';
 	import type { FChildParams, FlexParams } from '../types.js';
 

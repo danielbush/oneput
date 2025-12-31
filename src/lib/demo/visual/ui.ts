@@ -2,7 +2,7 @@
  * Some fake ui data we can use to populate oneput for demos.
  */
 
-import { randomId } from '$lib/oneput/lib/lib.js';
+import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
 import type { appState } from './state.js';
 

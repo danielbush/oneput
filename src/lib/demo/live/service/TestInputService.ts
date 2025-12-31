@@ -1,4 +1,4 @@
-import { randomId } from '$lib/oneput/lib/lib.js';
+import { randomId } from '$lib/oneput/lib/utils.js';
 
 export class TestInputService {
 	static create() {

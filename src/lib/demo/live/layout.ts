@@ -1,4 +1,4 @@
-import { mountSvelte, randomId } from '$lib/oneput/lib/lib.js';
+import { mountSvelte, randomId } from '$lib/oneput/lib/utils.js';
 import type { DynamicPlaceholderBase } from '$lib/oneput/types.js';
 import type { FChildParams, UILayout, UILayoutSettings } from '$lib/oneput/types.js';
 import type { Controller } from '$lib/oneput/controller.js';

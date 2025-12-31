@@ -1,5 +1,5 @@
 import { vflex, type FlexChildBuilder } from '../../../lib/builder.js';
-import { randomId } from '../../../lib/lib.js';
+import { randomId } from '../../../lib/utils.js';
 import type { FlexChildren, MenuItem } from '../../../types.js';
 
 /**

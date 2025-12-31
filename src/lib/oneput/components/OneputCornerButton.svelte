@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { hideShowListener } from '../lib/lib.js';
+	import { hideShowListener } from '../lib/utils.js';
 
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));

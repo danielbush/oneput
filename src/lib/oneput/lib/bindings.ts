@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { Controller } from '../controller.js';
-import { isMacOS } from '../lib/lib.js';
+import { isMacOS } from './utils.js';
 
 export type DuplicateBindingError = { message: string; details: string };
 

@@ -10,12 +10,14 @@ import type { UILayout, UILayoutSettings } from './oneput/types.js';
 export {
 	registerIcon,
 	registerIcons,
-	getIconSource,
+	getIconRenderer,
 	renderIcon,
 	lucide,
-	svg
+	element,
+	svg,
+	missingIcon
 } from './oneput/lib/icons.js';
-export type { IconSource } from './oneput/lib/icons.js';
+export type { IconRenderer } from './oneput/lib/icons.js';
 
 export { Oneput, OneputController, OneputCornerButton, Anchor, Controller };
 export type { UILayout, UILayoutSettings };

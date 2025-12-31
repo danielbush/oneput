@@ -4,7 +4,7 @@
 	import Oneput from './Oneput.svelte';
 	import { Controller } from '../controller.js';
 	import { onMount } from 'svelte';
-	import type { OneputProps } from '../lib/lib.js';
+	import type { OneputProps } from '../types.js';
 
 	let inputElement: HTMLInputElement | undefined = $state(undefined);
 	const currentProps = $state<OneputProps>({

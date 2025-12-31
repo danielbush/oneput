@@ -1,6 +1,6 @@
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import type { Controller } from '../../controller.js';
-import type { AppObject, OneputProps } from '../../lib/lib.js';
+import type { OneputProps, AppObject } from '../../types.js';
 import { globeIcon } from '../icons.js';
 
 // TODO: implement a global items / filter mechanism.

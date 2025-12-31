@@ -1,5 +1,5 @@
 import type { Controller } from '../../controller.js';
-import type { AppObject, MenuItem } from '../../lib/lib.js';
+import type { AppObject, MenuItem } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import * as icons from '../../shared/icons.js';
 import { DateVal } from '../values/DateVal.js';

@@ -6,7 +6,7 @@ import { type LayoutSettings } from '../layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
 import { DOMUpdater } from '$lib/oneput/lib/DOMUpdater.js';
-import type { AppObject } from '$lib/oneput/lib/lib.js';
+import type { AppObject } from '$lib/oneput/types.js';
 
 export class AsyncSearchExample implements AppObject {
 	static create(ctl: Controller) {

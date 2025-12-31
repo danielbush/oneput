@@ -1,11 +1,11 @@
-import {
-	randomId,
-	type FChildParams,
-	type FlexChildren,
-	type FlexParams,
-	type MenuItem,
-	type MenuItemDivider
-} from './lib.js';
+import { randomId } from './lib.js';
+import type {
+	FChildParams,
+	FlexChildren,
+	FlexParams,
+	MenuItem,
+	MenuItemDivider
+} from '../types.js';
 
 export type BuilderFlexParams = Partial<Omit<FlexParams, 'children'>> & {
 	children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);

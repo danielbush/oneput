@@ -1,5 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import type { AppObject, MenuItem, OneputProps } from '$lib/oneput/lib/lib.js';
+import type { AppObject, MenuItem, OneputProps } from '$lib/oneput/types.js';
 import { SetDateTime } from '$lib/oneput/shared/appObjects/SetDateTime.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';

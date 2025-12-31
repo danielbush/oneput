@@ -1,12 +1,8 @@
 <script lang="ts">
 	import FChild from './FChild.svelte';
-	import {
-		createStyleAttribute,
-		randomId,
-		type FChildParams,
-		type FlexParams
-	} from '../lib/lib.js';
+	import { createStyleAttribute, randomId } from '../lib/lib.js';
 	import { onMount } from 'svelte';
+	import type { FChildParams, FlexParams } from '../types.js';
 
 	type Props = { class: string } & FlexParams;
 	let { class: topLevelClass, ...props }: Props = $props();

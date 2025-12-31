@@ -7,7 +7,7 @@ import {
 	type FinishedSession,
 	type UnfinishedSession
 } from './TomatoTimerValue.js';
-import { type AppObject } from '$lib/oneput/lib/lib.js';
+import { type AppObject } from '$lib/oneput/types.js';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';

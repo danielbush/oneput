@@ -13,7 +13,8 @@ import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from '../bindings/BindingsIDB.js';
 import { hflex } from '../../lib/builder.js';
-import { mountSvelte, type AppObject } from '../../lib/lib.js';
+import { mountSvelte } from '../../lib/lib.js';
+import type { AppObject } from '../../types.js';
 import AcceptButton from '../components/AcceptButton.svelte';
 import CancelButton from '../components/CancelButton.svelte';
 

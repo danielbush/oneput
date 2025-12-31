@@ -1,4 +1,4 @@
-import type { MenuItem } from '../../../lib/lib.js';
+import type { MenuItem } from '../../../types.js';
 import { menuItem, type BuilderMenuItem } from '../../../lib/builder.js';
 import { infoIcon } from '../../icons.js';
 

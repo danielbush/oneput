@@ -1,4 +1,4 @@
-import { DynamicPlaceholderBase } from './lib/lib.js';
+import { DynamicPlaceholderBase } from './types.js';
 import type { Controller } from './controller.js';
 
 export class InputController {

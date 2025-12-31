@@ -5,7 +5,7 @@ import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuIt
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppObject, OneputProps } from '$lib/oneput/lib/lib.js';
+import type { AppObject, OneputProps } from '$lib/oneput/types.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 
 export class KatexDemo implements AppObject {

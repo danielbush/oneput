@@ -1,5 +1,6 @@
 import debounce from 'debounce';
-import { isFocusable, type MenuItem, type MenuItemAny } from './lib/lib.js';
+import { isFocusable } from './lib/lib.js';
+import type { MenuItem, MenuItemAny } from './types.js';
 import type { Controller } from './controller.js';
 
 export type MenuItemsFn = (

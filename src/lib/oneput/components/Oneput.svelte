@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createAttachmentKey } from 'svelte/attachments';
 	import Flex from './Flex.svelte';
-	import { type OneputProps } from '../lib/lib.js';
 	import { elasticOut, linear } from 'svelte/easing';
+	import type { OneputProps } from '../types.js';
 
 	let {
 		inputElement = $bindable(),

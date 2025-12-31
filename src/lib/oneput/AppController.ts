@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppObject } from './lib/lib.js';
+import type { AppObject } from './types.js';
 
 class AppVal {
 	static create(app: AppObject) {

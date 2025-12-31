@@ -1,7 +1,7 @@
 # https://taskfile.dev
 
-version: "3"
-dotenv: [".env"]
+version: '3'
+dotenv: ['.env']
 silent: false
 set:
   - errexit
@@ -91,7 +91,7 @@ tasks:
 
   package:test:
     desc: Create a test sveltekit application and import a locally packaged version of Oneput.
-    dir: "{{ .BUILD_PACKAGE }}"
+    dir: '{{ .BUILD_PACKAGE }}'
     cmds:
       - pnpx sv create --template minimal --types ts --no-add-ons --install pnpm .
       - cd ../.. && pnpm pack --pack-destination {{ .BUILD_PACKAGE }}

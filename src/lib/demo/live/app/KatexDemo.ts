@@ -1,6 +1,6 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
-import { circleAlertIcon, settingsIcon } from '$lib/oneput/shared/icons.js';
+import { circleAlertIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
@@ -129,7 +129,7 @@ export class KatexDemo implements AppObject {
 				divider(),
 				stdMenuItem({
 					id: 'insert-katex-btn',
-					left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
+					left: (b) => [b.icon({ icon: 'settings' })],
 					textContent: 'Insert...',
 					attr: {
 						disabled: !katexIsValid

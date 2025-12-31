@@ -13,7 +13,8 @@ import { RootUI } from './app/root.js';
 //   element(() => myElement)           - any element factory
 //   (target) => { ... }                - inline custom renderer
 registerIcons({
-	x: lucide(() => createElement(icons.X))
+	x: lucide(() => createElement(icons.X)),
+	settings: lucide(() => createElement(icons.Settings))
 });
 
 // Our app starts in this callback.  We get the controller and we can set keys

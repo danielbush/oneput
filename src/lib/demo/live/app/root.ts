@@ -2,7 +2,6 @@ import type { Controller } from '$lib/oneput/controller.js';
 import {
 	commandIcon,
 	searchIcon,
-	settingsIcon,
 	sigmaIcon,
 	timerIcon,
 	tocIcon
@@ -71,7 +70,7 @@ export class RootUI {
 			items: [
 				stdMenuItem({
 					id: 'settings',
-					left: (b) => [b.icon({ innerHTMLUnsafe: settingsIcon })],
+					left: (b) => [b.icon({ icon: 'settings' })],
 					textContent: 'Settings...',
 					action: () => {
 						this.ctl.app.run(this.createSettingsUI());

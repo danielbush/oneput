@@ -1,7 +1,7 @@
 # https://taskfile.dev
 
-version: '3'
-dotenv: ['.env']
+version: "3"
+dotenv: [".env"]
 silent: false
 set:
   - errexit
@@ -75,14 +75,23 @@ tasks:
 
   # build
 
-  build:clean:
+  build:
+    desc: build dist/
+    cmds:
+      - pnpm run build
+
+  # test package
+
+  package:clean:
     desc: Clear the .build/ area!
+    summary: |
+      BUILD_PACKAGE is the directory where we build the package.
     cmds:
       - rm -rf {{ .BUILD_PACKAGE }}
 
-  test:package:
+  package:test:
     desc: Create a test sveltekit application and import a locally packaged version of Oneput.
-    dir: '{{ .BUILD_PACKAGE }}'
+    dir: "{{ .BUILD_PACKAGE }}"
     cmds:
       - pnpx sv create --template minimal --types ts --no-add-ons --install pnpm .
       - cd ../.. && pnpm pack --pack-destination {{ .BUILD_PACKAGE }}

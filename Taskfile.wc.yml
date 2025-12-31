@@ -2,8 +2,8 @@
 
 # Attempt to build web components (WIP).
 
-version: '3'
-dotenv: ['.env']
+version: "3"
+dotenv: [".env"]
 silent: false
 set:
   - errexit
@@ -28,7 +28,7 @@ tasks:
       - TODO:
         - try https://github.com/svebcomponents/template ?  ( https://www.youtube.com/watch?v=lDWfdfTH3e8 )
         - Use es instead of iife?
-    dir: '{{ .BUILD_WC }}'
+    dir: "{{ .BUILD_WC }}"
     cmds:
       - echo "Using {{ .BUILD_WC }} to build a web component"
       - pnpm create vite@latest --template svelte .
@@ -47,7 +47,7 @@ tasks:
 
   test:wc:
     desc: Create a vanilla TypeScript Vite app in {{ .VITE_WC }} and demo loading Oneput as a webcomponent.
-    dir: '{{ .VITE_WC }}'
+    dir: "{{ .VITE_WC }}"
     deps:
       - build:wc
     cmds:

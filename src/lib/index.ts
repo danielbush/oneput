@@ -6,5 +6,16 @@ import Anchor from './oneput/components/Anchor.svelte';
 import { Controller } from './oneput/controller.js';
 import type { UILayout, UILayoutSettings } from './oneput/types.js';
 
+// Icon registry exports
+export {
+	registerIcon,
+	registerIcons,
+	getIconSource,
+	renderIcon,
+	lucide,
+	svg
+} from './oneput/lib/icons.js';
+export type { IconSource } from './oneput/lib/icons.js';
+
 export { Oneput, OneputController, OneputCornerButton, Anchor, Controller };
 export type { UILayout, UILayoutSettings };

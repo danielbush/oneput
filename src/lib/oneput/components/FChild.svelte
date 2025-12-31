@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { createStyleAttribute } from '../lib/utils.js';
 	import { defaultVoidElements } from '../lib/defaultVoidElements.js';
+	import { renderIcon } from '../lib/icons.js';
 	import type { FChildParams } from '../types.js';
 
 	type Props = FChildParams;
@@ -12,6 +13,10 @@
 	onMount(() => {
 		if (props.style) {
 			Object.assign(node!.style, props.style);
+		}
+		// Render icon if specified (takes precedence over innerHTMLUnsafe)
+		if (props.icon && node) {
+			renderIcon(props.icon, node);
 		}
 		if (props.onMount) {
 			return props.onMount(node!);
@@ -37,7 +42,9 @@
 		class={['oneput__fchild', ...(props.classes || [])]}
 		{...props.attr}
 	>
-		{#if props.derivedHTML}
+		{#if props.icon}
+			<!-- Icon is rendered via onMount using renderIcon() -->
+		{:else if props.derivedHTML}
 			<!-- eslint-disable svelte/no-at-html-tags -->
 			{@html props.derivedHTML}
 			<!-- eslint-enable svelte/no-at-html-tags -->

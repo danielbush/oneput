@@ -127,6 +127,12 @@ export type FChildParams = {
 	 */
 	innerHTMLUnsafe?: string;
 	/**
+	 * Name of a registered icon to render.
+	 * Use registerIcon() or registerIcons() to register icons before use.
+	 * Takes precedence over innerHTMLUnsafe when both are specified.
+	 */
+	icon?: string;
+	/**
 	 * Is set by a menuItemsFn (via Oneput controller) usually to show
 	 * highlighted text when user is filtering menu items by typing.
 	 */

@@ -1,6 +1,5 @@
 import { hflex } from '../../lib/builder.js';
 import type { Controller } from '../../controller.js';
-import { xIcon } from '../../shared/icons.js';
 
 export type NotificationParams = {
 	duration?: number;
@@ -40,7 +39,7 @@ export class Notification {
 					b.iconButton({
 						classes: ['oneput__icon-button'],
 						title: 'Close',
-						innerHTMLUnsafe: xIcon,
+						icon: 'x',
 						onClick: () => {
 							this.ctl.ui.injectUI();
 						}

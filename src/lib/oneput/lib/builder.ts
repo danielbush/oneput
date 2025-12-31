@@ -107,11 +107,14 @@ export class FlexChildBuilder {
 /**
  * Represents a square icon.
  *
- * TODO: set htmlContentUnsafe to never?
+ * Supports both:
+ * - icon: string (registered icon name via registerIcon/registerIcons)
+ * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function icon(params: Partial<FChildParams>): FChildParams {
 	return fchild({
 		textContent: params.textContent,
+		icon: params.icon,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		classes: ['oneput__icon', ...(params.classes ?? [])],
@@ -147,6 +150,10 @@ export function spacer(
 
 /**
  * Like icon but turns the icon into a button.
+ *
+ * Supports both:
+ * - icon: string (registered icon name via registerIcon/registerIcons)
+ * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function iconButton(
 	params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
@@ -154,6 +161,7 @@ export function iconButton(
 	return fchild({
 		tag: 'button',
 		textContent: params.textContent,
+		icon: params.icon,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		classes: ['oneput__icon-button', ...(params.classes ?? [])],

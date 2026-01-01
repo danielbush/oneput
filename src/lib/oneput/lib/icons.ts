@@ -40,7 +40,6 @@ export function getIconRenderer(name: string): IconRenderer | undefined {
  */
 export function renderIcon(name: string, target: HTMLElement): void {
 	const renderer = iconRegistry.get(name);
-	console.log('renderIcon', name, renderer);
 	if (!renderer) {
 		console.warn(`Icon "${name}" not found in registry`);
 		missingIcon(target);

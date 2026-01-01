@@ -148,13 +148,13 @@ export class AppController {
 	/**
 	 * Goes back to previous appObject.
 	 */
-	goBack = () => {
+	goBack = (payload?: unknown) => {
 		if (this.disableGoBack) {
 			return;
 		}
 		if (this.current?.app.onBack) {
 			const menu = this.getMenu();
-			this.current.app.onBack({ menu });
+			this.current.app.onBack({ menu, payload });
 			return;
 		}
 		this.pop();

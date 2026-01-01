@@ -62,7 +62,11 @@ export class BindingsEditor implements AppObject {
 		this.actionsUI();
 	}
 
-	onBack: AppObject['onBack'] = ({ menu }) => {
+	onBack: AppObject['onBack'] = ({ menu, payload }) => {
+		if (payload === 'capturedKeys') {
+			this.actionUI(this.actionId!);
+			return;
+		}
 		if (menu.menuId?.startsWith('actionUI-')) {
 			this.actionsUI();
 			return;
@@ -103,6 +107,7 @@ export class BindingsEditor implements AppObject {
 	 * UI displays bindings for a given action and lets you add/remove bindings.
 	 */
 	private actionUI = (actionId: string) => {
+		console.log('wtf');
 		this.ctl.app.reset();
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
@@ -118,6 +123,7 @@ export class BindingsEditor implements AppObject {
 					id: 'add-binding',
 					textContent: 'Add binding...',
 					action: () => {
+						console.log('wtf2');
 						this.captureBindingUI(actionId);
 					}
 				}),
@@ -140,6 +146,7 @@ export class BindingsEditor implements AppObject {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
+		console.log('start');
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: `Capturing...`,
@@ -181,7 +188,8 @@ export class BindingsEditor implements AppObject {
 		if (capturedKeys) {
 			this.addBinding(actionId, capturedKeys);
 		}
-		this.ctl.app.goBack();
+		console.log('here');
+		this.ctl.app.goBack('capturedKeys');
 	}
 
 	private startKeyCapture = () => {

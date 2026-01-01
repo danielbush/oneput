@@ -50,18 +50,24 @@ export class UIController {
 		return flags;
 	}
 
+	/**
+	 * Should perform similar reset to beforeRun logic in AppController.
+	 */
 	update<A extends Record<string, unknown> = Record<never, never>>(
-		settings: UILayoutSettings,
+		settings?: UILayoutSettings,
 		additional?: A
 	) {
-		const flags: UILayoutSettings = this.calcLayoutFlags(settings);
+		// Reset environment
+		const flags: UILayoutSettings = this.calcLayoutFlags(settings ?? {});
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
 		this.ctl.keys._enableKeys(flags.enableKeys);
 		this.ctl.menu._enableMenuActions(flags.enableMenuActions);
 		this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn);
 		this.ctl.input._enableInputElement(flags.enableInputElement);
-		if (settings.menuTitle) {
+
+		// Layout
+		if (settings?.menuTitle) {
 			flags['menuTitle'] = settings.menuTitle;
 		}
 		this.layout?.configure(flags, additional);

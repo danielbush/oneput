@@ -44,7 +44,7 @@ export class UIController {
 		settings?: UILayoutSettings,
 		additional?: A
 	) {
-		const flags = this.ctl.app.update(settings);
+		const flags = this.ctl.app.reset(settings);
 		if (settings?.menuTitle) {
 			flags['menuTitle'] = settings.menuTitle;
 		}

@@ -68,17 +68,10 @@ export class AppController {
 	private unsubscribeMenuItemFocus?: () => void;
 
 	/**
-	 * Performs resets similar to what is called before a new AppObject is run.
-	 */
-	public reset() {
-		this.beforeRun();
-	}
-
-	/**
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {
-		this.update();
+		this.reset();
 	}
 
 	private calcLayoutFlags(settings: Omit<UILayoutSettings, 'menuTitle'>) {
@@ -94,10 +87,7 @@ export class AppController {
 		return flags;
 	}
 
-	/**
-	 * Should perform similar reset to beforeRun logic in AppController.
-	 */
-	update(settings?: Omit<UILayoutSettings, 'menuTitle'>) {
+	reset(settings?: Omit<UILayoutSettings, 'menuTitle'>) {
 		// Events
 		this.unsubscribeMenuItemFocus?.();
 		if (this.current?.app.onMenuItemFocus) {

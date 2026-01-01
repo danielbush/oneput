@@ -78,37 +78,7 @@ export class AppController {
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.
 	 */
 	private beforeRun() {
-		// Events
-		this.unsubscribeMenuItemFocus?.();
-		if (this.current?.app.onMenuItemFocus) {
-			this.unsubscribeMenuItemFocus = this.ctl.events.on(
-				'menu-item-focus',
-				({ index, menuItem }) => {
-					this.current?.app.onMenuItemFocus?.({ index, menuItem });
-				}
-			);
-		}
-
-		// Re-enable stuff...
-		this.ctl.menu._enableMenuActions();
-		this.ctl.menu._enableMenuOpenClose();
-		this.ctl.menu._enableMenuItemsFn();
-		this.ctl.input._enableInputElement();
-		this.ctl.keys._enableKeys();
-		this._enableGoBack();
-
-		// Reset stuff...
-		this.resetOnBack();
-		this.ctl.keys.resetBindings();
-		this.ctl.keys.resetBindings(true);
-		this.ctl.input.resetPlaceholder();
-		this.ctl.menu.resetFocusBehaviour();
-		this.ctl.menu.resetMenuItemsFn();
-		this.ctl.input.setInputValue();
-		this.ctl.input.resetSubmitHandler();
-		this.ctl.menu.resetFillHandler();
-
-		// We don't clear notifications or alerts or confirmations.
+		this.update();
 	}
 
 	private calcLayoutFlags(settings: Omit<UILayoutSettings, 'menuTitle'>) {
@@ -128,7 +98,18 @@ export class AppController {
 	 * Should perform similar reset to beforeRun logic in AppController.
 	 */
 	update(settings?: Omit<UILayoutSettings, 'menuTitle'>) {
-		// Reset environment
+		// Events
+		this.unsubscribeMenuItemFocus?.();
+		if (this.current?.app.onMenuItemFocus) {
+			this.unsubscribeMenuItemFocus = this.ctl.events.on(
+				'menu-item-focus',
+				({ index, menuItem }) => {
+					this.current?.app.onMenuItemFocus?.({ index, menuItem });
+				}
+			);
+		}
+
+		// Re-enable stuff...
 		const flags: UILayoutSettings = this.calcLayoutFlags(settings ?? {});
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
@@ -136,6 +117,20 @@ export class AppController {
 		this.ctl.menu._enableMenuActions(flags.enableMenuActions);
 		this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn);
 		this.ctl.input._enableInputElement(flags.enableInputElement);
+
+		// Reset stuff...
+		this.resetOnBack();
+		this.ctl.keys.resetBindings();
+		this.ctl.keys.resetBindings(true);
+		this.ctl.input.resetPlaceholder();
+		this.ctl.menu.resetFocusBehaviour();
+		this.ctl.menu.resetMenuItemsFn();
+		this.ctl.input.setInputValue();
+		this.ctl.input.resetSubmitHandler();
+		this.ctl.menu.resetFillHandler();
+
+		// We don't clear notifications or alerts or confirmations.
+
 		return flags;
 	}
 

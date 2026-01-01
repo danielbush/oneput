@@ -1,7 +1,6 @@
 import type { Controller } from '../../controller.js';
 import type { AppObject, MenuItem } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import * as icons from '../../shared/icons.js';
 import { DateVal } from '../values/DateVal.js';
 
 function ordinal(n: number): string {
@@ -77,7 +76,7 @@ export class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-date-${year}`,
 					textContent: year.toString(),
-					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					right: (b) => [b.icon({ icon: 'chevronRight' })],
 					action: () => {
 						this.data = { ...this.data, year };
 						this.runSetMonth();
@@ -116,7 +115,7 @@ export class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-month-${jsmonth}`,
 					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
-					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					right: (b) => [b.icon({ icon: 'chevronRight' })],
 					action: () => {
 						this.data = { ...this.data, jsmonth };
 						this.runSetDay();

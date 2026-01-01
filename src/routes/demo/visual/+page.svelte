@@ -9,7 +9,6 @@
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
 	import { randomId } from '$lib/oneput/lib/utils.js';
-	import { xIcon } from '$lib/oneput/shared/icons.js';
 	import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 
 	setupDemoState();
@@ -233,7 +232,7 @@
 										id: randomId(),
 										type: 'fchild',
 										classes: ['oneput__icon-button'],
-										innerHTMLUnsafe: xIcon,
+										icon: 'x',
 										attr: {
 											onclick: () => {
 												toggleNotification = true;

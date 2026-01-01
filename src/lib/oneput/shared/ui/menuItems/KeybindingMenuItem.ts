@@ -37,7 +37,7 @@ export const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
 				htmlContentUnsafe: bindingHTML,
 				classes: ['oneput__kbd']
 			}),
-			b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
+			b.icon({ icon: 'chevronRight' })
 		]
 	});
 };

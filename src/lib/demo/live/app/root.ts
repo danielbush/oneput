@@ -74,7 +74,8 @@ export class RootUI {
 					textContent: 'Settings...',
 					action: () => {
 						this.ctl.app.run(this.createSettingsUI());
-					}
+					},
+					right: (b) => [b.icon({ icon: 'chevronRight' })]
 				}),
 				stdMenuItem({
 					id: 'navigate-outline',

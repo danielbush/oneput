@@ -1,16 +1,25 @@
 <script lang="ts">
-	import * as icons from '../icons.js';
+	import { renderIcon } from '../../lib/icons.js';
 	import type { Controller } from '../../controller.js';
 	const { controller, onClick }: { controller: Controller; onClick: (evt: Event) => void } =
 		$props();
+	let iconNode: HTMLButtonElement | null = $state(null);
+	$effect(() => {
+		if (iconNode) {
+			renderIcon('tick', iconNode);
+		}
+	});
 </script>
 
 {#if controller.input.getInputValue()}
-	<button title="Accept" type="button" onclick={onClick} class="oneput__icon-button enabled">
-		<!-- eslint-disable svelte/no-at-html-tags -->
-		{@html icons.tickIcon}
-		<!-- eslint-enable svelte/no-at-html-tags -->
-	</button>
+	<button
+		title="Accept"
+		aria-label="Accept"
+		type="button"
+		onclick={onClick}
+		class="oneput__icon-button enabled"
+		bind:this={iconNode}
+	></button>
 {/if}
 
 <style>

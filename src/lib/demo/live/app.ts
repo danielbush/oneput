@@ -15,7 +15,9 @@ import { RootUI } from './app/root.js';
 registerIcons({
 	x: lucide(() => createElement(icons.X)),
 	settings: lucide(() => createElement(icons.Settings)),
-	keyboard: lucide(() => createElement(icons.Keyboard))
+	keyboard: lucide(() => createElement(icons.Keyboard)),
+	chevronRight: lucide(() => createElement(icons.ChevronRight)),
+	tick: lucide(() => createElement(icons.Check))
 });
 
 // Our app starts in this callback.  We get the controller and we can set keys

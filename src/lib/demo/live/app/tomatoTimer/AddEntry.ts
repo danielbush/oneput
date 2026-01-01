@@ -167,7 +167,7 @@ export class AddEntry implements AppObject {
 						'...'
 					: 'Start time...',
 				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
-				right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+				right: (b) => [b.icon({ icon: 'chevronRight' })],
 				action: () => {
 					this.ctl.app.run(this.setDateTime);
 				}

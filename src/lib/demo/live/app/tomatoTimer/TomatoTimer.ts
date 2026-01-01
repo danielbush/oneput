@@ -137,7 +137,7 @@ export class TomatoTimer implements AppObject {
 					id: 'tomato-previous-sessions',
 					textContent: 'Previous sessions...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
-					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					right: (b) => [b.icon({ icon: 'chevronRight' })],
 					action: () => {
 						this.runPreviousSessions();
 					}
@@ -229,7 +229,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-finish',
 					textContent: 'Finish',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.tickIcon })],
+					left: (b) => [b.icon({ icon: 'tick' })],
 					action: () => {
 						timerValue.finish();
 						this.timerValue = null;
@@ -323,9 +323,9 @@ export class TomatoTimer implements AppObject {
 					children: (b) => [
 						b.iconButton({
 							title: 'Add',
-							innerHTMLUnsafe: icons.tickIcon
+							icon: 'tick'
 						}),
-						b.iconButton({ title: 'Cancel', innerHTMLUnsafe: icons.xIcon })
+						b.iconButton({ title: 'Cancel', icon: 'x' })
 					]
 				})
 			};
@@ -349,7 +349,7 @@ export class TomatoTimer implements AppObject {
 						left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
 						right: (b) => [
 							b.fchild({ textContent: `${new Date(session.startTime * 1000).toLocaleString()}` }),
-							b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })
+							b.icon({ icon: 'chevronRight' })
 						],
 						action: () => {
 							this.runEditEntry(session);
@@ -426,7 +426,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-edit-session-save',
 					textContent: 'Delete...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.xIcon })],
+					left: (b) => [b.icon({ icon: 'x' })],
 					action: async () => {
 						const confirm = this.ctl.confirm({
 							message: 'Are you sure you want to delete this session?'

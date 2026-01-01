@@ -66,7 +66,7 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 					id: 'set-date',
 					textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
-					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					right: (b) => [b.icon({ icon: 'chevronRight' })],
 					action: () => {
 						this.ctl.app.run(this.createSetDate());
 					}
@@ -75,7 +75,7 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 					id: 'set-time',
 					textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
 					left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
-					right: (b) => [b.icon({ innerHTMLUnsafe: icons.chevronRightIcon })],
+					right: (b) => [b.icon({ icon: 'chevronRight' })],
 					action: () => {
 						this.ctl.app.run(this.createSetTime());
 					}

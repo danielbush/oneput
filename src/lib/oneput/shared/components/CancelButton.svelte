@@ -1,20 +1,24 @@
 <script lang="ts">
-	import * as icons from '../icons.js';
+	import { renderIcon } from '../../lib/icons.js';
 	import type { Controller } from '../../controller.js';
 	const { controller, onClick }: { controller: Controller; onClick: (evt: Event) => void } =
 		$props();
+	let iconNode: HTMLButtonElement | null = $state(null);
+	$effect(() => {
+		if (iconNode) {
+			renderIcon('x', iconNode);
+		}
+	});
 </script>
 
 <button
 	title="Cancel"
+	aria-label="Cancel"
 	type="button"
 	onclick={onClick}
 	class={['oneput__icon-button', controller.input.getInputValue() || 'highlight']}
->
-	<!-- eslint-disable svelte/no-at-html-tags -->
-	{@html icons.xIcon}
-	<!-- eslint-enable svelte/no-at-html-tags -->
-</button>
+	bind:this={iconNode}
+></button>
 
 <style>
 	:not(.highlight) {

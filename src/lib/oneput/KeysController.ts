@@ -74,7 +74,7 @@ export class KeysController {
 	private keysDisabled = false;
 
 	/**
-	 * Prefer ctl.ui.update({ enableKeys: true }) instead.
+	 * Prefer ctl.ui.update({ flags: { enableKeys: true } }) instead.
 	 */
 	_enableKeys(on: boolean = true) {
 		this.keysDisabled = !on;

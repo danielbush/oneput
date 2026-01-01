@@ -30,9 +30,11 @@ export class Confirm {
 
 	private start = () => {
 		this.ctl.ui.update({
-			enableModal: true,
-			// Re-enable keys...
-			enableKeys: true
+			flags: {
+				enableModal: true,
+				// Re-enable keys...
+				enableKeys: true
+			}
 		});
 		this.ctl.keys.setBindings(
 			{
@@ -107,7 +109,9 @@ export class Confirm {
 
 	private stop = (ok: boolean) => {
 		this.ctl.ui.update({
-			enableModal: false
+			flags: {
+				enableModal: false
+			}
 		});
 
 		// Restore

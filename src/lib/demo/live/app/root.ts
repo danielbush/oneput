@@ -55,8 +55,12 @@ export class RootUI {
 
 	run = () => {
 		this.ctl.ui.update({
-			menuTitle: 'Home',
-			enableGoBack: false
+			params: {
+				menuTitle: 'Home'
+			},
+			flags: {
+				enableGoBack: false
+			}
 		});
 		const blankItems = [...Array(10)].map((_, i) => {
 			return stdMenuItem({

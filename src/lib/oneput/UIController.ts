@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { UILayout, FlexParams, OneputProps, UILayoutSettings } from './types.js';
+import type { UILayout, FlexParams, OneputProps, UIFlags } from './types.js';
 
 export class UIController {
 	static create(ctl: Controller) {
@@ -40,15 +40,12 @@ export class UIController {
 	/**
 	 * Should perform similar reset to beforeRun logic in AppController.
 	 */
-	update<A extends Record<string, unknown> = Record<never, never>>(
-		settings?: UILayoutSettings,
-		additional?: A
-	) {
-		const flags = this.ctl.app.reset(settings);
-		if (settings?.menuTitle) {
-			flags['menuTitle'] = settings.menuTitle;
-		}
-		this.layout?.configure(flags, additional);
+	update<A extends Record<string, unknown> = Record<string, unknown>>(settings: {
+		flags?: UIFlags;
+		params?: A;
+	}) {
+		const finalFlags = this.ctl.app.reset(settings.flags);
+		this.layout?.configure({ flags: finalFlags, params: settings.params });
 		this.ctl.currentProps.inputUI = this.layout?.inputUI;
 		this.ctl.currentProps.menuUI = this.layout?.menuUI;
 		this.ctl.currentProps.innerUI = this.layout?.innerUI;

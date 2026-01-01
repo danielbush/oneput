@@ -47,7 +47,9 @@ export class SetTime implements AppObject {
 			this.ctl.input.focusInput();
 		});
 		this.ctl.ui.update({
-			menuTitle: 'Set a time...'
+			params: {
+				menuTitle: 'Set a time...'
+			}
 		});
 		this.ctl.input.setSubmitHandler((time) => {
 			const [hour, minute] = time.split(':');

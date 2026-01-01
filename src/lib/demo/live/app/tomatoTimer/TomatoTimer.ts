@@ -58,7 +58,9 @@ export class TomatoTimer implements AppObject {
 
 	onStart() {
 		this.ctl.ui.update({
-			menuTitle: 'Tomato Timer'
+			params: {
+				menuTitle: 'Tomato Timer'
+			}
 		});
 		this.ctl.menu.clearMenuItemsFn();
 		// TODO: check if there is an active timer...
@@ -95,7 +97,9 @@ export class TomatoTimer implements AppObject {
 	private runMainNoTimer() {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
-			menuTitle: 'No timer running'
+			params: {
+				menuTitle: 'No timer running'
+			}
 		});
 		this.ctl.app.setOnBack(() => {
 			this.ctl.app.exit();
@@ -146,7 +150,9 @@ export class TomatoTimer implements AppObject {
 	private runMainWithTimer(timerValue: TomatoTimerValue) {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
-			menuTitle: 'Running timer... Seize the day!'
+			params: {
+				menuTitle: 'Running timer... Seize the day!'
+			}
 		});
 		this.ctl.app.setOnBack(() => {
 			this.ctl.app.exit();
@@ -263,7 +269,9 @@ export class TomatoTimer implements AppObject {
 	private runCreateTimer({ duration }: { duration: number }) {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
-			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
+			params: {
+				menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
+			}
 		});
 		this.ctl.app.setOnBack(() => {
 			this.runMain();
@@ -327,7 +335,9 @@ export class TomatoTimer implements AppObject {
 	private runPreviousSessions() {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
-			menuTitle: 'Previous sessions'
+			params: {
+				menuTitle: 'Previous sessions'
+			}
 		});
 		this.ctl.app.setOnBack(() => {
 			this.runMain();
@@ -359,7 +369,9 @@ export class TomatoTimer implements AppObject {
 		this.ctl.app.reset();
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
-			menuTitle: 'Edit session...'
+			params: {
+				menuTitle: 'Edit session...'
+			}
 		});
 		this.ctl.app.setOnBack(() => {
 			this.runPreviousSessions();

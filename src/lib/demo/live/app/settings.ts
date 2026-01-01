@@ -53,7 +53,9 @@ export class SettingsUI {
 
 	run = () => {
 		this.ctl.ui.update({
-			menuTitle: 'Settings'
+			params: {
+				menuTitle: 'Settings'
+			}
 		});
 		this.ctl.menu.setMenuItems({
 			id: 'main',

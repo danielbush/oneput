@@ -118,7 +118,7 @@ export class InputController {
 	}
 
 	/**
-	 * Prefer ctl.ui.update({ enableInputElement: true }) instead.
+	 * Prefer ctl.ui.update({ flags: { enableInputElement: true } }) instead.
 	 */
 	_enableInputElement(on: boolean = true) {
 		if (!this.inputElement) {

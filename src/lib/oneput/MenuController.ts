@@ -426,21 +426,21 @@ export class MenuController {
 	// - mennItemsFn
 
 	/**
-	 * Prefer ctl.ui.update({ enableMenuActions: true }) instead.
+	 * Prefer ctl.ui.update({ flags: { enableMenuActions: true } }) instead.
 	 */
 	_enableMenuActions(on: boolean = true) {
 		this.disableActions = !on;
 	}
 
 	/**
-	 * Prefer ctl.ui.update({ enableMenuOpenClose: true }) instead.
+	 * Prefer ctl.ui.update({ flags: { enableMenuOpenClose: true } }) instead.
 	 */
 	_enableMenuOpenClose(on: boolean = true) {
 		this.disableOpenClose = !on;
 	}
 
 	/**
-	 * Prefer ctl.ui.update({ enableMenuItemsFn: true }) instead.
+	 * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
 	 */
 	_enableMenuItemsFn(on: boolean = true) {
 		this.disableMenuItemsFn = !on;

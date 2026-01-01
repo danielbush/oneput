@@ -162,10 +162,6 @@ export interface AppObject<R = unknown> {
 
 export type NullishChildren = Array<FlexParams | FChildParams | '' | false | null | undefined>;
 
-export type UILayoutSettings = {
-	menuTitle?: string;
-} & UIFlags;
-
 export type UIFlags = {
 	enableGoBack?: boolean;
 	enableMenuOpenClose?: boolean;
@@ -177,7 +173,7 @@ export type UIFlags = {
 };
 
 export interface UILayout {
-	configure(values: UILayoutSettings, additional?: Record<string, unknown>): void;
+	configure(settings: { flags: UIFlags; params?: Record<string, unknown> }): void;
 	inputUI?: OneputProps['inputUI'];
 	menuUI?: OneputProps['menuUI'];
 	innerUI?: OneputProps['innerUI'];

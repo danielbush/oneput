@@ -71,7 +71,7 @@ export class BindingsEditor implements AppObject {
 			this.ctl.app.exit();
 		});
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.ctl.ui.update({ menuTitle: title });
+		this.ctl.ui.update({ params: { menuTitle: title } });
 		this.ctl.menu.setMenuItems({
 			id: 'actionsUI',
 			items: Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
@@ -97,7 +97,9 @@ export class BindingsEditor implements AppObject {
 		});
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
-			menuTitle: `Key bindings for "${description}"`
+			params: {
+				menuTitle: `Key bindings for "${description}"`
+			}
 		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
@@ -136,8 +138,12 @@ export class BindingsEditor implements AppObject {
 			this.actionUI(actionId);
 		});
 		this.ctl.ui.update({
-			menuTitle: `Capturing...`,
-			enableModal: true
+			params: {
+				menuTitle: `Capturing...`
+			},
+			flags: {
+				enableModal: true
+			}
 		});
 		const { accept, reject, capturingKeys } = this.startKeyCapture();
 		this.ctl.ui.setInputUI({
@@ -200,7 +206,7 @@ export class BindingsEditor implements AppObject {
 		});
 		const exit = () => {
 			window.removeEventListener('keydown', keyListener);
-			this.ctl.ui.update({ enableModal: false });
+			this.ctl.ui.update({ flags: { enableModal: false } });
 		};
 
 		return {

@@ -17,7 +17,9 @@ export class FiltersUI implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Filters'
+			params: {
+				menuTitle: 'Filters'
+			}
 		});
 
 		this.ctl.menu.setMenuItems({

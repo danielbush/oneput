@@ -53,8 +53,12 @@ export class KatexDemo implements AppObject {
 			this.renderUI();
 		});
 		this.ctl.ui.update({
-			menuTitle: 'Katex Demo',
-			enableMenuOpenClose: false
+			params: {
+				menuTitle: 'Katex Demo'
+			},
+			flags: {
+				enableMenuOpenClose: false
+			}
 		});
 		this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
 		this.ctl.input.focusInput();

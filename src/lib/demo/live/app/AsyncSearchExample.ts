@@ -26,17 +26,15 @@ export class AsyncSearchExample implements AppObject {
 	}
 
 	run() {
-		this.ctl.ui.update<LayoutSettings>(
-			{
-				menuTitle: 'Async Search Example'
-			},
-			{
+		this.ctl.ui.update<LayoutSettings>({
+			params: {
+				menuTitle: 'Async Search Example',
 				outerRight: (b) =>
 					b.fchild({
 						onMount: this.outerRightStatus.onMount
 					})
 			}
-		);
+		});
 		this.ctl.menu.setMenuItemsFnAsync(
 			async (input) => {
 				try {

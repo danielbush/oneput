@@ -26,10 +26,14 @@ export class NavigateHeadings implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Navigate Headings',
-			// Demo how to handle typed input by handling onInputChange directly and
-			// disable menuItemsFn...
-			enableMenuItemsFn: false
+			params: {
+				menuTitle: 'Navigate Headings'
+			},
+			flags: {
+				// Demo how to handle typed input by handling onInputChange directly and
+				// disable menuItemsFn...
+				enableMenuItemsFn: false
+			}
 		});
 		const menuAction = (heading: HTMLElement) => {
 			heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });

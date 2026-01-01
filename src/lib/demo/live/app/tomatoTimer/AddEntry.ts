@@ -52,7 +52,7 @@ export class AddEntry implements AppObject {
 			} satisfies OneputProps['inputUI'];
 		});
 		this.ctl.input.focusInput();
-		this.ctl.ui.update({ enableInputElement: true });
+		this.ctl.ui.update({ flags: { enableInputElement: true } });
 		switch (item.id) {
 			case 'add-label':
 				this.ctl.input.setPlaceholder('Enter label...');
@@ -96,7 +96,7 @@ export class AddEntry implements AppObject {
 				break;
 			case 'add-startTime':
 				this.ctl.input.setPlaceholder('Set start time and date...');
-				this.ctl.ui.update({ enableInputElement: false });
+				this.ctl.ui.update({ flags: { enableInputElement: false } });
 				this.ctl.input.setInputValue();
 				break;
 		}
@@ -108,7 +108,9 @@ export class AddEntry implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Add entry...'
+			params: {
+				menuTitle: 'Add entry...'
+			}
 		});
 		this.ctl.menu.clearMenuItemsFn();
 		this.ctl.menu.setMenuItems({

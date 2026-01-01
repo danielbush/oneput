@@ -18,7 +18,9 @@ export class GlobalFilter implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Global Filter'
+			params: {
+				menuTitle: 'Global Filter'
+			}
 		});
 		setTimeout(() => {
 			this.ctl.ui.setInputUI((current) => {

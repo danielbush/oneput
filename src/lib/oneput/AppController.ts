@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppObject, UIFlags, UILayoutSettings } from './types.js';
+import type { AppObject, UIFlags } from './types.js';
 
 class AppVal {
 	static create(app: AppObject) {
@@ -59,7 +59,7 @@ export class AppController {
 	private unsubscribeMenuItemFocus?: () => void;
 
 	/**
-	 * Prefer ctl.ui.update({ enableGoBack: true }) instead.
+	 * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.
 	 */
 	_enableGoBack(on: boolean = true) {
 		this.disableGoBack = !on;
@@ -74,7 +74,7 @@ export class AppController {
 
 	private calcLayoutFlags(settings: UIFlags) {
 		const enableModal = settings.enableModal ?? false;
-		const flags: UILayoutSettings = {
+		const flags: UIFlags = {
 			enableGoBack: settings.enableGoBack ?? !enableModal,
 			enableMenuOpenClose: settings.enableMenuOpenClose ?? !enableModal,
 			enableKeys: settings.enableKeys ?? !enableModal,
@@ -98,7 +98,7 @@ export class AppController {
 		}
 
 		// Re-enable stuff...
-		const flags: UILayoutSettings = this.calcLayoutFlags(settings ?? {});
+		const flags = this.calcLayoutFlags(settings ?? {});
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
 		this.ctl.keys._enableKeys(flags.enableKeys);

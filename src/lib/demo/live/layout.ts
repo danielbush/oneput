@@ -1,6 +1,6 @@
 import { mountSvelte, randomId } from '$lib/oneput/lib/utils.js';
-import type { DynamicPlaceholderBase } from '$lib/oneput/types.js';
-import type { FChildParams, UILayout, UILayoutSettings } from '$lib/oneput/types.js';
+import type { DynamicPlaceholderBase, UIFlags } from '$lib/oneput/types.js';
+import type { FChildParams, UILayout } from '$lib/oneput/types.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
 import { arrowLeftIcon, chevronDown } from '$lib/oneput/shared/icons.js';
@@ -11,7 +11,11 @@ import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsS
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 
+/**
+ * Define settings used by your particular layout.
+ */
 export type LayoutSettings = {
+	menuTitle?: string;
 	/**
 	 * Expose the bottom right corner of the layout.
 	 */
@@ -22,7 +26,7 @@ export type LayoutSettings = {
  * Defines a standard layout.
  */
 export class Layout implements UILayout {
-	static create(ctl: Controller, settings: UILayoutSettings = {}) {
+	static create(ctl: Controller, settings: LayoutSettings = {}) {
 		const bindingService = LocalBindingsService.create(ctl);
 		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
 			params.menuOpenBinding
@@ -38,8 +42,8 @@ export class Layout implements UILayout {
 
 	constructor(
 		private ctl: Controller,
-		private settings: UILayoutSettings = {},
-		private additional: LayoutSettings = {},
+		private settings: LayoutSettings = {},
+		private flags: UIFlags = {},
 		private dynamicPlaceholder: DynamicPlaceholder,
 		private bindingService: LocalBindingsService
 	) {
@@ -60,32 +64,26 @@ export class Layout implements UILayout {
 			});
 	}
 
-	configure(values: UILayoutSettings, additional: LayoutSettings) {
+	configure(settings: { flags: UIFlags; params?: LayoutSettings }) {
+		this.flags = settings.flags;
 		this.settings = {
 			menuTitle: this.settings.menuTitle || 'Menu',
-			...values
-		};
-		this.additional = {
-			...additional
+			...settings.params
 		};
 	}
 
 	private get exitAction() {
-		if (this.settings.enableMenuOpenClose === true) {
+		if (this.flags.enableMenuOpenClose === true) {
 			return this.ctl.menu.closeMenu;
 		}
 		return;
 	}
 
 	private get backAction() {
-		if (this.settings.enableGoBack === true) {
+		if (this.flags.enableGoBack === true) {
 			return this.ctl.app.goBack;
 		}
 		return;
-	}
-
-	private get menuTitle() {
-		return this.settings.menuTitle || 'Menu';
 	}
 
 	get inputUI() {
@@ -131,7 +129,7 @@ export class Layout implements UILayout {
 						: b.spacer(),
 					b.fchild({
 						classes: ['oneput__menu-item-header'],
-						textContent: this.menuTitle
+						textContent: this.settings.menuTitle || 'Menu'
 					}),
 					this.exitAction
 						? b.fchild({
@@ -174,10 +172,10 @@ export class Layout implements UILayout {
 					onMount: (node) =>
 						mountSvelte(MenuStatus, { target: node, props: { controller: this.ctl } })
 				}),
-				this.additional.outerRight
+				this.settings.outerRight
 					? {
 							style: { flex: '1', justifyContent: 'flex-end' },
-							...this.additional.outerRight(b)
+							...this.settings.outerRight(b)
 						}
 					: b.fchild({
 							// TODO: if outerRight is invoked above but has the same id

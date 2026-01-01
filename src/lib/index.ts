@@ -4,7 +4,7 @@ import OneputController from './oneput/components/OneputController.svelte';
 import OneputCornerButton from './oneput/components/OneputCornerButton.svelte';
 import Anchor from './oneput/components/Anchor.svelte';
 import { Controller } from './oneput/controller.js';
-import type { UILayout, UILayoutSettings } from './oneput/types.js';
+import type { UILayout } from './oneput/types.js';
 
 // Icon registry exports
 export {
@@ -20,4 +20,4 @@ export {
 export type { IconRenderer } from './oneput/lib/icons.js';
 
 export { Oneput, OneputController, OneputCornerButton, Anchor, Controller };
-export type { UILayout, UILayoutSettings };
+export type { UILayout };

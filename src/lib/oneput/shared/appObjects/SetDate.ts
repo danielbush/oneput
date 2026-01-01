@@ -47,7 +47,9 @@ export class SetDate implements AppObject {
 
 	run() {
 		this.ctl.ui.update({
-			menuTitle: 'Set date...'
+			params: {
+				menuTitle: 'Set date...'
+			}
 		});
 		this.runSetYear();
 	}

@@ -48,15 +48,15 @@ export class AppController {
 	private appParents: AppVal[] = [];
 	private _current: AppVal | null = null;
 	private onBack?: () => void;
+	private disableGoBack = false;
 	private get current() {
 		return this._current || null;
 	}
-	private disableGoBack = false;
-
 	private set current(appVal: AppVal | null) {
 		// console.warn('currentApp is now', app);
 		this._current = appVal;
 	}
+	private unsubscribeMenuItemFocus?: () => void;
 
 	/**
 	 * Prefer ctl.ui.update({ enableGoBack: true }) instead.
@@ -64,8 +64,6 @@ export class AppController {
 	_enableGoBack(on: boolean = true) {
 		this.disableGoBack = !on;
 	}
-
-	private unsubscribeMenuItemFocus?: () => void;
 
 	/**
 	 *  Resets things to sane defaults.  You can then set things in your AppObject.run.

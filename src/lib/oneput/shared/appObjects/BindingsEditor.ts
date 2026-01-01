@@ -6,7 +6,7 @@ import {
 	type KeyBindingMap,
 	type KeyEvent
 } from '../../lib/bindings.js';
-import { keyboardIcon, xIcon } from '../icons.js';
+import { xIcon } from '../icons.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { keybindingMenuItem } from '../ui/menuItems/KeybindingMenuItem.js';
 import { type ResultAsync } from 'neverthrow';
@@ -126,7 +126,7 @@ export class BindingsEditor implements AppObject {
 					return stdMenuItem({
 						id: binding,
 						textContent: binding,
-						left: (b) => [b.icon({ innerHTMLUnsafe: keyboardIcon })],
+						left: (b) => [b.icon({ icon: 'keyboard' })],
 						right: (b) => [b.icon({ innerHTMLUnsafe: xIcon })],
 						action: () => {
 							this.removeBinding(actionId, binding);

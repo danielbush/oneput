@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppObject } from './types.js';
+import type { AppObject, UILayoutSettings } from './types.js';
 
 class AppVal {
 	static create(app: AppObject) {
@@ -109,6 +109,34 @@ export class AppController {
 		this.ctl.menu.resetFillHandler();
 
 		// We don't clear notifications or alerts or confirmations.
+	}
+
+	private calcLayoutFlags(settings: Omit<UILayoutSettings, 'menuTitle'>) {
+		const enableModal = settings.enableModal ?? false;
+		const flags: UILayoutSettings = {
+			enableGoBack: settings.enableGoBack ?? !enableModal,
+			enableMenuOpenClose: settings.enableMenuOpenClose ?? !enableModal,
+			enableKeys: settings.enableKeys ?? !enableModal,
+			enableMenuActions: settings.enableMenuActions ?? !enableModal,
+			enableMenuItemsFn: settings.enableMenuItemsFn ?? !enableModal,
+			enableInputElement: settings.enableInputElement ?? !enableModal
+		};
+		return flags;
+	}
+
+	/**
+	 * Should perform similar reset to beforeRun logic in AppController.
+	 */
+	update(settings?: Omit<UILayoutSettings, 'menuTitle'>) {
+		// Reset environment
+		const flags: UILayoutSettings = this.calcLayoutFlags(settings ?? {});
+		this.ctl.app._enableGoBack(flags.enableGoBack);
+		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
+		this.ctl.keys._enableKeys(flags.enableKeys);
+		this.ctl.menu._enableMenuActions(flags.enableMenuActions);
+		this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn);
+		this.ctl.input._enableInputElement(flags.enableInputElement);
+		return flags;
 	}
 
 	private runBeforeExit() {

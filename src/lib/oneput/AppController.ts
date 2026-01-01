@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppObject, UILayoutSettings } from './types.js';
+import type { AppObject, UIFlags, UILayoutSettings } from './types.js';
 
 class AppVal {
 	static create(app: AppObject) {
@@ -72,7 +72,7 @@ export class AppController {
 		this.reset();
 	}
 
-	private calcLayoutFlags(settings: Omit<UILayoutSettings, 'menuTitle'>) {
+	private calcLayoutFlags(settings: UIFlags) {
 		const enableModal = settings.enableModal ?? false;
 		const flags: UILayoutSettings = {
 			enableGoBack: settings.enableGoBack ?? !enableModal,
@@ -85,7 +85,7 @@ export class AppController {
 		return flags;
 	}
 
-	reset(settings?: Omit<UILayoutSettings, 'menuTitle'>) {
+	reset(settings?: UIFlags) {
 		// Events
 		this.unsubscribeMenuItemFocus?.();
 		if (this.current?.app.onMenuItemFocus) {

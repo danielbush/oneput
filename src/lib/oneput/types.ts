@@ -164,6 +164,9 @@ export type NullishChildren = Array<FlexParams | FChildParams | '' | false | nul
 
 export type UILayoutSettings = {
 	menuTitle?: string;
+} & UIFlags;
+
+export type UIFlags = {
 	enableGoBack?: boolean;
 	enableMenuOpenClose?: boolean;
 	enableKeys?: boolean;

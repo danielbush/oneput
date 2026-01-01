@@ -12,6 +12,7 @@ import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+import type { LayoutSettings } from '../layout.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
@@ -54,7 +55,7 @@ export class RootUI {
 	};
 
 	run = () => {
-		this.ctl.ui.update({
+		this.ctl.ui.update<LayoutSettings>({
 			params: {
 				menuTitle: 'Home'
 			},

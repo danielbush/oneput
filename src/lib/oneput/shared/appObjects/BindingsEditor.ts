@@ -62,29 +62,14 @@ export class BindingsEditor implements AppObject {
 		this.actionsUI();
 	}
 
-	onBack: AppObject['onBack'] = ({ menu, payload }) => {
-		if (payload === 'capturedKeys') {
-			this.actionUI(this.actionId!);
-			return;
-		}
-		if (menu.menuId?.startsWith('actionUI-')) {
-			this.actionsUI();
-			return;
-		}
-		if (menu.menuId === 'captureBindingUI') {
-			this.actionUI(this.actionId!);
-			return;
-		}
-		this.ctl.app.exit();
-	};
-
-	private actionId?: string;
-
 	/**
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
 		this.ctl.app.reset();
+		this.ctl.app.setOnBack(() => {
+			this.ctl.app.exit();
+		});
 		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
 		this.ctl.ui.update({ menuTitle: title });
 		this.ctl.menu.setMenuItems({
@@ -95,7 +80,6 @@ export class BindingsEditor implements AppObject {
 					text: description,
 					bindings,
 					action: () => {
-						this.actionId = id;
 						this.actionUI(id);
 					}
 				})
@@ -107,8 +91,10 @@ export class BindingsEditor implements AppObject {
 	 * UI displays bindings for a given action and lets you add/remove bindings.
 	 */
 	private actionUI = (actionId: string) => {
-		console.log('wtf');
 		this.ctl.app.reset();
+		this.ctl.app.setOnBack(() => {
+			this.actionsUI();
+		});
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
 			menuTitle: `Key bindings for "${description}"`
@@ -123,7 +109,6 @@ export class BindingsEditor implements AppObject {
 					id: 'add-binding',
 					textContent: 'Add binding...',
 					action: () => {
-						console.log('wtf2');
 						this.captureBindingUI(actionId);
 					}
 				}),
@@ -146,8 +131,10 @@ export class BindingsEditor implements AppObject {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
-		console.log('start');
 		this.ctl.app.reset();
+		this.ctl.app.setOnBack(() => {
+			this.actionUI(actionId);
+		});
 		this.ctl.ui.update({
 			menuTitle: `Capturing...`,
 			enableModal: true
@@ -188,8 +175,7 @@ export class BindingsEditor implements AppObject {
 		if (capturedKeys) {
 			this.addBinding(actionId, capturedKeys);
 		}
-		console.log('here');
-		this.ctl.app.goBack('capturedKeys');
+		this.ctl.app.goBack();
 	}
 
 	private startKeyCapture = () => {

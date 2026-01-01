@@ -81,23 +81,6 @@ export class TomatoTimer implements AppObject {
 			});
 	}
 
-	/**
-	 * If we start a timer, we don't want to go back to the "noTimer" ui, so we
-	 * use onBack to handle all back actions.
-	 */
-	onBack: AppObject['onBack'] = ({ menu }) => {
-		switch (menu.menuId) {
-			case 'runCreateTimer':
-			case 'runPreviousSessions':
-				this.runMain();
-				return;
-			case 'runEditEntry':
-				this.runPreviousSessions();
-				return;
-		}
-		this.ctl.app.exit();
-	};
-
 	private runMain = () => {
 		if (this.timerValue) {
 			this.runMainWithTimer(this.timerValue);
@@ -113,6 +96,9 @@ export class TomatoTimer implements AppObject {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: 'No timer running'
+		});
+		this.ctl.app.setOnBack(() => {
+			this.ctl.app.exit();
 		});
 		this.ctl.menu.setMenuItems({
 			id: 'runMainNoTimer',
@@ -161,6 +147,9 @@ export class TomatoTimer implements AppObject {
 		this.ctl.app.reset();
 		this.ctl.ui.update({
 			menuTitle: 'Running timer... Seize the day!'
+		});
+		this.ctl.app.setOnBack(() => {
+			this.ctl.app.exit();
 		});
 		this.ctl.menu.setMenuItems({
 			id: 'runMainWithTimer',
@@ -276,6 +265,9 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
 		});
+		this.ctl.app.setOnBack(() => {
+			this.runMain();
+		});
 		this.dynamicPlaceholder.setPlaceholder((params) => {
 			return params.submitBinding
 				? `Enter a label and hit ${params.submitBinding}...`
@@ -337,6 +329,9 @@ export class TomatoTimer implements AppObject {
 		this.ctl.ui.update({
 			menuTitle: 'Previous sessions'
 		});
+		this.ctl.app.setOnBack(() => {
+			this.runMain();
+		});
 		this.ctl.input.setPlaceholder('Select a session...');
 		this.store.getFinishedSessions().andTee((sessions) => {
 			this.ctl.menu.setMenuItems({
@@ -365,6 +360,9 @@ export class TomatoTimer implements AppObject {
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
 			menuTitle: 'Edit session...'
+		});
+		this.ctl.app.setOnBack(() => {
+			this.runPreviousSessions();
 		});
 		this.ctl.input.setPlaceholder('Select an action...');
 		this.ctl.menu.setMenuItems({

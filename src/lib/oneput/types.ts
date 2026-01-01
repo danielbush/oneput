@@ -157,13 +157,6 @@ export interface AppObject<R = unknown> {
 	 */
 	onResume?: (result?: { payload?: R }) => void;
 	beforeExit?: () => void;
-	/**
-	 * Handles a user or programmatic to go back to the parent appObject that ran this instance.
-	 */
-	onBack?: (params: {
-		menu: { menuId?: string; lastActionId?: string };
-		payload?: unknown;
-	}) => void;
 	onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
 }
 

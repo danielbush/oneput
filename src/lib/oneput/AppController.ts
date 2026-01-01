@@ -47,17 +47,16 @@ export class AppController {
 
 	private appParents: AppVal[] = [];
 	private _current: AppVal | null = null;
-
+	private onBack?: () => void;
 	private get current() {
 		return this._current || null;
 	}
+	private disableGoBack = false;
 
 	private set current(appVal: AppVal | null) {
 		// console.warn('currentApp is now', app);
 		this._current = appVal;
 	}
-
-	private disableGoBack = false;
 
 	/**
 	 * Prefer ctl.ui.update({ enableGoBack: true }) instead.
@@ -98,6 +97,7 @@ export class AppController {
 		this._enableGoBack();
 
 		// Reset stuff...
+		this.resetOnBack();
 		this.ctl.keys.resetBindings();
 		this.ctl.keys.resetBindings(true);
 		this.ctl.input.resetPlaceholder();
@@ -148,18 +148,25 @@ export class AppController {
 	/**
 	 * Goes back to previous appObject.
 	 */
-	goBack = (payload?: unknown) => {
+	goBack = () => {
 		if (this.disableGoBack) {
 			return;
 		}
-		if (this.current?.app.onBack) {
-			const menu = this.getMenu();
-			this.current.app.onBack({ menu, payload });
+		if (this.onBack) {
+			this.onBack();
 			return;
 		}
 		this.pop();
 		return;
 	};
+
+	setOnBack(onBack: () => void) {
+		this.onBack = onBack;
+	}
+
+	resetOnBack() {
+		this.onBack = undefined;
+	}
 
 	/**
 	 * Returns details about the menu with menuId including the last action that

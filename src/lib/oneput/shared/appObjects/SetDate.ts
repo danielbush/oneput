@@ -41,19 +41,6 @@ export class SetDate implements AppObject {
 
 	private data?: Partial<{ year: number; month: number; jsmonth: number; day: number }>;
 
-	onBack: AppObject['onBack'] = ({ menu }) => {
-		switch (menu.menuId) {
-			case 'setMonth':
-				this.runSetYear();
-				break;
-			case 'setDay':
-				this.runSetMonth();
-				break;
-			default:
-				this.ctl.app.exit();
-		}
-	};
-
 	onStart() {
 		this.run();
 	}
@@ -67,6 +54,9 @@ export class SetDate implements AppObject {
 
 	private runSetYear() {
 		this.ctl.app.reset();
+		this.ctl.app.setOnBack(() => {
+			this.ctl.app.exit();
+		});
 		const currentYear = new Date().getFullYear();
 		const menuItems: MenuItem[] = [];
 		const span = 5;
@@ -107,6 +97,9 @@ export class SetDate implements AppObject {
 
 	private runSetMonth() {
 		this.ctl.app.reset();
+		this.ctl.app.setOnBack(() => {
+			this.runSetYear();
+		});
 		const { year } = this.data as { year: number };
 		const currentMonth = new Date().getMonth();
 		const menuItems: MenuItem[] = [];
@@ -140,6 +133,9 @@ export class SetDate implements AppObject {
 
 	private runSetDay() {
 		this.ctl.app.reset();
+		this.ctl.app.setOnBack(() => {
+			this.runSetMonth();
+		});
 		const { year, jsmonth } = this.data as { year: number; jsmonth: number };
 		const currentDay = new Date().getDate();
 		const menuItems: MenuItem[] = [];

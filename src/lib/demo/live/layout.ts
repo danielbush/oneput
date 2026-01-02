@@ -3,7 +3,7 @@ import type { DynamicPlaceholderBase, UIFlags } from '$lib/oneput/types.js';
 import type { FChildParams, UILayout } from '$lib/oneput/types.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
-import { arrowLeftIcon, chevronDown } from '$lib/oneput/shared/icons.js';
+import { chevronDown } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
 import { TimeDisplay } from '$lib/oneput/shared/components/TimeDisplay.js';
@@ -124,7 +124,7 @@ export class Layout implements UILayout {
 								tag: 'button',
 								attr: { type: 'button', title: 'Back', onclick: this.backAction },
 								classes: ['oneput__icon-button'],
-								innerHTMLUnsafe: arrowLeftIcon
+								icon: 'arrowLeft'
 							})
 						: b.spacer(),
 					b.fchild({

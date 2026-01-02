@@ -17,7 +17,10 @@ registerIcons({
 	settings: lucide(() => createElement(icons.Settings)),
 	keyboard: lucide(() => createElement(icons.Keyboard)),
 	chevronRight: lucide(() => createElement(icons.ChevronRight)),
-	tick: lucide(() => createElement(icons.Check))
+	tick: lucide(() => createElement(icons.Check)),
+	squareFunction: lucide(() => createElement(icons.SquareFunction)),
+	arrowLeft: lucide(() => createElement(icons.ArrowLeft)),
+	sigma: lucide(() => createElement(icons.Sigma))
 });
 
 // Our app starts in this callback.  We get the controller and we can set keys

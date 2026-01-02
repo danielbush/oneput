@@ -1,6 +1,5 @@
 import type { MenuItem } from '../../../types.js';
 import { stdMenuItem } from './stdMenuItem.js';
-import * as icons from '../../icons.js';
 
 export type KeybindingMenuItem = {
 	id: string;
@@ -27,7 +26,7 @@ export const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
 		// htmlContentUnsafe: bindingHTML,
 		textContent: text,
 		action,
-		left: (b) => [b.icon({ innerHTMLUnsafe: icons.squareFunctionIcon })],
+		left: (b) => [b.icon({ icon: 'squareFunction' })],
 		right: (b) => [
 			bindings.length > 1 &&
 				b.fchild({

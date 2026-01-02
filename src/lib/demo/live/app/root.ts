@@ -1,11 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import {
-	commandIcon,
-	searchIcon,
-	sigmaIcon,
-	timerIcon,
-	tocIcon
-} from '$lib/oneput/shared/icons.js';
+import { commandIcon, searchIcon, timerIcon, tocIcon } from '$lib/oneput/shared/icons.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
@@ -103,7 +97,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'insert-katex',
-					left: (b) => [b.icon({ innerHTMLUnsafe: sigmaIcon })],
+					left: (b) => [b.icon({ icon: 'sigma' })],
 					textContent: 'Insert katex...',
 					action: () => {
 						this.ctl.app.run(this.createKatexDemo());

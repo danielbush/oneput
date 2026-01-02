@@ -75,12 +75,11 @@ export class BindingsEditor implements AppObject {
 	 * UI for selecting an action from a list of actions in order to edit its bindings.
 	 */
 	private actionsUI = () => {
-		this.ctl.app.reset();
+		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
+		this.ctl.ui.update({ params: { menuTitle: title } });
 		this.ctl.app.setOnBack(() => {
 			this.ctl.app.exit();
 		});
-		const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
-		this.ctl.ui.update({ params: { menuTitle: title } });
 		this.ctl.menu.setMenuItems({
 			id: 'actionsUI',
 			items: Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
@@ -100,15 +99,14 @@ export class BindingsEditor implements AppObject {
 	 * UI displays bindings for a given action and lets you add/remove bindings.
 	 */
 	private actionUI = (actionId: string) => {
-		this.ctl.app.reset();
-		this.ctl.app.setOnBack(() => {
-			this.actionsUI();
-		});
 		const { description, bindings } = this.keyBindingMap[actionId];
 		this.ctl.ui.update({
 			params: {
 				menuTitle: `Key bindings for "${description}"`
 			}
+		});
+		this.ctl.app.setOnBack(() => {
+			this.actionsUI();
 		});
 		this.ctl.input.setPlaceholder();
 		this.ctl.input.setInputValue('');
@@ -142,10 +140,6 @@ export class BindingsEditor implements AppObject {
 	 * Triggered by actionUI when a new binding is being created for a given action.
 	 */
 	private async captureBindingUI(actionId: string) {
-		this.ctl.app.reset();
-		this.ctl.app.setOnBack(() => {
-			this.actionUI(actionId);
-		});
 		this.ctl.ui.update({
 			params: {
 				menuTitle: `Capturing...`
@@ -153,6 +147,9 @@ export class BindingsEditor implements AppObject {
 			flags: {
 				enableModal: true
 			}
+		});
+		this.ctl.app.setOnBack(() => {
+			this.actionUI(actionId);
 		});
 		const { accept, reject, capturingKeys } = this.startKeyCapture();
 		this.ctl.ui.setInputUI({

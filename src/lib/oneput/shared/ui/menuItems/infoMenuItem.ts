@@ -1,6 +1,6 @@
 import type { MenuItem } from '../../../types.js';
 import { menuItem, type BuilderMenuItem } from '../../../lib/builder.js';
-import { infoIcon } from '../../icons.js';
+import { icons } from '$lib/demo/live/icons.js';
 
 export function infoMenuItem(
 	id: string,
@@ -14,7 +14,7 @@ export function infoMenuItem(
 		},
 		children: (b) => [
 			b.icon({
-				innerHTMLUnsafe: infoIcon
+				icon: icons.Info
 			}),
 			b.fchild({
 				textContent: msg

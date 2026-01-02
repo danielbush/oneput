@@ -16,6 +16,7 @@ import { mountSvelte } from '../../lib/utils.js';
 import type { AppObject } from '../../types.js';
 import AcceptButton from '../components/AcceptButton.svelte';
 import CancelButton from '../components/CancelButton.svelte';
+import { icons } from '$lib/demo/live/icons.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
@@ -118,8 +119,8 @@ export class BindingsEditor implements AppObject {
 					return stdMenuItem({
 						id: binding,
 						textContent: binding,
-						left: (b) => [b.icon({ icon: 'keyboard' })],
-						right: (b) => [b.icon({ icon: 'x' })],
+						left: (b) => [b.icon({ icon: icons.Keyboard })],
+						right: (b) => [b.icon({ icon: icons.X })],
 						action: () => {
 							this.removeBinding(actionId, binding);
 						}

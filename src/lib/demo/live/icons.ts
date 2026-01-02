@@ -1,21 +1,51 @@
-import { registerIcons, lucide } from '$lib/oneput/lib/icons.js';
+import { lucide, registerIcon } from '$lib/oneput/lib/icons.js';
 import { createElement } from 'lucide';
-import * as icons from 'lucide';
+import * as lu from 'lucide';
 
-// Register all icons used by the app upfront.
-// Using vanilla Lucide icons - createElement returns an SVG element.
-//
-// Alternative strategies:
-//   svg('<svg>...</svg>')              - raw SVG string
-//   element(() => myElement)           - any element factory
-//   (target) => { ... }                - inline custom renderer
-registerIcons({
-	x: lucide(() => createElement(icons.X)),
-	settings: lucide(() => createElement(icons.Settings)),
-	keyboard: lucide(() => createElement(icons.Keyboard)),
-	chevronRight: lucide(() => createElement(icons.ChevronRight)),
-	tick: lucide(() => createElement(icons.Check)),
-	squareFunction: lucide(() => createElement(icons.SquareFunction)),
-	arrowLeft: lucide(() => createElement(icons.ArrowLeft)),
-	sigma: lucide(() => createElement(icons.Sigma))
+export const iconData = {
+	X: lu.X,
+	Settings: lu.Settings,
+	Keyboard: lu.Keyboard,
+	ChevronRight: lu.ChevronRight,
+	Check: lu.Check,
+	SquareFunction: lu.SquareFunction,
+	ArrowLeft: lu.ArrowLeft,
+	Sigma: lu.Sigma,
+	TableOfContents: lu.TableOfContents, // tocIcon
+	ChevronUp: lu.ChevronUp,
+	ChevronDown: lu.ChevronDown,
+	Command: lu.Command,
+	Search: lu.Search,
+	ListFilter: lu.ListFilter,
+	RefreshCw: lu.RefreshCw,
+	CircleAlert: lu.CircleAlert,
+	Globe: lu.Globe,
+	Timer: lu.Timer,
+	Play: lu.Play,
+	Stop: lu.Square,
+	Pause: lu.Pause,
+	CircleX: lu.CircleX,
+	Section: lu.Section,
+	History: lu.History,
+	CalendarCheck: lu.CalendarCheck,
+	Pencil: lu.Pencil,
+	Plus: lu.Plus,
+	Info: lu.Info,
+	Square: lu.Square,
+	Circle: lu.Circle,
+	Dot: lu.Dot,
+	NotebookPen: lu.NotebookPen,
+	Tag: lu.Tag,
+	Clock: lu.Clock
+};
+
+Object.entries(iconData).forEach(([name, icon]) => {
+	registerIcon(
+		name,
+		lucide(() => createElement(icon))
+	);
 });
+
+export const icons = Object.fromEntries(
+	Object.keys(iconData).map((name) => [name, name])
+) as Record<keyof typeof iconData, string>;

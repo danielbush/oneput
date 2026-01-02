@@ -1,3 +1,4 @@
+import { icons } from '$lib/demo/live/icons.js';
 import type { MenuItem } from '../../../types.js';
 import { stdMenuItem } from './stdMenuItem.js';
 
@@ -26,7 +27,7 @@ export const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
 		// htmlContentUnsafe: bindingHTML,
 		textContent: text,
 		action,
-		left: (b) => [b.icon({ icon: 'squareFunction' })],
+		left: (b) => [b.icon({ icon: icons.SquareFunction })],
 		right: (b) => [
 			bindings.length > 1 &&
 				b.fchild({
@@ -36,7 +37,7 @@ export const keybindingMenuItem: (params: KeybindingMenuItem) => MenuItem = ({
 				htmlContentUnsafe: bindingHTML,
 				classes: ['oneput__kbd']
 			}),
-			b.icon({ icon: 'chevronRight' })
+			b.icon({ icon: icons.ChevronRight })
 		]
 	});
 };

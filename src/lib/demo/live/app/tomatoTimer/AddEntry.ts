@@ -1,29 +1,23 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { AppObject, MenuItem, OneputProps } from '$lib/oneput/types.js';
 import { SetDateTime } from '$lib/oneput/shared/appObjects/SetDateTime.js';
-import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
-import * as icons from '$lib/oneput/shared/icons.js';
 import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
 import { TimeVal } from '$lib/oneput/shared/values/TimeVal.js';
 import { DateTimeVal } from '$lib/oneput/shared/values/DateTimeVal.js';
 import { DateVal } from '$lib/oneput/shared/values/DateVal.js';
+import { icons } from '../../icons.js';
 
 export class AddEntry implements AppObject {
 	static create(ctl: Controller, session: Partial<FinishedSession>) {
-		const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) => {
-			return params.submitBinding
-				? `Hit ${params.submitBinding} to submit...`
-				: 'Enter value and submit...';
-		});
 		const setDateTime = SetDateTime.create(ctl, {
 			date:
 				session.startTime === undefined ? undefined : DateVal.createFromUnixTime(session.startTime),
 			time:
 				session.startTime === undefined ? undefined : TimeVal.createFromUnixTime(session.startTime)
 		});
-		return new AddEntry(ctl, session, dynamicPlaceholder, setDateTime);
+		return new AddEntry(ctl, session, setDateTime);
 	}
 
 	private unsubscribeInputChange?: () => void;
@@ -31,7 +25,6 @@ export class AddEntry implements AppObject {
 	constructor(
 		private ctl: Controller,
 		private session: Partial<FinishedSession>,
-		private dynamicPlaceholder: DynamicPlaceholder,
 		private setDateTime: SetDateTime
 	) {}
 
@@ -125,7 +118,7 @@ export class AddEntry implements AppObject {
 			stdMenuItem({
 				id: 'add-label',
 				textContent: this.session.label ? `Label: ${this.session.label}` : 'Label...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.tagIcon })],
+				left: (b) => [b.icon({ icon: icons.Tag })],
 				action: () => {
 					this.ctl.input.focusInput();
 				}
@@ -135,7 +128,7 @@ export class AddEntry implements AppObject {
 				textContent: this.session.note
 					? `Note: ${this.session.note.replace(/\n/g, ' ').substring(0, 10)}...`
 					: 'Note...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.notebookPenIcon })],
+				left: (b) => [b.icon({ icon: icons.NotebookPen })],
 				action: () => {
 					this.ctl.ui.setInputUI((current) => {
 						return {
@@ -156,7 +149,7 @@ export class AddEntry implements AppObject {
 				textContent: this.session.duration
 					? `Duration: ${TimeVal.createFromSeconds(this.session.duration).longTimeString}`
 					: 'Duration...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.timerIcon })],
+				left: (b) => [b.icon({ icon: icons.Timer })],
 				action: () => {
 					this.ctl.input.focusInput();
 				}
@@ -168,8 +161,8 @@ export class AddEntry implements AppObject {
 						DateTimeVal.createFromUnixTime(this.session.startTime).dateTimeString +
 						'...'
 					: 'Start time...',
-				left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
-				right: (b) => [b.icon({ icon: 'chevronRight' })],
+				left: (b) => [b.icon({ icon: icons.CalendarCheck })],
+				right: (b) => [b.icon({ icon: icons.ChevronRight })],
 				action: () => {
 					this.ctl.app.run(this.setDateTime);
 				}

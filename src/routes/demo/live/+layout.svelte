@@ -5,7 +5,7 @@
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/shared/styles/oneput-defaults.css';
 	import OneputCornerButton from '$lib/oneput/components/OneputCornerButton.svelte';
-	import { commandIcon } from '$lib/oneput/shared/icons.js';
+	import { icons } from '$lib/demo/live/icons.js';
 
 	// Pretend the code here could be something outside of svelte.
 	// We create a layout and we add OneputWrapper eg as a web component.
@@ -18,4 +18,4 @@
 <Anchor>
 	<OneputController controllerRef={setController} />
 </Anchor>
-<OneputCornerButton icon={commandIcon} />
+<OneputCornerButton icon={icons.Command} />

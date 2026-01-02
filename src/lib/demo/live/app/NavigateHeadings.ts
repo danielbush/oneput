@@ -1,8 +1,8 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { AppObject } from '$lib/oneput/types.js';
 import { FuzzyFilter } from '$lib/oneput/shared/filters/FuzzyFilter.js';
-import { sectionIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { icons } from '../icons.js';
 
 /**
  * Demonstrates how we navigate the headings in an html document using Oneput.
@@ -48,7 +48,7 @@ export class NavigateHeadings implements AppObject {
 		const menuItem = (heading: HTMLElement) =>
 			stdMenuItem({
 				textContent: heading.textContent,
-				left: (b) => [b.icon({ innerHTMLUnsafe: sectionIcon })],
+				left: (b) => [b.icon({ icon: icons.Section })],
 				action: () => {
 					menuAction(heading);
 				}

@@ -1,7 +1,7 @@
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import type { Controller } from '../../controller.js';
 import type { OneputProps, AppObject } from '../../types.js';
-import { globeIcon } from '../icons.js';
+import { icons } from '$lib/demo/live/icons.js';
 
 // TODO: implement a global items / filter mechanism.
 
@@ -34,7 +34,7 @@ export class GlobalFilter implements AppObject {
 								id: 'global-filter-icon',
 								type: 'fchild',
 								classes: ['oneput__icon'],
-								innerHTMLUnsafe: globeIcon
+								icon: icons.Globe
 							}
 						]
 					}

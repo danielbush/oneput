@@ -1,12 +1,12 @@
 import { hflex } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
-import { dotIcon, refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { type LayoutSettings } from './_layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
 import { DOMUpdater } from '$lib/oneput/lib/DOMUpdater.js';
 import type { AppObject } from '$lib/oneput/types.js';
+import { icons } from '../icons.js';
 
 export class AsyncSearchExample implements AppObject {
 	static create(ctl: Controller) {
@@ -47,7 +47,7 @@ export class AsyncSearchExample implements AppObject {
 						return stdMenuItem({
 							id: result.id,
 							textContent: `Result: '${result.text}'`,
-							left: (b) => [b.icon({ innerHTMLUnsafe: dotIcon })],
+							left: (b) => [b.icon({ icon: icons.Dot })],
 							action: () => {
 								this.outerRightStatus.withNode((node) => {
 									node.innerHTML = `Selected: ${result}`;
@@ -109,7 +109,7 @@ export class AsyncSearchExample implements AppObject {
 				children: (b) => [
 					b.iconButton({
 						title: 'Error',
-						innerHTMLUnsafe: refreshCwIcon,
+						icon: icons.RefreshCw,
 						attr: {
 							onclick: () => {
 								alert.cancel();
@@ -129,7 +129,7 @@ export class AsyncSearchExample implements AppObject {
 				...current,
 				right: hflex({
 					id: 'input-right-1',
-					children: (b) => [b.icon({ innerHTMLUnsafe: refreshCwIcon, classes: ['oneput__rotate'] })]
+					children: (b) => [b.icon({ icon: icons.RefreshCw, classes: ['oneput__rotate'] })]
 				})
 			}));
 		} else {

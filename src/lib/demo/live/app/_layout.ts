@@ -3,13 +3,13 @@ import type { DynamicPlaceholderBase, UIFlags } from '$lib/oneput/types.js';
 import type { FChildParams, UILayout } from '$lib/oneput/types.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
-import { chevronDown } from '$lib/oneput/shared/icons.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
 import { TimeDisplay } from '$lib/oneput/shared/components/TimeDisplay.js';
 import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
+import { icons } from '../icons.js';
 
 /**
  * Define settings used by your particular layout.
@@ -107,7 +107,7 @@ export class Layout implements UILayout {
 						classes: ['oneput__icon-button', 'oneput__menu-button'],
 						// We use css to rotate the chevron which relies on
 						// Oneput to set a class depending on the menu state.
-						innerHTMLUnsafe: chevronDown
+						icon: icons.ChevronDown
 					})
 				]
 			})
@@ -124,7 +124,7 @@ export class Layout implements UILayout {
 								tag: 'button',
 								attr: { type: 'button', title: 'Back', onclick: this.backAction },
 								classes: ['oneput__icon-button'],
-								icon: 'arrowLeft'
+								icon: icons.ArrowLeft
 							})
 						: b.spacer(),
 					b.fchild({
@@ -136,7 +136,7 @@ export class Layout implements UILayout {
 								tag: 'button',
 								classes: ['oneput__icon-button'],
 								attr: { type: 'button', title: 'Exit', onclick: this.exitAction },
-								icon: 'x'
+								icon: icons.X
 							})
 						: b.spacer()
 				]

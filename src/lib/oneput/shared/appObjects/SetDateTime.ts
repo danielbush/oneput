@@ -1,9 +1,9 @@
 import type { Controller } from '../../controller.js';
 import type { AppObject } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import * as icons from '../../shared/icons.js';
 import { DateVal } from '../values/DateVal.js';
 import { TimeVal } from '../values/TimeVal.js';
+import { icons } from '$lib/demo/live/icons.js';
 import { SetDate } from './SetDate.js';
 import { SetTime } from './SetTime.js';
 
@@ -67,8 +67,8 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 				stdMenuItem({
 					id: 'set-date',
 					textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
-					right: (b) => [b.icon({ icon: 'chevronRight' })],
+					left: (b) => [b.icon({ icon: icons.CalendarCheck })],
+					right: (b) => [b.icon({ icon: icons.ChevronRight })],
 					action: () => {
 						this.ctl.app.run(this.createSetDate());
 					}
@@ -76,8 +76,8 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 				stdMenuItem({
 					id: 'set-time',
 					textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.clockIcon })],
-					right: (b) => [b.icon({ icon: 'chevronRight' })],
+					left: (b) => [b.icon({ icon: icons.Clock })],
+					right: (b) => [b.icon({ icon: icons.ChevronRight })],
 					action: () => {
 						this.ctl.app.run(this.createSetTime());
 					}

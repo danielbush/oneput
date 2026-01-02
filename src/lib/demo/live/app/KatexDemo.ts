@@ -1,12 +1,12 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import katex from 'katex';
-import { circleAlertIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppObject, OneputProps } from '$lib/oneput/types.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
+import { icons } from '../icons.js';
 
 export class KatexDemo implements AppObject {
 	static create(ctl: Controller) {
@@ -133,7 +133,7 @@ export class KatexDemo implements AppObject {
 				divider(),
 				stdMenuItem({
 					id: 'insert-katex-btn',
-					left: (b) => [b.icon({ icon: 'settings' })],
+					left: (b) => [b.icon({ icon: icons.Settings })],
 					textContent: 'Insert...',
 					attr: {
 						disabled: !katexIsValid
@@ -174,7 +174,7 @@ export class KatexDemo implements AppObject {
 									style: {
 										color: '#c44'
 									},
-									innerHTMLUnsafe: circleAlertIcon
+									icon: icons.CircleAlert
 								})
 							]
 						})

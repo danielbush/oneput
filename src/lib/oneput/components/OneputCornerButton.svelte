@@ -1,28 +1,31 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 	import { hideShowListener } from '../lib/utils.js';
+	import { renderIcon } from '../lib/icons.js';
 
 	const handleClick = () => {
 		window.dispatchEvent(new Event('oneput-toggle-hide'));
 	};
 
-	let { icon }: { icon: string | (() => ReturnType<Snippet>) } = $props();
+	let { icon }: { icon: string } = $props();
+	let node: HTMLButtonElement | null = $state(null);
+
+	onMount(() => {
+		if (node) {
+			renderIcon(icon, node);
+		}
+	});
 </script>
 
 <button
 	id="oneput__corner-button"
 	title="Hide Oneput"
+	aria-label="Hide Oneput"
 	type="button"
 	onclick={handleClick}
+	bind:this={node}
 	{@attach hideShowListener(false)}
 >
-	{#if typeof icon === 'string'}
-		<!-- eslint-disable svelte/no-at-html-tags -->
-		{@html icon}
-		<!-- eslint-enable svelte/no-at-html-tags -->
-	{:else}
-		{@render icon()}
-	{/if}
 </button>
 
 <style>

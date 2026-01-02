@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 	import { randomId } from '$lib/oneput/lib/utils.js';
 	import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+	import { icons } from '$lib/demo/live/icons.js';
 
 	setupDemoState();
 
@@ -232,7 +233,7 @@
 										id: randomId(),
 										type: 'fchild',
 										classes: ['oneput__icon-button'],
-										icon: 'x',
+										icon: icons.X,
 										attr: {
 											onclick: () => {
 												toggleNotification = true;

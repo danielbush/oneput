@@ -1,11 +1,11 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { BindingsEditor } from '$lib/oneput/shared/appObjects/BindingsEditor.js';
 import { config } from '$lib/demo/live/service/TestBindingsStore.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
+import { icons } from '../icons.js';
 
 export class SettingsUI {
 	static create(ctl: Controller) {
@@ -70,7 +70,7 @@ export class SettingsUI {
 				}),
 				stdMenuItem({
 					id: 'default-filter',
-					left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
+					left: (b) => [b.icon({ icon: icons.ListFilter })],
 					textContent: 'Set default typing filter...',
 					action: () => {
 						this.ctl.app.run(this.createFiltersUI());
@@ -79,7 +79,7 @@ export class SettingsUI {
 				stdMenuItem({
 					id: 'global-keys',
 					textContent: 'Set global default key bindings...',
-					left: (b) => [b.icon({ icon: 'keyboard' })],
+					left: (b) => [b.icon({ icon: icons.Keyboard })],
 					action: () => {
 						this.ctl.app.run(this.createGlobalBindingsEditor());
 					}
@@ -87,7 +87,7 @@ export class SettingsUI {
 				stdMenuItem({
 					id: 'local-keys',
 					textContent: 'Set local default key bindings...',
-					left: (b) => [b.icon({ icon: 'keyboard' })],
+					left: (b) => [b.icon({ icon: icons.Keyboard })],
 					action: () => {
 						this.ctl.app.run(this.createLocalBindingsEditor());
 					}

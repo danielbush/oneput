@@ -1,5 +1,4 @@
 import type { Controller } from '$lib/oneput/controller.js';
-import { commandIcon, searchIcon, timerIcon, tocIcon } from '$lib/oneput/shared/icons.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
@@ -7,6 +6,7 @@ import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { LayoutSettings } from './_layout.js';
+import { icons } from '../icons.js';
 
 export class RootUI {
 	static create(ctl: Controller) {
@@ -69,16 +69,16 @@ export class RootUI {
 			items: [
 				stdMenuItem({
 					id: 'settings',
-					left: (b) => [b.icon({ icon: 'settings' })],
+					left: (b) => [b.icon({ icon: icons.Settings })],
 					textContent: 'Settings...',
 					action: () => {
 						this.ctl.app.run(this.createSettingsUI());
 					},
-					right: (b) => [b.icon({ icon: 'chevronRight' })]
+					right: (b) => [b.icon({ icon: icons.ChevronRight })]
 				}),
 				stdMenuItem({
 					id: 'navigate-outline',
-					left: (b) => [b.icon({ innerHTMLUnsafe: tocIcon })],
+					left: (b) => [b.icon({ icon: icons.TableOfContents })],
 					textContent: 'Navigate outline...',
 					action: () => {
 						this.ctl.app.run(this.createNavigateHeadings());
@@ -86,7 +86,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'tomato-timer',
-					left: (b) => [b.icon({ innerHTMLUnsafe: timerIcon })],
+					left: (b) => [b.icon({ icon: icons.Timer })],
 					textContent: 'Tomato timer...',
 					action: () => {
 						this.ctl.app.run(this.createTomatoTimer());
@@ -97,7 +97,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'insert-katex',
-					left: (b) => [b.icon({ icon: 'sigma' })],
+					left: (b) => [b.icon({ icon: icons.Sigma })],
 					textContent: 'Insert katex...',
 					action: () => {
 						this.ctl.app.run(this.createKatexDemo());
@@ -105,7 +105,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'hide-oneput',
-					left: (b) => [b.icon({ innerHTMLUnsafe: commandIcon })],
+					left: (b) => [b.icon({ icon: icons.Command })],
 					textContent: 'Hide',
 					action: () => {
 						this.ctl.toggleHide();
@@ -113,7 +113,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'async-search',
-					left: (b) => [b.icon({ innerHTMLUnsafe: searchIcon })],
+					left: (b) => [b.icon({ icon: icons.Search })],
 					textContent: 'Async menu items demo...',
 					action: () => {
 						this.ctl.app.run(this.createAsyncSearchExample());

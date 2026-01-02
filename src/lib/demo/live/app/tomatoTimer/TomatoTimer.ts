@@ -1,6 +1,5 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
-import * as icons from '$lib/oneput/shared/icons.js';
 import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import {
 	TomatoTimerValue,
@@ -16,6 +15,7 @@ import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
 import { formatSecondsToHHMMSS } from './utils.js';
 import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry } from './AddEntry.js';
+import { icons } from '../../icons.js';
 
 export class TomatoTimer implements AppObject {
 	static create(ctl: Controller) {
@@ -110,7 +110,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-start',
 					textContent: '30 Minutes',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+					left: (b) => [b.icon({ icon: icons.Play })],
 					action: () => {
 						this.runCreateTimer({ duration: 30 * 60 });
 					}
@@ -118,7 +118,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-add-entry',
 					textContent: 'Add entry...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.plusIcon })],
+					left: (b) => [b.icon({ icon: icons.Plus })],
 					action: () => {
 						this.ctl.app.run(this.addEntry);
 					}
@@ -126,8 +126,8 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-previous-sessions',
 					textContent: 'Previous sessions...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
-					right: (b) => [b.icon({ icon: 'chevronRight' })],
+					left: (b) => [b.icon({ icon: icons.History })],
+					right: (b) => [b.icon({ icon: icons.ChevronRight })],
 					action: () => {
 						this.runPreviousSessions();
 					}
@@ -199,7 +199,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-previous-sessions',
 					textContent: 'Previous sessions...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.historyIcon })],
+					left: (b) => [b.icon({ icon: icons.History })],
 					action: () => {
 						this.runPreviousSessions();
 					}
@@ -209,7 +209,7 @@ export class TomatoTimer implements AppObject {
 					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
 					left: (b) => [
 						b.icon({
-							innerHTMLUnsafe: timerValue.isPaused ? icons.playIcon : icons.pauseIcon
+							icon: timerValue.isPaused ? icons.Play : icons.Pause
 						})
 					],
 					action: () => {
@@ -224,7 +224,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-finish',
 					textContent: 'Finish',
-					left: (b) => [b.icon({ icon: 'tick' })],
+					left: (b) => [b.icon({ icon: icons.Check })],
 					action: () => {
 						timerValue.finish();
 						this.timerValue = null;
@@ -244,7 +244,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-cancel',
 					textContent: 'Cancel',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.circleXIcon })],
+					left: (b) => [b.icon({ icon: icons.CircleX })],
 					action: () => {
 						this.timerValue = null;
 						this.store
@@ -304,7 +304,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-timer-no-label',
 					textContent: 'Start with no label',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.playIcon })],
+					left: (b) => [b.icon({ icon: icons.Play })],
 					action: () => {
 						startTimer();
 					}
@@ -323,9 +323,9 @@ export class TomatoTimer implements AppObject {
 					children: (b) => [
 						b.iconButton({
 							title: 'Add',
-							icon: 'tick'
+							icon: icons.Check
 						}),
-						b.iconButton({ title: 'Cancel', icon: 'x' })
+						b.iconButton({ title: 'Cancel', icon: icons.X })
 					]
 				})
 			};
@@ -351,10 +351,10 @@ export class TomatoTimer implements AppObject {
 					return stdMenuItem({
 						id: `tomato-previous-session-${session.id}`,
 						textContent: `${session.label ?? ''} (${formatSecondsToHHMMSS(v.elapsed / 60)})`,
-						left: (b) => [b.icon({ innerHTMLUnsafe: icons.calendarCheckIcon })],
+						left: (b) => [b.icon({ icon: icons.CalendarCheck })],
 						right: (b) => [
 							b.fchild({ textContent: `${new Date(session.startTime * 1000).toLocaleString()}` }),
-							b.icon({ icon: 'chevronRight' })
+							b.icon({ icon: icons.ChevronRight })
 						],
 						action: () => {
 							this.runEditEntry(session);
@@ -406,7 +406,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-edit-session-edit-label',
 					textContent: 'Edit label...',
-					left: (b) => [b.icon({ innerHTMLUnsafe: icons.pencilIcon })],
+					left: (b) => [b.icon({ icon: icons.Pencil })],
 					action: () => {
 						this.dynamicPlaceholder.setPlaceholder((params) => {
 							return params.submitBinding
@@ -436,7 +436,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-edit-session-save',
 					textContent: 'Delete...',
-					left: (b) => [b.icon({ icon: 'x' })],
+					left: (b) => [b.icon({ icon: icons.X })],
 					action: async () => {
 						const confirm = this.ctl.confirm({
 							message: 'Are you sure you want to delete this session?'

@@ -1,8 +1,8 @@
 import type { Controller } from '$lib/oneput/controller.js';
 import type { AppObject } from '$lib/oneput/types.js';
-import { listFilterIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { SettingsManager } from '../service/SettingsManager.js';
+import { icons } from '../icons.js';
 
 export class FiltersUI implements AppObject {
 	static create(ctl: Controller) {
@@ -27,7 +27,7 @@ export class FiltersUI implements AppObject {
 			items: [
 				stdMenuItem({
 					id: 'fuzzy-filter',
-					left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
+					left: (b) => [b.icon({ icon: icons.ListFilter })],
 					textContent: 'Fuzzy Filter',
 					action: () => {
 						SettingsManager.create(this.ctl).setFilter('fuzzy');
@@ -37,7 +37,7 @@ export class FiltersUI implements AppObject {
 				}),
 				stdMenuItem({
 					id: 'word-filter',
-					left: (b) => [b.icon({ innerHTMLUnsafe: listFilterIcon })],
+					left: (b) => [b.icon({ icon: icons.ListFilter })],
 					textContent: 'Word Filter',
 					action: () => {
 						SettingsManager.create(this.ctl).setFilter('word');

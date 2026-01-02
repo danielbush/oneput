@@ -6,7 +6,7 @@ import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { LayoutSettings } from '../layout.js';
+import type { LayoutSettings } from './_layout.js';
 
 export class RootUI {
 	static create(ctl: Controller) {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Anchor from '$lib/oneput/components/Anchor.svelte';
 	import OneputController from '$lib/oneput/components/OneputController.svelte';
-	import { setController } from '$lib/demo/live/app.js';
+	import { setController } from '$lib/demo/live/app/_app.js';
 	import '$lib/demo/styles.css';
 	import '$lib/oneput/shared/styles/oneput-defaults.css';
 	import OneputCornerButton from '$lib/oneput/components/OneputCornerButton.svelte';

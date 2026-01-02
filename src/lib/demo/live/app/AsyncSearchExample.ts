@@ -2,7 +2,7 @@ import { hflex } from '$lib/oneput/lib/builder.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { dotIcon, refreshCwIcon } from '$lib/oneput/shared/icons.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { type LayoutSettings } from '../layout.js';
+import { type LayoutSettings } from './_layout.js';
 import { TestInputService } from '../service/TestInputService.js';
 import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
 import { DOMUpdater } from '$lib/oneput/lib/DOMUpdater.js';

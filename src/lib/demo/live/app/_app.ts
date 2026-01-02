@@ -2,8 +2,8 @@ import type { Controller } from '$lib/oneput/controller.js';
 import { registerIcons, lucide } from '$lib/oneput/lib/icons.js';
 import { createElement } from 'lucide';
 import * as icons from 'lucide';
-import { Layout } from './layout.js';
-import { RootUI } from './app/root.js';
+import { Layout } from './_layout.js';
+import { RootUI } from './root.js';
 
 // Register all icons used by the app upfront.
 // Using vanilla Lucide icons - createElement returns an SVG element.

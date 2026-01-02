@@ -16,6 +16,10 @@ export class SettingsUI {
 				keyBindingMap: ctl.keys.getDefaultBindings(true),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
+				},
+				icons: {
+					Keyboard: icons.Keyboard,
+					X: icons.X
 				}
 			});
 		};
@@ -26,6 +30,10 @@ export class SettingsUI {
 				keyBindingMap: ctl.keys.getDefaultBindings(false),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
+				},
+				icons: {
+					Keyboard: icons.Keyboard,
+					X: icons.X
 				}
 			});
 		};

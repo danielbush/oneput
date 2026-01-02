@@ -16,7 +16,6 @@ import { mountSvelte } from '../../lib/utils.js';
 import type { AppObject } from '../../types.js';
 import AcceptButton from '../components/AcceptButton.svelte';
 import CancelButton from '../components/CancelButton.svelte';
-import { icons } from '$lib/demo/live/icons.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
@@ -33,6 +32,10 @@ export class BindingsEditor implements AppObject {
 				keyBindingMap: KeyBindingMap,
 				isLocal: boolean
 			) => ResultAsync<string, IDBError | IDBStoreError>;
+			icons: {
+				Keyboard: string;
+				X: string;
+			};
 		}
 	) {
 		const keyBindingMap = ctl.keys.getDefaultBindings(values.isLocal);
@@ -40,7 +43,8 @@ export class BindingsEditor implements AppObject {
 			ctl,
 			values.isLocal,
 			keyBindingMap,
-			values.onUpdate
+			values.onUpdate,
+			values.icons
 		);
 		return km;
 	}
@@ -52,7 +56,11 @@ export class BindingsEditor implements AppObject {
 		private onUpdate: (
 			keyBindingMap: KeyBindingMap,
 			isLocal: boolean
-		) => ResultAsync<string, IDBError | IDBStoreError>
+		) => ResultAsync<string, IDBError | IDBStoreError>,
+		private icons: {
+			Keyboard: string;
+			X: string;
+		}
 	) {}
 
 	onStart() {
@@ -119,8 +127,8 @@ export class BindingsEditor implements AppObject {
 					return stdMenuItem({
 						id: binding,
 						textContent: binding,
-						left: (b) => [b.icon({ icon: icons.Keyboard })],
-						right: (b) => [b.icon({ icon: icons.X })],
+						left: (b) => [b.icon({ icon: this.icons.Keyboard })],
+						right: (b) => [b.icon({ icon: this.icons.X })],
 						action: () => {
 							this.removeBinding(actionId, binding);
 						}

@@ -21,21 +21,21 @@ function ordinal(n: number): string {
 }
 
 export class SetDate implements AppObject {
-	static create(ctl: Controller, params: { icons: { Right: string } }, initial?: DateVal) {
-		return new SetDate(ctl, params.icons, initial);
+	static create(ctl: Controller, params: { date?: DateVal; icons: { Right: string } }) {
+		return new SetDate(ctl, params.icons, params.date);
 	}
 
-	constructor(
+	private constructor(
 		private ctl: Controller,
 		private icons: { Right: string },
-		private initial?: DateVal
+		private initialDate?: DateVal
 	) {
-		if (initial) {
+		if (this.initialDate) {
 			this.data = {
-				year: initial.year,
-				month: initial.month,
-				jsmonth: initial.jsmonth,
-				day: initial.day
+				year: this.initialDate.year,
+				month: this.initialDate.month,
+				jsmonth: this.initialDate.jsmonth,
+				day: this.initialDate.day
 			};
 		}
 	}

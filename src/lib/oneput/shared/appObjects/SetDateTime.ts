@@ -9,33 +9,36 @@ import { SetTime } from './SetTime.js';
 export class SetDateTime implements AppObject<TimeVal | DateVal> {
 	static create(
 		ctl: Controller,
-		params: { icons: { Right: string; SetDateIcon: string; SetTimeIcon: string } },
-		initial?: { date?: DateVal; time?: TimeVal }
+		params: {
+			date?: DateVal;
+			time?: TimeVal;
+			icons: { Right: string; SetDateIcon: string; SetTimeIcon: string };
+		}
 	) {
 		const createSetDate = () => {
-			return SetDate.create(ctl, { icons: params.icons }, initial?.date);
+			return SetDate.create(ctl, { date: params.date, icons: params.icons });
 		};
 		const createSetTime = () => {
-			return SetTime.create(ctl, initial?.time);
+			return SetTime.create(ctl, { time: params.time });
 		};
-		return new SetDateTime(ctl, createSetDate, createSetTime, params.icons, initial);
+		return new SetDateTime(
+			ctl,
+			createSetDate,
+			createSetTime,
+			params.icons,
+			params.date,
+			params.time
+		);
 	}
 
-	private date?: DateVal;
-	private time?: TimeVal;
-
-	constructor(
+	private constructor(
 		private ctl: Controller,
 		private createSetDate: () => SetDate,
 		private createSetTime: () => SetTime,
 		private icons: { Right: string; SetDateIcon: string; SetTimeIcon: string },
-		initial?: { date?: DateVal; time?: TimeVal }
-	) {
-		if (initial) {
-			this.date = initial.date;
-			this.time = initial.time;
-		}
-	}
+		private date?: DateVal,
+		private time?: TimeVal
+	) {}
 
 	onStart() {
 		this.run();

@@ -4,15 +4,15 @@ import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { TimeVal } from '../values/TimeVal.js';
 
 export class SetTime implements AppObject {
-	static create(ctl: Controller, initial?: TimeVal) {
-		return new SetTime(ctl, initial);
+	static create(ctl: Controller, params: { time?: TimeVal }) {
+		return new SetTime(ctl, params.time);
 	}
 
 	private menuItems: MenuItem[] = [];
 
-	constructor(
+	private constructor(
 		private ctl: Controller,
-		private initial?: TimeVal
+		private initialTime?: TimeVal
 	) {
 		this.menuItems = [];
 		for (let minute = 0; minute <= 23 * 60 + 45; minute += 15) {
@@ -64,8 +64,8 @@ export class SetTime implements AppObject {
 		this.ctl.input.setPlaceholder('Tab to fill input with a time or type in HH:MM...');
 		this.ctl.menu.setMenuItems({ id: 'main', items: this.menuItems });
 
-		const currentHour = this.initial?.hour ?? new Date().getHours();
-		const currentMinute = this.initial?.minute ?? new Date().getMinutes();
+		const currentHour = this.initialTime?.hour ?? new Date().getHours();
+		const currentMinute = this.initialTime?.minute ?? new Date().getMinutes();
 		this.ctl.menu.focusMenuItemByIndex(
 			this.menuItems.findIndex((item) => {
 				const { hour, minute } = item.data as { hour: number; minute: number };

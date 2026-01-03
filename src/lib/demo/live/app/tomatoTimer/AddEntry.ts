@@ -11,26 +11,17 @@ import { icons } from '../../icons.js';
 
 export class AddEntry implements AppObject {
 	static create(ctl: Controller, session: Partial<FinishedSession>) {
-		const setDateTime = SetDateTime.create(
-			ctl,
-			{
-				icons: {
-					SetDateIcon: icons.CalendarCheck,
-					SetTimeIcon: icons.Clock,
-					Right: icons.ChevronRight
-				}
+		const setDateTime = SetDateTime.create(ctl, {
+			icons: {
+				SetDateIcon: icons.CalendarCheck,
+				SetTimeIcon: icons.Clock,
+				Right: icons.ChevronRight
 			},
-			{
-				date:
-					session.startTime === undefined
-						? undefined
-						: DateVal.createFromUnixTime(session.startTime),
-				time:
-					session.startTime === undefined
-						? undefined
-						: TimeVal.createFromUnixTime(session.startTime)
-			}
-		);
+			date:
+				session.startTime === undefined ? undefined : DateVal.createFromUnixTime(session.startTime),
+			time:
+				session.startTime === undefined ? undefined : TimeVal.createFromUnixTime(session.startTime)
+		});
 		return new AddEntry(ctl, session, setDateTime);
 	}
 

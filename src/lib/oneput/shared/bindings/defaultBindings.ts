@@ -40,7 +40,9 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
 		c.menu.focusNextMenuItem();
 	},
 	globalFilter: (c) => {
-		GlobalFilter.create(c).onStart();
+		// If you don't supply an icon mapping for GlobalFilterInputIcon you'll see
+		// the "Missing Icon" icon.
+		GlobalFilter.create(c, { icons: { InputIcon: 'GlobalFilterInputIcon' } }).onStart();
 	},
 	fill: (c) => {
 		c.menu.runFillHandler();

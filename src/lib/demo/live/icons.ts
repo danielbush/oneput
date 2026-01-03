@@ -36,7 +36,9 @@ export const iconData = {
 	Dot: lu.Dot,
 	NotebookPen: lu.NotebookPen,
 	Tag: lu.Tag,
-	Clock: lu.Clock
+	Clock: lu.Clock,
+	// Bindings we should provide for existing appObjects...
+	GlobalFilterInputIcon: lu.Globe
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

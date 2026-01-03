@@ -83,7 +83,8 @@ export class AsyncSearchExample implements AppObject {
 					msg:
 						'Start typing something and inspect the browser console.  ' +
 						'Items are delayed but only latest items should show when debounce times out.  ' +
-						'The service will randomly fail 10% of the time.'
+						'The service will randomly fail 10% of the time.',
+					icon: icons.Info
 				})
 			]
 		});

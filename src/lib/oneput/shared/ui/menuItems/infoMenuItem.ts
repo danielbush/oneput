@@ -1,15 +1,16 @@
 import type { MenuItem } from '../../../types.js';
 import { menuItem, type BuilderMenuItem } from '../../../lib/builder.js';
-import { icons } from '$lib/demo/live/icons.js';
 
 export function infoMenuItem({
 	id,
 	msg,
-	params = {}
+	params = {},
+	icon
 }: {
 	id: string;
 	msg: string;
 	params?: Omit<Partial<BuilderMenuItem>, 'id'>;
+	icon: string;
 }): MenuItem {
 	return menuItem({
 		ignored: true,
@@ -19,7 +20,7 @@ export function infoMenuItem({
 		},
 		children: (b) => [
 			b.icon({
-				icon: icons.Info
+				icon
 			}),
 			b.fchild({
 				textContent: msg

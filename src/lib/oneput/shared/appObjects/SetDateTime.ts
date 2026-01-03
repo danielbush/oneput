@@ -3,19 +3,22 @@ import type { AppObject } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { DateVal } from '../values/DateVal.js';
 import { TimeVal } from '../values/TimeVal.js';
-import { icons } from '$lib/demo/live/icons.js';
 import { SetDate } from './SetDate.js';
 import { SetTime } from './SetTime.js';
 
 export class SetDateTime implements AppObject<TimeVal | DateVal> {
-	static create(ctl: Controller, initial?: { date?: DateVal; time?: TimeVal }) {
+	static create(
+		ctl: Controller,
+		params: { icons: { Right: string; SetDateIcon: string; SetTimeIcon: string } },
+		initial?: { date?: DateVal; time?: TimeVal }
+	) {
 		const createSetDate = () => {
-			return SetDate.create(ctl, initial?.date);
+			return SetDate.create(ctl, { icons: params.icons }, initial?.date);
 		};
 		const createSetTime = () => {
 			return SetTime.create(ctl, initial?.time);
 		};
-		return new SetDateTime(ctl, createSetDate, createSetTime, initial);
+		return new SetDateTime(ctl, createSetDate, createSetTime, params.icons, initial);
 	}
 
 	private date?: DateVal;
@@ -25,6 +28,7 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 		private ctl: Controller,
 		private createSetDate: () => SetDate,
 		private createSetTime: () => SetTime,
+		private icons: { Right: string; SetDateIcon: string; SetTimeIcon: string },
 		initial?: { date?: DateVal; time?: TimeVal }
 	) {
 		if (initial) {
@@ -67,8 +71,8 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 				stdMenuItem({
 					id: 'set-date',
 					textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
-					left: (b) => [b.icon({ icon: icons.CalendarCheck })],
-					right: (b) => [b.icon({ icon: icons.ChevronRight })],
+					left: (b) => [b.icon({ icon: this.icons.SetDateIcon })],
+					right: (b) => [b.icon({ icon: this.icons.Right })],
 					action: () => {
 						this.ctl.app.run(this.createSetDate());
 					}
@@ -76,8 +80,8 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 				stdMenuItem({
 					id: 'set-time',
 					textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
-					left: (b) => [b.icon({ icon: icons.Clock })],
-					right: (b) => [b.icon({ icon: icons.ChevronRight })],
+					left: (b) => [b.icon({ icon: this.icons.SetTimeIcon })],
+					right: (b) => [b.icon({ icon: this.icons.Right })],
 					action: () => {
 						this.ctl.app.run(this.createSetTime());
 					}

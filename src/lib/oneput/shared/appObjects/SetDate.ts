@@ -1,4 +1,3 @@
-import { icons } from '$lib/demo/live/icons.js';
 import type { Controller } from '../../controller.js';
 import type { AppObject, MenuItem } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
@@ -22,13 +21,14 @@ function ordinal(n: number): string {
 }
 
 export class SetDate implements AppObject {
-	static create(ctl: Controller, initial?: DateVal) {
-		return new SetDate(ctl, initial);
+	static create(ctl: Controller, params: { icons: { Right: string } }, initial?: DateVal) {
+		return new SetDate(ctl, params.icons, initial);
 	}
 
 	constructor(
 		private ctl: Controller,
-		initial?: DateVal
+		private icons: { Right: string },
+		private initial?: DateVal
 	) {
 		if (initial) {
 			this.data = {
@@ -69,7 +69,7 @@ export class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-date-${year}`,
 					textContent: year.toString(),
-					right: (b) => [b.icon({ icon: icons.ChevronRight })],
+					right: (b) => [b.icon({ icon: this.icons.Right })],
 					action: () => {
 						this.data = { ...this.data, year };
 						this.runSetMonth();
@@ -111,7 +111,7 @@ export class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-month-${jsmonth}`,
 					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
-					right: (b) => [b.icon({ icon: icons.ChevronRight })],
+					right: (b) => [b.icon({ icon: this.icons.Right })],
 					action: () => {
 						this.data = { ...this.data, jsmonth };
 						this.runSetDay();

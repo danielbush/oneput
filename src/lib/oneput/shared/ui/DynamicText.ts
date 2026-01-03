@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '../../controller.js';
 
 export type DynamicTextParams = {
 	isMenuOpen: boolean;

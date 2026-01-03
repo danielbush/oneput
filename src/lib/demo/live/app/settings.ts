@@ -13,13 +13,13 @@ export class SettingsUI {
 			const bindingsService = LocalBindingsService.create(ctl);
 			return BindingsEditor.create(ctl, {
 				isLocal: false,
-				keyBindingMap: ctl.keys.getDefaultBindings(true),
+				keyBindingMap: ctl.keys.getDefaultBindings(false),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
 				},
 				icons: {
 					Keyboard: icons.Keyboard,
-					X: icons.X
+					Close: icons.X
 				}
 			});
 		};
@@ -27,13 +27,13 @@ export class SettingsUI {
 			const bindingsService = LocalBindingsService.create(ctl);
 			return BindingsEditor.create(ctl, {
 				isLocal: true,
-				keyBindingMap: ctl.keys.getDefaultBindings(false),
+				keyBindingMap: ctl.keys.getDefaultBindings(true),
 				onUpdate: (keyBindingMap, isLocal) => {
 					return bindingsService.update(keyBindingMap, isLocal);
 				},
 				icons: {
 					Keyboard: icons.Keyboard,
-					X: icons.X
+					Close: icons.X
 				}
 			});
 		};

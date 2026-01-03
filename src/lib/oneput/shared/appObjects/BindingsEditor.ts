@@ -38,11 +38,10 @@ export class BindingsEditor implements AppObject {
 			};
 		}
 	) {
-		const keyBindingMap = ctl.keys.getDefaultBindings(values.isLocal);
 		const km: BindingsEditor = new BindingsEditor(
 			ctl,
 			values.isLocal,
-			keyBindingMap,
+			values.keyBindingMap,
 			values.onUpdate,
 			values.icons
 		);

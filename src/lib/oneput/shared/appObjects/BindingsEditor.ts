@@ -34,7 +34,7 @@ export class BindingsEditor implements AppObject {
 			) => ResultAsync<string, IDBError | IDBStoreError>;
 			icons: {
 				Keyboard: string;
-				X: string;
+				Close: string;
 			};
 		}
 	) {
@@ -58,7 +58,7 @@ export class BindingsEditor implements AppObject {
 		) => ResultAsync<string, IDBError | IDBStoreError>,
 		private icons: {
 			Keyboard: string;
-			X: string;
+			Close: string;
 		}
 	) {}
 
@@ -125,7 +125,7 @@ export class BindingsEditor implements AppObject {
 						id: binding,
 						textContent: binding,
 						left: (b) => [b.icon({ icon: this.icons.Keyboard })],
-						right: (b) => [b.icon({ icon: this.icons.X })],
+						right: (b) => [b.icon({ icon: this.icons.Close })],
 						action: () => {
 							this.removeBinding(actionId, binding);
 						}

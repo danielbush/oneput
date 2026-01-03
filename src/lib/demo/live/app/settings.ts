@@ -19,7 +19,9 @@ export class SettingsUI {
 				},
 				icons: {
 					Keyboard: icons.Keyboard,
-					Close: icons.X
+					Close: icons.X,
+					Action: icons.SquareFunction,
+					Right: icons.ChevronRight
 				}
 			});
 		};
@@ -33,7 +35,9 @@ export class SettingsUI {
 				},
 				icons: {
 					Keyboard: icons.Keyboard,
-					Close: icons.X
+					Close: icons.X,
+					Action: icons.SquareFunction,
+					Right: icons.ChevronRight
 				}
 			});
 		};

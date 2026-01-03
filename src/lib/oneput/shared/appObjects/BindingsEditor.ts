@@ -7,7 +7,6 @@ import {
 	type KeyEvent
 } from '../../lib/bindings.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import { keybindingMenuItem } from '../ui/menuItems/KeybindingMenuItem.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from '../bindings/BindingsIDB.js';
@@ -35,6 +34,8 @@ export class BindingsEditor implements AppObject {
 			icons: {
 				Keyboard: string;
 				Close: string;
+				Right: string;
+				Action: string;
 			};
 		}
 	) {
@@ -59,6 +60,8 @@ export class BindingsEditor implements AppObject {
 		private icons: {
 			Keyboard: string;
 			Close: string;
+			Right: string;
+			Action: string;
 		}
 	) {}
 
@@ -82,13 +85,27 @@ export class BindingsEditor implements AppObject {
 		this.ctl.menu.setMenuItems({
 			id: 'actionsUI',
 			items: Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
-				keybindingMenuItem({
+				stdMenuItem({
 					id,
-					text: description,
-					bindings,
+					textContent: description,
 					action: () => {
 						this.actionUI(id);
-					}
+					},
+					left: (b) => [b.icon({ icon: this.icons.Action })],
+					right: (b) => [
+						bindings.length > 1 &&
+							b.fchild({
+								innerHTMLUnsafe: `(${bindings.length})`
+							}),
+						b.fchild({
+							htmlContentUnsafe:
+								bindings.length === 0
+									? '<code><kbd>-</kbd></code>'
+									: '<code><kbd>' + bindings[0] + '</kbd></code>',
+							classes: ['oneput__kbd']
+						}),
+						b.icon({ icon: this.icons.Right })
+					]
 				})
 			)
 		});

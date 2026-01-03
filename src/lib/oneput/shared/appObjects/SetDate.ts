@@ -69,7 +69,7 @@ export class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-date-${year}`,
 					textContent: year.toString(),
-					right: (b) => [b.icon({ icon: this.icons.Right })],
+					right: (b) => [b.icon(this.icons.Right)],
 					action: () => {
 						this.data = { ...this.data, year };
 						this.runSetMonth();
@@ -111,7 +111,7 @@ export class SetDate implements AppObject {
 				stdMenuItem({
 					id: `set-month-${jsmonth}`,
 					textContent: new Date(year, jsmonth).toLocaleString('default', { month: 'long' }),
-					right: (b) => [b.icon({ icon: this.icons.Right })],
+					right: (b) => [b.icon(this.icons.Right)],
 					action: () => {
 						this.data = { ...this.data, jsmonth };
 						this.runSetDay();

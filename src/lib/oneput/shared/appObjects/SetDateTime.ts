@@ -74,8 +74,8 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 				stdMenuItem({
 					id: 'set-date',
 					textContent: this.date ? `Date: ${this.date.dateString}` : 'Set date...',
-					left: (b) => [b.icon({ icon: this.icons.SetDateIcon })],
-					right: (b) => [b.icon({ icon: this.icons.Right })],
+					left: (b) => [b.icon(this.icons.SetDateIcon)],
+					right: (b) => [b.icon(this.icons.Right)],
 					action: () => {
 						this.ctl.app.run(this.createSetDate());
 					}
@@ -83,8 +83,8 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
 				stdMenuItem({
 					id: 'set-time',
 					textContent: this.time ? `Time: ${this.time.timeString}` : 'Set time...',
-					left: (b) => [b.icon({ icon: this.icons.SetTimeIcon })],
-					right: (b) => [b.icon({ icon: this.icons.Right })],
+					left: (b) => [b.icon(this.icons.SetTimeIcon)],
+					right: (b) => [b.icon(this.icons.Right)],
 					action: () => {
 						this.ctl.app.run(this.createSetTime());
 					}

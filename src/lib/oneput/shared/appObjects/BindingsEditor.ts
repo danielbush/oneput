@@ -91,7 +91,7 @@ export class BindingsEditor implements AppObject {
 					action: () => {
 						this.actionUI(id);
 					},
-					left: (b) => [b.icon({ icon: this.icons.Action })],
+					left: (b) => [b.icon(this.icons.Action)],
 					right: (b) => [
 						bindings.length > 1 &&
 							b.fchild({
@@ -104,7 +104,7 @@ export class BindingsEditor implements AppObject {
 									: '<code><kbd>' + bindings[0] + '</kbd></code>',
 							classes: ['oneput__kbd']
 						}),
-						b.icon({ icon: this.icons.Right })
+						b.icon(this.icons.Right)
 					]
 				})
 			)
@@ -141,8 +141,8 @@ export class BindingsEditor implements AppObject {
 					return stdMenuItem({
 						id: binding,
 						textContent: binding,
-						left: (b) => [b.icon({ icon: this.icons.Keyboard })],
-						right: (b) => [b.icon({ icon: this.icons.Close })],
+						left: (b) => [b.icon(this.icons.Keyboard)],
+						right: (b) => [b.icon(this.icons.Close)],
 						action: () => {
 							this.removeBinding(actionId, binding);
 						}

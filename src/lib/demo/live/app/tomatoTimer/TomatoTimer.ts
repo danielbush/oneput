@@ -110,7 +110,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-start',
 					textContent: '30 Minutes',
-					left: (b) => [b.icon({ icon: icons.Play })],
+					left: (b) => [b.icon(icons.Play)],
 					action: () => {
 						this.runCreateTimer({ duration: 30 * 60 });
 					}
@@ -118,7 +118,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-add-entry',
 					textContent: 'Add entry...',
-					left: (b) => [b.icon({ icon: icons.Plus })],
+					left: (b) => [b.icon(icons.Plus)],
 					action: () => {
 						this.ctl.app.run(this.addEntry);
 					}
@@ -126,8 +126,8 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-previous-sessions',
 					textContent: 'Previous sessions...',
-					left: (b) => [b.icon({ icon: icons.History })],
-					right: (b) => [b.icon({ icon: icons.ChevronRight })],
+					left: (b) => [b.icon(icons.History)],
+					right: (b) => [b.icon(icons.ChevronRight)],
 					action: () => {
 						this.runPreviousSessions();
 					}
@@ -199,7 +199,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-previous-sessions',
 					textContent: 'Previous sessions...',
-					left: (b) => [b.icon({ icon: icons.History })],
+					left: (b) => [b.icon(icons.History)],
 					action: () => {
 						this.runPreviousSessions();
 					}
@@ -207,11 +207,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-pause',
 					textContent: timerValue.isPaused ? 'Resume' : 'Pause',
-					left: (b) => [
-						b.icon({
-							icon: timerValue.isPaused ? icons.Play : icons.Pause
-						})
-					],
+					left: (b) => [b.icon(timerValue.isPaused ? icons.Play : icons.Pause)],
 					action: () => {
 						timerValue.pause(!timerValue.isPaused);
 						this.timerDisplay.notify?.();
@@ -224,7 +220,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-finish',
 					textContent: 'Finish',
-					left: (b) => [b.icon({ icon: icons.Check })],
+					left: (b) => [b.icon(icons.Check)],
 					action: () => {
 						timerValue.finish();
 						this.timerValue = null;
@@ -244,7 +240,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-cancel',
 					textContent: 'Cancel',
-					left: (b) => [b.icon({ icon: icons.CircleX })],
+					left: (b) => [b.icon(icons.CircleX)],
 					action: () => {
 						this.timerValue = null;
 						this.store
@@ -304,7 +300,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-timer-no-label',
 					textContent: 'Start with no label',
-					left: (b) => [b.icon({ icon: icons.Play })],
+					left: (b) => [b.icon(icons.Play)],
 					action: () => {
 						startTimer();
 					}
@@ -351,10 +347,10 @@ export class TomatoTimer implements AppObject {
 					return stdMenuItem({
 						id: `tomato-previous-session-${session.id}`,
 						textContent: `${session.label ?? ''} (${formatSecondsToHHMMSS(v.elapsed / 60)})`,
-						left: (b) => [b.icon({ icon: icons.CalendarCheck })],
+						left: (b) => [b.icon(icons.CalendarCheck)],
 						right: (b) => [
 							b.fchild({ textContent: `${new Date(session.startTime * 1000).toLocaleString()}` }),
-							b.icon({ icon: icons.ChevronRight })
+							b.icon(icons.ChevronRight)
 						],
 						action: () => {
 							this.runEditEntry(session);
@@ -406,7 +402,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-edit-session-edit-label',
 					textContent: 'Edit label...',
-					left: (b) => [b.icon({ icon: icons.Pencil })],
+					left: (b) => [b.icon(icons.Pencil)],
 					action: () => {
 						this.dynamicPlaceholder.setPlaceholder((params) => {
 							return params.submitBinding
@@ -436,7 +432,7 @@ export class TomatoTimer implements AppObject {
 				stdMenuItem({
 					id: 'tomato-edit-session-save',
 					textContent: 'Delete...',
-					left: (b) => [b.icon({ icon: icons.X })],
+					left: (b) => [b.icon(icons.X)],
 					action: async () => {
 						const confirm = this.ctl.confirm({
 							message: 'Are you sure you want to delete this session?'

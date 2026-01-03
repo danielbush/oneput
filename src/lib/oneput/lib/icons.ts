@@ -57,11 +57,13 @@ export function renderIcon(name: string, target: HTMLElement): void {
  * Strategy for raw SVG strings.
  * Usage: svg('<svg>...</svg>')
  */
-export function svg(svgString: string): IconRenderer {
+export function raw(svgString: string): IconRenderer {
 	return (target) => {
 		target.innerHTML = svgString;
 	};
 }
+
+export const svg = raw;
 
 /**
  * Strategy for element factories (works with Lucide, or any library).

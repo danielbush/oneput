@@ -82,7 +82,7 @@ export class SettingsUI {
 				}),
 				stdMenuItem({
 					id: 'default-filter',
-					left: (b) => [b.icon({ icon: icons.ListFilter })],
+					left: (b) => [b.icon(icons.ListFilter)],
 					textContent: 'Set default typing filter...',
 					action: () => {
 						this.ctl.app.run(this.createFiltersUI());
@@ -91,7 +91,7 @@ export class SettingsUI {
 				stdMenuItem({
 					id: 'global-keys',
 					textContent: 'Set global default key bindings...',
-					left: (b) => [b.icon({ icon: icons.Keyboard })],
+					left: (b) => [b.icon(icons.Keyboard)],
 					action: () => {
 						this.ctl.app.run(this.createGlobalBindingsEditor());
 					}
@@ -99,7 +99,7 @@ export class SettingsUI {
 				stdMenuItem({
 					id: 'local-keys',
 					textContent: 'Set local default key bindings...',
-					left: (b) => [b.icon({ icon: icons.Keyboard })],
+					left: (b) => [b.icon(icons.Keyboard)],
 					action: () => {
 						this.ctl.app.run(this.createLocalBindingsEditor());
 					}

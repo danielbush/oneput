@@ -69,16 +69,16 @@ export class RootUI {
 			items: [
 				stdMenuItem({
 					id: 'settings',
-					left: (b) => [b.icon({ icon: icons.Settings })],
+					left: (b) => [b.icon(icons.Settings)],
 					textContent: 'Settings...',
 					action: () => {
 						this.ctl.app.run(this.createSettingsUI());
 					},
-					right: (b) => [b.icon({ icon: icons.ChevronRight })]
+					right: (b) => [b.icon(icons.ChevronRight)]
 				}),
 				stdMenuItem({
 					id: 'navigate-outline',
-					left: (b) => [b.icon({ icon: icons.TableOfContents })],
+					left: (b) => [b.icon(icons.TableOfContents)],
 					textContent: 'Navigate outline...',
 					action: () => {
 						this.ctl.app.run(this.createNavigateHeadings());
@@ -86,7 +86,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'tomato-timer',
-					left: (b) => [b.icon({ icon: icons.Timer })],
+					left: (b) => [b.icon(icons.Timer)],
 					textContent: 'Tomato timer...',
 					action: () => {
 						this.ctl.app.run(this.createTomatoTimer());
@@ -97,7 +97,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'insert-katex',
-					left: (b) => [b.icon({ icon: icons.Sigma })],
+					left: (b) => [b.icon(icons.Sigma)],
 					textContent: 'Insert katex...',
 					action: () => {
 						this.ctl.app.run(this.createKatexDemo());
@@ -105,7 +105,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'hide-oneput',
-					left: (b) => [b.icon({ icon: icons.Command })],
+					left: (b) => [b.icon(icons.Command)],
 					textContent: 'Hide',
 					action: () => {
 						this.ctl.toggleHide();
@@ -113,7 +113,7 @@ export class RootUI {
 				}),
 				stdMenuItem({
 					id: 'async-search',
-					left: (b) => [b.icon({ icon: icons.Search })],
+					left: (b) => [b.icon(icons.Search)],
 					textContent: 'Async menu items demo...',
 					action: () => {
 						this.ctl.app.run(this.createAsyncSearchExample());

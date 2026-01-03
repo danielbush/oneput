@@ -83,8 +83,8 @@ export class FlexChildBuilder {
 		return fchild({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
-	icon(params: Partial<FChildParams>): FChildParams {
-		return icon({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+	icon(iconName: string, params?: Partial<FChildParams>): FChildParams {
+		return icon(iconName, { ...params, id: params?.id ?? this.id + '-' + this.counter++ });
 	}
 
 	iconButton(
@@ -111,10 +111,10 @@ export class FlexChildBuilder {
  * - icon: string (registered icon name via registerIcon/registerIcons)
  * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
-export function icon(params: Partial<FChildParams>): FChildParams {
+export function icon(iconName: string, params: Partial<FChildParams>): FChildParams {
 	return fchild({
 		textContent: params.textContent,
-		icon: params.icon,
+		icon: iconName,
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		classes: ['oneput__icon', ...(params.classes ?? [])],

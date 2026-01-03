@@ -47,7 +47,7 @@ export class AsyncSearchExample implements AppObject {
 						return stdMenuItem({
 							id: result.id,
 							textContent: `Result: '${result.text}'`,
-							left: (b) => [b.icon({ icon: icons.Dot })],
+							left: (b) => [b.icon(icons.Dot)],
 							action: () => {
 								this.outerRightStatus.withNode((node) => {
 									node.innerHTML = `Selected: ${result}`;
@@ -131,7 +131,7 @@ export class AsyncSearchExample implements AppObject {
 				...current,
 				right: hflex({
 					id: 'input-right-1',
-					children: (b) => [b.icon({ icon: icons.RefreshCw, classes: ['oneput__rotate'] })]
+					children: (b) => [b.icon(icons.RefreshCw, { classes: ['oneput__rotate'] })]
 				})
 			}));
 		} else {

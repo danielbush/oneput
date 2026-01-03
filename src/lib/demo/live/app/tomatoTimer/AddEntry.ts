@@ -123,7 +123,7 @@ export class AddEntry implements AppObject {
 			stdMenuItem({
 				id: 'add-label',
 				textContent: this.session.label ? `Label: ${this.session.label}` : 'Label...',
-				left: (b) => [b.icon({ icon: icons.Tag })],
+				left: (b) => [b.icon(icons.Tag)],
 				action: () => {
 					this.ctl.input.focusInput();
 				}
@@ -133,7 +133,7 @@ export class AddEntry implements AppObject {
 				textContent: this.session.note
 					? `Note: ${this.session.note.replace(/\n/g, ' ').substring(0, 10)}...`
 					: 'Note...',
-				left: (b) => [b.icon({ icon: icons.NotebookPen })],
+				left: (b) => [b.icon(icons.NotebookPen)],
 				action: () => {
 					this.ctl.ui.setInputUI((current) => {
 						return {
@@ -154,7 +154,7 @@ export class AddEntry implements AppObject {
 				textContent: this.session.duration
 					? `Duration: ${TimeVal.createFromSeconds(this.session.duration).longTimeString}`
 					: 'Duration...',
-				left: (b) => [b.icon({ icon: icons.Timer })],
+				left: (b) => [b.icon(icons.Timer)],
 				action: () => {
 					this.ctl.input.focusInput();
 				}
@@ -166,8 +166,8 @@ export class AddEntry implements AppObject {
 						DateTimeVal.createFromUnixTime(this.session.startTime).dateTimeString +
 						'...'
 					: 'Start time...',
-				left: (b) => [b.icon({ icon: icons.CalendarCheck })],
-				right: (b) => [b.icon({ icon: icons.ChevronRight })],
+				left: (b) => [b.icon(icons.CalendarCheck)],
+				right: (b) => [b.icon(icons.ChevronRight)],
 				action: () => {
 					this.ctl.app.run(this.setDateTime);
 				}

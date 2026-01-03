@@ -19,9 +19,7 @@ export function infoMenuItem({
 			color: '#777'
 		},
 		children: (b) => [
-			b.icon({
-				icon
-			}),
+			b.icon(icon),
 			b.fchild({
 				textContent: msg
 			}),

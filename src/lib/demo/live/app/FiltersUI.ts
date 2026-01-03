@@ -27,7 +27,7 @@ export class FiltersUI implements AppObject {
 			items: [
 				stdMenuItem({
 					id: 'fuzzy-filter',
-					left: (b) => [b.icon({ icon: icons.ListFilter })],
+					left: (b) => [b.icon(icons.ListFilter)],
 					textContent: 'Fuzzy Filter',
 					action: () => {
 						SettingsManager.create(this.ctl).setFilter('fuzzy');
@@ -37,7 +37,7 @@ export class FiltersUI implements AppObject {
 				}),
 				stdMenuItem({
 					id: 'word-filter',
-					left: (b) => [b.icon({ icon: icons.ListFilter })],
+					left: (b) => [b.icon(icons.ListFilter)],
 					textContent: 'Word Filter',
 					action: () => {
 						SettingsManager.create(this.ctl).setFilter('word');

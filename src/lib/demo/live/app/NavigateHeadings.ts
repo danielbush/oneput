@@ -48,7 +48,7 @@ export class NavigateHeadings implements AppObject {
 		const menuItem = (heading: HTMLElement) =>
 			stdMenuItem({
 				textContent: heading.textContent,
-				left: (b) => [b.icon({ icon: icons.Section })],
+				left: (b) => [b.icon(icons.Section)],
 				action: () => {
 					menuAction(heading);
 				}

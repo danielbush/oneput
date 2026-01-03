@@ -133,7 +133,7 @@ export class KatexDemo implements AppObject {
 				divider(),
 				stdMenuItem({
 					id: 'insert-katex-btn',
-					left: (b) => [b.icon({ icon: icons.Settings })],
+					left: (b) => [b.icon(icons.Settings)],
 					textContent: 'Insert...',
 					attr: {
 						disabled: !katexIsValid

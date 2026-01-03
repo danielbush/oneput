@@ -1,5 +1,5 @@
-import type { Controller } from '$lib/oneput/controller.js';
-import { DynamicPlaceholderBase } from '$lib/oneput/types.js';
+import type { Controller } from '../../controller.js';
+import { DynamicPlaceholderBase } from '../../types.js';
 import { DynamicText, type DynamicTextParams } from './DynamicText.js';
 
 export class DynamicPlaceholder extends DynamicPlaceholderBase {

@@ -129,7 +129,7 @@ export class KatexDemo implements AppObject {
 						}
 					]
 				}),
-				infoMenuItem('katex-instructions', this.helpMessage),
+				infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage }),
 				divider(),
 				stdMenuItem({
 					id: 'insert-katex-btn',

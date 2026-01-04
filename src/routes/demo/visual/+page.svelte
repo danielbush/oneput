@@ -4,22 +4,47 @@
 	import Oneput from '$lib/oneput/components/Oneput.svelte';
 	import * as data from '$lib/demo/visual/state.js';
 	import * as ui from '$lib/demo/visual/ui.js';
-	import {
-		refreshIcons,
-		setupDemoState,
-		icons as iconsAlt
-	} from '$lib/demo/visual/state.svelte.js';
+	import { refreshIcons, icons as iconsAlt } from '$lib/demo/visual/state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
 	import { onMount } from 'svelte';
 	import { randomId } from '$lib/oneput/lib/utils.js';
 	import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 	import { icons } from '$lib/demo/live/icons.js';
+	import { tinykeys } from 'tinykeys';
 
-	setupDemoState();
+	const oneputState = $state({
+		menuOpen: false
+	});
 
 	onMount(() => {
 		refreshIcons();
+	});
+
+	$effect(() => {
+		if (oneputState.menuOpen) {
+			refreshIcons();
+		}
+	});
+
+	// Global keybindings
+
+	$effect(() => {
+		tinykeys(document.body, {
+			'$mod+k': () => {
+				oneputState.menuOpen = !oneputState.menuOpen;
+			}
+		});
+	});
+
+	// Oneput keybindings
+
+	$effect(() => {
+		tinykeys(document.body, {
+			'control+n': () => {
+				//
+			}
+		});
 	});
 
 	let toggleConfirm = $state(true);
@@ -526,4 +551,3 @@
 		</section>
 	</section>
 </main>
-spacerspacerspacer

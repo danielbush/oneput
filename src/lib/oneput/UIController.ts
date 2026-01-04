@@ -41,10 +41,29 @@ export class UIController {
 	 * Should perform similar reset to beforeRun logic in AppController.
 	 */
 	update<A extends Record<string, unknown> = Record<string, unknown>>(settings: {
+		/**
+		 * Does a full reset, similar to what happens in ctl.app.run(appObject)
+		 * which resets state before running appObject.
+		 *
+		 * Defaults to false. Set it to true when running multiple uis within an
+		 * appObject.
+		 *
+		 */
+		reset?: boolean;
+		/**
+		 * Sets ui flags; if `reset` is not set, only these flags will change.
+		 */
 		flags?: UIFlags;
+		/**
+		 * Your UILayout parameters..
+		 */
 		params?: A;
 	}) {
-		this.ctl.app.reset(settings.flags);
+		if (settings.reset) {
+			this.ctl.app.reset(settings.flags);
+		} else {
+			this.ctl.app.applyFlags(settings.flags);
+		}
 		this.layout?.configure({ params: settings.params });
 		this.ctl.currentProps.inputUI = this.layout?.inputUI;
 		this.ctl.currentProps.menuUI = this.layout?.menuUI;

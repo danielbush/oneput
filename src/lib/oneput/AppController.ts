@@ -80,6 +80,38 @@ export class AppController {
 		};
 	}
 
+	/**
+	 * Apply only the given flags.
+	 */
+	applyFlags(flags?: Partial<UIFlags>) {
+		if (!flags) {
+			return;
+		}
+		if ('enableGoBack' in flags || flags.enableModal) {
+			this.ctl.app._enableGoBack(flags.enableGoBack ?? !flags.enableModal);
+		}
+		if ('enableMenuOpenClose' in flags || flags.enableModal) {
+			this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose ?? !flags.enableModal);
+		}
+		if ('enableKeys' in flags || flags.enableModal) {
+			this.ctl.keys._enableKeys(flags.enableKeys ?? !flags.enableModal);
+		}
+		if ('enableMenuActions' in flags || flags.enableModal) {
+			this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? !flags.enableModal);
+		}
+		if ('enableMenuItemsFn' in flags || flags.enableModal) {
+			this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
+		}
+		if ('enableInputElement' in flags || flags.enableModal) {
+			this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
+		}
+	}
+
+	/**
+	 * Reset ui and related state.
+	 *
+	 * Used for resetting state when a new appObject is run.
+	 */
 	reset(settings?: UIFlags) {
 		// Events
 		this.unsubscribeMenuItemFocus?.();

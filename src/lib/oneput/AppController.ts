@@ -72,19 +72,6 @@ export class AppController {
 		this.reset();
 	}
 
-	private calcLayoutFlags(settings: UIFlags) {
-		const enableModal = settings.enableModal ?? false;
-		const flags: UIFlags = {
-			enableGoBack: settings.enableGoBack ?? !enableModal,
-			enableMenuOpenClose: settings.enableMenuOpenClose ?? !enableModal,
-			enableKeys: settings.enableKeys ?? !enableModal,
-			enableMenuActions: settings.enableMenuActions ?? !enableModal,
-			enableMenuItemsFn: settings.enableMenuItemsFn ?? !enableModal,
-			enableInputElement: settings.enableInputElement ?? !enableModal
-		};
-		return flags;
-	}
-
 	reset(settings?: UIFlags) {
 		// Events
 		this.unsubscribeMenuItemFocus?.();
@@ -98,7 +85,16 @@ export class AppController {
 		}
 
 		// Re-enable stuff...
-		const flags = this.calcLayoutFlags(settings ?? {});
+		const enableModal = settings?.enableModal ?? false;
+		const flags: UIFlags = {
+			enableGoBack: settings?.enableGoBack ?? !enableModal,
+			enableMenuOpenClose: settings?.enableMenuOpenClose ?? !enableModal,
+			enableKeys: settings?.enableKeys ?? !enableModal,
+			enableMenuActions: settings?.enableMenuActions ?? !enableModal,
+			enableMenuItemsFn: settings?.enableMenuItemsFn ?? !enableModal,
+			enableInputElement: settings?.enableInputElement ?? !enableModal
+		};
+
 		this.ctl.app._enableGoBack(flags.enableGoBack);
 		this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
 		this.ctl.keys._enableKeys(flags.enableKeys);

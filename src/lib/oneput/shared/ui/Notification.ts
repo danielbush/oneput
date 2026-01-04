@@ -36,10 +36,9 @@ export class Notification {
 					b.fchild({
 						textContent: message
 					}),
-					b.iconButton({
+					b.iconButton('CloseNotification', {
 						classes: ['oneput__icon-button'],
 						title: 'Close',
-						icon: 'CloseNotification',
 						onClick: () => {
 							this.ctl.ui.injectUI();
 						}

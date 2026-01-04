@@ -344,9 +344,9 @@
 						left: (b) => [b.icon(iconsAlt.Search)],
 						textContent: 'Left + multiple right icons...',
 						right: (b) => [
-							b.iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
-							b.iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
-							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' })
+							b.iconButton(iconsAlt.Play, { title: 'Play' }),
+							b.iconButton(iconsAlt.Pause, { title: 'Pause' }),
+							b.iconButton(iconsAlt.Square, { title: 'Stop' })
 						]
 					})
 				]}
@@ -388,9 +388,18 @@
 						left: (b) => [b.icon(iconsAlt.Search)],
 						textContent: 'Left + right + right + bottom...',
 						right: (b) => [
-							b.iconButton({ title: 'Play', innerHTMLUnsafe: '<i data-lucide="play"></i>' }),
-							b.iconButton({ title: 'Pause', innerHTMLUnsafe: '<i data-lucide="pause"></i>' }),
-							b.iconButton({ title: 'Stop', innerHTMLUnsafe: '<i data-lucide="square"></i>' }),
+							b.iconButton(iconsAlt.Play, {
+								title: 'Play',
+								innerHTMLUnsafe: '<i data-lucide="play"></i>'
+							}),
+							b.iconButton(iconsAlt.Pause, {
+								title: 'Pause',
+								innerHTMLUnsafe: '<i data-lucide="pause"></i>'
+							}),
+							b.iconButton(iconsAlt.Square, {
+								title: 'Stop',
+								innerHTMLUnsafe: '<i data-lucide="square"></i>'
+							}),
 							b.icon(iconsAlt.ChevronRight)
 						],
 						bottom: {
@@ -461,9 +470,8 @@
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
 							right: (b) => [
-								b.iconButton({
-									title: 'More...',
-									innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
+								b.iconButton(iconsAlt.EllipsisVertical, {
+									title: 'More...'
 								})
 							]
 						}

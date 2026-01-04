@@ -317,11 +317,10 @@ export class TomatoTimer implements AppObject {
 				...inputUI,
 				right: hflex({
 					children: (b) => [
-						b.iconButton({
-							title: 'Add',
-							icon: icons.Check
+						b.iconButton(icons.Check, {
+							title: 'Add'
 						}),
-						b.iconButton({ title: 'Cancel', icon: icons.X })
+						b.iconButton(icons.X, { title: 'Cancel' })
 					]
 				})
 			};

@@ -88,9 +88,10 @@ export class FlexChildBuilder {
 	}
 
 	iconButton(
+		iconName: string,
 		params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
 	): FChildParams {
-		return iconButton({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+		return iconButton(iconName, { ...params, id: params.id ?? this.id + '-' + this.counter++ });
 	}
 
 	button(
@@ -115,6 +116,7 @@ export function icon(iconName: string, params: Partial<FChildParams>): FChildPar
 	return fchild({
 		textContent: params.textContent,
 		icon: iconName,
+		// TODO: superfluous because of 'icon'?
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		classes: ['oneput__icon', ...(params.classes ?? [])],
@@ -156,12 +158,14 @@ export function spacer(
  * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function iconButton(
+	iconName: string,
 	params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
 ): FChildParams {
 	return fchild({
 		tag: 'button',
 		textContent: params.textContent,
-		icon: params.icon,
+		icon: iconName,
+		// TODO: superfluous because of 'icon'?
 		innerHTMLUnsafe: params.innerHTMLUnsafe,
 		...params,
 		classes: ['oneput__icon-button', ...(params.classes ?? [])],

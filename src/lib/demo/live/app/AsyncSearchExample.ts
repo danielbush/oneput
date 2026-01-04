@@ -109,9 +109,8 @@ export class AsyncSearchExample implements AppObject {
 			right: hflex({
 				id: 'input-right-1',
 				children: (b) => [
-					b.iconButton({
+					b.iconButton(icons.RefreshCw, {
 						title: 'Error',
-						icon: icons.RefreshCw,
 						attr: {
 							onclick: () => {
 								alert.cancel();

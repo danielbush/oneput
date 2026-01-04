@@ -14,12 +14,17 @@
 		if (props.style) {
 			Object.assign(node!.style, props.style);
 		}
-		// Render icon if specified (takes precedence over innerHTMLUnsafe)
-		if (props.icon && node) {
-			renderIcon(props.icon, node);
-		}
 		if (props.onMount) {
 			return props.onMount(node!);
+		}
+	});
+
+	// Render icon if specified (takes precedence over innerHTMLUnsafe)
+	// Use $effect, not onMount because fchild with same id in an array may
+	// conditionally render an icon or spacer etc.
+	$effect(() => {
+		if (props.icon && node) {
+			renderIcon(props.icon, node);
 		}
 	});
 </script>

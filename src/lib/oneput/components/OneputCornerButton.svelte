@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { hideShowListener } from '../lib/utils.js';
 	import { renderIcon } from '../lib/icons.js';
 
@@ -10,7 +9,7 @@
 	let { icon }: { icon: string } = $props();
 	let node: HTMLButtonElement | null = $state(null);
 
-	onMount(() => {
+	$effect(() => {
 		if (node) {
 			renderIcon(icon, node);
 		}

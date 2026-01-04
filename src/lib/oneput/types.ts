@@ -173,7 +173,7 @@ export type UIFlags = {
 };
 
 export interface UILayout {
-	configure(settings: { flags: UIFlags; params?: Record<string, unknown> }): void;
+	configure(settings: { params?: Record<string, unknown> }): void;
 	inputUI?: OneputProps['inputUI'];
 	menuUI?: OneputProps['menuUI'];
 	innerUI?: OneputProps['innerUI'];

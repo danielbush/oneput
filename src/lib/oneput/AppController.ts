@@ -72,6 +72,14 @@ export class AppController {
 		this.reset();
 	}
 
+	get flags() {
+		return {
+			enableGoBack: !this.disableGoBack,
+			enableMenuOpenClose: this.ctl.menu.enableMenuOpenClose
+			// TODO: add other flags?
+		};
+	}
+
 	reset(settings?: UIFlags) {
 		// Events
 		this.unsubscribeMenuItemFocus?.();

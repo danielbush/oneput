@@ -1,5 +1,5 @@
 import { mountSvelte, randomId } from '$lib/oneput/lib/utils.js';
-import type { DynamicPlaceholderBase, UIFlags } from '$lib/oneput/types.js';
+import type { DynamicPlaceholderBase } from '$lib/oneput/types.js';
 import type { FChildParams, UILayout } from '$lib/oneput/types.js';
 import type { Controller } from '$lib/oneput/controller.js';
 import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
@@ -35,7 +35,7 @@ export class Layout implements UILayout {
 					: `Open menu with ${params.menuOpenBinding}...`
 				: 'Type here...'
 		);
-		return new Layout(ctl, settings, {}, dynamicPlaceholder, bindingService);
+		return new Layout(ctl, settings, dynamicPlaceholder, bindingService);
 	}
 
 	defaultPlaceholder?: DynamicPlaceholderBase;
@@ -43,7 +43,6 @@ export class Layout implements UILayout {
 	constructor(
 		private ctl: Controller,
 		private settings: LayoutSettings = {},
-		private flags: UIFlags = {},
 		private dynamicPlaceholder: DynamicPlaceholder,
 		private bindingService: LocalBindingsService
 	) {
@@ -64,8 +63,7 @@ export class Layout implements UILayout {
 			});
 	}
 
-	configure(settings: { flags: UIFlags; params?: LayoutSettings }) {
-		this.flags = settings.flags;
+	configure(settings: { params?: LayoutSettings }) {
 		this.settings = {
 			menuTitle: this.settings.menuTitle || 'Menu',
 			...settings.params
@@ -73,14 +71,14 @@ export class Layout implements UILayout {
 	}
 
 	private get exitAction() {
-		if (this.flags.enableMenuOpenClose === true) {
+		if (this.ctl.app.flags.enableMenuOpenClose) {
 			return this.ctl.menu.closeMenu;
 		}
 		return;
 	}
 
 	private get backAction() {
-		if (this.flags.enableGoBack === true) {
+		if (this.ctl.app.flags.enableGoBack) {
 			return this.ctl.app.goBack;
 		}
 		return;

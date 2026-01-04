@@ -439,6 +439,10 @@ export class MenuController {
 		this.disableOpenClose = !on;
 	}
 
+	get enableMenuOpenClose() {
+		return !this.disableOpenClose;
+	}
+
 	/**
 	 * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
 	 */

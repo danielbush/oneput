@@ -44,8 +44,8 @@ export class UIController {
 		flags?: UIFlags;
 		params?: A;
 	}) {
-		const finalFlags = this.ctl.app.reset(settings.flags);
-		this.layout?.configure({ flags: finalFlags, params: settings.params });
+		this.ctl.app.reset(settings.flags);
+		this.layout?.configure({ params: settings.params });
 		this.ctl.currentProps.inputUI = this.layout?.inputUI;
 		this.ctl.currentProps.menuUI = this.layout?.menuUI;
 		this.ctl.currentProps.innerUI = this.layout?.innerUI;

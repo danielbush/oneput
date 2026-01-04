@@ -56,7 +56,6 @@ export class SetDate implements AppObject {
 	}
 
 	private runSetYear() {
-		this.ctl.app.reset();
 		this.ctl.app.setOnBack(() => {
 			this.ctl.app.exit();
 		});
@@ -99,7 +98,6 @@ export class SetDate implements AppObject {
 	}
 
 	private runSetMonth() {
-		this.ctl.app.reset();
 		this.ctl.app.setOnBack(() => {
 			this.runSetYear();
 		});
@@ -135,7 +133,6 @@ export class SetDate implements AppObject {
 	}
 
 	private runSetDay() {
-		this.ctl.app.reset();
 		this.ctl.app.setOnBack(() => {
 			this.runSetMonth();
 		});

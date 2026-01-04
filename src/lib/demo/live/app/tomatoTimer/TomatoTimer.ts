@@ -95,7 +95,6 @@ export class TomatoTimer implements AppObject {
 	 * The UI we see if there is no existing timer.
 	 */
 	private runMainNoTimer() {
-		this.ctl.app.reset();
 		this.ctl.ui.update({
 			params: {
 				menuTitle: 'No timer running'
@@ -148,7 +147,6 @@ export class TomatoTimer implements AppObject {
 	 * The UI we see if there is an existing timer.
 	 */
 	private runMainWithTimer(timerValue: TomatoTimerValue) {
-		this.ctl.app.reset();
 		this.ctl.ui.update({
 			params: {
 				menuTitle: 'Running timer... Seize the day!'
@@ -263,7 +261,6 @@ export class TomatoTimer implements AppObject {
 	}
 
 	private runCreateTimer({ duration }: { duration: number }) {
-		this.ctl.app.reset();
 		this.ctl.ui.update({
 			params: {
 				menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
@@ -328,7 +325,6 @@ export class TomatoTimer implements AppObject {
 	}
 
 	private runPreviousSessions() {
-		this.ctl.app.reset();
 		this.ctl.ui.update({
 			params: {
 				menuTitle: 'Previous sessions'
@@ -361,7 +357,6 @@ export class TomatoTimer implements AppObject {
 	}
 
 	private runEditEntry(session: FinishedSessionRecord) {
-		this.ctl.app.reset();
 		const v = TomatoTimerValue.create(session);
 		this.ctl.ui.update({
 			params: {

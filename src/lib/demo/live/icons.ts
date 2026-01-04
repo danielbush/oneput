@@ -1,4 +1,4 @@
-import { lucide, registerIcon } from '$lib/oneput/lib/icons.js';
+import { element, registerIcon } from '$lib/oneput/lib/icons.js';
 import { createElement } from 'lucide';
 import * as lu from 'lucide';
 
@@ -45,7 +45,7 @@ export const iconData = {
 Object.entries(iconData).forEach(([name, icon]) => {
 	registerIcon(
 		name,
-		lucide(() => createElement(icon))
+		element(() => createElement(icon))
 	);
 });
 

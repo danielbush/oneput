@@ -12,9 +12,7 @@ export {
 	registerIcons,
 	getIconRenderer,
 	renderIcon,
-	lucide,
 	element,
-	svg,
 	missingIcon
 } from './oneput/lib/icons.js';
 export type { IconRenderer } from './oneput/lib/icons.js';

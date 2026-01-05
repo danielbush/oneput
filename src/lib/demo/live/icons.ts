@@ -1,5 +1,4 @@
 import { element, registerIcon } from '$lib/oneput/lib/icons.js';
-import { createElement } from 'lucide';
 import * as lu from 'lucide';
 
 export const iconData = {
@@ -45,7 +44,7 @@ export const iconData = {
 Object.entries(iconData).forEach(([name, icon]) => {
 	registerIcon(
 		name,
-		element(() => createElement(icon))
+		element(() => lu.createElement(icon))
 	);
 });
 

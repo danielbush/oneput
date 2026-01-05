@@ -5,6 +5,7 @@
 import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
 import type { appState } from './state.js';
+import { icons } from './state.svelte.js';
 
 export const menuHeader1: FlexParams = {
 	id: 'menu-header-1',
@@ -16,7 +17,7 @@ export const menuHeader1: FlexParams = {
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
-			innerHTMLUnsafe: '<i data-lucide="chevron-left"></i>'
+			icon: icons.ChevronLeft
 		},
 		{
 			id: randomId(),
@@ -34,7 +35,7 @@ export const menuHeader1: FlexParams = {
 					tag: 'button',
 					attr: { type: 'button', title: 'Options' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="x"></i>'
+					icon: icons.X
 				},
 				{
 					id: randomId(),
@@ -42,7 +43,7 @@ export const menuHeader1: FlexParams = {
 					tag: 'button',
 					attr: { type: 'button', title: 'Options' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="maximize-2"></i>'
+					icon: icons.Maximize2
 				}
 			]
 		}
@@ -67,7 +68,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					id: randomId(),
 					type: 'fchild',
 					classes: ['oneput__icon'],
-					innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+					icon: icons.ChevronRight
 				}
 			]
 		},
@@ -96,7 +97,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__icon'],
-							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+							icon: icons.ChevronRight
 						}
 					]
 				}
@@ -132,7 +133,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					style: { alignSelf: 'flex-start' },
-					innerHTMLUnsafe: '<i data-lucide="search"></i>'
+					icon: icons.Search
 				},
 				{
 					id: randomId(),
@@ -149,7 +150,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							tag: 'button',
 							attr: { type: 'button', title: 'Play' },
 							classes: ['oneput__icon-button'],
-							innerHTMLUnsafe: '<i data-lucide="play"></i>'
+							icon: icons.Play
 						},
 						{
 							id: randomId(),
@@ -157,7 +158,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							tag: 'button',
 							attr: { type: 'button', title: 'Pause' },
 							classes: ['oneput__icon-button'],
-							innerHTMLUnsafe: '<i data-lucide="pause"></i>'
+							icon: icons.Pause
 						},
 						{
 							id: randomId(),
@@ -165,7 +166,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 							tag: 'button',
 							attr: { type: 'button', title: 'Stop' },
 							classes: ['oneput__icon-button'],
-							innerHTMLUnsafe: '<i data-lucide="square"></i>'
+							icon: icons.Square
 						}
 					]
 				}
@@ -215,7 +216,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 					type: 'fchild',
 					classes: ['oneput__icon'],
 					style: { alignSelf: 'flex-start' },
-					innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+					icon: icons.ChevronRight
 				}
 			]
 		},
@@ -270,7 +271,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 											tag: 'button',
 											attr: { type: 'button', title: 'database' },
 											classes: ['oneput__icon-button'],
-											innerHTMLUnsafe: '<i data-lucide="info"></i>'
+											icon: icons.Info
 										},
 										{
 											id: randomId(),
@@ -278,7 +279,7 @@ export const menuItems1: () => MenuItemAny[] = () => {
 											tag: 'button',
 											attr: { type: 'button', title: 'share' },
 											classes: ['oneput__icon-button'],
-											innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
+											icon: icons.EllipsisVertical
 										}
 									]
 								}
@@ -407,7 +408,7 @@ export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					tag: 'button',
 					attr: { type: 'button', title: 'database' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="database"></i>'
+					icon: icons.Database
 				},
 				{
 					id: randomId(),
@@ -415,7 +416,7 @@ export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					tag: 'button',
 					attr: { type: 'button', title: 'share' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="share-2"></i>'
+					icon: icons.Share2
 				}
 			]
 		},
@@ -430,7 +431,7 @@ export const menuFooter1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					tag: 'button',
 					attr: { type: 'button', title: 'zap' },
 					classes: ['oneput__icon-toggle-button'],
-					innerHTMLUnsafe: '<i data-lucide="zap"></i>',
+					icon: icons.Zap,
 					onMount: (node) => {
 						zap.add(node);
 						return () => {
@@ -470,13 +471,13 @@ export const inner1: FlexParams = {
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
 							classes: ['oneput__button'],
-							innerHTMLUnsafe: 'div'
+							textContent: 'div'
 						},
 						{
 							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__icon'],
-							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+							icon: icons.ChevronRight
 						},
 						{
 							id: randomId(),
@@ -484,13 +485,13 @@ export const inner1: FlexParams = {
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
 							classes: ['oneput__icon-button'],
-							innerHTMLUnsafe: '<i data-lucide="ellipsis"></i>'
+							icon: icons.Ellipsis
 						},
 						{
 							id: randomId(),
 							type: 'fchild',
 							classes: ['oneput__icon'],
-							innerHTMLUnsafe: '<i data-lucide="chevron-right"></i>'
+							icon: icons.ChevronRight
 						},
 						{
 							id: randomId(),
@@ -498,7 +499,7 @@ export const inner1: FlexParams = {
 							tag: 'button',
 							attr: { type: 'button', title: 'commit' },
 							classes: ['oneput__button'],
-							innerHTMLUnsafe: 'div'
+							textContent: 'div'
 						}
 					]
 				}
@@ -526,7 +527,7 @@ export const inner1: FlexParams = {
 					tag: 'button',
 					attr: { type: 'button', title: 'commit' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="git-commit-vertical"></i>'
+					icon: icons.GitCommitVertical
 				}
 			]
 		}
@@ -549,7 +550,7 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					tag: 'button',
 					attr: { type: 'button', title: 'database' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="database"></i>'
+					icon: icons.Database
 				},
 				{
 					id: randomId(),
@@ -557,7 +558,7 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 					tag: 'button',
 					attr: { type: 'button', title: 'share' },
 					classes: ['oneput__icon-button'],
-					innerHTMLUnsafe: '<i data-lucide="share-2"></i>'
+					icon: icons.Share2
 				}
 			]
 		},
@@ -578,7 +579,7 @@ export const outer1: (zap: typeof appState.zap) => FlexParams = (zap) => ({
 						}
 					},
 					classes: ['oneput__icon-toggle-button'],
-					innerHTMLUnsafe: '<i data-lucide="zap"></i>',
+					icon: icons.Zap,
 					onMount: (node) => {
 						zap.add(node);
 						return () => {
@@ -601,7 +602,7 @@ export const inputLeft1: FlexParams = {
 			tag: 'button',
 			attr: { type: 'button', title: 'Search' },
 			classes: ['oneput__icon-button'],
-			innerHTMLUnsafe: '<i data-lucide="search"></i>'
+			icon: icons.Search
 		}
 	]
 };
@@ -616,7 +617,7 @@ export const inputOuterLeft1: FlexParams = {
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
-			innerHTMLUnsafe: '<i data-lucide="ellipsis-vertical"></i>'
+			icon: icons.EllipsisVertical
 		}
 	]
 };
@@ -631,7 +632,7 @@ export const inputOuterRight1: FlexParams = {
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
-			innerHTMLUnsafe: '<i data-lucide="mic"></i>'
+			icon: icons.Mic
 		}
 	]
 };
@@ -646,7 +647,7 @@ export const inputRight1: FlexParams = {
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
-			innerHTMLUnsafe: '<i data-lucide="chevron-up"></i>'
+			icon: icons.ChevronUp
 		},
 		{
 			id: randomId(),
@@ -654,7 +655,7 @@ export const inputRight1: FlexParams = {
 			tag: 'button',
 			attr: { type: 'button', title: 'Options' },
 			classes: ['oneput__icon-button'],
-			innerHTMLUnsafe: '<i data-lucide="chevron-down"></i>'
+			icon: icons.ChevronDown
 		}
 	]
 };

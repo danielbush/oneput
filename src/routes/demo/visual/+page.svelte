@@ -4,27 +4,15 @@
 	import Oneput from '$lib/oneput/components/Oneput.svelte';
 	import * as data from '$lib/demo/visual/state.js';
 	import * as ui from '$lib/demo/visual/ui.js';
-	import { refreshIcons, icons as iconsAlt } from '$lib/demo/visual/state.svelte.js';
+	import { icons } from '$lib/demo/visual/state.svelte.js';
 	import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
 	import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
-	import { onMount } from 'svelte';
 	import { randomId } from '$lib/oneput/lib/utils.js';
 	import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
-	import { icons } from '$lib/demo/live/icons.js';
 	import { tinykeys } from 'tinykeys';
 
 	const oneputState = $state({
 		menuOpen: false
-	});
-
-	onMount(() => {
-		refreshIcons();
-	});
-
-	$effect(() => {
-		if (oneputState.menuOpen) {
-			refreshIcons();
-		}
 	});
 
 	// Global keybindings
@@ -347,7 +335,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left icon only...'
 					})
 				]}
@@ -356,9 +344,9 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Both left + right icons...',
-						right: (b) => [b.icon(iconsAlt.ChevronRight)]
+						right: (b) => [b.icon(icons.ChevronRight)]
 					})
 				]}
 			/>
@@ -366,12 +354,12 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + multiple right icons...',
 						right: (b) => [
-							b.iconButton(iconsAlt.Play, { title: 'Play' }),
-							b.iconButton(iconsAlt.Pause, { title: 'Pause' }),
-							b.iconButton(iconsAlt.Square, { title: 'Stop' })
+							b.iconButton(icons.Play, { title: 'Play' }),
+							b.iconButton(icons.Pause, { title: 'Pause' }),
+							b.iconButton(icons.Square, { title: 'Stop' })
 						]
 					})
 				]}
@@ -380,7 +368,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + right (kbd) ...',
 						right: (b) => [
 							b.fchild({
@@ -388,7 +376,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							b.icon(iconsAlt.ChevronRight)
+							b.icon(icons.ChevronRight)
 						]
 					})
 				]}
@@ -397,9 +385,9 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + right + innerBottom section...',
-						right: (b) => [b.icon(iconsAlt.ChevronRight)],
+						right: (b) => [b.icon(icons.ChevronRight)],
 						bottom: {
 							textContent: 'Here is a more detailed description.'
 						}
@@ -410,22 +398,22 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + right + right + bottom...',
 						right: (b) => [
-							b.iconButton(iconsAlt.Play, {
+							b.iconButton(icons.Play, {
 								title: 'Play',
 								innerHTMLUnsafe: '<i data-lucide="play"></i>'
 							}),
-							b.iconButton(iconsAlt.Pause, {
+							b.iconButton(icons.Pause, {
 								title: 'Pause',
 								innerHTMLUnsafe: '<i data-lucide="pause"></i>'
 							}),
-							b.iconButton(iconsAlt.Square, {
+							b.iconButton(icons.Square, {
 								title: 'Stop',
 								innerHTMLUnsafe: '<i data-lucide="square"></i>'
 							}),
-							b.icon(iconsAlt.ChevronRight)
+							b.icon(icons.ChevronRight)
 						],
 						bottom: {
 							textContent: 'Here is a more detailed description.'
@@ -437,7 +425,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + right (kbd) + bottom...',
 						right: (b) => [
 							b.fchild({
@@ -445,7 +433,7 @@
 								innerHTMLUnsafe: '<code><kbd>Ctrl</kbd><kbd>x</kbd></code>',
 								classes: ['oneput__kbd']
 							}),
-							b.icon(iconsAlt.ChevronRight)
+							b.icon(icons.ChevronRight)
 						],
 						bottom: {
 							textContent:
@@ -458,7 +446,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + right + bottom (left)...',
 						right: (b) => [
 							b.fchild({
@@ -469,7 +457,7 @@
 							b.spacer()
 						],
 						bottom: {
-							left: (b) => [b.icon(iconsAlt.Info)],
+							left: (b) => [b.icon(icons.Info)],
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.'
 						}
@@ -480,7 +468,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'Left + right + bottom (left + right)...',
 						right: (b) => [
 							b.fchild({
@@ -491,11 +479,11 @@
 							b.spacer()
 						],
 						bottom: {
-							left: (b) => [b.icon(iconsAlt.Info)],
+							left: (b) => [b.icon(icons.Info)],
 							textContent:
 								'This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item. This is some sort of description for this menu item.',
 							right: (b) => [
-								b.iconButton(iconsAlt.EllipsisVertical, {
+								b.iconButton(icons.EllipsisVertical, {
 									title: 'More...'
 								})
 							]
@@ -507,7 +495,7 @@
 				menuOpen={true}
 				menuItems={[
 					stdMenuItem({
-						left: (b) => [b.icon(iconsAlt.Search)],
+						left: (b) => [b.icon(icons.Search)],
 						textContent: 'No bottom (left + right)...',
 						right: (b) => [
 							b.fchild({

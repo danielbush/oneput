@@ -15,4 +15,4 @@ export { registerIcon, registerIcons, element, unsafeHTML } from './oneput/lib/i
 export type { IconRenderer } from './oneput/lib/icons.js';
 
 // Shared
-// TODO: Separate exports entry?
+// This is exposed under shared/.

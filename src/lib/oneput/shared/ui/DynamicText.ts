@@ -1,4 +1,4 @@
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 
 export type DynamicTextParams = {
 	isMenuOpen: boolean;

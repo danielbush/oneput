@@ -2,7 +2,7 @@
 	// Wraps Oneput and creates and exposes a controller that lets you
 	// programmatically control Oneput.
 	import Oneput from './Oneput.svelte';
-	import { Controller } from '../controller.js';
+	import { Controller } from '../controllers/controller.js';
 	import { onMount } from 'svelte';
 	import type { OneputProps } from '../types.js';
 

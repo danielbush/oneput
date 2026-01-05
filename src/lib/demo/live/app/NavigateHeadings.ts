@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import type { AppObject } from '$lib/oneput/types.js';
 import { FuzzyFilter } from '$lib/oneput/shared/filters/FuzzyFilter.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';

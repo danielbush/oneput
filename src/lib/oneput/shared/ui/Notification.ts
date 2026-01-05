@@ -1,5 +1,5 @@
 import { hflex } from '../../lib/builder.js';
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 
 export type NotificationParams = {
 	duration?: number;

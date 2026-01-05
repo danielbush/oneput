@@ -1,4 +1,4 @@
-import type { Controller } from '../../../controller.js';
+import type { Controller } from '../../../controllers/controller.js';
 import { randomId } from '../../../lib/utils.js';
 import type { FlexParams, MenuItem } from '../../../types.js';
 

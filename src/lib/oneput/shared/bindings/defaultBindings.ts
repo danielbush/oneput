@@ -2,7 +2,7 @@
  * These can be used as defaults.  You can set your own defaults instead if you prefer.
  */
 import { KeyEventBindings, type KeyBindingMapSerializable } from '../../lib/bindings.js';
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 import { GlobalFilter } from '../appObjects/GlobalFilter.js';
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {

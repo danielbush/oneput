@@ -1,4 +1,4 @@
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 import type { AppObject } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { DateVal } from '../values/DateVal.js';

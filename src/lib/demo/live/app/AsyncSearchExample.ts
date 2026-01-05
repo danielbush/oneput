@@ -1,5 +1,5 @@
 import { hflex } from '$lib/oneput/lib/builder.js';
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { type LayoutSettings } from './_layout.js';
 import { TestInputService } from '../service/TestInputService.js';

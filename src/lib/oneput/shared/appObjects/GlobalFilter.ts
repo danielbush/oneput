@@ -1,5 +1,5 @@
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 import type { OneputProps, AppObject } from '../../types.js';
 
 // TODO: implement a global items / filter mechanism.

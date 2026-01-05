@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { renderIcon } from '../../lib/icons.js';
-	import type { Controller } from '../../controller.js';
+	import type { Controller } from '../../controllers/controller.js';
 	const { controller, onClick }: { controller: Controller; onClick: (evt: Event) => void } =
 		$props();
 	let iconNode: HTMLButtonElement | null = $state(null);

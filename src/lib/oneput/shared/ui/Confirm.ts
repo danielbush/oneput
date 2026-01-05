@@ -1,5 +1,5 @@
 import { vflex } from '../../lib/builder.js';
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 
 export class Confirm {
 	static create(

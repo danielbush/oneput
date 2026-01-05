@@ -1,5 +1,5 @@
-import type { KeyBindingMap } from './lib/bindings.js';
-import type { MenuItem } from './types.js';
+import type { KeyBindingMap } from '../lib/bindings.js';
+import type { MenuItem } from '../types.js';
 
 // Internal event system for decoupled communication
 export type InternalEvent =

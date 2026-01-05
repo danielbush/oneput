@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';

@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { BindingsEditor } from '$lib/oneput/shared/appObjects/BindingsEditor.js';
 import { config } from '$lib/demo/live/service/TestBindingsStore.js';

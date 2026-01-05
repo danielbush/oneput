@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Controller } from '../../controller.js';
+	import type { Controller } from '../../controllers/controller.js';
 
 	const { controller }: { controller: Controller } = $props();
 	let label = $derived.by(() => {

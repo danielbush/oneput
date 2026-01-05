@@ -1,7 +1,7 @@
 import { mountSvelte, randomId } from '$lib/oneput/lib/utils.js';
 import type { DynamicPlaceholderBase } from '$lib/oneput/types.js';
 import type { FChildParams, UILayout } from '$lib/oneput/types.js';
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
 import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';

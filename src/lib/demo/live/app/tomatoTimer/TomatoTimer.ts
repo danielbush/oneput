@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
 import {

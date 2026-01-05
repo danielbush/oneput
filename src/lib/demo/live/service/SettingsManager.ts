@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controller.js';
+import type { Controller } from '$lib/oneput/controllers/controller.js';
 import { FuzzyFilter } from '$lib/oneput/shared/filters/FuzzyFilter.js';
 import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
 

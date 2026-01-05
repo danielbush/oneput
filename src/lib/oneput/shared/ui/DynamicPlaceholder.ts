@@ -1,4 +1,4 @@
-import type { Controller } from '../../controller.js';
+import type { Controller } from '../../controllers/controller.js';
 import { DynamicPlaceholderBase } from '../../types.js';
 import { DynamicText, type DynamicTextParams } from './DynamicText.js';
 

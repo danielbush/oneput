@@ -14,10 +14,10 @@ tasks:
     cmds:
       - rm -rf node_modules
       - pnpm i
-  setup:styles:
+  copy:styles:
     desc: Copy oneput defaults into this repo.
     cmds:
-      - cp {{.ONEPUT_DIR}}/src/lib/oneput/styles/oneput-defaults.css {{.ONEPUT_CSS_FILE}}
+      - cp {{.ONEPUT_DIR}}/src/lib/oneput/shared/styles/oneput-defaults.css {{.ONEPUT_CSS_FILE}}
       - echo "Commit any changes."
   dev:
     desc: Run dev server

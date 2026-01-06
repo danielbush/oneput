@@ -12,7 +12,9 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter(),
 		alias: {
-			$oneput: '../oneput/src/lib/index.ts'
+			$oneput: '../oneput/src/lib/index.ts',
+			$shared: '../oneput/src/lib/oneput/shared',
+			$types: '../oneput/dist/index.d.ts'
 		}
 	}
 };

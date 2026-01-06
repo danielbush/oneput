@@ -1,9 +1,9 @@
 <script lang="ts">
 	import '../../../lib/jsed/styles/oneput-defaults.css';
 	import '../../../lib/jsed/styles/jsed-defaults.css';
-	import { Command } from '@lucide/svelte';
 	import { Anchor, OneputCornerButton, OneputController } from '$oneput';
-	import { setController } from '$lib/demo/live/app.js';
+	import { setController } from '$lib/oneput/app/_app.js';
+	import { icons } from '$lib/oneput/icons.js';
 
 	let { children } = $props();
 	setTimeout(() => {
@@ -23,6 +23,4 @@
 <Anchor>
 	<OneputController controllerRef={setController} />
 </Anchor>
-<OneputCornerButton>
-	{#snippet icon()}<Command />{/snippet}
-</OneputCornerButton>
+<OneputCornerButton icon={icons.Command} />

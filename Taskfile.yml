@@ -70,6 +70,10 @@ tasks:
     desc: check types
     cmds:
       - pnpm run check --watch
+  sync:
+    desc: sync files - use this if you change config.kit.alias and need svelte to update the base typescript config.
+    cmds:
+      - pnpm run prepare
 
   # boilerplate / install / setup
 

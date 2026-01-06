@@ -6,9 +6,6 @@
 	import { icons } from '$lib/oneput/icons.js';
 
 	let { children } = $props();
-	setTimeout(() => {
-		window.dispatchEvent(new Event('oneput-toggle-hide'));
-	}, 10);
 </script>
 
 <svelte:head>

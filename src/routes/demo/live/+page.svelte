@@ -1,20 +1,7 @@
 <script lang="ts">
-	import { start, type JsedDocument } from '../../../lib/jsed/index.js';
-	import { onMount } from 'svelte';
-
-	let root: HTMLElement | null = null;
-
-	onMount(() => {
-		if (!root) return;
-		const doc = start(root);
-		console.log('Access "doc" in the console');
-		// TODO: improve ts
-		(globalThis as typeof globalThis & { doc: JsedDocument }).doc = doc;
-		console.log(doc);
-	});
 </script>
 
-<div bind:this={root}>
+<div id="load-doc">
 	<h2>simple paragraph</h2>
 	<p>This is just a simple paragraph of text. And this is a second sentence.</p>
 	<h2>line with inline tags</h2>

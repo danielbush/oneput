@@ -7,8 +7,9 @@ import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { LayoutSettings } from './_layout.js';
 import { icons } from '../icons.js';
+import type { AppObject } from '$lib/oneput/types.js';
 
-export class RootUI {
+export class RootUI implements AppObject {
 	static create(ctl: Controller) {
 		const createSettingsUI = () => {
 			return SettingsUI.create(ctl);

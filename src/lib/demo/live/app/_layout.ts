@@ -1,4 +1,4 @@
-import { mountSvelte, randomId } from '$lib/oneput/lib/utils.js';
+import { mountSvelte } from '$lib/oneput/lib/utils.js';
 import type { DynamicPlaceholderBase } from '$lib/oneput/types.js';
 import type { FChildParams, UILayout } from '$lib/oneput/types.js';
 import type { Controller } from '$lib/oneput/controllers/controller.js';
@@ -176,12 +176,12 @@ export class Layout implements UILayout {
 							...this.settings.outerRight(b)
 						}
 					: b.fchild({
-							// TODO: if outerRight is invoked above but has the same id
-							// then any onMount destructor callback will not get called!
-							// If we use a random id here, there is practically
-							// no way for outerRight to re-use the same it.
-							// id: 'root-outer-default-right',
-							id: randomId(),
+							// TODO: if this.settings.outerRight is invoked above but has the
+							// same id then any onMount destructor callback will not get
+							// called! We'll set an id here that should differ from any
+							// consumer being used above. The consumer can just use the
+							// default generated id via the build.
+							id: 'root-outer-right-default',
 							style: { flex: '1', justifyContent: 'flex-end' },
 							onMount: DateDisplay.onMount
 						})

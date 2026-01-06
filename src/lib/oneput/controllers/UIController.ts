@@ -55,7 +55,7 @@ export class UIController {
 		 */
 		flags?: UIFlags;
 		/**
-		 * Your UILayout parameters..
+		 * Your LayoutSettings parameters..
 		 */
 		params?: A;
 	}) {

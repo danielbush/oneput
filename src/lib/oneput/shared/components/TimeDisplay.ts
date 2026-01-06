@@ -8,7 +8,7 @@ export class TimeDisplay {
 			td.destroy();
 		};
 	};
-	private tid: number;
+	private tid: ReturnType<typeof setInterval>;
 	constructor(private node: HTMLElement) {
 		this.updateTime();
 		this.tid = setInterval(this.updateTime, 1000);

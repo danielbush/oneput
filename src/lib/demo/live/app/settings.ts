@@ -6,8 +6,9 @@ import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
 import { icons } from '../icons.js';
+import type { AppObject } from '$lib/oneput/types.js';
 
-export class SettingsUI {
+export class SettingsUI implements AppObject {
 	static create(ctl: Controller) {
 		const createGlobalBindingsEditor = () => {
 			const bindingsService = LocalBindingsService.create(ctl);

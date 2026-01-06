@@ -6,6 +6,7 @@ export const iconData = {
 	ArrowLeft: lu.ArrowLeft,
 	X: lu.X,
 	Command: lu.Command,
+	File: lu.Files,
 	// Bindings we should provide for existing appObjects...
 	GlobalFilterInputIcon: lu.Globe,
 	CloseNotification: lu.X

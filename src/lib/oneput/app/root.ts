@@ -1,4 +1,6 @@
 import type { AppObject, Controller } from '$oneput';
+import { stdMenuItem } from '$shared/ui/menuItems/stdMenuItem.js';
+import { icons } from '../icons.js';
 import type { LayoutSettings } from './_layout.js';
 
 export class Root implements AppObject {
@@ -8,5 +10,18 @@ export class Root implements AppObject {
 	constructor(private ctl: Controller) {}
 	onStart() {
 		this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
+		this.ctl.menu.setMenuItems({
+			id: 'root',
+			items: [
+				stdMenuItem({
+					id: 'load-doc',
+					textContent: 'Load test doc...',
+					action: () => {
+						console.log('loading...');
+					},
+					left: (b) => [b.icon(icons.File)]
+				})
+			]
+		});
 	}
 }

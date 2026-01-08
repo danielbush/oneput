@@ -1,72 +1,72 @@
 <div id="test-doc">
-	<h2>simple paragraph</h2>
-	<p>This is just a simple paragraph of text. And this is a second sentence.</p>
-	<h2>line with inline tags</h2>
-	<div>before <em>inline-tag</em> <em>inline-tag</em> after</div>
-	<h2>line with nested inline tags</h2>
-	<div>
-		before
-		<em>inline-tag with a <b>nested inline tag</b> in the middle</em> and then we get here
-	</div>
-	<h2>implicit LINE</h2>
-	<div>
-		<p>
-			This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-		</p>
-		But this sentence is just text nodes that come after.
-	</div>
-	<h2>line with float</h2>
-	<div>
-		before-float
-		<img
-			src="missing.jpg"
-			alt="placeholder"
-			style="float: right; width: 100px; height: 100px; border: dotted black 1px"
-		/>
-		after-float
-	</div>
-	<h2>bulleted lists</h2>
-	<div>
-		<ul>
-			<li>no para</li>
-			<li>
-				<p>1st para</p>
-				<p>2nd para - try: split parent before this p-tag</p>
-			</li>
-		</ul>
-	</div>
-	<h2 style="clear: right">line with complex float</h2>
-	<div>
-		<p>
-			This text is in a nested p-tag which comes before the float
-			<figure style="float: right; border: solid black 1px">
-				<img
-					src="missing.jpg"
-					alt="placeholder"
-					style="width: 100px; height: 100px; border: dotted black 1px; display: block"
-				/>
-				<figcaption>Here is a caption.</figcaption>
-			</figure>
-			This text is NOT in a p-tag - requires implicit line handling.
-		</p>
-	</div>
-	<h2 style="clear: right">Line with inline-block</h2>
-	<div>
-		foo
-		<div style="display: inline-block">this is some complicated</div>
-		bar
-	</div>
-	<h2>Tokenize only one LINE</h2>
-	<p>
-		The following div contains mulltiple paragraph tags. If this div represents a large document we
-		would hit performance issues if we tokenized it all.
-	</p>
-	<div>
-		<p>line 1</p>
-		<p>line 2 with <em>emphasis</em> tag</p>
-		<p>line 3</p>
-		<p>line 4</p>
-	</div>
+  <h2>simple paragraph</h2>
+  <p>This is just a simple paragraph of text. And this is a second sentence.</p>
+  <h2>line with inline tags</h2>
+  <div>before <em>inline-tag</em> <em>inline-tag</em> after</div>
+  <h2>line with nested inline tags</h2>
+  <div>
+    before
+    <em>inline-tag with a <b>nested inline tag</b> in the middle</em> and then we get here
+  </div>
+  <h2>implicit LINE</h2>
+  <div>
+    <p>
+      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
+    </p>
+    But this sentence is just text nodes that come after.
+  </div>
+  <h2>line with float</h2>
+  <div>
+    before-float
+    <img
+      src="missing.jpg"
+      alt="placeholder"
+      style="float: right; width: 100px; height: 100px; border: dotted black 1px"
+    />
+    after-float
+  </div>
+  <h2>bulleted lists</h2>
+  <div>
+    <ul>
+      <li>no para</li>
+      <li>
+        <p>1st para</p>
+        <p>2nd para - try: split parent before this p-tag</p>
+      </li>
+    </ul>
+  </div>
+  <h2 style="clear: right">line with complex float</h2>
+  <div>
+    <p>
+      This text is in a nested p-tag which comes before the float
+      <figure style="float: right; border: solid black 1px">
+        <img
+          src="missing.jpg"
+          alt="placeholder"
+          style="width: 100px; height: 100px; border: dotted black 1px; display: block"
+        />
+        <figcaption>Here is a caption.</figcaption>
+      </figure>
+      This text is NOT in a p-tag - requires implicit line handling.
+    </p>
+  </div>
+  <h2 style="clear: right">Line with inline-block</h2>
+  <div>
+    foo
+    <div style="display: inline-block">this is some complicated</div>
+    bar
+  </div>
+  <h2>Tokenize only one LINE</h2>
+  <p>
+    The following div contains mulltiple paragraph tags. If this div represents a large document we
+    would hit performance issues if we tokenized it all.
+  </p>
+  <div>
+    <p>line 1</p>
+    <p>line 2 with <em>emphasis</em> tag</p>
+    <p>line 3</p>
+    <p>line 4</p>
+  </div>
 
-	<div style="height: 400px"></div>
+  <div style="height: 400px"></div>
 </div>

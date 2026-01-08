@@ -5,26 +5,26 @@ import mk from '@iktakahiro/markdown-it-katex';
  * Convert markdown content to html but handle katex.
  */
 export function convertMd(markdown: string): string {
-	const md = new MarkdownIt({ html: true });
-	md.use(mk);
-	return md.render(markdown);
+  const md = new MarkdownIt({ html: true });
+  md.use(mk);
+  return md.render(markdown);
 }
 
 export function convert(markdown: string, title?: string, description?: string): string {
-	const content = convertMd(markdown);
-	return template(content, title, description);
+  const content = convertMd(markdown);
+  return template(content, title, description);
 }
 
 // See https://github.com/iktakahiro/markdown-it-katex for <link> tag for katex etc.
 
 function template(
-	content: string,
-	title: string = 'Converted',
-	description: string = 'Put your description here'
+  content: string,
+  title: string = 'Converted',
+  description: string = 'Put your description here'
 ) {
-	const appPath = '/src/index.tsx'; // TODO: hard coded for jsed-ui
-	const stylePath = '/src/index.css'; // TODO: hard coded for jsed-ui
-	return `<!doctype html>
+  const appPath = '/src/index.tsx'; // TODO: hard coded for jsed-ui
+  const stylePath = '/src/index.css'; // TODO: hard coded for jsed-ui
+  return `<!doctype html>
 <html lang="en">
 
 <head>

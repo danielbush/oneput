@@ -3,6 +3,6 @@ import { type Controller } from '$oneput';
 import { Root } from './root.js';
 
 export const setController = (ctl: Controller) => {
-	ctl.ui.setLayout(Layout.create(ctl));
-	ctl.app.run(Root.create(ctl));
+  ctl.ui.setLayout(Layout.create(ctl));
+  ctl.app.run(Root.create(ctl));
 };

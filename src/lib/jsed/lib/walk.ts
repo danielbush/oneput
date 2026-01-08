@@ -146,6 +146,10 @@ export function* findNextNode(
 	params?: Partial<WalkParams>,
 	_recurse = false
 ): IterableIterator<ParentNode | ChildNode> {
+	if (!limit || !limit.contains(start)) {
+		console.warn(`findNextNode: start ${start} is not contained in limit ${limit}`);
+		return;
+	}
 	const par = getParent(start, limit);
 	if (!_recurse) {
 		yield* descendIter(start, params);
@@ -153,7 +157,7 @@ export function* findNextNode(
 	let sib: ParentNode | ChildNode | null = start;
 	// If limit is an ancestor of start, we can check start's next siblings.
 	// If limit IS start, then start actis as the root which we must stay within.
-	if (limit !== start && limit?.contains(start)) {
+	if (limit !== start) {
 		while ((sib = getNextSiblingNode(sib, params))) {
 			yield sib;
 			yield* descendIter(sib, params);
@@ -187,14 +191,22 @@ export function* findPreviousNode(
 	limit: ParentNode | null,
 	params?: Partial<WalkParams>
 ): IterableIterator<ParentNode | ChildNode> {
+	if (limit && !limit.contains(start)) {
+		console.warn(`findPreviousNode: start ${start} is not contained in limit ${limit}`);
+		return;
+	}
 	const par = getParent(start, limit);
 	let sib: ParentNode | ChildNode | null = start;
-	while ((sib = getPreviousSiblingNode(sib, params))) {
-		yield* descendIterReverse(sib, params);
-		yield sib;
+	if (limit !== start) {
+		while ((sib = getPreviousSiblingNode(sib, params))) {
+			yield* descendIterReverse(sib, params);
+			yield sib;
+		}
 	}
-	if (par && par !== limit) {
-		yield par;
-		yield* findPreviousNode(par, limit, params);
+	if (limit !== start) {
+		if (par && par !== limit) {
+			yield par;
+			yield* findPreviousNode(par, limit, params);
+		}
 	}
 }

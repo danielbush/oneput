@@ -9,139 +9,139 @@ import type { AppObject } from '$lib/oneput/types.js';
 import { icons } from '../icons.js';
 
 export class AsyncSearchExample implements AppObject {
-	static create(ctl: Controller) {
-		const testInputService = TestInputService.create();
-		const outerRightStatus = DOMUpdater.create();
-		return new AsyncSearchExample(ctl, testInputService, outerRightStatus);
-	}
+  static create(ctl: Controller) {
+    const testInputService = TestInputService.create();
+    const outerRightStatus = DOMUpdater.create();
+    return new AsyncSearchExample(ctl, testInputService, outerRightStatus);
+  }
 
-	constructor(
-		private ctl: Controller,
-		private testInputService: TestInputService,
-		private outerRightStatus: DOMUpdater
-	) {}
+  constructor(
+    private ctl: Controller,
+    private testInputService: TestInputService,
+    private outerRightStatus: DOMUpdater
+  ) {}
 
-	onStart() {
-		this.run();
-	}
+  onStart() {
+    this.run();
+  }
 
-	run() {
-		this.ctl.ui.update<LayoutSettings>({
-			params: {
-				menuTitle: 'Async Search Example',
-				outerRight: (b) =>
-					b.fchild({
-						onMount: this.outerRightStatus.onMount
-					})
-			}
-		});
-		this.ctl.menu.setMenuItemsFnAsync(
-			async (input) => {
-				try {
-					this.outerRightStatus.withNode((node) => {
-						node.innerHTML = 'Fetching data...';
-					});
-					const results = await this.testInputService.fetchData(input);
-					return results.map((result) => {
-						this.ctl.clearNotifications();
-						return stdMenuItem({
-							id: result.id,
-							textContent: `Result: '${result.text}'`,
-							left: (b) => [b.icon(icons.Dot)],
-							action: () => {
-								this.outerRightStatus.withNode((node) => {
-									node.innerHTML = `Selected: ${result}`;
-								});
-							}
-						});
-					});
-				} catch (error) {
-					this.setError(error as Error);
-					return;
-				}
-			},
-			{
-				onDebounce: (isDebouncing) => {
-					if (this.isError && !isDebouncing) {
-						return;
-					} else {
-						this.outerRightStatus.withNode((node) => {
-							node.innerHTML = isDebouncing ? 'Debouncing...' : 'Ready';
-						});
-						this.setBusy(isDebouncing);
-					}
-				},
-				focusBehaviour: 'last'
-			}
-		);
-		this.ctl.input.setPlaceholder('Start typing something...');
-		this.ctl.menu.setMenuItems({
-			id: 'main',
-			items: [
-				infoMenuItem({
-					id: 'instructions',
-					msg:
-						'Start typing something and inspect the browser console.  ' +
-						'Items are delayed but only latest items should show when debounce times out.  ' +
-						'The service will randomly fail 10% of the time.',
-					icon: icons.Info
-				})
-			]
-		});
-		this.ctl.input.focusInput();
-	}
+  run() {
+    this.ctl.ui.update<LayoutSettings>({
+      params: {
+        menuTitle: 'Async Search Example',
+        outerRight: (b) =>
+          b.fchild({
+            onMount: this.outerRightStatus.onMount
+          })
+      }
+    });
+    this.ctl.menu.setMenuItemsFnAsync(
+      async (input) => {
+        try {
+          this.outerRightStatus.withNode((node) => {
+            node.innerHTML = 'Fetching data...';
+          });
+          const results = await this.testInputService.fetchData(input);
+          return results.map((result) => {
+            this.ctl.clearNotifications();
+            return stdMenuItem({
+              id: result.id,
+              textContent: `Result: '${result.text}'`,
+              left: (b) => [b.icon(icons.Dot)],
+              action: () => {
+                this.outerRightStatus.withNode((node) => {
+                  node.innerHTML = `Selected: ${result}`;
+                });
+              }
+            });
+          });
+        } catch (error) {
+          this.setError(error as Error);
+          return;
+        }
+      },
+      {
+        onDebounce: (isDebouncing) => {
+          if (this.isError && !isDebouncing) {
+            return;
+          } else {
+            this.outerRightStatus.withNode((node) => {
+              node.innerHTML = isDebouncing ? 'Debouncing...' : 'Ready';
+            });
+            this.setBusy(isDebouncing);
+          }
+        },
+        focusBehaviour: 'last'
+      }
+    );
+    this.ctl.input.setPlaceholder('Start typing something...');
+    this.ctl.menu.setMenuItems({
+      id: 'main',
+      items: [
+        infoMenuItem({
+          id: 'instructions',
+          msg:
+            'Start typing something and inspect the browser console.  ' +
+            'Items are delayed but only latest items should show when debounce times out.  ' +
+            'The service will randomly fail 10% of the time.',
+          icon: icons.Info
+        })
+      ]
+    });
+    this.ctl.input.focusInput();
+  }
 
-	private isError = false;
-	private setError(error: Error) {
-		console.error(error);
-		this.outerRightStatus.withNode((node) => {
-			node.innerHTML = '⚠️ Error';
-		});
-		this.isError = true;
-		const alert = this.ctl.alert({
-			message: 'An error!',
-			additional:
-				'This is a simulated error.  Check the browser console...  Try hitting the refresh icon in the input area to re-run your last input.  Or you can hit ok here and not re-run the input.  Here was the error:' +
-				error
-		});
-		this.ctl.ui.setInputUI((current) => ({
-			...current,
-			right: hflex({
-				id: 'input-right-1',
-				children: (b) => [
-					b.iconButton(icons.RefreshCw, {
-						title: 'Error',
-						attr: {
-							onclick: () => {
-								alert.cancel();
-								this.ctl.menu.triggerMenuItemsFn();
-							}
-						}
-					})
-				]
-			})
-		}));
-	}
+  private isError = false;
+  private setError(error: Error) {
+    console.error(error);
+    this.outerRightStatus.withNode((node) => {
+      node.innerHTML = '⚠️ Error';
+    });
+    this.isError = true;
+    const alert = this.ctl.alert({
+      message: 'An error!',
+      additional:
+        'This is a simulated error.  Check the browser console...  Try hitting the refresh icon in the input area to re-run your last input.  Or you can hit ok here and not re-run the input.  Here was the error:' +
+        error
+    });
+    this.ctl.ui.setInputUI((current) => ({
+      ...current,
+      right: hflex({
+        id: 'input-right-1',
+        children: (b) => [
+          b.iconButton(icons.RefreshCw, {
+            title: 'Error',
+            attr: {
+              onclick: () => {
+                alert.cancel();
+                this.ctl.menu.triggerMenuItemsFn();
+              }
+            }
+          })
+        ]
+      })
+    }));
+  }
 
-	private setBusy(busy: boolean) {
-		this.isError = false;
-		if (busy) {
-			this.ctl.ui.setInputUI((current) => ({
-				...current,
-				right: hflex({
-					id: 'input-right-1',
-					children: (b) => [b.icon(icons.RefreshCw, { classes: ['oneput__rotate'] })]
-				})
-			}));
-		} else {
-			this.ctl.ui.setInputUI((current) => ({
-				...current,
-				right: undefined
-			}));
-		}
-	}
+  private setBusy(busy: boolean) {
+    this.isError = false;
+    if (busy) {
+      this.ctl.ui.setInputUI((current) => ({
+        ...current,
+        right: hflex({
+          id: 'input-right-1',
+          children: (b) => [b.icon(icons.RefreshCw, { classes: ['oneput__rotate'] })]
+        })
+      }));
+    } else {
+      this.ctl.ui.setInputUI((current) => ({
+        ...current,
+        right: undefined
+      }));
+    }
+  }
 
-	beforeExit = () => {
-		this.ctl.clearNotifications();
-	};
+  beforeExit = () => {
+    this.ctl.clearNotifications();
+  };
 }

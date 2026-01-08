@@ -2,91 +2,91 @@
 
 h1,
 h2 {
-	margin: 0;
+  margin: 0;
 }
 
 p {
-	margin: 0;
+  margin: 0;
 }
 
 html.dark-mode {
-	background: #333;
-	color: #ccc;
+  background: #333;
+  color: #ccc;
 }
 
 section.demo-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-	gap: 1rem;
-	padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1rem;
+  padding: 0;
 }
 
 section.demo-example {
-	border: 0.5px solid #ccc;
-	border-radius: 5px;
-	display: flex;
-	flex-direction: column;
-	gap: 1.2rem;
-	box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 0.3);
-	padding: 1rem;
+  border: 0.5px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 0.3);
+  padding: 1rem;
 }
 
 fieldset.demo {
-	border: none;
+  border: none;
 
-	button {
-		border: solid 0.5px #999;
-		border-radius: 5px;
-		padding: 6px;
+  button {
+    border: solid 0.5px #999;
+    border-radius: 5px;
+    padding: 6px;
 
-		&:hover {
-			background: #ddd;
-			color: #333;
-		}
+    &:hover {
+      background: #ddd;
+      color: #333;
+    }
 
-		&:active {
-			background: #ccc;
-			color: #333;
-		}
+    &:active {
+      background: #ccc;
+      color: #333;
+    }
 
-		&:focus {
-			outline: none;
-			box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 0.3);
-		}
+    &:focus {
+      outline: none;
+      box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 0.3);
+    }
 
-		html.dark-mode & {
-			background: #444;
-			color: #ccc;
+    html.dark-mode & {
+      background: #444;
+      color: #ccc;
 
-			&:hover {
-				background: #555;
-				color: #fff;
-			}
+      &:hover {
+        background: #555;
+        color: #fff;
+      }
 
-			&:active {
-				background: #666;
-				color: #fff;
-			}
+      &:active {
+        background: #666;
+        color: #fff;
+      }
 
-			&:focus {
-				box-shadow: 0px 0px 5px 0px rgb(255 255 255 / 0.3);
-			}
-		}
-	}
+      &:focus {
+        box-shadow: 0px 0px 5px 0px rgb(255 255 255 / 0.3);
+      }
+    }
+  }
 
-	fieldset {
-		padding: 0.5rem;
-		border-radius: 5px;
-		border: 0.5px solid rgb(0 0 0 / 0.3);
-		max-width: 360px;
+  fieldset {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 0.5px solid rgb(0 0 0 / 0.3);
+    max-width: 360px;
 
-		html.dark-mode & {
-			background: rgb(0 0 0 / 0.1);
-		}
-	}
+    html.dark-mode & {
+      background: rgb(0 0 0 / 0.1);
+    }
+  }
 }
 
 .demo-buttons .oneput__container,
 .demo-buttons .oneput__menu-area {
-	border-radius: 0 !important;
+  border-radius: 0 !important;
 }

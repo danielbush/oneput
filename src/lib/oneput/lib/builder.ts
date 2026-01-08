@@ -1,62 +1,62 @@
 import { randomId } from './utils.js';
 import type {
-	FChildParams,
-	FlexChildren,
-	FlexParams,
-	MenuItem,
-	MenuItemDivider
+  FChildParams,
+  FlexChildren,
+  FlexParams,
+  MenuItem,
+  MenuItemDivider
 } from '../types.js';
 
 export type BuilderFlexParams = Partial<Omit<FlexParams, 'children'>> & {
-	children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);
+  children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);
 };
 
 export type BuilderMenuItem = Partial<Omit<MenuItem, 'children'>> & {
-	children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);
+  children?: FlexChildren | ((b: FlexChildBuilder) => FlexChildren);
 };
 
 function flex(params: BuilderFlexParams): FlexParams {
-	const id = params.id ?? randomId();
-	let children: FlexChildren | undefined;
-	if (typeof params.children === 'function') {
-		children = params.children(new FlexChildBuilder(id));
-	} else {
-		children = params.children;
-	}
-	const result: FlexParams = {
-		...params,
-		id,
-		children,
-		type: params.type ?? 'hflex'
-	};
-	return result;
+  const id = params.id ?? randomId();
+  let children: FlexChildren | undefined;
+  if (typeof params.children === 'function') {
+    children = params.children(new FlexChildBuilder(id));
+  } else {
+    children = params.children;
+  }
+  const result: FlexParams = {
+    ...params,
+    id,
+    children,
+    type: params.type ?? 'hflex'
+  };
+  return result;
 }
 
 export function hflex(params: BuilderFlexParams): FlexParams {
-	return flex({ ...params, type: 'hflex' });
+  return flex({ ...params, type: 'hflex' });
 }
 
 export function vflex(params: BuilderFlexParams): FlexParams {
-	return flex({ ...params, type: 'vflex' });
+  return flex({ ...params, type: 'vflex' });
 }
 
 export function fchild(params: Partial<FChildParams>): FChildParams {
-	const result: FChildParams = {
-		...params,
-		id: params.id ?? randomId(),
-		type: 'fchild'
-	};
-	return result;
+  const result: FChildParams = {
+    ...params,
+    id: params.id ?? randomId(),
+    type: 'fchild'
+  };
+  return result;
 }
 
 export function menuItem(params: Partial<BuilderMenuItem>): MenuItem {
-	const result: MenuItem = flex({
-		...params,
-		id: params.id ?? randomId(),
-		type: params.type ?? 'hflex',
-		classes: ['oneput__menu-item', ...(params.classes ?? [])]
-	});
-	return result;
+  const result: MenuItem = flex({
+    ...params,
+    id: params.id ?? randomId(),
+    type: params.type ?? 'hflex',
+    classes: ['oneput__menu-item', ...(params.classes ?? [])]
+  });
+  return result;
 }
 
 /**
@@ -66,43 +66,43 @@ export function menuItem(params: Partial<BuilderMenuItem>): MenuItem {
  * Used when doing layouts within Oneput or within menu items.
  */
 export class FlexChildBuilder {
-	constructor(
-		private id: string,
-		private counter: number = 0
-	) {}
+  constructor(
+    private id: string,
+    private counter: number = 0
+  ) {}
 
-	hflex(params: BuilderFlexParams): FlexParams {
-		return hflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
-	}
+  hflex(params: BuilderFlexParams): FlexParams {
+    return hflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+  }
 
-	vflex(params: BuilderFlexParams): FlexParams {
-		return vflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
-	}
+  vflex(params: BuilderFlexParams): FlexParams {
+    return vflex({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+  }
 
-	fchild(params: Partial<FChildParams>): FChildParams {
-		return fchild({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
-	}
+  fchild(params: Partial<FChildParams>): FChildParams {
+    return fchild({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+  }
 
-	icon(iconName: string, params?: Partial<FChildParams>): FChildParams {
-		return icon(iconName, { ...params, id: params?.id ?? this.id + '-' + this.counter++ });
-	}
+  icon(iconName: string, params?: Partial<FChildParams>): FChildParams {
+    return icon(iconName, { ...params, id: params?.id ?? this.id + '-' + this.counter++ });
+  }
 
-	iconButton(
-		iconName: string,
-		params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
-	): FChildParams {
-		return iconButton(iconName, { ...params, id: params.id ?? this.id + '-' + this.counter++ });
-	}
+  iconButton(
+    iconName: string,
+    params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+  ): FChildParams {
+    return iconButton(iconName, { ...params, id: params.id ?? this.id + '-' + this.counter++ });
+  }
 
-	button(
-		params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
-	): FChildParams {
-		return button({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
-	}
+  button(
+    params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+  ): FChildParams {
+    return button({ ...params, id: params.id ?? this.id + '-' + this.counter++ });
+  }
 
-	spacer(h: boolean = true, v: boolean = true, params?: Partial<FChildParams>): FChildParams {
-		return spacer(h, v, { id: this.id + '-' + this.counter++, ...(params ?? {}) });
-	}
+  spacer(h: boolean = true, v: boolean = true, params?: Partial<FChildParams>): FChildParams {
+    return spacer(h, v, { id: this.id + '-' + this.counter++, ...(params ?? {}) });
+  }
 }
 
 /**
@@ -113,15 +113,15 @@ export class FlexChildBuilder {
  * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function icon(iconName: string, params: Partial<FChildParams>): FChildParams {
-	return fchild({
-		textContent: params.textContent,
-		icon: iconName,
-		// TODO: superfluous because of 'icon'?
-		innerHTMLUnsafe: params.innerHTMLUnsafe,
-		...params,
-		classes: ['oneput__icon', ...(params.classes ?? [])],
-		style: { alignSelf: 'flex-start', ...params.style }
-	});
+  return fchild({
+    textContent: params.textContent,
+    icon: iconName,
+    // TODO: superfluous because of 'icon'?
+    innerHTMLUnsafe: params.innerHTMLUnsafe,
+    ...params,
+    classes: ['oneput__icon', ...(params.classes ?? [])],
+    style: { alignSelf: 'flex-start', ...params.style }
+  });
 }
 
 /**
@@ -133,21 +133,21 @@ export function icon(iconName: string, params: Partial<FChildParams>): FChildPar
  * If v is false, it will not take up height.
  */
 export function spacer(
-	h: boolean = true,
-	v: boolean = true,
-	params?: Partial<FChildParams>
+  h: boolean = true,
+  v: boolean = true,
+  params?: Partial<FChildParams>
 ): FChildParams {
-	const classes = [];
-	if (h) {
-		classes.push('oneput__hspacer');
-	}
-	if (v) {
-		classes.push('oneput__vspacer');
-	}
-	return fchild({
-		...params,
-		classes: [...classes, ...(params?.classes ?? [])]
-	});
+  const classes = [];
+  if (h) {
+    classes.push('oneput__hspacer');
+  }
+  if (v) {
+    classes.push('oneput__vspacer');
+  }
+  return fchild({
+    ...params,
+    classes: [...classes, ...(params?.classes ?? [])]
+  });
 }
 
 /**
@@ -158,55 +158,55 @@ export function spacer(
  * - innerHTMLUnsafe: string (raw SVG string - legacy approach)
  */
 export function iconButton(
-	iconName: string,
-	params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+  iconName: string,
+  params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
 ): FChildParams {
-	return fchild({
-		tag: 'button',
-		textContent: params.textContent,
-		icon: iconName,
-		// TODO: superfluous because of 'icon'?
-		innerHTMLUnsafe: params.innerHTMLUnsafe,
-		...params,
-		classes: ['oneput__icon-button', ...(params.classes ?? [])],
-		style: { alignSelf: 'flex-start', ...params.style },
-		attr: {
-			type: 'button',
-			title: params.title,
-			onclick: params.onClick ?? (() => {}),
-			...params.attr
-		}
-	});
+  return fchild({
+    tag: 'button',
+    textContent: params.textContent,
+    icon: iconName,
+    // TODO: superfluous because of 'icon'?
+    innerHTMLUnsafe: params.innerHTMLUnsafe,
+    ...params,
+    classes: ['oneput__icon-button', ...(params.classes ?? [])],
+    style: { alignSelf: 'flex-start', ...params.style },
+    attr: {
+      type: 'button',
+      title: params.title,
+      onclick: params.onClick ?? (() => {}),
+      ...params.attr
+    }
+  });
 }
 
 /**
  * A non-icon button - the sort of thing you might see on a form or alert or confirmation dialog etc.
  */
 export function button(
-	params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
+  params: Partial<FChildParams> & { title: string; onClick?: (event: Event) => void }
 ): FChildParams {
-	return fchild({
-		tag: 'button',
-		textContent: params.textContent,
-		innerHTMLUnsafe: params.innerHTMLUnsafe,
-		...params,
-		classes: ['oneput__button', ...(params.classes ?? [])],
-		attr: {
-			type: 'button',
-			title: params.title,
-			onclick: params.onClick ?? (() => {}),
-			...params.attr
-		}
-	});
+  return fchild({
+    tag: 'button',
+    textContent: params.textContent,
+    innerHTMLUnsafe: params.innerHTMLUnsafe,
+    ...params,
+    classes: ['oneput__button', ...(params.classes ?? [])],
+    attr: {
+      type: 'button',
+      title: params.title,
+      onclick: params.onClick ?? (() => {}),
+      ...params.attr
+    }
+  });
 }
 
 export function divider(params?: Partial<BuilderMenuItem>): MenuItemDivider {
-	const result = menuItem({
-		id: params?.id || randomId(),
-		tag: 'hr',
-		...params,
-		classes: ['oneput__divider', ...(params?.classes ?? [])],
-		ignored: true
-	});
-	return result as MenuItemDivider;
+  const result = menuItem({
+    id: params?.id || randomId(),
+    tag: 'hr',
+    ...params,
+    classes: ['oneput__divider', ...(params?.classes ?? [])],
+    ignored: true
+  });
+  return result as MenuItemDivider;
 }

@@ -8,6 +8,6 @@ import { RootUI } from './root.js';
 // Layout manages a number ofdefault settings.
 // But we could fetch settings asynchronously here and set defaults here also.
 export const setController = (ctl: Controller) => {
-	ctl.ui.setLayout(Layout.create(ctl));
-	ctl.app.run(RootUI.create(ctl));
+  ctl.ui.setLayout(Layout.create(ctl));
+  ctl.app.run(RootUI.create(ctl));
 };

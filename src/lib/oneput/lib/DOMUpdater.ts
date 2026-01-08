@@ -1,25 +1,25 @@
 export class DOMUpdater {
-	static create = () => {
-		const status = new DOMUpdater();
-		return status;
-	};
+  static create = () => {
+    const status = new DOMUpdater();
+    return status;
+  };
 
-	onMount = (node: HTMLElement) => {
-		this.node = node;
-		return () => {
-			this.destroy();
-		};
-	};
+  onMount = (node: HTMLElement) => {
+    this.node = node;
+    return () => {
+      this.destroy();
+    };
+  };
 
-	private node?: HTMLElement;
+  private node?: HTMLElement;
 
-	constructor() {}
+  constructor() {}
 
-	withNode = (fn: (node: HTMLElement) => void) => {
-		if (this.node) {
-			fn(this.node);
-		}
-	};
+  withNode = (fn: (node: HTMLElement) => void) => {
+    if (this.node) {
+      fn(this.node);
+    }
+  };
 
-	destroy = () => {};
+  destroy = () => {};
 }

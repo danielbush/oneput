@@ -4,14 +4,14 @@ import { type FinishedSession, type UnfinishedSession } from './TomatoTimerValue
 export type FinishedSessionRecord = FinishedSession & { id: number };
 
 export interface TomatoTimerDB extends DBSchema {
-	currentSession: {
-		value: UnfinishedSession;
-		key: string;
-	};
-	completedSessions: {
-		value: FinishedSessionRecord;
-		key: number;
-	};
+  currentSession: {
+    value: UnfinishedSession;
+    key: string;
+  };
+  completedSessions: {
+    value: FinishedSessionRecord;
+    key: number;
+  };
 }
 
 export const DB_NAME = 'tomato-timer';

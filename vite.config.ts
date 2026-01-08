@@ -7,38 +7,38 @@ import mkcert from 'vite-plugin-mkcert';
 // http, remove the mkcert plugin and the server.https setting.
 
 export default defineConfig({
-	// @ts-expect-error mkcert is missing types or its types are wrong, ignore this error
-	plugins: [sveltekit(), devtoolsJson(), mkcert()],
-	server: {
-		https: true
-	},
-	test: {
-		expect: { requireAssertions: true },
-		projects: [
-			{
-				extends: './vite.config.ts',
-				test: {
-					name: 'client',
-					environment: 'browser',
-					browser: {
-						enabled: true,
-						provider: 'playwright',
-						instances: [{ browser: 'chromium' }]
-					},
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-					exclude: ['src/lib/server/**'],
-					setupFiles: ['./vitest-setup-client.ts']
-				}
-			},
-			{
-				extends: './vite.config.ts',
-				test: {
-					name: 'server',
-					environment: 'node',
-					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
-				}
-			}
-		]
-	}
+  // @ts-expect-error mkcert is missing types or its types are wrong, ignore this error
+  plugins: [sveltekit(), devtoolsJson(), mkcert()],
+  server: {
+    https: true
+  },
+  test: {
+    expect: { requireAssertions: true },
+    projects: [
+      {
+        extends: './vite.config.ts',
+        test: {
+          name: 'client',
+          environment: 'browser',
+          browser: {
+            enabled: true,
+            provider: 'playwright',
+            instances: [{ browser: 'chromium' }]
+          },
+          include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+          exclude: ['src/lib/server/**'],
+          setupFiles: ['./vitest-setup-client.ts']
+        }
+      },
+      {
+        extends: './vite.config.ts',
+        test: {
+          name: 'server',
+          environment: 'node',
+          include: ['src/**/*.{test,spec}.{js,ts}'],
+          exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+        }
+      }
+    ]
+  }
 });

@@ -37,10 +37,7 @@
       "types": "./dist/index.d.ts",
       "svelte": "./dist/index.js"
     },
-    "./shared": {
-      "types": "./dist/oneput/shared/index.d.ts",
-      "svelte": "./dist/oneput/shared/index.js"
-    }
+    "./shared/*": "./dist/oneput/shared/*"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

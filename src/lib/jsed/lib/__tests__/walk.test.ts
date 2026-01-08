@@ -3,7 +3,7 @@ import { makeRoot, div, byId } from '../../test/util.js';
 import { findNextNode, findPreviousNode } from '../walk.js';
 
 describe('findNextNode - visit order', () => {
-	test('row', () => {
+	test('root=limit / limit=start / start=root', () => {
 		// arrange
 		const doc = makeRoot(
 			div(
@@ -27,7 +27,7 @@ describe('findNextNode - visit order', () => {
 		expect(visited).toEqual(['1-1', '1-2', '1-3', '1-4']);
 	});
 
-	test('row+descend', () => {
+	test('root=start / limit=start - deeper', () => {
 		// arrange
 		const doc = makeRoot(
 			div(
@@ -61,7 +61,55 @@ describe('findNextNode - visit order', () => {
 		]);
 	});
 
-	test('row+ascend', () => {
+	test('root > limit / limit=start - dont walk limit peers', () => {
+		// arrange
+		const doc = makeRoot(
+			div(
+				{ id: '1' },
+				div({ id: '1-1' }),
+				div({ id: '1-2' }),
+				div({ id: '1-3' }),
+				div({ id: '1-4' })
+			)
+		);
+		const visited = [];
+		const start = byId(doc, '1-1');
+		const limit = byId(doc, '1-1');
+
+		// act
+		for (const el of findNextNode(start, limit)) {
+			visited.push((el as HTMLElement).id);
+		}
+
+		// assert
+		expect(visited).toEqual([]);
+	});
+
+	test('root > limit / limit > start - dont walk limit peers, walk start peers', () => {
+		// arrange
+		const doc = makeRoot(
+			div(
+				{ id: '1' },
+				div({ id: '1-1' }, div({ id: '1-1-1' }), div({ id: '1-1-2' })),
+				div({ id: '1-2' }),
+				div({ id: '1-3' }),
+				div({ id: '1-4' })
+			)
+		);
+		const visited = [];
+		const start = byId(doc, '1-1-1');
+		const limit = byId(doc, '1-1');
+
+		// act
+		for (const el of findNextNode(start, limit)) {
+			visited.push((el as HTMLElement).id);
+		}
+
+		// assert
+		expect(visited).toEqual(['1-1-2']);
+	});
+
+	test('root=limit / limit > start', () => {
 		// arrange
 		const doc = makeRoot(
 			div(
@@ -85,7 +133,7 @@ describe('findNextNode - visit order', () => {
 		expect(visited).toEqual(['1-2', '1-3', '1-4']);
 	});
 
-	test('row+ascend 2', () => {
+	test('root=limit / limit > start - deeper', () => {
 		// arrange
 		const doc = makeRoot(
 			div(
@@ -107,22 +155,6 @@ describe('findNextNode - visit order', () => {
 
 		// assert
 		expect(visited).toEqual(['1-2', '1-2-1', '1-2-2', '1-3', '1-4']);
-	});
-
-	describe('start = limit', () => {
-		test('should visit root and descend and visit pre-order', () => {
-			// arrange
-			const doc = makeRoot(div({ id: '1' }, div({ id: '2' }), div({ id: '3' })));
-			const visited = [];
-			const start = byId(doc, '1');
-			const limit = start;
-			// act
-			for (const el of findNextNode(start, limit)) {
-				visited.push((el as HTMLElement).id);
-			}
-			// assert
-			expect(visited).toEqual(['2', '3']);
-		});
 	});
 });
 

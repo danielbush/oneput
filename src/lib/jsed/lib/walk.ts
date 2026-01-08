@@ -151,9 +151,13 @@ export function* findNextNode(
 		yield* descendIter(start, params);
 	}
 	let sib: ParentNode | ChildNode | null = start;
-	while ((sib = getNextSiblingNode(sib, params))) {
-		yield sib;
-		yield* descendIter(sib, params);
+	// If limit is an ancestor of start, we can check start's next siblings.
+	// If limit IS start, then start actis as the root which we must stay within.
+	if (limit !== start && limit?.contains(start)) {
+		while ((sib = getNextSiblingNode(sib, params))) {
+			yield sib;
+			yield* descendIter(sib, params);
+		}
 	}
 	if (par && par !== limit) {
 		yield* findNextNode(par, limit, params, true);

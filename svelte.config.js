@@ -12,6 +12,9 @@ const config = {
     // See https://svelte.dev/docs/kit/adapters for more information about adapters.
     adapter: adapter(),
     alias: {
+      // These aliases help with developing alongside a local version on oneput.
+      // Oneput's "exports" directive in its package.json specifies "." for
+      // $oneput and "./shared/*" for $shared.
       $oneput: '../oneput/src/lib/index.ts',
       $shared: '../oneput/src/lib/oneput/shared',
       $types: '../oneput/dist/index.d.ts'

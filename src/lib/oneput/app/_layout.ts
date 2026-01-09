@@ -1,13 +1,13 @@
-import { hflex, utils } from '$oneput';
+import { hflex, utils, bindings } from '$oneput';
 import type {
   Controller,
   DynamicPlaceholderBase,
   UILayout,
   FlexChildBuilder,
-  FChildParams
+  FChildParams,
+  KeyBindingMapSerializable
 } from '$oneput';
 import { DynamicPlaceholder } from '$shared/ui/DynamicPlaceholder.js';
-import { LocalBindingsService } from '$shared/bindings/LocalBindingsService.js';
 import { WordFilter } from '$shared/filters/WordFilter.js';
 import { TimeDisplay } from '$shared/components/TimeDisplay.js';
 import { DateDisplay } from '$shared/components/DateDisplay.js';
@@ -25,12 +25,43 @@ export type LayoutSettings = {
   outerRight?: (b: FlexChildBuilder) => FChildParams;
 };
 
+export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
+  openMenu: (c) => {
+    c.menu.openMenu();
+  },
+  focusInput: (c) => {
+    c.input.focusInput();
+  },
+  hideOneput: (c) => {
+    c.toggleHide();
+  }
+};
+
+export const defaultGlobalBindings: KeyBindingMapSerializable = {
+  openMenu: {
+    bindings: ['$mod+Shift+k'],
+    description: 'Open Oneput menu...'
+  },
+  focusInput: {
+    bindings: ['$mod+[', 'Control+['],
+    description: 'Focus input'
+  },
+  hideOneput: {
+    bindings: ['$mod+h'],
+    description: 'Hide Oneput'
+  }
+};
+
+const globalKeys = bindings.KeyEventBindings.fromSerializable(
+  defaultGlobalBindings,
+  defaultGlobalActions
+).keyBindingMap;
+
 /**
  * Defines a standard layout.
  */
 export class Layout implements UILayout {
   static create(ctl: Controller, settings: LayoutSettings = {}) {
-    const bindingService = LocalBindingsService.create(ctl);
     const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
       params.menuOpenBinding
         ? params.isMenuOpen
@@ -38,7 +69,7 @@ export class Layout implements UILayout {
           : `Open menu with ${params.menuOpenBinding}...`
         : 'Type here...'
     );
-    return new Layout(ctl, settings, dynamicPlaceholder, bindingService);
+    return new Layout(ctl, settings, dynamicPlaceholder);
   }
 
   defaultPlaceholder?: DynamicPlaceholderBase;
@@ -46,24 +77,13 @@ export class Layout implements UILayout {
   constructor(
     private ctl: Controller,
     private settings: LayoutSettings = {},
-    private dynamicPlaceholder: DynamicPlaceholder,
-    private bindingService: LocalBindingsService
+    private dynamicPlaceholder: DynamicPlaceholder
   ) {
     ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
     ctl.menu.setDefaultFocusBehaviour('last-action,first');
-    this.bindingService
-      .getBindings()
-      .andTee((bindings) => {
-        ctl.keys.setDefaultBindings(bindings.globalBindings, false, true);
-        ctl.keys.setDefaultBindings(bindings.localBindings, true, true);
-      })
-      .orTee((err) => {
-        ctl.alert({ message: 'Could not set default bindings!', additional: err.message });
-      })
-      .map(() => {
-        // Wait till default bindings have been set above.
-        ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
-      });
+    ctl.keys.setDefaultBindings(globalKeys, false, true);
+    ctl.keys.setDefaultBindings({}, true, true);
+    ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
   }
 
   configure(settings: { params?: LayoutSettings }) {

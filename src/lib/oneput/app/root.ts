@@ -3,6 +3,7 @@ import { stdMenuItem } from '$shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 import type { LayoutSettings } from './_layout.js';
 import { start, type JsedDocument } from '../../jsed/index.js';
+import { app } from '../jsed.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
@@ -36,10 +37,13 @@ export class Root implements AppObject {
               docRoot.innerHTML = html;
 
               const doc = start(docRoot);
-              console.log('Access "doc" in the console');
+              app.setDocument(doc);
+
+              console.log('Type "doc" in the console to access the current jsed document instance');
               // TODO: improve ts
               (globalThis as typeof globalThis & { doc: JsedDocument }).doc = doc;
-              console.log(doc);
+
+              this.ctl.menu.closeMenu();
             } catch (err) {
               this.ctl.notify('Error loading test doc!');
               console.error(err);

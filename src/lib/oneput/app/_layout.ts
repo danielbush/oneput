@@ -13,6 +13,7 @@ import { TimeDisplay } from '$shared/components/TimeDisplay.js';
 import { DateDisplay } from '$shared/components/DateDisplay.js';
 import MenuStatus from '$shared/components/MenuStatus.svelte';
 import { icons } from '../icons.js';
+import { app } from '../jsed.js';
 
 /**
  * Define settings used by your particular layout.
@@ -34,6 +35,12 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   hideOneput: (c) => {
     c.toggleHide();
+  },
+  REC_NEXT: () => {
+    app.document?.nav.REC_NEXT();
+  },
+  REC_PREV: () => {
+    app.document?.nav.REC_PREV();
   }
 };
 
@@ -49,12 +56,88 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
   hideOneput: {
     bindings: ['$mod+h'],
     description: 'Hide Oneput'
+  },
+  REC_NEXT: { bindings: ['$mod+j', 'Shift+ArrowDown'], description: 'Navigate to next element' },
+  REC_PREV: {
+    bindings: ['$mod+k', 'Shift+ArrowUp'],
+    description: 'Navigate to previous element'
   }
 };
 
 const globalKeys = bindings.KeyEventBindings.fromSerializable(
   defaultGlobalBindings,
   defaultGlobalActions
+).keyBindingMap;
+
+export const defaultLocalActions: Record<string, (c: Controller) => void> = {
+  hideOneput: (c) => {
+    c.toggleHide();
+  },
+  doAction: (c) => {
+    c.menu.doMenuAction();
+  },
+  back: (c) => {
+    c.app.goBack();
+  },
+  focusInput: (c) => {
+    c.input.focusInput();
+  },
+  closeMenu: (c) => {
+    c.menu.closeMenu();
+  },
+  focusPreviousMenuItem: (c) => {
+    c.menu.focusPreviousMenuItem();
+  },
+  focusNextMenuItem: (c) => {
+    c.menu.focusNextMenuItem();
+  },
+  fill: (c) => {
+    c.menu.runFillHandler();
+  },
+  submit: (c) => {
+    c.input.runSubmitHandler();
+  }
+};
+
+export const defaultLocalBindings: KeyBindingMapSerializable = {
+  hideOneput: {
+    bindings: [],
+    description: 'Hide Oneput'
+  },
+  doAction: {
+    bindings: ['Enter'],
+    description: 'Do action'
+  },
+  submit: {
+    bindings: ['$mod+Enter'],
+    description: 'Submit input'
+  },
+  // NOTE: reserve 'Shift+Enter' for newlines in text area input.
+  back: {
+    bindings: ['Meta+B'],
+    description: 'Back'
+  },
+  focusInput: {
+    bindings: ['$mod+[', 'Control+['],
+    description: 'Focus input'
+  },
+  closeMenu: {
+    bindings: ['$mod+Shift+k', 'Escape'],
+    description: 'Close menu'
+  },
+  focusPreviousMenuItem: {
+    bindings: ['$mod+k'],
+    description: 'Focus previous menu item'
+  },
+  focusNextMenuItem: {
+    bindings: ['$mod+j'],
+    description: 'Focus next menu item'
+  }
+};
+
+export const localKeys = bindings.KeyEventBindings.fromSerializable(
+  defaultLocalBindings,
+  defaultLocalActions
 ).keyBindingMap;
 
 /**
@@ -82,7 +165,7 @@ export class Layout implements UILayout {
     ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
     ctl.menu.setDefaultFocusBehaviour('last-action,first');
     ctl.keys.setDefaultBindings(globalKeys, false, true);
-    ctl.keys.setDefaultBindings({}, true, true);
+    ctl.keys.setDefaultBindings(localKeys, true, true);
     ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
   }
 

@@ -1,3 +1,12 @@
+/**
+ * Terminology:
+ *
+ * - KeyBinding = action, description and bindings currently in tinykeys format.
+ * - bs = KeyBinding['bindings']
+ * - KeyEvent = a representation of a KeyboardEvent that we use here to convert to/from KeyBinding's.
+ * - ke = KeyEvent
+ * - bs !== ke - bs is a list of strings, ke is a single string.
+ */
 import { Result, ok, err } from 'neverthrow';
 import type { Controller } from '../controllers/controller.js';
 import { isMacOS } from './utils.js';
@@ -28,6 +37,7 @@ export type KeyBindingSerializable = {
 export type KeyBindingMap = {
   [actionId: string]: KeyBinding;
 };
+
 export type KeyBindingMapSerializable = {
   [actionId: string]: KeyBindingSerializable;
 };
@@ -37,6 +47,11 @@ export type KeyBindingMapSerializable = {
  *
  * We use this to avoid holding references to actual KeyboardEvents as there may
  * be issues doing this.
+ *
+ * KeyEvent.key needs to handle 'm', 'M', 'KeyM'. For simplicty we don't try to
+ * convert 'm' to 'M' or vice versa. Functions like `isEqualKe` will transform
+ * .key to lower case when doing comparison. When we detect if a pressed key
+ * matches a binding we rely on Tinykeys to handle variations in case.
  */
 export type KeyEvent = {
   key: string;
@@ -68,7 +83,7 @@ export type KeyEventsMap = { [actionId: string]: KeyEventBinding };
 
 function isEqualKe(keyEvent1: KeyEvent, keyEvent2: KeyEvent) {
   return (
-    keyEvent1.key === keyEvent2.key &&
+    keyEvent1.key.toLowerCase() === keyEvent2.key.toLowerCase() &&
     keyEvent1.metaKey === keyEvent2.metaKey &&
     keyEvent1.shiftKey === keyEvent2.shiftKey &&
     keyEvent1.altKey === keyEvent2.altKey &&
@@ -125,8 +140,8 @@ function keToBs(keyEvents: KeyEvent[]): KeyBinding['bindings'][number] {
 }
 
 /**
- * Turns any tinykeys key binding into a KeyEvent which is a canonical form that we
- * can safely compare against.
+ * Turns any tinykeys key binding into a KeyEvent.
+ *
  */
 function bsToKe(binding: KeyBinding['bindings'][number]): KeyEvent[] {
   const keys = binding.split(' ');
@@ -139,7 +154,7 @@ function bsToKe(binding: KeyBinding['bindings'][number]): KeyEvent[] {
       controlKey: true
     };
     const parts = key.split('+');
-    keyEvent.key = parts.pop()?.toLowerCase() ?? '';
+    keyEvent.key = parts.pop() ?? '';
     const modifiers = parts.join('+');
     keyEvent.metaKey = modifiers.includes('Meta');
     keyEvent.shiftKey = modifiers.includes('Shift');

@@ -52,7 +52,7 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
 
 export const defaultGlobalBindings: KeyBindingMapSerializable = {
   openMenu: {
-    bindings: ['$mod+Shift+k'],
+    bindings: ['$mod+b'],
     description: 'Open Oneput menu...'
   },
   focusInput: {
@@ -63,13 +63,16 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
     bindings: ['$mod+h'],
     description: 'Hide Oneput'
   },
-  REC_NEXT: { bindings: ['$mod+j', 'Shift+ArrowDown'], description: 'Navigate to next element' },
+  REC_NEXT: {
+    bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
+    description: 'Navigate to next element'
+  },
   REC_PREV: {
-    bindings: ['$mod+k', 'Shift+ArrowUp'],
+    bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
     description: 'Navigate to previous element'
   },
-  SIB_NEXT: { bindings: ['j', 'ArrowDown'], description: 'Navigate to next sibling' },
-  SIB_PREV: { bindings: ['k', 'ArrowUp'], description: 'Navigate to previous sibling' }
+  SIB_NEXT: { bindings: ['$mod+j', 'ArrowDown'], description: 'Navigate to next sibling' },
+  SIB_PREV: { bindings: ['$mod+k', 'ArrowUp'], description: 'Navigate to previous sibling' }
 };
 
 const globalKeys = bindings.KeyEventBindings.fromSerializable(
@@ -130,7 +133,7 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
     description: 'Focus input'
   },
   closeMenu: {
-    bindings: ['$mod+Shift+k', 'Escape'],
+    bindings: ['$mod+b', 'Escape'],
     description: 'Close menu'
   },
   focusPreviousMenuItem: {

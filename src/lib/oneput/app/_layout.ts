@@ -47,6 +47,9 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   SIB_PREV: () => {
     app.document?.nav.SIB_PREV();
+  },
+  UP: () => {
+    app.document?.nav.UP();
   }
 };
 
@@ -72,7 +75,8 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
     description: 'Navigate to previous element'
   },
   SIB_NEXT: { bindings: ['$mod+j', 'ArrowDown'], description: 'Navigate to next sibling' },
-  SIB_PREV: { bindings: ['$mod+k', 'ArrowUp'], description: 'Navigate to previous sibling' }
+  SIB_PREV: { bindings: ['$mod+k', 'ArrowUp'], description: 'Navigate to previous sibling' },
+  UP: { bindings: ['$mod+u', '$mod+ArrowUp'], description: 'Find next parent' }
 };
 
 const globalKeys = bindings.KeyEventBindings.fromSerializable(

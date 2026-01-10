@@ -39,6 +39,8 @@ export class Root implements AppObject {
               const doc = start(docRoot);
               app.setDocument(doc);
 
+              doc.nav.FOCUS(doc.root);
+
               console.log('Type "doc" in the console to access the current jsed document instance');
               // TODO: improve ts
               (globalThis as typeof globalThis & { doc: JsedDocument }).doc = doc;

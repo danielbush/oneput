@@ -5,6 +5,10 @@ import { getParent, isToken } from '../jsed/lib/token.js';
  * Provides a visual indicator for the focused element (non-tokens).
  */
 export class ElementIndicator {
+  static create() {
+    return new ElementIndicator();
+  }
+
   /**
    * The indicator.
    */

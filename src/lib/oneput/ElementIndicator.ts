@@ -6,7 +6,9 @@ import { getParent, isToken } from '../jsed/lib/token.js';
  */
 export class ElementIndicator {
   static create() {
-    return new ElementIndicator();
+    const instance = new ElementIndicator();
+    instance.#init();
+    return instance;
   }
 
   /**
@@ -18,6 +20,21 @@ export class ElementIndicator {
    */
   #element: HTMLElement | null = null;
   #showIndicator = false;
+
+  #scrollHandler = () => {
+    if (this.#indicator) {
+      this.#indicator.style.display = 'none';
+    }
+  };
+
+  #init() {
+    document.addEventListener('scroll', this.#scrollHandler, true);
+  }
+
+  destroy() {
+    document.removeEventListener('scroll', this.#scrollHandler, true);
+    this.#removeIndicator();
+  }
 
   showIndicator(bool: boolean) {
     this.#showIndicator = bool;
@@ -50,40 +67,26 @@ export class ElementIndicator {
     if (!el) {
       return;
     }
-    if (!el.parentElement) {
-      return;
-    }
     const indic = this.#makeIndicator(el);
-    el.insertBefore(indic, el.firstChild);
+    document.body.appendChild(indic);
     this.#indicator = indic;
   }
 
-  /**
-   * We'll make a container that sits at the beginning of the element with no
-   * dimensions and inline so it doesn't break any lines.  Then we add an
-   * absolutely positioned tag indicator and try to position it above the
-   * element.
-   */
   #makeIndicator(el: HTMLElement): HTMLElement {
     const tagn = el.tagName;
-    const offw = el.offsetWidth;
-    const container = document.createElement('div');
-    container.classList.add(JSED_IGNORE_CLASS);
-    container.style.position = 'relative';
-    container.style.display = 'inline';
-    container.style.verticalAlign = 'top';
-    container.style.height = '0';
-    container.style.maxHeight = '0';
-    container.style.width = '0';
-    container.style.maxWidth = '0';
+    const rect = el.getBoundingClientRect();
+
     const span = document.createElement('span');
     span.classList.add(JSED_IGNORE_CLASS);
     span.classList.add('jsed-tag-indicator');
-    span.style.position = 'absolute';
-    span.style.transform = `translateY(calc(-100% - 5px)) translateX(calc(${offw}px - 100%))`;
+    span.style.position = 'fixed';
+    span.style.top = `${rect.top - 5}px`;
+    span.style.left = `${rect.right}px`;
+    span.style.transform = 'translateY(-100%) translateX(-100%)';
+    span.style.pointerEvents = 'none';
+    span.style.zIndex = '999999';
     span.innerText = tagn;
-    container.appendChild(span);
-    return container;
+    return span;
   }
 
   #removeIndicator(): void {

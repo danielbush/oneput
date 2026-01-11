@@ -13,7 +13,7 @@ import { TimeDisplay } from '$shared/components/TimeDisplay.js';
 import { DateDisplay } from '$shared/components/DateDisplay.js';
 import MenuStatus from '$shared/components/MenuStatus.svelte';
 import { icons } from '../icons.js';
-import { app } from '../jsed.js';
+import { state } from '../state.js';
 
 /**
  * Define settings used by your particular layout.
@@ -37,19 +37,19 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
     c.toggleHide();
   },
   REC_NEXT: () => {
-    app.document?.nav.REC_NEXT();
+    state.app?.document.nav.REC_NEXT();
   },
   REC_PREV: () => {
-    app.document?.nav.REC_PREV();
+    state.app?.document.nav.REC_PREV();
   },
   SIB_NEXT: () => {
-    app.document?.nav.SIB_NEXT();
+    state.app?.document.nav.SIB_NEXT();
   },
   SIB_PREV: () => {
-    app.document?.nav.SIB_PREV();
+    state.app?.document.nav.SIB_PREV();
   },
   UP: () => {
-    app.document?.nav.UP();
+    state.app?.document.nav.UP();
   }
 };
 

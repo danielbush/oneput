@@ -2,8 +2,8 @@ import type { AppObject, Controller } from '$oneput';
 import { stdMenuItem } from '$shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 import type { LayoutSettings } from './_layout.js';
-import { start, type JsedDocument } from '../../jsed/index.js';
-import { app } from '../jsed.js';
+import { App } from '../App.js';
+import { state } from '../state.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
@@ -36,15 +36,8 @@ export class Root implements AppObject {
               const html = await response.text();
               docRoot.innerHTML = html;
 
-              const doc = start(docRoot);
-              app.setDocument(doc);
-
-              doc.nav.FOCUS(doc.root);
-
-              console.log('Type "doc" in the console to access the current jsed document instance');
-              // TODO: improve ts
-              (globalThis as typeof globalThis & { doc: JsedDocument }).doc = doc;
-
+              state.app = App.create(docRoot);
+              state.app.document.nav.FOCUS(state.app.document.root);
               this.ctl.menu.closeMenu();
             } catch (err) {
               this.ctl.notify('Error loading test doc!');

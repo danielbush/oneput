@@ -15,9 +15,9 @@ const config = {
       // These aliases help with developing alongside a local version on oneput.
       // Oneput's "exports" directive in its package.json specifies "." for
       // $oneput and "./shared/*" for $shared.
-      $oneput: '../oneput/src/lib/index.ts',
-      $shared: '../oneput/src/lib/oneput/shared',
-      $types: '../oneput/dist/index.d.ts'
+      $oneput: '../oneput/oneput-main/src/lib/index.ts',
+      $shared: '../oneput/oneput-main/src/lib/oneput/shared',
+      $types: '../oneput/oneput-main/dist/index.d.ts'
     }
   }
 };

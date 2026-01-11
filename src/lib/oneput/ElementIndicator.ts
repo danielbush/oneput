@@ -6,9 +6,11 @@ import { getParent, isToken } from '../jsed/lib/token.js';
  */
 export class ElementIndicator {
   static create() {
-    const instance = new ElementIndicator();
-    instance.#init();
-    return instance;
+    return new ElementIndicator();
+  }
+
+  constructor() {
+    document.addEventListener('scroll', this.#scrollHandler, true);
   }
 
   /**
@@ -26,10 +28,6 @@ export class ElementIndicator {
       this.#indicator.style.display = 'none';
     }
   };
-
-  #init() {
-    document.addEventListener('scroll', this.#scrollHandler, true);
-  }
 
   destroy() {
     document.removeEventListener('scroll', this.#scrollHandler, true);

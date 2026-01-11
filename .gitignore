@@ -33,3 +33,6 @@ vite.config.ts.timestamp-*
 .vscode/settings.json
 # Temporary whilst trying out some rules:
 .cursor/rules
+
+# vitest
+coverage

@@ -52,6 +52,10 @@ tasks:
       See vite.config.js
     cmds:
       - ./node_modules/.bin/vitest run --project=server
+  test:coverage:
+    desc: Like `test` but prints coverage at the end
+    cmds:
+      - ./node_modules/.bin/vitest run --project=server --coverage
   test:browser:
     desc: |
       Test using browser mode, defaults to watch mode

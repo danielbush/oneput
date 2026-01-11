@@ -141,7 +141,7 @@ export class AsyncSearchExample implements AppObject {
     }
   }
 
-  beforeExit = () => {
+  onExit = () => {
     this.ctl.clearNotifications();
   };
 }

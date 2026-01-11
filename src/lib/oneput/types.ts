@@ -143,6 +143,10 @@ export type FChildParams = {
 };
 
 export interface AppObject<R = unknown> {
+  /**
+   * Called when the AppObject has been instantiated and is then given control
+   * of Oneput.
+   */
   onStart: () => void;
   /**
    * Called when a child AppObject that is run with ctl.app.run(...) calls
@@ -156,7 +160,14 @@ export interface AppObject<R = unknown> {
    * result back to this instance.
    */
   onResume?: (result?: { payload?: R }) => void;
-  beforeExit?: () => void;
+  /**
+   * Called when this AppObject exits.
+   *
+   * The AppObject can allow the user to trigger an exit (eg via an unhandled
+   * back action) so this hook can be used to clean up any resources or perform
+   * any necessary cleanup tasks.
+   */
+  onExit?: () => void;
   onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
 }
 

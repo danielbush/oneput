@@ -22,7 +22,7 @@ export class KatexDemo implements AppObject {
 
   private currentResult = '';
 
-  beforeExit = () => {
+  onExit = () => {
     this.unsubscribeBindingsChange?.();
   };
 

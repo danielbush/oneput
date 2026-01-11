@@ -33,7 +33,7 @@ export class AddEntry implements AppObject {
     private setDateTime: SetDateTime
   ) {}
 
-  beforeExit = () => {
+  onExit = () => {
     this.unsubscribeInputChange?.();
   };
 

@@ -73,7 +73,7 @@ export class NavigateHeadings implements AppObject {
   /**
    * It's important to clean up once we exit this mini-app.
    */
-  beforeExit = () => {
+  onExit = () => {
     this.clearInputChangeListener?.();
   };
 }

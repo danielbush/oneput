@@ -159,7 +159,7 @@ export class AppController {
   }
 
   private runBeforeExit() {
-    this.current?.app.beforeExit?.();
+    this.current?.app.onExit?.();
   }
 
   run<R = unknown>(appObject: AppObject<R>) {

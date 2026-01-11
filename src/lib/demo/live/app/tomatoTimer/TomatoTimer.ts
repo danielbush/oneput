@@ -46,7 +46,7 @@ export class TomatoTimer implements AppObject {
     private addEntry: AddEntry
   ) {}
 
-  beforeExit = () => {
+  onExit = () => {
     if (this.timerValue && !this.timerValue.isFinished) {
       this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee((err) => {
         this.ctl.alert({ message: 'Error saving timer', additional: err.message });

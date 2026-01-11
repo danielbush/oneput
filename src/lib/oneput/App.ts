@@ -7,7 +7,7 @@ class App {
 
   private doc: JsedDocument;
 
-  constructor(private htmlDoc: HTMLElement) {
+  constructor(htmlDoc: HTMLElement) {
     this.doc = start(htmlDoc);
     this.doc.listeners.FOCUS = this.handleElementFocus;
   }

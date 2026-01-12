@@ -23,6 +23,8 @@ export class ElementIndicator {
    */
   #element: HTMLElement | null = null;
   #showIndicator = false;
+  #observer: IntersectionObserver | null = null;
+  #isVisible = true;
 
   #scrollHandler = () => {
     if (this.#indicator) {
@@ -31,7 +33,7 @@ export class ElementIndicator {
   };
 
   #scrollEndHandler = () => {
-    if (this.#showIndicator && this.#element) {
+    if (this.#showIndicator && this.#element && this.#isVisible) {
       this.#addIndicator();
     }
   };
@@ -39,6 +41,8 @@ export class ElementIndicator {
   destroy() {
     document.removeEventListener('scroll', this.#scrollHandler, true);
     document.removeEventListener('scrollend', this.#scrollEndHandler, true);
+    this.#observer?.disconnect();
+    this.#observer = null;
     this.#removeIndicator();
   }
 
@@ -59,12 +63,31 @@ export class ElementIndicator {
   updateFocus(el: HTMLElement | null): void {
     if (!el) {
       this.#element = null;
+      this.#observer?.disconnect();
+      this.#isVisible = true;
       return;
     }
     this.#element = isToken(el) ? getParent(el) : el;
+    this.#setupObserver(this.#element);
     if (this.#showIndicator) {
       this.#addIndicator();
     }
+  }
+
+  #setupObserver(el: HTMLElement): void {
+    this.#observer?.disconnect();
+    this.#observer = new IntersectionObserver(
+      ([entry]) => {
+        this.#isVisible = entry.isIntersecting;
+        if (!this.#isVisible) {
+          this.#removeIndicator();
+        } else if (this.#showIndicator) {
+          this.#addIndicator();
+        }
+      },
+      { threshold: 0 }
+    );
+    this.#observer.observe(el);
   }
 
   #addIndicator(): void {

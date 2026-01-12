@@ -78,12 +78,30 @@ export class ElementIndicator {
     span.classList.add(JSED_IGNORE_CLASS);
     span.classList.add('jsed-tag-indicator');
     span.style.position = 'fixed';
-    span.style.top = `${rect.top - 5}px`;
     span.style.left = `${rect.right}px`;
-    span.style.transform = 'translateY(-100%) translateX(-100%)';
     span.style.pointerEvents = 'none';
     span.style.zIndex = '999999';
     span.innerText = tagn;
+
+    // Temporarily add to measure height
+    span.style.visibility = 'hidden';
+    document.body.appendChild(span);
+    const indicatorHeight = span.offsetHeight;
+    span.remove();
+    span.style.visibility = '';
+
+    // Check if indicator would be cut off at top of viewport
+    const spaceAbove = rect.top - 5;
+    if (spaceAbove < indicatorHeight) {
+      // Position below the element instead
+      span.style.top = `${rect.bottom + 5}px`;
+      span.style.transform = 'translateX(-100%)';
+    } else {
+      // Position above the element (default)
+      span.style.top = `${rect.top - 5}px`;
+      span.style.transform = 'translateY(-100%) translateX(-100%)';
+    }
+
     return span;
   }
 

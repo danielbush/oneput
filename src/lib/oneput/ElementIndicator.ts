@@ -11,6 +11,7 @@ export class ElementIndicator {
 
   constructor() {
     document.addEventListener('scroll', this.#scrollHandler, true);
+    document.addEventListener('scrollend', this.#scrollEndHandler, true);
   }
 
   /**
@@ -29,8 +30,15 @@ export class ElementIndicator {
     }
   };
 
+  #scrollEndHandler = () => {
+    if (this.#showIndicator && this.#element) {
+      this.#addIndicator();
+    }
+  };
+
   destroy() {
     document.removeEventListener('scroll', this.#scrollHandler, true);
+    document.removeEventListener('scrollend', this.#scrollEndHandler, true);
     this.#removeIndicator();
   }
 

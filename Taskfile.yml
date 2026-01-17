@@ -75,6 +75,15 @@ tasks:
 
   # build
 
+  docker:build:
+    desc: build docker image
+    cmds:
+      - docker build --progress=plain -t oneput .
+  docker:run:
+    desc: run docker image
+    cmds:
+      - docker run -p 5173:5173 -p 4173:4173 -p 9323:9323 oneput
+
   build:
     desc: build dist/
     cmds:

@@ -1,5 +1,6 @@
 services:
   app:
+    image: oneput:dev
     build:
       context: .
       target: development

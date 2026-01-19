@@ -1,7 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  ScrollView
+} from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const loremIpsumHTML = `
 <!DOCTYPE html>
@@ -63,6 +71,21 @@ const loremIpsumHTML = `
 export default function App() {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<TextInput>(null);
+  const shouldRefocusRef = useRef(false);
+
+  useEffect(() => {
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        if (shouldRefocusRef.current) {
+          shouldRefocusRef.current = false;
+          inputRef.current?.focus();
+        }
+      }
+    );
+
+    return () => keyboardWillHide.remove();
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -75,9 +98,11 @@ export default function App() {
         <WebView
           source={{ html: loremIpsumHTML }}
           style={styles.webView}
+          keyboardDisplayRequiresUserAction={false}
+          hideKeyboardAccessoryView={true}
           onMessage={(event) => {
+            shouldRefocusRef.current = true;
             setInputValue(event.nativeEvent.data);
-            inputRef.current?.focus();
           }}
         />
       </View>
@@ -90,6 +115,13 @@ export default function App() {
           onChangeText={setInputValue}
           placeholder="Type something..."
           placeholderTextColor="#999"
+          onBlur={() => {
+            // Immediately refocus when blurred to keep keyboard open
+            if (shouldRefocusRef.current) {
+              shouldRefocusRef.current = false;
+              setTimeout(() => inputRef.current?.focus(), 0);
+            }
+          }}
         />
       </View>
     </KeyboardAvoidingView>

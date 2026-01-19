@@ -18,6 +18,11 @@ const loremIpsumHTML = `
       margin-bottom: 16px;
       line-height: 1.6;
     }
+    p span {
+      background-color: rgba(0, 0, 0, 0.10);
+      padding: 2px 1px;
+      border-radius: 2px;
+    }
   </style>
 </head>
 <body>

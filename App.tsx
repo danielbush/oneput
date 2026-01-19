@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const loremIpsumHTML = `
 <!DOCTYPE html>
@@ -62,6 +62,7 @@ const loremIpsumHTML = `
 
 export default function App() {
   const [inputValue, setInputValue] = useState('');
+  const inputRef = useRef<TextInput>(null);
 
   return (
     <KeyboardAvoidingView
@@ -76,12 +77,14 @@ export default function App() {
           style={styles.webView}
           onMessage={(event) => {
             setInputValue(event.nativeEvent.data);
+            inputRef.current?.focus();
           }}
         />
       </View>
 
       <View style={styles.inputContainer}>
         <TextInput
+          ref={inputRef}
           style={styles.input}
           value={inputValue}
           onChangeText={setInputValue}

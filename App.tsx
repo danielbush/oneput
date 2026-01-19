@@ -40,7 +40,7 @@ const loremIpsumHTML = `
       const firstParagraph = document.querySelector('p');
       if (firstParagraph) {
         const text = firstParagraph.textContent;
-        const words = text.split(/\s+/).filter(word => word.length > 0);
+        const words = text.split(/\\s+/).filter(word => word.length > 0);
         firstParagraph.innerHTML = words.map(word => '<span>' + word + '</span>').join(' ');
 
         // Add click listeners to all spans

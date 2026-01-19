@@ -19,9 +19,13 @@ const loremIpsumHTML = `
       line-height: 1.6;
     }
     p span {
-      background-color: rgba(0, 0, 0, 0.10);
+      background-color: rgba(255, 0, 0, 0.10);
       padding: 2px 1px;
+      display: inline-block;
+      border-width: 0.5px;
       border-radius: 2px;
+      border-style: solid;
+      border-color: rgba(0, 0, 0, 0.8);
     }
   </style>
 </head>
@@ -38,6 +42,17 @@ const loremIpsumHTML = `
         const text = firstParagraph.textContent;
         const words = text.split(/\s+/).filter(word => word.length > 0);
         firstParagraph.innerHTML = words.map(word => '<span>' + word + '</span>').join(' ');
+
+        // Add click listeners to all spans
+        const spans = firstParagraph.querySelectorAll('span');
+        spans.forEach(span => {
+          span.style.cursor = 'pointer';
+          span.addEventListener('click', function() {
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(this.textContent);
+            }
+          });
+        });
       }
     })();
   </script>
@@ -56,7 +71,13 @@ export default function App() {
       <StatusBar style="auto" />
 
       <View style={styles.webViewContainer}>
-        <WebView source={{ html: loremIpsumHTML }} style={styles.webView} />
+        <WebView
+          source={{ html: loremIpsumHTML }}
+          style={styles.webView}
+          onMessage={(event) => {
+            setInputValue(event.nativeEvent.data);
+          }}
+        />
       </View>
 
       <View style={styles.inputContainer}>

@@ -92,6 +92,21 @@ export default function App() {
             onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             placeholder="Type something..."
             placeholderTextColor="#999"
+            // First Autosuggestion updates next/previous token:
+            //
+            // Disable autccomplete/correct:
+            // - I type "Abc" in the TextInput
+            // - this updates the current span tag
+            // - autocomplete above TextInput in iOS hows "Abc" | ABC | ...
+            // - I then hit right chevron button to move to next span tag
+            // - this span tag is ALSO updated with the first non-quoted autocomplete option (ABC)
+            // Claude:
+            // The issue is that iOS autocomplete applies when focus changes. We
+            // need to disable autocomplete on the TextInput to prevent this
+            // behavior. Let me add the appropriate props.
+            autoCorrect={false}
+            autoCapitalize="none"
+            spellCheck={false}
             onBlur={() => {
               // Immediately refocus when blurred to keep keyboard open
               if (shouldRefocusRef.current) {

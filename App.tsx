@@ -89,6 +89,14 @@ export default function App() {
 
       <View style={styles.inputContainer}>
         <View style={styles.inputRow}>
+          <Pressable
+            style={styles.chevronButton}
+            onPress={() => {
+              // TODO: implement M button functionality
+            }}
+          >
+            <Text style={styles.menuButtonText}>M</Text>
+          </Pressable>
           <TextInput
             ref={inputRef}
             style={styles.input}
@@ -204,6 +212,10 @@ const styles = StyleSheet.create({
   },
   insButtonText: {
     fontSize: 16,
+    color: '#333'
+  },
+  menuButtonText: {
+    fontSize: 18,
     color: '#333'
   },
   chevronTextUp: {

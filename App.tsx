@@ -45,6 +45,10 @@ const loremIpsumHTML = `
       `<p>Lorem! ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>`
   ).join('')}
   <script>
+    function moveNext() {
+      // TODO: Implement moveNext functionality
+    }
+
     (function() {
       const firstParagraph = document.querySelector('p');
       if (firstParagraph) {
@@ -72,6 +76,7 @@ const loremIpsumHTML = `
 export default function App() {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<TextInput>(null);
+  const webViewRef = useRef<WebView>(null);
   const shouldRefocusRef = useRef(false);
 
   useEffect(() => {
@@ -97,6 +102,7 @@ export default function App() {
 
       <View style={styles.webViewContainer}>
         <WebView
+          ref={webViewRef}
           source={{ html: loremIpsumHTML }}
           style={styles.webView}
           keyboardDisplayRequiresUserAction={false}
@@ -128,7 +134,12 @@ export default function App() {
           <Pressable style={styles.chevronButton}>
             <Text style={styles.chevronText}>‹</Text>
           </Pressable>
-          <Pressable style={styles.chevronButton}>
+          <Pressable
+            style={styles.chevronButton}
+            onPress={() => {
+              webViewRef.current?.injectJavaScript('moveNext();');
+            }}
+          >
             <Text style={styles.chevronText}>›</Text>
           </Pressable>
         </View>

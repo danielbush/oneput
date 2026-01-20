@@ -20,6 +20,22 @@ function movePrevious() {
   }
 }
 
+function moveNextParagraph() {
+  const current = document.querySelector('p.focus');
+  if (current && current.nextElementSibling?.tagName === 'P') {
+    current.classList.remove('focus');
+    current.nextElementSibling.classList.add('focus');
+  }
+}
+
+function movePreviousParagraph() {
+  const current = document.querySelector('p.focus');
+  if (current && current.previousElementSibling?.tagName === 'P') {
+    current.classList.remove('focus');
+    current.previousElementSibling.classList.add('focus');
+  }
+}
+
 (function () {
   const firstParagraph = document.querySelector('p');
   if (firstParagraph) {

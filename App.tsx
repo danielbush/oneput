@@ -45,12 +45,14 @@ const loremIpsumHTML = `
       `<p>Lorem! ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>`
   ).join('')}
   <script>
-    function moveNext() {
+    function moveNext(num, str) {
       // TODO: Implement moveNext functionality
+      alert(typeof num + ' ' + typeof str);
     }
 
-    function movePrevious() {
+    function movePrevious(what) {
       // TODO: Implement movePrevious functionality
+      alert(typeof what);
     }
 
     (function() {
@@ -138,7 +140,9 @@ export default function App() {
           <Pressable
             style={styles.chevronButton}
             onPress={() => {
-              webViewRef.current?.injectJavaScript('movePrevious();');
+              webViewRef.current?.injectJavaScript(
+                `movePrevious(${JSON.stringify({ foo: 123 })});`
+              );
             }}
           >
             <Text style={styles.chevronText}>‹</Text>
@@ -146,7 +150,7 @@ export default function App() {
           <Pressable
             style={styles.chevronButton}
             onPress={() => {
-              webViewRef.current?.injectJavaScript('moveNext();');
+              webViewRef.current?.injectJavaScript(`moveNext("foo", 42);`);
             }}
           >
             <Text style={styles.chevronText}>›</Text>

@@ -64,7 +64,7 @@ export default function App() {
               webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
             }}
           >
-            <Text style={styles.chevronTextUp}>‹</Text>
+            <Text style={styles.chevronTextUp}>▲</Text>
           </Pressable>
           <Pressable
             style={styles.chevronButton}
@@ -72,7 +72,7 @@ export default function App() {
               webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
             }}
           >
-            <Text style={styles.chevronTextDown}>‹</Text>
+            <Text style={styles.chevronTextDown}>▼</Text>
           </Pressable>
         </View>
       </View>

@@ -23,6 +23,7 @@ function movePrevious() {
 (function () {
   const firstParagraph = document.querySelector('p');
   if (firstParagraph) {
+    firstParagraph.classList.add('focus');
     const text = firstParagraph.textContent;
     const words = text.split(/\s+/).filter((word) => word.length > 0);
     firstParagraph.innerHTML = words.map((word) => '<span>' + word + '</span>').join(' ');

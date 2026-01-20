@@ -49,6 +49,10 @@ const loremIpsumHTML = `
       // TODO: Implement moveNext functionality
     }
 
+    function movePrevious() {
+      // TODO: Implement movePrevious functionality
+    }
+
     (function() {
       const firstParagraph = document.querySelector('p');
       if (firstParagraph) {
@@ -131,7 +135,12 @@ export default function App() {
               }
             }}
           />
-          <Pressable style={styles.chevronButton}>
+          <Pressable
+            style={styles.chevronButton}
+            onPress={() => {
+              webViewRef.current?.injectJavaScript('movePrevious();');
+            }}
+          >
             <Text style={styles.chevronText}>‹</Text>
           </Pressable>
           <Pressable

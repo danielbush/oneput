@@ -12,95 +12,8 @@ import {
 import { WebView } from 'react-native-webview';
 import { useState, useRef, useEffect } from 'react';
 
-const loremIpsumHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      padding: 16px;
-      margin: 0;
-    }
-    p {
-      margin-bottom: 16px;
-      line-height: 1.6;
-    }
-    p span {
-      background-color: rgba(255, 0, 0, 0.10);
-      padding: 2px 1px;
-      display: inline-block;
-      border-width: 0.5px;
-      border-radius: 2px;
-      border-style: solid;
-      border-color: rgba(0, 0, 0, 0.8);
-    }
-    p span.cursor {
-      background-color: rgba(135, 206, 250, 0.5);
-    }
-  </style>
-</head>
-<body>
-  ${Array.from(
-    { length: 20 },
-    (_, i) =>
-      `<p>Lorem! ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>`
-  ).join('')}
-  <script>
-    function moveNext() {
-      const current = document.querySelector('span.cursor');
-      if (current && current.nextElementSibling) {
-        current.classList.remove('cursor');
-        current.nextElementSibling.classList.add('cursor');
-        if (window.ReactNativeWebView) {
-          window.ReactNativeWebView.postMessage(current.nextElementSibling.textContent);
-        }
-      }
-    }
-
-    function movePrevious() {
-      const current = document.querySelector('span.cursor');
-      if (current && current.previousElementSibling) {
-        current.classList.remove('cursor');
-        current.previousElementSibling.classList.add('cursor');
-        if (window.ReactNativeWebView) {
-          window.ReactNativeWebView.postMessage(current.previousElementSibling.textContent);
-        }
-      }
-    }
-
-    (function() {
-      const firstParagraph = document.querySelector('p');
-      if (firstParagraph) {
-        const text = firstParagraph.textContent;
-        const words = text.split(/\\s+/).filter(word => word.length > 0);
-        firstParagraph.innerHTML = words.map(word => '<span>' + word + '</span>').join(' ');
-
-        // Add cursor to first span
-        const firstSpan = firstParagraph.querySelector('span');
-        if (firstSpan) {
-          firstSpan.classList.add('cursor');
-        }
-
-        // Add click listeners to all spans
-        const spans = firstParagraph.querySelectorAll('span');
-        spans.forEach(span => {
-          span.style.cursor = 'pointer';
-          span.addEventListener('click', function() {
-            if (window.ReactNativeWebView) {
-              document.querySelector('span.cursor')?.classList.remove('cursor');
-              span.classList.add('cursor');
-              window.ReactNativeWebView.postMessage(this.textContent);
-            }
-          });
-        });
-      }
-    })();
-  </script>
-</body>
-</html>
-`;
+const WEB_SERVER_URL = `http://${process.env.EXPO_PUBLIC_WEBVIEW_HOSTNAME}:${process.env.EXPO_PUBLIC_WEBVIEW_PORT}`;
+console.log(`WEB_SERVER_URL for webview content: ${WEB_SERVER_URL}`);
 
 export default function App() {
   const [inputValue, setInputValue] = useState('');
@@ -133,7 +46,7 @@ export default function App() {
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
-          source={{ html: loremIpsumHTML }}
+          source={{ uri: WEB_SERVER_URL }}
           style={styles.webView}
           keyboardDisplayRequiresUserAction={false}
           hideKeyboardAccessoryView={true}

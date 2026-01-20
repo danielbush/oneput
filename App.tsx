@@ -58,7 +58,16 @@ export default function App() {
             inputRef.current?.focus();
           }}
         />
-        <View style={styles.verticalChevronStrip}>
+        <View style={styles.floatingButtonStrip}>
+          <Pressable
+            style={styles.chevronButton}
+            onPress={() => {
+              // TODO: implement insert functionality
+            }}
+          >
+            <Text style={styles.insButtonText}>ins</Text>
+          </Pressable>
+          <View style={styles.floatingButtonSpacer} />
           <Pressable
             style={styles.chevronButton}
             onPress={() => {
@@ -182,12 +191,20 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#333'
   },
-  verticalChevronStrip: {
+  floatingButtonStrip: {
     position: 'absolute',
     bottom: 8,
+    left: 8,
     right: 8,
     flexDirection: 'row',
     gap: 8
+  },
+  floatingButtonSpacer: {
+    flex: 1
+  },
+  insButtonText: {
+    fontSize: 16,
+    color: '#333'
   },
   chevronTextUp: {
     fontSize: 24,

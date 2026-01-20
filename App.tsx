@@ -18,6 +18,7 @@ console.log(`WEB_SERVER_URL for webview content: ${WEB_SERVER_URL}`);
 export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>(undefined);
+  const [menuVisible, setMenuVisible] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const webViewRef = useRef<WebView>(null);
   const shouldRefocusRef = useRef(false);
@@ -88,13 +89,27 @@ export default function App() {
       </View>
 
       <View style={styles.inputContainer}>
+        {menuVisible && (
+          <View style={styles.menu}>
+            <Pressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+              <View style={styles.menuIconPlaceholder} />
+              <Text style={styles.menuItemText}>item 1</Text>
+              <View style={styles.menuIconPlaceholder} />
+            </Pressable>
+            <Pressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+              <View style={styles.menuIconPlaceholder} />
+              <Text style={styles.menuItemText}>item 2</Text>
+              <View style={styles.menuIconPlaceholder} />
+            </Pressable>
+            <Pressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+              <View style={styles.menuIconPlaceholder} />
+              <Text style={styles.menuItemText}>item 3</Text>
+              <View style={styles.menuIconPlaceholder} />
+            </Pressable>
+          </View>
+        )}
         <View style={styles.inputRow}>
-          <Pressable
-            style={styles.chevronButton}
-            onPress={() => {
-              // TODO: implement M button functionality
-            }}
-          >
+          <Pressable style={styles.chevronButton} onPress={() => setMenuVisible(!menuVisible)}>
             <Text style={styles.menuButtonText}>M</Text>
           </Pressable>
           <TextInput
@@ -170,6 +185,31 @@ const styles = StyleSheet.create({
     borderTopColor: '#ddd',
     backgroundColor: '#fff',
     padding: 12
+  },
+  menu: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 8
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee'
+  },
+  menuIconPlaceholder: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#eee',
+    borderRadius: 4
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    marginHorizontal: 12
   },
   inputRow: {
     flexDirection: 'row',

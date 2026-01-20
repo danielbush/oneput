@@ -25,6 +25,7 @@ function moveNextParagraph() {
   if (current && current.nextElementSibling?.tagName === 'P') {
     current.classList.remove('focus');
     current.nextElementSibling.classList.add('focus');
+    current.nextElementSibling.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
@@ -33,6 +34,7 @@ function movePreviousParagraph() {
   if (current && current.previousElementSibling?.tagName === 'P') {
     current.classList.remove('focus');
     current.previousElementSibling.classList.add('focus');
+    current.previousElementSibling.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 

@@ -89,6 +89,8 @@ const loremIpsumHTML = `
           span.style.cursor = 'pointer';
           span.addEventListener('click', function() {
             if (window.ReactNativeWebView) {
+              document.querySelector('span.cursor')?.classList.remove('cursor');
+              span.classList.add('cursor');
               window.ReactNativeWebView.postMessage(this.textContent);
             }
           });

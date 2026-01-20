@@ -136,7 +136,13 @@ export default function App() {
           hideKeyboardAccessoryView={true}
           onMessage={(event) => {
             shouldRefocusRef.current = true;
-            setInputValue(event.nativeEvent.data);
+            const text = event.nativeEvent.data;
+            setInputValue(text);
+            // The `setTimeout` ensures the selection happens after React has
+            // re-rendered with the new value.
+            setTimeout(() => {
+              inputRef.current?.setSelection(0, text.length);
+            }, 0);
           }}
         />
       </View>

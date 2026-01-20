@@ -84,7 +84,10 @@ export default function App() {
             ref={inputRef}
             style={styles.input}
             value={inputValue}
-            onChangeText={setInputValue}
+            onChangeText={(text) => {
+              setInputValue(text);
+              webViewRef.current?.injectJavaScript(`updateCursorText(${JSON.stringify(text)});`);
+            }}
             selection={selection}
             onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             placeholder="Type something..."

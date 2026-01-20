@@ -20,6 +20,13 @@ function movePrevious() {
   }
 }
 
+function updateCursorText(text) {
+  const current = document.querySelector('span.cursor');
+  if (current) {
+    current.textContent = text;
+  }
+}
+
 function moveNextParagraph() {
   const current = document.querySelector('p.focus');
   if (current && current.nextElementSibling?.tagName === 'P') {

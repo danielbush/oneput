@@ -57,6 +57,24 @@ export default function App() {
             setSelection({ start: 0, end: text.length });
           }}
         />
+        <View style={styles.verticalChevronStrip}>
+          <Pressable
+            style={styles.chevronButton}
+            onPress={() => {
+              webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
+            }}
+          >
+            <Text style={styles.chevronTextUp}>‹</Text>
+          </Pressable>
+          <Pressable
+            style={styles.chevronButton}
+            onPress={() => {
+              webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
+            }}
+          >
+            <Text style={styles.chevronTextDown}>‹</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.inputContainer}>
@@ -144,5 +162,22 @@ const styles = StyleSheet.create({
   chevronText: {
     fontSize: 24,
     color: '#333'
+  },
+  verticalChevronStrip: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    flexDirection: 'row',
+    gap: 8
+  },
+  chevronTextUp: {
+    fontSize: 24,
+    color: '#333',
+    transform: [{ rotate: '90deg' }]
+  },
+  chevronTextDown: {
+    fontSize: 24,
+    color: '#333',
+    transform: [{ rotate: '-90deg' }]
   }
 });

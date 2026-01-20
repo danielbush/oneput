@@ -36,6 +36,9 @@ const loremIpsumHTML = `
       border-style: solid;
       border-color: rgba(0, 0, 0, 0.8);
     }
+    p span.cursor {
+      background-color: rgba(135, 206, 250, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -45,14 +48,20 @@ const loremIpsumHTML = `
       `<p>Lorem! ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>`
   ).join('')}
   <script>
-    function moveNext(num, str) {
-      // TODO: Implement moveNext functionality
-      alert(typeof num + ' ' + typeof str);
+    function moveNext() {
+      const current = document.querySelector('span.cursor');
+      if (current && current.nextElementSibling) {
+        current.classList.remove('cursor');
+        current.nextElementSibling.classList.add('cursor');
+      }
     }
 
-    function movePrevious(what) {
-      // TODO: Implement movePrevious functionality
-      alert(typeof what);
+    function movePrevious() {
+      const current = document.querySelector('span.cursor');
+      if (current && current.previousElementSibling) {
+        current.classList.remove('cursor');
+        current.previousElementSibling.classList.add('cursor');
+      }
     }
 
     (function() {
@@ -61,6 +70,12 @@ const loremIpsumHTML = `
         const text = firstParagraph.textContent;
         const words = text.split(/\\s+/).filter(word => word.length > 0);
         firstParagraph.innerHTML = words.map(word => '<span>' + word + '</span>').join(' ');
+
+        // Add cursor to first span
+        const firstSpan = firstParagraph.querySelector('span');
+        if (firstSpan) {
+          firstSpan.classList.add('cursor');
+        }
 
         // Add click listeners to all spans
         const spans = firstParagraph.querySelectorAll('span');
@@ -140,9 +155,7 @@ export default function App() {
           <Pressable
             style={styles.chevronButton}
             onPress={() => {
-              webViewRef.current?.injectJavaScript(
-                `movePrevious(${JSON.stringify({ foo: 123 })});`
-              );
+              webViewRef.current?.injectJavaScript(`movePrevious();`);
             }}
           >
             <Text style={styles.chevronText}>‹</Text>
@@ -150,7 +163,7 @@ export default function App() {
           <Pressable
             style={styles.chevronButton}
             onPress={() => {
-              webViewRef.current?.injectJavaScript(`moveNext("foo", 42);`);
+              webViewRef.current?.injectJavaScript(`moveNext();`);
             }}
           >
             <Text style={styles.chevronText}>›</Text>

@@ -6,7 +6,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  ScrollView
+  Pressable,
+  Text
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useState, useRef, useEffect } from 'react';
@@ -108,21 +109,29 @@ export default function App() {
       </View>
 
       <View style={styles.inputContainer}>
-        <TextInput
-          ref={inputRef}
-          style={styles.input}
-          value={inputValue}
-          onChangeText={setInputValue}
-          placeholder="Type something..."
-          placeholderTextColor="#999"
-          onBlur={() => {
-            // Immediately refocus when blurred to keep keyboard open
-            if (shouldRefocusRef.current) {
-              shouldRefocusRef.current = false;
-              setTimeout(() => inputRef.current?.focus(), 0);
-            }
-          }}
-        />
+        <View style={styles.inputRow}>
+          <TextInput
+            ref={inputRef}
+            style={styles.input}
+            value={inputValue}
+            onChangeText={setInputValue}
+            placeholder="Type something..."
+            placeholderTextColor="#999"
+            onBlur={() => {
+              // Immediately refocus when blurred to keep keyboard open
+              if (shouldRefocusRef.current) {
+                shouldRefocusRef.current = false;
+                setTimeout(() => inputRef.current?.focus(), 0);
+              }
+            }}
+          />
+          <Pressable style={styles.chevronButton}>
+            <Text style={styles.chevronText}>‹</Text>
+          </Pressable>
+          <Pressable style={styles.chevronButton}>
+            <Text style={styles.chevronText}>›</Text>
+          </Pressable>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -145,12 +154,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 12
   },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
   input: {
+    flex: 1,
     height: 44,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 16
+  },
+  chevronButton: {
+    width: 44,
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f8'
+  },
+  chevronText: {
+    fontSize: 24,
+    color: '#333'
   }
 });

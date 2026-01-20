@@ -53,6 +53,9 @@ const loremIpsumHTML = `
       if (current && current.nextElementSibling) {
         current.classList.remove('cursor');
         current.nextElementSibling.classList.add('cursor');
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(current.nextElementSibling.textContent);
+        }
       }
     }
 
@@ -61,6 +64,9 @@ const loremIpsumHTML = `
       if (current && current.previousElementSibling) {
         current.classList.remove('cursor');
         current.previousElementSibling.classList.add('cursor');
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(current.previousElementSibling.textContent);
+        }
       }
     }
 

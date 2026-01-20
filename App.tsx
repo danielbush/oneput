@@ -62,7 +62,7 @@ export default function App() {
           <Pressable
             style={styles.chevronButton}
             onPress={() => {
-              // TODO: implement insert functionality
+              webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
             }}
           >
             <Text style={styles.insButtonText}>ins</Text>

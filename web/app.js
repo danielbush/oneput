@@ -45,6 +45,15 @@ function movePreviousParagraph() {
   }
 }
 
+function insertParagraphAfterFocus() {
+  const current = document.querySelector('p.focus');
+  if (current) {
+    const newParagraph = document.createElement('p');
+    newParagraph.innerHTML = '<span>insert</span>';
+    current.after(newParagraph);
+  }
+}
+
 (function () {
   const firstParagraph = document.querySelector('p');
   if (firstParagraph) {

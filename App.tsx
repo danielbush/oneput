@@ -55,6 +55,7 @@ export default function App() {
             const text = event.nativeEvent.data;
             setInputValue(text);
             setSelection({ start: 0, end: text.length });
+            inputRef.current?.focus();
           }}
         />
         <View style={styles.verticalChevronStrip}>

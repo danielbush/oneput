@@ -102,6 +102,7 @@ const loremIpsumHTML = `
 
 export default function App() {
   const [inputValue, setInputValue] = useState('');
+  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>(undefined);
   const inputRef = useRef<TextInput>(null);
   const webViewRef = useRef<WebView>(null);
   const shouldRefocusRef = useRef(false);
@@ -138,11 +139,7 @@ export default function App() {
             shouldRefocusRef.current = true;
             const text = event.nativeEvent.data;
             setInputValue(text);
-            // The `setTimeout` ensures the selection happens after React has
-            // re-rendered with the new value.
-            setTimeout(() => {
-              inputRef.current?.setSelection(0, text.length);
-            }, 0);
+            setSelection({ start: 0, end: text.length });
           }}
         />
       </View>
@@ -154,6 +151,8 @@ export default function App() {
             style={styles.input}
             value={inputValue}
             onChangeText={setInputValue}
+            selection={selection}
+            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             placeholder="Type something..."
             placeholderTextColor="#999"
             onBlur={() => {

@@ -4,9 +4,17 @@ dotenv: ['.env']
 version: '3'
 
 tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - '{{.TASK_EXE}} --list'
+    silent: true # Optional: hides the 'task: [default]' prefix
+
   webview:
+    desc: run web server that renders the webview in this prototype; do this first
     cmds:
       - pnpm run serve-web
   expo:
+    desc: run expo server that renders the webview in this prototype; do this second
     cmds:
       - pnpm run start

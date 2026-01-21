@@ -7,10 +7,94 @@ import {
   Platform,
   Keyboard,
   Pressable,
-  Text
+  Text,
+  Animated,
+  GestureResponderEvent,
+  ViewStyle,
+  StyleProp
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+interface RipplePressableProps {
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+  rippleColor?: string;
+}
+
+function RipplePressable({
+  onPress,
+  style,
+  children,
+  rippleColor = 'rgba(0, 0, 0, 0.1)'
+}: RipplePressableProps) {
+  const [ripple, setRipple] = useState<{ x: number; y: number; key: number } | null>(null);
+  const scale = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const containerRef = useRef<View>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  const handlePressIn = useCallback(
+    (event: GestureResponderEvent) => {
+      const { locationX, locationY } = event.nativeEvent;
+
+      scale.setValue(0);
+      opacity.setValue(1);
+
+      setRipple({ x: locationX, y: locationY, key: Date.now() });
+
+      Animated.parallel([
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true
+        }),
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true
+        })
+      ]).start(() => {
+        setRipple(null);
+      });
+    },
+    [scale, opacity]
+  );
+
+  const maxDimension = Math.max(containerSize.width, containerSize.height);
+  const rippleSize = maxDimension * 2.5;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      style={[style, { overflow: 'hidden' }]}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setContainerSize({ width, height });
+      }}
+    >
+      {children}
+      {ripple && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: ripple.x - rippleSize / 2,
+            top: ripple.y - rippleSize / 2,
+            width: rippleSize,
+            height: rippleSize,
+            borderRadius: rippleSize / 2,
+            backgroundColor: rippleColor,
+            transform: [{ scale }],
+            opacity
+          }}
+        />
+      )}
+    </Pressable>
+  );
+}
 
 const WEB_SERVER_URL = `http://${process.env.EXPO_PUBLIC_WEBVIEW_HOSTNAME}:${process.env.EXPO_PUBLIC_WEBVIEW_PORT}`;
 console.log(`WEB_SERVER_URL for webview content: ${WEB_SERVER_URL}`);
@@ -91,21 +175,21 @@ export default function App() {
       <View style={styles.inputContainer}>
         {menuVisible && (
           <View style={styles.menu}>
-            <Pressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+            <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
               <View style={styles.menuIconPlaceholder} />
               <Text style={styles.menuItemText}>item 1</Text>
               <View style={styles.menuIconPlaceholder} />
-            </Pressable>
-            <Pressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+            </RipplePressable>
+            <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
               <View style={styles.menuIconPlaceholder} />
               <Text style={styles.menuItemText}>item 2</Text>
               <View style={styles.menuIconPlaceholder} />
-            </Pressable>
-            <Pressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+            </RipplePressable>
+            <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
               <View style={styles.menuIconPlaceholder} />
               <Text style={styles.menuItemText}>item 3</Text>
               <View style={styles.menuIconPlaceholder} />
-            </Pressable>
+            </RipplePressable>
           </View>
         )}
         <View style={styles.inputRow}>

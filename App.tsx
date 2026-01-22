@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   TextInput,
-  KeyboardAvoidingView,
   Platform,
   Keyboard,
   Pressable,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 
 interface RipplePressableProps {
   onPress?: () => void;
@@ -122,134 +122,133 @@ export default function App() {
   }, []);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <StatusBar style="auto" />
+    <KeyboardProvider>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+        <StatusBar style="auto" />
 
-      <View style={styles.webViewContainer}>
-        <WebView
-          ref={webViewRef}
-          source={{ uri: WEB_SERVER_URL }}
-          style={styles.webView}
-          keyboardDisplayRequiresUserAction={false}
-          hideKeyboardAccessoryView={true}
-          onMessage={(event) => {
-            shouldRefocusRef.current = true;
-            const text = event.nativeEvent.data;
-            setInputValue(text);
-            setSelection({ start: 0, end: text.length });
-            inputRef.current?.focus();
-          }}
-        />
-        <View style={styles.floatingButtonStrip}>
-          <Pressable
-            style={styles.chevronButton}
-            onPress={() => {
-              webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
-            }}
-          >
-            <Text style={styles.insButtonText}>ins</Text>
-          </Pressable>
-          <View style={styles.floatingButtonSpacer} />
-          <Pressable
-            style={styles.chevronButton}
-            onPress={() => {
-              webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
-            }}
-          >
-            <Text style={styles.chevronTextUp}>▲</Text>
-          </Pressable>
-          <Pressable
-            style={styles.chevronButton}
-            onPress={() => {
-              webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
-            }}
-          >
-            <Text style={styles.chevronTextDown}>▼</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.inputContainer}>
-        {menuVisible && (
-          <View style={styles.menu}>
-            <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
-              <View style={styles.menuIconPlaceholder} />
-              <Text style={styles.menuItemText}>item 1</Text>
-              <View style={styles.menuIconPlaceholder} />
-            </RipplePressable>
-            <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
-              <View style={styles.menuIconPlaceholder} />
-              <Text style={styles.menuItemText}>item 2</Text>
-              <View style={styles.menuIconPlaceholder} />
-            </RipplePressable>
-            <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
-              <View style={styles.menuIconPlaceholder} />
-              <Text style={styles.menuItemText}>item 3</Text>
-              <View style={styles.menuIconPlaceholder} />
-            </RipplePressable>
-          </View>
-        )}
-        <View style={styles.inputRow}>
-          <Pressable style={styles.chevronButton} onPress={() => setMenuVisible(!menuVisible)}>
-            <Text style={styles.menuButtonText}>M</Text>
-          </Pressable>
-          <TextInput
-            ref={inputRef}
-            style={styles.input}
-            value={inputValue}
-            onChangeText={(text) => {
+        <View style={styles.webViewContainer}>
+          <WebView
+            ref={webViewRef}
+            source={{ uri: WEB_SERVER_URL }}
+            style={styles.webView}
+            keyboardDisplayRequiresUserAction={false}
+            hideKeyboardAccessoryView={true}
+            onMessage={(event) => {
+              shouldRefocusRef.current = true;
+              const text = event.nativeEvent.data;
               setInputValue(text);
-              webViewRef.current?.injectJavaScript(`updateCursorText(${JSON.stringify(text)});`);
-            }}
-            selection={selection}
-            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
-            placeholder="Type something..."
-            placeholderTextColor="#999"
-            // First Autosuggestion updates next/previous token:
-            //
-            // Disable autccomplete/correct:
-            // - I type "Abc" in the TextInput
-            // - this updates the current span tag
-            // - autocomplete above TextInput in iOS hows "Abc" | ABC | ...
-            // - I then hit right chevron button to move to next span tag
-            // - this span tag is ALSO updated with the first non-quoted autocomplete option (ABC)
-            // Claude:
-            // The issue is that iOS autocomplete applies when focus changes. We
-            // need to disable autocomplete on the TextInput to prevent this
-            // behavior. Let me add the appropriate props.
-            autoCorrect={false}
-            autoCapitalize="none"
-            spellCheck={false}
-            onBlur={() => {
-              // Immediately refocus when blurred to keep keyboard open
-              if (shouldRefocusRef.current) {
-                shouldRefocusRef.current = false;
-                setTimeout(() => inputRef.current?.focus(), 0);
-              }
+              setSelection({ start: 0, end: text.length });
+              inputRef.current?.focus();
             }}
           />
-          <Pressable
-            style={styles.chevronButton}
-            onPress={() => {
-              webViewRef.current?.injectJavaScript(`movePrevious();`);
-            }}
-          >
-            <Text style={styles.chevronText}>‹</Text>
-          </Pressable>
-          <Pressable
-            style={styles.chevronButton}
-            onPress={() => {
-              webViewRef.current?.injectJavaScript(`moveNext();`);
-            }}
-          >
-            <Text style={styles.chevronText}>›</Text>
-          </Pressable>
+          <View style={styles.floatingButtonStrip}>
+            <Pressable
+              style={styles.chevronButton}
+              onPress={() => {
+                webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
+              }}
+            >
+              <Text style={styles.insButtonText}>ins</Text>
+            </Pressable>
+            <View style={styles.floatingButtonSpacer} />
+            <Pressable
+              style={styles.chevronButton}
+              onPress={() => {
+                webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
+              }}
+            >
+              <Text style={styles.chevronTextUp}>▲</Text>
+            </Pressable>
+            <Pressable
+              style={styles.chevronButton}
+              onPress={() => {
+                webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
+              }}
+            >
+              <Text style={styles.chevronTextDown}>▼</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+
+        <View style={styles.inputContainer}>
+          {menuVisible && (
+            <View style={styles.menu}>
+              <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+                <View style={styles.menuIconPlaceholder} />
+                <Text style={styles.menuItemText}>item 1</Text>
+                <View style={styles.menuIconPlaceholder} />
+              </RipplePressable>
+              <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+                <View style={styles.menuIconPlaceholder} />
+                <Text style={styles.menuItemText}>item 2</Text>
+                <View style={styles.menuIconPlaceholder} />
+              </RipplePressable>
+              <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+                <View style={styles.menuIconPlaceholder} />
+                <Text style={styles.menuItemText}>item 3</Text>
+                <View style={styles.menuIconPlaceholder} />
+              </RipplePressable>
+            </View>
+          )}
+          <View style={styles.inputRow}>
+            <Pressable style={styles.chevronButton} onPress={() => setMenuVisible(!menuVisible)}>
+              <Text style={styles.menuButtonText}>M</Text>
+            </Pressable>
+            <TextInput
+              ref={inputRef}
+              style={styles.input}
+              value={inputValue}
+              onChangeText={(text) => {
+                setInputValue(text);
+                webViewRef.current?.injectJavaScript(`updateCursorText(${JSON.stringify(text)});`);
+              }}
+              selection={selection}
+              onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+              placeholder="Type something..."
+              placeholderTextColor="#999"
+              // First Autosuggestion updates next/previous token:
+              //
+              // Disable autccomplete/correct:
+              // - I type "Abc" in the TextInput
+              // - this updates the current span tag
+              // - autocomplete above TextInput in iOS hows "Abc" | ABC | ...
+              // - I then hit right chevron button to move to next span tag
+              // - this span tag is ALSO updated with the first non-quoted autocomplete option (ABC)
+              // Claude:
+              // The issue is that iOS autocomplete applies when focus changes. We
+              // need to disable autocomplete on the TextInput to prevent this
+              // behavior. Let me add the appropriate props.
+              autoCorrect={false}
+              autoCapitalize="none"
+              spellCheck={false}
+              onBlur={() => {
+                // Immediately refocus when blurred to keep keyboard open
+                if (shouldRefocusRef.current) {
+                  shouldRefocusRef.current = false;
+                  setTimeout(() => inputRef.current?.focus(), 0);
+                }
+              }}
+            />
+            <Pressable
+              style={styles.chevronButton}
+              onPress={() => {
+                webViewRef.current?.injectJavaScript(`movePrevious();`);
+              }}
+            >
+              <Text style={styles.chevronText}>‹</Text>
+            </Pressable>
+            <Pressable
+              style={styles.chevronButton}
+              onPress={() => {
+                webViewRef.current?.injectJavaScript(`moveNext();`);
+              }}
+            >
+              <Text style={styles.chevronText}>›</Text>
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </KeyboardProvider>
   );
 }
 

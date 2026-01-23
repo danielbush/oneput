@@ -139,8 +139,8 @@ export default function App() {
                 // tokens in iOS.
                 // Android doesn't have this problem.
                 // If enabled in Android this causes the keyboard to not go down
-                // the first time if you hit the done button, only the second
-                // time.
+                // the first time if you hit the done/submit button, only the
+                // second time.
                 shouldRefocusRef.current = true;
               }
               const text = event.nativeEvent.data;

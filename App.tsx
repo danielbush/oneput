@@ -150,33 +150,6 @@ export default function App() {
             }}
             webviewDebuggingEnabled={true}
           />
-          <View style={styles.floatingButtonStrip}>
-            <Pressable
-              style={styles.chevronButton}
-              onPress={() => {
-                webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
-              }}
-            >
-              <Text style={styles.insButtonText}>ins</Text>
-            </Pressable>
-            <View style={styles.floatingButtonSpacer} />
-            <Pressable
-              style={styles.chevronButton}
-              onPress={() => {
-                webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
-              }}
-            >
-              <Text style={styles.chevronTextUp}>▲</Text>
-            </Pressable>
-            <Pressable
-              style={styles.chevronButton}
-              onPress={() => {
-                webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
-              }}
-            >
-              <Text style={styles.chevronTextDown}>▼</Text>
-            </Pressable>
-          </View>
         </View>
 
         <View style={styles.inputContainer}>
@@ -199,6 +172,43 @@ export default function App() {
               </RipplePressable>
             </View>
           )}
+          <View style={styles.buttonRow}>
+            <View>
+              <Pressable
+                style={{ ...styles.chevronButton, position: 'absolute', bottom: 0 }}
+                onPress={() => {
+                  webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
+                }}
+              >
+                <Text style={styles.insButtonText}>ins</Text>
+              </Pressable>
+            </View>
+            <View>
+              <Text>wtf</Text>
+            </View>
+            <View>
+              <View
+                style={{ position: 'absolute', right: 0, bottom: 0, flexDirection: 'row', gap: 8 }}
+              >
+                <Pressable
+                  style={{ ...styles.chevronButton }}
+                  onPress={() => {
+                    webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
+                  }}
+                >
+                  <Text style={styles.chevronTextUp}>U</Text>
+                </Pressable>
+                <Pressable
+                  style={{ ...styles.chevronButton }}
+                  onPress={() => {
+                    webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
+                  }}
+                >
+                  <Text style={styles.chevronTextDown}>D</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
           <View style={styles.inputRow}>
             <Pressable style={styles.chevronButton} onPress={() => setMenuVisible(!menuVisible)}>
               <Text style={styles.menuButtonText}>M</Text>
@@ -309,6 +319,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8
+  },
   input: {
     flex: 1,
     height: 44,
@@ -333,12 +349,15 @@ const styles = StyleSheet.create({
     color: '#333'
   },
   floatingButtonStrip: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    right: 8,
+    // position: 'absolute',
+    // bottom: 8,
+    // left: 8,
+    // right: 8,
     flexDirection: 'row',
     gap: 8
+  },
+  between: {
+    flex: 1
   },
   floatingButtonSpacer: {
     flex: 1
@@ -353,12 +372,10 @@ const styles = StyleSheet.create({
   },
   chevronTextUp: {
     fontSize: 24,
-    color: '#333',
-    transform: [{ rotate: '90deg' }]
+    color: '#333'
   },
   chevronTextDown: {
     fontSize: 24,
-    color: '#333',
-    transform: [{ rotate: '-90deg' }]
+    color: '#333'
   }
 });

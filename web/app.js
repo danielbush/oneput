@@ -29,7 +29,7 @@ function updateCursorText(text) {
 
 function moveNextParagraph() {
   const current = document.querySelector('p.focus');
-  if (current && current.nextElementSibling?.tagName === 'P') {
+  if (current && current.nextElementSibling && current.nextElementSibling.tagName === 'P') {
     current.classList.remove('focus');
     current.nextElementSibling.classList.add('focus');
     current.nextElementSibling.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -38,7 +38,7 @@ function moveNextParagraph() {
 
 function movePreviousParagraph() {
   const current = document.querySelector('p.focus');
-  if (current && current.previousElementSibling?.tagName === 'P') {
+  if (current && current.previousElementSibling && current.previousElementSibling.tagName === 'P') {
     current.classList.remove('focus');
     current.previousElementSibling.classList.add('focus');
     current.previousElementSibling.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -74,7 +74,10 @@ function insertParagraphAfterFocus() {
       span.style.cursor = 'pointer';
       span.addEventListener('click', function () {
         if (window.ReactNativeWebView) {
-          document.querySelector('span.cursor')?.classList.remove('cursor');
+          const crs = document.querySelector('span.cursor');
+          if (crs) {
+            crs.classList.remove('cursor');
+          }
           span.classList.add('cursor');
           window.ReactNativeWebView.postMessage(this.textContent);
         }

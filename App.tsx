@@ -157,7 +157,42 @@ export default function App() {
             <View style={styles.menu}>
               <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
                 <View style={styles.menuIconPlaceholder} />
-                <Text style={styles.menuItemText}>item 1</Text>
+                <View style={styles.menuItemKatex}>
+                  <WebView
+                    style={styles.katexWebView}
+                    source={{
+                      html: `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+                          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+                          <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+                          <style>
+                            html, body {
+                              margin: 0;
+                              padding: 0;
+                              height: 100%;
+                            }
+                            body { padding: 0; margin: 0; padding-top: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: yellow; }
+                            .katex { font-size: 1.1em; }
+                            #formula { background-color: pink; }
+                          </style>
+                        </head>
+                        <body>
+                          <div id="formula"></div>
+                          <script>
+                            katex.render("e^{i\\\\pi} + 1 = 0", document.getElementById("formula"));
+                          </script>
+                        </body>
+                        </html>
+                      `
+                    }}
+                    scrollEnabled={false}
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                  />
+                </View>
                 <View style={styles.menuIconPlaceholder} />
               </RipplePressable>
               <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
@@ -313,6 +348,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginHorizontal: 12
+  },
+  menuItemKatex: {
+    flex: 1,
+    height: 30,
+    marginHorizontal: 12
+  },
+  katexWebView: {
+    flex: 1,
+    backgroundColor: 'red'
   },
   inputRow: {
     flexDirection: 'row',

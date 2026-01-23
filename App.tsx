@@ -102,6 +102,7 @@ export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>(undefined);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState(WEB_SERVER_URL);
   const inputRef = useRef<TextInput>(null);
   const webViewRef = useRef<WebView>(null);
   const shouldRefocusRef = useRef(false);
@@ -129,7 +130,7 @@ export default function App() {
         <View style={styles.webViewContainer}>
           <WebView
             ref={webViewRef}
-            source={{ uri: WEB_SERVER_URL }}
+            source={{ uri: webViewUrl }}
             style={styles.webView}
             keyboardDisplayRequiresUserAction={false}
             hideKeyboardAccessoryView={true}
@@ -195,14 +196,26 @@ export default function App() {
                 </View>
                 <View style={styles.menuIconPlaceholder} />
               </RipplePressable>
-              <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+              <RipplePressable
+                style={styles.menuItem}
+                onPress={() => {
+                  setWebViewUrl('https://en.wikipedia.org/wiki/Euler%27s_identity');
+                  setMenuVisible(false);
+                }}
+              >
                 <View style={styles.menuIconPlaceholder} />
-                <Text style={styles.menuItemText}>item 2</Text>
+                <Text style={styles.menuItemText}>Wikipedia</Text>
                 <View style={styles.menuIconPlaceholder} />
               </RipplePressable>
-              <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
+              <RipplePressable
+                style={styles.menuItem}
+                onPress={() => {
+                  setWebViewUrl(WEB_SERVER_URL);
+                  setMenuVisible(false);
+                }}
+              >
                 <View style={styles.menuIconPlaceholder} />
-                <Text style={styles.menuItemText}>item 3</Text>
+                <Text style={styles.menuItemText}>Back to Editor</Text>
                 <View style={styles.menuIconPlaceholder} />
               </RipplePressable>
             </View>
@@ -218,9 +231,7 @@ export default function App() {
                 <Text style={styles.insButtonText}>ins</Text>
               </Pressable>
             </View>
-            <View>
-              <Text>wtf</Text>
-            </View>
+            <View></View>
             <View>
               <View
                 style={{ position: 'absolute', right: 0, bottom: 0, flexDirection: 'row', gap: 8 }}

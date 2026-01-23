@@ -108,7 +108,8 @@ export default function App() {
 
   useEffect(() => {
     const keyboardWillHide = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      'keyboardWillHide',
+      // Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => {
         if (shouldRefocusRef.current) {
           shouldRefocusRef.current = false;
@@ -133,7 +134,15 @@ export default function App() {
             keyboardDisplayRequiresUserAction={false}
             hideKeyboardAccessoryView={true}
             onMessage={(event) => {
-              shouldRefocusRef.current = true;
+              if (Platform.OS === 'ios') {
+                // Prevents keyboard going down and up when clicking on word
+                // tokens in iOS.
+                // Android doesn't have this problem.
+                // If enabled in Android this causes the keyboard to not go down
+                // the first time if you hit the done button, only the second
+                // time.
+                shouldRefocusRef.current = true;
+              }
               const text = event.nativeEvent.data;
               setInputValue(text);
               setSelection({ start: 0, end: text.length });

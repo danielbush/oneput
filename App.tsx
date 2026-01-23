@@ -140,6 +140,7 @@ export default function App() {
               setSelection({ start: 0, end: text.length });
               inputRef.current?.focus();
             }}
+            webviewDebuggingEnabled={true}
           />
           <View style={styles.floatingButtonStrip}>
             <Pressable

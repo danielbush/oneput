@@ -46,12 +46,12 @@ function RipplePressable({
       Animated.parallel([
         Animated.timing(scale, {
           toValue: 1,
-          duration: 400,
+          duration: 800,
           useNativeDriver: true
         }),
         Animated.timing(opacity, {
           toValue: 0,
-          duration: 400,
+          duration: 800,
           useNativeDriver: true
         })
       ]).start(() => {

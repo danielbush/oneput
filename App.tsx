@@ -32,7 +32,6 @@ function RipplePressable({
   const [ripple, setRipple] = useState<{ x: number; y: number; key: number } | null>(null);
   const scale = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(1)).current;
-  const containerRef = useRef<View>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   const handlePressIn = useCallback(

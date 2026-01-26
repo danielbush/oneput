@@ -174,7 +174,7 @@ export default function App() {
                   {
                     translateY: menuSlideAnim.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [100, 0]
+                      outputRange: [50, 0]
                     })
                   }
                 ]
@@ -374,7 +374,12 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   menuAnimatedWrapper: {
-    // Menu slides up from behind controlsContainer
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: '100%',
+    paddingHorizontal: 12,
+    paddingBottom: 8
   },
   controlsContainer: {
     zIndex: 1,
@@ -384,8 +389,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 8
+    borderRadius: 8
   },
   menuItem: {
     flexDirection: 'row',

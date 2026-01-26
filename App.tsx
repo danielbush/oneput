@@ -106,6 +106,7 @@ export default function App() {
   const inputRef = useRef<TextInput>(null);
   const webViewRef = useRef<WebView>(null);
   const shouldRefocusRef = useRef(false);
+  const menuSlideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const keyboardWillHide = Keyboard.addListener(
@@ -121,6 +122,14 @@ export default function App() {
 
     return () => keyboardWillHide.remove();
   }, []);
+
+  useEffect(() => {
+    Animated.timing(menuSlideAnim, {
+      toValue: menuVisible ? 1 : 0,
+      duration: 250,
+      useNativeDriver: true
+    }).start();
+  }, [menuVisible, menuSlideAnim]);
 
   return (
     <KeyboardProvider>
@@ -154,7 +163,24 @@ export default function App() {
         </View>
 
         <View style={styles.inputContainer}>
-          {menuVisible && (
+          {/* Menu - always rendered, slides up from behind */}
+          <Animated.View
+            pointerEvents={menuVisible ? 'auto' : 'none'}
+            style={[
+              styles.menuAnimatedWrapper,
+              {
+                opacity: menuSlideAnim,
+                transform: [
+                  {
+                    translateY: menuSlideAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [100, 0]
+                    })
+                  }
+                ]
+              }
+            ]}
+          >
             <View style={styles.menu}>
               <RipplePressable style={styles.menuItem} onPress={() => setMenuVisible(false)}>
                 <View style={styles.menuIconPlaceholder} />
@@ -219,97 +245,109 @@ export default function App() {
                 <View style={styles.menuIconPlaceholder} />
               </RipplePressable>
             </View>
-          )}
-          <View style={styles.buttonRow}>
-            <View>
-              <Pressable
-                style={{ ...styles.chevronButton, position: 'absolute', bottom: 0 }}
-                onPress={() => {
-                  webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
-                }}
-              >
-                <Text style={styles.insButtonText}>ins</Text>
-              </Pressable>
-            </View>
-            <View></View>
-            <View>
-              <View
-                style={{ position: 'absolute', right: 0, bottom: 0, flexDirection: 'row', gap: 8 }}
-              >
+          </Animated.View>
+
+          {/* Controls - elevated above menu */}
+          <View style={styles.controlsContainer}>
+            <View style={styles.buttonRow}>
+              <View>
                 <Pressable
-                  style={{ ...styles.chevronButton }}
+                  style={{ ...styles.chevronButton, position: 'absolute', bottom: 0 }}
                   onPress={() => {
-                    webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
+                    webViewRef.current?.injectJavaScript(`insertParagraphAfterFocus();`);
                   }}
                 >
-                  <Text style={styles.chevronTextUp}>U</Text>
-                </Pressable>
-                <Pressable
-                  style={{ ...styles.chevronButton }}
-                  onPress={() => {
-                    webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
-                  }}
-                >
-                  <Text style={styles.chevronTextDown}>D</Text>
+                  <Text style={styles.insButtonText}>ins</Text>
                 </Pressable>
               </View>
+              <View></View>
+              <View>
+                <View
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: 0,
+                    flexDirection: 'row',
+                    gap: 8
+                  }}
+                >
+                  <Pressable
+                    style={{ ...styles.chevronButton }}
+                    onPress={() => {
+                      webViewRef.current?.injectJavaScript(`movePreviousParagraph();`);
+                    }}
+                  >
+                    <Text style={styles.chevronTextUp}>U</Text>
+                  </Pressable>
+                  <Pressable
+                    style={{ ...styles.chevronButton }}
+                    onPress={() => {
+                      webViewRef.current?.injectJavaScript(`moveNextParagraph();`);
+                    }}
+                  >
+                    <Text style={styles.chevronTextDown}>D</Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
-          </View>
-          <View style={styles.inputRow}>
-            <Pressable style={styles.chevronButton} onPress={() => setMenuVisible(!menuVisible)}>
-              <Text style={styles.menuButtonText}>M</Text>
-            </Pressable>
-            <TextInput
-              ref={inputRef}
-              style={styles.input}
-              value={inputValue}
-              onChangeText={(text) => {
-                setInputValue(text);
-                webViewRef.current?.injectJavaScript(`updateCursorText(${JSON.stringify(text)});`);
-              }}
-              selection={selection}
-              onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
-              placeholder="Type something..."
-              placeholderTextColor="#999"
-              // First Autosuggestion updates next/previous token:
-              //
-              // Disable autccomplete/correct:
-              // - I type "Abc" in the TextInput
-              // - this updates the current span tag
-              // - autocomplete above TextInput in iOS hows "Abc" | ABC | ...
-              // - I then hit right chevron button to move to next span tag
-              // - this span tag is ALSO updated with the first non-quoted autocomplete option (ABC)
-              // Claude:
-              // The issue is that iOS autocomplete applies when focus changes. We
-              // need to disable autocomplete on the TextInput to prevent this
-              // behavior. Let me add the appropriate props.
-              autoCorrect={false}
-              autoCapitalize="none"
-              spellCheck={false}
-              onBlur={() => {
-                // Immediately refocus when blurred to keep keyboard open
-                if (shouldRefocusRef.current) {
-                  shouldRefocusRef.current = false;
-                  setTimeout(() => inputRef.current?.focus(), 0);
-                }
-              }}
-            />
-            <Pressable
-              style={styles.chevronButton}
-              onPress={() => {
-                webViewRef.current?.injectJavaScript(`movePrevious();`);
-              }}
-            >
-              <Text style={styles.chevronText}>‹</Text>
-            </Pressable>
-            <Pressable
-              style={styles.chevronButton}
-              onPress={() => {
-                webViewRef.current?.injectJavaScript(`moveNext();`);
-              }}
-            >
-              <Text style={styles.chevronText}>›</Text>
-            </Pressable>
+            <View style={styles.inputRow}>
+              <Pressable style={styles.chevronButton} onPress={() => setMenuVisible(!menuVisible)}>
+                <Text style={styles.menuButtonText}>M</Text>
+              </Pressable>
+              <TextInput
+                ref={inputRef}
+                style={styles.input}
+                value={inputValue}
+                onChangeText={(text) => {
+                  setInputValue(text);
+                  webViewRef.current?.injectJavaScript(
+                    `updateCursorText(${JSON.stringify(text)});`
+                  );
+                }}
+                selection={selection}
+                onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+                placeholder="Type something..."
+                placeholderTextColor="#999"
+                // First Autosuggestion updates next/previous token:
+                //
+                // Disable autccomplete/correct:
+                // - I type "Abc" in the TextInput
+                // - this updates the current span tag
+                // - autocomplete above TextInput in iOS hows "Abc" | ABC | ...
+                // - I then hit right chevron button to move to next span tag
+                // - this span tag is ALSO updated with the first non-quoted autocomplete option (ABC)
+                // Claude:
+                // The issue is that iOS autocomplete applies when focus changes. We
+                // need to disable autocomplete on the TextInput to prevent this
+                // behavior. Let me add the appropriate props.
+                autoCorrect={false}
+                autoCapitalize="none"
+                spellCheck={false}
+                onBlur={() => {
+                  // Immediately refocus when blurred to keep keyboard open
+                  if (shouldRefocusRef.current) {
+                    shouldRefocusRef.current = false;
+                    setTimeout(() => inputRef.current?.focus(), 0);
+                  }
+                }}
+              />
+              <Pressable
+                style={styles.chevronButton}
+                onPress={() => {
+                  webViewRef.current?.injectJavaScript(`movePrevious();`);
+                }}
+              >
+                <Text style={styles.chevronText}>‹</Text>
+              </Pressable>
+              <Pressable
+                style={styles.chevronButton}
+                onPress={() => {
+                  webViewRef.current?.injectJavaScript(`moveNext();`);
+                }}
+              >
+                <Text style={styles.chevronText}>›</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -334,6 +372,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 12,
     marginBottom: 20
+  },
+  menuAnimatedWrapper: {
+    // Menu slides up from behind controlsContainer
+  },
+  controlsContainer: {
+    zIndex: 1,
+    backgroundColor: '#fff'
   },
   menu: {
     backgroundColor: '#fff',

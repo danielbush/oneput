@@ -100,7 +100,7 @@ export class AppController {
       this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? !flags.enableModal);
     }
     if ('enableMenuItemsFn' in flags || flags.enableModal) {
-      this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
+      this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
     }
     if ('enableInputElement' in flags || flags.enableModal) {
       this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
@@ -139,7 +139,7 @@ export class AppController {
     this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
     this.ctl.keys._enableKeys(flags.enableKeys);
     this.ctl.menu._enableMenuActions(flags.enableMenuActions);
-    this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn);
+    this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn);
     this.ctl.input._enableInputElement(flags.enableInputElement);
 
     // Reset stuff...
@@ -148,7 +148,7 @@ export class AppController {
     this.ctl.keys.resetBindings(true);
     this.ctl.input.resetPlaceholder();
     this.ctl.menu.resetFocusBehaviour();
-    this.ctl.menu.resetMenuItemsFn();
+    this.ctl.menu.fn.resetMenuItemsFn();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();
     this.ctl.menu.resetFillHandler();

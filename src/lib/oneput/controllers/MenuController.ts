@@ -1,7 +1,7 @@
-import debounce from 'debounce';
 import type { MenuItem, MenuItemAny } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
+import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
 
 export type MenuItemsFn = (
   input: string,
@@ -20,17 +20,19 @@ export type MenuItemsFnAsync = (
  *   - menus are identified by an id in setMenuItems
  *   - menu id's are scoped to the current appObject
  */
-type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
+export type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
 
 export class MenuController {
   public static create(ctl: Controller) {
     const currentMenu = CurrentMenu.create(ctl, '');
-    return new MenuController(ctl, currentMenu);
+    const fn = MenuItemsFnController.create(ctl);
+    return new MenuController(ctl, currentMenu, fn);
   }
 
   constructor(
     private ctl: Controller,
-    public currentMenu: CurrentMenu
+    public currentMenu: CurrentMenu,
+    public fn: MenuItemsFnController
   ) {
     this.ctl.currentProps.onMenuOpenChange = (menuOpen) => {
       if (menuOpen) {
@@ -54,12 +56,9 @@ export class MenuController {
   /**
    * Disable ALL menuItemsFn calls.
    */
-  private disableMenuItemsFn = false;
   private disableActions = false;
   private disableOpenClose = false;
-  private defaultMenuItemsFn?: MenuItemsFn;
-  private removeMenuItemsListener?: () => void;
-  private defaultFocusBehaviour: FocusBehaviour = 'last-action,first';
+  public defaultFocusBehaviour: FocusBehaviour = 'last-action,first';
   private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
 
   // #region menu open/close + action
@@ -105,7 +104,7 @@ export class MenuController {
 
   // #region setting menu items
 
-  private _setMenuItems(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
+  _setMenuItems(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
     this.ctl.currentProps.menuItems = params.items;
     this.runFocusBehaviour(params.focusBehaviour);
   }
@@ -114,111 +113,6 @@ export class MenuController {
     this.currentMenu.setNewMenu(params.id, params.items);
     this._setMenuItems(params);
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
-  }
-
-  // #endregion
-
-  // #region menuItemsFn
-
-  /**
-   * Sets a default menuItemsFn - see setMenuItemsFn for more details.
-   *
-   * If set, this is always present.  It can be disabled and re-enabled using
-   * disableAllMenuItemsFn / enableAllMenuItemsFn.  It can be replaced by a
-   * different menuItemsFn using setMenuItemsFn and restored by calling
-   * setMenuItemsFn with no arguments.
-   */
-  setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
-    this.defaultMenuItemsFn = menuItemsFn;
-  }
-
-  resetMenuItemsFn() {
-    if (this.defaultMenuItemsFn) {
-      this.setMenuItemsFn(this.defaultMenuItemsFn, { focusBehaviour: this.defaultFocusBehaviour });
-    }
-  }
-
-  /**
-   * Set a function that will be triggered on input change.
-   *
-   * If this function returns undefined, the menu will not be updated.
-   */
-  setMenuItemsFn(menuItemsFn: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
-    this.removeMenuItemsListener?.();
-    this.removeMenuItemsListener = this.ctl.events.on('input-change', ({ value }) => {
-      if (this.disableMenuItemsFn) {
-        return;
-      }
-      const items = menuItemsFn(value, this.currentMenu.allMenuItems);
-      if (!items) {
-        return;
-      }
-      this._setMenuItems({ items, focusBehaviour: options.focusBehaviour });
-    });
-  }
-
-  /**
-   * Calls to menuItemsFnAsync are debounced reducing calls to the function as
-   * the user types.  If an older call comes in AFTER a later call it will be
-   * discarded.
-   */
-  setMenuItemsFnAsync(
-    menuItemsFnAsync: MenuItemsFnAsync,
-    options: { onDebounce?: (isDebouncing: boolean) => void; focusBehaviour?: FocusBehaviour } = {}
-  ) {
-    this.removeMenuItemsListener?.();
-    let inFlight = 0;
-    const debouncedHandler = debounce(
-      async ({ value }: { value: string }) => {
-        inFlight = (inFlight + 1) % 100000;
-        const thisInFlight = inFlight;
-        let items: MenuItemAny[] | undefined;
-        try {
-          items = await menuItemsFnAsync(value, this.currentMenu.allMenuItems);
-        } catch (err) {
-          console.error(
-            'menuItemsFnAsync rejected - we recommend you catch your errors.  Error:',
-            err
-          );
-        }
-        if (thisInFlight === inFlight) {
-          // No new call has come in during the await...
-          options.onDebounce?.(false);
-        } else {
-          // Another call was triggered...
-          // We discard to avoid out of sequence.
-          // An older call may come in later than a newer call.
-          // The older call's thisInFlight will be out of date.
-          // console.warn(`DISCARDED ${value}...`);
-          return;
-        }
-        if (!items) {
-          return;
-        }
-        // console.warn(`got ${value}...`);
-        this._setMenuItems({ items, focusBehaviour: options.focusBehaviour });
-      },
-      500,
-      { immediate: false }
-    );
-    this.removeMenuItemsListener = this.ctl.events.on('input-change', (payload) => {
-      if (this.disableMenuItemsFn) {
-        return;
-      }
-      options.onDebounce?.(true);
-      debouncedHandler(payload);
-    });
-  }
-
-  /**
-   * Clear any non-default menu items fn.
-   */
-  clearMenuItemsFn() {
-    this.removeMenuItemsListener?.();
-  }
-
-  triggerMenuItemsFn() {
-    this.ctl.input.triggerInputEvent();
   }
 
   // #endregion
@@ -375,13 +269,6 @@ export class MenuController {
 
   get enableMenuOpenClose() {
     return !this.disableOpenClose;
-  }
-
-  /**
-   * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
-   */
-  _enableMenuItemsFn(on: boolean = true) {
-    this.disableMenuItemsFn = !on;
   }
 
   // #endregion

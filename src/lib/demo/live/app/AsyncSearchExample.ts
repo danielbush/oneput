@@ -35,7 +35,7 @@ export class AsyncSearchExample implements AppObject {
           })
       }
     });
-    this.ctl.menu.setMenuItemsFnAsync(
+    this.ctl.menu.fn.setMenuItemsFnAsync(
       async (input) => {
         try {
           this.outerRightStatus.withNode((node) => {
@@ -92,6 +92,7 @@ export class AsyncSearchExample implements AppObject {
   }
 
   private isError = false;
+
   private setError(error: Error) {
     console.error(error);
     this.outerRightStatus.withNode((node) => {
@@ -114,7 +115,7 @@ export class AsyncSearchExample implements AppObject {
             attr: {
               onclick: () => {
                 alert.cancel();
-                this.ctl.menu.triggerMenuItemsFn();
+                this.ctl.menu.fn.triggerMenuItemsFn();
               }
             }
           })

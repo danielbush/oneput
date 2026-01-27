@@ -17,10 +17,10 @@ export class SettingsManager {
   setFilter(filter: string) {
     switch (filter) {
       case this.FILTER_TYPE.FUZZY:
-        this.ctl.menu.setDefaultMenuItemsFn(FuzzyFilter.create().menuItemsFn);
+        this.ctl.menu.fn.setDefaultMenuItemsFn(FuzzyFilter.create().menuItemsFn);
         break;
       case this.FILTER_TYPE.WORD:
-        this.ctl.menu.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
+        this.ctl.menu.fn.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
         break;
     }
   }

@@ -62,7 +62,7 @@ export class TomatoTimer implements AppObject {
         menuTitle: 'Tomato Timer'
       }
     });
-    this.ctl.menu.clearMenuItemsFn();
+    this.ctl.menu.fn.clearMenuItemsFn();
     // TODO: check if there is an active timer...
     this.store
       .getCurrentSession()

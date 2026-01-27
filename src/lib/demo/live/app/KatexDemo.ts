@@ -62,7 +62,7 @@ export class KatexDemo implements AppObject {
     });
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
-    this.ctl.menu.setMenuItemsFn(() => {
+    this.ctl.menu.fn.setMenuItemsFn(() => {
       this.renderUI();
     });
     this.ctl.input.setSubmitHandler(() => {

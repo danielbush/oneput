@@ -110,7 +110,7 @@ export class AddEntry implements AppObject {
         menuTitle: 'Add entry...'
       }
     });
-    this.ctl.menu.clearMenuItemsFn();
+    this.ctl.menu.fn.clearMenuItemsFn();
     this.ctl.menu.setMenuItems({
       id: 'main',
       focusBehaviour: 'last-action,first',

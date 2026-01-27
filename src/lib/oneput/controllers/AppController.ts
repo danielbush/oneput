@@ -87,22 +87,22 @@ export class AppController {
     if (!flags) {
       return;
     }
-    if ('enableGoBack' in flags || flags.enableModal) {
+    if ('enableGoBack' in flags || 'enableModal' in flags) {
       this.ctl.app._enableGoBack(flags.enableGoBack ?? !flags.enableModal);
     }
-    if ('enableMenuOpenClose' in flags || flags.enableModal) {
+    if ('enableMenuOpenClose' in flags || 'enableModal' in flags) {
       this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose ?? !flags.enableModal);
     }
-    if ('enableKeys' in flags || flags.enableModal) {
+    if ('enableKeys' in flags || 'enableModal' in flags) {
       this.ctl.keys._enableKeys(flags.enableKeys ?? !flags.enableModal);
     }
-    if ('enableMenuActions' in flags || flags.enableModal) {
+    if ('enableMenuActions' in flags || 'enableModal' in flags) {
       this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? !flags.enableModal);
     }
-    if ('enableMenuItemsFn' in flags || flags.enableModal) {
+    if ('enableMenuItemsFn' in flags || 'enableModal' in flags) {
       this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
     }
-    if ('enableInputElement' in flags || flags.enableModal) {
+    if ('enableInputElement' in flags || 'enableModal' in flags) {
       this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
     }
   }

@@ -22,6 +22,11 @@ export type MenuItemsFnAsync = (
  */
 type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
 
+/**
+ * Calculates various things about the current menu.
+ *
+ * Does not make any changes to the menu.  Treat as a kind of value object.
+ */
 class CurrentMenuVal {
   static create(ctl: Controller, menuId: string) {
     return new CurrentMenuVal(ctl, menuId);
@@ -87,6 +92,24 @@ class CurrentMenuVal {
   setNewMenu(menuId: string, menuItems: Array<MenuItemAny>) {
     this._menuId = menuId;
     this.allMenuItems = menuItems;
+  }
+
+  getFocusable(index: number) {
+    const item = this.ctl.currentProps.menuItems?.[index];
+    if (isFocusable(item)) {
+      return item;
+    }
+    return null;
+  }
+
+  getIndexFromId(id: string) {
+    const index = this.ctl.currentProps.menuItems?.findIndex((item) => {
+      return item.id === id;
+    });
+    if (index !== undefined && index !== -1) {
+      return index;
+    }
+    return null;
   }
 }
 
@@ -311,11 +334,12 @@ export class MenuController {
       c < this.currentMenu.displayedMenuItemCount;
       c++, i = this.currentMenu.nextMenuItemIndex(i)
     ) {
-      if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+      const menuItem = this.currentMenu.getFocusable(i);
+      if (menuItem) {
         this.ctl.currentProps.menuItemFocus = [i, true];
         this.ctl.events.emit({
           type: 'menu-item-focus',
-          payload: { index: i, menuItem: this.ctl.currentProps.menuItems?.[i] }
+          payload: { index: i, menuItem }
         });
         break;
       }
@@ -328,11 +352,12 @@ export class MenuController {
       c < this.currentMenu.displayedMenuItemCount;
       c++, i = this.currentMenu.previousMenuItemIndex(i)
     ) {
-      if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+      const menuItem = this.currentMenu.getFocusable(i);
+      if (menuItem) {
         this.ctl.currentProps.menuItemFocus = [i, true];
         this.ctl.events.emit({
           type: 'menu-item-focus',
-          payload: { index: i, menuItem: this.ctl.currentProps.menuItems?.[i] }
+          payload: { index: i, menuItem }
         });
         break;
       }
@@ -341,11 +366,12 @@ export class MenuController {
 
   focusFirstMenuItem() {
     for (let i = 0; i < this.currentMenu.displayedMenuItemCount; i++) {
-      if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+      const menuItem = this.currentMenu.getFocusable(i);
+      if (menuItem) {
         this.ctl.currentProps.menuItemFocus = [i, true];
         this.ctl.events.emit({
           type: 'menu-item-focus',
-          payload: { index: i, menuItem: this.ctl.currentProps.menuItems?.[i] }
+          payload: { index: i, menuItem }
         });
         break;
       }
@@ -354,11 +380,12 @@ export class MenuController {
 
   focusLastMenuItem() {
     for (let i = this.currentMenu.displayedMenuItemCount - 1; i >= 0; i--) {
-      if (isFocusable(this.ctl.currentProps.menuItems?.[i])) {
+      const menuItem = this.currentMenu.getFocusable(i);
+      if (menuItem) {
         this.ctl.currentProps.menuItemFocus = [i, true];
         this.ctl.events.emit({
           type: 'menu-item-focus',
-          payload: { index: i, menuItem: this.ctl.currentProps.menuItems?.[i] }
+          payload: { index: i, menuItem }
         });
         break;
       }
@@ -366,10 +393,8 @@ export class MenuController {
   }
 
   focusMenuItemById(id: string) {
-    const index = this.ctl.currentProps.menuItems?.findIndex((item) => {
-      return item.id === id;
-    });
-    if (index !== undefined && index !== -1) {
+    const index = this.currentMenu.getIndexFromId(id);
+    if (index) {
       this.focusMenuItemByIndex(index, true);
       return true;
     }

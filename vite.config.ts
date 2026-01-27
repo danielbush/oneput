@@ -1,16 +1,20 @@
 import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import mkcert from 'vite-plugin-mkcert';
+// import mkcert from 'vite-plugin-mkcert';
 
 // mkcert generates self-signed cert so we can run dev with https.  To revert to
 // http, remove the mkcert plugin and the server.https setting.
 
 export default defineConfig({
-  // @ts-expect-error mkcert is missing types or its types are wrong, ignore this error
-  plugins: [sveltekit(), devtoolsJson(), mkcert()],
+  plugins: [
+    sveltekit(),
+    devtoolsJson()
+    //// @ts-expect-error mkcert is missing types or its types are wrong, ignore this error
+    // mkcert()
+  ],
   server: {
-    https: true
+    // https: true
   },
   test: {
     expect: { requireAssertions: true },

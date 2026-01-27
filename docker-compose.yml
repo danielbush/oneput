@@ -5,9 +5,9 @@ services:
       context: .
       target: development
     ports:
-      - "5173:5173"
-      - "4173:4173"
-      - "9323:9323"
+      - '5173:5173'
+      - '4173:4173'
+      - '9323:9323'
     volumes:
       - .:/app
       # Create an anonymous volumes. This prevents the host's from overwriting

@@ -36,6 +36,7 @@ export const iconData = {
   NotebookPen: lu.NotebookPen,
   Tag: lu.Tag,
   Clock: lu.Clock,
+  ChevronsLeftRightEllipsis: lu.ChevronsLeftRightEllipsis,
   // Bindings we should provide for existing appObjects...
   GlobalFilterInputIcon: lu.Globe,
   CloseNotification: lu.X

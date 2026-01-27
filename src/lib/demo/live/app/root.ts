@@ -105,6 +105,14 @@ export class RootUI implements AppObject {
           }
         }),
         stdMenuItem({
+          id: 'mobile-native-confirmation',
+          left: (b) => [b.icon(icons.ChevronsLeftRightEllipsis)],
+          textContent: 'Fire mobile native confirmation...',
+          action: () => {
+            // TODO: postMessage here
+          }
+        }),
+        stdMenuItem({
           id: 'hide-oneput',
           left: (b) => [b.icon(icons.Command)],
           textContent: 'Hide',

@@ -35,13 +35,6 @@ export class MenuController {
     public fn: MenuItemsFnController
   ) {
     this.currentMenu = CurrentMenu.createBlank(this.ctl);
-    this.ctl.currentProps.onMenuOpenChange = (menuOpen) => {
-      if (menuOpen) {
-        // Focusing input when menu opens seems like a sensible default.
-        // We could have a setting to disable this if needed.
-        this.ctl.input.focusInput();
-      }
-    };
     this.ctl.currentProps.onMenuAction = () => {
       if (this.disableActions) {
         return;

@@ -93,7 +93,7 @@ export class Layout implements UILayout {
             tag: 'button',
             attr: {
               type: 'button',
-              title: 'Options',
+              title: 'Open/close menu',
               onclick: () => {
                 if (this.ctl.menu.isMenuOpen) {
                   this.ctl.menu.closeMenu();

@@ -18,7 +18,7 @@ export class Controller {
       ui: UIController.create(controller),
       app: AppController.create(controller)
     });
-    return new Controller(currentProps, createControllers);
+    return new Controller(currentProps, window, createControllers);
   }
 
   public events = new InternalEventEmitter();
@@ -33,6 +33,7 @@ export class Controller {
    */
   constructor(
     public currentProps: OneputProps,
+    private window: Window,
     createControllers: (ctl: Controller) => {
       menu: MenuController;
       input: InputController;
@@ -47,10 +48,16 @@ export class Controller {
     this.keys = controllers.keys;
     this.ui = controllers.ui;
     this.app = controllers.app;
+
+    this.window.addEventListener('message', (evt) => {
+      if (evt.data.type === 'test') {
+        this.notify(evt.data.payload.message, { duration: 3000 });
+      }
+    });
   }
 
   toggleHide() {
-    window.dispatchEvent(new Event('oneput-toggle-hide'));
+    this.window.dispatchEvent(new Event('oneput-toggle-hide'));
   }
 
   private notification = Notification.create(this);

@@ -108,11 +108,15 @@ export class RootUI implements AppObject {
           stdMenuItem({
             id: 'mobile-native-confirmation',
             left: (b) => [b.icon(icons.ChevronsLeftRightEllipsis)],
-            textContent: 'Fire mobile native confirmation...',
+            textContent: 'Test mobile native bridge...',
+            bottom: {
+              textContent:
+                'You should see a native confirmation dialog.  Click ok or cancel.  You should then see Oneput show a notfication within the webview.  This tests communication both ways.'
+            },
             action: () => {
               window.ReactNativeWebView!.postMessage(
                 JSON.stringify({
-                  type: 'confirm',
+                  type: 'test',
                   title: 'Test Confirmation',
                   message: 'This is a test confirmation message.'
                 })

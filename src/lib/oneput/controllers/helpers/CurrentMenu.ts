@@ -12,9 +12,11 @@ export class CurrentMenu {
     return new CurrentMenu(ctl, '');
   }
 
-  static create(ctl: Controller, menuId: string, menuItems: Array<MenuItemAny>) {
+  static create(ctl: Controller, menuId: string, menuItems: Array<MenuItemAny | undefined>) {
     return new CurrentMenu(ctl, menuId, menuItems);
   }
+
+  public allMenuItems: Array<MenuItemAny> = [];
 
   constructor(
     private ctl: Controller,
@@ -30,8 +32,10 @@ export class CurrentMenu {
      * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
      * For dynamic menu item generation, menuItems can be ignored.
      */
-    public allMenuItems: Array<MenuItemAny> = []
-  ) {}
+    _allMenuItems: Array<MenuItemAny | undefined> = []
+  ) {
+    this.allMenuItems = _allMenuItems.filter(Boolean) as Array<MenuItemAny>;
+  }
 
   get focusedMenuItemIndex() {
     return this.ctl.currentProps.menuItemFocus?.[0] ?? 0;

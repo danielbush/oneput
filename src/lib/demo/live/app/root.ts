@@ -104,14 +104,19 @@ export class RootUI implements AppObject {
             this.ctl.app.run(this.createKatexDemo());
           }
         }),
-        stdMenuItem({
-          id: 'mobile-native-confirmation',
-          left: (b) => [b.icon(icons.ChevronsLeftRightEllipsis)],
-          textContent: 'Fire mobile native confirmation...',
-          action: () => {
-            // TODO: postMessage here
-          }
-        }),
+        window.ReactNativeWebView &&
+          stdMenuItem({
+            id: 'mobile-native-confirmation',
+            left: (b) => [b.icon(icons.ChevronsLeftRightEllipsis)],
+            textContent: 'Fire mobile native confirmation...',
+            action: () => {
+              window.ReactNativeWebView!.postMessage({
+                type: 'confirm',
+                title: 'Test Confirmation',
+                message: 'This is a test confirmation message.'
+              });
+            }
+          }),
         stdMenuItem({
           id: 'hide-oneput',
           left: (b) => [b.icon(icons.Command)],

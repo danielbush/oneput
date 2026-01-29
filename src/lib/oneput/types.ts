@@ -1,5 +1,15 @@
 import type { Controller } from './controllers/controller.js';
 
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: unknown) => void;
+    };
+  }
+}
+
+export {};
+
 export type InputChangeListener = (evt: InputEvent) => void;
 
 export type OneputProps = {
@@ -10,7 +20,7 @@ export type OneputProps = {
    */
   menuItemFocus?: [number, boolean?];
   menuOpen: boolean;
-  menuItems?: Array<MenuItem | MenuItemDivider>;
+  menuItems?: Array<MenuItemAny>;
   inputElement?: HTMLInputElement | HTMLTextAreaElement;
   inputValue?: string;
   placeholder?: string;

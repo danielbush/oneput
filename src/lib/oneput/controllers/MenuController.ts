@@ -112,9 +112,16 @@ export class MenuController {
     this.runFocusBehaviour(params.focusBehaviour);
   }
 
-  setMenuItems(params: { id: string; focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
+  setMenuItems(params: {
+    id: string;
+    focusBehaviour?: FocusBehaviour;
+    items: Array<MenuItemAny | undefined>;
+  }) {
     this.currentMenu = CurrentMenu.create(this.ctl, params.id, params.items);
-    this._setMenuItems(params);
+    this._setMenuItems({
+      focusBehaviour: params.focusBehaviour,
+      items: this.currentMenu.allMenuItems
+    });
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
   }
 

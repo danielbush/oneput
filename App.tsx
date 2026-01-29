@@ -16,7 +16,7 @@ import { WebView } from 'react-native-webview';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 
-const WEB_SERVER_URL = `http://${process.env.EXPO_PUBLIC_WEBVIEW_HOSTNAME}:${process.env.EXPO_PUBLIC_WEBVIEW_PORT}`;
+const WEB_SERVER_URL = `${process.env.EXPO_PUBLIC_WEBVIEW_PROTO}://${process.env.EXPO_PUBLIC_WEBVIEW_HOSTNAME}:${process.env.EXPO_PUBLIC_WEBVIEW_PORT}${process.env.EXPO_PUBLIC_WEBVIEW_PATH}`;
 console.log(`WEB_SERVER_URL for webview content: ${WEB_SERVER_URL}`);
 
 export default function App() {

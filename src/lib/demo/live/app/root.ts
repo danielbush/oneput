@@ -110,11 +110,13 @@ export class RootUI implements AppObject {
             left: (b) => [b.icon(icons.ChevronsLeftRightEllipsis)],
             textContent: 'Fire mobile native confirmation...',
             action: () => {
-              window.ReactNativeWebView!.postMessage({
-                type: 'confirm',
-                title: 'Test Confirmation',
-                message: 'This is a test confirmation message.'
-              });
+              window.ReactNativeWebView!.postMessage(
+                JSON.stringify({
+                  type: 'confirm',
+                  title: 'Test Confirmation',
+                  message: 'This is a test confirmation message.'
+                })
+              );
             }
           }),
         stdMenuItem({

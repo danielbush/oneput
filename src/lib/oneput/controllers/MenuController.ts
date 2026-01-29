@@ -24,16 +24,17 @@ export type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
 
 export class MenuController {
   public static create(ctl: Controller) {
-    const currentMenu = CurrentMenu.create(ctl, '');
     const fn = MenuItemsFnController.create(ctl);
-    return new MenuController(ctl, currentMenu, fn);
+    return new MenuController(ctl, fn);
   }
+
+  public currentMenu: CurrentMenu;
 
   constructor(
     private ctl: Controller,
-    public currentMenu: CurrentMenu,
     public fn: MenuItemsFnController
   ) {
+    this.currentMenu = CurrentMenu.createBlank(this.ctl);
     this.ctl.currentProps.onMenuOpenChange = (menuOpen) => {
       if (menuOpen) {
         // Focusing input when menu opens seems like a sensible default.
@@ -87,16 +88,18 @@ export class MenuController {
     if (this.disableActions) {
       return;
     }
-    const current = this.currentMenu;
-    if (current.focusedMenuItem?.action) {
+    if (this.currentMenu.focusedMenuItem?.action) {
       // TODO: call this before calling the action.  If the action
       // runs a new appObject, we'll break the tracking logic in
       // AppController.
       this.ctl.events.emit({
         type: 'menu-action',
-        payload: { menuId: current.menuId, menuActionId: current.focusedMenuItem.id }
+        payload: {
+          menuId: this.currentMenu.menuId,
+          menuActionId: this.currentMenu.focusedMenuItem.id
+        }
       });
-      current.focusedMenuItem.action(this.ctl);
+      this.currentMenu.focusedMenuItem.action(this.ctl);
     }
   }
 
@@ -110,7 +113,7 @@ export class MenuController {
   }
 
   setMenuItems(params: { id: string; focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
-    this.currentMenu.setNewMenu(params.id, params.items);
+    this.currentMenu = CurrentMenu.create(this.ctl, params.id, params.items);
     this._setMenuItems(params);
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
   }

@@ -8,27 +8,30 @@ import type { Controller } from '../controller.js';
  * Does not make any changes to the menu.  Treat as a kind of value object.
  */
 export class CurrentMenu {
-  static create(ctl: Controller, menuId: string) {
-    return new CurrentMenu(ctl, menuId);
+  static createBlank(ctl: Controller) {
+    return new CurrentMenu(ctl, '');
+  }
+
+  static create(ctl: Controller, menuId: string, menuItems: Array<MenuItemAny>) {
+    return new CurrentMenu(ctl, menuId, menuItems);
   }
 
   constructor(
     private ctl: Controller,
-    private _menuId: string
+    private _menuId: string,
+    /**
+     * Represents the current list of available menu items which is usually used
+     * to set currentProps.menuItems.
+     *
+     * - setMenuItems updates this list.
+     * - _setMenuItems only updates currentProps.menuItems.
+     * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
+     *
+     * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
+     * For dynamic menu item generation, menuItems can be ignored.
+     */
+    public allMenuItems: Array<MenuItemAny> = []
   ) {}
-
-  /**
-   * Represents the current list of available menu items which is usually used
-   * to set currentProps.menuItems.
-   *
-   * - setMenuItems updates this list.
-   * - _setMenuItems only updates currentProps.menuItems.
-   * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
-   *
-   * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
-   * For dynamic menu item generation, menuItems can be ignored.
-   */
-  allMenuItems: Array<MenuItemAny> = [];
 
   get focusedMenuItemIndex() {
     return this.ctl.currentProps.menuItemFocus?.[0] ?? 0;
@@ -67,11 +70,6 @@ export class CurrentMenu {
   previousMenuItemIndex(index?: number) {
     index = index ?? this.focusedMenuItemIndex;
     return (index - 1 + this.displayedMenuItemCount) % Math.max(1, this.displayedMenuItemCount);
-  }
-
-  setNewMenu(menuId: string, menuItems: Array<MenuItemAny>) {
-    this._menuId = menuId;
-    this.allMenuItems = menuItems;
   }
 
   getFocusable(index: number) {

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useState, useRef } from 'react';
 import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
@@ -24,7 +24,32 @@ export default function App() {
             keyboardDisplayRequiresUserAction={false}
             hideKeyboardAccessoryView={true}
             onMessage={(event) => {
-              // TODO
+              try {
+                const data = JSON.parse(event.nativeEvent.data);
+                if (data.type === 'test') {
+                  Alert.alert(data.title ?? 'Confirm', data.message ?? '', [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                      onPress: () => {
+                        webViewRef.current?.injectJavaScript(`
+                          window.postMessage(${JSON.stringify({ type: 'test', payload: { message: 'Cancelled' } })}, '*');
+                        `);
+                      }
+                    },
+                    {
+                      text: 'OK',
+                      onPress: () => {
+                        webViewRef.current?.injectJavaScript(`
+                          window.postMessage(${JSON.stringify({ type: 'test', payload: { message: 'Confirmed' } })}, '*');
+                        `);
+                      }
+                    }
+                  ]);
+                }
+              } catch {
+                // Not JSON, ignore
+              }
             }}
             webviewDebuggingEnabled={true}
           />

@@ -18,3 +18,14 @@ tasks:
     desc: run expo server that renders the webview in this prototype; do this second
     cmds:
       - pnpm run start
+
+  run:android:
+    desc: builds app using android sdk and runs it in the emulator
+    summary: |
+      (1) Install Android Studio
+      (2) export JAVA_HOME and ANDROID_HOME - see shrc/java; both of these are provided by Android Studio
+      (3) start an emulator so it's running
+      (4) run this command, may take 13mins (!)
+      The app will launch in your emulator but it will no longer be inside "expo go".
+    cmds:
+      - pnpm run android

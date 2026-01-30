@@ -26,6 +26,17 @@
       "softwareKeyboardLayoutMode": "resize",
       "package": "com.anonymous.workspace"
     },
+    "plugins": [
+      [
+        "expo-share-intent",
+        {
+          "androidIntentFilters": ["image/*", "application/pdf"],
+          "androidMainActivityAttributes": {
+            "android:launchMode": "singleTask"
+          }
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

@@ -1,15 +1,38 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
+import { useShareIntent, ShareIntentProvider } from 'expo-share-intent';
 
 const WEB_SERVER_URL = `${process.env.EXPO_PUBLIC_WEBVIEW_PROTO}://${process.env.EXPO_PUBLIC_WEBVIEW_HOSTNAME}:${process.env.EXPO_PUBLIC_WEBVIEW_PORT}${process.env.EXPO_PUBLIC_WEBVIEW_PATH}`;
 console.log(`WEB_SERVER_URL for webview content: ${WEB_SERVER_URL}`);
 
-export default function App() {
+function AppContent() {
   const [webViewUrl, setWebViewUrl] = useState(WEB_SERVER_URL);
   const webViewRef = useRef<WebView>(null);
+  const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntent();
+
+  useEffect(() => {
+    if (hasShareIntent && shareIntent) {
+      console.log('Received share intent:', shareIntent);
+
+      const files = shareIntent.files || [];
+      if (files.length > 0) {
+        const fileInfo = files.map((f) => `${f.fileName || f.path} (${f.mimeType})`).join('\n');
+        Alert.alert('Shared Content Received', `Received ${files.length} file(s):\n${fileInfo}`, [
+          { text: 'OK', onPress: () => resetShareIntent() }
+        ]);
+      } else if (shareIntent.text) {
+        Alert.alert('Shared Text Received', shareIntent.text, [
+          { text: 'OK', onPress: () => resetShareIntent() }
+        ]);
+      }
+    }
+    if (error) {
+      console.error('Share intent error:', error);
+    }
+  }, [hasShareIntent, shareIntent, error, resetShareIntent]);
 
   return (
     <KeyboardProvider>
@@ -56,6 +79,14 @@ export default function App() {
         </View>
       </KeyboardAvoidingView>
     </KeyboardProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ShareIntentProvider>
+      <AppContent />
+    </ShareIntentProvider>
   );
 }
 

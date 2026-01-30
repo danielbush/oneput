@@ -29,3 +29,20 @@ tasks:
       The app will launch in your emulator but it will no longer be inside "expo go".
     cmds:
       - pnpm run android
+
+  run:android:clean:
+    desc: run:android but regenerate the native code
+    summary: |
+      Example:
+        The `expo-share-intent` plugin is configured in `app.json`, but the
+        AndroidManifest.xml doesn't have the required intent filters for
+        receiving shared content. This means the native build hasn't been
+        regenerated after adding the plugin.
+
+        **The cause:** After adding or modifying the `expo-share-intent`
+        plugin configuration in `app.json`, you need to rebuild the native
+        Android project so Expo can apply the plugin's modifications to the
+        AndroidManifest.
+    cmds:
+      - pnpx expo prebuild --clean
+      - task: run:android

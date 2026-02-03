@@ -6,6 +6,12 @@ declare global {
       postMessage: (message: unknown) => void;
     };
   }
+  /**
+   * The controller will register an event listener for 'message'. Prevent this
+   * happening multiple times. Probably more an issue when hot reloading.
+   */
+  var messageListenerIsSetup: boolean;
+  var insertImage: (dataUrl: string, fileName: string) => void;
 }
 
 export {};

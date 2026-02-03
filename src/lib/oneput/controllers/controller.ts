@@ -49,11 +49,38 @@ export class Controller {
     this.ui = controllers.ui;
     this.app = controllers.app;
 
-    this.window.addEventListener('message', (evt) => {
-      if (evt.data.type === 'test') {
-        this.notify(evt.data.payload.message, { duration: 3000 });
-      }
-    });
+    if (!globalThis.messageListenerIsSetup) {
+      const div = document.createElement('div');
+      div.innerHTML = `<p>setting up listener</p>`;
+      document.body.prepend(div);
+      this.window.addEventListener('message', (evt) => {
+        let div = document.createElement('div');
+        div.innerHTML = `<p>got message</p>`;
+        document.body.prepend(div);
+        if (evt.data.type === 'test') {
+          this.notify(evt.data.payload.message, { duration: 3000 });
+        }
+        if (evt.data.type === 'insertImage') {
+          div = document.createElement('div');
+          div.innerHTML = `<p>insertImage called</p>`;
+          document.body.prepend(div);
+          const dataUrl = evt.data.payload.dataUrl;
+          const fileName = evt.data.payload.fileName;
+          const img = document.createElement('img');
+          img.src = dataUrl;
+          img.alt = fileName;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.margin = '16px 0';
+          div = document.createElement('div');
+          div.innerHTML = `<p>${fileName}</p>`;
+          document.body.prepend(div);
+          document.body.prepend(img);
+          img.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+      globalThis.messageListenerIsSetup = true;
+    }
   }
 
   toggleHide() {

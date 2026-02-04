@@ -25,16 +25,14 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.anonymous.workspace"
+      "package": "com.anonymous.workspace",
+      "launchMode": "singleTask"
     },
     "plugins": [
       [
         "expo-share-intent",
         {
-          "androidIntentFilters": ["image/*", "application/pdf"],
-          "androidMainActivityAttributes": {
-            "android:launchMode": "singleTask"
-          }
+          "androidIntentFilters": ["image/*", "application/pdf"]
         }
       ]
     ],

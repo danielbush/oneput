@@ -79,6 +79,12 @@ Tests
 - `task test:browser` - browser / component tests
 - `task test:e2e`
 
+#### Claude Code
+
+This project includes a `nullables` skill (in `.claude/skills/nullables/`) which provides guidance for testing without mocks.
+
+TODO: Consider publishing the nullables skill to the registry.
+
 ### Packaging
 
 To test packaging see task `test:package`

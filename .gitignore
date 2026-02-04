@@ -37,3 +37,6 @@ vite.config.ts.timestamp-*
 # Docker
 .devcontainer/.env
 docker-compose.override.yml
+
+# vitest
+coverage

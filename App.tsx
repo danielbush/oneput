@@ -74,7 +74,7 @@ function AppContent() {
                 // Not JSON, ignore
               }
             }}
-            webviewDebuggingEnabled={true}
+            // webviewDebuggingEnabled={true}
           />
         </View>
       </KeyboardAvoidingView>

@@ -1,12 +1,23 @@
 # https://taskfile.dev
 
-version: '3'
+version: "3"
+silent: false
+set:
+  - errexit
+  - nounset
+  - pipefail
+# dotenv: [".env"]
 
-vars:
-  GREETING: Hello, World!
+includes:
+  oneput:
+    taskfile: ./packages/oneput/Taskfile.yml
+    dir: ./packages/oneput
 
 tasks:
   default:
     cmds:
-      - echo "{{.GREETING}}"
-    silent: true
+      - task --list-all
+
+  install:
+    cmds:
+      - pnpm i

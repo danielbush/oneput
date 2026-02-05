@@ -6,5 +6,13 @@
   "keywords": [],
   "author": "Daniel Bush <dlb.id.au@gmail.com>",
   "license": "ISC",
-  "packageManager": "pnpm@10.28.1"
+  "packageManager": "pnpm@10.28.1",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "patchedDependencies": {
+      "tinykeys": "patches/tinykeys.patch"
+    }
+  }
 }

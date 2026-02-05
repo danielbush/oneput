@@ -1,0 +1,163 @@
+# https://taskfile.dev
+
+version: '3'
+dotenv: ['.env']
+silent: false
+set:
+  - errexit
+  - nounset
+  - pipefail
+
+vars:
+  BUILD_PACKAGE: .build/sveltekit
+
+tasks:
+  fix:
+    desc: format + eslint (fix) + check types (no fix)
+    cmds:
+      - task: format
+      - task: eslint:fix
+      - task: check
+  format:
+    desc: format files
+    cmds:
+      - pnpm run format
+  eslint:fix:
+    desc: run eslint fixes
+    cmds:
+      - ./node_modules/.bin/eslint . --fix
+  eslint:
+    desc: run eslint
+    cmds:
+      - ./node_modules/.bin/eslint .
+  check:
+    desc: check types
+    cmds:
+      - pnpm run check
+  check:watch:
+    desc: check types
+    cmds:
+      - pnpm run check --watch
+  dev:
+    desc: Run dev server
+    cmds:
+      - pnpm run dev
+  dev:public:
+    desc: Run dev server
+    cmds:
+      - pnpm run dev --host=0.0.0.0
+  test:
+    desc: |
+      Run unit tests; but avoid triggering browser tests.
+      See vite.config.js
+    cmds:
+      - ./node_modules/.bin/vitest run --project=server
+  test:coverage:
+    desc: Like `test` but prints coverage at the end
+    cmds:
+      - ./node_modules/.bin/vitest run --project=server --coverage
+  test:browser:
+    desc: |
+      Test using browser mode, defaults to watch mode
+      See https://vitest.dev/guide/browser/
+      This was introduced by sveltekit boilerplate in place of jsdom.
+    cmds:
+      - ./node_modules/.bin/vitest run --project=client --watch
+  test:e2e:
+    desc: Run end-to-end tests (headless)
+    cmds:
+      - pnpm run test:e2e
+
+  install:
+    deps:
+      - setup:nvm
+    cmds:
+      - rm -rf node_modules
+      - echo "Installing pnpm globally"
+      - npm install -g pnpm
+      - pnpm install
+
+  # dev
+
+  docker:build:
+    desc: build docker image
+    cmds:
+      - docker build --progress=plain -t oneput .
+  docker:run:
+    desc: run docker image
+    cmds:
+      - docker run -p 5173:5173 -p 4173:4173 -p 9323:9323 oneput
+
+  up:
+    desc: Start docker-compose services and build if needed
+    cmds:
+      - docker compose up --build
+  down:
+    desc: Stop and remove docker-compose services
+    cmds:
+      - docker compose down
+  start:
+    desc: Start existing docker-compose services without rebuilding
+    cmds:
+      - docker compose start
+  stop:
+    desc: Stop running docker-compose services without removing them
+    cmds:
+      - docker compose stop
+  status:
+    desc: Show status of docker-compose services
+    cmds:
+      - docker compose ps
+  logs:
+    desc: View logs from docker-compose services (follow mode)
+    cmds:
+      - docker compose logs -f
+  attach:
+    desc: Attach to the running container with an interactive shell
+    cmds:
+      - docker compose exec app /bin/bash
+
+  # build
+
+  build:
+    desc: build dist/
+    cmds:
+      - pnpm run build
+
+  # test package
+
+  package:clean:
+    desc: Clear the .build/ area!
+    summary: |
+      BUILD_PACKAGE is the directory where we build the package.
+    cmds:
+      - rm -rf {{ .BUILD_PACKAGE }}
+
+  package:test:
+    desc: Create a test sveltekit application and import a locally packaged version of Oneput.
+    dir: '{{ .BUILD_PACKAGE }}'
+    cmds:
+      - pnpx sv create --template minimal --types ts --no-add-ons --install pnpm .
+      - cd ../.. && pnpm pack --pack-destination {{ .BUILD_PACKAGE }}
+      - pnpm add ./*.tgz
+      - cp  ../files/sveltekit/+page.svelte src/routes/
+      - echo "We can now visit {{ .BUILD_PACKAGE }} in a new editor and start it up to test a locally packaged version of oneput."
+
+  # low level
+
+  setup:nvm:
+    preconditions:
+      - test -d "$NVM_DIR"
+    cmds:
+      - . "$NVM_DIR/nvm.sh" && nvm use 24
+
+  git:hooks:install:
+    desc: Install git hooks from scripts/ directory
+    cmds:
+      - mkdir -p .git/hooks
+      - cp scripts/pre-commit .git/hooks/pre-commit
+      - chmod +x .git/hooks/pre-commit
+      - echo "✅ Git hooks installed successfully!"
+      - echo ""
+      - echo "Current hooks:"
+      - ls -la .git/hooks/* 2>/dev/null | grep -v sample || echo "No hooks found"

@@ -6,12 +6,15 @@ set:
   - errexit
   - nounset
   - pipefail
-# dotenv: [".env"]
+dotenv: ["./packages/oneput-native-container/.env"]
 
 includes:
   oneput:
     taskfile: ./packages/oneput/Taskfile.yml
     dir: ./packages/oneput
+  native:
+    taskfile: ./packages/oneput-native-container/Taskfile.yml
+    dir: ./packages/oneput-native-container
 
 tasks:
   default:

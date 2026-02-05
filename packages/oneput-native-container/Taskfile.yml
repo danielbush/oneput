@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-dotenv: ['.env']
+# dotenv: ['.env']
 
 version: '3'
 

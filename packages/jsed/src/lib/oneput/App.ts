@@ -1,0 +1,35 @@
+import { start, type JsedDocument, type JsedFocusEvent } from '../jsed/index.js';
+import { ElementIndicator } from './ElementIndicator.js';
+
+class App {
+  static create(doc: HTMLElement) {
+    const elementIndicator = ElementIndicator.create();
+    return new App(doc, elementIndicator);
+  }
+
+  private doc: JsedDocument;
+
+  constructor(
+    htmlDoc: HTMLElement,
+    private elementIndicator: ElementIndicator
+  ) {
+    this.doc = start(htmlDoc);
+    this.doc.listeners.FOCUS = this.handleElementFocus;
+
+    // Configure indicator:
+    const focus = this.doc.nav.getFocus();
+    this.elementIndicator.updateFocus(focus);
+    this.elementIndicator.showIndicator(true);
+  }
+
+  get document(): JsedDocument {
+    return this.doc;
+  }
+
+  private handleElementFocus = (evt: JsedFocusEvent) => {
+    const el = evt.targetType === 'F_ELEM' ? evt.element : evt.token;
+    this.elementIndicator.updateFocus(el);
+  };
+}
+
+export { App };

@@ -6,7 +6,6 @@ set:
   - errexit
   - nounset
   - pipefail
-dotenv: ["./packages/oneput-native-container/.env"]
 
 includes:
   oneput:

@@ -15,11 +15,13 @@ tasks:
     cmds:
       - pnpm run serve-web
   expo:
+    dotenv: ['.env']
     desc: run expo server that renders the webview in this prototype; do this second
     cmds:
       - pnpm run start
 
   run:android:
+    dotenv: ['.env']
     desc: builds app using android sdk and runs it in the emulator
     summary: |
       (1) Install Android Studio
@@ -31,6 +33,7 @@ tasks:
       - pnpm run android
 
   run:android:clean:
+    dotenv: ['.env']
     desc: run:android but regenerate the native code
     summary: |
       Example:

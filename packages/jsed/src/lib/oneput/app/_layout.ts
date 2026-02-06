@@ -14,6 +14,7 @@ import { DateDisplay } from '$shared/components/DateDisplay.js';
 import MenuStatus from '$shared/components/MenuStatus.svelte';
 import { icons } from '../icons.js';
 import { state } from '../state.js';
+import { EditDocument } from './EditDocument.js';
 
 /**
  * Define settings used by your particular layout.
@@ -24,33 +25,6 @@ export type LayoutSettings = {
    * Expose the bottom right corner of the layout.
    */
   outerRight?: (b: FlexChildBuilder) => FChildParams;
-};
-
-export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
-  openMenu: (c) => {
-    c.menu.openMenu();
-  },
-  focusInput: (c) => {
-    c.input.focusInput();
-  },
-  hideOneput: (c) => {
-    c.toggleHide();
-  },
-  REC_NEXT: () => {
-    state.app?.document.nav.REC_NEXT();
-  },
-  REC_PREV: () => {
-    state.app?.document.nav.REC_PREV();
-  },
-  SIB_NEXT: () => {
-    state.app?.document.nav.SIB_NEXT();
-  },
-  SIB_PREV: () => {
-    state.app?.document.nav.SIB_PREV();
-  },
-  UP: () => {
-    state.app?.document.nav.UP();
-  }
 };
 
 export const defaultGlobalBindings: KeyBindingMapSerializable = {
@@ -76,7 +50,40 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
   },
   SIB_NEXT: { bindings: ['$mod+j', 'ArrowDown'], description: 'Navigate to next sibling' },
   SIB_PREV: { bindings: ['$mod+k', 'ArrowUp'], description: 'Navigate to previous sibling' },
-  UP: { bindings: ['$mod+u', '$mod+ArrowUp'], description: 'Find next parent' }
+  UP: { bindings: ['$mod+u', '$mod+ArrowUp'], description: 'Find next parent' },
+  EDIT_FIRST: { bindings: ['Enter'], description: 'Edit first editable token' }
+};
+
+export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
+  openMenu: (ctl) => {
+    ctl.menu.openMenu();
+  },
+  focusInput: (ctl) => {
+    ctl.input.focusInput();
+  },
+  hideOneput: (ctl) => {
+    ctl.toggleHide();
+  },
+  REC_NEXT: () => {
+    state.app?.document.nav.REC_NEXT();
+  },
+  REC_PREV: () => {
+    state.app?.document.nav.REC_PREV();
+  },
+  SIB_NEXT: () => {
+    state.app?.document.nav.SIB_NEXT();
+  },
+  SIB_PREV: () => {
+    state.app?.document.nav.SIB_PREV();
+  },
+  UP: () => {
+    state.app?.document.nav.UP();
+  },
+  EDIT_FIRST: (ctl) => {
+    if (state?.app?.document) {
+      ctl.app.run(EditDocument.create(ctl));
+    }
+  }
 };
 
 const globalKeys = bindings.KeyEventBindings.fromSerializable(

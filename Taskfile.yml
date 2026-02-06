@@ -14,6 +14,9 @@ includes:
   native:
     taskfile: ./packages/oneput-native-container/Taskfile.yml
     dir: ./packages/oneput-native-container
+  jsed:
+    taskfile: ./packages/jsed/Taskfile.yml
+    dir: ./packages/jsed
 
 tasks:
   default:

@@ -31,7 +31,7 @@ importers:
         specifier: ^13.0.1
         version: 13.0.2
       oneput:
-        specifier: link:../oneput
+        specifier: 'workspace:'
         version: link:../oneput
     devDependencies:
       '@eslint/compat':

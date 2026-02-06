@@ -52,10 +52,10 @@ Running android emulator
 - create a new device
 - start it
 
-Then we can run:
+Built oneput-native-container, install into the running android emulator and run it:
 
 ```sh
-task native:run:android # runs android for native-oneput-container
+task native:run:android
 ```
 
 Running iOS simulator

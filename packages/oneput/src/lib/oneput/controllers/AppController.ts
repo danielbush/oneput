@@ -31,6 +31,9 @@ class AppVal {
   }
 }
 
+/**
+ * Manages AppObject's . One AppObject controls Oneput at a time.
+ */
 export class AppController {
   public static create(ctl: Controller) {
     return new AppController(ctl);

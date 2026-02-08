@@ -7,10 +7,12 @@ export class JsedCursor implements IJsedCursor {
    * The token the cursor is currently on.
    */
   #token: HTMLElement;
+  document: JsedDocument;
 
   constructor(params: { document: JsedDocument; token: HTMLElement }) {
     this.#token = params.token; // ts
     this.setToken(params.token);
+    this.document = params.document;
   }
 
   // #region Events

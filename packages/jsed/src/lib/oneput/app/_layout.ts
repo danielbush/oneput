@@ -86,7 +86,8 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
       if (focus) {
         const token = jsed.utils.token.getFirstToken(focus);
         if (token) {
-          ctl.app.run(EditDocument.create(ctl, { document: state.app.document, token }));
+          const cursor = state.app.document.requestCursor({ token });
+          ctl.app.run(EditDocument.create(ctl, { cursor }));
         }
       }
     }

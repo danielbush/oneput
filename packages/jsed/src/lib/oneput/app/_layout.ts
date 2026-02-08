@@ -15,6 +15,7 @@ import MenuStatus from '$shared/components/MenuStatus.svelte';
 import { icons } from '../icons.js';
 import { state } from '../state.js';
 import { EditDocument } from './EditDocument.js';
+import * as jsed from '$lib/jsed/index.js';
 
 /**
  * Define settings used by your particular layout.
@@ -81,7 +82,13 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   EDIT_FIRST: (ctl) => {
     if (state?.app?.document) {
-      ctl.app.run(EditDocument.create(ctl, state.app.document));
+      const focus = state.app.document.nav.getFocus();
+      if (focus) {
+        const token = jsed.utils.token.getFirstToken(focus);
+        if (token) {
+          ctl.app.run(EditDocument.create(ctl, { document: state.app.document, token }));
+        }
+      }
     }
   }
 };

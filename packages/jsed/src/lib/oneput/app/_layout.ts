@@ -81,7 +81,7 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   EDIT_FIRST: (ctl) => {
     if (state?.app?.document) {
-      ctl.app.run(EditDocument.create(ctl));
+      ctl.app.run(EditDocument.create(ctl, state.app.document));
     }
   }
 };

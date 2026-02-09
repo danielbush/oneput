@@ -1,6 +1,7 @@
 import type { JsedCursor, JsedDocument } from '$lib/jsed/index.js';
 import type { AppObject, Controller } from '$oneput';
 import * as jsed from '$lib/jsed/index.js';
+import { calcInputChange } from '../calcInputChange.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; token: HTMLElement }) {
@@ -11,7 +12,7 @@ export class EditDocument implements AppObject {
         onClose: instance.handleCursorClose
       });
       ctl.events.on('input-change', ({ value }) => {
-        cursor.replace(value);
+        calcInputChange({ value, cursor });
       });
       return cursor;
     };

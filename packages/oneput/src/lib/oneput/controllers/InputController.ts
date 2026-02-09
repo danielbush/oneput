@@ -53,9 +53,27 @@ export class InputController {
     return tick();
   }
 
-  selectAll() {
+  selectAll = () => {
     this.inputElement?.setSelectionRange(0, this.inputElement.value.length);
-  }
+  };
+
+  getRange: () => [number | null, number | null] = () => {
+    const start = this.inputElement?.selectionStart ?? null;
+    const stop = this.inputElement?.selectionEnd ?? null;
+    return [start, stop];
+  };
+
+  moveCursorToBeginning = () => {
+    this.inputElement?.setSelectionRange(0, 0);
+  };
+
+  moveCursorToEnd = () => {
+    console.log('moveCursorToEnd');
+    const len = this.inputElement?.value.length;
+    if (len) {
+      this.inputElement?.setSelectionRange(len, len);
+    }
+  };
 
   setDefaultPlaceholder(msg?: string | DynamicPlaceholderBase, apply = false) {
     this.defaultPlaceholder = msg;

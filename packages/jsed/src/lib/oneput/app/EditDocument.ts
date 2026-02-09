@@ -12,7 +12,11 @@ export class EditDocument implements AppObject {
         onClose: instance.handleCursorClose
       });
       ctl.events.on('input-change', ({ value }) => {
-        calcInputChange({ value, cursor });
+        calcInputChange({
+          value,
+          cursor,
+          inputWrapper: instance
+        });
       });
       return cursor;
     };
@@ -23,8 +27,16 @@ export class EditDocument implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private createCursor: (instance: EditDocument) => JsedCursor
+    private createCursor: (instance: EditDocument) => JsedCursor,
+    public setInputValue = ctl.input.setInputValue,
+    public getRange = ctl.input.getRange,
+    public moveCursorToBeginning = ctl.input.moveCursorToBeginning,
+    public moveCursorToEnd = ctl.input.moveCursorToEnd
   ) {}
+
+  onStart() {
+    this.cursor = this.createCursor(this);
+  }
 
   handleCursorClose = () => {
     // clearInput();
@@ -45,8 +57,4 @@ export class EditDocument implements AppObject {
     // this.#controller.setStatusElementFocus(token);
     this.cursor?.getDocument().nav.FOCUS(token);
   };
-
-  onStart() {
-    this.cursor = this.createCursor(this);
-  }
 }

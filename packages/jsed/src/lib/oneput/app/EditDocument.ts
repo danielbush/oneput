@@ -5,11 +5,15 @@ import * as jsed from '$lib/jsed/index.js';
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; token: HTMLElement }) {
     const createCursor = (instance: EditDocument) => {
-      return params.document.requestCursor({
+      const cursor = params.document.requestCursor({
         token: params.token,
         onSetToken: instance.handleSetToken,
         onClose: instance.handleCursorClose
       });
+      ctl.events.on('input-change', ({ value }) => {
+        cursor.replace(value);
+      });
+      return cursor;
     };
     return new EditDocument(ctl, createCursor);
   }

@@ -1,5 +1,6 @@
 import { DynamicPlaceholderBase } from '../types.js';
 import type { Controller } from './controller.js';
+import { tick } from 'svelte';
 
 export class InputController {
   public static create(ctl: Controller) {
@@ -49,6 +50,11 @@ export class InputController {
    */
   setInputValue(val?: string) {
     this.ctl.currentProps.inputValue = val || '';
+    return tick();
+  }
+
+  selectAll() {
+    this.inputElement?.setSelectionRange(0, this.inputElement.value.length);
   }
 
   setDefaultPlaceholder(msg?: string | DynamicPlaceholderBase, apply = false) {

@@ -27,15 +27,15 @@ export class EditDocument implements AppObject {
     this.ctl.app.exit();
   };
 
-  handleSetToken = (token: HTMLElement) => {
+  handleSetToken = async (token: HTMLElement) => {
     //// this.#cursorMarkers.clear();
     // this.#controller.onMobileKeyboardOpenOnce(() => {
     //   debug('correct mobile keyboard scroll');
     //   scrollIntoView(token);
     // });
     this.ctl.input.focusInput();
-    this.ctl.input.setInputValue(jsed.utils.token.getValue(token));
-    // this.ctl.input.selectAll();
+    await this.ctl.input.setInputValue(jsed.utils.token.getValue(token));
+    this.ctl.input.selectAll();
     //// scrollIntoView(token);
     // this.#controller.setStatusElementFocus(token);
     this.cursor?.getDocument().nav.FOCUS(token);

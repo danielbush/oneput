@@ -176,6 +176,9 @@ export class AppController {
     appObject.onStart();
   }
 
+  /**
+   * The running AppObject can call this to exit itself.
+   */
   public exit = (payload?: unknown) => {
     this.pop({ payload });
   };

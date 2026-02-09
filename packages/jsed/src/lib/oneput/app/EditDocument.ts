@@ -1,17 +1,47 @@
-import type { JsedCursor } from '$lib/jsed/index.js';
+import type { JsedCursor, JsedDocument } from '$lib/jsed/index.js';
 import type { AppObject, Controller } from '$oneput';
+import * as jsed from '$lib/jsed/index.js';
 
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { cursor: JsedCursor }) {
-    return new EditDocument(ctl, params.cursor);
+  static create(ctl: Controller, params: { document: JsedDocument; token: HTMLElement }) {
+    const createCursor = (instance: EditDocument) => {
+      return params.document.requestCursor({
+        token: params.token,
+        onSetToken: instance.handleSetToken,
+        onClose: instance.handleCursorClose
+      });
+    };
+    return new EditDocument(ctl, createCursor);
   }
+
+  private cursor?: JsedCursor;
 
   constructor(
     private ctl: Controller,
-    private cursor: JsedCursor
+    private createCursor: (instance: EditDocument) => JsedCursor
   ) {}
 
+  handleCursorClose = () => {
+    // clearInput();
+    // blurInput();
+    this.ctl.app.exit();
+  };
+
+  handleSetToken = (token: HTMLElement) => {
+    //// this.#cursorMarkers.clear();
+    // this.#controller.onMobileKeyboardOpenOnce(() => {
+    //   debug('correct mobile keyboard scroll');
+    //   scrollIntoView(token);
+    // });
+    this.ctl.input.focusInput();
+    this.ctl.input.setInputValue(jsed.utils.token.getValue(token));
+    // this.ctl.input.selectAll();
+    //// scrollIntoView(token);
+    // this.#controller.setStatusElementFocus(token);
+    this.cursor?.getDocument().nav.FOCUS(token);
+  };
+
   onStart() {
-    console.log('cursor', this.cursor);
+    this.cursor = this.createCursor(this);
   }
 }

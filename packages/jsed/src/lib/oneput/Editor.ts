@@ -49,17 +49,38 @@ export class Editor {
   ) {
     this.cursor = document.requestCursor({
       token: initialToken,
-      onTokenChange: this.onTokenChange
+      onTokenChange: this.handleTokenChange
     });
     ctl.events.on('input-change', ({ value }) => {
       this.userInput(value);
     });
     this.cursorMarkers = CursorMarkers.create(ctl, this.cursor);
-
-    ctl.input.focus();
+    this.ctl.input.focus();
     ctl.input.setInputValue(jsed.utils.token.getValue(this.cursor.getToken())).then(() => {
       ctl.input.selectAll();
     });
+    this.document.listeners.REQUEST_FOCUS = this.handleFocusRequest;
+  }
+
+  private handleFocusRequest = (evt: jsed.JsedFocusRequestEvent) => {
+    if (evt.targetType === 'TOKEN') {
+      if (this.cursor.isSameLine(evt.token)) {
+        this.cursor.setToken(evt.token);
+        this.ctl.input.focus();
+        // TODO: await instead of .then?
+        this.ctl.input.setInputValue(jsed.utils.token.getValue(evt.token)).then(() => {
+          this.ctl.input.selectAll();
+          return false; // TODO: old code: #handleCursorSetToken will call FOCUS.
+        });
+      }
+    }
+    this.exit();
+    return true;
+  };
+
+  private exit() {
+    console.warn('Editor wants to exit!');
+    // TODO exit editor as per #handleExist from jsed-ui src/session/edit/index.ts
   }
 
   /**
@@ -68,7 +89,7 @@ export class Editor {
    *
    * USER_CALL / USER_ACT
    */
-  private onTokenChange = async (token: HTMLElement) => {
+  private handleTokenChange = async (token: HTMLElement) => {
     this.ctl.input.setInputValue(jsed.utils.token.getValue(token)).then(() => {
       this.ctl.input.selectAll();
     });

@@ -34,11 +34,7 @@ export type JsedDocument = {
   /**
    * Request a cursor for the current token.
    */
-  requestCursor: (params: {
-    token: HTMLElement;
-    onSetToken: (token: HTMLElement) => void;
-    onClose: () => void;
-  }) => IJsedCursor;
+  requestCursor: (params: { token: HTMLElement }) => IJsedCursor;
 };
 
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
@@ -123,19 +119,6 @@ export type IJsedCursor = {
    * Close the current edit session.
    */
   close: () => void;
-  /**
-   * Notify the consumer that the cursor has to close.
-   *
-   * Example might be that we have run out of tokens and we are not replacing
-   * the last deleted token with an anchor token - see `delete` and
-   * `keepAnchor`.
-   */
-  onClose: (fn: () => void) => void;
-
-  /**
-   * Notify the consumer when the cursor moves.
-   */
-  onSetToken: (fn: (el: HTMLElement) => void) => void;
 
   /**
    * Whether `tok` is on the same line as the cursor's token.

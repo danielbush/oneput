@@ -9,15 +9,8 @@ export class JsedCursor implements IJsedCursor {
   #token: HTMLElement;
   #document: JsedDocument;
 
-  constructor(params: {
-    document: JsedDocument;
-    token: HTMLElement;
-    onSetToken: (token: HTMLElement) => void;
-    onClose: () => void;
-  }) {
+  constructor(params: { document: JsedDocument; token: HTMLElement }) {
     this.#token = params.token; // ts
-    this.onSetToken(params.onSetToken);
-    this.onClose = params.onClose;
     this.setToken(params.token);
     this.#document = params.document;
   }
@@ -25,15 +18,6 @@ export class JsedCursor implements IJsedCursor {
   getDocument() {
     return this.#document;
   }
-
-  // #region Events
-
-  #onSetToken?: (token: HTMLElement) => void;
-  onSetToken(fn: (token: HTMLElement) => void) {
-    this.#onSetToken = fn;
-  }
-
-  // #endregion
 
   // #region Setting
 
@@ -50,9 +34,6 @@ export class JsedCursor implements IJsedCursor {
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     el.classList.add(JSED_TOKEN_FOCUS_CLASS);
     this.#token = el;
-    if (this.#onSetToken) {
-      this.#onSetToken(el);
-    }
   }
 
   // #endregion
@@ -175,10 +156,7 @@ export class JsedCursor implements IJsedCursor {
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     this.#removeAllFocusClasses();
   }
-  #onClose?: () => void;
-  onClose(fn: () => void) {
-    this.#onClose = fn;
-  }
+
   /**
    * In the situation where we delete all LINE siblings AND we don't keep an
    * ANCHOR, we will have no more tokens.  We will set this flag to true and
@@ -188,9 +166,6 @@ export class JsedCursor implements IJsedCursor {
   #setExhausted() {
     this.close();
     this.#exhausted = true;
-    if (this.#onClose) {
-      this.#onClose();
-    }
   }
   #failIfExhausted() {
     if (this.#exhausted) {

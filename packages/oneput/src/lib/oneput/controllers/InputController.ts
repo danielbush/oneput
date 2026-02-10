@@ -35,15 +35,22 @@ export class InputController {
     this.inputElement = inputElement;
   }
 
-  focusInput() {
+  focusInput = () => {
     // Edge case: we set multiline from 1 to n > 1; the input element
     // changes to textarea.  We call focus synchronously after this change.
     // It's very possible the inputElement will still be pointing to the old
     // input element.
+    //
+    // TODO: I think we could use svelte tick() here?
     setTimeout(() => {
       this.inputElement?.focus();
     }, 0);
-  }
+  };
+
+  /**
+   * TODO: replace focusInput with this.
+   */
+  focus = this.focusInput;
 
   /**
    * Allows you to set the value in the input programmatically.  Typing by the user will also update it.

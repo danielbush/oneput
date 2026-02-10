@@ -25,8 +25,8 @@ export function makeDocument(root: HTMLElement): JsedDocument {
       // Placeholder, see below.
       return;
     },
-    requestCursor: ({ token }) => {
-      return new JsedCursor({ document: document!, token });
+    requestCursor: ({ token, onTokenChange }) => {
+      return new JsedCursor({ document: document!, token, onTokenChange });
     }
   };
   document = Object.assign(base, { nav: new Navigator(base) });

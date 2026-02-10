@@ -34,7 +34,10 @@ export type JsedDocument = {
   /**
    * Request a cursor for the current token.
    */
-  requestCursor: (params: { token: HTMLElement }) => IJsedCursor;
+  requestCursor: (params: {
+    token: HTMLElement;
+    onTokenChange: (token: HTMLElement) => void;
+  }) => IJsedCursor;
 };
 
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;

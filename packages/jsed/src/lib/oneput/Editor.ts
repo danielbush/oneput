@@ -47,6 +47,9 @@ export class Editor {
     initialToken: HTMLElement;
   }) {
     const instance = new Editor(document, ctl.input, initialToken);
+    // Wire up Oneput events in the factory here keeping Oneput logic outside
+    // the Editor instance but we'll wire up JsedCursor within this Editor since
+    // it's jsed-specific.
     ctl.events.on('input-change', ({ value }) => {
       instance.userInput(value);
     });
@@ -61,7 +64,8 @@ export class Editor {
     initialToken: HTMLElement
   ) {
     this.cursor = document.requestCursor({
-      token: initialToken
+      token: initialToken,
+      onTokenChange: this.onTokenChange
     });
     input.focus();
     input.setInputValue(jsed.utils.token.getValue(this.cursor.getToken())).then(() => {
@@ -69,19 +73,22 @@ export class Editor {
     });
   }
 
+  /**
+   * When the cursor changes its token because of some action it has been
+   * commanded to do (eg due to delete operation).
+   *
+   * USER_CALL / USER_ACT
+   */
+  private onTokenChange = async (token: HTMLElement) => {
+    this.input.setInputValue(jsed.utils.token.getValue(token)).then(() => {
+      this.input.selectAll();
+    });
+  };
+
   closeCursor() {
     // clearInput();
     // blurInput();
   }
-
-  /**
-   * Handles USER_CALL / USER_ACT operations.
-   *
-   * @param token {HTMLElement} What the user has clicked/touched.
-   */
-  // setCursor(token: HTMLElement) {
-  //   //
-  // }
 
   /**
    * Handles USER_TYPE operations.

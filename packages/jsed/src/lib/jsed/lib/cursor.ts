@@ -8,11 +8,25 @@ export class JsedCursor implements IJsedCursor {
    */
   #token: HTMLElement;
   #document: JsedDocument;
+  #onTokenChange: (token: HTMLElement) => void;
 
-  constructor(params: { document: JsedDocument; token: HTMLElement }) {
+  static create(params: {
+    document: JsedDocument;
+    token: HTMLElement;
+    onTokenChange: (token: HTMLElement) => void;
+  }) {
+    return new JsedCursor(params);
+  }
+
+  constructor(params: {
+    document: JsedDocument;
+    token: HTMLElement;
+    onTokenChange: (token: HTMLElement) => void;
+  }) {
     this.#token = params.token; // ts
-    this.setToken(params.token);
     this.#document = params.document;
+    this.#onTokenChange = params.onTokenChange;
+    this.#setToken(params.token);
   }
 
   getDocument() {
@@ -26,6 +40,12 @@ export class JsedCursor implements IJsedCursor {
     return this.#token;
   }
 
+  /**
+   * Allows a consumer to set the token.
+   *
+   * The onTokenChange callback is not called. Instead, you should perform other
+   * change before and after calling this.
+   */
   setToken(el: HTMLElement) {
     if (!token.isToken(el)) {
       throw new Error(`Not a token`);
@@ -36,6 +56,15 @@ export class JsedCursor implements IJsedCursor {
     this.#token = el;
   }
 
+  /**
+   * Called internally when an operation causes the token to change. We need to
+   * notify the consumer, so we call the onTokenChange callback.
+   */
+  #setToken(el: HTMLElement) {
+    this.setToken(el);
+    this.#onTokenChange(el);
+  }
+
   // #endregion
 
   // #region Motion
@@ -44,14 +73,14 @@ export class JsedCursor implements IJsedCursor {
     this.#failIfExhausted();
     const nextToken = token.getNextLineSibling(this.#token);
     if (nextToken) {
-      this.setToken(nextToken);
+      this.#setToken(nextToken);
     }
   }
   movePrevious() {
     this.#failIfExhausted();
     const prevToken = token.getPreviousLineSibling(this.#token);
     if (prevToken) {
-      this.setToken(prevToken);
+      this.#setToken(prevToken);
     }
   }
 
@@ -79,7 +108,7 @@ export class JsedCursor implements IJsedCursor {
       this.#setExhausted();
       return;
     }
-    this.setToken(landOnTok);
+    this.#setToken(landOnTok);
     return;
   }
   append(val: string): HTMLElement {
@@ -135,7 +164,7 @@ export class JsedCursor implements IJsedCursor {
     this.#failIfExhausted();
     token.splitBefore(this.#token);
     // We may end up in a new token, so we need to update the focus.
-    this.setToken(this.#token);
+    this.#setToken(this.#token);
   }
 
   splitAfter() {
@@ -143,7 +172,7 @@ export class JsedCursor implements IJsedCursor {
     const [, after] = token.splitAfter(this.#token);
     const firstTok = token.getFirstToken(after);
     if (firstTok) {
-      this.setToken(firstTok);
+      this.#setToken(firstTok);
     }
   }
 
@@ -218,7 +247,7 @@ export class JsedCursor implements IJsedCursor {
     // Focus on token in el?
     const first = token.getFirstToken(el);
     if (first) {
-      this.setToken(first);
+      this.#setToken(first);
     }
   }
 
@@ -235,7 +264,7 @@ export class JsedCursor implements IJsedCursor {
     // Focus on token in el?
     const first = token.getFirstToken(el);
     if (first) {
-      this.setToken(first);
+      this.#setToken(first);
     }
   }
 

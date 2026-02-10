@@ -211,3 +211,11 @@ export abstract class DynamicPlaceholderBase {
   abstract enable(setPlaceholder: (msg?: string) => void): void;
   abstract disable(): void;
 }
+
+export type InputSelectionState =
+  | 'SELECT_ALL'
+  | 'SELECT_PARTIAL'
+  | 'CURSOR_AT_BEGINNING'
+  | 'CURSOR_AT_MIDDLE'
+  | 'CURSOR_AT_END'
+  | 'EMPTY';

@@ -2,18 +2,7 @@ import type { Controller } from '$oneput';
 import type { JsedCursor } from '$lib/jsed/index.js';
 import type { JsedDocument } from '$lib/jsed/types.js';
 import * as jsed from '$lib/jsed/index.js';
-
-/**
- * Represents an html input or textarea that can be manipulated by an editor.
- */
-export type InputWrapper = {
-  setInputValue: (value: string) => Promise<void>;
-  getRange: () => [number | null, number | null];
-  moveCursorToBeginning: () => void;
-  moveCursorToEnd: () => void;
-  focus: () => void;
-  selectAll: () => void;
-};
+import { CursorMarkers } from './CursorMarkers.js';
 
 /**
  * Performs edit/navigation operations by coordinating between JsedDocument,
@@ -46,30 +35,30 @@ export class Editor {
     controller: Controller;
     initialToken: HTMLElement;
   }) {
-    const instance = new Editor(document, ctl.input, initialToken);
-    // Wire up Oneput events in the factory here keeping Oneput logic outside
-    // the Editor instance but we'll wire up JsedCursor within this Editor since
-    // it's jsed-specific.
-    ctl.events.on('input-change', ({ value }) => {
-      instance.userInput(value);
-    });
+    const instance = new Editor(ctl, document, initialToken);
     return instance;
   }
 
   public cursor: JsedCursor;
+  public cursorMarkers: CursorMarkers;
 
   constructor(
+    private ctl: Controller,
     private document: JsedDocument,
-    private input: InputWrapper,
     initialToken: HTMLElement
   ) {
     this.cursor = document.requestCursor({
       token: initialToken,
       onTokenChange: this.onTokenChange
     });
-    input.focus();
-    input.setInputValue(jsed.utils.token.getValue(this.cursor.getToken())).then(() => {
-      input.selectAll();
+    ctl.events.on('input-change', ({ value }) => {
+      this.userInput(value);
+    });
+    this.cursorMarkers = CursorMarkers.create(ctl, this.cursor);
+
+    ctl.input.focus();
+    ctl.input.setInputValue(jsed.utils.token.getValue(this.cursor.getToken())).then(() => {
+      ctl.input.selectAll();
     });
   }
 
@@ -80,8 +69,8 @@ export class Editor {
    * USER_CALL / USER_ACT
    */
   private onTokenChange = async (token: HTMLElement) => {
-    this.input.setInputValue(jsed.utils.token.getValue(token)).then(() => {
-      this.input.selectAll();
+    this.ctl.input.setInputValue(jsed.utils.token.getValue(token)).then(() => {
+      this.ctl.input.selectAll();
     });
   };
 
@@ -102,7 +91,7 @@ export class Editor {
       ? jsed.utils.token.getValue(this.cursor.getToken()) + ' ' // "foo" + " "
       : inputValue;
     // Apply rewrite:
-    this.input.setInputValue(value);
+    this.ctl.input.setInputValue(value);
 
     // part0 can be undefined if we split on whitespace:
     const [part0, ...parts] = value.split(/\s+/).filter(Boolean);
@@ -120,7 +109,7 @@ export class Editor {
     if (containsSpace) {
       const firstWord = containsSpace[1];
       const firstSpace = containsSpace[2];
-      const [, stop] = this.input.getRange();
+      const [, stop] = this.ctl.input.getRange();
       preferFirstPart = firstWord.length === stop || stop == firstWord.length + firstSpace.length;
     }
     let lastToken: HTMLElement | null = null;
@@ -140,7 +129,7 @@ export class Editor {
 
     // Update TOKEN_FOCUS and input.
     if (prependedSpace) {
-      this.input.moveCursorToBeginning();
+      this.ctl.input.moveCursorToBeginning();
     }
 
     const finalToken = preferFirstPart ? this.cursor.getToken() : lastToken;
@@ -152,13 +141,13 @@ export class Editor {
       //   debug('correct mobile keyboard scroll');
       //   scrollIntoView(token);
       // });
-      this.input.focus();
-      await this.input.setInputValue(jsed.utils.token.getValue(finalToken));
-      this.input.selectAll();
+      this.ctl.input.focus();
+      await this.ctl.input.setInputValue(jsed.utils.token.getValue(finalToken));
+      this.ctl.input.selectAll();
       //// scrollIntoView(token);
       // this.#controller.setStatusElementFocus(token);
       this.document.nav.FOCUS(finalToken);
-      this.input.moveCursorToEnd();
+      this.ctl.input.moveCursorToEnd();
     }
   }
 }

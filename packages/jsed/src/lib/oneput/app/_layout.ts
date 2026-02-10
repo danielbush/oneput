@@ -52,7 +52,8 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
   SIB_NEXT: { bindings: ['$mod+j', 'ArrowDown'], description: 'Navigate to next sibling' },
   SIB_PREV: { bindings: ['$mod+k', 'ArrowUp'], description: 'Navigate to previous sibling' },
   UP: { bindings: ['$mod+u', '$mod+ArrowUp'], description: 'Find next parent' },
-  EDIT_FIRST: { bindings: ['Enter'], description: 'Edit first editable token' }
+  EDIT_FIRST: { bindings: ['Enter'], description: 'Edit first editable token' },
+  TOGGLE_SELECT: { bindings: ['$mod+e'], description: 'Toggle input element cursor state' }
 };
 
 export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
@@ -91,6 +92,9 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
         }
       }
     }
+  },
+  TOGGLE_SELECT: (ctl) => {
+    ctl.input.toggleSelect();
   }
 };
 

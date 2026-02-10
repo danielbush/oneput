@@ -1,5 +1,5 @@
 import type { KeyBindingMap } from '../lib/bindings.js';
-import type { MenuItem } from '../types.js';
+import type { InputSelectionState, MenuItem } from '../types.js';
 
 // Internal event system for decoupled communication
 export type InternalEvent =
@@ -8,7 +8,8 @@ export type InternalEvent =
   | MenuOpenChangeEvent
   | MenuItemFocusEvent
   | MenuActionEvent
-  | MenuSetItemsEvent;
+  | MenuSetItemsEvent
+  | ToggleSelectEvent;
 
 export type InputChangeEvent = {
   type: 'input-change';
@@ -38,6 +39,10 @@ export type MenuActionEvent = {
 export type MenuSetItemsEvent = {
   type: 'set-menu-items';
   payload: { menuId: string };
+};
+export type ToggleSelectEvent = {
+  type: 'toggle-select';
+  payload: { selection: InputSelectionState };
 };
 
 export class InternalEventEmitter {

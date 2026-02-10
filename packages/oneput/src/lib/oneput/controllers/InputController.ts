@@ -1,6 +1,8 @@
 import { DynamicPlaceholderBase } from '../types.js';
+import type { InputSelectionState } from '../types.js';
 import type { Controller } from './controller.js';
 import { tick } from 'svelte';
+import { SelectionToggler } from './helpers/SelectionToggler.js';
 
 export class InputController {
   public static create(ctl: Controller) {
@@ -26,13 +28,15 @@ export class InputController {
   }
 
   private defaultPlaceholder?: string | DynamicPlaceholderBase;
-  private inputElement: HTMLInputElement | undefined;
+  private inputElement?: HTMLInputElement;
+  private selectionToggler?: SelectionToggler;
 
   /**
    * Used by Oneput to tell the controller what the input element is.
    */
   handleInputElementChange(inputElement: HTMLInputElement | undefined) {
     this.inputElement = inputElement;
+    this.selectionToggler = new SelectionToggler(this.ctl);
   }
 
   focusInput = () => {
@@ -56,12 +60,45 @@ export class InputController {
    * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
    */
   setInputValue(val?: string) {
-    this.ctl.currentProps.inputValue = val || '';
+    this.ctl.currentProps.inputValue = val?.trim() || '';
     return tick();
   }
 
   selectAll = () => {
     this.inputElement?.setSelectionRange(0, this.inputElement.value.length);
+  };
+
+  /**
+   * Determine the type of selection in the input.
+   */
+  getSelectionState(): InputSelectionState {
+    const len = this.ctl.currentProps.inputValue?.length ?? 0;
+    const start = this.inputElement?.selectionStart ?? 0;
+    const stop = this.inputElement?.selectionEnd ?? 0;
+    if (len === 0) {
+      return 'EMPTY';
+    }
+    if (start === stop) {
+      if (start === 0) {
+        return 'CURSOR_AT_BEGINNING';
+      }
+      if (start === len) {
+        return 'CURSOR_AT_END';
+      }
+      return 'CURSOR_AT_MIDDLE';
+    }
+    if (start === 0 && stop === len) {
+      return 'SELECT_ALL';
+    }
+    return 'SELECT_PARTIAL';
+  }
+
+  toggleSelect = () => {
+    this.selectionToggler?.toggle();
+    this.ctl.events.emit({
+      type: 'toggle-select',
+      payload: { selection: this.getSelectionState() }
+    });
   };
 
   getRange: () => [number | null, number | null] = () => {

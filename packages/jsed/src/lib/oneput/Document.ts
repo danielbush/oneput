@@ -7,6 +7,11 @@ import { ElementIndicator } from './ElementIndicator.js';
  * When created we can navigate the document and launch Editor to edit it.
  */
 export class Document {
+  static createFromHTML(docRoot: HTMLElement, htmlContent: string) {
+    docRoot.innerHTML = htmlContent;
+    return Document.create(docRoot);
+  }
+
   static create(doc: HTMLElement) {
     const elementIndicator = ElementIndicator.create();
     return new Document(doc, elementIndicator);
@@ -20,6 +25,7 @@ export class Document {
   ) {
     this.doc = start(htmlDoc);
     this.doc.listeners.FOCUS = this.handleElementFocus;
+    this.doc.nav.FOCUS(this.doc.root);
 
     // Configure indicator:
     const focus = this.doc.nav.getFocus();

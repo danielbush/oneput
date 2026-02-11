@@ -34,10 +34,7 @@ export class Root implements AppObject {
                 return;
               }
               const html = await response.text();
-              docRoot.innerHTML = html;
-
-              state.currentDocument = Document.create(docRoot);
-              state.currentDocument.document.nav.FOCUS(state.currentDocument.document.root);
+              state.currentDocument = Document.createFromHTML(docRoot, html);
               this.ctl.menu.closeMenu();
             } catch (err) {
               this.ctl.notify('Error loading test doc!');

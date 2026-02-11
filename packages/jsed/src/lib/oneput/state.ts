@@ -1,3 +1,3 @@
-import { App } from './App.js';
+import { Document } from './Document.js';
 
-export const state: { app?: App } = {};
+export const state: { currentDocument?: Document } = {};

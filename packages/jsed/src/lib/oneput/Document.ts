@@ -1,10 +1,15 @@
 import { start, type JsedDocument, type JsedFocusEvent } from '../jsed/index.js';
 import { ElementIndicator } from './ElementIndicator.js';
 
-class App {
+/**
+ * Represents an editable html ("document").
+ *
+ * When created we can navigate the document and launch Editor to edit it.
+ */
+export class Document {
   static create(doc: HTMLElement) {
     const elementIndicator = ElementIndicator.create();
-    return new App(doc, elementIndicator);
+    return new Document(doc, elementIndicator);
   }
 
   private doc: JsedDocument;
@@ -31,5 +36,3 @@ class App {
     this.elementIndicator.updateFocus(el);
   };
 }
-
-export { App };

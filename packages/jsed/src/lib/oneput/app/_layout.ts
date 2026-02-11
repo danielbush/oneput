@@ -67,27 +67,27 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
     ctl.toggleHide();
   },
   REC_NEXT: () => {
-    state.app?.document.nav.REC_NEXT();
+    state.currentDocument?.document.nav.REC_NEXT();
   },
   REC_PREV: () => {
-    state.app?.document.nav.REC_PREV();
+    state.currentDocument?.document.nav.REC_PREV();
   },
   SIB_NEXT: () => {
-    state.app?.document.nav.SIB_NEXT();
+    state.currentDocument?.document.nav.SIB_NEXT();
   },
   SIB_PREV: () => {
-    state.app?.document.nav.SIB_PREV();
+    state.currentDocument?.document.nav.SIB_PREV();
   },
   UP: () => {
-    state.app?.document.nav.UP();
+    state.currentDocument?.document.nav.UP();
   },
   EDIT_FIRST: (ctl) => {
-    if (state?.app?.document) {
-      const focus = state.app.document.nav.getFocus();
+    if (state?.currentDocument?.document) {
+      const focus = state.currentDocument.document.nav.getFocus();
       if (focus) {
         const token = jsed.utils.token.getFirstToken(focus);
         if (token) {
-          const session = EditDocument.create(ctl, { document: state.app.document, token });
+          const session = EditDocument.create(ctl, { document: state.currentDocument.document, token });
           ctl.app.run(session);
         }
       }

@@ -2,7 +2,7 @@ import type { AppObject, Controller } from '$oneput';
 import { stdMenuItem } from '$shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 import type { LayoutSettings } from './_layout.js';
-import { App } from '../App.js';
+import { Document } from '../Document.js';
 import { state } from '../state.js';
 
 export class Root implements AppObject {
@@ -36,8 +36,8 @@ export class Root implements AppObject {
               const html = await response.text();
               docRoot.innerHTML = html;
 
-              state.app = App.create(docRoot);
-              state.app.document.nav.FOCUS(state.app.document.root);
+              state.currentDocument = Document.create(docRoot);
+              state.currentDocument.document.nav.FOCUS(state.currentDocument.document.root);
               this.ctl.menu.closeMenu();
             } catch (err) {
               this.ctl.notify('Error loading test doc!');

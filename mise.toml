@@ -1,5 +1,6 @@
 [tools]
 node = "24"
 # Use: corepack enable && corepack prepare pnpm@latest --activate
+# Or for specific version: corepack use pnpm@10.29.3
 # pnpm = "10"
 task = "latest"

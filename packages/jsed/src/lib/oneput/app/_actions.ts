@@ -3,6 +3,7 @@ import { state } from '../state.js';
 import { Document } from '../Document.js';
 import { EditDocument } from './EditDocument.js';
 import * as jsed from '$lib/jsed/index.js';
+import { Editor } from '../Editor.js';
 
 export const actions: Record<string, (ctl: Controller) => void> = {
   openMenu: (ctl) => {
@@ -23,9 +24,18 @@ export const actions: Record<string, (ctl: Controller) => void> = {
       if (focus) {
         const token = jsed.utils.token.getFirstToken(focus);
         if (token) {
+          const doc = state.currentDocument;
           const session = EditDocument.create(ctl, {
-            document: state.currentDocument.document,
-            token
+            document: doc,
+            onStart: () => {
+              Editor.create(ctl, {
+                document: doc.document,
+                initialToken: token
+              });
+            },
+            onExit: () => {
+              //
+            }
           });
           ctl.app.run(session);
         }
@@ -48,7 +58,7 @@ export const actions: Record<string, (ctl: Controller) => void> = {
         return;
       }
       const html = await response.text();
-      state.currentDocument = Document.createFromHTML(docRoot, html);
+      state.currentDocument = Document.createFromHTML(ctl, docRoot, html);
       ctl.menu.closeMenu();
     } catch (err) {
       ctl.notify('Error loading test doc!');

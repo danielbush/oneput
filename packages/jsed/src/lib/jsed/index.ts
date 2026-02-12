@@ -36,4 +36,4 @@ export {
   JSED_IGNORE_CLASS
 } from './lib/constants.js';
 export { start, utils };
-export type { JsedDocument, JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor as JsedCursor };
+export type { JsedDocument, JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor };

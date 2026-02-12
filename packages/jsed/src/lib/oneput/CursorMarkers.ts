@@ -1,4 +1,4 @@
-import { type JsedCursor } from '$lib/jsed/index.js';
+import { type IJsedCursor } from '$lib/jsed/index.js';
 import type { Controller, InputSelectionState } from '$oneput';
 import * as constants from './constants.js';
 
@@ -18,13 +18,13 @@ import * as constants from './constants.js';
  * - TOKEN_APPEND_CLASS - the cursor is about to append text to the token (no spaces)
  */
 export class CursorMarkers {
-  static create(ctl: Controller, cursor: JsedCursor): CursorMarkers {
+  static create(ctl: Controller, cursor: IJsedCursor): CursorMarkers {
     return new CursorMarkers(ctl, cursor);
   }
 
   constructor(
     private ctl: Controller,
-    private cursor: JsedCursor
+    private cursor: IJsedCursor
   ) {
     this.ctl.events.on('input-change', ({ value }) => {
       this.handleInputChange(value);

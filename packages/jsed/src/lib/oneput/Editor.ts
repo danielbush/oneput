@@ -1,5 +1,5 @@
 import type { Controller } from '$oneput';
-import type { JsedCursor } from '$lib/jsed/index.js';
+import type { IJsedCursor } from '$lib/jsed/index.js';
 import type { JsedDocument } from '$lib/jsed/types.js';
 import * as jsed from '$lib/jsed/index.js';
 import { CursorMarkers } from './CursorMarkers.js';
@@ -26,20 +26,21 @@ import { CursorMarkers } from './CursorMarkers.js';
  *   - input is not updated
  */
 export class Editor {
-  static create({
-    document,
-    controller: ctl,
-    initialToken
-  }: {
-    document: JsedDocument;
-    controller: Controller;
-    initialToken: HTMLElement;
-  }) {
+  static create(
+    ctl: Controller,
+    {
+      document,
+      initialToken
+    }: {
+      document: JsedDocument;
+      initialToken: HTMLElement;
+    }
+  ) {
     const instance = new Editor(ctl, document, initialToken);
     return instance;
   }
 
-  public cursor: JsedCursor;
+  public cursor: IJsedCursor;
   public cursorMarkers: CursorMarkers;
 
   constructor(
@@ -70,8 +71,8 @@ export class Editor {
         // TODO: await instead of .then?
         this.ctl.input.setInputValue(jsed.utils.token.getValue(evt.token)).then(() => {
           this.ctl.input.selectAll();
-          return false; // TODO: old code: #handleCursorSetToken will call FOCUS.
         });
+        return false; // TODO: old code: #handleCursorSetToken will call FOCUS.
       }
     }
     this.exit();
@@ -81,6 +82,11 @@ export class Editor {
   private exit() {
     console.warn('Editor wants to exit!');
     // TODO exit editor as per #handleExist from jsed-ui src/session/edit/index.ts
+  }
+
+  closeCursor() {
+    // clearInput();
+    // blurInput();
   }
 
   /**
@@ -94,11 +100,6 @@ export class Editor {
       this.ctl.input.selectAll();
     });
   };
-
-  closeCursor() {
-    // clearInput();
-    // blurInput();
-  }
 
   /**
    * Handles USER_TYPE operations.

@@ -1,40 +1,36 @@
+import type { Controller } from '$oneput';
 import { start, type JsedDocument, type JsedFocusEvent } from '../jsed/index.js';
 import { ElementIndicator } from './ElementIndicator.js';
 
 /**
- * Represents an editable html ("document").
+ * Represents an editable html ("document") and interfaces with Oneput and jsed.
  *
  * When created we can navigate the document and launch Editor to edit it.
  */
 export class Document {
-  static createFromHTML(docRoot: HTMLElement, htmlContent: string) {
+  static createFromHTML(ctl: Controller, docRoot: HTMLElement, htmlContent: string) {
     docRoot.innerHTML = htmlContent;
-    return Document.create(docRoot);
+    return Document.create(ctl, docRoot);
   }
 
-  static create(doc: HTMLElement) {
+  static create(ctl: Controller, el: HTMLElement) {
     const elementIndicator = ElementIndicator.create();
-    return new Document(doc, elementIndicator);
+    const jsedDocument = start(el);
+    return new Document(ctl, jsedDocument, elementIndicator);
   }
-
-  private doc: JsedDocument;
 
   constructor(
-    htmlDoc: HTMLElement,
+    private ctl: Controller,
+    public document: JsedDocument,
     private elementIndicator: ElementIndicator
   ) {
-    this.doc = start(htmlDoc);
-    this.doc.listeners.FOCUS = this.handleElementFocus;
-    this.doc.nav.FOCUS(this.doc.root);
+    this.document.listeners.FOCUS = this.handleElementFocus;
+    this.document.nav.FOCUS(this.document.root);
 
     // Configure indicator:
-    const focus = this.doc.nav.getFocus();
+    const focus = this.document.nav.getFocus();
     this.elementIndicator.updateFocus(focus);
     this.elementIndicator.showIndicator(true);
-  }
-
-  get document(): JsedDocument {
-    return this.doc;
   }
 
   private handleElementFocus = (evt: JsedFocusEvent) => {

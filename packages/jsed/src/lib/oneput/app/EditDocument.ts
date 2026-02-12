@@ -1,35 +1,21 @@
-import type { JsedDocument } from '$lib/jsed/index.js';
 import type { AppObject, Controller } from '$oneput';
-import { Editor } from '../Editor.js';
+import { Document } from '../Document.js';
 
 /**
  * Oneput AppObject that manages an edit session for a single document.
  */
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument; token: HTMLElement }) {
-    const createEditor = () => {
-      const editor = Editor.create({
-        controller: ctl,
-        document: params.document,
-        initialToken: params.token
-      });
-      return editor;
-    };
-    return new EditDocument(ctl, createEditor);
+  static create(
+    ctl: Controller,
+    params: { document: Document; onStart: () => void; onExit: () => void }
+  ) {
+    return new EditDocument(ctl, params.document, params.onStart, params.onExit);
   }
-
-  private editor?: Editor;
 
   constructor(
     private ctl: Controller,
-    private createEditor: () => Editor
+    private document: Document,
+    public onStart: () => void,
+    public onExit: () => void
   ) {}
-
-  onStart() {
-    this.editor = this.createEditor();
-  }
-
-  onExit = () => {
-    //
-  };
 }

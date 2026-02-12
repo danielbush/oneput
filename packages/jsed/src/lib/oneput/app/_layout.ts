@@ -13,9 +13,7 @@ import { TimeDisplay } from '$shared/components/TimeDisplay.js';
 import { DateDisplay } from '$shared/components/DateDisplay.js';
 import MenuStatus from '$shared/components/MenuStatus.svelte';
 import { icons } from '../icons.js';
-import { state } from '../state.js';
-import { EditDocument } from './EditDocument.js';
-import * as jsed from '$lib/jsed/index.js';
+import { actions } from './_actions.js';
 
 /**
  * Define settings used by your particular layout.
@@ -56,47 +54,7 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
   TOGGLE_SELECT: { bindings: ['$mod+e'], description: 'Toggle input element cursor state' }
 };
 
-export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
-  openMenu: (ctl) => {
-    ctl.menu.openMenu();
-  },
-  focusInput: (ctl) => {
-    ctl.input.focusInput();
-  },
-  hideOneput: (ctl) => {
-    ctl.toggleHide();
-  },
-  REC_NEXT: () => {
-    state.currentDocument?.document.nav.REC_NEXT();
-  },
-  REC_PREV: () => {
-    state.currentDocument?.document.nav.REC_PREV();
-  },
-  SIB_NEXT: () => {
-    state.currentDocument?.document.nav.SIB_NEXT();
-  },
-  SIB_PREV: () => {
-    state.currentDocument?.document.nav.SIB_PREV();
-  },
-  UP: () => {
-    state.currentDocument?.document.nav.UP();
-  },
-  EDIT_FIRST: (ctl) => {
-    if (state?.currentDocument?.document) {
-      const focus = state.currentDocument.document.nav.getFocus();
-      if (focus) {
-        const token = jsed.utils.token.getFirstToken(focus);
-        if (token) {
-          const session = EditDocument.create(ctl, { document: state.currentDocument.document, token });
-          ctl.app.run(session);
-        }
-      }
-    }
-  },
-  TOGGLE_SELECT: (ctl) => {
-    ctl.input.toggleSelect();
-  }
-};
+export const defaultGlobalActions: Record<string, (c: Controller) => void> = actions;
 
 const globalKeys = bindings.KeyEventBindings.fromSerializable(
   defaultGlobalBindings,

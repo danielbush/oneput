@@ -26,3 +26,14 @@ tasks:
   install:
     cmds:
       - pnpm i
+
+  check:
+    desc: run check on all important packages
+    cmds:
+      - task: oneput:check
+      - task: jsed:check
+  build:
+    desc: run build across all important packages
+    deps:
+      - task: oneput:build
+      # - task: jsed:build # TODO

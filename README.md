@@ -64,6 +64,32 @@ TODO
 
 ## Technical notes
 
+### Dual type resolution in workspace apps
+
+Apps in `apps/` (e.g. `jsed-demo`) use SvelteKit aliases to import directly from
+package source for a fast dev experience:
+
+```js
+// svelte.config.js
+alias: {
+  $oneput: '../../packages/oneput/src/lib/index.ts',
+  $jsed:   '../../packages/jsed/src/index.ts',
+}
+```
+
+When an app imports a type like `Controller` via `$oneput`, TypeScript resolves it
+from **source** (`packages/oneput/src/lib/...`). But if the app also depends on
+`jsed` (which imports `Controller` from the `"oneput"` package by name), TypeScript
+resolves that through oneput's `package.json` exports — which originally pointed to
+**dist** (`packages/oneput/dist/...`).
+
+Two separate declarations of the same type are not assignable to each other,
+especially when classes have `private` members (structural compatibility fails).
+
+**Fix:** oneput's `package.json` points `"types"` and `exports["."].types` to
+source (`./src/lib/index.ts`) so all workspace consumers resolve to the same
+place. A `publishConfig` block restores the `dist/` paths for npm publishing.
+
 ### Taskfile
 
 We use taskfile.dev to run tasks including run-scripts in package.json.

@@ -17,6 +17,9 @@ includes:
   jsed-demo:
     taskfile: ./apps/jsed-demo/Taskfile.yml
     dir: ./apps/jsed-demo
+  jsed:
+    taskfile: ./packages/jsed/Taskfile.yml
+    dir: ./packages/jsed
 
 tasks:
   default:
@@ -31,9 +34,12 @@ tasks:
     desc: run check on all important packages
     cmds:
       - task: oneput:check
+      - task: jsed-demo:check
       - task: jsed:check
+
   build:
     desc: run build across all important packages
     deps:
       - task: oneput:build
+      - task: jsed:build
       # - task: jsed:build # TODO

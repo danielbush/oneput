@@ -24,6 +24,7 @@ export class Document {
   }
 
   constructor(
+    // @ts-ignore unused for now
     private ctl: Controller,
     public document: JsedDocument,
     private elementIndicator: ElementIndicator,

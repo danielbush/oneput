@@ -57,3 +57,7 @@ tasks:
     desc: check types
     cmds:
       - pnpm run check --watch
+  build:
+    desc: build to dist/
+    cmds:
+      - pnpm run build

@@ -17,7 +17,8 @@ const config = {
       // $oneput and "./shared/*" for $shared.
       $oneput: '../../packages/oneput/src/lib/index.ts',
       $shared: '../../packages/oneput/src/lib/oneput/shared',
-      $types: '../../packages/oneput/dist/index.d.ts'
+      $types: '../../packages/oneput/dist/index.d.ts',
+      $jsed: '../../packages/jsed/src/index.ts'
     }
   }
 };

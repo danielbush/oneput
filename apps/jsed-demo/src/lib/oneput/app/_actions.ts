@@ -1,9 +1,7 @@
 import type { Controller } from '$oneput';
 import { state } from '../state.js';
-import { Document } from '../Document.js';
 import { EditDocument } from './EditDocument.js';
-import * as jsed from '$lib/jsed/index.js';
-import { Editor } from '../Editor.js';
+import * as jsed from '$jsed';
 
 export const actions: Record<string, (ctl: Controller) => void> = {
   openMenu: (ctl) => {
@@ -28,7 +26,7 @@ export const actions: Record<string, (ctl: Controller) => void> = {
           const session = EditDocument.create(ctl, {
             document: doc,
             onStart: () => {
-              Editor.create(ctl, {
+              jsed.Editor.create(ctl, {
                 document: doc.document,
                 initialToken: token
               });
@@ -58,7 +56,7 @@ export const actions: Record<string, (ctl: Controller) => void> = {
         return;
       }
       const html = await response.text();
-      state.currentDocument = Document.createFromHTML(ctl, docRoot, html);
+      state.currentDocument = jsed.Document.createFromHTML(ctl, docRoot, html);
       ctl.menu.closeMenu();
     } catch (err) {
       ctl.notify('Error loading test doc!');

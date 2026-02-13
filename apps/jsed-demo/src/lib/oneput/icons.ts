@@ -1,4 +1,4 @@
-import { element, registerIcon } from '$oneput';
+import { element, registerIcon } from 'oneput';
 import * as lu from 'lucide';
 
 export const iconData = {

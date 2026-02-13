@@ -1,8 +1,13 @@
-import type { JsedDocument, IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
-import { start } from './app/start.js';
-import * as token from './lib/token.js';
-import * as dom from './lib/dom.js';
-import * as domRules from './lib/dom-rules.js';
+import type {
+  JsedDocument,
+  IJsedCursor,
+  JsedFocusRequestEvent,
+  JsedFocusEvent,
+} from "./jsed/types.js";
+import { start } from "./jsed/app/start.js";
+import * as token from "./jsed/lib/token.js";
+import * as dom from "./jsed/lib/dom.js";
+import * as domRules from "./jsed/lib/dom-rules.js";
 
 const utils = {
   dom: {
@@ -13,7 +18,7 @@ const utils = {
     insertBefore: dom.insertBefore,
     deleteElement: dom.deleteElement,
     splitParentBefore: dom.splitParentBefore,
-    rules: domRules
+    rules: domRules,
   },
   token: {
     getValue: token.getValue,
@@ -25,15 +30,24 @@ const utils = {
     getParent: token.getParent,
     collapse: token.collapse,
     uncollapse: token.uncollapse,
-    isCollapsed: token.isCollapsed
-  }
+    isCollapsed: token.isCollapsed,
+  },
 };
 
 export {
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
   JSED_DOM_ROOT_ID,
-  JSED_IGNORE_CLASS
-} from './lib/constants.js';
+  JSED_IGNORE_CLASS,
+} from "./jsed/lib/constants.js";
 export { start, utils };
-export type { JsedDocument, JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor };
+export type {
+  JsedDocument,
+  JsedFocusRequestEvent,
+  JsedFocusEvent,
+  IJsedCursor,
+};
+
+export { CursorMarkers } from "./oneput/CursorMarkers.js";
+export { Document } from "./oneput/Document.js";
+export { Editor } from "./oneput/Editor.js";

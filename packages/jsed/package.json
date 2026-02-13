@@ -1,0 +1,72 @@
+{
+  "name": "jsed",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "private": true,
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest --run --reporter dot",
+    "test:coverage": "vitest --run --coverage",
+    "test:update": "vitest -u",
+    "test:watch": "vitest --watch",
+    "convert": "bun run src/cli/convert.ts",
+    "dev": "vite",
+    "build:check": "tsc",
+    "build:types": "tsc -p tsconfig.d.json",
+    "build:cli": "bun build ./src/cli/convert.ts --compile --outfile dist/bin/convert",
+    "build:watch": "bunx nodemon --ext js,jsx,ts,tsx,cjs,mjs,json --watch src --exec \"bun run build\"",
+    "build": "bunx rimraf dist; bun run build:check && vite build && bun run build:types && bun run build:cli",
+    "preview": "vite preview"
+  },
+  "bin": {
+    "convert": "./dist/bin/convert"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@testing-library/dom": "^8.20.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/jsdom": "^20.0.1",
+    "@types/markdown-it": "^12.2.3",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^1.1.0",
+    "jsdom": "^20.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "oneput": "workspace:",
+    "@iktakahiro/markdown-it-katex": "^4.0.1",
+    "commander": "^11.1.0",
+    "markdown-it": "^13.0.1"
+  },
+  "nodemonConfig": {
+    "ext": "css,ts,js,mjs,yaml,yml,json",
+    "watch": [
+      "src"
+    ],
+    "ignore": [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/test/**",
+      "**/docs/**"
+    ],
+    "delay": 10
+  }
+}

@@ -1,0 +1,59 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  # Where oneput lives so we can get the oneput-defaults.css file .
+  ONEPUT_DIR: ../oneput
+  # Where the oneput default css file lives.
+  # We will use this for now and extend it in a separate file we load after.
+  ONEPUT_CSS_FILE: src/lib/jsed/styles/oneput-defaults.css
+
+tasks:
+  install:
+    cmds:
+      - rm -rf node_modules
+      - pnpm i
+  test:
+    desc: |
+      Run unit tests; but avoid triggering browser tests.
+      See vite.config.js
+    cmds:
+      - ./node_modules/.bin/vitest run --project=server
+  test:browser:
+    desc: |
+      Test using browser mode, defaults to watch mode
+      See https://vitest.dev/guide/browser/
+      This was introduced by sveltekit boilerplate in place of jsdom.
+    cmds:
+      - ./node_modules/.bin/vitest run --project=client --watch
+  test:e2e:
+    desc: Run end-to-end tests (headless)
+    cmds:
+      - pnpm run test:e2e
+  fix:
+    desc: format + eslint (fix) + check types (no fix)
+    cmds:
+      - task: format
+      - task: eslint:fix
+      - task: check
+  format:
+    desc: format files
+    cmds:
+      - pnpm run format
+  eslint:fix:
+    desc: run eslint fixes
+    cmds:
+      - ./node_modules/.bin/eslint . --fix
+  eslint:
+    desc: run eslint
+    cmds:
+      - ./node_modules/.bin/eslint .
+  check:
+    desc: check types
+    cmds:
+      - pnpm run check
+  check:watch:
+    desc: check types
+    cmds:
+      - pnpm run check --watch

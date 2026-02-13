@@ -1,6 +1,6 @@
-import { type IJsedCursor } from '$lib/jsed/index.js';
-import type { Controller, InputSelectionState } from '$oneput';
-import * as constants from './constants.js';
+import { type IJsedCursor } from "../index.js";
+import type { Controller, InputSelectionState } from "$oneput";
+import * as constants from "./constants.js";
 
 /**
  * Manages the display state of the TOKEN under the cursor.
@@ -24,21 +24,21 @@ export class CursorMarkers {
 
   constructor(
     private ctl: Controller,
-    private cursor: IJsedCursor
+    private cursor: IJsedCursor,
   ) {
-    this.ctl.events.on('input-change', ({ value }) => {
+    this.ctl.events.on("input-change", ({ value }) => {
       this.handleInputChange(value);
     });
-    this.ctl.events.on('toggle-select', ({ selection }) => {
+    this.ctl.events.on("toggle-select", ({ selection }) => {
       this.handleToggleSelect(selection);
     });
   }
 
   private handleInputChange(inputValue: string): void {
     const val = inputValue;
-    if (val.endsWith(' ')) {
+    if (val.endsWith(" ")) {
       this.addFocusClasses(constants.TOKEN_INSERT_AFTER_CLASS);
-    } else if (val.startsWith(' ')) {
+    } else if (val.startsWith(" ")) {
       this.addFocusClasses(constants.TOKEN_INSERT_BEFORE_CLASS);
     }
   }
@@ -48,7 +48,7 @@ export class CursorMarkers {
       constants.TOKEN_INSERT_AFTER_CLASS,
       constants.TOKEN_INSERT_BEFORE_CLASS,
       constants.TOKEN_PREPEND_CLASS,
-      constants.TOKEN_APPEND_CLASS
+      constants.TOKEN_APPEND_CLASS,
     );
   }
 
@@ -59,10 +59,10 @@ export class CursorMarkers {
 
   handleToggleSelect(state: InputSelectionState): void {
     switch (state) {
-      case 'CURSOR_AT_BEGINNING':
+      case "CURSOR_AT_BEGINNING":
         this.addFocusClasses(constants.TOKEN_PREPEND_CLASS);
         return;
-      case 'CURSOR_AT_END':
+      case "CURSOR_AT_END":
         this.addFocusClasses(constants.TOKEN_APPEND_CLASS);
         return;
       default:
@@ -71,10 +71,14 @@ export class CursorMarkers {
   }
 
   isInsertingAfter(): boolean {
-    return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_AFTER_CLASS);
+    return this.cursor
+      .getToken()
+      .classList.contains(constants.TOKEN_INSERT_AFTER_CLASS);
   }
 
   isInsertingBefore(): boolean {
-    return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_BEFORE_CLASS);
+    return this.cursor
+      .getToken()
+      .classList.contains(constants.TOKEN_INSERT_BEFORE_CLASS);
   }
 }

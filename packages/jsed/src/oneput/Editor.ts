@@ -1,8 +1,7 @@
-import type { Controller } from '$oneput';
-import type { IJsedCursor } from '$lib/jsed/index.js';
-import type { JsedDocument } from '$lib/jsed/types.js';
-import * as jsed from '$lib/jsed/index.js';
-import { CursorMarkers } from './CursorMarkers.js';
+import type { Controller } from "$oneput";
+import type { IJsedCursor, JsedDocument } from "../index.js";
+import * as jsed from "../index.js";
+import { CursorMarkers } from "./CursorMarkers.js";
 
 /**
  * Performs edit/navigation operations by coordinating between JsedDocument,
@@ -30,11 +29,11 @@ export class Editor {
     ctl: Controller,
     {
       document,
-      initialToken
+      initialToken,
     }: {
       document: JsedDocument;
       initialToken: HTMLElement;
-    }
+    },
   ) {
     const instance = new Editor(ctl, document, initialToken);
     return instance;
@@ -46,32 +45,36 @@ export class Editor {
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
-    initialToken: HTMLElement
+    initialToken: HTMLElement,
   ) {
     this.cursor = document.requestCursor({
       token: initialToken,
-      onTokenChange: this.handleTokenChange
+      onTokenChange: this.handleTokenChange,
     });
-    ctl.events.on('input-change', ({ value }) => {
+    ctl.events.on("input-change", ({ value }) => {
       this.userInput(value);
     });
     this.cursorMarkers = CursorMarkers.create(ctl, this.cursor);
     this.ctl.input.focus();
-    ctl.input.setInputValue(jsed.utils.token.getValue(this.cursor.getToken())).then(() => {
-      ctl.input.selectAll();
-    });
+    ctl.input
+      .setInputValue(jsed.utils.token.getValue(this.cursor.getToken()))
+      .then(() => {
+        ctl.input.selectAll();
+      });
     this.document.listeners.REQUEST_FOCUS = this.handleFocusRequest;
   }
 
   private handleFocusRequest = (evt: jsed.JsedFocusRequestEvent) => {
-    if (evt.targetType === 'TOKEN') {
+    if (evt.targetType === "TOKEN") {
       if (this.cursor.isSameLine(evt.token)) {
         this.cursor.setToken(evt.token);
         this.ctl.input.focus();
         // TODO: await instead of .then?
-        this.ctl.input.setInputValue(jsed.utils.token.getValue(evt.token)).then(() => {
-          this.ctl.input.selectAll();
-        });
+        this.ctl.input
+          .setInputValue(jsed.utils.token.getValue(evt.token))
+          .then(() => {
+            this.ctl.input.selectAll();
+          });
         return false; // TODO: old code: #handleCursorSetToken will call FOCUS.
       }
     }
@@ -80,7 +83,7 @@ export class Editor {
   };
 
   private exit() {
-    console.warn('Editor wants to exit!');
+    console.warn("Editor wants to exit!");
     // TODO exit editor as per #handleExist from jsed-ui src/session/edit/index.ts
   }
 
@@ -110,7 +113,7 @@ export class Editor {
     // "foo" => " " => "foo "
     const isReplacedWithSpace = /^\s+$/.test(inputValue); // " "
     const value = isReplacedWithSpace
-      ? jsed.utils.token.getValue(this.cursor.getToken()) + ' ' // "foo" + " "
+      ? jsed.utils.token.getValue(this.cursor.getToken()) + " " // "foo" + " "
       : inputValue;
     // Apply rewrite:
     this.ctl.input.setInputValue(value);
@@ -132,12 +135,14 @@ export class Editor {
       const firstWord = containsSpace[1];
       const firstSpace = containsSpace[2];
       const [, stop] = this.ctl.input.getRange();
-      preferFirstPart = firstWord.length === stop || stop == firstWord.length + firstSpace.length;
+      preferFirstPart =
+        firstWord.length === stop ||
+        stop == firstWord.length + firstSpace.length;
     }
     let lastToken: HTMLElement | null = null;
 
     // Update document.
-    if (value === '') {
+    if (value === "") {
       this.cursor.delete();
     } else {
       this.cursor.replace(part0);

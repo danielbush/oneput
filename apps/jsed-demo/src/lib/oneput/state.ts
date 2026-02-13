@@ -1,3 +1,3 @@
-import { Document } from './Document.js';
+import { Document } from '$jsed';
 
 export const state: { currentDocument?: Document } = {};

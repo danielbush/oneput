@@ -1,9 +1,5 @@
 {
   "compilerOptions": {
-    "paths": {
-      "$oneput": ["../oneput/src/lib/index.ts"],
-    },
-
     // Required
     // See https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html#im-using-a-bundler
     "module": "esnext",

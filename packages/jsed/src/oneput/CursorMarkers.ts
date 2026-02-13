@@ -1,5 +1,5 @@
 import { type IJsedCursor } from "../index.js";
-import type { Controller, InputSelectionState } from "$oneput";
+import type { Controller, InputSelectionState } from "oneput";
 import * as constants from "./constants.js";
 
 /**

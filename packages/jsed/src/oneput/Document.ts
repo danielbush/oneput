@@ -1,4 +1,4 @@
-import type { Controller } from "$oneput";
+import type { Controller } from "oneput";
 import { start, type JsedDocument, type JsedFocusEvent } from "../index.js";
 import { ElementIndicator } from "./ElementIndicator.js";
 

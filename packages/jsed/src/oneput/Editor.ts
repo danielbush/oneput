@@ -1,4 +1,4 @@
-import type { Controller } from "$oneput";
+import type { Controller } from "oneput";
 import type { IJsedCursor, JsedDocument } from "../index.js";
 import * as jsed from "../index.js";
 import { CursorMarkers } from "./CursorMarkers.js";

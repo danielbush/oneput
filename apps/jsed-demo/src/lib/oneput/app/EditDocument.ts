@@ -1,4 +1,4 @@
-import type { AppObject, Controller } from '$oneput';
+import type { AppObject, Controller } from 'oneput';
 import type { Document } from '$jsed';
 
 /**

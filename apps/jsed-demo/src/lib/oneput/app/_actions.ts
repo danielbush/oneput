@@ -1,4 +1,4 @@
-import type { Controller } from '$oneput';
+import type { Controller } from 'oneput';
 import { state } from '../state.js';
 import { EditDocument } from './EditDocument.js';
 import * as jsed from '$jsed';

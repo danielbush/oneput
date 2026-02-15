@@ -166,7 +166,7 @@ export class AppController {
   }
 
   run<R = unknown>(appObject: AppObject<R>) {
-    console.log('run', { appObject });
+    console.warn('run', { appObject });
     this.runBeforeExit();
     if (this.current) {
       this.appParents.push(this.current);

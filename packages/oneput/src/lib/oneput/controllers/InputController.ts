@@ -112,7 +112,6 @@ export class InputController {
   };
 
   moveCursorToEnd = () => {
-    console.log('moveCursorToEnd');
     const len = this.inputElement?.value.length;
     if (len) {
       this.inputElement?.setSelectionRange(len, len);

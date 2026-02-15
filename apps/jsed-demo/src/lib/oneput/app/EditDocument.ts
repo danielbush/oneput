@@ -1,5 +1,5 @@
 import type { AppObject, Controller } from 'oneput';
-import type { Document } from '$jsed';
+import type { Document } from 'jsed';
 
 /**
  * Oneput AppObject that manages an edit session for a single document.

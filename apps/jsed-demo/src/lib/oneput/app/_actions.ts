@@ -1,7 +1,7 @@
 import type { Controller } from 'oneput';
 import { state } from '../state.js';
 import { EditDocument } from './EditDocument.js';
-import * as jsed from '$jsed';
+import * as jsed from 'jsed';
 
 export const actions: Record<string, (ctl: Controller) => void> = {
   openMenu: (ctl) => {

@@ -29,9 +29,9 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "svelte": "./src/lib/index.ts",
-  "types": "./src/lib/index.ts",
   "type": "module",
+  "types": "./src/lib/index.ts",
+  "svelte": "./src/lib/index.ts",
   "exports": {
     ".": {
       "types": "./src/lib/index.ts",

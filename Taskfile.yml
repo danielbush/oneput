@@ -1,6 +1,6 @@
 # https://taskfile.dev
 
-version: "3"
+version: '3'
 silent: false
 set:
   - errexit
@@ -31,15 +31,20 @@ tasks:
       - pnpm i
 
   check:
-    desc: run check on all important packages
+    desc: run checks (eg types, linting) on all important packages
     cmds:
       - task: oneput:check
-      - task: jsed-demo:check
       - task: jsed:check
+      - task: jsed-demo:check
+
+  test:
+    desc: run unit tests
+    cmds:
+      - task: jsed:test
+      - task: oneput:test
 
   build:
     desc: run build across all important packages
     deps:
       - task: oneput:build
       - task: jsed:build
-      # - task: jsed:build # TODO

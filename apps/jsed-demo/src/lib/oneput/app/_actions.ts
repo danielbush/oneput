@@ -1,6 +1,5 @@
 import type { Controller } from 'oneput';
 import { state } from '../state.js';
-import { EditDocument } from './EditDocument.js';
 import * as jsed from 'jsed';
 
 export const actions: Record<string, (ctl: Controller) => void> = {
@@ -12,33 +11,6 @@ export const actions: Record<string, (ctl: Controller) => void> = {
   },
   hideOneput: (ctl) => {
     ctl.toggleHide();
-  },
-
-  // App state transitions (ctl.app.run(AppObject)).
-
-  EDIT_FIRST: (ctl) => {
-    if (state?.currentDocument?.document) {
-      const focus = state.currentDocument.document.nav.getFocus();
-      if (focus) {
-        const token = jsed.utils.token.getFirstToken(focus);
-        if (token) {
-          const doc = state.currentDocument;
-          const session = EditDocument.create(ctl, {
-            document: doc,
-            onStart: () => {
-              jsed.Editor.create(ctl, {
-                document: doc.document,
-                initialToken: token
-              });
-            },
-            onExit: () => {
-              //
-            }
-          });
-          ctl.app.run(session);
-        }
-      }
-    }
   },
 
   // Menu actions.

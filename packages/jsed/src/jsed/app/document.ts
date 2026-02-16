@@ -1,35 +1,51 @@
 import { Navigator } from '../lib/navigator.js';
 import { JsedCursor } from '../lib/cursor.js';
-import type { JsedDocument } from '../types.js';
+import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
 import { tokenizeImplicitLine } from '../lib/token.js';
 
-export function makeDocument(root: HTMLElement): JsedDocument {
-  let document: JsedDocument | null = null;
-  const base: Omit<JsedDocument, 'nav'> = {
-    root,
-    get document(): Document {
-      return root.ownerDocument;
-    },
-    get window(): Window {
-      if (!root.ownerDocument.defaultView) {
-        throw new Error('defaultView not set');
-      }
-      return root.ownerDocument.defaultView;
-    },
-    SIB_HIGHLIGHT: new Set(),
-    listeners: {
-      REQUEST_FOCUS: null,
-      FOCUS: null
-    },
-    unload: () => {
-      // Placeholder, see below.
-      return;
-    },
-    requestCursor: ({ token, onTokenChange }) => {
-      return JsedCursor.create({ document: document!, token, onTokenChange });
-    }
+export class JsedDocument {
+  static create(root: HTMLElement): JsedDocument {
+    const doc = new JsedDocument(root);
+    return doc;
+  }
+
+  root: HTMLElement;
+  SIB_HIGHLIGHT: Set<HTMLElement> = new Set();
+  nav: Navigator;
+  listeners: {
+    REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
+    FOCUS: null | ((evt: JsedFocusEvent) => void);
+  } = {
+    REQUEST_FOCUS: null,
+    FOCUS: null
   };
-  document = Object.assign(base, { nav: new Navigator(base) });
-  tokenizeImplicitLine(root);
-  return document;
+  unload: () => void = () => {};
+
+  private constructor(root: HTMLElement) {
+    this.root = root;
+    tokenizeImplicitLine(root);
+    this.nav = new Navigator(this);
+  }
+
+  get document(): Document {
+    return this.root.ownerDocument;
+  }
+
+  get window(): Window {
+    if (!this.root.ownerDocument.defaultView) {
+      throw new Error('defaultView not set');
+    }
+    return this.root.ownerDocument.defaultView;
+  }
+
+  requestCursor(params: {
+    token: HTMLElement;
+    onTokenChange: (token: HTMLElement) => void;
+  }): IJsedCursor {
+    return JsedCursor.create({
+      document: this,
+      token: params.token,
+      onTokenChange: params.onTokenChange
+    });
+  }
 }

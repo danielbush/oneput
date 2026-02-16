@@ -1,44 +1,5 @@
-import type { Navigator } from './lib/navigator.js';
-
-export type JsedDocument = {
-  /**
-   * The root node of the subtree of the DOM that is potentially editable.
-   */
-  root: HTMLElement;
-  /**
-   * The document of the root.  This is a convenience, because we can calculate
-   * it at any time.
-   */
-  document: Document;
-  window: Window;
-  /**
-   * The currently selected TOKEN (may be none).
-   */
-  // activeToken: HTMLElement | null;
-  /**
-   * Handles showCurrentSiblings.
-   */
-  SIB_HIGHLIGHT: Set<HTMLElement>;
-  nav: Navigator;
-  listeners: {
-    /**
-     * Register a listener for FOCUS request events.  Consumer can decide if the FOCUS event should occur.
-     */
-    REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
-    /**
-     * Register a listener for FOCUS events that have occurred.
-     */
-    FOCUS: null | ((evt: JsedFocusEvent) => void);
-  };
-  unload: () => void;
-  /**
-   * Request a cursor for the current token.
-   */
-  requestCursor: (params: {
-    token: HTMLElement;
-    onTokenChange: (token: HTMLElement) => void;
-  }) => IJsedCursor;
-};
+import type { JsedDocument } from './app/document.js';
+export { JsedDocument } from './app/document.js';
 
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
 export type JsedFocusRequestEvent = JsedFocusEventBase<'FOCUS_REQUEST'>;

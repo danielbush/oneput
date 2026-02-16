@@ -1,5 +1,4 @@
-import { makeDocument } from '../app/document.js';
-import { type JsedDocument } from '../types.js';
+import { JsedDocument } from '../app/document.js';
 
 /**
  * Make a div be the root of the document.
@@ -9,7 +8,7 @@ import { type JsedDocument } from '../types.js';
  */
 export function makeRoot(html: string, document: Document = window.document): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
-  return makeDocument(document.getElementById('root') as HTMLElement);
+  return JsedDocument.create(document.getElementById('root') as HTMLElement);
 }
 
 type Attr = { [key: string]: string };

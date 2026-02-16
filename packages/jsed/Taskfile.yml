@@ -1,6 +1,6 @@
 # https://taskfile.dev
 
-version: "3"
+version: '3'
 
 vars:
   # Where oneput lives so we can get the oneput-defaults.css file .
@@ -19,18 +19,7 @@ tasks:
       Run unit tests; but avoid triggering browser tests.
       See vite.config.js
     cmds:
-      - ./node_modules/.bin/vitest run --project=server
-  test:browser:
-    desc: |
-      Test using browser mode, defaults to watch mode
-      See https://vitest.dev/guide/browser/
-      This was introduced by sveltekit boilerplate in place of jsdom.
-    cmds:
-      - ./node_modules/.bin/vitest run --project=client --watch
-  test:e2e:
-    desc: Run end-to-end tests (headless)
-    cmds:
-      - pnpm run test:e2e
+      - pnpm run test
   fix:
     desc: format + eslint (fix) + check types (no fix)
     cmds:

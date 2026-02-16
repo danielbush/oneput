@@ -19,7 +19,13 @@ export default defineConfig(
   ...svelte.configs.prettier,
   {
     languageOptions: {
-      globals: { ...globals.browser, ...globals.node }
+      globals: { ...globals.browser, ...globals.node },
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: ['*.js']
+        },
+        tsconfigRootDir: fileURLToPath(new URL('.', import.meta.url))
+      }
     },
     rules: {
       // typescript-eslint strongly recommend that you do not use the no-undef lint rule on TypeScript projects.
@@ -32,6 +38,7 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: true,
+        tsconfigRootDir: fileURLToPath(new URL('.', import.meta.url)),
         extraFileExtensions: ['.svelte'],
         parser: ts.parser,
         svelteConfig

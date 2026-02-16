@@ -185,6 +185,9 @@ export interface AppObject<R = unknown> {
    */
   onExit?: () => void;
   onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
+  actions?: {
+    [actionId: string]: (ctl: Controller) => void;
+  };
 }
 
 export type NullishChildren = Array<FlexParams | FChildParams | '' | false | null | undefined>;

@@ -244,4 +244,19 @@ export class AppController {
       exists: !!menuId && this.current?.menuExists(menuId)
     };
   }
+
+  /**
+   * If no action is provided for a binding, the action may be delegated to the
+   * currently running AppObject . If no action is found there then we give up.
+   */
+  delegateAction(actionId: string) {
+    if (!this.current) {
+      return;
+    }
+    if (this.current.app.actions?.[actionId]) {
+      this.current.app.actions?.[actionId]?.(this.ctl);
+    } else {
+      this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
+    }
+  }
 }

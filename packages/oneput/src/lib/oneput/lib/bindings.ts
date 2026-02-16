@@ -203,12 +203,18 @@ function kbToSerializable(keyBinding: KeyBinding): KeyBindingSerializable {
 
 function kbFromSerializable(
   kbSerializable: KeyBindingSerializable,
+  actionId: string,
   action?: (c: Controller) => void
 ): KeyBinding {
   return {
     description: kbSerializable.description,
     bindings: kbSerializable.bindings,
-    action: action ?? (() => {})
+    action:
+      action ??
+      ((c: Controller) => {
+        // Delegate to the current AppObject if no action was given.
+        c.app.delegateAction(actionId);
+      })
   };
 }
 
@@ -228,7 +234,7 @@ export class KeyEventBindings {
   ): KeyEventBindings {
     return KeyEventBindings.create(
       Object.entries(kbMapSerializable).reduce((acc, [actionId, kbSerializable]) => {
-        acc[actionId] = kbFromSerializable(kbSerializable, actionMap[actionId]);
+        acc[actionId] = kbFromSerializable(kbSerializable, actionId, actionMap[actionId]);
         return acc;
       }, {} as KeyBindingMap)
     );

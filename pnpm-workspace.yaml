@@ -3,5 +3,8 @@ packages:
   - apps/*
   - '!**/test/**'
 
+catalog:
+  neverthrow: ^8.2.0
+
 ignoredBuiltDependencies:
   - esbuild

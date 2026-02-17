@@ -4,6 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    neverthrow:
+      specifier: ^8.2.0
+      version: 8.2.0
+
 patchedDependencies:
   tinykeys:
     hash: 6855931e9590b29110de8402432514ff7aa294934a067557e96dc7eb46f365e3
@@ -177,7 +183,7 @@ importers:
         specifier: ^0.501.0
         version: 0.501.0
       neverthrow:
-        specifier: ^8.2.0
+        specifier: 'catalog:'
         version: 8.2.0
       tinykeys:
         specifier: ^3.0.0
@@ -10261,9 +10267,9 @@ snapshots:
 
   vitest-browser-svelte@0.1.0(@vitest/browser@3.2.4)(svelte@5.49.2)(vitest@3.2.4):
     dependencies:
-      '@vitest/browser': 3.2.4(playwright@1.58.1)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vitest@3.2.4)
+      '@vitest/browser': 3.2.4(playwright@1.58.1)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vitest@3.2.4)
       svelte: 5.49.2
-      vitest: 3.2.4(@types/node@25.2.0)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vitest: 3.2.4(@types/node@22.19.9)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
 
   vitest@3.2.4(@types/node@22.19.9)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2):
     dependencies:

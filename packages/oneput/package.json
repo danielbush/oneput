@@ -94,7 +94,7 @@
     "@leeoniya/ufuzzy": "^1.0.19",
     "debounce": "^2.2.0",
     "lucide": "^0.501.0",
-    "neverthrow": "^8.2.0",
+    "neverthrow": "catalog:",
     "tinykeys": "^3.0.0"
   }
 }

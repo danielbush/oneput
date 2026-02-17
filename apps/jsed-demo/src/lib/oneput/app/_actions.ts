@@ -4,10 +4,9 @@ import * as jsed from '@oneput/jsed';
 import { Document } from './Document.js';
 import { errAsync, ResultAsync, err, ok } from 'neverthrow';
 
-export type ActionError =
+export type FetchError =
   | { type: 'network'; cause: Error }
-  | { type: 'http'; status: number; statusText: string }
-  | { type: 'missing-element'; id: string };
+  | { type: 'http'; status: number; statusText: string };
 
 /**
  * Use neverthrow.  Returns an Err if the fetch fails or status is not OK.
@@ -15,17 +14,19 @@ export type ActionError =
 function safeFetch(input: RequestInfo | URL, init?: RequestInit) {
   return ResultAsync.fromPromise(
     fetch(input, init),
-    (e): ActionError => ({ type: 'network', cause: e as Error })
+    (e): FetchError => ({ type: 'network', cause: e as Error })
   ).andThen((response) =>
     response.ok
       ? ok(response)
-      : err<Response, ActionError>({
+      : err<Response, FetchError>({
           type: 'http',
           status: response.status,
           statusText: response.statusText
         })
   );
 }
+
+export type ActionError = { type: 'missing-element'; id: string };
 
 /**
  * Standalone actions we can import and use in menus, buttons etc.
@@ -49,7 +50,7 @@ export class Actions {
       .andThen((response) =>
         ResultAsync.fromPromise(
           response.text(),
-          (e): ActionError => ({ type: 'network', cause: e as Error })
+          (e): FetchError => ({ type: 'network', cause: e as Error })
         )
       )
       .map((html) => {

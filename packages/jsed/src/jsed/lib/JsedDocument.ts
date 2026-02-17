@@ -1,7 +1,7 @@
-import { Navigator } from '../lib/navigator.js';
-import { JsedCursor } from '../lib/cursor.js';
+import { Navigator } from './navigator.js';
+import { JsedCursor } from './cursor.js';
 import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
-import { tokenizeImplicitLine } from '../lib/token.js';
+import { tokenizeImplicitLine } from './token.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {

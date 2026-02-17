@@ -1,4 +1,4 @@
-import { JsedDocument } from './JsedDocument.js';
+import { JsedDocument } from '../lib/JsedDocument.js';
 import { JSED_DOM_ROOT_ID } from '../lib/constants.js';
 
 /**

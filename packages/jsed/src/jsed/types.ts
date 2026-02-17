@@ -1,5 +1,5 @@
-import type { JsedDocument } from './app/JsedDocument.js';
-export { JsedDocument } from './app/JsedDocument.js';
+import type { JsedDocument } from './lib/JsedDocument.js';
+export { JsedDocument } from './lib/JsedDocument.js';
 
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
 export type JsedFocusRequestEvent = JsedFocusEventBase<'FOCUS_REQUEST'>;

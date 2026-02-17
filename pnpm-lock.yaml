@@ -42,6 +42,9 @@ importers:
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2
+      neverthrow:
+        specifier: 'catalog:'
+        version: 8.2.0
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -10267,9 +10270,9 @@ snapshots:
 
   vitest-browser-svelte@0.1.0(@vitest/browser@3.2.4)(svelte@5.49.2)(vitest@3.2.4):
     dependencies:
-      '@vitest/browser': 3.2.4(playwright@1.58.1)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vitest@3.2.4)
+      '@vitest/browser': 3.2.4(playwright@1.58.1)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vitest@3.2.4)
       svelte: 5.49.2
-      vitest: 3.2.4(@types/node@22.19.9)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vitest: 3.2.4(@types/node@25.2.0)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
 
   vitest@3.2.4(@types/node@22.19.9)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2):
     dependencies:

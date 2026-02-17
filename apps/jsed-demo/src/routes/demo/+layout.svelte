@@ -1,8 +1,8 @@
 <script lang="ts">
   import '$lib/jsed/styles/oneput-defaults.css';
   import '$lib/jsed/styles/jsed-defaults.css';
-  import { JSED_DOM_ROOT_ID } from 'jsed';
-  import { Anchor, OneputCornerButton, OneputController } from 'oneput';
+  import { JSED_DOM_ROOT_ID } from '@oneput/jsed';
+  import { Anchor, OneputCornerButton, OneputController } from '@oneput/oneput';
   import { setController } from '$lib/oneput/app/_app.js';
   import { icons } from '$lib/oneput/icons.js';
 

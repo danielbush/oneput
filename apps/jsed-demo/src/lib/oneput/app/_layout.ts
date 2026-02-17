@@ -1,4 +1,4 @@
-import { hflex, utils, bindings } from 'oneput';
+import { hflex, utils, bindings } from '@oneput/oneput';
 import type {
   Controller,
   DynamicPlaceholderBase,
@@ -6,12 +6,12 @@ import type {
   FlexChildBuilder,
   FChildParams,
   KeyBindingMapSerializable
-} from 'oneput';
-import { DynamicPlaceholder } from 'oneput/shared/ui/DynamicPlaceholder.js';
-import { WordFilter } from 'oneput/shared/filters/WordFilter.js';
-import { TimeDisplay } from 'oneput/shared/components/TimeDisplay.js';
-import { DateDisplay } from 'oneput/shared/components/DateDisplay.js';
-import MenuStatus from 'oneput/shared/components/MenuStatus.svelte';
+} from '@oneput/oneput';
+import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
+import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
+import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
+import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
+import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 import { icons } from '../icons.js';
 import { actions } from './_actions.js';
 

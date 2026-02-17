@@ -1,5 +1,5 @@
 import { Layout } from '$lib/oneput/app/_layout.js';
-import { type Controller } from 'oneput';
+import { type Controller } from '@oneput/oneput';
 import { Root } from './root.js';
 
 export const setController = (ctl: Controller) => {

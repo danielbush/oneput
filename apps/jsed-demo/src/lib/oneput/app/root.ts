@@ -1,5 +1,5 @@
-import type { AppObject, Controller } from 'oneput';
-import { stdMenuItem } from 'oneput/shared/ui/menuItems/stdMenuItem.js';
+import type { AppObject, Controller } from '@oneput/oneput';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 import type { LayoutSettings } from './_layout.js';
 import { Actions } from './_actions.js';

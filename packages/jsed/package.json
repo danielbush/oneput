@@ -1,5 +1,5 @@
 {
-  "name": "jsed",
+  "name": "@oneput/jsed",
   "version": "0.0.1",
   "description": "",
   "main": "./src/index.ts",
@@ -25,7 +25,7 @@
     "!dist/**/*.test.*",
     "!dist/**/*.spec.*"
   ],
-  "private": true,
+  "private": false,
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest --run --reporter dot",
@@ -61,7 +61,7 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
-    "oneput": "workspace:",
+    "@oneput/oneput": "workspace:",
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "commander": "^11.1.0",
     "markdown-it": "^13.0.1"

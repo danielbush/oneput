@@ -1,5 +1,5 @@
-import type { AppObject, Controller } from 'oneput';
-import * as jsed from 'jsed';
+import type { AppObject, Controller } from '@oneput/oneput';
+import * as jsed from '@oneput/jsed';
 
 /**
  * Oneput AppObject that manages a single JsedDocument.

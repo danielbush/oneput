@@ -27,21 +27,21 @@ importers:
       '@lucide/svelte':
         specifier: ^0.544.0
         version: 0.544.0(svelte@5.49.2)
+      '@oneput/jsed':
+        specifier: 'workspace:'
+        version: link:../../packages/jsed
+      '@oneput/oneput':
+        specifier: 'workspace:'
+        version: link:../../packages/oneput
       commander:
         specifier: ^11.1.0
         version: 11.1.0
-      jsed:
-        specifier: 'workspace:'
-        version: link:../../packages/jsed
       lucide:
         specifier: ^0.562.0
         version: 0.562.0
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2
-      oneput:
-        specifier: 'workspace:'
-        version: link:../../packages/oneput
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -127,15 +127,15 @@ importers:
       '@iktakahiro/markdown-it-katex':
         specifier: ^4.0.1
         version: 4.0.1
+      '@oneput/oneput':
+        specifier: 'workspace:'
+        version: link:../oneput
       commander:
         specifier: ^11.1.0
         version: 11.1.0
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2
-      oneput:
-        specifier: 'workspace:'
-        version: link:../oneput
     devDependencies:
       '@testing-library/dom':
         specifier: ^8.20.0

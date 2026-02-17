@@ -1,6 +1,6 @@
-import type { Controller } from 'oneput';
+import type { Controller } from '@oneput/oneput';
 import { state } from '../state.js';
-import * as jsed from 'jsed';
+import * as jsed from '@oneput/jsed';
 import { Document } from './Document.js';
 
 /**

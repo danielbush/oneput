@@ -14,8 +14,6 @@ declare global {
   var insertImage: (dataUrl: string, fileName: string) => void;
 }
 
-export {};
-
 export type InputChangeListener = (evt: InputEvent) => void;
 
 export type OneputProps = {

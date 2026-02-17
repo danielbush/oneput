@@ -1,9 +1,8 @@
 import type { AppObject, Controller } from 'oneput';
-import { Document } from './Document.js';
 import { stdMenuItem } from 'oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
-import * as jsed from 'jsed';
 import type { LayoutSettings } from './_layout.js';
+import { Actions } from './_actions.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
@@ -31,28 +30,7 @@ export class Root implements AppObject {
 
   actions = {
     LOAD_TEST_DOC: async () => {
-      const docRoot = document.getElementById('load-doc');
-      if (!docRoot) {
-        this.ctl.notify('Could not load test doc!');
-        return;
-      }
-      try {
-        const response = await fetch('/api/docs/test_doc');
-        if (!response.ok) {
-          this.ctl.notify('Failed to load test doc!');
-          return;
-        }
-        const html = await response.text();
-        this.ctl.app.run(
-          Document.create(this.ctl, {
-            document: jsed.Document.createFromHTML(this.ctl, docRoot, html)
-          })
-        );
-        this.ctl.menu.closeMenu();
-      } catch (err) {
-        this.ctl.notify('Error loading test doc!');
-        console.error(err);
-      }
+      await Actions.create(this.ctl).loadTestDoc();
     }
   };
 }

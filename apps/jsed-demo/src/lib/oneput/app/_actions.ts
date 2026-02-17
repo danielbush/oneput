@@ -1,6 +1,42 @@
 import type { Controller } from 'oneput';
 import { state } from '../state.js';
 import * as jsed from 'jsed';
+import { Document } from './Document.js';
+
+/**
+ * Standalone actions we can import and use in menus, buttons etc.
+ */
+export class Actions {
+  static create(ctl: Controller) {
+    return new Actions(ctl);
+  }
+  constructor(private ctl: Controller) {}
+
+  async loadTestDoc() {
+    const docRoot = document.getElementById('load-doc');
+    if (!docRoot) {
+      this.ctl.notify('Could not load test doc!');
+      return;
+    }
+    try {
+      const response = await fetch('/api/docs/test_doc');
+      if (!response.ok) {
+        this.ctl.notify('Failed to load test doc!');
+        return;
+      }
+      const html = await response.text();
+      this.ctl.app.run(
+        Document.create(this.ctl, {
+          document: jsed.Document.createFromHTML(this.ctl, docRoot, html)
+        })
+      );
+      this.ctl.menu.closeMenu();
+    } catch (err) {
+      this.ctl.notify('Error loading test doc!');
+      console.error(err);
+    }
+  }
+}
 
 export const actions: Record<string, (ctl: Controller) => void> = {
   openMenu: (ctl) => {
@@ -11,29 +47,6 @@ export const actions: Record<string, (ctl: Controller) => void> = {
   },
   hideOneput: (ctl) => {
     ctl.toggleHide();
-  },
-
-  // Menu actions.
-
-  loadTestDoc: async (ctl) => {
-    const docRoot = document.getElementById('load-doc');
-    if (!docRoot) {
-      ctl.notify('Could not load test doc!');
-      return;
-    }
-    try {
-      const response = await fetch('/api/docs/test_doc');
-      if (!response.ok) {
-        ctl.notify('Failed to load test doc!');
-        return;
-      }
-      const html = await response.text();
-      state.currentDocument = jsed.Document.createFromHTML(ctl, docRoot, html);
-      ctl.menu.closeMenu();
-    } catch (err) {
-      ctl.notify('Error loading test doc!');
-      console.error(err);
-    }
   },
 
   // Editor actions

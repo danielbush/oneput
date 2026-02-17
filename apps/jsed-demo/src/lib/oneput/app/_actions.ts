@@ -2,14 +2,28 @@ import type { Controller } from '@oneput/oneput';
 import { state } from '../state.js';
 import * as jsed from '@oneput/jsed';
 import { Document } from './Document.js';
-import { ResultAsync, err, ok } from 'neverthrow';
+import { errAsync, ResultAsync, err, ok } from 'neverthrow';
+
+export type ActionError =
+  | { type: 'network'; cause: Error }
+  | { type: 'http'; status: number; statusText: string }
+  | { type: 'missing-element'; id: string };
 
 /**
  * Use neverthrow.  Returns an Err if the fetch fails or status is not OK.
  */
 function safeFetch(input: RequestInfo | URL, init?: RequestInit) {
-  return ResultAsync.fromPromise(fetch(input, init), (e) => e as Error).andThen((response) =>
-    response.ok ? ok(response) : err(new Error(`${response.status} ${response.statusText}`))
+  return ResultAsync.fromPromise(
+    fetch(input, init),
+    (e): ActionError => ({ type: 'network', cause: e as Error })
+  ).andThen((response) =>
+    response.ok
+      ? ok(response)
+      : err<Response, ActionError>({
+          type: 'http',
+          status: response.status,
+          statusText: response.statusText
+        })
   );
 }
 
@@ -25,15 +39,19 @@ export class Actions {
     private params: { fetch: typeof safeFetch }
   ) {}
 
-  async loadTestDoc() {
+  loadTestDoc() {
     const docRoot = document.getElementById('load-doc');
     if (!docRoot) {
-      this.ctl.notify('Could not load test doc!');
-      return;
+      return errAsync<void, ActionError>({ type: 'missing-element', id: 'load-doc' });
     }
-    const result = await this.params
+    return this.params
       .fetch('/api/docs/test_doc')
-      .andThen((response) => ResultAsync.fromPromise(response.text(), (e) => e as Error))
+      .andThen((response) =>
+        ResultAsync.fromPromise(
+          response.text(),
+          (e): ActionError => ({ type: 'network', cause: e as Error })
+        )
+      )
       .map((html) => {
         this.ctl.app.run(
           Document.create(this.ctl, {
@@ -42,11 +60,6 @@ export class Actions {
         );
         this.ctl.menu.closeMenu();
       });
-
-    if (result.isErr()) {
-      this.ctl.notify('Error loading test doc!');
-      console.error(result.error);
-    }
   }
 }
 

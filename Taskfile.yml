@@ -48,3 +48,13 @@ tasks:
     deps:
       - task: oneput:build
       - task: jsed:build
+
+  skills:nullables:update:
+    desc: update the nullables Claude skill from github.com/danielbush/skills
+    vars:
+      BASE_URL: https://raw.githubusercontent.com/danielbush/skills/master/skills/nullables/skill
+      DEST: .claude/skills/nullables
+    cmds:
+      - mkdir -p {{.DEST}}/references
+      - curl -fsSL -o {{.DEST}}/SKILL.md {{.BASE_URL}}/SKILL.md
+      - curl -fsSL -o {{.DEST}}/references/nullables-guide.md {{.BASE_URL}}/references/nullables-guide.md

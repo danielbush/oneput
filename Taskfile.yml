@@ -49,12 +49,11 @@ tasks:
       - task: oneput:build
       - task: jsed:build
 
-  skills:nullables:update:
-    desc: update the nullables Claude skill from github.com/danielbush/skills
+  skills:
+    desc: Set up skills.
     vars:
-      BASE_URL: https://raw.githubusercontent.com/danielbush/skills/master/skills/nullables/skill
-      DEST: .claude/skills/nullables
+      AGENTS: claude-code codex gemini-cli
     cmds:
-      - mkdir -p {{.DEST}}/references
-      - curl -fsSL -o {{.DEST}}/SKILL.md {{.BASE_URL}}/SKILL.md
-      - curl -fsSL -o {{.DEST}}/references/nullables-guide.md {{.BASE_URL}}/references/nullables-guide.md
+      - |
+        pnpx skills add danielbush/skills \
+        -y --agent {{.AGENTS}} --skill nullables

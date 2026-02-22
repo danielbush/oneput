@@ -4,3 +4,5 @@ node = "24"
 # Or for specific version: corepack use pnpm@10.29.3
 # pnpm = "10"
 task = "latest"
+# For btca:
+bun = "latest"

@@ -68,7 +68,11 @@ tasks:
     cmds:
       - bunx btca mcp
 
+  btca:add:
+    desc: Add things we want to reference.
     cmds:
       - |
-        pnpx skills add danielbush/skills \
-        -y --agent {{.AGENTS}} --skill nullables
+        set +e
+        bunx btca add -n svelte https://github.com/sveltejs/svelte.dev
+        # bunx btca add -n svelte https://github.com/sveltejs/svelte
+        # bunx btca add -n svelte-kit https://github.com/sveltejs/kit

@@ -14,5 +14,11 @@
     "patchedDependencies": {
       "tinykeys": "patches/tinykeys.patch"
     }
+  },
+  "devDependencies": {
+    "btca": "^1.0.961"
+  },
+  "dependencies": {
+    "skills": "^1.4.1"
   }
 }

@@ -54,25 +54,9 @@ tasks:
     vars:
       AGENTS: claude-code codex gemini-cli
     cmds:
-      - bunx skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables
-      - bunx skills add davis7dotsh/better-context -y --agent {{.AGENTS}} --skill btca-cli
+      - pnpm exec skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables
+      - pnpm exec skills add davis7dotsh/better-context -y --agent {{.AGENTS}} --skill btca-cli
 
-  btca:mcp:setup:
-    desc: set up local btca mcp
-    interactive: true
+  btca:tui:
     cmds:
-      - bunx btca mcp local
-
-  btca:mcp:
-    desc: Run btca mcp (http)
-    cmds:
-      - bunx btca mcp
-
-  btca:add:
-    desc: Add things we want to reference.
-    cmds:
-      - |
-        set +e
-        bunx btca add -n svelte https://github.com/sveltejs/svelte.dev
-        # bunx btca add -n svelte https://github.com/sveltejs/svelte
-        # bunx btca add -n svelte-kit https://github.com/sveltejs/kit
+      - pnpm exec btca

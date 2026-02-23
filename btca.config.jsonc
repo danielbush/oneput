@@ -4,14 +4,8 @@
   "resources": [
     {
       "type": "git",
-      "name": "svelte",
-      "url": "https://github.com/sveltejs/svelte",
-      "branch": "main"
-    },
-    {
-      "type": "git",
-      "name": "svelte-kit",
-      "url": "https://github.com/sveltejs/kit",
+      "name": "svelte-dev",
+      "url": "https://github.com/sveltejs/svelte.dev",
       "branch": "main"
     }
   ],

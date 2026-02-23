@@ -57,6 +57,17 @@ tasks:
       - bunx skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables
       - bunx skills add davis7dotsh/better-context -y --agent {{.AGENTS}} --skill btca-cli
 
+  btca:mcp:setup:
+    desc: set up local btca mcp
+    interactive: true
+    cmds:
+      - bunx btca mcp local
+
+  btca:mcp:
+    desc: Run btca mcp (http)
+    cmds:
+      - bunx btca mcp
+
     cmds:
       - |
         pnpx skills add danielbush/skills \

@@ -54,6 +54,10 @@ tasks:
     vars:
       AGENTS: claude-code codex gemini-cli
     cmds:
+      - bunx skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables
+      - bunx skills add davis7dotsh/better-context -y --agent {{.AGENTS}} --skill btca-cli
+
+    cmds:
       - |
         pnpx skills add danielbush/skills \
         -y --agent {{.AGENTS}} --skill nullables

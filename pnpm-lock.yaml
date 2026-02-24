@@ -175,6 +175,9 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.39.2
+      '@lucide/svelte':
+        specifier: ^0.544.0
+        version: 0.544.0(svelte@5.49.2)
       '@playwright/test':
         specifier: ^1.49.1
         version: 1.58.1

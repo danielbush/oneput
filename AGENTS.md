@@ -26,7 +26,7 @@ There's a root `Taskfile.yml`.
 
 ## Code style guidelines
 
-- We try to use the nullables pattern - see .agents/skills/nullables .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
+- In general apply the "nullables algorithm" in order to follow the nullables pattern - see `.agents/skills/nullables` .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
 - Use neverthrow to type check errors not just the happy path.
 - If a package is using effect-ts then we use that instead of neverthrow and it will replace a lot of the create-logic in the nullables pattern.
 

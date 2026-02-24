@@ -26,7 +26,7 @@ There's a root `Taskfile.yml`.
 
 ## Code style guidelines
 
-- We try to use the nullables pattern - see .agents/skills/nullables .  This is way to write code that is highly testable with narrow sociable unit tests and no mocks.
+- We try to use the nullables pattern - see .agents/skills/nullables .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
 - Use neverthrow to type check errors not just the happy path.
 - If a package is using effect-ts then we use that instead of neverthrow and it will replace a lot of the create-logic in the nullables pattern.
 
@@ -36,8 +36,7 @@ Testing Approach
 
 - Use vitest with AAA pattern (// arrange, // act, // assert with blank lines between)
 - Test intentions, not exhaustively - focus on core behaviors
-- Use helper functions to reduce boilerplate (e.g., `keyEvent()`, `createBindingMap()`)
-- No mocks - test pure logic directly with state-based assertions
+- No mocks - see the nullables skill
 - Ask what the most important tests are before writing
 - Keep test count small and focused
 

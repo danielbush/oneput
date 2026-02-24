@@ -1,7 +1,7 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
-import type { AppObject } from '$lib/oneput/types.js';
-import { FuzzyFilter } from '$lib/oneput/shared/filters/FuzzyFilter.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+import type { Controller } from '@oneput/oneput';
+import type { AppObject } from '@oneput/oneput';
+import { FuzzyFilter } from '@oneput/oneput/shared/filters/FuzzyFilter.js';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 
 /**

@@ -1,4 +1,4 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
+import type { Controller } from '@oneput/oneput';
 import { Layout } from './_layout.js';
 import { RootUI } from './root.js';
 

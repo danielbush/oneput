@@ -1,6 +1,6 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
-import { FuzzyFilter } from '$lib/oneput/shared/filters/FuzzyFilter.js';
-import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
+import type { Controller } from '@oneput/oneput';
+import { FuzzyFilter } from '@oneput/oneput/shared/filters/FuzzyFilter.js';
+import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 
 export class SettingsManager {
   static create(ctl: Controller) {

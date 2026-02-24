@@ -1,7 +1,7 @@
 <script lang="ts">
-  import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
-  import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
-  import { generateRandomText } from '$lib/demo/utils.js';
+  import VisualDebugControls from '@oneput/oneput/demo/components/VisualDebugControls.svelte';
+  import ForceDarkModeControls from '@oneput/oneput/demo/components/ForceDarkMode.svelte';
+  import { generateRandomText } from '$lib/utils.js';
 </script>
 
 <main>

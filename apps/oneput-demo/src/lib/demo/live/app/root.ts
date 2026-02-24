@@ -1,13 +1,13 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
+import type { Controller } from '@oneput/oneput';
 import { SettingsUI } from './settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { LayoutSettings } from './_layout.js';
 import { icons } from '../icons.js';
-import type { AppObject } from '$lib/oneput/types.js';
+import type { AppObject } from '@oneput/oneput';
 
 export class RootUI implements AppObject {
   static create(ctl: Controller) {

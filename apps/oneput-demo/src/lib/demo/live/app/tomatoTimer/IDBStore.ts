@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow';
 import { type UnfinishedSession } from './TomatoTimerValue.js';
-import { IDBStoreError } from '$lib/oneput/shared/bindings/BindingsIDB.js';
+import { IDBStoreError } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
 import {
   COMPLETED_SESSIONS_STORE,
   CURRENT_SESSION_KEY,
@@ -9,7 +9,7 @@ import {
   type FinishedSessionRecord,
   type TomatoTimerDB
 } from './idb.js';
-import { IDBError, openIDB } from '$lib/oneput/shared/idb.js';
+import { IDBError, openIDB } from '@oneput/oneput/shared/idb.js';
 import type { IDBPDatabase } from 'idb';
 import type { Store } from './Store.js';
 

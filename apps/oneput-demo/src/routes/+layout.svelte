@@ -1,10 +1,8 @@
 <script lang="ts">
-  import Anchor from '$lib/oneput/components/Anchor.svelte';
-  import OneputController from '$lib/oneput/components/OneputController.svelte';
+  import { Anchor, OneputController, OneputCornerButton } from '@oneput/oneput';
   import { setController } from '$lib/demo/live/app/_app.js';
-  import '$lib/demo/styles.css';
-  import '$lib/oneput/shared/styles/oneput-defaults.css';
-  import OneputCornerButton from '$lib/oneput/components/OneputCornerButton.svelte';
+  import '@oneput/oneput/demo/styles.css';
+  import '@oneput/oneput/shared/styles/oneput-defaults.css';
   import { icons } from '$lib/demo/live/icons.js';
 
   // Pretend the code here could be something outside of svelte.

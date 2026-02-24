@@ -1,12 +1,12 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
-import type { AppObject, MenuItem, OneputProps } from '$lib/oneput/types.js';
-import { SetDateTime } from '$lib/oneput/shared/appObjects/SetDateTime.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+import type { Controller } from '@oneput/oneput';
+import type { AppObject, MenuItem, OneputProps } from '@oneput/oneput';
+import { SetDateTime } from '@oneput/oneput/shared/appObjects/SetDateTime.js';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
-import { DynamicText } from '$lib/oneput/shared/ui/DynamicText.js';
-import { TimeVal } from '$lib/oneput/shared/values/TimeVal.js';
-import { DateTimeVal } from '$lib/oneput/shared/values/DateTimeVal.js';
-import { DateVal } from '$lib/oneput/shared/values/DateVal.js';
+import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
+import { TimeVal } from '@oneput/oneput/shared/values/TimeVal.js';
+import { DateTimeVal } from '@oneput/oneput/shared/values/DateTimeVal.js';
+import { DateVal } from '@oneput/oneput/shared/values/DateVal.js';
 import { icons } from '../../icons.js';
 
 export class AddEntry implements AppObject {

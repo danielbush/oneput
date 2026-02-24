@@ -1,71 +1,43 @@
 {
-  "name": "@oneput/jsed-demo",
+  "name": "@oneput/oneput-demo",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && npm run prepack",
+    "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
-    "prepack": "svelte-kit sync && svelte-package && publint",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
     "test:unit": "vitest",
-    "test": "npm run test:unit -- --run && npm run test:e2e",
+    "test": "npm run test:unit -- --run",
     "test:e2e": "playwright test"
   },
-  "files": [
-    "dist",
-    "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
-  ],
-  "sideEffects": [
-    "**/*.css"
-  ],
-  "svelte": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js"
-    }
-  },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  },
   "dependencies": {
-    "@iktakahiro/markdown-it-katex": "^4.0.1",
-    "@lucide/svelte": "^0.544.0",
-    "commander": "^11.1.0",
-    "lucide": "^0.562.0",
-    "markdown-it": "^13.0.1",
-    "neverthrow": "catalog:",
     "@oneput/oneput": "workspace:",
-    "@oneput/jsed": "workspace:"
+    "lucide": "^0.501.0",
+    "neverthrow": "catalog:"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.18.0",
     "@playwright/test": "^1.49.1",
     "@sveltejs/adapter-auto": "catalog:",
     "@sveltejs/kit": "catalog:",
-    "@sveltejs/package": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "catalog:",
-    "@types/markdown-it": "^14.1.2",
-    "@types/node": "^22",
     "@vitest/browser": "^3.2.3",
-    "eslint": "^9.22.0",
+    "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-svelte": "catalog:",
     "globals": "^16.0.0",
-    "happy-dom": "^18.0.1",
+    "idb": "^8.0.3",
+    "katex": "^0.16.25",
     "playwright": "^1.53.0",
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "catalog:",
-    "publint": "^0.3.2",
     "svelte": "catalog:",
     "svelte-check": "catalog:",
     "typescript": "^5.0.0",
@@ -76,10 +48,5 @@
   },
   "keywords": [
     "svelte"
-  ],
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  ]
 }

@@ -5,6 +5,14 @@ packages:
 
 catalog:
   neverthrow: ^8.2.0
+  svelte: "^5.0.0"
+  "@sveltejs/kit": "^2.22.0"
+  "@sveltejs/adapter-auto": "^6.0.0"
+  "@sveltejs/vite-plugin-svelte": "^6.0.0"
+  svelte-check: "^4.0.0"
+  eslint-plugin-svelte: "^3.0.0"
+  prettier-plugin-svelte: "^3.3.3"
+  vitest-browser-svelte: "^0.1.0"
 
 ignoredBuiltDependencies:
   - esbuild

@@ -6,9 +6,33 @@ settings:
 
 catalogs:
   default:
+    '@sveltejs/adapter-auto':
+      specifier: ^6.0.0
+      version: 6.1.1
+    '@sveltejs/kit':
+      specifier: ^2.22.0
+      version: 2.50.2
+    '@sveltejs/vite-plugin-svelte':
+      specifier: ^6.0.0
+      version: 6.2.4
+    eslint-plugin-svelte:
+      specifier: ^3.0.0
+      version: 3.14.0
     neverthrow:
       specifier: ^8.2.0
       version: 8.2.0
+    prettier-plugin-svelte:
+      specifier: ^3.3.3
+      version: 3.4.1
+    svelte:
+      specifier: ^5.0.0
+      version: 5.49.2
+    svelte-check:
+      specifier: ^4.0.0
+      version: 4.3.6
+    vitest-browser-svelte:
+      specifier: ^0.1.0
+      version: 0.1.0
 
 patchedDependencies:
   tinykeys:
@@ -64,16 +88,16 @@ importers:
         specifier: ^1.49.1
         version: 1.58.1
       '@sveltejs/adapter-auto':
-        specifier: ^6.0.0
+        specifier: 'catalog:'
         version: 6.1.1(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))
       '@sveltejs/kit':
-        specifier: ^2.22.0
+        specifier: 'catalog:'
         version: 2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
       '@sveltejs/package':
         specifier: ^2.0.0
         version: 2.5.7(svelte@5.49.2)(typescript@5.9.3)
       '@sveltejs/vite-plugin-svelte':
-        specifier: ^6.0.0
+        specifier: 'catalog:'
         version: 6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@22.19.9)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
       '@types/markdown-it':
         specifier: ^14.1.2
@@ -91,7 +115,7 @@ importers:
         specifier: ^10.0.1
         version: 10.1.8(eslint@9.39.2)
       eslint-plugin-svelte:
-        specifier: ^3.0.0
+        specifier: 'catalog:'
         version: 3.14.0(eslint@9.39.2)(svelte@5.49.2)
       globals:
         specifier: ^16.0.0
@@ -106,16 +130,16 @@ importers:
         specifier: ^3.4.2
         version: 3.8.1
       prettier-plugin-svelte:
-        specifier: ^3.3.3
+        specifier: 'catalog:'
         version: 3.4.1(prettier@3.8.1)(svelte@5.49.2)
       publint:
         specifier: ^0.3.2
         version: 0.3.17
       svelte:
-        specifier: ^5.0.0
+        specifier: 'catalog:'
         version: 5.49.2
       svelte-check:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.3.6(picomatch@4.0.3)(svelte@5.49.2)(typescript@5.9.3)
       typescript:
         specifier: ^5.0.0
@@ -130,7 +154,89 @@ importers:
         specifier: ^3.2.3
         version: 3.2.4(@types/node@22.19.9)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vitest-browser-svelte:
-        specifier: ^0.1.0
+        specifier: 'catalog:'
+        version: 0.1.0(@vitest/browser@3.2.4)(svelte@5.49.2)(vitest@3.2.4)
+
+  apps/oneput-demo:
+    dependencies:
+      '@oneput/oneput':
+        specifier: 'workspace:'
+        version: link:../../packages/oneput
+      lucide:
+        specifier: ^0.501.0
+        version: 0.501.0
+      neverthrow:
+        specifier: 'catalog:'
+        version: 8.2.0
+    devDependencies:
+      '@eslint/compat':
+        specifier: ^1.2.5
+        version: 1.4.1(eslint@9.39.2)
+      '@eslint/js':
+        specifier: ^9.18.0
+        version: 9.39.2
+      '@playwright/test':
+        specifier: ^1.49.1
+        version: 1.58.1
+      '@sveltejs/adapter-auto':
+        specifier: 'catalog:'
+        version: 6.1.1(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))
+      '@sveltejs/kit':
+        specifier: 'catalog:'
+        version: 2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
+      '@sveltejs/vite-plugin-svelte':
+        specifier: 'catalog:'
+        version: 6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
+      '@vitest/browser':
+        specifier: ^3.2.3
+        version: 3.2.4(playwright@1.58.1)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vitest@3.2.4)
+      eslint:
+        specifier: ^9.18.0
+        version: 9.39.2
+      eslint-config-prettier:
+        specifier: ^10.0.1
+        version: 10.1.8(eslint@9.39.2)
+      eslint-plugin-svelte:
+        specifier: 'catalog:'
+        version: 3.14.0(eslint@9.39.2)(svelte@5.49.2)
+      globals:
+        specifier: ^16.0.0
+        version: 16.5.0
+      idb:
+        specifier: ^8.0.3
+        version: 8.0.3
+      katex:
+        specifier: ^0.16.25
+        version: 0.16.28
+      playwright:
+        specifier: ^1.53.0
+        version: 1.58.1
+      prettier:
+        specifier: ^3.4.2
+        version: 3.8.1
+      prettier-plugin-svelte:
+        specifier: 'catalog:'
+        version: 3.4.1(prettier@3.8.1)(svelte@5.49.2)
+      svelte:
+        specifier: 'catalog:'
+        version: 5.49.2
+      svelte-check:
+        specifier: 'catalog:'
+        version: 4.3.6(picomatch@4.0.3)(svelte@5.49.2)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.20.0
+        version: 8.54.0(eslint@9.39.2)(typescript@5.9.3)
+      vite:
+        specifier: ^7.0.4
+        version: 7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.4(@types/node@25.2.0)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vitest-browser-svelte:
+        specifier: 'catalog:'
         version: 0.1.0(@vitest/browser@3.2.4)(svelte@5.49.2)(vitest@3.2.4)
 
   packages/jsed:
@@ -206,23 +312,20 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.39.2
-      '@lucide/svelte':
-        specifier: ^0.544.0
-        version: 0.544.0(svelte@5.49.2)
       '@playwright/test':
         specifier: ^1.49.1
         version: 1.58.1
       '@sveltejs/adapter-auto':
-        specifier: ^6.0.0
+        specifier: 'catalog:'
         version: 6.1.1(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))
       '@sveltejs/kit':
-        specifier: ^2.22.0
+        specifier: 'catalog:'
         version: 2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
       '@sveltejs/package':
         specifier: ^2.0.0
         version: 2.5.7(svelte@5.49.2)(typescript@5.9.3)
       '@sveltejs/vite-plugin-svelte':
-        specifier: ^6.0.0
+        specifier: 'catalog:'
         version: 6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
       '@testing-library/dom':
         specifier: ^10.4.1
@@ -243,7 +346,7 @@ importers:
         specifier: ^10.0.1
         version: 10.1.8(eslint@9.39.2)
       eslint-plugin-svelte:
-        specifier: ^3.0.0
+        specifier: 'catalog:'
         version: 3.14.0(eslint@9.39.2)(svelte@5.49.2)
       globals:
         specifier: ^16.0.0
@@ -261,16 +364,16 @@ importers:
         specifier: ^3.4.2
         version: 3.8.1
       prettier-plugin-svelte:
-        specifier: ^3.3.3
+        specifier: 'catalog:'
         version: 3.4.1(prettier@3.8.1)(svelte@5.49.2)
       publint:
         specifier: ^0.3.2
         version: 0.3.17
       svelte:
-        specifier: ^5.0.0
+        specifier: 'catalog:'
         version: 5.49.2
       svelte-check:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.3.6(picomatch@4.0.3)(svelte@5.49.2)(typescript@5.9.3)
       typescript:
         specifier: ^5.0.0
@@ -291,7 +394,7 @@ importers:
         specifier: ^3.2.3
         version: 3.2.4(@types/node@25.2.0)(@vitest/browser@3.2.4)(happy-dom@18.0.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vitest-browser-svelte:
-        specifier: ^0.1.0
+        specifier: 'catalog:'
         version: 0.1.0(@vitest/browser@3.2.4)(svelte@5.49.2)(vitest@3.2.4)
 
   packages/oneput-native-container:

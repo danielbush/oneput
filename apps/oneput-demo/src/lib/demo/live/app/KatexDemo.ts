@@ -1,11 +1,11 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
+import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
-import { checkboxMenuItem } from '$lib/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { divider, hflex, menuItem } from '$lib/oneput/lib/builder.js';
-import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppObject, OneputProps } from '$lib/oneput/types.js';
-import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
+import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { divider, hflex, menuItem } from '@oneput/oneput';
+import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
+import type { AppObject, OneputProps } from '@oneput/oneput';
+import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { icons } from '../icons.js';
 
 export class KatexDemo implements AppObject {

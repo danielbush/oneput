@@ -16,7 +16,10 @@ export type * from './oneput/lib/builder.js';
 // Lib
 export * as utils from './oneput/lib/utils.js';
 export * as bindings from './oneput/lib/bindings.js';
+export { mountSvelte, randomId } from './oneput/lib/utils.js';
 export { registerIcon, registerIcons, element, unsafeHTML } from './oneput/lib/icons.js';
+export { DOMUpdater } from './oneput/lib/DOMUpdater.js';
+export { SveltePropInjector } from './oneput/lib/SveltePropInjector.js';
 export {
   FlexChildBuilder,
   hflex,

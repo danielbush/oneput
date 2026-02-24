@@ -7,6 +7,13 @@
       "name": "svelte-dev",
       "url": "https://github.com/sveltejs/svelte.dev",
       "branch": "main"
+    },
+    {
+      "type": "git",
+      "name": "vitest",
+      "url": "https://github.com/vitest-dev/vitest",
+      "branch": "main",
+      "searchPath": "docs"
     }
   ],
   "model": "big-pickle",

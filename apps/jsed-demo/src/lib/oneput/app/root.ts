@@ -19,7 +19,7 @@ export class Root implements AppObject {
         stdMenuItem({
           id: 'load-doc',
           textContent: 'Load test doc...',
-          action: async () => {
+          action: () => {
             this.actions.LOAD_TEST_DOC();
           },
           left: (b) => [b.icon(icons.File)]
@@ -30,23 +30,22 @@ export class Root implements AppObject {
 
   actions = {
     LOAD_TEST_DOC: async () => {
-      const result = await Actions.create(this.ctl).loadTestDoc();
-      if (result.isErr()) {
-        switch (result.error.type) {
-          case 'missing-element':
-            this.ctl.notify(`Element #${result.error.id} not found`);
-            break;
-          case 'http':
-            this.ctl.notify(
-              `Failed to load doc: ${result.error.status} ${result.error.statusText}`
-            );
-            break;
-          case 'network':
-            this.ctl.notify('Network error loading doc');
-            console.error(result.error.cause);
-            break;
-        }
-      }
+      Actions.create(this.ctl)
+        .loadTestDoc()
+        .mapErr((error) => {
+          switch (error.type) {
+            case 'missing-element':
+              this.ctl.notify(`Element #${error.id} not found`);
+              break;
+            case 'http':
+              this.ctl.notify(`Failed to load doc: ${error.status} ${error.statusText}`);
+              break;
+            case 'network':
+              this.ctl.notify('Network error loading doc');
+              console.error(error.cause);
+              break;
+          }
+        });
     }
   };
 }

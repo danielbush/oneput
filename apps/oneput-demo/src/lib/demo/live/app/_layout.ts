@@ -1,14 +1,14 @@
-import { mountSvelte } from '$lib/oneput/lib/utils.js';
-import type { DynamicPlaceholderBase } from '$lib/oneput/types.js';
-import type { FChildParams, UILayout } from '$lib/oneput/types.js';
-import type { Controller } from '$lib/oneput/controllers/controller.js';
-import { FlexChildBuilder, hflex } from '$lib/oneput/lib/builder.js';
-import { DateDisplay } from '$lib/oneput/shared/components/DateDisplay.js';
-import MenuStatus from '$lib/oneput/shared/components/MenuStatus.svelte';
-import { TimeDisplay } from '$lib/oneput/shared/components/TimeDisplay.js';
-import { LocalBindingsService } from '$lib/oneput/shared/bindings/LocalBindingsService.js';
-import { WordFilter } from '$lib/oneput/shared/filters/WordFilter.js';
-import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
+import { mountSvelte } from '@oneput/oneput';
+import type { DynamicPlaceholderBase } from '@oneput/oneput';
+import type { FChildParams, UILayout } from '@oneput/oneput';
+import type { Controller } from '@oneput/oneput';
+import { FlexChildBuilder, hflex } from '@oneput/oneput';
+import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
+import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
+import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
+import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';
+import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
+import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { icons } from '../icons.js';
 
 /**

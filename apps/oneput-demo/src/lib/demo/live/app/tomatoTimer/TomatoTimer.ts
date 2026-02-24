@@ -1,19 +1,19 @@
-import type { Controller } from '$lib/oneput/controllers/controller.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { hflex, menuItem } from '$lib/oneput/lib/builder.js';
+import type { Controller } from '@oneput/oneput';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { hflex, menuItem } from '@oneput/oneput';
 import {
   TomatoTimerValue,
   type FinishedSession,
   type UnfinishedSession
 } from './TomatoTimerValue.js';
-import { type AppObject } from '$lib/oneput/types.js';
+import { type AppObject } from '@oneput/oneput';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
-import { SveltePropInjector } from '$lib/oneput/lib/SveltePropInjector.js';
+import { SveltePropInjector } from '@oneput/oneput';
 import { formatSecondsToHHMMSS } from './utils.js';
-import { DynamicPlaceholder } from '$lib/oneput/shared/ui/DynamicPlaceholder.js';
+import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry } from './AddEntry.js';
 import { icons } from '../../icons.js';
 

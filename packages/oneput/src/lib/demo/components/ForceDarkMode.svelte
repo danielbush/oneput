@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { demoState } from '$lib/demo/state.svelte.js';
+  import { demoState } from '../state.svelte.js';
 </script>
 
 <fieldset class="demo">

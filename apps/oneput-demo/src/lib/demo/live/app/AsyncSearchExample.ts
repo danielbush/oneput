@@ -1,11 +1,11 @@
-import { hflex } from '$lib/oneput/lib/builder.js';
-import type { Controller } from '$lib/oneput/controllers/controller.js';
-import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { hflex } from '@oneput/oneput';
+import type { Controller } from '@oneput/oneput';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { type LayoutSettings } from './_layout.js';
 import { TestInputService } from '../service/TestInputService.js';
-import { infoMenuItem } from '$lib/oneput/shared/ui/menuItems/infoMenuItem.js';
-import { DOMUpdater } from '$lib/oneput/lib/DOMUpdater.js';
-import type { AppObject } from '$lib/oneput/types.js';
+import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
+import { DOMUpdater } from '@oneput/oneput';
+import type { AppObject } from '@oneput/oneput';
 import { icons } from '../icons.js';
 
 export class AsyncSearchExample implements AppObject {

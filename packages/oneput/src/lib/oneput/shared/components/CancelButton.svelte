@@ -16,7 +16,7 @@
   aria-label="Cancel"
   type="button"
   onclick={onClick}
-  class={['oneput__icon-button', controller.input.getInputValue() || 'highlight']}
+  class={['oneput__icon-button', controller.input.getInputValue() && 'highlight']}
   bind:this={iconNode}
 ></button>
 

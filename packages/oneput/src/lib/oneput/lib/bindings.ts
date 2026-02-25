@@ -119,22 +119,28 @@ export function toKeyEvent(event: KeyboardEvent): KeyEvent {
  * use a KeyEvents format so that we have a canonical representation that we can
  * compare easily.
  */
-function keToBs(keyEvents: KeyEvent[]): KeyBinding['bindings'][number] {
-  const CONTROL_KEY = !isMacOS() ? '$mod' : 'Control';
-  const META_KEY = '$mod';
-
+function keToBs(keyEvents: KeyEvent[], isMac: boolean): KeyBinding['bindings'][number] {
   return keyEvents
     .map((keyEvent) => {
-      const modifiers = [
-        keyEvent.metaKey ? META_KEY : '',
-        keyEvent.altKey ? 'Alt' : '',
-        keyEvent.shiftKey ? 'Shift' : '',
-        keyEvent.controlKey ? CONTROL_KEY : ''
-      ]
-        .filter(Boolean)
-        .join('+');
+      // $mod is always first; remaining modifiers follow in Alt, Shift, <other> order.
+      // On macOS: $mod = Meta, explicit Control is separate.
+      // On Linux/Windows: $mod = Control, explicit Meta is separate.
+      const modifiers = isMac
+        ? [
+            keyEvent.metaKey ? '$mod' : '',
+            keyEvent.altKey ? 'Alt' : '',
+            keyEvent.shiftKey ? 'Shift' : '',
+            keyEvent.controlKey ? 'Control' : ''
+          ]
+        : [
+            keyEvent.controlKey ? '$mod' : '',
+            keyEvent.altKey ? 'Alt' : '',
+            keyEvent.shiftKey ? 'Shift' : '',
+            keyEvent.metaKey ? 'Meta' : ''
+          ];
 
-      return modifiers ? modifiers + '+' + keyEvent.key : keyEvent.key;
+      const modString = modifiers.filter(Boolean).join('+');
+      return modString ? modString + '+' + keyEvent.key : keyEvent.key;
     })
     .join(' ');
 }
@@ -142,16 +148,18 @@ function keToBs(keyEvents: KeyEvent[]): KeyBinding['bindings'][number] {
 /**
  * Turns any tinykeys key binding into a KeyEvent.
  *
+ * $mod is treated differently on a mac to a windows/linux machine.
+ *
  */
-function bsToKe(binding: KeyBinding['bindings'][number]): KeyEvent[] {
+function bsToKe(binding: KeyBinding['bindings'][number], isMac: boolean): KeyEvent[] {
   const keys = binding.split(' ');
   return keys.map((key) => {
     const keyEvent: KeyEvent = {
       key: '',
-      metaKey: true,
-      shiftKey: true,
-      altKey: true,
-      controlKey: true
+      metaKey: false,
+      shiftKey: false,
+      altKey: false,
+      controlKey: false
     };
     const parts = key.split('+');
     keyEvent.key = parts.pop() ?? '';
@@ -161,7 +169,7 @@ function bsToKe(binding: KeyBinding['bindings'][number]): KeyEvent[] {
     keyEvent.altKey = modifiers.includes('Alt');
     keyEvent.controlKey = modifiers.includes('Control');
     if (modifiers.includes('$mod')) {
-      if (isMacOS()) {
+      if (isMac) {
         keyEvent.metaKey = true;
       } else {
         keyEvent.controlKey = true;
@@ -171,23 +179,23 @@ function bsToKe(binding: KeyBinding['bindings'][number]): KeyEvent[] {
   });
 }
 
-function keMapToKbMap(keyEventsMap: KeyEventsMap): KeyBindingMap {
+function keMapToKbMap(keyEventsMap: KeyEventsMap, isMac: boolean): KeyBindingMap {
   return Object.entries(keyEventsMap).reduce((acc, [actionId, keyEventBinding]) => {
     acc[actionId] = {
       action: keyEventBinding.action,
       description: keyEventBinding.description,
-      bindings: keyEventBinding.bindings.map(keToBs)
+      bindings: keyEventBinding.bindings.map((ke) => keToBs(ke, isMac))
     };
     return acc;
   }, {} as KeyBindingMap);
 }
 
-function kbMaptoKeMap(keyBindingMap: KeyBindingMap): KeyEventsMap {
+function kbMaptoKeMap(keyBindingMap: KeyBindingMap, isMac: boolean): KeyEventsMap {
   return Object.entries(keyBindingMap).reduce((acc, [actionId, keyBinding]) => {
     acc[actionId] = {
       action: keyBinding.action,
       description: keyBinding.description,
-      bindings: keyBinding.bindings.map(bsToKe)
+      bindings: keyBinding.bindings.map((bs) => bsToKe(bs, isMac))
     };
     return acc;
   }, {} as KeyEventsMap);
@@ -224,29 +232,33 @@ function kbFromSerializable(
  * Internally we use KeyEvent's not KeyBinding since these are easier to compare.
  */
 export class KeyEventBindings {
-  static create(keyBindingMap: KeyBindingMap) {
-    return new KeyEventBindings(keyBindingMap);
+  static create(keyBindingMap: KeyBindingMap, isMac: boolean = isMacOS()) {
+    return new KeyEventBindings(keyBindingMap, isMac);
   }
 
   static fromSerializable(
     kbMapSerializable: KeyBindingMapSerializable,
-    actionMap: Record<string, (c: Controller) => void>
+    actionMap: Record<string, (c: Controller) => void>,
+    isMac: boolean = isMacOS()
   ): KeyEventBindings {
     return KeyEventBindings.create(
       Object.entries(kbMapSerializable).reduce((acc, [actionId, kbSerializable]) => {
         acc[actionId] = kbFromSerializable(kbSerializable, actionId, actionMap[actionId]);
         return acc;
-      }, {} as KeyBindingMap)
+      }, {} as KeyBindingMap),
+      isMac
     );
   }
 
   /**
-   * Store bindings in a canonical KeyEventsformat that we can easily compare against.
+   * Store bindings in a canonical KeyEvents format that we can easily compare against.
    */
   private keyEventsMap: KeyEventsMap;
+  private isMac: boolean;
 
-  constructor(keyBindingMap: KeyBindingMap) {
-    this.keyEventsMap = kbMaptoKeMap(keyBindingMap);
+  constructor(keyBindingMap: KeyBindingMap, isMac: boolean = isMacOS()) {
+    this.isMac = isMac;
+    this.keyEventsMap = kbMaptoKeMap(keyBindingMap, isMac);
   }
 
   toSerializable() {
@@ -283,7 +295,7 @@ export class KeyEventBindings {
         bindings: keyBindingMap[actionId].bindings.filter((b) => b !== binding)
       }
     };
-    this.keyEventsMap = kbMaptoKeMap(newBindings);
+    this.keyEventsMap = kbMaptoKeMap(newBindings, this.isMac);
   }
 
   /**
@@ -300,6 +312,6 @@ export class KeyEventBindings {
    * that is usually written by users in configs etc.
    */
   get keyBindingMap() {
-    return keMapToKbMap(this.keyEventsMap);
+    return keMapToKbMap(this.keyEventsMap, this.isMac);
   }
 }

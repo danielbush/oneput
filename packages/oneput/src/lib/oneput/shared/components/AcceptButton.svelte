@@ -6,7 +6,7 @@
   let iconNode: HTMLButtonElement | null = $state(null);
   $effect(() => {
     if (iconNode) {
-      renderIcon('tick', iconNode);
+      renderIcon('Check', iconNode);
     }
   });
 </script>

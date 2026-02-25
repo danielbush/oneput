@@ -32,6 +32,48 @@ function createBindingMap(
 }
 
 describe('KeyEventBindings', () => {
+  describe('addBinding', () => {
+    it('should store the new binding', () => {
+      // arrange
+      const bindings = KeyEventBindings.create(
+        createBindingMap({ save: { description: 'Save', bindings: ['$mod+s'] } })
+      );
+
+      // act
+      bindings.addBinding('save', [keyEvent('s', { altKey: true })]);
+
+      // assert
+      expect(bindings.keyBindingMap).toEqual({
+        save: {
+          action: expect.any(Function),
+          description: 'Save',
+          bindings: ['$mod+s', 'Alt+s']
+        }
+      });
+    });
+  });
+
+  describe('removeBinding', () => {
+    it('should remove the binding', () => {
+      // arrange
+      const bindings = KeyEventBindings.create(
+        createBindingMap({ save: { description: 'Save', bindings: ['$mod+s', 'Alt+s'] } })
+      );
+
+      // act
+      bindings.removeBinding('save', 'Alt+s');
+
+      // assert
+      expect(bindings.keyBindingMap).toEqual({
+        save: {
+          action: expect.any(Function),
+          description: 'Save',
+          bindings: ['$mod+s']
+        }
+      });
+    });
+  });
+
   describe('addBinding duplicate detection', () => {
     it('rejects a binding that already exists — macOS ($mod = Meta)', () => {
       // arrange

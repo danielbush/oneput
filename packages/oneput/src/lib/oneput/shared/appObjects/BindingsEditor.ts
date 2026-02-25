@@ -268,6 +268,7 @@ export class BindingsEditor implements AppObject {
     this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal)
       .andTee(() => {
         this.ctl.notify('Binding removed', { duration: 3000 });
+        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap, this.isLocal);
       })
       .orTee((err) => {
         this.keyBindingMap = oldKeyBindingMap;
@@ -297,6 +298,7 @@ export class BindingsEditor implements AppObject {
     this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal)
       .andTee(() => {
         this.ctl.notify('Binding added', { duration: 3000 });
+        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap, this.isLocal);
       })
       .orTee((err) => {
         this.keyBindingMap = oldKeyBindingMap;

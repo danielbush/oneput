@@ -51,8 +51,8 @@ export class Layout implements UILayout {
     this.bindingService
       .getBindings()
       .andTee((bindings) => {
-        ctl.keys.setDefaultBindings(bindings.globalBindings, false, true);
-        ctl.keys.setDefaultBindings(bindings.localBindings, true, true);
+        ctl.keys.setDefaultBindings(bindings.globalBindings, false);
+        ctl.keys.setDefaultBindings(bindings.localBindings, true);
       })
       .orTee((err) => {
         ctl.alert({ message: 'Could not set default bindings!', additional: err.message });

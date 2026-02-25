@@ -80,15 +80,21 @@ export class KeysController {
     this.keysDisabled = !on;
   }
 
-  setDefaultBindings(bindings: KeyBindingMap, isLocal: boolean = false, apply = false) {
+  /**
+   * Sets default local or global bindings.
+   *
+   * If the current bindings are default, then they will be updated so you can use the new binding straight away.
+   *
+   */
+  setDefaultBindings(bindings: KeyBindingMap, isLocal: boolean = false) {
     if (isLocal) {
       this.defaultLocalBindings = bindings;
-      if (apply) {
+      if (this.isUsingDefaultLocalBindings) {
         this.setBindings(bindings, true);
       }
     } else {
       this.defaultGlobalBindings = bindings;
-      if (apply) {
+      if (this.isUsingDefaultGlobalBindings) {
         this.setBindings(bindings, false);
       }
     }
@@ -111,12 +117,16 @@ export class KeysController {
   private defaultGlobalBindings: KeyBindingMap = {};
   private currentLocalBindings: KeyBindingMap = {};
   private currentGlobalBindings: KeyBindingMap = {};
+  private isUsingDefaultLocalBindings = true;
+  private isUsingDefaultGlobalBindings = true;
 
   setBindings(bindings: KeyBindingMap, isLocal: boolean = false) {
     if (isLocal) {
+      this.isUsingDefaultLocalBindings = false;
       this.currentLocalBindings = bindings;
       this.handleLocalKeys(bindings);
     } else {
+      this.isUsingDefaultGlobalBindings = false;
       this.currentGlobalBindings = bindings;
       this.handleGlobalKeys(bindings);
     }
@@ -129,8 +139,10 @@ export class KeysController {
   resetBindings(isLocal: boolean = false) {
     if (isLocal) {
       this.setBindings(this.defaultLocalBindings, true);
+      this.isUsingDefaultLocalBindings = true;
     } else {
       this.setBindings(this.defaultGlobalBindings, false);
+      this.isUsingDefaultGlobalBindings = true;
     }
   }
 }

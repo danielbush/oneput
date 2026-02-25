@@ -1,7 +1,6 @@
 <script lang="ts">
   import { renderIcon } from '../../lib/icons.js';
-  import type { Controller } from '../../controllers/controller.js';
-  const { controller, onClick }: { controller: Controller; onClick: (evt: Event) => void } =
+  const { onClick, isDisabled }: { onClick: (evt: Event) => void; isDisabled: () => boolean } =
     $props();
   let iconNode: HTMLButtonElement | null = $state(null);
   $effect(() => {
@@ -16,19 +15,9 @@
   aria-label="Cancel"
   type="button"
   onclick={onClick}
-  class={['oneput__icon-button', controller.input.getInputValue() && 'highlight']}
+  class={['oneput__icon-button', 'oneput__icon-cancel', isDisabled() && 'oneput__icon-disabled']}
   bind:this={iconNode}
 ></button>
 
 <style>
-  :not(.highlight) {
-    color: rgb(128 0 0 / 0.8);
-  }
-  .highlight {
-    background-color: rgb(128 0 0 / 0.8);
-    color: white;
-  }
-  .highlight:hover {
-    background-color: rgb(128 0 0 / 1);
-  }
 </style>

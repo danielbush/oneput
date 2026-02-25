@@ -552,11 +552,6 @@ button:disabled.oneput__menu-item {
   padding: var(--oneput-icon-padding);
   align-items: center;
   cursor: pointer;
-}
-
-.oneput__icon-toggle-button,
-.oneput__icon-button,
-.oneput__icon {
   font: var(--oneput-icon-font);
 }
 
@@ -839,3 +834,26 @@ button:disabled.oneput__menu-item {
 }
 
 /* #endregion */
+
+.oneput__icon-button.oneput__icon-accept {
+  background-color: rgb(0 128 0 / 0.8);
+  color: white;
+}
+
+.oneput__icon-button.oneput__icon-accept:hover {
+  background-color: rgb(0 128 0 / 1);
+}
+
+.oneput__icon-button.oneput__icon-cancel {
+  background-color: rgb(128 0 0 / 0.8);
+  color: white;
+}
+
+.oneput__icon-button.oneput__icon-cancel:hover {
+  background-color: rgb(128 0 0 / 1);
+}
+
+.oneput__icon-button.oneput__icon-disabled {
+  color: rgb(228 228 228);
+  background-color: rgb(188 188 188);
+}

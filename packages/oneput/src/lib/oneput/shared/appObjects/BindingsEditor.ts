@@ -184,14 +184,20 @@ export class BindingsEditor implements AppObject {
             onMount: (node) =>
               mountSvelte(AcceptButton, {
                 target: node,
-                props: { controller: this.ctl, onClick: accept }
+                props: {
+                  onClick: accept,
+                  isHidden: () => !this.ctl.input.getInputValue()
+                }
               })
           }),
           b.fchild({
             onMount: (node) =>
               mountSvelte(CancelButton, {
                 target: node,
-                props: { controller: this.ctl, onClick: reject }
+                props: {
+                  onClick: reject,
+                  isDisabled: () => !this.ctl.input.getInputValue()
+                }
               })
           })
         ]

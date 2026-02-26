@@ -61,8 +61,19 @@ tasks:
       - pnpm exec skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables
       - pnpm exec skills add davis7dotsh/better-context -y --agent {{.AGENTS}} --skill btca-cli
 
-  claude:
-    desc: Run Claude Code in the devcontainer (no permission prompts)
+  devc:nuke:
+    cmds:
+      - pnpm exec devcontainer build --workspace-folder . --no-cache
+      - pnpm exec devcontainer up --workspace-folder . --remove-existing-container
+  devc:up:
+    cmds:
+      - pnpm exec devcontainer up --workspace-folder .
+  devc:shell:
+    interactive: true
+    cmds:
+      - pnpm exec devcontainer exec --workspace-folder . -- bash
+  devc:claude:
+    desc: Run Claude Code in the devcontainer (no permission prompts); run devc:up first
     summary: |
       Runs Claude Code inside the devcontainer with permissions auto-approved.
 
@@ -84,12 +95,8 @@ tasks:
 
       To authenticate with an API key instead, set ANTHROPIC_API_KEY in your host
       shell before starting the container.
-    vars:
-      REBUILD: '{{.REBUILD | default ""}}'
     interactive: true
     cmds:
-      - pnpm exec devcontainer build --workspace-folder . {{if eq .REBUILD "yes"}}--no-cache{{end}}
-      - pnpm exec devcontainer up --workspace-folder . {{if eq .REBUILD "yes"}}--remove-existing-container{{end}}
       - pnpm exec devcontainer exec --workspace-folder . -- claude
 
   btca:tui:

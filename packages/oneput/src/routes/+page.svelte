@@ -5,8 +5,8 @@
   import * as data from '$lib/demo/visual/state.js';
   import * as ui from '$lib/demo/visual/ui.js';
   import { icons } from '$lib/demo/visual/state.svelte.js';
-  import VisualDebugControls from '$lib/demo/components/VisualDebugControls.svelte';
-  import ForceDarkModeControls from '$lib/demo/components/ForceDarkMode.svelte';
+  import VisualDebugControls from '$lib/oneput/shared/components/VisualDebugControls.svelte';
+  import ForceDarkModeControls from '$lib/oneput/shared/components/ForceDarkMode.svelte';
   import { randomId } from '$lib/oneput/lib/utils.js';
   import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
   import { tinykeys } from 'tinykeys';

@@ -39,7 +39,6 @@
       "default": "./src/lib/index.ts"
     },
     "./shared/*": "./src/lib/oneput/shared/*",
-    "./demo/components/*": "./src/lib/demo/components/*",
     "./demo/styles.css": "./src/lib/demo/styles.css"
   },
   "publishConfig": {

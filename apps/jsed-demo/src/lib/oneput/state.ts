@@ -1,3 +1,3 @@
-import { Document } from '@oneput/jsed';
+import * as jsed from '@oneput/jsed';
 
-export const state: { currentDocument?: Document } = {};
+export const state: { currentDocument?: jsed.JsedDocument } = {};

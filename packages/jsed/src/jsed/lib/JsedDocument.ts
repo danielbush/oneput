@@ -2,10 +2,54 @@ import { Navigator } from './navigator.js';
 import { JsedCursor } from './cursor.js';
 import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
 import { tokenizeImplicitLine } from './token.js';
+import { JSED_DOM_ROOT_ID } from './constants.js';
+import { ElementIndicator } from '../../oneput/ElementIndicator.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {
     const doc = new JsedDocument(root);
+
+    const elementIndicator = ElementIndicator.create();
+
+    // Set up event handlers
+
+    function handleElementClick(evt: MouseEvent) {
+      const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
+      if (app_root_node) {
+        const node = evt.target as Element;
+        if (app_root_node.contains(node)) {
+          return;
+        }
+      }
+      // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
+      evt.preventDefault();
+      doc.nav.REQUEST_FOCUS(evt.target);
+    }
+
+    // root.addEventListener<'click'>('click', handleElementClick);
+    root.addEventListener<'mousedown'>('mousedown', handleElementClick);
+
+    // Unload
+
+    doc.unload = () => {
+      root.removeEventListener('click', handleElementClick);
+    };
+
+    // Document stuff
+
+    const handleElementFocus = (evt: JsedFocusEvent) => {
+      const el = evt.targetType === 'F_ELEM' ? evt.element : evt.token;
+      elementIndicator.updateFocus(el);
+    };
+
+    doc.listeners.FOCUS = handleElementFocus;
+    doc.nav.FOCUS(doc.root);
+
+    // Configure indicator:
+    const focus = doc.nav.getFocus();
+    elementIndicator.updateFocus(focus);
+    elementIndicator.showIndicator(true);
+
     return doc;
   }
 

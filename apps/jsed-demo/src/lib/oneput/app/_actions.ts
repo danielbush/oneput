@@ -15,19 +15,19 @@ export const actions: Record<string, (ctl: Controller) => void> = {
   // Editor actions
 
   REC_NEXT: () => {
-    state.currentDocument?.document.nav.REC_NEXT();
+    state.currentDocument?.nav.REC_NEXT();
   },
   REC_PREV: () => {
-    state.currentDocument?.document.nav.REC_PREV();
+    state.currentDocument?.nav.REC_PREV();
   },
   SIB_NEXT: () => {
-    state.currentDocument?.document.nav.SIB_NEXT();
+    state.currentDocument?.nav.SIB_NEXT();
   },
   SIB_PREV: () => {
-    state.currentDocument?.document.nav.SIB_PREV();
+    state.currentDocument?.nav.SIB_PREV();
   },
   UP: () => {
-    state.currentDocument?.document.nav.UP();
+    state.currentDocument?.nav.UP();
   },
   TOGGLE_SELECT: (ctl) => {
     ctl.input.toggleSelect();

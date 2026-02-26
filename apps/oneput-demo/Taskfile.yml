@@ -1,0 +1,64 @@
+# https://taskfile.dev
+
+version: '3'
+silent: false
+set:
+  - errexit
+  - nounset
+  - pipefail
+
+tasks:
+  fix:
+    desc: format + eslint (fix) + check types (no fix)
+    cmds:
+      - task: format
+      - task: eslint:fix
+      - task: check
+  format:
+    desc: format files
+    cmds:
+      - pnpm run format
+  eslint:fix:
+    desc: run eslint fixes
+    cmds:
+      - ./node_modules/.bin/eslint . --fix
+  eslint:
+    desc: run eslint
+    cmds:
+      - ./node_modules/.bin/eslint .
+  check:
+    desc: check types
+    cmds:
+      - pnpm run check
+  check:watch:
+    desc: check types in watch mode
+    cmds:
+      - pnpm run check:watch
+  dev:
+    desc: Run dev server
+    cmds:
+      - pnpm run dev
+  dev:public:
+    desc: Run dev server exposed on all interfaces
+    cmds:
+      - pnpm run dev --host=0.0.0.0
+  test:
+    desc: |
+      Run unit tests; but avoid triggering browser tests.
+      See vite.config.ts
+    cmds:
+      - ./node_modules/.bin/vitest run --project=server --passWithNoTests
+  test:browser:
+    desc: |
+      Test using browser mode, defaults to watch mode
+      See https://vitest.dev/guide/browser/
+    cmds:
+      - ./node_modules/.bin/vitest run --project=client --watch
+  test:e2e:
+    desc: Run end-to-end tests (headless)
+    cmds:
+      - pnpm run test:e2e
+  build:
+    desc: build dist/
+    cmds:
+      - pnpm run build

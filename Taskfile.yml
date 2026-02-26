@@ -11,6 +11,9 @@ includes:
   oneput:
     taskfile: ./packages/oneput/Taskfile.yml
     dir: ./packages/oneput
+  oneput-demo:
+    taskfile: ./apps/oneput-demo/Taskfile.yml
+    dir: ./apps/oneput-demo
   native:
     taskfile: ./packages/oneput-native-container/Taskfile.yml
     dir: ./packages/oneput-native-container
@@ -34,6 +37,7 @@ tasks:
     desc: run checks (eg types, linting) on all important packages
     cmds:
       - task: oneput:check
+      - task: oneput-demo:check
       - task: jsed:check
       - task: jsed-demo:check
 

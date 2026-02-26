@@ -2,7 +2,7 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 import type { LayoutSettings } from './_layout.js';
-import { Actions } from './_actions.js';
+import { TestDocService } from '$lib/jsed/services/TestDocService.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
@@ -19,9 +19,7 @@ export class Root implements AppObject {
         stdMenuItem({
           id: 'load-doc',
           textContent: 'Load test doc...',
-          action: () => {
-            this.actions.LOAD_TEST_DOC();
-          },
+          action: this.actions.LOAD_TEST_DOC,
           left: (b) => [b.icon(icons.File)]
         })
       ]
@@ -30,7 +28,7 @@ export class Root implements AppObject {
 
   actions = {
     LOAD_TEST_DOC: async () => {
-      Actions.create(this.ctl)
+      TestDocService.create(this.ctl)
         .loadTestDoc()
         .mapErr((error) => {
           switch (error.type) {

@@ -1,11 +1,11 @@
 import { describe, it, expect, test, vi } from 'vitest';
-import { start } from '../start.js';
+import { JsedDocument } from '../JsedDocument.js';
 
 describe('start', () => {
   it('can unload the doc', () => {
     // arrange
     const root = document.createElement('DIV');
-    const doc = start(root);
+    const doc = JsedDocument.create(root);
     vi.spyOn(doc.root, 'removeEventListener');
 
     // act
@@ -24,7 +24,7 @@ describe('start', () => {
       const listener = vi.spyOn(root, 'addEventListener');
 
       // act
-      start(root);
+      const doc = JsedDocument.create(root);
 
       // assert
       const [click, handleElementClick] = listener.mock.calls[0];
@@ -37,7 +37,7 @@ describe('start', () => {
     test('clicking calls FOCUS on elements', async () => {
       // arrange
       const root = document.createElement('DIV');
-      const doc = start(root);
+      const doc = JsedDocument.create(root);
       const FOCUS = vi.spyOn(doc.nav, 'FOCUS');
 
       // act

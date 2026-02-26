@@ -1,9 +1,18 @@
 <script lang="ts">
-  import { demoState } from '../../../demo/state.svelte.js';
+  let visualDebug = $state(false);
+
+  function toggleVisualDebug() {
+    visualDebug = !visualDebug;
+    if (visualDebug) {
+      document.documentElement.classList.add('oneput__debug');
+    } else {
+      document.documentElement.classList.remove('oneput__debug');
+    }
+  }
 </script>
 
 <fieldset class="demo">
-  <button type="button" onclick={demoState.toggleVisualDebug}> Toggle visual debug </button>
+  <button type="button" onclick={toggleVisualDebug}> Toggle visual debug </button>
   <ul>
     <li>Highlights hflex, vflex and fchild</li>
     <li>

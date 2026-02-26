@@ -1,9 +1,18 @@
 <script lang="ts">
-  import { demoState } from '../../../demo/state.svelte.js';
+  let forceDarkMode = $state(false);
+
+  function toggleForceDarkMode() {
+    forceDarkMode = !forceDarkMode;
+    if (forceDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  }
 </script>
 
 <fieldset class="demo">
-  <button type="button" onclick={demoState.toggleForceDarkMode}>
+  <button type="button" onclick={toggleForceDarkMode}>
     Toggle force dark mode on page
   </button>
 </fieldset>

@@ -1,18 +1,69 @@
 import { JSED_IGNORE_CLASS } from '../jsed/lib/constants.js';
 import { getParent, isToken } from '../jsed/lib/token.js';
 
+// #region Types
+
+interface MinimalObserver {
+  observe(el: Element): void;
+  disconnect(): void;
+}
+
+type ObserverFactory = (
+  callback: IntersectionObserverCallback,
+  options?: IntersectionObserverInit
+) => MinimalObserver;
+
+interface IndicatorDeps {
+  doc: {
+    addEventListener(type: string, handler: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener(type: string, handler: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    createElement(tagName: string): HTMLElement;
+    body: { appendChild(node: Node): Node };
+  };
+  createObserver: ObserverFactory;
+}
+
+// #endregion
+
+// #region Embedded stubs
+
+class NullObserver implements MinimalObserver {
+  observe() {}
+  disconnect() {}
+}
+
+function createNullDeps(): IndicatorDeps {
+  return {
+    doc: {
+      addEventListener() {},
+      removeEventListener() {},
+      createElement(_tagName: string): HTMLElement {
+        throw new Error('ElementIndicator.createNull: createElement should not be called');
+      },
+      body: { appendChild(node: Node) { return node; } },
+    },
+    createObserver: () => new NullObserver(),
+  };
+}
+
+// #endregion
+
 /**
  * Provides a visual indicator for the focused element (non-tokens).
  */
 export class ElementIndicator {
   static create() {
-    return new ElementIndicator();
+    return new ElementIndicator({
+      doc: document,
+      createObserver: (callback, options) => new IntersectionObserver(callback, options),
+    });
   }
 
-  constructor() {
-    document.addEventListener('scroll', this.#scrollHandler, true);
-    document.addEventListener('scrollend', this.#scrollEndHandler, true);
+  static createNull() {
+    return new ElementIndicator(createNullDeps(), { isNull: true });
   }
+
+  #deps: IndicatorDeps;
 
   /**
    * The indicator.
@@ -23,8 +74,9 @@ export class ElementIndicator {
    */
   #element: HTMLElement | null = null;
   #showIndicator = false;
-  #observer: IntersectionObserver | null = null;
+  #observer: MinimalObserver | null = null;
   #isVisible = true;
+  #isNull: boolean;
 
   #scrollHandler = () => {
     if (this.#indicator) {
@@ -38,9 +90,16 @@ export class ElementIndicator {
     }
   };
 
+  constructor(deps: IndicatorDeps, options?: { isNull?: boolean }) {
+    this.#deps = deps;
+    this.#isNull = options?.isNull ?? false;
+    deps.doc.addEventListener('scroll', this.#scrollHandler, true);
+    deps.doc.addEventListener('scrollend', this.#scrollEndHandler, true);
+  }
+
   destroy() {
-    document.removeEventListener('scroll', this.#scrollHandler, true);
-    document.removeEventListener('scrollend', this.#scrollEndHandler, true);
+    this.#deps.doc.removeEventListener('scroll', this.#scrollHandler, true);
+    this.#deps.doc.removeEventListener('scrollend', this.#scrollEndHandler, true);
     this.#observer?.disconnect();
     this.#observer = null;
     this.#removeIndicator();
@@ -76,7 +135,7 @@ export class ElementIndicator {
 
   #setupObserver(el: HTMLElement): void {
     this.#observer?.disconnect();
-    this.#observer = new IntersectionObserver(
+    this.#observer = this.#deps.createObserver(
       ([entry]) => {
         this.#isVisible = entry.isIntersecting;
         if (!this.#isVisible) {
@@ -92,12 +151,13 @@ export class ElementIndicator {
 
   #addIndicator(): void {
     this.#removeIndicator();
+    if (this.#isNull) return;
     const el = this.#element;
     if (!el) {
       return;
     }
     const indic = this.#makeIndicator(el);
-    document.body.appendChild(indic);
+    this.#deps.doc.body.appendChild(indic);
     this.#indicator = indic;
   }
 
@@ -105,7 +165,7 @@ export class ElementIndicator {
     const tagn = el.tagName;
     const rect = el.getBoundingClientRect();
 
-    const span = document.createElement('span');
+    const span = this.#deps.doc.createElement('span');
     span.classList.add(JSED_IGNORE_CLASS);
     span.classList.add('jsed-tag-indicator');
     span.style.position = 'fixed';
@@ -116,7 +176,7 @@ export class ElementIndicator {
 
     // Temporarily add to measure height
     span.style.visibility = 'hidden';
-    document.body.appendChild(span);
+    this.#deps.doc.body.appendChild(span);
     const indicatorHeight = span.offsetHeight;
     span.remove();
     span.style.visibility = '';

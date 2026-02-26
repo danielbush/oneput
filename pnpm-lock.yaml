@@ -42,14 +42,16 @@ patchedDependencies:
 importers:
 
   .:
-    dependencies:
-      skills:
-        specifier: ^1.4.1
-        version: 1.4.1
     devDependencies:
+      '@devcontainers/cli':
+        specifier: ^0.75.0
+        version: 0.75.0
       btca:
         specifier: ^1.0.961
         version: 1.0.961
+      skills:
+        specifier: ^1.4.1
+        version: 1.4.1
 
   apps/jsed-demo:
     dependencies:
@@ -963,6 +965,11 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
+
+  '@devcontainers/cli@0.75.0':
+    resolution: {integrity: sha512-fYcAZMX1RjhG9bIhkiBrQMcKwnoGp808PWToAvWyNqSg8AeY8Bm2ClXVrFQknnPLRzD+GENlLrlx+WpI6weuUA==}
+    engines: {node: ^16.13.0 || >=18.0.0}
+    hasBin: true
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -5771,6 +5778,8 @@ snapshots:
   '@bcoe/v8-coverage@0.2.3': {}
 
   '@bcoe/v8-coverage@1.0.2': {}
+
+  '@devcontainers/cli@0.75.0': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

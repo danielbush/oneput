@@ -16,9 +16,8 @@
     }
   },
   "devDependencies": {
-    "btca": "^1.0.961"
-  },
-  "dependencies": {
+    "@devcontainers/cli": "^0.75.0",
+    "btca": "^1.0.961",
     "skills": "^1.4.1"
   }
 }

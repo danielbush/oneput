@@ -2,9 +2,9 @@
   import '$lib/demo/styles.css';
   import '$lib/oneput/shared/styles/oneput-defaults.css';
   import Oneput from '$lib/oneput/components/Oneput.svelte';
-  import * as data from '$lib/demo/visual/state.js';
-  import * as ui from '$lib/demo/visual/ui.js';
-  import { icons } from '$lib/demo/visual/state.svelte.js';
+  import * as data from './_state.js';
+  import * as ui from './_ui.js';
+  import { icons } from './_state.svelte.js';
   import VisualDebugControls from '$lib/oneput/shared/components/VisualDebugControls.svelte';
   import ForceDarkModeControls from '$lib/oneput/shared/components/ForceDarkMode.svelte';
   import { randomId } from '$lib/oneput/lib/utils.js';

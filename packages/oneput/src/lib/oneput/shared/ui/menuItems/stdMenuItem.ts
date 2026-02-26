@@ -31,7 +31,7 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
  * additional content to the right and an optional bottom section where you can
  * put more detail.
  *
- * See demo/visual for examples.
+ * See src/routes/ for examples.
  */
 export function stdMenuItem(params: StdMenuItemParams): MenuItem {
   const id = params.id ?? randomId();

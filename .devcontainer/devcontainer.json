@@ -42,17 +42,15 @@
   "remoteUser": "node",
   "mounts": [
     "source=oneput-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=oneput-claude-config-${devcontainerId},target=/home/node/.claude,type=volume"
+    "source=oneput-claude-config-${devcontainerId},target=/home/node/.claude,type=volume",
+    "source=${localWorkspaceFolder}/.devcontainer/claude-settings.json,target=/home/node/.claude/settings.json,type=bind"
   ],
   "containerEnv": {
-    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
     "NODE_OPTIONS": "--max-old-space-size=4096",
-    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "mkdir -p ~/.claude && ([ -f ~/.claude/settings.json ] || echo '{\"dangerouslySkipPermissions\": true}' > ~/.claude/settings.json)",
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
   "waitFor": "postStartCommand"
 }

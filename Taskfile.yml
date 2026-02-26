@@ -65,6 +65,9 @@ tasks:
     cmds:
       - pnpm exec devcontainer build --workspace-folder . --no-cache
       - pnpm exec devcontainer up --workspace-folder . --remove-existing-container
+  devc:kill:
+    cmds:
+      - docker rm -f $(docker ps -q --filter "label=devcontainer.local_folder=/home/debian/projects/@oneput")
   devc:up:
     cmds:
       - pnpm exec devcontainer up --workspace-folder .
@@ -77,27 +80,34 @@ tasks:
     summary: |
       Runs Claude Code inside the devcontainer with permissions auto-approved.
 
-      1. build — builds the Docker image
-      2. up — creates and starts the container, runs lifecycle scripts
-      3. exec — runs claude inside the already-running container
+      Prerequisites:
+        - Run devc:up first to start the container.
 
-      Permission prompts are skipped via dangerouslySkipPermissions in
-      ~/.claude/settings.json, written on first container creation (see
-      postCreateCommand in .devcontainer/devcontainer.json). This covers
-      subagents too, since Claude Code spawns them as fresh processes that
-      read settings.json rather than inheriting CLI flags.
+      Permission prompts are skipped via the --dangerously-skip-permissions
+      CLI flag. This is safe because the devcontainer is sandboxed with
+      firewall rules restricting network access.
 
-      To authenticate with a Claude Pro/Max subscription (first time only):
-        1. Start the devcontainer (e.g. open in VS Code or run: devcontainer up --workspace-folder .)
-        2. Open a shell in the container and run: claude login
-        3. Open the printed URL in your host browser and approve
-        4. Credentials are saved to the ~/.claude volume and persist across restarts
+      Authentication:
+        Claude Pro/Max subscription (first time only):
+          1. Start the devcontainer: task devc:up
+          2. Open a shell: task devc:shell
+          3. Run: claude login
+          4. Open the printed URL in your host browser and approve
+          5. Credentials are saved to the ~/.claude volume and persist across restarts
 
-      To authenticate with an API key instead, set ANTHROPIC_API_KEY in your host
-      shell before starting the container.
+        API key:
+          Set ANTHROPIC_API_KEY in your host shell before starting the container.
+
+      Note: Do NOT set ANTHROPIC_API_KEY to an empty string in the container
+      environment — Claude will try API key auth instead of OAuth and fail.
     interactive: true
     cmds:
-      - pnpm exec devcontainer exec --workspace-folder . -- claude
+      - |
+        args=()
+        if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+          args+=(--remote-env "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY")
+        fi
+        pnpm exec devcontainer exec --workspace-folder . "${args[@]}" -- claude --dangerously-skip-permissions
 
   btca:tui:
     cmds:

@@ -39,7 +39,7 @@
       "default": "./src/lib/index.ts"
     },
     "./shared/*": "./src/lib/oneput/shared/*",
-    "./demo/styles.css": "./src/lib/demo/styles.css"
+    "./demo/styles.css": "./src/routes/_demo-styles.css"
   },
   "publishConfig": {
     "types": "./dist/index.d.ts",

@@ -32,15 +32,25 @@ class NullObserver implements MinimalObserver {
   disconnect() {}
 }
 
+class NullElement {
+  classList = { add(..._classes: string[]) {} };
+  style: Record<string, string> = {};
+  innerText = '';
+  offsetHeight = 0;
+  remove() {}
+}
+
 function createNullDeps(): IndicatorDeps {
   return {
     doc: {
       addEventListener() {},
       removeEventListener() {},
       createElement(_tagName: string): HTMLElement {
-        throw new Error('ElementIndicator.createNull: createElement should not be called');
+        return new NullElement() as unknown as HTMLElement;
       },
-      body: { appendChild(node: Node) { return node; } },
+      body: {
+        appendChild(node: Node) { return node; },
+      },
     },
     createObserver: () => new NullObserver(),
   };
@@ -60,7 +70,7 @@ export class ElementIndicator {
   }
 
   static createNull() {
-    return new ElementIndicator(createNullDeps(), { isNull: true });
+    return new ElementIndicator(createNullDeps());
   }
 
   #deps: IndicatorDeps;
@@ -76,7 +86,6 @@ export class ElementIndicator {
   #showIndicator = false;
   #observer: MinimalObserver | null = null;
   #isVisible = true;
-  #isNull: boolean;
 
   #scrollHandler = () => {
     if (this.#indicator) {
@@ -90,9 +99,8 @@ export class ElementIndicator {
     }
   };
 
-  constructor(deps: IndicatorDeps, options?: { isNull?: boolean }) {
+  constructor(deps: IndicatorDeps) {
     this.#deps = deps;
-    this.#isNull = options?.isNull ?? false;
     deps.doc.addEventListener('scroll', this.#scrollHandler, true);
     deps.doc.addEventListener('scrollend', this.#scrollEndHandler, true);
   }
@@ -151,7 +159,6 @@ export class ElementIndicator {
 
   #addIndicator(): void {
     this.#removeIndicator();
-    if (this.#isNull) return;
     const el = this.#element;
     if (!el) {
       return;

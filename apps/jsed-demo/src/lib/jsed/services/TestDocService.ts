@@ -25,7 +25,7 @@ function safeFetch(input: RequestInfo | URL, init?: RequestInit) {
   );
 }
 
-export type ActionError = { type: 'missing-element'; id: string };
+export type TestDocError = { type: 'missing-element'; id: string };
 
 /**
  * Standalone actions we can import and use in menus, buttons etc.
@@ -42,7 +42,7 @@ export class TestDocService {
   loadTestDoc() {
     const docRoot = document.getElementById('load-doc');
     if (!docRoot) {
-      return errAsync<void, ActionError>({ type: 'missing-element', id: 'load-doc' });
+      return errAsync<void, TestDocError>({ type: 'missing-element', id: 'load-doc' });
     }
     return this.params
       .fetch('/api/docs/test_doc')
@@ -53,9 +53,10 @@ export class TestDocService {
         )
       )
       .map((html) => {
+        docRoot.innerHTML = html;
         this.ctl.app.run(
           Document.create(this.ctl, {
-            document: jsed.Document.createFromHTML(this.ctl, docRoot, html)
+            document: jsed.JsedDocument.create(docRoot)
           })
         );
         this.ctl.menu.closeMenu();

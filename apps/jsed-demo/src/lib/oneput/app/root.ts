@@ -1,11 +1,16 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
-import type { LayoutSettings } from './_layout.js';
+import { Layout, type LayoutSettings } from './_layout.js';
 import { TestDocService } from '$lib/jsed/services/TestDocService.js';
 
 export class Root implements AppObject {
+  static run(ctl: Controller) {
+    ctl.app.run(Root.create(ctl));
+  }
+
   static create(ctl: Controller) {
+    ctl.ui.setLayout(Layout.create(ctl));
     return new Root(ctl);
   }
 

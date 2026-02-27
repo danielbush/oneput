@@ -8,9 +8,9 @@ import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindin
 import { icons } from '../icons.js';
 import type { AppObject } from '@oneput/oneput';
 
-export class SettingsUI implements AppObject {
+export class Settings implements AppObject {
   static create(ctl: Controller) {
-    return new SettingsUI(ctl, {
+    return new Settings(ctl, {
       BindingsEditor: (isLocal: boolean) => {
         const bindingsService = LocalBindingsService.create(ctl);
         return BindingsEditor.create(ctl, {

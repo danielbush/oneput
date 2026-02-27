@@ -1,5 +1,5 @@
 import type { Controller } from '@oneput/oneput';
-import { SettingsUI } from './settings.js';
+import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
@@ -13,7 +13,7 @@ export class Root implements AppObject {
   static create(ctl: Controller) {
     ctl.ui.setLayout(Layout.create(ctl));
     const createSettingsUI = () => {
-      return SettingsUI.create(ctl);
+      return Settings.create(ctl);
     };
     const createNavigateHeadings = () => {
       return NavigateHeadings.create(ctl);
@@ -39,7 +39,7 @@ export class Root implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private createSettingsUI: () => SettingsUI,
+    private createSettingsUI: () => Settings,
     private createNavigateHeadings: () => NavigateHeadings,
     private createTomatoTimer: () => TomatoTimer,
     private createKatexDemo: () => KatexDemo,

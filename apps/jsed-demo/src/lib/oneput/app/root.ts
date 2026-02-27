@@ -9,10 +9,19 @@ import { ViewDocument } from './ViewDocument.js';
 export class Root implements AppObject {
   static create(ctl: Controller) {
     ctl.ui.setLayout(Layout.create(ctl));
-    return new Root(ctl);
+    return new Root(ctl, {
+      TestDocService: () => TestDocService.create(),
+      JsedDocument: (root: HTMLElement) => jsed.JsedDocument.create(root)
+    });
   }
 
-  constructor(private ctl: Controller) {}
+  constructor(
+    private ctl: Controller,
+    private create: {
+      TestDocService: () => TestDocService;
+      JsedDocument: (root: HTMLElement) => jsed.JsedDocument;
+    }
+  ) {}
 
   onStart() {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
@@ -31,12 +40,13 @@ export class Root implements AppObject {
 
   actions = {
     LOAD_TEST_DOC: async () => {
-      TestDocService.create()
+      this.create
+        .TestDocService()
         .loadTestDoc()
         .map((docRoot) => {
           this.ctl.app.run(
             ViewDocument.create(this.ctl, {
-              document: jsed.JsedDocument.create(docRoot)
+              document: this.create.JsedDocument(docRoot)
             })
           );
           this.ctl.menu.closeMenu();

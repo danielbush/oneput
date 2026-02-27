@@ -1,6 +1,14 @@
+import type { JsedDocument } from '@oneput/jsed';
 import { bindings } from '@oneput/oneput';
 import type { Controller, KeyBindingMapSerializable } from '@oneput/oneput';
-import { state } from '../state.js';
+
+const state: {
+  currentDocument?: JsedDocument;
+} = {};
+
+export function setDocument(doc: JsedDocument) {
+  state.currentDocument = doc;
+}
 
 export const defaultGlobalBindings: KeyBindingMapSerializable = {
   openMenu: {

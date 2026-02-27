@@ -1,5 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import * as jsed from '@oneput/jsed';
+import { setDocument } from './_bindings.js';
 
 /**
  * Oneput AppObject that manages a single JsedDocument.
@@ -15,7 +16,7 @@ export class ViewDocument implements AppObject {
   ) {}
 
   onStart = () => {
-    //
+    setDocument(this.document);
   };
 
   onExit = () => {

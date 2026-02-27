@@ -7,10 +7,6 @@ import { TestDocService } from '$lib/jsed/services/TestDocService.js';
 import { ViewDocument } from './ViewDocument.js';
 
 export class Root implements AppObject {
-  static run(ctl: Controller) {
-    ctl.app.run(Root.create(ctl));
-  }
-
   static create(ctl: Controller) {
     ctl.ui.setLayout(Layout.create(ctl));
     return new Root(ctl);

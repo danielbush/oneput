@@ -2,7 +2,7 @@
   import '$lib/jsed/styles/oneput-defaults.css';
   import '$lib/jsed/styles/jsed-defaults.css';
   import { JSED_DOM_ROOT_ID } from '@oneput/jsed';
-  import { Anchor, OneputCornerButton, OneputController } from '@oneput/oneput';
+  import { Anchor, OneputCornerButton, OneputController, Controller } from '@oneput/oneput';
   import { icons } from '$lib/oneput/icons.js';
   import { Root } from '$lib/oneput/app/root.js';
 
@@ -20,7 +20,11 @@
 {@render children()}
 <div id={JSED_DOM_ROOT_ID}>
   <Anchor>
-    <OneputController controllerRef={Root.run} />
+    <OneputController
+      controllerRef={(ctl: Controller) => {
+        ctl.app.run(Root.create(ctl));
+      }}
+    />
   </Anchor>
   <OneputCornerButton icon={icons.Command} />
 </div>

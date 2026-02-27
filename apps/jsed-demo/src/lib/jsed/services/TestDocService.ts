@@ -1,6 +1,4 @@
 import type { Controller } from '@oneput/oneput';
-import * as jsed from '@oneput/jsed';
-import { Document } from '../../oneput/app/Document.js';
 import { errAsync, ResultAsync, err, ok } from 'neverthrow';
 
 export type FetchError =
@@ -31,18 +29,15 @@ export type TestDocError = { type: 'missing-element'; id: string };
  * Standalone actions we can import and use in menus, buttons etc.
  */
 export class TestDocService {
-  static create(ctl: Controller) {
-    return new TestDocService(ctl, { fetch: safeFetch });
+  static create() {
+    return new TestDocService({ fetch: safeFetch });
   }
-  constructor(
-    private ctl: Controller,
-    private params: { fetch: typeof safeFetch }
-  ) {}
+  constructor(private params: { fetch: typeof safeFetch }) {}
 
-  loadTestDoc() {
+  loadTestDoc(): ResultAsync<HTMLElement, TestDocError | FetchError> {
     const docRoot = document.getElementById('load-doc');
     if (!docRoot) {
-      return errAsync<void, TestDocError>({ type: 'missing-element', id: 'load-doc' });
+      return errAsync({ type: 'missing-element' as const, id: 'load-doc' });
     }
     return this.params
       .fetch('/api/docs/test_doc')
@@ -54,12 +49,7 @@ export class TestDocService {
       )
       .map((html) => {
         docRoot.innerHTML = html;
-        this.ctl.app.run(
-          Document.create(this.ctl, {
-            document: jsed.JsedDocument.create(docRoot)
-          })
-        );
-        this.ctl.menu.closeMenu();
+        return docRoot;
       });
   }
 }

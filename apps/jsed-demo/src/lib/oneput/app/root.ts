@@ -1,8 +1,10 @@
+import * as jsed from '@oneput/jsed';
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { TestDocService } from '$lib/jsed/services/TestDocService.js';
+import { ViewDocument } from './ViewDocument.js';
 
 export class Root implements AppObject {
   static run(ctl: Controller) {
@@ -33,8 +35,16 @@ export class Root implements AppObject {
 
   actions = {
     LOAD_TEST_DOC: async () => {
-      TestDocService.create(this.ctl)
+      TestDocService.create()
         .loadTestDoc()
+        .map((docRoot) => {
+          this.ctl.app.run(
+            ViewDocument.create(this.ctl, {
+              document: jsed.JsedDocument.create(docRoot)
+            })
+          );
+          this.ctl.menu.closeMenu();
+        })
         .mapErr((error) => {
           switch (error.type) {
             case 'missing-element':

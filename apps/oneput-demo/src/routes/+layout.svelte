@@ -3,7 +3,7 @@
   import '@oneput/oneput/demo/styles.css';
   import '@oneput/oneput/shared/styles/oneput-defaults.css';
   import { icons } from '$lib/icons.js';
-  import { RootUI } from '$lib/app/root.js';
+  import { Root } from '$lib/app/Root.js';
 
   // Pretend the code here could be something outside of svelte.
   // We create a layout and we add OneputWrapper eg as a web component.
@@ -14,6 +14,6 @@
 
 {@render children()}
 <Anchor>
-  <OneputController run={(ctl: Controller) => RootUI.create(ctl)} />
+  <OneputController run={(ctl: Controller) => Root.create(ctl)} />
 </Anchor>
 <OneputCornerButton icon={icons.Command} />

@@ -9,7 +9,7 @@ import { Layout, type LayoutSettings } from './_layout.js';
 import { icons } from '../icons.js';
 import type { AppObject } from '@oneput/oneput';
 
-export class RootUI implements AppObject {
+export class Root implements AppObject {
   static create(ctl: Controller) {
     ctl.ui.setLayout(Layout.create(ctl));
     const createSettingsUI = () => {
@@ -27,7 +27,7 @@ export class RootUI implements AppObject {
     const createAsyncSearchExample = () => {
       return AsyncSearchExample.create(ctl);
     };
-    return new RootUI(
+    return new Root(
       ctl,
       createSettingsUI,
       createNavigateHeadings,

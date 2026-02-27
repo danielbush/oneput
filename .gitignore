@@ -3,3 +3,5 @@ node_modules/
 
 # btca local data
 .btca/
+
+.pnpm-store

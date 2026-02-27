@@ -8,6 +8,7 @@ import type { OneputProps } from '../types.js';
 import { Alert } from '../shared/ui/Alert.js';
 import { Confirm } from '../shared/ui/Confirm.js';
 import { AppController } from './AppController.js';
+import { NativeController } from './NativeController.js';
 
 export class Controller {
   static create(currentProps: OneputProps) {
@@ -16,9 +17,23 @@ export class Controller {
       input: InputController.create(controller),
       keys: KeysController.create(controller),
       ui: UIController.create(controller),
-      app: AppController.create(controller)
+      app: AppController.create(controller),
+      native: NativeController.create(controller)
     });
     return new Controller(currentProps, window, createControllers);
+  }
+
+  static createNull(win: Window, props: Partial<OneputProps> = {}) {
+    const currentProps: OneputProps = { menuOpen: false, ...props };
+    const createControllers = (controller: Controller) => ({
+      menu: MenuController.create(controller),
+      input: InputController.create(controller),
+      keys: KeysController.create(controller),
+      ui: UIController.create(controller),
+      app: AppController.create(controller),
+      native: NativeController.create(controller)
+    });
+    return new Controller(currentProps, win, createControllers);
   }
 
   public events = new InternalEventEmitter();
@@ -27,19 +42,21 @@ export class Controller {
   public keys: KeysController;
   public ui: UIController;
   public app: AppController;
+  public native: NativeController;
 
   /**
    * @param currentProps Should be reactive eg $state<OneputProps>({...})
    */
   constructor(
     public currentProps: OneputProps,
-    private window: Window,
+    public window: Window,
     createControllers: (ctl: Controller) => {
       menu: MenuController;
       input: InputController;
       keys: KeysController;
       ui: UIController;
       app: AppController;
+      native: NativeController;
     }
   ) {
     const controllers = createControllers(this);
@@ -48,39 +65,7 @@ export class Controller {
     this.keys = controllers.keys;
     this.ui = controllers.ui;
     this.app = controllers.app;
-
-    if (!globalThis.messageListenerIsSetup) {
-      const div = document.createElement('div');
-      div.innerHTML = `<p>setting up listener</p>`;
-      document.body.prepend(div);
-      this.window.addEventListener('message', (evt) => {
-        let div = document.createElement('div');
-        div.innerHTML = `<p>got message</p>`;
-        document.body.prepend(div);
-        if (evt.data.type === 'test') {
-          this.notify(evt.data.payload.message, { duration: 3000 });
-        }
-        if (evt.data.type === 'insertImage') {
-          div = document.createElement('div');
-          div.innerHTML = `<p>insertImage called</p>`;
-          document.body.prepend(div);
-          const dataUrl = evt.data.payload.dataUrl;
-          const fileName = evt.data.payload.fileName;
-          const img = document.createElement('img');
-          img.src = dataUrl;
-          img.alt = fileName;
-          img.style.maxWidth = '100%';
-          img.style.height = 'auto';
-          img.style.margin = '16px 0';
-          div = document.createElement('div');
-          div.innerHTML = `<p>${fileName}</p>`;
-          document.body.prepend(div);
-          document.body.prepend(img);
-          img.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      });
-      globalThis.messageListenerIsSetup = true;
-    }
+    this.native = controllers.native;
   }
 
   toggleHide() {

@@ -1,7 +1,7 @@
 import type { Controller } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { BindingsEditor } from '@oneput/oneput/shared/appObjects/BindingsEditor.js';
-import { config } from '$lib/demo/live/service/TestBindingsStore.js';
+import { config } from '$lib/service/TestBindingsStore.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';

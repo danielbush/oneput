@@ -14,7 +14,7 @@ import { isMacOS } from './utils.js';
 export type DuplicateBindingError = { message: string; details: string };
 
 export type KeyBinding = {
-  action: (c: Controller) => void;
+  action?: (c: Controller) => void;
   description: string;
   /**
    * A list of bindings in tinykeys format.  Each binding represents one ore more key presses.
@@ -62,7 +62,7 @@ export type KeyEvent = {
 };
 
 export type KeyEventBinding = {
-  action: (c: Controller) => void;
+  action?: (c: Controller) => void;
   description: string;
   /**
    *  A KeyBinding can be represented as a tinykeys string : "control+y e e t"
@@ -217,12 +217,7 @@ function kbFromSerializable(
   return {
     description: kbSerializable.description,
     bindings: kbSerializable.bindings,
-    action:
-      action ??
-      ((c: Controller) => {
-        // Delegate to the current AppObject if no action was given.
-        c.app.delegateAction(actionId);
-      })
+    action
   };
 }
 

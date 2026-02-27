@@ -246,17 +246,23 @@ export class AppController {
   }
 
   /**
-   * If no action is provided for a binding, the action may be delegated to the
-   * currently running AppObject . If no action is found there then we give up.
+   * The current AppObject should handle the action.
+   *
+   * Favour actions defined within the AppObject, fallback to defaultActions.
+   *
+   * @param actionId
+   * @param defaultAction An action defined outside of any AppObject.
    */
-  delegateAction(actionId: string) {
-    if (!this.current) {
+  handleAction(actionId: string, defaultAction: ((ctl: Controller) => void) | undefined) {
+    if (this.current?.app.actions?.[actionId]) {
+      this.current.app.actions?.[actionId]?.(this.ctl);
       return;
     }
-    if (this.current.app.actions?.[actionId]) {
-      this.current.app.actions?.[actionId]?.(this.ctl);
-    } else {
-      this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
+    if (defaultAction) {
+      defaultAction(this.ctl);
+      return;
     }
+
+    this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
   }
 }

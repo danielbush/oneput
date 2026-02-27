@@ -1,6 +1,6 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import type { KeyBindingMap } from '../lib/bindings.js';
+import type { KeyBinding, KeyBindingMap } from '../lib/bindings.js';
 
 /**
  * Manages key bindings.
@@ -19,6 +19,19 @@ export class KeysController {
     private unsubscribeLocalKeys: () => void = () => {}
   ) {}
 
+  private handleBinding(evt: KeyboardEvent, actionId: string, kb: KeyBinding, isLocal: boolean) {
+    evt.preventDefault();
+    if (this.keysDisabled) {
+      return;
+    }
+    if (this.ctl.menu.isMenuOpen === isLocal) {
+      // MENU_OPEN_CLOSE_RACE
+      setTimeout(() => {
+        this.ctl.app.handleAction(actionId, kb.action);
+      });
+    }
+  }
+
   /**
    * Only run globals when menu is closed.
    */
@@ -26,17 +39,10 @@ export class KeysController {
     this.unsubscribeGlobalKeys();
     const adjustedBindings = Object.entries(keys).reduce<{
       [key: string]: (evt: KeyboardEvent) => void;
-    }>((acc, [, { action, bindings }]) => {
-      bindings.forEach((binding) => {
+    }>((acc, [actionId, kb]) => {
+      kb.bindings.forEach((binding) => {
         acc[binding] = (evt) => {
-          evt.preventDefault();
-          if (this.keysDisabled) {
-            return;
-          }
-          if (!this.ctl.menu.isMenuOpen) {
-            // MENU_OPEN_CLOSE_RACE
-            setTimeout(() => action(this.ctl));
-          }
+          this.handleBinding(evt, actionId, kb, false);
         };
       });
       return acc;
@@ -52,17 +58,10 @@ export class KeysController {
     this.unsubscribeLocalKeys();
     const adjustedBindings = Object.entries(keys).reduce<{
       [key: string]: (evt: KeyboardEvent) => void;
-    }>((acc, [, { action, bindings }]) => {
-      bindings.forEach((binding) => {
+    }>((acc, [actionId, kb]) => {
+      kb.bindings.forEach((binding) => {
         acc[binding] = (evt) => {
-          evt.preventDefault();
-          if (this.keysDisabled) {
-            return;
-          }
-          if (this.ctl.menu.isMenuOpen) {
-            // MENU_OPEN_CLOSE_RACE
-            setTimeout(() => action(this.ctl));
-          }
+          this.handleBinding(evt, actionId, kb, true);
         };
       });
       return acc;

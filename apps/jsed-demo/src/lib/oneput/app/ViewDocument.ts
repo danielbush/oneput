@@ -25,13 +25,20 @@ export class ViewDocument implements AppObject {
 
   actions = {
     EDIT_FIRST: () => {
-      const focus = this.document.nav.getFocus();
-      if (focus) {
-        const token = jsed.utils.token.getFirstToken(focus);
-        if (token) {
-          console.warn('TODO: implement EDIT_FIRST');
-        }
-      }
+      this.document
+        .requestCursorUnderFocus({
+          onTokenChange: () => {}
+        })
+        .mapErr((err) => {
+          switch (err.type) {
+            case 'no-token-under-focus':
+              this.ctl.notify('No token under focus', { duration: 3000 });
+              break;
+            case 'no-focus':
+              this.ctl.notify('No document focus found', { duration: 3000 });
+              break;
+          }
+        });
     }
   };
 }

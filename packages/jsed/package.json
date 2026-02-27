@@ -64,7 +64,8 @@
     "@oneput/oneput": "workspace:",
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "commander": "^11.1.0",
-    "markdown-it": "^13.0.1"
+    "markdown-it": "^13.0.1",
+    "neverthrow": "catalog:"
   },
   "nodemonConfig": {
     "ext": "css,ts,js,mjs,yaml,yml,json",

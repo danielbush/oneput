@@ -1,9 +1,19 @@
 import { Navigator } from './navigator.js';
 import { JsedCursor } from './cursor.js';
 import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
-import { tokenizeImplicitLine } from './token.js';
+import { getFirstToken, tokenizeImplicitLine } from './token.js';
 import { JSED_DOM_ROOT_ID } from './constants.js';
 import { ElementIndicator } from '../../oneput/ElementIndicator.js';
+import { err, ok, Result } from 'neverthrow';
+
+export type JsedDocumentError =
+  | { type: 'no-token-under-focus' }
+  | {
+      /**
+       * TODO: should we ever let this happen?
+       */
+      type: 'no-focus';
+    };
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {
@@ -97,5 +107,28 @@ export class JsedDocument {
       token: params.token,
       onTokenChange: params.onTokenChange
     });
+  }
+
+  /**
+   * Set up cursor on first available token under focus.
+   */
+  requestCursorUnderFocus(params: {
+    onTokenChange: (token: HTMLElement) => void;
+  }): Result<IJsedCursor, JsedDocumentError> {
+    const focus = this.nav.getFocus();
+    if (focus) {
+      const firstToken = getFirstToken(focus);
+      if (firstToken) {
+        return ok(
+          JsedCursor.create({
+            document: this,
+            token: firstToken,
+            onTokenChange: params.onTokenChange
+          })
+        );
+      }
+      return err({ type: 'no-token-under-focus' });
+    }
+    return err({ type: 'no-focus' });
   }
 }

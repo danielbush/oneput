@@ -258,6 +258,9 @@ importers:
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2
+      neverthrow:
+        specifier: 'catalog:'
+        version: 8.2.0
     devDependencies:
       '@testing-library/dom':
         specifier: ^8.20.0

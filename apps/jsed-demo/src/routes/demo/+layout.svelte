@@ -4,7 +4,7 @@
   import { JSED_DOM_ROOT_ID } from '@oneput/jsed';
   import { Anchor, OneputCornerButton, OneputController, Controller } from '@oneput/oneput';
   import { icons } from '$lib/oneput/icons.js';
-  import { Root } from '$lib/oneput/app/root.js';
+  import { Root } from '$lib/oneput/app/Root.js';
 
   let { children } = $props();
 </script>

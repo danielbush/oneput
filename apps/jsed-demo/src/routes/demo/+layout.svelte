@@ -20,11 +20,7 @@
 {@render children()}
 <div id={JSED_DOM_ROOT_ID}>
   <Anchor>
-    <OneputController
-      controllerRef={(ctl: Controller) => {
-        ctl.app.run(Root.create(ctl));
-      }}
-    />
+    <OneputController run={(ctl: Controller) => Root.create(ctl)} />
   </Anchor>
   <OneputCornerButton icon={icons.Command} />
 </div>

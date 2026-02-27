@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Anchor, OneputController, OneputCornerButton } from '@oneput/oneput';
-  import { setController } from '$lib/demo/live/app/_app.js';
+  import { Anchor, Controller, OneputController, OneputCornerButton } from '@oneput/oneput';
   import '@oneput/oneput/demo/styles.css';
   import '@oneput/oneput/shared/styles/oneput-defaults.css';
   import { icons } from '$lib/demo/live/icons.js';
+  import { RootUI } from '$lib/demo/live/app/root.js';
 
   // Pretend the code here could be something outside of svelte.
   // We create a layout and we add OneputWrapper eg as a web component.
@@ -14,6 +14,6 @@
 
 {@render children()}
 <Anchor>
-  <OneputController controllerRef={setController} />
+  <OneputController run={(ctl: Controller) => RootUI.create(ctl)} />
 </Anchor>
 <OneputCornerButton icon={icons.Command} />

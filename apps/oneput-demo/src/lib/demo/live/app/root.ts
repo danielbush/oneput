@@ -5,12 +5,13 @@ import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { LayoutSettings } from './_layout.js';
+import { Layout, type LayoutSettings } from './_layout.js';
 import { icons } from '../icons.js';
 import type { AppObject } from '@oneput/oneput';
 
 export class RootUI implements AppObject {
   static create(ctl: Controller) {
+    ctl.ui.setLayout(Layout.create(ctl));
     const createSettingsUI = () => {
       return SettingsUI.create(ctl);
     };

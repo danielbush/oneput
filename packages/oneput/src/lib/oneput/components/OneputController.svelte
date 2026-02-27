@@ -4,7 +4,7 @@
   import Oneput from './Oneput.svelte';
   import { Controller } from '../controllers/controller.js';
   import { onMount } from 'svelte';
-  import type { OneputProps } from '../types.js';
+  import type { AppObject, OneputProps } from '../types.js';
 
   let inputElement: HTMLInputElement | undefined = $state(undefined);
   const currentProps = $state<OneputProps>({
@@ -15,7 +15,7 @@
     menuItems: [],
     menuOpen: false
   });
-  const { controllerRef }: { controllerRef: (c: Controller) => void } = $props();
+  const { run }: { run: (ctl: Controller) => AppObject } = $props();
 
   const controller = Controller.create(currentProps);
 
@@ -24,7 +24,7 @@
   });
 
   onMount(() => {
-    controllerRef(controller);
+    controller.app.run(run(controller));
   });
 </script>
 

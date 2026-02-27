@@ -10,54 +10,33 @@ import type { AppObject } from '@oneput/oneput';
 
 export class SettingsUI implements AppObject {
   static create(ctl: Controller) {
-    const createGlobalBindingsEditor = () => {
-      const bindingsService = LocalBindingsService.create(ctl);
-      return BindingsEditor.create(ctl, {
-        isLocal: false,
-        keyBindingMap: ctl.keys.getDefaultBindings(false),
-        onUpdate: (keyBindingMap, isLocal) => {
-          return bindingsService.update(keyBindingMap, isLocal);
-        },
-        icons: {
-          Keyboard: icons.Keyboard,
-          Close: icons.X,
-          Action: icons.SquareFunction,
-          Right: icons.ChevronRight
-        }
-      });
-    };
-    const createLocalBindingsEditor = () => {
-      const bindingsService = LocalBindingsService.create(ctl);
-      return BindingsEditor.create(ctl, {
-        isLocal: true,
-        keyBindingMap: ctl.keys.getDefaultBindings(true),
-        onUpdate: (keyBindingMap, isLocal) => {
-          return bindingsService.update(keyBindingMap, isLocal);
-        },
-        icons: {
-          Keyboard: icons.Keyboard,
-          Close: icons.X,
-          Action: icons.SquareFunction,
-          Right: icons.ChevronRight
-        }
-      });
-    };
-    const createFiltersUI = () => {
-      return FiltersUI.create(ctl);
-    };
-    return new SettingsUI(
-      ctl,
-      createGlobalBindingsEditor,
-      createLocalBindingsEditor,
-      createFiltersUI
-    );
+    return new SettingsUI(ctl, {
+      BindingsEditor: (isLocal: boolean) => {
+        const bindingsService = LocalBindingsService.create(ctl);
+        return BindingsEditor.create(ctl, {
+          isLocal,
+          keyBindingMap: ctl.keys.getDefaultBindings(isLocal),
+          onUpdate: (keyBindingMap, isLocal) => {
+            return bindingsService.update(keyBindingMap, isLocal);
+          },
+          icons: {
+            Keyboard: icons.Keyboard,
+            Close: icons.X,
+            Action: icons.SquareFunction,
+            Right: icons.ChevronRight
+          }
+        });
+      },
+      FiltersUI: () => FiltersUI.create(ctl)
+    });
   }
 
   constructor(
     private ctl: Controller,
-    private createGlobalBindingsEditor: () => BindingsEditor,
-    private createLocalBindingsEditor: () => BindingsEditor,
-    private createFiltersUI: () => FiltersUI
+    private create: {
+      BindingsEditor: (isLocal: boolean) => BindingsEditor;
+      FiltersUI: () => FiltersUI;
+    }
   ) {}
 
   onStart = () => {
@@ -86,7 +65,7 @@ export class SettingsUI implements AppObject {
           left: (b) => [b.icon(icons.ListFilter)],
           textContent: 'Set default typing filter...',
           action: () => {
-            this.ctl.app.run(this.createFiltersUI());
+            this.ctl.app.run(this.create.FiltersUI());
           }
         }),
         stdMenuItem({
@@ -94,7 +73,7 @@ export class SettingsUI implements AppObject {
           textContent: 'Set global default key bindings...',
           left: (b) => [b.icon(icons.Keyboard)],
           action: () => {
-            this.ctl.app.run(this.createGlobalBindingsEditor());
+            this.ctl.app.run(this.create.BindingsEditor(false));
           }
         }),
         stdMenuItem({
@@ -102,7 +81,7 @@ export class SettingsUI implements AppObject {
           textContent: 'Set local default key bindings...',
           left: (b) => [b.icon(icons.Keyboard)],
           action: () => {
-            this.ctl.app.run(this.createLocalBindingsEditor());
+            this.ctl.app.run(this.create.BindingsEditor(true));
           }
         })
       ]

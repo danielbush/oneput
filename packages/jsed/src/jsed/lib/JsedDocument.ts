@@ -7,9 +7,15 @@ import { ElementIndicator } from '../../oneput/ElementIndicator.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {
-    const doc = new JsedDocument(root);
+    return JsedDocument.#init(root, ElementIndicator.create());
+  }
 
-    const elementIndicator = ElementIndicator.create();
+  static createNull(root: HTMLElement): JsedDocument {
+    return JsedDocument.#init(root, ElementIndicator.createNull());
+  }
+
+  static #init(root: HTMLElement, elementIndicator: ElementIndicator): JsedDocument {
+    const doc = new JsedDocument(root);
 
     // Set up event handlers
 

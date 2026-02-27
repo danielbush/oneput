@@ -8,7 +8,7 @@ import { JsedDocument } from '../lib/JsedDocument.js';
  */
 export function makeRoot(html: string, document: Document = window.document): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
-  return JsedDocument.create(document.getElementById('root') as HTMLElement);
+  return JsedDocument.createNull(document.getElementById('root') as HTMLElement);
 }
 
 type Attr = { [key: string]: string };

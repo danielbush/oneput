@@ -2,6 +2,7 @@
 
 exports[`FOCUS > should focus an F_ELEM (SIB_HIGHLIGHT) 1`] = `
 <div
+  class=""
   id="root"
 >
   <p
@@ -19,9 +20,11 @@ exports[`FOCUS > should focus an F_ELEM (SIB_HIGHLIGHT) 1`] = `
 
 exports[`REC_NEXT should recurse down 1`] = `
 <div
+  class=""
   id="root"
 >
   <div
+    class="jsed-focus"
     id="div1"
   >
     <div
@@ -44,12 +47,15 @@ exports[`REC_NEXT should recurse down 1`] = `
 
 exports[`REC_NEXT should recurse down 2`] = `
 <div
+  class=""
   id="root"
 >
   <div
+    class=""
     id="div1"
   >
     <div
+      class="jsed-focus"
       id="div1-1"
     >
       <p
@@ -69,20 +75,29 @@ exports[`REC_NEXT should recurse down 2`] = `
 
 exports[`REC_NEXT should recurse down 3`] = `
 <div
+  class=""
   id="root"
 >
   <div
+    class=""
     id="div1"
   >
     <div
+      class=""
       id="div1-1"
     >
       <p
+        class="jsed-focus"
         id="p1"
       >
-        text-1
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
       </p>
       <p
+        class="jsed-focus-sibling"
         id="p2"
       >
         text-2
@@ -94,23 +109,36 @@ exports[`REC_NEXT should recurse down 3`] = `
 
 exports[`REC_NEXT should recurse down 4`] = `
 <div
+  class=""
   id="root"
 >
   <div
+    class=""
     id="div1"
   >
     <div
+      class=""
       id="div1-1"
     >
       <p
+        class="jsed-focus-sibling"
         id="p1"
       >
-        text-1
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
       </p>
       <p
+        class="jsed-focus"
         id="p2"
       >
-        text-2
+        <span
+          class="jsed-token"
+        >
+          text-2 
+        </span>
       </p>
     </div>
   </div>
@@ -119,23 +147,36 @@ exports[`REC_NEXT should recurse down 4`] = `
 
 exports[`REC_NEXT should recurse down 5`] = `
 <div
+  class=""
   id="root"
 >
   <div
+    class=""
     id="div1"
   >
     <div
+      class=""
       id="div1-1"
     >
       <p
+        class="jsed-focus-sibling"
         id="p1"
       >
-        text-1
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
       </p>
       <p
+        class="jsed-focus"
         id="p2"
       >
-        text-2
+        <span
+          class="jsed-token"
+        >
+          text-2 
+        </span>
       </p>
     </div>
   </div>
@@ -144,23 +185,36 @@ exports[`REC_NEXT should recurse down 5`] = `
 
 exports[`REC_NEXT should recurse down 6`] = `
 <div
+  class=""
   id="root"
 >
   <div
+    class=""
     id="div1"
   >
     <div
+      class=""
       id="div1-1"
     >
       <p
+        class="jsed-focus-sibling"
         id="p1"
       >
-        text-1
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
       </p>
       <p
+        class="jsed-focus"
         id="p2"
       >
-        text-2
+        <span
+          class="jsed-token"
+        >
+          text-2 
+        </span>
       </p>
     </div>
   </div>
@@ -169,6 +223,7 @@ exports[`REC_NEXT should recurse down 6`] = `
 
 exports[`REC_PREV should recurse up 1`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
@@ -189,6 +244,7 @@ exports[`REC_PREV should recurse up 1`] = `
 
 exports[`REC_PREV should recurse up 2`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
@@ -209,6 +265,7 @@ exports[`REC_PREV should recurse up 2`] = `
 
 exports[`REC_PREV should recurse up 3`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
@@ -229,6 +286,7 @@ exports[`REC_PREV should recurse up 3`] = `
 
 exports[`REC_PREV should recurse up 4`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
@@ -249,6 +307,7 @@ exports[`REC_PREV should recurse up 4`] = `
 
 exports[`REC_PREV should recurse up 5`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <div
@@ -269,6 +328,7 @@ exports[`REC_PREV should recurse up 5`] = `
 
 exports[`SIB_HIGHLIGHT > should highlight current siblings of the active element 1`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <p>
@@ -290,6 +350,7 @@ exports[`SIB_HIGHLIGHT > should highlight current siblings of the active element
 
 exports[`SIB_NEXT should walk to next sibling 1`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <ul
@@ -320,6 +381,7 @@ exports[`SIB_NEXT should walk to next sibling 1`] = `
 
 exports[`SIB_NEXT should walk to next sibling 2`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <ul
@@ -350,6 +412,7 @@ exports[`SIB_NEXT should walk to next sibling 2`] = `
 
 exports[`SIB_NEXT should walk to next sibling 3`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <ul
@@ -380,6 +443,7 @@ exports[`SIB_NEXT should walk to next sibling 3`] = `
 
 exports[`SIB_PREV should walk to previous sibling 1`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <ul
@@ -410,6 +474,7 @@ exports[`SIB_PREV should walk to previous sibling 1`] = `
 
 exports[`SIB_PREV should walk to previous sibling 2`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <ul
@@ -440,6 +505,7 @@ exports[`SIB_PREV should walk to previous sibling 2`] = `
 
 exports[`SIB_PREV should walk to previous sibling 3`] = `
 <div
+  class="jsed-focus"
   id="root"
 >
   <ul
@@ -470,6 +536,7 @@ exports[`SIB_PREV should walk to previous sibling 3`] = `
 
 exports[`UP can walk up successive parent elements 1`] = `
 <div
+  class=""
   id="root"
 >
   <div
@@ -496,6 +563,7 @@ exports[`UP can walk up successive parent elements 1`] = `
 
 exports[`UP can walk up successive parent elements 2`] = `
 <div
+  class=""
   id="root"
 >
   <div

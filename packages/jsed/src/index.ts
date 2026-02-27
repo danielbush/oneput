@@ -1,6 +1,5 @@
 import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from './jsed/types.js';
 import { JsedDocument } from './jsed/types.js';
-import { start } from './jsed/app/start.js';
 import * as token from './jsed/lib/token.js';
 import * as dom from './jsed/lib/dom.js';
 import * as domRules from './jsed/lib/dom-rules.js';
@@ -36,7 +35,7 @@ export {
   JSED_DOM_ROOT_ID,
   JSED_IGNORE_CLASS
 } from './jsed/lib/constants.js';
-export { start, utils };
+export { utils };
 export { JsedDocument };
 export type { JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor };
 

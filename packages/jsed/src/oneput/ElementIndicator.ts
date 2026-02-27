@@ -15,8 +15,16 @@ type ObserverFactory = (
 
 interface IndicatorDeps {
   doc: {
-    addEventListener(type: string, handler: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener(type: string, handler: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    addEventListener(
+      type: string,
+      handler: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions
+    ): void;
+    removeEventListener(
+      type: string,
+      handler: EventListenerOrEventListenerObject,
+      options?: boolean | EventListenerOptions
+    ): void;
     createElement(tagName: string): HTMLElement;
     body: { appendChild(node: Node): Node };
   };
@@ -40,22 +48,6 @@ class NullElement {
   remove() {}
 }
 
-function createNullDeps(): IndicatorDeps {
-  return {
-    doc: {
-      addEventListener() {},
-      removeEventListener() {},
-      createElement(_tagName: string): HTMLElement {
-        return new NullElement() as unknown as HTMLElement;
-      },
-      body: {
-        appendChild(node: Node) { return node; },
-      },
-    },
-    createObserver: () => new NullObserver(),
-  };
-}
-
 // #endregion
 
 /**
@@ -65,12 +57,26 @@ export class ElementIndicator {
   static create() {
     return new ElementIndicator({
       doc: document,
-      createObserver: (callback, options) => new IntersectionObserver(callback, options),
+      createObserver: (callback, options) => new IntersectionObserver(callback, options)
     });
   }
 
   static createNull() {
-    return new ElementIndicator(createNullDeps());
+    return new ElementIndicator({
+      doc: {
+        addEventListener() {},
+        removeEventListener() {},
+        createElement(_tagName: string): HTMLElement {
+          return new NullElement() as unknown as HTMLElement;
+        },
+        body: {
+          appendChild(node: Node) {
+            return node;
+          }
+        }
+      },
+      createObserver: () => new NullObserver()
+    });
   }
 
   #deps: IndicatorDeps;

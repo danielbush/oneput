@@ -3,6 +3,7 @@ import { icons } from '../icons.js';
 import * as jsed from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { EditDocument } from './EditDocument.js';
 
 /**
  * Oneput AppObject that manages a single JsedDocument.
@@ -27,20 +28,11 @@ export class ViewDocument implements AppObject {
 
   actions = {
     EDIT_FIRST: () => {
-      this.document
-        .requestCursorUnderFocus({
-          onTokenChange: () => {}
+      this.ctl.app.run(
+        EditDocument.create(this.ctl, {
+          document: this.document
         })
-        .mapErr((err) => {
-          switch (err.type) {
-            case 'no-token-under-focus':
-              this.ctl.notify('No token under focus', { duration: 3000 });
-              break;
-            case 'no-focus':
-              this.ctl.notify('No document focus found', { duration: 3000 });
-              break;
-          }
-        });
+      );
     }
   };
 
@@ -50,22 +42,7 @@ export class ViewDocument implements AppObject {
       stdMenuItem({
         id: 'EDIT_FIRST',
         textContent: 'Edit...',
-        action: () => {
-          this.document
-            .requestCursorUnderFocus({
-              onTokenChange: () => {}
-            })
-            .mapErr((err) => {
-              switch (err.type) {
-                case 'no-token-under-focus':
-                  this.ctl.notify('No token under focus', { duration: 3000 });
-                  break;
-                case 'no-focus':
-                  this.ctl.notify('No document focus found', { duration: 3000 });
-                  break;
-              }
-            });
-        },
+        action: this.actions.EDIT_FIRST,
         left: (b) => [b.icon(icons.Pencil)]
       })
     ]

@@ -211,6 +211,14 @@ export interface AppObject<R = unknown> {
    */
   onExit?: () => void;
   onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
+  /**
+   * If actionId is a binding, the action defined here will take precedence over
+   * "default" actions defined against bindings outside of any AppObject.
+   *
+   * You may prefer to define your bindings in one spot outside of AppObject's
+   * or you want your AppObject's to handle specific ones which you can set
+   * here.
+   */
   actions?: {
     [actionId: string]: (ctl: Controller) => void;
   };

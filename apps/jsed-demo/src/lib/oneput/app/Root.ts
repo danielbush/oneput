@@ -11,7 +11,8 @@ export class Root implements AppObject {
     ctl.ui.setLayout(Layout.create(ctl));
     return new Root(ctl, {
       TestDocService: () => TestDocService.create(),
-      JsedDocument: (root: HTMLElement) => jsed.JsedDocument.create(root)
+      JsedDocument: (root: HTMLElement) => jsed.JsedDocument.create(root),
+      ViewDocument: ViewDocument.create
     });
   }
 
@@ -20,6 +21,10 @@ export class Root implements AppObject {
     private create: {
       TestDocService: () => TestDocService;
       JsedDocument: (root: HTMLElement) => jsed.JsedDocument;
+      ViewDocument: (
+        ctl: Controller,
+        { document }: { document: jsed.JsedDocument }
+      ) => ViewDocument;
     }
   ) {}
 
@@ -34,7 +39,7 @@ export class Root implements AppObject {
         .loadTestDoc()
         .map((docRoot) => {
           this.ctl.app.run(
-            ViewDocument.create(this.ctl, {
+            this.create.ViewDocument(this.ctl, {
               document: this.create.JsedDocument(docRoot)
             })
           );

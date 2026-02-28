@@ -18,7 +18,7 @@ This skill guides implementation of James Shore's Nullables pattern and A-Frame 
 
 Apply this pattern when:
 
-- If the code uses a dependency injection framework (eg effect-ts) then use it to perform injections; also inform me where this happens as we might need to think about where the boundary lies between a 3rd party injection approach and the use of Nullables (`.create` / `.createNull`.
+- If the code uses a dependency injection framework (eg effect-ts) then use it to perform injections; also inform me where this happens as we might need to think about where the boundary lies between a 3rd party injection approach and the use of Nullables (`.create` / `.createNull`).
 - Writing new code
 - Refactoring existing code to eliminate mocks and improve test reliability
 - Writing tests for code that uses nullable patterns such as classes that use static factory method `.create`.
@@ -74,21 +74,26 @@ class ServiceClass {
 
 ## Nullable algorithm for writing and testing code
 
-Suppose `Foo` is the class under test.  We will use names like `Foo`, `foo`, `Bar`, `Client` etc for the purposes of describing this algorithm, but more descriptive names should be used in the code.
+We will use names like `Foo`, `foo`, `Bar`, `Client` etc for the purposes of describing this algorithm, but more descriptive names should be used in the code. Most code should be classes except potentially for logic layer code.  `Foo`, `Bar`, `Client` are classes; `foo` is an instance of `Foo` etc.
 
-The use of static methods `Foo.create` and `Foo.createNull` for classes in the code is similar to a dependency injection approach with the addition of creating nulled instances via `Foo.createNull` for unit tests that pretend to talk to the outside world.  
+Suppose `Foo` is the class under test or being created. 
+
 
 - If `Foo` is application layer or infrastructure layer
-  - `Foo` should be a class (the only exception might be logic code where a function might suffice, in which case call it `foo`)
-  - most code should be classes except potentially for logic code
-  - always use a static .create in order to instantiate: `Foo.create,` `Bar.create`
+  - `Foo` should be a class
+  - `Foo.create` and injects dependencies into the constructor of `Foo`;
+  - `Foo.createNull` injects nulled versions of the any infrastructure dependencies for unit tests; "nulled" ensures any infrastructure code is "nulled" and returns a configured response rather than perform an I/O operation (network, disk etc); "nulled" instance never interacts with the outside world.
+  - always get instances of `foo` by calling `Foo.create` in production code
+  - when testing `Foo`, instantiate it directly `foo = new Foo(...)` and pass in nulled versions of dependencies: eg `foo = new Foo(Bar.createNull(...))`.
+  - when `Foo` is a dependency in a unit test, use `Foo.createNull`.
   - `Foo.create` should set valid production defaults as much as possible reducing the need to pass parameters to `Foo.create`
-- If `Foo` is is logic layer code:
-  - if it's stateless, pure functions should be fine so it would be `foo` not `Foo`
+  - an instance `foo` created by `Foo.createNull` should execute in exactly the same way, line for line, as one created using `Foo.create`.
+- If `Foo` is logic layer code:
+  - if it's stateless, pure functions should be fine; in this case `Foo` becomes `foo` (upper case is for classes)
   - if it involves non-I/O non-network in-memory manipulation, a class may be suitable
-  - use `Foo.create`
-  - no need to create `Foo.createNull` since there should be no I/O or network operations
-- If `Val` is a a value object (immutable or mutable)
+    - use `Foo.create`
+    - no need to create `Foo.createNull` since there should be no I/O or network operations
+- If `Val` is a value object (immutable or mutable)
   - `Val` should be a class
   - we should have a static `Val.create` but we don't need a `Val.createNull` so some of the procedures below may not apply; this is because value objects shouldn't be doing I/O operations so we don't need nulled versions
   - it may not make sense to set defaults for all parameters when creating value objects;  so `Val.create` may end up requiring the consumer to specify many or all parameters and should be typed accordingly
@@ -99,15 +104,16 @@ The following is the algorithm for refactoring and creating new code.  It doesn'
 - Find the code (eg a class `Foo`) that you think is the most important to write or test
   - we want to be able to test `Foo` using narrow, sociable unit tests without mocks...
   - suppose `Bar` represents any another class that an instance of `Foo` needs to perform its actions
-  - take class `Foo`
-  - (1) ensure `Foo.create` calls `Bar.create` and passes the instance to `Foo`s constructor
-  - (2) or: we pass in a factory `createBar` that returns an instance of `Bar` and let the instance of `Foo` create `Bar` at a later time
-  - take note of calls to instances of `Bar` within `Foo's` instance code and refactor to inject them using either (1) or (2)
+  - we have 2 scenarios
+  - (1) instantiate `Bar` straight away: ensure `Foo.create` calls `Bar.create` and passes the instance to `Foo`s constructor
+  - (2) delayed instantiation of `Bar`: we pass in a factory `createBar` that returns an instance of `Bar` and let the instance of `Foo` create `Bar` at a later time; we might do this if `Bar` is only created based on some condition/event at a later.
+    - if we are passing multiple infrastructure dependencies we can use a "create" object that we pass in to the constructor: `{ Bar: Bar.create, Baz: ... }` or `{ Bar: (...) => Bar.create(...), Baz: ... }`; `foo` can then call `create.Bar(...)` to get a `Bar` instance at a later time
+    - `Foo.createNull` can then pass in a "create" object with nulled factories so that when `foo` calls `create.Bar(...)` it gets a `Bar` instance created by `Bar.createNull`
+  - If you see `Bar.create` within an instance of `Foo` refactor to inject it using either (1) or (2)
   - if you had to create `Bar.create`, repeat this process but with `Bar` in place of `Foo`
   - keep recursing as required
 - Now repeat the above but for `Foo.createNull` (if applicable)
-  - this means `Foo.createNull` will either (1) call `Bar.createNull` and pass to `Foo`s constructor (2) or it will pass `createBar` and this version of `createBar` will call `Bar.createNull`
-  - the point of `.createNull` is to ensure any infrastructure code is "nulled" and returns a configured response rather than perform an I/O operation (network, disk etc)
+  - this means `Foo.createNull` will either (1) or (2) like `Foo.create`.
 - Code that directly makes I/O calls to access an external service or resource such as the network (eg `fetch`) or disk etc is infrastrucure layer code and should be wrapped up in a class with `.create` and `.createNull` making it into a client we can instantiate;
   - call this `Client` (here) but give it an appropriately descriptive class name  eg `HttpClient`, `DiskClient` etc
   - `Client` sole purpose is to interface with the outside world but have minimal business logic

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "btca-cli": {
+      "source": "davis7dotsh/better-context",
+      "sourceType": "github",
+      "computedHash": "99bc5301f4f839a6f3be99d98955f32f1cd576c218731fa05fa54a003bd20e9b"
+    },
+    "nullables": {
+      "source": "danielbush/skills",
+      "sourceType": "github",
+      "computedHash": "17c7710aef30033301f0cd40b5600a1b68d2cb3246058234578555bca39a648a"
+    }
+  }
+}

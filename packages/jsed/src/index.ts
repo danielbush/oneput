@@ -40,4 +40,3 @@ export { JsedDocument };
 export type { JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor };
 
 export { CursorMarkers } from './oneput/CursorMarkers.js';
-export { Editor } from './oneput/Editor.js';

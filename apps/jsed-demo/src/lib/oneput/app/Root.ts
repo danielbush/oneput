@@ -1,4 +1,4 @@
-import * as jsed from '@oneput/jsed';
+import { JsedDocument } from '@oneput/jsed';
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../icons.js';
@@ -10,8 +10,8 @@ export class Root implements AppObject {
   static create(ctl: Controller) {
     ctl.ui.setLayout(Layout.create(ctl));
     return new Root(ctl, {
-      TestDocService: () => TestDocService.create(),
-      JsedDocument: (root: HTMLElement) => jsed.JsedDocument.create(root),
+      TestDocService: TestDocService.create,
+      JsedDocument: JsedDocument.create,
       ViewDocument: ViewDocument.create
     });
   }
@@ -20,11 +20,8 @@ export class Root implements AppObject {
     private ctl: Controller,
     private create: {
       TestDocService: () => TestDocService;
-      JsedDocument: (root: HTMLElement) => jsed.JsedDocument;
-      ViewDocument: (
-        ctl: Controller,
-        { document }: { document: jsed.JsedDocument }
-      ) => ViewDocument;
+      JsedDocument: (root: HTMLElement) => JsedDocument;
+      ViewDocument: (ctl: Controller, { document }: { document: JsedDocument }) => ViewDocument;
     }
   ) {}
 

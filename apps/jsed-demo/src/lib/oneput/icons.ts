@@ -9,7 +9,8 @@ export const iconData = {
   File: lu.Files,
   // Bindings we should provide for existing appObjects...
   GlobalFilterInputIcon: lu.Globe,
-  CloseNotification: lu.X
+  CloseNotification: lu.X,
+  Pencil: lu.Pencil
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

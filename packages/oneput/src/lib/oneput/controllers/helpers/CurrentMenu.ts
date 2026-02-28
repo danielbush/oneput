@@ -26,7 +26,7 @@ export class CurrentMenu {
      * to set currentProps.menuItems.
      *
      * - setMenu updates this list.
-     * - _setMenuItems only updates currentProps.menuItems.
+     * - _setMenuonly updates currentProps.menuItems.
      * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
      *
      * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.

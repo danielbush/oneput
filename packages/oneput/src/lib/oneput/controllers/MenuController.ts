@@ -81,7 +81,7 @@ export class MenuController {
 
   // #region setting menu items
 
-  _setMenuItems(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
+  _setMenu(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
     this.ctl.currentProps.menuItems = params.items;
     this.runFocusBehaviour(params.focusBehaviour);
   }
@@ -92,7 +92,7 @@ export class MenuController {
     items: Array<MenuItemAny | undefined>;
   }) {
     this.currentMenu = CurrentMenu.create(this.ctl, params.id, params.items);
-    this._setMenuItems({
+    this._setMenu({
       focusBehaviour: params.focusBehaviour,
       items: this.currentMenu.allMenuItems
     });

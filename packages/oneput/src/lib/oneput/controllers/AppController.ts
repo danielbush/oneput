@@ -1,35 +1,6 @@
 import type { Controller } from './controller.js';
 import type { AppObject, UIFlags } from '../types.js';
-
-class AppVal {
-  static create(app: AppObject) {
-    return new AppVal(app);
-  }
-
-  constructor(app: AppObject) {
-    this.app = app;
-  }
-
-  app: AppObject;
-  lastMenuActions: Record<string, string> = {};
-  menuId?: string;
-
-  setLastMenuActionId(menuId: string, menuActionId: string) {
-    this.lastMenuActions[menuId] = menuActionId;
-  }
-
-  setMenuId(menuId: string) {
-    this.menuId = menuId;
-  }
-
-  getLastMenuActionId(menuId: string) {
-    return this.lastMenuActions[menuId];
-  }
-
-  menuExists(menuId: string) {
-    return Object.keys(this.lastMenuActions).includes(menuId);
-  }
-}
+import { AppVal } from './helpers/AppVal.js';
 
 /**
  * Manages AppObject's . One AppObject controls Oneput at a time.
@@ -179,7 +150,7 @@ export class AppController {
   /**
    * The running AppObject can call this to exit itself.
    */
-  public exit = (payload?: unknown) => {
+  exit = (payload?: unknown) => {
     this.pop({ payload });
   };
 

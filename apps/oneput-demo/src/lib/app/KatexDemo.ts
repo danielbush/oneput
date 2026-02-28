@@ -100,7 +100,7 @@ export class KatexDemo implements AppObject {
     katexResult?: string,
     focusBehaviour?: 'none' | 'first' | 'last'
   ): void {
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'main',
       // This will ensure the menuItemFocus index won't change when we hit the
       // checkbox above or any other action.

@@ -39,7 +39,7 @@ export class NavigateHeadings implements AppObject {
       heading.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
       // Reset the input and menu:
       this.ctl.input.setInputValue();
-      this.ctl.menu.setMenuItems({
+      this.ctl.menu.setMenu({
         id: 'main',
         focusBehaviour: 'last-action,first',
         items: menuItems
@@ -57,7 +57,7 @@ export class NavigateHeadings implements AppObject {
     // Initialize headings and menu items...
     const headings: HTMLElement[] = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
     const menuItems = headings.map((h) => menuItem(h));
-    this.ctl.menu.setMenuItems({ id: 'main', items: menuItems });
+    this.ctl.menu.setMenu({ id: 'main', items: menuItems });
 
     // Normally you should use setMenuItemsFn / setDefaultMenuItemsFn or
     // related functions.
@@ -66,7 +66,7 @@ export class NavigateHeadings implements AppObject {
       if (!sortedMenuItems) {
         return;
       }
-      this.ctl.menu.setMenuItems({ id: 'main', items: sortedMenuItems });
+      this.ctl.menu.setMenu({ id: 'main', items: sortedMenuItems });
     });
   }
 

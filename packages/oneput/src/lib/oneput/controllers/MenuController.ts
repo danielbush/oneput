@@ -86,7 +86,7 @@ export class MenuController {
     this.runFocusBehaviour(params.focusBehaviour);
   }
 
-  setMenuItems(params: {
+  setMenu(params: {
     id: string;
     focusBehaviour?: FocusBehaviour;
     items: Array<MenuItemAny | undefined>;

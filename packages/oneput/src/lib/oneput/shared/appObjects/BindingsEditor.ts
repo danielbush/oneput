@@ -82,7 +82,7 @@ export class BindingsEditor implements AppObject {
     this.ctl.app.setOnBack(() => {
       this.ctl.app.exit();
     });
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'actionsUI',
       items: Object.entries(this.keyBindingMap).map(([id, { description, bindings }]) =>
         stdMenuItem({
@@ -126,7 +126,7 @@ export class BindingsEditor implements AppObject {
     });
     this.ctl.input.setPlaceholder();
     this.ctl.input.setInputValue('');
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: `actionUI-${actionId}`,
       focusBehaviour: 'first',
       items: [

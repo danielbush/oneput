@@ -100,7 +100,7 @@ export type MenuItemsFnAsync = (
  *
  * - Comma separated values means: try the first value first, then fall back to the next, etc.
  * - "last-action" = Try to focus on the last executed action item for a given menu
- *   - menus are identified by an id in setMenuItems
+ *   - menus are identified by an id in setMenu
  *   - menu id's are scoped to the current appObject
  */
 export type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
@@ -217,7 +217,7 @@ export interface AppObject<R = unknown> {
   /**
    * A declarative way to set your menu items.
    *
-   * If set, the system will do the equivalent of calling setMenuItems for you.
+   * If set, the system will do the equivalent of calling setMenu for you.
    */
   menu?: Menu;
 }

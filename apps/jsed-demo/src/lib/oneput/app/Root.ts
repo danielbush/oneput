@@ -25,7 +25,7 @@ export class Root implements AppObject {
 
   onStart() {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'root',
       items: [
         stdMenuItem({

@@ -57,7 +57,7 @@ export class AddEntry implements AppObject {
         this.ctl.input.setInputValue(this.session.label ?? '');
         this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
           this.session.label = value;
-          this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
+          this.ctl.menu.setMenu({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
         });
         break;
       case 'add-note':
@@ -71,7 +71,7 @@ export class AddEntry implements AppObject {
         this.ctl.input.setPlaceholder('Enter note...');
         this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
           this.session.note = value;
-          this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
+          this.ctl.menu.setMenu({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
         });
         break;
       case 'add-duration':
@@ -89,7 +89,7 @@ export class AddEntry implements AppObject {
             this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
             return;
           }
-          this.ctl.menu.setMenuItems({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
+          this.ctl.menu.setMenu({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
         });
         break;
       case 'add-startTime':
@@ -111,7 +111,7 @@ export class AddEntry implements AppObject {
       }
     });
     this.ctl.menu.fn.clearMenuItemsFn();
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'main',
       focusBehaviour: 'last-action,first',
       items: this.menuItems

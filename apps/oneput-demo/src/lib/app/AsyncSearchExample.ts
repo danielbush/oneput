@@ -75,7 +75,7 @@ export class AsyncSearchExample implements AppObject {
       }
     );
     this.ctl.input.setPlaceholder('Start typing something...');
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'main',
       items: [
         infoMenuItem({

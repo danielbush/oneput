@@ -22,7 +22,7 @@ export class FiltersUI implements AppObject {
       }
     });
 
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'main',
       items: [
         stdMenuItem({

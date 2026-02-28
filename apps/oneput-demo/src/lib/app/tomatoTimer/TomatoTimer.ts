@@ -103,7 +103,7 @@ export class TomatoTimer implements AppObject {
     this.ctl.app.setOnBack(() => {
       this.ctl.app.exit();
     });
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'runMainNoTimer',
       items: [
         stdMenuItem({
@@ -155,7 +155,7 @@ export class TomatoTimer implements AppObject {
     this.ctl.app.setOnBack(() => {
       this.ctl.app.exit();
     });
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'runMainWithTimer',
       items: [
         // It is possible to have a timer without mounting a svelte
@@ -291,7 +291,7 @@ export class TomatoTimer implements AppObject {
         });
     };
 
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'runCreateTimer',
       items: [
         stdMenuItem({
@@ -335,7 +335,7 @@ export class TomatoTimer implements AppObject {
     });
     this.ctl.input.setPlaceholder('Select a session...');
     this.store.getFinishedSessions().andTee((sessions) => {
-      this.ctl.menu.setMenuItems({
+      this.ctl.menu.setMenu({
         id: 'runPreviousSessions',
         items: sessions.map((session) => {
           const v = TomatoTimerValue.create(session);
@@ -367,7 +367,7 @@ export class TomatoTimer implements AppObject {
       this.runPreviousSessions();
     });
     this.ctl.input.setPlaceholder('Select an action...');
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'runEditEntry',
       items: [
         menuItem({
@@ -410,7 +410,7 @@ export class TomatoTimer implements AppObject {
                 .andTee(() => {
                   this.ctl.notify('Session label updated', { duration: 3000 });
                   // Refresh this ui to update the display.
-                  // We could just call setMenuItems again.
+                  // We could just call setMenu again.
                   // Using consistent id's will mean only a small part of the DOM will change.
                   this.runEditEntry(newSession);
                 })

@@ -66,7 +66,7 @@ export class Root implements AppObject {
         action: () => {}
       });
     });
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'main',
       items: [
         stdMenuItem({

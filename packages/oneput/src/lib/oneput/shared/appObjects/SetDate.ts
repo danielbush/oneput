@@ -77,7 +77,7 @@ export class SetDate implements AppObject {
         })
       );
     }
-    this.ctl.menu.setMenuItems({ id: 'setYear', items: menuItems });
+    this.ctl.menu.setMenu({ id: 'setYear', items: menuItems });
     this.ctl.menu.focusMenuItemByIndex(
       this.data?.year
         ? menuItems.findIndex((item) => item.data?.year === this.data!.year) || 5
@@ -118,7 +118,7 @@ export class SetDate implements AppObject {
         })
       );
     }
-    this.ctl.menu.setMenuItems({ id: 'setMonth', items: menuItems });
+    this.ctl.menu.setMenu({ id: 'setMonth', items: menuItems });
     if (this.data?.year && this.data?.jsmonth) {
       this.ctl.menu.focusMenuItemByIndex(
         menuItems.findIndex((item) => item.data?.jsmonth === this.data!.jsmonth) || 0,
@@ -151,7 +151,7 @@ export class SetDate implements AppObject {
         })
       );
     }
-    this.ctl.menu.setMenuItems({ id: 'setDay', items: menuItems });
+    this.ctl.menu.setMenu({ id: 'setDay', items: menuItems });
     if (this.data?.year && this.data?.jsmonth && this.data?.day) {
       this.ctl.menu.focusMenuItemByIndex(
         menuItems.findIndex((item) => item.data?.day === this.data!.day) || 0,

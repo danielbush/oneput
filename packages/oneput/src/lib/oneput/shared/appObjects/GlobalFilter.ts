@@ -44,7 +44,7 @@ export class GlobalFilter implements AppObject {
       });
     }, 10);
     this.ctl.input.setPlaceholder('Filter across all menu items...');
-    this.ctl.menu.setMenuItems({
+    this.ctl.menu.setMenu({
       id: 'main',
       items: [
         stdMenuItem({

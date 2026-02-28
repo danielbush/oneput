@@ -25,7 +25,7 @@ export class CurrentMenu {
      * Represents the current list of available menu items which is usually used
      * to set currentProps.menuItems.
      *
-     * - setMenuItems updates this list.
+     * - setMenu updates this list.
      * - _setMenuItems only updates currentProps.menuItems.
      * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
      *

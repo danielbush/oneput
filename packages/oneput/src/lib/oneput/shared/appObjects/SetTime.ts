@@ -62,7 +62,7 @@ export class SetTime implements AppObject {
       this.ctl.app.exit(new TimeVal(parsedHour, parsedMinute));
     });
     this.ctl.input.setPlaceholder('Tab to fill input with a time or type in HH:MM...');
-    this.ctl.menu.setMenuItems({ id: 'main', items: this.#menuItems });
+    this.ctl.menu.setMenu({ id: 'main', items: this.#menuItems });
 
     const currentHour = this.initialTime?.hour ?? new Date().getHours();
     const currentMinute = this.initialTime?.minute ?? new Date().getMinutes();

@@ -45,7 +45,7 @@ export class AppController {
   private beforeRun() {
     this.reset();
     if (this.current?.app.menu) {
-      this.ctl.menu.setMenuItems(this.current.app.menu);
+      this.ctl.menu.setMenu(this.current.app.menu);
     }
   }
 
@@ -199,9 +199,9 @@ export class AppController {
   /**
    * Returns details about the menu with menuId including the last action that
    * was fired.  If menuId is not provided, it will return details about the
-   * last menu that was set via setMenuItems.
+   * last menu that was set via setMenu.
    *
-   * Assumes you have called setMenuItems within the current appObject with
+   * Assumes you have called setMenu within the current appObject with
    * the given id.
    *
    * NOTE: it seems easier to put this in menu controller, but for the fact

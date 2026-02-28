@@ -23,20 +23,9 @@ export class Root implements AppObject {
     }
   ) {}
 
-  onStart() {
+  onStart = () => {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
-    this.ctl.menu.setMenu({
-      id: 'root',
-      items: [
-        stdMenuItem({
-          id: 'load-doc',
-          textContent: 'Load test doc...',
-          action: this.actions.LOAD_TEST_DOC,
-          left: (b) => [b.icon(icons.File)]
-        })
-      ]
-    });
-  }
+  };
 
   actions = {
     LOAD_TEST_DOC: async () => {
@@ -66,5 +55,17 @@ export class Root implements AppObject {
           }
         });
     }
+  };
+
+  menu = {
+    id: 'root',
+    items: [
+      stdMenuItem({
+        id: 'load-doc',
+        textContent: 'Load test doc...',
+        action: this.actions.LOAD_TEST_DOC,
+        left: (b) => [b.icon(icons.File)]
+      })
+    ]
   };
 }

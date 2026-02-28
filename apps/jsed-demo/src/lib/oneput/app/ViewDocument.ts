@@ -28,28 +28,13 @@ export class ViewDocument implements AppObject {
   };
 
   actions = {
-    EDIT_FIRST: () =>
-      this.document
-        .requestCursorUnderFocus({
-          onTokenChange: () => {}
+    EDIT_FIRST: () => {
+      this.ctl.app.run(
+        EditDocument.create(this.ctl, {
+          document: this.document
         })
-        .map((cursor) => {
-          this.ctl.app.run(
-            EditDocument.create(this.ctl, {
-              cursor: cursor
-            })
-          );
-        })
-        .mapErr((err) => {
-          switch (err.type) {
-            case 'no-token-under-focus':
-              this.ctl.notify('No token under focus', { duration: 3000 });
-              break;
-            case 'no-focus':
-              this.ctl.notify('No document focus found', { duration: 3000 });
-              break;
-          }
-        })
+      );
+    }
   };
 
   menu = {

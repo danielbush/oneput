@@ -43,48 +43,50 @@ export class Settings implements AppObject {
     this.run();
   };
 
+  // Example of declarative menu.
+  menu = {
+    id: 'main',
+    items: [
+      checkboxMenuItem({
+        id: 'simulate-error',
+        textContent: 'Toggle simulate error storing bindings',
+        checked: config.simulateError,
+        action: (_, checked) => {
+          config.toggleSimulateError(checked);
+        }
+      }),
+      stdMenuItem({
+        id: 'default-filter',
+        left: (b) => [b.icon(icons.ListFilter)],
+        textContent: 'Set default typing filter...',
+        action: () => {
+          this.ctl.app.run(this.create.FiltersUI());
+        }
+      }),
+      stdMenuItem({
+        id: 'global-keys',
+        textContent: 'Set global default key bindings...',
+        left: (b) => [b.icon(icons.Keyboard)],
+        action: () => {
+          this.ctl.app.run(this.create.BindingsEditor(false));
+        }
+      }),
+      stdMenuItem({
+        id: 'local-keys',
+        textContent: 'Set local default key bindings...',
+        left: (b) => [b.icon(icons.Keyboard)],
+        action: () => {
+          this.ctl.app.run(this.create.BindingsEditor(true));
+        }
+      })
+    ]
+  };
+
   run = () => {
     this.ctl.ui.update({
       params: {
         menuTitle: 'Settings'
       }
-    });
-    this.ctl.menu.setMenuItems({
-      id: 'main',
-      items: [
-        checkboxMenuItem({
-          id: 'simulate-error',
-          textContent: 'Toggle simulate error storing bindings',
-          checked: config.simulateError,
-          action: (_, checked) => {
-            config.toggleSimulateError(checked);
-          }
-        }),
-        stdMenuItem({
-          id: 'default-filter',
-          left: (b) => [b.icon(icons.ListFilter)],
-          textContent: 'Set default typing filter...',
-          action: () => {
-            this.ctl.app.run(this.create.FiltersUI());
-          }
-        }),
-        stdMenuItem({
-          id: 'global-keys',
-          textContent: 'Set global default key bindings...',
-          left: (b) => [b.icon(icons.Keyboard)],
-          action: () => {
-            this.ctl.app.run(this.create.BindingsEditor(false));
-          }
-        }),
-        stdMenuItem({
-          id: 'local-keys',
-          textContent: 'Set local default key bindings...',
-          left: (b) => [b.icon(icons.Keyboard)],
-          action: () => {
-            this.ctl.app.run(this.create.BindingsEditor(true));
-          }
-        })
-      ]
     });
   };
 }

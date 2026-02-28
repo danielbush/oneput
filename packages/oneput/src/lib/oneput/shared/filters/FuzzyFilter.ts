@@ -1,7 +1,6 @@
 import uFuzzy from '@leeoniya/ufuzzy';
 import { walk } from '../../lib/utils.js';
-import type { FChildParams, MenuItemAny } from '../../types.js';
-import type { MenuItemsFn } from '../../controllers/MenuController.js';
+import type { FChildParams, MenuItemAny, MenuItemsFn } from '../../types.js';
 
 export type HaystackData =
   | {

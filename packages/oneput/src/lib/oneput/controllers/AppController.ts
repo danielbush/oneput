@@ -44,6 +44,9 @@ export class AppController {
    */
   private beforeRun() {
     this.reset();
+    if (this.current?.app.menu) {
+      this.ctl.menu.setMenuItems(this.current.app.menu);
+    }
   }
 
   get flags() {

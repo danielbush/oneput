@@ -1,7 +1,6 @@
 import debounce from 'debounce';
 import type { Controller } from '../controller.js';
-import type { FocusBehaviour, MenuItemsFn, MenuItemsFnAsync } from '../MenuController.js';
-import type { MenuItemAny } from '../../../oneput/types.js';
+import type { FocusBehaviour, MenuItemAny, MenuItemsFn, MenuItemsFnAsync } from '../../types.js';
 
 /**
  * This is like a subcontroller.

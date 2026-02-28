@@ -1,26 +1,7 @@
-import type { MenuItem, MenuItemAny } from '../types.js';
+import type { FocusBehaviour, MenuItem, MenuItemAny } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
-
-export type MenuItemsFn = (
-  input: string,
-  items: MenuItemAny[]
-) => Array<MenuItemAny> | undefined | void;
-export type MenuItemsFnAsync = (
-  input: string,
-  items: MenuItemAny[]
-) => Promise<Array<MenuItemAny> | undefined>;
-
-/**
- * Focus behaviours decide which item to focus on when a menu is displayed.
- *
- * - Comma separated values means: try the first value first, then fall back to the next, etc.
- * - "last-action" = Try to focus on the last executed action item for a given menu
- *   - menus are identified by an id in setMenuItems
- *   - menu id's are scoped to the current appObject
- */
-export type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
 
 export class MenuController {
   public static create(ctl: Controller) {

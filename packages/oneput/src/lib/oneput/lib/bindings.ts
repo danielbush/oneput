@@ -211,7 +211,6 @@ function kbToSerializable(keyBinding: KeyBinding): KeyBindingSerializable {
 
 function kbFromSerializable(
   kbSerializable: KeyBindingSerializable,
-  actionId: string,
   action?: (c: Controller) => void
 ): KeyBinding {
   return {
@@ -238,7 +237,7 @@ export class KeyEventBindings {
   ): KeyEventBindings {
     return KeyEventBindings.create(
       Object.entries(kbMapSerializable).reduce((acc, [actionId, kbSerializable]) => {
-        acc[actionId] = kbFromSerializable(kbSerializable, actionId, actionMap[actionId]);
+        acc[actionId] = kbFromSerializable(kbSerializable, actionMap[actionId]);
         return acc;
       }, {} as KeyBindingMap),
       isMac

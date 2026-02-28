@@ -86,6 +86,34 @@ export type FlexParams = {
   onMount?: (node: HTMLElement) => void | (() => void);
 };
 
+export type MenuItemsFn = (
+  input: string,
+  items: MenuItemAny[]
+) => Array<MenuItemAny> | undefined | void;
+export type MenuItemsFnAsync = (
+  input: string,
+  items: MenuItemAny[]
+) => Promise<Array<MenuItemAny> | undefined>;
+
+/**
+ * Focus behaviours decide which item to focus on when a menu is displayed.
+ *
+ * - Comma separated values means: try the first value first, then fall back to the next, etc.
+ * - "last-action" = Try to focus on the last executed action item for a given menu
+ *   - menus are identified by an id in setMenuItems
+ *   - menu id's are scoped to the current appObject
+ */
+export type FocusBehaviour = 'last-action,first' | 'first' | 'last' | 'none';
+
+export type Menu = {
+  /**
+   * Identifies the menu.
+   */
+  id: string;
+  focusBehaviour?: FocusBehaviour;
+  items: Array<MenuItemAny | undefined>;
+};
+
 export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>> = FlexParams & {
   /**
    * Instructs Oneput renderer to add a pointerdown handler to run this action
@@ -186,6 +214,12 @@ export interface AppObject<R = unknown> {
   actions?: {
     [actionId: string]: (ctl: Controller) => void;
   };
+  /**
+   * A declarative way to set your menu items.
+   *
+   * If set, the system will do the equivalent of calling setMenuItems for you.
+   */
+  menu?: Menu;
 }
 
 export type NullishChildren = Array<FlexParams | FChildParams | '' | false | null | undefined>;

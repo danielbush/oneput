@@ -41,7 +41,7 @@ export class EditDocument implements AppObject {
     private document: JsedDocument
   ) {}
 
-  public onStart = () => {
+  onStart = () => {
     this.document
       .requestCursorUnderFocus({
         onTokenChange: this.handleTokenChange
@@ -71,7 +71,16 @@ export class EditDocument implements AppObject {
       });
   };
 
-  public onExit = () => {};
+  onExit = () => {};
+
+  actions = {
+    NEXT_TOKEN: () => {
+      // TODO
+    },
+    PREV_TOKEN: () => {
+      // TODO
+    }
+  };
 
   /**
    * When the cursor changes its token because of some action it has been

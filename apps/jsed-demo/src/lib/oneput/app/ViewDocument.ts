@@ -1,10 +1,9 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { icons } from '../icons.js';
-import { type IJsedCursor, type JsedDocument } from '@oneput/jsed';
+import { type JsedDocument } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { EditDocument } from './EditDocument.js';
-// import { EditDocument } from './EditDocument.js';
 
 /**
  * Oneput AppObject that manages a single JsedDocument.
@@ -34,6 +33,24 @@ export class ViewDocument implements AppObject {
           document: this.document
         })
       );
+    },
+    REC_NEXT: () => {
+      this.document.nav.REC_NEXT();
+    },
+    REC_PREV: () => {
+      this.document.nav.REC_PREV();
+    },
+    SIB_NEXT: () => {
+      this.document.nav.SIB_NEXT();
+    },
+    SIB_PREV: () => {
+      this.document.nav.SIB_PREV();
+    },
+    UP: () => {
+      this.document.nav.UP();
+    },
+    TOGGLE_SELECT: (ctl: Controller) => {
+      ctl.input.toggleSelect();
     }
   };
 

@@ -47,27 +47,6 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   hideOneput: (ctl) => {
     ctl.toggleHide();
-  },
-
-  // Editor actions
-
-  REC_NEXT: () => {
-    state.currentDocument?.nav.REC_NEXT();
-  },
-  REC_PREV: () => {
-    state.currentDocument?.nav.REC_PREV();
-  },
-  SIB_NEXT: () => {
-    state.currentDocument?.nav.SIB_NEXT();
-  },
-  SIB_PREV: () => {
-    state.currentDocument?.nav.SIB_PREV();
-  },
-  UP: () => {
-    state.currentDocument?.nav.UP();
-  },
-  TOGGLE_SELECT: (ctl) => {
-    ctl.input.toggleSelect();
   }
 };
 

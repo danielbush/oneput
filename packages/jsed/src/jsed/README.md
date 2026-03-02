@@ -25,7 +25,7 @@ Some of the key things the core library handles:
 See:
 
 - [CODE.md](./CODE.md) - how code and tests are organised
-- [DEFINITIONS.md](./DEFINITIONS.md) - key definitions and behaviours of the systems
+- [architecture.md](../../../docs/architecture.md) - architecture, key definitions and behaviours
 - [ISSUES.md](./ISSUES.md) - issues found along the way
 
 ## Usage

@@ -49,8 +49,8 @@ export class ViewDocument implements AppObject {
     UP: () => {
       this.document.nav.UP();
     },
-    TOGGLE_SELECT: (ctl: Controller) => {
-      ctl.input.toggleSelect();
+    TOGGLE_SELECT: () => {
+      this.ctl.input.toggleSelect();
     }
   };
 

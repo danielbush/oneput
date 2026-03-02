@@ -50,11 +50,6 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   }
 };
 
-export const globalKeys = bindings.KeyEventBindings.fromSerializable(
-  defaultGlobalBindings,
-  defaultGlobalActions
-).keyBindingMap;
-
 export const defaultLocalActions: Record<string, (c: Controller) => void> = {
   hideOneput: (c) => {
     c.toggleHide();
@@ -120,6 +115,13 @@ export const defaultLocalBindings: KeyBindingMapSerializable = {
     description: 'Focus next menu item'
   }
 };
+
+// Default local and global keybindings.
+
+export const globalKeys = bindings.KeyEventBindings.fromSerializable(
+  defaultGlobalBindings,
+  defaultGlobalActions
+).keyBindingMap;
 
 export const localKeys = bindings.KeyEventBindings.fromSerializable(
   defaultLocalBindings,

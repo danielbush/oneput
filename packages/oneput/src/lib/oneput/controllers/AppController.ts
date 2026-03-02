@@ -113,7 +113,6 @@ export class AppController {
     // Reset stuff...
     this.resetOnBack();
     this.ctl.keys.resetBindings();
-    this.ctl.keys.resetBindings(true);
     this.ctl.input.resetPlaceholder();
     this.ctl.menu.resetFocusBehaviour();
     this.ctl.menu.fn.resetMenuItemsFn();
@@ -138,14 +137,15 @@ export class AppController {
       const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(
         (acc, [actionId, actionWithBinding]) => {
           if (actionWithBinding.binding) {
-            acc[actionId] = actionWithBinding.binding;
+            acc[actionId] = {
+              ...actionWithBinding.binding,
+              action: actionWithBinding.action
+            };
           }
           return acc;
         },
         {}
       );
-      // TOOD: this is just setting global bindings.  Need to apply `when` logic.
-      // TOOD: the type AppObject['actions']['binding'] needs to not have 'action' in it.
       this.ctl.keys.setBindings(keyBindingsMap);
     }
   }

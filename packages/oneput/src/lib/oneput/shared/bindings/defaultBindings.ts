@@ -5,7 +5,7 @@ import { KeyEventBindings, type KeyBindingMapSerializable } from '../../lib/bind
 import type { Controller } from '../../controllers/controller.js';
 import { GlobalFilter } from '../appObjects/GlobalFilter.js';
 
-export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
+export const defaultActions: Record<string, (c: Controller) => void> = {
   openMenu: (c) => {
     c.menu.openMenu();
   },
@@ -14,21 +14,12 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   hideOneput: (c) => {
     c.toggleHide();
-  }
-};
-
-export const defaultLocalActions: Record<string, (c: Controller) => void> = {
-  hideOneput: (c) => {
-    c.toggleHide();
   },
   doAction: (c) => {
     c.menu.doMenuAction();
   },
   back: (c) => {
     c.app.goBack();
-  },
-  focusInput: (c) => {
-    c.input.focusInput();
   },
   closeMenu: (c) => {
     c.menu.closeMenu();
@@ -52,70 +43,64 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
   }
 };
 
-export const defaultGlobalBindings: KeyBindingMapSerializable = {
+export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   openMenu: {
     bindings: ['$mod+Shift+k'],
-    description: 'Open Oneput menu...'
+    description: 'Open Oneput menu...',
+    when: { menuOpen: false }
   },
   focusInput: {
     bindings: ['$mod+[', 'Control+['],
     description: 'Focus input'
   },
-  hideOneput: {
-    bindings: ['$mod+h'],
-    description: 'Hide Oneput'
-  }
-};
-
-export const defaultLocalBindings: KeyBindingMapSerializable = {
   hideOneput: {
     bindings: ['$mod+h'],
     description: 'Hide Oneput'
   },
   doAction: {
     bindings: ['Enter'],
-    description: 'Do action'
+    description: 'Do action',
+    when: { menuOpen: true }
   },
   submit: {
     bindings: ['$mod+Enter'],
-    description: 'Submit input'
+    description: 'Submit input',
+    when: { menuOpen: true }
   },
   fill: {
     bindings: ['Tab'],
-    description: 'Fill input using current menu item'
+    description: 'Fill input using current menu item',
+    when: { menuOpen: true }
   },
   // NOTE: reserve 'Shift+Enter' for newlines in text area input.
   back: {
     bindings: ['Meta+B'],
-    description: 'Back'
-  },
-  focusInput: {
-    bindings: ['$mod+[', 'Control+['],
-    description: 'Focus input'
+    description: 'Back',
+    when: { menuOpen: true }
   },
   closeMenu: {
     bindings: ['$mod+Shift+k', 'Escape'],
-    description: 'Close menu'
+    description: 'Close menu',
+    when: { menuOpen: true }
   },
   focusPreviousMenuItem: {
     bindings: ['$mod+k'],
-    description: 'Focus previous menu item'
+    description: 'Focus previous menu item',
+    when: { menuOpen: true }
   },
   focusNextMenuItem: {
     bindings: ['$mod+j'],
-    description: 'Focus next menu item'
+    description: 'Focus next menu item',
+    when: { menuOpen: true }
   },
   globalFilter: {
     bindings: ['$mod+e'],
-    description: 'Global filter'
+    description: 'Global filter',
+    when: { menuOpen: true }
   }
 };
 
-export const globalKeys = KeyEventBindings.fromSerializable(
-  defaultGlobalBindings,
-  defaultGlobalActions
-).keyBindingMap;
-export const localKeys = KeyEventBindings.fromSerializable(
-  defaultLocalBindings,
-  defaultLocalActions
+export const defaultKeys = KeyEventBindings.fromSerializable(
+  defaultBindingsSerializable,
+  defaultActions
 ).keyBindingMap;

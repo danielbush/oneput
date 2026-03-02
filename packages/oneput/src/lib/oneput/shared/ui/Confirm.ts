@@ -36,31 +36,30 @@ export class Confirm {
         enableKeys: true
       }
     });
-    this.ctl.keys.setBindings(
-      {
-        ok: {
-          description: 'OK',
-          bindings: ['Enter'],
-          action: () => {
-            // Support if the user tabs to the cancel button and
-            // hits enter.
-            if (document.activeElement === this.cancelButton) {
-              this.stop(false);
-            } else if (document.activeElement === this.okButton) {
-              this.stop(true);
-            } else {
-              this.stop(true);
-            }
+    this.ctl.keys.setBindings({
+      ok: {
+        description: 'OK',
+        bindings: ['Enter'],
+        when: { menuOpen: true },
+        action: () => {
+          // Support if the user tabs to the cancel button and
+          // hits enter.
+          if (document.activeElement === this.cancelButton) {
+            this.stop(false);
+          } else if (document.activeElement === this.okButton) {
+            this.stop(true);
+          } else {
+            this.stop(true);
           }
-        },
-        cancel: {
-          description: 'Cancel',
-          bindings: ['Escape'],
-          action: () => this.stop(false)
         }
       },
-      true
-    );
+      cancel: {
+        description: 'Cancel',
+        bindings: ['Escape'],
+        when: { menuOpen: true },
+        action: () => this.stop(false)
+      }
+    });
 
     this.ctl.input.setPlaceholder('"Enter" to accept, "Escape" to cancel...');
     this.ctl.ui.replaceMenuUI({
@@ -115,7 +114,7 @@ export class Confirm {
     });
 
     // Restore
-    this.ctl.keys.resetBindings(true);
+    this.ctl.keys.resetBindings();
     this.ctl.ui.replaceMenuUI();
     this.ctl.input.setPlaceholder(this.previousPlaceholder);
     this.resolve?.(ok);

@@ -17,7 +17,7 @@ export type InputChangeEvent = {
 };
 export type BindingsChangeEvent = {
   type: 'bindings-change';
-  payload: { bindings: KeyBindingMap; isLocal: boolean };
+  payload: { bindings: KeyBindingMap };
 };
 export type MenuOpenChangeEvent = {
   type: 'menu-open-change';

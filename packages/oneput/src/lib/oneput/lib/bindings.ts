@@ -27,6 +27,21 @@ export type KeyBinding = {
    * the pluses separate modifiers.
    */
   bindings: string[];
+  /**
+   * Conditions for when the binding is active.
+   * - menuOpen: true = only when menu is open, false = only when closed, undefined = always
+   */
+  when?: { menuOpen?: boolean };
+};
+
+/**
+ * The binding information for actions defined on AppObject.
+ * Same as KeyBinding but without the `action` callback.
+ */
+export type ActionBinding = {
+  description: string;
+  bindings: string[];
+  when?: { menuOpen?: boolean };
 };
 
 /**
@@ -39,6 +54,7 @@ export type KeyBindingMap = {
 export type KeyBindingSerializable = {
   description: string;
   bindings: string[];
+  when?: { menuOpen?: boolean };
   /**
    * If action is passed an its is js it will cause an exception in some stores.
    */
@@ -81,6 +97,7 @@ export type KeyEventBinding = {
    *  KeyEvent[][].
    */
   bindings: KeyEvent[][];
+  when?: { menuOpen?: boolean };
 };
 
 export type KeyEventsMap = { [actionId: string]: KeyEventBinding };
@@ -191,7 +208,8 @@ function keMapToKbMap(keyEventsMap: KeyEventsMap, isMac: boolean): KeyBindingMap
     acc[actionId] = {
       action: keyEventBinding.action,
       description: keyEventBinding.description,
-      bindings: keyEventBinding.bindings.map((ke) => keToBs(ke, isMac))
+      bindings: keyEventBinding.bindings.map((ke) => keToBs(ke, isMac)),
+      when: keyEventBinding.when
     };
     return acc;
   }, {} as KeyBindingMap);
@@ -202,7 +220,8 @@ function kbMaptoKeMap(keyBindingMap: KeyBindingMap, isMac: boolean): KeyEventsMa
     acc[actionId] = {
       action: keyBinding.action,
       description: keyBinding.description,
-      bindings: keyBinding.bindings.map((bs) => bsToKe(bs, isMac))
+      bindings: keyBinding.bindings.map((bs) => bsToKe(bs, isMac)),
+      when: keyBinding.when
     };
     return acc;
   }, {} as KeyEventsMap);
@@ -212,6 +231,7 @@ function kbToSerializable(keyBinding: KeyBinding): KeyBindingSerializable {
   return {
     description: keyBinding.description,
     bindings: keyBinding.bindings,
+    when: keyBinding.when,
     action: undefined as never
   };
 }
@@ -223,6 +243,7 @@ function kbFromSerializable(
   return {
     description: kbSerializable.description,
     bindings: kbSerializable.bindings,
+    when: kbSerializable.when,
     action
   };
 }

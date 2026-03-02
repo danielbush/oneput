@@ -41,12 +41,8 @@ export class KatexDemo implements AppObject {
 
   run() {
     this.unsubscribeBindingsChange?.();
-    this.unsubscribeBindingsChange = this.ctl.events.on('bindings-change', ({ isLocal }) => {
-      if (!isLocal) {
-        return;
-      }
-      const bindings = this.ctl.keys.getCurrentBindings(true);
-      const binding = bindings['submit']?.bindings[0];
+    this.unsubscribeBindingsChange = this.ctl.events.on('bindings-change', ({ bindings: currentBindings }) => {
+      const binding = currentBindings['submit']?.bindings[0];
       this.helpMessage = binding
         ? `Type some katex and hit ${binding} to insert... `
         : 'Type some katex...';

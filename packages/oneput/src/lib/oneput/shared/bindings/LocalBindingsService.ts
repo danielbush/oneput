@@ -1,13 +1,7 @@
 import { KeyEventBindings, type KeyBindingMap } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
 import { BindingsIDB } from './BindingsIDB.js';
-import {
-  defaultGlobalBindings,
-  defaultGlobalActions,
-  defaultLocalBindings,
-  defaultLocalActions
-} from './defaultBindings.js';
-import { ResultAsync } from 'neverthrow';
+import { defaultBindingsSerializable, defaultActions } from './defaultBindings.js';
 
 /**
  * Stores bindings in indexeddb.
@@ -24,43 +18,26 @@ export class LocalBindingsService {
   ) {}
 
   getBindings() {
-    const globalBindings = this.bindingsStore
-      .getBindings(false, defaultGlobalBindings)
+    return this.bindingsStore
+      .getBindings(defaultBindingsSerializable)
       .map((kbMapSerializable) => {
-        return KeyEventBindings.fromSerializable(kbMapSerializable, defaultGlobalActions)
-          .keyBindingMap;
+        return KeyEventBindings.fromSerializable(kbMapSerializable, defaultActions).keyBindingMap;
       })
-      .orTee((err) => this.ctl.notify(`Error getting global keys: ${err.message}`));
-    const localBindings = this.bindingsStore
-      .getBindings(true, defaultLocalBindings)
-      .map((kbMapSerializable) => {
-        return KeyEventBindings.fromSerializable(kbMapSerializable, defaultLocalActions)
-          .keyBindingMap;
-      })
-      .orTee((err) => this.ctl.notify(`Error getting local keys: ${err.message}`));
-    return ResultAsync.combine([globalBindings, localBindings]).map(
-      ([globalBindings, localBindings]) => {
-        return {
-          globalBindings,
-          localBindings
-        };
-      }
-    );
+      .orTee((err) => this.ctl.notify(`Error getting keys: ${err.message}`));
   }
 
-  update(keyBindingMap: KeyBindingMap, isLocal: boolean) {
+  update(keyBindingMap: KeyBindingMap) {
     const oldKeyBindingMap = keyBindingMap;
 
-    this.ctl.keys.setDefaultBindings(keyBindingMap, isLocal);
+    this.ctl.keys.setDefaultBindings(keyBindingMap);
 
     const result = this.bindingsStore.updateBindings(
-      KeyEventBindings.create(keyBindingMap).toSerializable(),
-      isLocal
+      KeyEventBindings.create(keyBindingMap).toSerializable()
     );
     result.orTee(() => {
       // Reset default bindings in event of error.
       // The caller of this method will show error message.
-      this.ctl.keys.setDefaultBindings(oldKeyBindingMap, isLocal);
+      this.ctl.keys.setDefaultBindings(oldKeyBindingMap);
     });
     return result;
   }

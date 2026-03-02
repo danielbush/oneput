@@ -33,7 +33,7 @@ export class Alert {
     });
 
     // Restore
-    this.ctl.keys.resetBindings(true);
+    this.ctl.keys.resetBindings();
     this.ctl.ui.replaceMenuUI();
     this.ctl.input.setPlaceholder(this.previousPlaceholder);
     this.resolve?.();
@@ -48,16 +48,14 @@ export class Alert {
         enableKeys: true
       }
     });
-    this.ctl.keys.setBindings(
-      {
-        ok: {
-          description: 'OK',
-          bindings: ['Enter'],
-          action: this.stop
-        }
-      },
-      true
-    );
+    this.ctl.keys.setBindings({
+      ok: {
+        description: 'OK',
+        bindings: ['Enter'],
+        action: this.stop,
+        when: { menuOpen: true }
+      }
+    });
 
     this.ctl.input.setPlaceholder('Click "ok" or type enter to continue...');
     this.ctl.ui.replaceMenuUI({

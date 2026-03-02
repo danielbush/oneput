@@ -1,5 +1,5 @@
 import type { Controller } from './controllers/controller.js';
-import type { KeyBinding } from './lib/bindings.js';
+import type { ActionBinding } from './lib/bindings.js';
 
 declare global {
   interface Window {
@@ -221,7 +221,7 @@ export interface AppObject<R = unknown> {
    * here.
    */
   actions?: {
-    [actionId: string]: { action: (ctl: Controller) => void; binding?: KeyBinding };
+    [actionId: string]: { action: (ctl: Controller) => void; binding?: ActionBinding };
   };
   /**
    * A declarative way to set your menu items.

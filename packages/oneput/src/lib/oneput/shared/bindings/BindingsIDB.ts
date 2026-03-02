@@ -24,20 +24,20 @@ export class BindingsIDB implements BindingsStore {
 
   private constructor(private dbp: GetOneputIDB) {}
 
-  getBindings = (isLocal: boolean, defaultKeys: KeyBindingMapSerializable = {}) =>
+  getBindings = (defaultKeys: KeyBindingMapSerializable = {}) =>
     this.dbp
       .andThen((db) =>
         ResultAsync.fromPromise(
-          db.get('bindings', isLocal ? 'local' : 'global'),
+          db.get('bindings', 'all'),
           (err) => new IDBStoreError('getKeys', err as Error)
         )
       )
       .map((value) => value || defaultKeys);
 
-  updateBindings = (keyMap: KeyBindingMapSerializable, isLocal: boolean) =>
+  updateBindings = (keyMap: KeyBindingMapSerializable) =>
     this.dbp.andThen((db) =>
       ResultAsync.fromPromise(
-        db.put('bindings', keyMap, isLocal ? 'local' : 'global'),
+        db.put('bindings', keyMap, 'all'),
         (err) => new IDBStoreError('setKeys', err as Error)
       )
     );

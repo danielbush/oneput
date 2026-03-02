@@ -11,13 +11,12 @@ import type { AppObject } from '@oneput/oneput';
 export class Settings implements AppObject {
   static create(ctl: Controller) {
     return new Settings(ctl, {
-      BindingsEditor: (isLocal: boolean) => {
+      BindingsEditor: () => {
         const bindingsService = LocalBindingsService.create(ctl);
         return BindingsEditor.create(ctl, {
-          isLocal,
-          keyBindingMap: ctl.keys.getDefaultBindings(isLocal),
-          onUpdate: (keyBindingMap, isLocal) => {
-            return bindingsService.update(keyBindingMap, isLocal);
+          keyBindingMap: ctl.keys.getDefaultBindings(),
+          onUpdate: (keyBindingMap) => {
+            return bindingsService.update(keyBindingMap);
           },
           icons: {
             Keyboard: icons.Keyboard,
@@ -34,7 +33,7 @@ export class Settings implements AppObject {
   constructor(
     private ctl: Controller,
     private create: {
-      BindingsEditor: (isLocal: boolean) => BindingsEditor;
+      BindingsEditor: () => BindingsEditor;
       FiltersUI: () => FiltersUI;
     }
   ) {}
@@ -64,19 +63,11 @@ export class Settings implements AppObject {
         }
       }),
       stdMenuItem({
-        id: 'global-keys',
-        textContent: 'Set global default key bindings...',
+        id: 'key-bindings',
+        textContent: 'Set default key bindings...',
         left: (b) => [b.icon(icons.Keyboard)],
         action: () => {
-          this.ctl.app.run(this.create.BindingsEditor(false));
-        }
-      }),
-      stdMenuItem({
-        id: 'local-keys',
-        textContent: 'Set local default key bindings...',
-        left: (b) => [b.icon(icons.Keyboard)],
-        action: () => {
-          this.ctl.app.run(this.create.BindingsEditor(true));
+          this.ctl.app.run(this.create.BindingsEditor());
         }
       })
     ]

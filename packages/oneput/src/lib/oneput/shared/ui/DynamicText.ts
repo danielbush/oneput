@@ -15,9 +15,9 @@ export class DynamicText {
   }
   constructor(private ctl: Controller) {}
 
-  private getBinding(open: boolean) {
-    const bindings = this.ctl.keys.getCurrentBindings(open);
-    if (open) {
+  private getBindingParams(isMenuOpen: boolean) {
+    const bindings = this.ctl.keys.getCurrentBindings();
+    if (isMenuOpen) {
       return {
         menuOpenBinding: bindings['closeMenu']?.bindings[0],
         submitBinding: bindings['submit']?.bindings[0],
@@ -38,7 +38,7 @@ export class DynamicText {
     const isMenuOpen = this.ctl.menu.isMenuOpen;
     return fn({
       isMenuOpen,
-      ...this.getBinding(isMenuOpen)
+      ...this.getBindingParams(isMenuOpen)
     });
   }
 }

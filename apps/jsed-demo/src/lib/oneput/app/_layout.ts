@@ -12,7 +12,7 @@ import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 import { icons } from './_icons.js';
-import { globalKeys, localKeys } from './_bindings.js';
+import { defaultKeys } from './_bindings.js';
 
 /**
  * Define settings used by your particular layout.
@@ -49,8 +49,7 @@ export class Layout implements UILayout {
   ) {
     ctl.menu.fn.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
     ctl.menu.setDefaultFocusBehaviour('last-action,first');
-    ctl.keys.setDefaultBindings(globalKeys, false);
-    ctl.keys.setDefaultBindings(localKeys, true);
+    ctl.keys.setDefaultBindings(defaultKeys);
     ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
   }
 

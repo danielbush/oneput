@@ -25,12 +25,8 @@ export class BindingsEditor implements AppObject {
   static create(
     ctl: Controller,
     values: {
-      isLocal: boolean;
       keyBindingMap: KeyBindingMap;
-      onUpdate: (
-        keyBindingMap: KeyBindingMap,
-        isLocal: boolean
-      ) => ResultAsync<string, IDBError | IDBStoreError>;
+      onUpdate: (keyBindingMap: KeyBindingMap) => ResultAsync<string, IDBError | IDBStoreError>;
       icons: {
         Keyboard: string;
         Close: string;
@@ -41,7 +37,6 @@ export class BindingsEditor implements AppObject {
   ) {
     const km: BindingsEditor = new BindingsEditor(
       ctl,
-      values.isLocal,
       values.keyBindingMap,
       values.onUpdate,
       values.icons
@@ -51,12 +46,8 @@ export class BindingsEditor implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private isLocal: boolean,
     private keyBindingMap: KeyBindingMap,
-    private onUpdate: (
-      keyBindingMap: KeyBindingMap,
-      isLocal: boolean
-    ) => ResultAsync<string, IDBError | IDBStoreError>,
+    private onUpdate: (keyBindingMap: KeyBindingMap) => ResultAsync<string, IDBError | IDBStoreError>,
     private icons: {
       Keyboard: string;
       Close: string;
@@ -77,7 +68,7 @@ export class BindingsEditor implements AppObject {
    * UI for selecting an action from a list of actions in order to edit its bindings.
    */
   private actionsUI = () => {
-    const title = `Manage ${this.isLocal ? 'local' : 'global'} key bindings`;
+    const title = 'Manage key bindings';
     this.ctl.ui.update({ params: { menuTitle: title } });
     this.ctl.app.setOnBack(() => {
       this.ctl.app.exit();
@@ -271,10 +262,10 @@ export class BindingsEditor implements AppObject {
     this.keyBindingMap = keyEventBindings.keyBindingMap;
     this.actionUI(actionId);
 
-    this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal)
+    this.onUpdate(keyEventBindings.keyBindingMap)
       .andTee(() => {
         this.ctl.notify('Binding removed', { duration: 3000 });
-        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap, this.isLocal);
+        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap);
       })
       .orTee((err) => {
         this.keyBindingMap = oldKeyBindingMap;
@@ -301,10 +292,10 @@ export class BindingsEditor implements AppObject {
     this.keyBindingMap = keyEventBindings.keyBindingMap;
     this.actionUI(actionId);
 
-    this.onUpdate(keyEventBindings.keyBindingMap, this.isLocal)
+    this.onUpdate(keyEventBindings.keyBindingMap)
       .andTee(() => {
         this.ctl.notify('Binding added', { duration: 3000 });
-        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap, this.isLocal);
+        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap);
       })
       .orTee((err) => {
         this.keyBindingMap = oldKeyBindingMap;

@@ -10,10 +10,11 @@ export function setDocument(doc: JsedDocument) {
   state.currentDocument = doc;
 }
 
-export const defaultGlobalBindings: KeyBindingMapSerializable = {
+export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   openMenu: {
     bindings: ['$mod+b'],
-    description: 'Open Oneput menu...'
+    description: 'Open Oneput menu...',
+    when: { menuOpen: false }
   },
   focusInput: {
     bindings: ['$mod+[', 'Control+['],
@@ -25,20 +26,73 @@ export const defaultGlobalBindings: KeyBindingMapSerializable = {
   },
   REC_NEXT: {
     bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
-    description: 'Navigate to next element'
+    description: 'Navigate to next element',
+    when: { menuOpen: false }
   },
   REC_PREV: {
     bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
-    description: 'Navigate to previous element'
+    description: 'Navigate to previous element',
+    when: { menuOpen: false }
   },
-  SIB_NEXT: { bindings: ['$mod+j', 'ArrowDown'], description: 'Navigate to next sibling' },
-  SIB_PREV: { bindings: ['$mod+k', 'ArrowUp'], description: 'Navigate to previous sibling' },
-  UP: { bindings: ['$mod+u', '$mod+ArrowUp'], description: 'Find next parent' },
-  EDIT_FIRST: { bindings: ['enter'], description: 'Edit first editable token' },
-  TOGGLE_SELECT: { bindings: ['$mod+e'], description: 'Toggle input element cursor state' }
+  SIB_NEXT: {
+    bindings: ['$mod+j', 'ArrowDown'],
+    description: 'Navigate to next sibling',
+    when: { menuOpen: false }
+  },
+  SIB_PREV: {
+    bindings: ['$mod+k', 'ArrowUp'],
+    description: 'Navigate to previous sibling',
+    when: { menuOpen: false }
+  },
+  UP: {
+    bindings: ['$mod+u', '$mod+ArrowUp'],
+    description: 'Find next parent',
+    when: { menuOpen: false }
+  },
+  EDIT_FIRST: {
+    bindings: ['enter'],
+    description: 'Edit first editable token',
+    when: { menuOpen: false }
+  },
+  TOGGLE_SELECT: {
+    bindings: ['$mod+e'],
+    description: 'Toggle input element cursor state',
+    when: { menuOpen: false }
+  },
+  doAction: {
+    bindings: ['Enter'],
+    description: 'Do action',
+    when: { menuOpen: true }
+  },
+  submit: {
+    bindings: ['$mod+Enter'],
+    description: 'Submit input',
+    when: { menuOpen: true }
+  },
+  // NOTE: reserve 'Shift+Enter' for newlines in text area input.
+  back: {
+    bindings: ['Meta+B'],
+    description: 'Back',
+    when: { menuOpen: true }
+  },
+  closeMenu: {
+    bindings: ['$mod+b', 'Escape'],
+    description: 'Close menu',
+    when: { menuOpen: true }
+  },
+  focusPreviousMenuItem: {
+    bindings: ['$mod+k'],
+    description: 'Focus previous menu item',
+    when: { menuOpen: true }
+  },
+  focusNextMenuItem: {
+    bindings: ['$mod+j'],
+    description: 'Focus next menu item',
+    when: { menuOpen: true }
+  }
 };
 
-export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
+export const defaultActions: Record<string, (c: Controller) => void> = {
   openMenu: (ctl) => {
     ctl.menu.openMenu();
   },
@@ -47,21 +101,12 @@ export const defaultGlobalActions: Record<string, (c: Controller) => void> = {
   },
   hideOneput: (ctl) => {
     ctl.toggleHide();
-  }
-};
-
-export const defaultLocalActions: Record<string, (c: Controller) => void> = {
-  hideOneput: (c) => {
-    c.toggleHide();
   },
   doAction: (c) => {
     c.menu.doMenuAction();
   },
   back: (c) => {
     c.app.goBack();
-  },
-  focusInput: (c) => {
-    c.input.focusInput();
   },
   closeMenu: (c) => {
     c.menu.closeMenu();
@@ -80,50 +125,7 @@ export const defaultLocalActions: Record<string, (c: Controller) => void> = {
   }
 };
 
-export const defaultLocalBindings: KeyBindingMapSerializable = {
-  hideOneput: {
-    bindings: [],
-    description: 'Hide Oneput'
-  },
-  doAction: {
-    bindings: ['Enter'],
-    description: 'Do action'
-  },
-  submit: {
-    bindings: ['$mod+Enter'],
-    description: 'Submit input'
-  },
-  // NOTE: reserve 'Shift+Enter' for newlines in text area input.
-  back: {
-    bindings: ['Meta+B'],
-    description: 'Back'
-  },
-  focusInput: {
-    bindings: ['$mod+[', 'Control+['],
-    description: 'Focus input'
-  },
-  closeMenu: {
-    bindings: ['$mod+b', 'Escape'],
-    description: 'Close menu'
-  },
-  focusPreviousMenuItem: {
-    bindings: ['$mod+k'],
-    description: 'Focus previous menu item'
-  },
-  focusNextMenuItem: {
-    bindings: ['$mod+j'],
-    description: 'Focus next menu item'
-  }
-};
-
-// Default local and global keybindings.
-
-export const globalKeys = bindings.KeyEventBindings.fromSerializable(
-  defaultGlobalBindings,
-  defaultGlobalActions
-).keyBindingMap;
-
-export const localKeys = bindings.KeyEventBindings.fromSerializable(
-  defaultLocalBindings,
-  defaultLocalActions
+export const defaultKeys = bindings.KeyEventBindings.fromSerializable(
+  defaultBindingsSerializable,
+  defaultActions
 ).keyBindingMap;

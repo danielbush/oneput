@@ -16,6 +16,11 @@ export const defaultBindingsSerializable: KeyBindingMapSerializable = {
     description: 'Open Oneput menu...',
     when: { menuOpen: false }
   },
+  closeMenu: {
+    bindings: ['$mod+b', 'Escape'],
+    description: 'Close menu',
+    when: { menuOpen: true }
+  },
   focusInput: {
     bindings: ['$mod+[', 'Control+['],
     description: 'Focus input'
@@ -23,41 +28,6 @@ export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   hideOneput: {
     bindings: ['$mod+h'],
     description: 'Hide Oneput'
-  },
-  REC_NEXT: {
-    bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
-    description: 'Navigate to next element',
-    when: { menuOpen: false }
-  },
-  REC_PREV: {
-    bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
-    description: 'Navigate to previous element',
-    when: { menuOpen: false }
-  },
-  SIB_NEXT: {
-    bindings: ['$mod+j', 'ArrowDown'],
-    description: 'Navigate to next sibling',
-    when: { menuOpen: false }
-  },
-  SIB_PREV: {
-    bindings: ['$mod+k', 'ArrowUp'],
-    description: 'Navigate to previous sibling',
-    when: { menuOpen: false }
-  },
-  UP: {
-    bindings: ['$mod+u', '$mod+ArrowUp'],
-    description: 'Find next parent',
-    when: { menuOpen: false }
-  },
-  EDIT_FIRST: {
-    bindings: ['enter'],
-    description: 'Edit first editable token',
-    when: { menuOpen: false }
-  },
-  TOGGLE_SELECT: {
-    bindings: ['$mod+e'],
-    description: 'Toggle input element cursor state',
-    when: { menuOpen: false }
   },
   doAction: {
     bindings: ['Enter'],
@@ -73,11 +43,6 @@ export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   back: {
     bindings: ['Meta+B'],
     description: 'Back',
-    when: { menuOpen: true }
-  },
-  closeMenu: {
-    bindings: ['$mod+b', 'Escape'],
-    description: 'Close menu',
     when: { menuOpen: true }
   },
   focusPreviousMenuItem: {

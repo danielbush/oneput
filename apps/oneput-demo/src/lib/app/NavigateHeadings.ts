@@ -2,7 +2,7 @@ import type { Controller } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { FuzzyFilter } from '@oneput/oneput/shared/filters/FuzzyFilter.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 
 /**
  * Demonstrates how we navigate the headings in an html document using Oneput.

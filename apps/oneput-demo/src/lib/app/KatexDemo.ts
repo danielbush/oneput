@@ -6,7 +6,7 @@ import { divider, hflex, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppObject, OneputProps } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 
 export class KatexDemo implements AppObject {
   static create(ctl: Controller) {

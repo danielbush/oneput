@@ -6,7 +6,7 @@ import { KatexDemo } from './KatexDemo.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 import type { AppObject } from '@oneput/oneput';
 
 export class Root implements AppObject {

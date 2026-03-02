@@ -6,7 +6,7 @@ import { TestInputService } from '../service/TestInputService.js';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import { DOMUpdater } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 
 export class AsyncSearchExample implements AppObject {
   static create(ctl: Controller) {

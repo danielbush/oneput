@@ -2,7 +2,7 @@
   import { Anchor, Controller, OneputController, OneputCornerButton } from '@oneput/oneput';
   import '@oneput/oneput/demo/styles.css';
   import '@oneput/oneput/shared/styles/oneput-defaults.css';
-  import { icons } from '$lib/icons.js';
+  import { icons } from '$lib/app/_icons.js';
   import { Root } from '$lib/app/Root.js';
 
   // Pretend the code here could be something outside of svelte.

@@ -5,7 +5,7 @@ import { config } from '$lib/service/TestBindingsStore.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
 import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 import type { AppObject } from '@oneput/oneput';
 
 export class Settings implements AppObject {

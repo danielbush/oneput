@@ -15,7 +15,7 @@ import { SveltePropInjector } from '@oneput/oneput';
 import { formatSecondsToHHMMSS } from './utils.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry } from './AddEntry.js';
-import { icons } from '../../icons.js';
+import { icons } from '../_icons.js';
 
 export class TomatoTimer implements AppObject {
   static create(ctl: Controller) {

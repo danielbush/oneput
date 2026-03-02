@@ -7,7 +7,7 @@ import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
 import { TimeVal } from '@oneput/oneput/shared/values/TimeVal.js';
 import { DateTimeVal } from '@oneput/oneput/shared/values/DateTimeVal.js';
 import { DateVal } from '@oneput/oneput/shared/values/DateVal.js';
-import { icons } from '../../icons.js';
+import { icons } from '../_icons.js';
 
 export class AddEntry implements AppObject {
   static create(ctl: Controller, session: Partial<FinishedSession>) {

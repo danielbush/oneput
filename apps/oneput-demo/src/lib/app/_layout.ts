@@ -9,7 +9,7 @@ import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 
 /**
  * Define settings used by your particular layout.

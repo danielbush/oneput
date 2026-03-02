@@ -8,8 +8,8 @@ import { ViewDocument } from './ViewDocument.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
-    ctl.ui.setLayout(Layout.create(ctl));
     return new Root(ctl, {
+      Layout: Layout.create,
       TestDocService: TestDocService.create,
       JsedDocument: JsedDocument.create,
       ViewDocument: ViewDocument.create
@@ -19,11 +19,14 @@ export class Root implements AppObject {
   constructor(
     private ctl: Controller,
     private create: {
+      Layout: (ctl: Controller, settings?: LayoutSettings) => Layout;
       TestDocService: () => TestDocService;
       JsedDocument: (root: HTMLElement) => JsedDocument;
       ViewDocument: (ctl: Controller, { document }: { document: JsedDocument }) => ViewDocument;
     }
-  ) {}
+  ) {
+    this.ctl.ui.setLayout(this.create.Layout(this.ctl));
+  }
 
   onStart = () => {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });

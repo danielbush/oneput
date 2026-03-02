@@ -11,40 +11,29 @@ import type { AppObject } from '@oneput/oneput';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
-    ctl.ui.setLayout(Layout.create(ctl));
-    const createSettingsUI = () => {
-      return Settings.create(ctl);
-    };
-    const createNavigateHeadings = () => {
-      return NavigateHeadings.create(ctl);
-    };
-    const createTomatoTimer = () => {
-      return TomatoTimer.create(ctl);
-    };
-    const createKatexDemo = () => {
-      return KatexDemo.create(ctl);
-    };
-    const createAsyncSearchExample = () => {
-      return AsyncSearchExample.create(ctl);
-    };
-    return new Root(
-      ctl,
-      createSettingsUI,
-      createNavigateHeadings,
-      createTomatoTimer,
-      createKatexDemo,
-      createAsyncSearchExample
-    );
+    return new Root(ctl, {
+      Layout: () => Layout.create(ctl),
+      SettingsUI: () => Settings.create(ctl),
+      NavigateHeadings: () => NavigateHeadings.create(ctl),
+      TomatoTimer: () => TomatoTimer.create(ctl),
+      KatexDemo: () => KatexDemo.create(ctl),
+      AsyncSearchExample: () => AsyncSearchExample.create(ctl)
+    });
   }
 
   constructor(
     private ctl: Controller,
-    private createSettingsUI: () => Settings,
-    private createNavigateHeadings: () => NavigateHeadings,
-    private createTomatoTimer: () => TomatoTimer,
-    private createKatexDemo: () => KatexDemo,
-    private createAsyncSearchExample: () => AsyncSearchExample
-  ) {}
+    private create: {
+      Layout: () => Layout;
+      SettingsUI: () => Settings;
+      NavigateHeadings: () => NavigateHeadings;
+      TomatoTimer: () => TomatoTimer;
+      KatexDemo: () => KatexDemo;
+      AsyncSearchExample: () => AsyncSearchExample;
+    }
+  ) {
+    ctl.ui.setLayout(this.create.Layout());
+  }
 
   onStart = () => {
     this.run();
@@ -74,7 +63,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.Settings)],
           textContent: 'Settings...',
           action: () => {
-            this.ctl.app.run(this.createSettingsUI());
+            this.ctl.app.run(this.create.SettingsUI());
           },
           right: (b) => [b.icon(icons.ChevronRight)]
         }),
@@ -83,7 +72,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.TableOfContents)],
           textContent: 'Navigate outline...',
           action: () => {
-            this.ctl.app.run(this.createNavigateHeadings());
+            this.ctl.app.run(this.create.NavigateHeadings());
           }
         }),
         stdMenuItem({
@@ -91,7 +80,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.Timer)],
           textContent: 'Tomato timer...',
           action: () => {
-            this.ctl.app.run(this.createTomatoTimer());
+            this.ctl.app.run(this.create.TomatoTimer());
           },
           bottom: {
             textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
@@ -102,7 +91,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.Sigma)],
           textContent: 'Insert katex...',
           action: () => {
-            this.ctl.app.run(this.createKatexDemo());
+            this.ctl.app.run(this.create.KatexDemo());
           }
         }),
         window.ReactNativeWebView &&
@@ -137,7 +126,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.Search)],
           textContent: 'Async menu items demo...',
           action: () => {
-            this.ctl.app.run(this.createAsyncSearchExample());
+            this.ctl.app.run(this.create.AsyncSearchExample());
           }
         }),
         stdMenuItem({

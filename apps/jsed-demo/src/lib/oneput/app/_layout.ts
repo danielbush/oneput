@@ -11,7 +11,7 @@ import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 import { globalKeys, localKeys } from './_bindings.js';
 
 /**

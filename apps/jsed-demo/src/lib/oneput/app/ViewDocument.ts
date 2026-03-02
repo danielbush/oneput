@@ -1,5 +1,5 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 import { type JsedDocument } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';

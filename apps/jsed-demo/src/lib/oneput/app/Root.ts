@@ -1,7 +1,7 @@
 import { JsedDocument } from '@oneput/jsed';
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from '../icons.js';
+import { icons } from './_icons.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { TestDocService } from '$lib/jsed/services/TestDocService.js';
 import { ViewDocument } from './ViewDocument.js';

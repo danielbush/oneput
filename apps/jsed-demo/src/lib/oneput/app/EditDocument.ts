@@ -73,15 +73,6 @@ export class EditDocument implements AppObject {
 
   onExit = () => {};
 
-  actions = {
-    NEXT_TOKEN: () => {
-      // TODO
-    },
-    PREV_TOKEN: () => {
-      // TODO
-    }
-  };
-
   /**
    * When the cursor changes its token because of some action it has been
    * commanded to do (eg due to delete operation).

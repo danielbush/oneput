@@ -1,6 +1,7 @@
 import type { Controller } from './controller.js';
 import type { AppObject, UIFlags } from '../types.js';
 import { AppVal } from './helpers/AppVal.js';
+import type { KeyBindingMap } from '../lib/bindings.js';
 
 /**
  * Manages AppObject's . One AppObject controls Oneput at a time.
@@ -37,16 +38,6 @@ export class AppController {
    */
   _enableGoBack(on: boolean = true) {
     this.disableGoBack = !on;
-  }
-
-  /**
-   *  Resets things to sane defaults.  You can then set things in your AppObject.run.
-   */
-  private beforeRun() {
-    this.reset();
-    if (this.current?.app.menu) {
-      this.ctl.menu.setMenu(this.current.app.menu);
-    }
   }
 
   get flags() {
@@ -135,6 +126,30 @@ export class AppController {
     return flags;
   }
 
+  /**
+   *  Resets things to sane defaults.  You can then set things in your AppObject.run.
+   */
+  private runBefore() {
+    this.reset();
+    if (this.current?.app.menu) {
+      this.ctl.menu.setMenu(this.current.app.menu);
+    }
+    if (this.current?.app.actions) {
+      const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(
+        (acc, [actionId, actionWithBinding]) => {
+          if (actionWithBinding.binding) {
+            acc[actionId] = actionWithBinding.binding;
+          }
+          return acc;
+        },
+        {}
+      );
+      // TOOD: this is just setting global bindings.  Need to apply `when` logic.
+      // TOOD: the type AppObject['actions']['binding'] needs to not have 'action' in it.
+      this.ctl.keys.setBindings(keyBindingsMap);
+    }
+  }
+
   private runBeforeExit() {
     this.current?.app.onExit?.();
   }
@@ -146,7 +161,7 @@ export class AppController {
       this.appParents.push(this.current);
     }
     this.current = AppVal.create(appObject as AppObject);
-    this.beforeRun();
+    this.runBefore();
     appObject.onStart();
   }
 
@@ -162,7 +177,7 @@ export class AppController {
     const appVal = this.appParents.pop();
     if (appVal) {
       this.current = appVal;
-      this.beforeRun();
+      this.runBefore();
       if (appVal.app.onResume) {
         appVal.app.onResume(result);
       } else {
@@ -229,7 +244,7 @@ export class AppController {
    */
   handleAction(actionId: string, defaultAction: ((ctl: Controller) => void) | undefined) {
     if (this.current?.app.actions?.[actionId]) {
-      this.current.app.actions?.[actionId]?.(this.ctl);
+      this.current.app.actions?.[actionId]?.action(this.ctl);
       return;
     }
     if (defaultAction) {

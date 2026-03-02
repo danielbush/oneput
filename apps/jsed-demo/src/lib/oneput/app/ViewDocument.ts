@@ -27,30 +27,75 @@ export class ViewDocument implements AppObject {
   };
 
   actions = {
-    EDIT_FIRST: () => {
-      this.ctl.app.run(
-        EditDocument.create(this.ctl, {
-          document: this.document
-        })
-      );
+    EDIT_FIRST: {
+      action: () => {
+        this.ctl.app.run(EditDocument.create(this.ctl, { document: this.document }));
+      },
+      binding: {
+        bindings: ['enter'],
+        description: 'Edit first editable token',
+        when: { menuOpen: false }
+      }
     },
-    REC_NEXT: () => {
-      this.document.nav.REC_NEXT();
+    REC_NEXT: {
+      action: () => {
+        this.document.nav.REC_NEXT();
+      },
+      binding: {
+        bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
+        description: 'Navigate to next element',
+        when: { menuOpen: false }
+      }
     },
-    REC_PREV: () => {
-      this.document.nav.REC_PREV();
+    REC_PREV: {
+      action: () => {
+        this.document.nav.REC_PREV();
+      },
+      binding: {
+        bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
+        description: 'Navigate to previous element',
+        when: { menuOpen: false }
+      }
     },
-    SIB_NEXT: () => {
-      this.document.nav.SIB_NEXT();
+    SIB_NEXT: {
+      action: () => {
+        this.document.nav.SIB_NEXT();
+      },
+      binding: {
+        bindings: ['$mod+j', 'ArrowDown'],
+        description: 'Navigate to next sibling',
+        when: { menuOpen: false }
+      }
     },
-    SIB_PREV: () => {
-      this.document.nav.SIB_PREV();
+    SIB_PREV: {
+      action: () => {
+        this.document.nav.SIB_PREV();
+      },
+      binding: {
+        bindings: ['$mod+k', 'ArrowUp'],
+        description: 'Navigate to previous sibling',
+        when: { menuOpen: false }
+      }
     },
-    UP: () => {
-      this.document.nav.UP();
+    UP: {
+      action: () => {
+        this.document.nav.UP();
+      },
+      binding: {
+        bindings: ['$mod+u', '$mod+ArrowUp'],
+        description: 'Find next parent',
+        when: { menuOpen: false }
+      }
     },
-    TOGGLE_SELECT: () => {
-      this.ctl.input.toggleSelect();
+    TOGGLE_SELECT: {
+      action: () => {
+        this.ctl.input.toggleSelect();
+      },
+      binding: {
+        bindings: ['$mod+e'],
+        description: 'Toggle input element cursor state',
+        when: { menuOpen: false }
+      }
     }
   };
 
@@ -60,7 +105,7 @@ export class ViewDocument implements AppObject {
       stdMenuItem({
         id: 'EDIT_FIRST',
         textContent: 'Edit...',
-        action: this.actions.EDIT_FIRST,
+        action: this.actions.EDIT_FIRST.action,
         left: (b) => [b.icon(icons.Pencil)]
       })
     ]

@@ -13,6 +13,10 @@ import { isMacOS } from './utils.js';
 
 export type DuplicateBindingError = { message: string; details: string };
 
+/**
+ * The primary representation of a key binding that is passed to the keys
+ * controller usually in a KeyBindingMap.
+ */
 export type KeyBinding = {
   action?: (c: Controller) => void;
   description: string;
@@ -25,6 +29,13 @@ export type KeyBinding = {
   bindings: string[];
 };
 
+/**
+ * The primary way to add key bindings to system (via the keys controller).
+ */
+export type KeyBindingMap = {
+  [actionId: string]: KeyBinding;
+};
+
 export type KeyBindingSerializable = {
   description: string;
   bindings: string[];
@@ -32,10 +43,6 @@ export type KeyBindingSerializable = {
    * If action is passed an its is js it will cause an exception in some stores.
    */
   action?: never;
-};
-
-export type KeyBindingMap = {
-  [actionId: string]: KeyBinding;
 };
 
 export type KeyBindingMapSerializable = {

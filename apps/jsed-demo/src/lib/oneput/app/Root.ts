@@ -33,32 +33,34 @@ export class Root implements AppObject {
   };
 
   actions = {
-    LOAD_TEST_DOC: async () => {
-      this.create
-        .TestDocService()
-        .loadTestDoc()
-        .map((docRoot) => {
-          this.ctl.app.run(
-            this.create.ViewDocument({
-              document: this.create.JsedDocument(docRoot)
-            })
-          );
-          this.ctl.menu.closeMenu();
-        })
-        .mapErr((error) => {
-          switch (error.type) {
-            case 'missing-element':
-              this.ctl.notify(`Element #${error.id} not found`);
-              break;
-            case 'http':
-              this.ctl.notify(`Failed to load doc: ${error.status} ${error.statusText}`);
-              break;
-            case 'network':
-              this.ctl.notify('Network error loading doc');
-              console.error(error.cause);
-              break;
-          }
-        });
+    LOAD_TEST_DOC: {
+      action: async () => {
+        this.create
+          .TestDocService()
+          .loadTestDoc()
+          .map((docRoot) => {
+            this.ctl.app.run(
+              this.create.ViewDocument({
+                document: this.create.JsedDocument(docRoot)
+              })
+            );
+            this.ctl.menu.closeMenu();
+          })
+          .mapErr((error) => {
+            switch (error.type) {
+              case 'missing-element':
+                this.ctl.notify(`Element #${error.id} not found`);
+                break;
+              case 'http':
+                this.ctl.notify(`Failed to load doc: ${error.status} ${error.statusText}`);
+                break;
+              case 'network':
+                this.ctl.notify('Network error loading doc');
+                console.error(error.cause);
+                break;
+            }
+          });
+      }
     }
   };
 
@@ -68,7 +70,7 @@ export class Root implements AppObject {
       stdMenuItem({
         id: 'load-doc',
         textContent: 'Load test doc...',
-        action: this.actions.LOAD_TEST_DOC,
+        action: this.actions.LOAD_TEST_DOC.action,
         left: (b) => [b.icon(icons.File)]
       })
     ]

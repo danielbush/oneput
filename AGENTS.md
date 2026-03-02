@@ -41,4 +41,30 @@ Testing Approach
 - Keep test count small and focused
 
 
+## Key systems (packages/oneput)
+
+For human-readable architecture docs, see `packages/oneput/docs/architecture.md` and `packages/jsed/docs/architecture.md`.
+
+Below are pointers for agents — read the source files for full detail via JSDoc.
+
+### Bindings
+Key bindings map keyboard shortcuts to actions. Each binding declares `when` conditions (e.g. `menuOpen: true`) controlling when it fires.
+- Types: `packages/oneput/src/lib/oneput/lib/bindings.ts` — `KeyBinding`, `ActionBinding`, `KeyBindingMap`
+- Controller: `packages/oneput/src/lib/oneput/controllers/KeysController.ts`
+- Defaults: `packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts`
+- Persistence: `packages/oneput/src/lib/oneput/shared/bindings/BindingsIDB.ts`
+
+### AppObject
+AppObjects represent screens/states in the app stack with actions, menu, and lifecycle hooks.
+- Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
+- Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
+
+### Controller
+The central API consumers use to control Oneput. Composes sub-controllers for keys, menu, input, ui, app.
+- Entry: `packages/oneput/src/lib/oneput/controllers/controller.ts`
+
+### Events
+Decoupled pub-sub communication between controllers.
+- Types and emitter: `packages/oneput/src/lib/oneput/controllers/InternalEventEmitter.ts`
+
 ## Security considerations

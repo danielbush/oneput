@@ -47,7 +47,9 @@ export class BindingsEditor implements AppObject {
   constructor(
     private ctl: Controller,
     private keyBindingMap: KeyBindingMap,
-    private onUpdate: (keyBindingMap: KeyBindingMap) => ResultAsync<string, IDBError | IDBStoreError>,
+    private onUpdate: (
+      keyBindingMap: KeyBindingMap
+    ) => ResultAsync<string, IDBError | IDBStoreError>,
     private icons: {
       Keyboard: string;
       Close: string;
@@ -187,7 +189,7 @@ export class BindingsEditor implements AppObject {
                 target: node,
                 props: {
                   onClick: reject,
-                  isDisabled: () => !this.ctl.input.getInputValue()
+                  isDisabled: () => false
                 }
               })
           })

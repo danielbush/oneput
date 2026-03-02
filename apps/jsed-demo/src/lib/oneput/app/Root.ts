@@ -9,23 +9,23 @@ import { ViewDocument } from './ViewDocument.js';
 export class Root implements AppObject {
   static create(ctl: Controller) {
     return new Root(ctl, {
-      Layout: Layout.create,
-      TestDocService: TestDocService.create,
-      JsedDocument: JsedDocument.create,
-      ViewDocument: ViewDocument.create
+      Layout: () => Layout.create(ctl),
+      TestDocService: () => TestDocService.create(),
+      JsedDocument: (root) => JsedDocument.create(root),
+      ViewDocument: (params) => ViewDocument.create(ctl, params)
     });
   }
 
   constructor(
     private ctl: Controller,
     private create: {
-      Layout: (ctl: Controller, settings?: LayoutSettings) => Layout;
+      Layout: () => Layout;
       TestDocService: () => TestDocService;
       JsedDocument: (root: HTMLElement) => JsedDocument;
-      ViewDocument: (ctl: Controller, { document }: { document: JsedDocument }) => ViewDocument;
+      ViewDocument: (params: { document: JsedDocument }) => ViewDocument;
     }
   ) {
-    this.ctl.ui.setLayout(this.create.Layout(this.ctl));
+    this.ctl.ui.setLayout(this.create.Layout());
   }
 
   onStart = () => {
@@ -39,7 +39,7 @@ export class Root implements AppObject {
         .loadTestDoc()
         .map((docRoot) => {
           this.ctl.app.run(
-            this.create.ViewDocument(this.ctl, {
+            this.create.ViewDocument({
               document: this.create.JsedDocument(docRoot)
             })
           );

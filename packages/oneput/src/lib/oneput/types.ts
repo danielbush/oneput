@@ -185,6 +185,15 @@ export type FChildParams = {
   voidElements?: Set<string | undefined>;
 };
 
+/**
+ * Represents a screen or state in the Oneput app stack.
+ *
+ * AppObjects are managed by AppController which maintains a stack — run() pushes,
+ * exit() pops. Each AppObject can declare actions (with optional key bindings)
+ * and menu items declaratively.
+ *
+ * @typeParam R - The type of payload that a child AppObject can return via exit().
+ */
 export interface AppObject<R = unknown> {
   /**
    * Called when the AppObject has been instantiated and is then given control

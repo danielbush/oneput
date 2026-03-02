@@ -1,11 +1,19 @@
 /**
- * Terminology:
+ * Bindings system — maps keyboard shortcuts to actions.
  *
- * - KeyBinding = action, description and bindings currently in tinykeys format.
- * - bs = KeyBinding['bindings']
- * - KeyEvent = a representation of a KeyboardEvent that we use here to convert to/from KeyBinding's.
- * - ke = KeyEvent
- * - bs !== ke - bs is a list of strings, ke is a single string.
+ * Each KeyBinding has a `when` condition (e.g. `{ menuOpen: true }`) that
+ * controls when it fires. KeysController uses these to register bindings
+ * with tinykeys and dispatch at runtime.
+ *
+ * Key types:
+ * - KeyBinding — the full binding with action callback, used by KeysController
+ * - ActionBinding — binding info without action, used by AppObject.actions
+ * - KeyBindingMap — dictionary of actionId → KeyBinding
+ *
+ * Terminology (internal):
+ * - bs = KeyBinding['bindings'] — tinykeys format strings
+ * - ke = KeyEvent — internal representation for comparison
+ * - KeyEventBindings — class for validating/editing bindings (add, remove, find duplicates)
  */
 import { Result, ok, err } from 'neverthrow';
 import type { Controller } from '../controllers/controller.js';

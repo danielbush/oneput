@@ -3,12 +3,22 @@ import type { Controller } from './controller.js';
 import type { KeyBinding, KeyBindingMap } from '../lib/bindings.js';
 
 /**
- * Manages key bindings.
+ * Manages key bindings — registration, dispatch, and default/override lifecycle.
  *
  * Bindings declare when they apply via `when.menuOpen`:
  * - true = only when menu is open
  * - false = only when menu is closed
  * - undefined = always active
+ *
+ * Dispatch strategy: bindings are split by `when.menuOpen` and registered
+ * with tinykeys on two targets (window for global, document.body for local).
+ * Bindings with undefined `when.menuOpen` are registered on both.
+ * At dispatch time, handleBinding() also checks the current menu state
+ * as a safety net against race conditions.
+ *
+ * Lifecycle: default bindings are set by the layout and restored on
+ * AppObject exit. Current bindings can be temporarily overridden (e.g.,
+ * by Alert/Confirm). resetBindings() restores defaults.
  */
 export class KeysController {
   public static create(ctl: Controller) {

@@ -11,7 +11,10 @@ This is a monorepo.
   
 There are applications which are used mostly to demo the code in packages/.
 
+- apps/oneput-demo
+  - demos various ways to use oneput
 - apps/jsed-demo
+  - demos jsed editor
 
 
 ## Build and test commands

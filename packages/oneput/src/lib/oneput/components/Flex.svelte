@@ -7,12 +7,22 @@
   type Props = { class: string } & FlexParams;
   let { class: topLevelClass, ...props }: Props = $props();
 
-  let node: HTMLElement | null = $state(null);
-  let child: HTMLElement | null = $state(null);
+  type Mountables = { [id: string]: { node: HTMLElement; onMount?: (node: HTMLElement) => void } };
+  let mounts = $state<Mountables>({});
   onMount(() => {
-    if (props.onMount) {
-      return props.onMount(node!);
-    }
+    const unmounts: (() => void)[] = [];
+    Object.keys(mounts).forEach((id) => {
+      const { node, onMount } = mounts[id];
+      if (onMount) {
+        const cleanup = onMount(node);
+        if (typeof cleanup === 'function') {
+          unmounts.push(cleanup);
+        }
+      }
+    });
+    return () => {
+      unmounts.forEach((cleanup) => cleanup());
+    };
   });
 </script>
 
@@ -33,13 +43,12 @@
     <svelte:element
       this={params.tag || 'div'}
       bind:this={
-        () => (nested ? child : node),
+        () => this,
         (n) => {
-          if (nested) {
-            child = n;
-          } else {
-            node = n;
-          }
+          mounts[params.id] = {
+            node: n,
+            onMount: params.onMount
+          };
         }
       }
       id={params.id}

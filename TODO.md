@@ -1,36 +1,22 @@
-PROBLEM: at the moment, Oneput (packages/oneput) has local and global bindings.  Local bindings apply wwhen oneput's menu is open and often includes bindings to move the menu item focus up and down etc.  Global bindings apply when it's closed.  The code currently handles this using a boolean, usually called `isLocal`.  The keys controller (packages/oneput/src/lib/oneput/controllers/KeysController.ts) sets bindings using setBindings(keyBindingsMap, isLocal) and also can set default bindings (which apply when no other bindings are set) setDefaultBindings(keyBindingsMap, isLocal).  We want to remove this isLocal flag and instead set a flag on the binding.  This means that the type KeyBinding in packages/oneput/src/lib/oneput/lib/bindings.ts becomes:
+PROBLEM
 
-```ts
-export type KeyBinding = {
-  action?: (c: Controller) => void;
-  description: string;
-  bindings: string[];
-  when: {
-    menuOpen?: boolean
-  }
-};
-```
+packages/oneput/src/lib/oneput/shared/appObjects/BindingsEditor.ts doesn't support the when-flag for bindings.
 
-When `menuOpen` is not set, the binding should apply all the time.
+We need to
+
+- (1) show it in the bindings editor
+- (2) update the "Add binding..." to allow us to set a flag
 
 
-Be aware of the type AppObject.actions , this is a new attribute that hasn't been completely set up yet in the code.  It's shape should be:
+(1) I think we can just show it to the right of the menu item that represents an individual binding for a given action; use a style similar to the oneput_kbd .
 
-```ts
-{
-  description: string;
-  bindings: string[];
-  when: {
-    menuOpen?: boolean
-  }
+(2) When we add a binding we need to allow the user to set the flags
 
-}
-```
-
-with the `action`.  This allows packages/oneput/src/lib/oneput/controllers/AppController.ts to call setBindings (in KeysController) on actions that set a binding.  Atm the type for `AppObject['actions']['binding']` is borrowing from `KeyBinding` but is slightly different.  KeyBinding is the final format we use to set bindings.  `AppObject['actions']['binding]` specifies just the binding information for actions (actions may or may not have bindings when defined in the AppObject).
-
-This affects
-
-- apps/oneput-demo
-- apps/jsed-demo
-- packages/oneput
+- "add binding...." captures the binding
+- if the user hits the tick to capture it we go to new menu;
+- the new menu shows menuOpen flag set to false by default
+- the user can hit enter to toggle the state between true, false, both
+- in oneput__std-menu-item-bottom we should have a note saying to toggle by hitting enter
+- there should be an
+  - ok menu item
+  - cancel menu item - binding is cancelled

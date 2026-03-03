@@ -30,6 +30,9 @@ export class BindingsEditor implements AppObject {
       icons: {
         Keyboard: string;
         Close: string;
+        OK: string;
+        Cancel: string;
+        WhenFlag: string;
         Right: string;
         Action: string;
       };
@@ -53,6 +56,9 @@ export class BindingsEditor implements AppObject {
     private icons: {
       Keyboard: string;
       Close: string;
+      OK: string;
+      Cancel: string;
+      WhenFlag: string;
       Right: string;
       Action: string;
     }
@@ -64,6 +70,16 @@ export class BindingsEditor implements AppObject {
 
   run() {
     this.actionsUI();
+  }
+
+  private whenLabel(when?: { menuOpen?: boolean }): string {
+    if (when?.menuOpen === true) return 'menu open';
+    if (when?.menuOpen === false) return 'menu closed';
+    return 'always';
+  }
+
+  private whenBadge(when?: { menuOpen?: boolean }): string {
+    return `<code><kbd>${this.whenLabel(when)}</kbd></code>`;
   }
 
   /**
@@ -108,7 +124,7 @@ export class BindingsEditor implements AppObject {
    * UI displays bindings for a given action and lets you add/remove bindings.
    */
   private actionUI = (actionId: string) => {
-    const { description, bindings } = this.keyBindingMap[actionId];
+    const { description, bindings, when } = this.keyBindingMap[actionId];
     this.ctl.ui.update({
       params: {
         menuTitle: `Key bindings for "${description}"`
@@ -135,7 +151,13 @@ export class BindingsEditor implements AppObject {
             id: binding,
             textContent: binding,
             left: (b) => [b.icon(this.icons.Keyboard)],
-            right: (b) => [b.icon(this.icons.Close)],
+            right: (b) => [
+              b.fchild({
+                htmlContentUnsafe: this.whenBadge(when),
+                classes: ['oneput__kbd']
+              }),
+              b.icon(this.icons.Close)
+            ],
             action: () => {
               this.removeBinding(actionId, binding);
             }
@@ -200,10 +222,84 @@ export class BindingsEditor implements AppObject {
     this.ctl.input.setPlaceholder('Type the keys...');
     const capturedKeys = await capturingKeys;
     if (capturedKeys) {
-      this.addBinding(actionId, capturedKeys);
+      this.whenFlagUI(actionId, capturedKeys);
+    } else {
+      this.ctl.app.goBack();
     }
-    this.ctl.app.goBack();
   }
+
+  /**
+   * After capturing keys, let the user set the when.menuOpen flag before saving.
+   *
+   * Toggles through: false → true → undefined (always) → false → ...
+   */
+  private whenFlagUI(actionId: string, capturedKeys: KeyEvent[]) {
+    const currentWhen = this.keyBindingMap[actionId].when;
+    let menuOpen: boolean | undefined = currentWhen?.menuOpen ?? false;
+
+    const toggleMenuOpen = () => {
+      if (menuOpen === false) menuOpen = true;
+      else if (menuOpen === true) menuOpen = undefined;
+      else menuOpen = false;
+      this.renderWhenFlagMenu(actionId, capturedKeys, menuOpen);
+    };
+
+    this.ctl.app.setOnBack(() => {
+      this.actionUI(actionId);
+    });
+
+    this.renderWhenFlagMenu(actionId, capturedKeys, menuOpen, toggleMenuOpen);
+  }
+
+  private renderWhenFlagMenu(
+    actionId: string,
+    capturedKeys: KeyEvent[],
+    menuOpen: boolean | undefined,
+    onToggle?: () => void
+  ) {
+    this.ctl.ui.update({
+      params: { menuTitle: 'Set when condition' }
+    });
+    // Hold a reference to the toggle so re-renders (which don't call whenFlagUI again) can use it.
+    const toggle = onToggle ?? this.lastToggle;
+    if (onToggle) this.lastToggle = onToggle;
+
+    const when = menuOpen === undefined ? undefined : { menuOpen };
+    this.ctl.menu.setMenu({
+      id: `whenFlagUI-${actionId}`,
+      focusBehaviour: 'first',
+      items: [
+        stdMenuItem({
+          id: 'menuOpen',
+          textContent: `Menu open: ${this.whenLabel(when)}`,
+          left: (b) => [b.icon(this.icons.WhenFlag)],
+          action: toggle,
+          bottom: {
+            textContent: 'Press enter to toggle'
+          }
+        }),
+        stdMenuItem({
+          id: 'ok',
+          textContent: 'OK',
+          left: (b) => [b.icon(this.icons.OK)],
+          action: () => {
+            this.addBinding(actionId, capturedKeys, when);
+            this.ctl.app.goBack();
+          }
+        }),
+        stdMenuItem({
+          id: 'cancel',
+          textContent: 'Cancel',
+          left: (b) => [b.icon(this.icons.Cancel)],
+          action: () => {
+            this.ctl.app.goBack();
+          }
+        })
+      ]
+    });
+  }
+
+  private lastToggle: (() => void) | undefined;
 
   private startKeyCapture = () => {
     let resolve: (r: KeyEvent[] | null) => void;
@@ -276,7 +372,11 @@ export class BindingsEditor implements AppObject {
       });
   };
 
-  private addBinding = (actionId: string, capturedKeys: KeyEvent[]) => {
+  private addBinding = (
+    actionId: string,
+    capturedKeys: KeyEvent[],
+    when?: { menuOpen?: boolean }
+  ) => {
     const oldKeyBindingMap = this.keyBindingMap;
     const keyEventBindings = KeyEventBindings.create(this.keyBindingMap);
 
@@ -290,14 +390,21 @@ export class BindingsEditor implements AppObject {
       return;
     }
 
+    // Apply the when flag to the action.
+    let updatedMap = keyEventBindings.keyBindingMap;
+    updatedMap = {
+      ...updatedMap,
+      [actionId]: { ...updatedMap[actionId], when }
+    };
+
     // Optimistic update:
-    this.keyBindingMap = keyEventBindings.keyBindingMap;
+    this.keyBindingMap = updatedMap;
     this.actionUI(actionId);
 
-    this.onUpdate(keyEventBindings.keyBindingMap)
+    this.onUpdate(updatedMap)
       .andTee(() => {
         this.ctl.notify('Binding added', { duration: 3000 });
-        this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap);
+        this.ctl.keys.setDefaultBindings(updatedMap);
       })
       .orTee((err) => {
         this.keyBindingMap = oldKeyBindingMap;

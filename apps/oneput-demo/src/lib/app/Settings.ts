@@ -21,6 +21,9 @@ export class Settings implements AppObject {
           icons: {
             Keyboard: icons.Keyboard,
             Close: icons.X,
+            OK: icons.Check,
+            Cancel: icons.X,
+            WhenFlag: icons.Flag,
             Action: icons.SquareFunction,
             Right: icons.ChevronRight
           }

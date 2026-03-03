@@ -3,6 +3,7 @@ import * as lu from 'lucide';
 
 export const iconData = {
   X: lu.X,
+  Flag: lu.Flag,
   Settings: lu.Settings,
   Keyboard: lu.Keyboard,
   ChevronRight: lu.ChevronRight,

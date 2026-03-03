@@ -7,12 +7,11 @@
   type Props = { class: string } & FlexParams;
   let { class: topLevelClass, ...props }: Props = $props();
 
-  type Mountables = { [id: string]: { node: HTMLElement; onMount?: (node: HTMLElement) => void } };
-  let mounts = $state<Mountables>({});
+  type Mountables = Map<string, { node: HTMLElement; onMount?: (node: HTMLElement) => void }>;
+  let mounts = $state<Mountables>(new Map());
   onMount(() => {
     const unmounts: (() => void)[] = [];
-    Object.keys(mounts).forEach((id) => {
-      const { node, onMount } = mounts[id];
+    mounts.forEach(({ node, onMount }) => {
       if (onMount) {
         const cleanup = onMount(node);
         if (typeof cleanup === 'function') {
@@ -45,10 +44,10 @@
       bind:this={
         () => this,
         (n) => {
-          mounts[params.id] = {
+          mounts.set(params.id, {
             node: n,
             onMount: params.onMount
-          };
+          });
         }
       }
       id={params.id}

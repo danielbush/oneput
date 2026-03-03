@@ -10,11 +10,14 @@ import type { KeyBinding, KeyBindingMap } from '../lib/bindings.js';
  * - false = only when menu is closed
  * - undefined = always active
  *
- * Dispatch strategy: bindings are split by `when.menuOpen` and registered
- * with tinykeys on two targets (window for global, document.body for local).
- * Bindings with undefined `when.menuOpen` are registered on both.
- * At dispatch time, handleBinding() also checks the current menu state
- * as a safety net against race conditions.
+ * Dispatch strategy: all bindings are registered on a single target (window)
+ * via one tinykeys call. When the same key string is bound to multiple actions
+ * under different `when` conditions, candidates are collected per key and
+ * matchesWhen() selects the right one at dispatch time.
+ *
+ * To add more `when` flags in future, extend matchesWhen() and validate at
+ * registration time that no two candidates for the same key have overlapping
+ * conditions (so exactly one fires).
  *
  * Lifecycle: default bindings are set by the layout and restored on
  * AppObject exit. Current bindings can be temporarily overridden (e.g.,
@@ -27,67 +30,47 @@ export class KeysController {
 
   constructor(
     private ctl: Controller,
-    private unsubscribeGlobalKeys: () => void = () => {},
-    private unsubscribeLocalKeys: () => void = () => {}
+    private unsubscribe: () => void = () => {}
   ) {}
 
-  private handleBinding(evt: KeyboardEvent, actionId: string, kb: KeyBinding) {
-    evt.preventDefault();
-    if (this.keysDisabled) {
-      return;
-    }
-    const menuOpen = this.ctl.menu.isMenuOpen;
-    const whenMenuOpen = kb.when?.menuOpen;
-    if (whenMenuOpen === undefined || whenMenuOpen === menuOpen) {
+  private matchesWhen(when?: { menuOpen?: boolean }): boolean {
+    if (when?.menuOpen !== undefined && when.menuOpen !== this.ctl.menu.isMenuOpen) return false;
+    return true;
+  }
+
+  private dispatch(evt: KeyboardEvent, candidates: Array<{ actionId: string; kb: KeyBinding }>) {
+    if (this.keysDisabled) return;
+    const match = candidates.find((c) => this.matchesWhen(c.kb.when));
+    if (match) {
+      evt.preventDefault();
       // MENU_OPEN_CLOSE_RACE
       setTimeout(() => {
-        this.ctl.app.handleAction(actionId, kb.action);
+        this.ctl.app.handleAction(match.actionId, match.kb.action);
       });
     }
   }
 
-  /**
-   * Split bindings by when.menuOpen and register with tinykeys.
-   *
-   * To scale this to more when-flags in future, we would register all bindings
-   * in one call to tinykeys and dispatch the correct action based on system
-   * state. If there are 2 different actions with the same binding and different
-   * values for a when-flag, then we dispatch the one that matches. If 2
-   * bindings have different flags that match the system state, then one of them
-   * has to take precendence as we don't want 2 actions firing. We could use
-   * specificity or we could detect overlap when bidings are being loaded and
-   * error out or drop the overlapping ones. This means overlapping bindings
-   * will need to specify all flags that overlap and decide who gets to handle a
-   * particular combination of those flags.
-   */
   private registerKeys(bindings: KeyBindingMap) {
-    this.unsubscribeGlobalKeys();
-    this.unsubscribeLocalKeys();
+    this.unsubscribe();
 
-    const globalTinykeys: { [key: string]: (evt: KeyboardEvent) => void } = {};
-    const localTinykeys: { [key: string]: (evt: KeyboardEvent) => void } = {};
-
+    // Group bindings by key string. A key like 'ArrowUp' may have multiple
+    // candidates with different `when` conditions (e.g. one for menuOpen: true,
+    // another for menuOpen: false). At dispatch time we pick the matching one.
+    const candidatesByKey = new Map<string, Array<{ actionId: string; kb: KeyBinding }>>();
     for (const [actionId, kb] of Object.entries(bindings)) {
-      const menuOpen = kb.when?.menuOpen;
       for (const binding of kb.bindings) {
-        const handler = (evt: KeyboardEvent) => {
-          this.handleBinding(evt, actionId, kb);
-        };
-        // Register in appropriate handler(s) based on when.menuOpen
-        if (menuOpen === undefined || menuOpen === false) {
-          globalTinykeys[binding] = handler;
-        }
-        if (menuOpen === undefined || menuOpen === true) {
-          localTinykeys[binding] = handler;
-        }
+        if (!candidatesByKey.has(binding)) candidatesByKey.set(binding, []);
+        candidatesByKey.get(binding)!.push({ actionId, kb });
       }
     }
 
-    if (Object.keys(globalTinykeys).length > 0) {
-      this.unsubscribeGlobalKeys = tinykeys(window, globalTinykeys);
+    const handlers: Record<string, (evt: KeyboardEvent) => void> = {};
+    for (const [key, candidates] of candidatesByKey) {
+      handlers[key] = (evt: KeyboardEvent) => this.dispatch(evt, candidates);
     }
-    if (Object.keys(localTinykeys).length > 0) {
-      this.unsubscribeLocalKeys = tinykeys(document.body, localTinykeys);
+
+    if (Object.keys(handlers).length > 0) {
+      this.unsubscribe = tinykeys(window, handlers);
     }
   }
 

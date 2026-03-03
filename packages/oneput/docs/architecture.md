@@ -64,12 +64,11 @@ Key bindings map keyboard shortcuts to actions. The system has several layers:
 
 `KeysController` maintains default bindings and current bindings. When bindings are set:
 
-1. Bindings are split by `when.menuOpen` into two groups
-2. Global bindings (`menuOpen: false` or `undefined`) → registered via tinykeys on `window`
-3. Local bindings (`menuOpen: true` or `undefined`) → registered via tinykeys on `document.body`
-4. At dispatch time, `handleBinding()` also verifies the current menu state matches the binding's `when.menuOpen` (safety net for race conditions)
+1. All bindings are registered on a single target (`window`) via one tinykeys call
+2. When the same key string is bound to multiple actions under different `when` conditions, candidates are collected per key
+3. At dispatch time, `matchesWhen()` selects the candidate whose `when` conditions match the current system state (e.g. menu open/closed)
 
-Bindings with `when.menuOpen === undefined` are registered in both groups and always fire.
+To add more `when` flags in future, extend `matchesWhen()` and validate at registration time that no two candidates for the same key have overlapping conditions.
 
 ### Defaults and overrides
 

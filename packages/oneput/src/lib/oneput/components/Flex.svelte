@@ -8,6 +8,7 @@
   let { class: topLevelClass, ...props }: Props = $props();
 
   let node: HTMLElement | null = $state(null);
+  let child: HTMLElement | null = $state(null);
   onMount(() => {
     if (props.onMount) {
       return props.onMount(node!);
@@ -31,7 +32,16 @@
   {:else}
     <svelte:element
       this={params.tag || 'div'}
-      bind:this={node}
+      bind:this={
+        () => (nested ? child : node),
+        (n) => {
+          if (nested) {
+            child = n;
+          } else {
+            node = n;
+          }
+        }
+      }
       id={params.id}
       style={params.style && createStyleAttribute(params.style)}
       class={[

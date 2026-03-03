@@ -104,13 +104,11 @@ export class ToggleMenuItem implements MenuItem {
   }
 
   onMount = (node: HTMLElement) => {
-    console.log('looking for', this.valueId, 'in', node);
     this.#valueElement = node.querySelector(`#${this.valueId}`) as HTMLElement;
   };
 
   action = (_c: Controller) => {
     this.#index = (this.#index + 1) % this.#values.length;
-    console.log(this.#valueElement);
     if (this.#valueElement) {
       this.#valueElement.textContent = `${this.#label}: ${this.#values[this.#index]}`;
     }

@@ -7,6 +7,7 @@ import {
   type KeyEvent
 } from '../../lib/bindings.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
+import { toggleMenuItem } from '../ui/menuItems/toggleMenuItem.js';
 import { type ResultAsync } from 'neverthrow';
 import type { IDBError } from '../idb.js';
 import type { IDBStoreError } from '../bindings/BindingsIDB.js';
@@ -228,62 +229,57 @@ export class BindingsEditor implements AppObject {
     }
   }
 
+  private static readonly whenValues = ['menu closed', 'menu open', 'always'] as const;
+
+  private static whenValueToFlag(index: number): { menuOpen?: boolean } | undefined {
+    if (index === 0) return { menuOpen: false };
+    if (index === 1) return { menuOpen: true };
+    return undefined;
+  }
+
+  private static whenFlagToIndex(when?: { menuOpen?: boolean }): number {
+    if (when?.menuOpen === false) return 0;
+    if (when?.menuOpen === true) return 1;
+    return 2;
+  }
+
   /**
    * After capturing keys, let the user set the when.menuOpen flag before saving.
    *
-   * Toggles through: false → true → undefined (always) → false → ...
+   * Toggles through: menu closed → menu open → always → menu closed → ...
    */
   private whenFlagUI(actionId: string, capturedKeys: KeyEvent[]) {
     const currentWhen = this.keyBindingMap[actionId].when;
-    let menuOpen: boolean | undefined = currentWhen?.menuOpen ?? false;
-
-    const toggleMenuOpen = () => {
-      if (menuOpen === false) menuOpen = true;
-      else if (menuOpen === true) menuOpen = undefined;
-      else menuOpen = false;
-      this.renderWhenFlagMenu(actionId, capturedKeys, menuOpen);
-    };
+    let whenIndex = BindingsEditor.whenFlagToIndex(currentWhen);
 
     this.ctl.app.setOnBack(() => {
       this.actionUI(actionId);
     });
 
-    this.renderWhenFlagMenu(actionId, capturedKeys, menuOpen, toggleMenuOpen);
-  }
-
-  private renderWhenFlagMenu(
-    actionId: string,
-    capturedKeys: KeyEvent[],
-    menuOpen: boolean | undefined,
-    onToggle?: () => void
-  ) {
     this.ctl.ui.update({
       params: { menuTitle: 'Set when condition' }
     });
-    // Hold a reference to the toggle so re-renders (which don't call whenFlagUI again) can use it.
-    const toggle = onToggle ?? this.lastToggle;
-    if (onToggle) this.lastToggle = onToggle;
 
-    const when = menuOpen === undefined ? undefined : { menuOpen };
     this.ctl.menu.setMenu({
       id: `whenFlagUI-${actionId}`,
       focusBehaviour: 'first',
       items: [
-        stdMenuItem({
+        toggleMenuItem({
           id: 'menuOpen',
-          textContent: `Menu open: ${this.whenLabel(when)}`,
-          left: (b) => [b.icon(this.icons.WhenFlag)],
-          action: toggle,
-          bottom: {
-            textContent: 'Press enter to toggle'
-          }
+          label: 'Menu open',
+          values: [...BindingsEditor.whenValues],
+          index: whenIndex,
+          onToggle: (nextIndex) => {
+            whenIndex = nextIndex;
+          },
+          left: (b) => [b.icon(this.icons.WhenFlag)]
         }),
         stdMenuItem({
           id: 'ok',
           textContent: 'OK',
           left: (b) => [b.icon(this.icons.OK)],
           action: () => {
-            this.addBinding(actionId, capturedKeys, when);
+            this.addBinding(actionId, capturedKeys, BindingsEditor.whenValueToFlag(whenIndex));
             this.ctl.app.goBack();
           }
         }),
@@ -298,8 +294,6 @@ export class BindingsEditor implements AppObject {
       ]
     });
   }
-
-  private lastToggle: (() => void) | undefined;
 
   private startKeyCapture = () => {
     let resolve: (r: KeyEvent[] | null) => void;

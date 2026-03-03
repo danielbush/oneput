@@ -82,4 +82,16 @@ When making code changes, look for opportunities to update docs. We're progressi
 
 The goal over time: a reader (human or agent) can start at any layer and progressively go deeper only as needed. Source files should have enough JSDoc that reading them after being pointed by CLAUDE.md gives you everything you need — the architecture docs provide the broader narrative if you want it.
 
+### Oneput skill (`packages/oneput-skill/SKILL.md`)
+
+There is also an agent skill at `.agents/skills/oneput` (symlinked from `packages/oneput-skill/`). This is a fourth layer that sits alongside the others but serves a different purpose:
+
+- **This file** tells agents where things are in this repo (navigational, project-specific)
+- **Architecture docs** explain how systems work and why (descriptive, for humans)
+- **The skill** teaches how to build with Oneput — patterns, recipes, API usage (prescriptive, portable)
+
+The skill is portable — it works in any project that uses Oneput as a dependency, not just this monorepo. It should not duplicate project-specific file paths (that's this file's job) or internal implementation details (that's JSDoc's job). Instead it covers the patterns: how to create AppObjects, declare bindings with `when` conditions, build menus with `stdMenuItem`, use the Controller, etc.
+
+When to update the skill: when the public API or recommended patterns change (e.g. new builder methods, new AppObject lifecycle hooks, changes to the bindings system). When changing internal implementation details, update JSDoc and architecture docs instead.
+
 ## Security considerations

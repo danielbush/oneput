@@ -1,0 +1,8 @@
+{
+  "name": "@oneput/skill",
+  "version": "0.0.1",
+  "description": "Agent skill for building Oneput command-bar interfaces",
+  "license": "MIT",
+  "keywords": ["agent-skill", "oneput"],
+  "files": ["SKILL.md"]
+}

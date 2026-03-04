@@ -19,11 +19,11 @@ import { findKeyConflicts, type KeyBinding, type KeyBindingMap } from '../lib/bi
  * registration time that no two candidates for the same key have overlapping
  * conditions (so exactly one fires).
  *
- * Lifecycle: default bindings are always present. setBindings() merges
- * additional bindings on top of defaults (for AppObject actions).
- * replaceBindings() fully replaces all bindings and returns a restore
- * callback (for modals like Alert/Confirm that need exclusive control).
- * resetBindings() restores to just the defaults.
+ * Lifecycle: setDefaultBindings() stores and applies defaults (called at
+ * startup and by BindingsEditor). setBindings() merges AppObject actions
+ * on top of defaults. replaceBindings() fully replaces all bindings and
+ * returns a restore callback (for modals). resetBindings() restores to
+ * just the defaults.
  */
 export class KeysController {
   public static create(ctl: Controller) {
@@ -86,15 +86,15 @@ export class KeysController {
   }
 
   /**
-   * Sets default bindings. Each binding declares when it applies via `when.menuOpen`.
+   * Stores default bindings and applies them immediately.
    *
-   * If currently using defaults, the change takes effect immediately.
+   * Called at startup (layout) and by BindingsEditor when the user edits
+   * bindings. Safe to call while an AppObject is active only if that
+   * AppObject has no actions (e.g. BindingsEditor itself).
    */
   setDefaultBindings(bindings: KeyBindingMap) {
     this.defaultBindings = bindings;
-    if (this.isUsingDefaultBindings) {
-      this.resetBindings();
-    }
+    this.resetBindings();
   }
 
   getDefaultBindings() {
@@ -107,7 +107,6 @@ export class KeysController {
 
   private defaultBindings: KeyBindingMap = {};
   private currentBindings: KeyBindingMap = {};
-  private isUsingDefaultBindings = true;
 
   /**
    * Merges the given bindings with the defaults. Use this for AppObject
@@ -125,7 +124,6 @@ export class KeysController {
         `Binding "${c.key}" on action "${c.overrideActionId}" overrides default action "${c.defaultActionId}"`
       );
     }
-    this.isUsingDefaultBindings = false;
     this.currentBindings = { ...cleanedDefaults, ...bindings };
     this.registerKeys(this.currentBindings);
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
@@ -140,13 +138,10 @@ export class KeysController {
    */
   replaceBindings(bindings: KeyBindingMap): () => void {
     const savedBindings = this.currentBindings;
-    const savedIsUsingDefaults = this.isUsingDefaultBindings;
-    this.isUsingDefaultBindings = false;
     this.currentBindings = bindings;
     this.registerKeys(this.currentBindings);
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
     return () => {
-      this.isUsingDefaultBindings = savedIsUsingDefaults;
       this.currentBindings = savedBindings;
       this.registerKeys(this.currentBindings);
       this.ctl.events.emit({
@@ -160,7 +155,6 @@ export class KeysController {
    * Reset bindings to default values or nothing if no default values are set.
    */
   resetBindings() {
-    this.isUsingDefaultBindings = true;
     this.currentBindings = { ...this.defaultBindings };
     this.registerKeys(this.currentBindings);
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });

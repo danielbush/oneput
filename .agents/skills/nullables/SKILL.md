@@ -106,9 +106,11 @@ The following is the algorithm for refactoring and creating new code.  It doesn'
   - suppose `Bar` represents any another class that an instance of `Foo` needs to perform its actions
   - we have 2 scenarios
   - (1) instantiate `Bar` straight away: ensure `Foo.create` calls `Bar.create` and passes the instance to `Foo`s constructor
-  - (2) delayed instantiation of `Bar`: we pass in a factory `createBar` that returns an instance of `Bar` and let the instance of `Foo` create `Bar` at a later time; we might do this if `Bar` is only created based on some condition/event at a later.
-    - if we are passing multiple infrastructure dependencies we can use a "create" object that we pass in to the constructor: `{ Bar: Bar.create, Baz: ... }` or `{ Bar: (...) => Bar.create(...), Baz: ... }`; `foo` can then call `create.Bar(...)` to get a `Bar` instance at a later time
+  - (2) delayed instantiation of `Bar`: we pass in a factory `createBar` that returns an instance of `Bar` and let the instance of `Foo` create `Bar` at a later time; we might do this if `Bar` is only created based on some condition/event at a later time.
+    - if we are passing multiple infrastructure dependencies we can use a "create" object that we pass in to the constructor: `{ Bar: (...) => Bar.create(...), Baz: ... }`; `foo` can then call `create.Bar(...)` to get a `Bar` instance at a later time.
     - `Foo.createNull` can then pass in a "create" object with nulled factories so that when `foo` calls `create.Bar(...)` it gets a `Bar` instance created by `Bar.createNull`
+    - NOTE: We wrap all create functions eg `Bar.create` / `Bar.createNull` in a function because when injecting delayed nullables (`Bar.createNull`), the `.createNull` may take non-production parameters to configure it.
+    - Factories in the create object can accept **runtime parameters** from the instance. This keeps decision logic in the factory (inside `Foo.create`) rather than in the instance. For example, if `foo` needs to select between implementations based on runtime state, the factory should accept a parameter for that: `{ Bar: ({ useFallback }) => useFallback ? FallbackBar.create() : Bar.create() }`. The instance just calls `create.Bar({ useFallback: this.flag })` — it doesn't know about the implementations.
   - If you see `Bar.create` within an instance of `Foo` refactor to inject it using either (1) or (2)
   - if you had to create `Bar.create`, repeat this process but with `Bar` in place of `Foo`
   - keep recursing as required
@@ -253,6 +255,51 @@ async transfer(fromId, toId, amount) {
   await this._repo.saveAccounts(result);
 }
 ```
+
+### Pattern: Consumer-Defined Interfaces
+
+When a class depends on infrastructure, define the **simplest interface the consumer needs** rather than accepting a concrete class. The consumer owns the contract; implementations adapt to it.
+
+```typescript
+// Consumer defines what it needs — just updateBindings, not the full store API
+interface EditorStore {
+  updateBindings(data: SerializableData): ResultAsync<string, StoreError>;
+}
+
+class Editor {
+  static create(ctl, values: { store: EditorStore; /* ... */ }) {
+    return new Editor(ctl, values.store);
+  }
+  constructor(private ctl, private store: EditorStore) {}
+}
+
+// Multiple implementations satisfy the same interface
+class LocalService implements EditorStore { /* persists to IDB */ }
+class TestService implements EditorStore { /* always fails */ }
+```
+
+This keeps infrastructure errors out of the consumer. Implementations map their internal errors to domain errors the consumer expects (see error mapping below).
+
+### Pattern: Error Mapping at Boundaries
+
+When implementing a consumer-defined interface, map infrastructure errors to domain errors using `.mapErr()`. The consumer should never see `IDBStoreError`, `FetchError`, etc. — only the error types declared in the interface.
+
+```typescript
+class StoreError extends Error {
+  readonly _tag = 'StoreError' as const;
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+  }
+}
+
+class LocalService implements EditorStore {
+  updateBindings = (data: SerializableData) =>
+    this.db.updateBindings(data)
+      .mapErr((err) => new StoreError(err.message, { cause: err }));
+}
+```
+
+Use a `_tag` discriminant on error classes so consumers can exhaustively match when the interface has multiple error types in a union.
 
 ### Pattern: Event Emitters for State
 

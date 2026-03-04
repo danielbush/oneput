@@ -20,7 +20,7 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
 
   const getText = () => `${params.label}: ${params.values[index]}`;
 
-  const item = stdMenuItem({
+  return stdMenuItem({
     id: params.id,
     tag: 'button',
     attr: { type: 'button' },
@@ -28,20 +28,16 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
     left: params.left,
     bottom: {
       textContent: params.bottom?.textContent ?? 'Press enter to toggle'
+    },
+    onMount: (node: HTMLElement) => {
+      titleElement = node.querySelector('.oneput__std-menu-item-title') as HTMLElement;
+    },
+    action: () => {
+      index = (index + 1) % params.values.length;
+      if (titleElement) {
+        titleElement.textContent = getText();
+      }
+      params.onToggle(index);
     }
   });
-
-  item.onMount = (node: HTMLElement) => {
-    titleElement = node.querySelector('.oneput__std-menu-item-title') as HTMLElement;
-  };
-
-  item.action = () => {
-    index = (index + 1) % params.values.length;
-    if (titleElement) {
-      titleElement.textContent = getText();
-    }
-    params.onToggle(index);
-  };
-
-  return item;
 }

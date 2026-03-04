@@ -64,7 +64,7 @@ export class Root implements AppObject {
     }
   };
 
-  menu = {
+  menu = () => ({
     id: 'root',
     items: [
       stdMenuItem({
@@ -74,5 +74,5 @@ export class Root implements AppObject {
         left: (b) => [b.icon(icons.File)]
       })
     ]
-  };
+  });
 }

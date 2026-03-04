@@ -236,8 +236,13 @@ export interface AppObject<R = unknown> {
    * A declarative way to set your menu items.
    *
    * If set, the system will do the equivalent of calling setMenu for you.
+   *
+   * We use a function to ensure that menu items are re-executed when AppObjects
+   * are resumed. This makes easier to work with state that persists beyond the
+   * life of an Appboject. An example is managing the checked state on
+   * checkBoxMenuItem .
    */
-  menu?: Menu;
+  menu?: () => Menu;
 }
 
 export type NullishChildren = Array<FlexParams | FChildParams | '' | false | null | undefined>;

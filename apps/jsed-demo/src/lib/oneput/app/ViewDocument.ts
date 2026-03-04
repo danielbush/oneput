@@ -99,7 +99,7 @@ export class ViewDocument implements AppObject {
     }
   };
 
-  menu = {
+  menu = () => ({
     id: 'root',
     items: [
       stdMenuItem({
@@ -109,5 +109,5 @@ export class ViewDocument implements AppObject {
         left: (b) => [b.icon(icons.Pencil)]
       })
     ]
-  };
+  });
 }

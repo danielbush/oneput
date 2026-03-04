@@ -47,7 +47,7 @@ export class Settings implements AppObject {
     this.run();
   };
 
-  menu = {
+  menu = () => ({
     id: 'main',
     items: [
       checkboxMenuItem({
@@ -75,7 +75,7 @@ export class Settings implements AppObject {
         }
       })
     ]
-  };
+  });
 
   run = () => {
     this.ctl.ui.update({

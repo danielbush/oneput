@@ -1,37 +1,26 @@
 import type { Controller } from '../../../controllers/controller.js';
-import { randomId } from '../../../lib/utils.js';
-import type { FlexParams, MenuItem } from '../../../types.js';
+import type { MenuItem } from '../../../types.js';
+import { stdMenuItem } from './stdMenuItem.js';
 
-export class CheckboxMenuItem implements MenuItem {
-  static create(params: {
-    action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
-    textContent: string;
-    checked: boolean;
-  }): CheckboxMenuItem {
-    return new CheckboxMenuItem(params);
-  }
-
+export type CheckboxMenuItemParams = {
   id: string;
-  inputId: string;
-  inputElement?: HTMLInputElement;
-  type = 'hflex' as const;
-  tag = 'button';
-  attr = { type: 'button' };
-  #action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
-  children: FlexParams['children'];
+  action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
+  textContent: string;
+  checked: boolean;
+};
 
-  constructor(params: {
-    action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
-    textContent: string;
-    checked: boolean;
-  }) {
-    this.id = randomId();
-    this.inputId = randomId();
-    this.#action = params.action;
-    this.children = [
-      {
-        id: this.inputId,
-        type: 'fchild',
+export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
+  const inputId = params.id + '-input';
+  let inputElement: HTMLInputElement | undefined;
+
+  const item = stdMenuItem({
+    id: params.id,
+    tag: 'button',
+    attr: { type: 'button' },
+    textContent: params.textContent,
+    left: (b) => [
+      b.fchild({
+        id: inputId,
         tag: 'input',
         attr: {
           type: 'checkbox',
@@ -42,40 +31,18 @@ export class CheckboxMenuItem implements MenuItem {
           }
         },
         classes: ['oneput__checkbox']
-      },
-      {
-        id: randomId(),
-        type: 'fchild',
-        tag: 'label',
-        attr: {
-          for: this.inputId,
-          onclick: (event: Event) => {
-            event.preventDefault();
-          }
-        },
-        textContent: params.textContent
-      }
-    ];
-  }
-
-  onMount = (node: HTMLElement) => {
-    this.inputElement = node.querySelector(`#${this.inputId}`) as HTMLInputElement;
-  };
-
-  action = (c: Controller) => {
-    if (!this.inputElement) {
-      return;
+      })
+    ],
+    onMount: () => {
+      inputElement = document.getElementById(inputId) as HTMLInputElement;
     }
-    this.inputElement.checked = !this.inputElement.checked;
-    this.#action(c, this.inputElement.checked, this.inputElement!);
-  };
-}
+  });
 
-export function checkboxMenuItem(params: {
-  id: string;
-  action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
-  textContent: string;
-  checked: boolean;
-}): CheckboxMenuItem {
-  return CheckboxMenuItem.create(params);
+  item.action = (c: Controller) => {
+    if (!inputElement) return;
+    inputElement.checked = !inputElement.checked;
+    params.action(c, inputElement.checked, inputElement);
+  };
+
+  return item;
 }

@@ -73,6 +73,37 @@ export class EditDocument implements AppObject {
 
   onExit = () => {};
 
+  actions = {
+    NEXT_TOKEN: {
+      action: () => {
+        if (this.cursorMarkers?.isInsertingBefore()) {
+          this.cursorMarkers.clear();
+        } else {
+          this.cursor?.moveNext();
+        }
+      },
+      binding: {
+        bindings: ['$mod+l'],
+        description: 'Move to next token',
+        when: { menuOpen: false }
+      }
+    },
+    PREV_TOKEN: {
+      action: () => {
+        if (this.cursorMarkers?.isInsertingAfter()) {
+          this.cursorMarkers.clear();
+        } else {
+          this.cursor?.movePrevious();
+        }
+      },
+      binding: {
+        bindings: ['$mod+h'],
+        description: 'Move to previous token',
+        when: { menuOpen: false }
+      }
+    }
+  };
+
   /**
    * When the cursor changes its token because of some action it has been
    * commanded to do (eg due to delete operation).

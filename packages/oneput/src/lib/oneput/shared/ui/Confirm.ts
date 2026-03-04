@@ -11,6 +11,7 @@ export class Confirm {
 
   private previousPlaceholder: string;
   private previousActiveElement: HTMLElement | null = null;
+  private restoreBindings: (() => void) | undefined;
 
   constructor(
     private ctl: Controller,
@@ -36,7 +37,7 @@ export class Confirm {
         enableKeys: true
       }
     });
-    this.ctl.keys.replaceBindings({
+    this.restoreBindings = this.ctl.keys.replaceBindings({
       ok: {
         description: 'OK',
         bindings: ['Enter'],
@@ -114,7 +115,7 @@ export class Confirm {
     });
 
     // Restore
-    this.ctl.keys.resetBindings();
+    this.restoreBindings?.();
     this.ctl.ui.replaceMenuUI();
     this.ctl.input.setPlaceholder(this.previousPlaceholder);
     this.resolve?.(ok);

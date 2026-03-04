@@ -15,6 +15,7 @@ export class Alert {
   private okPromise: Promise<void> | null = null;
   private previousActiveElement: HTMLElement | null = null;
   private previousPlaceholder: string;
+  private restoreBindings: (() => void) | undefined;
 
   constructor(
     private ctl: Controller,
@@ -33,7 +34,7 @@ export class Alert {
     });
 
     // Restore
-    this.ctl.keys.resetBindings();
+    this.restoreBindings?.();
     this.ctl.ui.replaceMenuUI();
     this.ctl.input.setPlaceholder(this.previousPlaceholder);
     this.resolve?.();
@@ -48,7 +49,7 @@ export class Alert {
         enableKeys: true
       }
     });
-    this.ctl.keys.replaceBindings({
+    this.restoreBindings = this.ctl.keys.replaceBindings({
       ok: {
         description: 'OK',
         bindings: ['Enter'],

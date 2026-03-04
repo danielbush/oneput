@@ -136,8 +136,10 @@ ctl.keys.setDefaultBindings(bindings);
 ctl.keys.setBindings(bindings);
 
 // Fully replace all bindings — defaults are NOT included.
+// Returns a callback that restores the previous bindings.
 // Use for modals (Alert/Confirm) that need exclusive key control.
-ctl.keys.replaceBindings(modalBindings);
+const restore = ctl.keys.replaceBindings(modalBindings);
+restore(); // restores previous bindings
 
 // Restore to just the defaults
 ctl.keys.resetBindings();
@@ -268,7 +270,7 @@ ctl.input.runSubmitHandler()
 // Keys
 ctl.keys.setDefaultBindings(bindings)
 ctl.keys.setBindings(bindings)       // merges with defaults
-ctl.keys.replaceBindings(bindings)   // full replace (modals)
+ctl.keys.replaceBindings(bindings)   // full replace (modals), returns restore callback
 ctl.keys.resetBindings()
 ctl.keys.getDefaultBindings()
 ctl.keys.getCurrentBindings()

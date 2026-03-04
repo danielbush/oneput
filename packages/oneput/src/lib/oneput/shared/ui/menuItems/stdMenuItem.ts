@@ -3,6 +3,47 @@ import { randomId } from '../../../lib/utils.js';
 import type { FlexChildren, MenuItem } from '../../../types.js';
 
 /**
+ * Value object mapping a root ID to the deterministic IDs of each structural
+ * part of a stdMenuItem. Use this to reference child nodes by ID rather than
+ * querying by class name.
+ */
+export class StdMenuItemIds {
+  constructor(readonly root: string) {}
+  get top() {
+    return this.root + '-top';
+  }
+  get left() {
+    return this.root + '-left';
+  }
+  get center() {
+    return this.root + '-center';
+  }
+  get title() {
+    return this.root + '-title';
+  }
+  get right() {
+    return this.root + '-right';
+  }
+  get divider() {
+    return this.root + '-divider';
+  }
+  get bottom() {
+    return this.root + '-bottom';
+  }
+  get bottomLeft() {
+    return this.root + '-bottom-left';
+  }
+  get bottomCenter() {
+    return this.root + '-bottom-center';
+  }
+  get bottomRight() {
+    return this.root + '-bottom-right';
+  }
+}
+
+export type StdMenuItem = MenuItem & { ids: StdMenuItemIds };
+
+/**
  * If action is specified, tag will be set to button.
  * If tag is set to button, type="button" will be set.
  */
@@ -34,8 +75,9 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
  *
  * See src/routes/ for examples.
  */
-export function stdMenuItem(params: StdMenuItemParams): MenuItem {
+export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
   const id = params.id ?? randomId();
+  const ids = new StdMenuItemIds(id);
   if (params.action) {
     params.tag = params.tag ?? 'button';
     params.attr = {
@@ -43,7 +85,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
       ...params.attr
     };
   }
-  const menuItem: MenuItem = vflex({
+  const menuItem = vflex({
     ...params,
     id,
     action: params.action,
@@ -56,13 +98,13 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
     ],
     children: (b) => [
       b.hflex({
-        id: id + '-top',
+        id: ids.top,
         classes: ['oneput__std-menu-item-top'],
         children: (b) => [
           // left
           params.left
             ? b.hflex({
-                id: id + '-left',
+                id: ids.left,
                 classes: ['oneput__std-menu-item-left'],
                 children: (b) => (params.left ? params.left(b) : [])
               })
@@ -72,10 +114,11 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 
           // center
           b.hflex({
-            id: id + '-center',
+            id: ids.center,
             classes: ['oneput__std-menu-item-center'],
             children: (b) => [
               b.fchild({
+                id: ids.title,
                 classes: ['oneput__std-menu-item-title'],
                 textContent: params.textContent,
                 htmlContentUnsafe: params.htmlContentUnsafe
@@ -86,7 +129,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
           // right
           params.right
             ? b.hflex({
-                id: id + '-right',
+                id: ids.right,
                 classes: ['oneput__std-menu-item-right'],
                 children: (b) => (params.right ? params.right?.(b) || [] : [])
               })
@@ -99,18 +142,19 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
         ? [
             // divider
             b.fchild({
+              id: ids.divider,
               type: 'fchild',
               classes: ['oneput__std-menu-item-divider'],
               tag: 'hr'
             }),
             b.hflex({
-              id: id + '-bottom',
+              id: ids.bottom,
               classes: ['oneput__std-menu-item-bottom'],
               children: (b) => [
                 // left
                 params.bottom?.left
                   ? b.hflex({
-                      id: id + '-bottom-left',
+                      id: ids.bottomLeft,
                       classes: ['oneput__std-menu-item-bottom-left'],
                       children: (b) => (params.bottom?.left ? params.bottom.left(b) : [])
                     })
@@ -120,6 +164,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
 
                 // center
                 b.fchild({
+                  id: ids.bottomCenter,
                   textContent: params.bottom?.textContent,
                   htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
                   classes: ['oneput__std-menu-item-bottom']
@@ -128,7 +173,7 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
                 // right
                 params.bottom?.right
                   ? b.hflex({
-                      id: id + '-bottom-right',
+                      id: ids.bottomRight,
                       classes: ['oneput__std-menu-item-bottom-right'],
                       children: (b) => (params.bottom?.right ? params.bottom.right(b) : [])
                     })
@@ -140,7 +185,8 @@ export function stdMenuItem(params: StdMenuItemParams): MenuItem {
           ]
         : [])
     ]
-  });
+  }) as StdMenuItem;
+  menuItem.ids = ids;
 
   return menuItem;
 }

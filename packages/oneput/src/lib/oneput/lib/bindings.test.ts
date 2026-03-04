@@ -24,13 +24,14 @@ function keyEvent(key: string, modifiers: Partial<KeyEvent> = {}): KeyEvent {
  * Helper to create a minimal KeyBindingMap for testing.
  */
 function createBindingMap(
-  bindings: Record<string, { description: string; bindings: string[] }>
+  bindings: Record<string, { description: string; bindings: string[]; when?: { menuOpen?: boolean } }>
 ): KeyBindingMap {
-  return Object.entries(bindings).reduce((acc, [actionId, { description, bindings }]) => {
+  return Object.entries(bindings).reduce((acc, [actionId, { description, bindings, when }]) => {
     acc[actionId] = {
       action: () => {},
       description,
-      bindings
+      bindings,
+      when
     };
     return acc;
   }, {} as KeyBindingMap);
@@ -339,5 +340,22 @@ describe('findKeyConflicts', () => {
     // assert
     expect(conflicts).toEqual([]);
     expect(cleanedDefaults['openMenu'].bindings).toEqual(['$mod+b']);
+  });
+
+  it('allows same key when when-conditions are mutually exclusive', () => {
+    // arrange
+    const defaults = createBindingMap({
+      focusPrev: { description: 'Focus previous', bindings: ['$mod+k'], when: { menuOpen: true } }
+    });
+    const overrides = createBindingMap({
+      SIB_PREV: { description: 'Previous sibling', bindings: ['$mod+k'], when: { menuOpen: false } }
+    });
+
+    // act
+    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+
+    // assert
+    expect(conflicts).toEqual([]);
+    expect(cleanedDefaults['focusPrev'].bindings).toEqual(['$mod+k']);
   });
 });

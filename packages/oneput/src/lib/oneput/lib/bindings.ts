@@ -370,8 +370,29 @@ export type BindingKeyConflict = {
 };
 
 /**
+ * Two `when` conditions overlap (can both be true at the same time).
+ *
+ * - Both undefined → always active, overlap
+ * - One undefined → the "always" one matches whenever the specific one does
+ * - Same menuOpen value → overlap
+ * - menuOpen: true vs menuOpen: false → mutually exclusive, no overlap
+ */
+function whenOverlaps(
+  a?: { menuOpen?: boolean },
+  b?: { menuOpen?: boolean }
+): boolean {
+  if (a?.menuOpen === undefined || b?.menuOpen === undefined) return true;
+  return a.menuOpen === b.menuOpen;
+}
+
+/**
  * Detects **conflicts** between two separate KeyBindingMaps (e.g. defaults vs
- * AppObject overrides) where different actions use the same key string.
+ * AppObject overrides) where different actions use the same key string and
+ * have overlapping `when` conditions.
+ *
+ * Bindings that share a key but have mutually exclusive `when` conditions
+ * (e.g. menuOpen: true vs menuOpen: false) are not conflicts — they can
+ * coexist safely because only one can fire at a time.
  *
  * Returns a copy of `defaults` with the conflicting key strings removed so
  * that the overrides take precedence when the maps are merged. The original
@@ -384,10 +405,10 @@ export function findKeyConflicts(
   defaults: KeyBindingMap,
   overrides: KeyBindingMap
 ): { cleanedDefaults: KeyBindingMap; conflicts: BindingKeyConflict[] } {
-  const overrideKeys = new Map<string, string>();
+  const overrideKeys = new Map<string, { actionId: string; when?: { menuOpen?: boolean } }>();
   for (const [actionId, kb] of Object.entries(overrides)) {
     for (const key of kb.bindings) {
-      overrideKeys.set(key, actionId);
+      overrideKeys.set(key, { actionId, when: kb.when });
     }
   }
 
@@ -396,9 +417,9 @@ export function findKeyConflicts(
 
   for (const [actionId, kb] of Object.entries(defaults)) {
     const remaining = kb.bindings.filter((key) => {
-      const overrideActionId = overrideKeys.get(key);
-      if (overrideActionId) {
-        conflicts.push({ defaultActionId: actionId, overrideActionId, key });
+      const override = overrideKeys.get(key);
+      if (override && whenOverlaps(kb.when, override.when)) {
+        conflicts.push({ defaultActionId: actionId, overrideActionId: override.actionId, key });
         return false;
       }
       return true;

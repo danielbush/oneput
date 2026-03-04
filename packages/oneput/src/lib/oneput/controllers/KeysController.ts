@@ -118,7 +118,7 @@ export class KeysController {
   setBindings(bindings: KeyBindingMap) {
     for (const actionId of Object.keys(bindings)) {
       if (actionId in this.defaultBindings) {
-        console.warn(`Binding "${actionId}" overrides default binding`);
+        console.warn(`ActionId "${actionId}" overrides an exisitng default actionId`);
       }
     }
     this.isUsingDefaultBindings = false;
@@ -145,7 +145,10 @@ export class KeysController {
       this.isUsingDefaultBindings = savedIsUsingDefaults;
       this.currentBindings = savedBindings;
       this.registerKeys(this.currentBindings);
-      this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
+      this.ctl.events.emit({
+        type: 'bindings-change',
+        payload: { bindings: this.currentBindings }
+      });
     };
   }
 

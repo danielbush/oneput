@@ -377,10 +377,7 @@ export type BindingKeyConflict = {
  * - Same menuOpen value → overlap
  * - menuOpen: true vs menuOpen: false → mutually exclusive, no overlap
  */
-function whenOverlaps(
-  a?: { menuOpen?: boolean },
-  b?: { menuOpen?: boolean }
-): boolean {
+function whenOverlaps(a?: { menuOpen?: boolean }, b?: { menuOpen?: boolean }): boolean {
   if (a?.menuOpen === undefined || b?.menuOpen === undefined) return true;
   return a.menuOpen === b.menuOpen;
 }

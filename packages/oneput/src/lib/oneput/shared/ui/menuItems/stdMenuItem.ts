@@ -23,6 +23,7 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
     htmlContentUnsafe?: string;
     textContent?: string;
   };
+  onMount?: (node: HTMLElement) => void | (() => void);
   data?: D;
 };
 

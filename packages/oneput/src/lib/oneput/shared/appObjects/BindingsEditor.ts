@@ -8,9 +8,7 @@ import {
 } from '../../lib/bindings.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { toggleMenuItem } from '../ui/menuItems/toggleMenuItem.js';
-import { type ResultAsync } from 'neverthrow';
-import type { IDBError } from '../idb.js';
-import type { IDBStoreError } from '../bindings/BindingsIDB.js';
+import type { BindingsEditorStore } from '../bindings/BindingsEditorStore.js';
 import { hflex } from '../../lib/builder.js';
 import { mountSvelte } from '../../lib/utils.js';
 import type { AppObject } from '../../types.js';
@@ -20,14 +18,14 @@ import CancelButton from '../components/CancelButton.svelte';
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
  *
- * A binding store is required to persist the bindings.
+ * Pass a {@link BindingsEditorStore} to persist changes.
  */
 export class BindingsEditor implements AppObject {
   static create(
     ctl: Controller,
     values: {
       keyBindingMap: KeyBindingMap;
-      onUpdate: (keyBindingMap: KeyBindingMap) => ResultAsync<string, IDBError | IDBStoreError>;
+      store: BindingsEditorStore;
       icons: {
         Keyboard: string;
         Close: string;
@@ -39,21 +37,13 @@ export class BindingsEditor implements AppObject {
       };
     }
   ) {
-    const km: BindingsEditor = new BindingsEditor(
-      ctl,
-      values.keyBindingMap,
-      values.onUpdate,
-      values.icons
-    );
-    return km;
+    return new BindingsEditor(ctl, values.keyBindingMap, values.store, values.icons);
   }
 
   constructor(
     private ctl: Controller,
     private keyBindingMap: KeyBindingMap,
-    private onUpdate: (
-      keyBindingMap: KeyBindingMap
-    ) => ResultAsync<string, IDBError | IDBStoreError>,
+    private store: BindingsEditorStore,
     private icons: {
       Keyboard: string;
       Close: string;
@@ -354,7 +344,8 @@ export class BindingsEditor implements AppObject {
     this.keyBindingMap = keyEventBindings.keyBindingMap;
     this.actionUI(actionId);
 
-    this.onUpdate(keyEventBindings.keyBindingMap)
+    this.store
+      .updateBindings(keyEventBindings.toSerializable())
       .andTee(() => {
         this.ctl.notify('Binding removed', { duration: 3000 });
         this.ctl.keys.setDefaultBindings(keyEventBindings.keyBindingMap);
@@ -395,7 +386,8 @@ export class BindingsEditor implements AppObject {
     this.keyBindingMap = updatedMap;
     this.actionUI(actionId);
 
-    this.onUpdate(updatedMap)
+    this.store
+      .updateBindings(KeyEventBindings.create(updatedMap).toSerializable())
       .andTee(() => {
         this.ctl.notify('Binding added', { duration: 3000 });
         this.ctl.keys.setDefaultBindings(updatedMap);

@@ -48,7 +48,7 @@ export class Alert {
         enableKeys: true
       }
     });
-    this.ctl.keys.setBindings({
+    this.ctl.keys.replaceBindings({
       ok: {
         description: 'OK',
         bindings: ['Enter'],

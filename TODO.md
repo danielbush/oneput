@@ -1,22 +1,7 @@
 PROBLEM
 
-packages/oneput/src/lib/oneput/shared/appObjects/BindingsEditor.ts doesn't support the when-flag for bindings.
+packages/oneput/src/lib/oneput/controllers/KeysController.ts has a concept of default bindings.  Until now, they are bindings that are present and enabled at the very start but can be replaced by calling setBindings.  When oneput resets everything before running a new AppObject, it will reset the bindings which will reinstate the default bindings.
 
-We need to
+What we want to do instead is have the default bindings be present all the time.  These bindings are for common actions like navigating the menu, opening/closing the menu etc.
 
-- (1) show it in the bindings editor
-- (2) update the "Add binding..." to allow us to set a flag
-
-
-(1) I think we can just show it to the right of the menu item that represents an individual binding for a given action; use a style similar to the oneput_kbd .
-
-(2) When we add a binding we need to allow the user to set the flags
-
-- "add binding...." captures the binding
-- if the user hits the tick to capture it we go to new menu;
-- the new menu shows menuOpen flag set to false by default
-- the user can hit enter to toggle the state between true, false, both
-- in oneput__std-menu-item-bottom we should have a note saying to toggle by hitting enter
-- there should be an
-  - ok menu item
-  - cancel menu item - binding is cancelled
+When an AppObject sets its own bindings, these should be in addition to the default bindings.  If the AppObject sets a binding that conflicts with a  default binding, have the console log a warning but allow the binding to override the default binding.  When bindings are reset, the default bindings should remain intact.

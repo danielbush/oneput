@@ -130,10 +130,16 @@ type KeyBindingMap = { [actionId: string]: KeyBinding };
 // Set default bindings (restored on AppObject exit)
 ctl.keys.setDefaultBindings(bindings);
 
-// Temporarily override (e.g. for modal dialogs)
-ctl.keys.setBindings(modalBindings);
+// Merge additional bindings with defaults (for AppObject actions).
+// Default bindings (menu nav, open/close, etc.) remain active.
+// Warns if an action ID conflicts with a default.
+ctl.keys.setBindings(bindings);
 
-// Restore defaults
+// Fully replace all bindings — defaults are NOT included.
+// Use for modals (Alert/Confirm) that need exclusive key control.
+ctl.keys.replaceBindings(modalBindings);
+
+// Restore to just the defaults
 ctl.keys.resetBindings();
 ```
 
@@ -261,7 +267,8 @@ ctl.input.runSubmitHandler()
 
 // Keys
 ctl.keys.setDefaultBindings(bindings)
-ctl.keys.setBindings(bindings)
+ctl.keys.setBindings(bindings)       // merges with defaults
+ctl.keys.replaceBindings(bindings)   // full replace (modals)
 ctl.keys.resetBindings()
 ctl.keys.getDefaultBindings()
 ctl.keys.getCurrentBindings()

@@ -19,9 +19,11 @@ import type { KeyBinding, KeyBindingMap } from '../lib/bindings.js';
  * registration time that no two candidates for the same key have overlapping
  * conditions (so exactly one fires).
  *
- * Lifecycle: default bindings are set by the layout and restored on
- * AppObject exit. Current bindings can be temporarily overridden (e.g.,
- * by Alert/Confirm). resetBindings() restores defaults.
+ * Lifecycle: default bindings are always present. setBindings() merges
+ * additional bindings on top of defaults (for AppObject actions).
+ * replaceBindings() fully replaces all bindings (for modals like
+ * Alert/Confirm that need exclusive control). resetBindings() restores
+ * to just the defaults.
  */
 export class KeysController {
   public static create(ctl: Controller) {
@@ -86,12 +88,12 @@ export class KeysController {
   /**
    * Sets default bindings. Each binding declares when it applies via `when.menuOpen`.
    *
-   * If the current bindings are default, then they will be updated so you can use the new binding straight away.
+   * If currently using defaults, the change takes effect immediately.
    */
   setDefaultBindings(bindings: KeyBindingMap) {
     this.defaultBindings = bindings;
     if (this.isUsingDefaultBindings) {
-      this.setBindings(bindings);
+      this.resetBindings();
     }
   }
 
@@ -107,18 +109,42 @@ export class KeysController {
   private currentBindings: KeyBindingMap = {};
   private isUsingDefaultBindings = true;
 
+  /**
+   * Merges the given bindings with the defaults. Use this for AppObject
+   * actions that should coexist with default bindings (menu nav, etc.).
+   *
+   * Logs a warning if an action ID conflicts with a default binding.
+   */
   setBindings(bindings: KeyBindingMap) {
+    for (const actionId of Object.keys(bindings)) {
+      if (actionId in this.defaultBindings) {
+        console.warn(`Binding "${actionId}" overrides default binding`);
+      }
+    }
+    this.isUsingDefaultBindings = false;
+    this.currentBindings = { ...this.defaultBindings, ...bindings };
+    this.registerKeys(this.currentBindings);
+    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
+  }
+
+  /**
+   * Fully replaces all bindings (defaults are NOT included). Use this for
+   * modals like Alert/Confirm that need exclusive control over key handling.
+   */
+  replaceBindings(bindings: KeyBindingMap) {
     this.isUsingDefaultBindings = false;
     this.currentBindings = bindings;
-    this.registerKeys(bindings);
-    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings } });
+    this.registerKeys(this.currentBindings);
+    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
   }
 
   /**
    * Reset bindings to default values or nothing if no default values are set.
    */
   resetBindings() {
-    this.setBindings(this.defaultBindings);
     this.isUsingDefaultBindings = true;
+    this.currentBindings = { ...this.defaultBindings };
+    this.registerKeys(this.currentBindings);
+    this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
   }
 }

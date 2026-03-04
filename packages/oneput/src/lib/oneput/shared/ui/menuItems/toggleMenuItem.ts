@@ -16,7 +16,6 @@ export type ToggleMenuItemParams = {
 
 export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
   let index = params.index;
-  let titleElement: HTMLElement | undefined;
 
   const getText = () => `${params.label}: ${params.values[index]}`;
 
@@ -29,10 +28,8 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
     bottom: {
       textContent: params.bottom?.textContent ?? 'Click or press enter to toggle'
     },
-    onMount: () => {
-      titleElement = document.getElementById(item.ids.title) as HTMLElement;
-    },
     action: () => {
+      const titleElement = document.getElementById(item.ids.title) as HTMLElement;
       index = (index + 1) % params.values.length;
       if (titleElement) {
         titleElement.textContent = getText();

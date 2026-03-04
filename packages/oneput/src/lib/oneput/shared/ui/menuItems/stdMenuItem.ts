@@ -1,3 +1,4 @@
+import type { Controller } from '../../../controllers/controller.js';
 import { vflex, type FlexChildBuilder } from '../../../lib/builder.js';
 import { randomId } from '../../../lib/utils.js';
 import type { FlexChildren, MenuItem } from '../../../types.js';
@@ -51,7 +52,7 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
   tag?: string;
   attr?: Record<string, string | boolean | ((event: Event) => void)>;
   id?: string;
-  action?: () => void;
+  action?: (ctl: Controller) => void;
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
   htmlContentUnsafe?: string;

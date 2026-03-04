@@ -11,7 +11,6 @@ export type CheckboxMenuItemParams = {
 
 export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
   const inputId = params.id + '-input';
-  let inputElement: HTMLInputElement | undefined;
 
   const item = stdMenuItem({
     id: params.id,
@@ -33,16 +32,12 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
         classes: ['oneput__checkbox']
       })
     ],
-    onMount: () => {
-      inputElement = document.getElementById(inputId) as HTMLInputElement;
+    action: (c: Controller) => {
+      const inputElement = document.getElementById(inputId) as HTMLInputElement;
+      inputElement.checked = !inputElement.checked;
+      params.action(c, inputElement.checked, inputElement);
     }
   });
-
-  item.action = (c: Controller) => {
-    if (!inputElement) return;
-    inputElement.checked = !inputElement.checked;
-    params.action(c, inputElement.checked, inputElement);
-  };
 
   return item;
 }

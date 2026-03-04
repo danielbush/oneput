@@ -41,13 +41,16 @@ export class KatexDemo implements AppObject {
 
   run() {
     this.unsubscribeBindingsChange?.();
-    this.unsubscribeBindingsChange = this.ctl.events.on('bindings-change', ({ bindings: currentBindings }) => {
-      const binding = currentBindings['submit']?.bindings[0];
-      this.helpMessage = binding
-        ? `Type some katex and hit ${binding} to insert... `
-        : 'Type some katex...';
-      this.renderUI();
-    });
+    this.unsubscribeBindingsChange = this.ctl.events.on(
+      'bindings-change',
+      ({ bindings: currentBindings }) => {
+        const binding = currentBindings['submit']?.bindings[0];
+        this.helpMessage = binding
+          ? `Type some katex and hit ${binding} to insert... `
+          : 'Type some katex...';
+        this.renderUI();
+      }
+    );
     this.ctl.ui.update({
       params: {
         menuTitle: 'Katex Demo'

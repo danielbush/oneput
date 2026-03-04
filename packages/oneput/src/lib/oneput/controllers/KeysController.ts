@@ -1,6 +1,6 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import type { KeyBinding, KeyBindingMap } from '../lib/bindings.js';
+import { findKeyConflicts, type KeyBinding, type KeyBindingMap } from '../lib/bindings.js';
 
 /**
  * Manages key bindings — registration, dispatch, and default/override lifecycle.
@@ -113,16 +113,20 @@ export class KeysController {
    * Merges the given bindings with the defaults. Use this for AppObject
    * actions that should coexist with default bindings (menu nav, etc.).
    *
-   * Logs a warning if an action ID conflicts with a default binding.
+   * When an override uses the same key string as a default binding, the
+   * override wins and the conflicting key is removed from the default for
+   * the duration of this AppObject. Logs a warning for each conflict.
+   * Defaults are fully restored on resetBindings().
    */
   setBindings(bindings: KeyBindingMap) {
-    for (const actionId of Object.keys(bindings)) {
-      if (actionId in this.defaultBindings) {
-        console.warn(`ActionId "${actionId}" overrides an exisitng default actionId`);
-      }
+    const { cleanedDefaults, conflicts } = findKeyConflicts(this.defaultBindings, bindings);
+    for (const c of conflicts) {
+      console.warn(
+        `Binding "${c.key}" on action "${c.overrideActionId}" overrides default action "${c.defaultActionId}"`
+      );
     }
     this.isUsingDefaultBindings = false;
-    this.currentBindings = { ...this.defaultBindings, ...bindings };
+    this.currentBindings = { ...cleanedDefaults, ...bindings };
     this.registerKeys(this.currentBindings);
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
   }

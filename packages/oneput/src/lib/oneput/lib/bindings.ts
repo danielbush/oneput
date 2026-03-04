@@ -14,6 +14,14 @@
  * - bs = KeyBinding['bindings'] — tinykeys format strings
  * - ke = KeyEvent — internal representation for comparison
  * - KeyEventBindings — class for validating/editing bindings (add, remove, find duplicates)
+ *
+ * Two kinds of binding clash:
+ * - **Duplicate**: same key within a single KeyEventBindings set (e.g. user
+ *   tries to bind $mod+s twice). Caught by addBinding() — this is an error.
+ * - **Conflict**: same key across two separate KeyBindingMaps being merged
+ *   (e.g. an AppObject action uses $mod+h which is also a default binding).
+ *   Detected by findKeyConflicts() — the override wins, a warning is logged,
+ *   and the default is restored when the AppObject exits.
  */
 import { Result, ok, err } from 'neverthrow';
 import type { Controller } from '../controllers/controller.js';
@@ -299,7 +307,14 @@ export class KeyEventBindings {
   }
 
   /**
-   * Add binding using KeyEvent's since this is what we capture.
+   * Add a binding to an existing action within this set.
+   *
+   * This checks for **duplicates** — the same key already bound to any action
+   * in this same set (e.g. user tries to bind $mod+s when it's already taken).
+   * This is an error because it's ambiguous which action should fire.
+   *
+   * For **conflicts** across two separate sets (e.g. AppObject vs defaults),
+   * see findKeyConflicts() instead.
    */
   addBinding = (actionId: string, keyEvents: KeyEvent[]): Result<void, DuplicateBindingError> => {
     const existing = this.find(keyEvents);
@@ -344,4 +359,55 @@ export class KeyEventBindings {
   get keyBindingMap() {
     return keMapToKbMap(this.keyEventsMap, this.isMac);
   }
+}
+
+// --- Conflict detection across two binding maps ---
+
+export type BindingKeyConflict = {
+  defaultActionId: string;
+  overrideActionId: string;
+  key: string;
+};
+
+/**
+ * Detects **conflicts** between two separate KeyBindingMaps (e.g. defaults vs
+ * AppObject overrides) where different actions use the same key string.
+ *
+ * Returns a copy of `defaults` with the conflicting key strings removed so
+ * that the overrides take precedence when the maps are merged. The original
+ * `defaults` map is not mutated — callers keep it intact for later restoration.
+ *
+ * This is distinct from **duplicate** detection in addBinding(), which catches
+ * the same key bound twice within a single set.
+ */
+export function findKeyConflicts(
+  defaults: KeyBindingMap,
+  overrides: KeyBindingMap
+): { cleanedDefaults: KeyBindingMap; conflicts: BindingKeyConflict[] } {
+  const overrideKeys = new Map<string, string>();
+  for (const [actionId, kb] of Object.entries(overrides)) {
+    for (const key of kb.bindings) {
+      overrideKeys.set(key, actionId);
+    }
+  }
+
+  const conflicts: BindingKeyConflict[] = [];
+  const cleanedDefaults: KeyBindingMap = {};
+
+  for (const [actionId, kb] of Object.entries(defaults)) {
+    const remaining = kb.bindings.filter((key) => {
+      const overrideActionId = overrideKeys.get(key);
+      if (overrideActionId) {
+        conflicts.push({ defaultActionId: actionId, overrideActionId, key });
+        return false;
+      }
+      return true;
+    });
+
+    if (remaining.length > 0) {
+      cleanedDefaults[actionId] = { ...kb, bindings: remaining };
+    }
+  }
+
+  return { cleanedDefaults, conflicts };
 }

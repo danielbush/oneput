@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { KeyEventBindings, type KeyEvent, type KeyBindingMap } from './bindings.js';
+import {
+  KeyEventBindings,
+  findKeyConflicts,
+  type KeyEvent,
+  type KeyBindingMap
+} from './bindings.js';
 
 /**
  * Helper to create a KeyEvent with sensible defaults (all modifiers false).
@@ -279,5 +284,60 @@ describe('KeyEventBindings', () => {
       expect(restored.keyBindingMap['open'].bindings).toEqual(original['open'].bindings);
       expect(restored.keyBindingMap['save'].description).toBe('Save file');
     });
+  });
+});
+
+describe('findKeyConflicts', () => {
+  it('removes conflicting key from defaults and reports the conflict', () => {
+    // arrange
+    const defaults = createBindingMap({
+      hideOneput: { description: 'Hide Oneput', bindings: ['$mod+h'] }
+    });
+    const overrides = createBindingMap({
+      PREV_TOKEN: { description: 'Move to previous token', bindings: ['$mod+h'] }
+    });
+
+    // act
+    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+
+    // assert
+    expect(conflicts).toEqual([
+      { defaultActionId: 'hideOneput', overrideActionId: 'PREV_TOKEN', key: '$mod+h' }
+    ]);
+    expect(cleanedDefaults['hideOneput']).toBeUndefined();
+  });
+
+  it('preserves non-conflicting keys on the same default action', () => {
+    // arrange
+    const defaults = createBindingMap({
+      closeMenu: { description: 'Close menu', bindings: ['$mod+b', 'Escape'] }
+    });
+    const overrides = createBindingMap({
+      TOGGLE: { description: 'Toggle', bindings: ['Escape'] }
+    });
+
+    // act
+    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+
+    // assert
+    expect(conflicts).toHaveLength(1);
+    expect(cleanedDefaults['closeMenu'].bindings).toEqual(['$mod+b']);
+  });
+
+  it('returns empty conflicts when keys do not overlap', () => {
+    // arrange
+    const defaults = createBindingMap({
+      openMenu: { description: 'Open menu', bindings: ['$mod+b'] }
+    });
+    const overrides = createBindingMap({
+      NEXT_TOKEN: { description: 'Next token', bindings: ['$mod+l'] }
+    });
+
+    // act
+    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+
+    // assert
+    expect(conflicts).toEqual([]);
+    expect(cleanedDefaults['openMenu'].bindings).toEqual(['$mod+b']);
   });
 });

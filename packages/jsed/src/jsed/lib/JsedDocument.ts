@@ -1,5 +1,5 @@
 import { Navigator } from './navigator.js';
-import { JsedCursor } from './cursor.js';
+import { JsedCursor } from './JsedCursor.js';
 import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
 import { getFirstToken, tokenizeImplicitLine } from './token.js';
 import { JSED_DOM_ROOT_ID } from './constants.js';

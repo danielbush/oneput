@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  KeyEventBindings,
-  findKeyConflicts,
-  type KeyEvent,
-  type KeyBindingMap
-} from './bindings.js';
+import { KeyEventBindings, type KeyEvent, type KeyBindingMap } from './bindings.js';
 
 /**
  * Helper to create a KeyEvent with sensible defaults (all modifiers false).
@@ -288,74 +283,122 @@ describe('KeyEventBindings', () => {
   });
 });
 
-describe('findKeyConflicts', () => {
+describe('KeyEventBindings.merge', () => {
   it('removes conflicting key from defaults and reports the conflict', () => {
     // arrange
-    const defaults = createBindingMap({
-      hideOneput: { description: 'Hide Oneput', bindings: ['$mod+h'] }
-    });
-    const overrides = createBindingMap({
-      PREV_TOKEN: { description: 'Move to previous token', bindings: ['$mod+h'] }
-    });
+    const defaults = KeyEventBindings.create(
+      createBindingMap({ hideOneput: { description: 'Hide Oneput', bindings: ['$mod+h'] } })
+    );
+    const overrides = KeyEventBindings.create(
+      createBindingMap({
+        PREV_TOKEN: { description: 'Move to previous token', bindings: ['$mod+h'] }
+      })
+    );
 
     // act
-    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+    const merged = defaults.merge(overrides);
 
     // assert
-    expect(conflicts).toEqual([
+    expect(merged.conflicts).toEqual([
       { defaultActionId: 'hideOneput', overrideActionId: 'PREV_TOKEN', key: '$mod+h' }
     ]);
-    expect(cleanedDefaults['hideOneput']).toBeUndefined();
+    expect(merged.keyBindingMap['hideOneput']).toBeUndefined();
+    expect(merged.keyBindingMap['PREV_TOKEN'].bindings).toEqual(['$mod+h']);
   });
 
   it('preserves non-conflicting keys on the same default action', () => {
     // arrange
-    const defaults = createBindingMap({
-      closeMenu: { description: 'Close menu', bindings: ['$mod+b', 'Escape'] }
-    });
-    const overrides = createBindingMap({
-      TOGGLE: { description: 'Toggle', bindings: ['Escape'] }
-    });
+    const defaults = KeyEventBindings.create(
+      createBindingMap({
+        closeMenu: { description: 'Close menu', bindings: ['$mod+b', 'Escape'] }
+      })
+    );
+    const overrides = KeyEventBindings.create(
+      createBindingMap({ TOGGLE: { description: 'Toggle', bindings: ['Escape'] } })
+    );
 
     // act
-    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+    const merged = defaults.merge(overrides);
 
     // assert
-    expect(conflicts).toHaveLength(1);
-    expect(cleanedDefaults['closeMenu'].bindings).toEqual(['$mod+b']);
+    expect(merged.conflicts).toHaveLength(1);
+    expect(merged.keyBindingMap['closeMenu'].bindings).toEqual(['$mod+b']);
   });
 
   it('returns empty conflicts when keys do not overlap', () => {
     // arrange
-    const defaults = createBindingMap({
-      openMenu: { description: 'Open menu', bindings: ['$mod+b'] }
-    });
-    const overrides = createBindingMap({
-      NEXT_TOKEN: { description: 'Next token', bindings: ['$mod+l'] }
-    });
+    const defaults = KeyEventBindings.create(
+      createBindingMap({ openMenu: { description: 'Open menu', bindings: ['$mod+b'] } })
+    );
+    const overrides = KeyEventBindings.create(
+      createBindingMap({ NEXT_TOKEN: { description: 'Next token', bindings: ['$mod+l'] } })
+    );
 
     // act
-    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+    const merged = defaults.merge(overrides);
 
     // assert
-    expect(conflicts).toEqual([]);
-    expect(cleanedDefaults['openMenu'].bindings).toEqual(['$mod+b']);
+    expect(merged.conflicts).toEqual([]);
+    expect(merged.keyBindingMap['openMenu'].bindings).toEqual(['$mod+b']);
   });
 
   it('allows same key when when-conditions are mutually exclusive', () => {
     // arrange
-    const defaults = createBindingMap({
-      focusPrev: { description: 'Focus previous', bindings: ['$mod+k'], when: { menuOpen: true } }
-    });
-    const overrides = createBindingMap({
-      SIB_PREV: { description: 'Previous sibling', bindings: ['$mod+k'], when: { menuOpen: false } }
-    });
+    const defaults = KeyEventBindings.create(
+      createBindingMap({
+        focusPrev: {
+          description: 'Focus previous',
+          bindings: ['$mod+k'],
+          when: { menuOpen: true }
+        }
+      })
+    );
+    const overrides = KeyEventBindings.create(
+      createBindingMap({
+        SIB_PREV: {
+          description: 'Previous sibling',
+          bindings: ['$mod+k'],
+          when: { menuOpen: false }
+        }
+      })
+    );
 
     // act
-    const { cleanedDefaults, conflicts } = findKeyConflicts(defaults, overrides);
+    const merged = defaults.merge(overrides);
 
     // assert
-    expect(conflicts).toEqual([]);
-    expect(cleanedDefaults['focusPrev'].bindings).toEqual(['$mod+k']);
+    expect(merged.conflicts).toEqual([]);
+    expect(merged.keyBindingMap['focusPrev'].bindings).toEqual(['$mod+k']);
+    expect(merged.keyBindingMap['SIB_PREV'].bindings).toEqual(['$mod+k']);
+  });
+});
+
+describe('KeyEventBindings.candidatesByKey', () => {
+  it('groups bindings by tinykeys key string', () => {
+    // arrange
+    const bindings = KeyEventBindings.create(
+      createBindingMap({
+        focusPrev: {
+          description: 'Focus previous',
+          bindings: ['$mod+k'],
+          when: { menuOpen: true }
+        },
+        sibPrev: {
+          description: 'Previous sibling',
+          bindings: ['$mod+k'],
+          when: { menuOpen: false }
+        },
+        openMenu: { description: 'Open menu', bindings: ['$mod+b'] }
+      })
+    );
+
+    // act
+    const candidates = bindings.candidatesByKey;
+
+    // assert
+    expect(candidates.get('$mod+k')).toHaveLength(2);
+    expect(candidates.get('$mod+b')).toHaveLength(1);
+    expect(candidates.get('$mod+k')!.map((c) => c.actionId)).toContain('focusPrev');
+    expect(candidates.get('$mod+k')!.map((c) => c.actionId)).toContain('sibPrev');
   });
 });

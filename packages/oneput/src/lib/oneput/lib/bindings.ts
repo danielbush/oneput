@@ -18,10 +18,10 @@
  * Two kinds of binding clash:
  * - **Duplicate**: same key within a single KeyEventBindings set (e.g. user
  *   tries to bind $mod+s twice). Caught by addBinding() — this is an error.
- * - **Conflict**: same key across two separate KeyBindingMaps being merged
+ * - **Conflict**: same key across two separate sets being merged
  *   (e.g. an AppObject action uses $mod+h which is also a default binding).
- *   Detected by findKeyConflicts() — the override wins, a warning is logged,
- *   and the default is restored when the AppObject exits.
+ *   Detected by KeyEventBindings.merge() — the override wins, a warning is
+ *   logged, and the default is restored when the AppObject exits.
  */
 import { Result, ok, err } from 'neverthrow';
 import type { Controller } from '../controllers/controller.js';
@@ -264,10 +264,39 @@ function kbFromSerializable(
   };
 }
 
+export type BindingKeyConflict = {
+  defaultActionId: string;
+  overrideActionId: string;
+  key: string;
+};
+
+/**
+ * Two `when` conditions overlap (can both be true at the same time).
+ *
+ * - Both undefined → always active, overlap
+ * - One undefined → the "always" one matches whenever the specific one does
+ * - Same menuOpen value → overlap
+ * - menuOpen: true vs menuOpen: false → mutually exclusive, no overlap
+ */
+function whenOverlaps(a?: { menuOpen?: boolean }, b?: { menuOpen?: boolean }): boolean {
+  if (a?.menuOpen === undefined || b?.menuOpen === undefined) return true;
+  return a.menuOpen === b.menuOpen;
+}
+
 /**
  * Let's you edit / validate a set of key bindings.
  *
  * Internally we use KeyEvent's not KeyBinding since these are easier to compare.
+ *
+ * A KeyBindingMap can be split into:
+ * - A serializable part (KeyBindingMapSerializable) — key strings, descriptions,
+ *   and when conditions. This can be persisted (e.g. IndexedDB) so users can
+ *   store their preferred key bindings.
+ * - An action map (Record<string, (c: Controller) => void>) — the callbacks,
+ *   which are reattached via fromSerializable().
+ *
+ * The bindings themselves use the tinykeys format, which is a convenient
+ * human-readable way to define key bindings (e.g. "$mod+Shift+k", "Escape").
  */
 export class KeyEventBindings {
   static create(keyBindingMap: KeyBindingMap, isMac: boolean = isMacOS()) {
@@ -294,9 +323,20 @@ export class KeyEventBindings {
   private keyEventsMap: KeyEventsMap;
   private isMac: boolean;
 
-  constructor(keyBindingMap: KeyBindingMap, isMac: boolean = isMacOS()) {
+  /**
+   * Conflicts detected by the last merge() call. Empty if this instance
+   * was not produced by merge().
+   */
+  readonly conflicts: BindingKeyConflict[] = [];
+
+  constructor(
+    keyBindingMap: KeyBindingMap,
+    isMac: boolean = isMacOS(),
+    conflicts: BindingKeyConflict[] = []
+  ) {
     this.isMac = isMac;
     this.keyEventsMap = kbMaptoKeMap(keyBindingMap, isMac);
+    this.conflicts = conflicts;
   }
 
   toSerializable() {
@@ -314,7 +354,7 @@ export class KeyEventBindings {
    * This is an error because it's ambiguous which action should fire.
    *
    * For **conflicts** across two separate sets (e.g. AppObject vs defaults),
-   * see findKeyConflicts() instead.
+   * use merge() instead.
    */
   addBinding = (actionId: string, keyEvents: KeyEvent[]): Result<void, DuplicateBindingError> => {
     const existing = this.find(keyEvents);
@@ -353,79 +393,83 @@ export class KeyEventBindings {
   }
 
   /**
+   * Merge overrides on top of this set (the defaults). Returns a new
+   * KeyEventBindings with conflicts removed from defaults and all overrides
+   * included. Access .conflicts on the result to see what was overridden.
+   *
+   * A conflict occurs when the same key sequence (compared canonically via
+   * KeyEvent) appears in both sets with overlapping `when` conditions.
+   * Mutually exclusive conditions (e.g. menuOpen: true vs false) are not
+   * conflicts and both bindings are kept.
+   */
+  merge(overrides: KeyEventBindings): KeyEventBindings {
+    const overrideKeMap = overrides.keyEventsMap;
+
+    // Build a lookup: for each override binding (KeyEvent[]), store its actionId and when
+    const overrideLookup: Array<{
+      actionId: string;
+      binding: KeyEvent[];
+      when?: { menuOpen?: boolean };
+    }> = [];
+    for (const [actionId, keb] of Object.entries(overrideKeMap)) {
+      for (const binding of keb.bindings) {
+        overrideLookup.push({ actionId, binding, when: keb.when });
+      }
+    }
+
+    const conflicts: BindingKeyConflict[] = [];
+    const cleanedDefaultsKeMap: KeyEventsMap = {};
+
+    for (const [actionId, keb] of Object.entries(this.keyEventsMap)) {
+      const remaining = keb.bindings.filter((defaultBinding) => {
+        const conflict = overrideLookup.find(
+          (o) => isEqual(defaultBinding, o.binding) && whenOverlaps(keb.when, o.when)
+        );
+        if (conflict) {
+          conflicts.push({
+            defaultActionId: actionId,
+            overrideActionId: conflict.actionId,
+            key: keToBs(defaultBinding, this.isMac)
+          });
+          return false;
+        }
+        return true;
+      });
+
+      if (remaining.length > 0) {
+        cleanedDefaultsKeMap[actionId] = { ...keb, bindings: remaining };
+      }
+    }
+
+    // Build the merged KeyBindingMap from cleaned defaults + overrides
+    const mergedKbMap = {
+      ...keMapToKbMap(cleanedDefaultsKeMap, this.isMac),
+      ...keMapToKbMap(overrideKeMap, this.isMac)
+    };
+    return new KeyEventBindings(mergedKbMap, this.isMac, conflicts);
+  }
+
+  /**
+   * Groups bindings by tinykeys key string. Each key may have multiple
+   * candidates with different `when` conditions (e.g. one for menuOpen: true,
+   * another for menuOpen: false). Used by KeysController to register handlers.
+   */
+  get candidatesByKey(): Map<string, Array<{ actionId: string; kb: KeyBinding }>> {
+    const result = new Map<string, Array<{ actionId: string; kb: KeyBinding }>>();
+    for (const [actionId, kb] of Object.entries(this.keyBindingMap)) {
+      for (const binding of kb.bindings) {
+        if (!result.has(binding)) result.set(binding, []);
+        result.get(binding)!.push({ actionId, kb });
+      }
+    }
+    return result;
+  }
+
+  /**
    * Convert the key events map back to a key binding map - this is the format
    * that is usually written by users in configs etc.
    */
   get keyBindingMap() {
     return keMapToKbMap(this.keyEventsMap, this.isMac);
   }
-}
-
-// --- Conflict detection across two binding maps ---
-
-export type BindingKeyConflict = {
-  defaultActionId: string;
-  overrideActionId: string;
-  key: string;
-};
-
-/**
- * Two `when` conditions overlap (can both be true at the same time).
- *
- * - Both undefined → always active, overlap
- * - One undefined → the "always" one matches whenever the specific one does
- * - Same menuOpen value → overlap
- * - menuOpen: true vs menuOpen: false → mutually exclusive, no overlap
- */
-function whenOverlaps(a?: { menuOpen?: boolean }, b?: { menuOpen?: boolean }): boolean {
-  if (a?.menuOpen === undefined || b?.menuOpen === undefined) return true;
-  return a.menuOpen === b.menuOpen;
-}
-
-/**
- * Detects **conflicts** between two separate KeyBindingMaps (e.g. defaults vs
- * AppObject overrides) where different actions use the same key string and
- * have overlapping `when` conditions.
- *
- * Bindings that share a key but have mutually exclusive `when` conditions
- * (e.g. menuOpen: true vs menuOpen: false) are not conflicts — they can
- * coexist safely because only one can fire at a time.
- *
- * Returns a copy of `defaults` with the conflicting key strings removed so
- * that the overrides take precedence when the maps are merged. The original
- * `defaults` map is not mutated — callers keep it intact for later restoration.
- *
- * This is distinct from **duplicate** detection in addBinding(), which catches
- * the same key bound twice within a single set.
- */
-export function findKeyConflicts(
-  defaults: KeyBindingMap,
-  overrides: KeyBindingMap
-): { cleanedDefaults: KeyBindingMap; conflicts: BindingKeyConflict[] } {
-  const overrideKeys = new Map<string, { actionId: string; when?: { menuOpen?: boolean } }>();
-  for (const [actionId, kb] of Object.entries(overrides)) {
-    for (const key of kb.bindings) {
-      overrideKeys.set(key, { actionId, when: kb.when });
-    }
-  }
-
-  const conflicts: BindingKeyConflict[] = [];
-  const cleanedDefaults: KeyBindingMap = {};
-
-  for (const [actionId, kb] of Object.entries(defaults)) {
-    const remaining = kb.bindings.filter((key) => {
-      const override = overrideKeys.get(key);
-      if (override && whenOverlaps(kb.when, override.when)) {
-        conflicts.push({ defaultActionId: actionId, overrideActionId: override.actionId, key });
-        return false;
-      }
-      return true;
-    });
-
-    if (remaining.length > 0) {
-      cleanedDefaults[actionId] = { ...kb, bindings: remaining };
-    }
-  }
-
-  return { cleanedDefaults, conflicts };
 }

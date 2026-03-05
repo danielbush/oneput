@@ -1,6 +1,6 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import { findKeyConflicts, type KeyBinding, type KeyBindingMap } from '../lib/bindings.js';
+import { KeyEventBindings, type KeyBinding, type KeyBindingMap } from '../lib/bindings.js';
 
 /**
  * Manages key bindings — registration, dispatch, and default/override lifecycle.
@@ -55,19 +55,9 @@ export class KeysController {
   private registerKeys(bindings: KeyBindingMap) {
     this.unsubscribe();
 
-    // Group bindings by key string. A key like 'ArrowUp' may have multiple
-    // candidates with different `when` conditions (e.g. one for menuOpen: true,
-    // another for menuOpen: false). At dispatch time we pick the matching one.
-    const candidatesByKey = new Map<string, Array<{ actionId: string; kb: KeyBinding }>>();
-    for (const [actionId, kb] of Object.entries(bindings)) {
-      for (const binding of kb.bindings) {
-        if (!candidatesByKey.has(binding)) candidatesByKey.set(binding, []);
-        candidatesByKey.get(binding)!.push({ actionId, kb });
-      }
-    }
-
+    const keb = KeyEventBindings.create(bindings);
     const handlers: Record<string, (evt: KeyboardEvent) => void> = {};
-    for (const [key, candidates] of candidatesByKey) {
+    for (const [key, candidates] of keb.candidatesByKey) {
       handlers[key] = (evt: KeyboardEvent) => this.dispatch(evt, candidates);
     }
 
@@ -118,13 +108,14 @@ export class KeysController {
    * Defaults are fully restored on resetBindings().
    */
   setBindings(bindings: KeyBindingMap) {
-    const { cleanedDefaults, conflicts } = findKeyConflicts(this.defaultBindings, bindings);
-    for (const c of conflicts) {
+    const overrides = KeyEventBindings.create(bindings);
+    const finalBindings = KeyEventBindings.create(this.defaultBindings).merge(overrides);
+    for (const c of finalBindings.conflicts) {
       console.warn(
         `Binding "${c.key}" on action "${c.overrideActionId}" overrides default action "${c.defaultActionId}"`
       );
     }
-    this.currentBindings = { ...cleanedDefaults, ...bindings };
+    this.currentBindings = finalBindings.keyBindingMap;
     this.registerKeys(this.currentBindings);
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });
   }

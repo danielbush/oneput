@@ -1,7 +1,18 @@
 import type { JsedDocument } from './lib/JsedDocument.js';
 export { JsedDocument } from './lib/JsedDocument.js';
 
+/**
+ * The focus has been set.
+ *
+ * The target could be an F_ELEM or a TOKEN.
+ */
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
+/**
+ * The focus wants to be set to the target.
+ *
+ * The receiver of this event can accept or reject the focus request.
+ * If accepted, this will generate a JsedFocusEvent.
+ */
 export type JsedFocusRequestEvent = JsedFocusEventBase<'FOCUS_REQUEST'>;
 
 /**

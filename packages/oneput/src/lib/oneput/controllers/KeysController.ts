@@ -1,6 +1,6 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import { KeyEventBindings, type KeyBinding, type KeyBindingMap } from '../lib/bindings.js';
+import { KeyEventBindings, type KeyEventBinding, type KeyBindingMap } from '../lib/bindings.js';
 
 /**
  * Manages key bindings — registration, dispatch, and default/override lifecycle.
@@ -40,7 +40,10 @@ export class KeysController {
     return true;
   }
 
-  private dispatch(evt: KeyboardEvent, candidates: Array<{ actionId: string; kb: KeyBinding }>) {
+  private dispatch(
+    evt: KeyboardEvent,
+    candidates: Array<{ actionId: string; kb: KeyEventBinding }>
+  ) {
     if (this.keysDisabled) return;
     const match = candidates.find((c) => this.matchesWhen(c.kb.when));
     if (match) {

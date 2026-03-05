@@ -454,12 +454,13 @@ export class KeyEventBindings {
    * candidates with different `when` conditions (e.g. one for menuOpen: true,
    * another for menuOpen: false). Used by KeysController to register handlers.
    */
-  get candidatesByKey(): Map<string, Array<{ actionId: string; kb: KeyBinding }>> {
-    const result = new Map<string, Array<{ actionId: string; kb: KeyBinding }>>();
-    for (const [actionId, kb] of Object.entries(this.keyBindingMap)) {
-      for (const binding of kb.bindings) {
-        if (!result.has(binding)) result.set(binding, []);
-        result.get(binding)!.push({ actionId, kb });
+  get candidatesByKey(): Map<string, Array<{ actionId: string; kb: KeyEventBinding }>> {
+    const result = new Map<string, Array<{ actionId: string; kb: KeyEventBinding }>>();
+    for (const [actionId, keb] of Object.entries(this.keyEventsMap)) {
+      for (const binding of keb.bindings) {
+        const key = keToBs(binding, this.isMac);
+        if (!result.has(key)) result.set(key, []);
+        result.get(key)!.push({ actionId, kb: keb });
       }
     }
     return result;

@@ -34,6 +34,7 @@ export class EditDocument implements AppObject {
   }
 
   private cursor?: IJsedCursor;
+  private unsubscribeInputChanges?: () => void;
 
   constructor(
     private ctl: Controller,
@@ -51,7 +52,7 @@ export class EditDocument implements AppObject {
           onTokenChange: this.handleTokenChange
         });
 
-        this.ctl.events.on('input-change', ({ value }) => {
+        this.unsubscribeInputChanges = this.ctl.events.on('input-change', ({ value }) => {
           this.handleUserInput(value);
         });
         // So the user can start editing...
@@ -73,9 +74,23 @@ export class EditDocument implements AppObject {
       });
   };
 
-  onExit = () => {};
+  onExit = () => {
+    this.cursor?.close();
+    this.unsubscribeInputChanges?.();
+    this.document.listeners.REQUEST_FOCUS = null;
+  };
 
   actions = {
+    EXIT: {
+      action: () => {
+        this.ctl.app.exit();
+      },
+      binding: {
+        bindings: ['Control+[', '$mod+[', 'Escape'],
+        description: 'Stop editing, return to viewer',
+        when: { menuOpen: false }
+      }
+    },
     NEXT_TOKEN: {
       action: () => {
         this.cursor?.moveNext();

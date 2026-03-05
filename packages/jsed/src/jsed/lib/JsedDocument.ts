@@ -1,6 +1,5 @@
 import { Navigator } from './navigator.js';
-import { JsedCursor } from './JsedCursor.js';
-import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
+import type { JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
 import { getFirstToken, tokenizeImplicitLine } from './token.js';
 import { JSED_DOM_ROOT_ID } from './constants.js';
 import { ElementIndicator } from '../../oneput/ElementIndicator.js';
@@ -98,34 +97,15 @@ export class JsedDocument {
     return this.root.ownerDocument.defaultView;
   }
 
-  requestCursor(params: {
-    token: HTMLElement;
-    onTokenChange: (token: HTMLElement) => void;
-  }): IJsedCursor {
-    return JsedCursor.create({
-      document: this,
-      token: params.token,
-      onTokenChange: params.onTokenChange
-    });
-  }
-
   /**
    * Set up cursor on first available token under focus.
    */
-  requestCursorUnderFocus(params: {
-    onTokenChange: (token: HTMLElement) => void;
-  }): Result<IJsedCursor, JsedDocumentError> {
+  getFirstTokenUnderFocus(): Result<HTMLElement, JsedDocumentError> {
     const focus = this.nav.getFocus();
     if (focus) {
       const firstToken = getFirstToken(focus);
       if (firstToken) {
-        return ok(
-          JsedCursor.create({
-            document: this,
-            token: firstToken,
-            onTokenChange: params.onTokenChange
-          })
-        );
+        return ok(firstToken);
       }
       return err({ type: 'no-token-under-focus' });
     }

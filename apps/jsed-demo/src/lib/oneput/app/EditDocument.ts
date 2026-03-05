@@ -4,7 +4,8 @@ import {
   type IJsedCursor,
   utils,
   CursorMarkers,
-  type JsedFocusRequestEvent
+  type JsedFocusRequestEvent,
+  JsedCursor
 } from '@oneput/jsed';
 
 /**
@@ -43,11 +44,14 @@ export class EditDocument implements AppObject {
 
   onStart = () => {
     this.document
-      .requestCursorUnderFocus({
-        onTokenChange: this.handleTokenChange
-      })
-      .map((cursor) => {
-        this.cursor = cursor;
+      .getFirstTokenUnderFocus()
+      .map((firstToken) => {
+        this.cursor = JsedCursor.create({
+          document: this.document,
+          token: firstToken,
+          onTokenChange: this.handleTokenChange
+        });
+
         this.ctl.events.on('input-change', ({ value }) => {
           this.handleUserInput(value);
         });

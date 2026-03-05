@@ -1,5 +1,6 @@
 import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from './jsed/types.js';
-import { JsedDocument } from './jsed/types.js';
+import { JsedDocument } from './jsed/lib/JsedDocument.js';
+import { JsedCursor } from './jsed/lib/JsedCursor.js';
 import * as token from './jsed/lib/token.js';
 import * as dom from './jsed/lib/dom.js';
 import * as domRules from './jsed/lib/dom-rules.js';
@@ -36,7 +37,7 @@ export {
   JSED_IGNORE_CLASS
 } from './jsed/lib/constants.js';
 export { utils };
-export { JsedDocument };
+export { JsedDocument, JsedCursor };
 export type { JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor };
 
 export { CursorMarkers } from './oneput/CursorMarkers.js';

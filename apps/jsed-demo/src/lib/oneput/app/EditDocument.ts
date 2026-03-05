@@ -4,7 +4,8 @@ import {
   type IJsedCursor,
   utils,
   type JsedFocusRequestEvent,
-  JsedCursor
+  JsedCursor,
+  CursorMarkers
 } from '@oneput/jsed';
 
 /**
@@ -30,7 +31,31 @@ import {
  */
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
-    return new EditDocument(ctl, params.document);
+    return new EditDocument(ctl, params.document, {
+      JsedCursor: (firstToken: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
+        return JsedCursor.create({
+          document: params.document,
+          token: firstToken,
+          onTokenChange,
+          create: {
+            CursorMarkers: (cursor: IJsedCursor) => {
+              const markers = CursorMarkers.create(cursor);
+              const unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
+                markers.handleInputChange(value)
+              );
+              const unsubscribeSelectionChanges = ctl.events.on('toggle-select', ({ selection }) =>
+                markers.handleToggleSelect(selection)
+              );
+              markers.onClose(() => {
+                unsubscribeInputChanges();
+                unsubscribeSelectionChanges();
+              });
+              return markers;
+            }
+          }
+        });
+      }
+    });
   }
 
   private cursor?: IJsedCursor;
@@ -38,19 +63,20 @@ export class EditDocument implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private document: JsedDocument
+    private document: JsedDocument,
+    private create: {
+      JsedCursor: (
+        firstToken: HTMLElement,
+        onTokenChange: (token: HTMLElement) => void
+      ) => IJsedCursor;
+    }
   ) {}
 
   onStart = () => {
     this.document
       .getFirstTokenUnderFocus()
       .map((firstToken) => {
-        this.cursor = JsedCursor.create({
-          ctl: this.ctl,
-          document: this.document,
-          token: firstToken,
-          onTokenChange: this.handleTokenChange
-        });
+        this.cursor = this.create.JsedCursor(firstToken, this.handleTokenChange);
 
         this.unsubscribeInputChanges = this.ctl.events.on('input-change', ({ value }) => {
           this.handleUserInput(value);

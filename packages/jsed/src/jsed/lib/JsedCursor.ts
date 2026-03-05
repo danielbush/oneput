@@ -1,5 +1,5 @@
 import type { JsedDocument, IJsedCursor } from '../types.js';
-import { CursorMarkers, type CursorMarkersCtl } from '../../oneput/CursorMarkers';
+import type { CursorMarkers } from '../../oneput/CursorMarkers.js';
 import { JSED_TOKEN_FOCUS_CLASS } from './constants.js';
 import * as token from './token.js';
 
@@ -8,15 +8,15 @@ export class JsedCursor implements IJsedCursor {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
-    ctl: CursorMarkersCtl;
+    create: {
+      CursorMarkers: (cursor: IJsedCursor) => CursorMarkers;
+    };
   }) {
     return new JsedCursor({
       document: params.document,
       token: params.token,
       onTokenChange: params.onTokenChange,
-      create: {
-        CursorMarkers: (cursor: IJsedCursor) => CursorMarkers.create(params.ctl, cursor)
-      }
+      create: params.create
     });
   }
 

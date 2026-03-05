@@ -2,16 +2,6 @@ import { type IJsedCursor } from '../index.js';
 import type { InputSelectionState } from '@oneput/oneput';
 import * as constants from './constants.js';
 
-export interface CursorMarkersCtl {
-  events: {
-    on(type: 'input-change', handler: (payload: { value: string }) => void): () => void;
-    on(
-      type: 'toggle-select',
-      handler: (payload: { selection: InputSelectionState }) => void
-    ): () => void;
-  };
-}
-
 /**
  * Manages the display state of the TOKEN under the cursor.
  *
@@ -28,33 +18,20 @@ export interface CursorMarkersCtl {
  * - TOKEN_APPEND_CLASS - the cursor is about to append text to the token (no spaces)
  */
 export class CursorMarkers {
-  static create(ctl: CursorMarkersCtl, cursor: IJsedCursor): CursorMarkers {
-    return new CursorMarkers(ctl, cursor);
+  static create(cursor: IJsedCursor): CursorMarkers {
+    return new CursorMarkers(cursor);
   }
 
-  constructor(
-    private ctl: CursorMarkersCtl,
-    private cursor: IJsedCursor
-  ) {
-    this.unsubscribeInputChanges = this.ctl.events.on('input-change', ({ value }) => {
-      this.handleInputChange(value);
-    });
-    this.unsubscribeSelectionChanges = this.ctl.events.on('toggle-select', ({ selection }) => {
-      this.handleToggleSelect(selection);
-    });
-  }
+  constructor(private cursor: IJsedCursor) {}
 
-  private unsubscribeInputChanges?: () => void;
-  private unsubscribeSelectionChanges?: () => void;
-
-  private handleInputChange(inputValue: string): void {
+  handleInputChange = (inputValue: string): void => {
     const val = inputValue;
     if (val.endsWith(' ')) {
       this.addFocusClasses(constants.TOKEN_INSERT_AFTER_CLASS);
     } else if (val.startsWith(' ')) {
       this.addFocusClasses(constants.TOKEN_INSERT_BEFORE_CLASS);
     }
-  }
+  };
 
   clear(): void {
     this.cursor.removeFocusClasses(
@@ -70,7 +47,7 @@ export class CursorMarkers {
     this.cursor.addFocusClasses(...classNames);
   }
 
-  handleToggleSelect(state: InputSelectionState): void {
+  handleToggleSelect = (state: InputSelectionState): void => {
     switch (state) {
       case 'CURSOR_AT_BEGINNING':
         this.addFocusClasses(constants.TOKEN_PREPEND_CLASS);
@@ -81,7 +58,7 @@ export class CursorMarkers {
       default:
         this.addFocusClasses();
     }
-  }
+  };
 
   isInsertingAfter(): boolean {
     return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_AFTER_CLASS);
@@ -93,7 +70,12 @@ export class CursorMarkers {
 
   close(): void {
     this.clear();
-    this.unsubscribeInputChanges?.();
-    this.unsubscribeSelectionChanges?.();
+    this.#onClose?.();
+  }
+
+  #onClose: (() => void) | undefined;
+
+  onClose(callback: () => void): void {
+    this.#onClose = callback;
   }
 }

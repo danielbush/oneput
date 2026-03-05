@@ -36,20 +36,16 @@ export class CursorMarkers {
     private ctl: CursorMarkersCtl,
     private cursor: IJsedCursor
   ) {
-    this.unsubscribers = [];
-    this.unsubscribers.push(
-      this.ctl.events.on('input-change', ({ value }) => {
-        this.handleInputChange(value);
-      })
-    );
-    this.unsubscribers.push(
-      this.ctl.events.on('toggle-select', ({ selection }) => {
-        this.handleToggleSelect(selection);
-      })
-    );
+    this.unsubscribeInputChanges = this.ctl.events.on('input-change', ({ value }) => {
+      this.handleInputChange(value);
+    });
+    this.unsubscribeSelectionChanges = this.ctl.events.on('toggle-select', ({ selection }) => {
+      this.handleToggleSelect(selection);
+    });
   }
 
-  private unsubscribers: Array<() => void>;
+  private unsubscribeInputChanges?: () => void;
+  private unsubscribeSelectionChanges?: () => void;
 
   private handleInputChange(inputValue: string): void {
     const val = inputValue;
@@ -97,6 +93,7 @@ export class CursorMarkers {
 
   close(): void {
     this.clear();
-    this.unsubscribers.forEach((unsubscribe) => unsubscribe());
+    this.unsubscribeInputChanges?.();
+    this.unsubscribeSelectionChanges?.();
   }
 }

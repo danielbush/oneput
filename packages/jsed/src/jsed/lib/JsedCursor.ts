@@ -3,13 +3,6 @@ import { JSED_TOKEN_FOCUS_CLASS } from './constants.js';
 import * as token from './token.js';
 
 export class JsedCursor implements IJsedCursor {
-  /**
-   * The token the cursor is currently on.
-   */
-  #token: HTMLElement;
-  #document: JsedDocument;
-  #onTokenChange: (token: HTMLElement) => void;
-
   static create(params: {
     document: JsedDocument;
     token: HTMLElement;
@@ -17,6 +10,13 @@ export class JsedCursor implements IJsedCursor {
   }) {
     return new JsedCursor(params);
   }
+
+  /**
+   * The token the cursor is currently on.
+   */
+  #token: HTMLElement;
+  #document: JsedDocument;
+  #onTokenChange: (token: HTMLElement) => void;
 
   constructor(params: {
     document: JsedDocument;

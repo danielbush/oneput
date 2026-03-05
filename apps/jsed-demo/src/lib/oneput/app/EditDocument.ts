@@ -3,7 +3,6 @@ import {
   type JsedDocument,
   type IJsedCursor,
   utils,
-  CursorMarkers,
   type JsedFocusRequestEvent,
   JsedCursor
 } from '@oneput/jsed';
@@ -35,7 +34,6 @@ export class EditDocument implements AppObject {
   }
 
   private cursor?: IJsedCursor;
-  private cursorMarkers?: CursorMarkers;
 
   constructor(
     private ctl: Controller,
@@ -47,6 +45,7 @@ export class EditDocument implements AppObject {
       .getFirstTokenUnderFocus()
       .map((firstToken) => {
         this.cursor = JsedCursor.create({
+          ctl: this.ctl,
           document: this.document,
           token: firstToken,
           onTokenChange: this.handleTokenChange
@@ -55,7 +54,6 @@ export class EditDocument implements AppObject {
         this.ctl.events.on('input-change', ({ value }) => {
           this.handleUserInput(value);
         });
-        this.cursorMarkers = CursorMarkers.create(this.ctl, this.cursor);
         // So the user can start editing...
         this.ctl.input.focus();
         this.document.listeners.REQUEST_FOCUS = this.handleFocusRequest;
@@ -80,11 +78,7 @@ export class EditDocument implements AppObject {
   actions = {
     NEXT_TOKEN: {
       action: () => {
-        if (this.cursorMarkers?.isInsertingBefore()) {
-          this.cursorMarkers.clear();
-        } else {
-          this.cursor?.moveNext();
-        }
+        this.cursor?.moveNext();
       },
       binding: {
         bindings: ['$mod+l'],
@@ -94,11 +88,7 @@ export class EditDocument implements AppObject {
     },
     PREV_TOKEN: {
       action: () => {
-        if (this.cursorMarkers?.isInsertingAfter()) {
-          this.cursorMarkers.clear();
-        } else {
-          this.cursor?.movePrevious();
-        }
+        this.cursor?.movePrevious();
       },
       binding: {
         bindings: ['$mod+h'],

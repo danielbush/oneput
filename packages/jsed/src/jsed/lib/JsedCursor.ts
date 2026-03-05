@@ -1,4 +1,5 @@
 import type { JsedDocument, IJsedCursor } from '../types.js';
+import { CursorMarkers, type CursorMarkersCtl } from '../../oneput/CursorMarkers';
 import { JSED_TOKEN_FOCUS_CLASS } from './constants.js';
 import * as token from './token.js';
 
@@ -7,8 +8,16 @@ export class JsedCursor implements IJsedCursor {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
+    ctl: CursorMarkersCtl;
   }) {
-    return new JsedCursor(params);
+    return new JsedCursor({
+      document: params.document,
+      token: params.token,
+      onTokenChange: params.onTokenChange,
+      create: {
+        CursorMarkers: (cursor: IJsedCursor) => CursorMarkers.create(params.ctl, cursor)
+      }
+    });
   }
 
   /**
@@ -17,16 +26,21 @@ export class JsedCursor implements IJsedCursor {
   #token: HTMLElement;
   #document: JsedDocument;
   #onTokenChange: (token: HTMLElement) => void;
+  #cursorMarkers: CursorMarkers;
 
   constructor(params: {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
+    create: {
+      CursorMarkers: (cursor: IJsedCursor) => CursorMarkers;
+    };
   }) {
     this.#token = params.token; // ts
     this.#document = params.document;
     this.#onTokenChange = params.onTokenChange;
     this.#setToken(params.token);
+    this.#cursorMarkers = params.create.CursorMarkers(this);
   }
 
   getDocument() {
@@ -71,6 +85,11 @@ export class JsedCursor implements IJsedCursor {
 
   moveNext() {
     this.#failIfExhausted();
+    if (this.#cursorMarkers.isInsertingBefore()) {
+      this.#cursorMarkers.clear();
+      return;
+    }
+
     const nextToken = token.getNextLineSibling(this.#token);
     if (nextToken) {
       this.#setToken(nextToken);
@@ -78,6 +97,11 @@ export class JsedCursor implements IJsedCursor {
   }
   movePrevious() {
     this.#failIfExhausted();
+    if (this.#cursorMarkers.isInsertingAfter()) {
+      this.#cursorMarkers.clear();
+      return;
+    }
+
     const prevToken = token.getPreviousLineSibling(this.#token);
     if (prevToken) {
       this.#setToken(prevToken);
@@ -181,9 +205,10 @@ export class JsedCursor implements IJsedCursor {
   // #region Closing
 
   close() {
-    this.#failIfExhausted();
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     this.#removeAllFocusClasses();
+    this.#cursorMarkers.close();
+    this.#failIfExhausted();
   }
 
   /**

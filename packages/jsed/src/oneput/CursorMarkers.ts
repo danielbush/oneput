@@ -1,6 +1,16 @@
 import { type IJsedCursor } from '../index.js';
-import type { Controller, InputSelectionState } from '@oneput/oneput';
+import type { InputSelectionState } from '@oneput/oneput';
 import * as constants from './constants.js';
+
+export interface CursorMarkersCtl {
+  events: {
+    on(type: 'input-change', handler: (payload: { value: string }) => void): () => void;
+    on(
+      type: 'toggle-select',
+      handler: (payload: { selection: InputSelectionState }) => void
+    ): () => void;
+  };
+}
 
 /**
  * Manages the display state of the TOKEN under the cursor.
@@ -18,21 +28,28 @@ import * as constants from './constants.js';
  * - TOKEN_APPEND_CLASS - the cursor is about to append text to the token (no spaces)
  */
 export class CursorMarkers {
-  static create(ctl: Controller, cursor: IJsedCursor): CursorMarkers {
+  static create(ctl: CursorMarkersCtl, cursor: IJsedCursor): CursorMarkers {
     return new CursorMarkers(ctl, cursor);
   }
 
   constructor(
-    private ctl: Controller,
+    private ctl: CursorMarkersCtl,
     private cursor: IJsedCursor
   ) {
-    this.ctl.events.on('input-change', ({ value }) => {
-      this.handleInputChange(value);
-    });
-    this.ctl.events.on('toggle-select', ({ selection }) => {
-      this.handleToggleSelect(selection);
-    });
+    this.unsubscribers = [];
+    this.unsubscribers.push(
+      this.ctl.events.on('input-change', ({ value }) => {
+        this.handleInputChange(value);
+      })
+    );
+    this.unsubscribers.push(
+      this.ctl.events.on('toggle-select', ({ selection }) => {
+        this.handleToggleSelect(selection);
+      })
+    );
   }
+
+  private unsubscribers: Array<() => void>;
 
   private handleInputChange(inputValue: string): void {
     const val = inputValue;
@@ -76,5 +93,10 @@ export class CursorMarkers {
 
   isInsertingBefore(): boolean {
     return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_BEFORE_CLASS);
+  }
+
+  close(): void {
+    this.clear();
+    this.unsubscribers.forEach((unsubscribe) => unsubscribe());
   }
 }

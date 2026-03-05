@@ -95,6 +95,16 @@ export class EditDocument implements AppObject {
         description: 'Move to previous token',
         when: { menuOpen: false }
       }
+    },
+    TOGGLE_SELECT: {
+      action: () => {
+        this.ctl.input.toggleSelect();
+      },
+      binding: {
+        bindings: ['$mod+e'],
+        description: 'Toggle input element cursor state',
+        when: { menuOpen: false }
+      }
     }
   };
 

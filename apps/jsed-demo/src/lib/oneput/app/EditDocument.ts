@@ -163,6 +163,9 @@ export class EditDocument implements AppObject {
     });
   };
 
+  /**
+   * When the user clicks somewhere...
+   */
   private handleFocusRequest = (evt: JsedFocusRequestEvent) => {
     if (!this.cursor) {
       return false;
@@ -175,10 +178,10 @@ export class EditDocument implements AppObject {
         this.ctl.input.setInputValue(utils.token.getValue(evt.token)).then(() => {
           this.ctl.input.selectAll();
         });
-        return false; // TODO: old code: #handleCursorSetToken will call FOCUS.
+        return true; // TODO: old code: #handleCursorSetToken will call FOCUS.
       }
     }
-    return true;
+    return false;
   };
 
   /**

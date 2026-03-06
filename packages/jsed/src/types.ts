@@ -1,3 +1,4 @@
+import type { JsedInputSelectionState } from './EditManager.js';
 import type { JsedDocument } from './JsedDocument.js';
 export { JsedDocument } from './JsedDocument.js';
 
@@ -40,6 +41,8 @@ type JsedFocusEventBase<T> =
     };
 
 export type ITokenCursor = {
+  handleInputChange: (input: string) => void;
+  handleSelectionChange: (selection: JsedInputSelectionState) => void;
   getDocument: () => JsedDocument;
   setToken: (token: HTMLElement) => void;
   /**

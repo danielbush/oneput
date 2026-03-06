@@ -33,6 +33,19 @@ export class CursorMarkers {
     }
   };
 
+  handleToggleSelect = (state: InputSelectionState): void => {
+    switch (state) {
+      case 'CURSOR_AT_BEGINNING':
+        this.addFocusClasses(constants.TOKEN_PREPEND_CLASS);
+        return;
+      case 'CURSOR_AT_END':
+        this.addFocusClasses(constants.TOKEN_APPEND_CLASS);
+        return;
+      default:
+        this.addFocusClasses();
+    }
+  };
+
   clear(): void {
     this.cursor.removeFocusClasses(
       constants.TOKEN_INSERT_AFTER_CLASS,
@@ -46,19 +59,6 @@ export class CursorMarkers {
     this.clear();
     this.cursor.addFocusClasses(...classNames);
   }
-
-  handleToggleSelect = (state: InputSelectionState): void => {
-    switch (state) {
-      case 'CURSOR_AT_BEGINNING':
-        this.addFocusClasses(constants.TOKEN_PREPEND_CLASS);
-        return;
-      case 'CURSOR_AT_END':
-        this.addFocusClasses(constants.TOKEN_APPEND_CLASS);
-        return;
-      default:
-        this.addFocusClasses();
-    }
-  };
 
   isInsertingAfter(): boolean {
     return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_AFTER_CLASS);

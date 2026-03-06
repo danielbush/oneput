@@ -1,22 +1,19 @@
 import type { JsedDocument, ITokenCursor } from './types.js';
-import type { CursorMarkers } from './CursorMarkers.js';
+import { CursorMarkers } from './CursorMarkers.js';
 import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
 import * as token from './lib/token.js';
+import type { JsedInputSelectionState } from './EditManager.js';
 
 export class TokenCursor implements ITokenCursor {
   static create(params: {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
-    create: {
-      CursorMarkers: (cursor: ITokenCursor) => CursorMarkers;
-    };
   }) {
     return new TokenCursor({
       document: params.document,
       token: params.token,
-      onTokenChange: params.onTokenChange,
-      create: params.create
+      onTokenChange: params.onTokenChange
     });
   }
 
@@ -32,16 +29,21 @@ export class TokenCursor implements ITokenCursor {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
-    create: {
-      CursorMarkers: (cursor: ITokenCursor) => CursorMarkers;
-    };
   }) {
     this.#token = params.token; // ts
     this.#document = params.document;
     this.#onTokenChange = params.onTokenChange;
     this.#setToken(params.token);
-    this.#cursorMarkers = params.create.CursorMarkers(this);
+    this.#cursorMarkers = CursorMarkers.create(this);
   }
+
+  public handleInputChange = (input: string): void => {
+    this.#cursorMarkers.handleInputChange(input);
+  };
+
+  public handleSelectionChange = (selection: JsedInputSelectionState): void => {
+    this.#cursorMarkers.handleToggleSelect(selection);
+  };
 
   getDocument() {
     return this.#document;

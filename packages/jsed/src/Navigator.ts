@@ -39,6 +39,10 @@ export class Navigator {
   #FOCUS?: HTMLElement;
   #REQUEST_FOCUS?: ((evt: JsedFocusRequestEvent) => boolean) | null;
 
+  get document(): JsedDocument {
+    return this.doc;
+  }
+
   constructor(
     private doc: JsedDocument,
     private elementIndicator: ElementIndicator

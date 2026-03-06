@@ -3,10 +3,12 @@ import {
   type Navigator,
   type JsedDocument,
   type ITokenCursor,
-  utils,
+  type JsedInputSelectionState,
   type JsedFocusRequestEvent,
+  utils,
   TokenCursor,
-  CursorMarkers
+  CursorMarkers,
+  EditManager
 } from '@oneput/jsed';
 
 /**
@@ -32,6 +34,14 @@ import {
  */
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; nav: Navigator }) {
+    EditManager.create({
+      doc: params.document,
+      nav: params.nav,
+      onInputChange: (fn: (value: string) => void) =>
+        ctl.events.on('input-change', ({ value }) => fn(value)),
+      onSelectionChange: (fn: (selection: JsedInputSelectionState) => void) =>
+        ctl.events.on('toggle-select', ({ selection }) => fn(selection))
+    });
     return new EditDocument(ctl, params.document, params.nav, {
       TokenCursor: (token: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
         return TokenCursor.create({

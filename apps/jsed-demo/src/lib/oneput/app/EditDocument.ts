@@ -33,10 +33,10 @@ import {
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; nav: Navigator }) {
     return new EditDocument(ctl, params.document, params.nav, {
-      TokenCursor: (firstToken: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
+      TokenCursor: (token: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
         return TokenCursor.create({
           document: params.document,
-          token: firstToken,
+          token,
           onTokenChange,
           create: {
             CursorMarkers: (cursor: ITokenCursor) => {

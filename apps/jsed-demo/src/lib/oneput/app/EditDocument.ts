@@ -85,7 +85,7 @@ export class EditDocument implements AppObject {
         });
         // So the user can start editing...
         this.ctl.input.focus();
-        this.document.listeners.REQUEST_FOCUS = this.handleFocusRequest;
+        this.nav.setFocusController(this.handleFocusRequest);
         this.nav.FOCUS(this.cursor.getToken());
       })
       .mapErr((err) => {
@@ -105,7 +105,7 @@ export class EditDocument implements AppObject {
   onExit = () => {
     this.cursor?.close();
     this.unsubscribeInputChanges?.();
-    this.document.listeners.REQUEST_FOCUS = null;
+    this.nav.removeFocusController();
   };
 
   actions = {

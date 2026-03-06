@@ -1,5 +1,5 @@
 import { err, ok, Result } from 'neverthrow';
-import type { JsedDocument, JsedFocusEvent } from './types.js';
+import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
 import { JSED_DOM_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
 import { ignoreDescendents, isFocusable } from './lib/focus.js';
 import * as token from './lib/token.js';
@@ -37,6 +37,7 @@ export class DOMCursor {
    * F_ELEM for that TOKEN.
    */
   #FOCUS?: HTMLElement;
+  #REQUEST_FOCUS?: ((evt: JsedFocusRequestEvent) => boolean) | null;
 
   constructor(
     private doc: JsedDocument,
@@ -54,10 +55,20 @@ export class DOMCursor {
     this.doc.root.removeEventListener('click', this.handleElementClick);
   }
 
-  handleElementFocus = (evt: JsedFocusEvent) => {
-    const el = evt.targetType === 'F_ELEM' ? evt.element : evt.token;
-    this.elementIndicator.updateFocus(el);
-  };
+  /**
+   * This can control whether or not a FOCUS can occur.
+   *
+   * Don't forget to remove it at the end.
+   * TOOO: need a better clean up pattern
+   * @param controller
+   */
+  setFocusController(controller: (evt: JsedFocusRequestEvent) => boolean) {
+    this.#REQUEST_FOCUS = controller;
+  }
+
+  removeFocusController() {
+    this.#REQUEST_FOCUS = null;
+  }
 
   handleElementClick = (evt: MouseEvent) => {
     const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
@@ -121,6 +132,7 @@ export class DOMCursor {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
     }
     this.#FOCUS = el;
+    this.elementIndicator.updateFocus(el);
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
     this.#emitFocusEvent(
       tok
@@ -231,25 +243,26 @@ export class DOMCursor {
       return;
     }
     // If there are no listeners, we'll assume ok = true.
-    const listener = this.doc.listeners.REQUEST_FOCUS ?? (() => true);
     if (isFocusable(el)) {
-      const ok = listener({
-        type: 'FOCUS_REQUEST',
-        targetType: 'F_ELEM',
-        element: el
-      });
+      const ok =
+        this.#REQUEST_FOCUS?.({
+          type: 'FOCUS_REQUEST',
+          targetType: 'F_ELEM',
+          element: el
+        }) ?? true;
       if (ok) {
         this.FOCUS(el);
       }
       return;
     }
     if (token.isToken2(el)) {
-      const ok = listener({
-        type: 'FOCUS_REQUEST',
-        targetType: 'TOKEN',
-        token: el,
-        value: token.getValue(el)
-      });
+      const ok =
+        this.#REQUEST_FOCUS?.({
+          type: 'FOCUS_REQUEST',
+          targetType: 'TOKEN',
+          token: el,
+          value: token.getValue(el)
+        }) ?? true;
       if (ok) {
         this.FOCUS(el);
       }

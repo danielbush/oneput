@@ -1,4 +1,4 @@
-import { JsedDocument } from '../lib/JsedDocument.js';
+import { JsedDocument } from '../JsedDocument.js';
 
 /**
  * Make a div be the root of the document.

@@ -1,5 +1,5 @@
-import { JSED_IGNORE_CLASS } from '../jsed/lib/constants.js';
-import { getParent, isToken } from '../jsed/lib/token.js';
+import { JSED_IGNORE_CLASS } from './lib/constants.js';
+import { getParent, isToken } from './lib/token.js';
 
 // #region Types
 

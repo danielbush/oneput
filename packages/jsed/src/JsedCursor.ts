@@ -1,7 +1,7 @@
-import type { JsedDocument, IJsedCursor } from '../types.js';
-import type { CursorMarkers } from '../../oneput/CursorMarkers.js';
-import { JSED_TOKEN_FOCUS_CLASS } from './constants.js';
-import * as token from './token.js';
+import type { JsedDocument, IJsedCursor } from './types.js';
+import type { CursorMarkers } from './CursorMarkers.js';
+import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
+import * as token from './lib/token.js';
 
 export class JsedCursor implements IJsedCursor {
   static create(params: {

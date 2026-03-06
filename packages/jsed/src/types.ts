@@ -1,5 +1,5 @@
-import type { JsedDocument } from './lib/JsedDocument.js';
-export { JsedDocument } from './lib/JsedDocument.js';
+import type { JsedDocument } from './JsedDocument.js';
+export { JsedDocument } from './JsedDocument.js';
 
 /**
  * The focus has been set.

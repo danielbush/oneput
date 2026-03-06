@@ -1,14 +1,14 @@
-import type { JsedDocument } from '../types.js';
-import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './constants.js';
-import { ignoreDescendents, isFocusable } from './focus.js';
-import * as token from './token.js';
+import type { JsedDocument } from './types.js';
+import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
+import { ignoreDescendents, isFocusable } from './lib/focus.js';
+import * as token from './lib/token.js';
 import {
   getNextSiblingNode,
   getParent,
   getPreviousSiblingNode,
   findNextNode,
   findPreviousNode
-} from './walk.js';
+} from './lib/walk.js';
 
 export class Navigator {
   #document: Omit<JsedDocument, 'nav'>;

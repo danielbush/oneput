@@ -1,9 +1,9 @@
-import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from './jsed/types.js';
-import { JsedDocument } from './jsed/lib/JsedDocument.js';
-import { JsedCursor } from './jsed/lib/JsedCursor.js';
-import * as token from './jsed/lib/token.js';
-import * as dom from './jsed/lib/dom.js';
-import * as domRules from './jsed/lib/dom-rules.js';
+import type { IJsedCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
+import { JsedDocument } from './JsedDocument.js';
+import { JsedCursor } from './JsedCursor.js';
+import * as token from './lib/token.js';
+import * as dom from './lib/dom.js';
+import * as domRules from './lib/dom-rules.js';
 
 const utils = {
   dom: {
@@ -35,9 +35,9 @@ export {
   JSED_TOKEN_CLASS,
   JSED_DOM_ROOT_ID,
   JSED_IGNORE_CLASS
-} from './jsed/lib/constants.js';
+} from './lib/constants.js';
 export { utils };
 export { JsedDocument, JsedCursor };
 export type { JsedFocusRequestEvent, JsedFocusEvent, IJsedCursor };
 
-export { CursorMarkers } from './oneput/CursorMarkers.js';
+export { CursorMarkers } from './CursorMarkers.js';

@@ -1,8 +1,8 @@
 import { Navigator } from './navigator.js';
-import type { JsedFocusRequestEvent, JsedFocusEvent } from '../types.js';
-import { getFirstToken, tokenizeImplicitLine } from './token.js';
-import { JSED_DOM_ROOT_ID } from './constants.js';
-import { ElementIndicator } from '../../oneput/ElementIndicator.js';
+import type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
+import { getFirstToken, tokenizeImplicitLine } from './lib/token.js';
+import { JSED_DOM_ROOT_ID } from './lib/constants.js';
+import { ElementIndicator } from './ElementIndicator.js';
 import { err, ok, Result } from 'neverthrow';
 
 export type JsedDocumentError =

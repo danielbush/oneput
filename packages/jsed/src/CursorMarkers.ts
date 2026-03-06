@@ -1,6 +1,6 @@
-import { type IJsedCursor } from '../index.js';
+import { type IJsedCursor } from './index.js';
 import type { InputSelectionState } from '@oneput/oneput';
-import * as constants from './constants.js';
+import * as constants from './lib/constants.js';
 
 /**
  * Manages the display state of the TOKEN under the cursor.

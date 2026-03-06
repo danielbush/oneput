@@ -1,18 +1,18 @@
-import type { JsedDocument, IJsedCursor } from './types.js';
+import type { JsedDocument, ITokenCursor } from './types.js';
 import type { CursorMarkers } from './CursorMarkers.js';
 import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
 import * as token from './lib/token.js';
 
-export class JsedCursor implements IJsedCursor {
+export class TokenCursor implements ITokenCursor {
   static create(params: {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
     create: {
-      CursorMarkers: (cursor: IJsedCursor) => CursorMarkers;
+      CursorMarkers: (cursor: ITokenCursor) => CursorMarkers;
     };
   }) {
-    return new JsedCursor({
+    return new TokenCursor({
       document: params.document,
       token: params.token,
       onTokenChange: params.onTokenChange,
@@ -33,7 +33,7 @@ export class JsedCursor implements IJsedCursor {
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
     create: {
-      CursorMarkers: (cursor: IJsedCursor) => CursorMarkers;
+      CursorMarkers: (cursor: ITokenCursor) => CursorMarkers;
     };
   }) {
     this.#token = params.token; // ts

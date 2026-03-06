@@ -1,10 +1,10 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import {
   type JsedDocument,
-  type IJsedCursor,
+  type ITokenCursor,
   utils,
   type JsedFocusRequestEvent,
-  JsedCursor,
+  TokenCursor,
   CursorMarkers
 } from '@oneput/jsed';
 
@@ -32,13 +32,13 @@ import {
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
     return new EditDocument(ctl, params.document, {
-      JsedCursor: (firstToken: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
-        return JsedCursor.create({
+      TokenCursor: (firstToken: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
+        return TokenCursor.create({
           document: params.document,
           token: firstToken,
           onTokenChange,
           create: {
-            CursorMarkers: (cursor: IJsedCursor) => {
+            CursorMarkers: (cursor: ITokenCursor) => {
               const markers = CursorMarkers.create(cursor);
               const unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
                 markers.handleInputChange(value)
@@ -58,17 +58,17 @@ export class EditDocument implements AppObject {
     });
   }
 
-  private cursor?: IJsedCursor;
+  private cursor?: ITokenCursor;
   private unsubscribeInputChanges?: () => void;
 
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
     private create: {
-      JsedCursor: (
+      TokenCursor: (
         firstToken: HTMLElement,
         onTokenChange: (token: HTMLElement) => void
-      ) => IJsedCursor;
+      ) => ITokenCursor;
     }
   ) {}
 
@@ -76,7 +76,7 @@ export class EditDocument implements AppObject {
     this.document
       .getFirstTokenUnderFocus()
       .map((firstToken) => {
-        this.cursor = this.create.JsedCursor(firstToken, this.handleTokenChange);
+        this.cursor = this.create.TokenCursor(firstToken, this.handleTokenChange);
 
         this.unsubscribeInputChanges = this.ctl.events.on('input-change', ({ value }) => {
           this.handleUserInput(value);

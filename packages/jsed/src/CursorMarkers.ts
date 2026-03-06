@@ -1,4 +1,4 @@
-import { type IJsedCursor } from './index.js';
+import { type ITokenCursor } from './index.js';
 import type { InputSelectionState } from '@oneput/oneput';
 import * as constants from './lib/constants.js';
 
@@ -18,11 +18,11 @@ import * as constants from './lib/constants.js';
  * - TOKEN_APPEND_CLASS - the cursor is about to append text to the token (no spaces)
  */
 export class CursorMarkers {
-  static create(cursor: IJsedCursor): CursorMarkers {
+  static create(cursor: ITokenCursor): CursorMarkers {
     return new CursorMarkers(cursor);
   }
 
-  constructor(private cursor: IJsedCursor) {}
+  constructor(private cursor: ITokenCursor) {}
 
   handleInputChange = (inputValue: string): void => {
     const val = inputValue;

@@ -60,7 +60,7 @@ These are no longer actively used but retained for reference:
 The main entry point. Created from an HTML root element. Follows the nullables pattern with `create()` / `createNull()`. Provides:
 
 - `nav` — a `Navigator` instance for moving focus around the document
-- `cursor` — a `JsedCursor` for editing tokens within the focused element
+- `cursor` — a `TokenCursor` for editing tokens within the focused element
 - `listeners` — event hooks for focus changes and cursor events
 
 ### Navigator (`lib/navigator.ts`)
@@ -74,7 +74,7 @@ Handles structural navigation through the document:
 
 Uses tree-walking utilities from `walk.ts` to traverse the DOM.
 
-### JsedCursor (`lib/cursor.ts`)
+### TokenCursor (`TokenCursor.ts`)
 
 Provides token-level editing operations once an element is focused:
 

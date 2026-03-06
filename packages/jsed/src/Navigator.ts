@@ -12,7 +12,7 @@ import {
 } from './lib/walk.js';
 import { ElementIndicator } from './ElementIndicator.js';
 
-export type DOMCursorError =
+export type NavigatorError =
   | { type: 'no-token-under-focus' }
   | {
       /**
@@ -21,15 +21,15 @@ export type DOMCursorError =
       type: 'no-focus';
     };
 
-export class DOMCursor {
-  static create(doc: JsedDocument): DOMCursor {
+export class Navigator {
+  static create(doc: JsedDocument): Navigator {
     const elementIndicator = ElementIndicator.create();
-    return new DOMCursor(doc, elementIndicator);
+    return new Navigator(doc, elementIndicator);
   }
 
-  static createNull(doc: JsedDocument): DOMCursor {
+  static createNull(doc: JsedDocument): Navigator {
     const elementIndicator = ElementIndicator.createNull();
-    return new DOMCursor(doc, elementIndicator);
+    return new Navigator(doc, elementIndicator);
   }
 
   /**
@@ -88,7 +88,7 @@ export class DOMCursor {
   /**
    * Set up cursor on first available token under focus.
    */
-  getFirstTokenUnderFocus(): Result<HTMLElement, DOMCursorError> {
+  getFirstTokenUnderFocus(): Result<HTMLElement, NavigatorError> {
     const focus = this.getFocus();
     if (focus) {
       const firstToken = token.getFirstToken(focus);

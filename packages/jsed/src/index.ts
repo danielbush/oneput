@@ -1,6 +1,6 @@
 export type { ITokenCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
-export { DOMCursor } from './DOMCursor.js';
+export { Navigator as Navigator } from './Navigator.js';
 export { TokenCursor } from './TokenCursor.js';
 export { CursorMarkers } from './CursorMarkers.js';
 

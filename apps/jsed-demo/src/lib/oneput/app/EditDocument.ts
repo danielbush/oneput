@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import {
-  type DOMCursor,
+  type Navigator,
   type JsedDocument,
   type ITokenCursor,
   utils,
@@ -31,7 +31,7 @@ import {
  *
  */
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument; nav: DOMCursor }) {
+  static create(ctl: Controller, params: { document: JsedDocument; nav: Navigator }) {
     return new EditDocument(ctl, params.document, params.nav, {
       TokenCursor: (firstToken: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
         return TokenCursor.create({
@@ -65,7 +65,7 @@ export class EditDocument implements AppObject {
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
-    private nav: DOMCursor,
+    private nav: Navigator,
     private create: {
       TokenCursor: (
         firstToken: HTMLElement,

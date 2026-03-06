@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { icons } from './_icons.js';
-import { DOMCursor, type JsedDocument } from '@oneput/jsed';
+import { Navigator, type JsedDocument } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { EditDocument } from './EditDocument.js';
@@ -10,14 +10,14 @@ import { EditDocument } from './EditDocument.js';
  */
 export class ViewDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
-    const nav = DOMCursor.create(params.document);
+    const nav = Navigator.create(params.document);
     return new ViewDocument(ctl, params.document, nav);
   }
 
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
-    private nav: DOMCursor
+    private nav: Navigator
   ) {}
 
   onStart = () => {

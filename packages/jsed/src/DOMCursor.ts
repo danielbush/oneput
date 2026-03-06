@@ -44,7 +44,6 @@ export class DOMCursor {
   ) {
     // doc.root.addEventListener<'click'>('click', this.handleElementClick);
     doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);
-    doc.listeners.FOCUS = this.handleElementFocus;
     this.FOCUS(doc.root);
     const focus = this.getFocus();
     elementIndicator.updateFocus(focus);
@@ -53,7 +52,6 @@ export class DOMCursor {
 
   close() {
     this.doc.root.removeEventListener('click', this.handleElementClick);
-    this.doc.listeners.FOCUS = null; // TODO: get rid of listeners!
   }
 
   handleElementFocus = (evt: JsedFocusEvent) => {
@@ -102,8 +100,11 @@ export class DOMCursor {
     }
   }
 
+  #emitFocusEvent(evt: JsedFocusEvent) {
+    console.warn('TODO: emit FOCUS event', evt);
+  }
+
   #updateFocus(el: HTMLElement) {
-    const flistener = this.doc.listeners.FOCUS ?? (() => {});
     let tok: HTMLElement | null = null;
     if (token.isToken(el)) {
       tok = el;
@@ -121,20 +122,20 @@ export class DOMCursor {
     }
     this.#FOCUS = el;
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
-    if (tok) {
-      flistener({
-        type: 'FOCUS',
-        targetType: 'TOKEN',
-        token: tok,
-        value: token.getValue(tok)
-      });
-    } else {
-      flistener({
-        type: 'FOCUS',
-        targetType: 'F_ELEM',
-        element: el
-      });
-    }
+    this.#emitFocusEvent(
+      tok
+        ? {
+            type: 'FOCUS',
+            targetType: 'TOKEN',
+            token: tok,
+            value: token.getValue(tok)
+          }
+        : {
+            type: 'FOCUS',
+            targetType: 'F_ELEM',
+            element: el
+          }
+    );
   }
 
   /**
@@ -220,18 +221,10 @@ export class DOMCursor {
   }
 
   /**
-   * Request FOCUS for an element `el`.
+   * Request FOCUS for an element `el`, if request is allow, focus and EMIT a
+   * FOCUS event.
    *
    * TOKEN_FOCUS is checked first.
-   *
-   * The FOCUS listener will be called and its response checked to determine if
-   * the FOCUS will occur or not.
-   *
-   * This can be called by something outside of the listener that is registered
-   * to document.listeners.FOCUS .   The listener is probably some sort of
-   * editor that controls the focus and cursor and it can decide to accept or
-   * reject the focus request.  This editor will usually call FOCUS directly.
-   *
    */
   REQUEST_FOCUS(el: Element | EventTarget | null): void {
     if (!el) {

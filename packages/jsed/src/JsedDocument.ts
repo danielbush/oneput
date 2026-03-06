@@ -1,4 +1,4 @@
-import type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
+import type { JsedFocusRequestEvent } from './types.js';
 import { tokenizeImplicitLine } from './lib/token.js';
 
 export class JsedDocument {
@@ -14,10 +14,8 @@ export class JsedDocument {
   SIB_HIGHLIGHT: Set<HTMLElement> = new Set();
   listeners: {
     REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
-    FOCUS: null | ((evt: JsedFocusEvent) => void);
   } = {
     REQUEST_FOCUS: null,
-    FOCUS: null
   };
 
   private constructor(root: HTMLElement) {

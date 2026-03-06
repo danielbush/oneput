@@ -1,4 +1,4 @@
-import { Navigator } from './navigator.js';
+import { DOMCursor } from './DOMCursor.js';
 import type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 import { getFirstToken, tokenizeImplicitLine } from './lib/token.js';
 import { JSED_DOM_ROOT_ID } from './lib/constants.js';
@@ -70,7 +70,7 @@ export class JsedDocument {
 
   root: HTMLElement;
   SIB_HIGHLIGHT: Set<HTMLElement> = new Set();
-  nav: Navigator;
+  nav: DOMCursor;
   listeners: {
     REQUEST_FOCUS: null | ((evt: JsedFocusRequestEvent) => boolean);
     FOCUS: null | ((evt: JsedFocusEvent) => void);
@@ -83,7 +83,7 @@ export class JsedDocument {
   private constructor(root: HTMLElement) {
     this.root = root;
     tokenizeImplicitLine(root);
-    this.nav = new Navigator(this);
+    this.nav = new DOMCursor(this);
   }
 
   get document(): Document {

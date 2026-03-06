@@ -15,7 +15,7 @@ Some of the key things the core library handles:
 - `edit`
   - when we get to text, we want to be able to edit it
 - `serialize`
-  - when we save we need to generate a version of the edited content without any any temporary artifacts from the navigator
+  - when we save we need to generate a version of the edited content without any any temporary artifacts from navigation / editing
 - `load` / `unload`
   - load and unload an html doc within the browser environment; be able to leave the html the way we found it if this program unloads
 - `convert`
@@ -58,9 +58,9 @@ bun run test:watch
 
 - document is initialized using `src/app/start.ts`
   - some modifications may occur at this point such as `tokenizeImplicitLine`
-- at this point the user can use `src/lib/navigator.ts` to navigate the document
-- `Navigator#FOCUS` on each F_ELEM as we navigate
-- the text nodes of the focused F_ELEM are tokenized using `tokenize` in `src/lib/token.ts`
+- at this point the user can use `src/DOMCursor.ts` to navigate the document
+- `DOMCursor#FOCUS` on each F_ELEM as we navigate
+- the text nodes of the focused F_ELEM are tokenized using `tokenize` in `src/DOMCursor.ts`
   - currently `tokenize` tokenizes the LINE associated with the F_ELEM which is all text nodes and text nodes of inline child nodes of the F_ELEM
   - TBC: we know that if we `tokenize` all text in a large doc we will run into performance issues in the browser; so we may need to consider untokenizing text once the user has navigated past the F_ELEM . However if they edit the text, we may leave it tokenized.
 - if the user stops to edit the tokneized text, they are using the cursor in `src/lib/cursor.ts`

@@ -10,7 +10,7 @@ import {
   findPreviousNode
 } from './lib/walk.js';
 
-export class Navigator {
+export class DOMCursor {
   #document: Omit<JsedDocument, 'nav'>;
   /**
    * The focus F_ELEM .  If a TOKEN is focused, this will be set to the parent

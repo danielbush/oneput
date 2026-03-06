@@ -23,7 +23,7 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 ### Focus
 
 - **FOCUS** — the current F_ELEM the user has clicked, touched, or navigated to. This is not native browser focus (which would conflict with Oneput's input element).
-- **TOKEN_FOCUS** — tokens have their own focus, distinct from FOCUS. Clicking a token focuses the containing F_ELEM (FOCUS) and then the token itself (TOKEN_FOCUS). The cursor updates TOKEN_FOCUS; the navigator updates FOCUS.
+- **TOKEN_FOCUS** — tokens have their own focus, distinct from FOCUS. Clicking a token focuses the containing F_ELEM (FOCUS) and then the token itself (TOKEN_FOCUS). The cursor updates TOKEN_FOCUS; the DOMCursor updates FOCUS.
 - **SIB_HIGHLIGHT** — visual highlight when a user focuses an element via navigation actions like REC_NEXT.
 
 ### Whitespace
@@ -59,11 +59,11 @@ These are no longer actively used but retained for reference:
 
 The main entry point. Created from an HTML root element. Follows the nullables pattern with `create()` / `createNull()`. Provides:
 
-- `nav` — a `Navigator` instance for moving focus around the document
+- `nav` — a `DOMCursor` instance for moving focus around the document
 - `cursor` — a `TokenCursor` for editing tokens within the focused element
 - `listeners` — event hooks for focus changes and cursor events
 
-### Navigator (`lib/navigator.ts`)
+### DOMCursor (`DOMCursor.ts`)
 
 Handles structural navigation through the document:
 

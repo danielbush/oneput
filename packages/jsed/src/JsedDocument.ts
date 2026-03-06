@@ -19,7 +19,6 @@ export class JsedDocument {
     REQUEST_FOCUS: null,
     FOCUS: null
   };
-  unload: () => void = () => {};
 
   private constructor(root: HTMLElement) {
     this.root = root;

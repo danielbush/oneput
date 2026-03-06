@@ -20,6 +20,10 @@ tasks:
       See vite.config.js
     cmds:
       - pnpm run test
+  test:update:
+    desc: Update snapshots
+    cmds:
+      - pnpm run test:update
   fix:
     desc: format + eslint (fix) + check types (no fix)
     cmds:

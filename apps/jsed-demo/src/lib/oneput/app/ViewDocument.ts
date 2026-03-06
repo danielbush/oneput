@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { icons } from './_icons.js';
-import { type JsedDocument } from '@oneput/jsed';
+import { DOMCursor, type JsedDocument } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { EditDocument } from './EditDocument.js';
@@ -10,12 +10,14 @@ import { EditDocument } from './EditDocument.js';
  */
 export class ViewDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
-    return new ViewDocument(ctl, params.document);
+    const nav = DOMCursor.create(params.document);
+    return new ViewDocument(ctl, params.document, nav);
   }
 
   constructor(
     private ctl: Controller,
-    private document: JsedDocument
+    private document: JsedDocument,
+    private nav: DOMCursor
   ) {}
 
   onStart = () => {
@@ -29,7 +31,7 @@ export class ViewDocument implements AppObject {
   actions = {
     EDIT_FIRST: {
       action: () => {
-        this.ctl.app.run(EditDocument.create(this.ctl, { document: this.document }));
+        this.ctl.app.run(EditDocument.create(this.ctl, { document: this.document, nav: this.nav }));
       },
       binding: {
         bindings: ['enter'],
@@ -39,7 +41,7 @@ export class ViewDocument implements AppObject {
     },
     REC_NEXT: {
       action: () => {
-        this.document.nav.REC_NEXT();
+        this.nav.REC_NEXT();
       },
       binding: {
         bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
@@ -49,7 +51,7 @@ export class ViewDocument implements AppObject {
     },
     REC_PREV: {
       action: () => {
-        this.document.nav.REC_PREV();
+        this.nav.REC_PREV();
       },
       binding: {
         bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
@@ -59,7 +61,7 @@ export class ViewDocument implements AppObject {
     },
     SIB_NEXT: {
       action: () => {
-        this.document.nav.SIB_NEXT();
+        this.nav.SIB_NEXT();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
@@ -69,7 +71,7 @@ export class ViewDocument implements AppObject {
     },
     SIB_PREV: {
       action: () => {
-        this.document.nav.SIB_PREV();
+        this.nav.SIB_PREV();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
@@ -79,14 +81,14 @@ export class ViewDocument implements AppObject {
     },
     UP: {
       action: () => {
-        this.document.nav.UP();
+        this.nav.UP();
       },
       binding: {
         bindings: ['$mod+u', '$mod+ArrowUp'],
         description: 'Find next parent',
         when: { menuOpen: false }
       }
-    },
+    }
   };
 
   menu = () => ({

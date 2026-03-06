@@ -1,5 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import {
+  type DOMCursor,
   type JsedDocument,
   type ITokenCursor,
   utils,
@@ -30,8 +31,8 @@ import {
  *
  */
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument }) {
-    return new EditDocument(ctl, params.document, {
+  static create(ctl: Controller, params: { document: JsedDocument; nav: DOMCursor }) {
+    return new EditDocument(ctl, params.document, params.nav, {
       TokenCursor: (firstToken: HTMLElement, onTokenChange: (token: HTMLElement) => void) => {
         return TokenCursor.create({
           document: params.document,
@@ -64,6 +65,7 @@ export class EditDocument implements AppObject {
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
+    private nav: DOMCursor,
     private create: {
       TokenCursor: (
         firstToken: HTMLElement,
@@ -73,7 +75,7 @@ export class EditDocument implements AppObject {
   ) {}
 
   onStart = () => {
-    this.document
+    this.nav
       .getFirstTokenUnderFocus()
       .map((firstToken) => {
         this.cursor = this.create.TokenCursor(firstToken, this.handleTokenChange);
@@ -84,7 +86,7 @@ export class EditDocument implements AppObject {
         // So the user can start editing...
         this.ctl.input.focus();
         this.document.listeners.REQUEST_FOCUS = this.handleFocusRequest;
-        this.document.nav.FOCUS(this.cursor.getToken());
+        this.nav.FOCUS(this.cursor.getToken());
       })
       .mapErr((err) => {
         switch (err.type) {
@@ -250,7 +252,7 @@ export class EditDocument implements AppObject {
       this.ctl.input.selectAll();
       //// scrollIntoView(token);
       // this.#controller.setStatusElementFocus(token);
-      this.document.nav.FOCUS(finalToken);
+      this.nav.FOCUS(finalToken);
       this.ctl.input.moveCursorToEnd();
     }
   }

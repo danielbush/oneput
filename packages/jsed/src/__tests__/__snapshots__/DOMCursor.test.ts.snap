@@ -1,0 +1,646 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FOCUS > should focus an F_ELEM (SIB_HIGHLIGHT) 1`] = `
+<div
+  class=""
+  id="root"
+>
+  <p
+    class="jsed-focus"
+    id="p1"
+  >
+    <span
+      class="jsed-token"
+    >
+      p1 
+    </span>
+  </p>
+</div>
+`;
+
+exports[`REC_NEXT should recurse down 1`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class="jsed-focus"
+    id="div1"
+  >
+    <div
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+      <p
+        id="p2"
+      >
+        text-2
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_NEXT should recurse down 2`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class=""
+    id="div1"
+  >
+    <div
+      class="jsed-focus"
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+      <p
+        id="p2"
+      >
+        text-2
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_NEXT should recurse down 3`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class=""
+    id="div1"
+  >
+    <div
+      class=""
+      id="div1-1"
+    >
+      <p
+        class="jsed-focus"
+        id="p1"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
+      </p>
+      <p
+        class="jsed-focus-sibling"
+        id="p2"
+      >
+        text-2
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_NEXT should recurse down 4`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class=""
+    id="div1"
+  >
+    <div
+      class=""
+      id="div1-1"
+    >
+      <p
+        class="jsed-focus-sibling"
+        id="p1"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
+      </p>
+      <p
+        class="jsed-focus"
+        id="p2"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-2 
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_NEXT should recurse down 5`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class=""
+    id="div1"
+  >
+    <div
+      class=""
+      id="div1-1"
+    >
+      <p
+        class="jsed-focus-sibling"
+        id="p1"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
+      </p>
+      <p
+        class="jsed-focus"
+        id="p2"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-2 
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_NEXT should recurse down 6`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class=""
+    id="div1"
+  >
+    <div
+      class=""
+      id="div1-1"
+    >
+      <p
+        class="jsed-focus-sibling"
+        id="p1"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-1 
+        </span>
+      </p>
+      <p
+        class="jsed-focus"
+        id="p2"
+      >
+        <span
+          class="jsed-token"
+        >
+          text-2 
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_PREV should recurse up 1`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    id="div1"
+  >
+    <div
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_PREV should recurse up 2`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    id="div1"
+  >
+    <div
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_PREV should recurse up 3`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    id="div1"
+  >
+    <div
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_PREV should recurse up 4`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    id="div1"
+  >
+    <div
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`REC_PREV should recurse up 5`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    id="div1"
+  >
+    <div
+      id="div1-1"
+    >
+      <p
+        id="p1"
+      >
+        text-1
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SIB_HIGHLIGHT > should highlight current siblings of the active element 1`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <p>
+    p1
+  </p>
+  <p
+    id="p2"
+  >
+    p2
+  </p>
+  <p>
+    p3
+  </p>
+  <p>
+    p4
+  </p>
+</div>
+`;
+
+exports[`SIB_NEXT should walk to next sibling 1`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <ul
+    id="ul"
+  >
+    <li
+      id="li1"
+    >
+      item 1
+    </li>
+    <li
+      id="li2"
+    >
+      <ul>
+        <li>
+          trap
+        </li>
+      </ul>
+    </li>
+    <li
+      id="li3"
+    >
+      item 3
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`SIB_NEXT should walk to next sibling 2`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <ul
+    id="ul"
+  >
+    <li
+      id="li1"
+    >
+      item 1
+    </li>
+    <li
+      id="li2"
+    >
+      <ul>
+        <li>
+          trap
+        </li>
+      </ul>
+    </li>
+    <li
+      id="li3"
+    >
+      item 3
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`SIB_NEXT should walk to next sibling 3`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <ul
+    id="ul"
+  >
+    <li
+      id="li1"
+    >
+      item 1
+    </li>
+    <li
+      id="li2"
+    >
+      <ul>
+        <li>
+          trap
+        </li>
+      </ul>
+    </li>
+    <li
+      id="li3"
+    >
+      item 3
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`SIB_PREV should walk to previous sibling 1`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <ul
+    id="ul"
+  >
+    <li
+      id="li1"
+    >
+      item 1
+    </li>
+    <li
+      id="li2"
+    >
+      <ul>
+        <li>
+          trap
+        </li>
+      </ul>
+    </li>
+    <li
+      id="li3"
+    >
+      item 3
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`SIB_PREV should walk to previous sibling 2`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <ul
+    id="ul"
+  >
+    <li
+      id="li1"
+    >
+      item 1
+    </li>
+    <li
+      id="li2"
+    >
+      <ul>
+        <li>
+          trap
+        </li>
+      </ul>
+    </li>
+    <li
+      id="li3"
+    >
+      item 3
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`SIB_PREV should walk to previous sibling 3`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <ul
+    id="ul"
+  >
+    <li
+      id="li1"
+    >
+      item 1
+    </li>
+    <li
+      id="li2"
+    >
+      <ul>
+        <li>
+          trap
+        </li>
+      </ul>
+    </li>
+    <li
+      id="li3"
+    >
+      item 3
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`UP can walk up successive parent elements 1`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    id="id1"
+  >
+    <div
+      class="jsed-focus"
+      id="id2"
+    >
+      <div
+        class=""
+        id="id3"
+      >
+        <span
+          class="jsed-token"
+        >
+          id3 
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`UP can walk up successive parent elements 2`] = `
+<div
+  class=""
+  id="root"
+>
+  <div
+    class="jsed-focus"
+    id="id1"
+  >
+    <div
+      class=""
+      id="id2"
+    >
+      <div
+        class=""
+        id="id3"
+      >
+        <span
+          class="jsed-token"
+        >
+          id3 
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`UP can walk up successive parent elements 3`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    class=""
+    id="id1"
+  >
+    <div
+      class=""
+      id="id2"
+    >
+      <div
+        class=""
+        id="id3"
+      >
+        <span
+          class="jsed-token"
+        >
+          id3 
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`UP can walk up successive parent elements 4`] = `
+<div
+  class="jsed-focus"
+  id="root"
+>
+  <div
+    class=""
+    id="id1"
+  >
+    <div
+      class=""
+      id="id2"
+    >
+      <div
+        class=""
+        id="id3"
+      >
+        <span
+          class="jsed-token"
+        >
+          id3 
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

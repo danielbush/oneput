@@ -1,10 +1,13 @@
-import type { ITokenCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
-import { JsedDocument } from './JsedDocument.js';
-import { TokenCursor } from './TokenCursor.js';
+export type { ITokenCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
+export { JsedDocument } from './JsedDocument.js';
+export { DOMCursor } from './DOMCursor.js';
+export { TokenCursor } from './TokenCursor.js';
+export { CursorMarkers } from './CursorMarkers.js';
+
+// TODO: hmm, should we just provide several entry points in package.json "exports"?
 import * as token from './lib/token.js';
 import * as dom from './lib/dom.js';
 import * as domRules from './lib/dom-rules.js';
-
 const utils = {
   dom: {
     copyElement: dom.copyElement,
@@ -37,7 +40,3 @@ export {
   JSED_IGNORE_CLASS
 } from './lib/constants.js';
 export { utils };
-export { JsedDocument, TokenCursor };
-export type { JsedFocusRequestEvent, JsedFocusEvent, ITokenCursor };
-
-export { CursorMarkers } from './CursorMarkers.js';

@@ -1,5 +1,6 @@
-import type { JsedDocument } from './types.js';
-import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
+import { err, ok, Result } from 'neverthrow';
+import type { JsedDocument, JsedFocusEvent } from './types.js';
+import { JSED_DOM_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
 import { ignoreDescendents, isFocusable } from './lib/focus.js';
 import * as token from './lib/token.js';
 import {
@@ -9,16 +10,85 @@ import {
   findNextNode,
   findPreviousNode
 } from './lib/walk.js';
+import { ElementIndicator } from './ElementIndicator.js';
+
+export type DOMCursorError =
+  | { type: 'no-token-under-focus' }
+  | {
+      /**
+       * TODO: should we ever let this happen?
+       */
+      type: 'no-focus';
+    };
 
 export class DOMCursor {
-  #document: Omit<JsedDocument, 'nav'>;
+  static create(doc: JsedDocument): DOMCursor {
+    const elementIndicator = ElementIndicator.create();
+    return new DOMCursor(doc, elementIndicator);
+  }
+
+  static createNull(doc: JsedDocument): DOMCursor {
+    const elementIndicator = ElementIndicator.createNull();
+    return new DOMCursor(doc, elementIndicator);
+  }
+
   /**
    * The focus F_ELEM .  If a TOKEN is focused, this will be set to the parent
    * F_ELEM for that TOKEN.
    */
   #FOCUS?: HTMLElement;
-  constructor(doc: Omit<JsedDocument, 'nav'>) {
-    this.#document = doc;
+
+  constructor(
+    private doc: JsedDocument,
+    private elementIndicator: ElementIndicator
+  ) {
+    // doc.root.addEventListener<'click'>('click', this.handleElementClick);
+    doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);
+    doc.listeners.FOCUS = this.handleElementFocus;
+    this.FOCUS(doc.root);
+    const focus = this.getFocus();
+    elementIndicator.updateFocus(focus);
+    elementIndicator.showIndicator(true);
+  }
+
+  close() {
+    this.doc.root.removeEventListener('click', this.handleElementClick);
+    this.doc.listeners.FOCUS = null; // TODO: get rid of listeners!
+  }
+
+  handleElementFocus = (evt: JsedFocusEvent) => {
+    const el = evt.targetType === 'F_ELEM' ? evt.element : evt.token;
+    this.elementIndicator.updateFocus(el);
+  };
+
+  handleElementClick = (evt: MouseEvent) => {
+    const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
+    if (app_root_node) {
+      const node = evt.target as Element;
+      if (app_root_node.contains(node)) {
+        return;
+      }
+    }
+    // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
+    evt.preventDefault();
+    this.REQUEST_FOCUS(evt.target);
+  };
+
+  // Actions
+
+  /**
+   * Set up cursor on first available token under focus.
+   */
+  getFirstTokenUnderFocus(): Result<HTMLElement, DOMCursorError> {
+    const focus = this.getFocus();
+    if (focus) {
+      const firstToken = token.getFirstToken(focus);
+      if (firstToken) {
+        return ok(firstToken);
+      }
+      return err({ type: 'no-token-under-focus' });
+    }
+    return err({ type: 'no-focus' });
   }
 
   getFocus(): HTMLElement | null {
@@ -33,7 +103,7 @@ export class DOMCursor {
   }
 
   #updateFocus(el: HTMLElement) {
-    const flistener = this.#document.listeners.FOCUS ?? (() => {});
+    const flistener = this.doc.listeners.FOCUS ?? (() => {});
     let tok: HTMLElement | null = null;
     if (token.isToken(el)) {
       tok = el;
@@ -72,7 +142,7 @@ export class DOMCursor {
    */
   REC_NEXT(): HTMLElement | null {
     if (!this.#FOCUS) return null;
-    for (const next of findNextNode(this.#FOCUS, this.#document.root, {
+    for (const next of findNextNode(this.#FOCUS, this.doc.root, {
       filter: isFocusable,
       ignoreDescendents
     })) {
@@ -87,7 +157,7 @@ export class DOMCursor {
    */
   REC_PREV(): HTMLElement | null {
     if (!this.#FOCUS) return null;
-    for (const next of findPreviousNode(this.#FOCUS, this.#document.root, {
+    for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
       filter: isFocusable,
       ignoreDescendents
     })) {
@@ -134,7 +204,7 @@ export class DOMCursor {
    */
   UP(): void {
     if (!this.#FOCUS) return;
-    const next = getParent(this.#FOCUS, this.#document.root);
+    const next = getParent(this.#FOCUS, this.doc.root);
     if (next) {
       this.REQUEST_FOCUS(next);
     }
@@ -168,7 +238,7 @@ export class DOMCursor {
       return;
     }
     // If there are no listeners, we'll assume ok = true.
-    const listener = this.#document.listeners.REQUEST_FOCUS ?? (() => true);
+    const listener = this.doc.listeners.REQUEST_FOCUS ?? (() => true);
     if (isFocusable(el)) {
       const ok = listener({
         type: 'FOCUS_REQUEST',
@@ -194,10 +264,10 @@ export class DOMCursor {
   }
 
   #SIB_HIGHLIGHT_CLEAR(): void {
-    for (const sib of this.#document.SIB_HIGHLIGHT) {
+    for (const sib of this.doc.SIB_HIGHLIGHT) {
       sib.classList.remove(SBR_FOCUS_SIBLING);
     }
-    this.#document.SIB_HIGHLIGHT.clear();
+    this.doc.SIB_HIGHLIGHT.clear();
   }
 
   /**
@@ -211,7 +281,7 @@ export class DOMCursor {
       for (const child of pnode.children) {
         if (isFocusable(child)) {
           if (child !== active) {
-            this.#document.SIB_HIGHLIGHT.add(child);
+            this.doc.SIB_HIGHLIGHT.add(child);
             child.classList.add(SBR_FOCUS_SIBLING);
           }
         }

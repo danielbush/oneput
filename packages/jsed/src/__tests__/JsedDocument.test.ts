@@ -1,6 +1,6 @@
 import { describe, it, expect, test, vi } from 'vitest';
 import { JsedDocument } from '../JsedDocument.js';
-import { Navigator } from '../Navigator.js';
+import { Nav } from '../Nav.js';
 
 describe('start', () => {
   describe('SIB_HIGHTLIGHT', () => {
@@ -8,7 +8,7 @@ describe('start', () => {
       // arrange
       const root = document.createElement('DIV');
       const doc = JsedDocument.createNull(root);
-      const nav = Navigator.createNull(doc);
+      const nav = Nav.createNull(doc);
       const FOCUS = vi.spyOn(nav, 'FOCUS');
 
       // act

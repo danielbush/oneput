@@ -1,5 +1,5 @@
 import { err, ok, Result } from 'neverthrow';
-import { Navigator } from './Navigator.js';
+import { Nav } from './Nav.js';
 import * as token from './lib/token.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
 import { TokenCursor } from './index.js';
@@ -56,7 +56,7 @@ export class EditManager {
     nav,
     inputManager
   }: {
-    nav: Navigator;
+    nav: Nav;
     inputManager: InputManager;
   }): EditManager {
     return new EditManager(nav, inputManager);
@@ -65,7 +65,7 @@ export class EditManager {
   private cursor?: ITokenCursor;
 
   constructor(
-    private nav: Navigator,
+    private nav: Nav,
     private inputManager: InputManager
   ) {
     this.nav.setFocusController(this.handleFocusRequest);

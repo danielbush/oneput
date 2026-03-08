@@ -58,9 +58,9 @@ bun run test:watch
 
 - document is initialized using `src/app/start.ts`
   - some modifications may occur at this point such as `tokenizeImplicitLine`
-- at this point the user can use `src/Navigator.ts` to navigate the document
-- `Navigator#FOCUS` on each F_ELEM as we navigate
-- the text nodes of the focused F_ELEM are tokenized using `tokenize` in `src/Navigator.ts`
+- at this point the user can use `src/Nav.ts` to navigate the document
+- `Nav#FOCUS` on each F_ELEM as we navigate
+- the text nodes of the focused F_ELEM are tokenized using `tokenize` in `src/Nav.ts`
   - currently `tokenize` tokenizes the LINE associated with the F_ELEM which is all text nodes and text nodes of inline child nodes of the F_ELEM
   - TBC: we know that if we `tokenize` all text in a large doc we will run into performance issues in the browser; so we may need to consider untokenizing text once the user has navigated past the F_ELEM . However if they edit the text, we may leave it tokenized.
 - if the user stops to edit the tokneized text, they are using the cursor in `src/lib/cursor.ts`

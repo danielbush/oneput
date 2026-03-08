@@ -1,12 +1,12 @@
 import { describe, it, test, expect, vi } from 'vitest';
 import { byId, div, frag, li, makeRoot, p, script, ul } from '../test/util.js';
-import { Navigator } from '../Navigator.js';
+import { Nav } from '../Nav.js';
 
 describe('FOCUS', () => {
   it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'p1'));
-    const nav = Navigator.createNull(doc);
+    const nav = Nav.createNull(doc);
     const p1 = doc.document.getElementById('p1') as HTMLElement;
 
     // act
@@ -19,7 +19,7 @@ describe('FOCUS', () => {
   it('should not focus a non-F_ELEM', () => {
     // arrange
     const doc = makeRoot(frag(script({ id: 'p1' }, 'p1')));
-    const nav = Navigator.createNull(doc);
+    const nav = Nav.createNull(doc);
     const p1 = doc.document.getElementById('p1') as HTMLElement;
     const focus = vi.spyOn(p1, 'focus');
 
@@ -35,7 +35,7 @@ describe('SIB_HIGHLIGHT', () => {
   it('should highlight current siblings of the active element', () => {
     // arrange
     const doc = makeRoot(frag(p('p1'), p({ id: 'p2' }, 'p2'), p('p3'), p('p4')));
-    const nav = Navigator.createNull(doc);
+    const nav = Nav.createNull(doc);
     byId(doc, 'p2').focus();
 
     // act
@@ -51,7 +51,7 @@ test('REC_NEXT should recurse down', () => {
   const doc = makeRoot(
     div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'), p({ id: 'p2' }, 'text-2')))
   );
-  const nav = Navigator.createNull(doc);
+  const nav = Nav.createNull(doc);
 
   // act
   nav.REC_NEXT();
@@ -76,7 +76,7 @@ test('REC_NEXT should recurse down', () => {
 test('REC_PREV should recurse up', () => {
   // arrange
   const doc = makeRoot(div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))));
-  const nav = Navigator.createNull(doc);
+  const nav = Nav.createNull(doc);
 
   // act
   nav.REC_PREV();
@@ -105,7 +105,7 @@ test('SIB_NEXT should walk to next sibling', () => {
       li({ id: 'li3' }, 'item 3')
     )
   );
-  const nav = Navigator.createNull(doc);
+  const nav = Nav.createNull(doc);
 
   // act
   nav.SIB_NEXT();
@@ -128,7 +128,7 @@ test('SIB_PREV should walk to previous sibling', () => {
       li({ id: 'li3' }, 'item 3')
     )
   );
-  const nav = Navigator.createNull(doc);
+  const nav = Nav.createNull(doc);
 
   // act
   nav.SIB_PREV();
@@ -144,7 +144,7 @@ test('SIB_PREV should walk to previous sibling', () => {
 test('UP can walk up successive parent elements', () => {
   // arrange
   const doc = makeRoot(div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))));
-  const nav = Navigator.createNull(doc);
+  const nav = Nav.createNull(doc);
   nav.REQUEST_FOCUS(byId(doc, 'id3'));
 
   // act
@@ -171,7 +171,7 @@ describe('ISLAND', () => {
         div({ id: 'div2' }, 'div')
       )
     );
-    const nav = Navigator.createNull(doc);
+    const nav = Nav.createNull(doc);
 
     // act
     nav.REC_NEXT();

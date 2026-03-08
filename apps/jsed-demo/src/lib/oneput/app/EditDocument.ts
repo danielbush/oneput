@@ -1,8 +1,8 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import { type Navigator, type JsedDocument, type ITokenCursor, EditManager } from '@oneput/jsed';
+import { type Nav, type JsedDocument, type ITokenCursor, EditManager } from '@oneput/jsed';
 
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument; nav: Navigator }) {
+  static create(ctl: Controller, params: { document: JsedDocument; nav: Nav }) {
     const editManager = EditManager.create({ nav: params.nav, inputManager: ctl.input });
 
     return new EditDocument(ctl, editManager);

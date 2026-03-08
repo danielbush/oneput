@@ -102,6 +102,7 @@ export class EditManager {
    * USER_CALL / USER_ACT
    */
   private handleTokenChange = async (tok: HTMLElement) => {
+    this.nav.FOCUS(tok);
     this.inputManager.setInputValue(token.getValue(tok)).then(() => {
       this.inputManager.selectAll();
     });

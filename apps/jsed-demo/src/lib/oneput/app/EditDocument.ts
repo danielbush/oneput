@@ -3,7 +3,7 @@ import { type Nav, type JsedDocument, type ITokenCursor, EditManager } from '@on
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; nav: Nav }) {
-    const editManager = EditManager.create({ nav: params.nav, inputManager: ctl.input });
+    const editManager = EditManager.create({ nav: params.nav, userInput: ctl.input });
 
     return new EditDocument(ctl, editManager);
   }

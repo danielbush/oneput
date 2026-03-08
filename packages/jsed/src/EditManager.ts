@@ -1,25 +1,9 @@
 import { err, ok, Result } from 'neverthrow';
-import { Nav } from './Nav.js';
 import * as token from './lib/token.js';
+import { Nav } from './Nav.js';
+import { TokenCursor } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
-import { TokenCursor } from './index.js';
-
-export type InputManager = {
-  setInputValue: (value: string) => Promise<void>;
-  selectAll: () => void;
-  moveCursorToBeginning: () => void;
-  moveCursorToEnd: () => void;
-  getRange: () => [number | null, number | null];
-  focus: () => void;
-};
-
-export type JsedInputSelectionState =
-  | 'SELECT_ALL'
-  | 'SELECT_PARTIAL'
-  | 'CURSOR_AT_BEGINNING'
-  | 'CURSOR_AT_MIDDLE'
-  | 'CURSOR_AT_END'
-  | 'EMPTY';
+import type { UserInput, UserInputSelectionState } from './UserInput.js';
 
 export type EditManagerError =
   | { type: 'no-token-under-focus' }
@@ -52,21 +36,15 @@ export type EditManagerError =
  *
  */
 export class EditManager {
-  static create({
-    nav,
-    inputManager
-  }: {
-    nav: Nav;
-    inputManager: InputManager;
-  }): EditManager {
-    return new EditManager(nav, inputManager);
+  static create({ nav, userInput }: { nav: Nav; userInput: UserInput }): EditManager {
+    return new EditManager(nav, userInput);
   }
 
   private cursor?: ITokenCursor;
 
   constructor(
     private nav: Nav,
-    private inputManager: InputManager
+    private userInput: UserInput
   ) {
     this.nav.setFocusController(this.handleFocusRequest);
   }
@@ -76,7 +54,7 @@ export class EditManager {
     this.nav.removeFocusController();
   }
 
-  /**
+  /**UserInputSelectionState
    * When user types in the input...
    *
    * Pass this to the input emitter after instantiation.
@@ -91,7 +69,7 @@ export class EditManager {
    *
    * Pass this to the selection emitter after instantiation.
    */
-  public handleSelectionChange = (selection: JsedInputSelectionState) => {
+  public handleSelectionChange = (selection: UserInputSelectionState) => {
     this.cursor?.handleSelectionChange(selection);
   };
 
@@ -103,8 +81,8 @@ export class EditManager {
    */
   private handleTokenChange = async (tok: HTMLElement) => {
     this.nav.FOCUS(tok);
-    this.inputManager.setInputValue(token.getValue(tok)).then(() => {
-      this.inputManager.selectAll();
+    this.userInput.setInputValue(token.getValue(tok)).then(() => {
+      this.userInput.selectAll();
     });
   };
 
@@ -119,10 +97,10 @@ export class EditManager {
     if (evt.targetType === 'TOKEN') {
       if (this.cursor.isSameLine(evt.token)) {
         this.cursor.setToken(evt.token);
-        this.inputManager.focus();
+        this.userInput.focus();
         // TODO: await instead of .then?
-        this.inputManager.setInputValue(token.getValue(evt.token)).then(() => {
-          this.inputManager.selectAll();
+        this.userInput.setInputValue(token.getValue(evt.token)).then(() => {
+          this.userInput.selectAll();
         });
         return true; // TODO: old code: #handleCursorSetToken will call FOCUS.
       }
@@ -146,7 +124,7 @@ export class EditManager {
       ? token.getValue(this.cursor.getToken()) + ' ' // "foo" + " "
       : inputValue;
     // Apply rewrite:
-    this.inputManager.setInputValue(value);
+    this.userInput.setInputValue(value);
 
     // part0 can be undefined if we split on whitespace:
     const [part0, ...parts] = value.split(/\s+/).filter(Boolean);
@@ -164,7 +142,7 @@ export class EditManager {
     if (containsSpace) {
       const firstWord = containsSpace[1];
       const firstSpace = containsSpace[2];
-      const [, stop] = this.inputManager.getRange();
+      const [, stop] = this.userInput.getRange();
       preferFirstPart = firstWord.length === stop || stop == firstWord.length + firstSpace.length;
     }
     let lastToken: HTMLElement | null = null;
@@ -184,7 +162,7 @@ export class EditManager {
 
     // Update TOKEN_FOCUS and input.
     if (prependedSpace) {
-      this.inputManager.moveCursorToBeginning();
+      this.userInput.moveCursorToBeginning();
     }
 
     const finalToken = preferFirstPart ? this.cursor.getToken() : lastToken;
@@ -196,13 +174,13 @@ export class EditManager {
       //   debug('correct mobile keyboard scroll');
       //   scrollIntoView(token);
       // });
-      this.inputManager.focus();
-      await this.inputManager.setInputValue(token.getValue(finalToken));
-      this.inputManager.selectAll();
+      this.userInput.focus();
+      await this.userInput.setInputValue(token.getValue(finalToken));
+      this.userInput.selectAll();
       //// scrollIntoView(token);
       // this.#controller.setStatusElementFocus(token);
       this.nav.FOCUS(finalToken);
-      this.inputManager.moveCursorToEnd();
+      this.userInput.moveCursorToEnd();
     }
   }
 
@@ -214,7 +192,7 @@ export class EditManager {
     if (focus) {
       const firstToken = token.getFirstToken(focus);
       if (firstToken) {
-        this.inputManager.focus();
+        this.userInput.focus();
         return ok(this.#setCursor(firstToken));
       }
       return err({ type: 'no-token-under-focus' });

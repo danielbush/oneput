@@ -2,7 +2,7 @@ import type { JsedDocument, ITokenCursor } from './types.js';
 import { CursorMarkers } from './CursorMarkers.js';
 import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
 import * as token from './lib/token.js';
-import type { JsedInputSelectionState } from './EditManager.js';
+import type { UserInputSelectionState } from './UserInput.js';
 
 export class TokenCursor implements ITokenCursor {
   static create(params: {
@@ -41,7 +41,7 @@ export class TokenCursor implements ITokenCursor {
     this.#cursorMarkers.handleInputChange(input);
   };
 
-  public handleSelectionChange = (selection: JsedInputSelectionState): void => {
+  public handleSelectionChange = (selection: UserInputSelectionState): void => {
     this.#cursorMarkers.handleToggleSelect(selection);
   };
 

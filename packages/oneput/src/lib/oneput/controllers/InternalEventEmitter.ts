@@ -41,7 +41,7 @@ export type MenuSetItemsEvent = {
   payload: { menuId: string };
 };
 export type ToggleSelectEvent = {
-  type: 'toggle-select';
+  type: 'selection-change';
   payload: { selection: InputSelectionState };
 };
 

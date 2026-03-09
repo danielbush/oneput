@@ -19,7 +19,7 @@ export class EditDocument implements AppObject {
     this.unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
       editManager.handleInputChange(value)
     );
-    this.unsubscribeSelectionChanges = ctl.events.on('toggle-select', ({ selection }) =>
+    this.unsubscribeSelectionChanges = ctl.events.on('selection-change', ({ selection }) =>
       editManager.handleSelectionChange(selection)
     );
   }

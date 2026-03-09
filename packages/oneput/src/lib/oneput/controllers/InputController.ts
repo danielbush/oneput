@@ -96,7 +96,7 @@ export class InputController {
   toggleSelect = () => {
     this.selectionToggler?.toggle();
     this.ctl.events.emit({
-      type: 'toggle-select',
+      type: 'selection-change',
       payload: { selection: this.getSelectionState() }
     });
   };

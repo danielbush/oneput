@@ -4,6 +4,7 @@ import { Nav } from './Nav.js';
 import { TokenCursor } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
+import { InputManager } from './InputManager.js';
 
 export type EditManagerError =
   | { type: 'no-token-under-focus' }
@@ -41,6 +42,7 @@ export class EditManager {
   }
 
   private cursor?: ITokenCursor;
+  private inputManager?: InputManager;
 
   constructor(
     private nav: Nav,
@@ -54,13 +56,15 @@ export class EditManager {
     this.nav.removeFocusController();
   }
 
-  /**UserInputSelectionState
+  /**
    * When user types in the input...
    *
-   * Pass this to the input emitter after instantiation.
+   * Handles USER_TYPE operations.
+   *
+   * @param {string} input What the user has typed into an html input/textarea
    */
   public handleInputChange = (input: string) => {
-    this.computeFromInput(input);
+    this.inputManager?.handleInputChange(input);
     this.cursor?.handleInputChange(input);
   };
 
@@ -109,82 +113,6 @@ export class EditManager {
   };
 
   /**
-   * Handles USER_TYPE operations.
-   *
-   * @param {string} inputValue What the user has typed into an html input/textarea
-   */
-  private async computeFromInput(inputValue: string) {
-    if (!this.cursor) {
-      return;
-    }
-
-    // "foo" => " " => "foo "
-    const isReplacedWithSpace = /^\s+$/.test(inputValue); // " "
-    const value = isReplacedWithSpace
-      ? token.getValue(this.cursor.getToken()) + ' ' // "foo" + " "
-      : inputValue;
-    // Apply rewrite:
-    this.userInput.setInputValue(value);
-
-    // part0 can be undefined if we split on whitespace:
-    const [part0, ...parts] = value.split(/\s+/).filter(Boolean);
-    /**
-     * "|foo" => " |foo" => "| foo"
-     */
-    const prependedSpace = /^\s+/.test(value);
-    /**
-     * true: "foo|a" => "foo |a" => "foo|"
-     * false: "foo a|" => "a|" etc
-     * false: "foo a" (pasted) => "a|"
-     */
-    let preferFirstPart = false;
-    const containsSpace = value.match(/^(\S+)(\s+)\S/); // "foo a..."
-    if (containsSpace) {
-      const firstWord = containsSpace[1];
-      const firstSpace = containsSpace[2];
-      const [, stop] = this.userInput.getRange();
-      preferFirstPart = firstWord.length === stop || stop == firstWord.length + firstSpace.length;
-    }
-    let lastToken: HTMLElement | null = null;
-
-    // Update document.
-    if (value === '') {
-      this.cursor.delete();
-    } else {
-      this.cursor.replace(part0);
-      for (const part of parts.reverse()) {
-        const token = this.cursor.append(part);
-        if (!lastToken) {
-          lastToken = token;
-        }
-      }
-    }
-
-    // Update TOKEN_FOCUS and input.
-    if (prependedSpace) {
-      this.userInput.moveCursorToBeginning();
-    }
-
-    const finalToken = preferFirstPart ? this.cursor.getToken() : lastToken;
-
-    if (finalToken) {
-      this.cursor.setToken(finalToken);
-      //// this.#cursorMarkers.clear();
-      // this.#controller.onMobileKeyboardOpenOnce(() => {
-      //   debug('correct mobile keyboard scroll');
-      //   scrollIntoView(token);
-      // });
-      this.userInput.focus();
-      await this.userInput.setInputValue(token.getValue(finalToken));
-      this.userInput.selectAll();
-      //// scrollIntoView(token);
-      // this.#controller.setStatusElementFocus(token);
-      this.nav.FOCUS(finalToken);
-      this.userInput.moveCursorToEnd();
-    }
-  }
-
-  /**
    * Set up cursor on first available token under focus.
    */
   getFirstTokenUnderFocus(): Result<ITokenCursor, EditManagerError> {
@@ -207,6 +135,7 @@ export class EditManager {
         token,
         onTokenChange: this.handleTokenChange
       });
+      this.inputManager = InputManager.create(this.nav, this.cursor, this.userInput);
     } else {
       this.cursor.setToken(token);
     }

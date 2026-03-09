@@ -45,7 +45,7 @@ export class EditManager {
   }: {
     nav: Nav;
     userInput: UserInput;
-    onError: (err: TokenCursorError) => void;
+    onError: (err: EditManagerError) => void;
   }): EditManager {
     return new EditManager(nav, userInput, onError);
   }
@@ -56,7 +56,7 @@ export class EditManager {
   constructor(
     private nav: Nav,
     private userInput: UserInput,
-    private onError: (err: TokenCursorError) => void
+    private onError: (err: EditManagerError) => void
   ) {
     this.nav.setFocusController(this.handleFocusRequest);
   }
@@ -109,17 +109,16 @@ export class EditManager {
       return false;
     }
     if (evt.targetType === 'TOKEN') {
-      if (this.cursor.isSameLine(evt.token)) {
-        this.cursor.setToken(evt.token);
-        this.userInput.focus();
-        // TODO: await instead of .then?
-        this.userInput.setInputValue(token.getValue(evt.token)).then(() => {
-          this.userInput.selectAll();
-        });
-        return true; // TODO: old code: #handleCursorSetToken will call FOCUS.
-      }
+      // if (this.cursor.isSameLine(evt.token)) {
+      this.cursor.setToken(evt.token);
+      this.userInput.focus();
+      // TODO: await instead of .then?
+      this.userInput.setInputValue(token.getValue(evt.token)).then(() => {
+        this.userInput.selectAll();
+      });
+      return true; // TODO: old code: #handleCursorSetToken will call FOCUS.
     }
-    return false;
+    return true;
   };
 
   private handleCursorError = (err: TokenCursorError) => {

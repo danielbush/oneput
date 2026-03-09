@@ -1,4 +1,3 @@
-import { err, ok, Result } from 'neverthrow';
 import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
 import { JSED_DOM_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
 import { ignoreDescendents, isFocusable } from './lib/focus.js';
@@ -67,10 +66,12 @@ export class Nav {
    * @param controller
    */
   setFocusController(controller: (evt: JsedFocusRequestEvent) => boolean) {
+    console.warn('set focus controller');
     this.#REQUEST_FOCUS = controller;
   }
 
   removeFocusController() {
+    console.warn('remove focus controller');
     this.#REQUEST_FOCUS = null;
   }
 
@@ -89,21 +90,6 @@ export class Nav {
 
   // Actions
 
-  /**
-   * Set up cursor on first available token under focus.
-   */
-  getFirstTokenUnderFocus(): Result<HTMLElement, NavError> {
-    const focus = this.getFocus();
-    if (focus) {
-      const firstToken = token.getFirstToken(focus);
-      if (firstToken) {
-        return ok(firstToken);
-      }
-      return err({ type: 'no-token-under-focus' });
-    }
-    return err({ type: 'no-focus' });
-  }
-
   getFocus(): HTMLElement | null {
     return this.#FOCUS ?? null;
   }
@@ -115,8 +101,8 @@ export class Nav {
     }
   }
 
-  #emitFocusEvent(evt: JsedFocusEvent) {
-    console.warn('TODO: emit FOCUS event', evt);
+  #emitFocusEvent(_evt: JsedFocusEvent) {
+    // console.warn('TODO: emit FOCUS event', evt);
   }
 
   #updateFocus(el: HTMLElement) {

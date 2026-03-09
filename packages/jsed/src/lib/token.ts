@@ -494,14 +494,13 @@ export function splitAfter(token: HTMLElement): HTMLElement[] {
 }
 
 /**
- * Remove the token and return the nearest token in the same LINE.
+ * Remove the token and return the nearest token in the same LINE_SEGMENT. If no
+ * tokens left we provide just an empty token with an anchor symbol to display
+ * it.
  *
  * @param params.keepAnchor If the token has no immediate siblings around it under the same parent element, then insert a ANCHOR .
  */
-export function remove(
-  token: HTMLElement,
-  params: { keepAnchor: boolean } = { keepAnchor: true }
-): void {
+export function remove(token: HTMLElement): void {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
@@ -515,11 +514,8 @@ export function remove(
   if (prevTok || nextTok) {
     return;
   }
-  // We're out of text, we need to add a ANCHOR for the appropriate
-  // LINE_SEGMENT .
-  if (!params?.keepAnchor) {
-    return;
-  }
+  // We're out of text, we need to add a ANCHOR to this LINE_SEGMENT .
+
   const anchor = createAnchor();
   if (prevEl) {
     insertAfter(anchor, prevEl as HTMLElement);

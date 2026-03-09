@@ -131,17 +131,11 @@ export class TokenCursor implements ITokenCursor {
     // Because we re-use the existing token, we do NOT focus.
     this.#token = token.replaceText(this.#token, val);
   }
-  delete(
-    { keepAnchor }: { keepAnchor: boolean } = {
-      keepAnchor: true
-    }
-  ) {
+  delete() {
     this.#failIfExhausted();
     const landOnTok =
       token.getPreviousLineSibling(this.#token) || token.getNextLineSibling(this.#token);
-    token.remove(this.#token, {
-      keepAnchor
-    });
+    token.remove(this.#token);
     if (!landOnTok) {
       console.error(
         `Cannot delete token: no previous or next token to land on; deleted token:`,

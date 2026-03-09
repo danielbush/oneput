@@ -64,7 +64,7 @@ export type ITokenCursor = {
   /**
    * Delete the current token.
    */
-  delete: (params?: { keepAnchor: boolean }) => void; // go back to previous word or next if no previous
+  delete: () => void; // go back to previous word or next if no previous
   /**
    * Append a new token after the current one.
    */

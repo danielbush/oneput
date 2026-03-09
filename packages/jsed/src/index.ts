@@ -1,6 +1,6 @@
 export type { ITokenCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
-export { EditManager } from './EditManager.js';
+export { EditManager, type EditManagerError } from './EditManager.js';
 export type { UserInput, UserInputSelectionState } from './UserInput.js';
 export { Nav } from './Nav.js';
 export { TokenCursor } from './TokenCursor.js';

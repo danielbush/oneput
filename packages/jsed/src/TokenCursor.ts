@@ -4,16 +4,25 @@ import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
 import * as token from './lib/token.js';
 import type { UserInputSelectionState } from './UserInput.js';
 
+export type TokenCursorError =
+  /**
+   * There should be at least an EOL token. But if the cursor finds itself in a
+   * situation where there are no tokens we notify.
+   */
+  { type: 'no-tokens' };
+
 export class TokenCursor implements ITokenCursor {
   static create(params: {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
+    onError: (err: TokenCursorError) => void;
   }) {
     return new TokenCursor({
       document: params.document,
       token: params.token,
-      onTokenChange: params.onTokenChange
+      onTokenChange: params.onTokenChange,
+      onError: params.onError
     });
   }
 
@@ -24,15 +33,18 @@ export class TokenCursor implements ITokenCursor {
   #document: JsedDocument;
   #onTokenChange: (token: HTMLElement) => void;
   #cursorMarkers: CursorMarkers;
+  #onError: (err: TokenCursorError) => void;
 
   constructor(params: {
     document: JsedDocument;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
+    onError: (err: TokenCursorError) => void;
   }) {
     this.#token = params.token; // ts
     this.#document = params.document;
     this.#onTokenChange = params.onTokenChange;
+    this.#onError = params.onError;
     this.#setToken(params.token);
     this.#cursorMarkers = CursorMarkers.create(this);
   }
@@ -131,6 +143,10 @@ export class TokenCursor implements ITokenCursor {
       keepAnchor
     });
     if (!landOnTok) {
+      console.error(
+        `Cannot delete token: no previous or next token to land on; deleted token:`,
+        this.#token
+      );
       this.#setExhausted();
       return;
     }
@@ -225,9 +241,7 @@ export class TokenCursor implements ITokenCursor {
   }
   #failIfExhausted() {
     if (this.#exhausted) {
-      throw new Error(
-        `Cursor is exhausted.  No more tokens.  There is a callback that should have notified you of this.`
-      );
+      this.#onError?.({ type: 'no-tokens' });
     }
   }
 

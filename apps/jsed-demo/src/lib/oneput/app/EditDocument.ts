@@ -1,11 +1,23 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import { type Nav, type JsedDocument, type ITokenCursor, EditManager } from '@oneput/jsed';
+import {
+  type Nav,
+  type JsedDocument,
+  type ITokenCursor,
+  EditManager,
+  type EditManagerError
+} from '@oneput/jsed';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; nav: Nav }) {
-    const editManager = EditManager.create({ nav: params.nav, userInput: ctl.input });
-
-    return new EditDocument(ctl, editManager);
+    const instance = new EditDocument(
+      ctl,
+      EditManager.create({
+        nav: params.nav,
+        userInput: ctl.input,
+        onError: (err) => instance.handleEditError(err)
+      })
+    );
+    return instance;
   }
 
   private cursor?: ITokenCursor;
@@ -48,6 +60,10 @@ export class EditDocument implements AppObject {
     this.editManager.close();
     this.unsubscribeInputChanges();
     this.unsubscribeSelectionChanges();
+  };
+
+  handleEditError = (err: EditManagerError) => {
+    this.ctl.notify(`There was an error editing the document: ${err.type}`);
   };
 
   actions = {

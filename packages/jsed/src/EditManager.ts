@@ -1,7 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { Nav } from './Nav.js';
-import { TokenCursor } from './TokenCursor.js';
+import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
@@ -13,7 +13,8 @@ export type EditManagerError =
        * TODO: should we ever let this happen?
        */
       type: 'no-focus';
-    };
+    }
+  | TokenCursorError;
 
 /**
  * Oneput AppObject that manages an edit session for a single document.
@@ -37,8 +38,16 @@ export type EditManagerError =
  *
  */
 export class EditManager {
-  static create({ nav, userInput }: { nav: Nav; userInput: UserInput }): EditManager {
-    return new EditManager(nav, userInput);
+  static create({
+    nav,
+    userInput,
+    onError
+  }: {
+    nav: Nav;
+    userInput: UserInput;
+    onError: (err: TokenCursorError) => void;
+  }): EditManager {
+    return new EditManager(nav, userInput, onError);
   }
 
   private cursor?: ITokenCursor;
@@ -46,7 +55,8 @@ export class EditManager {
 
   constructor(
     private nav: Nav,
-    private userInput: UserInput
+    private userInput: UserInput,
+    private onError: (err: TokenCursorError) => void
   ) {
     this.nav.setFocusController(this.handleFocusRequest);
   }
@@ -112,6 +122,10 @@ export class EditManager {
     return false;
   };
 
+  private handleCursorError = (err: TokenCursorError) => {
+    this.onError(err);
+  };
+
   /**
    * Set up cursor on first available token under focus.
    */
@@ -133,7 +147,8 @@ export class EditManager {
       this.cursor = TokenCursor.create({
         document: this.nav.document,
         token,
-        onTokenChange: this.handleTokenChange
+        onTokenChange: this.handleTokenChange,
+        onError: this.handleCursorError
       });
       this.inputManager = InputManager.create(this.nav, this.cursor, this.userInput);
     } else {

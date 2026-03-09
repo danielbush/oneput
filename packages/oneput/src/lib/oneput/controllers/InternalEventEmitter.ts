@@ -9,7 +9,7 @@ export type InternalEvent =
   | MenuItemFocusEvent
   | MenuActionEvent
   | MenuSetItemsEvent
-  | ToggleSelectEvent;
+  | SelectionChangeEvent;
 
 export type InputChangeEvent = {
   type: 'input-change';
@@ -40,7 +40,7 @@ export type MenuSetItemsEvent = {
   type: 'set-menu-items';
   payload: { menuId: string };
 };
-export type ToggleSelectEvent = {
+export type SelectionChangeEvent = {
   type: 'selection-change';
   payload: { selection: InputSelectionState };
 };

@@ -42,7 +42,7 @@ export class TokenCursor implements ITokenCursor {
   };
 
   public handleSelectionChange = (selection: UserInputSelectionState): void => {
-    this.#cursorMarkers.handleToggleSelect(selection);
+    this.#cursorMarkers.handleSelectionChange(selection);
   };
 
   getDocument() {

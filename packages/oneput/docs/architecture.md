@@ -116,4 +116,4 @@ Content is injected via `FlexParams` and `FChildParams` data structures that des
 - `menu-item-focus` — when focused menu item changes
 - `menu-action` — when a menu action fires
 - `set-menu-items` — when menu items are set
-- `selection-change` — when input selection state toggles
+- `selection-change` — when input selection state changes

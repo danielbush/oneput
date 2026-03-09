@@ -33,7 +33,7 @@ export class CursorMarkers {
     }
   };
 
-  handleToggleSelect = (state: InputSelectionState): void => {
+  handleSelectionChange = (state: InputSelectionState): void => {
     switch (state) {
       case 'CURSOR_AT_BEGINNING':
         this.addFocusClasses(constants.TOKEN_PREPEND_CLASS);

@@ -9,7 +9,8 @@
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts"
-    }
+    },
+    "./styles/jsed-defaults.css": "./src/styles/jsed-defaults.css"
   },
   "publishConfig": {
     "types": "./dist/index.d.ts",

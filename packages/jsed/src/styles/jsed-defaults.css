@@ -141,6 +141,10 @@
   cursor: pointer;
 }
 
+.jsed-anchor-token::after {
+  content: '\00A4';
+}
+
 .jsed-token-focus.jsed-token {
   background-color: var(--sky-blue-600);
   color: var(--slate-100);

@@ -5,11 +5,18 @@ import * as token from './lib/token.js';
 import type { UserInputSelectionState } from './UserInput.js';
 
 export type TokenCursorError =
-  /**
-   * There should be at least an EOL token. But if the cursor finds itself in a
-   * situation where there are no tokens we notify.
-   */
-  { type: 'no-tokens' };
+  | {
+      /**
+       * Cursor expected a TOKEN but got something else.
+       */
+      type: 'invalid-token';
+    }
+  | {
+      /**
+       * Cursor was passed an element that should not be a TOKEN.
+       */
+      type: 'expected-non-token';
+    };
 
 export class TokenCursor implements ITokenCursor {
   static create(params: {
@@ -64,7 +71,6 @@ export class TokenCursor implements ITokenCursor {
   // #region Setting
 
   getToken() {
-    this.#failIfExhausted();
     return this.#token;
   }
 
@@ -76,6 +82,7 @@ export class TokenCursor implements ITokenCursor {
    */
   setToken(el: HTMLElement) {
     if (!token.isToken(el)) {
+      this.#onError({ type: 'invalid-token' });
       throw new Error(`Not a token`);
     }
     this.#removeAllFocusClasses();
@@ -98,7 +105,6 @@ export class TokenCursor implements ITokenCursor {
   // #region Motion
 
   moveNext() {
-    this.#failIfExhausted();
     if (this.#cursorMarkers.isInsertingBefore()) {
       this.#cursorMarkers.clear();
       return;
@@ -110,7 +116,6 @@ export class TokenCursor implements ITokenCursor {
     }
   }
   movePrevious() {
-    this.#failIfExhausted();
     if (this.#cursorMarkers.isInsertingAfter()) {
       this.#cursorMarkers.clear();
       return;
@@ -127,28 +132,15 @@ export class TokenCursor implements ITokenCursor {
   // #region Editing tokens
 
   replace(val: string) {
-    this.#failIfExhausted();
     // Because we re-use the existing token, we do NOT focus.
     this.#token = token.replaceText(this.#token, val);
   }
   delete() {
-    this.#failIfExhausted();
-    const landOnTok =
-      token.getPreviousLineSibling(this.#token) || token.getNextLineSibling(this.#token);
-    token.remove(this.#token);
-    if (!landOnTok) {
-      console.error(
-        `Cannot delete token: no previous or next token to land on; deleted token:`,
-        this.#token
-      );
-      this.#setExhausted();
-      return;
-    }
-    this.#setToken(landOnTok);
+    const { next: nextTok } = token.remove(this.#token);
+    this.#setToken(nextTok);
     return;
   }
   append(val: string): HTMLElement {
-    this.#failIfExhausted();
     const tok = token.createToken(val);
     token.insertAfter(tok, this.#token);
     return tok;
@@ -158,7 +150,6 @@ export class TokenCursor implements ITokenCursor {
    * COLLAPSE the current token.
    */
   toggleCollapseNext() {
-    this.#failIfExhausted();
     if (token.isCollapsed(this.#token)) {
       token.uncollapse(this.#token);
       return false;
@@ -172,7 +163,6 @@ export class TokenCursor implements ITokenCursor {
    * COLLAPSE the token previous to the current token.
    */
   toggleCollapsePrevious() {
-    this.#failIfExhausted();
     const prev = token.getPreviousLineSibling(this.#token);
     if (!prev) {
       return false;
@@ -187,24 +177,20 @@ export class TokenCursor implements ITokenCursor {
   }
 
   joinNext() {
-    this.#failIfExhausted();
     token.joinNext(this.#token);
   }
 
   joinPrevious() {
-    this.#failIfExhausted();
     token.joinPrevious(this.#token);
   }
 
   splitBefore() {
-    this.#failIfExhausted();
     token.splitBefore(this.#token);
     // We may end up in a new token, so we need to update the focus.
     this.#setToken(this.#token);
   }
 
   splitAfter() {
-    this.#failIfExhausted();
     const [, after] = token.splitAfter(this.#token);
     const firstTok = token.getFirstToken(after);
     if (firstTok) {
@@ -220,23 +206,6 @@ export class TokenCursor implements ITokenCursor {
     this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
     this.#removeAllFocusClasses();
     this.#cursorMarkers.close();
-    this.#failIfExhausted();
-  }
-
-  /**
-   * In the situation where we delete all LINE siblings AND we don't keep an
-   * ANCHOR, we will have no more tokens.  We will set this flag to true and
-   * send a callback to the consumer of the cursor.
-   */
-  #exhausted: boolean = false;
-  #setExhausted() {
-    this.close();
-    this.#exhausted = true;
-  }
-  #failIfExhausted() {
-    if (this.#exhausted) {
-      this.#onError?.({ type: 'no-tokens' });
-    }
   }
 
   // #endregion
@@ -275,6 +244,7 @@ export class TokenCursor implements ITokenCursor {
    */
   insertElementAfter(el: HTMLElement) {
     if (token.isToken(el)) {
+      this.#onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
     token.insertAfter(el, this.#token);
@@ -292,6 +262,7 @@ export class TokenCursor implements ITokenCursor {
    */
   insertElementBefore(el: HTMLElement) {
     if (token.isToken(el)) {
+      this.#onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
     token.insertBefore(el, this.#token);

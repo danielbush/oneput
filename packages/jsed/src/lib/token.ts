@@ -96,7 +96,8 @@ export function createToken(text: string): HTMLElement {
  * additional class to help detect it.
  */
 export function createAnchor(): HTMLElement {
-  const el = createToken(JSED_ANCHOR_CHAR);
+  // const el = createToken(JSED_ANCHOR_CHAR);
+  const el = createToken('');
   el.classList.add(JSED_ANCHOR_CLASS);
   return el;
 }
@@ -500,33 +501,46 @@ export function splitAfter(token: HTMLElement): HTMLElement[] {
  *
  * @param params.keepAnchor If the token has no immediate siblings around it under the same parent element, then insert a ANCHOR .
  */
-export function remove(token: HTMLElement): void {
+export function remove(token: HTMLElement): { next: HTMLElement } {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
-  // TODO: hm, this seems expensive having to calculate all these up front...
-  const prevTok = getPreviousSibling(token);
-  const nextTok = getNextSibling(token);
-  const prevEl = token.previousElementSibling;
-  const nextEl = token.nextElementSibling;
-  parentNode.removeChild(token);
-  if (prevTok || nextTok) {
-    return;
+
+  // An anchor exists once we've exhausted the LINE_SEGMENT of non-empty
+  // TOKEN's. Operations that inject text back in should de-anchor the token.
+
+  if (isAnchor(token)) {
+    return { next: token };
   }
+
+  // Grab this if it exists before we delete...
+  const nextTok = getNextSibling(token) || getPreviousSibling(token);
+
+  parentNode.removeChild(token);
+
+  if (nextTok) {
+    return { next: nextTok };
+  }
+
   // We're out of text, we need to add a ANCHOR to this LINE_SEGMENT .
 
   const anchor = createAnchor();
+
+  const prevEl = token.previousElementSibling;
   if (prevEl) {
     insertAfter(anchor, prevEl as HTMLElement);
-    return;
+    return { next: anchor };
   }
+
+  const nextEl = token.nextElementSibling;
   if (nextEl) {
     insertBefore(anchor, nextEl as HTMLElement);
-    return;
+    return { next: anchor };
   }
   parentNode.appendChild(anchor);
-  return;
+
+  return { next: anchor };
 }
 
 export function getValue(token: HTMLElement): string {

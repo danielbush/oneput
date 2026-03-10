@@ -18,24 +18,6 @@ export type EditManagerError =
 
 /**
  * Oneput AppObject that manages an edit session for a single document.
- *
- * There are 3 main ways we get operations...
- *
- * - USER_CALL user triggers action eg EDIT_FIRST via a menu
- *   - cursor updates to reflect the location
- *   - input updates to reflect cursor
- * - USER_ACT user clicks/touches token
- *   - document emits REQUEST_FOCUS
- *   - cursor updates to reflect touch
- *   - input updates to reflect cursor
- * - USER_TYPE user types in input
- *   - the input event is emitted with the changed text
- *   - input may be updated as a result (eg typing "abc d" -> "d|"
- *   - cursor updates to reflect the final input state
- * - cursor is updated programmatically
- *   - this might be a remote cursor
- *   - input is not updated
- *
  */
 export class EditManager {
   static create({
@@ -69,8 +51,6 @@ export class EditManager {
   /**
    * When user types in the input...
    *
-   * Handles USER_TYPE operations.
-   *
    * @param {string} input What the user has typed into an html input/textarea
    */
   public handleInputChange = (input: string) => {
@@ -90,8 +70,6 @@ export class EditManager {
   /**
    * When the cursor changes its token because of some action it has been
    * commanded to do usually by the user... (eg due to delete operation).
-   *
-   * USER_CALL / USER_ACT
    */
   private handleTokenChange = async (tok: HTMLElement) => {
     this.nav.FOCUS(tok);
@@ -121,6 +99,9 @@ export class EditManager {
     return true;
   };
 
+  /**
+   * If the cursor finds itself in an untenable state...
+   */
   private handleCursorError = (err: TokenCursorError) => {
     this.onError(err);
   };

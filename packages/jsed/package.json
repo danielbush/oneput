@@ -37,7 +37,7 @@
     "dev": "vite",
     "build:check": "tsc",
     "build:types": "tsc -p tsconfig.d.json",
-    "build:cli": "bun build ./src/jsed/cli/convert.ts --compile --outfile dist/bin/convert",
+    "build:cli": "bun build ./src/cli/convert.ts --compile --outfile dist/bin/convert",
     "build:watch": "bunx nodemon --ext js,jsx,ts,tsx,cjs,mjs,json --watch src --exec \"bun run build\"",
     "build": "bunx rimraf dist; bun run build:check && vite build && bun run build:types && bun run build:cli",
     "preview": "vite preview"

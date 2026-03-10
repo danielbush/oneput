@@ -4,6 +4,7 @@ export { EditManager, type EditManagerError } from './EditManager.js';
 export type { UserInput, UserInputSelectionState } from './UserInput.js';
 export { Nav } from './Nav.js';
 export { TokenCursor } from './TokenCursor.js';
+export { TokenManager } from './TokenManager.js';
 export { CursorMarkers } from './CursorMarkers.js';
 
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
@@ -27,7 +28,6 @@ const utils = {
     isToken: token.isToken,
     isAnchor: token.isAnchor,
     addAnchors: token.addAnchors,
-    getFirstToken: token.getFirstToken,
     getParent: token.getParent,
     collapse: token.collapse,
     uncollapse: token.uncollapse,

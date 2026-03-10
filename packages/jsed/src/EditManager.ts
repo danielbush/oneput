@@ -5,6 +5,7 @@ import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
+import { TokenManager } from './TokenManager.js';
 
 export type EditManagerError =
   | { type: 'no-token-under-focus' }
@@ -29,7 +30,8 @@ export class EditManager {
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
   }): EditManager {
-    return new EditManager(nav, userInput, onError);
+    const tokenManager = TokenManager.create();
+    return new EditManager(nav, tokenManager, userInput, onError);
   }
 
   private cursor?: ITokenCursor;
@@ -37,6 +39,7 @@ export class EditManager {
 
   constructor(
     private nav: Nav,
+    private tokenManager: TokenManager,
     private userInput: UserInput,
     private onError: (err: EditManagerError) => void
   ) {
@@ -121,7 +124,7 @@ export class EditManager {
   getFirstTokenUnderFocus(): Result<ITokenCursor, EditManagerError> {
     const focus = this.nav.getFocus();
     if (focus) {
-      const firstToken = token.getFirstToken(focus);
+      const firstToken = this.tokenManager.tokenizeFirst(focus);
       if (firstToken) {
         this.userInput.focus();
         return ok(this.#setCursor(firstToken));
@@ -135,6 +138,7 @@ export class EditManager {
     if (!this.cursor) {
       this.cursor = TokenCursor.create({
         document: this.nav.document,
+        tokenManager: this.tokenManager,
         token,
         onTokenChange: this.handleTokenChange,
         onError: this.handleCursorError

@@ -6,7 +6,7 @@ import {
   JSED_TOKEN_COLLAPSED
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
-import { ignoreDescendents, isFocusable, isIgnorable } from './focus.js';
+import { isFocusable, isIgnorable } from './focus.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
 // #region utils
@@ -570,37 +570,6 @@ export function getLine(el: ChildNode): HTMLElement {
     }
   }
   throw new Error(`getLine: end of for-loop`);
-}
-
-/**
- * Walks el (an F_ELEM usually) and looks for the first text token we can focus
- * on.  This will tokenize as it recurses down depth-first.
- */
-export function getFirstToken(el: HTMLElement): HTMLElement | null {
-  if (isToken(el)) {
-    return el;
-  }
-  if (!isFocusable(el)) {
-    throw new Error('getFirstToken: expects an F_ELEM');
-  }
-  const line = el;
-  // const line = getLine(el);
-  tokenize(line);
-  const sib = getNextLineSibling(line);
-  if (sib) {
-    return sib;
-  }
-  for (const next of findNextNode(line, line, {
-    filter: isFocusable,
-    ignoreDescendents
-  })) {
-    tokenize(next as HTMLElement);
-    const sib = getNextLineSibling(next as HTMLElement);
-    if (sib) {
-      return sib;
-    }
-  }
-  return null;
 }
 
 /**

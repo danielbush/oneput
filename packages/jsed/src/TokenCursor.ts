@@ -3,6 +3,7 @@ import { CursorMarkers } from './CursorMarkers.js';
 import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
 import * as token from './lib/token.js';
 import type { UserInputSelectionState } from './UserInput.js';
+import type { TokenManager } from './TokenManager.js';
 
 export type TokenCursorError =
   | {
@@ -21,12 +22,14 @@ export type TokenCursorError =
 export class TokenCursor implements ITokenCursor {
   static create(params: {
     document: JsedDocument;
+    tokenManager: TokenManager;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
     onError: (err: TokenCursorError) => void;
   }) {
     return new TokenCursor({
       document: params.document,
+      tokenManager: params.tokenManager,
       token: params.token,
       onTokenChange: params.onTokenChange,
       onError: params.onError
@@ -38,18 +41,21 @@ export class TokenCursor implements ITokenCursor {
    */
   #token: HTMLElement;
   #document: JsedDocument;
+  #tokenManager: TokenManager;
   #onTokenChange: (token: HTMLElement) => void;
   #cursorMarkers: CursorMarkers;
   #onError: (err: TokenCursorError) => void;
 
   constructor(params: {
     document: JsedDocument;
+    tokenManager: TokenManager;
     token: HTMLElement;
     onTokenChange: (token: HTMLElement) => void;
     onError: (err: TokenCursorError) => void;
   }) {
     this.#token = params.token; // ts
     this.#document = params.document;
+    this.#tokenManager = params.tokenManager;
     this.#onTokenChange = params.onTokenChange;
     this.#onError = params.onError;
     this.#setToken(params.token);
@@ -192,7 +198,7 @@ export class TokenCursor implements ITokenCursor {
 
   splitAfter() {
     const [, after] = token.splitAfter(this.#token);
-    const firstTok = token.getFirstToken(after);
+    const firstTok = this.#tokenManager.tokenizeFirst(after);
     if (firstTok) {
       this.#setToken(firstTok);
     }
@@ -250,7 +256,7 @@ export class TokenCursor implements ITokenCursor {
     token.insertAfter(el, this.#token);
 
     // Focus on token in el?
-    const first = token.getFirstToken(el);
+    const first = this.#tokenManager.tokenizeFirst(el);
     if (first) {
       this.#setToken(first);
     }
@@ -268,7 +274,7 @@ export class TokenCursor implements ITokenCursor {
     token.insertBefore(el, this.#token);
 
     // Focus on token in el?
-    const first = token.getFirstToken(el);
+    const first = this.#tokenManager.tokenizeFirst(el);
     if (first) {
       this.#setToken(first);
     }

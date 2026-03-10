@@ -87,6 +87,15 @@ export class EditManager {
       return false;
     }
     if (evt.targetType === 'TOKEN') {
+      // For consistency, clicking on a parent that is the current LINE_SEGMENT
+      // focuses the parent instead of the token.
+      const parent = token.getParent(evt.token);
+      const preferParentFocus = parent !== this.nav.getFocus();
+      if (preferParentFocus) {
+        this.nav.FOCUS(parent);
+        return false;
+      }
+
       // if (this.cursor.isSameLine(evt.token)) {
       this.cursor.setToken(evt.token);
       this.userInput.focus();

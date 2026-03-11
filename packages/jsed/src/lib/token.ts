@@ -140,7 +140,7 @@ function replaceTextNode(child: ParentNode | ChildNode): boolean {
 /**
  * Recursively tokenize a LINE.
  */
-function tokenizeLine(line: ParentNode | ChildNode): void {
+function tokenizeLineRec(line: ParentNode | ChildNode): void {
   // Record childNodes before we mutate and convert to array as the NodeList is
   // live!
   const childNodes = Array.from(line.childNodes);
@@ -151,7 +151,7 @@ function tokenizeLine(line: ParentNode | ChildNode): void {
     // Recurse into inline tags eg em-tag.
     // Be aware of INLINE_COMPUTED_STYLE .
     if (isPartOfLine(child)) {
-      tokenizeLine(child);
+      tokenizeLineRec(child);
     } else {
       replaceTextNode(child);
     }
@@ -161,12 +161,50 @@ function tokenizeLine(line: ParentNode | ChildNode): void {
 /**
  * Tokenize a LINE.
  */
-export function tokenize(el: HTMLElement): void {
+export function tokenizeLine(el: HTMLElement): void {
   if (!isFocusable(el)) {
     throw new Error('Can only tokenize an F_ELEM');
   }
   el.normalize();
-  tokenizeLine(el);
+  tokenizeLineRec(el);
+}
+
+/**
+ * Create an IMPLICIT_LINE starting with `textNode` and slurping up anything
+ * directly next of it that is a text node or an inline node.
+ */
+function buildImplicitLine(textNode: Node): HTMLElement | null {
+  if (!textNode.parentNode) {
+    throw new Error(`Expected node to have parent.`);
+  }
+  textNode.parentNode.normalize(); // ok, so really there is just one text node now...
+  if (!textNode.nodeValue || /^\s+$/.test(textNode.nodeValue)) {
+    // Space nodes are generated between tags as an artifact of the html source.
+    // Ignore these.
+    return null;
+  }
+
+  const implicitLine = document.createElement('span');
+  implicitLine.className = JSED_IMPLICIT_CLASS;
+  textNode.parentNode.insertBefore(implicitLine, textNode);
+
+  for (let sib: Node | null = textNode; sib; ) {
+    if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
+      const nextSib: ChildNode | null = sib.nextSibling;
+      implicitLine.appendChild(sib);
+      sib = nextSib;
+    } else {
+      break;
+    }
+  }
+  return implicitLine;
+}
+
+function isImplicitLine(node: Node): boolean {
+  return (
+    node.nodeType === Node.ELEMENT_NODE &&
+    (node as HTMLElement).className.includes(JSED_IMPLICIT_CLASS)
+  );
 }
 
 /**
@@ -174,38 +212,23 @@ export function tokenize(el: HTMLElement): void {
  *
  * Run this on the whole doc at the beginning BEFORE any tokenization occurs.
  */
-export function tokenizeImplicitLine(root: HTMLElement) {
-  const buildImplicitLine = (node: Node): HTMLElement | null => {
-    if (!node.parentNode) {
-      throw new Error(`Expected node to have parent.`);
-    }
-    node.parentNode.normalize(); // ok, so really there is just one text node now...
-    if (!node.nodeValue || /^\s+$/.test(node.nodeValue)) {
-      // Space nodes are generated between tags as an artifact of the html source.
-      // Ignore these.
-      return null;
-    }
-
-    const implicitLine = document.createElement('span');
-    implicitLine.className = JSED_IMPLICIT_CLASS;
-    node.parentNode.insertBefore(implicitLine, node);
-
-    for (let sib: Node | null = node; sib; ) {
-      if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
-        const nextSib: ChildNode | null = sib.nextSibling;
-        implicitLine.appendChild(sib);
-        sib = nextSib;
-      } else {
-        break;
-      }
-    }
-    return implicitLine;
-  };
+export function tagImplicitLines(root: HTMLElement) {
   for (const node of findNextNode(root, root, {
     filter: (node) => node?.nodeType === Node.ELEMENT_NODE
   })) {
+    // if (isImplicitLine(node)) {
+    //   // findNextNode may walk over the IMPLICIT_LINE we just created causing an
+    //   // infinite loop.
+    //   continue;
+    // }
     for (let sib = node.firstChild; sib; ) {
       if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
+        // const implicitLine = buildImplicitLine(sib);
+        // if (implicitLine) {
+        //   sib = implicitLine.nextSibling;
+        //   continue;
+        // }
+
         const prev = sib.previousSibling;
         if (prev) {
           if (isFocusable(prev) && !isPartOfLine(prev)) {

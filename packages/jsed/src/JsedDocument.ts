@@ -1,4 +1,4 @@
-import { tokenizeImplicitLine } from './lib/token.js';
+import { tagImplicitLines } from './lib/token.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {
@@ -14,7 +14,7 @@ export class JsedDocument {
 
   private constructor(root: HTMLElement) {
     this.root = root;
-    tokenizeImplicitLine(root);
+    tagImplicitLines(root);
   }
 
   get document(): Document {

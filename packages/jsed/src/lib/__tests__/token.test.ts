@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../test/util.js';
-import { tokenize, tokenizeImplicitLine } from '../token.js';
+import { tokenizeLine, tagImplicitLines } from '../token.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -11,14 +11,14 @@ const inlineStyleHack = { style: 'display:inline;' };
  */
 const inlineStyleHackVal = 'display:inline;';
 
-describe('tokenize', () => {
+describe('tokenizeLine', () => {
   test('<p>foo <em>bar</em> baz</p>', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'));
     const p1 = byId(doc, 'p1');
 
     // act
-    tokenize(p1);
+    tokenizeLine(p1);
 
     // assert
     expect(byId(doc, 'p1')).toMatchSnapshot();
@@ -37,7 +37,7 @@ describe('tokenize', () => {
       const div1 = byId(doc, 'div1');
 
       // act
-      tokenize(div1);
+      tokenizeLine(div1);
 
       // assert
       expect(div1).toMatchSnapshot('Should not tokenize p1 and p2');
@@ -56,7 +56,7 @@ describe('tokenize', () => {
       const div1 = byId(doc, 'div1');
 
       // act
-      tokenize(p1);
+      tokenizeLine(p1);
 
       // assert
       expect(div1).toMatchSnapshot('Should only tokenize p1');
@@ -76,7 +76,7 @@ describe('tokenizeImplicitLine', () => {
     );
 
     // act
-    tokenizeImplicitLine(doc.root);
+    tagImplicitLines(doc.root);
 
     // assert
     expect(byId(doc, 'div1')).toMatchSnapshot();
@@ -93,7 +93,7 @@ describe('tokenizeImplicitLine', () => {
     );
 
     // act
-    tokenizeImplicitLine(doc.root);
+    tagImplicitLines(doc.root);
 
     // assert
     expect(byId(doc, 'div1')).toMatchSnapshot();
@@ -110,7 +110,7 @@ describe('tokenizeImplicitLine', () => {
     );
 
     // act
-    tokenizeImplicitLine(doc.root);
+    tagImplicitLines(doc.root);
 
     // assert
     expect(byId(doc, 'div1')).toMatchSnapshot();
@@ -130,7 +130,7 @@ describe('tokenizeImplicitLine', () => {
     );
 
     // act
-    tokenizeImplicitLine(doc.root);
+    tagImplicitLines(doc.root);
 
     // assert
     expect(byId(doc, 'p1').nextSibling).toHaveProperty('nodeType', 3);

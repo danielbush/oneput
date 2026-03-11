@@ -30,7 +30,7 @@ export class EditManager {
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
   }): EditManager {
-    const tokenManager = TokenManager.create();
+    const tokenManager = TokenManager.create(nav.document.root);
     return new EditManager(nav, tokenManager, userInput, onError);
   }
 

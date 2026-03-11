@@ -11,6 +11,13 @@
     "strict": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "preserveSymlinks": true
+    "preserveSymlinks": false,
+    "paths": {
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"],
+      "$app/types": ["./types/index.d.ts"],
+      "@oneput/oneput": ["../../packages/oneput/src/lib/index.ts"],
+      "@oneput/oneput/shared/*": ["../../packages/oneput/src/lib/oneput/shared/*"]
+    }
   }
 }

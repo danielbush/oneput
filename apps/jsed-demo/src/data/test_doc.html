@@ -54,9 +54,17 @@
   </div>
   <h2 style="clear: right">Line with inline-block</h2>
   <div>
-    foo
-    <div style="display: inline-block">this is some complicated</div>
-    bar
+    Before the inline-block...
+    <div style="border: solid black 1px; display: inline-block">this is an inline block</div>
+    After the inline block.
+  </div>
+  <div>
+    Before the inline-block...
+    <div style="border: solid black 1px; display: inline-block">
+      <p>para 1 in an inline-block</p>
+      <p>para 2 in an inline-block</p>
+    </div>
+    After the inline block.
   </div>
   <h2>Tokenize only one LINE</h2>
   <p>

@@ -198,7 +198,7 @@ export class TokenCursor implements ITokenCursor {
 
   splitAfter() {
     const [, after] = token.splitAfter(this.#token);
-    const firstTok = this.#tokenManager.tokenizeFirst(after);
+    const firstTok = this.#tokenManager.tokenize(after);
     if (firstTok) {
       this.#setToken(firstTok);
     }
@@ -256,7 +256,7 @@ export class TokenCursor implements ITokenCursor {
     token.insertAfter(el, this.#token);
 
     // Focus on token in el?
-    const first = this.#tokenManager.tokenizeFirst(el);
+    const first = this.#tokenManager.tokenize(el);
     if (first) {
       this.#setToken(first);
     }
@@ -274,7 +274,7 @@ export class TokenCursor implements ITokenCursor {
     token.insertBefore(el, this.#token);
 
     // Focus on token in el?
-    const first = this.#tokenManager.tokenizeFirst(el);
+    const first = this.#tokenManager.tokenize(el);
     if (first) {
       this.#setToken(first);
     }

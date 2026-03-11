@@ -114,10 +114,6 @@ export class Nav {
     if (!isFocusable(el)) {
       throw new Error('#updateFocus: expects an F_ELEM');
     }
-    if (!tok) {
-      // We're on an F_ELEM (not a token), tokenize it.
-      token.tokenize(el);
-    }
     if (this.#FOCUS) {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
     }

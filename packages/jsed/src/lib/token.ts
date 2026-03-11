@@ -138,21 +138,20 @@ function replaceTextNode(child: ParentNode | ChildNode): boolean {
 }
 
 /**
- * Tokenize all the child text nodes in an F_ELEM .
+ * Recursively tokenize a LINE.
  */
-function tokenizeShallow(el: ParentNode | ChildNode): void {
-  // el.normalize();
+function tokenizeLine(line: ParentNode | ChildNode): void {
   // Record childNodes before we mutate and convert to array as the NodeList is
   // live!
-  const childNodes = Array.from(el.childNodes);
+  const childNodes = Array.from(line.childNodes);
   for (const child of childNodes) {
-    if (isToken(el)) {
+    if (isToken(line)) {
       continue;
     }
     // Recurse into inline tags eg em-tag.
     // Be aware of INLINE_COMPUTED_STYLE .
     if (isPartOfLine(child)) {
-      tokenizeShallow(child);
+      tokenizeLine(child);
     } else {
       replaceTextNode(child);
     }
@@ -160,38 +159,14 @@ function tokenizeShallow(el: ParentNode | ChildNode): void {
 }
 
 /**
- * Depth first traversal of F_ELEM's, each F_ELEM is horizontally tokenized with tokenizeShallow.
- */
-function tokenizeLine(root: HTMLElement): void {
-  if (!isFocusable(root)) {
-    throw new Error('Can only tokenize an F_ELEM');
-  }
-  root.normalize();
-  tokenizeShallow(root);
-  // for (const el of findNextNode(root, ceiling, {
-  //   filter: (el) => {
-  //     if (!el) {
-  //       return false;
-  //     }
-  //     if (isToken(el)) {
-  //       return false;
-  //     }
-  //     return (
-  //       // Allow text nodes to ensure we capture things like 'foo <em>bar</em> baz'.
-  //       el.nodeType === Node.ELEMENT_NODE || el.nodeType === Node.TEXT_NODE
-  //     );
-  //   },
-  // })) {
-  //   tokenizeShallow(el);
-  // }
-}
-
-/**
- * Tokenize the text of an F_ELEM.
+ * Tokenize a LINE.
  */
 export function tokenize(el: HTMLElement): void {
-  const line = getLine(el);
-  tokenizeLine(line);
+  if (!isFocusable(el)) {
+    throw new Error('Can only tokenize an F_ELEM');
+  }
+  el.normalize();
+  tokenizeLine(el);
 }
 
 /**

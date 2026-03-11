@@ -89,6 +89,11 @@ export class EditManager {
     if (!this.cursor) {
       return false;
     }
+    if (evt.targetType === 'F_ELEM') {
+      // Tokenize on the fly but focus the parent...
+      this.tokenManager.tokenize(evt.element);
+      return true;
+    }
     if (evt.targetType === 'TOKEN') {
       // For consistency, clicking on a parent that is the current LINE_SEGMENT
       // focuses the parent instead of the token.
@@ -108,7 +113,7 @@ export class EditManager {
       });
       return true; // TODO: old code: #handleCursorSetToken will call FOCUS.
     }
-    return true;
+    return false;
   };
 
   /**
@@ -124,7 +129,7 @@ export class EditManager {
   getFirstTokenUnderFocus(): Result<ITokenCursor, EditManagerError> {
     const focus = this.nav.getFocus();
     if (focus) {
-      const firstToken = this.tokenManager.tokenizeFirst(focus);
+      const firstToken = this.tokenManager.tokenize(focus);
       if (firstToken) {
         this.userInput.focus();
         return ok(this.#setCursor(firstToken));

@@ -1,13 +1,15 @@
 # jsed
 
-## Prompts
+## Working with an agent
 
-How does jsed work?
+Type `/jsed` to orient the agent on the codebase — it will read the architecture narrative, vocabulary, and explain how the system works.
+
+Other useful prompts:
+- "What are jsed's vocabulary terms?"
+- "How does EditManager wire everything together?"
 
 
 ## Usage
-
-This is a library. It's intended to be used as dependency by jsed-ui.
 
 See Taskfile.yml .
 

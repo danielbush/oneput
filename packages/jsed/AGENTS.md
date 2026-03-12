@@ -1,6 +1,6 @@
 # Jsed
 
-Jsed is an HTML editor that lets you edit HTML content using Oneput as the interface.
+Jsed is an HTML editor that lets you edit HTML content using Oneput as the interface. Use the `/jsed` skill to get oriented quickly.
 
 ## Shared vocabulary
 

@@ -1,62 +1,74 @@
 # Jsed Architecture
 
-Jsed is an HTML editor that lets you navigate and edit HTML content using Oneput as the interface. It operates directly on the DOM.
+This document builds up from jsed's foundation to its orchestration layer. Each section depends only on what came before. For domain terms (F_ELEM, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
 
-For domain terms (F_ELEM, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
+## The foundation: JsedDocument
 
-## Key Modules
+Everything starts with `JsedDocument` — a thin wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other module takes a JsedDocument (or its root) as input.
 
-### JsedDocument (`lib/JsedDocument.ts`)
+Alongside it, `UserInput` is a type representing the text input the user types into — setting values, selecting text, moving the cursor. It has no dependencies; it's just a contract that the hosting environment fulfills.
 
-The main entry point. Created from an HTML root element. Follows the nullables pattern with `create()` / `createNull()`. Provides:
+## Navigation: Nav
 
-- `nav` — a `Nav` instance for moving focus around the document
-- `cursor` — a `TokenCursor` for editing tokens within the focused element
-- `listeners` — event hooks for focus changes and cursor events
+`Nav` takes a JsedDocument and provides structural navigation across the document's F_ELEMs. It manages FOCUS — which F_ELEM the user is currently on — and provides actions to move it:
 
-### Nav (`Nav.ts`)
+- **REC_NEXT / REC_PREV** — depth-first walk to the next/previous F_ELEM
+- **SIB_NEXT / SIB_PREV** — move to the next/previous sibling F_ELEM
+- **UP** — move to the parent F_ELEM
+- **REQUEST_FOCUS** — focus a specific element (e.g. from a click or touch)
+- **FOCUS** — set focus directly and update SIB_HIGHLIGHT
 
-Handles structural navigation through the document:
+Nav also creates an `ElementIndicator` — a visual tag-name badge that follows the focused element, handling scroll and visibility changes.
 
-- `REC_NEXT` / `REC_PREV` — navigate to next/previous element (recursive walk)
-- `SIB_NEXT` / `SIB_PREV` — navigate to next/previous sibling
-- `UP` — navigate to parent element
-- `REQUEST_FOCUS` — focus a specific element (e.g., from a click)
+Nav doesn't know about TOKENs. It only sees the F_ELEM tree.
 
-Uses tree-walking utilities from `walk.ts` to traverse the DOM.
+## Tokenization: TokenManager
 
-### TokenCursor (`TokenCursor.ts`)
+`TokenManager` also takes only the document root. Its job is to manage lazy tokenization — tokenizing the whole document upfront would be expensive, so instead we tokenize F_ELEMs on demand.
 
-Provides token-level editing operations once an element is focused:
+When asked to tokenize an F_ELEM, it finds its LINE, tokenizes it, and returns the first TOKEN. If the F_ELEM contains nested LINEs (e.g. a `<div>` containing `<p>` tags), it walks down into the first child LINE.
 
-- `replace(val)` — replace current token's value
-- `delete()` — remove current token
-- `append(val)` — add a new token after current
-- `moveNext()` / `movePrevious()` — move between tokens
-- `joinNext()` / `joinPrevious()` — merge adjacent tokens
-- `splitBefore()` / `splitAfter()` — split the line at the token boundary
-- `toggleCollapseNext()` / `toggleCollapsePrevious()` — collapse/expand adjacent tokens
+## Token editing: TokenCursor
 
-### Token utilities (`lib/token.ts`)
+`TokenCursor` is like a Nav for TOKENs. It takes a JsedDocument and a TokenManager, and provides TOKEN-level editing once an F_ELEM has been focused and tokenized:
 
-Functions for tokenizing text content within elements, detecting token types, and managing the token DOM structure.
+- **moveNext / movePrevious** — move between TOKENs within a LINE (via LINE_SIBLING)
+- **replace / delete / append** — edit TOKEN content
+- **joinNext / joinPrevious** — JOIN adjacent TOKENs
+- **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
+- **toggleCollapseNext / toggleCollapsePrevious** — toggle COLLAPSE
 
-### Walk utilities (`lib/walk.ts`)
+TokenCursor creates `CursorMarkers` internally — visual indicators showing whether the cursor is about to insert, prepend, or append relative to the current TOKEN.
 
-DOM tree-walking functions: `findNextNode`, `findPreviousNode`, `getNextSiblingNode`, `getPreviousSiblingNode`, `getParent`. These respect jsed's focusability rules and skip non-focusable elements.
+## Input handling: InputManager
 
-### DOM rules (`lib/dom-rules.ts`)
+`InputManager` sits one level higher, taking Nav, a TokenCursor, and UserInput. It translates what the user types into document edits: splitting input on whitespace to create multiple TOKENs, handling prepended spaces, and coordinating TOKEN_FOCUS with the input element's selection state.
 
-Rules about HTML element behavior — e.g., which elements can have anchors, void elements.
+## Orchestration: EditManager
 
-### Convert (`lib/convert.ts`, `cli/convert.ts`)
+`EditManager` is the top-level mediator. It takes a Nav and UserInput, and internally creates the TokenManager, TokenCursor, and InputManager. It wires everything together so that:
 
-Converts HTML to jsed-compatible format. The CLI version (`cli/convert.ts`) is compiled to a standalone binary.
+- Key bindings trigger navigation and editing actions
+- Mouse clicks and touches route through REQUEST_FOCUS with a focus controller that tokenizes on the fly
+- Input changes flow through InputManager to the cursor to the document
+- TOKEN changes flow back to update FOCUS and the input element
+
+A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditManager and connects it to Oneput's bindings and input systems.
+
+## Utilities (lib/)
+
+The top-level modules above delegate to lower-level utilities in `lib/`:
+
+- **token.ts** — tokenization, LINE_SIBLING traversal, JOIN, SPLIT, COLLAPSE operations
+- **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`, `getNextSiblingNode`, `getPreviousSiblingNode`, `getParent`
+- **focus.ts** — F_ELEM detection and filtering rules
+- **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)
+- **convert.ts** — converts HTML to jsed-compatible format (also available as a CLI binary via `cli/convert.ts`)
 
 ## Integration with Oneput
 
 Jsed uses Oneput's `AppObject` system to provide its UI. See `apps/jsed-demo/src/lib/oneput/app/` for examples:
 
 - `ViewDocument` — AppObject with navigation bindings (`when: { menuOpen: false }`) and an edit action
-- `EditDocument` — AppObject for token editing mode
+- `EditDocument` — AppObject for token editing mode, wires up EditManager
 - `_bindings.ts` — default bindings combining navigation (menu closed) and menu controls (menu open)

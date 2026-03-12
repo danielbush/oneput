@@ -4,12 +4,14 @@
 - `HTMLElement` is focusable
 - we can style on `:focus` and set `outline`; setting outline makes the focus ring show on focus() calls made on click events
 - `outline` css rule doesn't affect layout, avoids reflow
-- TEST_FIRE
+
+## TEST_FIRE
+
   - `await user.keyboard(...)` and ctrl+j (or other key) - doesn't work, had to use `fireEvent.keyDown(dom.window.document, FE_SIB_DOWN_KEY)` where FE_SIB_DOWN_KEY = `{ key: 'j', ctrlKey: true, };`
   - related maybe: <https://stackoverflow.com/questions/74281534/react-testing-library-user-event-keyboard-not-working>
-- TEST_HOTKEY
-  - `await user.keyboard(...)` doesn't trigger `hotkeys`; forced to test with hotkeys.trigger
-- USEREVENT_TAB_BODY
+  
+## USEREVENT_TAB_BODY
+
   - when: Mar-2023
   - what:
     - adding tabIndex="0" to body and trying to move focus by simulating a tab button
@@ -20,7 +22,9 @@
     - In a real browser, including the body works as expected
   - solution:
     - don't start from the body
-- RTL_FAIL
+    
+## RTL_FAIL
+
   - when: Mar-2023
   - what
     - RTL using jest and jsdom doesn't work; I've tried to test the code by exercising the event handlers as close as possible to a user and it's a massive time suck with mysterious errors like USEREVENT_TAB_BODY .
@@ -32,7 +36,9 @@
     - We can add some real e2e tests to make sure everything hangs together, either karma or cypress, I guess cypress.
     - I'm hoping this will make the tests mercifully easy to write without the mystery bugs.
     - I think we should structure the code to separate the glue code from functions that do stuff.
-- INLINE_COMPUTED_STYLE
+    
+## INLINE_COMPUTED_STYLE
+
   - when: Feb-2024
   - what:
     - The style in jsdom for the display of a tag like 'em' is '' which breaks functions like `isPartOfLine`. AFAICT the node is attached to the document and window.getComputedStyle(em)['display'] returns `inline` in safari, chrome, firefox and edge. So we'll hack it into tests here.

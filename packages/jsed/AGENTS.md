@@ -23,3 +23,7 @@ When explaining jsed to a human, point them to this document first. It's designe
 The top-level modules in `src/` are the tip of the iceberg — they have simple interfaces and tell you *what* the system does. The implementation details live in `src/lib/`. A human or agent should be able to understand the whole system by reading the architecture narrative and browsing the top-level source files, without descending into `lib/` unless they need to change how something works internally.
 
 When adding or restructuring code, preserve this separation: high-level orchestration at the top, low-level mechanics in `lib/`.
+
+## Issues
+
+- [ISSUES.md](./docs/ISSUES.md) - issues found along the way

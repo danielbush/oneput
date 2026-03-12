@@ -2,8 +2,10 @@
 
 This is a monorepo.
 
+## Key systems
+
 - packages/oneput
-  - the main package
+  - a UI that can handle a large subset of user inputs and interactions in a compact unified way
 - packages/jsed
   - an editor that lets you edit html using oneput
 - packages/oneput-native-container
@@ -17,6 +19,37 @@ There are applications which are used mostly to demo the code in packages/.
   - demos jsed editor
 
 
+## Making changes to the code
+
+General rules
+
+- Look for ways to structure each package or app using a deep modules approach; this means pushing low-level implementation details into a subdirectory and keeping the top-level code clean and focused
+  - stand-alone top-level types should be surfaced in the same way
+  - both humans and agents can peruse the top-level code and types without having to descend into the implementation details (unless they need to)
+- In general apply the "nullables algorithm" in order to follow the nullables pattern - see `.agents/skills/nullables` .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
+- Use neverthrow to type check errors not just the happy path.
+- If a package is using effect-ts then we use that instead of neverthrow and it will replace a lot of the create-logic in the nullables pattern.
+
+Follow the specific rules for each project, these take precedence over general rules:
+
+- Read `packages/jsed/AGENTS.md` before making changes to jsed.
+- Read `packages/oneput/AGENTS.md` before making changes to oneput.
+
+## Testing instructions
+
+General rules
+
+- Use vitest with AAA pattern (// arrange, // act, // assert with blank lines between)
+- Test intentions, not exhaustively - focus on core behaviors
+- No mocks - see the nullables skill
+- Ask what the most important tests are before writing
+- Keep test count small and focused
+
+Follow the specific rules for each project, these take precedence over general rules:
+
+- Read `packages/jsed/AGENTS.md` before making changes to jsed.
+- Read `packages/oneput/AGENTS.md` before making changes to oneput.
+
 ## Build and test commands
 
 There's a root `Taskfile.yml`.
@@ -27,48 +60,6 @@ There's a root `Taskfile.yml`.
   - we will add separate tasks for running slower tests
 - `task build`
 
-## Code style guidelines
-
-- In general apply the "nullables algorithm" in order to follow the nullables pattern - see `.agents/skills/nullables` .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
-- Use neverthrow to type check errors not just the happy path.
-- If a package is using effect-ts then we use that instead of neverthrow and it will replace a lot of the create-logic in the nullables pattern.
-
-## Testing instructions
-
-Testing Approach
-
-- Use vitest with AAA pattern (// arrange, // act, // assert with blank lines between)
-- Test intentions, not exhaustively - focus on core behaviors
-- No mocks - see the nullables skill
-- Ask what the most important tests are before writing
-- Keep test count small and focused
-
-
-## Key systems (packages/oneput)
-
-For human-readable architecture docs, see `packages/oneput/docs/architecture.md` and `packages/jsed/docs/architecture.md`.
-
-Below are pointers for agents — read the source files for full detail via JSDoc.
-
-### Bindings
-Key bindings map keyboard shortcuts to actions. Each binding declares `when` conditions (e.g. `menuOpen: true`) controlling when it fires.
-- Types: `packages/oneput/src/lib/oneput/lib/bindings.ts` — `KeyBinding`, `ActionBinding`, `KeyBindingMap`
-- Controller: `packages/oneput/src/lib/oneput/controllers/KeysController.ts`
-- Defaults: `packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts`
-- Persistence: `packages/oneput/src/lib/oneput/shared/bindings/BindingsIDB.ts`
-
-### AppObject
-AppObjects represent screens/states in the app stack with actions, menu, and lifecycle hooks.
-- Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
-- Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
-
-### Controller
-The central API consumers use to control Oneput. Composes sub-controllers for keys, menu, input, ui, app.
-- Entry: `packages/oneput/src/lib/oneput/controllers/controller.ts`
-
-### Events
-Decoupled pub-sub communication between controllers.
-- Types and emitter: `packages/oneput/src/lib/oneput/controllers/InternalEventEmitter.ts`
 
 ## Documentation guidelines
 
@@ -81,17 +72,5 @@ When making code changes, look for opportunities to update docs. We're progressi
 3. **Source-level JSDoc** — the deepest layer. Module-level doc comments on key files explain the "what and why" for that specific module. This is where agents drill down after being pointed by CLAUDE.md. When changing a module's behaviour, update its JSDoc to reflect the new design.
 
 The goal over time: a reader (human or agent) can start at any layer and progressively go deeper only as needed. Source files should have enough JSDoc that reading them after being pointed by CLAUDE.md gives you everything you need — the architecture docs provide the broader narrative if you want it.
-
-### Oneput skill (`packages/oneput-skill/SKILL.md`)
-
-There is also an agent skill at `.agents/skills/oneput` (symlinked from `packages/oneput-skill/`). This is a fourth layer that sits alongside the others but serves a different purpose:
-
-- **This file** tells agents where things are in this repo (navigational, project-specific)
-- **Architecture docs** explain how systems work and why (descriptive, for humans)
-- **The skill** teaches how to build with Oneput — patterns, recipes, API usage (prescriptive, portable)
-
-The skill is portable — it works in any project that uses Oneput as a dependency, not just this monorepo. It should not duplicate project-specific file paths (that's this file's job) or internal implementation details (that's JSDoc's job). Instead it covers the patterns: how to create AppObjects, declare bindings with `when` conditions, build menus with `stdMenuItem`, use the Controller, etc.
-
-When to update the skill: when the public API or recommended patterns change (e.g. new builder methods, new AppObject lifecycle hooks, changes to the bindings system). When changing internal implementation details, update JSDoc and architecture docs instead.
 
 ## Security considerations

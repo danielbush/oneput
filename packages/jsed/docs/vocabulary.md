@@ -8,23 +8,29 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 
 ## Elements
 
-- **F_ELEM** (focusable element) — an element the user can navigate to and focus on. Can be F_REC or F_NONREC. Not an IF_ELEM or TOKEN.
-- **IF_ELEM** (inherently focusable element) — an element that is already natively focusable, e.g. form controls.
-- **F_REC** (focusable recursable element) — an F_ELEM we can focus on and navigate into. Its text-bearing DOM nodes are usually editable. Example: a `<div>`.
+- **F_ELEM** (focusable element) — an element the user can navigate to and FOCUS on. Can be F_REC or F_NONREC. Not an IF_ELEM or TOKEN.
+- **IF_ELEM** (inherently focusable element) — an element that is already natively focusable, e.g. form controls.  Not a TOKEN.
+- **IGNORABLE** -  An element that can not be FOCUS'ed and is effectively invisible to jsed operations (although it may be very much visible to the user).
+
+We can break F_ELEM's down into two categories:
+
+- **F_REC** (focusable recursable element) — an F_ELEM we can focus on and navigate into. Its text-bearing DOM nodes are usually editable. Example: a `<div>`, `<p>` etc.
 - **F_NONREC** (focusable non-recursable element) — an F_ELEM we can focus on but cannot recurse into or edit directly. Used to create islands in the DOM managed outside of jsed. Example: a katex-rendered node.
-- **ISLAND** — an F_NONREC that we navigate "onto" but never "into". Example: `<div class="katex">...</div>`.
+- **ISLAND** — catchier name for an F_NONREC 
+- **F_INLINE** - an F_ELEM that is inline and intended to mark up one or more TOKEN's eg `<span>`, `<em>` or `<a>` etc.  `TokenCursor` should seamlessly navigate into and out of the TOKEN's of these elements within a LINE.  This excludes inline elements that potentially have more complex structures such as inline-block, inline-flex or ones that have been taken out of the normal line flow such as float, etc.  Use jcodemunch-mcp (or equivalent or just grep) and search the docstrings for F_INLINE to find the function that functionally defines this type of element.  
+- **F_NONINLINE** - an F_ELEM that is not an F_INLINE.  Usually this is a block element like `<div>`, `<p>`, or `<section>` but may include inline-block, inline-flex, float elements.
 
 ## Tokens and Text
 
 - **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters.
-- **ANCHOR** — inserted into an F_ELEM (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty tokens.
-- **COLLAPSED_TOKEN** / **COLLAPSE** — a token with no trailing space, so it sits flush against adjacent tokens. Most tokens in NEGATIVE_SPACE are uncollapsed (have a trailing space). Toggling collapse removes or adds this space. Example: `<em>foo<strong>bar</strong>baz</em>` — all collapsed. `<em>foo <strong>bar </strong>baz </em>` — all uncollapsed.
+- **ANCHOR** — a TOKEN which is inserted into an F_ELEM (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
+- **COLLAPSED_TOKEN** / **COLLAPSE** — a token with no trailing space, so it sits flush against adjacent tokens. Most tokens in NEGATIVE_SPACE are uncollapsed (have a trailing space) - this is their default state. Toggling collapse removes or adds this space. This allows us to express markup like this: `<em>foo<strong>bar</strong>baz</em>` (all TOKEN's are collapsed). Uncollapse tokens will include a trailing space and look like this: `<em>foo <strong>bar </strong>baz </em>`.
 
 ## Focus
 
-- **FOCUS** — the current F_ELEM the user has clicked, touched, or navigated to. This is not native browser focus (which would conflict with Oneput's input element).
+- **FOCUS** — the current F_ELEM the user has clicked, touched, or navigated to. This is not native browser focus (which would conflict with Oneput's input element).  This is managed by the `Nav` class.
 - **TOKEN_FOCUS** — tokens have their own focus, distinct from FOCUS. Clicking a token focuses the containing F_ELEM (FOCUS) and then the token itself (TOKEN_FOCUS). The cursor updates TOKEN_FOCUS; the Nav updates FOCUS.
-- **SIB_HIGHLIGHT** — visual highlight when a user focuses an element via navigation actions like REC_NEXT.
+- **SIB_HIGHLIGHT** — visual highlight of F_ELEM's that are DOM siblings; used when a user focuses an F_ELEM via navigation actions like REC_NEXT.
 
 ## Whitespace
 
@@ -33,11 +39,11 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 
 ## Lines and Structure
 
-- **LINE** — a non-inline parent node that directly contains text nodes to be tokenized. If it contains inline or inline-flow elements, those are part of the same LINE and are recursed into. Floats and other display types (inline-block, inline-flex, tables, list items) start new LINEs.
+- **LINE** — a F_NONINLINE and F_REC node that could contain text nodes or TOKEN's or could potentially contain these.
 - **IMPLICIT_LINE** — text nodes belonging to a LINE F_ELEM that also contains nested LINE F_ELEM's. Example: `<div><p>nested</p> this text needs an implicit LINE</div>`. The "loose" text gets wrapped in an inline span. In practice, we look for text nodes that have a LINE (non-inline element) as a previous sibling.
 - **LINE_SEGMENT** — a LINE divided into segments by non-TOKEN elements. Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
-- **SIBLING** — the next or previous DOM sibling for TOKENs and F_ELEMs, negotiating past hidden editing artifacts (undo markers, etc.) not part of the document content.
-- **LINE_SIBLING** — for TOKENs in a LINE, the next or previous TOKEN in that LINE. May differ from the DOM SIBLING because the LINE can contain inline F_ELEMs like `<em>`.
+- **SIBLING** — the next or previous DOM sibling for TOKENs and F_ELEMs; is not an IGNORABLE; so a SIBLING traverser will need to skip past hidden editing artifacts (undo markers, etc.) not part of the document content.
+- **LINE_SIBLING** — an element the `TokenCursor` can traverse and focus (TOKEN_FOCUS) on that has the same LINE as parent.  This includes elements that have F_INLINE's as their immediate ancestors as long as the first F_NONINLINE is the same LINE.  As a result F_INLINE's are effectively ignored when the `TokenCursor` traverses LINE_SIBLING's so we don't think of them as LINE_SIBLING's.  F_NONINLINE's can be given a TOKEN_FOCUS - in this situation, the `TokenCursor` sit on the F_NONINLINE and report it as the current TOKEN.  The broader system can get `Nav` to FOCUS it.  The user can then proceed to navigate past the F_NONINLINE to other LINE_SIBLING's.
 
 ## Operations
 

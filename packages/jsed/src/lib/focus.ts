@@ -55,7 +55,7 @@ export function ignoreDescendents(el: Element | Node | null | undefined): boolea
 }
 
 /**
- * An element that can not be FOCUS'ed and is effectively invisible to jsed operations (although it may be very much visible to the user).
+ * An IGNORABLE that can not be FOCUS'ed and is effectively invisible to jsed operations (although it may be very much visible to the user).
  *
  * An example might be an element indicator that floats next to the element and
  * shows its tag name.  The indicator is a visual aid and not a part of the

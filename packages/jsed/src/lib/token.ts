@@ -18,8 +18,8 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 }
 
 /**
- * Detect if an F_ELEM is acting like an inline element eg an em-tag - such
- * elements are considered part of the visual line of text.
+ * Detects F_INLINE's ie an F_ELEM is acting like an inline element eg an
+ * em-tag .
  */
 export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean {
   if (!el) {
@@ -90,7 +90,7 @@ export function createToken(text: string): HTMLElement {
 }
 
 /**
- * Create a ANCHOR
+ * Create an ANCHOR
  *
  * This is a token that contains text that represents a text anchor.  We add an
  * additional class to help detect it.

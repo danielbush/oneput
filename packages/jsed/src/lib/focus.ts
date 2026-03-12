@@ -69,7 +69,7 @@ export function isIgnorable(el: Element): boolean {
 }
 
 /**
- * Governs which elements actions like REC_NEXT should traverse.  This tests for F_ELEM .
+ * Test if the element is an F_ELEM.
  */
 export function isFocusable(el: EventTarget | Element | null | undefined): el is HTMLElement {
   if (el instanceof window.HTMLScriptElement) {

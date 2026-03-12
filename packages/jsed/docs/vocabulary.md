@@ -9,21 +9,27 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 ## Elements
 
 - **F_ELEM** (focusable element) — an element the user can navigate to and FOCUS on. Can be F_REC or F_NONREC. Not an IF_ELEM or TOKEN.
+    - Source of truth: search docstrings for F_ELEM.
 - **IF_ELEM** (inherently focusable element) — an element that is already natively focusable, e.g. form controls.  Not a TOKEN.
 - **IGNORABLE** -  An element that can not be FOCUS'ed and is effectively invisible to jsed operations (although it may be very much visible to the user).
+  - Source of truth: search docstrings for IGNORABLE.
 
 We can break F_ELEM's down into two categories:
 
 - **F_REC** (focusable recursable element) — an F_ELEM we can focus on and navigate into. Its text-bearing DOM nodes are usually editable. Example: a `<div>`, `<p>` etc.
 - **F_NONREC** (focusable non-recursable element) — an F_ELEM we can focus on but cannot recurse into or edit directly. Used to create islands in the DOM managed outside of jsed. Example: a katex-rendered node.
 - **ISLAND** — catchier name for an F_NONREC 
-- **F_INLINE** - an F_ELEM that is inline and intended to mark up one or more TOKEN's eg `<span>`, `<em>` or `<a>` etc.  `TokenCursor` should seamlessly navigate into and out of the TOKEN's of these elements within a LINE.  This excludes inline elements that potentially have more complex structures such as inline-block, inline-flex or ones that have been taken out of the normal line flow such as float, etc.  Use jcodemunch-mcp (or equivalent or just grep) and search the docstrings for F_INLINE to find the function that functionally defines this type of element.  
+- **F_INLINE** - an F_ELEM that is inline and intended to mark up one or more TOKEN's eg `<span>`, `<em>` or `<a>` etc.  `TokenCursor` should seamlessly navigate into and out of the TOKEN's of these elements within a LINE.  This excludes inline elements that potentially have more complex structures such as inline-block, inline-flex or ones that have been taken out of the normal line flow such as float, etc.
+  - Source of truth: search docstrings for F_INLINE.
 - **F_NONINLINE** - an F_ELEM that is not an F_INLINE.  Usually this is a block element like `<div>`, `<p>`, or `<section>` but may include inline-block, inline-flex, float elements.
+  - Source of truth: search docstrings for F_INLINE and use the negation or inverse
 
 ## Tokens and Text
 
 - **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters.
+  - Source of truth: search docstrings for TOKEN.
 - **ANCHOR** — a TOKEN which is inserted into an F_ELEM (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
+  - Source of truth: search docstrings for ANCHOR.
 - **COLLAPSED_TOKEN** / **COLLAPSE** — a token with no trailing space, so it sits flush against adjacent tokens. Most tokens in NEGATIVE_SPACE are uncollapsed (have a trailing space) - this is their default state. Toggling collapse removes or adds this space. This allows us to express markup like this: `<em>foo<strong>bar</strong>baz</em>` (all TOKEN's are collapsed). Uncollapse tokens will include a trailing space and look like this: `<em>foo <strong>bar </strong>baz </em>`.
 
 ## Focus

@@ -191,3 +191,99 @@ exports[`tokenizeImplicitLine > case 4 - it should ignore spaces > There should 
   </p>
 </div>
 `;
+
+exports[`tokenizeLine > <p>foo <em>bar</em> baz</p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    foo 
+  </span>
+  <em
+    style="display:inline;"
+  >
+    <span
+      class="jsed-token"
+    >
+      bar 
+    </span>
+  </em>
+  <span
+    class="jsed-token"
+  >
+    baz 
+  </span>
+</p>
+`;
+
+exports[`tokenizeLine > localized tokenization (not everything) > case 1 > Should not tokenize p1 and p2 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+  <p
+    id="p2"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+</div>
+`;
+
+exports[`tokenizeLine > localized tokenization (not everything) > case 2 > Should only tokenize p1 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    <span
+      class="jsed-token"
+    >
+      foo 
+    </span>
+    <em
+      style="display:inline;"
+    >
+      <span
+        class="jsed-token"
+      >
+        bar 
+      </span>
+    </em>
+    <span
+      class="jsed-token"
+    >
+      baz 
+    </span>
+  </p>
+  <p
+    id="p2"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+</div>
+`;

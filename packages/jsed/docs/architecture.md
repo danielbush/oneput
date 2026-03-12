@@ -2,6 +2,8 @@
 
 This document builds up from jsed's foundation to its orchestration layer. Each section depends only on what came before. For domain terms (F_ELEM, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
 
+Jsed is a headless library — it contains all the navigation and editing logic but does not run on its own. `apps/jsed-demo` is the canonical example of wiring jsed up in the browser with Oneput, and is used for active development.
+
 ## The foundation: JsedDocument
 
 Everything starts with `JsedDocument` — a thin wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other module takes a JsedDocument (or its root) as input.

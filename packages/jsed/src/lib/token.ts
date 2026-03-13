@@ -200,7 +200,7 @@ function buildImplicitLine(textNode: Node): HTMLElement | null {
   return implicitLine;
 }
 
-function isImplicitLine(node: Node): boolean {
+export function isImplicitLine(node: Node): boolean {
   return (
     node.nodeType === Node.ELEMENT_NODE &&
     (node as HTMLElement).className.includes(JSED_IMPLICIT_CLASS)

@@ -1,6 +1,6 @@
 import type { JsedDocument, ITokenCursor } from './types.js';
 import { CursorMarkers } from './CursorMarkers.js';
-import { JSED_TOKEN_FOCUS_CLASS } from './lib/constants.js';
+import { JSED_CURSOR_CLASS } from './lib/constants.js';
 import * as token from './lib/token.js';
 import type { UserInputSelectionState } from './UserInput.js';
 import type { TokenManager } from './TokenManager.js';
@@ -19,6 +19,9 @@ export type TokenCursorError =
       type: 'expected-non-token';
     };
 
+/**
+ * Manages the CURSOR.
+ */
 export class TokenCursor implements ITokenCursor {
   static create(params: {
     document: JsedDocument;
@@ -92,8 +95,8 @@ export class TokenCursor implements ITokenCursor {
       throw new Error(`Not a token`);
     }
     this.#removeAllFocusClasses();
-    this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
-    el.classList.add(JSED_TOKEN_FOCUS_CLASS);
+    this.#token.classList.remove(JSED_CURSOR_CLASS);
+    el.classList.add(JSED_CURSOR_CLASS);
     this.#token = el;
   }
 
@@ -209,7 +212,7 @@ export class TokenCursor implements ITokenCursor {
   // #region Closing
 
   close() {
-    this.#token.classList.remove(JSED_TOKEN_FOCUS_CLASS);
+    this.#token.classList.remove(JSED_CURSOR_CLASS);
     this.#removeAllFocusClasses();
     this.#cursorMarkers.close();
   }

@@ -18,7 +18,7 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 }
 
 /**
- * Detects F_INLINE's ie an F_ELEM is acting like an inline element eg an
+ * Detects INLINE's ie an FOCUSABLE is acting like an inline element eg an
  * em-tag .
  */
 export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean {
@@ -163,7 +163,7 @@ function tokenizeLineRec(line: ParentNode | ChildNode): void {
  */
 export function tokenizeLine(el: HTMLElement): void {
   if (!isFocusable(el)) {
-    throw new Error('Can only tokenize an F_ELEM');
+    throw new Error('Can only tokenize an FOCUSABLE');
   }
   el.normalize();
   tokenizeLineRec(el);
@@ -248,7 +248,7 @@ export function tagImplicitLines(root: HTMLElement) {
 
 // #endregion
 
-// #region Operations on tokenized F_ELEM's
+// #region Operations on tokenized FOCUSABLE's
 
 /**
  * Get the previous TOKEN SIBLING if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
@@ -359,8 +359,8 @@ function validate(token: HTMLElement): void {
  *
  * If the token is an ANCHOR, we convert it in-place to a regular token and
  * replace the ANCHOR character with the text.  This makes it easy to
- * manage the TOKEN_FOCUS and cursor operations - we only call focus when we
- * create a new token eg after deleting the current TOKEN_FOCUS and only in
+ * manage the CURSOR and cursor operations - we only call focus when we
+ * create a new token eg after deleting the current CURSOR and only in
  * these situations will focus get called triggering a "select-all" in jsed-ui.
  */
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
@@ -550,7 +550,7 @@ export function getValue(token: HTMLElement): string {
 }
 
 /**
- * Find the LINE associated with `el`.  Usually `el` should be a text node, TOKEN or inline F_ELEM .  May return `el` itself if not.
+ * Find the LINE associated with `el`.  Usually `el` should be a text node, TOKEN or inline FOCUSABLE .  May return `el` itself if not.
  */
 export function getLine(el: ChildNode): HTMLElement {
   if (!el) {
@@ -571,16 +571,16 @@ export function getLine(el: ChildNode): HTMLElement {
 }
 
 /**
- * Add ANCHOR's where applicable to the F_ELEM.
+ * Add ANCHOR's where applicable to the FOCUSABLE.
  *
  * Existing ANCHOR's are unchanged.  Only direct descendant ANCHOR's of
- * the F_ELEM are inserted (no recursion).
+ * the FOCUSABLE are inserted (no recursion).
  *
  * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
  */
 export function addAnchors(el: HTMLElement): HTMLElement[] {
   if (isToken(el)) {
-    throw new Error('addAnchors: expects an F_ELEM');
+    throw new Error('addAnchors: expects an FOCUSABLE');
   }
   let segment = { hasTokens: false };
   const anchors: HTMLElement[] = [];

@@ -1,4 +1,4 @@
-import { ignoreDescendents, isFocusable } from './lib/focus.js';
+import { isIsland, isFocusable } from './lib/focus.js';
 import { isToken, getNextLineSibling, getLine, tokenizeLine } from './lib/token.js';
 import { findNextNode, findPreviousNode } from './lib/walk.js';
 
@@ -20,7 +20,7 @@ export class TokenManager {
       return el;
     }
     if (!isFocusable(el)) {
-      throw new Error('tokenize: expects an F_ELEM');
+      throw new Error('tokenize: expects an FOCUSABLE');
     }
     const line = getLine(el);
     tokenizeLine(line);
@@ -29,14 +29,14 @@ export class TokenManager {
     // Scan for next / previous LINE's
     for (const next of findNextNode(line, this.docRoot, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     })) {
       console.log('next', next);
       break;
     }
     for (const previous of findPreviousNode(line, this.docRoot, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     })) {
       // Recurse in the "previous" direction into the parents but don't visit
       // them. We only want anything that is in a different subtree previous to
@@ -58,7 +58,7 @@ export class TokenManager {
 
     for (const next of findNextNode(el, el, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     })) {
       tokenizeLine(next as HTMLElement);
       const sib = getNextLineSibling(next as HTMLElement);

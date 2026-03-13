@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FOCUS > should focus an F_ELEM (SIB_HIGHLIGHT) 1`] = `
+exports[`FOCUS > should focus an FOCUSABLE (SIB_HIGHLIGHT) 1`] = `
 <div
   id="root"
 >

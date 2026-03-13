@@ -1,6 +1,6 @@
 import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
 import { JSED_DOM_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
-import { ignoreDescendents, isFocusable } from './lib/focus.js';
+import { isIsland, isFocusable } from './lib/focus.js';
 import * as token from './lib/token.js';
 import {
   getNextSiblingNode,
@@ -20,6 +20,9 @@ export type NavError =
       type: 'no-focus';
     };
 
+/**
+ * Manages the FOCUS .
+ */
 export class Nav {
   static create(doc: JsedDocument): Nav {
     const elementIndicator = ElementIndicator.create();
@@ -32,8 +35,8 @@ export class Nav {
   }
 
   /**
-   * The focus F_ELEM .  If a TOKEN is focused, this will be set to the parent
-   * F_ELEM for that TOKEN.
+   * The focus FOCUSABLE .  If a TOKEN is focused, this will be set to the parent
+   * FOCUSABLE for that TOKEN.
    */
   #FOCUS?: HTMLElement;
   #REQUEST_FOCUS?: ((evt: JsedFocusRequestEvent) => boolean) | null;
@@ -112,7 +115,7 @@ export class Nav {
       el = token.getParent(el);
     }
     if (!isFocusable(el)) {
-      throw new Error('#updateFocus: expects an F_ELEM');
+      throw new Error('#updateFocus: expects an FOCUSABLE');
     }
     if (this.#FOCUS) {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
@@ -130,7 +133,7 @@ export class Nav {
           }
         : {
             type: 'FOCUS',
-            targetType: 'F_ELEM',
+            targetType: 'FOCUSABLE',
             element: el
           }
     );
@@ -143,7 +146,7 @@ export class Nav {
     if (!this.#FOCUS) return null;
     for (const next of findNextNode(this.#FOCUS, this.doc.root, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     })) {
       this.REQUEST_FOCUS(next);
       return next as HTMLElement;
@@ -158,7 +161,7 @@ export class Nav {
     if (!this.#FOCUS) return null;
     for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     })) {
       this.REQUEST_FOCUS(next);
       return next as HTMLElement;
@@ -173,7 +176,7 @@ export class Nav {
     if (!this.#FOCUS) return null;
     const next = getNextSiblingNode(this.#FOCUS, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     });
     if (next) {
       this.REQUEST_FOCUS(next);
@@ -189,7 +192,7 @@ export class Nav {
     if (!this.#FOCUS) return null;
     const next = getPreviousSiblingNode(this.#FOCUS, {
       filter: isFocusable,
-      ignoreDescendents
+      ignoreDescendents: isIsland
     });
     if (next) {
       this.REQUEST_FOCUS(next);
@@ -211,7 +214,7 @@ export class Nav {
   }
 
   /**
-   * Focus an element if it is an F_ELEM .
+   * Focus an element if it is an FOCUSABLE .
    */
   FOCUS(el: HTMLElement): void {
     this.#updateFocus(el);
@@ -222,7 +225,7 @@ export class Nav {
    * Request FOCUS for an element `el`, if request is allow, focus and EMIT a
    * FOCUS event.
    *
-   * TOKEN_FOCUS is checked first.
+   * CURSOR is checked first.
    */
   REQUEST_FOCUS(el: Element | EventTarget | null): void {
     if (!el) {
@@ -233,7 +236,7 @@ export class Nav {
       const ok =
         this.#REQUEST_FOCUS?.({
           type: 'FOCUS_REQUEST',
-          targetType: 'F_ELEM',
+          targetType: 'FOCUSABLE',
           element: el
         }) ?? true;
       if (ok) {

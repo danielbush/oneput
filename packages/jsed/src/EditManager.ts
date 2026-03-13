@@ -89,7 +89,7 @@ export class EditManager {
     if (!this.cursor) {
       return false;
     }
-    if (evt.targetType === 'F_ELEM') {
+    if (evt.targetType === 'FOCUSABLE') {
       // Tokenize on the fly but focus the parent...
       this.tokenManager.tokenize(evt.element);
       return true;

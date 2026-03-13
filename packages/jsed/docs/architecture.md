@@ -1,6 +1,6 @@
 # Jsed Architecture
 
-This document builds up from jsed's foundation to its orchestration layer. Each section depends only on what came before. For domain terms (F_ELEM, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
+This document builds up from jsed's foundation to its orchestration layer. Each section depends only on what came before. For domain terms (FOCUSABLE, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
 
 Jsed is a headless library — it contains all the navigation and editing logic but does not run on its own. `apps/jsed-demo` is the canonical example of wiring jsed up in the browser with Oneput, and is used for active development.
 
@@ -12,27 +12,27 @@ Alongside it, `UserInput` is a type representing the text input the user types i
 
 ## Navigation: Nav
 
-`Nav` takes a JsedDocument and provides structural navigation across the document's F_ELEMs. It manages FOCUS — which F_ELEM the user is currently on — and provides actions to move it:
+`Nav` takes a JsedDocument and provides structural navigation across the document's FOCUSABLE's. It manages FOCUS — which FOCUSABLE the user is currently on — and provides actions to move it:
 
-- **REC_NEXT / REC_PREV** — depth-first walk to the next/previous F_ELEM
-- **SIB_NEXT / SIB_PREV** — move to the next/previous sibling F_ELEM
-- **UP** — move to the parent F_ELEM
+- **REC_NEXT / REC_PREV** — depth-first walk to the next/previous FOCUSABLE
+- **SIB_NEXT / SIB_PREV** — move to the next/previous sibling FOCUSABLE
+- **UP** — move to the parent FOCUSABLE
 - **REQUEST_FOCUS** — focus a specific element (e.g. from a click or touch)
 - **FOCUS** — set focus directly and update SIB_HIGHLIGHT
 
 Nav also creates an `ElementIndicator` — a visual tag-name badge that follows the focused element, handling scroll and visibility changes.
 
-Nav doesn't know about TOKENs. It only sees the F_ELEM tree.
+Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
 ## Tokenization: TokenManager
 
-`TokenManager` also takes only the document root. Its job is to manage lazy tokenization — tokenizing the whole document upfront would be expensive, so instead we tokenize F_ELEMs on demand.
+`TokenManager` also takes only the document root. Its job is to manage lazy tokenization — tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand.
 
-When asked to tokenize an F_ELEM, it finds its LINE, tokenizes it, and returns the first TOKEN. If the F_ELEM contains nested LINEs (e.g. a `<div>` containing `<p>` tags), it walks down into the first child LINE.
+When asked to tokenize a FOCUSABLE, it finds its LINE, tokenizes it, and returns the first TOKEN. If the FOCUSABLE contains nested LINEs (e.g. a `<div>` containing `<p>` tags), it walks down into the first child LINE.
 
 ## Token editing: TokenCursor
 
-`TokenCursor` is like a Nav for TOKENs. It takes a JsedDocument and a TokenManager, and provides TOKEN-level editing once an F_ELEM has been focused and tokenized:
+`TokenCursor` is like a Nav for TOKENs. It takes a JsedDocument and a TokenManager, and provides TOKEN-level editing once an FOCUSABLE has been focused and tokenized:
 
 - **moveNext / movePrevious** — move between TOKENs within a LINE (via LINE_SIBLING)
 - **replace / delete / append** — edit TOKEN content
@@ -44,7 +44,7 @@ TokenCursor creates `CursorMarkers` internally — visual indicators showing whe
 
 ## Input handling: InputManager
 
-`InputManager` sits one level higher, taking Nav, a TokenCursor, and UserInput. It translates what the user types into document edits: splitting input on whitespace to create multiple TOKENs, handling prepended spaces, and coordinating TOKEN_FOCUS with the input element's selection state.
+`InputManager` sits one level higher, taking Nav, a TokenCursor, and UserInput. It translates what the user types into document edits: splitting input on whitespace to create multiple TOKENs, handling prepended spaces, and coordinating CURSOR with the input element's selection state.
 
 ## Orchestration: EditManager
 
@@ -63,7 +63,7 @@ The top-level modules above delegate to lower-level utilities in `lib/`:
 
 - **token.ts** — tokenization, LINE_SIBLING traversal, JOIN, SPLIT, COLLAPSE operations
 - **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`, `getNextSiblingNode`, `getPreviousSiblingNode`, `getParent`
-- **focus.ts** — F_ELEM detection and filtering rules
+- **focus.ts** — FOCUSABLE detection and filtering rules
 - **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)
 - **convert.ts** — converts HTML to jsed-compatible format (also available as a CLI binary via `cli/convert.ts`)
 

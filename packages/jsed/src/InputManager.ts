@@ -56,7 +56,7 @@ export class InputManager {
       }
     }
 
-    // Update TOKEN_FOCUS and input.
+    // Update CURSOR and input.
     if (prependedSpace) {
       this.userInput.moveCursorToBeginning();
     }

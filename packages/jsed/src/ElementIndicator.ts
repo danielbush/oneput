@@ -129,7 +129,7 @@ export class ElementIndicator {
   }
 
   /**
-   * Update the focus around the F_ELEM that the user sees.
+   * Update the focus around the FOCUSABLE that the user sees.
    *
    * If a token is passed, calculate the focus based on the token.
    */

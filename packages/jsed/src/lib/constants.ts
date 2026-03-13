@@ -13,7 +13,7 @@ export const SBR_FOCUS_SIBLING = 'jsed-focus-sibling';
  */
 export const JSED_DOM_ROOT_ID = 'jsed-app-root';
 /**
- * The focus CSS class for F_ELEM's (not TOKEN's).
+ * The focus CSS class for FOCUSABLE's (not TOKEN's).
  */
 export const JSED_FOCUS_CLASS = 'jsed-focus';
 /**
@@ -23,7 +23,7 @@ export const JSED_TOKEN_CLASS = 'jsed-token';
 /**
  * The focus CSS class for TOKEN's.
  */
-export const JSED_TOKEN_FOCUS_CLASS = 'jsed-token-focus';
+export const JSED_CURSOR_CLASS = 'jsed-token-focus';
 export const JSED_TOKEN_COLLAPSED = 'jsed-token-collapsed';
 /**
  * CSS class for ANCHOR .

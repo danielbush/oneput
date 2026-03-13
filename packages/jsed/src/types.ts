@@ -5,7 +5,7 @@ export { JsedDocument } from './JsedDocument.js';
 /**
  * The focus has been set.
  *
- * The target could be an F_ELEM or a TOKEN.
+ * The target could be an FOCUSABLE or a TOKEN.
  */
 export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
 /**
@@ -17,14 +17,14 @@ export type JsedFocusEvent = JsedFocusEventBase<'FOCUS'>;
 export type JsedFocusRequestEvent = JsedFocusEventBase<'FOCUS_REQUEST'>;
 
 /**
- * Events that are emitted due to navigation and selection of F_ELEM's within the document (aka the FOCUS action).
+ * Events that are emitted due to navigation and selection of FOCUSABLE's within the document (aka the FOCUS action).
  *
- * The listener to this event will decide if the F_ELEM should become the active FOCUS based on this event.
+ * The listener to this event will decide if the FOCUSABLE should become the active FOCUS based on this event.
  */
 type JsedFocusEventBase<T> =
   | {
       type: T;
-      targetType: 'F_ELEM';
+      targetType: 'FOCUSABLE';
       element: HTMLElement;
     }
   | {

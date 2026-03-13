@@ -3,7 +3,7 @@ import { byId, div, frag, li, makeRoot, p, script, ul } from '../test/util.js';
 import { Nav } from '../Nav.js';
 
 describe('FOCUS', () => {
-  it('should focus an F_ELEM (SIB_HIGHLIGHT)', () => {
+  it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'p1'));
     const nav = Nav.createNull(doc);
@@ -16,7 +16,7 @@ describe('FOCUS', () => {
     expect(doc.root).toMatchSnapshot();
   });
 
-  it('should not focus a non-F_ELEM', () => {
+  it('should not focus a non-FOCUSABLE', () => {
     // arrange
     const doc = makeRoot(frag(script({ id: 'p1' }, 'p1')));
     const nav = Nav.createNull(doc);

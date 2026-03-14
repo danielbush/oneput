@@ -7,7 +7,7 @@ describe('findNextNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
+        { id: '1' }, //
         div({ id: '1-1' }),
         div({ id: '1-2' }),
         div({ id: '1-3' }),
@@ -32,10 +32,23 @@ describe('findNextNode - visit order', () => {
     const doc = makeRoot(
       div(
         { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' }), div({ id: '1-1-2' })),
-        div({ id: '1-2' }, div({ id: '1-2-1' })),
-        div({ id: '1-3' }, div({ id: '1-3-1' })),
-        div({ id: '1-4' }, div({ id: '1-4-1' }))
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' }),
+          div({ id: '1-1-2' })
+        ),
+        div(
+          { id: '1-2' }, //
+          div({ id: '1-2-1' })
+        ),
+        div(
+          { id: '1-3' }, //
+          div({ id: '1-3-1' })
+        ),
+        div(
+          { id: '1-4' }, //
+          div({ id: '1-4-1' })
+        )
       )
     );
     const visited = [];
@@ -65,7 +78,7 @@ describe('findNextNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
+        { id: '1' }, //
         div({ id: '1-1' }),
         div({ id: '1-2' }),
         div({ id: '1-3' }),
@@ -89,8 +102,12 @@ describe('findNextNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' }), div({ id: '1-1-2' })),
+        { id: '1' }, //
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' }),
+          div({ id: '1-1-2' })
+        ),
         div({ id: '1-2' }),
         div({ id: '1-3' }),
         div({ id: '1-4' })
@@ -114,7 +131,10 @@ describe('findNextNode - visit order', () => {
     const doc = makeRoot(
       div(
         { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' })),
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' })
+        ),
         div({ id: '1-2' }),
         div({ id: '1-3' }),
         div({ id: '1-4' })
@@ -137,9 +157,20 @@ describe('findNextNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' }, div({ id: '1-1-1-1' }), div({ id: '1-1-1-2' }))),
-        div({ id: '1-2' }, div({ id: '1-2-1' }), div({ id: '1-2-2' })),
+        { id: '1' }, //
+        div(
+          { id: '1-1' }, //
+          div(
+            { id: '1-1-1' }, //
+            div({ id: '1-1-1-1' }),
+            div({ id: '1-1-1-2' })
+          )
+        ),
+        div(
+          { id: '1-2' }, //
+          div({ id: '1-2-1' }),
+          div({ id: '1-2-2' })
+        ),
         div({ id: '1-3' }),
         div({ id: '1-4' })
       )
@@ -163,7 +194,7 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
+        { id: '1' }, //
         div({ id: '1-1' }),
         div({ id: '1-2' }),
         div({ id: '1-3' }),
@@ -187,11 +218,23 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' })),
-        div({ id: '1-2' }, div({ id: '1-2-1' })),
-        div({ id: '1-3' }, div({ id: '1-3-1' })),
-        div({ id: '1-4' }, div({ id: '1-4-1' }))
+        { id: '1' }, //
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' })
+        ),
+        div(
+          { id: '1-2' }, //
+          div({ id: '1-2-1' })
+        ),
+        div(
+          { id: '1-3' }, //
+          div({ id: '1-3-1' })
+        ),
+        div(
+          { id: '1-4' }, //
+          div({ id: '1-4-1' })
+        )
       )
     );
     const visited = [];
@@ -211,11 +254,27 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' })),
-        div({ id: '1-2' }, div({ id: '1-2-1' })),
-        div({ id: '1-3' }, div({ id: '1-3-1' }, div({ id: '1-3-1-1' }), div({ id: '1-3-1-2' }))),
-        div({ id: '1-4' }, div({ id: '1-4-1' }))
+        { id: '1' }, //
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' })
+        ),
+        div(
+          { id: '1-2' }, //
+          div({ id: '1-2-1' })
+        ),
+        div(
+          { id: '1-3' }, //
+          div(
+            { id: '1-3-1' }, //
+            div({ id: '1-3-1-1' }),
+            div({ id: '1-3-1-2' })
+          )
+        ),
+        div(
+          { id: '1-4' }, //
+          div({ id: '1-4-1' })
+        )
       )
     );
     const visited = [];
@@ -235,9 +294,9 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: 'a' },
+        { id: 'a' }, //
         div(
-          { id: '1' },
+          { id: '1' }, //
           div({ id: '1-1' }),
           div({ id: '1-2' }),
           div({ id: '1-3' }),
@@ -261,7 +320,15 @@ describe('findPreviousNode - visit order', () => {
   test('root=limit / limit > start - go up to parent and visit its previous sibs', () => {
     // arrange
     const doc = makeRoot(
-      div({ id: 'a' }, div({ id: '1' }), div({ id: '2' }), div({ id: '3' }, div({ id: '3-1' })))
+      div(
+        { id: 'a' }, //
+        div({ id: '1' }),
+        div({ id: '2' }),
+        div(
+          { id: '3' }, //
+          div({ id: '3-1' })
+        )
+      )
     );
     const visited = [];
     const start = byId(doc, '3-1');
@@ -280,11 +347,23 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' })),
-        div({ id: '1-2' }, div({ id: '1-2-1' })),
-        div({ id: '1-3' }, div({ id: '1-3-1' })),
-        div({ id: '1-4' }, div({ id: '1-4-1' }))
+        { id: '1' }, //
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' })
+        ),
+        div(
+          { id: '1-2' }, //
+          div({ id: '1-2-1' })
+        ),
+        div(
+          { id: '1-3' }, //
+          div({ id: '1-3-1' })
+        ),
+        div(
+          { id: '1-4' }, //
+          div({ id: '1-4-1' })
+        )
       )
     );
     const visited = [];
@@ -304,11 +383,24 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '1-1' }, div({ id: '1-1-1' })),
-        div({ id: '1-2' }, div({ id: '1-2-1' })),
-        div({ id: '1-3' }, div({ id: '1-3-1' })),
-        div({ id: '1-4' }, div({ id: '1-4-1' }), div({ id: '1-4-2' }))
+        { id: '1' }, //
+        div(
+          { id: '1-1' }, //
+          div({ id: '1-1-1' })
+        ),
+        div(
+          { id: '1-2' }, //
+          div({ id: '1-2-1' })
+        ),
+        div(
+          { id: '1-3' }, //
+          div({ id: '1-3-1' })
+        ),
+        div(
+          { id: '1-4' }, //
+          div({ id: '1-4-1' }),
+          div({ id: '1-4-2' })
+        )
       )
     );
     const visited = [];
@@ -329,10 +421,14 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
+        { id: '1' }, //
         div({ id: '2' }),
         div({ id: '3' }),
-        div({ id: '4' }, div({ id: '4-1' }), div({ id: '4-2' }))
+        div(
+          { id: '4' }, //
+          div({ id: '4-1' }),
+          div({ id: '4-2' })
+        )
       )
     );
     const visited = [];
@@ -353,10 +449,19 @@ describe('findPreviousNode - visit order', () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: '1' },
-        div({ id: '2' }, div({ id: '2-1' })),
-        div({ id: '3' }, div({ id: '3-1' })),
-        div({ id: '4' }, div({ id: '4-1' }))
+        { id: '1' }, //
+        div(
+          { id: '2' }, //
+          div({ id: '2-1' })
+        ),
+        div(
+          { id: '3' }, //
+          div({ id: '3-1' })
+        ),
+        div(
+          { id: '4' }, //
+          div({ id: '4-1' })
+        )
       )
     );
     const visited = [];

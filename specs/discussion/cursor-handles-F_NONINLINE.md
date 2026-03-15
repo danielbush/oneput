@@ -1,3 +1,10 @@
+---
+status: discussion
+created: 2026-03-12
+completed:
+summary:
+---
+
 Currently TokenCursor only traverses TOKEN's, ignoring all other elements.
 
 Facts:

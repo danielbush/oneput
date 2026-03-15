@@ -112,8 +112,9 @@ function anchor2Token(token: HTMLElement): HTMLElement {
 
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.
+ * Returns the first TOKEN created, or null if the child was not a text node.
  */
-function replaceTextNode(child: ParentNode | ChildNode): boolean {
+function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
   const el = child.parentNode;
   if (isToken(el)) {
     throw new Error(
@@ -132,18 +133,19 @@ function replaceTextNode(child: ParentNode | ChildNode): boolean {
     }
     el?.insertBefore(frag, child);
     el?.removeChild(child);
-    return true;
+    return tokens[0] ?? null;
   }
-  return false;
+  return null;
 }
 
 /**
- * Recursively tokenize a LINE.
+ * Recursively tokenize a LINE. Returns the first TOKEN created.
  */
-function tokenizeLineRec(line: ParentNode | ChildNode): void {
+function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
   // Record childNodes before we mutate and convert to array as the NodeList is
   // live!
   const childNodes = Array.from(line.childNodes);
+  let first: HTMLElement | null = null;
   for (const child of childNodes) {
     if (isToken(line)) {
       continue;
@@ -151,22 +153,26 @@ function tokenizeLineRec(line: ParentNode | ChildNode): void {
     // Recurse into inline tags eg em-tag.
     // Be aware of INLINE_COMPUTED_STYLE .
     if (isPartOfLine(child)) {
-      tokenizeLineRec(child);
+      const token = tokenizeLineRec(child);
+      if (!first) first = token;
     } else {
-      replaceTextNode(child);
+      const token = replaceTextNode(child);
+      if (!first) first = token;
     }
   }
+  return first;
 }
 
 /**
- * Tokenize a LINE.
+ * Tokenize a LINE (SHALLOW_TOKENIZATION — does not recurse into NESTED_LINE's).
+ * Returns the first TOKEN created, or null if there was nothing to tokenize.
  */
-export function tokenizeLine(el: HTMLElement): void {
+export function tokenizeLine(el: HTMLElement): HTMLElement | null {
   if (!isFocusable(el)) {
     throw new Error('Can only tokenize an FOCUSABLE');
   }
   el.normalize();
-  tokenizeLineRec(el);
+  return tokenizeLineRec(el);
 }
 
 /**

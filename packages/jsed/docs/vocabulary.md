@@ -31,9 +31,13 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 - **LINE** — a FOCUSABLE that is not an INLINE or ISLAND.  ISLAND's, INLINE's and even other LINE's all belong to the same LINE if their first LINE ancestor in their ancestor chain is the same LINE.  TOKEN's usually either have LINE as their parent or have an INLINE as a parent that belongs to the LINE.
   - Example: a `<div>`, `<p>` etc.
   - Source of truth:  search docstrings for INLINE as these functions or methods may be used via negation; also search docstrings for LINE;
-- **NESTED_LINE** - a LINE that has another LINE as an ancestor; see LINE_SIBLING for how it is treated
-- **LINE_SIBLING** — a TOKEN, NESTED_LINE or ISLAND that belongs to the same LINE.  INLINE's aren't considered LINE_SIBLING's even though they also belong to the same LINE.  When the CURSOR traverses the LINE it seamlessly recurses through INLINE's and visits TOKEN's, NESTED_LINE's and ISLAND's that belong to the same LINE.   ISLAND's and NESTED_LINE's can receive the CURSOR - in this situation, the CURSOR sits on the element and reports it as the current "TOKEN" (which is a slight abuse of terminology).  The editor can then decide to FOCUS non-TOKEN LINE_SIBLING's.  The user can then proceed to navigate past the NESTED_LINE to other LINE_SIBLING's.  The user could also opt to recurses into a NESTED_LINE; if this happens we treat this as moving to a new LINE.
-- **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Non-TOKEN LINE_SIBLING's act as separators between LINE_SEGMENT's.
+- **NESTED_LINE** - a LINE that has another LINE as an ancestor; it is a LINE_MEMBER but not a LINE_SIBLING (the CURSOR does not visit or descend into it)
+- **LINE_MEMBER** - any FOCUSABLE that belongs to a line; currently this means TOKEN, INLINE, NESTED_LINE and ISLAND can all be members.  Not all members are traversable.
+- **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR;
+  - TOKEN's that belong to the same LINE should be LINE_SIBLING's
+  - INLINE's aren't considered LINE_SIBLING's even though they also belong to the same LINE.  When the CURSOR traverses the LINE it seamlessly recurses through INLINE's and visits their TOKEN's as if they were DOM siblings.
+  - ISLAND's and NESTED_LINE's are not visited (atm) so they don't receive the CURSOR.  The CURSOR should not visit or descend into them.
+- **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Other LINE_MEMBER's act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR** - the current LINE_SIBLING the user has selected when editing the text of a document.  This is distinct from FOCUS which is the current FOCUSABLE the user has selected.  Usually the current FOCUSABLE becomes the current LINE within which the user edits the LINE_SIBLING's (text content).
   - Source of truth: search docstrings for CURSOR
@@ -62,6 +66,9 @@ For mutations...
 - **JOIN** — when a TOKEN (t) is joined with the next or previous (p): p is removed and its text is appended or prepended to t.
 - **SPLIT_BY_TOKEN** — splitting a TOKEN's parent before or after the TOKEN. The split applies to the parent (which may be the LINE or an inline element like `<em>`). LINE is always the highest ancestor we split at.
 - **SPLIT_BY_LINE** — splitting a LINE's parent element before or after the LINE. Can be done with reference to a TOKEN (split at the TOKEN's LINE) or at the FOCUSABLE level (split the focused LINE's parent).
+
+- **SHALLOW_TOKENIZATION** — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
+  - Source of truth: search docstrings for SHALLOW_TOKENIZATION.
 
 ## Deprecated
 

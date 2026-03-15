@@ -1,6 +1,6 @@
 import { isIsland, isFocusable } from './lib/focus.js';
-import { isToken, getNextLineSibling, getLine, tokenizeLine } from './lib/token.js';
-import { findNextNode, findPreviousNode } from './lib/walk.js';
+import { isToken, getLine, tokenizeLine } from './lib/token.js';
+import { findNextNode } from './lib/walk2.js';
 
 export class TokenManager {
   static create(docRoot: HTMLElement) {
@@ -10,60 +10,34 @@ export class TokenManager {
   constructor(private docRoot: HTMLElement) {}
 
   /**
-   * Tokenize the line and return first token.
+   * Tokenize the line and return first TOKEN.  See SHALLOW_TOKENIZATION .
    *
-   * If the line is not really a line eg a div-tag but contains other LINE's eg
-   * a p-tag, descend and tokenize the first one.
+   * If the LINE has no direct text (e.g. a div containing NESTED_LINE's),
+   * descend into child FOCUSABLE's and tokenize the first one that yields a TOKEN.
    */
   tokenize(el: HTMLElement): HTMLElement | null {
     if (isToken(el)) {
       return el;
     }
     if (!isFocusable(el)) {
-      throw new Error('tokenize: expects an FOCUSABLE');
+      throw new Error('tokenize: expects a FOCUSABLE');
     }
     const line = getLine(el);
-    tokenizeLine(line);
-    const sib = getNextLineSibling(line);
+    const first = tokenizeLine(line);
 
-    // Scan for next / previous LINE's
-    for (const next of findNextNode(line, this.docRoot, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
-    })) {
-      console.log('next', next);
-      break;
-    }
-    for (const previous of findPreviousNode(line, this.docRoot, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
-    })) {
-      // Recurse in the "previous" direction into the parents but don't visit
-      // them. We only want anything that is in a different subtree previous to
-      // us.
-      if (previous.contains(line)) {
-        continue;
-      }
-      console.log('previous', previous);
-      break;
+    if (first) {
+      return first;
     }
 
-    if (sib) {
-      return sib;
-    }
-
-    // Example: el is a div containing a p-tag.  Walk down into the p-tag.
-    // Also the p-tag will not be tokenized by the above call if this is virgin
-    // territory because we tokenize by line.
-
+    // LINE has no direct text — descend into child FOCUSABLE's (NESTED_LINE's)
+    // and tokenize the first one that has text.
     for (const next of findNextNode(el, el, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
+      visit: isFocusable,
+      descend: (node) => !isIsland(node)
     })) {
-      tokenizeLine(next as HTMLElement);
-      const sib = getNextLineSibling(next as HTMLElement);
-      if (sib) {
-        return sib;
+      const token = tokenizeLine(next as HTMLElement);
+      if (token) {
+        return token;
       }
     }
 

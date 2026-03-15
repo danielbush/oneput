@@ -1,5 +1,101 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`tagImplicitLines > case 1 - simple 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+  <span
+    class="jsed-implicit-line"
+  >
+    this is the implicit line
+  </span>
+</div>
+`;
+
+exports[`tagImplicitLines > case 2 - implicit line with nested inline tag 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+  <span
+    class="jsed-implicit-line"
+  >
+    this is the 
+    <em
+      id="em2"
+      style="display:inline;"
+    >
+      implicit
+    </em>
+     line
+  </span>
+</div>
+`;
+
+exports[`tagImplicitLines > case 3 - leaded nested inline tag 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+  <em
+    id="em2"
+    style="display:inline;"
+  >
+    implicit
+  </em>
+   line
+</div>
+`;
+
+exports[`tagImplicitLines > case 4 - it should ignore spaces > There should be no implicit line. 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo
+  </p>
+   
+  <p
+    id="p2"
+  >
+    foo
+  </p>
+</div>
+`;
+
 exports[`tokenize > <p>foo <em>bar</em> baz</p> 1`] = `
 <p
   id="p1"
@@ -218,6 +314,181 @@ exports[`tokenizeLine > <p>foo <em>bar</em> baz</p> 1`] = `
 </p>
 `;
 
+exports[`tokenizeLine > NESTED_LINE: <div><div>nested</div>outer</div> 1`] = `
+<div
+  id="div1"
+>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
+  <span
+    class="jsed-token"
+  >
+    outer 
+  </span>
+</div>
+`;
+
+exports[`tokenizeLine > SHALLOW_TOKENIZATION > case 1 > Should not tokenize p1 and p2 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+  <p
+    id="p2"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+</div>
+`;
+
+exports[`tokenizeLine > SHALLOW_TOKENIZATION > case 2 > Should only tokenize p1 1`] = `
+<div
+  id="div1"
+>
+  <p
+    id="p1"
+  >
+    <span
+      class="jsed-token"
+    >
+      foo 
+    </span>
+    <em
+      style="display:inline;"
+    >
+      <span
+        class="jsed-token"
+      >
+        bar 
+      </span>
+    </em>
+    <span
+      class="jsed-token"
+    >
+      baz 
+    </span>
+  </p>
+  <p
+    id="p2"
+  >
+    foo 
+    <em
+      style="display:inline;"
+    >
+      bar
+    </em>
+     baz
+  </p>
+</div>
+`;
+
+exports[`tokenizeLine > complex LINE: <p>foo <em>bar</em> baz</p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    foo 
+  </span>
+  <em
+    style="display:inline;"
+  >
+    <span
+      class="jsed-token"
+    >
+      bar 
+    </span>
+  </em>
+  <span
+    class="jsed-token"
+  >
+    baz 
+  </span>
+</p>
+`;
+
+exports[`tokenizeLine > complex line: <p>foo <em>bar</em> baz</p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    foo 
+  </span>
+  <em
+    style="display:inline;"
+  >
+    <span
+      class="jsed-token"
+    >
+      bar 
+    </span>
+  </em>
+  <span
+    class="jsed-token"
+  >
+    baz 
+  </span>
+</p>
+`;
+
+exports[`tokenizeLine > inline-block ISLAND: <p>outer<span style="display:inline-block">nested</span></p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    outer 
+  </span>
+  <span
+    id="span1"
+    style="display:inline-block;"
+  >
+    nested
+  </span>
+</p>
+`;
+
+exports[`tokenizeLine > inline-block NESTED_LINE: <p>outer<span style="display:inline-block">nested</span></p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    outer 
+  </span>
+  <span
+    id="span1"
+    style="display:inline-block;"
+  >
+    nested
+  </span>
+</p>
+`;
+
 exports[`tokenizeLine > localized tokenization (not everything) > case 1 > Should not tokenize p1 and p2 1`] = `
 <div
   id="div1"
@@ -285,5 +556,147 @@ exports[`tokenizeLine > localized tokenization (not everything) > case 2 > Shoul
     </em>
      baz
   </p>
+</div>
+`;
+
+exports[`tokenizeLine > nested LINE: <div><div>nested</div>outer</div> 1`] = `
+<div
+  id="div1"
+>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
+  <span
+    class="jsed-token"
+  >
+    outer 
+  </span>
+</div>
+`;
+
+exports[`tokenizeLine > nested line: <div><div>nested</div>outer</div> 1`] = `
+<div
+  id="div1"
+>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
+  <span
+    class="jsed-implicit-line"
+  >
+    outer
+  </span>
+</div>
+`;
+
+exports[`tokenizeLine > nested line: <p><div>nested</div>outer</p> 1`] = `
+<p
+  id="p1"
+/>
+`;
+
+exports[`tokenizeLine > only NESTED_LINE, no text: <div><div>nested</div></div> 1`] = `
+<div
+  id="div1"
+>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
+</div>
+`;
+
+exports[`tokenizeLine > only nested LINE, no text: <div><div>nested</div></div> 1`] = `
+<div
+  id="div1"
+>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
+</div>
+`;
+
+exports[`tokenizeLine > simple LINE: <p>foo bar baz</p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    foo 
+  </span>
+  <span
+    class="jsed-token"
+  >
+    bar 
+  </span>
+  <span
+    class="jsed-token"
+  >
+    baz 
+  </span>
+</p>
+`;
+
+exports[`tokenizeLine > simple line: <p>foo bar baz</p> 1`] = `
+<p
+  id="p1"
+>
+  <span
+    class="jsed-token"
+  >
+    foo 
+  </span>
+  <span
+    class="jsed-token"
+  >
+    bar 
+  </span>
+  <span
+    class="jsed-token"
+  >
+    baz 
+  </span>
+</p>
+`;
+
+exports[`tokenizeLine > text before NESTED_LINE: <div>outer<div>nested</div></div> 1`] = `
+<div
+  id="div1"
+>
+  <span
+    class="jsed-token"
+  >
+    outer 
+  </span>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
+</div>
+`;
+
+exports[`tokenizeLine > text before nested LINE: <div>outer<div>nested</div></div> 1`] = `
+<div
+  id="div1"
+>
+  <span
+    class="jsed-token"
+  >
+    outer 
+  </span>
+  <div
+    id="div2"
+  >
+    nested
+  </div>
 </div>
 `;

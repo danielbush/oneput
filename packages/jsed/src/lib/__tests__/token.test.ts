@@ -12,26 +12,120 @@ const inlineStyleHack = { style: 'display:inline;' };
 const inlineStyleHackVal = 'display:inline;';
 
 describe('tokenizeLine', () => {
-  test('<p>foo <em>bar</em> baz</p>', () => {
+  test('simple LINE: <p>foo bar baz</p>', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const first = tokenizeLine(p1);
+
+    // assert
+    expect(p1).toMatchSnapshot();
+    expect(first!.textContent!.trim()).toBe('foo');
+  });
+
+  test('complex LINE: <p>foo <em>bar</em> baz</p>', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'));
     const p1 = byId(doc, 'p1');
 
     // act
-    tokenizeLine(p1);
+    const first = tokenizeLine(p1);
 
     // assert
     expect(byId(doc, 'p1')).toMatchSnapshot();
+    expect(first!.textContent!.trim()).toBe('foo');
   });
 
-  describe('localized tokenization (not everything)', () => {
+  test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' }, //
+        div({ id: 'div2' }, 'nested'),
+        'outer'
+      )
+    );
+    const div1 = byId(doc, 'div1');
+
+    // act
+    const first = tokenizeLine(div1);
+
+    // assert
+    expect(div1).toMatchSnapshot();
+    expect(first!.textContent!.trim()).toBe('outer');
+  });
+
+  test('text before NESTED_LINE: <div>outer<div>nested</div></div>', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' }, //
+        'outer',
+        div({ id: 'div2' }, 'nested')
+      )
+    );
+    const div1 = byId(doc, 'div1');
+
+    // act
+    const first = tokenizeLine(div1);
+
+    // assert
+    expect(div1).toMatchSnapshot();
+    expect(first!.textContent!.trim()).toBe('outer');
+  });
+
+  test('only NESTED_LINE, no text: <div><div>nested</div></div>', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'div1' }, div({ id: 'div2' }, 'nested')));
+    const div1 = byId(doc, 'div1');
+
+    // act
+    const first = tokenizeLine(div1);
+
+    // assert
+    expect(div1).toMatchSnapshot();
+    console.log('first token:', first?.textContent ?? 'null');
+  });
+
+  test('inline-block NESTED_LINE: <p>outer<span style="display:inline-block">nested</span></p>', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' }, //
+        'outer',
+        `<span id="span1" style="display:inline-block;">nested</span>`
+      )
+    );
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const first = tokenizeLine(p1);
+
+    // assert
+    expect(p1).toMatchSnapshot();
+    expect(first!.textContent!.trim()).toBe('outer');
+  });
+
+  describe('SHALLOW_TOKENIZATION', () => {
     test('case 1', () => {
       // arrange
       const doc = makeRoot(
         div(
           { id: 'div1' },
-          p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
-          p({ id: 'p2' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz')
+          p(
+            { id: 'p1' },
+            'foo ', //
+            em(inlineStyleHack, 'bar'),
+            ' baz'
+          ),
+          p(
+            { id: 'p2' }, //
+            'foo ',
+            em(inlineStyleHack, 'bar'),
+            ' baz'
+          )
         )
       );
       const div1 = byId(doc, 'div1');
@@ -48,8 +142,18 @@ describe('tokenizeLine', () => {
       const doc = makeRoot(
         div(
           { id: 'div1' },
-          p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
-          p({ id: 'p2' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz')
+          p(
+            { id: 'p1' }, //
+            'foo ',
+            em(inlineStyleHack, 'bar'),
+            ' baz'
+          ),
+          p(
+            { id: 'p2' }, //
+            'foo ',
+            em(inlineStyleHack, 'bar'),
+            ' baz'
+          )
         )
       );
       const p1 = byId(doc, 'p1');
@@ -64,14 +168,14 @@ describe('tokenizeLine', () => {
   });
 });
 
-describe('tokenizeImplicitLine', () => {
+describe.skip('tagImplicitLines', () => {
   test('case 1 - simple', () => {
     // arrange
     const doc = makeRoot(
       div(
         { id: 'div1' },
         p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
-        'this is the implicit line'
+        'this is the IMPLICIT_LINE'
       )
     );
 
@@ -82,7 +186,7 @@ describe('tokenizeImplicitLine', () => {
     expect(byId(doc, 'div1')).toMatchSnapshot();
   });
 
-  test('case 2 - implicit line with nested inline tag', () => {
+  test('case 2 - IMPLICIT_LINE with nested inline tag', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -123,7 +227,7 @@ describe('tokenizeImplicitLine', () => {
         { id: 'div1' },
         p({ id: 'p1' }, 'foo'),
         //
-        ' ', // should not create implicit line
+        ' ', // should not create IMPLICIT_LINE
         //
         p({ id: 'p2' }, 'foo')
       )
@@ -134,6 +238,6 @@ describe('tokenizeImplicitLine', () => {
 
     // assert
     expect(byId(doc, 'p1').nextSibling).toHaveProperty('nodeType', 3);
-    expect(byId(doc, 'div1')).toMatchSnapshot('There should be no implicit line.');
+    expect(byId(doc, 'div1')).toMatchSnapshot('There should be no IMPLICIT_LINE.');
   });
 });

@@ -18,8 +18,11 @@ tasks:
     desc: |
       Run unit tests; but avoid triggering browser tests.
       See vite.config.js
+    summary: |
+      task test -- --testPathPattern=token
+      task test -- -t "test name filter"
     cmds:
-      - pnpm run test
+      - pnpm run test {{.CLI_ARGS}}
   test:update:
     desc: Update snapshots
     cmds:

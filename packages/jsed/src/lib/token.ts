@@ -39,6 +39,19 @@ export function isInline(el: Node | ChildNode | ParentNode | null): boolean {
   return false;
 }
 
+/**
+ * Detect LINE — a FOCUSABLE that is not a TOKEN, INLINE, or ISLAND.
+ * Examples: `<div>`, `<p>`, `<h1>`, inline-block `<span>`.
+ */
+export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
+  if (!el) return false;
+  if (!isFocusable(el)) return false;
+  if (isToken(el)) return false;
+  if (isInline(el)) return false;
+  if (isIsland(el)) return false;
+  return true;
+}
+
 export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean {
   if (!el) {
     throw new Error(`isInline called on null or undefined`);
@@ -561,21 +574,18 @@ export function getValue(token: HTMLElement): string {
 }
 
 /**
- * Find the LINE associated with `el`.  Usually `el` should be a text node, TOKEN or inline FOCUSABLE .  May return `el` itself if not.
+ * Find the LINE that contains `el` by walking up from el's parent.
  */
 export function getLine(el: ChildNode): HTMLElement {
   if (!el) {
     throw new Error(`getLine: element is null`);
   }
-  for (let p: ParentNode | ChildNode | null = el; ; p = p?.parentNode) {
+  for (let p: ParentNode | null = el.parentNode; ; p = p?.parentNode) {
     if (!p) {
       throw new Error(`getLine: expected parentNode to exist`);
     }
-    if (isFocusable(p)) {
-      if (isPartOfLine(p)) {
-        continue;
-      }
-      return p;
+    if (isLine(p)) {
+      return p as HTMLElement;
     }
   }
   throw new Error(`getLine: end of for-loop`);

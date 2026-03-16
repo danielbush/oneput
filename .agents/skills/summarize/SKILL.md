@@ -38,16 +38,15 @@ Two sections:
 
 ### Changes
 
-- Focus on the big changes at a conceptual level that both human and agent can understand
-- Use vocabulary terms (UPPER_SNAKE_CASE) naturally
+- Focus on the conceptual changes using vocabulary terms (UPPER_SNAKE_CASE)
 - Group by theme, not by file
-- Mention tests and what they cover, but don't list every assertion
+- Don't list individual tests, skills created, or implementation details — those are in the code
 
 ### Decisions
 
-- Record design decisions and their reasoning
-- These are the things that would be lost between sessions — the "why" behind choices
-- Include alternatives that were considered and rejected
+- Record design decisions and the **why** behind them
+- These are the things that would be lost between sessions — motivation, rejected alternatives, non-obvious reasoning
+- Use vocabulary terms to frame the decision
 
 ## Style
 
@@ -55,3 +54,4 @@ Two sections:
 - The frontmatter summary is the most important line — optimize it for scanning
 - Prefer vocabulary terms over implementation details (e.g. "SHALLOW_TOKENIZATION" not "the function doesn't recurse into nested elements")
 - Keep it concise — a spec should be shorter than the conversation that produced it
+- Focus on decisions and the why; the what is in the code

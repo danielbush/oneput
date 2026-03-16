@@ -218,6 +218,35 @@ describe('findNextNode - visit/descend separation', () => {
     expect(visited).toEqual(['child-1', 'child-2', '2']);
   });
 
+  test('visit rejects a sibling of start but descend allows recursing into it', () => {
+    // arrange — 'skip' is a sibling of start, not a child
+    const doc = makeRoot(
+      div(
+        { id: '1' }, //
+        div({ id: 'start' }),
+        div(
+          { id: 'skip' }, //
+          div({ id: 'child-1' }),
+          div({ id: 'child-2' })
+        ),
+        div({ id: '2' })
+      )
+    );
+    const visited = [];
+    const start = byId(doc, 'start');
+    const ceiling = byId(doc, '1');
+
+    // act — skip the 'skip' node but descend into its children
+    for (const el of findNextNode(start, ceiling, {
+      visit: (n) => (n as HTMLElement).id !== 'skip'
+    })) {
+      visited.push((el as HTMLElement).id);
+    }
+
+    // assert — 'skip' not visited, but its children are
+    expect(visited).toEqual(['child-1', 'child-2', '2']);
+  });
+
   test('descend prevents recursion even when visit would accept children', () => {
     // arrange
     const doc = makeRoot(
@@ -589,6 +618,35 @@ describe('findPreviousNode - visit/descend separation', () => {
 
     // assert — 'skip' not visited, but child-1 is; then 2
     expect(visited).toEqual(['child-1', '2']);
+  });
+
+  test('visit rejects a sibling of start but descend allows recursing into it', () => {
+    // arrange — 'skip' is a previous sibling of start, not a parent
+    const doc = makeRoot(
+      div(
+        { id: '1' }, //
+        div({ id: '2' }),
+        div(
+          { id: 'skip' }, //
+          div({ id: 'child-1' }),
+          div({ id: 'child-2' })
+        ),
+        div({ id: 'start' })
+      )
+    );
+    const visited = [];
+    const start = byId(doc, 'start');
+    const ceiling = byId(doc, '1');
+
+    // act — skip the 'skip' node but descend into its children
+    for (const el of findPreviousNode(start, ceiling, {
+      visit: (n) => (n as HTMLElement).id !== 'skip'
+    })) {
+      visited.push((el as HTMLElement).id);
+    }
+
+    // assert — 'skip' not visited, but its children are
+    expect(visited).toEqual(['child-2', 'child-1', '2']);
   });
 
   test('descend prevents recursion even when visit would accept children', () => {

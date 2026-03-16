@@ -6,8 +6,9 @@ import {
   JSED_TOKEN_COLLAPSED
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
-import { isFocusable, isIgnorable } from './focus.js';
-import { findNextNode, findPreviousNode } from './walk.js';
+import { isFocusable, isIgnorable, isIsland } from './focus.js';
+import { findNextNode } from './walk.js';
+import { findNextNode as findNextNode2, findPreviousNode as findPreviousNode2 } from './walk2.js';
 
 // #region utils
 
@@ -18,15 +19,13 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 }
 
 /**
- * Detects INLINE's ie an FOCUSABLE is acting like an inline element eg an
- * em-tag .
+ * Detect INLINE — a FOCUSABLE that acts as inline markup (e.g. `<em>`, `<a>`).
+ * The CURSOR traverses seamlessly through INLINE's to visit their TOKEN's.
  */
-export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean {
-  if (!el) {
-    throw new Error(`isInline called on null or undefined`);
-  }
-  if (isToken(el)) return true;
+export function isInline(el: Node | ChildNode | ParentNode | null): boolean {
+  if (!el) return false;
   if (!isFocusable(el)) return false;
+  if (isIsland(el)) return false;
 
   // This is an implicit line, it may be inline, but we treat it like a separate LINE.
   if (el.classList.contains(JSED_IMPLICIT_CLASS)) return false;
@@ -38,6 +37,14 @@ export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean 
   if (styles.display === 'inline') return true;
   if (styles.display === 'inline flow') return true;
   return false;
+}
+
+export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean {
+  if (!el) {
+    throw new Error(`isInline called on null or undefined`);
+  }
+  if (isToken(el)) return true;
+  return isInline(el);
 }
 
 export function isToken2(el: EventTarget | Element | null | undefined): el is HTMLElement {
@@ -295,12 +302,11 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
  */
 export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
-  for (const prev of findPreviousNode(el, line, {
-    filter: isPartOfLine
+  for (const prev of findPreviousNode2(el, line, {
+    visit: isToken2,
+    descend: isInline
   })) {
-    if (isToken2(prev)) {
-      return prev;
-    }
+    return prev as HTMLElement;
   }
   return null;
 }
@@ -310,12 +316,11 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
  */
 export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
-  for (const next of findNextNode(el, line, {
-    filter: isPartOfLine
+  for (const next of findNextNode2(el, line, {
+    visit: isToken2,
+    descend: isInline
   })) {
-    if (isToken2(next)) {
-      return next;
-    }
+    return next as HTMLElement;
   }
   return null;
 }

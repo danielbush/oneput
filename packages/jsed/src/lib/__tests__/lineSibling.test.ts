@@ -1,0 +1,167 @@
+import { describe, test, expect } from 'vitest';
+import { byId, makeRoot, div, p, em } from '../../test/util.js';
+import {
+  tokenizeLine,
+  getNextLineSibling,
+  getPreviousLineSibling,
+  isPartOfLine
+} from '../token.js';
+
+const inlineStyle = { style: 'display:inline;' };
+
+/** Collect all TOKEN text from first to last using getNextLineSibling. */
+function collectForward(first: HTMLElement): string[] {
+  const result: string[] = [first.textContent!.trim()];
+  let cur: HTMLElement | null = first;
+  while ((cur = getNextLineSibling(cur))) {
+    result.push(cur.textContent!.trim());
+  }
+  return result;
+}
+
+/** Collect all TOKEN text from last to first using getPreviousLineSibling. */
+function collectBackward(last: HTMLElement): string[] {
+  const result: string[] = [last.textContent!.trim()];
+  let cur: HTMLElement | null = last;
+  while ((cur = getPreviousLineSibling(cur))) {
+    result.push(cur.textContent!.trim());
+  }
+  return result;
+}
+
+/** Walk forward to the last TOKEN. */
+function walkToLast(first: HTMLElement): HTMLElement {
+  let cur = first;
+  let next: HTMLElement | null;
+  while ((next = getNextLineSibling(cur))) {
+    cur = next;
+  }
+  return cur;
+}
+
+describe('isPartOfLine', () => {
+  test('TOKEN: returns true', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello'));
+    tokenizeLine(byId(doc, 'p1'));
+    const token = byId(doc, 'p1').querySelector('.jsed-token')!;
+
+    // act & assert
+    expect(isPartOfLine(token)).toBe(true);
+  });
+
+  test('IGNORABLE: returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, '<span id="ig" class="jsed-ignore" style="display:inline;">marker</span>')
+    );
+    const ig = byId(doc, 'ig');
+
+    // act & assert
+    expect(isPartOfLine(ig)).toBe(false);
+  });
+
+  test('ISLAND (katex): returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>')
+    );
+    const katex = byId(doc, 'p1').querySelector('.katex')!;
+
+    // act & assert
+    expect(isPartOfLine(katex)).toBe(false);
+  });
+
+  test('NESTED_LINE (div inside div): returns false', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, 'nested')));
+    const inner = byId(doc, 'inner');
+
+    // act & assert
+    expect(isPartOfLine(inner)).toBe(false);
+  });
+
+  test('inline-block: returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, '<span id="ib" style="display:inline-block;">chip</span>')
+    );
+    const ib = byId(doc, 'ib');
+
+    // act & assert
+    expect(isPartOfLine(ib)).toBe(false);
+  });
+});
+
+describe('getNextLineSibling / getPreviousLineSibling', () => {
+  test('simple LINE: <p>foo bar baz</p>', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['foo', 'bar', 'baz']);
+    expect(collectBackward(walkToLast(first))).toEqual(['baz', 'bar', 'foo']);
+  });
+
+  test('INLINE: <p>aaa <em>bbb</em> ccc</p>', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'), ' ccc'));
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert — CURSOR traverses seamlessly through the INLINE
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc']);
+    expect(collectBackward(walkToLast(first))).toEqual(['ccc', 'bbb', 'aaa']);
+  });
+
+  test('nested INLINE: <p>aaa <em>bbb <em>ccc</em> ddd</em> eee</p>', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        em(inlineStyle, 'bbb ', em(inlineStyle, 'ccc'), ' ddd'),
+        ' eee'
+      )
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
+    expect(collectBackward(walkToLast(first))).toEqual(['eee', 'ddd', 'ccc', 'bbb', 'aaa']);
+  });
+
+  test('NESTED_LINE: CURSOR skips the nested div', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        'aaa ',
+        div({ id: 'div2' }, 'nested'),
+        ' bbb'
+      )
+    );
+    const first = tokenizeLine(byId(doc, 'div1'))!;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'aaa']);
+  });
+
+  test('ISLAND (katex): CURSOR skips the island', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        '<span class="katex" style="display:inline;">rendered</span>',
+        ' bbb'
+      )
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'aaa']);
+  });
+});

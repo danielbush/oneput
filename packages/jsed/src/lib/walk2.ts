@@ -138,8 +138,8 @@ export function* findNextNode(
   }
   let sib: ParentNode | ChildNode | null = start;
   if (ceiling !== start) {
-    while ((sib = getNextSiblingNode(sib, params))) {
-      yield sib;
+    while ((sib = sib.nextSibling)) {
+      if (shouldVisit(sib, params)) yield sib;
       yield* descendIter(sib, params);
     }
   }
@@ -173,9 +173,9 @@ export function* findPreviousNode(
   const par = getParent(start, ceiling);
   let sib: ParentNode | ChildNode | null = start;
   if (ceiling !== start) {
-    while ((sib = getPreviousSiblingNode(sib, params))) {
+    while ((sib = sib.previousSibling)) {
       yield* descendIterReverse(sib, params);
-      yield sib;
+      if (shouldVisit(sib, params)) yield sib;
     }
   }
   if (ceiling !== start) {

@@ -1,13 +1,5 @@
 # jsed
 
-## Working with an agent
-
-Type `/jsed` to orient the agent on the codebase — it will read the architecture narrative, vocabulary, and explain how the system works.
-
-Other useful prompts:
-- "What are jsed's vocabulary terms?"
-- "How does EditManager wire everything together?"
-
 
 ## Usage
 

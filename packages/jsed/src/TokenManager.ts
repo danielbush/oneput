@@ -1,5 +1,5 @@
 import { isIsland, isFocusable } from './lib/focus.js';
-import { isToken, getLine, isLine, tokenizeLine } from './lib/token.js';
+import { isToken, getLine, tokenizeLine } from './lib/token.js';
 import { findNextNode } from './lib/walk2.js';
 
 export class TokenManager {
@@ -22,7 +22,7 @@ export class TokenManager {
     if (!isFocusable(el)) {
       throw new Error('tokenize: expects a FOCUSABLE');
     }
-    const line = isLine(el) ? el : getLine(el);
+    const line = getLine(el);
     const first = tokenizeLine(line);
 
     if (first) {

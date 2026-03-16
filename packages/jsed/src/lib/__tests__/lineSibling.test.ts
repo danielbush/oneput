@@ -186,13 +186,13 @@ describe('getLine', () => {
     expect(getLine(katex)).toBe(line);
   });
 
-  test('NESTED_LINE: returns the containing LINE', () => {
+  test('NESTED_LINE: returns itself, not the outer LINE', () => {
     // arrange
     const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, 'text')));
     const inner = byId(doc, 'inner');
 
     // act & assert
-    expect(getLine(inner)).toBe(byId(doc, 'outer'));
+    expect(getLine(inner)).toBe(inner);
   });
 });
 

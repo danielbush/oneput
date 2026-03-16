@@ -574,13 +574,13 @@ export function getValue(token: HTMLElement): string {
 }
 
 /**
- * Find the LINE that contains `el` by walking up from el's parent.
+ * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.
  */
 export function getLine(el: ChildNode): HTMLElement {
   if (!el) {
     throw new Error(`getLine: element is null`);
   }
-  for (let p: ParentNode | null = el.parentNode; ; p = p?.parentNode) {
+  for (let p: ParentNode | ChildNode | null = el; ; p = p?.parentNode) {
     if (!p) {
       throw new Error(`getLine: expected parentNode to exist`);
     }

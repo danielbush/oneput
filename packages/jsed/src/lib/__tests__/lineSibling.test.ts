@@ -5,8 +5,9 @@ import {
   getNextLineSibling,
   getPreviousLineSibling,
   getLine,
-  isPartOfLine,
-  isLine
+  isLine,
+  isInline,
+  isToken
 } from '../token.js';
 
 // INLINE_COMPUTED_STYLE
@@ -42,47 +43,50 @@ function walkToLast(first: HTMLElement): HTMLElement {
   return cur;
 }
 
-describe('isPartOfLine', () => {
-  test('TOKEN: returns true', () => {
+describe('isToken', () => {
+  test('TOKEN after tokenization: returns true', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'hello'));
     tokenizeLine(byId(doc, 'p1'));
     const token = byId(doc, 'p1').querySelector('.jsed-token')!;
 
     // act & assert
-    expect(isPartOfLine(token)).toBe(true);
+    expect(isToken(token)).toBe(true);
   });
 
-  test('IGNORABLE: returns false', () => {
+  test('FOCUSABLE (p): returns false', () => {
     // arrange
-    const doc = makeRoot(
-      p({ id: 'p1' }, '<span id="ig" class="jsed-ignore" style="display:inline;">marker</span>')
-    );
-    const ig = byId(doc, 'ig');
+    const doc = makeRoot(p({ id: 'p1' }, 'hello'));
 
     // act & assert
-    expect(isPartOfLine(ig)).toBe(false);
+    expect(isToken(byId(doc, 'p1'))).toBe(false);
   });
 
-  test('ISLAND (katex): returns false', () => {
+  test('INLINE (em): returns false', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>'));
-    const katex = byId(doc, 'p1').querySelector('.katex')!;
+    const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'text')));
+    const emEl = byId(doc, 'p1').querySelector('em')!;
 
     // act & assert
-    expect(isPartOfLine(katex)).toBe(false);
+    expect(isToken(emEl)).toBe(false);
   });
 
-  test('NESTED_LINE (div inside div): returns false', () => {
+  test('null: returns false', () => {
+    expect(isToken(null)).toBe(false);
+  });
+});
+
+describe('isInline', () => {
+  test('INLINE (em with display:inline): returns true', () => {
     // arrange
-    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, 'nested')));
-    const inner = byId(doc, 'inner');
+    const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'text')));
+    const emEl = byId(doc, 'p1').querySelector('em')!;
 
     // act & assert
-    expect(isPartOfLine(inner)).toBe(false);
+    expect(isInline(emEl)).toBe(true);
   });
 
-  test('inline-block: returns false', () => {
+  test('inline-block: returns false (treated as LINE)', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, '<span id="ib" style="display:inline-block;">chip</span>')
@@ -90,7 +94,28 @@ describe('isPartOfLine', () => {
     const ib = byId(doc, 'ib');
 
     // act & assert
-    expect(isPartOfLine(ib)).toBe(false);
+    expect(isInline(ib)).toBe(false);
+  });
+
+  test('ISLAND (katex with display:inline): returns false', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>'));
+    const katex = byId(doc, 'p1').querySelector('.katex')!;
+
+    // act & assert
+    expect(isInline(katex)).toBe(false);
+  });
+
+  test('block element (div): returns false', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, 'text')));
+
+    // act & assert
+    expect(isInline(byId(doc, 'inner'))).toBe(false);
+  });
+
+  test('null: returns false', () => {
+    expect(isInline(null)).toBe(false);
   });
 });
 

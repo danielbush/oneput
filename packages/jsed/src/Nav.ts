@@ -8,7 +8,7 @@ import {
   getPreviousSiblingNode,
   findNextNode,
   findPreviousNode
-} from './lib/walk.js';
+} from './lib/walk2.js';
 import { ElementIndicator } from './ElementIndicator.js';
 
 export type NavError =
@@ -145,8 +145,8 @@ export class Nav {
   REC_NEXT(): HTMLElement | null {
     if (!this.#FOCUS) return null;
     for (const next of findNextNode(this.#FOCUS, this.doc.root, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
+      visit: isFocusable,
+      descend: (node) => !isIsland(node)
     })) {
       this.REQUEST_FOCUS(next);
       return next as HTMLElement;
@@ -160,8 +160,8 @@ export class Nav {
   REC_PREV(): HTMLElement | null {
     if (!this.#FOCUS) return null;
     for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
+      visit: isFocusable,
+      descend: (node) => !isIsland(node)
     })) {
       this.REQUEST_FOCUS(next);
       return next as HTMLElement;
@@ -175,8 +175,7 @@ export class Nav {
   SIB_NEXT(): HTMLElement | null {
     if (!this.#FOCUS) return null;
     const next = getNextSiblingNode(this.#FOCUS, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
+      visit: isFocusable
     });
     if (next) {
       this.REQUEST_FOCUS(next);
@@ -191,8 +190,7 @@ export class Nav {
   SIB_PREV(): HTMLElement | null {
     if (!this.#FOCUS) return null;
     const next = getPreviousSiblingNode(this.#FOCUS, {
-      filter: isFocusable,
-      ignoreDescendents: isIsland
+      visit: isFocusable
     });
     if (next) {
       this.REQUEST_FOCUS(next);
@@ -244,7 +242,7 @@ export class Nav {
       }
       return;
     }
-    if (token.isToken2(el)) {
+    if (token.isToken(el)) {
       const ok =
         this.#REQUEST_FOCUS?.({
           type: 'FOCUS_REQUEST',

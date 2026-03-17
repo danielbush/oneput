@@ -7,8 +7,7 @@ import {
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
 import { isFocusable, isIgnorable, isIsland } from './focus.js';
-import { findNextNode } from './walk.js';
-import { findNextNode as findNextNode2, findPreviousNode as findPreviousNode2 } from './walk2.js';
+import { findNextNode, findPreviousNode } from './walk2.js';
 
 // #region utils
 
@@ -52,22 +51,10 @@ export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
   return true;
 }
 
-export function isPartOfLine(el: Node | ChildNode | ParentNode | null): boolean {
-  if (!el) {
-    throw new Error(`isInline called on null or undefined`);
-  }
-  if (isToken(el)) return true;
-  return isInline(el);
-}
-
-export function isToken2(el: EventTarget | Element | null | undefined): el is HTMLElement {
-  return isToken(el);
-}
-
 /**
  * Detect if the element is a TOKEN .
  */
-export function isToken(el: EventTarget | Element | null | undefined): boolean {
+export function isToken(el: EventTarget | Element | Node | ChildNode | ParentNode | null | undefined): el is HTMLElement {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     return el.classList.contains(JSED_TOKEN_CLASS);
@@ -172,7 +159,7 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
     }
     // Recurse into inline tags eg em-tag.
     // Be aware of INLINE_COMPUTED_STYLE .
-    if (isPartOfLine(child)) {
+    if (isToken(child) || isInline(child)) {
       const token = tokenizeLineRec(child);
       if (!first) first = token;
     } else {
@@ -215,7 +202,7 @@ function buildImplicitLine(textNode: Node): HTMLElement | null {
   textNode.parentNode.insertBefore(implicitLine, textNode);
 
   for (let sib: Node | null = textNode; sib; ) {
-    if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
+    if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
       const nextSib: ChildNode | null = sib.nextSibling;
       implicitLine.appendChild(sib);
       sib = nextSib;
@@ -240,7 +227,7 @@ export function isImplicitLine(node: Node): boolean {
  */
 export function tagImplicitLines(root: HTMLElement) {
   for (const node of findNextNode(root, root, {
-    filter: (node) => node?.nodeType === Node.ELEMENT_NODE
+    visit: (node) => node?.nodeType === Node.ELEMENT_NODE
   })) {
     // if (isImplicitLine(node)) {
     //   // findNextNode may walk over the IMPLICIT_LINE we just created causing an
@@ -248,7 +235,7 @@ export function tagImplicitLines(root: HTMLElement) {
     //   continue;
     // }
     for (let sib = node.firstChild; sib; ) {
-      if (sib.nodeType === Node.TEXT_NODE || isPartOfLine(sib)) {
+      if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
         // const implicitLine = buildImplicitLine(sib);
         // if (implicitLine) {
         //   sib = implicitLine.nextSibling;
@@ -257,7 +244,7 @@ export function tagImplicitLines(root: HTMLElement) {
 
         const prev = sib.previousSibling;
         if (prev) {
-          if (isFocusable(prev) && !isPartOfLine(prev)) {
+          if (isFocusable(prev) && !isToken(prev) && !isInline(prev)) {
             const implicitLine = buildImplicitLine(sib);
             if (implicitLine) {
               // An implicit line was created and sucked up continguous text tokens.
@@ -290,7 +277,7 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
   while (prev && isIgnorable(prev)) {
     prev = prev.previousElementSibling;
   }
-  if (isToken2(prev)) {
+  if (isToken(prev)) {
     return prev;
   }
   return null;
@@ -304,7 +291,7 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
   while (next && isIgnorable(next)) {
     next = next.nextElementSibling as HTMLElement | null;
   }
-  if (isToken2(next)) {
+  if (isToken(next)) {
     return next;
   }
   return null;
@@ -315,8 +302,8 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
  */
 export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
-  for (const prev of findPreviousNode2(el, line, {
-    visit: isToken2,
+  for (const prev of findPreviousNode(el, line, {
+    visit: isToken,
     descend: isInline
   })) {
     return prev as HTMLElement;
@@ -329,8 +316,8 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
  */
 export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
-  for (const next of findNextNode2(el, line, {
-    visit: isToken2,
+  for (const next of findNextNode(el, line, {
+    visit: isToken,
     descend: isInline
   })) {
     return next as HTMLElement;
@@ -600,7 +587,7 @@ export function getLine(el: ChildNode): HTMLElement {
  * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
  */
 export function addAnchors(el: HTMLElement): HTMLElement[] {
-  if (isToken(el)) {
+  if (el.classList.contains(JSED_TOKEN_CLASS)) {
     throw new Error('addAnchors: expects an FOCUSABLE');
   }
   let segment = { hasTokens: false };

@@ -238,7 +238,7 @@ describe('TokenCursor motion', () => {
   });
 });
 
-describe('TokenCursor CURSOR_TOGGLE', () => {
+describe('TokenCursor CURSOR_STATE', () => {
   function setup() {
     const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));
     return tokenizeAndCursor(doc, '#p1');
@@ -249,79 +249,162 @@ describe('TokenCursor CURSOR_TOGGLE', () => {
       .filter((cls) => token.classList.contains(cls));
   }
 
-  it('CURSOR_AT_END adds append marker', () => {
-    // arrange
-    const { cursor } = setup();
+  describe('CURSOR_APPEND', () => {
+    it('CURSOR_AT_END sets CURSOR_APPEND marker', () => {
+      // arrange
+      const { cursor } = setup();
 
-    // act
-    cursor.handleSelectionChange('CURSOR_AT_END');
+      // act
+      cursor.handleSelectionChange('CURSOR_AT_END');
 
-    // assert
-    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+    });
+
+    it('moveNext clears CURSOR_APPEND marker', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleSelectionChange('CURSOR_AT_END');
+
+      // act
+      cursor.moveNext();
+
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([]);
+    });
   });
 
-  it('CURSOR_AT_BEGINNING adds prepend marker', () => {
-    // arrange
-    const { cursor } = setup();
+  describe('CURSOR_PREPEND', () => {
+    it('CURSOR_AT_BEGINNING sets CURSOR_PREPEND marker', () => {
+      // arrange
+      const { cursor } = setup();
 
-    // act
-    cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+      // act
+      cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
 
-    // assert
-    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+    });
+
+    it('movePrevious clears CURSOR_PREPEND marker', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.moveNext();
+      cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([]);
+    });
   });
 
-  it('SELECT_ALL clears all markers', () => {
-    // arrange
-    const { cursor } = setup();
-    cursor.handleSelectionChange('CURSOR_AT_END');
+  describe('CURSOR_OVERWRITE', () => {
+    it('SELECT_ALL clears all markers', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleSelectionChange('CURSOR_AT_END');
 
-    // act
-    cursor.handleSelectionChange('SELECT_ALL');
+      // act
+      cursor.handleSelectionChange('SELECT_ALL');
 
-    // assert
-    expect(markerClasses(cursor.getToken())).toEqual([]);
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([]);
+    });
+
+    it('cycling through states replaces the previous marker', () => {
+      // arrange
+      const { cursor } = setup();
+
+      // CURSOR_APPEND
+      cursor.handleSelectionChange('CURSOR_AT_END');
+      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+
+      // CURSOR_PREPEND
+      cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+
+      // CURSOR_OVERWRITE
+      cursor.handleSelectionChange('CURSOR_AT_MIDDLE');
+      expect(markerClasses(cursor.getToken())).toEqual([]);
+    });
   });
 
-  it('cycling through states replaces the previous marker', () => {
-    // arrange
-    const { cursor } = setup();
+  describe('CURSOR_INSERT_AFTER', () => {
+    it('typing space from CURSOR_APPEND enters CURSOR_INSERT_AFTER', () => {
+      // arrange
+      const { cursor } = setup();
 
-    // act & assert — end
-    cursor.handleSelectionChange('CURSOR_AT_END');
-    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+      // act
+      cursor.handleInputChange('hello ');
 
-    // act & assert — beginning
-    cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
-    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_INSERT_AFTER_CLASS]);
+    });
 
-    // act & assert — other
-    cursor.handleSelectionChange('CURSOR_AT_MIDDLE');
-    expect(markerClasses(cursor.getToken())).toEqual([]);
+    it('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleInputChange('hello ');
+
+      // act
+      cursor.movePrevious();
+
+      // assert — stayed on same token, marker cleared
+      expect(getValue(cursor.getToken())).toBe('hello');
+      expect(markerClasses(cursor.getToken())).toEqual([]);
+    });
+
+    it('moveNext still moves forward from CURSOR_INSERT_AFTER', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleInputChange('hello ');
+
+      // act
+      cursor.moveNext();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('world');
+    });
   });
 
-  it('moveNext clears markers when moving to next token', () => {
-    // arrange
-    const { cursor } = setup();
-    cursor.handleSelectionChange('CURSOR_AT_END');
+  describe('CURSOR_INSERT_BEFORE', () => {
+    it('typing space from CURSOR_PREPEND enters CURSOR_INSERT_BEFORE', () => {
+      // arrange
+      const { cursor } = setup();
 
-    // act
-    cursor.moveNext();
+      // act
+      cursor.handleInputChange(' hello');
 
-    // assert — old token cleared, new token has no markers
-    expect(markerClasses(cursor.getToken())).toEqual([]);
-  });
+      // assert
+      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_INSERT_BEFORE_CLASS]);
+    });
 
-  it('movePrevious clears markers when moving to previous token', () => {
-    // arrange
-    const { cursor } = setup();
-    cursor.moveNext();
-    cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+    it('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleInputChange(' hello');
 
-    // act
-    cursor.movePrevious();
+      // act
+      cursor.moveNext();
 
-    // assert
-    expect(markerClasses(cursor.getToken())).toEqual([]);
+      // assert — stayed on same token, marker cleared
+      expect(getValue(cursor.getToken())).toBe('hello');
+      expect(markerClasses(cursor.getToken())).toEqual([]);
+    });
+
+    it('movePrevious still moves backward from CURSOR_INSERT_BEFORE', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.moveNext();
+      cursor.handleInputChange(' world');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('hello');
+    });
   });
 });

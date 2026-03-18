@@ -56,10 +56,12 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
 ## Cursor state
 
-- **CURSOR_TOGGLE** — the user can cycle through states when the CURSOR is on a TOKEN by toggling the input cursor position. The CURSOR_TOGGLE determines whether the user's next edit will prepend to, append to, or overwrite the TOKEN:
-  - `CURSOR_AT_END` — the input cursor is at the end of the TOKEN's text. Visual marker: TOKEN_APPEND_CLASS. The user's next input will append to the TOKEN. If they type a space, the appended text separates into a new TOKEN after the original.
-  - `CURSOR_AT_BEGINNING` — the input cursor is at the beginning of the TOKEN's text. Visual marker: TOKEN_PREPEND_CLASS. The user's next input will prepend to the TOKEN. If they type a space, the prepended text separates into a new TOKEN before the original.
-  - Everything else (SELECT_ALL, SELECT_PARTIAL, CURSOR_AT_MIDDLE, EMPTY) — no special marker. The TOKEN's text is selected in the input, so the user's next input overwrites it.
+- **CURSOR_STATE** — the state the CURSOR is in when on a TOKEN. The user cycles through states by toggling the input cursor position and typing. The CURSOR_STATE determines whether the user's next edit will overwrite, append to, prepend to, or insert a new TOKEN. There are five states, progressing from selection through positioning to insertion:
+  - **CURSOR_OVERWRITE** (SELECT_ALL, SELECT_PARTIAL, CURSOR_AT_MIDDLE, EMPTY) — no special marker. The TOKEN's text is selected in the input, so the user's next input overwrites it.
+  - **CURSOR_APPEND** (`CURSOR_AT_END`) — the input cursor is at the end of the TOKEN's text. Visual marker: TOKEN_APPEND_CLASS. The user's next input will append to the TOKEN.
+  - **CURSOR_PREPEND** (`CURSOR_AT_BEGINNING`) — the input cursor is at the beginning of the TOKEN's text. Visual marker: TOKEN_PREPEND_CLASS. The user's next input will prepend to the TOKEN.
+  - **CURSOR_INSERT_AFTER** — entered from CURSOR_APPEND when the user types a space (input ends with space). Visual marker: TOKEN_INSERT_AFTER_CLASS. The user is now typing into a new TOKEN that will be created after the current one. Moving previous (movePrevious) from this state cancels the insertion and clears the marker without moving.
+  - **CURSOR_INSERT_BEFORE** — entered from CURSOR_PREPEND when the user types a space (input starts with space). Visual marker: TOKEN_INSERT_BEFORE_CLASS. The input cursor is moved back to the beginning after the space, so further typing goes into a new TOKEN before the current one. Moving next (moveNext) from this state cancels the insertion and clears the marker without moving.
 
 ## Operations
 

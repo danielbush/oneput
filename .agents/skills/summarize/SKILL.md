@@ -8,17 +8,18 @@ description: >
 
 # Summarize session
 
-Create or update a spec file capturing the session's work at `specs/active/<date>.<package>.<topic>.md`.
+Create or update a spec file capturing the session's work at `specs/active/<date>.<package>.<type>.<topic>.md`.
 
 ## Repeat invocations
 
-If a spec file already exists for this session (same date and topic), update it rather than creating a new one. Read the existing file, then append new changes and decisions to the relevant sections. Update the frontmatter summary to cover the full session. Do not duplicate content that is already captured.
+If a spec file already exists for this session (same date, type, and topic), update it rather than creating a new one. Read the existing file, then append new changes and decisions to the relevant sections. Update the frontmatter summary to cover the full session. Do not duplicate content that is already captured.
 
 ## Filename
 
 - Date: `YYYYMMDD`
 - Package: the primary package touched (e.g. `jsed`, `oneput`)
-- Topic: short kebab-case label (e.g. `tokenize-first-token`, `walk2`)
+- Type: conventional commit type — `feat`, `refactor`, `fix`, `chore`, `docs`, `test`, etc.
+- Topic: short kebab-case label (e.g. `tokenize-first-token`, `cursor-state`)
 
 ## Frontmatter
 

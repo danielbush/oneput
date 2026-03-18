@@ -10,6 +10,26 @@
       "source": "danielbush/skills",
       "sourceType": "github",
       "computedHash": "44cd158bba2957b0afd0b9f5e169e8b9205a442c20695181fabe71bddac78f37"
+    },
+    "nullables-refactor": {
+      "source": "danielbush/skills",
+      "sourceType": "github",
+      "computedHash": "7127d87a0e76dd2391f71dd549be8d872b2a9b27ad03498fb9bd4155dd9c0abb"
+    },
+    "nullables-test": {
+      "source": "danielbush/skills",
+      "sourceType": "github",
+      "computedHash": "04fe1217ad9f08cb7af13bceacba550436f64e71561915dbe84f5a739c91d56a"
+    },
+    "svelte-code-writer": {
+      "source": "sveltejs/ai-tools",
+      "sourceType": "github",
+      "computedHash": "c0e2cce9855f8e312cbb0a05aef164b4659c672d7723e4e598ffa6bc94890542"
+    },
+    "svelte-core-bestpractices": {
+      "source": "sveltejs/ai-tools",
+      "sourceType": "github",
+      "computedHash": "bec11e369679027edf9d4acbe6d9788f8da33dc14b48b874f231d3ba13705324"
     }
   }
 }

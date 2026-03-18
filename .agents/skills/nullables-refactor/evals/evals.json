@@ -1,0 +1,63 @@
+{
+  "skill_name": "nullables-refactor",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Analyze this file and produce a refactoring plan to apply the nullables pattern: evals/files/hardwired-function.ts",
+      "expected_output": "Plan identifying both functions as HARDWIRED_INFRASTRUCTURE (standalone functions with OUTSIDE_WORLD side effects) and recommending conversion to an INFRASTRUCTURE_WRAPPER class with DUAL_FACTORY",
+      "files": ["evals/files/hardwired-function.ts"],
+      "expectations": [
+        "Classifies getUserProfile as OUTSIDE_WORLD (it calls fetch)",
+        "Classifies saveUserPreferences as OUTSIDE_WORLD (it calls fetch)",
+        "Identifies both functions as HARDWIRED_INFRASTRUCTURE",
+        "Recommends converting to an INFRASTRUCTURE_WRAPPER class (e.g. UserApiClient) with DUAL_FACTORY (.create/.createNull)",
+        "Notes that the pure transformation logic (displayName formatting) can remain separate or inline as PURE code",
+        "Recommends an EMBEDDED_STUB for the fetch calls in .createNull",
+        "Recommends CONFIGURABLE_RESPONSE for configuring what the nulled client returns"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Analyze this file and produce a refactoring plan to apply the nullables pattern: evals/files/mixed-class.ts",
+      "expected_output": "Plan identifying ReportGenerator as a class with HARDWIRED_INFRASTRUCTURE that should become a NULLABLE_CLASS, with the I/O extracted into INFRASTRUCTURE_WRAPPERs",
+      "files": ["evals/files/mixed-class.ts"],
+      "expectations": [
+        "Classifies ReportGenerator as having OUTSIDE_WORLD side effects (fs.readFile, fs.writeFile, fetch)",
+        "Identifies the fs and fetch calls as HARDWIRED_INFRASTRUCTURE within the class",
+        "Distinguishes the PURE transformation logic (HTML templating, row reduction) from the OUTSIDE_WORLD I/O",
+        "Recommends extracting the I/O into one or more INFRASTRUCTURE_WRAPPERs (e.g. FileClient, WebhookClient)",
+        "Recommends ReportGenerator become a NULLABLE_CLASS that receives the wrappers via injection",
+        "Recommends DUAL_FACTORY on ReportGenerator with .create() instantiating wrappers and .createNull() injecting nulled versions",
+        "References the CREATE_BOUNDARY_RULE — wrapper .create() calls should be in the static .create()"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Analyze this file and produce a refactoring plan to apply the nullables pattern: evals/files/partial-nullable.ts",
+      "expected_output": "Plan identifying CREATE_BOUNDARY_RULE violations in UserRepository where DatabaseClient.create() is called inside instance methods",
+      "files": ["evals/files/partial-nullable.ts"],
+      "expectations": [
+        "Recognizes that UserRepository already has DUAL_FACTORY (.create and .createNull)",
+        "Identifies the DatabaseClient.create() call in runMigration() as a CREATE_BOUNDARY_RULE violation",
+        "Identifies the DatabaseClient.create() call in syncToAnalytics() as a CREATE_BOUNDARY_RULE violation",
+        "Recommends either immediate instantiation (move to static .create) or DELAYED_INSTANTIATION via FACTORY_OBJECT for the migration and analytics database clients",
+        "Considers whether DELAYED_INSTANTIATION is appropriate (migration/analytics DBs may only be needed conditionally)",
+        "Notes that findUser() correctly uses the injected this.db — no violation there"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Analyze this file and produce a refactoring plan to apply the nullables pattern: evals/files/already-compliant.ts",
+      "expected_output": "Plan recognizing that the code is already compliant with the nullables pattern, with EmailClient as an INFRASTRUCTURE_WRAPPER and NotificationService as a NULLABLE_CLASS",
+      "files": ["evals/files/already-compliant.ts"],
+      "expectations": [
+        "Identifies EmailClient as an INFRASTRUCTURE_WRAPPER with DUAL_FACTORY",
+        "Identifies NotificationService as a NULLABLE_CLASS with DUAL_FACTORY",
+        "Recognizes that CREATE_BOUNDARY_RULE is satisfied — EmailClient.create() is called within NotificationService.create()",
+        "Notes that EmailClient has OUTPUT_TRACKING (trackSentEmails)",
+        "Reports no major issues — the code is already compliant",
+        "Does not recommend unnecessary refactoring"
+      ]
+    }
+  ]
+}

@@ -65,8 +65,8 @@ tasks:
     vars:
       AGENTS: claude-code codex gemini-cli
     cmds:
-      - pnpm exec skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables
-      - pnpm exec skills add davis7dotsh/better-context -y --agent {{.AGENTS}} --skill btca-cli
+      - pnpx skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables-refactor --skill nullables-test
+      - pnpx skills add sveltejs/ai-tools -y --agent {{.AGENTS}} --skill svelte-code-writer --skill svelte-core-bestpractices
 
   devc:nuke:
     cmds:
@@ -116,6 +116,7 @@ tasks:
         fi
         pnpm exec devcontainer exec --workspace-folder . "${args[@]}" -- claude --dangerously-skip-permissions
 
-  btca:tui:
+  opensrc:add:
     cmds:
-      - pnpm exec btca
+      - pnpx opensrc https://github.com/sveltejs/svelte.dev
+      - pnpx opensrc https://github.com/vitest-dev/vitest

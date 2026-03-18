@@ -5,3 +5,6 @@ node_modules/
 .btca/
 
 .pnpm-store
+
+# opensrc - source code for packages
+opensrc/

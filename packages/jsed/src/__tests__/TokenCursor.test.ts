@@ -4,6 +4,12 @@ import { JsedDocument } from '../JsedDocument.js';
 import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue } from '../lib/token.js';
+import {
+  TOKEN_APPEND_CLASS,
+  TOKEN_PREPEND_CLASS,
+  TOKEN_INSERT_AFTER_CLASS,
+  TOKEN_INSERT_BEFORE_CLASS
+} from '../lib/constants.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -229,5 +235,93 @@ describe('TokenCursor motion', () => {
       cursor.movePrevious();
       expect(getValue(cursor.getToken())).toBe('aaa');
     });
+  });
+});
+
+describe('TokenCursor CURSOR_TOGGLE', () => {
+  function setup() {
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));
+    return tokenizeAndCursor(doc, '#p1');
+  }
+
+  function markerClasses(token: HTMLElement): string[] {
+    return [TOKEN_APPEND_CLASS, TOKEN_PREPEND_CLASS, TOKEN_INSERT_AFTER_CLASS, TOKEN_INSERT_BEFORE_CLASS]
+      .filter((cls) => token.classList.contains(cls));
+  }
+
+  it('CURSOR_AT_END adds append marker', () => {
+    // arrange
+    const { cursor } = setup();
+
+    // act
+    cursor.handleSelectionChange('CURSOR_AT_END');
+
+    // assert
+    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+  });
+
+  it('CURSOR_AT_BEGINNING adds prepend marker', () => {
+    // arrange
+    const { cursor } = setup();
+
+    // act
+    cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+
+    // assert
+    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+  });
+
+  it('SELECT_ALL clears all markers', () => {
+    // arrange
+    const { cursor } = setup();
+    cursor.handleSelectionChange('CURSOR_AT_END');
+
+    // act
+    cursor.handleSelectionChange('SELECT_ALL');
+
+    // assert
+    expect(markerClasses(cursor.getToken())).toEqual([]);
+  });
+
+  it('cycling through states replaces the previous marker', () => {
+    // arrange
+    const { cursor } = setup();
+
+    // act & assert — end
+    cursor.handleSelectionChange('CURSOR_AT_END');
+    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+
+    // act & assert — beginning
+    cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+    expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+
+    // act & assert — other
+    cursor.handleSelectionChange('CURSOR_AT_MIDDLE');
+    expect(markerClasses(cursor.getToken())).toEqual([]);
+  });
+
+  it('moveNext clears markers when moving to next token', () => {
+    // arrange
+    const { cursor } = setup();
+    cursor.handleSelectionChange('CURSOR_AT_END');
+
+    // act
+    cursor.moveNext();
+
+    // assert — old token cleared, new token has no markers
+    expect(markerClasses(cursor.getToken())).toEqual([]);
+  });
+
+  it('movePrevious clears markers when moving to previous token', () => {
+    // arrange
+    const { cursor } = setup();
+    cursor.moveNext();
+    cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
+
+    // act
+    cursor.movePrevious();
+
+    // assert
+    expect(markerClasses(cursor.getToken())).toEqual([]);
   });
 });

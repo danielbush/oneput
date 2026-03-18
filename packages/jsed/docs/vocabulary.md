@@ -54,6 +54,13 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 - **NEGATIVE_SPACE** — default HTML whitespace handling: sequences of whitespace collapse to a single space, newlines treated as whitespace. Applies to most tags like `<p>`.
 - **POSITIVE_SPACE** — whitespace-significant mode (e.g. `<pre>`, `white-space: pre`): sequences preserved, lines break only at newlines and `<br>`.
 
+## Cursor state
+
+- **CURSOR_TOGGLE** — the user can cycle through states when the CURSOR is on a TOKEN by toggling the input cursor position. The CURSOR_TOGGLE determines whether the user's next edit will prepend to, append to, or overwrite the TOKEN:
+  - `CURSOR_AT_END` — the input cursor is at the end of the TOKEN's text. Visual marker: TOKEN_APPEND_CLASS. The user's next input will append to the TOKEN. If they type a space, the appended text separates into a new TOKEN after the original.
+  - `CURSOR_AT_BEGINNING` — the input cursor is at the beginning of the TOKEN's text. Visual marker: TOKEN_PREPEND_CLASS. The user's next input will prepend to the TOKEN. If they type a space, the prepended text separates into a new TOKEN before the original.
+  - Everything else (SELECT_ALL, SELECT_PARTIAL, CURSOR_AT_MIDDLE, EMPTY) — no special marker. The TOKEN's text is selected in the input, so the user's next input overwrites it.
+
 ## Operations
 
 Allow the user to navigate the document structure and its text content...

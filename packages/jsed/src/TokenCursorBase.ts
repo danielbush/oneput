@@ -62,9 +62,9 @@ export abstract class TokenCursorBase {
    * change before and after calling this.
    */
   setToken(el: HTMLElement) {
-    if (!token.isToken(el)) {
+    if (!token.isLineSibling(el)) {
       this.onError({ type: 'invalid-token' });
-      throw new Error(`Not a token`);
+      throw new Error(`Not a LINE_SIBLING`);
     }
     this.removeAllFocusClasses();
     this.#token.classList.remove(JSED_CURSOR_CLASS);

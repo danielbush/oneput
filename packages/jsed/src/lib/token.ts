@@ -3,7 +3,8 @@ import {
   JSED_ANCHOR_CHAR,
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
-  JSED_TOKEN_COLLAPSED
+  JSED_TOKEN_COLLAPSED,
+  JSED_TOKEN_PADDED
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
 import { isFocusable, isIgnorable, isIsland } from './focus.js';
@@ -131,14 +132,19 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
     );
   }
   if (child.nodeType === Node.TEXT_NODE) {
-    const tokens = child
-      .nodeValue!.split(/\s+/)
+    const text = child.nodeValue!;
+    const tokens = text
+      .split(/\s+/)
       .filter(Boolean)
       .map((s) => createToken(s));
+    // PADDED_TOKEN: if text has leading whitespace and previous visible sibling
+    // is an ISLAND (which has no trailing space), pad the first TOKEN.
+    if (tokens.length > 0 && /^\s/.test(text) && isIsland(getPreviousVisibleSibling(child))) {
+      pad(tokens[0]);
+    }
     const frag = document.createDocumentFragment();
     for (const token of tokens) {
       frag.appendChild(token);
-      // frag.appendChild(createSpace());
     }
     el?.insertBefore(frag, child);
     el?.removeChild(child);
@@ -266,6 +272,30 @@ export function tagImplicitLines(root: HTMLElement) {
 // #region Operations on tokenized FOCUSABLE's
 
 /**
+ * Get previous visible (non-IGNORABLE) element sibling.
+ * Walks backwards skipping IGNORABLE's. Returns null if none found.
+ */
+export function getPreviousVisibleSibling(el: HTMLElement | ChildNode): HTMLElement | null {
+  let prev = (el as HTMLElement).previousElementSibling;
+  while (prev && isIgnorable(prev)) {
+    prev = prev.previousElementSibling;
+  }
+  return (prev as HTMLElement) ?? null;
+}
+
+/**
+ * Get next visible (non-IGNORABLE) element sibling.
+ * Walks forward skipping IGNORABLE's. Returns null if none found.
+ */
+export function getNextVisibleSibling(el: HTMLElement | ChildNode): HTMLElement | null {
+  let next = (el as HTMLElement).nextElementSibling as HTMLElement | null;
+  while (next && isIgnorable(next)) {
+    next = next.nextElementSibling as HTMLElement | null;
+  }
+  return next ?? null;
+}
+
+/**
  * Get the previous TOKEN SIBLING if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
  *
  * `el` may or may not be a TOKEN .  `el` might be an inline tag eg an em-tag.
@@ -274,11 +304,8 @@ export function tagImplicitLines(root: HTMLElement) {
  * node.previousElementSibling.  We may need to handle undo and other weird
  * stuff, so we use a wrapper here.
  */
-export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
-  let prev = el.previousElementSibling;
-  while (prev && isIgnorable(prev)) {
-    prev = prev.previousElementSibling;
-  }
+export function getPreviousTokenSibling(el: HTMLElement): HTMLElement | null {
+  const prev = getPreviousVisibleSibling(el);
   if (isToken(prev)) {
     return prev;
   }
@@ -286,17 +313,19 @@ export function getPreviousSibling(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Similar to getPreviousSibling but for the next SIBLING.
+ * Similar to getPreviousTokenSibling but for the next SIBLING.
  */
-export function getNextSibling(el: HTMLElement): HTMLElement | null {
-  let next = el.nextElementSibling as HTMLElement | null;
-  while (next && isIgnorable(next)) {
-    next = next.nextElementSibling as HTMLElement | null;
-  }
+export function getNextTokenSibling(el: HTMLElement): HTMLElement | null {
+  const next = getNextVisibleSibling(el);
   if (isToken(next)) {
     return next;
   }
   return null;
+}
+
+/** Visit predicate for LINE_SIBLING traversal: TOKEN's and ISLAND's. */
+export function isLineSibling(el: ParentNode | ChildNode): boolean {
+  return isToken(el) || isIsland(el);
 }
 
 /**
@@ -305,7 +334,7 @@ export function getNextSibling(el: HTMLElement): HTMLElement | null {
 export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   for (const prev of findPreviousNode(el, line, {
-    visit: isToken,
+    visit: isLineSibling,
     descend: isInline
   })) {
     return prev as HTMLElement;
@@ -319,10 +348,23 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
 export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   for (const next of findNextNode(el, line, {
-    visit: isToken,
+    visit: isLineSibling,
     descend: isInline
   })) {
     return next as HTMLElement;
+  }
+  return null;
+}
+
+/**
+ * Get the first LINE_SIBLING in a LINE — may be a TOKEN or an ISLAND.
+ */
+export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
+  for (const node of findNextNode(line, line, {
+    visit: isLineSibling,
+    descend: (n) => n === line || isInline(n)
+  })) {
+    return node as HTMLElement;
   }
   return null;
 }
@@ -334,7 +376,7 @@ export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void 
   existing.insertAdjacentElement('afterend', toInsert);
 
   // Need to add an anchor?
-  // const nexttok = getNextSibling(toInsert);
+  // const nexttok = getNextTokenSibling(toInsert);
   // if (!nexttok) {
   //   const anchor = createAnchor();
   //   toInsert.insertAdjacentElement('afterend', anchor);
@@ -348,7 +390,7 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
   existing.insertAdjacentElement('beforebegin', toInsert);
 
   // Need to add an anchor?
-  // const prevtok = getPreviousSibling(toInsert);
+  // const prevtok = getPreviousTokenSibling(toInsert);
   // if (!prevtok) {
   //   const anchor = createAnchor();
   //   toInsert.insertAdjacentElement('beforebegin', anchor);
@@ -379,22 +421,26 @@ function validate(token: HTMLElement): void {
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token);
   anchor2Token(token);
-  let content = val;
-  if (isCollapsed(token)) {
-    content = val.trim();
-  } else {
-    content = val.endsWith(' ') ? val : val + ' ';
+  let content = val.trim();
+  if (!isCollapsed(token)) {
+    content = content + ' ';
+  }
+  if (isPadded(token)) {
+    content = ' ' + content;
   }
   token.firstChild!.nodeValue = content;
   return token;
 }
 
+/**
+ * Token is a COLLAPSED_TOKEN .
+ */
 export function isCollapsed(token: HTMLElement): boolean {
   return token.classList.contains(JSED_TOKEN_COLLAPSED);
 }
 
 /**
- * Perform COLLAPSE on token.
+ * Perform TOGGLE_COLLAPSE "on" on TOKEN.
  *
  * Tokens should be uncollapsed by default.  We can then choose to collapse.
  */
@@ -412,7 +458,7 @@ export function collapse(token: HTMLElement): HTMLElement {
 }
 
 /**
- * Un-COLLAPSE token.
+ * Perform TOGGLE_COLLAPSE "off" on TOKEN.
  */
 export function uncollapse(token: HTMLElement): HTMLElement {
   const val = token.firstChild!.nodeValue;
@@ -427,8 +473,48 @@ export function uncollapse(token: HTMLElement): HTMLElement {
   return token;
 }
 
+/**
+ * Check if TOKEN is a PADDED_TOKEN.
+ */
+export function isPadded(token: HTMLElement): boolean {
+  return token.classList.contains(JSED_TOKEN_PADDED);
+}
+
+/**
+ * PAD a TOKEN — add a leading space.
+ *
+ * TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous
+ * LINE_SIBLING doesn't carry its own trailing space (e.g. an ISLAND).
+ */
+export function pad(token: HTMLElement): HTMLElement {
+  const val = token.firstChild!.nodeValue;
+  if (!val) {
+    throw new Error(`Invalid token: no string content detected`);
+  }
+  token.classList.add(JSED_TOKEN_PADDED);
+  if (!val.startsWith(' ')) {
+    token.firstChild!.nodeValue = ' ' + val;
+  }
+  return token;
+}
+
+/**
+ * Un-PAD a TOKEN — remove the leading space.
+ */
+export function unpad(token: HTMLElement): HTMLElement {
+  const val = token.firstChild!.nodeValue;
+  if (!val) {
+    throw new Error(`Invalid token: no string content detected`);
+  }
+  token.classList.remove(JSED_TOKEN_PADDED);
+  if (val.startsWith(' ')) {
+    token.firstChild!.nodeValue = val.trimStart();
+  }
+  return token;
+}
+
 export function joinNext(token: HTMLElement): void {
-  const next = getNextSibling(token);
+  const next = getNextTokenSibling(token);
   if (!next) {
     return;
   }
@@ -439,7 +525,7 @@ export function joinNext(token: HTMLElement): void {
 }
 
 export function joinPrevious(token: HTMLElement): void {
-  const prev = getPreviousSibling(token);
+  const prev = getPreviousTokenSibling(token);
   if (!prev) {
     return;
   }
@@ -453,7 +539,7 @@ export function joinPrevious(token: HTMLElement): void {
  * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
  */
 export function splitBefore(token: HTMLElement): HTMLElement[] {
-  const prevTok = getPreviousSibling(token);
+  const prevTok = getPreviousTokenSibling(token);
   const par = getParent(token);
   const line = getLine(token);
   const prevPar = document.createElement(par.tagName);
@@ -481,7 +567,7 @@ export function splitBefore(token: HTMLElement): HTMLElement[] {
  * Move anything after `token` to a new parent after the current parent (SPLIT_BY_TOKEN).
  */
 export function splitAfter(token: HTMLElement): HTMLElement[] {
-  const nextTok = getNextSibling(token);
+  const nextTok = getNextTokenSibling(token);
   const par = getParent(token);
   const line = getLine(token);
   const nextPar = document.createElement(par.tagName);
@@ -526,7 +612,7 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
   }
 
   // Grab this if it exists before we delete...
-  const nextTok = getNextSibling(token) || getPreviousSibling(token);
+  const nextTok = getNextTokenSibling(token) || getPreviousTokenSibling(token);
 
   parentNode.removeChild(token);
 

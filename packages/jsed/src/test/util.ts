@@ -61,5 +61,7 @@ export const li = makeTag('li');
 export function frag(...tags: string[]): string {
   return tags.join('');
 }
+export const span = makeTag('span');
+export const section = makeTag('section');
 export const script = makeTag('script');
 export const input = makeTag('input');

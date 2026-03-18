@@ -25,6 +25,7 @@ export const JSED_TOKEN_CLASS = 'jsed-token';
  */
 export const JSED_CURSOR_CLASS = 'jsed-token-focus';
 export const JSED_TOKEN_COLLAPSED = 'jsed-token-collapsed';
+export const JSED_TOKEN_PADDED = 'jsed-token-padded';
 /**
  * CSS class for ANCHOR .
  */

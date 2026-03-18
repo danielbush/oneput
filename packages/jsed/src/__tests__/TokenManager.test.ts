@@ -2,6 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../test/util.js';
 import { TokenManager } from '../TokenManager.js';
 import { tokenizeLine } from '../lib/token.js';
+import { isIsland } from '../lib/focus.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -101,5 +102,40 @@ describe('TokenManager.tokenize', () => {
     // assert
     expect(first).not.toBeNull();
     expect(first!.textContent!.trim()).toBe('italic');
+  });
+
+  test('LINE starting with ISLAND: returns the ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
+    );
+    const tm = new TokenManager(doc.root);
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const first = tm.tokenize(p1);
+
+    // assert
+    expect(first).not.toBeNull();
+    expect(isIsland(first!)).toBe(true);
+  });
+
+  test('NESTED_LINE starting with ISLAND: returns the ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
+      )
+    );
+    const tm = new TokenManager(doc.root);
+    const div1 = byId(doc, 'div1');
+
+    // act
+    const first = tm.tokenize(div1);
+
+    // assert
+    expect(first).not.toBeNull();
+    expect(isIsland(first!)).toBe(true);
   });
 });

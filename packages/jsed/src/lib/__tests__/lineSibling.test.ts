@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, span } from '../../test/util.js';
 import {
   tokenizeLine,
   getNextLineSibling,
@@ -7,33 +7,43 @@ import {
   getLine,
   isLine,
   isInline,
-  isToken
+  isToken,
+  isPadded
 } from '../token.js';
+import { isIsland } from '../focus.js';
 
 // INLINE_COMPUTED_STYLE
 const inlineStyle = { style: 'display:inline;' };
+const inlineBlockStyle = { style: 'display:inline-block;' };
 
-/** Collect all TOKEN text from first to last using getNextLineSibling. */
+/** Identify a LINE_SIBLING: TOKEN text for TOKEN's, bracketed descriptor for non-TOKEN's. */
+function identify(el: HTMLElement): string {
+  if (isToken(el)) return el.textContent!.trim();
+  if (isIsland(el)) return `[island:${el.tagName.toLowerCase()}]`;
+  return `[${el.tagName.toLowerCase()}]`;
+}
+
+/** Collect all LINE_SIBLING's forward using getNextLineSibling. */
 function collectForward(first: HTMLElement): string[] {
-  const result: string[] = [first.textContent!.trim()];
+  const result: string[] = [identify(first)];
   let cur: HTMLElement | null = first;
   while ((cur = getNextLineSibling(cur))) {
-    result.push(cur.textContent!.trim());
+    result.push(identify(cur));
   }
   return result;
 }
 
-/** Collect all TOKEN text from last to first using getPreviousLineSibling. */
+/** Collect all LINE_SIBLING's backward using getPreviousLineSibling. */
 function collectBackward(last: HTMLElement): string[] {
-  const result: string[] = [last.textContent!.trim()];
+  const result: string[] = [identify(last)];
   let cur: HTMLElement | null = last;
   while ((cur = getPreviousLineSibling(cur))) {
-    result.push(cur.textContent!.trim());
+    result.push(identify(cur));
   }
   return result;
 }
 
-/** Walk forward to the last TOKEN. */
+/** Walk forward to the last LINE_SIBLING. */
 function walkToLast(first: HTMLElement): HTMLElement {
   let cur = first;
   let next: HTMLElement | null;
@@ -264,15 +274,367 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'aaa']);
   });
 
-  test('ISLAND (katex): CURSOR skips the island', () => {
+  test('ISLAND (katex): CURSOR visits the island', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">rendered</span>', ' bbb')
     );
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
+    // act & assert — ISLAND is now a LINE_SIBLING the CURSOR visits
+    expect(collectForward(first)).toEqual(['aaa', '[island:span]', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[island:span]', 'aaa']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CURSOR walks non-TOKEN LINE_SIBLING's
+// ---------------------------------------------------------------------------
+//
+// These tests describe the DESIRED behavior from the spec
+// "cursor-walks-non-tokens". They are expected to FAIL until the
+// implementation is updated.
+
+describe('(1) ISLAND: CURSOR visit=yes, descend=no', () => {
+  test('ISLAND at middle of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert — CURSOR should visit the ISLAND as an opaque LINE_SIBLING
+    expect(collectForward(first)).toEqual(['aaa', '[island:span]', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[island:span]', 'aaa']);
+  });
+
+  test('ISLAND at start of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa bbb')
+    );
+    tokenizeLine(byId(doc, 'p1'));
+    const katex = byId(doc, 'p1').querySelector('.katex') as HTMLElement;
+
+    // act & assert — ISLAND is the first LINE_SIBLING
+    expect(collectForward(katex)).toEqual(['[island:span]', 'aaa', 'bbb']);
+  });
+
+  test('ISLAND at end of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa bbb ', '<span class="katex" style="display:inline;">x²</span>')
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert — ISLAND is the last LINE_SIBLING
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', '[island:span]']);
+  });
+
+  test('ISLAND inside INLINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        em(inlineStyle, 'bbb ', '<span class="katex" style="display:inline;">x²</span>', ' ccc'),
+        ' ddd'
+      )
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert — CURSOR descends into the INLINE, visits the ISLAND within it
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', '[island:span]', 'ccc', 'ddd']);
+  });
+
+  test('adjacent ISLANDs', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        '<span class="katex" style="display:inline;">x²</span>',
+        '<span class="katex" style="display:inline;">y³</span>',
+        ' bbb'
+      )
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert — both ISLANDs are visited
+    expect(collectForward(first)).toEqual(['aaa', '[island:span]', '[island:span]', 'bbb']);
+  });
+});
+
+describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
+  test('TOKEN after ISLAND is padded', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    tokenizeLine(byId(doc, 'p1'));
+
+    // act — find the TOKEN after the ISLAND
+    const katex = byId(doc, 'p1').querySelector('.katex') as HTMLElement;
+    const afterIsland = getNextLineSibling(katex)!;
+
+    // assert
+    expect(isToken(afterIsland)).toBe(true);
+    expect(isPadded(afterIsland)).toBe(true);
+    expect(afterIsland.textContent).toBe(' bbb ');
+  });
+
+  test('TOKEN before ISLAND is not padded', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // assert
+    expect(isPadded(first)).toBe(false);
+    expect(first.textContent).toBe('aaa ');
+  });
+
+  test('TOKEN after INLINE is not padded', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', em({ style: 'display:inline;' }, 'bbb'), ' ccc')
+    );
+    tokenizeLine(byId(doc, 'p1'));
+
+    // act — find the last TOKEN ('ccc')
+    const tokens = byId(doc, 'p1').querySelectorAll('.jsed-token');
+    const lastToken = tokens[tokens.length - 1] as HTMLElement;
+
+    // assert — INLINE's last TOKEN provides trailing space, so no padding needed
+    expect(isPadded(lastToken)).toBe(false);
+  });
+
+  test('ISLAND at end of LINE: no TOKEN to pad', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
+    );
+    tokenizeLine(byId(doc, 'p1'));
+
+    // assert — only one TOKEN, it should not be padded
+    const tokens = byId(doc, 'p1').querySelectorAll('.jsed-token');
+    expect(tokens.length).toBe(1);
+    expect(isPadded(tokens[0] as HTMLElement)).toBe(false);
+  });
+
+  test('adjacent ISLANDs: TOKEN after second ISLAND is padded', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        '<span class="katex" style="display:inline;">x²</span>',
+        '<span class="katex" style="display:inline;">y³</span>',
+        ' bbb'
+      )
+    );
+    tokenizeLine(byId(doc, 'p1'));
+
+    // act
+    const katexEls = byId(doc, 'p1').querySelectorAll('.katex');
+    const afterSecond = getNextLineSibling(katexEls[1] as HTMLElement)!;
+
+    // assert
+    expect(isToken(afterSecond)).toBe(true);
+    expect(isPadded(afterSecond)).toBe(true);
+  });
+});
+
+describe('(2) default non-INLINE: CURSOR visit=yes, descend=yes', () => {
+  // Category (2) is the DEFAULT for any non-INLINE, non-ISLAND FOCUSABLE.
+  // This includes nested block elements (div inside div) and inline-block spans.
+  // The CURSOR descends into them seamlessly, like an INLINE.
+
+  test('nested div at middle of LINE: <div>aaa <div>nested</div> bbb</div>', () => {
+    // arrange — nested div is not INLINE, not ISLAND → category (2) by default
+    const doc = makeRoot(
+      div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb')
+    );
+    const line = byId(doc, 'outer');
+    tokenizeLine(line);
+    // Manually tokenize the nested element since tokenizeLine does SHALLOW_TOKENIZATION
+    const inner = byId(doc, 'inner');
+    tokenizeLine(inner);
+
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert — CURSOR descends into the nested div and visits its TOKEN's
+    expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
+  });
+
+  test('nested div at start of LINE: <div><div>nested</div> aaa bbb</div>', () => {
+    // arrange
+    const doc = makeRoot(
+      div({ id: 'outer' }, div({ id: 'inner' }, 'nested'), ' aaa bbb')
+    );
+    const line = byId(doc, 'outer');
+    tokenizeLine(line);
+    const inner = byId(doc, 'inner');
+    tokenizeLine(inner);
+
+    // The first LINE_SIBLING should be the TOKEN inside the nested div
+    const innerToken = inner.querySelector('.jsed-token') as HTMLElement;
+
     // act & assert
-    expect(collectForward(first)).toEqual(['aaa', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'aaa']);
+    expect(collectForward(innerToken)).toEqual(['nested', 'aaa', 'bbb']);
+  });
+
+  test('nested div at end of LINE: <div>aaa bbb <div>nested</div></div>', () => {
+    // arrange
+    const doc = makeRoot(
+      div({ id: 'outer' }, 'aaa bbb ', div({ id: 'inner' }, 'nested'))
+    );
+    const line = byId(doc, 'outer');
+    tokenizeLine(line);
+    const inner = byId(doc, 'inner');
+    tokenizeLine(inner);
+
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested']);
+  });
+
+  test('nested div inside INLINE: <p>aaa <em>bbb <div>nested</div> ccc</em> ddd</p>', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        em(inlineStyle, 'bbb ', div({ id: 'inner' }, 'nested'), ' ccc'),
+        ' ddd'
+      )
+    );
+    const line = byId(doc, 'p1');
+    tokenizeLine(line);
+    const inner = byId(doc, 'inner');
+    tokenizeLine(inner);
+
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert — descend through INLINE, then descend into nested div, then back out
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
+  });
+
+  test('deeply nested blocks: <div>aaa <div>bbb <div>ccc</div> ddd</div> eee</div>', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' },
+        'aaa ',
+        div({ id: 'mid' }, 'bbb ', div({ id: 'deep' }, 'ccc'), ' ddd'),
+        ' eee'
+      )
+    );
+    const line = byId(doc, 'outer');
+    tokenizeLine(line);
+    tokenizeLine(byId(doc, 'mid'));
+    tokenizeLine(byId(doc, 'deep'));
+
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert — CURSOR descends through both nested levels
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
+  });
+
+  test('inline-block at middle of LINE', () => {
+    // arrange — inline-block is also category (2)
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb')
+    );
+    const line = byId(doc, 'p1');
+    tokenizeLine(line);
+    const ib = line.querySelector('span[style*="inline-block"]') as HTMLElement;
+    tokenizeLine(ib);
+
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'inner', 'bbb']);
+  });
+
+  test('nested block containing only an ANCHOR', () => {
+    // arrange — a nested div with no text content yet
+    const doc = makeRoot(
+      div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, ''), ' bbb')
+    );
+    const line = byId(doc, 'outer');
+    tokenizeLine(line);
+    const inner = byId(doc, 'inner');
+    tokenizeLine(inner);
+
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert — CURSOR should still traverse into the nested div and land on the ANCHOR
+    const siblings: HTMLElement[] = [first];
+    let cur: HTMLElement | null = first;
+    while ((cur = getNextLineSibling(cur))) {
+      siblings.push(cur);
+    }
+    // aaa, (anchor inside inner div), bbb = 3 LINE_SIBLING's
+    expect(siblings.length).toBe(3);
+  });
+});
+
+describe('(3) CURSOR_BOUNDARY: CURSOR visit=yes, descend=no', () => {
+  // A jsed-cursor-opaque element is visited as an opaque LINE_SIBLING.
+  // FOCUS can descend into it, but the CURSOR cannot.
+  const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
+
+  test('CURSOR_BOUNDARY at middle of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'nested content'), ' bbb')
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert — visited but not descended: shows as opaque element
+    expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
+  });
+
+  test('CURSOR_BOUNDARY at start of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, span(cursorOpaqueBlock, 'nested'), ' aaa bbb')
+    );
+    tokenizeLine(byId(doc, 'p1'));
+    const opaque = byId(doc, 'p1').querySelector('.jsed-cursor-opaque') as HTMLElement;
+
+    // act & assert — opaque element is the first LINE_SIBLING
+    expect(collectForward(opaque)).toEqual(['[span]', 'aaa', 'bbb']);
+  });
+
+  test('CURSOR_BOUNDARY at end of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa bbb ', span(cursorOpaqueBlock, 'nested'))
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]']);
+  });
+
+  test('CURSOR_BOUNDARY inside INLINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        em(inlineStyle, 'bbb ', span(cursorOpaqueBlock, 'nested'), ' ccc'),
+        ' ddd'
+      )
+    );
+    const first = tokenizeLine(byId(doc, 'p1'))!;
+
+    // act & assert
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]', 'ccc', 'ddd']);
   });
 });

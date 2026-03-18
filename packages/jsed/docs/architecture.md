@@ -41,7 +41,7 @@ When asked to tokenize a FOCUSABLE, it finds its LINE, tokenizes it, and returns
 - **replace / delete / append** — edit TOKEN content
 - **joinNext / joinPrevious** — JOIN adjacent TOKENs
 - **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
-- **toggleCollapseNext / toggleCollapsePrevious** — toggle COLLAPSE
+- **toggleCollapseNext / toggleCollapsePrevious** — toggle COLLAPSED_TOKEN on/off
 
 ## Input handling: InputManager
 
@@ -62,7 +62,7 @@ A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditMan
 
 The top-level modules above delegate to lower-level utilities in `lib/`:
 
-- **token.ts** — tokenization, LINE_SIBLING traversal, JOIN, SPLIT, COLLAPSE operations
+- **token.ts** — tokenization, LINE_SIBLING traversal, JOIN, SPLIT, TOGGLE_COLLAPSE operations
 - **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`, `getNextSiblingNode`, `getPreviousSiblingNode`, `getParent`
 - **focus.ts** — FOCUSABLE detection and filtering rules
 - **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)

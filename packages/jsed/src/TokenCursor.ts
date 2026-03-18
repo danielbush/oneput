@@ -114,7 +114,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   }
 
   /**
-   * COLLAPSE the current token.
+   * TOGGLE_COLLAPSE on the TOKEN
    */
   toggleCollapseNext() {
     if (token.isCollapsed(this.getToken())) {
@@ -127,7 +127,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   }
 
   /**
-   * COLLAPSE the token previous to the current token.
+   * TOGGLE_COLLAPSE on the TOKEN previous to the current TOKEN.
    */
   toggleCollapsePrevious() {
     const prev = token.getPreviousLineSibling(this.getToken());

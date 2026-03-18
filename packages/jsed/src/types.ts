@@ -70,11 +70,11 @@ export type ITokenCursor = {
    */
   append: (val: string) => HTMLElement;
   /**
-   * Toggle COLLAPSE state of token with what is next to it.
+   * TOGGLE_COLLAPSE state of token with what is next to it.
    */
   toggleCollapseNext: () => boolean;
   /**
-   * Toggle COLLAPSE state of token with what is previous to it.
+   * TOGGLE_COLLAPSE state of token with what is previous to it.
    */
   toggleCollapsePrevious: () => boolean;
   /**

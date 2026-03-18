@@ -20,10 +20,7 @@ function shouldDescend(node: ParentNode | ChildNode, params?: Walk2Params): bool
 /**
  * Get the last node to be pre-order visited.
  */
-export function lastNode(
-  el: ParentNode | ChildNode,
-  params?: Walk2Params
-): ParentNode | ChildNode {
+export function lastNode(el: ParentNode | ChildNode, params?: Walk2Params): ParentNode | ChildNode {
   if (!el.lastChild || !shouldDescend(el, params)) {
     return el;
   }

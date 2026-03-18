@@ -6,13 +6,13 @@ Oneput is a command-bar UI system — an input with a dropdown menu that can be 
 
 The `Controller` (`controllers/controller.ts`) is the central API that consumers use to interact with Oneput. It composes five sub-controllers:
 
-| Sub-controller | Purpose |
-|---|---|
-| `KeysController` | Manages key bindings — registering, dispatching, defaults |
-| `AppController` | Manages the AppObject stack — run, exit, back navigation |
-| `MenuController` | Menu state — open/close, items, focus, filtering |
+| Sub-controller    | Purpose                                                       |
+| ----------------- | ------------------------------------------------------------- |
+| `KeysController`  | Manages key bindings — registering, dispatching, defaults     |
+| `AppController`   | Manages the AppObject stack — run, exit, back navigation      |
+| `MenuController`  | Menu state — open/close, items, focus, filtering              |
 | `InputController` | Input state — value, placeholder, focus, submit/fill handlers |
-| `UIController` | Layout and UI areas — flex structures, flags, modal state |
+| `UIController`    | Layout and UI areas — flex structures, flags, modal state     |
 
 `Controller` also provides convenience methods: `notify()`, `alert()`, `confirm()`.
 

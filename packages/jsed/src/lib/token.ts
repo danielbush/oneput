@@ -54,7 +54,9 @@ export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
 /**
  * Detect if the element is a TOKEN .
  */
-export function isToken(el: EventTarget | Element | Node | ChildNode | ParentNode | null | undefined): el is HTMLElement {
+export function isToken(
+  el: EventTarget | Element | Node | ChildNode | ParentNode | null | undefined
+): el is HTMLElement {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     return el.classList.contains(JSED_TOKEN_CLASS);

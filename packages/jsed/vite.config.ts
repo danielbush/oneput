@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
-import { resolve } from "node:path";
-import { defineConfig } from "vite";
+import { resolve } from 'node:path';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   // See https://vite.dev/guide/build#library-mode (build.lib)
@@ -8,15 +8,15 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, "src/index.ts"),
-      name: "jsed",
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'jsed',
       // the proper extensions will be added
-      fileName: "index",
+      fileName: 'index'
     },
     rollupOptions: {
       output: {
-        dir: "dist",
-      },
+        dir: 'dist'
+      }
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       // external: ['vue'],
@@ -27,25 +27,19 @@ export default defineConfig({
       //     vue: 'Vue',
       //   },
       // },
-    },
+    }
   },
   test: {
-    environment: "jsdom",
+    environment: 'jsdom',
     coverage: {
-      exclude: [
-        "src/**/*.test.ts",
-        "**/*.d.ts",
-        "src/cli/**",
-        "src/app/sketch.ts",
-        "src/index.ts",
-      ],
-      include: ["src/**/*.ts"],
+      exclude: ['src/**/*.test.ts', '**/*.d.ts', 'src/cli/**', 'src/app/sketch.ts', 'src/index.ts'],
+      include: ['src/**/*.ts'],
       thresholds: {
         statements: 81,
         branches: 65,
         functions: 90,
-        lines: 82,
-      },
-    },
-  },
+        lines: 82
+      }
+    }
+  }
 } as Parameters<typeof defineConfig>[0]);

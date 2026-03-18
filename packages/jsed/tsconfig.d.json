@@ -9,8 +9,8 @@
     "emitDeclarationOnly": true,
     "declarationDir": "dist",
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "files": ["src/index.ts"],
-  "exclude": ["src/cli", "**/__tests__"],
+  "exclude": ["src/cli", "**/__tests__"]
 }

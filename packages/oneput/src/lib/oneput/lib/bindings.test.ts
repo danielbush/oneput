@@ -19,7 +19,10 @@ function keyEvent(key: string, modifiers: Partial<KeyEvent> = {}): KeyEvent {
  * Helper to create a minimal KeyBindingMap for testing.
  */
 function createBindingMap(
-  bindings: Record<string, { description: string; bindings: string[]; when?: { menuOpen?: boolean } }>
+  bindings: Record<
+    string,
+    { description: string; bindings: string[]; when?: { menuOpen?: boolean } }
+  >
 ): KeyBindingMap {
   return Object.entries(bindings).reduce((acc, [actionId, { description, bindings, when }]) => {
     acc[actionId] = {

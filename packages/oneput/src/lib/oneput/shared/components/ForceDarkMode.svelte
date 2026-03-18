@@ -12,7 +12,5 @@
 </script>
 
 <fieldset class="demo">
-  <button type="button" onclick={toggleForceDarkMode}>
-    Toggle force dark mode on page
-  </button>
+  <button type="button" onclick={toggleForceDarkMode}> Toggle force dark mode on page </button>
 </fieldset>

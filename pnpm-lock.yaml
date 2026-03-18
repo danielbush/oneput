@@ -283,6 +283,9 @@ importers:
       jsdom:
         specifier: ^20.0.3
         version: 20.0.3
+      prettier:
+        specifier: ^3.8.1
+        version: 3.8.1
       typescript:
         specifier: ^5.2.2
         version: 5.9.3

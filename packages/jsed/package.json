@@ -29,6 +29,7 @@
   "private": false,
   "scripts": {
     "check": "tsc --noEmit",
+    "format": "prettier --write .",
     "test": "vitest --run --reporter dot",
     "test:coverage": "vitest --run --coverage",
     "test:update": "vitest -u",
@@ -56,14 +57,15 @@
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^1.1.0",
     "jsdom": "^20.0.3",
+    "prettier": "^3.8.1",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vite-plugin-dts": "^4.3.0",
     "vitest": "^3.0.0"
   },
   "dependencies": {
-    "@oneput/oneput": "workspace:",
     "@iktakahiro/markdown-it-katex": "^4.0.1",
+    "@oneput/oneput": "workspace:",
     "commander": "^11.1.0",
     "markdown-it": "^13.0.1",
     "neverthrow": "catalog:"

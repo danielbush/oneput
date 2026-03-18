@@ -33,6 +33,13 @@ tasks:
     cmds:
       - pnpm i
 
+  format:
+    desc: format code
+    cmds:
+      - task: jsed:format
+      - task: oneput:format
+      - task: oneput-demo:format
+      - task: jsed-demo:format
   check:
     desc: run checks (eg types, linting) on all important packages
     cmds:

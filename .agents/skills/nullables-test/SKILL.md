@@ -9,7 +9,7 @@ Write tests for code that follows the Nullables pattern. Tests should illustrate
 
 ## Vocabulary
 
-This skill uses terms from `docs/vocabulary.md`. Key terms: HARDWIRED_INFRA, INJECTED_INFRA, DUAL_FACTORY, NULLABLE, CONFIGURABLE_RESPONSE, OUTPUT_TRACKING, INFRASTRUCTURE_WRAPPER, NULLABLE_CLASS, CREATE_BOUNDARY_RULE, VALUE_OBJECT.
+This skill uses terms from `references/vocabulary.md`. Key terms: HARDWIRED_INFRA, INJECTED_INFRA, DUAL_FACTORY, NULLABLE, CONFIGURABLE_RESPONSE, OUTPUT_TRACKING, INFRASTRUCTURE_WRAPPER, NULLABLE_CLASS, CREATE_BOUNDARY_RULE, VALUE_OBJECT.
 
 ## Philosophy
 

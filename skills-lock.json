@@ -14,12 +14,12 @@
     "nullables-refactor": {
       "source": "danielbush/skills",
       "sourceType": "github",
-      "computedHash": "7127d87a0e76dd2391f71dd549be8d872b2a9b27ad03498fb9bd4155dd9c0abb"
+      "computedHash": "4b938493a5e9b27955b80050909c77a3e2c4f70e8aeade1d47b86b68afef57d6"
     },
     "nullables-test": {
       "source": "danielbush/skills",
       "sourceType": "github",
-      "computedHash": "04fe1217ad9f08cb7af13bceacba550436f64e71561915dbe84f5a739c91d56a"
+      "computedHash": "48f0f557b99db3676108f60369b819221584d58a1b247c6670d026608ae34e4a"
     },
     "svelte-code-writer": {
       "source": "sveltejs/ai-tools",

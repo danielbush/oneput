@@ -1,112 +1,69 @@
-import type { JsedDocument, ITokenCursor } from './types.js';
-import { CursorMarkers } from './CursorMarkers.js';
-import { JSED_CURSOR_CLASS } from './lib/constants.js';
+import type { ITokenCursor } from './types.js';
+import {
+  CURSOR_APPEND_CLASS,
+  CURSOR_PREPEND_CLASS,
+  CURSOR_INSERT_AFTER_CLASS,
+  CURSOR_INSERT_BEFORE_CLASS
+} from './lib/constants.js';
 import * as token from './lib/token.js';
 import type { UserInputSelectionState } from './UserInput.js';
-import type { TokenManager } from './TokenManager.js';
+import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
-export type TokenCursorError =
-  | {
-      /**
-       * Cursor expected a TOKEN but got something else.
-       */
-      type: 'invalid-token';
-    }
-  | {
-      /**
-       * Cursor was passed an element that should not be a TOKEN.
-       */
-      type: 'expected-non-token';
-    };
+export type { TokenCursorError } from './TokenCursorBase.js';
 
 /**
- * Manages the CURSOR.
+ * Manages the CURSOR — motion, editing, and CURSOR_STATE markers.
  */
-export class TokenCursor implements ITokenCursor {
-  static create(params: {
-    document: JsedDocument;
-    tokenManager: TokenManager;
-    token: HTMLElement;
-    onTokenChange: (token: HTMLElement) => void;
-    onError: (err: TokenCursorError) => void;
-  }) {
-    return new TokenCursor({
-      document: params.document,
-      tokenManager: params.tokenManager,
-      token: params.token,
-      onTokenChange: params.onTokenChange,
-      onError: params.onError
-    });
+export class TokenCursor extends TokenCursorBase implements ITokenCursor {
+  static create(params: TokenCursorBaseParams) {
+    return new TokenCursor(params);
   }
 
-  /**
-   * The token the cursor is currently on.
-   */
-  #token: HTMLElement;
-  #document: JsedDocument;
-  #tokenManager: TokenManager;
-  #onTokenChange: (token: HTMLElement) => void;
-  #cursorMarkers: CursorMarkers;
-  #onError: (err: TokenCursorError) => void;
-
-  constructor(params: {
-    document: JsedDocument;
-    tokenManager: TokenManager;
-    token: HTMLElement;
-    onTokenChange: (token: HTMLElement) => void;
-    onError: (err: TokenCursorError) => void;
-  }) {
-    this.#token = params.token; // ts
-    this.#document = params.document;
-    this.#tokenManager = params.tokenManager;
-    this.#onTokenChange = params.onTokenChange;
-    this.#onError = params.onError;
-    this.#setToken(params.token);
-    this.#cursorMarkers = CursorMarkers.create(this);
-  }
+  // #region CURSOR_STATE
 
   public handleInputChange = (input: string): void => {
-    this.#cursorMarkers.handleInputChange(input);
+    if (input.endsWith(' ')) {
+      this.setMarker(CURSOR_INSERT_AFTER_CLASS);
+    } else if (input.startsWith(' ')) {
+      this.setMarker(CURSOR_INSERT_BEFORE_CLASS);
+    }
   };
 
   public handleSelectionChange = (selection: UserInputSelectionState): void => {
-    this.#cursorMarkers.handleSelectionChange(selection);
+    switch (selection) {
+      case 'CURSOR_AT_BEGINNING':
+        this.setMarker(CURSOR_PREPEND_CLASS);
+        return;
+      case 'CURSOR_AT_END':
+        this.setMarker(CURSOR_APPEND_CLASS);
+        return;
+      default:
+        this.setMarker();
+    }
   };
 
-  getDocument() {
-    return this.#document;
-  }
-
-  // #region Setting
-
-  getToken() {
-    return this.#token;
-  }
-
-  /**
-   * Allows a consumer to set the token.
-   *
-   * The onTokenChange callback is not called. Instead, you should perform other
-   * change before and after calling this.
-   */
-  setToken(el: HTMLElement) {
-    if (!token.isToken(el)) {
-      this.#onError({ type: 'invalid-token' });
-      throw new Error(`Not a token`);
+  private setMarker(className?: string): void {
+    this.clearMarkers();
+    if (className) {
+      this.addFocusClasses(className);
     }
-    this.#removeAllFocusClasses();
-    this.#token.classList.remove(JSED_CURSOR_CLASS);
-    el.classList.add(JSED_CURSOR_CLASS);
-    this.#token = el;
   }
 
-  /**
-   * Called internally when an operation causes the token to change. We need to
-   * notify the consumer, so we call the onTokenChange callback.
-   */
-  #setToken(el: HTMLElement) {
-    this.setToken(el);
-    this.#onTokenChange(el);
+  private clearMarkers(): void {
+    this.removeFocusClasses(
+      CURSOR_INSERT_AFTER_CLASS,
+      CURSOR_INSERT_BEFORE_CLASS,
+      CURSOR_PREPEND_CLASS,
+      CURSOR_APPEND_CLASS
+    );
+  }
+
+  private isInsertingAfter(): boolean {
+    return this.getToken().classList.contains(CURSOR_INSERT_AFTER_CLASS);
+  }
+
+  private isInsertingBefore(): boolean {
+    return this.getToken().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
   }
 
   // #endregion
@@ -114,25 +71,26 @@ export class TokenCursor implements ITokenCursor {
   // #region Motion
 
   moveNext() {
-    if (this.#cursorMarkers.isInsertingBefore()) {
-      this.#cursorMarkers.clear();
+    if (this.isInsertingBefore()) {
+      this.clearMarkers();
       return;
     }
 
-    const nextToken = token.getNextLineSibling(this.#token);
+    const nextToken = token.getNextLineSibling(this.getToken());
     if (nextToken) {
-      this.#setToken(nextToken);
+      this.setTokenInternal(nextToken);
     }
   }
+
   movePrevious() {
-    if (this.#cursorMarkers.isInsertingAfter()) {
-      this.#cursorMarkers.clear();
+    if (this.isInsertingAfter()) {
+      this.clearMarkers();
       return;
     }
 
-    const prevToken = token.getPreviousLineSibling(this.#token);
+    const prevToken = token.getPreviousLineSibling(this.getToken());
     if (prevToken) {
-      this.#setToken(prevToken);
+      this.setTokenInternal(prevToken);
     }
   }
 
@@ -141,17 +99,17 @@ export class TokenCursor implements ITokenCursor {
   // #region Editing tokens
 
   replace(val: string) {
-    // Because we re-use the existing token, we do NOT focus.
-    this.#token = token.replaceText(this.#token, val);
+    token.replaceText(this.getToken(), val);
   }
+
   delete() {
-    const { next: nextTok } = token.remove(this.#token);
-    this.#setToken(nextTok);
-    return;
+    const { next: nextTok } = token.remove(this.getToken());
+    this.setTokenInternal(nextTok);
   }
+
   append(val: string): HTMLElement {
     const tok = token.createToken(val);
-    token.insertAfter(tok, this.#token);
+    token.insertAfter(tok, this.getToken());
     return tok;
   }
 
@@ -159,11 +117,11 @@ export class TokenCursor implements ITokenCursor {
    * COLLAPSE the current token.
    */
   toggleCollapseNext() {
-    if (token.isCollapsed(this.#token)) {
-      token.uncollapse(this.#token);
+    if (token.isCollapsed(this.getToken())) {
+      token.uncollapse(this.getToken());
       return false;
     } else {
-      token.collapse(this.#token);
+      token.collapse(this.getToken());
       return true;
     }
   }
@@ -172,7 +130,7 @@ export class TokenCursor implements ITokenCursor {
    * COLLAPSE the token previous to the current token.
    */
   toggleCollapsePrevious() {
-    const prev = token.getPreviousLineSibling(this.#token);
+    const prev = token.getPreviousLineSibling(this.getToken());
     if (!prev) {
       return false;
     }
@@ -186,24 +144,24 @@ export class TokenCursor implements ITokenCursor {
   }
 
   joinNext() {
-    token.joinNext(this.#token);
+    token.joinNext(this.getToken());
   }
 
   joinPrevious() {
-    token.joinPrevious(this.#token);
+    token.joinPrevious(this.getToken());
   }
 
   splitBefore() {
-    token.splitBefore(this.#token);
+    token.splitBefore(this.getToken());
     // We may end up in a new token, so we need to update the focus.
-    this.#setToken(this.#token);
+    this.setTokenInternal(this.getToken());
   }
 
   splitAfter() {
-    const [, after] = token.splitAfter(this.#token);
-    const firstTok = this.#tokenManager.tokenize(after);
+    const [, after] = token.splitAfter(this.getToken());
+    const firstTok = this.tokenManager.tokenize(after);
     if (firstTok) {
-      this.#setToken(firstTok);
+      this.setTokenInternal(firstTok);
     }
   }
 
@@ -211,10 +169,9 @@ export class TokenCursor implements ITokenCursor {
 
   // #region Closing
 
-  close() {
-    this.#token.classList.remove(JSED_CURSOR_CLASS);
-    this.#removeAllFocusClasses();
-    this.#cursorMarkers.close();
+  override close() {
+    this.clearMarkers();
+    super.close();
   }
 
   // #endregion
@@ -222,25 +179,7 @@ export class TokenCursor implements ITokenCursor {
   // #region Other
 
   isSameLine(tok: HTMLElement) {
-    return token.isSameLine(this.#token, tok);
-  }
-
-  // #endregion
-
-  // #region Styling
-
-  #focusClasses: string[] = [];
-  addFocusClasses(...classNames: string[]) {
-    this.#token.classList.add(...classNames);
-    this.#focusClasses.push(...classNames);
-  }
-  removeFocusClasses(...classNames: string[]) {
-    this.#token.classList.remove(...classNames);
-    this.#focusClasses = this.#focusClasses.filter((c) => !classNames.includes(c));
-  }
-  #removeAllFocusClasses() {
-    this.#token.classList.remove(...this.#focusClasses);
-    this.#focusClasses = [];
+    return token.isSameLine(this.getToken(), tok);
   }
 
   // #endregion
@@ -253,15 +192,14 @@ export class TokenCursor implements ITokenCursor {
    */
   insertElementAfter(el: HTMLElement) {
     if (token.isToken(el)) {
-      this.#onError({ type: 'expected-non-token' });
+      this.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
-    token.insertAfter(el, this.#token);
+    token.insertAfter(el, this.getToken());
 
-    // Focus on token in el?
-    const first = this.#tokenManager.tokenize(el);
+    const first = this.tokenManager.tokenize(el);
     if (first) {
-      this.#setToken(first);
+      this.setTokenInternal(first);
     }
   }
 
@@ -271,15 +209,14 @@ export class TokenCursor implements ITokenCursor {
    */
   insertElementBefore(el: HTMLElement) {
     if (token.isToken(el)) {
-      this.#onError({ type: 'expected-non-token' });
+      this.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
-    token.insertBefore(el, this.#token);
+    token.insertBefore(el, this.getToken());
 
-    // Focus on token in el?
-    const first = this.#tokenManager.tokenize(el);
+    const first = this.tokenManager.tokenize(el);
     if (first) {
-      this.#setToken(first);
+      this.setTokenInternal(first);
     }
   }
 

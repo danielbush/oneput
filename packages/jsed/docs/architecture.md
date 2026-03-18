@@ -30,17 +30,18 @@ Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
 When asked to tokenize a FOCUSABLE, it finds its LINE, tokenizes it, and returns the first TOKEN. If the FOCUSABLE contains nested LINEs (e.g. a `<div>` containing `<p>` tags), it walks down into the first child LINE.
 
-## Token editing: TokenCursor
+## Token editing: TokenCursorBase → TokenCursor
 
-`TokenCursor` is like a Nav for TOKENs. It takes a JsedDocument and a TokenManager, and provides TOKEN-level editing once an FOCUSABLE has been focused and tokenized:
+`TokenCursorBase` holds the current TOKEN reference, manages the JSED_CURSOR_CLASS, and provides protected focus-class management. It is the foundation layer.
 
-- **moveNext / movePrevious** — move between TOKENs within a LINE (via LINE_SIBLING)
+`TokenCursor` extends `TokenCursorBase` and provides TOKEN-level editing and CURSOR_STATE management once a FOCUSABLE has been focused and tokenized:
+
+- **CURSOR_STATE** — manages the visual markers (CURSOR_APPEND, CURSOR_PREPEND, CURSOR_INSERT_AFTER, CURSOR_INSERT_BEFORE) that indicate what the user's next edit will do. See vocabulary.md for details.
+- **moveNext / movePrevious** — move between TOKENs within a LINE (via LINE_SIBLING). Gated by CURSOR_STATE: moveNext from CURSOR_INSERT_BEFORE cancels the insertion; movePrevious from CURSOR_INSERT_AFTER cancels.
 - **replace / delete / append** — edit TOKEN content
 - **joinNext / joinPrevious** — JOIN adjacent TOKENs
 - **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
 - **toggleCollapseNext / toggleCollapsePrevious** — toggle COLLAPSE
-
-TokenCursor creates `CursorMarkers` internally — visual indicators showing whether the cursor is about to insert, prepend, or append relative to the current TOKEN.
 
 ## Input handling: InputManager
 

@@ -5,10 +5,10 @@ import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue } from '../lib/token.js';
 import {
-  TOKEN_APPEND_CLASS,
-  TOKEN_PREPEND_CLASS,
-  TOKEN_INSERT_AFTER_CLASS,
-  TOKEN_INSERT_BEFORE_CLASS
+  CURSOR_APPEND_CLASS,
+  CURSOR_PREPEND_CLASS,
+  CURSOR_INSERT_AFTER_CLASS,
+  CURSOR_INSERT_BEFORE_CLASS
 } from '../lib/constants.js';
 
 /**
@@ -245,7 +245,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   }
 
   function markerClasses(token: HTMLElement): string[] {
-    return [TOKEN_APPEND_CLASS, TOKEN_PREPEND_CLASS, TOKEN_INSERT_AFTER_CLASS, TOKEN_INSERT_BEFORE_CLASS]
+    return [CURSOR_APPEND_CLASS, CURSOR_PREPEND_CLASS, CURSOR_INSERT_AFTER_CLASS, CURSOR_INSERT_BEFORE_CLASS]
       .filter((cls) => token.classList.contains(cls));
   }
 
@@ -258,7 +258,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       cursor.handleSelectionChange('CURSOR_AT_END');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_APPEND_CLASS]);
     });
 
     it('moveNext clears CURSOR_APPEND marker', () => {
@@ -283,7 +283,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_PREPEND_CLASS]);
     });
 
     it('movePrevious clears CURSOR_PREPEND marker', () => {
@@ -319,11 +319,11 @@ describe('TokenCursor CURSOR_STATE', () => {
 
       // CURSOR_APPEND
       cursor.handleSelectionChange('CURSOR_AT_END');
-      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_APPEND_CLASS]);
+      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_APPEND_CLASS]);
 
       // CURSOR_PREPEND
       cursor.handleSelectionChange('CURSOR_AT_BEGINNING');
-      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_PREPEND_CLASS]);
+      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_PREPEND_CLASS]);
 
       // CURSOR_OVERWRITE
       cursor.handleSelectionChange('CURSOR_AT_MIDDLE');
@@ -340,7 +340,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       cursor.handleInputChange('hello ');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_INSERT_AFTER_CLASS]);
+      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_INSERT_AFTER_CLASS]);
     });
 
     it('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
@@ -378,7 +378,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       cursor.handleInputChange(' hello');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([TOKEN_INSERT_BEFORE_CLASS]);
+      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_INSERT_BEFORE_CLASS]);
     });
 
     it('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {

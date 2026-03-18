@@ -9,13 +9,13 @@ import * as constants from './lib/constants.js';
  *
  * insert markers:
  *
- * - TOKEN_INSERT_AFTER_CLASS - the cursor is about to insert new token after this token
- * - TOKEN_INSERT_BEFORE_CLASS - the cursor is about to insert new token before this token
+ * - CURSOR_INSERT_AFTER_CLASS - the cursor is about to insert new token after this token
+ * - CURSOR_INSERT_BEFORE_CLASS - the cursor is about to insert new token before this token
  *
  * update markers:
  *
- * - TOKEN_PREPEND_CLASS - the cursor is about to prepend text to the token (no spaces)
- * - TOKEN_APPEND_CLASS - the cursor is about to append text to the token (no spaces)
+ * - CURSOR_PREPEND_CLASS - the cursor is about to prepend text to the token (no spaces)
+ * - CURSOR_APPEND_CLASS - the cursor is about to append text to the token (no spaces)
  */
 export class CursorMarkers {
   static create(cursor: ITokenCursor): CursorMarkers {
@@ -27,19 +27,19 @@ export class CursorMarkers {
   handleInputChange = (inputValue: string): void => {
     const val = inputValue;
     if (val.endsWith(' ')) {
-      this.addFocusClasses(constants.TOKEN_INSERT_AFTER_CLASS);
+      this.addFocusClasses(constants.CURSOR_INSERT_AFTER_CLASS);
     } else if (val.startsWith(' ')) {
-      this.addFocusClasses(constants.TOKEN_INSERT_BEFORE_CLASS);
+      this.addFocusClasses(constants.CURSOR_INSERT_BEFORE_CLASS);
     }
   };
 
   handleSelectionChange = (state: InputSelectionState): void => {
     switch (state) {
       case 'CURSOR_AT_BEGINNING':
-        this.addFocusClasses(constants.TOKEN_PREPEND_CLASS);
+        this.addFocusClasses(constants.CURSOR_PREPEND_CLASS);
         return;
       case 'CURSOR_AT_END':
-        this.addFocusClasses(constants.TOKEN_APPEND_CLASS);
+        this.addFocusClasses(constants.CURSOR_APPEND_CLASS);
         return;
       default:
         this.addFocusClasses();
@@ -48,10 +48,10 @@ export class CursorMarkers {
 
   clear(): void {
     this.cursor.removeFocusClasses(
-      constants.TOKEN_INSERT_AFTER_CLASS,
-      constants.TOKEN_INSERT_BEFORE_CLASS,
-      constants.TOKEN_PREPEND_CLASS,
-      constants.TOKEN_APPEND_CLASS
+      constants.CURSOR_INSERT_AFTER_CLASS,
+      constants.CURSOR_INSERT_BEFORE_CLASS,
+      constants.CURSOR_PREPEND_CLASS,
+      constants.CURSOR_APPEND_CLASS
     );
   }
 
@@ -61,11 +61,11 @@ export class CursorMarkers {
   }
 
   isInsertingAfter(): boolean {
-    return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_AFTER_CLASS);
+    return this.cursor.getToken().classList.contains(constants.CURSOR_INSERT_AFTER_CLASS);
   }
 
   isInsertingBefore(): boolean {
-    return this.cursor.getToken().classList.contains(constants.TOKEN_INSERT_BEFORE_CLASS);
+    return this.cursor.getToken().classList.contains(constants.CURSOR_INSERT_BEFORE_CLASS);
   }
 
   close(): void {

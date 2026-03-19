@@ -7,9 +7,10 @@ import {
   isLine,
   isInline,
   isToken,
-  isIsland
+  isIsland,
+  isBlockTransparent
 } from '../traversal.js';
-import { tokenizeLine, isPadded } from '../token.js';
+import { tokenizeLine, isPadded, addAnchors } from '../token.js';
 
 // INLINE_COMPUTED_STYLE
 const inlineStyle = { style: 'display:inline;' };
@@ -23,30 +24,33 @@ function identify(el: HTMLElement): string {
 }
 
 /** Collect all LINE_SIBLING's forward using getNextLineSibling. */
-function collectForward(first: HTMLElement): string[] {
+function collectForward(first: HTMLElement, line?: HTMLElement): string[] {
+  const ln = line ?? getLine(first);
   const result: string[] = [identify(first)];
   let cur: HTMLElement | null = first;
-  while ((cur = getNextLineSibling(cur))) {
+  while ((cur = getNextLineSibling(cur, ln))) {
     result.push(identify(cur));
   }
   return result;
 }
 
 /** Collect all LINE_SIBLING's backward using getPreviousLineSibling. */
-function collectBackward(last: HTMLElement): string[] {
+function collectBackward(last: HTMLElement, line?: HTMLElement): string[] {
+  const ln = line ?? getLine(last);
   const result: string[] = [identify(last)];
   let cur: HTMLElement | null = last;
-  while ((cur = getPreviousLineSibling(cur))) {
+  while ((cur = getPreviousLineSibling(cur, ln))) {
     result.push(identify(cur));
   }
   return result;
 }
 
 /** Walk forward to the last LINE_SIBLING. */
-function walkToLast(first: HTMLElement): HTMLElement {
+function walkToLast(first: HTMLElement, line?: HTMLElement): HTMLElement {
+  const ln = line ?? getLine(first);
   let cur = first;
   let next: HTMLElement | null;
-  while ((next = getNextLineSibling(cur))) {
+  while ((next = getNextLineSibling(cur, ln))) {
     cur = next;
   }
   return cur;
@@ -374,7 +378,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 
     // act — find the TOKEN after the ISLAND
     const katex = byId(doc, 'p1').querySelector('.katex') as HTMLElement;
-    const afterIsland = getNextLineSibling(katex)!;
+    const afterIsland = getNextLineSibling(katex, byId(doc, 'p1'))!;
 
     // assert
     expect(isToken(afterIsland)).toBe(true);
@@ -437,7 +441,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 
     // act
     const katexEls = byId(doc, 'p1').querySelectorAll('.katex');
-    const afterSecond = getNextLineSibling(katexEls[1] as HTMLElement)!;
+    const afterSecond = getNextLineSibling(katexEls[1] as HTMLElement, byId(doc, 'p1'))!;
 
     // assert
     expect(isToken(afterSecond)).toBe(true);
@@ -464,7 +468,7 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR descends into the nested div and visits its TOKEN's
-    expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
+    expect(collectForward(first, line)).toEqual(['aaa', 'nested', 'bbb']);
   });
 
   test('nested div at start of LINE: <div><div>nested</div> aaa bbb</div>', () => {
@@ -481,7 +485,7 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     const innerToken = inner.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert
-    expect(collectForward(innerToken)).toEqual(['nested', 'aaa', 'bbb']);
+    expect(collectForward(innerToken, line)).toEqual(['nested', 'aaa', 'bbb']);
   });
 
   test('nested div at end of LINE: <div>aaa bbb <div>nested</div></div>', () => {
@@ -497,20 +501,20 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert
-    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested']);
+    expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested']);
   });
 
-  test('nested div inside INLINE: <p>aaa <em>bbb <div>nested</div> ccc</em> ddd</p>', () => {
-    // arrange
+  test('nested div inside INLINE: <div>aaa <em>bbb <div>nested</div> ccc</em> ddd</div>', () => {
+    // arrange — uses <div> not <p> as outer because <p> auto-closes on block children
     const doc = makeRoot(
-      p(
-        { id: 'p1' },
+      div(
+        { id: 'outer' },
         'aaa ',
         em(inlineStyle, 'bbb ', div({ id: 'inner' }, 'nested'), ' ccc'),
         ' ddd'
       )
     );
-    const line = byId(doc, 'p1');
+    const line = byId(doc, 'outer');
     tokenizeLine(line);
     const inner = byId(doc, 'inner');
     tokenizeLine(inner);
@@ -518,7 +522,7 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — descend through INLINE, then descend into nested div, then back out
-    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
+    expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
   });
 
   test('deeply nested blocks: <div>aaa <div>bbb <div>ccc</div> ddd</div> eee</div>', () => {
@@ -539,7 +543,7 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR descends through both nested levels
-    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
+    expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
   });
 
   test('inline-block at middle of LINE', () => {
@@ -555,11 +559,12 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert
-    expect(collectForward(first)).toEqual(['aaa', 'inner', 'bbb']);
+    expect(collectForward(first, line)).toEqual(['aaa', 'inner', 'bbb']);
   });
 
   test('nested block containing only an ANCHOR', () => {
-    // arrange — a nested div with no text content yet
+    // arrange — a nested div with no text content yet; addAnchors creates
+    // an ANCHOR inside the empty BLOCK_TRANSPARENT so the CURSOR can land on it
     const doc = makeRoot(
       div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, ''), ' bbb')
     );
@@ -567,13 +572,14 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
     tokenizeLine(line);
     const inner = byId(doc, 'inner');
     tokenizeLine(inner);
+    addAnchors(inner);
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR should still traverse into the nested div and land on the ANCHOR
     const siblings: HTMLElement[] = [first];
     let cur: HTMLElement | null = first;
-    while ((cur = getNextLineSibling(cur))) {
+    while ((cur = getNextLineSibling(cur, line))) {
       siblings.push(cur);
     }
     // aaa, (anchor inside inner div), bbb = 3 LINE_SIBLING's

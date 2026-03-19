@@ -138,25 +138,26 @@ export class EditManager {
       const firstToken = this.tokenManager.tokenize(focus);
       if (firstToken) {
         this.userInput.focus();
-        return ok(this.#setCursor(firstToken));
+        return ok(this.#setCursor(firstToken, token.getLine(focus)));
       }
       return err({ type: 'no-token-under-focus' });
     }
     return err({ type: 'no-focus' });
   }
 
-  #setCursor(token: HTMLElement) {
+  #setCursor(tok: HTMLElement, line: HTMLElement) {
     if (!this.cursor) {
       this.cursor = TokenCursor.create({
         document: this.nav.document,
         tokenManager: this.tokenManager,
-        token,
+        token: tok,
+        line,
         onTokenChange: this.handleTokenChange,
         onError: this.handleCursorError
       });
       this.inputManager = InputManager.create(this.nav, this.cursor, this.userInput);
     } else {
-      this.cursor.setToken(token);
+      this.cursor.setToken(tok);
     }
     return this.cursor;
   }

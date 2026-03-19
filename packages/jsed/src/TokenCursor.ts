@@ -70,13 +70,20 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #region Motion
 
+  /** Lazy tokenization callback: tokenize BLOCK_TRANSPARENT's as the CURSOR walks into them. */
+  private lazyTokenize = (el: HTMLElement) => {
+    token.tokenizeLine(el);
+  };
+
   moveNext() {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
       return;
     }
 
-    const nextToken = token.getNextLineSibling(this.getToken());
+    const nextToken = token.getNextLineSibling(this.getToken(), this.getLine(), {
+      onEnterBlockTransparent: this.lazyTokenize
+    });
     if (nextToken) {
       this.setTokenInternal(nextToken);
     }
@@ -88,7 +95,9 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
       return;
     }
 
-    const prevToken = token.getPreviousLineSibling(this.getToken());
+    const prevToken = token.getPreviousLineSibling(this.getToken(), this.getLine(), {
+      onEnterBlockTransparent: this.lazyTokenize
+    });
     if (prevToken) {
       this.setTokenInternal(prevToken);
     }
@@ -140,7 +149,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    */
   toggleCollapsePrevious() {
     if (!this.isOnToken()) return false;
-    const prev = token.getPreviousLineSibling(this.getToken());
+    const prev = token.getPreviousLineSibling(this.getToken(), this.getLine());
     if (!prev) {
       return false;
     }

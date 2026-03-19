@@ -33,6 +33,8 @@ export {
   isImplicitLine,
   isLineSibling,
   isLine,
+  isCursorBoundary,
+  isBlockTransparent,
   isSameLine,
   getLine,
   getPreviousVisibleSibling,
@@ -43,6 +45,7 @@ export {
   getNextLineSibling,
   getFirstLineSibling
 } from './traversal.js';
+export type { LineSiblingOptions } from './traversal.js';
 
 // #region TOKEN CRUD
 

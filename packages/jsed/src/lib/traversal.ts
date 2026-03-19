@@ -11,7 +11,8 @@ import {
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
   JSED_DOM_ROOT_ID,
-  JSED_IGNORE_CLASS
+  JSED_IGNORE_CLASS,
+  JSED_CURSOR_OPAQUE_CLASS
 } from './constants.js';
 import { findNextNode, findPreviousNode } from './walk2.js';
 
@@ -155,6 +156,23 @@ export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
   return true;
 }
 
+/**
+ * Detect CURSOR_BOUNDARY — a FOCUSABLE explicitly marked so FOCUS can descend
+ * but the CURSOR treats it as opaque (visit=yes, descend=no).
+ */
+export function isCursorBoundary(el: Node | ChildNode | ParentNode | null): boolean {
+  if (!el || !(el instanceof Element)) return false;
+  return el.classList.contains(JSED_CURSOR_OPAQUE_CLASS);
+}
+
+/**
+ * Detect BLOCK_TRANSPARENT — the default for any non-INLINE, non-ISLAND FOCUSABLE
+ * that is not a CURSOR_BOUNDARY. The CURSOR descends into it seamlessly (like INLINE).
+ */
+export function isBlockTransparent(el: Node | ChildNode | ParentNode | null): boolean {
+  return isLine(el) && !isCursorBoundary(el);
+}
+
 export function isImplicitLine(node: Node): boolean {
   return (
     node.nodeType === Node.ELEMENT_NODE &&
@@ -229,6 +247,9 @@ export function getNextTokenSibling(el: HTMLElement): HTMLElement | null {
 
 /**
  * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.
+ *
+ * Used by FOCUS-level code (Nav). CURSOR-level code should use an explicitly
+ * stored LINE rather than calling this per-hop.
  */
 export function getLine(el: ChildNode): HTMLElement {
   if (!el) {
@@ -251,14 +272,31 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
   return line1 === line2;
 }
 
+/** Options for LINE_SIBLING traversal functions. */
+export type LineSiblingOptions = {
+  /** Called before descending into a BLOCK_TRANSPARENT. Use for lazy tokenization. */
+  onEnterBlockTransparent?: (el: HTMLElement) => void;
+};
+
+/** Build the descend predicate for LINE_SIBLING traversal. */
+function lineSiblingDescend(options?: LineSiblingOptions): (n: ParentNode | ChildNode) => boolean {
+  return (n) => {
+    if (isInline(n)) return true;
+    if (isBlockTransparent(n)) {
+      options?.onEnterBlockTransparent?.(n as HTMLElement);
+      return true;
+    }
+    return false;
+  };
+}
+
 /**
- * Get previous LINE_SIBLING.
+ * Get previous LINE_SIBLING within `line`.
  */
-export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
-  const line = getLine(el);
+export function getPreviousLineSibling(el: HTMLElement, line: HTMLElement, options?: LineSiblingOptions): HTMLElement | null {
   for (const prev of findPreviousNode(el, line, {
     visit: isLineSibling,
-    descend: isInline
+    descend: lineSiblingDescend(options)
   })) {
     return prev as HTMLElement;
   }
@@ -266,13 +304,12 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Get next LINE_SIBLING.
+ * Get next LINE_SIBLING within `line`.
  */
-export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
-  const line = getLine(el);
+export function getNextLineSibling(el: HTMLElement, line: HTMLElement, options?: LineSiblingOptions): HTMLElement | null {
   for (const next of findNextNode(el, line, {
     visit: isLineSibling,
-    descend: isInline
+    descend: lineSiblingDescend(options)
   })) {
     return next as HTMLElement;
   }
@@ -282,10 +319,11 @@ export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
 /**
  * Get the first LINE_SIBLING in a LINE — may be a TOKEN or an ISLAND.
  */
-export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
+export function getFirstLineSibling(line: HTMLElement, options?: LineSiblingOptions): HTMLElement | null {
+  const descendFn = lineSiblingDescend(options);
   for (const node of findNextNode(line, line, {
     visit: isLineSibling,
-    descend: (n) => n === line || isInline(n)
+    descend: (n) => n === line || descendFn(n)
   })) {
     return node as HTMLElement;
   }

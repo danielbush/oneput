@@ -5,7 +5,7 @@ import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
 import * as token from '../lib/token.js';
 import { getValue } from '../lib/token.js';
-import { isIsland } from '../lib/traversal.js';
+import { isIsland, getLine } from '../lib/traversal.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,
@@ -18,16 +18,17 @@ import {
  */
 const inlineStyle = { style: 'display:inline;' };
 
-function createCursor(doc: JsedDocument, token: HTMLElement) {
-  const tokenManager = TokenManager.create(doc.root);
+function createCursor(doc: JsedDocument, tok: HTMLElement, line?: HTMLElement) {
+  const tokenManager = TokenManager.create();
   const changes: string[] = [];
   const errors: string[] = [];
 
   const cursor = TokenCursor.create({
     document: doc,
     tokenManager,
-    token,
-    onTokenChange: (tok) => changes.push(getValue(tok)),
+    token: tok,
+    line: line ?? getLine(tok),
+    onTokenChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)
   });
 
@@ -36,9 +37,9 @@ function createCursor(doc: JsedDocument, token: HTMLElement) {
 
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
-  const tokenManager = TokenManager.create(doc.root);
+  const tokenManager = TokenManager.create();
   const firstToken = tokenManager.tokenize(el)!;
-  return createCursor(doc, firstToken);
+  return createCursor(doc, firstToken, el);
 }
 
 describe('TokenCursor motion', () => {

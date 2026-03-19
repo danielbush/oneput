@@ -9,6 +9,11 @@ export class TokenManager {
 
   constructor() {}
 
+  /** Lazy tokenization callback for BLOCK_TRANSPARENT's encountered during traversal. */
+  private lazyTokenize = (el: HTMLElement) => {
+    tokenizeLine(el);
+  };
+
   /**
    * Tokenize the line and return first TOKEN.  See SHALLOW_TOKENIZATION .
    *
@@ -25,7 +30,9 @@ export class TokenManager {
     const line = getLine(el);
     tokenizeLine(line);
 
-    const first = getFirstLineSibling(line);
+    const first = getFirstLineSibling(line, {
+      onEnterBlockTransparent: this.lazyTokenize
+    });
     if (first) {
       return first;
     }

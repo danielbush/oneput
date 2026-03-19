@@ -10,7 +10,32 @@ Not NESTED_LINE's.
 
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
+id: DETOKENIZE_SPEC
 Drafted: 19-Mar-2026
+
+I originally envisaged TokenManager would manage tokenizing and as a result would enforce SHALLOW_TOKENIZATION by figuring out when to tokenize and de-tokenize nodes based on where the CURSOR is located.  But in CURSOR_WALKS_NON_TOKENS_SPEC the solution was to allow the CURSOR itself to lazy tokenize when encountering BLOCK_TRANSPARENT nodes within the CURSOR_LINE .
+
+```ts
+  moveNext() {
+    if (this.isInsertingBefore()) {
+      this.clearMarkers();
+      return;
+    }
+
+    const nextToken = token.getNextLineSibling(this.getToken(), this.getLine(), {
+      onEnterBlockTransparent: this.lazyTokenize
+    });
+    if (nextToken) {
+      this.setTokenInternal(nextToken);
+    }
+  }
+```
+
+- remove TokenManager, I see no point keeping it
+- get CURSOR (TokenCursor) to tokenize the LINE next to or previous the CURSOR_LINE just before it moves on to it.
+- come up with a detokenization mechanism, perhaps one that is transparent to the cursor; the reason for attempting it this way is because I'm planning to support remote cursors (eg via operational transform), so how do we know what is safe to de-tokenize?  We have to check all the cursors to see where they are.
+  - One way to do this might be to have onTokenChange/handleTokenChange callback system configured to call a DetokenizeManager instance; it registers with each cursor and gets updates on their CURSOR_LINE (we maybe inclue that in the onTokenChange callback alongide the CURSOR TOKEN.)
+- is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
 
 ## feat: hitting enter splits paragraph
 

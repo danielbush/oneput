@@ -598,6 +598,48 @@ describe('TokenCursor walks non-TOKEN LINE_SIBLING\'s', () => {
       cursor.moveNext();
       expect(identifyCursor(cursor.getToken())).toBe('eee');
     });
+
+    it('empty BLOCK_TRANSPARENT nesting: CURSOR recurses through to find TOKEN', () => {
+      // arrange — mid and deep have no text of their own, only the innermost has content
+      const doc = makeRoot(
+        div(
+          { id: 'outer' },
+          'aaa ',
+          div({ id: 'mid' }, div({ id: 'deep' }, 'nested')),
+          ' bbb'
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#outer');
+
+      // act & assert
+      expect(identifyCursor(cursor.getToken())).toBe('aaa');
+      cursor.moveNext();
+      expect(identifyCursor(cursor.getToken())).toBe('nested');
+      cursor.moveNext();
+      expect(identifyCursor(cursor.getToken())).toBe('bbb');
+    });
+
+    it('empty BLOCK_TRANSPARENT nesting: movePrevious recurses back out', () => {
+      // arrange
+      const doc = makeRoot(
+        div(
+          { id: 'outer' },
+          'aaa ',
+          div({ id: 'mid' }, div({ id: 'deep' }, 'nested')),
+          ' bbb'
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#outer');
+      cursor.moveNext();
+      cursor.moveNext();
+
+      // act & assert
+      expect(identifyCursor(cursor.getToken())).toBe('bbb');
+      cursor.movePrevious();
+      expect(identifyCursor(cursor.getToken())).toBe('nested');
+      cursor.movePrevious();
+      expect(identifyCursor(cursor.getToken())).toBe('aaa');
+    });
   });
 
   describe('(3) CURSOR_BOUNDARY: visit=yes, descend=no', () => {

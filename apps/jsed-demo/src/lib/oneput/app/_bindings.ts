@@ -41,7 +41,7 @@ export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   },
   // NOTE: reserve 'Shift+Enter' for newlines in text area input.
   back: {
-    bindings: ['Meta+B'],
+    bindings: ['Shift+Meta+B'],
     description: 'Back',
     when: { menuOpen: true }
   },

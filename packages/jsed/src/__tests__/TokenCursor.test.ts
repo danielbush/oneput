@@ -539,8 +539,8 @@ describe('TokenCursor walks non-TOKEN LINE_SIBLING\'s', () => {
     });
   });
 
-  describe('(2) default non-INLINE: visit=yes, descend=yes', () => {
-    // Category (2) is the DEFAULT — any non-INLINE, non-ISLAND FOCUSABLE.
+  describe('(2) BLOCK_TRANSPARENT: visit=no, descend=yes', () => {
+    // Category (2) is the DEFAULT — any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
     // Includes nested block elements (div in div) and inline-block spans.
 
     it('moveNext descends into nested div to visit its TOKEN', () => {

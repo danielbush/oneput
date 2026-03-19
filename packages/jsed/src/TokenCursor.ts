@@ -98,16 +98,24 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #region Editing tokens
 
+  /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
+  private isOnToken(): boolean {
+    return token.isToken(this.getToken());
+  }
+
   replace(val: string) {
+    if (!this.isOnToken()) return;
     token.replaceText(this.getToken(), val);
   }
 
   delete() {
+    if (!this.isOnToken()) return;
     const { next: nextTok } = token.remove(this.getToken());
     this.setTokenInternal(nextTok);
   }
 
-  append(val: string): HTMLElement {
+  append(val: string): HTMLElement | null {
+    if (!this.isOnToken()) return null;
     const tok = token.createToken(val);
     token.insertAfter(tok, this.getToken());
     return tok;
@@ -117,6 +125,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    * TOGGLE_COLLAPSE on the TOKEN
    */
   toggleCollapseNext() {
+    if (!this.isOnToken()) return false;
     if (token.isCollapsed(this.getToken())) {
       token.uncollapse(this.getToken());
       return false;
@@ -130,6 +139,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    * TOGGLE_COLLAPSE on the TOKEN previous to the current TOKEN.
    */
   toggleCollapsePrevious() {
+    if (!this.isOnToken()) return false;
     const prev = token.getPreviousLineSibling(this.getToken());
     if (!prev) {
       return false;
@@ -144,20 +154,24 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   }
 
   joinNext() {
+    if (!this.isOnToken()) return;
     token.joinNext(this.getToken());
   }
 
   joinPrevious() {
+    if (!this.isOnToken()) return;
     token.joinPrevious(this.getToken());
   }
 
   splitBefore() {
+    if (!this.isOnToken()) return;
     token.splitBefore(this.getToken());
     // We may end up in a new token, so we need to update the focus.
     this.setTokenInternal(this.getToken());
   }
 
   splitAfter() {
+    if (!this.isOnToken()) return;
     const [, after] = token.splitAfter(this.getToken());
     const firstTok = this.tokenManager.tokenize(after);
     if (firstTok) {

@@ -21,10 +21,22 @@ We can break FOCUSABLE's down into different categories...
 
 - **INLINE** - a FOCUSABLE that is inline and intended to mark up one or more TOKEN's eg `<span>`, `<em>` or `<a>` etc. Whilst they can receive the FOCUS, they cannot receive the CURSOR; the CURSOR should seamlessly navigate into and out of the LINE_SIBLING's of these elements within a LINE. This excludes inline elements that potentially have more complex structures such as inline-block, inline-flex or ones that have been taken out of the normal line flow such as float or positioned elements other than static, etc.
   - Source of truth: search docstrings for INLINE.
-- **ISLAND** - a FOCUSABLE which we NEVER recurse into or edit directly (via tokenization) because of pre-existing rules we define that disallow it. Normal nodes can be designated islands according to pre-existing rules.
+- **ISLAND** - a FOCUSABLE which we NEVER recurse into or edit directly (via tokenization) because of pre-existing rules we define that disallow it. Normal nodes can be designated islands according to pre-existing rules. The CURSOR visits ISLAND's as opaque LINE_SIBLING's (visit=yes, descend=no) — it lands on the element itself but does not enter it. Editing operations (replace, delete, etc.) are no-ops when the CURSOR is on an ISLAND.
   - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
   - Example: We treat leaf nodes that have a special purpose like `<img>` tags etc as ISLAND's.
   - Example: Also elements that are already natively focusable, e.g. form controls.
+  - Source of truth: `isIsland` in focus.ts; `isLineSibling` in token.ts.
+
+### CURSOR taxonomy
+
+Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
+
+- **CURSOR_OPAQUE** (visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
+  - **ISLAND** — externally managed content (katex, `<img>`)
+  - **CURSOR_BOUNDARY** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque. *(planned — scenario 3)*
+- **CURSOR_TRANSPARENT** (visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
+  - **INLINE** — inline-level markup (`<em>`, `<a>`)
+  - **BLOCK_TRANSPARENT** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE. *(planned — scenario 2)*
 
 Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
@@ -35,8 +47,10 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 - **LINE_MEMBER** - any FOCUSABLE that belongs to a line; currently this means TOKEN, INLINE, NESTED_LINE and ISLAND can all be members. Not all members are traversable.
 - **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR;
   - TOKEN's that belong to the same LINE should be LINE_SIBLING's
+  - ISLAND's are LINE_SIBLING's — the CURSOR visits them as opaque elements but does not descend into them.
   - INLINE's aren't considered LINE_SIBLING's even though they also belong to the same LINE. When the CURSOR traverses the LINE it seamlessly recurses through INLINE's and visits their TOKEN's as if they were DOM siblings.
-  - ISLAND's and NESTED_LINE's are not visited (atm) so they don't receive the CURSOR. The CURSOR should not visit or descend into them.
+  - NESTED_LINE's are not LINE_SIBLING's (atm) — the CURSOR does not visit or descend into them.
+  - Source of truth: `isLineSibling` in token.ts.
 - **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Other LINE_MEMBER's act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR** - the current LINE_SIBLING the user has selected when editing the text of a document. This is distinct from FOCUS which is the current FOCUSABLE the user has selected. Usually the current FOCUSABLE becomes the current LINE within which the user edits the LINE_SIBLING's (text content).
@@ -50,7 +64,14 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
   - Source of truth: search docstrings for TOKEN.
 - **ANCHOR** — a TOKEN which is inserted into a FOCUSABLE (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
   - Source of truth: search docstrings for ANCHOR.
-- **COLLAPSED_TOKEN** — a token with no trailing space, so it sits flush against adjacent tokens. Most tokens in NEGATIVE_SPACE are uncollapsed (have a trailing space) - this is their default state. Toggling collapse removes or adds this space. This allows us to express markup like this: `<em>foo<strong>bar</strong>baz</em>` (all TOKEN's are collapsed). Uncollapse tokens will include a trailing space and look like this: `<em>foo <strong>bar </strong>baz </em>`.
+- **COLLAPSED_TOKEN** — a TOKEN with no trailing space, so it sits flush against the next TOKEN. Most TOKEN's in NEGATIVE_SPACE are uncollapsed (have a trailing space) — this is their default state. TOGGLE_COLLAPSE removes or adds this space. This allows us to express markup like this: `<em>foo<strong>bar</strong>baz</em>` (all TOKEN's are collapsed). Uncollapsed TOKEN's include a trailing space: `<em>foo <strong>bar </strong>baz </em>`.
+- **PADDED_TOKEN** — a TOKEN with a leading space. TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous LINE_SIBLING doesn't carry its own trailing space (e.g. an ISLAND). A TOKEN has 2² = 4 spacing states:
+  - unpadded + uncollapsed: `'foo '` — the default
+  - unpadded + collapsed: `'foo'` — COLLAPSED_TOKEN
+  - padded + uncollapsed: `' foo '` — PADDED_TOKEN
+  - padded + collapsed: `' foo'` — PADDED_TOKEN + COLLAPSED_TOKEN
+  - In NEGATIVE_SPACE, a stale leading space (e.g. if the ISLAND is later removed) is visually harmless — the browser collapses it.
+  - Source of truth: `isPadded`, `pad`, `unpad` in token.ts.
 - **NEGATIVE_SPACE** — default HTML whitespace handling: sequences of whitespace collapse to a single space, newlines treated as whitespace. Applies to most tags like `<p>`.
 - **POSITIVE_SPACE** — whitespace-significant mode (e.g. `<pre>`, `white-space: pre`): sequences preserved, lines break only at newlines and `<br>`.
 
@@ -78,7 +99,8 @@ For mutations...
 - **SHALLOW_TOKENIZATION** — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
   - Source of truth: search docstrings for SHALLOW_TOKENIZATION.
 
-- **TOGGLE_COLLAPSE** - toggle COLLAPSED_TOKEN state on/off
+- **TOGGLE_COLLAPSE** — toggle COLLAPSED_TOKEN state on/off (trailing space).
+- **TOGGLE_PADDED** — toggle PADDED_TOKEN state on/off (leading space). Typically relevant when the previous LINE_SIBLING is an ISLAND.
 
 ## Deprecated
 

@@ -68,7 +68,7 @@ export type ITokenCursor = {
   /**
    * Append a new token after the current one.
    */
-  append: (val: string) => HTMLElement;
+  append: (val: string) => HTMLElement | null;
   /**
    * TOGGLE_COLLAPSE state of token with what is next to it.
    */

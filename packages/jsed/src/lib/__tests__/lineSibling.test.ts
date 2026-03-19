@@ -446,8 +446,8 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
   });
 });
 
-describe('(2) default non-INLINE: CURSOR visit=yes, descend=yes', () => {
-  // Category (2) is the DEFAULT for any non-INLINE, non-ISLAND FOCUSABLE.
+describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
+  // Category (2) is the DEFAULT for any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
   // This includes nested block elements (div inside div) and inline-block spans.
   // The CURSOR descends into them seamlessly, like an INLINE.
 

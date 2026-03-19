@@ -57,6 +57,7 @@ export class EditManager {
    * @param {string} input What the user has typed into an html input/textarea
    */
   public handleInputChange = (input: string) => {
+    if (!this.cursor || !token.isToken(this.cursor.getToken())) return;
     this.inputManager?.handleInputChange(input);
     this.cursor?.handleInputChange(input);
   };
@@ -67,6 +68,7 @@ export class EditManager {
    * Pass this to the selection emitter after instantiation.
    */
   public handleSelectionChange = (selection: UserInputSelectionState) => {
+    if (!this.cursor || !token.isToken(this.cursor.getToken())) return;
     this.cursor?.handleSelectionChange(selection);
   };
 
@@ -76,9 +78,13 @@ export class EditManager {
    */
   private handleTokenChange = async (tok: HTMLElement) => {
     this.nav.FOCUS(tok);
-    this.userInput.setInputValue(token.getValue(tok)).then(() => {
-      this.userInput.selectAll();
-    });
+    if (token.isToken(tok)) {
+      this.userInput.setInputValue(token.getValue(tok)).then(() => {
+        this.userInput.selectAll();
+      });
+    } else {
+      this.userInput.setInputValue('');
+    }
   };
 
   /**

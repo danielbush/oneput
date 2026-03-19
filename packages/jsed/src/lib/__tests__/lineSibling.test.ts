@@ -1,16 +1,15 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em, span } from '../../test/util.js';
 import {
-  tokenizeLine,
   getNextLineSibling,
   getPreviousLineSibling,
   getLine,
   isLine,
   isInline,
   isToken,
-  isPadded
-} from '../token.js';
-import { isIsland } from '../focus.js';
+  isIsland
+} from '../traversal.js';
+import { tokenizeLine, isPadded } from '../token.js';
 
 // INLINE_COMPUTED_STYLE
 const inlineStyle = { style: 'display:inline;' };

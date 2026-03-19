@@ -7,67 +7,44 @@ import {
   JSED_TOKEN_PADDED
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
-import { isFocusable, isIgnorable, isIsland } from './focus.js';
-import { findNextNode, findPreviousNode } from './walk2.js';
+import { findNextNode } from './walk2.js';
+import {
+  isFocusable,
+  isIgnorable,
+  isIsland,
+  isToken,
+  isAnchor,
+  isInline,
+  getLine,
+  getPreviousVisibleSibling,
+  getPreviousTokenSibling,
+  getNextTokenSibling
+} from './traversal.js';
 
-// #region utils
+// Re-export traversal predicates that were historically part of this module,
+// so that `import * as token from './token.js'` consumers keep working.
+export {
+  isFocusable,
+  isIgnorable,
+  isIsland,
+  isToken,
+  isAnchor,
+  isInline,
+  isImplicitLine,
+  isLineSibling,
+  isLine,
+  isSameLine,
+  getLine,
+  getPreviousVisibleSibling,
+  getNextVisibleSibling,
+  getPreviousTokenSibling,
+  getNextTokenSibling,
+  getPreviousLineSibling,
+  getNextLineSibling,
+  getFirstLineSibling
+} from './traversal.js';
 
-export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
-  const line1 = getLine(tok1);
-  const line2 = getLine(tok2);
-  return line1 === line2;
-}
-
-/**
- * Detect INLINE — a FOCUSABLE that acts as inline markup (e.g. `<em>`, `<a>`).
- * The CURSOR traverses seamlessly through INLINE's to visit their TOKEN's.
- */
-export function isInline(el: Node | ChildNode | ParentNode | null): boolean {
-  if (!el) return false;
-  if (!isFocusable(el)) return false;
-  if (isIsland(el)) return false;
-
-  // This is an implicit line, it may be inline, but we treat it like a separate LINE.
-  if (el.classList.contains(JSED_IMPLICIT_CLASS)) return false;
-
-  const styles = window.getComputedStyle(el);
-  if (!['none', ''].includes(styles.float)) {
-    return false;
-  }
-  if (styles.display === 'inline') return true;
-  if (styles.display === 'inline flow') return true;
-  return false;
-}
-
-/**
- * Detect LINE — a FOCUSABLE that is not a TOKEN, INLINE, or ISLAND.
- * Examples: `<div>`, `<p>`, `<h1>`, inline-block `<span>`.
- */
-export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
-  if (!el) return false;
-  if (!isFocusable(el)) return false;
-  if (isToken(el)) return false;
-  if (isInline(el)) return false;
-  if (isIsland(el)) return false;
-  return true;
-}
-
-/**
- * Detect if the element is a TOKEN .
- */
-export function isToken(
-  el: EventTarget | Element | Node | ChildNode | ParentNode | null | undefined
-): el is HTMLElement {
-  const isHTMLElement = el instanceof window.HTMLElement;
-  if (isHTMLElement) {
-    return el.classList.contains(JSED_TOKEN_CLASS);
-  }
-  return false;
-}
-
-export function isAnchor(el: HTMLElement): boolean {
-  return isToken(el) && el.classList.contains(JSED_ANCHOR_CLASS);
-}
+// #region TOKEN CRUD
 
 export function getParent(el: HTMLElement): HTMLElement {
   if (!isToken(el)) {
@@ -81,9 +58,6 @@ export function getParent(el: HTMLElement): HTMLElement {
   }
   return par;
 }
-// #endregion
-
-// #region Tokenization
 
 /**
  * Create a TOKEN .
@@ -119,6 +93,18 @@ function anchor2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_ANCHOR_CLASS);
   return token;
 }
+
+export function getValue(token: HTMLElement): string {
+  validate(token);
+  if (isAnchor(token)) {
+    return JSED_ANCHOR_CHAR;
+  }
+  return token.firstChild!.nodeValue?.trim() as string;
+}
+
+// #endregion
+
+// #region Tokenization
 
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.
@@ -221,13 +207,6 @@ function buildImplicitLine(textNode: Node): HTMLElement | null {
   return implicitLine;
 }
 
-export function isImplicitLine(node: Node): boolean {
-  return (
-    node.nodeType === Node.ELEMENT_NODE &&
-    (node as HTMLElement).className.includes(JSED_IMPLICIT_CLASS)
-  );
-}
-
 /**
  * Find and handle IMPLICIT_LINE's.
  *
@@ -269,105 +248,7 @@ export function tagImplicitLines(root: HTMLElement) {
 
 // #endregion
 
-// #region Operations on tokenized FOCUSABLE's
-
-/**
- * Get previous visible (non-IGNORABLE) element sibling.
- * Walks backwards skipping IGNORABLE's. Returns null if none found.
- */
-export function getPreviousVisibleSibling(el: HTMLElement | ChildNode): HTMLElement | null {
-  let prev = (el as HTMLElement).previousElementSibling;
-  while (prev && isIgnorable(prev)) {
-    prev = prev.previousElementSibling;
-  }
-  return (prev as HTMLElement) ?? null;
-}
-
-/**
- * Get next visible (non-IGNORABLE) element sibling.
- * Walks forward skipping IGNORABLE's. Returns null if none found.
- */
-export function getNextVisibleSibling(el: HTMLElement | ChildNode): HTMLElement | null {
-  let next = (el as HTMLElement).nextElementSibling as HTMLElement | null;
-  while (next && isIgnorable(next)) {
-    next = next.nextElementSibling as HTMLElement | null;
-  }
-  return next ?? null;
-}
-
-/**
- * Get the previous TOKEN SIBLING if there is one.  Siblings must be contiguous text tokens with NO intervening tags including inline tags.
- *
- * `el` may or may not be a TOKEN .  `el` might be an inline tag eg an em-tag.
- *
- * This is basically a souped up version of the DOM's
- * node.previousElementSibling.  We may need to handle undo and other weird
- * stuff, so we use a wrapper here.
- */
-export function getPreviousTokenSibling(el: HTMLElement): HTMLElement | null {
-  const prev = getPreviousVisibleSibling(el);
-  if (isToken(prev)) {
-    return prev;
-  }
-  return null;
-}
-
-/**
- * Similar to getPreviousTokenSibling but for the next SIBLING.
- */
-export function getNextTokenSibling(el: HTMLElement): HTMLElement | null {
-  const next = getNextVisibleSibling(el);
-  if (isToken(next)) {
-    return next;
-  }
-  return null;
-}
-
-/** Visit predicate for LINE_SIBLING traversal: TOKEN's and ISLAND's. */
-export function isLineSibling(el: ParentNode | ChildNode): boolean {
-  return isToken(el) || isIsland(el);
-}
-
-/**
- * Get previous LINE_SIBLING.
- */
-export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
-  const line = getLine(el);
-  for (const prev of findPreviousNode(el, line, {
-    visit: isLineSibling,
-    descend: isInline
-  })) {
-    return prev as HTMLElement;
-  }
-  return null;
-}
-
-/**
- * Get next LINE_SIBLING.
- */
-export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
-  const line = getLine(el);
-  for (const next of findNextNode(el, line, {
-    visit: isLineSibling,
-    descend: isInline
-  })) {
-    return next as HTMLElement;
-  }
-  return null;
-}
-
-/**
- * Get the first LINE_SIBLING in a LINE — may be a TOKEN or an ISLAND.
- */
-export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
-  for (const node of findNextNode(line, line, {
-    visit: isLineSibling,
-    descend: (n) => n === line || isInline(n)
-  })) {
-    return node as HTMLElement;
-  }
-  return null;
-}
+// #region Insert / Remove
 
 export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void {
   if (!existing.parentNode) {
@@ -431,6 +312,100 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
   token.firstChild!.nodeValue = content;
   return token;
 }
+
+/**
+ * Remove the token and return the nearest token in the same LINE_SEGMENT. If no
+ * tokens left we provide just an empty token with an anchor symbol to display
+ * it.
+ *
+ * @param params.keepAnchor If the token has no immediate siblings around it under the same parent element, then insert a ANCHOR .
+ */
+export function remove(token: HTMLElement): { next: HTMLElement } {
+  const parentNode = token.parentNode;
+  if (!parentNode) {
+    throw new Error('remove: token has no parentNode');
+  }
+
+  // An anchor exists once we've exhausted the LINE_SEGMENT of non-empty
+  // TOKEN's. Operations that inject text back in should de-anchor the token.
+
+  if (isAnchor(token)) {
+    return { next: token };
+  }
+
+  // Grab this if it exists before we delete...
+  const nextTok = getNextTokenSibling(token) || getPreviousTokenSibling(token);
+
+  parentNode.removeChild(token);
+
+  if (nextTok) {
+    return { next: nextTok };
+  }
+
+  // We're out of text, we need to add a ANCHOR to this LINE_SEGMENT .
+
+  const anchor = createAnchor();
+
+  const prevEl = token.previousElementSibling;
+  if (prevEl) {
+    insertAfter(anchor, prevEl as HTMLElement);
+    return { next: anchor };
+  }
+
+  const nextEl = token.nextElementSibling;
+  if (nextEl) {
+    insertBefore(anchor, nextEl as HTMLElement);
+    return { next: anchor };
+  }
+  parentNode.appendChild(anchor);
+
+  return { next: anchor };
+}
+
+/**
+ * Add ANCHOR's where applicable to the FOCUSABLE.
+ *
+ * Existing ANCHOR's are unchanged.  Only direct descendant ANCHOR's of
+ * the FOCUSABLE are inserted (no recursion).
+ *
+ * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
+ */
+export function addAnchors(el: HTMLElement): HTMLElement[] {
+  if (el.classList.contains(JSED_TOKEN_CLASS)) {
+    throw new Error('addAnchors: expects an FOCUSABLE');
+  }
+  let segment = { hasTokens: false };
+  const anchors: HTMLElement[] = [];
+  const children = Array.from(el.children); // avoid infinite loops
+  for (const child of children) {
+    if (isIgnorable(child)) {
+      // eg element indicator in jsed-ui
+      continue;
+    }
+    if (isToken(child)) {
+      segment.hasTokens = true;
+      continue;
+    }
+    // We've hit a non-token...
+    if (!segment.hasTokens) {
+      const anchor = createAnchor();
+      anchors.push(anchor);
+      child.insertAdjacentElement('beforebegin', anchor);
+    }
+    // Start new segment...
+    segment = { hasTokens: false };
+  }
+  if (!segment.hasTokens) {
+    const anchor = createAnchor();
+    anchors.push(anchor);
+    el.appendChild(anchor);
+  }
+  return anchors;
+}
+
+// #endregion
+
+// #region Spacing
 
 /**
  * Token is a COLLAPSED_TOKEN .
@@ -513,6 +488,10 @@ export function unpad(token: HTMLElement): HTMLElement {
   return token;
 }
 
+// #endregion
+
+// #region Operations
+
 export function joinNext(token: HTMLElement): void {
   const next = getNextTokenSibling(token);
   if (!next) {
@@ -589,122 +568,6 @@ export function splitAfter(token: HTMLElement): HTMLElement[] {
     sib = nextSib;
   }
   return [par, nextPar];
-}
-
-/**
- * Remove the token and return the nearest token in the same LINE_SEGMENT. If no
- * tokens left we provide just an empty token with an anchor symbol to display
- * it.
- *
- * @param params.keepAnchor If the token has no immediate siblings around it under the same parent element, then insert a ANCHOR .
- */
-export function remove(token: HTMLElement): { next: HTMLElement } {
-  const parentNode = token.parentNode;
-  if (!parentNode) {
-    throw new Error('remove: token has no parentNode');
-  }
-
-  // An anchor exists once we've exhausted the LINE_SEGMENT of non-empty
-  // TOKEN's. Operations that inject text back in should de-anchor the token.
-
-  if (isAnchor(token)) {
-    return { next: token };
-  }
-
-  // Grab this if it exists before we delete...
-  const nextTok = getNextTokenSibling(token) || getPreviousTokenSibling(token);
-
-  parentNode.removeChild(token);
-
-  if (nextTok) {
-    return { next: nextTok };
-  }
-
-  // We're out of text, we need to add a ANCHOR to this LINE_SEGMENT .
-
-  const anchor = createAnchor();
-
-  const prevEl = token.previousElementSibling;
-  if (prevEl) {
-    insertAfter(anchor, prevEl as HTMLElement);
-    return { next: anchor };
-  }
-
-  const nextEl = token.nextElementSibling;
-  if (nextEl) {
-    insertBefore(anchor, nextEl as HTMLElement);
-    return { next: anchor };
-  }
-  parentNode.appendChild(anchor);
-
-  return { next: anchor };
-}
-
-export function getValue(token: HTMLElement): string {
-  validate(token);
-  if (isAnchor(token)) {
-    return JSED_ANCHOR_CHAR;
-  }
-  return token.firstChild!.nodeValue?.trim() as string;
-}
-
-/**
- * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.
- */
-export function getLine(el: ChildNode): HTMLElement {
-  if (!el) {
-    throw new Error(`getLine: element is null`);
-  }
-  for (let p: ParentNode | ChildNode | null = el; ; p = p?.parentNode) {
-    if (!p) {
-      throw new Error(`getLine: expected parentNode to exist`);
-    }
-    if (isLine(p)) {
-      return p as HTMLElement;
-    }
-  }
-  throw new Error(`getLine: end of for-loop`);
-}
-
-/**
- * Add ANCHOR's where applicable to the FOCUSABLE.
- *
- * Existing ANCHOR's are unchanged.  Only direct descendant ANCHOR's of
- * the FOCUSABLE are inserted (no recursion).
- *
- * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
- */
-export function addAnchors(el: HTMLElement): HTMLElement[] {
-  if (el.classList.contains(JSED_TOKEN_CLASS)) {
-    throw new Error('addAnchors: expects an FOCUSABLE');
-  }
-  let segment = { hasTokens: false };
-  const anchors: HTMLElement[] = [];
-  const children = Array.from(el.children); // avoid infinite loops
-  for (const child of children) {
-    if (isIgnorable(child)) {
-      // eg element indicator in jsed-ui
-      continue;
-    }
-    if (isToken(child)) {
-      segment.hasTokens = true;
-      continue;
-    }
-    // We've hit a non-token...
-    if (!segment.hasTokens) {
-      const anchor = createAnchor();
-      anchors.push(anchor);
-      child.insertAdjacentElement('beforebegin', anchor);
-    }
-    // Start new segment...
-    segment = { hasTokens: false };
-  }
-  if (!segment.hasTokens) {
-    const anchor = createAnchor();
-    anchors.push(anchor);
-    el.appendChild(anchor);
-  }
-  return anchors;
 }
 
 // #endregion

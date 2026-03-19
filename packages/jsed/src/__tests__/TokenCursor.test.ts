@@ -5,7 +5,7 @@ import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
 import * as token from '../lib/token.js';
 import { getValue } from '../lib/token.js';
-import { isIsland } from '../lib/focus.js';
+import { isIsland } from '../lib/traversal.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,

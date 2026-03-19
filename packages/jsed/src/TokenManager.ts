@@ -1,13 +1,13 @@
-import { isIsland, isFocusable } from './lib/focus.js';
-import { isToken, getLine, getFirstLineSibling, tokenizeLine } from './lib/token.js';
+import { isIsland, isFocusable, isToken, getLine, getFirstLineSibling } from './lib/traversal.js';
+import { tokenizeLine } from './lib/token.js';
 import { findNextNode } from './lib/walk2.js';
 
 export class TokenManager {
-  static create(docRoot: HTMLElement) {
-    return new TokenManager(docRoot);
+  static create() {
+    return new TokenManager();
   }
 
-  constructor(private docRoot: HTMLElement) {}
+  constructor() {}
 
   /**
    * Tokenize the line and return first TOKEN.  See SHALLOW_TOKENIZATION .

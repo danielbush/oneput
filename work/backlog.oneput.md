@@ -1,6 +1,6 @@
 # Backlog: packages/oneput
 
-The following are potential specs (tickets for work) sorted by priority: earlier tickets take precendence over later ones.  Extract the next ticket from the top, and convert it into a spec, and draft a plan based on the initial proposal.
+The following are potential work (tickets for work) sorted by priority: earlier tickets take precendence over later ones.  Extract the next ticket from the top, and convert it into a spec, and draft a plan based on the initial proposal.
 
 ## Initial proposal: (feat + refactor) better duplicate binding handling 
 

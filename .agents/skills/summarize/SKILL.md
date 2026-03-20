@@ -3,12 +3,12 @@ name: summarize
 description: >
   Summarize the current session's work into a spec file. Use when the user
   says "/summarize" or asks to write up, capture, or document what was done
-  in the session. Creates or updates a markdown file in specs/active/.
+  in the session. Creates or updates a markdown file in work/active/.
 ---
 
 # Summarize session
 
-Create or update a spec file capturing the session's work at `specs/active/<date>.<package>.<type>.<topic>.md`.
+Create or update a spec file capturing the session's work at `work/active/<date>.<package>.<type>.<topic>.md`.
 
 ## Repeat invocations
 
@@ -51,7 +51,7 @@ Two sections:
 
 ## Style
 
-- Write for a future reader (human or agent) who is skimming specs to find relevant context
+- Write for a future reader (human or agent) who is skimming work/ to find relevant context
 - The frontmatter summary is the most important line — optimize it for scanning
 - Prefer vocabulary terms over implementation details (e.g. "SHALLOW_TOKENIZATION" not "the function doesn't recurse into nested elements")
 - Keep it concise — a spec should be shorter than the conversation that produced it

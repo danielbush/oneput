@@ -9,14 +9,14 @@ description: >
 
 # Remember past work
 
-Search spec files in `specs/` to find context from previous sessions.
+Search spec files in `work/` to find context from previous sessions.
 
 ## Workflow
 
 1. Glob for spec files across all status directories:
-   - `specs/done/*.md`
-   - `specs/active/*.md`
-   - `specs/discussion/*.md`
+   - `work/done/*.md`
+   - `work/active/*.md`
+   - `work/discussion/*.md`
 
 2. Match the user's query against filenames first (fast path). The filename scheme is `YYYYMMDD.<package>.<topic>.md`, so match against the topic segment.
 

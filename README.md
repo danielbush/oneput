@@ -7,8 +7,8 @@
   - "What are jsed's vocabulary terms?"
   - "How does EditManager wire everything together?"
 - jcodemunch-mcp (in .mcp.json) has a skill; if you say "In x, ...", or "what does X do..." it should get triggered; the skill also reminds the agent to reindex periodically.
-- `/summarize` summarizes the current session into an md file in `specs/active`; you can run it several times within the one session to update the same file as the session progresses
-- `/remember ...` will get agent to scan through `specs/*`
+- `/summarize` summarizes the current session into an md file in `work//active`; you can run it several times within the one session to update the same file as the session progresses
+- `/remember ...` will get agent to scan through `work//*`
 
 
 

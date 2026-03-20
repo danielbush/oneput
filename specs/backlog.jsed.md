@@ -1,6 +1,6 @@
 # Backlog: packages/jsed
 
-Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be worked on first.  If we're working on an item, move it to specs/active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal".
+Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to specs/active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
 ## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
 
@@ -31,11 +31,11 @@ I originally envisaged TokenManager would manage tokenizing and as a result woul
   }
 ```
 
-- remove TokenManager, I see no point keeping it
 - get CURSOR (TokenCursor) to tokenize the LINE next to or previous the CURSOR_LINE just before it moves on to it.
 - come up with a detokenization mechanism, perhaps one that is transparent to the cursor; the reason for attempting it this way is because I'm planning to support remote cursors (eg via operational transform), so how do we know what is safe to de-tokenize?  We have to check all the cursors to see where they are.
-  - One way to do this might be to have onTokenChange/handleTokenChange callback system configured to call a DetokenizeManager instance; it registers with each cursor and gets updates on their CURSOR_LINE (we maybe inclue that in the onTokenChange callback alongide the CURSOR TOKEN.)
+  - One way to do this might be to have DetokenizeManager instance listen to onTokenChange callback for each CURSOR ;  each cursor gives updates on their CURSOR_LINE (we maybe inclue that in the onTokenChange callback alongide the CURSOR TOKEN.)
 - is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
+- remove TokenManager, I see no point keeping it for now
 
 ## feat: hitting enter splits paragraph
 

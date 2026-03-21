@@ -30,6 +30,11 @@
       "source": "sveltejs/ai-tools",
       "sourceType": "github",
       "computedHash": "bec11e369679027edf9d4acbe6d9788f8da33dc14b48b874f231d3ba13705324"
+    },
+    "work-tracker": {
+      "source": "danielbush/skills",
+      "sourceType": "github",
+      "computedHash": "0cb79f1acaa574204746aef53e323a6439c2a39aaa1773a4fd1a1037eceff564"
     }
   }
 }

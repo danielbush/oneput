@@ -17,7 +17,7 @@ work/
   done/         → completed items (moved here, not deleted)
   discussion/   → clarifying ideas and ongoing high-level thinking
   backlog/      → prioritised queues of future work
-.sessions/      → per-user session logs (can be committed or gitignored)
+  .sessions/    → per-user session logs (user decides: commit or gitignore)
 ```
 
 ### Backlog files
@@ -110,7 +110,7 @@ Discussion items use the same format as other work items (frontmatter, status, c
 
 ## Session log
 
-Each user has a session log at `.sessions/$USER.md` (e.g. `.sessions/danb.md`). Determine `$USER` from the system environment or ask on first use.
+Each user has a session log at `work/.sessions/$USER.md` (e.g. `work/.sessions/danb.md`). Determine `$USER` from the system environment or ask on first use.
 
 The session log has a different focus from work items. Work items track *what's being built* — changes, decisions, tasks. The session log tracks *where the human's head is at* — what they were thinking about, what's bothering them, what concerns cut across tickets or don't belong to any ticket. It may reference work items but doesn't have to.
 
@@ -135,7 +135,7 @@ The session log has a different focus from work items. Work items track *what's 
 
 ### Rotation
 
-Rotate by month: `.sessions/danb.2026-03.md`. When a new month starts, begin a new file. The agent should only read the current month's file (and optionally the tail of the previous month if the session is near the boundary). This keeps context usage bounded.
+Rotate by month: `work/.sessions/danb.2026-03.md`. When a new month starts, begin a new file. The agent should only read the current month's file (and optionally the tail of the previous month if the session is near the boundary). This keeps context usage bounded.
 
 ### When to write
 
@@ -148,7 +148,7 @@ Append to the session log at the end of a session — when the human says "summa
 When the human says "let's continue", "where were we", "what was I working on", or starts a new session:
 
 1. Read the `summary:` frontmatter from the project's theme docs (e.g. `docs/discussion-driven-development.md`, `docs/themes.md`) if they exist. Briefly remind the human what the project is about.
-2. Read the last entry in `.sessions/$USER.md` — this tells you what happened, what was on their mind, and which threads were open.
+2. Read the last entry in `work/.sessions/$USER.md` — this tells you what happened, what was on their mind, and which threads were open.
 3. Scan `work/active/` — read the Status section and checked/unchecked Tasks from each active item. This tells you the factual state of work across recent sessions.
 4. Present a summary that covers:
    - **Last session**: what happened and what was on the human's mind
@@ -216,7 +216,7 @@ When the human says "summarise this session", "write up what we did", "capture t
 - Update the frontmatter `summary:` if it's shifted
 - If no ticket exists for this work, create one in `work/active/`
 
-**2. Append to session log** — add an entry to `.sessions/$USER.md` with:
+**2. Append to session log** — add an entry to `work/.sessions/$USER.md` with:
 - **What happened** — conceptual changes, grouped by theme. Use vocabulary terms (UPPER_SNAKE_CASE) from `docs/vocab/` when they apply.
 - **On my mind** — what the human was thinking about, concerned with, open questions. Capture the headspace, not just the deliverables.
 - **Open threads** — which work items are active and where they stand.

@@ -48,6 +48,7 @@ Each work item is a markdown file with frontmatter:
 id: SHORT_UPPER_SNAKE_CASE__WORK
 status: active | done | discussion
 created: YYYY-MM-DD
+package: package-name (optional — omit for single-project repos, or for cross-cutting work use packages: [a, b])
 summary: one-line summary
 outcome: written when closing — what actually happened, what didn't, what was absorbed elsewhere
 ---
@@ -81,6 +82,7 @@ Optional. Things to do in addition to the main work — cleanup, follow-ups, rel
 - **status** — matches the directory it lives in: `active`, `done`, or `discussion`
 - **created** — date the item was created
 - **summary** — one line, used for scanning
+- **package** — (optional) which package this work belongs to. Omit entirely for single-project repos. For work spanning multiple packages, use `packages: [a, b]` instead. Scannable via `grep "^package" work/active/*.md`.
 - **outcome** — written when closing the ticket. What actually happened, what didn't, what was absorbed elsewhere. A future reader should be able to read `summary:` (the intent) and `outcome:` (the result) and understand the full arc.
 
 ### Title prefix
@@ -95,7 +97,7 @@ Examples:
 - `20260320.feat.entry-point-questions.md`
 - `20260320.chore.explore-pi-harness.md`
 
-In a monorepo with packages, add the package name: `YYYYMMDD.<package>.<type>.<slug>.md`
+Package scope lives in frontmatter (`package:` / `packages:`), not the filename.
 
 ## Discussion items (`work/discussion/`)
 

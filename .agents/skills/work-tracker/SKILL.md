@@ -16,18 +16,25 @@ work/
   active/       → items being worked on
   done/         → completed items (moved here, not deleted)
   discussion/   → clarifying ideas and ongoing high-level thinking
-  BACKLOG.md    → prioritised queue of future work
+  backlog/      → prioritised queues of future work
 .sessions/      → per-user session logs (can be committed or gitignored)
 ```
 
-Create `work/BACKLOG.md` with this header:
+### Backlog files
+
+- **Single project**: `work/backlog/main.md`
+- **Monorepo / workspace**: `work/backlog/{package-name}.md` — one file per package
+
+On bootstrap, create `work/backlog/main.md`. If the project is a monorepo or workspace (multiple packages), create one file per package instead.
+
+Each backlog file gets this header:
 
 ```markdown
 # Backlog
 
 Items near the top get worked on first. Each item is an initial draft — improve wording and break out into individual files when ready to work on.
 
-Grep-friendly: `grep -A 3 "^## " work/BACKLOG.md` gives a quick index.
+Grep-friendly: `grep -A 3 "^## " work/backlog/*.md` gives a quick index across all backlogs.
 
 ---
 ```
@@ -97,7 +104,7 @@ Discussion items serve two purposes:
 1. **Clarifying ideas before action** — when an idea isn't yet concrete enough for a backlog item or active ticket, it lives here while the human and agent work out what it means and what actionable outcomes it leads to.
 2. **Ongoing high-level thinking** — some discussions are never "done" in the way a ticket is. They capture thematic, strategic ways of thinking that evolve over time and inform other work without being work items themselves.
 
-Discussion items use the same format as other work items (frontmatter, status, changes) but with `status: discussion`. They don't need tasks or a clear endpoint. When a discussion crystallises into something actionable, create a new item in `active/` or `BACKLOG.md` and reference the discussion.
+Discussion items use the same format as other work items (frontmatter, status, changes) but with `status: discussion`. They don't need tasks or a clear endpoint. When a discussion crystallises into something actionable, create a new item in `active/` or the relevant backlog file and reference the discussion.
 
 ## Session log
 
@@ -146,7 +153,7 @@ When the human says "let's continue", "where were we", "what was I working on", 
    - **Current state of work**: which active items have progress, which are stalled, what's next
 5. Offer options:
    - Pick up a thread (if multiple are active)
-   - **Review the backlog?** — `grep -A 3 "^## " work/BACKLOG.md` for a quick index
+   - **Review the backlog?** — `grep -A 3 "^## " work/backlog/*.md` for a quick index
    - **Dive into the themes?** — read the full theme docs and walk through them
 
 The session log gives you the *feel* of where they left off. The work items give you the *facts*.
@@ -155,7 +162,8 @@ The session log gives you the *feel* of where they left off. The work items give
 
 When the human says "create a ticket", "let's track this", "create a work item", or similar:
 
-1. If it's future work (not something to start now), add it to `work/BACKLOG.md` as an h2 entry with the grep-friendly fields (see below). Otherwise, create a file in `work/active/`.
+1. If it's future work (not something to start now), add it to a backlog file. Otherwise, create a file in `work/active/`.
+   - **Which backlog?** If there's only `main.md`, use it. If multiple backlogs exist, infer the package from context (file being discussed, directory, etc.) or ask.
 2. Draft the item with frontmatter, a title, and body from what the human described.
 3. If it belongs in the backlog:
 
@@ -181,7 +189,7 @@ When closing a ticket (moving to done):
 3. Once confirmed, add the `outcome:` field, update `status: done`, and move to `work/done/`
 
 When promoting a backlog item to active:
-1. Remove it from `work/BACKLOG.md`
+1. Remove it from its backlog file (glob `work/backlog/*.md` to find it if needed)
 2. Create a file in `work/active/`
 
 ### Scan / review
@@ -189,7 +197,7 @@ When promoting a backlog item to active:
 When the human says "what's active", "what's in flight", "show me the backlog", or similar:
 
 - **Active items**: list files in `work/active/`, show id + summary from frontmatter
-- **Backlog**: run `grep -A 3 "^## " work/BACKLOG.md` for the quick index
+- **Backlog**: run `grep -A 3 "^## " work/backlog/*.md` for a quick index across all backlogs. If the human asks about a specific package, target that file.
 - **All statuses**: scan both directories
 
 ### Cross-referencing
@@ -217,7 +225,7 @@ Keep both concise. Focus on decisions and the why; the what is in the code. The 
 
 When the human says "remember when we...", "what did we do with...", or asks about previous sessions, past decisions, or earlier implementations:
 
-1. Glob for files across `work/done/`, `work/active/`, and `work/BACKLOG.md`.
+1. Glob for files across `work/done/`, `work/active/`, and `work/backlog/`.
 2. Match the query against filenames first (fast path) — the filename scheme encodes type and topic.
 3. If filename matches are found, read their frontmatter summaries. Present matches with status, date, and summary so the human can pick which to dive into.
 4. If no filename matches, grep the files for the query term in their content, including vocabulary terms (UPPER_SNAKE_CASE).

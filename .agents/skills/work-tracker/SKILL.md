@@ -15,6 +15,7 @@ If `work/` doesn't exist in the project root, create the full structure before d
 work/
   active/       → items being worked on
   done/         → completed items (moved here, not deleted)
+  discussion/   → clarifying ideas and ongoing high-level thinking
   BACKLOG.md    → prioritised queue of future work
 .sessions/      → per-user session logs (can be committed or gitignored)
 ```
@@ -38,18 +39,15 @@ Each work item is a markdown file with frontmatter:
 ```markdown
 ---
 id: SHORT_UPPER_SNAKE_CASE__WORK
-status: active | done
+status: active | done | discussion
 created: YYYY-MM-DD
 summary: one-line summary
+outcome: written when closing — what actually happened, what didn't, what was absorbed elsewhere
 ---
 
 # type: Title
 
 Body text — the initial proposal, plan, or discussion.
-
-## Status
-
-Where we're at right now. Update this as work progresses — it should reflect the current state at a glance. Recent progress may be implied by items marked off below.
 
 ## Changes
 
@@ -67,14 +65,16 @@ Track important changes as they happen — decisions made, approaches tried, thi
 ## Housekeeping
 
 Optional. Things to do in addition to the main work — cleanup, follow-ups, related chores that don't warrant their own ticket.
+
 ```
 
 ### Fields
 
 - **id** — short, unique, UPPER_SNAKE_CASE with `__WORK` suffix (double underscore to visually separate). Used for cross-referencing between items (e.g. "see SHARED_UNDERSTANDING__WORK"). Keep it descriptive but brief.
-- **status** — matches the directory it lives in: `active` or `done`
+- **status** — matches the directory it lives in: `active`, `done`, or `discussion`
 - **created** — date the item was created
 - **summary** — one line, used for scanning
+- **outcome** — written when closing the ticket. What actually happened, what didn't, what was absorbed elsewhere. A future reader should be able to read `summary:` (the intent) and `outcome:` (the result) and understand the full arc.
 
 ### Title prefix
 
@@ -89,6 +89,15 @@ Examples:
 - `20260320.chore.explore-pi-harness.md`
 
 In a monorepo with packages, add the package name: `YYYYMMDD.<package>.<type>.<slug>.md`
+
+## Discussion items (`work/discussion/`)
+
+Discussion items serve two purposes:
+
+1. **Clarifying ideas before action** — when an idea isn't yet concrete enough for a backlog item or active ticket, it lives here while the human and agent work out what it means and what actionable outcomes it leads to.
+2. **Ongoing high-level thinking** — some discussions are never "done" in the way a ticket is. They capture thematic, strategic ways of thinking that evolve over time and inform other work without being work items themselves.
+
+Discussion items use the same format as other work items (frontmatter, status, changes) but with `status: discussion`. They don't need tasks or a clear endpoint. When a discussion crystallises into something actionable, create a new item in `active/` or `BACKLOG.md` and reference the discussion.
 
 ## Session log
 
@@ -161,10 +170,15 @@ Body text.
 
 ### Move an item
 
-When the human says "this is done", "promote this to active", or similar:
+When the human says "this is done", "close the ticket", "promote this to active", or similar:
 
 1. Update the `status:` in frontmatter
 2. Move the file to the matching directory (`work/active/` or `work/done/`)
+
+When closing a ticket (moving to done):
+1. Draft an `outcome:` line for the frontmatter — what actually happened, what didn't, what was absorbed elsewhere
+2. Present the draft outcome to the human for review before writing it
+3. Once confirmed, add the `outcome:` field, update `status: done`, and move to `work/done/`
 
 When promoting a backlog item to active:
 1. Remove it from `work/BACKLOG.md`
@@ -193,7 +207,7 @@ When the human says "summarise this session", "write up what we did", "capture t
 - If no ticket exists for this work, create one in `work/active/`
 
 **2. Append to session log** — add an entry to `.sessions/$USER.md` with:
-- **What happened** — conceptual changes, grouped by theme. Use vocabulary terms (UPPER_SNAKE_CASE) from `docs/vocabulary.md` when they apply.
+- **What happened** — conceptual changes, grouped by theme. Use vocabulary terms (UPPER_SNAKE_CASE) from `docs/vocab/` when they apply.
 - **On my mind** — what the human was thinking about, concerned with, open questions. Capture the headspace, not just the deliverables.
 - **Open threads** — which work items are active and where they stand.
 

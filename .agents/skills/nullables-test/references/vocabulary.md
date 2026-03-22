@@ -2,6 +2,11 @@
 
 Terms are UPPER_SNAKE_CASE. Use them in agent output to stay in the shared conceptual frame.
 
+## Architecture
+
+### DEEP_MODULE
+A module whose public interface is simple relative to the complexity it absorbs internally. Top-level files show *what* (the interface); `lib/` or internals show *how* (the implementation). Callers get a small, stable surface; complexity is hidden behind it. The opposite — a shallow module — exposes most of its complexity through its interface, pushing the burden onto callers.
+
 ## Side-Effect Boundaries
 
 Code is classified by where its side effects reach. This is the primary lens for deciding what needs the nullable treatment.

@@ -2,11 +2,29 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
+## fix: scroll container when FOCUS or CURSOR moves beyond visible area
+
+Drafted: 23-Mar-2026
+
+When navigating with FOCUS or CURSOR inside a scrollable container (e.g. `overflow-y: scroll`), the container doesn't scroll to keep the focused/cursored element visible. Found using the "Scrollable container" example in test_doc.html. Both FOCUS (Nav) and CURSOR (TokenCursor) likely need scroll-into-view behaviour.
+
+## fix: ElementIndicator clipped when element is near left edge of container
+
+Drafted: 23-Mar-2026
+
+The ElementIndicator badge aligns its right edge with the right edge of the focused element by default. When the element is small and near the left edge of the container, the badge overflows and gets clipped. Fix: detect when right-aligned positioning would clip, and fall back to left-edge alignment.
+
 ## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
 
 Drafted: 19-Mar-2026
 
 Not NESTED_LINE's.
+
+## refactor: remove TokenManager
+
+Drafted: 23-Mar-2026
+
+TokenManager's role has been largely absorbed by TokenCursor's lazy tokenization (via `onEnterBlockTransparent` callback in `moveNext`/`movePrevious`). Review whether TokenManager still serves a purpose; if not, remove it and let the CURSOR own tokenization directly.
 
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
@@ -35,7 +53,6 @@ I originally envisaged TokenManager would manage tokenizing and as a result woul
 - come up with a detokenization mechanism, perhaps one that is transparent to the cursor; the reason for attempting it this way is because I'm planning to support remote cursors (eg via operational transform), so how do we know what is safe to de-tokenize?  We have to check all the cursors to see where they are.
   - One way to do this might be to have DetokenizeManager instance listen to onTokenChange callback for each CURSOR ;  each cursor gives updates on their CURSOR_LINE (we maybe inclue that in the onTokenChange callback alongide the CURSOR TOKEN.)
 - is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
-- remove TokenManager, I see no point keeping it for now
 
 ## feat: hitting enter splits paragraph
 

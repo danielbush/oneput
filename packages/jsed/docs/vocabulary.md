@@ -33,7 +33,7 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
 - **CURSOR_OPAQUE** (visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
   - **ISLAND** — externally managed content (katex, `<img>`)
-  - **CURSOR_BOUNDARY** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque. *(planned — scenario 3)*
+  - **CURSOR_BOUNDARY** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque.
 - **CURSOR_TRANSPARENT** (visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
   - **INLINE** — inline-level markup (`<em>`, `<a>`)
   - **BLOCK_TRANSPARENT** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.

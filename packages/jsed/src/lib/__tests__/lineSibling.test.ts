@@ -609,11 +609,12 @@ describe('(3) CURSOR_BOUNDARY: CURSOR visit=yes, descend=no', () => {
     const doc = makeRoot(
       p({ id: 'p1' }, span(cursorOpaqueBlock, 'nested'), ' aaa bbb')
     );
-    tokenizeLine(byId(doc, 'p1'));
-    const opaque = byId(doc, 'p1').querySelector('.jsed-cursor-opaque') as HTMLElement;
+    const line = byId(doc, 'p1');
+    tokenizeLine(line);
+    const opaque = line.querySelector('.jsed-cursor-opaque') as HTMLElement;
 
     // act & assert — opaque element is the first LINE_SIBLING
-    expect(collectForward(opaque)).toEqual(['[span]', 'aaa', 'bbb']);
+    expect(collectForward(opaque, line)).toEqual(['[span]', 'aaa', 'bbb']);
   });
 
   test('CURSOR_BOUNDARY at end of LINE', () => {

@@ -182,7 +182,7 @@ export function isImplicitLine(node: Node): boolean {
 
 /** Visit predicate for LINE_SIBLING traversal: TOKEN's and ISLAND's. */
 export function isLineSibling(el: ParentNode | ChildNode): boolean {
-  return isToken(el) || isIsland(el);
+  return isToken(el) || isIsland(el) || isCursorBoundary(el);
 }
 
 // #endregion

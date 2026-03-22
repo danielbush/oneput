@@ -10,10 +10,10 @@ Not NESTED_LINE's.
 
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
-id: DETOKENIZE_SPEC
+id: DETOKENIZE__WORK
 Drafted: 19-Mar-2026
 
-I originally envisaged TokenManager would manage tokenizing and as a result would enforce SHALLOW_TOKENIZATION by figuring out when to tokenize and de-tokenize nodes based on where the CURSOR is located.  But in CURSOR_WALKS_NON_TOKENS_SPEC the solution was to allow the CURSOR itself to lazy tokenize when encountering BLOCK_TRANSPARENT nodes within the CURSOR_LINE .
+I originally envisaged TokenManager would manage tokenizing and as a result would enforce SHALLOW_TOKENIZATION by figuring out when to tokenize and de-tokenize nodes based on where the CURSOR is located.  But in CURSOR_WALKS_NON_TOKENS__WORK the solution was to allow the CURSOR itself to lazy tokenize when encountering BLOCK_TRANSPARENT nodes within the CURSOR_LINE .
 
 ```ts
   moveNext() {

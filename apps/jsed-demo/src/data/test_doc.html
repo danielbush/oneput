@@ -9,9 +9,9 @@
   <div><p>This paragraph is contained by a div - this affects findPreivousNode</p></div>
   <p>Here's a third paragraph with more text in it.</p>
 
-  <h2>line with inline tags</h2>
+  <h2>INLINE</h2>
   <div>before <em>inline-tag</em> <em>inline-tag</em> after</div>
-  <h2>line with nested inline tags</h2>
+  <h2>nested INLINE</h2>
   <div>
     before
     <em>inline-tag with a <b>nested inline tag</b> in the middle</em> and then we get here
@@ -23,7 +23,7 @@
     </p>
     But this sentence is just text nodes that come after.
   </div>
-  <h2>line with float</h2>
+  <h2>ISLAND (float)</h2>
   <div>
     before-float
     <img
@@ -43,17 +43,17 @@
       </li>
     </ul>
   </div>
-  <h2>line with katex ISLAND</h2>
+  <h2>ISLAND (katex)</h2>
   <div>
     <p>aaa <span class="katex" style="display: inline">x²</span> bbb</p>
   </div>
-  <h2>nested line with katex ISLAND</h2>
+  <h2>ISLAND (katex) in nested BLOCK_TRANSPARENT</h2>
   <div>
     <div>
       <div><span class="katex" style="display: inline">x²</span></div>
     </div>
   </div>
-  <h2 style="clear: right">line with complex float</h2>
+  <h2 style="clear: right">ISLAND (complex float)</h2>
   <div>
     <p>
       This text is in a nested p-tag which comes before the float
@@ -68,7 +68,7 @@
       This text is NOT in a p-tag - requires implicit line handling.
     </p>
   </div>
-  <h2 style="clear: right">Line with inline-block</h2>
+  <h2 style="clear: right">BLOCK_TRANSPARENT (inline-block)</h2>
   <div>
     Before the inline-block...
     <div style="border: solid black 1px; display: inline-block">this is an inline block</div>
@@ -82,7 +82,21 @@
     </div>
     After the inline block.
   </div>
-  <h2>Tokenize only one LINE</h2>
+  <h2 style="clear: right">CURSOR_BOUNDARY</h2>
+  <div>
+    before
+    <span class="jsed-cursor-opaque" style="border: 1px dashed red; padding: 2px; display: inline-block">opaque to cursor</span>
+    after
+  </div>
+  <div>
+    <span class="jsed-cursor-opaque" style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at start</span>
+    aaa bbb
+  </div>
+  <div>
+    aaa bbb
+    <span class="jsed-cursor-opaque" style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at end</span>
+  </div>
+  <h2>SHALLOW_TOKENIZATION</h2>
   <p>
     The following div contains mulltiple paragraph tags. If this div represents a large document we
     would hit performance issues if we tokenized it all.

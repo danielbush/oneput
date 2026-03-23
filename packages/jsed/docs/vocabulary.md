@@ -61,17 +61,18 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
 ## Tokens and Text and whitespace
 
-- **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters.
+- **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters.  In the DOM, TOKEN's have a trailing space by default.  COLLAPSED_TOKEN and PADDED_TOKEN describe tokens with altered spacing.  TODO: POSITIVE_SPACE may further change TOKEN's behaviour.
+  - A TOKEN has 2² = 4 spacing states:
+    - unpadded + uncollapsed: `'foo '` — the default
+    - unpadded + collapsed: `'foo'` — COLLAPSED_TOKEN
+    - padded + uncollapsed: `' foo '` — PADDED_TOKEN
+    - padded + collapsed: `' foo'` — PADDED_TOKEN + COLLAPSED_TOKEN
+  - In NEGATIVE_SPACE, a stale leading space (e.g. if the ISLAND is later removed) is visually harmless — the browser collapses it.
   - Source of truth: search docstrings for TOKEN.
 - **ANCHOR** — a TOKEN which is inserted into a FOCUSABLE (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
   - Source of truth: search docstrings for ANCHOR.
 - **COLLAPSED_TOKEN** — a TOKEN with no trailing space, so it sits flush against the next TOKEN. Most TOKEN's in NEGATIVE_SPACE are uncollapsed (have a trailing space) — this is their default state. TOGGLE_COLLAPSE removes or adds this space. This allows us to express markup like this: `<em>foo<strong>bar</strong>baz</em>` (all TOKEN's are collapsed). Uncollapsed TOKEN's include a trailing space: `<em>foo <strong>bar </strong>baz </em>`.
-- **PADDED_TOKEN** — a TOKEN with a leading space. TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous LINE_SIBLING doesn't carry its own trailing space (e.g. an ISLAND). A TOKEN has 2² = 4 spacing states:
-  - unpadded + uncollapsed: `'foo '` — the default
-  - unpadded + collapsed: `'foo'` — COLLAPSED_TOKEN
-  - padded + uncollapsed: `' foo '` — PADDED_TOKEN
-  - padded + collapsed: `' foo'` — PADDED_TOKEN + COLLAPSED_TOKEN
-  - In NEGATIVE_SPACE, a stale leading space (e.g. if the ISLAND is later removed) is visually harmless — the browser collapses it.
+- **PADDED_TOKEN** — a TOKEN with a leading space. TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous LINE_SIBLING doesn't carry its own trailing space (e.g. an ISLAND).
   - Source of truth: `isPadded`, `pad`, `unpad` in token.ts.
 - **NEGATIVE_SPACE** — default HTML whitespace handling: sequences of whitespace collapse to a single space, newlines treated as whitespace. Applies to most tags like `<p>`.
 - **POSITIVE_SPACE** — whitespace-significant mode (e.g. `<pre>`, `white-space: pre`): sequences preserved, lines break only at newlines and `<br>`.

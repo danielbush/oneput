@@ -3,7 +3,7 @@ import { makeRoot, p, div, em, span, identifyCursor } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
-import { getValue } from '../lib/token.js';
+import { getValue, isPadded, isCollapsed } from '../lib/token.js';
 import { getLine } from '../lib/traversal.js';
 import {
   CURSOR_APPEND_CLASS,
@@ -660,5 +660,57 @@ describe('TokenCursor CURSOR_STATE', () => {
       // assert
       expect(getValue(cursor.getToken())).toBe('hello');
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TokenCursor editing operations
+// ---------------------------------------------------------------------------
+
+describe('TokenCursor replace', () => {
+  it('replaces TOKEN text', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world'));
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+    // act
+    cursor.replace('goodbye');
+
+    // assert
+    expect(getValue(cursor.getToken())).toBe('goodbye');
+  });
+
+  it('preserves PADDED_TOKEN', () => {
+    // arrange — TOKEN after ISLAND is auto-padded by tokenizeLine
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // past ISLAND
+    cursor.moveNext(); // on padded TOKEN 'bbb'
+    expect(isPadded(cursor.getToken())).toBe(true);
+
+    // act
+    cursor.replace('ccc');
+
+    // assert
+    expect(getValue(cursor.getToken())).toBe('ccc');
+    expect(isPadded(cursor.getToken())).toBe(true);
+  });
+
+  it('no-op when cursor is on ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on ISLAND
+    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+
+    // act
+    cursor.replace('oops');
+
+    // assert — ISLAND unchanged
+    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
   });
 });

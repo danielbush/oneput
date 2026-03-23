@@ -336,6 +336,16 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
     return { next: token };
   }
 
+  // PADDED_TOKEN transfer: if the deleted TOKEN is padded, the next TOKEN
+  // inherits the padding (it's now adjacent to the ISLAND). If there's no
+  // next TOKEN, the padding is simply dropped.
+  if (isPadded(token)) {
+    const next = getNextTokenSibling(token);
+    if (next) {
+      pad(next);
+    }
+  }
+
   // Grab this if it exists before we delete...
   const nextTok = getNextTokenSibling(token) || getPreviousTokenSibling(token);
 

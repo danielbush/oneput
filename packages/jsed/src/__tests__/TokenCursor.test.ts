@@ -756,4 +756,41 @@ describe('TokenCursor delete', () => {
     // assert — ISLAND unchanged, cursor unmoved
     expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
   });
+
+  it('transfers PADDED_TOKEN to next TOKEN on delete', () => {
+    // arrange — aaa [ISLAND] [PADDED bbb] ccc
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb ccc')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // ISLAND
+    cursor.moveNext(); // PADDED 'bbb'
+    expect(isPadded(cursor.getToken())).toBe(true);
+
+    // act
+    cursor.delete();
+
+    // assert — cursor on 'ccc', now PADDED_TOKEN
+    expect(getValue(cursor.getToken())).toBe('ccc');
+    expect(isPadded(cursor.getToken())).toBe(true);
+  });
+
+  it('drops PADDED_TOKEN when no next TOKEN exists', () => {
+    // arrange — aaa [ISLAND] [PADDED bbb]
+    // 'bbb' is the only TOKEN after the ISLAND, so deleting it
+    // creates an ANCHOR in that segment. Padding is simply dropped.
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // ISLAND
+    cursor.moveNext(); // PADDED 'bbb'
+    expect(isPadded(cursor.getToken())).toBe(true);
+
+    // act
+    cursor.delete();
+
+    // assert — ANCHOR created, no padding transfer
+    expect(identifyCursor(cursor.getToken())).toBe('¤');
+  });
 });

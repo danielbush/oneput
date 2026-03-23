@@ -900,6 +900,21 @@ describe('TokenCursor joinNext', () => {
     // assert — ISLAND unchanged
     expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
   });
+
+  it('no-op when next LINE_SIBLING is an INLINE', () => {
+    // arrange — 'aaa' followed by <em>bbb</em>
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'))
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    expect(getValue(cursor.getToken())).toBe('aaa');
+
+    // act
+    cursor.joinNext();
+
+    // assert — TOKEN unchanged, can't reach into INLINE
+    expect(getValue(cursor.getToken())).toBe('aaa');
+  });
 });
 
 describe('TokenCursor joinPrevious', () => {
@@ -949,5 +964,22 @@ describe('TokenCursor joinPrevious', () => {
 
     // assert — ISLAND unchanged
     expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+  });
+
+  it('no-op when previous LINE_SIBLING is an INLINE', () => {
+    // arrange — <em>aaa</em> followed by 'bbb'
+    const doc = makeRoot(
+      p({ id: 'p1' }, em(inlineStyle, 'aaa'), ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // past 'aaa' inside em
+    cursor.moveNext(); // on 'bbb'
+    expect(getValue(cursor.getToken())).toBe('bbb');
+
+    // act
+    cursor.joinPrevious();
+
+    // assert — TOKEN unchanged, can't reach into INLINE
+    expect(getValue(cursor.getToken())).toBe('bbb');
   });
 });

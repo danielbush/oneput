@@ -68,3 +68,9 @@ Drafted: 19-Mar-2026
 - make sure we do some exploratory testing using test_doc.html
 - `splitBefore`/`splitAfter` currently call `getLine(token)` internally to find the split ceiling. With BLOCK_TRANSPARENT, the passed-in LINE (from the CURSOR) may differ from the `getLine` result. For now these functions stay as-is (split relative to the nearest LINE), but when implementing enter-to-split we need to decide: should the split ceiling be the BLOCK_TRANSPARENT parent or the outer LINE? Likely the nearest LINE is correct (you split the immediate container), but verify with nested `<div>` structures
 - Include PADDED_TOKEN testing for `splitBefore`/`splitAfter` — deferred from CURSOR_WALKS_NON_TOKENS__WORK housekeeping. Verify correct behaviour when splitting a PADDED_TOKEN or when a split produces a TOKEN adjacent to an ISLAND
+
+## feat: joinNext/joinPrevious across INLINE boundaries
+
+Drafted: 23-Mar-2026
+
+`joinNext`/`joinPrevious` currently only find immediate TOKEN siblings via `getNextTokenSibling`/`getPreviousTokenSibling`. If the next/previous LINE_SIBLING is an INLINE (e.g. `<em>`), the join is a no-op — it can't reach the TOKEN inside. The target TOKEN should be extracted from the INLINE and absorbed into the receiving TOKEN.

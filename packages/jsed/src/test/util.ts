@@ -1,4 +1,6 @@
 import { JsedDocument } from '../JsedDocument.js';
+import * as token from '../lib/token.js';
+import { isIsland } from '../lib/traversal.js';
 
 /**
  * Make a div be the root of the document.
@@ -65,3 +67,10 @@ export const span = makeTag('span');
 export const section = makeTag('section');
 export const script = makeTag('script');
 export const input = makeTag('input');
+
+/** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
+export function identifyCursor(el: HTMLElement): string {
+  if (token.isToken(el)) return token.getValue(el);
+  if (isIsland(el)) return `[island:${el.tagName.toLowerCase()}]`;
+  return `[${el.tagName.toLowerCase()}]`;
+}

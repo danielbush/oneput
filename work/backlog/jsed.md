@@ -26,6 +26,8 @@ Drafted: 23-Mar-2026
 
 TokenManager's role has been largely absorbed by TokenCursor's lazy tokenization (via `onEnterBlockTransparent` callback in `moveNext`/`movePrevious`). Review whether TokenManager still serves a purpose; if not, remove it and let the CURSOR own tokenization directly.
 
+Once removed, simplify `createCursor` and `tokenizeAndCursor` test helpers in `TokenCursor.test.ts` — they currently wire up TokenManager as an intermediary.
+
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
 id: DETOKENIZE__WORK

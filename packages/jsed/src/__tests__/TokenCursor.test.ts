@@ -1,11 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { makeRoot, p, div, em, span } from '../test/util.js';
+import { makeRoot, p, div, em, span, identifyCursor } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
-import * as token from '../lib/token.js';
 import { getValue } from '../lib/token.js';
-import { isIsland, getLine } from '../lib/traversal.js';
+import { getLine } from '../lib/traversal.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,
@@ -239,6 +238,254 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('aaa');
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // CURSOR walks non-TOKEN LINE_SIBLING's
+  // ---------------------------------------------------------------------------
+  //
+  // These tests describe the DESIRED behavior from the spec
+  // "cursor-walks-non-tokens". They are expected to FAIL until the
+  // implementation is updated.
+
+  describe("TokenCursor walks non-TOKEN LINE_SIBLING's", () => {
+    describe('(1) ISLAND: visit=yes, descend=no', () => {
+      it('moveNext visits ISLAND, then continues to next TOKEN', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+      });
+
+      it('movePrevious visits ISLAND in reverse', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+      });
+
+      it('ISLAND at start of LINE is the first cursor position', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert — cursor should start on the ISLAND
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+      });
+
+      it('ISLAND at end of LINE is the last cursor position', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        // stays put — end of line
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+      });
+
+      it('ISLAND inside INLINE', () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' },
+            'aaa ',
+            em(
+              inlineStyle,
+              'bbb ',
+              '<span class="katex" style="display:inline;">x²</span>',
+              ' ccc'
+            ),
+            ' ddd'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert — CURSOR descends into the INLINE, visits the ISLAND within it
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('ccc');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('ddd');
+      });
+
+      it('adjacent ISLANDs', () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' },
+            'aaa ',
+            '<span class="katex" style="display:inline;">x²</span>',
+            '<span class="katex" style="display:inline;">y³</span>',
+            ' bbb'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert — both ISLANDs are visited
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+      });
+    });
+
+    describe('(2) BLOCK_TRANSPARENT: visit=no, descend=yes', () => {
+      // Category (2) is the DEFAULT — any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
+      // Includes nested block elements (div in div) and inline-block spans.
+
+      it('moveNext descends into nested div to visit its TOKEN', () => {
+        // arrange
+        const doc = makeRoot(div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb'));
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+      });
+
+      it('movePrevious exits nested div seamlessly', () => {
+        // arrange
+        const doc = makeRoot(div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb'));
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+      });
+
+      it('deeply nested blocks: CURSOR descends through multiple levels', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'outer' },
+            'aaa ',
+            div({ id: 'mid' }, 'bbb ', div({ id: 'deep' }, 'ccc'), ' ddd'),
+            ' eee'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('ccc');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('ddd');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('eee');
+      });
+
+      it('empty BLOCK_TRANSPARENT nesting: CURSOR recurses through to find TOKEN', () => {
+        // arrange — mid and deep have no text of their own, only the innermost has content
+        const doc = makeRoot(
+          div({ id: 'outer' }, 'aaa ', div({ id: 'mid' }, div({ id: 'deep' }, 'nested')), ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+      });
+
+      it('empty BLOCK_TRANSPARENT nesting: movePrevious recurses back out', () => {
+        // arrange
+        const doc = makeRoot(
+          div({ id: 'outer' }, 'aaa ', div({ id: 'mid' }, div({ id: 'deep' }, 'nested')), ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+      });
+    });
+
+    describe('(3) CURSOR_BOUNDARY: visit=yes, descend=no', () => {
+      const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
+
+      it('moveNext visits CURSOR_BOUNDARY as opaque element', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden content'), ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('[span]');
+        cursor.moveNext();
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+      });
+
+      it('movePrevious visits CURSOR_BOUNDARY in reverse', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden'), ' bbb'));
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('[span]');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+      });
+    });
+  });
 });
 
 describe('TokenCursor CURSOR_STATE', () => {
@@ -248,8 +495,12 @@ describe('TokenCursor CURSOR_STATE', () => {
   }
 
   function markerClasses(token: HTMLElement): string[] {
-    return [CURSOR_APPEND_CLASS, CURSOR_PREPEND_CLASS, CURSOR_INSERT_AFTER_CLASS, CURSOR_INSERT_BEFORE_CLASS]
-      .filter((cls) => token.classList.contains(cls));
+    return [
+      CURSOR_APPEND_CLASS,
+      CURSOR_PREPEND_CLASS,
+      CURSOR_INSERT_AFTER_CLASS,
+      CURSOR_INSERT_BEFORE_CLASS
+    ].filter((cls) => token.classList.contains(cls));
   }
 
   describe('CURSOR_APPEND', () => {
@@ -408,274 +659,6 @@ describe('TokenCursor CURSOR_STATE', () => {
 
       // assert
       expect(getValue(cursor.getToken())).toBe('hello');
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// CURSOR walks non-TOKEN LINE_SIBLING's
-// ---------------------------------------------------------------------------
-//
-// These tests describe the DESIRED behavior from the spec
-// "cursor-walks-non-tokens". They are expected to FAIL until the
-// implementation is updated.
-
-const inlineBlockStyle = { style: 'display:inline-block;' };
-
-/** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
-function identifyCursor(el: HTMLElement): string {
-  if (token.isToken(el)) return getValue(el);
-  if (isIsland(el)) return `[island:${el.tagName.toLowerCase()}]`;
-  return `[${el.tagName.toLowerCase()}]`;
-}
-
-describe('TokenCursor walks non-TOKEN LINE_SIBLING\'s', () => {
-  describe('(1) ISLAND: visit=yes, descend=no', () => {
-    it('moveNext visits ISLAND, then continues to next TOKEN', () => {
-      // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-    });
-
-    it('movePrevious visits ISLAND in reverse', () => {
-      // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-      cursor.moveNext();
-      cursor.moveNext();
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-    });
-
-    it('ISLAND at start of LINE is the first cursor position', () => {
-      // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-      // act & assert — cursor should start on the ISLAND
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-    });
-
-    it('ISLAND at end of LINE is the last cursor position', () => {
-      // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.moveNext();
-      // stays put — end of line
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-    });
-
-    it('ISLAND inside INLINE', () => {
-      // arrange
-      const doc = makeRoot(
-        p(
-          { id: 'p1' },
-          'aaa ',
-          em(inlineStyle, 'bbb ', '<span class="katex" style="display:inline;">x²</span>', ' ccc'),
-          ' ddd'
-        )
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-      // act & assert — CURSOR descends into the INLINE, visits the ISLAND within it
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('ccc');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('ddd');
-    });
-
-    it('adjacent ISLANDs', () => {
-      // arrange
-      const doc = makeRoot(
-        p(
-          { id: 'p1' },
-          'aaa ',
-          '<span class="katex" style="display:inline;">x²</span>',
-          '<span class="katex" style="display:inline;">y³</span>',
-          ' bbb'
-        )
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-      // act & assert — both ISLANDs are visited
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-    });
-  });
-
-  describe('(2) BLOCK_TRANSPARENT: visit=no, descend=yes', () => {
-    // Category (2) is the DEFAULT — any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
-    // Includes nested block elements (div in div) and inline-block spans.
-
-    it('moveNext descends into nested div to visit its TOKEN', () => {
-      // arrange
-      const doc = makeRoot(
-        div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#outer');
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('nested');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-    });
-
-    it('movePrevious exits nested div seamlessly', () => {
-      // arrange
-      const doc = makeRoot(
-        div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#outer');
-      cursor.moveNext();
-      cursor.moveNext();
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('nested');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-    });
-
-    it('deeply nested blocks: CURSOR descends through multiple levels', () => {
-      // arrange
-      const doc = makeRoot(
-        div(
-          { id: 'outer' },
-          'aaa ',
-          div({ id: 'mid' }, 'bbb ', div({ id: 'deep' }, 'ccc'), ' ddd'),
-          ' eee'
-        )
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#outer');
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('ccc');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('ddd');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('eee');
-    });
-
-    it('empty BLOCK_TRANSPARENT nesting: CURSOR recurses through to find TOKEN', () => {
-      // arrange — mid and deep have no text of their own, only the innermost has content
-      const doc = makeRoot(
-        div(
-          { id: 'outer' },
-          'aaa ',
-          div({ id: 'mid' }, div({ id: 'deep' }, 'nested')),
-          ' bbb'
-        )
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#outer');
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('nested');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-    });
-
-    it('empty BLOCK_TRANSPARENT nesting: movePrevious recurses back out', () => {
-      // arrange
-      const doc = makeRoot(
-        div(
-          { id: 'outer' },
-          'aaa ',
-          div({ id: 'mid' }, div({ id: 'deep' }, 'nested')),
-          ' bbb'
-        )
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#outer');
-      cursor.moveNext();
-      cursor.moveNext();
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('nested');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-    });
-  });
-
-  describe('(3) CURSOR_BOUNDARY: visit=yes, descend=no', () => {
-    const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
-
-    it('moveNext visits CURSOR_BOUNDARY as opaque element', () => {
-      // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden content'), ' bbb')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('[span]');
-      cursor.moveNext();
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-    });
-
-    it('movePrevious visits CURSOR_BOUNDARY in reverse', () => {
-      // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden'), ' bbb')
-      );
-      const { cursor } = tokenizeAndCursor(doc, '#p1');
-      cursor.moveNext();
-      cursor.moveNext();
-
-      // act & assert
-      expect(identifyCursor(cursor.getToken())).toBe('bbb');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('[span]');
-      cursor.movePrevious();
-      expect(identifyCursor(cursor.getToken())).toBe('aaa');
     });
   });
 });

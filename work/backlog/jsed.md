@@ -2,18 +2,6 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
-## fix: scroll container when FOCUS or CURSOR moves beyond visible area
-
-Drafted: 23-Mar-2026
-
-When navigating with FOCUS or CURSOR inside a scrollable container (e.g. `overflow-y: scroll`), the container doesn't scroll to keep the focused/cursored element visible. Found using the "Scrollable container" example in test_doc.html. Both FOCUS (Nav) and CURSOR (TokenCursor) likely need scroll-into-view behaviour.
-
-## fix: ElementIndicator clipped when element is near left edge of container
-
-Drafted: 23-Mar-2026
-
-The ElementIndicator badge aligns its right edge with the right edge of the focused element by default. When the element is small and near the left edge of the container, the badge overflows and gets clipped. Fix: detect when right-aligned positioning would clip, and fall back to left-edge alignment.
-
 ## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
 
 Drafted: 19-Mar-2026
@@ -69,8 +57,26 @@ Drafted: 19-Mar-2026
 - `splitBefore`/`splitAfter` currently call `getLine(token)` internally to find the split ceiling. With BLOCK_TRANSPARENT, the passed-in LINE (from the CURSOR) may differ from the `getLine` result. For now these functions stay as-is (split relative to the nearest LINE), but when implementing enter-to-split we need to decide: should the split ceiling be the BLOCK_TRANSPARENT parent or the outer LINE? Likely the nearest LINE is correct (you split the immediate container), but verify with nested `<div>` structures
 - Include PADDED_TOKEN testing for `splitBefore`/`splitAfter` — deferred from CURSOR_WALKS_NON_TOKENS__WORK housekeeping. Verify correct behaviour when splitting a PADDED_TOKEN or when a split produces a TOKEN adjacent to an ISLAND
 
+# Lower priority
+
+## feat: toggle token spacing
+
+Drafted: 23-Mar-2026
+
+Unify TOGGLE_COLLAPSE and TOGGLE_PADDED into a single "toggle token spacing" concept. TOGGLE_COLLAPSE controls trailing space (next-side); TOGGLE_PADDED controls leading space (previous-side). The binding should intelligently offer TOGGLE_PADDED when the previous LINE_SIBLING is an ISLAND (or other non-TOKEN that doesn't provide trailing space). Could be one key binding that inspects context, or two distinct bindings.
+
+See CURSOR_WALKS_NON_TOKENS__WORK for context — PADDED_TOKEN was introduced there to handle spacing between ISLANDs and adjacent TOKENs.
+
 ## feat: joinNext/joinPrevious across INLINE boundaries
 
 Drafted: 23-Mar-2026
 
 `joinNext`/`joinPrevious` currently only find immediate TOKEN siblings via `getNextTokenSibling`/`getPreviousTokenSibling`. If the next/previous LINE_SIBLING is an INLINE (e.g. `<em>`), the join is a no-op — it can't reach the TOKEN inside. The target TOKEN should be extracted from the INLINE and absorbed into the receiving TOKEN.
+
+## discussion: visible vs invisible IGNORABLE's
+
+Drafted: 23-Mar-2026
+
+`getPreviousVisibleSibling`/`getNextVisibleSibling` skip all IGNORABLE's, but some IGNORABLE's may be visually present (e.g. decorative markers) while others are truly invisible (e.g. undo bookmarks). This distinction could affect PADDED_TOKEN toggling and spacing decisions — a visible IGNORABLE between an ISLAND and a TOKEN might mean the user expects a gap, while an invisible one shouldn't influence spacing. Review whether IGNORABLE needs subclasses or whether the current blanket skip is sufficient.
+
+Needs a compelling example of a visible IGNORABLE before this is worth acting on.

@@ -22,6 +22,8 @@ Tests are not just for coverage — they are **illustrations of the system**. A 
 
 Write the minimum number of tests that ground these concepts. Don't exhaustively test every path — focus on tests that teach a reader about the system. The system being tested has its own domain, its own vocabulary, its own architecture. The tests should reflect that.
 
+**Build confidence from the top down.** Because nullables give us sociable, narrow, state-based unit tests, we can test exhaustively at higher, more meaningful levels — exercising real behavior through real dependency graphs without mocks or slow I/O. Start at the middle or top of the dependency graph where tests illustrate the most about how the system works. Lower-level tests are fine when they add clarity or catch things the higher-level tests don't reach — drop down as needed, guided by coverage and judgement. The goal is pragmatic confidence, not layer-by-layer exhaustiveness.
+
 ## Precondition: Is This Class Ready To Test?
 
 Before writing tests, verify the class under test is testable. Walk this checklist:

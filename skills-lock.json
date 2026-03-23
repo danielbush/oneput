@@ -19,7 +19,7 @@
     "nullables-test": {
       "source": "danielbush/skills",
       "sourceType": "github",
-      "computedHash": "48f0f557b99db3676108f60369b819221584d58a1b247c6670d026608ae34e4a"
+      "computedHash": "777f0e050cdcbaf018ff25909b643ded33247245eb0fbcc84e5468ca15d4b533"
     },
     "svelte-code-writer": {
       "source": "sveltejs/ai-tools",

@@ -5,6 +5,7 @@ export type UserInput = {
   moveCursorToEnd: () => void;
   getRange: () => [number | null, number | null];
   focus: () => void;
+  enable: (bool: boolean) => void;
 };
 
 export type UserInputSelectionState =

@@ -243,15 +243,16 @@ export class Nav {
       return;
     }
     if (token.isToken(el)) {
+      const htmlEl = el as HTMLElement;
       const ok =
         this.#REQUEST_FOCUS?.({
           type: 'FOCUS_REQUEST',
           targetType: 'TOKEN',
-          token: el,
-          value: token.getValue(el)
+          token: htmlEl,
+          value: token.getValue(htmlEl)
         }) ?? true;
       if (ok) {
-        this.FOCUS(el);
+        this.FOCUS(htmlEl);
       }
     }
   }

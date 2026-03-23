@@ -110,7 +110,7 @@ export function isFocusable(el: EventTarget | Element | null | undefined): el is
  */
 export function isToken(
   el: EventTarget | Element | Node | ChildNode | ParentNode | null | undefined
-): el is HTMLElement {
+): boolean {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     return el.classList.contains(JSED_TOKEN_CLASS);

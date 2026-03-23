@@ -794,3 +794,160 @@ describe('TokenCursor delete', () => {
     expect(identifyCursor(cursor.getToken())).toBe('¤');
   });
 });
+
+describe('TokenCursor append', () => {
+  it('inserts a new TOKEN after the current one', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world'));
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+    // act
+    cursor.append('new');
+
+    // assert — cursor still on 'hello', 'new' inserted after it
+    expect(getValue(cursor.getToken())).toBe('hello');
+    cursor.moveNext();
+    expect(getValue(cursor.getToken())).toBe('new');
+    cursor.moveNext();
+    expect(getValue(cursor.getToken())).toBe('world');
+  });
+
+  it('no-op when cursor is on ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on ISLAND
+
+    // act
+    const result = cursor.append('oops');
+
+    // assert
+    expect(result).toBeNull();
+  });
+});
+
+describe('TokenCursor joinNext', () => {
+  it('joins current TOKEN with next TOKEN', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world'));
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+    // act
+    cursor.joinNext();
+
+    // assert
+    expect(getValue(cursor.getToken())).toBe('helloworld');
+  });
+
+  it('preserves PADDED_TOKEN on survivor', () => {
+    // arrange — aaa [ISLAND] [PADDED bbb] ccc
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb ccc')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // ISLAND
+    cursor.moveNext(); // PADDED 'bbb'
+    expect(isPadded(cursor.getToken())).toBe(true);
+
+    // act
+    cursor.joinNext();
+
+    // assert — joined token keeps PADDED_TOKEN
+    expect(getValue(cursor.getToken())).toBe('bbbccc');
+    expect(isPadded(cursor.getToken())).toBe(true);
+  });
+
+  it('does not transfer PADDED_TOKEN forward when absorbing next', () => {
+    // arrange — aaa [ISLAND] [PADDED bbb] [PADDED ccc] ddd
+    // This can't happen naturally (only first TOKEN after ISLAND gets padded),
+    // so we test with: aaa [ISLAND] [PADDED bbb] ccc ddd
+    // joinNext on 'bbb' absorbs 'ccc', 'ddd' should not get padded
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        '<span class="katex" style="display:inline;">x²</span>',
+        ' bbb ccc ddd'
+      )
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // ISLAND
+    cursor.moveNext(); // PADDED 'bbb'
+    cursor.moveNext(); // 'ccc'
+    expect(isPadded(cursor.getToken())).toBe(false);
+
+    // act — join 'ccc' with 'ddd'
+    cursor.joinNext();
+
+    // assert — joined, not padded
+    expect(getValue(cursor.getToken())).toBe('cccddd');
+    expect(isPadded(cursor.getToken())).toBe(false);
+  });
+
+  it('no-op when cursor is on ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on ISLAND
+
+    // act
+    cursor.joinNext();
+
+    // assert — ISLAND unchanged
+    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+  });
+});
+
+describe('TokenCursor joinPrevious', () => {
+  it('joins current TOKEN with previous TOKEN', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world'));
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on 'world'
+
+    // act
+    cursor.joinPrevious();
+
+    // assert
+    expect(getValue(cursor.getToken())).toBe('helloworld');
+  });
+
+  it('does not incorrectly pad survivor when absorbing PADDED_TOKEN prev', () => {
+    // arrange — aaa [ISLAND] [PADDED bbb] ccc
+    // joinPrevious on 'ccc' absorbs 'bbb' (which is padded)
+    // 'ccc' should not become padded — it's not adjacent to the ISLAND
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb ccc')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // ISLAND
+    cursor.moveNext(); // PADDED 'bbb'
+    cursor.moveNext(); // 'ccc'
+
+    // act
+    cursor.joinPrevious();
+
+    // assert — absorbed prev's text, but not its padding
+    expect(getValue(cursor.getToken())).toBe('bbbccc');
+    expect(isPadded(cursor.getToken())).toBe(false);
+  });
+
+  it('no-op when cursor is on ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on ISLAND
+
+    // act
+    cursor.joinPrevious();
+
+    // assert — ISLAND unchanged
+    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+  });
+});

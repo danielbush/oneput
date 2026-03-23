@@ -128,7 +128,11 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
       .map((s) => createToken(s));
     // PADDED_TOKEN: if text has leading whitespace and previous visible sibling
     // is an ISLAND (which has no trailing space), pad the first TOKEN.
-    if (tokens.length > 0 && /^\s/.test(text) && isIsland(getPreviousVisibleSibling(child as ChildNode))) {
+    if (
+      tokens.length > 0 &&
+      /^\s/.test(text) &&
+      isIsland(getPreviousVisibleSibling(child as ChildNode))
+    ) {
       pad(tokens[0]);
     }
     const frag = document.createDocumentFragment();
@@ -469,7 +473,7 @@ export function isPadded(token: HTMLElement): boolean {
 }
 
 /**
- * PAD a TOKEN — add a leading space.
+ * Convert to PADDED_TOKEN — add a leading space.
  *
  * TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous
  * LINE_SIBLING doesn't carry its own trailing space (e.g. an ISLAND).
@@ -487,7 +491,7 @@ export function pad(token: HTMLElement): HTMLElement {
 }
 
 /**
- * Un-PAD a TOKEN — remove the leading space.
+ * Convert PADDED_TOKEN to TOKEN — remove the leading space.
  */
 export function unpad(token: HTMLElement): HTMLElement {
   const val = token.firstChild!.nodeValue;
@@ -513,6 +517,9 @@ export function joinNext(token: HTMLElement): void {
   const val = getValue(token);
   const nextVal = getValue(next);
   replaceText(token, val + nextVal);
+  // Unpad before remove — the content has been absorbed, so padding
+  // transfer would be incorrect.
+  unpad(next);
   remove(next);
 }
 
@@ -524,6 +531,9 @@ export function joinPrevious(token: HTMLElement): void {
   const val = getValue(token);
   const prevVal = getValue(prev);
   replaceText(token, prevVal + val);
+  // Unpad before remove — the content has been absorbed, so padding
+  // transfer would be incorrect.
+  unpad(prev);
   remove(prev);
 }
 

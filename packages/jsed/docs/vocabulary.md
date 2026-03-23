@@ -45,8 +45,8 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
   - Source of truth: search docstrings for INLINE as these functions or methods may be used via negation; also search docstrings for LINE;
 - **NESTED_LINE** - a LINE that has another LINE as an ancestor; it is a LINE_MEMBER but not a LINE_SIBLING (the CURSOR does not visit or descend into it)
 - **LINE_MEMBER** - any FOCUSABLE that belongs to a line; currently this means TOKEN, INLINE, NESTED_LINE and ISLAND can all be members. Not all members are traversable.
-- **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR;
-  - TOKEN's that belong to the same LINE should be LINE_SIBLING's
+- **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR's moveNext / movePrevious operations with the following:
+  - TOKEN's that belong to the same LINE are LINE_SIBLING's
   - ISLAND's are LINE_SIBLING's — the CURSOR visits them as opaque elements but does not descend into them.
   - INLINE's aren't considered LINE_SIBLING's even though they also belong to the same LINE. When the CURSOR traverses the LINE it seamlessly recurses through INLINE's and visits their TOKEN's as if they were DOM siblings.
   - NESTED_LINE's are not LINE_SIBLING's (atm) — the CURSOR does not visit or descend into them.

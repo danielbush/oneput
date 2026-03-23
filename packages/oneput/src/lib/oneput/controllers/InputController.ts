@@ -95,6 +95,7 @@ export class InputController {
 
   toggleSelect = () => {
     this.selectionToggler?.toggle();
+    this.focus();
     this.ctl.events.emit({
       type: 'selection-change',
       payload: { selection: this.getSelectionState() }

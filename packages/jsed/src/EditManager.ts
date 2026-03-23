@@ -79,11 +79,14 @@ export class EditManager {
   private handleTokenChange = async (tok: HTMLElement) => {
     this.nav.FOCUS(tok);
     if (token.isToken(tok)) {
+      this.userInput.enable(true);
+      this.userInput.focus();
       this.userInput.setInputValue(token.getValue(tok)).then(() => {
         this.userInput.selectAll();
       });
     } else {
-      this.userInput.setInputValue('');
+      this.userInput.enable(false);
+      this.userInput.setInputValue('(not a token)');
     }
   };
 

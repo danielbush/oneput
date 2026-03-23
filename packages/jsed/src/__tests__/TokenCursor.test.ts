@@ -714,3 +714,46 @@ describe('TokenCursor replace', () => {
     expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
   });
 });
+
+describe('TokenCursor delete', () => {
+  it('deletes TOKEN and moves cursor to next TOKEN', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(getValue(cursor.getToken())).toBe('world');
+  });
+
+  it('deletes last TOKEN and moves cursor to previous TOKEN', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world'));
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on 'world'
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(getValue(cursor.getToken())).toBe('hello');
+  });
+
+  it('no-op when cursor is on ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+    cursor.moveNext(); // on ISLAND
+    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+
+    // act
+    cursor.delete();
+
+    // assert — ISLAND unchanged, cursor unmoved
+    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+  });
+});

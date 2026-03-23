@@ -194,6 +194,16 @@ export class InputController {
     this.inputElement.disabled = !on;
   }
 
+  /**
+   * Enable or disable the input.
+   *
+   * This may be exposed as part of a set of input-related operations eg jsed as
+   * a UserInput interface.
+   */
+  enable(bool: boolean) {
+    this.ctl.ui.update({ flags: { enableInputElement: bool } });
+  }
+
   private submitHandler?: (input: string) => void;
   private submitOnce?: typeof this.submitHandler;
 

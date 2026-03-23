@@ -277,17 +277,7 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'aaa']);
   });
 
-  test('ISLAND (katex): CURSOR visits the island', () => {
-    // arrange
-    const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">rendered</span>', ' bbb')
-    );
-    const first = tokenizeLine(byId(doc, 'p1'))!;
-
-    // act & assert — ISLAND is now a LINE_SIBLING the CURSOR visits
-    expect(collectForward(first)).toEqual(['aaa', '[island:span]', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[island:span]', 'aaa']);
-  });
+  // ISLAND traversal covered thoroughly in '(1) ISLAND' describe block below
 });
 
 // ---------------------------------------------------------------------------

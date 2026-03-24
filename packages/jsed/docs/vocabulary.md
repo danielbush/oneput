@@ -19,13 +19,19 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 
 We can break FOCUSABLE's down into different categories...
 
-- **INLINE** - a FOCUSABLE that is inline and intended to mark up one or more TOKEN's eg `<span>`, `<em>` or `<a>` etc. Whilst they can receive the FOCUS, they cannot receive the CURSOR; the CURSOR should seamlessly navigate into and out of the LINE_SIBLING's of these elements within a LINE. This excludes inline elements that potentially have more complex structures such as inline-block, inline-flex or ones that have been taken out of the normal line flow such as float or positioned elements other than static, etc.
-  - Source of truth: search docstrings for INLINE.
-- **ISLAND** - a FOCUSABLE which we NEVER recurse into or edit directly (via tokenization) because of pre-existing rules we define that disallow it. Normal nodes can be designated islands according to pre-existing rules. The CURSOR visits ISLAND's as opaque LINE_SIBLING's (visit=yes, descend=no) — it lands on the element itself but does not enter it. Editing operations (replace, delete, etc.) are no-ops when the CURSOR is on an ISLAND.
-  - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
-  - Example: We treat leaf nodes that have a special purpose like `<img>` tags etc as ISLAND's.
-  - Example: Also elements that are already natively focusable, e.g. form controls.
-  - Source of truth: `isIsland` in focus.ts; `isLineSibling` in token.ts.
+- FOCUS descend=yes
+  - **INLINE** - FOCUS can visit and descend; the element is displayed inline and is often intended to mark up one or more TOKEN's eg `<span>`, `<em>` or `<a>` etc but excludes inline elements that potentially have more complex structures such as inline-block, inline-flex or ones that have been taken out of the normal line flow such as float or positioned elements other than static, etc.
+    - Source of truth: search docstrings for INLINE.
+  - **NON_INLINE** - the FOCUS can visit and descend but the element is not an INLINE.
+- FOCUS descend=no
+  - **ISLAND** - FOCUS can visit but not descend into or edit directly (via tokenization) because of pre-existing rules we define that disallow it. Normal nodes can be designated islands according to pre-existing rules. The CURSOR visits ISLAND's as opaque LINE_SIBLING's (visit=yes, descend=no) — it lands on the element itself but does not enter it. Editing operations (replace, delete, etc.) are no-ops when the CURSOR is on an ISLAND.
+    - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
+    - Example: We treat leaf nodes that have a special purpose like `<img>` tags etc as ISLAND's.
+    - Example: Also elements that are already natively focusable, e.g. form controls.
+    - Source of truth: `isIsland` in focus.ts; `isLineSibling` in token.ts.
+  - if necessary, we can break ISLAND's down into
+    - **INLINE_ISLAND** - ISLAND with same display characteristics as INLINE's
+    - **NON_INLINE_ISLAND** - ISLAND with same display characteristics as NON_INLINE's
 
 ### CURSOR taxonomy
 
@@ -48,10 +54,10 @@ In words:
 
 Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
-- **CURSOR_OPAQUE** (visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
+- **CURSOR_OPAQUE** (CURSOR: visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
   - **ISLAND** — externally managed content (katex, `<img>`)
   - **CURSOR_BOUNDARY** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque.
-- **CURSOR_TRANSPARENT** (visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
+- **CURSOR_TRANSPARENT** (CURSOR: visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
   - **INLINE** — inline-level markup (`<em>`, `<a>`)
   - **TRANSPARENT_BLOCK** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.
 
@@ -124,5 +130,8 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
 ## Deprecated
 
-- **IMPLICIT_LINE** — When recursing the FOCUSABLE's, it is hard to FOCUS on LINE_SEGMENT's other than the first one. IMPLICIT_LINE's are ININE's that wrap these LINE_SEGMENT's. It's possible based on the example below that only the last LINE_SEGMENT is handled, and not intermediate ones.
-  - Example: `<div><p>nested</p> this text needs an implicit LINE</div>`.
+- **IMPLICIT_LINE** — TOKEN's and INLINE's that sit next to a non-INLINE FOCUSABLE which we'll specify as NESTED_LINE's often resemble a LINE of text; but this "implicit" LINE will not be visited by the FOCUS .  We can tag implicit lines by simply wrapping a span tag around them;
+  - Example: `<div><p>here is the first line.</p>For some reason the 2nd line is not in a p-tag.</div>`.
+    - FOCUS will visit div, then p, then move on to something after p; this makes it look like the 2nd line is not reachable.
+  - Counter Example: `<div><em>this</em> text does not need an implicit LINE</div>`.
+    - the TOKEN's after the em-tag obviously form a single LINE with the em-tag; there is NO implicit line here.

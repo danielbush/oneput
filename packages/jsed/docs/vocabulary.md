@@ -32,7 +32,7 @@ FOCUS descend=no:
 
 - **ISLAND** - FOCUS can visit but not descend into or edit directly (via tokenization) because of pre-existing rules we define that disallow it. Normal nodes can be designated islands according to pre-existing rules. The CURSOR visits ISLAND's as opaque LINE_SIBLING's (visit=yes, descend=no) — it lands on the element itself but does not enter it. Editing operations (replace, delete, etc.) are no-ops when the CURSOR is on an ISLAND.
   - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
-  - Example: We treat leaf nodes that have a special purpose like `<img>` tags etc as ISLAND's.
+  - Example: Some leaf nodes that have a special purpose eg `<img>` tags etc may be treated as ISLAND's, others may end up being treated by default as either INLINE or TRANSPARENT_BLOCK
   - Example: Also elements that are already natively focusable, e.g. form controls.
   - Source of truth: `isIsland` in focus.ts; `isLineSibling` in token.ts.
 
@@ -120,12 +120,9 @@ In words:
 
 - All elements in the diagram are FOCUSABLE's so they are visitable by FOCUS; IGNORABLE's are not shown
 - the ISLAND branch (FOCUS descend=no) is much simpler because both FOCUS and CURSOR descend behaviours are set to "no".
-- the other branch (FOCUS descend=yes) is broken up into INLINE and NON_INLINE
+- ISLAND's tend to be special cases; putting them aside, an element is either INLINE or NON_INLINE and if NON_INLINE it defaults to TRANSPARENT_BLOCK unless we mark it as OPAQUE_BLOCK .  Be aware the definition of INLINE determines what is NON_INLINE by negation and may exclude display types like "inline-block".
 - the INLINE sub-branch is simple because we only assume CURSOR visit=no,descend=yes
-- the NON_INLINE sub-branch breaks NON_INLINE's into ones the CURSOR visits but not descends and vice versa
-- note that OPAQUE_BLOCK's and NON_INLINE_ISLAND's differ only because of FOCUS descend behaviour
-- note that OPAQUE_BLOCK is CURSOR descend=no when acting as a LINE_SIBLING but if the FOCUS visits this element then the CURSOR could be instructed descend its descendents
-- note that INLINE_ISLAND and INLINE are inversions of eachother
+- OPAQUE_BLOCK is CURSOR descend=no when acting as a LINE_SIBLING but if the FOCUS visits or descendes this element the CURSOR may end up visiting and descending elements within the OPAQUE_BLOCK.
 
 
 

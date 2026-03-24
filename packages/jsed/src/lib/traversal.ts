@@ -157,7 +157,7 @@ export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
 }
 
 /**
- * Detect CURSOR_BOUNDARY — a FOCUSABLE explicitly marked so FOCUS can descend
+ * Detect OPAQUE_BLOCK — a FOCUSABLE explicitly marked so FOCUS can descend
  * but the CURSOR treats it as opaque (visit=yes, descend=no).
  */
 export function isCursorBoundary(el: Node | ChildNode | ParentNode | null): boolean {
@@ -167,7 +167,7 @@ export function isCursorBoundary(el: Node | ChildNode | ParentNode | null): bool
 
 /**
  * Detect TRANSPARENT_BLOCK — the default for any non-INLINE, non-ISLAND FOCUSABLE
- * that is not a CURSOR_BOUNDARY. The CURSOR descends into it seamlessly (like INLINE).
+ * that is not a OPAQUE_BLOCK. The CURSOR descends into it seamlessly (like INLINE).
  */
 export function isBlockTransparent(el: Node | ChildNode | ParentNode | null): boolean {
   return isLine(el) && !isCursorBoundary(el);

@@ -452,10 +452,10 @@ describe('TokenCursor motion', () => {
       });
     });
 
-    describe('(3) CURSOR_BOUNDARY: visit=yes, descend=no', () => {
+    describe('(3) OPAQUE_BLOCK: visit=yes, descend=no', () => {
       const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
 
-      it('moveNext visits CURSOR_BOUNDARY as opaque element', () => {
+      it('moveNext visits OPAQUE_BLOCK as opaque element', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden content'), ' bbb')
@@ -470,7 +470,7 @@ describe('TokenCursor motion', () => {
         expect(identifyCursor(cursor.getToken())).toBe('bbb');
       });
 
-      it('movePrevious visits CURSOR_BOUNDARY in reverse', () => {
+      it('movePrevious visits OPAQUE_BLOCK in reverse', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden'), ' bbb'));
         const { cursor } = tokenizeAndCursor(doc, '#p1');

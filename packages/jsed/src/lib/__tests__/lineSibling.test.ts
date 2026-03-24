@@ -577,12 +577,12 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
   });
 });
 
-describe('(3) CURSOR_BOUNDARY: CURSOR visit=yes, descend=no', () => {
+describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
   // A jsed-cursor-opaque element is visited as an opaque LINE_SIBLING.
   // FOCUS can descend into it, but the CURSOR cannot.
   const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
 
-  test('CURSOR_BOUNDARY at middle of LINE', () => {
+  test('OPAQUE_BLOCK at middle of LINE', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'nested content'), ' bbb')
@@ -594,7 +594,7 @@ describe('(3) CURSOR_BOUNDARY: CURSOR visit=yes, descend=no', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
   });
 
-  test('CURSOR_BOUNDARY at start of LINE', () => {
+  test('OPAQUE_BLOCK at start of LINE', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, span(cursorOpaqueBlock, 'nested'), ' aaa bbb')
@@ -607,7 +607,7 @@ describe('(3) CURSOR_BOUNDARY: CURSOR visit=yes, descend=no', () => {
     expect(collectForward(opaque, line)).toEqual(['[span]', 'aaa', 'bbb']);
   });
 
-  test('CURSOR_BOUNDARY at end of LINE', () => {
+  test('OPAQUE_BLOCK at end of LINE', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa bbb ', span(cursorOpaqueBlock, 'nested'))
@@ -618,7 +618,7 @@ describe('(3) CURSOR_BOUNDARY: CURSOR visit=yes, descend=no', () => {
     expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]']);
   });
 
-  test('CURSOR_BOUNDARY inside INLINE', () => {
+  test('OPAQUE_BLOCK inside INLINE', () => {
     // arrange
     const doc = makeRoot(
       p(

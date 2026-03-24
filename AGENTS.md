@@ -52,6 +52,17 @@ Follow the specific rules for each project, these take precedence over general r
 
 ## Build and test commands
 
+The project uses mise.  See `mise.toml`.  Paths tend to be in `$HOME/.local/share/mise/installs/` or using shims in `$HOME/.local/share/mise/shims/`.
+
+If you see the following
+
+```
+mise ERROR error parsing config file: ~/projects/@oneput.agent-2/packages/oneput/mise.toml
+mise ERROR Config files in ~/projects/@oneput.agent-2/packages/oneput/mise.toml are not trusted.
+```
+
+try running `mise trust`.
+
 There's a root `Taskfile.yml`.
 
 - `task check`

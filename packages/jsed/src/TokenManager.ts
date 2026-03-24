@@ -9,7 +9,7 @@ export class TokenManager {
 
   constructor() {}
 
-  /** Lazy tokenization callback for BLOCK_TRANSPARENT's encountered during traversal. */
+  /** Lazy tokenization callback for TRANSPARENT_BLOCK's encountered during traversal. */
   private lazyTokenize = (el: HTMLElement) => {
     tokenizeLine(el);
   };

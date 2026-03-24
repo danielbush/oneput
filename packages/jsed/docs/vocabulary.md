@@ -36,7 +36,7 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
   - **CURSOR_BOUNDARY** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque.
 - **CURSOR_TRANSPARENT** (visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
   - **INLINE** — inline-level markup (`<em>`, `<a>`)
-  - **BLOCK_TRANSPARENT** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.
+  - **TRANSPARENT_BLOCK** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.
 
 Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
@@ -55,7 +55,7 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR** - the current LINE_SIBLING the user has selected when editing the text of a document. This is distinct from FOCUS which is the current FOCUSABLE the user has selected. Usually the current FOCUSABLE becomes the current LINE within which the user edits the LINE_SIBLING's (text content).
   - Source of truth: search docstrings for CURSOR
-- **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested BLOCK_TRANSPARENT elements within this line and not confuse them as the current LINE.
+- **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested TRANSPARENT_BLOCK elements within this line and not confuse them as the current LINE.
 - **SIBLING**, **SIB**,— usually means a FOCUSABLE DOM sibling (ie nextSibling, nextElementSibling). Never means a TOKEN. Traversing SIBLING's almost always entails at a minimum skipping past IGNORABLE's.
   - Example: SIB_HIGHLIGHT - a visual highlight of FOCUSABLE SIBLING's
 

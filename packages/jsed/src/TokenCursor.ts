@@ -70,7 +70,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #region Motion
 
-  /** Lazy tokenization callback: tokenize BLOCK_TRANSPARENT's as the CURSOR walks into them. */
+  /** Lazy tokenization callback: tokenize TRANSPARENT_BLOCK's as the CURSOR walks into them. */
   private lazyTokenize = (el: HTMLElement) => {
     token.tokenizeLine(el);
   };

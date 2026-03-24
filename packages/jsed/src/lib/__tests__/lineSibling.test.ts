@@ -439,7 +439,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
   });
 });
 
-describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
+describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
   // Category (2) is the DEFAULT for any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
   // This includes nested block elements (div inside div) and inline-block spans.
   // The CURSOR descends into them seamlessly, like an INLINE.
@@ -554,7 +554,7 @@ describe('(2) BLOCK_TRANSPARENT: CURSOR visit=no, descend=yes', () => {
 
   test('nested block containing only an ANCHOR', () => {
     // arrange — a nested div with no text content yet; addAnchors creates
-    // an ANCHOR inside the empty BLOCK_TRANSPARENT so the CURSOR can land on it
+    // an ANCHOR inside the empty TRANSPARENT_BLOCK so the CURSOR can land on it
     const doc = makeRoot(
       div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, ''), ' bbb')
     );

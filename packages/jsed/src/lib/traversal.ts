@@ -166,7 +166,7 @@ export function isCursorBoundary(el: Node | ChildNode | ParentNode | null): bool
 }
 
 /**
- * Detect BLOCK_TRANSPARENT — the default for any non-INLINE, non-ISLAND FOCUSABLE
+ * Detect TRANSPARENT_BLOCK — the default for any non-INLINE, non-ISLAND FOCUSABLE
  * that is not a CURSOR_BOUNDARY. The CURSOR descends into it seamlessly (like INLINE).
  */
 export function isBlockTransparent(el: Node | ChildNode | ParentNode | null): boolean {
@@ -274,7 +274,7 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 
 /** Options for LINE_SIBLING traversal functions. */
 export type LineSiblingOptions = {
-  /** Called before descending into a BLOCK_TRANSPARENT. Use for lazy tokenization. */
+  /** Called before descending into a TRANSPARENT_BLOCK. Use for lazy tokenization. */
   onEnterBlockTransparent?: (el: HTMLElement) => void;
 };
 

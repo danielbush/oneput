@@ -363,7 +363,7 @@ describe('TokenCursor motion', () => {
       });
     });
 
-    describe('(2) BLOCK_TRANSPARENT: visit=no, descend=yes', () => {
+    describe('(2) TRANSPARENT_BLOCK: visit=no, descend=yes', () => {
       // Category (2) is the DEFAULT — any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
       // Includes nested block elements (div in div) and inline-block spans.
 
@@ -419,7 +419,7 @@ describe('TokenCursor motion', () => {
         expect(identifyCursor(cursor.getToken())).toBe('eee');
       });
 
-      it('empty BLOCK_TRANSPARENT nesting: CURSOR recurses through to find TOKEN', () => {
+      it('empty TRANSPARENT_BLOCK nesting: CURSOR recurses through to find TOKEN', () => {
         // arrange — mid and deep have no text of their own, only the innermost has content
         const doc = makeRoot(
           div({ id: 'outer' }, 'aaa ', div({ id: 'mid' }, div({ id: 'deep' }, 'nested')), ' bbb')
@@ -434,7 +434,7 @@ describe('TokenCursor motion', () => {
         expect(identifyCursor(cursor.getToken())).toBe('bbb');
       });
 
-      it('empty BLOCK_TRANSPARENT nesting: movePrevious recurses back out', () => {
+      it('empty TRANSPARENT_BLOCK nesting: movePrevious recurses back out', () => {
         // arrange
         const doc = makeRoot(
           div({ id: 'outer' }, 'aaa ', div({ id: 'mid' }, div({ id: 'deep' }, 'nested')), ' bbb')

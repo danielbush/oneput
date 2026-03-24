@@ -43,6 +43,8 @@ If necessary, we can break ISLAND's down into:
 
 Now that we've marked out INLINE's and ISLAND's we are left with NON_INLINE's which from the point of view of the CURSOR we call LINE's...
 
+We introduce the idea of a CURSOR (defined below), allowing us to characterise FOCUSABLE elements by both their FOCUS and CURSOR behaviours where behaviours are VISIT and DESCEND.
+
 - **LINE** — a FOCUSABLE that is not CURSOR_OPAQUE.  INLINE's are not considered LINE's, rather they're considered part of a LINE (eg an em-tag inside a p-tag).  TRANSPARENT_BLOCK's are LINE's. 
   - Example: a `<div>`, `<p>` etc.
   - Source of truth: search docstrings for INLINE as these functions or methods may be used via negation; also search docstrings for LINE;
@@ -65,9 +67,16 @@ Now that we've marked out INLINE's and ISLAND's we are left with NON_INLINE's wh
 - **SIBLING**, **SIB**,— usually means a FOCUSABLE DOM sibling (ie nextSibling, nextElementSibling). Never means a TOKEN. Traversing SIBLING's almost always entails at a minimum skipping past IGNORABLE's.
   - Example: SIB_HIGHLIGHT - a visual highlight of FOCUSABLE SIBLING's
 
-## FOCUSABLE taxonomy
+Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
-We introduce the idea of a CURSOR (defined below), allowing us to characterise FOCUSABLE elements by both their FOCUS and CURSOR behaviours where behaviours are "visit" and "descend".
+- **CURSOR_OPAQUE** (CURSOR: visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
+  - **ISLAND** — externally managed content (katex, `<img>`)
+  - **OPAQUE_BLOCK** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque.
+- **CURSOR_TRANSPARENT** (CURSOR: visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
+  - **INLINE** — inline-level markup (`<em>`, `<a>`)
+  - **TRANSPARENT_BLOCK** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.
+
+## FOCUSABLE's by FOCUS and CURSOR (taxonomy)
 
 ```mermaid
 graph LR
@@ -94,6 +103,17 @@ graph LR
 
     C1 --> C1a["CURSOR visit=yes, descend=no"]
     C2 --> C2a["CURSOR visit=yes, descend=no"]
+    
+    F["CURSOR_OPAQUE"]
+    G["CURSOR_TRANSPARENT"]
+    
+    C1a --> F
+    C2a --> F
+    E2 --> F
+    D1 --> G
+    E1 --> G
+    
+    
 ```
 
 In words:
@@ -108,15 +128,6 @@ In words:
 - note that INLINE_ISLAND and INLINE are inversions of eachother
 
 
-
-Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
-
-- **CURSOR_OPAQUE** (CURSOR: visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
-  - **ISLAND** — externally managed content (katex, `<img>`)
-  - **OPAQUE_BLOCK** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque.
-- **CURSOR_TRANSPARENT** (CURSOR: visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
-  - **INLINE** — inline-level markup (`<em>`, `<a>`)
-  - **TRANSPARENT_BLOCK** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.
 
 
 ## Tokens and Text and whitespace
@@ -149,7 +160,11 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 ## Operations
 
 - **VISIT** - when recursively walking through the DOM, "visiting" means a callback will be called and the element passed to the consumer; both the FOCUS and CURSOR have different VISIT behaviours.
+  - Source of truth: Nav.ts manages FOCUS
+  - Source of truth: TokenCursor.ts manages CURSOR
 - **DESCEND** - when recursively walking through the DOM, "descending" means the walk will descend and recurse through the elements children; both the FOCUS and CURSOR have different DESCEND behaviours.
+  - Source of truth: Nav.ts manages FOCUS
+  - Source of truth: TokenCursor.ts manages CURSOR
 
 - **SHALLOW_TOKENIZATION** — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
   - Source of truth: search docstrings for SHALLOW_TOKENIZATION.

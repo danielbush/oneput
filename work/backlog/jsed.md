@@ -80,3 +80,20 @@ Drafted: 23-Mar-2026
 `getPreviousVisibleSibling`/`getNextVisibleSibling` skip all IGNORABLE's, but some IGNORABLE's may be visually present (e.g. decorative markers) while others are truly invisible (e.g. undo bookmarks). This distinction could affect PADDED_TOKEN toggling and spacing decisions — a visible IGNORABLE between an ISLAND and a TOKEN might mean the user expects a gap, while an invisible one shouldn't influence spacing. Review whether IGNORABLE needs subclasses or whether the current blanket skip is sufficient.
 
 Needs a compelling example of a visible IGNORABLE before this is worth acting on.
+
+## discussion: allow CURSOR to visit CURSOR_TRANSPARENT's
+
+Drafted: 24-Mar-2026
+
+Currently the CURSOR passes through CURSOR_TRANSPARENT elements (INLINE, TRANSPARENT_BLOCK) without stopping on them — it only visits their TOKEN children. What if the CURSOR could also visit these elements themselves? CURSOR_TRANSPARENT would become a toggle rather than a fixed behaviour.
+
+**Positives:**
+- When the CURSOR lands on an INLINE like `<em>`, we could offer CURSOR operations that act on the INLINE itself — e.g. extending, shrinking, or removing the `<em>` wrapper — without needing a separate mechanism to access it
+- Unifies structural editing with text editing under the same CURSOR navigation model
+
+**Negatives:**
+- Users have to navigate sub-LINE structures (INLINE's, TRANSPARENT_BLOCK's) in addition to TOKEN's — more stops per line, potentially tedious
+- Deeply nested structures (e.g. `<em>` inside `<strong>` inside `<a>`) would multiply the number of CURSOR stops, making TOKEN-to-TOKEN navigation harder
+- May need a way to toggle between "visit everything" and "visit TOKEN's only" modes to keep navigation ergonomic
+
+Worth exploring despite the trade-offs — the ability to edit structural elements under the CURSOR could be a significant UX win.

@@ -13,7 +13,7 @@ describe('TokenManager.tokenize', () => {
   test('simple LINE: tokenizes and returns first TOKEN', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
     const p1 = byId(doc, 'p1');
 
     // act
@@ -30,7 +30,7 @@ describe('TokenManager.tokenize', () => {
     const p1 = byId(doc, 'p1');
     tokenizeLine(p1);
     const token = p1.querySelector('.jsed-token') as HTMLElement;
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
 
     // act
     const result = tm.tokenize(token);
@@ -48,7 +48,7 @@ describe('TokenManager.tokenize', () => {
         p({ id: 'p2' }, 'bar')
       )
     );
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
     const div1 = byId(doc, 'div1');
 
     // act
@@ -73,7 +73,7 @@ describe('TokenManager.tokenize', () => {
         )
       )
     );
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
     const div1 = byId(doc, 'div1');
 
     // act
@@ -93,7 +93,7 @@ describe('TokenManager.tokenize', () => {
         ' after'
       )
     );
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
     const p1 = byId(doc, 'p1');
 
     // act
@@ -109,7 +109,7 @@ describe('TokenManager.tokenize', () => {
     const doc = makeRoot(
       p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
     );
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
     const p1 = byId(doc, 'p1');
 
     // act
@@ -128,7 +128,7 @@ describe('TokenManager.tokenize', () => {
         p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
       )
     );
-    const tm = new TokenManager(doc.root);
+    const tm = new TokenManager();
     const div1 = byId(doc, 'div1');
 
     // act

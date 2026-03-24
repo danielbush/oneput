@@ -7,8 +7,7 @@ import {
   isLine,
   isInline,
   isToken,
-  isIsland,
-  isBlockTransparent
+  isIsland
 } from '../traversal.js';
 import { tokenizeLine, isPadded, addAnchors } from '../token.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';

@@ -40,18 +40,20 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
 Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
-- **LINE** — a FOCUSABLE that is not an INLINE or ISLAND. ISLAND's, INLINE's and even other LINE's all belong to the same LINE if their first LINE ancestor in their ancestor chain is the same LINE. TOKEN's usually either have LINE as their parent or have an INLINE as a parent that belongs to the LINE.
+- **LINE** — a FOCUSABLE that is not CURSOR_OPAQUE.  INLINE's are not considered LINE's, rather they're considered part of a LINE (eg an em-tag inside a p-tag).  TRANSPARENT_BLOCK's are LINE's. INLINE's and other TRANSPARENT_BLOCK's all belong to the same LINE if their first LINE ancestor in their ancestor chain is the same LINE. TOKEN's usually either have LINE as their parent or have an INLINE as a parent that belongs to the LINE.
   - Example: a `<div>`, `<p>` etc.
   - Source of truth: search docstrings for INLINE as these functions or methods may be used via negation; also search docstrings for LINE;
-- **NESTED_LINE** - a LINE that has another LINE as an ancestor; it is a LINE_MEMBER but not a LINE_SIBLING (the CURSOR does not visit or descend into it)
-- **LINE_MEMBER** - any FOCUSABLE that belongs to a line; currently this means TOKEN, INLINE, NESTED_LINE and ISLAND can all be members. Not all members are traversable.
-- **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR's moveNext / movePrevious operations with the following:
-  - TOKEN's that belong to the same LINE are LINE_SIBLING's
-  - ISLAND's are LINE_SIBLING's — the CURSOR visits them as opaque elements but does not descend into them.
-  - INLINE's aren't considered LINE_SIBLING's even though they also belong to the same LINE. When the CURSOR traverses the LINE it seamlessly recurses through INLINE's and visits their TOKEN's as if they were DOM siblings.
-  - NESTED_LINE's are not LINE_SIBLING's (atm) — the CURSOR does not visit or descend into them.
+- **NESTED_LINE** - a LINE that has another LINE as an ancestor.  Currently this means a TRANSPARENT_BLOCK .
+- **LINE_MEMBER** - Something the user can FOCUS on or the CURSOR can visit and which belongs to the LINE.  eg any FOCUSABLE that belongs to a LINE and any TOKEN's that belong to the LINE.
+- **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR's moveNext / movePrevious operations subject to the following:
+  - it must belong to the LINE
+  - it can be a TOKEN
+  - it can be CURSOR_OPAQUE — CURSOR visits (does not descend)
+  - it is not CURSOR_TRANSPARENT - CURSOR does not visit (but will descend)
+  - anything visited by CURSOR in a CURSOR_TRANSPARENT that belongs to the LINE;
+    - Example: the TOKEN's in an em-tag within a p-tag are LINE_SIBLING's for the p-tag.
   - Source of truth: `isLineSibling` in token.ts.
-- **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Other LINE_MEMBER's act as separators between LINE_SEGMENT's.
+- **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Non-LINE_SIBLING LINE_MEMBER's act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR** - the current LINE_SIBLING the user has selected when editing the text of a document. This is distinct from FOCUS which is the current FOCUSABLE the user has selected. Usually the current FOCUSABLE becomes the current LINE within which the user edits the LINE_SIBLING's (text content).
   - Source of truth: search docstrings for CURSOR

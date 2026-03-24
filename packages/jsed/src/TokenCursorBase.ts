@@ -78,6 +78,7 @@ export abstract class TokenCursorBase {
     this.removeAllFocusClasses();
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     el.classList.add(JSED_CURSOR_CLASS);
+    el.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     this.#token = el;
   }
 

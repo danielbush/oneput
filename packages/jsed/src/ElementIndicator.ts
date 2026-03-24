@@ -187,23 +187,31 @@ export class ElementIndicator {
     span.style.zIndex = '999999';
     span.innerText = tagn;
 
-    // Temporarily add to measure height
+    // Temporarily add to measure dimensions
     span.style.visibility = 'hidden';
     this.#deps.doc.body.appendChild(span);
     const indicatorHeight = span.offsetHeight;
+    const indicatorWidth = span.offsetWidth;
     span.remove();
     span.style.visibility = '';
 
-    // Check if indicator would be cut off at top of viewport
+    // Vertical: check if indicator would be cut off at top of viewport
     const spaceAbove = rect.top - 5;
-    if (spaceAbove < indicatorHeight) {
-      // Position below the element instead
+    const positionBelow = spaceAbove < indicatorHeight;
+
+    // Horizontal: check if right-aligned badge would clip off the left edge
+    const leftAligned = rect.right - indicatorWidth < 0;
+
+    if (leftAligned) {
+      span.style.left = `${rect.left}px`;
+    }
+
+    if (positionBelow) {
       span.style.top = `${rect.bottom + 5}px`;
-      span.style.transform = 'translateX(-100%)';
+      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
     } else {
-      // Position above the element (default)
       span.style.top = `${rect.top - 5}px`;
-      span.style.transform = 'translateY(-100%) translateX(-100%)';
+      span.style.transform = leftAligned ? 'translateY(-100%)' : 'translateY(-100%) translateX(-100%)';
     }
 
     return span;

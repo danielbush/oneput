@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../test/util.js';
 import { tokenizeLine, tagImplicitLines } from '../token.js';
+import { JSED_IMPLICIT_CLASS } from '../constants.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -170,12 +171,17 @@ describe('tokenizeLine', () => {
 });
 
 describe('tagImplicitLines', () => {
-  test('case 1 - simple', () => {
+  test('text after a LINE is wrapped', () => {
     // arrange
     const doc = makeRoot(
       div(
         { id: 'div1' },
-        p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+        p(
+          { id: 'p1' }, //
+          'foo ',
+          em(inlineStyleHack, 'bar'),
+          ' baz'
+        ),
         'this is the IMPLICIT_LINE'
       )
     );
@@ -184,15 +190,23 @@ describe('tagImplicitLines', () => {
     tagImplicitLines(doc.root);
 
     // assert
-    expect(byId(doc, 'div1')).toMatchSnapshot();
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.tagName).toBe('SPAN');
+    expect(implicit!.textContent).toBe('this is the IMPLICIT_LINE');
   });
 
-  test('case 2 - IMPLICIT_LINE with nested inline tag', () => {
+  test('IMPLICIT_LINE slurps up adjacent INLINE', () => {
     // arrange
     const doc = makeRoot(
       div(
         { id: 'div1' },
-        p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+        p(
+          { id: 'p1' }, //
+          'foo ',
+          em(inlineStyleHack, 'bar'),
+          ' baz'
+        ),
         `this is the <em id="em2" style="${inlineStyleHackVal}">implicit</em> line`
       )
     );
@@ -201,15 +215,23 @@ describe('tagImplicitLines', () => {
     tagImplicitLines(doc.root);
 
     // assert
-    expect(byId(doc, 'div1')).toMatchSnapshot();
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent).toBe('this is the implicit line');
+    expect(implicit!.querySelector('#em2')).not.toBeNull();
   });
 
-  test('case 3 - leaded nested inline tag', () => {
+  test('IMPLICIT_LINE starting with an INLINE', () => {
     // arrange
     const doc = makeRoot(
       div(
         { id: 'div1' },
-        p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'),
+        p(
+          { id: 'p1' }, //
+          'foo ',
+          em(inlineStyleHack, 'bar'),
+          ' baz'
+        ),
         `<em id="em2" style="${inlineStyleHackVal}">implicit</em> line`
       )
     );
@@ -218,18 +240,19 @@ describe('tagImplicitLines', () => {
     tagImplicitLines(doc.root);
 
     // assert
-    expect(byId(doc, 'div1')).toMatchSnapshot();
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent).toBe('implicit line');
+    expect(implicit!.querySelector('#em2')).not.toBeNull();
   });
 
-  test('case 4 - it should ignore spaces', () => {
+  test("whitespace-only text between LINE's is ignored", () => {
     // arrange
     const doc = makeRoot(
       div(
-        { id: 'div1' },
+        { id: 'div1' }, //
         p({ id: 'p1' }, 'foo'),
-        //
-        ' ', // should not create IMPLICIT_LINE
-        //
+        ' ',
         p({ id: 'p2' }, 'foo')
       )
     );
@@ -238,7 +261,8 @@ describe('tagImplicitLines', () => {
     tagImplicitLines(doc.root);
 
     // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).toBeNull();
     expect(byId(doc, 'p1').nextSibling).toHaveProperty('nodeType', 3);
-    expect(byId(doc, 'div1')).toMatchSnapshot('There should be no IMPLICIT_LINE.');
   });
 });

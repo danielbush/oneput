@@ -1,3 +1,13 @@
+<style>
+  h2 {
+    color: blue;
+  }
+  p + p {
+      0.5em;
+  }
+</style>
+<script>
+</script>
 <div id="test-doc">
   <h2>simple paragraphs</h2>
   <p>This is just a simple paragraph of text. And this is a second sentence.</p>
@@ -16,12 +26,24 @@
     before
     <em>inline-tag with a <b>nested inline tag</b> in the middle</em> and then we get here
   </div>
-  <h2>implicit LINE</h2>
+  <h2>IMPLICIT_LINE</h2>
   <div>
     <p>
       This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
     </p>
     But this sentence is just text nodes that come after.
+  </div>
+  <h2>IMPLICIT_LINE with br and hr tags</h2>
+  <div>
+    <p>
+      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
+    </p>
+    But this sentence <strong>is <em>just</em></strong> text nodes that come after.
+    <br />
+    But this sentence is just text nodes that come after.
+    <hr />
+    But this sentence is just text nodes that come after.
+    <br />
   </div>
   <h2>ISLAND (float)</h2>
   <div>

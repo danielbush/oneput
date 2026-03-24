@@ -246,6 +246,36 @@ describe('tagImplicitLines', () => {
     expect(implicit!.querySelector('#em2')).not.toBeNull();
   });
 
+  test('br tags are INLINE — absorbed into one IMPLICIT_LINE; hr is block — creates a new one', () => {
+    // br tags are inline so buildImplicitLine slurps them along with adjacent
+    // text into a single IMPLICIT_LINE. An <hr> is block-level (a LINE), so it
+    // stops the slurp and text after the <hr> becomes a second IMPLICIT_LINE.
+    //
+    // br tags need INLINE_COMPUTED_STYLE because jsdom returns empty display for <br>
+    const br = `<br style="display:inline">`;
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'A paragraph.'),
+        `First sentence.${br}Second sentence.${br}Third sentence.<hr>After the rule.`
+      )
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicits = byId(doc, 'div1').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicits.length).toBe(2);
+
+    // First IMPLICIT_LINE: text and br's before the <hr>
+    expect(implicits[0].textContent).toBe('First sentence.Second sentence.Third sentence.');
+    expect(implicits[0].querySelectorAll('br').length).toBe(2);
+
+    // Second IMPLICIT_LINE: text after the <hr>
+    expect(implicits[1].textContent).toBe('After the rule.');
+  });
+
   test("whitespace-only text between LINE's is ignored", () => {
     // arrange
     const doc = makeRoot(

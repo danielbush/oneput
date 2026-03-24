@@ -29,6 +29,23 @@ We can break FOCUSABLE's down into different categories...
 
 ### CURSOR taxonomy
 
+If we introduce the idea of a CURSOR, we can then characterise FOCUSABLE elements by both their FOCUS and CURSOR behaviours where behaviours are "visit" and "descend".
+
+| Category | Example | FOCUS visit | FOCUS descend | CURSOR visit | CURSOR descend |
+|---|---|---|---|---|---|
+| INLINE | `<em>bold text</em>` | yes | yes | no | yes |
+| TRANSPARENT_BLOCK | `<div>` inside a `<div>` | yes | yes | no | yes |
+| ISLAND | `<span class="katex">x²</span>` | yes | no | yes | no |
+| CURSOR_BOUNDARY | `<div class="jsed-cursor-opaque">` | yes | yes | yes | no |
+
+In words:
+
+- All elements are FOCUSABLE's so they are visitable by FOCUS
+- INLINE and TRANSPARENT_BLOCK are not CURSOR visitable
+- ISLAND is never descendable by FOCUS or CURSOR
+- CURSOR_BOUNDARY is often block-level structure that is not CURSOR descendable.
+- IGNORABLE's (not shown) cannot receive FOCUS so are not FOCUS visitable or descendable; by extension the same applies to the CURSOR
+
 Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
 - **CURSOR_OPAQUE** (visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
@@ -40,11 +57,12 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
 Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
-- **LINE** — a FOCUSABLE that is not CURSOR_OPAQUE.  INLINE's are not considered LINE's, rather they're considered part of a LINE (eg an em-tag inside a p-tag).  TRANSPARENT_BLOCK's are LINE's. INLINE's and other TRANSPARENT_BLOCK's all belong to the same LINE if their first LINE ancestor in their ancestor chain is the same LINE. TOKEN's usually either have LINE as their parent or have an INLINE as a parent that belongs to the LINE.
+- **LINE** — a FOCUSABLE that is not CURSOR_OPAQUE.  INLINE's are not considered LINE's, rather they're considered part of a LINE (eg an em-tag inside a p-tag).  TRANSPARENT_BLOCK's are LINE's. 
   - Example: a `<div>`, `<p>` etc.
   - Source of truth: search docstrings for INLINE as these functions or methods may be used via negation; also search docstrings for LINE;
-- **NESTED_LINE** - a LINE that has another LINE as an ancestor.  Currently this means a TRANSPARENT_BLOCK .
-- **LINE_MEMBER** - Something the user can FOCUS on or the CURSOR can visit and which belongs to the LINE.  eg any FOCUSABLE that belongs to a LINE and any TOKEN's that belong to the LINE.
+- **LINE_MEMBER** - FOCUSABLE's belong to the same LINE and are called LINE_MEMBER's if the first LINE ancestor in their ancestor chain is the same LINE.
+  - Example: a TOKEN that either has a LINE as their parent or an INLINE as parent that belongs to a LINE (etc).
+- **NESTED_LINE** - a LINE that has another LINE as an ancestor.  Currently this includes CURSOR_BOUNDARY and TRANSPARENT_BLOCK elements.  In CURSOR_BOUNDARY we deny the CURSOR the ability to descend when moving next, but we could move the FOCUS into that element and treat it as the new LINE.  For TRANSPARENT_BLOCK, the cursor will descend, effectively treating it like an INLINE, but we can also FOCUS on it and treat as LINE in its own right.
 - **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR's moveNext / movePrevious operations subject to the following:
   - it must belong to the LINE
   - it can be a TOKEN
@@ -90,19 +108,17 @@ Now that we've marked out INLINE's and ISLAND's we are left with LINE's...
 
 ## Operations
 
-Allow the user to navigate the document structure and its text content...
-
-**FOCUS** and **CURSOR** (defined above)
-
-For mutations...
-
-- **JOIN** — when a TOKEN (t) is joined with the next or previous (p): p is removed and its text is appended or prepended to t.
-- **SPLIT_BY_TOKEN** — splitting a TOKEN's parent before or after the TOKEN. The split applies to the parent (which may be the LINE or an inline element like `<em>`). LINE is always the highest ancestor we split at.
-- **SPLIT_BY_LINE** — splitting a LINE's parent element before or after the LINE. Can be done with reference to a TOKEN (split at the TOKEN's LINE) or at the FOCUSABLE level (split the focused LINE's parent).
+- **VISIT** - when recursively walking through the DOM, "visiting" means a callback will be called and the element passed to the consumer; both the FOCUS and CURSOR have different VISIT behaviours.
+- **DESCEND** - when recursively walking through the DOM, "descending" means the walk will descend and recurse through the elements children; both the FOCUS and CURSOR have different DESCEND behaviours.
 
 - **SHALLOW_TOKENIZATION** — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
   - Source of truth: search docstrings for SHALLOW_TOKENIZATION.
 
+### CURSOR operations
+
+- **JOIN** — when a TOKEN (t) is joined with the next or previous (p): p is removed and its text is appended or prepended to t.
+- **SPLIT_BY_TOKEN** — splitting a TOKEN's parent before or after the TOKEN. The split applies to the parent (which may be the LINE or an inline element like `<em>`). LINE is always the highest ancestor we split at.
+- **SPLIT_BY_LINE** — splitting a LINE's parent element before or after the LINE. Can be done with reference to a TOKEN (split at the TOKEN's LINE) or at the FOCUSABLE level (split the focused LINE's parent).
 - **TOGGLE_COLLAPSE** — toggle COLLAPSED_TOKEN state on/off (trailing space).
 - **TOGGLE_PADDED** — toggle PADDED_TOKEN state on/off (leading space). Typically relevant when the previous LINE_SIBLING is an ISLAND.
 

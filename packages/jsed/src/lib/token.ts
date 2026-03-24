@@ -18,7 +18,9 @@ import {
   getLine,
   getPreviousVisibleSibling,
   getPreviousTokenSibling,
-  getNextTokenSibling
+  getNextTokenSibling,
+  isImplicitLine,
+  isLine
 } from './traversal.js';
 
 // Re-export traversal predicates that were historically part of this module,
@@ -184,25 +186,30 @@ export function tokenizeLine(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Create an IMPLICIT_LINE starting with `textNode` and slurping up anything
- * directly next of it that is a text node or an inline node.
+ * Create an IMPLICIT_LINE starting with `startNode` and slurping up anything
+ * directly next of it that is a text node or an INLINE.
+ *
+ * `startNode` may be a text node or an INLINE element — either can begin an
+ * IMPLICIT_LINE.
  */
-function buildImplicitLine(textNode: Node): HTMLElement | null {
-  if (!textNode.parentNode) {
+function buildImplicitLine(startNode: Node): HTMLElement | null {
+  if (!startNode.parentNode) {
     throw new Error(`Expected node to have parent.`);
   }
-  textNode.parentNode.normalize(); // ok, so really there is just one text node now...
-  if (!textNode.nodeValue || /^\s+$/.test(textNode.nodeValue)) {
-    // Space nodes are generated between tags as an artifact of the html source.
-    // Ignore these.
-    return null;
+  startNode.parentNode.normalize();
+
+  // Skip whitespace-only text nodes — they're artifacts of HTML source formatting.
+  if (startNode.nodeType === Node.TEXT_NODE) {
+    if (!startNode.nodeValue || /^\s+$/.test(startNode.nodeValue)) {
+      return null;
+    }
   }
 
   const implicitLine = document.createElement('span');
   implicitLine.className = JSED_IMPLICIT_CLASS;
-  textNode.parentNode.insertBefore(implicitLine, textNode);
+  startNode.parentNode.insertBefore(implicitLine, startNode);
 
-  for (let sib: Node | null = textNode; sib; ) {
+  for (let sib: Node | null = startNode; sib; ) {
     if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
       const nextSib: ChildNode | null = sib.nextSibling;
       implicitLine.appendChild(sib);
@@ -217,31 +224,34 @@ function buildImplicitLine(textNode: Node): HTMLElement | null {
 /**
  * Find and handle IMPLICIT_LINE's.
  *
+ * Wraps bare text/INLINE nodes that follow a LINE sibling — these are not
+ * reachable by FOCUS on their own, so we wrap them in a `<span>` with
+ * JSED_IMPLICIT_CLASS to make them a FOCUSABLE LINE.
+ *
+ * Only triggers when the previous sibling is a LINE (not an ISLAND or other
+ * non-block FOCUSABLE). Text next to an ISLAND within a LINE is part of that
+ * LINE and doesn't need wrapping.
+ *
  * Run this on the whole doc at the beginning BEFORE any tokenization occurs.
  */
 export function tagImplicitLines(root: HTMLElement) {
   for (const node of findNextNode(root, root, {
     visit: (node) => node?.nodeType === Node.ELEMENT_NODE
   })) {
-    // if (isImplicitLine(node)) {
-    //   // findNextNode may walk over the IMPLICIT_LINE we just created causing an
-    //   // infinite loop.
-    //   continue;
-    // }
+    if (isImplicitLine(node)) {
+      continue;
+    }
     for (let sib = node.firstChild; sib; ) {
       if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
-        // const implicitLine = buildImplicitLine(sib);
-        // if (implicitLine) {
-        //   sib = implicitLine.nextSibling;
-        //   continue;
-        // }
-
         const prev = sib.previousSibling;
-        if (prev) {
-          if (isFocusable(prev) && !isToken(prev) && !isInline(prev)) {
+        if (prev && isLine(prev)) {
+          // Only wrap after block-level LINE's that cause a visual line break.
+          // Inline-level LINE's (inline-block, inline-flex, etc.) sit on the
+          // same visual line as the surrounding text.
+          const display = window.getComputedStyle(prev as HTMLElement).display;
+          if (!display.startsWith('inline')) {
             const implicitLine = buildImplicitLine(sib);
             if (implicitLine) {
-              // An implicit line was created and sucked up continguous text tokens.
               sib = implicitLine.nextSibling;
               continue;
             }

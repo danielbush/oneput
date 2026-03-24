@@ -39,7 +39,8 @@ describe('tokenizeLine', () => {
   });
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {
-    // arrange
+    // arrange — "outer" after div2 is wrapped in IMPLICIT_LINE by tagImplicitLines.
+    // tokenizeLine(div1) returns null because there's no direct text to tokenize.
     const doc = makeRoot(
       div(
         { id: 'div1' }, //
@@ -52,9 +53,9 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(div1);
 
-    // assert
+    // assert — "outer" is in IMPLICIT_LINE, not tokenized at this level
     expect(div1).toMatchSnapshot();
-    expect(first!.textContent!.trim()).toBe('outer');
+    expect(first).toBeNull();
   });
 
   test('text before NESTED_LINE: <div>outer<div>nested</div></div>', () => {
@@ -168,7 +169,7 @@ describe('tokenizeLine', () => {
   });
 });
 
-describe.skip('tagImplicitLines', () => {
+describe('tagImplicitLines', () => {
   test('case 1 - simple', () => {
     // arrange
     const doc = makeRoot(

@@ -11,6 +11,14 @@ import {
   isBlockTransparent
 } from '../traversal.js';
 import { tokenizeLine, isPadded, addAnchors } from '../token.js';
+import { JSED_IMPLICIT_CLASS } from '../constants.js';
+
+/** Tokenize all IMPLICIT_LINE's within a root element. */
+function tokenizeImplicitLines(root: HTMLElement) {
+  for (const el of root.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`)) {
+    tokenizeLine(el as HTMLElement);
+  }
+}
 
 // INLINE_COMPUTED_STYLE
 const inlineStyle = { style: 'display:inline;' };
@@ -267,14 +275,19 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['eee', 'ddd', 'ccc', 'bbb', 'aaa']);
   });
 
-  test('NESTED_LINE: CURSOR skips the nested div', () => {
-    // arrange
+  test('NESTED_LINE: CURSOR descends nested div and IMPLICIT_LINE', () => {
+    // arrange — "bbb" after the nested div is wrapped in IMPLICIT_LINE by tagImplicitLines
     const doc = makeRoot(div({ id: 'div1' }, 'aaa ', div({ id: 'div2' }, 'nested'), ' bbb'));
-    const first = tokenizeLine(byId(doc, 'div1'))!;
+    const div1 = byId(doc, 'div1');
+    tokenizeLine(div1);
+    tokenizeLine(byId(doc, 'div2'));
+    tokenizeImplicitLines(div1);
+    const first = div1.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert
-    expect(collectForward(first)).toEqual(['aaa', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'aaa']);
+    // act & assert — CURSOR traverses through nested div (TRANSPARENT_BLOCK)
+    // and IMPLICIT_LINE (also TRANSPARENT_BLOCK)
+    expect(collectForward(first, div1)).toEqual(['aaa', 'nested', 'bbb']);
+    expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', 'nested', 'aaa']);
   });
 
   // ISLAND traversal covered thoroughly in '(1) ISLAND' describe block below
@@ -446,35 +459,34 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 
   test('nested div at middle of LINE: <div>aaa <div>nested</div> bbb</div>', () => {
     // arrange — nested div is not INLINE, not ISLAND → category (2) by default
+    // "bbb" after the nested div is wrapped in IMPLICIT_LINE (also TRANSPARENT_BLOCK)
     const doc = makeRoot(
       div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb')
     );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
-    // Manually tokenize the nested element since tokenizeLine does SHALLOW_TOKENIZATION
-    const inner = byId(doc, 'inner');
-    tokenizeLine(inner);
+    tokenizeLine(byId(doc, 'inner'));
+    tokenizeImplicitLines(line);
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — CURSOR descends into the nested div and visits its TOKEN's
+    // act & assert — CURSOR descends into the nested div and IMPLICIT_LINE
     expect(collectForward(first, line)).toEqual(['aaa', 'nested', 'bbb']);
   });
 
   test('nested div at start of LINE: <div><div>nested</div> aaa bbb</div>', () => {
-    // arrange
+    // arrange — "aaa bbb" after the nested div is wrapped in IMPLICIT_LINE
     const doc = makeRoot(
       div({ id: 'outer' }, div({ id: 'inner' }, 'nested'), ' aaa bbb')
     );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
-    const inner = byId(doc, 'inner');
-    tokenizeLine(inner);
+    tokenizeLine(byId(doc, 'inner'));
+    tokenizeImplicitLines(line);
 
-    // The first LINE_SIBLING should be the TOKEN inside the nested div
-    const innerToken = inner.querySelector('.jsed-token') as HTMLElement;
+    const innerToken = byId(doc, 'inner').querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert
+    // act & assert — CURSOR descends through nested div and IMPLICIT_LINE
     expect(collectForward(innerToken, line)).toEqual(['nested', 'aaa', 'bbb']);
   });
 
@@ -496,6 +508,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 
   test('nested div inside INLINE: <div>aaa <em>bbb <div>nested</div> ccc</em> ddd</div>', () => {
     // arrange — uses <div> not <p> as outer because <p> auto-closes on block children
+    // "ccc" after the nested div inside em is wrapped in IMPLICIT_LINE
     const doc = makeRoot(
       div(
         { id: 'outer' },
@@ -506,17 +519,17 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
-    const inner = byId(doc, 'inner');
-    tokenizeLine(inner);
+    tokenizeLine(byId(doc, 'inner'));
+    tokenizeImplicitLines(line);
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — descend through INLINE, then descend into nested div, then back out
+    // act & assert — descend through INLINE, then nested div, then IMPLICIT_LINE for "ccc"
     expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
   });
 
   test('deeply nested blocks: <div>aaa <div>bbb <div>ccc</div> ddd</div> eee</div>', () => {
-    // arrange
+    // arrange — "ddd" and "eee" after block-level divs are wrapped in IMPLICIT_LINE's
     const doc = makeRoot(
       div(
         { id: 'outer' },
@@ -529,15 +542,17 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     tokenizeLine(line);
     tokenizeLine(byId(doc, 'mid'));
     tokenizeLine(byId(doc, 'deep'));
+    tokenizeImplicitLines(line);
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — CURSOR descends through both nested levels
+    // act & assert — CURSOR descends through all nested levels and IMPLICIT_LINE's
     expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
   });
 
   test('inline-block at middle of LINE', () => {
-    // arrange — inline-block is also category (2)
+    // arrange — inline-block is also category (2).
+    // Inline-block does NOT trigger IMPLICIT_LINE (not block-level).
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb')
     );
@@ -554,7 +569,8 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 
   test('nested block containing only an ANCHOR', () => {
     // arrange — a nested div with no text content yet; addAnchors creates
-    // an ANCHOR inside the empty TRANSPARENT_BLOCK so the CURSOR can land on it
+    // an ANCHOR inside the empty TRANSPARENT_BLOCK so the CURSOR can land on it.
+    // "bbb" after the nested div is wrapped in IMPLICIT_LINE.
     const doc = makeRoot(
       div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, ''), ' bbb')
     );
@@ -563,16 +579,16 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const inner = byId(doc, 'inner');
     tokenizeLine(inner);
     addAnchors(inner);
+    tokenizeImplicitLines(line);
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — CURSOR should still traverse into the nested div and land on the ANCHOR
+    // act & assert — CURSOR traverses: aaa, (anchor inside inner div), bbb (in IMPLICIT_LINE)
     const siblings: HTMLElement[] = [first];
     let cur: HTMLElement | null = first;
     while ((cur = getNextLineSibling(cur, line))) {
       siblings.push(cur);
     }
-    // aaa, (anchor inside inner div), bbb = 3 LINE_SIBLING's
     expect(siblings.length).toBe(3);
   });
 });

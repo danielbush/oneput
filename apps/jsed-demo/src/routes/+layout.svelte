@@ -1,7 +1,7 @@
 <script lang="ts">
   import '$lib/jsed/styles/oneput-defaults.css';
   import '@oneput/jsed/styles/jsed-defaults.css';
-  import { JSED_DOM_ROOT_ID } from '@oneput/jsed';
+  import { JSED_APP_ROOT_ID } from '@oneput/jsed';
   import { Anchor, OneputCornerButton, OneputController, Controller } from '@oneput/oneput';
   import { icons } from '$lib/oneput/app/_icons.js';
   import { Root } from '$lib/oneput/app/Root.js';
@@ -18,7 +18,7 @@
 </svelte:head>
 
 {@render children()}
-<div id={JSED_DOM_ROOT_ID}>
+<div id={JSED_APP_ROOT_ID}>
   <Anchor>
     <OneputController run={(ctl: Controller) => Root.create(ctl)} />
   </Anchor>

@@ -38,7 +38,7 @@ const utils = {
 export {
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
-  JSED_DOM_ROOT_ID,
+  JSED_APP_ROOT_ID,
   JSED_IGNORE_CLASS
 } from './lib/constants.js';
 export { utils };

@@ -1,5 +1,5 @@
 import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
-import { JSED_DOM_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
+import { JSED_APP_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
 import { isIsland, isFocusable } from './lib/traversal.js';
 import * as token from './lib/token.js';
 import {
@@ -79,7 +79,7 @@ export class Nav {
   }
 
   handleElementClick = (evt: MouseEvent) => {
-    const app_root_node = document.getElementById(JSED_DOM_ROOT_ID);
+    const app_root_node = document.getElementById(JSED_APP_ROOT_ID);
     if (app_root_node) {
       const node = evt.target as Element;
       if (app_root_node.contains(node)) {

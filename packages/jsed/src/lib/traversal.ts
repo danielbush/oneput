@@ -10,7 +10,7 @@ import {
   JSED_IMPLICIT_CLASS,
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS,
-  JSED_DOM_ROOT_ID,
+  JSED_APP_ROOT_ID,
   JSED_IGNORE_CLASS,
   JSED_CURSOR_OPAQUE_CLASS
 } from './constants.js';
@@ -61,7 +61,7 @@ export function isIsland(el: Element | Node | null | undefined): boolean {
     if (el.classList.contains('katex')) {
       return true;
     }
-    if (el.id === JSED_DOM_ROOT_ID) {
+    if (el.id === JSED_APP_ROOT_ID) {
       return true;
     }
   }
@@ -91,7 +91,7 @@ export function isFocusable(el: EventTarget | Element | null | undefined): el is
   }
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
-    if (el?.id === JSED_DOM_ROOT_ID) {
+    if (el?.id === JSED_APP_ROOT_ID) {
       return false;
     }
     // Tokens (text) get a cursor and are not treated as focusable.

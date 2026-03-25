@@ -21,7 +21,7 @@ import {
   getNextTokenSibling,
   isImplicitLine,
   isLine,
-  isBlockTransparent
+  isTransparentBlock
 } from './traversal.js';
 
 // Re-export traversal predicates that were historically part of this module,
@@ -37,7 +37,7 @@ export {
   isLineSibling,
   isLine,
   isCursorBoundary,
-  isBlockTransparent,
+  isTransparentBlock,
   isSameLine,
   getLine,
   getPreviousVisibleSibling,
@@ -167,7 +167,7 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
     }
     // Recurse into INLINE's, TOKEN's, and TRANSPARENT_BLOCK's.
     // Be aware of INLINE_COMPUTED_STYLE .
-    if (isToken(child) || isInline(child) || isBlockTransparent(child)) {
+    if (isToken(child) || isInline(child) || isTransparentBlock(child)) {
       const token = tokenizeLineRec(child);
       if (!first) first = token;
     } else if (child.nodeType === Node.TEXT_NODE) {

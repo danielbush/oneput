@@ -169,7 +169,7 @@ export function isCursorBoundary(el: Node | ChildNode | ParentNode | null): bool
  * Detect TRANSPARENT_BLOCK — the default for any non-INLINE, non-ISLAND FOCUSABLE
  * that is not a OPAQUE_BLOCK. The CURSOR descends into it seamlessly (like INLINE).
  */
-export function isBlockTransparent(el: Node | ChildNode | ParentNode | null): boolean {
+export function isTransparentBlock(el: Node | ChildNode | ParentNode | null): boolean {
   return isLine(el) && !isCursorBoundary(el);
 }
 
@@ -282,7 +282,7 @@ export type LineSiblingOptions = {
 function lineSiblingDescend(options?: LineSiblingOptions): (n: ParentNode | ChildNode) => boolean {
   return (n) => {
     if (isInline(n)) return true;
-    if (isBlockTransparent(n)) {
+    if (isTransparentBlock(n)) {
       options?.onEnterBlockTransparent?.(n as HTMLElement);
       return true;
     }

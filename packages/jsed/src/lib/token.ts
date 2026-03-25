@@ -20,7 +20,8 @@ import {
   getPreviousTokenSibling,
   getNextTokenSibling,
   isImplicitLine,
-  isLine
+  isLine,
+  isBlockTransparent
 } from './traversal.js';
 
 // Re-export traversal predicates that were historically part of this module,
@@ -150,6 +151,10 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
 
 /**
  * Recursively tokenize a LINE. Returns the first TOKEN created.
+ *
+ * Recurses into INLINE's and TRANSPARENT_BLOCK's (including IMPLICIT_LINE's)
+ * — everything the CURSOR would descend through. Skips OPAQUE_BLOCK's and
+ * ISLAND's but continues past them to tokenize the rest of the LINE.
  */
 function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
   // Record childNodes before we mutate and convert to array as the NodeList is
@@ -160,22 +165,23 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
     if (isToken(line)) {
       continue;
     }
-    // Recurse into inline tags eg em-tag.
+    // Recurse into INLINE's, TOKEN's, and TRANSPARENT_BLOCK's.
     // Be aware of INLINE_COMPUTED_STYLE .
-    if (isToken(child) || isInline(child)) {
+    if (isToken(child) || isInline(child) || isBlockTransparent(child)) {
       const token = tokenizeLineRec(child);
       if (!first) first = token;
-    } else {
+    } else if (child.nodeType === Node.TEXT_NODE) {
       const token = replaceTextNode(child);
       if (!first) first = token;
     }
+    // OPAQUE_BLOCK's, ISLAND's, and other elements: skip but continue loop
   }
   return first;
 }
 
 /**
- * Tokenize a LINE (SHALLOW_TOKENIZATION — does not recurse into NESTED_LINE's).
- * Returns the first TOKEN created, or null if there was nothing to tokenize.
+ * Tokenize a LINE — recurses into TRANSPARENT_BLOCK's but not OPAQUE_BLOCK's
+ * or ISLAND's. Returns the first TOKEN created, or null if nothing to tokenize.
  */
 export function tokenizeLine(el: HTMLElement): HTMLElement | null {
   if (!isFocusable(el)) {

@@ -41,7 +41,7 @@ describe('tokenizeLine', () => {
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {
     // arrange — "outer" after div2 is wrapped in IMPLICIT_LINE by tagImplicitLines.
-    // tokenizeLine(div1) returns null because there's no direct text to tokenize.
+    // tokenizeLine recurses into both TRANSPARENT_BLOCK's (div2 and IMPLICIT_LINE).
     const doc = makeRoot(
       div(
         { id: 'div1' }, //
@@ -54,9 +54,11 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(div1);
 
-    // assert — "outer" is in IMPLICIT_LINE, not tokenized at this level
-    expect(div1).toMatchSnapshot();
-    expect(first).toBeNull();
+    // assert — first TOKEN is "nested" (inside div2), "outer" is in IMPLICIT_LINE
+    expect(first).not.toBeNull();
+    expect(first!.textContent!.trim()).toBe('nested');
+    const implicit = div1.querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit!.querySelector('.jsed-token')!.textContent!.trim()).toBe('outer');
   });
 
   test('text before NESTED_LINE: <div>outer<div>nested</div></div>', () => {
@@ -73,9 +75,9 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(div1);
 
-    // assert
-    expect(div1).toMatchSnapshot();
+    // assert — "outer" tokenized at div1 level, "nested" tokenized inside div2
     expect(first!.textContent!.trim()).toBe('outer');
+    expect(byId(doc, 'div2').querySelector('.jsed-token')!.textContent!.trim()).toBe('nested');
   });
 
   test('only NESTED_LINE, no text: <div><div>nested</div></div>', () => {
@@ -86,13 +88,13 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(div1);
 
-    // assert
-    expect(div1).toMatchSnapshot();
-    console.log('first token:', first?.textContent ?? 'null');
+    // assert — recurses into div2 (TRANSPARENT_BLOCK) and tokenizes "nested"
+    expect(first).not.toBeNull();
+    expect(first!.textContent!.trim()).toBe('nested');
   });
 
-  test('inline-block NESTED_LINE: <p>outer<span style="display:inline-block">nested</span></p>', () => {
-    // arrange
+  test('inline-block TRANSPARENT_BLOCK: <p>outer<span style="display:inline-block">nested</span></p>', () => {
+    // arrange — inline-block span is a TRANSPARENT_BLOCK
     const doc = makeRoot(
       p(
         { id: 'p1' }, //
@@ -105,13 +107,37 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(p1);
 
-    // assert
-    expect(p1).toMatchSnapshot();
+    // assert — "outer" tokenized at p1 level, "nested" tokenized inside the span
     expect(first!.textContent!.trim()).toBe('outer');
+    expect(doc.document.getElementById('span1')!.querySelector('.jsed-token')!.textContent!.trim()).toBe('nested');
+  });
+
+  test('nested div at middle: <div>aaa <div>nested</div> bbb</div>', () => {
+    // arrange — "bbb" after the nested div is wrapped in IMPLICIT_LINE
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        'aaa ',
+        div({ id: 'div2' }, 'nested'),
+        ' bbb'
+      )
+    );
+    const div1 = byId(doc, 'div1');
+
+    // act
+    const first = tokenizeLine(div1);
+
+    // assert — tokenizeLine should tokenize both "aaa" and "bbb" (inside IMPLICIT_LINE)
+    expect(first).not.toBeNull();
+    expect(first!.textContent!.trim()).toBe('aaa');
+    const implicit = div1.querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.querySelector('.jsed-token')).not.toBeNull();
+    expect(implicit!.querySelector('.jsed-token')!.textContent!.trim()).toBe('bbb');
   });
 
   describe('SHALLOW_TOKENIZATION', () => {
-    test('case 1', () => {
+    test('tokenizeLine recurses into TRANSPARENT_BLOCK children', () => {
       // arrange
       const doc = makeRoot(
         div(
@@ -135,8 +161,9 @@ describe('tokenizeLine', () => {
       // act
       tokenizeLine(div1);
 
-      // assert
-      expect(div1).toMatchSnapshot('Should not tokenize p1 and p2');
+      // assert — both p1 and p2 are TRANSPARENT_BLOCK, so both are tokenized
+      expect(byId(doc, 'p1').querySelector('.jsed-token')).not.toBeNull();
+      expect(byId(doc, 'p2').querySelector('.jsed-token')).not.toBeNull();
     });
 
     test('case 2', () => {

@@ -51,12 +51,12 @@ We introduce the idea of a CURSOR (defined below), allowing us to characterise F
 - **LINE_MEMBER** - FOCUSABLE's belong to the same LINE and are called LINE_MEMBER's if the first LINE ancestor in their ancestor chain is the same LINE.
   - Example: a TOKEN that either has a LINE as their parent or an INLINE as parent that belongs to a LINE (etc).
 - **NESTED_LINE** - a LINE that has another LINE as an ancestor.  Currently this includes OPAQUE_BLOCK and TRANSPARENT_BLOCK elements.  In OPAQUE_BLOCK we deny the CURSOR the ability to descend when moving next, but we could move the FOCUS into that element and treat it as the new LINE.  For TRANSPARENT_BLOCK, the cursor will descend, effectively treating it like an INLINE, but we can also FOCUS on it and treat as LINE in its own right.
-- **LINE_SIBLING** — by sibling we mean something we can traverse to and from using the CURSOR's moveNext / movePrevious operations subject to the following:
+- **LINE_SIBLING** — by sibling we mean something the CURSOR can VISIT within a LINE; which equates to the following:
   - it must belong to the LINE
   - it can be a TOKEN
   - it can be CURSOR_OPAQUE — CURSOR visits (does not descend)
-  - it is not CURSOR_TRANSPARENT - CURSOR does not visit (but will descend)
-  - anything visited by CURSOR in a CURSOR_TRANSPARENT that belongs to the LINE;
+  - it is not CURSOR_TRANSPARENT or INLINE - CURSOR does not visit (but will descend)
+  - anything visited by CURSOR in a CURSOR_TRANSPARENT or INLINE where either belongs to the LINE;
     - Example: the TOKEN's in an em-tag within a p-tag are LINE_SIBLING's for the p-tag.
   - Source of truth: `isLineSibling` in token.ts.
 - **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Non-LINE_SIBLING LINE_MEMBER's act as separators between LINE_SEGMENT's.

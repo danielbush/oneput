@@ -211,7 +211,9 @@ export class ElementIndicator {
       span.style.transform = leftAligned ? '' : 'translateX(-100%)';
     } else {
       span.style.top = `${rect.top - 5}px`;
-      span.style.transform = leftAligned ? 'translateY(-100%)' : 'translateY(-100%) translateX(-100%)';
+      span.style.transform = leftAligned
+        ? 'translateY(-100%)'
+        : 'translateY(-100%) translateX(-100%)';
     }
 
     return span;

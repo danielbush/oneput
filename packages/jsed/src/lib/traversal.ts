@@ -12,7 +12,7 @@ import {
   JSED_TOKEN_CLASS,
   JSED_APP_ROOT_ID,
   JSED_IGNORE_CLASS,
-  JSED_CURSOR_OPAQUE_CLASS
+  JSED_CURSOR_TRANSPARENT_CLASS
 } from './constants.js';
 import { findNextNode, findPreviousNode } from './walk2.js';
 
@@ -157,20 +157,26 @@ export function isLine(el: Node | ChildNode | ParentNode | null): boolean {
 }
 
 /**
- * Detect OPAQUE_BLOCK — a FOCUSABLE explicitly marked so FOCUS can descend
- * but the CURSOR treats it as opaque (visit=yes, descend=no).
+ * Detect OPAQUE_BLOCK — the default for any non-INLINE, non-ISLAND FOCUSABLE (LINE).
+ * FOCUS can descend but the CURSOR treats it as opaque (visit=yes, descend=no).
+ * A LINE is opaque unless explicitly marked with JSED_CURSOR_TRANSPARENT_CLASS.
+ * IMPLICIT_LINE's are never opaque — they are synthetic wrappers that always descend.
  */
 export function isCursorBoundary(el: Node | ChildNode | ParentNode | null): boolean {
   if (!el || !(el instanceof Element)) return false;
-  return el.classList.contains(JSED_CURSOR_OPAQUE_CLASS);
+  if (isImplicitLine(el)) return false;
+  return isLine(el) && !el.classList.contains(JSED_CURSOR_TRANSPARENT_CLASS);
 }
 
 /**
- * Detect TRANSPARENT_BLOCK — the default for any non-INLINE, non-ISLAND FOCUSABLE
- * that is not a OPAQUE_BLOCK. The CURSOR descends into it seamlessly (like INLINE).
+ * Detect TRANSPARENT_BLOCK — a LINE explicitly marked with JSED_CURSOR_TRANSPARENT_CLASS,
+ * or an IMPLICIT_LINE (always transparent). The CURSOR descends into it seamlessly
+ * (like INLINE), visit=no, descend=yes.
  */
 export function isTransparentBlock(el: Node | ChildNode | ParentNode | null): boolean {
-  return isLine(el) && !isCursorBoundary(el);
+  if (!el || !(el instanceof Element)) return false;
+  if (isImplicitLine(el)) return true;
+  return isLine(el) && el.classList.contains(JSED_CURSOR_TRANSPARENT_CLASS);
 }
 
 export function isImplicitLine(node: Node): boolean {
@@ -180,7 +186,7 @@ export function isImplicitLine(node: Node): boolean {
   );
 }
 
-/** Visit predicate for LINE_SIBLING traversal: TOKEN's and ISLAND's. */
+/** Visit predicate for LINE_SIBLING traversal: TOKEN's, ISLAND's, and OPAQUE_BLOCK's. */
 export function isLineSibling(el: ParentNode | ChildNode): boolean {
   return isToken(el) || isIsland(el) || isCursorBoundary(el);
 }
@@ -293,7 +299,11 @@ function lineSiblingDescend(options?: LineSiblingOptions): (n: ParentNode | Chil
 /**
  * Get previous LINE_SIBLING within `line`.
  */
-export function getPreviousLineSibling(el: HTMLElement, line: HTMLElement, options?: LineSiblingOptions): HTMLElement | null {
+export function getPreviousLineSibling(
+  el: HTMLElement,
+  line: HTMLElement,
+  options?: LineSiblingOptions
+): HTMLElement | null {
   for (const prev of findPreviousNode(el, line, {
     visit: isLineSibling,
     descend: lineSiblingDescend(options)
@@ -306,7 +316,11 @@ export function getPreviousLineSibling(el: HTMLElement, line: HTMLElement, optio
 /**
  * Get next LINE_SIBLING within `line`.
  */
-export function getNextLineSibling(el: HTMLElement, line: HTMLElement, options?: LineSiblingOptions): HTMLElement | null {
+export function getNextLineSibling(
+  el: HTMLElement,
+  line: HTMLElement,
+  options?: LineSiblingOptions
+): HTMLElement | null {
   for (const next of findNextNode(el, line, {
     visit: isLineSibling,
     descend: lineSiblingDescend(options)
@@ -319,7 +333,10 @@ export function getNextLineSibling(el: HTMLElement, line: HTMLElement, options?:
 /**
  * Get the first LINE_SIBLING in a LINE — may be a TOKEN or an ISLAND.
  */
-export function getFirstLineSibling(line: HTMLElement, options?: LineSiblingOptions): HTMLElement | null {
+export function getFirstLineSibling(
+  line: HTMLElement,
+  options?: LineSiblingOptions
+): HTMLElement | null {
   const descendFn = lineSiblingDescend(options);
   for (const node of findNextNode(line, line, {
     visit: isLineSibling,

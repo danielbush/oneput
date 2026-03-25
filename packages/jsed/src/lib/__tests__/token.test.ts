@@ -41,11 +41,11 @@ describe('tokenizeLine', () => {
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {
     // arrange — "outer" after div2 is wrapped in IMPLICIT_LINE by tagImplicitLines.
-    // tokenizeLine recurses into both TRANSPARENT_BLOCK's (div2 and IMPLICIT_LINE).
+    // tokenizeLine recurses into TRANSPARENT_BLOCK's (div2 marked transparent, and IMPLICIT_LINE).
     const doc = makeRoot(
       div(
         { id: 'div1' }, //
-        div({ id: 'div2' }, 'nested'),
+        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
         'outer'
       )
     );
@@ -67,7 +67,7 @@ describe('tokenizeLine', () => {
       div(
         { id: 'div1' }, //
         'outer',
-        div({ id: 'div2' }, 'nested')
+        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested')
       )
     );
     const div1 = byId(doc, 'div1');
@@ -82,7 +82,9 @@ describe('tokenizeLine', () => {
 
   test('only NESTED_LINE, no text: <div><div>nested</div></div>', () => {
     // arrange
-    const doc = makeRoot(div({ id: 'div1' }, div({ id: 'div2' }, 'nested')));
+    const doc = makeRoot(
+      div({ id: 'div1' }, div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'))
+    );
     const div1 = byId(doc, 'div1');
 
     // act
@@ -94,12 +96,12 @@ describe('tokenizeLine', () => {
   });
 
   test('inline-block TRANSPARENT_BLOCK: <p>outer<span style="display:inline-block">nested</span></p>', () => {
-    // arrange — inline-block span is a TRANSPARENT_BLOCK
+    // arrange — inline-block span marked transparent
     const doc = makeRoot(
       p(
         { id: 'p1' }, //
         'outer',
-        `<span id="span1" style="display:inline-block;">nested</span>`
+        `<span id="span1" class="jsed-cursor-transparent" style="display:inline-block;">nested</span>`
       )
     );
     const p1 = byId(doc, 'p1');
@@ -109,7 +111,9 @@ describe('tokenizeLine', () => {
 
     // assert — "outer" tokenized at p1 level, "nested" tokenized inside the span
     expect(first!.textContent!.trim()).toBe('outer');
-    expect(doc.document.getElementById('span1')!.querySelector('.jsed-token')!.textContent!.trim()).toBe('nested');
+    expect(
+      doc.document.getElementById('span1')!.querySelector('.jsed-token')!.textContent!.trim()
+    ).toBe('nested');
   });
 
   test('nested div at middle: <div>aaa <div>nested</div> bbb</div>', () => {
@@ -118,7 +122,7 @@ describe('tokenizeLine', () => {
       div(
         { id: 'div1' },
         'aaa ',
-        div({ id: 'div2' }, 'nested'),
+        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
         ' bbb'
       )
     );
@@ -138,18 +142,18 @@ describe('tokenizeLine', () => {
 
   describe('SHALLOW_TOKENIZATION', () => {
     test('tokenizeLine recurses into TRANSPARENT_BLOCK children', () => {
-      // arrange
+      // arrange — p1 and p2 marked transparent so tokenizeLine descends into them
       const doc = makeRoot(
         div(
           { id: 'div1' },
           p(
-            { id: 'p1' },
+            { id: 'p1', class: 'jsed-cursor-transparent' },
             'foo ', //
             em(inlineStyleHack, 'bar'),
             ' baz'
           ),
           p(
-            { id: 'p2' }, //
+            { id: 'p2', class: 'jsed-cursor-transparent' }, //
             'foo ',
             em(inlineStyleHack, 'bar'),
             ' baz'

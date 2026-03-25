@@ -267,8 +267,15 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
   });
 
   test('NESTED_LINE: CURSOR descends nested div and IMPLICIT_LINE', () => {
-    // arrange — "bbb" after the nested div is wrapped in IMPLICIT_LINE by tagImplicitLines
-    const doc = makeRoot(div({ id: 'div1' }, 'aaa ', div({ id: 'div2' }, 'nested'), ' bbb'));
+    // arrange — nested div marked transparent; "bbb" wrapped in IMPLICIT_LINE by tagImplicitLines
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        'aaa ',
+        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
+        ' bbb'
+      )
+    );
     const div1 = byId(doc, 'div1');
     tokenizeLine(div1);
     tokenizeLine(byId(doc, 'div2'));
@@ -442,25 +449,25 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 });
 
 describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
-  // Category (2) is the DEFAULT for any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
+  // Category (2) requires explicit opt-in via jsed-cursor-transparent class.
   // This includes nested block elements (div inside div) and inline-block spans.
   // The CURSOR descends into them seamlessly, like an INLINE.
+  const transparent = 'jsed-cursor-transparent';
 
   test('nested div at middle of LINE: <div>aaa <div>nested</div> bbb</div>', () => {
-    // arrange — nested div is not INLINE, not ISLAND → category (2) by default
+    // arrange — nested div marked transparent so CURSOR descends
     // "bbb" after the nested div is wrapped in IMPLICIT_LINE (also TRANSPARENT_BLOCK)
     const doc = makeRoot(
       div(
         { id: 'outer' }, //
         'aaa ',
-        div({ id: 'inner' }, 'nested'),
+        div({ id: 'inner', class: transparent }, 'nested'),
         ' bbb'
       )
     );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
     tokenizeLine(byId(doc, 'inner'));
-
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
@@ -470,11 +477,12 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 
   test('nested div at start of LINE: <div><div>nested</div> aaa bbb</div>', () => {
     // arrange — "aaa bbb" after the nested div is wrapped in IMPLICIT_LINE
-    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, 'nested'), ' aaa bbb'));
+    const doc = makeRoot(
+      div({ id: 'outer' }, div({ id: 'inner', class: transparent }, 'nested'), ' aaa bbb')
+    );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
     tokenizeLine(byId(doc, 'inner'));
-
 
     const innerToken = byId(doc, 'inner').querySelector('.jsed-token') as HTMLElement;
 
@@ -484,7 +492,9 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 
   test('nested div at end of LINE: <div>aaa bbb <div>nested</div></div>', () => {
     // arrange
-    const doc = makeRoot(div({ id: 'outer' }, 'aaa bbb ', div({ id: 'inner' }, 'nested')));
+    const doc = makeRoot(
+      div({ id: 'outer' }, 'aaa bbb ', div({ id: 'inner', class: transparent }, 'nested'))
+    );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
     const inner = byId(doc, 'inner');
@@ -503,14 +513,13 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
       div(
         { id: 'outer' },
         'aaa ',
-        em(inlineStyle, 'bbb ', div({ id: 'inner' }, 'nested'), ' ccc'),
+        em(inlineStyle, 'bbb ', div({ id: 'inner', class: transparent }, 'nested'), ' ccc'),
         ' ddd'
       )
     );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
     tokenizeLine(byId(doc, 'inner'));
-
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
@@ -524,7 +533,12 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
       div(
         { id: 'outer' },
         'aaa ',
-        div({ id: 'mid' }, 'bbb ', div({ id: 'deep' }, 'ccc'), ' ddd'),
+        div(
+          { id: 'mid', class: transparent },
+          'bbb ',
+          div({ id: 'deep', class: transparent }, 'ccc'),
+          ' ddd'
+        ),
         ' eee'
       )
     );
@@ -533,7 +547,6 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     tokenizeLine(byId(doc, 'mid'));
     tokenizeLine(byId(doc, 'deep'));
 
-
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR descends through all nested levels and IMPLICIT_LINE's
@@ -541,9 +554,11 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
   });
 
   test('inline-block at middle of LINE', () => {
-    // arrange — inline-block is also category (2).
+    // arrange — inline-block marked transparent so CURSOR descends.
     // Inline-block does NOT trigger IMPLICIT_LINE (not block-level).
-    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb'));
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', span({ ...inlineBlockStyle, class: transparent }, 'inner'), ' bbb')
+    );
     const line = byId(doc, 'p1');
     tokenizeLine(line);
     const ib = line.querySelector('span[style*="inline-block"]') as HTMLElement;
@@ -559,13 +574,14 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     // arrange — a nested div with no text content yet; addAnchors creates
     // an ANCHOR inside the empty TRANSPARENT_BLOCK so the CURSOR can land on it.
     // "bbb" after the nested div is wrapped in IMPLICIT_LINE.
-    const doc = makeRoot(div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, ''), ' bbb'));
+    const doc = makeRoot(
+      div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, ''), ' bbb')
+    );
     const line = byId(doc, 'outer');
     tokenizeLine(line);
     const inner = byId(doc, 'inner');
     tokenizeLine(inner);
     addAnchors(inner);
-
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
@@ -580,15 +596,13 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 });
 
 describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
-  // A jsed-cursor-opaque element is visited as an opaque LINE_SIBLING.
+  // A non-INLINE, non-ISLAND FOCUSABLE is opaque by default (no class needed).
   // FOCUS can descend into it, but the CURSOR cannot.
-  const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
+  const opaqueBlock = { style: 'display:inline-block;' };
 
   test('OPAQUE_BLOCK at middle of LINE', () => {
     // arrange
-    const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'nested content'), ' bbb')
-    );
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'nested content'), ' bbb'));
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
     // act & assert — visited but not descended: shows as opaque element
@@ -598,10 +612,10 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
 
   test('OPAQUE_BLOCK at start of LINE', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, span(cursorOpaqueBlock, 'nested'), ' aaa bbb'));
+    const doc = makeRoot(p({ id: 'p1' }, span(opaqueBlock, 'nested'), ' aaa bbb'));
     const line = byId(doc, 'p1');
     tokenizeLine(line);
-    const opaque = line.querySelector('.jsed-cursor-opaque') as HTMLElement;
+    const opaque = line.querySelector('span[style]') as HTMLElement;
 
     // act & assert — opaque element is the first LINE_SIBLING
     expect(collectForward(opaque, line)).toEqual(['[span]', 'aaa', 'bbb']);
@@ -609,7 +623,7 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
 
   test('OPAQUE_BLOCK at end of LINE', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'aaa bbb ', span(cursorOpaqueBlock, 'nested')));
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa bbb ', span(opaqueBlock, 'nested')));
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
     // act & assert
@@ -619,12 +633,7 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
   test('OPAQUE_BLOCK inside INLINE', () => {
     // arrange
     const doc = makeRoot(
-      p(
-        { id: 'p1' },
-        'aaa ',
-        em(inlineStyle, 'bbb ', span(cursorOpaqueBlock, 'nested'), ' ccc'),
-        ' ddd'
-      )
+      p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb ', span(opaqueBlock, 'nested'), ' ccc'), ' ddd')
     );
     const first = tokenizeLine(byId(doc, 'p1'))!;
 

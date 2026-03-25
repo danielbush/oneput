@@ -125,7 +125,11 @@ describe('TokenManager.tokenize', () => {
     const doc = makeRoot(
       div(
         { id: 'div1' },
-        p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
+        p(
+          { id: 'p1', class: 'jsed-cursor-transparent' },
+          '<span class="katex" style="display:inline;">x²</span>',
+          ' aaa'
+        )
       )
     );
     const tm = new TokenManager();

@@ -45,12 +45,12 @@ Now that we've marked out INLINE's and ISLAND's we are left with NON_INLINE's wh
 
 We introduce the idea of a CURSOR (defined below), allowing us to characterise FOCUSABLE elements by both their FOCUS and CURSOR behaviours where behaviours are VISIT and DESCEND.
 
-- **LINE** — a FOCUSABLE that is not CURSOR_OPAQUE.  INLINE's are not considered LINE's, rather they're considered part of a LINE (eg an em-tag inside a p-tag).  TRANSPARENT_BLOCK's are LINE's. 
+- **LINE** — a FOCUSABLE that is not CURSOR_OPAQUE. INLINE's are not considered LINE's, rather they're considered part of a LINE (eg an em-tag inside a p-tag). TRANSPARENT_BLOCK's are LINE's.
   - Example: a `<div>`, `<p>` etc.
   - Source of truth: search docstrings for INLINE as these functions or methods may be used via negation; also search docstrings for LINE;
 - **LINE_MEMBER** - FOCUSABLE's belong to the same LINE and are called LINE_MEMBER's if the first LINE ancestor in their ancestor chain is the same LINE.
   - Example: a TOKEN that either has a LINE as their parent or an INLINE as parent that belongs to a LINE (etc).
-- **NESTED_LINE** - a LINE that has another LINE as an ancestor.  Currently this includes OPAQUE_BLOCK and TRANSPARENT_BLOCK elements.  In OPAQUE_BLOCK we deny the CURSOR the ability to descend when moving next, but we could move the FOCUS into that element and treat it as the new LINE.  For TRANSPARENT_BLOCK, the cursor will descend, effectively treating it like an INLINE, but we can also FOCUS on it and treat as LINE in its own right.
+- **NESTED_LINE** - a LINE that has another LINE as an ancestor. This includes both OPAQUE_BLOCK (default) and TRANSPARENT_BLOCK elements. In OPAQUE_BLOCK we deny the CURSOR the ability to descend when moving next, but we could move the FOCUS into that element and treat it as the new LINE. For TRANSPARENT_BLOCK (marked with `jsed-cursor-transparent`), the cursor will descend, effectively treating it like an INLINE, but we can also FOCUS on it and treat as LINE in its own right.
 - **LINE_SIBLING** — by sibling we mean something the CURSOR can VISIT within a LINE; which equates to the following:
   - it must belong to the LINE
   - it can be a TOKEN
@@ -71,10 +71,10 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
 
 - **CURSOR_OPAQUE** (CURSOR: visit=yes, descend=no) — the CURSOR lands on the element itself as an opaque LINE_SIBLING.
   - **ISLAND** — externally managed content (katex, `<img>`)
-  - **OPAQUE_BLOCK** — a FOCUSABLE explicitly marked with `jsed-cursor-opaque` class. FOCUS can descend into it, but the CURSOR treats it as opaque.
+  - **OPAQUE_BLOCK** — the default for any non-INLINE, non-ISLAND FOCUSABLE (LINE): block, inline-block, etc. FOCUS can descend into it, but the CURSOR treats it as opaque. To make a block transparent, mark it with `jsed-cursor-transparent` class.
 - **CURSOR_TRANSPARENT** (CURSOR: visit=no, descend=yes) — the CURSOR passes through to visit TOKEN children.
   - **INLINE** — inline-level markup (`<em>`, `<a>`)
-  - **TRANSPARENT_BLOCK** — default for any non-INLINE, non-ISLAND FOCUSABLE: block, inline-block, etc. (nested `<div>`, `<section>`). The CURSOR descends into their TOKEN's seamlessly, like an INLINE.
+  - **TRANSPARENT_BLOCK** — a non-INLINE, non-ISLAND FOCUSABLE explicitly marked with `jsed-cursor-transparent` class. The CURSOR descends into their TOKEN's seamlessly, like an INLINE. IMPLICIT_LINE's are always transparent.
 
 ## FOCUSABLE's by FOCUS and CURSOR (taxonomy)
 
@@ -89,7 +89,7 @@ graph LR
 
     C --> C1["INLINE_ISLAND <hr/>(inline katex, inline img)"]
     C --> C2["NON_INLINE_ISLAND <hr/>(block katex, block img)"]
-    
+
     %% CURSOR level
 
     D --> D1["CURSOR visit=no, descend=yes"]
@@ -97,39 +97,36 @@ graph LR
     %% D --> D3["visit=yes, descend=yes"]
     %% D --> D4["visit=no, descend=no"]
 
-    E --> E1["TRANSPARENT_BLOCK <br/><em>(div in div)</em><hr/>CURSOR visit=no, descend=yes"]
-    E --> E2["OPAQUE_BLOCK <br/><em>(jsed-cursor-opaque)</em><hr/>CURSOR visit=yes, descend=no"]
+    E --> E2["TRANSPARENT_BLOCK <br/><em>(jsed-cursor-transparent)</em><hr/>CURSOR visit=no, descend=yes"]
+    E --> E1["OPAQUE_BLOCK <br/><em>(default)</em><hr/>CURSOR visit=yes, descend=no"]
 
 
     C1 --> C1a["CURSOR visit=yes, descend=no"]
     C2 --> C2a["CURSOR visit=yes, descend=no"]
-    
+
     F["CURSOR_OPAQUE"]
     G["CURSOR_TRANSPARENT"]
-    
+
     C1a --> F
     C2a --> F
-    E2 --> F
+    E1 --> F
     D1 --> G
-    E1 --> G
-    
-    
+    E2 --> G
+
+
 ```
 
 In words:
 
 - All elements in the diagram are FOCUSABLE's so they are visitable by FOCUS; IGNORABLE's are not shown
 - the ISLAND branch (FOCUS descend=no) is much simpler because both FOCUS and CURSOR descend behaviours are set to "no".
-- ISLAND's tend to be special cases; putting them aside, an element is either INLINE or NON_INLINE and if NON_INLINE it defaults to TRANSPARENT_BLOCK unless we mark it as OPAQUE_BLOCK .  Be aware the definition of INLINE determines what is NON_INLINE by negation and may exclude display types like "inline-block".
+- ISLAND's tend to be special cases; putting them aside, an element is either INLINE or NON_INLINE and if NON_INLINE it defaults to OPAQUE_BLOCK unless we mark it with `jsed-cursor-transparent`. Be aware the definition of INLINE determines what is NON_INLINE by negation and may exclude display types like "inline-block". IMPLICIT_LINE's are always transparent regardless of class.
 - the INLINE sub-branch is simple because we only assume CURSOR visit=no,descend=yes
 - OPAQUE_BLOCK is CURSOR descend=no when acting as a LINE_SIBLING but if the FOCUS visits or descendes this element the CURSOR may end up visiting and descending elements within the OPAQUE_BLOCK.
 
-
-
-
 ## Tokens and Text and whitespace
 
-- **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters.  In the DOM, TOKEN's have a trailing space by default.  COLLAPSED_TOKEN and PADDED_TOKEN describe tokens with altered spacing.  TODO: POSITIVE_SPACE may further change TOKEN's behaviour.
+- **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters. In the DOM, TOKEN's have a trailing space by default. COLLAPSED_TOKEN and PADDED_TOKEN describe tokens with altered spacing. TODO: POSITIVE_SPACE may further change TOKEN's behaviour.
   - A TOKEN has 2² = 4 spacing states:
     - unpadded + uncollapsed: `'foo '` — the default
     - unpadded + collapsed: `'foo'` — COLLAPSED_TOKEN
@@ -174,9 +171,9 @@ In words:
 - **TOGGLE_COLLAPSE** — toggle COLLAPSED_TOKEN state on/off (trailing space).
 - **TOGGLE_PADDED** — toggle PADDED_TOKEN state on/off (leading space). Typically relevant when the previous LINE_SIBLING is an ISLAND.
 
-- **IMPLICIT_LINE** — TOKEN's and INLINE's that have a NON_INLINE as their previous LINE_SIBLING often resemble LINE's in their own right but they are not directly visitable by FOCUS at least as LINE's in their own right.  If we wrap a span tag around them, this tag is called an IMPLICIT_LINE and can receive the FOCUS.
+- **IMPLICIT_LINE** — TOKEN's and INLINE's that have a NON_INLINE as their previous LINE_SIBLING often resemble LINE's in their own right but they are not directly visitable by FOCUS at least as LINE's in their own right. If we wrap a span tag around them, this tag is called an IMPLICIT_LINE and can receive the FOCUS.
   - Example: `<div><p>here is the first line.</p>For some reason the 2nd line is not in a p-tag.</div>`.
-    - FOCUS will visit div, then p, then move on to something after p; this makes it look like the 2nd line is not reachable.  We need to construct an implicit line around the trailing tokens that form the 2nd line.
+    - FOCUS will visit div, then p, then move on to something after p; this makes it look like the 2nd line is not reachable. We need to construct an implicit line around the trailing tokens that form the 2nd line.
   - Example: `<div><p>here is the first line.</p><em>For</em> some reason the 2nd line is not in a p-tag.</div>`.
     - Here we need ot build the IMPLICIT_LINE around both the trailing TOKEN's AND the em-tag
   - Counter Example: `<div><em>this</em> text does not need an implicit LINE</div>`.

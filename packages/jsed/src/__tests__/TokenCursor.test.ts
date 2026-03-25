@@ -364,12 +364,15 @@ describe('TokenCursor motion', () => {
     });
 
     describe('(2) TRANSPARENT_BLOCK: visit=no, descend=yes', () => {
-      // Category (2) is the DEFAULT — any non-INLINE, non-ISLAND FOCUSABLE (CURSOR_TRANSPARENT).
+      // Category (2) requires explicit opt-in via jsed-cursor-transparent class.
       // Includes nested block elements (div in div) and inline-block spans.
+      const transparent = 'jsed-cursor-transparent';
 
       it('moveNext descends into nested div to visit its TOKEN', () => {
         // arrange
-        const doc = makeRoot(div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb'));
+        const doc = makeRoot(
+          div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, 'nested'), ' bbb')
+        );
         const { cursor } = tokenizeAndCursor(doc, '#outer');
 
         // act & assert
@@ -382,7 +385,9 @@ describe('TokenCursor motion', () => {
 
       it('movePrevious exits nested div seamlessly', () => {
         // arrange
-        const doc = makeRoot(div({ id: 'outer' }, 'aaa ', div({ id: 'inner' }, 'nested'), ' bbb'));
+        const doc = makeRoot(
+          div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, 'nested'), ' bbb')
+        );
         const { cursor } = tokenizeAndCursor(doc, '#outer');
         cursor.moveNext();
         cursor.moveNext();
@@ -401,7 +406,12 @@ describe('TokenCursor motion', () => {
           div(
             { id: 'outer' },
             'aaa ',
-            div({ id: 'mid' }, 'bbb ', div({ id: 'deep' }, 'ccc'), ' ddd'),
+            div(
+              { id: 'mid', class: transparent },
+              'bbb ',
+              div({ id: 'deep', class: transparent }, 'ccc'),
+              ' ddd'
+            ),
             ' eee'
           )
         );
@@ -422,7 +432,15 @@ describe('TokenCursor motion', () => {
       it('empty TRANSPARENT_BLOCK nesting: CURSOR recurses through to find TOKEN', () => {
         // arrange — mid and deep have no text of their own, only the innermost has content
         const doc = makeRoot(
-          div({ id: 'outer' }, 'aaa ', div({ id: 'mid' }, div({ id: 'deep' }, 'nested')), ' bbb')
+          div(
+            { id: 'outer' },
+            'aaa ',
+            div(
+              { id: 'mid', class: transparent },
+              div({ id: 'deep', class: transparent }, 'nested')
+            ),
+            ' bbb'
+          )
         );
         const { cursor } = tokenizeAndCursor(doc, '#outer');
 
@@ -437,7 +455,15 @@ describe('TokenCursor motion', () => {
       it('empty TRANSPARENT_BLOCK nesting: movePrevious recurses back out', () => {
         // arrange
         const doc = makeRoot(
-          div({ id: 'outer' }, 'aaa ', div({ id: 'mid' }, div({ id: 'deep' }, 'nested')), ' bbb')
+          div(
+            { id: 'outer' },
+            'aaa ',
+            div(
+              { id: 'mid', class: transparent },
+              div({ id: 'deep', class: transparent }, 'nested')
+            ),
+            ' bbb'
+          )
         );
         const { cursor } = tokenizeAndCursor(doc, '#outer');
         cursor.moveNext();
@@ -453,13 +479,12 @@ describe('TokenCursor motion', () => {
     });
 
     describe('(3) OPAQUE_BLOCK: visit=yes, descend=no', () => {
-      const cursorOpaqueBlock = { style: 'display:inline-block;', class: 'jsed-cursor-opaque' };
+      // OPAQUE_BLOCK is the default for non-INLINE, non-ISLAND FOCUSABLE's (no class needed).
+      const opaqueBlock = { style: 'display:inline-block;' };
 
       it('moveNext visits OPAQUE_BLOCK as opaque element', () => {
         // arrange
-        const doc = makeRoot(
-          p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden content'), ' bbb')
-        );
+        const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'hidden content'), ' bbb'));
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert
@@ -472,7 +497,7 @@ describe('TokenCursor motion', () => {
 
       it('movePrevious visits OPAQUE_BLOCK in reverse', () => {
         // arrange
-        const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(cursorOpaqueBlock, 'hidden'), ' bbb'));
+        const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'hidden'), ' bbb'));
         const { cursor } = tokenizeAndCursor(doc, '#p1');
         cursor.moveNext();
         cursor.moveNext();
@@ -903,9 +928,7 @@ describe('TokenCursor joinNext', () => {
 
   it('no-op when next LINE_SIBLING is an INLINE', () => {
     // arrange — 'aaa' followed by <em>bbb</em>
-    const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'))
-    );
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb')));
     const { cursor } = tokenizeAndCursor(doc, '#p1');
     expect(getValue(cursor.getToken())).toBe('aaa');
 
@@ -968,9 +991,7 @@ describe('TokenCursor joinPrevious', () => {
 
   it('no-op when previous LINE_SIBLING is an INLINE', () => {
     // arrange — <em>aaa</em> followed by 'bbb'
-    const doc = makeRoot(
-      p({ id: 'p1' }, em(inlineStyle, 'aaa'), ' bbb')
-    );
+    const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'aaa'), ' bbb'));
     const { cursor } = tokenizeAndCursor(doc, '#p1');
     cursor.moveNext(); // past 'aaa' inside em
     cursor.moveNext(); // on 'bbb'

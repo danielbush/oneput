@@ -43,6 +43,8 @@ export const JSED_IGNORE_CLASS = 'jsed-ignore';
 export const JSED_IMPLICIT_CLASS = 'jsed-implicit-line';
 
 /**
- * CSS class for OPAQUE_BLOCK — a FOCUSABLE that FOCUS can descend but the CURSOR treats as opaque.
+ * CSS class for TRANSPARENT_BLOCK — a non-INLINE, non-ISLAND FOCUSABLE that the CURSOR
+ * descends into (visit=no, descend=yes). By default such elements are OPAQUE_BLOCK;
+ * this class opts them in to transparency.
  */
-export const JSED_CURSOR_OPAQUE_CLASS = 'jsed-cursor-opaque';
+export const JSED_CURSOR_TRANSPARENT_CLASS = 'jsed-cursor-transparent';

@@ -3,10 +3,17 @@
     color: blue;
   }
   p + p {
-      0.5em;
+    margin-top: 0.5em;
+  }
+  p + p {
+    margin-top: 0.5em;
   }
   .jsed-token {
-      outline: 0.5px solid rgba(0, 0, 0, 0.40);
+    outline: 0.5px solid rgba(0, 0, 0, 0.4);
+  }
+
+  .jsed-ignore :not(.jsed-tag-indicator) {
+    background-color: rgba(0, 0, 0, 0.1);
   }
 </style>
 <script></script>
@@ -74,8 +81,10 @@
   </div>
   <h2>ISLAND (katex) in nested TRANSPARENT_BLOCK</h2>
   <div>
-    <div>
-      <div><span class="katex" style="display: inline">x²</span></div>
+    <div class="jsed-transparent-block">
+      <div class="jsed-transparent-block">
+        <span class="katex" style="display: inline">x²</span>
+      </div>
     </div>
   </div>
   <h2 style="clear: right">ISLAND (complex float)</h2>
@@ -94,13 +103,22 @@
       handling.
     </p>
   </div>
-  <h2 class="jsed-ignore" style="clear: right">TRANSPARENT_BLOCK (inline-block)</h2>
+  <h2 style="clear: right">TRANSPARENT_BLOCK (inline-block)</h2>
   <div>
     Before the inline-block...
-    <div style="border: solid black 1px; display: inline-block">this is an inline block</div>
+    <div class="jsed-transparent-block" style="border: solid black 1px; display: inline-block">
+      this is an inline block<br />another line
+    </div>
     After the inline block.
   </div>
-  <br class="jsed-ignore" />
+  <h2 style="clear: right">OPAQUE_BLOCK</h2>
+  <div>
+    before
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block"
+      >opaque to cursor</span
+    >
+    after
+  </div>
   <div>
     Before the inline-block...
     <div style="border: solid black 1px; display: inline-block">
@@ -109,34 +127,16 @@
     </div>
     After the inline block.
   </div>
-  <h2 style="clear: right">OPAQUE_BLOCK</h2>
   <div>
-    before
-    <span
-      class="jsed-cursor-opaque"
-      style="border: 1px dashed red; padding: 2px; display: inline-block"
-      >opaque to cursor</span
-    >
-    after
-  </div>
-  <div>
-    <span
-      class="jsed-cursor-opaque"
-      style="border: 1px dashed red; padding: 2px; display: inline-block"
-      >opaque at start</span
-    >
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at start</span>
     aaa bbb
   </div>
   <div>
     aaa bbb
-    <span
-      class="jsed-cursor-opaque"
-      style="border: 1px dashed red; padding: 2px; display: inline-block"
-      >opaque at end</span
-    >
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at end</span>
   </div>
   <h2>SHALLOW_TOKENIZATION</h2>
-  <p>
+  <p class="jsed-ignore">
     The following div contains mulltiple paragraph tags. If this div represents a large document we
     would hit performance issues if we tokenized it all.
   </p>

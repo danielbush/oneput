@@ -65,10 +65,20 @@ try running `mise trust`.
 
 There's a root `Taskfile.yml`.
 
+Key commands you should run after doing work:
+
+- `task format`
 - `task check`
 - `task test`
-  - should be fast narrow social unit tests; one way to a
+  - should be fast narrow social unit tests;
   - we will add separate tasks for running slower tests
+  
+You can run the same commands above but for individual projects.  Check `Taskfile.yml` or use the package or app name as a prefix:
+
+eg `task format` -> `task jsed:format`
+  
+In some situations you might want to test the build, but it's fine to not run this
+  
 - `task build`
 
 

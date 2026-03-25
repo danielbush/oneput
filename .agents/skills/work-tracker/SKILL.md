@@ -1,6 +1,6 @@
 ---
 name: work-tracker
-description: "Create and manage work items, tickets, and tracking artifacts in a project's work/ directory. Also handles session continuity, summarisation, and searching past work. Use when the human wants to create a ticket, track work, log a decision, review the backlog, move items between statuses, scan what's in flight, summarise what was done in a session, recall past work and decisions, or continue from a previous session. Triggers on phrases like: 'create a ticket', 'let's track this', 'create a work item', 'what's in the backlog', 'what's active', 'move this to done', 'summarise this session', 'write up what we did', 'remember when we...', 'what did we do with...', 'let's continue', 'where were we', 'what was I working on'. Bootstraps the work/ directory structure on first use if it doesn't exist."
+description: "Create and manage work items, tickets, and tracking artifacts in a project's work/ directory. Also handles session continuity, summarisation, and searching past work. Supports unsupervised tickets — self-contained work items queued for autonomous agent execution in backlog/unsupervised/. Use when the human wants to create a ticket, track work, log a decision, review the backlog, move items between statuses, scan what's in flight, summarise what was done in a session, recall past work and decisions, continue from a previous session, or queue work for an unsupervised agent. Triggers on phrases like: 'create a ticket', 'let's track this', 'create a work item', 'what's in the backlog', 'what's active', 'move this to done', 'summarise this session', 'write up what we did', 'remember when we...', 'what did we do with...', 'let's continue', 'where were we', 'what was I working on', 'create an unsupervised ticket', 'queue this for an agent', 'let an agent handle this'. Bootstraps the work/ directory structure on first use if it doesn't exist."
 ---
 
 # Work Tracker
@@ -13,11 +13,13 @@ If `work/` doesn't exist in the project root, create the full structure before d
 
 ```
 work/
-  active/       → items being worked on
-  done/         → completed items (moved here, not deleted)
-  discussion/   → clarifying ideas and ongoing high-level thinking
-  backlog/      → prioritised queues of future work
-  .sessions/    → per-user session logs (user decides: commit or gitignore)
+  active/              → items being worked on (human + model)
+  active/unsupervised/ → items an agent is working on autonomously
+  done/                → completed items (moved here, not deleted)
+  discussion/          → clarifying ideas and ongoing high-level thinking
+  backlog/             → prioritised queues of future work
+  backlog/unsupervised/ → queued items for autonomous agent work
+  .sessions/           → per-user session logs (user decides: commit or gitignore)
 ```
 
 ### Backlog files
@@ -108,6 +110,66 @@ Discussion items serve two purposes:
 
 Discussion items use the same format as other work items (frontmatter, status, changes) but with `status: discussion`. They don't need tasks or a clear endpoint. When a discussion crystallises into something actionable, create a new item in `active/` or the relevant backlog file and reference the discussion.
 
+## Unsupervised items (`backlog/unsupervised/` → `active/unsupervised/`)
+
+Unsupervised items are tickets designed for an agent to pick up and work on autonomously with minimal human supervision. The human queues them in `work/backlog/unsupervised/` and an agent moves them to `work/active/unsupervised/` when starting work.
+
+The key distinction: items directly in `work/active/` are for the human working *with* a model. Items in `work/active/unsupervised/` are for an agent working *alone*.
+
+### Creating unsupervised items
+
+When the human says "create an unsupervised ticket", "queue this for an agent", "let an agent handle this", or similar — or when creating a regular ticket and additionally asking for an unsupervised version:
+
+1. Create a file in `work/backlog/unsupervised/` using the standard work item format
+2. Add `mode: unsupervised` to the frontmatter
+3. The body must contain **clear, self-contained instructions** — everything the agent needs to understand the goal, constraints, and definition of done. The agent won't have the human available to clarify, so:
+   - State the objective concretely
+   - Specify any constraints (files to touch, patterns to follow, things to avoid)
+   - Define what "done" looks like
+   - Reference relevant vocabulary, docs, or other tickets by id if context is needed
+4. Include a `## Acceptance criteria` section with checkable items
+
+### Agent workflow
+
+When an agent picks up an unsupervised item:
+
+1. Move the file from `work/backlog/unsupervised/` to `work/active/unsupervised/`
+2. Update `status: active` in frontmatter
+3. Work through the instructions, checking off tasks as completed
+4. Log decisions and changes in the `## Changes` section as with any ticket
+5. When done, leave the item in `work/active/unsupervised/` with tasks checked off — the human reviews and moves to `work/done/`
+
+### Example
+
+```markdown
+---
+id: UPDATE_VOCAB_EXAMPLES__WORK
+status: backlog
+mode: unsupervised
+created: 2026-03-25
+summary: Add usage examples to each term in docs/vocab/coding.md
+---
+
+# chore: Add vocab examples
+
+Each term in `docs/vocab/coding.md` should have a short code example showing the pattern. Currently they have definitions only.
+
+## Instructions
+
+- For each term in `docs/vocab/coding.md`, add a 3-5 line code example beneath the definition
+- Use TypeScript
+- Examples should be minimal and self-contained — a reader should understand the term from definition + example alone
+- Don't modify definitions, only add examples
+- Follow existing formatting conventions in the file
+
+## Acceptance criteria
+
+- [ ] Every term has a code example
+- [ ] Examples are TypeScript
+- [ ] Existing definitions unchanged
+- [ ] File still renders cleanly as markdown
+```
+
 ## Session log
 
 Each user has a session log at `work/.sessions/$USER.md` (e.g. `work/.sessions/danb.md`). Determine `$USER` from the system environment or ask on first use.
@@ -166,6 +228,7 @@ When the human says "create a ticket", "let's track this", "create a work item",
 
 1. If it's future work (not something to start now), add it to a backlog file. Otherwise, create a file in `work/active/`.
    - **Which backlog?** If there's only `main.md`, use it. If multiple backlogs exist, infer the package from context (file being discussed, directory, etc.) or ask.
+   - **Unsupervised?** If the human asks to create an unsupervised ticket (or asks for one alongside a regular ticket), create a file in `work/backlog/unsupervised/` with self-contained instructions. See the "Unsupervised items" section above.
 2. Draft the item with frontmatter, a title, and body from what the human described.
 3. If it belongs in the backlog:
 
@@ -198,9 +261,9 @@ When promoting a backlog item to active:
 
 When the human says "what's active", "what's in flight", "show me the backlog", or similar:
 
-- **Active items**: list files in `work/active/`, show id + summary from frontmatter
-- **Backlog**: run `grep -A 3 "^## " work/backlog/*.md` for a quick index across all backlogs. If the human asks about a specific package, target that file.
-- **All statuses**: scan both directories
+- **Active items**: list files in `work/active/` (human+model) and `work/active/unsupervised/` (autonomous), show id + summary from frontmatter. Distinguish which are unsupervised.
+- **Backlog**: run `grep -A 3 "^## " work/backlog/*.md` for a quick index across all backlogs. Also list files in `work/backlog/unsupervised/` if any exist. If the human asks about a specific package, target that file.
+- **All statuses**: scan all directories
 
 ### Cross-referencing
 

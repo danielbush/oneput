@@ -30,7 +30,7 @@ export default defineConfig({
     }
   },
   test: {
-    environment: 'jsdom',
+    environment: 'happy-dom',
     coverage: {
       exclude: ['src/**/*.test.ts', '**/*.d.ts', 'src/cli/**', 'src/app/sketch.ts', 'src/index.ts'],
       include: ['src/**/*.ts'],

@@ -2,6 +2,7 @@ import type { JsedDocument } from './types.js';
 import { JSED_CURSOR_CLASS } from './lib/constants.js';
 import { isLineSibling } from './lib/traversal.js';
 import type { TokenManager } from './TokenManager.js';
+import { scrollIntoViewIfSmaller } from './lib/dom.js';
 
 export type TokenCursorError =
   | {
@@ -78,7 +79,7 @@ export abstract class TokenCursorBase {
     this.removeAllFocusClasses();
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     el.classList.add(JSED_CURSOR_CLASS);
-    el.scrollIntoView?.({ block: 'center', inline: 'center' });
+    scrollIntoViewIfSmaller(el);
     this.#token = el;
   }
 

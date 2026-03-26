@@ -64,3 +64,16 @@ export function splitParentBefore(el: HTMLElement): void {
     sib = prevSib;
   }
 }
+
+/**
+ * Only scroll elements into view if they are smaller than the viewport.
+ */
+export function scrollIntoViewIfSmaller(el: HTMLElement) {
+  const vp = window.visualViewport;
+  const vpWidth = vp?.width ?? window.innerWidth;
+  const vpHeight = vp?.height ?? window.innerHeight;
+  const rect = el.getBoundingClientRect();
+  if (rect.height <= vpHeight && rect.width <= vpWidth) {
+    el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+  }
+}

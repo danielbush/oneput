@@ -10,6 +10,7 @@ import {
   findPreviousNode
 } from './lib/walk2.js';
 import { ElementIndicator } from './ElementIndicator.js';
+import { scrollIntoViewIfSmaller } from './lib/dom.js';
 
 export type NavError =
   | { type: 'no-token-under-focus' }
@@ -123,7 +124,7 @@ export class Nav {
     this.#FOCUS = el;
     this.elementIndicator.updateFocus(el);
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
-    el.scrollIntoView?.({ block: 'center', inline: 'center' });
+    scrollIntoViewIfSmaller(el);
     this.#emitFocusEvent(
       tok
         ? {

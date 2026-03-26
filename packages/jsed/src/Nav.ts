@@ -251,7 +251,7 @@ export class Nav {
       }
       return;
     }
-    if (isToken(el)) {
+    if (isToken(el as Node)) {
       const htmlEl = el as HTMLElement;
       const ok =
         this.#REQUEST_FOCUS?.({

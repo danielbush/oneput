@@ -108,7 +108,7 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
     if (
       tokens.length > 0 &&
       /^\s/.test(text) &&
-      isIsland(getPreviousVisibleSibling(child as ChildNode))
+      isIsland(getPreviousVisibleSibling(child as HTMLElement))
     ) {
       pad(tokens[0]);
     }

@@ -6,6 +6,7 @@ import {
   CURSOR_INSERT_BEFORE_CLASS
 } from './lib/constants.js';
 import * as token from './lib/token.js';
+import { isToken, isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/traversal.js';
 import type { UserInputSelectionState } from './UserInput.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
@@ -81,7 +82,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
       return;
     }
 
-    const nextToken = token.getNextLineSibling(this.getToken(), this.getLine(), {
+    const nextToken = getNextLineSibling(this.getToken(), this.getLine(), {
       onEnterBlockTransparent: this.lazyTokenize
     });
     if (nextToken) {
@@ -95,7 +96,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
       return;
     }
 
-    const prevToken = token.getPreviousLineSibling(this.getToken(), this.getLine(), {
+    const prevToken = getPreviousLineSibling(this.getToken(), this.getLine(), {
       onEnterBlockTransparent: this.lazyTokenize
     });
     if (prevToken) {
@@ -109,7 +110,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
   private isOnToken(): boolean {
-    return token.isToken(this.getToken());
+    return isToken(this.getToken());
   }
 
   replace(val: string) {
@@ -149,7 +150,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    */
   toggleCollapsePrevious() {
     if (!this.isOnToken()) return false;
-    const prev = token.getPreviousLineSibling(this.getToken(), this.getLine());
+    const prev = getPreviousLineSibling(this.getToken(), this.getLine());
     if (!prev) {
       return false;
     }
@@ -202,7 +203,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   // #region Other
 
   isSameLine(tok: HTMLElement) {
-    return token.isSameLine(this.getToken(), tok);
+    return isSameLine(this.getToken(), tok);
   }
 
   // #endregion
@@ -214,7 +215,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    * current token.
    */
   insertElementAfter(el: HTMLElement) {
-    if (token.isToken(el)) {
+    if (isToken(el)) {
       this.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
@@ -231,7 +232,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    * current token.
    */
   insertElementBefore(el: HTMLElement) {
-    if (token.isToken(el)) {
+    if (isToken(el)) {
       this.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }

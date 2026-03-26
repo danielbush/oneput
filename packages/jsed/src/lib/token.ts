@@ -24,32 +24,6 @@ import {
   isTransparentBlock
 } from './traversal.js';
 
-// Re-export traversal predicates that were historically part of this module,
-// so that `import * as token from './token.js'` consumers keep working.
-export {
-  isFocusable,
-  isIgnorable,
-  isIsland,
-  isToken,
-  isAnchor,
-  isInline,
-  isImplicitLine,
-  isLineSibling,
-  isLine,
-  isCursorBoundary,
-  isTransparentBlock,
-  isSameLine,
-  getLine,
-  getPreviousVisibleSibling,
-  getNextVisibleSibling,
-  getPreviousTokenSibling,
-  getNextTokenSibling,
-  getPreviousLineSibling,
-  getNextLineSibling,
-  getFirstLineSibling
-} from './traversal.js';
-export type { LineSiblingOptions } from './traversal.js';
-
 // #region TOKEN CRUD
 
 export function getParent(el: HTMLElement): HTMLElement {

@@ -1,5 +1,6 @@
 import { JSED_IGNORE_CLASS } from './lib/constants.js';
-import { getParent, isToken } from './lib/token.js';
+import { getParent } from './lib/token.js';
+import { isToken } from './lib/traversal.js';
 
 // #region Types
 

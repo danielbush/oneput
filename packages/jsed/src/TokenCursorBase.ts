@@ -1,6 +1,6 @@
 import type { JsedDocument } from './types.js';
 import { JSED_CURSOR_CLASS } from './lib/constants.js';
-import * as token from './lib/token.js';
+import { isLineSibling } from './lib/traversal.js';
 import type { TokenManager } from './TokenManager.js';
 
 export type TokenCursorError =
@@ -71,7 +71,7 @@ export abstract class TokenCursorBase {
    * change before and after calling this.
    */
   setToken(el: HTMLElement) {
-    if (!token.isLineSibling(el)) {
+    if (!isLineSibling(el)) {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);
     }

@@ -1,5 +1,6 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
+import { isToken, getLine } from './lib/traversal.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
@@ -57,7 +58,7 @@ export class EditManager {
    * @param {string} input What the user has typed into an html input/textarea
    */
   public handleInputChange = (input: string) => {
-    if (!this.cursor || !token.isToken(this.cursor.getToken())) return;
+    if (!this.cursor || !isToken(this.cursor.getToken())) return;
     this.inputManager?.handleInputChange(input);
     this.cursor?.handleInputChange(input);
   };
@@ -68,7 +69,7 @@ export class EditManager {
    * Pass this to the selection emitter after instantiation.
    */
   public handleSelectionChange = (selection: UserInputSelectionState) => {
-    if (!this.cursor || !token.isToken(this.cursor.getToken())) return;
+    if (!this.cursor || !isToken(this.cursor.getToken())) return;
     this.cursor?.handleSelectionChange(selection);
   };
 
@@ -78,7 +79,7 @@ export class EditManager {
    */
   private handleTokenChange = async (tok: HTMLElement) => {
     this.nav.FOCUS(tok);
-    if (token.isToken(tok)) {
+    if (isToken(tok)) {
       this.userInput.enable(true);
       this.userInput.focus();
       this.userInput.setInputValue(token.getValue(tok)).then(() => {
@@ -141,7 +142,7 @@ export class EditManager {
       const firstToken = this.tokenManager.tokenize(focus);
       if (firstToken) {
         this.userInput.focus();
-        return ok(this.#setCursor(firstToken, token.getLine(focus)));
+        return ok(this.#setCursor(firstToken, getLine(focus)));
       }
       return err({ type: 'no-token-under-focus' });
     }

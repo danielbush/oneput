@@ -9,6 +9,7 @@ export { TokenManager } from './TokenManager.js';
 
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
 import * as token from './lib/token.js';
+import { getLine, isToken, isAnchor } from './lib/traversal.js';
 import * as dom from './lib/dom.js';
 import * as domRules from './lib/dom-rules.js';
 const utils = {
@@ -24,9 +25,9 @@ const utils = {
   },
   token: {
     getValue: token.getValue,
-    getLine: token.getLine,
-    isToken: token.isToken,
-    isAnchor: token.isAnchor,
+    getLine,
+    isToken,
+    isAnchor,
     addAnchors: token.addAnchors,
     getParent: token.getParent,
     collapse: token.collapse,

@@ -1,6 +1,6 @@
 import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
 import { JSED_APP_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
-import { isIsland, isFocusable } from './lib/traversal.js';
+import { isIsland, isFocusable, isToken } from './lib/traversal.js';
 import * as token from './lib/token.js';
 import {
   getNextSiblingNode,
@@ -110,7 +110,7 @@ export class Nav {
 
   #updateFocus(el: HTMLElement) {
     let tok: HTMLElement | null = null;
-    if (token.isToken(el)) {
+    if (isToken(el)) {
       tok = el;
       el = token.getParent(el);
     }
@@ -251,7 +251,7 @@ export class Nav {
       }
       return;
     }
-    if (token.isToken(el)) {
+    if (isToken(el)) {
       const htmlEl = el as HTMLElement;
       const ok =
         this.#REQUEST_FOCUS?.({

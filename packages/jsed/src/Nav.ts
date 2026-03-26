@@ -115,7 +115,7 @@ export class Nav {
       el = token.getParent(el);
     }
     if (!isFocusable(el)) {
-      throw new Error('#updateFocus: expects an FOCUSABLE');
+      throw new Error('#updateFocus: expects a FOCUSABLE');
     }
     if (this.#FOCUS) {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);

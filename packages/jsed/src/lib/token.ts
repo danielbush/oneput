@@ -15,13 +15,15 @@ import {
   isToken,
   isAnchor,
   isInlineFlow,
-  getLine,
-  getPreviousVisibleSibling,
-  getPreviousTokenSibling,
-  getNextTokenSibling,
   isImplicitLine,
   isLine,
   isTransparentBlock
+} from './taxonomy.js';
+import {
+  getLine,
+  getPreviousVisibleSibling,
+  getPreviousTokenSibling,
+  getNextTokenSibling
 } from './traversal.js';
 
 // #region TOKEN CRUD

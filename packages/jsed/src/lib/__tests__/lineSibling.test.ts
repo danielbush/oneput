@@ -303,6 +303,45 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
     expect(isPadded(tokens[0] as HTMLElement)).toBe(false);
   });
 
+  test('TOKEN after inline-block OPAQUE_BLOCK is padded', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb')
+    );
+    tokenizeLine(byId(doc, 'p1'));
+
+    // act — find the TOKEN after the inline-block
+    const ib = byId(doc, 'p1').querySelector('span[style]') as HTMLElement;
+    const afterIb = getNextLineSibling(ib, byId(doc, 'p1'))!;
+
+    // assert
+    expect(isToken(afterIb)).toBe(true);
+    expect(isPadded(afterIb)).toBe(true);
+    expect(afterIb.textContent).toBe(' bbb ');
+  });
+
+  test('TOKEN after TRANSPARENT_BLOCK is not padded (text absorbed into block)', () => {
+    // arrange — tokenization descends into TRANSPARENT_BLOCKs, so the trailing
+    // text node gets absorbed (via implicit line tagging) rather than staying as
+    // a sibling. The padding predicate never fires.
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        'aaa ',
+        div({ id: 'inner', class: 'jsed-cursor-transparent' }, 'inner'),
+        ' bbb'
+      )
+    );
+    tokenizeLine(byId(doc, 'p1'));
+
+    // act — find the last TOKEN ('bbb')
+    const tokens = byId(doc, 'p1').querySelectorAll('.jsed-token');
+    const lastToken = tokens[tokens.length - 1] as HTMLElement;
+
+    // assert
+    expect(isPadded(lastToken)).toBe(false);
+  });
+
   test('adjacent ISLANDs: TOKEN after second ISLAND is padded', () => {
     // arrange
     const doc = makeRoot(

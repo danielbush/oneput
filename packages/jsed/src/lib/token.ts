@@ -106,13 +106,13 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
       .filter(Boolean)
       .map((s) => createToken(s));
     // PADDED_TOKEN: if text has leading whitespace and previous visible sibling
-    // is an ISLAND (which has no trailing space), pad the first TOKEN.
-    if (
-      tokens.length > 0 &&
-      /^\s/.test(text) &&
-      isIsland(getPreviousVisibleSibling(child as HTMLElement))
-    ) {
-      pad(tokens[0]);
+    // is a block or ISLAND (neither carries trailing space to the next sibling),
+    // pad the first TOKEN.
+    if (tokens.length > 0 && /^\s/.test(text)) {
+      const prev = getPreviousVisibleSibling(child as HTMLElement);
+      if (prev && (isIsland(prev) || isLine(prev))) {
+        pad(tokens[0]);
+      }
     }
     const frag = document.createDocumentFragment();
     for (const token of tokens) {

@@ -175,7 +175,7 @@ export class Nav {
    */
   SIB_NEXT(): HTMLElement | null {
     if (!this.#FOCUS) return null;
-    const next = getNextSiblingNode(this.#FOCUS, {
+    const next = getNextSiblingNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable
     });
     if (next) {
@@ -190,7 +190,7 @@ export class Nav {
    */
   SIB_PREV(): HTMLElement | null {
     if (!this.#FOCUS) return null;
-    const next = getPreviousSiblingNode(this.#FOCUS, {
+    const next = getPreviousSiblingNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable
     });
     if (next) {

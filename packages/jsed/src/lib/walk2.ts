@@ -68,8 +68,12 @@ function* descendIterReverse(
 
 export function getNextSiblingNode(
   start: ParentNode | ChildNode,
+  ceiling: ParentNode | ChildNode,
   params?: Walk2Params
 ): ParentNode | ChildNode | null {
+  if (start === ceiling) {
+    return null;
+  }
   let next: ParentNode | ChildNode | null | undefined = start;
   for (;;) {
     next = next?.nextSibling;
@@ -85,8 +89,12 @@ export function getNextSiblingNode(
 
 export function getPreviousSiblingNode(
   start: ParentNode | ChildNode,
+  ceiling: ParentNode | ChildNode,
   params?: Walk2Params
 ): ParentNode | ChildNode | null {
+  if (start === ceiling) {
+    return null;
+  }
   let prev: ParentNode | ChildNode | null | undefined = start;
   for (;;) {
     prev = prev?.previousSibling;

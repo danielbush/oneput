@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, span } from '../../test/util.js';
 import { tokenizeLine, tagImplicitLines } from '../token.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';
 
@@ -201,7 +201,7 @@ describe('tokenizeLine', () => {
   });
 });
 
-describe('tagImplicitLines', () => {
+describe('IMPLICIT_LINE creation', () => {
   test('text after a LINE is wrapped', () => {
     // arrange
     const doc = makeRoot(
@@ -227,7 +227,7 @@ describe('tagImplicitLines', () => {
     expect(implicit!.textContent).toBe('this is the IMPLICIT_LINE');
   });
 
-  test('IMPLICIT_LINE slurps up adjacent INLINE', () => {
+  test('slurps up adjacent INLINE', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -252,7 +252,7 @@ describe('tagImplicitLines', () => {
     expect(implicit!.querySelector('#em2')).not.toBeNull();
   });
 
-  test('IMPLICIT_LINE starting with an INLINE', () => {
+  test('starting with an INLINE', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -305,6 +305,94 @@ describe('tagImplicitLines', () => {
 
     // Second IMPLICIT_LINE: text after the <hr>
     expect(implicits[1].textContent).toBe('After the rule.');
+  });
+
+  test('text after a floated LINE is wrapped', () => {
+    // arrange — a floated span is not INLINE (float excludes it), so it's a LINE.
+    // Browsers blockify floated elements (computed display becomes block),
+    // so trailing text should be wrapped in IMPLICIT_LINE.
+    const doc = makeRoot(
+      div({ id: 'div1' }, 'aaa ', span({ style: 'float:left;' }, 'floated'), ' bbb')
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent!.trim()).toBe('bbb');
+  });
+
+  test('text after a block-level ISLAND is wrapped', () => {
+    // arrange — a katex span with display:block is an ISLAND, not a LINE.
+    // tagImplicitLines should still wrap trailing text so it's reachable by FOCUS.
+    const doc = makeRoot(
+      div({ id: 'div1' }, 'aaa ', '<span class="katex" style="display:block;">x²</span>', ' bbb')
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent!.trim()).toBe('bbb');
+  });
+
+  test('text after an inline ISLAND is not wrapped', () => {
+    // arrange — an inline katex span sits on the same visual line as surrounding text.
+    // No IMPLICIT_LINE should be created.
+    const doc = makeRoot(
+      div({ id: 'div1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).toBeNull();
+  });
+
+  test('text after a TRANSPARENT_BLOCK is wrapped', () => {
+    // arrange — a div marked jsed-cursor-transparent is still a LINE,
+    // so trailing text should be wrapped in IMPLICIT_LINE.
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
+        ' bbb'
+      )
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent!.trim()).toBe('bbb');
+  });
+
+  test('text after an inline-block TRANSPARENT_BLOCK is not wrapped', () => {
+    // arrange — inline-block starts with "inline" so tagImplicitLines skips it.
+    // The element sits on the same visual line as surrounding text.
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        'aaa ',
+        div({ id: 'div2', class: 'jsed-cursor-transparent', style: 'display:inline-block;' }, 'nested'),
+        ' bbb'
+      )
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).toBeNull();
   });
 
   test("whitespace-only text between LINE's is ignored", () => {

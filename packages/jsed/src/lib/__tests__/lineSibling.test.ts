@@ -266,8 +266,8 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['eee', 'ddd', 'ccc', 'bbb', 'aaa']);
   });
 
-  test('NESTED_LINE: CURSOR descends nested div and IMPLICIT_LINE', () => {
-    // arrange — nested div marked transparent; "bbb" wrapped in IMPLICIT_LINE by tagImplicitLines
+  test('NESTED_LINE: CURSOR descends nested div', () => {
+    // arrange — nested div marked transparent; "bbb"
     const doc = makeRoot(
       div(
         { id: 'div1' },
@@ -283,9 +283,29 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR traverses through nested div (TRANSPARENT_BLOCK)
-    // and IMPLICIT_LINE (also TRANSPARENT_BLOCK)
     expect(collectForward(first, div1)).toEqual(['aaa', 'nested', 'bbb']);
     expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', 'nested', 'aaa']);
+  });
+
+  test('floated element is a LINE (OPAQUE_BLOCK)', () => {
+    // arrange — a floated span is not INLINE (float excludes it), so it's a LINE.
+    const doc = makeRoot(
+      div({ id: 'div1' }, 'aaa ', span({ style: 'float:left;' }, 'floated'), ' bbb')
+    );
+    const div1 = byId(doc, 'div1');
+    const floatedSpan = div1.querySelector('span[style*="float"]') as HTMLElement;
+
+    // assert — float makes it not INLINE, therefore a LINE
+    expect(isInline(floatedSpan)).toBe(false);
+    expect(isLine(floatedSpan)).toBe(true);
+
+    // act — tokenize and check traversal
+    tokenizeLine(div1);
+    const first = div1.querySelector('.jsed-token') as HTMLElement;
+
+    // assert — floated span is OPAQUE_BLOCK (visited, not descended),
+    expect(collectForward(first, div1)).toEqual(['aaa', '[span]', 'bbb']);
+    expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', '[span]', 'aaa']);
   });
 
   // ISLAND traversal covered thoroughly in '(1) ISLAND' describe block below

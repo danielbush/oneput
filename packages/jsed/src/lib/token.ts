@@ -250,10 +250,10 @@ export function tagImplicitLines(root: HTMLElement) {
     for (let sib = node.firstChild; sib; ) {
       if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
         const prev = sib.previousSibling;
-        if (prev && isLine(prev)) {
-          // Only wrap after block-level LINE's that cause a visual line break.
-          // Inline-level LINE's (inline-block, inline-flex, etc.) sit on the
-          // same visual line as the surrounding text.
+        if (prev && (isLine(prev) || isIsland(prev))) {
+          // Only wrap after block-level elements that cause a visual line break.
+          // Inline-level LINE's (inline-block, inline-flex, etc.) and inline
+          // ISLAND's sit on the same visual line as the surrounding text.
           const display = window.getComputedStyle(prev as HTMLElement).display;
           if (!display.startsWith('inline')) {
             const implicitLine = buildImplicitLine(sib);

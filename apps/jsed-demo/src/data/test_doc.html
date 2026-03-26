@@ -43,6 +43,10 @@
       <p>1st para</p>
       <p>2nd para - try: split parent before this p-tag</p>
     </li>
+    <li>
+      <p>1st para</p>
+      2nd implied para
+    </li>
   </ul>
 
   <h2 class="jsed-ignore">INLINE</h2>
@@ -123,11 +127,18 @@
     CURSOR_TRANSPARENT. A block-like element that is CURSOR_TRANSPARENT is a TRANSPARENT_BLOCK.
   </p>
   <div>
+    Before the block...
+    <div class="jsed-cursor-transparent" style="border: 1px dashed red">
+      this div is marked as jsed-cursor-transparent
+    </div>
+    After the block.
+  </div>
+  <div>
     Before the inline-block...
     <div class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block">
       this div is marked as jsed-cursor-transparent
     </div>
-    After the inline block.
+    After the inline-block.
   </div>
 
   <h2 class="jsed-ignore">ISLAND</h2>
@@ -157,6 +168,10 @@
   </div>
 
   <h2 class="jsed-ignore">IMPLICIT_LINE</h2>
+  <p class="jsed-ignore">
+    You can test for IMPLICIT_LINE's above in all the various scenarios. Here we show examples that
+    motivated this feature.
+  </p>
   <div>
     <p>
       This LINE is in a p-tag. When we use the down-action we want to get to the next line below...

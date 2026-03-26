@@ -6,7 +6,12 @@ import {
   CURSOR_INSERT_BEFORE_CLASS
 } from './lib/constants.js';
 import * as token from './lib/token.js';
-import { isToken, isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/traversal.js';
+import {
+  isToken,
+  isSameLine,
+  getNextLineSibling,
+  getPreviousLineSibling
+} from './lib/traversal.js';
 import type { UserInputSelectionState } from './UserInput.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 

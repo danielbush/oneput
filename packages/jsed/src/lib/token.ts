@@ -14,7 +14,7 @@ import {
   isIsland,
   isToken,
   isAnchor,
-  isInline,
+  isInlineFlow,
   getLine,
   getPreviousVisibleSibling,
   getPreviousTokenSibling,
@@ -139,9 +139,12 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
     if (isToken(line)) {
       continue;
     }
-    // Recurse into INLINE's, TOKEN's, and TRANSPARENT_BLOCK's.
-    // Be aware of INLINE_COMPUTED_STYLE .
-    if (isToken(child) || isInline(child) || isTransparentBlock(child)) {
+    // Recurse into TOKEN's, INLINE's (isInlineFlow && !isIsland), and TRANSPARENT_BLOCK's.
+    if (
+      isToken(child) ||
+      (isFocusable(child) && !isIsland(child) && isInlineFlow(child)) ||
+      isTransparentBlock(child)
+    ) {
       const token = tokenizeLineRec(child);
       if (!first) first = token;
     } else if (child.nodeType === Node.TEXT_NODE) {
@@ -190,7 +193,12 @@ function buildImplicitLine(startNode: Node): HTMLElement | null {
   startNode.parentNode.insertBefore(implicitLine, startNode);
 
   for (let sib: Node | null = startNode; sib; ) {
-    if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
+    // Slurp text nodes, tokens, and INLINE elements (isInlineFlow, not island, not implicit-line)
+    if (
+      sib.nodeType === Node.TEXT_NODE ||
+      isToken(sib) ||
+      (isFocusable(sib) && !isIsland(sib) && !isImplicitLine(sib) && isInlineFlow(sib))
+    ) {
       const nextSib: ChildNode | null = sib.nextSibling;
       implicitLine.appendChild(sib);
       sib = nextSib;
@@ -222,7 +230,12 @@ export function tagImplicitLines(root: HTMLElement) {
       continue;
     }
     for (let sib = node.firstChild; sib; ) {
-      if (sib.nodeType === Node.TEXT_NODE || isToken(sib) || isInline(sib)) {
+      // Text, tokens, and INLINE elements (isInlineFlow, not island, not implicit-line)
+      if (
+        sib.nodeType === Node.TEXT_NODE ||
+        isToken(sib) ||
+        (isFocusable(sib) && !isIsland(sib) && !isImplicitLine(sib) && isInlineFlow(sib))
+      ) {
         const prev = sib.previousSibling;
         if (prev && (isLine(prev) || isIsland(prev))) {
           // Only wrap after block-level elements that cause a visual line break.

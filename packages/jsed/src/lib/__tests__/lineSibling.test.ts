@@ -5,7 +5,7 @@ import {
   getPreviousLineSibling,
   getLine,
   isLine,
-  isInline,
+  isInlineFlow,
   isToken,
   isIsland
 } from '../traversal.js';
@@ -88,17 +88,17 @@ describe('isToken', () => {
   });
 });
 
-describe('isInline', () => {
-  test('INLINE (em with display:inline): returns true', () => {
+describe('isInlineFlow', () => {
+  test('em with display:inline: returns true', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'text')));
     const emEl = byId(doc, 'p1').querySelector('em')!;
 
     // act & assert
-    expect(isInline(emEl)).toBe(true);
+    expect(isInlineFlow(emEl)).toBe(true);
   });
 
-  test('inline-block: returns false (treated as LINE)', () => {
+  test('inline-block: returns false (narrow check)', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, '<span id="ib" style="display:inline-block;">chip</span>')
@@ -106,16 +106,42 @@ describe('isInline', () => {
     const ib = byId(doc, 'ib');
 
     // act & assert
-    expect(isInline(ib)).toBe(false);
+    expect(isInlineFlow(ib)).toBe(false);
   });
 
-  test('ISLAND (katex with display:inline): returns false', () => {
+  test('ISLAND (katex with display:inline): returns true (pure — no island check)', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>'));
     const katex = byId(doc, 'p1').querySelector('.katex')!;
 
-    // act & assert
-    expect(isInline(katex)).toBe(false);
+    // act & assert — isInlineFlow is pure display, so islands with inline display return true
+    expect(isInlineFlow(katex)).toBe(true);
+  });
+
+  test('implicit-line span: returns true (pure — no class check)', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' },
+        div({ id: 'inner' }, 'first line'),
+        '<span class="jsed-implicit-line" style="display:inline;">second line</span>'
+      )
+    );
+    const implicit = byId(doc, 'outer').querySelector('.jsed-implicit-line')!;
+
+    // act & assert — isInlineFlow doesn't check classes
+    expect(isInlineFlow(implicit)).toBe(true);
+  });
+
+  test('floated span with display:inline: returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'p1' }, '<span style="float:left; display:inline;">floated</span>')
+    );
+    const floated = byId(doc, 'p1').querySelector('span')!;
+
+    // act & assert — float pulls element out of normal flow
+    expect(isInlineFlow(floated)).toBe(false);
   });
 
   test('block element (div): returns false', () => {
@@ -123,11 +149,11 @@ describe('isInline', () => {
     const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, 'text')));
 
     // act & assert
-    expect(isInline(byId(doc, 'inner'))).toBe(false);
+    expect(isInlineFlow(byId(doc, 'inner'))).toBe(false);
   });
 
   test('null: returns false', () => {
-    expect(isInline(null)).toBe(false);
+    expect(isInlineFlow(null)).toBe(false);
   });
 });
 
@@ -295,8 +321,8 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     const div1 = byId(doc, 'div1');
     const floatedSpan = div1.querySelector('span[style*="float"]') as HTMLElement;
 
-    // assert — float makes it not INLINE, therefore a LINE
-    expect(isInline(floatedSpan)).toBe(false);
+    // assert — float pulls element out of normal flow, so isInlineFlow is false → it's a LINE
+    expect(isInlineFlow(floatedSpan)).toBe(false);
     expect(isLine(floatedSpan)).toBe(true);
 
     // act — tokenize and check traversal

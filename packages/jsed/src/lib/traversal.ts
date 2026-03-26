@@ -121,21 +121,20 @@ export function isAnchor(el: HTMLElement): boolean {
 }
 
 /**
- * Detect INLINE — a FOCUSABLE that acts as inline markup (e.g. `<em>`, `<a>`).
- * The CURSOR traverses seamlessly through INLINE's to visit their TOKEN's.
+ * Pure display predicate: does this element have inline-flow display?
+ *
+ * Returns true when the element's computed display is `inline` or `inline flow`
+ * AND the element is not floated (floated elements are pulled out of normal flow).
+ *
+ * This is a primitive — no FOCUSABLE, ISLAND, or class checks. Use it when you
+ * need just the CSS display-model answer. Callers combine it with other primitives
+ * to derive taxonomy labels (e.g. INLINE = `isInlineFlow && !isIsland && !isImplicitLine`,
+ * given FOCUSABLE).
  */
-export function isInline(el: Node | null): boolean {
-  if (!el) return false;
-  if (!isFocusable(el)) return false;
-  if (isIsland(el)) return false;
-
-  // This is an implicit line, it may be inline, but we treat it like a separate LINE.
-  if (el.classList.contains(JSED_IMPLICIT_CLASS)) return false;
-
+export function isInlineFlow(el: Node | null): boolean {
+  if (!el || !(el instanceof HTMLElement)) return false;
   const styles = window.getComputedStyle(el);
-  if (!['none', ''].includes(styles.float)) {
-    return false;
-  }
+  if (!['none', ''].includes(styles.float)) return false;
   if (styles.display === 'inline') return true;
   if (styles.display === 'inline flow') return true;
   return false;
@@ -144,12 +143,15 @@ export function isInline(el: Node | null): boolean {
 /**
  * Detect LINE — a FOCUSABLE that is not a TOKEN, INLINE, or ISLAND.
  * Examples: `<div>`, `<p>`, `<h1>`, inline-block `<span>`.
+ *
+ * Derived: `isFocusable && !isToken && !isIsland && (!isInlineFlow || isImplicitLine)`.
+ * IMPLICIT_LINE's have inline display but are LINE's (they're synthetic wrappers).
  */
 export function isLine(el: Node | null): boolean {
   if (!el) return false;
   if (!isFocusable(el)) return false;
   if (isToken(el)) return false;
-  if (isInline(el)) return false;
+  if (!isImplicitLine(el) && isInlineFlow(el)) return false;
   if (isIsland(el)) return false;
   return true;
 }
@@ -285,7 +287,8 @@ export type LineSiblingOptions = {
 /** Build the descend predicate for LINE_SIBLING traversal. */
 function lineSiblingDescend(options?: LineSiblingOptions): (n: ParentNode | ChildNode) => boolean {
   return (n) => {
-    if (isInline(n)) return true;
+    // INLINE: focusable, not island, not implicit-line, inline-flow display
+    if (isFocusable(n) && !isIsland(n) && !isImplicitLine(n) && isInlineFlow(n)) return true;
     if (isTransparentBlock(n)) {
       options?.onEnterBlockTransparent?.(n as HTMLElement);
       return true;

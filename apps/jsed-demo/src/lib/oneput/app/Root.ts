@@ -39,11 +39,6 @@ export class Root implements AppObject {
           .TestDocService()
           .loadTestDoc()
           .map((docRoot) => {
-            for (const h2 of document.querySelectorAll('h2')) {
-              h2.classList.add(JSED_IGNORE_CLASS);
-            }
-            console.warn('Setting JSED_IGNORE_CLASS on h2 tags');
-
             this.ctl.app.run(
               this.create.ViewDocument({
                 document: this.create.JsedDocument(docRoot)

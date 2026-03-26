@@ -1,93 +1,105 @@
 <style class="jsed-ignore">
-  h2 {
-    color: blue;
+  #test-doc {
+    padding: 0.5rem;
   }
+  .jsed-ignore:not(.jsed-tag-indicator) {
+    padding: 0.5rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    color: rgba(80, 100, 180);
+    background-color: rgba(220, 220, 255);
+    font-family: sans-serif;
+    clear: both;
+  }
+  h1.jsed-ignore:not(.jsed-tag-indicator) {
+    color: rgba(80, 180, 100);
+    background-color: rgba(220, 255, 220);
+    font-size: 1.2rem;
+  }
+
   p + p {
-    margin-top: 0.5em;
+    margin-top: 0.5rem;
   }
-  p + p {
-    margin-top: 0.5em;
+  div + div {
+    margin-top: 0.5rem;
   }
+
   .jsed-token {
     outline: 0.5px solid rgba(0, 0, 0, 0.4);
   }
-
-  .jsed-ignore :not(.jsed-tag-indicator) {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
 </style>
-<script></script>
+
 <div id="test-doc">
-  <h2>simple paragraphs</h2>
+  <h1 class="jsed-ignore">Default behaviours</h1>
+  <h2 class="jsed-ignore">Simple paragraphs</h2>
   <p>This is just a simple paragraph of text. And this is a second sentence.</p>
   <p>Here's a second paragraph with more text in it.</p>
   <p>Here's a third paragraph with more text in it.</p>
 
-  <h2>paragraphs but some are nested</h2>
-  <p>This is just a simple paragraph of text. And this is a second sentence.</p>
-  <div><p>This paragraph is contained by a div - this affects findPreivousNode</p></div>
-  <p>Here's a third paragraph with more text in it.</p>
+  <h2 class="jsed-ignore">Bulleted lists</h2>
+  <ul>
+    <li>no para</li>
+    <li>
+      <p>1st para</p>
+      <p>2nd para - try: split parent before this p-tag</p>
+    </li>
+  </ul>
 
-  <h2>INLINE</h2>
+  <h2 class="jsed-ignore">INLINE</h2>
   <div>before <em>inline-tag</em> <em>inline-tag</em> after</div>
-  <h2>nested INLINE</h2>
   <div>
     before
     <em>inline-tag with a <b>nested inline tag</b> in the middle</em> and then we get here
   </div>
-  <h2>IMPLICIT_LINE</h2>
+
+  <h2 class="jsed-ignore">OPAQUE_BLOCK</h2>
+  <p class="jsed-ignore">Anything block-like by default is treated as an OPAQUE_BLOCK.</p>
+  <p class="jsed-ignore">
+    FOCUS can descend OPAQUE_BLOCK's but CURSOR cannot descend when visiting. BUT if you can FOCUS
+    onto an OPAQUE_BLOCK you then get the CURSOR to descend it directly.
+  </p>
+  <p class="jsed-ignore">block in block</p>
   <div>
-    <p>
-      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-    </p>
-    But this sentence is just text nodes that come after.
+    outer text before the block
+    <div>inner block starts here</div>
+    outer text after the block
   </div>
-  <h2>IMPLICIT_LINE with br and hr tags</h2>
   <div>
-    <p>
-      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-    </p>
-    But this sentence <strong>is <em>just</em></strong> text nodes that come after.
-    <br />
-    But this sentence is just text nodes that come after.
-    <hr />
-    But this sentence is just text nodes that come after.
-    <br />
+    before inline-block
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block"
+      >opaque to cursor</span
+    >
+    after inline-block
   </div>
-  <h2>ISLAND (float)</h2>
   <div>
-    before-float
+    Before the inline-block...
+    <div style="border: 1px dashed red; display: inline-block">
+      <p>para 1 in an inline-block (OPAQUE_BLOCK)</p>
+      <p>para 2 in same block</p>
+    </div>
+    After the inline-block.
+  </div>
+  <div>
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at start</span>
+    aaa bbb
+  </div>
+  <div>
+    aaa bbb
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at end</span>
+  </div>
+
+  <p class="jsed-ignore">Float's are OPAQUE_BLOCK's.</p>
+  <div>
+    before float
     <img
       src="missing.jpg"
       alt="placeholder"
-      style="float: right; width: 100px; height: 100px; border: dotted black 1px"
+      style="float: right; width: 100px; height: 100px; border: 1px dashed red"
     />
-    after-float
+    after float
   </div>
-  <h2>bulleted lists</h2>
-  <div>
-    <ul>
-      <li>no para</li>
-      <li>
-        <p>1st para</p>
-        <p>2nd para - try: split parent before this p-tag</p>
-      </li>
-    </ul>
-  </div>
-  <h2>ISLAND (katex)</h2>
-  <p class="jsed-ignore">This illustrates PADDED_TOKEN scenario</p>
-  <div>
-    <p>aaa <span class="katex" style="display: inline">x²</span> bbb</p>
-  </div>
-  <h2>ISLAND (katex) in nested TRANSPARENT_BLOCK</h2>
-  <div>
-    <div class="jsed-transparent-block">
-      <div class="jsed-transparent-block">
-        <span class="katex" style="display: inline">x²</span>
-      </div>
-    </div>
-  </div>
-  <h2 style="clear: right">ISLAND (complex float)</h2>
+
+  <p class="jsed-ignore">Complex float</p>
   <div>
     <p>
       This text is in a nested p-tag which comes before the float
@@ -103,39 +115,68 @@
       handling.
     </p>
   </div>
-  <h2 style="clear: right">TRANSPARENT_BLOCK (inline-block)</h2>
+
+  <h1 class="jsed-ignore">Special cases</h1>
+  <h2 class="jsed-ignore" style="clear: right">TRANSPARENT_BLOCK</h2>
+  <p class="jsed-ignore">
+    If we want the CURSOR to treat a block-like element like an INLINE we have to mark it as
+    CURSOR_TRANSPARENT. A block-like element that is CURSOR_TRANSPARENT is a TRANSPARENT_BLOCK.
+  </p>
   <div>
     Before the inline-block...
-    <div class="jsed-transparent-block" style="border: solid black 1px; display: inline-block">
-      this is an inline block<br />another line
+    <div class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block">
+      this div is marked as jsed-cursor-transparent
     </div>
     After the inline block.
   </div>
-  <h2 style="clear: right">OPAQUE_BLOCK</h2>
+
+  <h2 class="jsed-ignore">ISLAND</h2>
+  <p class="jsed-ignore">
+    ISLAND's prevent both FOCUS and CURSOR from descending into them. They can only be visited.
+  </p>
+
+  <p class="jsed-ignore">INLINE_ISLAND</p>
   <div>
-    before
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block"
-      >opaque to cursor</span
-    >
-    after
+    <p>before formula <span class="katex" style="display: inline">x²</span> after formula</p>
   </div>
+
+  <p class="jsed-ignore">ISLAND katex middle block</p>
   <div>
-    Before the inline-block...
-    <div style="border: solid black 1px; display: inline-block">
-      <p>para 1 in an inline-block</p>
-      <p>para 2 in an inline-block</p>
-    </div>
-    After the inline block.
+    <p>Some text before the block formula...</p>
+    <span class="katex" style="display: block">x²</span>
+    <p>Some text after the block formula...</p>
   </div>
+
+  <p class="jsed-ignore">ISLAND (katex) block in block</p>
   <div>
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at start</span>
-    aaa bbb
+    <p>
+      Some text before the block formula...
+      <span class="katex" style="display: block">x²</span>
+      Some text after the block formula...
+    </p>
   </div>
+
+  <h2 class="jsed-ignore">IMPLICIT_LINE</h2>
   <div>
-    aaa bbb
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at end</span>
+    <p>
+      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
+    </p>
+    But this sentence is just text nodes that come after.
   </div>
-  <h2>SHALLOW_TOKENIZATION</h2>
+  <p class="jsed-ignore">IMPLICIT_LINE with br and hr tags</p>
+  <div>
+    <p>
+      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
+    </p>
+    But this sentence <strong>is <em>just</em></strong> text nodes that come after.
+    <br />
+    But this sentence is just text nodes that come after.
+    <hr />
+    But this sentence is just text nodes that come after.
+    <br />
+  </div>
+
+  <h1 class="jsed-ignore">SHALLOW_TOKENIZATION</h1>
   <p class="jsed-ignore">
     The following div contains mulltiple paragraph tags. If this div represents a large document we
     would hit performance issues if we tokenized it all.
@@ -147,7 +188,8 @@
     <p>line 4</p>
   </div>
 
-  <h2>Scrollable container</h2>
+  <h1 class="jsed-ignore">Other scenarios</h1>
+  <h2 class="jsed-ignore">Scrollable container</h2>
   <div style="height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px">
     <p>First paragraph inside the scrollable container.</p>
     <p>Second paragraph with some more text to take up space.</p>

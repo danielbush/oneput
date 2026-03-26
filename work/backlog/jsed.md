@@ -16,6 +16,12 @@ TokenManager's role has been largely absorbed by TokenCursor's lazy tokenization
 
 Once removed, simplify `createCursor` and `tokenizeAndCursor` test helpers in `TokenCursor.test.ts` — they currently wire up TokenManager as an intermediary.
 
+## feat: REC_NEXT/SIB_NEXT and REC_PREV/SIB_PREV close CURSOR and move FOCUS
+
+Drafted: 27-Mar-2026
+
+When the CURSOR is open (editing a LINE), pressing REC_NEXT/SIB_NEXT or REC_PREV/SIB_PREV should close the CURSOR (return to view mode) and move FOCUS to the appropriate FOCUSABLE. Currently you have to explicitly exit edit mode before navigating.
+
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
 id: DETOKENIZE__WORK

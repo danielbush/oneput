@@ -160,17 +160,17 @@
 /*
 See:
 
-- CURSOR_APPEND_CLASS - jsed-ui-ew
-- CURSOR_PREPEND_CLASS - jsed-ui-bw
+- CURSOR_APPEND_CLASS - jsed-crs-append
+- CURSOR_PREPEND_CLASS - jsed-crs-prepend
 */
 
 /* update markers */
-.jsed-token-focus.jsed-token.jsed-ui-bw,
-.jsed-token-focus.jsed-token.jsed-ui-ew {
+.jsed-token-focus.jsed-token.jsed-crs-prepend,
+.jsed-token-focus.jsed-token.jsed-crs-append {
   background-color: var(--slate-600);
   color: var(--slate-100);
 }
-.jsed-token-focus.jsed-token.jsed-ui-bw::before {
+.jsed-token-focus.jsed-token.jsed-crs-prepend::before {
   /* content: '*'; */
   /* content: '\2217'; */
   /* content: '\00A4'; */
@@ -180,7 +180,7 @@ See:
   background-color: transparent;
   font-weight: normal;
 }
-.jsed-token-focus.jsed-token.jsed-ui-ew::after {
+.jsed-token-focus.jsed-token.jsed-crs-append::after {
   /* content: '*\0020'; */
   content: '\02D0\0020';
   background-color: transparent;
@@ -188,18 +188,18 @@ See:
   font-weight: normal;
   font-style: normal;
 }
-.jsed-token-focus.jsed-token.jsed-token-collapsed.jsed-ui-ew::after {
+.jsed-token-focus.jsed-token.jsed-token-collapsed.jsed-crs-append::after {
   margin-left: 0;
 }
 
 /* insertion marker */
-.jsed-token-focus.jsed-token.jsed-ui-ia,
-.jsed-token-focus.jsed-token.jsed-ui-ib {
+.jsed-token-focus.jsed-token.jsed-crs-insert-after,
+.jsed-token-focus.jsed-token.jsed-crs-insert-before {
   background-color: unset;
   color: unset;
 }
 /* "* foo" */
-.jsed-token-focus.jsed-token.jsed-ui-ib::before {
+.jsed-token-focus.jsed-token.jsed-crs-insert-before::before {
   content: '\0020\02D0\0020';
   background-color: var(--sky-blue-600);
   color: var(--slate-300);
@@ -208,7 +208,7 @@ See:
   font-style: normal;
 }
 /* "foo *" */
-.jsed-token-focus.jsed-token.jsed-ui-ia::after {
+.jsed-token-focus.jsed-token.jsed-crs-insert-after::after {
   content: '\0020\02D0\0020';
   background-color: var(--sky-blue-600);
   color: var(--slate-300);

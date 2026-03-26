@@ -1,7 +1,7 @@
-export const CURSOR_APPEND_CLASS = 'jsed-ui-ew';
-export const CURSOR_PREPEND_CLASS = 'jsed-ui-bw';
-export const CURSOR_INSERT_AFTER_CLASS = 'jsed-ui-ia';
-export const CURSOR_INSERT_BEFORE_CLASS = 'jsed-ui-ib';
+export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
+export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
+export const CURSOR_INSERT_AFTER_CLASS = 'jsed-crs-insert-after';
+export const CURSOR_INSERT_BEFORE_CLASS = 'jsed-crs-insert-before';
 
 /**
  * CSS class for SIB_HIGHLIGHT.

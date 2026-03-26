@@ -170,6 +170,36 @@ describe('tokenizeLine', () => {
       expect(byId(doc, 'p2').querySelector('.jsed-token')).not.toBeNull();
     });
 
+    test('tokenizeLine does not recurse into OPAQUE_BLOCK children', () => {
+      // arrange — p1 and p2 have no jsed-cursor-transparent class, so they are
+      // OPAQUE_BLOCK by default. tokenizeLine should skip them.
+      const doc = makeRoot(
+        div(
+          { id: 'div1' },
+          p(
+            { id: 'p1' },
+            'foo ', //
+            em(inlineStyleHack, 'bar'),
+            ' baz'
+          ),
+          p(
+            { id: 'p2' }, //
+            'foo ',
+            em(inlineStyleHack, 'bar'),
+            ' baz'
+          )
+        )
+      );
+      const div1 = byId(doc, 'div1');
+
+      // act
+      tokenizeLine(div1);
+
+      // assert — neither p1 nor p2 should have tokens inside them
+      expect(byId(doc, 'p1').querySelector('.jsed-token')).toBeNull();
+      expect(byId(doc, 'p2').querySelector('.jsed-token')).toBeNull();
+    });
+
     test('case 2', () => {
       // arrange
       const doc = makeRoot(
@@ -359,11 +389,7 @@ describe('IMPLICIT_LINE creation', () => {
     // arrange — a div marked jsed-cursor-transparent is still a LINE,
     // so trailing text should be wrapped in IMPLICIT_LINE.
     const doc = makeRoot(
-      div(
-        { id: 'div1' },
-        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
-        ' bbb'
-      )
+      div({ id: 'div1' }, div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'), ' bbb')
     );
 
     // act
@@ -382,7 +408,10 @@ describe('IMPLICIT_LINE creation', () => {
       div(
         { id: 'div1' },
         'aaa ',
-        div({ id: 'div2', class: 'jsed-cursor-transparent', style: 'display:inline-block;' }, 'nested'),
+        div(
+          { id: 'div2', class: 'jsed-cursor-transparent', style: 'display:inline-block;' },
+          'nested'
+        ),
         ' bbb'
       )
     );

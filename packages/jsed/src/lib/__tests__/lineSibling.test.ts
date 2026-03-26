@@ -618,11 +618,31 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
   // A non-INLINE, non-ISLAND FOCUSABLE is opaque by default (no class needed).
   // FOCUS can descend into it, but the CURSOR cannot.
-  const opaqueBlock = { style: 'display:inline-block;' };
+  const inlineBlock = { style: 'display:inline-block;' };
 
-  test('OPAQUE_BLOCK at middle of LINE', () => {
+  test('plain block-level div middle of line', () => {
+    // arrange — a nested div with no class is opaque by default (the flip).
+    // CURSOR visits it but does not descend into its content.
+    const doc = makeRoot(
+      div(
+        { id: 'outer' }, //
+        'aaa ',
+        div({ id: 'inner' }, 'nested content'),
+        ' bbb'
+      )
+    );
+    const line = byId(doc, 'outer');
+    tokenizeLine(line);
+    const first = line.querySelector('.jsed-token') as HTMLElement;
+
+    // act & assert — inner div is visited as opaque, "nested content" is not descended into
+    expect(collectForward(first, line)).toEqual(['aaa', '[div]', 'bbb']);
+    expect(collectBackward(walkToLast(first, line), line)).toEqual(['bbb', '[div]', 'aaa']);
+  });
+
+  test('inline-block at middle of LINE', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'nested content'), ' bbb'));
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(inlineBlock, 'nested content'), ' bbb'));
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
     // act & assert — visited but not descended: shows as opaque element
@@ -630,9 +650,9 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
   });
 
-  test('OPAQUE_BLOCK at start of LINE', () => {
+  test('inline-block at start of LINE', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, span(opaqueBlock, 'nested'), ' aaa bbb'));
+    const doc = makeRoot(p({ id: 'p1' }, span(inlineBlock, 'nested'), ' aaa bbb'));
     const line = byId(doc, 'p1');
     tokenizeLine(line);
     const opaque = line.querySelector('span[style]') as HTMLElement;
@@ -641,19 +661,29 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
     expect(collectForward(opaque, line)).toEqual(['[span]', 'aaa', 'bbb']);
   });
 
-  test('OPAQUE_BLOCK at end of LINE', () => {
+  test('inline-block at end of LINE', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'aaa bbb ', span(opaqueBlock, 'nested')));
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa bbb ', span(inlineBlock, 'nested')));
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
     // act & assert
     expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]']);
   });
 
-  test('OPAQUE_BLOCK inside INLINE', () => {
+  test('inline-block inside INLINE', () => {
     // arrange
     const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb ', span(opaqueBlock, 'nested'), ' ccc'), ' ddd')
+      p(
+        { id: 'p1' }, //
+        'aaa ',
+        em(
+          inlineStyle, //
+          'bbb ',
+          span(inlineBlock, 'nested'),
+          ' ccc'
+        ),
+        ' ddd'
+      )
     );
     const first = tokenizeLine(byId(doc, 'p1'))!;
 

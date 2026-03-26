@@ -170,14 +170,25 @@ export class Nav {
     return null;
   }
 
+  #sibnext = () =>
+    this.#FOCUS
+      ? (getNextSiblingNode(this.#FOCUS, this.doc.root, {
+          visit: isFocusable
+        }) as HTMLElement)
+      : null;
+
+  #sibprev = () =>
+    this.#FOCUS
+      ? (getPreviousSiblingNode(this.#FOCUS, this.doc.root, {
+          visit: isFocusable
+        }) as HTMLElement)
+      : null;
+
   /**
    * Find next sibling element if there is one.
    */
   SIB_NEXT(): HTMLElement | null {
-    if (!this.#FOCUS) return null;
-    const next = getNextSiblingNode(this.#FOCUS, this.doc.root, {
-      visit: isFocusable
-    });
+    const next = this.#sibnext();
     if (next) {
       this.REQUEST_FOCUS(next);
       return next as HTMLElement;
@@ -189,10 +200,7 @@ export class Nav {
    * Find previous sibling element if there is one.
    */
   SIB_PREV(): HTMLElement | null {
-    if (!this.#FOCUS) return null;
-    const next = getPreviousSiblingNode(this.#FOCUS, this.doc.root, {
-      visit: isFocusable
-    });
+    const next = this.#sibprev();
     if (next) {
       this.REQUEST_FOCUS(next);
       return next as HTMLElement;
@@ -271,16 +279,16 @@ export class Nav {
   SIB_HIGHLIGHT(): void {
     this.#SIB_HIGHLIGHT_CLEAR();
     const active = this.#FOCUS;
-    const pnode = active?.parentElement;
-    if (active && pnode && isFocusable(active)) {
-      for (const child of pnode.children) {
-        if (isFocusable(child)) {
-          if (child !== active) {
-            this.doc.SIB_HIGHLIGHT.add(child);
-            child.classList.add(SBR_FOCUS_SIBLING);
-          }
-        }
-      }
+    if (!active) return;
+    const next = this.#sibnext();
+    const prev = this.#sibprev();
+    if (next) {
+      next.classList.add(SBR_FOCUS_SIBLING);
+      this.doc.SIB_HIGHLIGHT.add(next);
+    }
+    if (prev) {
+      prev.classList.add(SBR_FOCUS_SIBLING);
+      this.doc.SIB_HIGHLIGHT.add(prev);
     }
   }
 }

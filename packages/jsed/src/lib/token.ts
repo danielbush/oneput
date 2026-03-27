@@ -7,7 +7,7 @@ import {
   JSED_TOKEN_PADDED
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
-import { findNextNode } from './walk2.js';
+import { findNextNode } from './walk.js';
 import {
   isFocusable,
   isIgnorable,

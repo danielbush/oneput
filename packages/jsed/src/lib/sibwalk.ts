@@ -16,7 +16,7 @@ import {
   isTransparentBlock,
   isLineSibling
 } from './taxonomy.js';
-import { findNextNode, findPreviousNode } from './walk2.js';
+import { findNextNode, findPreviousNode } from './walk.js';
 
 /**
  * Get previous visible (non-IGNORABLE) element sibling.

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { makeRoot, div, byId } from '../../test/util.js';
-import { findNextNode, findPreviousNode } from '../walk2.js';
+import { findNextNode, findPreviousNode } from '../walk.js';
 
 describe('findNextNode - visit order', () => {
   test('root=ceiling / ceiling=start / start=root', () => {

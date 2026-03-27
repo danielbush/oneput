@@ -8,7 +8,7 @@ import {
   getPreviousSiblingNode,
   findNextNode,
   findPreviousNode
-} from './lib/walk2.js';
+} from './lib/walk.js';
 import { ElementIndicator } from './ElementIndicator.js';
 import { scrollIntoViewIfSmaller } from './lib/dom.js';
 

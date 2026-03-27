@@ -1,9 +1,6 @@
 import { getParent } from './lib/token.js';
 import { isToken } from './lib/taxonomy.js';
 import { Indicator } from './lib/indicator.js';
-import type { IndicatorConfig } from './lib/indicator.js';
-
-// #region Types
 
 interface MinimalObserver {
   observe(el: Element): void;
@@ -15,59 +12,38 @@ type ObserverFactory = (
   options?: IntersectionObserverInit
 ) => MinimalObserver;
 
-interface ElementIndicatorDeps {
-  doc: {
-    addEventListener(
-      type: string,
-      handler: EventListenerOrEventListenerObject,
-      options?: boolean | AddEventListenerOptions
-    ): void;
-    removeEventListener(
-      type: string,
-      handler: EventListenerOrEventListenerObject,
-      options?: boolean | EventListenerOptions
-    ): void;
-  };
-  indicator: Indicator;
-  createObserver: ObserverFactory;
-  viewportHeight: () => number;
-}
-
-// #endregion
-
-// #region Embedded stubs
-
+/**
+ * For embedded stubs.
+ */
 class NullObserver implements MinimalObserver {
   observe() {}
   disconnect() {}
 }
-
-// #endregion
 
 /**
  * Provides a visual indicator for the focused element (non-tokens).
  */
 export class ElementIndicator {
   static create() {
-    return new ElementIndicator({
-      doc: document,
-      indicator: Indicator.create(document, document.body),
-      createObserver: (callback, options) => new IntersectionObserver(callback, options),
-      viewportHeight: () => window.innerHeight
+    return new ElementIndicator(Indicator.create(), {
+      IntersectionObserver: (callback, options) => new IntersectionObserver(callback, options)
     });
   }
 
-  static createNull(opts?: { indicatorSize?: IndicatorConfig; viewportHeight?: number }) {
-    const viewportHeight = opts?.viewportHeight ?? 768;
-    return new ElementIndicator({
-      doc: document,
-      indicator: Indicator.createNull(opts?.indicatorSize),
-      createObserver: () => new NullObserver(),
-      viewportHeight: () => viewportHeight
-    });
+  static createNull(opts?: { viewportHeight?: number }) {
+    return new ElementIndicator(
+      Indicator.createNull({
+        viewportHeight: opts?.viewportHeight
+      }),
+      {
+        IntersectionObserver: () => new NullObserver()
+      }
+    );
   }
 
-  #deps: ElementIndicatorDeps;
+  get #doc() {
+    return document;
+  }
 
   /**
    * The element we're indicating on.
@@ -78,7 +54,7 @@ export class ElementIndicator {
   #isVisible = true;
 
   #scrollHandler = () => {
-    this.#deps.indicator.hide();
+    this.indicator.hide();
   };
 
   #scrollEndHandler = () => {
@@ -87,18 +63,22 @@ export class ElementIndicator {
     }
   };
 
-  constructor(deps: ElementIndicatorDeps) {
-    this.#deps = deps;
-    deps.doc.addEventListener('scroll', this.#scrollHandler, true);
-    deps.doc.addEventListener('scrollend', this.#scrollEndHandler, true);
+  constructor(
+    private indicator: Indicator,
+    private create: {
+      IntersectionObserver: ObserverFactory;
+    }
+  ) {
+    this.#doc.addEventListener('scroll', this.#scrollHandler, true);
+    this.#doc.addEventListener('scrollend', this.#scrollEndHandler, true);
   }
 
   destroy() {
-    this.#deps.doc.removeEventListener('scroll', this.#scrollHandler, true);
-    this.#deps.doc.removeEventListener('scrollend', this.#scrollEndHandler, true);
+    this.#doc.removeEventListener('scroll', this.#scrollHandler, true);
+    this.#doc.removeEventListener('scrollend', this.#scrollEndHandler, true);
     this.#observer?.disconnect();
     this.#observer = null;
-    this.#deps.indicator.remove();
+    this.indicator.remove();
   }
 
   showIndicator(bool: boolean) {
@@ -106,7 +86,7 @@ export class ElementIndicator {
     if (bool) {
       this.#addIndicator();
     } else {
-      this.#deps.indicator.remove();
+      this.indicator.remove();
     }
   }
 
@@ -131,11 +111,11 @@ export class ElementIndicator {
 
   #setupObserver(el: HTMLElement): void {
     this.#observer?.disconnect();
-    this.#observer = this.#deps.createObserver(
+    this.#observer = this.create.IntersectionObserver(
       ([entry]) => {
         this.#isVisible = entry.isIntersecting;
         if (!this.#isVisible) {
-          this.#deps.indicator.remove();
+          this.indicator.remove();
         } else if (this.#showIndicator) {
           this.#addIndicator();
         }
@@ -146,8 +126,7 @@ export class ElementIndicator {
   }
 
   #addIndicator(): void {
-    const el = this.#element;
-    if (!el) return;
-    this.#deps.indicator.show(el, this.#deps.viewportHeight());
+    if (!this.#element) return;
+    this.indicator.show(this.#element);
   }
 }

@@ -1,58 +1,44 @@
 import { JSED_IGNORE_CLASS } from './constants.js';
 
-// #region Types
-
-export interface IndicatorConfig {
-  indicatorHeight?: number;
-  indicatorWidth?: number;
-}
-
-interface IndicatorMount {
-  appendChild(node: Node): Node;
-}
-
-interface IndicatorDeps {
-  doc: Document;
-  mount: IndicatorMount;
-}
-
-// #endregion
-
 /**
  * Wraps the indicator span element — creation, positioning, hiding, and removal.
- *
- * INFRASTRUCTURE_WRAPPER: the OUTSIDE_WORLD boundary is real DOM layout
- * (offsetHeight/offsetWidth, getBoundingClientRect). createNull() uses
- * happy-dom for everything else and only patches layout measurements via
- * CONFIGURABLE_RESPONSE.
  */
 export class Indicator {
-  static create(doc: Document, mount: IndicatorMount) {
-    return new Indicator({ doc, mount });
+  static create() {
+    return new Indicator({ getHeight: () => window.innerHeight });
   }
 
-  static createNull(config?: IndicatorConfig & { mount?: IndicatorMount }) {
+  static createNull({
+    createElement,
+    viewportHeight
+  }: {
+    createElement?: (tagName: string) => HTMLElement;
+    viewportHeight?: number;
+  }) {
     return new Indicator(
-      { doc: document, mount: config?.mount ?? { appendChild: (n) => n } },
-      config
+      { getHeight: () => viewportHeight ?? 768 },
+      createElement ?? ((tagName) => document.createElement(tagName))
     );
   }
 
-  #deps: IndicatorDeps;
   #el: HTMLElement | null = null;
-  #config?: IndicatorConfig;
 
-  private constructor(deps: IndicatorDeps, config?: IndicatorConfig) {
-    this.#deps = deps;
-    this.#config = config;
+  get element(): HTMLElement | null {
+    return this.#el;
   }
 
-  show(target: HTMLElement, viewportHeight: number): void {
+  constructor(
+    private viewport: { getHeight: () => number },
+    private createElement = (tagName: string) => document.createElement(tagName)
+  ) {}
+
+  show(target: HTMLElement): void {
     this.remove();
     const tagn = target.tagName;
     const rect = target.getBoundingClientRect();
+    const viewportHeight = this.viewport.getHeight();
 
-    const span = this.#deps.doc.createElement('span');
+    const span = this.createElement('span');
     span.classList.add(JSED_IGNORE_CLASS);
     span.classList.add('jsed-tag-indicator');
     span.style.position = 'fixed';
@@ -63,9 +49,9 @@ export class Indicator {
 
     // Temporarily add to measure dimensions
     span.style.visibility = 'hidden';
-    this.#deps.mount.appendChild(span);
-    const indicatorHeight = this.#config?.indicatorHeight ?? span.offsetHeight;
-    const indicatorWidth = this.#config?.indicatorWidth ?? span.offsetWidth;
+    document.body.appendChild(span);
+    const indicatorHeight = span.offsetHeight;
+    const indicatorWidth = span.offsetWidth;
     span.remove();
     span.style.visibility = '';
 
@@ -100,7 +86,7 @@ export class Indicator {
       span.style.transform = leftAligned ? '' : 'translateX(-100%)';
     }
 
-    this.#deps.mount.appendChild(span);
+    document.body.appendChild(span);
     this.#el = span;
   }
 

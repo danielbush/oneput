@@ -47,11 +47,11 @@ Unify TOGGLE_COLLAPSE and TOGGLE_PADDED into a single "toggle token spacing" con
 
 See CURSOR_WALKS_NON_TOKENS__WORK for context — PADDED_TOKEN was introduced there to handle spacing between ISLANDs and adjacent TOKENs.
 
-## feat: joinNext/joinPrevious across INLINE boundaries
+## feat: joinNext/joinPrevious across INLINE_FLOW boundaries
 
 Drafted: 23-Mar-2026
 
-`joinNext`/`joinPrevious` currently only find immediate TOKEN siblings via `getNextTokenSibling`/`getPreviousTokenSibling`. If the next/previous LINE_SIBLING is an INLINE (e.g. `<em>`), the join is a no-op — it can't reach the TOKEN inside. The target TOKEN should be extracted from the INLINE and absorbed into the receiving TOKEN.
+`joinNext`/`joinPrevious` currently only find immediate TOKEN siblings via `getNextTokenSibling`/`getPreviousTokenSibling`. If the next/previous LINE_SIBLING is an INLINE_FLOW (e.g. `<em>`), the join is a no-op — it can't reach the TOKEN inside. The target TOKEN should be extracted from the INLINE_FLOW and absorbed into the receiving TOKEN.
 
 ## discussion: visible vs invisible IGNORABLE's
 

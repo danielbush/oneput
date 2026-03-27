@@ -59,7 +59,7 @@ describe('getLine', () => {
     expect(getLine(token)).toBe(line);
   });
 
-  test('INLINE: returns the containing LINE, not the INLINE itself', () => {
+  test('INLINE_FLOW: returns the containing LINE, not the INLINE_FLOW itself', () => {
     // arrange
     const doc = makeRoot(div({ id: 'line' }, em(inlineStyle, 'text')));
     const line = byId(doc, 'line');
@@ -102,17 +102,17 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['baz', 'bar', 'foo']);
   });
 
-  test('INLINE: <p>aaa <em>bbb</em> ccc</p>', () => {
+  test('INLINE_FLOW: <p>aaa <em>bbb</em> ccc</p>', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'), ' ccc'));
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
-    // act & assert — CURSOR traverses seamlessly through the INLINE
+    // act & assert — CURSOR traverses seamlessly through the INLINE_FLOW
     expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc']);
     expect(collectBackward(walkToLast(first))).toEqual(['ccc', 'bbb', 'aaa']);
   });
 
-  test('nested INLINE: <p>aaa <em>bbb <em>ccc</em> ddd</em> eee</p>', () => {
+  test('nested INLINE_FLOW: <p>aaa <em>bbb <em>ccc</em> ddd</em> eee</p>', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb ', em(inlineStyle, 'ccc'), ' ddd'), ' eee')
@@ -146,7 +146,7 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
   });
 
   test('floated element is a LINE (OPAQUE_BLOCK)', () => {
-    // arrange — a floated span is not INLINE (float excludes it), so it's a LINE.
+    // arrange — a floated span is not INLINE_FLOW (float excludes it), so it's a LINE.
     const doc = makeRoot(
       div({ id: 'div1' }, 'aaa ', span({ style: 'float:left;' }, 'floated'), ' bbb')
     );
@@ -213,7 +213,7 @@ describe('(1) ISLAND: CURSOR visit=yes, descend=no', () => {
     expect(collectForward(first)).toEqual(['aaa', 'bbb', '[island:span]']);
   });
 
-  test('ISLAND inside INLINE', () => {
+  test('ISLAND inside INLINE_FLOW', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -225,7 +225,7 @@ describe('(1) ISLAND: CURSOR visit=yes, descend=no', () => {
     );
     const first = tokenizeLine(byId(doc, 'p1'))!;
 
-    // act & assert — CURSOR descends into the INLINE, visits the ISLAND within it
+    // act & assert — CURSOR descends into the INLINE_FLOW, visits the ISLAND within it
     expect(collectForward(first)).toEqual(['aaa', 'bbb', '[island:span]', 'ccc', 'ddd']);
   });
 
@@ -277,7 +277,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
     expect(first.textContent).toBe('aaa ');
   });
 
-  test('TOKEN after INLINE is not padded', () => {
+  test('TOKEN after INLINE_FLOW is not padded', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em({ style: 'display:inline;' }, 'bbb'), ' ccc'));
     tokenizeLine(byId(doc, 'p1'));
@@ -286,7 +286,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
     const tokens = byId(doc, 'p1').querySelectorAll('.jsed-token');
     const lastToken = tokens[tokens.length - 1] as HTMLElement;
 
-    // assert — INLINE's last TOKEN provides trailing space, so no padding needed
+    // assert — INLINE_FLOW's last TOKEN provides trailing space, so no padding needed
     expect(isPadded(lastToken)).toBe(false);
   });
 
@@ -366,7 +366,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
   // Category (2) requires explicit opt-in via jsed-cursor-transparent class.
   // This includes nested block elements (div inside div) and inline-block spans.
-  // The CURSOR descends into them seamlessly, like an INLINE.
+  // The CURSOR descends into them seamlessly, like an INLINE_FLOW.
   const transparent = 'jsed-cursor-transparent';
 
   test('nested div at middle of LINE: <div>aaa <div>nested</div> bbb</div>', () => {
@@ -421,7 +421,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested']);
   });
 
-  test('nested div inside INLINE: <div>aaa <em>bbb <div>nested</div> ccc</em> ddd</div>', () => {
+  test('nested div inside INLINE_FLOW: <div>aaa <em>bbb <div>nested</div> ccc</em> ddd</div>', () => {
     // arrange — uses <div> not <p> as outer because <p> auto-closes on block children
     // "ccc" after the nested div inside em is wrapped in IMPLICIT_LINE
     const doc = makeRoot(
@@ -438,7 +438,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — descend through INLINE, then nested div, then IMPLICIT_LINE for "ccc"
+    // act & assert — descend through INLINE_FLOW, then nested div, then IMPLICIT_LINE for "ccc"
     expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
   });
 
@@ -511,7 +511,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
 });
 
 describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
-  // A non-INLINE, non-ISLAND FOCUSABLE is opaque by default (no class needed).
+  // A non-INLINE_FLOW, non-ISLAND FOCUSABLE is opaque by default (no class needed).
   // FOCUS can descend into it, but the CURSOR cannot.
   const inlineBlock = { style: 'display:inline-block;' };
 
@@ -565,7 +565,7 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
     expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]']);
   });
 
-  test('inline-block inside INLINE', () => {
+  test('inline-block inside INLINE_FLOW', () => {
     // arrange
     const doc = makeRoot(
       p(

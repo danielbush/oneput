@@ -79,7 +79,7 @@ describe('quickDescend', () => {
     expect(first!.textContent!.trim()).toBe('deep');
   });
 
-  test('LINE with INLINE: returns first TOKEN from inside INLINE', () => {
+  test('LINE with INLINE_FLOW: returns first TOKEN from inside INLINE_FLOW', () => {
     // arrange
     const doc = makeRoot(
       p(

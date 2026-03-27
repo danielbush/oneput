@@ -117,13 +117,13 @@ describe('TokenCursor motion', () => {
     });
   });
 
-  describe('INLINE: <p>aaa <em>bbb</em> ccc</p>', () => {
+  describe('INLINE_FLOW: <p>aaa <em>bbb</em> ccc</p>', () => {
     function setup() {
       const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'), ' ccc'));
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext traverses seamlessly through the INLINE', () => {
+    it('moveNext traverses seamlessly through the INLINE_FLOW', () => {
       // arrange
       const { cursor } = setup();
 
@@ -135,7 +135,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('ccc');
     });
 
-    it('movePrevious traverses seamlessly back through the INLINE', () => {
+    it('movePrevious traverses seamlessly back through the INLINE_FLOW', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -150,7 +150,7 @@ describe('TokenCursor motion', () => {
     });
   });
 
-  describe('nested INLINE: <p>aaa <em>bbb <em>ccc</em> ddd</em> eee</p>', () => {
+  describe('nested INLINE_FLOW: <p>aaa <em>bbb <em>ccc</em> ddd</em> eee</p>', () => {
     function setup() {
       const doc = makeRoot(
         p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb ', em(inlineStyle, 'ccc'), ' ddd'), ' eee')
@@ -158,7 +158,7 @@ describe('TokenCursor motion', () => {
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext traverses through nested INLINE depth', () => {
+    it('moveNext traverses through nested INLINE_FLOW depth', () => {
       // arrange
       const { cursor } = setup();
 
@@ -174,7 +174,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('eee');
     });
 
-    it('movePrevious traverses back through nested INLINE depth', () => {
+    it('movePrevious traverses back through nested INLINE_FLOW depth', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -203,7 +203,7 @@ describe('TokenCursor motion', () => {
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext crosses from one INLINE to the adjacent INLINE', () => {
+    it('moveNext crosses from one INLINE_FLOW to the adjacent INLINE_FLOW', () => {
       // arrange
       const { cursor } = setup();
 
@@ -306,7 +306,7 @@ describe('TokenCursor motion', () => {
         expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
       });
 
-      it('ISLAND inside INLINE', () => {
+      it('ISLAND inside INLINE_FLOW', () => {
         // arrange
         const doc = makeRoot(
           p(
@@ -323,7 +323,7 @@ describe('TokenCursor motion', () => {
         );
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
-        // act & assert — CURSOR descends into the INLINE, visits the ISLAND within it
+        // act & assert — CURSOR descends into the INLINE_FLOW, visits the ISLAND within it
         expect(identifyCursor(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
         expect(identifyCursor(cursor.getToken())).toBe('bbb');
@@ -475,7 +475,7 @@ describe('TokenCursor motion', () => {
     });
 
     describe('(3) OPAQUE_BLOCK: visit=yes, descend=no', () => {
-      // OPAQUE_BLOCK is the default for non-INLINE, non-ISLAND FOCUSABLE's (no class needed).
+      // OPAQUE_BLOCK is the default for non-INLINE_FLOW, non-ISLAND FOCUSABLE's (no class needed).
       const opaqueBlock = { style: 'display:inline-block;' };
 
       it('moveNext visits OPAQUE_BLOCK as opaque element', () => {
@@ -922,7 +922,7 @@ describe('TokenCursor joinNext', () => {
     expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
   });
 
-  it('no-op when next LINE_SIBLING is an INLINE', () => {
+  it('no-op when next LINE_SIBLING is an INLINE_FLOW', () => {
     // arrange — 'aaa' followed by <em>bbb</em>
     const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb')));
     const { cursor } = tokenizeAndCursor(doc, '#p1');
@@ -931,7 +931,7 @@ describe('TokenCursor joinNext', () => {
     // act
     cursor.joinNext();
 
-    // assert — TOKEN unchanged, can't reach into INLINE
+    // assert — TOKEN unchanged, can't reach into INLINE_FLOW
     expect(getValue(cursor.getToken())).toBe('aaa');
   });
 });
@@ -985,7 +985,7 @@ describe('TokenCursor joinPrevious', () => {
     expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
   });
 
-  it('no-op when previous LINE_SIBLING is an INLINE', () => {
+  it('no-op when previous LINE_SIBLING is an INLINE_FLOW', () => {
     // arrange — <em>aaa</em> followed by 'bbb'
     const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'aaa'), ' bbb'));
     const { cursor } = tokenizeAndCursor(doc, '#p1');
@@ -996,7 +996,7 @@ describe('TokenCursor joinPrevious', () => {
     // act
     cursor.joinPrevious();
 
-    // assert — TOKEN unchanged, can't reach into INLINE
+    // assert — TOKEN unchanged, can't reach into INLINE_FLOW
     expect(getValue(cursor.getToken())).toBe('bbb');
   });
 });

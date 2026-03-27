@@ -99,7 +99,7 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 
 /** Descend predicate for LINE_SIBLING traversal. */
 function canDescendLineSibling(n: ParentNode | ChildNode): boolean {
-  // INLINE: focusable, not island, not implicit-line, inline-flow display
+  // INLINE_FLOW: focusable, not island, not implicit-line, inline-flow display
   if (isFocusable(n) && !isIsland(n) && !isImplicitLine(n) && isInlineFlow(n)) return true;
   if (isTransparentBlock(n)) {
     return true;

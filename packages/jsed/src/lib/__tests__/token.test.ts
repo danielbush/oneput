@@ -257,7 +257,7 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit!.textContent).toBe('this is the IMPLICIT_LINE');
   });
 
-  test('slurps up adjacent INLINE', () => {
+  test('slurps up adjacent INLINE_FLOW', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -282,7 +282,7 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit!.querySelector('#em2')).not.toBeNull();
   });
 
-  test('starting with an INLINE', () => {
+  test('starting with an INLINE_FLOW', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -307,7 +307,7 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit!.querySelector('#em2')).not.toBeNull();
   });
 
-  test('br tags are INLINE — absorbed into one IMPLICIT_LINE; hr is block — creates a new one', () => {
+  test('br tags are INLINE_FLOW — absorbed into one IMPLICIT_LINE; hr is block — creates a new one', () => {
     // br tags are inline so buildImplicitLine slurps them along with adjacent
     // text into a single IMPLICIT_LINE. An <hr> is block-level (a LINE), so it
     // stops the slurp and text after the <hr> becomes a second IMPLICIT_LINE.
@@ -338,7 +338,7 @@ describe('IMPLICIT_LINE creation', () => {
   });
 
   test('text after a floated LINE is wrapped', () => {
-    // arrange — a floated span is not INLINE (float excludes it), so it's a LINE.
+    // arrange — a floated span is not INLINE_FLOW (float excludes it), so it's a LINE.
     // Browsers blockify floated elements (computed display becomes block),
     // so trailing text should be wrapped in IMPLICIT_LINE.
     const doc = makeRoot(

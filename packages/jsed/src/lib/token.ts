@@ -130,7 +130,7 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
 /**
  * Recursively tokenize a LINE. Returns the first TOKEN created.
  *
- * Recurses into INLINE's and TRANSPARENT_BLOCK's (including IMPLICIT_LINE's)
+ * Recurses into INLINE_FLOW's and TRANSPARENT_BLOCK's (including IMPLICIT_LINE's)
  * — everything the CURSOR would descend through. Skips OPAQUE_BLOCK's and
  * ISLAND's but continues past them to tokenize the rest of the LINE.
  */
@@ -143,7 +143,7 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
     if (isToken(line)) {
       continue;
     }
-    // Recurse into TOKEN's, INLINE's (isInlineFlow && !isIsland), and TRANSPARENT_BLOCK's.
+    // Recurse into TOKEN's, INLINE_FLOW's (isInlineFlow && !isIsland), and TRANSPARENT_BLOCK's.
     if (
       isToken(child) ||
       (isFocusable(child) && !isIsland(child) && isInlineFlow(child)) ||

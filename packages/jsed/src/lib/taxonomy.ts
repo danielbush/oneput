@@ -132,8 +132,8 @@ export function isAnchor(el: HTMLElement): boolean {
  *
  * This is a primitive — no FOCUSABLE, ISLAND, or class checks. Use it when you
  * need just the CSS display-model answer. Callers combine it with other primitives
- * to derive taxonomy labels (e.g. INLINE = `isInlineFlow && !isIsland && !isImplicitLine`,
- * given FOCUSABLE).
+ * to derive taxonomy labels (e.g. INLINE_FLOW = `isFocusable && isInlineFlow && !isIsland
+ * && !isImplicitLine`).
  */
 export function isInlineFlow(el: Node | null): boolean {
   if (!el || !(el instanceof HTMLElement)) return false;
@@ -156,7 +156,7 @@ export function isImplicitLine(node: Node): boolean {
 // ============================================================================
 
 /**
- * Detect LINE — a FOCUSABLE that is not a TOKEN, INLINE, or ISLAND.
+ * Detect LINE — a FOCUSABLE that is not a TOKEN, INLINE_FLOW, or ISLAND.
  * Examples: `<div>`, `<p>`, `<h1>`, inline-block `<span>`.
  *
  * Derived: `isFocusable && !isToken && !isIsland && (!isInlineFlow || isImplicitLine)`.
@@ -172,7 +172,7 @@ export function isLine(el: Node | null): boolean {
 }
 
 /**
- * Detect OPAQUE_BLOCK — the default for any non-INLINE, non-ISLAND FOCUSABLE (LINE).
+ * Detect OPAQUE_BLOCK — the default for any LINE (non-INLINE_FLOW, non-ISLAND FOCUSABLE).
  * FOCUS can descend but the CURSOR treats it as opaque (visit=yes, descend=no).
  * A LINE is opaque unless explicitly marked with JSED_CURSOR_TRANSPARENT_CLASS.
  * IMPLICIT_LINE's are never opaque — they are synthetic wrappers that always descend.
@@ -186,7 +186,7 @@ export function isCursorBoundary(el: Node | null): boolean {
 /**
  * Detect TRANSPARENT_BLOCK — a LINE explicitly marked with JSED_CURSOR_TRANSPARENT_CLASS,
  * or an IMPLICIT_LINE (always transparent). The CURSOR descends into it seamlessly
- * (like INLINE), visit=no, descend=yes.
+ * (like INLINE_FLOW), visit=no, descend=yes.
  */
 export function isTransparentBlock(el: Node | ChildNode | ParentNode | null): boolean {
   if (!el || !(el instanceof Element)) return false;

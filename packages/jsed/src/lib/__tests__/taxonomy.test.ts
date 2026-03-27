@@ -24,7 +24,7 @@ describe('isToken', () => {
     expect(isToken(byId(doc, 'p1'))).toBe(false);
   });
 
-  test('INLINE (em): returns false', () => {
+  test('INLINE_FLOW (em): returns false', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'text')));
     const emEl = byId(doc, 'p1').querySelector('em')!;
@@ -127,7 +127,7 @@ describe('isLine', () => {
     expect(isLine(token)).toBe(false);
   });
 
-  test('INLINE (em): returns false', () => {
+  test('INLINE_FLOW (em): returns false', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'text')));
     const emEl = byId(doc, 'p1').querySelector('em')!;

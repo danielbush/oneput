@@ -305,9 +305,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 
   test('TOKEN after inline-block OPAQUE_BLOCK is padded', () => {
     // arrange
-    const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb')
-    );
+    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb'));
     tokenizeLine(byId(doc, 'p1'));
 
     // act — find the TOKEN after the inline-block

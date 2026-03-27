@@ -30,6 +30,7 @@ interface IndicatorDeps {
     body: { appendChild(node: Node): Node };
   };
   createObserver: ObserverFactory;
+  viewportHeight: () => number;
 }
 
 // #endregion
@@ -41,11 +42,43 @@ class NullObserver implements MinimalObserver {
   disconnect() {}
 }
 
+interface NullElementConfig {
+  rect?: Partial<DOMRect>;
+  offsetHeight?: number;
+  offsetWidth?: number;
+}
+
 class NullElement {
   classList = { add(..._classes: string[]) {} };
   style: Record<string, string> = {};
   innerText = '';
-  offsetHeight = 0;
+  offsetHeight: number;
+  offsetWidth: number;
+  #rect: DOMRect;
+
+  constructor(config: NullElementConfig = {}) {
+    const r = config.rect ?? {};
+    this.#rect = {
+      top: r.top ?? 0,
+      bottom: r.bottom ?? 0,
+      left: r.left ?? 0,
+      right: r.right ?? 0,
+      width: r.width ?? 0,
+      height: r.height ?? 0,
+      x: r.x ?? r.left ?? 0,
+      y: r.y ?? r.top ?? 0,
+      toJSON() {
+        return this;
+      }
+    };
+    this.offsetHeight = config.offsetHeight ?? 0;
+    this.offsetWidth = config.offsetWidth ?? 0;
+  }
+
+  getBoundingClientRect(): DOMRect {
+    return this.#rect;
+  }
+
   remove() {}
 }
 
@@ -58,17 +91,19 @@ export class ElementIndicator {
   static create() {
     return new ElementIndicator({
       doc: document,
-      createObserver: (callback, options) => new IntersectionObserver(callback, options)
+      createObserver: (callback, options) => new IntersectionObserver(callback, options),
+      viewportHeight: () => window.innerHeight
     });
   }
 
-  static createNull() {
+  static createNull(opts?: { indicatorSize?: NullElementConfig; viewportHeight?: number }) {
+    const viewportHeight = opts?.viewportHeight ?? 768;
     return new ElementIndicator({
       doc: {
         addEventListener() {},
         removeEventListener() {},
         createElement(_tagName: string): HTMLElement {
-          return new NullElement() as unknown as HTMLElement;
+          return new NullElement(opts?.indicatorSize) as unknown as HTMLElement;
         },
         body: {
           appendChild(node: Node) {
@@ -76,7 +111,8 @@ export class ElementIndicator {
           }
         }
       },
-      createObserver: () => new NullObserver()
+      createObserver: () => new NullObserver(),
+      viewportHeight: () => viewportHeight
     });
   }
 
@@ -178,6 +214,7 @@ export class ElementIndicator {
   #makeIndicator(el: HTMLElement): HTMLElement {
     const tagn = el.tagName;
     const rect = el.getBoundingClientRect();
+    const viewportHeight = this.#deps.viewportHeight();
 
     const span = this.#deps.doc.createElement('span');
     span.classList.add(JSED_IGNORE_CLASS);
@@ -196,25 +233,35 @@ export class ElementIndicator {
     span.remove();
     span.style.visibility = '';
 
-    // Vertical: check if indicator would be cut off at top of viewport
-    const spaceAbove = rect.top - 5;
-    const positionBelow = spaceAbove < indicatorHeight;
-
     // Horizontal: check if right-aligned badge would clip off the left edge
     const leftAligned = rect.right - indicatorWidth < 0;
-
     if (leftAligned) {
       span.style.left = `${rect.left}px`;
     }
 
-    if (positionBelow) {
-      span.style.top = `${rect.bottom + 5}px`;
-      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
-    } else {
+    const topVisible = rect.top >= 0;
+    const fitsInViewport = rect.bottom <= viewportHeight;
+    const spaceAbove = rect.top - 5;
+    const canFitAbove = spaceAbove >= indicatorHeight;
+
+    if (topVisible && fitsInViewport && canFitAbove) {
+      // Case 1: Small element fully in viewport with space above — position above
       span.style.top = `${rect.top - 5}px`;
       span.style.transform = leftAligned
         ? 'translateY(-100%)'
         : 'translateY(-100%) translateX(-100%)';
+    } else if (topVisible && fitsInViewport) {
+      // Case 1b: Small element, not enough space above — position below
+      span.style.top = `${rect.bottom + 5}px`;
+      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
+    } else if (topVisible) {
+      // Case 2: Large element, top visible — anchor inside top-right corner
+      span.style.top = `${rect.top + 5}px`;
+      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
+    } else {
+      // Case 3: Top scrolled past viewport — pin to viewport top
+      span.style.top = '5px';
+      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
     }
 
     return span;

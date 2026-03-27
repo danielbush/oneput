@@ -14,14 +14,6 @@ Drafted: 27-Mar-2026
 
 When the CURSOR is open (editing a LINE), pressing REC_NEXT/SIB_NEXT or REC_PREV/SIB_PREV should close the CURSOR (return to view mode) and move FOCUS to the appropriate FOCUSABLE. Currently you have to explicitly exit edit mode before navigating.
 
-## refactor: remove TokenManager
-
-Drafted: 23-Mar-2026
-
-TokenManager's role has been largely absorbed by TokenCursor's lazy tokenization (via `onEnterBlockTransparent` callback in `moveNext`/`movePrevious`). Review whether TokenManager still serves a purpose; if not, remove it and let the CURSOR own tokenization directly.
-
-Once removed, simplify `createCursor` and `tokenizeAndCursor` test helpers in `TokenCursor.test.ts` — they currently wire up TokenManager as an intermediary.
-
 ## feat: hitting enter splits paragraph
 
 Drafted: 19-Mar-2026

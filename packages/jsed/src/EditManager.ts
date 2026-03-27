@@ -1,6 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { isToken, getLine } from './lib/traversal.js';
+import { isToken } from './lib/taxonomy.js';
+import { getLine } from './lib/traversal.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';

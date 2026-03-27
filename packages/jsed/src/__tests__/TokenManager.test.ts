@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../test/util.js';
 import { TokenManager } from '../TokenManager.js';
 import { tokenizeLine } from '../lib/token.js';
-import { isIsland } from '../lib/traversal.js';
+import { isIsland } from '../lib/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

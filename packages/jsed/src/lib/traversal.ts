@@ -1,24 +1,9 @@
 /**
  * Sibling helpers, LINE detection, and LINE_SIBLING traversal.
  *
- * Classification predicates (`is*`) live in taxonomy.ts and are re-exported
- * here for backward compatibility. This module adds traversal logic on top.
+ * Classification predicates (`is*`) live in taxonomy.ts. This module
+ * imports from taxonomy.ts and adds traversal logic on top.
  */
-
-export {
-  isAlreadyFocusable,
-  isIsland,
-  isIgnorable,
-  isFocusable,
-  isToken,
-  isAnchor,
-  isInlineFlow,
-  isImplicitLine,
-  isLine,
-  isCursorBoundary,
-  isTransparentBlock,
-  isLineSibling
-} from './taxonomy.js';
 
 import {
   isIgnorable,

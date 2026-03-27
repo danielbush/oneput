@@ -1,4 +1,5 @@
-import { isIsland, isFocusable, isToken, getLine, getFirstLineSibling } from './lib/traversal.js';
+import { isIsland, isFocusable, isToken } from './lib/taxonomy.js';
+import { getLine, getFirstLineSibling } from './lib/traversal.js';
 import { tokenizeLine } from './lib/token.js';
 import { findNextNode } from './lib/walk2.js';
 

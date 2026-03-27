@@ -1,6 +1,6 @@
 import { JsedDocument } from '../JsedDocument.js';
 import * as token from '../lib/token.js';
-import { isIsland, isToken } from '../lib/traversal.js';
+import { isIsland, isToken } from '../lib/taxonomy.js';
 
 /**
  * Make a div be the root of the document.

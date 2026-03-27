@@ -1,6 +1,6 @@
 import type { JsedDocument } from './types.js';
 import { JSED_CURSOR_CLASS } from './lib/constants.js';
-import { isLineSibling } from './lib/traversal.js';
+import { isLineSibling } from './lib/taxonomy.js';
 import type { TokenManager } from './TokenManager.js';
 import { scrollIntoViewIfSmaller } from './lib/dom.js';
 

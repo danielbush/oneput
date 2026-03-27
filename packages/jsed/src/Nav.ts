@@ -1,6 +1,6 @@
 import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
 import { JSED_APP_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
-import { isIsland, isFocusable, isToken } from './lib/traversal.js';
+import { isIsland, isFocusable, isToken } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
 import {
   getNextSiblingNode,

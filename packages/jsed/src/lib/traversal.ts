@@ -140,7 +140,7 @@ export function getPreviousLineSibling(
 }
 
 /**
- * Get next LINE_SIBLING within `line`.
+ * Get next LINE_SIBLING from `el` within `line`.
  */
 export function getNextLineSibling(
   el: HTMLElement,
@@ -157,7 +157,7 @@ export function getNextLineSibling(
 }
 
 /**
- * Get the first LINE_SIBLING in a LINE — may be a TOKEN or an ISLAND.
+ * Get the first LINE_SIBLING in a LINE.
  */
 export function getFirstLineSibling(
   line: HTMLElement,
@@ -166,6 +166,7 @@ export function getFirstLineSibling(
   const descendFn = lineSiblingDescend(options);
   for (const node of findNextNode(line, line, {
     visit: isLineSibling,
+    // Descend `line`.
     descend: (n) => n === line || descendFn(n)
   })) {
     return node as HTMLElement;

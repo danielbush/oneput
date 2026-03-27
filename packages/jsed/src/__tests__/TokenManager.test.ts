@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../test/util.js';
 import { TokenManager } from '../TokenManager.js';
 import { tokenizeLine } from '../lib/token.js';
-import { isIsland } from '../lib/taxonomy.js';
+import { isToken } from '../lib/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -104,7 +104,7 @@ describe('TokenManager.tokenize', () => {
     expect(first!.textContent!.trim()).toBe('italic');
   });
 
-  test('LINE starting with ISLAND: returns the ISLAND', () => {
+  test('LINE starting with ISLAND: skips ISLAND, returns first TOKEN', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
@@ -117,10 +117,11 @@ describe('TokenManager.tokenize', () => {
 
     // assert
     expect(first).not.toBeNull();
-    expect(isIsland(first!)).toBe(true);
+    expect(isToken(first!)).toBe(true);
+    expect(first!.textContent!.trim()).toBe('aaa');
   });
 
-  test('NESTED_LINE starting with ISLAND: returns the ISLAND', () => {
+  test('NESTED_LINE starting with ISLAND: skips ISLAND, returns first TOKEN', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -140,6 +141,7 @@ describe('TokenManager.tokenize', () => {
 
     // assert
     expect(first).not.toBeNull();
-    expect(isIsland(first!)).toBe(true);
+    expect(isToken(first!)).toBe(true);
+    expect(first!.textContent!.trim()).toBe('aaa');
   });
 });

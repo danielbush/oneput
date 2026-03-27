@@ -156,8 +156,10 @@ export class EditManager {
     if (focus) {
       const firstToken = this.tokenManager.tokenize(focus);
       if (firstToken) {
+        const line = getLine(firstToken);
+        this.nav.FOCUS(line);
         this.userInput.focus();
-        return ok(this.#setCursor(firstToken, getLine(focus)));
+        return ok(this.#setCursor(firstToken, line));
       }
       return err({ type: 'no-token-under-focus' });
     }

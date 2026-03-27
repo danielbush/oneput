@@ -1,7 +1,6 @@
 import { isIsland, isFocusable, isToken } from './lib/taxonomy.js';
-import { getLine, getFirstLineSibling } from './lib/traversal.js';
+import { getLine, getFirstLineSibling, getNextLineSibling } from './lib/traversal.js';
 import { tokenizeLine } from './lib/token.js';
-import { findNextNode } from './lib/walk2.js';
 
 export class TokenManager {
   static create() {
@@ -16,10 +15,13 @@ export class TokenManager {
   };
 
   /**
-   * Tokenize the line and return first TOKEN.  See SHALLOW_TOKENIZATION .
+   * Quick-descend: tokenize and find the first TOKEN within a FOCUSABLE.
+   * See SHALLOW_TOKENIZATION.
    *
-   * If the LINE has no direct text (e.g. a div containing NESTED_LINE's),
-   * descend into child FOCUSABLE's and tokenize the first one that yields a TOKEN.
+   * Tokenizes the LINE containing the element and looks for the first TOKEN
+   * among its LINE_SIBLING's. If a LINE_SIBLING is an OPAQUE_BLOCK (not a
+   * TOKEN or ISLAND), recurses into it. Returns null if no TOKEN is found —
+   * the FOCUSABLE has no editable text content.
    */
   tokenize(el: HTMLElement): HTMLElement | null {
     if (isToken(el)) {
@@ -31,25 +33,21 @@ export class TokenManager {
     const line = getLine(el);
     tokenizeLine(line);
 
-    const first = getFirstLineSibling(line, {
-      onEnterBlockTransparent: this.lazyTokenize
-    });
-    if (first) {
-      return first;
-    }
-
-    // LINE has no direct text — descend into child FOCUSABLE's (NESTED_LINE's)
-    // and tokenize the first one that yields a LINE_SIBLING.
-    for (const next of findNextNode(el, el, {
-      visit: isFocusable,
-      descend: (node) => !isIsland(node)
-    })) {
-      const nested = next as HTMLElement;
-      tokenizeLine(nested);
-      const nestedFirst = getFirstLineSibling(nested);
-      if (nestedFirst) {
-        return nestedFirst;
+    // Walk LINE_SIBLING's looking for a TOKEN. If we hit an OPAQUE_BLOCK,
+    // quick-descend into it to find TOKEN's inside.
+    const opts = { onEnterBlockTransparent: this.lazyTokenize };
+    let sib = getFirstLineSibling(line, opts);
+    while (sib) {
+      if (isToken(sib)) {
+        return sib;
       }
+      // OPAQUE_BLOCK — recurse to find TOKEN's within
+      if (!isIsland(sib)) {
+        const nested = this.tokenize(sib);
+        if (nested) return nested;
+      }
+      // ISLAND or empty OPAQUE_BLOCK — skip, continue to next LINE_SIBLING
+      sib = getNextLineSibling(sib, line, opts);
     }
 
     return null;

@@ -281,17 +281,17 @@ describe('TokenCursor motion', () => {
         expect(identifyCursor(cursor.getToken())).toBe('aaa');
       });
 
-      it('ISLAND at start of LINE is the first cursor position', () => {
+      it('ISLAND at start of LINE: cursor starts on first TOKEN after ISLAND', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
         );
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
-        // act & assert — cursor should start on the ISLAND
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
-        cursor.moveNext();
+        // act & assert — quick-descend skips the ISLAND, cursor starts on first TOKEN
         expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        cursor.movePrevious();
+        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
       });
 
       it('ISLAND at end of LINE is the last cursor position', () => {

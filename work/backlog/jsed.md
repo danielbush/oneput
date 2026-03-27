@@ -2,31 +2,6 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
-## feat: click/touch tokenizes LINE and enters edit mode
-
-Drafted: 27-Mar-2026
-
-Click or touch on a LINE should tokenize it and put the CURSOR at the beginning of the first TOKEN. If FOCUS is already on that LINE (e.g. second tap), quick-descend into it — find the first text/TOKEN, establish the LINE, and enter edit mode directly. See QUICK_DESCEND__WORK.
-
-## feat: REC_NEXT/SIB_NEXT and REC_PREV/SIB_PREV close CURSOR and move FOCUS
-
-Drafted: 27-Mar-2026
-
-When the CURSOR is open (editing a LINE), pressing REC_NEXT/SIB_NEXT or REC_PREV/SIB_PREV should close the CURSOR (return to view mode) and move FOCUS to the appropriate FOCUSABLE. Currently you have to explicitly exit edit mode before navigating.
-
-## feat: hitting enter splits paragraph
-
-Drafted: 19-Mar-2026
-
-- CURSOR should split before the TOKEN by default
-- if CURSOR is toggled to the "after token" position and/or we've typed a space after the token, then split after the current TOKEN
-- CURSOR should sit on the new paragraph
-- what happens if we're in a div? - do we repeat?
-- what happens if we're in an em? - do we repeat?
-- make sure we do some exploratory testing using test_doc.html
-- `splitBefore`/`splitAfter` currently call `getLine(token)` internally to find the split ceiling. With TRANSPARENT_BLOCK, the passed-in LINE (from the CURSOR) may differ from the `getLine` result. For now these functions stay as-is (split relative to the nearest LINE), but when implementing enter-to-split we need to decide: should the split ceiling be the TRANSPARENT_BLOCK parent or the outer LINE? Likely the nearest LINE is correct (you split the immediate container), but verify with nested `<div>` structures
-- Include PADDED_TOKEN testing for `splitBefore`/`splitAfter` — deferred from CURSOR_WALKS_NON_TOKENS__WORK housekeeping. Verify correct behaviour when splitting a PADDED_TOKEN or when a split produces a TOKEN adjacent to an ISLAND
-
 # Lower priority
 
 ## feat: CURSOR can seamlessly move to next or previous "sibling" LINE

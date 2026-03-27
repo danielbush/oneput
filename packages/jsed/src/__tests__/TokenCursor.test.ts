@@ -3,7 +3,7 @@ import { makeRoot, p, div, em, span, identifyCursor } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue, isPadded, quickDescend } from '../lib/token.js';
-import { getLine } from '../lib/traversal.js';
+import { getLine } from '../lib/sibwalk.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,

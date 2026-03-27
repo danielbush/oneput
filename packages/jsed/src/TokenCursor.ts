@@ -7,7 +7,7 @@ import {
 } from './lib/constants.js';
 import * as token from './lib/token.js';
 import { isToken } from './lib/taxonomy.js';
-import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/traversal.js';
+import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
 import type { UserInputSelectionState } from './UserInput.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 

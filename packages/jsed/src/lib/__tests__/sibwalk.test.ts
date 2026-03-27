@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em, span } from '../../test/util.js';
 import { isToken, isIsland, isInlineFlow, isLine } from '../taxonomy.js';
-import { getNextLineSibling, getPreviousLineSibling, getLine } from '../traversal.js';
+import { getNextLineSibling, getPreviousLineSibling, getLine } from '../sibwalk.js';
 import { tokenizeLine, isPadded, addAnchors } from '../token.js';
 
 // INLINE_COMPUTED_STYLE

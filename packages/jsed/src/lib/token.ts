@@ -26,7 +26,7 @@ import {
   getPreviousVisibleSibling,
   getPreviousTokenSibling,
   getNextTokenSibling
-} from './traversal.js';
+} from './sibwalk.js';
 
 // #region TOKEN CRUD
 

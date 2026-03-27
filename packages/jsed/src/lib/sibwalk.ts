@@ -18,8 +18,6 @@ import {
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk2.js';
 
-// #region Sibling helpers
-
 /**
  * Get previous visible (non-IGNORABLE) element sibling.
  * Walks backwards skipping IGNORABLE's. Returns null if none found.
@@ -71,10 +69,6 @@ export function getNextTokenSibling(el: HTMLElement): HTMLElement | null {
   }
   return null;
 }
-
-// #endregion
-
-// #region LINE detection and LINE_SIBLING traversal
 
 /**
  * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.
@@ -152,5 +146,3 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   }
   return null;
 }
-
-// #endregion

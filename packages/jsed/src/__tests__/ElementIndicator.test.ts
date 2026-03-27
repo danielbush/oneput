@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ElementIndicator } from '../ElementIndicator.js';
+import { Indicator } from '../lib/indicator.js';
 
 /**
  * Creates a fake FOCUSABLE element with a configurable bounding rect.
@@ -30,51 +30,37 @@ function fakeElement(
 
 /**
  * Shows the indicator for the given element and returns the style of the
- * indicator span. Uses a custom ElementIndicator wired with a body spy
- * to capture the appended indicator node.
+ * indicator span via a mount spy.
  */
 function getIndicatorStyle(
   el: HTMLElement,
   opts?: { viewportHeight?: number; indicatorHeight?: number; indicatorWidth?: number }
 ) {
-  let lastAppended: { style: Record<string, string> } | undefined;
+  let lastAppended: HTMLElement | undefined;
 
-  const indicator = new (ElementIndicator as any)({
-    doc: {
-      addEventListener() {},
-      removeEventListener() {},
-      createElement(): HTMLElement {
-        const node = {
-          classList: { add() {} },
-          style: {} as Record<string, string>,
-          innerText: '',
-          offsetHeight: opts?.indicatorHeight ?? 20,
-          offsetWidth: opts?.indicatorWidth ?? 40,
-          remove() {}
-        };
-        lastAppended = node;
-        return node as unknown as HTMLElement;
-      },
-      body: {
-        appendChild(node: any) {
-          lastAppended = node;
-          return node;
-        }
+  const indicator = Indicator.createNull({
+    mount: {
+      appendChild(node: Node) {
+        lastAppended = node as HTMLElement;
+        return node;
       }
     },
-    createObserver: () => ({ observe() {}, disconnect() {} }),
-    viewportHeight: () => opts?.viewportHeight ?? 768
-  }) as ElementIndicator;
+    indicatorHeight: opts?.indicatorHeight ?? 20,
+    indicatorWidth: opts?.indicatorWidth ?? 40
+  });
 
-  indicator.updateFocus(el);
-  indicator.showIndicator(true);
+  indicator.show(el, opts?.viewportHeight ?? 768);
 
-  const style = lastAppended?.style ?? {};
-  indicator.destroy();
-  return style;
+  const style = lastAppended?.style;
+  return {
+    top: style?.top ?? '',
+    left: style?.left ?? '',
+    transform: style?.transform ?? '',
+    position: style?.position ?? ''
+  };
 }
 
-describe('ElementIndicator', () => {
+describe('Indicator', () => {
   describe('positioning', () => {
     it('positions above a small element with space above', () => {
       // arrange

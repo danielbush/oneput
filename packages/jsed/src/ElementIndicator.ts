@@ -1,6 +1,7 @@
-import { JSED_IGNORE_CLASS } from './lib/constants.js';
 import { getParent } from './lib/token.js';
 import { isToken } from './lib/taxonomy.js';
+import { Indicator } from './lib/indicator.js';
+import type { IndicatorConfig } from './lib/indicator.js';
 
 // #region Types
 
@@ -14,7 +15,7 @@ type ObserverFactory = (
   options?: IntersectionObserverInit
 ) => MinimalObserver;
 
-interface IndicatorDeps {
+interface ElementIndicatorDeps {
   doc: {
     addEventListener(
       type: string,
@@ -26,9 +27,8 @@ interface IndicatorDeps {
       handler: EventListenerOrEventListenerObject,
       options?: boolean | EventListenerOptions
     ): void;
-    createElement(tagName: string): HTMLElement;
-    body: { appendChild(node: Node): Node };
   };
+  indicator: Indicator;
   createObserver: ObserverFactory;
   viewportHeight: () => number;
 }
@@ -42,46 +42,6 @@ class NullObserver implements MinimalObserver {
   disconnect() {}
 }
 
-interface NullElementConfig {
-  rect?: Partial<DOMRect>;
-  offsetHeight?: number;
-  offsetWidth?: number;
-}
-
-class NullElement {
-  classList = { add(..._classes: string[]) {} };
-  style: Record<string, string> = {};
-  innerText = '';
-  offsetHeight: number;
-  offsetWidth: number;
-  #rect: DOMRect;
-
-  constructor(config: NullElementConfig = {}) {
-    const r = config.rect ?? {};
-    this.#rect = {
-      top: r.top ?? 0,
-      bottom: r.bottom ?? 0,
-      left: r.left ?? 0,
-      right: r.right ?? 0,
-      width: r.width ?? 0,
-      height: r.height ?? 0,
-      x: r.x ?? r.left ?? 0,
-      y: r.y ?? r.top ?? 0,
-      toJSON() {
-        return this;
-      }
-    };
-    this.offsetHeight = config.offsetHeight ?? 0;
-    this.offsetWidth = config.offsetWidth ?? 0;
-  }
-
-  getBoundingClientRect(): DOMRect {
-    return this.#rect;
-  }
-
-  remove() {}
-}
-
 // #endregion
 
 /**
@@ -91,37 +51,24 @@ export class ElementIndicator {
   static create() {
     return new ElementIndicator({
       doc: document,
+      indicator: Indicator.create(document, document.body),
       createObserver: (callback, options) => new IntersectionObserver(callback, options),
       viewportHeight: () => window.innerHeight
     });
   }
 
-  static createNull(opts?: { indicatorSize?: NullElementConfig; viewportHeight?: number }) {
+  static createNull(opts?: { indicatorSize?: IndicatorConfig; viewportHeight?: number }) {
     const viewportHeight = opts?.viewportHeight ?? 768;
     return new ElementIndicator({
-      doc: {
-        addEventListener() {},
-        removeEventListener() {},
-        createElement(_tagName: string): HTMLElement {
-          return new NullElement(opts?.indicatorSize) as unknown as HTMLElement;
-        },
-        body: {
-          appendChild(node: Node) {
-            return node;
-          }
-        }
-      },
+      doc: document,
+      indicator: Indicator.createNull(opts?.indicatorSize),
       createObserver: () => new NullObserver(),
       viewportHeight: () => viewportHeight
     });
   }
 
-  #deps: IndicatorDeps;
+  #deps: ElementIndicatorDeps;
 
-  /**
-   * The indicator.
-   */
-  #indicator: HTMLElement | null = null;
   /**
    * The element we're indicating on.
    */
@@ -131,9 +78,7 @@ export class ElementIndicator {
   #isVisible = true;
 
   #scrollHandler = () => {
-    if (this.#indicator) {
-      this.#indicator.style.display = 'none';
-    }
+    this.#deps.indicator.hide();
   };
 
   #scrollEndHandler = () => {
@@ -142,7 +87,7 @@ export class ElementIndicator {
     }
   };
 
-  constructor(deps: IndicatorDeps) {
+  constructor(deps: ElementIndicatorDeps) {
     this.#deps = deps;
     deps.doc.addEventListener('scroll', this.#scrollHandler, true);
     deps.doc.addEventListener('scrollend', this.#scrollEndHandler, true);
@@ -153,7 +98,7 @@ export class ElementIndicator {
     this.#deps.doc.removeEventListener('scrollend', this.#scrollEndHandler, true);
     this.#observer?.disconnect();
     this.#observer = null;
-    this.#removeIndicator();
+    this.#deps.indicator.remove();
   }
 
   showIndicator(bool: boolean) {
@@ -161,7 +106,7 @@ export class ElementIndicator {
     if (bool) {
       this.#addIndicator();
     } else {
-      this.#removeIndicator();
+      this.#deps.indicator.remove();
     }
   }
 
@@ -190,7 +135,7 @@ export class ElementIndicator {
       ([entry]) => {
         this.#isVisible = entry.isIntersecting;
         if (!this.#isVisible) {
-          this.#removeIndicator();
+          this.#deps.indicator.remove();
         } else if (this.#showIndicator) {
           this.#addIndicator();
         }
@@ -201,76 +146,8 @@ export class ElementIndicator {
   }
 
   #addIndicator(): void {
-    this.#removeIndicator();
     const el = this.#element;
-    if (!el) {
-      return;
-    }
-    const indic = this.#makeIndicator(el);
-    this.#deps.doc.body.appendChild(indic);
-    this.#indicator = indic;
-  }
-
-  #makeIndicator(el: HTMLElement): HTMLElement {
-    const tagn = el.tagName;
-    const rect = el.getBoundingClientRect();
-    const viewportHeight = this.#deps.viewportHeight();
-
-    const span = this.#deps.doc.createElement('span');
-    span.classList.add(JSED_IGNORE_CLASS);
-    span.classList.add('jsed-tag-indicator');
-    span.style.position = 'fixed';
-    span.style.left = `${rect.right}px`;
-    span.style.pointerEvents = 'none';
-    span.style.zIndex = '999999';
-    span.innerText = tagn;
-
-    // Temporarily add to measure dimensions
-    span.style.visibility = 'hidden';
-    this.#deps.doc.body.appendChild(span);
-    const indicatorHeight = span.offsetHeight;
-    const indicatorWidth = span.offsetWidth;
-    span.remove();
-    span.style.visibility = '';
-
-    // Horizontal: check if right-aligned badge would clip off the left edge
-    const leftAligned = rect.right - indicatorWidth < 0;
-    if (leftAligned) {
-      span.style.left = `${rect.left}px`;
-    }
-
-    const topVisible = rect.top >= 0;
-    const fitsInViewport = rect.bottom <= viewportHeight;
-    const spaceAbove = rect.top - 5;
-    const canFitAbove = spaceAbove >= indicatorHeight;
-
-    if (topVisible && fitsInViewport && canFitAbove) {
-      // Case 1: Small element fully in viewport with space above — position above
-      span.style.top = `${rect.top - 5}px`;
-      span.style.transform = leftAligned
-        ? 'translateY(-100%)'
-        : 'translateY(-100%) translateX(-100%)';
-    } else if (topVisible && fitsInViewport) {
-      // Case 1b: Small element, not enough space above — position below
-      span.style.top = `${rect.bottom + 5}px`;
-      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
-    } else if (topVisible) {
-      // Case 2: Large element, top visible — anchor inside top-right corner
-      span.style.top = `${rect.top + 5}px`;
-      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
-    } else {
-      // Case 3: Top scrolled past viewport — pin to viewport top
-      span.style.top = '5px';
-      span.style.transform = leftAligned ? '' : 'translateX(-100%)';
-    }
-
-    return span;
-  }
-
-  #removeIndicator(): void {
-    if (this.#indicator) {
-      this.#indicator.remove();
-      this.#indicator = null;
-    }
+    if (!el) return;
+    this.#deps.indicator.show(el, this.#deps.viewportHeight());
   }
 }

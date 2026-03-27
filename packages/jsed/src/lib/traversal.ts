@@ -103,36 +103,23 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
   return line1 === line2;
 }
 
-/** Options for LINE_SIBLING traversal functions. */
-export type LineSiblingOptions = {
-  /** Called before descending into a TRANSPARENT_BLOCK. Use for lazy tokenization. */
-  onEnterBlockTransparent?: (el: HTMLElement) => void;
-};
-
-/** Build the descend predicate for LINE_SIBLING traversal. */
-function lineSiblingDescend(options?: LineSiblingOptions): (n: ParentNode | ChildNode) => boolean {
-  return (n) => {
-    // INLINE: focusable, not island, not implicit-line, inline-flow display
-    if (isFocusable(n) && !isIsland(n) && !isImplicitLine(n) && isInlineFlow(n)) return true;
-    if (isTransparentBlock(n)) {
-      options?.onEnterBlockTransparent?.(n as HTMLElement);
-      return true;
-    }
-    return false;
-  };
+/** Descend predicate for LINE_SIBLING traversal. */
+function canDescendLineSibling(n: ParentNode | ChildNode): boolean {
+  // INLINE: focusable, not island, not implicit-line, inline-flow display
+  if (isFocusable(n) && !isIsland(n) && !isImplicitLine(n) && isInlineFlow(n)) return true;
+  if (isTransparentBlock(n)) {
+    return true;
+  }
+  return false;
 }
 
 /**
  * Get previous LINE_SIBLING within `line`.
  */
-export function getPreviousLineSibling(
-  el: HTMLElement,
-  line: HTMLElement,
-  options?: LineSiblingOptions
-): HTMLElement | null {
+export function getPreviousLineSibling(el: HTMLElement, line: HTMLElement): HTMLElement | null {
   for (const prev of findPreviousNode(el, line, {
     visit: isLineSibling,
-    descend: lineSiblingDescend(options)
+    descend: canDescendLineSibling
   })) {
     return prev as HTMLElement;
   }
@@ -142,14 +129,10 @@ export function getPreviousLineSibling(
 /**
  * Get next LINE_SIBLING from `el` within `line`.
  */
-export function getNextLineSibling(
-  el: HTMLElement,
-  line: HTMLElement,
-  options?: LineSiblingOptions
-): HTMLElement | null {
+export function getNextLineSibling(el: HTMLElement, line: HTMLElement): HTMLElement | null {
   for (const next of findNextNode(el, line, {
     visit: isLineSibling,
-    descend: lineSiblingDescend(options)
+    descend: canDescendLineSibling
   })) {
     return next as HTMLElement;
   }
@@ -159,15 +142,11 @@ export function getNextLineSibling(
 /**
  * Get the first LINE_SIBLING in a LINE.
  */
-export function getFirstLineSibling(
-  line: HTMLElement,
-  options?: LineSiblingOptions
-): HTMLElement | null {
-  const descendFn = lineSiblingDescend(options);
+export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   for (const node of findNextNode(line, line, {
     visit: isLineSibling,
     // Descend `line`.
-    descend: (n) => n === line || descendFn(n)
+    descend: (n) => n === line || canDescendLineSibling(n)
   })) {
     return node as HTMLElement;
   }

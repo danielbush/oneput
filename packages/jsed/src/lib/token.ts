@@ -191,8 +191,7 @@ export function quickDescend(el: HTMLElement): HTMLElement | null {
   const line = getLine(el);
   tokenizeLine(line);
 
-  const opts = { onEnterBlockTransparent: tokenizeLine };
-  let sib = getFirstLineSibling(line, opts);
+  let sib = getFirstLineSibling(line);
   while (sib) {
     if (isToken(sib)) {
       return sib;
@@ -201,7 +200,7 @@ export function quickDescend(el: HTMLElement): HTMLElement | null {
       const nested = quickDescend(sib);
       if (nested) return nested;
     }
-    sib = getNextLineSibling(sib, line, opts);
+    sib = getNextLineSibling(sib, line);
   }
 
   return null;

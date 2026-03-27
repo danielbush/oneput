@@ -41,10 +41,6 @@ export class ElementIndicator {
     );
   }
 
-  get #doc() {
-    return document;
-  }
-
   /**
    * The element we're indicating on.
    */
@@ -69,13 +65,13 @@ export class ElementIndicator {
       IntersectionObserver: ObserverFactory;
     }
   ) {
-    this.#doc.addEventListener('scroll', this.#scrollHandler, true);
-    this.#doc.addEventListener('scrollend', this.#scrollEndHandler, true);
+    document.addEventListener('scroll', this.#scrollHandler, true);
+    document.addEventListener('scrollend', this.#scrollEndHandler, true);
   }
 
   destroy() {
-    this.#doc.removeEventListener('scroll', this.#scrollHandler, true);
-    this.#doc.removeEventListener('scrollend', this.#scrollEndHandler, true);
+    document.removeEventListener('scroll', this.#scrollHandler, true);
+    document.removeEventListener('scrollend', this.#scrollEndHandler, true);
     this.#observer?.disconnect();
     this.#observer = null;
     this.indicator.remove();

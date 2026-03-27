@@ -21,6 +21,8 @@ import {
 } from './taxonomy.js';
 import {
   getLine,
+  getFirstLineSibling,
+  getNextLineSibling,
   getPreviousVisibleSibling,
   getPreviousTokenSibling,
   getNextTokenSibling
@@ -171,91 +173,38 @@ export function tokenizeLine(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Create an IMPLICIT_LINE starting with `startNode` and slurping up anything
- * directly next of it that is a text node or an INLINE.
+ * Quick-descend: tokenize and find the first TOKEN within a FOCUSABLE.
+ * See SHALLOW_TOKENIZATION.
  *
- * `startNode` may be a text node or an INLINE element — either can begin an
- * IMPLICIT_LINE.
+ * Tokenizes the LINE containing the element and walks its LINE_SIBLING's.
+ * If a LINE_SIBLING is an OPAQUE_BLOCK (not a TOKEN or ISLAND), recurses
+ * into it. Skips ISLAND's. Returns null if no TOKEN is found — the
+ * FOCUSABLE has no editable text content.
  */
-function buildImplicitLine(startNode: Node): HTMLElement | null {
-  if (!startNode.parentNode) {
-    throw new Error(`Expected node to have parent.`);
+export function quickDescend(el: HTMLElement): HTMLElement | null {
+  if (isToken(el)) {
+    return el;
   }
-  startNode.parentNode.normalize();
+  if (!isFocusable(el)) {
+    throw new Error('quickDescend: expects a FOCUSABLE');
+  }
+  const line = getLine(el);
+  tokenizeLine(line);
 
-  // Skip whitespace-only text nodes — they're artifacts of HTML source formatting.
-  if (startNode.nodeType === Node.TEXT_NODE) {
-    if (!startNode.nodeValue || /^\s+$/.test(startNode.nodeValue)) {
-      return null;
+  const opts = { onEnterBlockTransparent: tokenizeLine };
+  let sib = getFirstLineSibling(line, opts);
+  while (sib) {
+    if (isToken(sib)) {
+      return sib;
     }
+    if (!isIsland(sib)) {
+      const nested = quickDescend(sib);
+      if (nested) return nested;
+    }
+    sib = getNextLineSibling(sib, line, opts);
   }
 
-  const implicitLine = document.createElement('span');
-  implicitLine.className = JSED_IMPLICIT_CLASS;
-  startNode.parentNode.insertBefore(implicitLine, startNode);
-
-  for (let sib: Node | null = startNode; sib; ) {
-    // Slurp text nodes, tokens, and INLINE elements (isInlineFlow, not island, not implicit-line)
-    if (
-      sib.nodeType === Node.TEXT_NODE ||
-      isToken(sib) ||
-      (isFocusable(sib) && !isIsland(sib) && !isImplicitLine(sib) && isInlineFlow(sib))
-    ) {
-      const nextSib: ChildNode | null = sib.nextSibling;
-      implicitLine.appendChild(sib);
-      sib = nextSib;
-    } else {
-      break;
-    }
-  }
-  return implicitLine;
-}
-
-/**
- * Find and handle IMPLICIT_LINE's.
- *
- * Wraps bare text/INLINE nodes that follow a LINE sibling — these are not
- * reachable by FOCUS on their own, so we wrap them in a `<span>` with
- * JSED_IMPLICIT_CLASS to make them a FOCUSABLE LINE.
- *
- * Only triggers when the previous sibling is a LINE (not an ISLAND or other
- * non-block FOCUSABLE). Text next to an ISLAND within a LINE is part of that
- * LINE and doesn't need wrapping.
- *
- * Run this on the whole doc at the beginning BEFORE any tokenization occurs.
- */
-export function tagImplicitLines(root: HTMLElement) {
-  for (const node of findNextNode(root, root, {
-    visit: (node) => node?.nodeType === Node.ELEMENT_NODE
-  })) {
-    if (isImplicitLine(node)) {
-      continue;
-    }
-    for (let sib = node.firstChild; sib; ) {
-      // Text, tokens, and INLINE elements (isInlineFlow, not island, not implicit-line)
-      if (
-        sib.nodeType === Node.TEXT_NODE ||
-        isToken(sib) ||
-        (isFocusable(sib) && !isIsland(sib) && !isImplicitLine(sib) && isInlineFlow(sib))
-      ) {
-        const prev = sib.previousSibling;
-        if (prev && (isLine(prev) || isIsland(prev))) {
-          // Only wrap after block-level elements that cause a visual line break.
-          // Inline-level LINE's (inline-block, inline-flex, etc.) and inline
-          // ISLAND's sit on the same visual line as the surrounding text.
-          const display = window.getComputedStyle(prev as HTMLElement).display;
-          if (!display.startsWith('inline')) {
-            const implicitLine = buildImplicitLine(sib);
-            if (implicitLine) {
-              sib = implicitLine.nextSibling;
-              continue;
-            }
-          }
-        }
-      }
-      sib = sib.nextSibling;
-    }
-  }
+  return null;
 }
 
 // #endregion
@@ -599,3 +548,91 @@ export function splitAfter(token: HTMLElement): HTMLElement[] {
 }
 
 // #endregion
+
+/**
+ * Create an IMPLICIT_LINE starting with `startNode` and slurping up anything
+ * directly next of it that is a text node or an INLINE.
+ *
+ * `startNode` may be a text node or an INLINE element — either can begin an
+ * IMPLICIT_LINE.
+ */
+function buildImplicitLine(startNode: Node): HTMLElement | null {
+  if (!startNode.parentNode) {
+    throw new Error(`Expected node to have parent.`);
+  }
+  startNode.parentNode.normalize();
+
+  // Skip whitespace-only text nodes — they're artifacts of HTML source formatting.
+  if (startNode.nodeType === Node.TEXT_NODE) {
+    if (!startNode.nodeValue || /^\s+$/.test(startNode.nodeValue)) {
+      return null;
+    }
+  }
+
+  const implicitLine = document.createElement('span');
+  implicitLine.className = JSED_IMPLICIT_CLASS;
+  startNode.parentNode.insertBefore(implicitLine, startNode);
+
+  for (let sib: Node | null = startNode; sib; ) {
+    // Slurp text nodes, tokens, and INLINE elements (isInlineFlow, not island, not implicit-line)
+    if (
+      sib.nodeType === Node.TEXT_NODE ||
+      isToken(sib) ||
+      (isFocusable(sib) && !isIsland(sib) && !isImplicitLine(sib) && isInlineFlow(sib))
+    ) {
+      const nextSib: ChildNode | null = sib.nextSibling;
+      implicitLine.appendChild(sib);
+      sib = nextSib;
+    } else {
+      break;
+    }
+  }
+  return implicitLine;
+}
+
+/**
+ * Find and handle IMPLICIT_LINE's.
+ *
+ * Wraps bare text/INLINE nodes that follow a LINE sibling — these are not
+ * reachable by FOCUS on their own, so we wrap them in a `<span>` with
+ * JSED_IMPLICIT_CLASS to make them a FOCUSABLE LINE.
+ *
+ * Only triggers when the previous sibling is a LINE (not an ISLAND or other
+ * non-block FOCUSABLE). Text next to an ISLAND within a LINE is part of that
+ * LINE and doesn't need wrapping.
+ *
+ * Run this on the whole doc at the beginning BEFORE any tokenization occurs.
+ */
+export function tagImplicitLines(root: HTMLElement) {
+  for (const node of findNextNode(root, root, {
+    visit: (node) => node?.nodeType === Node.ELEMENT_NODE
+  })) {
+    if (isImplicitLine(node)) {
+      continue;
+    }
+    for (let sib = node.firstChild; sib; ) {
+      // Text, tokens, and INLINE elements (isInlineFlow, not island, not implicit-line)
+      if (
+        sib.nodeType === Node.TEXT_NODE ||
+        isToken(sib) ||
+        (isFocusable(sib) && !isIsland(sib) && !isImplicitLine(sib) && isInlineFlow(sib))
+      ) {
+        const prev = sib.previousSibling;
+        if (prev && (isLine(prev) || isIsland(prev))) {
+          // Only wrap after block-level elements that cause a visual line break.
+          // Inline-level LINE's (inline-block, inline-flex, etc.) and inline
+          // ISLAND's sit on the same visual line as the surrounding text.
+          const display = window.getComputedStyle(prev as HTMLElement).display;
+          if (!display.startsWith('inline')) {
+            const implicitLine = buildImplicitLine(sib);
+            if (implicitLine) {
+              sib = implicitLine.nextSibling;
+              continue;
+            }
+          }
+        }
+      }
+      sib = sib.nextSibling;
+    }
+  }
+}

@@ -1,7 +1,6 @@
 import type { JsedDocument } from './types.js';
 import { JSED_CURSOR_CLASS } from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
-import type { TokenManager } from './TokenManager.js';
 import { scrollIntoViewIfSmaller } from './lib/dom.js';
 
 export type TokenCursorError =
@@ -20,7 +19,6 @@ export type TokenCursorError =
 
 export type TokenCursorBaseParams = {
   document: JsedDocument;
-  tokenManager: TokenManager;
   token: HTMLElement;
   /** The LINE determined at entry time — used as the ceiling for CURSOR traversal. */
   line: HTMLElement;
@@ -36,7 +34,6 @@ export abstract class TokenCursorBase {
   #token: HTMLElement;
   #line: HTMLElement;
   #document: JsedDocument;
-  protected tokenManager: TokenManager;
   #onTokenChange: (token: HTMLElement) => void;
   protected onError: (err: TokenCursorError) => void;
 
@@ -44,7 +41,6 @@ export abstract class TokenCursorBase {
     this.#token = params.token; // ts needs this before #setToken
     this.#line = params.line;
     this.#document = params.document;
-    this.tokenManager = params.tokenManager;
     this.#onTokenChange = params.onTokenChange;
     this.onError = params.onError;
     this.setTokenInternal(params.token);

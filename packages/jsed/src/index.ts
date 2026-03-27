@@ -5,7 +5,7 @@ export type { UserInput, UserInputSelectionState } from './UserInput.js';
 export { Nav } from './Nav.js';
 export { TokenCursorBase } from './TokenCursorBase.js';
 export { TokenCursor } from './TokenCursor.js';
-export { TokenManager } from './TokenManager.js';
+export { quickDescend } from './lib/token.js';
 
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
 import * as token from './lib/token.js';

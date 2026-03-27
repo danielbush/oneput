@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { makeRoot, p, div, em, span, identifyCursor } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
-import { TokenManager } from '../TokenManager.js';
 import { TokenCursor } from '../TokenCursor.js';
-import { getValue, isPadded } from '../lib/token.js';
+import { getValue, isPadded, quickDescend } from '../lib/token.js';
 import { getLine } from '../lib/traversal.js';
 import {
   CURSOR_APPEND_CLASS,
@@ -18,13 +17,11 @@ import {
 const inlineStyle = { style: 'display:inline;' };
 
 function createCursor(doc: JsedDocument, tok: HTMLElement, line?: HTMLElement) {
-  const tokenManager = TokenManager.create();
   const changes: string[] = [];
   const errors: string[] = [];
 
   const cursor = TokenCursor.create({
     document: doc,
-    tokenManager,
     token: tok,
     line: line ?? getLine(tok),
     onTokenChange: (t) => changes.push(getValue(t)),
@@ -36,8 +33,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement, line?: HTMLElement) {
 
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
-  const tokenManager = TokenManager.create();
-  const firstToken = tokenManager.tokenize(el)!;
+  const firstToken = quickDescend(el)!;
   return createCursor(doc, firstToken, el);
 }
 

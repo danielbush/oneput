@@ -7,7 +7,6 @@ import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
-import { TokenManager } from './TokenManager.js';
 
 export type EditManagerError =
   | { type: 'no-token-under-focus' }
@@ -34,8 +33,7 @@ export class EditManager {
     onError: (err: EditManagerError) => void;
     onExit?: () => void;
   }): EditManager {
-    const tokenManager = TokenManager.create();
-    return new EditManager(nav, tokenManager, userInput, onError, onExit);
+    return new EditManager(nav, userInput, onError, onExit);
   }
 
   private cursor?: ITokenCursor;
@@ -43,7 +41,6 @@ export class EditManager {
 
   constructor(
     private nav: Nav,
-    private tokenManager: TokenManager,
     private userInput: UserInput,
     private onError: (err: EditManagerError) => void,
     private onExit?: () => void
@@ -117,7 +114,7 @@ export class EditManager {
 
     // Tokenize on the fly but focus the parent...
     if (evt.targetType === 'FOCUSABLE') {
-      this.tokenManager.tokenize(evt.element);
+      token.quickDescend(evt.element);
       return true;
     }
 
@@ -154,7 +151,7 @@ export class EditManager {
   getFirstTokenUnderFocus(): Result<ITokenCursor, EditManagerError> {
     const focus = this.nav.getFocus();
     if (focus) {
-      const firstToken = this.tokenManager.tokenize(focus);
+      const firstToken = token.quickDescend(focus);
       if (firstToken) {
         const line = getLine(firstToken);
         this.nav.FOCUS(line);
@@ -170,7 +167,6 @@ export class EditManager {
     if (!this.cursor) {
       this.cursor = TokenCursor.create({
         document: this.nav.document,
-        tokenManager: this.tokenManager,
         token: tok,
         line,
         onTokenChange: this.handleTokenChange,

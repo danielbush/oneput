@@ -24,11 +24,11 @@ Nav also creates an `ElementIndicator` — a visual tag-name badge that follows 
 
 Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
-## Tokenization: TokenManager
+## Tokenization: quickDescend
 
-`TokenManager` also takes only the document root. Its job is to manage lazy tokenization — tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand.
+Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/token.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and finds the first TOKEN. If the first LINE_SIBLING is an OPAQUE_BLOCK (e.g. a `<p>` inside a `<div>`), it recurses into it. ISLAND's are skipped. If no TOKEN is found, it returns null — the FOCUSABLE has no editable text content.
 
-When asked to tokenize a FOCUSABLE, it finds its LINE, tokenizes it, and returns the first TOKEN. If the FOCUSABLE contains nested LINEs (e.g. a `<div>` containing `<p>` tags), it walks down into the first child LINE.
+`quickDescend` is also used by TokenCursor internally (e.g. after `splitAfter` or `insertElementAfter`) to find the first TOKEN in a newly created element.
 
 ## Token editing: TokenCursorBase → TokenCursor
 
@@ -49,7 +49,7 @@ When asked to tokenize a FOCUSABLE, it finds its LINE, tokenizes it, and returns
 
 ## Orchestration: EditManager
 
-`EditManager` is the top-level mediator. It takes a Nav and UserInput, and internally creates the TokenManager, TokenCursor, and InputManager. It wires everything together so that:
+`EditManager` is the top-level mediator. It takes a Nav and UserInput, and internally creates the TokenCursor and InputManager. It wires everything together so that:
 
 - Key bindings trigger navigation and editing actions
 - Mouse clicks and touches route through REQUEST_FOCUS with a focus controller that tokenizes on the fly
@@ -62,9 +62,11 @@ A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditMan
 
 The top-level modules above delegate to lower-level utilities in `lib/`:
 
-- **token.ts** — tokenization, LINE_SIBLING traversal, JOIN, SPLIT, TOGGLE_COLLAPSE operations
-- **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`, `getNextSiblingNode`, `getPreviousSiblingNode`, `getParent`
-- **focus.ts** — FOCUSABLE detection and filtering rules
+- **token.ts** — tokenization, `quickDescend`, LINE_SIBLING traversal, JOIN, SPLIT, TOGGLE_COLLAPSE operations
+- **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
+- **traversal.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`
+- **walk2.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`
+- **dom.ts** — DOM manipulation: `copyElement`, `replaceElement`, `createElement`, `splitParentBefore`
 - **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)
 - **convert.ts** — converts HTML to jsed-compatible format (also available as a CLI binary via `cli/convert.ts`)
 

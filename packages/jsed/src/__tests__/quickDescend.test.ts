@@ -1,7 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../test/util.js';
-import { TokenManager } from '../TokenManager.js';
-import { tokenizeLine } from '../lib/token.js';
+import { tokenizeLine, quickDescend } from '../lib/token.js';
 import { isToken } from '../lib/taxonomy.js';
 
 /**
@@ -9,15 +8,14 @@ import { isToken } from '../lib/taxonomy.js';
  */
 const inlineStyleHack = { style: 'display:inline;' };
 
-describe('TokenManager.tokenize', () => {
+describe('quickDescend', () => {
   test('simple LINE: tokenizes and returns first TOKEN', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-    const tm = new TokenManager();
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tm.tokenize(p1);
+    const first = quickDescend(p1);
 
     // assert
     expect(first).not.toBeNull();
@@ -30,10 +28,9 @@ describe('TokenManager.tokenize', () => {
     const p1 = byId(doc, 'p1');
     tokenizeLine(p1);
     const token = p1.querySelector('.jsed-token') as HTMLElement;
-    const tm = new TokenManager();
 
     // act
-    const result = tm.tokenize(token);
+    const result = quickDescend(token);
 
     // assert
     expect(result).toBe(token);
@@ -48,11 +45,10 @@ describe('TokenManager.tokenize', () => {
         p({ id: 'p2' }, 'bar')
       )
     );
-    const tm = new TokenManager();
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tm.tokenize(div1);
+    const first = quickDescend(div1);
 
     // assert
     expect(first).not.toBeNull();
@@ -73,11 +69,10 @@ describe('TokenManager.tokenize', () => {
         )
       )
     );
-    const tm = new TokenManager();
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tm.tokenize(div1);
+    const first = quickDescend(div1);
 
     // assert
     expect(first).not.toBeNull();
@@ -93,11 +88,10 @@ describe('TokenManager.tokenize', () => {
         ' after'
       )
     );
-    const tm = new TokenManager();
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tm.tokenize(p1);
+    const first = quickDescend(p1);
 
     // assert
     expect(first).not.toBeNull();
@@ -109,11 +103,10 @@ describe('TokenManager.tokenize', () => {
     const doc = makeRoot(
       p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
     );
-    const tm = new TokenManager();
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tm.tokenize(p1);
+    const first = quickDescend(p1);
 
     // assert
     expect(first).not.toBeNull();
@@ -133,11 +126,10 @@ describe('TokenManager.tokenize', () => {
         )
       )
     );
-    const tm = new TokenManager();
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tm.tokenize(div1);
+    const first = quickDescend(div1);
 
     // assert
     expect(first).not.toBeNull();

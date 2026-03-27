@@ -184,7 +184,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   splitAfter() {
     if (!this.isOnToken()) return;
     const [, after] = token.splitAfter(this.getToken());
-    const firstTok = this.tokenManager.tokenize(after);
+    const firstTok = token.quickDescend(after);
     if (firstTok) {
       this.setTokenInternal(firstTok);
     }
@@ -222,7 +222,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     }
     token.insertAfter(el, this.getToken());
 
-    const first = this.tokenManager.tokenize(el);
+    const first = token.quickDescend(el);
     if (first) {
       this.setTokenInternal(first);
     }
@@ -239,7 +239,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     }
     token.insertBefore(el, this.getToken());
 
-    const first = this.tokenManager.tokenize(el);
+    const first = token.quickDescend(el);
     if (first) {
       this.setTokenInternal(first);
     }

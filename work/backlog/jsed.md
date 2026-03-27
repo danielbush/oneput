@@ -2,6 +2,19 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
+## feat: click/touch tokenizes LINE and enters edit mode
+
+Drafted: 27-Mar-2026
+
+Click or touch on a LINE should tokenize it and put the CURSOR at the beginning of the first TOKEN. If FOCUS is already on that LINE (e.g. second tap), quick-descend into it — find the first text/TOKEN, establish the LINE, and enter edit mode directly. See QUICK_DESCEND__WORK.
+
+## feat: quick-descend into a FOCUSABLE
+
+id: QUICK_DESCEND__WORK
+Drafted: 27-Mar-2026
+
+When the user FOCUS's on a FOCUSABLE (via Nav or touch), quick-descend finds the first text node or TOKEN within it, establishes the LINE, and enters edit mode directly. This removes friction from OPAQUE_BLOCK — the user doesn't have to manually "enter" a container to start editing. Prerequisite for OPAQUE_BLOCK_DEFAULT__WORK.
+
 ## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
 
 Drafted: 19-Mar-2026

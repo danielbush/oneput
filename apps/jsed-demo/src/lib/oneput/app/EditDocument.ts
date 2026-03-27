@@ -14,7 +14,8 @@ export class EditDocument implements AppObject {
       EditManager.create({
         nav: params.nav,
         userInput: ctl.input,
-        onError: (err) => instance.handleEditError(err)
+        onError: (err) => instance.handleEditError(err),
+        onExit: () => ctl.app.exit()
       })
     );
     return instance;

@@ -26,14 +26,16 @@ export class EditManager {
   static create({
     nav,
     userInput,
-    onError
+    onError,
+    onExit
   }: {
     nav: Nav;
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
+    onExit?: () => void;
   }): EditManager {
     const tokenManager = TokenManager.create();
-    return new EditManager(nav, tokenManager, userInput, onError);
+    return new EditManager(nav, tokenManager, userInput, onError, onExit);
   }
 
   private cursor?: ITokenCursor;
@@ -43,7 +45,8 @@ export class EditManager {
     private nav: Nav,
     private tokenManager: TokenManager,
     private userInput: UserInput,
-    private onError: (err: EditManagerError) => void
+    private onError: (err: EditManagerError) => void,
+    private onExit?: () => void
   ) {
     this.nav.setFocusController(this.handleFocusRequest);
   }
@@ -100,11 +103,24 @@ export class EditManager {
     if (!this.cursor) {
       return false;
     }
+
+    const cursorLine = this.cursor.getLine();
+    const targetElement = evt.targetType === 'TOKEN' ? evt.token : evt.element;
+    const targetLine = getLine(targetElement);
+
+    // Exit back to view mode.
+    if (targetLine !== cursorLine) {
+      this.nav.FOCUS(targetElement);
+      this.onExit?.();
+      return false;
+    }
+
+    // Tokenize on the fly but focus the parent...
     if (evt.targetType === 'FOCUSABLE') {
-      // Tokenize on the fly but focus the parent...
       this.tokenManager.tokenize(evt.element);
       return true;
     }
+
     if (evt.targetType === 'TOKEN') {
       // For consistency, clicking on a parent that is the current LINE_SEGMENT
       // focuses the parent instead of the token.
@@ -115,14 +131,12 @@ export class EditManager {
         return false;
       }
 
-      // if (this.cursor.isSameLine(evt.token)) {
       this.cursor.setToken(evt.token);
       this.userInput.focus();
-      // TODO: await instead of .then?
       this.userInput.setInputValue(token.getValue(evt.token)).then(() => {
         this.userInput.selectAll();
       });
-      return true; // TODO: old code: #handleCursorSetToken will call FOCUS.
+      return true;
     }
     return false;
   };

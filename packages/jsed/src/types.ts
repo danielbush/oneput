@@ -50,6 +50,10 @@ export type ITokenCursor = {
    */
   getToken: () => HTMLElement;
   /**
+   * Return the CURSOR_LINE — the LINE ceiling for CURSOR traversal.
+   */
+  getLine: () => HTMLElement;
+  /**
    * Move to previous token if it exists.
    */
   movePrevious: () => void;

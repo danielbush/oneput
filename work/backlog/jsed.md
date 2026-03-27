@@ -8,18 +8,11 @@ Drafted: 27-Mar-2026
 
 Click or touch on a LINE should tokenize it and put the CURSOR at the beginning of the first TOKEN. If FOCUS is already on that LINE (e.g. second tap), quick-descend into it — find the first text/TOKEN, establish the LINE, and enter edit mode directly. See QUICK_DESCEND__WORK.
 
-## feat: quick-descend into a FOCUSABLE
+## feat: REC_NEXT/SIB_NEXT and REC_PREV/SIB_PREV close CURSOR and move FOCUS
 
-id: QUICK_DESCEND__WORK
 Drafted: 27-Mar-2026
 
-When the user FOCUS's on a FOCUSABLE (via Nav or touch), quick-descend finds the first text node or TOKEN within it, establishes the LINE, and enters edit mode directly. This removes friction from OPAQUE_BLOCK — the user doesn't have to manually "enter" a container to start editing. Prerequisite for OPAQUE_BLOCK_DEFAULT__WORK.
-
-## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
-
-Drafted: 19-Mar-2026
-
-Not NESTED_LINE's.
+When the CURSOR is open (editing a LINE), pressing REC_NEXT/SIB_NEXT or REC_PREV/SIB_PREV should close the CURSOR (return to view mode) and move FOCUS to the appropriate FOCUSABLE. Currently you have to explicitly exit edit mode before navigating.
 
 ## refactor: remove TokenManager
 
@@ -29,11 +22,26 @@ TokenManager's role has been largely absorbed by TokenCursor's lazy tokenization
 
 Once removed, simplify `createCursor` and `tokenizeAndCursor` test helpers in `TokenCursor.test.ts` — they currently wire up TokenManager as an intermediary.
 
-## feat: REC_NEXT/SIB_NEXT and REC_PREV/SIB_PREV close CURSOR and move FOCUS
+## feat: hitting enter splits paragraph
 
-Drafted: 27-Mar-2026
+Drafted: 19-Mar-2026
 
-When the CURSOR is open (editing a LINE), pressing REC_NEXT/SIB_NEXT or REC_PREV/SIB_PREV should close the CURSOR (return to view mode) and move FOCUS to the appropriate FOCUSABLE. Currently you have to explicitly exit edit mode before navigating.
+- CURSOR should split before the TOKEN by default
+- if CURSOR is toggled to the "after token" position and/or we've typed a space after the token, then split after the current TOKEN
+- CURSOR should sit on the new paragraph
+- what happens if we're in a div? - do we repeat?
+- what happens if we're in an em? - do we repeat?
+- make sure we do some exploratory testing using test_doc.html
+- `splitBefore`/`splitAfter` currently call `getLine(token)` internally to find the split ceiling. With TRANSPARENT_BLOCK, the passed-in LINE (from the CURSOR) may differ from the `getLine` result. For now these functions stay as-is (split relative to the nearest LINE), but when implementing enter-to-split we need to decide: should the split ceiling be the TRANSPARENT_BLOCK parent or the outer LINE? Likely the nearest LINE is correct (you split the immediate container), but verify with nested `<div>` structures
+- Include PADDED_TOKEN testing for `splitBefore`/`splitAfter` — deferred from CURSOR_WALKS_NON_TOKENS__WORK housekeeping. Verify correct behaviour when splitting a PADDED_TOKEN or when a split produces a TOKEN adjacent to an ISLAND
+
+# Lower priority
+
+## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
+
+Drafted: 19-Mar-2026
+
+Not NESTED_LINE's.
 
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
@@ -63,20 +71,6 @@ I originally envisaged TokenManager would manage tokenizing and as a result woul
   - One way to do this might be to have DetokenizeManager instance listen to onTokenChange callback for each CURSOR ;  each cursor gives updates on their CURSOR_LINE (we maybe inclue that in the onTokenChange callback alongide the CURSOR TOKEN.)
 - is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
 
-## feat: hitting enter splits paragraph
-
-Drafted: 19-Mar-2026
-
-- CURSOR should split before the TOKEN by default
-- if CURSOR is toggled to the "after token" position and/or we've typed a space after the token, then split after the current TOKEN
-- CURSOR should sit on the new paragraph
-- what happens if we're in a div? - do we repeat?
-- what happens if we're in an em? - do we repeat?
-- make sure we do some exploratory testing using test_doc.html
-- `splitBefore`/`splitAfter` currently call `getLine(token)` internally to find the split ceiling. With TRANSPARENT_BLOCK, the passed-in LINE (from the CURSOR) may differ from the `getLine` result. For now these functions stay as-is (split relative to the nearest LINE), but when implementing enter-to-split we need to decide: should the split ceiling be the TRANSPARENT_BLOCK parent or the outer LINE? Likely the nearest LINE is correct (you split the immediate container), but verify with nested `<div>` structures
-- Include PADDED_TOKEN testing for `splitBefore`/`splitAfter` — deferred from CURSOR_WALKS_NON_TOKENS__WORK housekeeping. Verify correct behaviour when splitting a PADDED_TOKEN or when a split produces a TOKEN adjacent to an ISLAND
-
-# Lower priority
 
 ## feat: toggle token spacing
 

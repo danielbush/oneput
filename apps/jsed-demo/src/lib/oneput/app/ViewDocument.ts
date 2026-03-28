@@ -1,12 +1,16 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { icons } from './_icons.js';
-import { Nav, type JsedDocument } from '@oneput/jsed';
+import { Nav, type JsedDocument, type JsedFocusRequestEvent } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { EditDocument } from './EditDocument.js';
 
 /**
  * Oneput AppObject that manages a single JsedDocument.
+ *
+ * Uses a "focus twice to edit" model: the first click/touch on a FOCUSABLE
+ * sets FOCUS (view mode). A second click/touch on the *same* FOCUSABLE
+ * triggers quick-descend and enters edit mode.
  */
 export class ViewDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -20,12 +24,29 @@ export class ViewDocument implements AppObject {
     private nav: Nav
   ) {}
 
+  /**
+   * Focus controller for view mode: detects when REQUEST_FOCUS targets the
+   * already-focused element ("focus twice") and enters edit mode.
+   */
+  private viewFocusController = (evt: JsedFocusRequestEvent): boolean => {
+    if (evt.targetType === 'FOCUSABLE' && evt.element === this.nav.getFocus()) {
+      this.actions.EDIT_FIRST.action();
+      return false;
+    }
+    return true;
+  };
+
   onStart = () => {
     setDocument(this.document);
+    this.nav.setFocusController(this.viewFocusController);
+  };
+
+  onResume = () => {
+    this.nav.setFocusController(this.viewFocusController);
   };
 
   onExit = () => {
-    //
+    this.nav.removeFocusController();
   };
 
   actions = {

@@ -18,8 +18,8 @@ The taxonomy is built from a small set of independent predicates. All other labe
   - **`isImplicitLine`** — synthetic wrapper (IMPLICIT_LINE) created by tokenization
 - non-FOCUSABLE's
   - **`isIgnorable`** — is the element completely ignored by FOCUS and CURSOR
-  - **`isToken`** — is the element a TOKEN?  
-  
+  - **`isToken`** — is the element a TOKEN?
+
 Derived:
 
 - `isCursorTransparent`

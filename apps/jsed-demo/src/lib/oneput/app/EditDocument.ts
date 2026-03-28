@@ -11,6 +11,7 @@ export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument; nav: Nav }) {
     const instance = new EditDocument(
       ctl,
+      params.nav,
       EditManager.create({
         nav: params.nav,
         userInput: ctl.input,
@@ -27,6 +28,7 @@ export class EditDocument implements AppObject {
 
   constructor(
     private ctl: Controller,
+    private nav: Nav,
     private editManager: EditManager
   ) {
     this.unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
@@ -105,6 +107,50 @@ export class EditDocument implements AppObject {
       binding: {
         bindings: ['$mod+e'],
         description: 'Toggle input element cursor state',
+        when: { menuOpen: false }
+      }
+    },
+    REC_NEXT: {
+      action: () => {
+        this.ctl.app.exit();
+        this.nav.REC_NEXT();
+      },
+      binding: {
+        bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
+        description: 'Close editor and navigate to next element',
+        when: { menuOpen: false }
+      }
+    },
+    REC_PREV: {
+      action: () => {
+        this.ctl.app.exit();
+        this.nav.REC_PREV();
+      },
+      binding: {
+        bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
+        description: 'Close editor and navigate to previous element',
+        when: { menuOpen: false }
+      }
+    },
+    SIB_NEXT: {
+      action: () => {
+        this.ctl.app.exit();
+        this.nav.SIB_NEXT();
+      },
+      binding: {
+        bindings: ['$mod+j', 'ArrowDown'],
+        description: 'Close editor and navigate to next sibling',
+        when: { menuOpen: false }
+      }
+    },
+    SIB_PREV: {
+      action: () => {
+        this.ctl.app.exit();
+        this.nav.SIB_PREV();
+      },
+      binding: {
+        bindings: ['$mod+k', 'ArrowUp'],
+        description: 'Close editor and navigate to previous sibling',
         when: { menuOpen: false }
       }
     }

@@ -11,11 +11,38 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 
 The taxonomy is built from a small set of independent predicates. All other labels (LINE, OPAQUE_BLOCK, etc.) are derived from combinations of these. Source of truth: `taxonomy.ts`.
 
-- **`isFocusable`** — can the user navigate to this element?
-- **`isIsland`** — externally managed content (katex, `<img>`, form controls)?
-- **`isInlineFlow`** — pure display predicate: CSS `display: inline` or `display: inline flow`, and not floated. Excludes `inline-block`, `inline-flex`, `inline-grid`. No focusable/island/class checks.
-- **`isImplicitLine`** — synthetic wrapper (IMPLICIT_LINE) created by tokenization?
-- **`isToken`** — a jsed token span?
+- FOCUSABLE's
+  - **`isFocusable`** — can the user navigate to this element using FOCUS?
+  - **`isIsland`** — externally managed content (katex, `<img>`, form controls)
+  - **`isInlineFlow`** — pure display predicate: CSS `display: inline` or `display: inline flow`, and not floated. Excludes `inline-block`, `inline-flex`, `inline-grid`. No focusable/island/class checks.
+  - **`isImplicitLine`** — synthetic wrapper (IMPLICIT_LINE) created by tokenization
+- non-FOCUSABLE's
+  - **`isIgnorable`** — is the element completely ignored by FOCUS and CURSOR
+  - **`isToken`** — is the element a TOKEN?  
+  
+Derived:
+
+- `isCursorTransparent`
+  - is fully determined by the other predicates except in the `!isIsland && !isInlineFlow` case, where the `jsed-cursor-transparent` class is the tiebreaker.
+- `isCursorOpaque` = `!isCursorTransparent`
+- `isLine` = `!isIsland && !isInlineFlow`
+- `isLineSibling` = `isToken || isCursorOpaque`
+
+```
+┌─────────────┬───────────┬───────────────┬─────────────────────┬───────────────────┬────────────────────┐
+│             │           │               │ isCursorTransparent │ Derived label     │ Cursor behavior    │
+├─────────────┼───────────┼───────────────┼─────────────────────┼───────────────────┼────────────────────┤
+│             │           │ isInlineFlow  │ no                  │ INLINE_ISLAND     │ CURSOR_OPAQUE      │
+│             │ isIsland  ├───────────────┼─────────────────────┼───────────────────┼────────────────────┤
+│             │           │ !isInlineFlow │ no                  │ NON_INLINE_ISLAND │ CURSOR_OPAQUE      │
+│ isFocusable ├───────────┼───────────────┼─────────────────────┼───────────────────┼────────────────────┤
+│             │           │ isInlineFlow  │ yes                 │ INLINE_FLOW       │ CURSOR_TRANSPARENT │
+│             │           ├───────────────┼─────────────────────┼───────────────────┼────────────────────┤
+│             │ !isIsland │               │ yes (class)         │ TRANSPARENT_BLOCK │ CURSOR_TRANSPARENT │
+│             │           │ !isInlineFlow ├─────────────────────┼───────────────────┼────────────────────┤
+│             │           │               │ no  (default)       │ OPAQUE_BLOCK      │ CURSOR_OPAQUE      │
+└─────────────┴───────────┴───────────────┴─────────────────────┴───────────────────┴────────────────────┘
+```
 
 ## Elements
 
@@ -86,54 +113,6 @@ Non-TOKEN FOCUSABLE's group into two CURSOR behaviours:
   - **INLINE_FLOW** — inline-level markup (`<em>`, `<a>`)
   - **TRANSPARENT_BLOCK** — a LINE explicitly marked with `jsed-cursor-transparent` class. The CURSOR descends into their TOKEN's seamlessly, like an INLINE_FLOW. IMPLICIT_LINE's are always transparent.
 
-## FOCUSABLE's by FOCUS and CURSOR (taxonomy)
-
-```mermaid
-graph LR
-    A["FOCUSABLE<hr/>FOCUS visit=yes"] --> B["FOCUS descend=yes"]
-    A --> C["ISLAND<hr/>FOCUS descend=no"]
-
-    B --> D["INLINE_FLOW <hr/>(em, a, span)"]
-    B --> E["NON_INLINE_FLOW"]
-
-
-    C --> C1["INLINE_ISLAND <hr/>(inline katex, inline img)"]
-    C --> C2["NON_INLINE_ISLAND <hr/>(block katex, block img)"]
-
-    %% CURSOR level
-
-    D --> D1["CURSOR visit=no, descend=yes"]
-    %% D --> D2["visit=yes, descend=no"]
-    %% D --> D3["visit=yes, descend=yes"]
-    %% D --> D4["visit=no, descend=no"]
-
-    E --> E2["TRANSPARENT_BLOCK <br/><em>(jsed-cursor-transparent)</em><hr/>CURSOR visit=no, descend=yes"]
-    E --> E1["OPAQUE_BLOCK <br/><em>(default)</em><hr/>CURSOR visit=yes, descend=no"]
-
-
-    C1 --> C1a["CURSOR visit=yes, descend=no"]
-    C2 --> C2a["CURSOR visit=yes, descend=no"]
-
-    F["CURSOR_OPAQUE"]
-    G["CURSOR_TRANSPARENT"]
-
-    C1a --> F
-    C2a --> F
-    E1 --> F
-    D1 --> G
-    E2 --> G
-
-
-```
-
-In words:
-
-- All elements in the diagram are FOCUSABLE's so they are visitable by FOCUS; IGNORABLE's are not shown
-- the ISLAND branch (FOCUS descend=no) is much simpler because both FOCUS and CURSOR descend behaviours are set to "no".
-- ISLAND's tend to be special cases; putting them aside, an element is either INLINE_FLOW or NON_INLINE_FLOW and if NON_INLINE_FLOW it defaults to OPAQUE_BLOCK unless we mark it with `jsed-cursor-transparent`. `isInlineFlow` is the narrow display check — only `inline` and `inline flow` count, so inline-block/inline-flex elements are NON_INLINE_FLOW and become LINE/OPAQUE_BLOCK. IMPLICIT_LINE's are always transparent regardless of class.
-- the INLINE_FLOW sub-branch is simple because we only assume CURSOR visit=no,descend=yes
-- OPAQUE_BLOCK is CURSOR descend=no when acting as a LINE_SIBLING but if the FOCUS visits or descends this element the CURSOR may end up visiting and descending elements within the OPAQUE_BLOCK.
-
 ## Tokens and Text and whitespace
 
 - **TOKEN** — a jsed token, usually a span wrapping consecutive non-whitespace text. The cursor operates on tokens, not individual characters. In the DOM, TOKEN's have a trailing space by default. COLLAPSED_TOKEN and PADDED_TOKEN describe tokens with altered spacing. TODO: POSITIVE_SPACE may further change TOKEN's behaviour.
@@ -161,7 +140,7 @@ In words:
   - **CURSOR_INSERT_AFTER** — entered from CURSOR_APPEND when the user types a space (input ends with space). Visual marker: CURSOR_INSERT_AFTER_CLASS. The user is now typing into a new TOKEN that will be created after the current one. Moving previous (movePrevious) from this state cancels the insertion and clears the marker without moving.
   - **CURSOR_INSERT_BEFORE** — entered from CURSOR_PREPEND when the user types a space (input starts with space). Visual marker: CURSOR_INSERT_BEFORE_CLASS. The input cursor is moved back to the beginning after the space, so further typing goes into a new TOKEN before the current one. Moving next (moveNext) from this state cancels the insertion and clears the marker without moving.
 
-## Operations
+## Operations on FOCUSABLE's
 
 - **VISIT** - when recursively walking through the DOM, "visiting" means a callback will be called and the element passed to the consumer; both the FOCUS and CURSOR have different VISIT behaviours.
   - Source of truth: Nav.ts manages FOCUS
@@ -169,6 +148,11 @@ In words:
 - **DESCEND** - when recursively walking through the DOM, "descending" means the walk will descend and recurse through the elements children; both the FOCUS and CURSOR have different DESCEND behaviours.
   - Source of truth: Nav.ts manages FOCUS
   - Source of truth: TokenCursor.ts manages CURSOR
+- **TRANSPARENT** - VISIT=no but DESCEND=yes
+  - only applies to CURSOR: FOCUS can VISIT any FOCUSABLE
+- **OPAQUE** - VISIT=yes but DESCEND=no
+  - elements that are OPAQUE to FOCUS are ISLAND's
+  - elements that are CURSOR_OPAQUE are ISLAND's or OPAQUE_BLOCK's
 
 - **SHALLOW_TOKENIZATION** — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
   - Source of truth: search docstrings for SHALLOW_TOKENIZATION.

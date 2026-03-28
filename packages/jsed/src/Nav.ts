@@ -12,6 +12,8 @@ import {
 import { ElementIndicator } from './ElementIndicator.js';
 import { scrollIntoViewIfSmaller } from './lib/dom.js';
 
+export type FocusController = (evt: JsedFocusRequestEvent) => boolean;
+
 export type NavError =
   | { type: 'no-token-under-focus' }
   | {
@@ -22,17 +24,21 @@ export type NavError =
     };
 
 /**
- * Manages the FOCUS .
+ * Manages the FOCUS.
+ *
+ * Each Nav instance owns its lifecycle: call `connect()` to start listening
+ * for DOM events and `disconnect()` to stop. The optional `focusController`
+ * is immutable — set once at construction.
  */
 export class Nav {
-  static create(doc: JsedDocument): Nav {
+  static create(doc: JsedDocument, focusController?: FocusController): Nav {
     const elementIndicator = ElementIndicator.create();
-    return new Nav(doc, elementIndicator);
+    return new Nav(doc, elementIndicator, focusController);
   }
 
-  static createNull(doc: JsedDocument): Nav {
+  static createNull(doc: JsedDocument, focusController?: FocusController): Nav {
     const elementIndicator = ElementIndicator.createNull();
-    return new Nav(doc, elementIndicator);
+    return new Nav(doc, elementIndicator, focusController);
   }
 
   /**
@@ -40,7 +46,8 @@ export class Nav {
    * FOCUSABLE for that TOKEN.
    */
   #FOCUS?: HTMLElement;
-  #REQUEST_FOCUS?: ((evt: JsedFocusRequestEvent) => boolean) | null;
+  #focusController?: FocusController;
+  #connected = false;
 
   get document(): JsedDocument {
     return this.doc;
@@ -48,35 +55,42 @@ export class Nav {
 
   constructor(
     private doc: JsedDocument,
-    private elementIndicator: ElementIndicator
+    private elementIndicator: ElementIndicator,
+    focusController?: FocusController
   ) {
-    // doc.root.addEventListener<'click'>('click', this.handleElementClick);
-    doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);
+    this.#focusController = focusController;
     this.FOCUS(doc.root);
-    const focus = this.getFocus();
-    elementIndicator.updateFocus(focus);
-    elementIndicator.showIndicator(true);
-  }
-
-  close() {
-    this.doc.root.removeEventListener('click', this.handleElementClick);
   }
 
   /**
-   * This can control whether or not a FOCUS can occur.
-   *
-   * Don't forget to remove it at the end.
-   * TOOO: need a better clean up pattern
-   * @param controller
+   * Start listening for DOM events and show the element indicator.
    */
-  setFocusController(controller: (evt: JsedFocusRequestEvent) => boolean) {
-    console.warn('set focus controller');
-    this.#REQUEST_FOCUS = controller;
+  connect() {
+    if (this.#connected) return;
+    this.#connected = true;
+    this.doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);
+    const focus = this.getFocus();
+    this.elementIndicator.updateFocus(focus);
+    this.elementIndicator.showIndicator(true);
   }
 
-  removeFocusController() {
-    console.warn('remove focus controller');
-    this.#REQUEST_FOCUS = null;
+  /**
+   * Stop listening for DOM events and hide the element indicator.
+   */
+  disconnect() {
+    if (!this.#connected) return;
+    this.#connected = false;
+    this.doc.root.removeEventListener('mousedown', this.handleElementClick);
+    this.elementIndicator.showIndicator(false);
+  }
+
+  /**
+   * Disconnect and permanently tear down the Nav and its ElementIndicator.
+   * The instance cannot be used after this.
+   */
+  destroy() {
+    this.disconnect();
+    this.elementIndicator.destroy();
   }
 
   handleElementClick = (evt: MouseEvent) => {
@@ -242,7 +256,7 @@ export class Nav {
     // If there are no listeners, we'll assume ok = true.
     if (isFocusable(el)) {
       const ok =
-        this.#REQUEST_FOCUS?.({
+        this.#focusController?.({
           type: 'FOCUS_REQUEST',
           targetType: 'FOCUSABLE',
           element: el
@@ -255,7 +269,7 @@ export class Nav {
     if (isToken(el as Node)) {
       const htmlEl = el as HTMLElement;
       const ok =
-        this.#REQUEST_FOCUS?.({
+        this.#focusController?.({
           type: 'FOCUS_REQUEST',
           targetType: 'TOKEN',
           token: htmlEl,

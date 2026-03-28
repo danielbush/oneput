@@ -111,9 +111,9 @@ export abstract class TokenCursorBase {
 
   // #endregion
 
-  // #region Closing
+  // #region Destroy
 
-  close() {
+  destroy() {
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     this.removeAllFocusClasses();
   }

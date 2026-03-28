@@ -183,11 +183,11 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #endregion
 
-  // #region Closing
+  // #region Destroy
 
-  override close() {
+  override destroy() {
     this.clearMarkers();
-    super.close();
+    super.destroy();
   }
 
   // #endregion

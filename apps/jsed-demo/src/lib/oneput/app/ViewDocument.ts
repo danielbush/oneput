@@ -3,26 +3,23 @@ import { icons } from './_icons.js';
 import { Nav, type JsedDocument, type JsedFocusRequestEvent } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { EditDocument } from './EditDocument.js';
+import { EditDocument, type EditDocumentResult } from './EditDocument.js';
 
 /**
- * Oneput AppObject that manages a single JsedDocument.
+ * Oneput AppObject that manages a single JsedDocument in view mode.
  *
  * Uses a "focus twice to edit" model: the first click/touch on a FOCUSABLE
  * sets FOCUS (view mode). A second click/touch on the *same* FOCUSABLE
  * triggers quick-descend and enters edit mode.
+ *
+ * Owns its Nav lifecycle: connects on start/resume, disconnects on exit.
  */
 export class ViewDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
-    const nav = Nav.create(params.document);
-    return new ViewDocument(ctl, params.document, nav);
+    return new ViewDocument(ctl, params.document);
   }
 
-  constructor(
-    private ctl: Controller,
-    private document: JsedDocument,
-    private nav: Nav
-  ) {}
+  private nav: Nav;
 
   /**
    * Focus controller for view mode: detects when REQUEST_FOCUS targets the
@@ -36,23 +33,41 @@ export class ViewDocument implements AppObject {
     return true;
   };
 
+  constructor(
+    private ctl: Controller,
+    private document: JsedDocument
+  ) {
+    this.nav = Nav.create(this.document, this.viewFocusController);
+  }
+
   onStart = () => {
     setDocument(this.document);
-    this.nav.setFocusController(this.viewFocusController);
+    this.nav.connect();
   };
 
-  onResume = () => {
-    this.nav.setFocusController(this.viewFocusController);
+  onResume = (result?: { payload?: unknown }) => {
+    this.nav.connect();
+    const payload = result?.payload as EditDocumentResult | undefined;
+    if (payload?.focusElement) {
+      this.nav.FOCUS(payload.focusElement);
+    }
   };
 
   onExit = () => {
-    this.nav.removeFocusController();
+    this.nav.disconnect();
   };
 
   actions = {
     EDIT_FIRST: {
       action: () => {
-        this.ctl.app.run(EditDocument.create(this.ctl, { document: this.document, nav: this.nav }));
+        const initialFocus = this.nav.getFocus();
+        if (!initialFocus) return;
+        this.ctl.app.run(
+          EditDocument.create(this.ctl, {
+            document: this.document,
+            initialFocus
+          })
+        );
       },
       binding: {
         bindings: ['enter'],

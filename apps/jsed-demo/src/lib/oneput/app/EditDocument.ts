@@ -1,34 +1,35 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import {
-  type Nav,
-  type JsedDocument,
-  type ITokenCursor,
-  EditManager,
-  type EditManagerError
-} from '@oneput/jsed';
+import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
+
+export type EditDocumentResult = {
+  focusElement?: HTMLElement;
+};
 
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument; nav: Nav }) {
+  static create(
+    ctl: Controller,
+    params: { document: JsedDocument; initialFocus: HTMLElement }
+  ) {
     const instance = new EditDocument(
       ctl,
-      params.nav,
+      params.initialFocus,
       EditManager.create({
-        nav: params.nav,
+        document: params.document,
         userInput: ctl.input,
         onError: (err) => instance.handleEditError(err),
-        onExit: () => ctl.app.exit()
+        onExit: (result?: { focusElement?: HTMLElement }) =>
+          ctl.app.exit({ payload: { focusElement: result?.focusElement } })
       })
     );
     return instance;
   }
 
-  private cursor?: ITokenCursor;
   private unsubscribeInputChanges: () => void;
   private unsubscribeSelectionChanges: () => void;
 
   constructor(
     private ctl: Controller,
-    private nav: Nav,
+    private initialFocus: HTMLElement,
     private editManager: EditManager
   ) {
     this.unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
@@ -40,27 +41,18 @@ export class EditDocument implements AppObject {
   }
 
   onStart = () => {
-    this.editManager
-      .getFirstTokenUnderFocus()
-      .map((cursor) => {
-        this.cursor = cursor;
-      })
-      .mapErr((err) => {
-        switch (err.type) {
-          case 'no-token-under-focus':
-            this.ctl.notify('No token under focus', { duration: 3000 });
-            this.ctl.app.exit();
-            break;
-          case 'no-focus':
-            this.ctl.notify('No document focus found', { duration: 3000 });
-            this.ctl.app.exit();
-            break;
-        }
-      });
+    this.editManager.edit(this.initialFocus).mapErr((err) => {
+      switch (err.type) {
+        case 'no-token-under-focus':
+          this.ctl.notify('No token under focus', { duration: 3000 });
+          this.ctl.app.exit();
+          break;
+      }
+    });
   };
 
   onExit = () => {
-    this.editManager.close();
+    this.editManager.destroy();
     this.unsubscribeInputChanges();
     this.unsubscribeSelectionChanges();
   };
@@ -69,10 +61,14 @@ export class EditDocument implements AppObject {
     this.ctl.notify(`There was an error editing the document: ${err.type}`);
   };
 
+  private exitWith(result: EditDocumentResult) {
+    this.ctl.app.exit({ payload: result });
+  }
+
   actions = {
     EXIT: {
       action: () => {
-        this.ctl.app.exit();
+        this.exitWith({ focusElement: this.editManager.nav?.getFocus() ?? undefined });
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
@@ -82,7 +78,7 @@ export class EditDocument implements AppObject {
     },
     NEXT_TOKEN: {
       action: () => {
-        this.cursor?.moveNext();
+        this.editManager.cursor?.moveNext();
       },
       binding: {
         bindings: ['$mod+l'],
@@ -92,7 +88,7 @@ export class EditDocument implements AppObject {
     },
     PREV_TOKEN: {
       action: () => {
-        this.cursor?.movePrevious();
+        this.editManager.cursor?.movePrevious();
       },
       binding: {
         bindings: ['$mod+h'],
@@ -112,8 +108,9 @@ export class EditDocument implements AppObject {
     },
     REC_NEXT: {
       action: () => {
-        this.ctl.app.exit();
-        this.nav.REC_NEXT();
+        if (!this.editManager.nav) return;
+        this.editManager.nav.REC_NEXT();
+        this.exitWith({ focusElement: this.editManager.nav.getFocus() ?? undefined });
       },
       binding: {
         bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
@@ -123,8 +120,9 @@ export class EditDocument implements AppObject {
     },
     REC_PREV: {
       action: () => {
-        this.ctl.app.exit();
-        this.nav.REC_PREV();
+        if (!this.editManager.nav) return;
+        this.editManager.nav.REC_PREV();
+        this.exitWith({ focusElement: this.editManager.nav.getFocus() ?? undefined });
       },
       binding: {
         bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
@@ -134,8 +132,9 @@ export class EditDocument implements AppObject {
     },
     SIB_NEXT: {
       action: () => {
-        this.ctl.app.exit();
-        this.nav.SIB_NEXT();
+        if (!this.editManager.nav) return;
+        this.editManager.nav.SIB_NEXT();
+        this.exitWith({ focusElement: this.editManager.nav.getFocus() ?? undefined });
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
@@ -145,8 +144,9 @@ export class EditDocument implements AppObject {
     },
     SIB_PREV: {
       action: () => {
-        this.ctl.app.exit();
-        this.nav.SIB_PREV();
+        if (!this.editManager.nav) return;
+        this.editManager.nav.SIB_PREV();
+        this.exitWith({ focusElement: this.editManager.nav.getFocus() ?? undefined });
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],

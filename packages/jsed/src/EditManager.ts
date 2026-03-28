@@ -4,53 +4,69 @@ import { isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
-import type { ITokenCursor, JsedFocusRequestEvent } from './types.js';
+import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
 
 export type EditManagerError =
   | { type: 'no-token-under-focus' }
-  | {
-      /**
-       * TODO: should we ever let this happen?
-       */
-      type: 'no-focus';
-    }
   | TokenCursorError;
 
 /**
- * Oneput AppObject that manages an edit session for a single document.
+ * Manages an edit session for a single document.
+ *
+ * Call `edit(initialFocus)` to create a Nav, connect it, tokenize the
+ * focused element, and enter edit mode. Call `destroy()` to tear down.
  */
 export class EditManager {
   static create({
-    nav,
+    document,
     userInput,
     onError,
     onExit
   }: {
-    nav: Nav;
+    document: JsedDocument;
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
-    onExit?: () => void;
+    onExit?: (result?: { focusElement?: HTMLElement }) => void;
   }): EditManager {
-    return new EditManager(nav, userInput, onError, onExit);
+    return new EditManager(document, userInput, onError, onExit);
   }
 
-  private cursor?: ITokenCursor;
+  nav?: Nav;
+  cursor?: ITokenCursor;
   private inputManager?: InputManager;
 
   constructor(
-    private nav: Nav,
+    private document: JsedDocument,
     private userInput: UserInput,
     private onError: (err: EditManagerError) => void,
-    private onExit?: () => void
-  ) {
-    this.nav.setFocusController(this.handleFocusRequest);
+    private onExit?: (result?: { focusElement?: HTMLElement }) => void
+  ) {}
+
+  /**
+   * Create a Nav, connect it, set FOCUS to `initialFocus`, tokenize via
+   * quickDescend, and enter edit mode with the CURSOR on the first TOKEN.
+   */
+  edit(initialFocus: HTMLElement): Result<void, EditManagerError> {
+    this.nav = Nav.create(this.document, this.handleFocusRequest);
+    this.nav.FOCUS(initialFocus);
+    this.nav.connect();
+
+    const firstToken = token.quickDescend(initialFocus);
+    if (firstToken) {
+      const line = getLine(firstToken);
+      this.nav.FOCUS(line);
+      this.userInput.focus();
+      this.#setCursor(firstToken, line);
+      return ok(undefined);
+    }
+    return err({ type: 'no-token-under-focus' });
   }
 
-  close() {
-    this.cursor?.close();
-    this.nav.removeFocusController();
+  destroy() {
+    this.cursor?.destroy();
+    this.nav?.destroy();
   }
 
   /**
@@ -79,7 +95,7 @@ export class EditManager {
    * commanded to do usually by the user... (eg due to delete operation).
    */
   private handleTokenChange = async (tok: HTMLElement) => {
-    this.nav.FOCUS(tok);
+    this.nav?.FOCUS(tok);
     if (isToken(tok)) {
       this.userInput.enable(true);
       this.userInput.focus();
@@ -97,7 +113,7 @@ export class EditManager {
    * occur...
    */
   private handleFocusRequest = (evt: JsedFocusRequestEvent) => {
-    if (!this.cursor) {
+    if (!this.cursor || !this.nav) {
       return false;
     }
 
@@ -107,8 +123,7 @@ export class EditManager {
 
     // Exit back to view mode.
     if (targetLine !== cursorLine) {
-      this.nav.FOCUS(targetElement);
-      this.onExit?.();
+      this.onExit?.({ focusElement: targetElement });
       return false;
     }
 
@@ -145,34 +160,16 @@ export class EditManager {
     this.onError(err);
   };
 
-  /**
-   * Set up cursor on first available token under focus.
-   */
-  getFirstTokenUnderFocus(): Result<ITokenCursor, EditManagerError> {
-    const focus = this.nav.getFocus();
-    if (focus) {
-      const firstToken = token.quickDescend(focus);
-      if (firstToken) {
-        const line = getLine(firstToken);
-        this.nav.FOCUS(line);
-        this.userInput.focus();
-        return ok(this.#setCursor(firstToken, line));
-      }
-      return err({ type: 'no-token-under-focus' });
-    }
-    return err({ type: 'no-focus' });
-  }
-
   #setCursor(tok: HTMLElement, line: HTMLElement) {
     if (!this.cursor) {
       this.cursor = TokenCursor.create({
-        document: this.nav.document,
+        document: this.nav!.document,
         token: tok,
         line,
         onTokenChange: this.handleTokenChange,
         onError: this.handleCursorError
       });
-      this.inputManager = InputManager.create(this.nav, this.cursor, this.userInput);
+      this.inputManager = InputManager.create(this.nav!, this.cursor, this.userInput);
     } else {
       this.cursor.setToken(tok);
     }

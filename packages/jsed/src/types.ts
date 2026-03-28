@@ -98,9 +98,9 @@ export type ITokenCursor = {
    */
   splitAfter: () => void;
   /**
-   * Close the current edit session.
+   * Destroy the current edit session. The instance cannot be used after this.
    */
-  close: () => void;
+  destroy: () => void;
 
   /**
    * Whether `tok` is on the same line as the cursor's token.

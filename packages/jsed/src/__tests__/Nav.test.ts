@@ -166,9 +166,9 @@ describe('focus controller', () => {
   it('should call the focus controller when REQUEST_FOCUS targets a FOCUSABLE', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const nav = new Nav(doc, ElementIndicator.createNull());
-    const controller = vi.fn(() => true);
-    nav.setFocusController(controller);
+    const controller = vi.fn((): boolean => true);
+    const nav = new Nav(doc, ElementIndicator.createNull(), controller);
+    controller.mockClear();
 
     // act
     nav.REQUEST_FOCUS(byId(doc, 'p1'));
@@ -187,11 +187,11 @@ describe('focus controller', () => {
   it('should pass same-element event when REQUEST_FOCUS targets the already-focused element', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const controller = vi.fn(() => false);
+    const nav = new Nav(doc, ElementIndicator.createNull(), controller);
     const p1 = byId(doc, 'p1');
     nav.FOCUS(p1);
-    const controller = vi.fn(() => false);
-    nav.setFocusController(controller);
+    controller.mockClear();
 
     // act
     nav.REQUEST_FOCUS(p1);
@@ -210,10 +210,9 @@ describe('focus controller', () => {
   it('should not change FOCUS when controller returns false', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc, ElementIndicator.createNull(), () => false);
     const p1 = byId(doc, 'p1');
     nav.FOCUS(p1);
-    nav.setFocusController(() => false);
 
     // act
     nav.REQUEST_FOCUS(byId(doc, 'p2'));
@@ -225,9 +224,8 @@ describe('focus controller', () => {
   it('should allow focus change when controller returns true', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc, ElementIndicator.createNull(), () => true);
     nav.FOCUS(byId(doc, 'p1'));
-    nav.setFocusController(() => true);
 
     // act
     nav.REQUEST_FOCUS(byId(doc, 'p2'));

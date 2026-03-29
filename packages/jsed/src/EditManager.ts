@@ -8,9 +8,7 @@ import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
 
-export type EditManagerError =
-  | { type: 'no-token-under-focus' }
-  | TokenCursorError;
+export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 
 /**
  * Manages an edit session for a single document.
@@ -28,7 +26,7 @@ export class EditManager {
     document: JsedDocument;
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
-    onExit?: (result?: { focusElement?: HTMLElement }) => void;
+    onExit?: (result: { focusElement: HTMLElement }) => void;
   }): EditManager {
     return new EditManager(document, userInput, onError, onExit);
   }
@@ -41,7 +39,7 @@ export class EditManager {
     private document: JsedDocument,
     private userInput: UserInput,
     private onError: (err: EditManagerError) => void,
-    private onExit?: (result?: { focusElement?: HTMLElement }) => void
+    private onExit?: (result: { focusElement: HTMLElement }) => void
   ) {}
 
   /**
@@ -121,17 +119,32 @@ export class EditManager {
     const targetElement = evt.targetType === 'TOKEN' ? evt.token : evt.element;
     const targetLine = getLine(targetElement);
 
-    // Exit back to view mode.
+    // A change in LINE suggests the user is navigating to a different "part" of
+    // the document...
     if (targetLine !== cursorLine) {
-      this.onExit?.({ focusElement: targetElement });
+      this.onExit?.({ focusElement: targetElement })
       return false;
+      // if () {
+      //   const tok = token.quickDescend(targetElement);
+      //   if (tok) {
+      //     this.nav.FOCUS(tok);
+      //     this.cursor.setToken(tok);
+      //     this.userInput.focus();
+      //     this.userInput.setInputValue(token.getValue(tok)).then(() => {
+      //       this.userInput.selectAll();
+      //     });
+      //     return false;
+      //   }
+      //   return true;
+      // }
     }
 
     // Tokenize on the fly but focus the parent...
-    if (evt.targetType === 'FOCUSABLE') {
-      token.quickDescend(evt.element);
-      return true;
-    }
+    // if (evt.targetType === 'FOCUSABLE') {
+    //   console.log('<< handleFocusRequest FOCUSABLE tokenize but not set cursor');
+    //   token.quickDescend(evt.element);
+    //   return true;
+    // }
 
     if (evt.targetType === 'TOKEN') {
       // For consistency, clicking on a parent that is the current LINE_SEGMENT
@@ -150,6 +163,7 @@ export class EditManager {
       });
       return true;
     }
+
     return false;
   };
 

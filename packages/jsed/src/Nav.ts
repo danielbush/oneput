@@ -93,7 +93,7 @@ export class Nav {
     this.elementIndicator.destroy();
   }
 
-  handleElementClick = (evt: MouseEvent) => {
+  private handleElementClick = (evt: MouseEvent) => {
     const app_root_node = document.getElementById(JSED_APP_ROOT_ID);
     if (app_root_node) {
       const node = evt.target as Element;
@@ -103,7 +103,7 @@ export class Nav {
     }
     // Prevent default actions like blurring the input in jsed-ui (assumes "mousedown").
     evt.preventDefault();
-    this.REQUEST_FOCUS(evt.target);
+    this.REQUEST_FOCUS(evt.target, { scrollIntoView: false });
   };
 
   // Actions
@@ -123,7 +123,7 @@ export class Nav {
     // console.warn('TODO: emit FOCUS event', evt);
   }
 
-  #updateFocus(el: HTMLElement) {
+  #updateFocus(el: HTMLElement, params?: { scrollIntoView?: boolean }) {
     let tok: HTMLElement | null = null;
     if (isToken(el)) {
       tok = el;
@@ -138,7 +138,9 @@ export class Nav {
     this.#FOCUS = el;
     this.elementIndicator.updateFocus(el);
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
-    scrollIntoViewIfSmaller(el);
+    if (params?.scrollIntoView ?? true) {
+      scrollIntoViewIfSmaller(el);
+    }
     this.#emitFocusEvent(
       tok
         ? {
@@ -238,8 +240,8 @@ export class Nav {
   /**
    * Focus an element if it is an FOCUSABLE .
    */
-  FOCUS(el: HTMLElement): void {
-    this.#updateFocus(el);
+  FOCUS(el: HTMLElement, params?: { scrollIntoView?: boolean }): void {
+    this.#updateFocus(el, params);
     this.SIB_HIGHLIGHT();
   }
 
@@ -249,7 +251,7 @@ export class Nav {
    *
    * CURSOR is checked first.
    */
-  REQUEST_FOCUS(el: Element | EventTarget | null): void {
+  REQUEST_FOCUS(el: Element | EventTarget | null, params?: { scrollIntoView?: boolean }): void {
     if (!el) {
       return;
     }
@@ -262,7 +264,7 @@ export class Nav {
           element: el
         }) ?? true;
       if (ok) {
-        this.FOCUS(el);
+        this.FOCUS(el, params);
       }
       return;
     }
@@ -276,7 +278,7 @@ export class Nav {
           value: token.getValue(htmlEl)
         }) ?? true;
       if (ok) {
-        this.FOCUS(htmlEl);
+        this.FOCUS(htmlEl, params);
       }
     }
   }

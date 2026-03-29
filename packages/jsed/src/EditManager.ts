@@ -122,7 +122,7 @@ export class EditManager {
     // A change in LINE suggests the user is navigating to a different "part" of
     // the document...
     if (targetLine !== cursorLine) {
-      this.onExit?.({ focusElement: targetElement })
+      this.onExit?.({ focusElement: targetElement });
       return false;
       // if () {
       //   const tok = token.quickDescend(targetElement);

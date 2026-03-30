@@ -160,31 +160,31 @@ export class Nav {
   /**
    * Find next using depth first recursion.
    */
-  REC_NEXT(): HTMLElement | null {
-    if (!this.#FOCUS) return null;
+  REC_NEXT() {
+    if (!this.#FOCUS) return;
     for (const next of findNextNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable,
       descend: (node) => !isIsland(node)
     })) {
       this.REQUEST_FOCUS(next);
-      return next as HTMLElement;
+      return;
     }
-    return null;
+    return;
   }
 
   /**
    * Find previous using depth first recursion.
    */
-  REC_PREV(): HTMLElement | null {
-    if (!this.#FOCUS) return null;
+  REC_PREV() {
+    if (!this.#FOCUS) return;
     for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable,
       descend: (node) => !isIsland(node)
     })) {
       this.REQUEST_FOCUS(next);
-      return next as HTMLElement;
+      return;
     }
-    return null;
+    return;
   }
 
   #sibnext = () =>
@@ -204,25 +204,25 @@ export class Nav {
   /**
    * Find next sibling element if there is one.
    */
-  SIB_NEXT(): HTMLElement | null {
+  SIB_NEXT() {
     const next = this.#sibnext();
     if (next) {
       this.REQUEST_FOCUS(next);
-      return next as HTMLElement;
+      return;
     }
-    return null;
+    return;
   }
 
   /**
    * Find previous sibling element if there is one.
    */
-  SIB_PREV(): HTMLElement | null {
+  SIB_PREV() {
     const next = this.#sibprev();
     if (next) {
       this.REQUEST_FOCUS(next);
-      return next as HTMLElement;
+      return;
     }
-    return null;
+    return;
   }
 
   /**

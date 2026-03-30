@@ -424,6 +424,42 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit).toBeNull();
   });
 
+  test('text after a normal block (OPAQUE_BLOCK) is wrapped', () => {
+    // arrange — a plain div with no transparent class is an OPAQUE_BLOCK.
+    // Trailing text should be wrapped in IMPLICIT_LINE.
+    const doc = makeRoot(
+      div({ id: 'div1' }, div({ id: 'div2' }, 'nested'), ' bbb')
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent!.trim()).toBe('bbb');
+  });
+
+  test('text after an inline-block (OPAQUE_BLOCK) is not wrapped', () => {
+    // arrange — inline-block without transparent class. Sits on the same
+    // visual line as surrounding text, so no IMPLICIT_LINE needed.
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        'aaa ',
+        div({ id: 'div2', style: 'display:inline-block;' }, 'nested'),
+        ' bbb'
+      )
+    );
+
+    // act
+    tagImplicitLines(doc.root);
+
+    // assert
+    const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicit).toBeNull();
+  });
+
   test("whitespace-only text between LINE's is ignored", () => {
     // arrange
     const doc = makeRoot(

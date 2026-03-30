@@ -49,6 +49,9 @@ importers:
       btca:
         specifier: ^1.0.961
         version: 1.0.961
+      prettier:
+        specifier: ^3.8.1
+        version: 3.8.1
       skills:
         specifier: ^1.4.1
         version: 1.4.1

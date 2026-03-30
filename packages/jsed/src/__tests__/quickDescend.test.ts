@@ -98,6 +98,46 @@ describe('quickDescend', () => {
     expect(first!.textContent!.trim()).toBe('italic');
   });
 
+  test('FOCUS on LINE with INLINE_FLOW: returns first TOKEN of LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' }, //
+        'before ',
+        em({ id: 'em1', ...inlineStyleHack }, 'italic'),
+        ' after'
+      )
+    );
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const first = quickDescend(p1);
+
+    // assert
+    expect(first).not.toBeNull();
+    expect(first!.textContent!.trim()).toBe('before');
+  });
+
+  test('FOCUS on INLINE_FLOW inside LINE: tokenizes LINE but returns first TOKEN of INLINE_FLOW', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' }, //
+        'before ',
+        em({ id: 'em1', ...inlineStyleHack }, 'italic'),
+        ' after'
+      )
+    );
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const first = quickDescend(em1);
+
+    // assert
+    expect(first).not.toBeNull();
+    expect(first!.textContent!.trim()).toBe('italic');
+  });
+
   test('LINE starting with ISLAND: skips ISLAND, returns first TOKEN', () => {
     // arrange
     const doc = makeRoot(

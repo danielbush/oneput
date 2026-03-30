@@ -188,10 +188,11 @@ export function quickDescend(el: HTMLElement): HTMLElement | null {
   if (!isFocusable(el)) {
     throw new Error('quickDescend: expects a FOCUSABLE');
   }
+
+  // Example: `el` is an em-tag;  `line` is parent p-tag.
   const line = getLine(el);
   tokenizeLine(line);
-
-  let sib = getFirstLineSibling(line);
+  let sib = getFirstLineSibling(el);
   while (sib) {
     if (isToken(sib)) {
       return sib;

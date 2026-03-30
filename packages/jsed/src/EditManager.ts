@@ -46,12 +46,12 @@ export class EditManager {
    * Create a Nav, connect it, set FOCUS to `initialFocus`, tokenize via
    * quickDescend, and enter edit mode with the CURSOR on the first TOKEN.
    */
-  edit(initialFocus: HTMLElement): Result<void, EditManagerError> {
+  edit(initial: HTMLElement): Result<void, EditManagerError> {
     this.nav = Nav.create(this.document, this.handleFocusRequest);
-    this.nav.FOCUS(initialFocus);
+    this.nav.FOCUS(initial);
     this.nav.connect();
 
-    const firstToken = token.quickDescend(initialFocus);
+    const firstToken = isToken(initial) ? initial : token.quickDescend(initial);
     if (firstToken) {
       const line = getLine(firstToken);
       this.nav.FOCUS(line);
@@ -124,27 +124,7 @@ export class EditManager {
     if (targetLine !== cursorLine) {
       this.onExit?.({ focusElement: targetElement });
       return false;
-      // if () {
-      //   const tok = token.quickDescend(targetElement);
-      //   if (tok) {
-      //     this.nav.FOCUS(tok);
-      //     this.cursor.setToken(tok);
-      //     this.userInput.focus();
-      //     this.userInput.setInputValue(token.getValue(tok)).then(() => {
-      //       this.userInput.selectAll();
-      //     });
-      //     return false;
-      //   }
-      //   return true;
-      // }
     }
-
-    // Tokenize on the fly but focus the parent...
-    // if (evt.targetType === 'FOCUSABLE') {
-    //   console.log('<< handleFocusRequest FOCUSABLE tokenize but not set cursor');
-    //   token.quickDescend(evt.element);
-    //   return true;
-    // }
 
     if (evt.targetType === 'TOKEN') {
       // For consistency, clicking on a parent that is the current LINE_SEGMENT

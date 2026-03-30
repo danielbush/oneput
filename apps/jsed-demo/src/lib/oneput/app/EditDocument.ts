@@ -2,10 +2,10 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
 
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument; initialFocus: HTMLElement }) {
+  static create(ctl: Controller, params: { document: JsedDocument; initial: HTMLElement }) {
     const instance = new EditDocument(
       ctl,
-      params.initialFocus,
+      params.initial,
       EditManager.create({
         document: params.document,
         userInput: ctl.input,
@@ -23,7 +23,7 @@ export class EditDocument implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private initialFocus: HTMLElement,
+    private initial: HTMLElement,
     private editManager: EditManager
   ) {
     this.unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
@@ -35,7 +35,7 @@ export class EditDocument implements AppObject {
   }
 
   onStart = () => {
-    this.editManager.edit(this.initialFocus).mapErr((err) => {
+    this.editManager.edit(this.initial).mapErr((err) => {
       switch (err.type) {
         case 'no-token-under-focus':
           this.ctl.notify('No token under focus', { duration: 3000 });

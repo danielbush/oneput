@@ -107,32 +107,27 @@ export class EditManager {
   };
 
   /**
-   * When the user clicks/touches somewhere, decide if we allow the FOCUS to
-   * occur...
+   * When the user causes a FOCUS change (click, touch, key bindings)...
    */
   private handleFocusRequest = (evt: JsedFocusRequestEvent) => {
     if (!this.cursor || !this.nav) {
       return false;
     }
 
-    const cursorLine = this.cursor.getLine();
-    const targetElement = evt.targetType === 'TOKEN' ? evt.token : evt.element;
-    const targetLine = getLine(targetElement);
-
-    // A change in LINE suggests the user is navigating to a different "part" of
-    // the document...
-    if (targetLine !== cursorLine) {
-      this.onExit?.({ focusElement: targetElement });
+    // FOCUS has been set to some FOCUSABLE...
+    if (evt.targetType === 'FOCUSABLE') {
+      this.onExit?.({ focusElement: evt.element });
       return false;
     }
 
+    // FOCUS has been set to a TOKEN...
     if (evt.targetType === 'TOKEN') {
-      // For consistency, clicking on a parent that is the current LINE_SEGMENT
-      // focuses the parent instead of the token.
+
+      // Exit and focus on new parent if TOKEN is in a different LINE.
       const parent = token.getParent(evt.token);
-      const preferParentFocus = parent !== this.nav.getFocus();
-      if (preferParentFocus) {
-        this.nav.FOCUS(parent);
+      const tokenBelongsToCursorLine = this.cursor.getLine().contains(parent)
+      if (!tokenBelongsToCursorLine) {
+        this.onExit?.({ focusElement: parent });
         return false;
       }
 

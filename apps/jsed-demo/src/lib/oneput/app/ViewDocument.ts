@@ -53,7 +53,9 @@ export class ViewDocument implements AppObject {
     this.nav.connect();
     const payload = result?.payload as { focusElement?: HTMLElement } | undefined;
     if (payload?.focusElement) {
-      this.nav.FOCUS(payload.focusElement);
+      // Don't scrollIntoView because this can have a jarring effect on UX and
+      // the CURSOR / EditManager should have already scrolled anyway.
+      this.nav.FOCUS(payload.focusElement, { scrollIntoView: false });
     }
   };
 

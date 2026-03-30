@@ -6,6 +6,8 @@ export type UserInput = {
   getRange: () => [number | null, number | null];
   focus: () => void;
   enable: (bool: boolean) => void;
+  setPlaceholder: (value: string) => void;
+  resetPlaceholder: () => void;
 };
 
 export type UserInputSelectionState =

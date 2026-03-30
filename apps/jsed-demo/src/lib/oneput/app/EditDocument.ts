@@ -66,6 +66,16 @@ export class EditDocument implements AppObject {
         when: { menuOpen: false }
       }
     },
+    ENTER: {
+      action: () => {
+        this.editManager.edit();
+      },
+      binding: {
+        bindings: ['enter'],
+        description: 'Edit within the element under cursor',
+        when: { menuOpen: false }
+      }
+    },
     NEXT_TOKEN: {
       action: () => {
         this.editManager.cursor?.moveNext();
@@ -102,7 +112,7 @@ export class EditDocument implements AppObject {
         this.editManager.nav.REC_NEXT();
       },
       binding: {
-        bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
+        bindings: ['$mod+Shift+l', 'Shift+ArrowDown'],
         description: 'Close editor and navigate to next element',
         when: { menuOpen: false }
       }
@@ -113,7 +123,7 @@ export class EditDocument implements AppObject {
         this.editManager.nav.REC_PREV();
       },
       binding: {
-        bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
+        bindings: ['$mod+Shift+h', 'Shift+ArrowUp'],
         description: 'Close editor and navigate to previous element',
         when: { menuOpen: false }
       }

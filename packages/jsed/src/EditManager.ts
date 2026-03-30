@@ -1,6 +1,6 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { isToken } from './lib/taxonomy.js';
+import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
@@ -46,9 +46,13 @@ export class EditManager {
    * Create a Nav, connect it, set FOCUS to `initialFocus`, tokenize via
    * quickDescend, and enter edit mode with the CURSOR on the first TOKEN.
    */
-  edit(initial: HTMLElement): Result<void, EditManagerError> {
-    this.nav = Nav.create(this.document, this.handleFocusRequest);
+  edit(initial?: HTMLElement): Result<void, EditManagerError> {
+    this.nav = this.nav ?? Nav.create(this.document, this.handleFocusRequest);
     this.nav.connect();
+    initial = initial ?? this.nav.getFocus() ?? undefined;
+    if (!initial) {
+      return err({ type: 'no-token-under-focus' });
+    }
 
     const firstToken = isToken(initial) ? initial : token.quickDescend(initial);
     if (firstToken) {
@@ -94,15 +98,23 @@ export class EditManager {
    */
   private handleTokenChange = async (tok: HTMLElement) => {
     this.nav?.FOCUS(tok, { scrollIntoView: false }); // Let the cursor handle scrolling.
+    this.userInput.resetPlaceholder();
+    this.userInput.enable(true);
+
     if (isToken(tok)) {
-      this.userInput.enable(true);
       this.userInput.focus();
       this.userInput.setInputValue(token.getValue(tok)).then(() => {
         this.userInput.selectAll();
       });
     } else {
       this.userInput.enable(false);
-      this.userInput.setInputValue('(not a token)');
+      this.userInput.setInputValue('');
+      if (isIsland(tok) || isLine(tok)) {
+        // TODO: Handle 'Enter' which may be a different key binding.
+        this.userInput.setPlaceholder('Hit Enter to edit this element');
+      } else {
+        this.userInput.setInputValue('(not a token)');
+      }
     }
   };
 
@@ -122,20 +134,15 @@ export class EditManager {
 
     // FOCUS has been set to a TOKEN...
     if (evt.targetType === 'TOKEN') {
-
       // Exit and focus on new parent if TOKEN is in a different LINE.
       const parent = token.getParent(evt.token);
-      const tokenBelongsToCursorLine = this.cursor.getLine().contains(parent)
+      const tokenBelongsToCursorLine = this.cursor.getLine().contains(parent);
       if (!tokenBelongsToCursorLine) {
         this.onExit?.({ focusElement: parent });
         return false;
       }
 
-      this.cursor.setToken(evt.token);
-      this.userInput.focus();
-      this.userInput.setInputValue(token.getValue(evt.token)).then(() => {
-        this.userInput.selectAll();
-      });
+      this.cursor.setToken(evt.token); // calls handleTokenChange
       return true;
     }
 
@@ -160,7 +167,7 @@ export class EditManager {
       });
       this.inputManager = InputManager.create(this.nav!, this.cursor, this.userInput);
     } else {
-      this.cursor.setToken(tok);
+      this.cursor.setToken(tok); // calls handleTokenChange
     }
     return this.cursor;
   }

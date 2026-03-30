@@ -90,7 +90,7 @@ export class ViewDocument implements AppObject {
         this.nav.REC_NEXT();
       },
       binding: {
-        bindings: ['$mod+Shift+j', 'Shift+ArrowDown'],
+        bindings: ['$mod+l', 'Shift+ArrowDown'],
         description: 'Navigate to next element',
         when: { menuOpen: false }
       }
@@ -100,7 +100,7 @@ export class ViewDocument implements AppObject {
         this.nav.REC_PREV();
       },
       binding: {
-        bindings: ['$mod+Shift+k', 'Shift+ArrowUp'],
+        bindings: ['$mod+h', 'Shift+ArrowUp'],
         description: 'Navigate to previous element',
         when: { menuOpen: false }
       }

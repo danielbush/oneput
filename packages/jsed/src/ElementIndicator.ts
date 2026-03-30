@@ -55,7 +55,11 @@ export class ElementIndicator {
 
   #scrollEndHandler = () => {
     if (this.#showIndicator && this.#element && this.#isVisible) {
-      this.#addIndicator();
+      // TODO: scrollIntoView is not handled by scroll listeners so we add a
+      // timeout.  Without this, the indicator may appear in the wrong place.
+      setTimeout(() => {
+        this.#addIndicator();
+      }, 100);
     }
   };
 

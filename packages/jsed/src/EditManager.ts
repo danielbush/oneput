@@ -48,17 +48,17 @@ export class EditManager {
    */
   edit(initial: HTMLElement): Result<void, EditManagerError> {
     this.nav = Nav.create(this.document, this.handleFocusRequest);
-    this.nav.FOCUS(initial);
     this.nav.connect();
 
     const firstToken = isToken(initial) ? initial : token.quickDescend(initial);
     if (firstToken) {
       const line = getLine(firstToken);
-      this.nav.FOCUS(line);
+      this.nav.FOCUS(line, { scrollIntoView: false }); // Let the cursor handle scrolling.
       this.userInput.focus();
       this.#setCursor(firstToken, line);
       return ok(undefined);
     }
+
     return err({ type: 'no-token-under-focus' });
   }
 
@@ -93,7 +93,7 @@ export class EditManager {
    * commanded to do usually by the user... (eg due to delete operation).
    */
   private handleTokenChange = async (tok: HTMLElement) => {
-    this.nav?.FOCUS(tok);
+    this.nav?.FOCUS(tok, { scrollIntoView: false });  // Let the cursor handle scrolling.
     if (isToken(tok)) {
       this.userInput.enable(true);
       this.userInput.focus();
@@ -157,7 +157,7 @@ export class EditManager {
   #setCursor(tok: HTMLElement, line: HTMLElement) {
     if (!this.cursor) {
       this.cursor = TokenCursor.create({
-        document: this.nav!.document,
+        document: this.document,
         token: tok,
         line,
         onTokenChange: this.handleTokenChange,

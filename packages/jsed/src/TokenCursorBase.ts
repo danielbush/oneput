@@ -75,7 +75,8 @@ export abstract class TokenCursorBase {
     this.removeAllFocusClasses();
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     el.classList.add(JSED_CURSOR_CLASS);
-    scrollIntoViewIfSmaller(el);
+    // Don't scroll to middle of screen when setting token, UX is too jarring.
+    scrollIntoViewIfSmaller(el, { vertical: 'nearest' });
     this.#token = el;
   }
 

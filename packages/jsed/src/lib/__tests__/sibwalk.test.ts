@@ -303,19 +303,22 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
     expect(isPadded(tokens[0] as HTMLElement)).toBe(false);
   });
 
-  test('TOKEN after inline-block OPAQUE_BLOCK is padded', () => {
-    // arrange
+  test('TOKEN after inline-block OPAQUE_BLOCK is not padded (wrapped in IMPLICIT_LINE)', () => {
+    // arrange — trailing text after inline-block is wrapped in IMPLICIT_LINE
+    // by tagImplicitLines, so the TOKEN is inside the IMPLICIT_LINE and not
+    // a direct sibling of the inline-block. No padding needed.
     const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(inlineBlockStyle, 'inner'), ' bbb'));
-    tokenizeLine(byId(doc, 'p1'));
+    const line = byId(doc, 'p1');
+    tokenizeLine(line);
 
-    // act — find the TOKEN after the inline-block
-    const ib = byId(doc, 'p1').querySelector('span[style]') as HTMLElement;
-    const afterIb = getNextLineSibling(ib, byId(doc, 'p1'))!;
+    // act — find the TOKEN after the inline-block (inside IMPLICIT_LINE)
+    const ib = line.querySelector('span[style]') as HTMLElement;
+    const afterIb = getNextLineSibling(ib, line)!;
 
     // assert
     expect(isToken(afterIb)).toBe(true);
-    expect(isPadded(afterIb)).toBe(true);
-    expect(afterIb.textContent).toBe(' bbb ');
+    expect(isPadded(afterIb)).toBe(false);
+    expect(afterIb.textContent).toBe('bbb ');
   });
 
   test('TOKEN after TRANSPARENT_BLOCK is not padded (text absorbed into block)', () => {
@@ -536,13 +539,16 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
   });
 
   test('inline-block at middle of LINE', () => {
-    // arrange
+    // arrange — trailing " bbb" is wrapped in IMPLICIT_LINE by tagImplicitLines
+    // (inline-block is not INLINE_FLOW), so we pass the LINE explicitly for
+    // backward traversal to scope to the full p-tag.
     const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(inlineBlock, 'nested content'), ' bbb'));
-    const first = tokenizeLine(byId(doc, 'p1'))!;
+    const line = byId(doc, 'p1');
+    const first = tokenizeLine(line)!;
 
     // act & assert — visited but not descended: shows as opaque element
-    expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
+    expect(collectForward(first, line)).toEqual(['aaa', '[span]', 'bbb']);
+    expect(collectBackward(walkToLast(first, line), line)).toEqual(['bbb', '[span]', 'aaa']);
   });
 
   test('inline-block at start of LINE', () => {

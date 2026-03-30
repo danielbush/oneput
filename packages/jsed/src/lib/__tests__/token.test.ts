@@ -401,9 +401,9 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit!.textContent!.trim()).toBe('bbb');
   });
 
-  test('text after an inline-block TRANSPARENT_BLOCK is not wrapped', () => {
-    // arrange — inline-block starts with "inline" so tagImplicitLines skips it.
-    // The element sits on the same visual line as surrounding text.
+  test('text after an inline-block TRANSPARENT_BLOCK is wrapped', () => {
+    // arrange — inline-block is not INLINE_FLOW, so trailing text gets
+    // an IMPLICIT_LINE even though it's visually inline.
     const doc = makeRoot(
       div(
         { id: 'div1' },
@@ -421,7 +421,8 @@ describe('IMPLICIT_LINE creation', () => {
 
     // assert
     const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
-    expect(implicit).toBeNull();
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent!.trim()).toBe('bbb');
   });
 
   test('text after a normal block (OPAQUE_BLOCK) is wrapped', () => {
@@ -440,9 +441,9 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit!.textContent!.trim()).toBe('bbb');
   });
 
-  test('text after an inline-block (OPAQUE_BLOCK) is not wrapped', () => {
-    // arrange — inline-block without transparent class. Sits on the same
-    // visual line as surrounding text, so no IMPLICIT_LINE needed.
+  test('text after an inline-block (OPAQUE_BLOCK) is wrapped', () => {
+    // arrange — inline-block is not INLINE_FLOW, so trailing text gets
+    // an IMPLICIT_LINE even though it's visually inline.
     const doc = makeRoot(
       div(
         { id: 'div1' },
@@ -457,7 +458,8 @@ describe('IMPLICIT_LINE creation', () => {
 
     // assert
     const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
-    expect(implicit).toBeNull();
+    expect(implicit).not.toBeNull();
+    expect(implicit!.textContent!.trim()).toBe('bbb');
   });
 
   test("whitespace-only text between LINE's is ignored", () => {

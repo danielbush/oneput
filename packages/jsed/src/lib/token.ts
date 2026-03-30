@@ -619,11 +619,12 @@ export function tagImplicitLines(root: HTMLElement) {
       ) {
         const prev = sib.previousSibling;
         if (prev && (isLine(prev) || isIsland(prev))) {
-          // Only wrap after block-level elements that cause a visual line break.
-          // Inline-level LINE's (inline-block, inline-flex, etc.) and inline
-          // ISLAND's sit on the same visual line as the surrounding text.
-          const display = window.getComputedStyle(prev as HTMLElement).display;
-          if (!display.startsWith('inline')) {
+          // Wrap after any non-INLINE_FLOW element. INLINE_FLOW elements
+          // (display: inline / inline flow) sit in the same text run as
+          // surrounding content. Everything else (block, inline-block,
+          // inline-flex, etc.) breaks the text run and trailing text needs
+          // an IMPLICIT_LINE to be reachable by FOCUS.
+          if (!isInlineFlow(prev)) {
             const implicitLine = buildImplicitLine(sib);
             if (implicitLine) {
               sib = implicitLine.nextSibling;

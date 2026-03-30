@@ -428,9 +428,7 @@ describe('IMPLICIT_LINE creation', () => {
   test('text after a normal block (OPAQUE_BLOCK) is wrapped', () => {
     // arrange — a plain div with no transparent class is an OPAQUE_BLOCK.
     // Trailing text should be wrapped in IMPLICIT_LINE.
-    const doc = makeRoot(
-      div({ id: 'div1' }, div({ id: 'div2' }, 'nested'), ' bbb')
-    );
+    const doc = makeRoot(div({ id: 'div1' }, div({ id: 'div2' }, 'nested'), ' bbb'));
 
     // act
     tagImplicitLines(doc.root);

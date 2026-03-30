@@ -93,7 +93,7 @@ export class EditManager {
    * commanded to do usually by the user... (eg due to delete operation).
    */
   private handleTokenChange = async (tok: HTMLElement) => {
-    this.nav?.FOCUS(tok, { scrollIntoView: false });  // Let the cursor handle scrolling.
+    this.nav?.FOCUS(tok, { scrollIntoView: false }); // Let the cursor handle scrolling.
     if (isToken(tok)) {
       this.userInput.enable(true);
       this.userInput.focus();

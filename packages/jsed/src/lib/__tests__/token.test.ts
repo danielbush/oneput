@@ -40,8 +40,9 @@ describe('tokenizeLine', () => {
   });
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {
-    // arrange — "outer" after div2 is wrapped in IMPLICIT_LINE by tagImplicitLines.
-    // tokenizeLine recurses into TRANSPARENT_BLOCK's (div2 marked transparent, and IMPLICIT_LINE).
+    // arrange — trailing text after a TRANSPARENT_BLOCK now stays in the same
+    // LINE, so tokenizeLine recurses into div2 and then tokenizes "outer" on
+    // the outer LINE directly.
     const doc = makeRoot(
       div(
         { id: 'div1' }, //
@@ -54,11 +55,15 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(div1);
 
-    // assert — first TOKEN is "nested" (inside div2), "outer" is in IMPLICIT_LINE
+    // assert — first TOKEN is "nested" (inside div2), "outer" remains directly
+    // under the outer LINE
     expect(first).not.toBeNull();
     expect(first!.textContent!.trim()).toBe('nested');
-    const implicit = div1.querySelector(`.${JSED_IMPLICIT_CLASS}`);
-    expect(implicit!.querySelector('.jsed-token')!.textContent!.trim()).toBe('outer');
+    expect(div1.querySelector(`.${JSED_IMPLICIT_CLASS}`)).toBeNull();
+    const outerTokens = Array.from(div1.children).filter((child) =>
+      child.classList.contains('jsed-token')
+    );
+    expect(outerTokens[0]!.textContent!.trim()).toBe('outer');
   });
 
   test('text before NESTED_LINE: <div>outer<div>nested</div></div>', () => {
@@ -117,7 +122,8 @@ describe('tokenizeLine', () => {
   });
 
   test('nested div at middle: <div>aaa <div>nested</div> bbb</div>', () => {
-    // arrange — "bbb" after the nested div is wrapped in IMPLICIT_LINE
+    // arrange — trailing text after a TRANSPARENT_BLOCK now stays directly on
+    // the outer LINE rather than moving into an IMPLICIT_LINE.
     const doc = makeRoot(
       div(
         { id: 'div1' },
@@ -131,13 +137,14 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLine(div1);
 
-    // assert — tokenizeLine should tokenize both "aaa" and "bbb" (inside IMPLICIT_LINE)
+    // assert — tokenizeLine should tokenize both "aaa" and "bbb" on the outer LINE
     expect(first).not.toBeNull();
     expect(first!.textContent!.trim()).toBe('aaa');
-    const implicit = div1.querySelector(`.${JSED_IMPLICIT_CLASS}`);
-    expect(implicit).not.toBeNull();
-    expect(implicit!.querySelector('.jsed-token')).not.toBeNull();
-    expect(implicit!.querySelector('.jsed-token')!.textContent!.trim()).toBe('bbb');
+    expect(div1.querySelector(`.${JSED_IMPLICIT_CLASS}`)).toBeNull();
+    const outerTokens = Array.from(div1.children).filter((child) =>
+      child.classList.contains('jsed-token')
+    );
+    expect(outerTokens[1]!.textContent!.trim()).toBe('bbb');
   });
 
   describe('SHALLOW_TOKENIZATION', () => {
@@ -385,9 +392,9 @@ describe('IMPLICIT_LINE creation', () => {
     expect(implicit).toBeNull();
   });
 
-  test('text after a TRANSPARENT_BLOCK is wrapped', () => {
-    // arrange — a div marked jsed-cursor-transparent is still a LINE,
-    // so trailing text should be wrapped in IMPLICIT_LINE.
+  test('text after a TRANSPARENT_BLOCK is not wrapped', () => {
+    // arrange — a TRANSPARENT_BLOCK stays part of the containing LINE for
+    // trailing text purposes, so no IMPLICIT_LINE is created.
     const doc = makeRoot(
       div({ id: 'div1' }, div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'), ' bbb')
     );
@@ -397,13 +404,12 @@ describe('IMPLICIT_LINE creation', () => {
 
     // assert
     const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
-    expect(implicit).not.toBeNull();
-    expect(implicit!.textContent!.trim()).toBe('bbb');
+    expect(implicit).toBeNull();
   });
 
-  test('text after an inline-block TRANSPARENT_BLOCK is wrapped', () => {
-    // arrange — inline-block is not INLINE_FLOW, so trailing text gets
-    // an IMPLICIT_LINE even though it's visually inline.
+  test('text after an inline-block TRANSPARENT_BLOCK is not wrapped', () => {
+    // arrange — TRANSPARENT_BLOCK wins here too, so trailing text stays on the
+    // same LINE instead of being moved into an IMPLICIT_LINE.
     const doc = makeRoot(
       div(
         { id: 'div1' },
@@ -421,8 +427,7 @@ describe('IMPLICIT_LINE creation', () => {
 
     // assert
     const implicit = byId(doc, 'div1').querySelector(`.${JSED_IMPLICIT_CLASS}`);
-    expect(implicit).not.toBeNull();
-    expect(implicit!.textContent!.trim()).toBe('bbb');
+    expect(implicit).toBeNull();
   });
 
   test('text after a normal block (OPAQUE_BLOCK) is wrapped', () => {

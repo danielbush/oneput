@@ -59,7 +59,17 @@ export class EditManager {
       const line = getLine(firstToken);
       this.nav.FOCUS(line, { scrollIntoView: false }); // Let the cursor handle scrolling.
       this.userInput.focus();
-      this.#setCursor(firstToken, line);
+      if (!this.cursor) {
+        this.cursor = TokenCursor.create({
+          document: this.document,
+          token: firstToken,
+          onTokenChange: this.handleTokenChange,
+          onError: this.handleCursorError
+        });
+        this.inputManager = InputManager.create(this.nav!, this.cursor, this.userInput);
+      } else {
+        this.cursor.setToken(firstToken); // calls handleTokenChange
+      }
       return ok(undefined);
     }
 
@@ -136,7 +146,7 @@ export class EditManager {
     if (evt.targetType === 'TOKEN') {
       // Exit and focus on new parent if TOKEN is in a different LINE.
       const parent = token.getParent(evt.token);
-      const tokenBelongsToCursorLine = this.cursor.getLine().contains(parent);
+      const tokenBelongsToCursorLine = getLine(this.cursor.getToken()).contains(parent);
       if (!tokenBelongsToCursorLine) {
         this.onExit?.({ focusElement: parent });
         return false;
@@ -155,20 +165,4 @@ export class EditManager {
   private handleCursorError = (err: TokenCursorError) => {
     this.onError(err);
   };
-
-  #setCursor(tok: HTMLElement, line: HTMLElement) {
-    if (!this.cursor) {
-      this.cursor = TokenCursor.create({
-        document: this.document,
-        token: tok,
-        line,
-        onTokenChange: this.handleTokenChange,
-        onError: this.handleCursorError
-      });
-      this.inputManager = InputManager.create(this.nav!, this.cursor, this.userInput);
-    } else {
-      this.cursor.setToken(tok); // calls handleTokenChange
-    }
-    return this.cursor;
-  }
 }

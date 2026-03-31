@@ -143,9 +143,11 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
     if (isToken(line)) {
       continue;
     }
-    // Recurse into TOKEN's, INLINE_FLOW's (isInlineFlow && !isIsland), and TRANSPARENT_BLOCK's.
+    // Recurse into TOKEN's, INLINE_FLOW's (isInlineFlow && !isIsland),
+    // IMPLICIT_LINE's, and TRANSPARENT_BLOCK's.
     if (
       isToken(child) ||
+      isImplicitLine(child) ||
       (isFocusable(child) && !isIsland(child) && isInlineFlow(child)) ||
       isTransparentBlock(child)
     ) {
@@ -163,6 +165,8 @@ function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
 /**
  * Tokenize a LINE — recurses into TRANSPARENT_BLOCK's but not OPAQUE_BLOCK's
  * or ISLAND's. Returns the first TOKEN created, or null if nothing to tokenize.
+ *
+ * Part of SHALLOW_TOKENIZATION strategy.
  */
 export function tokenizeLine(el: HTMLElement): HTMLElement | null {
   if (!isFocusable(el)) {
@@ -201,7 +205,7 @@ export function quickDescend(el: HTMLElement): HTMLElement | null {
       const nested = quickDescend(sib);
       if (nested) return nested;
     }
-    sib = getNextLineSibling(sib, line);
+    sib = getNextLineSibling(sib);
   }
 
   return null;

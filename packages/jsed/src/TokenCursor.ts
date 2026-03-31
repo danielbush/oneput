@@ -78,7 +78,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
       return;
     }
 
-    const nextToken = getNextLineSibling(this.getToken(), this.getLine());
+    const nextToken = getNextLineSibling(this.getToken());
     if (nextToken) {
       this.setTokenInternal(nextToken);
     }
@@ -90,7 +90,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
       return;
     }
 
-    const prevToken = getPreviousLineSibling(this.getToken(), this.getLine());
+    const prevToken = getPreviousLineSibling(this.getToken());
     if (prevToken) {
       this.setTokenInternal(prevToken);
     }
@@ -142,7 +142,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
    */
   toggleCollapsePrevious() {
     if (!this.isOnToken()) return false;
-    const prev = getPreviousLineSibling(this.getToken(), this.getLine());
+    const prev = getPreviousLineSibling(this.getToken());
     if (!prev) {
       return false;
     }

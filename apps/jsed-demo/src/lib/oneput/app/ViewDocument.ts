@@ -69,7 +69,7 @@ export class ViewDocument implements AppObject {
     this.ctl.app.run(
       EditDocument.create(this.ctl, {
         document: this.document,
-        initial,
+        initial
       })
     );
   };

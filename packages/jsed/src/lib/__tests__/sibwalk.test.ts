@@ -16,33 +16,30 @@ function identify(el: HTMLElement): string {
 }
 
 /** Collect all LINE_SIBLING's forward using getNextLineSibling. */
-function collectForward(first: HTMLElement, line?: HTMLElement): string[] {
-  const ln = line ?? getLine(first);
+function collectForward(first: HTMLElement): string[] {
   const result: string[] = [identify(first)];
   let cur: HTMLElement | null = first;
-  while ((cur = getNextLineSibling(cur, ln))) {
+  while ((cur = getNextLineSibling(cur))) {
     result.push(identify(cur));
   }
   return result;
 }
 
 /** Collect all LINE_SIBLING's backward using getPreviousLineSibling. */
-function collectBackward(last: HTMLElement, line?: HTMLElement): string[] {
-  const ln = line ?? getLine(last);
+function collectBackward(last: HTMLElement): string[] {
   const result: string[] = [identify(last)];
   let cur: HTMLElement | null = last;
-  while ((cur = getPreviousLineSibling(cur, ln))) {
+  while ((cur = getPreviousLineSibling(cur))) {
     result.push(identify(cur));
   }
   return result;
 }
 
 /** Walk forward to the last LINE_SIBLING. */
-function walkToLast(first: HTMLElement, line?: HTMLElement): HTMLElement {
-  const ln = line ?? getLine(first);
+function walkToLast(first: HTMLElement): HTMLElement {
   let cur = first;
   let next: HTMLElement | null;
-  while ((next = getNextLineSibling(cur, ln))) {
+  while ((next = getNextLineSibling(cur))) {
     cur = next;
   }
   return cur;
@@ -141,8 +138,8 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR traverses through nested div (TRANSPARENT_BLOCK)
-    expect(collectForward(first, div1)).toEqual(['aaa', 'nested', 'bbb']);
-    expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', 'nested', 'aaa']);
+    expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'nested', 'aaa']);
   });
 
   test('floated element is a LINE (OPAQUE_BLOCK)', () => {
@@ -162,8 +159,8 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
     // assert — floated span is OPAQUE_BLOCK (visited, not descended),
-    expect(collectForward(first, div1)).toEqual(['aaa', '[span]', 'bbb']);
-    expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', '[span]', 'aaa']);
+    expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
   });
 
   // ISLAND traversal covered thoroughly in '(1) ISLAND' describe block below
@@ -257,7 +254,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 
     // act — find the TOKEN after the ISLAND
     const katex = byId(doc, 'p1').querySelector('.katex') as HTMLElement;
-    const afterIsland = getNextLineSibling(katex, byId(doc, 'p1'))!;
+    const afterIsland = getNextLineSibling(katex)!;
 
     // assert
     expect(isToken(afterIsland)).toBe(true);
@@ -313,7 +310,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 
     // act — find the TOKEN after the inline-block (inside IMPLICIT_LINE)
     const ib = line.querySelector('span[style]') as HTMLElement;
-    const afterIb = getNextLineSibling(ib, line)!;
+    const afterIb = getNextLineSibling(ib)!;
 
     // assert
     expect(isToken(afterIb)).toBe(true);
@@ -358,7 +355,7 @@ describe('PADDED_TOKEN: TOKEN after ISLAND gets leading space', () => {
 
     // act
     const katexEls = byId(doc, 'p1').querySelectorAll('.katex');
-    const afterSecond = getNextLineSibling(katexEls[1] as HTMLElement, byId(doc, 'p1'))!;
+    const afterSecond = getNextLineSibling(katexEls[1] as HTMLElement)!;
 
     // assert
     expect(isToken(afterSecond)).toBe(true);
@@ -390,7 +387,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR descends into the nested div and IMPLICIT_LINE
-    expect(collectForward(first, line)).toEqual(['aaa', 'nested', 'bbb']);
+    expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
   });
 
   test('nested div at start of LINE: <div><div>nested</div> aaa bbb</div>', () => {
@@ -405,7 +402,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const innerToken = byId(doc, 'inner').querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR descends through nested div and IMPLICIT_LINE
-    expect(collectForward(innerToken, line)).toEqual(['nested', 'aaa', 'bbb']);
+    expect(collectForward(innerToken)).toEqual(['nested', 'aaa', 'bbb']);
   });
 
   test('nested div at end of LINE: <div>aaa bbb <div>nested</div></div>', () => {
@@ -421,7 +418,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert
-    expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested']);
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested']);
   });
 
   test('nested div inside INLINE_FLOW: <div>aaa <em>bbb <div>nested</div> ccc</em> ddd</div>', () => {
@@ -442,7 +439,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — descend through INLINE_FLOW, then nested div, then IMPLICIT_LINE for "ccc"
-    expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested', 'ccc', 'ddd']);
   });
 
   test('deeply nested blocks: <div>aaa <div>bbb <div>ccc</div> ddd</div> eee</div>', () => {
@@ -468,7 +465,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR descends through all nested levels and IMPLICIT_LINE's
-    expect(collectForward(first, line)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
+    expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
   });
 
   test('inline-block at middle of LINE', () => {
@@ -485,7 +482,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert
-    expect(collectForward(first, line)).toEqual(['aaa', 'inner', 'bbb']);
+    expect(collectForward(first)).toEqual(['aaa', 'inner', 'bbb']);
   });
 
   test('nested block containing only an ANCHOR', () => {
@@ -506,7 +503,7 @@ describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
     // act & assert — CURSOR traverses: aaa, (anchor inside inner div), bbb (in IMPLICIT_LINE)
     const siblings: HTMLElement[] = [first];
     let cur: HTMLElement | null = first;
-    while ((cur = getNextLineSibling(cur, line))) {
+    while ((cur = getNextLineSibling(cur))) {
       siblings.push(cur);
     }
     expect(siblings.length).toBe(3);
@@ -534,8 +531,8 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
     const first = line.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — inner div is visited as opaque, "nested content" is not descended into
-    expect(collectForward(first, line)).toEqual(['aaa', '[div]', 'bbb']);
-    expect(collectBackward(walkToLast(first, line), line)).toEqual(['bbb', '[div]', 'aaa']);
+    expect(collectForward(first)).toEqual(['aaa', '[div]', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[div]', 'aaa']);
   });
 
   test('inline-block at middle of LINE', () => {
@@ -547,8 +544,8 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
     const first = tokenizeLine(line)!;
 
     // act & assert — visited but not descended: shows as opaque element
-    expect(collectForward(first, line)).toEqual(['aaa', '[span]', 'bbb']);
-    expect(collectBackward(walkToLast(first, line), line)).toEqual(['bbb', '[span]', 'aaa']);
+    expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
+    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
   });
 
   test('inline-block at start of LINE', () => {
@@ -559,7 +556,7 @@ describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
     const opaque = line.querySelector('span[style]') as HTMLElement;
 
     // act & assert — opaque element is the first LINE_SIBLING
-    expect(collectForward(opaque, line)).toEqual(['[span]', 'aaa', 'bbb']);
+    expect(collectForward(opaque)).toEqual(['[span]', 'aaa', 'bbb']);
   });
 
   test('inline-block at end of LINE', () => {

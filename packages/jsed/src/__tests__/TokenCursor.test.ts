@@ -3,7 +3,6 @@ import { makeRoot, p, div, em, span, identifyCursor } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue, isPadded, quickDescend } from '../lib/token.js';
-import { getLine } from '../lib/sibwalk.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,
@@ -16,14 +15,13 @@ import {
  */
 const inlineStyle = { style: 'display:inline;' };
 
-function createCursor(doc: JsedDocument, tok: HTMLElement, line?: HTMLElement) {
+function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
 
   const cursor = TokenCursor.create({
     document: doc,
     token: tok,
-    line: line ?? getLine(tok),
     onTokenChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)
   });
@@ -34,7 +32,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement, line?: HTMLElement) {
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
   const firstToken = quickDescend(el)!;
-  return createCursor(doc, firstToken, el);
+  return createCursor(doc, firstToken);
 }
 
 describe('TokenCursor motion', () => {

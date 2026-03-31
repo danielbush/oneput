@@ -5,17 +5,7 @@
  * imports from taxonomy.ts and adds traversal logic on top.
  */
 
-import {
-  isIgnorable,
-  isFocusable,
-  isIsland,
-  isToken,
-  isInlineFlow,
-  isImplicitLine,
-  isLine,
-  isTransparentBlock,
-  isLineSibling
-} from './taxonomy.js';
+import { isIgnorable, isToken, isLine, isCursorTransparent, isLineSibling } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
 /**
@@ -76,11 +66,11 @@ export function getNextTokenSibling(el: HTMLElement): HTMLElement | null {
  * Used by FOCUS-level code (Nav). CURSOR-level code should use an explicitly
  * stored LINE rather than calling this per-hop.
  */
-export function getLine(el: ChildNode): HTMLElement {
+export function getLine(el: Node): HTMLElement {
   if (!el) {
     throw new Error(`getLine: element is null`);
   }
-  for (let p: ParentNode | ChildNode | null = el; ; p = p?.parentNode) {
+  for (let p: Node | null = el; ; p = p?.parentNode) {
     if (!p) {
       throw new Error(`getLine: expected parentNode to exist`);
     }
@@ -91,29 +81,26 @@ export function getLine(el: ChildNode): HTMLElement {
   throw new Error(`getLine: end of for-loop`);
 }
 
+export function getParentLine(el: Node): HTMLElement {
+  if (!el.parentNode) {
+    throw new Error(`getParentLine: parentNode is null`);
+  }
+  return getLine(el.parentNode);
+}
+
 export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
   const line1 = getLine(tok1);
   const line2 = getLine(tok2);
   return line1 === line2;
 }
 
-/** Descend predicate for LINE_SIBLING traversal. */
-function canDescendLineSibling(n: ParentNode | ChildNode): boolean {
-  // INLINE_FLOW: focusable, not island, not implicit-line, inline-flow display
-  if (isFocusable(n) && !isIsland(n) && !isImplicitLine(n) && isInlineFlow(n)) return true;
-  if (isTransparentBlock(n)) {
-    return true;
-  }
-  return false;
-}
-
 /**
  * Get previous LINE_SIBLING within `line`.
  */
-export function getPreviousLineSibling(el: HTMLElement, line: HTMLElement): HTMLElement | null {
-  for (const prev of findPreviousNode(el, line, {
+export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
+  for (const prev of findPreviousNode(el, getParentLine(el), {
     visit: isLineSibling,
-    descend: canDescendLineSibling
+    descend: isCursorTransparent
   })) {
     return prev as HTMLElement;
   }
@@ -123,10 +110,10 @@ export function getPreviousLineSibling(el: HTMLElement, line: HTMLElement): HTML
 /**
  * Get next LINE_SIBLING from `el` within `line`.
  */
-export function getNextLineSibling(el: HTMLElement, line: HTMLElement): HTMLElement | null {
-  for (const next of findNextNode(el, line, {
+export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
+  for (const next of findNextNode(el, getParentLine(el), {
     visit: isLineSibling,
-    descend: canDescendLineSibling
+    descend: isCursorTransparent
   })) {
     return next as HTMLElement;
   }
@@ -140,7 +127,7 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   for (const node of findNextNode(line, line, {
     visit: isLineSibling,
     // Descend `line`.
-    descend: (n) => n === line || canDescendLineSibling(n)
+    descend: (n) => n === line || isCursorTransparent(n)
   })) {
     return node as HTMLElement;
   }

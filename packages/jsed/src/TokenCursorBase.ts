@@ -20,8 +20,6 @@ export type TokenCursorError =
 export type TokenCursorBaseParams = {
   document: JsedDocument;
   token: HTMLElement;
-  /** The LINE determined at entry time — used as the ceiling for CURSOR traversal. */
-  line: HTMLElement;
   onTokenChange: (token: HTMLElement) => void;
   onError: (err: TokenCursorError) => void;
 };
@@ -32,14 +30,12 @@ export type TokenCursorBaseParams = {
  */
 export abstract class TokenCursorBase {
   #token: HTMLElement;
-  #line: HTMLElement;
   #document: JsedDocument;
   #onTokenChange: (token: HTMLElement) => void;
   protected onError: (err: TokenCursorError) => void;
 
   constructor(params: TokenCursorBaseParams) {
     this.#token = params.token; // ts needs this before #setToken
-    this.#line = params.line;
     this.#document = params.document;
     this.#onTokenChange = params.onTokenChange;
     this.onError = params.onError;
@@ -48,11 +44,6 @@ export abstract class TokenCursorBase {
 
   getDocument() {
     return this.#document;
-  }
-
-  /** The LINE determined at entry time — ceiling for CURSOR traversal. */
-  getLine() {
-    return this.#line;
   }
 
   // #region Token access

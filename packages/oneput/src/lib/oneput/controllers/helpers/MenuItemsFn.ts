@@ -10,6 +10,10 @@ export class MenuItemsFnController {
     return new MenuItemsFnController(ctl);
   }
 
+  public static createNull(ctl: Controller) {
+    return new MenuItemsFnController(ctl);
+  }
+
   private disableMenuItemsFn = false;
   private defaultMenuItemsFn?: MenuItemsFn;
   private removeMenuItemsListener?: () => void;

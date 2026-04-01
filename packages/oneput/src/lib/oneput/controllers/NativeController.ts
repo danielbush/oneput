@@ -16,13 +16,13 @@ export class NativeController {
   start() {
     if (this.started) return;
     this.started = true;
-    this.ctl.window.addEventListener('message', (evt: MessageEvent) => {
+    window.addEventListener('message', (evt: MessageEvent) => {
       if (evt.data?.type === 'test') {
         this.ctl.notify(evt.data.payload.message, { duration: 3000 });
       }
       if (evt.data?.type === 'insertImage') {
         const { dataUrl, fileName } = evt.data.payload;
-        const doc = this.ctl.window.document;
+        const doc = window.document;
         const img = doc.createElement('img');
         img.src = dataUrl;
         img.alt = fileName;

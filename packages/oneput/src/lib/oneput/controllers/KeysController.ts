@@ -30,6 +30,10 @@ export class KeysController {
     return new KeysController(ctl);
   }
 
+  public static createNull(ctl: Controller) {
+    return new KeysController(ctl);
+  }
+
   constructor(
     private ctl: Controller,
     private unsubscribe: () => void = () => {}

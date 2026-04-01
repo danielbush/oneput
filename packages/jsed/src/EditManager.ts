@@ -27,10 +27,27 @@ export class EditManager {
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
   }): EditManager {
-    return new EditManager(document, userInput, onError);
+    let instance: EditManager;
+    const nav = Nav.create(document, (evt) => instance.handleFocusRequest(evt));
+    instance = new EditManager(document, userInput, onError, nav);
+    return instance;
   }
 
-  readonly nav: Nav;
+  static createNull({
+    document,
+    userInput,
+    onError
+  }: {
+    document: JsedDocument;
+    userInput: UserInput;
+    onError: (err: EditManagerError) => void;
+  }): EditManager {
+    let instance: EditManager;
+    const nav = Nav.createNull(document, (evt) => instance.handleFocusRequest(evt));
+    instance = new EditManager(document, userInput, onError, nav);
+    return instance;
+  }
+
   cursor?: ITokenCursor;
   private inputManager?: InputManager;
   private mode: EditManagerMode = 'view';
@@ -38,10 +55,9 @@ export class EditManager {
   constructor(
     private document: JsedDocument,
     private userInput: UserInput,
-    private onError: (err: EditManagerError) => void
-  ) {
-    this.nav = Nav.create(this.document, this.handleFocusRequest);
-  }
+    private onError: (err: EditManagerError) => void,
+    readonly nav: Nav
+  ) {}
 
   getMode(): EditManagerMode {
     return this.mode;

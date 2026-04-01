@@ -46,7 +46,6 @@ export class Nav {
    * FOCUSABLE for that TOKEN.
    */
   #FOCUS?: HTMLElement;
-  #focusController?: FocusController;
   #connected = false;
 
   get document(): JsedDocument {
@@ -56,9 +55,9 @@ export class Nav {
   constructor(
     private doc: JsedDocument,
     private elementIndicator: ElementIndicator,
-    focusController?: FocusController
+    private focusController?: FocusController
   ) {
-    this.#focusController = focusController;
+    this.focusController = focusController;
     this.FOCUS(doc.root);
   }
 
@@ -258,7 +257,7 @@ export class Nav {
     // If there are no listeners, we'll assume ok = true.
     if (isFocusable(el)) {
       const ok =
-        this.#focusController?.({
+        this.focusController?.({
           type: 'FOCUS_REQUEST',
           targetType: 'FOCUSABLE',
           element: el
@@ -271,7 +270,7 @@ export class Nav {
     if (isToken(el as Node)) {
       const htmlEl = el as HTMLElement;
       const ok =
-        this.#focusController?.({
+        this.focusController?.({
           type: 'FOCUS_REQUEST',
           targetType: 'TOKEN',
           token: htmlEl,

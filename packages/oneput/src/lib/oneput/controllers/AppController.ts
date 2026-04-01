@@ -3,11 +3,25 @@ import type { AppObject, UIFlags } from '../types.js';
 import { AppVal } from './helpers/AppVal.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
+export type AppChange = {
+  previous: AppObject | null;
+  current: AppObject | null;
+};
+
+export type AppChangeTracker = {
+  data: AppChange[];
+  stop: () => void;
+};
+
 /**
  * Manages AppObject's . One AppObject controls Oneput at a time.
  */
 export class AppController {
   public static create(ctl: Controller) {
+    return new AppController(ctl);
+  }
+
+  public static createNull(ctl: Controller) {
     return new AppController(ctl);
   }
 
@@ -22,16 +36,33 @@ export class AppController {
 
   private appParents: AppVal[] = [];
   private _current: AppVal | null = null;
+  private appChangeListeners = new Set<(change: AppChange) => void>();
   private onBack?: () => void;
   private disableGoBack = false;
   private get current() {
     return this._current || null;
   }
   private set current(appVal: AppVal | null) {
-    // console.warn('currentApp is now', app);
+    const previous = this._current?.app ?? null;
     this._current = appVal;
+    const current = appVal?.app ?? null;
+    this.appChangeListeners.forEach((listener) => listener({ previous, current }));
   }
   private unsubscribeMenuItemFocus?: () => void;
+
+  trackAppChanges(): AppChangeTracker {
+    const data: AppChange[] = [];
+    const listener = (change: AppChange) => {
+      data.push(change);
+    };
+    this.appChangeListeners.add(listener);
+    return {
+      data,
+      stop: () => {
+        this.appChangeListeners.delete(listener);
+      }
+    };
+  }
 
   /**
    * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.

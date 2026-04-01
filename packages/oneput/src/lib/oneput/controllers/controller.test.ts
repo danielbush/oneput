@@ -1,12 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { Window as HappyWindow } from 'happy-dom';
 import { Controller } from './controller.js';
 
-function createNull(props: Parameters<typeof Controller.createNull>[1] = {}) {
-  return Controller.createNull(new HappyWindow() as unknown as Window, props);
+function createNull(props: Parameters<typeof Controller.createNull>[0] = {}) {
+  return Controller.createNull(props);
 }
 
 describe('Controller', () => {
+  describe('createNull', () => {
+    it('tracks app changes without spying', () => {
+      // arrange
+      const ctl = createNull();
+      const appChanges = ctl.app.trackAppChanges();
+      const appObject = {
+        onStart: () => {}
+      };
+
+      // act
+      ctl.app.run(appObject);
+
+      // assert
+      expect(appChanges.data).toEqual([{ previous: null, current: appObject }]);
+    });
+  });
+
   describe('notify', () => {
     it('injects notification UI into currentProps', () => {
       // arrange
@@ -39,7 +55,7 @@ describe('Controller', () => {
       // arrange
       const ctl = createNull();
       const events: Event[] = [];
-      ctl.window.addEventListener('oneput-toggle-hide', (e) => events.push(e));
+      window.addEventListener('oneput-toggle-hide', (e) => events.push(e));
 
       // act
       ctl.toggleHide();

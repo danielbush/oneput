@@ -20,20 +20,20 @@ export class Controller {
       app: AppController.create(controller),
       native: NativeController.create(controller)
     });
-    return new Controller(currentProps, window, createControllers);
+    return new Controller(currentProps, createControllers);
   }
 
-  static createNull(win: Window, props: Partial<OneputProps> = {}) {
+  static createNull(props: Partial<OneputProps> = {}) {
     const currentProps: OneputProps = { menuOpen: false, ...props };
     const createControllers = (controller: Controller) => ({
-      menu: MenuController.create(controller),
-      input: InputController.create(controller),
-      keys: KeysController.create(controller),
-      ui: UIController.create(controller),
-      app: AppController.create(controller),
-      native: NativeController.create(controller)
+      menu: MenuController.createNull(controller),
+      input: InputController.createNull(controller),
+      keys: KeysController.createNull(controller),
+      ui: UIController.createNull(controller),
+      app: AppController.createNull(controller),
+      native: NativeController.createNull(controller)
     });
-    return new Controller(currentProps, win, createControllers);
+    return new Controller(currentProps, createControllers);
   }
 
   public events = new InternalEventEmitter();
@@ -49,7 +49,6 @@ export class Controller {
    */
   constructor(
     public currentProps: OneputProps,
-    public window: Window,
     createControllers: (ctl: Controller) => {
       menu: MenuController;
       input: InputController;
@@ -69,7 +68,7 @@ export class Controller {
   }
 
   toggleHide() {
-    this.window.dispatchEvent(new Event('oneput-toggle-hide'));
+    window.dispatchEvent(new Event('oneput-toggle-hide'));
   }
 
   private notification = Notification.create(this);

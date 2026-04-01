@@ -34,11 +34,11 @@ export class EditDocument implements AppObject {
 
   onStart = () => {
     setDocument(this.document);
-    this.editManager.connect();
+    this.editManager.nav.connect();
   };
 
   onResume = () => {
-    this.editManager.connect();
+    this.editManager.nav.connect();
   };
 
   onExit = () => {

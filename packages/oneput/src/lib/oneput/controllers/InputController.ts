@@ -9,6 +9,10 @@ export class InputController {
     return new InputController(ctl);
   }
 
+  public static createNull(ctl: Controller) {
+    return new InputController(ctl);
+  }
+
   constructor(private ctl: Controller) {
     this.ctl.currentProps.onInputChange = (evt) => {
       // Emit internal event for decoupled communication

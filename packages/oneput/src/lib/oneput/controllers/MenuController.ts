@@ -9,6 +9,11 @@ export class MenuController {
     return new MenuController(ctl, fn);
   }
 
+  public static createNull(ctl: Controller) {
+    const fn = MenuItemsFnController.createNull(ctl);
+    return new MenuController(ctl, fn);
+  }
+
   public currentMenu: CurrentMenu;
 
   constructor(

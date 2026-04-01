@@ -6,6 +6,10 @@ export class UIController {
     return new UIController(ctl);
   }
 
+  static createNull(ctl: Controller) {
+    return new UIController(ctl);
+  }
+
   constructor(private ctl: Controller) {}
 
   setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {

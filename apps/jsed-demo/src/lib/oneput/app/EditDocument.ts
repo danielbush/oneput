@@ -1,20 +1,18 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
+import { setDocument } from './_bindings.js';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { icons } from './_icons.js';
 
 export class EditDocument implements AppObject {
-  static create(ctl: Controller, params: { document: JsedDocument; initial: HTMLElement }) {
-    const instance = new EditDocument(
-      ctl,
-      params.initial,
-      EditManager.create({
-        document: params.document,
-        userInput: ctl.input,
-        onError: (err) => instance.handleEditError(err),
-        onExit: ({ focusElement: element }) => {
-          ctl.app.exit({ focusElement: element });
-        }
-      })
-    );
+  static create(ctl: Controller, params: { document: JsedDocument }) {
+    let instance: EditDocument;
+    const editManager = EditManager.create({
+      document: params.document,
+      userInput: ctl.input,
+      onError: (err) => instance.handleEditError(err)
+    });
+    instance = new EditDocument(ctl, params.document, editManager);
     return instance;
   }
 
@@ -23,7 +21,7 @@ export class EditDocument implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private initial: HTMLElement,
+    private document: JsedDocument,
     private editManager: EditManager
   ) {
     this.unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
@@ -35,14 +33,12 @@ export class EditDocument implements AppObject {
   }
 
   onStart = () => {
-    this.editManager.edit(this.initial).mapErr((err) => {
-      switch (err.type) {
-        case 'no-token-under-focus':
-          this.ctl.notify('No token under focus', { duration: 3000 });
-          this.ctl.app.exit();
-          break;
-      }
-    });
+    setDocument(this.document);
+    this.editManager.connect();
+  };
+
+  onResume = () => {
+    this.editManager.connect();
   };
 
   onExit = () => {
@@ -58,41 +54,29 @@ export class EditDocument implements AppObject {
   actions = {
     EXIT: {
       action: () => {
-        this.ctl.app.exit({ focusElement: this.editManager.nav?.getFocus() ?? undefined });
+        if (this.editManager.getMode() === 'editing') {
+          this.editManager.exitEditing();
+        }
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Stop editing, return to viewer',
+        description: 'Stop editing',
         when: { menuOpen: false }
       }
     },
     ENTER: {
       action: () => {
-        this.editManager.edit();
+        this.editManager.enterEditing().mapErr((err) => {
+          switch (err.type) {
+            case 'no-token-under-focus':
+              this.ctl.notify('No token under focus', { duration: 3000 });
+              break;
+          }
+        });
       },
       binding: {
         bindings: ['enter'],
-        description: 'Edit within the element under cursor',
-        when: { menuOpen: false }
-      }
-    },
-    NEXT_TOKEN: {
-      action: () => {
-        this.editManager.cursor?.moveNext();
-      },
-      binding: {
-        bindings: ['$mod+l'],
-        description: 'Move to next token',
-        when: { menuOpen: false }
-      }
-    },
-    PREV_TOKEN: {
-      action: () => {
-        this.editManager.cursor?.movePrevious();
-      },
-      binding: {
-        bindings: ['$mod+h'],
-        description: 'Move to previous token',
+        description: 'Edit first editable token',
         when: { menuOpen: false }
       }
     },
@@ -106,49 +90,75 @@ export class EditDocument implements AppObject {
         when: { menuOpen: false }
       }
     },
-    REC_NEXT: {
+    RIGHT: {
       action: () => {
-        if (!this.editManager.nav) return;
+        if (this.editManager.getMode() === 'editing') {
+          this.editManager.cursor?.moveNext();
+          return;
+        }
         this.editManager.nav.REC_NEXT();
       },
       binding: {
-        bindings: ['$mod+Shift+l', 'Shift+ArrowDown'],
-        description: 'Close editor and navigate to next element',
+        bindings: ['$mod+l', 'ArrowRight'],
+        description: 'Move to next token or element',
         when: { menuOpen: false }
       }
     },
-    REC_PREV: {
+    LEFT: {
       action: () => {
-        if (!this.editManager.nav) return;
+        if (this.editManager.getMode() === 'editing') {
+          this.editManager.cursor?.movePrevious();
+          return;
+        }
         this.editManager.nav.REC_PREV();
       },
       binding: {
-        bindings: ['$mod+Shift+h', 'Shift+ArrowUp'],
-        description: 'Close editor and navigate to previous element',
+        bindings: ['$mod+h', 'ArrowLeft'],
+        description: 'Move to previous token or element',
         when: { menuOpen: false }
       }
     },
-    SIB_NEXT: {
+    DOWN: {
       action: () => {
-        if (!this.editManager.nav) return;
         this.editManager.nav.SIB_NEXT();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
-        description: 'Close editor and navigate to next sibling',
+        description: 'Navigate to next sibling',
         when: { menuOpen: false }
       }
     },
-    SIB_PREV: {
+    UP: {
       action: () => {
-        if (!this.editManager.nav) return;
         this.editManager.nav.SIB_PREV();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
-        description: 'Close editor and navigate to previous sibling',
+        description: 'Navigate to previous sibling',
+        when: { menuOpen: false }
+      }
+    },
+    PARENT: {
+      action: () => {
+        this.editManager.nav.UP();
+      },
+      binding: {
+        bindings: ['$mod+u', '$mod+ArrowUp'],
+        description: 'Find next parent',
         when: { menuOpen: false }
       }
     }
   };
+
+  menu = () => ({
+    id: 'root',
+    items: [
+      stdMenuItem({
+        id: 'EDIT_FIRST',
+        textContent: 'Edit...',
+        action: this.actions.ENTER.action,
+        left: (b) => [b.icon(icons.Pencil)]
+      })
+    ]
+  });
 }

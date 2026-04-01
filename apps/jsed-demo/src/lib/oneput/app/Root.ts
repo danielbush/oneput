@@ -4,7 +4,7 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { TestDocService } from '$lib/jsed/services/TestDocService.js';
-import { ViewDocument } from './ViewDocument.js';
+import { EditDocument } from './EditDocument.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
@@ -12,7 +12,7 @@ export class Root implements AppObject {
       Layout: () => Layout.create(ctl),
       TestDocService: () => TestDocService.create(),
       JsedDocument: (root) => JsedDocument.create(root),
-      ViewDocument: (params) => ViewDocument.create(ctl, params)
+      EditDocument: (params) => EditDocument.create(ctl, params)
     });
   }
 
@@ -22,7 +22,7 @@ export class Root implements AppObject {
       Layout: () => Layout;
       TestDocService: () => TestDocService;
       JsedDocument: (root: HTMLElement) => JsedDocument;
-      ViewDocument: (params: { document: JsedDocument }) => ViewDocument;
+      EditDocument: (params: { document: JsedDocument }) => EditDocument;
     }
   ) {
     this.ctl.ui.setLayout(this.create.Layout());
@@ -40,7 +40,7 @@ export class Root implements AppObject {
           .loadTestDoc()
           .map((docRoot) => {
             this.ctl.app.run(
-              this.create.ViewDocument({
+              this.create.EditDocument({
                 document: this.create.JsedDocument(docRoot)
               })
             );

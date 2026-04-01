@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { EditManager } from '../EditManager.js';
-import { byId, makeRoot, p } from '../test/util.js';
+import { byId, frag, makeRoot, p } from '../test/util.js';
 import type { UserInput } from '../UserInput.js';
 
 function makeUserInput(): UserInput {
@@ -18,7 +18,29 @@ function makeUserInput(): UserInput {
 }
 
 describe('EditManager', () => {
-  it('places the CURSOR on the first TOKEN when editing from a FOCUSABLE', () => {
+  it('first focus quick-descends but stays in view mode', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+    const editManager = EditManager.create({
+      document: doc,
+      userInput: makeUserInput(),
+      onError: vi.fn()
+    });
+    editManager.nav.connect();
+    const p1 = byId(doc, 'p1');
+
+    // act
+    editManager.nav.REQUEST_FOCUS(p1);
+
+    // assert
+    expect(editManager.getMode()).toBe('view');
+    expect(editManager.nav.getFocus()).toBe(p1);
+    expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+
+    editManager.destroy();
+  });
+
+  it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
     const editManager = EditManager.create({
@@ -28,11 +50,68 @@ describe('EditManager', () => {
     });
 
     // act
-    const result = editManager.edit(byId(doc, 'p1'));
+    const result = editManager.enterEditing(byId(doc, 'p1'));
 
     // assert
     expect(result.isOk()).toBe(true);
+    expect(editManager.getMode()).toBe('editing');
     expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+
+    editManager.destroy();
+  });
+
+  it('clicking a token in another already-tokenized FOCUSABLE requires two interactions', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+    const editManager = EditManager.create({
+      document: doc,
+      userInput: makeUserInput(),
+      onError: vi.fn()
+    });
+    editManager.nav.connect();
+    const p1 = byId(doc, 'p1');
+    const p2 = byId(doc, 'p2');
+
+    editManager.nav.REQUEST_FOCUS(p1);
+    editManager.nav.REQUEST_FOCUS(p2);
+    const p1FirstToken = p1.querySelector('.jsed-token') as HTMLElement;
+
+    // act
+    editManager.nav.REQUEST_FOCUS(p1FirstToken);
+
+    // assert
+    expect(editManager.getMode()).toBe('view');
+    expect(editManager.nav.getFocus()).toBe(p1);
+
+    // act
+    editManager.nav.REQUEST_FOCUS(p1FirstToken);
+
+    // assert
+    expect(editManager.getMode()).toBe('editing');
+    expect(editManager.cursor?.getToken()).toBe(p1FirstToken);
+
+    editManager.destroy();
+  });
+
+  it('clicking a different element while editing exits to view mode and quick-descends it', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+    const editManager = EditManager.create({
+      document: doc,
+      userInput: makeUserInput(),
+      onError: vi.fn()
+    });
+    editManager.nav.connect();
+    editManager.enterEditing(byId(doc, 'p1'));
+    const p2 = byId(doc, 'p2');
+
+    // act
+    editManager.nav.REQUEST_FOCUS(p2);
+
+    // assert
+    expect(editManager.getMode()).toBe('view');
+    expect(editManager.nav.getFocus()).toBe(p2);
+    expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
 
     editManager.destroy();
   });

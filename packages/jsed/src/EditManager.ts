@@ -9,6 +9,7 @@ import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
+export type EditManagerMode = 'view' | 'editing';
 
 /**
  * Manages an edit session for a single document.
@@ -20,27 +21,31 @@ export class EditManager {
   static create({
     document,
     userInput,
-    onError,
-    onExit
+    onError
   }: {
     document: JsedDocument;
     userInput: UserInput;
     onError: (err: EditManagerError) => void;
-    onExit?: (result: { focusElement: HTMLElement }) => void;
   }): EditManager {
-    return new EditManager(document, userInput, onError, onExit);
+    return new EditManager(document, userInput, onError);
   }
 
-  nav?: Nav;
+  readonly nav: Nav;
   cursor?: ITokenCursor;
   private inputManager?: InputManager;
+  private mode: EditManagerMode = 'view';
 
   constructor(
     private document: JsedDocument,
     private userInput: UserInput,
-    private onError: (err: EditManagerError) => void,
-    private onExit?: (result: { focusElement: HTMLElement }) => void
-  ) {}
+    private onError: (err: EditManagerError) => void
+  ) {
+    this.nav = Nav.create(this.document, this.handleFocusRequest);
+  }
+
+  getMode(): EditManagerMode {
+    return this.mode;
+  }
 
   /**
    * Put CURSOR on first LINE associated with `initial`.
@@ -48,8 +53,7 @@ export class EditManager {
    * If `initial` is a TOKEN, the CURSOR will be placed on that token.
    * If `initial` is a FOCUSABLE, the CURSOR will be placed on the first token in the LINE.
    */
-  edit(initial?: HTMLElement): Result<void, EditManagerError> {
-    this.nav = this.nav ?? Nav.create(this.document, this.handleFocusRequest);
+  enterEditing(initial?: HTMLElement): Result<void, EditManagerError> {
     this.nav.connect();
     initial = initial ?? this.nav.getFocus() ?? undefined;
     if (!initial) {
@@ -72,15 +76,30 @@ export class EditManager {
       } else {
         this.cursor.setToken(firstToken); // calls handleTokenChange
       }
+      this.mode = 'editing';
       return ok(undefined);
     }
 
     return err({ type: 'no-token-under-focus' });
   }
 
+  exitEditing(params?: { focusElement?: HTMLElement; scrollIntoView?: boolean }) {
+    const focusElement = params?.focusElement ?? this.nav.getFocus() ?? undefined;
+    this.cursor?.destroy();
+    this.cursor = undefined;
+    this.userInput.setInputValue('');
+    this.inputManager = undefined;
+    this.mode = 'view';
+
+    if (focusElement) {
+      this.nav.FOCUS(focusElement, { scrollIntoView: params?.scrollIntoView ?? false });
+      token.quickDescend(focusElement);
+    }
+  }
+
   destroy() {
     this.cursor?.destroy();
-    this.nav?.destroy();
+    this.nav.destroy();
   }
 
   /**
@@ -89,7 +108,7 @@ export class EditManager {
    * @param {string} input What the user has typed into an html input/textarea
    */
   public handleInputChange = (input: string) => {
-    if (!this.cursor || !isToken(this.cursor.getToken())) return;
+    if (this.mode !== 'editing' || !this.cursor || !isToken(this.cursor.getToken())) return;
     this.inputManager?.handleInputChange(input);
     this.cursor?.handleInputChange(input);
   };
@@ -100,7 +119,7 @@ export class EditManager {
    * Pass this to the selection emitter after instantiation.
    */
   public handleSelectionChange = (selection: UserInputSelectionState) => {
-    if (!this.cursor || !isToken(this.cursor.getToken())) return;
+    if (this.mode !== 'editing' || !this.cursor || !isToken(this.cursor.getToken())) return;
     this.cursor?.handleSelectionChange(selection);
   };
 
@@ -134,23 +153,54 @@ export class EditManager {
    * When the user causes a FOCUS change (click, touch, key bindings)...
    */
   private handleFocusRequest = (evt: JsedFocusRequestEvent) => {
-    if (!this.cursor || !this.nav) {
+    if (this.mode === 'view') {
+      return this.handleFocusRequestInViewMode(evt);
+    }
+
+    return this.handleFocusRequestInEditingMode(evt);
+  };
+
+  private handleFocusRequestInViewMode = (evt: JsedFocusRequestEvent) => {
+    const currentFocus = this.nav.getFocus();
+
+    if (evt.targetType === 'FOCUSABLE') {
+      if (evt.element === currentFocus) {
+        this.enterEditing(evt.element).mapErr(this.onError);
+        return false;
+      }
+
+      token.quickDescend(evt.element);
+      return true;
+    }
+
+    if (evt.targetType === 'TOKEN') {
+      if (currentFocus?.contains(evt.token)) {
+        this.enterEditing(evt.token).mapErr(this.onError);
+        return false;
+      }
+
+      return true;
+    }
+
+    return true;
+  };
+
+  private handleFocusRequestInEditingMode = (evt: JsedFocusRequestEvent) => {
+    if (!this.cursor) {
       return false;
     }
 
     // FOCUS has been set to some FOCUSABLE...
     if (evt.targetType === 'FOCUSABLE') {
-      this.onExit?.({ focusElement: evt.element });
+      this.exitEditing({ focusElement: evt.element });
       return false;
     }
 
     // FOCUS has been set to a TOKEN...
     if (evt.targetType === 'TOKEN') {
-      // Exit and focus on new parent if TOKEN is in a different LINE.
       const parent = token.getParent(evt.token);
-      const tokenBelongsToCursorLine = getLine(this.cursor.getToken()).contains(parent);
-      if (!tokenBelongsToCursorLine) {
-        this.onExit?.({ focusElement: parent });
+      if (!this.cursor.isSameLine(evt.token)) {
+        this.exitEditing({ focusElement: parent });
         return false;
       }
 

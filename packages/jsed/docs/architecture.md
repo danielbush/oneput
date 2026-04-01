@@ -49,11 +49,16 @@ Tokenizing the whole document upfront would be expensive, so instead we tokenize
 
 ## Orchestration: EditManager
 
-`EditManager` is the top-level mediator. It takes a Nav and UserInput, and internally creates the TokenCursor and InputManager. It wires everything together so that:
+`EditManager` is the top-level mediator. It takes a JsedDocument and UserInput, creates a persistent Nav, and switches between two modes:
+
+- **view** — owns FOCUS only. First FOCUS on a FOCUSABLE runs `quickDescend` opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
+- **editing** — owns FOCUS plus TokenCursor and InputManager. TOKEN-level input flows through the CURSOR, and structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
+
+It wires everything together so that:
 
 - Key bindings trigger navigation and editing actions
 - Mouse clicks and touches route through REQUEST_FOCUS with a focus controller that tokenizes on the fly
-- Input changes flow through InputManager to the cursor to the document
+- Input changes flow through InputManager to the CURSOR to the document
 - TOKEN changes flow back to update FOCUS and the input element
 
 A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditManager and connects it to Oneput's bindings and input systems.
@@ -74,6 +79,5 @@ The top-level modules above delegate to lower-level utilities in `lib/`:
 
 Jsed uses Oneput's `AppObject` system to provide its UI. See `apps/jsed-demo/src/lib/oneput/app/` for examples:
 
-- `ViewDocument` — AppObject with navigation bindings (`when: { menuOpen: false }`) and an edit action
-- `EditDocument` — AppObject for token editing mode, wires up EditManager
+- `EditDocument` — single AppObject that stays mounted in both view and editing modes and wires bindings to EditManager
 - `_bindings.ts` — default bindings combining navigation (menu closed) and menu controls (menu open)

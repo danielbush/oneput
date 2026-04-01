@@ -2,42 +2,27 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
-# Lower priority
-
-## feat: CURSOR can seamlessly move to next or previous "sibling" LINE
-
-Drafted: 19-Mar-2026
-
-Not NESTED_LINE's.
-
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
 id: DETOKENIZE__WORK
 Drafted: 19-Mar-2026
+Updated: 1-Apr-2026
 
-I originally envisaged TokenManager would manage tokenizing and as a result would enforce SHALLOW_TOKENIZATION by figuring out when to tokenize and de-tokenize nodes based on where the CURSOR is located.  But in CURSOR_WALKS_NON_TOKENS__WORK the solution was to allow the CURSOR itself to lazy tokenize when encountering TRANSPARENT_BLOCK nodes within the CURSOR_LINE .
+In QUICK_DESCEND_ON_FOCUS__WORK we TOKENIZE on FOCUS which means just moving through the document could TOKENIZE substantial parts of it.  For large documents this will eventually affect browser performance.
 
-```ts
-  moveNext() {
-    if (this.isInsertingBefore()) {
-      this.clearMarkers();
-      return;
-    }
+Come up with a detokenization mechanism, perhaps one that is transparent to the cursor; the reason for attempting it this way is because I'm planning to support remote cursors (eg via operational transform), so how do we know what is safe to de-tokenize?  We have to check all the cursors to see where they are.
 
-    const nextToken = token.getNextLineSibling(this.getToken(), this.getLine(), {
-      onEnterBlockTransparent: this.lazyTokenize
-    });
-    if (nextToken) {
-      this.setTokenInternal(nextToken);
-    }
-  }
-```
+One way to do this might be to have DetokenizeManager instance listen to onTokenChange callback for each CURSOR ;  each cursor gives updates on their CURSOR_LINE (we maybe include that in the onTokenChange callback alongide the CURSOR TOKEN).
 
-- get CURSOR (TokenCursor) to tokenize the LINE next to or previous the CURSOR_LINE just before it moves on to it.
-- come up with a detokenization mechanism, perhaps one that is transparent to the cursor; the reason for attempting it this way is because I'm planning to support remote cursors (eg via operational transform), so how do we know what is safe to de-tokenize?  We have to check all the cursors to see where they are.
-  - One way to do this might be to have DetokenizeManager instance listen to onTokenChange callback for each CURSOR ;  each cursor gives updates on their CURSOR_LINE (we maybe inclue that in the onTokenChange callback alongide the CURSOR TOKEN.)
-- is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
+Is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
 
+# Lower priority
+
+## feat: CURSOR can move to the next LINE wants it has exhuasted the current LINE
+
+Drafted: 19-Mar-2026
+
+When the CURSOR can no longer get any more LINE_SIBLING's via moveNext, movePrevious, it should signal that it has exhausted the next or previous direction.  The editor (EditManager) should immediately look for the next LINE and quickDescend it, putting the CURSOR on the first LINE_SIBLING on this new LINE.
 
 ## feat: toggle token spacing
 

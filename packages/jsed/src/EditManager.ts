@@ -66,7 +66,7 @@ export class EditManager {
           onTokenChange: this.handleTokenChange,
           onError: this.handleCursorError
         });
-        this.inputManager = InputManager.create(this.nav!, this.cursor, this.userInput);
+        this.inputManager = InputManager.create(this.nav, this.cursor, this.userInput);
       } else {
         this.cursor.setToken(firstToken); // calls handleTokenChange
       }

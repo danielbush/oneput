@@ -176,4 +176,20 @@ describe('quickDescend', () => {
     expect(isToken(first!)).toBe(true);
     expect(first!.textContent!.trim()).toBe('aaa');
   });
+
+  test('re-running on an already-tokenized FOCUSABLE does not duplicate TOKEN wrappers', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const first = quickDescend(p1);
+    const second = quickDescend(p1);
+
+    // assert
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
+    expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+    expect(second).toBe(first);
+  });
 });

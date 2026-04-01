@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { icons } from './_icons.js';
-import { Nav, type JsedDocument, type JsedFocusRequestEvent } from '@oneput/jsed';
+import { Nav, quickDescend, type JsedDocument, type JsedFocusRequestEvent } from '@oneput/jsed';
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { EditDocument } from './EditDocument.js';
@@ -8,9 +8,10 @@ import { EditDocument } from './EditDocument.js';
 /**
  * Oneput AppObject that manages a single JsedDocument in view mode.
  *
- * Uses a "focus twice to edit" model: the first click/touch on a FOCUSABLE
- * sets FOCUS (view mode). A second click/touch on the *same* FOCUSABLE
- * triggers quick-descend and enters edit mode.
+ * Uses a "focus twice to edit" model: first FOCUS tokenizes the target so the
+ * next click/touch can resolve a TOKEN precisely, but still does not open the
+ * CURSOR. A second click/touch within the already-focused FOCUSABLE enters edit
+ * mode.
  *
  * Owns its Nav lifecycle: connects on start/resume, disconnects on exit.
  */
@@ -22,18 +23,32 @@ export class ViewDocument implements AppObject {
   private nav: Nav;
 
   /**
-   * Focus controller for view mode: detects when REQUEST_FOCUS targets the
-   * already-focused element ("focus twice") and enters edit mode.
+   * Focus controller for view mode:
+   * - first FOCUS tokenizes a FOCUSABLE but stays in view mode
+   * - second interaction within the already-focused FOCUSABLE enters edit mode
    */
   private handleFocusRequest = (evt: JsedFocusRequestEvent): boolean => {
-    if (evt.targetType === 'FOCUSABLE' && evt.element === this.nav.getFocus()) {
-      this.editFirst({ element: evt.element });
-      return false;
+    const currentFocus = this.nav.getFocus();
+
+    if (evt.targetType === 'FOCUSABLE') {
+      if (evt.element === currentFocus) {
+        this.editFirst({ element: evt.element });
+        return false;
+      }
+
+      quickDescend(evt.element);
+      return true;
     }
+
     if (evt.targetType === 'TOKEN') {
-      this.editFirst({ element: evt.token });
-      return false;
+      if (currentFocus?.contains(evt.token)) {
+        this.editFirst({ element: evt.token });
+        return false;
+      }
+
+      return true;
     }
+
     return true;
   };
 
@@ -56,6 +71,7 @@ export class ViewDocument implements AppObject {
       // Don't scrollIntoView because this can have a jarring effect on UX and
       // the CURSOR / EditManager should have already scrolled anyway.
       this.nav.FOCUS(payload.focusElement, { scrollIntoView: false });
+      quickDescend(payload.focusElement);
     }
   };
 

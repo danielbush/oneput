@@ -43,8 +43,10 @@ export class EditManager {
   ) {}
 
   /**
-   * Create a Nav, connect it, set FOCUS to `initialFocus`, tokenize via
-   * quickDescend, and enter edit mode with the CURSOR on the first TOKEN.
+   * Put CURSOR on first LINE associated with `initial`.
+   *
+   * If `initial` is a TOKEN, the CURSOR will be placed on that token.
+   * If `initial` is a FOCUSABLE, the CURSOR will be placed on the first token in the LINE.
    */
   edit(initial?: HTMLElement): Result<void, EditManagerError> {
     this.nav = this.nav ?? Nav.create(this.document, this.handleFocusRequest);

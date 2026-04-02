@@ -4,7 +4,7 @@ import { InputController } from './InputController.js';
 import { KeysController } from './KeysController.js';
 import { UIController } from './UIController.js';
 import { Notification, type NotificationParams } from '../shared/ui/Notification.js';
-import type { OneputProps } from '../types.js';
+import type { AppObject, OneputProps } from '../types.js';
 import { Alert } from '../shared/ui/Alert.js';
 import { Confirm } from '../shared/ui/Confirm.js';
 import { AppController } from './AppController.js';
@@ -91,5 +91,13 @@ export class Controller {
     const confirm = Confirm.create(this, params);
     confirm.run();
     return confirm;
+  }
+
+  /**
+   * Simulates the current app starting.  Usually this happens when Oneput is
+   * mounted into the DOM.
+   */
+  simulateStart(run: (ctl: Controller) => AppObject) {
+    this.app.run(run(this))
   }
 }

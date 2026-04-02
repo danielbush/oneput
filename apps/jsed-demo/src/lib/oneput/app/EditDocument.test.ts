@@ -17,7 +17,7 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
 }
 
 describe('EditDocument', () => {
-  it('starts in view mode and quick-descends first focus without launching another app', () => {
+  it('starts in view mode and quick-descends first focus without going into edit mode', () => {
     // arrange
     const doc = makeDocument('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
     const ctl = Controller.createNull();
@@ -29,7 +29,7 @@ describe('EditDocument', () => {
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
 
-    ctl.app.run(editDocument);
+    ctl.simulateStart(() => editDocument);
     const appChanges = ctl.app.trackAppChanges();
 
     // act
@@ -54,7 +54,7 @@ describe('EditDocument', () => {
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
 
-    ctl.app.run(editDocument);
+    ctl.simulateStart(() => editDocument);
     const appChanges = ctl.app.trackAppChanges();
     editManager.nav.REQUEST_FOCUS(p1);
 

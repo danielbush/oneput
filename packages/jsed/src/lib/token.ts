@@ -135,18 +135,18 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
  * ISLAND's but continues past them to tokenize the rest of the LINE.
  */
 function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
+  if (isToken(line)) {
+    return null;
+  }
+
   // Record childNodes before we mutate and convert to array as the NodeList is
   // live!
   const childNodes = Array.from(line.childNodes);
   let first: HTMLElement | null = null;
   for (const child of childNodes) {
-    if (isToken(line)) {
-      continue;
-    }
-    // Recurse into TOKEN's, INLINE_FLOW's (isInlineFlow && !isIsland),
-    // IMPLICIT_LINE's, and TRANSPARENT_BLOCK's.
+    // Recurse into INLINE_FLOW's (isInlineFlow && !isIsland), IMPLICIT_LINE's,
+    // and TRANSPARENT_BLOCK's.
     if (
-      isToken(child) ||
       isImplicitLine(child) ||
       (isFocusable(child) && !isIsland(child) && isInlineFlow(child)) ||
       isTransparentBlock(child)

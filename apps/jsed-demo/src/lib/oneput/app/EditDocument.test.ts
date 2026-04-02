@@ -21,7 +21,6 @@ describe('EditDocument', () => {
     // arrange
     const doc = makeDocument('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
     const ctl = Controller.createNull();
-    const appChanges = ctl.app.trackAppChanges();
     const editManager = EditManager.createNull({
       document: doc,
       userInput: ctl.input,
@@ -30,7 +29,8 @@ describe('EditDocument', () => {
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
 
-    editDocument.onStart();
+    ctl.app.run(editDocument);
+    const appChanges = ctl.app.trackAppChanges();
 
     // act
     editManager.nav.REQUEST_FOCUS(p1);
@@ -46,7 +46,6 @@ describe('EditDocument', () => {
     // arrange
     const doc = makeDocument('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const appChanges = ctl.app.trackAppChanges();
     const editManager = EditManager.createNull({
       document: doc,
       userInput: ctl.input,
@@ -55,7 +54,8 @@ describe('EditDocument', () => {
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
 
-    editDocument.onStart();
+    ctl.app.run(editDocument);
+    const appChanges = ctl.app.trackAppChanges();
     editManager.nav.REQUEST_FOCUS(p1);
 
     // act

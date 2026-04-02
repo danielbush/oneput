@@ -65,7 +65,7 @@ tasks:
     vars:
       AGENTS: claude-code codex gemini-cli
     cmds:
-      - pnpx skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables-refactor --skill nullables-test --skill work-tracker --skill jcodemunch
+      # - pnpx skills add danielbush/skills -y --agent {{.AGENTS}} --skill nullables-refactor --skill nullables-test --skill work-tracker --skill jcodemunch
       - pnpx skills add sveltejs/ai-tools -y --agent {{.AGENTS}} --skill svelte-code-writer --skill svelte-core-bestpractices
 
   devc:nuke:

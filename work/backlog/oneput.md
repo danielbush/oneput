@@ -2,6 +2,55 @@
 
 The following are potential work (tickets for work) sorted by priority: earlier tickets take precendence over later ones.  Extract the next ticket from the top, and convert it into a spec, and draft a plan based on the initial proposal.
 
+## Initial proposal: (docs + feat) configurable keybindings for AppObject actions
+
+Drafted: 03-Apr-2026
+
+How should Oneput make keybindings configurable when an AppObject defines bindings through its `actions` property?
+
+Questions to answer:
+
+- how did `apps/oneput-demo` make bindings configurable?
+- what is the intended path for configuring bindings when they originate from `actions` on an `AppObject`?
+- how should defaults, overrides, and persistence fit together?
+- what is the cleanest way to do this for app-local bindings versus shared bindings?
+
+Concrete example:
+
+- `ENTER` in `apps/jsed-demo/src/lib/oneput/app/EditDocument.ts`
+
+The agent should explain the current architecture and then propose the implementation shape we actually want.
+
+## Initial proposal: (feat) `onBack` on AppObject for goBack functionality
+
+Drafted: 03-Apr-2026
+
+Consider whether `AppObject` should grow an `onBack` hook for goBack functionality.
+
+This would be conceptually equivalent to today's `setOnBack`, but owned by the `AppObject` lifecycle instead of controller-level imperative wiring.
+
+Questions to answer:
+
+- when should `goBack` delegate to the current app object versus popping the app stack directly?
+- should `onBack` be a first-class `AppObject` hook rather than controller-level wiring?
+- how should this interact with existing back bindings and menu/navigation behavior?
+- what should happen when an app wants custom back behavior but still sometimes fall through to normal `goBack`?
+
+## Initial proposal: (bug) previous app menu can leak into next AppObject
+
+Drafted: 03-Apr-2026
+
+Bug: when Oneput runs a new `AppObject`, the menu from the previous `AppObject` may still show if the new app does not specify a `menu`.
+
+This was originally noticed in `apps/jsed-demo` back when we had separate `ViewDocument` and `EditDocument` app objects.
+
+Questions to answer:
+
+- why does the previous menu survive the app transition?
+- should `ctl.app.run(...)` always clear menu state before applying the next app's menu?
+- what is the intended behavior when the new app omits `menu` entirely?
+- are there similar leaks for other AppObject-owned state besides menu?
+
 ## Initial proposal: (feat + refactor) better duplicate binding handling 
 
 Drafted: 19-Mar-2026

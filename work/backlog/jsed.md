@@ -18,7 +18,7 @@ Is there a better name for onTokenChange/handleTokenChange given that the CURSOR
 
 # Lower priority
 
-## feat: CURSOR can move to the next LINE wants it has exhuasted the current LINE
+## feat: CURSOR can move to the next LINE wants it has exhausted the current LINE
 
 Drafted: 19-Mar-2026
 

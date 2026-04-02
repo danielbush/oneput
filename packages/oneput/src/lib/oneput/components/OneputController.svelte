@@ -15,7 +15,7 @@
     menuItems: [],
     menuOpen: false
   });
-  const { run }: { run: (ctl: Controller) => AppObject } = $props();
+  const props: { run: (ctl: Controller) => AppObject } = $props();
 
   const controller = Controller.create(currentProps);
 
@@ -24,7 +24,7 @@
   });
 
   onMount(() => {
-    controller.app.run(run(controller));
+    controller.app.run(props.run(controller));
   });
 </script>
 

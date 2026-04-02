@@ -1,7 +1,22 @@
-import { describe, it, test, expect, vi } from 'vitest';
+import { describe, it, test, expect } from 'vitest';
 import { byId, div, frag, li, makeRoot, p, script, ul } from '../test/util.js';
-import { Nav } from '../Nav.js';
+import { Nav, type OnRequestFocus } from '../Nav.js';
 import { ElementIndicator } from '../ElementIndicator.js';
+import type { JsedFocusRequestEvent } from '../types.js';
+
+function trackFocusRequests(allow: boolean | ((evt: JsedFocusRequestEvent) => boolean) = true): {
+  onFocusRequest: OnRequestFocus;
+  data: JsedFocusRequestEvent[];
+} {
+  const data: JsedFocusRequestEvent[] = [];
+  return {
+    onFocusRequest: (evt) => {
+      data.push(evt);
+      return typeof allow === 'function' ? allow(evt) : allow;
+    },
+    data
+  };
+}
 
 describe('FOCUS', () => {
   it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
@@ -22,13 +37,12 @@ describe('FOCUS', () => {
     const doc = makeRoot(frag(script({ id: 'p1' }, 'p1')));
     const nav = new Nav(doc, ElementIndicator.createNull());
     const p1 = doc.document.getElementById('p1') as HTMLElement;
-    const focus = vi.spyOn(p1, 'focus');
 
     // act
     nav.REQUEST_FOCUS(p1);
 
     // assert
-    expect(focus).toBeCalledTimes(0);
+    expect(nav.getFocus()).toBe(doc.root);
   });
 });
 
@@ -166,45 +180,43 @@ describe('focus controller', () => {
   it('should call the focus controller when REQUEST_FOCUS targets a FOCUSABLE', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const controller = vi.fn((): boolean => true);
-    const nav = new Nav(doc, ElementIndicator.createNull(), controller);
-    controller.mockClear();
+    const requests = trackFocusRequests();
+    const nav = new Nav(doc, ElementIndicator.createNull(), requests.onFocusRequest);
+    requests.data.length = 0;
 
     // act
     nav.REQUEST_FOCUS(byId(doc, 'p1'));
 
     // assert
-    expect(controller).toHaveBeenCalledOnce();
-    expect(controller).toHaveBeenCalledWith(
+    expect(requests.data).toEqual([
       expect.objectContaining({
         type: 'FOCUS_REQUEST',
         targetType: 'FOCUSABLE',
         element: byId(doc, 'p1')
       })
-    );
+    ]);
   });
 
   it('should pass same-element event when REQUEST_FOCUS targets the already-focused element', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const controller = vi.fn(() => false);
-    const nav = new Nav(doc, ElementIndicator.createNull(), controller);
+    const requests = trackFocusRequests(false);
+    const nav = new Nav(doc, ElementIndicator.createNull(), requests.onFocusRequest);
     const p1 = byId(doc, 'p1');
     nav.FOCUS(p1);
-    controller.mockClear();
+    requests.data.length = 0;
 
     // act
     nav.REQUEST_FOCUS(p1);
 
     // assert
-    expect(controller).toHaveBeenCalledOnce();
-    expect(controller).toHaveBeenCalledWith(
+    expect(requests.data).toEqual([
       expect.objectContaining({
         type: 'FOCUS_REQUEST',
         targetType: 'FOCUSABLE',
         element: p1
       })
-    );
+    ]);
   });
 
   it('should not change FOCUS when controller returns false', () => {

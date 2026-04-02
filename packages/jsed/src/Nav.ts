@@ -12,7 +12,7 @@ import {
 import { ElementIndicator } from './ElementIndicator.js';
 import { scrollIntoViewIfSmaller } from './lib/dom.js';
 
-export type FocusController = (evt: JsedFocusRequestEvent) => boolean;
+export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
 
 export type NavError =
   | { type: 'no-token-under-focus' }
@@ -27,18 +27,18 @@ export type NavError =
  * Manages the FOCUS.
  *
  * Each Nav instance owns its lifecycle: call `connect()` to start listening
- * for DOM events and `disconnect()` to stop. The optional `focusController`
+ * for DOM events and `disconnect()` to stop. The optional `onRequestFocus`
  * is immutable — set once at construction.
  */
 export class Nav {
-  static create(doc: JsedDocument, focusController?: FocusController): Nav {
+  static create(doc: JsedDocument, onRequestFocus?: OnRequestFocus): Nav {
     const elementIndicator = ElementIndicator.create();
-    return new Nav(doc, elementIndicator, focusController);
+    return new Nav(doc, elementIndicator, onRequestFocus);
   }
 
-  static createNull(doc: JsedDocument, focusController?: FocusController): Nav {
+  static createNull(doc: JsedDocument, onRequestFocus?: OnRequestFocus): Nav {
     const elementIndicator = ElementIndicator.createNull();
-    return new Nav(doc, elementIndicator, focusController);
+    return new Nav(doc, elementIndicator, onRequestFocus);
   }
 
   /**
@@ -55,9 +55,9 @@ export class Nav {
   constructor(
     private doc: JsedDocument,
     private elementIndicator: ElementIndicator,
-    private focusController?: FocusController
+    private onRequestFocus?: OnRequestFocus
   ) {
-    this.focusController = focusController;
+    this.onRequestFocus = onRequestFocus;
     this.FOCUS(doc.root);
   }
 
@@ -257,7 +257,7 @@ export class Nav {
     // If there are no listeners, we'll assume ok = true.
     if (isFocusable(el)) {
       const ok =
-        this.focusController?.({
+        this.onRequestFocus?.({
           type: 'FOCUS_REQUEST',
           targetType: 'FOCUSABLE',
           element: el
@@ -270,7 +270,7 @@ export class Nav {
     if (isToken(el as Node)) {
       const htmlEl = el as HTMLElement;
       const ok =
-        this.focusController?.({
+        this.onRequestFocus?.({
           type: 'FOCUS_REQUEST',
           targetType: 'TOKEN',
           token: htmlEl,

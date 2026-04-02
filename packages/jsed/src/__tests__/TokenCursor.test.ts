@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { makeRoot, p, div, em, span, identifyCursor } from '../test/util.js';
+import { makeRoot, p, div, em, span, identify } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue, isPadded, quickDescend } from '../lib/token.js';
@@ -251,11 +251,11 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
       });
 
       it('movePrevious visits ISLAND in reverse', () => {
@@ -268,11 +268,11 @@ describe('TokenCursor motion', () => {
         cursor.moveNext();
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
       });
 
       it('ISLAND at start of LINE: cursor starts on first TOKEN after ISLAND', () => {
@@ -283,9 +283,9 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert — quick-descend skips the ISLAND, cursor starts on first TOKEN
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
       });
 
       it('ISLAND at end of LINE is the last cursor position', () => {
@@ -296,12 +296,12 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
         cursor.moveNext();
         // stays put — end of line
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
       });
 
       it('ISLAND inside INLINE_FLOW', () => {
@@ -322,15 +322,15 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert — CURSOR descends into the INLINE_FLOW, visits the ISLAND within it
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('ccc');
+        expect(identify(cursor.getToken())).toBe('ccc');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('ddd');
+        expect(identify(cursor.getToken())).toBe('ddd');
       });
 
       it('adjacent ISLANDs', () => {
@@ -347,13 +347,13 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert — both ISLANDs are visited
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+        expect(identify(cursor.getToken())).toBe('[island:span]');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
       });
     });
 
@@ -370,11 +370,11 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#outer');
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        expect(identify(cursor.getToken())).toBe('nested');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
       });
 
       it('movePrevious exits nested div seamlessly', () => {
@@ -387,11 +387,11 @@ describe('TokenCursor motion', () => {
         cursor.moveNext();
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        expect(identify(cursor.getToken())).toBe('nested');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
       });
 
       it('deeply nested blocks: CURSOR descends through multiple levels', () => {
@@ -412,15 +412,15 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#outer');
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('ccc');
+        expect(identify(cursor.getToken())).toBe('ccc');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('ddd');
+        expect(identify(cursor.getToken())).toBe('ddd');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('eee');
+        expect(identify(cursor.getToken())).toBe('eee');
       });
 
       it('empty TRANSPARENT_BLOCK nesting: CURSOR recurses through to find TOKEN', () => {
@@ -439,11 +439,11 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#outer');
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        expect(identify(cursor.getToken())).toBe('nested');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
       });
 
       it('empty TRANSPARENT_BLOCK nesting: movePrevious recurses back out', () => {
@@ -464,11 +464,11 @@ describe('TokenCursor motion', () => {
         cursor.moveNext();
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('nested');
+        expect(identify(cursor.getToken())).toBe('nested');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
       });
     });
 
@@ -482,11 +482,11 @@ describe('TokenCursor motion', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('[span]');
+        expect(identify(cursor.getToken())).toBe('[span]');
         cursor.moveNext();
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
       });
 
       it('movePrevious visits OPAQUE_BLOCK in reverse', () => {
@@ -497,11 +497,11 @@ describe('TokenCursor motion', () => {
         cursor.moveNext();
 
         // act & assert
-        expect(identifyCursor(cursor.getToken())).toBe('bbb');
+        expect(identify(cursor.getToken())).toBe('bbb');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('[span]');
+        expect(identify(cursor.getToken())).toBe('[span]');
         cursor.movePrevious();
-        expect(identifyCursor(cursor.getToken())).toBe('aaa');
+        expect(identify(cursor.getToken())).toBe('aaa');
       });
     });
   });
@@ -724,13 +724,13 @@ describe('TokenCursor replace', () => {
     );
     const { cursor } = tokenizeAndCursor(doc, '#p1');
     cursor.moveNext(); // on ISLAND
-    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getToken())).toBe('[island:span]');
 
     // act
     cursor.replace('oops');
 
     // assert — ISLAND unchanged
-    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getToken())).toBe('[island:span]');
   });
 });
 
@@ -767,13 +767,13 @@ describe('TokenCursor delete', () => {
     );
     const { cursor } = tokenizeAndCursor(doc, '#p1');
     cursor.moveNext(); // on ISLAND
-    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getToken())).toBe('[island:span]');
 
     // act
     cursor.delete();
 
     // assert — ISLAND unchanged, cursor unmoved
-    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getToken())).toBe('[island:span]');
   });
 
   it('transfers PADDED_TOKEN to next TOKEN on delete', () => {
@@ -810,7 +810,7 @@ describe('TokenCursor delete', () => {
     cursor.delete();
 
     // assert — ANCHOR created, no padding transfer
-    expect(identifyCursor(cursor.getToken())).toBe('¤');
+    expect(identify(cursor.getToken())).toBe('¤');
   });
 });
 
@@ -917,7 +917,7 @@ describe('TokenCursor joinNext', () => {
     cursor.joinNext();
 
     // assert — ISLAND unchanged
-    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getToken())).toBe('[island:span]');
   });
 
   it('no-op when next LINE_SIBLING is an INLINE_FLOW', () => {
@@ -980,7 +980,7 @@ describe('TokenCursor joinPrevious', () => {
     cursor.joinPrevious();
 
     // assert — ISLAND unchanged
-    expect(identifyCursor(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getToken())).toBe('[island:span]');
   });
 
   it('no-op when previous LINE_SIBLING is an INLINE_FLOW', () => {

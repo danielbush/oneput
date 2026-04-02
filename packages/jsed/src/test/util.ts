@@ -1,4 +1,5 @@
 import { JsedDocument } from '../JsedDocument.js';
+import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../lib/constants.js';
 import * as token from '../lib/token.js';
 import { isIsland, isToken } from '../lib/taxonomy.js';
 
@@ -68,8 +69,22 @@ export const section = makeTag('section');
 export const script = makeTag('script');
 export const input = makeTag('input');
 
+/**
+ * Create a TOKEN fixture. TOKEN's carry a trailing space by default.
+ */
+export function t(text: string): string {
+  return span({ class: JSED_TOKEN_CLASS }, text.endsWith(' ') ? text : `${text} `);
+}
+
+/**
+ * Create an ANCHOR fixture. ANCHOR's are empty TOKEN's.
+ */
+export function a(): string {
+  return span({ class: `${JSED_TOKEN_CLASS} ${JSED_ANCHOR_CLASS}` }, ' ');
+}
+
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
-export function identifyCursor(el: HTMLElement): string {
+export function identify(el: HTMLElement): string {
   if (isToken(el)) return token.getValue(el);
   if (isIsland(el)) return `[island:${el.tagName.toLowerCase()}]`;
   return `[${el.tagName.toLowerCase()}]`;

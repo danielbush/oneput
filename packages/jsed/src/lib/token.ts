@@ -94,7 +94,7 @@ export function getValue(token: HTMLElement): string {
  * Used by tokenizer to convert text nodes to TOKEN's.
  * Returns the first TOKEN created, or null if the child was not a text node.
  */
-function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
+function replaceTextNode(child: Node): HTMLElement | null {
   const el = child.parentNode;
   if (isToken(el)) {
     throw new Error(
@@ -134,7 +134,7 @@ function replaceTextNode(child: ParentNode | ChildNode): HTMLElement | null {
  * — everything the CURSOR would descend through. Skips OPAQUE_BLOCK's and
  * ISLAND's but continues past them to tokenize the rest of the LINE.
  */
-function tokenizeLineRec(line: ParentNode | ChildNode): HTMLElement | null {
+function tokenizeLineRec(line: Node): HTMLElement | null {
   if (isToken(line)) {
     return null;
   }

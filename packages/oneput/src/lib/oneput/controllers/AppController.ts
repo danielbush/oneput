@@ -46,7 +46,9 @@ export class AppController {
     const previous = this._current?.app ?? null;
     this._current = appVal;
     const current = appVal?.app ?? null;
-    this.appChangeListeners.forEach((listener) => listener({ previous, current }));
+    const change = { previous, current };
+    this.appChangeListeners.forEach((listener) => listener(change));
+    this.ctl.events.emit({ type: 'app-change', payload: change });
   }
   private unsubscribeMenuItemFocus?: () => void;
 

@@ -21,6 +21,24 @@ describe('Controller', () => {
       // assert
       expect(appChanges.data).toEqual([{ previous: null, current: appObject }]);
     });
+
+    it('emits app-change events', () => {
+      // arrange
+      const ctl = createNull();
+      const events: { previous: object | null; current: object | null }[] = [];
+      const appObject = {
+        onStart: () => {}
+      };
+      ctl.events.on('app-change', (payload) => {
+        events.push(payload as { previous: object | null; current: object | null });
+      });
+
+      // act
+      ctl.app.run(appObject);
+
+      // assert
+      expect(events).toEqual([{ previous: null, current: appObject }]);
+    });
   });
 
   describe('notify', () => {

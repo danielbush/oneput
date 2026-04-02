@@ -31,9 +31,75 @@ A good nullable test:
 - uses real production classes with nulled dependencies
 - avoids mocks, spies, patched methods, and casted partials
 - asserts on state or tracked output
+- uses explicit `// arrange`, `// act`, `// assert` structure
+- stays DAMP rather than aggressively DRY
 - illustrates one meaningful behavior, not every branch
 
 The goal is not coverage-by-default. The goal is confidence through a few clear examples.
+
+## Test Shape: AAA And DAMP
+
+Prefer tests with explicit AAA structure:
+
+- `// arrange`
+- `// act`
+- `// assert`
+
+Keep blank lines between those sections when they are separate.
+
+It is fine to collapse `act` and `assert` when that reads better, especially when:
+
+- the action is a single line
+- the assertion immediately explains why that action matters
+- splitting them would add ceremony without adding clarity
+
+Typical good shape:
+
+```ts
+// act & assert
+expect(service.save("hello")).toEqual(ok(true));
+```
+
+or:
+
+```ts
+// act
+cursor.moveNext();
+
+// assert
+expect(cursor.getToken()).toBe(nextToken);
+```
+
+Prefer DAMP tests ("Descriptive And Meaningful Phrases") over DRY tests. In practice that means:
+
+- repeat a little setup when that makes the example easier to read
+- repeat a little assertion logic when that keeps the behavior obvious at the test site
+- optimize for local readability over helper reuse
+
+Do not extract helpers just to remove three or four repeated lines. A good test should read top-to-bottom as a worked example without forcing the reader to jump around.
+
+## Test Helpers
+
+Bias toward fewer helpers in tests.
+
+When a helper is worth keeping, it should spell out what it does in domain language. Good helper names are specific:
+
+- `expectFocusedElement(...)`
+- `expectRootFocused(...)`
+- `expectTrackedWrites(...)`
+
+Avoid vague or over-general helpers such as:
+
+- `expectState(...)`
+- `expectFocus(...)`
+- `setupThing(...)`
+
+Good helpers usually do one of these:
+
+- remove noisy mechanical setup that is not important to the example
+- package a repeated domain assertion with a precise name
+
+Helpers should not hide the interesting part of the test. If a helper bundles several different assertions or obscures which state is being checked, inline those assertions instead.
 
 ## Start With The Test You Want
 
@@ -332,6 +398,8 @@ Avoid asserting:
 - patched method behavior
 - exact interactions unless the interaction record itself is the behavior
 
+When asserting, prefer a few direct expectations over one opaque "state" helper. The reader should be able to see what changed without reverse-engineering a utility function.
+
 Object interactions are implementation details; the consequences of those interactions are what the tests should care about.
 
 ## Example Pattern
@@ -477,6 +545,8 @@ Use plain inputs and outputs. Do not force nullables where they do not help.
 - do not cast hand-built objects to richer types
 - do not assert call counts
 - do not hide important setup in vague helpers
+- do not collapse AAA structure into large setup helpers
+- do not extract generic assertion helpers when a few direct expects would read more clearly
 - do not use `.create()` in unit tests unless you intentionally want real infrastructure
 - do not spend time inventing a classification taxonomy when a small wrapper and one good example test would clarify the design faster
 
@@ -491,6 +561,9 @@ When reviewing a nullable test or refactor, ask:
 5. Do the assertions describe behavior instead of interactions?
 6. Does the test teach something real about the design?
 7. Is the lowest environment boundary wrapped in a small nullable infrastructure wrapper?
+8. Does the test use clear AAA structure?
+9. Are helper names specific enough to explain what they assert or set up?
+10. Would the test be easier to read if one of the helpers were inlined?
 
 ## Response Pattern
 

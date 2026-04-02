@@ -3,6 +3,7 @@ import { byId, div, frag, li, makeRoot, p, script, ul } from '../test/util.js';
 import { Nav, type OnRequestFocus } from '../Nav.js';
 import { ElementIndicator } from '../ElementIndicator.js';
 import type { JsedFocusRequestEvent } from '../types.js';
+import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from '../lib/constants.js';
 
 function trackFocusRequests(allow: boolean | ((evt: JsedFocusRequestEvent) => boolean) = true): {
   onFocusRequest: OnRequestFocus;
@@ -18,6 +19,25 @@ function trackFocusRequests(allow: boolean | ((evt: JsedFocusRequestEvent) => bo
   };
 }
 
+function expectFocusedElement(doc: ReturnType<typeof makeRoot>, el: HTMLElement) {
+  const focused = Array.from(doc.root.querySelectorAll(`.${JSED_FOCUS_CLASS}`));
+  expect(focused).toHaveLength(1);
+  expect(focused[0]).toBe(el);
+  expect(el.classList.contains(JSED_FOCUS_CLASS)).toBe(true);
+}
+
+function expectRootFocused(doc: ReturnType<typeof makeRoot>) {
+  expect(doc.root.classList.contains(JSED_FOCUS_CLASS)).toBe(true);
+  expect(doc.root.querySelectorAll(`.${JSED_FOCUS_CLASS}`)).toHaveLength(0);
+}
+
+function expectSiblingHighlights(doc: ReturnType<typeof makeRoot>, ids: string[]) {
+  const highlighted = Array.from(doc.root.querySelectorAll(`.${SBR_FOCUS_SIBLING}`)).map(
+    (el) => (el as HTMLElement).id
+  );
+  expect(highlighted).toEqual(ids);
+}
+
 describe('FOCUS', () => {
   it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
     // arrange
@@ -29,7 +49,8 @@ describe('FOCUS', () => {
     nav.REQUEST_FOCUS(p1);
 
     // assert
-    expect(doc.root).toMatchSnapshot();
+    expectFocusedElement(doc, p1);
+    expectSiblingHighlights(doc, []);
   });
 
   it('should not focus a non-FOCUSABLE', () => {
@@ -57,57 +78,73 @@ describe('SIB_HIGHLIGHT', () => {
     nav.SIB_HIGHLIGHT();
 
     // assert
-    expect(doc.root).toMatchSnapshot();
+    expectRootFocused(doc);
+    expectSiblingHighlights(doc, []);
   });
 });
 
 test('REC_NEXT should recurse down', () => {
   // arrange
   const doc = makeRoot(
-    div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'), p({ id: 'p2' }, 'text-2')))
+    div(
+      { id: 'div1' }, //
+      div(
+        { id: 'div1-1' }, //
+        p({ id: 'p1' }, 'text-1'),
+        p({ id: 'p2' }, 'text-2')
+      )
+    )
   );
   const nav = new Nav(doc, ElementIndicator.createNull());
 
   // act
   nav.REC_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'div1'));
+  expectSiblingHighlights(doc, []);
 
   nav.REC_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'div1-1'));
+  expectSiblingHighlights(doc, []);
 
   nav.REC_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'p1'));
+  expectSiblingHighlights(doc, ['p2']);
 
   nav.REC_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'p2'));
+  expectSiblingHighlights(doc, ['p1']);
 
   nav.REC_NEXT();
-  expect(doc.root).toMatchSnapshot();
-
-  nav.REC_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'p2'));
+  expectSiblingHighlights(doc, ['p1']);
 });
 
 test('REC_PREV should recurse up', () => {
   // arrange
-  const doc = makeRoot(div({ id: 'div1' }, div({ id: 'div1-1' }, p({ id: 'p1' }, 'text-1'))));
+  const doc = makeRoot(
+    div(
+      { id: 'div1' }, //
+      div(
+        { id: 'div1-1' }, //
+        p({ id: 'p1' }, 'text-1')
+      )
+    )
+  );
   const nav = new Nav(doc, ElementIndicator.createNull());
+  nav.FOCUS(byId(doc, 'p1'));
 
   // act
   nav.REC_PREV();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'div1-1'));
+  expectSiblingHighlights(doc, []);
 
   nav.REC_PREV();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'div1'));
+  expectSiblingHighlights(doc, []);
 
   nav.REC_PREV();
-  expect(doc.root).toMatchSnapshot();
-
-  nav.REC_PREV();
-  expect(doc.root).toMatchSnapshot();
-
-  nav.REC_PREV();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'div1'));
+  expectSiblingHighlights(doc, []);
 });
 
 test('SIB_NEXT should walk to next sibling', () => {
@@ -121,16 +158,20 @@ test('SIB_NEXT should walk to next sibling', () => {
     )
   );
   const nav = new Nav(doc, ElementIndicator.createNull());
+  nav.FOCUS(byId(doc, 'li1'));
 
   // act
   nav.SIB_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'li2'));
+  expectSiblingHighlights(doc, ['li1', 'li3']);
 
   nav.SIB_NEXT();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'li3'));
+  expectSiblingHighlights(doc, ['li2']);
 
   nav.SIB_NEXT(); // no wrap around
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'li3'));
+  expectSiblingHighlights(doc, ['li2']);
 });
 
 test('SIB_PREV should walk to previous sibling', () => {
@@ -144,36 +185,44 @@ test('SIB_PREV should walk to previous sibling', () => {
     )
   );
   const nav = new Nav(doc, ElementIndicator.createNull());
+  nav.FOCUS(byId(doc, 'li3'));
 
   // act
   nav.SIB_PREV();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'li2'));
+  expectSiblingHighlights(doc, ['li1', 'li3']);
 
   nav.SIB_PREV();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'li1'));
+  expectSiblingHighlights(doc, ['li2']);
 
   nav.SIB_PREV(); // no wrap around
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'li1'));
+  expectSiblingHighlights(doc, ['li2']);
 });
 
 test('UP can walk up successive parent elements', () => {
   // arrange
   const doc = makeRoot(div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))));
   const nav = new Nav(doc, ElementIndicator.createNull());
-  nav.REQUEST_FOCUS(byId(doc, 'id3'));
+  nav.FOCUS(byId(doc, 'id3'));
 
   // act
   nav.UP();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'id2'));
+  expectSiblingHighlights(doc, []);
 
   nav.UP();
-  expect(doc.root).toMatchSnapshot();
+  expectFocusedElement(doc, byId(doc, 'id1'));
+  expectSiblingHighlights(doc, []);
 
   nav.UP();
-  expect(doc.root).toMatchSnapshot();
+  expectRootFocused(doc);
+  expectSiblingHighlights(doc, []);
 
   nav.UP(); // no wrap around
-  expect(doc.root).toMatchSnapshot();
+  expectRootFocused(doc);
+  expectSiblingHighlights(doc, []);
 });
 
 describe('focus controller', () => {

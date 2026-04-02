@@ -7,7 +7,7 @@ import { Notification, type NotificationParams } from '../shared/ui/Notification
 import type { AppObject, OneputProps } from '../types.js';
 import { Alert } from '../shared/ui/Alert.js';
 import { Confirm } from '../shared/ui/Confirm.js';
-import { AppController } from './AppController.js';
+import { AppController, type AppChange, type AppChangeTracker } from './AppController.js';
 import { NativeController } from './NativeController.js';
 
 export class Controller {
@@ -93,11 +93,19 @@ export class Controller {
     return confirm;
   }
 
+  trackAppChanges(): AppChangeTracker {
+    const data: AppChange[] = [];
+    const stop = this.events.on('app-change', (payload) => {
+      data.push(payload);
+    });
+    return { data, stop };
+  }
+
   /**
    * Simulates the current app starting.  Usually this happens when Oneput is
    * mounted into the DOM.
    */
   simulateStart(run: (ctl: Controller) => AppObject) {
-    this.app.run(run(this))
+    this.app.run(run(this));
   }
 }

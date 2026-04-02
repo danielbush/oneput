@@ -10,7 +10,7 @@ describe('Controller', () => {
     it('tracks app changes without spying', () => {
       // arrange
       const ctl = createNull();
-      const appChanges = ctl.app.trackAppChanges();
+      const appChanges = ctl.trackAppChanges();
       const appObject = {
         onStart: () => {}
       };

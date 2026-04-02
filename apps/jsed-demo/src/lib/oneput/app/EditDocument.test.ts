@@ -30,7 +30,7 @@ describe('EditDocument', () => {
     const p1 = byId(doc, 'p1');
 
     ctl.simulateStart(() => editDocument);
-    const appChanges = ctl.app.trackAppChanges();
+    const appChanges = ctl.trackAppChanges();
 
     // act
     editManager.nav.REQUEST_FOCUS(p1);
@@ -55,7 +55,7 @@ describe('EditDocument', () => {
     const p1 = byId(doc, 'p1');
 
     ctl.simulateStart(() => editDocument);
-    const appChanges = ctl.app.trackAppChanges();
+    const appChanges = ctl.trackAppChanges();
     editManager.nav.REQUEST_FOCUS(p1);
 
     // act

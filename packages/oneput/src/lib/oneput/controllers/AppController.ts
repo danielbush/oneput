@@ -36,7 +36,6 @@ export class AppController {
 
   private appParents: AppVal[] = [];
   private _current: AppVal | null = null;
-  private appChangeListeners = new Set<(change: AppChange) => void>();
   private onBack?: () => void;
   private disableGoBack = false;
   private get current() {
@@ -47,24 +46,9 @@ export class AppController {
     this._current = appVal;
     const current = appVal?.app ?? null;
     const change = { previous, current };
-    this.appChangeListeners.forEach((listener) => listener(change));
     this.ctl.events.emit({ type: 'app-change', payload: change });
   }
   private unsubscribeMenuItemFocus?: () => void;
-
-  trackAppChanges(): AppChangeTracker {
-    const data: AppChange[] = [];
-    const listener = (change: AppChange) => {
-      data.push(change);
-    };
-    this.appChangeListeners.add(listener);
-    return {
-      data,
-      stop: () => {
-        this.appChangeListeners.delete(listener);
-      }
-    };
-  }
 
   /**
    * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.

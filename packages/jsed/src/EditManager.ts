@@ -254,7 +254,7 @@ export class EditManager {
 
     const current = this.cursor.getToken();
     if (isToken(current)) {
-      this.cursor.splitBefore();
+      this.cursor.splitAtToken();
       return ok(undefined);
     }
 

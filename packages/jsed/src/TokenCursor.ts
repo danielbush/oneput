@@ -60,11 +60,23 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     );
   }
 
-  private isInsertingAfter(): boolean {
+  /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */
+  isAppend(): boolean {
+    return this.getToken().classList.contains(CURSOR_APPEND_CLASS);
+  }
+
+  /** Whether the CURSOR_STATE is CURSOR_PREPEND on the current TOKEN. */
+  isPrepend(): boolean {
+    return this.getToken().classList.contains(CURSOR_PREPEND_CLASS);
+  }
+
+  /** Whether the CURSOR_STATE is CURSOR_INSERT_AFTER on the current TOKEN. */
+  isInsertingAfter(): boolean {
     return this.getToken().classList.contains(CURSOR_INSERT_AFTER_CLASS);
   }
 
-  private isInsertingBefore(): boolean {
+  /** Whether the CURSOR_STATE is CURSOR_INSERT_BEFORE on the current TOKEN. */
+  isInsertingBefore(): boolean {
     return this.getToken().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
   }
 
@@ -179,6 +191,15 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     if (firstTok) {
       this.setTokenInternal(firstTok);
     }
+  }
+
+  splitAtToken() {
+    if (this.isInsertingAfter() || this.isAppend()) {
+      this.splitAfter();
+      return;
+    }
+
+    this.splitBefore();
   }
 
   // #endregion

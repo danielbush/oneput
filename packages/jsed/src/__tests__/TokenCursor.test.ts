@@ -545,6 +545,19 @@ describe('TokenCursor CURSOR_STATE', () => {
       // assert
       expect(markerClasses(cursor.getToken())).toEqual([]);
     });
+
+    it('splitAtToken splits after the current TOKEN', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleSelectionChange('CURSOR_AT_END');
+
+      // act
+      cursor.splitAtToken();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('world');
+      expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+    });
   });
 
   describe('CURSOR_PREPEND', () => {
@@ -640,6 +653,19 @@ describe('TokenCursor CURSOR_STATE', () => {
       // assert
       expect(getValue(cursor.getToken())).toBe('world');
     });
+
+    it('splitAtToken splits after the current TOKEN', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.handleInputChange('hello ');
+
+      // act
+      cursor.splitAtToken();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('world');
+      expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+    });
   });
 
   describe('CURSOR_INSERT_BEFORE', () => {
@@ -678,6 +704,25 @@ describe('TokenCursor CURSOR_STATE', () => {
 
       // assert
       expect(getValue(cursor.getToken())).toBe('hello');
+    });
+  });
+
+  describe('splitAtToken default', () => {
+    it('splits before the current TOKEN when no after-state marker is set', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.moveNext(); // on "world"
+
+      // act
+      cursor.splitAtToken();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('world');
+      expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+      expect(cursor.getDocument().root.querySelectorAll('p')[0]?.textContent?.trim()).toBe('hello');
+      expect(cursor.getDocument().root.querySelectorAll('p')[1]?.textContent?.trim()).toBe(
+        'world foo'
+      );
     });
   });
 });

@@ -94,6 +94,10 @@ export type ITokenCursor = {
    */
   splitAfter: () => void;
   /**
+   * Perform SPLIT_BY_TOKEN according to CURSOR_STATE.
+   */
+  splitAtToken: () => void;
+  /**
    * Destroy the current edit session. The instance cannot be used after this.
    */
   destroy: () => void;

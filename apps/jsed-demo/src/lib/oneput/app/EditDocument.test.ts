@@ -42,7 +42,31 @@ describe('EditDocument', () => {
     expect(appChanges.data).toEqual([]);
   });
 
-  it('uses the same app object to move from view mode into editing', () => {
+  it('uses the same app object to move from view mode into edit mode', () => {
+    // arrange
+    const doc = makeDocument('<p id="p1">foo bar</p>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const p1 = byId(doc, 'p1');
+    ctl.simulateStart(() => editDocument);
+    const appChanges = ctl.trackAppChanges();
+
+    // act
+    editManager.nav.REQUEST_FOCUS(p1);
+    editManager.nav.REQUEST_FOCUS(p1);
+
+    // assert
+    expect(editManager.getMode()).toBe('edit');
+    expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+    expect(appChanges.data).toEqual([]);
+  });
+
+  it('splits the current paragraph when ENTER is pressed in edit mode', async () => {
     // arrange
     const doc = makeDocument('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
@@ -55,15 +79,19 @@ describe('EditDocument', () => {
     const p1 = byId(doc, 'p1');
 
     ctl.simulateStart(() => editDocument);
-    const appChanges = ctl.trackAppChanges();
+    // Edit mode
     editManager.nav.REQUEST_FOCUS(p1);
+    editManager.nav.REQUEST_FOCUS(p1);
+    editManager.cursor?.moveNext();
 
     // act
-    editManager.nav.REQUEST_FOCUS(p1);
+    await ctl.simulateKey('Enter');
 
     // assert
-    expect(editManager.getMode()).toBe('editing');
-    expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
-    expect(appChanges.data).toEqual([]);
+    const paragraphs = Array.from(doc.root.querySelectorAll('p'));
+    expect(paragraphs).toHaveLength(2);
+    expect(paragraphs[0]?.textContent?.trim()).toBe('foo');
+    expect(paragraphs[1]?.textContent?.trim()).toBe('bar');
+    expect(editManager.cursor?.getToken().textContent?.trim()).toBe('bar');
   });
 });

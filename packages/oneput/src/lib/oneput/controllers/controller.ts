@@ -108,4 +108,21 @@ export class Controller {
   simulateStart(run: (ctl: Controller) => AppObject) {
     this.app.run(run(this));
   }
+
+  /**
+   * Simulates a key press against Oneput's window-level key bindings.
+   *
+   * KeysController dispatches actions through a setTimeout to avoid menu-open
+   * races, so tests should await this helper before asserting.
+   */
+  async simulateKey(key: string, init: KeyboardEventInit = {}) {
+    const event = new KeyboardEvent('keydown', {
+      key,
+      bubbles: true,
+      cancelable: true,
+      ...init
+    });
+    window.dispatchEvent(event);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
 }

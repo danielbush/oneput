@@ -82,4 +82,33 @@ describe('Controller', () => {
       expect(events).toHaveLength(1);
     });
   });
+
+  describe('simulateKey', () => {
+    it('dispatches key bindings registered on the current app object', async () => {
+      // arrange
+      const ctl = createNull();
+      let count = 0;
+
+      ctl.simulateStart(() => ({
+        onStart: () => {},
+        actions: {
+          ENTER: {
+            action: () => {
+              count += 1;
+            },
+            binding: {
+              bindings: ['Enter'],
+              description: 'Run enter action'
+            }
+          }
+        }
+      }));
+
+      // act
+      await ctl.simulateKey('Enter');
+
+      // assert
+      expect(count).toBe(1);
+    });
+  });
 });

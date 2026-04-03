@@ -54,7 +54,7 @@ export class EditDocument implements AppObject {
   actions = {
     EXIT: {
       action: () => {
-        if (this.editManager.getMode() === 'editing') {
+        if (this.editManager.getMode() === 'edit') {
           this.editManager.exitEditing();
         }
       },
@@ -66,7 +66,7 @@ export class EditDocument implements AppObject {
     },
     ENTER: {
       action: () => {
-        this.editManager.enterEditing().mapErr((err) => {
+        this.editManager.handleEnter().mapErr((err) => {
           switch (err.type) {
             case 'no-token-under-focus':
               this.ctl.notify('No token under focus', { duration: 3000 });
@@ -92,7 +92,7 @@ export class EditDocument implements AppObject {
     },
     RIGHT: {
       action: () => {
-        if (this.editManager.getMode() === 'editing') {
+        if (this.editManager.getMode() === 'edit') {
           this.editManager.cursor?.moveNext();
           return;
         }
@@ -106,7 +106,7 @@ export class EditDocument implements AppObject {
     },
     LEFT: {
       action: () => {
-        if (this.editManager.getMode() === 'editing') {
+        if (this.editManager.getMode() === 'edit') {
           this.editManager.cursor?.movePrevious();
           return;
         }

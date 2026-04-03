@@ -54,7 +54,7 @@ describe('EditManager', () => {
 
     // assert
     expect(result.isOk()).toBe(true);
-    expect(editManager.getMode()).toBe('editing');
+    expect(editManager.getMode()).toBe('edit');
     expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
 
     editManager.destroy();
@@ -87,7 +87,7 @@ describe('EditManager', () => {
     editManager.nav.REQUEST_FOCUS(p1FirstToken);
 
     // assert
-    expect(editManager.getMode()).toBe('editing');
+    expect(editManager.getMode()).toBe('edit');
     expect(editManager.cursor?.getToken()).toBe(p1FirstToken);
 
     editManager.destroy();

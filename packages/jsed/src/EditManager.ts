@@ -9,7 +9,7 @@ import type { UserInput, UserInputSelectionState } from './UserInput.js';
 import { InputManager } from './InputManager.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
-export type EditManagerMode = 'view' | 'editing';
+export type EditManagerMode = 'view' | 'edit';
 
 /**
  * Manages an edit session for a single document.
@@ -92,7 +92,7 @@ export class EditManager {
       } else {
         this.cursor.setToken(firstToken); // calls handleTokenChange
       }
-      this.mode = 'editing';
+      this.mode = 'edit';
       return ok(undefined);
     }
 
@@ -124,7 +124,7 @@ export class EditManager {
    * @param {string} input What the user has typed into an html input/textarea
    */
   public handleInputChange = (input: string) => {
-    if (this.mode !== 'editing' || !this.cursor || !isToken(this.cursor.getToken())) return;
+    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
     this.inputManager?.handleInputChange(input);
     this.cursor?.handleInputChange(input);
   };
@@ -135,7 +135,7 @@ export class EditManager {
    * Pass this to the selection emitter after instantiation.
    */
   public handleSelectionChange = (selection: UserInputSelectionState) => {
-    if (this.mode !== 'editing' || !this.cursor || !isToken(this.cursor.getToken())) return;
+    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
     this.cursor?.handleSelectionChange(selection);
   };
 
@@ -233,4 +233,33 @@ export class EditManager {
   private handleCursorError = (err: TokenCursorError) => {
     this.onError(err);
   };
+
+  // Actions
+
+  /**
+   * Handle the user pressing Enter based on the current editing context.
+   *
+   * - view mode: enter edit mode from the current FOCUS
+   * - edit mode on a TOKEN: placeholder for paragraph split behaviour
+   * - edit mode on a non-TOKEN target: descend into that target
+   */
+  handleEnter(): Result<void, EditManagerError> {
+    if (this.mode === 'view') {
+      return this.enterEditing();
+    }
+
+    if (!this.cursor) {
+      return this.enterEditing();
+    }
+
+    const current = this.cursor.getToken();
+    if (isToken(current)) {
+      this.cursor.splitBefore();
+      return ok(undefined);
+    }
+
+    return this.enterEditing(current);
+  }
+
+
 }

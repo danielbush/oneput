@@ -240,7 +240,7 @@ export class EditManager {
    * Handle the user pressing Enter based on the current editing context.
    *
    * - view mode: enter edit mode from the current FOCUS
-   * - edit mode on a TOKEN: placeholder for paragraph split behaviour
+   * - edit mode on a TOKEN: split before the current TOKEN
    * - edit mode on a non-TOKEN target: descend into that target
    */
   handleEnter(): Result<void, EditManagerError> {
@@ -261,5 +261,40 @@ export class EditManager {
     return this.enterEditing(current);
   }
 
+  handleExit() {
+    if (this.mode === 'edit') {
+      this.exitEditing();
+    }
+  }
+
+  handleLeft() {
+    if (this.mode === 'edit') {
+      this.cursor?.movePrevious();
+      return;
+    }
+
+    this.nav.REC_PREV();
+  }
+
+  handleRight() {
+    if (this.mode === 'edit') {
+      this.cursor?.moveNext();
+      return;
+    }
+
+    this.nav.REC_NEXT();
+  }
+
+  handleDown() {
+    this.nav.SIB_NEXT();
+  }
+
+  handleUp() {
+    this.nav.SIB_PREV();
+  }
+
+  handleParent() {
+    this.nav.UP();
+  }
 
 }

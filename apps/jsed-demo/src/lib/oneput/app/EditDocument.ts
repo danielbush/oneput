@@ -54,9 +54,7 @@ export class EditDocument implements AppObject {
   actions = {
     EXIT: {
       action: () => {
-        if (this.editManager.getMode() === 'edit') {
-          this.editManager.exitEditing();
-        }
+        this.editManager.handleExit();
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
@@ -92,11 +90,7 @@ export class EditDocument implements AppObject {
     },
     RIGHT: {
       action: () => {
-        if (this.editManager.getMode() === 'edit') {
-          this.editManager.cursor?.moveNext();
-          return;
-        }
-        this.editManager.nav.REC_NEXT();
+        this.editManager.handleRight();
       },
       binding: {
         bindings: ['$mod+l', 'ArrowRight'],
@@ -106,11 +100,7 @@ export class EditDocument implements AppObject {
     },
     LEFT: {
       action: () => {
-        if (this.editManager.getMode() === 'edit') {
-          this.editManager.cursor?.movePrevious();
-          return;
-        }
-        this.editManager.nav.REC_PREV();
+        this.editManager.handleLeft();
       },
       binding: {
         bindings: ['$mod+h', 'ArrowLeft'],
@@ -120,7 +110,7 @@ export class EditDocument implements AppObject {
     },
     DOWN: {
       action: () => {
-        this.editManager.nav.SIB_NEXT();
+        this.editManager.handleDown();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
@@ -130,7 +120,7 @@ export class EditDocument implements AppObject {
     },
     UP: {
       action: () => {
-        this.editManager.nav.SIB_PREV();
+        this.editManager.handleUp();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
@@ -140,7 +130,7 @@ export class EditDocument implements AppObject {
     },
     PARENT: {
       action: () => {
-        this.editManager.nav.UP();
+        this.editManager.handleParent();
       },
       binding: {
         bindings: ['$mod+u', '$mod+ArrowUp'],

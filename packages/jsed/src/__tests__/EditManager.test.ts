@@ -206,7 +206,7 @@ describe('EditManager', () => {
     // arrange
     const doc = makeRoot(
       frag(
-        p({ id: 'p1' }, 'foo'),
+        p({ id: 'p1' }, 'foo'), //
         p({ id: 'p2' }, 'bar'),
         p({ id: 'p3' }, 'baz')
       )
@@ -233,7 +233,7 @@ describe('EditManager', () => {
     // arrange
     const doc = makeRoot(
       frag(
-        p({ id: 'p1' }, 'foo'),
+        p({ id: 'p1' }, 'foo'), //
         p({ id: 'p2' }, 'bar'),
         p({ id: 'p3' }, 'baz')
       )

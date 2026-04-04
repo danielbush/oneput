@@ -296,5 +296,4 @@ export class EditManager {
   handleParent() {
     this.nav.UP();
   }
-
 }

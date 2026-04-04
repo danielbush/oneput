@@ -16,6 +16,33 @@ One way to do this might be to have DetokenizeManager instance listen to onToken
 
 Is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
 
+## refactor: explore unifying InputManager and UserInput
+
+Drafted: 5-Apr-2026
+
+`InputManager` currently handles input rewrites and TOKEN-splitting behavior, while `UserInput` is an injected resource that `EditManager` and `InputManager` both control. That split may be valid, but it also feels a bit odd: there is effectively one INPUT resource we need to drive, and the input-change logic may belong closer to that resource boundary.
+
+Explore whether `UserInput` should become a real class/interface with richer behavior, perhaps one that accepts `handleInputChange`/selection callbacks directly and owns more of the INPUT orchestration. The goal would be to reduce the sense that there are two overlapping abstractions for one thing.
+
+This is not yet a committed direction. Review the tradeoff carefully before changing anything:
+- `InputManager` may still be a useful orchestration seam above a simpler `UserInput`
+- combining them too early could blur the boundary between DOM/input infrastructure and editing semantics
+- if they are unified, preserve testability and the nullable path
+
+One possible direction: make `UserInput.create(...)` concrete and have it accept an adapter around the actual INPUT element. That adapter could expose a similar control surface to the current `UserInput` type, plus event registration like `onInputChange`, so `handleInputChange` can be passed in at the boundary rather than split across two abstractions. This is only a sketch for now, not a settled design.
+
+Another concrete smell to address in that refactor: `EditManager.handleInputChange(...)` currently forwards the same input change to both `InputManager` and `TokenCursor`, while `InputManager.handleInputChange(...)` also orchestrates `TokenCursor` operations directly. That split makes the ownership of input-change handling unclear. A refactor should unify this so one component owns input-change handling and orchestrates the CURSOR explicitly, rather than having the flow divided between `EditManager`, `InputManager`, and `TokenCursor`.
+
+If this is unified, the nullable story should unify with it too: `NullUserInput` would likely be replaced by the new single abstraction's `.createNull()` rather than keeping a separate nullable input type alongside a separate input orchestrator.
+
+## refactor: rename handleTokenChange to handleCursorChange
+
+Drafted: 5-Apr-2026
+
+`handleTokenChange` no longer describes the callback accurately because the CURSOR can sit on non-TOKEN LINE_SIBLINGs as well as TOKENs. Rename this callback and related terminology to `handleCursorChange` so the naming matches the current CURSOR model.
+
+Review the surrounding callback names at the same time, especially any `onTokenChange` naming that now really means "the CURSOR target changed".
+
 # Lower priority
 
 ## feat: CURSOR can move to the next LINE wants it has exhausted the current LINE

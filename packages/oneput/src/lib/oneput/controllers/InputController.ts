@@ -9,8 +9,16 @@ export class InputController {
     return new InputController(ctl);
   }
 
+  /**
+   * Assumes we have happy-dom set up in the testing environment.
+   */
   public static createNull(ctl: Controller) {
-    return new InputController(ctl);
+    const controller = new InputController(ctl);
+    const inputElement = document.createElement('input');
+    controller.handleInputElementChange(inputElement);
+    ctl.currentProps.inputElement = inputElement;
+    ctl.currentProps.inputValue = '';
+    return controller;
   }
 
   constructor(private ctl: Controller) {
@@ -65,11 +73,28 @@ export class InputController {
    */
   setInputValue(val?: string) {
     this.ctl.currentProps.inputValue = val?.trim() || '';
+    if (this.inputElement) {
+      this.inputElement.value = this.ctl.currentProps.inputValue;
+    }
     return tick();
   }
 
   selectAll = () => {
     this.inputElement?.setSelectionRange(0, this.inputElement.value.length);
+  };
+
+  subscribeInputChange = (handleInputChange: (value: string) => void) => {
+    const unsubscribeInputChanges = this.ctl.events.on('input-change', ({ value }) =>
+      handleInputChange(value)
+    );
+    return unsubscribeInputChanges;
+  };
+
+  subscribeSelectionChange = (handleSelectionChange: (selection: InputSelectionState) => void) => {
+    const unsubscribeSelectionChanges = this.ctl.events.on('selection-change', ({ selection }) =>
+      handleSelectionChange(selection)
+    );
+    return unsubscribeSelectionChanges;
   };
 
   /**
@@ -244,5 +269,71 @@ export class InputController {
   resetSubmitHandler() {
     this.submitHandler = undefined;
     this.submitOnce = undefined;
+  }
+
+  /**
+   * Emit the same selection-change signal that production input code relies on.
+   *
+   * This does not change the selection by itself. Tests must first update the
+   * element's selection state, then dispatch so subscribers observe it through
+   * the normal selection-change path.
+   */
+  private dispatchSelectionChange() {
+    this.ctl.events.emit({
+      type: 'selection-change',
+      payload: { selection: this.getSelectionState() }
+    });
+  }
+
+  /**
+   * Emit the same input event that production input code subscribes to.
+   *
+   * This does not simulate typing by itself. Tests must first update `.value`
+   * (and usually selection), then dispatch so subscribers are notified through
+   * the normal input subscription path.
+   */
+  private dispatchInput() {
+    const target = this.inputElement;
+    if (!target) return;
+    this.ctl.currentProps.inputValue = target.value;
+    this.ctl.events.emit({
+      type: 'input-change',
+      payload: { evt: new InputEvent('input'), value: target.value }
+    });
+  }
+
+  /**
+   * Move the caret and emit selection-change so tests drive the same
+   * CURSOR_STATE path as production input selection updates.
+   */
+  async setCaret(index: number) {
+    this.inputElement?.setSelectionRange(index, index);
+    this.dispatchSelectionChange();
+  }
+
+  /**
+   * Select a range and emit selection-change so subscribers observe the update
+   * through the normal input controller event path.
+   */
+  async selectRange(start: number, end: number) {
+    this.inputElement?.setSelectionRange(start, end);
+    this.dispatchSelectionChange();
+  }
+
+  /**
+   * Replace the current selection with text, move the caret to the end of the
+   * inserted text, and emit the selection/input events that EditManager
+   * subscribes to. Mutating `.value` alone would skip that path.
+   */
+  async typeText(text: string) {
+    const input = this.inputElement;
+    if (!input) return;
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? start;
+    input.value = input.value.slice(0, start) + text + input.value.slice(end);
+    const next = start + text.length;
+    input.setSelectionRange(next, next);
+    this.dispatchSelectionChange();
+    this.dispatchInput();
   }
 }

@@ -1,105 +1,3 @@
-export type UserInput = {
-  setInputValue: (value: string) => Promise<void>;
-  selectAll: () => void;
-  moveCursorToBeginning: () => void;
-  moveCursorToEnd: () => void;
-  getRange: () => [number | null, number | null];
-  focus: () => void;
-  enable: (bool: boolean) => void;
-  setPlaceholder: (value: string) => void;
-  resetPlaceholder: () => void;
-};
-
-export type NullUserInputEvent =
-  | { type: 'set-input-value'; value: string }
-  | { type: 'select-all' }
-  | { type: 'move-cursor-to-beginning' }
-  | { type: 'move-cursor-to-end' }
-  | { type: 'focus' }
-  | { type: 'enable'; enabled: boolean }
-  | { type: 'set-placeholder'; value: string }
-  | { type: 'reset-placeholder' };
-
-/**
- * Nullable USER_INPUT that records observable writes and lets tests control the
- * current selection range.
- */
-export class NullUserInput implements UserInput {
-  static createNull(params?: { range?: [number | null, number | null] }) {
-    return new NullUserInput(params?.range ?? [0, 0]);
-  }
-
-  #inputValue = '';
-  #range: [number | null, number | null];
-  #enabled = true;
-  #placeholder = '';
-  #events: NullUserInputEvent[] = [];
-
-  constructor(range: [number | null, number | null] = [0, 0]) {
-    this.#range = range;
-  }
-
-  async setInputValue(value: string): Promise<void> {
-    this.#inputValue = value;
-    this.#events.push({ type: 'set-input-value', value });
-  }
-
-  selectAll(): void {
-    this.#events.push({ type: 'select-all' });
-  }
-
-  moveCursorToBeginning(): void {
-    this.#events.push({ type: 'move-cursor-to-beginning' });
-  }
-
-  moveCursorToEnd(): void {
-    this.#events.push({ type: 'move-cursor-to-end' });
-  }
-
-  getRange(): [number | null, number | null] {
-    return this.#range;
-  }
-
-  focus(): void {
-    this.#events.push({ type: 'focus' });
-  }
-
-  enable(enabled: boolean): void {
-    this.#enabled = enabled;
-    this.#events.push({ type: 'enable', enabled });
-  }
-
-  setPlaceholder(value: string): void {
-    this.#placeholder = value;
-    this.#events.push({ type: 'set-placeholder', value });
-  }
-
-  resetPlaceholder(): void {
-    this.#placeholder = '';
-    this.#events.push({ type: 'reset-placeholder' });
-  }
-
-  setRange(range: [number | null, number | null]) {
-    this.#range = range;
-  }
-
-  getInputValue() {
-    return this.#inputValue;
-  }
-
-  isEnabled() {
-    return this.#enabled;
-  }
-
-  getPlaceholder() {
-    return this.#placeholder;
-  }
-
-  trackEvents() {
-    return { data: this.#events };
-  }
-}
-
 export type UserInputSelectionState =
   | 'SELECT_ALL'
   | 'SELECT_PARTIAL'
@@ -107,3 +5,50 @@ export type UserInputSelectionState =
   | 'CURSOR_AT_MIDDLE'
   | 'CURSOR_AT_END'
   | 'EMPTY';
+
+export type UserInput = {
+  setInputValue: (value: string) => Promise<void>;
+  selectAll: () => void;
+  moveCursorToBeginning: () => void;
+  moveCursorToEnd: () => void;
+  /**
+   * Move the caret to a specific position and notify selection subscribers.
+   *
+   * Intended mainly for nulled/test input implementations that need to mimic
+   * the real selection-change path.
+   */
+  setCaret: (index: number) => Promise<void>;
+  /**
+   * Select a range and notify selection subscribers.
+   *
+   * Intended mainly for nulled/test input implementations that need to mimic
+   * the real selection-change path.
+   */
+  selectRange: (start: number, end: number) => Promise<void>;
+  /**
+   * Replace the current selection with text and notify input/selection
+   * subscribers as if the user had typed into the input.
+   *
+   * Intended mainly for nulled/test input implementations.
+   */
+  typeText: (text: string) => Promise<void>;
+  getRange: () => [number | null, number | null];
+  focus: () => void;
+  enable: (bool: boolean) => void;
+  setPlaceholder: (value: string) => void;
+  resetPlaceholder: () => void;
+  /**
+   * Subscribe to user input changes.
+   *
+   * This lets you react to the user typing into the input.
+   */
+  subscribeInputChange: (handleInputChange: (value: string) => void) => () => void;
+  /**
+   * Subscribe to user selection changes.
+   *
+   * This lets you react to the user changing the selection in the input.
+   */
+  subscribeSelectionChange: (
+    handleSelectionChange: (selection: UserInputSelectionState) => void
+  ) => () => void;
+};

@@ -1,7 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, test } from 'vitest';
 import { EditManager } from '../EditManager.js';
 import { byId, frag, makeRoot, p } from '../test/util.js';
-import { NullUserInput } from '../UserInput.js';
+import { getValue, quickDescend } from '../lib/token.js';
+import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
+import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
 
 describe('EditManager', () => {
   it('first focus quick-descends but stays in view mode', () => {
@@ -9,7 +11,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -31,7 +33,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
 
@@ -51,7 +53,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -84,7 +86,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -107,7 +109,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -131,7 +133,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.enterEditing(byId(doc, 'p1'));
@@ -151,7 +153,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.enterEditing(byId(doc, 'p1'));
@@ -172,7 +174,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     const p1 = byId(doc, 'p1');
@@ -199,7 +201,7 @@ describe('EditManager', () => {
     );
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -226,7 +228,7 @@ describe('EditManager', () => {
     );
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: NullUserInput.createNull(),
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -244,21 +246,161 @@ describe('EditManager', () => {
 
   it('handleParent moves FOCUS to the parent element', () => {
     // arrange
-    const nestedDoc = makeRoot('<div id="root-line"><p id="nested">inner</p></div>');
+    const doc = makeRoot('<div id="root-line"><p id="nested">inner</p></div>');
     const editManager = EditManager.createNull({
-      document: nestedDoc,
-      userInput: NullUserInput.createNull(),
+      document: doc,
+      userInput: Controller.createNull().input,
       onError: vi.fn()
     });
     editManager.nav.connect();
-    editManager.nav.REQUEST_FOCUS(byId(nestedDoc, 'nested'));
+    editManager.nav.REQUEST_FOCUS(byId(doc, 'nested'));
 
     // act
     editManager.handleParent();
 
     // assert
-    expect(editManager.nav.getFocus()).toBe(byId(nestedDoc, 'root-line'));
+    expect(editManager.nav.getFocus()).toBe(byId(doc, 'root-line'));
 
     editManager.destroy();
+  });
+});
+
+describe('input handling', () => {
+  // "..." represents the current input
+  // "|" = input cursor position in input
+  // "[...]" = selection range
+  // => user-initiated transformation
+  // ==> is a transformation performed automatically, not by the user
+
+  async function createEditManagerFixture(params?: {
+    html?: string;
+  }) {
+    const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
+    const line = byId(doc, 'p1');
+    const firstToken = quickDescend(line);
+    if (!firstToken) {
+      throw new Error('expected first token');
+    }
+    const ctl = Controller.createNull();
+    const userInput = ctl.input;
+    await userInput.setInputValue(getValue(firstToken));
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput,
+      onError: vi.fn()
+    });
+    editManager.enterEditing(line);
+
+    return { ctl, doc, editManager, line, userInput };
+  }
+
+  function getTokenValues(line: HTMLElement) {
+    return Array.from(line.querySelectorAll('.jsed-token')).map((token) => token.textContent);
+  }
+
+  test('"foo|" => "foo |" => "foo b|" ==> "b|": inserts new token after foo with space between', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo')
+    });
+    // handleTokenChange asynchronously selects the whole token text
+    await userInput.setCaret(3);
+    expect(userInput.getRange()).toEqual([3, 3]); // verify
+
+    // act: user types space at the end of "foo"
+    await userInput.typeText(' ');
+
+    // act: then types "b"
+    await userInput.typeText('b');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['foo', 'b']);
+    expect(getValue(editManager.cursor!.getToken())).toBe('b');
+    expect(userInput.getInputValue()).toBe('b');
+  });
+
+  test('"[foo]" => " |": moves next token', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo bar')
+    });
+    await userInput.selectRange(0, 3);
+
+    // act
+    await userInput.typeText(' ');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['foo', 'bar']);
+    expect(getValue(editManager.cursor!.getToken())).toBe('bar');
+    expect(userInput.getInputValue()).toBe('bar');
+  });
+
+  test('"[foo]" => "|": deletes the token', async () => {
+    // arrange
+    const { line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo')
+    });
+    await userInput.selectRange(0, 3);
+
+    // act
+    await userInput.typeText('');
+
+    // assert
+    expect(line.querySelectorAll('.jsed-token')).toHaveLength(1);
+    expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+  });
+
+  test('"|foo" => " |foo" ==> "| foo" => "b| foo" ==> "b|": inserts new token before foo with space between', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo')
+    });
+    await userInput.setCaret(0);
+
+    // act
+    await userInput.typeText(' ');
+    await userInput.typeText('b');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['b', 'foo']);
+    expect(getValue(editManager.cursor!.getToken())).toBe('b');
+    expect(userInput.getInputValue()).toBe('b');
+  });
+
+  test('"|foo" => "b|foo" ==> "b |foo" ==> "b|": inserts new token before foo with space between', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo')
+    });
+    await userInput.setCaret(0);
+
+    // act
+    await userInput.typeText('b');
+    await userInput.typeText(' ');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['b', 'foo']);
+    const [firstToken, secondToken] = Array.from(line.querySelectorAll('.jsed-token'));
+    expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(firstToken?.nextSibling?.textContent).toBe(' ');
+    expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
+    expect(getValue(editManager.cursor!.getToken())).toBe('b');
+    expect(userInput.getInputValue()).toBe('b');
+  });
+
+  test.fails('"fo|o" => " fo |o" ==> "[o]": splits at the cursor and prefers the trailing TOKEN', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo')
+    });
+    await userInput.setCaret(2);
+
+    // act
+    await userInput.typeText(' ');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['fo', 'o']);
+    expect(getValue(editManager.cursor!.getToken())).toBe('o');
+    expect(userInput.getInputValue()).toBe('o');
   });
 });

@@ -6,7 +6,6 @@ import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputSelectionState } from './UserInput.js';
-import { InputManager } from './InputManager.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -49,8 +48,9 @@ export class EditManager {
   }
 
   cursor?: ITokenCursor;
-  private inputManager?: InputManager;
   private mode: EditManagerMode = 'view';
+  private unsubscribeInputChange?: () => void;
+  private unsubscribeSelectionChange?: () => void;
 
   constructor(
     private document: JsedDocument,
@@ -75,6 +75,12 @@ export class EditManager {
     if (!initial) {
       return err({ type: 'no-token-under-focus' });
     }
+    this.unsubscribeInputChange?.();
+    this.unsubscribeSelectionChange?.();
+    this.unsubscribeInputChange = this.userInput.subscribeInputChange(this.handleInputChange);
+    this.unsubscribeSelectionChange = this.userInput.subscribeSelectionChange(
+      this.handleSelectionChange
+    );
 
     const firstToken = isToken(initial) ? initial : token.quickDescend(initial);
     if (firstToken) {
@@ -88,7 +94,6 @@ export class EditManager {
           onTokenChange: this.handleTokenChange,
           onError: this.handleCursorError
         });
-        this.inputManager = InputManager.create(this.nav, this.cursor, this.userInput);
       } else {
         this.cursor.setToken(firstToken); // calls handleTokenChange
       }
@@ -101,10 +106,11 @@ export class EditManager {
 
   exitEditing(params?: { focusElement?: HTMLElement; scrollIntoView?: boolean }) {
     const focusElement = params?.focusElement ?? this.nav.getFocus() ?? undefined;
+    this.unsubscribeInputChange?.();
+    this.unsubscribeSelectionChange?.();
     this.cursor?.destroy();
     this.cursor = undefined;
     this.userInput.setInputValue('');
-    this.inputManager = undefined;
     this.mode = 'view';
 
     if (focusElement) {
@@ -121,12 +127,79 @@ export class EditManager {
   /**
    * When user types in the input...
    *
-   * @param {string} input What the user has typed into an html input/textarea
+   * @param {string} inputValue What the user has typed into an html input/textarea
    */
-  public handleInputChange = (input: string) => {
+  public handleInputChange = async (inputValue: string) => {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
-    this.inputManager?.handleInputChange(input);
-    this.cursor?.handleInputChange(input);
+
+    // "[foo]" => " " => moveNext
+    const isReplacedWithSpace = /^\s+$/.test(inputValue); // " "
+    if (isReplacedWithSpace) {
+      this.cursor.moveNext();
+      return;
+    }
+    const value = inputValue;
+
+    // part0 can be undefined if we split on whitespace:
+    const [part0, ...parts] = value.split(/\s+/).filter(Boolean);
+    /**
+     * "|foo" => " |foo" => "| foo"
+     */
+    const prependedSpace = /^\s+/.test(value);
+    /**
+     * true: "foo|a" => "foo |a" => "foo|"
+     * false: "foo a|" => "a|" etc
+     * false: "foo a" (pasted) => "a|"
+     */
+    let preferFirstPart = false;
+    const containsSpace = value.match(/^(\S+)(\s+)\S/); // "foo a..."
+    if (containsSpace) {
+      const firstWord = containsSpace[1];
+      const firstSpace = containsSpace[2];
+      const [, stop] = this.userInput.getRange();
+      const isFirstWord = firstWord.length === stop;
+      const isFirstWordPlusSpace = firstWord.length + firstSpace.length === stop;
+      preferFirstPart = isFirstWord || isFirstWordPlusSpace;
+    }
+    let lastToken: HTMLElement | null = null;
+
+    // Update document.
+    if (value === '') {
+      this.cursor.delete();
+    } else {
+      this.cursor.replace(part0);
+      for (const part of parts.reverse()) {
+        const token = this.cursor.append(part);
+        if (!lastToken) {
+          lastToken = token;
+        }
+      }
+    }
+
+    // Update CURSOR and input.
+    if (prependedSpace) {
+      this.userInput.moveCursorToBeginning();
+    }
+
+    const finalToken = preferFirstPart ? this.cursor.getToken() : lastToken;
+
+    if (finalToken) {
+      this.cursor.setToken(finalToken);
+      //// this.#cursorMarkers.clear();
+      // this.#controller.onMobileKeyboardOpenOnce(() => {
+      //   debug('correct mobile keyboard scroll');
+      //   scrollIntoView(token);
+      // });
+      this.userInput.focus();
+      await this.userInput.setInputValue(token.getValue(finalToken));
+      this.userInput.selectAll();
+      //// scrollIntoView(token);
+      // this.#controller.setStatusElementFocus(token);
+      this.nav.FOCUS(finalToken);
+      this.userInput.moveCursorToEnd();
+    }
+
+    this.cursor?.handleInputChange(inputValue);
   };
 
   /**
@@ -152,6 +225,8 @@ export class EditManager {
       this.userInput.focus();
       this.userInput.setInputValue(token.getValue(tok)).then(() => {
         this.userInput.selectAll();
+        // Mainly to update CURSOR_STATE eg "[foo]" => " " ==> moveNext
+        this.handleInputChange(token.getValue(tok));
       });
     } else {
       this.userInput.enable(false);

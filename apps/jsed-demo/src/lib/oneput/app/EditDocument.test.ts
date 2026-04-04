@@ -1,6 +1,6 @@
 import { Controller } from '@oneput/oneput';
 import { EditManager, JsedDocument } from '@oneput/jsed';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test, it } from 'vitest';
 import { EditDocument } from './EditDocument.js';
 
 function makeDocument(html: string): JsedDocument {

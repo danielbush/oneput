@@ -32,6 +32,8 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
       this.setMarker(CURSOR_INSERT_AFTER_CLASS);
     } else if (input.startsWith(' ')) {
       this.setMarker(CURSOR_INSERT_BEFORE_CLASS);
+    } else {
+      this.clearMarkers();
     }
   };
 
@@ -134,8 +136,10 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   append(val: string): HTMLElement | null {
     if (!this.isOnToken()) return null;
+    const current = this.getToken();
     const tok = token.createToken(val);
-    token.insertAfter(tok, this.getToken());
+    token.insertAfter(tok, current);
+    token.uncollapse(current);
     return tok;
   }
 

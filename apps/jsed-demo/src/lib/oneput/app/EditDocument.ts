@@ -16,21 +16,11 @@ export class EditDocument implements AppObject {
     return instance;
   }
 
-  private unsubscribeInputChanges: () => void;
-  private unsubscribeSelectionChanges: () => void;
-
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
     private editManager: EditManager
-  ) {
-    this.unsubscribeInputChanges = ctl.events.on('input-change', ({ value }) =>
-      editManager.handleInputChange(value)
-    );
-    this.unsubscribeSelectionChanges = ctl.events.on('selection-change', ({ selection }) =>
-      editManager.handleSelectionChange(selection)
-    );
-  }
+  ) {}
 
   onStart = () => {
     setDocument(this.document);
@@ -43,8 +33,6 @@ export class EditDocument implements AppObject {
 
   onExit = () => {
     this.editManager.destroy();
-    this.unsubscribeInputChanges();
-    this.unsubscribeSelectionChanges();
   };
 
   handleEditError = (err: EditManagerError) => {

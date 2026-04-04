@@ -17,13 +17,12 @@ Jsed divides the DOM that up into 3 broad mutually exclusive categories:
   — an element the user can navigate to and FOCUS on. Cannot be a TOKEN or an IGNORABLE.
   - Source of truth: `isFocusable` in `taxonomy.ts`.
 - (2) **TOKEN** (jsed token)
-  — a span wrapping consecutive non-whitespace text. The CURSOR operates on tokens, not individual characters. In the DOM, TOKEN's have a trailing space by default. COLLAPSED_TOKEN and PADDED_TOKEN describe tokens with altered spacing. TODO: POSITIVE_SPACE may further change TOKEN's behaviour.
-  - A TOKEN has 2² = 4 spacing states:
-    - unpadded + uncollapsed: `'foo '` — the default
-    - unpadded + collapsed: `'foo'` — COLLAPSED_TOKEN
-    - padded + uncollapsed: `' foo '` — PADDED_TOKEN
-    - padded + collapsed: `' foo'` — PADDED_TOKEN + COLLAPSED_TOKEN
-  - In NEGATIVE_SPACE, a stale leading space (e.g. if the ISLAND is later removed) is visually harmless — the browser collapses it.
+  — a span wrapping consecutive non-whitespace text. The CURSOR operates on TOKEN's, not individual characters. In the DOM, a TOKEN now holds only its visible text. Spacing in NEGATIVE_SPACE is represented by whitespace text nodes at TOKEN boundaries rather than being stored inside the TOKEN text node.
+  - This means jsed distinguishes between:
+    - TOKEN content: e.g. `'foo'`
+    - boundary spacing after a TOKEN: e.g. a sibling text node `' '`
+    - boundary spacing before a TOKEN: e.g. a sibling text node `' '` immediately before it
+  - COLLAPSED_TOKEN and PADDED_TOKEN remain useful terms for discussing these spacing states, but the source of truth is now the boundary whitespace in the DOM rather than literal leading or trailing space in the TOKEN text.
   - Source of truth: search docstrings for TOKEN.
 - (3) **IGNORABLE**
   - An element that cannot be FOCUS'ed and is effectively invisible to user navigation and other jsed operations (although it may be very much visible to the user). It is invisible to the CURSOR.
@@ -155,8 +154,8 @@ Tokens and Text and whitespace
 
 - **ANCHOR** — a TOKEN which is inserted into a FOCUSABLE (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
   - Source of truth: search docstrings for ANCHOR.
-- **COLLAPSED_TOKEN** — a TOKEN with no trailing space, so it sits flush against the next TOKEN. Most TOKEN's in NEGATIVE_SPACE are uncollapsed (have a trailing space) — this is their default state. TOGGLE_COLLAPSE removes or adds this space. This allows us to express markup like this: `<em>foo<strong>bar</strong>baz</em>` (all TOKEN's are collapsed). Uncollapsed TOKEN's include a trailing space: `<em>foo <strong>bar </strong>baz </em>`.
-- **PADDED_TOKEN** — a TOKEN with a leading space. TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous visible sibling doesn't carry its own trailing space — e.g. an ISLAND or any LINE (block, inline-block, etc.).
+- **COLLAPSED_TOKEN** — a TOKEN whose trailing boundary spacing has been removed, so it sits flush against the next TOKEN. In the current model this means there is no whitespace text node immediately after the TOKEN. TOGGLE_COLLAPSE removes or restores that boundary spacing. This allows jsed to express markup like `<em>foo<strong>bar</strong>baz</em>` where the TOKEN's are visually adjacent.
+- **PADDED_TOKEN** — a TOKEN whose leading boundary spacing has been added explicitly. In the current model this means there is whitespace text node immediately before the TOKEN. PADDED_TOKEN is mainly a transitional term for cases where the previous visible sibling does not carry spacing of its own, such as an ISLAND or another LINE.
   - Source of truth: `isPadded`, `pad`, `unpad` in token.ts.
 - **NEGATIVE_SPACE** — default HTML whitespace handling: sequences of whitespace collapse to a single space, newlines treated as whitespace. Applies to most tags like `<p>`.
 - **POSITIVE_SPACE** — whitespace-significant mode (e.g. `<pre>`, `white-space: pre`): sequences preserved, lines break only at newlines and `<br>`.
@@ -176,5 +175,5 @@ Tokens and Text and whitespace
 - **JOIN** — when a TOKEN (t) is joined with the next or previous (p): p is removed and its text is appended or prepended to t.
 - **SPLIT_BY_TOKEN** — splitting a TOKEN's parent before or after the TOKEN. The split applies to the parent (which may be the LINE or an inline element like `<em>`). LINE is always the highest ancestor we split at.
 - **SPLIT_BY_LINE** — splitting a LINE's parent element before or after the LINE. Can be done with reference to a TOKEN (split at the TOKEN's LINE) or at the FOCUSABLE level (split the focused LINE's parent).
-- **TOGGLE_COLLAPSE** — toggle COLLAPSED_TOKEN state on/off (trailing space).
-- **TOGGLE_PADDED** — toggle PADDED_TOKEN state on/off (leading space). Typically relevant when the previous visible sibling is an ISLAND or LINE.
+- **TOGGLE_COLLAPSE** — toggle the trailing boundary spacing after a TOKEN on/off.
+- **TOGGLE_PADDED** — toggle the leading boundary spacing before a TOKEN on/off. Typically relevant when the previous visible sibling is an ISLAND or LINE.

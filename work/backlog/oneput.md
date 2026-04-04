@@ -51,6 +51,19 @@ Questions to answer:
 - what is the intended behavior when the new app omits `menu` entirely?
 - are there similar leaks for other AppObject-owned state besides menu?
 
+## Initial proposal: (refactor) null input controller backed by happy-dom input element
+
+Drafted: 05-Apr-2026
+
+Create a nullable input controller for `packages/oneput` that is backed by a real `happy-dom` input element rather than a hand-rolled fake. This should be similar in spirit to the recent `NullUserInput` work in `packages/jsed`: keep it nullable, but let selection/value behavior come from a real DOM input so tests can rely on realistic `value`, `selectionStart`, `selectionEnd`, and `setSelectionRange(...)` behavior.
+
+Questions to answer:
+
+- what is the right boundary in Oneput for this nullable input controller?
+- should it wrap the existing input controller API directly, or sit one layer lower as an infrastructure wrapper around the actual input element?
+- what observable writes/events should it track for tests?
+- can existing Oneput tests benefit from a DOM-backed nullable instead of casted fakes or looser helpers?
+
 ## Initial proposal: (feat + refactor) better duplicate binding handling 
 
 Drafted: 19-Mar-2026

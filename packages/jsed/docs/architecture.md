@@ -8,7 +8,7 @@ Jsed is a headless library — it contains all the navigation and editing logic 
 
 Everything starts with `JsedDocument` — a thin wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other module takes a JsedDocument (or its root) as input.
 
-Alongside it, `UserInput` is a type representing the text input the user types into — setting values, selecting text, moving the cursor. It has no dependencies; it's just a contract that the hosting environment fulfills.
+Alongside it, `UserInput` is the contract for the host input control. It covers setting values, selecting text, moving the input cursor, and subscribing to input and selection changes. Jsed stays headless by depending on this contract instead of owning a concrete `<input>` element.
 
 ## Navigation: Nav
 
@@ -43,22 +43,19 @@ Tokenizing the whole document upfront would be expensive, so instead we tokenize
 - **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
 - **toggleCollapseNext / toggleCollapsePrevious** — toggle COLLAPSED_TOKEN on/off
 
-## Input handling: InputManager
-
-`InputManager` sits one level higher, taking Nav, a TokenCursor, and UserInput. It translates what the user types into document edits: splitting input on whitespace to create multiple TOKENs, handling prepended spaces, and coordinating CURSOR with the input element's selection state.
-
 ## Orchestration: EditManager
 
 `EditManager` is the top-level mediator. It takes a JsedDocument and UserInput, creates a persistent Nav, and switches between two modes:
 
 - **view** — owns FOCUS only. First FOCUS on a FOCUSABLE runs `quickDescend` opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
-- **editing** — owns FOCUS plus TokenCursor and InputManager. TOKEN-level input flows through the CURSOR, and structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
+- **editing** — owns FOCUS plus TokenCursor. `EditManager` also subscribes to UserInput changes in this mode, translating input text and input selection into CURSOR actions. Structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
 
 It wires everything together so that:
 
 - Key bindings trigger navigation and editing actions
 - Mouse clicks and touches route through REQUEST_FOCUS with a focus controller that tokenizes on the fly
-- Input changes flow through InputManager to the CURSOR to the document
+- Input changes flow through `EditManager.handleInputChange(...)`, which may rewrite the current TOKEN, append new TOKEN's after whitespace splits, or move the CURSOR based on the input contents
+- Input selection changes flow through `EditManager.handleSelectionChange(...)` into `TokenCursor.handleSelectionChange(...)`
 - TOKEN changes flow back to update FOCUS and the input element
 
 A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditManager and connects it to Oneput's bindings and input systems.

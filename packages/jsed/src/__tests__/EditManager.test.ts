@@ -1,29 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import { EditManager } from '../EditManager.js';
 import { byId, frag, makeRoot, p } from '../test/util.js';
-import type { UserInput } from '../UserInput.js';
-
-function makeUserInput(): UserInput {
-  return {
-    setInputValue: vi.fn(async () => {}),
-    selectAll: vi.fn(),
-    moveCursorToBeginning: vi.fn(),
-    moveCursorToEnd: vi.fn(),
-    getRange: vi.fn(() => [0, 0] as [number | null, number | null]),
-    focus: vi.fn(),
-    enable: vi.fn(),
-    setPlaceholder: vi.fn(),
-    resetPlaceholder: vi.fn()
-  };
-}
+import { NullUserInput } from '../UserInput.js';
 
 describe('EditManager', () => {
   it('first focus quick-descends but stays in view mode', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -43,9 +29,9 @@ describe('EditManager', () => {
   it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
 
@@ -63,9 +49,9 @@ describe('EditManager', () => {
   it('clicking a token in another already-tokenized FOCUSABLE requires two interactions', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -96,9 +82,9 @@ describe('EditManager', () => {
   it('clicking a different element while editing exits to view mode and quick-descends it', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -119,9 +105,9 @@ describe('EditManager', () => {
   it('handleRight navigates by FOCUS in view mode', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -143,9 +129,9 @@ describe('EditManager', () => {
   it('handleRight moves to the next TOKEN in edit mode', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.enterEditing(byId(doc, 'p1'));
@@ -163,9 +149,9 @@ describe('EditManager', () => {
   it('handleLeft moves to the previous TOKEN in edit mode', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.enterEditing(byId(doc, 'p1'));
@@ -184,9 +170,9 @@ describe('EditManager', () => {
   it('handleExit leaves edit mode and returns to view mode', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     const p1 = byId(doc, 'p1');
@@ -211,9 +197,9 @@ describe('EditManager', () => {
         p({ id: 'p3' }, 'baz')
       )
     );
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -238,9 +224,9 @@ describe('EditManager', () => {
         p({ id: 'p3' }, 'baz')
       )
     );
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: doc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();
@@ -259,9 +245,9 @@ describe('EditManager', () => {
   it('handleParent moves FOCUS to the parent element', () => {
     // arrange
     const nestedDoc = makeRoot('<div id="root-line"><p id="nested">inner</p></div>');
-    const editManager = EditManager.create({
+    const editManager = EditManager.createNull({
       document: nestedDoc,
-      userInput: makeUserInput(),
+      userInput: NullUserInput.createNull(),
       onError: vi.fn()
     });
     editManager.nav.connect();

@@ -10,21 +10,23 @@ exports[`tokenizeLine > SHALLOW_TOKENIZATION > case 2 > Should only tokenize p1 
     <span
       class="jsed-token"
     >
-      foo 
+      foo
     </span>
+     
     <em
       style="display:inline;"
     >
       <span
         class="jsed-token"
       >
-        bar 
+        bar
       </span>
     </em>
+     
     <span
       class="jsed-token"
     >
-      baz 
+      baz
     </span>
   </p>
   <p
@@ -48,21 +50,23 @@ exports[`tokenizeLine > complex LINE: <p>foo <em>bar</em> baz</p> 1`] = `
   <span
     class="jsed-token"
   >
-    foo 
+    foo
   </span>
+   
   <em
     style="display:inline;"
   >
     <span
       class="jsed-token"
     >
-      bar 
+      bar
     </span>
   </em>
+   
   <span
     class="jsed-token"
   >
-    baz 
+    baz
   </span>
 </p>
 `;
@@ -74,17 +78,19 @@ exports[`tokenizeLine > simple LINE: <p>foo bar baz</p> 1`] = `
   <span
     class="jsed-token"
   >
-    foo 
+    foo
   </span>
+   
   <span
     class="jsed-token"
   >
-    bar 
+    bar
   </span>
+   
   <span
     class="jsed-token"
   >
-    baz 
+    baz
   </span>
 </p>
 `;

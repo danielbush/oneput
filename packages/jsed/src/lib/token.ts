@@ -23,7 +23,6 @@ import {
   getLine,
   getFirstLineSibling,
   getNextLineSibling,
-  getPreviousVisibleSibling,
   getPreviousTokenSibling,
   getNextTokenSibling
 } from './sibwalk.js';
@@ -51,9 +50,7 @@ export function getParent(el: HTMLElement): HTMLElement {
 export function createToken(text: string): HTMLElement {
   const el = document.createElement('span');
   el.classList.add(JSED_TOKEN_CLASS);
-  // Create uncollapsed by default:
-  const content = text.endsWith(' ') ? text : text + ' ';
-  el.appendChild(document.createTextNode(content));
+  el.appendChild(document.createTextNode(text));
   return el;
 }
 
@@ -83,7 +80,7 @@ export function getValue(token: HTMLElement): string {
   if (isAnchor(token)) {
     return JSED_ANCHOR_CHAR;
   }
-  return token.firstChild!.nodeValue?.trim() as string;
+  return token.firstChild!.nodeValue as string;
 }
 
 // #endregion
@@ -103,26 +100,26 @@ function replaceTextNode(child: Node): HTMLElement | null {
   }
   if (child.nodeType === Node.TEXT_NODE) {
     const text = child.nodeValue!;
-    const tokens = text
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((s) => createToken(s));
-    // PADDED_TOKEN: if text has leading whitespace and previous visible sibling
-    // is a block or ISLAND (neither carries trailing space to the next sibling),
-    // pad the first TOKEN.
-    if (tokens.length > 0 && /^\s/.test(text)) {
-      const prev = getPreviousVisibleSibling(child as HTMLElement);
-      if (prev && (isIsland(prev) || isLine(prev))) {
-        pad(tokens[0]);
-      }
-    }
+    const parts = text.match(/\s+|\S+/g) ?? [];
     const frag = document.createDocumentFragment();
-    for (const token of tokens) {
+    let first: HTMLElement | null = null;
+
+    for (const part of parts) {
+      if (/^\s+$/.test(part)) {
+        // Boundary-spacing model: preserve inter-token whitespace as its own
+        // text node rather than baking it into TOKEN content.
+        frag.appendChild(document.createTextNode(part));
+        continue;
+      }
+
+      const token = createToken(part);
+      if (!first) first = token;
       frag.appendChild(token);
     }
+
     el?.insertBefore(frag, child);
     el?.removeChild(child);
-    return tokens[0] ?? null;
+    return first;
   }
   return null;
 }
@@ -247,12 +244,76 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
  * Assumes `isToken` is true, but checks for weird invalid states that might occur
  */
 function validate(token: HTMLElement): void {
+  if (isAnchor(token)) {
+    return;
+  }
   if (!token.firstChild) {
     throw new Error('token has no text');
   }
   if (token.firstChild.nodeType !== Node.TEXT_NODE) {
     throw new Error('first child should be a text node');
   }
+}
+
+function isWhitespaceTextNode(node: Node | null | undefined): node is Text {
+  return node instanceof window.Text && /^\s+$/.test(node.nodeValue ?? '');
+}
+
+function getSeparatorBefore(token: HTMLElement): Text | null {
+  const prev = token.previousSibling;
+  return isWhitespaceTextNode(prev) ? prev : null;
+}
+
+function getSeparatorAfter(token: HTMLElement): Text | null {
+  const next = token.nextSibling;
+  return isWhitespaceTextNode(next) ? next : null;
+}
+
+/**
+ * Ensure there is a whitespace separator immediately before the TOKEN.
+ *
+ * Used in PADDED_TOKEN's.
+ */
+function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
+  const existing = getSeparatorBefore(token);
+  if (existing) {
+    return existing;
+  }
+  const separator = document.createTextNode(value);
+  token.parentNode?.insertBefore(separator, token);
+  return separator;
+}
+
+/**
+ * Ensure there is a whitespace separator immediately after the TOKEN.
+ *
+ * Used for default inter-TOKEN spacing when the TOKEN is not a
+ * COLLAPSED_TOKEN.
+ */
+function ensureSeparatorAfter(token: HTMLElement, value = ' '): Text {
+  const existing = getSeparatorAfter(token);
+  if (existing) {
+    return existing;
+  }
+  const separator = document.createTextNode(value);
+  token.parentNode?.insertBefore(separator, token.nextSibling);
+  return separator;
+}
+
+/**
+ * Remove the whitespace separator immediately before the TOKEN, if present.
+ */
+function removeSeparatorBefore(token: HTMLElement): void {
+  const separator = getSeparatorBefore(token);
+  separator?.parentNode?.removeChild(separator);
+}
+
+/**
+ * Remove the whitespace separator immediately after the TOKEN, if present.
+ */
+function removeSeparatorAfter(token: HTMLElement): void {
+  const separator = getSeparatorAfter(token);
+  separator?.parentNode?.removeChild(separator);
 }
 
 /**
@@ -263,18 +324,14 @@ function validate(token: HTMLElement): void {
  * manage the CURSOR and cursor operations - we only call focus when we
  * create a new token eg after deleting the current CURSOR and only in
  * these situations will focus get called triggering a "select-all" in jsed-ui.
+ *
+ * In the boundary-spacing model this only updates visible TOKEN text. Spacing
+ * before / after the TOKEN is managed by adjacent separator text nodes.
  */
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token);
   anchor2Token(token);
-  let content = val.trim();
-  if (!isCollapsed(token)) {
-    content = content + ' ';
-  }
-  if (isPadded(token)) {
-    content = ' ' + content;
-  }
-  token.firstChild!.nodeValue = content;
+  token.firstChild!.nodeValue = val.trim();
   return token;
 }
 
@@ -298,23 +355,29 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
     return { next: token };
   }
 
-  // PADDED_TOKEN transfer: if the deleted TOKEN is padded, the next TOKEN
-  // inherits the padding (it's now adjacent to the ISLAND). If there's no
-  // next TOKEN, the padding is simply dropped.
-  if (isPadded(token)) {
-    const next = getNextTokenSibling(token);
-    if (next) {
-      pad(next);
-    }
-  }
+  const prevTok = getPreviousTokenSibling(token);
+  const nextTok = getNextTokenSibling(token);
+  const separatorBefore = getSeparatorBefore(token);
+  const separatorAfter = getSeparatorAfter(token);
 
-  // Grab this if it exists before we delete...
-  const nextTok = getNextTokenSibling(token) || getPreviousTokenSibling(token);
+  // Keep at most one separator across the gap left by the removed TOKEN.
+  // Edge separators (leading / trailing whitespace with no TOKEN on one side)
+  // are dropped.
+  if (prevTok && nextTok) {
+    if (separatorBefore && separatorAfter) {
+      separatorAfter.parentNode?.removeChild(separatorAfter);
+    }
+  } else {
+    separatorBefore?.parentNode?.removeChild(separatorBefore);
+    separatorAfter?.parentNode?.removeChild(separatorAfter);
+  }
 
   parentNode.removeChild(token);
 
-  if (nextTok) {
-    return { next: nextTok };
+  const nextFocus = nextTok || prevTok;
+
+  if (nextFocus) {
+    return { next: nextFocus };
   }
 
   // We're out of text, we need to add a ANCHOR to this LINE_SEGMENT .
@@ -383,7 +446,10 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
 // #region Spacing
 
 /**
- * Token is a COLLAPSED_TOKEN .
+ * Token is a COLLAPSED_TOKEN.
+ *
+ * In the boundary-spacing model this means there is no separator text node
+ * immediately after the TOKEN.
  */
 export function isCollapsed(token: HTMLElement): boolean {
   return token.classList.contains(JSED_TOKEN_COLLAPSED);
@@ -392,74 +458,62 @@ export function isCollapsed(token: HTMLElement): boolean {
 /**
  * Perform TOGGLE_COLLAPSE "on" on TOKEN.
  *
- * Tokens should be uncollapsed by default.  We can then choose to collapse.
+ * In the boundary-spacing model this removes the separator after the TOKEN.
  */
 export function collapse(token: HTMLElement): HTMLElement {
-  const val = token.firstChild!.nodeValue;
-  if (!val) {
-    throw new Error(`Invalid token: no string content detected`);
-  }
+  validate(token);
   token.classList.add(JSED_TOKEN_COLLAPSED);
-  if (val.endsWith(' ')) {
-    token.firstChild!.nodeValue = val.trim();
-    return token;
-  }
+  removeSeparatorAfter(token);
   return token;
 }
 
 /**
  * Perform TOGGLE_COLLAPSE "off" on TOKEN.
+ *
+ * In the boundary-spacing model this ensures there is a separator after the
+ * TOKEN.
  */
 export function uncollapse(token: HTMLElement): HTMLElement {
-  const val = token.firstChild!.nodeValue;
-  if (!val) {
-    throw new Error(`Invalid token: no string content detected`);
-  }
+  validate(token);
   token.classList.remove(JSED_TOKEN_COLLAPSED);
-  if (val.endsWith(' ')) {
-    return token;
-  }
-  token.firstChild!.nodeValue += ' ';
+  ensureSeparatorAfter(token);
   return token;
 }
 
 /**
  * Check if TOKEN is a PADDED_TOKEN.
+ *
+ * In the boundary-spacing model this means there is explicit separator
+ * whitespace immediately before the TOKEN.
  */
 export function isPadded(token: HTMLElement): boolean {
   return token.classList.contains(JSED_TOKEN_PADDED);
 }
 
 /**
- * Convert to PADDED_TOKEN — add a leading space.
+ * Convert to PADDED_TOKEN.
  *
- * TOKEN's are unpadded by default. PADDED_TOKEN is used when the previous
- * LINE_SIBLING doesn't carry its own trailing space (e.g. an ISLAND).
+ * In the boundary-spacing model this ensures there is separator whitespace
+ * immediately before the TOKEN. PADDED_TOKEN remains as a transitional class
+ * while spacing migrates away from TOKEN-owned text content.
  */
 export function pad(token: HTMLElement): HTMLElement {
-  const val = token.firstChild!.nodeValue;
-  if (!val) {
-    throw new Error(`Invalid token: no string content detected`);
-  }
+  validate(token);
   token.classList.add(JSED_TOKEN_PADDED);
-  if (!val.startsWith(' ')) {
-    token.firstChild!.nodeValue = ' ' + val;
-  }
+  ensureSeparatorBefore(token);
   return token;
 }
 
 /**
- * Convert PADDED_TOKEN to TOKEN — remove the leading space.
+ * Convert PADDED_TOKEN to TOKEN.
+ *
+ * In the boundary-spacing model this removes separator whitespace immediately
+ * before the TOKEN.
  */
 export function unpad(token: HTMLElement): HTMLElement {
-  const val = token.firstChild!.nodeValue;
-  if (!val) {
-    throw new Error(`Invalid token: no string content detected`);
-  }
+  validate(token);
   token.classList.remove(JSED_TOKEN_PADDED);
-  if (val.startsWith(' ')) {
-    token.firstChild!.nodeValue = val.trimStart();
-  }
+  removeSeparatorBefore(token);
   return token;
 }
 
@@ -472,13 +526,18 @@ export function joinNext(token: HTMLElement): void {
   if (!next) {
     return;
   }
+  const nextSeparatorValue = getSeparatorAfter(next)?.nodeValue ?? null;
   const val = getValue(token);
   const nextVal = getValue(next);
   replaceText(token, val + nextVal);
-  // Unpad before remove — the content has been absorbed, so padding
-  // transfer would be incorrect.
-  unpad(next);
+  removeSeparatorAfter(token);
   remove(next);
+  if (nextSeparatorValue) {
+    ensureSeparatorAfter(token, nextSeparatorValue);
+    token.classList.remove(JSED_TOKEN_COLLAPSED);
+  } else {
+    token.classList.add(JSED_TOKEN_COLLAPSED);
+  }
 }
 
 export function joinPrevious(token: HTMLElement): void {
@@ -486,13 +545,18 @@ export function joinPrevious(token: HTMLElement): void {
   if (!prev) {
     return;
   }
+  const prevSeparatorValue = getSeparatorBefore(prev)?.nodeValue ?? null;
   const val = getValue(token);
   const prevVal = getValue(prev);
   replaceText(token, prevVal + val);
-  // Unpad before remove — the content has been absorbed, so padding
-  // transfer would be incorrect.
-  unpad(prev);
+  removeSeparatorBefore(token);
   remove(prev);
+  if (prevSeparatorValue) {
+    ensureSeparatorBefore(token, prevSeparatorValue);
+    token.classList.add(JSED_TOKEN_PADDED);
+  } else {
+    token.classList.remove(JSED_TOKEN_PADDED);
+  }
 }
 
 /**

@@ -21,6 +21,10 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return new TokenCursor(params);
   }
 
+  static createNull(params: TokenCursorBaseParams) {
+    return new TokenCursor(params);
+  }
+
   // #region CURSOR_STATE
 
   public handleInputChange = (input: string): void => {

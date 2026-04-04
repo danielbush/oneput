@@ -39,7 +39,7 @@ describe('tokenizeLine', () => {
     expect(first!.textContent!.trim()).toBe('foo');
   });
 
-  test('TOKEN after ISLAND is padded', () => {
+  test('TOKEN after ISLAND is not yet marked padded during tokenizeLine', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
@@ -53,8 +53,8 @@ describe('tokenizeLine', () => {
 
     // assert
     expect(tokens.length).toBe(2);
-    expect(isPadded(afterIsland)).toBe(true);
-    expect(afterIsland.textContent).toBe(' bbb ');
+    expect(isPadded(afterIsland)).toBe(false);
+    expect(afterIsland.textContent).toBe('bbb');
   });
 
   test('TOKEN before ISLAND is not padded', () => {
@@ -69,7 +69,7 @@ describe('tokenizeLine', () => {
 
     // assert
     expect(isPadded(first)).toBe(false);
-    expect(first.textContent).toBe('aaa ');
+    expect(first.textContent).toBe('aaa');
   });
 
   test('TOKEN after INLINE_FLOW is not padded', () => {
@@ -115,7 +115,7 @@ describe('tokenizeLine', () => {
     const afterInlineBlock = tokens[tokens.length - 1] as HTMLElement;
 
     // assert
-    expect(afterInlineBlock.textContent).toBe('bbb ');
+    expect(afterInlineBlock.textContent).toBe('bbb');
     expect(isPadded(afterInlineBlock)).toBe(false);
   });
 
@@ -141,7 +141,7 @@ describe('tokenizeLine', () => {
     expect(isPadded(lastToken)).toBe(false);
   });
 
-  test('adjacent ISLANDs: TOKEN after second ISLAND is padded', () => {
+  test('adjacent ISLANDs: TOKEN after second ISLAND is not yet marked padded during tokenizeLine', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -160,8 +160,8 @@ describe('tokenizeLine', () => {
     const afterSecondIsland = tokens[tokens.length - 1] as HTMLElement;
 
     // assert
-    expect(isPadded(afterSecondIsland)).toBe(true);
-    expect(afterSecondIsland.textContent).toBe(' bbb ');
+    expect(isPadded(afterSecondIsland)).toBe(false);
+    expect(afterSecondIsland.textContent).toBe('bbb');
   });
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {

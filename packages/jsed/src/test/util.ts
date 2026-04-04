@@ -70,17 +70,17 @@ export const script = makeTag('script');
 export const input = makeTag('input');
 
 /**
- * Create a TOKEN fixture. TOKEN's carry a trailing space by default.
+ * Create a TOKEN fixture.
  */
 export function t(text: string): string {
-  return span({ class: JSED_TOKEN_CLASS }, text.endsWith(' ') ? text : `${text} `);
+  return span({ class: JSED_TOKEN_CLASS }, text);
 }
 
 /**
  * Create an ANCHOR fixture. ANCHOR's are empty TOKEN's.
  */
 export function a(): string {
-  return span({ class: `${JSED_TOKEN_CLASS} ${JSED_ANCHOR_CLASS}` }, ' ');
+  return span({ class: `${JSED_TOKEN_CLASS} ${JSED_ANCHOR_CLASS}` }, '');
 }
 
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */

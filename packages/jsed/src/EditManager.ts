@@ -160,6 +160,9 @@ export class EditManager {
       const firstWord = containsSpace[1];
       const insertedSpace = containsSpace[2];
       const isFirstWord = firstWord.length === stop;
+      /**
+       * (previous) "b|foo" => "b |foo"
+       */
       const isLeadingSplitCommit =
         previousStop === firstWord.length &&
         stop === firstWord.length + insertedSpace.length &&

@@ -272,9 +272,7 @@ describe('input handling', () => {
   // => user-initiated transformation
   // ==> is a transformation performed automatically, not by the user
 
-  async function createEditManagerFixture(params?: {
-    html?: string;
-  }) {
+  async function createEditManagerFixture(params?: { html?: string }) {
     const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
     const line = byId(doc, 'p1');
     const firstToken = quickDescend(line);
@@ -388,7 +386,7 @@ describe('input handling', () => {
     expect(userInput.getInputValue()).toBe('b');
   });
 
-  test.fails('"fo|o" => " fo |o" ==> "[o]": splits at the cursor and prefers the trailing TOKEN', async () => {
+  test('"fo|o" => " fo |o" ==> "[o]": splits at the cursor and prefers the trailing TOKEN with a space in-between', async () => {
     // arrange
     const { editManager, line, userInput } = await createEditManagerFixture({
       html: p({ id: 'p1' }, 'foo')
@@ -400,6 +398,10 @@ describe('input handling', () => {
 
     // assert
     expect(getTokenValues(line)).toEqual(['fo', 'o']);
+    const [firstToken, secondToken] = Array.from(line.querySelectorAll('.jsed-token'));
+    expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(firstToken?.nextSibling?.textContent).toBe(' ');
+    expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
     expect(getValue(editManager.cursor!.getToken())).toBe('o');
     expect(userInput.getInputValue()).toBe('o');
   });

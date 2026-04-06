@@ -8,7 +8,7 @@ Jsed is a headless library — it contains all the navigation and editing logic 
 
 Everything starts with `JsedDocument` — a thin wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other module takes a JsedDocument (or its root) as input.
 
-Alongside it, `UserInput` is the contract for the host input control. It covers setting values, selecting text, moving the input cursor, and subscribing to input and selection changes. Jsed stays headless by depending on this contract instead of owning a concrete `<input>` element.
+Alongside it, `UserInput` is the contract for the host input control. It covers setting values, selecting text, moving the input cursor, and subscribing to input and selection changes. Input change subscriptions carry before/after value and range snapshots so editing logic can reason about the user transition rather than only the final input string. Jsed stays headless by depending on this contract instead of owning a concrete `<input>` element.
 
 ## Navigation: Nav
 

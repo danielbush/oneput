@@ -5,7 +5,7 @@ import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
-import type { UserInput, UserInputSelectionState } from './UserInput.js';
+import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -129,8 +129,11 @@ export class EditManager {
    *
    * @param {string} inputValue What the user has typed into an html input/textarea
    */
-  public handleInputChange = async (inputValue: string) => {
+  public handleInputChange = async (change: UserInputChange) => {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
+    const { value: inputValue, previousValue, previousRange, range } = change;
+    const [, previousStop] = previousRange;
+    const [, stop] = range;
 
     // "[foo]" => " " => moveNext
     const isReplacedWithSpace = /^\s+$/.test(inputValue); // " "
@@ -147,7 +150,7 @@ export class EditManager {
      */
     const prependedSpace = /^\s+/.test(value);
     /**
-     * true: "foo|a" => "foo |a" => "foo|"
+     * true: "foo| a" => "foo|"
      * false: "foo a|" => "a|" etc
      * false: "foo a" (pasted) => "a|"
      */
@@ -155,11 +158,15 @@ export class EditManager {
     const containsSpace = value.match(/^(\S+)(\s+)\S/); // "foo a..."
     if (containsSpace) {
       const firstWord = containsSpace[1];
-      const firstSpace = containsSpace[2];
-      const [, stop] = this.userInput.getRange();
+      const insertedSpace = containsSpace[2];
       const isFirstWord = firstWord.length === stop;
-      const isFirstWordPlusSpace = firstWord.length + firstSpace.length === stop;
-      preferFirstPart = isFirstWord || isFirstWordPlusSpace;
+      const isLeadingSplitCommit =
+        previousStop === firstWord.length &&
+        stop === firstWord.length + insertedSpace.length &&
+        !!change.priorValue &&
+        previousValue.endsWith(change.priorValue) &&
+        firstWord === previousValue.slice(0, previousValue.length - change.priorValue.length);
+      preferFirstPart = isFirstWord || isLeadingSplitCommit;
     }
     let lastToken: HTMLElement | null = null;
 
@@ -226,7 +233,7 @@ export class EditManager {
       this.userInput.setInputValue(token.getValue(tok)).then(() => {
         this.userInput.selectAll();
         // Mainly to update CURSOR_STATE eg "[foo]" => " " ==> moveNext
-        this.handleInputChange(token.getValue(tok));
+        this.cursor?.handleInputChange(token.getValue(tok));
       });
     } else {
       this.userInput.enable(false);

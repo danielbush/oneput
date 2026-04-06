@@ -2,6 +2,17 @@ import type { KeyBindingMap } from '../lib/bindings.js';
 import type { InputSelectionState, MenuItem } from '../types.js';
 import type { AppChange } from './AppController.js';
 
+export type InputChangePayload = {
+  evt: InputEvent;
+  value: string;
+  previousValue: string;
+  range: [number | null, number | null];
+  previousRange: [number | null, number | null];
+  priorValue?: string;
+  priorRange?: [number | null, number | null];
+  cause: 'user' | 'programmatic';
+};
+
 // Internal event system for decoupled communication
 export type InternalEvent =
   | InputChangeEvent
@@ -15,7 +26,7 @@ export type InternalEvent =
 
 export type InputChangeEvent = {
   type: 'input-change';
-  payload: { evt: InputEvent; value: string };
+  payload: InputChangePayload;
 };
 export type AppChangeEvent = {
   type: 'app-change';

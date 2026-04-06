@@ -111,7 +111,7 @@ Content is injected via `FlexParams` and `FChildParams` data structures that des
 `InternalEventEmitter` (`controllers/InternalEventEmitter.ts`) provides decoupled pub-sub communication between controllers. Key events:
 
 - `bindings-change` — when key bindings are updated
-- `input-change` — when the input value changes
+- `input-change` — when the input value changes, carrying before/after value and range snapshots so consumers can reason about the edit transition
 - `menu-open-change` — when menu opens/closes
 - `menu-item-focus` — when focused menu item changes
 - `menu-action` — when a menu action fires

@@ -6,6 +6,26 @@ export type UserInputSelectionState =
   | 'CURSOR_AT_END'
   | 'EMPTY';
 
+export type UserInputRange = [number | null, number | null];
+
+export type UserInputChangeCause = 'user' | 'programmatic';
+
+export type UserInputChange = {
+  value: string;
+  previousValue: string;
+  range: UserInputRange;
+  previousRange: UserInputRange;
+  /**
+   * Previous user-observed input state before `previousValue`.
+   *
+   * This helps consumers reason about ambiguous multi-step typing flows such as
+   * prepend-then-space versus split-in-the-middle without keeping ad hoc flags.
+   */
+  priorValue?: string;
+  priorRange?: UserInputRange;
+  cause: UserInputChangeCause;
+};
+
 export type UserInput = {
   setInputValue: (value: string) => Promise<void>;
   selectAll: () => void;
@@ -42,7 +62,7 @@ export type UserInput = {
    *
    * This lets you react to the user typing into the input.
    */
-  subscribeInputChange: (handleInputChange: (value: string) => void) => () => void;
+  subscribeInputChange: (handleInputChange: (change: UserInputChange) => void) => () => void;
   /**
    * Subscribe to user selection changes.
    *

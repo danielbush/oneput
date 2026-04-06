@@ -182,9 +182,8 @@ See:
 }
 .jsed-token-focus.jsed-token.jsed-crs-append::after {
   /* content: '*\0020'; */
-  content: '\02D0\0020';
+  content: '\02D0';
   background-color: transparent;
-  margin-left: -0.3em;
   font-weight: normal;
   font-style: normal;
 }

@@ -232,8 +232,6 @@ export class EditManager {
       this.userInput.focus();
       this.userInput.setInputValue(token.getValue(tok)).then(() => {
         this.userInput.selectAll();
-        // Mainly to update CURSOR_STATE eg "[foo]" => " " ==> moveNext
-        this.cursor?.handleInputChange(token.getValue(tok));
       });
     } else {
       this.userInput.enable(false);

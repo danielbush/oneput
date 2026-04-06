@@ -46,7 +46,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
         this.setMarker(CURSOR_APPEND_CLASS);
         return;
       default:
-        this.setMarker();
+        this.clearMarkers();
     }
   };
 
@@ -98,7 +98,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
     const nextToken = getNextLineSibling(this.getToken());
     if (nextToken) {
-      this.setTokenInternal(nextToken);
+      this.setToken(nextToken);
     }
   }
 
@@ -110,7 +110,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
     const prevToken = getPreviousLineSibling(this.getToken());
     if (prevToken) {
-      this.setTokenInternal(prevToken);
+      this.setToken(prevToken);
     }
   }
 
@@ -131,7 +131,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   delete() {
     if (!this.isOnToken()) return;
     const { next: nextTok } = token.remove(this.getToken());
-    this.setTokenInternal(nextTok);
+    this.setToken(nextTok);
   }
 
   append(val: string): HTMLElement | null {
@@ -189,7 +189,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     if (!this.isOnToken()) return;
     token.splitBefore(this.getToken());
     // We may end up in a new token, so we need to update the focus.
-    this.setTokenInternal(this.getToken());
+    this.setToken(this.getToken());
   }
 
   splitAfter() {
@@ -197,7 +197,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     const [, after] = token.splitAfter(this.getToken());
     const firstTok = token.quickDescend(after);
     if (firstTok) {
-      this.setTokenInternal(firstTok);
+      this.setToken(firstTok);
     }
   }
 
@@ -244,7 +244,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
     const first = token.quickDescend(el);
     if (first) {
-      this.setTokenInternal(first);
+      this.setToken(first);
     }
   }
 
@@ -261,7 +261,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
     const first = token.quickDescend(el);
     if (first) {
-      this.setTokenInternal(first);
+      this.setToken(first);
     }
   }
 

@@ -39,7 +39,7 @@ export abstract class TokenCursorBase {
     this.#document = params.document;
     this.#onTokenChange = params.onTokenChange;
     this.onError = params.onError;
-    this.setTokenInternal(params.token);
+    this.setToken(params.token);
   }
 
   getDocument() {
@@ -70,16 +70,6 @@ export abstract class TokenCursorBase {
     scrollIntoViewIfSmaller(el, { vertical: 'nearest' });
     this.#token = el;
     this.#onTokenChange(el);
-  }
-
-  /**
-   * Called internally when an operation causes the token to change. We need to
-   * notify the consumer, so we call the onTokenChange callback.
-   *
-   * TODO: this only existed because setToken used to not call #onTokenChange.
-   */
-  protected setTokenInternal(el: HTMLElement) {
-    this.setToken(el);
   }
 
   // #endregion

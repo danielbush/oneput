@@ -317,6 +317,30 @@ describe('input handling', () => {
     expect(userInput.getInputValue()).toBe('b');
   });
 
+  test('"foo bar" with "foo|" => "foo |" => "foo c|" ==> "c|": inserts a new token between foo and bar', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo bar')
+    });
+    await userInput.setCaret(3);
+
+    // act
+    await userInput.typeText(' ');
+    await userInput.typeText('c');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['foo', 'c', 'bar']);
+    const [firstToken, secondToken, thirdToken] = Array.from(line.querySelectorAll('.jsed-token'));
+    expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(firstToken?.nextSibling?.textContent).toBe(' ');
+    expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
+    expect(secondToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(secondToken?.nextSibling?.textContent).toBe(' ');
+    expect(secondToken?.nextSibling?.nextSibling).toBe(thirdToken);
+    expect(getValue(editManager.cursor!.getToken())).toBe('c');
+    expect(userInput.getInputValue()).toBe('c');
+  });
+
   test('"[foo]" => " |": moves next token', async () => {
     // arrange
     const { editManager, line, userInput } = await createEditManagerFixture({
@@ -331,6 +355,48 @@ describe('input handling', () => {
     expect(getTokenValues(line)).toEqual(['foo', 'bar']);
     expect(getValue(editManager.cursor!.getToken())).toBe('bar');
     expect(userInput.getInputValue()).toBe('bar');
+  });
+
+  test('"foo|" => "foo |" ==> "[bar]": moves to the next token and keeps a space boundary', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: p({ id: 'p1' }, 'foo bar')
+    });
+    await userInput.setCaret(3);
+
+    // act
+    await userInput.typeText(' ');
+
+    // assert
+    expect(getTokenValues(line)).toEqual(['foo', 'bar']);
+    const [firstToken, secondToken] = Array.from(line.querySelectorAll('.jsed-token'));
+    expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(firstToken?.nextSibling?.textContent).toBe(' ');
+    expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
+    expect(getValue(editManager.cursor!.getToken())).toBe('bar');
+    expect(userInput.getInputValue()).toBe('bar');
+    expect(userInput.getRange()).toEqual([0, 3]);
+  });
+
+  test('"foo|" => "foo |" inside collapsed inline wrappers creates a boundary space before moving to "[bar]"', async () => {
+    // arrange
+    const { editManager, line, userInput } = await createEditManagerFixture({
+      html: '<p id="p1"><em>foo</em><strong>bar</strong><u>baz</u></p>'
+    });
+    await userInput.setCaret(3);
+
+    // act
+    await userInput.typeText(' ');
+
+    // assert
+    const em = line.querySelector('em');
+    const strong = line.querySelector('strong');
+    expect(em?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(em?.nextSibling?.textContent).toBe(' ');
+    expect(em?.nextSibling?.nextSibling).toBe(strong);
+    expect(getValue(editManager.cursor!.getToken())).toBe('bar');
+    expect(userInput.getInputValue()).toBe('bar');
+    expect(userInput.getRange()).toEqual([0, 3]);
   });
 
   test('"[foo]" => "|": deletes the token', async () => {

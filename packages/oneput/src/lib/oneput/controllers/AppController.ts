@@ -147,9 +147,7 @@ export class AppController {
    */
   private runBefore() {
     this.reset();
-    if (this.current?.app.menu) {
-      this.ctl.menu.setMenu(this.current.app.menu());
-    }
+    this.ctl.menu.setMenu(this.current?.menu());
     if (this.current?.app.actions) {
       const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(
         (acc, [actionId, actionWithBinding]) => {

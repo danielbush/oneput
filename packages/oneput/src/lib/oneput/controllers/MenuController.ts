@@ -91,17 +91,22 @@ export class MenuController {
     this.runFocusBehaviour(params.focusBehaviour);
   }
 
-  setMenu(params: {
+  /**
+   * If called with no arguments, the menu will be cleared.
+   */
+  setMenu(params?: {
     id: string;
     focusBehaviour?: FocusBehaviour;
     items: Array<MenuItemAny | undefined>;
   }) {
-    this.currentMenu = CurrentMenu.create(this.ctl, params.id, params.items);
+    this.currentMenu = params
+      ? CurrentMenu.create(this.ctl, params.id, params.items)
+      : CurrentMenu.createBlank(this.ctl);
     this._setMenu({
-      focusBehaviour: params.focusBehaviour,
+      focusBehaviour: params?.focusBehaviour ?? this.defaultFocusBehaviour,
       items: this.currentMenu.allMenuItems
     });
-    this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: params.id } });
+    this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: this.currentMenu.menuId } });
   }
 
   // #endregion

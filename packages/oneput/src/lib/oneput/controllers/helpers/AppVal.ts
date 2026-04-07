@@ -13,6 +13,10 @@ export class AppVal {
   lastMenuActions: Record<string, string> = {};
   menuId?: string;
 
+  menu() {
+    return this.app.menu?.();
+  }
+
   setLastMenuActionId(menuId: string, menuActionId: string) {
     this.lastMenuActions[menuId] = menuActionId;
   }

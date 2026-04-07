@@ -1,6 +1,6 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { isIgnorable, isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
@@ -388,5 +388,24 @@ export class EditManager {
 
   handleParent() {
     this.nav.UP();
+  }
+
+  canInsertAnchorAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus || isToken(focus)) {
+      return false;
+    }
+
+    for (let node = focus.nextSibling; node; node = node.nextSibling) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return false;
+      }
+      if (node instanceof Element && isIgnorable(node)) {
+        continue;
+      }
+      return node instanceof HTMLElement && !isToken(node);
+    }
+
+    return false;
   }
 }

@@ -143,14 +143,15 @@ export class EditDocument implements AppObject {
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),
-        stdMenuItem({
-          id: 'INSERT_ANCHOR_AFTER_TAG',
-          textContent: 'Insert anchor after tag...',
-          action: () => {
-            console.log('intent: insert anchor after focused tag boundary');
-          },
-          left: (b) => [b.icon(icons.Pencil)]
-        })
+        this.editManager.canInsertAnchorAfterTag() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_AFTER_TAG',
+            textContent: 'Insert anchor after tag...',
+            action: () => {
+              console.log('intent: insert anchor after focused tag boundary');
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          })
       ]
     });
   };

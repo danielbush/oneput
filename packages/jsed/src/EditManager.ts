@@ -20,30 +20,34 @@ export class EditManager {
   static create({
     document,
     userInput,
-    onError
+    onError,
+    onModeChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
-    onError: (err: EditManagerError) => void;
+    onError?: (err: EditManagerError) => void;
+    onModeChange?: (mode: EditManagerMode) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(document, (evt) => instance.handleFocusRequest(evt));
-    instance = new EditManager(document, userInput, onError, nav);
+    instance = new EditManager(document, userInput, nav, onError, onModeChange);
     return instance;
   }
 
   static createNull({
     document,
     userInput,
-    onError
+    onError,
+    onModeChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
-    onError: (err: EditManagerError) => void;
+    onError?: (err: EditManagerError) => void;
+    onModeChange?: (mode: EditManagerMode) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(document, (evt) => instance.handleFocusRequest(evt));
-    instance = new EditManager(document, userInput, onError, nav);
+    instance = new EditManager(document, userInput, nav, onError, onModeChange);
     return instance;
   }
 
@@ -55,12 +59,18 @@ export class EditManager {
   constructor(
     private document: JsedDocument,
     private userInput: UserInput,
-    private onError: (err: EditManagerError) => void,
-    readonly nav: Nav
+    readonly nav: Nav,
+    private onError?: (err: EditManagerError) => void,
+    private onModeChange?: (mode: EditManagerMode) => void
   ) {}
 
   getMode(): EditManagerMode {
     return this.mode;
+  }
+
+  private setMode(mode: EditManagerMode) {
+    this.mode = mode;
+    this.onModeChange?.(mode);
   }
 
   /**
@@ -97,7 +107,7 @@ export class EditManager {
       } else {
         this.cursor.setToken(firstToken); // calls handleTokenChange
       }
-      this.mode = 'edit';
+      this.setMode('edit');
       return ok(undefined);
     }
 
@@ -111,7 +121,7 @@ export class EditManager {
     this.cursor?.destroy();
     this.cursor = undefined;
     this.userInput.setInputValue('');
-    this.mode = 'view';
+    this.setMode('view');
 
     if (focusElement) {
       this.nav.FOCUS(focusElement, { scrollIntoView: params?.scrollIntoView ?? false });
@@ -264,7 +274,7 @@ export class EditManager {
 
     if (evt.targetType === 'FOCUSABLE') {
       if (evt.element === currentFocus) {
-        this.enterEditing(evt.element).mapErr(this.onError);
+        this.enterEditing(evt.element).mapErr((err) => this.onError?.(err));
         return false;
       }
 
@@ -274,7 +284,7 @@ export class EditManager {
 
     if (evt.targetType === 'TOKEN') {
       if (currentFocus?.contains(evt.token)) {
-        this.enterEditing(evt.token).mapErr(this.onError);
+        this.enterEditing(evt.token).mapErr((err) => this.onError?.(err));
         return false;
       }
 
@@ -314,7 +324,7 @@ export class EditManager {
    * If the cursor finds itself in an untenable state...
    */
   private handleCursorError = (err: TokenCursorError) => {
-    this.onError(err);
+    this.onError?.(err);
   };
 
   // Actions

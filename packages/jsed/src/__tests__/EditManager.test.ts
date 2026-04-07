@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, test } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { EditManager } from '../EditManager.js';
 import { byId, frag, makeRoot, p } from '../test/util.js';
 import { getValue, quickDescend } from '../lib/token.js';
@@ -11,8 +11,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
     const p1 = byId(doc, 'p1');
@@ -33,8 +32,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
 
     // act
@@ -53,8 +51,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
     const p1 = byId(doc, 'p1');
@@ -86,8 +83,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
     editManager.enterEditing(byId(doc, 'p1'));
@@ -109,8 +105,7 @@ describe('EditManager', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
     const p1 = byId(doc, 'p1');
@@ -133,8 +128,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.enterEditing(byId(doc, 'p1'));
 
@@ -153,8 +147,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.enterEditing(byId(doc, 'p1'));
     editManager.cursor?.moveNext();
@@ -174,8 +167,7 @@ describe('EditManager', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     const p1 = byId(doc, 'p1');
     editManager.enterEditing(p1);
@@ -201,8 +193,7 @@ describe('EditManager', () => {
     );
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
 
@@ -228,8 +219,7 @@ describe('EditManager', () => {
     );
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
 
@@ -249,8 +239,7 @@ describe('EditManager', () => {
     const doc = makeRoot('<div id="root-line"><p id="nested">inner</p></div>');
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: Controller.createNull().input,
-      onError: vi.fn()
+      userInput: Controller.createNull().input
     });
     editManager.nav.connect();
     editManager.nav.REQUEST_FOCUS(byId(doc, 'nested'));
@@ -284,8 +273,7 @@ describe('input handling', () => {
     await userInput.setInputValue(getValue(firstToken));
     const editManager = EditManager.createNull({
       document: doc,
-      userInput,
-      onError: vi.fn()
+      userInput
     });
     editManager.enterEditing(line);
 

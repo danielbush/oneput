@@ -10,7 +10,10 @@ export class EditDocument implements AppObject {
     const editManager = EditManager.create({
       document: params.document,
       userInput: ctl.input,
-      onError: (err) => instance.handleEditError(err)
+      onError: (err) => instance.handleEditError(err),
+      onModeChange: (mode) => {
+        instance.renderMenuItems({ isEditing: mode !== 'view' });
+      }
     });
     instance = new EditDocument(ctl, params.document, editManager);
     return instance;
@@ -25,6 +28,7 @@ export class EditDocument implements AppObject {
   onStart = () => {
     setDocument(this.document);
     this.editManager.nav.connect();
+    this.renderMenuItems({ isEditing: false });
   };
 
   onResume = () => {
@@ -46,8 +50,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Stop editing',
-        when: { menuOpen: false }
+        description: 'Stop editing'
+        // when: { menuOpen: false }
       }
     },
     ENTER: {
@@ -62,8 +66,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['enter'],
-        description: 'Edit first editable token',
-        when: { menuOpen: false }
+        description: 'Edit first editable token'
+        // when: { menuOpen: false }
       }
     },
     TOGGLE_SELECT: {
@@ -72,8 +76,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['$mod+e'],
-        description: 'Toggle input element cursor state',
-        when: { menuOpen: false }
+        description: 'Toggle input element cursor state'
+        // when: { menuOpen: false }
       }
     },
     RIGHT: {
@@ -82,8 +86,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['$mod+l', 'ArrowRight'],
-        description: 'Move to next token or element',
-        when: { menuOpen: false }
+        description: 'Move to next token or element'
+        // when: { menuOpen: false }
       }
     },
     LEFT: {
@@ -92,8 +96,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['$mod+h', 'ArrowLeft'],
-        description: 'Move to previous token or element',
-        when: { menuOpen: false }
+        description: 'Move to previous token or element'
+        // when: { menuOpen: false }
       }
     },
     DOWN: {
@@ -102,8 +106,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
-        description: 'Navigate to next sibling',
-        when: { menuOpen: false }
+        description: 'Navigate to next sibling'
+        // when: { menuOpen: false }
       }
     },
     UP: {
@@ -112,8 +116,8 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
-        description: 'Navigate to previous sibling',
-        when: { menuOpen: false }
+        description: 'Navigate to previous sibling'
+        // when: { menuOpen: false }
       }
     },
     PARENT: {
@@ -122,29 +126,32 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['$mod+u', '$mod+ArrowUp'],
-        description: 'Find next parent',
-        when: { menuOpen: false }
+        description: 'Find next parent'
+        // when: { menuOpen: false }
       }
     }
   };
 
-  menu = () => ({
-    id: 'root',
-    items: [
-      stdMenuItem({
-        id: 'EDIT_FIRST',
-        textContent: 'Edit...',
-        action: this.actions.ENTER.action,
-        left: (b) => [b.icon(icons.Pencil)]
-      }),
-      stdMenuItem({
-        id: 'INSERT_ANCHOR_AFTER_TAG',
-        textContent: 'Insert anchor after tag...',
-        action: () => {
-          console.log('intent: insert anchor after focused tag boundary');
-        },
-        left: (b) => [b.icon(icons.Pencil)]
-      })
-    ]
-  });
+  renderMenuItems = ({ isEditing }: { isEditing: boolean }) => {
+    this.ctl.menu.setMenu({
+      id: 'root',
+      items: [
+        !isEditing &&
+          stdMenuItem({
+            id: 'EDIT_FIRST',
+            textContent: 'Edit...',
+            action: this.actions.ENTER.action,
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
+        stdMenuItem({
+          id: 'INSERT_ANCHOR_AFTER_TAG',
+          textContent: 'Insert anchor after tag...',
+          action: () => {
+            console.log('intent: insert anchor after focused tag boundary');
+          },
+          left: (b) => [b.icon(icons.Pencil)]
+        })
+      ]
+    });
+  };
 }

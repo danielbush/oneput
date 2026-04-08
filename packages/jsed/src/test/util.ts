@@ -89,3 +89,12 @@ export function identify(el: HTMLElement): string {
   if (isIsland(el)) return `[island:${el.tagName.toLowerCase()}]`;
   return `[${el.tagName.toLowerCase()}]`;
 }
+
+/**
+ * See INLINE_COMPUTED_STYLE
+ */
+export const inlineStyleHackVal = 'display:inline;';
+/**
+ * See INLINE_COMPUTED_STYLE
+ */
+export const inlineStyleHack = { style: inlineStyleHackVal };

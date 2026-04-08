@@ -1,4 +1,4 @@
-import { tagImplicitLines } from './lib/token.js';
+import { tagImplicitLines } from './lib/implicitLine.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {

@@ -1,8 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { isIgnorable, isImplicitLine, isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
-import { getNextSiblingNode } from './lib/walk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
@@ -406,44 +405,17 @@ export class EditManager {
     this.nav.UP();
   }
 
-  private getAnchorAfterTagInsertionPoint(): { parent: Node; next: Node | null } | null {
-    const focus = this.nav.getFocus();
-    if (!focus || isToken(focus) || !focus.parentNode) {
-      return null;
-    }
-
-    const next = getNextSiblingNode(focus, focus.parentNode, {
-      visit: (node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          return true;
-        }
-        return !(node instanceof Element && isIgnorable(node));
-      }
-    });
-
-    if (next?.nodeType === Node.TEXT_NODE) {
-      return null;
-    }
-
-    if (next && !(next instanceof HTMLElement)) {
-      return null;
-    }
-
-    if (next && (isToken(next) || isImplicitLine(next))) {
-      return null;
-    }
-
-    return { parent: focus.parentNode, next };
-  }
-
   insertAnchorAfterTag(): boolean {
-    const insertionPoint = this.getAnchorAfterTagInsertionPoint();
-    if (!insertionPoint) {
+    const focus = this.nav.getFocus();
+    if (!focus) {
       return false;
     }
 
-    const anchor = token.createAnchor();
-    insertionPoint.parent.insertBefore(anchor, insertionPoint.next);
+    const anchor = token.insertAnchorAfterTag(focus);
+    if (!anchor) {
+      return false;
+    }
+
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
@@ -455,6 +427,7 @@ export class EditManager {
   }
 
   canInsertAnchorAfterTag(): boolean {
-    return !!this.getAnchorAfterTagInsertionPoint();
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
   }
 }

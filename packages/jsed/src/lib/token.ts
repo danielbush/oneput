@@ -465,8 +465,12 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
  * Get the immediate editable boundary after a focused tag where an ANCHOR can
  * be inserted.
  *
- * Returns null when the boundary is already represented by text, a TOKEN, or
- * an IMPLICIT_LINE. IGNORABLE siblings are skipped.
+ * IGNORABLE siblings are skipped. A whitespace text node remains a valid
+ * insertion boundary: inserting "after tag" places the ANCHOR before that
+ * space node so the user can type text on the tag-side of the space.
+ *
+ * Returns null when the boundary is already represented by a non-whitespace
+ * text node, a TOKEN, or an IMPLICIT_LINE.
  */
 export function getAnchorAfterTagInsertionPoint(
   focus: HTMLElement
@@ -485,7 +489,7 @@ export function getAnchorAfterTagInsertionPoint(
   });
 
   if (next?.nodeType === Node.TEXT_NODE) {
-    return null;
+    return isWhitespaceTextNode(next) ? { parent: focus.parentNode, next } : null;
   }
 
   if (next && !(next instanceof HTMLElement)) {
@@ -520,8 +524,12 @@ export function insertAnchorAfterTag(focus: HTMLElement): HTMLElement | null {
  * Get the immediate editable boundary before a focused tag where an ANCHOR can
  * be inserted.
  *
- * Returns null when the boundary is already represented by text, a TOKEN, or
- * an IMPLICIT_LINE. IGNORABLE siblings are skipped.
+ * IGNORABLE siblings are skipped. A whitespace text node remains a valid
+ * insertion boundary: inserting "before tag" places the ANCHOR after that
+ * space node and immediately before the focused tag.
+ *
+ * Returns null when the boundary is already represented by a non-whitespace
+ * text node, a TOKEN, or an IMPLICIT_LINE.
  */
 export function getAnchorBeforeTagInsertionPoint(
   focus: HTMLElement
@@ -540,7 +548,7 @@ export function getAnchorBeforeTagInsertionPoint(
   });
 
   if (previous?.nodeType === Node.TEXT_NODE) {
-    return null;
+    return isWhitespaceTextNode(previous) ? { parent: focus.parentNode, previous } : null;
   }
 
   if (previous && !(previous instanceof HTMLElement)) {

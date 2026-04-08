@@ -352,6 +352,37 @@ describe('EditManager', () => {
     editManager.destroy();
   });
 
+  test('insertAnchorAfterTag inserts an anchor before existing whitespace and enters editing on it', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const userInput = Controller.createNull().input;
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput,
+      onError: () => {}
+    });
+    editManager.nav.connect();
+    const em = byId(doc, 'em1');
+
+    editManager.nav.REQUEST_FOCUS(em);
+
+    // act
+    const canInsert = editManager.canInsertAnchorAfterTag();
+    const result = editManager.insertAnchorAfterTag();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    const anchor = em.nextElementSibling as HTMLElement | null;
+    expect(anchor).not.toBeNull();
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+    expect(editManager.cursor?.getToken()).toBe(anchor);
+    expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(anchor?.nextSibling?.textContent).toBe(' ');
+
+    editManager.destroy();
+  });
+
   test('insertAnchorBeforeTag inserts an anchor before the focused tag when there is no previous sibling', () => {
     // arrange
     const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
@@ -380,6 +411,37 @@ describe('EditManager', () => {
     expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
     expect(editManager.cursor?.getToken()).toBe(anchor);
     expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+
+    editManager.destroy();
+  });
+
+  test('insertAnchorBeforeTag inserts an anchor after existing whitespace and enters editing on it', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const userInput = Controller.createNull().input;
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput,
+      onError: () => {}
+    });
+    editManager.nav.connect();
+    const strong = byId(doc, 'strong1');
+
+    editManager.nav.REQUEST_FOCUS(strong);
+
+    // act
+    const canInsert = editManager.canInsertAnchorBeforeTag();
+    const result = editManager.insertAnchorBeforeTag();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    const anchor = strong.previousElementSibling as HTMLElement | null;
+    expect(anchor).not.toBeNull();
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+    expect(editManager.cursor?.getToken()).toBe(anchor);
+    expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(anchor?.previousSibling?.textContent).toBe(' ');
 
     editManager.destroy();
   });

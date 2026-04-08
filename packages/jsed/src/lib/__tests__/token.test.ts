@@ -393,6 +393,20 @@ describe('anchor insertion', () => {
     expect(insertionPoint).toBeNull();
   });
 
+  test('getAnchorBeforeTagInsertionPoint allows insertion after existing whitespace', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const insertionPoint = getAnchorBeforeTagInsertionPoint(strong1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.previous?.nodeType).toBe(Node.TEXT_NODE);
+    expect(insertionPoint?.previous?.textContent).toBe(' ');
+  });
+
   test('getAnchorAfterTagInsertionPoint skips IGNORABLE siblings and finds the next tag boundary', () => {
     // arrange
     const doc = makeRoot(
@@ -422,6 +436,20 @@ describe('anchor insertion', () => {
 
     // assert
     expect(insertionPoint).toBeNull();
+  });
+
+  test('getAnchorAfterTagInsertionPoint allows insertion before existing whitespace', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const insertionPoint = getAnchorAfterTagInsertionPoint(em1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.next?.nodeType).toBe(Node.TEXT_NODE);
+    expect(insertionPoint?.next?.textContent).toBe(' ');
   });
 
   test('insertAnchorAfterTag inserts an anchor at the boundary before the next tag', () => {
@@ -457,6 +485,21 @@ describe('anchor insertion', () => {
     expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
   });
 
+  test('insertAnchorAfterTag inserts an anchor before existing whitespace', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const anchor = insertAnchorAfterTag(em1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(em1.nextElementSibling).toBe(anchor);
+    expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(anchor?.nextSibling?.textContent).toBe(' ');
+  });
+
   test('insertAnchorBeforeTag inserts an anchor at the boundary after the previous tag', () => {
     // arrange
     const doc = makeRoot(
@@ -488,5 +531,20 @@ describe('anchor insertion', () => {
     expect(em1.previousElementSibling).toBe(anchor);
     expect(anchor?.classList.contains('jsed-token')).toBe(true);
     expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+  });
+
+  test('insertAnchorBeforeTag inserts an anchor after existing whitespace', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const anchor = insertAnchorBeforeTag(strong1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(anchor?.previousSibling?.textContent).toBe(' ');
+    expect(anchor?.nextElementSibling).toBe(strong1);
   });
 });

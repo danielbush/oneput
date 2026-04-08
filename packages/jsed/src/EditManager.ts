@@ -1,5 +1,6 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
+import { decideInputIntent } from './lib/edit/decideInputIntent.js';
 import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
@@ -154,85 +155,50 @@ export class EditManager {
    */
   public handleInputChange = async (change: UserInputChange) => {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
-    const { value: inputValue, previousValue, previousRange, range } = change;
-    const [, previousStop] = previousRange;
-    const [, stop] = range;
-
-    // "[foo]" => " " => moveNext
-    const isReplacedWithSpace = /^\s+$/.test(inputValue); // " "
-    if (isReplacedWithSpace) {
-      this.cursor.moveNext();
-      return;
-    }
-    const value = inputValue;
-
-    // part0 can be undefined if we split on whitespace:
-    const [part0, ...parts] = value.split(/\s+/).filter(Boolean);
-    /**
-     * "|foo" => " |foo" => "| foo"
-     */
-    const prependedSpace = /^\s+/.test(value);
-    /**
-     * true: "foo| a" => "foo|"
-     * false: "foo a|" => "a|" etc
-     * false: "foo a" (pasted) => "a|"
-     */
-    let preferFirstPart = false;
-    const containsSpace = value.match(/^(\S+)(\s+)\S/); // "foo a..."
-    if (containsSpace) {
-      const firstWord = containsSpace[1];
-      const insertedSpace = containsSpace[2];
-      const isFirstWord = firstWord.length === stop;
-      /**
-       * (previous) "b|foo" => "b |foo"
-       */
-      const isLeadingSplitCommit =
-        previousStop === firstWord.length &&
-        stop === firstWord.length + insertedSpace.length &&
-        !!change.priorValue &&
-        previousValue.endsWith(change.priorValue) &&
-        firstWord === previousValue.slice(0, previousValue.length - change.priorValue.length);
-      preferFirstPart = isFirstWord || isLeadingSplitCommit;
-    }
+    const intent = decideInputIntent(change);
     let lastToken: HTMLElement | null = null;
 
-    // Update document.
-    if (value === '') {
-      this.cursor.delete();
-    } else {
-      this.cursor.replace(part0);
-      for (const part of parts.reverse()) {
-        const token = this.cursor.append(part);
-        if (!lastToken) {
-          lastToken = token;
+    switch (intent.type) {
+      case 'move-next-on-space':
+        this.cursor.moveNext();
+        return;
+
+      case 'delete-current':
+        this.cursor.delete();
+        break;
+
+      case 'rewrite-current':
+        this.cursor.replace(intent.firstPart);
+        for (const part of intent.appendedParts.reverse()) {
+          const appendedToken = this.cursor.append(part);
+          if (!lastToken) {
+            lastToken = appendedToken;
+          }
         }
-      }
+        if (intent.prependedSpace) {
+          this.userInput.moveCursorToBeginning();
+        }
+        break;
     }
 
-    // Update CURSOR and input.
-    if (prependedSpace) {
-      this.userInput.moveCursorToBeginning();
+    if (intent.type === 'delete-current') {
+      this.cursor?.handleInputChange(intent.inputValue);
+      return;
     }
 
-    const finalToken = preferFirstPart ? this.cursor.getToken() : lastToken;
+    const finalToken =
+      intent.finalTokenPreference === 'current-token' ? this.cursor.getToken() : lastToken;
 
     if (finalToken) {
       this.cursor.setToken(finalToken);
-      //// this.#cursorMarkers.clear();
-      // this.#controller.onMobileKeyboardOpenOnce(() => {
-      //   debug('correct mobile keyboard scroll');
-      //   scrollIntoView(token);
-      // });
       this.userInput.focus();
       await this.userInput.setInputValue(token.getValue(finalToken));
       this.userInput.selectAll();
-      //// scrollIntoView(token);
-      // this.#controller.setStatusElementFocus(token);
       this.nav.FOCUS(finalToken);
       this.userInput.moveCursorToEnd();
     }
 
-    this.cursor?.handleInputChange(inputValue);
+    this.cursor?.handleInputChange(intent.inputValue);
   };
 
   /**

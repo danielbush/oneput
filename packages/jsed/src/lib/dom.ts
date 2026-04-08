@@ -67,6 +67,9 @@ export function splitParentBefore(el: HTMLElement): void {
 
 /**
  * Only scroll elements into view if they are smaller than the viewport.
+ *
+ * Combined with block: 'center' (vertical), this will keep the focus in the
+ * middle of the screen when moving up or down.
  */
 export function scrollIntoViewIfSmaller(
   el: HTMLElement,

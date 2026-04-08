@@ -151,6 +151,15 @@ export class EditDocument implements AppObject {
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),
+        this.editManager.canInsertAnchorBeforeTag() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_BEFORE_TAG',
+            textContent: 'Insert anchor before tag...',
+            action: () => {
+              this.editManager.insertAnchorBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
         this.editManager.canInsertAnchorAfterTag() &&
           stdMenuItem({
             id: 'INSERT_ANCHOR_AFTER_TAG',

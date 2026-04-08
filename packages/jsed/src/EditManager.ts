@@ -406,6 +406,21 @@ export class EditManager {
     return true;
   }
 
+  insertAnchorBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    const anchor = token.insertAnchorBeforeTag(focus);
+    if (!anchor) {
+      return false;
+    }
+
+    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
+    return true;
+  }
+
   // is*/can* methods
 
   isEditing(): boolean {
@@ -415,5 +430,10 @@ export class EditManager {
   canInsertAnchorAfterTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
+  }
+
+  canInsertAnchorBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
   }
 }

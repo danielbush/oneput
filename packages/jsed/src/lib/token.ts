@@ -6,7 +6,7 @@ import {
   JSED_TOKEN_PADDED
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
-import { getNextSiblingNode } from './walk.js';
+import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 import {
   isFocusable,
   isIgnorable,
@@ -513,6 +513,61 @@ export function insertAnchorAfterTag(focus: HTMLElement): HTMLElement | null {
 
   const anchor = createAnchor();
   insertionPoint.parent.insertBefore(anchor, insertionPoint.next);
+  return anchor;
+}
+
+/**
+ * Get the immediate editable boundary before a focused tag where an ANCHOR can
+ * be inserted.
+ *
+ * Returns null when the boundary is already represented by text, a TOKEN, or
+ * an IMPLICIT_LINE. IGNORABLE siblings are skipped.
+ */
+export function getAnchorBeforeTagInsertionPoint(
+  focus: HTMLElement
+): { parent: Node; previous: Node | null } | null {
+  if (isToken(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (previous?.nodeType === Node.TEXT_NODE) {
+    return null;
+  }
+
+  if (previous && !(previous instanceof HTMLElement)) {
+    return null;
+  }
+
+  if (previous && (isToken(previous) || isImplicitLine(previous))) {
+    return null;
+  }
+
+  return { parent: focus.parentNode, previous };
+}
+
+/**
+ * Insert an ANCHOR at the immediate boundary before `focus`.
+ *
+ * Returns the inserted ANCHOR, or null if that boundary is already represented
+ * and no anchor should be created.
+ */
+export function insertAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
+  const insertionPoint = getAnchorBeforeTagInsertionPoint(focus);
+  if (!insertionPoint) {
+    return null;
+  }
+
+  const anchor = createAnchor();
+  insertionPoint.parent.insertBefore(anchor, focus);
   return anchor;
 }
 

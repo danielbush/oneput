@@ -253,54 +253,6 @@ describe('EditManager', () => {
     editManager.destroy();
   });
 
-  it('canInsertAnchorAfterTag ignores IGNORABLE siblings between adjacent visible tags', () => {
-    // arrange
-    const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
-    );
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input,
-      onError: () => {}
-    });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
-
-    editManager.nav.REQUEST_FOCUS(em);
-
-    // act
-    const result = editManager.canInsertAnchorAfterTag();
-
-    // assert
-    expect(result).toBe(true);
-
-    editManager.destroy();
-  });
-
-  it('canInsertAnchorAfterTag returns false when a text node already represents the gap', () => {
-    // arrange
-    const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em> gap <strong id="strong1">bar</strong></p>'
-    );
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input,
-      onError: () => {}
-    });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
-
-    editManager.nav.FOCUS(em);
-
-    // act
-    const result = editManager.canInsertAnchorAfterTag();
-
-    // assert
-    expect(result).toBe(false);
-
-    editManager.destroy();
-  });
-
   test('insertAnchorAfterTag inserts an anchor at the boundary and enters editing on it', () => {
     // arrange
     const doc = makeRoot(

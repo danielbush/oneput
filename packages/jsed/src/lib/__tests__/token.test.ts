@@ -1,6 +1,11 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em, span, inlineStyleHack } from '../../test/util.js';
-import { tokenizeLine, isPadded } from '../token.js';
+import {
+  tokenizeLine,
+  isPadded,
+  getAnchorAfterTagInsertionPoint,
+  insertAnchorAfterTag
+} from '../token.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';
 
 describe('tokenizeLine', () => {
@@ -351,5 +356,71 @@ describe('tokenizeLine', () => {
       // assert
       expect(div1).toMatchSnapshot('Should only tokenize p1');
     });
+  });
+});
+
+describe('anchor insertion', () => {
+  test('getAnchorAfterTagInsertionPoint skips IGNORABLE siblings and finds the next tag boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const insertionPoint = getAnchorAfterTagInsertionPoint(em1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.parent).toBe(em1.parentNode);
+    expect(insertionPoint?.next).toBe(strong1);
+  });
+
+  test('getAnchorAfterTagInsertionPoint returns null when text already represents the gap', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1">foo</em> gap <strong id="strong1">bar</strong></p>'
+    );
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const insertionPoint = getAnchorAfterTagInsertionPoint(em1);
+
+    // assert
+    expect(insertionPoint).toBeNull();
+  });
+
+  test('insertAnchorAfterTag inserts an anchor at the boundary before the next tag', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const anchor = insertAnchorAfterTag(em1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(strong1.previousElementSibling).toBe(anchor);
+    expect(anchor?.classList.contains('jsed-token')).toBe(true);
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+  });
+
+  test('insertAnchorAfterTag inserts an anchor at end of siblings when there is no next tag', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const anchor = insertAnchorAfterTag(em1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(em1.nextElementSibling).toBe(anchor);
+    expect(anchor?.classList.contains('jsed-token')).toBe(true);
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
   });
 });

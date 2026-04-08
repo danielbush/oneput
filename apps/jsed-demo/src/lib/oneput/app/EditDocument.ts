@@ -47,14 +47,37 @@ export class EditDocument implements AppObject {
   };
 
   actions = {
+
+    // Disable these when menu is open so we can use the menu:
+
     EXIT: {
       action: () => {
         this.editManager.handleExit();
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Stop editing'
-        // when: { menuOpen: false }
+        description: 'Stop editing',
+        when: { menuOpen: false }
+      }
+    },
+    DOWN: {
+      action: () => {
+        this.editManager.handleDown();
+      },
+      binding: {
+        bindings: ['$mod+j', 'ArrowDown'],
+        description: 'Navigate to next sibling',
+        when: { menuOpen: false }
+      }
+    },
+    UP: {
+      action: () => {
+        this.editManager.handleUp();
+      },
+      binding: {
+        bindings: ['$mod+k', 'ArrowUp'],
+        description: 'Navigate to previous sibling',
+        when: { menuOpen: false }
       }
     },
     ENTER: {
@@ -69,10 +92,13 @@ export class EditDocument implements AppObject {
       },
       binding: {
         bindings: ['enter'],
-        description: 'Edit first editable token'
-        // when: { menuOpen: false }
+        description: 'Edit first editable token',
+        when: { menuOpen: false }
       }
     },
+
+    // Keep these ambient (menu open / close)
+
     TOGGLE_SELECT: {
       action: () => {
         this.ctl.input.toggleSelect();
@@ -100,26 +126,6 @@ export class EditDocument implements AppObject {
       binding: {
         bindings: ['$mod+h', 'ArrowLeft'],
         description: 'Move to previous token or element'
-        // when: { menuOpen: false }
-      }
-    },
-    DOWN: {
-      action: () => {
-        this.editManager.handleDown();
-      },
-      binding: {
-        bindings: ['$mod+j', 'ArrowDown'],
-        description: 'Navigate to next sibling'
-        // when: { menuOpen: false }
-      }
-    },
-    UP: {
-      action: () => {
-        this.editManager.handleUp();
-      },
-      binding: {
-        bindings: ['$mod+k', 'ArrowUp'],
-        description: 'Navigate to previous sibling'
         // when: { menuOpen: false }
       }
     },

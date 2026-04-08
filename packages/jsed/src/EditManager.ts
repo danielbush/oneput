@@ -406,6 +406,8 @@ export class EditManager {
     this.nav.UP();
   }
 
+  // is*/can* methods
+
   isEditing(): boolean {
     return this.mode === 'edit';
   }

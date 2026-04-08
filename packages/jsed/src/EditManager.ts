@@ -1,7 +1,8 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { isIgnorable, isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { isIgnorable, isImplicitLine, isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
+import { getNextSiblingNode } from './lib/walk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
@@ -21,16 +22,22 @@ export class EditManager {
     document,
     userInput,
     onError,
-    onModeChange
+    onModeChange,
+    onFocusChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
     onError?: (err: EditManagerError) => void;
     onModeChange?: (mode: EditManagerMode) => void;
+    onFocusChange?: (focus: HTMLElement | null) => void;
   }): EditManager {
     let instance: EditManager;
-    const nav = Nav.create(document, (evt) => instance.handleFocusRequest(evt));
-    instance = new EditManager(document, userInput, nav, onError, onModeChange);
+    const nav = Nav.create(
+      document,
+      (evt) => instance?.handleFocusRequest(evt),
+      (focus) => instance?.handleFocusChange(focus)
+    );
+    instance = new EditManager(document, userInput, nav, onError, onModeChange, onFocusChange);
     return instance;
   }
 
@@ -38,16 +45,22 @@ export class EditManager {
     document,
     userInput,
     onError,
-    onModeChange
+    onModeChange,
+    onFocusChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
     onError?: (err: EditManagerError) => void;
     onModeChange?: (mode: EditManagerMode) => void;
+    onFocusChange?: (focus: HTMLElement | null) => void;
   }): EditManager {
     let instance: EditManager;
-    const nav = Nav.createNull(document, (evt) => instance.handleFocusRequest(evt));
-    instance = new EditManager(document, userInput, nav, onError, onModeChange);
+    const nav = Nav.createNull(
+      document,
+      (evt) => instance?.handleFocusRequest(evt),
+      (focus) => instance?.handleFocusChange(focus)
+    );
+    instance = new EditManager(document, userInput, nav, onError, onModeChange, onFocusChange);
     return instance;
   }
 
@@ -61,7 +74,8 @@ export class EditManager {
     private userInput: UserInput,
     readonly nav: Nav,
     private onError?: (err: EditManagerError) => void,
-    private onModeChange?: (mode: EditManagerMode) => void
+    private onModeChange?: (mode: EditManagerMode) => void,
+    private onFocusChange?: (focus: HTMLElement | null) => void
   ) {}
 
   getMode(): EditManagerMode {
@@ -287,8 +301,6 @@ export class EditManager {
         this.enterEditing(evt.token).mapErr((err) => this.onError?.(err));
         return false;
       }
-
-      return true;
     }
 
     return true;
@@ -319,6 +331,10 @@ export class EditManager {
 
     return false;
   };
+
+  private handleFocusChange(focus: HTMLElement | null) {
+    this.onFocusChange?.(focus);
+  }
 
   /**
    * If the cursor finds itself in an untenable state...
@@ -390,22 +406,41 @@ export class EditManager {
     this.nav.UP();
   }
 
+  isEditing(): boolean {
+    return this.mode === 'edit';
+  }
+
   canInsertAnchorAfterTag(): boolean {
     const focus = this.nav.getFocus();
-    if (!focus || isToken(focus)) {
+    if (!focus || isToken(focus) || !focus.parentNode) {
       return false;
     }
 
-    for (let node = focus.nextSibling; node; node = node.nextSibling) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return false;
+    const next = getNextSiblingNode(focus, focus.parentNode, {
+      visit: (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return true;
+        }
+        return !(node instanceof Element && isIgnorable(node));
       }
-      if (node instanceof Element && isIgnorable(node)) {
-        continue;
-      }
-      return node instanceof HTMLElement && !isToken(node);
+    });
+
+    if (!next) {
+      return false;
     }
 
-    return false;
+    if (next.nodeType === Node.TEXT_NODE) {
+      return false;
+    }
+
+    if (!(next instanceof HTMLElement)) {
+      return false;
+    }
+
+    if (isToken(next) || isImplicitLine(next)) {
+      return false;
+    }
+
+    return true;
   }
 }

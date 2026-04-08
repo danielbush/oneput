@@ -11,8 +11,11 @@ export class EditDocument implements AppObject {
       document: params.document,
       userInput: ctl.input,
       onError: (err) => instance.handleEditError(err),
-      onModeChange: (mode) => {
-        instance.renderMenuItems({ isEditing: mode !== 'view' });
+      onModeChange: () => {
+        instance?.renderMenuItems();
+      },
+      onFocusChange: () => {
+        instance?.renderMenuItems();
       }
     });
     instance = new EditDocument(ctl, params.document, editManager);
@@ -28,7 +31,7 @@ export class EditDocument implements AppObject {
   onStart = () => {
     setDocument(this.document);
     this.editManager.nav.connect();
-    this.renderMenuItems({ isEditing: false });
+    this.renderMenuItems();
   };
 
   onResume = () => {
@@ -132,11 +135,11 @@ export class EditDocument implements AppObject {
     }
   };
 
-  renderMenuItems = ({ isEditing }: { isEditing: boolean }) => {
+  renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
       items: [
-        !isEditing &&
+        !this.editManager.isEditing() &&
           stdMenuItem({
             id: 'EDIT_FIRST',
             textContent: 'Edit...',

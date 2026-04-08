@@ -31,14 +31,22 @@ export type NavError =
  * is immutable — set once at construction.
  */
 export class Nav {
-  static create(doc: JsedDocument, onRequestFocus?: OnRequestFocus): Nav {
+  static create(
+    doc: JsedDocument,
+    onRequestFocus?: OnRequestFocus,
+    onFocusChange?: (focus: HTMLElement) => void
+  ): Nav {
     const elementIndicator = ElementIndicator.create();
-    return new Nav(doc, elementIndicator, onRequestFocus);
+    return new Nav(doc, elementIndicator, onRequestFocus, onFocusChange);
   }
 
-  static createNull(doc: JsedDocument, onRequestFocus?: OnRequestFocus): Nav {
+  static createNull(
+    doc: JsedDocument,
+    onRequestFocus?: OnRequestFocus,
+    onFocusChange?: (focus: HTMLElement) => void
+  ): Nav {
     const elementIndicator = ElementIndicator.createNull();
-    return new Nav(doc, elementIndicator, onRequestFocus);
+    return new Nav(doc, elementIndicator, onRequestFocus, onFocusChange);
   }
 
   /**
@@ -55,7 +63,8 @@ export class Nav {
   constructor(
     private doc: JsedDocument,
     private elementIndicator: ElementIndicator,
-    private onRequestFocus?: OnRequestFocus
+    private onRequestFocus?: OnRequestFocus,
+    private onFocusChange?: (focus: HTMLElement) => void
   ) {
     this.onRequestFocus = onRequestFocus;
     this.FOCUS(doc.root);
@@ -154,6 +163,7 @@ export class Nav {
             element: el
           }
     );
+    this.onFocusChange?.(this.#FOCUS!);
   }
 
   /**

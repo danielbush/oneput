@@ -157,7 +157,7 @@ export class EditManager {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
     const currentTokenValue = token.getValue(this.cursor.getToken());
     const intent = decideInputIntent(change, currentTokenValue);
-    console.log('decided intent', JSON.stringify(intent, null, 2));
+    // console.log('decided intent', JSON.stringify(intent, null, 2));
     let lastToken: HTMLElement | null = null;
     const currentToken = this.cursor.getToken();
 

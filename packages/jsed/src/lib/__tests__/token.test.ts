@@ -505,7 +505,7 @@ describe('anchor insertion', () => {
     const doc = makeRoot(
       '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
     );
-    const em1 = byId(doc, 'em1');
+    // const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
 
     // act

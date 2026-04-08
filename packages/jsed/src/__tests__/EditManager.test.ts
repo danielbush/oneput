@@ -253,197 +253,203 @@ describe('EditManager', () => {
     editManager.destroy();
   });
 
-  test('insertAnchorAfterTag inserts an anchor at the boundary and enters editing on it', () => {
-    // arrange
-    const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
-    );
-    const userInput = Controller.createNull().input;
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput,
-      onError: () => {}
+  describe('insertAnchorAfterTag', () => {
+    it('insertAnchorAfterTag inserts an anchor at the boundary and enters editing on it', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const result = editManager.insertAnchorAfterTag();
+
+      // assert
+      expect(result).toBe(true);
+      expect(editManager.isEditing()).toBe(true);
+      const anchor = strong.previousElementSibling as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor?.classList.contains('jsed-token')).toBe(true);
+      expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+
+      editManager.destroy();
     });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
-    const strong = byId(doc, 'strong1');
+    it('insertAnchorAfterTag inserts an anchor after the focused tag when there is no next sibling', () => {
+      // arrange
+      const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
 
-    editManager.nav.REQUEST_FOCUS(em);
+      editManager.nav.REQUEST_FOCUS(em);
 
-    // act
-    const result = editManager.insertAnchorAfterTag();
+      // act
+      const canInsert = editManager.canInsertAnchorAfterTag();
+      const result = editManager.insertAnchorAfterTag();
 
-    // assert
-    expect(result).toBe(true);
-    expect(editManager.isEditing()).toBe(true);
-    const anchor = strong.previousElementSibling as HTMLElement | null;
-    expect(anchor).not.toBeNull();
-    expect(anchor?.classList.contains('jsed-token')).toBe(true);
-    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
-    expect(editManager.cursor?.getToken()).toBe(anchor);
-    expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(editManager.isEditing()).toBe(true);
+      const anchor = em.nextElementSibling as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor?.classList.contains('jsed-token')).toBe(true);
+      expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
 
-    editManager.destroy();
+      editManager.destroy();
+    });
+    it('insertAnchorAfterTag inserts an anchor before existing whitespace and enters editing on it', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canInsert = editManager.canInsertAnchorAfterTag();
+      const result = editManager.insertAnchorAfterTag();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      const anchor = em.nextElementSibling as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor?.nextSibling?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
   });
 
-  test('insertAnchorBeforeTag inserts an anchor at the boundary and enters editing on it', () => {
-    // arrange
-    const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
-    );
-    const userInput = Controller.createNull().input;
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput,
-      onError: () => {}
+  describe('insertAnchorBeforeTag', () => {
+    it('insertAnchorBeforeTag inserts an anchor at the boundary and enters editing on it', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      // const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const result = editManager.insertAnchorBeforeTag();
+
+      // assert
+      expect(result).toBe(true);
+      expect(editManager.isEditing()).toBe(true);
+      const anchor = strong.previousElementSibling as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor?.classList.contains('jsed-token')).toBe(true);
+      expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+      expect(strong.previousElementSibling).toBe(anchor);
+
+      editManager.destroy();
     });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
-    const strong = byId(doc, 'strong1');
 
-    editManager.nav.REQUEST_FOCUS(strong);
+    it('insertAnchorBeforeTag inserts an anchor before the focused tag when there is no previous sibling', () => {
+      // arrange
+      const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
 
-    // act
-    const result = editManager.insertAnchorBeforeTag();
+      editManager.nav.REQUEST_FOCUS(em);
 
-    // assert
-    expect(result).toBe(true);
-    expect(editManager.isEditing()).toBe(true);
-    const anchor = strong.previousElementSibling as HTMLElement | null;
-    expect(anchor).not.toBeNull();
-    expect(anchor?.classList.contains('jsed-token')).toBe(true);
-    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
-    expect(editManager.cursor?.getToken()).toBe(anchor);
-    expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
-    expect(strong.previousElementSibling).toBe(anchor);
+      // act
+      const canInsert = editManager.canInsertAnchorBeforeTag();
+      const result = editManager.insertAnchorBeforeTag();
 
-    editManager.destroy();
-  });
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(editManager.isEditing()).toBe(true);
+      const anchor = em.previousElementSibling as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor?.classList.contains('jsed-token')).toBe(true);
+      expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
 
-  test('insertAnchorAfterTag inserts an anchor after the focused tag when there is no next sibling', () => {
-    // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
-    const userInput = Controller.createNull().input;
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput,
-      onError: () => {}
+      editManager.destroy();
     });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
 
-    editManager.nav.REQUEST_FOCUS(em);
+    it('insertAnchorBeforeTag inserts an anchor after existing whitespace and enters editing on it', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const strong = byId(doc, 'strong1');
 
-    // act
-    const canInsert = editManager.canInsertAnchorAfterTag();
-    const result = editManager.insertAnchorAfterTag();
+      editManager.nav.REQUEST_FOCUS(strong);
 
-    // assert
-    expect(canInsert).toBe(true);
-    expect(result).toBe(true);
-    expect(editManager.isEditing()).toBe(true);
-    const anchor = em.nextElementSibling as HTMLElement | null;
-    expect(anchor).not.toBeNull();
-    expect(anchor?.classList.contains('jsed-token')).toBe(true);
-    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
-    expect(editManager.cursor?.getToken()).toBe(anchor);
-    expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+      // act
+      const canInsert = editManager.canInsertAnchorBeforeTag();
+      const result = editManager.insertAnchorBeforeTag();
 
-    editManager.destroy();
-  });
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      const anchor = strong.previousElementSibling as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor?.previousSibling?.textContent).toBe(' ');
 
-  test('insertAnchorAfterTag inserts an anchor before existing whitespace and enters editing on it', () => {
-    // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
-    const userInput = Controller.createNull().input;
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput,
-      onError: () => {}
+      editManager.destroy();
     });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
-
-    editManager.nav.REQUEST_FOCUS(em);
-
-    // act
-    const canInsert = editManager.canInsertAnchorAfterTag();
-    const result = editManager.insertAnchorAfterTag();
-
-    // assert
-    expect(canInsert).toBe(true);
-    expect(result).toBe(true);
-    const anchor = em.nextElementSibling as HTMLElement | null;
-    expect(anchor).not.toBeNull();
-    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
-    expect(editManager.cursor?.getToken()).toBe(anchor);
-    expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
-    expect(anchor?.nextSibling?.textContent).toBe(' ');
-
-    editManager.destroy();
-  });
-
-  test('insertAnchorBeforeTag inserts an anchor before the focused tag when there is no previous sibling', () => {
-    // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
-    const userInput = Controller.createNull().input;
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput,
-      onError: () => {}
-    });
-    editManager.nav.connect();
-    const em = byId(doc, 'em1');
-
-    editManager.nav.REQUEST_FOCUS(em);
-
-    // act
-    const canInsert = editManager.canInsertAnchorBeforeTag();
-    const result = editManager.insertAnchorBeforeTag();
-
-    // assert
-    expect(canInsert).toBe(true);
-    expect(result).toBe(true);
-    expect(editManager.isEditing()).toBe(true);
-    const anchor = em.previousElementSibling as HTMLElement | null;
-    expect(anchor).not.toBeNull();
-    expect(anchor?.classList.contains('jsed-token')).toBe(true);
-    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
-    expect(editManager.cursor?.getToken()).toBe(anchor);
-    expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
-
-    editManager.destroy();
-  });
-
-  test('insertAnchorBeforeTag inserts an anchor after existing whitespace and enters editing on it', () => {
-    // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
-    const userInput = Controller.createNull().input;
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput,
-      onError: () => {}
-    });
-    editManager.nav.connect();
-    const strong = byId(doc, 'strong1');
-
-    editManager.nav.REQUEST_FOCUS(strong);
-
-    // act
-    const canInsert = editManager.canInsertAnchorBeforeTag();
-    const result = editManager.insertAnchorBeforeTag();
-
-    // assert
-    expect(canInsert).toBe(true);
-    expect(result).toBe(true);
-    const anchor = strong.previousElementSibling as HTMLElement | null;
-    expect(anchor).not.toBeNull();
-    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
-    expect(editManager.cursor?.getToken()).toBe(anchor);
-    expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
-    expect(anchor?.previousSibling?.textContent).toBe(' ');
-
-    editManager.destroy();
   });
 });
 

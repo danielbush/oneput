@@ -406,7 +406,7 @@ export class EditManager {
     this.nav.UP();
   }
 
-  private getAnchorAfterTagInsertionPoint(): HTMLElement | null {
+  private getAnchorAfterTagInsertionPoint(): { parent: Node; next: Node | null } | null {
     const focus = this.nav.getFocus();
     if (!focus || isToken(focus) || !focus.parentNode) {
       return null;
@@ -421,33 +421,29 @@ export class EditManager {
       }
     });
 
-    if (!next) {
+    if (next?.nodeType === Node.TEXT_NODE) {
       return null;
     }
 
-    if (next.nodeType === Node.TEXT_NODE) {
+    if (next && !(next instanceof HTMLElement)) {
       return null;
     }
 
-    if (!(next instanceof HTMLElement)) {
+    if (next && (isToken(next) || isImplicitLine(next))) {
       return null;
     }
 
-    if (isToken(next) || isImplicitLine(next)) {
-      return null;
-    }
-
-    return next;
+    return { parent: focus.parentNode, next };
   }
 
   insertAnchorAfterTag(): boolean {
-    const next = this.getAnchorAfterTagInsertionPoint();
-    if (!next) {
+    const insertionPoint = this.getAnchorAfterTagInsertionPoint();
+    if (!insertionPoint) {
       return false;
     }
 
     const anchor = token.createAnchor();
-    token.insertBefore(anchor, next);
+    insertionPoint.parent.insertBefore(anchor, insertionPoint.next);
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }

@@ -47,7 +47,6 @@ export class EditDocument implements AppObject {
   };
 
   actions = {
-
     // Disable these when menu is open so we can use the menu:
 
     EXIT: {
@@ -157,7 +156,7 @@ export class EditDocument implements AppObject {
             id: 'INSERT_ANCHOR_AFTER_TAG',
             textContent: 'Insert anchor after tag...',
             action: () => {
-              console.log('intent: insert anchor after focused tag boundary');
+              this.editManager.insertAnchorAfterTag();
             },
             left: (b) => [b.icon(icons.Pencil)]
           })

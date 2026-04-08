@@ -406,16 +406,10 @@ export class EditManager {
     this.nav.UP();
   }
 
-  // is*/can* methods
-
-  isEditing(): boolean {
-    return this.mode === 'edit';
-  }
-
-  canInsertAnchorAfterTag(): boolean {
+  private getAnchorAfterTagInsertionPoint(): HTMLElement | null {
     const focus = this.nav.getFocus();
     if (!focus || isToken(focus) || !focus.parentNode) {
-      return false;
+      return null;
     }
 
     const next = getNextSiblingNode(focus, focus.parentNode, {
@@ -428,21 +422,43 @@ export class EditManager {
     });
 
     if (!next) {
-      return false;
+      return null;
     }
 
     if (next.nodeType === Node.TEXT_NODE) {
-      return false;
+      return null;
     }
 
     if (!(next instanceof HTMLElement)) {
-      return false;
+      return null;
     }
 
     if (isToken(next) || isImplicitLine(next)) {
+      return null;
+    }
+
+    return next;
+  }
+
+  insertAnchorAfterTag(): boolean {
+    const next = this.getAnchorAfterTagInsertionPoint();
+    if (!next) {
       return false;
     }
 
+    const anchor = token.createAnchor();
+    token.insertBefore(anchor, next);
+    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
+  }
+
+  // is*/can* methods
+
+  isEditing(): boolean {
+    return this.mode === 'edit';
+  }
+
+  canInsertAnchorAfterTag(): boolean {
+    return !!this.getAnchorAfterTagInsertionPoint();
   }
 }

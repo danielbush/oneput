@@ -315,6 +315,28 @@ function removeSeparatorAfter(token: HTMLElement): void {
 }
 
 /**
+ * Ensure normal boundary spacing before a TOKEN.
+ *
+ * This is the spacing-model name for "there should be whitespace immediately
+ * before this TOKEN", without relying on PADDED_TOKEN vocabulary at the call
+ * site.
+ */
+export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
+  return ensureSeparatorBefore(token, value);
+}
+
+/**
+ * Ensure normal boundary spacing after a TOKEN.
+ *
+ * This is the spacing-model name for "there should be whitespace immediately
+ * after this TOKEN", without relying on COLLAPSED_TOKEN vocabulary at the call
+ * site.
+ */
+export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
+  return ensureSeparatorAfter(token, value);
+}
+
+/**
  * Replaces the text of the existing token.
  *
  * If the token is an ANCHOR, we convert it in-place to a regular token and

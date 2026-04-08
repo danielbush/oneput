@@ -320,12 +320,6 @@ describe('EditManager', () => {
 });
 
 describe('input handling', () => {
-  // "..." represents the current input
-  // "|" = input cursor position in input
-  // "[...]" = selection range
-  // => user-initiated transformation
-  // ==> is a transformation performed automatically, not by the user
-
   async function createEditManagerFixture(params?: { html?: string }) {
     const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
     const line = byId(doc, 'p1');

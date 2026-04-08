@@ -1,21 +1,61 @@
 import type { UserInputChange } from '../../UserInput.js';
 
+/*
+Notation
+
+"..." represents the current input
+"|" = input cursor position in input
+"[...]" = selection range
+=> user-initiated transformation
+==> is a transformation performed automatically, not by the user
+*/
+
 export type InputIntent =
   | {
+      /**
+       * "[foo]" => " " ==> "[bar]"
+       */
       type: 'move-next-on-space';
       inputValue: string;
     }
   | {
+      /**
+       * "[foo]" => "|"
+       */
       type: 'delete-current';
       inputValue: string;
-      prependedSpace: false;
       finalTokenPreference: 'last-appended';
     }
   | {
+      /**
+       * "foo|" => "foo |" => "foo b|" ==> "b|"
+       */
+      type: 'insert-after-current';
+      inputValue: string;
+      insertedParts: string[];
+      finalTokenPreference: 'last-inserted';
+    }
+  | {
+      /**
+       * "|foo" => " |foo" ==> "| foo" => "b| foo" ==> "b|"
+       */
+      type: 'insert-before-current';
+      inputValue: string;
+      insertedParts: string[];
+      finalTokenPreference: 'last-inserted';
+    }
+  | {
+      /**
+       * "fo|o" => " fo |o" ==> "[o]"
+       */
       type: 'rewrite-current';
       inputValue: string;
       firstPart: string;
       appendedParts: string[];
+      /**
+       * Preserves the leading-space cursor rewrite:
+       * "|foo" => " |foo" ==> "| foo"
+       */
       prependedSpace: boolean;
       finalTokenPreference: 'current-token' | 'last-appended';
     };
@@ -27,7 +67,7 @@ export type InputIntent =
  * raw input value plus before/after selection state into a small semantic
  * instruction, leaving DOM edits and CURSOR choreography to the caller.
  */
-export function decideInputIntent(change: UserInputChange): InputIntent {
+export function decideInputIntent(change: UserInputChange, currentTokenValue: string): InputIntent {
   const { value: inputValue, previousValue, previousRange, range } = change;
   const [, previousStop] = previousRange;
   const [, stop] = range;
@@ -43,9 +83,38 @@ export function decideInputIntent(change: UserInputChange): InputIntent {
     return {
       type: 'delete-current',
       inputValue,
-      prependedSpace: false,
+      // prependedSpace: false,
       finalTokenPreference: 'last-appended'
     };
+  }
+
+  const insertAfterPrefix = `${currentTokenValue} `;
+  if (previousValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
+    const insertedParts = inputValue.slice(insertAfterPrefix.length).split(/\s+/).filter(Boolean);
+    if (insertedParts.length > 0) {
+      return {
+        type: 'insert-after-current',
+        inputValue,
+        insertedParts,
+        finalTokenPreference: 'last-inserted'
+      };
+    }
+  }
+
+  const insertBeforeSuffix = ` ${currentTokenValue}`;
+  if (previousValue === insertBeforeSuffix && inputValue.endsWith(insertBeforeSuffix)) {
+    const insertedParts = inputValue
+      .slice(0, inputValue.length - insertBeforeSuffix.length)
+      .split(/\s+/)
+      .filter(Boolean);
+    if (insertedParts.length > 0) {
+      return {
+        type: 'insert-before-current',
+        inputValue,
+        insertedParts,
+        finalTokenPreference: 'last-inserted'
+      };
+    }
   }
 
   const [firstPart, ...appendedParts] = inputValue.split(/\s+/).filter(Boolean);
@@ -57,6 +126,9 @@ export function decideInputIntent(change: UserInputChange): InputIntent {
     const firstWord = containsSpace[1];
     const insertedSpace = containsSpace[2];
     const isFirstWord = firstWord.length === stop;
+    /**
+     * "b|foo" => "b |foo"
+     */
     const isLeadingSplitCommit =
       previousStop === firstWord.length &&
       stop === firstWord.length + insertedSpace.length &&

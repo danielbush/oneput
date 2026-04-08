@@ -14,7 +14,7 @@ function makeChange(overrides: Partial<UserInputChange>): UserInputChange {
 }
 
 describe('decideInputIntent', () => {
-  test('whitespace-only replacement becomes move-next-on-space', () => {
+  test('"[foo]" => " " ==> "[bar]": move-next-on-space', () => {
     // arrange
     const change = makeChange({
       value: ' ',
@@ -23,7 +23,7 @@ describe('decideInputIntent', () => {
     });
 
     // act
-    const intent = decideInputIntent(change);
+    const intent = decideInputIntent(change, 'foo');
 
     // assert
     expect(intent).toEqual({
@@ -32,7 +32,7 @@ describe('decideInputIntent', () => {
     });
   });
 
-  test('empty value becomes delete-current', () => {
+  test('"[foo]" => "|": delete-current', () => {
     // arrange
     const change = makeChange({
       previousValue: 'foo',
@@ -42,18 +42,17 @@ describe('decideInputIntent', () => {
     });
 
     // act
-    const intent = decideInputIntent(change);
+    const intent = decideInputIntent(change, 'foo');
 
     // assert
     expect(intent).toEqual({
       type: 'delete-current',
       inputValue: '',
-      prependedSpace: false,
       finalTokenPreference: 'last-appended'
     });
   });
 
-  test('prepended whitespace keeps current-token preference for committed leading split', () => {
+  test('"b|foo" => "b |foo" ==> "b|": rewrite-current prefers current-token on leading split commit', () => {
     // arrange
     const change = makeChange({
       priorValue: 'foo',
@@ -64,7 +63,7 @@ describe('decideInputIntent', () => {
     });
 
     // act
-    const intent = decideInputIntent(change);
+    const intent = decideInputIntent(change, 'bfoo');
 
     // assert
     expect(intent).toEqual({
@@ -77,7 +76,49 @@ describe('decideInputIntent', () => {
     });
   });
 
-  test('mid-token split prefers the last appended token', () => {
+  test('"foo |" => "foo b|" ==> "b|": insert-after-current', () => {
+    // arrange
+    const change = makeChange({
+      previousValue: 'foo ',
+      value: 'foo b',
+      previousRange: [4, 4],
+      range: [5, 5]
+    });
+
+    // act
+    const intent = decideInputIntent(change, 'foo');
+
+    // assert
+    expect(intent).toEqual({
+      type: 'insert-after-current',
+      inputValue: 'foo b',
+      insertedParts: ['b'],
+      finalTokenPreference: 'last-inserted'
+    });
+  });
+
+  test('"| foo" => "b| foo" ==> "b|": insert-before-current', () => {
+    // arrange
+    const change = makeChange({
+      previousValue: ' foo',
+      value: 'b foo',
+      previousRange: [0, 0],
+      range: [1, 1]
+    });
+
+    // act
+    const intent = decideInputIntent(change, 'foo');
+
+    // assert
+    expect(intent).toEqual({
+      type: 'insert-before-current',
+      inputValue: 'b foo',
+      insertedParts: ['b'],
+      finalTokenPreference: 'last-inserted'
+    });
+  });
+
+  test('"fo|o" => "fo o|" ==> "o|": rewrite-current prefers last-appended on mid-token split', () => {
     // arrange
     const change = makeChange({
       previousValue: 'foo',
@@ -87,7 +128,7 @@ describe('decideInputIntent', () => {
     });
 
     // act
-    const intent = decideInputIntent(change);
+    const intent = decideInputIntent(change, 'foo');
 
     // assert
     expect(intent).toEqual({

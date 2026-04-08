@@ -155,16 +155,41 @@ export class EditManager {
    */
   public handleInputChange = async (change: UserInputChange) => {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
-    const intent = decideInputIntent(change);
+    const currentTokenValue = token.getValue(this.cursor.getToken());
+    const intent = decideInputIntent(change, currentTokenValue);
+    console.log('decided intent', JSON.stringify(intent, null, 2));
     let lastToken: HTMLElement | null = null;
+    const currentToken = this.cursor.getToken();
 
     switch (intent.type) {
       case 'move-next-on-space':
         this.cursor.moveNext();
         return;
 
-      case 'delete-current':
+      case 'delete-current': {
         this.cursor.delete();
+        this.cursor?.handleInputChange(intent.inputValue);
+        return;
+      }
+
+      case 'insert-after-current':
+        for (const part of intent.insertedParts.reverse()) {
+          const insertedToken = token.createToken(part);
+          token.insertAfter(insertedToken, currentToken);
+          token.ensureSpaceAfter(currentToken);
+          if (!lastToken) {
+            lastToken = insertedToken;
+          }
+        }
+        break;
+
+      case 'insert-before-current':
+        for (const part of intent.insertedParts) {
+          const insertedToken = token.createToken(part);
+          token.insertBefore(insertedToken, currentToken);
+          token.ensureSpaceAfter(insertedToken);
+          lastToken = insertedToken;
+        }
         break;
 
       case 'rewrite-current':
@@ -179,11 +204,6 @@ export class EditManager {
           this.userInput.moveCursorToBeginning();
         }
         break;
-    }
-
-    if (intent.type === 'delete-current') {
-      this.cursor?.handleInputChange(intent.inputValue);
-      return;
     }
 
     const finalToken =

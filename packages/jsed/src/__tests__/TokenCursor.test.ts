@@ -505,6 +505,45 @@ describe('TokenCursor motion', () => {
       });
     });
   });
+
+  it('scrolls a hidden LINE_SIBLING back into view when the CURSOR moves onto it', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'hello world'), {
+      viewportScrollerOpts: {
+        getElementRect: (el) =>
+          el.textContent?.trim() === 'world'
+            ? {
+                top: 0,
+                left: -10,
+                bottom: 10,
+                right: 10,
+                width: 20,
+                height: 10
+              }
+            : undefined
+      }
+    });
+    const firstToken = quickDescend(doc.root.querySelector('#p1') as HTMLElement)!;
+    const secondToken = firstToken.nextElementSibling as HTMLElement;
+    const { cursor } = createCursor(doc, firstToken);
+    const scrollRequests = doc.viewportScroller.trackScrollRequests();
+    scrollRequests.data.length = 0;
+
+    // act
+    cursor.moveNext();
+
+    // assert
+    expect(scrollRequests.data).toEqual([
+      {
+        element: secondToken,
+        options: {
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth'
+        }
+      }
+    ]);
+  });
 });
 
 describe('TokenCursor CURSOR_STATE', () => {

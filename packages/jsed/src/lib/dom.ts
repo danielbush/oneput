@@ -64,22 +64,3 @@ export function splitParentBefore(el: HTMLElement): void {
     sib = prevSib;
   }
 }
-
-/**
- * Only scroll elements into view if they are smaller than the viewport.
- *
- * Combined with block: 'center' (vertical), this will keep the focus in the
- * middle of the screen when moving up or down.
- */
-export function scrollIntoViewIfSmaller(
-  el: HTMLElement,
-  opts?: { vertical?: 'nearest' | 'start' | 'center' | 'end' }
-) {
-  const vp = window.visualViewport;
-  const vpWidth = vp?.width ?? window.innerWidth;
-  const vpHeight = vp?.height ?? window.innerHeight;
-  const rect = el.getBoundingClientRect();
-  if (rect.height <= vpHeight && rect.width <= vpWidth) {
-    el.scrollIntoView({ block: opts?.vertical ?? 'center', inline: 'nearest', behavior: 'smooth' });
-  }
-}

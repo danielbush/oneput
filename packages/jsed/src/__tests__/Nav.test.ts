@@ -65,6 +65,44 @@ describe('FOCUS', () => {
     // assert
     expect(nav.getFocus()).toBe(doc.root);
   });
+
+  it('scrolls a hidden FOCUSABLE back into view with nearest alignment', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'p1'), {
+      viewportScrollerOpts: {
+        getElementRect: (el) =>
+          el.id === 'p1'
+            ? {
+                top: -10,
+                left: 0,
+                bottom: 10,
+                right: 10,
+                width: 10,
+                height: 20
+              }
+            : undefined
+      }
+    });
+    const nav = new Nav(doc, ElementIndicator.createNull());
+    const p1 = byId(doc, 'p1');
+    const scrollRequests = doc.viewportScroller.trackScrollRequests();
+    scrollRequests.data.length = 0;
+
+    // act
+    nav.REQUEST_FOCUS(p1);
+
+    // assert
+    expect(scrollRequests.data).toEqual([
+      {
+        element: p1,
+        options: {
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth'
+        }
+      }
+    ]);
+  });
 });
 
 describe('SIB_HIGHLIGHT', () => {

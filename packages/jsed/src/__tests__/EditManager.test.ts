@@ -253,6 +253,98 @@ describe('EditManager', () => {
     editManager.destroy();
   });
 
+  describe('revealActiveTarget', () => {
+    it('centers the current TOKEN in edit mode', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar'), {
+        viewportScrollerOpts: {
+          getElementRect: (el) =>
+            el.classList.contains('jsed-token-focus')
+              ? {
+                  top: 0,
+                  left: 0,
+                  bottom: 20,
+                  right: 40,
+                  width: 40,
+                  height: 20
+                }
+              : undefined
+        }
+      });
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.enterEditing(byId(doc, 'p1'));
+      const token = editManager.cursor?.getToken() as HTMLElement;
+      const scrollRequests = doc.viewportScroller.trackScrollRequests();
+      scrollRequests.data.length = 0;
+
+      // act
+      const revealed = editManager.revealActiveTarget();
+
+      // assert
+      expect(revealed).toBe(true);
+      expect(scrollRequests.data).toEqual([
+        {
+          element: token,
+          options: {
+            block: 'center',
+            inline: 'nearest',
+            behavior: 'smooth'
+          }
+        }
+      ]);
+
+      editManager.destroy();
+    });
+
+    it('aligns an oversized FOCUSABLE to the top of the viewport', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar'), {
+        viewportScrollerOpts: {
+          getElementRect: (el) =>
+            el.id === 'p1'
+              ? {
+                  top: 0,
+                  left: 0,
+                  bottom: 818,
+                  right: 100,
+                  width: 100,
+                  height: 818
+                }
+              : undefined
+        }
+      });
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      const p1 = byId(doc, 'p1');
+      editManager.nav.REQUEST_FOCUS(p1);
+      const scrollRequests = doc.viewportScroller.trackScrollRequests();
+      scrollRequests.data.length = 0;
+
+      // act
+      const revealed = editManager.revealActiveTarget();
+
+      // assert
+      expect(revealed).toBe(true);
+      expect(scrollRequests.data).toEqual([
+        {
+          element: p1,
+          options: {
+            block: 'start',
+            inline: 'nearest',
+            behavior: 'smooth'
+          }
+        }
+      ]);
+
+      editManager.destroy();
+    });
+  });
+
   describe('insertAnchorAfterTag', () => {
     it('insertAnchorAfterTag inserts an anchor at the boundary and enters editing on it', () => {
       // arrange

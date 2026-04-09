@@ -137,6 +137,15 @@ export class EditDocument implements AppObject {
         description: 'Find next parent'
         // when: { menuOpen: false }
       }
+    },
+    REVEAL: {
+      action: () => {
+        this.editManager.revealActiveTarget();
+      },
+      binding: {
+        bindings: ['$mod+m'],
+        description: 'Center the active token or reveal the focused element'
+      }
     }
   };
 

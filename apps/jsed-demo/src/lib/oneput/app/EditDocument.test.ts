@@ -3,9 +3,12 @@ import { EditManager, JsedDocument } from '@oneput/jsed';
 import { describe, expect, test, it } from 'vitest';
 import { EditDocument } from './EditDocument.js';
 
-function makeDocument(html: string): JsedDocument {
+function makeDocument(
+  html: string,
+  opts?: Parameters<typeof JsedDocument.createNull>[1]
+): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
-  return JsedDocument.createNull(document.getElementById('root') as HTMLElement);
+  return JsedDocument.createNull(document.getElementById('root') as HTMLElement, opts);
 }
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
@@ -93,5 +96,56 @@ describe('EditDocument', () => {
     expect(paragraphs[0]?.textContent?.trim()).toBe('foo');
     expect(paragraphs[1]?.textContent?.trim()).toBe('bar');
     expect(editManager.cursor?.getToken().textContent?.trim()).toBe('bar');
+  });
+
+  it('binds cmd+m to reveal the active token', () => {
+    // arrange
+    const doc = makeDocument('<p id="p1">foo bar</p>', {
+      viewportScrollerOpts: {
+        getElementRect: (el) =>
+          el.classList.contains('jsed-token-focus')
+            ? {
+                top: 0,
+                left: 0,
+                bottom: 20,
+                right: 40,
+                width: 40,
+                height: 20
+              }
+            : undefined
+      }
+    });
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const p1 = byId(doc, 'p1');
+
+    ctl.simulateStart(() => editDocument);
+    editManager.nav.REQUEST_FOCUS(p1);
+    editManager.nav.REQUEST_FOCUS(p1);
+
+    const token = editManager.cursor?.getToken() as HTMLElement;
+    const scrollRequests = doc.viewportScroller.trackScrollRequests();
+    scrollRequests.data.length = 0;
+
+    // act
+    editDocument.actions.REVEAL.action();
+
+    // assert
+    expect(editDocument.actions.REVEAL.binding.bindings).toContain('$mod+m');
+    expect(scrollRequests.data).toEqual([
+      {
+        element: token,
+        options: {
+          block: 'center',
+          inline: 'nearest',
+          behavior: 'smooth'
+        }
+      }
+    ]);
   });
 });

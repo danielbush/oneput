@@ -1,7 +1,6 @@
 import type { JsedDocument } from './types.js';
 import { JSED_CURSOR_CLASS } from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
-import { scrollIntoViewIfSmaller } from './lib/dom.js';
 
 export type TokenCursorError =
   | {
@@ -66,8 +65,7 @@ export abstract class TokenCursorBase {
     this.removeAllFocusClasses();
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     el.classList.add(JSED_CURSOR_CLASS);
-    // Don't scroll to middle of screen when setting token, UX is too jarring.
-    scrollIntoViewIfSmaller(el, { vertical: 'nearest' });
+    this.getDocument().viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
     this.#token = el;
     this.#onTokenChange(el);
   }

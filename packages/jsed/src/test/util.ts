@@ -1,5 +1,6 @@
 import { JsedDocument } from '../JsedDocument.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../lib/constants.js';
+import type { ViewportScrollerNullOptions } from '../lib/ViewportScroller.js';
 import * as token from '../lib/token.js';
 import { isIsland, isToken } from '../lib/taxonomy.js';
 
@@ -9,9 +10,12 @@ import { isIsland, isToken } from '../lib/taxonomy.js';
  * It calls loadDoc which is part of the app we're testing but this is a
  * trade-off for convenience.
  */
-export function makeRoot(html: string, document: Document = window.document): JsedDocument {
+export function makeRoot(
+  html: string,
+  opts?: { viewportScrollerOpts?: ViewportScrollerNullOptions }
+): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
-  return JsedDocument.createNull(document.getElementById('root') as HTMLElement);
+  return JsedDocument.createNull(document.getElementById('root') as HTMLElement, opts);
 }
 
 type Attr = { [key: string]: string };

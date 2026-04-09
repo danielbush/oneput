@@ -109,7 +109,7 @@ export class EditManager {
     const firstToken = isToken(initial) ? initial : token.quickDescend(initial);
     if (firstToken) {
       const line = getLine(firstToken);
-      this.nav.FOCUS(line, { scrollIntoView: false }); // Let the cursor handle scrolling.
+      this.nav.FOCUS(line);
       this.userInput.focus();
       if (!this.cursor) {
         this.cursor = TokenCursor.create({
@@ -128,7 +128,7 @@ export class EditManager {
     return err({ type: 'no-token-under-focus' });
   }
 
-  exitEditing(params?: { focusElement?: HTMLElement; scrollIntoView?: boolean }) {
+  exitEditing(params?: { focusElement?: HTMLElement }) {
     const focusElement = params?.focusElement ?? this.nav.getFocus() ?? undefined;
     this.unsubscribeInputChange?.();
     this.unsubscribeSelectionChange?.();
@@ -138,7 +138,7 @@ export class EditManager {
     this.setMode('view');
 
     if (focusElement) {
-      this.nav.FOCUS(focusElement, { scrollIntoView: params?.scrollIntoView ?? false });
+      this.nav.FOCUS(focusElement);
       token.quickDescend(focusElement);
     }
   }
@@ -236,7 +236,7 @@ export class EditManager {
    * commanded to do usually by the user... (eg due to delete operation).
    */
   private handleTokenChange = async (tok: HTMLElement) => {
-    this.nav?.FOCUS(tok, { scrollIntoView: false }); // Let the cursor handle scrolling.
+    this.nav?.FOCUS(tok);
     this.userInput.resetPlaceholder();
     this.userInput.enable(true);
 
@@ -389,6 +389,24 @@ export class EditManager {
 
   handleParent() {
     this.nav.UP();
+  }
+
+  revealActiveTarget(): boolean {
+    const current = this.cursor?.getToken();
+    if (current && isToken(current)) {
+      this.document.viewportScroller.scrollIntoViewCentered(current);
+      return true;
+    }
+
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    this.document.viewportScroller.scrollIntoViewCentered(focus, {
+      oversizedVertical: 'start'
+    });
+    return true;
   }
 
   insertAnchorAfterTag(): boolean {

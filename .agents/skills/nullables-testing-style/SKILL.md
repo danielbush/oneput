@@ -138,6 +138,56 @@ Good infrastructure wrappers:
 
 Shore's `CommandLine` example is the model: the wrapper owns configurable input, tracked output, and the real/null switch in production code.
 
+### Embedded stubs
+
+An **embedded stub** is the nulled implementation that lives *inside* the production infrastructure wrapper. It is not a test-local fake and it is not a mock. It is production code that the wrapper uses in `.createNull()`.
+
+For example:
+
+- `ViewportScroller.create()` uses the real browser APIs
+- `ViewportScroller.createNull()` uses an embedded stub that does not scroll the real page, but can return configured element rects and track scroll requests
+
+Why this matters:
+
+- the real/null switch stays in production code, not scattered through tests
+- tests do not patch methods or cast partial objects
+- the same nullable implementation can be reused by many tests
+
+The embedded stub should usually do three things:
+
+1. return safe default values with no real I/O
+2. accept configurable responses when tests need controlled inputs
+3. record observable outputs when tests need to assert what would have happened
+
+### Configurable responses
+
+A **configurable response** is test-controlled input returned by a nullable dependency. Instead of rewriting production code to make testing easier, configure the nullable dependency to answer in a specific way.
+
+Examples:
+
+- a nullable repository returns a specific user
+- a nullable command-line wrapper returns specific args
+- a nullable viewport wrapper returns a specific rect for a matching element
+- a nullable clock returns a chosen current time
+
+Prefer configuring responses at construction time, close to the test, for example:
+
+```ts
+const repo = UserRepo.createNull({
+  findById: (id) => (id === 'u1' ? user : null)
+});
+```
+
+Sometimes a nullable dependency needs to return different values over time. In that case a queue of return values is fine:
+
+```ts
+const clock = Clock.createNull({
+  now: [t1, t2, t3]
+});
+```
+
+Use a queue only when the response genuinely changes over time and matching by input is not enough. Prefer matching by input when the behavior is really "return this value for this request".
+
 ## Preflight
 
 Before writing tests, verify:
@@ -172,6 +222,13 @@ Preferred progression:
 8. Inject the wrapper into higher-level classes.
 
 The most reusable machinery tends to live at this lower boundary layer.
+
+In practice, steps 4 and 5 are where many tests become dramatically simpler:
+
+- the **embedded stub** gives you a reusable nulled environment implementation
+- the **configurable responses** let the test describe what the environment should say back
+
+Together they replace most situations where people reach for mocks, spies, patched methods, or special-case production code.
 
 ### Keep the advice light
 

@@ -25,8 +25,6 @@ When working in one of these packages or apps, check if they have an AGENTS.md .
 
 ## Reading and writing code
 
-Use `/jcodemunch` or consult the jcodemunch skill for symbol-aware code search, dependency analysis, and codebase orientation. Prefer this over raw Grep/Read when exploring code structure, relationships, or impact of changes.
-
 General rules
 
 - Look for ways to structure each package or app using a deep modules approach; this means pushing low-level implementation details into a subdirectory and keeping the top-level code clean and focused
@@ -40,7 +38,11 @@ For tests
 
 - Use vitest with AAA pattern (// arrange, // act, // assert with blank lines between)
 - Test intentions, not exhaustively - focus on core behaviors
-- No mocks - see the `nullables-test` and `nullables-refactor` skill
+- Never ever use mocks
+- Never test interactions, call counts, or spy-based expectations; prefer state-based assertions and tracked outputs
+- Never write production code to accommodate tests; instead use configurable responses and embedded stubs, even when that means configuring a queue of return values in a nullable dependency
+- Use nullables and narrow sociable unit tests as described by the `nullables-testing-style` skill
+- Put the test seam at the environment boundary; use `.createNull()` dependencies, configurable responses, behavior simulation, and tracked outputs instead of patched methods or fake interaction checks
 - Ask what the most important tests are before writing
 - Keep test count small and focused
 

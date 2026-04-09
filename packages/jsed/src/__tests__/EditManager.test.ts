@@ -349,7 +349,7 @@ describe('EditManager', () => {
     it('insertAnchorAfterTag inserts an anchor at the boundary and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -380,7 +380,7 @@ describe('EditManager', () => {
     });
     it('insertAnchorAfterTag inserts an anchor after the focused tag when there is no next sibling', () => {
       // arrange
-      const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+      const doc = makeRoot('<p id="p1"><em id="em1" style="display:inline;">foo</em></p>');
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
         document: doc,
@@ -412,7 +412,7 @@ describe('EditManager', () => {
     it('insertAnchorAfterTag inserts an anchor before existing whitespace and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>'
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -447,7 +447,7 @@ describe('EditManager', () => {
     it('insertAnchorBeforeTag inserts an anchor at the boundary and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -480,7 +480,7 @@ describe('EditManager', () => {
 
     it('insertAnchorBeforeTag inserts an anchor before the focused tag when there is no previous sibling', () => {
       // arrange
-      const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+      const doc = makeRoot('<p id="p1"><em id="em1" style="display:inline;">foo</em></p>');
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
         document: doc,
@@ -513,7 +513,7 @@ describe('EditManager', () => {
     it('insertAnchorBeforeTag inserts an anchor after existing whitespace and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>'
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({

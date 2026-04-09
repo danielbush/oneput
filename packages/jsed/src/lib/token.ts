@@ -15,6 +15,7 @@ import {
   isAnchor,
   isInlineFlow,
   isImplicitLine,
+  isLine,
   isTransparentBlock
 } from './taxonomy.js';
 import {
@@ -475,7 +476,7 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
 export function getAnchorAfterTagInsertionPoint(
   focus: HTMLElement
 ): { parent: Node; next: Node | null } | null {
-  if (isToken(focus) || !focus.parentNode) {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
     return null;
   }
 
@@ -534,7 +535,7 @@ export function insertAnchorAfterTag(focus: HTMLElement): HTMLElement | null {
 export function getAnchorBeforeTagInsertionPoint(
   focus: HTMLElement
 ): { parent: Node; previous: Node | null } | null {
-  if (isToken(focus) || !focus.parentNode) {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
     return null;
   }
 

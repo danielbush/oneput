@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, span, inlineStyleHack } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, span, inlineStyleHack, inlineStyleHackVal } from '../../test/util.js';
 import {
   tokenizeLine,
   isPadded,
@@ -365,7 +365,7 @@ describe('anchor insertion', () => {
   test('getAnchorBeforeTagInsertionPoint skips IGNORABLE siblings and finds the previous tag boundary', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     const strong1 = byId(doc, 'strong1');
     const em1 = byId(doc, 'em1');
@@ -382,7 +382,7 @@ describe('anchor insertion', () => {
   test('getAnchorBeforeTagInsertionPoint returns null when text already represents the gap', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em> gap <strong id="strong1">bar</strong></p>'
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> gap <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     const strong1 = byId(doc, 'strong1');
 
@@ -393,9 +393,26 @@ describe('anchor insertion', () => {
     expect(insertionPoint).toBeNull();
   });
 
+  test('anchor insertion points return null for LINEs', () => {
+    // arrange
+    const doc = makeRoot('<div id="div1"><p id="p1">foo</p><p id="p2">bar</p></div>');
+    const p1 = byId(doc, 'p1');
+    const p2 = byId(doc, 'p2');
+
+    // act
+    const afterPoint = getAnchorAfterTagInsertionPoint(p1);
+    const beforePoint = getAnchorBeforeTagInsertionPoint(p2);
+
+    // assert
+    expect(afterPoint).toBeNull();
+    expect(beforePoint).toBeNull();
+  });
+
   test('getAnchorBeforeTagInsertionPoint allows insertion after existing whitespace', () => {
     // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
     const strong1 = byId(doc, 'strong1');
 
     // act
@@ -410,7 +427,7 @@ describe('anchor insertion', () => {
   test('getAnchorAfterTagInsertionPoint skips IGNORABLE siblings and finds the next tag boundary', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
@@ -427,7 +444,7 @@ describe('anchor insertion', () => {
   test('getAnchorAfterTagInsertionPoint returns null when text already represents the gap', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em> gap <strong id="strong1">bar</strong></p>'
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> gap <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     const em1 = byId(doc, 'em1');
 
@@ -440,7 +457,9 @@ describe('anchor insertion', () => {
 
   test('getAnchorAfterTagInsertionPoint allows insertion before existing whitespace', () => {
     // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
     const em1 = byId(doc, 'em1');
 
     // act
@@ -455,7 +474,7 @@ describe('anchor insertion', () => {
   test('insertAnchorAfterTag inserts an anchor at the boundary before the next tag', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
@@ -472,7 +491,7 @@ describe('anchor insertion', () => {
 
   test('insertAnchorAfterTag inserts an anchor at end of siblings when there is no next tag', () => {
     // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+    const doc = makeRoot(`<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em></p>`);
     const em1 = byId(doc, 'em1');
 
     // act
@@ -487,7 +506,9 @@ describe('anchor insertion', () => {
 
   test('insertAnchorAfterTag inserts an anchor before existing whitespace', () => {
     // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
     const em1 = byId(doc, 'em1');
 
     // act
@@ -503,7 +524,7 @@ describe('anchor insertion', () => {
   test('insertAnchorBeforeTag inserts an anchor at the boundary after the previous tag', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1">foo</em><span class="jsed-ignore"></span><strong id="strong1">bar</strong></p>'
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     // const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
@@ -520,7 +541,7 @@ describe('anchor insertion', () => {
 
   test('insertAnchorBeforeTag inserts an anchor at start of siblings when there is no previous tag', () => {
     // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em></p>');
+    const doc = makeRoot(`<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em></p>`);
     const em1 = byId(doc, 'em1');
 
     // act
@@ -535,7 +556,9 @@ describe('anchor insertion', () => {
 
   test('insertAnchorBeforeTag inserts an anchor after existing whitespace', () => {
     // arrange
-    const doc = makeRoot('<p id="p1"><em id="em1">foo</em> <strong id="strong1">bar</strong></p>');
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
     const strong1 = byId(doc, 'strong1');
 
     // act

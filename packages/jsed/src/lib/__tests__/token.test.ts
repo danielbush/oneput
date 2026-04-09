@@ -3,6 +3,7 @@ import { byId, makeRoot, div, p, em, span, inlineStyleHack, inlineStyleHackVal }
 import {
   tokenizeLine,
   isPadded,
+  canInsertAnchorInLine,
   getAnchorAfterTagInsertionPoint,
   insertAnchorAfterTag,
   getAnchorBeforeTagInsertionPoint,
@@ -406,6 +407,18 @@ describe('anchor insertion', () => {
     // assert
     expect(afterPoint).toBeNull();
     expect(beforePoint).toBeNull();
+  });
+
+  test('canInsertAnchorInLine ignores IGNORABLE content inside an otherwise empty LINE', () => {
+    // arrange
+    const doc = makeRoot(`<p id="p1"><span class="jsed-ignore">debug label</span></p>`);
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const result = canInsertAnchorInLine(p1);
+
+    // assert
+    expect(result).toBe(true);
   });
 
   test('getAnchorBeforeTagInsertionPoint allows insertion after existing whitespace', () => {

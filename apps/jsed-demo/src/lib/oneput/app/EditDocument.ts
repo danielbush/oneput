@@ -160,6 +160,15 @@ export class EditDocument implements AppObject {
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),
+        this.editManager.canInsertAnchorInLine() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_IN_LINE',
+            textContent: 'Insert anchor in empty line...',
+            action: () => {
+              this.editManager.insertAnchorInLine();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
         this.editManager.canInsertAnchorBeforeTag() &&
           stdMenuItem({
             id: 'INSERT_ANCHOR_BEFORE_TAG',

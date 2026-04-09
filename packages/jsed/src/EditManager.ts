@@ -439,10 +439,30 @@ export class EditManager {
     return true;
   }
 
+  insertAnchorInLine(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus || !token.canInsertAnchorInLine(focus)) {
+      return false;
+    }
+
+    const [anchor] = token.addAnchors(focus);
+    if (!anchor) {
+      return false;
+    }
+
+    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
+    return true;
+  }
+
   // is*/can* methods
 
   isEditing(): boolean {
     return this.mode === 'edit';
+  }
+
+  canInsertAnchorInLine(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.canInsertAnchorInLine(focus));
   }
 
   canInsertAnchorAfterTag(): boolean {

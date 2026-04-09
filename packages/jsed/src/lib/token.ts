@@ -462,6 +462,46 @@ export function addAnchors(el: HTMLElement): HTMLElement[] {
   return anchors;
 }
 
+function hasNonIgnorableLineContent(node: Node): boolean {
+  if (node instanceof Text) {
+    return (node.textContent ?? '').trim() !== '';
+  }
+
+  if (!(node instanceof Element)) {
+    return false;
+  }
+
+  if (isIgnorable(node)) {
+    return false;
+  }
+
+  if (isToken(node)) {
+    return true;
+  }
+
+  for (const child of Array.from(node.childNodes)) {
+    if (hasNonIgnorableLineContent(child)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Return true when a LINE is effectively empty for anchor insertion.
+ *
+ * IGNORABLE subtrees are treated as absent so element indicators and similar
+ * UI aids do not block inserting an ANCHOR into an otherwise empty LINE.
+ */
+export function canInsertAnchorInLine(line: HTMLElement): boolean {
+  if (!isLine(line)) {
+    return false;
+  }
+
+  return !hasNonIgnorableLineContent(line);
+}
+
 /**
  * Get the immediate editable boundary after a focused tag where an ANCHOR can
  * be inserted.

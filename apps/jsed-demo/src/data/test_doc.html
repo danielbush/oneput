@@ -4,7 +4,7 @@
   }
 
   #test-doc {
-    .jsed-ignore:not(.jsed-tag-indicator) {
+    :is(p, h1, h2).jsed-ignore:not(.jsed-tag-indicator) {
       padding: 0.5rem;
       margin-left: -0.5rem;
       margin-right: -0.5rem;
@@ -25,6 +25,10 @@
 
     div + div {
       margin-top: 0.5rem;
+    }
+
+    .note {
+      font-size: 0.8rem;
     }
 
     .jsed-token {
@@ -205,6 +209,11 @@
   <h2 class="jsed-ignore">Collapsed-like adjacency</h2>
   <p class="jsed-ignore">
     Explore removing and restoring boundary spacing between adjacent TOKEN's and inline runs.
+  </p>
+  <p style="border: 1px dashed red; min-height: 1rem; position: relative">
+    <span style="position: absolute; right: 0; top: 0; margin: 0" class="note jsed-ignore"
+      >(empty p-tag)</span
+    >
   </p>
   <p><em>foo</em> <strong>bar</strong> <u>baz</u></p>
   <p><em>foo</em><strong>bar</strong><u>baz</u></p>

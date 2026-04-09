@@ -1,6 +1,6 @@
 import { describe, expect, it, test } from 'vitest';
 import { EditManager } from '../EditManager.js';
-import { byId, frag, makeRoot, p } from '../test/util.js';
+import { byId, frag, makeRoot, p, span } from '../test/util.js';
 import { getValue, quickDescend } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
@@ -539,6 +539,70 @@ describe('EditManager', () => {
       expect(editManager.cursor?.getToken()).toBe(anchor);
       expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(anchor?.previousSibling?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+  });
+
+  describe('insertAnchorInLine', () => {
+    it('inserts an anchor into an empty LINE and enters editing on it', () => {
+      // arrange
+      const doc = makeRoot('<p id="p1"></p>');
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+
+      editManager.nav.REQUEST_FOCUS(p1);
+
+      // act
+      const canInsert = editManager.canInsertAnchorInLine();
+      const result = editManager.insertAnchorInLine();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(editManager.isEditing()).toBe(true);
+      const anchor = p1.querySelector('.jsed-anchor-token') as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+
+      editManager.destroy();
+    });
+
+    it('treats IGNORABLE content as empty when deciding whether an anchor can be inserted', () => {
+      // arrange
+      const doc = makeRoot(
+        p({ id: 'p1' }, span({ class: 'jsed-ignore' }, 'debug label'))
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+
+      editManager.nav.REQUEST_FOCUS(p1);
+
+      // act
+      const canInsert = editManager.canInsertAnchorInLine();
+      const result = editManager.insertAnchorInLine();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(editManager.isEditing()).toBe(true);
+      const anchor = p1.querySelector('.jsed-anchor-token') as HTMLElement | null;
+      expect(anchor).not.toBeNull();
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
 
       editManager.destroy();
     });

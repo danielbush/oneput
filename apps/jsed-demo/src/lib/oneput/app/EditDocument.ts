@@ -19,6 +19,9 @@ export class EditDocument implements AppObject {
       },
       onCursorChange: () => {
         instance?.renderMenuItems();
+      },
+      onTextChange: () => {
+        instance?.renderMenuItems();
       }
     });
     instance = new EditDocument(ctl, params.document, editManager);

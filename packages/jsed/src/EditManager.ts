@@ -25,7 +25,8 @@ export class EditManager {
     onError,
     onModeChange,
     onFocusChange,
-    onCursorChange
+    onCursorChange,
+    onTextChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -33,6 +34,7 @@ export class EditManager {
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
+    onTextChange?: () => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -47,7 +49,8 @@ export class EditManager {
       onError,
       onModeChange,
       onFocusChange,
-      onCursorChange
+      onCursorChange,
+      onTextChange
     );
     return instance;
   }
@@ -58,7 +61,8 @@ export class EditManager {
     onError,
     onModeChange,
     onFocusChange,
-    onCursorChange
+    onCursorChange,
+    onTextChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -66,6 +70,7 @@ export class EditManager {
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
+    onTextChange?: () => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -80,7 +85,8 @@ export class EditManager {
       onError,
       onModeChange,
       onFocusChange,
-      onCursorChange
+      onCursorChange,
+      onTextChange
     );
     return instance;
   }
@@ -97,7 +103,8 @@ export class EditManager {
     private onError?: (err: EditManagerError) => void,
     private onModeChange?: (mode: EditManagerMode) => void,
     private onFocusChange?: (focus: HTMLElement | null) => void,
-    private onCursorChange?: (target: HTMLElement) => void
+    private onCursorChange?: (target: HTMLElement) => void,
+    private onTextChange?: () => void
   ) {}
 
   getMode(): EditManagerMode {
@@ -107,6 +114,10 @@ export class EditManager {
   private setMode(mode: EditManagerMode) {
     this.mode = mode;
     this.onModeChange?.(mode);
+  }
+
+  private notifyTextChange() {
+    this.onTextChange?.();
   }
 
   /**
@@ -190,6 +201,7 @@ export class EditManager {
 
       case 'delete-current': {
         this.cursor.delete();
+        this.notifyTextChange();
         this.cursor?.handleInputChange(intent.inputValue);
         return;
       }
@@ -203,6 +215,7 @@ export class EditManager {
             lastToken = insertedToken;
           }
         }
+        this.notifyTextChange();
         break;
 
       case 'insert-before-current':
@@ -212,6 +225,7 @@ export class EditManager {
           token.ensureSpaceAfter(insertedToken);
           lastToken = insertedToken;
         }
+        this.notifyTextChange();
         break;
 
       case 'rewrite-current':
@@ -225,6 +239,7 @@ export class EditManager {
         if (intent.prependedSpace) {
           this.userInput.moveCursorToBeginning();
         }
+        this.notifyTextChange();
         break;
     }
 
@@ -443,6 +458,7 @@ export class EditManager {
       return false;
     }
 
+    this.notifyTextChange();
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
@@ -458,6 +474,7 @@ export class EditManager {
       return false;
     }
 
+    this.notifyTextChange();
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
@@ -468,7 +485,12 @@ export class EditManager {
       return false;
     }
 
-    return !!token.insertSpaceAfterTag(focus);
+    const inserted = token.insertSpaceAfterTag(focus);
+    if (inserted) {
+      this.notifyTextChange();
+      return true;
+    }
+    return false;
   }
 
   removeSpaceAfterTag(): boolean {
@@ -477,7 +499,12 @@ export class EditManager {
       return false;
     }
 
-    return token.removeSpaceAfterTag(focus);
+    const removed = token.removeSpaceAfterTag(focus);
+    if (removed) {
+      this.notifyTextChange();
+      return true;
+    }
+    return false;
   }
 
   insertSpaceBeforeTag(): boolean {
@@ -486,7 +513,12 @@ export class EditManager {
       return false;
     }
 
-    return !!token.insertSpaceBeforeTag(focus);
+    const inserted = token.insertSpaceBeforeTag(focus);
+    if (inserted) {
+      this.notifyTextChange();
+      return true;
+    }
+    return false;
   }
 
   removeSpaceBeforeTag(): boolean {
@@ -495,7 +527,12 @@ export class EditManager {
       return false;
     }
 
-    return token.removeSpaceBeforeTag(focus);
+    const removed = token.removeSpaceBeforeTag(focus);
+    if (removed) {
+      this.notifyTextChange();
+      return true;
+    }
+    return false;
   }
 
   insertAnchorInLine(): boolean {
@@ -509,6 +546,7 @@ export class EditManager {
       return false;
     }
 
+    this.notifyTextChange();
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }

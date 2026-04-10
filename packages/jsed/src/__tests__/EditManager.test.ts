@@ -954,7 +954,7 @@ describe('input handling', () => {
     const { editManager, line, userInput } = await createEditManagerFixture({
       html: p({ id: 'p1' }, 'foo')
     });
-    // handleTokenChange asynchronously selects the whole token text
+    // handleCursorChange asynchronously selects the whole token text
     await userInput.setCaret(3);
     expect(userInput.getRange()).toEqual([3, 3]); // verify
 

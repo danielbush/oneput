@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, test } from 'vitest';
 import { makeRoot, p, div, em, span, identify } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
@@ -23,7 +23,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const cursor = TokenCursor.create({
     document: doc,
     token: tok,
-    onTokenChange: (t) => changes.push(getValue(t)),
+    onCursorChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)
   });
 
@@ -43,7 +43,7 @@ describe('TokenCursor motion', () => {
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext advances to the next token', () => {
+    test('moveNext advances to the next token', () => {
       // arrange
       const { cursor } = setup();
 
@@ -54,7 +54,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('world');
     });
 
-    it('moveNext twice reaches the third token', () => {
+    test('moveNext twice reaches the third token', () => {
       // arrange
       const { cursor } = setup();
 
@@ -66,7 +66,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('foo');
     });
 
-    it('moveNext at the last token stays put', () => {
+    test('moveNext at the last token stays put', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -79,7 +79,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('foo');
     });
 
-    it('movePrevious from the second token goes back to first', () => {
+    test('movePrevious from the second token goes back to first', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -91,7 +91,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('hello');
     });
 
-    it('movePrevious at the first token stays put', () => {
+    test('movePrevious at the first token stays put', () => {
       // arrange
       const { cursor } = setup();
 
@@ -102,7 +102,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('hello');
     });
 
-    it('onTokenChange fires on each move', () => {
+    test('onCursorChange fires on each move', () => {
       // arrange
       const { cursor, changes } = setup();
 
@@ -122,7 +122,7 @@ describe('TokenCursor motion', () => {
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext traverses seamlessly through the INLINE_FLOW', () => {
+    test('moveNext traverses seamlessly through the INLINE_FLOW', () => {
       // arrange
       const { cursor } = setup();
 
@@ -134,7 +134,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('ccc');
     });
 
-    it('movePrevious traverses seamlessly back through the INLINE_FLOW', () => {
+    test('movePrevious traverses seamlessly back through the INLINE_FLOW', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -157,7 +157,7 @@ describe('TokenCursor motion', () => {
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext traverses through nested INLINE_FLOW depth', () => {
+    test('moveNext traverses through nested INLINE_FLOW depth', () => {
       // arrange
       const { cursor } = setup();
 
@@ -173,7 +173,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('eee');
     });
 
-    it('movePrevious traverses back through nested INLINE_FLOW depth', () => {
+    test('movePrevious traverses back through nested INLINE_FLOW depth', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -202,7 +202,7 @@ describe('TokenCursor motion', () => {
       return tokenizeAndCursor(doc, '#p1');
     }
 
-    it('moveNext crosses from one INLINE_FLOW to the adjacent INLINE_FLOW', () => {
+    test('moveNext crosses from one INLINE_FLOW to the adjacent INLINE_FLOW', () => {
       // arrange
       const { cursor } = setup();
 
@@ -216,7 +216,7 @@ describe('TokenCursor motion', () => {
       expect(getValue(cursor.getToken())).toBe('ddd');
     });
 
-    it('movePrevious crosses back across adjacent INLINEs', () => {
+    test('movePrevious crosses back across adjacent INLINEs', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -244,7 +244,7 @@ describe('TokenCursor motion', () => {
 
   describe("TokenCursor walks non-TOKEN LINE_SIBLING's", () => {
     describe('(1) ISLAND: visit=yes, descend=no', () => {
-      it('moveNext visits ISLAND, then continues to next TOKEN', () => {
+      test('moveNext visits ISLAND, then continues to next TOKEN', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
@@ -259,7 +259,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('bbb');
       });
 
-      it('movePrevious visits ISLAND in reverse', () => {
+      test('movePrevious visits ISLAND in reverse', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
@@ -276,7 +276,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('aaa');
       });
 
-      it('ISLAND at start of LINE: cursor starts on first TOKEN after ISLAND', () => {
+      test('ISLAND at start of LINE: cursor starts on first TOKEN after ISLAND', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
@@ -289,7 +289,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('[island:span]');
       });
 
-      it('ISLAND at end of LINE is the last cursor position', () => {
+      test('ISLAND at end of LINE is the last cursor position', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
@@ -305,7 +305,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('[island:span]');
       });
 
-      it('ISLAND inside INLINE_FLOW', () => {
+      test('ISLAND inside INLINE_FLOW', () => {
         // arrange
         const doc = makeRoot(
           p(
@@ -334,7 +334,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('ddd');
       });
 
-      it('adjacent ISLANDs', () => {
+      test('adjacent ISLANDs', () => {
         // arrange
         const doc = makeRoot(
           p(
@@ -363,7 +363,7 @@ describe('TokenCursor motion', () => {
       // Includes nested block elements (div in div) and inline-block spans.
       const transparent = 'jsed-cursor-transparent';
 
-      it('moveNext descends into nested div to visit its TOKEN', () => {
+      test('moveNext descends into nested div to visit its TOKEN', () => {
         // arrange
         const doc = makeRoot(
           div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, 'nested'), ' bbb')
@@ -378,7 +378,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('bbb');
       });
 
-      it('movePrevious exits nested div seamlessly', () => {
+      test('movePrevious exits nested div seamlessly', () => {
         // arrange
         const doc = makeRoot(
           div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, 'nested'), ' bbb')
@@ -395,7 +395,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('aaa');
       });
 
-      it('deeply nested blocks: CURSOR descends through multiple levels', () => {
+      test('deeply nested blocks: CURSOR descends through multiple levels', () => {
         // arrange
         const doc = makeRoot(
           div(
@@ -424,7 +424,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('eee');
       });
 
-      it('empty TRANSPARENT_BLOCK nesting: CURSOR recurses through to find TOKEN', () => {
+      test('empty TRANSPARENT_BLOCK nesting: CURSOR recurses through to find TOKEN', () => {
         // arrange — mid and deep have no text of their own, only the innermost has content
         const doc = makeRoot(
           div(
@@ -447,7 +447,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('bbb');
       });
 
-      it('empty TRANSPARENT_BLOCK nesting: movePrevious recurses back out', () => {
+      test('empty TRANSPARENT_BLOCK nesting: movePrevious recurses back out', () => {
         // arrange
         const doc = makeRoot(
           div(
@@ -477,7 +477,7 @@ describe('TokenCursor motion', () => {
       // OPAQUE_BLOCK is the default for non-INLINE_FLOW, non-ISLAND FOCUSABLE's (no class needed).
       const opaqueBlock = { style: 'display:inline-block;' };
 
-      it('moveNext visits OPAQUE_BLOCK as opaque element', () => {
+      test('moveNext visits OPAQUE_BLOCK as opaque element', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'hidden content'), ' bbb'));
         const { cursor } = tokenizeAndCursor(doc, '#p1');
@@ -490,7 +490,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('bbb');
       });
 
-      it('movePrevious visits OPAQUE_BLOCK in reverse', () => {
+      test('movePrevious visits OPAQUE_BLOCK in reverse', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'hidden'), ' bbb'));
         const { cursor } = tokenizeAndCursor(doc, '#p1');
@@ -563,7 +563,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   }
 
   describe('CURSOR_APPEND', () => {
-    it('CURSOR_AT_END sets CURSOR_APPEND marker', () => {
+    test('CURSOR_AT_END sets CURSOR_APPEND marker', () => {
       // arrange
       const { cursor } = setup();
 
@@ -574,7 +574,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([CURSOR_APPEND_CLASS]);
     });
 
-    it('moveNext clears CURSOR_APPEND marker', () => {
+    test('moveNext clears CURSOR_APPEND marker', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleSelectionChange('CURSOR_AT_END');
@@ -586,7 +586,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([]);
     });
 
-    it('splitAtToken splits after the current TOKEN', () => {
+    test('splitAtToken splits after the current TOKEN', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleSelectionChange('CURSOR_AT_END');
@@ -601,7 +601,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   });
 
   describe('CURSOR_PREPEND', () => {
-    it('CURSOR_AT_BEGINNING sets CURSOR_PREPEND marker', () => {
+    test('CURSOR_AT_BEGINNING sets CURSOR_PREPEND marker', () => {
       // arrange
       const { cursor } = setup();
 
@@ -612,7 +612,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([CURSOR_PREPEND_CLASS]);
     });
 
-    it('movePrevious clears CURSOR_PREPEND marker', () => {
+    test('movePrevious clears CURSOR_PREPEND marker', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -627,7 +627,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   });
 
   describe('CURSOR_OVERWRITE', () => {
-    it('SELECT_ALL clears all markers', () => {
+    test('SELECT_ALL clears all markers', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleSelectionChange('CURSOR_AT_END');
@@ -639,7 +639,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([]);
     });
 
-    it('cycling through states replaces the previous marker', () => {
+    test('cycling through states replaces the previous marker', () => {
       // arrange
       const { cursor } = setup();
 
@@ -658,7 +658,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   });
 
   describe('CURSOR_INSERT_AFTER', () => {
-    it('typing space from CURSOR_APPEND enters CURSOR_INSERT_AFTER', () => {
+    test('typing space from CURSOR_APPEND enters CURSOR_INSERT_AFTER', () => {
       // arrange
       const { cursor } = setup();
 
@@ -669,7 +669,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([CURSOR_INSERT_AFTER_CLASS]);
     });
 
-    it('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
+    test('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleInputChange('hello ');
@@ -682,7 +682,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([]);
     });
 
-    it('moveNext still moves forward from CURSOR_INSERT_AFTER', () => {
+    test('moveNext still moves forward from CURSOR_INSERT_AFTER', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleInputChange('hello ');
@@ -694,7 +694,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(getValue(cursor.getToken())).toBe('world');
     });
 
-    it('splitAtToken splits after the current TOKEN', () => {
+    test('splitAtToken splits after the current TOKEN', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleInputChange('hello ');
@@ -709,7 +709,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   });
 
   describe('CURSOR_INSERT_BEFORE', () => {
-    it('typing space from CURSOR_PREPEND enters CURSOR_INSERT_BEFORE', () => {
+    test('typing space from CURSOR_PREPEND enters CURSOR_INSERT_BEFORE', () => {
       // arrange
       const { cursor } = setup();
 
@@ -720,7 +720,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([CURSOR_INSERT_BEFORE_CLASS]);
     });
 
-    it('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {
+    test('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {
       // arrange
       const { cursor } = setup();
       cursor.handleInputChange(' hello');
@@ -733,7 +733,7 @@ describe('TokenCursor CURSOR_STATE', () => {
       expect(markerClasses(cursor.getToken())).toEqual([]);
     });
 
-    it('movePrevious still moves backward from CURSOR_INSERT_BEFORE', () => {
+    test('movePrevious still moves backward from CURSOR_INSERT_BEFORE', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
@@ -748,7 +748,7 @@ describe('TokenCursor CURSOR_STATE', () => {
   });
 
   describe('splitAtToken default', () => {
-    it('splits before the current TOKEN when no after-state marker is set', () => {
+    test('splits before the current TOKEN when no after-state marker is set', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext(); // on "world"

@@ -19,7 +19,7 @@ export type TokenCursorError =
 export type TokenCursorBaseParams = {
   document: JsedDocument;
   token: HTMLElement;
-  onTokenChange: (token: HTMLElement) => void;
+  onCursorChange: (token: HTMLElement) => void;
   onError: (err: TokenCursorError) => void;
 };
 
@@ -30,13 +30,13 @@ export type TokenCursorBaseParams = {
 export abstract class TokenCursorBase {
   #token: HTMLElement;
   #document: JsedDocument;
-  #onTokenChange: (token: HTMLElement) => void;
+  #onCursorChange: (token: HTMLElement) => void;
   protected onError: (err: TokenCursorError) => void;
 
   constructor(params: TokenCursorBaseParams) {
     this.#token = params.token; // ts needs this before #setToken
     this.#document = params.document;
-    this.#onTokenChange = params.onTokenChange;
+    this.#onCursorChange = params.onCursorChange;
     this.onError = params.onError;
     this.setToken(params.token);
   }
@@ -54,7 +54,7 @@ export abstract class TokenCursorBase {
   /**
    * Allows a consumer to set the token.
    *
-   * The onTokenChange callback is not called. Instead, you should perform other
+   * The onCursorChange callback is not called. Instead, you should perform other
    * change before and after calling this.
    */
   setToken(el: HTMLElement) {
@@ -67,7 +67,7 @@ export abstract class TokenCursorBase {
     el.classList.add(JSED_CURSOR_CLASS);
     this.getDocument().viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
     this.#token = el;
-    this.#onTokenChange(el);
+    this.#onCursorChange(el);
   }
 
   // #endregion

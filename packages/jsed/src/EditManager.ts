@@ -24,13 +24,15 @@ export class EditManager {
     userInput,
     onError,
     onModeChange,
-    onFocusChange
+    onFocusChange,
+    onCursorChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
     onError?: (err: EditManagerError) => void;
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
+    onCursorChange?: (target: HTMLElement) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -38,7 +40,15 @@ export class EditManager {
       (evt) => instance?.handleFocusRequest(evt),
       (focus) => instance?.handleFocusChange(focus)
     );
-    instance = new EditManager(document, userInput, nav, onError, onModeChange, onFocusChange);
+    instance = new EditManager(
+      document,
+      userInput,
+      nav,
+      onError,
+      onModeChange,
+      onFocusChange,
+      onCursorChange
+    );
     return instance;
   }
 
@@ -47,13 +57,15 @@ export class EditManager {
     userInput,
     onError,
     onModeChange,
-    onFocusChange
+    onFocusChange,
+    onCursorChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
     onError?: (err: EditManagerError) => void;
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
+    onCursorChange?: (target: HTMLElement) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -61,7 +73,15 @@ export class EditManager {
       (evt) => instance?.handleFocusRequest(evt),
       (focus) => instance?.handleFocusChange(focus)
     );
-    instance = new EditManager(document, userInput, nav, onError, onModeChange, onFocusChange);
+    instance = new EditManager(
+      document,
+      userInput,
+      nav,
+      onError,
+      onModeChange,
+      onFocusChange,
+      onCursorChange
+    );
     return instance;
   }
 
@@ -76,7 +96,8 @@ export class EditManager {
     readonly nav: Nav,
     private onError?: (err: EditManagerError) => void,
     private onModeChange?: (mode: EditManagerMode) => void,
-    private onFocusChange?: (focus: HTMLElement | null) => void
+    private onFocusChange?: (focus: HTMLElement | null) => void,
+    private onCursorChange?: (target: HTMLElement) => void
   ) {}
 
   getMode(): EditManagerMode {
@@ -116,11 +137,11 @@ export class EditManager {
         this.cursor = TokenCursor.create({
           document: this.document,
           token: firstToken,
-          onTokenChange: this.handleTokenChange,
+          onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
         });
       } else {
-        this.cursor.setToken(firstToken); // calls handleTokenChange
+        this.cursor.setToken(firstToken); // calls handleCursorChange
       }
       this.setMode('edit');
       return ok(undefined);
@@ -236,8 +257,9 @@ export class EditManager {
    * When the cursor changes its token because of some action it has been
    * commanded to do usually by the user... (eg due to delete operation).
    */
-  private handleTokenChange = async (tok: HTMLElement) => {
+  private handleCursorChange = async (tok: HTMLElement) => {
     this.nav?.FOCUS(tok);
+    this.onCursorChange?.(tok);
     this.userInput.resetPlaceholder();
     this.userInput.enable(true);
 
@@ -311,7 +333,7 @@ export class EditManager {
         return false;
       }
 
-      this.cursor.setToken(evt.token); // calls handleTokenChange
+      this.cursor.setToken(evt.token); // calls handleCursorChange
       return true;
     }
 

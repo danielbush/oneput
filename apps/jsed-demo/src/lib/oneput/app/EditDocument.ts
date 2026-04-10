@@ -209,6 +209,15 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),
+        this.editManager.canRemoveAnchorBeforeTag() &&
+          stdMenuItem({
+            id: 'REMOVE_ANCHOR_BEFORE_TAG',
+            textContent: 'Remove anchor before tag...',
+            action: () => {
+              this.editManager.removeAnchorBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
         this.editManager.canInsertSpaceAfterTag() &&
           stdMenuItem({
             id: 'INSERT_SPACE_AFTER_TAG',
@@ -233,6 +242,15 @@ export class EditDocument implements AppObject {
             textContent: 'Insert anchor after tag...',
             action: () => {
               this.editManager.insertAnchorAfterTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
+        this.editManager.canRemoveAnchorAfterTag() &&
+          stdMenuItem({
+            id: 'REMOVE_ANCHOR_AFTER_TAG',
+            textContent: 'Remove anchor after tag...',
+            action: () => {
+              this.editManager.removeAnchorAfterTag();
             },
             left: (b) => [b.icon(icons.Pencil)]
           })

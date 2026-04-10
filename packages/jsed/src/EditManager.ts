@@ -19,7 +19,7 @@ export type EditManagerTextChangeEvent =
   | {
       type: 'anchor-change';
       anchor: HTMLElement;
-      change: 'inserted';
+      change: 'inserted' | 'removed';
     }
   | {
       type: 'whitespace-change';
@@ -524,6 +524,21 @@ export class EditManager {
     return true;
   }
 
+  removeAnchorAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    const anchor = token.removeAnchorAfterTag(focus);
+    if (!anchor) {
+      return false;
+    }
+
+    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    return true;
+  }
+
   insertAnchorBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     if (!focus) {
@@ -537,6 +552,21 @@ export class EditManager {
 
     this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
+    return true;
+  }
+
+  removeAnchorBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    const anchor = token.removeAnchorBeforeTag(focus);
+    if (!anchor) {
+      return false;
+    }
+
+    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
@@ -644,6 +674,11 @@ export class EditManager {
     return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
   }
 
+  canRemoveAnchorAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableAnchorAfterTag(focus));
+  }
+
   canInsertSpaceAfterTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getSpaceAfterTagInsertionPoint(focus));
@@ -657,6 +692,11 @@ export class EditManager {
   canInsertAnchorBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
+  }
+
+  canRemoveAnchorBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableAnchorBeforeTag(focus));
   }
 
   canInsertSpaceBeforeTag(): boolean {

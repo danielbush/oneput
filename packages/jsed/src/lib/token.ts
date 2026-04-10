@@ -544,6 +544,50 @@ export function insertAnchorAfterTag(focus: HTMLElement): HTMLElement | null {
   return anchor;
 }
 
+export function getRemovableAnchorAfterTag(focus: HTMLElement): HTMLElement | null {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const next = getNextSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (next instanceof HTMLElement && isAnchor(next)) {
+    return next;
+  }
+
+  if (next instanceof Text && isWhitespaceTextNode(next)) {
+    const nextAfterWhitespace = getNextSiblingNode(next, focus.parentNode, {
+      visit: (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return true;
+        }
+        return !(node instanceof Element && isIgnorable(node));
+      }
+    });
+    return nextAfterWhitespace instanceof HTMLElement && isAnchor(nextAfterWhitespace)
+      ? nextAfterWhitespace
+      : null;
+  }
+
+  return null;
+}
+
+export function removeAnchorAfterTag(focus: HTMLElement): HTMLElement | null {
+  const anchor = getRemovableAnchorAfterTag(focus);
+  if (!anchor) {
+    return null;
+  }
+  anchor.remove();
+  return anchor;
+}
+
 /**
  * Get the immediate editable boundary before a focused tag where an ANCHOR can
  * be inserted.
@@ -694,6 +738,50 @@ export function insertAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
 
   const anchor = createAnchor();
   insertionPoint.parent.insertBefore(anchor, focus);
+  return anchor;
+}
+
+export function getRemovableAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (previous instanceof HTMLElement && isAnchor(previous)) {
+    return previous;
+  }
+
+  if (previous instanceof Text && isWhitespaceTextNode(previous)) {
+    const previousBeforeWhitespace = getPreviousSiblingNode(previous, focus.parentNode, {
+      visit: (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return true;
+        }
+        return !(node instanceof Element && isIgnorable(node));
+      }
+    });
+    return previousBeforeWhitespace instanceof HTMLElement && isAnchor(previousBeforeWhitespace)
+      ? previousBeforeWhitespace
+      : null;
+  }
+
+  return null;
+}
+
+export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
+  const anchor = getRemovableAnchorBeforeTag(focus);
+  if (!anchor) {
+    return null;
+  }
+  anchor.remove();
   return anchor;
 }
 

@@ -444,6 +444,66 @@ describe('EditManager', () => {
     });
   });
 
+  describe('removeAnchorAfterTag', () => {
+    it('removeAnchorAfterTag removes an anchor at the immediate boundary', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canRemove = editManager.canRemoveAnchorAfterTag();
+      const result = editManager.removeAnchorAfterTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling).toBe(em);
+
+      editManager.destroy();
+    });
+
+    it('removeAnchorAfterTag removes an anchor after existing whitespace and preserves the space', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canRemove = editManager.canRemoveAnchorAfterTag();
+      const result = editManager.removeAnchorAfterTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' ');
+      expect(em.nextSibling?.nextSibling).toBe(strong);
+
+      editManager.destroy();
+    });
+  });
+
   describe('insertSpaceAfterTag', () => {
     it('insertSpaceAfterTag inserts a space at the boundary after the focused tag', () => {
       // arrange
@@ -698,6 +758,67 @@ describe('EditManager', () => {
       expect(editManager.cursor?.getToken()).toBe(anchor);
       expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(anchor?.previousSibling?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+  });
+
+  describe('removeAnchorBeforeTag', () => {
+    it('removeAnchorBeforeTag removes an anchor at the immediate boundary', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canRemove = editManager.canRemoveAnchorBeforeTag();
+      const result = editManager.removeAnchorBeforeTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling).toBe(em);
+
+      editManager.destroy();
+    });
+
+    it('removeAnchorBeforeTag removes an anchor before existing whitespace and preserves the space', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canRemove = editManager.canRemoveAnchorBeforeTag();
+      const result = editManager.removeAnchorBeforeTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' ');
+      expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(strong.previousSibling?.textContent).toBe(' ');
 
       editManager.destroy();
     });

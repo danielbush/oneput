@@ -25,8 +25,12 @@ import {
   removeSpaceBeforeTag,
   getAnchorAfterTagInsertionPoint,
   insertAnchorAfterTag,
+  getRemovableAnchorAfterTag,
+  removeAnchorAfterTag,
   getAnchorBeforeTagInsertionPoint,
-  insertAnchorBeforeTag
+  insertAnchorBeforeTag,
+  getRemovableAnchorBeforeTag,
+  removeAnchorBeforeTag
 } from '../token.js';
 import { isAnchor } from '../taxonomy.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';
@@ -851,6 +855,54 @@ describe('anchor insertion', () => {
     expect(anchor?.nextSibling?.textContent).toBe(' ');
   });
 
+  test('getRemovableAnchorAfterTag finds an anchor at the immediate boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const anchor = getRemovableAnchorAfterTag(em1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+  });
+
+  test('getRemovableAnchorAfterTag finds an anchor after existing whitespace', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const anchor = getRemovableAnchorAfterTag(em1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+  });
+
+  test('removeAnchorAfterTag removes the anchor and preserves whitespace', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const removed = removeAnchorAfterTag(em1);
+
+    // assert
+    expect(removed).not.toBeNull();
+    expect(em1.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(em1.nextSibling?.textContent).toBe(' ');
+    expect(em1.nextSibling?.nextSibling).toBe(strong1);
+  });
+
   test('insertAnchorBeforeTag inserts an anchor at the boundary after the previous tag', () => {
     // arrange
     const doc = makeRoot(
@@ -899,5 +951,54 @@ describe('anchor insertion', () => {
     expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
     expect(anchor?.previousSibling?.textContent).toBe(' ');
     expect(anchor?.nextElementSibling).toBe(strong1);
+  });
+
+  test('getRemovableAnchorBeforeTag finds an anchor at the immediate boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const anchor = getRemovableAnchorBeforeTag(strong1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+  });
+
+  test('getRemovableAnchorBeforeTag finds an anchor before existing whitespace', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const anchor = getRemovableAnchorBeforeTag(strong1);
+
+    // assert
+    expect(anchor).not.toBeNull();
+    expect(anchor?.classList.contains('jsed-anchor-token')).toBe(true);
+  });
+
+  test('removeAnchorBeforeTag removes the anchor and preserves whitespace', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const removed = removeAnchorBeforeTag(strong1);
+
+    // assert
+    expect(removed).not.toBeNull();
+    expect(em1.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(em1.nextSibling?.textContent).toBe(' ');
+    expect(strong1.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(strong1.previousSibling?.textContent).toBe(' ');
   });
 });

@@ -69,6 +69,10 @@ export type ITokenCursor = {
    * Append a new token after the current one.
    */
   append: (val: string) => HTMLElement | null;
+  canInsertSpaceBeforeCursor: () => boolean;
+  insertSpaceBeforeCursor: () => boolean;
+  canInsertSpaceAfterCursor: () => boolean;
+  insertSpaceAfterCursor: () => boolean;
   /**
    * TOGGLE_COLLAPSE state of token with what is next to it.
    */

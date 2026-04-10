@@ -642,6 +642,40 @@ export class EditManager {
     return false;
   }
 
+  insertSpaceBeforeCursor(): boolean {
+    if (this.mode !== 'edit' || !this.cursor) {
+      return false;
+    }
+
+    const inserted = this.cursor.insertSpaceBeforeCursor();
+    if (inserted) {
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'leading-space',
+        change: 'inserted'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  insertSpaceAfterCursor(): boolean {
+    if (this.mode !== 'edit' || !this.cursor) {
+      return false;
+    }
+
+    const inserted = this.cursor.insertSpaceAfterCursor();
+    if (inserted) {
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'trailing-space',
+        change: 'inserted'
+      });
+      return true;
+    }
+    return false;
+  }
+
   insertAnchorInLine(): boolean {
     const focus = this.nav.getFocus();
     if (!focus || !token.canInsertAnchorInLine(focus)) {
@@ -707,5 +741,13 @@ export class EditManager {
   canRemoveSpaceBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getRemovableSpaceBeforeTag(focus));
+  }
+
+  canInsertSpaceBeforeCursor(): boolean {
+    return this.mode === 'edit' && !!this.cursor?.canInsertSpaceBeforeCursor();
+  }
+
+  canInsertSpaceAfterCursor(): boolean {
+    return this.mode === 'edit' && !!this.cursor?.canInsertSpaceAfterCursor();
   }
 }

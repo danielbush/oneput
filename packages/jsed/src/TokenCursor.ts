@@ -144,6 +144,22 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return tok;
   }
 
+  canInsertSpaceBeforeCursor(): boolean {
+    return !!token.getSpaceBeforeTokenInsertionPoint(this.getToken());
+  }
+
+  insertSpaceBeforeCursor(): boolean {
+    return !!token.insertSpaceBeforeToken(this.getToken());
+  }
+
+  canInsertSpaceAfterCursor(): boolean {
+    return !!token.getSpaceAfterTokenInsertionPoint(this.getToken());
+  }
+
+  insertSpaceAfterCursor(): boolean {
+    return !!token.insertSpaceAfterToken(this.getToken());
+  }
+
   /**
    * TOGGLE_COLLAPSE on the TOKEN
    */

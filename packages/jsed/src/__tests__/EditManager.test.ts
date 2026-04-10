@@ -923,6 +923,71 @@ describe('EditManager', () => {
     });
   });
 
+  describe('insertSpaceBeforeCursor', () => {
+    it('insertSpaceBeforeCursor inserts whitespace before an anchor between adjacent tags', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const anchor = byId(doc, 'a1');
+
+      editManager.enterEditing(anchor);
+
+      // act
+      const canInsert = editManager.canInsertSpaceBeforeCursor();
+      const result = editManager.insertSpaceBeforeCursor();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(anchor.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor.previousSibling?.textContent).toBe(' ');
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+
+      editManager.destroy();
+    });
+
+    it('insertSpaceBeforeCursor inserts whitespace before a token between a closing tag and an opening tag', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      quickDescend(byId(doc, 'p1'));
+      const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+        (el) => el.textContent === 'bar'
+      ) as HTMLElement;
+
+      editManager.enterEditing(bar);
+
+      // act
+      const canInsert = editManager.canInsertSpaceBeforeCursor();
+      const result = editManager.insertSpaceBeforeCursor();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(bar.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(bar.previousSibling?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+  });
+
   describe('removeSpaceBeforeTag', () => {
     it('removeSpaceBeforeTag removes boundary whitespace between adjacent tags', () => {
       // arrange
@@ -978,6 +1043,71 @@ describe('EditManager', () => {
         true
       );
       expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+
+      editManager.destroy();
+    });
+  });
+
+  describe('insertSpaceAfterCursor', () => {
+    it('insertSpaceAfterCursor inserts whitespace after an anchor between adjacent tags', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const anchor = byId(doc, 'a1');
+
+      editManager.enterEditing(anchor);
+
+      // act
+      const canInsert = editManager.canInsertSpaceAfterCursor();
+      const result = editManager.insertSpaceAfterCursor();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(anchor.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor.nextSibling?.textContent).toBe(' ');
+      expect(editManager.cursor?.getToken()).toBe(anchor);
+      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+
+      editManager.destroy();
+    });
+
+    it('insertSpaceAfterCursor inserts whitespace after a token between a closing tag and an opening tag', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      quickDescend(byId(doc, 'p1'));
+      const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+        (el) => el.textContent === 'bar'
+      ) as HTMLElement;
+
+      editManager.enterEditing(bar);
+
+      // act
+      const canInsert = editManager.canInsertSpaceAfterCursor();
+      const result = editManager.insertSpaceAfterCursor();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(bar.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(bar.nextSibling?.textContent).toBe(' ');
 
       editManager.destroy();
     });

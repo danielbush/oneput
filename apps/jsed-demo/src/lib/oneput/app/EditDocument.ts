@@ -191,6 +191,15 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),
+        this.editManager.canInsertSpaceBeforeCursor() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_BEFORE_CURSOR',
+            textContent: 'Insert leading space at cursor...',
+            action: () => {
+              this.editManager.insertSpaceBeforeCursor();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
         this.editManager.canRemoveSpaceBeforeTag() &&
           stdMenuItem({
             id: 'REMOVE_SPACE_BEFORE_TAG',
@@ -224,6 +233,15 @@ export class EditDocument implements AppObject {
             textContent: 'Insert space after tag...',
             action: () => {
               this.editManager.insertSpaceAfterTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
+        this.editManager.canInsertSpaceAfterCursor() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_AFTER_CURSOR',
+            textContent: 'Insert trailing space at cursor...',
+            action: () => {
+              this.editManager.insertSpaceAfterCursor();
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),

@@ -547,6 +547,144 @@ describe('TokenCursor motion', () => {
   });
 });
 
+describe('TokenCursor cursor-side space actions', () => {
+  it('insertSpaceBeforeCursor inserts whitespace before an anchor between adjacent inline tags', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+    );
+    const anchor = doc.root.querySelector('#a1') as HTMLElement;
+    const { cursor } = createCursor(doc, anchor);
+
+    // act
+    const canInsert = cursor.canInsertSpaceBeforeCursor();
+    const result = cursor.insertSpaceBeforeCursor();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    expect(anchor.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(anchor.previousSibling?.textContent).toBe(' ');
+  });
+
+  it('insertSpaceBeforeCursor inserts whitespace before a token between a closing tag and an opening tag', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+    );
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canInsert = cursor.canInsertSpaceBeforeCursor();
+    const result = cursor.insertSpaceBeforeCursor();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    expect(bar.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(bar.previousSibling?.textContent).toBe(' ');
+  });
+
+  it('insertSpaceAfterCursor inserts whitespace after an anchor between adjacent inline tags', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+    );
+    const anchor = doc.root.querySelector('#a1') as HTMLElement;
+    const { cursor } = createCursor(doc, anchor);
+
+    // act
+    const canInsert = cursor.canInsertSpaceAfterCursor();
+    const result = cursor.insertSpaceAfterCursor();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    expect(anchor.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(anchor.nextSibling?.textContent).toBe(' ');
+  });
+
+  it('insertSpaceAfterCursor inserts whitespace after a token between a closing tag and an opening tag', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+    );
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canInsert = cursor.canInsertSpaceAfterCursor();
+    const result = cursor.insertSpaceAfterCursor();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    expect(bar.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(bar.nextSibling?.textContent).toBe(' ');
+  });
+
+  it('does not offer cursor-side space insertion in an ordinary text run', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1">foo bar baz</p>');
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canInsertBefore = cursor.canInsertSpaceBeforeCursor();
+    const canInsertAfter = cursor.canInsertSpaceAfterCursor();
+
+    // assert
+    expect(canInsertBefore).toBe(false);
+    expect(canInsertAfter).toBe(false);
+  });
+
+  it('does not offer leading space when the previous inline boundary already contributes trailing whitespace', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo </em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+    );
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canInsertBefore = cursor.canInsertSpaceBeforeCursor();
+
+    // assert
+    expect(canInsertBefore).toBe(false);
+  });
+
+  it('does not offer trailing space when the next inline boundary already contributes leading whitespace', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;"> baz</strong></p>'
+    );
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canInsertAfter = cursor.canInsertSpaceAfterCursor();
+
+    // assert
+    expect(canInsertAfter).toBe(false);
+  });
+});
+
 describe('TokenCursor CURSOR_STATE', () => {
   function setup() {
     const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));

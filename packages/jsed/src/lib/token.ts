@@ -8,7 +8,13 @@ import {
 import { canCreateWithAnchor } from './dom-rules.js';
 import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 import { isIgnorable, isToken, isAnchor, isImplicitLine, isLine } from './taxonomy.js';
-import { getLine, getPreviousTokenSibling, getNextTokenSibling } from './sibwalk.js';
+import {
+  getLine,
+  getPreviousTokenSibling,
+  getNextTokenSibling,
+  getPreviousVisibleSibling,
+  getNextVisibleSibling
+} from './sibwalk.js';
 
 // #region TOKEN CRUD
 
@@ -119,6 +125,45 @@ function isWhitespaceTextNode(node: Node | null | undefined): node is Text {
   return node instanceof window.Text && /^\s+$/.test(node.nodeValue ?? '');
 }
 
+function subtreeEndsWithWhitespace(node: Node): boolean {
+  if (node instanceof Text) {
+    return /\s$/.test(node.nodeValue ?? '');
+  }
+
+  if (!(node instanceof Element) || isIgnorable(node)) {
+    return false;
+  }
+
+  const children = Array.from(node.childNodes).reverse();
+  for (const child of children) {
+    if (child instanceof Element && isIgnorable(child)) {
+      continue;
+    }
+    return subtreeEndsWithWhitespace(child);
+  }
+
+  return false;
+}
+
+function subtreeStartsWithWhitespace(node: Node): boolean {
+  if (node instanceof Text) {
+    return /^\s/.test(node.nodeValue ?? '');
+  }
+
+  if (!(node instanceof Element) || isIgnorable(node)) {
+    return false;
+  }
+
+  for (const child of node.childNodes) {
+    if (child instanceof Element && isIgnorable(child)) {
+      continue;
+    }
+    return subtreeStartsWithWhitespace(child);
+  }
+
+  return false;
+}
+
 function removeLeadingSpace(textNode: Text): Text | null {
   const value = textNode.nodeValue ?? '';
   if (!/^\s/.test(value)) {
@@ -224,6 +269,58 @@ export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
  */
 export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
   return ensureSeparatorAfter(token, value);
+}
+
+export function getSpaceBeforeTokenInsertionPoint(
+  token: HTMLElement
+): { parent: Node; next: Node | null } | null {
+  if (!isToken(token) || !token.parentNode || getSeparatorBefore(token)) {
+    return null;
+  }
+
+  const previous = getPreviousVisibleSibling(token);
+  if (!previous || isToken(previous) || subtreeEndsWithWhitespace(previous)) {
+    return null;
+  }
+
+  return { parent: token.parentNode, next: token };
+}
+
+export function insertSpaceBeforeToken(token: HTMLElement, value = ' '): Text | null {
+  const insertionPoint = getSpaceBeforeTokenInsertionPoint(token);
+  if (!insertionPoint) {
+    return null;
+  }
+
+  const space = document.createTextNode(value);
+  insertionPoint.parent.insertBefore(space, insertionPoint.next);
+  return space;
+}
+
+export function getSpaceAfterTokenInsertionPoint(
+  token: HTMLElement
+): { parent: Node; next: Node | null } | null {
+  if (!isToken(token) || !token.parentNode || getSeparatorAfter(token)) {
+    return null;
+  }
+
+  const next = getNextVisibleSibling(token);
+  if (!next || isToken(next) || subtreeStartsWithWhitespace(next)) {
+    return null;
+  }
+
+  return { parent: token.parentNode, next: token.nextSibling };
+}
+
+export function insertSpaceAfterToken(token: HTMLElement, value = ' '): Text | null {
+  const insertionPoint = getSpaceAfterTokenInsertionPoint(token);
+  if (!insertionPoint) {
+    return null;
+  }
+
+  const space = document.createTextNode(value);
+  insertionPoint.parent.insertBefore(space, insertionPoint.next);
+  return space;
 }
 
 /**

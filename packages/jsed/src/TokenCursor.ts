@@ -10,6 +10,7 @@ import { isToken } from './lib/taxonomy.js';
 import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
 import type { UserInputSelectionState } from './UserInput.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
+import { quickDescend } from './index.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
 
@@ -195,7 +196,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   splitAfter() {
     if (!this.isOnToken()) return;
     const [, after] = token.splitAfter(this.getToken());
-    const firstTok = token.quickDescend(after);
+    const firstTok = quickDescend(after);
     if (firstTok) {
       this.setToken(firstTok);
     }
@@ -242,7 +243,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     }
     token.insertAfter(el, this.getToken());
 
-    const first = token.quickDescend(el);
+    const first = quickDescend(el);
     if (first) {
       this.setToken(first);
     }
@@ -259,7 +260,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     }
     token.insertBefore(el, this.getToken());
 
-    const first = token.quickDescend(el);
+    const first = quickDescend(el);
     if (first) {
       this.setToken(first);
     }

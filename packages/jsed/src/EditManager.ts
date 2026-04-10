@@ -7,6 +7,7 @@ import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
+import { quickDescend } from './lib/tokenize.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -106,7 +107,7 @@ export class EditManager {
       this.handleSelectionChange
     );
 
-    const firstToken = isToken(initial) ? initial : token.quickDescend(initial);
+    const firstToken = isToken(initial) ? initial : quickDescend(initial);
     if (firstToken) {
       const line = getLine(firstToken);
       this.nav.FOCUS(line);
@@ -139,7 +140,7 @@ export class EditManager {
 
     if (focusElement) {
       this.nav.FOCUS(focusElement);
-      token.quickDescend(focusElement);
+      quickDescend(focusElement);
     }
   }
 
@@ -277,7 +278,7 @@ export class EditManager {
         return false;
       }
 
-      token.quickDescend(evt.element);
+      quickDescend(evt.element);
       return true;
     }
 

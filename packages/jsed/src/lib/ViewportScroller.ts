@@ -127,10 +127,7 @@ export class ViewportScroller {
     const viewport = this.getViewportRect();
     const rect = this.getElementRect(el);
     const isHidden =
-      rect.top < 0 ||
-      rect.left < 0 ||
-      rect.bottom > viewport.height ||
-      rect.right > viewport.width;
+      rect.top < 0 || rect.left < 0 || rect.bottom > viewport.height || rect.right > viewport.width;
 
     if (isHidden) {
       this.scrollIntoView(el, {
@@ -147,8 +144,7 @@ export class ViewportScroller {
   ): void {
     const viewport = this.getViewportRect();
     const rect = this.getElementRect(el);
-    const block =
-      rect.height > viewport.height ? (opts?.oversizedVertical ?? 'start') : 'center';
+    const block = rect.height > viewport.height ? (opts?.oversizedVertical ?? 'start') : 'center';
 
     this.scrollIntoView(el, {
       block,

@@ -2,13 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { makeRoot, p, div, em, span, identify } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
-import { getValue, isPadded, quickDescend } from '../lib/token.js';
+import { getValue, isPadded } from '../lib/token.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS
 } from '../lib/constants.js';
+import { quickDescend } from '../lib/tokenize.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

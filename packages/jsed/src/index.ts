@@ -4,7 +4,7 @@ export { EditManager, type EditManagerError, type EditManagerMode } from './Edit
 export { Nav, type OnRequestFocus } from './Nav.js';
 export { TokenCursorBase } from './TokenCursorBase.js';
 export { TokenCursor } from './TokenCursor.js';
-export { quickDescend } from './lib/token.js';
+export { quickDescend } from './lib/tokenize.js';
 
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
 import * as token from './lib/token.js';

@@ -8,7 +8,10 @@ export class JsedDocument {
 
   static createNull(
     root: HTMLElement,
-    opts?: { viewportScroller?: ViewportScroller; viewportScrollerOpts?: ViewportScrollerNullOptions }
+    opts?: {
+      viewportScroller?: ViewportScroller;
+      viewportScrollerOpts?: ViewportScrollerNullOptions;
+    }
   ): JsedDocument {
     return new JsedDocument(
       root,

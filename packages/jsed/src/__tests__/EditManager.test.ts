@@ -1,9 +1,10 @@
 import { describe, expect, it, test } from 'vitest';
 import { EditManager } from '../EditManager.js';
 import { byId, frag, makeRoot, p, span } from '../test/util.js';
-import { getValue, quickDescend } from '../lib/token.js';
+import { getValue } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
+import { quickDescend } from '../lib/tokenize.js';
 
 describe('EditManager', () => {
   it('first focus quick-descends but stays in view mode', () => {
@@ -497,7 +498,9 @@ describe('EditManager', () => {
       // assert
       expect(canInsert).toBe(false);
       expect(result).toBe(false);
-      const textNodes = Array.from(p1.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE);
+      const textNodes = Array.from(p1.childNodes).filter(
+        (node) => node.nodeType === Node.TEXT_NODE
+      );
       expect(textNodes).toHaveLength(1);
       expect(textNodes[0]?.textContent).toBe(' ');
 
@@ -529,7 +532,9 @@ describe('EditManager', () => {
       expect(result).toBe(true);
       expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(em.nextSibling?.textContent).toBe(' ');
-      expect((em.nextSibling?.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+      expect(
+        (em.nextSibling?.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')
+      ).toBe(true);
       expect((em.nextSibling?.nextSibling as HTMLElement | null)?.textContent).toBe('bar');
       expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
 
@@ -751,7 +756,9 @@ describe('EditManager', () => {
       // assert
       expect(canInsert).toBe(false);
       expect(result).toBe(false);
-      const textNodes = Array.from(p1.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE);
+      const textNodes = Array.from(p1.childNodes).filter(
+        (node) => node.nodeType === Node.TEXT_NODE
+      );
       expect(textNodes).toHaveLength(1);
       expect(textNodes[0]?.textContent).toBe(' ');
 
@@ -787,7 +794,9 @@ describe('EditManager', () => {
           'jsed-token'
         )
       ).toBe(true);
-      expect((strong.previousSibling?.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+      expect((strong.previousSibling?.previousSibling as HTMLElement | null)?.textContent).toBe(
+        'bar'
+      );
 
       editManager.destroy();
     });
@@ -844,7 +853,9 @@ describe('EditManager', () => {
       // assert
       expect(canRemove).toBe(true);
       expect(result).toBe(true);
-      expect((strong.previousSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+      expect((strong.previousSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(
+        true
+      );
       expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
 
       editManager.destroy();
@@ -884,9 +895,7 @@ describe('EditManager', () => {
 
     it('treats IGNORABLE content as empty when deciding whether an anchor can be inserted', () => {
       // arrange
-      const doc = makeRoot(
-        p({ id: 'p1' }, span({ class: 'jsed-ignore' }, 'debug label'))
-      );
+      const doc = makeRoot(p({ id: 'p1' }, span({ class: 'jsed-ignore' }, 'debug label')));
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
         document: doc,

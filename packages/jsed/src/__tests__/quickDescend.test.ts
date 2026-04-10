@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../test/util.js';
-import { tokenizeLine, quickDescend } from '../lib/token.js';
+import { tokenizeLine, quickDescend } from '../lib/tokenize.js';
 import { isToken } from '../lib/taxonomy.js';
 
 /**

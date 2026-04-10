@@ -1,7 +1,15 @@
 import { describe, test, expect, it } from 'vitest';
-import { byId, makeRoot, div, p, em, span, inlineStyleHack, inlineStyleHackVal } from '../../test/util.js';
 import {
-  tokenizeLine,
+  byId,
+  makeRoot,
+  div,
+  p,
+  em,
+  span,
+  inlineStyleHack,
+  inlineStyleHackVal
+} from '../../test/util.js';
+import {
   isPadded,
   canInsertAnchorInLine,
   createToken,
@@ -22,6 +30,7 @@ import {
 } from '../token.js';
 import { isAnchor } from '../taxonomy.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';
+import { tokenizeLine } from '../tokenize.js';
 
 describe('tokenizeLine', () => {
   test('simple LINE: <p>foo bar baz</p>', () => {
@@ -668,8 +677,7 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
     expect(strong1.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
     expect(strong1.previousSibling?.textContent).toBe('bar');
   });
-
-})
+});
 
 describe('anchor insertion', () => {
   test('getAnchorBeforeTagInsertionPoint skips IGNORABLE siblings and finds the previous tag boundary', () => {

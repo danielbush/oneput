@@ -20,8 +20,13 @@ export class EditDocument implements AppObject {
       onCursorChange: () => {
         instance?.renderMenuItems();
       },
-      onTextChange: () => {
-        instance?.renderMenuItems();
+      onTextChange: (evt) => {
+        switch (evt.type) {
+          case 'anchor-change':
+          case 'whitespace-change':
+            console.log('rerender')
+            instance?.renderMenuItems();
+        }
       }
     });
     instance = new EditDocument(ctl, params.document, editManager);

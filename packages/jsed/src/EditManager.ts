@@ -11,6 +11,21 @@ import { quickDescend } from './lib/tokenize.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
+export type EditManagerTextChangeEvent =
+  | {
+      type: 'token-text-change';
+      token: HTMLElement;
+    }
+  | {
+      type: 'anchor-change';
+      anchor: HTMLElement;
+      change: 'inserted';
+    }
+  | {
+      type: 'whitespace-change';
+      kind: 'leading-space' | 'trailing-space';
+      change: 'inserted' | 'removed';
+    };
 
 /**
  * Manages an edit session for a single document.
@@ -34,7 +49,7 @@ export class EditManager {
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
-    onTextChange?: () => void;
+    onTextChange?: (event: EditManagerTextChangeEvent) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -70,7 +85,7 @@ export class EditManager {
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
-    onTextChange?: () => void;
+    onTextChange?: (event: EditManagerTextChangeEvent) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -104,7 +119,7 @@ export class EditManager {
     private onModeChange?: (mode: EditManagerMode) => void,
     private onFocusChange?: (focus: HTMLElement | null) => void,
     private onCursorChange?: (target: HTMLElement) => void,
-    private onTextChange?: () => void
+    private onTextChange?: (event: EditManagerTextChangeEvent) => void
   ) {}
 
   getMode(): EditManagerMode {
@@ -116,8 +131,8 @@ export class EditManager {
     this.onModeChange?.(mode);
   }
 
-  private notifyTextChange() {
-    this.onTextChange?.();
+  private notifyTextChange(event: EditManagerTextChangeEvent) {
+    this.onTextChange?.(event);
   }
 
   /**
@@ -200,8 +215,9 @@ export class EditManager {
         return;
 
       case 'delete-current': {
+        const current = this.cursor.getToken();
         this.cursor.delete();
-        this.notifyTextChange();
+        this.notifyTextChange({ type: 'token-text-change', token: current });
         this.cursor?.handleInputChange(intent.inputValue);
         return;
       }
@@ -215,7 +231,10 @@ export class EditManager {
             lastToken = insertedToken;
           }
         }
-        this.notifyTextChange();
+        const inserted = lastToken;
+        if (inserted) {
+          this.notifyTextChange({ type: 'token-text-change', token: inserted });
+        }
         break;
 
       case 'insert-before-current':
@@ -225,7 +244,9 @@ export class EditManager {
           token.ensureSpaceAfter(insertedToken);
           lastToken = insertedToken;
         }
-        this.notifyTextChange();
+        if (lastToken) {
+          this.notifyTextChange({ type: 'token-text-change', token: lastToken });
+        }
         break;
 
       case 'rewrite-current':
@@ -239,7 +260,7 @@ export class EditManager {
         if (intent.prependedSpace) {
           this.userInput.moveCursorToBeginning();
         }
-        this.notifyTextChange();
+        this.notifyTextChange({ type: 'token-text-change', token: currentToken });
         break;
     }
 
@@ -458,7 +479,7 @@ export class EditManager {
       return false;
     }
 
-    this.notifyTextChange();
+    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
@@ -474,7 +495,7 @@ export class EditManager {
       return false;
     }
 
-    this.notifyTextChange();
+    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
@@ -487,7 +508,11 @@ export class EditManager {
 
     const inserted = token.insertSpaceAfterTag(focus);
     if (inserted) {
-      this.notifyTextChange();
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'trailing-space',
+        change: 'inserted'
+      });
       return true;
     }
     return false;
@@ -501,7 +526,11 @@ export class EditManager {
 
     const removed = token.removeSpaceAfterTag(focus);
     if (removed) {
-      this.notifyTextChange();
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'trailing-space',
+        change: 'removed'
+      });
       return true;
     }
     return false;
@@ -515,7 +544,11 @@ export class EditManager {
 
     const inserted = token.insertSpaceBeforeTag(focus);
     if (inserted) {
-      this.notifyTextChange();
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'leading-space',
+        change: 'inserted'
+      });
       return true;
     }
     return false;
@@ -529,7 +562,11 @@ export class EditManager {
 
     const removed = token.removeSpaceBeforeTag(focus);
     if (removed) {
-      this.notifyTextChange();
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'leading-space',
+        change: 'removed'
+      });
       return true;
     }
     return false;
@@ -546,7 +583,7 @@ export class EditManager {
       return false;
     }
 
-    this.notifyTextChange();
+    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }

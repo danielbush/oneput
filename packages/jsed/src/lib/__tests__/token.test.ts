@@ -1,14 +1,18 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, it } from 'vitest';
 import { byId, makeRoot, div, p, em, span, inlineStyleHack, inlineStyleHackVal } from '../../test/util.js';
 import {
   tokenizeLine,
   isPadded,
   canInsertAnchorInLine,
+  createToken,
+  createAnchor,
+  replaceText,
   getAnchorAfterTagInsertionPoint,
   insertAnchorAfterTag,
   getAnchorBeforeTagInsertionPoint,
   insertAnchorBeforeTag
 } from '../token.js';
+import { isAnchor } from '../taxonomy.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';
 
 describe('tokenizeLine', () => {
@@ -359,6 +363,36 @@ describe('tokenizeLine', () => {
       // assert
       expect(div1).toMatchSnapshot('Should only tokenize p1');
     });
+  });
+});
+
+describe('replaceText', () => {
+  it('rewrites an existing TOKEN text node', () => {
+    // arrange
+    const token = createToken('foo');
+
+    // act
+    replaceText(token, 'bar');
+
+    // assert
+    expect(token.textContent).toBe('bar');
+    expect(token.childNodes).toHaveLength(1);
+    expect(token.firstChild?.nodeType).toBe(Node.TEXT_NODE);
+  });
+
+  it('converts an empty ANCHOR into a TOKEN with a text node', () => {
+    // arrange
+    const anchor = createAnchor();
+    expect(anchor.childNodes).toHaveLength(0);
+
+    // act
+    replaceText(anchor, 'bar');
+
+    // assert
+    expect(isAnchor(anchor)).toBe(false);
+    expect(anchor.textContent).toBe('bar');
+    expect(anchor.childNodes).toHaveLength(1);
+    expect(anchor.firstChild?.nodeType).toBe(Node.TEXT_NODE);
   });
 });
 

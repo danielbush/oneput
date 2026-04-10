@@ -46,10 +46,12 @@ export function getParent(el: HTMLElement): HTMLElement {
  *
  * @param text Should be non-whitespace
  */
-export function createToken(text: string): HTMLElement {
+export function createToken(text?: string): HTMLElement {
   const el = document.createElement('span');
   el.classList.add(JSED_TOKEN_CLASS);
-  el.appendChild(document.createTextNode(text));
+  if (text) {
+    el.appendChild(document.createTextNode(text));
+  }
   return el;
 }
 
@@ -61,7 +63,7 @@ export function createToken(text: string): HTMLElement {
  */
 export function createAnchor(): HTMLElement {
   // const el = createToken(JSED_ANCHOR_CHAR);
-  const el = createToken('');
+  const el = createToken();
   el.classList.add(JSED_ANCHOR_CLASS);
   return el;
 }
@@ -340,11 +342,7 @@ export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
 /**
  * Replaces the text of the existing token.
  *
- * If the token is an ANCHOR, we convert it in-place to a regular token and
- * replace the ANCHOR character with the text.  This makes it easy to
- * manage the CURSOR and cursor operations - we only call focus when we
- * create a new token eg after deleting the current CURSOR and only in
- * these situations will focus get called triggering a "select-all" in jsed-ui.
+ * If the token is an ANCHOR, we convert it in-place to a regular token.
  *
  * In the boundary-spacing model this only updates visible TOKEN text. Spacing
  * before / after the TOKEN is managed by adjacent separator text nodes.
@@ -352,7 +350,11 @@ export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
 export function replaceText(token: HTMLElement, val: string): HTMLElement {
   validate(token);
   anchor2Token(token);
-  token.firstChild!.nodeValue = val.trim();
+  if (token.firstChild) {
+    token.firstChild.nodeValue = val.trim();
+  } else {
+    token.append(document.createTextNode(val.trim()))
+  }
   return token;
 }
 

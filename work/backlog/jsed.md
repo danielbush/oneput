@@ -2,6 +2,21 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
+## For consideration
+
+- opening the menu exits edit mode and cursor
+  - if we do that, we can't perform menu actions at the cursor!
+  - opening the menu detaches input from editor; closing, re-engages it
+- bug: splitting on em-tag splits the em-tag; it should split the LINE
+  - should go in the split ticket
+- feat: cmd+h,l - UP,DOWN vs cmd+j,k = PREV/NEXT SIBLING
+  - we should remember the ancestor chain
+  - if you go up and down, we keep the same chain
+  - changing sibling updates the chain
+  - the chain can be represented by the lowest element; so going DOWN extends the existing chain; UP does not update anything
+  - leave a permanent marker in the dom pointing to the lowest element in the chain; we the editor loads again, it can jump automatically to this point
+  - $mod+shift+h,l does pre-order walk
+
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
 id: DETOKENIZE__WORK

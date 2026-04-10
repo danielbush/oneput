@@ -186,29 +186,30 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     token.joinPrevious(this.getToken());
   }
 
-  splitBefore() {
-    if (!this.isOnToken()) return;
-    token.splitBefore(this.getToken());
+  splitBefore(): HTMLElement | null {
+    if (!this.isOnToken()) return null;
+    const [before] = token.splitBefore(this.getToken());
     // We may end up in a new token, so we need to update the focus.
     this.setToken(this.getToken());
+    return before;
   }
 
-  splitAfter() {
-    if (!this.isOnToken()) return;
+  splitAfter(): HTMLElement | null {
+    if (!this.isOnToken()) return null;
     const [, after] = token.splitAfter(this.getToken());
     const firstTok = quickDescend(after);
     if (firstTok) {
       this.setToken(firstTok);
     }
+    return after;
   }
 
-  splitAtToken() {
+  splitAtToken(): HTMLElement | null {
     if (this.isInsertingAfter() || this.isAppend()) {
-      this.splitAfter();
-      return;
+      return this.splitAfter();
     }
 
-    this.splitBefore();
+    return this.splitBefore();
   }
 
   // #endregion

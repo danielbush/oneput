@@ -26,6 +26,20 @@ export type EditManagerTextChangeEvent =
       kind: 'leading-space' | 'trailing-space';
       change: 'inserted' | 'removed';
     };
+export type EditManagerElementChangeEvent =
+  | {
+      type: 'focusable-inserted';
+      element: HTMLElement;
+    }
+  | {
+      type: 'focusable-removed';
+      element: HTMLElement;
+    }
+  | {
+      type: 'focusable-replaced';
+      previous: HTMLElement;
+      element: HTMLElement;
+    };
 
 /**
  * Manages an edit session for a single document.
@@ -41,7 +55,8 @@ export class EditManager {
     onModeChange,
     onFocusChange,
     onCursorChange,
-    onTextChange
+    onTextChange,
+    onElementChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -50,6 +65,7 @@ export class EditManager {
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
     onTextChange?: (event: EditManagerTextChangeEvent) => void;
+    onElementChange?: (event: EditManagerElementChangeEvent) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -65,7 +81,8 @@ export class EditManager {
       onModeChange,
       onFocusChange,
       onCursorChange,
-      onTextChange
+      onTextChange,
+      onElementChange
     );
     return instance;
   }
@@ -77,7 +94,8 @@ export class EditManager {
     onModeChange,
     onFocusChange,
     onCursorChange,
-    onTextChange
+    onTextChange,
+    onElementChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -86,6 +104,7 @@ export class EditManager {
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
     onTextChange?: (event: EditManagerTextChangeEvent) => void;
+    onElementChange?: (event: EditManagerElementChangeEvent) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -101,7 +120,8 @@ export class EditManager {
       onModeChange,
       onFocusChange,
       onCursorChange,
-      onTextChange
+      onTextChange,
+      onElementChange
     );
     return instance;
   }
@@ -119,7 +139,8 @@ export class EditManager {
     private onModeChange?: (mode: EditManagerMode) => void,
     private onFocusChange?: (focus: HTMLElement | null) => void,
     private onCursorChange?: (target: HTMLElement) => void,
-    private onTextChange?: (event: EditManagerTextChangeEvent) => void
+    private onTextChange?: (event: EditManagerTextChangeEvent) => void,
+    private onElementChange?: (event: EditManagerElementChangeEvent) => void
   ) {}
 
   getMode(): EditManagerMode {
@@ -133,6 +154,10 @@ export class EditManager {
 
   private notifyTextChange(event: EditManagerTextChangeEvent) {
     this.onTextChange?.(event);
+  }
+
+  private notifyElementChange(event: EditManagerElementChangeEvent) {
+    this.onElementChange?.(event);
   }
 
   /**
@@ -398,20 +423,35 @@ export class EditManager {
    */
   handleEnter(): Result<void, EditManagerError> {
     if (this.mode === 'view') {
-      return this.enterEditing();
+      return this.enterEditingAtFocus();
     }
 
     if (!this.cursor) {
-      return this.enterEditing();
+      return this.enterEditingAtFocus();
     }
 
     const current = this.cursor.getToken();
     if (isToken(current)) {
-      this.cursor.splitAtToken();
+      this.splitAtCursor();
       return ok(undefined);
     }
 
-    return this.enterEditing(current);
+    return this.enterEditingAtTarget(current);
+  }
+
+  private enterEditingAtFocus(): Result<void, EditManagerError> {
+    return this.enterEditing();
+  }
+
+  private enterEditingAtTarget(target: HTMLElement): Result<void, EditManagerError> {
+    return this.enterEditing(target);
+  }
+
+  private splitAtCursor() {
+    const inserted = this.cursor?.splitAtToken();
+    if (inserted) {
+      this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    }
   }
 
   handleExit() {

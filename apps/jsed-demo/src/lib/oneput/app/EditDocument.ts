@@ -24,9 +24,11 @@ export class EditDocument implements AppObject {
         switch (evt.type) {
           case 'anchor-change':
           case 'whitespace-change':
-            console.log('rerender')
             instance?.renderMenuItems();
         }
+      },
+      onElementChange: () => {
+        instance?.renderMenuItems();
       }
     });
     instance = new EditDocument(ctl, params.document, editManager);

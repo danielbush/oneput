@@ -88,15 +88,15 @@ export type ITokenCursor = {
   /**
    * Perform SPLIT_BY_TOKEN .
    */
-  splitBefore: () => void;
+  splitBefore: () => HTMLElement | null;
   /**
    * Perform SPLIT_BY_TOKEN .
    */
-  splitAfter: () => void;
+  splitAfter: () => HTMLElement | null;
   /**
    * Perform SPLIT_BY_TOKEN according to CURSOR_STATE.
    */
-  splitAtToken: () => void;
+  splitAtToken: () => HTMLElement | null;
   /**
    * Destroy the current edit session. The instance cannot be used after this.
    */

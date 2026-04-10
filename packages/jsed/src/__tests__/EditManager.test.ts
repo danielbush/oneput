@@ -443,6 +443,100 @@ describe('EditManager', () => {
     });
   });
 
+  describe('insertSpaceAfterTag', () => {
+    it('insertSpaceAfterTag inserts a space at the boundary after the focused tag', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canInsert = editManager.canInsertSpaceAfterTag();
+      const result = editManager.insertSpaceAfterTag();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(strong.previousSibling?.textContent).toBe(' ');
+      expect(editManager.isEditing()).toBe(false);
+
+      editManager.destroy();
+    });
+
+    it('insertSpaceAfterTag does not insert another space when one already exists', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const p1 = byId(doc, 'p1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canInsert = editManager.canInsertSpaceAfterTag();
+      const result = editManager.insertSpaceAfterTag();
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(result).toBe(false);
+      const textNodes = Array.from(p1.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE);
+      expect(textNodes).toHaveLength(1);
+      expect(textNodes[0]?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+
+    it('insertSpaceAfterTag inserts a space before intervening text', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canInsert = editManager.canInsertSpaceAfterTag();
+      const result = editManager.insertSpaceAfterTag();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' ');
+      expect((em.nextSibling?.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+      expect((em.nextSibling?.nextSibling as HTMLElement | null)?.textContent).toBe('bar');
+      expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+
+      editManager.destroy();
+    });
+  });
+
   describe('insertAnchorBeforeTag', () => {
     it('insertAnchorBeforeTag inserts an anchor at the boundary and enters editing on it', () => {
       // arrange
@@ -539,6 +633,102 @@ describe('EditManager', () => {
       expect(editManager.cursor?.getToken()).toBe(anchor);
       expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(anchor?.previousSibling?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+  });
+
+  describe('insertSpaceBeforeTag', () => {
+    it('insertSpaceBeforeTag inserts a space at the boundary before the focused tag', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const strong = byId(doc, 'strong1');
+      const em = byId(doc, 'em1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canInsert = editManager.canInsertSpaceBeforeTag();
+      const result = editManager.insertSpaceBeforeTag();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(strong.previousSibling?.textContent).toBe(' ');
+      expect(editManager.isEditing()).toBe(false);
+
+      editManager.destroy();
+    });
+
+    it('insertSpaceBeforeTag does not insert another space when one already exists', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const strong = byId(doc, 'strong1');
+      const p1 = byId(doc, 'p1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canInsert = editManager.canInsertSpaceBeforeTag();
+      const result = editManager.insertSpaceBeforeTag();
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(result).toBe(false);
+      const textNodes = Array.from(p1.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE);
+      expect(textNodes).toHaveLength(1);
+      expect(textNodes[0]?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+
+    it('insertSpaceBeforeTag inserts a space after intervening text', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canInsert = editManager.canInsertSpaceBeforeTag();
+      const result = editManager.insertSpaceBeforeTag();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(strong.previousSibling?.textContent).toBe(' ');
+      expect(
+        (strong.previousSibling?.previousSibling as HTMLElement | null)?.classList.contains(
+          'jsed-token'
+        )
+      ).toBe(true);
+      expect((strong.previousSibling?.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
 
       editManager.destroy();
     });

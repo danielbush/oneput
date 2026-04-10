@@ -169,12 +169,30 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),
+        this.editManager.canInsertSpaceBeforeTag() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_BEFORE_TAG',
+            textContent: 'Insert space before tag...',
+            action: () => {
+              this.editManager.insertSpaceBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
         this.editManager.canInsertAnchorBeforeTag() &&
           stdMenuItem({
             id: 'INSERT_ANCHOR_BEFORE_TAG',
             textContent: 'Insert anchor before tag...',
             action: () => {
               this.editManager.insertAnchorBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
+        this.editManager.canInsertSpaceAfterTag() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_AFTER_TAG',
+            textContent: 'Insert space after tag...',
+            action: () => {
+              this.editManager.insertSpaceAfterTag();
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),

@@ -439,6 +439,24 @@ export class EditManager {
     return true;
   }
 
+  insertSpaceAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    return !!token.insertSpaceAfterTag(focus);
+  }
+
+  insertSpaceBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    return !!token.insertSpaceBeforeTag(focus);
+  }
+
   insertAnchorInLine(): boolean {
     const focus = this.nav.getFocus();
     if (!focus || !token.canInsertAnchorInLine(focus)) {
@@ -470,8 +488,18 @@ export class EditManager {
     return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
   }
 
+  canInsertSpaceAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getSpaceAfterTagInsertionPoint(focus));
+  }
+
   canInsertAnchorBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
+  }
+
+  canInsertSpaceBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getSpaceBeforeTagInsertionPoint(focus));
   }
 }

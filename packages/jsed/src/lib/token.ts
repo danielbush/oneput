@@ -505,6 +505,62 @@ export function canInsertAnchorInLine(line: HTMLElement): boolean {
 }
 
 /**
+ * Get the immediate boundary after a focused tag where a whitespace text node
+ * can be inserted.
+ *
+ * IGNORABLE siblings are skipped. A non-whitespace text node is a valid
+ * insertion target as long as it does not already begin with whitespace. A
+ * TOKEN is also a valid insertion target when no separator already represents
+ * the boundary. In both cases the space is inserted before the target so the
+ * focused tag gains trailing space.
+ *
+ * Returns null when the boundary is already represented by whitespace or an
+ * IMPLICIT_LINE.
+ */
+export function getSpaceAfterTagInsertionPoint(
+  focus: HTMLElement
+): { parent: Node; next: Node | null } | null {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const next = getNextSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (next?.nodeType === Node.TEXT_NODE) {
+    const text = next.textContent ?? '';
+    return /^\s/.test(text) ? null : { parent: focus.parentNode, next };
+  }
+
+  if (next && !(next instanceof HTMLElement)) {
+    return null;
+  }
+
+  if (next && isImplicitLine(next)) {
+    return null;
+  }
+
+  return next ? { parent: focus.parentNode, next } : null;
+}
+
+export function insertSpaceAfterTag(focus: HTMLElement, value = ' '): Text | null {
+  const insertionPoint = getSpaceAfterTagInsertionPoint(focus);
+  if (!insertionPoint) {
+    return null;
+  }
+
+  const space = document.createTextNode(value);
+  insertionPoint.parent.insertBefore(space, insertionPoint.next);
+  return space;
+}
+
+/**
  * Get the immediate editable boundary after a focused tag where an ANCHOR can
  * be inserted.
  *
@@ -603,6 +659,62 @@ export function getAnchorBeforeTagInsertionPoint(
   }
 
   return { parent: focus.parentNode, previous };
+}
+
+/**
+ * Get the immediate boundary before a focused tag where a whitespace text node
+ * can be inserted.
+ *
+ * IGNORABLE siblings are skipped. A non-whitespace text node is a valid
+ * insertion target as long as it does not already end with whitespace. A
+ * TOKEN is also a valid insertion target when no separator already represents
+ * the boundary. In both cases the space is inserted after the target so the
+ * focused tag gains leading space.
+ *
+ * Returns null when the boundary is already represented by whitespace or an
+ * IMPLICIT_LINE.
+ */
+export function getSpaceBeforeTagInsertionPoint(
+  focus: HTMLElement
+): { parent: Node; previous: Node | null } | null {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (previous?.nodeType === Node.TEXT_NODE) {
+    const text = previous.textContent ?? '';
+    return /\s$/.test(text) ? null : { parent: focus.parentNode, previous };
+  }
+
+  if (previous && !(previous instanceof HTMLElement)) {
+    return null;
+  }
+
+  if (previous && isImplicitLine(previous)) {
+    return null;
+  }
+
+  return previous ? { parent: focus.parentNode, previous } : null;
+}
+
+export function insertSpaceBeforeTag(focus: HTMLElement, value = ' '): Text | null {
+  const insertionPoint = getSpaceBeforeTagInsertionPoint(focus);
+  if (!insertionPoint) {
+    return null;
+  }
+
+  const space = document.createTextNode(value);
+  insertionPoint.parent.insertBefore(space, focus);
+  return space;
 }
 
 /**

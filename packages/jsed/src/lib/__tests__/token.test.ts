@@ -7,6 +7,10 @@ import {
   createToken,
   createAnchor,
   replaceText,
+  getSpaceAfterTagInsertionPoint,
+  insertSpaceAfterTag,
+  getSpaceBeforeTagInsertionPoint,
+  insertSpaceBeforeTag,
   getAnchorAfterTagInsertionPoint,
   insertAnchorAfterTag,
   getAnchorBeforeTagInsertionPoint,
@@ -397,6 +401,175 @@ describe('replaceText', () => {
 });
 
 describe('anchor insertion', () => {
+  test('getSpaceAfterTagInsertionPoint skips IGNORABLE siblings and finds the next tag boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const insertionPoint = getSpaceAfterTagInsertionPoint(em1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.parent).toBe(em1.parentNode);
+    expect(insertionPoint?.next).toBe(strong1);
+  });
+
+  test('getSpaceAfterTagInsertionPoint returns null when whitespace already represents the gap', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const insertionPoint = getSpaceAfterTagInsertionPoint(em1);
+
+    // assert
+    expect(insertionPoint).toBeNull();
+  });
+
+  test('getSpaceAfterTagInsertionPoint allows insertion before intervening text with no leading space', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const insertionPoint = getSpaceAfterTagInsertionPoint(em1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.next?.nodeType).toBe(Node.TEXT_NODE);
+    expect(insertionPoint?.next?.textContent).toBe('bar');
+  });
+
+  test('insertSpaceAfterTag inserts a whitespace text node before the next tag', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const space = insertSpaceAfterTag(em1);
+
+    // assert
+    expect(space).not.toBeNull();
+    expect(strong1.previousSibling).toBe(space);
+    expect(space?.nodeType).toBe(Node.TEXT_NODE);
+    expect(space?.textContent).toBe(' ');
+  });
+
+  test('insertSpaceAfterTag inserts a whitespace text node before intervening text', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+    );
+    const em1 = byId(doc, 'em1');
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const space = insertSpaceAfterTag(em1);
+
+    // assert
+    expect(space).not.toBeNull();
+    expect(space?.nodeType).toBe(Node.TEXT_NODE);
+    expect(space?.textContent).toBe(' ');
+    expect(space?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(space?.nextSibling?.textContent).toBe('bar');
+    expect(strong1.previousSibling?.textContent).toBe('bar');
+  });
+
+  test('getSpaceBeforeTagInsertionPoint skips IGNORABLE siblings and finds the previous tag boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const insertionPoint = getSpaceBeforeTagInsertionPoint(strong1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.parent).toBe(strong1.parentNode);
+    expect(insertionPoint?.previous).toBe(em1);
+  });
+
+  test('getSpaceBeforeTagInsertionPoint returns null when whitespace already represents the gap', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const insertionPoint = getSpaceBeforeTagInsertionPoint(strong1);
+
+    // assert
+    expect(insertionPoint).toBeNull();
+  });
+
+  test('getSpaceBeforeTagInsertionPoint allows insertion after intervening text with no trailing space', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const insertionPoint = getSpaceBeforeTagInsertionPoint(strong1);
+
+    // assert
+    expect(insertionPoint).not.toBeNull();
+    expect(insertionPoint?.previous?.nodeType).toBe(Node.TEXT_NODE);
+    expect(insertionPoint?.previous?.textContent).toBe('bar');
+  });
+
+  test('insertSpaceBeforeTag inserts a whitespace text node after the previous tag', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+    const em1 = byId(doc, 'em1');
+
+    // act
+    const space = insertSpaceBeforeTag(strong1);
+
+    // assert
+    expect(space).not.toBeNull();
+    expect(strong1.previousSibling).toBe(space);
+    expect(space?.nodeType).toBe(Node.TEXT_NODE);
+    expect(space?.textContent).toBe(' ');
+  });
+
+  test('insertSpaceBeforeTag inserts a whitespace text node after intervening text', () => {
+    // arrange
+    const doc = makeRoot(
+      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+    );
+    const strong1 = byId(doc, 'strong1');
+
+    // act
+    const space = insertSpaceBeforeTag(strong1);
+
+    // assert
+    expect(space).not.toBeNull();
+    expect(space?.nodeType).toBe(Node.TEXT_NODE);
+    expect(space?.textContent).toBe(' ');
+    expect(strong1.previousSibling).toBe(space);
+    expect(space?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(space?.previousSibling?.textContent).toBe('bar');
+  });
+
   test('getAnchorBeforeTagInsertionPoint skips IGNORABLE siblings and finds the previous tag boundary', () => {
     // arrange
     const doc = makeRoot(

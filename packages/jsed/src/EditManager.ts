@@ -448,6 +448,15 @@ export class EditManager {
     return !!token.insertSpaceAfterTag(focus);
   }
 
+  removeSpaceAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    return token.removeSpaceAfterTag(focus);
+  }
+
   insertSpaceBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     if (!focus) {
@@ -455,6 +464,15 @@ export class EditManager {
     }
 
     return !!token.insertSpaceBeforeTag(focus);
+  }
+
+  removeSpaceBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+
+    return token.removeSpaceBeforeTag(focus);
   }
 
   insertAnchorInLine(): boolean {
@@ -493,6 +511,11 @@ export class EditManager {
     return !!(focus && token.getSpaceAfterTagInsertionPoint(focus));
   }
 
+  canRemoveSpaceAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableSpaceAfterTag(focus));
+  }
+
   canInsertAnchorBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
@@ -501,5 +524,10 @@ export class EditManager {
   canInsertSpaceBeforeTag(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.getSpaceBeforeTagInsertionPoint(focus));
+  }
+
+  canRemoveSpaceBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableSpaceBeforeTag(focus));
   }
 }

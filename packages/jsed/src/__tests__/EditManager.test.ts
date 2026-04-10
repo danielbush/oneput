@@ -537,6 +537,66 @@ describe('EditManager', () => {
     });
   });
 
+  describe('removeSpaceAfterTag', () => {
+    it('removeSpaceAfterTag removes boundary whitespace between adjacent tags', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceAfterTag();
+      const result = editManager.removeSpaceAfterTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling).toBe(em);
+
+      editManager.destroy();
+    });
+
+    it('removeSpaceAfterTag removes leading whitespace from intervening text', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(em);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceAfterTag();
+      const result = editManager.removeSpaceAfterTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect((em.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+      expect((em.nextSibling as HTMLElement | null)?.textContent).toBe('bar');
+      expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+
+      editManager.destroy();
+    });
+  });
+
   describe('insertAnchorBeforeTag', () => {
     it('insertAnchorBeforeTag inserts an anchor at the boundary and enters editing on it', () => {
       // arrange
@@ -651,7 +711,6 @@ describe('EditManager', () => {
       });
       editManager.nav.connect();
       const strong = byId(doc, 'strong1');
-      const em = byId(doc, 'em1');
 
       editManager.nav.REQUEST_FOCUS(strong);
 
@@ -729,6 +788,64 @@ describe('EditManager', () => {
         )
       ).toBe(true);
       expect((strong.previousSibling?.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+
+      editManager.destroy();
+    });
+  });
+
+  describe('removeSpaceBeforeTag', () => {
+    it('removeSpaceBeforeTag removes boundary whitespace between adjacent tags', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const em = byId(doc, 'em1');
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceBeforeTag();
+      const result = editManager.removeSpaceBeforeTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(strong.previousSibling).toBe(em);
+
+      editManager.destroy();
+    });
+
+    it('removeSpaceBeforeTag removes trailing whitespace from intervening text', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const strong = byId(doc, 'strong1');
+
+      editManager.nav.REQUEST_FOCUS(strong);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceBeforeTag();
+      const result = editManager.removeSpaceBeforeTag();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect((strong.previousSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+      expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
 
       editManager.destroy();
     });

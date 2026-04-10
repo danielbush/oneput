@@ -260,6 +260,34 @@ function isWhitespaceTextNode(node: Node | null | undefined): node is Text {
   return node instanceof window.Text && /^\s+$/.test(node.nodeValue ?? '');
 }
 
+function removeLeadingSpace(textNode: Text): Text | null {
+  const value = textNode.nodeValue ?? '';
+  if (!/^\s/.test(value)) {
+    return null;
+  }
+  const nextValue = value.replace(/^\s/, '');
+  if (nextValue.length === 0) {
+    textNode.parentNode?.removeChild(textNode);
+    return textNode;
+  }
+  textNode.nodeValue = nextValue;
+  return textNode;
+}
+
+function removeTrailingSpace(textNode: Text): Text | null {
+  const value = textNode.nodeValue ?? '';
+  if (!/\s$/.test(value)) {
+    return null;
+  }
+  const nextValue = value.replace(/\s$/, '');
+  if (nextValue.length === 0) {
+    textNode.parentNode?.removeChild(textNode);
+    return textNode;
+  }
+  textNode.nodeValue = nextValue;
+  return textNode;
+}
+
 function getSeparatorBefore(token: HTMLElement): Text | null {
   const prev = token.previousSibling;
   return isWhitespaceTextNode(prev) ? prev : null;
@@ -560,6 +588,44 @@ export function insertSpaceAfterTag(focus: HTMLElement, value = ' '): Text | nul
   return space;
 }
 
+export function getRemovableSpaceAfterTag(focus: HTMLElement): Text | null {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const next = getNextSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (next instanceof Text) {
+    return /^\s/.test(next.nodeValue ?? '') ? next : null;
+  }
+
+  if (next && !(next instanceof HTMLElement)) {
+    return null;
+  }
+
+  if (next && isImplicitLine(next)) {
+    return null;
+  }
+
+  return null;
+}
+
+export function removeSpaceAfterTag(focus: HTMLElement): boolean {
+  const textNode = getRemovableSpaceAfterTag(focus);
+  if (!textNode) {
+    return false;
+  }
+
+  return !!removeLeadingSpace(textNode);
+}
+
 /**
  * Get the immediate editable boundary after a focused tag where an ANCHOR can
  * be inserted.
@@ -715,6 +781,44 @@ export function insertSpaceBeforeTag(focus: HTMLElement, value = ' '): Text | nu
   const space = document.createTextNode(value);
   insertionPoint.parent.insertBefore(space, focus);
   return space;
+}
+
+export function getRemovableSpaceBeforeTag(focus: HTMLElement): Text | null {
+  if (isToken(focus) || isLine(focus) || !focus.parentNode) {
+    return null;
+  }
+
+  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
+  if (previous instanceof Text) {
+    return /\s$/.test(previous.nodeValue ?? '') ? previous : null;
+  }
+
+  if (previous && !(previous instanceof HTMLElement)) {
+    return null;
+  }
+
+  if (previous && isImplicitLine(previous)) {
+    return null;
+  }
+
+  return null;
+}
+
+export function removeSpaceBeforeTag(focus: HTMLElement): boolean {
+  const textNode = getRemovableSpaceBeforeTag(focus);
+  if (!textNode) {
+    return false;
+  }
+
+  return !!removeTrailingSpace(textNode);
 }
 
 /**

@@ -65,11 +65,6 @@
   </div>
 
   <h2 class="jsed-ignore">OPAQUE_BLOCK</h2>
-  <p class="jsed-ignore">Anything block-like by default is treated as an OPAQUE_BLOCK.</p>
-  <p class="jsed-ignore">
-    FOCUS can descend OPAQUE_BLOCK's but CURSOR cannot descend when visiting. BUT if you can FOCUS
-    onto an OPAQUE_BLOCK you then get the CURSOR to descend it directly.
-  </p>
   <p class="jsed-ignore">block in block</p>
   <div>
     outer text before the block
@@ -126,6 +121,58 @@
       This text comes after the figure and is in a p-tag but is not reachable without implicit line
       handling.
     </p>
+  </div>
+
+  <h1 class="jsed-ignore">Boundary spacing scenarios</h1>
+  <p class="jsed-ignore">
+    Try adding/remove LEADING_SPACE's and TRAILING_SPACE's.  Try adding and removing ANCHOR's.
+  </p>
+
+  <p class="jsed-ignore">
+    INLINE_FLOW
+  </p>
+  <p style="border: 1px dashed red; min-height: 1rem; position: relative">
+    <span style="position: absolute; right: 0; top: 0; margin: 0" class="note jsed-ignore"
+      >(empty p-tag)</span
+    >
+  </p>
+  <p><em>foo</em><strong>bar</strong></p>
+  <p><em>foo</em>between<strong>bar</strong></p>
+  <p><em>foo</em> <strong>bar</strong></p>
+  <p>before<em>inline</em>after</p>
+  <p><u>underlined</u><strong>joined</strong>text</p>
+  <p><em>foo</em> <strong>bar</strong> <u>baz</u></p>
+  <p><em>foo</em><strong>bar</strong><u>baz</u></p>
+
+  <p class="jsed-ignore">
+    ISLAND's
+  </p>
+  <div><span class="katex" style="display: inline">x²</span> after island</div>
+  <div>before island <span class="katex" style="display: inline">x²</span> after island</div>
+
+  <p class="jsed-ignore">
+    TRANSPARENT_BLOCK
+  </p>
+  <div>
+    <span class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block"
+      >transparent inline-block</span
+    > after transparent inline-block
+  </div>
+
+  <p class="jsed-ignore">
+    OPAQUE_BLOCK
+  </p>
+  <div>
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">inline block</span
+    > after opaque inline-block
+  </div>
+
+  <p class="jsed-ignore">
+    Combine both behaviours in one line: remove one boundary, keep another, then restore spacing.
+  </p>
+  <div>
+    start <em>tight<strong>cluster</strong></em>
+    <span class="katex" style="display: inline">x²</span>after island
   </div>
 
   <h1 class="jsed-ignore">Special cases</h1>
@@ -199,55 +246,6 @@
     <br />
   </div>
 
-  <h1 class="jsed-ignore">Boundary spacing scenarios</h1>
-  <p class="jsed-ignore">
-    These replace the old COLLAPSED_TOKEN and PADDED_TOKEN examples. The intent is the same, but the
-    source of truth is now boundary whitespace text nodes between LINE_SIBLING's rather than literal
-    spaces inside TOKEN text.
-  </p>
-
-  <h2 class="jsed-ignore">Collapsed-like adjacency</h2>
-  <p class="jsed-ignore">
-    Explore removing and restoring boundary spacing between adjacent TOKEN's and inline runs.
-  </p>
-  <p style="border: 1px dashed red; min-height: 1rem; position: relative">
-    <span style="position: absolute; right: 0; top: 0; margin: 0" class="note jsed-ignore"
-      >(empty p-tag)</span
-    >
-  </p>
-  <p><em>foo</em><strong>bar</strong></p>
-  <p><em>foo</em>between<strong>bar</strong></p>
-  <p><em>foo</em> <strong>bar</strong></p>
-  <p>before<em>inline</em>after</p>
-  <p><u>underlined</u><strong>joined</strong>text</p>
-  <p><em>foo</em> <strong>bar</strong> <u>baz</u></p>
-  <p><em>foo</em><strong>bar</strong><u>baz</u></p>
-
-  <h2 class="jsed-ignore">Padded-like boundaries</h2>
-  <p class="jsed-ignore">
-    Explore adding boundary spacing where the previous visible sibling does not carry spacing of its
-    own.
-  </p>
-  <div><span class="katex" style="display: inline">x²</span>after island</div>
-  <div>before island<span class="katex" style="display: inline">x²</span>after island</div>
-  <div>
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">inline block</span
-    >after opaque inline-block
-  </div>
-  <div>
-    <span class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block"
-      >transparent inline-block</span
-    >after transparent inline-block
-  </div>
-
-  <h2 class="jsed-ignore">Mixed spacing intent</h2>
-  <p class="jsed-ignore">
-    Combine both behaviours in one line: remove one boundary, keep another, then restore spacing.
-  </p>
-  <div>
-    start <em>tight<strong>cluster</strong></em>
-    <span class="katex" style="display: inline">x²</span>after island
-  </div>
 
   <h1 class="jsed-ignore">SHALLOW_TOKENIZATION</h1>
   <p class="jsed-ignore">

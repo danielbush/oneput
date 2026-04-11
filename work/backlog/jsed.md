@@ -4,6 +4,12 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## For consideration
 
+- refactor: handleInputChange in EditManager;
+  - add performInputIntent as a function in packages/jsed/src/lib/edit/decideInputIntent.ts
+  - it should perform actions based on output of decideInputIntent
+  - handleInputChange should get a lot smaller
+  - to test it, we can run the function but pass in nulled versions
+  - move and convert the handleInputChange tests in packages/jsed/src/__tests__/EditManager.test.ts 
 - opening the menu exits edit mode and cursor
   - if we do that, we can't perform menu actions at the cursor!
   - opening the menu detaches input from editor; closing, re-engages it

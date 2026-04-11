@@ -169,9 +169,13 @@ export class AppController {
     this.current?.app.onExit?.();
   }
 
+  private runBeforeSuspend() {
+    this.current?.app.onSuspend?.();
+  }
+
   run<R = unknown>(appObject: AppObject<R>) {
     // console.warn('run', { appObject });
-    this.runBeforeExit();
+    this.runBeforeSuspend();
     if (this.current) {
       this.appParents.push(this.current);
     }

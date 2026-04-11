@@ -201,6 +201,12 @@ export interface AppObject<R = unknown> {
    */
   onStart: () => void;
   /**
+   * Called on the current AppObect if it's about to launch a child AppObject in
+   * its place (via ctl.app.run).  It will resume when the child AppObject
+   * exits.
+   */
+  onSuspend?: () => void;
+  /**
    * Called when a child AppObject that is run with ctl.app.run(...) calls
    * ctl.app.exit to return to this instance.
    *

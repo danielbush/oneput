@@ -58,6 +58,9 @@ export class MenuItemsFnController {
       if (this.disableMenuItemsFn) {
         return;
       }
+      if (!this.ctl.menu.isMenuOpen) {
+        return;
+      }
       const items = menuItemsFn(value, this.ctl.menu.currentMenu.allMenuItems);
       if (!items) {
         return;
@@ -112,6 +115,9 @@ export class MenuItemsFnController {
     );
     this.removeMenuItemsListener = this.ctl.events.on('input-change', (payload) => {
       if (this.disableMenuItemsFn) {
+        return;
+      }
+      if (!this.ctl.menu.isMenuOpen) {
         return;
       }
       options.onDebounce?.(true);

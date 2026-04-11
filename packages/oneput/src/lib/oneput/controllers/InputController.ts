@@ -23,36 +23,7 @@ export class InputController {
   }
 
   constructor(private ctl: Controller) {
-    this.ctl.currentProps.onInputChange = (evt) => {
-      const target = evt.target as HTMLInputElement | null;
-      const value = target?.value ?? '';
-      const range: [number | null, number | null] = [
-        target?.selectionStart ?? null,
-        target?.selectionEnd ?? null
-      ];
-      const previousValue = this.beforeInputSnapshot?.value ?? this.lastInputValue;
-      const previousRange = this.beforeInputSnapshot?.range ?? this.lastInputRange;
-      // Emit internal event for decoupled communication
-      const payload: InputChangeEvent = {
-        type: 'input-change',
-        payload: {
-          evt: evt as InputEvent,
-          value,
-          previousValue,
-          range,
-          previousRange,
-          priorValue: this.previousUserInputValue,
-          priorRange: this.previousUserInputRange,
-          cause: 'user'
-        }
-      };
-      this.ctl.events.emit(payload);
-      this.previousUserInputValue = previousValue;
-      this.previousUserInputRange = previousRange;
-      this.lastInputValue = value;
-      this.lastInputRange = range;
-      this.beforeInputSnapshot = undefined;
-    };
+    this.ctl.currentProps.onInputChange = this.handleInputChange;
   }
 
   triggerInputEvent() {
@@ -390,6 +361,37 @@ export class InputController {
     this.lastInputValue = target.value;
     this.lastInputRange = range;
   }
+
+  private handleInputChange = (evt: InputEvent) => {
+    const target = evt.target as HTMLInputElement | null;
+    const value = target?.value ?? '';
+    const range: [number | null, number | null] = [
+      target?.selectionStart ?? null,
+      target?.selectionEnd ?? null
+    ];
+    const previousValue = this.beforeInputSnapshot?.value ?? this.lastInputValue;
+    const previousRange = this.beforeInputSnapshot?.range ?? this.lastInputRange;
+    // Emit internal event for decoupled communication
+    const payload: InputChangeEvent = {
+      type: 'input-change',
+      payload: {
+        evt: evt as InputEvent,
+        value,
+        previousValue,
+        range,
+        previousRange,
+        priorValue: this.previousUserInputValue,
+        priorRange: this.previousUserInputRange,
+        cause: 'user'
+      }
+    };
+    this.ctl.events.emit(payload);
+    this.previousUserInputValue = previousValue;
+    this.previousUserInputRange = previousRange;
+    this.lastInputValue = value;
+    this.lastInputRange = range;
+    this.beforeInputSnapshot = undefined;
+  };
 
   /**
    * Move the caret and emit selection-change so tests drive the same

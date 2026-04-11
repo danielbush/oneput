@@ -683,6 +683,102 @@ describe('TokenCursor cursor-side space actions', () => {
     // assert
     expect(canInsertAfter).toBe(false);
   });
+
+  it('removeSpaceBeforeCursor removes whitespace before an anchor between adjacent inline tags', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+    );
+    const anchor = doc.root.querySelector('#a1') as HTMLElement;
+    const { cursor } = createCursor(doc, anchor);
+
+    // act
+    const canRemove = cursor.canRemoveSpaceBeforeCursor();
+    const result = cursor.removeSpaceBeforeCursor();
+
+    // assert
+    expect(canRemove).toBe(true);
+    expect(result).toBe(true);
+    expect(anchor.previousSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+
+  it('removeSpaceAfterCursor removes whitespace after an anchor between adjacent inline tags', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="display:inline;">bar</strong></p>'
+    );
+    const anchor = doc.root.querySelector('#a1') as HTMLElement;
+    const { cursor } = createCursor(doc, anchor);
+
+    // act
+    const canRemove = cursor.canRemoveSpaceAfterCursor();
+    const result = cursor.removeSpaceAfterCursor();
+
+    // assert
+    expect(canRemove).toBe(true);
+    expect(result).toBe(true);
+    expect(anchor.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+
+  it('removeSpaceBeforeCursor removes whitespace before a token between a closing tag and an opening tag', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+    );
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canRemove = cursor.canRemoveSpaceBeforeCursor();
+    const result = cursor.removeSpaceBeforeCursor();
+
+    // assert
+    expect(canRemove).toBe(true);
+    expect(result).toBe(true);
+    expect(bar.previousSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+
+  it('removeSpaceAfterCursor removes whitespace after a token between a closing tag and an opening tag', () => {
+    // arrange
+    const doc = makeRoot(
+      '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
+    );
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canRemove = cursor.canRemoveSpaceAfterCursor();
+    const result = cursor.removeSpaceAfterCursor();
+
+    // assert
+    expect(canRemove).toBe(true);
+    expect(result).toBe(true);
+    expect(bar.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+
+  it('does not offer cursor-side space removal in an ordinary text run', () => {
+    // arrange
+    const doc = makeRoot('<p id="p1">foo bar baz</p>');
+    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
+    const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+    const { cursor } = createCursor(doc, bar);
+
+    // act
+    const canRemoveBefore = cursor.canRemoveSpaceBeforeCursor();
+    const canRemoveAfter = cursor.canRemoveSpaceAfterCursor();
+
+    // assert
+    expect(canRemoveBefore).toBe(false);
+    expect(canRemoveAfter).toBe(false);
+  });
 });
 
 describe('TokenCursor CURSOR_STATE', () => {

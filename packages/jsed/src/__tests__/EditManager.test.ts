@@ -347,7 +347,7 @@ describe('EditManager', () => {
   });
 
   describe('insertAnchorAfterTag', () => {
-    it('insertAnchorAfterTag inserts an anchor at the boundary and enters editing on it', () => {
+    it('inserts an anchor at the boundary and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -379,7 +379,7 @@ describe('EditManager', () => {
 
       editManager.destroy();
     });
-    it('insertAnchorAfterTag inserts an anchor after the focused tag when there is no next sibling', () => {
+    it('inserts an anchor after the focused tag when there is no next sibling', () => {
       // arrange
       const doc = makeRoot('<p id="p1"><em id="em1" style="display:inline;">foo</em></p>');
       const userInput = Controller.createNull().input;
@@ -410,7 +410,7 @@ describe('EditManager', () => {
 
       editManager.destroy();
     });
-    it('insertAnchorAfterTag inserts an anchor before existing whitespace and enters editing on it', () => {
+    it('inserts an anchor before existing whitespace and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -445,7 +445,7 @@ describe('EditManager', () => {
   });
 
   describe('removeAnchorAfterTag', () => {
-    it('removeAnchorAfterTag removes an anchor at the immediate boundary', () => {
+    it('removes an anchor at the immediate boundary', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -473,7 +473,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('removeAnchorAfterTag removes an anchor after existing whitespace and preserves the space', () => {
+    it('removes an anchor after existing whitespace and preserves the space', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -505,7 +505,7 @@ describe('EditManager', () => {
   });
 
   describe('insertSpaceAfterTag', () => {
-    it('insertSpaceAfterTag inserts a space at the boundary after the focused tag', () => {
+    it('inserts a space at the boundary after the focused tag', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -535,7 +535,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertSpaceAfterTag does not insert another space when one already exists', () => {
+    it('does not insert another space when one already exists', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -567,7 +567,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertSpaceAfterTag inserts a space before intervening text', () => {
+    it('inserts a space before intervening text', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
@@ -603,7 +603,7 @@ describe('EditManager', () => {
   });
 
   describe('removeSpaceAfterTag', () => {
-    it('removeSpaceAfterTag removes boundary whitespace between adjacent tags', () => {
+    it('removes boundary whitespace between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -631,7 +631,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('removeSpaceAfterTag removes leading whitespace from intervening text', () => {
+    it('removes leading whitespace from intervening text', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
@@ -663,7 +663,7 @@ describe('EditManager', () => {
   });
 
   describe('insertAnchorBeforeTag', () => {
-    it('insertAnchorBeforeTag inserts an anchor at the boundary and enters editing on it', () => {
+    it('inserts an anchor at the boundary and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -697,7 +697,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertAnchorBeforeTag inserts an anchor before the focused tag when there is no previous sibling', () => {
+    it('inserts an anchor before the focused tag when there is no previous sibling', () => {
       // arrange
       const doc = makeRoot('<p id="p1"><em id="em1" style="display:inline;">foo</em></p>');
       const userInput = Controller.createNull().input;
@@ -729,7 +729,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertAnchorBeforeTag inserts an anchor after existing whitespace and enters editing on it', () => {
+    it('inserts an anchor after existing whitespace and enters editing on it', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -764,7 +764,7 @@ describe('EditManager', () => {
   });
 
   describe('removeAnchorBeforeTag', () => {
-    it('removeAnchorBeforeTag removes an anchor at the immediate boundary', () => {
+    it('removes an anchor at the immediate boundary', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -792,7 +792,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('removeAnchorBeforeTag removes an anchor before existing whitespace and preserves the space', () => {
+    it('removes an anchor before existing whitespace and preserves the space', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -825,7 +825,7 @@ describe('EditManager', () => {
   });
 
   describe('insertSpaceBeforeTag', () => {
-    it('insertSpaceBeforeTag inserts a space at the boundary before the focused tag', () => {
+    it('inserts a space at the boundary before the focused tag', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -854,7 +854,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertSpaceBeforeTag does not insert another space when one already exists', () => {
+    it('does not insert another space when one already exists', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -886,7 +886,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertSpaceBeforeTag inserts a space after intervening text', () => {
+    it('inserts a space after intervening text', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
@@ -924,7 +924,7 @@ describe('EditManager', () => {
   });
 
   describe('insertSpaceBeforeCursor', () => {
-    it('insertSpaceBeforeCursor inserts whitespace before an anchor between adjacent tags', () => {
+    it('inserts whitespace before an anchor between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -955,7 +955,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertSpaceBeforeCursor inserts whitespace before a token between a closing tag and an opening tag', () => {
+    it('inserts whitespace before a token between a closing tag and an opening tag', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
@@ -989,7 +989,7 @@ describe('EditManager', () => {
   });
 
   describe('removeSpaceBeforeTag', () => {
-    it('removeSpaceBeforeTag removes boundary whitespace between adjacent tags', () => {
+    it('removes boundary whitespace between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -1017,7 +1017,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('removeSpaceBeforeTag removes trailing whitespace from intervening text', () => {
+    it('removes trailing whitespace from intervening text', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
@@ -1048,8 +1048,69 @@ describe('EditManager', () => {
     });
   });
 
+  describe('removeSpaceBeforeCursor', () => {
+    it('removes whitespace before an anchor between adjacent tags', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const anchor = byId(doc, 'a1');
+
+      editManager.enterEditing(anchor);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceBeforeCursor();
+      const result = editManager.removeSpaceBeforeCursor();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(anchor.previousSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+
+      editManager.destroy();
+    });
+
+    it('removes whitespace before a token between a closing tag and an opening tag', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      quickDescend(byId(doc, 'p1'));
+      const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+        (el) => el.textContent === 'bar'
+      ) as HTMLElement;
+
+      editManager.enterEditing(bar);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceBeforeCursor();
+      const result = editManager.removeSpaceBeforeCursor();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(bar.previousSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+
+      editManager.destroy();
+    });
+  });
+
   describe('insertSpaceAfterCursor', () => {
-    it('insertSpaceAfterCursor inserts whitespace after an anchor between adjacent tags', () => {
+    it('inserts whitespace after an anchor between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
@@ -1080,7 +1141,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('insertSpaceAfterCursor inserts whitespace after a token between a closing tag and an opening tag', () => {
+    it('inserts whitespace after a token between a closing tag and an opening tag', () => {
       // arrange
       const doc = makeRoot(
         '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
@@ -1108,6 +1169,67 @@ describe('EditManager', () => {
       expect(result).toBe(true);
       expect(bar.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(bar.nextSibling?.textContent).toBe(' ');
+
+      editManager.destroy();
+    });
+  });
+
+  describe('removeSpaceAfterCursor', () => {
+    it('removes whitespace after an anchor between adjacent tags', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const anchor = byId(doc, 'a1');
+
+      editManager.enterEditing(anchor);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceAfterCursor();
+      const result = editManager.removeSpaceAfterCursor();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(anchor.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+
+      editManager.destroy();
+    });
+
+    it('removes whitespace after a token between a closing tag and an opening tag', () => {
+      // arrange
+      const doc = makeRoot(
+        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      quickDescend(byId(doc, 'p1'));
+      const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+        (el) => el.textContent === 'bar'
+      ) as HTMLElement;
+
+      editManager.enterEditing(bar);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceAfterCursor();
+      const result = editManager.removeSpaceAfterCursor();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(bar.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
 
       editManager.destroy();
     });

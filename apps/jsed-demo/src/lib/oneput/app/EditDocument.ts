@@ -194,7 +194,7 @@ export class EditDocument implements AppObject {
         this.editManager.canInsertSpaceBeforeCursor() &&
           stdMenuItem({
             id: 'INSERT_SPACE_BEFORE_CURSOR',
-            textContent: 'Insert leading space at cursor...',
+            textContent: 'Insert leading space before cursor...',
             action: () => {
               this.editManager.insertSpaceBeforeCursor();
             },
@@ -206,6 +206,15 @@ export class EditDocument implements AppObject {
             textContent: 'Remove space before tag...',
             action: () => {
               this.editManager.removeSpaceBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
+        this.editManager.canRemoveSpaceBeforeCursor() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_BEFORE_CURSOR',
+            textContent: 'Remove leading space before cursor...',
+            action: () => {
+              this.editManager.removeSpaceBeforeCursor();
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),
@@ -239,7 +248,7 @@ export class EditDocument implements AppObject {
         this.editManager.canInsertSpaceAfterCursor() &&
           stdMenuItem({
             id: 'INSERT_SPACE_AFTER_CURSOR',
-            textContent: 'Insert trailing space at cursor...',
+            textContent: 'Insert trailing space after cursor...',
             action: () => {
               this.editManager.insertSpaceAfterCursor();
             },
@@ -251,6 +260,15 @@ export class EditDocument implements AppObject {
             textContent: 'Remove space after tag...',
             action: () => {
               this.editManager.removeSpaceAfterTag();
+            },
+            left: (b) => [b.icon(icons.Pencil)]
+          }),
+        this.editManager.canRemoveSpaceAfterCursor() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_AFTER_CURSOR',
+            textContent: 'Remove trailing space after cursor...',
+            action: () => {
+              this.editManager.removeSpaceAfterCursor();
             },
             left: (b) => [b.icon(icons.Pencil)]
           }),

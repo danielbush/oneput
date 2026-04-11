@@ -160,6 +160,22 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return !!token.insertSpaceAfterToken(this.getToken());
   }
 
+  canRemoveSpaceBeforeCursor(): boolean {
+    return !!token.getRemovableSpaceBeforeToken(this.getToken());
+  }
+
+  removeSpaceBeforeCursor(): boolean {
+    return !!token.removeSpaceBeforeToken(this.getToken());
+  }
+
+  canRemoveSpaceAfterCursor(): boolean {
+    return !!token.getRemovableSpaceAfterToken(this.getToken());
+  }
+
+  removeSpaceAfterCursor(): boolean {
+    return !!token.removeSpaceAfterToken(this.getToken());
+  }
+
   /**
    * TOGGLE_COLLAPSE on the TOKEN
    */

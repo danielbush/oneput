@@ -297,6 +297,33 @@ export function insertSpaceBeforeToken(token: HTMLElement, value = ' '): Text | 
   return space;
 }
 
+export function getRemovableSpaceBeforeToken(token: HTMLElement): Text | null {
+  if (!isToken(token)) {
+    return null;
+  }
+
+  const separator = getSeparatorBefore(token);
+  if (!separator) {
+    return null;
+  }
+
+  const previous = getPreviousVisibleSibling(token);
+  if (!previous || isToken(previous)) {
+    return null;
+  }
+
+  return separator;
+}
+
+export function removeSpaceBeforeToken(token: HTMLElement): boolean {
+  const separator = getRemovableSpaceBeforeToken(token);
+  if (!separator) {
+    return false;
+  }
+
+  return !!removeTrailingSpace(separator);
+}
+
 export function getSpaceAfterTokenInsertionPoint(
   token: HTMLElement
 ): { parent: Node; next: Node | null } | null {
@@ -321,6 +348,33 @@ export function insertSpaceAfterToken(token: HTMLElement, value = ' '): Text | n
   const space = document.createTextNode(value);
   insertionPoint.parent.insertBefore(space, insertionPoint.next);
   return space;
+}
+
+export function getRemovableSpaceAfterToken(token: HTMLElement): Text | null {
+  if (!isToken(token)) {
+    return null;
+  }
+
+  const separator = getSeparatorAfter(token);
+  if (!separator) {
+    return null;
+  }
+
+  const next = getNextVisibleSibling(token);
+  if (!next || isToken(next)) {
+    return null;
+  }
+
+  return separator;
+}
+
+export function removeSpaceAfterToken(token: HTMLElement): boolean {
+  const separator = getRemovableSpaceAfterToken(token);
+  if (!separator) {
+    return false;
+  }
+
+  return !!removeLeadingSpace(separator);
 }
 
 /**

@@ -73,6 +73,10 @@ export type ITokenCursor = {
   insertSpaceBeforeCursor: () => boolean;
   canInsertSpaceAfterCursor: () => boolean;
   insertSpaceAfterCursor: () => boolean;
+  canRemoveSpaceBeforeCursor: () => boolean;
+  removeSpaceBeforeCursor: () => boolean;
+  canRemoveSpaceAfterCursor: () => boolean;
+  removeSpaceAfterCursor: () => boolean;
   /**
    * TOGGLE_COLLAPSE state of token with what is next to it.
    */

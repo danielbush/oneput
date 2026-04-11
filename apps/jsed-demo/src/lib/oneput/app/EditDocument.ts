@@ -189,7 +189,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertAnchorInLine();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Anchor)]
           }),
         this.editManager.canInsertSpaceBeforeTag() &&
           stdMenuItem({
@@ -198,7 +198,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertSpaceBeforeTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canInsertSpaceBeforeCursor() &&
           stdMenuItem({
@@ -207,7 +207,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertSpaceBeforeCursor();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canRemoveSpaceBeforeTag() &&
           stdMenuItem({
@@ -216,7 +216,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.removeSpaceBeforeTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canRemoveSpaceBeforeCursor() &&
           stdMenuItem({
@@ -225,7 +225,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.removeSpaceBeforeCursor();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canInsertAnchorBeforeTag() &&
           stdMenuItem({
@@ -234,7 +234,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertAnchorBeforeTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Anchor)]
           }),
         this.editManager.canRemoveAnchorBeforeTag() &&
           stdMenuItem({
@@ -243,7 +243,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.removeAnchorBeforeTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Anchor)]
           }),
         this.editManager.canInsertSpaceAfterTag() &&
           stdMenuItem({
@@ -252,7 +252,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertSpaceAfterTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canInsertSpaceAfterCursor() &&
           stdMenuItem({
@@ -261,7 +261,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertSpaceAfterCursor();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canRemoveSpaceAfterTag() &&
           stdMenuItem({
@@ -270,7 +270,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.removeSpaceAfterTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canRemoveSpaceAfterCursor() &&
           stdMenuItem({
@@ -279,7 +279,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.removeSpaceAfterCursor();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Space)]
           }),
         this.editManager.canInsertAnchorAfterTag() &&
           stdMenuItem({
@@ -288,7 +288,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.insertAnchorAfterTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Anchor)]
           }),
         this.editManager.canRemoveAnchorAfterTag() &&
           stdMenuItem({
@@ -297,7 +297,7 @@ export class EditDocument implements AppObject {
             action: () => {
               this.editManager.removeAnchorAfterTag();
             },
-            left: (b) => [b.icon(icons.Pencil)]
+            left: (b) => [b.icon(icons.Anchor)]
           })
       ]
     });

@@ -10,7 +10,9 @@ export const iconData = {
   // Bindings we should provide for existing appObjects...
   GlobalFilterInputIcon: lu.Globe,
   CloseNotification: lu.X,
-  Pencil: lu.Pencil
+  Pencil: lu.Pencil,
+  Anchor: lu.Anchor,
+  Space: lu.Space
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

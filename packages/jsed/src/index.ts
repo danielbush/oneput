@@ -29,10 +29,7 @@ const utils = {
     isToken,
     isAnchor,
     addAnchors: token.addAnchors,
-    getParent: token.getParent,
-    collapse: token.collapse,
-    uncollapse: token.uncollapse,
-    isCollapsed: token.isCollapsed
+    getParent: token.getParent
   }
 };
 

@@ -78,14 +78,6 @@ export type ITokenCursor = {
   canRemoveSpaceAfterCursor: () => boolean;
   removeSpaceAfterCursor: () => boolean;
   /**
-   * TOGGLE_COLLAPSE state of token with what is next to it.
-   */
-  toggleCollapseNext: () => boolean;
-  /**
-   * TOGGLE_COLLAPSE state of token with what is previous to it.
-   */
-  toggleCollapsePrevious: () => boolean;
-  /**
    * Merge with next adjacent token if it exists (JOIN).
    */
   joinNext: () => void;

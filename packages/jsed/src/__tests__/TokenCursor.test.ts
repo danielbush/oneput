@@ -2,7 +2,7 @@ import { describe, it, expect, test } from 'vitest';
 import { makeRoot, p, div, em, span, identify } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
-import { getValue, isPadded } from '../lib/token.js';
+import { getValue } from '../lib/token.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,
@@ -1032,7 +1032,6 @@ describe('TokenCursor replace', () => {
 
     // assert
     expect(getValue(cursor.getToken())).toBe('ccc');
-    expect(isPadded(cursor.getToken())).toBe(false);
   });
 
   it('no-op when cursor is on ISLAND', () => {
@@ -1108,7 +1107,6 @@ describe('TokenCursor delete', () => {
 
     // assert
     expect(getValue(cursor.getToken())).toBe('ccc');
-    expect(isPadded(cursor.getToken())).toBe(false);
   });
 
   it('deletes last TOKEN after an ISLAND and leaves an ANCHOR', () => {
@@ -1205,34 +1203,6 @@ describe('TokenCursor joinNext', () => {
 
     // assert
     expect(getValue(cursor.getToken())).toBe('bbbccc');
-    expect(isPadded(cursor.getToken())).toBe(false);
-  });
-
-  it('does not transfer PADDED_TOKEN forward when absorbing next', () => {
-    // arrange — aaa [ISLAND] [PADDED bbb] [PADDED ccc] ddd
-    // This can't happen naturally (only first TOKEN after ISLAND gets padded),
-    // so we test with: aaa [ISLAND] [PADDED bbb] ccc ddd
-    // joinNext on 'bbb' absorbs 'ccc', 'ddd' should not get padded
-    const doc = makeRoot(
-      p(
-        { id: 'p1' },
-        'aaa ',
-        '<span class="katex" style="display:inline;">x²</span>',
-        ' bbb ccc ddd'
-      )
-    );
-    const { cursor } = tokenizeAndCursor(doc, '#p1');
-    cursor.moveNext(); // ISLAND
-    cursor.moveNext(); // PADDED 'bbb'
-    cursor.moveNext(); // 'ccc'
-    expect(isPadded(cursor.getToken())).toBe(false);
-
-    // act — join 'ccc' with 'ddd'
-    cursor.joinNext();
-
-    // assert — joined, not padded
-    expect(getValue(cursor.getToken())).toBe('cccddd');
-    expect(isPadded(cursor.getToken())).toBe(false);
   });
 
   it('no-op when cursor is on ISLAND', () => {
@@ -1293,7 +1263,6 @@ describe('TokenCursor joinPrevious', () => {
 
     // assert — merged survivor now sits adjacent to the ISLAND boundary
     expect(getValue(cursor.getToken())).toBe('bbbccc');
-    expect(isPadded(cursor.getToken())).toBe(true);
   });
 
   it('no-op when cursor is on ISLAND', () => {

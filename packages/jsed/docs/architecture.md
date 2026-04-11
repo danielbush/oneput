@@ -41,7 +41,6 @@ Tokenizing the whole document upfront would be expensive, so instead we tokenize
 - **replace / delete / append** — edit TOKEN content
 - **joinNext / joinPrevious** — JOIN adjacent TOKENs
 - **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
-- **toggleCollapseNext / toggleCollapsePrevious** — toggle COLLAPSED_TOKEN on/off
 
 ## Orchestration: EditManager
 
@@ -64,7 +63,7 @@ A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditMan
 
 The top-level modules above delegate to lower-level utilities in `lib/`:
 
-- **token.ts** — tokenization, `quickDescend`, LINE_SIBLING traversal, JOIN, SPLIT, TOGGLE_COLLAPSE operations
+- **token.ts** — tokenization, `quickDescend`, LINE_SIBLING traversal, JOIN, SPLIT, operations
 - **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
 - **traversal.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`
 - **walk2.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`

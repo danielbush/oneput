@@ -140,7 +140,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     const current = this.getToken();
     const tok = token.createToken(val);
     token.insertAfter(tok, current);
-    token.uncollapse(current);
+    token.ensureSeparatorAfter(current);
     return tok;
   }
 
@@ -174,38 +174,6 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   removeSpaceAfterCursor(): boolean {
     return !!token.removeSpaceAfterToken(this.getToken());
-  }
-
-  /**
-   * TOGGLE_COLLAPSE on the TOKEN
-   */
-  toggleCollapseNext() {
-    if (!this.isOnToken()) return false;
-    if (token.isCollapsed(this.getToken())) {
-      token.uncollapse(this.getToken());
-      return false;
-    } else {
-      token.collapse(this.getToken());
-      return true;
-    }
-  }
-
-  /**
-   * TOGGLE_COLLAPSE on the TOKEN previous to the current TOKEN.
-   */
-  toggleCollapsePrevious() {
-    if (!this.isOnToken()) return false;
-    const prev = getPreviousLineSibling(this.getToken());
-    if (!prev) {
-      return false;
-    }
-    if (token.isCollapsed(prev)) {
-      token.uncollapse(prev);
-      return false;
-    } else {
-      token.collapse(prev);
-      return true;
-    }
   }
 
   joinNext() {

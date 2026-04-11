@@ -53,14 +53,6 @@ Drafted: 19-Mar-2026
 
 When the CURSOR can no longer get any more LINE_SIBLING's via moveNext, movePrevious, it should signal that it has exhausted the next or previous direction.  The editor (EditManager) should immediately look for the next LINE and quickDescend it, putting the CURSOR on the first LINE_SIBLING on this new LINE.
 
-## feat: toggle token spacing
-
-Drafted: 23-Mar-2026
-
-Unify TOGGLE_COLLAPSE and TOGGLE_PADDED into a single "toggle token spacing" concept. TOGGLE_COLLAPSE controls trailing space (next-side); TOGGLE_PADDED controls leading space (previous-side). The binding should intelligently offer TOGGLE_PADDED when the previous LINE_SIBLING is an ISLAND (or other non-TOKEN that doesn't provide trailing space). Could be one key binding that inspects context, or two distinct bindings.
-
-See CURSOR_WALKS_NON_TOKENS__WORK for context — PADDED_TOKEN was introduced there to handle spacing between ISLANDs and adjacent TOKENs.
-
 ## feat: joinNext/joinPrevious across INLINE_FLOW boundaries
 
 Drafted: 23-Mar-2026
@@ -71,7 +63,7 @@ Drafted: 23-Mar-2026
 
 Drafted: 23-Mar-2026
 
-`getPreviousVisibleSibling`/`getNextVisibleSibling` skip all IGNORABLE's, but some IGNORABLE's may be visually present (e.g. decorative markers) while others are truly invisible (e.g. undo bookmarks). This distinction could affect PADDED_TOKEN toggling and spacing decisions — a visible IGNORABLE between an ISLAND and a TOKEN might mean the user expects a gap, while an invisible one shouldn't influence spacing. Review whether IGNORABLE needs subclasses or whether the current blanket skip is sufficient.
+`getPreviousVisibleSibling`/`getNextVisibleSibling` skip all IGNORABLE's, but some IGNORABLE's may be visually present (e.g. decorative markers) while others are truly invisible (e.g. undo bookmarks). This distinction could affect TOKEN spacing decisions — a visible IGNORABLE between an ISLAND and a TOKEN might mean the user expects a gap, while an invisible one shouldn't influence spacing. Review whether IGNORABLE needs subclasses or whether the current blanket skip is sufficient.
 
 Needs a compelling example of a visible IGNORABLE before this is worth acting on.
 

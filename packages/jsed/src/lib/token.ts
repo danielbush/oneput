@@ -204,8 +204,6 @@ function getSeparatorAfter(token: HTMLElement): Text | null {
 
 /**
  * Ensure there is a whitespace separator immediately before the TOKEN.
- *
- * Used in PADDED_TOKEN's.
  */
 function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
   const existing = getSeparatorBefore(token);
@@ -220,10 +218,9 @@ function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
 /**
  * Ensure there is a whitespace separator immediately after the TOKEN.
  *
- * Used for default inter-TOKEN spacing when the TOKEN is not a
- * COLLAPSED_TOKEN.
+ * Used for default inter-TOKEN spacing.
  */
-function ensureSeparatorAfter(token: HTMLElement, value = ' '): Text {
+export function ensureSeparatorAfter(token: HTMLElement, value = ' '): Text {
   const existing = getSeparatorAfter(token);
   if (existing) {
     return existing;
@@ -251,10 +248,6 @@ function removeSeparatorAfter(token: HTMLElement): void {
 
 /**
  * Ensure normal boundary spacing before a TOKEN.
- *
- * This is the spacing-model name for "there should be whitespace immediately
- * before this TOKEN", without relying on PADDED_TOKEN vocabulary at the call
- * site.
  */
 export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
   return ensureSeparatorBefore(token, value);
@@ -262,10 +255,6 @@ export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
 
 /**
  * Ensure normal boundary spacing after a TOKEN.
- *
- * This is the spacing-model name for "there should be whitespace immediately
- * after this TOKEN", without relying on COLLAPSED_TOKEN vocabulary at the call
- * site.
  */
 export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
   return ensureSeparatorAfter(token, value);
@@ -934,82 +923,6 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
   }
   anchor.remove();
   return anchor;
-}
-
-// #endregion
-
-// #region Spacing
-
-/**
- * Token is a COLLAPSED_TOKEN.
- *
- * In the boundary-spacing model this means there is no separator text node
- * immediately after the TOKEN.
- */
-export function isCollapsed(token: HTMLElement): boolean {
-  return token.classList.contains(JSED_TOKEN_COLLAPSED);
-}
-
-/**
- * Perform TOGGLE_COLLAPSE "on" on TOKEN.
- *
- * In the boundary-spacing model this removes the separator after the TOKEN.
- */
-export function collapse(token: HTMLElement): HTMLElement {
-  validate(token);
-  token.classList.add(JSED_TOKEN_COLLAPSED);
-  removeSeparatorAfter(token);
-  return token;
-}
-
-/**
- * Perform TOGGLE_COLLAPSE "off" on TOKEN.
- *
- * In the boundary-spacing model this ensures there is a separator after the
- * TOKEN.
- */
-export function uncollapse(token: HTMLElement): HTMLElement {
-  validate(token);
-  token.classList.remove(JSED_TOKEN_COLLAPSED);
-  ensureSeparatorAfter(token);
-  return token;
-}
-
-/**
- * Check if TOKEN is a PADDED_TOKEN.
- *
- * In the boundary-spacing model this means there is explicit separator
- * whitespace immediately before the TOKEN.
- */
-export function isPadded(token: HTMLElement): boolean {
-  return token.classList.contains(JSED_TOKEN_PADDED);
-}
-
-/**
- * Convert to PADDED_TOKEN.
- *
- * In the boundary-spacing model this ensures there is separator whitespace
- * immediately before the TOKEN. PADDED_TOKEN remains as a transitional class
- * while spacing migrates away from TOKEN-owned text content.
- */
-export function pad(token: HTMLElement): HTMLElement {
-  validate(token);
-  token.classList.add(JSED_TOKEN_PADDED);
-  ensureSeparatorBefore(token);
-  return token;
-}
-
-/**
- * Convert PADDED_TOKEN to TOKEN.
- *
- * In the boundary-spacing model this removes separator whitespace immediately
- * before the TOKEN.
- */
-export function unpad(token: HTMLElement): HTMLElement {
-  validate(token);
-  token.classList.remove(JSED_TOKEN_PADDED);
-  removeSeparatorBefore(token);
-  return token;
 }
 
 // #endregion

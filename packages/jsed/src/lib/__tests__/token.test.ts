@@ -10,7 +10,6 @@ import {
   inlineStyleHackVal
 } from '../../test/util.js';
 import {
-  isPadded,
   canInsertAnchorInLine,
   createToken,
   createAnchor,
@@ -77,7 +76,6 @@ describe('tokenizeLine', () => {
 
     // assert
     expect(tokens.length).toBe(2);
-    expect(isPadded(afterIsland)).toBe(false);
     expect(afterIsland.textContent).toBe('bbb');
   });
 
@@ -92,22 +90,7 @@ describe('tokenizeLine', () => {
     const first = tokenizeLine(p1)!;
 
     // assert
-    expect(isPadded(first)).toBe(false);
     expect(first.textContent).toBe('aaa');
-  });
-
-  test('TOKEN after INLINE_FLOW is not padded', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em({ style: 'display:inline;' }, 'bbb'), ' ccc'));
-    const p1 = byId(doc, 'p1');
-
-    // act
-    tokenizeLine(p1);
-    const tokens = p1.querySelectorAll('.jsed-token');
-    const lastToken = tokens[tokens.length - 1] as HTMLElement;
-
-    // assert
-    expect(isPadded(lastToken)).toBe(false);
   });
 
   test('ISLAND at end of LINE: no TOKEN to pad', () => {
@@ -123,7 +106,6 @@ describe('tokenizeLine', () => {
 
     // assert
     expect(tokens.length).toBe(1);
-    expect(isPadded(tokens[0] as HTMLElement)).toBe(false);
   });
 
   test('TOKEN after inline-block OPAQUE_BLOCK is not padded', () => {
@@ -140,29 +122,6 @@ describe('tokenizeLine', () => {
 
     // assert
     expect(afterInlineBlock.textContent).toBe('bbb');
-    expect(isPadded(afterInlineBlock)).toBe(false);
-  });
-
-  test('TOKEN after TRANSPARENT_BLOCK is not padded', () => {
-    // arrange — tokenization descends into TRANSPARENT_BLOCKs, so trailing
-    // text stays part of the containing LINE without becoming padded.
-    const doc = makeRoot(
-      p(
-        { id: 'p1' },
-        'aaa ',
-        div({ id: 'inner', class: 'jsed-cursor-transparent' }, 'inner'),
-        ' bbb'
-      )
-    );
-    const p1 = byId(doc, 'p1');
-
-    // act
-    tokenizeLine(p1);
-    const tokens = p1.querySelectorAll('.jsed-token');
-    const lastToken = tokens[tokens.length - 1] as HTMLElement;
-
-    // assert
-    expect(isPadded(lastToken)).toBe(false);
   });
 
   test('adjacent ISLANDs: TOKEN after second ISLAND is not yet marked padded during tokenizeLine', () => {
@@ -184,7 +143,6 @@ describe('tokenizeLine', () => {
     const afterSecondIsland = tokens[tokens.length - 1] as HTMLElement;
 
     // assert
-    expect(isPadded(afterSecondIsland)).toBe(false);
     expect(afterSecondIsland.textContent).toBe('bbb');
   });
 

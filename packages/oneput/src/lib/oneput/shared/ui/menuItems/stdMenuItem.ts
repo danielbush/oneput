@@ -53,6 +53,10 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
   attr?: Record<string, string | boolean | ((event: Event) => void)>;
   id?: string;
   action?: (ctl: Controller) => void;
+  /**
+   * Whether to close the menu after performing the action.  Defaults to true.
+   */
+  closeMenuOnAction?: boolean;
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
   htmlContentUnsafe?: string;
@@ -89,7 +93,13 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
   const menuItem = vflex({
     ...params,
     id,
-    action: params.action,
+    // action: params.action,
+    action: (ctl) => {
+      params.action?.(ctl);
+      if (params.closeMenuOnAction ?? true) {
+        ctl.menu.closeMenu();
+      }
+    },
     classes: [
       'oneput__std-menu-item',
       params.left === false && 'oneput__std-menu-item--no-left',

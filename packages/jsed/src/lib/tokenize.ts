@@ -1,4 +1,4 @@
-import { getFirstLineSibling, getLine, getNextLineSibling } from './sibwalk';
+import { getFirstLineSibling, getLine, getNextLineSibling } from './sibwalk.js';
 import {
   isFocusable,
   isImplicitLine,
@@ -6,8 +6,8 @@ import {
   isIsland,
   isToken,
   isTransparentBlock
-} from './taxonomy';
-import { createToken } from './token';
+} from './taxonomy.js';
+import { createToken } from './token.js';
 
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.

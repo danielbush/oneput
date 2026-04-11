@@ -35,6 +35,8 @@ export class EditDocument implements AppObject {
     return instance;
   }
 
+  private removeSuspendHandler?: () => void;
+
   constructor(
     private ctl: Controller,
     private document: JsedDocument,
@@ -45,6 +47,9 @@ export class EditDocument implements AppObject {
     setDocument(this.document);
     this.editManager.nav.connect();
     this.renderMenuItems();
+    this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
+      this.editManager.suspend(isOpen);
+    });
   };
 
   onResume = () => {
@@ -53,6 +58,7 @@ export class EditDocument implements AppObject {
 
   onExit = () => {
     this.editManager.destroy();
+    this.removeSuspendHandler?.();
   };
 
   handleEditError = (err: EditManagerError) => {
@@ -60,18 +66,10 @@ export class EditDocument implements AppObject {
   };
 
   actions = {
-    // Disable these when menu is open so we can use the menu:
+    // These are shadowed by default bindings...
+    // When menuOpen true, the default bindings will take over.
+    // TOOD: not sure about this.
 
-    EXIT: {
-      action: () => {
-        this.editManager.handleExit();
-      },
-      binding: {
-        bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Stop editing',
-        when: { menuOpen: false }
-      }
-    },
     DOWN: {
       action: () => {
         this.editManager.handleDown();
@@ -109,8 +107,18 @@ export class EditDocument implements AppObject {
       }
     },
 
-    // Keep these ambient (menu open / close)
+    // Always handled by the editor, see section above.
 
+    EXIT: {
+      action: () => {
+        this.editManager.handleExit();
+      },
+      binding: {
+        bindings: ['Control+[', '$mod+[', 'Escape'],
+        description: 'Stop editing'
+        // when: { menuOpen: false }
+      }
+    },
     TOGGLE_SELECT: {
       action: () => {
         this.ctl.input.toggleSelect();
@@ -165,6 +173,7 @@ export class EditDocument implements AppObject {
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
+      focusBehaviour: 'last-action,first',
       items: [
         !this.editManager.isEditing() &&
           stdMenuItem({

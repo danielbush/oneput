@@ -128,6 +128,7 @@ export class EditManager {
 
   cursor?: ITokenCursor;
   private mode: EditManagerMode = 'view';
+  private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
 
@@ -216,10 +217,31 @@ export class EditManager {
     }
   }
 
+  suspend(bool: boolean) {
+    this.isSuspended = bool;
+    if (this.isSuspended) {
+      this.userInput.setInputValue('');
+      return;
+    }
+    if (this.mode === 'edit') {
+      this.enterEditing(this.cursor?.getToken());
+    }
+  }
+
   destroy() {
     this.cursor?.destroy();
     this.nav.destroy();
   }
+
+  private enterEditingAtFocus(): Result<void, EditManagerError> {
+    return this.enterEditing();
+  }
+
+  private enterEditingAtTarget(target: HTMLElement): Result<void, EditManagerError> {
+    return this.enterEditing(target);
+  }
+
+  // #region Events
 
   /**
    * When user types in the input...
@@ -227,6 +249,7 @@ export class EditManager {
    * @param {string} inputValue What the user has typed into an html input/textarea
    */
   public handleInputChange = async (change: UserInputChange) => {
+    if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
     const currentTokenValue = token.getValue(this.cursor.getToken());
     const intent = decideInputIntent(change, currentTokenValue);
@@ -412,8 +435,6 @@ export class EditManager {
     this.onError?.(err);
   };
 
-  // Actions
-
   /**
    * Handle the user pressing Enter based on the current editing context.
    *
@@ -422,6 +443,7 @@ export class EditManager {
    * - edit mode on a non-TOKEN target: descend into that target
    */
   handleEnter(): Result<void, EditManagerError> {
+    // This allows us to edit via the "Edit..." menu .
     if (this.mode === 'view') {
       return this.enterEditingAtFocus();
     }
@@ -430,6 +452,7 @@ export class EditManager {
       return this.enterEditingAtFocus();
     }
 
+    if (this.isSuspended) return ok(undefined);
     const current = this.cursor.getToken();
     if (isToken(current)) {
       this.splitAtCursor();
@@ -439,28 +462,15 @@ export class EditManager {
     return this.enterEditingAtTarget(current);
   }
 
-  private enterEditingAtFocus(): Result<void, EditManagerError> {
-    return this.enterEditing();
-  }
-
-  private enterEditingAtTarget(target: HTMLElement): Result<void, EditManagerError> {
-    return this.enterEditing(target);
-  }
-
-  private splitAtCursor() {
-    const inserted = this.cursor?.splitAtToken();
-    if (inserted) {
-      this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    }
-  }
-
   handleExit() {
+    if (this.isSuspended) return;
     if (this.mode === 'edit') {
       this.exitEditing();
     }
   }
 
   handleLeft() {
+    if (this.isSuspended) return;
     if (this.mode === 'edit') {
       this.cursor?.movePrevious();
       return;
@@ -470,6 +480,7 @@ export class EditManager {
   }
 
   handleRight() {
+    if (this.isSuspended) return;
     if (this.mode === 'edit') {
       this.cursor?.moveNext();
       return;
@@ -479,15 +490,29 @@ export class EditManager {
   }
 
   handleDown() {
+    if (this.isSuspended) return;
     this.nav.SIB_NEXT();
   }
 
   handleUp() {
+    if (this.isSuspended) return;
     this.nav.SIB_PREV();
   }
 
   handleParent() {
+    if (this.isSuspended) return;
     this.nav.UP();
+  }
+
+  // #endregion Events
+
+  // #region Actions
+
+  private splitAtCursor() {
+    const inserted = this.cursor?.splitAtToken();
+    if (inserted) {
+      this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    }
   }
 
   revealActiveTarget(): boolean {
@@ -726,7 +751,9 @@ export class EditManager {
     return true;
   }
 
-  // is*/can* methods
+  // #endregion Actions
+
+  // #region is*/can* methods
 
   isEditing(): boolean {
     return this.mode === 'edit';
@@ -792,4 +819,6 @@ export class EditManager {
   canRemoveSpaceAfterCursor(): boolean {
     return this.mode === 'edit' && !!this.cursor?.canRemoveSpaceAfterCursor();
   }
+
+  // #endregion is*/can* methods
 }

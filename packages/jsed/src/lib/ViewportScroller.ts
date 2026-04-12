@@ -8,6 +8,7 @@ type ScrollVerticalAlignment = 'nearest' | 'start' | 'center' | 'end';
 export type ViewportScrollerNullOptions = {
   viewportRect?: ViewportRect;
   getElementRect?: (el: HTMLElement) => ElementRect | null | undefined;
+  getScrollportRects?: (el: HTMLElement) => ElementRect[] | null | undefined;
   defaultElementRect?: ElementRect;
 };
 
@@ -19,6 +20,7 @@ export type ScrollRequest = {
 interface ViewportScrollerEnv {
   getViewportRect(): ViewportRect;
   getElementRect(el: HTMLElement): ElementRect;
+  getScrollportRects(el: HTMLElement): ElementRect[];
   scrollIntoView(el: HTMLElement, options: ScrollIntoViewOptions): void;
   trackScrollRequests(): { data: ScrollRequest[] };
 }
@@ -34,6 +36,28 @@ class RealViewportScrollerEnv implements ViewportScrollerEnv {
 
   getElementRect(el: HTMLElement): ElementRect {
     return el.getBoundingClientRect();
+  }
+
+  getScrollportRects(el: HTMLElement): ElementRect[] {
+    const rects: ElementRect[] = [];
+    for (let current = el.parentElement; current; current = current.parentElement) {
+      const style = window.getComputedStyle(current);
+      const clipsVertically =
+        (style.overflowY === 'auto' ||
+          style.overflowY === 'scroll' ||
+          style.overflowY === 'overlay') &&
+        current.scrollHeight > current.clientHeight;
+      const clipsHorizontally =
+        (style.overflowX === 'auto' ||
+          style.overflowX === 'scroll' ||
+          style.overflowX === 'overlay') &&
+        current.scrollWidth > current.clientWidth;
+
+      if (clipsVertically || clipsHorizontally) {
+        rects.push(current.getBoundingClientRect());
+      }
+    }
+    return rects;
   }
 
   scrollIntoView(el: HTMLElement, options: ScrollIntoViewOptions): void {
@@ -54,6 +78,7 @@ class NullViewportScrollerEnv implements ViewportScrollerEnv {
   constructor(
     private viewportRect: ViewportRect,
     private getConfiguredElementRect?: (el: HTMLElement) => ElementRect | null | undefined,
+    private getConfiguredScrollportRects?: (el: HTMLElement) => ElementRect[] | null | undefined,
     private defaultElementRect: ElementRect = {
       top: 0,
       left: 0,
@@ -70,6 +95,10 @@ class NullViewportScrollerEnv implements ViewportScrollerEnv {
 
   getElementRect(_el: HTMLElement): ElementRect {
     return this.getConfiguredElementRect?.(_el) ?? this.defaultElementRect;
+  }
+
+  getScrollportRects(_el: HTMLElement): ElementRect[] {
+    return this.getConfiguredScrollportRects?.(_el) ?? [];
   }
 
   scrollIntoView(el: HTMLElement, options: ScrollIntoViewOptions): void {
@@ -97,6 +126,7 @@ export class ViewportScroller {
           height: 768
         },
         opts?.getElementRect,
+        opts?.getScrollportRects,
         opts?.defaultElementRect
       )
     );
@@ -112,6 +142,10 @@ export class ViewportScroller {
     return this.env.getElementRect(el);
   }
 
+  getScrollportRects(el: HTMLElement): ElementRect[] {
+    return this.env.getScrollportRects(el);
+  }
+
   scrollIntoView(el: HTMLElement, options: ScrollIntoViewOptions): void {
     this.env.scrollIntoView(el, options);
   }
@@ -124,10 +158,23 @@ export class ViewportScroller {
     el: HTMLElement,
     opts?: { vertical?: ScrollVerticalAlignment; horizontal?: ScrollLogicalPosition }
   ): void {
-    const viewport = this.getViewportRect();
     const rect = this.getElementRect(el);
-    const isHidden =
-      rect.top < 0 || rect.left < 0 || rect.bottom > viewport.height || rect.right > viewport.width;
+    const viewport = this.getViewportRect();
+    const viewportRect: ElementRect = {
+      top: 0,
+      left: 0,
+      bottom: viewport.height,
+      right: viewport.width,
+      width: viewport.width,
+      height: viewport.height
+    };
+    const isHidden = [viewportRect, ...this.getScrollportRects(el)].some(
+      (boundary) =>
+        rect.top < boundary.top ||
+        rect.left < boundary.left ||
+        rect.bottom > boundary.bottom ||
+        rect.right > boundary.right
+    );
 
     if (isHidden) {
       this.scrollIntoView(el, {

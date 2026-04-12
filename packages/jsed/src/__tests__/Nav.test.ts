@@ -103,6 +103,65 @@ describe('FOCUS', () => {
       }
     ]);
   });
+
+  it('scrolls a FOCUSABLE into view when it is clipped by a nested scroll container', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        {
+          id: 'scrollport'
+        },
+        p({ id: 'p1' }, 'p1')
+      ),
+      {
+        viewportScrollerOpts: {
+          getElementRect: (el) =>
+            el.id === 'p1'
+              ? {
+                  top: 160,
+                  left: 0,
+                  bottom: 190,
+                  right: 100,
+                  width: 100,
+                  height: 30
+                }
+              : undefined,
+          getScrollportRects: (el) =>
+            el.id === 'p1'
+              ? [
+                  {
+                    top: 0,
+                    left: 0,
+                    bottom: 150,
+                    right: 300,
+                    width: 300,
+                    height: 150
+                  }
+                ]
+              : undefined
+        }
+      }
+    );
+    const nav = new Nav(doc, ElementIndicator.createNull());
+    const p1 = byId(doc, 'p1');
+    const scrollRequests = doc.viewportScroller.trackScrollRequests();
+    scrollRequests.data.length = 0;
+
+    // act
+    nav.REQUEST_FOCUS(p1);
+
+    // assert
+    expect(scrollRequests.data).toEqual([
+      {
+        element: p1,
+        options: {
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth'
+        }
+      }
+    ]);
+  });
 });
 
 describe('SIB_HIGHLIGHT', () => {

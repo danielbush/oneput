@@ -5,16 +5,13 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 ## For consideration
 
 - refactor: handleInputChange in EditManager;
-  - add performInputIntent as a function in packages/jsed/src/lib/edit/decideInputIntent.ts
+  - add applyInputIntent as a function in packages/jsed/src/lib/edit/decideInputIntent.ts
   - it should perform actions based on output of decideInputIntent
   - handleInputChange should get a lot smaller
   - to test it, we can run the function but pass in nulled versions
   - move and convert the handleInputChange tests in packages/jsed/src/__tests__/EditManager.test.ts 
-- opening the menu exits edit mode and cursor
-  - if we do that, we can't perform menu actions at the cursor!
-  - opening the menu detaches input from editor; closing, re-engages it
-- bug: splitting on em-tag splits the em-tag; it should split the LINE
-  - should go in the split ticket
+  - Attempt - 12-Apr-2026
+    - felt messy; codex wanted to keep some manipulation in handleInputChange and some in applyInputIntent; the tests for applyInputIntent were hard to read; in short I want the handleInputChange tests that use the symoblic notation to repreent the "whole" thing; adding applyInputIntent causes
 - feat: cmd+h,l - UP,DOWN vs cmd+j,k = PREV/NEXT SIBLING
   - we should remember the ancestor chain
   - if you go up and down, we keep the same chain

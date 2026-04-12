@@ -149,16 +149,6 @@ export class EditDocument implements AppObject {
         // when: { menuOpen: false }
       }
     },
-    PARENT: {
-      action: () => {
-        this.editManager.handleParent();
-      },
-      binding: {
-        bindings: ['$mod+u', '$mod+ArrowUp'],
-        description: 'Find next parent'
-        // when: { menuOpen: false }
-      }
-    },
     REVEAL: {
       action: () => {
         this.editManager.revealActiveTarget();

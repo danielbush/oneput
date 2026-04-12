@@ -1,6 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/edit/decideInputIntent.js';
+import { FocusChainNavigator } from './lib/edit/FocusChainNavigator.js';
 import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
@@ -56,7 +57,8 @@ export class EditManager {
     onFocusChange,
     onCursorChange,
     onTextChange,
-    onElementChange
+    onElementChange,
+    focusChainNavigator
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -66,6 +68,7 @@ export class EditManager {
     onCursorChange?: (target: HTMLElement) => void;
     onTextChange?: (event: EditManagerTextChangeEvent) => void;
     onElementChange?: (event: EditManagerElementChangeEvent) => void;
+    focusChainNavigator?: FocusChainNavigator;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -82,7 +85,8 @@ export class EditManager {
       onFocusChange,
       onCursorChange,
       onTextChange,
-      onElementChange
+      onElementChange,
+      focusChainNavigator ?? FocusChainNavigator.create(nav)
     );
     return instance;
   }
@@ -95,7 +99,8 @@ export class EditManager {
     onFocusChange,
     onCursorChange,
     onTextChange,
-    onElementChange
+    onElementChange,
+    focusChainNavigator
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -105,6 +110,7 @@ export class EditManager {
     onCursorChange?: (target: HTMLElement) => void;
     onTextChange?: (event: EditManagerTextChangeEvent) => void;
     onElementChange?: (event: EditManagerElementChangeEvent) => void;
+    focusChainNavigator?: FocusChainNavigator;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -121,7 +127,8 @@ export class EditManager {
       onFocusChange,
       onCursorChange,
       onTextChange,
-      onElementChange
+      onElementChange,
+      focusChainNavigator ?? FocusChainNavigator.createNull(nav)
     );
     return instance;
   }
@@ -141,7 +148,8 @@ export class EditManager {
     private onFocusChange?: (focus: HTMLElement | null) => void,
     private onCursorChange?: (target: HTMLElement) => void,
     private onTextChange?: (event: EditManagerTextChangeEvent) => void,
-    private onElementChange?: (event: EditManagerElementChangeEvent) => void
+    private onElementChange?: (event: EditManagerElementChangeEvent) => void,
+    private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
   ) {}
 
   getMode(): EditManagerMode {
@@ -426,6 +434,7 @@ export class EditManager {
   };
 
   private handleFocusChange(focus: HTMLElement | null) {
+    this.focusChainNavigator.handleFocusChange(focus);
     this.onFocusChange?.(focus);
   }
 
@@ -477,7 +486,7 @@ export class EditManager {
       return;
     }
 
-    this.nav.REC_PREV();
+    this.focusChainNavigator.moveUp();
   }
 
   handleRight() {
@@ -487,7 +496,7 @@ export class EditManager {
       return;
     }
 
-    this.nav.REC_NEXT();
+    this.focusChainNavigator.moveDown();
   }
 
   handleDown() {
@@ -498,11 +507,6 @@ export class EditManager {
   handleUp() {
     if (this.isSuspended) return;
     this.nav.SIB_PREV();
-  }
-
-  handleParent() {
-    if (this.isSuspended) return;
-    this.nav.UP();
   }
 
   // #endregion Events

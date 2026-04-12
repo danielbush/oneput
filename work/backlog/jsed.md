@@ -4,14 +4,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## For consideration
 
-- feat: cmd+h,l - UP,DOWN vs cmd+j,k = PREV/NEXT SIBLING
-  - we should remember the ancestor chain
-  - if you go up and down, we keep the same chain
-  - changing sibling updates the chain
-  - the chain can be represented by the lowest element; so going DOWN extends the existing chain; UP does not update anything
-  - leave a permanent marker in the dom pointing to the lowest element in the chain; we the editor loads again, it can jump automatically to this point
-  - $mod+shift+h,l does pre-order walk
-
 ## feat: tokenize and de-tokenize lines on the fly for performance
 
 id: DETOKENIZE__WORK

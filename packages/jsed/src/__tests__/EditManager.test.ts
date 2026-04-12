@@ -101,7 +101,7 @@ describe('EditManager', () => {
     editManager.destroy();
   });
 
-  it('handleRight navigates by FOCUS in view mode', () => {
+  it('handleRight descends within the focused subtree in view mode', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
     const editManager = EditManager.createNull({
@@ -110,16 +110,13 @@ describe('EditManager', () => {
     });
     editManager.nav.connect();
     const p1 = byId(doc, 'p1');
-    const p2 = byId(doc, 'p2');
-
-    editManager.nav.REQUEST_FOCUS(p1);
 
     // act
     editManager.handleRight();
 
     // assert
     expect(editManager.getMode()).toBe('view');
-    expect(editManager.nav.getFocus()).toBe(p2);
+    expect(editManager.nav.getFocus()).toBe(p1);
 
     editManager.destroy();
   });
@@ -231,25 +228,6 @@ describe('EditManager', () => {
 
     // assert
     expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
-
-    editManager.destroy();
-  });
-
-  it('handleParent moves FOCUS to the parent element', () => {
-    // arrange
-    const doc = makeRoot('<div id="root-line"><p id="nested">inner</p></div>');
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
-    });
-    editManager.nav.connect();
-    editManager.nav.REQUEST_FOCUS(byId(doc, 'nested'));
-
-    // act
-    editManager.handleParent();
-
-    // assert
-    expect(editManager.nav.getFocus()).toBe(byId(doc, 'root-line'));
 
     editManager.destroy();
   });

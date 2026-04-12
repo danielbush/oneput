@@ -251,11 +251,12 @@ export class EditManager {
   public handleInputChange = async (change: UserInputChange) => {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
-    const currentTokenValue = token.getValue(this.cursor.getToken());
-    const intent = decideInputIntent(change, currentTokenValue);
-    // console.log('decided intent', JSON.stringify(intent, null, 2));
+
     let lastToken: HTMLElement | null = null;
     const currentToken = this.cursor.getToken();
+    const currentTokenValue = token.getValue(currentToken);
+    const intent = decideInputIntent(change, currentTokenValue);
+    // console.log('decided intent', JSON.stringify(intent, null, 2));
 
     switch (intent.type) {
       case 'move-next-on-space':

@@ -1,4 +1,4 @@
-export type { ITokenCursor, JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
+export type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
 export { EditManager, type EditManagerError, type EditManagerMode } from './EditManager.js';
 export { Nav, type OnRequestFocus } from './Nav.js';

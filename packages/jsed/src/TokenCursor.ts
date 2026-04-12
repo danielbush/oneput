@@ -1,4 +1,3 @@
-import type { ITokenCursor } from './types.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_PREPEND_CLASS,
@@ -17,7 +16,7 @@ export type { TokenCursorError } from './TokenCursorBase.js';
 /**
  * Manages the CURSOR — motion, editing, and CURSOR_STATE markers.
  */
-export class TokenCursor extends TokenCursorBase implements ITokenCursor {
+export class TokenCursor extends TokenCursorBase {
   static create(params: TokenCursorBaseParams) {
     return new TokenCursor(params);
   }
@@ -28,6 +27,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #region CURSOR_STATE
 
+  /** Update CURSOR_STATE markers from the current input value. */
   public handleInputChange = (input: string): void => {
     if (input.endsWith(' ')) {
       this.setMarker(CURSOR_INSERT_AFTER_CLASS);
@@ -38,6 +38,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     }
   };
 
+  /** Update CURSOR_STATE markers from the current input selection. */
   public handleSelectionChange = (selection: UserInputSelectionState): void => {
     switch (selection) {
       case 'CURSOR_AT_BEGINNING':
@@ -91,6 +92,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #region Motion
 
+  /** Move to next TOKEN if it exists. */
   moveNext() {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
@@ -103,6 +105,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     }
   }
 
+  /** Move to previous TOKEN if it exists. */
   movePrevious() {
     if (this.isInsertingAfter()) {
       this.clearMarkers();
@@ -124,17 +127,20 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return isToken(this.getToken());
   }
 
+  /** Replace the value of the current TOKEN with a new value. */
   replace(val: string) {
     if (!this.isOnToken()) return;
     token.replaceText(this.getToken(), val);
   }
 
+  /** Delete the current TOKEN. */
   delete() {
     if (!this.isOnToken()) return;
     const { next: nextTok } = token.remove(this.getToken());
     this.setToken(nextTok);
   }
 
+  /** Append a new TOKEN after the current one. */
   append(val: string): HTMLElement | null {
     if (!this.isOnToken()) return null;
     const current = this.getToken();
@@ -144,48 +150,59 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return tok;
   }
 
+  /** Whether a space can be inserted immediately before the CURSOR. */
   canInsertSpaceBeforeCursor(): boolean {
     return !!token.getSpaceBeforeTokenInsertionPoint(this.getToken());
   }
 
+  /** Insert a space immediately before the CURSOR if possible. */
   insertSpaceBeforeCursor(): boolean {
     return !!token.insertSpaceBeforeToken(this.getToken());
   }
 
+  /** Whether a space can be inserted immediately after the CURSOR. */
   canInsertSpaceAfterCursor(): boolean {
     return !!token.getSpaceAfterTokenInsertionPoint(this.getToken());
   }
 
+  /** Insert a space immediately after the CURSOR if possible. */
   insertSpaceAfterCursor(): boolean {
     return !!token.insertSpaceAfterToken(this.getToken());
   }
 
+  /** Whether removable space exists immediately before the CURSOR. */
   canRemoveSpaceBeforeCursor(): boolean {
     return !!token.getRemovableSpaceBeforeToken(this.getToken());
   }
 
+  /** Remove space immediately before the CURSOR if possible. */
   removeSpaceBeforeCursor(): boolean {
     return !!token.removeSpaceBeforeToken(this.getToken());
   }
 
+  /** Whether removable space exists immediately after the CURSOR. */
   canRemoveSpaceAfterCursor(): boolean {
     return !!token.getRemovableSpaceAfterToken(this.getToken());
   }
 
+  /** Remove space immediately after the CURSOR if possible. */
   removeSpaceAfterCursor(): boolean {
     return !!token.removeSpaceAfterToken(this.getToken());
   }
 
+  /** Merge with next adjacent TOKEN if it exists (JOIN). */
   joinNext() {
     if (!this.isOnToken()) return;
     token.joinNext(this.getToken());
   }
 
+  /** Merge with previous adjacent TOKEN if it exists (JOIN). */
   joinPrevious() {
     if (!this.isOnToken()) return;
     token.joinPrevious(this.getToken());
   }
 
+  /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
   splitBefore(): HTMLElement | null {
     if (!this.isOnToken()) return null;
     const [before] = token.splitBefore(this.getToken());
@@ -194,6 +211,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return before;
   }
 
+  /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
   splitAfter(): HTMLElement | null {
     if (!this.isOnToken()) return null;
     const [, after] = token.splitAfter(this.getToken());
@@ -204,6 +222,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
     return after;
   }
 
+  /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
   splitAtToken(): HTMLElement | null {
     if (this.isInsertingAfter() || this.isAppend()) {
       return this.splitAfter();
@@ -225,6 +244,7 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
 
   // #region Other
 
+  /** Whether `tok` is on the same LINE as the cursor's TOKEN. */
   isSameLine(tok: HTMLElement) {
     return isSameLine(this.getToken(), tok);
   }
@@ -234,8 +254,8 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   // #region Dom (non-token)
 
   /**
-   * Focus on the new element anchor if there is one, else keep focused on
-   * current token.
+   * Insert a non-TOKEN element after the current TOKEN and focus its first
+   * editable TOKEN if one exists.
    */
   insertElementAfter(el: HTMLElement) {
     if (isToken(el)) {
@@ -251,8 +271,8 @@ export class TokenCursor extends TokenCursorBase implements ITokenCursor {
   }
 
   /**
-   * Focus on the new element anchor if there is one, else keep focused on
-   * current token.
+   * Insert a non-TOKEN element before the current TOKEN and focus its first
+   * editable TOKEN if one exists.
    */
   insertElementBefore(el: HTMLElement) {
     if (isToken(el)) {

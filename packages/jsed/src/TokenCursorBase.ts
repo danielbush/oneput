@@ -41,21 +41,23 @@ export abstract class TokenCursorBase {
     this.setToken(params.token);
   }
 
+  /** Return the JsedDocument that owns this CURSOR session. */
   getDocument() {
     return this.#document;
   }
 
   // #region Token access
 
+  /** Return the active TOKEN that the CURSOR is on. */
   getToken() {
     return this.#token;
   }
 
   /**
-   * Allows a consumer to set the token.
+   * Set the active TOKEN for the CURSOR.
    *
-   * The onCursorChange callback is not called. Instead, you should perform other
-   * change before and after calling this.
+   * The cursor change callback is fired after the DOM classes and scroll state
+   * have been updated.
    */
   setToken(el: HTMLElement) {
     if (!isLineSibling(el)) {
@@ -95,6 +97,7 @@ export abstract class TokenCursorBase {
 
   // #region Destroy
 
+  /** Destroy the current edit session. The instance cannot be used after this. */
   destroy() {
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     this.removeAllFocusClasses();

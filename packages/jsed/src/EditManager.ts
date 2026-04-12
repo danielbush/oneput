@@ -5,7 +5,7 @@ import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
-import type { ITokenCursor, JsedDocument, JsedFocusRequestEvent } from './types.js';
+import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { quickDescend } from './lib/tokenize.js';
 
@@ -126,7 +126,7 @@ export class EditManager {
     return instance;
   }
 
-  cursor?: ITokenCursor;
+  cursor?: TokenCursor;
   private mode: EditManagerMode = 'view';
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;

@@ -26,7 +26,7 @@ Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
 ## Tokenization: quickDescend
 
-Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/token.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and finds the first TOKEN. If the first LINE_SIBLING is an OPAQUE_BLOCK (e.g. a `<p>` inside a `<div>`), it recurses into it. ISLAND's are skipped. If no TOKEN is found, it returns null — the FOCUSABLE has no editable text content.
+Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/tokenize.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and finds the first TOKEN. If the first LINE_SIBLING is an OPAQUE_BLOCK (e.g. a `<p>` inside a `<div>`), it recurses into it. ISLAND's are skipped. If no TOKEN is found, it returns null — the FOCUSABLE has no editable text content.
 
 `quickDescend` is also used by TokenCursor internally (e.g. after `splitAfter` or `insertElementAfter`) to find the first TOKEN in a newly created element.
 
@@ -63,10 +63,11 @@ A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditMan
 
 The top-level modules above delegate to lower-level utilities in `lib/`:
 
-- **token.ts** — tokenization, `quickDescend`, LINE_SIBLING traversal, JOIN, SPLIT, operations
+- **tokenize.ts** — on-demand tokenization, including `quickDescend`
+- **token.ts** — TOKEN operations, separator management, JOIN, SPLIT, and related editing helpers
 - **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
-- **traversal.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`
-- **walk2.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`
+- **sibwalk.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`
+- **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`
 - **dom.ts** — DOM manipulation: `copyElement`, `replaceElement`, `createElement`, `splitParentBefore`
 - **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)
 - **convert.ts** — converts HTML to jsed-compatible format (also available as a CLI binary via `cli/convert.ts`)

@@ -1,6 +1,7 @@
 import { getFirstLineSibling, getLine, getNextLineSibling } from './sibwalk.js';
 import {
   isFocusable,
+  isLineSibling,
   isImplicitLine,
   isInlineFlow,
   isIsland,
@@ -96,34 +97,41 @@ export function tokenizeLine(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Quick-descend: tokenize and find the first TOKEN within a FOCUSABLE.
+ * Quick-descend: tokenize and find the first LINE_SIBLING within a FOCUSABLE.
  * See SHALLOW_TOKENIZATION.
  *
  * Tokenizes the LINE containing the element and walks its LINE_SIBLING's.
- * If a LINE_SIBLING is an OPAQUE_BLOCK (not a TOKEN or ISLAND), recurses
- * into it. Skips ISLAND's. Returns null if no TOKEN is found — the
- * FOCUSABLE has no editable text content.
+ * Returns null if no LINE_SIBLING is found.
  */
 export function quickDescend(el: HTMLElement): HTMLElement | null {
-  if (isToken(el)) {
+  if (isToken(el) || isIsland(el)) {
     return el;
   }
   if (!isFocusable(el)) {
     throw new Error('quickDescend: expects a FOCUSABLE');
   }
 
-  // Example: `el` is an em-tag;  `line` is parent p-tag.
+  // Example: `el` is an em-tag; `line` is parent p-tag.
   const line = getLine(el);
   tokenizeLine(line);
-  let sib = getFirstLineSibling(el);
+
+  let sib: HTMLElement | null;
+  if (el === line) {
+    sib = getFirstLineSibling(line);
+  } else {
+    sib = isLineSibling(el) ? el : getFirstLineSibling(el);
+  }
+
   while (sib) {
-    if (isToken(sib)) {
+    if (isToken(sib) || isIsland(sib)) {
       return sib;
     }
-    if (!isIsland(sib)) {
-      const nested = quickDescend(sib);
-      if (nested) return nested;
+
+    const nested = quickDescend(sib);
+    if (nested) {
+      return nested;
     }
+
     sib = getNextLineSibling(sib);
   }
 

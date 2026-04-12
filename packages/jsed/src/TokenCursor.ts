@@ -1,6 +1,7 @@
 import * as token from './lib/token.js';
-import { isToken } from './lib/taxonomy.js';
-import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
+import { isCursorTransparent, isIsland, isToken, isLineSibling } from './lib/taxonomy.js';
+import { isSameLine, getLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
+import { findNextNode, findPreviousNode } from './lib/walk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 import { quickDescend } from './index.js';
 
@@ -30,6 +31,12 @@ export class TokenCursor extends TokenCursorBase {
     const nextToken = getNextLineSibling(this.getToken());
     if (nextToken) {
       this.setToken(nextToken);
+      return;
+    }
+
+    const nextLineTarget = this.findNextLineTarget();
+    if (nextLineTarget) {
+      this.setToken(nextLineTarget);
     }
   }
 
@@ -43,12 +50,89 @@ export class TokenCursor extends TokenCursorBase {
     const prevToken = getPreviousLineSibling(this.getToken());
     if (prevToken) {
       this.setToken(prevToken);
+      return;
+    }
+
+    const prevLineTarget = this.findPreviousLineTarget();
+    if (prevLineTarget) {
+      this.setToken(prevLineTarget);
     }
   }
 
   // #endregion
 
   // #region Editing tokens
+
+  /** Find the first editable LINE_SIBLING beyond the current exhausted LINE. */
+  private findNextLineTarget(): HTMLElement | null {
+    const current = this.getToken();
+    const currentLine = getLine(current);
+
+    for (const node of findNextNode(current, this.getDocument().root, {
+      visit: isLineSibling,
+      descend: isCursorTransparent
+    })) {
+      if (node instanceof HTMLElement && node.contains(currentLine)) {
+        continue;
+      }
+
+      const nextLine = getLine(node);
+      if (nextLine === currentLine) {
+        continue;
+      }
+
+      return quickDescend(node as HTMLElement);
+    }
+
+    return null;
+  }
+
+  /** Find the previous editable LINE_SIBLING beyond the current exhausted LINE. */
+  private findPreviousLineTarget(): HTMLElement | null {
+    const current = this.getToken();
+    const currentLine = getLine(current);
+
+    for (const node of findPreviousNode(current, this.getDocument().root, {
+      visit: isLineSibling,
+      descend: isCursorTransparent
+    })) {
+      if (node instanceof HTMLElement && node.contains(currentLine)) {
+        continue;
+      }
+
+      const prevLine = getLine(node);
+      if (prevLine === currentLine) {
+        continue;
+      }
+
+      return this.findLastCursorTarget(node as HTMLElement);
+    }
+
+    return null;
+  }
+
+  /** Resolve a LINE_SIBLING/container to its last reachable CURSOR target in document order. */
+  private findLastCursorTarget(el: HTMLElement): HTMLElement | null {
+    if (isToken(el) || isIsland(el)) {
+      return el;
+    }
+
+    // Ensure any reachable text content has been tokenized before we scan.
+    quickDescend(el);
+
+    let last: HTMLElement | null = null;
+    for (const node of findNextNode(el, el, {
+      visit: isLineSibling,
+      descend: (node) => node === el || isCursorTransparent(node)
+    })) {
+      const target = this.findLastCursorTarget(node as HTMLElement);
+      if (target) {
+        last = target;
+      }
+    }
+
+    return last;
+  }
 
   /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
   private isOnToken(): boolean {
@@ -174,7 +258,7 @@ export class TokenCursor extends TokenCursorBase {
 
   /**
    * Insert a non-TOKEN element after the current TOKEN and focus its first
-   * editable TOKEN if one exists.
+   * editable LINE_SIBLING if one exists.
    */
   insertElementAfter(el: HTMLElement) {
     if (isToken(el)) {
@@ -191,7 +275,7 @@ export class TokenCursor extends TokenCursorBase {
 
   /**
    * Insert a non-TOKEN element before the current TOKEN and focus its first
-   * editable TOKEN if one exists.
+   * editable LINE_SIBLING if one exists.
    */
   insertElementBefore(el: HTMLElement) {
     if (isToken(el)) {

@@ -26,9 +26,7 @@ Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
 ## Tokenization: quickDescend
 
-Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/tokenize.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and finds the first TOKEN. If the first LINE_SIBLING is an OPAQUE_BLOCK (e.g. a `<p>` inside a `<div>`), it recurses into it. ISLAND's are skipped. If no TOKEN is found, it returns null — the FOCUSABLE has no editable text content.
-
-`quickDescend` is also used by TokenCursor internally (e.g. after `splitAfter` or `insertElementAfter`) to find the first TOKEN in a newly created element.
+Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/tokenize.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and descends until it finds the first `TOKEN` or `ISLAND`. Other focusable structures are traversed through rather than treated as final cursor targets. If no `TOKEN` or `ISLAND` is found, it returns null.
 
 ## Token editing: TokenCursorBase → TokenCursor
 

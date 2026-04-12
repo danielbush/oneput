@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../test/util.js';
-import { tokenizeLine, quickDescend } from '../lib/tokenize.js';
+import { quickDescend } from '../lib/tokenize.js';
 import { isToken } from '../lib/taxonomy.js';
 
 /**
@@ -22,21 +22,7 @@ describe('quickDescend', () => {
     expect(first!.textContent!.trim()).toBe('foo');
   });
 
-  test('already a TOKEN: returns it immediately', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-    const p1 = byId(doc, 'p1');
-    tokenizeLine(p1);
-    const token = p1.querySelector('.jsed-token') as HTMLElement;
-
-    // act
-    const result = quickDescend(token);
-
-    // assert
-    expect(result).toBe(token);
-  });
-
-  test('LINE with NESTED_LINE: descends into first child LINE', () => {
+  test('LINE with NESTED_LINE: descends into first child LINE and returns first TOKEN', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -138,7 +124,7 @@ describe('quickDescend', () => {
     expect(first!.textContent!.trim()).toBe('italic');
   });
 
-  test('LINE starting with ISLAND: skips ISLAND, returns first TOKEN', () => {
+  test('LINE starting with ISLAND: returns the ISLAND as the first LINE_SIBLING', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
@@ -150,11 +136,12 @@ describe('quickDescend', () => {
 
     // assert
     expect(first).not.toBeNull();
-    expect(isToken(first!)).toBe(true);
-    expect(first!.textContent!.trim()).toBe('aaa');
+    expect(isToken(first!)).toBe(false);
+    expect(first!.tagName.toLowerCase()).toBe('span');
+    expect(first!.classList.contains('katex')).toBe(true);
   });
 
-  test('NESTED_LINE starting with ISLAND: skips ISLAND, returns first TOKEN', () => {
+  test('CURSOR_TRANSPARENT nested LINE starting with ISLAND: returns the first descendant ISLAND', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -173,8 +160,9 @@ describe('quickDescend', () => {
 
     // assert
     expect(first).not.toBeNull();
-    expect(isToken(first!)).toBe(true);
-    expect(first!.textContent!.trim()).toBe('aaa');
+    expect(isToken(first!)).toBe(false);
+    expect(first!.tagName.toLowerCase()).toBe('span');
+    expect(first!.classList.contains('katex')).toBe(true);
   });
 
   test('re-running on an already-tokenized FOCUSABLE does not duplicate TOKEN wrappers', () => {

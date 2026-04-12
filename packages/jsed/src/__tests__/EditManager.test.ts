@@ -5,6 +5,7 @@ import { getValue } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
 import { quickDescend } from '../lib/tokenize.js';
+import { isIsland } from '../lib/taxonomy.js';
 
 describe('EditManager', () => {
   it('first focus quick-descends but stays in view mode', () => {
@@ -24,25 +25,6 @@ describe('EditManager', () => {
     expect(editManager.getMode()).toBe('view');
     expect(editManager.nav.getFocus()).toBe(p1);
     expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
-
-    editManager.destroy();
-  });
-
-  it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
-    });
-
-    // act
-    const result = editManager.enterEditing(byId(doc, 'p1'));
-
-    // assert
-    expect(result.isOk()).toBe(true);
-    expect(editManager.getMode()).toBe('edit');
-    expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
 
     editManager.destroy();
   });
@@ -101,135 +83,195 @@ describe('EditManager', () => {
     editManager.destroy();
   });
 
-  it('handleRight descends within the focused subtree in view mode', () => {
-    // arrange
-    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
+  describe('enterEditing', () => {
+    it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+
+      // act
+      const result = editManager.enterEditing(byId(doc, 'p1'));
+
+      // assert
+      expect(result.isOk()).toBe(true);
+      expect(editManager.getMode()).toBe('edit');
+      expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+
+      editManager.destroy();
     });
-    editManager.nav.connect();
-    const p1 = byId(doc, 'p1');
-
-    // act
-    editManager.handleRight();
-
-    // assert
-    expect(editManager.getMode()).toBe('view');
-    expect(editManager.nav.getFocus()).toBe(p1);
-
-    editManager.destroy();
   });
 
-  it('handleRight moves to the next TOKEN in edit mode', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
+  describe('handleEnter', () => {
+    test('from a focused LINE with a leading ISLAND lands the CURSOR on that ISLAND', () => {
+      // arrange
+      const doc = makeRoot(
+        '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.nav.connect();
+      const div1 = byId(doc, 'd1');
+
+      editManager.nav.REQUEST_FOCUS(div1);
+
+      // act
+      const result = editManager.handleEnter();
+
+      // assert
+      expect(result.isOk()).toBe(true);
+      expect(editManager.getMode()).toBe('edit');
+      expect(editManager.cursor).toBeDefined();
+      expect(isIsland(editManager.cursor!.getToken())).toBe(true);
+      expect(editManager.cursor!.getToken().classList.contains('katex')).toBe(true);
+
+      editManager.destroy();
     });
-    editManager.enterEditing(byId(doc, 'p1'));
-
-    // act
-    editManager.handleRight();
-
-    // assert
-    expect(editManager.getMode()).toBe('edit');
-    expect(editManager.cursor?.getToken().textContent?.trim()).toBe('bar');
-
-    editManager.destroy();
   });
 
-  it('handleLeft moves to the previous TOKEN in edit mode', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
+  describe('handleRight', () => {
+    it('descends within the focused subtree in view mode', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+
+      // act
+      editManager.handleRight();
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+
+      editManager.destroy();
     });
-    editManager.enterEditing(byId(doc, 'p1'));
-    editManager.cursor?.moveNext();
 
-    // act
-    editManager.handleLeft();
+    it('moves to the next TOKEN in edit mode', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.enterEditing(byId(doc, 'p1'));
 
-    // assert
-    expect(editManager.getMode()).toBe('edit');
-    expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+      // act
+      editManager.handleRight();
 
-    editManager.destroy();
+      // assert
+      expect(editManager.getMode()).toBe('edit');
+      expect(editManager.cursor?.getToken().textContent?.trim()).toBe('bar');
+
+      editManager.destroy();
+    });
   });
 
-  it('handleExit leaves edit mode and returns to view mode', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
+  describe('handleLeft', () => {
+    it('moves to the previous TOKEN in edit mode', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.enterEditing(byId(doc, 'p1'));
+      editManager.cursor?.moveNext();
+
+      // act
+      editManager.handleLeft();
+
+      // assert
+      expect(editManager.getMode()).toBe('edit');
+      expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+
+      editManager.destroy();
     });
-    const p1 = byId(doc, 'p1');
-    editManager.enterEditing(p1);
-
-    // act
-    editManager.handleExit();
-
-    // assert
-    expect(editManager.getMode()).toBe('view');
-    expect(editManager.nav.getFocus()).toBe(p1);
-
-    editManager.destroy();
   });
 
-  it('handleDown moves FOCUS to the next sibling', () => {
-    // arrange
-    const doc = makeRoot(
-      frag(
-        p({ id: 'p1' }, 'foo'), //
-        p({ id: 'p2' }, 'bar'),
-        p({ id: 'p3' }, 'baz')
-      )
-    );
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
+  describe('handleExit', () => {
+    it('leaves edit mode and returns to view mode', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      const p1 = byId(doc, 'p1');
+      editManager.enterEditing(p1);
+
+      // act
+      editManager.handleExit();
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+
+      editManager.destroy();
     });
-    editManager.nav.connect();
-
-    editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
-
-    // act
-    editManager.handleDown();
-
-    // assert
-    expect(editManager.nav.getFocus()).toBe(byId(doc, 'p3'));
-
-    editManager.destroy();
   });
 
-  it('handleUp moves FOCUS to the previous sibling', () => {
-    // arrange
-    const doc = makeRoot(
-      frag(
-        p({ id: 'p1' }, 'foo'), //
-        p({ id: 'p2' }, 'bar'),
-        p({ id: 'p3' }, 'baz')
-      )
-    );
-    const editManager = EditManager.createNull({
-      document: doc,
-      userInput: Controller.createNull().input
+  describe('handleDown', () => {
+    it('moves FOCUS to the next sibling', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'foo'), //
+          p({ id: 'p2' }, 'bar'),
+          p({ id: 'p3' }, 'baz')
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.nav.connect();
+
+      editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
+
+      // act
+      editManager.handleDown();
+
+      // assert
+      expect(editManager.nav.getFocus()).toBe(byId(doc, 'p3'));
+
+      editManager.destroy();
     });
-    editManager.nav.connect();
+  });
 
-    editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
+  describe('handleUp', () => {
+    it('moves FOCUS to the previous sibling', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'foo'), //
+          p({ id: 'p2' }, 'bar'),
+          p({ id: 'p3' }, 'baz')
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.nav.connect();
 
-    // act
-    editManager.handleUp();
+      editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
-    // assert
-    expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
+      // act
+      editManager.handleUp();
 
-    editManager.destroy();
+      // assert
+      expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
+
+      editManager.destroy();
+    });
   });
 
   describe('revealActiveTarget', () => {

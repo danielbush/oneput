@@ -173,7 +173,8 @@ export class EditManager {
    * Put CURSOR on first LINE associated with `initial`.
    *
    * If `initial` is a TOKEN, the CURSOR will be placed on that token.
-   * If `initial` is a FOCUSABLE, the CURSOR will be placed on the first token in the LINE.
+   * If `initial` is a FOCUSABLE, the CURSOR will be placed on the first
+   * LINE_SIBLING reachable from the focused LINE.
    */
   enterEditing(initial?: HTMLElement): Result<void, EditManagerError> {
     this.nav.connect();
@@ -188,20 +189,20 @@ export class EditManager {
       this.handleSelectionChange
     );
 
-    const firstToken = isToken(initial) ? initial : quickDescend(initial);
-    if (firstToken) {
-      const line = getLine(firstToken);
+    const firstTarget = isToken(initial) ? initial : quickDescend(initial);
+    if (firstTarget) {
+      const line = getLine(firstTarget);
       this.nav.FOCUS(line);
       this.userInput.focus();
       if (!this.cursor) {
         this.cursor = TokenCursor.create({
           document: this.document,
-          token: firstToken,
+          token: firstTarget,
           onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
         });
       } else {
-        this.cursor.setToken(firstToken); // calls handleCursorChange
+        this.cursor.setToken(firstTarget); // calls handleCursorChange
       }
       this.setMode('edit');
       return ok(undefined);

@@ -1,5 +1,11 @@
 import type { JsedDocument } from './types.js';
-import { CURSOR_APPEND_CLASS, CURSOR_INSERT_AFTER_CLASS, CURSOR_INSERT_BEFORE_CLASS, CURSOR_PREPEND_CLASS, JSED_CURSOR_CLASS } from './lib/constants.js';
+import {
+  CURSOR_APPEND_CLASS,
+  CURSOR_INSERT_AFTER_CLASS,
+  CURSOR_INSERT_BEFORE_CLASS,
+  CURSOR_PREPEND_CLASS,
+  JSED_CURSOR_CLASS
+} from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
 import type { UserInputSelectionState } from './UserInput.js';
 

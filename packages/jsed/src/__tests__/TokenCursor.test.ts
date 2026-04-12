@@ -1,5 +1,5 @@
 import { describe, it, expect, test } from 'vitest';
-import { makeRoot, p, div, em, span, identify } from '../test/util.js';
+import { makeRoot, p, div, em, span, frag, identify } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue } from '../lib/token.js';
@@ -37,6 +37,157 @@ function tokenizeAndCursor(doc: JsedDocument, selector: string) {
 }
 
 describe('TokenCursor motion', () => {
+  describe('forward movement across LINE boundaries', () => {
+    test('moveNext from the last TOKEN of a LINE enters the next LINE', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'aaa'), p({ id: 'p2' }, 'bbb ccc')));
+      const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+      // act
+      cursor.moveNext();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('bbb');
+    });
+
+    test('moveNext from the last LINE_SIBLING of a LINE enters the next LINE that starts with an ISLAND', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'aaa'),
+          p({ id: 'p2' }, '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+      // act
+      cursor.moveNext();
+
+      // assert
+      expect(identify(cursor.getToken())).toBe('[island:span]');
+    });
+
+    test('moveNext stays put at the final LINE of the document', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'aaa'), p({ id: 'p2' }, 'bbb')));
+      const { cursor } = tokenizeAndCursor(doc, '#p2');
+
+      // act
+      cursor.moveNext();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('bbb');
+    });
+
+    test('moveNext lands on the first editable LINE_SIBLING beyond the exhausted LINE, not the start of an ancestor LINE', () => {
+      // arrange
+      const doc = makeRoot(
+        div(
+          { id: 'outer' },
+          p({ id: 'p1' }, 'aaa'),
+          div(
+            { id: 'wrap', class: 'jsed-cursor-transparent' },
+            p({ id: 'p2' }, 'bbb'),
+            p({ id: 'p3' }, 'ccc')
+          )
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+      // act
+      cursor.moveNext();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('bbb');
+    });
+  });
+
+  describe('backward movement across LINE boundaries', () => {
+    test('movePrevious from the first TOKEN of a LINE enters the previous LINE', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'aaa bbb'), p({ id: 'p2' }, 'ccc')));
+      const { cursor } = tokenizeAndCursor(doc, '#p2');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('bbb');
+    });
+
+    test('movePrevious from the first TOKEN of a LINE enters the previous LINE that ends with an ISLAND', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>'),
+          p({ id: 'p2' }, 'bbb')
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#p2');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(identify(cursor.getToken())).toBe('[island:span]');
+    });
+
+    test('movePrevious lands on the last editable LINE_SIBLING beyond the exhausted LINE, not the start of an ancestor LINE', () => {
+      // arrange
+      const doc = makeRoot(
+        div(
+          { id: 'outer' },
+          div(
+            { id: 'wrap', class: 'jsed-cursor-transparent' },
+            p({ id: 'p1' }, 'aaa'),
+            p({ id: 'p2' }, 'bbb')
+          ),
+          p({ id: 'p3' }, 'ccc')
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#p3');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('bbb');
+    });
+
+    test('movePrevious from the first paragraph in an opaque container skips the container and continues to something before it', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'before' }, 'zzz'),
+          div(
+            { id: 'outer' },
+            p({ id: 'p1' }, 'aaa'),
+            p({ id: 'p2' }, 'bbb')
+          )
+        )
+      );
+      const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('zzz');
+    });
+
+    test('movePrevious stays put at the first LINE of the document', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'aaa'), p({ id: 'p2' }, 'bbb')));
+      const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+      // act
+      cursor.movePrevious();
+
+      // assert
+      expect(getValue(cursor.getToken())).toBe('aaa');
+    });
+  });
+
   describe('simple paragraph: <p>hello world foo</p>', () => {
     function setup() {
       const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));
@@ -276,17 +427,17 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('aaa');
       });
 
-      test('ISLAND at start of LINE: cursor starts on first TOKEN after ISLAND', () => {
+      test('ISLAND at start of LINE: cursor starts on the ISLAND', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
         );
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
-        // act & assert — quick-descend skips the ISLAND, cursor starts on first TOKEN
-        expect(identify(cursor.getToken())).toBe('aaa');
-        cursor.movePrevious();
+        // act & assert — quick-descend now lands on the first LINE_SIBLING
         expect(identify(cursor.getToken())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getToken())).toBe('aaa');
       });
 
       test('ISLAND at end of LINE is the last cursor position', () => {

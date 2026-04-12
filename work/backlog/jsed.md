@@ -2,45 +2,60 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
-## For consideration
+## Critical path
 
-## feat: tokenize and de-tokenize lines on the fly for performance
+- moving cursor between lines
+  - adjust quickDescend, return first LINE_SILBING not first TOKEN
+    - test: quickDescend a LINE with an ISLAND as the first LINE_SIBLING
+  - when the cursor has exhausted the current line
+    - it calls findNextNode, looks for first text node or TOKEN (t), calls quickDescend on getLine(t), puts itself on first token
+- detokenize on the fly to reduce tokens
+  - we create a Detokenizer object, inject it into EditManager
+  - it listens for tokenization events
+  - maybe it also needs to track cursors
+    - for normal editing, there is one cursor which will get created and destroyed
+    - but in future there could be remote cursors
+    - if it has the current cursors, it can establish where in the DOM they are very quickly
+  - it records what got tokenized
+    - so it tracks calls to enterEditing / quickDescend
+  - it wakes up, maybe on each tokenization event, and schedules clean up algorithm
+  - clean up algorithm
+    - go through oldest tokenized LINE's
+    - detokenize first one where CURSOR is not present
+- selections
+  - within p-tag
+  - across inline flows within p-tag
+  - across p-tags
+- undo
+  - undo text changes
+  - undo FOCUSABLE changes
+- save/persist changes and load
+- islands
+  - katex as exampmle of an island
+  - code might be another
+- r:JSED_AGENT_COEDIT
 
-id: DETOKENIZE__WORK
-Drafted: 19-Mar-2026
-Updated: 1-Apr-2026
 
-In QUICK_DESCEND_ON_FOCUS__WORK we TOKENIZE on FOCUS which means just moving through the document could TOKENIZE substantial parts of it.  For large documents this will eventually affect browser performance.
+## Critical work
 
-Come up with a detokenization mechanism, perhaps one that is transparent to the cursor; the reason for attempting it this way is because I'm planning to support remote cursors (eg via operational transform), so how do we know what is safe to de-tokenize?  We have to check all the cursors to see where they are.
+## Finer details
 
-One way to do this might be to have DetokenizeManager instance listen to onTokenChange callback for each CURSOR ;  each cursor gives updates on their CURSOR_LINE (we maybe include that in the onTokenChange callback alongide the CURSOR TOKEN).
+### For consideration
 
-Is there a better name for onTokenChange/handleTokenChange given that the CURSOR can now sit on non-TOKEN's?
+- hitting ENTER on empty p-tag should insert anchor; no need to go into menu
+- $mod+m when hit 2 or 3 times within an interval, moves FOCUS to top and bottom of screen respectively
+- remember last token position in each LINE (not LINE_SEGMENT)
+- persist last token position in each LINE
+- persist last FOCUS position and FOCUS it when we reload the document
+- use IMPLICIT_LINE's on all LINE_SEGMENT's that aren't enclosed by an INLINE_FLOW within the line; this makes it easy to navigate all segments with the FOCUS not just trailing IMPLICIT_LINE LINE_SEGMENT's and INLINE_FLOW LINE_SEGMENT's
 
-## refactor: rename handleTokenChange to handleCursorChange
-
-Drafted: 5-Apr-2026
-
-`handleTokenChange` no longer describes the callback accurately because the CURSOR can sit on non-TOKEN LINE_SIBLINGs as well as TOKENs. Rename this callback and related terminology to `handleCursorChange` so the naming matches the current CURSOR model.
-
-Review the surrounding callback names at the same time, especially any `onTokenChange` naming that now really means "the CURSOR target changed".
-
-# Lower priority
-
-## feat: CURSOR can move to the next LINE wants it has exhausted the current LINE
-
-Drafted: 19-Mar-2026
-
-When the CURSOR can no longer get any more LINE_SIBLING's via moveNext, movePrevious, it should signal that it has exhausted the next or previous direction.  The editor (EditManager) should immediately look for the next LINE and quickDescend it, putting the CURSOR on the first LINE_SIBLING on this new LINE.
-
-## feat: joinNext/joinPrevious across INLINE_FLOW boundaries
+### feat: joinNext/joinPrevious across INLINE_FLOW boundaries
 
 Drafted: 23-Mar-2026
 
 `joinNext`/`joinPrevious` currently only find immediate TOKEN siblings via `getNextTokenSibling`/`getPreviousTokenSibling`. If the next/previous LINE_SIBLING is an INLINE_FLOW (e.g. `<em>`), the join is a no-op — it can't reach the TOKEN inside. The target TOKEN should be extracted from the INLINE_FLOW and absorbed into the receiving TOKEN.
 
-## discussion: visible vs invisible IGNORABLE's
+### discussion: visible vs invisible IGNORABLE's
 
 Drafted: 23-Mar-2026
 

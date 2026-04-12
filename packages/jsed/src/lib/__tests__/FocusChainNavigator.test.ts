@@ -9,9 +9,13 @@ describe('FocusChainNavigator', () => {
     const doc = makeRoot(
       div(
         { id: 'container' },
-        div({ id: 'section' }, //
-          p({ id: 'target' }, //
-            span({ id: 'inline' }, 'foo'))),
+        div(
+          { id: 'section' }, //
+          p(
+            { id: 'target' }, //
+            span({ id: 'inline' }, 'foo')
+          )
+        ),
         p({ id: 'peer' }, 'bar')
       )
     );
@@ -60,10 +64,14 @@ describe('FocusChainNavigator', () => {
     const doc = makeRoot(
       div(
         { id: 'container' },
-        div({ id: 'left' }, //
-          p({ id: 'left-leaf' }, 'foo')),
-        div({ id: 'right' }, //
-          p({ id: 'right-leaf' }, 'bar'))
+        div(
+          { id: 'left' }, //
+          p({ id: 'left-leaf' }, 'foo')
+        ),
+        div(
+          { id: 'right' }, //
+          p({ id: 'right-leaf' }, 'bar')
+        )
       )
     );
     const nav = Nav.createNull(doc);
@@ -88,9 +96,11 @@ describe('FocusChainNavigator', () => {
   it('walks the current subtree when focus is already at CURRENT_MARK', () => {
     // arrange
     const doc = makeRoot(
-      div({ id: 'container' }, //
+      div(
+        { id: 'container' }, //
         p({ id: 'first' }, 'foo'), //
-        p({ id: 'second' }, 'bar'))
+        p({ id: 'second' }, 'bar')
+      )
     );
     const nav = Nav.createNull(doc);
     const navigator = FocusChainNavigator.createNull(nav);

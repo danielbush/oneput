@@ -1,6 +1,7 @@
 import type { JsedDocument } from './types.js';
-import { JSED_CURSOR_CLASS } from './lib/constants.js';
+import { CURSOR_APPEND_CLASS, CURSOR_INSERT_AFTER_CLASS, CURSOR_INSERT_BEFORE_CLASS, CURSOR_PREPEND_CLASS, JSED_CURSOR_CLASS } from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
+import type { UserInputSelectionState } from './UserInput.js';
 
 export type TokenCursorError =
   | {
@@ -95,10 +96,76 @@ export abstract class TokenCursorBase {
 
   // #endregion
 
+  // #region CURSOR_STATE
+
+  /** Update CURSOR_STATE markers from the current input value. */
+  public handleInputChange = (input: string): void => {
+    if (input.endsWith(' ')) {
+      this.setMarker(CURSOR_INSERT_AFTER_CLASS);
+    } else if (input.startsWith(' ')) {
+      this.setMarker(CURSOR_INSERT_BEFORE_CLASS);
+    } else {
+      this.clearMarkers();
+    }
+  };
+
+  /** Update CURSOR_STATE markers from the current input selection. */
+  public handleSelectionChange = (selection: UserInputSelectionState): void => {
+    switch (selection) {
+      case 'CURSOR_AT_BEGINNING':
+        this.setMarker(CURSOR_PREPEND_CLASS);
+        return;
+      case 'CURSOR_AT_END':
+        this.setMarker(CURSOR_APPEND_CLASS);
+        return;
+      default:
+        this.clearMarkers();
+    }
+  };
+
+  private setMarker(className?: string): void {
+    this.clearMarkers();
+    if (className) {
+      this.addFocusClasses(className);
+    }
+  }
+
+  protected clearMarkers(): void {
+    this.removeFocusClasses(
+      CURSOR_INSERT_AFTER_CLASS,
+      CURSOR_INSERT_BEFORE_CLASS,
+      CURSOR_PREPEND_CLASS,
+      CURSOR_APPEND_CLASS
+    );
+  }
+
+  /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */
+  isAppend(): boolean {
+    return this.getToken().classList.contains(CURSOR_APPEND_CLASS);
+  }
+
+  /** Whether the CURSOR_STATE is CURSOR_PREPEND on the current TOKEN. */
+  isPrepend(): boolean {
+    return this.getToken().classList.contains(CURSOR_PREPEND_CLASS);
+  }
+
+  /** Whether the CURSOR_STATE is CURSOR_INSERT_AFTER on the current TOKEN. */
+  isInsertingAfter(): boolean {
+    return this.getToken().classList.contains(CURSOR_INSERT_AFTER_CLASS);
+  }
+
+  /** Whether the CURSOR_STATE is CURSOR_INSERT_BEFORE on the current TOKEN. */
+  isInsertingBefore(): boolean {
+    return this.getToken().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
+  }
+
+  // #endregion
+
   // #region Destroy
 
   /** Destroy the current edit session. The instance cannot be used after this. */
   destroy() {
+    this.clearMarkers();
     this.#token.classList.remove(JSED_CURSOR_CLASS);
     this.removeAllFocusClasses();
   }

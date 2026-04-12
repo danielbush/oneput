@@ -1,13 +1,6 @@
-import {
-  CURSOR_APPEND_CLASS,
-  CURSOR_PREPEND_CLASS,
-  CURSOR_INSERT_AFTER_CLASS,
-  CURSOR_INSERT_BEFORE_CLASS
-} from './lib/constants.js';
 import * as token from './lib/token.js';
 import { isToken } from './lib/taxonomy.js';
 import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
-import type { UserInputSelectionState } from './UserInput.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 import { quickDescend } from './index.js';
 
@@ -24,71 +17,6 @@ export class TokenCursor extends TokenCursorBase {
   static createNull(params: TokenCursorBaseParams) {
     return new TokenCursor(params);
   }
-
-  // #region CURSOR_STATE
-
-  /** Update CURSOR_STATE markers from the current input value. */
-  public handleInputChange = (input: string): void => {
-    if (input.endsWith(' ')) {
-      this.setMarker(CURSOR_INSERT_AFTER_CLASS);
-    } else if (input.startsWith(' ')) {
-      this.setMarker(CURSOR_INSERT_BEFORE_CLASS);
-    } else {
-      this.clearMarkers();
-    }
-  };
-
-  /** Update CURSOR_STATE markers from the current input selection. */
-  public handleSelectionChange = (selection: UserInputSelectionState): void => {
-    switch (selection) {
-      case 'CURSOR_AT_BEGINNING':
-        this.setMarker(CURSOR_PREPEND_CLASS);
-        return;
-      case 'CURSOR_AT_END':
-        this.setMarker(CURSOR_APPEND_CLASS);
-        return;
-      default:
-        this.clearMarkers();
-    }
-  };
-
-  private setMarker(className?: string): void {
-    this.clearMarkers();
-    if (className) {
-      this.addFocusClasses(className);
-    }
-  }
-
-  private clearMarkers(): void {
-    this.removeFocusClasses(
-      CURSOR_INSERT_AFTER_CLASS,
-      CURSOR_INSERT_BEFORE_CLASS,
-      CURSOR_PREPEND_CLASS,
-      CURSOR_APPEND_CLASS
-    );
-  }
-
-  /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */
-  isAppend(): boolean {
-    return this.getToken().classList.contains(CURSOR_APPEND_CLASS);
-  }
-
-  /** Whether the CURSOR_STATE is CURSOR_PREPEND on the current TOKEN. */
-  isPrepend(): boolean {
-    return this.getToken().classList.contains(CURSOR_PREPEND_CLASS);
-  }
-
-  /** Whether the CURSOR_STATE is CURSOR_INSERT_AFTER on the current TOKEN. */
-  isInsertingAfter(): boolean {
-    return this.getToken().classList.contains(CURSOR_INSERT_AFTER_CLASS);
-  }
-
-  /** Whether the CURSOR_STATE is CURSOR_INSERT_BEFORE on the current TOKEN. */
-  isInsertingBefore(): boolean {
-    return this.getToken().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
-  }
-
-  // #endregion
 
   // #region Motion
 
@@ -229,15 +157,6 @@ export class TokenCursor extends TokenCursorBase {
     }
 
     return this.splitBefore();
-  }
-
-  // #endregion
-
-  // #region Destroy
-
-  override destroy() {
-    this.clearMarkers();
-    super.destroy();
   }
 
   // #endregion

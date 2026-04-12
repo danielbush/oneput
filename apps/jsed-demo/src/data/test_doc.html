@@ -125,12 +125,10 @@
 
   <h1 class="jsed-ignore">Boundary spacing scenarios</h1>
   <p class="jsed-ignore">
-    Try adding/remove LEADING_SPACE's and TRAILING_SPACE's.  Try adding and removing ANCHOR's.
+    Try adding/remove LEADING_SPACE's and TRAILING_SPACE's. Try adding and removing ANCHOR's.
   </p>
 
-  <p class="jsed-ignore">
-    INLINE_FLOW
-  </p>
+  <p class="jsed-ignore">INLINE_FLOW</p>
   <p style="border: 1px dashed red; min-height: 1rem; position: relative">
     <span style="position: absolute; right: 0; top: 0; margin: 0" class="note jsed-ignore"
       >(empty p-tag)</span
@@ -144,27 +142,22 @@
   <p><em>foo</em> <strong>bar</strong> <u>baz</u></p>
   <p><em>foo</em><strong>bar</strong><u>baz</u></p>
 
-  <p class="jsed-ignore">
-    ISLAND's
-  </p>
+  <p class="jsed-ignore">ISLAND's</p>
   <div><span class="katex" style="display: inline">x²</span> after island</div>
   <div>before island <span class="katex" style="display: inline">x²</span> after island</div>
 
-  <p class="jsed-ignore">
-    TRANSPARENT_BLOCK
-  </p>
+  <p class="jsed-ignore">TRANSPARENT_BLOCK</p>
   <div>
     <span class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block"
       >transparent inline-block</span
-    > after transparent inline-block
+    >
+    after transparent inline-block
   </div>
 
-  <p class="jsed-ignore">
-    OPAQUE_BLOCK
-  </p>
+  <p class="jsed-ignore">OPAQUE_BLOCK</p>
   <div>
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">inline block</span
-    > after opaque inline-block
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">inline block</span>
+    after opaque inline-block
   </div>
 
   <p class="jsed-ignore">
@@ -245,7 +238,6 @@
     But this sentence is just text nodes that come after.
     <br />
   </div>
-
 
   <h1 class="jsed-ignore">SHALLOW_TOKENIZATION</h1>
   <p class="jsed-ignore">

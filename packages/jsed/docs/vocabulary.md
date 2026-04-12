@@ -154,7 +154,7 @@ Tokens and Text and whitespace
   - Source of truth: search docstrings for ANCHOR.
 - **LEADING_SPACE**
   - a space whose previous sibling is a closing tag
-  - when the user types words the spaces created are "in-between" spaces; TRAILING_SPACE's and LEADING_SPACE's are the spaces at the boundaries of what is typed; they can be toggled into and out of existence; 
+  - when the user types words the spaces created are "in-between" spaces; TRAILING_SPACE's and LEADING_SPACE's are the spaces at the boundaries of what is typed; they can be toggled into and out of existence;
   - Example
     - `...<em/> foo<strong>...`
     - `...<em/> <strong>...` - could be either a LEADING_SPACE or a TRAILING_SPACE .

@@ -1,14 +1,7 @@
-import { getFirstLineSibling, getLine, getNextLineSibling } from './sibwalk.js';
-import {
-  isFocusable,
-  isLineSibling,
-  isImplicitLine,
-  isInlineFlow,
-  isIsland,
-  isToken,
-  isTransparentBlock
-} from './taxonomy.js';
+import { getFirstLineSibling, getLine } from './sibwalk.js';
+import { isFocusable, isCursorTransparent, isLineSibling, isIsland, isToken } from './taxonomy.js';
 import { createToken } from './token.js';
+import { findNextNode } from './walk.js';
 
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.
@@ -47,39 +40,81 @@ function replaceTextNode(child: Node): HTMLElement | null {
   return null;
 }
 
+type TokenizeLineRecResult = {
+  first: HTMLElement | null;
+  tokenizedSelf: boolean;
+};
+
 /**
- * Recursively tokenize a LINE. Returns the first TOKEN created.
+ * Recursively tokenize a LINE.
  *
- * Recurses into INLINE_FLOW's and TRANSPARENT_BLOCK's (including IMPLICIT_LINE's)
- * — everything the CURSOR would descend through. Skips OPAQUE_BLOCK's and
- * ISLAND's but continues past them to tokenize the rest of the LINE.
+ * Recurses into CURSOR_TRANSPARENT structure — everything the CURSOR would
+ * descend through. Skips OPAQUE_BLOCK's and ISLAND's but continues past them
+ * to tokenize the rest of the LINE.
  */
-function tokenizeLineRec(line: Node): HTMLElement | null {
+function tokenizeLineRec(line: Node, tokenizedLines?: Set<HTMLElement>): TokenizeLineRecResult {
   if (isToken(line)) {
-    return null;
+    return { first: null, tokenizedSelf: false };
   }
 
   // Record childNodes before we mutate and convert to array as the NodeList is
   // live!
   const childNodes = Array.from(line.childNodes);
   let first: HTMLElement | null = null;
+  let tokenizedSelf = false;
   for (const child of childNodes) {
-    // Recurse into INLINE_FLOW's (isInlineFlow && !isIsland), IMPLICIT_LINE's,
-    // and TRANSPARENT_BLOCK's.
-    if (
-      isImplicitLine(child) ||
-      (isFocusable(child) && !isIsland(child) && isInlineFlow(child)) ||
-      isTransparentBlock(child)
-    ) {
-      const token = tokenizeLineRec(child);
-      if (!first) first = token;
+    if (isCursorTransparent(child)) {
+      const nested = tokenizeLineRec(child, tokenizedLines);
+      if (!first) first = nested.first;
     } else if (child.nodeType === Node.TEXT_NODE) {
       const token = replaceTextNode(child);
-      if (!first) first = token;
+      if (token) {
+        tokenizedSelf = true;
+        if (!first) first = token;
+      }
     }
     // OPAQUE_BLOCK's, ISLAND's, and other elements: skip but continue loop
   }
-  return first;
+
+  if (tokenizedSelf && line instanceof HTMLElement) {
+    tokenizedLines?.add(getLine(line));
+  }
+
+  return { first, tokenizedSelf };
+}
+
+function replaceTokenElement(token: HTMLElement): void {
+  if (!isToken(token)) {
+    throw new Error('replaceTokenElement: called on non-token');
+  }
+
+  const text = token.textContent ?? '';
+  const textNode = document.createTextNode(text);
+  token.parentNode?.insertBefore(textNode, token);
+  token.parentNode?.removeChild(token);
+}
+
+/**
+ * Recursively detokenize a LINE.
+ *
+ * Mirrors tokenizeLineRec by descending only through CURSOR_TRANSPARENT
+ * structure.
+ * TOKEN wrappers are replaced with plain text nodes; ISLAND's and
+ * OPAQUE_BLOCK's are left untouched.
+ */
+function detokenizeLineRec(line: Node): void {
+  const childNodes = Array.from(line.childNodes);
+
+  for (const child of childNodes) {
+    if (isToken(child)) {
+      replaceTokenElement(child as HTMLElement);
+      continue;
+    }
+
+    if (isCursorTransparent(child)) {
+      detokenizeLineRec(child);
+    }
+  }
 }
 
 /**
@@ -93,47 +128,100 @@ export function tokenizeLine(el: HTMLElement): HTMLElement | null {
     throw new Error('Can only tokenize an FOCUSABLE');
   }
   el.normalize();
-  return tokenizeLineRec(el);
+  return tokenizeLineRec(el).first;
+}
+
+/**
+ * Reverse tokenizeLine for a LINE.
+ *
+ * Removes TOKEN wrappers from the LINE and from any CURSOR-transparent
+ * descendants that were tokenized as part of the same shallow tokenization
+ * pass, then normalizes text nodes back together.
+ */
+export function detokenizeLine(el: HTMLElement): void {
+  if (!isFocusable(el)) {
+    throw new Error('Can only detokenize a FOCUSABLE');
+  }
+
+  detokenizeLineRec(el);
+  el.normalize();
+}
+
+export type QuickDescendResult = {
+  line: HTMLElement;
+  target: HTMLElement | null;
+  tokenizedLines: HTMLElement[];
+};
+
+function tokenizeTrackedLine(line: HTMLElement, tokenizedLines: Set<HTMLElement>): void {
+  line.normalize();
+  tokenizeLineRec(line, tokenizedLines);
+}
+
+function isCandidateNode(node: ParentNode | ChildNode): boolean {
+  if (isToken(node) || isIsland(node)) {
+    return true;
+  }
+  return node.nodeType === Node.TEXT_NODE && /\S/.test(node.textContent ?? '');
 }
 
 /**
  * Quick-descend: tokenize and find the first LINE_SIBLING within a FOCUSABLE.
  * See SHALLOW_TOKENIZATION.
  *
- * Tokenizes the LINE containing the element and walks its LINE_SIBLING's.
- * Returns null if no LINE_SIBLING is found.
+ * Algorithm:
+ * - get the LINE for el (root line)
+ *   - reason: el could be CURSOR_TRANSPARENT eg an INLINE_FLOW
+ * - starting with el, search within root line for the first candidate node
+ *   - a candidate node is non-whitespace text, TOKEN, or ISLAND
+ *   - then call getLine(candidate) to get the candidate line
+ * - call tokenizeLine on the candidate line
+ * - return the candidate line's first reachable LINE_SIBLING
+ * - only one line (the candidate line) is tokenized
  */
-export function quickDescend(el: HTMLElement): HTMLElement | null {
+export function quickDescend(el: HTMLElement): QuickDescendResult {
+  const rootLine = getLine(el);
   if (isToken(el) || isIsland(el)) {
-    return el;
+    return { line: rootLine, target: el, tokenizedLines: [] };
   }
   if (!isFocusable(el)) {
     throw new Error('quickDescend: expects a FOCUSABLE');
   }
 
-  // Example: `el` is an em-tag; `line` is parent p-tag.
-  const line = getLine(el);
-  tokenizeLine(line);
-
-  let sib: HTMLElement | null;
-  if (el === line) {
-    sib = getFirstLineSibling(line);
+  const tokenizedLines = new Set<HTMLElement>();
+  let candidateNode: ParentNode | ChildNode | null = null;
+  if (isCandidateNode(el)) {
+    candidateNode = el;
   } else {
-    sib = isLineSibling(el) ? el : getFirstLineSibling(el);
+    for (const node of findNextNode(el, rootLine, {
+      visit: isCandidateNode,
+      descend: isFocusable
+    })) {
+      candidateNode = node;
+      break;
+    }
+  }
+  if (!candidateNode) {
+    return { line: rootLine, target: null, tokenizedLines: [] };
   }
 
-  while (sib) {
-    if (isToken(sib) || isIsland(sib)) {
-      return sib;
-    }
+  const line = getLine(candidateNode);
+  tokenizeTrackedLine(line, tokenizedLines);
 
-    const nested = quickDescend(sib);
-    if (nested) {
-      return nested;
+  let target: HTMLElement | null;
+  if (line === rootLine) {
+    if (el === rootLine) {
+      target = getFirstLineSibling(rootLine);
+    } else {
+      target = isLineSibling(el) ? el : getFirstLineSibling(el);
     }
-
-    sib = getNextLineSibling(sib);
+  } else {
+    target = getFirstLineSibling(line);
   }
 
-  return null;
+  return {
+    line: rootLine,
+    target,
+    tokenizedLines: Array.from(tokenizedLines)
+  };
 }

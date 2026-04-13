@@ -28,6 +28,10 @@ Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
 Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/tokenize.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and descends until it finds the first `TOKEN` or `ISLAND`. Other focusable structures are traversed through rather than treated as final cursor targets. If no `TOKEN` or `ISLAND` is found, it returns null.
 
+`lib/tokenize.ts` also now provides the inverse operation, `detokenizeLine(...)`, which removes `TOKEN` wrappers from a `LINE` and its CURSOR-transparent descendants and normalizes text nodes back together. That gives the in-progress `Detokenizer` work a concrete primitive for reclaiming older tokenized DOM.
+
+The `Tokenizer` service now uses that primitive opportunistically: once the number of recorded tokenized `LINE`s passes a small limit, it schedules a background cleanup pass that detokenizes one old `LINE` at a time while skipping any `LINE` that currently contains the active `CURSOR`.
+
 ## Token editing: TokenCursorBase → TokenCursor
 
 `TokenCursorBase` holds the current TOKEN reference, manages the JSED_CURSOR_CLASS, and provides protected focus-class management. It is the foundation layer.
@@ -61,7 +65,7 @@ A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditMan
 
 The top-level modules above delegate to lower-level utilities in `lib/`:
 
-- **tokenize.ts** — on-demand tokenization, including `quickDescend`
+- **tokenize.ts** — on-demand tokenization, `quickDescend`, and `detokenizeLine(...)`
 - **token.ts** — TOKEN operations, separator management, JOIN, SPLIT, and related editing helpers
 - **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
 - **sibwalk.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`

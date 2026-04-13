@@ -1,6 +1,7 @@
 import { describe, it, expect, test } from 'vitest';
 import { makeRoot, p, div, em, span, frag, identify } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
+import { Tokenizer } from '../Tokenizer.js';
 import { TokenCursor } from '../TokenCursor.js';
 import { getValue } from '../lib/token.js';
 import {
@@ -22,6 +23,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
 
   const cursor = TokenCursor.create({
     document: doc,
+    tokenizer: Tokenizer.createNull(),
     token: tok,
     onCursorChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)
@@ -32,7 +34,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
 
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
-  const firstToken = quickDescend(el)!;
+  const firstToken = quickDescend(el).target!;
   return createCursor(doc, firstToken);
 }
 
@@ -160,7 +162,7 @@ describe('TokenCursor motion', () => {
         frag(
           p({ id: 'before' }, 'zzz'),
           div(
-            { id: 'outer' },
+            { id: 'outer' }, //
             p({ id: 'p1' }, 'aaa'),
             p({ id: 'p2' }, 'bbb')
           )
@@ -675,7 +677,7 @@ describe('TokenCursor motion', () => {
             : undefined
       }
     });
-    const firstToken = quickDescend(doc.root.querySelector('#p1') as HTMLElement)!;
+    const firstToken = quickDescend(doc.root.querySelector('#p1') as HTMLElement).target!;
     const secondToken = firstToken.nextElementSibling as HTMLElement;
     const { cursor } = createCursor(doc, firstToken);
     const scrollRequests = doc.viewportScroller.trackScrollRequests();

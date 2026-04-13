@@ -1322,7 +1322,7 @@ describe('input handling', () => {
   async function createEditManagerFixture(params?: { html?: string }) {
     const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
     const line = byId(doc, 'p1');
-    const firstToken = quickDescend(line);
+    const firstToken = quickDescend(line).target;
     if (!firstToken) {
       throw new Error('expected first token');
     }

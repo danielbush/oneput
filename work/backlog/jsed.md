@@ -4,7 +4,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Critical path
 
-- moving cursor between lines
+- [x] moving cursor between lines
   - adjust quickDescend, return first LINE_SILBING not first TOKEN
     - test: quickDescend a LINE with an ISLAND as the first LINE_SIBLING
   - when the cursor has exhausted the current line
@@ -25,6 +25,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - selections
   - within p-tag
   - across inline flows within p-tag
+    - explore visual appearance of selection as it extends over INLINE_FLOW's, is it broken?  How do we make it look like a selection?
   - across p-tags
 - undo
   - undo text changes

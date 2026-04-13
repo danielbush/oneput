@@ -1,4 +1,5 @@
 import type { JsedDocument } from './types.js';
+import type { Tokenizer } from './Tokenizer.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_INSERT_AFTER_CLASS,
@@ -25,6 +26,7 @@ export type TokenCursorError =
 
 export type TokenCursorBaseParams = {
   document: JsedDocument;
+  tokenizer: Tokenizer;
   token: HTMLElement;
   onCursorChange: (token: HTMLElement) => void;
   onError: (err: TokenCursorError) => void;
@@ -37,12 +39,14 @@ export type TokenCursorBaseParams = {
 export abstract class TokenCursorBase {
   #token: HTMLElement;
   #document: JsedDocument;
+  #tokenizer: Tokenizer;
   #onCursorChange: (token: HTMLElement) => void;
   protected onError: (err: TokenCursorError) => void;
 
   constructor(params: TokenCursorBaseParams) {
     this.#token = params.token; // ts needs this before #setToken
     this.#document = params.document;
+    this.#tokenizer = params.tokenizer;
     this.#onCursorChange = params.onCursorChange;
     this.onError = params.onError;
     this.setToken(params.token);
@@ -51,6 +55,11 @@ export abstract class TokenCursorBase {
   /** Return the JsedDocument that owns this CURSOR session. */
   getDocument() {
     return this.#document;
+  }
+
+  /** Return the Tokenizer that owns tokenization/detokenization lifecycle. */
+  getTokenizer() {
+    return this.#tokenizer;
   }
 
   // #region Token access

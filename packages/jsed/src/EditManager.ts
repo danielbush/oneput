@@ -6,9 +6,9 @@ import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
+import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
-import { quickDescend } from './lib/tokenize.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -57,8 +57,7 @@ export class EditManager {
     onFocusChange,
     onCursorChange,
     onTextChange,
-    onElementChange,
-    focusChainNavigator
+    onElementChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -68,7 +67,6 @@ export class EditManager {
     onCursorChange?: (target: HTMLElement) => void;
     onTextChange?: (event: EditManagerTextChangeEvent) => void;
     onElementChange?: (event: EditManagerElementChangeEvent) => void;
-    focusChainNavigator?: FocusChainNavigator;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -86,7 +84,8 @@ export class EditManager {
       onCursorChange,
       onTextChange,
       onElementChange,
-      focusChainNavigator ?? FocusChainNavigator.create(nav)
+      Tokenizer.create(),
+      FocusChainNavigator.create(nav)
     );
     return instance;
   }
@@ -99,8 +98,7 @@ export class EditManager {
     onFocusChange,
     onCursorChange,
     onTextChange,
-    onElementChange,
-    focusChainNavigator
+    onElementChange
   }: {
     document: JsedDocument;
     userInput: UserInput;
@@ -110,7 +108,6 @@ export class EditManager {
     onCursorChange?: (target: HTMLElement) => void;
     onTextChange?: (event: EditManagerTextChangeEvent) => void;
     onElementChange?: (event: EditManagerElementChangeEvent) => void;
-    focusChainNavigator?: FocusChainNavigator;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -128,7 +125,8 @@ export class EditManager {
       onCursorChange,
       onTextChange,
       onElementChange,
-      focusChainNavigator ?? FocusChainNavigator.createNull(nav)
+      Tokenizer.createNull(),
+      FocusChainNavigator.createNull(nav)
     );
     return instance;
   }
@@ -149,6 +147,7 @@ export class EditManager {
     private onCursorChange?: (target: HTMLElement) => void,
     private onTextChange?: (event: EditManagerTextChangeEvent) => void,
     private onElementChange?: (event: EditManagerElementChangeEvent) => void,
+    private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
   ) {}
 
@@ -189,7 +188,7 @@ export class EditManager {
       this.handleSelectionChange
     );
 
-    const firstTarget = isToken(initial) ? initial : quickDescend(initial);
+    const firstTarget = isToken(initial) ? initial : this.tokenizer.quickDescend(initial);
     if (firstTarget) {
       const line = getLine(firstTarget);
       this.nav.FOCUS(line);
@@ -197,6 +196,7 @@ export class EditManager {
       if (!this.cursor) {
         this.cursor = TokenCursor.create({
           document: this.document,
+          tokenizer: this.tokenizer,
           token: firstTarget,
           onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
@@ -217,12 +217,13 @@ export class EditManager {
     this.unsubscribeSelectionChange?.();
     this.cursor?.destroy();
     this.cursor = undefined;
+    this.tokenizer.setCursorElement(null);
     this.userInput.setInputValue('');
     this.setMode('view');
 
     if (focusElement) {
       this.nav.FOCUS(focusElement);
-      quickDescend(focusElement);
+      this.tokenizer.quickDescend(focusElement);
     }
   }
 
@@ -239,7 +240,9 @@ export class EditManager {
 
   destroy() {
     this.cursor?.destroy();
+    this.tokenizer.setCursorElement(null);
     this.nav.destroy();
+    this.tokenizer.destroy();
   }
 
   private enterEditingAtFocus(): Result<void, EditManagerError> {
@@ -360,6 +363,7 @@ export class EditManager {
    * commanded to do usually by the user... (eg due to delete operation).
    */
   private handleCursorChange = (tok: HTMLElement) => {
+    this.tokenizer.setCursorElement(tok);
     this.nav?.FOCUS(tok);
     this.onCursorChange?.(tok);
     this.userInput.resetPlaceholder();
@@ -402,7 +406,7 @@ export class EditManager {
         return false;
       }
 
-      quickDescend(evt.element);
+      this.tokenizer.quickDescend(evt.element);
       return true;
     }
 

@@ -3,7 +3,6 @@ import { isCursorTransparent, isIsland, isToken, isLineSibling } from './lib/tax
 import { isSameLine, getLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
 import { findNextNode, findPreviousNode } from './lib/walk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
-import { quickDescend } from './index.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
 
@@ -81,7 +80,7 @@ export class TokenCursor extends TokenCursorBase {
         continue;
       }
 
-      return quickDescend(node as HTMLElement);
+      return this.getTokenizer().quickDescend(node as HTMLElement);
     }
 
     return null;
@@ -118,7 +117,7 @@ export class TokenCursor extends TokenCursorBase {
     }
 
     // Ensure any reachable text content has been tokenized before we scan.
-    quickDescend(el);
+    this.getTokenizer().quickDescend(el);
 
     let last: HTMLElement | null = null;
     for (const node of findNextNode(el, el, {
@@ -227,7 +226,7 @@ export class TokenCursor extends TokenCursorBase {
   splitAfter(): HTMLElement | null {
     if (!this.isOnToken()) return null;
     const [, after] = token.splitAfter(this.getToken());
-    const firstTok = quickDescend(after);
+    const firstTok = this.getTokenizer().quickDescend(after);
     if (firstTok) {
       this.setToken(firstTok);
     }
@@ -267,7 +266,7 @@ export class TokenCursor extends TokenCursorBase {
     }
     token.insertAfter(el, this.getToken());
 
-    const first = quickDescend(el);
+    const first = this.getTokenizer().quickDescend(el);
     if (first) {
       this.setToken(first);
     }
@@ -284,7 +283,7 @@ export class TokenCursor extends TokenCursorBase {
     }
     token.insertBefore(el, this.getToken());
 
-    const first = quickDescend(el);
+    const first = this.getTokenizer().quickDescend(el);
     if (first) {
       this.setToken(first);
     }

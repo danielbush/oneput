@@ -155,6 +155,13 @@
 }
 /* #endregion */
 
+/* #region selection */
+.jsed-selection {
+  background-color: var(--sky-blue-500);
+  color: var(--slate-100);
+}
+/* #endregion */
+
 /* #region token - insert / update markers */
 
 /*

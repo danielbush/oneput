@@ -13,7 +13,8 @@ import {
   JSED_TOKEN_CLASS,
   JSED_APP_ROOT_ID,
   JSED_IGNORE_CLASS,
-  JSED_CURSOR_TRANSPARENT_CLASS
+  JSED_CURSOR_TRANSPARENT_CLASS,
+  JSED_SELECTION_CLASS
 } from './constants.js';
 
 // ============================================================================
@@ -156,6 +157,18 @@ export function isTransparentBlock(node: Node | null): boolean {
   return isFocusable(node) && node.classList.contains(JSED_CURSOR_TRANSPARENT_CLASS);
 }
 
+/**
+ * Detect SELECTION_WRAPPER — a transient decoration inserted by
+ * `TokenSelection` to paint the selection background around a
+ * contiguous run of LINE_SIBLING's. Structurally invisible to the
+ * CURSOR: descend-but-don't-visit, like CURSOR_TRANSPARENT, but
+ * semantically distinct so other code can recognise and ignore it
+ * (serialization, tokenization, etc.).
+ */
+export function isSelectionWrapper(node: Node | null): boolean {
+  return isFocusable(node) && node.classList.contains(JSED_SELECTION_CLASS);
+}
+
 // ============================================================================
 // Derived
 // ============================================================================
@@ -171,6 +184,7 @@ export function isLine(el: Node | null): boolean {
   if (isImplicitLine(el)) return false;
   if (isInlineFlow(el)) return false;
   if (isIsland(el)) return false;
+  if (isSelectionWrapper(el)) return false;
   return true;
 }
 
@@ -189,5 +203,6 @@ export function isCursorTransparent(n: Node): boolean {
   if (isInlineFlow(n)) return true;
   if (isTransparentBlock(n)) return true;
   if (isImplicitLine(n)) return true;
+  if (isSelectionWrapper(n)) return true;
   return false;
 }

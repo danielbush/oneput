@@ -43,6 +43,13 @@ export const JSED_IGNORE_CLASS = 'jsed-ignore';
 export const JSED_IMPLICIT_CLASS = 'jsed-implicit-line';
 
 /**
+ * CSS class for SELECTION_WRAPPER — a styling-neutral inline span that
+ * wraps a contiguous run of LINE_SIBLING's to paint the selection
+ * background without disturbing inherited styling.
+ */
+export const JSED_SELECTION_CLASS = 'jsed-selection';
+
+/**
  * CSS class for TRANSPARENT_BLOCK — a LINE (non-INLINE_FLOW, non-ISLAND FOCUSABLE) that the CURSOR
  * descends into (visit=no, descend=yes). By default such elements are OPAQUE_BLOCK;
  * this class opts them in to transparency.

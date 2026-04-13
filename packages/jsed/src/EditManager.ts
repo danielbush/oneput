@@ -6,6 +6,7 @@ import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
+import { TokenSelection } from './TokenSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
@@ -132,6 +133,7 @@ export class EditManager {
   }
 
   cursor?: TokenCursor;
+  private selection?: TokenSelection;
   private mode: EditManagerMode = 'view';
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
@@ -490,6 +492,37 @@ export class EditManager {
     if (this.mode === 'edit') {
       this.exitEditing();
     }
+  }
+
+  /**
+   * Extend the SELECTION one LINE_SIBLING forward from the current CURSOR.
+   *
+   * Stub for the selections feature (work/active/20260414.feat.selections.md).
+   * When implemented, this will seed a TokenSelection from the current TOKEN
+   * on first call and grow (or shrink) its head via LINE_SIBLING traversal on
+   * subsequent calls. Noop outside edit mode.
+   */
+  extendNext() {
+    if (this.isSuspended) return;
+    if (this.mode !== 'edit' || !this.cursor) return;
+    if (!this.selection) {
+      this.selection = TokenSelection.create({ seed: this.cursor.getToken() });
+    }
+    this.selection.extendNext();
+  }
+
+  /**
+   * Extend the SELECTION one LINE_SIBLING backward from the current CURSOR.
+   *
+   * See `extendNext` for the full design sketch.
+   */
+  extendPrevious() {
+    if (this.isSuspended) return;
+    if (this.mode !== 'edit' || !this.cursor) return;
+    if (!this.selection) {
+      this.selection = TokenSelection.create({ seed: this.cursor.getToken() });
+    }
+    this.selection.extendPrevious();
   }
 
   handleLeft() {

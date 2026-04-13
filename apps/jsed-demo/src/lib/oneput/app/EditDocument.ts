@@ -149,6 +149,24 @@ export class EditDocument implements AppObject {
         // when: { menuOpen: false }
       }
     },
+    EXTEND_NEXT: {
+      action: () => {
+        this.editManager.extendNext();
+      },
+      binding: {
+        bindings: ['Shift+$mod+l', 'Shift+ArrowRight'],
+        description: 'Extend selection to next LINE_SIBLING'
+      }
+    },
+    EXTEND_PREVIOUS: {
+      action: () => {
+        this.editManager.extendPrevious();
+      },
+      binding: {
+        bindings: ['Shift+$mod+h', 'Shift+ArrowLeft'],
+        description: 'Extend selection to previous LINE_SIBLING'
+      }
+    },
     REVEAL: {
       action: () => {
         this.editManager.revealActiveTarget();

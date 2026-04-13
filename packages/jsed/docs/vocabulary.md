@@ -138,6 +138,10 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
 - **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Non-LINE_SIBLING LINE_MEMBER's act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested TRANSPARENT_BLOCK elements within this line and not confuse them as the current LINE.
+- **SELECTION_WRAPPER**
+  - a transient `<span>` decoration inserted by `TokenSelection` to paint the selection background around a contiguous run of LINE_SIBLING's that share a DOM parent. Purely visual — unwrapped on collapse, never persisted.
+  - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
+  - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
 - **IMPLICIT_LINE**
   — IMPLICIT_LINE's are added to make FOCUS navigation easier but they are NOT treated as LINE's only as LINE_MEMBER's so they are similar to !ISLAND / INLINE_FLOW.
   - The CURSOR should descend into them but not visit. TOKEN's and INLINE_FLOW's that have a LINE as their previous sibling often resemble LINE's in their own right but they are not directly visitable by FOCUS at least as LINE's in their own right and appear hard to access. If we wrap a span tag around them, this tag is called an IMPLICIT_LINE and can receive the FOCUS.

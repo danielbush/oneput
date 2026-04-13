@@ -257,7 +257,7 @@ export class EditManager {
    *
    * @param {string} inputValue What the user has typed into an html input/textarea
    */
-  public handleInputChange = async (change: UserInputChange) => {
+  public handleInputChange = (change: UserInputChange) => {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
 
@@ -328,13 +328,21 @@ export class EditManager {
     if (finalToken) {
       this.cursor.setToken(finalToken);
       this.userInput.focus();
-      await this.userInput.setInputValue(token.getValue(finalToken));
-      this.userInput.selectAll();
-      this.nav.FOCUS(finalToken);
-      this.userInput.moveCursorToEnd();
+      this.userInput
+        .setInputValue(token.getValue(finalToken))
+        .then(() => {
+          this.userInput.selectAll();
+          this.nav.FOCUS(finalToken);
+          this.userInput.moveCursorToEnd();
+          this.cursor?.handleInputChange(intent.inputValue);
+        })
+        .catch((err) => {
+          // TODO: close cursor?
+          console.warn('handleInputChange error:', err);
+        });
+    } else {
+      this.cursor?.handleInputChange(intent.inputValue);
     }
-
-    this.cursor?.handleInputChange(intent.inputValue);
   };
 
   /**
@@ -351,7 +359,7 @@ export class EditManager {
    * When the cursor changes its token because of some action it has been
    * commanded to do usually by the user... (eg due to delete operation).
    */
-  private handleCursorChange = async (tok: HTMLElement) => {
+  private handleCursorChange = (tok: HTMLElement) => {
     this.nav?.FOCUS(tok);
     this.onCursorChange?.(tok);
     this.userInput.resetPlaceholder();

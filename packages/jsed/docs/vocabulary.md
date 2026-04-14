@@ -153,13 +153,13 @@ Tokens and Text and whitespace
 - **ANCHOR** — a TOKEN which is inserted into a FOCUSABLE (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
   - Source of truth: search docstrings for ANCHOR.
 - **LEADING_SPACE**
-  - a space whose previous sibling is a closing tag
+  - a text node consisting purely of whitespace "\s" characters whose previous sibling is a closing tag
   - when the user types words the spaces created are "in-between" spaces; TRAILING_SPACE's and LEADING_SPACE's are the spaces at the boundaries of what is typed; they can be toggled into and out of existence;
   - Example
     - `...<em/> foo<strong>...`
     - `...<em/> <strong>...` - could be either a LEADING_SPACE or a TRAILING_SPACE .
 - **TRAILING_SPACE**
-  - a space whose next sibling is an opening tag ; see LEADING_SPACE .
+  - a text node consisting purely of whitespace "\s" characters whose next sibling is an opening tag ; see LEADING_SPACE .
   - Example
     - `...<em/>foo <strong>...`
 - **NEGATIVE_SPACE** — default HTML whitespace handling: sequences of whitespace collapse to a single space, newlines treated as whitespace. Applies to most tags like `<p>`.

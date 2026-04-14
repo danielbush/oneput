@@ -1,5 +1,17 @@
 import { describe, it, expect, test } from 'vitest';
-import { makeRoot, p, div, em, span, frag, identify } from '../test/util.js';
+import {
+  div,
+  em,
+  em as emTag,
+  frag,
+  identify,
+  makeRoot,
+  p,
+  s,
+  span,
+  strong as strongTag,
+  t
+} from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { TokenCursor } from '../TokenCursor.js';
@@ -704,7 +716,14 @@ describe('TokenCursor cursor-side space actions', () => {
   it('insertSpaceBeforeCursor inserts whitespace before an anchor between adjacent inline tags', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      frag(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', ...inlineStyle }, 'foo'),
+          span({ id: 'a1', class: 'jsed-token jsed-anchor-token' }),
+          strongTag({ id: 'strong1', ...inlineStyle }, 'bar')
+        )
+      )
     );
     const anchor = doc.root.querySelector('#a1') as HTMLElement;
     const { cursor } = createCursor(doc, anchor);
@@ -723,9 +742,15 @@ describe('TokenCursor cursor-side space actions', () => {
   it('insertSpaceBeforeCursor inserts whitespace before a token between a closing tag and an opening tag', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      frag(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', ...inlineStyle }, 'foo'),
+          t('bar'),
+          strongTag({ id: 'strong1', ...inlineStyle }, 'baz')
+        )
+      )
     );
-    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
     const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
       (el) => el.textContent === 'bar'
     ) as HTMLElement;
@@ -781,6 +806,72 @@ describe('TokenCursor cursor-side space actions', () => {
     expect(result).toBe(true);
     expect(bar.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
     expect(bar.nextSibling?.textContent).toBe(' ');
+  });
+
+  it('insertSpaceAfterCursor inserts whitespace after a token before an OPAQUE_BLOCK', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        div(
+          { id: 'div1' },
+          t('foo'),
+          div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+          s(),
+          t('baz')
+        )
+      )
+    );
+    const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'foo'
+    ) as HTMLElement;
+    const opaque1 = doc.root.querySelector('#opaque1') as HTMLElement;
+    const { cursor } = createCursor(doc, foo);
+
+    // act
+    const canInsert = cursor.canInsertSpaceAfterCursor();
+    const result = cursor.insertSpaceAfterCursor();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    expect(foo.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(foo.nextSibling?.textContent).toBe(' ');
+    expect(foo.nextSibling?.nextSibling).toBe(opaque1);
+  });
+
+  it('insertSpaceAfterCursor inserts whitespace after a token before an OPAQUE_BLOCK with leading space', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        div(
+          { id: 'div1' },
+          t('foo'),
+          div(
+            { id: 'opaque1', style: 'display:inline-block;' },
+            s(), // this caued a regression
+            p('bar')
+          ),
+          s(),
+          t('baz')
+        )
+      )
+    );
+    const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'foo'
+    ) as HTMLElement;
+    const opaque1 = doc.root.querySelector('#opaque1') as HTMLElement;
+    const { cursor } = createCursor(doc, foo);
+
+    // act
+    const canInsert = cursor.canInsertSpaceAfterCursor();
+    const result = cursor.insertSpaceAfterCursor();
+
+    // assert
+    expect(canInsert).toBe(true);
+    expect(result).toBe(true);
+    expect(foo.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+    expect(foo.nextSibling?.textContent).toBe(' ');
+    expect(foo.nextSibling?.nextSibling).toBe(opaque1);
   });
 
   it('does not offer cursor-side space insertion in an ordinary text run', () => {
@@ -840,7 +931,15 @@ describe('TokenCursor cursor-side space actions', () => {
   it('removeSpaceBeforeCursor removes whitespace before an anchor between adjacent inline tags', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+      frag(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', ...inlineStyle }, 'foo'),
+          s(),
+          span({ id: 'a1', class: 'jsed-token jsed-anchor-token' }),
+          strongTag({ id: 'strong1', ...inlineStyle }, 'bar')
+        )
+      )
     );
     const anchor = doc.root.querySelector('#a1') as HTMLElement;
     const { cursor } = createCursor(doc, anchor);
@@ -858,7 +957,15 @@ describe('TokenCursor cursor-side space actions', () => {
   it('removeSpaceAfterCursor removes whitespace after an anchor between adjacent inline tags', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="display:inline;">bar</strong></p>'
+      frag(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', ...inlineStyle }, 'foo'),
+          span({ id: 'a1', class: 'jsed-token jsed-anchor-token' }),
+          s(),
+          strongTag({ id: 'strong1', ...inlineStyle }, 'bar')
+        )
+      )
     );
     const anchor = doc.root.querySelector('#a1') as HTMLElement;
     const { cursor } = createCursor(doc, anchor);
@@ -876,9 +983,16 @@ describe('TokenCursor cursor-side space actions', () => {
   it('removeSpaceBeforeCursor removes whitespace before a token between a closing tag and an opening tag', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+      frag(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', ...inlineStyle }, 'foo'),
+          s(),
+          t('bar'),
+          strongTag({ id: 'strong1', ...inlineStyle }, 'baz')
+        )
+      )
     );
-    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
     const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
       (el) => el.textContent === 'bar'
     ) as HTMLElement;
@@ -897,9 +1011,16 @@ describe('TokenCursor cursor-side space actions', () => {
   it('removeSpaceAfterCursor removes whitespace after a token between a closing tag and an opening tag', () => {
     // arrange
     const doc = makeRoot(
-      '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
+      frag(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', ...inlineStyle }, 'foo'),
+          t('bar'),
+          s(),
+          strongTag({ id: 'strong1', ...inlineStyle }, 'baz')
+        )
+      )
     );
-    quickDescend(doc.root.querySelector('#p1') as HTMLElement);
     const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
       (el) => el.textContent === 'bar'
     ) as HTMLElement;
@@ -913,6 +1034,36 @@ describe('TokenCursor cursor-side space actions', () => {
     expect(canRemove).toBe(true);
     expect(result).toBe(true);
     expect(bar.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+
+  it('removeSpaceAfterCursor removes whitespace after a token before an OPAQUE_BLOCK', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        div(
+          { id: 'div1' },
+          t('foo'),
+          s('  '),
+          div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+          s(),
+          t('baz')
+        )
+      )
+    );
+    const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'foo'
+    ) as HTMLElement;
+    const opaque1 = doc.root.querySelector('#opaque1') as HTMLElement;
+    const { cursor } = createCursor(doc, foo);
+
+    // act
+    const canRemove = cursor.canRemoveSpaceAfterCursor();
+    const result = cursor.removeSpaceAfterCursor();
+
+    // assert
+    expect(canRemove).toBe(true);
+    expect(result).toBe(true);
+    expect(foo.nextSibling).toBe(opaque1);
   });
 
   it('does not offer cursor-side space removal in an ordinary text run', () => {

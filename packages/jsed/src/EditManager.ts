@@ -794,7 +794,7 @@ export class EditManager {
 
   canInsertSpaceAfterTag(): boolean {
     const focus = this.nav.getFocus();
-    return !!(focus && token.getSpaceAfterTagInsertionPoint(focus));
+    return !!(focus && token.canInsertSpaceAfterTag(focus));
   }
 
   canRemoveSpaceAfterTag(): boolean {
@@ -814,7 +814,7 @@ export class EditManager {
 
   canInsertSpaceBeforeTag(): boolean {
     const focus = this.nav.getFocus();
-    return !!(focus && token.getSpaceBeforeTagInsertionPoint(focus));
+    return !!(focus && token.canInsertSpaceBeforeTag(focus));
   }
 
   canRemoveSpaceBeforeTag(): boolean {

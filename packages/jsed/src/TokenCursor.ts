@@ -163,7 +163,7 @@ export class TokenCursor extends TokenCursorBase {
 
   /** Whether a space can be inserted immediately before the CURSOR. */
   canInsertSpaceBeforeCursor(): boolean {
-    return !!token.getSpaceBeforeTokenInsertionPoint(this.getToken());
+    return token.canInsertSpaceBeforeToken(this.getToken());
   }
 
   /** Insert a space immediately before the CURSOR if possible. */
@@ -173,7 +173,7 @@ export class TokenCursor extends TokenCursorBase {
 
   /** Whether a space can be inserted immediately after the CURSOR. */
   canInsertSpaceAfterCursor(): boolean {
-    return !!token.getSpaceAfterTokenInsertionPoint(this.getToken());
+    return token.canInsertSpaceAfterToken(this.getToken());
   }
 
   /** Insert a space immediately after the CURSOR if possible. */

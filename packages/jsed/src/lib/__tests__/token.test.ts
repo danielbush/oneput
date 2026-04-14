@@ -1,17 +1,32 @@
 import { describe, test, expect, it } from 'vitest';
-import { byId, makeRoot, inlineStyleHackVal } from '../../test/util.js';
+import {
+  byId,
+  em,
+  frag,
+  inlineStyleHack,
+  inlineStyleHackVal,
+  makeRoot,
+  p,
+  s,
+  strong,
+  t
+} from '../../test/util.js';
 import {
   canInsertAnchorInLine,
   createToken,
   createAnchor,
   replaceText,
-  getSpaceAfterTagInsertionPoint,
+  getRemovableSpaceAfterToken,
+  canInsertSpaceAfterTag,
   insertSpaceAfterTag,
+  removeSpaceAfterToken,
+  getRemovableSpaceBeforeToken,
   getRemovableSpaceAfterTag,
   removeSpaceAfterTag,
-  getSpaceBeforeTagInsertionPoint,
+  canInsertSpaceBeforeTag,
   insertSpaceBeforeTag,
   getRemovableSpaceBeforeTag,
+  removeSpaceBeforeToken,
   removeSpaceBeforeTag,
   getAnchorAfterTagInsertionPoint,
   insertAnchorAfterTag,
@@ -54,25 +69,77 @@ describe('replaceText', () => {
   });
 });
 
+describe('token LEADING_SPACE / TRAILING_SPACE removal', () => {
+  test('removeSpaceBeforeToken removes boundary whitespace before a TOKEN', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          s(),
+          t('bar'),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'baz')
+        )
+      )
+    );
+    const tokenBar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+
+    // act
+    const removable = getRemovableSpaceBeforeToken(tokenBar);
+    const result = removeSpaceBeforeToken(tokenBar);
+
+    // assert
+    expect(removable?.textContent).toBe(' ');
+    expect(result).toBe(true);
+    expect(tokenBar.previousSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+
+  test('removeSpaceAfterToken removes boundary whitespace after a TOKEN', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          t('bar'),
+          s(),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'baz')
+        )
+      )
+    );
+    const tokenBar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+      (el) => el.textContent === 'bar'
+    ) as HTMLElement;
+
+    // act
+    const removable = getRemovableSpaceAfterToken(tokenBar);
+    const result = removeSpaceAfterToken(tokenBar);
+
+    // assert
+    expect(removable?.textContent).toBe(' ');
+    expect(result).toBe(true);
+    expect(tokenBar.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+  });
+});
+
 describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
-  test('getSpaceAfterTagInsertionPoint skips IGNORABLE siblings and finds the next tag boundary', () => {
+  test('canInsertSpaceAfterTag skips IGNORABLE siblings and finds the next tag boundary', () => {
     // arrange
     const doc = makeRoot(
       `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
     );
     const em1 = byId(doc, 'em1');
-    const strong1 = byId(doc, 'strong1');
-
     // act
-    const insertionPoint = getSpaceAfterTagInsertionPoint(em1);
+    const canInsert = canInsertSpaceAfterTag(em1);
 
     // assert
-    expect(insertionPoint).not.toBeNull();
-    expect(insertionPoint?.parent).toBe(em1.parentNode);
-    expect(insertionPoint?.next).toBe(strong1);
+    expect(canInsert).toBe(true);
   });
 
-  test('getSpaceAfterTagInsertionPoint returns null when whitespace already represents the gap', () => {
+  test('canInsertSpaceAfterTag returns false when whitespace already represents the gap', () => {
     // arrange
     const doc = makeRoot(
       `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
@@ -80,13 +147,13 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
     const em1 = byId(doc, 'em1');
 
     // act
-    const insertionPoint = getSpaceAfterTagInsertionPoint(em1);
+    const canInsert = canInsertSpaceAfterTag(em1);
 
     // assert
-    expect(insertionPoint).toBeNull();
+    expect(canInsert).toBe(false);
   });
 
-  test('getSpaceAfterTagInsertionPoint allows insertion before intervening text with no leading space', () => {
+  test('canInsertSpaceAfterTag allows insertion before intervening text with no leading space', () => {
     // arrange
     const doc = makeRoot(
       `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
@@ -94,12 +161,10 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
     const em1 = byId(doc, 'em1');
 
     // act
-    const insertionPoint = getSpaceAfterTagInsertionPoint(em1);
+    const canInsert = canInsertSpaceAfterTag(em1);
 
     // assert
-    expect(insertionPoint).not.toBeNull();
-    expect(insertionPoint?.next?.nodeType).toBe(Node.TEXT_NODE);
-    expect(insertionPoint?.next?.textContent).toBe('bar');
+    expect(canInsert).toBe(true);
   });
 
   test('insertSpaceAfterTag inserts a whitespace text node before the next tag', () => {
@@ -158,7 +223,14 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
   test('removeSpaceAfterTag removes boundary whitespace between adjacent tags', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          s(),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'bar')
+        )
+      )
     );
     const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
@@ -174,7 +246,15 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
   test('removeSpaceAfterTag removes leading whitespace from intervening text', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          s(),
+          t('bar'),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'baz')
+        )
+      )
     );
     const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
@@ -184,62 +264,84 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
 
     // assert
     expect(result).toBe(true);
-    expect(em1.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
-    expect(em1.nextSibling?.textContent).toBe('bar');
+    expect((em1.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+    expect((em1.nextSibling as HTMLElement | null)?.textContent).toBe('bar');
     expect(strong1.previousSibling?.textContent).toBe('bar');
   });
 
-  test('getSpaceBeforeTagInsertionPoint skips IGNORABLE siblings and finds the previous tag boundary', () => {
+  test('canInsertSpaceBeforeTag skips IGNORABLE siblings and finds the previous tag boundary', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          '<span class="jsed-ignore"></span>',
+          strong({ id: 'strong1', ...inlineStyleHack }, 'bar')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
-    const em1 = byId(doc, 'em1');
-
     // act
-    const insertionPoint = getSpaceBeforeTagInsertionPoint(strong1);
+    const canInsert = canInsertSpaceBeforeTag(strong1);
 
     // assert
-    expect(insertionPoint).not.toBeNull();
-    expect(insertionPoint?.parent).toBe(strong1.parentNode);
-    expect(insertionPoint?.previous).toBe(em1);
+    expect(canInsert).toBe(true);
   });
 
-  test('getSpaceBeforeTagInsertionPoint returns null when whitespace already represents the gap', () => {
+  test('canInsertSpaceBeforeTag returns false when whitespace already represents the gap', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          s(),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'bar')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
 
     // act
-    const insertionPoint = getSpaceBeforeTagInsertionPoint(strong1);
+    const canInsert = canInsertSpaceBeforeTag(strong1);
 
     // assert
-    expect(insertionPoint).toBeNull();
+    expect(canInsert).toBe(false);
   });
 
-  test('getSpaceBeforeTagInsertionPoint allows insertion after intervening text with no trailing space', () => {
+  test('canInsertSpaceBeforeTag allows insertion after intervening text with no trailing space', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          t('bar'),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'baz')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
 
     // act
-    const insertionPoint = getSpaceBeforeTagInsertionPoint(strong1);
+    const canInsert = canInsertSpaceBeforeTag(strong1);
 
     // assert
-    expect(insertionPoint).not.toBeNull();
-    expect(insertionPoint?.previous?.nodeType).toBe(Node.TEXT_NODE);
-    expect(insertionPoint?.previous?.textContent).toBe('bar');
+    expect(canInsert).toBe(true);
   });
 
   test('insertSpaceBeforeTag inserts a whitespace text node after the previous tag', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          '<span class="jsed-ignore"></span>',
+          strong({ id: 'strong1', ...inlineStyleHack }, 'bar')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
 
@@ -256,7 +358,14 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
   test('insertSpaceBeforeTag inserts a whitespace text node after intervening text', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar<strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          t('bar'),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'baz')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
 
@@ -268,14 +377,23 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
     expect(space?.nodeType).toBe(Node.TEXT_NODE);
     expect(space?.textContent).toBe(' ');
     expect(strong1.previousSibling).toBe(space);
-    expect(space?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
-    expect(space?.previousSibling?.textContent).toBe('bar');
+    expect((space?.previousSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(
+      true
+    );
+    expect((space?.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
   });
 
   test('getRemovableSpaceBeforeTag finds boundary whitespace between adjacent tags', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          s(),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'bar')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
 
@@ -290,7 +408,14 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
   test('removeSpaceBeforeTag removes boundary whitespace between adjacent tags', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em> <strong id="strong1" style="${inlineStyleHackVal}">bar</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          s(),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'bar')
+        )
+      )
     );
     const em1 = byId(doc, 'em1');
     const strong1 = byId(doc, 'strong1');
@@ -306,7 +431,15 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
   test('removeSpaceBeforeTag removes trailing whitespace from intervening text', () => {
     // arrange
     const doc = makeRoot(
-      `<p id="p1"><em id="em1" style="${inlineStyleHackVal}">foo</em>bar <strong id="strong1" style="${inlineStyleHackVal}">baz</strong></p>`
+      frag(
+        p(
+          { id: 'p1' },
+          em({ id: 'em1', ...inlineStyleHack }, 'foo'),
+          t('bar'),
+          s(),
+          strong({ id: 'strong1', ...inlineStyleHack }, 'baz')
+        )
+      )
     );
     const strong1 = byId(doc, 'strong1');
 
@@ -315,8 +448,10 @@ describe('anchor LEADING_SPACE / TRAILING_SPACE insertion', () => {
 
     // assert
     expect(result).toBe(true);
-    expect(strong1.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
-    expect(strong1.previousSibling?.textContent).toBe('bar');
+    expect((strong1.previousSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(
+      true
+    );
+    expect((strong1.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
   });
 });
 

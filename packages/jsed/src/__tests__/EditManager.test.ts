@@ -1,6 +1,17 @@
 import { describe, expect, it, test } from 'vitest';
 import { EditManager } from '../EditManager.js';
-import { byId, frag, makeRoot, p, span } from '../test/util.js';
+import {
+  byId,
+  div,
+  em as emTag,
+  frag,
+  makeRoot,
+  p,
+  s,
+  span,
+  strong as strongTag,
+  t
+} from '../test/util.js';
 import { getValue } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
@@ -626,7 +637,14 @@ describe('EditManager', () => {
     it('removes boundary whitespace between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            s(),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -654,7 +672,15 @@ describe('EditManager', () => {
     it('removes leading whitespace from intervening text', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            s(),
+            t('bar'),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -848,7 +874,14 @@ describe('EditManager', () => {
     it('inserts a space at the boundary before the focused tag', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            '<span class="jsed-ignore"></span>',
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -877,7 +910,14 @@ describe('EditManager', () => {
     it('does not insert another space when one already exists', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            s(),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -909,7 +949,14 @@ describe('EditManager', () => {
     it('inserts a space after intervening text', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            t('bar'),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -1012,7 +1059,14 @@ describe('EditManager', () => {
     it('removes boundary whitespace between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            s(),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -1040,7 +1094,15 @@ describe('EditManager', () => {
     it('removes trailing whitespace from intervening text', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            t('bar'),
+            s(),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+          )
+        )
       );
       const editManager = EditManager.createNull({
         document: doc,
@@ -1072,7 +1134,15 @@ describe('EditManager', () => {
     it('removes whitespace before an anchor between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span id="a1" class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            s(),
+            span({ id: 'a1', class: 'jsed-token jsed-anchor-token' }),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+          )
+        )
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -1100,7 +1170,15 @@ describe('EditManager', () => {
     it('removes whitespace before a token between a closing tag and an opening tag', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em> bar<strong id="strong1" style="display:inline;">baz</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            s(),
+            t('bar'),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+          )
+        )
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -1109,7 +1187,6 @@ describe('EditManager', () => {
         onError: () => {}
       });
       editManager.nav.connect();
-      quickDescend(byId(doc, 'p1'));
       const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
         (el) => el.textContent === 'bar'
       ) as HTMLElement;
@@ -1192,13 +1269,62 @@ describe('EditManager', () => {
 
       editManager.destroy();
     });
+
+    it('inserts whitespace after a token before an OPAQUE_BLOCK', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          div(
+            { id: 'div1' },
+            t('foo'),
+            div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+            s(),
+            t('baz')
+          )
+        )
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+        (el) => el.textContent === 'foo'
+      ) as HTMLElement;
+      const opaque1 = byId(doc, 'opaque1');
+
+      editManager.enterEditing(foo);
+
+      // act
+      const canInsert = editManager.canInsertSpaceAfterCursor();
+      const result = editManager.insertSpaceAfterCursor();
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(result).toBe(true);
+      expect(foo.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(foo.nextSibling?.textContent).toBe(' ');
+      expect(foo.nextSibling?.nextSibling).toBe(opaque1);
+
+      editManager.destroy();
+    });
   });
 
   describe('removeSpaceAfterCursor', () => {
     it('removes whitespace after an anchor between adjacent tags', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em><span id="a1" class="jsed-token jsed-anchor-token"></span> <strong id="strong1" style="display:inline;">bar</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            span({ id: 'a1', class: 'jsed-token jsed-anchor-token' }),
+            s(),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+          )
+        )
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -1226,7 +1352,15 @@ describe('EditManager', () => {
     it('removes whitespace after a token between a closing tag and an opening tag', () => {
       // arrange
       const doc = makeRoot(
-        '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar <strong id="strong1" style="display:inline;">baz</strong></p>'
+        frag(
+          p(
+            { id: 'p1' },
+            emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+            t('bar'),
+            s(),
+            strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+          )
+        )
       );
       const userInput = Controller.createNull().input;
       const editManager = EditManager.createNull({
@@ -1235,7 +1369,6 @@ describe('EditManager', () => {
         onError: () => {}
       });
       editManager.nav.connect();
-      quickDescend(byId(doc, 'p1'));
       const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
         (el) => el.textContent === 'bar'
       ) as HTMLElement;
@@ -1250,6 +1383,46 @@ describe('EditManager', () => {
       expect(canRemove).toBe(true);
       expect(result).toBe(true);
       expect(bar.nextSibling?.nodeType).not.toBe(Node.TEXT_NODE);
+
+      editManager.destroy();
+    });
+
+    it('removes whitespace after a token before an OPAQUE_BLOCK', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          div(
+            { id: 'div1' },
+            t('foo'),
+            s(),
+            div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+            s(),
+            t('baz')
+          )
+        )
+      );
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput,
+        onError: () => {}
+      });
+      editManager.nav.connect();
+      const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
+        (el) => el.textContent === 'foo'
+      ) as HTMLElement;
+      const opaque1 = byId(doc, 'opaque1');
+
+      editManager.enterEditing(foo);
+
+      // act
+      const canRemove = editManager.canRemoveSpaceAfterCursor();
+      const result = editManager.removeSpaceAfterCursor();
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(result).toBe(true);
+      expect(foo.nextSibling).toBe(opaque1);
 
       editManager.destroy();
     });

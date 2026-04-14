@@ -69,6 +69,7 @@ export function frag(...tags: string[]): string {
   return tags.join('');
 }
 export const span = makeTag('span');
+export const strong = makeTag('strong');
 export const section = makeTag('section');
 export const script = makeTag('script');
 export const input = makeTag('input');
@@ -78,6 +79,13 @@ export const input = makeTag('input');
  */
 export function t(text: string): string {
   return span({ class: JSED_TOKEN_CLASS }, text);
+}
+
+/**
+ * Create a text-node fixture.
+ */
+export function s(text = ' '): string {
+  return text;
 }
 
 /**

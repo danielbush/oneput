@@ -7,7 +7,14 @@ import {
 } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
 import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
-import { isIgnorable, isToken, isAnchor, isImplicitLine, isLine } from './taxonomy.js';
+import {
+  isIgnorable,
+  isToken,
+  isAnchor,
+  isImplicitLine,
+  isLine,
+  isCursorTransparent
+} from './taxonomy.js';
 import {
   getLine,
   getPreviousTokenSibling,
@@ -164,31 +171,21 @@ function subtreeStartsWithWhitespace(node: Node): boolean {
   return false;
 }
 
-function removeLeadingSpace(textNode: Text): Text | null {
+function removeLeadingSpaceNode(textNode: Text): Text | null {
   const value = textNode.nodeValue ?? '';
   if (!/^\s/.test(value)) {
     return null;
   }
-  const nextValue = value.replace(/^\s/, '');
-  if (nextValue.length === 0) {
-    textNode.parentNode?.removeChild(textNode);
-    return textNode;
-  }
-  textNode.nodeValue = nextValue;
+  textNode.parentNode?.removeChild(textNode);
   return textNode;
 }
 
-function removeTrailingSpace(textNode: Text): Text | null {
+function removeTrailingSpaceNode(textNode: Text): Text | null {
   const value = textNode.nodeValue ?? '';
   if (!/\s$/.test(value)) {
     return null;
   }
-  const nextValue = value.replace(/\s$/, '');
-  if (nextValue.length === 0) {
-    textNode.parentNode?.removeChild(textNode);
-    return textNode;
-  }
-  textNode.nodeValue = nextValue;
+  textNode.parentNode?.removeChild(textNode);
   return textNode;
 }
 
@@ -260,29 +257,30 @@ export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
   return ensureSeparatorAfter(token, value);
 }
 
-export function getSpaceBeforeTokenInsertionPoint(
-  token: HTMLElement
-): { parent: Node; next: Node | null } | null {
+export function canInsertSpaceBeforeToken(token: HTMLElement): boolean {
   if (!isToken(token) || !token.parentNode || getSeparatorBefore(token)) {
-    return null;
+    return false;
   }
 
   const previous = getPreviousVisibleSibling(token);
-  if (!previous || isToken(previous) || subtreeEndsWithWhitespace(previous)) {
-    return null;
+  if (
+    !previous ||
+    isToken(previous) ||
+    (isCursorTransparent(previous) && subtreeEndsWithWhitespace(previous))
+  ) {
+    return false;
   }
 
-  return { parent: token.parentNode, next: token };
+  return true;
 }
 
 export function insertSpaceBeforeToken(token: HTMLElement, value = ' '): Text | null {
-  const insertionPoint = getSpaceBeforeTokenInsertionPoint(token);
-  if (!insertionPoint) {
+  if (!canInsertSpaceBeforeToken(token) || !token.parentNode) {
     return null;
   }
 
   const space = document.createTextNode(value);
-  insertionPoint.parent.insertBefore(space, insertionPoint.next);
+  token.parentNode.insertBefore(space, token);
   return space;
 }
 
@@ -310,32 +308,29 @@ export function removeSpaceBeforeToken(token: HTMLElement): boolean {
     return false;
   }
 
-  return !!removeTrailingSpace(separator);
+  return !!removeTrailingSpaceNode(separator);
 }
 
-export function getSpaceAfterTokenInsertionPoint(
-  token: HTMLElement
-): { parent: Node; next: Node | null } | null {
+export function canInsertSpaceAfterToken(token: HTMLElement): boolean {
   if (!isToken(token) || !token.parentNode || getSeparatorAfter(token)) {
-    return null;
+    return false;
   }
 
   const next = getNextVisibleSibling(token);
-  if (!next || isToken(next) || subtreeStartsWithWhitespace(next)) {
-    return null;
+  if (!next || isToken(next) || (isCursorTransparent(next) && subtreeStartsWithWhitespace(next))) {
+    return false;
   }
 
-  return { parent: token.parentNode, next: token.nextSibling };
+  return true;
 }
 
 export function insertSpaceAfterToken(token: HTMLElement, value = ' '): Text | null {
-  const insertionPoint = getSpaceAfterTokenInsertionPoint(token);
-  if (!insertionPoint) {
+  if (!canInsertSpaceAfterToken(token) || !token.parentNode) {
     return null;
   }
 
   const space = document.createTextNode(value);
-  insertionPoint.parent.insertBefore(space, insertionPoint.next);
+  token.parentNode.insertBefore(space, token.nextSibling);
   return space;
 }
 
@@ -363,7 +358,7 @@ export function removeSpaceAfterToken(token: HTMLElement): boolean {
     return false;
   }
 
-  return !!removeLeadingSpace(separator);
+  return !!removeLeadingSpaceNode(separator);
 }
 
 /**
@@ -532,23 +527,17 @@ export function canInsertAnchorInLine(line: HTMLElement): boolean {
 }
 
 /**
- * Get the immediate boundary after a focused tag where a whitespace text node
- * can be inserted.
+ * Whether a whitespace text node can be inserted immediately after a focused
+ * tag.
  *
  * IGNORABLE siblings are skipped. A non-whitespace text node is a valid
  * insertion target as long as it does not already begin with whitespace. A
  * TOKEN is also a valid insertion target when no separator already represents
- * the boundary. In both cases the space is inserted before the target so the
- * focused tag gains trailing space.
- *
- * Returns null when the boundary is already represented by whitespace or an
- * IMPLICIT_LINE.
+ * the boundary.
  */
-export function getSpaceAfterTagInsertionPoint(
-  focus: HTMLElement
-): { parent: Node; next: Node | null } | null {
+export function canInsertSpaceAfterTag(focus: HTMLElement): boolean {
   if (isToken(focus) || isLine(focus) || !focus.parentNode) {
-    return null;
+    return false;
   }
 
   const next = getNextSiblingNode(focus, focus.parentNode, {
@@ -562,28 +551,36 @@ export function getSpaceAfterTagInsertionPoint(
 
   if (next?.nodeType === Node.TEXT_NODE) {
     const text = next.textContent ?? '';
-    return /^\s/.test(text) ? null : { parent: focus.parentNode, next };
+    return !/^\s/.test(text);
   }
 
   if (next && !(next instanceof HTMLElement)) {
-    return null;
+    return false;
   }
 
   if (next && isImplicitLine(next)) {
-    return null;
+    return false;
   }
 
-  return next ? { parent: focus.parentNode, next } : null;
+  return !!next;
 }
 
 export function insertSpaceAfterTag(focus: HTMLElement, value = ' '): Text | null {
-  const insertionPoint = getSpaceAfterTagInsertionPoint(focus);
-  if (!insertionPoint) {
+  if (!canInsertSpaceAfterTag(focus) || !focus.parentNode) {
     return null;
   }
 
+  const next = getNextSiblingNode(focus, focus.parentNode, {
+    visit: (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
+      }
+      return !(node instanceof Element && isIgnorable(node));
+    }
+  });
+
   const space = document.createTextNode(value);
-  insertionPoint.parent.insertBefore(space, insertionPoint.next);
+  focus.parentNode.insertBefore(space, next);
   return space;
 }
 
@@ -622,7 +619,7 @@ export function removeSpaceAfterTag(focus: HTMLElement): boolean {
     return false;
   }
 
-  return !!removeLeadingSpace(textNode);
+  return !!removeLeadingSpaceNode(textNode);
 }
 
 /**
@@ -771,23 +768,17 @@ export function getAnchorBeforeTagInsertionPoint(
 }
 
 /**
- * Get the immediate boundary before a focused tag where a whitespace text node
- * can be inserted.
+ * Whether a whitespace text node can be inserted immediately before a focused
+ * tag.
  *
  * IGNORABLE siblings are skipped. A non-whitespace text node is a valid
  * insertion target as long as it does not already end with whitespace. A
  * TOKEN is also a valid insertion target when no separator already represents
- * the boundary. In both cases the space is inserted after the target so the
- * focused tag gains leading space.
- *
- * Returns null when the boundary is already represented by whitespace or an
- * IMPLICIT_LINE.
+ * the boundary.
  */
-export function getSpaceBeforeTagInsertionPoint(
-  focus: HTMLElement
-): { parent: Node; previous: Node | null } | null {
+export function canInsertSpaceBeforeTag(focus: HTMLElement): boolean {
   if (isToken(focus) || isLine(focus) || !focus.parentNode) {
-    return null;
+    return false;
   }
 
   const previous = getPreviousSiblingNode(focus, focus.parentNode, {
@@ -801,28 +792,27 @@ export function getSpaceBeforeTagInsertionPoint(
 
   if (previous?.nodeType === Node.TEXT_NODE) {
     const text = previous.textContent ?? '';
-    return /\s$/.test(text) ? null : { parent: focus.parentNode, previous };
+    return !/\s$/.test(text);
   }
 
   if (previous && !(previous instanceof HTMLElement)) {
-    return null;
+    return false;
   }
 
   if (previous && isImplicitLine(previous)) {
-    return null;
+    return false;
   }
 
-  return previous ? { parent: focus.parentNode, previous } : null;
+  return !!previous;
 }
 
 export function insertSpaceBeforeTag(focus: HTMLElement, value = ' '): Text | null {
-  const insertionPoint = getSpaceBeforeTagInsertionPoint(focus);
-  if (!insertionPoint) {
+  if (!canInsertSpaceBeforeTag(focus) || !focus.parentNode) {
     return null;
   }
 
   const space = document.createTextNode(value);
-  insertionPoint.parent.insertBefore(space, focus);
+  focus.parentNode.insertBefore(space, focus);
   return space;
 }
 
@@ -861,7 +851,7 @@ export function removeSpaceBeforeTag(focus: HTMLElement): boolean {
     return false;
   }
 
-  return !!removeTrailingSpace(textNode);
+  return !!removeTrailingSpaceNode(textNode);
 }
 
 /**

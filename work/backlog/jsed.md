@@ -9,7 +9,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     - test: quickDescend a LINE with an ISLAND as the first LINE_SIBLING
   - when the cursor has exhausted the current line
     - it calls findNextNode, looks for first text node or TOKEN (t), calls quickDescend on getLine(t), puts itself on first token
-- detokenize on the fly to reduce tokens
+- [x] detokenize on the fly to reduce tokens
   - we create a Detokenizer object, inject it into EditManager
   - it listens for tokenization events
   - maybe it also needs to track cursors
@@ -31,8 +31,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - undo text changes
   - undo FOCUSABLE changes
 - save/persist changes and load
-- islands
-  - katex as exampmle of an island
+- editing islands
+  - katex as example of an island
   - code might be another
 - r:JSED_AGENT_COEDIT
 
@@ -41,8 +41,20 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Finer details
 
-### For consideration
+### Drafting
 
+- remove symobls from architecture; just use vocab and module file names
+- move skills/jsed/SKILL.md into jsed/AGENTS.md
+- importing oneput `import { Controller } from '@oneput/oneput';` in jsed breaks because `packages/oneput/src/lib/index.ts` imports .svelte files (directly or indirectly); what can we do about this?
+  - run this by claude / codex
+    - we break oneput into oneput-core, oneput-svelte ?
+      - this could lead into oneput-react
+    - we have a `components/*` `"exports"` entry in oneput
+    - not viable: make jsed use sveltekit vite plugin - because we want oneput and jsed to work as web components
+  - at the moment (Apr-2026), EditManager and EditManager.test both import Controller relatively; they should import using the package
+- use before, after, replaceWith where applicable
+- use el.ownerDocument  eg `el.ownerDocument.createElement(...)`
+- probably should rename TokenCursor and TokenSelection since they can sit on non-TOKEN LINE_SIBLING's like ISLAND's
 - hitting ENTER on empty p-tag should insert anchor; no need to go into menu
 - $mod+m when hit 2 or 3 times within an interval, moves FOCUS to top and bottom of screen respectively
 - remember last token position in each LINE (not LINE_SEGMENT)

@@ -1,5 +1,7 @@
 {
     "recommendations": [
-        "task.vscode-task"
+        "task.vscode-task",
+        "esbenp.prettier-vscode",
+        "svelte.svelte-vscode"
     ]
 }

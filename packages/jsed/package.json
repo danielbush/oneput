@@ -55,12 +55,12 @@
     "happy-dom": "^18.0.1",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^24.0.0",
-    "@vitest/coverage-v8": "^1.1.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "prettier": "^3.8.1",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vite-plugin-dts": "^4.3.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",

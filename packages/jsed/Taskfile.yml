@@ -14,6 +14,9 @@ tasks:
     cmds:
       - rm -rf node_modules
       - pnpm i
+  test:coverage:
+    cmds:
+      - pnpm run test:coverage {{.CLI_ARGS}}
   test:
     desc: |
       Run unit tests; but avoid triggering browser tests.

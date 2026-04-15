@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Tracked pre-commit-user hook. Installed into .git/hooks/pre-commit-user
+# via scripts/hooks/install.sh (run once after clone).
+#
+# Runs `task format` against staged files and re-stages any that format
+# modified. Scoped to originally-staged files only — does not sweep in
+# untracked or unstaged changes.
+#
+# GitButler: this is invoked by GitButler's managed .git/hooks/pre-commit,
+# which delegates to pre-commit-user before its workspace-branch guard.
+#
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$STAGED" ]; then
+    exit 0
+fi
+
+echo "Running task format..."
+if ! task format; then
+    echo "task format failed. Fix the issues before committing."
+    exit 1
+fi
+
+RESTAGE=""
+for f in $STAGED; do
+    if [ -f "$f" ] && ! git diff --quiet -- "$f"; then
+        RESTAGE="$RESTAGE $f"
+    fi
+done
+
+if [ -n "$RESTAGE" ]; then
+    echo "task format modified staged files; re-staging:$RESTAGE"
+    # shellcheck disable=SC2086
+    git add -- $RESTAGE
+fi
+
+exit 0

@@ -30,8 +30,15 @@ tasks:
       - task --list-all
 
   install:
+    desc: install dependencies and git hooks
     cmds:
       - pnpm i
+      - task: hooks:install
+
+  hooks:install:
+    desc: install tracked git hooks into .git/hooks
+    cmds:
+      - sh scripts/hooks/install.sh
 
   format:
     desc: format code

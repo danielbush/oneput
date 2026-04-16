@@ -5,6 +5,10 @@ import { findNextNode, findPreviousNode } from './lib/walk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
+export type TokenCursorMoveNextOutcome =
+  | { type: 'moved' }
+  | { type: 'stayed' }
+  | { type: 'exhausted' };
 
 /**
  * Manages the CURSOR — motion, editing, and CURSOR_STATE markers.
@@ -21,22 +25,19 @@ export class TokenCursor extends TokenCursorBase {
   // #region Motion
 
   /** Move to next TOKEN if it exists. */
-  moveNext() {
+  moveNext(): TokenCursorMoveNextOutcome {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
-      return;
+      return { type: 'stayed' };
     }
 
     const nextToken = getNextLineSibling(this.getToken());
     if (nextToken) {
       this.setToken(nextToken);
-      return;
+      return { type: 'moved' };
     }
 
-    const nextLineTarget = this.findNextLineTarget();
-    if (nextLineTarget) {
-      this.setToken(nextLineTarget);
-    }
+    return { type: 'exhausted' };
   }
 
   /** Move to previous TOKEN if it exists. */
@@ -61,30 +62,6 @@ export class TokenCursor extends TokenCursorBase {
   // #endregion
 
   // #region Editing tokens
-
-  /** Find the first editable LINE_SIBLING beyond the current exhausted LINE. */
-  private findNextLineTarget(): HTMLElement | null {
-    const current = this.getToken();
-    const currentLine = getLine(current);
-
-    for (const node of findNextNode(current, this.getDocument().root, {
-      visit: isLineSibling,
-      descend: isCursorTransparent
-    })) {
-      if (node instanceof HTMLElement && node.contains(currentLine)) {
-        continue;
-      }
-
-      const nextLine = getLine(node);
-      if (nextLine === currentLine) {
-        continue;
-      }
-
-      return this.getTokenizer().quickDescend(node as HTMLElement);
-    }
-
-    return null;
-  }
 
   /** Find the previous editable LINE_SIBLING beyond the current exhausted LINE. */
   private findPreviousLineTarget(): HTMLElement | null {

@@ -2,8 +2,9 @@ import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/edit/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/edit/FocusChainNavigator.js';
-import { isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
+import { findNextNode } from './lib/walk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import { TokenSelection } from './TokenSelection.js';
@@ -275,7 +276,7 @@ export class EditManager {
 
     switch (intent.type) {
       case 'move-next-on-space':
-        this.cursor.moveNext();
+        this.moveCursorNext();
         return;
 
       case 'delete-current': {
@@ -461,6 +462,42 @@ export class EditManager {
     this.onError?.(err);
   };
 
+  /** Find the first editable LINE_SIBLING beyond the current exhausted LINE. */
+  private findNextLineTarget(from: HTMLElement): HTMLElement | null {
+    const currentLine = getLine(from);
+
+    for (const node of findNextNode(from, this.document.root, {
+      visit: isLineSibling,
+      descend: isCursorTransparent
+    })) {
+      if (node instanceof HTMLElement && node.contains(currentLine)) {
+        continue;
+      }
+
+      const nextLine = getLine(node);
+      if (nextLine === currentLine) {
+        continue;
+      }
+
+      return this.tokenizer.quickDescend(node as HTMLElement);
+    }
+
+    return null;
+  }
+
+  private moveCursorNext() {
+    if (!this.cursor) return;
+    const outcome = this.cursor.moveNext();
+    if (outcome.type !== 'exhausted') {
+      return;
+    }
+
+    const nextLineTarget = this.findNextLineTarget(this.cursor.getToken());
+    if (nextLineTarget) {
+      this.cursor.setToken(nextLineTarget);
+    }
+  }
+
   /**
    * Handle the user pressing Enter based on the current editing context.
    *
@@ -539,7 +576,7 @@ export class EditManager {
   handleRight() {
     if (this.isSuspended) return;
     if (this.mode === 'edit') {
-      this.cursor?.moveNext();
+      this.moveCursorNext();
       return;
     }
 

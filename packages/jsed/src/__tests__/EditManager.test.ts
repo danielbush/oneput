@@ -5,6 +5,7 @@ import {
   div,
   em as emTag,
   frag,
+  identify,
   makeRoot,
   p,
   s,
@@ -337,6 +338,105 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
+
+      it('from the last TOKEN of a LINE enters the next LINE', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            //
+            p({ id: 'p1' }, 'aaa'),
+            p({ id: 'p2' }, 'bbb ccc')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+
+        // act
+        editManager.handleRight();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+        editManager.destroy();
+      });
+
+      it('from the last LINE_SIBLING of a LINE enters the next LINE that starts with an ISLAND', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            p({ id: 'p1' }, 'aaa'),
+            p({ id: 'p2' }, '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+
+        // act
+        editManager.handleRight();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(identify(editManager.cursor!.getToken())).toBe('[island:span]');
+
+        editManager.destroy();
+      });
+
+      it('stays put at the final LINE of the document', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            //
+            p({ id: 'p1' }, 'aaa'),
+            p({ id: 'p2' }, 'bbb')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p2'));
+
+        // act
+        editManager.handleRight();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+        editManager.destroy();
+      });
+
+      it('lands on the first editable LINE_SIBLING beyond the exhausted LINE, not the start of an ancestor LINE', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'outer' },
+            p({ id: 'p1' }, 'aaa'),
+            div(
+              { id: 'wrap', class: 'jsed-cursor-transparent' },
+              p({ id: 'p2' }, 'bbb'),
+              p({ id: 'p3' }, 'ccc')
+            )
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+
+        // act
+        editManager.handleRight();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+        editManager.destroy();
+      });
     });
 
     describe('handleLeft', () => {
@@ -355,6 +455,128 @@ describe('EditManager', () => {
         // assert
         expect(editManager.getMode()).toBe('edit');
         expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+
+        editManager.destroy();
+      });
+
+      it('from the first TOKEN of a LINE enters the previous LINE', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            //
+            p({ id: 'p1' }, 'aaa bbb'),
+            p({ id: 'p2' }, 'ccc')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p2'));
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+        editManager.destroy();
+      });
+
+      it('from the first TOKEN of a LINE enters the previous LINE that ends with an ISLAND', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>'),
+            p({ id: 'p2' }, 'bbb')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p2'));
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(identify(editManager.cursor!.getToken())).toBe('[island:span]');
+
+        editManager.destroy();
+      });
+
+      it('lands on the last editable LINE_SIBLING beyond the exhausted LINE, not the start of an ancestor LINE', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'outer' },
+            div(
+              { id: 'wrap', class: 'jsed-cursor-transparent' },
+              p({ id: 'p1' }, 'aaa'),
+              p({ id: 'p2' }, 'bbb')
+            ),
+            p({ id: 'p3' }, 'ccc')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p3'));
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+        editManager.destroy();
+      });
+
+      it('from the first paragraph in an opaque container skips the container and continues to something before it', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            p({ id: 'before' }, 'zzz'),
+            div({ id: 'outer' }, p({ id: 'p1' }, 'aaa'), p({ id: 'p2' }, 'bbb'))
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('zzz');
+
+        editManager.destroy();
+      });
+
+      it('stays put at the first LINE of the document', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            //
+            p({ id: 'p1' }, 'aaa'),
+            p({ id: 'p2' }, 'bbb')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
 
         editManager.destroy();
       });

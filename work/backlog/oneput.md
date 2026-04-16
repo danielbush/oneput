@@ -2,7 +2,16 @@
 
 The following are potential work (tickets for work) sorted by priority: earlier tickets take precendence over later ones.  Extract the next ticket from the top, and convert it into a spec, and draft a plan based on the initial proposal.
 
-## Initial proposal: (docs + feat) configurable keybindings for AppObject actions
+## Crtical work
+
+## Finer Details
+
+### Drafting
+
+- move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+- need to make ai-docs similar to effect v4
+
+### Initial proposal: (docs + feat) configurable keybindings for AppObject actions
 
 Drafted: 03-Apr-2026
 
@@ -21,7 +30,7 @@ Concrete example:
 
 The agent should explain the current architecture and then propose the implementation shape we actually want.
 
-## Initial proposal: (feat) `onBack` on AppObject for goBack functionality
+### Initial proposal: (feat) `onBack` on AppObject for goBack functionality
 
 Drafted: 03-Apr-2026
 
@@ -36,7 +45,7 @@ Questions to answer:
 - how should this interact with existing back bindings and menu/navigation behavior?
 - what should happen when an app wants custom back behavior but still sometimes fall through to normal `goBack`?
 
-## Initial proposal: (bug) previous app menu can leak into next AppObject
+### Initial proposal: (bug) previous app menu can leak into next AppObject
 
 Drafted: 03-Apr-2026
 
@@ -51,7 +60,7 @@ Questions to answer:
 - what is the intended behavior when the new app omits `menu` entirely?
 - are there similar leaks for other AppObject-owned state besides menu?
 
-## Initial proposal: (refactor) null input controller backed by happy-dom input element
+### Initial proposal: (refactor) null input controller backed by happy-dom input element
 
 Drafted: 05-Apr-2026
 
@@ -64,7 +73,7 @@ Questions to answer:
 - what observable writes/events should it track for tests?
 - can existing Oneput tests benefit from a DOM-backed nullable instead of casted fakes or looser helpers?
 
-## Initial proposal: (feat + refactor) better duplicate binding handling 
+### Initial proposal: (feat + refactor) better duplicate binding handling 
 
 Drafted: 19-Mar-2026
 
@@ -95,7 +104,7 @@ Things I'd like to do
     - console warn what actionId's were dropped
     - we can then look into reporting this via Oneput's alert or notification mechanisms
 
-## Initial proposal: (refactor) deep modules for packages/oneput 
+### Initial proposal: (refactor) deep modules for packages/oneput 
 
 Drafted: 19-Mar-2026
 
@@ -112,7 +121,7 @@ Drafted: 19-Mar-2026
     - everything else that was in packages/oneput/src/lib/oneput
 - TODO: think about deep modules and how it supports progressive disclosure both for agents and humans and suggest any improvements to the above
 
-## Initial proposal: (docs) ai-docs similar to effect-ts
+### Initial proposal: (docs) ai-docs similar to effect-ts
 
 Drafted: 19-Mar-2026
 
@@ -123,7 +132,7 @@ Some key ideas:
 - we should be able to do all the things forms do
 - we should be able to edit and store keybindings using a pluggable storage mechanism
 
-## Initial proposal: (feat) support web components
+### Initial proposal: (feat) support web components
 
 Drafted: 19-Mar-2026
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from 'vitest';
+import { describe, expect, it, test, vi } from 'vitest';
 import { EditManager } from '../EditManager.js';
 import {
   byId,
@@ -19,13 +19,12 @@ import { quickDescend } from '../lib/tokenize.js';
 import { isIsland } from '../lib/taxonomy.js';
 
 describe('EditManager', () => {
-  describe('focus and edit lifecycle', () => {
-    it('first focus quick-descends but stays in view mode', () => {
+  describe('focus and edit lifecycle incl tokenization', () => {
+    it('first REQUEST_FOCUS in view mode tokenizes the focused LINE but stays in view mode', () => {
       // arrange
       const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
       const editManager = EditManager.createNull({
-        document: doc,
-        userInput: Controller.createNull().input
+        document: doc
       });
       editManager.nav.connect();
       const p1 = byId(doc, 'p1');
@@ -39,6 +38,102 @@ describe('EditManager', () => {
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
 
       editManager.destroy();
+    });
+
+    it('focusing a new FOCUSABLE tokenizes that new LINE without entering edit mode', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+
+      editManager.nav.REQUEST_FOCUS(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p2);
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p2);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
+
+      editManager.destroy();
+    });
+
+    it('re-focusing an already-tokenized LINE is idempotent at the DOM level', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+
+      editManager.nav.REQUEST_FOCUS(p1);
+      const originalTokens = Array.from(p1.querySelectorAll('.jsed-token'));
+      expect(originalTokens).toHaveLength(2);
+
+      editManager.nav.REQUEST_FOCUS(p2);
+      expect(editManager.nav.getFocus()).toBe(p2);
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p1);
+
+      // assert
+      const retokenizedTokens = Array.from(p1.querySelectorAll('.jsed-token'));
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(retokenizedTokens).toHaveLength(2);
+      expect(retokenizedTokens).toEqual(originalTokens);
+      expect(p1.querySelector('.jsed-token .jsed-token')).toBeNull();
+
+      editManager.destroy();
+    });
+
+    test('background cleanup detokenizes the oldest inactive LINE after enough normal interactions', async () => {
+      // arrange
+      vi.useFakeTimers();
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'aaa'),
+          p({ id: 'p2' }, 'bbb'),
+          p({ id: 'p3' }, 'ccc'),
+          p({ id: 'p4' }, 'ddd')
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+      const p3 = byId(doc, 'p3');
+      const p4 = byId(doc, 'p4');
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p1);
+      editManager.nav.REQUEST_FOCUS(p2);
+      editManager.nav.REQUEST_FOCUS(p3);
+      editManager.nav.REQUEST_FOCUS(p4);
+      await vi.runAllTimersAsync();
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p4);
+      expect(p1.querySelector('.jsed-token')).toBeNull();
+      expect(p2.querySelector('.jsed-token')?.textContent).toBe('bbb');
+      expect(p3.querySelector('.jsed-token')?.textContent).toBe('ccc');
+      expect(p4.querySelector('.jsed-token')?.textContent).toBe('ddd');
+
+      editManager.destroy();
+      vi.useRealTimers();
     });
 
     it('clicking a token in another already-tokenized FOCUSABLE requires two interactions', () => {
@@ -73,7 +168,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    it('clicking a different element while editing exits to view mode and quick-descends it', () => {
+    it('exiting edit mode by focusing another element quick-descends and tokenizes the new focus target', () => {
       // arrange
       const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
       const editManager = EditManager.createNull({
@@ -95,13 +190,12 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    describe('enterEditing', () => {
+    describe('when user initiates editing...', () => {
       it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
 
         // act
@@ -111,6 +205,66 @@ describe('EditManager', () => {
         expect(result.isOk()).toBe(true);
         expect(editManager.getMode()).toBe('edit');
         expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+
+        editManager.destroy();
+      });
+
+      it('tokenizes the focused LINE and lands on its first TOKEN', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        const line = byId(doc, 'p1');
+
+        expect(line.querySelectorAll('.jsed-token')).toHaveLength(0);
+
+        // act
+        const result = editManager.enterEditing(line);
+
+        // assert
+        expect(result.isOk()).toBe(true);
+        expect(editManager.getMode()).toBe('edit');
+        expect(
+          Array.from(line.querySelectorAll('.jsed-token')).map((token) => token.textContent)
+        ).toEqual(['foo', 'bar', 'baz']);
+        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+
+        editManager.destroy();
+      });
+
+      it('entering from a container tokenizes only the candidate LINE, not the whole subtree', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'div1' }, //
+            p({ id: 'p1' }, 'foo bar'),
+            p({ id: 'p2' }, 'baz qux')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        const div1 = byId(doc, 'div1');
+        const p1 = byId(doc, 'p1');
+        const p2 = byId(doc, 'p2');
+
+        expect(div1.querySelectorAll(':scope > .jsed-token')).toHaveLength(0);
+        expect(p1.querySelectorAll('.jsed-token')).toHaveLength(0);
+        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
+
+        // act
+        const result = editManager.enterEditing(div1);
+
+        // assert
+        expect(result.isOk()).toBe(true);
+        expect(editManager.getMode()).toBe('edit');
+        expect(div1.querySelectorAll(':scope > .jsed-token')).toHaveLength(0);
+        expect(
+          Array.from(p1.querySelectorAll('.jsed-token')).map((token) => token.textContent)
+        ).toEqual(['foo', 'bar']);
+        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
+        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
 
         editManager.destroy();
       });
@@ -125,8 +279,7 @@ describe('EditManager', () => {
           '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.nav.connect();
         const div1 = byId(doc, 'd1');
@@ -152,8 +305,7 @@ describe('EditManager', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.nav.connect();
         const p1 = byId(doc, 'p1');
@@ -172,8 +324,7 @@ describe('EditManager', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
 
@@ -193,8 +344,7 @@ describe('EditManager', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.cursor?.moveNext();
@@ -215,8 +365,7 @@ describe('EditManager', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         const p1 = byId(doc, 'p1');
         editManager.enterEditing(p1);
@@ -243,8 +392,7 @@ describe('EditManager', () => {
           )
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.nav.connect();
 
@@ -271,8 +419,7 @@ describe('EditManager', () => {
           )
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.nav.connect();
 
@@ -306,8 +453,7 @@ describe('EditManager', () => {
           }
         });
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
         const token = editManager.cursor?.getToken() as HTMLElement;
@@ -351,8 +497,7 @@ describe('EditManager', () => {
           }
         });
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         const p1 = byId(doc, 'p1');
         editManager.nav.REQUEST_FOCUS(p1);
@@ -395,8 +540,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         // const em = byId(doc, 'em1');
@@ -431,8 +575,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -470,8 +613,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const strong = byId(doc, 'strong1');
@@ -506,9 +648,7 @@ describe('EditManager', () => {
           )
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const strong = byId(doc, 'strong1');
@@ -534,9 +674,7 @@ describe('EditManager', () => {
         // arrange
         const doc = makeRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const p2 = byId(doc, 'p2');
@@ -567,9 +705,7 @@ describe('EditManager', () => {
           )
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -601,9 +737,7 @@ describe('EditManager', () => {
           )
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -636,8 +770,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -665,9 +798,7 @@ describe('EditManager', () => {
         // arrange
         const doc = makeRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const p1 = byId(doc, 'p1');
@@ -694,8 +825,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -728,8 +858,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -764,9 +893,7 @@ describe('EditManager', () => {
           )
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -794,9 +921,7 @@ describe('EditManager', () => {
           '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -822,9 +947,7 @@ describe('EditManager', () => {
           '<p id="p1"><em id="em1" style="display:inline;">foo</em> <span class="jsed-token jsed-anchor-token"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
         );
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input,
-          onError: () => {}
+          document: doc
         });
         editManager.nav.connect();
         const em = byId(doc, 'em1');
@@ -854,8 +977,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const p1 = byId(doc, 'p1');
@@ -884,8 +1006,7 @@ describe('EditManager', () => {
         const userInput = Controller.createNull().input;
         const editManager = EditManager.createNull({
           document: doc,
-          userInput,
-          onError: () => {}
+          userInput
         });
         editManager.nav.connect();
         const p1 = byId(doc, 'p1');
@@ -919,9 +1040,7 @@ describe('EditManager', () => {
             '<p id="p1"><em id="em1" style="display:inline;">foo</em><span class="jsed-ignore"></span><strong id="strong1" style="display:inline;">bar</strong></p>'
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const em = byId(doc, 'em1');
@@ -949,9 +1068,7 @@ describe('EditManager', () => {
             '<p id="p1"><em id="em1" style="display:inline;">foo</em> <strong id="strong1" style="display:inline;">bar</strong></p>'
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const em = byId(doc, 'em1');
@@ -981,9 +1098,7 @@ describe('EditManager', () => {
             '<p id="p1"><em id="em1" style="display:inline;">foo</em>bar<strong id="strong1" style="display:inline;">baz</strong></p>'
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const em = byId(doc, 'em1');
@@ -1024,9 +1139,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const em = byId(doc, 'em1');
@@ -1060,9 +1173,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const em = byId(doc, 'em1');
@@ -1100,9 +1211,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const strong = byId(doc, 'strong1');
@@ -1136,9 +1245,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const strong = byId(doc, 'strong1');
@@ -1175,9 +1282,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const strong = byId(doc, 'strong1');
@@ -1219,9 +1324,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const em = byId(doc, 'em1');
@@ -1255,9 +1358,7 @@ describe('EditManager', () => {
             )
           );
           const editManager = EditManager.createNull({
-            document: doc,
-            userInput: Controller.createNull().input,
-            onError: () => {}
+            document: doc
           });
           editManager.nav.connect();
           const strong = byId(doc, 'strong1');
@@ -1298,8 +1399,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           const anchor = byId(doc, 'a1');
@@ -1336,8 +1436,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           quickDescend(byId(doc, 'p1'));
@@ -1375,8 +1474,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           quickDescend(byId(doc, 'p1'));
@@ -1411,8 +1509,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           const anchor = byId(doc, 'a1');
@@ -1447,8 +1544,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
@@ -1486,8 +1582,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           const anchor = byId(doc, 'a1');
@@ -1524,8 +1619,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           quickDescend(byId(doc, 'p1'));
@@ -1554,8 +1648,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           quickDescend(byId(doc, 'p1'));
@@ -1591,8 +1684,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           quickDescend(byId(doc, 'p1'));
@@ -1627,8 +1719,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           const anchor = byId(doc, 'a1');
@@ -1663,8 +1754,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
@@ -1691,8 +1781,7 @@ describe('EditManager', () => {
           const userInput = Controller.createNull().input;
           const editManager = EditManager.createNull({
             document: doc,
-            userInput,
-            onError: () => {}
+            userInput
           });
           editManager.nav.connect();
           quickDescend(byId(doc, 'p1'));
@@ -1731,8 +1820,7 @@ describe('EditManager', () => {
             const userInput = Controller.createNull().input;
             const editManager = EditManager.createNull({
               document: doc,
-              userInput,
-              onError: () => {}
+              userInput
             });
             editManager.nav.connect();
             const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
@@ -1776,8 +1864,7 @@ describe('EditManager', () => {
             const userInput = Controller.createNull().input;
             const editManager = EditManager.createNull({
               document: doc,
-              userInput,
-              onError: () => {}
+              userInput
             });
             editManager.nav.connect();
             const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
@@ -1818,8 +1905,7 @@ describe('EditManager', () => {
             const userInput = Controller.createNull().input;
             const editManager = EditManager.createNull({
               document: doc,
-              userInput,
-              onError: () => {}
+              userInput
             });
             editManager.nav.connect();
             const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
@@ -1858,8 +1944,7 @@ describe('EditManager', () => {
             const userInput = Controller.createNull().input;
             const editManager = EditManager.createNull({
               document: doc,
-              userInput,
-              onError: () => {}
+              userInput
             });
             editManager.nav.connect();
             const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(

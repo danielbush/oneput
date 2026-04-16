@@ -10,6 +10,7 @@ import { TokenSelection } from './TokenSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
+import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -102,7 +103,7 @@ export class EditManager {
     onElementChange
   }: {
     document: JsedDocument;
-    userInput: UserInput;
+    userInput?: UserInput;
     onError?: (err: EditManagerError) => void;
     onModeChange?: (mode: EditManagerMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
@@ -118,7 +119,7 @@ export class EditManager {
     );
     instance = new EditManager(
       document,
-      userInput,
+      userInput ?? Controller.createNull().input,
       nav,
       onError,
       onModeChange,

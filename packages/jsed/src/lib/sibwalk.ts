@@ -161,3 +161,31 @@ export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTM
 
   return null;
 }
+
+/**
+ * Find the last LINE_SIBLING candidate before the current exhausted LINE.
+ *
+ * This is a structural traversal only. Callers that need an editable target
+ * should resolve the candidate into the final CURSOR target themselves.
+ */
+export function findPreviousLineCandidate(from: HTMLElement, root: HTMLElement): HTMLElement | null {
+  const currentLine = getLine(from);
+
+  for (const node of findPreviousNode(from, root, {
+    visit: isLineSibling,
+    descend: isCursorTransparent
+  })) {
+    if (node instanceof HTMLElement && node.contains(currentLine)) {
+      continue;
+    }
+
+    const previousLine = getLine(node);
+    if (previousLine === currentLine) {
+      continue;
+    }
+
+    return node as HTMLElement;
+  }
+
+  return null;
+}

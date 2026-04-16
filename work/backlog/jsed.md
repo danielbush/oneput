@@ -43,6 +43,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ### Drafting
 
+- refactor: get rid of quickDescend in TokenCursor
+  - this follows on from work in `work/active/20260416.refactor.extract-line-crossing.md` where we removed quickDescend from moveNext
 - remove symobls from architecture; just use vocab and module file names
 - move skills/jsed/SKILL.md into jsed/AGENTS.md
 - importing oneput `import { Controller } from '@oneput/oneput';` in jsed breaks because `packages/oneput/src/lib/index.ts` imports .svelte files (directly or indirectly); what can we do about this?

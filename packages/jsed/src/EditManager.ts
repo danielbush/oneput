@@ -2,8 +2,9 @@ import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { isIsland, isLine, isToken } from './lib/taxonomy.js';
-import { findNextLineCandidate, getLine } from './lib/sibwalk.js';
+import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
+import { findNextLineCandidate, findPreviousLineCandidate, getLine } from './lib/sibwalk.js';
+import { findNextNode } from './lib/walk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import { TokenSelection } from './TokenSelection.js';
@@ -477,6 +478,45 @@ export class EditManager {
     }
   }
 
+  /** Resolve a LINE_SIBLING/container to its last reachable CURSOR target in document order. */
+  private findLastCursorTarget(el: HTMLElement): HTMLElement | null {
+    if (isToken(el) || isIsland(el)) {
+      return el;
+    }
+
+    // Ensure any reachable text content has been tokenized before we scan.
+    this.tokenizer.quickDescend(el);
+
+    let last: HTMLElement | null = null;
+    for (const node of findNextNode(el, el, {
+      visit: isLineSibling,
+      descend: (node) => node === el || isCursorTransparent(node)
+    })) {
+      const target = this.findLastCursorTarget(node as HTMLElement);
+      if (target) {
+        last = target;
+      }
+    }
+
+    return last;
+  }
+
+  private moveCursorPrevious() {
+    if (!this.cursor) return;
+    const outcome = this.cursor.movePrevious();
+    if (outcome.type !== 'exhausted') {
+      return;
+    }
+
+    const candidate = findPreviousLineCandidate(this.cursor.getToken(), this.document.root);
+    if (!candidate) return;
+
+    const previousLineTarget = this.findLastCursorTarget(candidate);
+    if (previousLineTarget) {
+      this.cursor.setToken(previousLineTarget);
+    }
+  }
+
   /**
    * Handle the user pressing Enter based on the current editing context.
    *
@@ -545,7 +585,7 @@ export class EditManager {
   handleLeft() {
     if (this.isSuspended) return;
     if (this.mode === 'edit') {
-      this.cursor?.movePrevious();
+      this.moveCursorPrevious();
       return;
     }
 

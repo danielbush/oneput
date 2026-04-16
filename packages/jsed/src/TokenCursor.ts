@@ -1,11 +1,10 @@
 import * as token from './lib/token.js';
-import { isCursorTransparent, isIsland, isToken, isLineSibling } from './lib/taxonomy.js';
-import { isSameLine, getLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
-import { findNextNode, findPreviousNode } from './lib/walk.js';
+import { isToken } from './lib/taxonomy.js';
+import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
-export type TokenCursorMoveNextOutcome =
+export type TokenCursorMoveOutcome =
   | { type: 'moved' }
   | { type: 'stayed' }
   | { type: 'exhausted' };
@@ -25,7 +24,7 @@ export class TokenCursor extends TokenCursorBase {
   // #region Motion
 
   /** Move to next TOKEN if it exists. */
-  moveNext(): TokenCursorMoveNextOutcome {
+  moveNext(): TokenCursorMoveOutcome {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
       return { type: 'stayed' };
@@ -41,74 +40,24 @@ export class TokenCursor extends TokenCursorBase {
   }
 
   /** Move to previous TOKEN if it exists. */
-  movePrevious() {
+  movePrevious(): TokenCursorMoveOutcome {
     if (this.isInsertingAfter()) {
       this.clearMarkers();
-      return;
+      return { type: 'stayed' };
     }
 
     const prevToken = getPreviousLineSibling(this.getToken());
     if (prevToken) {
       this.setToken(prevToken);
-      return;
+      return { type: 'moved' };
     }
 
-    const prevLineTarget = this.findPreviousLineTarget();
-    if (prevLineTarget) {
-      this.setToken(prevLineTarget);
-    }
+    return { type: 'exhausted' };
   }
 
   // #endregion
 
   // #region Editing tokens
-
-  /** Find the previous editable LINE_SIBLING beyond the current exhausted LINE. */
-  private findPreviousLineTarget(): HTMLElement | null {
-    const current = this.getToken();
-    const currentLine = getLine(current);
-
-    for (const node of findPreviousNode(current, this.getDocument().root, {
-      visit: isLineSibling,
-      descend: isCursorTransparent
-    })) {
-      if (node instanceof HTMLElement && node.contains(currentLine)) {
-        continue;
-      }
-
-      const prevLine = getLine(node);
-      if (prevLine === currentLine) {
-        continue;
-      }
-
-      return this.findLastCursorTarget(node as HTMLElement);
-    }
-
-    return null;
-  }
-
-  /** Resolve a LINE_SIBLING/container to its last reachable CURSOR target in document order. */
-  private findLastCursorTarget(el: HTMLElement): HTMLElement | null {
-    if (isToken(el) || isIsland(el)) {
-      return el;
-    }
-
-    // Ensure any reachable text content has been tokenized before we scan.
-    this.getTokenizer().quickDescend(el);
-
-    let last: HTMLElement | null = null;
-    for (const node of findNextNode(el, el, {
-      visit: isLineSibling,
-      descend: (node) => node === el || isCursorTransparent(node)
-    })) {
-      const target = this.findLastCursorTarget(node as HTMLElement);
-      if (target) {
-        last = target;
-      }
-    }
-
-    return last;
-  }
 
   /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
   private isOnToken(): boolean {

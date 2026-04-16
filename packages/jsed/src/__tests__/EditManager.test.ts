@@ -3,9 +3,11 @@ import { EditManager } from '../EditManager.js';
 import {
   byId,
   div,
+  em,
   em as emTag,
   frag,
   identify,
+  inlineStyleHack,
   makeRoot,
   p,
   s,
@@ -16,7 +18,7 @@ import {
 import { getValue } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
-import { quickDescend } from '../lib/tokenize.js';
+import { Tokenizer } from '../Tokenizer.js';
 import { isIsland } from '../lib/taxonomy.js';
 
 describe('EditManager', () => {
@@ -192,6 +194,7 @@ describe('EditManager', () => {
     });
 
     describe('when user initiates editing...', () => {
+      // TODO: should these be in handleEnter ?
       it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
@@ -268,6 +271,84 @@ describe('EditManager', () => {
         expect(getValue(editManager.cursor!.getToken())).toBe('foo');
 
         editManager.destroy();
+      });
+
+      test('if entering on a INLINE_FLOW (em-tag), CURSOR should be set to first child in INLINE_FLOW', () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' }, //
+            'before ',
+            em({ id: 'em1', ...inlineStyleHack }, 'italic'),
+            ' after'
+          )
+        );
+        const em1 = byId(doc, 'em1');
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+
+        // act
+        const result = editManager.enterEditing(em1);
+
+        // assert
+        expect(result.isOk()).toBe(true);
+        expect(editManager.getMode()).toBe('edit');
+        expect(editManager.cursor?.getToken()).not.toBeNull();
+        expect(editManager.cursor?.getToken()!.textContent).toEqual('italic');
+      });
+
+      test(`if entering on empty INLINE_FLOW (em-tag), don't add CURSOR`, () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' }, //
+            'before ',
+            em({ id: 'em1', ...inlineStyleHack }),
+            ' after'
+          )
+        );
+        const em1 = byId(doc, 'em1');
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+
+        // act
+        const result = editManager.enterEditing(em1);
+
+        // assert
+        expect(result.isOk()).toBe(false);
+        expect(editManager.getMode()).toBe('view');
+      });
+
+      test('if entering on a TOKEN, CURSOR should be set to this TOKEN', () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' }, //
+            t('before'),
+            s(),
+            t('middle'),
+            s(),
+            em({ id: 'em1', ...inlineStyleHack }),
+            ' after'
+          )
+        );
+        const p1 = byId(doc, 'p1');
+        const middle1 = p1.firstChild?.nextSibling?.nextSibling as HTMLElement;
+        expect(middle1?.textContent).toEqual('middle');
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+
+        // act
+        const result = editManager.enterEditing(middle1!);
+
+        // assert
+        expect(result.isOk()).toBe(true);
+        expect(editManager.getMode()).toBe('edit');
+        expect(editManager.cursor?.getToken()).not.toBeNull();
+        expect(editManager.cursor?.getToken()!.textContent).toEqual('middle');
       });
     });
   });
@@ -1661,7 +1742,7 @@ describe('EditManager', () => {
             userInput
           });
           editManager.nav.connect();
-          quickDescend(byId(doc, 'p1'));
+          Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
             (el) => el.textContent === 'bar'
           ) as HTMLElement;
@@ -1699,7 +1780,7 @@ describe('EditManager', () => {
             userInput
           });
           editManager.nav.connect();
-          quickDescend(byId(doc, 'p1'));
+          Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
             (el) => el.textContent === 'bar'
           ) as HTMLElement;
@@ -1844,7 +1925,7 @@ describe('EditManager', () => {
             userInput
           });
           editManager.nav.connect();
-          quickDescend(byId(doc, 'p1'));
+          Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
             (el) => el.textContent === 'bar'
           ) as HTMLElement;
@@ -1873,7 +1954,7 @@ describe('EditManager', () => {
             userInput
           });
           editManager.nav.connect();
-          quickDescend(byId(doc, 'p1'));
+          Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
             (el) => el.textContent === 'bar'
           ) as HTMLElement;
@@ -1909,7 +1990,7 @@ describe('EditManager', () => {
             userInput
           });
           editManager.nav.connect();
-          quickDescend(byId(doc, 'p1'));
+          Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
             (el) => el.textContent === 'bar'
           ) as HTMLElement;
@@ -2006,7 +2087,7 @@ describe('EditManager', () => {
             userInput
           });
           editManager.nav.connect();
-          quickDescend(byId(doc, 'p1'));
+          Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
           const bar = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
             (el) => el.textContent === 'bar'
           ) as HTMLElement;
@@ -2196,7 +2277,7 @@ describe('EditManager', () => {
     async function createEditManagerFixture(params?: { html?: string }) {
       const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
       const line = byId(doc, 'p1');
-      const firstToken = quickDescend(line).target;
+      const firstToken = Tokenizer.createNull().tokenizeLineAt(line);
       if (!firstToken) {
         throw new Error('expected first token');
       }

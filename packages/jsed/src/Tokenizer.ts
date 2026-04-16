@@ -1,11 +1,20 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { quickDescend as quickDescendImpl } from './lib/tokenize.js';
+import { findLineCandidateAt } from './lib/sibwalk.js';
+import { tokenizeLine } from './lib/tokenize.js';
 
 /**
- * Thin service wrapper around tokenization entry points.
+ * Tokenize-and-seat service for the CURSOR.
  *
- * Owns the Detokenizer so tokenization lifecycle concerns stay grouped under a
- * single module boundary.
+ * Owns the Detokenizer and orchestrates SHALLOW_TOKENIZATION:
+ * - resolves the candidate LINE under a starting FOCUSABLE
+ *   (`findLineCandidateAt`)
+ * - tokenizes that LINE (`tokenizeLine`)
+ * - records the tokenized LINE for background detokenization
+ * - returns the first reachable LINE_SIBLING ("first seat") so callers can
+ *   place the CURSOR
+ *
+ * The DOM-mutation primitives live in `lib/tokenize.ts`; this module is the
+ * orchestration boundary above them.
  */
 export class Tokenizer {
   #cursorElement: HTMLElement | null = null;
@@ -20,13 +29,27 @@ export class Tokenizer {
 
   constructor(private detokenizer: Detokenizer = Detokenizer.create()) {}
 
-  quickDescend(el: HTMLElement): HTMLElement | null {
-    const result = quickDescendImpl(el);
-    for (const line of result.tokenizedLines) {
+  /**
+   * Resolve a candidate LINE under `el`, tokenize it, and return the first
+   * reachable LINE_SIBLING within that LINE (the first CURSOR seat).
+   *
+   * `el` should be a FOCUSABLE often the current FOCUS.  If the FOCUSABLE is
+   * cursor transparent (eg an 'em' tag) then we tokenize the surrounding LINE
+   * but find the first token within this tag.
+   *
+   * Returns null if no candidate LINE exists under `el`.
+   */
+  tokenizeLineAt(el: HTMLElement): HTMLElement | null {
+    const { line } = findLineCandidateAt(el);
+    if (!line) {
+      return null;
+    }
+    const firstLineSibling = tokenizeLine(line);
+    if (firstLineSibling) {
       this.detokenizer.recordTokenizedLine(line);
     }
-    this.detokenizer.scheduleCleanup((line) => this.lineContainsCursor(line));
-    return result.target;
+    this.detokenizer.scheduleCleanup((l) => this.lineContainsCursor(l));
+    return firstLineSibling;
   }
 
   setCursorElement(el: HTMLElement | null) {

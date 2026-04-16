@@ -10,7 +10,6 @@ import {
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS
 } from '../lib/constants.js';
-import { quickDescend } from '../lib/tokenize.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -34,7 +33,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
 
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
-  const firstToken = quickDescend(el).target!;
+  const firstToken = Tokenizer.createNull().tokenizeLineAt(el)!;
   return createCursor(doc, firstToken);
 }
 
@@ -526,7 +525,9 @@ describe('TokenCursor motion', () => {
             : undefined
       }
     });
-    const firstToken = quickDescend(doc.root.querySelector('#p1') as HTMLElement).target!;
+    const firstToken = Tokenizer.createNull().tokenizeLineAt(
+      doc.root.querySelector('#p1') as HTMLElement
+    )!;
     const secondToken = firstToken.nextElementSibling as HTMLElement;
     const { cursor } = createCursor(doc, firstToken);
     const scrollRequests = doc.viewportScroller.trackScrollRequests();

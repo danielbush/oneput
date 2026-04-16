@@ -24,31 +24,33 @@ Nav also creates an `ElementIndicator` — a visual tag-name badge that follows 
 
 Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
 
-## Tokenization: quickDescend
+## Tokenization: Tokenizer.tokenizeLineAt
 
-Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The `quickDescend` function (in `lib/tokenize.ts`) is the entry point: given a FOCUSABLE, it tokenizes its LINE and descends until it finds the first `TOKEN` or `ISLAND`. Other focusable structures are traversed through rather than treated as final cursor targets. If no `TOKEN` or `ISLAND` is found, it returns null.
+Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The entry point is `Tokenizer.tokenizeLineAt(el)`: given a FOCUSABLE, it resolves the candidate LINE under `el` (`findLineCandidateAt` in `lib/sibwalk.ts`), tokenizes that LINE (`tokenizeLine` in `lib/tokenize.ts`), records the LINE for background detokenization, and returns the first reachable LINE_SIBLING ("first seat") for the CURSOR. If no candidate LINE exists, it returns null.
 
-`lib/tokenize.ts` also now provides the inverse operation, `detokenizeLine(...)`, which removes `TOKEN` wrappers from a `LINE` and its CURSOR-transparent descendants and normalizes text nodes back together. That gives the in-progress `Detokenizer` work a concrete primitive for reclaiming older tokenized DOM.
+The DOM-mutation primitives (`tokenizeLine`, `detokenizeLine` and their `Rec` helpers) live in `lib/tokenize.ts`. `Tokenizer` is the orchestration boundary above them — it owns the `Detokenizer` and is the only place that knows how the candidate-find / tokenize / first-seat steps compose.
 
-The `Tokenizer` service now uses that primitive opportunistically: once the number of recorded tokenized `LINE`s passes a small limit, it schedules a background cleanup pass that detokenizes one old `LINE` at a time while skipping any `LINE` that currently contains the active `CURSOR`.
+`detokenizeLine(...)` removes `TOKEN` wrappers from a `LINE` and its CURSOR-transparent descendants and normalizes text nodes back together. The `Tokenizer` service uses it opportunistically: once the number of recorded tokenized `LINE`s passes a small limit, it schedules a background cleanup pass that detokenizes one old `LINE` at a time while skipping any `LINE` that currently contains the active `CURSOR`.
 
 ## Token editing: TokenCursorBase → TokenCursor
 
 `TokenCursorBase` holds the current TOKEN reference, manages the JSED_CURSOR_CLASS, and provides protected focus-class management. It is the foundation layer.
 
-`TokenCursor` extends `TokenCursorBase` and provides TOKEN-level editing and CURSOR_STATE management once a FOCUSABLE has been focused and tokenized:
+`TokenCursor` extends `TokenCursorBase` and owns cursor motion + editing + CURSOR_STATE once a FOCUSABLE has been focused and tokenized. Motion is the full job in one place: intra-LINE LINE_SIBLING steps plus cross-LINE walking with tokenize-on-arrival — callers don't get back an `exhausted` signal, `TokenCursor` resolves it internally via `Tokenizer.tokenizeLineAt`:
 
 - **CURSOR_STATE** — manages the visual markers (CURSOR_APPEND, CURSOR_PREPEND, CURSOR_INSERT_AFTER, CURSOR_INSERT_BEFORE) that indicate what the user's next edit will do. See vocabulary.md for details.
-- **moveNext / movePrevious** — move between TOKENs within a LINE (via LINE_SIBLING). Gated by CURSOR_STATE: moveNext from CURSOR_INSERT_BEFORE cancels the insertion; movePrevious from CURSOR_INSERT_AFTER cancels.
+- **moveNext / movePrevious** — step to the next/previous CURSOR target. First tries the next LINE_SIBLING within the current LINE; if the LINE is exhausted, consults the cross-LINE walk (`findNextLineCandidate` / `findPreviousLineCandidate` in `lib/sibwalk.ts`) and tokenizes the new LINE on arrival. Backward motion uses a private `findLastCursorTarget` to resolve the last reachable seat in the previous LINE. Gated by CURSOR_STATE: moveNext from CURSOR_INSERT_BEFORE cancels the insertion; movePrevious from CURSOR_INSERT_AFTER cancels.
 - **replace / delete / append** — edit TOKEN content
 - **joinNext / joinPrevious** — JOIN adjacent TOKENs
 - **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
+
+`TokenSelection` (for ranged selections) owns its own internal `TokenCursor` for the selection head; the editing cursor stays pinned at the anchor. Cross-LINE extension reuses the head-cursor's cross-LINE walk.
 
 ## Orchestration: EditManager
 
 `EditManager` is the top-level mediator. It takes a JsedDocument and UserInput, creates a persistent Nav, and switches between two modes:
 
-- **view** — owns FOCUS only. First FOCUS on a FOCUSABLE runs `quickDescend` opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
+- **view** — owns FOCUS only. First FOCUS on a FOCUSABLE runs `Tokenizer.tokenizeLineAt` opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
 - **editing** — owns FOCUS plus TokenCursor. `EditManager` also subscribes to UserInput changes in this mode, translating input text and input selection into CURSOR actions. Structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
 
 It wires everything together so that:
@@ -65,7 +67,7 @@ A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditMan
 
 The top-level modules above delegate to lower-level utilities in `lib/`:
 
-- **tokenize.ts** — on-demand tokenization, `quickDescend`, and `detokenizeLine(...)`
+- **tokenize.ts** — DOM-mutation primitives: `tokenizeLine`, `detokenizeLine` (orchestration lives in `Tokenizer.tokenizeLineAt`)
 - **token.ts** — TOKEN operations, separator management, JOIN, SPLIT, and related editing helpers
 - **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
 - **sibwalk.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`

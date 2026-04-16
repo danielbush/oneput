@@ -2,8 +2,8 @@ import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { isIsland, isLine, isToken } from './lib/taxonomy.js';
-import { getLine } from './lib/sibwalk.js';
+import { isCursorTransparent, isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import { TokenSelection } from './TokenSelection.js';
@@ -47,8 +47,11 @@ export type EditManagerElementChangeEvent =
 /**
  * Manages an edit session for a single document.
  *
- * Call `edit(initialFocus)` to create a Nav, connect it, tokenize the
- * focused element, and enter edit mode. Call `destroy()` to tear down.
+ * In 'view' mode, user navigates the document and EM will ensure the FOCUS is
+ * tokenized so the user can focus the CURSOR at a TOKEN within the FOCUS.  Once
+ * the CURSOR is created, EM goes into 'edit' mode and the CURSOR handles
+ * tokenizing if it moves past the initial LINE it started on.
+ *
  */
 export class EditManager {
   static create({
@@ -191,21 +194,27 @@ export class EditManager {
       this.handleSelectionChange
     );
 
-    const firstTarget = isToken(initial) ? initial : this.tokenizer.quickDescend(initial);
-    if (firstTarget) {
-      const line = getLine(firstTarget);
+    // Tokenize LINE at or within `initial` if not already.
+    const firstLineSibling = this.tokenizer.tokenizeLineAt(initial);
+    const targetLineSibling = isToken(initial)
+      ? initial
+      : isCursorTransparent(initial)
+        ? getFirstLineSibling(initial)
+        : firstLineSibling;
+    if (targetLineSibling) {
+      const line = getLine(targetLineSibling);
       this.nav.FOCUS(line);
       this.userInput.focus();
       if (!this.cursor) {
         this.cursor = TokenCursor.create({
           document: this.document,
           tokenizer: this.tokenizer,
-          token: firstTarget,
+          token: targetLineSibling,
           onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
         });
       } else {
-        this.cursor.setToken(firstTarget); // calls handleCursorChange
+        this.cursor.setToken(targetLineSibling); // calls handleCursorChange
       }
       this.setMode('edit');
       return ok(undefined);
@@ -226,7 +235,7 @@ export class EditManager {
 
     if (focusElement) {
       this.nav.FOCUS(focusElement);
-      this.tokenizer.quickDescend(focusElement);
+      this.tokenizer.tokenizeLineAt(focusElement);
     }
   }
 
@@ -409,7 +418,7 @@ export class EditManager {
         return false;
       }
 
-      this.tokenizer.quickDescend(evt.element);
+      this.tokenizer.tokenizeLineAt(evt.element);
       return true;
     }
 

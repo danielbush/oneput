@@ -49,27 +49,33 @@ describe('tokenizeLine', () => {
     expect(p1.childNodes[3]?.textContent).toBe(' ');
   });
 
-  test('TOKEN after ISLAND is not yet marked padded during tokenizeLine', () => {
+  test('TOKEN after ISLAND', () => {
     // arrange
     const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+      p(
+        { id: 'p1' }, //
+        'aaa ',
+        '<span class="katex" style="display:inline;">x²</span>',
+        ' bbb'
+      )
     );
     const p1 = byId(doc, 'p1');
 
     // act
-    tokenizeLine(p1);
+    const first = tokenizeLine(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
     const afterIsland = tokens[1] as HTMLElement;
 
     // assert
+    expect(first!.textContent!.trim()).toBe('aaa');
     expect(tokens.length).toBe(2);
     expect(afterIsland.textContent).toBe('bbb');
   });
 
-  test('TOKEN before ISLAND is not padded', () => {
+  test('ISLAND as first LINE_SIBLING', () => {
     // arrange
     const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+      p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' bbb')
     );
     const p1 = byId(doc, 'p1');
 
@@ -77,7 +83,25 @@ describe('tokenizeLine', () => {
     const first = tokenizeLine(p1)!;
 
     // assert
-    expect(first.textContent).toBe('aaa');
+    expect(first.textContent).toBe('x²');
+  });
+
+  test('em around ISLAND as first LINE_SIBLING', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        em(inlineStyleHack, '<span class="katex" style="display:inline;">x²</span>'),
+        ' bbb'
+      )
+    );
+    const p1 = byId(doc, 'p1');
+
+    // act
+    const first = tokenizeLine(p1)!;
+
+    // assert
+    expect(first.textContent).toBe('x²');
   });
 
   test('ISLAND at end of LINE: no TOKEN to pad', () => {

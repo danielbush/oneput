@@ -5,7 +5,15 @@
  * imports from taxonomy.ts and adds traversal logic on top.
  */
 
-import { isIgnorable, isToken, isLine, isCursorTransparent, isLineSibling } from './taxonomy.js';
+import {
+  isCandidateLineSibling,
+  isCursorTransparent,
+  isFocusable,
+  isIgnorable,
+  isLine,
+  isLineSibling,
+  isToken
+} from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
 /**
@@ -135,10 +143,34 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
 }
 
 /**
+ * Returns { line, rootLine } where `line` is a candidate line with a
+ * LINE_SIBLING the CURSOR could sit on.  If `line` is null, no candiates were
+ * found at or within `rootLine`.
+ *
+ * Pairs with:
+ * - `findNextLineCandidate(from, root)` — find a LINE_SIBLING in a later LINE
+ * - `findPreviousLineCandidate(from, root)` — find a LINE_SIBLING in an earlier LINE
+ */
+export function findLineCandidateAt(from: HTMLElement): {
+  rootLine: HTMLElement;
+  line: HTMLElement | null;
+} {
+  const rootLine = getLine(from);
+  if (isCandidateLineSibling(from)) return { rootLine, line: rootLine };
+  for (const node of findNextNode(from, rootLine, {
+    visit: isCandidateLineSibling,
+    descend: isFocusable
+  })) {
+    return { rootLine, line: getLine(node) };
+  }
+  return { rootLine, line: null };
+}
+
+/**
  * Find the first LINE_SIBLING candidate beyond the current exhausted LINE.
  *
  * This is a structural traversal only. Callers that need an editable target
- * should re-enter through quickDescend(...) or equivalent tokenization logic.
+ * should re-enter through Tokenizer.tokenizeLineAt(...) or equivalent tokenization logic.
  */
 export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTMLElement | null {
   const currentLine = getLine(from);

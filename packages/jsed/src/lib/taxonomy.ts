@@ -188,6 +188,20 @@ export function isLine(el: Node | null): boolean {
   return true;
 }
 
+/**
+ * Detect a candidate/potential LINE_SIBLING — a non-whitespace text node,
+ * TOKEN, or ISLAND.
+ *
+ * "Candidate" means: a node whose presence indicates a LINE worth tokenizing
+ * or descending into. Used by `findLineCandidateAt` to locate the LINE under
+ * a FOCUSABLE that the CURSOR could land in.
+ */
+export function isCandidateLineSibling(node: Node | null): boolean {
+  if (!node) return false;
+  if (isToken(node) || isIsland(node)) return true;
+  return node.nodeType === Node.TEXT_NODE && /\S/.test(node.textContent ?? '');
+}
+
 /** Visit predicate for LINE_SIBLING traversal: TOKEN's, ISLAND's, and OPAQUE_BLOCK's. */
 export function isLineSibling(el: Node): boolean {
   if (isToken(el) || isIsland(el)) {

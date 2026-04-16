@@ -11,7 +11,6 @@ import { findNextNode } from './lib/walk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
-export type TokenCursorMoveOutcome = { type: 'moved' } | { type: 'stayed' } | { type: 'exhausted' };
 
 /**
  * Manages the CURSOR — motion, editing, and CURSOR_STATE markers.
@@ -28,47 +27,43 @@ export class TokenCursor extends TokenCursorBase {
   // #region Motion
 
   /** Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE). */
-  moveNext(): TokenCursorMoveOutcome {
+  moveNext() {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
-      return { type: 'stayed' };
+      return;
     }
 
     const nextToken = getNextLineSibling(this.getToken());
     if (nextToken) {
       this.setToken(nextToken);
-      return { type: 'moved' };
+      return;
     }
 
     const crossLineTarget = this.findCrossLineTarget('next');
     if (crossLineTarget) {
       this.setToken(crossLineTarget);
-      return { type: 'moved' };
+      return;
     }
-
-    return { type: 'exhausted' };
   }
 
   /** Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE). */
-  movePrevious(): TokenCursorMoveOutcome {
+  movePrevious() {
     if (this.isInsertingAfter()) {
       this.clearMarkers();
-      return { type: 'stayed' };
+      return;
     }
 
     const prevToken = getPreviousLineSibling(this.getToken());
     if (prevToken) {
       this.setToken(prevToken);
-      return { type: 'moved' };
+      return;
     }
 
     const crossLineTarget = this.findCrossLineTarget('previous');
     if (crossLineTarget) {
       this.setToken(crossLineTarget);
-      return { type: 'moved' };
+      return;
     }
-
-    return { type: 'exhausted' };
   }
 
   /**
@@ -86,7 +81,7 @@ export class TokenCursor extends TokenCursorBase {
     if (!candidate) return null;
 
     return direction === 'next'
-      ? this.getTokenizer().quickDescend(candidate)
+      ? this.getTokenizer().tokenizeLineAt(candidate)
       : this.findLastCursorTarget(candidate);
   }
 
@@ -97,7 +92,7 @@ export class TokenCursor extends TokenCursorBase {
     }
 
     // Ensure any reachable text content has been tokenized before we scan.
-    this.getTokenizer().quickDescend(el);
+    this.getTokenizer().tokenizeLineAt(el);
 
     let last: HTMLElement | null = null;
     for (const node of findNextNode(el, el, {
@@ -210,7 +205,7 @@ export class TokenCursor extends TokenCursorBase {
   splitAfter(): HTMLElement | null {
     if (!this.isOnToken()) return null;
     const [, after] = token.splitAfter(this.getToken());
-    const firstTok = this.getTokenizer().quickDescend(after);
+    const firstTok = this.getTokenizer().tokenizeLineAt(after);
     if (firstTok) {
       this.setToken(firstTok);
     }
@@ -250,7 +245,7 @@ export class TokenCursor extends TokenCursorBase {
     }
     token.insertAfter(el, this.getToken());
 
-    const first = this.getTokenizer().quickDescend(el);
+    const first = this.getTokenizer().tokenizeLineAt(el);
     if (first) {
       this.setToken(first);
     }
@@ -267,7 +262,7 @@ export class TokenCursor extends TokenCursorBase {
     }
     token.insertBefore(el, this.getToken());
 
-    const first = this.getTokenizer().quickDescend(el);
+    const first = this.getTokenizer().tokenizeLineAt(el);
     if (first) {
       this.setToken(first);
     }

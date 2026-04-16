@@ -1,4 +1,4 @@
-import { Detokenizer } from './lib/edit/Detokenizer.js';
+import { Detokenizer } from './lib/Detokenizer.js';
 import { quickDescend as quickDescendImpl } from './lib/tokenize.js';
 
 /**

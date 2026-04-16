@@ -1,7 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { decideInputIntent } from './lib/edit/decideInputIntent.js';
-import { FocusChainNavigator } from './lib/edit/FocusChainNavigator.js';
+import { decideInputIntent } from './lib/decideInputIntent.js';
+import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { getLine } from './lib/sibwalk.js';
 import { findNextNode } from './lib/walk.js';

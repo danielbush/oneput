@@ -6,7 +6,7 @@ export { TokenCursorBase } from './TokenCursorBase.js';
 export { TokenCursor } from './TokenCursor.js';
 export { Tokenizer } from './Tokenizer.js';
 export { quickDescend } from './lib/tokenize.js';
-export { Detokenizer } from './lib/edit/Detokenizer.js';
+export { Detokenizer } from './lib/Detokenizer.js';
 
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
 import * as token from './lib/token.js';

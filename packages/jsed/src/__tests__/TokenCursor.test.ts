@@ -1,5 +1,5 @@
 import { describe, it, expect, test } from 'vitest';
-import { div, em, frag, identify, makeRoot, p, span } from '../test/util.js';
+import { div, em, identify, makeRoot, p, span } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { TokenCursor } from '../TokenCursor.js';

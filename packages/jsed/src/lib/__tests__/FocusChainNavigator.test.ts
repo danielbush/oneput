@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Nav } from '../../Nav.js';
 import { byId, div, makeRoot, p, span } from '../../test/util.js';
-import { FocusChainNavigator } from '../edit/FocusChainNavigator.js';
+import { FocusChainNavigator } from '../FocusChainNavigator.js';
 
 describe('FocusChainNavigator', () => {
   it('keeps moving back down the remembered ancestor chain', () => {

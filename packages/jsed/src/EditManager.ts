@@ -2,9 +2,8 @@ import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
-import { getLine } from './lib/sibwalk.js';
-import { findNextNode } from './lib/walk.js';
+import { isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { findNextLineCandidate, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import { TokenSelection } from './TokenSelection.js';
@@ -462,29 +461,6 @@ export class EditManager {
     this.onError?.(err);
   };
 
-  /** Find the first editable LINE_SIBLING beyond the current exhausted LINE. */
-  private findNextLineTarget(from: HTMLElement): HTMLElement | null {
-    const currentLine = getLine(from);
-
-    for (const node of findNextNode(from, this.document.root, {
-      visit: isLineSibling,
-      descend: isCursorTransparent
-    })) {
-      if (node instanceof HTMLElement && node.contains(currentLine)) {
-        continue;
-      }
-
-      const nextLine = getLine(node);
-      if (nextLine === currentLine) {
-        continue;
-      }
-
-      return this.tokenizer.quickDescend(node as HTMLElement);
-    }
-
-    return null;
-  }
-
   private moveCursorNext() {
     if (!this.cursor) return;
     const outcome = this.cursor.moveNext();
@@ -492,7 +468,10 @@ export class EditManager {
       return;
     }
 
-    const nextLineTarget = this.findNextLineTarget(this.cursor.getToken());
+    const candidate = findNextLineCandidate(this.cursor.getToken(), this.document.root);
+    if (!candidate) return;
+
+    const nextLineTarget = this.tokenizer.quickDescend(candidate);
     if (nextLineTarget) {
       this.cursor.setToken(nextLineTarget);
     }

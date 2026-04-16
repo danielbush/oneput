@@ -133,3 +133,31 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   }
   return null;
 }
+
+/**
+ * Find the first LINE_SIBLING candidate beyond the current exhausted LINE.
+ *
+ * This is a structural traversal only. Callers that need an editable target
+ * should re-enter through quickDescend(...) or equivalent tokenization logic.
+ */
+export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTMLElement | null {
+  const currentLine = getLine(from);
+
+  for (const node of findNextNode(from, root, {
+    visit: isLineSibling,
+    descend: isCursorTransparent
+  })) {
+    if (node instanceof HTMLElement && node.contains(currentLine)) {
+      continue;
+    }
+
+    const nextLine = getLine(node);
+    if (nextLine === currentLine) {
+      continue;
+    }
+
+    return node as HTMLElement;
+  }
+
+  return null;
+}

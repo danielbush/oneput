@@ -168,7 +168,10 @@ export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTM
  * This is a structural traversal only. Callers that need an editable target
  * should resolve the candidate into the final CURSOR target themselves.
  */
-export function findPreviousLineCandidate(from: HTMLElement, root: HTMLElement): HTMLElement | null {
+export function findPreviousLineCandidate(
+  from: HTMLElement,
+  root: HTMLElement
+): HTMLElement | null {
   const currentLine = getLine(from);
 
   for (const node of findPreviousNode(from, root, {

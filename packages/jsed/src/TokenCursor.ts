@@ -1,13 +1,17 @@
 import * as token from './lib/token.js';
-import { isToken } from './lib/taxonomy.js';
-import { isSameLine, getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
+import { isCursorTransparent, isIsland, isLineSibling, isToken } from './lib/taxonomy.js';
+import {
+  findNextLineCandidate,
+  findPreviousLineCandidate,
+  getNextLineSibling,
+  getPreviousLineSibling,
+  isSameLine
+} from './lib/sibwalk.js';
+import { findNextNode } from './lib/walk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
-export type TokenCursorMoveOutcome =
-  | { type: 'moved' }
-  | { type: 'stayed' }
-  | { type: 'exhausted' };
+export type TokenCursorMoveOutcome = { type: 'moved' } | { type: 'stayed' } | { type: 'exhausted' };
 
 /**
  * Manages the CURSOR — motion, editing, and CURSOR_STATE markers.
@@ -23,7 +27,7 @@ export class TokenCursor extends TokenCursorBase {
 
   // #region Motion
 
-  /** Move to next TOKEN if it exists. */
+  /** Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE). */
   moveNext(): TokenCursorMoveOutcome {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
@@ -36,10 +40,16 @@ export class TokenCursor extends TokenCursorBase {
       return { type: 'moved' };
     }
 
+    const crossLineTarget = this.findCrossLineTarget('next');
+    if (crossLineTarget) {
+      this.setToken(crossLineTarget);
+      return { type: 'moved' };
+    }
+
     return { type: 'exhausted' };
   }
 
-  /** Move to previous TOKEN if it exists. */
+  /** Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE). */
   movePrevious(): TokenCursorMoveOutcome {
     if (this.isInsertingAfter()) {
       this.clearMarkers();
@@ -52,7 +62,55 @@ export class TokenCursor extends TokenCursorBase {
       return { type: 'moved' };
     }
 
+    const crossLineTarget = this.findCrossLineTarget('previous');
+    if (crossLineTarget) {
+      this.setToken(crossLineTarget);
+      return { type: 'moved' };
+    }
+
     return { type: 'exhausted' };
+  }
+
+  /**
+   * Resolve a CURSOR target in the next/previous LINE, tokenizing on arrival.
+   *
+   * Forward: lands on the first reachable target in the next LINE.
+   * Backward: lands on the last reachable target in the previous LINE.
+   */
+  private findCrossLineTarget(direction: 'next' | 'previous'): HTMLElement | null {
+    const root = this.getDocument().root;
+    const candidate =
+      direction === 'next'
+        ? findNextLineCandidate(this.getToken(), root)
+        : findPreviousLineCandidate(this.getToken(), root);
+    if (!candidate) return null;
+
+    return direction === 'next'
+      ? this.getTokenizer().quickDescend(candidate)
+      : this.findLastCursorTarget(candidate);
+  }
+
+  /** Resolve a LINE_SIBLING/container to its last reachable CURSOR target in document order. */
+  private findLastCursorTarget(el: HTMLElement): HTMLElement | null {
+    if (isToken(el) || isIsland(el)) {
+      return el;
+    }
+
+    // Ensure any reachable text content has been tokenized before we scan.
+    this.getTokenizer().quickDescend(el);
+
+    let last: HTMLElement | null = null;
+    for (const node of findNextNode(el, el, {
+      visit: isLineSibling,
+      descend: (node) => node === el || isCursorTransparent(node)
+    })) {
+      const target = this.findLastCursorTarget(node as HTMLElement);
+      if (target) {
+        last = target;
+      }
+    }
+
+    return last;
   }
 
   // #endregion

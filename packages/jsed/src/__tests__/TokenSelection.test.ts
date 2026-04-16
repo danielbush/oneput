@@ -116,7 +116,17 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
   test('grow from the start of a paragraph, through a middle <em>, out the other side, then shrink back', () => {
     // arrange
     const doc = makeRoot(
-      p(t('a'), s(), t('b'), s(), em(inlineStyleHack, t('c'), s(), t('d')), s(), t('e'), s(), t('f'))
+      p(
+        t('a'),
+        s(),
+        t('b'),
+        s(),
+        em(inlineStyleHack, t('c'), s(), t('d')),
+        s(),
+        t('e'),
+        s(),
+        t('f')
+      )
     );
     const [a] = tokens(doc);
     const selection = TokenSelection.create({ seed: a });
@@ -169,7 +179,17 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
   test('mirror: grow from the end of a paragraph, through a middle <em>, out the other side, then shrink back', () => {
     // arrange
     const doc = makeRoot(
-      p(t('a'), s(), t('b'), s(), em(inlineStyleHack, t('c'), s(), t('d')), s(), t('e'), s(), t('f'))
+      p(
+        t('a'),
+        s(),
+        t('b'),
+        s(),
+        em(inlineStyleHack, t('c'), s(), t('d')),
+        s(),
+        t('e'),
+        s(),
+        t('f')
+      )
     );
     const all = tokens(doc);
     const f = all[5];

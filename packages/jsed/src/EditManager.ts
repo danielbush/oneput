@@ -516,7 +516,11 @@ export class EditManager {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor) return;
     if (!this.selection) {
-      this.selection = TokenSelection.create({ seed: this.cursor.getToken() });
+      this.selection = TokenSelection.create({
+        seed: this.cursor.getToken(),
+        document: this.document,
+        tokenizer: this.tokenizer
+      });
     }
     this.selection.extendNext();
   }
@@ -530,7 +534,11 @@ export class EditManager {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor) return;
     if (!this.selection) {
-      this.selection = TokenSelection.create({ seed: this.cursor.getToken() });
+      this.selection = TokenSelection.create({
+        seed: this.cursor.getToken(),
+        document: this.document,
+        tokenizer: this.tokenizer
+      });
     }
     this.selection.extendPrevious();
   }

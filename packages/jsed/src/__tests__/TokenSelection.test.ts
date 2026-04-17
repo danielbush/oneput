@@ -1,8 +1,14 @@
 import { describe, test, expect } from 'vitest';
 import { em, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
 import { TokenSelection } from '../TokenSelection.js';
+import { Tokenizer } from '../Tokenizer.js';
 import { getValue } from '../lib/token.js';
 import { JSED_TOKEN_CLASS } from '../lib/constants.js';
+import type { JsedDocument } from '../types.js';
+
+function seed(doc: JsedDocument, el: HTMLElement): TokenSelection {
+  return TokenSelection.create({ seed: el, document: doc, tokenizer: Tokenizer.createNull() });
+}
 
 /**
  * Narrow tests for TokenSelection at the class level. These exercise
@@ -34,7 +40,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     const [, , c] = tokens(doc);
 
     // act
-    const selection = TokenSelection.create({ seed: c });
+    const selection = seed(doc, c);
 
     // assert
     expect(headValue(selection)).toBe('c');
@@ -45,7 +51,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c'), s(), t('d'), s(), t('e')));
     const [, , c] = tokens(doc);
-    const selection = TokenSelection.create({ seed: c });
+    const selection = seed(doc, c);
 
     // act + assert — grow forward from c to e
     expect(selectedTokenValues(doc)).toEqual(['c']);
@@ -81,7 +87,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c'), s(), t('d'), s(), t('e')));
     const [, , c] = tokens(doc);
-    const selection = TokenSelection.create({ seed: c });
+    const selection = seed(doc, c);
 
     // grow backward from c to a
     expect(selectedTokenValues(doc)).toEqual(['c']);
@@ -129,7 +135,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
       )
     );
     const [a] = tokens(doc);
-    const selection = TokenSelection.create({ seed: a });
+    const selection = seed(doc, a);
 
     expect(selectedTokenValues(doc)).toEqual(['a']);
 
@@ -193,7 +199,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     );
     const all = tokens(doc);
     const f = all[5];
-    const selection = TokenSelection.create({ seed: f });
+    const selection = seed(doc, f);
 
     expect(selectedTokenValues(doc)).toEqual(['f']);
 

@@ -30,6 +30,11 @@ export type TokenCursorBaseParams = {
   token: HTMLElement;
   onCursorChange: (token: HTMLElement) => void;
   onError: (err: TokenCursorError) => void;
+  /**
+   * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
+   * Used by TokenSelection's head-cursor, which must not render a second caret.
+   */
+  silent?: boolean;
 };
 
 /**
@@ -41,6 +46,7 @@ export abstract class TokenCursorBase {
   #document: JsedDocument;
   #tokenizer: Tokenizer;
   #onCursorChange: (token: HTMLElement) => void;
+  #silent: boolean;
   protected onError: (err: TokenCursorError) => void;
 
   constructor(params: TokenCursorBaseParams) {
@@ -49,6 +55,7 @@ export abstract class TokenCursorBase {
     this.#tokenizer = params.tokenizer;
     this.#onCursorChange = params.onCursorChange;
     this.onError = params.onError;
+    this.#silent = params.silent ?? false;
     this.setToken(params.token);
   }
 
@@ -81,9 +88,11 @@ export abstract class TokenCursorBase {
       throw new Error(`Not a LINE_SIBLING`);
     }
     this.removeAllFocusClasses();
-    this.#token.classList.remove(JSED_CURSOR_CLASS);
-    el.classList.add(JSED_CURSOR_CLASS);
-    this.getDocument().viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
+    if (!this.#silent) {
+      this.#token.classList.remove(JSED_CURSOR_CLASS);
+      el.classList.add(JSED_CURSOR_CLASS);
+      this.getDocument().viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
+    }
     this.#token = el;
     this.#onCursorChange(el);
   }
@@ -181,7 +190,9 @@ export abstract class TokenCursorBase {
   /** Destroy the current edit session. The instance cannot be used after this. */
   destroy() {
     this.clearMarkers();
-    this.#token.classList.remove(JSED_CURSOR_CLASS);
+    if (!this.#silent) {
+      this.#token.classList.remove(JSED_CURSOR_CLASS);
+    }
     this.removeAllFocusClasses();
   }
 

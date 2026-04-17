@@ -1,5 +1,7 @@
 import { JSED_SELECTION_CLASS } from './lib/constants.js';
-import { getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
+import { TokenCursor } from './TokenCursor.js';
+import type { JsedDocument } from './types.js';
+import type { Tokenizer } from './Tokenizer.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -14,34 +16,44 @@ import { getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
  * descendant, never move TOKEN's out of their styling context.
  *
  * When the selection crosses a parent boundary — entering or leaving an
- * INLINE_FLOW, or (eventually) spanning LINE's — a new wrapper is
- * started in the new parent. The list of wrappers is therefore ordered
- * and one-per-contiguous-run.
+ * INLINE_FLOW, or spanning LINE's — a new wrapper is started in the new
+ * parent. The list of wrappers is therefore ordered and
+ * one-per-contiguous-run.
  *
- * First pass is intentionally within a single LINE. Cross-LINE
- * selection is a follow-up.
- *
- * Standalone for now: `TokenSelection` does its own LINE_SIBLING
- * traversal via `sibwalk` and does not move `TokenCursor`. Whether the
- * CURSOR should follow the head is a decision to make after seeing
- * this render.
+ * The head is driven by an internal silent `TokenCursor`. This reuses
+ * the cursor's LINE_SIBLING motion and cross-LINE tokenization-on-arrival,
+ * so growing into a new paragraph is the same code path as growing
+ * across an `<em>` — the wrapper's parent-mismatch branch just opens a
+ * fresh wrapper in the new parent. The editing cursor (owned by
+ * EditManager) stays pinned at the anchor.
  *
  * See work/active/20260414.feat.selections.md.
  */
 export class TokenSelection {
-  static create(params: { seed: HTMLElement }): TokenSelection {
-    return new TokenSelection(params.seed);
+  static create(params: {
+    seed: HTMLElement;
+    document: JsedDocument;
+    tokenizer: Tokenizer;
+  }): TokenSelection {
+    return new TokenSelection(params);
   }
 
   private anchor: HTMLElement;
-  private head: HTMLElement;
+  private headCursor: TokenCursor;
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
-  constructor(seed: HTMLElement) {
-    this.anchor = seed;
-    this.head = seed;
-    this.wrappers.push(this.openWrapper(seed));
+  constructor(params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }) {
+    this.anchor = params.seed;
+    this.headCursor = TokenCursor.create({
+      document: params.document,
+      tokenizer: params.tokenizer,
+      token: params.seed,
+      onCursorChange: () => {},
+      onError: () => {},
+      silent: true
+    });
+    this.wrappers.push(this.openWrapper(params.seed));
   }
 
   getAnchor(): HTMLElement {
@@ -49,7 +61,7 @@ export class TokenSelection {
   }
 
   getHead(): HTMLElement {
-    return this.head;
+    return this.headCursor.getToken();
   }
 
   /**
@@ -58,14 +70,16 @@ export class TokenSelection {
    * backward side when head is before the anchor.
    */
   extendNext(): void {
-    const next = getNextLineSibling(this.head);
-    if (!next) return;
-    if (this.isHeadBeforeAnchor()) {
+    const before = this.headCursor.getToken();
+    const wasBeforeAnchor = this.isBeforeAnchor(before);
+    this.headCursor.moveNext();
+    const next = this.headCursor.getToken();
+    if (next === before) return;
+    if (wasBeforeAnchor) {
       this.shrinkFront(next);
     } else {
       this.growBack(next);
     }
-    this.head = next;
   }
 
   /**
@@ -74,21 +88,24 @@ export class TokenSelection {
    * forward side when head is after the anchor.
    */
   extendPrevious(): void {
-    const prev = getPreviousLineSibling(this.head);
-    if (!prev) return;
-    if (this.isHeadAfterAnchor()) {
+    const before = this.headCursor.getToken();
+    const wasAfterAnchor = this.isAfterAnchor(before);
+    this.headCursor.movePrevious();
+    const prev = this.headCursor.getToken();
+    if (prev === before) return;
+    if (wasAfterAnchor) {
       this.shrinkBack(prev);
     } else {
       this.growFront(prev);
     }
-    this.head = prev;
   }
 
   /**
    * Grow at the back. If `next` shares a parent with the current back
    * wrapper, absorb the intervening nodes + `next`. Otherwise we've
-   * crossed a parent boundary (entering or leaving an INLINE_FLOW) —
-   * open a new wrapper around `next` in its own parent.
+   * crossed a parent boundary (entering/leaving an INLINE_FLOW, or
+   * spanning LINE's) — open a new wrapper around `next` in its own
+   * parent.
    */
   private growBack(next: HTMLElement): void {
     const back = this.wrappers[this.wrappers.length - 1];
@@ -168,14 +185,14 @@ export class TokenSelection {
     wrapper.replaceWith(...Array.from(wrapper.childNodes));
   }
 
-  private isHeadAfterAnchor(): boolean {
-    if (this.head === this.anchor) return false;
-    return !!(this.anchor.compareDocumentPosition(this.head) & Node.DOCUMENT_POSITION_FOLLOWING);
+  private isAfterAnchor(el: HTMLElement): boolean {
+    if (el === this.anchor) return false;
+    return !!(this.anchor.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
   }
 
-  private isHeadBeforeAnchor(): boolean {
-    if (this.head === this.anchor) return false;
-    return !!(this.anchor.compareDocumentPosition(this.head) & Node.DOCUMENT_POSITION_PRECEDING);
+  private isBeforeAnchor(el: HTMLElement): boolean {
+    if (el === this.anchor) return false;
+    return !!(this.anchor.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING);
   }
 
   /**
@@ -185,6 +202,6 @@ export class TokenSelection {
   collapse(): void {
     for (const wrapper of this.wrappers) this.unwrap(wrapper);
     this.wrappers = [];
-    this.head = this.anchor;
+    this.headCursor.destroy();
   }
 }

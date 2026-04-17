@@ -11,6 +11,7 @@ import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
+import { tagImplicitLines } from './lib/implicitLine.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -819,6 +820,10 @@ export class EditManager {
     this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
+
+  createImplicitLines = () => {
+    tagImplicitLines(this.document.root);
+  };
 
   // #endregion Actions
 

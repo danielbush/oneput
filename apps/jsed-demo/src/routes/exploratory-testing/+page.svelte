@@ -76,7 +76,7 @@
   <div>
     <p>
       This text is in a nested p-tag which comes before the float
-      <figure style="float: right; border: solid black 1px">
+      <figure style="margin: 0; float: right; border: solid black 1px">
         <img
           src="missing.jpg"
           alt="placeholder"

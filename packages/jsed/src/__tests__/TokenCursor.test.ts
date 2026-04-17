@@ -10,6 +10,7 @@ import {
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS
 } from '../lib/constants.js';
+import { tagImplicitLines } from '../lib/implicitLine.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -547,6 +548,27 @@ describe('TokenCursor motion', () => {
         }
       }
     ]);
+  });
+});
+
+describe('TokenCursor cross-LINE motion', () => {
+  test('moveNext past end of <p> lands in the following IMPLICIT_LINE', () => {
+    // arrange — "trailing text" after the <p> gets wrapped in an IMPLICIT_LINE;
+    // the cursor should reach the first TOKEN in that line.
+    const doc = makeRoot(div(p({ id: 'p1' }, 'hello world'), 'trailing text'));
+    tagImplicitLines(doc.root);
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+    // sanity: start at first TOKEN of the <p>
+    expect(identify(cursor.getToken())).toBe('hello');
+    cursor.moveNext();
+    expect(identify(cursor.getToken())).toBe('world');
+
+    // act — step past the end of the <p> into the IMPLICIT_LINE
+    cursor.moveNext();
+
+    // assert — lands on first TOKEN of the IMPLICIT_LINE, not skipping it
+    expect(identify(cursor.getToken())).toBe('trailing');
   });
 });
 

@@ -152,8 +152,11 @@ describe('Tokenizer', () => {
     // arrange
     const doc = makeRoot(
       frag(
-        //
-        div({ id: 'div1' }, p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two'))
+        div(
+          { id: 'div1' }, //
+          p({ id: 'p1' }, 'one'),
+          p({ id: 'p2' }, 'two')
+        )
       )
     );
     const detokenizer = new Detokenizer(10);

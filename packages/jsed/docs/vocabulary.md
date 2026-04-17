@@ -143,8 +143,8 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
   - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
 - **IMPLICIT_LINE**
-  — IMPLICIT_LINE's are added to make FOCUS navigation easier but they are NOT treated as LINE's only as LINE_MEMBER's so they are similar to !ISLAND / INLINE_FLOW.
-  - The CURSOR should descend into them but not visit. TOKEN's and INLINE_FLOW's that have a LINE as their previous sibling often resemble LINE's in their own right but they are not directly visitable by FOCUS at least as LINE's in their own right and appear hard to access. If we wrap a span tag around them, this tag is called an IMPLICIT_LINE and can receive the FOCUS.
+  — IMPLICIT_LINE's are LINE's created to wrap lose text. This promotes better document structure and better FOCUS navigation.
+  - Source of truth: `tagImplicitLines` / `lib/implicitLine.ts`
   - Example: `<div><p>here is the first line.</p>For some reason the 2nd line is not in a p-tag.</div>`.
     - FOCUS will visit div, then p, then move on to something after p; this makes it look like the 2nd line is not reachable. We need to construct an implicit line around the trailing tokens that form the 2nd line.
   - Example: `<div><p>here is the first line.</p><em>For</em> some reason the 2nd line is not in a p-tag.</div>`.

@@ -6,10 +6,10 @@
  */
 
 import {
-  isCandidateLineSibling,
   isCursorTransparent,
   isFocusable,
   isIgnorable,
+  isIsland,
   isLine,
   isLineSibling,
   isToken
@@ -144,7 +144,7 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
 
 /**
  * Returns { line, rootLine } where `line` is a candidate line with a
- * LINE_SIBLING the CURSOR could sit on.  If `line` is null, no candiates were
+ * LINE_SIBLING the CURSOR could sit on.  If `line` is null, no candidates were
  * found at or within `rootLine`.
  *
  * Pairs with:
@@ -156,7 +156,9 @@ export function findLineCandidateAt(from: HTMLElement): {
   line: HTMLElement | null;
 } {
   const rootLine = getLine(from);
-  if (isCandidateLineSibling(from)) return { rootLine, line: rootLine };
+  if (isCandidateLineSibling(from)) {
+    return { rootLine, line: rootLine };
+  }
   for (const node of findNextNode(from, rootLine, {
     visit: isCandidateLineSibling,
     descend: isFocusable
@@ -168,9 +170,6 @@ export function findLineCandidateAt(from: HTMLElement): {
 
 /**
  * Find the first LINE_SIBLING candidate beyond the current exhausted LINE.
- *
- * This is a structural traversal only. Callers that need an editable target
- * should re-enter through Tokenizer.tokenizeLineAt(...) or equivalent tokenization logic.
  */
 export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTMLElement | null {
   const currentLine = getLine(from);
@@ -179,26 +178,36 @@ export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTM
     visit: isLineSibling,
     descend: isCursorTransparent
   })) {
-    if (node instanceof HTMLElement && node.contains(currentLine)) {
-      continue;
-    }
+    if (!(node instanceof HTMLElement)) continue;
+    if (node.contains(currentLine)) continue;
 
     const nextLine = getLine(node);
-    if (nextLine === currentLine) {
-      continue;
-    }
+    if (nextLine === currentLine) continue;
 
-    return node as HTMLElement;
+    return node;
   }
 
   return null;
 }
 
 /**
+ * Detect a candidate/potential LINE_SIBLING — a non-whitespace text node,
+ * TOKEN, or ISLAND.
+ *
+ * "Candidate" means: a node whose presence indicates a LINE worth tokenizing
+ * or descending into. Used by `findLineCandidateAt` to locate the LINE under
+ * a FOCUSABLE that the CURSOR could land in.
+ */
+function isCandidateLineSibling(node: Node | null): boolean {
+  if (!node) return false;
+  if (isToken(node) || isIsland(node)) return true;
+  return node.nodeType === Node.TEXT_NODE && /\S/.test(node.textContent ?? '');
+}
+
+/**
  * Find the last LINE_SIBLING candidate before the current exhausted LINE.
  *
- * This is a structural traversal only. Callers that need an editable target
- * should resolve the candidate into the final CURSOR target themselves.
+ * Mirror of `findNextLineCandidate`.
  */
 export function findPreviousLineCandidate(
   from: HTMLElement,
@@ -210,16 +219,13 @@ export function findPreviousLineCandidate(
     visit: isLineSibling,
     descend: isCursorTransparent
   })) {
-    if (node instanceof HTMLElement && node.contains(currentLine)) {
-      continue;
-    }
+    if (!(node instanceof HTMLElement)) continue;
+    if (node.contains(currentLine)) continue;
 
     const previousLine = getLine(node);
-    if (previousLine === currentLine) {
-      continue;
-    }
+    if (previousLine === currentLine) continue;
 
-    return node as HTMLElement;
+    return node;
   }
 
   return null;

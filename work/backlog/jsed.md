@@ -41,12 +41,27 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Finer details
 
+### Bugs
+
+- fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
+  - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
+  - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
+- `getValue(editManager.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
+
 ### Drafting
 
+- test: sibwalk tests should be tested via handleLeft/handleRight
+- test: enterEditing should be tested via handleEnter? (in EditManager.test)
+- refactor: move edit operations out of TokenCursor?
+  - TokenCursor focuses on token navigation and tokenizing on fly and also facilitating token edits
+  - edit operations can just take a token
+  - eg
+    - insertSpaceBeforeCursor lives in 3 places; but the cursor version is just a thin wrapper around token version
+  - COMMENT: possible tension around if the edit operation affects the token itself as this might affect the cursor; I think there is probably a clear distinction though between DOM operations that use a token as a reference and actual token edit operations
 - refactor: get rid of quickDescend in TokenCursor
   - this follows on from work in `work/active/20260416.refactor.extract-line-crossing.md` where we removed quickDescend from moveNext
-- remove symobls from architecture; just use vocab and module file names
-- move skills/jsed/SKILL.md into jsed/AGENTS.md
+- chore: remove symbols from architecture; just use vocab and module file names
+- chore: move skills/jsed/SKILL.md into jsed/AGENTS.md
 - importing oneput `import { Controller } from '@oneput/oneput';` in jsed breaks because `packages/oneput/src/lib/index.ts` imports .svelte files (directly or indirectly); what can we do about this?
   - run this by claude / codex
     - we break oneput into oneput-core, oneput-svelte ?
@@ -57,8 +72,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - use before, after, replaceWith where applicable
 - use el.ownerDocument  eg `el.ownerDocument.createElement(...)`
 - probably should rename TokenCursor and TokenSelection since they can sit on non-TOKEN LINE_SIBLING's like ISLAND's
-- hitting ENTER on empty p-tag should insert anchor; no need to go into menu
-- $mod+m when hit 2 or 3 times within an interval, moves FOCUS to top and bottom of screen respectively
+- feat: hitting ENTER on empty p-tag should insert anchor; no need to go into menu
+- feat: $mod+m when hit 2 or 3 times within an interval, moves FOCUS to top and bottom of screen respectively
 - remember last token position in each LINE (not LINE_SEGMENT)
 - persist last token position in each LINE
 - persist last FOCUS position and FOCUS it when we reload the document

@@ -67,34 +67,42 @@ export class TokenCursor extends TokenCursorBase {
   }
 
   /**
-   * Resolve a CURSOR target in the next/previous LINE, tokenizing on arrival.
+   * Resolve a CURSOR target in the next LINE, tokenizing on arrival.
    *
-   * Forward: lands on the first reachable target in the next LINE.
-   * Backward: lands on the last reachable target in the previous LINE.
-   */
-  private findPreviousCrossLineTarget(): HTMLElement | null {
-    const root = this.getDocument().root;
-    const candidate = findPreviousLineCandidate(this.getToken(), root);
-    if (!candidate) return null;
-
-    return this.findLastCursorTarget(candidate);
-  }
-
-  /**
-   * Resolve a CURSOR target in the next/previous LINE, tokenizing on arrival.
-   *
-   * Forward: lands on the first reachable target in the next LINE.
-   * Backward: lands on the last reachable target in the previous LINE.
    */
   private findNextCrossLineTarget(): HTMLElement | null {
     const root = this.getDocument().root;
     const candidate = findNextLineCandidate(this.getToken(), root);
     if (!candidate) return null;
-
+    if (isToken(candidate)) {
+      return candidate;
+    }
     return this.getTokenizer().tokenizeLineAt(candidate);
   }
 
-  /** Resolve a LINE_SIBLING/container to its last reachable CURSOR target in document order. */
+  /**
+   * Resolve last reachable CURSOR target in the previous LINE, tokenizing as
+   * required.
+   */
+  private findPreviousCrossLineTarget(): HTMLElement | null {
+    const root = this.getDocument().root;
+    const candidate = findPreviousLineCandidate(this.getToken(), root);
+    if (!candidate) return null;
+    if (candidate.nodeType === Node.TEXT_NODE) {
+      const tokens = this.getTokenizer().tokenizeLineAtTextNode(candidate);
+      return tokens[tokens.length - 1];
+    }
+    if (isToken(candidate)) {
+      return candidate as HTMLElement;
+    }
+
+    return this.findLastCursorTarget(candidate as HTMLElement);
+  }
+
+  /**
+   * Resolve a LINE_SIBLING/container to its last reachable CURSOR target in
+   * document order.
+   */
   private findLastCursorTarget(el: HTMLElement): HTMLElement | null {
     if (isToken(el) || isIsland(el)) {
       return el;

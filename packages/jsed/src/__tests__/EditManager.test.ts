@@ -19,7 +19,7 @@ import { getValue } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { isIsland } from '../lib/taxonomy.js';
+import { isIsland, isToken } from '../lib/taxonomy.js';
 
 describe('EditManager', () => {
   describe('FOCUS - user moves the FOCUS', () => {
@@ -226,6 +226,38 @@ describe('EditManager', () => {
         expect(editManager.getMode()).toBe('view');
         expect(editManager.nav.getFocus()).toBe(p2);
         expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
+
+        editManager.destroy();
+      });
+
+      test('<p/> <loose/> <p/>', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'div1' },
+            p({ id: 'p1' }, 'aaa'), //
+            'bbb ccc', // not tokenized, regression here
+            p({ id: 'p2' }, 'ddd')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        const div1 = byId(doc, 'div1');
+
+        // act
+        editManager.nav.REQUEST_FOCUS(div1);
+
+        // assert
+        expect(editManager.getMode()).toBe('view');
+        expect(editManager.nav.getFocus()).toBe(div1);
+        // First FOCUS change should trigger tokenization for (1) first element;
+        // (2) all loose text (this is the tricky bit).
+        expect(Array.from(div1.querySelectorAll('.jsed-token')).map((t) => t.textContent)).toEqual([
+          'aaa',
+          'bbb',
+          'ccc'
+        ]);
 
         editManager.destroy();
       });
@@ -478,6 +510,79 @@ describe('EditManager', () => {
         expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
         editManager.destroy();
+      });
+
+      describe('loose text', () => {
+        it('<loose/> <p/> <loose/>', () => {
+          // arrange
+          const doc = makeRoot(
+            div(
+              { id: 'div1' }, //
+              'aaa ',
+              p({ id: 'p1' }, 'bbb'),
+              ' ccc'
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'div1'));
+          expect(editManager.getMode()).toBe('edit');
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+
+          // The cursor sits on the p-tag
+          // TODO: In another test we should repeat up to here then run
+          // enterEditing at this point to go inside the p-tag.
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(false);
+          expect(editManager.cursor!.getToken().tagName).toBe('P');
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+
+          editManager.destroy();
+        });
+
+        it('<p/> <loose/> <p/>', () => {
+          // arrange
+          const doc = makeRoot(
+            frag(
+              p({ id: 'p1' }, 'aaa'), //
+              'bbb ccc', // not tokenized, regression here
+              p({ id: 'p2' }, 'ddd')
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'p1'));
+          expect(editManager.getMode()).toBe('edit');
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+
+          // Regression here in findCrossLineTarget.
+          // <loose/> never gets tokenized and the current algorithm doesn't detect tokens.
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(false); // on p-tag
+          expect(editManager.cursor!.getToken().innerText).toBe('ddd');
+
+          editManager.destroy();
+        });
       });
 
       it('from the last LINE_SIBLING of a LINE enters the next LINE that starts with an ISLAND', () => {

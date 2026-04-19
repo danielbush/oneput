@@ -1,6 +1,7 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { findLineCandidateAt } from './lib/sibwalk.js';
-import { tokenizeLine } from './lib/tokenize.js';
+import { findLineCandidateAt, getLine } from './lib/sibwalk.js';
+import { isFocusable, isToken } from './lib/taxonomy.js';
+import { tokenizeLine, tokenizeLooseLinesAround, tokenizeLooseLinesIn } from './lib/tokenize.js';
 
 /**
  * Tokenize-and-seat service for the CURSOR.
@@ -40,6 +41,14 @@ export class Tokenizer {
    * Returns null if no candidate LINE exists under `el`.
    */
   tokenizeLineAt(el: HTMLElement): HTMLElement | null {
+    if (!isFocusable(el)) {
+      return null;
+    }
+    tokenizeLooseLinesIn(el);
+    // Pre-emptively tokenize LOOSE_LINE's previous/next of `el`.
+    // This ensures cross line detection (when user moves between LINE') works
+    // if the previous/next thing is a LOOSE_LINE.
+    tokenizeLooseLinesAround(el);
     const { line } = findLineCandidateAt(el);
     if (!line) {
       return null;
@@ -50,6 +59,40 @@ export class Tokenizer {
     }
     this.detokenizer.scheduleCleanup((l) => this.lineContainsCursor(l));
     return firstLineSibling;
+  }
+
+  /**
+   * Run tokenizeLineAt on the LINE that `node` belongs to and return the
+   * TOKEN's generated from `node`, in document order.
+   *
+   * The text node is usually part of a LOOSE_LINE — a run of loose content
+   * between nested LINE's of an outer LINE. `tokenizeLineAt` on the owning
+   * LINE will tokenize that LOOSE_LINE as part of its pre-pass. To identify
+   * which TOKEN's specifically replaced `node`, we sandwich `node` with
+   * comment markers before tokenization, then collect the TOKEN's that land
+   * between them afterwards. Comment nodes are ignored by the tokenization
+   * walk so they don't affect behaviour.
+   */
+  tokenizeLineAtTextNode(node: Node): HTMLElement[] {
+    if (node.nodeType !== Node.TEXT_NODE) return [];
+    const parent = node.parentNode;
+    if (!parent) return [];
+
+    const line = getLine(node);
+    const startMarker = document.createComment('');
+    const endMarker = document.createComment('');
+    parent.insertBefore(startMarker, node);
+    parent.insertBefore(endMarker, node.nextSibling);
+
+    this.tokenizeLineAt(line);
+
+    const tokens: HTMLElement[] = [];
+    for (let n = startMarker.nextSibling; n && n !== endMarker; n = n.nextSibling) {
+      if (isToken(n)) tokens.push(n as HTMLElement);
+    }
+    startMarker.remove();
+    endMarker.remove();
+    return tokens;
   }
 
   setCursorElement(el: HTMLElement | null) {

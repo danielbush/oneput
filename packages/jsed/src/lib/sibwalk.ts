@@ -175,16 +175,15 @@ export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTM
   const currentLine = getLine(from);
 
   for (const node of findNextNode(from, root, {
-    visit: (node) => isLineSibling(node),
-    descend: isCursorTransparent
+    visit: isLineSibling,
+    descend: isFocusable
   })) {
-    if (!(node instanceof HTMLElement)) continue;
     if (node.contains(currentLine)) continue;
 
     const nextLine = getLine(node);
     if (nextLine === currentLine) continue;
 
-    return node;
+    return node as HTMLElement;
   }
 
   return null;
@@ -209,17 +208,25 @@ function isCandidateLineSibling(node: Node | null): boolean {
  *
  * Mirror of `findNextLineCandidate`.
  */
-export function findPreviousLineCandidate(
-  from: HTMLElement,
-  root: HTMLElement
-): HTMLElement | null {
+export function findPreviousLineCandidate(from: HTMLElement, root: HTMLElement): Node | null {
   const currentLine = getLine(from);
 
   for (const node of findPreviousNode(from, root, {
-    visit: isLineSibling,
-    descend: isCursorTransparent
+    visit: (el) => isLineSibling(el) || el.nodeType === Node.TEXT_NODE,
+    descend: isFocusable
   })) {
-    if (!(node instanceof HTMLElement)) continue;
+    if (node === from) {
+      // TODO: we seem to visit current by default when moving previous.  This
+      // might be deliberate?
+      continue;
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (/\S/.test(node.textContent ?? '')) {
+        return node;
+      } else {
+        continue;
+      }
+    }
     if (node.contains(currentLine)) continue;
 
     const previousLine = getLine(node);

@@ -414,11 +414,13 @@ export class EditManager {
     const currentFocus = this.nav.getFocus();
 
     if (evt.targetType === 'FOCUSABLE') {
+      // Second focus puts us into editing mode.
       if (evt.element === currentFocus) {
         this.enterEditing(evt.element).mapErr((err) => this.onError?.(err));
         return false;
       }
 
+      // First focus, just tokenizes.
       this.tokenizer.tokenizeLineAt(evt.element);
       return true;
     }

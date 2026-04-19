@@ -154,6 +154,45 @@
     After the inline-block.
   </div>
 
+  <h2 class="jsed-ignore">Loose text</h2>
+  <p class="jsed-ignore">
+    You can test for IMPLICIT_LINE's above in all the various scenarios. Here we show examples that
+    motivated this feature.
+  </p>
+  <div>
+    loose text <p>paragraph text</p>
+    more loose text
+  </div>
+  <hr class="jsed-ignore" />
+  <div>
+    loose text between paragraphs
+    <p>text in paragraph</p>
+    <p>text in paragraph</p>
+    loose text between paragraphs
+    <p>text in paragraph</p>
+    <p>text in paragraph</p>
+  </div>
+
+  <hr class="jsed-ignore" />
+  <div>
+    <p>
+      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
+    </p>
+    But this sentence is just text nodes that come after.
+  </div>
+  <p class="jsed-ignore">IMPLICIT_LINE with br and hr tags</p>
+  <div>
+    <p>
+      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
+    </p>
+    But this sentence<strong>is <em>just</em></strong> text nodes that come after.
+    <br />
+    But this sentence is just text nodes that come after.
+    <hr />
+    But this sentence is just text nodes that come after.
+    <br />
+  </div>
+
   <h2 class="jsed-ignore">ISLAND</h2>
   <p class="jsed-ignore">
     ISLAND's prevent both FOCUS and CURSOR from descending into them. They can only be visited.
@@ -178,30 +217,6 @@
       <span class="katex" style="display: block">x²</span>
       Some text after the block formula...
     </p>
-  </div>
-
-  <h2 class="jsed-ignore">IMPLICIT_LINE</h2>
-  <p class="jsed-ignore">
-    You can test for IMPLICIT_LINE's above in all the various scenarios. Here we show examples that
-    motivated this feature.
-  </p>
-  <div>
-    <p>
-      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-    </p>
-    But this sentence is just text nodes that come after.
-  </div>
-  <p class="jsed-ignore">IMPLICIT_LINE with br and hr tags</p>
-  <div>
-    <p>
-      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-    </p>
-    But this sentence<strong>is <em>just</em></strong> text nodes that come after.
-    <br />
-    But this sentence is just text nodes that come after.
-    <hr />
-    But this sentence is just text nodes that come after.
-    <br />
   </div>
 
   <h1 class="jsed-ignore">SHALLOW_TOKENIZATION</h1>

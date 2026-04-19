@@ -1,4 +1,4 @@
-import { isFocusable, isCursorTransparent, isToken, isLineSibling } from './taxonomy.js';
+import { isFocusable, isCursorTransparent, isToken, isLine, isLineSibling } from './taxonomy.js';
 import { createToken } from './token.js';
 
 /**
@@ -136,4 +136,141 @@ export function detokenizeLine(el: HTMLElement): void {
 
   detokenizeLineRec(el);
   el.normalize();
+}
+
+/**
+ * Scan `el` for LOOSE_LINE runs — the text content that sits between nested
+ * LINE children of `el`. A LOOSE_LINE is the run of content between one
+ * nested LINE and the next (or the end of `el`). Non-LINE direct children
+ * and CURSOR_TRANSPARENT wrappers (INLINE_FLOW etc.) belong to the run;
+ * we descend through CURSOR_TRANSPARENT to collect every text node with
+ * non-whitespace content. Content before any nested LINE is ignored — it
+ * belongs to `el`'s own LINE.
+ *
+ * Returns one `Node[]` per LOOSE_LINE (in document order), each holding the
+ * text nodes that make up the run. `tokenizeLooseLine` can operate on these.
+ *
+ * @example
+ * Two LOOSE_LINE's:
+ * - `[text('first'), text('second third')]` (text('first') is the text node
+ *   inside `<em>`)
+ * - `[text('fourth fifth')]`
+ * `aaa` is ignored.
+ * ```html
+ * <div>
+ *   aaa bbb
+ *   <p>...</p>
+ *   <em>first</em> second third
+ *   <p>...</p>
+ *   fourth fifth
+ * </div>
+ * ```
+ */
+export function collectLooseTextNodesIn(el: HTMLElement): Node[][] {
+  const runs: Node[][] = [];
+  let current: Node[] | null = null;
+  for (const child of Array.from(el.childNodes)) {
+    if (isLine(child)) {
+      if (current) runs.push(current);
+      current = [];
+      continue;
+    }
+    if (!current) continue;
+    collectTextsWithContent(child, current);
+  }
+  if (current && current.length > 0) runs.push(current);
+  return runs.filter((run) => run.length > 0);
+}
+
+/**
+ * Collect all descendant text nodes with non-whitespace content into `out`,
+ * descending only through CURSOR_TRANSPARENT elements (INLINE_FLOW etc.).
+ */
+function collectTextsWithContent(n: Node, out: Node[]): void {
+  if (n.nodeType === Node.TEXT_NODE) {
+    if (/\S/.test(n.nodeValue ?? '')) out.push(n);
+    return;
+  }
+  if (n instanceof window.HTMLElement && isCursorTransparent(n)) {
+    for (const c of Array.from(n.childNodes)) {
+      collectTextsWithContent(c, out);
+    }
+  }
+}
+
+/**
+ * Tokenize every LOOSE_LINE in `el`. For each text node in each run,
+ * replace it with TOKEN spans (and preserved whitespace text nodes, per
+ * the boundary-spacing model used by `replaceTextNode`). Content before
+ * the first nested LINE is left untouched, and nested LINE's themselves
+ * are skipped — their own tokenization is done lazily by
+ * `Tokenizer.tokenizeLineAt`.
+ *
+ * Returns the head TOKEN of each LOOSE_LINE (first TOKEN created in the
+ * run), in document order.
+ */
+export function tokenizeLooseLinesIn(el: HTMLElement) {
+  const runs = collectLooseTextNodesIn(el);
+  for (const run of runs) {
+    for (const textNode of run) {
+      replaceTextNode(textNode);
+    }
+  }
+}
+
+/**
+ * Detect untokenized text on either side of `el` up to the next LINE.  If
+ * found, tokenize them.
+ */
+export function tokenizeLooseLinesAround(el: HTMLElement) {
+  if (!isFocusable(el)) {
+    return;
+  }
+  tokenizePreviousLooseTextNodes(el);
+  tokenizeNextLooseTextNodes(el);
+}
+
+function tokenizePreviousLooseTextNodes(el: HTMLElement) {
+  const nodes = collectPreviousLooseTextNodes(el);
+  for (const textNode of nodes) {
+    replaceTextNode(textNode);
+  }
+}
+
+function tokenizeNextLooseTextNodes(el: HTMLElement) {
+  const nodes = collectNextLooseTextNodes(el);
+  for (const textNode of nodes) {
+    replaceTextNode(textNode);
+  }
+}
+
+/**
+ * Collect text nodes with non-whitespace content preceding `el` within its
+ * parent, stopping at the first LINE encountered. Descends through
+ * CURSOR_TRANSPARENT siblings. Returned in document order.
+ */
+function collectPreviousLooseTextNodes(el: HTMLElement): Node[] {
+  const prevs: Node[] = [];
+  for (let s = el.previousSibling; s; s = s.previousSibling) {
+    if (isLine(s)) break;
+    prevs.push(s);
+  }
+  prevs.reverse();
+  const out: Node[] = [];
+  for (const n of prevs) collectTextsWithContent(n, out);
+  return out;
+}
+
+/**
+ * Collect text nodes with non-whitespace content following `el` within its
+ * parent, stopping at the first LINE encountered. Descends through
+ * CURSOR_TRANSPARENT siblings. Returned in document order.
+ */
+function collectNextLooseTextNodes(el: HTMLElement): Node[] {
+  const out: Node[] = [];
+  for (let s = el.nextSibling; s; s = s.nextSibling) {
+    if (isLine(s)) break;
+    collectTextsWithContent(s, out);
+  }
+  return out;
 }

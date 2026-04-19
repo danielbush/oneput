@@ -39,7 +39,7 @@ export class TokenCursor extends TokenCursorBase {
       return;
     }
 
-    const crossLineTarget = this.findCrossLineTarget('next');
+    const crossLineTarget = this.findNextCrossLineTarget();
     if (crossLineTarget) {
       this.setToken(crossLineTarget);
       return;
@@ -59,7 +59,7 @@ export class TokenCursor extends TokenCursorBase {
       return;
     }
 
-    const crossLineTarget = this.findCrossLineTarget('previous');
+    const crossLineTarget = this.findPreviousCrossLineTarget();
     if (crossLineTarget) {
       this.setToken(crossLineTarget);
       return;
@@ -72,17 +72,26 @@ export class TokenCursor extends TokenCursorBase {
    * Forward: lands on the first reachable target in the next LINE.
    * Backward: lands on the last reachable target in the previous LINE.
    */
-  private findCrossLineTarget(direction: 'next' | 'previous'): HTMLElement | null {
+  private findPreviousCrossLineTarget(): HTMLElement | null {
     const root = this.getDocument().root;
-    const candidate =
-      direction === 'next'
-        ? findNextLineCandidate(this.getToken(), root)
-        : findPreviousLineCandidate(this.getToken(), root);
+    const candidate = findPreviousLineCandidate(this.getToken(), root);
     if (!candidate) return null;
 
-    return direction === 'next'
-      ? this.getTokenizer().tokenizeLineAt(candidate)
-      : this.findLastCursorTarget(candidate);
+    return this.findLastCursorTarget(candidate);
+  }
+
+  /**
+   * Resolve a CURSOR target in the next/previous LINE, tokenizing on arrival.
+   *
+   * Forward: lands on the first reachable target in the next LINE.
+   * Backward: lands on the last reachable target in the previous LINE.
+   */
+  private findNextCrossLineTarget(): HTMLElement | null {
+    const root = this.getDocument().root;
+    const candidate = findNextLineCandidate(this.getToken(), root);
+    if (!candidate) return null;
+
+    return this.getTokenizer().tokenizeLineAt(candidate);
   }
 
   /** Resolve a LINE_SIBLING/container to its last reachable CURSOR target in document order. */

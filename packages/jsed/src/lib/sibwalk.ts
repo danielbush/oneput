@@ -175,7 +175,7 @@ export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTM
   const currentLine = getLine(from);
 
   for (const node of findNextNode(from, root, {
-    visit: isLineSibling,
+    visit: (node) => isLineSibling(node),
     descend: isCursorTransparent
   })) {
     if (!(node instanceof HTMLElement)) continue;

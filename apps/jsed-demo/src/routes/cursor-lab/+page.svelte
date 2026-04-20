@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { quickDescend } from '@oneput/jsed';
+  import { tokenizeLine } from '@oneput/jsed';
 
   const markerClasses = [
     'jsed-crs-append',
@@ -139,7 +139,7 @@
     for (const sample of samples) {
       if (!sample.element || sample.didTokenize) continue;
 
-      quickDescend(sample.element);
+      tokenizeLine(sample.element);
       sample.didTokenize = true;
       applyFakeCursor(sample);
     }
@@ -407,10 +407,10 @@
     content: '';
     position: absolute;
     z-index: -1;
-    top: -0.08em;
-    bottom: -0.08em;
-    left: -0.1em;
-    right: 0.33ch;
+    top: 0;
+    bottom: 0;
+    left: -0.2em;
+    right: -0.2em;
     border-radius: 0.24rem;
     background: #2563eb;
   }

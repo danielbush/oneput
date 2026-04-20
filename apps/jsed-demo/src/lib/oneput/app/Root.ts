@@ -32,45 +32,21 @@ export class Root implements AppObject {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
   };
 
-  actions = {
-    LOAD_TEST_DOC: {
-      action: async () => {
-        this.create
-          .TestDocService()
-          .loadTestDoc()
-          .map((docRoot) => {
-            this.ctl.app.run(
-              this.create.EditDocument({
-                document: this.create.JsedDocument(docRoot)
-              })
-            );
-            this.ctl.menu.closeMenu();
-          })
-          .mapErr((error) => {
-            switch (error.type) {
-              case 'missing-element':
-                this.ctl.notify(`Element #${error.id} not found`);
-                break;
-              case 'http':
-                this.ctl.notify(`Failed to load doc: ${error.status} ${error.statusText}`);
-                break;
-              case 'network':
-                this.ctl.notify('Network error loading doc');
-                console.error(error.cause);
-                break;
-            }
-          });
-      }
-    }
-  };
-
   menu = () => ({
     id: 'root',
     items: [
       stdMenuItem({
         id: 'load-doc',
-        textContent: 'Load test doc...',
-        action: this.actions.LOAD_TEST_DOC.action,
+        textContent: 'Start editing...',
+        action: async () => {
+          const docRoot = document.querySelector('#test-doc') as HTMLElement;
+          this.ctl.app.run(
+            this.create.EditDocument({
+              document: this.create.JsedDocument(docRoot)
+            })
+          );
+          this.ctl.menu.closeMenu();
+        },
         left: (b) => [b.icon(icons.File)]
       })
     ]

@@ -18,6 +18,7 @@
 </svelte:head>
 
 {@render children()}
+
 <div id={JSED_APP_ROOT_ID}>
   <Anchor>
     <OneputController run={(ctl: Controller) => Root.create(ctl)} />

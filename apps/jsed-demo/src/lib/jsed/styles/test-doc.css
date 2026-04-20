@@ -1,0 +1,51 @@
+#test-doc {
+  padding: 0.5rem;
+
+  ul {
+    list-style-position: outside;
+    p {
+      margin: 0;
+    }
+    li {
+      margin-left: 1em;
+    }
+  }
+
+  :is(p, h1, h2, ul).jsed-ignore:not(.jsed-tag-indicator):not(.notice) {
+    padding: 0.5rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    color: rgba(80, 100, 180);
+    background-color: rgba(220, 220, 255);
+    font-family: sans-serif;
+    clear: both;
+  }
+
+  h1.jsed-ignore:not(.jsed-tag-indicator) {
+    color: rgba(80, 180, 100);
+    background-color: rgba(220, 255, 220);
+    font-size: 1.2rem;
+  }
+
+  li + li,
+  p + p {
+    margin-top: 0.5rem;
+  }
+
+  div + div {
+    margin-top: 0.5rem;
+  }
+
+  .note {
+    font-size: 0.8rem;
+  }
+
+  .notice {
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 1em;
+    background-color: rgba(200, 240, 240, 1);
+    color: rgba(0, 140, 140, 1);
+    font-family: sans-serif;
+  }
+}

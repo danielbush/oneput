@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Nav } from '../../Nav.js';
-import { byId, div, makeRoot, p, span } from '../../test/util.js';
+import { byId, div, em, makeRoot, p, span } from '../../test/util.js';
 import { FocusChainNavigator } from '../FocusChainNavigator.js';
 
 describe('FocusChainNavigator', () => {
@@ -27,6 +27,8 @@ describe('FocusChainNavigator', () => {
     const target = byId(doc, 'target');
     const inline = byId(doc, 'inline');
 
+    // TODO: maybe better to test this at the EditManager level; we're assuming
+    // interactions here:
     nav.REQUEST_FOCUS(target);
     navigator.handleFocusChange(nav.getFocus());
     nav.REQUEST_FOCUS(section);
@@ -81,6 +83,8 @@ describe('FocusChainNavigator', () => {
     const right = byId(doc, 'right');
     const rightLeaf = byId(doc, 'right-leaf');
 
+    // TODO: maybe better to test this at the EditManager level; we're assuming
+    // interactions here:
     nav.REQUEST_FOCUS(leftLeaf);
     navigator.handleFocusChange(nav.getFocus());
     nav.REQUEST_FOCUS(right);
@@ -106,8 +110,8 @@ describe('FocusChainNavigator', () => {
     const navigator = FocusChainNavigator.createNull(nav);
     nav.connect();
     const first = byId(doc, 'first');
-
     nav.REQUEST_FOCUS(first);
+    // Set currentMark
     navigator.handleFocusChange(nav.getFocus());
 
     // act
@@ -143,5 +147,57 @@ describe('FocusChainNavigator', () => {
 
     // assert
     expect(nav.getFocus()).toBe(visibleLeaf);
+  });
+
+  it('re-enters the same child chain after moving back up', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'container' }, //
+        p({ id: 'first' }, 'foo'),
+        p({ id: 'second' }, 'bar')
+      )
+    );
+    let navigator: FocusChainNavigator | undefined;
+    const nav = Nav.createNull(doc, undefined, (focus) => navigator?.handleFocusChange(focus));
+    navigator = FocusChainNavigator.createNull(nav);
+    nav.connect();
+    const container = byId(doc, 'container');
+    const second = byId(doc, 'second');
+
+    nav.REQUEST_FOCUS(second);
+
+    // act + assert
+    navigator.moveUp();
+    expect(nav.getFocus()).toBe(container);
+
+    navigator.moveDown();
+    expect(nav.getFocus()).toBe(second);
+  });
+
+  it('does not traverse to a sibling on repeated moveDown', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'line' },
+        em({ id: 'em1', style: 'display:inline;' }, 'foo'),
+        em({ id: 'em2', style: 'display:inline;' }, 'bar')
+      )
+    );
+    let navigator: FocusChainNavigator | undefined;
+    const nav = Nav.createNull(doc, undefined, (focus) => navigator?.handleFocusChange(focus));
+    navigator = FocusChainNavigator.createNull(nav);
+    nav.connect();
+    const line = byId(doc, 'line');
+    const em1 = byId(doc, 'em1');
+
+    nav.REQUEST_FOCUS(line);
+
+    // act + assert
+    navigator.moveDown();
+    expect(nav.getFocus()).toBe(em1);
+
+    navigator.moveDown();
+    expect(nav.getFocus()).toBe(em1);
   });
 });

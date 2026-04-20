@@ -1,4 +1,3 @@
-import { getLine } from './sibwalk.js';
 import { isFocusable, isIsland } from './taxonomy.js';
 import { findNextNode } from './walk.js';
 import type { Nav } from '../Nav.js';
@@ -30,7 +29,9 @@ export class FocusChainNavigator {
 
   moveDown() {
     const focus = this.nav.getFocus();
-    if (!focus) return;
+    if (!focus) {
+      return;
+    }
 
     const nextDown = this.getNextFocusDownCurrentChain(focus);
     if (nextDown) {
@@ -38,7 +39,7 @@ export class FocusChainNavigator {
       return;
     }
 
-    for (const next of findNextNode(focus, getLine(focus), {
+    for (const next of findNextNode(focus, focus, {
       visit: isFocusable,
       descend: (node) => isFocusable(node) && !isIsland(node)
     })) {

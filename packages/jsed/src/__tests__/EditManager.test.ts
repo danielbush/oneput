@@ -100,6 +100,42 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
+    it('ignores REQUEST_FOCUS on an element inside an IGNORABLE ancestor', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'foo bar'),
+          p(
+            { id: 'p2' },
+            '<span class="jsed-ignore"><em id="ignored-target" style="display:inline;">debug</em></span>'
+          )
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+      const ignoredTarget = byId(doc, 'ignored-target');
+
+      editManager.nav.REQUEST_FOCUS(p1);
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
+
+      // act
+      editManager.nav.REQUEST_FOCUS(ignoredTarget);
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
+
+      editManager.destroy();
+    });
+
     test('background cleanup detokenizes the oldest inactive LINE after enough normal interactions', async () => {
       // arrange
       vi.useFakeTimers();

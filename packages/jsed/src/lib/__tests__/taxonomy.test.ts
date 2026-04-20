@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../test/util.js';
-import { isToken, isInlineFlow, isLine } from '../taxonomy.js';
+import { isFocusable, isIgnorable, isInlineFlow, isLine, isToken } from '../taxonomy.js';
 import { tokenizeLine } from '../tokenize.js';
 
 const inlineStyle = { style: 'display:inline;' };
@@ -104,6 +104,47 @@ describe('isInlineFlow', () => {
 
   test('null: returns false', () => {
     expect(isInlineFlow(null)).toBe(false);
+  });
+});
+
+describe('isIgnorable', () => {
+  test('directly flagged element: returns true', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, '<span id="ignore" class="jsed-ignore"></span>'));
+    const ignore = byId(doc, 'ignore');
+
+    // act & assert
+    expect(isIgnorable(ignore)).toBe(true);
+  });
+
+  test('descendant of a flagged ancestor: returns true', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        '<span class="jsed-ignore"><em id="inner" style="display:inline;">debug</em></span>'
+      )
+    );
+    const inner = byId(doc, 'inner');
+
+    // act & assert
+    expect(isIgnorable(inner)).toBe(true);
+  });
+});
+
+describe('isFocusable', () => {
+  test('descendant of a flagged ancestor: returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        '<span class="jsed-ignore"><em id="inner" style="display:inline;">debug</em></span>'
+      )
+    );
+    const inner = byId(doc, 'inner');
+
+    // act & assert
+    expect(isFocusable(inner)).toBe(false);
   });
 });
 

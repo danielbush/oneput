@@ -60,7 +60,16 @@ export function isAlreadyFocusable(el: Element): boolean {
  * shows its tag name.  The indicator is a visual aid and not a part of the
  * document.
  */
-export function isIgnorable(el: Element): boolean {
+export function isIgnorable(el: Element) {
+  for (let p: Element | null = el; p; p = p.parentElement) {
+    if (isIgnorableElement(p)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isIgnorableElement(el: Element): boolean {
   if (el.classList.contains(JSED_IGNORE_CLASS)) {
     return true;
   }

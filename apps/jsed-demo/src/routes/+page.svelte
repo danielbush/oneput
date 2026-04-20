@@ -44,12 +44,22 @@
   </p>
   <p>
     Once you're focused on the paragraph above, try hitting <b>$mod+J</b> to move the FOCUS down to
-    this. Then hit <b>$mod+K</b> to move the FOCUS back up to it.
+    this paragraph. Then hit <b>$mod+K</b> to move the FOCUS back up to it. <b>Notice</b> that the
+    next element you can $mod+J or $mod+K to is <b>highlighted</b>; if you can't see a highlight,
+    that probably means you can't go any further and you may want to go "out" again (hit
+    <b>$mod+H</b>).
+  </p>
+  <p>
+    Focus on this paragraph, hit $mod+L to go "inside" it. Then try hitting $mod+J and $mod+K to
+    move between the sibling markup: <em>this is an em</em>, <strong>this is a strong tag</strong>,
+    <u>This is an underline tag</u>, <del>this is del tag</del>,
+    <span>this is just a plain old span tag</span>. To get out, hit $mod+H to focus back on to the
+    paragraph.
   </p>
   <p>
     Here's a bit more practice. Below are some bullet points including some nested entries. Trying
     moving in an out and between the items using all 4 keys. (Hint: use $mod+J to move down to the
-    list and $mod+L to go "into" it.)
+    list and $mod+L to go "into" it. Then use $mod+J, $mod+K to move between sibling elements.)
   </p>
   <ul>
     <li>this is the first bullet point</li>
@@ -73,7 +83,7 @@
     <li>
       Use the motion keys to move the FOCUS so that it sits on the paragraph below. Then hit <b
         >ENTER</b
-      > (or whatever pass for your usual return key).
+      > (or whatever passes for your usual return key).
     </li>
     <li>
       You should see the first word highlighted: <b>"Try"</b>. And you should see <b>"Try"</b>
@@ -140,11 +150,11 @@
     </li>
   </ul>
 
-  <p>To get out of edit mode you can hit <b>ESCAPE</b></p>
+  <p class="jsed-ignore">To remove the cursor you can hit <b>ESCAPE</b></p>
 
-  <br />
-  <br />
-  <br />
-  <br />
-  <br />
+  <br class="jsed-ignore" />
+  <br class="jsed-ignore" />
+  <br class="jsed-ignore" />
+  <br class="jsed-ignore" />
+  <br class="jsed-ignore" />
 </div>

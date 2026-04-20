@@ -1,5 +1,14 @@
 # Oneput monorepo
 
+There are 2 main things going on this workspace:
+
+- jsed - an editor that edits HTML pages using a "word cursor"
+  - `task jsed-demo:dev`
+  - this is pre-alpha, not ready for prime time
+- oneput - a command-bar-like ui that was created with the initial motivation of providing a UI for jsed but which can perform potentially many types of user input and interactions
+  - `task oneput-demo:dev`
+  - this is also pre-alpha
+
 ## Working with an agent
 
 - In packages/jsed: Type `/jsed` to orient the agent on the codebase — it will read the architecture narrative, vocabulary, and explain how the system works.

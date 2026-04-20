@@ -40,7 +40,7 @@ export class FocusChainNavigator {
 
     for (const next of findNextNode(focus, getLine(focus), {
       visit: isFocusable,
-      descend: (node) => !isIsland(node)
+      descend: (node) => isFocusable(node) && !isIsland(node)
     })) {
       this.nav.REQUEST_FOCUS(next);
       return;

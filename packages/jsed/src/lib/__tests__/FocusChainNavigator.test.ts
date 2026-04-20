@@ -116,4 +116,32 @@ describe('FocusChainNavigator', () => {
     // assert
     expect(nav.getFocus()).toBe(first);
   });
+
+  it('skips IGNORABLE subtrees when walking down the current line', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'container' },
+        div(
+          { class: 'jsed-ignore' }, //
+          p({ id: 'ignored-leaf' }, 'hidden')
+        ),
+        p({ id: 'visible-leaf' }, 'shown')
+      )
+    );
+    const nav = Nav.createNull(doc);
+    const navigator = FocusChainNavigator.createNull(nav);
+    nav.connect();
+    const container = byId(doc, 'container');
+    const visibleLeaf = byId(doc, 'visible-leaf');
+
+    nav.REQUEST_FOCUS(container);
+    navigator.handleFocusChange(nav.getFocus());
+
+    // act
+    navigator.moveDown();
+
+    // assert
+    expect(nav.getFocus()).toBe(visibleLeaf);
+  });
 });

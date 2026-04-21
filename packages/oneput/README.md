@@ -12,9 +12,10 @@ This is also pre-alpha but potentially usable.
 
 ## Usage
 
+The demo is in [apps/oneput-demo](../../apps/oneput-demo/)
+
 ```sh
-task dev # using local taskfile
-task oneput-demo:dev # from root taskfile
+task -t ../../Taskfile.yml oneput-demo:dev # from root taskfile
 ```
 
 See [Taskfile.yml](./Taskfile.yml) .

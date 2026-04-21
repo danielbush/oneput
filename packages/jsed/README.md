@@ -8,9 +8,10 @@ This is pre-alpha, not ready for prime time.
 
 ## Usage
 
+The demo is in [apps/jsed-demo](../../apps/jsed-demo/)
+
 ```sh
-task dev # using local taskfile
-task jsed-demo:dev # from root taskfile
+task -t ../../Taskfile.yml jsed-demo:dev
 ```
 
 See [Taskfile.yml](./Taskfile.yml) .

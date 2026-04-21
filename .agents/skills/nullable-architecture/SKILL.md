@@ -580,9 +580,18 @@ expect(writes.data).toEqual([{ key: "draft", value: "hello" }]);
 
 ## What To Test
 
-Prefer testing at the highest level the nullable graph allows. Because we inject infrastructure and write sociable tests through real code, we can test happy paths, sad paths, and edge cases deterministically and instantly at the top level without mocks or real I/O.
+This section is about **unit tests**. Prefer testing at the highest level the nullable graph allows. Because we inject infrastructure and write sociable tests through real code, we can test happy paths, sad paths, and edge cases deterministically and instantly at the top level without mocks or real I/O.
 
-Avoid redundant tests on intermediate code. Testing intermediate layers (1) locks in design choices that should be free to change and (2) often duplicates what a higher-level test already covers. Only add intermediate tests when they cover something the top-level test genuinely cannot reach and the test is easier to write and read at that level.
+Avoid unit tests that exercise interactions between system components to produce a behaviour. Such tests lock in implementation details: refactor the interaction and you have to rewrite the test, even though the outward behaviour is unchanged. Where possible, test the component that performs the interaction instead.
+
+The criterion: did the test have to perform several actions on several subcomponents to achieve a single outward behaviour? If yes, the test is probably encoding assumptions about system internals.
+
+This pushes unit tests toward a barbell:
+
+- **High-level and highly sociable** — exercise the system at its top edge. Nullable architecture and dependency injection make this practical: real code runs end-to-end, infrastructure is nulled, behaviour is deterministic.
+- **Low-level and narrow** — test a function or class with a single responsibility directly.
+
+**Smell: mirroring the same behaviour at multiple levels.** If you find yourself writing a test that covers the same (or nearly the same) thing a higher-level test already covers, stop. With nullable architecture and DI, there's no point mirroring behaviour into lower levels — the top-level test already exercises it through real code. Only drop to a lower level when it's meaningfully easier to write/read there, or when you're genuinely operating on the low end of the barbell (testing a single-responsibility unit for its own sake, not as a proxy for higher-level behaviour).
 
 Choose a few tests that teach the system.
 

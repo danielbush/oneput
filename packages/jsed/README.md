@@ -1,8 +1,18 @@
 # jsed
 
+An editor that edits HTML pages using a "word cursor".
+
+## Status
+
+This is pre-alpha, not ready for prime time.
+
 ## Usage
 
-See Taskfile.yml .
+```sh
+task jsed-demo:dev
+```
+
+See [Taskfile.yml](./Taskfile.yml) .
 
 ## Notes
 

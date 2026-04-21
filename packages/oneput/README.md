@@ -13,8 +13,11 @@ This is also pre-alpha but potentially usable.
 ## Usage
 
 ```sh
-task oneput-demo:dev
+task dev # using local taskfile
+task oneput-demo:dev # from root taskfile
 ```
+
+See [Taskfile.yml](./Taskfile.yml) .
 
 ## Development
 

@@ -4,8 +4,6 @@ There are 2 main things going on this workspace:
 
 - [jsed](./packages/jsed/) - an editor that edits HTML pages using a "word cursor"
 - [oneput](./packages/oneput/) - a command-bar-like ui that was created with the initial motivation of providing a UI for jsed but which can perform potentially many types of user input and interactions
-  - `task oneput-demo:dev`
-  - this is also pre-alpha
 
 ## Working with an agent
 

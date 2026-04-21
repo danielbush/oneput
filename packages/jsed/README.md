@@ -9,7 +9,8 @@ This is pre-alpha, not ready for prime time.
 ## Usage
 
 ```sh
-task jsed-demo:dev
+task dev # using local taskfile
+task jsed-demo:dev # from root taskfile
 ```
 
 See [Taskfile.yml](./Taskfile.yml) .

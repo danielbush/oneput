@@ -94,3 +94,17 @@ Drafted: 23-Mar-2026
 Needs a compelling example of a visible IGNORABLE before this is worth acting on.
 
 Moved to `work/discussion/20260326.discussion.cursor-visits-transparents.md`.
+
+### Remove or update cli/convert.ts
+
+What it did:
+
+- convert takes markdown files (used in the prototype project "fold") and converts them and the 2br constructs into html that can then be navigated and edited. The conversion is one-way, there is no going back.
+
+Hasn't been looked at in a while
+
+Add cli to `dist/`
+
+```sh
+bun run build:cli
+```

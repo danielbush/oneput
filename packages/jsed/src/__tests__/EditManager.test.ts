@@ -22,249 +22,325 @@ import { Tokenizer } from '../Tokenizer.js';
 import { isIsland, isToken } from '../lib/taxonomy.js';
 
 describe('EditManager', () => {
-  describe('FOCUS - user moves the FOCUS', () => {
-    describe('REQUEST_FOCUS', () => {
-      it('first REQUEST_FOCUS in view mode tokenizes the focused LINE but stays in view mode', () => {
-        // arrange
-        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-
-        // act
-        editManager.nav.REQUEST_FOCUS(p1);
-
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p1);
-        expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
-
-        editManager.destroy();
+  describe('REQUEST_FOCUS (view mode): User clicks/touches', () => {
+    it('first REQUEST_FOCUS in view mode tokenizes the focused LINE but stays in view mode', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc
       });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
 
-      it('focusing a new FOCUSABLE tokenizes that new LINE without entering edit mode', () => {
-        // arrange
-        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-        const p2 = byId(doc, 'p2');
+      // act
+      editManager.nav.REQUEST_FOCUS(p1);
 
-        editManager.nav.REQUEST_FOCUS(p1);
-        expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
-        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
 
-        // act
-        editManager.nav.REQUEST_FOCUS(p2);
+      editManager.destroy();
+    });
 
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p2);
-        expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
-        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
-
-        editManager.destroy();
+    it('focusing a new FOCUSABLE tokenizes that new LINE without entering edit mode', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc
       });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
 
-      it('re-focusing an already-tokenized LINE is idempotent at the DOM level', () => {
-        // arrange
-        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-        const p2 = byId(doc, 'p2');
+      editManager.nav.REQUEST_FOCUS(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
 
-        editManager.nav.REQUEST_FOCUS(p1);
-        const originalTokens = Array.from(p1.querySelectorAll('.jsed-token'));
-        expect(originalTokens).toHaveLength(2);
+      // act
+      editManager.nav.REQUEST_FOCUS(p2);
 
-        editManager.nav.REQUEST_FOCUS(p2);
-        expect(editManager.nav.getFocus()).toBe(p2);
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p2);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
 
-        // act
-        editManager.nav.REQUEST_FOCUS(p1);
+      editManager.destroy();
+    });
 
-        // assert
-        const retokenizedTokens = Array.from(p1.querySelectorAll('.jsed-token'));
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p1);
-        expect(retokenizedTokens).toHaveLength(2);
-        expect(retokenizedTokens).toEqual(originalTokens);
-        expect(p1.querySelector('.jsed-token .jsed-token')).toBeNull();
-
-        editManager.destroy();
+    it('re-focusing an already-tokenized LINE is idempotent at the DOM level', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc
       });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
 
-      it('ignores REQUEST_FOCUS on an element inside an IGNORABLE ancestor', () => {
-        // arrange
-        const doc = makeRoot(
-          frag(
-            p({ id: 'p1' }, 'foo bar'),
-            p(
-              { id: 'p2' },
-              '<span class="jsed-ignore"><em id="ignored-target" style="display:inline;">debug</em></span>'
-            )
+      editManager.nav.REQUEST_FOCUS(p1);
+      const originalTokens = Array.from(p1.querySelectorAll('.jsed-token'));
+      expect(originalTokens).toHaveLength(2);
+
+      editManager.nav.REQUEST_FOCUS(p2);
+      expect(editManager.nav.getFocus()).toBe(p2);
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p1);
+
+      // assert
+      const retokenizedTokens = Array.from(p1.querySelectorAll('.jsed-token'));
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(retokenizedTokens).toHaveLength(2);
+      expect(retokenizedTokens).toEqual(originalTokens);
+      expect(p1.querySelector('.jsed-token .jsed-token')).toBeNull();
+
+      editManager.destroy();
+    });
+
+    it('ignores REQUEST_FOCUS on an element inside an IGNORABLE ancestor', () => {
+      // arrange
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'foo bar'),
+          p(
+            { id: 'p2' },
+            '<span class="jsed-ignore"><em id="ignored-target" style="display:inline;">debug</em></span>'
           )
-        );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-        const p2 = byId(doc, 'p2');
-        const ignoredTarget = byId(doc, 'ignored-target');
-
-        editManager.nav.REQUEST_FOCUS(p1);
-        expect(editManager.nav.getFocus()).toBe(p1);
-        expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
-        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
-
-        // act
-        editManager.nav.REQUEST_FOCUS(ignoredTarget);
-
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p1);
-        expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
-        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
-
-        editManager.destroy();
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc
       });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+      const ignoredTarget = byId(doc, 'ignored-target');
 
-      test('background cleanup detokenizes the oldest inactive LINE after enough normal interactions', async () => {
-        // arrange
-        vi.useFakeTimers();
-        const doc = makeRoot(
-          frag(
-            p({ id: 'p1' }, 'aaa'),
-            p({ id: 'p2' }, 'bbb'),
-            p({ id: 'p3' }, 'ccc'),
-            p({ id: 'p4' }, 'ddd')
-          )
-        );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-        const p2 = byId(doc, 'p2');
-        const p3 = byId(doc, 'p3');
-        const p4 = byId(doc, 'p4');
+      editManager.nav.REQUEST_FOCUS(p1);
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
 
-        // act
-        editManager.nav.REQUEST_FOCUS(p1);
-        editManager.nav.REQUEST_FOCUS(p2);
-        editManager.nav.REQUEST_FOCUS(p3);
-        editManager.nav.REQUEST_FOCUS(p4);
-        await vi.runAllTimersAsync();
+      // act
+      editManager.nav.REQUEST_FOCUS(ignoredTarget);
 
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p4);
-        expect(p1.querySelector('.jsed-token')).toBeNull();
-        expect(p2.querySelector('.jsed-token')?.textContent).toBe('bbb');
-        expect(p3.querySelector('.jsed-token')?.textContent).toBe('ccc');
-        expect(p4.querySelector('.jsed-token')?.textContent).toBe('ddd');
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
 
-        editManager.destroy();
-        vi.useRealTimers();
+      editManager.destroy();
+    });
+
+    test('background cleanup detokenizes the oldest inactive LINE after enough normal interactions', async () => {
+      // arrange
+      vi.useFakeTimers();
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'aaa'),
+          p({ id: 'p2' }, 'bbb'),
+          p({ id: 'p3' }, 'ccc'),
+          p({ id: 'p4' }, 'ddd')
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc
       });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+      const p3 = byId(doc, 'p3');
+      const p4 = byId(doc, 'p4');
 
-      it('clicking a token in another already-tokenized FOCUSABLE requires two interactions', () => {
+      // act
+      editManager.nav.REQUEST_FOCUS(p1);
+      editManager.nav.REQUEST_FOCUS(p2);
+      editManager.nav.REQUEST_FOCUS(p3);
+      editManager.nav.REQUEST_FOCUS(p4);
+      await vi.runAllTimersAsync();
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p4);
+      expect(p1.querySelector('.jsed-token')).toBeNull();
+      expect(p2.querySelector('.jsed-token')?.textContent).toBe('bbb');
+      expect(p3.querySelector('.jsed-token')?.textContent).toBe('ccc');
+      expect(p4.querySelector('.jsed-token')?.textContent).toBe('ddd');
+
+      editManager.destroy();
+      vi.useRealTimers();
+    });
+
+    it('clicking a token in another already-tokenized FOCUSABLE requires two interactions', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.nav.connect();
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+
+      editManager.nav.REQUEST_FOCUS(p1);
+      editManager.nav.REQUEST_FOCUS(p2);
+      const p1FirstToken = p1.querySelector('.jsed-token') as HTMLElement;
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p1FirstToken);
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p1);
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p1FirstToken);
+
+      // assert
+      expect(editManager.getMode()).toBe('edit');
+      expect(editManager.cursor?.getToken()).toBe(p1FirstToken);
+
+      editManager.destroy();
+    });
+  });
+
+  describe('REQUEST_FOCUS (edit mode): User clicks/touches', () => {
+    it('exiting edit mode by focusing another element quick-descends and tokenizes the new focus target', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const editManager = EditManager.createNull({
+        document: doc,
+        userInput: Controller.createNull().input
+      });
+      editManager.nav.connect();
+      editManager.enterEditing(byId(doc, 'p1'));
+      const p2 = byId(doc, 'p2');
+
+      // act
+      editManager.nav.REQUEST_FOCUS(p2);
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(p2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
+
+      editManager.destroy();
+    });
+
+    test('<p/> <loose/> <p/>', () => {
+      // arrange
+      const doc = makeRoot(
+        div(
+          { id: 'div1' },
+          p({ id: 'p1' }, 'aaa'), //
+          'bbb ccc', // not tokenized, regression here
+          p({ id: 'p2' }, 'ddd')
+        )
+      );
+      const editManager = EditManager.createNull({
+        document: doc
+      });
+      const div1 = byId(doc, 'div1');
+
+      // act
+      editManager.nav.REQUEST_FOCUS(div1);
+
+      // assert
+      expect(editManager.getMode()).toBe('view');
+      expect(editManager.nav.getFocus()).toBe(div1);
+      // First FOCUS change should trigger tokenization for (1) first element;
+      // (2) all loose text (this is the tricky bit).
+      expect(Array.from(div1.querySelectorAll('.jsed-token')).map((t) => t.textContent)).toEqual([
+        'aaa',
+        'bbb',
+        'ccc'
+      ]);
+
+      editManager.destroy();
+    });
+  });
+
+  // Action = Key or menu
+  describe('FOCUS-based actions (view mode)', () => {
+    describe('handleRight', () => {
+      it('descends within the focused subtree in view mode', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
         const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
+          document: doc
         });
         editManager.nav.connect();
         const p1 = byId(doc, 'p1');
-        const p2 = byId(doc, 'p2');
-
-        editManager.nav.REQUEST_FOCUS(p1);
-        editManager.nav.REQUEST_FOCUS(p2);
-        const p1FirstToken = p1.querySelector('.jsed-token') as HTMLElement;
 
         // act
-        editManager.nav.REQUEST_FOCUS(p1FirstToken);
+        editManager.handleRight();
 
         // assert
         expect(editManager.getMode()).toBe('view');
         expect(editManager.nav.getFocus()).toBe(p1);
-
-        // act
-        editManager.nav.REQUEST_FOCUS(p1FirstToken);
-
-        // assert
-        expect(editManager.getMode()).toBe('edit');
-        expect(editManager.cursor?.getToken()).toBe(p1FirstToken);
-
-        editManager.destroy();
-      });
-
-      it('exiting edit mode by focusing another element quick-descends and tokenizes the new focus target', () => {
-        // arrange
-        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-        const editManager = EditManager.createNull({
-          document: doc,
-          userInput: Controller.createNull().input
-        });
-        editManager.nav.connect();
-        editManager.enterEditing(byId(doc, 'p1'));
-        const p2 = byId(doc, 'p2');
-
-        // act
-        editManager.nav.REQUEST_FOCUS(p2);
-
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p2);
-        expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
-
-        editManager.destroy();
-      });
-
-      test('<p/> <loose/> <p/>', () => {
-        // arrange
-        const doc = makeRoot(
-          div(
-            { id: 'div1' },
-            p({ id: 'p1' }, 'aaa'), //
-            'bbb ccc', // not tokenized, regression here
-            p({ id: 'p2' }, 'ddd')
-          )
-        );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        const div1 = byId(doc, 'div1');
-
-        // act
-        editManager.nav.REQUEST_FOCUS(div1);
-
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(div1);
-        // First FOCUS change should trigger tokenization for (1) first element;
-        // (2) all loose text (this is the tricky bit).
-        expect(Array.from(div1.querySelectorAll('.jsed-token')).map((t) => t.textContent)).toEqual([
-          'aaa',
-          'bbb',
-          'ccc'
-        ]);
 
         editManager.destroy();
       });
     });
-  });
 
-  describe('actions - menu or keyed', () => {
+    describe('handleUp', () => {
+      it('moves FOCUS to the previous sibling', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            p({ id: 'p1' }, 'foo'), //
+            p({ id: 'p2' }, 'bar'),
+            p({ id: 'p3' }, 'baz')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.nav.connect();
+
+        editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
+
+        // act
+        editManager.handleUp();
+
+        // assert
+        expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
+
+        editManager.destroy();
+      });
+    });
+
+    describe('handleDown', () => {
+      it('moves FOCUS to the next sibling', () => {
+        // arrange
+        const doc = makeRoot(
+          frag(
+            p({ id: 'p1' }, 'foo'), //
+            p({ id: 'p2' }, 'bar'),
+            p({ id: 'p3' }, 'baz')
+          )
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.nav.connect();
+
+        editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
+
+        // act
+        editManager.handleDown();
+
+        // assert
+        expect(editManager.nav.getFocus()).toBe(byId(doc, 'p3'));
+
+        editManager.destroy();
+      });
+    });
+
     describe('handleEnter - user initiates editing', () => {
       test('from a focused LINE with a leading ISLAND lands the CURSOR on that ISLAND', () => {
         // arrange
@@ -291,6 +367,11 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
+    });
+  });
+
+  describe('CURSOR-based actions (edit mode)', () => {
+    describe('handleEnter - user initiates editing', () => {
       describe('enterEditing: when user initiates editing...', () => {
         // TODO: should these be in handleEnter ?
         it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
@@ -452,25 +533,6 @@ describe('EditManager', () => {
     });
 
     describe('handleRight', () => {
-      it('descends within the focused subtree in view mode', () => {
-        // arrange
-        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-
-        // act
-        editManager.handleRight();
-
-        // assert
-        expect(editManager.getMode()).toBe('view');
-        expect(editManager.nav.getFocus()).toBe(p1);
-
-        editManager.destroy();
-      });
-
       it('moves to the next TOKEN in edit mode', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
@@ -510,79 +572,6 @@ describe('EditManager', () => {
         expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
         editManager.destroy();
-      });
-
-      describe('loose text', () => {
-        it('<loose/> <p/> <loose/>', () => {
-          // arrange
-          const doc = makeRoot(
-            div(
-              { id: 'div1' }, //
-              'aaa ',
-              p({ id: 'p1' }, 'bbb'),
-              ' ccc'
-            )
-          );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
-
-          // act + assert
-          editManager.enterEditing(byId(doc, 'div1'));
-          expect(editManager.getMode()).toBe('edit');
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
-
-          // The cursor sits on the p-tag
-          // TODO: In another test we should repeat up to here then run
-          // enterEditing at this point to go inside the p-tag.
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(false);
-          expect(editManager.cursor!.getToken().tagName).toBe('P');
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
-
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
-
-          editManager.destroy();
-        });
-
-        it('<p/> <loose/> <p/>', () => {
-          // arrange
-          const doc = makeRoot(
-            frag(
-              p({ id: 'p1' }, 'aaa'), //
-              'bbb ccc', // not tokenized, regression here
-              p({ id: 'p2' }, 'ddd')
-            )
-          );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
-
-          // act + assert
-          editManager.enterEditing(byId(doc, 'p1'));
-          expect(editManager.getMode()).toBe('edit');
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
-
-          // Regression here in findCrossLineTarget.
-          // <loose/> never gets tokenized and the current algorithm doesn't detect tokens.
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
-
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
-
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(false); // on p-tag
-          expect(editManager.cursor!.getToken().innerText).toBe('ddd');
-
-          editManager.destroy();
-        });
       });
 
       it('from the last LINE_SIBLING of a LINE enters the next LINE that starts with an ISLAND', () => {
@@ -659,6 +648,79 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
+
+      describe('LOOSE_TEXT', () => {
+        it('<loose/> <p/> <loose/>', () => {
+          // arrange
+          const doc = makeRoot(
+            div(
+              { id: 'div1' }, //
+              'aaa ',
+              p({ id: 'p1' }, 'bbb'),
+              ' ccc'
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'div1'));
+          expect(editManager.getMode()).toBe('edit');
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+
+          // The cursor sits on the p-tag
+          // TODO: In another test we should repeat up to here then run
+          // enterEditing at this point to go inside the p-tag.
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(false);
+          expect(editManager.cursor!.getToken().tagName).toBe('P');
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+
+          editManager.destroy();
+        });
+
+        it('<p/> <loose/> <p/>', () => {
+          // arrange
+          const doc = makeRoot(
+            frag(
+              p({ id: 'p1' }, 'aaa'), //
+              'bbb ccc', // not tokenized, regression here
+              p({ id: 'p2' }, 'ddd')
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'p1'));
+          expect(editManager.getMode()).toBe('edit');
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+
+          // Regression here in findCrossLineTarget.
+          // <loose/> never gets tokenized and the current algorithm doesn't detect tokens.
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+
+          editManager.handleRight();
+          expect(isToken(editManager.cursor!.getToken())).toBe(false); // on p-tag
+          expect(editManager.cursor!.getToken().innerText).toBe('ddd');
+
+          editManager.destroy();
+        });
+      });
     });
 
     describe('handleLeft', () => {
@@ -717,6 +779,7 @@ describe('EditManager', () => {
           document: doc
         });
         editManager.enterEditing(byId(doc, 'p2'));
+        expect(identify(editManager.cursor!.getToken())).toBe('bbb');
 
         // act
         editManager.handleLeft();
@@ -824,61 +887,10 @@ describe('EditManager', () => {
         editManager.destroy();
       });
     });
+  });
 
-    describe('handleDown', () => {
-      it('moves FOCUS to the next sibling', () => {
-        // arrange
-        const doc = makeRoot(
-          frag(
-            p({ id: 'p1' }, 'foo'), //
-            p({ id: 'p2' }, 'bar'),
-            p({ id: 'p3' }, 'baz')
-          )
-        );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-
-        editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
-
-        // act
-        editManager.handleDown();
-
-        // assert
-        expect(editManager.nav.getFocus()).toBe(byId(doc, 'p3'));
-
-        editManager.destroy();
-      });
-    });
-
-    describe('handleUp', () => {
-      it('moves FOCUS to the previous sibling', () => {
-        // arrange
-        const doc = makeRoot(
-          frag(
-            p({ id: 'p1' }, 'foo'), //
-            p({ id: 'p2' }, 'bar'),
-            p({ id: 'p3' }, 'baz')
-          )
-        );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
-        editManager.nav.connect();
-
-        editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
-
-        // act
-        editManager.handleUp();
-
-        // assert
-        expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
-
-        editManager.destroy();
-      });
-    });
-    describe('revealActiveTarget - user scrolls into view', () => {
+  describe('scrolling', () => {
+    describe('revealActiveTarget (edit mode) - user scrolls into view', () => {
       it('centers the current TOKEN in edit mode', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'), {
@@ -922,7 +934,9 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
+    });
 
+    describe('revealActiveTarget (view mode) - user scrolls into view', () => {
       it('aligns an oversized FOCUSABLE to the top of the viewport', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'), {
@@ -967,7 +981,9 @@ describe('EditManager', () => {
         editManager.destroy();
       });
     });
+  });
 
+  describe('Actions at FOCUS', () => {
     describe('anchors', () => {
       describe('before tag', () => {
         it('inserts an anchor at the boundary and enters editing on it', () => {
@@ -1473,9 +1489,8 @@ describe('EditManager', () => {
         });
       });
     });
-
     describe('leading/trailing spaces', () => {
-      describe('at tag (FOCUSABLE)', () => {
+      describe('at FOCUS', () => {
         describe('insertSpaceAfterTag', () => {
           it('inserts a space at the boundary after the focused tag', () => {
             // arrange
@@ -1824,7 +1839,11 @@ describe('EditManager', () => {
           });
         });
       });
+    });
+  });
 
+  describe('Actions at CURSOR', () => {
+    describe('leading/trailing spaces', () => {
       describe('at CURSOR', () => {
         describe('before CURSOR', () => {
           it('inserts whitespace before an anchor between adjacent inline tags', () => {
@@ -2414,7 +2433,7 @@ describe('EditManager', () => {
     });
   });
 
-  describe('input handling', () => {
+  describe('User types - input handling', () => {
     async function createEditManagerFixture(params?: { html?: string }) {
       const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
       const line = byId(doc, 'p1');

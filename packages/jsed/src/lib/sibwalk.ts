@@ -176,7 +176,7 @@ export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTM
 
   for (const node of findNextNode(from, root, {
     visit: isLineSibling,
-    descend: isFocusable
+    descend: (el) => isFocusable(el) && !isIsland(el)
   })) {
     if (node.contains(currentLine)) continue;
 
@@ -213,7 +213,7 @@ export function findPreviousLineCandidate(from: HTMLElement, root: HTMLElement):
 
   for (const node of findPreviousNode(from, root, {
     visit: (el) => isLineSibling(el) || el.nodeType === Node.TEXT_NODE,
-    descend: isFocusable
+    descend: (el) => isFocusable(el) && !isIsland(el)
   })) {
     if (node === from) {
       // TODO: we seem to visit current by default when moving previous.  This

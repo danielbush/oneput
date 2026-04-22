@@ -67,11 +67,7 @@ export class Tokenizer {
    *
    * The text node is usually part of a LOOSE_LINE — a run of loose content
    * between nested LINE's of an outer LINE. `tokenizeLineAt` on the owning
-   * LINE will tokenize that LOOSE_LINE as part of its pre-pass. To identify
-   * which TOKEN's specifically replaced `node`, we sandwich `node` with
-   * comment markers before tokenization, then collect the TOKEN's that land
-   * between them afterwards. Comment nodes are ignored by the tokenization
-   * walk so they don't affect behaviour.
+   * LINE will tokenize that LOOSE_LINE as part of its pre-pass.
    */
   tokenizeLineAtTextNode(node: Node): HTMLElement[] {
     if (node.nodeType !== Node.TEXT_NODE) return [];
@@ -79,6 +75,8 @@ export class Tokenizer {
     if (!parent) return [];
 
     const line = getLine(node);
+    // Comment nodes are ignored by the tokenization walk so they don't affect
+    // behaviour.
     const startMarker = document.createComment('');
     const endMarker = document.createComment('');
     parent.insertBefore(startMarker, node);

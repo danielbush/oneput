@@ -368,7 +368,7 @@ describe('tokenizeLine', () => {
 });
 
 describe('findLooseLinesIn', () => {
-  test('returns one run of text nodes per LOOSE_LINE, ignores text before any LINE', () => {
+  test('returns one run of text nodes per LOOSE_LINE, including the leading run before the first nested LINE', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -387,6 +387,7 @@ describe('findLooseLinesIn', () => {
 
     // assert
     expect(runs.map((run) => run.map((n) => n.nodeValue?.trim()))).toEqual([
+      ['aaa bbb'],
       ['first second third'],
       ['fourth fifth']
     ]);
@@ -413,6 +414,7 @@ describe('findLooseLinesIn', () => {
 
     // assert
     expect(runs.map((run) => run.map((n) => n.nodeValue?.trim()))).toEqual([
+      ['aaa'],
       ['first', 'second third'],
       ['fourth fifth']
     ]);
@@ -443,6 +445,7 @@ describe('findLooseLinesIn', () => {
 
     // assert
     expect(runs.map((run) => run.map((n) => n.nodeValue?.trim()))).toEqual([
+      ['aaa'],
       ['first', 'strong1', 'second third'],
       ['fourth fifth']
     ]);
@@ -463,7 +466,7 @@ describe('findLooseLinesIn', () => {
 });
 
 describe('tokenizeLooseLinesIn', () => {
-  test('tokenizes each LOOSE_LINE run and leaves pre-LINE content alone', () => {
+  test('tokenizes every LOOSE_LINE run including the leading run before the first nested LINE', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -485,15 +488,14 @@ describe('tokenizeLooseLinesIn', () => {
       child.classList.contains('jsed-token')
     );
     expect(directTokens.map((t) => t.textContent)).toEqual([
+      'aaa',
+      'bbb',
       'first',
       'second',
       'third',
       'fourth',
       'fifth'
     ]);
-    // pre-LINE text "aaa bbb" stays as a plain text node
-    expect(div1.firstChild?.nodeType).toBe(Node.TEXT_NODE);
-    expect(div1.firstChild?.nodeValue).toBe('aaa bbb');
     // nested <p>'s are left untouched
     expect(byId(doc, 'p1').querySelector('.jsed-token')).toBeNull();
     expect(byId(doc, 'p2').querySelector('.jsed-token')).toBeNull();

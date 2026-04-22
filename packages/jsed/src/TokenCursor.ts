@@ -13,7 +13,8 @@ import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.j
 export type { TokenCursorError } from './TokenCursorBase.js';
 
 /**
- * Manages the CURSOR — motion, editing, and CURSOR_STATE markers.
+ * Manages moving the CURSOR and ensuring beforehand that nearby DOM is
+ * tokenized via the Tokenizer.
  */
 export class TokenCursor extends TokenCursorBase {
   static create(params: TokenCursorBaseParams) {
@@ -26,7 +27,9 @@ export class TokenCursor extends TokenCursorBase {
 
   // #region Motion
 
-  /** Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE). */
+  /**
+   * Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE).
+   */
   moveNext() {
     if (this.isInsertingBefore()) {
       this.clearMarkers();
@@ -46,7 +49,9 @@ export class TokenCursor extends TokenCursorBase {
     }
   }
 
-  /** Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE). */
+  /**
+   * Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE).
+   */
   movePrevious() {
     if (this.isInsertingAfter()) {
       this.clearMarkers();
@@ -83,6 +88,15 @@ export class TokenCursor extends TokenCursorBase {
   /**
    * Resolve last reachable CURSOR target in the previous LINE, tokenizing as
    * required.
+   *
+   * More work than `findNextCrossLineTarget` for two reasons:
+   * 1. `tokenizeLineAt` returns the first LINE_SIBLING in first reachable LINE,
+   *    which forward can use directly. Backward wants the LAST, so it must descend
+   *    and scan.
+   * 2. That scan may reach content that hasn't been tokenized yet — either a
+   *    trailing LOOSE_LINE in a sibling outer LINE, or the raw text of a
+   *    previous real LINE we've never entered. Hence the TEXT_NODE branch.
+
    */
   private findPreviousCrossLineTarget(): HTMLElement | null {
     const root = this.getDocument().root;

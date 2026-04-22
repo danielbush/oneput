@@ -139,23 +139,23 @@ export function detokenizeLine(el: HTMLElement): void {
 }
 
 /**
- * Scan `el` for LOOSE_LINE runs — the text content that sits between nested
- * LINE children of `el`. A LOOSE_LINE is the run of content between one
- * nested LINE and the next (or the end of `el`). Non-LINE direct children
- * and CURSOR_TRANSPARENT wrappers (INLINE_FLOW etc.) belong to the run;
- * we descend through CURSOR_TRANSPARENT to collect every text node with
- * non-whitespace content. Content before any nested LINE is ignored — it
- * belongs to `el`'s own LINE.
+ * Scan `el` for LOOSE_LINE runs — the text content that sits around nested
+ * LINE children of `el`. A LOOSE_LINE is the run of content before the first
+ * nested LINE, between one nested LINE and the next, or after the last
+ * nested LINE. Non-LINE direct children and CURSOR_TRANSPARENT wrappers
+ * (INLINE_FLOW etc.) belong to the run; we descend through CURSOR_TRANSPARENT
+ * to collect every text node with non-whitespace content. If `el` has no
+ * nested LINE children, no runs are returned — `el` is itself a LINE.
  *
  * Returns one `Node[]` per LOOSE_LINE (in document order), each holding the
  * text nodes that make up the run. `tokenizeLooseLine` can operate on these.
  *
  * @example
- * Two LOOSE_LINE's:
+ * Three LOOSE_LINE's:
+ * - `[text('aaa bbb')]`
  * - `[text('first'), text('second third')]` (text('first') is the text node
  *   inside `<em>`)
  * - `[text('fourth fifth')]`
- * `aaa` is ignored.
  * ```html
  * <div>
  *   aaa bbb
@@ -168,17 +168,19 @@ export function detokenizeLine(el: HTMLElement): void {
  */
 export function collectLooseTextNodesIn(el: HTMLElement): Node[][] {
   const runs: Node[][] = [];
-  let current: Node[] | null = null;
+  let current: Node[] = [];
+  let sawLine = false;
   for (const child of Array.from(el.childNodes)) {
     if (isLine(child)) {
-      if (current) runs.push(current);
+      runs.push(current);
       current = [];
+      sawLine = true;
       continue;
     }
-    if (!current) continue;
     collectTextsWithContent(child, current);
   }
-  if (current && current.length > 0) runs.push(current);
+  if (!sawLine) return [];
+  runs.push(current);
   return runs.filter((run) => run.length > 0);
 }
 
@@ -199,15 +201,10 @@ function collectTextsWithContent(n: Node, out: Node[]): void {
 }
 
 /**
- * Tokenize every LOOSE_LINE in `el`. For each text node in each run,
- * replace it with TOKEN spans (and preserved whitespace text nodes, per
- * the boundary-spacing model used by `replaceTextNode`). Content before
- * the first nested LINE is left untouched, and nested LINE's themselves
- * are skipped — their own tokenization is done lazily by
- * `Tokenizer.tokenizeLineAt`.
- *
- * Returns the head TOKEN of each LOOSE_LINE (first TOKEN created in the
- * run), in document order.
+ * Tokenize every LOOSE_LINE in `el`. For each text node in each run, replace it
+ * with TOKEN spans (and preserved whitespace text nodes, per the
+ * boundary-spacing model used by `replaceTextNode`).  Nested LINE's are skipped
+ * — their own tokenization is done lazily by `Tokenizer.tokenizeLineAt`.
  */
 export function tokenizeLooseLinesIn(el: HTMLElement) {
   const runs = collectLooseTextNodesIn(el);
@@ -219,8 +216,8 @@ export function tokenizeLooseLinesIn(el: HTMLElement) {
 }
 
 /**
- * Detect untokenized text on either side of `el` up to the next LINE.  If
- * found, tokenize them.
+ * Detect untokenized text (a LOOSE_LINE) on either side of `el` up to the
+ * next/previous LINE.  If found, tokenize them.
  */
 export function tokenizeLooseLinesAround(el: HTMLElement) {
   if (!isFocusable(el)) {

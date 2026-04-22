@@ -205,8 +205,6 @@ function isCandidateLineSibling(node: Node | null): boolean {
 
 /**
  * Find the last LINE_SIBLING candidate before the current exhausted LINE.
- *
- * Mirror of `findNextLineCandidate`.
  */
 export function findPreviousLineCandidate(from: HTMLElement, root: HTMLElement): Node | null {
   const currentLine = getLine(from);

@@ -865,6 +865,107 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
+
+      describe('LOOSE_TEXT', () => {
+        it('<loose/> <p/> <loose/>', () => {
+          // arrange
+          const doc = makeRoot(
+            div(
+              { id: 'div1' }, //
+              'aaa ',
+              p({ id: 'p1' }, 'bbb'),
+              ' ccc',
+              p({ id: 'p2' }, 'ddd')
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'p1'));
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleLeft();
+          // This triggers findPreviousLineCandidate to return an untokenized
+          // text node 'aaa'.
+          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+
+          editManager.destroy();
+        });
+
+        it('<loose/> <p/> <loose/> <p/>', () => {
+          // arrange
+          const doc = makeRoot(
+            div(
+              { id: 'div1' }, //
+              'aaa ',
+              p({ id: 'p1' }, 'bbb'),
+              ' ccc',
+              p({ id: 'p2' }, 'ddd')
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'p2'));
+          expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
+
+          editManager.handleLeft();
+          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+
+          editManager.handleLeft();
+          expect(isToken(editManager.cursor!.getToken())).toBe(false);
+          expect(editManager.cursor!.getToken().tagName).toBe('P');
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleLeft();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+
+          editManager.destroy();
+        });
+
+        it('<p/> <loose/> <p/>', () => {
+          // arrange
+          const doc = makeRoot(
+            frag(
+              p({ id: 'p1' }, 'aaa'), //
+              'bbb ccc', // not tokenized, regression here
+              p({ id: 'p2' }, 'ddd')
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+
+          // act + assert
+          editManager.enterEditing(byId(doc, 'p2'));
+          expect(editManager.getMode()).toBe('edit');
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
+
+          // Regression here in findPreviousCrossLineTarget.
+          // <loose/> never gets tokenized and the current algorithm
+          // doesn't detect tokens.
+          editManager.handleLeft();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+
+          editManager.handleLeft();
+          expect(isToken(editManager.cursor!.getToken())).toBe(true);
+          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+
+          editManager.handleLeft();
+          expect(isToken(editManager.cursor!.getToken())).toBe(false); // on p-tag
+          expect(editManager.cursor!.getToken().tagName).toBe('P');
+          expect(editManager.cursor!.getToken().innerText).toBe('aaa');
+
+          editManager.destroy();
+        });
+      });
     });
 
     describe('handleExit', () => {

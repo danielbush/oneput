@@ -151,6 +151,15 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
     - Here we need to build the IMPLICIT_LINE around both the trailing TOKEN's AND the em-tag
   - Counter Example: `<div><em>this</em> text does not need an implicit LINE</div>`.
     - the TOKEN's after the em-tag obviously form a single LINE with the em-tag; there is NO implicit line here.
+- **LOOSE_LINE**
+  — an interstitial run of loose content that sits **around** NESTED_LINE's within an outer LINE. A LOOSE_LINE is a contiguous stretch of non-LINE siblings (text nodes, INLINE_FLOW wrappers, TOKEN's) bounded by the outer LINE's edges on one side and a NESTED_LINE on the other. They come in three positions:
+  - **leading** — before the first NESTED_LINE
+  - **between** — between two NESTED_LINE's
+  - **trailing** — after the last NESTED_LINE
+  - Unlike IMPLICIT_LINE, a LOOSE_LINE is **not** promoted to its own LINE — it remains part of the outer LINE. IMPLICIT_LINE is a structural fix-up that creates a wrapping LINE; LOOSE_LINE is a runtime label for a run that the outer LINE is responsible for.
+  - Tokenization: a LINE's own TOKEN's (via `tokenizeLine`) are separate from its LOOSE_LINE content. `tokenizeLooseLinesIn(el)` tokenizes every LOOSE_LINE inside `el`; `tokenizeLooseLinesAround(el)` tokenizes the LOOSE_LINE runs on either side of `el` within `el`'s parent LINE, up to the next NESTED_LINE boundary.
+  - Example: in `<div>aaa<p>bbb</p> ccc <p>ddd</p> eee</div>` there are three LOOSE_LINE's on `div`: leading `aaa`, between ` ccc `, trailing ` eee`. They all belong to the `div` LINE.
+  - Source of truth: `collectLooseTextNodesIn`, `tokenizeLooseLinesIn`, `tokenizeLooseLinesAround` in `lib/tokenize.ts`.
 
 Tokens and Text and whitespace
 

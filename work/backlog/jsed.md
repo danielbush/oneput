@@ -22,7 +22,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - clean up algorithm
     - go through oldest tokenized LINE's
     - detokenize first one where CURSOR is not present
-- selections
+- [x] selections
   - within p-tag
   - across inline flows within p-tag
     - explore visual appearance of selection as it extends over INLINE_FLOW's, is it broken?  How do we make it look like a selection?

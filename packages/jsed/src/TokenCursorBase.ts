@@ -24,11 +24,26 @@ export type TokenCursorError =
       type: 'expected-non-token';
     };
 
+/**
+ * Options threaded through `setToken` → `onCursorChange`. TokenCursorBase
+ * is opaque to the contents; consumers (e.g. EditManager's handleCursorChange)
+ * interpret them.
+ */
+export type SetTokenOpts = {
+  /**
+   * When false, the cursor-change listener should skip any user-facing
+   * input-sync side effects (e.g. overwriting the input value). Internal
+   * model updates (tokenizer keep-alive, nav focus) still fire.
+   * Default: true.
+   */
+  syncInput?: boolean;
+};
+
 export type TokenCursorBaseParams = {
   document: JsedDocument;
   tokenizer: Tokenizer;
   token: HTMLElement;
-  onCursorChange: (token: HTMLElement) => void;
+  onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
   onError: (err: TokenCursorError) => void;
   /**
    * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
@@ -45,7 +60,7 @@ export abstract class TokenCursorBase {
   #token: HTMLElement;
   #document: JsedDocument;
   #tokenizer: Tokenizer;
-  #onCursorChange: (token: HTMLElement) => void;
+  #onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
   #silent: boolean;
   protected onError: (err: TokenCursorError) => void;
 
@@ -80,9 +95,10 @@ export abstract class TokenCursorBase {
    * Set the active TOKEN for the CURSOR.
    *
    * The cursor change callback is fired after the DOM classes and scroll state
-   * have been updated.
+   * have been updated. `opts` is opaque to this class — it flows through to
+   * the callback so callers can attach per-call hints (e.g. `syncInput`).
    */
-  setToken(el: HTMLElement) {
+  setToken(el: HTMLElement, opts?: SetTokenOpts) {
     if (!isLineSibling(el)) {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);
@@ -94,7 +110,7 @@ export abstract class TokenCursorBase {
       this.getDocument().viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
     }
     this.#token = el;
-    this.#onCursorChange(el);
+    this.#onCursorChange(el, opts);
   }
 
   // #endregion

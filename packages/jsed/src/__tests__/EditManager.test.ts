@@ -2915,4 +2915,124 @@ describe('EditManager', () => {
       expect(userInput.getInputValue()).toBe('o');
     });
   });
+
+  /**
+   * Typing while a selection is active should replace the whole selection
+   * with a single new TOKEN positioned where the head was. Tiered from
+   * easy to hard:
+   *   1. single-LINE full selection  → one TOKEN, rest removed
+   *   2. single-LINE partial         → selected removed, rest intact
+   *   3. INLINE_FLOW fully consumed  → em-tag removed when emptied
+   *   4. cross-LINE with one empty   → p-tag removed when emptied
+   *
+   * All four currently fail — typing acts only on the anchor TOKEN.
+   */
+  describe('User types over a selection', () => {
+    async function setupWithDoc(doc: ReturnType<typeof makeRoot>, seed: HTMLElement) {
+      const userInput = Controller.createNull().input;
+      const editManager = EditManager.createNull({ document: doc, userInput });
+      editManager.enterEditing(seed);
+      return { editManager, userInput };
+    }
+
+    function tokenValues(el: HTMLElement): string[] {
+      return Array.from(el.querySelectorAll('.jsed-token')).map((t) => t.textContent ?? '');
+    }
+
+    test('tier 1: single-LINE full selection → one TOKEN replaces all', async () => {
+      // arrange: p(foo bar baz), select all three tokens forward
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+      const p1 = byId(doc, 'p1');
+      const { editManager, userInput } = await setupWithDoc(doc, p1);
+      editManager.extendNext(); // head: bar
+      editManager.extendNext(); // head: baz
+
+      // act: user types over the selection
+      await userInput.typeText('x');
+
+      // assert
+      expect(tokenValues(p1)).toEqual(['x']);
+      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+      // Input value reflects what the user typed — handleCursorChange must
+      // not clobber it with the head TOKEN's pre-rewrite value.
+      expect(userInput.getInputValue()).toBe('x');
+
+      editManager.destroy();
+    });
+
+    test('tier 2: single-LINE partial forward selection → selected removed, rest intact', async () => {
+      // arrange: p(foo bar baz), anchor=foo, head=bar
+      const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+      const p1 = byId(doc, 'p1');
+      const { editManager, userInput } = await setupWithDoc(doc, p1);
+      editManager.extendNext(); // head: bar
+
+      // act
+      await userInput.typeText('x');
+
+      // assert: 'foo' and 'bar' gone, 'x' lands where bar was, 'baz' intact
+      expect(tokenValues(p1)).toEqual(['x', 'baz']);
+      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+      editManager.destroy();
+    });
+
+    test('tier 3: selection fully consumes <em> → em-tag removed', async () => {
+      // arrange: p(aa <em>bb cc</em> dd)
+      const doc = makeRoot(
+        p(
+          { id: 'p1' }, //
+          'aa ',
+          em({ ...inlineStyleHack, id: 'em1' }, 'bb cc'),
+          ' dd'
+        )
+      );
+      const p1 = byId(doc, 'p1');
+      const { editManager, userInput } = await setupWithDoc(doc, p1);
+      editManager.extendNext(); // aa -> bb
+      editManager.extendNext(); // bb -> cc
+
+      // act
+      await userInput.typeText('x');
+
+      // assert: em emptied and removed; p has single 'x' followed by 'dd'
+      expect(tokenValues(p1)).toEqual(['x', 'dd']);
+      expect(p1.querySelector('em')).toBeNull();
+      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+
+      editManager.destroy();
+    });
+
+    test('tier 4: cross-LINE forward selection → new TOKEN lands on the START line', async () => {
+      // arrange: p1(foo bar) + p2(baz qux). Anchor=foo (in p1); forward
+      // extension to baz crosses into p2. Selection = [foo, bar, baz].
+      // Standard text-editor UX: typing lands where the selection STARTED
+      // (p1). p1's tokens are all in the selection but p1 survives because
+      // it hosts the new TOKEN; p2 is partial so qux remains.
+      const doc = makeRoot(
+        frag(
+          p({ id: 'p1' }, 'foo bar'), //
+          p({ id: 'p2' }, 'baz qux')
+        )
+      );
+      const p1 = byId(doc, 'p1');
+      const p2 = byId(doc, 'p2');
+      const { editManager, userInput } = await setupWithDoc(doc, p1);
+      editManager.extendNext(); // head: bar
+      editManager.extendNext(); // head: baz (crossed into p2)
+
+      // act
+      await userInput.typeText('x');
+
+      // assert
+      expect(tokenValues(p1)).toEqual(['x']);
+      expect(tokenValues(p2)).toEqual(['qux']);
+      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(doc.root.querySelector('#p1')).not.toBeNull();
+
+      editManager.destroy();
+    });
+  });
 });

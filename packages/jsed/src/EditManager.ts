@@ -6,6 +6,7 @@ import { isCursorTransparent, isIsland, isLine, isToken } from './lib/taxonomy.j
 import { getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
+import type { SetTokenOpts } from './TokenCursorBase.js';
 import { TokenSelection } from './TokenSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
@@ -278,9 +279,24 @@ export class EditManager {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
 
     let lastToken: HTMLElement | null = null;
-    const currentToken = this.cursor.getToken();
+    let currentToken = this.cursor.getToken();
     const currentTokenValue = token.getValue(currentToken);
     const intent = decideInputIntent(change, currentTokenValue);
+
+    // If a selection is active, reduce it to the START (earlier end in
+    // document order): remove all selected TOKEN's except the start,
+    // unwrap SELECTION_WRAPPER's, and re-seat the editing CURSOR on the
+    // start. The intent (decided above against the anchor's value) then
+    // executes against the start — e.g. rewrite-current turns typing
+    // "x" into "replace start TOKEN with x", landing the new content
+    // where the selection began.
+    if (this.selection) {
+      const start = this.selection.collapseToStart();
+      this.selection = undefined;
+      // Suppress input sync — user is mid-typing, we'd clobber their input.
+      this.cursor.setToken(start, { syncInput: false });
+      currentToken = start;
+    }
     // console.log('decided intent', JSON.stringify(intent, null, 2));
 
     switch (intent.type) {
@@ -374,11 +390,18 @@ export class EditManager {
   /**
    * When the cursor changes its token because of some action it has been
    * commanded to do usually by the user... (eg due to delete operation).
+   *
+   * `opts.syncInput === false` skips all `userInput.*` side effects —
+   * internal model updates (tokenizer keep-alive, nav focus, external
+   * onCursorChange) still fire. Used for mid-typing cursor re-seating so
+   * the user's in-flight input value is not clobbered by the head TOKEN's
+   * pre-rewrite value.
    */
-  private handleCursorChange = (tok: HTMLElement) => {
+  private handleCursorChange = (tok: HTMLElement, opts?: SetTokenOpts) => {
     this.tokenizer.setCursorElement(tok);
     this.nav?.FOCUS(tok);
     this.onCursorChange?.(tok);
+    if (opts?.syncInput === false) return;
     this.userInput.resetPlaceholder();
     this.userInput.enable(true);
 

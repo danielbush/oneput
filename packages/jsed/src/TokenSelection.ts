@@ -1,4 +1,7 @@
-import { JSED_SELECTION_CLASS } from './lib/constants.js';
+import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from './lib/constants.js';
+import { getLine } from './lib/sibwalk.js';
+import { isCursorTransparent } from './lib/taxonomy.js';
+import * as token from './lib/token.js';
 import { TokenCursor } from './TokenCursor.js';
 import type { JsedDocument } from './types.js';
 import type { Tokenizer } from './Tokenizer.js';
@@ -219,5 +222,109 @@ export class TokenSelection {
     for (const wrapper of this.wrappers) this.unwrap(wrapper);
     this.wrappers = [];
     this.headCursor.destroy();
+  }
+
+  /**
+   * Reduce the selection to its START (earlier in document order):
+   * unwrap SELECTION_WRAPPER's, remove every selected TOKEN except the
+   * start, clean up any structural containers that were fully consumed
+   * and became empty. Returns the surviving start TOKEN so callers can
+   * re-seat their CURSOR on it.
+   *
+   * "Start" = the end of the selection that is earlier in the document:
+   * forward extension → anchor; backward extension → head. This matches
+   * standard text-editor behaviour where typing over a selection lands
+   * the new content at the beginning of what was selected.
+   *
+   * Cleanup rules:
+   * - CURSOR_TRANSPARENT ancestor (em, span) fully consumed by the
+   *   selection → removed. If it was an ancestor of the start TOKEN,
+   *   start is lifted out first.
+   * - LINE (p, div) fully consumed → removed, EXCEPT when it hosts the
+   *   start TOKEN (which is what the user will type into).
+   */
+  collapseToStart(): HTMLElement {
+    const keeper = this.getBackwardEnd();
+    // Snapshot the selected TOKEN's before unwrapping — the
+    // `.jsed-selection` wrappers go away once we collapse.
+    const selectedTokens = Array.from(
+      this.wrappers.flatMap((w) => Array.from(w.querySelectorAll(`.${JSED_TOKEN_CLASS}`)))
+    ) as HTMLElement[];
+    const selectedSet = new Set(selectedTokens);
+
+    // LINE's the selection fully consumed (every TOKEN in the LINE is
+    // in the selection).
+    const fullyConsumedLines = new Set<HTMLElement>();
+    for (const wrapper of this.wrappers) {
+      const line = getLine(wrapper);
+      if (fullyConsumedLines.has(line)) continue;
+      const tokensInLine = Array.from(
+        line.querySelectorAll(`.${JSED_TOKEN_CLASS}`)
+      ) as HTMLElement[];
+      if (tokensInLine.every((t) => selectedSet.has(t))) {
+        fullyConsumedLines.add(line);
+      }
+    }
+
+    // CURSOR_TRANSPARENT containers (em, span) the selection fully
+    // consumed — walk up from each selected TOKEN.
+    const consumedCTContainers = new Set<HTMLElement>();
+    const visitedCT = new Set<HTMLElement>();
+    for (const tok of selectedTokens) {
+      for (let anc = tok.parentElement; anc && isCursorTransparent(anc); anc = anc.parentElement) {
+        if (visitedCT.has(anc)) continue;
+        visitedCT.add(anc);
+        const ancTokens = Array.from(anc.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
+        if (ancTokens.every((t) => selectedSet.has(t))) {
+          consumedCTContainers.add(anc);
+        }
+      }
+    }
+
+    this.collapse();
+
+    // Lift keeper out of its own consumed CURSOR_TRANSPARENT ancestors
+    // (innermost → outermost). Done BEFORE pruning so keeper ends up as
+    // a proper token sibling in the surviving LINE context; otherwise
+    // `token.remove` would insert stray ANCHOR's when it can't find a
+    // token sibling at the detached level.
+    let outermostConsumedForKeeper: HTMLElement | null = null;
+    for (
+      let anc = keeper.parentElement;
+      anc && isCursorTransparent(anc);
+      anc = anc.parentElement
+    ) {
+      if (!consumedCTContainers.has(anc)) break;
+      outermostConsumedForKeeper = anc;
+    }
+    if (outermostConsumedForKeeper) {
+      outermostConsumedForKeeper.replaceWith(keeper);
+    }
+
+    // Prune all other selected TOKEN's. Skip any already-detached TOKEN
+    // (those inside a lifted-away ancestor).
+    for (const tok of selectedTokens) {
+      if (tok === keeper) continue;
+      if (!tok.isConnected) continue;
+      token.remove(tok);
+    }
+
+    // Remove any consumed CURSOR_TRANSPARENT container still in the DOM
+    // that doesn't host keeper (keeper's lift handled its ancestors).
+    for (const container of consumedCTContainers) {
+      if (!container.isConnected) continue;
+      if (container.contains(keeper)) continue;
+      container.remove();
+    }
+
+    // Remove fully-consumed LINE's except keeper's own — keeper will be
+    // rewritten by the caller and needs its LINE to live in.
+    for (const line of fullyConsumedLines) {
+      if (!line.isConnected) continue;
+      if (line.contains(keeper)) continue;
+      line.remove();
+    }
+
+    return keeper;
   }
 }

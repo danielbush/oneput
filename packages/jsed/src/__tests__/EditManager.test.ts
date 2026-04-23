@@ -1029,6 +1029,66 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
+
+      it('cancels a forward-extended selection and lands the CURSOR on the head (stays in edit mode)', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({ document: doc });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.extendNext(); // head: bar
+        editManager.extendNext(); // head: baz
+
+        // act
+        editManager.handleExit();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('baz');
+        expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+        editManager.destroy();
+      });
+
+      it('cancels a backward-extended selection and lands the CURSOR on the head', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({ document: doc });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.handleRight(); // cursor: bar
+        editManager.handleRight(); // cursor: baz
+        editManager.extendPrevious(); // head: bar
+        editManager.extendPrevious(); // head: foo
+
+        // act
+        editManager.handleExit();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+        expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+        editManager.destroy();
+      });
+
+      it('exits editing when there is no selection', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
+        const editManager = EditManager.createNull({ document: doc });
+        const p1 = byId(doc, 'p1');
+        editManager.enterEditing(p1);
+        editManager.extendNext();
+        editManager.handleExit(); // cancels selection
+        expect(editManager.getMode()).toBe('edit');
+
+        // act — second handleExit now exits editing
+        editManager.handleExit();
+
+        // assert
+        expect(editManager.getMode()).toBe('view');
+        expect(editManager.nav.getFocus()).toBe(p1);
+
+        editManager.destroy();
+      });
     });
   });
 

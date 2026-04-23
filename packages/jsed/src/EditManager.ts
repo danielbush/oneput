@@ -502,6 +502,15 @@ export class EditManager {
 
   handleExit() {
     if (this.isSuspended) return;
+    if (this.selection) {
+      // Cancel selection: collapse wrappers and land the CURSOR on the head
+      // (wherever the selection was extended to). Keeps edit mode.
+      const head = this.selection.getHead();
+      this.selection.collapse();
+      this.selection = undefined;
+      this.cursor?.setToken(head);
+      return;
+    }
     if (this.mode === 'edit') {
       this.exitEditing();
     }

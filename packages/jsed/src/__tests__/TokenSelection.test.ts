@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { em, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
+import { em, frag, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
 import { TokenSelection } from '../TokenSelection.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { getValue } from '../lib/token.js';
@@ -244,5 +244,90 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     selection.extendNext();
     expect(headValue(selection)).toBe('f');
     expect(selectedTokenValues(doc)).toEqual(['f']);
+  });
+});
+
+describe('TokenSelection cross-LINE grow/shrink', () => {
+  /** Count SELECTION_WRAPPER's currently in the document. */
+  function wrapperCount(doc: { root: HTMLElement }): number {
+    return doc.root.querySelectorAll('.jsed-selection').length;
+  }
+
+  test('grow forward from end of LINE 1 into LINE 2, then shrink back past the boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        //
+        p(t('a'), s(), t('b')),
+        p(t('c'), s(), t('d'))
+      )
+    );
+    const [, b] = tokens(doc);
+    const selection = seed(doc, b);
+
+    // act + assert — seeded single wrapper in LINE 1
+    expect(selectedTokenValues(doc)).toEqual(['b']);
+    expect(wrapperCount(doc)).toBe(1);
+
+    // cross into LINE 2 — a second wrapper opens in the new parent
+    selection.extendNext();
+    expect(headValue(selection)).toBe('c');
+    expect(selectedTokenValues(doc)).toEqual(['b', 'c']);
+    expect(wrapperCount(doc)).toBe(2);
+
+    selection.extendNext();
+    expect(headValue(selection)).toBe('d');
+    expect(selectedTokenValues(doc)).toEqual(['b', 'c', 'd']);
+    expect(wrapperCount(doc)).toBe(2);
+
+    // shrink back across the boundary — far wrapper unwraps entirely
+    selection.extendPrevious();
+    expect(headValue(selection)).toBe('c');
+    expect(selectedTokenValues(doc)).toEqual(['b', 'c']);
+    expect(wrapperCount(doc)).toBe(2);
+
+    selection.extendPrevious();
+    expect(headValue(selection)).toBe('b');
+    expect(selectedTokenValues(doc)).toEqual(['b']);
+    expect(wrapperCount(doc)).toBe(1);
+  });
+
+  test('mirror: grow backward from start of LINE 2 into LINE 1, then shrink back past the boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        //
+        p(t('a'), s(), t('b')),
+        p(t('c'), s(), t('d'))
+      )
+    );
+    const [, , c] = tokens(doc);
+    const selection = seed(doc, c);
+
+    // act + assert
+    expect(selectedTokenValues(doc)).toEqual(['c']);
+    expect(wrapperCount(doc)).toBe(1);
+
+    // cross back into LINE 1 — new wrapper opens there
+    selection.extendPrevious();
+    expect(headValue(selection)).toBe('b');
+    expect(selectedTokenValues(doc)).toEqual(['b', 'c']);
+    expect(wrapperCount(doc)).toBe(2);
+
+    selection.extendPrevious();
+    expect(headValue(selection)).toBe('a');
+    expect(selectedTokenValues(doc)).toEqual(['a', 'b', 'c']);
+    expect(wrapperCount(doc)).toBe(2);
+
+    // shrink forward across the boundary
+    selection.extendNext();
+    expect(headValue(selection)).toBe('b');
+    expect(selectedTokenValues(doc)).toEqual(['b', 'c']);
+    expect(wrapperCount(doc)).toBe(2);
+
+    selection.extendNext();
+    expect(headValue(selection)).toBe('c');
+    expect(selectedTokenValues(doc)).toEqual(['c']);
+    expect(wrapperCount(doc)).toBe(1);
   });
 });

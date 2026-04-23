@@ -206,39 +206,45 @@ function collectTextsWithContent(n: Node, out: Node[]): void {
  * boundary-spacing model used by `replaceTextNode`).  Nested LINE's are skipped
  * — their own tokenization is done lazily by `Tokenizer.tokenizeLineAt`.
  */
-export function tokenizeLooseLinesIn(el: HTMLElement) {
+export function tokenizeLooseLinesIn(el: HTMLElement): boolean {
   const runs = collectLooseTextNodesIn(el);
+  let any = false;
   for (const run of runs) {
     for (const textNode of run) {
       replaceTextNode(textNode);
+      any = true;
     }
   }
+  return any;
 }
 
 /**
  * Detect untokenized text (a LOOSE_LINE) on either side of `el` up to the
  * next/previous LINE.  If found, tokenize them.
  */
-export function tokenizeLooseLinesAround(el: HTMLElement) {
+export function tokenizeLooseLinesAround(el: HTMLElement): boolean {
   if (!isFocusable(el)) {
-    return;
+    return false;
   }
-  tokenizePreviousLooseTextNodes(el);
-  tokenizeNextLooseTextNodes(el);
+  const prev = tokenizePreviousLooseTextNodes(el);
+  const next = tokenizeNextLooseTextNodes(el);
+  return prev || next;
 }
 
-function tokenizePreviousLooseTextNodes(el: HTMLElement) {
+function tokenizePreviousLooseTextNodes(el: HTMLElement): boolean {
   const nodes = collectPreviousLooseTextNodes(el);
   for (const textNode of nodes) {
     replaceTextNode(textNode);
   }
+  return nodes.length > 0;
 }
 
-function tokenizeNextLooseTextNodes(el: HTMLElement) {
+function tokenizeNextLooseTextNodes(el: HTMLElement): boolean {
   const nodes = collectNextLooseTextNodes(el);
   for (const textNode of nodes) {
     replaceTextNode(textNode);
   }
+  return nodes.length > 0;
 }
 
 /**

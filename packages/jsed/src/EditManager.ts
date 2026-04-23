@@ -505,15 +505,24 @@ export class EditManager {
     if (this.selection) {
       // Cancel selection: collapse wrappers and land the CURSOR on the head
       // (wherever the selection was extended to). Keeps edit mode.
-      const head = this.selection.getHead();
-      this.selection.collapse();
-      this.selection = undefined;
-      this.cursor?.setToken(head);
+      this.cancelSelectionAt(this.selection.getHead());
       return;
     }
     if (this.mode === 'edit') {
       this.exitEditing();
     }
+  }
+
+  /**
+   * Collapse any active selection and move the CURSOR to `target`.
+   * Returns true if a selection was cancelled. Stays in edit mode.
+   */
+  private cancelSelectionAt(target: HTMLElement): boolean {
+    if (!this.selection) return false;
+    this.selection.collapse();
+    this.selection = undefined;
+    this.cursor?.setToken(target);
+    return true;
   }
 
   /**
@@ -557,6 +566,10 @@ export class EditManager {
 
   handleLeft() {
     if (this.isSuspended) return;
+    if (this.selection) {
+      this.cancelSelectionAt(this.selection.getBackwardEnd());
+      return;
+    }
     if (this.mode === 'edit') {
       this.cursor?.movePrevious();
       return;
@@ -567,6 +580,10 @@ export class EditManager {
 
   handleRight() {
     if (this.isSuspended) return;
+    if (this.selection) {
+      this.cancelSelectionAt(this.selection.getForwardEnd());
+      return;
+    }
     if (this.mode === 'edit') {
       this.cursor?.moveNext();
       return;

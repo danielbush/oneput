@@ -1070,6 +1070,86 @@ describe('EditManager', () => {
         editManager.destroy();
       });
 
+      it('next-extended + handleRight → CURSOR lands on head (forward end)', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({ document: doc });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.extendNext(); // head: bar
+        editManager.extendNext(); // head: baz
+
+        // act
+        editManager.handleRight();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('baz');
+        expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+        editManager.destroy();
+      });
+
+      it('next-extended + handleLeft → CURSOR lands on anchor (start)', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({ document: doc });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.extendNext();
+        editManager.extendNext();
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+        expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+        editManager.destroy();
+      });
+
+      it('previous-extended + handleLeft → CURSOR lands on head (backward end)', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({ document: doc });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.handleRight();
+        editManager.handleRight(); // cursor: baz
+        editManager.extendPrevious(); // head: bar
+        editManager.extendPrevious(); // head: foo
+
+        // act
+        editManager.handleLeft();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+        expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+        editManager.destroy();
+      });
+
+      it('previous-extended + handleRight → CURSOR lands on anchor (start)', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
+        const editManager = EditManager.createNull({ document: doc });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.handleRight();
+        editManager.handleRight(); // cursor: baz
+        editManager.extendPrevious();
+        editManager.extendPrevious();
+
+        // act
+        editManager.handleRight();
+
+        // assert
+        expect(editManager.getMode()).toBe('edit');
+        expect(getValue(editManager.cursor!.getToken())).toBe('baz');
+        expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
+
+        editManager.destroy();
+      });
+
       it('exits editing when there is no selection', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));

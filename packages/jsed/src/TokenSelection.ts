@@ -196,6 +196,22 @@ export class TokenSelection {
   }
 
   /**
+   * Whichever of anchor/head is later in document order. When the
+   * selection hasn't been extended, both are the same element.
+   */
+  getForwardEnd(): HTMLElement {
+    return this.isAfterAnchor(this.getHead()) ? this.getHead() : this.anchor;
+  }
+
+  /**
+   * Whichever of anchor/head is earlier in document order. When the
+   * selection hasn't been extended, both are the same element.
+   */
+  getBackwardEnd(): HTMLElement {
+    return this.isBeforeAnchor(this.getHead()) ? this.getHead() : this.anchor;
+  }
+
+  /**
    * Unwrap every SELECTION_WRAPPER in place, leaving TOKEN's and
    * spacing text nodes untouched.
    */

@@ -5,6 +5,7 @@
  * imports from taxonomy.ts and adds traversal logic on top.
  */
 
+import { JSED_SELECTION_CLASS } from './constants.js';
 import {
   isCursorTransparent,
   isFocusable,
@@ -15,6 +16,17 @@ import {
   isToken
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
+
+/**
+ * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's
+ * keep-alive predicate so LINEs hosting an active selection are not
+ * detokenized underneath TokenSelection's references.
+ *
+ * Lives here for now but may move if it grows a wider audience.
+ */
+export function containsSelection(el: HTMLElement): boolean {
+  return el.querySelector(`.${JSED_SELECTION_CLASS}`) !== null;
+}
 
 /**
  * Get previous visible (non-IGNORABLE) element sibling.

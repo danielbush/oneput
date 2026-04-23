@@ -1,5 +1,5 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { findLineCandidateAt, getLine, getParentLine } from './lib/sibwalk.js';
+import { containsSelection, findLineCandidateAt, getLine, getParentLine } from './lib/sibwalk.js';
 import { isFocusable, isToken } from './lib/taxonomy.js';
 import { tokenizeLine, tokenizeLooseLinesAround, tokenizeLooseLinesIn } from './lib/tokenize.js';
 
@@ -58,14 +58,14 @@ export class Tokenizer {
     }
     const { line } = findLineCandidateAt(el);
     if (!line) {
-      this.detokenizer.scheduleCleanup((l) => this.lineContainsCursor(l));
+      this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
       return null;
     }
     const firstLineSibling = tokenizeLine(line);
     if (firstLineSibling) {
       this.detokenizer.recordTokenizedLine(line);
     }
-    this.detokenizer.scheduleCleanup((l) => this.lineContainsCursor(l));
+    this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
     return firstLineSibling;
   }
 
@@ -111,6 +111,15 @@ export class Tokenizer {
 
   lineContainsCursor(line: HTMLElement) {
     return !!this.#cursorElement && line.contains(this.#cursorElement);
+  }
+
+  /**
+   * A LINE should stay tokenized while it hosts the CURSOR or any
+   * SELECTION_WRAPPER — detokenizing under either would strand references
+   * held by TokenCursor or TokenSelection.
+   */
+  private shouldKeepTokenized(line: HTMLElement): boolean {
+    return this.lineContainsCursor(line) || containsSelection(line);
   }
 
   getDetokenizer() {

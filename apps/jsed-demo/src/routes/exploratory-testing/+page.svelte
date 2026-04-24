@@ -74,17 +74,18 @@
 
   <p class="jsed-ignore">Complex float</p>
   <div>
+    <p>This text is in a nested p-tag which comes before the float</p>
+    <figure style="margin: 0; float: right; border: solid black 1px">
+      <img
+        src="missing.jpg"
+        alt="placeholder"
+        style="width: 100px; height: 100px; border: dotted black 1px; display: block"
+      />
+      <figcaption>Here is a caption.</figcaption>
+    </figure>
     <p>
-      This text is in a nested p-tag which comes before the float
-      <figure style="margin: 0; float: right; border: solid black 1px">
-        <img
-          src="missing.jpg"
-          alt="placeholder"
-          style="width: 100px; height: 100px; border: dotted black 1px; display: block"
-        />
-        <figcaption>Here is a caption.</figcaption>
-      </figure>
-      This text comes after the figure and is in a p-tag but is not reachable without implicit line handling.
+      This text comes after the figure and is in a p-tag but is not reachable without implicit line
+      handling.
     </p>
   </div>
 

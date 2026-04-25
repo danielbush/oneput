@@ -38,7 +38,9 @@ export const JSED_ANCHOR_CHAR = '\u00A4';
 export const JSED_IGNORE_CLASS = 'jsed-ignore';
 
 /**
- * CSS class for IMPLICIT_LINE.
+ * CSS class for IMPLICIT_LINE — applied to both block-level wrappers
+ * (`tagImplicitLines` in `implicitLine.ts`) and inline span wrappers around
+ * interstitial text (`tagImplicitLines` in `interstitial.ts`).
  */
 export const JSED_IMPLICIT_CLASS = 'jsed-implicit-line';
 

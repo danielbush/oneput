@@ -1,3 +1,4 @@
+import { tagImplicitLines } from './lib/interstitial.js';
 import { ViewportScroller, type ViewportScrollerNullOptions } from './lib/ViewportScroller.js';
 
 export class JsedDocument {
@@ -26,6 +27,7 @@ export class JsedDocument {
     readonly viewportScroller: ViewportScroller
   ) {
     this.root = root;
+    tagImplicitLines(this.root);
   }
 
   get document(): Document {

@@ -39,6 +39,39 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Critical work
 
+COMMENT: do interstitial lines first because we can simplify tokenization; I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; then make most focusables cursor transparent by default; then unify get next line sibling logic to work intra and inter-LINE
+
+
+- CURSOR_TRANSPARENT_BY_DEFAULT__WORK
+- fix find next / previous line candidate logic
+  - [ ] next direction
+    - [ ] write getNextLineSibling2
+      - we just do findNextNode and scan for the first token, text node or LINE_SIBLING
+      - test cases
+        - next line has text node
+          - COMMENT: this is where the cursor tokenizes the LINE of text node; and puts the CURSOR on the first LINE_SIBLING in that LINE (if in previous direction it would be the last LINE_SIBLING)
+        - next line has token
+        - next line has inline ISLAND
+        - next line has block ISLAND - what do we do here?
+        - next line is implicit line - make sure we treat it like a line
+    - [ ] replace getNextLineSibling callsites with v2
+    - [ ] do exploratory testing
+    - [ ] get rid of crossline code and replace getNextLineSibling with v2
+  - [ ] previous direction
+    - repeat as above
+  - if ISLAND or token, we just put the cursor on it
+    - although if an ISLAND we should probably tokenize the LINE just to be sure
+  - if text node, we tokenize getLine(textNode)
+    - we have to get the last token in this text node for previous direction or first token in next direction
+    - we can use comment tags or inject a temporary span parent to the node
+  - we place the cursor on the token or ISLAND
+  - we might even be able to use the same find next/previous line sibling logic for intra and interline
+    - visit=isLineSibling || isTextNode
+    - descend=isFocusable
+    - ceiling=doc.root
+    - if we get a text node we tokenize and cleverly recover the associated token
+- CONVERT_INTERSTITIAL_TEXT__WORK
+
 ## Finer details
 
 ### Bugs
@@ -46,27 +79,22 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
   - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
+- fix: `findPreviousNode(from, ...)` in `findPreviousLineCandidate` appears to visit `from`; I thought by default it shouldn't?
+- fix: possible issue when finding next or previous line candidates during cross line
+  - the code finds next line sibling then tokenizes it; 
+  - the "next" code returns the tokeniziation - so it's biased towards candidates that have tokens; but only checks the first one
+  - unit test findNextCrossLineTarget
+  - unit test findPreviousCrossLineTarget
+  - do the cursor transparent revision first because that makes most things transparent;
 - `getValue(editManager.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
+- fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 
 ### Drafting
 
-- feat: LOOSE_LINE's make real LINE's look like OPAQUE_BLOCK's that the CURSOR moves onto but not into; this is a little jarring
-  - [ ] make everything cursor transparent except for islands
-  - [ ] if we need it, we can mark elements as cursor opaque - these might be FOCUS descendable like ISLAND's but the CURSOR steps on to them but never goes in
-  - [!] setToken / Cursor becomes token-only again? - no, it has to handle ISLAND's and possibly cursor opaques (as defined above)
-  - [ ] vocab: "cursor opaque" vs ISLAND concepts
-- feat: convert all interstitial text (LOOSE_LINE's) before jsed operators on the document
-  - loose lines is better described as interstitial text; the experience of shallow tokenization and cross line traversal especially in the previous direction shows a lot of complicated logic; what if we just wrapped all interstitial text in inline span tags at the beginning of the session?  These would not be treated as INLFINE_FLOW so they'd have to be marked as a kind of implicit line.  Interstitial would not apply to text around anyt type of inline-ish elements including inline-block's.  One benefit is that we could offer to convert the interstitial under focus into a proper line eg a p-tag or offer to convert all of them.  One wrinkle: if we add an anchor into an interstitial area (interstice) we'll need to do it in an interstitial... or not; if the token is there we could still handle it without too much complexity when doing findPreviousCrosslineTarget and when the document is loaded again, the interstital would be created at start up - so either way, not a big issue.
-  - we'd implement the code to create implicit lines
-  - at this point, nothing destructive; we could keep both strategies; the interstitials should only exercise the less complicated logic so we can assess if this will work...
-  - we'd then remove "tokenize loose lines in/around" functions
-  - we'd then remove the text node detection logic
-  - we'd then remove "tokenize at text node" functionality
 - [ ] refactor: revisit implicit lines?
   - [ ] I think we make them p-tags and we include loose text at the very beginning (not just between LINE's)
 - [ ] feat: for both cursor and selection, add menu item to wrap the component; let's start with a strong-tag with a view that we need to allow the user to select one from multiple tags in the menu and also that we may want to disable some options depending on whether they would be valid or not eg a p-tag inside a p-tag would not be allowed
 - refactor: handleLeft, handleRight should be handlePrevious, handleNext or just previous, next ?
-- fix? `findPreviousNode(from, ...)` in `findPreviousLineCandidate` appears to visit `from`; I thought by default it shouldn't?
 - refactor: TokenCursorBase becomes Cursor; TokenCursor breaks up into CursorMovement, CursorAction
   - CursorMovement takes Cursor and Tokenizer and ensures document is tokenized wherever the cursor goes
   - CursorAction just peforms actions at cursor; this part could be dissolved into EditManager, avoiding shallow duplicate layering of action code

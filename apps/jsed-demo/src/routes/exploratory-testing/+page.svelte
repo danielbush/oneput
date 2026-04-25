@@ -30,116 +30,201 @@
     <em>em-tag with a <b>nested b-tag</b> back in the em-tag</em> and now we're out again
   </div>
 
-  <h2 class="jsed-ignore">OPAQUE_BLOCK</h2>
-  <p class="jsed-ignore">block in block</p>
+  <h2 class="jsed-ignore">INTERSTITIAL_TEXT and mixed levels</h2>
   <div>
-    outer text before the block
-    <div>inner block starts here</div>
-    outer text after the block
-  </div>
-  <div>
-    before inline-block
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block"
-      >inline-block in block</span
-    >
-    after inline-block
-  </div>
-  <div>
-    Before the inline-block...
-    <div style="border: 1px dashed red; display: inline-block">
-      <p>para 1 in an inline-block (OPAQUE_BLOCK)</p>
-      <p>para 2 in same block</p>
+    aa bb
+    <div>
+      cc dd <div>
+        ee ff <div>gg hh</div>
+        ii jj
+      </div>
+      kk ll
     </div>
-    After the inline-block.
+    mm nn
+    <div>oo pp</div>
+    qq rr
   </div>
   <div>
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at start</span>
-    aaa bbb
+    aa bb <p>cc dd</p>
+    ee ff
   </div>
   <div>
-    aaa bbb
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">opaque at end</span>
+    aa bb
+    <p>cc dd</p>
+    <p>ee ff</p>
+    gg hh
+    <p>ii jj</p>
+    <p>kk ll</p>
+  </div>
+  <div>
+    aa bb
+    <div>cc dd</div>
+    ee ff
+  </div>
+  <hr class="jsed-ignore" />
+  <div>
+    <p>aa bb</p>
+    cc dd
+  </div>
+  <div>
+    <p>aa bb</p>
+    cc<strong>dd <em>ee</em></strong> ff gg
+    <br />
+    hh ii
+    <hr />
+    jj kk
+    <br />
+  </div>
+  <hr class="jsed-ignore" />
+  <p class="jsed-ignore">br tags are inline by default</p>
+  <div>
+    aa bb <br /> cc dd
+  </div>
+  <hr class="jsed-ignore" />
+  <div>&nbsp;<em></em>&nbsp;</div>
+
+  <p class="jsed-ignore">inline-block</p>
+  <div>
+    aa bb
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">cc dd</span>
+    ee ff
   </div>
 
-  <p class="jsed-ignore">Float's are OPAQUE_BLOCK's.</p>
   <div>
-    before float
+    aa bb
+    <div style="border: 1px dashed red; display: inline-block">
+      <p>cc dd</p>
+      <p>ee ff</p>
+    </div>
+    gg hh
+  </div>
+
+  <div>
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">aa bb</span>
+    cc dd
+  </div>
+  <div>
+    aa bb
+    <span style="border: 1px dashed red; padding: 2px; display: inline-block">cc dd</span>
+  </div>
+
+  <p class="jsed-ignore">ISLAND's</p>
+  <div><span class="katex" style="display: inline">x²</span> aa bb</div>
+  <div>cc dd <span class="katex" style="display: inline">x²</span> ee ff</div>
+  <p class="jsed-ignore">inline ISLAND</p>
+  <div>
+    <p>aa bb <span class="katex" style="display: inline">x²</span> cc dd</p>
+  </div>
+  <p class="jsed-ignore">block ISLAND</p>
+  <div>
+    <p>aa bb</p>
+    <span class="katex" style="display: block">x²</span>
+    <p>cc dd</p>
+  </div>
+  <p class="jsed-ignore">ISLAND (katex) block in p-tag (not really valid but could happen)</p>
+  <div>
+    <p>
+      aa bb
+      <span class="katex" style="display: block">x²</span>
+      cc dd
+    </p>
+  </div>
+
+  <p class="jsed-ignore">Floats</p>
+  <div>
+    aa bb
     <img
       src="missing.jpg"
       alt="placeholder"
       style="float: right; width: 100px; height: 100px; border: 1px dashed red"
     />
-    after float
+    cc dd
   </div>
-
-  <p class="jsed-ignore">Complex float</p>
+  <hr class="jsed-ignore" style="clear:both;" />
   <div>
-    <p>This text is in a nested p-tag which comes before the float</p>
+    aa bb
     <figure style="margin: 0; float: right; border: solid black 1px">
       <img
         src="missing.jpg"
         alt="placeholder"
         style="width: 100px; height: 100px; border: dotted black 1px; display: block"
       />
-      <figcaption>Here is a caption.</figcaption>
+      <figcaption>cc dd</figcaption>
     </figure>
-    <p>
-      This text comes after the figure and is in a p-tag but is not reachable without implicit line
-      handling.
-    </p>
+    ee ff
+  </div>
+  <hr class="jsed-ignore" style="clear:both;" />
+  <div>
+    <p>aa bb</p>
+    <figure style="margin: 0; float: right; border: solid black 1px">
+      <img
+        src="missing.jpg"
+        alt="placeholder"
+        style="width: 100px; height: 100px; border: dotted black 1px; display: block"
+      />
+      <figcaption>cc dd</figcaption>
+    </figure>
+    <p>ee ff</p>
+  </div>
+  <p class="jsed-ignore">Embedded ignores</p>
+  <div>
+    aa bb
+    <div class="jsed-ignore">this is ignored</div>
+    cc dd
   </div>
 
-  <h1 class="jsed-ignore">Boundary spacing scenarios</h1>
+  <h1 class="jsed-ignore">ANCHOR's, TRAILING_SPACE, LEADING_SPACE</h1>
   <p class="jsed-ignore">
     Try adding/remove LEADING_SPACE's and TRAILING_SPACE's. Try adding and removing ANCHOR's.
   </p>
 
-  <p class="jsed-ignore">INLINE_FLOW</p>
   <p style="border: 1px dashed red; min-height: 1rem; position: relative">
     <span style="position: absolute; right: 0; top: 0; margin: 0" class="note jsed-ignore"
       >(empty p-tag)</span
     >
   </p>
-  <p><em>foo</em><strong>bar</strong></p>
-  <p><em>foo</em>between<strong>bar</strong></p>
-  <p><em>foo</em> <strong>bar</strong></p>
-  <p>before<em>inline</em>after</p>
-  <p><u>underlined</u><strong>joined</strong>text</p>
-  <p><em>foo</em> <strong>bar</strong> <u>baz</u></p>
-  <p><em>foo</em><strong>bar</strong><u>baz</u></p>
+  <p><em>aa</em><strong>bb</strong></p>
+  <p><em>aa</em>bb<strong>cc</strong></p>
+  <p><em>aa</em> <strong>bb</strong></p>
+  <p>aa<em>bb</em>cc</p>
+  <p><u>aa</u><strong>bb</strong>cc</p>
+  <p><em>aa</em> <strong>bb</strong> <u>cc</u></p>
+  <p><em>aa</em><strong>bb</strong><u>cc</u></p>
+  <div>
+    aa <em>bb<strong>cc</strong></em>
+    <span class="katex" style="display: inline">x²</span>dd ee
+  </div>
 
-  <p class="jsed-ignore">ISLAND's</p>
-  <div><span class="katex" style="display: inline">x²</span> after island</div>
-  <div>before island <span class="katex" style="display: inline">x²</span> after island</div>
+  <h2 class="jsed-ignore">Scrollable container</h2>
+  <div style="height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px">
+    <p>First paragraph inside the scrollable container.</p>
+    <p>Second paragraph with some more text to take up space.</p>
+    <p>Third paragraph continuing to add content.</p>
+    <p>Fourth paragraph to ensure we have enough overflow.</p>
+    <p>Fifth paragraph adding more scrollable content.</p>
+    <p>Sixth paragraph near the bottom of the container.</p>
+    <p>Seventh paragraph to guarantee scrolling is needed.</p>
+  </div>
 
-  <p class="jsed-ignore">TRANSPARENT_BLOCK</p>
+  <h2 class="jsed-ignore">SHALLOW_TOKENIZATION</h2>
+  <p class="jsed-ignore">
+    The following div contains mulltiple paragraph tags. If this div represents a large document we
+    would hit performance issues if we tokenized it all.
+  </p>
+  <div>
+    <p>line 1</p>
+    <p>line 2 with <em>emphasis</em> tag</p>
+    <p>line 3</p>
+    <p>line 4</p>
+  </div>
+
+  <h1 class="jsed-ignore" style="clear: right">(deprecated) TRANSPARENT_BLOCK</h1>
   <div>
     <span class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block"
       >transparent inline-block</span
     >
     after transparent inline-block
   </div>
-
-  <p class="jsed-ignore">OPAQUE_BLOCK</p>
-  <div>
-    <span style="border: 1px dashed red; padding: 2px; display: inline-block">inline block</span>
-    after opaque inline-block
-  </div>
-
-  <p class="jsed-ignore">
-    Combine both behaviours in one line: remove one boundary, keep another, then restore spacing.
-  </p>
-  <div>
-    start <em>tight<strong>cluster</strong></em>
-    <span class="katex" style="display: inline">x²</span>after island
-  </div>
-
-  <h1 class="jsed-ignore">Special cases</h1>
-  <h2 class="jsed-ignore" style="clear: right">TRANSPARENT_BLOCK</h2>
-  <p class="jsed-ignore">
-    If we want the CURSOR to treat a block-like element like an INLINE_FLOW we have to mark it as
-    CURSOR_TRANSPARENT. A block-like element that is CURSOR_TRANSPARENT is a TRANSPARENT_BLOCK.
-  </p>
   <div>
     Before the block...
     <div class="jsed-cursor-transparent" style="border: 1px dashed red">
@@ -153,95 +238,6 @@
       this div is marked as jsed-cursor-transparent
     </div>
     After the inline-block.
-  </div>
-
-  <h2 class="jsed-ignore">Loose text</h2>
-  <p class="jsed-ignore">
-    You can test for IMPLICIT_LINE's above in all the various scenarios. Here we show examples that
-    motivated this feature.
-  </p>
-  <div>
-    loose text <p>paragraph text</p>
-    more loose text
-  </div>
-  <hr class="jsed-ignore" />
-  <div>
-    loose text between paragraphs
-    <p>text in paragraph</p>
-    <p>text in paragraph</p>
-    loose text between paragraphs
-    <p>text in paragraph</p>
-    <p>text in paragraph</p>
-  </div>
-
-  <hr class="jsed-ignore" />
-  <div>
-    <p>
-      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-    </p>
-    But this sentence is just text nodes that come after.
-  </div>
-  <p class="jsed-ignore">IMPLICIT_LINE with br and hr tags</p>
-  <div>
-    <p>
-      This LINE is in a p-tag. When we use the down-action we want to get to the next line below...
-    </p>
-    But this sentence<strong>is <em>just</em></strong> text nodes that come after.
-    <br />
-    But this sentence is just text nodes that come after.
-    <hr />
-    But this sentence is just text nodes that come after.
-    <br />
-  </div>
-
-  <h2 class="jsed-ignore">ISLAND</h2>
-  <p class="jsed-ignore">
-    ISLAND's prevent both FOCUS and CURSOR from descending into them. They can only be visited.
-  </p>
-
-  <p class="jsed-ignore">INLINE_ISLAND</p>
-  <div>
-    <p>before formula <span class="katex" style="display: inline">x²</span> after formula</p>
-  </div>
-
-  <p class="jsed-ignore">ISLAND katex middle block</p>
-  <div>
-    <p>Some text before the block formula...</p>
-    <span class="katex" style="display: block">x²</span>
-    <p>Some text after the block formula...</p>
-  </div>
-
-  <p class="jsed-ignore">ISLAND (katex) block in block</p>
-  <div>
-    <p>
-      Some text before the block formula...
-      <span class="katex" style="display: block">x²</span>
-      Some text after the block formula...
-    </p>
-  </div>
-
-  <h1 class="jsed-ignore">SHALLOW_TOKENIZATION</h1>
-  <p class="jsed-ignore">
-    The following div contains mulltiple paragraph tags. If this div represents a large document we
-    would hit performance issues if we tokenized it all.
-  </p>
-  <div>
-    <p>line 1</p>
-    <p>line 2 with <em>emphasis</em> tag</p>
-    <p>line 3</p>
-    <p>line 4</p>
-  </div>
-
-  <h1 class="jsed-ignore">Other scenarios</h1>
-  <h2 class="jsed-ignore">Scrollable container</h2>
-  <div style="height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px">
-    <p>First paragraph inside the scrollable container.</p>
-    <p>Second paragraph with some more text to take up space.</p>
-    <p>Third paragraph continuing to add content.</p>
-    <p>Fourth paragraph to ensure we have enough overflow.</p>
-    <p>Fifth paragraph adding more scrollable content.</p>
-    <p>Sixth paragraph near the bottom of the container.</p>
-    <p>Seventh paragraph to guarantee scrolling is needed.</p>
   </div>
 
   <div style="height: 400px"></div>

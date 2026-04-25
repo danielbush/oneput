@@ -146,11 +146,9 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       )
     );
     const div1 = byId(doc, 'div1');
-
-    // act — check traversal
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
-    // assert — floated span is OPAQUE_BLOCK (visited, not descended),
+    // act & assert — floated span is OPAQUE_BLOCK (visited, not descended),
     expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
   });

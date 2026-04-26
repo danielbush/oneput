@@ -1,4 +1,4 @@
-import { tagImplicitLines } from './lib/interstitial.js';
+import { tagImplicitLines } from './lib/implicitLine.js';
 import { ViewportScroller, type ViewportScrollerNullOptions } from './lib/ViewportScroller.js';
 
 export class JsedDocument {

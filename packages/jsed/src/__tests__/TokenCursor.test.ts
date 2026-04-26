@@ -10,7 +10,7 @@ import {
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS
 } from '../lib/constants.js';
-import { tagImplicitLines } from '../lib/interstitial.js';
+import { tagImplicitLines } from '../lib/implicitLine.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

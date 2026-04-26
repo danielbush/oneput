@@ -43,7 +43,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ### Bugs
 
-- fix: when menu is open, arrow keys/selections within oneput's input don't seem to work; they're probably being overridden?  also: up/down arrows from end/start of input
 - fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
   - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why

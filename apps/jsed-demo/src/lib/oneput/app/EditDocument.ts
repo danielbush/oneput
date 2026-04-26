@@ -106,6 +106,47 @@ export class EditDocument implements AppObject {
         when: { menuOpen: false }
       }
     },
+    // Make arrow keys work in input when menu is open...
+    RIGHT_ARROW: {
+      action: () => {
+        this.editManager.handleRight();
+      },
+      binding: {
+        bindings: ['ArrowRight'],
+        description: 'Move to next token or element',
+        when: { menuOpen: false }
+      }
+    },
+    LEFT_ARROW: {
+      action: () => {
+        this.editManager.handleLeft();
+      },
+      binding: {
+        bindings: ['ArrowLeft'],
+        description: 'Move to previous token or element',
+        when: { menuOpen: false }
+      }
+    },
+    EXTEND_RIGHT_ARROW: {
+      action: () => {
+        this.editManager.extendNext();
+      },
+      binding: {
+        bindings: ['Shift+ArrowRight'],
+        description: 'Extend selection to next LINE_SIBLING',
+        when: { menuOpen: false }
+      }
+    },
+    EXTEND_LEFT_ARROW: {
+      action: () => {
+        this.editManager.extendPrevious();
+      },
+      binding: {
+        bindings: ['Shift+ArrowLeft'],
+        description: 'Extend selection to previous LINE_SIBLING',
+        when: { menuOpen: false }
+      }
+    },
 
     // Always handled by the editor, see section above.
 
@@ -134,7 +175,7 @@ export class EditDocument implements AppObject {
         this.editManager.handleRight();
       },
       binding: {
-        bindings: ['$mod+l', 'ArrowRight'],
+        bindings: ['$mod+l'],
         description: 'Move to next token or element'
         // when: { menuOpen: false }
       }
@@ -144,7 +185,7 @@ export class EditDocument implements AppObject {
         this.editManager.handleLeft();
       },
       binding: {
-        bindings: ['$mod+h', 'ArrowLeft'],
+        bindings: ['$mod+h'],
         description: 'Move to previous token or element'
         // when: { menuOpen: false }
       }
@@ -154,7 +195,7 @@ export class EditDocument implements AppObject {
         this.editManager.extendNext();
       },
       binding: {
-        bindings: ['Shift+$mod+l', 'Shift+ArrowRight'],
+        bindings: ['Shift+$mod+l'],
         description: 'Extend selection to next LINE_SIBLING'
       }
     },
@@ -163,7 +204,7 @@ export class EditDocument implements AppObject {
         this.editManager.extendPrevious();
       },
       binding: {
-        bindings: ['Shift+$mod+h', 'Shift+ArrowLeft'],
+        bindings: ['Shift+$mod+h'],
         description: 'Extend selection to previous LINE_SIBLING'
       }
     },

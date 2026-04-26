@@ -526,7 +526,9 @@ describe('Tokenizer', () => {
 
       // assert
       expect(tokens.map((t) => t.textContent)).toEqual(['alpha', 'beta']);
-      expect(Array.from(div1.querySelectorAll('.jsed-token')).map((t) => getValue(t))).toEqual([
+      expect(
+        Array.from(div1.querySelectorAll<HTMLElement>('.jsed-token')).map((t) => getValue(t))
+      ).toEqual([
         // 'aaa' will get tokenized because getLine(targetTextNode) will be div1.
         'aaa',
         // It's important we tokenize the whole LOOSE_LINE:
@@ -565,13 +567,9 @@ describe('Tokenizer', () => {
 
       // assert
       expect(tokens.map((t) => t.textContent)).toEqual(['beta']);
-      expect(Array.from(div1.querySelectorAll('.jsed-token')).map((t) => getValue(t))).toEqual([
-        'aaa',
-        'alpha',
-        'beta',
-        'gamma',
-        'delta'
-      ]);
+      expect(
+        Array.from(div1.querySelectorAll<HTMLElement>('.jsed-token')).map((t) => getValue(t))
+      ).toEqual(['aaa', 'alpha', 'beta', 'gamma', 'delta']);
       // markers cleaned up
       expect(
         Array.from(em1.childNodes).filter((n) => n.nodeType === Node.COMMENT_NODE).length

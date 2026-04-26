@@ -72,9 +72,8 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
     - if we get a text node we tokenize and cleverly recover the associated token
 - CONVERT_INTERSTITIAL_TEXT__WORK
 
-## Finer details
 
-### Bugs
+## Bugs
 
 - fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
@@ -89,7 +88,7 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
 - `getValue(editManager.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 
-### Drafting
+## Drafting / inbox
 
 - [ ] convert implicit lines to paragraphs (ones created using the new interstitial logic)
 - [ ] refactor: revisit implicit lines?
@@ -128,6 +127,17 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
 - persist last token position in each LINE
 - persist last FOCUS position and FOCUS it when we reload the document
 - use IMPLICIT_LINE's on all LINE_SEGMENT's that aren't enclosed by an INLINE_FLOW within the line; this makes it easy to navigate all segments with the FOCUS not just trailing IMPLICIT_LINE LINE_SEGMENT's and INLINE_FLOW LINE_SEGMENT's
+
+## Discussion
+
+- Invariant maintenance post-edit. Today tokenizeLooseLines* runs opportunistically at tokenize-time, so it catches bare text no matter how it appeared in the DOM. After removal, the "no bare interstitial text" invariant is established once at load and depends on every editing operation preserving it. Things to audit:
+  - Either every edit op maintains the invariant, or you need a cheap "re-wrap this subtree" call you fire after suspicious edits.
+  - paste / insertHTML — anything inserted into an outer LINE that contains block children needs re-wrapping
+  - split operations on an outer LINE — the residue could leave bare runs
+  - join / delete operations that pull a LINE's contents into its parent
+  - anchor add/remove inside an interstice (already on your task list)
+
+## Finer details
 
 ### feat: joinNext/joinPrevious across INLINE_FLOW boundaries
 

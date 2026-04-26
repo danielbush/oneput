@@ -1,7 +1,7 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { containsSelection, findLineCandidateAt, getLine, getParentLine } from './lib/sibwalk.js';
+import { containsSelection, findLineCandidateAt, getLine } from './lib/sibwalk.js';
 import { isFocusable, isToken } from './lib/taxonomy.js';
-import { tokenizeLine, tokenizeLooseLinesAround, tokenizeLooseLinesIn } from './lib/tokenize.js';
+import { tokenizeLine } from './lib/tokenize.js';
 
 /**
  * Tokenize-and-seat service for the CURSOR.
@@ -43,18 +43,6 @@ export class Tokenizer {
   tokenizeLineAt(el: HTMLElement): HTMLElement | null {
     if (!isFocusable(el)) {
       return null;
-    }
-    // LOOSE_LINE tokens written by the two pre-passes may live in LINEs
-    // other than the candidate `line`. Record those eagerly — before
-    // candidate resolution — so a null candidate doesn't strand them.
-    if (tokenizeLooseLinesIn(el)) {
-      this.detokenizer.recordTokenizedLine(getLine(el));
-    }
-    // Pre-emptively tokenize LOOSE_LINE's previous/next of `el`.
-    // This ensures cross line detection (when user moves between LINE') works
-    // if the previous/next thing is a LOOSE_LINE.
-    if (tokenizeLooseLinesAround(el)) {
-      this.detokenizer.recordTokenizedLine(getParentLine(el));
     }
     const { line } = findLineCandidateAt(el);
     if (!line) {

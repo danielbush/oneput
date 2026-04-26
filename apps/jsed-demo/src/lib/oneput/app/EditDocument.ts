@@ -224,14 +224,6 @@ export class EditDocument implements AppObject {
       id: 'root',
       focusBehaviour: 'last-action,first',
       items: [
-        stdMenuItem({
-          id: 'IMPLICIT_LINES_DOC',
-          textContent: 'Add implicit lines to document',
-          action: () => {
-            this.editManager.createImplicitLines();
-          },
-          left: (b) => [b.icon(icons.Pencil)]
-        }),
         !this.editManager.isEditing() &&
           stdMenuItem({
             id: 'EDIT_FIRST',

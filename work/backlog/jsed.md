@@ -91,6 +91,7 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
 
 ### Drafting
 
+- [ ] convert implicit lines to paragraphs (ones created using the new interstitial logic)
 - [ ] refactor: revisit implicit lines?
   - [ ] I think we make them p-tags and we include loose text at the very beginning (not just between LINE's)
 - [ ] feat: for both cursor and selection, add menu item to wrap the component; let's start with a strong-tag with a view that we need to allow the user to select one from multiple tags in the menu and also that we may want to disable some options depending on whether they would be valid or not eg a p-tag inside a p-tag would not be allowed

@@ -5,10 +5,6 @@ import { JSED_IMPLICIT_CLASS } from './constants.js';
  * within an outer LINE — in inline span IMPLICIT_LINE wrappers.
  *
  * Run on the whole document at session start, BEFORE any tokenization.
- *
- * Distinct from `tagImplicitLines` in `implicitLine.ts`: that promotes runs
- * to block-level LINE's; this wraps them in inline spans so the surrounding
- * LINE keeps owning them.
  */
 export function tagImplicitLines(root: HTMLElement) {
   const elements: HTMLElement[] = [root];

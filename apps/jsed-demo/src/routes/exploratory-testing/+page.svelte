@@ -30,7 +30,7 @@
     <em>em-tag with a <b>nested b-tag</b> back in the em-tag</em> and now we're out again
   </div>
 
-  <h2 class="jsed-ignore">INTERSTITIAL_TEXT and mixed levels</h2>
+  <h2 class="jsed-ignore">IMPLICIT_LINE's and mixed levels</h2>
   <div>
     aa bb
     <div>

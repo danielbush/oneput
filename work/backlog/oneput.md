@@ -4,6 +4,18 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Crtical work
 
+- [x] fix: svelte "reference only captures the initial value"
+  - Did you mean to reference it inside a derived instead?
+  - https://svelte.dev/e/state_referenced_locally
+  - /Users/danb/projects/@oneput/packages/oneput/src/lib/oneput/components/InjectedProps.svelte:6:28
+- fix: oneput-demo menu is closing on actions where it shouldn't
+  - I think I altered this when working on jsed-demo; what is the preferred approach?
+- fix: .svelte files imported into .ts files
+  - `rg 'import.*\.svelte' * | grep '\.ts'`
+  - we do this to inject svelte components into oneput
+  - will this break anything?
+  - will it break non-svelte, wc oneput builds
+
 ## Finer Details
 
 ### Drafting

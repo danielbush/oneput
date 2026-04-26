@@ -11,7 +11,7 @@
 
   const { initialSecondsRemaining, isPaused, isFinished }: Props = $props();
 
-  let secondsRemaining = $state(initialSecondsRemaining);
+  let secondsRemaining = $derived(initialSecondsRemaining);
   let interval: ReturnType<typeof setInterval> | undefined;
 
   const stopTimer = () => {

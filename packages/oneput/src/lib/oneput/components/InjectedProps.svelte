@@ -3,7 +3,7 @@
 
   const { createProps, subscribe, Child }: SveltePropInjectorProps<P> = $props();
 
-  let createdProps = $state(createProps());
+  let createdProps = $derived(createProps());
   $effect(() => {
     subscribe();
     createdProps = createProps();

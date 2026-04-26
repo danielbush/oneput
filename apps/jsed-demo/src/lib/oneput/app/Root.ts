@@ -1,4 +1,4 @@
-import { JSED_IGNORE_CLASS, JsedDocument } from '@oneput/jsed';
+import { JsedDocument } from '@oneput/jsed';
 import type { AppObject, Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';

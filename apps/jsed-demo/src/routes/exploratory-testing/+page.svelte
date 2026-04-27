@@ -37,6 +37,11 @@
       cc dd <div>
         ee ff <div>gg hh</div>
         ii jj
+        <div>
+          <div>ii2 jj2</div>
+          ii3 jj3
+          <div>ii4 jj4</div>
+        </div>
       </div>
       kk ll
     </div>
@@ -193,6 +198,12 @@
   <div>
     aa <em>bb<strong>cc</strong></em>
     <span class="katex" style="display: inline">x²</span>dd ee
+  </div>
+  <p class="jsed-ignore">inline-block</p>
+  <div>
+    aa bb
+    <div style="display:inline-block;">cc dd</div>
+    ee ff
   </div>
 
   <h2 class="jsed-ignore">Scrollable container</h2>

@@ -417,6 +417,11 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
     separatorAfter?.parentNode?.removeChild(separatorAfter);
   }
 
+  // Capture neighbours BEFORE detaching — once `token` is removed,
+  // `previousElementSibling` / `nextElementSibling` return null.
+  const prevEl = token.previousElementSibling;
+  const nextEl = token.nextElementSibling;
+
   parentNode.removeChild(token);
 
   const nextFocus = nextTok || prevTok;
@@ -429,13 +434,11 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
 
   const anchor = createAnchor();
 
-  const prevEl = token.previousElementSibling;
   if (prevEl) {
     insertAfter(anchor, prevEl as HTMLElement);
     return { next: anchor };
   }
 
-  const nextEl = token.nextElementSibling;
   if (nextEl) {
     insertBefore(anchor, nextEl as HTMLElement);
     return { next: anchor };

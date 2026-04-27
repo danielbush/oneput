@@ -8,6 +8,7 @@ import {
   getRemovableSpaceBeforeToken,
   insertSpaceAfterToken,
   insertSpaceBeforeToken,
+  remove,
   removeSpaceAfterToken,
   removeSpaceBeforeToken,
   replaceText
@@ -453,5 +454,95 @@ describe('leading/trailing spaces', () => {
         expect(foo.nextSibling).toBe(opaque1);
       });
     });
+  });
+});
+
+// Build a parent with arbitrary children directly — sidesteps `makeRoot`'s
+// load-time transforms (e.g. implicit-line wrapping) so these tests exercise
+// `remove` semantics in isolation.
+function buildParent(...children: Node[]): HTMLElement {
+  const parent = document.createElement('div');
+  parent.append(...children);
+  return parent;
+}
+
+describe('remove', () => {
+  it('returns the next TOKEN sibling when one exists', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    const baz = createToken('baz');
+    buildParent(foo, document.createTextNode(' '), bar, document.createTextNode(' '), baz);
+
+    // act
+    const { next } = remove(bar);
+
+    // assert
+    expect(next).toBe(baz);
+    expect(bar.isConnected).toBe(false);
+  });
+
+  it('falls back to the previous TOKEN sibling when no next exists', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    buildParent(foo, document.createTextNode(' '), bar);
+
+    // act
+    const { next } = remove(bar);
+
+    // assert
+    expect(next).toBe(foo);
+  });
+
+  it('inserts a new ANCHOR adjacent to the removed TOKEN when there is a non-token next sibling but no token siblings', () => {
+    // Regression: bug fixed where prev/nextElementSibling were read AFTER
+    // detaching the token, causing the ANCHOR to be appended at the parent's
+    // end instead of placed at the removed token's actual position.
+    // arrange
+    const before = createToken('before');
+    const p1 = document.createElement('p');
+    p1.textContent = 'stuff';
+    const parent = buildParent(before, p1);
+
+    // act
+    const { next } = remove(before);
+
+    // assert: anchor lands at the position 'before' occupied — adjacent to
+    // p1, NOT appended at the parent's end.
+    expect(isAnchor(next)).toBe(true);
+    expect(next.parentNode).toBe(parent);
+    expect(next.nextElementSibling).toBe(p1);
+  });
+
+  it('inserts a new ANCHOR adjacent to a non-token previous sibling when no token siblings exist on either side', () => {
+    // arrange
+    const p1 = document.createElement('p');
+    p1.textContent = 'stuff';
+    const only = createToken('only');
+    const parent = buildParent(p1, only);
+
+    // act
+    const { next } = remove(only);
+
+    // assert: anchor lands after p1.
+    expect(isAnchor(next)).toBe(true);
+    expect(next.parentNode).toBe(parent);
+    expect(next.previousElementSibling).toBe(p1);
+  });
+
+  it('appends a new ANCHOR to the parent when the removed TOKEN had no element siblings', () => {
+    // arrange
+    const only = createToken('only');
+    const parent = buildParent(only);
+
+    // act
+    const { next } = remove(only);
+
+    // assert
+    expect(isAnchor(next)).toBe(true);
+    expect(next.parentNode).toBe(parent);
+    expect(parent.children).toHaveLength(1);
+    expect(parent.firstElementChild).toBe(next);
   });
 });

@@ -50,10 +50,3 @@ export const JSED_IMPLICIT_CLASS = 'jsed-implicit-line';
  * background without disturbing inherited styling.
  */
 export const JSED_SELECTION_CLASS = 'jsed-selection';
-
-/**
- * CSS class for TRANSPARENT_BLOCK — a LINE (non-INLINE_FLOW, non-ISLAND FOCUSABLE) that the CURSOR
- * descends into (visit=no, descend=yes). By default such elements are OPAQUE_BLOCK;
- * this class opts them in to transparency.
- */
-export const JSED_CURSOR_TRANSPARENT_CLASS = 'jsed-cursor-transparent';

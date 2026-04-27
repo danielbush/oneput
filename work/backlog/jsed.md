@@ -52,7 +52,11 @@ COMMENT: [x] do interstitial lines first because we can simplify tokenization; [
 - [x] rewrite getPreviousLineSibling without no visit,descend
 - [x] make it cross lines
 - [x] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
-- [ ] get rid of isTransparentBlock
+- [x] get rid of isTransparentBlock
+- [x] TRANSPARENT_BLOCK tests are now just testing the default situation
+- [x] TRANSPARENT_BLOCK - remove term
+- [ ] OPAQUE_BLOCK - remove tests
+- [ ] OPAQUE_BLOCK - remove term
 
 
 ## Bugs
@@ -71,9 +75,13 @@ COMMENT: [x] do interstitial lines first because we can simplify tokenization; [
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
+- fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 
 ## Drafting / inbox
 
+- [ ] refactor: we shouldn't have to call `editManager.nav.connect()` in EditManager tests
+  - I think we can connect when EditManager starts
+  - and disconnect when we suspend
 - [ ] convert implicit lines to paragraphs (ones created using the new interstitial logic)
 - [ ] refactor: revisit implicit lines?
   - [ ] I think we make them p-tags and we include loose text at the very beginning (not just between LINE's)

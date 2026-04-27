@@ -110,9 +110,9 @@ function detokenizeLineRec(line: Node): void {
 }
 
 /**
- * Tokenize a LINE — recurses into TRANSPARENT_BLOCK's but not OPAQUE_BLOCK's
- * or ISLAND's. Returns the first TOKEN created, or null if there was nothing
- * to tokenize (already tokenized, or no text content).
+ * Tokenize a LINE — recurses into most elements excluding ISLAND's. Returns the
+ * first TOKEN created, or null if there was nothing to tokenize (already
+ * tokenized, or no text content).
  *
  * Part of SHALLOW_TOKENIZATION strategy.
  */

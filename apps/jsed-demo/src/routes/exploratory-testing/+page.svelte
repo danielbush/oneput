@@ -218,28 +218,6 @@
     <p>line 4</p>
   </div>
 
-  <h1 class="jsed-ignore" style="clear: right">(deprecated) TRANSPARENT_BLOCK</h1>
-  <div>
-    <span class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block"
-      >transparent inline-block</span
-    >
-    after transparent inline-block
-  </div>
-  <div>
-    Before the block...
-    <div class="jsed-cursor-transparent" style="border: 1px dashed red">
-      this div is marked as jsed-cursor-transparent
-    </div>
-    After the block.
-  </div>
-  <div>
-    Before the inline-block...
-    <div class="jsed-cursor-transparent" style="border: 1px dashed red; display: inline-block">
-      this div is marked as jsed-cursor-transparent
-    </div>
-    After the inline-block.
-  </div>
-
   <div style="height: 400px"></div>
 </div>
 

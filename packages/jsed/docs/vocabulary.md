@@ -9,7 +9,7 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 
 ## Primitives
 
-The taxonomy is built from a small set of independent predicates. All other labels (LINE, OPAQUE_BLOCK, etc.) are derived from combinations of these. Source of truth: `taxonomy.ts`.
+The taxonomy is built from a small set of independent predicates. All other labels (LINE, etc.) are derived from combinations of these. Source of truth: `taxonomy.ts`.
 
 Jsed divides the DOM that up into 3 broad mutually exclusive categories:
 
@@ -59,17 +59,17 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
 Most of the DOM structure will likely be FOCUSABLE, it breaks down according to the FOCUSABLE_TAXONOMY table:
 
 ```
-┌─────────────┬───────────────────┬───────────────┬─────────────────────┬───────────────────┬
-│             │ FOCUS_TRANSPARENT │               │ CURSOR_TRANSPARENT  │ Derived label     │
-├─────────────┼───────────────────┼───────────────┼─────────────────────┼───────────────────┼
-│             │ ISLAND  (no)      │               │ no                  │ ISLAND            │
-│ FOCUSABLE   ├───────────────────┼───────────────┼─────────────────────┼───────────────────┼
-│             │                   │ INLINE_FLOW   │ yes                 │ INLINE_FLOW       │
-│             │                   ├───────────────┼─────────────────────┼───────────────────┼
-│             │ !ISLAND (yes)     │               │ yes (css class)     │ TRANSPARENT_BLOCK │
-│             │                   │ !INLINE_FLOW  ├─────────────────────┼───────────────────┼
-│             │                   │               │ no                  │ OPAQUE_BLOCK      │
-└─────────────┴───────────────────┴───────────────┴─────────────────────┴───────────────────┴
+┌─────────────┬───────────────────┬─────────────────────┬───────────────────┬
+│             │ FOCUS_TRANSPARENT │ CURSOR_TRANSPARENT  │ Derived label     │
+├─────────────┼───────────────────┼─────────────────────┼───────────────────┼
+│             │ ISLAND  (no)      │ no                  │ ISLAND            │
+│ FOCUSABLE   ├───────────────────┼─────────────────────┼───────────────────┼
+│             │                   │                     │                   │
+│             │                   ├ yes                 │ (default)         │
+│             │ !ISLAND (yes)     │                     │                   │
+│             │                   │─────────────────────┼───────────────────┼
+│             │                   │ no                  │ CURSOR_OPAQUE [1] │
+└─────────────┴───────────────────┴─────────────────────┴───────────────────┴
 ```
 
 - **ISLAND**
@@ -77,7 +77,7 @@ Most of the DOM structure will likely be FOCUSABLE, it breaks down according to 
   - This means we can't edit the internal structure of these elements.
   - Source of truth: `isIsland` in `taxonomy.ts`.
   - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
-  - Example: Some leaf nodes that have a special purpose eg `<img>` tags etc may be treated as ISLAND's, others may end up being treated by default as either INLINE_FLOW or TRANSPARENT_BLOCK
+  - Example: Some leaf nodes that have a special purpose eg `<img>` tags etc may be treated as ISLAND's
   - Example: Also elements that are already natively focusable, e.g. form controls.
 - **INLINE_FLOW**
   — a FOCUSABLE with inline-flow display.
@@ -99,14 +99,11 @@ We can define the traversal rules:
 
 The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break the world up into
 
-- **OPAQUE_BLOCK**
-  - a !ISLAND / !INLINE_FLOW
-  - CURSOR_OPAQUE
+- ## **CURSOR_OPAQUE**
+  - TODO: we don't handle this case; by default everything besides ISLAND's (and IGNORABLE's) can be traversed by the cursor.
   - Example: a div or p-tag
   - Example: an inline-block or inline-flow or inline-grid span tag
-- **TRANSPARENT_BLOCK**
-  - an OPQUE_BLOCK
-  - by default, !ISLAND / !INLINE_FLOW's are OPAQUE_BLOCK's; to make CURSOR_TRANSPARENT we mark it with `jsed-cursor-transparent` class.
+  - Example: an INLINE_FLOW
 
 ## TOKENIZATION
 
@@ -137,7 +134,7 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - Source of truth: `isLineSibling` in `taxonomy.ts`.
 - **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Non-LINE_SIBLING LINE_MEMBER's act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
-- **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested TRANSPARENT_BLOCK elements within this line and not confuse them as the current LINE.
+- **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested LINE elements within this line and not confuse them as the current LINE.
 - **SELECTION_WRAPPER**
   - a transient `<span>` decoration inserted by `TokenSelection` to paint the selection background around a contiguous run of LINE_SIBLING's that share a DOM parent. Purely visual — unwrapped on collapse, never persisted.
   - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
@@ -158,7 +155,7 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - **trailing** — after the last NESTED_LINE
   - Unlike IMPLICIT_LINE, a LOOSE_LINE is **not** promoted to its own LINE — it remains part of the outer LINE. IMPLICIT_LINE is a structural fix-up that creates a wrapping LINE; LOOSE_LINE is a runtime label for a run that the outer LINE is responsible for.
   - Tokenization: a LINE's own TOKEN's (via `tokenizeLine`) are separate from its LOOSE_LINE content. `tokenizeLooseLinesIn(el)` tokenizes every LOOSE_LINE inside `el`; `tokenizeLooseLinesAround(el)` tokenizes the LOOSE_LINE runs on either side of `el` within `el`'s parent LINE, up to the next NESTED_LINE boundary.
-  - Example: in `<div>aaa<p>bbb</p> ccc <p>ddd</p> eee</div>` there are three LOOSE_LINE's on `div`: leading `aaa`, between ` ccc `, trailing ` eee`. They all belong to the `div` LINE.
+  - Example: in `<div>aaa<p>bbb</p> ccc <p>ddd</p> eee</div>` there are three LOOSE_LINE's on `div`: leading `aaa`, between `ccc`, trailing ` eee`. They all belong to the `div` LINE.
   - Source of truth: `collectLooseTextNodesIn`, `tokenizeLooseLinesIn`, `tokenizeLooseLinesAround` in `lib/tokenize.ts`.
 
 Tokens and Text and whitespace

@@ -1,15 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import {
+  canInsertSpaceAfterTag,
   canInsertSpaceAfterToken,
+  canInsertSpaceBeforeTag,
   canInsertSpaceBeforeToken,
   createAnchor,
   createToken,
+  getRemovableSpaceAfterTag,
   getRemovableSpaceAfterToken,
+  getRemovableSpaceBeforeTag,
   getRemovableSpaceBeforeToken,
+  insertSpaceAfterTag,
   insertSpaceAfterToken,
+  insertSpaceBeforeTag,
   insertSpaceBeforeToken,
   remove,
+  removeSpaceAfterTag,
   removeSpaceAfterToken,
+  removeSpaceBeforeTag,
   removeSpaceBeforeToken,
   replaceText
 } from '../token.js';
@@ -64,6 +72,17 @@ function findTokenByText(root: HTMLElement, text: string): HTMLElement {
   ) as HTMLElement | undefined;
   if (!tok) throw new Error(`token with text "${text}" not found`);
   return tok;
+}
+
+function makeRawRoot(html: string): HTMLElement {
+  document.body.innerHTML = `<div id="root">${html}</div>`;
+  return document.getElementById('root') as HTMLElement;
+}
+
+function rawById(root: HTMLElement, id: string): HTMLElement {
+  const el = root.querySelector<HTMLElement>(`#${id}`);
+  if (!el) throw new Error(`rawById: could not find id="${id}"`);
+  return el;
 }
 
 describe('leading/trailing spaces', () => {
@@ -452,6 +471,291 @@ describe('leading/trailing spaces', () => {
         expect(canRemove).toBe(true);
         expect(result).toBe(true);
         expect(foo.nextSibling).toBe(opaque1);
+      });
+    });
+  });
+
+  describe('around FOCUSABLE', () => {
+    describe('after FOCUSABLE', () => {
+      it('inserts a space at the boundary after the focused tag', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              span({ class: 'jsed-ignore' }),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+            )
+          )
+        );
+        const em = rawById(root, 'em1');
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canInsert = canInsertSpaceAfterTag(em);
+        const result = !!insertSpaceAfterTag(em);
+
+        // assert
+        expect(canInsert).toBe(true);
+        expect(result).toBe(true);
+        expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+        expect(strong.previousSibling?.textContent).toBe(' ');
+      });
+
+      it('does not insert another space when one already exists', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              s(),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+            )
+          )
+        );
+        const em = rawById(root, 'em1');
+        const p1 = rawById(root, 'p1');
+
+        // act
+        const canInsert = canInsertSpaceAfterTag(em);
+        const result = !!insertSpaceAfterTag(em);
+
+        // assert
+        expect(canInsert).toBe(false);
+        expect(result).toBe(false);
+        const textNodes = Array.from(p1.childNodes).filter(
+          (node) => node.nodeType === Node.TEXT_NODE
+        );
+        expect(textNodes).toHaveLength(1);
+        expect(textNodes[0]?.textContent).toBe(' ');
+      });
+
+      it('inserts a space before intervening text', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              t('bar'),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+            )
+          )
+        );
+        const em = rawById(root, 'em1');
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canInsert = canInsertSpaceAfterTag(em);
+        const result = !!insertSpaceAfterTag(em);
+
+        // assert
+        expect(canInsert).toBe(true);
+        expect(result).toBe(true);
+        expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+        expect(em.nextSibling?.textContent).toBe(' ');
+        expect(
+          (em.nextSibling?.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')
+        ).toBe(true);
+        expect((em.nextSibling?.nextSibling as HTMLElement | null)?.textContent).toBe('bar');
+        expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+      });
+
+      it('removes boundary whitespace between adjacent tags', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              s(),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+            )
+          )
+        );
+        const em = rawById(root, 'em1');
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canRemove = !!getRemovableSpaceAfterTag(em);
+        const result = removeSpaceAfterTag(em);
+
+        // assert
+        expect(canRemove).toBe(true);
+        expect(result).toBe(true);
+        expect(strong.previousSibling).toBe(em);
+      });
+
+      it('removes leading whitespace from intervening text', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              s(),
+              t('bar'),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+            )
+          )
+        );
+        const em = rawById(root, 'em1');
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canRemove = !!getRemovableSpaceAfterTag(em);
+        const result = removeSpaceAfterTag(em);
+
+        // assert
+        expect(canRemove).toBe(true);
+        expect(result).toBe(true);
+        expect((em.nextSibling as HTMLElement | null)?.classList.contains('jsed-token')).toBe(true);
+        expect((em.nextSibling as HTMLElement | null)?.textContent).toBe('bar');
+        expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
+      });
+    });
+
+    describe('before FOCUSABLE', () => {
+      it('inserts a space at the boundary before the focused tag', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              span({ class: 'jsed-ignore' }),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+            )
+          )
+        );
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canInsert = canInsertSpaceBeforeTag(strong);
+        const result = !!insertSpaceBeforeTag(strong);
+
+        // assert
+        expect(canInsert).toBe(true);
+        expect(result).toBe(true);
+        expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+        expect(strong.previousSibling?.textContent).toBe(' ');
+      });
+
+      it('does not insert another space when one already exists', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              s(),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+            )
+          )
+        );
+        const strong = rawById(root, 'strong1');
+        const p1 = rawById(root, 'p1');
+
+        // act
+        const canInsert = canInsertSpaceBeforeTag(strong);
+        const result = !!insertSpaceBeforeTag(strong);
+
+        // assert
+        expect(canInsert).toBe(false);
+        expect(result).toBe(false);
+        const textNodes = Array.from(p1.childNodes).filter(
+          (node) => node.nodeType === Node.TEXT_NODE
+        );
+        expect(textNodes).toHaveLength(1);
+        expect(textNodes[0]?.textContent).toBe(' ');
+      });
+
+      it('inserts a space after intervening text', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              t('bar'),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+            )
+          )
+        );
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canInsert = canInsertSpaceBeforeTag(strong);
+        const result = !!insertSpaceBeforeTag(strong);
+
+        // assert
+        expect(canInsert).toBe(true);
+        expect(result).toBe(true);
+        expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+        expect(strong.previousSibling?.textContent).toBe(' ');
+        expect(
+          (strong.previousSibling?.previousSibling as HTMLElement | null)?.classList.contains(
+            'jsed-token'
+          )
+        ).toBe(true);
+        expect((strong.previousSibling?.previousSibling as HTMLElement | null)?.textContent).toBe(
+          'bar'
+        );
+      });
+
+      it('removes boundary whitespace between adjacent tags', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              s(),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+            )
+          )
+        );
+        const em = rawById(root, 'em1');
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canRemove = !!getRemovableSpaceBeforeTag(strong);
+        const result = removeSpaceBeforeTag(strong);
+
+        // assert
+        expect(canRemove).toBe(true);
+        expect(result).toBe(true);
+        expect(strong.previousSibling).toBe(em);
+      });
+
+      it('removes trailing whitespace from intervening text', () => {
+        // arrange
+        const root = makeRawRoot(
+          frag(
+            p(
+              { id: 'p1' },
+              emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+              t('bar'),
+              s(),
+              strongTag({ id: 'strong1', style: 'display:inline;' }, 'baz')
+            )
+          )
+        );
+        const strong = rawById(root, 'strong1');
+
+        // act
+        const canRemove = !!getRemovableSpaceBeforeTag(strong);
+        const result = removeSpaceBeforeTag(strong);
+
+        // assert
+        expect(canRemove).toBe(true);
+        expect(result).toBe(true);
+        expect(
+          (strong.previousSibling as HTMLElement | null)?.classList.contains('jsed-token')
+        ).toBe(true);
+        expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
       });
     });
   });

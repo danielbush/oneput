@@ -1,5 +1,5 @@
 import * as token from './lib/token.js';
-import { isToken } from './lib/taxonomy.js';
+import { isToken, isTokenizableTextNode } from './lib/taxonomy.js';
 import { getNextLineSibling, getPreviousLineSibling, isSameLine } from './lib/sibwalk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
@@ -29,11 +29,19 @@ export class TokenCursor extends TokenCursorBase {
       return;
     }
 
-    const nextToken = getNextLineSibling(this.getToken());
-    if (nextToken) {
-      this.setToken(nextToken);
+    const next = getNextLineSibling(this.getToken(), this.getDocument().root);
+    if (!next) {
       return;
     }
+    // We may get a text node because we do SHALLOW_TOKENIZATION.
+    if (isTokenizableTextNode(next)) {
+      const { tokens } = this.getTokenizer().tokenizeLineAtTextNode(next);
+      if (tokens[0]) {
+        this.setToken(tokens[0]);
+      }
+      return;
+    }
+    this.setToken(next as HTMLElement);
   }
 
   /**
@@ -45,11 +53,19 @@ export class TokenCursor extends TokenCursorBase {
       return;
     }
 
-    const prevToken = getPreviousLineSibling(this.getToken());
-    if (prevToken) {
-      this.setToken(prevToken);
+    const prev = getPreviousLineSibling(this.getToken(), this.getDocument().root);
+    if (!prev) {
       return;
     }
+    if (isTokenizableTextNode(prev)) {
+      const { tokens } = this.getTokenizer().tokenizeLineAtTextNode(prev);
+      if (tokens.length > 0) {
+        this.setToken(tokens[tokens.length - 1]);
+      }
+      return;
+    }
+
+    this.setToken(prev as HTMLElement);
   }
 
   // #endregion

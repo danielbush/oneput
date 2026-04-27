@@ -17,6 +17,11 @@ tasks:
   test:coverage:
     cmds:
       - pnpm run test:coverage {{.CLI_ARGS}}
+  test:html:
+    desc: Run tests and then run vite to view them - useful if  a lot of errors
+    cmds:
+      - pnpm run test --reporter=html --outputFile=$(pwd)/.test-results/index.html || true
+      - pnpx vite preview --outDir $(pwd)/.test-results
   test:
     desc: |
       Run unit tests; but avoid triggering browser tests.

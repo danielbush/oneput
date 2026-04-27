@@ -7,30 +7,30 @@ const inlineStyle = { style: 'display:inline;' };
 const inlineBlockStyle = { style: 'display:inline-block;' };
 
 /** Collect all LINE_SIBLING's forward using getNextLineSibling. */
-function collectForward(first: HTMLElement): string[] {
+function collectForward(first: Node, ceiling = first.parentElement!): string[] {
   const result: string[] = [identify(first)];
-  let cur: HTMLElement | null = first;
-  while ((cur = getNextLineSibling(cur))) {
+  let cur: Node | null = first;
+  while ((cur = getNextLineSibling(cur, ceiling))) {
     result.push(identify(cur));
   }
   return result;
 }
 
 /** Collect all LINE_SIBLING's backward using getPreviousLineSibling. */
-function collectBackward(last: HTMLElement): string[] {
+function collectBackward(last: Node, ceiling = last.parentElement!): string[] {
   const result: string[] = [identify(last)];
-  let cur: HTMLElement | null = last;
-  while ((cur = getPreviousLineSibling(cur))) {
+  let cur: Node | null = last;
+  while ((cur = getPreviousLineSibling(cur, ceiling))) {
     result.push(identify(cur));
   }
   return result;
 }
 
 /** Walk forward to the last LINE_SIBLING. */
-function walkToLast(first: HTMLElement): HTMLElement {
+function walkToLast(first: Node, ceiling = first.parentElement!): Node {
   let cur = first;
-  let next: HTMLElement | null;
-  while ((next = getNextLineSibling(cur))) {
+  let next: Node | null;
+  while ((next = getNextLineSibling(cur, ceiling))) {
     cur = next;
   }
   return cur;
@@ -87,7 +87,7 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
 
     // act & assert
     expect(collectForward(first)).toEqual(['foo', 'bar', 'baz']);
-    expect(collectBackward(walkToLast(first))).toEqual(['baz', 'bar', 'foo']);
+    expect(collectBackward(walkToLast(first, first.parentElement!))).toEqual(['baz', 'bar', 'foo']);
   });
 
   test('INLINE_FLOW: <p>aaa <em>bbb</em> ccc</p>', () => {

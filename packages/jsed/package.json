@@ -52,10 +52,11 @@
   "devDependencies": {
     "@testing-library/dom": "^8.20.0",
     "@testing-library/user-event": "^14.4.3",
-    "happy-dom": "^18.0.1",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "happy-dom": "^18.0.1",
     "prettier": "^3.8.1",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",

@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../test/util.js';
 import { isFocusable, isIgnorable, isInlineFlow, isLine, isToken } from '../taxonomy.js';
-import { tokenizeLine } from '../tokenize.js';
+import { tokenizeLineAt } from '../tokenize.js';
 
 const inlineStyle = { style: 'display:inline;' };
 
@@ -9,7 +9,7 @@ describe('isToken', () => {
   test('TOKEN after tokenization: returns true', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'hello'));
-    tokenizeLine(byId(doc, 'p1'));
+    tokenizeLineAt(byId(doc, 'p1'));
     const token = byId(doc, 'p1').querySelector('.jsed-token')!;
 
     // act & assert
@@ -161,7 +161,7 @@ describe('isLine', () => {
   test('TOKEN: returns false', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'hello'));
-    tokenizeLine(byId(doc, 'p1'));
+    tokenizeLineAt(byId(doc, 'p1'));
     const token = byId(doc, 'p1').querySelector('.jsed-token')!;
 
     // act & assert

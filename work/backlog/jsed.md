@@ -39,46 +39,20 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Critical work
 
-COMMENT: do interstitial lines first because we can simplify tokenization; I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; then make most focusables cursor transparent by default; then unify get next line sibling logic to work intra and inter-LINE
+COMMENT: [x] do interstitial lines first because we can simplify tokenization; [x] I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; [x] then make most focusables cursor transparent by default; [x] then unify get next line sibling logic to work intra and inter-LINE
 
 
 - CONVERT_INTERSTITIAL_TEXT__WORK
 - [ ] fix anchor functions for implicit line invariant
 - [x] rip out cross line code
-- rewrite getNextLineSibling without no visit,descend
-- make it cross lines
-- rewrite getPreviousLineSibling without no visit,descend
-- make it cross lines
-- rip out TokenizeLineAtTextNode
-- [.] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
-- CURSOR_TRANSPARENT_BY_DEFAULT__WORK
-- fix find next / previous line candidate logic
-  - [ ] next direction
-    - [ ] write getNextLineSibling2
-      - we just do findNextNode and scan for the first token, text node or LINE_SIBLING
-      - test cases
-        - next line has text node
-          - COMMENT: this is where the cursor tokenizes the LINE of text node; and puts the CURSOR on the first LINE_SIBLING in that LINE (if in previous direction it would be the last LINE_SIBLING)
-        - next line has token
-        - next line has inline ISLAND
-        - next line has block ISLAND - what do we do here?
-        - next line is implicit line - make sure we treat it like a line
-    - [ ] replace getNextLineSibling callsites with v2
-    - [ ] do exploratory testing
-    - [ ] get rid of crossline code and replace getNextLineSibling with v2
-  - [ ] previous direction
-    - repeat as above
-  - if ISLAND or token, we just put the cursor on it
-    - although if an ISLAND we should probably tokenize the LINE just to be sure
-  - if text node, we tokenize getLine(textNode)
-    - we have to get the last token in this text node for previous direction or first token in next direction
-    - we can use comment tags or inject a temporary span parent to the node
-  - we place the cursor on the token or ISLAND
-  - we might even be able to use the same find next/previous line sibling logic for intra and interline
-    - visit=isLineSibling || isTextNode
-    - descend=isFocusable
-    - ceiling=doc.root
-    - if we get a text node we tokenize and cleverly recover the associated token
+- [x] CURSOR_TRANSPARENT_BY_DEFAULT__WORK
+- [x] tokenizeLineAt
+- [x] rewrite getNextLineSibling without no visit,descend
+- [x] make it cross lines
+- [x] rewrite getPreviousLineSibling without no visit,descend
+- [x] make it cross lines
+- [x] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
+- [ ] get rid of isTransparentBlock
 
 
 ## Bugs
@@ -95,6 +69,8 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
   - do the cursor transparent revision first because that makes most things transparent;
 - `getValue(editManager.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
+- fix: getLine can exceed document root
+  - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 
 ## Drafting / inbox
 

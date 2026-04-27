@@ -10,10 +10,12 @@ import {
   isCursorTransparent,
   isFocusable,
   isIgnorable,
+  isIgnorableNode,
   isIsland,
   isLine,
   isLineSibling,
-  isToken
+  isToken,
+  isTokenizableTextNode
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
@@ -117,12 +119,19 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 /**
  * Get previous LINE_SIBLING within `line`.
  */
-export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
-  for (const prev of findPreviousNode(el, getParentLine(el), {
-    visit: isLineSibling,
-    descend: isCursorTransparent
+export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
+  for (const prev of findPreviousNode(el, ceiling, {
+    descend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node)
   })) {
-    return prev as HTMLElement;
+    if (isIgnorableNode(prev)) {
+      continue;
+    }
+    if (isTokenizableTextNode(prev)) {
+      return prev;
+    }
+    if (isLineSibling(prev)) {
+      return prev as HTMLElement;
+    }
   }
   return null;
 }
@@ -130,12 +139,17 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
 /**
  * Get next LINE_SIBLING from `el` within `line`.
  */
-export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
-  for (const next of findNextNode(el, getParentLine(el), {
-    // visit: isLineSibling,
-    // descend: isCursorTransparent
+export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
+  for (const next of findNextNode(el, ceiling, {
+    descend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node)
   })) {
-    if (isLineSibling(el)) {
+    if (isIgnorableNode(next)) {
+      continue;
+    }
+    if (isTokenizableTextNode(next)) {
+      return next;
+    }
+    if (isLineSibling(next)) {
       return next as HTMLElement;
     }
   }

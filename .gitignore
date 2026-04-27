@@ -13,3 +13,6 @@ opensrc/
 .vscode/settings.json
 
 .DS_Store
+
+# vitest
+.test-results

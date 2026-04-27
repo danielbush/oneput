@@ -1,19 +1,19 @@
 type Walk2Params = {
   /** Only yield nodes that pass this check. Does not control descent. */
-  visit?: (node: ParentNode | ChildNode) => boolean;
+  visit?: (node: Node) => boolean;
   /** Controls whether to descend into a node's children. Independent of visit. */
-  descend?: (node: ParentNode | ChildNode) => boolean;
+  descend?: (node: Node) => boolean;
   /** Whether to visit the start node. Default: false. */
   visitStart?: boolean;
   /** Whether to visit the ceiling node. Default: false. */
   visitCeiling?: boolean;
 };
 
-function shouldVisit(node: ParentNode | ChildNode, params?: Walk2Params): boolean {
+function shouldVisit(node: Node, params?: Walk2Params): boolean {
   return !params?.visit || params.visit(node);
 }
 
-function shouldDescend(node: ParentNode | ChildNode, params?: Walk2Params): boolean {
+function shouldDescend(node: Node, params?: Walk2Params): boolean {
   return !params?.descend || params.descend(node);
 }
 
@@ -35,10 +35,7 @@ export function lastNode(el: ParentNode | ChildNode, params?: Walk2Params): Pare
   return el;
 }
 
-function* descendIter(
-  root: ParentNode | ChildNode,
-  params?: Walk2Params
-): IterableIterator<ParentNode | ChildNode> {
+function* descendIter(root: Node, params?: Walk2Params): IterableIterator<ParentNode | ChildNode> {
   if (!shouldDescend(root, params)) {
     return;
   }
@@ -50,10 +47,7 @@ function* descendIter(
   }
 }
 
-function* descendIterReverse(
-  root: ParentNode | ChildNode,
-  params?: Walk2Params
-): IterableIterator<ParentNode | ChildNode> {
+function* descendIterReverse(root: Node, params?: Walk2Params): IterableIterator<Node> {
   if (!shouldDescend(root, params)) {
     return;
   }
@@ -108,10 +102,7 @@ export function getPreviousSiblingNode(
   return null;
 }
 
-export function getParent(
-  start: ParentNode | ChildNode,
-  ceiling: ParentNode | null
-): ParentNode | null {
+export function getParent(start: Node, ceiling: Node | null): Node | null {
   if (start === ceiling) {
     return null;
   }
@@ -128,11 +119,11 @@ export function getParent(
  * @param ceiling The boundary node we don't exceed
  */
 export function* findNextNode(
-  start: ParentNode | ChildNode,
-  ceiling: ParentNode | null,
+  start: Node,
+  ceiling: Node | null,
   params?: Walk2Params,
   _recurse = false
-): IterableIterator<ParentNode | ChildNode> {
+): IterableIterator<Node> {
   if (!ceiling || !ceiling.contains(start)) {
     console.warn(`findNextNode: start ${start} is not contained in ceiling ${ceiling}`);
     return;
@@ -141,7 +132,7 @@ export function* findNextNode(
   if (!_recurse) {
     yield* descendIter(start, params);
   }
-  let sib: ParentNode | ChildNode | null = start;
+  let sib: Node | null = start;
   if (ceiling !== start) {
     while ((sib = sib.nextSibling)) {
       if (shouldVisit(sib, params)) yield sib;
@@ -167,16 +158,16 @@ export function* findNextNode(
  * @param ceiling The boundary node we don't exceed
  */
 export function* findPreviousNode(
-  start: ParentNode | ChildNode,
-  ceiling: ParentNode | null,
+  start: Node,
+  ceiling: Node | null,
   params?: Walk2Params
-): IterableIterator<ParentNode | ChildNode> {
+): IterableIterator<Node> {
   if (ceiling && !ceiling.contains(start)) {
     console.warn(`findPreviousNode: start ${start} is not contained in ceiling ${ceiling}`);
     return;
   }
   const par = getParent(start, ceiling);
-  let sib: ParentNode | ChildNode | null = start;
+  let sib: Node | null = start;
   if (ceiling !== start) {
     while ((sib = sib.previousSibling)) {
       yield* descendIterReverse(sib, params);

@@ -32,6 +32,23 @@ const FORM_FOCUSABLE = [
   'label'
 ];
 
+export function isTextNode(node: Node): boolean {
+  return node.nodeType === Node.TEXT_NODE;
+}
+
+export function isTokenizableTextNode(node: Node): boolean {
+  if (node.nodeType !== Node.TEXT_NODE) return false;
+  if (!node.nodeValue) return false;
+  return /\S/.test(node.nodeValue);
+}
+
+export function isSpaceNode(node: Node): boolean {
+  if (node.nodeType === Node.TEXT_NODE && node.nodeValue) {
+    return /^\s*$/.test(node.nodeValue);
+  }
+  return false;
+}
+
 /**
  * Detect a subclass of IGNORABLE's that are natively focusable elements.
  *
@@ -60,17 +77,20 @@ export function isAlreadyFocusable(el: Element): boolean {
  * shows its tag name.  The indicator is a visual aid and not a part of the
  * document.
  */
-export function isIgnorable(el: Element) {
-  for (let p: Element | null = el; p; p = p.parentElement) {
-    if (isIgnorableElement(p)) {
+export function isIgnorable(el: Node) {
+  for (let p: Node | null = el; p; p = p.parentNode) {
+    if (isIgnorableNode(p)) {
       return true;
     }
   }
   return false;
 }
 
-function isIgnorableElement(el: Element): boolean {
-  if (el.classList.contains(JSED_IGNORE_CLASS)) {
+export function isIgnorableNode(el: Node): boolean {
+  if (el.nodeType === Node.TEXT_NODE) {
+    return false;
+  }
+  if (el instanceof Element && el.classList.contains(JSED_IGNORE_CLASS)) {
     return true;
   }
   return false;

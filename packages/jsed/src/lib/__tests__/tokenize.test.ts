@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em, span, inlineStyleHack } from '../../test/util.js';
-import { detokenizeLine, tokenizeLine } from '../tokenize.js';
+import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
 import { JSED_IMPLICIT_CLASS } from '../constants.js';
 
 describe('tokenizeLine', () => {
@@ -10,7 +10,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tokenizeLine(p1);
+    const first = tokenizeLineAt(p1);
 
     // assert
     expect(first!.textContent!.trim()).toBe('foo');
@@ -32,7 +32,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tokenizeLine(p1);
+    const first = tokenizeLineAt(p1);
 
     // assert
     expect(first!.textContent!.trim()).toBe('foo');
@@ -62,7 +62,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tokenizeLine(p1);
+    const first = tokenizeLineAt(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
     const afterIsland = tokens[1] as HTMLElement;
 
@@ -80,7 +80,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tokenizeLine(p1)!;
+    const first = tokenizeLineAt(p1)!;
 
     // assert
     expect(first.textContent).toBe('x²');
@@ -98,7 +98,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tokenizeLine(p1)!;
+    const first = tokenizeLineAt(p1)!;
 
     // assert
     expect(first.textContent).toBe('x²');
@@ -112,7 +112,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    tokenizeLine(p1);
+    tokenizeLineAt(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
 
     // assert
@@ -127,7 +127,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    tokenizeLine(p1);
+    tokenizeLineAt(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
     const afterInlineBlock = tokens[tokens.length - 1] as HTMLElement;
 
@@ -149,7 +149,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    tokenizeLine(p1);
+    tokenizeLineAt(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
     const afterSecondIsland = tokens[tokens.length - 1] as HTMLElement;
 
@@ -171,7 +171,7 @@ describe('tokenizeLine', () => {
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tokenizeLine(div1);
+    const first = tokenizeLineAt(div1);
 
     // assert — first TOKEN is "nested" (inside div2), "outer" remains directly
     // under the outer LINE
@@ -196,7 +196,7 @@ describe('tokenizeLine', () => {
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tokenizeLine(div1);
+    const first = tokenizeLineAt(div1);
 
     // assert — "outer" tokenized at div1 level, "nested" tokenized inside div2
     expect(first!.textContent!.trim()).toBe('outer');
@@ -211,7 +211,7 @@ describe('tokenizeLine', () => {
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tokenizeLine(div1);
+    const first = tokenizeLineAt(div1);
 
     // assert — recurses into div2 (TRANSPARENT_BLOCK) and tokenizes "nested"
     expect(first).not.toBeNull();
@@ -230,7 +230,7 @@ describe('tokenizeLine', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const first = tokenizeLine(p1);
+    const first = tokenizeLineAt(p1);
 
     // assert — "outer" tokenized at p1 level, "nested" tokenized inside the span
     expect(first!.textContent!.trim()).toBe('outer');
@@ -253,7 +253,7 @@ describe('tokenizeLine', () => {
     const div1 = byId(doc, 'div1');
 
     // act
-    const first = tokenizeLine(div1);
+    const first = tokenizeLineAt(div1);
 
     // assert — tokenizeLine should tokenize both "aaa" and "bbb" on the outer LINE
     expect(first).not.toBeNull();
@@ -288,7 +288,7 @@ describe('tokenizeLine', () => {
       const div1 = byId(doc, 'div1');
 
       // act
-      tokenizeLine(div1);
+      tokenizeLineAt(div1);
 
       // assert — both p1 and p2 are TRANSPARENT_BLOCK, so both are tokenized
       expect(byId(doc, 'p1').querySelector('.jsed-token')).not.toBeNull();
@@ -318,7 +318,7 @@ describe('tokenizeLine', () => {
       const div1 = byId(doc, 'div1');
 
       // act
-      tokenizeLine(div1);
+      tokenizeLineAt(div1);
 
       // assert — neither p1 nor p2 should have tokens inside them
       expect(byId(doc, 'p1').querySelector('.jsed-token')).toBeNull();
@@ -348,7 +348,7 @@ describe('tokenizeLine', () => {
       const div1 = byId(doc, 'div1');
 
       // act
-      tokenizeLine(p1);
+      tokenizeLineAt(p1);
 
       // assert
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(3);
@@ -366,7 +366,7 @@ describe('detokenizeLine', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
     const p1 = byId(doc, 'p1');
-    tokenizeLine(p1);
+    tokenizeLineAt(p1);
 
     // act
     detokenizeLine(p1);
@@ -381,7 +381,7 @@ describe('detokenizeLine', () => {
     const doc = makeRoot(p({ id: 'p1' }, 'foo ', em(inlineStyleHack, 'bar'), ' baz'));
     const p1 = byId(doc, 'p1');
     const initialHtml = p1.innerHTML;
-    tokenizeLine(p1);
+    tokenizeLineAt(p1);
 
     // act
     detokenizeLine(p1);
@@ -398,7 +398,7 @@ describe('detokenizeLine', () => {
     );
     const div1 = byId(doc, 'div1');
     const initialHtml = div1.innerHTML;
-    tokenizeLine(div1);
+    tokenizeLineAt(div1);
 
     // act
     detokenizeLine(div1);
@@ -413,8 +413,8 @@ describe('detokenizeLine', () => {
     const doc = makeRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo bar'), ' outer'));
     const div1 = byId(doc, 'div1');
     const p1 = byId(doc, 'p1');
-    tokenizeLine(p1);
-    tokenizeLine(div1);
+    tokenizeLineAt(p1);
+    tokenizeLineAt(div1);
 
     // act
     detokenizeLine(div1);

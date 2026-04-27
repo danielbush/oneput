@@ -1,3 +1,4 @@
+import { getLine } from './sibwalk.js';
 import { isFocusable, isCursorTransparent, isToken, isLineSibling } from './taxonomy.js';
 import { createToken } from './token.js';
 
@@ -5,7 +6,7 @@ import { createToken } from './token.js';
  * Used by tokenizer to convert text nodes to TOKEN's.
  * Returns the first TOKEN created, or null if the child was not a text node.
  */
-function replaceTextNode(child: Node): HTMLElement | null {
+export function replaceTextNode(child: Node): HTMLElement[] {
   const el = child.parentNode;
   if (isToken(el)) {
     throw new Error(
@@ -16,7 +17,7 @@ function replaceTextNode(child: Node): HTMLElement | null {
     const text = child.nodeValue!;
     const parts = text.match(/\s+|\S+/g) ?? [];
     const frag = document.createDocumentFragment();
-    let first: HTMLElement | null = null;
+    const tokens: HTMLElement[] = [];
 
     for (const part of parts) {
       if (/^\s+$/.test(part)) {
@@ -27,15 +28,15 @@ function replaceTextNode(child: Node): HTMLElement | null {
       }
 
       const token = createToken(part);
-      if (!first) first = token;
       frag.appendChild(token);
+      tokens.push(token);
     }
 
     el?.insertBefore(frag, child);
     el?.removeChild(child);
-    return first;
+    return tokens;
   }
-  return null;
+  return [];
 }
 
 /**
@@ -60,7 +61,8 @@ function tokenizeLineRec(line: Node): HTMLElement | null {
       const nestedFirst = tokenizeLineRec(child);
       if (!first) first = nestedFirst;
     } else if (child.nodeType === Node.TEXT_NODE) {
-      const token = replaceTextNode(child);
+      const tokens = replaceTextNode(child);
+      const token = tokens[0];
       if (token && !first) first = token;
     } else {
       if (!first && isLineSibling(child)) {
@@ -114,12 +116,26 @@ function detokenizeLineRec(line: Node): void {
  *
  * Part of SHALLOW_TOKENIZATION strategy.
  */
-export function tokenizeLine(el: HTMLElement): HTMLElement | null {
-  if (!isFocusable(el)) {
+export function tokenizeLineAt(el: HTMLElement): HTMLElement | null {
+  const line = getLine(el);
+  if (!isFocusable(line)) {
     return null;
   }
-  el.normalize();
-  return tokenizeLineRec(el);
+  line.normalize();
+  return tokenizeLineRec(line);
+}
+
+export function tokenizeLineAtTextNode(node: Node): {
+  first: HTMLElement | null;
+  tokens: HTMLElement[];
+  line: HTMLElement;
+} {
+  const line = getLine(node); // this must come before replaceTextNode
+  // Get the associated tokens...
+  const tokens = replaceTextNode(node);
+  // Now tokenize anything else in the line...
+  const first = tokenizeLineAt(line);
+  return { first, tokens, line };
 }
 
 /**

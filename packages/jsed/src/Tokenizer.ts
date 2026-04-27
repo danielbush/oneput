@@ -1,7 +1,7 @@
 import { Detokenizer } from './lib/Detokenizer.js';
 import { containsSelection } from './lib/sibwalk.js';
 import { isFocusable } from './lib/taxonomy.js';
-import { tokenizeLine } from './lib/tokenize.js';
+import { tokenizeLineAt, tokenizeLineAtTextNode } from './lib/tokenize.js';
 
 /**
  * Tokenize-and-seat service for the CURSOR.
@@ -44,12 +44,25 @@ export class Tokenizer {
     if (!isFocusable(el)) {
       return null;
     }
-    const firstLineSibling = tokenizeLine(el);
+    const firstLineSibling = tokenizeLineAt(el);
     if (firstLineSibling) {
       this.detokenizer.recordTokenizedLine(el);
     }
     this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
     return firstLineSibling;
+  }
+
+  tokenizeLineAtTextNode(node: Node): {
+    first: HTMLElement | null;
+    tokens: HTMLElement[];
+    line: HTMLElement;
+  } {
+    const { first, tokens, line } = tokenizeLineAtTextNode(node);
+    if (first) {
+      this.detokenizer.recordTokenizedLine(line);
+    }
+    this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
+    return { first, tokens, line };
   }
 
   setCursorElement(el: HTMLElement | null) {

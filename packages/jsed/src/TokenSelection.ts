@@ -1,6 +1,6 @@
 import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from './lib/constants.js';
 import { getLine } from './lib/sibwalk.js';
-import { isCursorTransparent } from './lib/taxonomy.js';
+import { isInlineFlow } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
 import { TokenCursor } from './TokenCursor.js';
 import type { JsedDocument } from './types.js';
@@ -237,9 +237,9 @@ export class TokenSelection {
    * the new content at the beginning of what was selected.
    *
    * Cleanup rules:
-   * - CURSOR_TRANSPARENT ancestor (em, span) fully consumed by the
-   *   selection → removed. If it was an ancestor of the start TOKEN,
-   *   start is lifted out first.
+   * - INLINE_FLOW ancestor (em, span) fully consumed by the selection
+   *   → removed. If it was an ancestor of the start TOKEN, start is
+   *   lifted out first.
    * - LINE (p, div) fully consumed → removed, EXCEPT when it hosts the
    *   start TOKEN (which is what the user will type into).
    */
@@ -266,12 +266,12 @@ export class TokenSelection {
       }
     }
 
-    // CURSOR_TRANSPARENT containers (em, span) the selection fully
-    // consumed — walk up from each selected TOKEN.
+    // INLINE_FLOW containers (em, span) the selection fully consumed —
+    // walk up from each selected TOKEN.
     const consumedCTContainers = new Set<HTMLElement>();
     const visitedCT = new Set<HTMLElement>();
     for (const tok of selectedTokens) {
-      for (let anc = tok.parentElement; anc && isCursorTransparent(anc); anc = anc.parentElement) {
+      for (let anc = tok.parentElement; anc && isInlineFlow(anc); anc = anc.parentElement) {
         if (visitedCT.has(anc)) continue;
         visitedCT.add(anc);
         const ancTokens = Array.from(anc.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
@@ -283,7 +283,7 @@ export class TokenSelection {
 
     this.collapse();
 
-    // Lift keeper out of its own consumed CURSOR_TRANSPARENT ancestors
+    // Lift keeper out of its own consumed INLINE_FLOW ancestors
     // (innermost → outermost). Done BEFORE pruning so keeper ends up as
     // a proper token sibling in the surviving LINE context; otherwise
     // `token.remove` would insert stray ANCHOR's when it can't find a
@@ -291,7 +291,7 @@ export class TokenSelection {
     let outermostConsumedForKeeper: HTMLElement | null = null;
     for (
       let anc = keeper.parentElement;
-      anc && isCursorTransparent(anc);
+      anc && isInlineFlow(anc);
       anc = anc.parentElement
     ) {
       if (!consumedCTContainers.has(anc)) break;
@@ -309,7 +309,7 @@ export class TokenSelection {
       token.remove(tok);
     }
 
-    // Remove any consumed CURSOR_TRANSPARENT container still in the DOM
+    // Remove any consumed INLINE_FLOW container still in the DOM
     // that doesn't host keeper (keeper's lift handled its ancestors).
     for (const container of consumedCTContainers) {
       if (!container.isConnected) continue;

@@ -1,6 +1,6 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { containsSelection, getLine } from './lib/sibwalk.js';
-import { isFocusable, isToken } from './lib/taxonomy.js';
+import { containsSelection } from './lib/sibwalk.js';
+import { isFocusable } from './lib/taxonomy.js';
 import { tokenizeLine } from './lib/tokenize.js';
 
 /**
@@ -50,38 +50,6 @@ export class Tokenizer {
     }
     this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
     return firstLineSibling;
-  }
-
-  /**
-   * Run tokenizeLineAt on the LINE that `node` belongs to and return the
-   * TOKEN's generated from `node`, in document order.
-   *
-   * The text node is usually part of a LOOSE_LINE — a run of loose content
-   * between nested LINE's of an outer LINE. `tokenizeLineAt` on the owning
-   * LINE will tokenize that LOOSE_LINE as part of its pre-pass.
-   */
-  tokenizeLineAtTextNode(node: Node): HTMLElement[] {
-    if (node.nodeType !== Node.TEXT_NODE) return [];
-    const parent = node.parentNode;
-    if (!parent) return [];
-
-    const line = getLine(node);
-    // Comment nodes are ignored by the tokenization walk so they don't affect
-    // behaviour.
-    const startMarker = document.createComment('');
-    const endMarker = document.createComment('');
-    parent.insertBefore(startMarker, node);
-    parent.insertBefore(endMarker, node.nextSibling);
-
-    this.tokenizeLineAt(line);
-
-    const tokens: HTMLElement[] = [];
-    for (let n = startMarker.nextSibling; n && n !== endMarker; n = n.nextSibling) {
-      if (isToken(n)) tokens.push(n as HTMLElement);
-    }
-    startMarker.remove();
-    endMarker.remove();
-    return tokens;
   }
 
   setCursorElement(el: HTMLElement | null) {

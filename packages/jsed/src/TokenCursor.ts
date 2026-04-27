@@ -1,14 +1,6 @@
 import * as token from './lib/token.js';
-import { isCursorTransparent, isIsland, isLineSibling, isToken } from './lib/taxonomy.js';
-import {
-  findLineCandidateAt,
-  findNextLineCandidate,
-  findPreviousLineCandidate,
-  getNextLineSibling,
-  getPreviousLineSibling,
-  isSameLine
-} from './lib/sibwalk.js';
-import { findNextNode } from './lib/walk.js';
+import { isToken } from './lib/taxonomy.js';
+import { getNextLineSibling, getPreviousLineSibling, isSameLine } from './lib/sibwalk.js';
 import { TokenCursorBase, type TokenCursorBaseParams } from './TokenCursorBase.js';
 
 export type { TokenCursorError } from './TokenCursorBase.js';
@@ -42,12 +34,6 @@ export class TokenCursor extends TokenCursorBase {
       this.setToken(nextToken);
       return;
     }
-
-    const crossLineTarget = this.findNextCrossLineTarget();
-    if (crossLineTarget) {
-      this.setToken(crossLineTarget);
-      return;
-    }
   }
 
   /**
@@ -64,87 +50,6 @@ export class TokenCursor extends TokenCursorBase {
       this.setToken(prevToken);
       return;
     }
-
-    const crossLineTarget = this.findPreviousCrossLineTarget();
-    if (crossLineTarget) {
-      this.setToken(crossLineTarget);
-      return;
-    }
-  }
-
-  /**
-   * Resolve a CURSOR target in the next LINE, tokenizing on arrival.
-   *
-   */
-  private findNextCrossLineTarget(): HTMLElement | null {
-    const root = this.getDocument().root;
-    const candidate = findNextLineCandidate(this.getToken(), root);
-    if (!candidate) return null;
-    if (isToken(candidate)) {
-      return candidate;
-    }
-    const { line } = findLineCandidateAt(candidate);
-    if (line) {
-      return this.getTokenizer().tokenizeLineAt(line);
-    }
-    return null;
-  }
-
-  /**
-   * Resolve last reachable CURSOR target in the previous LINE, tokenizing as
-   * required.
-   *
-   * More work than `findNextCrossLineTarget` for two reasons:
-   * 1. `tokenizeLineAt` returns the first LINE_SIBLING in first reachable LINE,
-   *    which forward can use directly. Backward wants the LAST, so it must descend
-   *    and scan.
-   * 2. That scan may reach content that hasn't been tokenized yet — either a
-   *    trailing LOOSE_LINE in a sibling outer LINE, or the raw text of a
-   *    previous real LINE we've never entered. Hence the TEXT_NODE branch.
-
-   */
-  private findPreviousCrossLineTarget(): HTMLElement | null {
-    const root = this.getDocument().root;
-    const candidate = findPreviousLineCandidate(this.getToken(), root);
-    if (!candidate) return null;
-    if (candidate.nodeType === Node.TEXT_NODE) {
-      const tokens = this.getTokenizer().tokenizeLineAtTextNode(candidate);
-      return tokens[tokens.length - 1];
-    }
-    if (isToken(candidate)) {
-      return candidate as HTMLElement;
-    }
-
-    return this.findLastCursorTarget(candidate as HTMLElement);
-  }
-
-  /**
-   * Resolve a LINE_SIBLING/container to its last reachable CURSOR target in
-   * document order.
-   */
-  private findLastCursorTarget(el: HTMLElement): HTMLElement | null {
-    if (isToken(el) || isIsland(el)) {
-      return el;
-    }
-
-    // Ensure any reachable text content has been tokenized before we scan.
-    const { line } = findLineCandidateAt(el);
-    if (line) {
-      this.getTokenizer().tokenizeLineAt(line);
-    }
-
-    let last: HTMLElement | null = null;
-    for (const node of findNextNode(el, el, {
-      visit: isLineSibling,
-      descend: (node) => node === el || isCursorTransparent(node)
-    })) {
-      const target = this.findLastCursorTarget(node as HTMLElement);
-      if (target) {
-        last = target;
-      }
-    }
-
-    return last;
   }
 
   // #endregion

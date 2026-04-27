@@ -43,9 +43,14 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
 
 
 - CONVERT_INTERSTITIAL_TEXT__WORK
-- rip out findPreviousCrossLineTarget
+- [ ] fix anchor functions for implicit line invariant
+- [x] rip out cross line code
+- rewrite getNextLineSibling without no visit,descend
+- make it cross lines
+- rewrite getPreviousLineSibling without no visit,descend
+- make it cross lines
 - rip out TokenizeLineAtTextNode
-- Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
+- [.] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
 - CURSOR_TRANSPARENT_BY_DEFAULT__WORK
 - fix find next / previous line candidate logic
   - [ ] next direction

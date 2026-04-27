@@ -132,10 +132,12 @@ export function getPreviousLineSibling(el: HTMLElement): HTMLElement | null {
  */
 export function getNextLineSibling(el: HTMLElement): HTMLElement | null {
   for (const next of findNextNode(el, getParentLine(el), {
-    visit: isLineSibling,
-    descend: isCursorTransparent
+    // visit: isLineSibling,
+    // descend: isCursorTransparent
   })) {
-    return next as HTMLElement;
+    if (isLineSibling(el)) {
+      return next as HTMLElement;
+    }
   }
   return null;
 }
@@ -181,27 +183,6 @@ export function findLineCandidateAt(from: HTMLElement): {
 }
 
 /**
- * Find the first LINE_SIBLING candidate beyond the current exhausted LINE.
- */
-export function findNextLineCandidate(from: HTMLElement, root: HTMLElement): HTMLElement | null {
-  const currentLine = getLine(from);
-
-  for (const node of findNextNode(from, root, {
-    visit: isLineSibling,
-    descend: (el) => isFocusable(el) && !isIsland(el)
-  })) {
-    if (node.contains(currentLine)) continue;
-
-    const nextLine = getLine(node);
-    if (nextLine === currentLine) continue;
-
-    return node as HTMLElement;
-  }
-
-  return null;
-}
-
-/**
  * Detect a candidate/potential LINE_SIBLING — a non-whitespace text node,
  * TOKEN, or ISLAND.
  *
@@ -213,37 +194,4 @@ function isCandidateLineSibling(node: Node | null): boolean {
   if (!node) return false;
   if (isToken(node) || isIsland(node)) return true;
   return node.nodeType === Node.TEXT_NODE && /\S/.test(node.textContent ?? '');
-}
-
-/**
- * Find the last LINE_SIBLING candidate before the current exhausted LINE.
- */
-export function findPreviousLineCandidate(from: HTMLElement, root: HTMLElement): Node | null {
-  const currentLine = getLine(from);
-
-  for (const node of findPreviousNode(from, root, {
-    visit: (el) => isLineSibling(el) || el.nodeType === Node.TEXT_NODE,
-    descend: (el) => isFocusable(el) && !isIsland(el)
-  })) {
-    if (node === from) {
-      // TODO: we seem to visit current by default when moving previous.  This
-      // might be deliberate?
-      continue;
-    }
-    if (node.nodeType === Node.TEXT_NODE) {
-      if (/\S/.test(node.textContent ?? '')) {
-        return node;
-      } else {
-        continue;
-      }
-    }
-    if (node.contains(currentLine)) continue;
-
-    const previousLine = getLine(node);
-    if (previousLine === currentLine) continue;
-
-    return node;
-  }
-
-  return null;
 }

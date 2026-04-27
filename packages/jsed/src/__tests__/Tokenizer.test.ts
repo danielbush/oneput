@@ -1,9 +1,8 @@
-import { afterEach, describe, expect, it, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { Tokenizer } from '../Tokenizer.js';
 import { Detokenizer } from '../lib/Detokenizer.js';
-import { byId, div, em, frag, inlineStyleHack, makeRoot, p, strong } from '../test/util.js';
+import { byId, div, em, frag, inlineStyleHack, makeRoot, p } from '../test/util.js';
 import { isToken } from '../lib/taxonomy.js';
-import { getValue } from '../lib/token.js';
 
 describe('Tokenizer', () => {
   afterEach(() => {
@@ -467,113 +466,6 @@ describe('Tokenizer', () => {
       expect(second).not.toBeNull();
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
       expect(second).toBe(first);
-    });
-  });
-
-  describe('tokenizeLineAtTextNode', () => {
-    it('returns the TOKENs created from the text node', () => {
-      // arrange — text node is the second LOOSE_LINE run inside div1
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p({ id: 'p1' }, 'aaa'),
-          ' first second ',
-          p({ id: 'p2' }, 'third fourth'),
-          ' fifth sixth '
-        )
-      );
-      const div1 = byId(doc, 'div1');
-      const targetTextNode = Array.from(div1.childNodes).find(
-        (n) => n.nodeType === Node.TEXT_NODE && (n.nodeValue ?? '').includes('fifth')
-      )!;
-      const tokenizer = Tokenizer.createNull();
-
-      // act
-      const tokens = tokenizer.tokenizeLineAtTextNode(targetTextNode);
-
-      // assert
-      expect(tokens.map((t) => t.textContent)).toEqual(['fifth', 'sixth']);
-      // the other LOOSE_LINE and nested LINE were also tokenized (via
-      // tokenizeLineAt on the owning LINE) but aren't returned
-      const directTokens = Array.from(div1.children)
-        .filter((c) => c.classList.contains('jsed-token'))
-        .map((c) => c.textContent);
-      expect(directTokens).toEqual(['first', 'second', 'fifth', 'sixth']);
-      // no stray comment-marker nodes left behind
-      const commentCount = Array.from(div1.childNodes).filter(
-        (n) => n.nodeType === Node.COMMENT_NODE
-      ).length;
-      expect(commentCount).toBe(0);
-    });
-
-    it('works when the text node is inside an INLINE_FLOW wrapper', () => {
-      // arrange
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p({ id: 'p1' }, 'aaa'),
-          em({ ...inlineStyleHack, id: 'em1' }, 'alpha beta'),
-          ' gamma'
-        )
-      );
-      const div1 = byId(doc, 'div1');
-      const em1 = byId(doc, 'em1');
-      const targetTextNode = em1.firstChild!;
-      const tokenizer = Tokenizer.createNull();
-
-      // act
-      const tokens = tokenizer.tokenizeLineAtTextNode(targetTextNode);
-
-      // assert
-      expect(tokens.map((t) => t.textContent)).toEqual(['alpha', 'beta']);
-      expect(
-        Array.from(div1.querySelectorAll<HTMLElement>('.jsed-token')).map((t) => getValue(t))
-      ).toEqual([
-        // 'aaa' will get tokenized because getLine(targetTextNode) will be div1.
-        'aaa',
-        // It's important we tokenize the whole LOOSE_LINE:
-        'alpha',
-        'beta',
-        'gamma'
-      ]);
-      // markers cleaned up
-      expect(
-        Array.from(em1.childNodes).filter((n) => n.nodeType === Node.COMMENT_NODE).length
-      ).toBe(0);
-    });
-
-    test('more complex example', () => {
-      // arrange
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p({ id: 'p1' }, 'aaa'),
-          ' alpha ',
-          em(
-            { ...inlineStyleHack, id: 'em1' },
-            'beta ',
-            strong({ ...inlineStyleHack, id: 'strong1' }, 'gamma')
-          ),
-          ' delta'
-        )
-      );
-      const div1 = byId(doc, 'div1');
-      const em1 = byId(doc, 'em1');
-      const targetTextNode = em1.firstChild!;
-      const tokenizer = Tokenizer.createNull();
-
-      // act
-      const tokens = tokenizer.tokenizeLineAtTextNode(targetTextNode);
-
-      // assert
-      expect(tokens.map((t) => t.textContent)).toEqual(['beta']);
-      expect(
-        Array.from(div1.querySelectorAll<HTMLElement>('.jsed-token')).map((t) => getValue(t))
-      ).toEqual(['aaa', 'alpha', 'beta', 'gamma', 'delta']);
-      // markers cleaned up
-      expect(
-        Array.from(em1.childNodes).filter((n) => n.nodeType === Node.COMMENT_NODE).length
-      ).toBe(0);
     });
   });
 });

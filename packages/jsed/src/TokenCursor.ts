@@ -1,6 +1,7 @@
 import * as token from './lib/token.js';
 import { isCursorTransparent, isIsland, isLineSibling, isToken } from './lib/taxonomy.js';
 import {
+  findLineCandidateAt,
   findNextLineCandidate,
   findPreviousLineCandidate,
   getNextLineSibling,
@@ -82,7 +83,11 @@ export class TokenCursor extends TokenCursorBase {
     if (isToken(candidate)) {
       return candidate;
     }
-    return this.getTokenizer().tokenizeLineAt(candidate);
+    const { line } = findLineCandidateAt(candidate);
+    if (line) {
+      return this.getTokenizer().tokenizeLineAt(line);
+    }
+    return null;
   }
 
   /**
@@ -123,7 +128,10 @@ export class TokenCursor extends TokenCursorBase {
     }
 
     // Ensure any reachable text content has been tokenized before we scan.
-    this.getTokenizer().tokenizeLineAt(el);
+    const { line } = findLineCandidateAt(el);
+    if (line) {
+      this.getTokenizer().tokenizeLineAt(line);
+    }
 
     let last: HTMLElement | null = null;
     for (const node of findNextNode(el, el, {

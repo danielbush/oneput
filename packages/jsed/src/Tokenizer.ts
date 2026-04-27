@@ -1,5 +1,5 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { containsSelection, findLineCandidateAt, getLine } from './lib/sibwalk.js';
+import { containsSelection, getLine } from './lib/sibwalk.js';
 import { isFocusable, isToken } from './lib/taxonomy.js';
 import { tokenizeLine } from './lib/tokenize.js';
 
@@ -44,14 +44,9 @@ export class Tokenizer {
     if (!isFocusable(el)) {
       return null;
     }
-    const { line } = findLineCandidateAt(el);
-    if (!line) {
-      this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
-      return null;
-    }
-    const firstLineSibling = tokenizeLine(line);
+    const firstLineSibling = tokenizeLine(el);
     if (firstLineSibling) {
-      this.detokenizer.recordTokenizedLine(line);
+      this.detokenizer.recordTokenizedLine(el);
     }
     this.detokenizer.scheduleCleanup((l) => this.shouldKeepTokenized(l));
     return firstLineSibling;

@@ -42,6 +42,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 COMMENT: do interstitial lines first because we can simplify tokenization; I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; then make most focusables cursor transparent by default; then unify get next line sibling logic to work intra and inter-LINE
 
 
+- CONVERT_INTERSTITIAL_TEXT__WORK
+- rip out findPreviousCrossLineTarget
+- rip out TokenizeLineAtTextNode
+- Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
 - CURSOR_TRANSPARENT_BY_DEFAULT__WORK
 - fix find next / previous line candidate logic
   - [ ] next direction
@@ -70,7 +74,6 @@ COMMENT: do interstitial lines first because we can simplify tokenization; I als
     - descend=isFocusable
     - ceiling=doc.root
     - if we get a text node we tokenize and cleverly recover the associated token
-- CONVERT_INTERSTITIAL_TEXT__WORK
 
 
 ## Bugs

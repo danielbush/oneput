@@ -3,7 +3,7 @@ import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { isCursorTransparent, isIsland, isLine, isToken } from './lib/taxonomy.js';
-import { getFirstLineSibling, getLine } from './lib/sibwalk.js';
+import { findLineCandidateAt, getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
 import type { SetTokenOpts } from './TokenCursorBase.js';
@@ -196,7 +196,8 @@ export class EditManager {
     );
 
     // Tokenize LINE at or within `initial` if not already.
-    const firstLineSibling = this.tokenizer.tokenizeLineAt(initial);
+    const { line } = findLineCandidateAt(initial);
+    const firstLineSibling = line && this.tokenizer.tokenizeLineAt(line);
     const targetLineSibling = isToken(initial)
       ? initial
       : isCursorTransparent(initial)
@@ -236,7 +237,10 @@ export class EditManager {
 
     if (focusElement) {
       this.nav.FOCUS(focusElement);
-      this.tokenizer.tokenizeLineAt(focusElement);
+      const { line } = findLineCandidateAt(focusElement);
+      if (line) {
+        this.tokenizer.tokenizeLineAt(line);
+      }
     }
   }
 
@@ -443,7 +447,10 @@ export class EditManager {
       }
 
       // First focus, just tokenizes.
-      this.tokenizer.tokenizeLineAt(evt.element);
+      const { line } = findLineCandidateAt(evt.element);
+      if (line) {
+        this.tokenizer.tokenizeLineAt(line);
+      }
       return true;
     }
 

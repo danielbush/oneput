@@ -799,7 +799,7 @@ export class EditManager {
       return false;
     }
 
-    const inserted = this.cursor.insertSpaceBeforeCursor();
+    const inserted = !!token.insertSpaceBeforeToken(this.cursor.getToken());
     if (inserted) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -816,7 +816,7 @@ export class EditManager {
       return false;
     }
 
-    const inserted = this.cursor.insertSpaceAfterCursor();
+    const inserted = !!token.insertSpaceAfterToken(this.cursor.getToken());
     if (inserted) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -833,7 +833,7 @@ export class EditManager {
       return false;
     }
 
-    const removed = this.cursor.removeSpaceBeforeCursor();
+    const removed = !!token.removeSpaceBeforeToken(this.cursor.getToken());
     if (removed) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -850,7 +850,7 @@ export class EditManager {
       return false;
     }
 
-    const removed = this.cursor.removeSpaceAfterCursor();
+    const removed = !!token.removeSpaceAfterToken(this.cursor.getToken());
     if (removed) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -932,19 +932,35 @@ export class EditManager {
   }
 
   canInsertSpaceBeforeCursor(): boolean {
-    return this.mode === 'edit' && !!this.cursor?.canInsertSpaceBeforeCursor();
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      token.canInsertSpaceBeforeToken(this.cursor.getToken())
+    );
   }
 
   canInsertSpaceAfterCursor(): boolean {
-    return this.mode === 'edit' && !!this.cursor?.canInsertSpaceAfterCursor();
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      token.canInsertSpaceAfterToken(this.cursor.getToken())
+    );
   }
 
   canRemoveSpaceBeforeCursor(): boolean {
-    return this.mode === 'edit' && !!this.cursor?.canRemoveSpaceBeforeCursor();
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      !!token.getRemovableSpaceBeforeToken(this.cursor.getToken())
+    );
   }
 
   canRemoveSpaceAfterCursor(): boolean {
-    return this.mode === 'edit' && !!this.cursor?.canRemoveSpaceAfterCursor();
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      !!token.getRemovableSpaceAfterToken(this.cursor.getToken())
+    );
   }
 
   // #endregion is*/can* methods

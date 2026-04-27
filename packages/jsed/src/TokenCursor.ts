@@ -100,46 +100,6 @@ export class TokenCursor extends TokenCursorBase {
     return tok;
   }
 
-  /** Whether a space can be inserted immediately before the CURSOR. */
-  canInsertSpaceBeforeCursor(): boolean {
-    return token.canInsertSpaceBeforeToken(this.getToken());
-  }
-
-  /** Insert a space immediately before the CURSOR if possible. */
-  insertSpaceBeforeCursor(): boolean {
-    return !!token.insertSpaceBeforeToken(this.getToken());
-  }
-
-  /** Whether a space can be inserted immediately after the CURSOR. */
-  canInsertSpaceAfterCursor(): boolean {
-    return token.canInsertSpaceAfterToken(this.getToken());
-  }
-
-  /** Insert a space immediately after the CURSOR if possible. */
-  insertSpaceAfterCursor(): boolean {
-    return !!token.insertSpaceAfterToken(this.getToken());
-  }
-
-  /** Whether removable space exists immediately before the CURSOR. */
-  canRemoveSpaceBeforeCursor(): boolean {
-    return !!token.getRemovableSpaceBeforeToken(this.getToken());
-  }
-
-  /** Remove space immediately before the CURSOR if possible. */
-  removeSpaceBeforeCursor(): boolean {
-    return !!token.removeSpaceBeforeToken(this.getToken());
-  }
-
-  /** Whether removable space exists immediately after the CURSOR. */
-  canRemoveSpaceAfterCursor(): boolean {
-    return !!token.getRemovableSpaceAfterToken(this.getToken());
-  }
-
-  /** Remove space immediately after the CURSOR if possible. */
-  removeSpaceAfterCursor(): boolean {
-    return !!token.removeSpaceAfterToken(this.getToken());
-  }
-
   /** Merge with next adjacent TOKEN if it exists (JOIN). */
   joinNext() {
     if (!this.isOnToken()) return;

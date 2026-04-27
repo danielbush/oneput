@@ -405,16 +405,11 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
   const separatorBefore = getSeparatorBefore(token);
   const separatorAfter = getSeparatorAfter(token);
 
-  // Keep at most one separator across the gap left by the removed TOKEN.
-  // Edge separators (leading / trailing whitespace with no TOKEN on one side)
-  // are dropped.
-  if (prevTok && nextTok) {
-    if (separatorBefore && separatorAfter) {
-      separatorAfter.parentNode?.removeChild(separatorAfter);
-    }
-  } else {
-    separatorBefore?.parentNode?.removeChild(separatorBefore);
-    separatorAfter?.parentNode?.removeChild(separatorAfter);
+  // Collapse paired separators down to one by dropping the trailing one.
+  // The leading separator stays as either the previous TOKEN's trailing
+  // space or as an edge space — both are visually harmless.
+  if (separatorBefore && separatorAfter) {
+    separatorAfter.parentNode?.removeChild(separatorAfter);
   }
 
   // Capture neighbours BEFORE detaching — once `token` is removed,

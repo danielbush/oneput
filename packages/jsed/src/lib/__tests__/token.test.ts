@@ -531,6 +531,44 @@ describe('remove', () => {
     expect(next.previousElementSibling).toBe(p1);
   });
 
+  it('preserves the leading separator when the removed TOKEN is at the end of a segment', () => {
+    // arrange — `[prev, ' ', removed, ' ']`. After removing `removed`, the
+    // leading ' ' should remain as `prev`'s trailing space; only the trailing
+    // separator is dropped.
+    const prev = createToken('prev');
+    const removed = createToken('removed');
+    const sepBefore = document.createTextNode(' ');
+    const sepAfter = document.createTextNode(' ');
+    const parent = buildParent(prev, sepBefore, removed, sepAfter);
+
+    // act
+    remove(removed);
+
+    // assert
+    expect(Array.from(parent.childNodes)).toEqual([prev, sepBefore]);
+    expect(sepBefore.parentNode).toBe(parent);
+    expect(sepAfter.parentNode).toBeNull();
+  });
+
+  it('preserves the leading separator when the removed TOKEN is at the start of a segment', () => {
+    // arrange — `[' ', removed, ' ', next]`. After removing `removed`, the
+    // leading ' ' should remain as an edge separator; only the trailing
+    // separator (between removed and next) is dropped.
+    const removed = createToken('removed');
+    const next = createToken('next');
+    const sepBefore = document.createTextNode(' ');
+    const sepAfter = document.createTextNode(' ');
+    const parent = buildParent(sepBefore, removed, sepAfter, next);
+
+    // act
+    remove(removed);
+
+    // assert
+    expect(Array.from(parent.childNodes)).toEqual([sepBefore, next]);
+    expect(sepBefore.parentNode).toBe(parent);
+    expect(sepAfter.parentNode).toBeNull();
+  });
+
   it('appends a new ANCHOR to the parent when the removed TOKEN had no element siblings', () => {
     // arrange
     const only = createToken('only');

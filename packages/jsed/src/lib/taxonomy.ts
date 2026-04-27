@@ -208,8 +208,5 @@ export function isLineSibling(el: Node): boolean {
 export function isCursorTransparent(n: Node): boolean {
   if (!isFocusable(n)) return false;
   if (isIsland(n)) return false;
-  if (isInlineFlow(n)) return true;
-  if (isTransparentBlock(n)) return true;
-  if (isSelectionWrapper(n)) return true;
-  return false;
+  return true;
 }

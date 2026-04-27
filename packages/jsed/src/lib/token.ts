@@ -12,8 +12,8 @@ import {
   isToken,
   isAnchor,
   isImplicitLine,
-  isLine,
-  isCursorTransparent
+  isInlineFlow,
+  isLine
 } from './taxonomy.js';
 import {
   getLine,
@@ -266,7 +266,7 @@ export function canInsertSpaceBeforeToken(token: HTMLElement): boolean {
   if (
     !previous ||
     isToken(previous) ||
-    (isCursorTransparent(previous) && subtreeEndsWithWhitespace(previous))
+    (isInlineFlow(previous) && subtreeEndsWithWhitespace(previous))
   ) {
     return false;
   }
@@ -317,7 +317,7 @@ export function canInsertSpaceAfterToken(token: HTMLElement): boolean {
   }
 
   const next = getNextVisibleSibling(token);
-  if (!next || isToken(next) || (isCursorTransparent(next) && subtreeStartsWithWhitespace(next))) {
+  if (!next || isToken(next) || (isInlineFlow(next) && subtreeStartsWithWhitespace(next))) {
     return false;
   }
 

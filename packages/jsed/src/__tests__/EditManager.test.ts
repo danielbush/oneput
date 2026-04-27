@@ -2546,7 +2546,7 @@ describe('EditManager', () => {
         });
 
         // Blocks usually don't care about trailing or leading whitespace.
-        describe('OPAQUE_BLOCK', () => {
+        describe('block', () => {
           it('inserts whitespace after a token before an OPAQUE_BLOCK', () => {
             // arrange
             const doc = makeRoot(
@@ -2554,7 +2554,7 @@ describe('EditManager', () => {
                 div(
                   { id: 'div1' },
                   t('foo'),
-                  div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+                  div({ id: 'div2', style: 'display:inline-block;' }, p('bar')),
                   s(),
                   t('baz')
                 )
@@ -2569,7 +2569,7 @@ describe('EditManager', () => {
             const foo = Array.from(doc.root.querySelectorAll('.jsed-token')).find(
               (el) => el.textContent === 'foo'
             ) as HTMLElement;
-            const opaque1 = byId(doc, 'opaque1');
+            const div2 = byId(doc, 'div2');
 
             editManager.enterEditing(foo);
 
@@ -2582,7 +2582,7 @@ describe('EditManager', () => {
             expect(result).toBe(true);
             expect(foo.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
             expect(foo.nextSibling?.textContent).toBe(' ');
-            expect(foo.nextSibling?.nextSibling).toBe(opaque1);
+            expect(foo.nextSibling?.nextSibling).toBe(div2);
 
             editManager.destroy();
           });

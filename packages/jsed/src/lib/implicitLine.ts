@@ -1,4 +1,5 @@
 import { JSED_IMPLICIT_CLASS } from './constants.js';
+import { isImplicitLine, isToken } from './taxonomy.js';
 
 /**
  * Wrap interstitial text runs — bare text that sits alongside NESTED_LINE's
@@ -63,10 +64,11 @@ function isInterstitialChild(n: ChildNode): boolean {
     const el = n as Element;
     // Idempotence: an existing implicit-line span is treated as a boundary so
     // it does not get re-wrapped on a second pass.
-    if (el.classList.contains(JSED_IMPLICIT_CLASS)) return false;
+    if (isImplicitLine(el)) return false;
     // <br> is inline-displayed but a forced line break — treat as a boundary
     // so the runs on either side become separate implicit lines.
     if (el.tagName === 'BR') return false;
+    if (isToken(el)) return true;
     return isInlineDisplay(el);
   }
   return false;
@@ -78,6 +80,7 @@ function isInterstitialChild(n: ChildNode): boolean {
  * These belong to the surrounding implicit line.
  */
 function isInlineDisplay(el: Element): boolean {
+  if (isToken(el)) return true;
   const styles = el.ownerDocument.defaultView?.getComputedStyle(el);
   if (!styles) return false;
   return styles.display.startsWith('inline');

@@ -175,7 +175,7 @@ export function isInlineFlow(el: Node | null): boolean {
  * Detect IMPLICIT_LINE .
  */
 export function isImplicitLine(node: Node) {
-  return isFocusable(node) && node.classList.contains(JSED_IMPLICIT_CLASS);
+  return node instanceof Element && node.classList.contains(JSED_IMPLICIT_CLASS);
 }
 
 /**
@@ -187,7 +187,7 @@ export function isImplicitLine(node: Node) {
  * (serialization, tokenization, etc.).
  */
 export function isSelectionWrapper(node: Node | null): boolean {
-  return isFocusable(node) && node.classList.contains(JSED_SELECTION_CLASS);
+  return node instanceof Element && node.classList.contains(JSED_SELECTION_CLASS);
 }
 
 // ============================================================================

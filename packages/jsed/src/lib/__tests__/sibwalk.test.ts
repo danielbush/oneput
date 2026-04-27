@@ -130,7 +130,7 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     const div1 = byId(doc, 'div1');
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — CURSOR traverses through nested div (TRANSPARENT_BLOCK)
+    // act & assert — CURSOR traverses through nested div
     expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'nested', 'aaa']);
   });
@@ -227,7 +227,7 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     });
   });
 
-  describe('(2) TRANSPARENT_BLOCK: CURSOR visit=no, descend=yes', () => {
+  describe(`(2) non-ISLAND's: CURSOR visit=no, descend=yes`, () => {
     // Category (2) requires explicit opt-in via jsed-cursor-transparent class.
     // This includes nested block elements (div inside div) and inline-block spans.
     // The CURSOR descends into them seamlessly, like an INLINE_FLOW.

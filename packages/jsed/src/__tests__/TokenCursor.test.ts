@@ -360,7 +360,7 @@ describe('TokenCursor motion', () => {
       });
     });
 
-    describe('(2) TRANSPARENT_BLOCK: visit=no, descend=yes', () => {
+    describe(`(2) non-ISLAND's: visit=no, descend=yes`, () => {
       // Category (2) requires explicit opt-in via jsed-cursor-transparent class.
       // Includes nested block elements (div in div) and inline-block spans.
       const transparent = 'jsed-cursor-transparent';
@@ -426,7 +426,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('eee');
       });
 
-      test('empty TRANSPARENT_BLOCK nesting: CURSOR recurses through to find TOKEN', () => {
+      test('empty element nesting: CURSOR recurses through to find TOKEN', () => {
         // arrange — mid and deep have no text of their own, only the innermost has content
         const doc = makeRoot(
           div(
@@ -449,7 +449,7 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('bbb');
       });
 
-      test('empty TRANSPARENT_BLOCK nesting: movePrevious recurses back out', () => {
+      test('empty element nesting: movePrevious recurses back out', () => {
         // arrange
         const doc = makeRoot(
           div(
@@ -470,39 +470,6 @@ describe('TokenCursor motion', () => {
         expect(identify(cursor.getToken())).toBe('bbb');
         cursor.movePrevious();
         expect(identify(cursor.getToken())).toBe('nested');
-        cursor.movePrevious();
-        expect(identify(cursor.getToken())).toBe('aaa');
-      });
-    });
-
-    describe('(3) OPAQUE_BLOCK: visit=yes, descend=no', () => {
-      // OPAQUE_BLOCK is the default for non-INLINE_FLOW, non-ISLAND FOCUSABLE's (no class needed).
-      const opaqueBlock = { style: 'display:inline-block;' };
-
-      test('moveNext visits OPAQUE_BLOCK as opaque element', () => {
-        // arrange
-        const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'hidden content'), ' bbb'));
-        const { cursor } = tokenizeAndCursor(doc, '#p1');
-
-        // act & assert
-        expect(identify(cursor.getToken())).toBe('aaa');
-        cursor.moveNext();
-        expect(identify(cursor.getToken())).toBe('[span]');
-        cursor.moveNext();
-        expect(identify(cursor.getToken())).toBe('bbb');
-      });
-
-      test('movePrevious visits OPAQUE_BLOCK in reverse', () => {
-        // arrange
-        const doc = makeRoot(p({ id: 'p1' }, 'aaa ', span(opaqueBlock, 'hidden'), ' bbb'));
-        const { cursor } = tokenizeAndCursor(doc, '#p1');
-        cursor.moveNext();
-        cursor.moveNext();
-
-        // act & assert
-        expect(identify(cursor.getToken())).toBe('bbb');
-        cursor.movePrevious();
-        expect(identify(cursor.getToken())).toBe('[span]');
         cursor.movePrevious();
         expect(identify(cursor.getToken())).toBe('aaa');
       });

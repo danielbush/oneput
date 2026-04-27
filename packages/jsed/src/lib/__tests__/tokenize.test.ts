@@ -158,7 +158,7 @@ describe('tokenizeLine', () => {
   });
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {
-    // arrange — trailing text after a TRANSPARENT_BLOCK now stays in the same
+    // arrange — trailing text after a FOCUSABLE now stays in the same
     // LINE, so tokenizeLine recurses into div2 and then tokenizes "outer" on
     // the outer LINE directly.
     const doc = makeRoot(
@@ -213,12 +213,12 @@ describe('tokenizeLine', () => {
     // act
     const first = tokenizeLineAt(div1);
 
-    // assert — recurses into div2 (TRANSPARENT_BLOCK) and tokenizes "nested"
+    // assert — recurses into div2 and tokenizes "nested"
     expect(first).not.toBeNull();
     expect(first!.textContent!.trim()).toBe('nested');
   });
 
-  test('inline-block TRANSPARENT_BLOCK: <p>outer<span style="display:inline-block">nested</span></p>', () => {
+  test('inline-block: <p>outer<span style="display:inline-block">nested</span></p>', () => {
     // arrange — inline-block span marked transparent
     const doc = makeRoot(
       p(
@@ -240,7 +240,7 @@ describe('tokenizeLine', () => {
   });
 
   test('nested div at middle: <div>aaa <div>nested</div> bbb</div>', () => {
-    // arrange — trailing text after a TRANSPARENT_BLOCK now stays directly on
+    // arrange — trailing text after a FOCUSABLE now stays directly on
     // the outer LINE rather than moving into an IMPLICIT_LINE.
     const doc = makeRoot(
       div(
@@ -266,7 +266,7 @@ describe('tokenizeLine', () => {
   });
 
   describe('SHALLOW_TOKENIZATION', () => {
-    test('tokenizeLine recurses into TRANSPARENT_BLOCK children', () => {
+    test('tokenizeLine recurses into children', () => {
       // arrange — p1 and p2 marked transparent so tokenizeLine descends into them
       const doc = makeRoot(
         div(
@@ -290,7 +290,7 @@ describe('tokenizeLine', () => {
       // act
       tokenizeLineAt(div1);
 
-      // assert — both p1 and p2 are TRANSPARENT_BLOCK, so both are tokenized
+      // assert — both p1 and p2 are FOCUSABLE's, so both are tokenized
       expect(byId(doc, 'p1').querySelector('.jsed-token')).not.toBeNull();
       expect(byId(doc, 'p2').querySelector('.jsed-token')).not.toBeNull();
     });
@@ -391,7 +391,7 @@ describe('detokenizeLine', () => {
     expect(p1.querySelector('.jsed-token')).toBeNull();
   });
 
-  test('TRANSPARENT_BLOCK round-trips back to plain text structure', () => {
+  test('FOCUSABLE round-trips back to plain text structure', () => {
     // arrange
     const doc = makeRoot(
       div({ id: 'div1' }, div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'), ' outer')

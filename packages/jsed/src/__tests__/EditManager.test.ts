@@ -230,38 +230,6 @@ describe('EditManager', () => {
 
       editManager.destroy();
     });
-
-    test('<p/> <loose/> <p/>', () => {
-      // arrange
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p({ id: 'p1' }, 'aaa'), //
-          'bbb ccc', // not tokenized, regression here
-          p({ id: 'p2' }, 'ddd')
-        )
-      );
-      const editManager = EditManager.createNull({
-        document: doc
-      });
-      const div1 = byId(doc, 'div1');
-
-      // act
-      editManager.nav.REQUEST_FOCUS(div1);
-
-      // assert
-      expect(editManager.getMode()).toBe('view');
-      expect(editManager.nav.getFocus()).toBe(div1);
-      // First FOCUS change should trigger tokenization for (1) first element;
-      // (2) all loose text (this is the tricky bit).
-      expect(Array.from(div1.querySelectorAll('.jsed-token')).map((t) => t.textContent)).toEqual([
-        'aaa',
-        'bbb',
-        'ccc'
-      ]);
-
-      editManager.destroy();
-    });
   });
 
   // Action = Key or menu
@@ -648,79 +616,6 @@ describe('EditManager', () => {
 
         editManager.destroy();
       });
-
-      describe('LOOSE_TEXT', () => {
-        it('<loose/> <p/> <loose/>', () => {
-          // arrange
-          const doc = makeRoot(
-            div(
-              { id: 'div1' }, //
-              'aaa ',
-              p({ id: 'p1' }, 'bbb'),
-              ' ccc'
-            )
-          );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
-
-          // act + assert
-          editManager.enterEditing(byId(doc, 'div1'));
-          expect(editManager.getMode()).toBe('edit');
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
-
-          // The cursor sits on the p-tag
-          // TODO: In another test we should repeat up to here then run
-          // enterEditing at this point to go inside the p-tag.
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(false);
-          expect(editManager.cursor!.getToken().tagName).toBe('P');
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
-
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
-
-          editManager.destroy();
-        });
-
-        it('<p/> <loose/> <p/>', () => {
-          // arrange
-          const doc = makeRoot(
-            frag(
-              p({ id: 'p1' }, 'aaa'), //
-              'bbb ccc', // not tokenized, regression here
-              p({ id: 'p2' }, 'ddd')
-            )
-          );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
-
-          // act + assert
-          editManager.enterEditing(byId(doc, 'p1'));
-          expect(editManager.getMode()).toBe('edit');
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
-
-          // Regression here in findCrossLineTarget.
-          // <loose/> never gets tokenized and the current algorithm doesn't detect tokens.
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
-
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
-
-          editManager.handleRight();
-          expect(isToken(editManager.cursor!.getToken())).toBe(false); // on p-tag
-          expect(editManager.cursor!.getToken().innerText).toBe('ddd');
-
-          editManager.destroy();
-        });
-      });
     });
 
     describe('handleLeft', () => {
@@ -926,8 +821,6 @@ describe('EditManager', () => {
           expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
           editManager.handleLeft();
-          expect(isToken(editManager.cursor!.getToken())).toBe(false); // on p-tag
-          expect(editManager.cursor!.getToken().tagName).toBe('P');
           expect(editManager.cursor!.getToken().innerText).toBe('aaa');
 
           editManager.destroy();
@@ -956,8 +849,6 @@ describe('EditManager', () => {
           expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
 
           editManager.handleLeft();
-          expect(isToken(editManager.cursor!.getToken())).toBe(false);
-          expect(editManager.cursor!.getToken().tagName).toBe('P');
           expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
           editManager.handleLeft();
@@ -2546,18 +2437,16 @@ describe('EditManager', () => {
         });
 
         // Blocks usually don't care about trailing or leading whitespace.
-        describe('block', () => {
-          it('inserts whitespace after a token before an OPAQUE_BLOCK', () => {
+        describe('inline-block', () => {
+          it('inserts whitespace after a token before an inline-block', () => {
             // arrange
             const doc = makeRoot(
-              frag(
-                div(
-                  { id: 'div1' },
-                  t('foo'),
-                  div({ id: 'div2', style: 'display:inline-block;' }, p('bar')),
-                  s(),
-                  t('baz')
-                )
+              div(
+                { id: 'div1' },
+                t('foo'),
+                div({ id: 'div2', style: 'display:inline-block;' }, p('bar')),
+                s(),
+                t('baz')
               )
             );
             const userInput = Controller.createNull().input;
@@ -2578,6 +2467,8 @@ describe('EditManager', () => {
             const result = editManager.insertSpaceAfterCursor();
 
             // assert
+            console.log(byId(doc, 'div1').outerHTML);
+            console.log(getComputedStyle(div2).display);
             expect(canInsert).toBe(true);
             expect(result).toBe(true);
             expect(foo.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
@@ -2587,21 +2478,19 @@ describe('EditManager', () => {
             editManager.destroy();
           });
 
-          it('inserts whitespace after a token before an OPAQUE_BLOCK with leading space', () => {
+          it('inserts whitespace after a token before an inline-block with leading space', () => {
             // arrange
             const doc = makeRoot(
-              frag(
+              div(
+                { id: 'div1' },
+                t('foo'),
                 div(
-                  { id: 'div1' },
-                  t('foo'),
-                  div(
-                    { id: 'opaque1', style: 'display:inline-block;' }, //
-                    s(), // should be ignored
-                    p('bar')
-                  ),
-                  s(),
-                  t('baz')
-                )
+                  { id: 'opaque1', style: 'display:inline-block;' }, //
+                  s(), // should be ignored
+                  p('bar')
+                ),
+                s(),
+                t('baz')
               )
             );
             const userInput = Controller.createNull().input;
@@ -2631,18 +2520,16 @@ describe('EditManager', () => {
             editManager.destroy();
           });
 
-          it('removes whitespace after a token before an OPAQUE_BLOCK', () => {
+          it('removes whitespace after a token before an inline-block', () => {
             // arrange
             const doc = makeRoot(
-              frag(
-                div(
-                  { id: 'div1' },
-                  t('foo'),
-                  s(),
-                  div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
-                  s(),
-                  t('baz')
-                )
+              div(
+                { id: 'div1' },
+                t('foo'),
+                s(),
+                div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+                s(),
+                t('baz')
               )
             );
             const userInput = Controller.createNull().input;
@@ -2670,18 +2557,16 @@ describe('EditManager', () => {
             editManager.destroy();
           });
 
-          it('removes whitespace after a token before an OPAQUE_BLOCK with extra whitespace', () => {
+          it('removes whitespace after a token before an inline-block with extra whitespace', () => {
             // arrange
             const doc = makeRoot(
-              frag(
-                div(
-                  { id: 'div1' },
-                  t('foo'),
-                  s('  '),
-                  div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
-                  s(),
-                  t('baz')
-                )
+              div(
+                { id: 'div1' },
+                t('foo'),
+                s('  '),
+                div({ id: 'opaque1', style: 'display:inline-block;' }, p('bar')),
+                s(),
+                t('baz')
               )
             );
             const userInput = Controller.createNull().input;

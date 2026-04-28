@@ -200,6 +200,7 @@ export function isSelectionWrapper(node: Node | null): boolean {
 export function isLine(el: Node | null): boolean {
   if (!el) return false;
   if (!isFocusable(el)) return false;
+  if (isImplicitLine(el)) return true;
   if (isToken(el)) return false;
   if (isInlineFlow(el)) return false;
   if (isIsland(el)) return false;

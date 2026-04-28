@@ -879,7 +879,7 @@ describe('TokenCursor delete', () => {
     cursor.delete();
 
     // assert
-    expect(identify(cursor.getToken())).toBe('¤');
+    expect(identify(cursor.getToken())).toBe('[anchor]');
   });
 });
 

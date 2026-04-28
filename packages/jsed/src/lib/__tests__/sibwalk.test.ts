@@ -118,12 +118,15 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
   });
 
   test('NESTED_LINE: CURSOR descends nested div', () => {
-    // arrange — nested div marked transparent; "bbb"
+    // arrange — nested div
     const doc = makeRoot(
       div(
         { id: 'div1' },
         t('aaa'),
-        div({ id: 'div2', class: 'jsed-cursor-transparent' }, t('nested')),
+        div(
+          { id: 'div2' }, //
+          t('nested')
+        ),
         t('bbb')
       )
     );
@@ -131,8 +134,8 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
     // act & assert — CURSOR traverses through nested div
-    expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'nested', 'aaa']);
+    expect(collectForward(first, div1)).toEqual(['aaa', 'nested', 'bbb']);
+    expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', 'nested', 'aaa']);
   });
 
   test('floated span', () => {
@@ -231,59 +234,67 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
   });
 
   describe(`(2) non-ISLAND's: CURSOR visit=no, descend=yes`, () => {
-    // Category (2) requires explicit opt-in via jsed-cursor-transparent class.
+    // Category (2)
     // This includes nested block elements (div inside div) and inline-block spans.
     // The CURSOR descends into them seamlessly, like an INLINE_FLOW.
-    const transparent = 'jsed-cursor-transparent';
 
     test('nested div at middle of LINE: <div>aaa <div>nested</div> bbb</div>', () => {
-      // arrange — nested div marked transparent so CURSOR descends
+      // arrange — nested div
       const doc = makeRoot(
         div(
-          { id: 'outer' }, //
+          { id: 'div1' }, //
           t('aaa'),
-          div({ id: 'inner', class: transparent }, t('nested')),
+          div(
+            { id: 'inner' }, //
+            t('nested')
+          ),
           t('bbb')
         )
       );
-      const line = byId(doc, 'outer');
-      const first = line.querySelector('.jsed-token') as HTMLElement;
+      const div1 = byId(doc, 'div1');
+      const first = div1.querySelector('.jsed-token') as HTMLElement;
 
       // act & assert — CURSOR descends into the nested div
-      expect(collectForward(first)).toEqual(['aaa', 'nested', 'bbb']);
+      expect(collectForward(first, div1)).toEqual(['aaa', 'nested', 'bbb']);
     });
 
     test('nested div at start of LINE: <div><div>nested</div> aaa bbb</div>', () => {
       // arrange
       const doc = makeRoot(
         div(
-          { id: 'outer' },
-          div({ id: 'inner', class: transparent }, t('nested')),
+          { id: 'div1' }, //
+          div(
+            { id: 'div2' }, //
+            t('nested')
+          ),
           t('aaa'),
           t('bbb')
         )
       );
-      const innerToken = byId(doc, 'inner').querySelector('.jsed-token') as HTMLElement;
+      const innerToken = byId(doc, 'div2').querySelector('.jsed-token') as HTMLElement;
 
       // act & assert — CURSOR descends through nested div
-      expect(collectForward(innerToken)).toEqual(['nested', 'aaa', 'bbb']);
+      expect(collectForward(innerToken, byId(doc, 'div1'))).toEqual(['nested', 'aaa', 'bbb']);
     });
 
     test('nested div at end of LINE: <div>aaa bbb <div>nested</div></div>', () => {
       // arrange
       const doc = makeRoot(
         div(
-          { id: 'outer' },
+          { id: 'div1' }, //
           t('aaa'),
           t('bbb'),
-          div({ id: 'inner', class: transparent }, t('nested'))
+          div(
+            { id: 'inner' }, //
+            t('nested')
+          )
         )
       );
-      const line = byId(doc, 'outer');
-      const first = line.querySelector('.jsed-token') as HTMLElement;
+      const div1 = byId(doc, 'div1');
+      const first = div1.querySelector('.jsed-token') as HTMLElement;
 
       // act & assert
-      expect(collectForward(first)).toEqual(['aaa', 'bbb', 'nested']);
+      expect(collectForward(first, div1)).toEqual(['aaa', 'bbb', 'nested']);
     });
 
     test('nested div inside INLINE_FLOW: <div>aaa <em>bbb <div>nested</div> ccc</em> ddd</div>', () => {
@@ -292,12 +303,7 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
         div(
           { id: 'outer' },
           t('aaa'),
-          em(
-            inlineStyle,
-            t('bbb'),
-            div({ id: 'inner', class: transparent }, t('nested')),
-            t('ccc')
-          ),
+          em(inlineStyle, t('bbb'), div({ id: 'inner' }, t('nested')), t('ccc')),
           t('ddd')
         )
       );
@@ -312,34 +318,32 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       // arrange
       const doc = makeRoot(
         div(
-          { id: 'outer' },
+          { id: 'div1' },
           t('aaa'),
           div(
-            { id: 'mid', class: transparent },
+            { id: 'mid' }, //
             t('bbb'),
-            div({ id: 'deep', class: transparent }, t('ccc')),
+            div(
+              { id: 'deep' }, //
+              t('ccc')
+            ),
             t('ddd')
           ),
           t('eee')
         )
       );
-      const line = byId(doc, 'outer');
-      const first = line.querySelector('.jsed-token') as HTMLElement;
+      const div1 = byId(doc, 'div1');
+      const first = div1.querySelector('.jsed-token') as HTMLElement;
 
       // act & assert — CURSOR descends through all nested levels
-      expect(collectForward(first)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
+      expect(collectForward(first, div1)).toEqual(['aaa', 'bbb', 'ccc', 'ddd', 'eee']);
     });
 
     test('inline-block at middle of LINE', () => {
-      // arrange — inline-block marked transparent so CURSOR descends.
+      // arrange — inline-block
       // Inline-block does NOT trigger IMPLICIT_LINE (not block-level).
       const doc = makeRoot(
-        p(
-          { id: 'p1' },
-          t('aaa'),
-          span({ ...inlineBlockStyle, class: transparent }, t('inner')),
-          t('bbb')
-        )
+        p({ id: 'p1' }, t('aaa'), span({ ...inlineBlockStyle }, t('inner')), t('bbb'))
       );
       const line = byId(doc, 'p1');
       const first = line.querySelector('.jsed-token') as HTMLElement;
@@ -352,18 +356,21 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       // arrange — a nested div with an explicit ANCHOR so the CURSOR can land on it.
       const doc = makeRoot(
         div(
-          { id: 'outer' }, //
+          { id: 'div1' }, //
           t('aaa'),
-          div({ id: 'inner', class: transparent }, a()),
+          div(
+            { id: 'div2' }, //
+            a()
+          ),
           t('bbb')
         )
       );
-      const line = byId(doc, 'outer');
-      const first = line.querySelector('.jsed-token') as HTMLElement;
+      const div1 = byId(doc, 'div1');
+      const first = div1.querySelector('.jsed-token') as HTMLElement;
 
-      // act & assert — CURSOR traverses: aaa, (anchor inside inner div), bbb
-      expect(collectForward(first)).toHaveLength(3);
-      expect(collectForward(first)).toEqual(['aaa', '¤', 'bbb']);
+      // act & assert — CURSOR traverses: aaa, (anchor inside div2), bbb
+      expect(collectForward(first, div1)).toHaveLength(3);
+      expect(collectForward(first, div1)).toEqual(['aaa', '[anchor]', 'bbb']);
     });
   });
 });

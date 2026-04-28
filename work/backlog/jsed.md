@@ -27,6 +27,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - across inline flows within p-tag
     - explore visual appearance of selection as it extends over INLINE_FLOW's, is it broken?  How do we make it look like a selection?
   - across p-tags
+- [ ] split elements
+- [ ] converting elements
+- [ ] insert elements
+- [ ] delete elements
 - undo
   - undo text changes
   - undo FOCUSABLE changes
@@ -41,25 +45,30 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 COMMENT: [x] do interstitial lines first because we can simplify tokenization; [x] I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; [x] then make most focusables cursor transparent by default; [x] then unify get next line sibling logic to work intra and inter-LINE
 
-
-- CONVERT_INTERSTITIAL_TEXT__WORK
-- [ ] fix anchor functions for implicit line invariant
-- [x] rip out cross line code
-- [x] CURSOR_TRANSPARENT_BY_DEFAULT__WORK
-- [x] tokenizeLineAt
-- [x] rewrite getNextLineSibling without no visit,descend
-- [x] make it cross lines
-- [x] rewrite getPreviousLineSibling without no visit,descend
-- [x] make it cross lines
-- [x] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
-- [x] get rid of isTransparentBlock
-- [x] TRANSPARENT_BLOCK tests are now just testing the default situation
-- [x] TRANSPARENT_BLOCK - remove term
-- [ ] OPAQUE_BLOCK - remove tests
-- [ ] OPAQUE_BLOCK - remove term
-- [x] review findLineCandidateAt; rewrite it in similar style to getNextLineSibling or use getNextLineSibling??
-- [x] move remaining anchor / space tests in EditManager into lib/token
-
+- [x] CONVERT_INTERSTITIAL_TEXT__WORK
+- [.] refactor cross line traversal and make most elements transparent
+  - [.] fix anchor functions for implicit line invariant
+  - [x] rip out cross line code
+  - [x] CURSOR_TRANSPARENT_BY_DEFAULT__WORK
+  - [x] tokenizeLineAt
+  - [x] rewrite getNextLineSibling without no visit,descend
+  - [x] make it cross lines
+  - [x] rewrite getPreviousLineSibling without no visit,descend
+  - [x] make it cross lines
+  - [x] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
+  - [x] get rid of isTransparentBlock
+  - [x] TRANSPARENT_BLOCK tests are now just testing the default situation
+  - [x] TRANSPARENT_BLOCK - remove term
+  - [x] OPAQUE_BLOCK - remove tests
+  - [x] OPAQUE_BLOCK - remove term
+  - [x] review findLineCandidateAt; rewrite it in similar style to getNextLineSibling or use getNextLineSibling??
+  - [x] move remaining anchor / space tests in EditManager into lib/token
+- split
+  - tasks
+    - move test operations
+    - [ ] when a user splits an IMPLICIT_LINE
+      - break into two, convert both to p-tags
+- convert
 
 ## Bugs
 

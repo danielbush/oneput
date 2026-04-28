@@ -140,8 +140,13 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - a transient `<span>` decoration inserted by `TokenSelection` to paint the selection background around a contiguous run of LINE_SIBLING's that share a DOM parent. Purely visual — unwrapped on collapse, never persisted.
   - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
   - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
+- **INTERSTITIAL_TEXT**
+  - text nodes and related LINE_SIBLING content that sit at same level as a LINE; this makes them look like a line but there is no tag around them. jsed aims to convert all such text by wrapping them into an IMPLICIT_LINE that is treated as an LINE but is still inline. The user can then opt to convert them properly into paragraphs.
+  - Source of truth: `tagImplicitLines` / `lib/implicitLine.ts`
+- **INTERSTITIAL_INVARIANT**
+  - At the beginning of the session, jsed should convert all INTERSTITIAL_TEXT to IMPLICIT_LINE's. During the edit session, the editor should ensure no additional INTERSTITIAL_TEXT should be created. When writing the file, the editor can strip out IMPLICIT_LINE's.
 - **IMPLICIT_LINE**
-  — IMPLICIT_LINE's are LINE's created to wrap lose text. This promotes better document structure and better FOCUS navigation.
+  — IMPLICIT_LINE's are LINE's created to wrap INTERSTITIAL_TEXT. This promotes better document structure, easier tokenization implementations and better FOCUS navigation.
   - Source of truth: `tagImplicitLines` / `lib/implicitLine.ts`
   - Example: `<div><p>here is the first line.</p>For some reason the 2nd line is not in a p-tag.</div>`.
     - FOCUS will visit div, then p, then move on to something after p; this makes it look like the 2nd line is not reachable. We need to construct an implicit line around the trailing tokens that form the 2nd line.

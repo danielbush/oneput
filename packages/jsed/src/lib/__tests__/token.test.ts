@@ -1,20 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addAnchors,
+  canInsertAnchorInLine,
   canInsertSpaceAfterTag,
   canInsertSpaceAfterToken,
   canInsertSpaceBeforeTag,
   canInsertSpaceBeforeToken,
   createAnchor,
   createToken,
+  getAnchorAfterTagInsertionPoint,
+  getAnchorBeforeTagInsertionPoint,
+  getRemovableAnchorAfterTag,
+  getRemovableAnchorBeforeTag,
   getRemovableSpaceAfterTag,
   getRemovableSpaceAfterToken,
   getRemovableSpaceBeforeTag,
   getRemovableSpaceBeforeToken,
+  insertAnchorAfterTag,
+  insertAnchorBeforeTag,
   insertSpaceAfterTag,
   insertSpaceAfterToken,
   insertSpaceBeforeTag,
   insertSpaceBeforeToken,
   remove,
+  removeAnchorAfterTag,
+  removeAnchorBeforeTag,
   removeSpaceAfterTag,
   removeSpaceAfterToken,
   removeSpaceBeforeTag,
@@ -84,6 +94,360 @@ function rawById(root: HTMLElement, id: string): HTMLElement {
   if (!el) throw new Error(`rawById: could not find id="${id}"`);
   return el;
 }
+
+describe('anchors around FOCUSABLE', () => {
+  describe('in LINE', () => {
+    it('inserts an anchor into an empty LINE', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }));
+      const p1 = byId(doc, 'p1');
+
+      // act
+      const canInsert = canInsertAnchorInLine(p1);
+      const [anchor] = addAnchors(p1);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeUndefined();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
+    });
+
+    it('treats IGNORABLE content as empty when deciding whether an anchor can be inserted', () => {
+      // arrange
+      const doc = makeRoot(p({ id: 'p1' }, span({ class: 'jsed-ignore' }, 'debug label')));
+      const p1 = byId(doc, 'p1');
+
+      // act
+      const canInsert = canInsertAnchorInLine(p1);
+      const [anchor] = addAnchors(p1);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeUndefined();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
+    });
+  });
+
+  describe('before FOCUSABLE', () => {
+    it('inserts an anchor at the boundary before the focused tag', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          span({ class: 'jsed-ignore' }),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canInsert = !!getAnchorBeforeTagInsertionPoint(strong);
+      const anchor = insertAnchorBeforeTag(strong);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(strong.previousElementSibling).toBe(anchor);
+    });
+
+    it('inserts an anchor before the focused tag when there is no previous sibling', () => {
+      // arrange
+      const root = makeRawRoot(
+        p({ id: 'p1' }, emTag({ id: 'em1', style: 'display:inline;' }, 'foo'))
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorBeforeTagInsertionPoint(em);
+      const anchor = insertAnchorBeforeTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(em.previousElementSibling).toBe(anchor);
+    });
+
+    it('inserts an anchor after existing whitespace', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          s(' '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canInsert = !!getAnchorBeforeTagInsertionPoint(strong);
+      const anchor = insertAnchorBeforeTag(strong);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(anchor?.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor?.previousSibling?.textContent).toBe(' ');
+      expect(strong.previousElementSibling).toBe(anchor);
+    });
+
+    it('does not insert an anchor when text already represents the gap', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          s(' gap '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canInsert = !!getAnchorBeforeTagInsertionPoint(strong);
+      const anchor = insertAnchorBeforeTag(strong);
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(anchor).toBeNull();
+      expect(strong.previousElementSibling?.id).toBe('em1');
+      expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(strong.previousSibling?.textContent).toBe(' gap ');
+    });
+
+    it('does not insert an anchor before a focused LINE', () => {
+      // arrange
+      const root = makeRawRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+      const p1 = rawById(root, 'p1');
+      const p2 = rawById(root, 'p2');
+
+      // act
+      const canInsert = !!getAnchorBeforeTagInsertionPoint(p2);
+      const anchor = insertAnchorBeforeTag(p2);
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(anchor).toBeNull();
+      expect(p2.previousSibling).toBe(p1);
+    });
+
+    it('removes an anchor at the immediate boundary', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          span({ class: 'jsed-token jsed-anchor-token' }),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canRemove = !!getRemovableAnchorBeforeTag(strong);
+      const anchor = removeAnchorBeforeTag(strong);
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(strong.previousSibling).toBe(em);
+    });
+
+    it('removes an anchor before existing whitespace and preserves the space', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          span({ class: 'jsed-token jsed-anchor-token' }),
+          s(' '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canRemove = !!getRemovableAnchorBeforeTag(strong);
+      const anchor = removeAnchorBeforeTag(strong);
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' ');
+      expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(strong.previousSibling?.textContent).toBe(' ');
+    });
+  });
+
+  describe('after FOCUSABLE', () => {
+    it('inserts an anchor at the boundary after the focused tag', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          span({ class: 'jsed-ignore' }),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(strong.previousElementSibling).toBe(anchor);
+    });
+
+    it('does not insert an anchor after a focused LINE', () => {
+      // arrange
+      const root = makeRawRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+      const p1 = rawById(root, 'p1');
+      const p2 = rawById(root, 'p2');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(p1);
+      const anchor = insertAnchorAfterTag(p1);
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(anchor).toBeNull();
+      expect(p1.nextSibling).toBe(p2);
+    });
+
+    it('inserts an anchor after the focused tag when there is no next sibling', () => {
+      // arrange
+      const root = makeRawRoot(
+        p({ id: 'p1' }, emTag({ id: 'em1', style: 'display:inline;' }, 'foo'))
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(em.nextElementSibling).toBe(anchor);
+    });
+
+    it('inserts an anchor before existing whitespace', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          s(' '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(em.nextElementSibling).toBe(anchor);
+      expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor?.nextSibling?.textContent).toBe(' ');
+    });
+
+    it('does not insert an anchor when text already represents the gap after the focused tag', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          s(' gap '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(anchor).toBeNull();
+      expect(em.nextElementSibling?.id).toBe('strong1');
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' gap ');
+    });
+
+    it('removes an anchor at the immediate boundary', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          span({ class: 'jsed-token jsed-anchor-token' }),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canRemove = !!getRemovableAnchorAfterTag(em);
+      const anchor = removeAnchorAfterTag(em);
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(strong.previousSibling).toBe(em);
+    });
+
+    it('removes an anchor after existing whitespace and preserves the space', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          s(' '),
+          span({ class: 'jsed-token jsed-anchor-token' }),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canRemove = !!getRemovableAnchorAfterTag(em);
+      const anchor = removeAnchorAfterTag(em);
+
+      // assert
+      expect(canRemove).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' ');
+      expect(em.nextSibling?.nextSibling).toBe(strong);
+    });
+  });
+});
 
 describe('leading/trailing spaces', () => {
   describe('before TOKEN', () => {

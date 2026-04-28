@@ -207,5 +207,5 @@ export function findLineCandidateAt(from: HTMLElement): {
 function isCandidateLineSibling(node: Node | null): boolean {
   if (!node) return false;
   if (isToken(node) || isIsland(node)) return true;
-  return node.nodeType === Node.TEXT_NODE && /\S/.test(node.textContent ?? '');
+  return isTokenizableTextNode(node);
 }

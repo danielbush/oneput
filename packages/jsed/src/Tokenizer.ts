@@ -8,7 +8,6 @@ import { tokenizeLineAt, tokenizeLineAtTextNode } from './lib/tokenize.js';
  *
  * Owns the Detokenizer and orchestrates SHALLOW_TOKENIZATION:
  * - resolves the candidate LINE under a starting FOCUSABLE
- *   (`findLineCandidateAt`)
  * - tokenizes that LINE (`tokenizeLine`)
  * - records the tokenized LINE for background detokenization
  * - returns the first reachable LINE_SIBLING ("first seat") so callers can

@@ -2,7 +2,7 @@ import { JsedDocument } from '../JsedDocument.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../lib/constants.js';
 import type { ViewportScrollerNullOptions } from '../lib/ViewportScroller.js';
 import * as token from '../lib/token.js';
-import { isIsland, isToken } from '../lib/taxonomy.js';
+import { isAnchor, isIsland, isToken } from '../lib/taxonomy.js';
 
 /**
  * Make a div be the root of the document.
@@ -97,6 +97,7 @@ export function a(): string {
 
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
 export function identify(el: Node): string {
+  if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el as HTMLElement);
   if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;
   if (el.nodeType === el.ELEMENT_NODE) {

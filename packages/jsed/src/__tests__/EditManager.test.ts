@@ -2,7 +2,7 @@ import { describe, expect, it, test, vi } from 'vitest';
 import { EditManager } from '../EditManager.js';
 import { byId, div, em, frag, identify, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
 import { getValue } from '../lib/token.js';
-import { JSED_ANCHOR_CHAR } from '../lib/constants.js';
+import { JSED_ANCHOR_CHAR, JSED_TOKEN_CLASS } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { isIsland, isToken } from '../lib/taxonomy.js';
@@ -1464,9 +1464,15 @@ describe('EditManager', () => {
       await userInput.typeText('x');
 
       // assert: em emptied and removed; p has single 'x' followed by 'dd'
-      expect(tokenValues(p1)).toEqual(['x', 'dd']);
-      expect(p1.querySelector('em')).toBeNull();
+      expect(Array.from(p1.querySelectorAll(`.${JSED_TOKEN_CLASS}`)).map(identify)).toEqual([
+        'x',
+        '[anchor]',
+        'dd'
+      ]);
+      expect(isToken(p1.firstChild)).toBe(true);
+      expect(getValue(p1.firstChild as HTMLElement)).toBe('x');
       expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(Array.from(p1.querySelectorAll('em > *')).map(identify)).toEqual(['[anchor]']);
 
       editManager.destroy();
     });

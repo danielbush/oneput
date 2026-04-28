@@ -43,9 +43,7 @@ export function replaceTextNode(child: Node): HTMLElement[] {
  * Recursively tokenize a LINE.
  *
  * Recurses into CURSOR_TRANSPARENT structure — everything the CURSOR would
- * descend through. Skips OPAQUE_BLOCK's and ISLAND's but continues past them
- * to tokenize the rest of the LINE. Returns the first TOKEN created at any
- * depth, or null if nothing was tokenized.
+ * descend through.
  */
 function tokenizeLineRec(line: Node): HTMLElement | null {
   if (isToken(line)) {
@@ -69,7 +67,7 @@ function tokenizeLineRec(line: Node): HTMLElement | null {
         first = child as HTMLElement;
       }
     }
-    // OPAQUE_BLOCK's, ISLAND's, and other elements: skip but continue loop
+    // ISLAND's, and other elements: skip but continue loop
   }
 
   return first;
@@ -91,8 +89,8 @@ function replaceTokenElement(token: HTMLElement): void {
  *
  * Mirrors tokenizeLineRec by descending only through CURSOR_TRANSPARENT
  * structure.
- * TOKEN wrappers are replaced with plain text nodes; ISLAND's and
- * OPAQUE_BLOCK's are left untouched.
+ * TOKEN wrappers are replaced with plain text nodes; ISLAND's are left
+ * untouched.
  */
 function detokenizeLineRec(line: Node): void {
   const childNodes = Array.from(line.childNodes);

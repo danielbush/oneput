@@ -135,22 +135,25 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first))).toEqual(['bbb', 'nested', 'aaa']);
   });
 
-  test('floated element is a LINE (OPAQUE_BLOCK)', () => {
+  test('floated span', () => {
     // arrange — a floated span is not INLINE_FLOW (float excludes it), so it's a LINE.
     const doc = makeRoot(
       div(
         { id: 'div1' }, //
         t('aaa'),
-        span({ style: 'float:left;' }, 'floated'),
+        span(
+          { style: 'float:left;' }, //
+          t('floated')
+        ),
         t('bbb')
       )
     );
     const div1 = byId(doc, 'div1');
     const first = div1.querySelector('.jsed-token') as HTMLElement;
 
-    // act & assert — floated span is OPAQUE_BLOCK (visited, not descended),
-    expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
+    // act & assert — floated span is walked
+    expect(collectForward(first, div1)).toEqual(['aaa', 'floated', 'bbb']);
+    expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', 'floated', 'aaa']);
   });
 
   describe('(1) ISLAND: CURSOR visit=yes, descend=no', () => {
@@ -362,89 +365,5 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       expect(collectForward(first)).toHaveLength(3);
       expect(collectForward(first)).toEqual(['aaa', '¤', 'bbb']);
     });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// CURSOR walks non-TOKEN LINE_SIBLING's
-// ---------------------------------------------------------------------------
-//
-// These tests describe the DESIRED behavior from the spec
-// "cursor-walks-non-tokens". They are expected to FAIL until the
-// implementation is updated.
-
-describe('(3) OPAQUE_BLOCK: CURSOR visit=yes, descend=no', () => {
-  // A non-INLINE_FLOW, non-ISLAND FOCUSABLE is opaque by default (no class needed).
-  // FOCUS can descend into it, but the CURSOR cannot.
-  const inlineBlock = { style: 'display:inline-block;' };
-
-  test('plain block-level div middle of line', () => {
-    // arrange — a nested div with no class is opaque by default (the flip).
-    // CURSOR visits it but does not descend into its content.
-    const doc = makeRoot(
-      div(
-        { id: 'outer' }, //
-        t('aaa'),
-        div({ id: 'inner' }, 'nested content'),
-        t('bbb')
-      )
-    );
-    const line = byId(doc, 'outer');
-    const first = line.querySelector('.jsed-token') as HTMLElement;
-
-    // act & assert — inner div is visited as opaque, "nested content" is not descended into
-    expect(collectForward(first)).toEqual(['aaa', '[div]', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[div]', 'aaa']);
-  });
-
-  test('inline-block at middle of LINE', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, t('aaa'), span(inlineBlock, 'nested content'), t('bbb')));
-    const line = byId(doc, 'p1');
-    const first = line.querySelector('.jsed-token') as HTMLElement;
-
-    // act & assert — visited but not descended: shows as opaque element
-    expect(collectForward(first)).toEqual(['aaa', '[span]', 'bbb']);
-    expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[span]', 'aaa']);
-  });
-
-  test('inline-block at start of LINE', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, span(inlineBlock, 'nested'), t('aaa'), t('bbb')));
-    const line = byId(doc, 'p1');
-    const opaque = line.querySelector('span[style]') as HTMLElement;
-
-    // act & assert — opaque element is the first LINE_SIBLING
-    expect(collectForward(opaque)).toEqual(['[span]', 'aaa', 'bbb']);
-  });
-
-  test('inline-block at end of LINE', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, t('aaa'), t('bbb'), span(inlineBlock, 'nested')));
-    const first = byId(doc, 'p1').querySelector('.jsed-token') as HTMLElement;
-
-    // act & assert
-    expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]']);
-  });
-
-  test('inline-block inside INLINE_FLOW', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        { id: 'p1' }, //
-        t('aaa'),
-        em(
-          inlineStyle, //
-          t('bbb'),
-          span(inlineBlock, 'nested'),
-          t('ccc')
-        ),
-        t('ddd')
-      )
-    );
-    const first = byId(doc, 'p1').querySelector('.jsed-token') as HTMLElement;
-
-    // act & assert
-    expect(collectForward(first)).toEqual(['aaa', 'bbb', '[span]', 'ccc', 'ddd']);
   });
 });

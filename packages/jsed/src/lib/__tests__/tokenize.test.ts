@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, span, inlineStyleHack } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, inlineStyleHack } from '../../test/util.js';
 import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
-import { JSED_IMPLICIT_CLASS } from '../constants.js';
+import { JSED_TOKEN_CLASS } from '../constants.js';
 
-describe('tokenizeLine', () => {
+describe('tokenizeLineAt', () => {
   test('simple LINE: <p>foo bar baz</p>', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
@@ -119,22 +119,6 @@ describe('tokenizeLine', () => {
     expect(tokens.length).toBe(1);
   });
 
-  test('TOKEN after inline-block OPAQUE_BLOCK is not padded', () => {
-    // arrange — trailing text after inline-block should remain unpadded.
-    const doc = makeRoot(
-      p({ id: 'p1' }, 'aaa ', span({ style: 'display:inline-block;' }, 'inner'), ' bbb')
-    );
-    const p1 = byId(doc, 'p1');
-
-    // act
-    tokenizeLineAt(p1);
-    const tokens = p1.querySelectorAll('.jsed-token');
-    const afterInlineBlock = tokens[tokens.length - 1] as HTMLElement;
-
-    // assert
-    expect(afterInlineBlock.textContent).toBe('bbb');
-  });
-
   test('adjacent ISLANDs: TOKEN after second ISLAND is not yet marked padded during tokenizeLine', () => {
     // arrange
     const doc = makeRoot(
@@ -164,7 +148,7 @@ describe('tokenizeLine', () => {
     const doc = makeRoot(
       div(
         { id: 'div1' }, //
-        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
+        div({ id: 'div2' }, 'nested'),
         'outer'
       )
     );
@@ -177,11 +161,8 @@ describe('tokenizeLine', () => {
     // under the outer LINE
     expect(first).not.toBeNull();
     expect(first!.textContent!.trim()).toBe('nested');
-    expect(div1.querySelector(`.${JSED_IMPLICIT_CLASS}`)).toBeNull();
-    const outerTokens = Array.from(div1.children).filter((child) =>
-      child.classList.contains('jsed-token')
-    );
-    expect(outerTokens[0]!.textContent!.trim()).toBe('outer');
+    const outerTokens = Array.from(div1.querySelectorAll('.jsed-token'));
+    expect(outerTokens.map((t) => t.textContent!.trim())).toEqual(['nested', 'outer']);
   });
 
   test('text before NESTED_LINE: <div>outer<div>nested</div></div>', () => {
@@ -190,7 +171,7 @@ describe('tokenizeLine', () => {
       div(
         { id: 'div1' }, //
         'outer',
-        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested')
+        div({ id: 'div2' }, 'nested')
       )
     );
     const div1 = byId(doc, 'div1');
@@ -205,9 +186,7 @@ describe('tokenizeLine', () => {
 
   test('only NESTED_LINE, no text: <div><div>nested</div></div>', () => {
     // arrange
-    const doc = makeRoot(
-      div({ id: 'div1' }, div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'))
-    );
+    const doc = makeRoot(div({ id: 'div1' }, div({ id: 'div2' }, 'nested')));
     const div1 = byId(doc, 'div1');
 
     // act
@@ -224,7 +203,7 @@ describe('tokenizeLine', () => {
       p(
         { id: 'p1' }, //
         'outer',
-        `<span id="span1" class="jsed-cursor-transparent" style="display:inline-block;">nested</span>`
+        `<span id="span1" style="display:inline-block;">nested</span>`
       )
     );
     const p1 = byId(doc, 'p1');
@@ -246,7 +225,10 @@ describe('tokenizeLine', () => {
       div(
         { id: 'div1' },
         'aaa ',
-        div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'),
+        div(
+          { id: 'div2' }, //
+          'nested'
+        ),
         ' bbb'
       )
     );
@@ -258,106 +240,37 @@ describe('tokenizeLine', () => {
     // assert — tokenizeLine should tokenize both "aaa" and "bbb" on the outer LINE
     expect(first).not.toBeNull();
     expect(first!.textContent!.trim()).toBe('aaa');
-    expect(div1.querySelector(`.${JSED_IMPLICIT_CLASS}`)).toBeNull();
-    const outerTokens = Array.from(div1.children).filter((child) =>
-      child.classList.contains('jsed-token')
-    );
-    expect(outerTokens[1]!.textContent!.trim()).toBe('bbb');
+    const outerTokens = Array.from(div1.querySelectorAll(`.${JSED_TOKEN_CLASS}`));
+    expect(outerTokens.map((t) => t.textContent!)).toEqual(['aaa', 'nested', 'bbb']);
   });
 
-  describe('SHALLOW_TOKENIZATION', () => {
-    test('tokenizeLine recurses into children', () => {
-      // arrange — p1 and p2 marked transparent so tokenizeLine descends into them
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p(
-            { id: 'p1', class: 'jsed-cursor-transparent' },
-            'foo ', //
-            em(inlineStyleHack, 'bar'),
-            ' baz'
-          ),
-          p(
-            { id: 'p2', class: 'jsed-cursor-transparent' }, //
-            'foo ',
-            em(inlineStyleHack, 'bar'),
-            ' baz'
-          )
+  test('tokenizeLine recurses into children', () => {
+    // arrange — p1 and p2 marked transparent so tokenizeLine descends into them
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p(
+          { id: 'p1' },
+          'foo ', //
+          em(inlineStyleHack, 'bar'),
+          ' baz'
+        ),
+        p(
+          { id: 'p2' }, //
+          'foo ',
+          em(inlineStyleHack, 'bar'),
+          ' baz'
         )
-      );
-      const div1 = byId(doc, 'div1');
+      )
+    );
+    const div1 = byId(doc, 'div1');
 
-      // act
-      tokenizeLineAt(div1);
+    // act
+    tokenizeLineAt(div1);
 
-      // assert — both p1 and p2 are FOCUSABLE's, so both are tokenized
-      expect(byId(doc, 'p1').querySelector('.jsed-token')).not.toBeNull();
-      expect(byId(doc, 'p2').querySelector('.jsed-token')).not.toBeNull();
-    });
-
-    test('tokenizeLine does not recurse into OPAQUE_BLOCK children', () => {
-      // arrange — p1 and p2 have no jsed-cursor-transparent class, so they are
-      // OPAQUE_BLOCK by default. tokenizeLine should skip them.
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p(
-            { id: 'p1' },
-            'foo ', //
-            em(inlineStyleHack, 'bar'),
-            ' baz'
-          ),
-          p(
-            { id: 'p2' }, //
-            'foo ',
-            em(inlineStyleHack, 'bar'),
-            ' baz'
-          )
-        )
-      );
-      const div1 = byId(doc, 'div1');
-
-      // act
-      tokenizeLineAt(div1);
-
-      // assert — neither p1 nor p2 should have tokens inside them
-      expect(byId(doc, 'p1').querySelector('.jsed-token')).toBeNull();
-      expect(byId(doc, 'p2').querySelector('.jsed-token')).toBeNull();
-    });
-
-    test('tokenizing one OPAQUE_BLOCK does not tokenize sibling OPAQUE_BLOCKs', () => {
-      // arrange
-      const doc = makeRoot(
-        div(
-          { id: 'div1' },
-          p(
-            { id: 'p1' }, //
-            'foo ',
-            em(inlineStyleHack, 'bar'),
-            ' baz'
-          ),
-          p(
-            { id: 'p2' }, //
-            'foo ',
-            em(inlineStyleHack, 'bar'),
-            ' baz'
-          )
-        )
-      );
-      const p1 = byId(doc, 'p1');
-      const div1 = byId(doc, 'div1');
-
-      // act
-      tokenizeLineAt(p1);
-
-      // assert
-      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(3);
-      expect(
-        Array.from(p1.querySelectorAll('.jsed-token')).map((token) => token.textContent)
-      ).toEqual(['foo', 'bar', 'baz']);
-      expect(byId(doc, 'p2').querySelector('.jsed-token')).toBeNull();
-      expect(div1.querySelectorAll('.jsed-token')).toHaveLength(3);
-    });
+    // assert — both p1 and p2 are FOCUSABLE's, so both are tokenized
+    expect(byId(doc, 'p1').querySelector('.jsed-token')).not.toBeNull();
+    expect(byId(doc, 'p2').querySelector('.jsed-token')).not.toBeNull();
   });
 });
 
@@ -394,7 +307,11 @@ describe('detokenizeLine', () => {
   test('FOCUSABLE round-trips back to plain text structure', () => {
     // arrange
     const doc = makeRoot(
-      div({ id: 'div1' }, div({ id: 'div2', class: 'jsed-cursor-transparent' }, 'nested'), ' outer')
+      div(
+        { id: 'div1' }, //
+        div({ id: 'div2' }, 'nested'),
+        ' outer'
+      )
     );
     const div1 = byId(doc, 'div1');
     const initialHtml = div1.innerHTML;
@@ -408,19 +325,23 @@ describe('detokenizeLine', () => {
     expect(div1.querySelector('.jsed-token')).toBeNull();
   });
 
-  test('detokenizeLine does not recurse into OPAQUE_BLOCK children', () => {
+  test('nested LINE', () => {
     // arrange
-    const doc = makeRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo bar'), ' outer'));
+    const doc = makeRoot(
+      div(
+        { id: 'div1' }, //
+        p({ id: 'p1' }, 'foo bar'),
+        ' outer'
+      )
+    );
     const div1 = byId(doc, 'div1');
     const p1 = byId(doc, 'p1');
-    tokenizeLineAt(p1);
     tokenizeLineAt(div1);
 
     // act
     detokenizeLine(div1);
 
     // assert
-    expect(div1.querySelectorAll(':scope > .jsed-token')).toHaveLength(0);
-    expect(p1.querySelector('.jsed-token')?.textContent).toBe('foo');
+    expect(div1.querySelectorAll(`.${JSED_TOKEN_CLASS}`)).toHaveLength(0);
   });
 });

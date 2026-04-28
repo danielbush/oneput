@@ -208,7 +208,7 @@ export function isLine(el: Node | null): boolean {
   return true;
 }
 
-/** Visit predicate for LINE_SIBLING traversal: TOKEN's, ISLAND's, and OPAQUE_BLOCK's. */
+/** Predicate for LINE_SIBLING traversal. */
 export function isLineSibling(el: Node): boolean {
   if (isToken(el) || isIsland(el)) {
     return true;

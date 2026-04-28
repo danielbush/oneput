@@ -212,7 +212,7 @@ describe('Tokenizer', () => {
       expect(target!.textContent!.trim()).toBe('foo');
     });
 
-    test('LINE starting with OPAQUE_BLOCK (nested LINE): descends into it and returns first TOKEN', () => {
+    test('LINE starting with nested LINE: descends into it and returns first TOKEN', () => {
       // arrange
       const doc = makeRoot(
         div(

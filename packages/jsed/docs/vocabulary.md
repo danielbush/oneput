@@ -112,6 +112,7 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - this can be expensive on a large html document so we use SHALLOW_TOKENIZATION .
 - **SHALLOW_TOKENIZATION**
   — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
+  - in practice this means is that although the utilities that tokenize may fully tokenize whatever element they're given, we walk the DOM until we find a text node or other valid LINE_SIBLING and then only tokenize that immediate LINE. The cursor uses a similar logic once it has exhausted the current LINE to find the next or previous LINE.
   - Source of truth: search docstrings for SHALLOW_TOKENIZATION.
 - **LINE**
   - loosely: an element with descendents a CURSOR can edit

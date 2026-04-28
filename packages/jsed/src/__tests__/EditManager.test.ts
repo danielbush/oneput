@@ -406,6 +406,42 @@ describe('EditManager', () => {
           editManager.destroy();
         });
 
+        it('SHALLOW_TOKENIZATION: skips empty LINEs and tokenizes only the first editable LINE', () => {
+          // arrange
+          const doc = makeRoot(
+            div(
+              { id: 'div1' },
+              p({ id: 'empty-line' }),
+              p({ id: 'first-editable-line' }, 'foo bar'),
+              p({ id: 'later-line' }, 'baz qux')
+            )
+          );
+          const editManager = EditManager.createNull({
+            document: doc
+          });
+          const div1 = byId(doc, 'div1');
+          const emptyLine = byId(doc, 'empty-line');
+          const firstEditableLine = byId(doc, 'first-editable-line');
+          const laterLine = byId(doc, 'later-line');
+
+          // act
+          const result = editManager.enterEditing(div1);
+
+          // assert
+          expect(result.isOk()).toBe(true);
+          expect(editManager.getMode()).toBe('edit');
+          expect(emptyLine.querySelectorAll('.jsed-token')).toHaveLength(0);
+          expect(
+            Array.from(firstEditableLine.querySelectorAll('.jsed-token')).map(
+              (token) => token.textContent
+            )
+          ).toEqual(['foo', 'bar']);
+          expect(laterLine.querySelectorAll('.jsed-token')).toHaveLength(0);
+          expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+
+          editManager.destroy();
+        });
+
         test('if entering on a INLINE_FLOW (em-tag), CURSOR should be set to first child in INLINE_FLOW', () => {
           // arrange
           const doc = makeRoot(

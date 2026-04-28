@@ -1,5 +1,5 @@
 import { describe, it, expect, test } from 'vitest';
-import { div, em, identify, makeRoot, p, span } from '../test/util.js';
+import { div, em, identify, makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { TokenCursor } from '../TokenCursor.js';
@@ -516,10 +516,8 @@ describe('TokenCursor motion', () => {
       }
     ]);
   });
-});
 
-describe('TokenCursor cross-LINE motion', () => {
-  test('moveNext past end of <p> lands in the following IMPLICIT_LINE', () => {
+  test('cross line: moveNext past end of <p> lands in the following IMPLICIT_LINE', () => {
     // arrange — "trailing text" after the <p> gets wrapped in an IMPLICIT_LINE;
     // the cursor should reach the first TOKEN in that line.
     const doc = makeRoot(div(p({ id: 'p1' }, 'hello world'), 'trailing text'));

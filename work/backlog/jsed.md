@@ -57,6 +57,8 @@ COMMENT: [x] do interstitial lines first because we can simplify tokenization; [
 - [x] TRANSPARENT_BLOCK - remove term
 - [ ] OPAQUE_BLOCK - remove tests
 - [ ] OPAQUE_BLOCK - remove term
+- [x] review findLineCandidateAt; rewrite it in similar style to getNextLineSibling or use getNextLineSibling??
+- [x] move remaining anchor / space tests in EditManager into lib/token
 
 
 ## Bugs

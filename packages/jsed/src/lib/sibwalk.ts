@@ -8,7 +8,6 @@
 import { JSED_SELECTION_CLASS } from './constants.js';
 import {
   isCursorTransparent,
-  isFocusable,
   isIgnorable,
   isIgnorableNode,
   isIsland,
@@ -170,42 +169,8 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   return null;
 }
 
-/**
- * Returns { line, rootLine } where `line` is a candidate line with a
- * LINE_SIBLING the CURSOR could sit on.  If `line` is null, no candidates were
- * found at or within `rootLine`.
- *
- * Pairs with:
- * - `findNextLineCandidate(from, root)` — find a LINE_SIBLING in a later LINE
- * - `findPreviousLineCandidate(from, root)` — find a LINE_SIBLING in an earlier LINE
- */
-export function findLineCandidateAt(from: HTMLElement): {
-  rootLine: HTMLElement;
-  line: HTMLElement | null;
-} {
-  const rootLine = getLine(from);
-  if (isCandidateLineSibling(from)) {
-    return { rootLine, line: rootLine };
-  }
-  for (const node of findNextNode(from, rootLine, {
-    visit: isCandidateLineSibling,
-    descend: isFocusable
-  })) {
-    return { rootLine, line: getLine(node) };
-  }
-  return { rootLine, line: null };
-}
-
-/**
- * Detect a candidate/potential LINE_SIBLING — a non-whitespace text node,
- * TOKEN, or ISLAND.
- *
- * "Candidate" means: a node whose presence indicates a LINE worth tokenizing
- * or descending into. Used by `findLineCandidateAt` to locate the LINE under
- * a FOCUSABLE that the CURSOR could land in.
- */
-function isCandidateLineSibling(node: Node | null): boolean {
-  if (!node) return false;
-  if (isToken(node) || isIsland(node)) return true;
-  return isTokenizableTextNode(node);
+export function findNextEditableLine(from: Node, ceiling: HTMLElement): HTMLElement | null {
+  const nextToken = getNextLineSibling(from, ceiling);
+  const line = nextToken ? getLine(nextToken) : null;
+  return line;
 }

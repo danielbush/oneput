@@ -44,8 +44,13 @@ function selectedTokenValues(doc: { root: HTMLElement }): string[] {
   );
 }
 
+/** Count SELECTION_WRAPPER's currently in the document. */
+function wrapperCount(doc: { root: HTMLElement }): number {
+  return doc.root.querySelectorAll('.jsed-selection').length;
+}
+
 describe('TokenSelection single-paragraph grow/shrink', () => {
-  test('seeded selection immediately wraps the anchor TOKEN', () => {
+  test('no grow', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c')));
     const [, , c] = tokens(doc);
@@ -58,7 +63,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     expect(selectedTokenValues(doc)).toEqual(['c']);
   });
 
-  test('start in middle, grow forward, shrink back past the anchor, keep going to grow backward', () => {
+  test('grow both ways - next', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c'), s(), t('d'), s(), t('e')));
     const [, , c] = tokens(doc);
@@ -94,7 +99,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     expect(selectedTokenValues(doc)).toEqual(['a', 'b', 'c']);
   });
 
-  test('mirror: start in middle, grow backward, shrink forward past the anchor, keep going to grow forward', () => {
+  test('grow both ways - previous', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c'), s(), t('d'), s(), t('e')));
     const [, , c] = tokens(doc);
@@ -130,7 +135,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     expect(selectedTokenValues(doc)).toEqual(['c', 'd', 'e']);
   });
 
-  test('grow from the start of a paragraph, through a middle <em>, out the other side, then shrink back', () => {
+  test('grow INLINE_FLOW - next', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -193,7 +198,7 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     expect(selectedTokenValues(doc)).toEqual(['a']);
   });
 
-  test('mirror: grow from the end of a paragraph, through a middle <em>, out the other side, then shrink back', () => {
+  test('grow INLINE_FLOW - previous', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -256,15 +261,8 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     expect(headValue(selection)).toBe('f');
     expect(selectedTokenValues(doc)).toEqual(['f']);
   });
-});
 
-describe('TokenSelection cross-LINE grow/shrink', () => {
-  /** Count SELECTION_WRAPPER's currently in the document. */
-  function wrapperCount(doc: { root: HTMLElement }): number {
-    return doc.root.querySelectorAll('.jsed-selection').length;
-  }
-
-  test('grow forward from end of LINE 1 into LINE 2, then shrink back past the boundary', () => {
+  test('grow both ways - next + cross line', () => {
     // arrange
     const doc = makeRoot(
       frag(
@@ -303,7 +301,7 @@ describe('TokenSelection cross-LINE grow/shrink', () => {
     expect(wrapperCount(doc)).toBe(1);
   });
 
-  test('mirror: grow backward from start of LINE 2 into LINE 1, then shrink back past the boundary', () => {
+  test('grow both ways = previous + cross line', () => {
     // arrange
     const doc = makeRoot(
       frag(

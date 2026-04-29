@@ -29,7 +29,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - across inline flows within p-tag
     - explore visual appearance of selection as it extends over INLINE_FLOW's, is it broken?  How do we make it look like a selection?
   - across p-tags
-- [ ] split elements
+- [x] split elements
 - [ ] select and tag selection with em-tag
 - [ ] insert element before/after tag
 - [ ] delete elements

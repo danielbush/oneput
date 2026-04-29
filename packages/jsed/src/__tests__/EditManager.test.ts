@@ -1405,7 +1405,7 @@ describe('EditManager', () => {
       return Array.from(el.querySelectorAll('.jsed-token')).map((t) => t.textContent ?? '');
     }
 
-    test('tier 1: single-LINE full selection → one TOKEN replaces all', async () => {
+    test('type over selection - replace all / extendNext', async () => {
       // arrange: p(foo bar baz), select all three tokens forward
       const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
       const p1 = byId(doc, 'p1');
@@ -1427,7 +1427,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    test('tier 2: single-LINE partial forward selection → selected removed, rest intact', async () => {
+    test('type over selection - partial extendNext', async () => {
       // arrange: p(foo bar baz), anchor=foo, head=bar
       const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
       const p1 = byId(doc, 'p1');
@@ -1445,13 +1445,16 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    test('tier 3: selection fully consumes <em> → em-tag removed', async () => {
+    test('type over selection - INLINE_FLOW extendNext', async () => {
       // arrange: p(aa <em>bb cc</em> dd)
       const doc = makeRoot(
         p(
           { id: 'p1' }, //
           'aa ',
-          em({ ...inlineStyleHack, id: 'em1' }, 'bb cc'),
+          em(
+            { ...inlineStyleHack, id: 'em1' }, //
+            'bb cc'
+          ),
           ' dd'
         )
       );
@@ -1477,7 +1480,7 @@ describe('EditManager', () => {
       editManager.destroy();
     });
 
-    test('tier 4: cross-LINE forward selection → new TOKEN lands on the START line', async () => {
+    test('type over selection - cross-LINE extendNext', async () => {
       // arrange: p1(foo bar) + p2(baz qux). Anchor=foo (in p1); forward
       // extension to baz crosses into p2. Selection = [foo, bar, baz].
       // Standard text-editor UX: typing lands where the selection STARTED

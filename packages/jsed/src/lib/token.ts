@@ -1,6 +1,7 @@
 import {
   JSED_ANCHOR_CHAR,
   JSED_ANCHOR_CLASS,
+  JSED_IMPLICIT_CLASS,
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
   JSED_TOKEN_PADDED
@@ -955,6 +956,14 @@ export function joinPrevious(token: HTMLElement): void {
   }
 }
 
+function createSplitPeer(parent: HTMLElement): HTMLElement {
+  const peer = document.createElement(parent.tagName);
+  if (isImplicitLine(parent)) {
+    peer.classList.add(JSED_IMPLICIT_CLASS);
+  }
+  return peer;
+}
+
 /**
  * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
  */
@@ -962,7 +971,7 @@ export function splitBefore(token: HTMLElement): HTMLElement[] {
   const prevTok = getPreviousTokenSibling(token);
   const par = getParent(token);
   const line = getLine(token);
-  const prevPar = document.createElement(par.tagName);
+  const prevPar = createSplitPeer(par);
   par.insertAdjacentElement('beforebegin', prevPar);
   // We may need to put an anchor between prevPar and par.
   if (line !== par) {
@@ -990,7 +999,7 @@ export function splitAfter(token: HTMLElement): HTMLElement[] {
   const nextTok = getNextTokenSibling(token);
   const par = getParent(token);
   const line = getLine(token);
-  const nextPar = document.createElement(par.tagName);
+  const nextPar = createSplitPeer(par);
   par.insertAdjacentElement('afterend', nextPar);
   // We may need to put an anchor between prevPar and par.
   if (line !== par) {

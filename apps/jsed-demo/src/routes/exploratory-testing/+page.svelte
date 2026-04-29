@@ -205,6 +205,12 @@
     <div style="display:inline-block;">cc dd</div>
     ee ff
   </div>
+  <div>
+    <p>can we add ANCHOR before or after this p-tag?</p>
+  </div>
+  <div>
+    <em>can we add ANCHOR before or after this em-tag?</em>
+  </div>
 
   <h2 class="jsed-ignore">Scrollable container</h2>
   <div style="height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px">

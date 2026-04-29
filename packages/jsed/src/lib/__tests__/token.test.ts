@@ -29,9 +29,12 @@ import {
   removeSpaceAfterToken,
   removeSpaceBeforeTag,
   removeSpaceBeforeToken,
-  replaceText
+  replaceText,
+  splitAfter,
+  splitBefore
 } from '../token.js';
-import { isAnchor } from '../taxonomy.js';
+import { isAnchor, isImplicitLine } from '../taxonomy.js';
+import { JSED_IMPLICIT_CLASS } from '../constants.js';
 import {
   byId,
   div,
@@ -95,9 +98,9 @@ function rawById(root: HTMLElement, id: string): HTMLElement {
   return el;
 }
 
-describe('anchors around FOCUSABLE', () => {
-  describe('in LINE', () => {
-    it('inserts an anchor into an empty LINE', () => {
+describe('ANCHOR', () => {
+  describe('add ANCHOR', () => {
+    it('in LINE (1) - empty', () => {
       // arrange
       const doc = makeRoot(p({ id: 'p1' }));
       const p1 = byId(doc, 'p1');
@@ -113,9 +116,14 @@ describe('anchors around FOCUSABLE', () => {
       expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
     });
 
-    it('treats IGNORABLE content as empty when deciding whether an anchor can be inserted', () => {
+    it('in LINE (2) - empty', () => {
       // arrange
-      const doc = makeRoot(p({ id: 'p1' }, span({ class: 'jsed-ignore' }, 'debug label')));
+      const doc = makeRoot(
+        p(
+          { id: 'p1' }, //
+          span({ class: 'jsed-ignore' }, 'debug label')
+        )
+      );
       const p1 = byId(doc, 'p1');
 
       // act
@@ -128,10 +136,8 @@ describe('anchors around FOCUSABLE', () => {
       expect(isAnchor(anchor!)).toBe(true);
       expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
     });
-  });
 
-  describe('before FOCUSABLE', () => {
-    it('inserts an anchor at the boundary before the focused tag', () => {
+    it('before INLINE_FLOW (1)', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -154,10 +160,13 @@ describe('anchors around FOCUSABLE', () => {
       expect(strong.previousElementSibling).toBe(anchor);
     });
 
-    it('inserts an anchor before the focused tag when there is no previous sibling', () => {
+    it('before INLINE_FLOW (2)', () => {
       // arrange
       const root = makeRawRoot(
-        p({ id: 'p1' }, emTag({ id: 'em1', style: 'display:inline;' }, 'foo'))
+        p(
+          { id: 'p1' }, //
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo')
+        )
       );
       const em = rawById(root, 'em1');
 
@@ -172,7 +181,32 @@ describe('anchors around FOCUSABLE', () => {
       expect(em.previousElementSibling).toBe(anchor);
     });
 
-    it('inserts an anchor after existing whitespace', () => {
+    it('before INLINE_FLOW (3) - IMPLICIT_LINE', () => {
+      // arrange
+      const doc = makeRoot(
+        div(
+          { id: 'd' },
+          p({ id: 'p1' }, 'aaa'),
+          emTag({ id: 'em1', style: 'display:inline;' }, 'bbb'),
+          p({ id: 'p2' }, 'ccc')
+        )
+      );
+      const em = byId(doc, 'em1');
+      const implicitLine = em.parentElement;
+
+      // act
+      const anchor = insertAnchorBeforeTag(em);
+
+      // assert
+      expect(implicitLine).not.toBeNull();
+      expect(isImplicitLine(implicitLine!)).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(anchor?.parentElement).toBe(implicitLine);
+      expect(em.previousElementSibling).toBe(anchor);
+    });
+
+    it('before INLINE_FLOW (4) - whitespace', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -197,7 +231,7 @@ describe('anchors around FOCUSABLE', () => {
       expect(strong.previousElementSibling).toBe(anchor);
     });
 
-    it('does not insert an anchor when text already represents the gap', () => {
+    it('before INLINE_FLOW (5) - negative', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -221,9 +255,15 @@ describe('anchors around FOCUSABLE', () => {
       expect(strong.previousSibling?.textContent).toBe(' gap ');
     });
 
-    it('does not insert an anchor before a focused LINE', () => {
+    it('before LINE (1) - negative', () => {
       // arrange
-      const root = makeRawRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+      const root = makeRawRoot(
+        div(
+          { id: 'div1' }, //
+          p({ id: 'p1' }, 'foo'),
+          p({ id: 'p2' }, 'bar')
+        )
+      );
       const p1 = rawById(root, 'p1');
       const p2 = rawById(root, 'p2');
 
@@ -237,7 +277,151 @@ describe('anchors around FOCUSABLE', () => {
       expect(p2.previousSibling).toBe(p1);
     });
 
-    it('removes an anchor at the immediate boundary', () => {
+    it('after LINE - negative', () => {
+      // arrange
+      const root = makeRawRoot(
+        div(
+          { id: 'div1' }, //
+          p({ id: 'p1' }, 'foo'),
+          p({ id: 'p2' }, 'bar')
+        )
+      );
+      const p1 = rawById(root, 'p1');
+      const p2 = rawById(root, 'p2');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(p1);
+      const anchor = insertAnchorAfterTag(p1);
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(anchor).toBeNull();
+      expect(p1.nextSibling).toBe(p2);
+    });
+
+    it('after INLINE_FLOW (1)', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          span({ class: 'jsed-ignore' }),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+      const strong = rawById(root, 'strong1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(strong.previousElementSibling).toBe(anchor);
+    });
+
+    it('after INLINE_FLOW (2)', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' }, //
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo')
+        )
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(em.nextElementSibling).toBe(anchor);
+    });
+
+    it('after INLINE_FLOW (3) - IMPLICIT_LINE', () => {
+      // arrange
+      const doc = makeRoot(
+        div(
+          { id: 'd' },
+          p({ id: 'p1' }, 'aaa'),
+          emTag({ id: 'em1', style: 'display:inline;' }, 'bbb'),
+          p({ id: 'p2' }, 'ccc')
+        )
+      );
+      const em = byId(doc, 'em1');
+      const implicitLine = em.parentElement;
+
+      // act
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(implicitLine).not.toBeNull();
+      expect(isImplicitLine(implicitLine!)).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(anchor?.parentElement).toBe(implicitLine);
+      expect(em.nextElementSibling).toBe(anchor);
+    });
+
+    it('after INLINE_FLOW (4) - whitespace', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          // before existing whitespace is ok
+          s(' '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(true);
+      expect(anchor).not.toBeNull();
+      expect(isAnchor(anchor!)).toBe(true);
+      expect(em.nextElementSibling).toBe(anchor);
+      expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(anchor?.nextSibling?.textContent).toBe(' ');
+    });
+
+    it('after INLINE_FLOW (5) - negative', () => {
+      // arrange
+      const root = makeRawRoot(
+        p(
+          { id: 'p1' },
+          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
+          s(' gap '),
+          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
+        )
+      );
+      const em = rawById(root, 'em1');
+
+      // act
+      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
+      const anchor = insertAnchorAfterTag(em);
+
+      // assert
+      expect(canInsert).toBe(false);
+      expect(anchor).toBeNull();
+      expect(em.nextElementSibling?.id).toBe('strong1');
+      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
+      expect(em.nextSibling?.textContent).toBe(' gap ');
+    });
+  });
+
+  describe('remove ANCHOR', () => {
+    it('before INLINE_FLOW', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -261,7 +445,7 @@ describe('anchors around FOCUSABLE', () => {
       expect(strong.previousSibling).toBe(em);
     });
 
-    it('removes an anchor before existing whitespace and preserves the space', () => {
+    it('before INLINE_FLOW (2)', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -287,117 +471,8 @@ describe('anchors around FOCUSABLE', () => {
       expect(strong.previousSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(strong.previousSibling?.textContent).toBe(' ');
     });
-  });
 
-  describe('after FOCUSABLE', () => {
-    it('inserts an anchor at the boundary after the focused tag', () => {
-      // arrange
-      const root = makeRawRoot(
-        p(
-          { id: 'p1' },
-          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
-          span({ class: 'jsed-ignore' }),
-          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
-        )
-      );
-      const em = rawById(root, 'em1');
-      const strong = rawById(root, 'strong1');
-
-      // act
-      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
-      const anchor = insertAnchorAfterTag(em);
-
-      // assert
-      expect(canInsert).toBe(true);
-      expect(anchor).not.toBeNull();
-      expect(isAnchor(anchor!)).toBe(true);
-      expect(strong.previousElementSibling).toBe(anchor);
-    });
-
-    it('does not insert an anchor after a focused LINE', () => {
-      // arrange
-      const root = makeRawRoot(div({ id: 'div1' }, p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-      const p1 = rawById(root, 'p1');
-      const p2 = rawById(root, 'p2');
-
-      // act
-      const canInsert = !!getAnchorAfterTagInsertionPoint(p1);
-      const anchor = insertAnchorAfterTag(p1);
-
-      // assert
-      expect(canInsert).toBe(false);
-      expect(anchor).toBeNull();
-      expect(p1.nextSibling).toBe(p2);
-    });
-
-    it('inserts an anchor after the focused tag when there is no next sibling', () => {
-      // arrange
-      const root = makeRawRoot(
-        p({ id: 'p1' }, emTag({ id: 'em1', style: 'display:inline;' }, 'foo'))
-      );
-      const em = rawById(root, 'em1');
-
-      // act
-      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
-      const anchor = insertAnchorAfterTag(em);
-
-      // assert
-      expect(canInsert).toBe(true);
-      expect(anchor).not.toBeNull();
-      expect(isAnchor(anchor!)).toBe(true);
-      expect(em.nextElementSibling).toBe(anchor);
-    });
-
-    it('inserts an anchor before existing whitespace', () => {
-      // arrange
-      const root = makeRawRoot(
-        p(
-          { id: 'p1' },
-          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
-          s(' '),
-          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
-        )
-      );
-      const em = rawById(root, 'em1');
-
-      // act
-      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
-      const anchor = insertAnchorAfterTag(em);
-
-      // assert
-      expect(canInsert).toBe(true);
-      expect(anchor).not.toBeNull();
-      expect(isAnchor(anchor!)).toBe(true);
-      expect(em.nextElementSibling).toBe(anchor);
-      expect(anchor?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
-      expect(anchor?.nextSibling?.textContent).toBe(' ');
-    });
-
-    it('does not insert an anchor when text already represents the gap after the focused tag', () => {
-      // arrange
-      const root = makeRawRoot(
-        p(
-          { id: 'p1' },
-          emTag({ id: 'em1', style: 'display:inline;' }, 'foo'),
-          s(' gap '),
-          strongTag({ id: 'strong1', style: 'display:inline;' }, 'bar')
-        )
-      );
-      const em = rawById(root, 'em1');
-
-      // act
-      const canInsert = !!getAnchorAfterTagInsertionPoint(em);
-      const anchor = insertAnchorAfterTag(em);
-
-      // assert
-      expect(canInsert).toBe(false);
-      expect(anchor).toBeNull();
-      expect(em.nextElementSibling?.id).toBe('strong1');
-      expect(em.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
-      expect(em.nextSibling?.textContent).toBe(' gap ');
-    });
-
-    it('removes an anchor at the immediate boundary', () => {
+    it('after INLINE_FLOW', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -421,7 +496,7 @@ describe('anchors around FOCUSABLE', () => {
       expect(strong.previousSibling).toBe(em);
     });
 
-    it('removes an anchor after existing whitespace and preserves the space', () => {
+    it('after INLINE_FLOW (2)', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -1122,6 +1197,50 @@ describe('leading/trailing spaces', () => {
         expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
       });
     });
+  });
+});
+
+describe('SPLIT_BY_TOKEN in IMPLICIT_LINE', () => {
+  it('preserves IMPLICIT_LINE on the new leading segment', () => {
+    // arrange
+    const doc = makeRoot(
+      div({ id: 'd' }, p({ id: 'p1' }, 'aaa'), 'bbb ccc', p({ id: 'p2' }, 'ddd'))
+    );
+    const implicitLine = byId(doc, 'd').querySelector(`.${JSED_IMPLICIT_CLASS}`) as HTMLElement;
+    Tokenizer.createNull().tokenizeLineAt(implicitLine);
+    const ccc = findTokenByText(implicitLine, 'ccc');
+
+    // act
+    const [leading, trailing] = splitBefore(ccc);
+
+    // assert
+    expect(isImplicitLine(leading)).toBe(true);
+    expect(isImplicitLine(trailing)).toBe(true);
+    expect(leading.textContent).toBe('bbb ');
+    expect(trailing.textContent).toBe('ccc');
+    expect(leading.previousElementSibling).toBe(byId(doc, 'p1'));
+    expect(trailing.nextElementSibling).toBe(byId(doc, 'p2'));
+  });
+
+  it('preserves IMPLICIT_LINE on the new trailing segment', () => {
+    // arrange
+    const doc = makeRoot(
+      div({ id: 'd' }, p({ id: 'p1' }, 'aaa'), 'bbb ccc', p({ id: 'p2' }, 'ddd'))
+    );
+    const implicitLine = byId(doc, 'd').querySelector(`.${JSED_IMPLICIT_CLASS}`) as HTMLElement;
+    Tokenizer.createNull().tokenizeLineAt(implicitLine);
+    const bbb = findTokenByText(implicitLine, 'bbb');
+
+    // act
+    const [leading, trailing] = splitAfter(bbb);
+
+    // assert
+    expect(isImplicitLine(leading)).toBe(true);
+    expect(isImplicitLine(trailing)).toBe(true);
+    expect(leading.textContent).toBe('bbb');
+    expect(trailing.textContent).toBe(' ccc');
+    expect(leading.previousElementSibling).toBe(byId(doc, 'p1'));
+    expect(trailing.nextElementSibling).toBe(byId(doc, 'p2'));
   });
 });
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import {
   addAnchors,
   canInsertAnchorInLine,
@@ -1200,14 +1200,18 @@ describe('leading/trailing spaces', () => {
   });
 });
 
-describe('SPLIT_BY_TOKEN in IMPLICIT_LINE', () => {
-  it('preserves IMPLICIT_LINE on the new leading segment', () => {
+describe('splitting', () => {
+  test('splitBefore - preserves IMPLICIT_LINE on the new leading segment', () => {
     // arrange
     const doc = makeRoot(
-      div({ id: 'd' }, p({ id: 'p1' }, 'aaa'), 'bbb ccc', p({ id: 'p2' }, 'ddd'))
+      div(
+        { id: 'd' },
+        p({ id: 'p1' }, 'aaa'),
+        span({ class: JSED_IMPLICIT_CLASS }, t('bbb'), s(), t('ccc')),
+        p({ id: 'p2' }, 'ddd')
+      )
     );
     const implicitLine = byId(doc, 'd').querySelector(`.${JSED_IMPLICIT_CLASS}`) as HTMLElement;
-    Tokenizer.createNull().tokenizeLineAt(implicitLine);
     const ccc = findTokenByText(implicitLine, 'ccc');
 
     // act
@@ -1222,13 +1226,17 @@ describe('SPLIT_BY_TOKEN in IMPLICIT_LINE', () => {
     expect(trailing.nextElementSibling).toBe(byId(doc, 'p2'));
   });
 
-  it('preserves IMPLICIT_LINE on the new trailing segment', () => {
+  test('splitAfter - preserves IMPLICIT_LINE on the new trailing segment', () => {
     // arrange
     const doc = makeRoot(
-      div({ id: 'd' }, p({ id: 'p1' }, 'aaa'), 'bbb ccc', p({ id: 'p2' }, 'ddd'))
+      div(
+        { id: 'd' },
+        p({ id: 'p1' }, 'aaa'),
+        span({ class: JSED_IMPLICIT_CLASS }, t('bbb'), s(), t('ccc')),
+        p({ id: 'p2' }, 'ddd')
+      )
     );
     const implicitLine = byId(doc, 'd').querySelector(`.${JSED_IMPLICIT_CLASS}`) as HTMLElement;
-    Tokenizer.createNull().tokenizeLineAt(implicitLine);
     const bbb = findTokenByText(implicitLine, 'bbb');
 
     // act

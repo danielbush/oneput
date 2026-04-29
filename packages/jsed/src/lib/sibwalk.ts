@@ -102,13 +102,6 @@ export function getLine(el: Node): HTMLElement {
   throw new Error(`getLine: end of for-loop`);
 }
 
-export function getParentLine(el: Node): HTMLElement {
-  if (!el.parentNode) {
-    throw new Error(`getParentLine: parentNode is null`);
-  }
-  return getLine(el.parentNode);
-}
-
 export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
   const line1 = getLine(tok1);
   const line2 = getLine(tok2);

@@ -335,7 +335,6 @@ describe('detokenizeLine', () => {
       )
     );
     const div1 = byId(doc, 'div1');
-    const p1 = byId(doc, 'p1');
     tokenizeLineAt(div1);
 
     // act

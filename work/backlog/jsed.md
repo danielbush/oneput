@@ -46,8 +46,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 COMMENT: [x] do interstitial lines first because we can simplify tokenization; [x] I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; [x] then make most focusables cursor transparent by default; [x] then unify get next line sibling logic to work intra and inter-LINE
 
 - [x] CONVERT_INTERSTITIAL_TEXT__WORK
-- [.] refactor cross line traversal and make most elements transparent
-  - [.] fix anchor functions for implicit line invariant
+- [x] refactor cross line traversal and make most elements transparent
+  - [x] fix anchor functions for implicit line invariant
   - [x] rip out cross line code
   - [x] CURSOR_TRANSPARENT_BY_DEFAULT__WORK
   - [x] tokenizeLineAt

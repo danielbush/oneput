@@ -32,13 +32,11 @@ The DOM-mutation primitives (`tokenizeLine`, `detokenizeLine` and their `Rec` he
 
 `detokenizeLine(...)` removes `TOKEN` wrappers from a `LINE` and its CURSOR-transparent descendants and normalizes text nodes back together. The `Tokenizer` service uses it opportunistically: once the number of recorded tokenized `LINE`s passes a small limit, it schedules a background cleanup pass that detokenizes one old `LINE` at a time while skipping any `LINE` that currently contains the active `CURSOR`.
 
-### LOOSE_LINE tokenization
+### INTERSTITIAL_TEXT and IMPLICIT_LINEs
 
-An outer LINE can contain nested LINEs with loose content between, before, or after them. That content belongs to the outer LINE and must be tokenized for the CURSOR to reach it — a LOOSE_LINE (see vocabulary). Tokenizing the candidate LINE alone isn't enough; the interstitial runs need their own passes.
+An outer LINE can contain text and inline content between, before, or after NESTED_LINEs. That content looks like a line to the user, but without a wrapper it is just INTERSTITIAL_TEXT sitting beside real LINE elements. Jsed establishes the INTERSTITIAL_INVARIANT when a `JsedDocument` is created: `tagImplicitLines` wraps each INTERSTITIAL_TEXT run in an inline `span` marked as an IMPLICIT_LINE.
 
-`Tokenizer.tokenizeLineAt` therefore runs two pre-passes before the candidate step: one for LOOSE_LINEs inside the target element, one for LOOSE_LINEs bracketing the target within its parent LINE. Between them, cross-LINE navigation always finds a seatable LINE_SIBLING when crossing into a neighbouring LINE.
-
-Two consequences follow. The pre-passes can mutate LINEs other than the candidate — the target's own LINE, or its parent LINE — so Detokenizer records up to three LINEs per call (deduped) to keep cleanup complete. And cross-LINE navigation has a forward/backward asymmetry: forward receives the destination LINE's first seat directly from tokenization. Backward needs the *last* seat, which can live in a trailing LOOSE_LINE that no pre-pass reached (pre-passes only scan around the starting element). The backward candidate walk therefore recognises raw text nodes as seats and tokenizes them on arrival.
+After that startup pass, tokenization no longer has to discover loose interstitial runs opportunistically. IMPLICIT_LINEs are normal LINEs for navigation and tokenization, so `Tokenizer.tokenizeLineAt` can stay focused on the candidate LINE it was given. Editing operations that split or insert around IMPLICIT_LINE content preserve that wrapper so the editor does not create new INTERSTITIAL_TEXT during the session.
 
 ## Token editing: TokenCursorBase → TokenCursor
 

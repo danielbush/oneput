@@ -12,26 +12,9 @@ import type { CursorTextOps } from './CursorTextOps.js';
  * SELECTION_WRAPPER elements inserted as direct parents of contiguous
  * TOKEN runs.
  *
- * A SELECTION_WRAPPER is a styling-neutral inline span (background only)
- * that wraps a run of LINE_SIBLING's sharing the same immediate DOM
- * parent. Inserting it between `<em>`/`<strong>`/etc. and its TOKEN's
- * preserves inherited styling (italic, bold, underline, color) because
- * CSS inheritance follows the DOM ancestor chain and we only add a
- * descendant, never move TOKEN's out of their styling context.
- *
- * When the selection crosses a parent boundary — entering or leaving an
- * INLINE_FLOW, or spanning LINE's — a new wrapper is started in the new
- * parent. The list of wrappers is therefore ordered and
- * one-per-contiguous-run.
- *
- * The head is driven by an internal silent `TokenCursor`. This reuses
- * the cursor's LINE_SIBLING motion and cross-LINE tokenization-on-arrival,
- * so growing into a new paragraph is the same code path as growing
- * across an `<em>` — the wrapper's parent-mismatch branch just opens a
- * fresh wrapper in the new parent. The editing cursor (owned by
- * EditManager) stays pinned at the anchor.
- *
- * See work/active/20260414.feat.selections.md.
+ * - creates new segments (Wrappers) when parentNode changes
+ * - `head` is driven by an internal silent cursor.
+ * - `anchor` is initial starting point
  */
 export class TokenSelection {
   static create(params: {

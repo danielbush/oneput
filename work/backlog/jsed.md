@@ -2,7 +2,9 @@
 
 Treat each item (h2 section) as an initial proposal that may require discussion and investigation.  Assign a "conventional commits" classification to each item as a prefix in the title.  Items at the top should be looked at first.  If we're working on an item, move it to work//active and make it into a proper spec.  If the content is not detailed and may have several solutions, put it at the bottom of the spec with title "Initial Proposal" to help capture the original intent before creating more details.
 
-## Critical path
+## Critical work
+
+### Critical path
 
 - [x] moving cursor between lines
   - adjust quickDescend, return first LINE_SILBING not first TOKEN
@@ -39,36 +41,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - katex as example of an island
   - code might be another
 - r:JSED_AGENT_COEDIT
-
-
-## Critical work
-
-COMMENT: [x] do interstitial lines first because we can simplify tokenization; [x] I also want tokenizer to be given a clear thing to tokenize and not try to refine or decide it itself; [x] then make most focusables cursor transparent by default; [x] then unify get next line sibling logic to work intra and inter-LINE
-
-- [x] CONVERT_INTERSTITIAL_TEXT__WORK
-- [x] refactor cross line traversal and make most elements transparent
-  - [x] fix anchor functions for implicit line invariant
-  - [x] rip out cross line code
-  - [x] CURSOR_TRANSPARENT_BY_DEFAULT__WORK
-  - [x] tokenizeLineAt
-  - [x] rewrite getNextLineSibling without no visit,descend
-  - [x] make it cross lines
-  - [x] rewrite getPreviousLineSibling without no visit,descend
-  - [x] make it cross lines
-  - [x] Tokenizer.tokenizeLineAt is doing too much; it shouldn't look for candidates within el it should just do el
-  - [x] get rid of isTransparentBlock
-  - [x] TRANSPARENT_BLOCK tests are now just testing the default situation
-  - [x] TRANSPARENT_BLOCK - remove term
-  - [x] OPAQUE_BLOCK - remove tests
-  - [x] OPAQUE_BLOCK - remove term
-  - [x] review findLineCandidateAt; rewrite it in similar style to getNextLineSibling or use getNextLineSibling??
-  - [x] move remaining anchor / space tests in EditManager into lib/token
-- split
-  - tasks
-    - move test operations
-    - [ ] when a user splits an IMPLICIT_LINE
-      - break into two, convert both to p-tags
-- convert
 
 ## Bugs
 

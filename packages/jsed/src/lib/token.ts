@@ -1,7 +1,6 @@
 import {
   JSED_ANCHOR_CHAR,
   JSED_ANCHOR_CLASS,
-  JSED_IMPLICIT_CLASS,
   JSED_TOKEN_CLASS,
   JSED_TOKEN_COLLAPSED,
   JSED_TOKEN_PADDED
@@ -24,7 +23,13 @@ import {
   getNextVisibleSibling
 } from './sibwalk.js';
 
-// #region TOKEN CRUD
+export function getValue(token: HTMLElement): string {
+  validate(token);
+  if (isAnchor(token)) {
+    return JSED_ANCHOR_CHAR;
+  }
+  return token.firstChild!.nodeValue as string;
+}
 
 export function getParent(el: HTMLElement): HTMLElement {
   if (!isToken(el)) {
@@ -73,16 +78,6 @@ function anchor2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_ANCHOR_CLASS);
   return token;
 }
-
-export function getValue(token: HTMLElement): string {
-  validate(token);
-  if (isAnchor(token)) {
-    return JSED_ANCHOR_CHAR;
-  }
-  return token.firstChild!.nodeValue as string;
-}
-
-// #endregion
 
 // #region Insert / Remove
 
@@ -916,7 +911,7 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
 
 // #endregion
 
-// #region Operations
+// #region Join
 
 export function joinNext(token: HTMLElement): void {
   const next = getNextTokenSibling(token);
@@ -956,39 +951,93 @@ export function joinPrevious(token: HTMLElement): void {
   }
 }
 
+// #endregion
+
+// #region Split
+
 function createSplitPeer(parent: HTMLElement): HTMLElement {
-  const peer = document.createElement(parent.tagName);
   if (isImplicitLine(parent)) {
-    peer.classList.add(JSED_IMPLICIT_CLASS);
+    return document.createElement('p');
+  }
+
+  const peer = parent.cloneNode(false) as HTMLElement;
+  if (peer.id) {
+    peer.removeAttribute('id');
   }
   return peer;
+}
+
+function movePreviousSiblings(from: Node, to: HTMLElement): void {
+  for (let sib: ChildNode | null = from.previousSibling; sib; ) {
+    const prevSib: ChildNode | null = sib.previousSibling;
+    to.insertBefore(sib, to.firstChild);
+    sib = prevSib;
+  }
+}
+
+function moveNextSiblings(from: Node, to: HTMLElement): void {
+  for (let sib: ChildNode | null = from.nextSibling; sib; ) {
+    const nextSib: ChildNode | null = sib.nextSibling;
+    to.appendChild(sib);
+    sib = nextSib;
+  }
+}
+
+function ensureAnchorIfEmpty(el: HTMLElement): void {
+  if (el.childNodes.length > 0) {
+    return;
+  }
+  if (canCreateWithAnchor(el.tagName)) {
+    addAnchors(el);
+  }
+}
+
+function isRootTextLine(line: HTMLElement): boolean {
+  return line.tagName === 'DIV' && line.parentElement === line.ownerDocument.body;
+}
+
+function convertImplicitLineToParagraph(line: HTMLElement): HTMLElement {
+  if (!isImplicitLine(line)) {
+    return line;
+  }
+
+  const paragraph = document.createElement('p');
+  while (line.firstChild) {
+    paragraph.appendChild(line.firstChild);
+  }
+  line.replaceWith(paragraph);
+  return paragraph;
 }
 
 /**
  * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
  */
 export function splitBefore(token: HTMLElement): HTMLElement[] {
-  const prevTok = getPreviousTokenSibling(token);
-  const par = getParent(token);
+  let par = getParent(token);
+  par = convertImplicitLineToParagraph(par);
   const line = getLine(token);
+
+  if (par === line && isRootTextLine(line)) {
+    const br = document.createElement('br');
+    token.parentNode?.insertBefore(br, token);
+    return [br, line];
+  }
+
   const prevPar = createSplitPeer(par);
   par.insertAdjacentElement('beforebegin', prevPar);
-  // We may need to put an anchor between prevPar and par.
-  if (line !== par) {
-    const anchor = createAnchor();
-    par.insertAdjacentElement('beforebegin', anchor);
-  }
-  if (!prevTok) {
-    if (canCreateWithAnchor(prevPar.tagName)) {
-      addAnchors(prevPar);
+  movePreviousSiblings(token, prevPar);
+  ensureAnchorIfEmpty(prevPar);
+
+  for (let current = par; current !== line; current = current.parentElement as HTMLElement) {
+    const parent = current.parentElement;
+    if (!parent) {
+      break;
     }
+    const prevParent = createSplitPeer(parent);
+    parent.insertAdjacentElement('beforebegin', prevParent);
+    movePreviousSiblings(current, prevParent);
   }
-  // Move tokens and non-tokens across.
-  for (let sib: ChildNode | null = token.previousSibling; sib; ) {
-    const prevSib: ChildNode | null = sib.previousSibling;
-    prevPar.insertBefore(sib, prevPar.firstChild);
-    sib = prevSib;
-  }
+
   return [prevPar, par];
 }
 
@@ -996,27 +1045,31 @@ export function splitBefore(token: HTMLElement): HTMLElement[] {
  * Move anything after `token` to a new parent after the current parent (SPLIT_BY_TOKEN).
  */
 export function splitAfter(token: HTMLElement): HTMLElement[] {
-  const nextTok = getNextTokenSibling(token);
-  const par = getParent(token);
+  let par = getParent(token);
+  par = convertImplicitLineToParagraph(par);
   const line = getLine(token);
+
+  if (par === line && isRootTextLine(line)) {
+    const br = document.createElement('br');
+    token.after(br);
+    return [line, br];
+  }
+
   const nextPar = createSplitPeer(par);
   par.insertAdjacentElement('afterend', nextPar);
-  // We may need to put an anchor between prevPar and par.
-  if (line !== par) {
-    const anchor = createAnchor();
-    par.insertAdjacentElement('afterend', anchor);
-  }
-  if (!nextTok) {
-    if (canCreateWithAnchor(nextPar.tagName)) {
-      addAnchors(nextPar);
+  moveNextSiblings(token, nextPar);
+  ensureAnchorIfEmpty(nextPar);
+
+  for (let current = par; current !== line; current = current.parentElement as HTMLElement) {
+    const parent = current.parentElement;
+    if (!parent) {
+      break;
     }
+    const nextParent = createSplitPeer(parent);
+    parent.insertAdjacentElement('afterend', nextParent);
+    moveNextSiblings(current, nextParent);
   }
-  // Move tokens and non-tokens across.
-  for (let sib: ChildNode | null = token.nextSibling; sib; ) {
-    const nextSib: ChildNode | null = sib.nextSibling;
-    nextPar.appendChild(sib);
-    sib = nextSib;
-  }
+
   return [par, nextPar];
 }
 

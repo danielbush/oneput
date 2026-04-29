@@ -40,9 +40,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     at root text level.
   - Whitespace around split boundaries. Current expectations include leading spaces in text content like ' ccc'; once splitting across ancestors, we may need to
     normalize whether whitespace stays with the left or right side.
-- [ ] converting elements
-- [ ] insert elements
+- [ ] select and tag selection with em-tag
+- [ ] insert element before/after tag
 - [ ] delete elements
+- [ ] converting elements
 - undo
   - undo text changes
   - undo FOCUSABLE changes

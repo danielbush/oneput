@@ -4,7 +4,8 @@ import { isInlineFlow } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
 import { TokenCursor } from './TokenCursor.js';
 import type { JsedDocument } from './types.js';
-import type { Tokenizer } from './Tokenizer.js';
+import type { CursorMotion } from './CursorMotion.js';
+import type { CursorTextOps } from './CursorTextOps.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -36,7 +37,8 @@ export class TokenSelection {
   static create(params: {
     seed: HTMLElement;
     document: JsedDocument;
-    tokenizer: Tokenizer;
+    motion: CursorMotion;
+    textOps: CursorTextOps;
   }): TokenSelection {
     return new TokenSelection(params);
   }
@@ -46,11 +48,17 @@ export class TokenSelection {
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
-  constructor(params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }) {
+  constructor(params: {
+    seed: HTMLElement;
+    document: JsedDocument;
+    motion: CursorMotion;
+    textOps: CursorTextOps;
+  }) {
     this.anchor = params.seed;
     this.headCursor = TokenCursor.create({
       document: params.document,
-      tokenizer: params.tokenizer,
+      motion: params.motion,
+      textOps: params.textOps,
       token: params.seed,
       onCursorChange: () => {},
       onError: () => {},
@@ -289,11 +297,7 @@ export class TokenSelection {
     // `token.remove` would insert stray ANCHOR's when it can't find a
     // token sibling at the detached level.
     let outermostConsumedForKeeper: HTMLElement | null = null;
-    for (
-      let anc = keeper.parentElement;
-      anc && isInlineFlow(anc);
-      anc = anc.parentElement
-    ) {
+    for (let anc = keeper.parentElement; anc && isInlineFlow(anc); anc = anc.parentElement) {
       if (!consumedCTContainers.has(anc)) break;
       outermostConsumedForKeeper = anc;
     }

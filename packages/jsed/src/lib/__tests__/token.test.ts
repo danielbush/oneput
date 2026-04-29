@@ -47,7 +47,6 @@ import {
   strong as strongTag,
   t
 } from '../../test/util.js';
-import { Tokenizer } from '../../Tokenizer.js';
 
 describe('replaceText', () => {
   it('rewrites an existing TOKEN text node', () => {
@@ -563,7 +562,6 @@ describe('leading/trailing spaces', () => {
           )
         )
       );
-      Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
       const bar = findTokenByText(doc.root, 'bar');
 
       // act
@@ -589,7 +587,6 @@ describe('leading/trailing spaces', () => {
           )
         )
       );
-      Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
       const bar = findTokenByText(doc.root, 'bar');
 
       // act
@@ -688,7 +685,6 @@ describe('leading/trailing spaces', () => {
           )
         )
       );
-      Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
       const bar = findTokenByText(doc.root, 'bar');
 
       // act
@@ -704,8 +700,7 @@ describe('leading/trailing spaces', () => {
 
     it('does not offer space insertion in an ordinary text run', () => {
       // arrange
-      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar baz')));
-      Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
+      const doc = makeRoot(frag(p({ id: 'p1' }, t('foo'), s(), t('bar'), s(), t('baz'))));
       const bar = findTokenByText(doc.root, 'bar');
 
       // act
@@ -729,7 +724,6 @@ describe('leading/trailing spaces', () => {
           )
         )
       );
-      Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
       const bar = findTokenByText(doc.root, 'bar');
 
       // act
@@ -791,8 +785,7 @@ describe('leading/trailing spaces', () => {
 
     it('does not offer space removal in an ordinary text run', () => {
       // arrange
-      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar baz')));
-      Tokenizer.createNull().tokenizeLineAt(byId(doc, 'p1'));
+      const doc = makeRoot(frag(p({ id: 'p1' }, t('foo'), s(), t('bar'), s(), t('baz'))));
       const bar = findTokenByText(doc.root, 'bar');
 
       // act

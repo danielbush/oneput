@@ -5,8 +5,9 @@ import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { isCursorTransparent, isIsland, isLine, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
-import { TokenCursor, type TokenCursorError } from './TokenCursor.js';
-import type { SetTokenOpts } from './TokenCursorBase.js';
+import { TokenCursor, type SetTokenOpts, type TokenCursorError } from './TokenCursor.js';
+import { CursorMotion } from './CursorMotion.js';
+import { CursorTextOps } from './CursorTextOps.js';
 import { TokenSelection } from './TokenSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
@@ -143,6 +144,8 @@ export class EditManager {
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
+  private cursorMotion: CursorMotion;
+  private cursorTextOps: CursorTextOps;
 
   constructor(
     private document: JsedDocument,
@@ -156,7 +159,16 @@ export class EditManager {
     private onElementChange?: (event: EditManagerElementChangeEvent) => void,
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
-  ) {}
+  ) {
+    this.cursorMotion = CursorMotion.create({
+      document: this.document,
+      tokenizer: this.tokenizer
+    });
+    this.cursorTextOps = CursorTextOps.create({
+      tokenizer: this.tokenizer,
+      onError: this.handleCursorError
+    });
+  }
 
   getMode(): EditManagerMode {
     return this.mode;
@@ -210,7 +222,8 @@ export class EditManager {
       if (!this.cursor) {
         this.cursor = TokenCursor.create({
           document: this.document,
-          tokenizer: this.tokenizer,
+          motion: this.cursorMotion,
+          textOps: this.cursorTextOps,
           token: targetLineSibling,
           onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
@@ -309,9 +322,9 @@ export class EditManager {
 
       case 'delete-current': {
         const current = this.cursor.getToken();
-        this.cursor.delete();
+        this.cursor.ops.delete();
         this.notifyTextChange({ type: 'token-text-change', token: current });
-        this.cursor?.handleInputChange(intent.inputValue);
+        this.cursor?.setStateFromInput(intent.inputValue);
         return;
       }
 
@@ -343,9 +356,9 @@ export class EditManager {
         break;
 
       case 'rewrite-current':
-        this.cursor.replace(intent.firstPart);
+        this.cursor.ops.replace(intent.firstPart);
         for (const part of intent.appendedParts.reverse()) {
-          const appendedToken = this.cursor.append(part);
+          const appendedToken = this.cursor.ops.append(part);
           if (!lastToken) {
             lastToken = appendedToken;
           }
@@ -369,14 +382,14 @@ export class EditManager {
           this.userInput.selectAll();
           this.nav.FOCUS(finalToken);
           this.userInput.moveCursorToEnd();
-          this.cursor?.handleInputChange(intent.inputValue);
+          this.cursor?.setStateFromInput(intent.inputValue);
         })
         .catch((err) => {
           // TODO: close cursor?
           console.warn('handleInputChange error:', err);
         });
     } else {
-      this.cursor?.handleInputChange(intent.inputValue);
+      this.cursor?.setStateFromInput(intent.inputValue);
     }
   };
 
@@ -387,7 +400,7 @@ export class EditManager {
    */
   public handleSelectionChange = (selection: UserInputSelectionState) => {
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
-    this.cursor?.handleSelectionChange(selection);
+    this.cursor?.setStateFromSelection(selection);
   };
 
   /**
@@ -569,7 +582,8 @@ export class EditManager {
       this.selection = TokenSelection.create({
         seed: this.cursor.getToken(),
         document: this.document,
-        tokenizer: this.tokenizer
+        motion: this.cursorMotion,
+        textOps: this.cursorTextOps
       });
     }
     this.selection.extendNext();
@@ -587,7 +601,8 @@ export class EditManager {
       this.selection = TokenSelection.create({
         seed: this.cursor.getToken(),
         document: this.document,
-        tokenizer: this.tokenizer
+        motion: this.cursorMotion,
+        textOps: this.cursorTextOps
       });
     }
     this.selection.extendPrevious();
@@ -636,7 +651,7 @@ export class EditManager {
   // #region Actions
 
   private splitAtCursor() {
-    const inserted = this.cursor?.splitAtToken();
+    const inserted = this.cursor?.ops.splitAtToken();
     if (inserted) {
       this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     }

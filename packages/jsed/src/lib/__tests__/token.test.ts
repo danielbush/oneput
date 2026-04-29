@@ -1316,6 +1316,161 @@ describe('splitting', () => {
     expect(trailing).toBe(inlineFlows[1]);
   });
 
+  test('splitBefore - INLINE_FLOW nested', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'),
+        s(),
+        emTag(
+          { style: 'display:inline;' },
+          t('bbb'),
+          s(),
+          strongTag(
+            { style: 'display:inline;' }, //
+            t('ccc')
+          ),
+          s(),
+          t('ddd')
+        ),
+        s(),
+        t('eee')
+      )
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    const [leading, trailing] = splitBefore(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    const ems = Array.from(doc.root.querySelectorAll('em'));
+    const strongs = Array.from(doc.root.querySelectorAll('strong'));
+    expect(lines).toHaveLength(2);
+    expect(ems).toHaveLength(2);
+    expect(strongs).toHaveLength(2);
+    expect(lines[0]?.textContent?.trim()).toBe('aaa bbb');
+    expect(lines[1]?.textContent?.trim()).toBe('ccc ddd eee');
+    expect(leading).toBe(strongs[0]);
+    expect(trailing).toBe(strongs[1]);
+    expect(isAnchor(strongs[0]?.firstElementChild as HTMLElement)).toBe(true);
+  });
+
+  test('splitAfter - INLINE_FLOW nested', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'),
+        s(),
+        emTag(
+          { style: 'display:inline;' },
+          t('bbb'),
+          s(),
+          strongTag(
+            { style: 'display:inline;' }, //
+            t('ccc')
+          ),
+          s(),
+          t('ddd')
+        ),
+        s(),
+        t('eee')
+      )
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    const [leading, trailing] = splitAfter(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    const ems = Array.from(doc.root.querySelectorAll('em'));
+    const strongs = Array.from(doc.root.querySelectorAll('strong'));
+    expect(lines).toHaveLength(2);
+    expect(ems).toHaveLength(2);
+    expect(strongs).toHaveLength(2);
+    expect(lines[0]?.textContent?.trim()).toBe('aaa bbb ccc');
+    expect(lines[1]?.textContent?.trim()).toBe('ddd eee');
+    expect(leading).toBe(strongs[0]);
+    expect(trailing).toBe(strongs[1]);
+    expect(isAnchor(strongs[1]?.firstElementChild as HTMLElement)).toBe(true);
+  });
+
+  test('splitBefore - INLINE_FLOW boundary (ANCHOR)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(t('aaa'), s(), emTag({ style: 'display:inline;' }, t('bbb'), s(), t('ccc')), s(), t('ddd'))
+    );
+    const bbb = findTokenByText(doc.root, 'bbb');
+
+    // act
+    const [leading, trailing] = splitBefore(bbb);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    const inlineFlows = Array.from(doc.root.querySelectorAll('em'));
+    expect(lines).toHaveLength(2);
+    expect(inlineFlows).toHaveLength(2);
+    expect(lines[0]?.textContent?.trim()).toBe('aaa');
+    expect(lines[1]?.textContent?.trim()).toBe('bbb ccc ddd');
+    expect(isAnchor(inlineFlows[0]?.firstElementChild as HTMLElement)).toBe(true);
+    expect(leading).toBe(inlineFlows[0]);
+    expect(trailing).toBe(inlineFlows[1]);
+  });
+
+  test('splitAfter - INLINE_FLOW boundary (ANCHOR)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(t('aaa'), s(), emTag({ style: 'display:inline;' }, t('bbb'), s(), t('ccc')), s(), t('ddd'))
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    const [leading, trailing] = splitAfter(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    const inlineFlows = Array.from(doc.root.querySelectorAll('em'));
+    expect(lines).toHaveLength(2);
+    expect(inlineFlows).toHaveLength(2);
+    expect(lines[0]?.textContent?.trim()).toBe('aaa bbb ccc');
+    expect(lines[1]?.textContent?.trim()).toBe('ddd');
+    expect(isAnchor(inlineFlows[1]?.firstElementChild as HTMLElement)).toBe(true);
+    expect(leading).toBe(inlineFlows[0]);
+    expect(trailing).toBe(inlineFlows[1]);
+  });
+
+  test('splitBefore - ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'),
+        s(),
+        emTag(
+          { style: 'display:inline;' },
+          t('bbb'),
+          s(),
+          '<span class="katex" style="display:inline;">x²</span>',
+          s(),
+          t('ccc')
+        ),
+        s(),
+        t('ddd')
+      )
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    splitBefore(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    expect(lines[0]?.querySelector('.katex')?.textContent).toBe('x²');
+    expect(lines[1]?.querySelector('.katex')).toBeNull();
+    expect(lines[0]?.textContent?.trim()).toBe('aaa bbb x²');
+    expect(lines[1]?.textContent?.trim()).toBe('ccc ddd');
+  });
+
   test('splitBefore - IMPLICIT_LINE', () => {
     // arrange
     const doc = makeRoot(
@@ -1381,6 +1536,46 @@ describe('splitting', () => {
     // assert
     expect(doc.root.querySelectorAll('br')).toHaveLength(1);
     expect(doc.root.textContent?.trim()).toBe('aaa bbb');
+  });
+
+  test('splitBefore - text-only doc', () => {
+    // arrange
+    const doc = makeRoot(frag(t('aaa'), s(), t('bbb')));
+    const bbb = findTokenByText(doc.root, 'bbb');
+
+    // act
+    splitBefore(bbb);
+
+    // assert
+    expect(doc.root.querySelectorAll('br')).toHaveLength(1);
+    expect(doc.root.textContent?.trim()).toBe('aaa bbb');
+  });
+
+  test('splitBefore - whitespace preservation', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'), //
+        s(),
+        emTag(
+          { style: 'display:inline;' }, //
+          t('bbb'),
+          s(),
+          t('ccc')
+        ),
+        s(),
+        t('ddd')
+      )
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    splitBefore(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    expect(lines[0]?.textContent).toBe('aaa bbb ');
+    expect(lines[1]?.textContent).toBe('ccc ddd');
   });
 });
 

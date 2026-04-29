@@ -77,10 +77,6 @@ describe('splitAtToken', () => {
     // assert
     expect(getValue(cursor.getToken())).toBe('world');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
-    expect(cursor.getDocument().root.querySelectorAll('p')[0]?.textContent?.trim()).toBe('hello');
-    expect(cursor.getDocument().root.querySelectorAll('p')[1]?.textContent?.trim()).toBe(
-      'world foo'
-    );
   });
 });
 

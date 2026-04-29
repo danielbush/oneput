@@ -1194,7 +1194,129 @@ describe('leading/trailing spaces', () => {
 });
 
 describe('splitting', () => {
-  test('splitBefore - preserves IMPLICIT_LINE on the new leading segment', () => {
+  test('splitBefore - P', () => {
+    // arrange
+    const doc = makeRoot(p(t('aaa'), s(), t('bbb')));
+    const bbb = findTokenByText(doc.root, 'bbb');
+
+    // act
+    const [leading, trailing] = splitBefore(bbb);
+
+    // assert
+    expect(leading.tagName).toBe('P');
+    expect(trailing.tagName).toBe('P');
+    expect(leading.textContent).toBe('aaa ');
+    expect(trailing.textContent).toBe('bbb');
+    expect(Array.from(doc.root.querySelectorAll('p'))).toEqual([leading, trailing]);
+  });
+
+  test('splitAfter - P', () => {
+    // arrange
+    const doc = makeRoot(p(t('aaa'), s(), t('bbb')));
+    const aaa = findTokenByText(doc.root, 'aaa');
+
+    // act
+    const [leading, trailing] = splitAfter(aaa);
+
+    // assert
+    expect(leading.tagName).toBe('P');
+    expect(trailing.tagName).toBe('P');
+    expect(leading.textContent).toBe('aaa');
+    expect(trailing.textContent).toBe(' bbb');
+    expect(Array.from(doc.root.querySelectorAll('p'))).toEqual([leading, trailing]);
+  });
+
+  test('splitBefore - first TOKEN in P', () => {
+    // arrange
+    const doc = makeRoot(p(t('aaa'), s(), t('bbb')));
+    const aaa = findTokenByText(doc.root, 'aaa');
+
+    // act
+    const [leading, trailing] = splitBefore(aaa);
+
+    // assert
+    expect(leading.tagName).toBe('P');
+    expect(trailing.tagName).toBe('P');
+    expect(isAnchor(leading.firstElementChild!)).toBe(true);
+    expect(trailing.textContent).toBe('aaa bbb');
+    expect(Array.from(doc.root.querySelectorAll('p'))).toEqual([leading, trailing]);
+  });
+
+  test('splitAfter - last TOKEN in P', () => {
+    // arrange
+    const doc = makeRoot(p(t('aaa'), s(), t('bbb')));
+    const bbb = findTokenByText(doc.root, 'bbb');
+
+    // act
+    const [leading, trailing] = splitAfter(bbb);
+
+    // assert
+    expect(leading.tagName).toBe('P');
+    expect(trailing.tagName).toBe('P');
+    expect(leading.textContent).toBe('aaa bbb');
+    expect(isAnchor(trailing.firstElementChild!)).toBe(true);
+    expect(Array.from(doc.root.querySelectorAll('p'))).toEqual([leading, trailing]);
+  });
+
+  test('splitBefore - INLINE_FLOW', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'),
+        s(),
+        emTag({ style: 'display:inline;' }, t('bbb'), s(), t('ccc'), s(), t('ddd')),
+        s(),
+        t('eee')
+      )
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    const [leading, trailing] = splitBefore(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    const inlineFlows = Array.from(doc.root.querySelectorAll('em'));
+    expect(lines).toHaveLength(2);
+    expect(inlineFlows).toHaveLength(2);
+    expect(lines[0]?.textContent?.trim()).toBe('aaa bbb');
+    expect(lines[1]?.textContent?.trim()).toBe('ccc ddd eee');
+    expect(inlineFlows[0]?.textContent?.trim()).toBe('bbb');
+    expect(inlineFlows[1]?.textContent?.trim()).toBe('ccc ddd');
+    expect(leading).toBe(inlineFlows[0]);
+    expect(trailing).toBe(inlineFlows[1]);
+  });
+
+  test('splitAfter - INLINE_FLOW', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'),
+        s(),
+        emTag({ style: 'display:inline;' }, t('bbb'), s(), t('ccc'), s(), t('ddd')),
+        s(),
+        t('eee')
+      )
+    );
+    const ccc = findTokenByText(doc.root, 'ccc');
+
+    // act
+    const [leading, trailing] = splitAfter(ccc);
+
+    // assert
+    const lines = Array.from(doc.root.querySelectorAll('p'));
+    const inlineFlows = Array.from(doc.root.querySelectorAll('em'));
+    expect(lines).toHaveLength(2);
+    expect(inlineFlows).toHaveLength(2);
+    expect(lines[0]?.textContent?.trim()).toBe('aaa bbb ccc');
+    expect(lines[1]?.textContent?.trim()).toBe('ddd eee');
+    expect(inlineFlows[0]?.textContent?.trim()).toBe('bbb ccc');
+    expect(inlineFlows[1]?.textContent?.trim()).toBe('ddd');
+    expect(leading).toBe(inlineFlows[0]);
+    expect(trailing).toBe(inlineFlows[1]);
+  });
+
+  test('splitBefore - IMPLICIT_LINE', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -1211,15 +1333,17 @@ describe('splitting', () => {
     const [leading, trailing] = splitBefore(ccc);
 
     // assert
-    expect(isImplicitLine(leading)).toBe(true);
-    expect(isImplicitLine(trailing)).toBe(true);
+    expect(leading.tagName).toBe('P');
+    expect(trailing.tagName).toBe('P');
+    expect(isImplicitLine(leading)).toBe(false);
+    expect(isImplicitLine(trailing)).toBe(false);
     expect(leading.textContent).toBe('bbb ');
     expect(trailing.textContent).toBe('ccc');
     expect(leading.previousElementSibling).toBe(byId(doc, 'p1'));
     expect(trailing.nextElementSibling).toBe(byId(doc, 'p2'));
   });
 
-  test('splitAfter - preserves IMPLICIT_LINE on the new trailing segment', () => {
+  test('splitAfter - IMPLICIT_LINE', () => {
     // arrange
     const doc = makeRoot(
       div(
@@ -1236,12 +1360,27 @@ describe('splitting', () => {
     const [leading, trailing] = splitAfter(bbb);
 
     // assert
-    expect(isImplicitLine(leading)).toBe(true);
-    expect(isImplicitLine(trailing)).toBe(true);
+    expect(leading.tagName).toBe('P');
+    expect(trailing.tagName).toBe('P');
+    expect(isImplicitLine(leading)).toBe(false);
+    expect(isImplicitLine(trailing)).toBe(false);
     expect(leading.textContent).toBe('bbb');
     expect(trailing.textContent).toBe(' ccc');
     expect(leading.previousElementSibling).toBe(byId(doc, 'p1'));
     expect(trailing.nextElementSibling).toBe(byId(doc, 'p2'));
+  });
+
+  test('splitAfter - text-only doc', () => {
+    // arrange
+    const doc = makeRoot(frag(t('aaa'), s(), t('bbb')));
+    const aaa = findTokenByText(doc.root, 'aaa');
+
+    // act
+    splitAfter(aaa);
+
+    // assert
+    expect(doc.root.querySelectorAll('br')).toHaveLength(1);
+    expect(doc.root.textContent?.trim()).toBe('aaa bbb');
   });
 });
 

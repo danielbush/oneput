@@ -440,6 +440,14 @@
     right: -0.28em;
   }
 
+  .demo-line :global(.jsed-token-focus.jsed-crs-insert-before)::after {
+    filter: drop-shadow(0.36em 0 0 #dc2626);
+  }
+
+  .demo-line :global(.jsed-token-focus.jsed-crs-insert-after)::after {
+    filter: drop-shadow(-0.36em 0 0 #dc2626);
+  }
+
   .demo-line :global(.jsed-token-focus.jsed-crs-append)::after {
     top: -0.22em;
   }
@@ -470,11 +478,6 @@
     border-radius: 999px;
     background: currentColor;
     animation: cursor-lab-underline 1.35s ease-in-out infinite;
-  }
-
-  .demo-line :global(.jsed-token-focus.jsed-crs-insert-before),
-  .demo-line :global(.jsed-token-focus.jsed-crs-insert-after) {
-    color: inherit;
   }
 
   .demo-line :global(.jsed-token-focus.jsed-crs-insert-before)::before,

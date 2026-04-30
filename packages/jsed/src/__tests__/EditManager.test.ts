@@ -443,6 +443,53 @@ describe('EditManager', () => {
       });
     });
 
+    describe('deleteFocus', () => {
+      it('deletes the focused element and focuses the next FOCUSABLE', () => {
+        // arrange
+        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.start();
+        const p1 = byId(doc, 'p1');
+        const p2 = byId(doc, 'p2');
+
+        // act
+        const deleted = editManager.deleteFocus();
+
+        // assert
+        expect(deleted).toBe(true);
+        expect(doc.root.contains(p1)).toBe(false);
+        expect(Array.from(doc.root.children)).toHaveLength(1);
+        expect(editManager.nav.getFocus()).toBe(p2);
+
+        editManager.destroy();
+      });
+
+      it('deletes the focused element and falls back to the previous FOCUSABLE', () => {
+        // arrange
+        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.start();
+        const p1 = byId(doc, 'p1');
+        const p2 = byId(doc, 'p2');
+        editManager.nav.REQUEST_FOCUS(p2);
+
+        // act
+        const deleted = editManager.deleteFocus();
+
+        // assert
+        expect(deleted).toBe(true);
+        expect(doc.root.contains(p2)).toBe(false);
+        expect(Array.from(doc.root.children)).toHaveLength(1);
+        expect(editManager.nav.getFocus()).toBe(p1);
+
+        editManager.destroy();
+      });
+    });
+
     describe('handleEnter - user initiates editing', () => {
       test('from a focused LINE with a leading ISLAND lands the CURSOR on that ISLAND', () => {
         // arrange

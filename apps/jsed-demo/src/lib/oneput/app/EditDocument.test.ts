@@ -31,6 +31,7 @@ describe('EditDocument', () => {
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
+    const p2 = byId(doc, 'p2');
 
     ctl.simulateStart(() => editDocument);
     const appChanges = ctl.trackAppChanges();
@@ -336,5 +337,37 @@ describe('EditDocument', () => {
     expect(insertItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('li');
     expect(editManager.nav.getFocus()).toBe(child);
+  });
+
+  it('adds a Delete focused element menu item that confirms before deleting', async () => {
+    // arrange
+    const doc = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const p1 = byId(doc, 'p1');
+    const p2 = byId(doc, 'p2');
+
+    ctl.simulateStart(() => editDocument);
+    editDocument.renderMenuItems();
+    const deleteItem = ctl.currentProps.menuItems?.find(
+      (item) => item.id === 'DELETE_FOCUSED_ELEMENT'
+    );
+
+    // act
+    const action = deleteItem?.action?.(ctl);
+    ctl.currentProps.menuOpen = true;
+    await ctl.simulateKey('Enter');
+    await action;
+
+    // assert
+    expect(deleteItem).toBeDefined();
+    expect(doc.root.contains(p1)).toBe(false);
+    expect(Array.from(doc.root.children)).toHaveLength(1);
+    expect(editManager.nav.getFocus()).toBe(p2);
   });
 });

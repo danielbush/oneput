@@ -240,6 +240,20 @@ export class EditDocument implements AppObject {
     this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'in'));
   };
 
+  private confirmDeleteFocusedElement = async () => {
+    const tagName = this.editManager.getFocusedElementTagName() ?? 'element';
+    const confirm = this.ctl.confirm({
+      message: `Delete focused ${tagName} element?`
+    });
+    const yes = await confirm.userChooses();
+    if (!yes) {
+      return;
+    }
+
+    this.editManager.deleteFocus();
+    this.ctl.menu.closeMenu();
+  };
+
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
@@ -373,6 +387,13 @@ export class EditDocument implements AppObject {
             action: this.promptForElementInTag,
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
+          }),
+        this.editManager.canDeleteFocus() &&
+          stdMenuItem({
+            id: 'DELETE_FOCUSED_ELEMENT',
+            textContent: 'Delete focused element...',
+            action: this.confirmDeleteFocusedElement,
+            left: (b) => [b.icon(icons.X)]
           }),
         this.editManager.canRemoveSpaceAfterCursor() &&
           stdMenuItem({

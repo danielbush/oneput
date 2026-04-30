@@ -3,9 +3,15 @@ import * as dom from './lib/dom.js';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { canContainChildTag, getDefaultInsertChildTag } from './lib/dom-rules.js';
+import { canContainChildTag, canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
+import {
+  findNextEditableLine,
+  findNextFocusableOutside,
+  findPreviousFocusableOutside,
+  getFirstLineSibling,
+  getLine
+} from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type SetTokenOpts, type TokenCursorError } from './TokenCursor.js';
 import { CursorMotion } from './CursorMotion.js';
@@ -1071,6 +1077,11 @@ export class EditManager {
     return !!this.getFocusElementChildInsertion(tagName);
   }
 
+  canDeleteFocus(): boolean {
+    const focus = this.getFocusedTag();
+    return !!(focus && canDelete(focus, this.document));
+  }
+
   insertElementAfterFocus(tagName?: string): boolean {
     const insertion = this.getFocusElementInsertion(tagName);
     if (!insertion) {
@@ -1107,6 +1118,27 @@ export class EditManager {
     insertion.parent.appendChild(inserted);
     this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     this.nav.FOCUS(inserted);
+    return true;
+  }
+
+  deleteFocus(): boolean {
+    const focus = this.getFocusedTag();
+    if (!focus || !canDelete(focus, this.document)) {
+      return false;
+    }
+
+    const parent = focus.parentElement;
+    if (!parent) {
+      return false;
+    }
+    const nextFocus =
+      findNextFocusableOutside(focus, this.document.root) ??
+      findPreviousFocusableOutside(focus, this.document.root) ??
+      parent;
+
+    dom.deleteElement(focus);
+    this.notifyElementChange({ type: 'focusable-removed', element: focus });
+    this.nav.FOCUS(nextFocus);
     return true;
   }
 

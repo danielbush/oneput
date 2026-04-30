@@ -50,8 +50,8 @@ task # see tasks
 Web
 
 ```sh
-task oneput:dev:public # to to live/demo and play with oneput
-task jsed:dev:public
+task oneput-demo:dev # to to live/demo and play with oneput
+task jsed-demo:dev
 ```
 
 Expo sandbox

@@ -345,25 +345,82 @@ describe('EditManager', () => {
         expect(wrapper.textContent).toBe('foo');
         expect(wrapper.firstElementChild).toBe(cursorToken);
         expect(editManager.cursor?.getToken()).toBe(cursorToken);
+        expect(editManager.nav.getFocus()).toBe(wrapper);
 
         editManager.destroy();
       });
 
-      it('does not wrap when a ranged SELECTION is active', () => {
+      it('wraps the current ISLAND and keeps the CURSOR on that ISLAND', () => {
+        // arrange
+        const doc = makeRoot(
+          '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'd1'));
+        const island = editManager.cursor?.getToken() as HTMLElement;
+
+        // act
+        const wrapped = editManager.wrapCursorWithTag('em');
+
+        // assert
+        const wrapper = byId(doc, 'd1').querySelector('em') as HTMLElement;
+        expect(wrapped).toBe(true);
+        expect(wrapper).not.toBeNull();
+        expect(wrapper.firstElementChild).toBe(island);
+        expect(isIsland(editManager.cursor!.getToken())).toBe(true);
+        expect(editManager.cursor?.getToken()).toBe(island);
+
+        editManager.destroy();
+      });
+
+      it('wraps the active SELECTION and clears the transient selection wrappers', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editManager = EditManager.createNull({
           document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
+        const anchor = editManager.cursor?.getToken() as HTMLElement;
         editManager.extendNext();
 
         // act
-        const wrapped = editManager.wrapCursorWithTag('em');
+        const wrapped = editManager.wrapCursorWithTag('strong');
 
         // assert
-        expect(wrapped).toBe(false);
-        expect(byId(doc, 'p1').querySelector('em')).toBeNull();
+        const wrapper = byId(doc, 'p1').querySelector('strong') as HTMLElement;
+        expect(wrapped).toBe(true);
+        expect(wrapper).not.toBeNull();
+        expect(wrapper.textContent).toBe('foo bar');
+        expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+        expect(editManager.cursor?.getToken()).toBe(anchor);
+        expect(editManager.nav.getFocus()).toBe(wrapper);
+
+        editManager.destroy();
+      });
+
+      it('wraps a SELECTION containing an ISLAND', () => {
+        // arrange
+        const doc = makeRoot(
+          '<div id="d1">before <span class="katex" style="display:inline;">x²</span> after</div>'
+        );
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'd1'));
+        editManager.extendNext();
+
+        // act
+        const wrapped = editManager.wrapCursorWithTag('strong');
+
+        // assert
+        const wrapper = byId(doc, 'd1').querySelector('strong') as HTMLElement;
+        expect(wrapped).toBe(true);
+        expect(wrapper).not.toBeNull();
+        expect(wrapper.textContent).toBe('before x²');
+        expect(wrapper.querySelector('.katex')).not.toBeNull();
+        expect(doc.root.querySelector('.jsed-selection')).toBeNull();
 
         editManager.destroy();
       });

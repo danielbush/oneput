@@ -215,6 +215,20 @@ export class TokenSelection {
     this.headCursor.destroy();
   }
 
+  wrapWithTag(tagName: string): HTMLElement[] | null {
+    if (!this.wrappers.every((wrapper) => token.canWrapElementChildrenWithTag(wrapper, tagName))) {
+      return null;
+    }
+
+    const wrapped = this.wrappers.flatMap((wrapper) => {
+      const element = token.wrapElementChildrenWithTag(wrapper, tagName);
+      return element ? [element] : [];
+    });
+    this.wrappers = [];
+    this.headCursor.destroy();
+    return wrapped;
+  }
+
   /**
    * Reduce the selection to its START (earlier in document order):
    * unwrap SELECTION_WRAPPER's, remove every selected TOKEN except the

@@ -170,6 +170,8 @@ describe('EditDocument', () => {
 
     // act
     tagItem?.action?.(ctl);
+    expect(ctl.currentProps.menuItems?.[0]?.id).toBe('APPLY_TAG_SELECTION');
+    expect(ctl.currentProps.inputElement?.disabled).toBe(false);
     ctl.input.setInputValue('em');
     ctl.input.runSubmitHandler();
 
@@ -179,5 +181,42 @@ describe('EditDocument', () => {
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(cursorToken);
     expect(editManager.cursor?.getToken()).toBe(cursorToken);
+  });
+
+  it('runs Tag selection as a child app so an island can use the input prompt', () => {
+    // arrange
+    const doc = makeDocument(
+      '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
+    );
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const d1 = byId(doc, 'd1');
+
+    ctl.simulateStart(() => editDocument);
+    editManager.nav.REQUEST_FOCUS(d1);
+    editManager.nav.REQUEST_FOCUS(d1);
+    editDocument.renderMenuItems();
+    const island = editManager.cursor?.getToken() as HTMLElement;
+    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'TAG_SELECTION');
+    expect(ctl.currentProps.inputElement?.disabled).toBe(true);
+
+    // act
+    tagItem?.action?.(ctl);
+    expect(ctl.currentProps.inputElement?.disabled).toBe(false);
+    ctl.input.setInputValue('em');
+    ctl.input.runSubmitHandler();
+
+    // assert
+    const wrapper = d1.querySelector('em') as HTMLElement;
+    expect(tagItem).toBeDefined();
+    expect(wrapper).not.toBeNull();
+    expect(wrapper.firstElementChild).toBe(island);
+    expect(editManager.cursor?.getToken()).toBe(island);
+    expect(ctl.currentProps.inputElement?.disabled).toBe(true);
   });
 });

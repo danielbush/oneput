@@ -198,6 +198,26 @@ describe('TokenSelection single-paragraph grow/shrink', () => {
     expect(selectedTokenValues(doc)).toEqual(['a']);
   });
 
+  test('wrapWithTag preserves INLINE_FLOW boundaries', () => {
+    // arrange
+    const doc = makeRoot(p(t('a'), s(), em(inlineStyleHack, t('b'), s(), t('c')), s(), t('d')));
+    const [a] = tokens(doc);
+    const selection = seed(doc, a);
+    selection.extendNext();
+    selection.extendNext();
+    selection.extendNext();
+
+    // act
+    const wrappers = selection.wrapWithTag('strong');
+
+    // assert
+    const strongs = Array.from(doc.root.querySelectorAll('strong'));
+    expect(wrappers).toEqual(strongs);
+    expect(strongs.map((el) => el.textContent)).toEqual(['a', 'b c', 'd']);
+    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(doc.root.querySelector('em strong')?.textContent).toBe('b c');
+  });
+
   test('grow INLINE_FLOW - previous', () => {
     // arrange
     const doc = makeRoot(

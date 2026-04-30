@@ -13,7 +13,8 @@ import {
   isAnchor,
   isImplicitLine,
   isInlineFlow,
-  isLine
+  isLine,
+  isLineSibling
 } from './taxonomy.js';
 import {
   getLine,
@@ -79,6 +80,25 @@ function anchor2Token(token: HTMLElement): HTMLElement {
   return token;
 }
 
+/**
+ * Assumes `isToken` is true, but checks for weird invalid states that might occur
+ */
+function validate(token: HTMLElement): void {
+  if (isAnchor(token)) {
+    return;
+  }
+  if (!token.firstChild) {
+    throw new Error('token has no text');
+  }
+  if (token.firstChild.nodeType !== Node.TEXT_NODE) {
+    throw new Error('first child should be a text node');
+  }
+}
+
+function isWhitespaceTextNode(node: Node | null | undefined): node is Text {
+  return node instanceof window.Text && /^\s+$/.test(node.nodeValue ?? '');
+}
+
 // #region Insert / Remove
 
 export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void {
@@ -110,254 +130,6 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
 }
 
 /**
- * Assumes `isToken` is true, but checks for weird invalid states that might occur
- */
-function validate(token: HTMLElement): void {
-  if (isAnchor(token)) {
-    return;
-  }
-  if (!token.firstChild) {
-    throw new Error('token has no text');
-  }
-  if (token.firstChild.nodeType !== Node.TEXT_NODE) {
-    throw new Error('first child should be a text node');
-  }
-}
-
-function isWhitespaceTextNode(node: Node | null | undefined): node is Text {
-  return node instanceof window.Text && /^\s+$/.test(node.nodeValue ?? '');
-}
-
-function subtreeEndsWithWhitespace(node: Node): boolean {
-  if (node instanceof Text) {
-    return /\s$/.test(node.nodeValue ?? '');
-  }
-
-  if (!(node instanceof Element) || isIgnorable(node)) {
-    return false;
-  }
-
-  const children = Array.from(node.childNodes).reverse();
-  for (const child of children) {
-    if (child instanceof Element && isIgnorable(child)) {
-      continue;
-    }
-    return subtreeEndsWithWhitespace(child);
-  }
-
-  return false;
-}
-
-function subtreeStartsWithWhitespace(node: Node): boolean {
-  if (node instanceof Text) {
-    return /^\s/.test(node.nodeValue ?? '');
-  }
-
-  if (!(node instanceof Element) || isIgnorable(node)) {
-    return false;
-  }
-
-  for (const child of node.childNodes) {
-    if (child instanceof Element && isIgnorable(child)) {
-      continue;
-    }
-    return subtreeStartsWithWhitespace(child);
-  }
-
-  return false;
-}
-
-function removeLeadingSpaceNode(textNode: Text): Text | null {
-  const value = textNode.nodeValue ?? '';
-  if (!/^\s/.test(value)) {
-    return null;
-  }
-  textNode.parentNode?.removeChild(textNode);
-  return textNode;
-}
-
-function removeTrailingSpaceNode(textNode: Text): Text | null {
-  const value = textNode.nodeValue ?? '';
-  if (!/\s$/.test(value)) {
-    return null;
-  }
-  textNode.parentNode?.removeChild(textNode);
-  return textNode;
-}
-
-function getSeparatorBefore(token: HTMLElement): Text | null {
-  const prev = token.previousSibling;
-  return isWhitespaceTextNode(prev) ? prev : null;
-}
-
-function getSeparatorAfter(token: HTMLElement): Text | null {
-  const next = token.nextSibling;
-  return isWhitespaceTextNode(next) ? next : null;
-}
-
-/**
- * Ensure there is a whitespace separator immediately before the TOKEN.
- */
-function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
-  const existing = getSeparatorBefore(token);
-  if (existing) {
-    return existing;
-  }
-  const separator = document.createTextNode(value);
-  token.parentNode?.insertBefore(separator, token);
-  return separator;
-}
-
-/**
- * Ensure there is a whitespace separator immediately after the TOKEN.
- *
- * Used for default inter-TOKEN spacing.
- */
-export function ensureSeparatorAfter(token: HTMLElement, value = ' '): Text {
-  const existing = getSeparatorAfter(token);
-  if (existing) {
-    return existing;
-  }
-  const separator = document.createTextNode(value);
-  token.parentNode?.insertBefore(separator, token.nextSibling);
-  return separator;
-}
-
-/**
- * Remove the whitespace separator immediately before the TOKEN, if present.
- */
-function removeSeparatorBefore(token: HTMLElement): void {
-  const separator = getSeparatorBefore(token);
-  separator?.parentNode?.removeChild(separator);
-}
-
-/**
- * Remove the whitespace separator immediately after the TOKEN, if present.
- */
-function removeSeparatorAfter(token: HTMLElement): void {
-  const separator = getSeparatorAfter(token);
-  separator?.parentNode?.removeChild(separator);
-}
-
-/**
- * Ensure normal boundary spacing before a TOKEN.
- */
-export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
-  return ensureSeparatorBefore(token, value);
-}
-
-/**
- * Ensure normal boundary spacing after a TOKEN.
- */
-export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
-  return ensureSeparatorAfter(token, value);
-}
-
-export function canInsertSpaceBeforeToken(token: HTMLElement): boolean {
-  if (!isToken(token) || !token.parentNode || getSeparatorBefore(token)) {
-    return false;
-  }
-
-  const previous = getPreviousVisibleSibling(token);
-  if (
-    !previous ||
-    isToken(previous) ||
-    (isInlineFlow(previous) && subtreeEndsWithWhitespace(previous))
-  ) {
-    return false;
-  }
-
-  return true;
-}
-
-export function insertSpaceBeforeToken(token: HTMLElement, value = ' '): Text | null {
-  if (!canInsertSpaceBeforeToken(token) || !token.parentNode) {
-    return null;
-  }
-
-  const space = document.createTextNode(value);
-  token.parentNode.insertBefore(space, token);
-  return space;
-}
-
-export function getRemovableSpaceBeforeToken(token: HTMLElement): Text | null {
-  if (!isToken(token)) {
-    return null;
-  }
-
-  const separator = getSeparatorBefore(token);
-  if (!separator) {
-    return null;
-  }
-
-  const previous = getPreviousVisibleSibling(token);
-  if (!previous || isToken(previous)) {
-    return null;
-  }
-
-  return separator;
-}
-
-export function removeSpaceBeforeToken(token: HTMLElement): boolean {
-  const separator = getRemovableSpaceBeforeToken(token);
-  if (!separator) {
-    return false;
-  }
-
-  return !!removeTrailingSpaceNode(separator);
-}
-
-export function canInsertSpaceAfterToken(token: HTMLElement): boolean {
-  if (!isToken(token) || !token.parentNode || getSeparatorAfter(token)) {
-    return false;
-  }
-
-  const next = getNextVisibleSibling(token);
-  if (!next || isToken(next) || (isInlineFlow(next) && subtreeStartsWithWhitespace(next))) {
-    return false;
-  }
-
-  return true;
-}
-
-export function insertSpaceAfterToken(token: HTMLElement, value = ' '): Text | null {
-  if (!canInsertSpaceAfterToken(token) || !token.parentNode) {
-    return null;
-  }
-
-  const space = document.createTextNode(value);
-  token.parentNode.insertBefore(space, token.nextSibling);
-  return space;
-}
-
-export function getRemovableSpaceAfterToken(token: HTMLElement): Text | null {
-  if (!isToken(token)) {
-    return null;
-  }
-
-  const separator = getSeparatorAfter(token);
-  if (!separator) {
-    return null;
-  }
-
-  const next = getNextVisibleSibling(token);
-  if (!next || isToken(next)) {
-    return null;
-  }
-
-  return separator;
-}
-
-export function removeSpaceAfterToken(token: HTMLElement): boolean {
-  const separator = getRemovableSpaceAfterToken(token);
-  if (!separator) {
-    return false;
-  }
-
-  return !!removeLeadingSpaceNode(separator);
-}
-
-/**
  * Replaces the text of the existing token.
  *
  * If the token is an ANCHOR, we convert it in-place to a regular token.
@@ -374,44 +146,6 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
     token.append(document.createTextNode(val.trim()));
   }
   return token;
-}
-
-function normalizeTagName(tagName: string): string | null {
-  const normalized = tagName.trim().replace(/^<\s*/, '').replace(/\s*>$/, '').toLowerCase();
-  return /^[a-z][a-z0-9-]*$/.test(normalized) ? normalized : null;
-}
-
-export function canWrapTokenWithTag(token: HTMLElement, tagName: string): boolean {
-  if (!isToken(token) || !token.parentElement) {
-    return false;
-  }
-
-  const normalized = normalizeTagName(tagName);
-  if (!normalized) {
-    return false;
-  }
-
-  const parentAllowsWrapper = getAllowableChildTags(token.parentElement.tagName).includes(
-    normalized
-  );
-  const wrapperAllowsToken = getAllowableChildTags(normalized).includes('span');
-  return parentAllowsWrapper && wrapperAllowsToken;
-}
-
-/**
- * Wrap a TOKEN in a new FOCUSABLE element while keeping the TOKEN itself
- * intact, so the active CURSOR can stay seated on the same LINE_SIBLING.
- */
-export function wrapTokenWithTag(token: HTMLElement, tagName: string): HTMLElement | null {
-  const normalized = normalizeTagName(tagName);
-  if (!normalized || !canWrapTokenWithTag(token, normalized)) {
-    return null;
-  }
-
-  const wrapper = token.ownerDocument.createElement(normalized);
-  token.before(wrapper);
-  wrapper.appendChild(token);
-  return wrapper;
 }
 
 /**
@@ -557,6 +291,493 @@ export function canInsertAnchorInLine(line: HTMLElement): boolean {
 
   return !hasNonIgnorableLineContent(line);
 }
+
+// #endregion
+
+// #region Wrapping (Selections)
+
+export function normalizeTagName(tagName: string): string | null {
+  const normalized = tagName.trim().replace(/^<\s*/, '').replace(/\s*>$/, '').toLowerCase();
+  return /^[a-z][a-z0-9-]*$/.test(normalized) ? normalized : null;
+}
+
+export function canWrapElementChildrenWithTag(container: HTMLElement, tagName: string): boolean {
+  if (!container.parentElement) {
+    return false;
+  }
+
+  const normalized = normalizeTagName(tagName);
+  if (!normalized) {
+    return false;
+  }
+
+  const parentAllowsWrapper = getAllowableChildTags(container.parentElement.tagName).includes(
+    normalized
+  );
+  const allowedChildTags = getAllowableChildTags(normalized);
+  const wrapperAllowsChildren = Array.from(container.children).every((child) =>
+    allowedChildTags.includes(child.tagName.toLowerCase())
+  );
+  return parentAllowsWrapper && wrapperAllowsChildren;
+}
+
+export function wrapElementChildrenWithTag(
+  container: HTMLElement,
+  tagName: string
+): HTMLElement | null {
+  const normalized = normalizeTagName(tagName);
+  if (!normalized || !canWrapElementChildrenWithTag(container, normalized)) {
+    return null;
+  }
+
+  const wrapper = container.ownerDocument.createElement(normalized);
+  container.before(wrapper);
+  wrapper.append(...Array.from(container.childNodes));
+  container.remove();
+  return wrapper;
+}
+
+export function canWrapLineSiblingWithTag(lineSibling: HTMLElement, tagName: string): boolean {
+  if (!isLineSibling(lineSibling) || !lineSibling.parentElement) {
+    return false;
+  }
+
+  const normalized = normalizeTagName(tagName);
+  if (!normalized) {
+    return false;
+  }
+
+  const parentAllowsWrapper = getAllowableChildTags(lineSibling.parentElement.tagName).includes(
+    normalized
+  );
+  const wrapperAllowsLineSibling = getAllowableChildTags(normalized).includes(
+    lineSibling.tagName.toLowerCase()
+  );
+  return parentAllowsWrapper && wrapperAllowsLineSibling;
+}
+
+/**
+ * Wrap a LINE_SIBLING in a new FOCUSABLE element while keeping the target itself
+ * intact, so the active CURSOR can stay seated on the same LINE_SIBLING.
+ */
+export function wrapLineSiblingWithTag(
+  lineSibling: HTMLElement,
+  tagName: string
+): HTMLElement | null {
+  const normalized = normalizeTagName(tagName);
+  if (!normalized || !canWrapLineSiblingWithTag(lineSibling, normalized)) {
+    return null;
+  }
+
+  const wrapper = lineSibling.ownerDocument.createElement(normalized);
+  lineSibling.before(wrapper);
+  wrapper.appendChild(lineSibling);
+  return wrapper;
+}
+
+// #endregion
+
+// #region Join
+
+export function joinNext(token: HTMLElement): void {
+  const next = getNextTokenSibling(token);
+  if (!next) {
+    return;
+  }
+  const nextSeparatorValue = getSeparatorAfter(next)?.nodeValue ?? null;
+  const val = getValue(token);
+  const nextVal = getValue(next);
+  replaceText(token, val + nextVal);
+  removeSeparatorAfter(token);
+  remove(next);
+  if (nextSeparatorValue) {
+    ensureSeparatorAfter(token, nextSeparatorValue);
+    token.classList.remove(JSED_TOKEN_COLLAPSED);
+  } else {
+    token.classList.add(JSED_TOKEN_COLLAPSED);
+  }
+}
+
+export function joinPrevious(token: HTMLElement): void {
+  const prev = getPreviousTokenSibling(token);
+  if (!prev) {
+    return;
+  }
+  const prevSeparatorValue = getSeparatorBefore(prev)?.nodeValue ?? null;
+  const val = getValue(token);
+  const prevVal = getValue(prev);
+  replaceText(token, prevVal + val);
+  removeSeparatorBefore(token);
+  remove(prev);
+  if (prevSeparatorValue) {
+    ensureSeparatorBefore(token, prevSeparatorValue);
+    token.classList.add(JSED_TOKEN_PADDED);
+  } else {
+    token.classList.remove(JSED_TOKEN_PADDED);
+  }
+}
+
+// #endregion
+
+// #region Split
+
+function createSplitPeer(parent: HTMLElement): HTMLElement {
+  if (isImplicitLine(parent)) {
+    return document.createElement('p');
+  }
+
+  const peer = parent.cloneNode(false) as HTMLElement;
+  if (peer.id) {
+    peer.removeAttribute('id');
+  }
+  return peer;
+}
+
+function movePreviousSiblings(from: Node, to: HTMLElement): void {
+  for (let sib: ChildNode | null = from.previousSibling; sib; ) {
+    const prevSib: ChildNode | null = sib.previousSibling;
+    to.insertBefore(sib, to.firstChild);
+    sib = prevSib;
+  }
+}
+
+function moveNextSiblings(from: Node, to: HTMLElement): void {
+  for (let sib: ChildNode | null = from.nextSibling; sib; ) {
+    const nextSib: ChildNode | null = sib.nextSibling;
+    to.appendChild(sib);
+    sib = nextSib;
+  }
+}
+
+function ensureAnchorIfEmpty(el: HTMLElement): void {
+  if (el.childNodes.length > 0) {
+    return;
+  }
+  if (canCreateWithAnchor(el.tagName)) {
+    addAnchors(el);
+  }
+}
+
+function isRootTextLine(line: HTMLElement): boolean {
+  return line.tagName === 'DIV' && line.parentElement === line.ownerDocument.body;
+}
+
+function convertImplicitLineToParagraph(line: HTMLElement): HTMLElement {
+  if (!isImplicitLine(line)) {
+    return line;
+  }
+
+  const paragraph = document.createElement('p');
+  while (line.firstChild) {
+    paragraph.appendChild(line.firstChild);
+  }
+  line.replaceWith(paragraph);
+  return paragraph;
+}
+
+/**
+ * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
+ */
+export function splitBefore(token: HTMLElement): HTMLElement[] {
+  let par = getParent(token);
+  par = convertImplicitLineToParagraph(par);
+  const line = getLine(token);
+
+  if (par === line && isRootTextLine(line)) {
+    const br = document.createElement('br');
+    token.parentNode?.insertBefore(br, token);
+    return [br, line];
+  }
+
+  const prevPar = createSplitPeer(par);
+  par.insertAdjacentElement('beforebegin', prevPar);
+  movePreviousSiblings(token, prevPar);
+  ensureAnchorIfEmpty(prevPar);
+
+  for (let current = par; current !== line; current = current.parentElement as HTMLElement) {
+    const parent = current.parentElement;
+    if (!parent) {
+      break;
+    }
+    const prevParent = createSplitPeer(parent);
+    parent.insertAdjacentElement('beforebegin', prevParent);
+    movePreviousSiblings(current, prevParent);
+  }
+
+  return [prevPar, par];
+}
+
+/**
+ * Move anything after `token` to a new parent after the current parent (SPLIT_BY_TOKEN).
+ */
+export function splitAfter(token: HTMLElement): HTMLElement[] {
+  let par = getParent(token);
+  par = convertImplicitLineToParagraph(par);
+  const line = getLine(token);
+
+  if (par === line && isRootTextLine(line)) {
+    const br = document.createElement('br');
+    token.after(br);
+    return [line, br];
+  }
+
+  const nextPar = createSplitPeer(par);
+  par.insertAdjacentElement('afterend', nextPar);
+  moveNextSiblings(token, nextPar);
+  ensureAnchorIfEmpty(nextPar);
+
+  for (let current = par; current !== line; current = current.parentElement as HTMLElement) {
+    const parent = current.parentElement;
+    if (!parent) {
+      break;
+    }
+    const nextParent = createSplitPeer(parent);
+    parent.insertAdjacentElement('afterend', nextParent);
+    moveNextSiblings(current, nextParent);
+  }
+
+  return [par, nextPar];
+}
+
+// #endregion
+
+// #region Separator (Space) utils
+function getSeparatorBefore(token: HTMLElement): Text | null {
+  const prev = token.previousSibling;
+  return isWhitespaceTextNode(prev) ? prev : null;
+}
+
+function getSeparatorAfter(token: HTMLElement): Text | null {
+  const next = token.nextSibling;
+  return isWhitespaceTextNode(next) ? next : null;
+}
+
+/**
+ * Ensure there is a whitespace separator immediately before the TOKEN.
+ */
+function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
+  const existing = getSeparatorBefore(token);
+  if (existing) {
+    return existing;
+  }
+  const separator = document.createTextNode(value);
+  token.parentNode?.insertBefore(separator, token);
+  return separator;
+}
+
+/**
+ * Ensure there is a whitespace separator immediately after the TOKEN.
+ *
+ * Used for default inter-TOKEN spacing.
+ */
+export function ensureSeparatorAfter(token: HTMLElement, value = ' '): Text {
+  const existing = getSeparatorAfter(token);
+  if (existing) {
+    return existing;
+  }
+  const separator = document.createTextNode(value);
+  token.parentNode?.insertBefore(separator, token.nextSibling);
+  return separator;
+}
+
+/**
+ * Remove the whitespace separator immediately before the TOKEN, if present.
+ */
+function removeSeparatorBefore(token: HTMLElement): void {
+  const separator = getSeparatorBefore(token);
+  separator?.parentNode?.removeChild(separator);
+}
+
+/**
+ * Remove the whitespace separator immediately after the TOKEN, if present.
+ */
+function removeSeparatorAfter(token: HTMLElement): void {
+  const separator = getSeparatorAfter(token);
+  separator?.parentNode?.removeChild(separator);
+}
+
+// #endregion
+
+// #region Leading / Trailing Space (tokens)
+
+function subtreeEndsWithWhitespace(node: Node): boolean {
+  if (node instanceof Text) {
+    return /\s$/.test(node.nodeValue ?? '');
+  }
+
+  if (!(node instanceof Element) || isIgnorable(node)) {
+    return false;
+  }
+
+  const children = Array.from(node.childNodes).reverse();
+  for (const child of children) {
+    if (child instanceof Element && isIgnorable(child)) {
+      continue;
+    }
+    return subtreeEndsWithWhitespace(child);
+  }
+
+  return false;
+}
+
+function subtreeStartsWithWhitespace(node: Node): boolean {
+  if (node instanceof Text) {
+    return /^\s/.test(node.nodeValue ?? '');
+  }
+
+  if (!(node instanceof Element) || isIgnorable(node)) {
+    return false;
+  }
+
+  for (const child of node.childNodes) {
+    if (child instanceof Element && isIgnorable(child)) {
+      continue;
+    }
+    return subtreeStartsWithWhitespace(child);
+  }
+
+  return false;
+}
+
+function removeLeadingSpaceNode(textNode: Text): Text | null {
+  const value = textNode.nodeValue ?? '';
+  if (!/^\s/.test(value)) {
+    return null;
+  }
+  textNode.parentNode?.removeChild(textNode);
+  return textNode;
+}
+
+function removeTrailingSpaceNode(textNode: Text): Text | null {
+  const value = textNode.nodeValue ?? '';
+  if (!/\s$/.test(value)) {
+    return null;
+  }
+  textNode.parentNode?.removeChild(textNode);
+  return textNode;
+}
+
+/**
+ * Ensure normal boundary spacing before a TOKEN.
+ */
+export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
+  return ensureSeparatorBefore(token, value);
+}
+
+/**
+ * Ensure normal boundary spacing after a TOKEN.
+ */
+export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
+  return ensureSeparatorAfter(token, value);
+}
+
+export function canInsertSpaceBeforeToken(token: HTMLElement): boolean {
+  if (!isToken(token) || !token.parentNode || getSeparatorBefore(token)) {
+    return false;
+  }
+
+  const previous = getPreviousVisibleSibling(token);
+  if (
+    !previous ||
+    isToken(previous) ||
+    (isInlineFlow(previous) && subtreeEndsWithWhitespace(previous))
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function insertSpaceBeforeToken(token: HTMLElement, value = ' '): Text | null {
+  if (!canInsertSpaceBeforeToken(token) || !token.parentNode) {
+    return null;
+  }
+
+  const space = document.createTextNode(value);
+  token.parentNode.insertBefore(space, token);
+  return space;
+}
+
+export function getRemovableSpaceBeforeToken(token: HTMLElement): Text | null {
+  if (!isToken(token)) {
+    return null;
+  }
+
+  const separator = getSeparatorBefore(token);
+  if (!separator) {
+    return null;
+  }
+
+  const previous = getPreviousVisibleSibling(token);
+  if (!previous || isToken(previous)) {
+    return null;
+  }
+
+  return separator;
+}
+
+export function removeSpaceBeforeToken(token: HTMLElement): boolean {
+  const separator = getRemovableSpaceBeforeToken(token);
+  if (!separator) {
+    return false;
+  }
+
+  return !!removeTrailingSpaceNode(separator);
+}
+
+export function canInsertSpaceAfterToken(token: HTMLElement): boolean {
+  if (!isToken(token) || !token.parentNode || getSeparatorAfter(token)) {
+    return false;
+  }
+
+  const next = getNextVisibleSibling(token);
+  if (!next || isToken(next) || (isInlineFlow(next) && subtreeStartsWithWhitespace(next))) {
+    return false;
+  }
+
+  return true;
+}
+
+export function insertSpaceAfterToken(token: HTMLElement, value = ' '): Text | null {
+  if (!canInsertSpaceAfterToken(token) || !token.parentNode) {
+    return null;
+  }
+
+  const space = document.createTextNode(value);
+  token.parentNode.insertBefore(space, token.nextSibling);
+  return space;
+}
+
+export function getRemovableSpaceAfterToken(token: HTMLElement): Text | null {
+  if (!isToken(token)) {
+    return null;
+  }
+
+  const separator = getSeparatorAfter(token);
+  if (!separator) {
+    return null;
+  }
+
+  const next = getNextVisibleSibling(token);
+  if (!next || isToken(next)) {
+    return null;
+  }
+
+  return separator;
+}
+
+export function removeSpaceAfterToken(token: HTMLElement): boolean {
+  const separator = getRemovableSpaceAfterToken(token);
+  if (!separator) {
+    return false;
+  }
+
+  return !!removeLeadingSpaceNode(separator);
+}
+
+// #endregion
+
+// #region Leading / Trailing Space (tags)
 
 /**
  * Whether a whitespace text node can be inserted immediately after a focused
@@ -945,170 +1166,6 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
   }
   anchor.remove();
   return anchor;
-}
-
-// #endregion
-
-// #region Join
-
-export function joinNext(token: HTMLElement): void {
-  const next = getNextTokenSibling(token);
-  if (!next) {
-    return;
-  }
-  const nextSeparatorValue = getSeparatorAfter(next)?.nodeValue ?? null;
-  const val = getValue(token);
-  const nextVal = getValue(next);
-  replaceText(token, val + nextVal);
-  removeSeparatorAfter(token);
-  remove(next);
-  if (nextSeparatorValue) {
-    ensureSeparatorAfter(token, nextSeparatorValue);
-    token.classList.remove(JSED_TOKEN_COLLAPSED);
-  } else {
-    token.classList.add(JSED_TOKEN_COLLAPSED);
-  }
-}
-
-export function joinPrevious(token: HTMLElement): void {
-  const prev = getPreviousTokenSibling(token);
-  if (!prev) {
-    return;
-  }
-  const prevSeparatorValue = getSeparatorBefore(prev)?.nodeValue ?? null;
-  const val = getValue(token);
-  const prevVal = getValue(prev);
-  replaceText(token, prevVal + val);
-  removeSeparatorBefore(token);
-  remove(prev);
-  if (prevSeparatorValue) {
-    ensureSeparatorBefore(token, prevSeparatorValue);
-    token.classList.add(JSED_TOKEN_PADDED);
-  } else {
-    token.classList.remove(JSED_TOKEN_PADDED);
-  }
-}
-
-// #endregion
-
-// #region Split
-
-function createSplitPeer(parent: HTMLElement): HTMLElement {
-  if (isImplicitLine(parent)) {
-    return document.createElement('p');
-  }
-
-  const peer = parent.cloneNode(false) as HTMLElement;
-  if (peer.id) {
-    peer.removeAttribute('id');
-  }
-  return peer;
-}
-
-function movePreviousSiblings(from: Node, to: HTMLElement): void {
-  for (let sib: ChildNode | null = from.previousSibling; sib; ) {
-    const prevSib: ChildNode | null = sib.previousSibling;
-    to.insertBefore(sib, to.firstChild);
-    sib = prevSib;
-  }
-}
-
-function moveNextSiblings(from: Node, to: HTMLElement): void {
-  for (let sib: ChildNode | null = from.nextSibling; sib; ) {
-    const nextSib: ChildNode | null = sib.nextSibling;
-    to.appendChild(sib);
-    sib = nextSib;
-  }
-}
-
-function ensureAnchorIfEmpty(el: HTMLElement): void {
-  if (el.childNodes.length > 0) {
-    return;
-  }
-  if (canCreateWithAnchor(el.tagName)) {
-    addAnchors(el);
-  }
-}
-
-function isRootTextLine(line: HTMLElement): boolean {
-  return line.tagName === 'DIV' && line.parentElement === line.ownerDocument.body;
-}
-
-function convertImplicitLineToParagraph(line: HTMLElement): HTMLElement {
-  if (!isImplicitLine(line)) {
-    return line;
-  }
-
-  const paragraph = document.createElement('p');
-  while (line.firstChild) {
-    paragraph.appendChild(line.firstChild);
-  }
-  line.replaceWith(paragraph);
-  return paragraph;
-}
-
-/**
- * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
- */
-export function splitBefore(token: HTMLElement): HTMLElement[] {
-  let par = getParent(token);
-  par = convertImplicitLineToParagraph(par);
-  const line = getLine(token);
-
-  if (par === line && isRootTextLine(line)) {
-    const br = document.createElement('br');
-    token.parentNode?.insertBefore(br, token);
-    return [br, line];
-  }
-
-  const prevPar = createSplitPeer(par);
-  par.insertAdjacentElement('beforebegin', prevPar);
-  movePreviousSiblings(token, prevPar);
-  ensureAnchorIfEmpty(prevPar);
-
-  for (let current = par; current !== line; current = current.parentElement as HTMLElement) {
-    const parent = current.parentElement;
-    if (!parent) {
-      break;
-    }
-    const prevParent = createSplitPeer(parent);
-    parent.insertAdjacentElement('beforebegin', prevParent);
-    movePreviousSiblings(current, prevParent);
-  }
-
-  return [prevPar, par];
-}
-
-/**
- * Move anything after `token` to a new parent after the current parent (SPLIT_BY_TOKEN).
- */
-export function splitAfter(token: HTMLElement): HTMLElement[] {
-  let par = getParent(token);
-  par = convertImplicitLineToParagraph(par);
-  const line = getLine(token);
-
-  if (par === line && isRootTextLine(line)) {
-    const br = document.createElement('br');
-    token.after(br);
-    return [line, br];
-  }
-
-  const nextPar = createSplitPeer(par);
-  par.insertAdjacentElement('afterend', nextPar);
-  moveNextSiblings(token, nextPar);
-  ensureAnchorIfEmpty(nextPar);
-
-  for (let current = par; current !== line; current = current.parentElement as HTMLElement) {
-    const parent = current.parentElement;
-    if (!parent) {
-      break;
-    }
-    const nextParent = createSplitPeer(parent);
-    parent.insertAdjacentElement('afterend', nextParent);
-    moveNextSiblings(current, nextParent);
-  }
-
-  return [par, nextPar];
 }
 
 // #endregion

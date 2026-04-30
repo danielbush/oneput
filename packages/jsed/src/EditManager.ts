@@ -2,7 +2,7 @@ import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { isCursorTransparent, isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type SetTokenOpts, type TokenCursorError } from './TokenCursor.js';
@@ -210,7 +210,7 @@ export class EditManager {
     // Tokenize LINE at or within `initial` if not already.
     const line = findNextEditableLine(initial, this.document.root);
     const firstLineSibling = line && this.tokenizer.tokenizeLineAt(line);
-    const targetLineSibling = isToken(initial)
+    const targetLineSibling = isLineSibling(initial)
       ? initial
       : isCursorTransparent(initial)
         ? getFirstLineSibling(initial)
@@ -658,16 +658,31 @@ export class EditManager {
   }
 
   wrapCursorWithTag(tagName: string): boolean {
-    if (this.mode !== 'edit' || !this.cursor || this.selection) {
+    if (this.mode !== 'edit' || !this.cursor) {
       return false;
+    }
+
+    if (this.selection) {
+      const anchor = this.selection.getAnchor();
+      const wrappers = this.selection.wrapWithTag(tagName);
+      if (!wrappers) {
+        return false;
+      }
+
+      this.selection = undefined;
+      for (const wrapper of wrappers) {
+        this.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
+      }
+      this.cursor.setToken(anchor);
+      return true;
     }
 
     const current = this.cursor.getToken();
-    if (!isToken(current)) {
+    if (!isLineSibling(current)) {
       return false;
     }
 
-    const wrapper = token.wrapTokenWithTag(current, tagName);
+    const wrapper = token.wrapLineSiblingWithTag(current, tagName);
     if (!wrapper) {
       return false;
     }
@@ -983,9 +998,7 @@ export class EditManager {
   }
 
   canWrapCursorWithTag(): boolean {
-    return (
-      this.mode === 'edit' && !!this.cursor && !this.selection && isToken(this.cursor.getToken())
-    );
+    return this.mode === 'edit' && !!this.cursor && isLineSibling(this.cursor.getToken());
   }
 
   canRemoveSpaceBeforeCursor(): boolean {

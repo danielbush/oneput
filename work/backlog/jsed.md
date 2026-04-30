@@ -63,6 +63,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Drafting / inbox
 
+- [ ] should oneput menu operations like "wrap tag in element" which prompts for a tag name be in a child AppObject - so we can control oneput more declaratively
+- [ ] refactor: can we extract selection orchestration out of EditManager
+  - maybe a similar pattern to CursorTextOps ?
+  - or possibly move it into an AppObject
 - [ ] refactor: we shouldn't have to call `editManager.nav.connect()` in EditManager tests
   - I think we can connect when EditManager starts
   - and disconnect when we suspend

@@ -3,6 +3,7 @@ import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/j
 import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
+import { TagSelection } from './TagSelection.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -53,7 +54,13 @@ export class EditDocument implements AppObject {
   };
 
   onResume = () => {
+    this.editManager.suspend(false);
     this.editManager.nav.connect();
+    this.renderMenuItems();
+  };
+
+  onSuspend = () => {
+    this.editManager.suspend(true);
   };
 
   onExit = () => {
@@ -220,19 +227,7 @@ export class EditDocument implements AppObject {
   };
 
   private promptForTagSelection = () => {
-    this.ctl.input.setPlaceholder('Tag name...');
-    this.ctl.input.setInputValue('');
-    this.ctl.input.focusInput();
-    this.ctl.input.setSubmitHandlerOnce((tagName) => {
-      const wrapped = this.editManager.wrapCursorWithTag(tagName);
-      this.ctl.input.resetPlaceholder();
-      this.ctl.input.setInputValue('');
-      if (wrapped) {
-        this.ctl.menu.closeMenu();
-        return;
-      }
-      this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
-    });
+    this.ctl.app.run(TagSelection.create(this.ctl, this.editManager));
   };
 
   renderMenuItems = () => {

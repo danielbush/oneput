@@ -124,13 +124,14 @@
 /* #region FOCUS (not tokens / cursor) */
 
 .jsed-focus {
-  outline: solid blue 0.5px;
+  outline: dotted blue 0.5px;
   outline-offset: -0.5px;
   background-color: rgba(180, 220, 255, 0.3);
 }
 
 .jsed-focus-sibling {
-  outline: solid rgba(80, 100, 80, 1) 0.75px;
+  outline: dotted rgba(80, 100, 80, 1) 0.75px;
+  outline-offset: -0.75px;
 }
 /* #endregion */
 
@@ -202,14 +203,20 @@ See:
   font-style: normal;
 }
 
-.jsed-token-focus.jsed-token.jsed-crs-prepend::after,
-.jsed-token-focus.jsed-token.jsed-crs-insert-before::after {
+.jsed-token-focus.jsed-token.jsed-crs-prepend::after {
   left: -0.28em;
 }
 
-.jsed-token-focus.jsed-token.jsed-crs-append::after,
-.jsed-token-focus.jsed-token.jsed-crs-insert-after::after {
+.jsed-token-focus.jsed-token.jsed-crs-insert-before::after {
+  left: -0.48em;
+}
+
+.jsed-token-focus.jsed-token.jsed-crs-append::after {
   right: -0.28em;
+}
+
+.jsed-token-focus.jsed-token.jsed-crs-insert-after::after {
+  right: -0.48em;
 }
 
 .jsed-token-focus.jsed-token.jsed-crs-insert-before::after {

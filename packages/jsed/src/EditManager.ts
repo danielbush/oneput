@@ -180,6 +180,11 @@ export class EditManager {
     return this.mode;
   }
 
+  private setMode(mode: EditManagerMode) {
+    this.mode = mode;
+    this.onModeChange?.(mode);
+  }
+
   start(): void {
     this.nav.connect();
     this.nav.FOCUS(
@@ -187,17 +192,26 @@ export class EditManager {
     );
   }
 
-  private setMode(mode: EditManagerMode) {
-    this.mode = mode;
-    this.onModeChange?.(mode);
+  suspend(bool: boolean) {
+    this.isSuspended = bool;
+    if (this.isSuspended) {
+      this.userInput.setInputValue('');
+      return;
+    }
+    if (this.mode === 'edit') {
+      this.enterEditing(this.cursor?.getToken());
+    }
   }
 
-  private notifyTextChange(event: EditManagerTextChangeEvent) {
-    this.onTextChange?.(event);
+  destroy() {
+    this.cursor?.destroy();
+    this.tokenizer.setCursorElement(null);
+    this.nav.destroy();
+    this.tokenizer.destroy();
   }
 
-  private notifyElementChange(event: EditManagerElementChangeEvent) {
-    this.onElementChange?.(event);
+  isEditing(): boolean {
+    return this.mode === 'edit';
   }
 
   /**
@@ -270,24 +284,6 @@ export class EditManager {
     }
   }
 
-  suspend(bool: boolean) {
-    this.isSuspended = bool;
-    if (this.isSuspended) {
-      this.userInput.setInputValue('');
-      return;
-    }
-    if (this.mode === 'edit') {
-      this.enterEditing(this.cursor?.getToken());
-    }
-  }
-
-  destroy() {
-    this.cursor?.destroy();
-    this.tokenizer.setCursorElement(null);
-    this.nav.destroy();
-    this.tokenizer.destroy();
-  }
-
   private enterEditingAtFocus(): Result<void, EditManagerError> {
     return this.enterEditing();
   }
@@ -296,7 +292,19 @@ export class EditManager {
     return this.enterEditing(target);
   }
 
-  // #region Events
+  // #region Send events
+
+  private notifyTextChange(event: EditManagerTextChangeEvent) {
+    this.onTextChange?.(event);
+  }
+
+  private notifyElementChange(event: EditManagerElementChangeEvent) {
+    this.onElementChange?.(event);
+  }
+
+  // #endregion
+
+  // #region Handle events
 
   /**
    * When user types in the input...
@@ -662,13 +670,21 @@ export class EditManager {
 
   // #endregion Events
 
-  // #region Actions
+  // #region Splitting
 
   private splitAtCursor() {
     const inserted = this.cursor?.ops.splitAtToken();
     if (inserted) {
       this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     }
+  }
+
+  // #endregion
+
+  // #region Selections
+
+  canWrapCursorWithTag(): boolean {
+    return this.mode === 'edit' && !!this.cursor && isLineSibling(this.cursor.getToken());
   }
 
   wrapCursorWithTag(tagName: string): boolean {
@@ -706,31 +722,9 @@ export class EditManager {
     return true;
   }
 
-  insertElementAfterFocus(tagName?: string): boolean {
-    const insertion = this.getFocusElementInsertion(tagName);
-    if (!insertion) {
-      return false;
-    }
+  // #endregion
 
-    const inserted = dom.createElement(insertion.tagName);
-    dom.insertAfter(inserted, insertion.focus);
-    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    this.nav.FOCUS(inserted);
-    return true;
-  }
-
-  insertElementBeforeFocus(tagName?: string): boolean {
-    const insertion = this.getFocusElementInsertion(tagName);
-    if (!insertion) {
-      return false;
-    }
-
-    const inserted = dom.createElement(insertion.tagName);
-    dom.insertBefore(inserted, insertion.focus);
-    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    this.nav.FOCUS(inserted);
-    return true;
-  }
+  // #region Scrolling
 
   revealActiveTarget(): boolean {
     const current = this.cursor?.getToken();
@@ -748,6 +742,35 @@ export class EditManager {
       oversizedVertical: 'start'
     });
     return true;
+  }
+
+  // #endregion
+
+  // #region Anchor actions
+
+  canInsertAnchorInLine(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.canInsertAnchorInLine(focus));
+  }
+
+  canInsertAnchorAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
+  }
+
+  canRemoveAnchorAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableAnchorAfterTag(focus));
+  }
+
+  canInsertAnchorBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
+  }
+
+  canRemoveAnchorBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableAnchorBeforeTag(focus));
   }
 
   insertAnchorAfterTag(): boolean {
@@ -810,6 +833,150 @@ export class EditManager {
 
     this.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
+  }
+
+  insertAnchorInLine(): boolean {
+    const focus = this.nav.getFocus();
+    if (!focus || !token.canInsertAnchorInLine(focus)) {
+      return false;
+    }
+
+    const [anchor] = token.addAnchors(focus);
+    if (!anchor) {
+      return false;
+    }
+
+    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
+    return true;
+  }
+
+  // #endregion
+
+  // #region Trailing / Leading space (at cursor)
+
+  canRemoveSpaceBeforeCursor(): boolean {
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      !!token.getRemovableSpaceBeforeToken(this.cursor.getToken())
+    );
+  }
+
+  canRemoveSpaceAfterCursor(): boolean {
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      !!token.getRemovableSpaceAfterToken(this.cursor.getToken())
+    );
+  }
+
+  canInsertSpaceBeforeCursor(): boolean {
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      token.canInsertSpaceBeforeToken(this.cursor.getToken())
+    );
+  }
+
+  canInsertSpaceAfterCursor(): boolean {
+    return (
+      this.mode === 'edit' &&
+      !!this.cursor &&
+      token.canInsertSpaceAfterToken(this.cursor.getToken())
+    );
+  }
+
+  insertSpaceBeforeCursor(): boolean {
+    if (this.mode !== 'edit' || !this.cursor) {
+      return false;
+    }
+
+    const inserted = !!token.insertSpaceBeforeToken(this.cursor.getToken());
+    if (inserted) {
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'leading-space',
+        change: 'inserted'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  insertSpaceAfterCursor(): boolean {
+    if (this.mode !== 'edit' || !this.cursor) {
+      return false;
+    }
+
+    const inserted = !!token.insertSpaceAfterToken(this.cursor.getToken());
+    if (inserted) {
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'trailing-space',
+        change: 'inserted'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  removeSpaceBeforeCursor(): boolean {
+    if (this.mode !== 'edit' || !this.cursor) {
+      return false;
+    }
+
+    const removed = !!token.removeSpaceBeforeToken(this.cursor.getToken());
+    if (removed) {
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'leading-space',
+        change: 'removed'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  removeSpaceAfterCursor(): boolean {
+    if (this.mode !== 'edit' || !this.cursor) {
+      return false;
+    }
+
+    const removed = !!token.removeSpaceAfterToken(this.cursor.getToken());
+    if (removed) {
+      this.notifyTextChange({
+        type: 'whitespace-change',
+        kind: 'trailing-space',
+        change: 'removed'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  // #endregion
+
+  // #region Trailing / Leading space (at focus)
+
+  canInsertSpaceAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.canInsertSpaceAfterTag(focus));
+  }
+
+  canRemoveSpaceAfterTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableSpaceAfterTag(focus));
+  }
+
+  canInsertSpaceBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.canInsertSpaceBeforeTag(focus));
+  }
+
+  canRemoveSpaceBeforeTag(): boolean {
+    const focus = this.nav.getFocus();
+    return !!(focus && token.getRemovableSpaceBeforeTag(focus));
   }
 
   insertSpaceAfterTag(): boolean {
@@ -884,97 +1051,9 @@ export class EditManager {
     return false;
   }
 
-  insertSpaceBeforeCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
+  // #endregion
 
-    const inserted = !!token.insertSpaceBeforeToken(this.cursor.getToken());
-    if (inserted) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'leading-space',
-        change: 'inserted'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  insertSpaceAfterCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const inserted = !!token.insertSpaceAfterToken(this.cursor.getToken());
-    if (inserted) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'trailing-space',
-        change: 'inserted'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  removeSpaceBeforeCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const removed = !!token.removeSpaceBeforeToken(this.cursor.getToken());
-    if (removed) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'leading-space',
-        change: 'removed'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  removeSpaceAfterCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const removed = !!token.removeSpaceAfterToken(this.cursor.getToken());
-    if (removed) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'trailing-space',
-        change: 'removed'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  insertAnchorInLine(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus || !token.canInsertAnchorInLine(focus)) {
-      return false;
-    }
-
-    const [anchor] = token.addAnchors(focus);
-    if (!anchor) {
-      return false;
-    }
-
-    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
-    return true;
-  }
-
-  // #endregion Actions
-
-  // #region is*/can* methods
-
-  isEditing(): boolean {
-    return this.mode === 'edit';
-  }
+  // #region Element actions (at focus)
 
   canInsertElementAfterFocus(tagName?: string): boolean {
     return !!this.getFocusElementInsertion(tagName);
@@ -984,88 +1063,33 @@ export class EditManager {
     return !!this.getFocusElementInsertion(tagName);
   }
 
-  canInsertAnchorInLine(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.canInsertAnchorInLine(focus));
+  insertElementAfterFocus(tagName?: string): boolean {
+    const insertion = this.getFocusElementInsertion(tagName);
+    if (!insertion) {
+      return false;
+    }
+
+    const inserted = dom.createElement(insertion.tagName);
+    dom.insertAfter(inserted, insertion.focus);
+    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.nav.FOCUS(inserted);
+    return true;
   }
 
-  canInsertAnchorAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
+  insertElementBeforeFocus(tagName?: string): boolean {
+    const insertion = this.getFocusElementInsertion(tagName);
+    if (!insertion) {
+      return false;
+    }
+
+    const inserted = dom.createElement(insertion.tagName);
+    dom.insertBefore(inserted, insertion.focus);
+    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.nav.FOCUS(inserted);
+    return true;
   }
 
-  canRemoveAnchorAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableAnchorAfterTag(focus));
-  }
-
-  canInsertSpaceAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.canInsertSpaceAfterTag(focus));
-  }
-
-  canRemoveSpaceAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableSpaceAfterTag(focus));
-  }
-
-  canInsertAnchorBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
-  }
-
-  canRemoveAnchorBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableAnchorBeforeTag(focus));
-  }
-
-  canInsertSpaceBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.canInsertSpaceBeforeTag(focus));
-  }
-
-  canRemoveSpaceBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableSpaceBeforeTag(focus));
-  }
-
-  canInsertSpaceBeforeCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      token.canInsertSpaceBeforeToken(this.cursor.getToken())
-    );
-  }
-
-  canInsertSpaceAfterCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      token.canInsertSpaceAfterToken(this.cursor.getToken())
-    );
-  }
-
-  canWrapCursorWithTag(): boolean {
-    return this.mode === 'edit' && !!this.cursor && isLineSibling(this.cursor.getToken());
-  }
-
-  canRemoveSpaceBeforeCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      !!token.getRemovableSpaceBeforeToken(this.cursor.getToken())
-    );
-  }
-
-  canRemoveSpaceAfterCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      !!token.getRemovableSpaceAfterToken(this.cursor.getToken())
-    );
-  }
-
-  // #endregion is*/can* methods
+  // #endregion
 
   private getFocusedTag(): HTMLElement | null {
     const focus = this.nav.getFocus();

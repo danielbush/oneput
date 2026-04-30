@@ -412,7 +412,7 @@
     left: -0.2em;
     right: -0.2em;
     border-radius: 0.24rem;
-    background: #2563eb;
+    background: rgba(37, 99, 235, 0.92);
   }
 
   .demo-line :global(.jsed-token-focus.jsed-crs-prepend)::after,
@@ -454,7 +454,7 @@
 
   .demo-line :global(.jsed-token-focus.jsed-crs-prepend)::before,
   .demo-line :global(.jsed-token-focus.jsed-crs-append)::before {
-    background: #1e3a8a;
+    background: rgba(30, 58, 138, 0.92);
   }
 
   .flash-on.flash-underline :global(.jsed-token-focus)::before,
@@ -501,12 +501,12 @@
   @keyframes cursor-lab-pulse {
     0%,
     100% {
-      opacity: 0.92;
+      background: rgba(37, 99, 235, 1);
       transform: scale(1);
     }
 
     50% {
-      opacity: 0.68;
+      background: rgba(59, 130, 246, 1);
       transform: scale(0.985);
     }
   }

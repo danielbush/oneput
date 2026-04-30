@@ -426,18 +426,18 @@
     height: 0;
     border-left: 0.24em solid transparent;
     border-right: 0.24em solid transparent;
-    border-top: 0.28em solid #1e3a8a;
+    border-top: 0.28em solid #dc2626;
     border-bottom: 0;
   }
 
   .demo-line :global(.jsed-token-focus.jsed-crs-prepend)::after,
   .demo-line :global(.jsed-token-focus.jsed-crs-insert-before)::after {
-    left: 0.08em;
+    left: -0.28em;
   }
 
   .demo-line :global(.jsed-token-focus.jsed-crs-append)::after,
   .demo-line :global(.jsed-token-focus.jsed-crs-insert-after)::after {
-    right: 0ch;
+    right: -0.28em;
   }
 
   .demo-line :global(.jsed-token-focus.jsed-crs-append)::after {

@@ -176,6 +176,13 @@ export class EditManager {
     return this.mode;
   }
 
+  start(): void {
+    this.nav.connect();
+    this.nav.FOCUS(
+      findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
+    );
+  }
+
   private setMode(mode: EditManagerMode) {
     this.mode = mode;
     this.onModeChange?.(mode);
@@ -461,11 +468,6 @@ export class EditManager {
         return false;
       }
 
-      // First focus, just tokenizes.
-      const line = findNextEditableLine(evt.element, this.document.root);
-      if (line) {
-        this.tokenizer.tokenizeLineAt(line);
-      }
       return true;
     }
 
@@ -507,6 +509,12 @@ export class EditManager {
 
   private handleFocusChange(focus: HTMLElement | null) {
     this.focusChainNavigator.handleFocusChange(focus);
+    if (this.mode === 'view' && focus && !isToken(focus)) {
+      const line = findNextEditableLine(focus, this.document.root);
+      if (line) {
+        this.tokenizer.tokenizeLineAt(line);
+      }
+    }
     this.onFocusChange?.(focus);
   }
 

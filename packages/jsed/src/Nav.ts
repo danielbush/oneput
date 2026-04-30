@@ -66,7 +66,6 @@ export class Nav {
     private onFocusChange?: (focus: HTMLElement) => void
   ) {
     this.onRequestFocus = onRequestFocus;
-    this.FOCUS(doc.root);
   }
 
   /**

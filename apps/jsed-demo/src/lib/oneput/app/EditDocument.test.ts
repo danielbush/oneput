@@ -35,9 +35,6 @@ describe('EditDocument', () => {
     ctl.simulateStart(() => editDocument);
     const appChanges = ctl.trackAppChanges();
 
-    // act
-    editManager.nav.REQUEST_FOCUS(p1);
-
     // assert
     expect(editManager.getMode()).toBe('view');
     expect(editManager.nav.getFocus()).toBe(p1);
@@ -61,7 +58,6 @@ describe('EditDocument', () => {
 
     // act
     editManager.nav.REQUEST_FOCUS(p1);
-    editManager.nav.REQUEST_FOCUS(p1);
 
     // assert
     expect(editManager.getMode()).toBe('edit');
@@ -83,7 +79,6 @@ describe('EditDocument', () => {
 
     ctl.simulateStart(() => editDocument);
     // Edit mode
-    editManager.nav.REQUEST_FOCUS(p1);
     editManager.nav.REQUEST_FOCUS(p1);
     editManager.cursor?.moveNext();
 
@@ -126,7 +121,6 @@ describe('EditDocument', () => {
 
     ctl.simulateStart(() => editDocument);
     editManager.nav.REQUEST_FOCUS(p1);
-    editManager.nav.REQUEST_FOCUS(p1);
 
     const token = editManager.cursor?.getToken() as HTMLElement;
     const scrollRequests = doc.viewportScroller.trackScrollRequests();
@@ -163,7 +157,6 @@ describe('EditDocument', () => {
 
     ctl.simulateStart(() => editDocument);
     editManager.nav.REQUEST_FOCUS(p1);
-    editManager.nav.REQUEST_FOCUS(p1);
     editDocument.renderMenuItems();
     const cursorToken = editManager.cursor?.getToken() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'TAG_SELECTION');
@@ -198,7 +191,6 @@ describe('EditDocument', () => {
 
     ctl.simulateStart(() => editDocument);
     editManager.nav.REQUEST_FOCUS(d1);
-    editManager.nav.REQUEST_FOCUS(d1);
     editDocument.renderMenuItems();
     const island = editManager.cursor?.getToken() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'TAG_SELECTION');
@@ -232,7 +224,6 @@ describe('EditDocument', () => {
     const p1 = byId(doc, 'p1');
 
     ctl.simulateStart(() => editDocument);
-    editManager.nav.REQUEST_FOCUS(p1);
     editDocument.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'INSERT_ELEMENT_AFTER_TAG'

@@ -45,7 +45,7 @@ export class EditDocument implements AppObject {
   ) {}
 
   onStart = () => {
-    this.editManager.nav.connect();
+    this.editManager.start();
     this.renderMenuItems();
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editManager.suspend(isOpen);
@@ -54,7 +54,6 @@ export class EditDocument implements AppObject {
 
   onResume = () => {
     this.editManager.suspend(false);
-    this.editManager.nav.connect();
     this.renderMenuItems();
   };
 

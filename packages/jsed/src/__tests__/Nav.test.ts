@@ -57,6 +57,7 @@ describe('FOCUS', () => {
     // arrange
     const doc = makeRoot(frag(script({ id: 'p1' }, 'p1')));
     const nav = new Nav(doc, ElementIndicator.createNull());
+    nav.FOCUS(doc.root);
     const p1 = doc.document.getElementById('p1') as HTMLElement;
 
     // act
@@ -169,6 +170,7 @@ describe('SIB_HIGHLIGHT', () => {
     // arrange
     const doc = makeRoot(frag(p('p1'), p({ id: 'p2' }, 'p2'), p('p3'), p('p4')));
     const nav = new Nav(doc, ElementIndicator.createNull());
+    nav.FOCUS(doc.root);
     byId(doc, 'p2').focus();
 
     // act
@@ -193,6 +195,7 @@ test('REC_NEXT should recurse down', () => {
     )
   );
   const nav = new Nav(doc, ElementIndicator.createNull());
+  nav.FOCUS(doc.root);
 
   // act
   nav.REC_NEXT();

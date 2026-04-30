@@ -11,20 +11,31 @@ describe('EditManager', () => {
   describe('REQUEST_FOCUS (view mode): User clicks/touches', () => {
     it('first REQUEST_FOCUS in view mode tokenizes the focused LINE but stays in view mode', () => {
       // arrange
-      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
+      const doc = makeRoot(
+        frag(
+          p(
+            { id: 'p1' }, //
+            'foo bar'
+          ),
+          p(
+            { id: 'p2' }, //
+            'baz qux'
+          )
+        )
+      );
       const editManager = EditManager.createNull({
         document: doc
       });
-      editManager.nav.connect();
-      const p1 = byId(doc, 'p1');
+      editManager.start();
+      const p2 = byId(doc, 'p2');
 
       // act
-      editManager.nav.REQUEST_FOCUS(p1);
+      editManager.nav.REQUEST_FOCUS(p2);
 
       // assert
       expect(editManager.getMode()).toBe('view');
-      expect(editManager.nav.getFocus()).toBe(p1);
-      expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
+      expect(editManager.nav.getFocus()).toBe(p2);
+      expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
 
       editManager.destroy();
     });
@@ -35,11 +46,10 @@ describe('EditManager', () => {
       const editManager = EditManager.createNull({
         document: doc
       });
-      editManager.nav.connect();
+      editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
 
-      editManager.nav.REQUEST_FOCUS(p1);
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
       expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
 
@@ -61,11 +71,10 @@ describe('EditManager', () => {
       const editManager = EditManager.createNull({
         document: doc
       });
-      editManager.nav.connect();
+      editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
 
-      editManager.nav.REQUEST_FOCUS(p1);
       const originalTokens = Array.from(p1.querySelectorAll('.jsed-token'));
       expect(originalTokens).toHaveLength(2);
 
@@ -100,12 +109,11 @@ describe('EditManager', () => {
       const editManager = EditManager.createNull({
         document: doc
       });
-      editManager.nav.connect();
+      editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
       const ignoredTarget = byId(doc, 'ignored-target');
 
-      editManager.nav.REQUEST_FOCUS(p1);
       expect(editManager.nav.getFocus()).toBe(p1);
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
       expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
@@ -136,14 +144,13 @@ describe('EditManager', () => {
       const editManager = EditManager.createNull({
         document: doc
       });
-      editManager.nav.connect();
+      editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
       const p3 = byId(doc, 'p3');
       const p4 = byId(doc, 'p4');
 
       // act
-      editManager.nav.REQUEST_FOCUS(p1);
       editManager.nav.REQUEST_FOCUS(p2);
       editManager.nav.REQUEST_FOCUS(p3);
       editManager.nav.REQUEST_FOCUS(p4);
@@ -168,11 +175,10 @@ describe('EditManager', () => {
         document: doc,
         userInput: Controller.createNull().input
       });
-      editManager.nav.connect();
+      editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
 
-      editManager.nav.REQUEST_FOCUS(p1);
       editManager.nav.REQUEST_FOCUS(p2);
       const p1FirstToken = p1.querySelector('.jsed-token') as HTMLElement;
 
@@ -202,7 +208,7 @@ describe('EditManager', () => {
         document: doc,
         userInput: Controller.createNull().input
       });
-      editManager.nav.connect();
+      editManager.start();
       editManager.enterEditing(byId(doc, 'p1'));
       const p2 = byId(doc, 'p2');
 
@@ -227,7 +233,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
-        editManager.nav.connect();
+        editManager.start();
         const p1 = byId(doc, 'p1');
 
         // act
@@ -254,7 +260,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
-        editManager.nav.connect();
+        editManager.start();
 
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
@@ -281,7 +287,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
-        editManager.nav.connect();
+        editManager.start();
 
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
@@ -302,10 +308,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-
-        editManager.nav.REQUEST_FOCUS(p1);
+        editManager.start();
 
         // act
         const inserted = editManager.insertElementAfterFocus();
@@ -327,10 +330,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
-        editManager.nav.connect();
-        const p1 = byId(doc, 'p1');
-
-        editManager.nav.REQUEST_FOCUS(p1);
+        editManager.start();
 
         // act
         const inserted = editManager.insertElementAfterFocus('h2');
@@ -354,7 +354,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
-        editManager.nav.connect();
+        editManager.start();
         const div1 = byId(doc, 'd1');
 
         editManager.nav.REQUEST_FOCUS(div1);
@@ -1081,6 +1081,7 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
+        editManager.start();
         const p1 = byId(doc, 'p1');
         editManager.enterEditing(p1);
 
@@ -1304,8 +1305,8 @@ describe('EditManager', () => {
         const editManager = EditManager.createNull({
           document: doc
         });
+        editManager.start();
         const p1 = byId(doc, 'p1');
-        editManager.nav.REQUEST_FOCUS(p1);
         const scrollRequests = doc.viewportScroller.trackScrollRequests();
         scrollRequests.data.length = 0;
 

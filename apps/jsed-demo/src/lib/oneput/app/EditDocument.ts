@@ -232,6 +232,10 @@ export class EditDocument implements AppObject {
     this.ctl.app.run(InsertElementAfterTag.create(this.ctl, this.editManager));
   };
 
+  private promptForElementBeforeTag = () => {
+    this.ctl.app.run(InsertElementAfterTag.create(this.ctl, this.editManager, 'before'));
+  };
+
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
@@ -347,6 +351,14 @@ export class EditDocument implements AppObject {
             id: 'INSERT_ELEMENT_AFTER_TAG',
             textContent: 'Insert element after tag...',
             action: this.promptForElementAfterTag,
+            closeMenuOnAction: false,
+            left: (b) => [b.icon(icons.Plus)]
+          }),
+        this.editManager.canInsertElementBeforeFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ELEMENT_BEFORE_TAG',
+            textContent: 'Insert element before tag...',
+            action: this.promptForElementBeforeTag,
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
           }),

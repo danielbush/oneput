@@ -1,14 +1,21 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { type EditManager } from '@oneput/jsed';
 
+type InsertElementPosition = 'after' | 'before';
+
 export class InsertElementAfterTag implements AppObject {
-  static create(ctl: Controller, editManager: EditManager) {
-    return new InsertElementAfterTag(ctl, editManager);
+  static create(
+    ctl: Controller,
+    editManager: EditManager,
+    position: InsertElementPosition = 'after'
+  ) {
+    return new InsertElementAfterTag(ctl, editManager, position);
   }
 
   private constructor(
     private ctl: Controller,
-    private editManager: EditManager
+    private editManager: EditManager,
+    private position: InsertElementPosition
   ) {}
 
   onStart = () => {
@@ -41,12 +48,17 @@ export class InsertElementAfterTag implements AppObject {
   };
 
   private apply = (tagName: string) => {
-    const inserted = this.editManager.insertElementAfterFocus(tagName);
+    const inserted =
+      this.position === 'after'
+        ? this.editManager.insertElementAfterFocus(tagName)
+        : this.editManager.insertElementBeforeFocus(tagName);
     if (inserted) {
       this.exit();
       return;
     }
 
-    this.ctl.notify('Could not insert element after focused tag', { duration: 3000 });
+    this.ctl.notify(`Could not insert element ${this.position} focused tag`, {
+      duration: 3000
+    });
   };
 }

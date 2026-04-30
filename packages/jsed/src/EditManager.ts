@@ -725,6 +725,24 @@ export class EditManager {
     return true;
   }
 
+  insertElementBeforeFocus(tagName?: string): boolean {
+    const focus = this.getFocusedTag();
+    if (!focus) {
+      return false;
+    }
+
+    const normalized = token.normalizeTagName(tagName ?? focus.tagName);
+    if (!normalized || !this.canInsertElementBeforeFocus(normalized)) {
+      return false;
+    }
+
+    const inserted = dom.createElement(normalized);
+    dom.insertBefore(inserted, focus);
+    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.nav.FOCUS(inserted);
+    return true;
+  }
+
   revealActiveTarget(): boolean {
     const current = this.cursor?.getToken();
     if (current && isToken(current)) {
@@ -970,6 +988,16 @@ export class EditManager {
   }
 
   canInsertElementAfterFocus(tagName?: string): boolean {
+    const focus = this.getFocusedTag();
+    if (!focus || !focus.parentElement) {
+      return false;
+    }
+
+    const normalized = token.normalizeTagName(tagName ?? focus.tagName);
+    return !!normalized && canContainChildTag(focus.parentElement.tagName, normalized);
+  }
+
+  canInsertElementBeforeFocus(tagName?: string): boolean {
     const focus = this.getFocusedTag();
     if (!focus || !focus.parentElement) {
       return false;

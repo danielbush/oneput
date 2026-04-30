@@ -242,4 +242,37 @@ describe('EditDocument', () => {
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
     expect(editManager.nav.getFocus()).toBe(children[1]);
   });
+
+  it('adds an Insert element before tag menu item that defaults to the focused tag name', () => {
+    // arrange
+    const doc = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const p2 = byId(doc, 'p2');
+
+    ctl.simulateStart(() => editDocument);
+    editManager.nav.REQUEST_FOCUS(p2);
+    editDocument.renderMenuItems();
+    const insertItem = ctl.currentProps.menuItems?.find(
+      (item) => item.id === 'INSERT_ELEMENT_BEFORE_TAG'
+    );
+
+    // act
+    insertItem?.action?.(ctl);
+    expect(ctl.currentProps.inputValue).toBe('p');
+    ctl.input.setInputValue('h2');
+    ctl.input.runSubmitHandler();
+
+    // assert
+    const children = Array.from(doc.root.children);
+    expect(insertItem).toBeDefined();
+    expect(children).toHaveLength(3);
+    expect(children[1]?.tagName.toLowerCase()).toBe('h2');
+    expect(editManager.nav.getFocus()).toBe(children[1]);
+  });
 });

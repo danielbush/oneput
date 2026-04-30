@@ -1,7 +1,9 @@
 import { err, ok, Result } from 'neverthrow';
+import * as dom from './lib/dom.js';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
+import { canContainChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
@@ -692,6 +694,29 @@ export class EditManager {
     return true;
   }
 
+  getFocusedElementTagName(): string | null {
+    const focus = this.getFocusedTag();
+    return focus?.tagName.toLowerCase() ?? null;
+  }
+
+  insertElementAfterFocus(tagName?: string): boolean {
+    const focus = this.getFocusedTag();
+    if (!focus) {
+      return false;
+    }
+
+    const normalized = token.normalizeTagName(tagName ?? focus.tagName);
+    if (!normalized || !this.canInsertElementAfterFocus(normalized)) {
+      return false;
+    }
+
+    const inserted = dom.createElement(normalized);
+    dom.insertAfter(inserted, focus);
+    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.nav.FOCUS(inserted);
+    return true;
+  }
+
   revealActiveTarget(): boolean {
     const current = this.cursor?.getToken();
     if (current && isToken(current)) {
@@ -936,6 +961,16 @@ export class EditManager {
     return this.mode === 'edit';
   }
 
+  canInsertElementAfterFocus(tagName?: string): boolean {
+    const focus = this.getFocusedTag();
+    if (!focus || !focus.parentElement) {
+      return false;
+    }
+
+    const normalized = token.normalizeTagName(tagName ?? focus.tagName);
+    return !!normalized && canContainChildTag(focus.parentElement.tagName, normalized);
+  }
+
   canInsertAnchorInLine(): boolean {
     const focus = this.nav.getFocus();
     return !!(focus && token.canInsertAnchorInLine(focus));
@@ -1018,4 +1053,12 @@ export class EditManager {
   }
 
   // #endregion is*/can* methods
+
+  private getFocusedTag(): HTMLElement | null {
+    const focus = this.nav.getFocus();
+    if (this.mode !== 'view' || !focus || focus === this.document.root || isToken(focus)) {
+      return null;
+    }
+    return focus;
+  }
 }

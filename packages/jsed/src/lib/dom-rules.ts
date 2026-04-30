@@ -84,7 +84,7 @@ function isLeaf(tagName: string): boolean {
   return LEAF.includes(tagName);
 }
 
-export function getAllowableChildTags(tagName: string): string[] {
+function getAllowedChildTags(tagName: string): string[] {
   const ltagname = tagName.toLowerCase();
   if (isLeaf(tagName)) {
     return [];
@@ -97,6 +97,15 @@ export function getAllowableChildTags(tagName: string): string[] {
     return RULES[ltagname].filter((t) => t !== ltagname);
   }
   return [];
+}
+
+export function getAllowableChildTags(tagName: string): string[] {
+  const ltagname = tagName.toLowerCase();
+  return getAllowedChildTags(tagName).filter((t) => t !== ltagname);
+}
+
+export function canContainChildTag(parentTagName: string, childTagName: string): boolean {
+  return getAllowedChildTags(parentTagName).includes(childTagName.toLowerCase());
 }
 
 /**

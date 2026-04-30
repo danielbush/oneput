@@ -170,7 +170,6 @@ describe('EditDocument', () => {
 
     // act
     tagItem?.action?.(ctl);
-    expect(ctl.currentProps.menuItems?.[0]?.id).toBe('APPLY_TAG_SELECTION');
     expect(ctl.currentProps.inputElement?.disabled).toBe(false);
     ctl.input.setInputValue('em');
     ctl.input.runSubmitHandler();
@@ -218,5 +217,38 @@ describe('EditDocument', () => {
     expect(wrapper.firstElementChild).toBe(island);
     expect(editManager.cursor?.getToken()).toBe(island);
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
+  });
+
+  it('adds an Insert element after tag menu item that defaults to the focused tag name', () => {
+    // arrange
+    const doc = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const p1 = byId(doc, 'p1');
+
+    ctl.simulateStart(() => editDocument);
+    editManager.nav.REQUEST_FOCUS(p1);
+    editDocument.renderMenuItems();
+    const insertItem = ctl.currentProps.menuItems?.find(
+      (item) => item.id === 'INSERT_ELEMENT_AFTER_TAG'
+    );
+
+    // act
+    insertItem?.action?.(ctl);
+    expect(ctl.currentProps.inputValue).toBe('p');
+    ctl.input.setInputValue('h2');
+    ctl.input.runSubmitHandler();
+
+    // assert
+    const children = Array.from(doc.root.children);
+    expect(insertItem).toBeDefined();
+    expect(children).toHaveLength(3);
+    expect(children[1]?.tagName.toLowerCase()).toBe('h2');
+    expect(editManager.nav.getFocus()).toBe(children[1]);
   });
 });

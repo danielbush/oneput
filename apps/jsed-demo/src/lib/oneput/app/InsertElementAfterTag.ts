@@ -1,9 +1,9 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { type EditManager } from '@oneput/jsed';
 
-export class TagSelection implements AppObject {
+export class InsertElementAfterTag implements AppObject {
   static create(ctl: Controller, editManager: EditManager) {
-    return new TagSelection(ctl, editManager);
+    return new InsertElementAfterTag(ctl, editManager);
   }
 
   private constructor(
@@ -12,9 +12,12 @@ export class TagSelection implements AppObject {
   ) {}
 
   onStart = () => {
+    const tagName = this.editManager.getFocusedElementTagName() ?? '';
     this.ctl.ui.update({ flags: { enableMenuItemsFn: false } });
-    this.ctl.input.setPlaceholder('Tag name...');
-    this.ctl.input.setInputValue('');
+    this.ctl.input.setPlaceholder('Element name...');
+    this.ctl.input.setInputValue(tagName).then(() => {
+      this.ctl.input.selectAll();
+    });
     this.ctl.input.focusInput();
     this.ctl.input.setSubmitHandler(this.apply);
   };
@@ -38,12 +41,12 @@ export class TagSelection implements AppObject {
   };
 
   private apply = (tagName: string) => {
-    const wrapped = this.editManager.wrapCursorWithTag(tagName);
-    if (wrapped) {
+    const inserted = this.editManager.insertElementAfterFocus(tagName);
+    if (inserted) {
       this.exit();
       return;
     }
 
-    this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
+    this.ctl.notify('Could not insert element after focused tag', { duration: 3000 });
   };
 }

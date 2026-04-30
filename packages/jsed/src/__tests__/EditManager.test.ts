@@ -295,6 +295,56 @@ describe('EditManager', () => {
       });
     });
 
+    describe('insertElementAfterFocus', () => {
+      it('inserts a new element after the focused tag and focuses it', () => {
+        // arrange
+        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.nav.connect();
+        const p1 = byId(doc, 'p1');
+
+        editManager.nav.REQUEST_FOCUS(p1);
+
+        // act
+        const inserted = editManager.insertElementAfterFocus();
+
+        // assert
+        const children = Array.from(doc.root.children);
+        expect(inserted).toBe(true);
+        expect(children).toHaveLength(3);
+        expect(children[1]?.tagName.toLowerCase()).toBe('p');
+        expect(children[1]?.querySelector(`.${JSED_TOKEN_CLASS}`)).not.toBeNull();
+        expect(editManager.nav.getFocus()).toBe(children[1]);
+
+        editManager.destroy();
+      });
+
+      it('uses a typed element name when the focused tag parent allows it', () => {
+        // arrange
+        const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.nav.connect();
+        const p1 = byId(doc, 'p1');
+
+        editManager.nav.REQUEST_FOCUS(p1);
+
+        // act
+        const inserted = editManager.insertElementAfterFocus('h2');
+
+        // assert
+        const children = Array.from(doc.root.children);
+        expect(inserted).toBe(true);
+        expect(children[1]?.tagName.toLowerCase()).toBe('h2');
+        expect(editManager.nav.getFocus()).toBe(children[1]);
+
+        editManager.destroy();
+      });
+    });
+
     describe('handleEnter - user initiates editing', () => {
       test('from a focused LINE with a leading ISLAND lands the CURSOR on that ISLAND', () => {
         // arrange

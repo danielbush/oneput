@@ -4,6 +4,7 @@ import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { TagSelection } from './TagSelection.js';
+import { InsertElementAfterTag } from './InsertElementAfterTag.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -230,6 +231,10 @@ export class EditDocument implements AppObject {
     this.ctl.app.run(TagSelection.create(this.ctl, this.editManager));
   };
 
+  private promptForElementAfterTag = () => {
+    this.ctl.app.run(InsertElementAfterTag.create(this.ctl, this.editManager));
+  };
+
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
@@ -339,6 +344,14 @@ export class EditDocument implements AppObject {
             action: this.promptForTagSelection,
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Tags)]
+          }),
+        this.editManager.canInsertElementAfterFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ELEMENT_AFTER_TAG',
+            textContent: 'Insert element after tag...',
+            action: this.promptForElementAfterTag,
+            closeMenuOnAction: false,
+            left: (b) => [b.icon(icons.Plus)]
           }),
         this.editManager.canRemoveSpaceAfterCursor() &&
           stdMenuItem({

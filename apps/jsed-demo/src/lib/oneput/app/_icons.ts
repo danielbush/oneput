@@ -13,7 +13,8 @@ export const iconData = {
   Pencil: lu.Pencil,
   Anchor: lu.Anchor,
   Space: lu.Space,
-  Tags: lu.Tags
+  Tags: lu.Tags,
+  Plus: lu.Plus
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

@@ -21,6 +21,10 @@ tasks:
     desc: format files
     cmds:
       - pnpm run format
+  format:check:
+    desc: check formatting without modifying files
+    cmds:
+      - pnpm exec prettier --check .
   eslint:fix:
     desc: run eslint fixes
     cmds:

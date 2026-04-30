@@ -47,9 +47,16 @@ tasks:
       - task: oneput:format
       - task: oneput-demo:format
       - task: jsed-demo:format
+  format:check:
+    desc: check code formatting without modifying files
+    deps:
+      - task: jsed:format:check
+      - task: oneput:format:check
+      - task: oneput-demo:format:check
+      - task: jsed-demo:format:check
   check:
     desc: run checks (eg types, linting) on all important packages
-    cmds:
+    deps:
       - task: oneput:check
       - task: oneput-demo:check
       - task: jsed:check

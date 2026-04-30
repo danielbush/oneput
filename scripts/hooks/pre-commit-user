@@ -3,9 +3,7 @@
 # Tracked pre-commit-user hook. Installed into .git/hooks/pre-commit-user
 # via scripts/hooks/install.sh (run once after clone).
 #
-# Runs `task format` against staged files and re-stages any that format
-# modified. Scoped to originally-staged files only — does not sweep in
-# untracked or unstaged changes.
+# Checks formatting and package checks without mutating the worktree.
 #
 # GitButler: this is invoked by GitButler's managed .git/hooks/pre-commit,
 # which delegates to pre-commit-user before its workspace-branch guard.
@@ -18,23 +16,23 @@ if [ -z "$STAGED" ]; then
     exit 0
 fi
 
-echo "Running task format..."
-if ! task format; then
-    echo "task format failed. Fix the issues before committing."
-    exit 1
+echo "Running task format:check..."
+task format:check &
+FORMAT_PID=$!
+
+echo "Running task check..."
+task check &
+CHECK_PID=$!
+
+STATUS=0
+if ! wait "$FORMAT_PID"; then
+    echo "task format:check failed. Run task format and stage the result before committing."
+    STATUS=1
 fi
 
-RESTAGE=""
-for f in $STAGED; do
-    if [ -f "$f" ] && ! git diff --quiet -- "$f"; then
-        RESTAGE="$RESTAGE $f"
-    fi
-done
-
-if [ -n "$RESTAGE" ]; then
-    echo "task format modified staged files; re-staging:$RESTAGE"
-    # shellcheck disable=SC2086
-    git add -- $RESTAGE
+if ! wait "$CHECK_PID"; then
+    echo "task check failed. Fix the issues before committing."
+    STATUS=1
 fi
 
-exit 0
+exit "$STATUS"

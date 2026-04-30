@@ -219,6 +219,22 @@ export class EditDocument implements AppObject {
     }
   };
 
+  private promptForTagSelection = () => {
+    this.ctl.input.setPlaceholder('Tag name...');
+    this.ctl.input.setInputValue('');
+    this.ctl.input.focusInput();
+    this.ctl.input.setSubmitHandlerOnce((tagName) => {
+      const wrapped = this.editManager.wrapCursorWithTag(tagName);
+      this.ctl.input.resetPlaceholder();
+      this.ctl.input.setInputValue('');
+      if (wrapped) {
+        this.ctl.menu.closeMenu();
+        return;
+      }
+      this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
+    });
+  };
+
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
@@ -320,6 +336,14 @@ export class EditDocument implements AppObject {
               this.editManager.removeSpaceAfterTag();
             },
             left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.canWrapCursorWithTag() &&
+          stdMenuItem({
+            id: 'TAG_SELECTION',
+            textContent: 'Tag selection...',
+            action: this.promptForTagSelection,
+            closeMenuOnAction: false,
+            left: (b) => [b.icon(icons.Tags)]
           }),
         this.editManager.canRemoveSpaceAfterCursor() &&
           stdMenuItem({

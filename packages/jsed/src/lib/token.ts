@@ -5,7 +5,7 @@ import {
   JSED_TOKEN_COLLAPSED,
   JSED_TOKEN_PADDED
 } from './constants.js';
-import { canCreateWithAnchor } from './dom-rules.js';
+import { canCreateWithAnchor, getAllowableChildTags } from './dom-rules.js';
 import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 import {
   isIgnorable,
@@ -374,6 +374,44 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
     token.append(document.createTextNode(val.trim()));
   }
   return token;
+}
+
+function normalizeTagName(tagName: string): string | null {
+  const normalized = tagName.trim().replace(/^<\s*/, '').replace(/\s*>$/, '').toLowerCase();
+  return /^[a-z][a-z0-9-]*$/.test(normalized) ? normalized : null;
+}
+
+export function canWrapTokenWithTag(token: HTMLElement, tagName: string): boolean {
+  if (!isToken(token) || !token.parentElement) {
+    return false;
+  }
+
+  const normalized = normalizeTagName(tagName);
+  if (!normalized) {
+    return false;
+  }
+
+  const parentAllowsWrapper = getAllowableChildTags(token.parentElement.tagName).includes(
+    normalized
+  );
+  const wrapperAllowsToken = getAllowableChildTags(normalized).includes('span');
+  return parentAllowsWrapper && wrapperAllowsToken;
+}
+
+/**
+ * Wrap a TOKEN in a new FOCUSABLE element while keeping the TOKEN itself
+ * intact, so the active CURSOR can stay seated on the same LINE_SIBLING.
+ */
+export function wrapTokenWithTag(token: HTMLElement, tagName: string): HTMLElement | null {
+  const normalized = normalizeTagName(tagName);
+  if (!normalized || !canWrapTokenWithTag(token, normalized)) {
+    return null;
+  }
+
+  const wrapper = token.ownerDocument.createElement(normalized);
+  token.before(wrapper);
+  wrapper.appendChild(token);
+  return wrapper;
 }
 
 /**

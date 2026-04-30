@@ -657,6 +657,26 @@ export class EditManager {
     }
   }
 
+  wrapCursorWithTag(tagName: string): boolean {
+    if (this.mode !== 'edit' || !this.cursor || this.selection) {
+      return false;
+    }
+
+    const current = this.cursor.getToken();
+    if (!isToken(current)) {
+      return false;
+    }
+
+    const wrapper = token.wrapTokenWithTag(current, tagName);
+    if (!wrapper) {
+      return false;
+    }
+
+    this.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
+    this.cursor.setToken(current);
+    return true;
+  }
+
   revealActiveTarget(): boolean {
     const current = this.cursor?.getToken();
     if (current && isToken(current)) {
@@ -959,6 +979,12 @@ export class EditManager {
       this.mode === 'edit' &&
       !!this.cursor &&
       token.canInsertSpaceAfterToken(this.cursor.getToken())
+    );
+  }
+
+  canWrapCursorWithTag(): boolean {
+    return (
+      this.mode === 'edit' && !!this.cursor && !this.selection && isToken(this.cursor.getToken())
     );
   }
 

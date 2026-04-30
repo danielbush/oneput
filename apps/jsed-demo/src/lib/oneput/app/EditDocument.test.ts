@@ -148,4 +148,36 @@ describe('EditDocument', () => {
       }
     ]);
   });
+
+  it('adds a Tag selection menu item that wraps the current cursor token on submit', () => {
+    // arrange
+    const doc = makeDocument('<p id="p1">foo bar</p>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const p1 = byId(doc, 'p1');
+
+    ctl.simulateStart(() => editDocument);
+    editManager.nav.REQUEST_FOCUS(p1);
+    editManager.nav.REQUEST_FOCUS(p1);
+    editDocument.renderMenuItems();
+    const cursorToken = editManager.cursor?.getToken() as HTMLElement;
+    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'TAG_SELECTION');
+
+    // act
+    tagItem?.action?.(ctl);
+    ctl.input.setInputValue('em');
+    ctl.input.runSubmitHandler();
+
+    // assert
+    const wrapper = p1.querySelector('em') as HTMLElement;
+    expect(tagItem).toBeDefined();
+    expect(wrapper).not.toBeNull();
+    expect(wrapper.firstElementChild).toBe(cursorToken);
+    expect(editManager.cursor?.getToken()).toBe(cursorToken);
+  });
 });

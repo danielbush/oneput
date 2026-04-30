@@ -325,6 +325,50 @@ describe('EditManager', () => {
   });
 
   describe('CURSOR-based actions (edit mode)', () => {
+    describe('wrapCursorWithTag', () => {
+      it('wraps the current TOKEN and keeps the CURSOR on that TOKEN', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+        const cursorToken = editManager.cursor?.getToken() as HTMLElement;
+
+        // act
+        const wrapped = editManager.wrapCursorWithTag('em');
+
+        // assert
+        const wrapper = byId(doc, 'p1').querySelector('em') as HTMLElement;
+        expect(wrapped).toBe(true);
+        expect(wrapper).not.toBeNull();
+        expect(wrapper.textContent).toBe('foo');
+        expect(wrapper.firstElementChild).toBe(cursorToken);
+        expect(editManager.cursor?.getToken()).toBe(cursorToken);
+
+        editManager.destroy();
+      });
+
+      it('does not wrap when a ranged SELECTION is active', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.enterEditing(byId(doc, 'p1'));
+        editManager.extendNext();
+
+        // act
+        const wrapped = editManager.wrapCursorWithTag('em');
+
+        // assert
+        expect(wrapped).toBe(false);
+        expect(byId(doc, 'p1').querySelector('em')).toBeNull();
+
+        editManager.destroy();
+      });
+    });
+
     describe('handleEnter - user initiates editing', () => {
       describe('enterEditing: when user initiates editing...', () => {
         // TODO: should these be in handleEnter ?

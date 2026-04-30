@@ -12,7 +12,8 @@ export const iconData = {
   CloseNotification: lu.X,
   Pencil: lu.Pencil,
   Anchor: lu.Anchor,
-  Space: lu.Space
+  Space: lu.Space,
+  Tags: lu.Tags
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

@@ -94,7 +94,7 @@ function getAllowedChildTags(tagName: string): string[] {
     return [...PHRASING_CONTENT, ...LEAF].filter((t) => t !== ltagname);
   }
   if (ltagname in RULES) {
-    return RULES[ltagname].filter((t) => t !== ltagname);
+    return RULES[ltagname];
   }
   return [];
 }

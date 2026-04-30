@@ -144,13 +144,27 @@
   content: '\00A4';
 }
 
-.jsed-token-focus.jsed-token {
-  background-color: var(--sky-blue-600);
-  color: var(--slate-100);
-}
+.jsed-token-focus.jsed-token,
 .jsed-token-focus.jsed-anchor-token {
-  background-color: var(--sky-blue-600);
-  color: var(--slate-100);
+  position: relative;
+  background-color: transparent;
+  color: white;
+  border-radius: 0.24rem;
+  isolation: isolate;
+}
+
+.jsed-token-focus.jsed-token::before,
+.jsed-token-focus.jsed-anchor-token::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: -0.2em;
+  right: -0.2em;
+  border-radius: 0.24rem;
+  background: rgba(37, 99, 235, 1);
+  animation: jsed-cursor-pulse 1.6s ease-in-out infinite;
 }
 /* #endregion */
 
@@ -170,56 +184,61 @@ See:
 - CURSOR_PREPEND_CLASS - jsed-crs-prepend
 */
 
-/* update markers */
-.jsed-token-focus.jsed-token.jsed-crs-prepend,
-.jsed-token-focus.jsed-token.jsed-crs-append {
-  background-color: var(--slate-600);
-  color: var(--slate-100);
-}
-.jsed-token-focus.jsed-token.jsed-crs-prepend::before {
-  /* content: '*'; */
-  /* content: '\2217'; */
-  /* content: '\00A4'; */
-  /* content: '\00B7'; */
-  /* content: '\02D1'; */
-  content: '\02D0';
-  background-color: transparent;
-  font-weight: normal;
-}
-.jsed-token-focus.jsed-token.jsed-crs-append::after {
-  /* content: '*\0020'; */
-  content: '\02D0';
-  background-color: transparent;
+.jsed-token-focus.jsed-token.jsed-crs-prepend::after,
+.jsed-token-focus.jsed-token.jsed-crs-append::after,
+.jsed-token-focus.jsed-token.jsed-crs-insert-before::after,
+.jsed-token-focus.jsed-token.jsed-crs-insert-after::after {
+  content: '';
+  position: absolute;
+  top: -0.34em;
+  width: 0;
+  height: 0;
+  border-left: 0.24em solid transparent;
+  border-right: 0.24em solid transparent;
+  border-top: 0.28em solid #dc2626;
+  border-bottom: 0;
+  background: transparent;
   font-weight: normal;
   font-style: normal;
-}
-.jsed-token-focus.jsed-token.jsed-token-collapsed.jsed-crs-append::after {
-  margin-left: 0;
 }
 
-/* insertion marker */
-.jsed-token-focus.jsed-token.jsed-crs-insert-after,
-.jsed-token-focus.jsed-token.jsed-crs-insert-before {
-  background-color: unset;
-  color: unset;
+.jsed-token-focus.jsed-token.jsed-crs-prepend::after,
+.jsed-token-focus.jsed-token.jsed-crs-insert-before::after {
+  left: -0.28em;
 }
-/* "* foo" */
-.jsed-token-focus.jsed-token.jsed-crs-insert-before::before {
-  content: '\0020\02D0\0020';
-  background-color: var(--sky-blue-600);
-  color: var(--slate-300);
-  /* margin-left: -0.3em; */
-  font-weight: normal;
-  font-style: normal;
-}
-/* "foo *" */
+
+.jsed-token-focus.jsed-token.jsed-crs-append::after,
 .jsed-token-focus.jsed-token.jsed-crs-insert-after::after {
-  content: '\0020\02D0\0020';
-  background-color: var(--sky-blue-600);
-  color: var(--slate-300);
-  /* margin-left: -0.3em; */
-  font-weight: normal;
-  font-style: normal;
+  right: -0.28em;
+}
+
+.jsed-token-focus.jsed-token.jsed-crs-insert-before::after {
+  filter: drop-shadow(0.36em 0 0 #dc2626);
+}
+
+.jsed-token-focus.jsed-token.jsed-crs-insert-after::after {
+  filter: drop-shadow(-0.36em 0 0 #dc2626);
+}
+
+.jsed-token-focus.jsed-token.jsed-crs-append::after {
+  top: -0.22em;
+}
+
+.jsed-token-focus.jsed-token.jsed-token-collapsed::before {
+  right: -0.06em;
+}
+
+@keyframes jsed-cursor-pulse {
+  0%,
+  100% {
+    background: rgba(37, 99, 235, 1);
+    transform: scale(1);
+  }
+
+  50% {
+    background: rgba(59, 130, 246, 1);
+    transform: scale(0.985);
+  }
 }
 /* #endregion */
 

@@ -3,7 +3,7 @@ import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/j
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { TagSelection } from './TagSelection.js';
-import { InsertElementAfterTag } from './InsertElementAfterTag.js';
+import { InsertElement } from './InsertElement.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -229,11 +229,15 @@ export class EditDocument implements AppObject {
   };
 
   private promptForElementAfterTag = () => {
-    this.ctl.app.run(InsertElementAfterTag.create(this.ctl, this.editManager));
+    this.ctl.app.run(InsertElement.create(this.ctl, this.editManager));
   };
 
   private promptForElementBeforeTag = () => {
-    this.ctl.app.run(InsertElementAfterTag.create(this.ctl, this.editManager, 'before'));
+    this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'before'));
+  };
+
+  private promptForElementInTag = () => {
+    this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'in'));
   };
 
   renderMenuItems = () => {
@@ -359,6 +363,14 @@ export class EditDocument implements AppObject {
             id: 'INSERT_ELEMENT_BEFORE_TAG',
             textContent: 'Insert element before tag...',
             action: this.promptForElementBeforeTag,
+            closeMenuOnAction: false,
+            left: (b) => [b.icon(icons.Plus)]
+          }),
+        this.editManager.canInsertElementInFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ELEMENT_IN_TAG',
+            textContent: 'Insert element in tag...',
+            action: this.promptForElementInTag,
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
           }),

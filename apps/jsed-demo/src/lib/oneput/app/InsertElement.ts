@@ -1,15 +1,15 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { type EditManager } from '@oneput/jsed';
 
-type InsertElementPosition = 'after' | 'before';
+type InsertElementPosition = 'after' | 'before' | 'in';
 
-export class InsertElementAfterTag implements AppObject {
+export class InsertElement implements AppObject {
   static create(
     ctl: Controller,
     editManager: EditManager,
     position: InsertElementPosition = 'after'
   ) {
-    return new InsertElementAfterTag(ctl, editManager, position);
+    return new InsertElement(ctl, editManager, position);
   }
 
   private constructor(
@@ -19,7 +19,10 @@ export class InsertElementAfterTag implements AppObject {
   ) {}
 
   onStart = () => {
-    const tagName = this.editManager.getFocusedElementTagName() ?? '';
+    const tagName =
+      this.position === 'in'
+        ? (this.editManager.getFocusedElementInsertChildTagName() ?? '')
+        : (this.editManager.getFocusedElementTagName() ?? '');
     this.ctl.ui.update({ flags: { enableMenuItemsFn: false } });
     this.ctl.input.setPlaceholder('Element name...');
     this.ctl.input.setInputValue(tagName).then(() => {
@@ -48,10 +51,7 @@ export class InsertElementAfterTag implements AppObject {
   };
 
   private apply = (tagName: string) => {
-    const inserted =
-      this.position === 'after'
-        ? this.editManager.insertElementAfterFocus(tagName)
-        : this.editManager.insertElementBeforeFocus(tagName);
+    const inserted = this.insertElement(tagName);
     if (inserted) {
       this.exit();
       return;
@@ -61,4 +61,16 @@ export class InsertElementAfterTag implements AppObject {
       duration: 3000
     });
   };
+
+  private insertElement(tagName: string): boolean {
+    if (this.position === 'after') {
+      return this.editManager.insertElementAfterFocus(tagName);
+    }
+
+    if (this.position === 'before') {
+      return this.editManager.insertElementBeforeFocus(tagName);
+    }
+
+    return this.editManager.insertElementInFocus(tagName);
+  }
 }

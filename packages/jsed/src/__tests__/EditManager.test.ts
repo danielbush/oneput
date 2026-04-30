@@ -1,6 +1,19 @@
 import { describe, expect, it, test, vi } from 'vitest';
 import { EditManager } from '../EditManager.js';
-import { byId, div, em, frag, identify, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
+import {
+  byId,
+  div,
+  em,
+  frag,
+  identify,
+  inlineStyleHack,
+  li,
+  makeRoot,
+  p,
+  s,
+  t,
+  ul
+} from '../test/util.js';
 import { getValue } from '../lib/token.js';
 import { JSED_ANCHOR_CHAR, JSED_TOKEN_CLASS } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
@@ -364,6 +377,67 @@ describe('EditManager', () => {
         expect(children).toHaveLength(3);
         expect(children[1]?.tagName.toLowerCase()).toBe('h2');
         expect(editManager.nav.getFocus()).toBe(children[1]);
+
+        editManager.destroy();
+      });
+    });
+
+    describe('insertElementInFocus', () => {
+      it('uses a typed element name inside the focused tag and focuses it', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'foo'));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.start();
+        const p1 = byId(doc, 'p1');
+
+        // act
+        const inserted = editManager.insertElementInFocus('span');
+
+        // assert
+        const child = p1.lastElementChild;
+        expect(inserted).toBe(true);
+        expect(child?.tagName.toLowerCase()).toBe('span');
+        expect(child?.querySelector(`.${JSED_TOKEN_CLASS}`)).not.toBeNull();
+        expect(editManager.nav.getFocus()).toBe(child);
+
+        editManager.destroy();
+      });
+
+      it('defaults to a specific child tag when the focused tag requires one', () => {
+        // arrange
+        const doc = makeRoot(ul({ id: 'list' }, li('one')));
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.start();
+        const list = byId(doc, 'list');
+        editManager.nav.REQUEST_FOCUS(list);
+
+        // act
+        const inserted = editManager.insertElementInFocus();
+
+        // assert
+        const child = list.lastElementChild;
+        expect(inserted).toBe(true);
+        expect(child?.tagName.toLowerCase()).toBe('li');
+        expect(editManager.nav.getFocus()).toBe(child);
+
+        editManager.destroy();
+      });
+
+      it('does not offer insert-in for a tag without child elements', () => {
+        // arrange
+        const doc = makeRoot('<br id="break">');
+        const editManager = EditManager.createNull({
+          document: doc
+        });
+        editManager.start();
+
+        // assert
+        expect(editManager.canInsertElementInFocus()).toBe(false);
+        expect(editManager.insertElementInFocus()).toBe(false);
 
         editManager.destroy();
       });

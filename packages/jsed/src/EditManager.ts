@@ -3,7 +3,7 @@ import * as dom from './lib/dom.js';
 import * as token from './lib/token.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { canContainChildTag } from './lib/dom-rules.js';
+import { canContainChildTag, getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
@@ -49,6 +49,10 @@ export type EditManagerElementChangeEvent =
     };
 type FocusElementInsertion = {
   focus: HTMLElement;
+  tagName: string;
+};
+type FocusElementChildInsertion = {
+  parent: HTMLElement;
   tagName: string;
 };
 
@@ -1063,6 +1067,10 @@ export class EditManager {
     return !!this.getFocusElementInsertion(tagName);
   }
 
+  canInsertElementInFocus(tagName?: string): boolean {
+    return !!this.getFocusElementChildInsertion(tagName);
+  }
+
   insertElementAfterFocus(tagName?: string): boolean {
     const insertion = this.getFocusElementInsertion(tagName);
     if (!insertion) {
@@ -1089,6 +1097,19 @@ export class EditManager {
     return true;
   }
 
+  insertElementInFocus(tagName?: string): boolean {
+    const insertion = this.getFocusElementChildInsertion(tagName);
+    if (!insertion) {
+      return false;
+    }
+
+    const inserted = dom.createElement(insertion.tagName);
+    insertion.parent.appendChild(inserted);
+    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.nav.FOCUS(inserted);
+    return true;
+  }
+
   // #endregion
 
   private getFocusedTag(): HTMLElement | null {
@@ -1104,6 +1125,11 @@ export class EditManager {
     return focus?.tagName.toLowerCase() ?? null;
   }
 
+  getFocusedElementInsertChildTagName(): string | null {
+    const focus = this.getFocusedTag();
+    return focus ? getDefaultInsertChildTag(focus.tagName) : null;
+  }
+
   private getFocusElementInsertion(tagName?: string): FocusElementInsertion | null {
     const focus = this.getFocusedTag();
     if (!focus || !focus.parentElement) {
@@ -1116,5 +1142,20 @@ export class EditManager {
     }
 
     return { focus, tagName: normalized };
+  }
+
+  private getFocusElementChildInsertion(tagName?: string): FocusElementChildInsertion | null {
+    const parent = this.getFocusedTag();
+    if (!parent) {
+      return null;
+    }
+
+    const defaultTagName = getDefaultInsertChildTag(parent.tagName);
+    const normalized = token.normalizeTagName(tagName ?? defaultTagName ?? '');
+    if (!normalized || !canContainChildTag(parent.tagName, normalized)) {
+      return null;
+    }
+
+    return { parent, tagName: normalized };
   }
 }

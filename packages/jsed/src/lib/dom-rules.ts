@@ -1,7 +1,7 @@
 import type { JsedDocument } from '../types.js';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories
-const LEAF = ['br', 'img'];
+const LEAF = ['br', 'hr', 'img'];
 const PHRASING_CONTENT = [
   'b',
   'i',
@@ -106,6 +106,24 @@ export function getAllowableChildTags(tagName: string): string[] {
 
 export function canContainChildTag(parentTagName: string, childTagName: string): boolean {
   return getAllowedChildTags(parentTagName).includes(childTagName.toLowerCase());
+}
+
+export function getDefaultInsertChildTag(tagName: string): string | null {
+  const ltagname = tagName.toLowerCase();
+  const allowed = getAllowedChildTags(ltagname);
+  if (allowed.length === 0) {
+    return null;
+  }
+
+  if (allowed.includes(ltagname)) {
+    return ltagname;
+  }
+
+  if (allowed.length === 1) {
+    return allowed[0] ?? null;
+  }
+
+  return null;
 }
 
 /**

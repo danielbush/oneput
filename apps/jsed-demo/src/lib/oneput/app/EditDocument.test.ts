@@ -275,4 +275,66 @@ describe('EditDocument', () => {
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
     expect(editManager.nav.getFocus()).toBe(children[1]);
   });
+
+  it('adds an Insert element in tag menu item that defaults to the focused tag name', () => {
+    // arrange
+    const doc = makeDocument('<div id="d1">foo</div>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const d1 = byId(doc, 'd1');
+
+    ctl.simulateStart(() => editDocument);
+    editDocument.renderMenuItems();
+    const insertItem = ctl.currentProps.menuItems?.find(
+      (item) => item.id === 'INSERT_ELEMENT_IN_TAG'
+    );
+
+    // act
+    insertItem?.action?.(ctl);
+    expect(ctl.currentProps.inputValue).toBe('div');
+    ctl.input.setInputValue('p');
+    ctl.input.runSubmitHandler();
+
+    // assert
+    const child = d1.lastElementChild;
+    expect(insertItem).toBeDefined();
+    expect(child?.tagName.toLowerCase()).toBe('p');
+    expect(editManager.nav.getFocus()).toBe(child);
+  });
+
+  it('defaults Insert element in tag to a specific child tag when required', () => {
+    // arrange
+    const doc = makeDocument('<ul id="list"><li>one</li></ul>');
+    const ctl = Controller.createNull();
+    const editManager = EditManager.createNull({
+      document: doc,
+      userInput: ctl.input,
+      onError: (err) => editDocument.handleEditError(err)
+    });
+    const editDocument = new EditDocument(ctl, doc, editManager);
+    const list = byId(doc, 'list');
+
+    ctl.simulateStart(() => editDocument);
+    editManager.nav.REQUEST_FOCUS(list);
+    editDocument.renderMenuItems();
+    const insertItem = ctl.currentProps.menuItems?.find(
+      (item) => item.id === 'INSERT_ELEMENT_IN_TAG'
+    );
+
+    // act
+    insertItem?.action?.(ctl);
+    expect(ctl.currentProps.inputValue).toBe('li');
+    ctl.input.runSubmitHandler();
+
+    // assert
+    const child = list.lastElementChild;
+    expect(insertItem).toBeDefined();
+    expect(child?.tagName.toLowerCase()).toBe('li');
+    expect(editManager.nav.getFocus()).toBe(child);
+  });
 });

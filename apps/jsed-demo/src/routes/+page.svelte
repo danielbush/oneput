@@ -3,7 +3,7 @@
 </script>
 
 <div id="test-doc" style="max-width: 900px; margin: 0 auto;">
-  <h1 class="jsed-ignore">Demo</h1>
+  <h1 class="jsed-ignore">Jsed Tutorial</h1>
   <p class="jsed-ignore">
     Welcome to the jsed demo! This is keyboard-centric demo that takes you through how to use the
     keybindings. There will be a separate demo for touch screens and mobile devices.

@@ -1,6 +1,5 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
-import { setDocument } from './_bindings.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { TagSelection } from './TagSelection.js';
@@ -46,7 +45,6 @@ export class EditDocument implements AppObject {
   ) {}
 
   onStart = () => {
-    setDocument(this.document);
     this.editManager.nav.connect();
     this.renderMenuItems();
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {

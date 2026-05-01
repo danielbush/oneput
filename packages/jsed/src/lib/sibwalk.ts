@@ -19,21 +19,6 @@ import {
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
-function getFirstFocusableAtOrInside(node: Node): HTMLElement | null {
-  if (isFocusable(node)) {
-    return node;
-  }
-
-  for (const next of findNextNode(node, node, {
-    visit: isFocusable,
-    descend: (candidate) => !isIsland(candidate)
-  })) {
-    return next as HTMLElement;
-  }
-
-  return null;
-}
-
 /**
  * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's
  * keep-alive predicate so LINEs hosting an active selection are not
@@ -188,23 +173,12 @@ export function findNextEditableLine(from: Node, ceiling: HTMLElement): HTMLElem
  * Find the next FOCUSABLE after `el`, skipping everything inside `el`.
  */
 export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
-  if (!ceiling.contains(el)) {
-    return null;
+  for (const next of findNextNode(el, ceiling, {
+    visit: isFocusable,
+    descend: (node) => !isIsland(node) && node !== el
+  })) {
+    return next as HTMLElement;
   }
-
-  for (
-    let current: Node | null = el;
-    current && current !== ceiling;
-    current = current.parentNode
-  ) {
-    for (let sibling = current.nextSibling; sibling; sibling = sibling.nextSibling) {
-      const next = getFirstFocusableAtOrInside(sibling);
-      if (next) {
-        return next;
-      }
-    }
-  }
-
   return null;
 }
 

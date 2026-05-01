@@ -6,9 +6,9 @@ import * as token from './lib/token.js';
  *
  * This is effectivey an extension of EditManager.
  */
-export class EditManagerAnchor {
+export class EditManagerAnchorOps {
   static create(editManager: EditManager) {
-    return new EditManagerAnchor(editManager);
+    return new EditManagerAnchorOps(editManager);
   }
 
   constructor(private editManager: EditManager) {}

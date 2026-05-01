@@ -215,7 +215,7 @@ export class EditDocument implements AppObject {
     },
     REVEAL: {
       action: () => {
-        this.editManager.revealActiveTarget();
+        this.editManager.scrollActiveTargetIntoView();
       },
       binding: {
         bindings: ['$mod+m'],

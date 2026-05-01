@@ -9,9 +9,9 @@ import { getFocusElementChildInsertion, getFocusElementInsertion } from './lib/f
  *
  * This is effectivey an extension of EditManager.
  */
-export class EditManagerFocus {
+export class EditManagerFocusOps {
   static create(editManager: EditManager) {
-    return new EditManagerFocus(editManager);
+    return new EditManagerFocusOps(editManager);
   }
 
   space: EditManagerFocusSpaceOps;

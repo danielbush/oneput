@@ -1410,7 +1410,7 @@ describe('EditManager', () => {
         scrollRequests.data.length = 0;
 
         // act
-        const revealed = editManager.revealActiveTarget();
+        const revealed = editManager.scrollActiveTargetIntoView();
 
         // assert
         expect(revealed).toBe(true);
@@ -1456,7 +1456,7 @@ describe('EditManager', () => {
         scrollRequests.data.length = 0;
 
         // act
-        const revealed = editManager.revealActiveTarget();
+        const revealed = editManager.scrollActiveTargetIntoView();
 
         // assert
         expect(revealed).toBe(true);

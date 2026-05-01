@@ -13,8 +13,8 @@ import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
-import { EditManagerFocus } from './EditManagerFocus.js';
-import { EditManagerAnchor } from './EditManagerAnchor.js';
+import { EditManagerFocusOps } from './EditManagerFocusOps.js';
+import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
 import { EditManagerCursorOps } from './EditManagerCursorOps.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
@@ -147,8 +147,8 @@ export class EditManager {
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
-  focus: EditManagerFocus;
-  anchor: EditManagerAnchor;
+  focus: EditManagerFocusOps;
+  anchor: EditManagerAnchorOps;
   cursorOps: EditManagerCursorOps;
 
   constructor(
@@ -167,8 +167,8 @@ export class EditManager {
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
   ) {
-    this.focus = EditManagerFocus.create(this);
-    this.anchor = EditManagerAnchor.create(this);
+    this.focus = EditManagerFocusOps.create(this);
+    this.anchor = EditManagerAnchorOps.create(this);
     this.cursorOps = EditManagerCursorOps.create(this);
   }
 
@@ -287,8 +287,6 @@ export class EditManager {
     return this.enterEditing(target);
   }
 
-  // #region Send events
-
   notifyTextChange(event: EditManagerTextChangeEvent) {
     this.onTextChange?.(event);
   }
@@ -296,10 +294,6 @@ export class EditManager {
   notifyElementChange(event: EditManagerElementChangeEvent) {
     this.onElementChange?.(event);
   }
-
-  // #endregion
-
-  // #region Handle events
 
   /**
    * When user types in the input...
@@ -661,10 +655,6 @@ export class EditManager {
     this.nav.SIB_PREV();
   }
 
-  // #endregion Events
-
-  // #region Splitting
-
   private splitAtCursor() {
     const inserted = this.cursor?.ops.splitAtToken();
     if (inserted) {
@@ -672,15 +662,7 @@ export class EditManager {
     }
   }
 
-  // #endregion
-
-  // #region Selections
-
-  // #endregion
-
-  // #region Scrolling
-
-  revealActiveTarget(): boolean {
+  scrollActiveTargetIntoView(): boolean {
     const current = this.cursor?.getToken();
     if (current && isToken(current)) {
       this.document.viewportScroller.scrollIntoViewCentered(current);
@@ -697,8 +679,6 @@ export class EditManager {
     });
     return true;
   }
-
-  // #endregion
 
   getFocusedTag(): HTMLElement | null {
     const focus = this.nav.getFocus();

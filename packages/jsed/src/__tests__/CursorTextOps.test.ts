@@ -41,7 +41,7 @@ describe('splitAtToken', () => {
     cursor.ops.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('world');
+    expect(getValue(cursor.getPlace())).toBe('world');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
@@ -55,7 +55,7 @@ describe('splitAtToken', () => {
     cursor.ops.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('world');
+    expect(getValue(cursor.getPlace())).toBe('world');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
@@ -68,7 +68,7 @@ describe('splitAtToken', () => {
     cursor.ops.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('world');
+    expect(getValue(cursor.getPlace())).toBe('world');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 });
@@ -83,7 +83,7 @@ describe('replace', () => {
     cursor.ops.replace('goodbye');
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('goodbye');
+    expect(getValue(cursor.getPlace())).toBe('goodbye');
   });
 
   it('replaces TOKEN text after an ISLAND without adding padding state', () => {
@@ -97,7 +97,7 @@ describe('replace', () => {
     cursor.ops.replace('ccc');
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('ccc');
+    expect(getValue(cursor.getPlace())).toBe('ccc');
   });
 
   it('no-op when cursor is on ISLAND', () => {
@@ -107,13 +107,13 @@ describe('replace', () => {
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
     const { cursor } = createCursor(doc, island);
-    expect(identify(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
     cursor.ops.replace('oops');
 
     // assert
-    expect(identify(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 });
 
@@ -127,7 +127,7 @@ describe('delete', () => {
     cursor.ops.delete();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('world');
+    expect(getValue(cursor.getPlace())).toBe('world');
   });
 
   it('deletes last TOKEN and moves cursor to previous TOKEN', () => {
@@ -139,7 +139,7 @@ describe('delete', () => {
     cursor.ops.delete();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('hello');
+    expect(getValue(cursor.getPlace())).toBe('hello');
   });
 
   it('no-op when cursor is on ISLAND', () => {
@@ -149,13 +149,13 @@ describe('delete', () => {
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
     const { cursor } = createCursor(doc, island);
-    expect(identify(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
     cursor.ops.delete();
 
     // assert
-    expect(identify(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
   it('deletes TOKEN after an ISLAND and moves cursor to next TOKEN', () => {
@@ -177,7 +177,7 @@ describe('delete', () => {
     cursor.ops.delete();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('ccc');
+    expect(getValue(cursor.getPlace())).toBe('ccc');
   });
 
   it('deletes last TOKEN after an ISLAND and leaves an ANCHOR', () => {
@@ -191,7 +191,7 @@ describe('delete', () => {
     cursor.ops.delete();
 
     // assert
-    expect(identify(cursor.getToken())).toBe('[anchor]');
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
   });
 });
 
@@ -205,18 +205,18 @@ describe('append', () => {
     cursor.ops.append('new');
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('hello');
+    expect(getValue(cursor.getPlace())).toBe('hello');
     cursor.moveNext();
-    expect(getValue(cursor.getToken())).toBe('new');
+    expect(getValue(cursor.getPlace())).toBe('new');
     cursor.moveNext();
-    expect(getValue(cursor.getToken())).toBe('world');
+    expect(getValue(cursor.getPlace())).toBe('world');
   });
 
   it('inserts a whitespace text node between the current TOKEN and the appended TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
-    const current = cursor.getToken();
+    const current = cursor.getPlace();
 
     // act
     const appended = cursor.ops.append('new');
@@ -254,7 +254,7 @@ describe('joinNext', () => {
     cursor.ops.joinNext();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('helloworld');
+    expect(getValue(cursor.getPlace())).toBe('helloworld');
   });
 
   it('joins current TOKEN with next TOKEN after an ISLAND without padding state', () => {
@@ -276,7 +276,7 @@ describe('joinNext', () => {
     cursor.ops.joinNext();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('bbbccc');
+    expect(getValue(cursor.getPlace())).toBe('bbbccc');
   });
 
   it('no-op when cursor is on ISLAND', () => {
@@ -291,7 +291,7 @@ describe('joinNext', () => {
     cursor.ops.joinNext();
 
     // assert
-    expect(identify(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
   it('no-op when next LINE_SIBLING is an INLINE_FLOW', () => {
@@ -303,7 +303,7 @@ describe('joinNext', () => {
     cursor.ops.joinNext();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('aaa');
+    expect(getValue(cursor.getPlace())).toBe('aaa');
   });
 });
 
@@ -317,7 +317,7 @@ describe('joinPrevious', () => {
     cursor.ops.joinPrevious();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('helloworld');
+    expect(getValue(cursor.getPlace())).toBe('helloworld');
   });
 
   it('joinPrevious preserves boundary padding when survivor becomes ISLAND-adjacent', () => {
@@ -339,7 +339,7 @@ describe('joinPrevious', () => {
     cursor.ops.joinPrevious();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('bbbccc');
+    expect(getValue(cursor.getPlace())).toBe('bbbccc');
   });
 
   it('no-op when cursor is on ISLAND', () => {
@@ -354,7 +354,7 @@ describe('joinPrevious', () => {
     cursor.ops.joinPrevious();
 
     // assert
-    expect(identify(cursor.getToken())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
   it('no-op when previous LINE_SIBLING is an INLINE_FLOW', () => {
@@ -366,6 +366,6 @@ describe('joinPrevious', () => {
     cursor.ops.joinPrevious();
 
     // assert
-    expect(getValue(cursor.getToken())).toBe('bbb');
+    expect(getValue(cursor.getPlace())).toBe('bbb');
   });
 });

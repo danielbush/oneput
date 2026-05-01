@@ -24,20 +24,20 @@ export class CursorTextOps {
   /** Replace the value of the current TOKEN with a new value. */
   replace(val: string): void {
     if (!this.isOnToken()) return;
-    token.replaceText(this.params.cursor.getToken(), val);
+    token.replaceText(this.params.cursor.getPlace(), val);
   }
 
   /** Delete the current TOKEN. */
   delete(): void {
     if (!this.isOnToken()) return;
-    const { next: nextTok } = token.remove(this.params.cursor.getToken());
-    this.params.cursor.setToken(nextTok);
+    const { next: nextTok } = token.remove(this.params.cursor.getPlace());
+    this.params.cursor.place(nextTok);
   }
 
   /** Append a new TOKEN after the current one. */
   append(val: string): HTMLElement | null {
     if (!this.isOnToken()) return null;
-    const current = this.params.cursor.getToken();
+    const current = this.params.cursor.getPlace();
     const tok = token.createToken(val);
     token.insertAfter(tok, current);
     space.ensureSeparatorAfter(current);
@@ -47,31 +47,31 @@ export class CursorTextOps {
   /** Merge with next adjacent TOKEN if it exists (JOIN). */
   joinNext(): void {
     if (!this.isOnToken()) return;
-    token.joinNext(this.params.cursor.getToken());
+    token.joinNext(this.params.cursor.getPlace());
   }
 
   /** Merge with previous adjacent TOKEN if it exists (JOIN). */
   joinPrevious(): void {
     if (!this.isOnToken()) return;
-    token.joinPrevious(this.params.cursor.getToken());
+    token.joinPrevious(this.params.cursor.getPlace());
   }
 
   /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
   splitBefore(): HTMLElement | null {
     if (!this.isOnToken()) return null;
-    const [before] = token.splitBefore(this.params.cursor.getToken());
+    const [before] = token.splitBefore(this.params.cursor.getPlace());
     // We may end up in a new token, so we need to update the focus.
-    this.params.cursor.setToken(this.params.cursor.getToken());
+    this.params.cursor.place(this.params.cursor.getPlace());
     return before;
   }
 
   /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
   splitAfter(): HTMLElement | null {
     if (!this.isOnToken()) return null;
-    const [, after] = token.splitAfter(this.params.cursor.getToken());
+    const [, after] = token.splitAfter(this.params.cursor.getPlace());
     const firstTok = this.params.tokenizer.tokenizeLineAt(after);
     if (firstTok) {
-      this.params.cursor.setToken(firstTok);
+      this.params.cursor.place(firstTok);
     }
     return after;
   }
@@ -90,11 +90,11 @@ export class CursorTextOps {
       this.params.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
-    token.insertAfter(el, this.params.cursor.getToken());
+    token.insertAfter(el, this.params.cursor.getPlace());
 
     const first = this.params.tokenizer.tokenizeLineAt(el);
     if (first) {
-      this.params.cursor.setToken(first);
+      this.params.cursor.place(first);
     }
   }
 
@@ -103,16 +103,16 @@ export class CursorTextOps {
       this.params.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
-    token.insertBefore(el, this.params.cursor.getToken());
+    token.insertBefore(el, this.params.cursor.getPlace());
 
     const first = this.params.tokenizer.tokenizeLineAt(el);
     if (first) {
-      this.params.cursor.setToken(first);
+      this.params.cursor.place(first);
     }
   }
 
   /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
   private isOnToken(): boolean {
-    return isToken(this.params.cursor.getToken());
+    return isToken(this.params.cursor.getPlace());
   }
 }

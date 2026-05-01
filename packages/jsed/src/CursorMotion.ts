@@ -30,7 +30,7 @@ export class CursorMotion {
       return;
     }
 
-    const next = getNextLineSibling(cursor.getToken(), this.params.document.root);
+    const next = getNextLineSibling(cursor.getPlace(), this.params.document.root);
     if (!next) {
       return;
     }
@@ -39,12 +39,12 @@ export class CursorMotion {
     if (isTokenizableTextNode(next)) {
       const { tokens } = this.params.tokenizer.tokenizeLineAtTextNode(next);
       if (tokens[0]) {
-        cursor.setToken(tokens[0]);
+        cursor.place(tokens[0]);
       }
       return;
     }
 
-    cursor.setToken(next as HTMLElement);
+    cursor.place(next as HTMLElement);
   }
 
   /**
@@ -56,7 +56,7 @@ export class CursorMotion {
       return;
     }
 
-    const prev = getPreviousLineSibling(cursor.getToken(), this.params.document.root);
+    const prev = getPreviousLineSibling(cursor.getPlace(), this.params.document.root);
     if (!prev) {
       return;
     }
@@ -64,11 +64,11 @@ export class CursorMotion {
     if (isTokenizableTextNode(prev)) {
       const { tokens } = this.params.tokenizer.tokenizeLineAtTextNode(prev);
       if (tokens.length > 0) {
-        cursor.setToken(tokens[tokens.length - 1]);
+        cursor.place(tokens[tokens.length - 1]);
       }
       return;
     }
 
-    cursor.setToken(prev as HTMLElement);
+    cursor.place(prev as HTMLElement);
   }
 }

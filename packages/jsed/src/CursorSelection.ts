@@ -47,7 +47,7 @@ export class CursorSelection {
   }
 
   getHead(): HTMLElement {
-    return this.headCursor.getToken();
+    return this.headCursor.getPlace();
   }
 
   /**
@@ -56,10 +56,10 @@ export class CursorSelection {
    * backward side when head is before the anchor.
    */
   extendNext(): void {
-    const before = this.headCursor.getToken();
+    const before = this.headCursor.getPlace();
     const wasBeforeAnchor = this.isBeforeAnchor(before);
     this.headCursor.moveNext();
-    const next = this.headCursor.getToken();
+    const next = this.headCursor.getPlace();
     if (next === before) return;
     if (wasBeforeAnchor) {
       this.shrinkFront(next);
@@ -74,10 +74,10 @@ export class CursorSelection {
    * forward side when head is after the anchor.
    */
   extendPrevious(): void {
-    const before = this.headCursor.getToken();
+    const before = this.headCursor.getPlace();
     const wasAfterAnchor = this.isAfterAnchor(before);
     this.headCursor.movePrevious();
-    const prev = this.headCursor.getToken();
+    const prev = this.headCursor.getPlace();
     if (prev === before) return;
     if (wasAfterAnchor) {
       this.shrinkBack(prev);

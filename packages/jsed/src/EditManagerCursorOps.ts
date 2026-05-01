@@ -17,7 +17,7 @@ export class EditManagerCursorOps {
     return (
       this.editManager.mode === 'edit' &&
       !!this.editManager.cursor &&
-      isLineSibling(this.editManager.cursor.getToken())
+      isLineSibling(this.editManager.cursor.getPlace())
     );
   }
 
@@ -40,11 +40,11 @@ export class EditManagerCursorOps {
       for (const wrapper of wrappers) {
         this.editManager.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
       }
-      this.editManager.cursor.setToken(anchor);
+      this.editManager.cursor.place(anchor);
       return true;
     }
 
-    const current = this.editManager.cursor.getToken();
+    const current = this.editManager.cursor.getPlace();
     if (!isLineSibling(current)) {
       return false;
     }
@@ -55,7 +55,7 @@ export class EditManagerCursorOps {
     }
 
     this.editManager.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-    this.editManager.cursor.setToken(current);
+    this.editManager.cursor.place(current);
     return true;
   }
 
@@ -63,7 +63,7 @@ export class EditManagerCursorOps {
     return (
       this.editManager.mode === 'edit' &&
       !!this.editManager.cursor &&
-      !!space.getRemovableSpaceBeforeToken(this.editManager.cursor.getToken())
+      !!space.getRemovableSpaceBeforeToken(this.editManager.cursor.getPlace())
     );
   }
 
@@ -71,7 +71,7 @@ export class EditManagerCursorOps {
     return (
       this.editManager.mode === 'edit' &&
       !!this.editManager.cursor &&
-      !!space.getRemovableSpaceAfterToken(this.editManager.cursor.getToken())
+      !!space.getRemovableSpaceAfterToken(this.editManager.cursor.getPlace())
     );
   }
 
@@ -79,7 +79,7 @@ export class EditManagerCursorOps {
     return (
       this.editManager.mode === 'edit' &&
       !!this.editManager.cursor &&
-      space.canInsertSpaceBeforeToken(this.editManager.cursor.getToken())
+      space.canInsertSpaceBeforeToken(this.editManager.cursor.getPlace())
     );
   }
 
@@ -87,7 +87,7 @@ export class EditManagerCursorOps {
     return (
       this.editManager.mode === 'edit' &&
       !!this.editManager.cursor &&
-      space.canInsertSpaceAfterToken(this.editManager.cursor.getToken())
+      space.canInsertSpaceAfterToken(this.editManager.cursor.getPlace())
     );
   }
 
@@ -96,7 +96,7 @@ export class EditManagerCursorOps {
       return false;
     }
 
-    const inserted = !!space.insertSpaceBeforeToken(this.editManager.cursor.getToken());
+    const inserted = !!space.insertSpaceBeforeToken(this.editManager.cursor.getPlace());
     if (inserted) {
       this.editManager.notifyTextChange({
         type: 'whitespace-change',
@@ -113,7 +113,7 @@ export class EditManagerCursorOps {
       return false;
     }
 
-    const inserted = !!space.insertSpaceAfterToken(this.editManager.cursor.getToken());
+    const inserted = !!space.insertSpaceAfterToken(this.editManager.cursor.getPlace());
     if (inserted) {
       this.editManager.notifyTextChange({
         type: 'whitespace-change',
@@ -130,7 +130,7 @@ export class EditManagerCursorOps {
       return false;
     }
 
-    const removed = !!space.removeSpaceBeforeToken(this.editManager.cursor.getToken());
+    const removed = !!space.removeSpaceBeforeToken(this.editManager.cursor.getPlace());
     if (removed) {
       this.editManager.notifyTextChange({
         type: 'whitespace-change',
@@ -147,7 +147,7 @@ export class EditManagerCursorOps {
       return false;
     }
 
-    const removed = !!space.removeSpaceAfterToken(this.editManager.cursor.getToken());
+    const removed = !!space.removeSpaceAfterToken(this.editManager.cursor.getPlace());
     if (removed) {
       this.editManager.notifyTextChange({
         type: 'whitespace-change',

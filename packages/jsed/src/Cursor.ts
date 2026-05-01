@@ -103,7 +103,7 @@ export class Cursor {
       tokenizer: params.tokenizer,
       onError: params.onError
     });
-    this.setToken(params.token);
+    this.place(params.token);
   }
 
   /** Destroy the current edit session. The instance cannot be used after this. */
@@ -121,7 +121,7 @@ export class Cursor {
   }
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
-  getToken() {
+  getPlace() {
     return this.#token;
   }
 
@@ -132,7 +132,7 @@ export class Cursor {
    * have been updated. `opts` is opaque to this class; it flows through to
    * the callback so callers can attach per-call hints (e.g. `syncInput`).
    */
-  setToken(el: HTMLElement, opts?: SetTokenOpts) {
+  place(el: HTMLElement, opts?: SetTokenOpts) {
     if (!isLineSibling(el)) {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);
@@ -213,22 +213,22 @@ export class Cursor {
 
   /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */
   isAppend(): boolean {
-    return this.getToken().classList.contains(CURSOR_APPEND_CLASS);
+    return this.getPlace().classList.contains(CURSOR_APPEND_CLASS);
   }
 
   /** Whether the CURSOR_STATE is CURSOR_PREPEND on the current TOKEN. */
   isPrepend(): boolean {
-    return this.getToken().classList.contains(CURSOR_PREPEND_CLASS);
+    return this.getPlace().classList.contains(CURSOR_PREPEND_CLASS);
   }
 
   /** Whether the CURSOR_STATE is CURSOR_INSERT_AFTER on the current TOKEN. */
   isInsertingAfter(): boolean {
-    return this.getToken().classList.contains(CURSOR_INSERT_AFTER_CLASS);
+    return this.getPlace().classList.contains(CURSOR_INSERT_AFTER_CLASS);
   }
 
   /** Whether the CURSOR_STATE is CURSOR_INSERT_BEFORE on the current TOKEN. */
   isInsertingBefore(): boolean {
-    return this.getToken().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
+    return this.getPlace().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
   }
 
   // #endregion
@@ -249,6 +249,6 @@ export class Cursor {
 
   /** Whether `tok` is on the same LINE as the cursor's TOKEN. */
   isSameLine(tok: HTMLElement) {
-    return isSameLine(this.getToken(), tok);
+    return isSameLine(this.getPlace(), tok);
   }
 }

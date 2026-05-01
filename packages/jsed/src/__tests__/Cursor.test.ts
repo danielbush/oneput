@@ -57,7 +57,7 @@ describe('CURSOR_STATE', () => {
       cursor.setState('CURSOR_APPEND');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_APPEND_CLASS]);
+      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_APPEND_CLASS]);
     });
 
     test('moveNext clears CURSOR_APPEND marker', () => {
@@ -69,7 +69,7 @@ describe('CURSOR_STATE', () => {
       cursor.moveNext();
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([]);
+      expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
   });
 
@@ -82,7 +82,7 @@ describe('CURSOR_STATE', () => {
       cursor.setState('CURSOR_PREPEND');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_PREPEND_CLASS]);
+      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
     });
 
     test('movePrevious clears CURSOR_PREPEND marker', () => {
@@ -95,7 +95,7 @@ describe('CURSOR_STATE', () => {
       cursor.movePrevious();
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([]);
+      expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
   });
 
@@ -109,7 +109,7 @@ describe('CURSOR_STATE', () => {
       cursor.setState('CURSOR_OVERWRITE');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([]);
+      expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
 
     test('cycling through states replaces the previous marker', () => {
@@ -118,13 +118,13 @@ describe('CURSOR_STATE', () => {
 
       // act & assert
       cursor.setState('CURSOR_APPEND');
-      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_APPEND_CLASS]);
+      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_APPEND_CLASS]);
 
       cursor.setState('CURSOR_PREPEND');
-      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_PREPEND_CLASS]);
+      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
 
       cursor.setState('CURSOR_OVERWRITE');
-      expect(markerClasses(cursor.getToken())).toEqual([]);
+      expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
   });
 
@@ -137,7 +137,7 @@ describe('CURSOR_STATE', () => {
       cursor.setState('CURSOR_INSERT_AFTER');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_INSERT_AFTER_CLASS]);
+      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_INSERT_AFTER_CLASS]);
     });
 
     test('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
@@ -149,8 +149,8 @@ describe('CURSOR_STATE', () => {
       cursor.movePrevious();
 
       // assert
-      expect(getValue(cursor.getToken())).toBe('hello');
-      expect(markerClasses(cursor.getToken())).toEqual([]);
+      expect(getValue(cursor.getPlace())).toBe('hello');
+      expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
 
     test('moveNext still moves forward from CURSOR_INSERT_AFTER', () => {
@@ -162,7 +162,7 @@ describe('CURSOR_STATE', () => {
       cursor.moveNext();
 
       // assert
-      expect(getValue(cursor.getToken())).toBe('world');
+      expect(getValue(cursor.getPlace())).toBe('world');
     });
   });
 
@@ -175,7 +175,7 @@ describe('CURSOR_STATE', () => {
       cursor.setState('CURSOR_INSERT_BEFORE');
 
       // assert
-      expect(markerClasses(cursor.getToken())).toEqual([CURSOR_INSERT_BEFORE_CLASS]);
+      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_INSERT_BEFORE_CLASS]);
     });
 
     test('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {
@@ -187,8 +187,8 @@ describe('CURSOR_STATE', () => {
       cursor.moveNext();
 
       // assert
-      expect(getValue(cursor.getToken())).toBe('hello');
-      expect(markerClasses(cursor.getToken())).toEqual([]);
+      expect(getValue(cursor.getPlace())).toBe('hello');
+      expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
 
     test('movePrevious still moves backward from CURSOR_INSERT_BEFORE', () => {
@@ -201,7 +201,7 @@ describe('CURSOR_STATE', () => {
       cursor.movePrevious();
 
       // assert
-      expect(getValue(cursor.getToken())).toBe('hello');
+      expect(getValue(cursor.getPlace())).toBe('hello');
     });
   });
 });

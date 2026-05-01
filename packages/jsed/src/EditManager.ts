@@ -195,7 +195,7 @@ export class EditManager {
       return;
     }
     if (this.mode === 'edit') {
-      this.enterEditing(this.cursor?.getToken());
+      this.enterEditing(this.cursor?.getPlace());
     }
   }
 
@@ -251,7 +251,7 @@ export class EditManager {
           onError: this.handleCursorError
         });
       } else {
-        this.cursor.setToken(targetLineSibling); // calls handleCursorChange
+        this.cursor.place(targetLineSibling); // calls handleCursorChange
       }
       this.setMode('edit');
       return ok(undefined);
@@ -300,12 +300,12 @@ export class EditManager {
    *
    * @param {string} inputValue What the user has typed into an html input/textarea
    */
-  public handleInputChange = (change: UserInputChange) => {
+  handleInputChange = (change: UserInputChange) => {
     if (this.isSuspended) return;
-    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
+    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) return;
 
     let lastToken: HTMLElement | null = null;
-    let currentToken = this.cursor.getToken();
+    let currentToken = this.cursor.getPlace();
     const currentTokenValue = token.getValue(currentToken);
     const intent = decideInputIntent(change, currentTokenValue);
 
@@ -320,7 +320,7 @@ export class EditManager {
       const start = this.selection.collapseToStart();
       this.selection = undefined;
       // Suppress input sync — user is mid-typing, we'd clobber their input.
-      this.cursor.setToken(start, { syncInput: false });
+      this.cursor.place(start, { syncInput: false });
       currentToken = start;
     }
     // console.log('decided intent', JSON.stringify(intent, null, 2));
@@ -331,7 +331,7 @@ export class EditManager {
         return;
 
       case 'delete-current': {
-        const current = this.cursor.getToken();
+        const current = this.cursor.getPlace();
         this.cursor.ops.delete();
         this.notifyTextChange({ type: 'token-text-change', token: current });
         this.cursor?.setStateFromInput(intent.inputValue);
@@ -381,10 +381,10 @@ export class EditManager {
     }
 
     const finalToken =
-      intent.finalTokenPreference === 'current-token' ? this.cursor.getToken() : lastToken;
+      intent.finalTokenPreference === 'current-token' ? this.cursor.getPlace() : lastToken;
 
     if (finalToken) {
-      this.cursor.setToken(finalToken);
+      this.cursor.place(finalToken);
       this.userInput.focus();
       this.userInput
         .setInputValue(token.getValue(finalToken))
@@ -408,8 +408,8 @@ export class EditManager {
    *
    * Pass this to the selection emitter after instantiation.
    */
-  public handleSelectionChange = (selection: UserInputSelectionState) => {
-    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getToken())) return;
+  handleSelectionChange = (selection: UserInputSelectionState) => {
+    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) return;
     this.cursor?.setStateFromSelection(selection);
   };
 
@@ -501,7 +501,7 @@ export class EditManager {
         return false;
       }
 
-      this.cursor.setToken(evt.token); // calls handleCursorChange
+      this.cursor.place(evt.token); // calls handleCursorChange
       return true;
     }
 
@@ -544,7 +544,7 @@ export class EditManager {
     }
 
     if (this.isSuspended) return ok(undefined);
-    const current = this.cursor.getToken();
+    const current = this.cursor.getPlace();
     if (isToken(current)) {
       this.splitAtCursor();
       return ok(undefined);
@@ -574,7 +574,7 @@ export class EditManager {
     if (!this.selection) return false;
     this.selection.collapse();
     this.selection = undefined;
-    this.cursor?.setToken(target);
+    this.cursor?.place(target);
     return true;
   }
 
@@ -592,7 +592,7 @@ export class EditManager {
     if (!this.selection) {
       this.selection = CursorSelection.create({
         tokenizer: this.tokenizer,
-        seed: this.cursor.getToken(),
+        seed: this.cursor.getPlace(),
         document: this.document
       });
     }
@@ -610,7 +610,7 @@ export class EditManager {
     if (!this.selection) {
       this.selection = CursorSelection.create({
         tokenizer: this.tokenizer,
-        seed: this.cursor.getToken(),
+        seed: this.cursor.getPlace(),
         document: this.document
       });
     }
@@ -663,7 +663,7 @@ export class EditManager {
   }
 
   scrollActiveTargetIntoView(): boolean {
-    const current = this.cursor?.getToken();
+    const current = this.cursor?.getPlace();
     if (current && isToken(current)) {
       this.document.viewportScroller.scrollIntoViewCentered(current);
       return true;

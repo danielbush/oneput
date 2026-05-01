@@ -207,7 +207,7 @@ describe('EditManager', () => {
 
       // assert
       expect(editManager.getMode()).toBe('edit');
-      expect(editManager.cursor?.getToken()).toBe(p1FirstToken);
+      expect(editManager.cursor?.getPlace()).toBe(p1FirstToken);
 
       editManager.destroy();
     });
@@ -511,8 +511,8 @@ describe('EditManager', () => {
         expect(result.isOk()).toBe(true);
         expect(editManager.getMode()).toBe('edit');
         expect(editManager.cursor).toBeDefined();
-        expect(isIsland(editManager.cursor!.getToken())).toBe(true);
-        expect(editManager.cursor!.getToken().classList.contains('katex')).toBe(true);
+        expect(isIsland(editManager.cursor!.getPlace())).toBe(true);
+        expect(editManager.cursor!.getPlace().classList.contains('katex')).toBe(true);
 
         editManager.destroy();
       });
@@ -528,7 +528,7 @@ describe('EditManager', () => {
           document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
-        const cursorToken = editManager.cursor?.getToken() as HTMLElement;
+        const cursorToken = editManager.cursor?.getPlace() as HTMLElement;
 
         // act
         const wrapped = editManager.cursorOps.wrap('em');
@@ -539,7 +539,7 @@ describe('EditManager', () => {
         expect(wrapper).not.toBeNull();
         expect(wrapper.textContent).toBe('foo');
         expect(wrapper.firstElementChild).toBe(cursorToken);
-        expect(editManager.cursor?.getToken()).toBe(cursorToken);
+        expect(editManager.cursor?.getPlace()).toBe(cursorToken);
         expect(editManager.nav.getFocus()).toBe(wrapper);
 
         editManager.destroy();
@@ -554,7 +554,7 @@ describe('EditManager', () => {
           document: doc
         });
         editManager.enterEditing(byId(doc, 'd1'));
-        const island = editManager.cursor?.getToken() as HTMLElement;
+        const island = editManager.cursor?.getPlace() as HTMLElement;
 
         // act
         const wrapped = editManager.cursorOps.wrap('em');
@@ -564,8 +564,8 @@ describe('EditManager', () => {
         expect(wrapped).toBe(true);
         expect(wrapper).not.toBeNull();
         expect(wrapper.firstElementChild).toBe(island);
-        expect(isIsland(editManager.cursor!.getToken())).toBe(true);
-        expect(editManager.cursor?.getToken()).toBe(island);
+        expect(isIsland(editManager.cursor!.getPlace())).toBe(true);
+        expect(editManager.cursor?.getPlace()).toBe(island);
 
         editManager.destroy();
       });
@@ -577,7 +577,7 @@ describe('EditManager', () => {
           document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
-        const anchor = editManager.cursor?.getToken() as HTMLElement;
+        const anchor = editManager.cursor?.getPlace() as HTMLElement;
         editManager.extendNext();
 
         // act
@@ -589,7 +589,7 @@ describe('EditManager', () => {
         expect(wrapper).not.toBeNull();
         expect(wrapper.textContent).toBe('foo bar');
         expect(doc.root.querySelector('.jsed-selection')).toBeNull();
-        expect(editManager.cursor?.getToken()).toBe(anchor);
+        expect(editManager.cursor?.getPlace()).toBe(anchor);
         expect(editManager.nav.getFocus()).toBe(wrapper);
 
         editManager.destroy();
@@ -637,7 +637,7 @@ describe('EditManager', () => {
           // assert
           expect(result.isOk()).toBe(true);
           expect(editManager.getMode()).toBe('edit');
-          expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+          expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('foo');
 
           editManager.destroy();
         });
@@ -661,7 +661,7 @@ describe('EditManager', () => {
           expect(
             Array.from(line.querySelectorAll('.jsed-token')).map((token) => token.textContent)
           ).toEqual(['foo', 'bar', 'baz']);
-          expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('foo');
 
           editManager.destroy();
         });
@@ -697,7 +697,7 @@ describe('EditManager', () => {
             Array.from(p1.querySelectorAll('.jsed-token')).map((token) => token.textContent)
           ).toEqual(['foo', 'bar']);
           expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
-          expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('foo');
 
           editManager.destroy();
         });
@@ -733,7 +733,7 @@ describe('EditManager', () => {
             )
           ).toEqual(['foo', 'bar']);
           expect(laterLine.querySelectorAll('.jsed-token')).toHaveLength(0);
-          expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('foo');
 
           editManager.destroy();
         });
@@ -759,8 +759,8 @@ describe('EditManager', () => {
           // assert
           expect(result.isOk()).toBe(true);
           expect(editManager.getMode()).toBe('edit');
-          expect(editManager.cursor?.getToken()).not.toBeNull();
-          expect(editManager.cursor?.getToken()!.textContent).toEqual('italic');
+          expect(editManager.cursor?.getPlace()).not.toBeNull();
+          expect(editManager.cursor?.getPlace()!.textContent).toEqual('italic');
         });
 
         test(`if entering on empty INLINE_FLOW (em-tag), don't add CURSOR`, () => {
@@ -812,8 +812,8 @@ describe('EditManager', () => {
           // assert
           expect(result.isOk()).toBe(true);
           expect(editManager.getMode()).toBe('edit');
-          expect(editManager.cursor?.getToken()).not.toBeNull();
-          expect(editManager.cursor?.getToken()!.textContent).toEqual('middle');
+          expect(editManager.cursor?.getPlace()).not.toBeNull();
+          expect(editManager.cursor?.getPlace()!.textContent).toEqual('middle');
         });
       });
     });
@@ -832,7 +832,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(editManager.cursor?.getToken().textContent?.trim()).toBe('bar');
+        expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('bar');
 
         editManager.destroy();
       });
@@ -855,7 +855,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
         editManager.destroy();
       });
@@ -878,7 +878,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(identify(editManager.cursor!.getToken())).toBe('[island:span]');
+        expect(identify(editManager.cursor!.getPlace())).toBe('[island:span]');
 
         editManager.destroy();
       });
@@ -902,7 +902,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
         editManager.destroy();
       });
@@ -930,7 +930,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
         editManager.destroy();
       });
@@ -951,7 +951,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(editManager.cursor?.getToken().textContent?.trim()).toBe('foo');
+        expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('foo');
 
         editManager.destroy();
       });
@@ -975,7 +975,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
         editManager.destroy();
       });
@@ -992,14 +992,14 @@ describe('EditManager', () => {
           document: doc
         });
         editManager.enterEditing(byId(doc, 'p2'));
-        expect(identify(editManager.cursor!.getToken())).toBe('bbb');
+        expect(identify(editManager.cursor!.getPlace())).toBe('bbb');
 
         // act
         editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(identify(editManager.cursor!.getToken())).toBe('[island:span]');
+        expect(identify(editManager.cursor!.getPlace())).toBe('[island:span]');
 
         editManager.destroy();
       });
@@ -1027,7 +1027,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
         editManager.destroy();
       });
@@ -1050,7 +1050,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('zzz');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('zzz');
 
         editManager.destroy();
       });
@@ -1074,7 +1074,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('aaa');
 
         editManager.destroy();
       });
@@ -1097,13 +1097,13 @@ describe('EditManager', () => {
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p1'));
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
           editManager.movePrevious();
           // This triggers findPreviousLineCandidate to return an untokenized
           // text node 'aaa' but only when tokenizeLooseLinesIn ignored the
           // first LOOSE_LINE ('aaa').
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('aaa');
 
           editManager.destroy();
         });
@@ -1124,22 +1124,22 @@ describe('EditManager', () => {
           // act + assert
           editManager.enterEditing(byId(doc, 'p2'));
           expect(editManager.getMode()).toBe('edit');
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
+          expect(isToken(editManager.cursor!.getPlace())).toBe(true);
+          expect(getValue(editManager.cursor!.getPlace())).toBe('ddd');
 
           // Regression here in findPreviousCrossLineTarget.
           // <loose/> never gets tokenized and the current algorithm
           // doesn't detect tokens.
           editManager.movePrevious();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+          expect(isToken(editManager.cursor!.getPlace())).toBe(true);
+          expect(getValue(editManager.cursor!.getPlace())).toBe('ccc');
 
           editManager.movePrevious();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+          expect(isToken(editManager.cursor!.getPlace())).toBe(true);
+          expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
           editManager.movePrevious();
-          expect(editManager.cursor!.getToken().innerText).toBe('aaa');
+          expect(editManager.cursor!.getPlace().innerText).toBe('aaa');
 
           editManager.destroy();
         });
@@ -1161,17 +1161,17 @@ describe('EditManager', () => {
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p2'));
-          expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('ddd');
 
           editManager.movePrevious();
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('ccc');
 
           editManager.movePrevious();
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
           editManager.movePrevious();
-          expect(isToken(editManager.cursor!.getToken())).toBe(true);
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+          expect(isToken(editManager.cursor!.getPlace())).toBe(true);
+          expect(getValue(editManager.cursor!.getPlace())).toBe('aaa');
 
           editManager.destroy();
         });
@@ -1199,20 +1199,20 @@ describe('EditManager', () => {
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p2'));
-          expect(getValue(editManager.cursor!.getToken())).toBe('eee');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('eee');
 
           editManager.movePrevious();
-          expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('ddd');
 
           editManager.movePrevious();
           // Key regression here - something about the div boundary between div1 and div2.
-          expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('ccc');
 
           editManager.movePrevious();
-          expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('bbb');
 
           editManager.movePrevious();
-          expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
+          expect(getValue(editManager.cursor!.getPlace())).toBe('aaa');
 
           editManager.destroy();
         });
@@ -1253,7 +1253,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('baz');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('baz');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editManager.destroy();
@@ -1274,7 +1274,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('foo');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editManager.destroy();
@@ -1293,7 +1293,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('baz');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('baz');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editManager.destroy();
@@ -1312,7 +1312,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('foo');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editManager.destroy();
@@ -1333,7 +1333,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('foo');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('foo');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editManager.destroy();
@@ -1354,7 +1354,7 @@ describe('EditManager', () => {
 
         // assert
         expect(editManager.getMode()).toBe('edit');
-        expect(getValue(editManager.cursor!.getToken())).toBe('baz');
+        expect(getValue(editManager.cursor!.getPlace())).toBe('baz');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editManager.destroy();
@@ -1405,7 +1405,7 @@ describe('EditManager', () => {
           document: doc
         });
         editManager.enterEditing(byId(doc, 'p1'));
-        const token = editManager.cursor?.getToken() as HTMLElement;
+        const token = editManager.cursor?.getPlace() as HTMLElement;
         const scrollRequests = doc.viewportScroller.trackScrollRequests();
         scrollRequests.data.length = 0;
 
@@ -1517,7 +1517,7 @@ describe('EditManager', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['foo', 'b']);
-      expect(getValue(editManager.cursor!.getToken())).toBe('b');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('b');
       expect(userInput.getInputValue()).toBe('b');
     });
 
@@ -1543,7 +1543,7 @@ describe('EditManager', () => {
       expect(secondToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(secondToken?.nextSibling?.textContent).toBe(' ');
       expect(secondToken?.nextSibling?.nextSibling).toBe(thirdToken);
-      expect(getValue(editManager.cursor!.getToken())).toBe('c');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('c');
       expect(userInput.getInputValue()).toBe('c');
     });
 
@@ -1559,7 +1559,7 @@ describe('EditManager', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['foo', 'bar']);
-      expect(getValue(editManager.cursor!.getToken())).toBe('bar');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('bar');
       expect(userInput.getInputValue()).toBe('bar');
     });
 
@@ -1579,7 +1579,7 @@ describe('EditManager', () => {
       expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(firstToken?.nextSibling?.textContent).toBe(' ');
       expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
-      expect(getValue(editManager.cursor!.getToken())).toBe('bar');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('bar');
       expect(userInput.getInputValue()).toBe('bar');
       expect(userInput.getRange()).toEqual([0, 3]);
     });
@@ -1600,7 +1600,7 @@ describe('EditManager', () => {
       expect(em?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(em?.nextSibling?.textContent).toBe(' ');
       expect(em?.nextSibling?.nextSibling).toBe(strong);
-      expect(getValue(editManager.cursor!.getToken())).toBe('bar');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('bar');
       expect(userInput.getInputValue()).toBe('bar');
       expect(userInput.getRange()).toEqual([0, 3]);
     });
@@ -1633,7 +1633,7 @@ describe('EditManager', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['b', 'foo']);
-      expect(getValue(editManager.cursor!.getToken())).toBe('b');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('b');
       expect(userInput.getInputValue()).toBe('b');
     });
 
@@ -1654,7 +1654,7 @@ describe('EditManager', () => {
       expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(firstToken?.nextSibling?.textContent).toBe(' ');
       expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
-      expect(getValue(editManager.cursor!.getToken())).toBe('b');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('b');
       expect(userInput.getInputValue()).toBe('b');
     });
 
@@ -1674,7 +1674,7 @@ describe('EditManager', () => {
       expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(firstToken?.nextSibling?.textContent).toBe(' ');
       expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
-      expect(getValue(editManager.cursor!.getToken())).toBe('o');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('o');
       expect(userInput.getInputValue()).toBe('o');
     });
   });
@@ -1715,7 +1715,7 @@ describe('EditManager', () => {
 
       // assert
       expect(tokenValues(p1)).toEqual(['x']);
-      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
       // Input value reflects what the user typed — handleCursorChange must
       // not clobber it with the head TOKEN's pre-rewrite value.
@@ -1736,7 +1736,7 @@ describe('EditManager', () => {
 
       // assert: 'foo' and 'bar' gone, 'x' lands where bar was, 'baz' intact
       expect(tokenValues(p1)).toEqual(['x', 'baz']);
-      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
       editManager.destroy();
@@ -1771,7 +1771,7 @@ describe('EditManager', () => {
       ]);
       expect(isToken(p1.firstChild)).toBe(true);
       expect(getValue(p1.firstChild as HTMLElement)).toBe('x');
-      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('x');
       expect(Array.from(p1.querySelectorAll('em > *')).map(identify)).toEqual(['[anchor]']);
 
       editManager.destroy();
@@ -1801,7 +1801,7 @@ describe('EditManager', () => {
       // assert
       expect(tokenValues(p1)).toEqual(['x']);
       expect(tokenValues(p2)).toEqual(['qux']);
-      expect(getValue(editManager.cursor!.getToken())).toBe('x');
+      expect(getValue(editManager.cursor!.getPlace())).toBe('x');
       expect(doc.root.querySelector('#p1')).not.toBeNull();
 
       editManager.destroy();

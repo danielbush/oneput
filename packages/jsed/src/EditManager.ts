@@ -11,7 +11,7 @@ import { Nav } from './Nav.js';
 import { Cursor, type SetTokenOpts, type CursorError } from './Cursor.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
-import { TokenSelection } from './TokenSelection.js';
+import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
@@ -151,7 +151,7 @@ export class EditManager {
   }
 
   cursor?: Cursor;
-  private selection?: TokenSelection;
+  private selection?: CursorSelection;
   private mode: EditManagerMode = 'view';
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
@@ -599,7 +599,7 @@ export class EditManager {
    * Extend the SELECTION one LINE_SIBLING forward from the current CURSOR.
    *
    * Stub for the selections feature (work/active/20260414.feat.selections.md).
-   * When implemented, this will seed a TokenSelection from the current TOKEN
+   * When implemented, this will seed a CursorSelection from the current TOKEN
    * on first call and grow (or shrink) its head via LINE_SIBLING traversal on
    * subsequent calls. Noop outside edit mode.
    */
@@ -607,7 +607,7 @@ export class EditManager {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor) return;
     if (!this.selection) {
-      this.selection = TokenSelection.create({
+      this.selection = CursorSelection.create({
         seed: this.cursor.getToken(),
         document: this.document,
         motion: this.cursorMotion,
@@ -626,7 +626,7 @@ export class EditManager {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor) return;
     if (!this.selection) {
-      this.selection = TokenSelection.create({
+      this.selection = CursorSelection.create({
         seed: this.cursor.getToken(),
         document: this.document,
         motion: this.cursorMotion,

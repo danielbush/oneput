@@ -137,7 +137,7 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested LINE elements within this line and not confuse them as the current LINE.
 - **SELECTION_WRAPPER**
-  - a transient `<span>` decoration inserted by `TokenSelection` to paint the selection background around a contiguous run of LINE_SIBLING's that share a DOM parent. Purely visual — unwrapped on collapse, never persisted.
+  - a transient `<span>` decoration inserted by `CursorSelection` to paint the selection background around a contiguous run of LINE_SIBLING's that share a DOM parent. Purely visual — unwrapped on collapse, never persisted.
   - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
   - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
 - **INTERSTITIAL_TEXT**

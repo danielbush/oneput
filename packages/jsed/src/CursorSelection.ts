@@ -16,14 +16,14 @@ import type { CursorTextOps } from './CursorTextOps.js';
  * - `head` is driven by an internal silent cursor.
  * - `anchor` is initial starting point
  */
-export class TokenSelection {
+export class CursorSelection {
   static create(params: {
     seed: HTMLElement;
     document: JsedDocument;
     motion: CursorMotion;
     textOps: CursorTextOps;
-  }): TokenSelection {
-    return new TokenSelection(params);
+  }): CursorSelection {
+    return new CursorSelection(params);
   }
 
   private anchor: HTMLElement;

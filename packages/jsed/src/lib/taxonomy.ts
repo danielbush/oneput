@@ -173,7 +173,7 @@ export function isImplicitLine(node: Node) {
 
 /**
  * Detect SELECTION_WRAPPER — a transient decoration inserted by
- * `TokenSelection` to paint the selection background around a
+ * `CursorSelection` to paint the selection background around a
  * contiguous run of LINE_SIBLING's. Structurally invisible to the
  * CURSOR: descend-but-don't-visit, like CURSOR_TRANSPARENT, but
  * semantically distinct so other code can recognise and ignore it

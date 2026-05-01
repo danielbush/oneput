@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { em, frag, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
-import { TokenSelection } from '../TokenSelection.js';
+import { CursorSelection } from '../CursorSelection.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { CursorMotion } from '../CursorMotion.js';
 import { CursorTextOps } from '../CursorTextOps.js';
@@ -8,9 +8,9 @@ import { getValue } from '../lib/token.js';
 import { JSED_TOKEN_CLASS } from '../lib/constants.js';
 import type { JsedDocument } from '../types.js';
 
-function seed(doc: JsedDocument, el: HTMLElement): TokenSelection {
+function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
   const tokenizer = Tokenizer.createNull();
-  return TokenSelection.create({
+  return CursorSelection.create({
     seed: el,
     document: doc,
     motion: CursorMotion.createNull({ document: doc, tokenizer }),
@@ -22,7 +22,7 @@ function seed(doc: JsedDocument, el: HTMLElement): TokenSelection {
 }
 
 /**
- * Narrow tests for TokenSelection at the class level. These exercise
+ * Narrow tests for CursorSelection at the class level. These exercise
  * the wrapper grow/shrink mechanics directly rather than going through
  * EditManager, because the behavior is DOM-shape sensitive and easier
  * to reason about at the TOKEN level.
@@ -32,7 +32,7 @@ function tokens(doc: { root: HTMLElement }): HTMLElement[] {
   return Array.from(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
 }
 
-function headValue(selection: TokenSelection): string {
+function headValue(selection: CursorSelection): string {
   return getValue(selection.getHead());
 }
 
@@ -49,7 +49,7 @@ function wrapperCount(doc: { root: HTMLElement }): number {
   return doc.root.querySelectorAll('.jsed-selection').length;
 }
 
-describe('TokenSelection single-paragraph grow/shrink', () => {
+describe('CursorSelection', () => {
   test('no grow', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c')));

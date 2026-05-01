@@ -56,7 +56,7 @@ export type CursorParams = {
   onError: (err: CursorError) => void;
   /**
    * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
-   * Used by TokenSelection's head-cursor, which must not render a second caret.
+   * Used by CursorSelection's head-cursor, which must not render a second caret.
    */
   silent?: boolean;
   motion: CursorMotion;
@@ -113,8 +113,6 @@ export class Cursor {
     return this.#document;
   }
 
-  // #region Token access
-
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getToken() {
     return this.#token;
@@ -142,9 +140,23 @@ export class Cursor {
     this.#onCursorChange(el, opts);
   }
 
-  // #endregion
+  // #region CURSOR_STATE
 
-  // #region Focus classes
+  private setMarker(className?: string): void {
+    this.clearMarkers();
+    if (className) {
+      this.addFocusClasses(className);
+    }
+  }
+
+  clearMarkers(): void {
+    this.removeFocusClasses(
+      CURSOR_INSERT_AFTER_CLASS,
+      CURSOR_INSERT_BEFORE_CLASS,
+      CURSOR_PREPEND_CLASS,
+      CURSOR_APPEND_CLASS
+    );
+  }
 
   private addFocusClasses(...classNames: string[]) {
     this.#token.classList.add(...classNames);
@@ -160,10 +172,6 @@ export class Cursor {
     this.#token.classList.remove(...this.#focusClasses);
     this.#focusClasses = [];
   }
-
-  // #endregion
-
-  // #region CURSOR_STATE
 
   /** Update the current CURSOR_STATE marker. */
   setState(state: CursorState): void {
@@ -194,22 +202,6 @@ export class Cursor {
   /** Update CURSOR_STATE markers from the current input selection. */
   setStateFromSelection(selection: UserInputSelectionState): void {
     this.setState(getCursorStateFromSelection(selection));
-  }
-
-  private setMarker(className?: string): void {
-    this.clearMarkers();
-    if (className) {
-      this.addFocusClasses(className);
-    }
-  }
-
-  clearMarkers(): void {
-    this.removeFocusClasses(
-      CURSOR_INSERT_AFTER_CLASS,
-      CURSOR_INSERT_BEFORE_CLASS,
-      CURSOR_PREPEND_CLASS,
-      CURSOR_APPEND_CLASS
-    );
   }
 
   /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */

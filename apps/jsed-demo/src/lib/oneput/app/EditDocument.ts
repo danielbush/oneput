@@ -275,39 +275,39 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Anchor)]
           }),
-        this.editManager.canInsertSpaceBeforeTag() &&
+        this.editManager.focus.space.canInsertSpaceBeforeTag() &&
           stdMenuItem({
             id: 'INSERT_SPACE_BEFORE_TAG',
             textContent: 'Insert space before tag...',
             action: () => {
-              this.editManager.insertSpaceBeforeTag();
+              this.editManager.focus.space.insertSpaceBeforeTag();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canInsertSpaceBeforeCursor() &&
+        this.editManager.cursorOps.canInsertSpaceBefore() &&
           stdMenuItem({
             id: 'INSERT_SPACE_BEFORE_CURSOR',
             textContent: 'Insert leading space before cursor...',
             action: () => {
-              this.editManager.insertSpaceBeforeCursor();
+              this.editManager.cursorOps.insertSpaceBefore();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canRemoveSpaceBeforeTag() &&
+        this.editManager.focus.space.canRemoveSpaceBeforeTag() &&
           stdMenuItem({
             id: 'REMOVE_SPACE_BEFORE_TAG',
             textContent: 'Remove space before tag...',
             action: () => {
-              this.editManager.removeSpaceBeforeTag();
+              this.editManager.focus.space.removeSpaceBeforeTag();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canRemoveSpaceBeforeCursor() &&
+        this.editManager.cursorOps.canRemoveSpaceBefore() &&
           stdMenuItem({
             id: 'REMOVE_SPACE_BEFORE_CURSOR',
             textContent: 'Remove leading space before cursor...',
             action: () => {
-              this.editManager.removeSpaceBeforeCursor();
+              this.editManager.cursorOps.removeSpaceBefore();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
@@ -329,34 +329,34 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Anchor)]
           }),
-        this.editManager.canInsertSpaceAfterTag() &&
+        this.editManager.focus.space.canInsertSpaceAfterTag() &&
           stdMenuItem({
             id: 'INSERT_SPACE_AFTER_TAG',
             textContent: 'Insert space after tag...',
             action: () => {
-              this.editManager.insertSpaceAfterTag();
+              this.editManager.focus.space.insertSpaceAfterTag();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canInsertSpaceAfterCursor() &&
+        this.editManager.cursorOps.canInsertSpaceAfter() &&
           stdMenuItem({
             id: 'INSERT_SPACE_AFTER_CURSOR',
             textContent: 'Insert trailing space after cursor...',
             action: () => {
-              this.editManager.insertSpaceAfterCursor();
+              this.editManager.cursorOps.insertSpaceAfter();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canRemoveSpaceAfterTag() &&
+        this.editManager.focus.space.canRemoveSpaceAfterTag() &&
           stdMenuItem({
             id: 'REMOVE_SPACE_AFTER_TAG',
             textContent: 'Remove space after tag...',
             action: () => {
-              this.editManager.removeSpaceAfterTag();
+              this.editManager.focus.space.removeSpaceAfterTag();
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canWrapCursorWithTag() &&
+        this.editManager.cursorOps.canWrap() &&
           stdMenuItem({
             id: 'TAG_SELECTION',
             textContent: 'Tag selection...',
@@ -395,12 +395,12 @@ export class EditDocument implements AppObject {
             action: this.confirmDeleteFocusedElement,
             left: (b) => [b.icon(icons.X)]
           }),
-        this.editManager.canRemoveSpaceAfterCursor() &&
+        this.editManager.cursorOps.canRemoveSpaceAfter() &&
           stdMenuItem({
             id: 'REMOVE_SPACE_AFTER_CURSOR',
             textContent: 'Remove trailing space after cursor...',
             action: () => {
-              this.editManager.removeSpaceAfterCursor();
+              this.editManager.cursorOps.removeSpaceAfter();
             },
             left: (b) => [b.icon(icons.Space)]
           }),

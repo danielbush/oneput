@@ -531,7 +531,7 @@ describe('EditManager', () => {
         const cursorToken = editManager.cursor?.getToken() as HTMLElement;
 
         // act
-        const wrapped = editManager.wrapCursorWithTag('em');
+        const wrapped = editManager.cursorOps.wrap('em');
 
         // assert
         const wrapper = byId(doc, 'p1').querySelector('em') as HTMLElement;
@@ -557,7 +557,7 @@ describe('EditManager', () => {
         const island = editManager.cursor?.getToken() as HTMLElement;
 
         // act
-        const wrapped = editManager.wrapCursorWithTag('em');
+        const wrapped = editManager.cursorOps.wrap('em');
 
         // assert
         const wrapper = byId(doc, 'd1').querySelector('em') as HTMLElement;
@@ -581,7 +581,7 @@ describe('EditManager', () => {
         editManager.extendNext();
 
         // act
-        const wrapped = editManager.wrapCursorWithTag('strong');
+        const wrapped = editManager.cursorOps.wrap('strong');
 
         // assert
         const wrapper = byId(doc, 'p1').querySelector('strong') as HTMLElement;
@@ -607,7 +607,7 @@ describe('EditManager', () => {
         editManager.extendNext();
 
         // act
-        const wrapped = editManager.wrapCursorWithTag('strong');
+        const wrapped = editManager.cursorOps.wrap('strong');
 
         // assert
         const wrapper = byId(doc, 'd1').querySelector('strong') as HTMLElement;

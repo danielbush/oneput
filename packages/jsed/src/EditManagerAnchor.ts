@@ -2,7 +2,7 @@ import type { EditManager } from './EditManager.js';
 import * as token from './lib/token.js';
 
 /**
- * High-level ANCHOR operations / state for EditManager.
+ * High-level ANCHOR operations for EditManager.
  *
  * This is effectivey an extension of EditManager.
  */

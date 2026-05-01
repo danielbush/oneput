@@ -17,6 +17,7 @@ import type { UserInput, UserInputChange, UserInputSelectionState } from './User
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
 import { EditManagerFocus } from './EditManagerFocus.js';
 import { EditManagerAnchor } from './EditManagerAnchor.js';
+import { EditManagerCursorOps } from './EditManagerCursorOps.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -143,8 +144,8 @@ export class EditManager {
   }
 
   cursor?: Cursor;
-  private selection?: CursorSelection;
-  private mode: EditManagerMode = 'view';
+  selection?: CursorSelection;
+  mode: EditManagerMode = 'view';
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
@@ -152,6 +153,7 @@ export class EditManager {
   private cursorTextOps: CursorTextOps;
   focus: EditManagerFocus;
   anchor: EditManagerAnchor;
+  cursorOps: EditManagerCursorOps;
 
   constructor(
     public document: JsedDocument,
@@ -179,6 +181,7 @@ export class EditManager {
     });
     this.focus = EditManagerFocus.create(this);
     this.anchor = EditManagerAnchor.create(this);
+    this.cursorOps = EditManagerCursorOps.create(this);
   }
 
   getMode(): EditManagerMode {
@@ -688,45 +691,6 @@ export class EditManager {
 
   // #region Selections
 
-  canWrapCursorWithTag(): boolean {
-    return this.mode === 'edit' && !!this.cursor && isLineSibling(this.cursor.getToken());
-  }
-
-  wrapCursorWithTag(tagName: string): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    if (this.selection) {
-      const anchor = this.selection.getAnchor();
-      const wrappers = this.selection.wrapWithTag(tagName);
-      if (!wrappers) {
-        return false;
-      }
-
-      this.selection = undefined;
-      for (const wrapper of wrappers) {
-        this.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-      }
-      this.cursor.setToken(anchor);
-      return true;
-    }
-
-    const current = this.cursor.getToken();
-    if (!isLineSibling(current)) {
-      return false;
-    }
-
-    const wrapper = token.wrapLineSiblingWithTag(current, tagName);
-    if (!wrapper) {
-      return false;
-    }
-
-    this.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-    this.cursor.setToken(current);
-    return true;
-  }
-
   // #endregion
 
   // #region Scrolling
@@ -748,210 +712,6 @@ export class EditManager {
     });
     return true;
   }
-
-  // #endregion
-
-  // #region Trailing / Leading space (at cursor)
-
-  canRemoveSpaceBeforeCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      !!space.getRemovableSpaceBeforeToken(this.cursor.getToken())
-    );
-  }
-
-  canRemoveSpaceAfterCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      !!space.getRemovableSpaceAfterToken(this.cursor.getToken())
-    );
-  }
-
-  canInsertSpaceBeforeCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      space.canInsertSpaceBeforeToken(this.cursor.getToken())
-    );
-  }
-
-  canInsertSpaceAfterCursor(): boolean {
-    return (
-      this.mode === 'edit' &&
-      !!this.cursor &&
-      space.canInsertSpaceAfterToken(this.cursor.getToken())
-    );
-  }
-
-  insertSpaceBeforeCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const inserted = !!space.insertSpaceBeforeToken(this.cursor.getToken());
-    if (inserted) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'leading-space',
-        change: 'inserted'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  insertSpaceAfterCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const inserted = !!space.insertSpaceAfterToken(this.cursor.getToken());
-    if (inserted) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'trailing-space',
-        change: 'inserted'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  removeSpaceBeforeCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const removed = !!space.removeSpaceBeforeToken(this.cursor.getToken());
-    if (removed) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'leading-space',
-        change: 'removed'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  removeSpaceAfterCursor(): boolean {
-    if (this.mode !== 'edit' || !this.cursor) {
-      return false;
-    }
-
-    const removed = !!space.removeSpaceAfterToken(this.cursor.getToken());
-    if (removed) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'trailing-space',
-        change: 'removed'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  // #endregion
-
-  // #region Trailing / Leading space (at focus)
-
-  canInsertSpaceAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && space.canInsertSpaceAfterTag(focus));
-  }
-
-  canRemoveSpaceAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && space.getRemovableSpaceAfterTag(focus));
-  }
-
-  canInsertSpaceBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && space.canInsertSpaceBeforeTag(focus));
-  }
-
-  canRemoveSpaceBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && space.getRemovableSpaceBeforeTag(focus));
-  }
-
-  insertSpaceAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const inserted = space.insertSpaceAfterTag(focus);
-    if (inserted) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'trailing-space',
-        change: 'inserted'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  removeSpaceAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const removed = space.removeSpaceAfterTag(focus);
-    if (removed) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'trailing-space',
-        change: 'removed'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  insertSpaceBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const inserted = space.insertSpaceBeforeTag(focus);
-    if (inserted) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'leading-space',
-        change: 'inserted'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  removeSpaceBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const removed = space.removeSpaceBeforeTag(focus);
-    if (removed) {
-      this.notifyTextChange({
-        type: 'whitespace-change',
-        kind: 'leading-space',
-        change: 'removed'
-      });
-      return true;
-    }
-    return false;
-  }
-
-  // #endregion
-
-  // #region Element actions (at focus)
 
   // #endregion
 

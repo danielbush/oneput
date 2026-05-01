@@ -38,7 +38,7 @@ export class TagSelection implements AppObject {
   };
 
   private apply = (tagName: string) => {
-    const wrapped = this.editManager.wrapCursorWithTag(tagName);
+    const wrapped = this.editManager.cursorOps.wrap(tagName);
     if (wrapped) {
       this.exit();
       return;

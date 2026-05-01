@@ -8,8 +8,6 @@ import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from '.
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
 import { Cursor, type SetTokenOpts, type CursorError } from './Cursor.js';
-import { CursorMotion } from './CursorMotion.js';
-import { CursorTextOps } from './CursorTextOps.js';
 import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
@@ -149,8 +147,6 @@ export class EditManager {
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
-  private cursorMotion: CursorMotion;
-  private cursorTextOps: CursorTextOps;
   focus: EditManagerFocus;
   anchor: EditManagerAnchor;
   cursorOps: EditManagerCursorOps;
@@ -171,14 +167,6 @@ export class EditManager {
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
   ) {
-    this.cursorMotion = CursorMotion.create({
-      document: this.document,
-      tokenizer: this.tokenizer
-    });
-    this.cursorTextOps = CursorTextOps.create({
-      tokenizer: this.tokenizer,
-      onError: this.handleCursorError
-    });
     this.focus = EditManagerFocus.create(this);
     this.anchor = EditManagerAnchor.create(this);
     this.cursorOps = EditManagerCursorOps.create(this);
@@ -257,8 +245,7 @@ export class EditManager {
       if (!this.cursor) {
         this.cursor = Cursor.create({
           document: this.document,
-          motion: this.cursorMotion,
-          textOps: this.cursorTextOps,
+          tokenizer: this.tokenizer,
           token: targetLineSibling,
           onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
@@ -610,10 +597,9 @@ export class EditManager {
     if (this.mode !== 'edit' || !this.cursor) return;
     if (!this.selection) {
       this.selection = CursorSelection.create({
+        tokenizer: this.tokenizer,
         seed: this.cursor.getToken(),
-        document: this.document,
-        motion: this.cursorMotion,
-        textOps: this.cursorTextOps
+        document: this.document
       });
     }
     this.selection.extendNext();
@@ -629,10 +615,9 @@ export class EditManager {
     if (this.mode !== 'edit' || !this.cursor) return;
     if (!this.selection) {
       this.selection = CursorSelection.create({
+        tokenizer: this.tokenizer,
         seed: this.cursor.getToken(),
-        document: this.document,
-        motion: this.cursorMotion,
-        textOps: this.cursorTextOps
+        document: this.document
       });
     }
     this.selection.extendPrevious();

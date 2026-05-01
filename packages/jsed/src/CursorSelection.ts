@@ -4,8 +4,7 @@ import { isInlineFlow } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
 import { Cursor } from './Cursor.js';
 import type { JsedDocument } from './types.js';
-import type { CursorMotion } from './CursorMotion.js';
-import type { CursorTextOps } from './CursorTextOps.js';
+import type { Tokenizer } from './Tokenizer.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -20,8 +19,7 @@ export class CursorSelection {
   static create(params: {
     seed: HTMLElement;
     document: JsedDocument;
-    motion: CursorMotion;
-    textOps: CursorTextOps;
+    tokenizer: Tokenizer;
   }): CursorSelection {
     return new CursorSelection(params);
   }
@@ -31,17 +29,11 @@ export class CursorSelection {
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
-  constructor(params: {
-    seed: HTMLElement;
-    document: JsedDocument;
-    motion: CursorMotion;
-    textOps: CursorTextOps;
-  }) {
+  constructor(params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }) {
     this.anchor = params.seed;
     this.headCursor = Cursor.create({
       document: params.document,
-      motion: params.motion,
-      textOps: params.textOps,
+      tokenizer: params.tokenizer,
       token: params.seed,
       onCursorChange: () => {},
       onError: () => {},

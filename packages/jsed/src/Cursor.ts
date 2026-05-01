@@ -9,9 +9,10 @@ import { isLineSibling } from './lib/taxonomy.js';
 import { isSameLine } from './lib/line.js';
 import { getCursorStateFromInput, getCursorStateFromSelection } from './lib/cursor.js';
 import { CursorMotion } from './CursorMotion.js';
-import { CursorTextOps, type CursorTextOpsForCursor } from './CursorTextOps.js';
+import { CursorTextOps } from './CursorTextOps.js';
 import type { JsedDocument } from './types.js';
 import type { UserInputSelectionState } from './UserInput.js';
+import type { Tokenizer } from './Tokenizer.js';
 
 export type CursorError =
   | {
@@ -51,6 +52,7 @@ export type CursorState =
 
 export type CursorParams = {
   document: JsedDocument;
+  tokenizer: Tokenizer;
   token: HTMLElement;
   onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
   onError: (err: CursorError) => void;
@@ -59,8 +61,6 @@ export type CursorParams = {
    * Used by CursorSelection's head-cursor, which must not render a second caret.
    */
   silent?: boolean;
-  motion: CursorMotion;
-  textOps: CursorTextOps;
 };
 
 /**
@@ -70,13 +70,21 @@ export type CursorParams = {
  * coordination are delegated to focused operation classes.
  */
 export class Cursor {
+  static create(params: CursorParams) {
+    return new Cursor(params);
+  }
+
+  static createNull(params: CursorParams) {
+    return new Cursor(params);
+  }
+
   #token: HTMLElement;
   #document: JsedDocument;
   #onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
   #silent: boolean;
   #focusClasses: string[] = [];
 
-  readonly ops: CursorTextOpsForCursor;
+  readonly ops: CursorTextOps;
   private motion: CursorMotion;
   private onError: (err: CursorError) => void;
 
@@ -86,17 +94,16 @@ export class Cursor {
     this.#onCursorChange = params.onCursorChange;
     this.onError = params.onError;
     this.#silent = params.silent ?? false;
-    this.motion = params.motion;
-    this.ops = params.textOps.forCursor(this);
+    this.motion = CursorMotion.create({
+      document: params.document,
+      tokenizer: params.tokenizer
+    });
+    this.ops = CursorTextOps.create({
+      cursor: this,
+      tokenizer: params.tokenizer,
+      onError: params.onError
+    });
     this.setToken(params.token);
-  }
-
-  static create(params: CursorParams) {
-    return new Cursor(params);
-  }
-
-  static createNull(params: CursorParams) {
-    return new Cursor(params);
   }
 
   /** Destroy the current edit session. The instance cannot be used after this. */

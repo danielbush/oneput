@@ -4,51 +4,13 @@ import { isToken } from './lib/taxonomy.js';
 import type { Cursor, CursorError } from './Cursor.js';
 import type { Tokenizer } from './Tokenizer.js';
 
-/**
- * Coordinates TOKEN editing operations from the active CURSOR position.
- *
- * Cursor owns current CURSOR state and visual markers. CursorTextOps owns
- * the text-editing policy, including operations that need the shared Tokenizer
- * to re-seat the CURSOR after creating new editable content.
- */
 export class CursorTextOps {
-  static create(params: {
-    tokenizer: Tokenizer;
-    onError: (err: CursorError) => void;
-  }): CursorTextOps {
-    return new CursorTextOps(params);
-  }
-
-  static createNull(params: {
-    tokenizer: Tokenizer;
-    onError: (err: CursorError) => void;
-  }): CursorTextOps {
-    return new CursorTextOps(params);
-  }
-
-  private constructor(
-    private params: {
-      tokenizer: Tokenizer;
-      onError: (err: CursorError) => void;
-    }
-  ) {}
-
-  forCursor(cursor: Cursor): CursorTextOpsForCursor {
-    return CursorTextOpsForCursor.create({
-      cursor,
-      tokenizer: this.params.tokenizer,
-      onError: this.params.onError
-    });
-  }
-}
-
-export class CursorTextOpsForCursor {
   static create(params: {
     cursor: Cursor;
     tokenizer: Tokenizer;
     onError: (err: CursorError) => void;
-  }): CursorTextOpsForCursor {
-    return new CursorTextOpsForCursor(params);
+  }): CursorTextOps {
+    return new CursorTextOps(params);
   }
 
   private constructor(

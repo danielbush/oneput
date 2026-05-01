@@ -3,8 +3,6 @@ import { makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { CursorMotion } from '../CursorMotion.js';
-import { CursorTextOps } from '../CursorTextOps.js';
 import { getValue } from '../lib/token.js';
 import {
   CURSOR_APPEND_CLASS,
@@ -17,15 +15,10 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
-  const textOps = CursorTextOps.createNull({
-    tokenizer,
-    onError: (err) => errors.push(err.type)
-  });
 
   const cursor = Cursor.create({
     document: doc,
-    motion: CursorMotion.createNull({ document: doc, tokenizer }),
-    textOps,
+    tokenizer,
     token: tok,
     onCursorChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)

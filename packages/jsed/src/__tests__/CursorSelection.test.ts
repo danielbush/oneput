@@ -2,8 +2,6 @@ import { describe, test, expect } from 'vitest';
 import { em, frag, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
 import { CursorSelection } from '../CursorSelection.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { CursorMotion } from '../CursorMotion.js';
-import { CursorTextOps } from '../CursorTextOps.js';
 import { getValue } from '../lib/token.js';
 import { JSED_TOKEN_CLASS } from '../lib/constants.js';
 import type { JsedDocument } from '../types.js';
@@ -11,13 +9,9 @@ import type { JsedDocument } from '../types.js';
 function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
   const tokenizer = Tokenizer.createNull();
   return CursorSelection.create({
+    tokenizer,
     seed: el,
-    document: doc,
-    motion: CursorMotion.createNull({ document: doc, tokenizer }),
-    textOps: CursorTextOps.createNull({
-      tokenizer,
-      onError: () => {}
-    })
+    document: doc
   });
 }
 

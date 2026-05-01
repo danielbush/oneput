@@ -250,7 +250,7 @@ export class EditDocument implements AppObject {
       return;
     }
 
-    this.editManager.deleteFocus();
+    this.editManager.focus.delete();
     this.ctl.menu.closeMenu();
   };
 
@@ -364,7 +364,7 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Tags)]
           }),
-        this.editManager.canInsertElementAfterFocus() &&
+        this.editManager.focus.canInsertAfter() &&
           stdMenuItem({
             id: 'INSERT_ELEMENT_AFTER_TAG',
             textContent: 'Insert element after tag...',
@@ -372,7 +372,7 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
           }),
-        this.editManager.canInsertElementBeforeFocus() &&
+        this.editManager.focus.canInsertBefore() &&
           stdMenuItem({
             id: 'INSERT_ELEMENT_BEFORE_TAG',
             textContent: 'Insert element before tag...',
@@ -380,7 +380,7 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
           }),
-        this.editManager.canInsertElementInFocus() &&
+        this.editManager.focus.canInsertIn() &&
           stdMenuItem({
             id: 'INSERT_ELEMENT_IN_TAG',
             textContent: 'Insert element in tag...',
@@ -388,7 +388,7 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
           }),
-        this.editManager.canDeleteFocus() &&
+        this.editManager.focus.canDelete() &&
           stdMenuItem({
             id: 'DELETE_FOCUSED_ELEMENT',
             textContent: 'Delete focused element...',

@@ -1,10 +1,9 @@
 import { err, ok, Result } from 'neverthrow';
-import * as dom from './lib/focusable.js';
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
+import { getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
@@ -16,12 +15,7 @@ import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
-import {
-  findNextFocusableOutside,
-  findPreviousFocusableOutside,
-  getFocusElementChildInsertion,
-  getFocusElementInsertion
-} from './lib/focusable.js';
+import { EditManagerFocus } from './EditManagerFocus.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -155,9 +149,10 @@ export class EditManager {
   private unsubscribeSelectionChange?: () => void;
   private cursorMotion: CursorMotion;
   private cursorTextOps: CursorTextOps;
+  focus: EditManagerFocus;
 
   constructor(
-    private document: JsedDocument,
+    public document: JsedDocument,
     private userInput: UserInput,
     readonly nav: Nav,
     private onError?: (err: EditManagerError) => void,
@@ -177,6 +172,7 @@ export class EditManager {
       tokenizer: this.tokenizer,
       onError: this.handleCursorError
     });
+    this.focus = EditManagerFocus.create(this);
   }
 
   getMode(): EditManagerMode {
@@ -297,11 +293,11 @@ export class EditManager {
 
   // #region Send events
 
-  private notifyTextChange(event: EditManagerTextChangeEvent) {
+  notifyTextChange(event: EditManagerTextChangeEvent) {
     this.onTextChange?.(event);
   }
 
-  private notifyElementChange(event: EditManagerElementChangeEvent) {
+  notifyElementChange(event: EditManagerElementChangeEvent) {
     this.onElementChange?.(event);
   }
 
@@ -1058,92 +1054,9 @@ export class EditManager {
 
   // #region Element actions (at focus)
 
-  canInsertElementAfterFocus(tagName?: string): boolean {
-    const focus = this.getFocusedTag();
-    return !!getFocusElementInsertion(focus, tagName);
-  }
-
-  canInsertElementBeforeFocus(tagName?: string): boolean {
-    const focus = this.getFocusedTag();
-    return !!getFocusElementInsertion(focus, tagName);
-  }
-
-  canInsertElementInFocus(tagName?: string): boolean {
-    const focus = this.getFocusedTag();
-    return !!getFocusElementChildInsertion(focus, tagName);
-  }
-
-  canDeleteFocus(): boolean {
-    const focus = this.getFocusedTag();
-    return !!(focus && canDelete(focus, this.document));
-  }
-
-  insertElementAfterFocus(tagName?: string): boolean {
-    const focus = this.getFocusedTag();
-    const insertion = getFocusElementInsertion(focus, tagName);
-    if (!insertion) {
-      return false;
-    }
-
-    const inserted = dom.createElement(insertion.tagName);
-    dom.insertAfter(inserted, insertion.focus);
-    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    this.nav.FOCUS(inserted);
-    return true;
-  }
-
-  insertElementBeforeFocus(tagName?: string): boolean {
-    const focus = this.getFocusedTag();
-    const insertion = getFocusElementInsertion(focus, tagName);
-    if (!insertion) {
-      return false;
-    }
-
-    const inserted = dom.createElement(insertion.tagName);
-    dom.insertBefore(inserted, insertion.focus);
-    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    this.nav.FOCUS(inserted);
-    return true;
-  }
-
-  insertElementInFocus(tagName?: string): boolean {
-    const focus = this.getFocusedTag();
-    const insertion = getFocusElementChildInsertion(focus, tagName);
-    if (!insertion) {
-      return false;
-    }
-
-    const inserted = dom.createElement(insertion.tagName);
-    insertion.parent.appendChild(inserted);
-    this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    this.nav.FOCUS(inserted);
-    return true;
-  }
-
-  deleteFocus(): boolean {
-    const focus = this.getFocusedTag();
-    if (!focus || !canDelete(focus, this.document)) {
-      return false;
-    }
-
-    const parent = focus.parentElement;
-    if (!parent) {
-      return false;
-    }
-    const nextFocus =
-      findNextFocusableOutside(focus, this.document.root) ??
-      findPreviousFocusableOutside(focus, this.document.root) ??
-      parent;
-
-    dom.deleteElement(focus);
-    this.notifyElementChange({ type: 'focusable-removed', element: focus });
-    this.nav.FOCUS(nextFocus);
-    return true;
-  }
-
   // #endregion
 
-  private getFocusedTag(): HTMLElement | null {
+  getFocusedTag(): HTMLElement | null {
     const focus = this.nav.getFocus();
     if (this.mode !== 'view' || !focus || focus === this.document.root || isToken(focus)) {
       return null;

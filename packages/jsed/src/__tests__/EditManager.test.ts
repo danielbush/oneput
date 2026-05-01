@@ -324,7 +324,7 @@ describe('EditManager', () => {
         editManager.start();
 
         // act
-        const inserted = editManager.insertElementAfterFocus();
+        const inserted = editManager.focus.insertAfter();
 
         // assert
         const children = Array.from(doc.root.children);
@@ -346,7 +346,7 @@ describe('EditManager', () => {
         editManager.start();
 
         // act
-        const inserted = editManager.insertElementAfterFocus('h2');
+        const inserted = editManager.focus.insertAfter('h2');
 
         // assert
         const children = Array.from(doc.root.children);
@@ -369,7 +369,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
         // act
-        const inserted = editManager.insertElementBeforeFocus('h2');
+        const inserted = editManager.focus.insertBefore('h2');
 
         // assert
         const children = Array.from(doc.root.children);
@@ -393,7 +393,7 @@ describe('EditManager', () => {
         const p1 = byId(doc, 'p1');
 
         // act
-        const inserted = editManager.insertElementInFocus('span');
+        const inserted = editManager.focus.insertIn('span');
 
         // assert
         const child = p1.lastElementChild;
@@ -416,7 +416,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(list);
 
         // act
-        const inserted = editManager.insertElementInFocus();
+        const inserted = editManager.focus.insertIn();
 
         // assert
         const child = list.lastElementChild;
@@ -436,8 +436,8 @@ describe('EditManager', () => {
         editManager.start();
 
         // assert
-        expect(editManager.canInsertElementInFocus()).toBe(false);
-        expect(editManager.insertElementInFocus()).toBe(false);
+        expect(editManager.focus.canInsertIn()).toBe(false);
+        expect(editManager.focus.insertIn()).toBe(false);
 
         editManager.destroy();
       });
@@ -455,7 +455,7 @@ describe('EditManager', () => {
         const p2 = byId(doc, 'p2');
 
         // act
-        const deleted = editManager.deleteFocus();
+        const deleted = editManager.focus.delete();
 
         // assert
         expect(deleted).toBe(true);
@@ -478,7 +478,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(p2);
 
         // act
-        const deleted = editManager.deleteFocus();
+        const deleted = editManager.focus.delete();
 
         // assert
         expect(deleted).toBe(true);

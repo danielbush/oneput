@@ -64,13 +64,13 @@ export class InsertElement implements AppObject {
 
   private insertElement(tagName: string): boolean {
     if (this.position === 'after') {
-      return this.editManager.insertElementAfterFocus(tagName);
+      return this.editManager.focus.insertAfter(tagName);
     }
 
     if (this.position === 'before') {
-      return this.editManager.insertElementBeforeFocus(tagName);
+      return this.editManager.focus.insertBefore(tagName);
     }
 
-    return this.editManager.insertElementInFocus(tagName);
+    return this.editManager.focus.insertIn(tagName);
   }
 }

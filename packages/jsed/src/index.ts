@@ -2,7 +2,7 @@ export type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
 export { EditManager, type EditManagerError, type EditManagerMode } from './EditManager.js';
 export { Nav, type OnRequestFocus } from './Nav.js';
-export { TokenCursor } from './TokenCursor.js';
+export { Cursor } from './Cursor.js';
 export { Tokenizer } from './Tokenizer.js';
 export { Detokenizer } from './lib/Detokenizer.js';
 export { tokenizeLineAt as tokenizeLine } from './lib/tokenize.js';
@@ -11,7 +11,7 @@ export { tokenizeLineAt as tokenizeLine } from './lib/tokenize.js';
 import * as token from './lib/token.js';
 import { isToken, isAnchor } from './lib/taxonomy.js';
 import { getLine } from './lib/line.js';
-import * as dom from './lib/dom.js';
+import * as dom from './lib/focusable.js';
 import * as domRules from './lib/dom-rules.js';
 const utils = {
   dom: {

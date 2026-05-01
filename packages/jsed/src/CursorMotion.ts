@@ -1,13 +1,13 @@
 import { getNextLineSibling, getPreviousLineSibling } from './lib/line.js';
 import { isTokenizableTextNode } from './lib/taxonomy.js';
-import type { TokenCursor } from './TokenCursor.js';
+import type { Cursor } from './Cursor.js';
 import type { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument } from './types.js';
 
 /**
  * Coordinates CURSOR movement across LINE boundaries.
  *
- * TokenCursor owns the current CURSOR seat and visual state. CursorMotion owns
+ * Cursor owns the current CURSOR seat and visual state. CursorMotion owns
  * the movement policy that needs document structure plus SHALLOW_TOKENIZATION.
  */
 export class CursorMotion {
@@ -24,7 +24,7 @@ export class CursorMotion {
   /**
    * Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE).
    */
-  moveNext(cursor: TokenCursor): void {
+  moveNext(cursor: Cursor): void {
     if (cursor.isInsertingBefore()) {
       cursor.clearMarkers();
       return;
@@ -50,7 +50,7 @@ export class CursorMotion {
   /**
    * Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE).
    */
-  movePrevious(cursor: TokenCursor): void {
+  movePrevious(cursor: Cursor): void {
     if (cursor.isInsertingAfter()) {
       cursor.clearMarkers();
       return;

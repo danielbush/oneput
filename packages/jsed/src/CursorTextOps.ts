@@ -1,27 +1,27 @@
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { isToken } from './lib/taxonomy.js';
-import type { TokenCursor, TokenCursorError } from './TokenCursor.js';
+import type { Cursor, CursorError } from './Cursor.js';
 import type { Tokenizer } from './Tokenizer.js';
 
 /**
  * Coordinates TOKEN editing operations from the active CURSOR position.
  *
- * TokenCursor owns current CURSOR state and visual markers. CursorTextOps owns
+ * Cursor owns current CURSOR state and visual markers. CursorTextOps owns
  * the text-editing policy, including operations that need the shared Tokenizer
  * to re-seat the CURSOR after creating new editable content.
  */
 export class CursorTextOps {
   static create(params: {
     tokenizer: Tokenizer;
-    onError: (err: TokenCursorError) => void;
+    onError: (err: CursorError) => void;
   }): CursorTextOps {
     return new CursorTextOps(params);
   }
 
   static createNull(params: {
     tokenizer: Tokenizer;
-    onError: (err: TokenCursorError) => void;
+    onError: (err: CursorError) => void;
   }): CursorTextOps {
     return new CursorTextOps(params);
   }
@@ -29,11 +29,11 @@ export class CursorTextOps {
   private constructor(
     private params: {
       tokenizer: Tokenizer;
-      onError: (err: TokenCursorError) => void;
+      onError: (err: CursorError) => void;
     }
   ) {}
 
-  forCursor(cursor: TokenCursor): CursorTextOpsForCursor {
+  forCursor(cursor: Cursor): CursorTextOpsForCursor {
     return CursorTextOpsForCursor.create({
       cursor,
       tokenizer: this.params.tokenizer,
@@ -44,18 +44,18 @@ export class CursorTextOps {
 
 export class CursorTextOpsForCursor {
   static create(params: {
-    cursor: TokenCursor;
+    cursor: Cursor;
     tokenizer: Tokenizer;
-    onError: (err: TokenCursorError) => void;
+    onError: (err: CursorError) => void;
   }): CursorTextOpsForCursor {
     return new CursorTextOpsForCursor(params);
   }
 
   private constructor(
     private params: {
-      cursor: TokenCursor;
+      cursor: Cursor;
       tokenizer: Tokenizer;
-      onError: (err: TokenCursorError) => void;
+      onError: (err: CursorError) => void;
     }
   ) {}
 

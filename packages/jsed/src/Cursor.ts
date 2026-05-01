@@ -13,7 +13,7 @@ import { CursorTextOps, type CursorTextOpsForCursor } from './CursorTextOps.js';
 import type { JsedDocument } from './types.js';
 import type { UserInputSelectionState } from './UserInput.js';
 
-export type TokenCursorError =
+export type CursorError =
   | {
       /**
        * Cursor expected a TOKEN but got something else.
@@ -28,7 +28,7 @@ export type TokenCursorError =
     };
 
 /**
- * Options threaded through `setToken` -> `onCursorChange`. TokenCursor
+ * Options threaded through `setToken` -> `onCursorChange`. Cursor
  * is opaque to the contents; consumers (e.g. EditManager's handleCursorChange)
  * interpret them.
  */
@@ -42,18 +42,18 @@ export type SetTokenOpts = {
   syncInput?: boolean;
 };
 
-export type TokenCursorState =
+export type CursorState =
   | 'CURSOR_APPEND'
   | 'CURSOR_PREPEND'
   | 'CURSOR_INSERT_AFTER'
   | 'CURSOR_INSERT_BEFORE'
   | 'CURSOR_OVERWRITE';
 
-export type TokenCursorParams = {
+export type CursorParams = {
   document: JsedDocument;
   token: HTMLElement;
   onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
-  onError: (err: TokenCursorError) => void;
+  onError: (err: CursorError) => void;
   /**
    * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
    * Used by TokenSelection's head-cursor, which must not render a second caret.
@@ -66,10 +66,10 @@ export type TokenCursorParams = {
 /**
  * Public CURSOR facade for the editing session.
  *
- * TokenCursor owns current CURSOR state. Movement and text editing
+ * Cursor owns current CURSOR state. Movement and text editing
  * coordination are delegated to focused operation classes.
  */
-export class TokenCursor {
+export class Cursor {
   #token: HTMLElement;
   #document: JsedDocument;
   #onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
@@ -78,9 +78,9 @@ export class TokenCursor {
 
   readonly ops: CursorTextOpsForCursor;
   private motion: CursorMotion;
-  private onError: (err: TokenCursorError) => void;
+  private onError: (err: CursorError) => void;
 
-  constructor(params: TokenCursorParams) {
+  constructor(params: CursorParams) {
     this.#token = params.token; // ts needs this before setToken
     this.#document = params.document;
     this.#onCursorChange = params.onCursorChange;
@@ -91,12 +91,12 @@ export class TokenCursor {
     this.setToken(params.token);
   }
 
-  static create(params: TokenCursorParams) {
-    return new TokenCursor(params);
+  static create(params: CursorParams) {
+    return new Cursor(params);
   }
 
-  static createNull(params: TokenCursorParams) {
-    return new TokenCursor(params);
+  static createNull(params: CursorParams) {
+    return new Cursor(params);
   }
 
   /** Destroy the current edit session. The instance cannot be used after this. */
@@ -166,7 +166,7 @@ export class TokenCursor {
   // #region CURSOR_STATE
 
   /** Update the current CURSOR_STATE marker. */
-  setState(state: TokenCursorState): void {
+  setState(state: CursorState): void {
     switch (state) {
       case 'CURSOR_APPEND':
         this.setMarker(CURSOR_APPEND_CLASS);

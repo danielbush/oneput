@@ -2,7 +2,7 @@ import { describe, expect, it, test } from 'vitest';
 import { div, em, identify, makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { TokenCursor } from '../TokenCursor.js';
+import { Cursor } from '../Cursor.js';
 import { CursorMotion } from '../CursorMotion.js';
 import { CursorTextOps } from '../CursorTextOps.js';
 import { getValue } from '../lib/token.js';
@@ -22,7 +22,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
     onError: (err) => errors.push(err.type)
   });
 
-  const cursor = TokenCursor.create({
+  const cursor = Cursor.create({
     document: doc,
     motion: CursorMotion.createNull({ document: doc, tokenizer }),
     textOps,

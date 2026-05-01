@@ -38,8 +38,8 @@ FOCUSABLE's and TOKEN's can get their own types of focus...
   - Source of truth: search docstrings for FOCUS.
 - **CURSOR**
   - the current LINE_SIBLING the user has selected when editing the text of a document. This is distinct from FOCUS which is the current FOCUSABLE the user has selected. Usually the current FOCUSABLE becomes the current LINE within which the user edits the LINE_SIBLING's (text content).
-  - Source of truth: search docstrings for CURSOR, TokenCursor.ts
-  - Source of truth: TokenCursor.ts manages CURSOR
+  - Source of truth: search docstrings for CURSOR, Cursor.ts
+  - Source of truth: Cursor.ts manages CURSOR
 
 Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We can navigate by visiting or not visiting (VISIT) and descending or not descending (DESCEND).
 

@@ -1,5 +1,5 @@
 import { err, ok, Result } from 'neverthrow';
-import * as dom from './lib/dom.js';
+import * as dom from './lib/focusable.js';
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
@@ -8,7 +8,7 @@ import { canContainChildTag, canDelete, getDefaultInsertChildTag } from './lib/d
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
-import { TokenCursor, type SetTokenOpts, type TokenCursorError } from './TokenCursor.js';
+import { Cursor, type SetTokenOpts, type CursorError } from './Cursor.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import { TokenSelection } from './TokenSelection.js';
@@ -16,9 +16,9 @@ import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
-import { findNextFocusableOutside, findPreviousFocusableOutside } from './lib/dom.js';
+import { findNextFocusableOutside, findPreviousFocusableOutside } from './lib/focusable.js';
 
-export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
+export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
 export type EditManagerTextChangeEvent =
   | {
@@ -150,7 +150,7 @@ export class EditManager {
     return instance;
   }
 
-  cursor?: TokenCursor;
+  cursor?: Cursor;
   private selection?: TokenSelection;
   private mode: EditManagerMode = 'view';
   private isSuspended: boolean = false;
@@ -253,7 +253,7 @@ export class EditManager {
       this.nav.FOCUS(line);
       this.userInput.focus();
       if (!this.cursor) {
-        this.cursor = TokenCursor.create({
+        this.cursor = Cursor.create({
           document: this.document,
           motion: this.cursorMotion,
           textOps: this.cursorTextOps,
@@ -539,7 +539,7 @@ export class EditManager {
   /**
    * If the cursor finds itself in an untenable state...
    */
-  private handleCursorError = (err: TokenCursorError) => {
+  private handleCursorError = (err: CursorError) => {
     this.onError?.(err);
   };
 

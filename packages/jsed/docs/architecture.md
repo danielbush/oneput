@@ -38,11 +38,11 @@ An outer LINE can contain text and inline content between, before, or after NEST
 
 After that startup pass, tokenization no longer has to discover loose interstitial runs opportunistically. IMPLICIT_LINEs are normal LINEs for navigation and tokenization, so `Tokenizer.tokenizeLineAt` can stay focused on the candidate LINE it was given. Editing operations that split or insert around IMPLICIT_LINE content preserve that wrapper so the editor does not create new INTERSTITIAL_TEXT during the session.
 
-## Token editing: TokenCursorBase → TokenCursor
+## Token editing
 
-`TokenCursorBase` holds the current TOKEN reference, manages the JSED_CURSOR_CLASS, and provides protected focus-class management. It is the foundation layer.
+`Cursor` holds the current TOKEN reference, manages the JSED_CURSOR_CLASS, and provides protected focus-class management. It is the foundation layer.
 
-`TokenCursor` extends `TokenCursorBase` and owns cursor motion + editing + CURSOR_STATE once a FOCUSABLE has been focused and tokenized. Motion is the full job in one place: intra-LINE LINE_SIBLING steps plus cross-LINE walking with tokenize-on-arrival — callers don't get back an `exhausted` signal, `TokenCursor` resolves it internally via `Tokenizer.tokenizeLineAt`:
+`Cursor` owns cursor motion + editing + CURSOR_STATE once a FOCUSABLE has been focused and tokenized. Motion is the full job in one place: intra-LINE LINE_SIBLING steps plus cross-LINE walking with tokenize-on-arrival — callers don't get back an `exhausted` signal, `Cursor` resolves it internally via `Tokenizer.tokenizeLineAt`:
 
 - **CURSOR_STATE** — manages the visual markers (CURSOR_APPEND, CURSOR_PREPEND, CURSOR_INSERT_AFTER, CURSOR_INSERT_BEFORE) that indicate what the user's next edit will do. See vocabulary.md for details.
 - **moveNext / movePrevious** — step to the next/previous CURSOR target. First tries the next LINE_SIBLING within the current LINE; if the LINE is exhausted, consults the cross-LINE walk (`findNextLineCandidate` / `findPreviousLineCandidate` in `lib/sibwalk.ts`) and tokenizes the new LINE on arrival. Backward motion uses a private `findLastCursorTarget` to resolve the last reachable seat in the previous LINE. Gated by CURSOR_STATE: moveNext from CURSOR_INSERT_BEFORE cancels the insertion; movePrevious from CURSOR_INSERT_AFTER cancels.

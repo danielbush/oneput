@@ -1,7 +1,7 @@
-import type { TokenCursorState } from '../TokenCursor.js';
+import type { CursorState } from '../Cursor.js';
 import type { UserInputSelectionState } from '../UserInput.js';
 
-export function getCursorStateFromInput(input: string): TokenCursorState {
+export function getCursorStateFromInput(input: string): CursorState {
   if (input.endsWith(' ')) {
     return 'CURSOR_INSERT_AFTER';
   }
@@ -13,7 +13,7 @@ export function getCursorStateFromInput(input: string): TokenCursorState {
   return 'CURSOR_OVERWRITE';
 }
 
-export function getCursorStateFromSelection(selection: UserInputSelectionState): TokenCursorState {
+export function getCursorStateFromSelection(selection: UserInputSelectionState): CursorState {
   switch (selection) {
     case 'CURSOR_AT_BEGINNING':
       return 'CURSOR_PREPEND';

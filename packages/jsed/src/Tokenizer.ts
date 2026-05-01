@@ -79,7 +79,7 @@ export class Tokenizer {
   /**
    * A LINE should stay tokenized while it hosts the CURSOR or any
    * SELECTION_WRAPPER — detokenizing under either would strand references
-   * held by TokenCursor or TokenSelection.
+   * held by Cursor or TokenSelection.
    */
   private shouldKeepTokenized(line: HTMLElement): boolean {
     return this.lineContainsCursor(line) || containsSelection(line);

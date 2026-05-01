@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { byId, div, makeRoot, p } from '../../test/util';
-import { findNextFocusableOutside, findPreviousFocusableOutside } from '../dom';
+import { findNextFocusableOutside, findPreviousFocusableOutside } from '../focusable';
 
 describe('findNextFocusableOutside / findPreviousFocusableOutside', () => {
   test('next skips descendants and finds the next outside FOCUSABLE', () => {

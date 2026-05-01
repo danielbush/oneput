@@ -2,7 +2,7 @@ import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from './lib/constants.js';
 import { getLine } from './lib/line.js';
 import { isInlineFlow } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
-import { TokenCursor } from './TokenCursor.js';
+import { Cursor } from './Cursor.js';
 import type { JsedDocument } from './types.js';
 import type { CursorMotion } from './CursorMotion.js';
 import type { CursorTextOps } from './CursorTextOps.js';
@@ -27,7 +27,7 @@ export class TokenSelection {
   }
 
   private anchor: HTMLElement;
-  private headCursor: TokenCursor;
+  private headCursor: Cursor;
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
@@ -38,7 +38,7 @@ export class TokenSelection {
     textOps: CursorTextOps;
   }) {
     this.anchor = params.seed;
-    this.headCursor = TokenCursor.create({
+    this.headCursor = Cursor.create({
       document: params.document,
       motion: params.motion,
       textOps: params.textOps,

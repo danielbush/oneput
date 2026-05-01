@@ -159,8 +159,8 @@
   content: '';
   position: absolute;
   z-index: -1;
-  top: 0;
-  bottom: 0;
+  top: -0.025em;
+  bottom: -0.075em;
   left: -0.2em;
   right: -0.2em;
   border-radius: 0.24rem;
@@ -238,12 +238,12 @@ See:
 @keyframes jsed-cursor-pulse {
   0%,
   100% {
-    background: rgba(37, 99, 235, 1);
+    background: rgba(37, 99, 200, 1);
     transform: scale(1);
   }
 
   50% {
-    background: rgba(59, 130, 246, 1);
+    background: rgba(59, 110, 130, 1);
     transform: scale(0.985);
   }
 }

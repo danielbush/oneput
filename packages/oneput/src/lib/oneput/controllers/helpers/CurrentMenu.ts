@@ -15,7 +15,7 @@ export class CurrentMenu {
   static create(
     ctl: Controller,
     menuId: string,
-    menuItems: Array<MenuItemAny | undefined | false | null>
+    menuItems: Array<MenuItemAny | undefined | false | null | ''>
   ) {
     return new CurrentMenu(ctl, menuId, menuItems);
   }
@@ -36,7 +36,7 @@ export class CurrentMenu {
      * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
      * For dynamic menu item generation, menuItems can be ignored.
      */
-    _allMenuItems: Array<MenuItemAny | undefined | false | null> = []
+    _allMenuItems: Array<MenuItemAny | undefined | false | null | ''> = []
   ) {
     this.allMenuItems = _allMenuItems.filter(Boolean) as Array<MenuItemAny>;
   }

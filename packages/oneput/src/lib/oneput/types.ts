@@ -112,7 +112,7 @@ export type Menu = {
    */
   id: string;
   focusBehaviour?: FocusBehaviour;
-  items: Array<MenuItemAny | undefined>;
+  items: Array<MenuItemAny | undefined | null | '' | false>;
 };
 
 export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>> = FlexParams & {

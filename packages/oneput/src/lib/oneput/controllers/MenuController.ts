@@ -97,7 +97,7 @@ export class MenuController {
   setMenu(params?: {
     id: string;
     focusBehaviour?: FocusBehaviour;
-    items: Array<MenuItemAny | undefined | false | null>;
+    items: Array<MenuItemAny | undefined | false | null | ''>;
   }) {
     this.currentMenu = params
       ? CurrentMenu.create(this.ctl, params.id, params.items)

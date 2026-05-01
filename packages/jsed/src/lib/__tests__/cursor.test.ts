@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getCursorStateFromInput, getCursorStateFromSelection } from '../cursorState.js';
+import { getCursorStateFromInput, getCursorStateFromSelection } from '../cursor.js';
 
 describe('getCursorStateFromInput', () => {
   test('trailing space maps to CURSOR_INSERT_AFTER', () => {

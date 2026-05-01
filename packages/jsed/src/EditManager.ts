@@ -1,6 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import * as dom from './lib/dom.js';
 import * as token from './lib/token.js';
+import * as space from './lib/space.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { canContainChildTag, canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
@@ -358,7 +359,7 @@ export class EditManager {
         for (const part of intent.insertedParts.reverse()) {
           const insertedToken = token.createToken(part);
           token.insertAfter(insertedToken, currentToken);
-          token.ensureSpaceAfter(currentToken);
+          space.ensureSpaceAfter(currentToken);
           if (!lastToken) {
             lastToken = insertedToken;
           }
@@ -373,7 +374,7 @@ export class EditManager {
         for (const part of intent.insertedParts) {
           const insertedToken = token.createToken(part);
           token.insertBefore(insertedToken, currentToken);
-          token.ensureSpaceAfter(insertedToken);
+          space.ensureSpaceAfter(insertedToken);
           lastToken = insertedToken;
         }
         if (lastToken) {
@@ -864,7 +865,7 @@ export class EditManager {
     return (
       this.mode === 'edit' &&
       !!this.cursor &&
-      !!token.getRemovableSpaceBeforeToken(this.cursor.getToken())
+      !!space.getRemovableSpaceBeforeToken(this.cursor.getToken())
     );
   }
 
@@ -872,7 +873,7 @@ export class EditManager {
     return (
       this.mode === 'edit' &&
       !!this.cursor &&
-      !!token.getRemovableSpaceAfterToken(this.cursor.getToken())
+      !!space.getRemovableSpaceAfterToken(this.cursor.getToken())
     );
   }
 
@@ -880,7 +881,7 @@ export class EditManager {
     return (
       this.mode === 'edit' &&
       !!this.cursor &&
-      token.canInsertSpaceBeforeToken(this.cursor.getToken())
+      space.canInsertSpaceBeforeToken(this.cursor.getToken())
     );
   }
 
@@ -888,7 +889,7 @@ export class EditManager {
     return (
       this.mode === 'edit' &&
       !!this.cursor &&
-      token.canInsertSpaceAfterToken(this.cursor.getToken())
+      space.canInsertSpaceAfterToken(this.cursor.getToken())
     );
   }
 
@@ -897,7 +898,7 @@ export class EditManager {
       return false;
     }
 
-    const inserted = !!token.insertSpaceBeforeToken(this.cursor.getToken());
+    const inserted = !!space.insertSpaceBeforeToken(this.cursor.getToken());
     if (inserted) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -914,7 +915,7 @@ export class EditManager {
       return false;
     }
 
-    const inserted = !!token.insertSpaceAfterToken(this.cursor.getToken());
+    const inserted = !!space.insertSpaceAfterToken(this.cursor.getToken());
     if (inserted) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -931,7 +932,7 @@ export class EditManager {
       return false;
     }
 
-    const removed = !!token.removeSpaceBeforeToken(this.cursor.getToken());
+    const removed = !!space.removeSpaceBeforeToken(this.cursor.getToken());
     if (removed) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -948,7 +949,7 @@ export class EditManager {
       return false;
     }
 
-    const removed = !!token.removeSpaceAfterToken(this.cursor.getToken());
+    const removed = !!space.removeSpaceAfterToken(this.cursor.getToken());
     if (removed) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -966,22 +967,22 @@ export class EditManager {
 
   canInsertSpaceAfterTag(): boolean {
     const focus = this.nav.getFocus();
-    return !!(focus && token.canInsertSpaceAfterTag(focus));
+    return !!(focus && space.canInsertSpaceAfterTag(focus));
   }
 
   canRemoveSpaceAfterTag(): boolean {
     const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableSpaceAfterTag(focus));
+    return !!(focus && space.getRemovableSpaceAfterTag(focus));
   }
 
   canInsertSpaceBeforeTag(): boolean {
     const focus = this.nav.getFocus();
-    return !!(focus && token.canInsertSpaceBeforeTag(focus));
+    return !!(focus && space.canInsertSpaceBeforeTag(focus));
   }
 
   canRemoveSpaceBeforeTag(): boolean {
     const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableSpaceBeforeTag(focus));
+    return !!(focus && space.getRemovableSpaceBeforeTag(focus));
   }
 
   insertSpaceAfterTag(): boolean {
@@ -990,7 +991,7 @@ export class EditManager {
       return false;
     }
 
-    const inserted = token.insertSpaceAfterTag(focus);
+    const inserted = space.insertSpaceAfterTag(focus);
     if (inserted) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -1008,7 +1009,7 @@ export class EditManager {
       return false;
     }
 
-    const removed = token.removeSpaceAfterTag(focus);
+    const removed = space.removeSpaceAfterTag(focus);
     if (removed) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -1026,7 +1027,7 @@ export class EditManager {
       return false;
     }
 
-    const inserted = token.insertSpaceBeforeTag(focus);
+    const inserted = space.insertSpaceBeforeTag(focus);
     if (inserted) {
       this.notifyTextChange({
         type: 'whitespace-change',
@@ -1044,7 +1045,7 @@ export class EditManager {
       return false;
     }
 
-    const removed = token.removeSpaceBeforeTag(focus);
+    const removed = space.removeSpaceBeforeTag(focus);
     if (removed) {
       this.notifyTextChange({
         type: 'whitespace-change',

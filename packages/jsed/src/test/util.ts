@@ -114,3 +114,22 @@ export const inlineStyleHackVal = 'display:inline;';
  * See INLINE_COMPUTED_STYLE
  */
 export const inlineStyleHack = { style: inlineStyleHackVal };
+
+export function findTokenByText(root: HTMLElement, text: string): HTMLElement {
+  const tok = Array.from(root.querySelectorAll('.jsed-token')).find(
+    (el) => el.textContent === text
+  ) as HTMLElement | undefined;
+  if (!tok) throw new Error(`token with text "${text}" not found`);
+  return tok;
+}
+
+export function makeRawRoot(html: string): HTMLElement {
+  document.body.innerHTML = `<div id="root">${html}</div>`;
+  return document.getElementById('root') as HTMLElement;
+}
+
+export function rawById(root: HTMLElement, id: string): HTMLElement {
+  const el = root.querySelector<HTMLElement>(`#${id}`);
+  if (!el) throw new Error(`rawById: could not find id="${id}"`);
+  return el;
+}

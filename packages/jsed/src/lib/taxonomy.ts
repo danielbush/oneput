@@ -41,13 +41,6 @@ export function isTokenizableTextNode(node: Node): boolean {
   return /\S/.test(node.nodeValue);
 }
 
-export function isSpaceNode(node: Node): boolean {
-  if (node.nodeType === Node.TEXT_NODE && node.nodeValue) {
-    return /^\s*$/.test(node.nodeValue);
-  }
-  return false;
-}
-
 /**
  * Detect a subclass of IGNORABLE's that are natively focusable elements.
  *
@@ -221,4 +214,15 @@ export function isCursorTransparent(n: Node): boolean {
   if (!isFocusable(n)) return false;
   if (isIsland(n)) return false;
   return true;
+}
+
+export function isWhitespaceTextNode(node: Node | null | undefined): node is Text {
+  return node instanceof window.Text && /^\s+$/.test(node.nodeValue ?? '');
+}
+
+export function isSpaceNode(node: Node): boolean {
+  if (node.nodeType === Node.TEXT_NODE && node.nodeValue) {
+    return /^\s*$/.test(node.nodeValue);
+  }
+  return false;
 }

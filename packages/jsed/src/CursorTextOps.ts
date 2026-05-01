@@ -1,4 +1,5 @@
 import * as token from './lib/token.js';
+import * as space from './lib/space.js';
 import { isToken } from './lib/taxonomy.js';
 import type { TokenCursor, TokenCursorError } from './TokenCursor.js';
 import type { Tokenizer } from './Tokenizer.js';
@@ -77,7 +78,7 @@ export class CursorTextOpsForCursor {
     const current = this.params.cursor.getToken();
     const tok = token.createToken(val);
     token.insertAfter(tok, current);
-    token.ensureSeparatorAfter(current);
+    space.ensureSeparatorAfter(current);
     return tok;
   }
 

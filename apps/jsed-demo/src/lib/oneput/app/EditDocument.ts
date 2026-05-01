@@ -266,12 +266,12 @@ export class EditDocument implements AppObject {
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),
-        this.editManager.canInsertAnchorInLine() &&
+        this.editManager.anchor.canInsertInFocus() &&
           stdMenuItem({
             id: 'INSERT_ANCHOR_IN_LINE',
             textContent: 'Insert anchor in empty line...',
             action: () => {
-              this.editManager.insertAnchorInLine();
+              this.editManager.anchor.insertInFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
           }),
@@ -311,21 +311,21 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canInsertAnchorBeforeTag() &&
+        this.editManager.anchor.canInsertBeforeFocus() &&
           stdMenuItem({
             id: 'INSERT_ANCHOR_BEFORE_TAG',
             textContent: 'Insert anchor before tag...',
             action: () => {
-              this.editManager.insertAnchorBeforeTag();
+              this.editManager.anchor.insertBeforeFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
           }),
-        this.editManager.canRemoveAnchorBeforeTag() &&
+        this.editManager.anchor.canRemoveBeforeFocus() &&
           stdMenuItem({
             id: 'REMOVE_ANCHOR_BEFORE_TAG',
             textContent: 'Remove anchor before tag...',
             action: () => {
-              this.editManager.removeAnchorBeforeTag();
+              this.editManager.anchor.removeBeforeFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
           }),
@@ -404,21 +404,21 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Space)]
           }),
-        this.editManager.canInsertAnchorAfterTag() &&
+        this.editManager.anchor.canInsertAfterFocus() &&
           stdMenuItem({
             id: 'INSERT_ANCHOR_AFTER_TAG',
             textContent: 'Insert anchor after tag...',
             action: () => {
-              this.editManager.insertAnchorAfterTag();
+              this.editManager.anchor.insertAfterFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
           }),
-        this.editManager.canRemoveAnchorAfterTag() &&
+        this.editManager.anchor.canRemoveAfterFocus() &&
           stdMenuItem({
             id: 'REMOVE_ANCHOR_AFTER_TAG',
             textContent: 'Remove anchor after tag...',
             action: () => {
-              this.editManager.removeAnchorAfterTag();
+              this.editManager.anchor.removeAfterFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
           })

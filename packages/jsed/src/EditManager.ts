@@ -16,6 +16,7 @@ import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
 import { EditManagerFocus } from './EditManagerFocus.js';
+import { EditManagerAnchor } from './EditManagerAnchor.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -150,12 +151,16 @@ export class EditManager {
   private cursorMotion: CursorMotion;
   private cursorTextOps: CursorTextOps;
   focus: EditManagerFocus;
+  anchor: EditManagerAnchor;
 
   constructor(
     public document: JsedDocument,
     private userInput: UserInput,
     readonly nav: Nav,
-    private onError?: (err: EditManagerError) => void,
+    /**
+     * A callback that EditManager or one of its helpers can call with errors.
+     */
+    public onError?: (err: EditManagerError) => void,
     private onModeChange?: (mode: EditManagerMode) => void,
     private onFocusChange?: (focus: HTMLElement | null) => void,
     private onCursorChange?: (target: HTMLElement) => void,
@@ -173,6 +178,7 @@ export class EditManager {
       onError: this.handleCursorError
     });
     this.focus = EditManagerFocus.create(this);
+    this.anchor = EditManagerAnchor.create(this);
   }
 
   getMode(): EditManagerMode {
@@ -740,113 +746,6 @@ export class EditManager {
     this.document.viewportScroller.scrollIntoViewCentered(focus, {
       oversizedVertical: 'start'
     });
-    return true;
-  }
-
-  // #endregion
-
-  // #region Anchor actions
-
-  canInsertAnchorInLine(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.canInsertAnchorInLine(focus));
-  }
-
-  canInsertAnchorAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
-  }
-
-  canRemoveAnchorAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableAnchorAfterTag(focus));
-  }
-
-  canInsertAnchorBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
-  }
-
-  canRemoveAnchorBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    return !!(focus && token.getRemovableAnchorBeforeTag(focus));
-  }
-
-  insertAnchorAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const anchor = token.insertAnchorAfterTag(focus);
-    if (!anchor) {
-      return false;
-    }
-
-    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
-    return true;
-  }
-
-  removeAnchorAfterTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const anchor = token.removeAnchorAfterTag(focus);
-    if (!anchor) {
-      return false;
-    }
-
-    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
-    return true;
-  }
-
-  insertAnchorBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const anchor = token.insertAnchorBeforeTag(focus);
-    if (!anchor) {
-      return false;
-    }
-
-    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
-    return true;
-  }
-
-  removeAnchorBeforeTag(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const anchor = token.removeAnchorBeforeTag(focus);
-    if (!anchor) {
-      return false;
-    }
-
-    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
-    return true;
-  }
-
-  insertAnchorInLine(): boolean {
-    const focus = this.nav.getFocus();
-    if (!focus || !token.canInsertAnchorInLine(focus)) {
-      return false;
-    }
-
-    const [anchor] = token.addAnchors(focus);
-    if (!anchor) {
-      return false;
-    }
-
-    this.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.enterEditing(anchor).mapErr((err) => this.onError?.(err));
     return true;
   }
 

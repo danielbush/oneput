@@ -4,7 +4,7 @@ import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { canContainChildTag, canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
+import { canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
@@ -16,7 +16,12 @@ import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
-import { findNextFocusableOutside, findPreviousFocusableOutside } from './lib/focusable.js';
+import {
+  findNextFocusableOutside,
+  findPreviousFocusableOutside,
+  getFocusElementChildInsertion,
+  getFocusElementInsertion
+} from './lib/focusable.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -49,14 +54,6 @@ export type EditManagerElementChangeEvent =
       previous: HTMLElement;
       element: HTMLElement;
     };
-type FocusElementInsertion = {
-  focus: HTMLElement;
-  tagName: string;
-};
-type FocusElementChildInsertion = {
-  parent: HTMLElement;
-  tagName: string;
-};
 
 /**
  * Manages an edit session for a single document.
@@ -1062,15 +1059,18 @@ export class EditManager {
   // #region Element actions (at focus)
 
   canInsertElementAfterFocus(tagName?: string): boolean {
-    return !!this.getFocusElementInsertion(tagName);
+    const focus = this.getFocusedTag();
+    return !!getFocusElementInsertion(focus, tagName);
   }
 
   canInsertElementBeforeFocus(tagName?: string): boolean {
-    return !!this.getFocusElementInsertion(tagName);
+    const focus = this.getFocusedTag();
+    return !!getFocusElementInsertion(focus, tagName);
   }
 
   canInsertElementInFocus(tagName?: string): boolean {
-    return !!this.getFocusElementChildInsertion(tagName);
+    const focus = this.getFocusedTag();
+    return !!getFocusElementChildInsertion(focus, tagName);
   }
 
   canDeleteFocus(): boolean {
@@ -1079,7 +1079,8 @@ export class EditManager {
   }
 
   insertElementAfterFocus(tagName?: string): boolean {
-    const insertion = this.getFocusElementInsertion(tagName);
+    const focus = this.getFocusedTag();
+    const insertion = getFocusElementInsertion(focus, tagName);
     if (!insertion) {
       return false;
     }
@@ -1092,7 +1093,8 @@ export class EditManager {
   }
 
   insertElementBeforeFocus(tagName?: string): boolean {
-    const insertion = this.getFocusElementInsertion(tagName);
+    const focus = this.getFocusedTag();
+    const insertion = getFocusElementInsertion(focus, tagName);
     if (!insertion) {
       return false;
     }
@@ -1105,7 +1107,8 @@ export class EditManager {
   }
 
   insertElementInFocus(tagName?: string): boolean {
-    const insertion = this.getFocusElementChildInsertion(tagName);
+    const focus = this.getFocusedTag();
+    const insertion = getFocusElementChildInsertion(focus, tagName);
     if (!insertion) {
       return false;
     }
@@ -1156,34 +1159,5 @@ export class EditManager {
   getFocusedElementInsertChildTagName(): string | null {
     const focus = this.getFocusedTag();
     return focus ? getDefaultInsertChildTag(focus.tagName) : null;
-  }
-
-  private getFocusElementInsertion(tagName?: string): FocusElementInsertion | null {
-    const focus = this.getFocusedTag();
-    if (!focus || !focus.parentElement) {
-      return null;
-    }
-
-    const normalized = token.normalizeTagName(tagName ?? focus.tagName);
-    if (!normalized || !canContainChildTag(focus.parentElement.tagName, normalized)) {
-      return null;
-    }
-
-    return { focus, tagName: normalized };
-  }
-
-  private getFocusElementChildInsertion(tagName?: string): FocusElementChildInsertion | null {
-    const parent = this.getFocusedTag();
-    if (!parent) {
-      return null;
-    }
-
-    const defaultTagName = getDefaultInsertChildTag(parent.tagName);
-    const normalized = token.normalizeTagName(tagName ?? defaultTagName ?? '');
-    if (!normalized || !canContainChildTag(parent.tagName, normalized)) {
-      return null;
-    }
-
-    return { parent, tagName: normalized };
   }
 }

@@ -1,4 +1,4 @@
-import { canCreateWithAnchor } from './dom-rules.js';
+import { canContainChildTag, canCreateWithAnchor, getDefaultInsertChildTag } from './dom-rules.js';
 import { isFocusable, isIsland } from './taxonomy.js';
 import * as token from './token.js';
 import { findNextNode, findPreviousNode } from './walk.js';
@@ -92,4 +92,47 @@ export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HT
   }
 
   return null;
+}
+
+export type FocusElementInsertion = {
+  focus: HTMLElement;
+  tagName: string;
+};
+
+export type FocusElementChildInsertion = {
+  parent: HTMLElement;
+  tagName: string;
+};
+
+export function getFocusElementInsertion(
+  focus: HTMLElement | null,
+  tagName?: string
+): FocusElementInsertion | null {
+  if (!focus || !focus.parentElement) {
+    return null;
+  }
+
+  const normalized = token.normalizeTagName(tagName ?? focus.tagName);
+  if (!normalized || !canContainChildTag(focus.parentElement.tagName, normalized)) {
+    return null;
+  }
+
+  return { focus, tagName: normalized };
+}
+
+export function getFocusElementChildInsertion(
+  parent: HTMLElement | null,
+  tagName?: string
+): FocusElementChildInsertion | null {
+  if (!parent) {
+    return null;
+  }
+
+  const defaultTagName = getDefaultInsertChildTag(parent.tagName);
+  const normalized = token.normalizeTagName(tagName ?? defaultTagName ?? '');
+  if (!normalized || !canContainChildTag(parent.tagName, normalized)) {
+    return null;
+  }
+
+  return { parent, tagName: normalized };
 }

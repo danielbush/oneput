@@ -1,4 +1,4 @@
-import { JSED_SELECTION_CLASS } from './constants';
+import { JSED_SELECTION_CLASS } from './constants.js';
 
 /**
  * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's

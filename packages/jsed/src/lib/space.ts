@@ -1,4 +1,4 @@
-import { getNextVisibleSibling, getPreviousVisibleSibling } from './line';
+import { getNextVisibleSibling, getPreviousVisibleSibling } from './line.js';
 import {
   isIgnorable,
   isImplicitLine,
@@ -6,8 +6,8 @@ import {
   isLine,
   isToken,
   isWhitespaceTextNode
-} from './taxonomy';
-import { getNextSiblingNode, getPreviousSiblingNode } from './walk';
+} from './taxonomy.js';
+import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 
 // #region Separator (Space) utils
 export function getSeparatorBefore(token: HTMLElement): Text | null {

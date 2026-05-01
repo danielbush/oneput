@@ -80,11 +80,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [ ] convert implicit lines to paragraphs (ones created using the new interstitial logic)
 - [ ] refactor: revisit implicit lines?
   - [ ] I think we make them p-tags and we include loose text at the very beginning (not just between LINE's)
-- [ ] feat: for both cursor and selection, add menu item to wrap the component; let's start with a strong-tag with a view that we need to allow the user to select one from multiple tags in the menu and also that we may want to disable some options depending on whether they would be valid or not eg a p-tag inside a p-tag would not be allowed
-- refactor: handleLeft, handleRight should be handlePrevious, handleNext or just previous, next ?
 - refactor: FocusChainNavigator should be used by Nav; EditManager just sees Nav?
-- test: sibwalk tests should be tested via handleLeft/handleRight
-- test: enterEditing should be tested via handleEnter? (in EditManager.test)
 - chore: remove symbols from architecture; just use vocab and module file names
 - chore: move skills/jsed/SKILL.md into jsed/AGENTS.md
 - importing oneput `import { Controller } from '@oneput/oneput';` in jsed breaks because `packages/oneput/src/lib/index.ts` imports .svelte files (directly or indirectly); what can we do about this?
@@ -94,7 +90,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     - we have a `components/*` `"exports"` entry in oneput
     - not viable: make jsed use sveltekit vite plugin - because we want oneput and jsed to work as web components
   - at the moment (Apr-2026), EditManager and EditManager.test both import Controller relatively; they should import using the package
-- use before, after, replaceWith where applicable
 - use el.ownerDocument  eg `el.ownerDocument.createElement(...)`
 - feat: hitting ENTER on empty p-tag should insert anchor; no need to go into menu
 - feat: $mod+m when hit 2 or 3 times within an interval, moves FOCUS to top and bottom of screen respectively

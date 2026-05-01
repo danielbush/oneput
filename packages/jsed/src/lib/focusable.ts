@@ -136,3 +136,7 @@ export function getFocusElementChildInsertion(
 
   return { parent, tagName: normalized };
 }
+
+export function unwrap(el: HTMLElement): void {
+  el.replaceWith(...Array.from(el.childNodes));
+}

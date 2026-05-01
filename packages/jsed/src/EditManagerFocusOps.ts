@@ -2,7 +2,12 @@ import type { EditManager } from './EditManager.js';
 import * as dom from './lib/focusable.js';
 import * as space from './lib/space.js';
 import { canDelete } from './lib/dom-rules.js';
-import { getFocusElementChildInsertion, getFocusElementInsertion } from './lib/focusable.js';
+import {
+  getFocusElementChildInsertion,
+  getFocusElementInsertion,
+  unwrap
+} from './lib/focusable.js';
+import { isInlineFlow } from './lib/taxonomy.js';
 
 /**
  * High-level FOCUS operations for EditManager.
@@ -101,6 +106,20 @@ export class EditManagerFocusOps {
     this.editManager.notifyElementChange({ type: 'focusable-removed', element: focus });
     this.editManager.nav.FOCUS(nextFocus);
     return true;
+  }
+
+  canUnwrap(): boolean {
+    const focus = this.editManager.nav.getFocus();
+    return isInlineFlow(focus);
+  }
+
+  unwrap(): boolean {
+    const focus = this.editManager.nav.getFocus();
+    if (focus && isInlineFlow(focus)) {
+      unwrap(focus);
+      return true;
+    }
+    return false;
   }
 }
 

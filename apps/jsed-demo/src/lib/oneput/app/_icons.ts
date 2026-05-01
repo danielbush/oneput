@@ -14,7 +14,8 @@ export const iconData = {
   Anchor: lu.Anchor,
   Space: lu.Space,
   Tags: lu.Tags,
-  Plus: lu.Plus
+  Plus: lu.Plus,
+  CodeXml: lu.CodeXml
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

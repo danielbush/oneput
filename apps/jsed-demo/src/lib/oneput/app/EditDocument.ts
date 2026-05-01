@@ -421,6 +421,15 @@ export class EditDocument implements AppObject {
               this.editManager.anchor.removeAfterFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
+          }),
+        this.editManager.focus.canUnwrap() &&
+          stdMenuItem({
+            id: 'UNWRAP',
+            textContent: 'Unwrap...',
+            action: () => {
+              this.editManager.focus.unwrap();
+            },
+            left: (b) => [b.icon(icons.CodeXml)]
           })
       ]
     });

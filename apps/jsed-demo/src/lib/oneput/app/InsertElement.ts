@@ -1,5 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { type EditManager } from '@oneput/jsed';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 
 type InsertElementPosition = 'after' | 'before' | 'in';
 
@@ -30,6 +31,10 @@ export class InsertElement implements AppObject {
     });
     this.ctl.input.focusInput();
     this.ctl.input.setSubmitHandler(this.apply);
+    this.renderMenuItems();
+    this.ctl.events.on('input-change', () => {
+      this.renderMenuItems();
+    });
   };
 
   actions = {
@@ -52,14 +57,13 @@ export class InsertElement implements AppObject {
 
   private apply = (tagName: string) => {
     const inserted = this.insertElement(tagName);
-    if (inserted) {
-      this.exit();
-      return;
+    if (!inserted) {
+      this.ctl.notify(`Could not insert element ${this.position} focused tag`, {
+        duration: 3000
+      });
     }
 
-    this.ctl.notify(`Could not insert element ${this.position} focused tag`, {
-      duration: 3000
-    });
+    this.exit();
   };
 
   private insertElement(tagName: string): boolean {
@@ -73,4 +77,37 @@ export class InsertElement implements AppObject {
 
     return this.editManager.focus.insertIn(tagName);
   }
+
+  renderMenuItems = () => {
+    const inputValue = this.ctl.input.getInputValue().trim();
+    this.ctl.menu.setMenu({
+      id: 'InsertElementMenu',
+      focusBehaviour: 'last',
+      items: [
+        stdMenuItem({
+          id: 'p',
+          textContent: 'p',
+          action: () => {
+            this.apply('p');
+          }
+        }),
+        stdMenuItem({
+          id: 'div',
+          textContent: 'div',
+          action: () => {
+            this.apply('div');
+          }
+        }),
+        inputValue &&
+          stdMenuItem({
+            id: 'Apply',
+            textContent: `Apply '${inputValue}'...`,
+            action: () => {
+              const tagName = this.ctl.input.getInputValue();
+              this.apply(tagName);
+            }
+          })
+      ]
+    });
+  };
 }

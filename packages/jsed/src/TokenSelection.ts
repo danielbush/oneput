@@ -1,5 +1,5 @@
 import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from './lib/constants.js';
-import { getLine } from './lib/sibwalk.js';
+import { getLine } from './lib/line.js';
 import { isInlineFlow } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
 import { TokenCursor } from './TokenCursor.js';

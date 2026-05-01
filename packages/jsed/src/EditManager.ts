@@ -5,7 +5,7 @@ import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { canContainChildTag, canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
+import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type SetTokenOpts, type TokenCursorError } from './TokenCursor.js';
 import { CursorMotion } from './CursorMotion.js';

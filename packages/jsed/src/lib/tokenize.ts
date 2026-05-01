@@ -1,4 +1,4 @@
-import { getLine } from './sibwalk.js';
+import { getLine } from './line.js';
 import { isFocusable, isCursorTransparent, isToken, isLineSibling } from './taxonomy.js';
 import { createToken } from './token.js';
 

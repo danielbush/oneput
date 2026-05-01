@@ -22,7 +22,7 @@ import {
   getNextTokenSibling,
   getPreviousVisibleSibling,
   getNextVisibleSibling
-} from './sibwalk.js';
+} from './line.js';
 
 export function getValue(token: HTMLElement): string {
   validate(token);

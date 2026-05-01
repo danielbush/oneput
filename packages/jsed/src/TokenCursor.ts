@@ -6,7 +6,7 @@ import {
   JSED_CURSOR_CLASS
 } from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
-import { isSameLine } from './lib/sibwalk.js';
+import { isSameLine } from './lib/line.js';
 import { getCursorStateFromInput, getCursorStateFromSelection } from './lib/cursorState.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps, type CursorTextOpsForCursor } from './CursorTextOps.js';

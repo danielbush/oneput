@@ -10,7 +10,7 @@ export { tokenizeLineAt as tokenizeLine } from './lib/tokenize.js';
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
 import * as token from './lib/token.js';
 import { isToken, isAnchor } from './lib/taxonomy.js';
-import { getLine } from './lib/sibwalk.js';
+import { getLine } from './lib/line.js';
 import * as dom from './lib/dom.js';
 import * as domRules from './lib/dom-rules.js';
 const utils = {

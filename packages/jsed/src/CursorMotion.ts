@@ -1,4 +1,4 @@
-import { getNextLineSibling, getPreviousLineSibling } from './lib/sibwalk.js';
+import { getNextLineSibling, getPreviousLineSibling } from './lib/line.js';
 import { isTokenizableTextNode } from './lib/taxonomy.js';
 import type { TokenCursor } from './TokenCursor.js';
 import type { Tokenizer } from './Tokenizer.js';

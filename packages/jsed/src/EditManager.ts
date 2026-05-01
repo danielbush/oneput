@@ -5,13 +5,7 @@ import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { canContainChildTag, canDelete, getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
-import {
-  findNextEditableLine,
-  findNextFocusableOutside,
-  findPreviousFocusableOutside,
-  getFirstLineSibling,
-  getLine
-} from './lib/sibwalk.js';
+import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/sibwalk.js';
 import { Nav } from './Nav.js';
 import { TokenCursor, type SetTokenOpts, type TokenCursorError } from './TokenCursor.js';
 import { CursorMotion } from './CursorMotion.js';
@@ -21,6 +15,7 @@ import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
 import { Controller } from '../../oneput/src/lib/oneput/controllers/controller.js';
+import { findNextFocusableOutside, findPreviousFocusableOutside } from './lib/dom.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | TokenCursorError;
 export type EditManagerMode = 'view' | 'edit';

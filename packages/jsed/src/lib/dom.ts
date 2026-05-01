@@ -1,5 +1,7 @@
 import { canCreateWithAnchor } from './dom-rules.js';
+import { isFocusable, isIsland } from './taxonomy.js';
 import * as token from './token.js';
+import { findNextNode, findPreviousNode } from './walk.js';
 
 export function copyElement(el: HTMLElement, newTagName?: string): HTMLElement {
   newTagName = newTagName || el.tagName;
@@ -63,4 +65,31 @@ export function splitParentBefore(el: HTMLElement): void {
     prevPar.insertBefore(sib, prevPar.firstChild);
     sib = prevSib;
   }
+}
+
+/**
+ * Find the next FOCUSABLE after `el`, skipping everything inside `el`.
+ */
+export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
+  for (const next of findNextNode(el, ceiling, {
+    visit: isFocusable,
+    descend: (node) => !isIsland(node) && node !== el
+  })) {
+    return next as HTMLElement;
+  }
+  return null;
+}
+
+/**
+ * Find the previous FOCUSABLE before `el`, skipping everything inside `el`.
+ */
+export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
+  for (const previous of findPreviousNode(el, ceiling, {
+    visit: isFocusable,
+    descend: (node) => !isIsland(node)
+  })) {
+    return previous as HTMLElement;
+  }
+
+  return null;
 }

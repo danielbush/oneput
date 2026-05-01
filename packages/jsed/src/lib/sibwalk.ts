@@ -5,10 +5,8 @@
  * imports from taxonomy.ts and adds traversal logic on top.
  */
 
-import { JSED_SELECTION_CLASS } from './constants.js';
 import {
   isCursorTransparent,
-  isFocusable,
   isIgnorable,
   isIgnorableNode,
   isIsland,
@@ -18,17 +16,6 @@ import {
   isTokenizableTextNode
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
-
-/**
- * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's
- * keep-alive predicate so LINEs hosting an active selection are not
- * detokenized underneath TokenSelection's references.
- *
- * Lives here for now but may move if it grows a wider audience.
- */
-export function containsSelection(el: HTMLElement): boolean {
-  return el.querySelector(`.${JSED_SELECTION_CLASS}`) !== null;
-}
 
 /**
  * Get previous visible (non-IGNORABLE) element sibling.
@@ -167,31 +154,4 @@ export function findNextEditableLine(from: Node, ceiling: HTMLElement): HTMLElem
   const nextToken = getNextLineSibling(from, ceiling);
   const line = nextToken ? getLine(nextToken) : null;
   return line;
-}
-
-/**
- * Find the next FOCUSABLE after `el`, skipping everything inside `el`.
- */
-export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
-  for (const next of findNextNode(el, ceiling, {
-    visit: isFocusable,
-    descend: (node) => !isIsland(node) && node !== el
-  })) {
-    return next as HTMLElement;
-  }
-  return null;
-}
-
-/**
- * Find the previous FOCUSABLE before `el`, skipping everything inside `el`.
- */
-export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
-  for (const previous of findPreviousNode(el, ceiling, {
-    visit: isFocusable,
-    descend: (node) => !isIsland(node)
-  })) {
-    return previous as HTMLElement;
-  }
-
-  return null;
 }

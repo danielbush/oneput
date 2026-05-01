@@ -1,5 +1,5 @@
 import { Detokenizer } from './lib/Detokenizer.js';
-import { containsSelection } from './lib/sibwalk.js';
+import { containsSelection } from './lib/selection.js';
 import { isFocusable } from './lib/taxonomy.js';
 import { tokenizeLineAt, tokenizeLineAtTextNode } from './lib/tokenize.js';
 

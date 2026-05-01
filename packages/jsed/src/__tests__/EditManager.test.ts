@@ -250,7 +250,7 @@ describe('EditManager', () => {
         const p1 = byId(doc, 'p1');
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('view');
@@ -278,7 +278,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
         // act
-        editManager.handleUp();
+        editManager.moveUp();
 
         // assert
         expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
@@ -305,7 +305,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
         // act
-        editManager.handleDown();
+        editManager.moveDown();
 
         // assert
         expect(editManager.nav.getFocus()).toBe(byId(doc, 'p3'));
@@ -828,7 +828,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -851,7 +851,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -874,7 +874,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -898,7 +898,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p2'));
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -926,7 +926,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -947,7 +947,7 @@ describe('EditManager', () => {
         editManager.cursor?.moveNext();
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -971,7 +971,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p2'));
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -995,7 +995,7 @@ describe('EditManager', () => {
         expect(identify(editManager.cursor!.getToken())).toBe('bbb');
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1023,7 +1023,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p3'));
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1046,7 +1046,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1070,7 +1070,7 @@ describe('EditManager', () => {
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1099,7 +1099,7 @@ describe('EditManager', () => {
           editManager.enterEditing(byId(doc, 'p1'));
           expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           // This triggers findPreviousLineCandidate to return an untokenized
           // text node 'aaa' but only when tokenizeLooseLinesIn ignored the
           // first LOOSE_LINE ('aaa').
@@ -1130,15 +1130,15 @@ describe('EditManager', () => {
           // Regression here in findPreviousCrossLineTarget.
           // <loose/> never gets tokenized and the current algorithm
           // doesn't detect tokens.
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(isToken(editManager.cursor!.getToken())).toBe(true);
           expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(isToken(editManager.cursor!.getToken())).toBe(true);
           expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(editManager.cursor!.getToken().innerText).toBe('aaa');
 
           editManager.destroy();
@@ -1163,13 +1163,13 @@ describe('EditManager', () => {
           editManager.enterEditing(byId(doc, 'p2'));
           expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(isToken(editManager.cursor!.getToken())).toBe(true);
           expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
 
@@ -1201,17 +1201,17 @@ describe('EditManager', () => {
           editManager.enterEditing(byId(doc, 'p2'));
           expect(getValue(editManager.cursor!.getToken())).toBe('eee');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(getValue(editManager.cursor!.getToken())).toBe('ddd');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           // Key regression here - something about the div boundary between div1 and div2.
           expect(getValue(editManager.cursor!.getToken())).toBe('ccc');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(getValue(editManager.cursor!.getToken())).toBe('bbb');
 
-          editManager.handleLeft();
+          editManager.movePrevious();
           expect(getValue(editManager.cursor!.getToken())).toBe('aaa');
 
           editManager.destroy();
@@ -1264,8 +1264,8 @@ describe('EditManager', () => {
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
         const editManager = EditManager.createNull({ document: doc });
         editManager.enterEditing(byId(doc, 'p1'));
-        editManager.handleRight(); // cursor: bar
-        editManager.handleRight(); // cursor: baz
+        editManager.moveNext(); // cursor: bar
+        editManager.moveNext(); // cursor: baz
         editManager.extendPrevious(); // head: bar
         editManager.extendPrevious(); // head: foo
 
@@ -1289,7 +1289,7 @@ describe('EditManager', () => {
         editManager.extendNext(); // head: baz
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1308,7 +1308,7 @@ describe('EditManager', () => {
         editManager.extendNext();
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1323,13 +1323,13 @@ describe('EditManager', () => {
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
         const editManager = EditManager.createNull({ document: doc });
         editManager.enterEditing(byId(doc, 'p1'));
-        editManager.handleRight();
-        editManager.handleRight(); // cursor: baz
+        editManager.moveNext();
+        editManager.moveNext(); // cursor: baz
         editManager.extendPrevious(); // head: bar
         editManager.extendPrevious(); // head: foo
 
         // act
-        editManager.handleLeft();
+        editManager.movePrevious();
 
         // assert
         expect(editManager.getMode()).toBe('edit');
@@ -1344,13 +1344,13 @@ describe('EditManager', () => {
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
         const editManager = EditManager.createNull({ document: doc });
         editManager.enterEditing(byId(doc, 'p1'));
-        editManager.handleRight();
-        editManager.handleRight(); // cursor: baz
+        editManager.moveNext();
+        editManager.moveNext(); // cursor: baz
         editManager.extendPrevious();
         editManager.extendPrevious();
 
         // act
-        editManager.handleRight();
+        editManager.moveNext();
 
         // assert
         expect(editManager.getMode()).toBe('edit');

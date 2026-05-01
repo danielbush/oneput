@@ -77,7 +77,7 @@ export class EditDocument implements AppObject {
 
     DOWN: {
       action: () => {
-        this.editManager.handleDown();
+        this.editManager.moveDown();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
@@ -87,7 +87,7 @@ export class EditDocument implements AppObject {
     },
     UP: {
       action: () => {
-        this.editManager.handleUp();
+        this.editManager.moveUp();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
@@ -114,7 +114,7 @@ export class EditDocument implements AppObject {
     // Make arrow keys work in input when menu is open...
     RIGHT_ARROW: {
       action: () => {
-        this.editManager.handleRight();
+        this.editManager.moveNext();
       },
       binding: {
         bindings: ['ArrowRight'],
@@ -124,7 +124,7 @@ export class EditDocument implements AppObject {
     },
     LEFT_ARROW: {
       action: () => {
-        this.editManager.handleLeft();
+        this.editManager.movePrevious();
       },
       binding: {
         bindings: ['ArrowLeft'],
@@ -177,7 +177,7 @@ export class EditDocument implements AppObject {
     },
     RIGHT: {
       action: () => {
-        this.editManager.handleRight();
+        this.editManager.moveNext();
       },
       binding: {
         bindings: ['$mod+l'],
@@ -187,7 +187,7 @@ export class EditDocument implements AppObject {
     },
     LEFT: {
       action: () => {
-        this.editManager.handleLeft();
+        this.editManager.movePrevious();
       },
       binding: {
         bindings: ['$mod+h'],

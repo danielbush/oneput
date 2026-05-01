@@ -636,7 +636,7 @@ export class EditManager {
     this.selection.extendPrevious();
   }
 
-  handleLeft() {
+  movePrevious() {
     if (this.isSuspended) return;
     if (this.selection) {
       this.cancelSelectionAt(this.selection.getBackwardEnd());
@@ -650,7 +650,7 @@ export class EditManager {
     this.focusChainNavigator.moveUp();
   }
 
-  handleRight() {
+  moveNext() {
     if (this.isSuspended) return;
     if (this.selection) {
       this.cancelSelectionAt(this.selection.getForwardEnd());
@@ -664,12 +664,12 @@ export class EditManager {
     this.focusChainNavigator.moveDown();
   }
 
-  handleDown() {
+  moveDown() {
     if (this.isSuspended) return;
     this.nav.SIB_NEXT();
   }
 
-  handleUp() {
+  moveUp() {
     if (this.isSuspended) return;
     this.nav.SIB_PREV();
   }

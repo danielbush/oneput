@@ -30,9 +30,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     - explore visual appearance of selection as it extends over INLINE_FLOW's, is it broken?  How do we make it look like a selection?
   - across p-tags
 - [x] split elements
-- [ ] select and tag selection with em-tag
-- [ ] insert element before/after tag
-- [ ] delete elements
+- [x] select and tag selection with em-tag
+- [x] insert element before/after tag
+- [x] delete elements
+- [ ] unwrap esp for INLINE_FLOW
 - [ ] converting elements
 - undo
   - undo text changes
@@ -63,6 +64,12 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Drafting / inbox
 
+- [ ] join tokens
+- [ ] grow/shrink INLINE_FLOW?
+  - FOCUS goes on em
+  - em converted to selection
+  - use modifies selection and confirms
+  - em occupies the selection
 - [ ] should oneput menu operations like "wrap tag in element" which prompts for a tag name be in a child AppObject - so we can control oneput more declaratively
 - [ ] refactor: can we extract selection orchestration out of EditManager
   - maybe a similar pattern to CursorTextOps ?

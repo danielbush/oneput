@@ -72,7 +72,9 @@ export class EditDocument implements AppObject {
   };
 
   actions = {
-    // These are shadowed by default bindings...
+    // #region menu closed
+
+    // Some of these override default bindings...
     // When menuOpen true, the default bindings will take over.
     // TOOD: not sure about this.
 
@@ -153,19 +155,23 @@ export class EditDocument implements AppObject {
         when: { menuOpen: false }
       }
     },
-
-    // Always handled by the editor, see section above.
-
     EXIT: {
       action: () => {
         this.editManager.handleExit();
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Stop editing'
-        // when: { menuOpen: false }
+        description: 'Stop editing',
+        when: { menuOpen: false }
       }
     },
+
+    // #endregion
+
+    // #region menu open or closed
+
+    // Always handled by the editor, see section above.
+
     TOGGLE_SELECT: {
       action: () => {
         this.ctl.input.toggleSelect();
@@ -173,7 +179,6 @@ export class EditDocument implements AppObject {
       binding: {
         bindings: ['$mod+e'],
         description: 'Toggle input element cursor state'
-        // when: { menuOpen: false }
       }
     },
     RIGHT: {
@@ -183,7 +188,6 @@ export class EditDocument implements AppObject {
       binding: {
         bindings: ['$mod+l'],
         description: 'Move to next token or element'
-        // when: { menuOpen: false }
       }
     },
     LEFT: {
@@ -193,7 +197,6 @@ export class EditDocument implements AppObject {
       binding: {
         bindings: ['$mod+h'],
         description: 'Move to previous token or element'
-        // when: { menuOpen: false }
       }
     },
     EXTEND_NEXT: {
@@ -223,6 +226,7 @@ export class EditDocument implements AppObject {
         description: 'Center the active token or reveal the focused element'
       }
     }
+    // #endregion
   };
 
   private promptForTagSelection = () => {

@@ -33,7 +33,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [x] select and tag selection with em-tag
 - [x] insert element before/after tag
 - [x] delete elements
-- [ ] unwrap esp for INLINE_FLOW
+- [x] unwrap esp for INLINE_FLOW
 - [ ] converting elements
 - undo
   - undo text changes

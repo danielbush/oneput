@@ -140,3 +140,11 @@ export function getFocusElementChildInsertion(
 export function unwrap(el: HTMLElement): void {
   el.replaceWith(...Array.from(el.childNodes));
 }
+
+export function convert(el: HTMLElement, toTagName: string): HTMLElement {
+  const newEl = el.ownerDocument.createElement(toTagName);
+  el.before(newEl);
+  newEl.append(...Array.from(el.childNodes));
+  el.remove();
+  return newEl;
+}

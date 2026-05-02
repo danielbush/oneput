@@ -4,6 +4,7 @@ import * as lu from 'lucide';
 export const iconData = {
   ChevronDown: lu.ChevronDown,
   ArrowLeft: lu.ArrowLeft,
+  ArrowRight: lu.ArrowRight,
   X: lu.X,
   Command: lu.Command,
   File: lu.Files,

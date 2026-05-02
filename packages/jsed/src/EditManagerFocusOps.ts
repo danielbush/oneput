@@ -3,6 +3,7 @@ import * as dom from './lib/focusable.js';
 import * as space from './lib/space.js';
 import { canDelete } from './lib/dom-rules.js';
 import {
+  convert,
   getFocusElementChildInsertion,
   getFocusElementInsertion,
   unwrap
@@ -117,6 +118,21 @@ export class EditManagerFocusOps {
     const focus = this.editManager.nav.getFocus();
     if (focus && isInlineFlow(focus)) {
       unwrap(focus);
+      return true;
+    }
+    return false;
+  }
+
+  canConvert(): boolean {
+    const focus = this.editManager.nav.getFocus();
+    return !!focus && focus !== this.editManager.document.root;
+  }
+
+  convert(tagName: string): boolean {
+    const focus = this.editManager.nav.getFocus();
+    if (focus && focus !== this.editManager.document.root) {
+      const newEl = convert(focus, tagName);
+      this.editManager.nav.FOCUS(newEl);
       return true;
     }
     return false;

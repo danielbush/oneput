@@ -4,6 +4,7 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { TagSelection } from './TagSelection.js';
 import { InsertElement } from './InsertElement.js';
+import { PickList } from './PickList.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -430,6 +431,44 @@ export class EditDocument implements AppObject {
               this.editManager.focus.unwrap();
             },
             left: (b) => [b.icon(icons.CodeXml)]
+          }),
+        this.editManager.focus.canConvert() &&
+          stdMenuItem({
+            id: 'CONVERT',
+            textContent: 'Convert...',
+            action: () => {
+              this.ctl.app.run(
+                PickList.create(this.ctl, {
+                  prompt: 'Select item from menu...',
+                  title: 'Convert to...',
+                  candidates: [
+                    {
+                      id: 'p',
+                      title: '<p> - paragraph tag',
+                      action: () => {
+                        this.editManager.focus.convert('p');
+                      }
+                    },
+                    {
+                      id: 'div',
+                      title: '<div> - div tag',
+                      action: () => {
+                        this.editManager.focus.convert('div');
+                      }
+                    },
+                    {
+                      id: 'section',
+                      title: '<section> - section tag',
+                      action: () => {
+                        this.editManager.focus.convert('section');
+                      }
+                    }
+                  ]
+                })
+              );
+            },
+            left: (b) => [b.icon(icons.CodeXml)],
+            closeMenuOnAction: false
           })
       ]
     });

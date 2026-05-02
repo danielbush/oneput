@@ -26,28 +26,20 @@ export class EditManagerFocusOps {
     this.space = EditManagerFocusSpaceOps.create(editManager);
   }
 
+  getInsertAfterCandidates(): string[] {
+    return ['p', 'div', 'section'];
+  }
+
   canInsertAfter(tagName?: string): boolean {
-    const focus = this.editManager.getFocusedTag();
-    return !!getFocusElementInsertion(focus, tagName);
-  }
-
-  canInsertBefore(tagName?: string): boolean {
-    const focus = this.editManager.getFocusedTag();
-    return !!getFocusElementInsertion(focus, tagName);
-  }
-
-  canInsertIn(tagName?: string): boolean {
-    const focus = this.editManager.getFocusedTag();
-    return !!getFocusElementChildInsertion(focus, tagName);
-  }
-
-  canDelete(): boolean {
-    const focus = this.editManager.getFocusedTag();
-    return !!(focus && canDelete(focus, this.editManager.document));
+    if (this.editManager.isEditing()) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    return !!getFocusElementInsertion(focus, tagName) && this.getInsertAfterCandidates().length > 0;
   }
 
   insertAfter(tagName?: string): boolean {
-    const focus = this.editManager.getFocusedTag();
+    const focus = this.editManager.nav.getFocus();
     const insertion = getFocusElementInsertion(focus, tagName);
     if (!insertion) {
       return false;
@@ -60,8 +52,32 @@ export class EditManagerFocusOps {
     return true;
   }
 
+  canInsertBefore(tagName?: string): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    return !!getFocusElementInsertion(focus, tagName);
+  }
+
+  canInsertIn(tagName?: string): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    return !!getFocusElementChildInsertion(focus, tagName);
+  }
+
+  canDelete(): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    return !!(focus && canDelete(focus, this.editManager.document));
+  }
+
   insertBefore(tagName?: string): boolean {
-    const focus = this.editManager.getFocusedTag();
+    const focus = this.editManager.nav.getFocus();
     const insertion = getFocusElementInsertion(focus, tagName);
     if (!insertion) {
       return false;
@@ -75,7 +91,7 @@ export class EditManagerFocusOps {
   }
 
   insertIn(tagName?: string): boolean {
-    const focus = this.editManager.getFocusedTag();
+    const focus = this.editManager.nav.getFocus();
     const insertion = getFocusElementChildInsertion(focus, tagName);
     if (!insertion) {
       return false;
@@ -89,7 +105,7 @@ export class EditManagerFocusOps {
   }
 
   delete(): boolean {
-    const focus = this.editManager.getFocusedTag();
+    const focus = this.editManager.nav.getFocus();
     if (!focus || !canDelete(focus, this.editManager.document)) {
       return false;
     }
@@ -110,6 +126,9 @@ export class EditManagerFocusOps {
   }
 
   canUnwrap(): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
     const focus = this.editManager.nav.getFocus();
     return isInlineFlow(focus);
   }
@@ -129,6 +148,9 @@ export class EditManagerFocusOps {
   }
 
   canConvert(): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
     return !!this.editManager.nav.getFocus();
   }
 

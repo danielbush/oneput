@@ -435,6 +435,9 @@ describe('EditManager', () => {
         });
         editManager.start();
 
+        // act
+        editManager.nav.FOCUS(byId(doc, 'break'));
+
         // assert
         expect(editManager.focus.canInsertIn()).toBe(false);
         expect(editManager.focus.insertIn()).toBe(false);

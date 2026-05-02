@@ -680,21 +680,13 @@ export class EditManager {
     return true;
   }
 
-  getFocusedTag(): HTMLElement | null {
-    const focus = this.nav.getFocus();
-    if (this.mode !== 'view' || !focus || focus === this.document.root || isToken(focus)) {
-      return null;
-    }
-    return focus;
-  }
-
   getFocusedElementTagName(): string | null {
-    const focus = this.getFocusedTag();
+    const focus = this.nav.getFocus();
     return focus?.tagName.toLowerCase() ?? null;
   }
 
   getFocusedElementInsertChildTagName(): string | null {
-    const focus = this.getFocusedTag();
+    const focus = this.nav.getFocus();
     return focus ? getDefaultInsertChildTag(focus.tagName) : null;
   }
 }

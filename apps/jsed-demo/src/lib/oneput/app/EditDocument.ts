@@ -51,11 +51,13 @@ export class EditDocument implements AppObject {
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editManager.suspend(isOpen);
     });
+    this.ctl.input.focus();
   };
 
   onResume = () => {
     this.editManager.suspend(false);
     this.renderMenuItems();
+    this.ctl.input.focus();
   };
 
   onSuspend = () => {
@@ -233,10 +235,6 @@ export class EditDocument implements AppObject {
     this.ctl.app.run(TagSelection.create(this.ctl, this.editManager));
   };
 
-  private promptForElementAfterTag = () => {
-    this.ctl.app.run(InsertElement.create(this.ctl, this.editManager));
-  };
-
   private promptForElementBeforeTag = () => {
     this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'before'));
   };
@@ -399,14 +397,6 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Tags)]
           }),
-        this.editManager.focus.canInsertAfter() &&
-          stdMenuItem({
-            id: 'INSERT_ELEMENT_AFTER_TAG',
-            textContent: 'Insert element after tag...',
-            action: this.promptForElementAfterTag,
-            closeMenuOnAction: false,
-            left: (b) => [b.icon(icons.Plus)]
-          }),
         this.editManager.focus.canInsertBefore() &&
           stdMenuItem({
             id: 'INSERT_ELEMENT_BEFORE_TAG',
@@ -464,10 +454,10 @@ export class EditDocument implements AppObject {
                   candidates,
                   manualEntry: {
                     prompt: 'Type tag name...',
-                    title: 'Type tag name...',
+                    title: 'Convert to...',
                     icon: icons.Pencil,
-                    action: (toTagName: string) => {
-                      this.editManager.focus.convert(toTagName);
+                    action: (item: string) => {
+                      this.editManager.focus.convert(item);
                     }
                   }
                 })
@@ -475,6 +465,44 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.CodeXml)],
             closeMenuOnAction: false
+          }),
+
+        this.editManager.focus.canInsertAfter() &&
+          stdMenuItem({
+            id: 'INSERT_ELEMENT_AFTER_FOCUS',
+            textContent: 'Insert element after...',
+            left: (b) => [b.icon(icons.Plus)],
+            closeMenuOnAction: false,
+            action: () => {
+              const candidates = this.editManager.focus
+                .getInsertAfterCandidates()
+                .map((tagName, index) => {
+                  return {
+                    id: `${tagName}-${index}`,
+                    title: `<${tagName}>`,
+                    icon: icons.Plus,
+                    action: () => {
+                      this.editManager.focus.insertAfter(tagName);
+                    }
+                  };
+                });
+
+              this.ctl.app.run(
+                PickListUI.create(this.ctl, {
+                  prompt: 'Select item from menu...',
+                  title: 'Insert after...',
+                  candidates,
+                  manualEntry: {
+                    prompt: 'Type tag name...',
+                    title: 'Insert after...',
+                    icon: icons.Pencil,
+                    action: (item: string) => {
+                      this.editManager.focus.insertAfter(item);
+                    }
+                  }
+                })
+              );
+            }
           })
       ]
     });

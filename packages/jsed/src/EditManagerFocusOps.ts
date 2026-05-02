@@ -52,12 +52,18 @@ export class EditManagerFocusOps {
     return true;
   }
 
+  getInsertBeforeCandidates(): string[] {
+    return ['p', 'div', 'section'];
+  }
+
   canInsertBefore(tagName?: string): boolean {
     if (this.editManager.isEditing()) {
       return false;
     }
     const focus = this.editManager.nav.getFocus();
-    return !!getFocusElementInsertion(focus, tagName);
+    return (
+      !!getFocusElementInsertion(focus, tagName) && this.getInsertBeforeCandidates().length > 0
+    );
   }
 
   canInsertIn(tagName?: string): boolean {

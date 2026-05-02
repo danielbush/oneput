@@ -235,10 +235,6 @@ export class EditDocument implements AppObject {
     this.ctl.app.run(TagSelection.create(this.ctl, this.editManager));
   };
 
-  private promptForElementBeforeTag = () => {
-    this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'before'));
-  };
-
   private promptForElementInTag = () => {
     this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'in'));
   };
@@ -397,14 +393,6 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Tags)]
           }),
-        this.editManager.focus.canInsertBefore() &&
-          stdMenuItem({
-            id: 'INSERT_ELEMENT_BEFORE_TAG',
-            textContent: 'Insert element before tag...',
-            action: this.promptForElementBeforeTag,
-            closeMenuOnAction: false,
-            left: (b) => [b.icon(icons.Plus)]
-          }),
         this.editManager.focus.canInsertIn() &&
           stdMenuItem({
             id: 'INSERT_ELEMENT_IN_TAG',
@@ -413,6 +401,7 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Plus)]
           }),
+
         this.editManager.focus.canDelete() &&
           stdMenuItem({
             id: 'DELETE_FOCUSED_ELEMENT',
@@ -420,6 +409,7 @@ export class EditDocument implements AppObject {
             action: this.confirmDeleteFocusedElement,
             left: (b) => [b.icon(icons.X)]
           }),
+
         this.editManager.focus.canUnwrap() &&
           stdMenuItem({
             id: 'UNWRAP_FOCUS',
@@ -429,6 +419,7 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.CodeXml)]
           }),
+
         this.editManager.focus.canConvert() &&
           stdMenuItem({
             id: 'CONVERT_FOCUS',
@@ -498,6 +489,44 @@ export class EditDocument implements AppObject {
                     icon: icons.Pencil,
                     action: (item: string) => {
                       this.editManager.focus.insertAfter(item);
+                    }
+                  }
+                })
+              );
+            }
+          }),
+
+        this.editManager.focus.canInsertBefore() &&
+          stdMenuItem({
+            id: 'INSERT_ELEMENT_BEFORE_FOCUS',
+            textContent: 'Insert element before...',
+            left: (b) => [b.icon(icons.Plus)],
+            closeMenuOnAction: false,
+            action: () => {
+              const candidates = this.editManager.focus
+                .getInsertBeforeCandidates()
+                .map((tagName, index) => {
+                  return {
+                    id: `${tagName}-${index}`,
+                    title: `<${tagName}>`,
+                    icon: icons.Plus,
+                    action: () => {
+                      this.editManager.focus.insertBefore(tagName);
+                    }
+                  };
+                });
+
+              this.ctl.app.run(
+                PickListUI.create(this.ctl, {
+                  prompt: 'Select item from menu...',
+                  title: 'Insert before...',
+                  candidates,
+                  manualEntry: {
+                    prompt: 'Type tag name...',
+                    title: 'Insert before...',
+                    icon: icons.Pencil,
+                    action: (item: string) => {
+                      this.editManager.focus.insertBefore(item);
                     }
                   }
                 })

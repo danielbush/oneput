@@ -5,7 +5,7 @@ import {
   JSED_TOKEN_COLLAPSED,
   JSED_TOKEN_PADDED
 } from './constants.js';
-import { canCreateWithAnchor, getAllowableChildTags } from './dom-rules.js';
+import { canCreateWithAnchor, getAllowableChildTags, normalizeTagName } from './dom-rules.js';
 import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 import {
   isIgnorable,
@@ -503,11 +503,6 @@ export function canInsertAnchorInLine(line: HTMLElement): boolean {
 // #endregion
 
 // #region Wrapping (Selections)
-
-export function normalizeTagName(tagName: string): string | null {
-  const normalized = tagName.trim().replace(/^<\s*/, '').replace(/\s*>$/, '').toLowerCase();
-  return /^[a-z][a-z0-9-]*$/.test(normalized) ? normalized : null;
-}
 
 export function canWrapElementChildrenWithTag(container: HTMLElement, tagName: string): boolean {
   if (!container.parentElement) {

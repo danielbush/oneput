@@ -235,10 +235,6 @@ export class EditDocument implements AppObject {
     this.ctl.app.run(TagSelection.create(this.ctl, this.editManager));
   };
 
-  private promptForElementInTag = () => {
-    this.ctl.app.run(InsertElement.create(this.ctl, this.editManager, 'in'));
-  };
-
   private confirmDeleteFocusedElement = async () => {
     const tagName = this.editManager.getFocusedElementTagName() ?? 'element';
     const confirm = this.ctl.confirm({
@@ -393,14 +389,6 @@ export class EditDocument implements AppObject {
             closeMenuOnAction: false,
             left: (b) => [b.icon(icons.Tags)]
           }),
-        this.editManager.focus.canInsertIn() &&
-          stdMenuItem({
-            id: 'INSERT_ELEMENT_IN_TAG',
-            textContent: 'Insert element in tag...',
-            action: this.promptForElementInTag,
-            closeMenuOnAction: false,
-            left: (b) => [b.icon(icons.Plus)]
-          }),
 
         this.editManager.focus.canDelete() &&
           stdMenuItem({
@@ -527,6 +515,44 @@ export class EditDocument implements AppObject {
                     icon: icons.Pencil,
                     action: (item: string) => {
                       this.editManager.focus.insertBefore(item);
+                    }
+                  }
+                })
+              );
+            }
+          }),
+
+        this.editManager.focus.canInsertIn() &&
+          stdMenuItem({
+            id: 'INSERT_ELEMENT_IN_FOCUS',
+            textContent: 'Insert element in...',
+            left: (b) => [b.icon(icons.Plus)],
+            closeMenuOnAction: false,
+            action: () => {
+              const candidates = this.editManager.focus
+                .getInsertInCandidates()
+                .map((tagName, index) => {
+                  return {
+                    id: `${tagName}-${index}`,
+                    title: `<${tagName}>`,
+                    icon: icons.Plus,
+                    action: () => {
+                      this.editManager.focus.insertIn(tagName);
+                    }
+                  };
+                });
+
+              this.ctl.app.run(
+                PickListUI.create(this.ctl, {
+                  prompt: 'Select item from menu...',
+                  title: 'Insert in...',
+                  candidates,
+                  manualEntry: {
+                    prompt: 'Type tag name...',
+                    title: 'Insert in...',
+                    icon: icons.Pencil,
+                    action: (item: string) => {
+                      this.editManager.focus.insertIn(item);
                     }
                   }
                 })

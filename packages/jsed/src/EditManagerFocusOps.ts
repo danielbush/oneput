@@ -1,7 +1,7 @@
 import type { EditManager } from './EditManager.js';
 import * as focusable from './lib/focusable.js';
 import * as space from './lib/space.js';
-import { canDelete } from './lib/dom-rules.js';
+import { canDelete, getAllowableChildTags } from './lib/dom-rules.js';
 import {
   convert,
   getFocusElementChildInsertion,
@@ -66,22 +66,6 @@ export class EditManagerFocusOps {
     );
   }
 
-  canInsertIn(tagName?: string): boolean {
-    if (this.editManager.isEditing()) {
-      return false;
-    }
-    const focus = this.editManager.nav.getFocus();
-    return !!getFocusElementChildInsertion(focus, tagName);
-  }
-
-  canDelete(): boolean {
-    if (this.editManager.isEditing()) {
-      return false;
-    }
-    const focus = this.editManager.nav.getFocus();
-    return !!(focus && canDelete(focus, this.editManager.document));
-  }
-
   insertBefore(tagName?: string): boolean {
     const focus = this.editManager.nav.getFocus();
     const insertion = getFocusElementInsertion(focus, tagName);
@@ -96,6 +80,24 @@ export class EditManagerFocusOps {
     return true;
   }
 
+  getInsertInCandidates(): string[] {
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return [];
+    }
+    return getAllowableChildTags(focus.tagName);
+  }
+
+  canInsertIn(tagName?: string): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    return (
+      !!getFocusElementChildInsertion(focus, tagName) && this.getInsertInCandidates().length > 0
+    );
+  }
+
   insertIn(tagName?: string): boolean {
     const focus = this.editManager.nav.getFocus();
     const insertion = getFocusElementChildInsertion(focus, tagName);
@@ -108,6 +110,14 @@ export class EditManagerFocusOps {
     this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     this.editManager.nav.FOCUS(inserted);
     return true;
+  }
+
+  canDelete(): boolean {
+    if (this.editManager.isEditing()) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    return !!(focus && canDelete(focus, this.editManager.document));
   }
 
   delete(): boolean {

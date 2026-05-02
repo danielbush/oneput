@@ -113,7 +113,7 @@ export function getFocusElementInsertion(
     return null;
   }
 
-  const normalized = token.normalizeTagName(tagName ?? focus.tagName);
+  const normalized = domRules.normalizeTagName(tagName ?? focus.tagName);
   if (!normalized || !canContainChildTag(focus.parentElement.tagName, normalized)) {
     return null;
   }
@@ -130,7 +130,7 @@ export function getFocusElementChildInsertion(
   }
 
   const defaultTagName = getDefaultInsertChildTag(parent.tagName);
-  const normalized = token.normalizeTagName(tagName ?? defaultTagName ?? '');
+  const normalized = domRules.normalizeTagName(tagName ?? defaultTagName ?? '');
   if (!normalized || !canContainChildTag(parent.tagName, normalized)) {
     return null;
   }

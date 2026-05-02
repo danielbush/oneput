@@ -159,3 +159,8 @@ export function canDelete(el: HTMLElement, doc: JsedDocument): boolean {
 export function getConversionCandidates(_el: HTMLElement): string[] {
   return ['p', 'div', 'section'];
 }
+
+export function normalizeTagName(tagName: string): string | null {
+  const normalized = tagName.trim().replace(/^<\s*/, '').replace(/\s*>$/, '').toLowerCase();
+  return /^[a-z][a-z0-9-]*$/.test(normalized) ? normalized : null;
+}

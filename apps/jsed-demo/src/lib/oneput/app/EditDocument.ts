@@ -4,7 +4,7 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { TagSelection } from './TagSelection.js';
 import { InsertElement } from './InsertElement.js';
-import { PickList } from './PickList.js';
+import { PickListUI } from './PickListUI.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -361,6 +361,36 @@ export class EditDocument implements AppObject {
             },
             left: (b) => [b.icon(icons.Space)]
           }),
+        this.editManager.cursorOps.canRemoveSpaceAfter() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_AFTER_CURSOR',
+            textContent: 'Remove trailing space after cursor...',
+            action: () => {
+              this.editManager.cursorOps.removeSpaceAfter();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.anchor.canInsertAfterFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_AFTER_TAG',
+            textContent: 'Insert anchor after tag...',
+            action: () => {
+              this.editManager.anchor.insertAfterFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
+          }),
+        this.editManager.anchor.canRemoveAfterFocus() &&
+          stdMenuItem({
+            id: 'REMOVE_ANCHOR_AFTER_TAG',
+            textContent: 'Remove anchor after tag...',
+            action: () => {
+              this.editManager.anchor.removeAfterFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
+          }),
+
+        // Modifying elements at FOCUS or CURSOR
+
         this.editManager.cursorOps.canWrap() &&
           stdMenuItem({
             id: 'TAG_SELECTION',
@@ -400,36 +430,9 @@ export class EditDocument implements AppObject {
             action: this.confirmDeleteFocusedElement,
             left: (b) => [b.icon(icons.X)]
           }),
-        this.editManager.cursorOps.canRemoveSpaceAfter() &&
-          stdMenuItem({
-            id: 'REMOVE_SPACE_AFTER_CURSOR',
-            textContent: 'Remove trailing space after cursor...',
-            action: () => {
-              this.editManager.cursorOps.removeSpaceAfter();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.anchor.canInsertAfterFocus() &&
-          stdMenuItem({
-            id: 'INSERT_ANCHOR_AFTER_TAG',
-            textContent: 'Insert anchor after tag...',
-            action: () => {
-              this.editManager.anchor.insertAfterFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
-        this.editManager.anchor.canRemoveAfterFocus() &&
-          stdMenuItem({
-            id: 'REMOVE_ANCHOR_AFTER_TAG',
-            textContent: 'Remove anchor after tag...',
-            action: () => {
-              this.editManager.anchor.removeAfterFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
         this.editManager.focus.canUnwrap() &&
           stdMenuItem({
-            id: 'UNWRAP',
+            id: 'UNWRAP_FOCUS',
             textContent: 'Unwrap...',
             action: () => {
               this.editManager.focus.unwrap();
@@ -438,36 +441,35 @@ export class EditDocument implements AppObject {
           }),
         this.editManager.focus.canConvert() &&
           stdMenuItem({
-            id: 'CONVERT',
+            id: 'CONVERT_FOCUS',
             textContent: 'Convert...',
             action: () => {
+              const candidates = this.editManager.focus
+                .getConversionCandidates()
+                .map((tagName, index) => {
+                  return {
+                    id: `${tagName}-${index}`,
+                    title: `<${tagName}>`,
+                    icon: icons.ArrowLeft,
+                    action: () => {
+                      this.editManager.focus.convert(tagName);
+                    }
+                  };
+                });
+
               this.ctl.app.run(
-                PickList.create(this.ctl, {
+                PickListUI.create(this.ctl, {
                   prompt: 'Select item from menu...',
                   title: 'Convert to...',
-                  candidates: [
-                    {
-                      id: 'p',
-                      title: '<p> - paragraph tag',
-                      action: () => {
-                        this.editManager.focus.convert('p');
-                      }
-                    },
-                    {
-                      id: 'div',
-                      title: '<div> - div tag',
-                      action: () => {
-                        this.editManager.focus.convert('div');
-                      }
-                    },
-                    {
-                      id: 'section',
-                      title: '<section> - section tag',
-                      action: () => {
-                        this.editManager.focus.convert('section');
-                      }
+                  candidates,
+                  manualEntry: {
+                    prompt: 'Type tag name...',
+                    title: 'Type tag name...',
+                    icon: icons.Pencil,
+                    action: (toTagName: string) => {
+                      this.editManager.focus.convert(toTagName);
                     }
-                  ]
+                  }
                 })
               );
             },

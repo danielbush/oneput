@@ -152,3 +152,10 @@ export function canDelete(el: HTMLElement, doc: JsedDocument): boolean {
   }
   return true;
 }
+
+/**
+ * TODO: we could look at parent node to determine what is valid eg ul -> li etc
+ */
+export function getConversionCandidates(_el: HTMLElement): string[] {
+  return ['p', 'div', 'section'];
+}

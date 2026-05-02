@@ -1,5 +1,5 @@
 import type { EditManager } from './EditManager.js';
-import * as dom from './lib/focusable.js';
+import * as focusable from './lib/focusable.js';
 import * as space from './lib/space.js';
 import { canDelete } from './lib/dom-rules.js';
 import {
@@ -53,8 +53,8 @@ export class EditManagerFocusOps {
       return false;
     }
 
-    const inserted = dom.createElement(insertion.tagName);
-    dom.insertAfter(inserted, insertion.focus);
+    const inserted = focusable.createElement(insertion.tagName);
+    focusable.insertAfter(inserted, insertion.focus);
     this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     this.editManager.nav.FOCUS(inserted);
     return true;
@@ -67,8 +67,8 @@ export class EditManagerFocusOps {
       return false;
     }
 
-    const inserted = dom.createElement(insertion.tagName);
-    dom.insertBefore(inserted, insertion.focus);
+    const inserted = focusable.createElement(insertion.tagName);
+    focusable.insertBefore(inserted, insertion.focus);
     this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     this.editManager.nav.FOCUS(inserted);
     return true;
@@ -81,7 +81,7 @@ export class EditManagerFocusOps {
       return false;
     }
 
-    const inserted = dom.createElement(insertion.tagName);
+    const inserted = focusable.createElement(insertion.tagName);
     insertion.parent.appendChild(inserted);
     this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     this.editManager.nav.FOCUS(inserted);
@@ -99,11 +99,11 @@ export class EditManagerFocusOps {
       return false;
     }
     const nextFocus =
-      dom.findNextFocusableOutside(focus, this.editManager.document.root) ??
-      dom.findPreviousFocusableOutside(focus, this.editManager.document.root) ??
+      focusable.findNextFocusableOutside(focus, this.editManager.document.root) ??
+      focusable.findPreviousFocusableOutside(focus, this.editManager.document.root) ??
       parent;
 
-    dom.deleteElement(focus);
+    focusable.deleteElement(focus);
     this.editManager.notifyElementChange({ type: 'focusable-removed', element: focus });
     this.editManager.nav.FOCUS(nextFocus);
     return true;
@@ -123,9 +123,13 @@ export class EditManagerFocusOps {
     return false;
   }
 
-  canConvert(): boolean {
+  getConversionCandidates(): string[] {
     const focus = this.editManager.nav.getFocus();
-    return !!focus && focus !== this.editManager.document.root;
+    return focusable.getConversionCandidates(focus, this.editManager.document.root);
+  }
+
+  canConvert(): boolean {
+    return !!this.editManager.nav.getFocus();
   }
 
   convert(tagName: string): boolean {

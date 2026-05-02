@@ -1,4 +1,5 @@
 import { canContainChildTag, canCreateWithAnchor, getDefaultInsertChildTag } from './dom-rules.js';
+import * as domRules from './dom-rules.js';
 import { isFocusable, isIsland } from './taxonomy.js';
 import * as token from './token.js';
 import { findNextNode, findPreviousNode } from './walk.js';
@@ -147,4 +148,14 @@ export function convert(el: HTMLElement, toTagName: string): HTMLElement {
   newEl.append(...Array.from(el.childNodes));
   el.remove();
   return newEl;
+}
+
+export function getConversionCandidates(el: HTMLElement | null, root: HTMLElement): string[] {
+  if (!el) {
+    return [];
+  }
+  if (!root.contains(el)) {
+    return [];
+  }
+  return domRules.getConversionCandidates(el);
 }

@@ -403,7 +403,7 @@ export class EditDocument implements AppObject {
                 .map((tagName, index) => {
                   return {
                     id: `${tagName}-${index}`,
-                    title: `<${tagName}>`,
+                    text: `<${tagName}>`,
                     icon: icons.ArrowLeft,
                     action: () => {
                       this.editManager.focus.convert(tagName);
@@ -417,8 +417,9 @@ export class EditDocument implements AppObject {
                   title: 'Convert to...',
                   candidates,
                   manualEntry: {
-                    prompt: 'Type tag name...',
                     title: 'Convert to...',
+                    text: 'Type tag name...',
+                    prompt: 'Type tag name...',
                     icon: icons.Pencil,
                     action: (item: string) => {
                       this.editManager.focus.convert(item);
@@ -443,10 +444,10 @@ export class EditDocument implements AppObject {
                 .map((tagName, index) => {
                   return {
                     id: `${tagName}-${index}`,
-                    title: `<${tagName}>`,
+                    text: `<${tagName}>`,
                     icon: icons.Plus,
                     action: () => {
-                      this.editManager.focus.insertAfter(tagName);
+                      this.editManager.focus.insertNewAfter(tagName);
                     }
                   };
                 });
@@ -457,11 +458,12 @@ export class EditDocument implements AppObject {
                   title: 'Insert after...',
                   candidates,
                   manualEntry: {
-                    prompt: 'Type tag name...',
                     title: 'Insert after...',
+                    prompt: 'Type tag name...',
+                    text: 'Type tag name...',
                     icon: icons.Pencil,
                     action: (item: string) => {
-                      this.editManager.focus.insertAfter(item);
+                      this.editManager.focus.insertNewAfter(item);
                     }
                   }
                 })
@@ -481,10 +483,10 @@ export class EditDocument implements AppObject {
                 .map((tagName, index) => {
                   return {
                     id: `${tagName}-${index}`,
-                    title: `<${tagName}>`,
+                    text: `<${tagName}>`,
                     icon: icons.Plus,
                     action: () => {
-                      this.editManager.focus.insertBefore(tagName);
+                      this.editManager.focus.insertNewBefore(tagName);
                     }
                   };
                 });
@@ -495,11 +497,12 @@ export class EditDocument implements AppObject {
                   title: 'Insert before...',
                   candidates,
                   manualEntry: {
-                    prompt: 'Type tag name...',
                     title: 'Insert before...',
+                    prompt: 'Type tag name...',
+                    text: 'Type tag name...',
                     icon: icons.Pencil,
                     action: (item: string) => {
-                      this.editManager.focus.insertBefore(item);
+                      this.editManager.focus.insertNewBefore(item);
                     }
                   }
                 })
@@ -507,22 +510,22 @@ export class EditDocument implements AppObject {
             }
           }),
 
-        this.editManager.focus.canInsertIn() &&
+        this.editManager.focus.canAppend() &&
           stdMenuItem({
-            id: 'INSERT_ELEMENT_IN_FOCUS',
-            textContent: 'Insert element in...',
+            id: 'APPEND_NEW_ELEMENT_IN_FOCUS',
+            textContent: 'Append new element...',
             left: (b) => [b.icon(icons.Plus)],
             closeMenuOnAction: false,
             action: () => {
               const candidates = this.editManager.focus
-                .getInsertInCandidates()
+                .getAppendCandidates()
                 .map((tagName, index) => {
                   return {
                     id: `${tagName}-${index}`,
-                    title: `<${tagName}>`,
+                    text: `<${tagName}>`,
                     icon: icons.Plus,
                     action: () => {
-                      this.editManager.focus.insertIn(tagName);
+                      this.editManager.focus.appendNew(tagName);
                     }
                   };
                 });
@@ -530,14 +533,15 @@ export class EditDocument implements AppObject {
               this.ctl.app.run(
                 PickListUI.create(this.ctl, {
                   prompt: 'Select item from menu...',
-                  title: 'Insert in...',
+                  title: 'Append new element...',
                   candidates,
                   manualEntry: {
+                    title: 'Append new element...',
                     prompt: 'Type tag name...',
-                    title: 'Insert in...',
+                    text: 'Type tag name...',
                     icon: icons.Pencil,
                     action: (item: string) => {
-                      this.editManager.focus.insertIn(item);
+                      this.editManager.focus.appendNew(item);
                     }
                   }
                 })
@@ -557,7 +561,7 @@ export class EditDocument implements AppObject {
                 .map((tagName, index) => {
                   return {
                     id: `${tagName}-${index}`,
-                    title: `<${tagName}>`,
+                    text: `<${tagName}>`,
                     icon: icons.Plus,
                     action: () => {
                       const wrapped = this.editManager.cursorOps.wrap(tagName);
@@ -574,8 +578,9 @@ export class EditDocument implements AppObject {
                   title: 'Wrap selection...',
                   candidates,
                   manualEntry: {
-                    prompt: 'Wrap selection...',
-                    title: 'Type tag name...',
+                    title: 'Wrap selection...',
+                    prompt: 'Type tag name...',
+                    text: 'Type tag name...',
                     icon: icons.Pencil,
                     action: (item: string) => {
                       const wrapped = this.editManager.cursorOps.wrap(item);

@@ -1,4 +1,4 @@
-import { canContainChildTag, canCreateWithAnchor, getDefaultInsertChildTag } from './dom-rules.js';
+import { canCreateWithAnchor } from './dom-rules.js';
 import * as domRules from './dom-rules.js';
 import { isFocusable, isIsland } from './taxonomy.js';
 import * as token from './token.js';
@@ -40,12 +40,49 @@ export function createElement(
   return el;
 }
 
-export function insertAfter(newElement: HTMLElement, el: HTMLElement): void {
-  el.insertAdjacentElement('afterend', newElement);
+export function getAppendCandidates(parent: HTMLElement): string[] {
+  return domRules.getAllowableChildTags(parent.tagName);
 }
 
-export function insertBefore(newElement: HTMLElement, el: HTMLElement): void {
-  el.insertAdjacentElement('beforebegin', newElement);
+/**
+ * Append new child element (tagName) to parent.
+ */
+export function appendNew(parent: HTMLElement, tagName: string): HTMLElement | null {
+  if (!domRules.getAllowableChildTags(parent.tagName).includes(tagName.toLowerCase())) {
+    return null;
+  }
+
+  const inserted = createElement(tagName);
+  parent.appendChild(inserted);
+  return inserted;
+}
+
+export function getInsertAfterCandidates(el: HTMLElement): string[] {
+  return domRules.getAllowableInsertAfterTags(el.tagName);
+}
+
+export function insertNewAfter(tagName: string, target: HTMLElement): HTMLElement | null {
+  if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(tagName.toLowerCase())) {
+    return null;
+  }
+
+  const inserted = createElement(tagName);
+  target.insertAdjacentElement('afterend', inserted);
+  return inserted;
+}
+
+export function getInsertBeforeCandidates(el: HTMLElement): string[] {
+  return domRules.getAllowableInsertBeforeTags(el.tagName);
+}
+
+export function insertNewBefore(tagName: string, target: HTMLElement): HTMLElement | null {
+  if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(tagName.toLowerCase())) {
+    return null;
+  }
+
+  const inserted = createElement(tagName);
+  target.insertAdjacentElement('beforebegin', inserted);
+  return inserted;
 }
 
 export function deleteElement(el: HTMLElement): void {
@@ -95,48 +132,26 @@ export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HT
   return null;
 }
 
-export type FocusElementInsertion = {
-  focus: HTMLElement;
-  tagName: string;
-};
+// export type FocusElementInsertion = {
+//   focus: HTMLElement;
+//   tagName: string;
+// };
 
-export type FocusElementChildInsertion = {
-  parent: HTMLElement;
-  tagName: string;
-};
+// export function getFocusElementInsertion(
+//   focus: HTMLElement | null,
+//   tagName?: string
+// ): FocusElementInsertion | null {
+//   if (!focus || !focus.parentElement) {
+//     return null;
+//   }
 
-export function getFocusElementInsertion(
-  focus: HTMLElement | null,
-  tagName?: string
-): FocusElementInsertion | null {
-  if (!focus || !focus.parentElement) {
-    return null;
-  }
+//   const normalized = domRules.normalizeTagName(tagName ?? focus.tagName);
+//   if (!normalized || !canContainChildTag(focus.parentElement.tagName, normalized)) {
+//     return null;
+//   }
 
-  const normalized = domRules.normalizeTagName(tagName ?? focus.tagName);
-  if (!normalized || !canContainChildTag(focus.parentElement.tagName, normalized)) {
-    return null;
-  }
-
-  return { focus, tagName: normalized };
-}
-
-export function getFocusElementChildInsertion(
-  parent: HTMLElement | null,
-  tagName?: string
-): FocusElementChildInsertion | null {
-  if (!parent) {
-    return null;
-  }
-
-  const defaultTagName = getDefaultInsertChildTag(parent.tagName);
-  const normalized = domRules.normalizeTagName(tagName ?? defaultTagName ?? '');
-  if (!normalized || !canContainChildTag(parent.tagName, normalized)) {
-    return null;
-  }
-
-  return { parent, tagName: normalized };
-}
+//   return { focus, tagName: normalized };
+// }
 
 export function unwrap(el: HTMLElement): void {
   el.replaceWith(...Array.from(el.childNodes));

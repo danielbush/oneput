@@ -18,8 +18,8 @@ const utils = {
     copyElement: dom.copyElement,
     replaceElement: dom.replaceElement,
     createElement: dom.createElement,
-    insertAfter: dom.insertAfter,
-    insertBefore: dom.insertBefore,
+    insertAfter: dom.insertNewAfter,
+    insertBefore: dom.insertNewBefore,
     deleteElement: dom.deleteElement,
     splitParentBefore: dom.splitParentBefore,
     rules: domRules

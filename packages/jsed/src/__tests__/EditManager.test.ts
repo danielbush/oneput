@@ -324,7 +324,8 @@ describe('EditManager', () => {
         editManager.start();
 
         // act
-        const inserted = editManager.focus.insertAfter();
+        expect(editManager.nav.getFocus()).toBe(byId(doc, 'p1'));
+        const inserted = editManager.focus.insertNewAfter('p');
 
         // assert
         const children = Array.from(doc.root.children);
@@ -346,7 +347,7 @@ describe('EditManager', () => {
         editManager.start();
 
         // act
-        const inserted = editManager.focus.insertAfter('h2');
+        const inserted = editManager.focus.insertNewAfter('h2');
 
         // assert
         const children = Array.from(doc.root.children);
@@ -369,7 +370,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
         // act
-        const inserted = editManager.focus.insertBefore('h2');
+        const inserted = editManager.focus.insertNewBefore('h2');
 
         // assert
         const children = Array.from(doc.root.children);
@@ -393,7 +394,7 @@ describe('EditManager', () => {
         const p1 = byId(doc, 'p1');
 
         // act
-        const inserted = editManager.focus.insertIn('span');
+        const inserted = editManager.focus.appendNew('span');
 
         // assert
         const child = p1.lastElementChild;
@@ -416,7 +417,7 @@ describe('EditManager', () => {
         editManager.nav.REQUEST_FOCUS(list);
 
         // act
-        const inserted = editManager.focus.insertIn();
+        const inserted = editManager.focus.appendNew('li');
 
         // assert
         const child = list.lastElementChild;
@@ -439,8 +440,8 @@ describe('EditManager', () => {
         editManager.nav.FOCUS(byId(doc, 'break'));
 
         // assert
-        expect(editManager.focus.canInsertIn()).toBe(false);
-        expect(editManager.focus.insertIn()).toBe(false);
+        expect(editManager.focus.canAppend()).toBe(false);
+        expect(editManager.focus.appendNew('span')).toBe(false);
 
         editManager.destroy();
       });

@@ -3,9 +3,12 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { type LayoutSettings } from './_layout.js';
 import { icons } from './_icons.js';
 
+/**
+ * Candidates in pick list.
+ */
 export type Candidate = {
   id: string;
-  title: string;
+  text: string;
   action: () => void;
   /**
    * Name of registered icon.
@@ -13,9 +16,13 @@ export type Candidate = {
   icon?: string;
 };
 
+/**
+ * Configure ui to manually add entry (eg not in pick list).
+ */
 export type ManualEntry = {
   prompt: string;
   title: string;
+  text: string;
   icon?: string;
   action: (item: string) => void;
 };
@@ -81,7 +88,7 @@ export class PickListUI implements AppObject {
         ...this.candidates.map((candidate) =>
           stdMenuItem({
             id: candidate.id,
-            textContent: candidate.title,
+            textContent: candidate.text,
             action: () => {
               candidate.action();
               this.ctl.app.exit();
@@ -92,7 +99,7 @@ export class PickListUI implements AppObject {
         this.manualEntry &&
           stdMenuItem({
             id: 'MANUAL_ENTRY',
-            textContent: this.manualEntry.title,
+            textContent: this.manualEntry.text,
             action: () => {
               this.ctl.app.run(ManualEntryUI.create(this.ctl, this.manualEntry!));
             },

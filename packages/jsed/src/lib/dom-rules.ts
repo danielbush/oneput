@@ -84,33 +84,39 @@ function isLeaf(tagName: string): boolean {
   return LEAF.includes(tagName);
 }
 
-function getAllowedChildTags(tagName: string): string[] {
-  const ltagname = tagName.toLowerCase();
-  if (isLeaf(tagName)) {
-    return [];
+export function getAllowableInsertBeforeTags(tagName: string): string[] {
+  const normTagName = tagName.toLowerCase();
+  if (['li', 'tr', 'td'].includes(normTagName)) return [normTagName];
+  if (PHRASING_CONTENT.includes(normTagName)) {
+    return PHRASING_CONTENT;
   }
-  // Exclude leaf phrasing in the test for ltagname but include in the output:
-  if (PHRASING_CONTENT.includes(ltagname)) {
-    return [...PHRASING_CONTENT, ...LEAF].filter((t) => t !== ltagname);
-  }
-  if (ltagname in RULES) {
-    return RULES[ltagname];
+  if (FLOW_CONTENT.includes(normTagName)) {
+    return FLOW_CONTENT;
   }
   return [];
 }
 
-export function getAllowableChildTags(tagName: string): string[] {
-  const ltagname = tagName.toLowerCase();
-  return getAllowedChildTags(tagName).filter((t) => t !== ltagname);
+export function getAllowableInsertAfterTags(tagName: string): string[] {
+  return getAllowableInsertBeforeTags(tagName);
 }
 
-export function canContainChildTag(parentTagName: string, childTagName: string): boolean {
-  return getAllowedChildTags(parentTagName).includes(childTagName.toLowerCase());
+export function getAllowableChildTags(tagName: string): string[] {
+  const parentTag = tagName.toLowerCase();
+  if (isLeaf(tagName)) {
+    return [];
+  }
+  if (PHRASING_CONTENT.includes(parentTag)) {
+    return [...PHRASING_CONTENT, ...LEAF];
+  }
+  if (parentTag in RULES) {
+    return RULES[parentTag];
+  }
+  return [];
 }
 
 export function getDefaultInsertChildTag(tagName: string): string | null {
   const ltagname = tagName.toLowerCase();
-  const allowed = getAllowedChildTags(ltagname);
+  const allowed = getAllowableChildTags(ltagname);
   if (allowed.length === 0) {
     return null;
   }
@@ -162,9 +168,4 @@ export function getConversionCandidates(_el: HTMLElement): string[] {
 
 export function getWrapCandidates(): string[] {
   return ['em', 'strong', 'i', 'b'];
-}
-
-export function normalizeTagName(tagName: string): string | null {
-  const normalized = tagName.trim().replace(/^<\s*/, '').replace(/\s*>$/, '').toLowerCase();
-  return /^[a-z][a-z0-9-]*$/.test(normalized) ? normalized : null;
 }

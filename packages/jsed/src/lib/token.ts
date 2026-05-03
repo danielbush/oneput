@@ -5,7 +5,7 @@ import {
   JSED_TOKEN_COLLAPSED,
   JSED_TOKEN_PADDED
 } from './constants.js';
-import { canCreateWithAnchor, getAllowableChildTags, normalizeTagName } from './dom-rules.js';
+import { canCreateWithAnchor, getAllowableChildTags } from './dom-rules.js';
 import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 import {
   isIgnorable,
@@ -509,7 +509,7 @@ export function canWrapElementChildrenWithTag(container: HTMLElement, tagName: s
     return false;
   }
 
-  const normalized = normalizeTagName(tagName);
+  const normalized = tagName.toLowerCase();
   if (!normalized) {
     return false;
   }
@@ -528,7 +528,7 @@ export function wrapElementChildrenWithTag(
   container: HTMLElement,
   tagName: string
 ): HTMLElement | null {
-  const normalized = normalizeTagName(tagName);
+  const normalized = tagName.toLowerCase();
   if (!normalized || !canWrapElementChildrenWithTag(container, normalized)) {
     return null;
   }
@@ -545,7 +545,7 @@ export function canWrapLineSiblingWithTag(lineSibling: HTMLElement, tagName: str
     return false;
   }
 
-  const normalized = normalizeTagName(tagName);
+  const normalized = tagName.toLowerCase();
   if (!normalized) {
     return false;
   }
@@ -567,7 +567,7 @@ export function wrapLineSiblingWithTag(
   lineSibling: HTMLElement,
   tagName: string
 ): HTMLElement | null {
-  const normalized = normalizeTagName(tagName);
+  const normalized = tagName.toLowerCase();
   if (!normalized || !canWrapLineSiblingWithTag(lineSibling, normalized)) {
     return null;
   }

@@ -16,7 +16,8 @@ export const iconData = {
   Space: lu.Space,
   Tags: lu.Tags,
   Plus: lu.Plus,
-  CodeXml: lu.CodeXml
+  CodeXml: lu.CodeXml,
+  SquareCode: lu.SquareCode
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

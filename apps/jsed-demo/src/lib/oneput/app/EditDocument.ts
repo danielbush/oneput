@@ -2,7 +2,6 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import { TagSelection } from './TagSelection.js';
 import { PickListUI } from './PickListUI.js';
 
 export class EditDocument implements AppObject {
@@ -230,10 +229,6 @@ export class EditDocument implements AppObject {
     // #endregion
   };
 
-  private promptForTagSelection = () => {
-    this.ctl.app.run(TagSelection.create(this.ctl, this.editManager));
-  };
-
   private confirmDeleteFocusedElement = async () => {
     const tagName = this.editManager.getFocusedElementTagName() ?? 'element';
     const confirm = this.ctl.confirm({
@@ -379,15 +374,6 @@ export class EditDocument implements AppObject {
           }),
 
         // Modifying elements at FOCUS or CURSOR
-
-        this.editManager.cursorOps.canWrap() &&
-          stdMenuItem({
-            id: 'TAG_SELECTION',
-            textContent: 'Tag selection...',
-            action: this.promptForTagSelection,
-            closeMenuOnAction: false,
-            left: (b) => [b.icon(icons.Tags)]
-          }),
 
         this.editManager.focus.canDelete() &&
           stdMenuItem({
@@ -552,6 +538,50 @@ export class EditDocument implements AppObject {
                     icon: icons.Pencil,
                     action: (item: string) => {
                       this.editManager.focus.insertIn(item);
+                    }
+                  }
+                })
+              );
+            }
+          }),
+
+        this.editManager.cursorOps.canWrap() &&
+          stdMenuItem({
+            id: 'WRAP_SELECTION',
+            textContent: 'Wrap selection...',
+            left: (b) => [b.icon(icons.SquareCode)],
+            closeMenuOnAction: false,
+            action: () => {
+              const candidates = this.editManager.cursorOps
+                .getWrapCandidates()
+                .map((tagName, index) => {
+                  return {
+                    id: `${tagName}-${index}`,
+                    title: `<${tagName}>`,
+                    icon: icons.Plus,
+                    action: () => {
+                      const wrapped = this.editManager.cursorOps.wrap(tagName);
+                      if (!wrapped) {
+                        this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
+                      }
+                    }
+                  };
+                });
+
+              this.ctl.app.run(
+                PickListUI.create(this.ctl, {
+                  prompt: 'Select wrapping element from menu...',
+                  title: 'Wrap selection...',
+                  candidates,
+                  manualEntry: {
+                    prompt: 'Wrap selection...',
+                    title: 'Type tag name...',
+                    icon: icons.Pencil,
+                    action: (item: string) => {
+                      const wrapped = this.editManager.cursorOps.wrap(item);
+                      if (!wrapped) {
+                        this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
+                      }
                     }
                   }
                 })

@@ -2,6 +2,7 @@ import type { EditManager } from './EditManager.js';
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { isLineSibling } from './lib/taxonomy.js';
+import { getWrapCandidates } from './lib/dom-rules.js';
 
 /**
  * Trailing / Leading space (at cursor)
@@ -19,6 +20,10 @@ export class EditManagerCursorOps {
       !!this.editManager.cursor &&
       isLineSibling(this.editManager.cursor.getPlace())
     );
+  }
+
+  getWrapCandidates(): string[] {
+    return getWrapCandidates();
   }
 
   /**

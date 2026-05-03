@@ -3,7 +3,6 @@ import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/j
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { TagSelection } from './TagSelection.js';
-import { InsertElement } from './InsertElement.js';
 import { PickListUI } from './PickListUI.js';
 
 export class EditDocument implements AppObject {

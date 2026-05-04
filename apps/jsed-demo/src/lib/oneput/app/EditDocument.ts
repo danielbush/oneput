@@ -2,7 +2,7 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import { PickListUI } from './PickListUI.js';
+import { PickListUI } from './_ui/PickListUI.js';
 import type { LayoutSettings } from './_layout.js';
 
 export class EditDocument implements AppObject {

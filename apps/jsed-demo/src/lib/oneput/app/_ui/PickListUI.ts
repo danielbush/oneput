@@ -1,7 +1,7 @@
 import { type AppObject, type Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { type LayoutSettings } from './_layout.js';
-import { icons } from './_icons.js';
+import { type LayoutSettings } from '../_layout.js';
+import { icons } from '../_icons.js';
 
 /**
  * Candidates in pick list.

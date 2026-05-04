@@ -3,6 +3,7 @@ import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/j
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { PickListUI } from './PickListUI.js';
+import type { LayoutSettings } from './_layout.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
@@ -46,6 +47,7 @@ export class EditDocument implements AppObject {
   onStart = () => {
     this.editManager.start();
     this.renderMenuItems();
+    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'jsed' } });
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editManager.suspend(isOpen);
     });

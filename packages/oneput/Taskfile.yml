@@ -11,6 +11,10 @@ vars:
   BUILD_PACKAGE: .build/sveltekit
 
 tasks:
+  knip:
+    desc: report unused files, exports, dependencies
+    cmds:
+      - pnpm exec knip
   fix:
     desc: format + eslint (fix) + check types (no fix)
     cmds:

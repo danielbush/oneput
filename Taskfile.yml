@@ -74,6 +74,15 @@ tasks:
       - task: oneput:build
       - task: jsed:build
 
+  knip:
+    desc: report unused files, exports, dependencies
+    cmds:
+      - pnpm exec knip
+  knip:fix:
+    desc: knip with autofix (removes unused exports/files; review the diff)
+    cmds:
+      - pnpm exec knip --fix
+
   skills:
     desc: Set up skills.
     vars:

@@ -8,6 +8,10 @@ set:
   - pipefail
 
 tasks:
+  knip:
+    desc: report unused files, exports, dependencies
+    cmds:
+      - pnpm exec knip
   fix:
     desc: format + eslint (fix) + check types (no fix)
     cmds:

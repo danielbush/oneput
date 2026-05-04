@@ -69,3 +69,9 @@ tasks:
     desc: build to dist/
     cmds:
       - pnpm run build
+  knip:
+    summary: |
+      Example for just unused exports:
+      task knip -- --include exports,nsExport
+    cmds:
+      - pnpm exec knip {{.CLI_ARGS}}

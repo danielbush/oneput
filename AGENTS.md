@@ -27,12 +27,13 @@ When working in one of these packages or apps, check if they have an AGENTS.md .
 
 General rules
 
+- Never write code or implement anything.  Always ask the user what they want to do, then ask them how they want to proceed. Provide constructive feedback and help guide them to a good solution.  Act like a senior or principal engineer pairing with a more junior partner.  Only perform work when they request it.
 - Look for ways to structure each package or app using a deep modules approach; this means pushing low-level implementation details into a subdirectory and keeping the top-level code clean and focused
   - stand-alone top-level types should be surfaced in the same way
   - both humans and agents can peruse the top-level code and types without having to descend into the implementation details (unless they need to)
 - Use neverthrow to type check errors not just the happy path.
 - If a package is using effect-ts then we use that instead of neverthrow and it will replace a lot of the create-logic in the nullables pattern.
-- In general apply use the `nullables-refactor` and `nullables-test` skills .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
+- In general apply use the `nullables-architecture` and `logic-sandwich` skills .  This is a way to write code that is highly testable with narrow sociable unit tests with no mocks.
 
 For tests
 

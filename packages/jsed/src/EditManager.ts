@@ -3,7 +3,6 @@ import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
-import { getDefaultInsertChildTag } from './lib/dom-rules.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
@@ -683,10 +682,5 @@ export class EditManager {
   getFocusedElementTagName(): string | null {
     const focus = this.nav.getFocus();
     return focus?.tagName.toLowerCase() ?? null;
-  }
-
-  getFocusedElementInsertChildTagName(): string | null {
-    const focus = this.nav.getFocus();
-    return focus ? getDefaultInsertChildTag(focus.tagName) : null;
   }
 }

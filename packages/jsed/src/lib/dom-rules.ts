@@ -114,24 +114,6 @@ export function getAllowableChildTags(tagName: string): string[] {
   return [];
 }
 
-export function getDefaultInsertChildTag(tagName: string): string | null {
-  const ltagname = tagName.toLowerCase();
-  const allowed = getAllowableChildTags(ltagname);
-  if (allowed.length === 0) {
-    return null;
-  }
-
-  if (allowed.includes(ltagname)) {
-    return ltagname;
-  }
-
-  if (allowed.length === 1) {
-    return allowed[0] ?? null;
-  }
-
-  return null;
-}
-
 /**
  * Return true if newly created tagName should have an ANCHOR.
  */

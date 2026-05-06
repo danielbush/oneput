@@ -86,6 +86,7 @@
     bottom: 0;
     width: 100%;
     height: 0;
+    z-index: var(--oneput-z-index, 999999);
   }
 
   .oneput__command-bar-inner {

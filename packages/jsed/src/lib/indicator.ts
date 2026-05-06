@@ -44,7 +44,7 @@ export class Indicator {
     span.style.position = 'fixed';
     span.style.left = `${rect.right}px`;
     span.style.pointerEvents = 'none';
-    span.style.zIndex = '999999';
+    span.style.zIndex = '99999';
     span.innerText = tagn;
 
     // Temporarily add to measure dimensions

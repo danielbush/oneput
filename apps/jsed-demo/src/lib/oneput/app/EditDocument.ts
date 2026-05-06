@@ -248,17 +248,23 @@ export class EditDocument implements AppObject {
     CUT: {
       action: () => {
         if (this.editManager.focus.cut()) {
-          this.ctl.app.run(
-            PasteElementUI.create(this.ctl, this.editManager, {
-              title: 'Cut Element',
-              prompt: 'Navigate to a new element and paste'
-            })
-          );
+          this.ctl.app.run(PasteElementUI.create(this.ctl, this.editManager, { cut: true }));
         }
       },
       binding: {
         bindings: ['$mod+x'],
         description: 'Cut element at focus'
+      }
+    },
+    COPY: {
+      action: () => {
+        if (this.editManager.focus.copy()) {
+          this.ctl.app.run(PasteElementUI.create(this.ctl, this.editManager, { cut: false }));
+        }
+      },
+      binding: {
+        bindings: ['$mod+c'],
+        description: 'Copy element at focus'
       }
     }
     // #endregion
@@ -400,6 +406,13 @@ export class EditDocument implements AppObject {
           textContent: 'Cut...',
           action: this.actions.CUT.action,
           left: (b) => [b.icon(icons.Scissors)]
+        }),
+
+        stdMenuItem({
+          id: 'COPY_ELEMENT',
+          textContent: 'Copy...',
+          action: this.actions.COPY.action,
+          left: (b) => [b.icon(icons.Copy)]
         }),
 
         this.editManager.focus.canDelete() &&

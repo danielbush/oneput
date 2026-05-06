@@ -9,22 +9,30 @@ export class PasteElementUI implements AppObject {
     ctl: Controller,
     editManager: EditManager,
     {
-      title,
-      prompt
+      cut
     }: {
-      title: string;
-      prompt: string;
+      cut: boolean;
     }
   ) {
-    return new PasteElementUI(ctl, editManager, title, prompt);
+    return new PasteElementUI(ctl, editManager, cut);
   }
 
   constructor(
     private ctl: Controller,
     private editManager: EditManager,
-    private title: string,
-    private prompt: string
+    private cut: boolean
   ) {}
+
+  get title() {
+    if (this.cut) {
+      return 'Cut Element';
+    }
+    return 'Copy Element';
+  }
+
+  get prompt() {
+    return 'Navigate to a new element and paste';
+  }
 
   onStart = () => {
     this.ctl.ui.update<LayoutSettings>({

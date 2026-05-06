@@ -175,14 +175,29 @@ export function getConversionCandidates(el: HTMLElement | null, root: HTMLElemen
   return domRules.getConversionCandidates(el);
 }
 
-export function pasteBefore(pasted: HTMLElement, before: HTMLElement): boolean {
-  return !!before.insertAdjacentElement('beforebegin', pasted);
+export function pasteBefore(pasted: HTMLElement, before: HTMLElement): HTMLElement | null {
+  return before.insertAdjacentElement('beforebegin', pasted) as HTMLElement | null;
 }
 
-export function pasteAfter(pasted: HTMLElement, after: HTMLElement): boolean {
-  return !!after.insertAdjacentElement('afterend', pasted);
+export function pasteCopyBefore(pasted: HTMLElement, before: HTMLElement): HTMLElement | null {
+  const copy = pasted.cloneNode(true) as HTMLElement;
+  return before.insertAdjacentElement('beforebegin', copy) as HTMLElement | null;
 }
 
-export function pasteWithin(pasted: HTMLElement, within: HTMLElement): boolean {
-  return !!within.insertAdjacentElement('beforeend', pasted);
+export function pasteAfter(pasted: HTMLElement, after: HTMLElement): HTMLElement | null {
+  return after.insertAdjacentElement('afterend', pasted) as HTMLElement | null;
+}
+
+export function pasteCopyAfter(pasted: HTMLElement, after: HTMLElement): HTMLElement | null {
+  const copy = pasted.cloneNode(true) as HTMLElement;
+  return after.insertAdjacentElement('afterend', copy) as HTMLElement | null;
+}
+
+export function pasteWithin(pasted: HTMLElement, within: HTMLElement): HTMLElement | null {
+  return within.insertAdjacentElement('beforeend', pasted) as HTMLElement | null;
+}
+
+export function pasteCopyWithin(pasted: HTMLElement, within: HTMLElement): HTMLElement | null {
+  const copy = pasted.cloneNode(true) as HTMLElement;
+  return within.insertAdjacentElement('beforeend', copy) as HTMLElement | null;
 }

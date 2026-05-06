@@ -218,78 +218,80 @@ export class EditManagerFocusOps {
   // #region cut/paste focus
 
   private cutElement: HTMLElement | null = null;
+  private isCopy: boolean = false;
 
   cut(): boolean {
+    this.isCopy = false;
     this.cutElement = this.editManager.nav.getFocus();
     this.cutElement?.classList.add(JSED_MARCHING_ANTS_CLASS);
     return !!this.cutElement;
   }
 
-  pasteBefore(): boolean {
+  copy(): boolean {
+    this.isCopy = true;
+    this.cutElement = this.editManager.nav.getFocus();
+    this.cutElement?.classList.add(JSED_MARCHING_ANTS_CLASS);
+    return !!this.cutElement;
+  }
+
+  private prePaste(): { cutElement: HTMLElement; focus: HTMLElement } | null {
     if (!this.cutElement) {
-      return false;
+      return null;
     }
     const focus = this.editManager.nav.getFocus();
     if (!focus) {
-      return false;
+      return null;
     }
     const cutElement = this.cutElement;
-    this.cutElement = null;
     cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
-    if (focusable.pasteBefore(cutElement, focus)) {
-      this.editManager.nav.FOCUS(cutElement);
-      return true;
+    this.cutElement = null;
+    return { cutElement, focus };
+  }
+
+  pasteBefore(): boolean {
+    const { cutElement, focus } = this.prePaste() ?? {};
+    if (!cutElement || !focus) {
+      return false;
     }
-    return false;
+    const result = this.isCopy
+      ? focusable.pasteCopyBefore(cutElement, focus)
+      : focusable.pasteBefore(cutElement, focus);
+    if (result) {
+      this.editManager.nav.FOCUS(result);
+    }
+    return !!result;
   }
 
   pasteAfter(): boolean {
-    if (!this.cutElement) {
+    const { cutElement, focus } = this.prePaste() ?? {};
+    if (!cutElement || !focus) {
       return false;
     }
-    const focus = this.editManager.nav.getFocus();
-    if (!focus) {
-      return false;
+    const result = this.isCopy
+      ? focusable.pasteCopyAfter(cutElement, focus)
+      : focusable.pasteAfter(cutElement, focus);
+    if (result) {
+      this.editManager.nav.FOCUS(result);
     }
-    const cutElement = this.cutElement;
-    this.cutElement = null;
-    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
-    if (focusable.pasteAfter(cutElement, focus)) {
-      this.editManager.nav.FOCUS(cutElement);
-      return true;
-    }
-    return false;
+    return !!result;
   }
 
   pasteAppend(): boolean {
-    if (!this.cutElement) {
+    const { cutElement, focus } = this.prePaste() ?? {};
+    if (!cutElement || !focus) {
       return false;
     }
-    const focus = this.editManager.nav.getFocus();
-    if (!focus) {
-      return false;
+    const result = this.isCopy
+      ? focusable.pasteCopyWithin(cutElement, focus)
+      : focusable.pasteWithin(cutElement, focus);
+    if (result) {
+      this.editManager.nav.FOCUS(result);
     }
-    const cutElement = this.cutElement;
-    this.cutElement = null;
-    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
-    if (focusable.pasteWithin(cutElement, focus)) {
-      this.editManager.nav.FOCUS(cutElement);
-      return true;
-    }
-    return false;
+    return !!result;
   }
 
   cancelPaste(): boolean {
-    if (!this.cutElement) {
-      return false;
-    }
-    const focus = this.editManager.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-    const cutElement = this.cutElement;
-    this.cutElement = null;
-    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
+    this.prePaste();
     return true;
   }
 

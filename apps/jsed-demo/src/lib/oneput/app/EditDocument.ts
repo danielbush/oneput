@@ -183,7 +183,7 @@ export class EditDocument implements AppObject {
         description: 'Toggle input element cursor state'
       }
     },
-    RIGHT: {
+    NEXT: {
       action: () => {
         this.editManager.moveNext();
       },
@@ -192,7 +192,7 @@ export class EditDocument implements AppObject {
         description: 'Move to next token or element'
       }
     },
-    LEFT: {
+    PREVIOUS: {
       action: () => {
         this.editManager.movePrevious();
       },

@@ -64,6 +64,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Drafting / inbox
 
+- [ ] refactor
+  - EditManager becomes private state
+  - all functionalities get moved into helper classes
+  - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers
 - [ ] join tokens
 - [ ] grow/shrink INLINE_FLOW?
   - FOCUS goes on em

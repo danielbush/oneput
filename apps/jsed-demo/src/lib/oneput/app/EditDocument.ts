@@ -231,20 +231,6 @@ export class EditDocument implements AppObject {
     // #endregion
   };
 
-  private confirmDeleteFocusedElement = async () => {
-    const tagName = this.editManager.getFocusedElementTagName() ?? 'element';
-    const confirm = this.ctl.confirm({
-      message: `Delete focused ${tagName} element?`
-    });
-    const yes = await confirm.userChooses();
-    if (!yes) {
-      return;
-    }
-
-    this.editManager.focus.delete();
-    this.ctl.menu.closeMenu();
-  };
-
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'root',
@@ -381,7 +367,18 @@ export class EditDocument implements AppObject {
           stdMenuItem({
             id: 'DELETE_FOCUSED_ELEMENT',
             textContent: 'Delete focused element...',
-            action: this.confirmDeleteFocusedElement,
+            action: async () => {
+              const confirm = this.ctl.confirm({
+                message: `Delete element?`
+              });
+              const yes = await confirm.userChooses();
+              if (!yes) {
+                return;
+              }
+
+              this.editManager.focus.delete();
+              this.ctl.menu.closeMenu();
+            },
             left: (b) => [b.icon(icons.X)]
           }),
 

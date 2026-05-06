@@ -678,9 +678,4 @@ export class EditManager {
     });
     return true;
   }
-
-  getFocusedElementTagName(): string | null {
-    const focus = this.nav.getFocus();
-    return focus?.tagName.toLowerCase() ?? null;
-  }
 }

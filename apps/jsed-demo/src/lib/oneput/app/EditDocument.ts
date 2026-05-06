@@ -4,36 +4,16 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { PickListUI } from './_ui/PickListUI.js';
 import type { LayoutSettings } from './_layout.js';
+import { PasteElementUI } from './PasteElementUI.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
     let instance: EditDocument;
     const editManager = EditManager.create({
       document: params.document,
-      userInput: ctl.input,
-      onError: (err) => instance.handleEditError(err),
-      onModeChange: () => {
-        instance?.renderMenuItems();
-      },
-      onFocusChange: () => {
-        instance?.renderMenuItems();
-      },
-      onCursorChange: () => {
-        instance?.renderMenuItems();
-      },
-      onTextChange: (evt) => {
-        switch (evt.type) {
-          case 'anchor-change':
-          case 'whitespace-change':
-            instance?.renderMenuItems();
-        }
-      },
-      onElementChange: () => {
-        instance?.renderMenuItems();
-      }
+      userInput: ctl.input
     });
-    instance = new EditDocument(ctl, params.document, editManager);
-    return instance;
+    return new EditDocument(ctl, params.document, editManager);
   }
 
   private removeSuspendHandler?: () => void;
@@ -44,6 +24,31 @@ export class EditDocument implements AppObject {
     private editManager: EditManager
   ) {}
 
+  private subscribeEditChanges = () => {
+    this.editManager.subscribe({
+      onError: (err) => this.handleEditError(err),
+      onModeChange: () => {
+        this.renderMenuItems();
+      },
+      onFocusChange: () => {
+        this.renderMenuItems();
+      },
+      onCursorChange: () => {
+        this.renderMenuItems();
+      },
+      onTextChange: (evt) => {
+        switch (evt.type) {
+          case 'anchor-change':
+          case 'whitespace-change':
+            this.renderMenuItems();
+        }
+      },
+      onElementChange: () => {
+        this.renderMenuItems();
+      }
+    });
+  };
+
   onStart = () => {
     this.editManager.start();
     this.renderMenuItems();
@@ -52,16 +57,19 @@ export class EditDocument implements AppObject {
       this.editManager.suspend(isOpen);
     });
     this.ctl.input.focus();
+    this.subscribeEditChanges();
   };
 
   onResume = () => {
-    this.editManager.suspend(false);
+    this.editManager.suspend(false); // just in case
     this.renderMenuItems();
     this.ctl.input.focus();
+    this.subscribeEditChanges();
   };
 
   onSuspend = () => {
-    this.editManager.suspend(true);
+    // TODO: hack: call subscribe to remove any unwanted callbacks.
+    this.editManager.subscribe();
   };
 
   onExit = () => {
@@ -174,6 +182,15 @@ export class EditDocument implements AppObject {
 
     // Always handled by the editor, see section above.
 
+    FOCUS: {
+      action: () => {
+        this.ctl.input.focus();
+      },
+      binding: {
+        bindings: ['$mod+g'],
+        description: 'Focus the input'
+      }
+    },
     TOGGLE_SELECT: {
       action: () => {
         this.ctl.input.toggleSelect();
@@ -227,13 +244,29 @@ export class EditDocument implements AppObject {
         bindings: ['$mod+m'],
         description: 'Center the active token or reveal the focused element'
       }
+    },
+    CUT: {
+      action: () => {
+        if (this.editManager.focus.cut()) {
+          this.ctl.app.run(
+            PasteElementUI.create(this.ctl, this.editManager, {
+              title: 'Cut Element',
+              prompt: 'Navigate to a new element and paste'
+            })
+          );
+        }
+      },
+      binding: {
+        bindings: ['$mod+x'],
+        description: 'Cut element at focus'
+      }
     }
     // #endregion
   };
 
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
-      id: 'root',
+      id: 'EditDocument',
       focusBehaviour: 'last-action,first',
       items: [
         !this.editManager.isEditing() &&
@@ -362,6 +395,12 @@ export class EditDocument implements AppObject {
           }),
 
         // Modifying elements at FOCUS or CURSOR
+        stdMenuItem({
+          id: 'CUT_ELEMENT',
+          textContent: 'Cut...',
+          action: this.actions.CUT.action,
+          left: (b) => [b.icon(icons.Scissors)]
+        }),
 
         this.editManager.focus.canDelete() &&
           stdMenuItem({

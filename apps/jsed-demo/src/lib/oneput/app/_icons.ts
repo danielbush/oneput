@@ -8,7 +8,6 @@ export const iconData = {
   X: lu.X,
   Command: lu.Command,
   File: lu.Files,
-  // Bindings we should provide for existing appObjects...
   GlobalFilterInputIcon: lu.Globe,
   CloseNotification: lu.X,
   Pencil: lu.Pencil,
@@ -17,7 +16,13 @@ export const iconData = {
   Tags: lu.Tags,
   Plus: lu.Plus,
   CodeXml: lu.CodeXml,
-  SquareCode: lu.SquareCode
+  SquareCode: lu.SquareCode,
+  Scissors: lu.Scissors,
+  Copy: lu.Copy,
+  CircleX: lu.CircleX,
+  ArrowLeftToLine: lu.ArrowLeftToLine,
+  ArrowRightToLine: lu.ArrowRightToLine,
+  ArrowDownToLine: lu.ArrowDownToLine
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

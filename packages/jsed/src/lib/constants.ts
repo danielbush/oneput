@@ -50,3 +50,5 @@ export const JSED_IMPLICIT_CLASS = 'jsed-implicit-line';
  * background without disturbing inherited styling.
  */
 export const JSED_SELECTION_CLASS = 'jsed-selection';
+
+export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';

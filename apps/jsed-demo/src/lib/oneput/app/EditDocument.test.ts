@@ -26,8 +26,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
@@ -49,8 +48,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
@@ -72,8 +70,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
@@ -114,8 +111,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
@@ -150,8 +146,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
@@ -184,8 +179,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const d1 = byId(doc, 'd1');
@@ -218,8 +212,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
@@ -250,8 +243,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p2 = byId(doc, 'p2');
@@ -283,8 +275,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const d1 = byId(doc, 'd1');
@@ -314,8 +305,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const list = byId(doc, 'list');
@@ -345,8 +335,7 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const editManager = EditManager.createNull({
       document: doc,
-      userInput: ctl.input,
-      onError: (err) => editDocument.handleEditError(err)
+      userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');

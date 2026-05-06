@@ -4,6 +4,7 @@ import * as space from './lib/space.js';
 import { canDelete } from './lib/dom-rules.js';
 import { convert, unwrap } from './lib/focusable.js';
 import { isInlineFlow } from './lib/taxonomy.js';
+import { JSED_MARCHING_ANTS_CLASS } from './lib/constants.js';
 
 /**
  * High-level FOCUS operations for EditManager.
@@ -210,6 +211,86 @@ export class EditManagerFocusOps {
       return true;
     }
     return false;
+  }
+
+  // #endregion
+
+  // #region cut/paste focus
+
+  private cutElement: HTMLElement | null = null;
+
+  cut(): boolean {
+    this.cutElement = this.editManager.nav.getFocus();
+    this.cutElement?.classList.add(JSED_MARCHING_ANTS_CLASS);
+    return !!this.cutElement;
+  }
+
+  pasteBefore(): boolean {
+    if (!this.cutElement) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+    const cutElement = this.cutElement;
+    this.cutElement = null;
+    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
+    if (focusable.pasteBefore(cutElement, focus)) {
+      this.editManager.nav.FOCUS(cutElement);
+      return true;
+    }
+    return false;
+  }
+
+  pasteAfter(): boolean {
+    if (!this.cutElement) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+    const cutElement = this.cutElement;
+    this.cutElement = null;
+    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
+    if (focusable.pasteAfter(cutElement, focus)) {
+      this.editManager.nav.FOCUS(cutElement);
+      return true;
+    }
+    return false;
+  }
+
+  pasteAppend(): boolean {
+    if (!this.cutElement) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+    const cutElement = this.cutElement;
+    this.cutElement = null;
+    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
+    if (focusable.pasteWithin(cutElement, focus)) {
+      this.editManager.nav.FOCUS(cutElement);
+      return true;
+    }
+    return false;
+  }
+
+  cancelPaste(): boolean {
+    if (!this.cutElement) {
+      return false;
+    }
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+    const cutElement = this.cutElement;
+    this.cutElement = null;
+    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
+    return true;
   }
 
   // #endregion

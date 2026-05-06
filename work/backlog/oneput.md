@@ -4,6 +4,15 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Crtical work
 
+- [ ] disable individual menu items
+  - eg pasteBefore, pasteAfter, pasteIn
+- [ ] filter for global items
+  - example?
+  - scenario: you have nested menus, you only see the outer entry but you want to filter on the items within as well as the ones showing in the current menu
+  - scenario: you have a lot of items, not all necessarily in a menu; you want to bring them up when typing
+    - COMMENT: seems a bit weak
+  - This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
+  - the issue is how to define "global items"
 - [x] fix: svelte "reference only captures the initial value"
   - Did you mean to reference it inside a derived instead?
   - https://svelte.dev/e/state_referenced_locally

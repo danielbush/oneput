@@ -34,6 +34,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [x] insert element before/after tag
 - [x] delete elements
 - [x] unwrap esp for INLINE_FLOW
+- [ ] cut/move element
 - [ ] converting elements
 - undo
   - undo text changes
@@ -46,6 +47,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Bugs
 
+- fix: delete should delete back not suck next word in
 - fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
   - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why

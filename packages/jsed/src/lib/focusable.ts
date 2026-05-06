@@ -174,3 +174,15 @@ export function getConversionCandidates(el: HTMLElement | null, root: HTMLElemen
   }
   return domRules.getConversionCandidates(el);
 }
+
+export function pasteBefore(pasted: HTMLElement, before: HTMLElement): boolean {
+  return !!before.insertAdjacentElement('beforebegin', pasted);
+}
+
+export function pasteAfter(pasted: HTMLElement, after: HTMLElement): boolean {
+  return !!after.insertAdjacentElement('afterend', pasted);
+}
+
+export function pasteWithin(pasted: HTMLElement, within: HTMLElement): boolean {
+  return !!within.insertAdjacentElement('beforeend', pasted);
+}

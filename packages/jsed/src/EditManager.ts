@@ -60,22 +60,10 @@ export type EditManagerElementChangeEvent =
 export class EditManager {
   static create({
     document,
-    userInput,
-    onError,
-    onModeChange,
-    onFocusChange,
-    onCursorChange,
-    onTextChange,
-    onElementChange
+    userInput
   }: {
     document: JsedDocument;
     userInput: UserInput;
-    onError?: (err: EditManagerError) => void;
-    onModeChange?: (mode: EditManagerMode) => void;
-    onFocusChange?: (focus: HTMLElement | null) => void;
-    onCursorChange?: (target: HTMLElement) => void;
-    onTextChange?: (event: EditManagerTextChangeEvent) => void;
-    onElementChange?: (event: EditManagerElementChangeEvent) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.create(
@@ -87,12 +75,6 @@ export class EditManager {
       document,
       userInput,
       nav,
-      onError,
-      onModeChange,
-      onFocusChange,
-      onCursorChange,
-      onTextChange,
-      onElementChange,
       Tokenizer.create(),
       FocusChainNavigator.create(nav)
     );
@@ -101,22 +83,10 @@ export class EditManager {
 
   static createNull({
     document,
-    userInput,
-    onError,
-    onModeChange,
-    onFocusChange,
-    onCursorChange,
-    onTextChange,
-    onElementChange
+    userInput
   }: {
     document: JsedDocument;
     userInput?: UserInput;
-    onError?: (err: EditManagerError) => void;
-    onModeChange?: (mode: EditManagerMode) => void;
-    onFocusChange?: (focus: HTMLElement | null) => void;
-    onCursorChange?: (target: HTMLElement) => void;
-    onTextChange?: (event: EditManagerTextChangeEvent) => void;
-    onElementChange?: (event: EditManagerElementChangeEvent) => void;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -128,12 +98,6 @@ export class EditManager {
       document,
       userInput ?? Controller.createNull().input,
       nav,
-      onError,
-      onModeChange,
-      onFocusChange,
-      onCursorChange,
-      onTextChange,
-      onElementChange,
       Tokenizer.createNull(),
       FocusChainNavigator.createNull(nav)
     );
@@ -154,15 +118,6 @@ export class EditManager {
     public document: JsedDocument,
     private userInput: UserInput,
     readonly nav: Nav,
-    /**
-     * A callback that EditManager or one of its helpers can call with errors.
-     */
-    public onError?: (err: EditManagerError) => void,
-    private onModeChange?: (mode: EditManagerMode) => void,
-    private onFocusChange?: (focus: HTMLElement | null) => void,
-    private onCursorChange?: (target: HTMLElement) => void,
-    private onTextChange?: (event: EditManagerTextChangeEvent) => void,
-    private onElementChange?: (event: EditManagerElementChangeEvent) => void,
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
   ) {
@@ -203,6 +158,14 @@ export class EditManager {
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
     this.tokenizer.destroy();
+    this.unsubscribeInputChange?.();
+    this.unsubscribeSelectionChange?.();
+    this.onError = undefined;
+    this.onModeChange = undefined;
+    this.onFocusChange = undefined;
+    this.onCursorChange = undefined;
+    this.onTextChange = undefined;
+    this.onElementChange = undefined;
   }
 
   isEditing(): boolean {
@@ -677,5 +640,31 @@ export class EditManager {
       oversizedVertical: 'start'
     });
     return true;
+  }
+
+  /**
+   * A callback that EditManager or one of its helpers can call with errors.
+   */
+  public onError?: (err: EditManagerError) => void;
+  private onModeChange?: (mode: EditManagerMode) => void;
+  private onFocusChange?: (focus: HTMLElement | null) => void;
+  private onCursorChange?: (target: HTMLElement) => void;
+  private onTextChange?: (event: EditManagerTextChangeEvent) => void;
+  private onElementChange?: (event: EditManagerElementChangeEvent) => void;
+
+  subscribe(subscriptions?: {
+    onError?: (err: EditManagerError) => void;
+    onModeChange?: (mode: EditManagerMode) => void;
+    onFocusChange?: (focus: HTMLElement | null) => void;
+    onCursorChange?: (target: HTMLElement) => void;
+    onTextChange?: (event: EditManagerTextChangeEvent) => void;
+    onElementChange?: (event: EditManagerElementChangeEvent) => void;
+  }) {
+    this.onError = subscriptions?.onError;
+    this.onModeChange = subscriptions?.onModeChange;
+    this.onFocusChange = subscriptions?.onFocusChange;
+    this.onCursorChange = subscriptions?.onCursorChange;
+    this.onTextChange = subscriptions?.onTextChange;
+    this.onElementChange = subscriptions?.onElementChange;
   }
 }

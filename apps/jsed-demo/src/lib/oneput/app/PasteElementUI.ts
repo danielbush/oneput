@@ -56,7 +56,7 @@ export class PasteElementUI implements AppObject {
         description: 'Focus the input'
       }
     },
-    CANCEL: {
+    EXIT: {
       action: () => {
         this.editManager.focus.cancelPaste();
         this.ctl.app.exit();
@@ -103,6 +103,36 @@ export class PasteElementUI implements AppObject {
         bindings: ['$mod+h'],
         description: 'Move to previous token or element'
       }
+    },
+    PASTE_BEFORE: {
+      action: () => {
+        this.editManager.focus.pasteBefore();
+        this.ctl.app.exit();
+      },
+      binding: {
+        bindings: ['$mod+v b'],
+        description: 'Paste element before'
+      }
+    },
+    PASTE_AFTER: {
+      action: () => {
+        this.editManager.focus.pasteAfter();
+        this.ctl.app.exit();
+      },
+      binding: {
+        bindings: ['$mod+v a'],
+        description: 'Paste element after'
+      }
+    },
+    PASTE_APPEND: {
+      action: () => {
+        this.editManager.focus.pasteAppend();
+        this.ctl.app.exit();
+      },
+      binding: {
+        bindings: ['$mod+v i'],
+        description: 'Paste element at end'
+      }
     }
   };
 
@@ -115,37 +145,25 @@ export class PasteElementUI implements AppObject {
           id: 'PASTE_BEFORE',
           textContent: 'Paste before',
           left: (b) => [b.icon(icons.ArrowLeftToLine)],
-          action: () => {
-            this.editManager.focus.pasteBefore();
-            this.ctl.app.exit();
-          }
+          action: this.actions.PASTE_BEFORE.action
         }),
         stdMenuItem({
           id: 'PASTE_AFTER',
           textContent: 'Paste after',
           left: (b) => [b.icon(icons.ArrowRightToLine)],
-          action: () => {
-            this.editManager.focus.pasteAfter();
-            this.ctl.app.exit();
-          }
+          action: this.actions.PASTE_AFTER.action
         }),
         stdMenuItem({
           id: 'PASTE_WITHIN',
           textContent: 'Paste within',
           left: (b) => [b.icon(icons.ArrowDownToLine)],
-          action: () => {
-            this.editManager.focus.pasteAppend();
-            this.ctl.app.exit();
-          }
+          action: this.actions.PASTE_APPEND.action
         }),
         stdMenuItem({
-          id: 'CANCEL',
+          id: 'EXIT',
           textContent: 'Cancel',
           left: (b) => [b.icon(icons.CircleX)],
-          action: () => {
-            this.editManager.focus.cancelPaste();
-            this.ctl.app.exit();
-          }
+          action: this.actions.EXIT.action
         })
       ]
     });

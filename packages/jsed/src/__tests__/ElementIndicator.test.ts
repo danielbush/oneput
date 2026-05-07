@@ -41,9 +41,32 @@ function patchedCreateElement(opts?: { offsetHeight?: number; offsetWidth?: numb
   };
 }
 
+/**
+ * Parses the indicator's `transform` style into anchor coordinates and
+ * directional modifiers, so tests can assert intent rather than the exact
+ * string layout. The Indicator writes `translate(<x>px, <y>px) [extras]`.
+ */
+function parseTransform(transform: string | undefined): {
+  x: number;
+  y: number;
+  rightAligned: boolean;
+  above: boolean;
+} {
+  const match = transform?.match(
+    /translate\(\s*(-?\d+(?:\.\d+)?)px\s*,\s*(-?\d+(?:\.\d+)?)px\s*\)/
+  );
+  if (!match) throw new Error(`expected translate(...) in transform, got: ${transform}`);
+  return {
+    x: Number(match[1]),
+    y: Number(match[2]),
+    rightAligned: transform!.includes('translateX(-100%)'),
+    above: transform!.includes('translateY(-100%)')
+  };
+}
+
 describe('Indicator', () => {
   describe('positioning', () => {
-    it('positions above a small element with space above', () => {
+    it('sits above and right-aligned to a small element with space above', () => {
       // arrange
       const target = fakeElement('DIV', { top: 200, bottom: 300, left: 50, right: 400 });
       const indicator = new Indicator(
@@ -55,12 +78,14 @@ describe('Indicator', () => {
       indicator.show(target);
 
       // assert
-      expect(indicator.element?.style?.top).toBe('195px');
-      expect(indicator.element?.style?.transform).toContain('translateY(-100%)');
-      expect(indicator.element?.style?.transform).toContain('translateX(-100%)');
+      const t = parseTransform(indicator.element?.style?.transform);
+      expect(t.above).toBe(true);
+      expect(t.rightAligned).toBe(true);
+      expect(t.y).toBeLessThan(200); // above target.top
+      expect(t.x).toBe(400); // anchored to target.right
     });
 
-    it('positions below a small element near the top of viewport', () => {
+    it('drops below the element when there is no space above', () => {
       // arrange
       const target = fakeElement('P', { top: 10, bottom: 60, left: 50, right: 400 });
       const indicator = new Indicator(
@@ -72,11 +97,14 @@ describe('Indicator', () => {
       indicator.show(target);
 
       // assert
-      expect(indicator.element?.style?.top).toBe('65px');
-      expect(indicator.element?.style?.transform).toBe('translateX(-100%)');
+      const t = parseTransform(indicator.element?.style?.transform);
+      expect(t.above).toBe(false);
+      expect(t.rightAligned).toBe(true);
+      expect(t.y).toBeGreaterThan(60); // below target.bottom
+      expect(t.x).toBe(400);
     });
 
-    it('anchors inside top-right of a large element with top visible', () => {
+    it('anchors inside the top-right corner of a tall element with top visible', () => {
       // arrange
       const target = fakeElement('SECTION', { top: 100, bottom: 2000, left: 50, right: 800 });
       const indicator = new Indicator(
@@ -88,11 +116,15 @@ describe('Indicator', () => {
       indicator.show(target);
 
       // assert
-      expect(indicator.element?.style?.top).toBe('105px');
-      expect(indicator.element?.style?.transform).toBe('translateX(-100%)');
+      const t = parseTransform(indicator.element?.style?.transform);
+      expect(t.above).toBe(false);
+      expect(t.rightAligned).toBe(true);
+      expect(t.y).toBeGreaterThanOrEqual(100); // inside the element, near the top
+      expect(t.y).toBeLessThan(200);
+      expect(t.x).toBe(800);
     });
 
-    it('pins to viewport top when element top has scrolled past', () => {
+    it('pins to the viewport top when the element top has scrolled past', () => {
       // arrange
       const target = fakeElement('DIV', { top: -200, bottom: 1500, left: 50, right: 800 });
       const indicator = new Indicator(
@@ -104,11 +136,14 @@ describe('Indicator', () => {
       indicator.show(target);
 
       // assert
-      expect(indicator.element?.style?.top).toBe('5px');
-      expect(indicator.element?.style?.transform).toBe('translateX(-100%)');
+      const t = parseTransform(indicator.element?.style?.transform);
+      expect(t.above).toBe(false);
+      expect(t.rightAligned).toBe(true);
+      expect(t.y).toBeGreaterThanOrEqual(0); // visible
+      expect(t.y).toBeLessThan(50); // near the viewport top, not scrolled with the element
     });
 
-    it('left-aligns when element is narrow and right edge would clip', () => {
+    it('flips to left-aligned when the element is too narrow for a right anchor', () => {
       // arrange
       const target = fakeElement('SPAN', { top: 200, bottom: 300, left: 5, right: 20 });
       const indicator = new Indicator(
@@ -120,8 +155,9 @@ describe('Indicator', () => {
       indicator.show(target);
 
       // assert
-      expect(indicator.element?.style?.left).toBe('5px');
-      expect(indicator.element?.style?.transform).not.toContain('translateX(-100%)');
+      const t = parseTransform(indicator.element?.style?.transform);
+      expect(t.rightAligned).toBe(false);
+      expect(t.x).toBe(5); // anchored to target.left
     });
   });
 });

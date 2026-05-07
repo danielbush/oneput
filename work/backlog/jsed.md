@@ -47,7 +47,14 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
+- feat: enter on token (no before/after states) should break AFTER token
+- feat: copy empty element above / below (for li or p-tags)
+- feat: improve input / cursor state
+  - use the line state from the cursor lab when token is not fully selected
+  - when we start typing is usually a good clue that full selection is lost
 - feat: don't hard select id="test-doc" - editor should be configurable
+- feat: cut/copy/paste selection
+  - COMMENT: marching ants just works; should be easy to do
 - fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
 - fix: delete should delete back not suck next word in
 - fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
@@ -65,20 +72,18 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
-
-
-- feat: cut/copy/paste selection
-  - COMMENT: marching ants just works; should be easy to do
-- [ ] refactor
-  - EditManager becomes private state
-  - all functionalities get moved into helper classes
-  - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers
-- [ ] join tokens
-- [ ] grow/shrink INLINE_FLOW?
+- [ ] feat: join tokens
+- [ ] feat: grow/shrink INLINE_FLOW?
   - FOCUS goes on em
   - em converted to selection
   - use modifies selection and confirms
   - em occupies the selection
+
+## refactors
+
+- [ ] refactor: EditManager becomes private state
+  - all functionalities get moved into helper classes
+  - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers
 - [ ] should oneput menu operations like "wrap tag in element" which prompts for a tag name be in a child AppObject - so we can control oneput more declaratively
 - [ ] refactor: can we extract selection orchestration out of EditManager
   - maybe a similar pattern to CursorTextOps ?

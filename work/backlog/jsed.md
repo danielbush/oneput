@@ -45,8 +45,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - code might be another
 - r:JSED_AGENT_COEDIT
 
-## Bugs
+## Details
 
+- feat: don't hard select id="test-doc" - editor should be configurable
+- fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
 - fix: delete should delete back not suck next word in
 - fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
@@ -64,9 +66,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 
-## Details
 
-- [ ] cut/copy/paste selection
+- feat: cut/copy/paste selection
   - COMMENT: marching ants just works; should be easy to do
 - [ ] refactor
   - EditManager becomes private state

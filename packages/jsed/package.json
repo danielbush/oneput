@@ -63,6 +63,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@oneput/oneput": "workspace:",
     "@testing-library/dom": "^8.20.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/markdown-it": "^12.2.3",
@@ -76,9 +77,11 @@
     "vite-plugin-dts": "^4.3.0",
     "vitest": "^3.2.4"
   },
+  "peerDependencies": {
+    "@oneput/oneput": "0.0.1"
+  },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
-    "@oneput/oneput": "workspace:",
     "commander": "^11.1.0",
     "lucide": "^0.562.0",
     "markdown-it": "^13.0.1",

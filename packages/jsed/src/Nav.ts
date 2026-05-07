@@ -76,7 +76,7 @@ export class Nav {
     this.#connected = true;
     this.doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);
     const focus = this.getFocus();
-    this.elementIndicator.updateFocus(focus);
+    this.elementIndicator.setTarget(focus);
     this.elementIndicator.showIndicator(true);
   }
 
@@ -142,7 +142,7 @@ export class Nav {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
     }
     this.#FOCUS = el;
-    this.elementIndicator.updateFocus(el);
+    this.elementIndicator.setTarget(el);
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
     if (el !== this.doc.root) {
       this.doc.viewportScroller.scrollIntoViewIfHidden(el);

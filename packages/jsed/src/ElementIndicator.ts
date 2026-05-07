@@ -48,8 +48,14 @@ export class ElementIndicator {
   #showIndicator = false;
   #observer: MinimalObserver | null = null;
   #isVisible = true;
+  #rafId: number | null = null;
 
   #scrollHandler = () => {
+    // if (this.#rafId !== null) return; // already scheduled
+    // this.#rafId = requestAnimationFrame(() => {
+    //   this.#rafId = null;
+    //   this.update();
+    // });
     this.indicator.hide();
   };
 
@@ -69,8 +75,11 @@ export class ElementIndicator {
       IntersectionObserver: ObserverFactory;
     }
   ) {
-    document.addEventListener('scroll', this.#scrollHandler, true);
-    document.addEventListener('scrollend', this.#scrollEndHandler, true);
+    document.addEventListener('scroll', this.#scrollHandler, { capture: true, passive: true });
+    document.addEventListener('scrollend', this.#scrollEndHandler, {
+      capture: true,
+      passive: true
+    });
   }
 
   destroy() {
@@ -95,7 +104,7 @@ export class ElementIndicator {
    *
    * If a token is passed, calculate the focus based on the token.
    */
-  updateFocus(el: HTMLElement | null): void {
+  setTarget(el: HTMLElement | null): void {
     if (!el) {
       this.#element = null;
       this.#observer?.disconnect();
@@ -106,6 +115,18 @@ export class ElementIndicator {
     this.#setupObserver(this.#element);
     if (this.#showIndicator) {
       this.#addIndicator();
+    }
+  }
+
+  /**
+   * For continuous updates while the same target stays focused (scroll, pan,
+   * zoom, etc.). Cheap — calls Indicator.position() which only writes a
+   * transform, no DOM creation, no layout reads beyond getBoundingClientRect.
+   * Safe to call on every animation frame.
+   */
+  update(): void {
+    if (this.#showIndicator && this.#element && this.#isVisible) {
+      this.indicator.position(this.#element);
     }
   }
 

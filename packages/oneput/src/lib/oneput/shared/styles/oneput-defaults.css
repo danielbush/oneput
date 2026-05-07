@@ -40,6 +40,14 @@
   .oneput__container textarea {
     resize: vertical;
   }
+
+  .oneput__container input:focus {
+    outline: none;
+    /* tailwind uses box-shadow */
+    box-shadow: none;
+    /* border color etc... */
+    border: inherit;
+  }
 }
 
 /* #endregion */

@@ -1,8 +1,9 @@
-import type { AppObject, Controller } from '@oneput/oneput';
+import type { Controller } from '@oneput/oneput/controllers/controller.js';
+import type { AppObject } from '@oneput/oneput/types.js';
 import type { LayoutSettings } from './_layout.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import type { EditManager } from '@oneput/jsed';
+import type { EditManager } from '../../../EditManager.js';
 
 export class PasteElementUI implements AppObject {
   static create(

@@ -1,6 +1,8 @@
-import type { AppObject, Controller } from '@oneput/oneput';
-import { type JsedDocument, EditManager, type EditManagerError } from '@oneput/jsed';
+import type { Controller } from '@oneput/oneput/controllers/controller.js';
+import type { AppObject } from '@oneput/oneput/types.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { EditManager, type EditManagerError } from '../../../EditManager.js';
+import type { JsedDocument } from '../../../JsedDocument.js';
 import { icons } from './_icons.js';
 import { PickListUI } from './_ui/PickListUI.js';
 import type { LayoutSettings } from './_layout.js';
@@ -8,7 +10,6 @@ import { PasteElementUI } from './PasteElementUI.js';
 
 export class EditDocument implements AppObject {
   static create(ctl: Controller, params: { document: JsedDocument }) {
-    let instance: EditDocument;
     const editManager = EditManager.create({
       document: params.document,
       userInput: ctl.input
@@ -20,7 +21,7 @@ export class EditDocument implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private document: JsedDocument,
+    _document: JsedDocument,
     private editManager: EditManager
   ) {}
 

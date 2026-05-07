@@ -8,12 +8,17 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        'ui/oneput/app/index': resolve(__dirname, 'src/ui/oneput/app/index.ts')
+      },
       name: 'jsed',
+      formats: ['es'],
       // the proper extensions will be added
-      fileName: 'index'
+      fileName: (_format, entryName) => `${entryName}.js`
     },
     rollupOptions: {
+      external: [/^@oneput\/oneput(\/.*)?$/, 'lucide'],
       output: {
         dir: 'dist'
       }

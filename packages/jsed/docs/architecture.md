@@ -84,7 +84,7 @@ The top-level modules above delegate to lower-level utilities in `lib/`:
 
 ## Integration with Oneput
 
-Jsed uses Oneput's `AppObject` system to provide its UI. See `apps/jsed-demo/src/lib/oneput/app/` for examples:
+Jsed uses Oneput's `AppObject` system to provide its UI. See `src/ui/oneput/app/` for the reusable package integration:
 
 - `EditDocument` — single AppObject that stays mounted in both view and editing modes and wires bindings to EditManager
 - `_bindings.ts` — default bindings combining navigation (menu closed) and menu controls (menu open)

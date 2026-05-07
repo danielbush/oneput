@@ -1,5 +1,6 @@
-import { bindings } from '@oneput/oneput';
-import type { Controller, KeyBindingMapSerializable } from '@oneput/oneput';
+import * as bindings from '@oneput/oneput/lib/bindings.js';
+import type { Controller } from '@oneput/oneput/controllers/controller.js';
+import type { KeyBindingMapSerializable } from '@oneput/oneput/lib/bindings.js';
 
 export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   openMenu: {

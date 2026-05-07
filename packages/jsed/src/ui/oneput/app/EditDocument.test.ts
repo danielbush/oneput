@@ -1,6 +1,6 @@
-import { Controller } from '@oneput/oneput';
 import { EditManager, JsedDocument } from '@oneput/jsed';
-import { describe, expect, test, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
 import { EditDocument } from './EditDocument.js';
 
 function makeDocument(
@@ -30,7 +30,6 @@ describe('EditDocument', () => {
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
     const p1 = byId(doc, 'p1');
-    const p2 = byId(doc, 'p2');
 
     ctl.simulateStart(() => editDocument);
     const appChanges = ctl.trackAppChanges();
@@ -155,10 +154,12 @@ describe('EditDocument', () => {
     editManager.nav.REQUEST_FOCUS(p1);
     editDocument.renderMenuItems();
     const cursorToken = editManager.cursor?.getPlace() as HTMLElement;
-    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'TAG_SELECTION');
+    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
 
     // act
     tagItem?.action?.(ctl);
+    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
+    manualEntryItem?.action?.(ctl);
     expect(ctl.currentProps.inputElement?.disabled).toBe(false);
     ctl.input.setInputValue('em');
     ctl.input.runSubmitHandler();
@@ -166,6 +167,7 @@ describe('EditDocument', () => {
     // assert
     const wrapper = p1.querySelector('em') as HTMLElement;
     expect(tagItem).toBeDefined();
+    expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(cursorToken);
     expect(editManager.cursor?.getPlace()).toBe(cursorToken);
@@ -188,11 +190,13 @@ describe('EditDocument', () => {
     editManager.nav.REQUEST_FOCUS(d1);
     editDocument.renderMenuItems();
     const island = editManager.cursor?.getPlace() as HTMLElement;
-    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'TAG_SELECTION');
+    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
 
     // act
     tagItem?.action?.(ctl);
+    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
+    manualEntryItem?.action?.(ctl);
     expect(ctl.currentProps.inputElement?.disabled).toBe(false);
     ctl.input.setInputValue('em');
     ctl.input.runSubmitHandler();
@@ -200,6 +204,7 @@ describe('EditDocument', () => {
     // assert
     const wrapper = d1.querySelector('em') as HTMLElement;
     expect(tagItem).toBeDefined();
+    expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(island);
     expect(editManager.cursor?.getPlace()).toBe(island);
@@ -215,23 +220,24 @@ describe('EditDocument', () => {
       userInput: ctl.input
     });
     const editDocument = new EditDocument(ctl, doc, editManager);
-    const p1 = byId(doc, 'p1');
 
     ctl.simulateStart(() => editDocument);
     editDocument.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'INSERT_ELEMENT_AFTER_TAG'
+      (item) => item.id === 'INSERT_ELEMENT_AFTER_FOCUS'
     );
 
     // act
     insertItem?.action?.(ctl);
-    expect(ctl.currentProps.inputValue).toBe('p');
+    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
+    manualEntryItem?.action?.(ctl);
     ctl.input.setInputValue('h2');
     ctl.input.runSubmitHandler();
 
     // assert
     const children = Array.from(doc.root.children);
     expect(insertItem).toBeDefined();
+    expect(manualEntryItem).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
     expect(editManager.nav.getFocus()).toBe(children[1]);
@@ -252,18 +258,20 @@ describe('EditDocument', () => {
     editManager.nav.REQUEST_FOCUS(p2);
     editDocument.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'INSERT_ELEMENT_BEFORE_TAG'
+      (item) => item.id === 'INSERT_ELEMENT_BEFORE_FOCUS'
     );
 
     // act
     insertItem?.action?.(ctl);
-    expect(ctl.currentProps.inputValue).toBe('p');
+    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
+    manualEntryItem?.action?.(ctl);
     ctl.input.setInputValue('h2');
     ctl.input.runSubmitHandler();
 
     // assert
     const children = Array.from(doc.root.children);
     expect(insertItem).toBeDefined();
+    expect(manualEntryItem).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
     expect(editManager.nav.getFocus()).toBe(children[1]);
@@ -283,18 +291,20 @@ describe('EditDocument', () => {
     ctl.simulateStart(() => editDocument);
     editDocument.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'INSERT_ELEMENT_IN_TAG'
+      (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
     );
 
     // act
     insertItem?.action?.(ctl);
-    expect(ctl.currentProps.inputValue).toBe('div');
+    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
+    manualEntryItem?.action?.(ctl);
     ctl.input.setInputValue('p');
     ctl.input.runSubmitHandler();
 
     // assert
     const child = d1.lastElementChild;
     expect(insertItem).toBeDefined();
+    expect(manualEntryItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('p');
     expect(editManager.nav.getFocus()).toBe(child);
   });
@@ -314,17 +324,20 @@ describe('EditDocument', () => {
     editManager.nav.REQUEST_FOCUS(list);
     editDocument.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'INSERT_ELEMENT_IN_TAG'
+      (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
     );
 
     // act
     insertItem?.action?.(ctl);
-    expect(ctl.currentProps.inputValue).toBe('li');
+    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
+    manualEntryItem?.action?.(ctl);
+    ctl.input.setInputValue('li');
     ctl.input.runSubmitHandler();
 
     // assert
     const child = list.lastElementChild;
     expect(insertItem).toBeDefined();
+    expect(manualEntryItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('li');
     expect(editManager.nav.getFocus()).toBe(child);
   });

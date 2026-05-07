@@ -3,8 +3,7 @@
   import '@oneput/jsed/styles/jsed-defaults.css';
   import { JSED_APP_ROOT_ID } from '@oneput/jsed';
   import { Anchor, OneputCornerButton, OneputController, Controller } from '@oneput/oneput';
-  import { icons } from '$lib/oneput/app/_icons.js';
-  import { Root } from '$lib/oneput/app/Root.js';
+  import { icons, Root } from '@oneput/jsed/ui/oneput/app';
 
   let { children } = $props();
 </script>

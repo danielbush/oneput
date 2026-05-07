@@ -64,8 +64,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 
-## Drafting / inbox
+## Details
 
+- [ ] cut/copy/paste selection
+  - COMMENT: marching ants just works; should be easy to do
 - [ ] refactor
   - EditManager becomes private state
   - all functionalities get moved into helper classes
@@ -104,16 +106,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - persist last FOCUS position and FOCUS it when we reload the document
 - use IMPLICIT_LINE's on all LINE_SEGMENT's that aren't enclosed by an INLINE_FLOW within the line; this makes it easy to navigate all segments with the FOCUS not just trailing IMPLICIT_LINE LINE_SEGMENT's and INLINE_FLOW LINE_SEGMENT's
 
-## Discussion
 
-- Invariant maintenance post-edit. Today tokenizeLooseLines* runs opportunistically at tokenize-time, so it catches bare text no matter how it appeared in the DOM. After removal, the "no bare interstitial text" invariant is established once at load and depends on every editing operation preserving it. Things to audit:
-  - Either every edit op maintains the invariant, or you need a cheap "re-wrap this subtree" call you fire after suspicious edits.
-  - paste / insertHTML — anything inserted into an outer LINE that contains block children needs re-wrapping
-  - split operations on an outer LINE — the residue could leave bare runs
-  - join / delete operations that pull a LINE's contents into its parent
-  - anchor add/remove inside an interstice (already on your task list)
-
-## Finer details
 
 ### feat: joinNext/joinPrevious across INLINE_FLOW boundaries
 
@@ -144,3 +137,12 @@ Add cli to `dist/`
 ```sh
 bun run build:cli
 ```
+
+## Discussion
+
+- Invariant maintenance post-edit. Today tokenizeLooseLines* runs opportunistically at tokenize-time, so it catches bare text no matter how it appeared in the DOM. After removal, the "no bare interstitial text" invariant is established once at load and depends on every editing operation preserving it. Things to audit:
+  - Either every edit op maintains the invariant, or you need a cheap "re-wrap this subtree" call you fire after suspicious edits.
+  - paste / insertHTML — anything inserted into an outer LINE that contains block children needs re-wrapping
+  - split operations on an outer LINE — the residue could leave bare runs
+  - join / delete operations that pull a LINE's contents into its parent
+  - anchor add/remove inside an interstice (already on your task list)

@@ -395,7 +395,7 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
 
   parentNode.removeChild(token);
 
-  const nextFocus = nextTok || prevTok;
+  const nextFocus = prevTok || nextTok;
 
   if (nextFocus) {
     return { next: nextFocus };

@@ -887,7 +887,7 @@ function buildParent(...children: Node[]): HTMLElement {
 }
 
 describe('remove', () => {
-  it('returns the next TOKEN sibling when one exists', () => {
+  it('returns the previous TOKEN sibling when one exists', () => {
     // arrange
     const foo = createToken('foo');
     const bar = createToken('bar');
@@ -898,7 +898,7 @@ describe('remove', () => {
     const { next } = remove(bar);
 
     // assert
-    expect(next).toBe(baz);
+    expect(next).toBe(foo);
     expect(bar.isConnected).toBe(false);
   });
 

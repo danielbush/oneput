@@ -56,8 +56,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: cut/copy/paste selection
   - COMMENT: marching ants just works; should be easy to do
 - fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
-- fix: delete should delete back not suck next word in
-- fix: removing anchor after inline tag moves the cursor off tag and to the beginning of the line
+- [x] fix: delete should delete back not suck next word in
+- fix: removing an anchor that sits after an inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
   - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
 - fix: `findPreviousNode(from, ...)` in `findPreviousLineCandidate` appears to visit `from`; I thought by default it shouldn't?

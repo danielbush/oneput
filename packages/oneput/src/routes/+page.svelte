@@ -1,7 +1,7 @@
 <script lang="ts">
   import './_demo-styles.css';
   import '$lib/oneput/shared/styles/oneput-defaults.css';
-  import Oneput from '$lib/oneput/components/Oneput.svelte';
+  import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
   import * as data from './_state.js';
   import * as ui from './_ui.js';
   import { icons } from './_state.svelte.js';

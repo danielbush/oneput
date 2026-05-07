@@ -11,7 +11,7 @@ import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
-import { SveltePropInjector } from '@oneput/oneput';
+import { SveltePropInjector } from '@oneput/oneput/shared/components/SveltePropInjector.js';
 import { formatSecondsToHHMMSS } from './utils.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry } from './AddEntry.js';

@@ -1,8 +1,11 @@
-import { hflex } from '@oneput/oneput/lib/builder.js';
-// import * as utils from '@oneput/oneput/lib/utils.js';
-import type { Controller } from '@oneput/oneput/controllers/controller.js';
-import type { FlexChildBuilder } from '@oneput/oneput/lib/builder.js';
-import type { DynamicPlaceholderBase, UILayout, FChildParams } from '@oneput/oneput/types.js';
+import { hflex } from '@oneput/oneput';
+import type {
+  Controller,
+  DynamicPlaceholderBase,
+  UILayout,
+  FlexChildBuilder,
+  FChildParams
+} from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';

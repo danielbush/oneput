@@ -33,19 +33,12 @@ Key details:
   - A separate project should also be able to import this jsed Oneput UI entrypoint.
 - problem:
   - The moved code depends on Oneput APIs such as `Controller`, `AppObject`, builders, icons, key bindings, and shared menu UI.
-  - Importing the root `@oneput/oneput` entrypoint from jsed pulls in `.svelte` components (`Oneput.svelte`, `MenuStatus.svelte`, etc.).
-  - jsed's Vite/Vitest setup is not a Svelte/SvelteKit app setup, so following that import chain caused parse failures on `.svelte` files.
-  - Exporting broad Oneput subpaths like `@oneput/oneput/controllers/*` and `@oneput/oneput/lib/*` works technically, but it expands Oneput's public API more than the existing deliberate `./shared/*` export pattern.
-  - Pointing a published jsed subpath's `"types"` at `src/` is also a smell. It can work if `src` is published, but runtime and types then come from different trees (`dist` for JS, `src` for TS).
-- current workaround:
-  - jsed imports narrow Oneput subpaths rather than the root package, and Oneput exposes those subpaths in `package.json`.
-  - jsed builds `dist/ui/oneput/app/index.js` as an additional library entry.
-  - jsed's published UI subpath currently uses built JS with source TS types because declaration generation for that subpath follows Oneput source imports across the package boundary.
-- options:
-  - Add a small explicit non-Svelte Oneput entrypoint, e.g. `@oneput/oneput/headless`, that exports only the controller/types/builders/icons/bindings needed by AppObject-style integrations.
-  - Move reusable non-Svelte APIs that jsed needs under Oneput's existing `./shared/*` public surface.
-  - Add Svelte support to jsed's Vite/Vitest config (`@sveltejs/vite-plugin-svelte`, or SvelteKit if jsed becomes a SvelteKit package), which would solve `.svelte` parsing locally but would not by itself define a clean public Oneput API.
-  - Publish proper Oneput declaration files for whichever public subpaths jsed consumes, then emit jsed declarations for `@oneput/jsed/ui/oneput/app` into `dist`.
-- preferred direction:
-  - Prefer a deliberately named non-Svelte Oneput public entrypoint over broad `controllers/*` and `lib/*` exports.
-  - Once that exists, switch jsed's UI entrypoint to import only from that public API and emit `dist/ui/oneput/app/index.d.ts` instead of pointing publish types at `src/`.
+  - If root `@oneput/oneput` exports `.svelte` components, jsed's plain Vite/Vitest setup can pull those files into a non-Svelte build graph and fail parsing.
+  - Exporting broad Oneput subpaths like `@oneput/oneput/controllers/*` and `@oneput/oneput/lib/*` avoids root Svelte imports technically, but expands Oneput's public API more than the existing deliberate `./shared/*` export pattern.
+  - Pointing a published jsed subpath's `"types"` at `src/` is a smell. It can work if `src` is published, but runtime and types then come from different trees (`dist` for JS, `src` for TS).
+- decision:
+  - Root `@oneput/oneput` is the pure/core entrypoint.
+  - Svelte components live under explicit `@oneput/oneput/shared/components/*` paths.
+  - `@oneput/jsed/ui/oneput/app` imports pure Oneput APIs from the root and Svelte-specific demo code imports Svelte components from `shared/components/*`.
+  - Oneput does not expose broad `controllers/*`, `lib/*`, or `types.js` subpaths.
+  - jsed emits `dist/ui/oneput/app/index.d.ts` and published `@oneput/jsed/ui/oneput/app` types point at `dist`, not `src`.

@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Anchor, Controller, OneputController, OneputCornerButton } from '@oneput/oneput';
+  import type { Controller } from '@oneput/oneput';
+  import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
+  import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
+  import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
   import '@oneput/oneput/demo/styles.css';
   import '@oneput/oneput/shared/styles/oneput-defaults.css';
   import { icons } from '$lib/app/_icons.js';

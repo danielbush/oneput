@@ -1,5 +1,5 @@
 <script lang="ts" generics="P extends Record<string, unknown>">
-  import type { SveltePropInjectorProps } from '../lib/SveltePropInjector.js';
+  import type { SveltePropInjectorProps } from './SveltePropInjector.js';
 
   const { createProps, subscribe, Child }: SveltePropInjectorProps<P> = $props();
 

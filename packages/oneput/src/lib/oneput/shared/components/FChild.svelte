@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { createStyleAttribute } from '../lib/utils.js';
-  import { defaultVoidElements } from '../lib/defaultVoidElements.js';
-  import { renderIcon } from '../lib/icons.js';
-  import type { FChildParams } from '../types.js';
+  import { createStyleAttribute } from '../../lib/utils.js';
+  import { defaultVoidElements } from '../../lib/defaultVoidElements.js';
+  import { renderIcon } from '../../lib/icons.js';
+  import type { FChildParams } from '../../types.js';
 
   type Props = FChildParams;
   let node: HTMLElement | null = $state(null);

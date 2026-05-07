@@ -25,7 +25,7 @@
       },
       "./ui/oneput/app": {
         "import": "./dist/ui/oneput/app/index.js",
-        "types": "./src/ui/oneput/app/index.ts"
+        "types": "./dist/ui/oneput/app/index.d.ts"
       },
       "./styles/jsed-defaults.css": "./dist/styles/jsed-defaults.css"
     }

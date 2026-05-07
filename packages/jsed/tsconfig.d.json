@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
   },
-  "files": ["src/index.ts"],
+  "files": ["src/index.ts", "src/ui/oneput/app/index.ts"],
   "exclude": ["src/cli", "**/__tests__"]
 }

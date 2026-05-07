@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { hideShowListener } from '../lib/utils.js';
-  import { renderIcon } from '../lib/icons.js';
+  import { hideShowListener } from '../../lib/utils.js';
+  import { renderIcon } from '../../lib/icons.js';
 
   const handleClick = () => {
     window.dispatchEvent(new Event('oneput-toggle-hide'));

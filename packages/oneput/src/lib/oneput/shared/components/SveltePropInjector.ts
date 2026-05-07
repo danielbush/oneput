@@ -1,4 +1,4 @@
-import SubscribedProps from '../components/InjectedProps.svelte';
+import SubscribedProps from './InjectedProps.svelte';
 import { createSubscriber } from 'svelte/reactivity';
 import { mount, type Component, type ComponentProps } from 'svelte';
 

@@ -11,7 +11,7 @@ import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
-import { Controller } from '@oneput/oneput/controllers/controller.js';
+import { Controller } from '@oneput/oneput';
 import { EditManagerFocusOps } from './EditManagerFocusOps.js';
 import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
 import { EditManagerCursorOps } from './EditManagerCursorOps.js';

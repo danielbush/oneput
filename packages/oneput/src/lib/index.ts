@@ -1,11 +1,3 @@
-// Components
-// These import .svelte and will break projects that can't handle .svelte files.
-export { default as Oneput } from './oneput/components/Oneput.svelte';
-export { default as OneputController } from './oneput/components/OneputController.svelte';
-export { default as OneputCornerButton } from './oneput/components/OneputCornerButton.svelte';
-export { default as Anchor } from './oneput/components/Anchor.svelte';
-export { SveltePropInjector } from './oneput/lib/SveltePropInjector.js';
-
 // Controllers
 export { Controller } from './oneput/controllers/controller.js';
 

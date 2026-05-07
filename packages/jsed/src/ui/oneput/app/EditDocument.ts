@@ -1,5 +1,4 @@
-import type { Controller } from '@oneput/oneput/controllers/controller.js';
-import type { AppObject } from '@oneput/oneput/types.js';
+import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { EditManager, type EditManagerError } from '../../../EditManager.js';
 import type { JsedDocument } from '../../../JsedDocument.js';

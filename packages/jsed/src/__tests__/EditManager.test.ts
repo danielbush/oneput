@@ -19,6 +19,14 @@ import { JSED_ANCHOR_CHAR, JSED_TOKEN_CLASS } from '../lib/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { isIsland, isToken } from '../lib/taxonomy.js';
+import type { JsedDocument } from '../JsedDocument.js';
+
+function createNullEditManager(doc: JsedDocument): EditManager {
+  return EditManager.createNull({
+    document: doc,
+    userInput: Controller.createNull().input
+  });
+}
 
 describe('EditManager', () => {
   describe('REQUEST_FOCUS (view mode): User clicks/touches', () => {
@@ -36,9 +44,7 @@ describe('EditManager', () => {
           )
         )
       );
-      const editManager = EditManager.createNull({
-        document: doc
-      });
+      const editManager = createNullEditManager(doc);
       editManager.start();
       const p2 = byId(doc, 'p2');
 
@@ -56,9 +62,7 @@ describe('EditManager', () => {
     it('focusing a new FOCUSABLE tokenizes that new LINE without entering edit mode', () => {
       // arrange
       const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-      const editManager = EditManager.createNull({
-        document: doc
-      });
+      const editManager = createNullEditManager(doc);
       editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
@@ -81,9 +85,7 @@ describe('EditManager', () => {
     it('re-focusing an already-tokenized LINE is idempotent at the DOM level', () => {
       // arrange
       const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-      const editManager = EditManager.createNull({
-        document: doc
-      });
+      const editManager = createNullEditManager(doc);
       editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
@@ -119,9 +121,7 @@ describe('EditManager', () => {
           )
         )
       );
-      const editManager = EditManager.createNull({
-        document: doc
-      });
+      const editManager = createNullEditManager(doc);
       editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
@@ -154,9 +154,7 @@ describe('EditManager', () => {
           p({ id: 'p4' }, 'ddd')
         )
       );
-      const editManager = EditManager.createNull({
-        document: doc
-      });
+      const editManager = createNullEditManager(doc);
       editManager.start();
       const p1 = byId(doc, 'p1');
       const p2 = byId(doc, 'p2');
@@ -243,9 +241,7 @@ describe('EditManager', () => {
       it('descends within the focused subtree in view mode', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo bar'), p({ id: 'p2' }, 'baz qux')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const p1 = byId(doc, 'p1');
 
@@ -270,9 +266,7 @@ describe('EditManager', () => {
             p({ id: 'p3' }, 'baz')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
 
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
@@ -297,9 +291,7 @@ describe('EditManager', () => {
             p({ id: 'p3' }, 'baz')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
 
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
@@ -318,9 +310,7 @@ describe('EditManager', () => {
       it('inserts a new element after the focused tag and focuses it', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
 
         // act
@@ -341,9 +331,7 @@ describe('EditManager', () => {
       it('uses a typed element name when the focused tag parent allows it', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
 
         // act
@@ -363,9 +351,7 @@ describe('EditManager', () => {
       it('uses a typed element name before the focused tag and focuses it', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         editManager.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
@@ -387,9 +373,7 @@ describe('EditManager', () => {
       it('uses a typed element name inside the focused tag and focuses it', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo'));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const p1 = byId(doc, 'p1');
 
@@ -409,9 +393,7 @@ describe('EditManager', () => {
       it('defaults to a specific child tag when the focused tag requires one', () => {
         // arrange
         const doc = makeRoot(ul({ id: 'list' }, li('one')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const list = byId(doc, 'list');
         editManager.nav.REQUEST_FOCUS(list);
@@ -431,9 +413,7 @@ describe('EditManager', () => {
       it('does not offer insert-in for a tag without child elements', () => {
         // arrange
         const doc = makeRoot('<br id="break">');
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
 
         // act
@@ -451,9 +431,7 @@ describe('EditManager', () => {
       it('deletes the focused element and focuses the next FOCUSABLE', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const p1 = byId(doc, 'p1');
         const p2 = byId(doc, 'p2');
@@ -473,9 +451,7 @@ describe('EditManager', () => {
       it('deletes the focused element and falls back to the previous FOCUSABLE', () => {
         // arrange
         const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const p1 = byId(doc, 'p1');
         const p2 = byId(doc, 'p2');
@@ -500,9 +476,7 @@ describe('EditManager', () => {
         const doc = makeRoot(
           '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const div1 = byId(doc, 'd1');
 
@@ -528,9 +502,7 @@ describe('EditManager', () => {
       it('wraps the current TOKEN and keeps the CURSOR on that TOKEN', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
         const cursorToken = editManager.cursor?.getPlace() as HTMLElement;
 
@@ -554,9 +526,7 @@ describe('EditManager', () => {
         const doc = makeRoot(
           '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'd1'));
         const island = editManager.cursor?.getPlace() as HTMLElement;
 
@@ -577,9 +547,7 @@ describe('EditManager', () => {
       it('wraps the active SELECTION and clears the transient selection wrappers', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
         const anchor = editManager.cursor?.getPlace() as HTMLElement;
         editManager.extendNext();
@@ -604,9 +572,7 @@ describe('EditManager', () => {
         const doc = makeRoot(
           '<div id="d1">before <span class="katex" style="display:inline;">x²</span> after</div>'
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'd1'));
         editManager.extendNext();
 
@@ -631,9 +597,7 @@ describe('EditManager', () => {
         it('places the CURSOR on the first TOKEN when entering editing from a FOCUSABLE', () => {
           // arrange
           const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act
           const result = editManager.enterEditing(byId(doc, 'p1'));
@@ -649,9 +613,7 @@ describe('EditManager', () => {
         it('tokenizes the focused LINE and lands on its first TOKEN', () => {
           // arrange
           const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
           const line = byId(doc, 'p1');
 
           expect(line.querySelectorAll('.jsed-token')).toHaveLength(0);
@@ -679,9 +641,7 @@ describe('EditManager', () => {
               p({ id: 'p2' }, 'baz qux')
             )
           );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
           const div1 = byId(doc, 'div1');
           const p1 = byId(doc, 'p1');
           const p2 = byId(doc, 'p2');
@@ -716,9 +676,7 @@ describe('EditManager', () => {
               p({ id: 'later-line' }, 'baz qux')
             )
           );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
           const div1 = byId(doc, 'div1');
           const emptyLine = byId(doc, 'empty-line');
           const firstEditableLine = byId(doc, 'first-editable-line');
@@ -753,9 +711,7 @@ describe('EditManager', () => {
             )
           );
           const em1 = byId(doc, 'em1');
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act
           const result = editManager.enterEditing(em1);
@@ -778,9 +734,7 @@ describe('EditManager', () => {
             )
           );
           const em1 = byId(doc, 'em1');
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act
           const result = editManager.enterEditing(em1);
@@ -806,9 +760,7 @@ describe('EditManager', () => {
           const p1 = byId(doc, 'p1');
           const middle1 = p1.firstChild?.nextSibling?.nextSibling as HTMLElement;
           expect(middle1?.textContent).toEqual('middle');
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act
           const result = editManager.enterEditing(middle1!);
@@ -826,9 +778,7 @@ describe('EditManager', () => {
       it('moves to the next TOKEN in edit mode', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
@@ -849,9 +799,7 @@ describe('EditManager', () => {
             p({ id: 'p2' }, 'bbb ccc')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
@@ -872,9 +820,7 @@ describe('EditManager', () => {
             p({ id: 'p2' }, '<span class="katex" style="display:inline;">x²</span>', ' bbb')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
@@ -896,9 +842,7 @@ describe('EditManager', () => {
             p({ id: 'p2' }, 'bbb')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p2'));
 
         // act
@@ -924,9 +868,7 @@ describe('EditManager', () => {
             )
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
@@ -944,9 +886,7 @@ describe('EditManager', () => {
       it('moves to the previous TOKEN in edit mode', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.cursor?.moveNext();
 
@@ -969,9 +909,7 @@ describe('EditManager', () => {
             p({ id: 'p2' }, 'ccc')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p2'));
 
         // act
@@ -992,9 +930,7 @@ describe('EditManager', () => {
             p({ id: 'p2' }, 'bbb')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p2'));
         expect(identify(editManager.cursor!.getPlace())).toBe('bbb');
 
@@ -1021,9 +957,7 @@ describe('EditManager', () => {
             p({ id: 'p3' }, 'ccc')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p3'));
 
         // act
@@ -1044,9 +978,7 @@ describe('EditManager', () => {
             div({ id: 'outer' }, p({ id: 'p1' }, 'aaa'), p({ id: 'p2' }, 'bbb'))
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
@@ -1068,9 +1000,7 @@ describe('EditManager', () => {
             p({ id: 'p2' }, 'bbb')
           )
         );
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
 
         // act
@@ -1095,9 +1025,7 @@ describe('EditManager', () => {
               p({ id: 'p2' }, 'ddd')
             )
           );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p1'));
@@ -1121,9 +1049,7 @@ describe('EditManager', () => {
               p({ id: 'p2' }, 'ddd')
             )
           );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p2'));
@@ -1159,9 +1085,7 @@ describe('EditManager', () => {
               p({ id: 'p2' }, 'ddd')
             )
           );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p2'));
@@ -1197,9 +1121,7 @@ describe('EditManager', () => {
               )
             )
           );
-          const editManager = EditManager.createNull({
-            document: doc
-          });
+          const editManager = createNullEditManager(doc);
 
           // act + assert
           editManager.enterEditing(byId(doc, 'p2'));
@@ -1227,9 +1149,7 @@ describe('EditManager', () => {
       it('leaves edit mode and returns to view mode', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const p1 = byId(doc, 'p1');
         editManager.enterEditing(p1);
@@ -1247,7 +1167,10 @@ describe('EditManager', () => {
       it('cancels a forward-extended selection and lands the CURSOR on the head (stays in edit mode)', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.extendNext(); // head: bar
         editManager.extendNext(); // head: baz
@@ -1266,7 +1189,10 @@ describe('EditManager', () => {
       it('cancels a backward-extended selection and lands the CURSOR on the head', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.moveNext(); // cursor: bar
         editManager.moveNext(); // cursor: baz
@@ -1287,7 +1213,10 @@ describe('EditManager', () => {
       it('next-extended + handleRight → CURSOR lands on head (forward end)', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.extendNext(); // head: bar
         editManager.extendNext(); // head: baz
@@ -1306,7 +1235,10 @@ describe('EditManager', () => {
       it('next-extended + handleLeft → CURSOR lands on anchor (start)', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.extendNext();
         editManager.extendNext();
@@ -1325,7 +1257,10 @@ describe('EditManager', () => {
       it('previous-extended + handleLeft → CURSOR lands on head (backward end)', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.moveNext();
         editManager.moveNext(); // cursor: baz
@@ -1346,7 +1281,10 @@ describe('EditManager', () => {
       it('previous-extended + handleRight → CURSOR lands on anchor (start)', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar baz'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         editManager.enterEditing(byId(doc, 'p1'));
         editManager.moveNext();
         editManager.moveNext(); // cursor: baz
@@ -1367,7 +1305,10 @@ describe('EditManager', () => {
       it('exits editing when there is no selection', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-        const editManager = EditManager.createNull({ document: doc });
+        const editManager = EditManager.createNull({
+          document: doc,
+          userInput: Controller.createNull().input
+        });
         const p1 = byId(doc, 'p1');
         editManager.enterEditing(p1);
         editManager.extendNext();
@@ -1405,9 +1346,7 @@ describe('EditManager', () => {
                 : undefined
           }
         });
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.enterEditing(byId(doc, 'p1'));
         const token = editManager.cursor?.getPlace() as HTMLElement;
         const scrollRequests = doc.viewportScroller.trackScrollRequests();
@@ -1451,9 +1390,7 @@ describe('EditManager', () => {
                 : undefined
           }
         });
-        const editManager = EditManager.createNull({
-          document: doc
-        });
+        const editManager = createNullEditManager(doc);
         editManager.start();
         const p1 = byId(doc, 'p1');
         const scrollRequests = doc.viewportScroller.trackScrollRequests();

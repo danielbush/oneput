@@ -11,7 +11,6 @@ import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
-import { Controller } from '@oneput/oneput';
 import { EditManagerFocusOps } from './EditManagerFocusOps.js';
 import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
 import { EditManagerCursorOps } from './EditManagerCursorOps.js';
@@ -86,7 +85,7 @@ export class EditManager {
     userInput
   }: {
     document: JsedDocument;
-    userInput?: UserInput;
+    userInput: UserInput;
   }): EditManager {
     let instance: EditManager;
     const nav = Nav.createNull(
@@ -96,7 +95,7 @@ export class EditManager {
     );
     instance = new EditManager(
       document,
-      userInput ?? Controller.createNull().input,
+      userInput,
       nav,
       Tokenizer.createNull(),
       FocusChainNavigator.createNull(nav)

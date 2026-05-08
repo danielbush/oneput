@@ -343,4 +343,8 @@ describe('detokenizeLine', () => {
     // assert
     expect(div1.querySelectorAll(`.${JSED_TOKEN_CLASS}`)).toHaveLength(0);
   });
+
+  test('it should not remove ANCHOR tokens', () => {
+    // TODO
+  });
 });

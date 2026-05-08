@@ -1,5 +1,5 @@
 import { getLine } from './line.js';
-import { isFocusable, isCursorTransparent, isToken, isLineSibling } from './taxonomy.js';
+import { isFocusable, isCursorTransparent, isToken, isLineSibling, isAnchor } from './taxonomy.js';
 import { createToken } from './token.js';
 
 /**
@@ -76,6 +76,12 @@ function tokenizeLineRec(line: Node): HTMLElement | null {
 function replaceTokenElement(token: HTMLElement): void {
   if (!isToken(token)) {
     throw new Error('replaceTokenElement: called on non-token');
+  }
+  if (isAnchor(token)) {
+    // Allow anchor tokens to stay and become part of the document.  Otherwise
+    // they will disappear because of SHALLOW_TOKENIZATION and the user will be
+    // forced to add them back before editing.
+    return;
   }
 
   const text = token.textContent ?? '';

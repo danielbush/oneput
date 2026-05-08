@@ -78,11 +78,11 @@ export class CursorTextOps {
 
   /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
   splitAtToken(): HTMLElement | null {
-    if (this.params.cursor.isInsertingAfter() || this.params.cursor.isAppend()) {
-      return this.splitAfter();
+    if (this.params.cursor.isInsertingBefore() || this.params.cursor.isPrepend()) {
+      return this.splitBefore();
     }
 
-    return this.splitBefore();
+    return this.splitAfter();
   }
 
   insertElementAfter(el: HTMLElement): void {

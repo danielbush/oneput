@@ -68,7 +68,7 @@ describe('splitAtToken', () => {
     cursor.ops.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('world');
+    expect(getValue(cursor.getPlace())).toBe('foo');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 });

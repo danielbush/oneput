@@ -85,9 +85,9 @@ describe('EditDocument', () => {
     // assert
     const paragraphs = Array.from(doc.root.querySelectorAll('p'));
     expect(paragraphs).toHaveLength(2);
-    expect(paragraphs[0]?.textContent?.trim()).toBe('foo');
-    expect(paragraphs[1]?.textContent?.trim()).toBe('bar');
-    expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('bar');
+    expect(paragraphs[0]?.textContent?.trim()).toBe('foo bar');
+    expect(paragraphs[1]?.textContent?.trim()).toBe('');
+    expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('');
   });
 
   it('binds cmd+m to reveal the active token', () => {

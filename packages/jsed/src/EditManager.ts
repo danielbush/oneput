@@ -507,7 +507,7 @@ export class EditManager {
     if (this.isSuspended) return ok(undefined);
     const current = this.cursor.getPlace();
     if (isToken(current)) {
-      this.splitAtCursor();
+      this.cursorOps.splitAtCursor();
       return ok(undefined);
     }
 
@@ -614,13 +614,6 @@ export class EditManager {
   moveUp() {
     if (this.isSuspended) return;
     this.nav.SIB_PREV();
-  }
-
-  private splitAtCursor() {
-    const inserted = this.cursor?.ops.splitAtToken();
-    if (inserted) {
-      this.notifyElementChange({ type: 'focusable-inserted', element: inserted });
-    }
   }
 
   scrollActiveTargetIntoView(): boolean {

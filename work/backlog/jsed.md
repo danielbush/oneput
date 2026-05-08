@@ -47,7 +47,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
-- feat: enter on token (no before/after states) should break AFTER token
+- [x] fix: delete should delete back not suck next word in
+- [x] feat: enter on token (no before/after states) should break AFTER token
 - feat: copy empty element above / below (for li or p-tags)
 - feat: improve input / cursor state
   - use the line state from the cursor lab when token is not fully selected
@@ -56,7 +57,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: cut/copy/paste selection
   - COMMENT: marching ants just works; should be easy to do
 - fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
-- [x] fix: delete should delete back not suck next word in
 - fix: removing an anchor that sits after an inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
   - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
@@ -81,6 +81,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## refactors
 
+- [ ] refactor: merge CursorTextOps.ts into EditManagerCursorOps.ts
 - [ ] refactor: EditManager becomes private state
   - all functionalities get moved into helper classes
   - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers

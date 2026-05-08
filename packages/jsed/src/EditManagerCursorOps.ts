@@ -163,4 +163,15 @@ export class EditManagerCursorOps {
     }
     return false;
   }
+
+  splitAtCursor() {
+    if (this.editManager.mode !== 'edit' || !this.editManager.cursor) {
+      return false;
+    }
+
+    const inserted = this.editManager.cursor.ops.splitAtToken();
+    if (inserted) {
+      this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    }
+  }
 }

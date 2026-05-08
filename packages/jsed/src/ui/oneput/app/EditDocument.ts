@@ -282,125 +282,9 @@ export class EditDocument implements AppObject {
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),
-        this.editManager.anchor.canInsertInFocus() &&
-          stdMenuItem({
-            id: 'INSERT_ANCHOR_IN_LINE',
-            textContent: 'Insert anchor in empty line...',
-            action: () => {
-              this.editManager.anchor.insertInFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
-        this.editManager.focus.space.canInsertSpaceBeforeTag() &&
-          stdMenuItem({
-            id: 'INSERT_SPACE_BEFORE_TAG',
-            textContent: 'Insert space before tag...',
-            action: () => {
-              this.editManager.focus.space.insertSpaceBeforeTag();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.cursorOps.canInsertSpaceBefore() &&
-          stdMenuItem({
-            id: 'INSERT_SPACE_BEFORE_CURSOR',
-            textContent: 'Insert leading space before cursor...',
-            action: () => {
-              this.editManager.cursorOps.insertSpaceBefore();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.focus.space.canRemoveSpaceBeforeTag() &&
-          stdMenuItem({
-            id: 'REMOVE_SPACE_BEFORE_TAG',
-            textContent: 'Remove space before tag...',
-            action: () => {
-              this.editManager.focus.space.removeSpaceBeforeTag();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.cursorOps.canRemoveSpaceBefore() &&
-          stdMenuItem({
-            id: 'REMOVE_SPACE_BEFORE_CURSOR',
-            textContent: 'Remove leading space before cursor...',
-            action: () => {
-              this.editManager.cursorOps.removeSpaceBefore();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.anchor.canInsertBeforeFocus() &&
-          stdMenuItem({
-            id: 'INSERT_ANCHOR_BEFORE_TAG',
-            textContent: 'Insert anchor before tag...',
-            action: () => {
-              this.editManager.anchor.insertBeforeFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
-        this.editManager.anchor.canRemoveBeforeFocus() &&
-          stdMenuItem({
-            id: 'REMOVE_ANCHOR_BEFORE_TAG',
-            textContent: 'Remove anchor before tag...',
-            action: () => {
-              this.editManager.anchor.removeBeforeFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
-        this.editManager.focus.space.canInsertSpaceAfterTag() &&
-          stdMenuItem({
-            id: 'INSERT_SPACE_AFTER_TAG',
-            textContent: 'Insert space after tag...',
-            action: () => {
-              this.editManager.focus.space.insertSpaceAfterTag();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.cursorOps.canInsertSpaceAfter() &&
-          stdMenuItem({
-            id: 'INSERT_SPACE_AFTER_CURSOR',
-            textContent: 'Insert trailing space after cursor...',
-            action: () => {
-              this.editManager.cursorOps.insertSpaceAfter();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.focus.space.canRemoveSpaceAfterTag() &&
-          stdMenuItem({
-            id: 'REMOVE_SPACE_AFTER_TAG',
-            textContent: 'Remove space after tag...',
-            action: () => {
-              this.editManager.focus.space.removeSpaceAfterTag();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.cursorOps.canRemoveSpaceAfter() &&
-          stdMenuItem({
-            id: 'REMOVE_SPACE_AFTER_CURSOR',
-            textContent: 'Remove trailing space after cursor...',
-            action: () => {
-              this.editManager.cursorOps.removeSpaceAfter();
-            },
-            left: (b) => [b.icon(icons.Space)]
-          }),
-        this.editManager.anchor.canInsertAfterFocus() &&
-          stdMenuItem({
-            id: 'INSERT_ANCHOR_AFTER_TAG',
-            textContent: 'Insert anchor after tag...',
-            action: () => {
-              this.editManager.anchor.insertAfterFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
-        this.editManager.anchor.canRemoveAfterFocus() &&
-          stdMenuItem({
-            id: 'REMOVE_ANCHOR_AFTER_TAG',
-            textContent: 'Remove anchor after tag...',
-            action: () => {
-              this.editManager.anchor.removeAfterFocus();
-            },
-            left: (b) => [b.icon(icons.Anchor)]
-          }),
 
-        // Modifying elements at FOCUS or CURSOR
+        // #region focus ops
+
         stdMenuItem({
           id: 'CUT_ELEMENT',
           textContent: 'Cut...',
@@ -600,6 +484,10 @@ export class EditDocument implements AppObject {
             }
           }),
 
+        // #endregion
+
+        // #region cursor ops
+
         this.editManager.cursorOps.canWrap() &&
           stdMenuItem({
             id: 'WRAP_SELECTION',
@@ -643,7 +531,137 @@ export class EditDocument implements AppObject {
                 })
               );
             }
+          }),
+
+        // #endregion
+
+        // #region leading/trailing spaces
+
+        this.editManager.focus.space.canInsertSpaceBeforeTag() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_BEFORE_TAG',
+            textContent: 'Insert space before tag...',
+            action: () => {
+              this.editManager.focus.space.insertSpaceBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.focus.space.canRemoveSpaceBeforeTag() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_BEFORE_TAG',
+            textContent: 'Remove space before tag...',
+            action: () => {
+              this.editManager.focus.space.removeSpaceBeforeTag();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.focus.space.canInsertSpaceAfterTag() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_AFTER_TAG',
+            textContent: 'Insert space after tag...',
+            action: () => {
+              this.editManager.focus.space.insertSpaceAfterTag();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.focus.space.canRemoveSpaceAfterTag() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_AFTER_TAG',
+            textContent: 'Remove space after tag...',
+            action: () => {
+              this.editManager.focus.space.removeSpaceAfterTag();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+
+        this.editManager.cursorOps.canInsertSpaceAfter() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_AFTER_CURSOR',
+            textContent: 'Insert trailing space after cursor...',
+            action: () => {
+              this.editManager.cursorOps.insertSpaceAfter();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.cursorOps.canRemoveSpaceAfter() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_AFTER_CURSOR',
+            textContent: 'Remove trailing space after cursor...',
+            action: () => {
+              this.editManager.cursorOps.removeSpaceAfter();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.cursorOps.canInsertSpaceBefore() &&
+          stdMenuItem({
+            id: 'INSERT_SPACE_BEFORE_CURSOR',
+            textContent: 'Insert leading space before cursor...',
+            action: () => {
+              this.editManager.cursorOps.insertSpaceBefore();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+        this.editManager.cursorOps.canRemoveSpaceBefore() &&
+          stdMenuItem({
+            id: 'REMOVE_SPACE_BEFORE_CURSOR',
+            textContent: 'Remove leading space before cursor...',
+            action: () => {
+              this.editManager.cursorOps.removeSpaceBefore();
+            },
+            left: (b) => [b.icon(icons.Space)]
+          }),
+
+        // #endregion
+
+        // #region anchor ops
+
+        this.editManager.anchor.canInsertInFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_IN_LINE',
+            textContent: 'Insert anchor in empty line...',
+            action: () => {
+              this.editManager.anchor.insertInFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
+          }),
+        this.editManager.anchor.canInsertBeforeFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_BEFORE_TAG',
+            textContent: 'Insert anchor before tag...',
+            action: () => {
+              this.editManager.anchor.insertBeforeFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
+          }),
+        this.editManager.anchor.canRemoveBeforeFocus() &&
+          stdMenuItem({
+            id: 'REMOVE_ANCHOR_BEFORE_TAG',
+            textContent: 'Remove anchor before tag...',
+            action: () => {
+              this.editManager.anchor.removeBeforeFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
+          }),
+        this.editManager.anchor.canInsertAfterFocus() &&
+          stdMenuItem({
+            id: 'INSERT_ANCHOR_AFTER_TAG',
+            textContent: 'Insert anchor after tag...',
+            action: () => {
+              this.editManager.anchor.insertAfterFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
+          }),
+        this.editManager.anchor.canRemoveAfterFocus() &&
+          stdMenuItem({
+            id: 'REMOVE_ANCHOR_AFTER_TAG',
+            textContent: 'Remove anchor after tag...',
+            action: () => {
+              this.editManager.anchor.removeAfterFocus();
+            },
+            left: (b) => [b.icon(icons.Anchor)]
           })
+
+        // #endregion
       ]
     });
   };

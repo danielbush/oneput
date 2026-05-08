@@ -350,7 +350,6 @@ export class EditManager {
       this.userInput
         .setInputValue(token.getValue(finalToken))
         .then(() => {
-          this.userInput.selectAll();
           this.nav.FOCUS(finalToken);
           this.userInput.moveCursorToEnd();
           this.cursor?.setStateFromInput(intent.inputValue);

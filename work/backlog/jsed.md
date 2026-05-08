@@ -49,8 +49,9 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 - [x] fix: delete should delete back not suck next word in
 - [x] feat: enter on token (no before/after states) should break AFTER token
-- feat: copy empty element above / below (for li or p-tags)
-- feat: improve input / cursor state
+- [ ] feat: copy empty element above / below (for li or p-tags)
+- [ ] feat: improve input / cursor state
+  - [ ] when we change to either end, use an underline
   - use the line state from the cursor lab when token is not fully selected
   - when we start typing is usually a good clue that full selection is lost
 - feat: don't hard select id="test-doc" - editor should be configurable

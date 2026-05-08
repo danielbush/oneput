@@ -298,4 +298,14 @@ export class Cursor {
   isSameLine(tok: HTMLElement) {
     return isSameLine(this.getPlace(), tok);
   }
+
+  exitInsertionState(): boolean {
+    // GOTCHA: this must come before this.place (or clearMarkers).
+    const willExit =
+      this.isAppend() || this.isInsertingAfter() || this.isPrepend() || this.isInsertingBefore();
+    this.place(this.getPlace()); // does select-all in input
+    console.log('willExit', willExit);
+    this.clearMarkers();
+    return willExit;
+  }
 }

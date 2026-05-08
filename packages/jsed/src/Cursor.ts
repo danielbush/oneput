@@ -304,7 +304,6 @@ export class Cursor {
     const willExit =
       this.isAppend() || this.isInsertingAfter() || this.isPrepend() || this.isInsertingBefore();
     this.place(this.getPlace()); // does select-all in input
-    console.log('willExit', willExit);
     this.clearMarkers();
     return willExit;
   }

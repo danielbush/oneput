@@ -49,7 +49,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 - [x] fix: delete should delete back not suck next word in
 - [x] feat: enter on token (no before/after states) should break AFTER token
-- [ ] feat: copy empty element above / below (for li or p-tags)
+- [x] feat: copy empty element above / below (for li or p-tags)
+- [.] feat: when auto tokenizing, (1) add anchor to empty p or li tags; (2) preserve anchors (somehow) on detokenization so that they come back when we focus on the element again
+  - COMMENT: see canCreateWithAnchor; maybe we need to extend this to a version that takes an element and checks if its empty; then tokenize needs to call it to add anchors
+  - COMMENT: keep the jsed-anchor token (span) even after detokenization?
 - [ ] feat: improve input / cursor state
   - [ ] when we change to either end, use an underline
   - use the line state from the cursor lab when token is not fully selected

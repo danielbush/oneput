@@ -266,6 +266,24 @@ export class EditDocument implements AppObject {
         bindings: ['$mod+c'],
         description: 'Copy element at focus'
       }
+    },
+    COPY_EMPTY_PREVIOUS: {
+      action: () => {
+        this.editManager.focus.copyEmptyPrevious();
+      },
+      binding: {
+        bindings: ['Control+c b'],
+        description: 'Copy to empty element before focus'
+      }
+    },
+    COPY_EMPTY_NEXT: {
+      action: () => {
+        this.editManager.focus.copyEmptyNext();
+      },
+      binding: {
+        bindings: ['Control+c a'],
+        description: 'Copy to empty element after focus'
+      }
     }
     // #endregion
   };
@@ -285,19 +303,37 @@ export class EditDocument implements AppObject {
 
         // #region focus ops
 
-        stdMenuItem({
-          id: 'CUT_ELEMENT',
-          textContent: 'Cut...',
-          action: this.actions.CUT.action,
-          left: (b) => [b.icon(icons.Scissors)]
-        }),
+        this.editManager.focus.canCut() &&
+          stdMenuItem({
+            id: 'CUT_ELEMENT',
+            textContent: 'Cut...',
+            action: this.actions.CUT.action,
+            left: (b) => [b.icon(icons.Scissors)]
+          }),
 
-        stdMenuItem({
-          id: 'COPY_ELEMENT',
-          textContent: 'Copy...',
-          action: this.actions.COPY.action,
-          left: (b) => [b.icon(icons.Copy)]
-        }),
+        this.editManager.focus.canCopy() &&
+          stdMenuItem({
+            id: 'COPY_ELEMENT',
+            textContent: 'Copy...',
+            action: this.actions.COPY.action,
+            left: (b) => [b.icon(icons.Copy)]
+          }),
+
+        this.editManager.focus.canCopyEmpty() &&
+          stdMenuItem({
+            id: 'COPY_EMPTY_BEFORE',
+            textContent: 'Copy to empty element before...',
+            action: this.actions.COPY_EMPTY_PREVIOUS.action,
+            left: (b) => [b.icon(icons.BetweenHorizonalStart)]
+          }),
+
+        this.editManager.focus.canCopyEmpty() &&
+          stdMenuItem({
+            id: 'COPY_EMPTY_AFTER',
+            textContent: 'Copy to empty element after...',
+            action: this.actions.COPY_EMPTY_NEXT.action,
+            left: (b) => [b.icon(icons.BetweenHorizonalStart)]
+          }),
 
         this.editManager.focus.canDelete() &&
           stdMenuItem({

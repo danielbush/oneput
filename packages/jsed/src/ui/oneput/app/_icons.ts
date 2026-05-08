@@ -22,7 +22,9 @@ export const iconData = {
   CircleX: lu.CircleX,
   ArrowLeftToLine: lu.ArrowLeftToLine,
   ArrowRightToLine: lu.ArrowRightToLine,
-  ArrowDownToLine: lu.ArrowDownToLine
+  ArrowDownToLine: lu.ArrowDownToLine,
+  BetweenHorizonalStart: lu.BetweenHorizonalStart,
+  BetweenHorizonalEnd: lu.BetweenHorizonalEnd
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

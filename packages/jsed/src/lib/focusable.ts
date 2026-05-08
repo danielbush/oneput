@@ -1,6 +1,7 @@
+import { JSED_FOCUS_CLASS } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
 import * as domRules from './dom-rules.js';
-import { isFocusable, isIsland } from './taxonomy.js';
+import { isFocusable, isInlineFlow, isIsland } from './taxonomy.js';
 import * as token from './token.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
@@ -200,4 +201,32 @@ export function pasteWithin(pasted: HTMLElement, within: HTMLElement): HTMLEleme
 export function pasteCopyWithin(pasted: HTMLElement, within: HTMLElement): HTMLElement | null {
   const copy = pasted.cloneNode(true) as HTMLElement;
   return within.insertAdjacentElement('beforeend', copy) as HTMLElement | null;
+}
+
+export function copyEmptyNext(target: HTMLElement): HTMLElement | null {
+  if (isInlineFlow(target)) {
+    // Use cursor ops eg wrap text in em; copying empty after would be weird
+    return null;
+  }
+  const empty = target.cloneNode(false) as HTMLElement;
+  empty.classList.remove(JSED_FOCUS_CLASS);
+  target.insertAdjacentElement('afterend', empty);
+  if (canCreateWithAnchor(empty.tagName)) {
+    token.addAnchors(empty);
+  }
+  return empty;
+}
+
+export function copyEmptyPrevious(target: HTMLElement): HTMLElement | null {
+  if (isInlineFlow(target)) {
+    // Use cursor ops eg wrap text in em; copying empty after would be weird
+    return null;
+  }
+  const empty = target.cloneNode(false) as HTMLElement;
+  empty.classList.remove(JSED_FOCUS_CLASS);
+  target.insertAdjacentElement('beforebegin', empty);
+  if (canCreateWithAnchor(empty.tagName)) {
+    token.addAnchors(empty);
+  }
+  return empty;
 }

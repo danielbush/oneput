@@ -219,6 +219,25 @@ export class EditManagerFocusOps {
 
   private cutElement: HTMLElement | null = null;
   private isCopy: boolean = false;
+  private prePaste(): { cutElement: HTMLElement; focus: HTMLElement } | null {
+    if (!this.cutElement) {
+      return null;
+    }
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return null;
+    }
+    const cutElement = this.cutElement;
+    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
+    this.cutElement = null;
+    return { cutElement, focus };
+  }
+
+  canCopy = (): boolean => {
+    return !!this.editManager.nav.getFocus();
+  };
+  canCut = this.canCopy;
+  canCopyEmpty = this.canCopy;
 
   cut(): boolean {
     this.isCopy = false;
@@ -232,20 +251,6 @@ export class EditManagerFocusOps {
     this.cutElement = this.editManager.nav.getFocus();
     this.cutElement?.classList.add(JSED_MARCHING_ANTS_CLASS);
     return !!this.cutElement;
-  }
-
-  private prePaste(): { cutElement: HTMLElement; focus: HTMLElement } | null {
-    if (!this.cutElement) {
-      return null;
-    }
-    const focus = this.editManager.nav.getFocus();
-    if (!focus) {
-      return null;
-    }
-    const cutElement = this.cutElement;
-    cutElement?.classList.remove(JSED_MARCHING_ANTS_CLASS);
-    this.cutElement = null;
-    return { cutElement, focus };
   }
 
   pasteBefore(): boolean {
@@ -293,6 +298,30 @@ export class EditManagerFocusOps {
   cancelPaste(): boolean {
     this.prePaste();
     return true;
+  }
+
+  copyEmptyNext(): boolean {
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+    const empty = focusable.copyEmptyNext(focus);
+    if (empty) {
+      this.editManager.nav.FOCUS(empty);
+    }
+    return false;
+  }
+
+  copyEmptyPrevious(): boolean {
+    const focus = this.editManager.nav.getFocus();
+    if (!focus) {
+      return false;
+    }
+    const empty = focusable.copyEmptyPrevious(focus);
+    if (empty) {
+      this.editManager.nav.FOCUS(empty);
+    }
+    return false;
   }
 
   // #endregion

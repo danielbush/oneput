@@ -167,6 +167,30 @@
   background: rgba(37, 99, 235, 1);
   animation: jsed-cursor-pulse 1.6s ease-in-out infinite;
 }
+
+/*
+Caret indicator: when the input has a collapsed caret in the TOKEN's text
+(jsed-crs-caret), the focus indicator collapses from a pulsing background
+to a pulsing underline. Range / empty input states (SELECT_ALL /
+SELECT_PARTIAL / EMPTY) have no caret class and keep the default pulse.
+*/
+.jsed-token-focus.jsed-crs-caret.jsed-token,
+.jsed-token-focus.jsed-crs-caret.jsed-anchor-token {
+  background-color: transparent;
+  color: inherit;
+}
+
+.jsed-token-focus.jsed-crs-caret.jsed-token::before,
+.jsed-token-focus.jsed-crs-caret.jsed-anchor-token::before {
+  top: auto;
+  bottom: -0.14em;
+  left: -0.08em;
+  right: -0.08em;
+  height: 0.14em;
+  border-radius: 999px;
+  background: currentColor;
+  animation: jsed-cursor-underline 1.35s ease-in-out infinite;
+}
 /* #endregion */
 
 /* #region selection */
@@ -245,6 +269,19 @@ See:
   50% {
     background: rgba(59, 140, 130, 1);
     transform: scale(0.985);
+  }
+}
+
+@keyframes jsed-cursor-underline {
+  0%,
+  100% {
+    opacity: 0.95;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 0.14;
+    transform: scaleX(0.82);
   }
 }
 /* #endregion */

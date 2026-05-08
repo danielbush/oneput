@@ -1,72 +1,82 @@
 import { describe, expect, test } from 'vitest';
-import { getCursorStateFromInput, getCursorStateFromSelection } from '../cursor.js';
+import { deriveCursorVisuals } from '../cursor.js';
 
-describe('getCursorStateFromInput', () => {
-  test('trailing space maps to CURSOR_INSERT_AFTER', () => {
-    // arrange
-    const input = 'hello ';
+describe('deriveCursorVisuals', () => {
+  describe('caret indicator', () => {
+    test.each([
+      ['CURSOR_AT_BEGINNING', true],
+      ['CURSOR_AT_MIDDLE', true],
+      ['CURSOR_AT_END', true],
+      ['SELECT_ALL', false],
+      ['SELECT_PARTIAL', false],
+      ['EMPTY', false]
+    ] as const)('selection %s → caret=%s', (selection, expected) => {
+      // arrange + act
+      const { caret } = deriveCursorVisuals(selection, 'hello');
 
-    // act
-    const state = getCursorStateFromInput(input);
+      // assert
+      expect(caret).toBe(expected);
+    });
 
-    // assert
-    expect(state).toBe('CURSOR_INSERT_AFTER');
+    test('null selection → caret=false', () => {
+      // arrange + act
+      const { caret } = deriveCursorVisuals(null, 'hello');
+
+      // assert
+      expect(caret).toBe(false);
+    });
   });
 
-  test('leading space maps to CURSOR_INSERT_BEFORE', () => {
-    // arrange
-    const input = ' hello';
+  describe('marker', () => {
+    test('AT_BEGINNING with leading space → INSERT_BEFORE', () => {
+      // arrange + act
+      const { marker } = deriveCursorVisuals('CURSOR_AT_BEGINNING', ' hello');
 
-    // act
-    const state = getCursorStateFromInput(input);
+      // assert
+      expect(marker).toBe('CURSOR_INSERT_BEFORE');
+    });
 
-    // assert
-    expect(state).toBe('CURSOR_INSERT_BEFORE');
-  });
+    test('AT_BEGINNING with no leading space → PREPEND', () => {
+      // arrange + act
+      const { marker } = deriveCursorVisuals('CURSOR_AT_BEGINNING', 'hello');
 
-  test('plain input maps to null (no marker)', () => {
-    // arrange
-    const input = 'hello';
+      // assert
+      expect(marker).toBe('CURSOR_PREPEND');
+    });
 
-    // act
-    const state = getCursorStateFromInput(input);
+    test('AT_END with trailing space → INSERT_AFTER', () => {
+      // arrange + act
+      const { marker } = deriveCursorVisuals('CURSOR_AT_END', 'hello ');
 
-    // assert
-    expect(state).toBeNull();
-  });
-});
+      // assert
+      expect(marker).toBe('CURSOR_INSERT_AFTER');
+    });
 
-describe('getCursorStateFromSelection', () => {
-  test('selection at beginning maps to CURSOR_PREPEND', () => {
-    // arrange
-    const selection = 'CURSOR_AT_BEGINNING';
+    test('AT_END with no trailing space → APPEND', () => {
+      // arrange + act
+      const { marker } = deriveCursorVisuals('CURSOR_AT_END', 'hello');
 
-    // act
-    const state = getCursorStateFromSelection(selection);
+      // assert
+      expect(marker).toBe('CURSOR_APPEND');
+    });
 
-    // assert
-    expect(state).toBe('CURSOR_PREPEND');
-  });
+    test.each(['CURSOR_AT_MIDDLE', 'SELECT_ALL', 'SELECT_PARTIAL', 'EMPTY'] as const)(
+      '%s → no marker (regardless of boundary spaces)',
+      (selection) => {
+        // arrange + act
+        const { marker } = deriveCursorVisuals(selection, ' hello ');
 
-  test('selection at end maps to CURSOR_APPEND', () => {
-    // arrange
-    const selection = 'CURSOR_AT_END';
+        // assert
+        expect(marker).toBeNull();
+      }
+    );
 
-    // act
-    const state = getCursorStateFromSelection(selection);
+    test('null selection → no marker', () => {
+      // arrange + act
+      const { marker } = deriveCursorVisuals(null, ' hello ');
 
-    // assert
-    expect(state).toBe('CURSOR_APPEND');
-  });
-
-  test('other selections map to null (no marker)', () => {
-    // arrange
-    const selection = 'SELECT_ALL';
-
-    // act
-    const state = getCursorStateFromSelection(selection);
-
-    // assert
-    expect(state).toBeNull();
+      // assert
+      expect(marker).toBeNull();
+    });
   });
 });

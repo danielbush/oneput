@@ -1,5 +1,6 @@
 import {
   CURSOR_APPEND_CLASS,
+  CURSOR_CARET_CLASS,
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS,
   CURSOR_PREPEND_CLASS,
@@ -7,7 +8,7 @@ import {
 } from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
 import { isSameLine } from './lib/line.js';
-import { getCursorStateFromInput, getCursorStateFromSelection } from './lib/cursor.js';
+import { deriveCursorVisuals } from './lib/cursor.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import type { JsedDocument } from './types.js';
@@ -87,6 +88,17 @@ export class Cursor {
   #onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
   #silent: boolean;
   #focusClasses: string[] = [];
+  /**
+   * Last input selection state observed via setStateFromSelection. Used as
+   * the model for visual derivation; reset on `place()` since a new TOKEN
+   * starts a fresh editing session.
+   */
+  #lastSelection: UserInputSelectionState | null = null;
+  /**
+   * Last input value observed via setStateFromInput. Paired with
+   * `#lastSelection` to derive the marker class.
+   */
+  #lastInputValue = '';
 
   readonly ops: CursorTextOps;
   private motion: CursorMotion;
@@ -141,6 +153,12 @@ export class Cursor {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);
     }
+    // Clear visual classes on the outgoing token but preserve the cached
+    // selection / input value: those mirror the input element's state, which
+    // is global across tokens. Resetting them would leave the new token in
+    // bg-pulse until the next selection-change event arrives — and in flows
+    // that don't fire one (e.g. setStateFromInput called after place during
+    // insert-after-current), we'd miss the underline indefinitely.
     this.removeAllFocusClasses();
     if (!this.#silent) {
       this.#token.classList.remove(JSED_CURSOR_CLASS);
@@ -205,14 +223,39 @@ export class Cursor {
     }
   }
 
-  /** Update CURSOR_STATE markers from the current input value. */
+  /**
+   * Notify Cursor that the input value changed. Updates the cached input
+   * value and re-derives the marker (which depends on selection + value).
+   * The caret indicator is unchanged — it depends on selection only.
+   */
   setStateFromInput(input: string): void {
-    this.setState(getCursorStateFromInput(input));
+    this.#lastInputValue = input;
+    this.applyVisuals();
   }
 
-  /** Update CURSOR_STATE markers from the current input selection. */
+  /**
+   * Notify Cursor that the input selection changed. Updates the cached
+   * selection and re-derives both the caret indicator and the marker.
+   */
   setStateFromSelection(selection: UserInputSelectionState): void {
-    this.setState(getCursorStateFromSelection(selection));
+    this.#lastSelection = selection;
+    this.applyVisuals();
+  }
+
+  private applyVisuals(): void {
+    const { caret, marker } = deriveCursorVisuals(this.#lastSelection, this.#lastInputValue);
+    this.setCaret(caret);
+    this.setState(marker);
+  }
+
+  private setCaret(on: boolean): void {
+    if (on) {
+      if (!this.#focusClasses.includes(CURSOR_CARET_CLASS)) {
+        this.addFocusClasses(CURSOR_CARET_CLASS);
+      }
+    } else {
+      this.removeFocusClasses(CURSOR_CARET_CLASS);
+    }
   }
 
   /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */

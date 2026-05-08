@@ -4,6 +4,14 @@ export const CURSOR_INSERT_AFTER_CLASS = 'jsed-crs-insert-after';
 export const CURSOR_INSERT_BEFORE_CLASS = 'jsed-crs-insert-before';
 
 /**
+ * Indicates the input has a collapsed caret in its text (CURSOR_AT_BEGINNING /
+ * _MIDDLE / _END), as opposed to a range or empty value. Drives the
+ * underline-vs-background-pulse focus visual on the focused TOKEN.
+ * Independent of the four marker classes above.
+ */
+export const CURSOR_CARET_CLASS = 'jsed-crs-caret';
+
+/**
  * CSS class for SIB_HIGHLIGHT.
  */
 export const SBR_FOCUS_SIBLING = 'jsed-focus-sibling';

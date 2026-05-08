@@ -61,12 +61,22 @@ export class InputController {
     range: [number | null, number | null];
   };
   private removeBeforeInputListener?: () => void;
+  private removeSelectionChangeListener?: () => void;
+  /**
+   * Last selection state we emitted, used to dedupe selectionchange events.
+   * The DOM fires `selectionchange` very frequently (on focus, on every
+   * setSelectionRange, sometimes redundantly); we only want to emit when
+   * the discrete state actually transitions.
+   */
+  private lastEmittedSelectionState?: InputSelectionState;
 
   /**
    * Used by Oneput to tell the controller what the input element is.
    */
   handleInputElementChange(inputElement: HTMLInputElement | undefined) {
     this.removeBeforeInputListener?.();
+    this.removeSelectionChangeListener?.();
+    this.lastEmittedSelectionState = undefined;
     this.inputElement = inputElement;
     this.selectionToggler = new SelectionToggler(this.ctl);
     if (!inputElement) {
@@ -84,6 +94,27 @@ export class InputController {
     this.removeBeforeInputListener = () => {
       inputElement.removeEventListener('beforeinput', handleBeforeInput);
     };
+
+    // 'selectionchange' is a document-level event that covers user-driven
+    // collapses/expansions (clicks, arrow keys, Esc) and selection mutations
+    // from setSelectionRange (which our programmatic selectAll / moveCursorTo*
+    // helpers all use). We filter to events for our input only and emit a
+    // selection-change when the discrete state actually transitions.
+    const handleSelectionChange = () => {
+      if (document.activeElement !== inputElement) return;
+      const current = this.getSelectionState();
+      if (current === this.lastEmittedSelectionState) return;
+      this.lastEmittedSelectionState = current;
+      this.ctl.events.emit({
+        type: 'selection-change',
+        payload: { selection: current }
+      });
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    this.removeSelectionChangeListener = () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+
     this.lastInputValue = inputElement.value;
     this.lastInputRange = [inputElement.selectionStart ?? 0, inputElement.selectionEnd ?? 0];
   }
@@ -163,12 +194,13 @@ export class InputController {
   }
 
   toggleSelect = () => {
+    // toggle() ends up calling selectAll / moveCursorToEnd /
+    // moveCursorToBeginning, all of which mutate the input via
+    // setSelectionRange. That triggers the document-level 'selectionchange'
+    // listener installed in handleInputElementChange, which emits the
+    // selection-change event — no need to emit it again here.
     this.selectionToggler?.toggle();
     this.focus();
-    this.ctl.events.emit({
-      type: 'selection-change',
-      payload: { selection: this.getSelectionState() }
-    });
   };
 
   getRange: () => [number | null, number | null] = () => {

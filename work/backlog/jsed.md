@@ -47,10 +47,20 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
+- [ ] feat: we lost the menu count (MenuStatus) in jsed's oneput layout
+  - packages/jsed/src/ui/oneput/app/_layout.ts
+  - COMMENT:
+    - the layout in packages/jsed should just be an example
+    - we could provide a pure one with a non-svelte MenuStatus?  is that even possible?
+    - we could provide a svelte one, but it shouldn't be imported into anything
+      - probably packages/jsed/src/ui/oneput/app/Root.ts is a bit arbitrary and should be left as instructions; maybe it goes back into jsed-demo?
+    - if we're a svelte app, we should be able to define our own layout and import it
+    - what issues are there in importing .svelte in a .ts file?
+      - it should be fine as long as typescript / vite are extended to handle it
 - [x] fix: delete should delete back not suck next word in
 - [x] feat: enter on token (no before/after states) should break AFTER token
 - [x] feat: copy empty element above / below (for li or p-tags)
-- [.] feat: when auto tokenizing, (1) add anchor to empty p or li tags; (2) preserve anchors (somehow) on detokenization so that they come back when we focus on the element again
+- [x] feat: when auto tokenizing, (1) add anchor to empty p or li tags; (2) preserve anchors (somehow) on detokenization so that they come back when we focus on the element again
   - COMMENT: see canCreateWithAnchor; maybe we need to extend this to a version that takes an element and checks if its empty; then tokenize needs to call it to add anchors
   - COMMENT: keep the jsed-anchor token (span) even after detokenization?
 - [ ] feat: improve input / cursor state
@@ -89,6 +99,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [ ] refactor: EditManager becomes private state
   - all functionalities get moved into helper classes
   - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers
+  - [ ] refactor: similarly Cursor and Nav - these are particular clumps of state; they might even just belong in EditManager; everything else is just ops: ops with particular local state + EditManager state that calls into simpler ops that are stateless
 - [ ] should oneput menu operations like "wrap tag in element" which prompts for a tag name be in a child AppObject - so we can control oneput more declaratively
 - [ ] refactor: can we extract selection orchestration out of EditManager
   - maybe a similar pattern to CursorTextOps ?

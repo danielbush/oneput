@@ -1,9 +1,8 @@
 import type { Controller, AppObject } from '@oneput/oneput';
-import { JsedDocument } from '../../../JsedDocument.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from './_icons.js';
 import { Layout, type LayoutSettings } from './_layout.js';
-import { EditDocument } from './EditDocument.js';
+import { JsedDocument } from '@oneput/jsed';
+import { EditDocument, icons } from '@oneput/jsed/ui/oneput/app';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {

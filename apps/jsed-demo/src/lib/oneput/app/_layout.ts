@@ -1,4 +1,4 @@
-import { hflex } from '@oneput/oneput';
+import { hflex, mountSvelte } from '@oneput/oneput';
 import type {
   Controller,
   DynamicPlaceholderBase,
@@ -10,8 +10,8 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
-import { icons } from './_icons.js';
-import { defaultKeys } from './_bindings.js';
+import { defaultKeys, icons } from '@oneput/jsed/ui/oneput/app';
+import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 
 /**
  * Define settings used by your particular layout.
@@ -153,6 +153,12 @@ export class Layout implements UILayout {
     return hflex({
       id: 'root-outer',
       children: (b) => [
+        b.fchild({
+          style: { flex: '1', position: 'relative' },
+          // Example of a svelte-based ui widget:
+          onMount: (node) =>
+            mountSvelte(MenuStatus, { target: node, props: { controller: this.ctl } })
+        }),
         this.settings.outerRight
           ? {
               style: { flex: '1', justifyContent: 'flex-end' },

@@ -1,5 +1,5 @@
 import type { Controller, AppObject } from '@oneput/oneput';
-import type { LayoutSettings } from './_layout.js';
+import type { LayoutSettings } from '../../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import type { EditManager } from '../../../EditManager.js';

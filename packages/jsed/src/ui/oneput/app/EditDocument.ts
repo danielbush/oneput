@@ -4,7 +4,7 @@ import { EditManager, type EditManagerError } from '../../../EditManager.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { icons } from './_icons.js';
 import { PickListUI } from './_ui/PickListUI.js';
-import type { LayoutSettings } from './_layout.js';
+import type { LayoutSettings } from '../../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { PasteElementUI } from './PasteElementUI.js';
 
 export class EditDocument implements AppObject {

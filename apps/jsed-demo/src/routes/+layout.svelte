@@ -6,7 +6,8 @@
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
-  import { icons, Root } from '@oneput/jsed/ui/oneput/app';
+  import { icons } from '@oneput/jsed/ui/oneput/app';
+  import { Root } from '$lib/oneput/app/Root.js';
 
   let { children } = $props();
 </script>

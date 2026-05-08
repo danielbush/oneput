@@ -48,7 +48,7 @@ export class ElementIndicator {
   #showIndicator = false;
   #observer: MinimalObserver | null = null;
   #isVisible = true;
-  #rafId: number | null = null;
+  // #rafId: number | null = null;
 
   #scrollHandler = () => {
     // if (this.#rafId !== null) return; // already scheduled

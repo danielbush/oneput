@@ -15,8 +15,6 @@ import * as dom from './lib/focusable.js';
 import * as domRules from './lib/dom-rules.js';
 const utils = {
   dom: {
-    copyElement: dom.copyElement,
-    replaceElement: dom.replaceElement,
     createElement: dom.createElement,
     insertAfter: dom.insertNewAfter,
     insertBefore: dom.insertNewBefore,

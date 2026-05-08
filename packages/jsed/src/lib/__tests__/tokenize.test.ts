@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, inlineStyleHack } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, inlineStyleHack, a } from '../../test/util.js';
 import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
-import { JSED_TOKEN_CLASS } from '../constants.js';
+import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../constants.js';
 
 describe('tokenizeLineAt', () => {
   test('simple LINE: <p>foo bar baz</p>', () => {
@@ -345,6 +345,21 @@ describe('detokenizeLine', () => {
   });
 
   test('it should not remove ANCHOR tokens', () => {
-    // TODO
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'foo ', a(), ' bar'));
+    const p1 = byId(doc, 'p1');
+    const anchor = p1.querySelector(`.${JSED_ANCHOR_CLASS}`) as HTMLElement;
+    tokenizeLineAt(p1);
+
+    // act
+    detokenizeLine(p1);
+
+    // assert
+    expect(p1.querySelector(`.${JSED_ANCHOR_CLASS}`)).toBe(anchor);
+    expect(anchor.classList.contains(JSED_TOKEN_CLASS)).toBe(true);
+    expect(Array.from(p1.querySelectorAll(`.${JSED_TOKEN_CLASS}`))).toEqual([anchor]);
+    expect(p1.childNodes[0]?.textContent).toBe('foo ');
+    expect(p1.childNodes[1]).toBe(anchor);
+    expect(p1.childNodes[2]?.textContent).toBe(' bar');
   });
 });

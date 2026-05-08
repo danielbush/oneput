@@ -51,8 +51,10 @@ export class CursorMotion {
    * Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE).
    */
   movePrevious(cursor: Cursor): void {
-    if (cursor.isInsertingAfter()) {
+    // Cancel append or insertAfter states and re-select token.
+    if (cursor.isInsertingAfter() || cursor.isAppend()) {
       cursor.clearMarkers();
+      cursor.place(cursor.getPlace()); // causes select-all in input
       return;
     }
 

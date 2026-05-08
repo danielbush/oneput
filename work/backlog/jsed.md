@@ -34,8 +34,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [x] insert element before/after tag
 - [x] delete elements
 - [x] unwrap esp for INLINE_FLOW
-- [ ] cut/move element
-- [ ] converting elements
+- [x] cut/move element
+- [x] converting elements
 - undo
   - undo text changes
   - undo FOCUSABLE changes
@@ -57,20 +57,11 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     - if we're a svelte app, we should be able to define our own layout and import it
     - what issues are there in importing .svelte in a .ts file?
       - it should be fine as long as typescript / vite are extended to handle it
-- [x] fix: delete should delete back not suck next word in
-- [x] feat: enter on token (no before/after states) should break AFTER token
-- [x] feat: copy empty element above / below (for li or p-tags)
-- [x] feat: when auto tokenizing, (1) add anchor to empty p or li tags; (2) preserve anchors (somehow) on detokenization so that they come back when we focus on the element again
-  - COMMENT: see canCreateWithAnchor; maybe we need to extend this to a version that takes an element and checks if its empty; then tokenize needs to call it to add anchors
-  - COMMENT: keep the jsed-anchor token (span) even after detokenization?
-- [ ] feat: improve input / cursor state
-  - [ ] when we change to either end, use an underline
-  - use the line state from the cursor lab when token is not fully selected
-  - when we start typing is usually a good clue that full selection is lost
 - feat: don't hard select id="test-doc" - editor should be configurable
 - feat: cut/copy/paste selection
   - COMMENT: marching ants just works; should be easy to do
-- fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
+- [.] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
+  - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
 - fix: removing an anchor that sits after an inline tag moves the cursor off tag and to the beginning of the line
   - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
   - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
@@ -86,12 +77,16 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
-- [ ] feat: join tokens
-- [ ] feat: grow/shrink INLINE_FLOW?
+- feat: join tokens
+- feat: grow/shrink INLINE_FLOW?
   - FOCUS goes on em
   - em converted to selection
   - use modifies selection and confirms
   - em occupies the selection
+- chore: remove cli/convert?
+  - COMMENT: I'm probably going to import my markdown in chunks by pasting into oneput and loading into spaces or linear idables
+  - see `dist/`
+  - see `bun run build:cli`
 
 ## refactors
 
@@ -128,38 +123,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - persist last FOCUS position and FOCUS it when we reload the document
 - use IMPLICIT_LINE's on all LINE_SEGMENT's that aren't enclosed by an INLINE_FLOW within the line; this makes it easy to navigate all segments with the FOCUS not just trailing IMPLICIT_LINE LINE_SEGMENT's and INLINE_FLOW LINE_SEGMENT's
 
-
-
-### feat: joinNext/joinPrevious across INLINE_FLOW boundaries
-
-Drafted: 23-Mar-2026
-
-`joinNext`/`joinPrevious` currently only find immediate TOKEN siblings via `getNextTokenSibling`/`getPreviousTokenSibling`. If the next/previous LINE_SIBLING is an INLINE_FLOW (e.g. `<em>`), the join is a no-op — it can't reach the TOKEN inside. The target TOKEN should be extracted from the INLINE_FLOW and absorbed into the receiving TOKEN.
-
-### discussion: visible vs invisible IGNORABLE's
-
-Drafted: 23-Mar-2026
-
-`getPreviousVisibleSibling`/`getNextVisibleSibling` skip all IGNORABLE's, but some IGNORABLE's may be visually present (e.g. decorative markers) while others are truly invisible (e.g. undo bookmarks). This distinction could affect TOKEN spacing decisions — a visible IGNORABLE between an ISLAND and a TOKEN might mean the user expects a gap, while an invisible one shouldn't influence spacing. Review whether IGNORABLE needs subclasses or whether the current blanket skip is sufficient.
-
-Needs a compelling example of a visible IGNORABLE before this is worth acting on.
-
-Moved to `work/discussion/20260326.discussion.cursor-visits-transparents.md`.
-
-### Remove or update cli/convert.ts
-
-What it did:
-
-- convert takes markdown files (used in the prototype project "fold") and converts them and the 2br constructs into html that can then be navigated and edited. The conversion is one-way, there is no going back.
-
-Hasn't been looked at in a while
-
-Add cli to `dist/`
-
-```sh
-bun run build:cli
-```
-
 ## Discussion
 
 - Invariant maintenance post-edit. Today tokenizeLooseLines* runs opportunistically at tokenize-time, so it catches bare text no matter how it appeared in the DOM. After removal, the "no bare interstitial text" invariant is established once at load and depends on every editing operation preserving it. Things to audit:
@@ -168,3 +131,16 @@ bun run build:cli
   - split operations on an outer LINE — the residue could leave bare runs
   - join / delete operations that pull a LINE's contents into its parent
   - anchor add/remove inside an interstice (already on your task list)
+
+## Done
+
+- [x] fix: delete should delete back not suck next word in
+- [x] feat: enter on token (no before/after states) should break AFTER token
+- [x] feat: copy empty element above / below (for li or p-tags)
+- [x] feat: when auto tokenizing, (1) add anchor to empty p or li tags; (2) preserve anchors (somehow) on detokenization so that they come back when we focus on the element again
+  - COMMENT: see canCreateWithAnchor; maybe we need to extend this to a version that takes an element and checks if its empty; then tokenize needs to call it to add anchors
+  - COMMENT: keep the jsed-anchor token (span) even after detokenization?
+- [x] feat: improve input / cursor state
+  - [x] when we change to either end, use an underline
+  - use the line state from the cursor lab when token is not fully selected
+  - when we start typing is usually a good clue that full selection is lost

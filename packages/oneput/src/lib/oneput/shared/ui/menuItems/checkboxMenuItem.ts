@@ -1,12 +1,13 @@
 import type { Controller } from '../../../controllers/controller.js';
 import type { MenuItem } from '../../../types.js';
-import { stdMenuItem } from './stdMenuItem.js';
+import { stdMenuItem, type StdMenuItemParams } from './stdMenuItem.js';
 
 export type CheckboxMenuItemParams = {
   id: string;
   action: (c: Controller, checked: boolean, node: HTMLInputElement) => void;
   textContent: string;
   checked: boolean;
+  closeMenuOnAction?: StdMenuItemParams['closeMenuOnAction'];
 };
 
 export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
@@ -17,6 +18,7 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
     tag: 'button',
     attr: { type: 'button' },
     textContent: params.textContent,
+    closeMenuOnAction: params.closeMenuOnAction,
     left: (b) => [
       b.fchild({
         id: inputId,

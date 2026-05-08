@@ -1,5 +1,6 @@
 import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { EditManager, type EditManagerError } from '../../../EditManager.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { icons } from './_icons.js';
@@ -704,9 +705,20 @@ export class EditDocument implements AppObject {
               this.editManager.anchor.removeAfterFocus();
             },
             left: (b) => [b.icon(icons.Anchor)]
-          })
+          }),
 
         // #endregion
+
+        checkboxMenuItem({
+          id: 'ENABLE_LEGACY_ELEMENT_INDICATOR',
+          textContent: 'Use legacy element indicator',
+          closeMenuOnAction: false,
+          action: (_, bool) => {
+            this.editManager.enableLegacyElementIndicator(bool);
+            this.renderMenuItems();
+          },
+          checked: this.editManager.legacyElementIndicatorEnabled
+        })
       ]
     });
   };

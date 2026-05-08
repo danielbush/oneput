@@ -117,6 +117,14 @@ export class EditManager {
   focus: EditManagerFocusOps;
   anchor: EditManagerAnchorOps;
   cursorOps: EditManagerCursorOps;
+  /**
+   * Uses ElementIndicator.
+   */
+  private useLegacyElementIndicator: boolean = false;
+  /**
+   * Modern CSS Anchors.
+   */
+  private useElementIndicator: boolean = false;
 
   constructor(
     public document: JsedDocument,
@@ -124,7 +132,7 @@ export class EditManager {
     readonly nav: Nav,
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav),
-    private elementIndicator: ElementIndicator
+    private legacyElementIndicator: ElementIndicator
   ) {
     this.focus = EditManagerFocusOps.create(this);
     this.anchor = EditManagerAnchorOps.create(this);
@@ -142,7 +150,7 @@ export class EditManager {
 
   start(): void {
     this.nav.connect();
-    this.elementIndicator.showIndicator(true);
+    this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
     this.nav.FOCUS(
       findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
     );
@@ -156,7 +164,7 @@ export class EditManager {
     }
     if (this.mode === 'edit') {
       this.enterEditing(this.cursor?.getPlace());
-      this.elementIndicator.showIndicator(true);
+      this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
     }
   }
 
@@ -165,7 +173,7 @@ export class EditManager {
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
     this.tokenizer.destroy();
-    this.elementIndicator.destroy();
+    this.legacyElementIndicator.destroy();
     this.unsubscribeInputChange?.();
     this.unsubscribeSelectionChange?.();
     this.onError = undefined;
@@ -484,8 +492,10 @@ export class EditManager {
   };
 
   private handleFocusChange(focus: HTMLElement | null) {
-    if (focus) this.elementIndicator.setTarget(focus);
-    this.elementIndicator.showIndicator(!!focus);
+    if (focus) this.legacyElementIndicator.setTarget(focus);
+    if (this.useLegacyElementIndicator) {
+      this.legacyElementIndicator.showIndicator(!!focus);
+    }
     this.focusChainNavigator.handleFocusChange(focus);
     if (this.mode === 'view' && focus && !isToken(focus)) {
       const line = findNextEditableLine(focus, this.document.root);
@@ -673,5 +683,25 @@ export class EditManager {
     this.onCursorChange = subscriptions?.onCursorChange;
     this.onTextChange = subscriptions?.onTextChange;
     this.onElementChange = subscriptions?.onElementChange;
+  }
+
+  get legacyElementIndicatorEnabled() {
+    return this.useLegacyElementIndicator;
+  }
+  get elementIndicatorEnabled() {
+    return this.useElementIndicator;
+  }
+  enableLegacyElementIndicator(bool: boolean) {
+    this.useElementIndicator = !bool;
+    this.useLegacyElementIndicator = bool;
+    const focus = this.nav.getFocus();
+    if (focus) {
+      this.legacyElementIndicator.showIndicator(bool);
+    }
+  }
+  enableElementIndicator(bool: boolean) {
+    this.useElementIndicator = bool;
+    this.useLegacyElementIndicator = !bool;
+    this.legacyElementIndicator.showIndicator(!bool);
   }
 }

@@ -78,7 +78,7 @@ The top-level modules above delegate to lower-level utilities in `lib/`:
 - **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
 - **sibwalk.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`
 - **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`
-- **dom.ts** — DOM manipulation: `copyElement`, `replaceElement`, `createElement`, `splitParentBefore`
+- **dom.ts** — DOM manipulation
 - **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)
 - **convert.ts** — converts HTML to jsed-compatible format (also available as a CLI binary via `cli/convert.ts`)
 

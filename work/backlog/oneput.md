@@ -4,33 +4,33 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Crtical work
 
-- [ ] disable individual menu items
-  - eg pasteBefore, pasteAfter, pasteIn
-- [ ] filter for global items
-  - example?
-  - scenario: you have nested menus, you only see the outer entry but you want to filter on the items within as well as the ones showing in the current menu
-  - scenario: you have a lot of items, not all necessarily in a menu; you want to bring them up when typing
-    - COMMENT: seems a bit weak
-  - This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
-  - the issue is how to define "global items"
-- [x] fix: svelte "reference only captures the initial value"
-  - Did you mean to reference it inside a derived instead?
-  - https://svelte.dev/e/state_referenced_locally
-  - /Users/danb/projects/@oneput/packages/oneput/src/lib/oneput/components/InjectedProps.svelte:6:28
-- fix: oneput-demo menu is closing on actions where it shouldn't
-  - I think I altered this when working on jsed-demo; what is the preferred approach?
 - fix: .svelte files imported into .ts files
   - `rg 'import.*\.svelte' * | grep '\.ts'`
   - we do this to inject svelte components into oneput
   - will this break anything?
   - will it break non-svelte, wc oneput builds
 
-## Finer Details
+## Details
 
-### Drafting
-
-- move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
-- need to make ai-docs similar to effect v4
+- fix: oneput-demo menu is closing on actions where it shouldn't
+  - I think I altered this when working on jsed-demo; what is the preferred approach?
+- fix: `$mod+v a` types a into input
+  - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
+  - COMMENT: blur input focus if we detect any key that has a modifier
+- fix: `$mod+v` pastes into input
+- fix: oneput-demo menu items close when they should stay open eg Settings
+  - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
+- feat: disable individual menu items
+  - eg pasteBefore, pasteAfter, pasteIn
+- feat: filter for global items
+  - example?
+  - scenario: you have nested menus, you only see the outer entry but you want to filter on the items within as well as the ones showing in the current menu
+  - scenario: you have a lot of items, not all necessarily in a menu; you want to bring them up when typing
+    - COMMENT: seems a bit weak
+  - This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
+  - the issue is how to define "global items"
+- chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+- docs: need to make ai-docs similar to effect v4
 
 ### Initial proposal: (docs + feat) configurable keybindings for AppObject actions
 

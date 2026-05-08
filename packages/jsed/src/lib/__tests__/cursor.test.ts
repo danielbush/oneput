@@ -24,7 +24,7 @@ describe('getCursorStateFromInput', () => {
     expect(state).toBe('CURSOR_INSERT_BEFORE');
   });
 
-  test('plain input maps to CURSOR_OVERWRITE', () => {
+  test('plain input maps to null (no marker)', () => {
     // arrange
     const input = 'hello';
 
@@ -32,7 +32,7 @@ describe('getCursorStateFromInput', () => {
     const state = getCursorStateFromInput(input);
 
     // assert
-    expect(state).toBe('CURSOR_OVERWRITE');
+    expect(state).toBeNull();
   });
 });
 
@@ -59,7 +59,7 @@ describe('getCursorStateFromSelection', () => {
     expect(state).toBe('CURSOR_APPEND');
   });
 
-  test('other selections map to CURSOR_OVERWRITE', () => {
+  test('other selections map to null (no marker)', () => {
     // arrange
     const selection = 'SELECT_ALL';
 
@@ -67,6 +67,6 @@ describe('getCursorStateFromSelection', () => {
     const state = getCursorStateFromSelection(selection);
 
     // assert
-    expect(state).toBe('CURSOR_OVERWRITE');
+    expect(state).toBeNull();
   });
 });

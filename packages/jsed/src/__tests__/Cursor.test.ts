@@ -99,14 +99,14 @@ describe('CURSOR_STATE', () => {
     });
   });
 
-  describe('CURSOR_OVERWRITE', () => {
-    test('setState clears all markers', () => {
+  describe('null state (no marker)', () => {
+    test('setState(null) clears all markers', () => {
       // arrange
       const { cursor } = setup();
       cursor.setState('CURSOR_APPEND');
 
       // act
-      cursor.setState('CURSOR_OVERWRITE');
+      cursor.setState(null);
 
       // assert
       expect(markerClasses(cursor.getPlace())).toEqual([]);
@@ -123,7 +123,7 @@ describe('CURSOR_STATE', () => {
       cursor.setState('CURSOR_PREPEND');
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
 
-      cursor.setState('CURSOR_OVERWRITE');
+      cursor.setState(null);
       expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
   });

@@ -369,6 +369,7 @@ export class EditManager {
    * Pass this to the selection emitter after instantiation.
    */
   handleSelectionChange = (selection: UserInputSelectionState) => {
+    console.log(selection);
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) return;
     this.cursor?.setStateFromSelection(selection);
   };

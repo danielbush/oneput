@@ -43,12 +43,16 @@ export type SetTokenOpts = {
   syncInput?: boolean;
 };
 
+/**
+ * The four CURSOR_STATE marker labels. A `null` state means "no marker" —
+ * the previous default `CURSOR_OVERWRITE` was just an alias for that and
+ * has been removed.
+ */
 export type CursorState =
   | 'CURSOR_APPEND'
   | 'CURSOR_PREPEND'
   | 'CURSOR_INSERT_AFTER'
-  | 'CURSOR_INSERT_BEFORE'
-  | 'CURSOR_OVERWRITE';
+  | 'CURSOR_INSERT_BEFORE';
 
 export type CursorParams = {
   document: JsedDocument;
@@ -180,8 +184,8 @@ export class Cursor {
     this.#focusClasses = [];
   }
 
-  /** Update the current CURSOR_STATE marker. */
-  setState(state: CursorState): void {
+  /** Update the current CURSOR_STATE marker. `null` clears all markers. */
+  setState(state: CursorState | null): void {
     switch (state) {
       case 'CURSOR_APPEND':
         this.setMarker(CURSOR_APPEND_CLASS);
@@ -195,7 +199,7 @@ export class Cursor {
       case 'CURSOR_INSERT_BEFORE':
         this.setMarker(CURSOR_INSERT_BEFORE_CLASS);
         return;
-      case 'CURSOR_OVERWRITE':
+      case null:
         this.clearMarkers();
         return;
     }

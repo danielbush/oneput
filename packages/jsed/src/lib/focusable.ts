@@ -5,31 +5,6 @@ import { isFocusable, isInlineFlow, isIsland } from './taxonomy.js';
 import * as token from './token.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
-export function copyElement(el: HTMLElement, newTagName?: string): HTMLElement {
-  newTagName = newTagName || el.tagName;
-  const newElement = document.createElement(newTagName);
-
-  // Copy all attributes from the old element to the new element
-  for (let i = 0; i < el.attributes.length; i++) {
-    const attr = el.attributes[i];
-    newElement.setAttribute(attr.name, attr.value);
-  }
-
-  // Move all children from the old element to the new element
-  while (el.firstChild) {
-    newElement.appendChild(el.firstChild);
-  }
-
-  return newElement;
-}
-
-export function replaceElement(old: HTMLElement, newElement: HTMLElement): void {
-  if (!old.parentNode) {
-    throw new Error('replaceElement: Element has no parent');
-  }
-  old.parentNode.replaceChild(newElement, old);
-}
-
 export function createElement(
   tagName: string,
   options: { addAnchors: boolean } = { addAnchors: true }

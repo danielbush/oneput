@@ -44,6 +44,17 @@
   border-radius: 5px;
 }
 
+.jsed-tag-indicator-css {
+  position: fixed;
+  position-anchor: --jsed-element-indicator;
+  top: anchor(top);
+  left: anchor(right);
+  transform-origin: 100% 100%;
+  transform: translate(-100%, -100%) scale(var(--jsed-zoom, 1));
+  margin-top: -5px;
+  z-index: 99999;
+}
+
 #jsed-app {
   position: fixed;
   left: 50vw;

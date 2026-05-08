@@ -718,6 +718,16 @@ export class EditDocument implements AppObject {
             this.renderMenuItems();
           },
           checked: this.editManager.legacyElementIndicatorEnabled
+        }),
+        checkboxMenuItem({
+          id: 'ENABLE_ELEMENT_INDICATOR',
+          textContent: 'Use modern element indicator',
+          closeMenuOnAction: false,
+          action: (_, bool) => {
+            this.editManager.enableElementIndicator(bool);
+            this.renderMenuItems();
+          },
+          checked: this.editManager.elementIndicatorEnabled
         })
       ]
     });

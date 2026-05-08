@@ -15,6 +15,7 @@ import { EditManagerFocusOps } from './EditManagerFocusOps.js';
 import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
 import { EditManagerCursorOps } from './EditManagerCursorOps.js';
 import { ElementIndicator } from './ElementIndicator.js';
+import { CSSElementIndicator } from './CSSElementIndicator.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -72,13 +73,15 @@ export class EditManager {
       (focus) => instance?.handleFocusChange(focus)
     );
     const elementIndicator = ElementIndicator.create();
+    const cssElementIndicator = CSSElementIndicator.create();
     instance = new EditManager(
       document,
       userInput,
       nav,
       Tokenizer.create(),
       FocusChainNavigator.create(nav),
-      elementIndicator
+      elementIndicator,
+      cssElementIndicator
     );
     return instance;
   }
@@ -97,13 +100,15 @@ export class EditManager {
       (focus) => instance?.handleFocusChange(focus)
     );
     const elementIndicator = ElementIndicator.createNull();
+    const cssElementIndicator = CSSElementIndicator.createNull();
     instance = new EditManager(
       document,
       userInput,
       nav,
       Tokenizer.createNull(),
       FocusChainNavigator.createNull(nav),
-      elementIndicator
+      elementIndicator,
+      cssElementIndicator
     );
     return instance;
   }
@@ -132,7 +137,8 @@ export class EditManager {
     readonly nav: Nav,
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav),
-    private legacyElementIndicator: ElementIndicator
+    private legacyElementIndicator: ElementIndicator,
+    private cssElementIndicator: CSSElementIndicator
   ) {
     this.focus = EditManagerFocusOps.create(this);
     this.anchor = EditManagerAnchorOps.create(this);
@@ -151,6 +157,7 @@ export class EditManager {
   start(): void {
     this.nav.connect();
     this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
+    this.cssElementIndicator.showIndicator(this.useElementIndicator && true);
     this.nav.FOCUS(
       findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
     );
@@ -165,6 +172,7 @@ export class EditManager {
     if (this.mode === 'edit') {
       this.enterEditing(this.cursor?.getPlace());
       this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
+      this.cssElementIndicator.showIndicator(this.useElementIndicator && true);
     }
   }
 
@@ -174,6 +182,7 @@ export class EditManager {
     this.nav.destroy();
     this.tokenizer.destroy();
     this.legacyElementIndicator.destroy();
+    this.cssElementIndicator.destroy();
     this.unsubscribeInputChange?.();
     this.unsubscribeSelectionChange?.();
     this.onError = undefined;
@@ -496,6 +505,10 @@ export class EditManager {
     if (this.useLegacyElementIndicator) {
       this.legacyElementIndicator.showIndicator(!!focus);
     }
+    this.cssElementIndicator.setTarget(focus);
+    if (this.useElementIndicator) {
+      this.cssElementIndicator.showIndicator(!!focus);
+    }
     this.focusChainNavigator.handleFocusChange(focus);
     if (this.mode === 'view' && focus && !isToken(focus)) {
       const line = findNextEditableLine(focus, this.document.root);
@@ -692,16 +705,29 @@ export class EditManager {
     return this.useElementIndicator;
   }
   enableLegacyElementIndicator(bool: boolean) {
-    this.useElementIndicator = !bool;
-    this.useLegacyElementIndicator = bool;
     const focus = this.nav.getFocus();
+
+    this.useElementIndicator = false;
+    this.cssElementIndicator.showIndicator(false);
+
+    this.useLegacyElementIndicator = bool;
     if (focus) {
       this.legacyElementIndicator.showIndicator(bool);
+    } else {
+      this.legacyElementIndicator.showIndicator(false);
     }
   }
   enableElementIndicator(bool: boolean) {
+    const focus = this.nav.getFocus();
+
+    this.useLegacyElementIndicator = false;
+    this.legacyElementIndicator.showIndicator(false);
+
     this.useElementIndicator = bool;
-    this.useLegacyElementIndicator = !bool;
-    this.legacyElementIndicator.showIndicator(!bool);
+    if (focus) {
+      this.cssElementIndicator.showIndicator(bool);
+    } else {
+      this.cssElementIndicator.showIndicator(false);
+    }
   }
 }

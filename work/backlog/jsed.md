@@ -92,6 +92,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 - [ ] refactor: merge CursorTextOps.ts into EditManagerCursorOps.ts
 - [ ] refactor: EditManager becomes private state
+  - COMMENT: how do we handle event handling; where do the `handle*` functions live?
+    - if the handling logic cuts across several classes created by this refactor then it has to be in the Editor state object that dispatches to the other classes
   - all functionalities get moved into helper classes
   - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers
   - [ ] refactor: similarly Cursor and Nav - these are particular clumps of state; they might even just belong in EditManager; everything else is just ops: ops with particular local state + EditManager state that calls into simpler ops that are stateless

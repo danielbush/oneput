@@ -11,17 +11,21 @@ export type UserInputRange = [number | null, number | null];
 export type UserInputChangeCause = 'user' | 'programmatic';
 
 export type UserInputChange = {
+  /** Input value after this change. */
   value: string;
+  /** Input value immediately before this change (one step back). */
   previousValue: string;
+  /** Selection range after this change. */
   range: UserInputRange;
+  /** Selection range immediately before this change (one step back). */
   previousRange: UserInputRange;
   /**
-   * Previous user-observed input state before `previousValue`.
-   *
-   * This helps consumers reason about ambiguous multi-step typing flows such as
-   * prepend-then-space versus split-in-the-middle without keeping ad hoc flags.
+   * Input value two steps back — the state before `previousValue`. Optional;
+   * only populated when a meaningful two-step history exists. Disambiguates
+   * multi-step flows like prepend-then-space vs. split-in-the-middle.
    */
   priorValue?: string;
+  /** Selection range two steps back — paired with `priorValue`. */
   priorRange?: UserInputRange;
   cause: UserInputChangeCause;
 };

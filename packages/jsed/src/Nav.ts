@@ -9,7 +9,6 @@ import {
   findNextNode,
   findPreviousNode
 } from './lib/walk.js';
-import { ElementIndicator } from './ElementIndicator.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
 
@@ -35,8 +34,7 @@ export class Nav {
     onRequestFocus?: OnRequestFocus,
     onFocusChange?: (focus: HTMLElement) => void
   ): Nav {
-    const elementIndicator = ElementIndicator.create();
-    return new Nav(doc, elementIndicator, onRequestFocus, onFocusChange);
+    return new Nav(doc, onRequestFocus, onFocusChange);
   }
 
   static createNull(
@@ -44,8 +42,7 @@ export class Nav {
     onRequestFocus?: OnRequestFocus,
     onFocusChange?: (focus: HTMLElement) => void
   ): Nav {
-    const elementIndicator = ElementIndicator.createNull();
-    return new Nav(doc, elementIndicator, onRequestFocus, onFocusChange);
+    return new Nav(doc, onRequestFocus, onFocusChange);
   }
 
   /**
@@ -61,7 +58,6 @@ export class Nav {
 
   constructor(
     private doc: JsedDocument,
-    private elementIndicator: ElementIndicator,
     private onRequestFocus?: OnRequestFocus,
     private onFocusChange?: (focus: HTMLElement) => void
   ) {
@@ -75,9 +71,6 @@ export class Nav {
     if (this.#connected) return;
     this.#connected = true;
     this.doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);
-    const focus = this.getFocus();
-    this.elementIndicator.setTarget(focus);
-    this.elementIndicator.showIndicator(true);
   }
 
   /**
@@ -87,16 +80,14 @@ export class Nav {
     if (!this.#connected) return;
     this.#connected = false;
     this.doc.root.removeEventListener('mousedown', this.handleElementClick);
-    this.elementIndicator.showIndicator(false);
   }
 
   /**
-   * Disconnect and permanently tear down the Nav and its ElementIndicator.
+   * Disconnect and permanently tear down stuff.
    * The instance cannot be used after this.
    */
   destroy() {
     this.disconnect();
-    this.elementIndicator.destroy();
   }
 
   private handleElementClick = (evt: MouseEvent) => {
@@ -142,7 +133,6 @@ export class Nav {
       this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
     }
     this.#FOCUS = el;
-    this.elementIndicator.setTarget(el);
     this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
     if (el !== this.doc.root) {
       this.doc.viewportScroller.scrollIntoViewIfHidden(el);

@@ -14,6 +14,7 @@ import type { UserInput, UserInputChange, UserInputSelectionState } from './User
 import { EditManagerFocusOps } from './EditManagerFocusOps.js';
 import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
 import { EditManagerCursorOps } from './EditManagerCursorOps.js';
+import { ElementIndicator } from './ElementIndicator.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -70,12 +71,14 @@ export class EditManager {
       (evt) => instance?.handleFocusRequest(evt),
       (focus) => instance?.handleFocusChange(focus)
     );
+    const elementIndicator = ElementIndicator.create();
     instance = new EditManager(
       document,
       userInput,
       nav,
       Tokenizer.create(),
-      FocusChainNavigator.create(nav)
+      FocusChainNavigator.create(nav),
+      elementIndicator
     );
     return instance;
   }
@@ -93,12 +96,14 @@ export class EditManager {
       (evt) => instance?.handleFocusRequest(evt),
       (focus) => instance?.handleFocusChange(focus)
     );
+    const elementIndicator = ElementIndicator.createNull();
     instance = new EditManager(
       document,
       userInput,
       nav,
       Tokenizer.createNull(),
-      FocusChainNavigator.createNull(nav)
+      FocusChainNavigator.createNull(nav),
+      elementIndicator
     );
     return instance;
   }
@@ -118,7 +123,8 @@ export class EditManager {
     private userInput: UserInput,
     readonly nav: Nav,
     private tokenizer: Tokenizer = Tokenizer.create(),
-    private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav)
+    private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav),
+    private elementIndicator: ElementIndicator
   ) {
     this.focus = EditManagerFocusOps.create(this);
     this.anchor = EditManagerAnchorOps.create(this);
@@ -136,6 +142,7 @@ export class EditManager {
 
   start(): void {
     this.nav.connect();
+    this.elementIndicator.showIndicator(true);
     this.nav.FOCUS(
       findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
     );
@@ -149,6 +156,7 @@ export class EditManager {
     }
     if (this.mode === 'edit') {
       this.enterEditing(this.cursor?.getPlace());
+      this.elementIndicator.showIndicator(true);
     }
   }
 
@@ -157,6 +165,7 @@ export class EditManager {
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
     this.tokenizer.destroy();
+    this.elementIndicator.destroy();
     this.unsubscribeInputChange?.();
     this.unsubscribeSelectionChange?.();
     this.onError = undefined;
@@ -475,6 +484,8 @@ export class EditManager {
   };
 
   private handleFocusChange(focus: HTMLElement | null) {
+    if (focus) this.elementIndicator.setTarget(focus);
+    this.elementIndicator.showIndicator(!!focus);
     this.focusChainNavigator.handleFocusChange(focus);
     if (this.mode === 'view' && focus && !isToken(focus)) {
       const line = findNextEditableLine(focus, this.document.root);

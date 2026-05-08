@@ -221,9 +221,9 @@ export class EditManager {
     return err({ type: 'no-token-under-focus' });
   }
 
-  exitEditing(params?: { focusElement?: HTMLElement }) {
+  exitEditing(params?: { softExit?: boolean; focusElement?: HTMLElement }) {
     // Exit cursor insertion state if present.
-    if (this.cursor?.exitInsertionState()) {
+    if (params?.softExit && this.cursor?.exitInsertionState()) {
       return;
     }
 
@@ -519,8 +519,7 @@ export class EditManager {
     return this.enterEditingAtTarget(current);
   }
 
-  handleExit() {
-    if (this.isSuspended) return;
+  handleExit({ softExit }: { softExit: boolean } = { softExit: true }) {
     if (this.selection) {
       // Cancel selection: collapse wrappers and land the CURSOR on the head
       // (wherever the selection was extended to). Keeps edit mode.
@@ -528,7 +527,7 @@ export class EditManager {
       return;
     }
     if (this.mode === 'edit') {
-      this.exitEditing();
+      this.exitEditing({ softExit });
     }
   }
 

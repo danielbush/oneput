@@ -293,10 +293,19 @@ export class EditDocument implements AppObject {
       id: 'EditDocument',
       focusBehaviour: 'last-action,first',
       items: [
+        this.editManager.isEditing() &&
+          stdMenuItem({
+            id: 'STOP_EDITING',
+            textContent: 'Stop editing',
+            action: () => {
+              this.editManager.handleExit({ softExit: false });
+            },
+            left: (b) => [b.icon(icons.PencilOff)]
+          }),
         !this.editManager.isEditing() &&
           stdMenuItem({
             id: 'EDIT_FIRST',
-            textContent: 'Edit...',
+            textContent: 'Edit this document',
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),

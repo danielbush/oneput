@@ -307,7 +307,7 @@ export class EditDocument implements AppObject {
         !this.editManager.isEditing() &&
           stdMenuItem({
             id: 'EDIT_FIRST',
-            textContent: 'Edit this document',
+            textContent: 'Edit content',
             action: this.actions.ENTER.action,
             left: (b) => [b.icon(icons.Pencil)]
           }),

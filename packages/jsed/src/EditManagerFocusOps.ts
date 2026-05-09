@@ -1,10 +1,10 @@
-import type { EditManager } from './EditManager.js';
-import * as focusable from './lib/focusable.js';
-import { canDelete } from './lib/dom-rules.js';
-import { convert, unwrap } from './lib/focusable.js';
-import { isInlineFlow } from './lib/taxonomy.js';
-import { JSED_MARCHING_ANTS_CLASS } from './lib/constants.js';
-import { EditManagerFocusSpaceOps } from './EditManagerFocusSpaceOps.js';
+import type { EditManager } from "./EditManager.js";
+import * as focusable from "./lib/focusable.js";
+import { canDelete } from "./lib/dom-rules.js";
+import { convert, unwrap } from "./lib/focusable.js";
+import { isInlineFlow } from "./lib/taxonomy.js";
+import { JSED_MARCHING_ANTS_CLASS } from "./lib/constants.js";
+import { EditManagerFocusSpaceOps } from "./EditManagerFocusSpaceOps.js";
 
 /**
  * High-level FOCUS operations for EditManager.
@@ -40,6 +40,9 @@ export class EditManagerFocusOps {
     if (!focus) {
       return false;
     }
+    if (focus === this.editManager.document.root) {
+      return false;
+    }
     return focusable.getInsertAfterCandidates(focus).length > 0;
   }
 
@@ -53,7 +56,10 @@ export class EditManagerFocusOps {
     if (!inserted) {
       return false;
     }
-    this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.editManager.notifyElementChange({
+      type: "focusable-inserted",
+      element: inserted,
+    });
     this.editManager.nav.FOCUS(inserted);
     return true;
   }
@@ -78,6 +84,9 @@ export class EditManagerFocusOps {
     if (!focus) {
       return false;
     }
+    if (focus === this.editManager.document.root) {
+      return false;
+    }
     return focusable.getInsertBeforeCandidates(focus).length > 0;
   }
 
@@ -91,7 +100,10 @@ export class EditManagerFocusOps {
       return false;
     }
 
-    this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.editManager.notifyElementChange({
+      type: "focusable-inserted",
+      element: inserted,
+    });
     this.editManager.nav.FOCUS(inserted);
     return true;
   }
@@ -128,7 +140,10 @@ export class EditManagerFocusOps {
     if (!inserted) {
       return false;
     }
-    this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+    this.editManager.notifyElementChange({
+      type: "focusable-inserted",
+      element: inserted,
+    });
     this.editManager.nav.FOCUS(inserted);
     return true;
   }
@@ -155,13 +170,21 @@ export class EditManagerFocusOps {
     if (!parent) {
       return false;
     }
-    const nextFocus =
-      focusable.findNextFocusableOutside(focus, this.editManager.document.root) ??
-      focusable.findPreviousFocusableOutside(focus, this.editManager.document.root) ??
+    const nextFocus = focusable.findNextFocusableOutside(
+      focus,
+      this.editManager.document.root,
+    ) ??
+      focusable.findPreviousFocusableOutside(
+        focus,
+        this.editManager.document.root,
+      ) ??
       parent;
 
     focusable.deleteElement(focus);
-    this.editManager.notifyElementChange({ type: 'focusable-removed', element: focus });
+    this.editManager.notifyElementChange({
+      type: "focusable-removed",
+      element: focus,
+    });
     this.editManager.nav.FOCUS(nextFocus);
     return true;
   }
@@ -193,7 +216,10 @@ export class EditManagerFocusOps {
 
   getConversionCandidates(): string[] {
     const focus = this.editManager.nav.getFocus();
-    return focusable.getConversionCandidates(focus, this.editManager.document.root);
+    return focusable.getConversionCandidates(
+      focus,
+      this.editManager.document.root,
+    );
   }
 
   canConvert(): boolean {

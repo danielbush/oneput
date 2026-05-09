@@ -47,6 +47,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
+- fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
 - feat: copy tokens
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
 - fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it

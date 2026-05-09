@@ -494,7 +494,7 @@ export class EditDocument implements AppObject {
         this.editManager.focus.canAppend() &&
           stdMenuItem({
             id: 'APPEND_NEW_ELEMENT_IN_FOCUS',
-            textContent: 'Append new element...',
+            textContent: 'Insert new element within (append)...',
             left: (b) => [b.icon(icons.Plus)],
             closeMenuOnAction: false,
             action: () => {

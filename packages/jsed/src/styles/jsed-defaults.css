@@ -26,17 +26,17 @@
   --btn-border: var(--slate-500);
 
   /* The tag indicator that shows on the currently focused tag. */
-  --tag-inidc--bgcolor: var(--slate-200);
-  --tag-inidc--fontsize: 14px;
+  --jsed-tag-indicator--bgcolor: var(--slate-200);
+  --jsed-tag-indicator--fontsize: 8px;
 }
 
 .jsed-tag-indicator {
-  background-color: var(--tag-inidc--bgcolor);
-  padding: 0.25rem 0.5rem;
+  background-color: var(--jsed-tag-indicator--bgcolor);
+  padding: 0.1rem 0.3rem;
   border-color: var(--sky-blue-700);
   border-width: 1px;
   border-style: solid;
-  font-size: var(--tag-inidc--fontsize);
+  font-size: var(--jsed-tag-indicator--fontsize);
   font-weight: 200;
   font-family: Arial, Helvetica, sans-serif;
   font-style: normal;

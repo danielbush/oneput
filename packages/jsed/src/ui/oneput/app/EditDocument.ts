@@ -53,7 +53,7 @@ export class EditDocument implements AppObject {
   onStart = () => {
     this.editManager.start();
     this.renderMenuItems();
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'jsed' } });
+    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing...' } });
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editManager.suspend(isOpen);
     });
@@ -62,6 +62,7 @@ export class EditDocument implements AppObject {
   };
 
   onResume = () => {
+    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing...' } });
     this.editManager.suspend(false); // just in case
     this.renderMenuItems();
     this.ctl.input.focus();

@@ -59,6 +59,9 @@ export type OneputProps = {
 
 export type FlexChildren = Array<FlexParams | FChildParams | undefined | null | false | ''>;
 
+export type FlexRealChild = FlexParams | FChildParams;
+export const isFlexRealChild = (c: FlexChildren[number]): c is FlexRealChild => Boolean(c);
+
 /**
  * Represents a either a horizontal or vertical flex container which is used to
  * represent top-level menu items or dividers but can also be used to structure

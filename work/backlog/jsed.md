@@ -47,13 +47,17 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
+- [.] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
+  - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
+- fix: typing a word in a paragraph and then immediately hitting enter creates an empty paragraph that is not accessible; hitting enter 2nd time creates a 3rd paragraph with an anchor and moves cursor to the anchor
+- fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it
 - [.] EditDocument (in jsed) imports Layout from jsed-demo
-  - COMMENT: the consumer could create their on AppObject and plug in EditDocument; it can then set menu title using its layout
-- [x] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
+  - COMMENT: using an adapter
+- [.] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
+  - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext
 - feat: copy tokens
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
-- fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it
-- [ ] feat: we lost the menu count (MenuStatus) in jsed's oneput layout
+- [x] feat: we lost the menu count (MenuStatus) in jsed's oneput layout
   - packages/jsed/src/ui/oneput/app/_layout.ts
   - COMMENT:
     - the layout in packages/jsed should just be an example
@@ -64,14 +68,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     - what issues are there in importing .svelte in a .ts file?
       - it should be fine as long as typescript / vite are extended to handle it
 - feat: don't hard select id="test-doc" - editor should be configurable
-- feat: cut/copy/paste selection
+- feat: cut/copy/paste selection and single tokens
   - COMMENT: marching ants just works; should be easy to do
-- [.] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
-  - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
-- fix: removing an anchor that sits after an inline tag moves the cursor off tag and to the beginning of the line
-  - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
-  - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
-- fix: `findPreviousNode(from, ...)` in `findPreviousLineCandidate` appears to visit `from`; I thought by default it shouldn't?
 - fix: possible issue when finding next or previous line candidates during cross line
   - the code finds next line sibling then tokenizes it; 
   - the "next" code returns the tokeniziation - so it's biased towards candidates that have tokens; but only checks the first one
@@ -93,6 +91,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - COMMENT: I'm probably going to import my markdown in chunks by pasting into oneput and loading into spaces or linear idables
   - see `dist/`
   - see `bun run build:cli`
+- fix: removing an anchor that sits after an inline tag moves the cursor off tag and to the beginning of the line
+  - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
+  - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
+- fix: `findPreviousNode(from, ...)` in `findPreviousLineCandidate` appears to visit `from`; I thought by default it shouldn't?
 
 ## refactors
 

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { Cursor } from '../Cursor.js';
+import { Cursor, computeCursorState } from '../Cursor.js';
 import { getValue } from '../lib/token.js';
 import {
   CURSOR_APPEND_CLASS,
@@ -54,7 +54,7 @@ describe('CURSOR_STATE', () => {
       const { cursor } = setup();
 
       // act
-      cursor.setState('CURSOR_APPEND');
+      cursor.setInsertState('CURSOR_APPEND');
 
       // assert
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_APPEND_CLASS]);
@@ -63,7 +63,7 @@ describe('CURSOR_STATE', () => {
     test('moveNext clears CURSOR_APPEND marker', () => {
       // arrange
       const { cursor } = setup();
-      cursor.setState('CURSOR_APPEND');
+      cursor.setInsertState('CURSOR_APPEND');
 
       // act
       cursor.moveNext();
@@ -79,7 +79,7 @@ describe('CURSOR_STATE', () => {
       const { cursor } = setup();
 
       // act
-      cursor.setState('CURSOR_PREPEND');
+      cursor.setInsertState('CURSOR_PREPEND');
 
       // assert
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
@@ -89,7 +89,7 @@ describe('CURSOR_STATE', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
-      cursor.setState('CURSOR_PREPEND');
+      cursor.setInsertState('CURSOR_PREPEND');
 
       // act
       cursor.movePrevious();
@@ -103,10 +103,10 @@ describe('CURSOR_STATE', () => {
     test('setState(null) clears all markers', () => {
       // arrange
       const { cursor } = setup();
-      cursor.setState('CURSOR_APPEND');
+      cursor.setInsertState('CURSOR_APPEND');
 
       // act
-      cursor.setState(null);
+      cursor.setInsertState(null);
 
       // assert
       expect(markerClasses(cursor.getPlace())).toEqual([]);
@@ -117,13 +117,13 @@ describe('CURSOR_STATE', () => {
       const { cursor } = setup();
 
       // act & assert
-      cursor.setState('CURSOR_APPEND');
+      cursor.setInsertState('CURSOR_APPEND');
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_APPEND_CLASS]);
 
-      cursor.setState('CURSOR_PREPEND');
+      cursor.setInsertState('CURSOR_PREPEND');
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
 
-      cursor.setState(null);
+      cursor.setInsertState(null);
       expect(markerClasses(cursor.getPlace())).toEqual([]);
     });
   });
@@ -134,7 +134,7 @@ describe('CURSOR_STATE', () => {
       const { cursor } = setup();
 
       // act
-      cursor.setState('CURSOR_INSERT_AFTER');
+      cursor.setInsertState('CURSOR_INSERT_AFTER');
 
       // assert
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_INSERT_AFTER_CLASS]);
@@ -143,7 +143,7 @@ describe('CURSOR_STATE', () => {
     test('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
       // arrange
       const { cursor } = setup();
-      cursor.setState('CURSOR_INSERT_AFTER');
+      cursor.setInsertState('CURSOR_INSERT_AFTER');
 
       // act
       cursor.movePrevious();
@@ -156,7 +156,7 @@ describe('CURSOR_STATE', () => {
     test('moveNext still moves forward from CURSOR_INSERT_AFTER', () => {
       // arrange
       const { cursor } = setup();
-      cursor.setState('CURSOR_INSERT_AFTER');
+      cursor.setInsertState('CURSOR_INSERT_AFTER');
 
       // act
       cursor.moveNext();
@@ -172,7 +172,7 @@ describe('CURSOR_STATE', () => {
       const { cursor } = setup();
 
       // act
-      cursor.setState('CURSOR_INSERT_BEFORE');
+      cursor.setInsertState('CURSOR_INSERT_BEFORE');
 
       // assert
       expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_INSERT_BEFORE_CLASS]);
@@ -181,7 +181,7 @@ describe('CURSOR_STATE', () => {
     test('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {
       // arrange
       const { cursor } = setup();
-      cursor.setState('CURSOR_INSERT_BEFORE');
+      cursor.setInsertState('CURSOR_INSERT_BEFORE');
 
       // act
       cursor.moveNext();
@@ -195,13 +195,93 @@ describe('CURSOR_STATE', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
-      cursor.setState('CURSOR_INSERT_BEFORE');
+      cursor.setInsertState('CURSOR_INSERT_BEFORE');
 
       // act
       cursor.movePrevious();
 
       // assert
       expect(getValue(cursor.getPlace())).toBe('hello');
+    });
+  });
+});
+
+describe('deriveCursorVisuals', () => {
+  describe('caret indicator', () => {
+    test.each([
+      ['CURSOR_AT_BEGINNING', true],
+      ['CURSOR_AT_MIDDLE', true],
+      ['CURSOR_AT_END', true],
+      ['SELECT_ALL', false],
+      ['SELECT_PARTIAL', false],
+      ['EMPTY', false]
+    ] as const)('selection %s → caret=%s', (selection, expected) => {
+      // arrange + act
+      const { isCaret: caret } = computeCursorState(selection, 'hello');
+
+      // assert
+      expect(caret).toBe(expected);
+    });
+
+    test('null selection → caret=false', () => {
+      // arrange + act
+      const { isCaret: caret } = computeCursorState(null, 'hello');
+
+      // assert
+      expect(caret).toBe(false);
+    });
+  });
+
+  describe('marker', () => {
+    test('AT_BEGINNING with leading space → INSERT_BEFORE', () => {
+      // arrange + act
+      const { insertMarker: marker } = computeCursorState('CURSOR_AT_BEGINNING', ' hello');
+
+      // assert
+      expect(marker).toBe('CURSOR_INSERT_BEFORE');
+    });
+
+    test('AT_BEGINNING with no leading space → PREPEND', () => {
+      // arrange + act
+      const { insertMarker: marker } = computeCursorState('CURSOR_AT_BEGINNING', 'hello');
+
+      // assert
+      expect(marker).toBe('CURSOR_PREPEND');
+    });
+
+    test('AT_END with trailing space → INSERT_AFTER', () => {
+      // arrange + act
+      const { insertMarker: marker } = computeCursorState('CURSOR_AT_END', 'hello ');
+
+      // assert
+      expect(marker).toBe('CURSOR_INSERT_AFTER');
+    });
+
+    test('AT_END with no trailing space → APPEND', () => {
+      // arrange + act
+      const { insertMarker: marker } = computeCursorState('CURSOR_AT_END', 'hello');
+
+      // assert
+      expect(marker).toBe('CURSOR_APPEND');
+    });
+
+    test.each(['CURSOR_AT_MIDDLE', 'SELECT_ALL', 'SELECT_PARTIAL', 'EMPTY'] as const)(
+      '%s → no marker (regardless of boundary spaces)',
+      (selection) => {
+        // arrange + act
+        const { insertMarker: marker } = computeCursorState(selection, ' hello ');
+
+        // assert
+        expect(marker).toBeNull();
+      }
+    );
+
+    test('null selection → no marker', () => {
+      // arrange + act
+      const { insertMarker: marker } = computeCursorState(null, ' hello ');
+
+      // assert
+      expect(marker).toBeNull();
     });
   });
 });

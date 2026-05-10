@@ -35,7 +35,7 @@ describe('splitAtToken', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
-    cursor.setState('CURSOR_APPEND');
+    cursor.setInsertState('CURSOR_APPEND');
 
     // act
     cursor.ops.splitAtToken();
@@ -49,7 +49,7 @@ describe('splitAtToken', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
-    cursor.setState('CURSOR_INSERT_AFTER');
+    cursor.setInsertState('CURSOR_INSERT_AFTER');
 
     // act
     cursor.ops.splitAtToken();

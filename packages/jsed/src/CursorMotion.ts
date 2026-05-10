@@ -26,7 +26,7 @@ export class CursorMotion {
    */
   moveNext(cursor: Cursor): void {
     if (cursor.isInsertingBefore()) {
-      cursor.clearMarkers();
+      cursor.clearInsertState();
       return;
     }
 
@@ -53,7 +53,7 @@ export class CursorMotion {
   movePrevious(cursor: Cursor): void {
     // Cancel append or insertAfter states and re-select token.
     if (cursor.isInsertingAfter() || cursor.isAppend()) {
-      cursor.clearMarkers();
+      cursor.clearInsertState();
       cursor.place(cursor.getPlace()); // causes select-all in input
       return;
     }

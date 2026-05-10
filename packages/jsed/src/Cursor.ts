@@ -8,7 +8,6 @@ import {
 } from './lib/constants.js';
 import { isLineSibling } from './lib/taxonomy.js';
 import { isSameLine } from './lib/line.js';
-import { deriveCursorVisuals } from './lib/cursor.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import type { JsedDocument } from './types.js';
@@ -30,9 +29,7 @@ export type CursorError =
     };
 
 /**
- * Options threaded through `setToken` -> `onCursorChange`. Cursor
- * is opaque to the contents; consumers (e.g. EditManager's handleCursorChange)
- * interpret them.
+ * Options threaded through `place` -> `onCursorChange`.
  */
 export type SetTokenOpts = {
   /**
@@ -49,7 +46,7 @@ export type SetTokenOpts = {
  * the previous default `CURSOR_OVERWRITE` was just an alias for that and
  * has been removed.
  */
-export type CursorState =
+export type CursorInsertState =
   | 'CURSOR_APPEND'
   | 'CURSOR_PREPEND'
   | 'CURSOR_INSERT_AFTER'
@@ -87,7 +84,7 @@ export class Cursor {
   #document: JsedDocument;
   #onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
   #silent: boolean;
-  #focusClasses: string[] = [];
+  #classes: string[] = [];
   /**
    * Last input selection state observed via setStateFromSelection. Used as
    * the model for visual derivation; reset on `place()` since a new TOKEN
@@ -124,11 +121,11 @@ export class Cursor {
 
   /** Destroy the current edit session. The instance cannot be used after this. */
   destroy() {
-    this.clearMarkers();
+    this.clearInsertState();
     if (!this.#silent) {
       this.#token.classList.remove(JSED_CURSOR_CLASS);
     }
-    this.removeAllFocusClasses();
+    this.removeAllClasses();
   }
 
   /** Return the JsedDocument that owns this CURSOR session. */
@@ -159,68 +156,33 @@ export class Cursor {
     // bg-pulse until the next selection-change event arrives — and in flows
     // that don't fire one (e.g. setStateFromInput called after place during
     // insert-after-current), we'd miss the underline indefinitely.
-    this.removeAllFocusClasses();
+    this.removeAllClasses();
     if (!this.#silent) {
       this.#token.classList.remove(JSED_CURSOR_CLASS);
       el.classList.add(JSED_CURSOR_CLASS);
-      this.getDocument().viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
+      this.#document.viewportScroller.scrollIntoViewIfHidden(el, { vertical: 'nearest' });
     }
     this.#token = el;
     this.#onCursorChange(el, opts);
   }
 
-  // #region CURSOR_STATE
-
-  private setMarker(className?: string): void {
-    this.clearMarkers();
-    if (className) {
-      this.addFocusClasses(className);
-    }
+  reload() {
+    this.place(this.getPlace()); // does select-all in input
   }
 
-  clearMarkers(): void {
-    this.removeFocusClasses(
-      CURSOR_INSERT_AFTER_CLASS,
-      CURSOR_INSERT_BEFORE_CLASS,
-      CURSOR_PREPEND_CLASS,
-      CURSOR_APPEND_CLASS
-    );
-  }
-
-  private addFocusClasses(...classNames: string[]) {
+  private addClasses(...classNames: string[]) {
     this.#token.classList.add(...classNames);
-    this.#focusClasses.push(...classNames);
+    this.#classes.push(...classNames);
   }
 
-  private removeFocusClasses(...classNames: string[]) {
+  private removeClasses(...classNames: string[]) {
     this.#token.classList.remove(...classNames);
-    this.#focusClasses = this.#focusClasses.filter((c) => !classNames.includes(c));
+    this.#classes = this.#classes.filter((c) => !classNames.includes(c));
   }
 
-  private removeAllFocusClasses() {
-    this.#token.classList.remove(...this.#focusClasses);
-    this.#focusClasses = [];
-  }
-
-  /** Update the current CURSOR_STATE marker. `null` clears all markers. */
-  setState(state: CursorState | null): void {
-    switch (state) {
-      case 'CURSOR_APPEND':
-        this.setMarker(CURSOR_APPEND_CLASS);
-        return;
-      case 'CURSOR_PREPEND':
-        this.setMarker(CURSOR_PREPEND_CLASS);
-        return;
-      case 'CURSOR_INSERT_AFTER':
-        this.setMarker(CURSOR_INSERT_AFTER_CLASS);
-        return;
-      case 'CURSOR_INSERT_BEFORE':
-        this.setMarker(CURSOR_INSERT_BEFORE_CLASS);
-        return;
-      case null:
-        this.clearMarkers();
-        return;
-    }
+  private removeAllClasses() {
+    this.#token.classList.remove(...this.#classes);
+    this.#classes = [];
   }
 
   /**
@@ -230,7 +192,7 @@ export class Cursor {
    */
   setStateFromInput(input: string): void {
     this.#lastInputValue = input;
-    this.applyVisuals();
+    this.computeState();
   }
 
   /**
@@ -239,23 +201,49 @@ export class Cursor {
    */
   setStateFromSelection(selection: UserInputSelectionState): void {
     this.#lastSelection = selection;
-    this.applyVisuals();
+    this.computeState();
   }
 
-  private applyVisuals(): void {
-    const { caret, marker } = deriveCursorVisuals(this.#lastSelection, this.#lastInputValue);
-    this.setCaret(caret);
-    this.setState(marker);
+  private computeState(): void {
+    const { isCaret, insertMarker } = computeCursorState(this.#lastSelection, this.#lastInputValue);
+    this.setCaret(isCaret);
+    this.setInsertState(insertMarker);
   }
 
-  private setCaret(on: boolean): void {
-    if (on) {
-      if (!this.#focusClasses.includes(CURSOR_CARET_CLASS)) {
-        this.addFocusClasses(CURSOR_CARET_CLASS);
-      }
-    } else {
-      this.removeFocusClasses(CURSOR_CARET_CLASS);
+  // #region cursor insert state (CURSOR_STATE)
+
+  clearInsertState(): void {
+    this.removeClasses(
+      CURSOR_INSERT_AFTER_CLASS,
+      CURSOR_INSERT_BEFORE_CLASS,
+      CURSOR_PREPEND_CLASS,
+      CURSOR_APPEND_CLASS
+    );
+  }
+
+  /** Update the current CURSOR_STATE marker. `null` clears all markers. */
+  setInsertState(state: CursorInsertState | null): void {
+    this.clearInsertState();
+    switch (state) {
+      case 'CURSOR_APPEND':
+        this.addClasses(CURSOR_APPEND_CLASS);
+        return;
+      case 'CURSOR_PREPEND':
+        this.addClasses(CURSOR_PREPEND_CLASS);
+        return;
+      case 'CURSOR_INSERT_AFTER':
+        this.addClasses(CURSOR_INSERT_AFTER_CLASS);
+        return;
+      case 'CURSOR_INSERT_BEFORE':
+        this.addClasses(CURSOR_INSERT_BEFORE_CLASS);
+        return;
     }
+  }
+
+  isInInsertState() {
+    return (
+      this.isAppend() || this.isInsertingAfter() || this.isPrepend() || this.isInsertingBefore()
+    );
   }
 
   /** Whether the CURSOR_STATE is CURSOR_APPEND on the current TOKEN. */
@@ -280,6 +268,26 @@ export class Cursor {
 
   // #endregion
 
+  // #region caret / select-all
+
+  /**
+   * If off, typing will usually overwrite the whole token; if on, typing will
+   * insert text in addition (like a normal caret would).
+   *
+   * This should map to whether the "user input" is in select-all or not.
+   */
+  private setCaret(on: boolean): void {
+    if (on) {
+      if (!this.#classes.includes(CURSOR_CARET_CLASS)) {
+        this.addClasses(CURSOR_CARET_CLASS);
+      }
+    } else {
+      this.removeClasses(CURSOR_CARET_CLASS);
+    }
+  }
+
+  // #endregion
+
   /**
    * Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE).
    */
@@ -298,13 +306,40 @@ export class Cursor {
   isSameLine(tok: HTMLElement) {
     return isSameLine(this.getPlace(), tok);
   }
+}
 
-  exitInsertionState(): boolean {
-    // GOTCHA: this must come before this.place (or clearMarkers).
-    const willExit =
-      this.isAppend() || this.isInsertingAfter() || this.isPrepend() || this.isInsertingBefore();
-    this.place(this.getPlace()); // does select-all in input
-    this.clearMarkers();
-    return willExit;
+/**
+ * Pure visual derivation for the focused TOKEN, computed from the current
+ * input selection state and input value together.
+ *
+ * - `caret` is true when the input has a collapsed caret in its text
+ *   (CURSOR_AT_BEGINNING / _MIDDLE / _END). Drives the underline indicator;
+ *   false means bg-pulse.
+ * - `marker` is the boundary marker for the four CURSOR_STATE labels.
+ *   - AT_BEGINNING + leading space  → CURSOR_INSERT_BEFORE
+ *   - AT_BEGINNING, no leading space → CURSOR_PREPEND
+ *   - AT_END + trailing space        → CURSOR_INSERT_AFTER
+ *   - AT_END, no trailing space      → CURSOR_APPEND
+ *   - anything else                  → null (clear markers)
+ *
+ * `selection` may be null when no selection state has been observed yet
+ * (e.g. immediately after the cursor was placed on a new TOKEN).
+ */
+export function computeCursorState(
+  selection: UserInputSelectionState | null,
+  userInput: string
+): { isCaret: boolean; insertMarker: CursorInsertState | null } {
+  const isCaret =
+    selection === 'CURSOR_AT_BEGINNING' ||
+    selection === 'CURSOR_AT_MIDDLE' ||
+    selection === 'CURSOR_AT_END';
+
+  let insertMarker: CursorInsertState | null = null;
+  if (selection === 'CURSOR_AT_BEGINNING') {
+    insertMarker = userInput.startsWith(' ') ? 'CURSOR_INSERT_BEFORE' : 'CURSOR_PREPEND';
+  } else if (selection === 'CURSOR_AT_END') {
+    insertMarker = userInput.endsWith(' ') ? 'CURSOR_INSERT_AFTER' : 'CURSOR_APPEND';
   }
+
+  return { isCaret, insertMarker };
 }

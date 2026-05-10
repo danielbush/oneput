@@ -249,7 +249,8 @@ export class EditManager {
 
   exitEditing(params?: { softExit?: boolean; focusElement?: HTMLElement }) {
     // Exit cursor insertion state if present.
-    if (params?.softExit && this.cursor?.exitInsertionState()) {
+    if (params?.softExit && this.cursor?.isInInsertState()) {
+      this.cursor.reload();
       return;
     }
 

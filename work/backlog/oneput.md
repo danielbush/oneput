@@ -12,9 +12,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Details
 
+- refactor: start should only be called once; make onResume required or just don't call anything
 - fix: oneput-demo menu is closing on actions where it shouldn't
   - I think I altered this when working on jsed-demo; what is the preferred approach?
-- fix: `$mod+v a` types a into input
+- fix: `$mod+v a` types `a` into input
   - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
   - COMMENT: blur input focus if we detect any key that has a modifier
 - fix: `$mod+v` pastes into input

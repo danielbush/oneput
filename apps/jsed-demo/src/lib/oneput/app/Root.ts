@@ -2,14 +2,16 @@ import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { JsedDocument } from '@oneput/jsed';
-import { EditDocument, icons } from '@oneput/jsed/ui/oneput/app';
+import { icons } from '@oneput/jsed/ui/oneput/app';
+import { EditDocumentUI } from './EditDocumentUI.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
     return new Root(ctl, {
       Layout: () => Layout.create(ctl),
       JsedDocument: (root) => JsedDocument.create(root),
-      EditDocument: (params) => EditDocument.create(ctl, params)
+      EditDocumentUI: ({ document }: { document: JsedDocument }) =>
+        EditDocumentUI.create(ctl, { document })
     });
   }
 
@@ -18,7 +20,7 @@ export class Root implements AppObject {
     private create: {
       Layout: () => Layout;
       JsedDocument: (root: HTMLElement) => JsedDocument;
-      EditDocument: (params: { document: JsedDocument }) => EditDocument;
+      EditDocumentUI: (params: { document: JsedDocument }) => EditDocumentUI;
     }
   ) {
     this.ctl.ui.setLayout(this.create.Layout());
@@ -37,7 +39,7 @@ export class Root implements AppObject {
         action: async () => {
           const docRoot = document.querySelector('#test-doc') as HTMLElement;
           this.ctl.app.run(
-            this.create.EditDocument({
+            this.create.EditDocumentUI({
               document: this.create.JsedDocument(docRoot)
             })
           );

@@ -1,4 +1,4 @@
-export { EditDocument } from './EditDocument.js';
+export { OneputEditDocumentAdapter } from './OneputEditDocumentAdapter.js';
 export { PasteElementUI } from './PasteElementUI.js';
 export { icons, iconData } from './_icons.js';
 export { defaultActions, defaultBindingsSerializable, defaultKeys } from './_bindings.js';

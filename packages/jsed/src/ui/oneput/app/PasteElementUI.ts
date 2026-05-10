@@ -46,6 +46,10 @@ export class PasteElementUI implements AppObject {
     this.renderMenuItems();
   };
 
+  onExit = () => {
+    this.editManager.focus.cancelPaste();
+  };
+
   actions = {
     FOCUS: {
       action: () => {
@@ -58,7 +62,6 @@ export class PasteElementUI implements AppObject {
     },
     EXIT: {
       action: () => {
-        this.editManager.focus.cancelPaste();
         this.ctl.app.exit();
       },
       binding: {

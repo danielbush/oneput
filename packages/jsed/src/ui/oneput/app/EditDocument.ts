@@ -5,7 +5,6 @@ import { EditManager, type EditManagerError } from '../../../EditManager.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { icons } from './_icons.js';
 import { PickListUI } from './_ui/PickListUI.js';
-import type { LayoutSettings } from '../../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { PasteElementUI } from './PasteElementUI.js';
 
 export class EditDocument implements AppObject {
@@ -53,7 +52,6 @@ export class EditDocument implements AppObject {
   onStart = () => {
     this.editManager.start();
     this.renderMenuItems();
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing...' } });
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editManager.suspend(isOpen);
     });
@@ -62,7 +60,6 @@ export class EditDocument implements AppObject {
   };
 
   onResume = () => {
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing...' } });
     this.editManager.suspend(false); // just in case
     this.renderMenuItems();
     this.ctl.input.focus();

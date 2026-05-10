@@ -1,4 +1,4 @@
-import type { EditManager } from './EditManager';
+import type { EditManager } from './EditManager.js';
 import * as space from './lib/space.js';
 
 /**

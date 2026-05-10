@@ -1,11 +1,11 @@
 import type { Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import type { JsedDocument } from '../../../JsedDocument';
-import { EditManager, type EditManagerError } from '../../../EditManager';
-import { icons } from './_icons';
-import { PickListUI } from './_ui/PickListUI';
-import { PasteElementUI } from './PasteElementUI';
+import type { JsedDocument } from '../../../JsedDocument.js';
+import { EditManager, type EditManagerError } from '../../../EditManager.js';
+import { icons } from './_icons.js';
+import { PickListUI } from './_ui/PickListUI.js';
+import { PasteElementUI } from './PasteElementUI.js';
 
 /**
  * Provides functionality needed to manage the Jsed editor in Oneput when

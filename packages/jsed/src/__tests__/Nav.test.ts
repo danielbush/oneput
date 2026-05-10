@@ -1,7 +1,6 @@
 import { describe, it, test, expect } from 'vitest';
 import { byId, div, frag, li, makeRoot, p, script, ul } from '../test/util.js';
 import { Nav, type OnRequestFocus } from '../Nav.js';
-import { ElementIndicator } from '../ElementIndicator.js';
 import type { JsedFocusRequestEvent } from '../types.js';
 import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from '../lib/constants.js';
 
@@ -42,7 +41,7 @@ describe('FOCUS', () => {
   it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'p1'));
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc);
     const p1 = doc.document.getElementById('p1') as HTMLElement;
 
     // act
@@ -56,7 +55,7 @@ describe('FOCUS', () => {
   it('should not focus a non-FOCUSABLE', () => {
     // arrange
     const doc = makeRoot(frag(script({ id: 'p1' }, 'p1')));
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc);
     nav.FOCUS(doc.root);
     const p1 = doc.document.getElementById('p1') as HTMLElement;
 
@@ -84,7 +83,7 @@ describe('FOCUS', () => {
             : undefined
       }
     });
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc);
     const p1 = byId(doc, 'p1');
     const scrollRequests = doc.viewportScroller.trackScrollRequests();
     scrollRequests.data.length = 0;
@@ -143,7 +142,7 @@ describe('FOCUS', () => {
         }
       }
     );
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc);
     const p1 = byId(doc, 'p1');
     const scrollRequests = doc.viewportScroller.trackScrollRequests();
     scrollRequests.data.length = 0;
@@ -169,7 +168,7 @@ describe('SIB_HIGHLIGHT', () => {
   it('should highlight current siblings of the active element', () => {
     // arrange
     const doc = makeRoot(frag(p('p1'), p({ id: 'p2' }, 'p2'), p('p3'), p('p4')));
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc);
     nav.FOCUS(doc.root);
     byId(doc, 'p2').focus();
 
@@ -194,7 +193,7 @@ test('REC_NEXT should recurse down', () => {
       )
     )
   );
-  const nav = new Nav(doc, ElementIndicator.createNull());
+  const nav = new Nav(doc);
   nav.FOCUS(doc.root);
 
   // act
@@ -230,7 +229,7 @@ test('REC_PREV should recurse up', () => {
       )
     )
   );
-  const nav = new Nav(doc, ElementIndicator.createNull());
+  const nav = new Nav(doc);
   nav.FOCUS(byId(doc, 'p1'));
 
   // act
@@ -257,7 +256,7 @@ test('SIB_NEXT should walk to next sibling', () => {
       li({ id: 'li3' }, 'item 3')
     )
   );
-  const nav = new Nav(doc, ElementIndicator.createNull());
+  const nav = new Nav(doc);
   nav.FOCUS(byId(doc, 'li1'));
 
   // act
@@ -284,7 +283,7 @@ test('SIB_PREV should walk to previous sibling', () => {
       li({ id: 'li3' }, 'item 3')
     )
   );
-  const nav = new Nav(doc, ElementIndicator.createNull());
+  const nav = new Nav(doc);
   nav.FOCUS(byId(doc, 'li3'));
 
   // act
@@ -304,7 +303,7 @@ test('SIB_PREV should walk to previous sibling', () => {
 test('UP can walk up successive parent elements', () => {
   // arrange
   const doc = makeRoot(div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))));
-  const nav = new Nav(doc, ElementIndicator.createNull());
+  const nav = new Nav(doc);
   nav.FOCUS(byId(doc, 'id3'));
 
   // act
@@ -330,7 +329,7 @@ describe('focus controller', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
     const requests = trackFocusRequests();
-    const nav = new Nav(doc, ElementIndicator.createNull(), requests.onFocusRequest);
+    const nav = new Nav(doc, requests.onFocusRequest);
     requests.data.length = 0;
 
     // act
@@ -350,7 +349,7 @@ describe('focus controller', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
     const requests = trackFocusRequests(false);
-    const nav = new Nav(doc, ElementIndicator.createNull(), requests.onFocusRequest);
+    const nav = new Nav(doc, requests.onFocusRequest);
     const p1 = byId(doc, 'p1');
     nav.FOCUS(p1);
     requests.data.length = 0;
@@ -371,7 +370,7 @@ describe('focus controller', () => {
   it('should not change FOCUS when controller returns false', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const nav = new Nav(doc, ElementIndicator.createNull(), () => false);
+    const nav = new Nav(doc, () => false);
     const p1 = byId(doc, 'p1');
     nav.FOCUS(p1);
 
@@ -385,7 +384,7 @@ describe('focus controller', () => {
   it('should allow focus change when controller returns true', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'p1'), p({ id: 'p2' }, 'p2')));
-    const nav = new Nav(doc, ElementIndicator.createNull(), () => true);
+    const nav = new Nav(doc, () => true);
     nav.FOCUS(byId(doc, 'p1'));
 
     // act
@@ -406,7 +405,7 @@ describe('ISLAND', () => {
         div({ id: 'div2' }, 'div')
       )
     );
-    const nav = new Nav(doc, ElementIndicator.createNull());
+    const nav = new Nav(doc);
 
     // act
     nav.REC_NEXT();

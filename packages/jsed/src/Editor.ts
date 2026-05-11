@@ -264,14 +264,6 @@ export class Editor {
     }
   }
 
-  private enterEditingAtFocus(): Result<void, EditorError> {
-    return this.enterEditing();
-  }
-
-  private enterEditingAtTarget(target: HTMLElement): Result<void, EditorError> {
-    return this.enterEditing(target);
-  }
-
   notifyTextChange(event: EditorTextChangeEvent) {
     this.onTextChange?.(event);
   }
@@ -442,11 +434,11 @@ export class Editor {
   handleEnter(): Result<void, EditorError> {
     // This allows us to edit via the "Edit..." menu .
     if (this.mode === 'view') {
-      return this.enterEditingAtFocus();
+      return this.enterEditing();
     }
 
     if (!this.cursor) {
-      return this.enterEditingAtFocus();
+      return this.enterEditing();
     }
 
     if (this.isSuspended) return ok(undefined);
@@ -456,7 +448,7 @@ export class Editor {
       return ok(undefined);
     }
 
-    return this.enterEditingAtTarget(current);
+    return this.enterEditing(current);
   }
 
   handleExit({ softExit }: { softExit: boolean } = { softExit: true }) {

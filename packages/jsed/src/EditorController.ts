@@ -8,6 +8,9 @@ import { findNextEditableLine } from './lib/line.js';
 
 /**
  * Handles incoming events for an Editor instance excluding actions fired by the user.
+ *
+ * This object should try to "route" to other objects but does carry high-level
+ * "glue" logic.
  */
 export class EditorController {
   static create(state: Editor) {
@@ -33,11 +36,7 @@ export class EditorController {
 
   onInputChange = (change: UserInputChange) => {
     if (this.state.isSuspended) return;
-    if (
-      this.state.mode !== 'edit' ||
-      !this.state.cursor ||
-      !isToken(this.state.cursor.getPlace())
-    ) {
+    if (this.state.mode !== 'edit' || !this.state.cursor || !this.state.cursor.isOnToken()) {
       return;
     }
     // If a selection is active, reduce it to the START (earlier end in
@@ -63,8 +62,9 @@ export class EditorController {
    */
   onInputSelectionChange = (selection: UserInputSelectionState) => {
     if (this.state.isSuspended) return;
-    if (this.state.mode !== 'edit' || !this.state.cursor || !isToken(this.state.cursor.getPlace()))
+    if (this.state.mode !== 'edit' || !this.state.cursor || !this.state.cursor.isOnToken()) {
       return;
+    }
     this.state.cursor?.setStateFromSelection(selection);
   };
 

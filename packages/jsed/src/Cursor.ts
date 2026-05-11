@@ -38,6 +38,7 @@ export class Cursor {
   getPlace = () => this.#state.getPlace();
   reload = () => this.#state.reload();
   isSameLine = (tok: HTMLElement) => this.#state.isSameLine(tok);
+  isOnToken = () => this.#state.isOnToken();
 
   // insertion states
   setInsertState = (state: CursorInsertState | null) => this.#state.setInsertState(state);

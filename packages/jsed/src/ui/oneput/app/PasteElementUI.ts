@@ -2,24 +2,24 @@ import type { Controller, AppObject } from '@oneput/oneput';
 import type { LayoutSettings } from '../../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import type { EditManager } from '../../../EditManager.js';
+import type { Editor } from '../../../Editor.js';
 
 export class PasteElementUI implements AppObject {
   static create(
     ctl: Controller,
-    editManager: EditManager,
+    editor: Editor,
     {
       cut
     }: {
       cut: boolean;
     }
   ) {
-    return new PasteElementUI(ctl, editManager, cut);
+    return new PasteElementUI(ctl, editor, cut);
   }
 
   constructor(
     private ctl: Controller,
-    private editManager: EditManager,
+    private editor: Editor,
     private cut: boolean
   ) {}
 
@@ -47,7 +47,7 @@ export class PasteElementUI implements AppObject {
   };
 
   onExit = () => {
-    this.editManager.focus.cancelPaste();
+    this.editor.focus.cancelPaste();
   };
 
   actions = {
@@ -71,7 +71,7 @@ export class PasteElementUI implements AppObject {
     },
     DOWN: {
       action: () => {
-        this.editManager.moveDown();
+        this.editor.moveDown();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
@@ -81,7 +81,7 @@ export class PasteElementUI implements AppObject {
     },
     UP: {
       action: () => {
-        this.editManager.moveUp();
+        this.editor.moveUp();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
@@ -91,7 +91,7 @@ export class PasteElementUI implements AppObject {
     },
     NEXT: {
       action: () => {
-        this.editManager.moveNext();
+        this.editor.moveNext();
       },
       binding: {
         bindings: ['$mod+l'],
@@ -100,7 +100,7 @@ export class PasteElementUI implements AppObject {
     },
     PREVIOUS: {
       action: () => {
-        this.editManager.movePrevious();
+        this.editor.movePrevious();
       },
       binding: {
         bindings: ['$mod+h'],
@@ -109,7 +109,7 @@ export class PasteElementUI implements AppObject {
     },
     PASTE_BEFORE: {
       action: () => {
-        this.editManager.focus.pasteBefore();
+        this.editor.focus.pasteBefore();
         this.ctl.app.exit();
       },
       binding: {
@@ -119,7 +119,7 @@ export class PasteElementUI implements AppObject {
     },
     PASTE_AFTER: {
       action: () => {
-        this.editManager.focus.pasteAfter();
+        this.editor.focus.pasteAfter();
         this.ctl.app.exit();
       },
       binding: {
@@ -129,7 +129,7 @@ export class PasteElementUI implements AppObject {
     },
     PASTE_APPEND: {
       action: () => {
-        this.editManager.focus.pasteAppend();
+        this.editor.focus.pasteAppend();
         this.ctl.app.exit();
       },
       binding: {

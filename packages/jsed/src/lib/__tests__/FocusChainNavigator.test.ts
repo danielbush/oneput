@@ -27,7 +27,7 @@ describe('FocusChainNavigator', () => {
     const target = byId(doc, 'target');
     const inline = byId(doc, 'inline');
 
-    // TODO: maybe better to test this at the EditManager level; we're assuming
+    // TODO: maybe better to test this at the Editor level; we're assuming
     // interactions here:
     nav.REQUEST_FOCUS(target);
     navigator.handleFocusChange(nav.getFocus());
@@ -83,7 +83,7 @@ describe('FocusChainNavigator', () => {
     const right = byId(doc, 'right');
     const rightLeaf = byId(doc, 'right-leaf');
 
-    // TODO: maybe better to test this at the EditManager level; we're assuming
+    // TODO: maybe better to test this at the Editor level; we're assuming
     // interactions here:
     nav.REQUEST_FOCUS(leftLeaf);
     navigator.handleFocusChange(nav.getFocus());

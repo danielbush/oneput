@@ -11,16 +11,16 @@ import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
-import { EditManagerFocusOps } from './EditManagerFocusOps.js';
-import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
-import { EditManagerCursorOps } from './EditManagerCursorOps.js';
+import { EditorFocusOps } from './EditorFocusOps.js';
+import { EditorAnchorOps } from './EditorAnchorOps.js';
+import { EditorCursorOps } from './EditorCursorOps.js';
 import { ElementIndicator } from './ElementIndicator.js';
 import { CSSElementIndicator } from './CSSElementIndicator.js';
 import type { CursorError, SetTokenOpts } from './CursorState.js';
 
-export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
-export type EditManagerMode = 'view' | 'edit';
-export type EditManagerTextChangeEvent =
+export type EditorError = { type: 'no-token-under-focus' } | CursorError;
+export type EditorMode = 'view' | 'edit';
+export type EditorTextChangeEvent =
   | {
       type: 'token-text-change';
       token: HTMLElement;
@@ -35,7 +35,7 @@ export type EditManagerTextChangeEvent =
       kind: 'leading-space' | 'trailing-space';
       change: 'inserted' | 'removed';
     };
-export type EditManagerElementChangeEvent =
+export type EditorElementChangeEvent =
   | {
       type: 'focusable-inserted';
       element: HTMLElement;
@@ -59,15 +59,9 @@ export type EditManagerElementChangeEvent =
  * tokenizing if it moves past the initial LINE it started on.
  *
  */
-export class EditManager {
-  static create({
-    document,
-    userInput
-  }: {
-    document: JsedDocument;
-    userInput: UserInput;
-  }): EditManager {
-    let instance: EditManager;
+export class Editor {
+  static create({ document, userInput }: { document: JsedDocument; userInput: UserInput }): Editor {
+    let instance: Editor;
     const nav = Nav.create(
       document,
       (evt) => instance?.handleFocusRequest(evt),
@@ -75,7 +69,7 @@ export class EditManager {
     );
     const elementIndicator = ElementIndicator.create();
     const cssElementIndicator = CSSElementIndicator.create();
-    instance = new EditManager(
+    instance = new Editor(
       document,
       userInput,
       nav,
@@ -93,8 +87,8 @@ export class EditManager {
   }: {
     document: JsedDocument;
     userInput: UserInput;
-  }): EditManager {
-    let instance: EditManager;
+  }): Editor {
+    let instance: Editor;
     const nav = Nav.createNull(
       document,
       (evt) => instance?.handleFocusRequest(evt),
@@ -102,7 +96,7 @@ export class EditManager {
     );
     const elementIndicator = ElementIndicator.createNull();
     const cssElementIndicator = CSSElementIndicator.createNull();
-    instance = new EditManager(
+    instance = new Editor(
       document,
       userInput,
       nav,
@@ -116,13 +110,13 @@ export class EditManager {
 
   cursor?: Cursor;
   selection?: CursorSelection;
-  mode: EditManagerMode = 'view';
+  mode: EditorMode = 'view';
   private isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
-  focus: EditManagerFocusOps;
-  anchor: EditManagerAnchorOps;
-  cursorOps: EditManagerCursorOps;
+  focus: EditorFocusOps;
+  anchor: EditorAnchorOps;
+  cursorOps: EditorCursorOps;
   /**
    * Uses ElementIndicator.
    */
@@ -141,16 +135,16 @@ export class EditManager {
     private legacyElementIndicator: ElementIndicator,
     private cssElementIndicator: CSSElementIndicator
   ) {
-    this.focus = EditManagerFocusOps.create(this);
-    this.anchor = EditManagerAnchorOps.create(this);
-    this.cursorOps = EditManagerCursorOps.create(this);
+    this.focus = EditorFocusOps.create(this);
+    this.anchor = EditorAnchorOps.create(this);
+    this.cursorOps = EditorCursorOps.create(this);
   }
 
-  getMode(): EditManagerMode {
+  getMode(): EditorMode {
     return this.mode;
   }
 
-  private setMode(mode: EditManagerMode) {
+  private setMode(mode: EditorMode) {
     this.mode = mode;
     this.onModeChange?.(mode);
   }
@@ -205,7 +199,7 @@ export class EditManager {
    * If `initial` is a FOCUSABLE, the CURSOR will be placed on the first
    * LINE_SIBLING reachable from the focused LINE.
    */
-  enterEditing(initial?: HTMLElement): Result<void, EditManagerError> {
+  enterEditing(initial?: HTMLElement): Result<void, EditorError> {
     this.nav.connect();
     initial = initial ?? this.nav.getFocus() ?? undefined;
     if (!initial) {
@@ -273,19 +267,19 @@ export class EditManager {
     }
   }
 
-  private enterEditingAtFocus(): Result<void, EditManagerError> {
+  private enterEditingAtFocus(): Result<void, EditorError> {
     return this.enterEditing();
   }
 
-  private enterEditingAtTarget(target: HTMLElement): Result<void, EditManagerError> {
+  private enterEditingAtTarget(target: HTMLElement): Result<void, EditorError> {
     return this.enterEditing(target);
   }
 
-  notifyTextChange(event: EditManagerTextChangeEvent) {
+  notifyTextChange(event: EditorTextChangeEvent) {
     this.onTextChange?.(event);
   }
 
-  notifyElementChange(event: EditManagerElementChangeEvent) {
+  notifyElementChange(event: EditorElementChangeEvent) {
     this.onElementChange?.(event);
   }
 
@@ -535,7 +529,7 @@ export class EditManager {
    * - edit mode on a TOKEN: split before the current TOKEN
    * - edit mode on a non-TOKEN target: descend into that target
    */
-  handleEnter(): Result<void, EditManagerError> {
+  handleEnter(): Result<void, EditorError> {
     // This allows us to edit via the "Edit..." menu .
     if (this.mode === 'view') {
       return this.enterEditingAtFocus();
@@ -675,22 +669,22 @@ export class EditManager {
   }
 
   /**
-   * A callback that EditManager or one of its helpers can call with errors.
+   * A callback that Editor or one of its helpers can call with errors.
    */
-  public onError?: (err: EditManagerError) => void;
-  private onModeChange?: (mode: EditManagerMode) => void;
+  public onError?: (err: EditorError) => void;
+  private onModeChange?: (mode: EditorMode) => void;
   private onFocusChange?: (focus: HTMLElement | null) => void;
   private onCursorChange?: (target: HTMLElement) => void;
-  private onTextChange?: (event: EditManagerTextChangeEvent) => void;
-  private onElementChange?: (event: EditManagerElementChangeEvent) => void;
+  private onTextChange?: (event: EditorTextChangeEvent) => void;
+  private onElementChange?: (event: EditorElementChangeEvent) => void;
 
   subscribe(subscriptions?: {
-    onError?: (err: EditManagerError) => void;
-    onModeChange?: (mode: EditManagerMode) => void;
+    onError?: (err: EditorError) => void;
+    onModeChange?: (mode: EditorMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
     onCursorChange?: (target: HTMLElement) => void;
-    onTextChange?: (event: EditManagerTextChangeEvent) => void;
-    onElementChange?: (event: EditManagerElementChangeEvent) => void;
+    onTextChange?: (event: EditorTextChangeEvent) => void;
+    onElementChange?: (event: EditorElementChangeEvent) => void;
   }) {
     this.onError = subscriptions?.onError;
     this.onModeChange = subscriptions?.onModeChange;

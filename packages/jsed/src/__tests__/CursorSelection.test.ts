@@ -18,7 +18,7 @@ function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
 /**
  * Narrow tests for CursorSelection at the class level. These exercise
  * the wrapper grow/shrink mechanics directly rather than going through
- * EditManager, because the behavior is DOM-shape sensitive and easier
+ * Editor, because the behavior is DOM-shape sensitive and easier
  * to reason about at the TOKEN level.
  */
 

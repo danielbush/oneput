@@ -1,7 +1,7 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import type { LayoutSettings } from './_layout.js';
 import { OneputEditDocumentAdapter } from '@oneput/jsed/ui/oneput/app';
-import type { EditManagerError, JsedDocument } from '@oneput/jsed';
+import type { EditorError, JsedDocument } from '@oneput/jsed';
 
 export class EditDocumentUI implements AppObject {
   static create(ctl: Controller, { document }: { document: JsedDocument }) {
@@ -53,7 +53,7 @@ export class EditDocumentUI implements AppObject {
     });
   };
 
-  handleEditError = (err: EditManagerError) => {
+  handleEditError = (err: EditorError) => {
     this.ctl.notify(`There was an error editing the document: ${err.type}`);
   };
 }

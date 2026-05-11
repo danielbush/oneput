@@ -63,7 +63,7 @@ export type InputIntent =
 /**
  * Interpret a user input transition as a higher-level edit intent.
  *
- * This is the logic center of EditManager.handleInputChange(...): it turns the
+ * This is the logic center of Editor.handleInputChange(...): it turns the
  * raw input value plus before/after selection state into a small semantic
  * instruction, leaving DOM edits and CURSOR choreography to the caller.
  */

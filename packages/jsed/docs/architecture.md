@@ -52,22 +52,22 @@ After that startup pass, tokenization no longer has to discover loose interstiti
 
 `CursorSelection` (for ranged selections) owns its own internal `Cursor` for the selection head; the editing cursor stays pinned at the anchor. Cross-LINE extension reuses the head-cursor's cross-LINE walk.
 
-## Orchestration: EditManager
+## Orchestration: Editor
 
-`EditManager` is the top-level mediator. It takes a JsedDocument and UserInput, creates a persistent Nav, and switches between two modes:
+`Editor` is the top-level mediator. It takes a JsedDocument and UserInput, creates a persistent Nav, and switches between two modes:
 
 - **view** — owns FOCUS only. First FOCUS on a FOCUSABLE runs `Tokenizer.tokenizeLineAt` opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
-- **editing** — owns FOCUS plus Cursor. `EditManager` also subscribes to UserInput changes in this mode, translating input text and input selection into CURSOR actions. Structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
+- **editing** — owns FOCUS plus Cursor. `Editor` also subscribes to UserInput changes in this mode, translating input text and input selection into CURSOR actions. Structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
 
 It wires everything together so that:
 
 - Key bindings trigger navigation and editing actions
 - Mouse clicks and touches route through REQUEST_FOCUS with a focus controller that tokenizes on the fly
-- Input changes flow through `EditManager.handleInputChange(...)`, which may rewrite the current TOKEN, append new TOKEN's after whitespace splits, or move the CURSOR based on the input contents
-- Input selection changes flow through `EditManager.handleSelectionChange(...)` into `Cursor.handleSelectionChange(...)`
+- Input changes flow through `Editor.handleInputChange(...)`, which may rewrite the current TOKEN, append new TOKEN's after whitespace splits, or move the CURSOR based on the input contents
+- Input selection changes flow through `Editor.handleSelectionChange(...)` into `Cursor.handleSelectionChange(...)`
 - TOKEN changes flow back to update FOCUS and the input element
 
-A consumer (typically a Oneput AppObject like `EditDocument`) creates an EditManager and connects it to Oneput's bindings and input systems.
+A consumer (typically a Oneput AppObject like `EditDocument`) creates an Editor and connects it to Oneput's bindings and input systems.
 
 ## Utilities (lib/)
 
@@ -86,5 +86,5 @@ The top-level modules above delegate to lower-level utilities in `lib/`:
 
 Jsed uses Oneput's `AppObject` system to provide its UI. See `src/ui/oneput/app/` for the reusable package integration:
 
-- `EditDocument` — single AppObject that stays mounted in both view and editing modes and wires bindings to EditManager
+- `EditDocument` — single AppObject that stays mounted in both view and editing modes and wires bindings to Editor
 - `_bindings.ts` — default bindings combining navigation (menu closed) and menu controls (menu open)

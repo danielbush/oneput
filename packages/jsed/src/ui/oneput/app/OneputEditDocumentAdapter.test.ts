@@ -1,4 +1,4 @@
-import { EditManager, JsedDocument, type EditManagerError } from '@oneput/jsed';
+import { Editor, JsedDocument, type EditorError } from '@oneput/jsed';
 import { describe, expect, it } from 'vitest';
 import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
 import { OneputEditDocumentAdapter } from './OneputEditDocumentAdapter.js';
@@ -38,7 +38,7 @@ export class EditDocument implements AppObject {
 
   private adapter: OneputEditDocumentAdapter;
   public actions: AppObject['actions'];
-  public editManager: EditManager;
+  public editor: Editor;
 
   constructor(
     private ctl: Controller,
@@ -46,7 +46,7 @@ export class EditDocument implements AppObject {
   ) {
     this.adapter = this.create.adapter(this);
     this.actions = this.adapter.actions;
-    this.editManager = this.adapter.editManager;
+    this.editor = this.adapter.editor;
   }
 
   onStart = () => {
@@ -73,7 +73,7 @@ export class EditDocument implements AppObject {
     });
   };
 
-  handleEditError = (err: EditManagerError) => {
+  handleEditError = (err: EditorError) => {
     this.ctl.notify(`There was an error editing the document: ${err.type}`);
   };
 }
@@ -83,17 +83,17 @@ describe('EditDocument', () => {
     // arrange
     const document = makeDocument('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
     const ctl = Controller.createNull();
-    const editor = EditDocument.createNull(ctl, { document });
+    const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
 
     // act
-    ctl.simulateStart(() => editor);
+    ctl.simulateStart(() => editorUI);
     const appChanges = ctl.trackAppChanges();
-    const editManager = editor.editManager;
+    const editor = editorUI.editor;
 
     // assert
-    expect(editManager.getMode()).toBe('view');
-    expect(editManager.nav.getFocus()).toBe(p1);
+    expect(editor.getMode()).toBe('view');
+    expect(editor.nav.getFocus()).toBe(p1);
     expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
     expect(appChanges.data).toEqual([]);
   });
@@ -102,18 +102,18 @@ describe('EditDocument', () => {
     // arrange
     const document = makeDocument('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editor = EditDocument.createNull(ctl, { document });
+    const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
-    ctl.simulateStart(() => editor);
+    ctl.simulateStart(() => editorUI);
     const appChanges = ctl.trackAppChanges();
-    const editManager = editor.editManager;
+    const editor = editorUI.editor;
 
     // act
-    editManager.nav.REQUEST_FOCUS(p1);
+    editor.nav.REQUEST_FOCUS(p1);
 
     // assert
-    expect(editManager.getMode()).toBe('edit');
-    expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('foo');
+    expect(editor.getMode()).toBe('edit');
+    expect(editor.cursor?.getPlace().textContent?.trim()).toBe('foo');
     expect(appChanges.data).toEqual([]);
   });
 
@@ -121,13 +121,13 @@ describe('EditDocument', () => {
     // arrange
     const document = makeDocument('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editor = EditDocument.createNull(ctl, { document });
+    const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
-    const editManager = editor.editManager;
-    ctl.simulateStart(() => editor);
+    const editor = editorUI.editor;
+    ctl.simulateStart(() => editorUI);
     // Edit mode
-    editManager.nav.REQUEST_FOCUS(p1);
-    editManager.cursor?.moveNext();
+    editor.nav.REQUEST_FOCUS(p1);
+    editor.cursor?.moveNext();
 
     // act
     await ctl.simulateKey('Enter');
@@ -137,7 +137,7 @@ describe('EditDocument', () => {
     expect(paragraphs).toHaveLength(2);
     expect(paragraphs[0]?.textContent?.trim()).toBe('foo bar');
     expect(paragraphs[1]?.textContent?.trim()).toBe('');
-    expect(editManager.cursor?.getPlace().textContent?.trim()).toBe('');
+    expect(editor.cursor?.getPlace().textContent?.trim()).toBe('');
   });
 
   it('binds cmd+m to reveal the active token', () => {
@@ -158,22 +158,22 @@ describe('EditDocument', () => {
       }
     });
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
+    const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
-    const editManager = editDocument.editManager;
+    const editor = editorUI.editor;
 
-    ctl.simulateStart(() => editDocument);
-    editManager.nav.REQUEST_FOCUS(p1);
+    ctl.simulateStart(() => editorUI);
+    editor.nav.REQUEST_FOCUS(p1);
 
-    const token = editManager.cursor?.getPlace() as HTMLElement;
+    const token = editor.cursor?.getPlace() as HTMLElement;
     const scrollRequests = document.viewportScroller.trackScrollRequests();
     scrollRequests.data.length = 0;
 
     // act
-    editDocument.actions?.REVEAL.action(ctl);
+    editorUI.actions?.REVEAL.action(ctl);
 
     // assert
-    expect(editDocument.actions?.REVEAL.binding?.bindings).toContain('$mod+m');
+    expect(editorUI.actions?.REVEAL.binding?.bindings).toContain('$mod+m');
     expect(scrollRequests.data).toEqual([
       {
         element: token,
@@ -190,14 +190,14 @@ describe('EditDocument', () => {
     // arrange
     const document = makeDocument('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
+    const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
-    const editManager = editDocument.editManager;
+    const editor = editorUI.editor;
 
-    ctl.simulateStart(() => editDocument);
-    editManager.nav.REQUEST_FOCUS(p1);
-    editDocument.renderMenuItems();
-    const cursorToken = editManager.cursor?.getPlace() as HTMLElement;
+    ctl.simulateStart(() => editorUI);
+    editor.nav.REQUEST_FOCUS(p1);
+    editorUI.renderMenuItems();
+    const cursorToken = editor.cursor?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
 
     // act
@@ -214,7 +214,7 @@ describe('EditDocument', () => {
     expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(cursorToken);
-    expect(editManager.cursor?.getPlace()).toBe(cursorToken);
+    expect(editor.cursor?.getPlace()).toBe(cursorToken);
   });
 
   it('runs Tag selection as a child app so an island can use the input prompt', () => {
@@ -223,14 +223,14 @@ describe('EditDocument', () => {
       '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
     );
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
+    const editorUI = EditDocument.createNull(ctl, { document });
     const d1 = byId(document, 'd1');
-    const editManager = editDocument.editManager;
+    const editor = editorUI.editor;
 
-    ctl.simulateStart(() => editDocument);
-    editManager.nav.REQUEST_FOCUS(d1);
-    editDocument.renderMenuItems();
-    const island = editManager.cursor?.getPlace() as HTMLElement;
+    ctl.simulateStart(() => editorUI);
+    editor.nav.REQUEST_FOCUS(d1);
+    editorUI.renderMenuItems();
+    const island = editor.cursor?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
 
@@ -248,7 +248,7 @@ describe('EditDocument', () => {
     expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(island);
-    expect(editManager.cursor?.getPlace()).toBe(island);
+    expect(editor.cursor?.getPlace()).toBe(island);
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
   });
 
@@ -256,11 +256,11 @@ describe('EditDocument', () => {
     // arrange
     const document = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
-    const editManager = editDocument.editManager;
+    const editorUI = EditDocument.createNull(ctl, { document });
+    const editor = editorUI.editor;
 
-    ctl.simulateStart(() => editDocument);
-    editDocument.renderMenuItems();
+    ctl.simulateStart(() => editorUI);
+    editorUI.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'INSERT_ELEMENT_AFTER_FOCUS'
     );
@@ -278,20 +278,20 @@ describe('EditDocument', () => {
     expect(manualEntryItem).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
-    expect(editManager.nav.getFocus()).toBe(children[1]);
+    expect(editor.nav.getFocus()).toBe(children[1]);
   });
 
   it('adds an Insert element before tag menu item that defaults to the focused tag name', () => {
     // arrange
     const document = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
-    const editManager = editDocument.editManager;
+    const editorUI = EditDocument.createNull(ctl, { document });
+    const editor = editorUI.editor;
     const p2 = byId(document, 'p2');
 
-    ctl.simulateStart(() => editDocument);
-    editManager.nav.REQUEST_FOCUS(p2);
-    editDocument.renderMenuItems();
+    ctl.simulateStart(() => editorUI);
+    editor.nav.REQUEST_FOCUS(p2);
+    editorUI.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'INSERT_ELEMENT_BEFORE_FOCUS'
     );
@@ -309,19 +309,19 @@ describe('EditDocument', () => {
     expect(manualEntryItem).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
-    expect(editManager.nav.getFocus()).toBe(children[1]);
+    expect(editor.nav.getFocus()).toBe(children[1]);
   });
 
   it('adds an Insert element in tag menu item that defaults to the focused tag name', () => {
     // arrange
     const document = makeDocument('<div id="d1">foo</div>');
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
-    const editManager = editDocument.editManager;
+    const editorUI = EditDocument.createNull(ctl, { document });
+    const editor = editorUI.editor;
     const d1 = byId(document, 'd1');
 
-    ctl.simulateStart(() => editDocument);
-    editDocument.renderMenuItems();
+    ctl.simulateStart(() => editorUI);
+    editorUI.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
     );
@@ -338,20 +338,20 @@ describe('EditDocument', () => {
     expect(insertItem).toBeDefined();
     expect(manualEntryItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('p');
-    expect(editManager.nav.getFocus()).toBe(child);
+    expect(editor.nav.getFocus()).toBe(child);
   });
 
   it('defaults Insert element in tag to a specific child tag when required', () => {
     // arrange
     const document = makeDocument('<ul id="list"><li>one</li></ul>');
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
-    const editManager = editDocument.editManager;
+    const editorUI = EditDocument.createNull(ctl, { document });
+    const editor = editorUI.editor;
     const list = byId(document, 'list');
 
-    ctl.simulateStart(() => editDocument);
-    editManager.nav.REQUEST_FOCUS(list);
-    editDocument.renderMenuItems();
+    ctl.simulateStart(() => editorUI);
+    editor.nav.REQUEST_FOCUS(list);
+    editorUI.renderMenuItems();
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
     );
@@ -368,20 +368,20 @@ describe('EditDocument', () => {
     expect(insertItem).toBeDefined();
     expect(manualEntryItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('li');
-    expect(editManager.nav.getFocus()).toBe(child);
+    expect(editor.nav.getFocus()).toBe(child);
   });
 
   it('adds a Delete focused element menu item that confirms before deleting', async () => {
     // arrange
     const document = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editDocument = EditDocument.createNull(ctl, { document });
-    const editManager = editDocument.editManager;
+    const editorUI = EditDocument.createNull(ctl, { document });
+    const editor = editorUI.editor;
     const p1 = byId(document, 'p1');
     const p2 = byId(document, 'p2');
 
-    ctl.simulateStart(() => editDocument);
-    editDocument.renderMenuItems();
+    ctl.simulateStart(() => editorUI);
+    editorUI.renderMenuItems();
     const deleteItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'DELETE_FOCUSED_ELEMENT'
     );
@@ -396,6 +396,6 @@ describe('EditDocument', () => {
     expect(deleteItem).toBeDefined();
     expect(document.root.contains(p1)).toBe(false);
     expect(Array.from(document.root.children)).toHaveLength(1);
-    expect(editManager.nav.getFocus()).toBe(p2);
+    expect(editor.nav.getFocus()).toBe(p2);
   });
 });

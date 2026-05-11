@@ -1,25 +1,25 @@
-import type { EditManager } from './EditManager.js';
+import type { Editor } from './Editor.js';
 import * as token from './lib/token.js';
 
 /**
- * High-level ANCHOR operations for EditManager.
+ * High-level ANCHOR operations for Editor.
  *
- * This is effectivey an extension of EditManager.
+ * This is effectivey an extension of Editor.
  */
-export class EditManagerAnchorOps {
-  static create(editManager: EditManager) {
-    return new EditManagerAnchorOps(editManager);
+export class EditorAnchorOps {
+  static create(editor: Editor) {
+    return new EditorAnchorOps(editor);
   }
 
-  constructor(private editManager: EditManager) {}
+  constructor(private editor: Editor) {}
 
   canInsertBeforeFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
   }
 
   insertBeforeFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -29,18 +29,18 @@ export class EditManagerAnchorOps {
       return false;
     }
 
-    this.editManager.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editManager.enterEditing(anchor).mapErr((err) => this.editManager.onError?.(err));
+    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.editor.enterEditing(anchor).mapErr((err) => this.editor.onError?.(err));
     return true;
   }
 
   canInsertAfterFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
   }
 
   insertAfterFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -50,18 +50,18 @@ export class EditManagerAnchorOps {
       return false;
     }
 
-    this.editManager.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editManager.enterEditing(anchor).mapErr((err) => this.editManager.onError?.(err));
+    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.editor.enterEditing(anchor).mapErr((err) => this.editor.onError?.(err));
     return true;
   }
 
   canRemoveAfterFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     return !!(focus && token.getRemovableAnchorAfterTag(focus));
   }
 
   removeAfterFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -71,17 +71,17 @@ export class EditManagerAnchorOps {
       return false;
     }
 
-    this.editManager.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
   canRemoveBeforeFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     return !!(focus && token.getRemovableAnchorBeforeTag(focus));
   }
 
   removeBeforeFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -91,17 +91,17 @@ export class EditManagerAnchorOps {
       return false;
     }
 
-    this.editManager.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
   canInsertInFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     return !!(focus && token.canInsertAnchorInLine(focus));
   }
 
   insertInFocus(): boolean {
-    const focus = this.editManager.nav.getFocus();
+    const focus = this.editor.nav.getFocus();
     if (!focus || !token.canInsertAnchorInLine(focus)) {
       return false;
     }
@@ -111,8 +111,8 @@ export class EditManagerAnchorOps {
       return false;
     }
 
-    this.editManager.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editManager.enterEditing(anchor).mapErr((err) => this.editManager.onError?.(err));
+    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.editor.enterEditing(anchor).mapErr((err) => this.editor.onError?.(err));
     return true;
   }
 }

@@ -470,22 +470,22 @@ describe('EditDocument', () => {
     const ctl = Controller.createNull();
     const appChanges = ctl.app.trackAppChanges();
     const doc = JsedDocument.createNull(root);
-    const editManager = EditManager.createNull({
+    const editor = Editor.createNull({
       document: doc,
       userInput: ctl.input,
       onError: (err) => editDocument.handleEditError(err)
     });
-    const editDocument = new EditDocument(ctl, doc, editManager);
+    const editDocument = new EditDocument(ctl, doc, editor);
     const p1 = byId(doc, 'p1');
 
     editDocument.onStart();
-    editManager.nav.REQUEST_FOCUS(p1);
+    editor.nav.REQUEST_FOCUS(p1);
 
     // act
-    editManager.nav.REQUEST_FOCUS(p1);
+    editor.nav.REQUEST_FOCUS(p1);
 
     // assert
-    expect(editManager.getMode()).toBe('editing');
+    expect(editor.getMode()).toBe('editing');
     expect(appChanges.data).toEqual([]);
   });
 });

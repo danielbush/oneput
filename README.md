@@ -10,7 +10,7 @@ There are 2 main things going on this workspace:
 - In packages/jsed: Type `/jsed` to orient the agent on the codebase — it will read the architecture narrative, vocabulary, and explain how the system works.
   - Other useful prompts:
   - "What are jsed's vocabulary terms?"
-  - "How does EditManager wire everything together?"
+  - "How does Editor wire everything together?"
 - jcodemunch-mcp (in .mcp.json) has a skill; if you say "In x, ...", or "what does X do..." it should get triggered; the skill also reminds the agent to reindex periodically.
 - `/summarize` summarizes the current session into an md file in `work//active`; you can run it several times within the one session to update the same file as the session progresses
 - `/remember ...` will get agent to scan through `work//*`

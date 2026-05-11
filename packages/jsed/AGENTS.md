@@ -4,7 +4,7 @@ Jsed is an HTML editor that lets you edit HTML content using Oneput as the inter
 
 ## Tests
 
-See the `nullables-testing-style` skill which defines the style of unit tests we write. Always write unit tests at the highest level possible. For jsed this is probably `EditManager`. We can do this because we inject infrastructure code (code that talks to the outside world) and we encourage sociable unit tests that test through the code. So we can test happy and sad paths and edge cases deterministically and instantly at the highest level. Avoid heavily testing intermediate code because (1) it locks in our design choices and (2) it often duplicates a test we can write at the highest level; there are times where it makes sense if (2) isn't the case and it's easier, but always stop and ask me.
+See the `nullables-testing-style` skill which defines the style of unit tests we write. Always write unit tests at the highest level possible. For jsed this is probably `Editor`. We can do this because we inject infrastructure code (code that talks to the outside world) and we encourage sociable unit tests that test through the code. So we can test happy and sad paths and edge cases deterministically and instantly at the highest level. Avoid heavily testing intermediate code because (1) it locks in our design choices and (2) it often duplicates a test we can write at the highest level; there are times where it makes sense if (2) isn't the case and it's easier, but always stop and ask me.
 
 ## Deep modules structure
 

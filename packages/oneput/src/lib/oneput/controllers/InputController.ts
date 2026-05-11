@@ -447,7 +447,7 @@ export class InputController {
 
   /**
    * Replace the current selection with text, move the caret to the end of the
-   * inserted text, and emit the selection/input events that EditManager
+   * inserted text, and emit the selection/input events that Editor
    * subscribes to. Mutating `.value` alone would skip that path.
    */
   async typeText(text: string) {

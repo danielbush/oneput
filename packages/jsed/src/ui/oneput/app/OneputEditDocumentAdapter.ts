@@ -2,7 +2,7 @@ import type { Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
-import { EditManager, type EditManagerError } from '../../../EditManager.js';
+import { Editor, type EditorError } from '../../../Editor.js';
 import { icons } from './_icons.js';
 import { PickListUI } from './_ui/PickListUI.js';
 import { PasteElementUI } from './PasteElementUI.js';
@@ -22,15 +22,15 @@ export class OneputEditDocumentAdapter {
       onRenderMenuItems
     }: {
       document: JsedDocument;
-      onEditError: (err: EditManagerError) => void;
+      onEditError: (err: EditorError) => void;
       onRenderMenuItems: () => void;
     }
   ) {
-    const editManager = EditManager.create({
+    const editor = Editor.create({
       document,
       userInput: ctl.input
     });
-    return new OneputEditDocumentAdapter(ctl, editManager, onRenderMenuItems, onEditError);
+    return new OneputEditDocumentAdapter(ctl, editor, onRenderMenuItems, onEditError);
   }
 
   static createNull(
@@ -41,29 +41,29 @@ export class OneputEditDocumentAdapter {
       onRenderMenuItems
     }: {
       document: JsedDocument;
-      onEditError: (err: EditManagerError) => void;
+      onEditError: (err: EditorError) => void;
       onRenderMenuItems: () => void;
     }
   ) {
-    const editManager = EditManager.createNull({
+    const editor = Editor.createNull({
       document,
       userInput: ctl.input
     });
-    return new OneputEditDocumentAdapter(ctl, editManager, onRenderMenuItems, onEditError);
+    return new OneputEditDocumentAdapter(ctl, editor, onRenderMenuItems, onEditError);
   }
 
   constructor(
     private ctl: Controller,
     /**
-     * Expose editManager to the consumer.
+     * Expose editor to the consumer.
      */
-    public editManager: EditManager,
+    public editor: Editor,
     private onRenderMenuItems: () => void,
-    private onEditError: (err: EditManagerError) => void
+    private onEditError: (err: EditorError) => void
   ) {}
 
   private subscribeEditChanges = () => {
-    this.editManager.subscribe({
+    this.editor.subscribe({
       onError: (err) => this.onEditError(err),
       onModeChange: () => {
         this.onRenderMenuItems();
@@ -90,17 +90,17 @@ export class OneputEditDocumentAdapter {
   private removeSuspendHandler?: () => void;
 
   start = () => {
-    this.editManager.start();
+    this.editor.start();
     this.onRenderMenuItems();
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
-      this.editManager.suspend(isOpen);
+      this.editor.suspend(isOpen);
     });
     this.ctl.input.focus();
     this.subscribeEditChanges();
   };
 
   resume = () => {
-    this.editManager.suspend(false); // just in case
+    this.editor.suspend(false); // just in case
     this.onRenderMenuItems();
     this.ctl.input.focus();
     this.subscribeEditChanges();
@@ -108,11 +108,11 @@ export class OneputEditDocumentAdapter {
 
   suspend = () => {
     // TODO: hack: call subscribe to remove any unwanted callbacks.
-    this.editManager.subscribe();
+    this.editor.subscribe();
   };
 
   exit = () => {
-    this.editManager.destroy();
+    this.editor.destroy();
     this.removeSuspendHandler?.();
   };
 
@@ -125,7 +125,7 @@ export class OneputEditDocumentAdapter {
 
     DOWN: {
       action: () => {
-        this.editManager.moveDown();
+        this.editor.moveDown();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
@@ -135,7 +135,7 @@ export class OneputEditDocumentAdapter {
     },
     UP: {
       action: () => {
-        this.editManager.moveUp();
+        this.editor.moveUp();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
@@ -145,7 +145,7 @@ export class OneputEditDocumentAdapter {
     },
     ENTER: {
       action: () => {
-        this.editManager.handleEnter().mapErr((err) => {
+        this.editor.handleEnter().mapErr((err) => {
           switch (err.type) {
             case 'no-token-under-focus':
               this.ctl.notify('No token under focus', { duration: 3000 });
@@ -162,7 +162,7 @@ export class OneputEditDocumentAdapter {
     // Make arrow keys work in input when menu is open...
     RIGHT_ARROW: {
       action: () => {
-        this.editManager.moveNext();
+        this.editor.moveNext();
       },
       binding: {
         bindings: ['ArrowRight'],
@@ -172,7 +172,7 @@ export class OneputEditDocumentAdapter {
     },
     LEFT_ARROW: {
       action: () => {
-        this.editManager.movePrevious();
+        this.editor.movePrevious();
       },
       binding: {
         bindings: ['ArrowLeft'],
@@ -182,7 +182,7 @@ export class OneputEditDocumentAdapter {
     },
     EXTEND_RIGHT_ARROW: {
       action: () => {
-        this.editManager.extendNext();
+        this.editor.extendNext();
       },
       binding: {
         bindings: ['Shift+ArrowRight'],
@@ -192,7 +192,7 @@ export class OneputEditDocumentAdapter {
     },
     EXTEND_LEFT_ARROW: {
       action: () => {
-        this.editManager.extendPrevious();
+        this.editor.extendPrevious();
       },
       binding: {
         bindings: ['Shift+ArrowLeft'],
@@ -202,7 +202,7 @@ export class OneputEditDocumentAdapter {
     },
     EXIT: {
       action: () => {
-        this.editManager.handleExit();
+        this.editor.handleExit();
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
@@ -237,7 +237,7 @@ export class OneputEditDocumentAdapter {
     },
     NEXT: {
       action: () => {
-        this.editManager.moveNext();
+        this.editor.moveNext();
       },
       binding: {
         bindings: ['$mod+l'],
@@ -246,7 +246,7 @@ export class OneputEditDocumentAdapter {
     },
     PREVIOUS: {
       action: () => {
-        this.editManager.movePrevious();
+        this.editor.movePrevious();
       },
       binding: {
         bindings: ['$mod+h'],
@@ -255,7 +255,7 @@ export class OneputEditDocumentAdapter {
     },
     EXTEND_NEXT: {
       action: () => {
-        this.editManager.extendNext();
+        this.editor.extendNext();
       },
       binding: {
         bindings: ['Shift+$mod+l'],
@@ -264,7 +264,7 @@ export class OneputEditDocumentAdapter {
     },
     EXTEND_PREVIOUS: {
       action: () => {
-        this.editManager.extendPrevious();
+        this.editor.extendPrevious();
       },
       binding: {
         bindings: ['Shift+$mod+h'],
@@ -273,7 +273,7 @@ export class OneputEditDocumentAdapter {
     },
     REVEAL: {
       action: () => {
-        this.editManager.scrollActiveTargetIntoView();
+        this.editor.scrollActiveTargetIntoView();
       },
       binding: {
         bindings: ['$mod+m'],
@@ -282,8 +282,8 @@ export class OneputEditDocumentAdapter {
     },
     CUT: {
       action: () => {
-        if (this.editManager.focus.cut()) {
-          this.ctl.app.run(PasteElementUI.create(this.ctl, this.editManager, { cut: true }));
+        if (this.editor.focus.cut()) {
+          this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut: true }));
         }
       },
       binding: {
@@ -293,8 +293,8 @@ export class OneputEditDocumentAdapter {
     },
     COPY: {
       action: () => {
-        if (this.editManager.focus.copy()) {
-          this.ctl.app.run(PasteElementUI.create(this.ctl, this.editManager, { cut: false }));
+        if (this.editor.focus.copy()) {
+          this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut: false }));
         }
       },
       binding: {
@@ -304,7 +304,7 @@ export class OneputEditDocumentAdapter {
     },
     COPY_EMPTY_PREVIOUS: {
       action: () => {
-        this.editManager.focus.copyEmptyPrevious();
+        this.editor.focus.copyEmptyPrevious();
       },
       binding: {
         bindings: ['Control+c b'],
@@ -313,7 +313,7 @@ export class OneputEditDocumentAdapter {
     },
     COPY_EMPTY_NEXT: {
       action: () => {
-        this.editManager.focus.copyEmptyNext();
+        this.editor.focus.copyEmptyNext();
       },
       binding: {
         bindings: ['Control+c a'],
@@ -325,16 +325,16 @@ export class OneputEditDocumentAdapter {
 
   getMenuItems = ({ renderMenuItems }: { renderMenuItems: () => void }) => {
     return [
-      this.editManager.isEditing() &&
+      this.editor.isEditing() &&
         stdMenuItem({
           id: 'STOP_EDITING',
           textContent: 'Stop editing',
           action: () => {
-            this.editManager.handleExit({ softExit: false });
+            this.editor.handleExit({ softExit: false });
           },
           left: (b) => [b.icon(icons.PencilOff)]
         }),
-      !this.editManager.isEditing() &&
+      !this.editor.isEditing() &&
         stdMenuItem({
           id: 'EDIT_FIRST',
           textContent: 'Edit content',
@@ -344,7 +344,7 @@ export class OneputEditDocumentAdapter {
 
       // #region focus ops
 
-      this.editManager.focus.canCut() &&
+      this.editor.focus.canCut() &&
         stdMenuItem({
           id: 'CUT_ELEMENT',
           textContent: 'Cut...',
@@ -352,7 +352,7 @@ export class OneputEditDocumentAdapter {
           left: (b) => [b.icon(icons.Scissors)]
         }),
 
-      this.editManager.focus.canCopy() &&
+      this.editor.focus.canCopy() &&
         stdMenuItem({
           id: 'COPY_ELEMENT',
           textContent: 'Copy...',
@@ -360,7 +360,7 @@ export class OneputEditDocumentAdapter {
           left: (b) => [b.icon(icons.Copy)]
         }),
 
-      this.editManager.focus.canCopyEmpty() &&
+      this.editor.focus.canCopyEmpty() &&
         stdMenuItem({
           id: 'COPY_EMPTY_BEFORE',
           textContent: 'Copy to empty element before...',
@@ -368,7 +368,7 @@ export class OneputEditDocumentAdapter {
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
 
-      this.editManager.focus.canCopyEmpty() &&
+      this.editor.focus.canCopyEmpty() &&
         stdMenuItem({
           id: 'COPY_EMPTY_AFTER',
           textContent: 'Copy to empty element after...',
@@ -376,7 +376,7 @@ export class OneputEditDocumentAdapter {
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
 
-      this.editManager.focus.canDelete() &&
+      this.editor.focus.canDelete() &&
         stdMenuItem({
           id: 'DELETE_FOCUSED_ELEMENT',
           textContent: 'Delete focused element...',
@@ -389,39 +389,37 @@ export class OneputEditDocumentAdapter {
               return;
             }
 
-            this.editManager.focus.delete();
+            this.editor.focus.delete();
             this.ctl.menu.closeMenu();
           },
           left: (b) => [b.icon(icons.X)]
         }),
 
-      this.editManager.focus.canUnwrap() &&
+      this.editor.focus.canUnwrap() &&
         stdMenuItem({
           id: 'UNWRAP_FOCUS',
           textContent: 'Unwrap...',
           action: () => {
-            this.editManager.focus.unwrap();
+            this.editor.focus.unwrap();
           },
           left: (b) => [b.icon(icons.CodeXml)]
         }),
 
-      this.editManager.focus.canConvert() &&
+      this.editor.focus.canConvert() &&
         stdMenuItem({
           id: 'CONVERT_FOCUS',
           textContent: 'Convert...',
           action: () => {
-            const candidates = this.editManager.focus
-              .getConversionCandidates()
-              .map((tagName, index) => {
-                return {
-                  id: `${tagName}-${index}`,
-                  text: `<${tagName}>`,
-                  icon: icons.ArrowLeft,
-                  action: () => {
-                    this.editManager.focus.convert(tagName);
-                  }
-                };
-              });
+            const candidates = this.editor.focus.getConversionCandidates().map((tagName, index) => {
+              return {
+                id: `${tagName}-${index}`,
+                text: `<${tagName}>`,
+                icon: icons.ArrowLeft,
+                action: () => {
+                  this.editor.focus.convert(tagName);
+                }
+              };
+            });
 
             this.ctl.app.run(
               PickListUI.create(this.ctl, {
@@ -434,7 +432,7 @@ export class OneputEditDocumentAdapter {
                   prompt: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    this.editManager.focus.convert(item);
+                    this.editor.focus.convert(item);
                   }
                 }
               })
@@ -444,14 +442,14 @@ export class OneputEditDocumentAdapter {
           closeMenuOnAction: false
         }),
 
-      this.editManager.focus.canInsertAfter() &&
+      this.editor.focus.canInsertAfter() &&
         stdMenuItem({
           id: 'INSERT_ELEMENT_AFTER_FOCUS',
           textContent: 'Insert element after...',
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = this.editManager.focus
+            const candidates = this.editor.focus
               .getInsertAfterCandidates()
               .map((tagName, index) => {
                 return {
@@ -459,7 +457,7 @@ export class OneputEditDocumentAdapter {
                   text: `<${tagName}>`,
                   icon: icons.Plus,
                   action: () => {
-                    this.editManager.focus.insertNewAfter(tagName);
+                    this.editor.focus.insertNewAfter(tagName);
                   }
                 };
               });
@@ -475,7 +473,7 @@ export class OneputEditDocumentAdapter {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    this.editManager.focus.insertNewAfter(item);
+                    this.editor.focus.insertNewAfter(item);
                   }
                 }
               })
@@ -483,14 +481,14 @@ export class OneputEditDocumentAdapter {
           }
         }),
 
-      this.editManager.focus.canInsertBefore() &&
+      this.editor.focus.canInsertBefore() &&
         stdMenuItem({
           id: 'INSERT_ELEMENT_BEFORE_FOCUS',
           textContent: 'Insert element before...',
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = this.editManager.focus
+            const candidates = this.editor.focus
               .getInsertBeforeCandidates()
               .map((tagName, index) => {
                 return {
@@ -498,7 +496,7 @@ export class OneputEditDocumentAdapter {
                   text: `<${tagName}>`,
                   icon: icons.Plus,
                   action: () => {
-                    this.editManager.focus.insertNewBefore(tagName);
+                    this.editor.focus.insertNewBefore(tagName);
                   }
                 };
               });
@@ -514,7 +512,7 @@ export class OneputEditDocumentAdapter {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    this.editManager.focus.insertNewBefore(item);
+                    this.editor.focus.insertNewBefore(item);
                   }
                 }
               })
@@ -522,25 +520,23 @@ export class OneputEditDocumentAdapter {
           }
         }),
 
-      this.editManager.focus.canAppend() &&
+      this.editor.focus.canAppend() &&
         stdMenuItem({
           id: 'APPEND_NEW_ELEMENT_IN_FOCUS',
           textContent: 'Insert new element within (append)...',
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = this.editManager.focus
-              .getAppendCandidates()
-              .map((tagName, index) => {
-                return {
-                  id: `${tagName}-${index}`,
-                  text: `<${tagName}>`,
-                  icon: icons.Plus,
-                  action: () => {
-                    this.editManager.focus.appendNew(tagName);
-                  }
-                };
-              });
+            const candidates = this.editor.focus.getAppendCandidates().map((tagName, index) => {
+              return {
+                id: `${tagName}-${index}`,
+                text: `<${tagName}>`,
+                icon: icons.Plus,
+                action: () => {
+                  this.editor.focus.appendNew(tagName);
+                }
+              };
+            });
 
             this.ctl.app.run(
               PickListUI.create(this.ctl, {
@@ -553,7 +549,7 @@ export class OneputEditDocumentAdapter {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    this.editManager.focus.appendNew(item);
+                    this.editor.focus.appendNew(item);
                   }
                 }
               })
@@ -565,28 +561,26 @@ export class OneputEditDocumentAdapter {
 
       // #region cursor ops
 
-      this.editManager.cursorOps.canWrap() &&
+      this.editor.cursorOps.canWrap() &&
         stdMenuItem({
           id: 'WRAP_SELECTION',
           textContent: 'Wrap selection...',
           left: (b) => [b.icon(icons.SquareCode)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = this.editManager.cursorOps
-              .getWrapCandidates()
-              .map((tagName, index) => {
-                return {
-                  id: `${tagName}-${index}`,
-                  text: `<${tagName}>`,
-                  icon: icons.Plus,
-                  action: () => {
-                    const wrapped = this.editManager.cursorOps.wrap(tagName);
-                    if (!wrapped) {
-                      this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
-                    }
+            const candidates = this.editor.cursorOps.getWrapCandidates().map((tagName, index) => {
+              return {
+                id: `${tagName}-${index}`,
+                text: `<${tagName}>`,
+                icon: icons.Plus,
+                action: () => {
+                  const wrapped = this.editor.cursorOps.wrap(tagName);
+                  if (!wrapped) {
+                    this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
                   }
-                };
-              });
+                }
+              };
+            });
 
             this.ctl.app.run(
               PickListUI.create(this.ctl, {
@@ -599,7 +593,7 @@ export class OneputEditDocumentAdapter {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    const wrapped = this.editManager.cursorOps.wrap(item);
+                    const wrapped = this.editor.cursorOps.wrap(item);
                     if (!wrapped) {
                       this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
                     }
@@ -614,76 +608,76 @@ export class OneputEditDocumentAdapter {
 
       // #region leading/trailing spaces
 
-      this.editManager.focus.space.canInsertSpaceBeforeTag() &&
+      this.editor.focus.space.canInsertSpaceBeforeTag() &&
         stdMenuItem({
           id: 'INSERT_SPACE_BEFORE_TAG',
           textContent: 'Insert space before tag...',
           action: () => {
-            this.editManager.focus.space.insertSpaceBeforeTag();
+            this.editor.focus.space.insertSpaceBeforeTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      this.editManager.focus.space.canRemoveSpaceBeforeTag() &&
+      this.editor.focus.space.canRemoveSpaceBeforeTag() &&
         stdMenuItem({
           id: 'REMOVE_SPACE_BEFORE_TAG',
           textContent: 'Remove space before tag...',
           action: () => {
-            this.editManager.focus.space.removeSpaceBeforeTag();
+            this.editor.focus.space.removeSpaceBeforeTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      this.editManager.focus.space.canInsertSpaceAfterTag() &&
+      this.editor.focus.space.canInsertSpaceAfterTag() &&
         stdMenuItem({
           id: 'INSERT_SPACE_AFTER_TAG',
           textContent: 'Insert space after tag...',
           action: () => {
-            this.editManager.focus.space.insertSpaceAfterTag();
+            this.editor.focus.space.insertSpaceAfterTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      this.editManager.focus.space.canRemoveSpaceAfterTag() &&
+      this.editor.focus.space.canRemoveSpaceAfterTag() &&
         stdMenuItem({
           id: 'REMOVE_SPACE_AFTER_TAG',
           textContent: 'Remove space after tag...',
           action: () => {
-            this.editManager.focus.space.removeSpaceAfterTag();
+            this.editor.focus.space.removeSpaceAfterTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
 
-      this.editManager.cursorOps.canInsertSpaceAfter() &&
+      this.editor.cursorOps.canInsertSpaceAfter() &&
         stdMenuItem({
           id: 'INSERT_SPACE_AFTER_CURSOR',
           textContent: 'Insert trailing space after cursor...',
           action: () => {
-            this.editManager.cursorOps.insertSpaceAfter();
+            this.editor.cursorOps.insertSpaceAfter();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      this.editManager.cursorOps.canRemoveSpaceAfter() &&
+      this.editor.cursorOps.canRemoveSpaceAfter() &&
         stdMenuItem({
           id: 'REMOVE_SPACE_AFTER_CURSOR',
           textContent: 'Remove trailing space after cursor...',
           action: () => {
-            this.editManager.cursorOps.removeSpaceAfter();
+            this.editor.cursorOps.removeSpaceAfter();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      this.editManager.cursorOps.canInsertSpaceBefore() &&
+      this.editor.cursorOps.canInsertSpaceBefore() &&
         stdMenuItem({
           id: 'INSERT_SPACE_BEFORE_CURSOR',
           textContent: 'Insert leading space before cursor...',
           action: () => {
-            this.editManager.cursorOps.insertSpaceBefore();
+            this.editor.cursorOps.insertSpaceBefore();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      this.editManager.cursorOps.canRemoveSpaceBefore() &&
+      this.editor.cursorOps.canRemoveSpaceBefore() &&
         stdMenuItem({
           id: 'REMOVE_SPACE_BEFORE_CURSOR',
           textContent: 'Remove leading space before cursor...',
           action: () => {
-            this.editManager.cursorOps.removeSpaceBefore();
+            this.editor.cursorOps.removeSpaceBefore();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
@@ -692,48 +686,48 @@ export class OneputEditDocumentAdapter {
 
       // #region anchor ops
 
-      this.editManager.anchor.canInsertInFocus() &&
+      this.editor.anchor.canInsertInFocus() &&
         stdMenuItem({
           id: 'INSERT_ANCHOR_IN_LINE',
           textContent: 'Insert anchor in empty line...',
           action: () => {
-            this.editManager.anchor.insertInFocus();
+            this.editor.anchor.insertInFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      this.editManager.anchor.canInsertBeforeFocus() &&
+      this.editor.anchor.canInsertBeforeFocus() &&
         stdMenuItem({
           id: 'INSERT_ANCHOR_BEFORE_TAG',
           textContent: 'Insert anchor before tag...',
           action: () => {
-            this.editManager.anchor.insertBeforeFocus();
+            this.editor.anchor.insertBeforeFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      this.editManager.anchor.canRemoveBeforeFocus() &&
+      this.editor.anchor.canRemoveBeforeFocus() &&
         stdMenuItem({
           id: 'REMOVE_ANCHOR_BEFORE_TAG',
           textContent: 'Remove anchor before tag...',
           action: () => {
-            this.editManager.anchor.removeBeforeFocus();
+            this.editor.anchor.removeBeforeFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      this.editManager.anchor.canInsertAfterFocus() &&
+      this.editor.anchor.canInsertAfterFocus() &&
         stdMenuItem({
           id: 'INSERT_ANCHOR_AFTER_TAG',
           textContent: 'Insert anchor after tag...',
           action: () => {
-            this.editManager.anchor.insertAfterFocus();
+            this.editor.anchor.insertAfterFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      this.editManager.anchor.canRemoveAfterFocus() &&
+      this.editor.anchor.canRemoveAfterFocus() &&
         stdMenuItem({
           id: 'REMOVE_ANCHOR_AFTER_TAG',
           textContent: 'Remove anchor after tag...',
           action: () => {
-            this.editManager.anchor.removeAfterFocus();
+            this.editor.anchor.removeAfterFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
@@ -745,20 +739,20 @@ export class OneputEditDocumentAdapter {
         textContent: 'Use legacy element indicator',
         closeMenuOnAction: false,
         action: (_, bool) => {
-          this.editManager.enableLegacyElementIndicator(bool);
+          this.editor.enableLegacyElementIndicator(bool);
           renderMenuItems();
         },
-        checked: this.editManager.legacyElementIndicatorEnabled
+        checked: this.editor.legacyElementIndicatorEnabled
       }),
       checkboxMenuItem({
         id: 'ENABLE_ELEMENT_INDICATOR',
         textContent: 'Use modern element indicator',
         closeMenuOnAction: false,
         action: (_, bool) => {
-          this.editManager.enableElementIndicator(bool);
+          this.editor.enableElementIndicator(bool);
           renderMenuItems();
         },
-        checked: this.editManager.elementIndicatorEnabled
+        checked: this.editor.elementIndicatorEnabled
       })
     ];
   };

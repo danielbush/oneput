@@ -12,7 +12,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - when the cursor has exhausted the current line
     - it calls findNextNode, looks for first text node or TOKEN (t), calls quickDescend on getLine(t), puts itself on first token
 - [x] detokenize on the fly to reduce tokens
-  - we create a Detokenizer object, inject it into EditManager
+  - we create a Detokenizer object, inject it into Editor
   - it listens for tokenization events
   - maybe it also needs to track cursors
     - for normal editing, there is one cursor which will get created and destroyed
@@ -76,7 +76,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - unit test findNextCrossLineTarget
   - unit test findPreviousCrossLineTarget
   - do the cursor transparent revision first because that makes most things transparent;
-- `getValue(editManager.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
+- `getValue(editor.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
@@ -98,24 +98,24 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## refactors
 
-- [ ] refactor: merge CursorTextOps.ts into EditManagerCursorOps.ts
-- [ ] refactor: EditManager becomes private state
+- [ ] refactor: merge CursorTextOps.ts into EditorCursorOps.ts
+- [ ] refactor: Editor becomes private state
   - COMMENT: how do we handle event handling; where do the `handle*` functions live?
     - if the handling logic cuts across several classes created by this refactor then it has to be in the Editor state object that dispatches to the other classes
   - all functionalities get moved into helper classes
-  - we have an Editor class with `private e: EditManager, private cursor: CursorOps, ...` and passing `e` to the helpers
-  - [ ] refactor: similarly Cursor and Nav - these are particular clumps of state; they might even just belong in EditManager; everything else is just ops: ops with particular local state + EditManager state that calls into simpler ops that are stateless
+  - we have an Editor class with `private e: Editor, private cursor: CursorOps, ...` and passing `e` to the helpers
+  - [ ] refactor: similarly Cursor and Nav - these are particular clumps of state; they might even just belong in Editor; everything else is just ops: ops with particular local state + Editor state that calls into simpler ops that are stateless
 - [ ] should oneput menu operations like "wrap tag in element" which prompts for a tag name be in a child AppObject - so we can control oneput more declaratively
-- [ ] refactor: can we extract selection orchestration out of EditManager
+- [ ] refactor: can we extract selection orchestration out of Editor
   - maybe a similar pattern to CursorTextOps ?
   - or possibly move it into an AppObject
-- [ ] refactor: we shouldn't have to call `editManager.nav.connect()` in EditManager tests
-  - I think we can connect when EditManager starts
+- [ ] refactor: we shouldn't have to call `editor.nav.connect()` in Editor tests
+  - I think we can connect when Editor starts
   - and disconnect when we suspend
 - [ ] convert implicit lines to paragraphs (ones created using the new interstitial logic)
 - [ ] refactor: revisit implicit lines?
   - [ ] I think we make them p-tags and we include loose text at the very beginning (not just between LINE's)
-- refactor: FocusChainNavigator should be used by Nav; EditManager just sees Nav?
+- refactor: FocusChainNavigator should be used by Nav; Editor just sees Nav?
 - chore: remove symbols from architecture; just use vocab and module file names
 - chore: move skills/jsed/SKILL.md into jsed/AGENTS.md
 - importing oneput `import { Controller } from '@oneput/oneput';` in jsed breaks because `packages/oneput/src/lib/index.ts` imports .svelte files (directly or indirectly); what can we do about this?
@@ -124,7 +124,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
       - this could lead into oneput-react
     - we have a `components/*` `"exports"` entry in oneput
     - not viable: make jsed use sveltekit vite plugin - because we want oneput and jsed to work as web components
-  - at the moment (Apr-2026), EditManager and EditManager.test both import Controller relatively; they should import using the package
+  - at the moment (Apr-2026), Editor and Editor.test both import Controller relatively; they should import using the package
 - use el.ownerDocument  eg `el.ownerDocument.createElement(...)`
 - feat: hitting ENTER on empty p-tag should insert anchor; no need to go into menu
 - feat: $mod+m when hit 2 or 3 times within an interval, moves FOCUS to top and bottom of screen respectively

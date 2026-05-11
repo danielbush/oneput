@@ -30,7 +30,7 @@ export class EditorAnchorOps {
     }
 
     this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editor.enterEditing(anchor).mapErr((err) => this.editor.onError?.(err));
+    this.editor.enterEditing(anchor).mapErr((err) => this.editor.eventsEmitter.onError?.(err));
     return true;
   }
 
@@ -51,7 +51,7 @@ export class EditorAnchorOps {
     }
 
     this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editor.enterEditing(anchor).mapErr((err) => this.editor.onError?.(err));
+    this.editor.enterEditing(anchor).mapErr((err) => this.editor.eventsEmitter.onError?.(err));
     return true;
   }
 
@@ -112,7 +112,7 @@ export class EditorAnchorOps {
     }
 
     this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editor.enterEditing(anchor).mapErr((err) => this.editor.onError?.(err));
+    this.editor.enterEditing(anchor).mapErr((err) => this.editor.eventsEmitter.onError?.(err));
     return true;
   }
 }

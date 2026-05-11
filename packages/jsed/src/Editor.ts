@@ -15,6 +15,7 @@ import { ElementIndicator } from './ElementIndicator.js';
 import { CSSElementIndicator } from './CSSElementIndicator.js';
 import type { CursorError, SetTokenOpts } from './CursorState.js';
 import { EditorInputOps } from './EditorInputOps.js';
+import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorMode = 'view' | 'edit';
@@ -129,7 +130,8 @@ export class Editor {
     readonly nav: Nav,
     private tokenizer: Tokenizer = Tokenizer.create(),
     private legacyElementIndicator: ElementIndicator,
-    private cssElementIndicator: CSSElementIndicator
+    private cssElementIndicator: CSSElementIndicator,
+    public eventsEmitter: EditorEventsEmitter = EditorEventsEmitter.create()
   ) {
     this.focus = EditorFocusOps.create(this);
     this.anchor = EditorAnchorOps.create(this);
@@ -143,7 +145,7 @@ export class Editor {
 
   private setMode(mode: EditorMode) {
     this.mode = mode;
-    this.onModeChange?.(mode);
+    this.eventsEmitter.onModeChange?.(mode);
   }
 
   start(): void {
@@ -177,12 +179,7 @@ export class Editor {
     this.cssElementIndicator.destroy();
     this.unsubscribeInputChange?.();
     this.unsubscribeSelectionChange?.();
-    this.onError = undefined;
-    this.onModeChange = undefined;
-    this.onFocusChange = undefined;
-    this.onCursorChange = undefined;
-    this.onTextChange = undefined;
-    this.onElementChange = undefined;
+    this.eventsEmitter.destroy();
   }
 
   isEditing(): boolean {
@@ -265,11 +262,11 @@ export class Editor {
   }
 
   notifyTextChange(event: EditorTextChangeEvent) {
-    this.onTextChange?.(event);
+    this.eventsEmitter.onTextChange?.(event);
   }
 
   notifyElementChange(event: EditorElementChangeEvent) {
-    this.onElementChange?.(event);
+    this.eventsEmitter.onElementChange?.(event);
   }
 
   handleInputChange = (change: UserInputChange) => {
@@ -317,7 +314,7 @@ export class Editor {
   private handleCursorChange = (tok: HTMLElement, opts?: SetTokenOpts) => {
     this.tokenizer.setCursorElement(tok);
     this.nav?.FOCUS(tok);
-    this.onCursorChange?.(tok);
+    this.eventsEmitter.onCursorChange?.(tok);
     if (opts?.syncInput === false) return;
     this.userInput.resetPlaceholder();
     this.userInput.enable(true);
@@ -356,7 +353,7 @@ export class Editor {
     if (evt.targetType === 'FOCUSABLE') {
       // Second focus puts us into editing mode.
       if (evt.element === currentFocus) {
-        this.enterEditing(evt.element).mapErr((err) => this.onError?.(err));
+        this.enterEditing(evt.element).mapErr((err) => this.eventsEmitter.onError?.(err));
         return false;
       }
 
@@ -365,7 +362,7 @@ export class Editor {
 
     if (evt.targetType === 'TOKEN') {
       if (currentFocus?.contains(evt.token)) {
-        this.enterEditing(evt.token).mapErr((err) => this.onError?.(err));
+        this.enterEditing(evt.token).mapErr((err) => this.eventsEmitter.onError?.(err));
         return false;
       }
     }
@@ -414,14 +411,14 @@ export class Editor {
         this.tokenizer.tokenizeLineAt(line);
       }
     }
-    this.onFocusChange?.(focus);
+    this.eventsEmitter.onFocusChange?.(focus);
   }
 
   /**
    * If the cursor finds itself in an untenable state...
    */
   private handleCursorError = (err: CursorError) => {
-    this.onError?.(err);
+    this.eventsEmitter.onError?.(err);
   };
 
   /**
@@ -568,32 +565,6 @@ export class Editor {
       oversizedVertical: 'start'
     });
     return true;
-  }
-
-  /**
-   * A callback that Editor or one of its helpers can call with errors.
-   */
-  public onError?: (err: EditorError) => void;
-  private onModeChange?: (mode: EditorMode) => void;
-  private onFocusChange?: (focus: HTMLElement | null) => void;
-  private onCursorChange?: (target: HTMLElement) => void;
-  private onTextChange?: (event: EditorTextChangeEvent) => void;
-  private onElementChange?: (event: EditorElementChangeEvent) => void;
-
-  subscribe(subscriptions?: {
-    onError?: (err: EditorError) => void;
-    onModeChange?: (mode: EditorMode) => void;
-    onFocusChange?: (focus: HTMLElement | null) => void;
-    onCursorChange?: (target: HTMLElement) => void;
-    onTextChange?: (event: EditorTextChangeEvent) => void;
-    onElementChange?: (event: EditorElementChangeEvent) => void;
-  }) {
-    this.onError = subscriptions?.onError;
-    this.onModeChange = subscriptions?.onModeChange;
-    this.onFocusChange = subscriptions?.onFocusChange;
-    this.onCursorChange = subscriptions?.onCursorChange;
-    this.onTextChange = subscriptions?.onTextChange;
-    this.onElementChange = subscriptions?.onElementChange;
   }
 
   get legacyElementIndicatorEnabled() {

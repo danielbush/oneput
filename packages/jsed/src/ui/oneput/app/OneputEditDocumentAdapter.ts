@@ -63,7 +63,7 @@ export class OneputEditDocumentAdapter {
   ) {}
 
   private subscribeEditChanges = () => {
-    this.editor.subscribe({
+    this.editor.eventsEmitter.subscribe({
       onError: (err) => this.onEditError(err),
       onModeChange: () => {
         this.onRenderMenuItems();
@@ -108,7 +108,7 @@ export class OneputEditDocumentAdapter {
 
   suspend = () => {
     // TODO: hack: call subscribe to remove any unwanted callbacks.
-    this.editor.subscribe();
+    this.editor.eventsEmitter.subscribe();
   };
 
   exit = () => {

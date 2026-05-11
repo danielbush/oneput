@@ -1,6 +1,7 @@
 export type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
-export { Editor, type EditorError, type EditorMode } from './Editor.js';
+export { Editor } from './Editor.js';
+export { type EditorError, type EditorMode } from './EditorState.js';
 export { Nav, type OnRequestFocus } from './Nav.js';
 export { Cursor } from './Cursor.js';
 export { Tokenizer } from './Tokenizer.js';

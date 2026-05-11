@@ -1,4 +1,4 @@
-import type { Editor } from './Editor.js';
+import type { EditorState } from './EditorState.js';
 import * as token from './lib/token.js';
 
 /**
@@ -7,19 +7,19 @@ import * as token from './lib/token.js';
  * This is effectivey an extension of Editor.
  */
 export class EditorAnchorOps {
-  static create(editor: Editor) {
-    return new EditorAnchorOps(editor);
+  static create(state: EditorState) {
+    return new EditorAnchorOps(state);
   }
 
-  constructor(private editor: Editor) {}
+  constructor(private state: EditorState) {}
 
   canInsertBeforeFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
   }
 
   insertBeforeFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -29,18 +29,18 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editor.enterEditing(anchor).mapErr((err) => this.editor.eventsEmitter.onError?.(err));
+    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
 
   canInsertAfterFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
   }
 
   insertAfterFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -50,18 +50,18 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editor.enterEditing(anchor).mapErr((err) => this.editor.eventsEmitter.onError?.(err));
+    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
 
   canRemoveAfterFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     return !!(focus && token.getRemovableAnchorAfterTag(focus));
   }
 
   removeAfterFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -71,17 +71,17 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
   canRemoveBeforeFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     return !!(focus && token.getRemovableAnchorBeforeTag(focus));
   }
 
   removeBeforeFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -91,17 +91,17 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
   canInsertInFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     return !!(focus && token.canInsertAnchorInLine(focus));
   }
 
   insertInFocus(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus || !token.canInsertAnchorInLine(focus)) {
       return false;
     }
@@ -111,8 +111,8 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.editor.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.editor.enterEditing(anchor).mapErr((err) => this.editor.eventsEmitter.onError?.(err));
+    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
 }

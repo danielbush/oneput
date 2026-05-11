@@ -3,7 +3,7 @@ import type {
   EditorError,
   EditorMode,
   EditorTextChangeEvent
-} from './Editor';
+} from './EditorState.js';
 
 /**
  * Responsible for emitting events to subscribes outside of Editor.

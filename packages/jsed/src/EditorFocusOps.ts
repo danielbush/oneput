@@ -1,4 +1,4 @@
-import type { Editor } from './Editor.js';
+import type { EditorState } from './EditorState.js';
 import * as focusable from './lib/focusable.js';
 import { canDelete } from './lib/dom-rules.js';
 import { convert, unwrap } from './lib/focusable.js';
@@ -12,20 +12,20 @@ import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
  * This is effectivey an extension of Editor.
  */
 export class EditorFocusOps {
-  static create(editor: Editor) {
-    return new EditorFocusOps(editor);
+  static create(state: EditorState) {
+    return new EditorFocusOps(state);
   }
 
   space: EditorFocusSpaceOps;
 
-  constructor(private editor: Editor) {
-    this.space = EditorFocusSpaceOps.create(editor);
+  constructor(private state: EditorState) {
+    this.space = EditorFocusSpaceOps.create(state);
   }
 
   // #region insert after
 
   getInsertAfterCandidates(): string[] {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
@@ -33,21 +33,21 @@ export class EditorFocusOps {
   }
 
   canInsertAfter(): boolean {
-    if (this.editor.isEditing()) {
+    if (this.state.isEditing()) {
       return false;
     }
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
-    if (focus === this.editor.document.root) {
+    if (focus === this.state.document.root) {
       return false;
     }
     return focusable.getInsertAfterCandidates(focus).length > 0;
   }
 
   insertNewAfter(tagName: string): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -56,11 +56,11 @@ export class EditorFocusOps {
     if (!inserted) {
       return false;
     }
-    this.editor.notifyElementChange({
+    this.state.notifyElementChange({
       type: 'focusable-inserted',
       element: inserted
     });
-    this.editor.nav.FOCUS(inserted);
+    this.state.nav.FOCUS(inserted);
     return true;
   }
 
@@ -69,7 +69,7 @@ export class EditorFocusOps {
   // #region insert before
 
   getInsertBeforeCandidates(): string[] {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
@@ -77,21 +77,21 @@ export class EditorFocusOps {
   }
 
   canInsertBefore(): boolean {
-    if (this.editor.isEditing()) {
+    if (this.state.isEditing()) {
       return false;
     }
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
-    if (focus === this.editor.document.root) {
+    if (focus === this.state.document.root) {
       return false;
     }
     return focusable.getInsertBeforeCandidates(focus).length > 0;
   }
 
   insertNewBefore(tagName: string): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -100,11 +100,11 @@ export class EditorFocusOps {
       return false;
     }
 
-    this.editor.notifyElementChange({
+    this.state.notifyElementChange({
       type: 'focusable-inserted',
       element: inserted
     });
-    this.editor.nav.FOCUS(inserted);
+    this.state.nav.FOCUS(inserted);
     return true;
   }
 
@@ -113,7 +113,7 @@ export class EditorFocusOps {
   // #region append new
 
   getAppendCandidates(): string[] {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
@@ -121,10 +121,10 @@ export class EditorFocusOps {
   }
 
   canAppend(): boolean {
-    if (this.editor.isEditing()) {
+    if (this.state.isEditing()) {
       return false;
     }
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -132,7 +132,7 @@ export class EditorFocusOps {
   }
 
   appendNew(tagName: string): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
@@ -140,11 +140,11 @@ export class EditorFocusOps {
     if (!inserted) {
       return false;
     }
-    this.editor.notifyElementChange({
+    this.state.notifyElementChange({
       type: 'focusable-inserted',
       element: inserted
     });
-    this.editor.nav.FOCUS(inserted);
+    this.state.nav.FOCUS(inserted);
     return true;
   }
 
@@ -153,16 +153,16 @@ export class EditorFocusOps {
   // #region delete
 
   canDelete(): boolean {
-    if (this.editor.isEditing()) {
+    if (this.state.isEditing()) {
       return false;
     }
-    const focus = this.editor.nav.getFocus();
-    return !!(focus && canDelete(focus, this.editor.document));
+    const focus = this.state.nav.getFocus();
+    return !!(focus && canDelete(focus, this.state.document));
   }
 
   delete(): boolean {
-    const focus = this.editor.nav.getFocus();
-    if (!focus || !canDelete(focus, this.editor.document)) {
+    const focus = this.state.nav.getFocus();
+    if (!focus || !canDelete(focus, this.state.document)) {
       return false;
     }
 
@@ -171,16 +171,16 @@ export class EditorFocusOps {
       return false;
     }
     const nextFocus =
-      focusable.findNextFocusableOutside(focus, this.editor.document.root) ??
-      focusable.findPreviousFocusableOutside(focus, this.editor.document.root) ??
+      focusable.findNextFocusableOutside(focus, this.state.document.root) ??
+      focusable.findPreviousFocusableOutside(focus, this.state.document.root) ??
       parent;
 
     focusable.deleteElement(focus);
-    this.editor.notifyElementChange({
+    this.state.notifyElementChange({
       type: 'focusable-removed',
       element: focus
     });
-    this.editor.nav.FOCUS(nextFocus);
+    this.state.nav.FOCUS(nextFocus);
     return true;
   }
 
@@ -189,15 +189,15 @@ export class EditorFocusOps {
   // #region wrap
 
   canUnwrap(): boolean {
-    if (this.editor.isEditing()) {
+    if (this.state.isEditing()) {
       return false;
     }
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     return isInlineFlow(focus);
   }
 
   unwrap(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (focus && isInlineFlow(focus)) {
       unwrap(focus);
       return true;
@@ -210,22 +210,22 @@ export class EditorFocusOps {
   // #region convert
 
   getConversionCandidates(): string[] {
-    const focus = this.editor.nav.getFocus();
-    return focusable.getConversionCandidates(focus, this.editor.document.root);
+    const focus = this.state.nav.getFocus();
+    return focusable.getConversionCandidates(focus, this.state.document.root);
   }
 
   canConvert(): boolean {
-    if (this.editor.isEditing()) {
+    if (this.state.isEditing()) {
       return false;
     }
-    return !!this.editor.nav.getFocus();
+    return !!this.state.nav.getFocus();
   }
 
   convert(tagName: string): boolean {
-    const focus = this.editor.nav.getFocus();
-    if (focus && focus !== this.editor.document.root) {
+    const focus = this.state.nav.getFocus();
+    if (focus && focus !== this.state.document.root) {
       const newEl = convert(focus, tagName);
-      this.editor.nav.FOCUS(newEl);
+      this.state.nav.FOCUS(newEl);
       return true;
     }
     return false;
@@ -241,7 +241,7 @@ export class EditorFocusOps {
     if (!this.cutElement) {
       return null;
     }
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return null;
     }
@@ -252,21 +252,21 @@ export class EditorFocusOps {
   }
 
   canCopy = (): boolean => {
-    return !!this.editor.nav.getFocus();
+    return !!this.state.nav.getFocus();
   };
   canCut = this.canCopy;
   canCopyEmpty = this.canCopy;
 
   cut(): boolean {
     this.isCopy = false;
-    this.cutElement = this.editor.nav.getFocus();
+    this.cutElement = this.state.nav.getFocus();
     this.cutElement?.classList.add(JSED_MARCHING_ANTS_CLASS);
     return !!this.cutElement;
   }
 
   copy(): boolean {
     this.isCopy = true;
-    this.cutElement = this.editor.nav.getFocus();
+    this.cutElement = this.state.nav.getFocus();
     this.cutElement?.classList.add(JSED_MARCHING_ANTS_CLASS);
     return !!this.cutElement;
   }
@@ -280,7 +280,7 @@ export class EditorFocusOps {
       ? focusable.pasteCopyBefore(cutElement, focus)
       : focusable.pasteBefore(cutElement, focus);
     if (result) {
-      this.editor.nav.FOCUS(result);
+      this.state.nav.FOCUS(result);
     }
     return !!result;
   }
@@ -294,7 +294,7 @@ export class EditorFocusOps {
       ? focusable.pasteCopyAfter(cutElement, focus)
       : focusable.pasteAfter(cutElement, focus);
     if (result) {
-      this.editor.nav.FOCUS(result);
+      this.state.nav.FOCUS(result);
     }
     return !!result;
   }
@@ -308,7 +308,7 @@ export class EditorFocusOps {
       ? focusable.pasteCopyWithin(cutElement, focus)
       : focusable.pasteWithin(cutElement, focus);
     if (result) {
-      this.editor.nav.FOCUS(result);
+      this.state.nav.FOCUS(result);
     }
     return !!result;
   }
@@ -319,25 +319,25 @@ export class EditorFocusOps {
   }
 
   copyEmptyNext(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
     const empty = focusable.copyEmptyNext(focus);
     if (empty) {
-      this.editor.nav.FOCUS(empty);
+      this.state.nav.FOCUS(empty);
     }
     return false;
   }
 
   copyEmptyPrevious(): boolean {
-    const focus = this.editor.nav.getFocus();
+    const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;
     }
     const empty = focusable.copyEmptyPrevious(focus);
     if (empty) {
-      this.editor.nav.FOCUS(empty);
+      this.state.nav.FOCUS(empty);
     }
     return false;
   }

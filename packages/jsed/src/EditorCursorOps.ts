@@ -1,4 +1,4 @@
-import type { Editor } from './Editor.js';
+import type { EditorState } from './EditorState.js';
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { isLineSibling } from './lib/taxonomy.js';
@@ -8,17 +8,17 @@ import { getWrapCandidates } from './lib/dom-rules.js';
  * Trailing / Leading space (at cursor)
  */
 export class EditorCursorOps {
-  static create(editor: Editor) {
-    return new EditorCursorOps(editor);
+  static create(state: EditorState) {
+    return new EditorCursorOps(state);
   }
 
-  constructor(private editor: Editor) {}
+  constructor(private state: EditorState) {}
 
   canWrap(): boolean {
     return (
-      this.editor.mode === 'edit' &&
-      !!this.editor.cursor &&
-      isLineSibling(this.editor.cursor.getPlace())
+      this.state.mode === 'edit' &&
+      !!this.state.cursor &&
+      isLineSibling(this.state.cursor.getPlace())
     );
   }
 
@@ -30,26 +30,26 @@ export class EditorCursorOps {
    * Wrap token at CURSOR in a tag.
    */
   wrap(tagName: string): boolean {
-    if (this.editor.mode !== 'edit' || !this.editor.cursor) {
+    if (this.state.mode !== 'edit' || !this.state.cursor) {
       return false;
     }
 
-    if (this.editor.selection) {
-      const anchor = this.editor.selection.getAnchor();
-      const wrappers = this.editor.selection.wrapWithTag(tagName);
+    if (this.state.selection) {
+      const anchor = this.state.selection.getAnchor();
+      const wrappers = this.state.selection.wrapWithTag(tagName);
       if (!wrappers) {
         return false;
       }
 
-      this.editor.selection = undefined;
+      this.state.selection = undefined;
       for (const wrapper of wrappers) {
-        this.editor.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
+        this.state.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
       }
-      this.editor.cursor.place(anchor);
+      this.state.cursor.place(anchor);
       return true;
     }
 
-    const current = this.editor.cursor.getPlace();
+    const current = this.state.cursor.getPlace();
     if (!isLineSibling(current)) {
       return false;
     }
@@ -59,51 +59,51 @@ export class EditorCursorOps {
       return false;
     }
 
-    this.editor.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-    this.editor.cursor.place(current);
+    this.state.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
+    this.state.cursor.place(current);
     return true;
   }
 
   canRemoveSpaceBefore(): boolean {
     return (
-      this.editor.mode === 'edit' &&
-      !!this.editor.cursor &&
-      !!space.getRemovableSpaceBeforeToken(this.editor.cursor.getPlace())
+      this.state.mode === 'edit' &&
+      !!this.state.cursor &&
+      !!space.getRemovableSpaceBeforeToken(this.state.cursor.getPlace())
     );
   }
 
   canRemoveSpaceAfter(): boolean {
     return (
-      this.editor.mode === 'edit' &&
-      !!this.editor.cursor &&
-      !!space.getRemovableSpaceAfterToken(this.editor.cursor.getPlace())
+      this.state.mode === 'edit' &&
+      !!this.state.cursor &&
+      !!space.getRemovableSpaceAfterToken(this.state.cursor.getPlace())
     );
   }
 
   canInsertSpaceBefore(): boolean {
     return (
-      this.editor.mode === 'edit' &&
-      !!this.editor.cursor &&
-      space.canInsertSpaceBeforeToken(this.editor.cursor.getPlace())
+      this.state.mode === 'edit' &&
+      !!this.state.cursor &&
+      space.canInsertSpaceBeforeToken(this.state.cursor.getPlace())
     );
   }
 
   canInsertSpaceAfter(): boolean {
     return (
-      this.editor.mode === 'edit' &&
-      !!this.editor.cursor &&
-      space.canInsertSpaceAfterToken(this.editor.cursor.getPlace())
+      this.state.mode === 'edit' &&
+      !!this.state.cursor &&
+      space.canInsertSpaceAfterToken(this.state.cursor.getPlace())
     );
   }
 
   insertSpaceBefore(): boolean {
-    if (this.editor.mode !== 'edit' || !this.editor.cursor) {
+    if (this.state.mode !== 'edit' || !this.state.cursor) {
       return false;
     }
 
-    const inserted = !!space.insertSpaceBeforeToken(this.editor.cursor.getPlace());
+    const inserted = !!space.insertSpaceBeforeToken(this.state.cursor.getPlace());
     if (inserted) {
-      this.editor.notifyTextChange({
+      this.state.notifyTextChange({
         type: 'whitespace-change',
         kind: 'leading-space',
         change: 'inserted'
@@ -114,13 +114,13 @@ export class EditorCursorOps {
   }
 
   insertSpaceAfter(): boolean {
-    if (this.editor.mode !== 'edit' || !this.editor.cursor) {
+    if (this.state.mode !== 'edit' || !this.state.cursor) {
       return false;
     }
 
-    const inserted = !!space.insertSpaceAfterToken(this.editor.cursor.getPlace());
+    const inserted = !!space.insertSpaceAfterToken(this.state.cursor.getPlace());
     if (inserted) {
-      this.editor.notifyTextChange({
+      this.state.notifyTextChange({
         type: 'whitespace-change',
         kind: 'trailing-space',
         change: 'inserted'
@@ -131,13 +131,13 @@ export class EditorCursorOps {
   }
 
   removeSpaceBefore(): boolean {
-    if (this.editor.mode !== 'edit' || !this.editor.cursor) {
+    if (this.state.mode !== 'edit' || !this.state.cursor) {
       return false;
     }
 
-    const removed = !!space.removeSpaceBeforeToken(this.editor.cursor.getPlace());
+    const removed = !!space.removeSpaceBeforeToken(this.state.cursor.getPlace());
     if (removed) {
-      this.editor.notifyTextChange({
+      this.state.notifyTextChange({
         type: 'whitespace-change',
         kind: 'leading-space',
         change: 'removed'
@@ -148,13 +148,13 @@ export class EditorCursorOps {
   }
 
   removeSpaceAfter(): boolean {
-    if (this.editor.mode !== 'edit' || !this.editor.cursor) {
+    if (this.state.mode !== 'edit' || !this.state.cursor) {
       return false;
     }
 
-    const removed = !!space.removeSpaceAfterToken(this.editor.cursor.getPlace());
+    const removed = !!space.removeSpaceAfterToken(this.state.cursor.getPlace());
     if (removed) {
-      this.editor.notifyTextChange({
+      this.state.notifyTextChange({
         type: 'whitespace-change',
         kind: 'trailing-space',
         change: 'removed'
@@ -165,13 +165,13 @@ export class EditorCursorOps {
   }
 
   splitAtCursor() {
-    if (this.editor.mode !== 'edit' || !this.editor.cursor) {
+    if (this.state.mode !== 'edit' || !this.state.cursor) {
       return false;
     }
 
-    const inserted = this.editor.cursor.splitAtToken();
+    const inserted = this.state.cursor.splitAtToken();
     if (inserted) {
-      this.editor.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+      this.state.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     }
   }
 }

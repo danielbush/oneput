@@ -1,17 +1,17 @@
-import type { Editor } from './Editor';
+import type { EditorState } from './EditorState.js';
 import { decideInputIntent } from './lib/decideInputIntent.js';
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
-import type { UserInputChange } from './UserInput';
+import type { UserInputChange } from './UserInput.js';
 import type { Cursor } from './Cursor.js';
 import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 
 export class EditorInputOps {
-  static create(editor: Editor) {
-    return new EditorInputOps(editor);
+  static create(state: EditorState) {
+    return new EditorInputOps(state);
   }
 
-  constructor(private editor: Editor) {}
+  constructor(private state: EditorState) {}
 
   /**
    * When user types in the input...
@@ -32,7 +32,7 @@ export class EditorInputOps {
       case 'delete-current': {
         const current = cursor.getPlace();
         cursor.delete();
-        this.editor.notifyTextChange({ type: 'token-text-change', token: current });
+        this.state.notifyTextChange({ type: 'token-text-change', token: current });
         cursor.setStateFromInput(intent.inputValue);
         return;
       }
@@ -48,7 +48,7 @@ export class EditorInputOps {
         }
         const inserted = lastToken;
         if (inserted) {
-          this.editor.notifyTextChange({ type: 'token-text-change', token: inserted });
+          this.state.notifyTextChange({ type: 'token-text-change', token: inserted });
         }
         break;
 
@@ -60,7 +60,7 @@ export class EditorInputOps {
           lastToken = insertedToken;
         }
         if (lastToken) {
-          this.editor.notifyTextChange({ type: 'token-text-change', token: lastToken });
+          this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         break;
 
@@ -73,9 +73,9 @@ export class EditorInputOps {
           }
         }
         if (intent.prependedSpace) {
-          this.editor.userInput.moveCursorToBeginning();
+          this.state.userInput.moveCursorToBeginning();
         }
-        this.editor.notifyTextChange({ type: 'token-text-change', token: currentToken });
+        this.state.notifyTextChange({ type: 'token-text-change', token: currentToken });
         break;
     }
 
@@ -84,12 +84,12 @@ export class EditorInputOps {
 
     if (finalToken) {
       cursor.place(finalToken);
-      this.editor.userInput.focus();
-      this.editor.userInput
+      this.state.userInput.focus();
+      this.state.userInput
         .setInputValue(token.getValue(finalToken))
         .then(() => {
-          this.editor.nav.FOCUS(finalToken);
-          this.editor.userInput.moveCursorToEnd();
+          this.state.nav.FOCUS(finalToken);
+          this.state.userInput.moveCursorToEnd();
           cursor.setStateFromInput(intent.inputValue);
         })
         .catch((err) => {
@@ -103,18 +103,18 @@ export class EditorInputOps {
 
   udpateWithCursorChange = (el: HTMLElement) => {
     if (isToken(el)) {
-      this.editor.userInput.focus();
-      this.editor.userInput.setInputValue(token.getValue(el)).then(() => {
-        this.editor.userInput.selectAll();
+      this.state.userInput.focus();
+      this.state.userInput.setInputValue(token.getValue(el)).then(() => {
+        this.state.userInput.selectAll();
       });
     } else {
-      this.editor.userInput.enable(false);
-      this.editor.userInput.setInputValue('');
+      this.state.userInput.enable(false);
+      this.state.userInput.setInputValue('');
       if (isIsland(el) || isLine(el)) {
         // TODO: Handle 'Enter' which may be a different key binding.
-        this.editor.userInput.setPlaceholder('Hit Enter to edit this element');
+        this.state.userInput.setPlaceholder('Hit Enter to edit this element');
       } else {
-        this.editor.userInput.setInputValue('(not a token)');
+        this.state.userInput.setInputValue('(not a token)');
       }
     }
   };

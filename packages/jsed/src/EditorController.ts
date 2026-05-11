@@ -1,8 +1,8 @@
 import * as token from './lib/token.js';
-import type { CursorError, SetTokenOpts } from './CursorState';
-import type { Editor } from './Editor';
-import { isToken } from './lib/taxonomy';
-import type { UserInputChange, UserInputSelectionState } from './UserInput';
+import type { CursorError, SetTokenOpts } from './CursorState.js';
+import type { EditorState } from './EditorState.js';
+import { isToken } from './lib/taxonomy.js';
+import type { UserInputChange, UserInputSelectionState } from './UserInput.js';
 import type { JsedFocusRequestEvent } from './types.js';
 import { findNextEditableLine } from './lib/line.js';
 
@@ -13,11 +13,11 @@ import { findNextEditableLine } from './lib/line.js';
  * "glue" logic.
  */
 export class EditorController {
-  static create(state: Editor) {
+  static create(state: EditorState) {
     return new EditorController(state);
   }
 
-  constructor(private state: Editor) {}
+  constructor(private state: EditorState) {}
 
   private unsubscribeInputChange?: () => void;
   private unsubscribeInputSelectionChange?: () => void;

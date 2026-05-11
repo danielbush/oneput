@@ -1,6 +1,5 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
@@ -73,7 +72,6 @@ export class Editor {
       userInput,
       nav,
       Tokenizer.create(),
-      FocusChainNavigator.create(nav),
       elementIndicator,
       cssElementIndicator
     );
@@ -100,7 +98,6 @@ export class Editor {
       userInput,
       nav,
       Tokenizer.createNull(),
-      FocusChainNavigator.createNull(nav),
       elementIndicator,
       cssElementIndicator
     );
@@ -131,7 +128,6 @@ export class Editor {
     public userInput: UserInput,
     readonly nav: Nav,
     private tokenizer: Tokenizer = Tokenizer.create(),
-    private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav),
     private legacyElementIndicator: ElementIndicator,
     private cssElementIndicator: CSSElementIndicator
   ) {
@@ -420,7 +416,6 @@ export class Editor {
     if (this.useElementIndicator) {
       this.cssElementIndicator.showIndicator(!!focus);
     }
-    this.focusChainNavigator.handleFocusChange(focus);
     if (this.mode === 'view' && focus && !isToken(focus)) {
       const line = findNextEditableLine(focus, this.document.root);
       if (line) {
@@ -538,7 +533,7 @@ export class Editor {
       return;
     }
 
-    this.focusChainNavigator.moveUp();
+    this.nav.UP_CHAIN();
   }
 
   moveNext() {
@@ -552,7 +547,7 @@ export class Editor {
       return;
     }
 
-    this.focusChainNavigator.moveDown();
+    this.nav.DOWN_CHAIN();
   }
 
   moveDown() {

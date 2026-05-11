@@ -20,7 +20,7 @@ describe('FocusChainNavigator', () => {
       )
     );
     const nav = Nav.createNull(doc);
-    const navigator = FocusChainNavigator.createNull(nav);
+    const navigator = FocusChainNavigator.create(nav);
     nav.connect();
     const root = byId(doc, 'container');
     const section = byId(doc, 'section');
@@ -77,7 +77,7 @@ describe('FocusChainNavigator', () => {
       )
     );
     const nav = Nav.createNull(doc);
-    const navigator = FocusChainNavigator.createNull(nav);
+    const navigator = FocusChainNavigator.create(nav);
     nav.connect();
     const leftLeaf = byId(doc, 'left-leaf');
     const right = byId(doc, 'right');
@@ -107,7 +107,7 @@ describe('FocusChainNavigator', () => {
       )
     );
     const nav = Nav.createNull(doc);
-    const navigator = FocusChainNavigator.createNull(nav);
+    const navigator = FocusChainNavigator.create(nav);
     nav.connect();
     const first = byId(doc, 'first');
     nav.REQUEST_FOCUS(first);
@@ -134,7 +134,7 @@ describe('FocusChainNavigator', () => {
       )
     );
     const nav = Nav.createNull(doc);
-    const navigator = FocusChainNavigator.createNull(nav);
+    const navigator = FocusChainNavigator.create(nav);
     nav.connect();
     const container = byId(doc, 'container');
     const visibleLeaf = byId(doc, 'visible-leaf');
@@ -160,7 +160,7 @@ describe('FocusChainNavigator', () => {
     );
     let navigator: FocusChainNavigator | undefined;
     const nav = Nav.createNull(doc, undefined, (focus) => navigator?.handleFocusChange(focus));
-    navigator = FocusChainNavigator.createNull(nav);
+    navigator = FocusChainNavigator.create(nav);
     nav.connect();
     const container = byId(doc, 'container');
     const second = byId(doc, 'second');
@@ -186,7 +186,7 @@ describe('FocusChainNavigator', () => {
     );
     let navigator: FocusChainNavigator | undefined;
     const nav = Nav.createNull(doc, undefined, (focus) => navigator?.handleFocusChange(focus));
-    navigator = FocusChainNavigator.createNull(nav);
+    navigator = FocusChainNavigator.create(nav);
     nav.connect();
     const line = byId(doc, 'line');
     const em1 = byId(doc, 'em1');

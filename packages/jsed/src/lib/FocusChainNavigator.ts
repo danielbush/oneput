@@ -10,10 +10,6 @@ export class FocusChainNavigator {
     return new FocusChainNavigator(nav);
   }
 
-  static createNull(nav: Nav) {
-    return new FocusChainNavigator(nav);
-  }
-
   private currentMark?: HTMLElement;
 
   constructor(private nav: Nav) {}

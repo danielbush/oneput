@@ -1,4 +1,4 @@
-import type { JsedDocument, JsedFocusEvent, JsedFocusRequestEvent } from './types.js';
+import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
 import { JSED_APP_ROOT_ID, JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from './lib/constants.js';
 import { isIsland, isFocusable, isToken } from './lib/taxonomy.js';
 import * as token from './lib/token.js';
@@ -9,6 +9,7 @@ import {
   findNextNode,
   findPreviousNode
 } from './lib/walk.js';
+import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
 
@@ -51,6 +52,7 @@ export class Nav {
    */
   #FOCUS?: HTMLElement;
   #connected = false;
+  #focusChainNavigator: FocusChainNavigator;
 
   get document(): JsedDocument {
     return this.doc;
@@ -61,6 +63,7 @@ export class Nav {
     private onRequestFocus?: OnRequestFocus,
     private onFocusChange?: (focus: HTMLElement) => void
   ) {
+    this.#focusChainNavigator = FocusChainNavigator.create(this);
     this.onRequestFocus = onRequestFocus;
   }
 
@@ -116,14 +119,8 @@ export class Nav {
     }
   }
 
-  #emitFocusEvent(_evt: JsedFocusEvent) {
-    // console.warn('TODO: emit FOCUS event', evt);
-  }
-
   #updateFocus(el: HTMLElement) {
-    let tok: HTMLElement | null = null;
     if (isToken(el)) {
-      tok = el;
       el = token.getParent(el);
     }
     if (!isFocusable(el)) {
@@ -137,20 +134,7 @@ export class Nav {
     if (el !== this.doc.root) {
       this.doc.viewportScroller.scrollIntoViewIfHidden(el);
     }
-    this.#emitFocusEvent(
-      tok
-        ? {
-            type: 'FOCUS',
-            targetType: 'TOKEN',
-            token: tok,
-            value: token.getValue(tok)
-          }
-        : {
-            type: 'FOCUS',
-            targetType: 'FOCUSABLE',
-            element: el
-          }
-    );
+    this.#focusChainNavigator.handleFocusChange(this.#FOCUS);
     this.onFocusChange?.(this.#FOCUS!);
   }
 
@@ -234,6 +218,14 @@ export class Nav {
     return;
   }
 
+  UP_CHAIN(): void {
+    this.#focusChainNavigator.moveUp();
+  }
+
+  DOWN_CHAIN(): void {
+    this.#focusChainNavigator.moveDown();
+  }
+
   /**
    * Focus an element if it is an FOCUSABLE .
    */
@@ -243,8 +235,7 @@ export class Nav {
   }
 
   /**
-   * Request FOCUS for an element `el`, if request is allow, focus and EMIT a
-   * FOCUS event.
+   * Request FOCUS for an element `el`, if request is allow, focus.
    *
    * CURSOR is checked first.
    */

@@ -64,7 +64,6 @@ export class Nav {
     private onFocusChange?: (focus: HTMLElement) => void
   ) {
     this.#focusChainNavigator = FocusChainNavigator.create(this);
-    this.onRequestFocus = onRequestFocus;
   }
 
   /**

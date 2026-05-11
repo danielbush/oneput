@@ -206,7 +206,7 @@ export class Editor {
     this.unsubscribeSelectionChange?.();
     this.unsubscribeInputChange = this.userInput.subscribeInputChange(this.handleInputChange);
     this.unsubscribeSelectionChange = this.userInput.subscribeSelectionChange(
-      this.handleSelectionChange
+      this.handleInputSelectionChange
     );
 
     // Tokenize LINE at or within `initial` if not already.
@@ -306,7 +306,7 @@ export class Editor {
    *
    * Pass this to the selection emitter after instantiation.
    */
-  handleSelectionChange = (selection: UserInputSelectionState) => {
+  handleInputSelectionChange = (selection: UserInputSelectionState) => {
     if (this.isSuspended) return;
     if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) return;
     this.cursor?.setStateFromSelection(selection);

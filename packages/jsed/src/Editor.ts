@@ -1,7 +1,5 @@
 import { err, ok, Result } from 'neverthrow';
 import * as token from './lib/token.js';
-import * as space from './lib/space.js';
-import { decideInputIntent } from './lib/decideInputIntent.js';
 import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
@@ -17,6 +15,7 @@ import { EditorCursorOps } from './EditorCursorOps.js';
 import { ElementIndicator } from './ElementIndicator.js';
 import { CSSElementIndicator } from './CSSElementIndicator.js';
 import type { CursorError, SetTokenOpts } from './CursorState.js';
+import { EditorInputOps } from './EditorInputOps.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorMode = 'view' | 'edit';
@@ -111,12 +110,13 @@ export class Editor {
   cursor?: Cursor;
   selection?: CursorSelection;
   mode: EditorMode = 'view';
-  private isSuspended: boolean = false;
+  isSuspended: boolean = false;
   private unsubscribeInputChange?: () => void;
   private unsubscribeSelectionChange?: () => void;
   focus: EditorFocusOps;
   anchor: EditorAnchorOps;
   cursorOps: EditorCursorOps;
+  inputOps: EditorInputOps;
   /**
    * Uses ElementIndicator.
    */
@@ -128,7 +128,7 @@ export class Editor {
 
   constructor(
     public document: JsedDocument,
-    private userInput: UserInput,
+    public userInput: UserInput,
     readonly nav: Nav,
     private tokenizer: Tokenizer = Tokenizer.create(),
     private focusChainNavigator: FocusChainNavigator = FocusChainNavigator.create(nav),
@@ -138,6 +138,7 @@ export class Editor {
     this.focus = EditorFocusOps.create(this);
     this.anchor = EditorAnchorOps.create(this);
     this.cursorOps = EditorCursorOps.create(this);
+    this.inputOps = EditorInputOps.create(this);
   }
 
   getMode(): EditorMode {
@@ -283,20 +284,11 @@ export class Editor {
     this.onElementChange?.(event);
   }
 
-  /**
-   * When user types in the input...
-   *
-   * @param {string} inputValue What the user has typed into an html input/textarea
-   */
   handleInputChange = (change: UserInputChange) => {
     if (this.isSuspended) return;
-    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) return;
-
-    let lastToken: HTMLElement | null = null;
-    let currentToken = this.cursor.getPlace();
-    const currentTokenValue = token.getValue(currentToken);
-    const intent = decideInputIntent(change, currentTokenValue);
-
+    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) {
+      return;
+    }
     // If a selection is active, reduce it to the START (earlier end in
     // document order): remove all selected TOKEN's except the start,
     // unwrap SELECTION_WRAPPER's, and re-seat the editing CURSOR on the
@@ -309,85 +301,8 @@ export class Editor {
       this.selection = undefined;
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.cursor.place(start, { syncInput: false });
-      currentToken = start;
     }
-    // console.log('decided intent', JSON.stringify(intent, null, 2));
-
-    switch (intent.type) {
-      case 'move-next-on-space':
-        this.cursor.moveNext();
-        return;
-
-      case 'delete-current': {
-        const current = this.cursor.getPlace();
-        this.cursor.delete();
-        this.notifyTextChange({ type: 'token-text-change', token: current });
-        this.cursor?.setStateFromInput(intent.inputValue);
-        return;
-      }
-
-      case 'insert-after-current':
-        for (const part of intent.insertedParts.reverse()) {
-          const insertedToken = token.createToken(part);
-          token.insertAfter(insertedToken, currentToken);
-          space.ensureSpaceAfter(currentToken);
-          if (!lastToken) {
-            lastToken = insertedToken;
-          }
-        }
-        const inserted = lastToken;
-        if (inserted) {
-          this.notifyTextChange({ type: 'token-text-change', token: inserted });
-        }
-        break;
-
-      case 'insert-before-current':
-        for (const part of intent.insertedParts) {
-          const insertedToken = token.createToken(part);
-          token.insertBefore(insertedToken, currentToken);
-          space.ensureSpaceAfter(insertedToken);
-          lastToken = insertedToken;
-        }
-        if (lastToken) {
-          this.notifyTextChange({ type: 'token-text-change', token: lastToken });
-        }
-        break;
-
-      case 'rewrite-current':
-        this.cursor.replace(intent.firstPart);
-        for (const part of intent.appendedParts.reverse()) {
-          const appendedToken = this.cursor.append(part);
-          if (!lastToken) {
-            lastToken = appendedToken;
-          }
-        }
-        if (intent.prependedSpace) {
-          this.userInput.moveCursorToBeginning();
-        }
-        this.notifyTextChange({ type: 'token-text-change', token: currentToken });
-        break;
-    }
-
-    const finalToken =
-      intent.finalTokenPreference === 'current-token' ? this.cursor.getPlace() : lastToken;
-
-    if (finalToken) {
-      this.cursor.place(finalToken);
-      this.userInput.focus();
-      this.userInput
-        .setInputValue(token.getValue(finalToken))
-        .then(() => {
-          this.nav.FOCUS(finalToken);
-          this.userInput.moveCursorToEnd();
-          this.cursor?.setStateFromInput(intent.inputValue);
-        })
-        .catch((err) => {
-          // TODO: close cursor?
-          console.warn('handleInputChange error:', err);
-        });
-    } else {
-      this.cursor?.setStateFromInput(intent.inputValue);
-    }
+    this.inputOps.handleInputChange(change, this.cursor);
   };
 
   /**

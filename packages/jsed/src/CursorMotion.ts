@@ -1,8 +1,6 @@
+import type { CursorState } from './CursorState.js';
 import { getNextLineSibling, getPreviousLineSibling } from './lib/line.js';
 import { isTokenizableTextNode } from './lib/taxonomy.js';
-import type { Cursor } from './Cursor.js';
-import type { Tokenizer } from './Tokenizer.js';
-import type { JsedDocument } from './types.js';
 
 /**
  * Coordinates CURSOR movement across LINE boundaries.
@@ -11,66 +9,66 @@ import type { JsedDocument } from './types.js';
  * the movement policy that needs document structure plus SHALLOW_TOKENIZATION.
  */
 export class CursorMotion {
-  static create(params: { document: JsedDocument; tokenizer: Tokenizer }): CursorMotion {
-    return new CursorMotion(params);
+  static create(state: CursorState): CursorMotion {
+    return new CursorMotion(state);
   }
 
-  static createNull(params: { document: JsedDocument; tokenizer: Tokenizer }): CursorMotion {
-    return new CursorMotion(params);
+  static createNull(state: CursorState): CursorMotion {
+    return new CursorMotion(state);
   }
 
-  private constructor(private params: { document: JsedDocument; tokenizer: Tokenizer }) {}
+  private constructor(private state: CursorState) {}
 
   /**
    * Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE).
    */
-  moveNext(cursor: Cursor): void {
-    if (cursor.isInsertingBefore()) {
-      cursor.clearInsertState();
+  moveNext(): void {
+    if (this.state.isInsertingBefore()) {
+      this.state.clearInsertState();
       return;
     }
 
-    const next = getNextLineSibling(cursor.getPlace(), this.params.document.root);
+    const next = getNextLineSibling(this.state.getPlace(), this.state.document.root);
     if (!next) {
       return;
     }
 
     // We may get a text node because we do SHALLOW_TOKENIZATION.
     if (isTokenizableTextNode(next)) {
-      const { tokens } = this.params.tokenizer.tokenizeLineAtTextNode(next);
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(next);
       if (tokens[0]) {
-        cursor.place(tokens[0]);
+        this.state.place(tokens[0]);
       }
       return;
     }
 
-    cursor.place(next as HTMLElement);
+    this.state.place(next as HTMLElement);
   }
 
   /**
    * Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE).
    */
-  movePrevious(cursor: Cursor): void {
+  movePrevious(): void {
     // Cancel append or insertAfter states and re-select token.
-    if (cursor.isInsertingAfter() || cursor.isAppend()) {
-      cursor.clearInsertState();
-      cursor.place(cursor.getPlace()); // causes select-all in input
+    if (this.state.isInsertingAfter() || this.state.isAppend()) {
+      this.state.clearInsertState();
+      this.state.place(this.state.getPlace()); // causes select-all in input
       return;
     }
 
-    const prev = getPreviousLineSibling(cursor.getPlace(), this.params.document.root);
+    const prev = getPreviousLineSibling(this.state.getPlace(), this.state.document.root);
     if (!prev) {
       return;
     }
 
     if (isTokenizableTextNode(prev)) {
-      const { tokens } = this.params.tokenizer.tokenizeLineAtTextNode(prev);
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(prev);
       if (tokens.length > 0) {
-        cursor.place(tokens[tokens.length - 1]);
+        this.state.place(tokens[tokens.length - 1]);
       }
       return;
     }
 
-    cursor.place(prev as HTMLElement);
+    this.state.place(prev as HTMLElement);
   }
 }

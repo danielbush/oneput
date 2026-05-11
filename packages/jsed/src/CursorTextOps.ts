@@ -1,41 +1,32 @@
 import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import { isToken } from './lib/taxonomy.js';
-import type { Cursor, CursorError } from './Cursor.js';
-import type { Tokenizer } from './Tokenizer.js';
+import type { CursorState } from './CursorState.js';
 
 export class CursorTextOps {
-  static create(params: {
-    cursor: Cursor;
-    tokenizer: Tokenizer;
-    onError: (err: CursorError) => void;
-  }): CursorTextOps {
-    return new CursorTextOps(params.cursor, params.tokenizer, params.onError);
+  static create(state: CursorState): CursorTextOps {
+    return new CursorTextOps(state);
   }
 
-  private constructor(
-    private cursor: Cursor,
-    private tokenizer: Tokenizer,
-    private onError: (err: CursorError) => void
-  ) {}
+  private constructor(private state: CursorState) {}
 
   /** Replace the value of the current TOKEN with a new value. */
   replace(val: string): void {
-    if (!this.isOnToken()) return;
-    token.replaceText(this.cursor.getPlace(), val);
+    if (!this.state.isOnToken()) return;
+    token.replaceText(this.state.getPlace(), val);
   }
 
   /** Delete the current TOKEN. */
   delete(): void {
-    if (!this.isOnToken()) return;
-    const { next: nextTok } = token.remove(this.cursor.getPlace());
-    this.cursor.place(nextTok);
+    if (!this.state.isOnToken()) return;
+    const { next: nextTok } = token.remove(this.state.getPlace());
+    this.state.place(nextTok);
   }
 
   /** Append a new TOKEN after the current one. */
   append(val: string): HTMLElement | null {
-    if (!this.isOnToken()) return null;
-    const current = this.cursor.getPlace();
+    if (!this.state.isOnToken()) return null;
+    const current = this.state.getPlace();
     const tok = token.createToken(val);
     token.insertAfter(tok, current);
     space.ensureSeparatorAfter(current);
@@ -44,39 +35,39 @@ export class CursorTextOps {
 
   /** Merge with next adjacent TOKEN if it exists (JOIN). */
   joinNext(): void {
-    if (!this.isOnToken()) return;
-    token.joinNext(this.cursor.getPlace());
+    if (!this.state.isOnToken()) return;
+    token.joinNext(this.state.getPlace());
   }
 
   /** Merge with previous adjacent TOKEN if it exists (JOIN). */
   joinPrevious(): void {
-    if (!this.isOnToken()) return;
-    token.joinPrevious(this.cursor.getPlace());
+    if (!this.state.isOnToken()) return;
+    token.joinPrevious(this.state.getPlace());
   }
 
   /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
   splitBefore(): HTMLElement | null {
-    if (!this.isOnToken()) return null;
-    const [before] = token.splitBefore(this.cursor.getPlace());
+    if (!this.state.isOnToken()) return null;
+    const [before] = token.splitBefore(this.state.getPlace());
     // We may end up in a new token, so we need to update the focus.
-    this.cursor.place(this.cursor.getPlace());
+    this.state.place(this.state.getPlace());
     return before;
   }
 
   /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
   splitAfter(): HTMLElement | null {
-    if (!this.isOnToken()) return null;
-    const [, after] = token.splitAfter(this.cursor.getPlace());
-    const firstTok = this.tokenizer.tokenizeLineAt(after);
+    if (!this.state.isOnToken()) return null;
+    const [, after] = token.splitAfter(this.state.getPlace());
+    const firstTok = this.state.tokenizer.tokenizeLineAt(after);
     if (firstTok) {
-      this.cursor.place(firstTok);
+      this.state.place(firstTok);
     }
     return after;
   }
 
   /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
   splitAtToken(): HTMLElement | null {
-    if (this.cursor.isInsertingBefore() || this.cursor.isPrepend()) {
+    if (this.state.isInsertingBefore() || this.state.isPrepend()) {
       return this.splitBefore();
     }
 
@@ -85,32 +76,27 @@ export class CursorTextOps {
 
   insertElementAfter(el: HTMLElement): void {
     if (isToken(el)) {
-      this.onError({ type: 'expected-non-token' });
+      this.state.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
-    token.insertAfter(el, this.cursor.getPlace());
+    token.insertAfter(el, this.state.getPlace());
 
-    const first = this.tokenizer.tokenizeLineAt(el);
+    const first = this.state.tokenizer.tokenizeLineAt(el);
     if (first) {
-      this.cursor.place(first);
+      this.state.place(first);
     }
   }
 
   insertElementBefore(el: HTMLElement): void {
     if (isToken(el)) {
-      this.onError({ type: 'expected-non-token' });
+      this.state.onError({ type: 'expected-non-token' });
       throw new Error(`Expected non-token element.`);
     }
-    token.insertBefore(el, this.cursor.getPlace());
+    token.insertBefore(el, this.state.getPlace());
 
-    const first = this.tokenizer.tokenizeLineAt(el);
+    const first = this.state.tokenizer.tokenizeLineAt(el);
     if (first) {
-      this.cursor.place(first);
+      this.state.place(first);
     }
-  }
-
-  /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
-  private isOnToken(): boolean {
-    return isToken(this.cursor.getPlace());
   }
 }

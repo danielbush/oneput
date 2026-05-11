@@ -38,7 +38,7 @@ describe('splitAtToken', () => {
     cursor.setInsertState('CURSOR_APPEND');
 
     // act
-    cursor.ops.splitAtToken();
+    cursor.splitAtToken();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('world');
@@ -52,7 +52,7 @@ describe('splitAtToken', () => {
     cursor.setInsertState('CURSOR_INSERT_AFTER');
 
     // act
-    cursor.ops.splitAtToken();
+    cursor.splitAtToken();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('world');
@@ -65,7 +65,7 @@ describe('splitAtToken', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.splitAtToken();
+    cursor.splitAtToken();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('foo');
@@ -80,7 +80,7 @@ describe('replace', () => {
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    cursor.ops.replace('goodbye');
+    cursor.replace('goodbye');
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('goodbye');
@@ -94,7 +94,7 @@ describe('replace', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.replace('ccc');
+    cursor.replace('ccc');
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('ccc');
@@ -110,7 +110,7 @@ describe('replace', () => {
     expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
-    cursor.ops.replace('oops');
+    cursor.replace('oops');
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
@@ -124,7 +124,7 @@ describe('delete', () => {
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    cursor.ops.delete();
+    cursor.delete();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('world');
@@ -136,7 +136,7 @@ describe('delete', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.delete();
+    cursor.delete();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('hello');
@@ -152,7 +152,7 @@ describe('delete', () => {
     expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
-    cursor.ops.delete();
+    cursor.delete();
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
@@ -174,7 +174,7 @@ describe('delete', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.delete();
+    cursor.delete();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('ccc');
@@ -188,7 +188,7 @@ describe('delete', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.delete();
+    cursor.delete();
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
@@ -202,7 +202,7 @@ describe('append', () => {
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    cursor.ops.append('new');
+    cursor.append('new');
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('hello');
@@ -219,7 +219,7 @@ describe('append', () => {
     const current = cursor.getPlace();
 
     // act
-    const appended = cursor.ops.append('new');
+    const appended = cursor.append('new');
 
     // assert
     expect(appended).not.toBeNull();
@@ -237,7 +237,7 @@ describe('append', () => {
     const { cursor } = createCursor(doc, island);
 
     // act
-    const result = cursor.ops.append('oops');
+    const result = cursor.append('oops');
 
     // assert
     expect(result).toBeNull();
@@ -251,7 +251,7 @@ describe('joinNext', () => {
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    cursor.ops.joinNext();
+    cursor.joinNext();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('helloworld');
@@ -273,7 +273,7 @@ describe('joinNext', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.joinNext();
+    cursor.joinNext();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('bbbccc');
@@ -288,7 +288,7 @@ describe('joinNext', () => {
     const { cursor } = createCursor(doc, island);
 
     // act
-    cursor.ops.joinNext();
+    cursor.joinNext();
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
@@ -300,7 +300,7 @@ describe('joinNext', () => {
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    cursor.ops.joinNext();
+    cursor.joinNext();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('aaa');
@@ -314,7 +314,7 @@ describe('joinPrevious', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.joinPrevious();
+    cursor.joinPrevious();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('helloworld');
@@ -336,7 +336,7 @@ describe('joinPrevious', () => {
     const { cursor } = createCursor(doc, tokens(doc)[2]);
 
     // act
-    cursor.ops.joinPrevious();
+    cursor.joinPrevious();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('bbbccc');
@@ -351,7 +351,7 @@ describe('joinPrevious', () => {
     const { cursor } = createCursor(doc, island);
 
     // act
-    cursor.ops.joinPrevious();
+    cursor.joinPrevious();
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
@@ -363,7 +363,7 @@ describe('joinPrevious', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.ops.joinPrevious();
+    cursor.joinPrevious();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('bbb');

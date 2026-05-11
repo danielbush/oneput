@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { Cursor, computeCursorState } from '../Cursor.js';
+import { Cursor } from '../Cursor.js';
 import { getValue } from '../lib/token.js';
 import {
   CURSOR_APPEND_CLASS,
@@ -10,6 +10,7 @@ import {
   CURSOR_INSERT_BEFORE_CLASS,
   CURSOR_PREPEND_CLASS
 } from '../lib/constants.js';
+import { computeCursorState } from '../CursorState.js';
 
 function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];

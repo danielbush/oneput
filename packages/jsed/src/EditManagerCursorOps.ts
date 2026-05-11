@@ -169,7 +169,7 @@ export class EditManagerCursorOps {
       return false;
     }
 
-    const inserted = this.editManager.cursor.ops.splitAtToken();
+    const inserted = this.editManager.cursor.splitAtToken();
     if (inserted) {
       this.editManager.notifyElementChange({ type: 'focusable-inserted', element: inserted });
     }

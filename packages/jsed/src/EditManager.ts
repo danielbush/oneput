@@ -6,7 +6,7 @@ import { FocusChainNavigator } from './lib/FocusChainNavigator.js';
 import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
-import { Cursor, type SetTokenOpts, type CursorError } from './Cursor.js';
+import { Cursor } from './Cursor.js';
 import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
 import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
@@ -16,6 +16,7 @@ import { EditManagerAnchorOps } from './EditManagerAnchorOps.js';
 import { EditManagerCursorOps } from './EditManagerCursorOps.js';
 import { ElementIndicator } from './ElementIndicator.js';
 import { CSSElementIndicator } from './CSSElementIndicator.js';
+import type { CursorError, SetTokenOpts } from './CursorState.js';
 
 export type EditManagerError = { type: 'no-token-under-focus' } | CursorError;
 export type EditManagerMode = 'view' | 'edit';
@@ -237,9 +238,8 @@ export class EditManager {
           onCursorChange: this.handleCursorChange,
           onError: this.handleCursorError
         });
-      } else {
-        this.cursor.place(targetLineSibling); // calls handleCursorChange
       }
+      this.cursor.place(targetLineSibling); // calls handleCursorChange
       this.setMode('edit');
       return ok(undefined);
     }
@@ -326,7 +326,7 @@ export class EditManager {
 
       case 'delete-current': {
         const current = this.cursor.getPlace();
-        this.cursor.ops.delete();
+        this.cursor.delete();
         this.notifyTextChange({ type: 'token-text-change', token: current });
         this.cursor?.setStateFromInput(intent.inputValue);
         return;
@@ -360,9 +360,9 @@ export class EditManager {
         break;
 
       case 'rewrite-current':
-        this.cursor.ops.replace(intent.firstPart);
+        this.cursor.replace(intent.firstPart);
         for (const part of intent.appendedParts.reverse()) {
-          const appendedToken = this.cursor.ops.append(part);
+          const appendedToken = this.cursor.append(part);
           if (!lastToken) {
             lastToken = appendedToken;
           }

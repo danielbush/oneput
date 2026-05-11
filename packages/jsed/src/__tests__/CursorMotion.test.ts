@@ -22,6 +22,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
     onCursorChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)
   });
+  cursor.place(tok);
 
   return { cursor, changes, errors };
 }

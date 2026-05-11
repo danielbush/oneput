@@ -4,6 +4,7 @@ import * as token from './lib/token.js';
 import * as space from './lib/space.js';
 import type { UserInputChange } from './UserInput';
 import type { Cursor } from './Cursor.js';
+import { isIsland, isLine, isToken } from './lib/taxonomy.js';
 
 export class EditorInputOps {
   static create(editor: Editor) {
@@ -15,7 +16,7 @@ export class EditorInputOps {
   /**
    * When user types in the input...
    */
-  handleInputChange = (change: UserInputChange, cursor: Cursor) => {
+  updateWithInputChange = (change: UserInputChange, cursor: Cursor) => {
     let lastToken: HTMLElement | null = null;
     const currentToken = cursor.getPlace();
     const currentTokenValue = token.getValue(currentToken);
@@ -97,6 +98,24 @@ export class EditorInputOps {
         });
     } else {
       cursor.setStateFromInput(intent.inputValue);
+    }
+  };
+
+  udpateWithCursorChange = (el: HTMLElement) => {
+    if (isToken(el)) {
+      this.editor.userInput.focus();
+      this.editor.userInput.setInputValue(token.getValue(el)).then(() => {
+        this.editor.userInput.selectAll();
+      });
+    } else {
+      this.editor.userInput.enable(false);
+      this.editor.userInput.setInputValue('');
+      if (isIsland(el) || isLine(el)) {
+        // TODO: Handle 'Enter' which may be a different key binding.
+        this.editor.userInput.setPlaceholder('Hit Enter to edit this element');
+      } else {
+        this.editor.userInput.setInputValue('(not a token)');
+      }
     }
   };
 }

@@ -1,7 +1,7 @@
 import * as token from './lib/token.js';
 import type { CursorError, SetTokenOpts } from './CursorState';
 import type { Editor } from './Editor';
-import { isIsland, isLine, isToken } from './lib/taxonomy';
+import { isToken } from './lib/taxonomy';
 import type { UserInputChange, UserInputSelectionState } from './UserInput';
 import type { JsedFocusRequestEvent } from './types.js';
 import { findNextEditableLine } from './lib/line.js';
@@ -53,7 +53,7 @@ export class EditorController {
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.state.cursor.place(start, { syncInput: false });
     }
-    this.state.inputOps.handleInputChange(change, this.state.cursor);
+    this.state.inputOps.updateWithInputChange(change, this.state.cursor);
   };
 
   /**
@@ -85,22 +85,7 @@ export class EditorController {
     if (opts?.syncInput === false) return;
     this.state.userInput.resetPlaceholder();
     this.state.userInput.enable(true);
-
-    if (isToken(tok)) {
-      this.state.userInput.focus();
-      this.state.userInput.setInputValue(token.getValue(tok)).then(() => {
-        this.state.userInput.selectAll();
-      });
-    } else {
-      this.state.userInput.enable(false);
-      this.state.userInput.setInputValue('');
-      if (isIsland(tok) || isLine(tok)) {
-        // TODO: Handle 'Enter' which may be a different key binding.
-        this.state.userInput.setPlaceholder('Hit Enter to edit this element');
-      } else {
-        this.state.userInput.setInputValue('(not a token)');
-      }
-    }
+    this.state.inputOps.udpateWithCursorChange(tok);
   };
 
   /**

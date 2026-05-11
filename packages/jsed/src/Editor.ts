@@ -1,21 +1,21 @@
 import { err, ok, Result } from 'neverthrow';
-import * as token from './lib/token.js';
-import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from './lib/taxonomy.js';
+import { isCursorTransparent, isLineSibling, isToken } from './lib/taxonomy.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from './lib/line.js';
 import { Nav } from './Nav.js';
 import { Cursor } from './Cursor.js';
 import { CursorSelection } from './CursorSelection.js';
 import { Tokenizer } from './Tokenizer.js';
-import type { JsedDocument, JsedFocusRequestEvent } from './types.js';
-import type { UserInput, UserInputChange, UserInputSelectionState } from './UserInput.js';
+import type { JsedDocument } from './types.js';
+import type { UserInput } from './UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';
 import { EditorAnchorOps } from './EditorAnchorOps.js';
 import { EditorCursorOps } from './EditorCursorOps.js';
 import { ElementIndicator } from './ElementIndicator.js';
 import { CSSElementIndicator } from './CSSElementIndicator.js';
-import type { CursorError, SetTokenOpts } from './CursorState.js';
+import type { CursorError } from './CursorState.js';
 import { EditorInputOps } from './EditorInputOps.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
+import { EditorController } from './EditorController.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorMode = 'view' | 'edit';
@@ -60,15 +60,10 @@ export type EditorElementChangeEvent =
  */
 export class Editor {
   static create({ document, userInput }: { document: JsedDocument; userInput: UserInput }): Editor {
-    let instance: Editor;
-    const nav = Nav.create(
-      document,
-      (evt) => instance?.handleFocusRequest(evt),
-      (focus) => instance?.handleFocusChange(focus)
-    );
+    const nav = Nav.create(document);
     const elementIndicator = ElementIndicator.create();
     const cssElementIndicator = CSSElementIndicator.create();
-    instance = new Editor(
+    return new Editor(
       document,
       userInput,
       nav,
@@ -76,7 +71,6 @@ export class Editor {
       elementIndicator,
       cssElementIndicator
     );
-    return instance;
   }
 
   static createNull({
@@ -86,15 +80,10 @@ export class Editor {
     document: JsedDocument;
     userInput: UserInput;
   }): Editor {
-    let instance: Editor;
-    const nav = Nav.createNull(
-      document,
-      (evt) => instance?.handleFocusRequest(evt),
-      (focus) => instance?.handleFocusChange(focus)
-    );
+    const nav = Nav.createNull(document);
     const elementIndicator = ElementIndicator.createNull();
     const cssElementIndicator = CSSElementIndicator.createNull();
-    instance = new Editor(
+    return new Editor(
       document,
       userInput,
       nav,
@@ -102,15 +91,12 @@ export class Editor {
       elementIndicator,
       cssElementIndicator
     );
-    return instance;
   }
 
   cursor?: Cursor;
   selection?: CursorSelection;
   mode: EditorMode = 'view';
   isSuspended: boolean = false;
-  private unsubscribeInputChange?: () => void;
-  private unsubscribeSelectionChange?: () => void;
   focus: EditorFocusOps;
   anchor: EditorAnchorOps;
   cursorOps: EditorCursorOps;
@@ -118,20 +104,21 @@ export class Editor {
   /**
    * Uses ElementIndicator.
    */
-  private useLegacyElementIndicator: boolean = false;
+  useLegacyElementIndicator: boolean = false;
   /**
    * Modern CSS Anchors.
    */
-  private useElementIndicator: boolean = false;
+  useElementIndicator: boolean = false;
 
   constructor(
     public document: JsedDocument,
     public userInput: UserInput,
-    readonly nav: Nav,
-    private tokenizer: Tokenizer = Tokenizer.create(),
-    private legacyElementIndicator: ElementIndicator,
-    private cssElementIndicator: CSSElementIndicator,
-    public eventsEmitter: EditorEventsEmitter = EditorEventsEmitter.create()
+    public nav: Nav,
+    public tokenizer: Tokenizer = Tokenizer.create(),
+    public legacyElementIndicator: ElementIndicator,
+    public cssElementIndicator: CSSElementIndicator,
+    public eventsEmitter: EditorEventsEmitter = EditorEventsEmitter.create(),
+    public controller: EditorController = EditorController.create(this)
   ) {
     this.focus = EditorFocusOps.create(this);
     this.anchor = EditorAnchorOps.create(this);
@@ -149,7 +136,10 @@ export class Editor {
   }
 
   start(): void {
-    this.nav.connect();
+    this.nav.connect({
+      onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
+      onFocusChange: (focus) => this.controller.onFocusChange(focus)
+    });
     this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
     this.cssElementIndicator.showIndicator(this.useElementIndicator && true);
     this.nav.FOCUS(
@@ -177,8 +167,7 @@ export class Editor {
     this.tokenizer.destroy();
     this.legacyElementIndicator.destroy();
     this.cssElementIndicator.destroy();
-    this.unsubscribeInputChange?.();
-    this.unsubscribeSelectionChange?.();
+    this.controller.unsubscribeAll();
     this.eventsEmitter.destroy();
   }
 
@@ -194,17 +183,16 @@ export class Editor {
    * LINE_SIBLING reachable from the focused LINE.
    */
   enterEditing(initial?: HTMLElement): Result<void, EditorError> {
-    this.nav.connect();
+    this.nav.connect({
+      onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
+      onFocusChange: (focus) => this.controller.onFocusChange(focus)
+    });
     initial = initial ?? this.nav.getFocus() ?? undefined;
     if (!initial) {
       return err({ type: 'no-token-under-focus' });
     }
-    this.unsubscribeInputChange?.();
-    this.unsubscribeSelectionChange?.();
-    this.unsubscribeInputChange = this.userInput.subscribeInputChange(this.handleInputChange);
-    this.unsubscribeSelectionChange = this.userInput.subscribeSelectionChange(
-      this.handleInputSelectionChange
-    );
+    this.controller.unsubscribeAll();
+    this.controller.subscribeAll();
 
     // Tokenize LINE at or within `initial` if not already.
     const line = findNextEditableLine(initial, this.document.root);
@@ -223,8 +211,8 @@ export class Editor {
           document: this.document,
           tokenizer: this.tokenizer,
           token: targetLineSibling,
-          onCursorChange: this.handleCursorChange,
-          onError: this.handleCursorError
+          onCursorChange: this.controller.onCursorChange,
+          onError: this.controller.onCursorError
         });
       }
       this.cursor.place(targetLineSibling); // calls handleCursorChange
@@ -244,8 +232,7 @@ export class Editor {
 
     // Exit the cursor completely
     const focusElement = params?.focusElement ?? this.nav.getFocus() ?? undefined;
-    this.unsubscribeInputChange?.();
-    this.unsubscribeSelectionChange?.();
+    this.controller.unsubscribeAll();
     this.cursor?.destroy();
     this.cursor = undefined;
     this.tokenizer.setCursorElement(null);
@@ -268,158 +255,6 @@ export class Editor {
   notifyElementChange(event: EditorElementChangeEvent) {
     this.eventsEmitter.onElementChange?.(event);
   }
-
-  handleInputChange = (change: UserInputChange) => {
-    if (this.isSuspended) return;
-    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) {
-      return;
-    }
-    // If a selection is active, reduce it to the START (earlier end in
-    // document order): remove all selected TOKEN's except the start,
-    // unwrap SELECTION_WRAPPER's, and re-seat the editing CURSOR on the
-    // start. The intent (decided above against the anchor's value) then
-    // executes against the start — e.g. rewrite-current turns typing
-    // "x" into "replace start TOKEN with x", landing the new content
-    // where the selection began.
-    if (this.selection) {
-      const start = this.selection.collapseToStart();
-      this.selection = undefined;
-      // Suppress input sync — user is mid-typing, we'd clobber their input.
-      this.cursor.place(start, { syncInput: false });
-    }
-    this.inputOps.handleInputChange(change, this.cursor);
-  };
-
-  /**
-   * When user changes the selection in the input...
-   *
-   * Pass this to the selection emitter after instantiation.
-   */
-  handleInputSelectionChange = (selection: UserInputSelectionState) => {
-    if (this.isSuspended) return;
-    if (this.mode !== 'edit' || !this.cursor || !isToken(this.cursor.getPlace())) return;
-    this.cursor?.setStateFromSelection(selection);
-  };
-
-  /**
-   * When the cursor changes its token because of some action it has been
-   * commanded to do usually by the user... (eg due to delete operation).
-   *
-   * `opts.syncInput === false` skips all `userInput.*` side effects —
-   * internal model updates (tokenizer keep-alive, nav focus, external
-   * onCursorChange) still fire. Used for mid-typing cursor re-seating so
-   * the user's in-flight input value is not clobbered by the head TOKEN's
-   * pre-rewrite value.
-   */
-  private handleCursorChange = (tok: HTMLElement, opts?: SetTokenOpts) => {
-    this.tokenizer.setCursorElement(tok);
-    this.nav?.FOCUS(tok);
-    this.eventsEmitter.onCursorChange?.(tok);
-    if (opts?.syncInput === false) return;
-    this.userInput.resetPlaceholder();
-    this.userInput.enable(true);
-
-    if (isToken(tok)) {
-      this.userInput.focus();
-      this.userInput.setInputValue(token.getValue(tok)).then(() => {
-        this.userInput.selectAll();
-      });
-    } else {
-      this.userInput.enable(false);
-      this.userInput.setInputValue('');
-      if (isIsland(tok) || isLine(tok)) {
-        // TODO: Handle 'Enter' which may be a different key binding.
-        this.userInput.setPlaceholder('Hit Enter to edit this element');
-      } else {
-        this.userInput.setInputValue('(not a token)');
-      }
-    }
-  };
-
-  /**
-   * When the user causes a FOCUS change (click, touch, key bindings)...
-   */
-  private handleFocusRequest = (evt: JsedFocusRequestEvent) => {
-    if (this.mode === 'view') {
-      return this.handleFocusRequestInViewMode(evt);
-    }
-
-    return this.handleFocusRequestInEditingMode(evt);
-  };
-
-  private handleFocusRequestInViewMode = (evt: JsedFocusRequestEvent) => {
-    const currentFocus = this.nav.getFocus();
-
-    if (evt.targetType === 'FOCUSABLE') {
-      // Second focus puts us into editing mode.
-      if (evt.element === currentFocus) {
-        this.enterEditing(evt.element).mapErr((err) => this.eventsEmitter.onError?.(err));
-        return false;
-      }
-
-      return true;
-    }
-
-    if (evt.targetType === 'TOKEN') {
-      if (currentFocus?.contains(evt.token)) {
-        this.enterEditing(evt.token).mapErr((err) => this.eventsEmitter.onError?.(err));
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  private handleFocusRequestInEditingMode = (evt: JsedFocusRequestEvent) => {
-    if (!this.cursor) {
-      return false;
-    }
-
-    // FOCUS has been set to some FOCUSABLE...
-    if (evt.targetType === 'FOCUSABLE') {
-      this.exitEditing({ focusElement: evt.element });
-      return false;
-    }
-
-    // FOCUS has been set to a TOKEN...
-    if (evt.targetType === 'TOKEN') {
-      const parent = token.getParent(evt.token);
-      if (!this.cursor.isSameLine(evt.token)) {
-        this.exitEditing({ focusElement: parent });
-        return false;
-      }
-
-      this.cursor.place(evt.token); // calls handleCursorChange
-      return true;
-    }
-
-    return false;
-  };
-
-  private handleFocusChange(focus: HTMLElement | null) {
-    if (focus) this.legacyElementIndicator.setTarget(focus);
-    if (this.useLegacyElementIndicator) {
-      this.legacyElementIndicator.showIndicator(!!focus);
-    }
-    this.cssElementIndicator.setTarget(focus);
-    if (this.useElementIndicator) {
-      this.cssElementIndicator.showIndicator(!!focus);
-    }
-    if (this.mode === 'view' && focus && !isToken(focus)) {
-      const line = findNextEditableLine(focus, this.document.root);
-      if (line) {
-        this.tokenizer.tokenizeLineAt(line);
-      }
-    }
-    this.eventsEmitter.onFocusChange?.(focus);
-  }
-
-  /**
-   * If the cursor finds itself in an untenable state...
-   */
-  private handleCursorError = (err: CursorError) => {
-    this.eventsEmitter.onError?.(err);
-  };
 
   /**
    * Handle the user pressing Enter based on the current editing context.

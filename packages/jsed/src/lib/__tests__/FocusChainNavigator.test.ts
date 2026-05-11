@@ -159,9 +159,11 @@ describe('FocusChainNavigator', () => {
       )
     );
     let navigator: FocusChainNavigator | undefined;
-    const nav = Nav.createNull(doc, undefined, (focus) => navigator?.handleFocusChange(focus));
+    const nav = Nav.createNull(doc);
     navigator = FocusChainNavigator.create(nav);
-    nav.connect();
+    nav.connect({
+      onFocusChange: (focus) => navigator?.handleFocusChange(focus)
+    });
     const container = byId(doc, 'container');
     const second = byId(doc, 'second');
 
@@ -185,9 +187,11 @@ describe('FocusChainNavigator', () => {
       )
     );
     let navigator: FocusChainNavigator | undefined;
-    const nav = Nav.createNull(doc, undefined, (focus) => navigator?.handleFocusChange(focus));
+    const nav = Nav.createNull(doc);
     navigator = FocusChainNavigator.create(nav);
-    nav.connect();
+    nav.connect({
+      onFocusChange: (focus) => navigator?.handleFocusChange(focus)
+    });
     const line = byId(doc, 'line');
     const em1 = byId(doc, 'em1');
 

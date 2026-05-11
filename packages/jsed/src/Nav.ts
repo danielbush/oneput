@@ -30,20 +30,12 @@ export type NavError =
  * is immutable — set once at construction.
  */
 export class Nav {
-  static create(
-    doc: JsedDocument,
-    onRequestFocus?: OnRequestFocus,
-    onFocusChange?: (focus: HTMLElement) => void
-  ): Nav {
-    return new Nav(doc, onRequestFocus, onFocusChange);
+  static create(doc: JsedDocument): Nav {
+    return new Nav(doc);
   }
 
-  static createNull(
-    doc: JsedDocument,
-    onRequestFocus?: OnRequestFocus,
-    onFocusChange?: (focus: HTMLElement) => void
-  ): Nav {
-    return new Nav(doc, onRequestFocus, onFocusChange);
+  static createNull(doc: JsedDocument): Nav {
+    return new Nav(doc);
   }
 
   /**
@@ -69,7 +61,15 @@ export class Nav {
   /**
    * Start listening for DOM events and show the element indicator.
    */
-  connect() {
+  connect({
+    onRequestFocus,
+    onFocusChange
+  }: {
+    onRequestFocus?: OnRequestFocus;
+    onFocusChange?: (focus: HTMLElement) => void;
+  } = {}) {
+    this.onFocusChange = onFocusChange;
+    this.onRequestFocus = onRequestFocus;
     if (this.#connected) return;
     this.#connected = true;
     this.doc.root.addEventListener<'mousedown'>('mousedown', this.handleElementClick);

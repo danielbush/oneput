@@ -1,4 +1,4 @@
-import type { JsedDocument } from './JsedDocument';
+import type { JsedDocument } from '../../JsedDocument';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_CARET_CLASS,
@@ -6,11 +6,11 @@ import {
   CURSOR_INSERT_BEFORE_CLASS,
   CURSOR_PREPEND_CLASS,
   JSED_CURSOR_CLASS
-} from './lib/constants';
-import { isSameLine } from './lib/line';
-import { isLineSibling, isToken } from './lib/taxonomy';
-import type { Tokenizer } from './Tokenizer';
-import type { UserInputSelectionState } from './UserInput';
+} from '../dom/constants';
+import { isSameLine } from '../dom/line';
+import { isLineSibling, isToken } from '../dom/taxonomy';
+import type { Tokenizer } from '../../Tokenizer';
+import type { UserInputSelectionState } from '../../UserInput';
 
 /**
  * Options threaded through `place` -> `onCursorChange`.

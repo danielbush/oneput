@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { byId, div, makeRoot, p } from '../../test/util';
+import { byId, div, makeRoot, p } from '../../../test/util';
 import { JSED_ANCHOR_CLASS, JSED_FOCUS_CLASS } from '../constants';
 import {
   copyEmptyNext,

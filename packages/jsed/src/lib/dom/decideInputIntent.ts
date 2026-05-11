@@ -1,4 +1,4 @@
-import type { UserInputChange } from '../UserInput.js';
+import type { UserInputChange } from '../../UserInput.js';
 
 /*
 Notation

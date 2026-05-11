@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em } from '../../test/util.js';
+import { byId, makeRoot, div, p, em } from '../../../test/util.js';
 import { isFocusable, isIgnorable, isInlineFlow, isLine, isToken } from '../taxonomy.js';
 import { tokenizeLineAt } from '../tokenize.js';
 

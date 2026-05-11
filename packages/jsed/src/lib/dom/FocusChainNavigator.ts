@@ -1,6 +1,6 @@
 import { isFocusable, isIsland } from './taxonomy.js';
 import { findNextNode } from './walk.js';
-import type { Nav } from '../Nav.js';
+import type { Nav } from '../../Nav.js';
 
 /**
  * Tracks CURRENT_MARK and applies chain-aware FOCUS navigation in view mode.

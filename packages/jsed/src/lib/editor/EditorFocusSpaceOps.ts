@@ -1,5 +1,5 @@
 import type { EditorState } from './EditorState.js';
-import * as space from './lib/space.js';
+import * as space from '../dom/space.js';
 
 /**
  * Trailing / Leading space (at focus)

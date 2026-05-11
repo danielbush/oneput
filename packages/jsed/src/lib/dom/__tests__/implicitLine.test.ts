@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { byId, div, em, inlineStyleHackVal, makeRoot, p, span, strong } from '../../test/util';
-import { tagImplicitLines } from '../interstitial';
+import { byId, div, em, inlineStyleHackVal, makeRoot, p, span, strong } from '../../../test/util';
+import { tagImplicitLines } from '../implicitLine';
 import { JSED_IGNORE_CLASS, JSED_IMPLICIT_CLASS } from '../constants';
 
 describe('inline IMPLICIT_LINE (interstitial)', () => {

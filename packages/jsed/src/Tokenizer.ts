@@ -1,7 +1,7 @@
-import { Detokenizer } from './lib/Detokenizer.js';
-import { containsSelection } from './lib/selection.js';
-import { isFocusable } from './lib/taxonomy.js';
-import { tokenizeLineAt, tokenizeLineAtTextNode } from './lib/tokenize.js';
+import { Detokenizer } from './lib/dom/Detokenizer.js';
+import { containsSelection } from './lib/dom/selection.js';
+import { isFocusable } from './lib/dom/taxonomy.js';
+import { tokenizeLineAt, tokenizeLineAtTextNode } from './lib/dom/tokenize.js';
 
 /**
  * Tokenize-and-seat service for the CURSOR.

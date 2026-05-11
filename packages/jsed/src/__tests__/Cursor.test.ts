@@ -3,14 +3,14 @@ import { makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { getValue } from '../lib/token.js';
+import { getValue } from '../lib/dom/token.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS,
   CURSOR_PREPEND_CLASS
-} from '../lib/constants.js';
-import { computeCursorState } from '../CursorState.js';
+} from '../lib/dom/constants.js';
+import { computeCursorState } from '../lib/cursor/CursorState.js';
 
 function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];

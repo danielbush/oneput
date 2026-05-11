@@ -1,11 +1,11 @@
-import { CursorMotion } from './CursorMotion.js';
+import { CursorMotion } from './lib/cursor/CursorMotion.js';
 import {
   CursorState,
   type CursorInsertState,
   type CursorParams,
   type SetTokenOpts
-} from './CursorState.js';
-import { CursorTextOps } from './CursorTextOps.js';
+} from './lib/cursor/CursorState.js';
+import { CursorTextOps } from './lib/cursor/CursorTextOps.js';
 import type { UserInputSelectionState } from './UserInput.js';
 
 /**

@@ -1,7 +1,7 @@
 import { ok, Result } from 'neverthrow';
-import { isToken } from './lib/taxonomy.js';
+import { isToken } from '../dom/taxonomy.js';
 import type { EditorError, EditorState } from './EditorState.js';
-import { CursorSelection } from './CursorSelection.js';
+import { CursorSelection } from '../cursor/CursorSelection.js';
 
 /**
  * Manages an edit session for a single document.

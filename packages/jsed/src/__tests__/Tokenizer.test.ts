@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { Tokenizer } from '../Tokenizer.js';
-import { Detokenizer } from '../lib/Detokenizer.js';
+import { Detokenizer } from '../lib/dom/Detokenizer.js';
 import { byId, div, em, frag, inlineStyleHack, makeRoot, p } from '../test/util.js';
-import { isToken } from '../lib/taxonomy.js';
+import { isToken } from '../lib/dom/taxonomy.js';
 
 describe('Tokenizer', () => {
   afterEach(() => {

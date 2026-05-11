@@ -1,10 +1,10 @@
-import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from './lib/constants.js';
-import { getLine } from './lib/line.js';
-import { isInlineFlow } from './lib/taxonomy.js';
-import * as token from './lib/token.js';
-import { Cursor } from './Cursor.js';
-import type { JsedDocument } from './types.js';
-import type { Tokenizer } from './Tokenizer.js';
+import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from '../dom/constants.js';
+import { getLine } from '../dom/line.js';
+import { isInlineFlow } from '../dom/taxonomy.js';
+import * as token from '../dom/token.js';
+import { Cursor } from '../../Cursor.js';
+import type { JsedDocument } from '../../types.js';
+import type { Tokenizer } from '../../Tokenizer.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by

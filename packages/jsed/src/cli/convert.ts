@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { convert } from '../lib/convert.js';
+import { convert } from '../lib/dom/convert.js';
 import * as fs from 'fs';
 
 const program = new Command();

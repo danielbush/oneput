@@ -33,7 +33,7 @@ import {
   span,
   strong as strongTag,
   t
-} from '../../test/util.js';
+} from '../../../test/util.js';
 
 describe('replaceText', () => {
   it('rewrites an existing TOKEN text node', () => {

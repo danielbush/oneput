@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { decideInputIntent } from '../decideInputIntent.js';
-import type { UserInputChange } from '../../UserInput.js';
+import type { UserInputChange } from '../../../UserInput.js';
 
 function makeChange(overrides: Partial<UserInputChange>): UserInputChange {
   return {

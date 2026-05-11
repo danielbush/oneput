@@ -1,10 +1,10 @@
 import type { EditorState } from './EditorState.js';
-import { decideInputIntent } from './lib/decideInputIntent.js';
-import * as token from './lib/token.js';
-import * as space from './lib/space.js';
-import type { UserInputChange } from './UserInput.js';
-import type { Cursor } from './Cursor.js';
-import { isIsland, isLine, isToken } from './lib/taxonomy.js';
+import { decideInputIntent } from '../dom/decideInputIntent.js';
+import * as token from '../dom/token.js';
+import * as space from '../dom/space.js';
+import type { UserInputChange } from '../../UserInput.js';
+import type { Cursor } from '../../Cursor.js';
+import { isIsland, isLine, isToken } from '../dom/taxonomy.js';
 
 export class EditorInputOps {
   static create(state: EditorState) {

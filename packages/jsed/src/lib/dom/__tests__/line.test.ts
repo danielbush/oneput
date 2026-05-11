@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, span, t, a, identify } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, span, t, a, identify } from '../../../test/util.js';
 import { getNextLineSibling, getPreviousLineSibling, getLine } from '../line.js';
 
 // INLINE_COMPUTED_STYLE

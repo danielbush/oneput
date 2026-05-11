@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Indicator } from '../lib/indicator.js';
+import { Indicator } from '../lib/dom/indicator.js';
 
 /**
  * Creates a fake FOCUSABLE element with a configurable bounding rect.

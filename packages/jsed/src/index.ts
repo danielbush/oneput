@@ -1,19 +1,19 @@
 export type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
 export { Editor } from './Editor.js';
-export { type EditorError, type EditorMode } from './EditorState.js';
+export { type EditorError, type EditorMode } from './lib/editor/EditorState.js';
 export { Nav, type OnRequestFocus } from './Nav.js';
 export { Cursor } from './Cursor.js';
 export { Tokenizer } from './Tokenizer.js';
-export { Detokenizer } from './lib/Detokenizer.js';
-export { tokenizeLineAt as tokenizeLine } from './lib/tokenize.js';
+export { Detokenizer } from './lib/dom/Detokenizer.js';
+export { tokenizeLineAt as tokenizeLine } from './lib/dom/tokenize.js';
 
 // TODO: hmm, should we just provide several entry points in package.json "exports"?
-import * as token from './lib/token.js';
-import { isToken, isAnchor } from './lib/taxonomy.js';
-import { getLine } from './lib/line.js';
-import * as dom from './lib/focusable.js';
-import * as domRules from './lib/dom-rules.js';
+import * as token from './lib/dom/token.js';
+import { isToken, isAnchor } from './lib/dom/taxonomy.js';
+import { getLine } from './lib/dom/line.js';
+import * as dom from './lib/dom/focusable.js';
+import * as domRules from './lib/dom/dom-rules.js';
 const utils = {
   dom: {
     createElement: dom.createElement,
@@ -38,5 +38,5 @@ export {
   JSED_TOKEN_CLASS,
   JSED_APP_ROOT_ID,
   JSED_IGNORE_CLASS
-} from './lib/constants.js';
+} from './lib/dom/constants.js';
 export { utils };

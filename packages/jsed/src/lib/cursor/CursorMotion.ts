@@ -1,6 +1,6 @@
 import type { CursorState } from './CursorState.js';
-import { getNextLineSibling, getPreviousLineSibling } from './lib/line.js';
-import { isTokenizableTextNode } from './lib/taxonomy.js';
+import { getNextLineSibling, getPreviousLineSibling } from '../dom/line.js';
+import { isTokenizableTextNode } from '../dom/taxonomy.js';
 
 /**
  * Coordinates CURSOR movement across LINE boundaries.

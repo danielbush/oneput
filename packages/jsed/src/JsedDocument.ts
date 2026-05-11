@@ -1,5 +1,5 @@
-import { tagImplicitLines } from './lib/implicitLine.js';
-import { ViewportScroller, type ViewportScrollerNullOptions } from './lib/ViewportScroller.js';
+import { tagImplicitLines } from './lib/dom/implicitLine.js';
+import { ViewportScroller, type ViewportScrollerNullOptions } from './lib/dom/ViewportScroller.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {

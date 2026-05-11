@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest';
 import { em, frag, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
-import { CursorSelection } from '../CursorSelection.js';
+import { CursorSelection } from '../lib/cursor/CursorSelection.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { getValue } from '../lib/token.js';
-import { JSED_TOKEN_CLASS } from '../lib/constants.js';
+import { getValue } from '../lib/dom/token.js';
+import { JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
 import type { JsedDocument } from '../types.js';
 
 function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {

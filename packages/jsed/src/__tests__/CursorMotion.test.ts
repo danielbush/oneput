@@ -3,8 +3,8 @@ import { div, em, identify, makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { getValue } from '../lib/token.js';
-import { tagImplicitLines } from '../lib/implicitLine.js';
+import { getValue } from '../lib/dom/token.js';
+import { tagImplicitLines } from '../lib/dom/implicitLine.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

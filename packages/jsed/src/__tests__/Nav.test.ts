@@ -2,7 +2,7 @@ import { describe, it, test, expect } from 'vitest';
 import { byId, div, frag, li, makeRoot, p, script, ul } from '../test/util.js';
 import { Nav, type OnRequestFocus } from '../Nav.js';
 import type { JsedFocusRequestEvent } from '../types.js';
-import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from '../lib/constants.js';
+import { JSED_FOCUS_CLASS, SBR_FOCUS_SIBLING } from '../lib/dom/constants.js';
 
 function trackFocusRequests(allow: boolean | ((evt: JsedFocusRequestEvent) => boolean) = true): {
   onFocusRequest: OnRequestFocus;

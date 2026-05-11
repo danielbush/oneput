@@ -1,6 +1,6 @@
-import * as token from './lib/token.js';
-import * as space from './lib/space.js';
-import { isToken } from './lib/taxonomy.js';
+import * as token from '../dom/token.js';
+import * as space from '../dom/space.js';
+import { isToken } from '../dom/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 
 export class CursorTextOps {

@@ -1,6 +1,6 @@
-import { getParent } from './lib/token.js';
-import { isToken } from './lib/taxonomy.js';
-import { Indicator } from './lib/indicator.js';
+import { getParent } from './token.js';
+import { isToken } from './taxonomy.js';
+import { Indicator } from './indicator.js';
 
 interface MinimalObserver {
   observe(el: Element): void;

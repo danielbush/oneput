@@ -13,7 +13,7 @@ import {
   div,
   makeRawRoot,
   rawById
-} from '../../test/util';
+} from '../../../test/util';
 import {
   canInsertSpaceAfterTag,
   canInsertSpaceAfterToken,

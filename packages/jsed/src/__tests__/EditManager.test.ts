@@ -14,11 +14,11 @@ import {
   t,
   ul
 } from '../test/util.js';
-import { getValue } from '../lib/token.js';
-import { JSED_ANCHOR_CHAR, JSED_TOKEN_CLASS } from '../lib/constants.js';
+import { getValue } from '../lib/dom/token.js';
+import { JSED_ANCHOR_CHAR, JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
 import { Controller } from '../../../oneput/src/lib/oneput/controllers/controller.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { isIsland, isToken } from '../lib/taxonomy.js';
+import { isIsland, isToken } from '../lib/dom/taxonomy.js';
 import type { JsedDocument } from '../JsedDocument.js';
 
 function createNullEditor(doc: JsedDocument): Editor {

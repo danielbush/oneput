@@ -1,12 +1,15 @@
 import { Nav } from './Nav.js';
 import type { JsedDocument } from './types.js';
 import type { UserInput } from './UserInput.js';
-import { EditorFocusOps } from './EditorFocusOps.js';
-import { EditorAnchorOps } from './EditorAnchorOps.js';
-import { EditorCursorOps } from './EditorCursorOps.js';
-import { EditorEventsEmitter } from './EditorEventsEmitter.js';
-import { EditorState } from './EditorState.js';
+import { EditorFocusOps } from './lib/editor/EditorFocusOps.js';
+import { EditorAnchorOps } from './lib/editor/EditorAnchorOps.js';
+import { EditorCursorOps } from './lib/editor/EditorCursorOps.js';
+import { EditorEventsEmitter } from './lib/editor/EditorEventsEmitter.js';
+import { EditorState } from './lib/editor/EditorState.js';
 
+/**
+ * Facade that represents an editor instance for a single "document".
+ */
 export class Editor {
   static create({ document, userInput }: { document: JsedDocument; userInput: UserInput }): Editor {
     const state = EditorState.create({ document, userInput });

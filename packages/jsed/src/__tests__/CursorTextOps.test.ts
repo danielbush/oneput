@@ -3,8 +3,8 @@ import { em, identify, makeRoot, p, s, t } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { JSED_TOKEN_CLASS } from '../lib/constants.js';
-import { getValue } from '../lib/token.js';
+import { JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
+import { getValue } from '../lib/dom/token.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

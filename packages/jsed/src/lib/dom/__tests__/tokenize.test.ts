@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, inlineStyleHack, a } from '../../test/util.js';
+import { byId, makeRoot, div, p, em, inlineStyleHack, a } from '../../../test/util.js';
 import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../constants.js';
 

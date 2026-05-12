@@ -29,20 +29,20 @@ export class CursorTextOps {
   replaceWithText(text: string): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const currentToken = this.state.getPlace();
-    let lastToken: HTMLElement = currentToken;
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
+    if (!firstPart) return null;
+
     this.replace(firstPart);
+    let lastToken: HTMLElement = currentToken;
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
       token.insertAfter(insertedToken, currentToken);
       space.ensureSeparatorAfter(currentToken);
-      if (!lastToken) {
+      if (lastToken === currentToken) {
         lastToken = insertedToken;
       }
     }
-    if (lastToken) {
-      this.state.place(lastToken);
-    }
+    this.state.place(lastToken);
     return lastToken;
   }
 

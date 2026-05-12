@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { em, identify, makeRoot, p, s, t } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
@@ -30,8 +30,12 @@ function tokens(doc: JsedDocument): HTMLElement[] {
   return Array.from(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
 }
 
+function tokenValues(doc: JsedDocument): string[] {
+  return tokens(doc).map((token) => getValue(token));
+}
+
 describe('splitAtToken', () => {
-  test('splits after the current TOKEN for CURSOR_APPEND', () => {
+  test('CURSOR_APPEND', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -45,7 +49,7 @@ describe('splitAtToken', () => {
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
-  test('splits after the current TOKEN for CURSOR_INSERT_AFTER', () => {
+  test('CURSOR_INSERT_AFTER', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -59,7 +63,7 @@ describe('splitAtToken', () => {
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
-  test('splits before the current TOKEN when no after-state marker is set', () => {
+  test('default split before current TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
     const { cursor } = createCursor(doc, tokens(doc)[1]);
@@ -74,7 +78,7 @@ describe('splitAtToken', () => {
 });
 
 describe('replace', () => {
-  it('replaces TOKEN text', () => {
+  test('TOKEN text', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -86,7 +90,7 @@ describe('replace', () => {
     expect(getValue(cursor.getPlace())).toBe('goodbye');
   });
 
-  it('replaces TOKEN text after an ISLAND without adding padding state', () => {
+  test('TOKEN after ISLAND', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -100,7 +104,7 @@ describe('replace', () => {
     expect(getValue(cursor.getPlace())).toBe('ccc');
   });
 
-  it('no-op when cursor is on ISLAND', () => {
+  test('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -117,8 +121,59 @@ describe('replace', () => {
   });
 });
 
+describe('replaceWithText', () => {
+  test('multiple TOKEN replacement', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[0]);
+
+    // act
+    const result = cursor.replaceWithText('goodbye friend');
+
+    // assert
+    expect(tokenValues(doc)).toEqual(['goodbye', 'friend', 'world']);
+    expect(result).not.toBeNull();
+    expect(getValue(result!)).toBe('friend');
+    expect(getValue(cursor.getPlace())).toBe('friend');
+  });
+});
+
+describe('insertTextAfter', () => {
+  test('multiple TOKEN insert after', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[0]);
+
+    // act
+    const result = cursor.insertTextAfter('new words');
+
+    // assert
+    expect(tokenValues(doc)).toEqual(['hello', 'new', 'words', 'world']);
+    expect(result).not.toBeNull();
+    expect(getValue(result!)).toBe('words');
+    expect(getValue(cursor.getPlace())).toBe('words');
+  });
+});
+
+describe('insertTextBefore', () => {
+  test('multiple TOKEN insert before', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[1]);
+
+    // act
+    const result = cursor.insertTextBefore('new words');
+
+    // assert
+    expect(tokenValues(doc)).toEqual(['hello', 'new', 'words', 'world']);
+    expect(result).not.toBeNull();
+    expect(getValue(result!)).toBe('words');
+    expect(getValue(cursor.getPlace())).toBe('words');
+  });
+});
+
 describe('delete', () => {
-  it('deletes TOKEN and moves cursor to next TOKEN', () => {
+  test('middle TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -130,7 +185,7 @@ describe('delete', () => {
     expect(getValue(cursor.getPlace())).toBe('world');
   });
 
-  it('deletes last TOKEN and moves cursor to previous TOKEN', () => {
+  test('last TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
     const { cursor } = createCursor(doc, tokens(doc)[1]);
@@ -142,7 +197,7 @@ describe('delete', () => {
     expect(getValue(cursor.getPlace())).toBe('hello');
   });
 
-  it('no-op when cursor is on ISLAND', () => {
+  test('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -158,7 +213,7 @@ describe('delete', () => {
     expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
-  it('deletes TOKEN after an ISLAND and moves cursor to next TOKEN', () => {
+  test('TOKEN after ISLAND with next TOKEN', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -180,7 +235,7 @@ describe('delete', () => {
     expect(getValue(cursor.getPlace())).toBe('ccc');
   });
 
-  it('deletes last TOKEN after an ISLAND and leaves an ANCHOR', () => {
+  test('last TOKEN after ISLAND', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -196,7 +251,7 @@ describe('delete', () => {
 });
 
 describe('append', () => {
-  it('inserts a new TOKEN after the current one', () => {
+  test('new TOKEN after current', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -212,7 +267,7 @@ describe('append', () => {
     expect(getValue(cursor.getPlace())).toBe('world');
   });
 
-  it('inserts a whitespace text node between the current TOKEN and the appended TOKEN', () => {
+  test('separator before appended TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -228,7 +283,7 @@ describe('append', () => {
     expect(current.nextSibling?.nextSibling).toBe(appended);
   });
 
-  it('no-op when cursor is on ISLAND', () => {
+  test('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -245,7 +300,7 @@ describe('append', () => {
 });
 
 describe('joinNext', () => {
-  it('joins current TOKEN with next TOKEN', () => {
+  test('next TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -257,7 +312,7 @@ describe('joinNext', () => {
     expect(getValue(cursor.getPlace())).toBe('helloworld');
   });
 
-  it('joins current TOKEN with next TOKEN after an ISLAND without padding state', () => {
+  test('next TOKEN after ISLAND', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -279,7 +334,7 @@ describe('joinNext', () => {
     expect(getValue(cursor.getPlace())).toBe('bbbccc');
   });
 
-  it('no-op when cursor is on ISLAND', () => {
+  test('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -294,7 +349,7 @@ describe('joinNext', () => {
     expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
-  it('no-op when next LINE_SIBLING is an INLINE_FLOW', () => {
+  test('next INLINE_FLOW no-op', () => {
     // arrange
     const doc = makeRoot(p(t('aaa'), s(), em(inlineStyle, t('bbb'))));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
@@ -308,7 +363,7 @@ describe('joinNext', () => {
 });
 
 describe('joinPrevious', () => {
-  it('joins current TOKEN with previous TOKEN', () => {
+  test('previous TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
     const { cursor } = createCursor(doc, tokens(doc)[1]);
@@ -320,7 +375,7 @@ describe('joinPrevious', () => {
     expect(getValue(cursor.getPlace())).toBe('helloworld');
   });
 
-  it('joinPrevious preserves boundary padding when survivor becomes ISLAND-adjacent', () => {
+  test('previous TOKEN before ISLAND', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -342,7 +397,7 @@ describe('joinPrevious', () => {
     expect(getValue(cursor.getPlace())).toBe('bbbccc');
   });
 
-  it('no-op when cursor is on ISLAND', () => {
+  test('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -357,7 +412,7 @@ describe('joinPrevious', () => {
     expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
-  it('no-op when previous LINE_SIBLING is an INLINE_FLOW', () => {
+  test('previous INLINE_FLOW no-op', () => {
     // arrange
     const doc = makeRoot(p(em(inlineStyle, t('aaa')), s(), t('bbb')));
     const { cursor } = createCursor(doc, tokens(doc)[1]);

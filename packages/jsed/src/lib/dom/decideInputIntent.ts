@@ -52,13 +52,10 @@ export type InputIntent =
       inputValue: string;
       firstPart: string;
       appendedParts: string[];
-      /**
-       * Preserves the leading-space cursor rewrite:
-       * "|foo" => " |foo" ==> "| foo"
-       */
-      prependedSpace: boolean;
       finalTokenPreference: 'current-token' | 'last-appended';
-    };
+    }
+  | { type: 'start-insert-before-current'; inputValue: string }
+  | { type: 'start-insert-after-current'; inputValue: string };
 
 /**
  * Interpret a user input transition as a higher-level edit intent.
@@ -83,12 +80,17 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     return {
       type: 'delete-current',
       inputValue,
-      // prependedSpace: false,
       finalTokenPreference: 'last-appended'
     };
   }
 
   const insertAfterPrefix = `${currentTokenValue} `;
+  if (inputValue === insertAfterPrefix) {
+    return {
+      type: 'start-insert-after-current',
+      inputValue
+    };
+  }
   if (previousValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
     const insertedParts = inputValue.slice(insertAfterPrefix.length).split(/\s+/).filter(Boolean);
     if (insertedParts.length > 0) {
@@ -102,6 +104,12 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   }
 
   const insertBeforeSuffix = ` ${currentTokenValue}`;
+  if (inputValue === insertBeforeSuffix) {
+    return {
+      type: 'start-insert-before-current',
+      inputValue
+    };
+  }
   if (previousValue === insertBeforeSuffix && inputValue.endsWith(insertBeforeSuffix)) {
     const insertedParts = inputValue
       .slice(0, inputValue.length - insertBeforeSuffix.length)
@@ -118,17 +126,16 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   }
 
   const [firstPart, ...appendedParts] = inputValue.split(/\s+/).filter(Boolean);
-  const prependedSpace = /^\s+/.test(inputValue);
   let finalTokenPreference: 'current-token' | 'last-appended' = 'last-appended';
-  const containsSpace = inputValue.match(/^(\S+)(\s+)\S/);
 
+  /**
+   * "b|foo" => "b |foo"
+   */
+  const containsSpace = inputValue.match(/^(\S+)(\s+)\S/);
   if (containsSpace) {
     const firstWord = containsSpace[1];
     const insertedSpace = containsSpace[2];
     const isFirstWord = firstWord.length === stop;
-    /**
-     * "b|foo" => "b |foo"
-     */
     const isLeadingSplitCommit =
       previousStop === firstWord.length &&
       stop === firstWord.length + insertedSpace.length &&
@@ -146,7 +153,6 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     inputValue,
     firstPart,
     appendedParts,
-    prependedSpace,
     finalTokenPreference
   };
 }

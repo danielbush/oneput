@@ -37,6 +37,21 @@ export class EditorInputOps {
         return;
       }
 
+      case 'rewrite-current':
+        cursor.replace(intent.firstPart);
+        for (const part of intent.appendedParts.reverse()) {
+          const appendedToken = cursor.append(part);
+          if (!lastToken) {
+            lastToken = appendedToken;
+          }
+        }
+        this.state.notifyTextChange({ type: 'token-text-change', token: currentToken });
+        break;
+
+      case 'start-insert-after-current':
+        cursor.setStateFromInput(intent.inputValue);
+        return;
+
       case 'insert-after-current':
         for (const part of intent.insertedParts.reverse()) {
           const insertedToken = token.createToken(part);
@@ -52,6 +67,11 @@ export class EditorInputOps {
         }
         break;
 
+      case 'start-insert-before-current':
+        this.state.userInput.moveCursorToBeginning();
+        cursor.setStateFromInput(intent.inputValue);
+        return;
+
       case 'insert-before-current':
         for (const part of intent.insertedParts) {
           const insertedToken = token.createToken(part);
@@ -62,20 +82,6 @@ export class EditorInputOps {
         if (lastToken) {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
-        break;
-
-      case 'rewrite-current':
-        cursor.replace(intent.firstPart);
-        for (const part of intent.appendedParts.reverse()) {
-          const appendedToken = cursor.append(part);
-          if (!lastToken) {
-            lastToken = appendedToken;
-          }
-        }
-        if (intent.prependedSpace) {
-          this.state.userInput.moveCursorToBeginning();
-        }
-        this.state.notifyTextChange({ type: 'token-text-change', token: currentToken });
         break;
     }
 

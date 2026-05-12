@@ -41,8 +41,8 @@ export class Editor {
     this.eventsEmitter = this.state.eventsEmitter;
   }
 
-  // Initialise (object lifecycle)
-  start = () => this.state.start();
+  // Editor Lifecycle
+  start = () => this.state.start(); // initialize
   suspend = (bool: boolean) => this.state.suspend(bool);
   destroy = () => this.state.destroy();
 
@@ -53,12 +53,12 @@ export class Editor {
   isEditing = () => this.state.isEditing();
 
   // editing
-  get cursor() {
-    return this.state.cursor;
-  }
   handleEnter = () => this.state.ops.handleEnter();
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
   scrollActiveTargetIntoView = () => this.state.ops.scrollActiveTargetIntoView();
+  get cursor() {
+    return this.state.cursor;
+  }
 
   // motion
   moveUp = () => this.state.ops.moveUp();

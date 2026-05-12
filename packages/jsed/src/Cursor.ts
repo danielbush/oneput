@@ -57,6 +57,7 @@ export class Cursor {
   // ops
   delete = () => this.#ops.delete();
   replace = (val: string) => this.#ops.replace(val);
+  replaceWithText = (text: string) => this.#ops.replaceWithText(text);
   insertTextAfter = (text: string) => this.#ops.insertTextAfter(text);
   insertTextBefore = (text: string) => this.#ops.insertTextBefore(text);
   append = (val: string) => this.#ops.append(val);

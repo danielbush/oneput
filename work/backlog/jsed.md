@@ -4,8 +4,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Critical work
 
-### Critical path
-
 - [x] moving cursor between lines
   - adjust quickDescend, return first LINE_SILBING not first TOKEN
     - test: quickDescend a LINE with an ISLAND as the first LINE_SIBLING

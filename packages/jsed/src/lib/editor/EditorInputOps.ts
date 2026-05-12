@@ -64,22 +64,11 @@ export class EditorInputOps {
         return;
 
       case 'rewrite-current':
-        cursor.replace(intent.firstPart);
-        for (const part of intent.appendedParts.reverse()) {
-          const appendedToken = cursor.append(part);
-          if (!lastToken) {
-            lastToken = appendedToken;
-          }
-        }
-        this.state.notifyTextChange({ type: 'token-text-change', token: currentToken });
-        const finalToken =
-          intent.finalTokenPreference === 'current-token' ? cursor.getPlace() : lastToken;
-        if (finalToken) {
-          cursor.place(finalToken);
-          cursor.setStateFromInput(intent.inputValue);
-          this.updateInput(cursor);
-        } else {
-          cursor.setStateFromInput(intent.inputValue);
+        lastToken = cursor.replaceWithText(intent.inputValue);
+        cursor.setStateFromInput(intent.inputValue);
+        this.updateInput(cursor);
+        if (lastToken) {
+          this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         return;
     }

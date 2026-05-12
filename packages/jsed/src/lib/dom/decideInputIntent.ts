@@ -110,7 +110,6 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
       inputValue,
       insertedText
     };
-    // }
   }
 
   const [firstPart, ...appendedParts] = inputValue.split(/\s+/).filter(Boolean);

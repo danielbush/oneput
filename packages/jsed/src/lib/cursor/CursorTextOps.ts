@@ -24,6 +24,29 @@ export class CursorTextOps {
   }
 
   /**
+   * Similar to insertTextAfter.
+   */
+  replaceWithText(text: string): HTMLElement | null {
+    if (!this.state.isOnToken()) return null;
+    const currentToken = this.state.getPlace();
+    let lastToken: HTMLElement = currentToken;
+    const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
+    this.replace(firstPart);
+    for (const part of parts.reverse()) {
+      const insertedToken = token.createToken(part);
+      token.insertAfter(insertedToken, currentToken);
+      space.ensureSeparatorAfter(currentToken);
+      if (!lastToken) {
+        lastToken = insertedToken;
+      }
+    }
+    if (lastToken) {
+      this.state.place(lastToken);
+    }
+    return lastToken;
+  }
+
+  /**
    * Insert string vals after cursor and put cursor on last one.
    *
    * Supports 'insert-after-current' operation (input intent).

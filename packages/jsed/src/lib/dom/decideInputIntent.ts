@@ -129,7 +129,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   if (containsSpace) {
     const firstWord = containsSpace[1];
     const insertedSpace = containsSpace[2];
-    const isFirstWord = firstWord.length === stop;
+    // const isFirstWord = firstWord.length === stop;
     const isLeadingSplitCommit =
       previousStop === firstWord.length &&
       stop === firstWord.length + insertedSpace.length &&
@@ -137,7 +137,8 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
       previousValue.endsWith(change.priorValue) &&
       firstWord === previousValue.slice(0, previousValue.length - change.priorValue.length);
 
-    if (isFirstWord || isLeadingSplitCommit) {
+    // if (isFirstWord || isLeadingSplitCommit) {
+    if (isLeadingSplitCommit) {
       finalTokenPreference = 'current-token';
     }
   }

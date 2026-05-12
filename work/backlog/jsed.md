@@ -47,14 +47,21 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
+bugs
+
 - fix: typing a word in a paragraph and then immediately hitting enter creates an empty paragraph that is not accessible; hitting enter 2nd time creates a 3rd paragraph with an anchor and moves cursor to the anchor
 - fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it
-- [.] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
+- fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
   - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
-- [.] EditDocument (in jsed) imports Layout from jsed-demo
-  - COMMENT: using an adapter
 - [.] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
   - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext
+- fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
+- fix: getLine can exceed document root
+  - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
+- fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
+
+feats
+
 - feat: copy tokens
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
 - [x] feat: we lost the menu count (MenuStatus) in jsed's oneput layout
@@ -70,17 +77,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: don't hard select id="test-doc" - editor should be configurable
 - feat: cut/copy/paste selection and single tokens
   - COMMENT: marching ants just works; should be easy to do
-- fix: possible issue when finding next or previous line candidates during cross line
-  - the code finds next line sibling then tokenizes it; 
-  - the "next" code returns the tokeniziation - so it's biased towards candidates that have tokens; but only checks the first one
-  - unit test findNextCrossLineTarget
-  - unit test findPreviousCrossLineTarget
-  - do the cursor transparent revision first because that makes most things transparent;
-- `getValue(editor.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
-- fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
-- fix: getLine can exceed document root
-  - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
-- fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 - feat: join tokens
 - feat: grow/shrink INLINE_FLOW?
   - FOCUS goes on em
@@ -91,10 +87,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - COMMENT: I'm probably going to import my markdown in chunks by pasting into oneput and loading into spaces or linear idables
   - see `dist/`
   - see `bun run build:cli`
-- fix: removing an anchor that sits after an inline tag moves the cursor off tag and to the beginning of the line
-  - the issue is when the menu closes after triggering the action, enterEditing is called and targetLineSibling ends up getting the first line sibling
-  - but if we replace isToken with isLineSibling, we break a bunch of tests - so we need to find out why
-- fix: `findPreviousNode(from, ...)` in `findPreviousLineCandidate` appears to visit `from`; I thought by default it shouldn't?
 
 ## refactors
 
@@ -132,6 +124,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - persist last token position in each LINE
 - persist last FOCUS position and FOCUS it when we reload the document
 - use IMPLICIT_LINE's on all LINE_SEGMENT's that aren't enclosed by an INLINE_FLOW within the line; this makes it easy to navigate all segments with the FOCUS not just trailing IMPLICIT_LINE LINE_SEGMENT's and INLINE_FLOW LINE_SEGMENT's
+- refactor: `getValue(editor.cursor!.getToken())` is a bad pattern if CURSOR can sit on non-TOKEN's - came up with LOOSE_TEXT and handleRight
 
 ## Discussion
 

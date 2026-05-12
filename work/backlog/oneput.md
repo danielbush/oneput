@@ -4,22 +4,25 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Crtical work
 
-- fix: .svelte files imported into .ts files
-  - `rg 'import.*\.svelte' * | grep '\.ts'`
-  - we do this to inject svelte components into oneput
-  - will this break anything?
-  - will it break non-svelte, wc oneput builds
-
 ## Details
 
-- refactor: start should only be called once; make onResume required or just don't call anything
-- fix: oneput-demo menu is closing on actions where it shouldn't
-  - I think I altered this when working on jsed-demo; what is the preferred approach?
 - fix: `$mod+v a` types `a` into input
   - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
   - COMMENT: blur input focus if we detect any key that has a modifier
 - fix: `$mod+v` pastes into input
-- fix: oneput-demo menu items close when they should stay open eg Settings
+- fix/feat: layouts for things like `PasteElementUI` or  `PickListUI`
+  - fix: search for "jsed-demo" in jsed/src
+  - fix: search for "LayoutSettings" in jsed/src
+  - COMMENT - we run it as an AppObject but it provides lots of hooks
+    - ```
+      PasteElementUI.create({
+        onRenderMenuItem: (...) => {...} // default to stdMenuItem
+        onLayoutChange: (ctl, { actions, menuTitle }) => { ctl.ui.setLayout(...) }
+      })
+      ```
+- refactor: start should only be called once; make onResume required or just don't call anything
+- fix: oneput-demo menu is closing on actions where it shouldn't
+  - I think I altered this when working on jsed-demo; what is the preferred approach?
   - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
 - feat: disable individual menu items
   - eg pasteBefore, pasteAfter, pasteIn
@@ -28,135 +31,18 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - scenario: you have nested menus, you only see the outer entry but you want to filter on the items within as well as the ones showing in the current menu
   - scenario: you have a lot of items, not all necessarily in a menu; you want to bring them up when typing
     - COMMENT: seems a bit weak
-  - This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
-  - the issue is how to define "global items"
-- chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+  - COMMENT: This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
+  - COMMENT: the issue is how to define "global items"
 - docs: need to make ai-docs similar to effect v4
-
-### Initial proposal: (docs + feat) configurable keybindings for AppObject actions
-
-Drafted: 03-Apr-2026
-
-How should Oneput make keybindings configurable when an AppObject defines bindings through its `actions` property?
-
-Questions to answer:
-
-- how did `apps/oneput-demo` make bindings configurable?
-- what is the intended path for configuring bindings when they originate from `actions` on an `AppObject`?
-- how should defaults, overrides, and persistence fit together?
-- what is the cleanest way to do this for app-local bindings versus shared bindings?
-
-Concrete example:
-
-- `ENTER` in `apps/jsed-demo/src/lib/oneput/app/EditDocument.ts`
-
-The agent should explain the current architecture and then propose the implementation shape we actually want.
-
-### Initial proposal: (feat) `onBack` on AppObject for goBack functionality
-
-Drafted: 03-Apr-2026
-
-Consider whether `AppObject` should grow an `onBack` hook for goBack functionality.
-
-This would be conceptually equivalent to today's `setOnBack`, but owned by the `AppObject` lifecycle instead of controller-level imperative wiring.
-
-Questions to answer:
-
-- when should `goBack` delegate to the current app object versus popping the app stack directly?
-- should `onBack` be a first-class `AppObject` hook rather than controller-level wiring?
-- how should this interact with existing back bindings and menu/navigation behavior?
-- what should happen when an app wants custom back behavior but still sometimes fall through to normal `goBack`?
-
-### Initial proposal: (bug) previous app menu can leak into next AppObject
-
-Drafted: 03-Apr-2026
-
-Bug: when Oneput runs a new `AppObject`, the menu from the previous `AppObject` may still show if the new app does not specify a `menu`.
-
-This was originally noticed in `apps/jsed-demo` back when we had separate `ViewDocument` and `EditDocument` app objects.
-
-Questions to answer:
-
-- why does the previous menu survive the app transition?
-- should `ctl.app.run(...)` always clear menu state before applying the next app's menu?
-- what is the intended behavior when the new app omits `menu` entirely?
-- are there similar leaks for other AppObject-owned state besides menu?
-
-### Initial proposal: (refactor) null input controller backed by happy-dom input element
-
-Drafted: 05-Apr-2026
-
-Create a nullable input controller for `packages/oneput` that is backed by a real `happy-dom` input element rather than a hand-rolled fake. This should be similar in spirit to the recent `NullUserInput` work in `packages/jsed`: keep it nullable, but let selection/value behavior come from a real DOM input so tests can rely on realistic `value`, `selectionStart`, `selectionEnd`, and `setSelectionRange(...)` behavior.
-
-Questions to answer:
-
-- what is the right boundary in Oneput for this nullable input controller?
-- should it wrap the existing input controller API directly, or sit one layer lower as an infrastructure wrapper around the actual input element?
-- what observable writes/events should it track for tests?
-- can existing Oneput tests benefit from a DOM-backed nullable instead of casted fakes or looser helpers?
-
-### Initial proposal: (feat + refactor) better duplicate binding handling 
-
-Drafted: 19-Mar-2026
-
-In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulting in a significant change to the bindings themselves but the change wasn't visible to the user making the user think that opening/closing the menu had broken the bindings when this was not the case.  
-
-So we need to catch duplicate bindings before they get loaded and complain via oneput's notification or alert system and maybe also console.warn it.
-
-While we're here, I want to slightly rework the main workhorse for keybindings, the KeyEventBindings class in packages/oneput/src/lib/oneput/lib/bindings.ts and document the thinking behind how bindings work possibly updating the vocabulary and the architecture.
-
-- "bindings format"
-  - We allow the consumer to set up their bindings using a tinykeys format eg "$mod+b" etc.  This is represented by KeyBinding and KeyBindingMap types.
-  - We use this same format for storage; we can't store the actions (I don't think?), but we can store the actionId's and the tinykeys string-based bindings formats.  That's why we have `defaultActions` and `defaultBindingsSerializable` in `apps/jsed-demo/src/lib/oneput/app/_bindings.ts` - and `KeyEventBindings.fromSerializable`
-- "events format" for bindings
-  - But... we prefer internally to transform this format to a KeyEvent, KeyEventBinding and KeyEventsMap .  This is the format we use internally when doing anything.  It is also the format we use when capturing bindings using an interacting binding editor such as `packages/oneput/src/lib/oneput/shared/appObjects/BindingsEditor.ts`.
-- So `KeyEventBindings` is a class whose job is to take both formats, output either, and works with events format internally to do stuff
-
-Things I'd like to do
-
-- document the point of KeyEventBindings, identify concepts and make them vocabulary; document the formats and the serialization - as vocab or possibly architecture; the agent should be able to explain to a human or other agent how this works
-- make sure there are existing tests for duplicates (adding) and conflicts (merging)
-- then make some changes
-  - have .merge mutate the existing instance and update the .conflicts property
-  - remove conflicts from the constructor
-  - when instantiating, KeyEventsBindings should check for duplicates
-    - we probably want to degrade gracefully rather than fail hard
-    - record any duplicates encountered (similar to .conflicts) and drop them
-    - console warn that we have duplicates
-    - console warn what actionId's were dropped
-    - we can then look into reporting this via Oneput's alert or notification mechanisms
-
-### Initial proposal: (refactor) deep modules for packages/oneput 
-
-Drafted: 19-Mar-2026
-
-- we want to apply a "deep modules" approach to Oneput
-- packages/oneput/src/lib/index.ts -> packages/oneput/src/index.ts
-- packages/oneput/src/lib/oneput should go away, it's a redundant (the directory); it's contents should be distributed to either
-  - packages/oneput/src/ - can store the "tip of the iceberg" - the high-level modules
-    - move the following:
-      - packages/oneput/src/lib/oneput/controllers
-        - but move helpers/ subdir into packages/oneput/src/lib
-      - packages/oneput/src/lib/oneput/types.ts
-      - KeyEventBindings class - extract it from packages/oneput/src/lib/oneput/lib/bindings.ts - it's key to understanding bindings
-  - packages/oneput/src/lib - should store low-level content
-    - everything else that was in packages/oneput/src/lib/oneput
-- TODO: think about deep modules and how it supports progressive disclosure both for agents and humans and suggest any improvements to the above
-
-### Initial proposal: (docs) ai-docs similar to effect-ts
-
-Drafted: 19-Mar-2026
-
-We want to build up a set of canoncial examples of how to use Oneput and how to extend it.  We can use apps/oneput-demo and even apps/jsed-demo for inspiration.  We may need to "polish", finish, finalize some of the examples in apps/oneput-demo in order to do this.
-
-Some key ideas:
-
-- we should be able to do all the things forms do
-- we should be able to edit and store keybindings using a pluggable storage mechanism
-
-### Initial proposal: (feat) support web components
-
-Drafted: 19-Mar-2026
-
-We should be able to run as a web component (this will require some work, some basic work has been done within packages/oneput).
-I'm incline to extract this to a separate package in order to build and demo it; look into the merits of this.
+- chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+- feat: declarative onBack in AppObject
+- refactor: null input controller backed by happy-dom input element
+- refactor: deep modules for packages/oneput 
+  - packages/oneput/src/lib/index.ts -> packages/oneput/src/index.ts
+  - packages/oneput/src/lib/oneput should go away, it's a redundant (the directory); it's contents should be distributed to either
+  - packages/oneput/src/lib/oneput/controllers
+    - but move helpers/ subdir into packages/oneput/src/lib
+  - packages/oneput/src/lib/oneput/types.ts
+  - KeyEventBindings class - extract it from packages/oneput/src/lib/oneput/lib/bindings.ts - it's key to understanding bindings
+- feat: implemenet web components
+- fix: In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulted in a significant change to the bindings themselves but the change wasn't visible to the user, making the user think that opening/closing the menu had broken the bindings when this was not the case.  

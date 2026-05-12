@@ -125,20 +125,6 @@ function removeTrailingSpaceNode(textNode: Text): Text | null {
   return textNode;
 }
 
-/**
- * Ensure normal boundary spacing before a TOKEN.
- */
-export function ensureSpaceBefore(token: HTMLElement, value = ' '): Text {
-  return ensureSeparatorBefore(token, value);
-}
-
-/**
- * Ensure normal boundary spacing after a TOKEN.
- */
-export function ensureSpaceAfter(token: HTMLElement, value = ' '): Text {
-  return ensureSeparatorAfter(token, value);
-}
-
 export function canInsertSpaceBeforeToken(token: HTMLElement): boolean {
   if (!isToken(token) || !token.parentNode || getSeparatorBefore(token)) {
     return false;

@@ -35,7 +35,7 @@ export class CursorTextOps {
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
       token.insertAfter(insertedToken, currentToken);
-      space.ensureSpaceAfter(currentToken);
+      space.ensureSeparatorAfter(currentToken);
       if (!lastToken) {
         lastToken = insertedToken;
       }
@@ -53,7 +53,7 @@ export class CursorTextOps {
     for (const part of parts) {
       const insertedToken = token.createToken(part);
       token.insertBefore(insertedToken, currentToken);
-      space.ensureSpaceAfter(insertedToken);
+      space.ensureSeparatorAfter(insertedToken);
       lastToken = insertedToken;
     }
     if (lastToken) {

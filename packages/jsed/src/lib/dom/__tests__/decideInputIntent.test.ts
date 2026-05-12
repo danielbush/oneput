@@ -47,8 +47,7 @@ describe('decideInputIntent', () => {
     // assert
     expect(intent).toEqual({
       type: 'delete-current',
-      inputValue: '',
-      finalTokenPreference: 'last-appended'
+      inputValue: ''
     });
   });
 
@@ -71,7 +70,6 @@ describe('decideInputIntent', () => {
       inputValue: 'b foo',
       firstPart: 'b',
       appendedParts: ['foo'],
-      prependedSpace: false,
       finalTokenPreference: 'current-token'
     });
   });
@@ -92,8 +90,7 @@ describe('decideInputIntent', () => {
     expect(intent).toEqual({
       type: 'insert-after-current',
       inputValue: 'foo b',
-      insertedParts: ['b'],
-      finalTokenPreference: 'last-inserted'
+      insertedParts: ['b']
     });
   });
 
@@ -113,8 +110,7 @@ describe('decideInputIntent', () => {
     expect(intent).toEqual({
       type: 'insert-before-current',
       inputValue: 'b foo',
-      insertedParts: ['b'],
-      finalTokenPreference: 'last-inserted'
+      insertedParts: ['b']
     });
   });
 
@@ -136,7 +132,6 @@ describe('decideInputIntent', () => {
       inputValue: 'fo o',
       firstPart: 'fo',
       appendedParts: ['o'],
-      prependedSpace: false,
       finalTokenPreference: 'last-appended'
     });
   });

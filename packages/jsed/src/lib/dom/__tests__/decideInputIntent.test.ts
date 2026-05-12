@@ -110,7 +110,7 @@ describe('decideInputIntent', () => {
     expect(intent).toEqual({
       type: 'insert-before-current',
       inputValue: 'b foo',
-      insertedParts: ['b']
+      insertedText: 'b'
     });
   });
 

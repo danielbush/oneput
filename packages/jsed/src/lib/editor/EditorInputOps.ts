@@ -1,7 +1,6 @@
 import type { EditorState } from './EditorState.js';
 import { decideInputIntent } from '../dom/decideInputIntent.js';
 import * as token from '../dom/token.js';
-import * as space from '../dom/space.js';
 import type { UserInputChange } from '../../UserInput.js';
 import type { Cursor } from '../../Cursor.js';
 import { isIsland, isLine, isToken } from '../dom/taxonomy.js';
@@ -56,16 +55,10 @@ export class EditorInputOps {
         return;
 
       case 'insert-before-current':
-        for (const part of intent.insertedParts) {
-          const insertedToken = token.createToken(part);
-          token.insertBefore(insertedToken, currentToken);
-          space.ensureSpaceAfter(insertedToken);
-          lastToken = insertedToken;
-        }
+        lastToken = cursor.insertTextBefore(intent.insertedText);
+        cursor.setStateFromInput(intent.inputValue);
+        this.updateInput(cursor);
         if (lastToken) {
-          cursor.place(lastToken);
-          cursor.setStateFromInput(intent.inputValue);
-          this.updateInput(cursor);
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         return;

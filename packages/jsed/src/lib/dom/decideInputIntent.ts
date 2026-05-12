@@ -39,7 +39,7 @@ export type InputIntent =
        */
       type: 'insert-before-current';
       inputValue: string;
-      insertedParts: string[];
+      insertedText: string;
     }
   | {
       /**
@@ -88,15 +88,12 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     };
   }
   if (beforeValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
-    const insertedParts = inputValue.slice(insertAfterPrefix.length).split(/\s+/).filter(Boolean);
     const insertedText = inputValue.slice(insertAfterPrefix.length);
-    if (insertedParts.length > 0) {
-      return {
-        type: 'insert-after-current',
-        inputValue,
-        insertedText
-      };
-    }
+    return {
+      type: 'insert-after-current',
+      inputValue,
+      insertedText
+    };
   }
 
   const insertBeforeSuffix = ` ${currentTokenValue}`;
@@ -107,17 +104,13 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     };
   }
   if (beforeValue === insertBeforeSuffix && inputValue.endsWith(insertBeforeSuffix)) {
-    const insertedParts = inputValue
-      .slice(0, inputValue.length - insertBeforeSuffix.length)
-      .split(/\s+/)
-      .filter(Boolean);
-    if (insertedParts.length > 0) {
-      return {
-        type: 'insert-before-current',
-        inputValue,
-        insertedParts
-      };
-    }
+    const insertedText = inputValue.slice(0, inputValue.length - insertBeforeSuffix.length);
+    return {
+      type: 'insert-before-current',
+      inputValue,
+      insertedText
+    };
+    // }
   }
 
   const [firstPart, ...appendedParts] = inputValue.split(/\s+/).filter(Boolean);

@@ -46,6 +46,22 @@ export class CursorTextOps {
     return lastToken;
   }
 
+  insertTextBefore(text: string): HTMLElement | null {
+    const currentToken = this.state.getPlace();
+    let lastToken: HTMLElement | null = null;
+    const parts = text.split(/\s+/).filter(Boolean);
+    for (const part of parts) {
+      const insertedToken = token.createToken(part);
+      token.insertBefore(insertedToken, currentToken);
+      space.ensureSpaceAfter(insertedToken);
+      lastToken = insertedToken;
+    }
+    if (lastToken) {
+      this.state.place(lastToken);
+    }
+    return lastToken;
+  }
+
   /** Append a new TOKEN after the current one. */
   append(val: string): HTMLElement | null {
     if (!this.state.isOnToken()) return null;

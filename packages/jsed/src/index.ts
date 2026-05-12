@@ -1,3 +1,4 @@
+export { JSED_APP_ROOT_ID } from './lib/dom/constants.js';
 export type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
 export { Editor } from './Editor.js';

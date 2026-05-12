@@ -1,17 +1,17 @@
-import { hflex, mountSvelte } from '@oneput/oneput';
+import { hflex, mountSvelte } from "@oneput/oneput";
 import type {
   Controller,
   DynamicPlaceholderBase,
-  UILayout,
+  FChildParams,
   FlexChildBuilder,
-  FChildParams
-} from '@oneput/oneput';
-import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
-import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
-import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
-import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
-import { defaultKeys, icons } from '@oneput/jsed/ui/oneput/app';
-import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
+  UILayout,
+} from "@oneput/oneput";
+import { DynamicPlaceholder } from "@oneput/oneput/shared/ui/DynamicPlaceholder.js";
+import { WordFilter } from "@oneput/oneput/shared/filters/WordFilter.js";
+import { TimeDisplay } from "@oneput/oneput/shared/components/TimeDisplay.js";
+import { DateDisplay } from "@oneput/oneput/shared/components/DateDisplay.js";
+import { defaultKeys, icons } from "@oneput/jsed";
+import MenuStatus from "@oneput/oneput/shared/components/MenuStatus.svelte";
 
 /**
  * Define settings used by your particular layout.
@@ -29,12 +29,14 @@ export type LayoutSettings = {
  */
 export class Layout implements UILayout {
   static create(ctl: Controller, settings: LayoutSettings = {}) {
-    const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
-      params.menuOpenBinding
-        ? params.isMenuOpen
-          ? `Close menu with ${params.menuOpenBinding}...`
-          : `Open menu with ${params.menuOpenBinding}...`
-        : 'Type here...'
+    const dynamicPlaceholder = DynamicPlaceholder.create(
+      ctl,
+      (params) =>
+        params.menuOpenBinding
+          ? params.isMenuOpen
+            ? `Close menu with ${params.menuOpenBinding}...`
+            : `Open menu with ${params.menuOpenBinding}...`
+          : "Type here...",
     );
     return new Layout(ctl, settings, dynamicPlaceholder);
   }
@@ -44,18 +46,18 @@ export class Layout implements UILayout {
   constructor(
     private ctl: Controller,
     private settings: LayoutSettings = {},
-    private dynamicPlaceholder: DynamicPlaceholder
+    private dynamicPlaceholder: DynamicPlaceholder,
   ) {
     ctl.menu.fn.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
-    ctl.menu.setDefaultFocusBehaviour('last-action,first');
+    ctl.menu.setDefaultFocusBehaviour("last-action,first");
     ctl.keys.setDefaultBindings(defaultKeys);
     ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
   }
 
   configure(settings: { params?: LayoutSettings }) {
     this.settings = {
-      menuTitle: this.settings.menuTitle || 'Menu',
-      ...settings.params
+      menuTitle: this.settings.menuTitle || "Menu",
+      ...settings.params,
     };
   }
 
@@ -76,105 +78,108 @@ export class Layout implements UILayout {
   get inputUI() {
     return {
       outerRight: hflex({
-        id: 'root-input-right',
+        id: "root-input-right",
         children: (b) => [
           b.fchild({
-            tag: 'button',
+            tag: "button",
             attr: {
-              type: 'button',
-              title: 'Options',
+              type: "button",
+              title: "Options",
               onclick: () => {
                 if (this.ctl.menu.isMenuOpen) {
                   this.ctl.menu.closeMenu();
                 } else {
                   this.ctl.menu.openMenu();
                 }
-              }
+              },
             },
-            classes: ['oneput__icon-button', 'oneput__menu-button'],
+            classes: ["oneput__icon-button", "oneput__menu-button"],
             // We use css to rotate the chevron which relies on
             // Oneput to set a class depending on the menu state.
-            icon: icons.ChevronDown
-          })
-        ]
-      })
+            icon: icons.ChevronDown,
+          }),
+        ],
+      }),
     };
   }
 
   get menuUI() {
     return {
       header: hflex({
-        id: 'menu-header',
+        id: "menu-header",
         children: (b) => [
           this.backAction
             ? b.fchild({
-                tag: 'button',
-                attr: { type: 'button', title: 'Back', onclick: this.backAction },
-                classes: ['oneput__icon-button'],
-                icon: icons.ArrowLeft
-              })
+              tag: "button",
+              attr: { type: "button", title: "Back", onclick: this.backAction },
+              classes: ["oneput__icon-button"],
+              icon: icons.ArrowLeft,
+            })
             : b.spacer(),
           b.fchild({
-            classes: ['oneput__menu-item-header'],
-            textContent: this.settings.menuTitle || 'Menu'
+            classes: ["oneput__menu-item-header"],
+            textContent: this.settings.menuTitle || "Menu",
           }),
           this.exitAction
             ? b.fchild({
-                tag: 'button',
-                classes: ['oneput__icon-button'],
-                attr: { type: 'button', title: 'Exit', onclick: this.exitAction },
-                icon: icons.X
-              })
-            : b.spacer()
-        ]
-      })
+              tag: "button",
+              classes: ["oneput__icon-button"],
+              attr: { type: "button", title: "Exit", onclick: this.exitAction },
+              icon: icons.X,
+            })
+            : b.spacer(),
+        ],
+      }),
     };
   }
 
   get innerUI() {
     return hflex({
-      id: 'root-inner',
+      id: "root-inner",
       children: (b) => [
         b.fchild({
-          style: { flex: '1' }
+          style: { flex: "1" },
         }),
         b.fchild({
-          style: { justifyContent: 'center' },
-          onMount: TimeDisplay.onMount
+          style: { justifyContent: "center" },
+          onMount: TimeDisplay.onMount,
         }),
         b.fchild({
-          style: { flex: '1' }
-        })
-      ]
+          style: { flex: "1" },
+        }),
+      ],
     });
   }
 
   get outerUI() {
     return hflex({
-      id: 'root-outer',
+      id: "root-outer",
       children: (b) => [
         b.fchild({
-          style: { flex: '1', position: 'relative' },
+          style: { flex: "1", position: "relative" },
           // Example of a svelte-based ui widget:
           onMount: (node) =>
-            mountSvelte(MenuStatus, { target: node, props: { controller: this.ctl } })
+            mountSvelte(MenuStatus, {
+              target: node,
+              props: { controller: this.ctl },
+            }),
         }),
         this.settings.outerRight
           ? {
-              style: { flex: '1', justifyContent: 'flex-end' },
-              ...this.settings.outerRight(b)
-            }
+            style: { flex: "1", justifyContent: "flex-end" },
+            ...this.settings.outerRight(b),
+          }
           : b.fchild({
-              // TODO: if outerRight is invoked above but has the same id
-              // then any onMount destructor callback will not get called!
-              // If we use a random id here, there is practically
-              // no way for outerRight to re-use the same it.
-              // id: 'root-outer-default-right',
-              id: 'root-outer-right-default',
-              style: { flex: '1', justifyContent: 'flex-end' },
-              onMount: DateDisplay.onMount
-            })
-      ]
+            // TODO: if outerRight is invoked above but has the same id
+            // then any onMount destructor callback will not get called!
+            // If we use a random id here, there is practically
+            // no way for outerRight to re-use the same it.
+            // id: 'root-outer-default-right',
+            id: "root-outer-right-default",
+            style: { flex: "1", justifyContent: "flex-end" },
+            onMount: DateDisplay.onMount,
+          }),
+      ],
     });
   }
 }

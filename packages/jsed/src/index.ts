@@ -7,3 +7,10 @@ export { Nav, type OnRequestFocus } from './Nav.js';
 export { Cursor } from './Cursor.js';
 export { Tokenizer } from './Tokenizer.js';
 export { Detokenizer } from './lib/dom/Detokenizer.js';
+export { OneputEditDocumentAdapter } from './lib/ui/oneput/OneputEditDocumentAdapter.js';
+export { icons, iconData } from './lib/ui/oneput/icons.js';
+export {
+  defaultActions,
+  defaultBindingsSerializable,
+  defaultKeys
+} from './lib/ui/oneput/bindings.js';

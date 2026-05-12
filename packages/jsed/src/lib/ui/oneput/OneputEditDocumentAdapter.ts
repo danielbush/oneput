@@ -3,10 +3,10 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Editor } from '../../../Editor.js';
-import { icons } from './_icons.js';
-import { PickListUI } from './_ui/PickListUI.js';
+import { icons } from './icons.js';
+import { PickListUI } from './PickListUI.js';
 import { PasteElementUI } from './PasteElementUI.js';
-import type { EditorError } from '../../../lib/editor/EditorState.js';
+import type { EditorError } from '../../editor/EditorState.js';
 
 /**
  * Provides functionality needed to manage the Jsed editor in Oneput when

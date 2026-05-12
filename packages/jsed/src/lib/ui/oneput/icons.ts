@@ -34,6 +34,9 @@ Object.entries(iconData).forEach(([name, icon]) => {
   );
 });
 
+/**
+ * Create a lookup that returns the name of the icon.
+ */
 export const icons = Object.fromEntries(
   Object.keys(iconData).map((name) => [name, name])
 ) as Record<keyof typeof iconData, string>;

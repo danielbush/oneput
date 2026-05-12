@@ -2,7 +2,7 @@ import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { JsedDocument } from '@oneput/jsed';
-import { icons } from '@oneput/jsed/ui/oneput/app';
+import { icons } from '@oneput/jsed';
 import { EditDocumentUI } from './EditDocumentUI.js';
 
 export class Root implements AppObject {

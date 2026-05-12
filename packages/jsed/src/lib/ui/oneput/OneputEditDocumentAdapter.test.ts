@@ -1,8 +1,7 @@
 import { Editor, JsedDocument, type EditorError } from '@oneput/jsed';
+import { Controller, type AppObject } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
-import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
 import { OneputEditDocumentAdapter } from './OneputEditDocumentAdapter.js';
-import type { AppObject } from '@oneput/oneput';
 
 function makeDocument(
   html: string,

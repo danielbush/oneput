@@ -47,10 +47,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## Details
 
-- [.] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
-  - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
 - fix: typing a word in a paragraph and then immediately hitting enter creates an empty paragraph that is not accessible; hitting enter 2nd time creates a 3rd paragraph with an anchor and moves cursor to the anchor
 - fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it
+- [.] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
+  - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
 - [.] EditDocument (in jsed) imports Layout from jsed-demo
   - COMMENT: using an adapter
 - [.] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!

@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import type { LayoutSettings } from './_layout.js';
-import { OneputEditDocumentAdapter } from '@oneput/jsed/ui/oneput/app';
+import { OneputEditDocumentAdapter } from '@oneput/jsed';
 import type { EditorError, JsedDocument } from '@oneput/jsed';
 
 export class EditDocumentUI implements AppObject {

@@ -4,9 +4,9 @@ import type { UserInputChange } from '../../../UserInput.js';
 
 function makeChange(overrides: Partial<UserInputChange>): UserInputChange {
   return {
-    previousValue: '',
+    beforeValue: '',
     value: '',
-    previousRange: [0, 0],
+    beforeRange: [0, 0],
     range: [0, 0],
     cause: 'user',
     ...overrides
@@ -18,7 +18,7 @@ describe('decideInputIntent', () => {
     // arrange
     const change = makeChange({
       value: ' ',
-      previousRange: [0, 3],
+      beforeRange: [0, 3],
       range: [1, 1]
     });
 
@@ -35,9 +35,9 @@ describe('decideInputIntent', () => {
   test('"[foo]" => "|": delete-current', () => {
     // arrange
     const change = makeChange({
-      previousValue: 'foo',
+      beforeValue: 'foo',
       value: '',
-      previousRange: [0, 3],
+      beforeRange: [0, 3],
       range: [0, 0]
     });
 
@@ -54,10 +54,10 @@ describe('decideInputIntent', () => {
   test('"b|foo" => "b |foo" ==> "b|": rewrite-current prefers current-token on leading split commit', () => {
     // arrange
     const change = makeChange({
-      priorValue: 'foo',
-      previousValue: 'bfoo',
+      previousUserValue: 'foo',
+      beforeValue: 'bfoo',
       value: 'b foo',
-      previousRange: [1, 1],
+      beforeRange: [1, 1],
       range: [2, 2]
     });
 
@@ -77,9 +77,9 @@ describe('decideInputIntent', () => {
   test('"foo |" => "foo b|" ==> "b|": insert-after-current', () => {
     // arrange
     const change = makeChange({
-      previousValue: 'foo ',
+      beforeValue: 'foo ',
       value: 'foo b',
-      previousRange: [4, 4],
+      beforeRange: [4, 4],
       range: [5, 5]
     });
 
@@ -97,9 +97,9 @@ describe('decideInputIntent', () => {
   test('"| foo" => "b| foo" ==> "b|": insert-before-current', () => {
     // arrange
     const change = makeChange({
-      previousValue: ' foo',
+      beforeValue: ' foo',
       value: 'b foo',
-      previousRange: [0, 0],
+      beforeRange: [0, 0],
       range: [1, 1]
     });
 
@@ -117,9 +117,9 @@ describe('decideInputIntent', () => {
   test('"fo|o" => "fo o|" ==> "o|": rewrite-current prefers last-appended on mid-token split', () => {
     // arrange
     const change = makeChange({
-      previousValue: 'foo',
+      beforeValue: 'foo',
       value: 'fo o',
-      previousRange: [2, 2],
+      beforeRange: [2, 2],
       range: [3, 3]
     });
 

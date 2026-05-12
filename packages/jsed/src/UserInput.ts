@@ -13,20 +13,20 @@ export type UserInputChangeCause = 'user' | 'programmatic';
 export type UserInputChange = {
   /** Input value after this change. */
   value: string;
-  /** Input value immediately before this change (one step back). */
-  previousValue: string;
+  /** Input value immediately before this change. */
+  beforeValue: string;
   /** Selection range after this change. */
   range: UserInputRange;
-  /** Selection range immediately before this change (one step back). */
-  previousRange: UserInputRange;
+  /** Selection range immediately before this change. */
+  beforeRange: UserInputRange;
   /**
-   * Input value two steps back — the state before `previousValue`. Optional;
+   * Input value from the previous user-originated input-change. Optional;
    * only populated when a meaningful two-step history exists. Disambiguates
    * multi-step flows like prepend-then-space vs. split-in-the-middle.
    */
-  priorValue?: string;
-  /** Selection range two steps back — paired with `priorValue`. */
-  priorRange?: UserInputRange;
+  previousUserValue?: string;
+  /** Selection range paired with `previousUserValue`. */
+  previousUserRange?: UserInputRange;
   cause: UserInputChangeCause;
 };
 

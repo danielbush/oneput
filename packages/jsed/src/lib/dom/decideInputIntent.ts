@@ -62,8 +62,8 @@ export type InputIntent =
  * instruction, leaving DOM edits and CURSOR choreography to the caller.
  */
 export function decideInputIntent(change: UserInputChange, currentTokenValue: string): InputIntent {
-  const { value: inputValue, previousValue, previousRange, range } = change;
-  const [, previousStop] = previousRange;
+  const { value: inputValue, beforeValue, beforeRange, range } = change;
+  const [, beforeStop] = beforeRange;
   const [, stop] = range;
 
   if (/^\s+$/.test(inputValue)) {
@@ -87,7 +87,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
       inputValue
     };
   }
-  if (previousValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
+  if (beforeValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
     const insertedParts = inputValue.slice(insertAfterPrefix.length).split(/\s+/).filter(Boolean);
     if (insertedParts.length > 0) {
       return {
@@ -105,7 +105,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
       inputValue
     };
   }
-  if (previousValue === insertBeforeSuffix && inputValue.endsWith(insertBeforeSuffix)) {
+  if (beforeValue === insertBeforeSuffix && inputValue.endsWith(insertBeforeSuffix)) {
     const insertedParts = inputValue
       .slice(0, inputValue.length - insertBeforeSuffix.length)
       .split(/\s+/)
@@ -131,11 +131,11 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     const insertedSpace = containsSpace[2];
     // const isFirstWord = firstWord.length === stop;
     const isLeadingSplitCommit =
-      previousStop === firstWord.length &&
+      beforeStop === firstWord.length &&
       stop === firstWord.length + insertedSpace.length &&
-      !!change.priorValue &&
-      previousValue.endsWith(change.priorValue) &&
-      firstWord === previousValue.slice(0, previousValue.length - change.priorValue.length);
+      !!change.previousUserValue &&
+      beforeValue.endsWith(change.previousUserValue) &&
+      firstWord === beforeValue.slice(0, beforeValue.length - change.previousUserValue.length);
 
     // if (isFirstWord || isLeadingSplitCommit) {
     if (isLeadingSplitCommit) {

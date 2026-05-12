@@ -5,11 +5,11 @@ import type { AppChange } from './AppController.js';
 export type InputChangePayload = {
   evt: InputEvent;
   value: string;
-  previousValue: string;
+  beforeValue: string;
   range: [number | null, number | null];
-  previousRange: [number | null, number | null];
-  priorValue?: string;
-  priorRange?: [number | null, number | null];
+  beforeRange: [number | null, number | null];
+  previousUserValue?: string;
+  previousUserRange?: [number | null, number | null];
   cause: 'user' | 'programmatic';
 };
 

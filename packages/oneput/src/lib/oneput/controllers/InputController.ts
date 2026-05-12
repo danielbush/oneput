@@ -88,8 +88,7 @@ export class InputController {
         range: [inputElement.selectionStart ?? null, inputElement.selectionEnd ?? null]
       };
     };
-    // 'beforeinput' lets us capture the real pre-edit state from the DOM,
-    // instead of trying to reconstruct it later.
+    // 'beforeinput'  fires just before the browser applies the user's edit.
     inputElement.addEventListener('beforeinput', handleBeforeInput);
     this.removeBeforeInputListener = () => {
       inputElement.removeEventListener('beforeinput', handleBeforeInput);
@@ -379,11 +378,11 @@ export class InputController {
       payload: {
         evt: new InputEvent('input'),
         value: target.value,
-        previousValue: this.lastInputValue,
-        previousRange: this.lastInputRange,
+        beforeValue: this.lastInputValue,
+        beforeRange: this.lastInputRange,
         range,
-        priorValue: this.previousUserInputValue,
-        priorRange: this.previousUserInputRange,
+        previousUserValue: this.previousUserInputValue,
+        previousUserRange: this.previousUserInputRange,
         cause: 'user'
       }
     };
@@ -401,25 +400,25 @@ export class InputController {
       target?.selectionStart ?? null,
       target?.selectionEnd ?? null
     ];
-    const previousValue = this.beforeInputSnapshot?.value ?? this.lastInputValue;
-    const previousRange = this.beforeInputSnapshot?.range ?? this.lastInputRange;
+    const beforeValue = this.beforeInputSnapshot?.value ?? this.lastInputValue;
+    const beforeRange = this.beforeInputSnapshot?.range ?? this.lastInputRange;
     // Emit internal event for decoupled communication
     const payload: InputChangeEvent = {
       type: 'input-change',
       payload: {
         evt: evt as InputEvent,
         value,
-        previousValue,
+        beforeValue,
         range,
-        previousRange,
-        priorValue: this.previousUserInputValue,
-        priorRange: this.previousUserInputRange,
+        beforeRange,
+        previousUserValue: this.previousUserInputValue,
+        previousUserRange: this.previousUserInputRange,
         cause: 'user'
       }
     };
     this.ctl.events.emit(payload);
-    this.previousUserInputValue = previousValue;
-    this.previousUserInputRange = previousRange;
+    this.previousUserInputValue = beforeValue;
+    this.previousUserInputRange = beforeRange;
     this.lastInputValue = value;
     this.lastInputRange = range;
     this.beforeInputSnapshot = undefined;

@@ -43,7 +43,9 @@ export class EditorInputOps {
       case 'insert-after-current':
         lastToken = cursor.insertTextAfter(intent.insertedText);
         cursor.setStateFromInput(intent.inputValue);
-        this.updateInput(cursor);
+        this.updateInput(cursor).finally(() => {
+          this.state.userInput.moveCursorToEnd();
+        });
         if (lastToken) {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
@@ -57,7 +59,9 @@ export class EditorInputOps {
       case 'insert-before-current':
         lastToken = cursor.insertTextBefore(intent.insertedText);
         cursor.setStateFromInput(intent.inputValue);
-        this.updateInput(cursor);
+        this.updateInput(cursor).finally(() => {
+          this.state.userInput.moveCursorToEnd();
+        });
         if (lastToken) {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
@@ -77,11 +81,10 @@ export class EditorInputOps {
   private updateInput = (cursor: Cursor) => {
     const finalToken = cursor.getPlace();
     this.state.userInput.focus();
-    this.state.userInput
+    return this.state.userInput
       .setInputValue(token.getValue(finalToken))
       .then(() => {
         this.state.nav.FOCUS(finalToken);
-        this.state.userInput.moveCursorToEnd();
       })
       .catch((err) => {
         // TODO: close cursor?

@@ -42,7 +42,7 @@ export class CursorTextOps {
         lastToken = insertedToken;
       }
     }
-    this.state.place(lastToken);
+    this.state.place(lastToken, { syncInput: false });
     return lastToken;
   }
 

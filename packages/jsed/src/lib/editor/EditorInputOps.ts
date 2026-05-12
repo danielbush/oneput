@@ -37,17 +37,6 @@ export class EditorInputOps {
         return;
       }
 
-      case 'rewrite-current':
-        cursor.replace(intent.firstPart);
-        for (const part of intent.appendedParts.reverse()) {
-          const appendedToken = cursor.append(part);
-          if (!lastToken) {
-            lastToken = appendedToken;
-          }
-        }
-        this.state.notifyTextChange({ type: 'token-text-change', token: currentToken });
-        break;
-
       case 'start-insert-after-current':
         cursor.setStateFromInput(intent.inputValue);
         return;
@@ -61,11 +50,13 @@ export class EditorInputOps {
             lastToken = insertedToken;
           }
         }
-        const inserted = lastToken;
-        if (inserted) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: inserted });
+        if (lastToken) {
+          cursor.place(lastToken);
+          cursor.setStateFromInput(intent.inputValue);
+          this.updateInput(cursor);
+          this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
-        break;
+        return;
 
       case 'start-insert-before-current':
         this.state.userInput.moveCursorToBeginning();
@@ -80,31 +71,48 @@ export class EditorInputOps {
           lastToken = insertedToken;
         }
         if (lastToken) {
+          cursor.place(lastToken);
+          cursor.setStateFromInput(intent.inputValue);
+          this.updateInput(cursor);
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
-        break;
-    }
+        return;
 
-    const finalToken =
-      intent.finalTokenPreference === 'current-token' ? cursor.getPlace() : lastToken;
-
-    if (finalToken) {
-      cursor.place(finalToken);
-      this.state.userInput.focus();
-      this.state.userInput
-        .setInputValue(token.getValue(finalToken))
-        .then(() => {
-          this.state.nav.FOCUS(finalToken);
-          this.state.userInput.moveCursorToEnd();
+      case 'rewrite-current':
+        cursor.replace(intent.firstPart);
+        for (const part of intent.appendedParts.reverse()) {
+          const appendedToken = cursor.append(part);
+          if (!lastToken) {
+            lastToken = appendedToken;
+          }
+        }
+        this.state.notifyTextChange({ type: 'token-text-change', token: currentToken });
+        const finalToken =
+          intent.finalTokenPreference === 'current-token' ? cursor.getPlace() : lastToken;
+        if (finalToken) {
+          cursor.place(finalToken);
           cursor.setStateFromInput(intent.inputValue);
-        })
-        .catch((err) => {
-          // TODO: close cursor?
-          console.warn('handleInputChange error:', err);
-        });
-    } else {
-      cursor.setStateFromInput(intent.inputValue);
+          this.updateInput(cursor);
+        } else {
+          cursor.setStateFromInput(intent.inputValue);
+        }
+        return;
     }
+  };
+
+  private updateInput = (cursor: Cursor) => {
+    const finalToken = cursor.getPlace();
+    this.state.userInput.focus();
+    this.state.userInput
+      .setInputValue(token.getValue(finalToken))
+      .then(() => {
+        this.state.nav.FOCUS(finalToken);
+        this.state.userInput.moveCursorToEnd();
+      })
+      .catch((err) => {
+        // TODO: close cursor?
+        console.warn('handleInputChange error:', err);
+      });
   };
 
   udpateWithCursorChange = (el: HTMLElement) => {

@@ -24,7 +24,6 @@ export type InputIntent =
        */
       type: 'delete-current';
       inputValue: string;
-      finalTokenPreference: 'last-appended';
     }
   | {
       /**
@@ -33,7 +32,6 @@ export type InputIntent =
       type: 'insert-after-current';
       inputValue: string;
       insertedParts: string[];
-      finalTokenPreference: 'last-inserted';
     }
   | {
       /**
@@ -42,7 +40,6 @@ export type InputIntent =
       type: 'insert-before-current';
       inputValue: string;
       insertedParts: string[];
-      finalTokenPreference: 'last-inserted';
     }
   | {
       /**
@@ -79,8 +76,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   if (inputValue === '') {
     return {
       type: 'delete-current',
-      inputValue,
-      finalTokenPreference: 'last-appended'
+      inputValue
     };
   }
 
@@ -97,8 +93,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
       return {
         type: 'insert-after-current',
         inputValue,
-        insertedParts,
-        finalTokenPreference: 'last-inserted'
+        insertedParts
       };
     }
   }
@@ -119,8 +114,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
       return {
         type: 'insert-before-current',
         inputValue,
-        insertedParts,
-        finalTokenPreference: 'last-inserted'
+        insertedParts
       };
     }
   }

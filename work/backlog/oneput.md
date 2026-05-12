@@ -10,7 +10,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
   - COMMENT: blur input focus if we detect any key that has a modifier
 - fix: `$mod+v` pastes into input
-- fix/feat: layouts for things like `PasteElementUI` or  `PickListUI`
+- fix/feat: layouts for things like `PasteElementUI` or  `PickListUI` 
   - fix: search for "jsed-demo" in jsed/src
   - fix: search for "LayoutSettings" in jsed/src
   - COMMENT - we run it as an AppObject but it provides lots of hooks
@@ -20,6 +20,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
         onLayoutChange: (ctl, { actions, menuTitle }) => { ctl.ui.setLayout(...) }
       })
       ```
+  - COMMENT - we run our own AppObject and it gives us stuff we need
+    - `OneputEditDocumentAdapter` does this
 - refactor: start should only be called once; make onResume required or just don't call anything
 - fix: oneput-demo menu is closing on actions where it shouldn't
   - I think I altered this when working on jsed-demo; what is the preferred approach?

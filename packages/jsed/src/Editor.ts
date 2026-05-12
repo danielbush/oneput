@@ -72,7 +72,11 @@ export class Editor {
 
   // misc
   enableElementIndicator = (bool: boolean) => this.state.enableElementIndicator(bool);
-  elementIndicatorEnabled = this.state.elementIndicatorEnabled;
+  get elementIndicatorEnabled() {
+    return this.state.elementIndicatorEnabled;
+  }
   enableLegacyElementIndicator = (bool: boolean) => this.state.enableLegacyElementIndicator(bool);
-  legacyElementIndicatorEnabled = this.state.legacyElementIndicatorEnabled;
+  get legacyElementIndicatorEnabled() {
+    return this.state.legacyElementIndicatorEnabled;
+  }
 }

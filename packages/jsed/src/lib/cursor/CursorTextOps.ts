@@ -10,17 +10,40 @@ export class CursorTextOps {
 
   private constructor(private state: CursorState) {}
 
+  /** Delete the current TOKEN. */
+  delete(): void {
+    if (!this.state.isOnToken()) return;
+    const { next: nextTok } = token.remove(this.state.getPlace());
+    this.state.place(nextTok);
+  }
+
   /** Replace the value of the current TOKEN with a new value. */
   replace(val: string): void {
     if (!this.state.isOnToken()) return;
     token.replaceText(this.state.getPlace(), val);
   }
 
-  /** Delete the current TOKEN. */
-  delete(): void {
-    if (!this.state.isOnToken()) return;
-    const { next: nextTok } = token.remove(this.state.getPlace());
-    this.state.place(nextTok);
+  /**
+   * Insert string vals after cursor and put cursor on last one.
+   *
+   * Supports 'insert-after-current' operation (input intent).
+   */
+  insertTextAfter(text: string): HTMLElement | null {
+    const currentToken = this.state.getPlace();
+    let lastToken: HTMLElement | null = null;
+    const parts = text.split(/\s+/).filter(Boolean);
+    for (const part of parts.reverse()) {
+      const insertedToken = token.createToken(part);
+      token.insertAfter(insertedToken, currentToken);
+      space.ensureSpaceAfter(currentToken);
+      if (!lastToken) {
+        lastToken = insertedToken;
+      }
+    }
+    if (lastToken) {
+      this.state.place(lastToken);
+    }
+    return lastToken;
   }
 
   /** Append a new TOKEN after the current one. */

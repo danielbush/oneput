@@ -31,7 +31,7 @@ export type InputIntent =
        */
       type: 'insert-after-current';
       inputValue: string;
-      insertedParts: string[];
+      insertedText: string;
     }
   | {
       /**
@@ -89,11 +89,12 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   }
   if (beforeValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
     const insertedParts = inputValue.slice(insertAfterPrefix.length).split(/\s+/).filter(Boolean);
+    const insertedText = inputValue.slice(insertAfterPrefix.length);
     if (insertedParts.length > 0) {
       return {
         type: 'insert-after-current',
         inputValue,
-        insertedParts
+        insertedText
       };
     }
   }

@@ -55,8 +55,9 @@ export class Cursor {
   movePrevious = () => this.#motion.movePrevious();
 
   // ops
-  replace = (val: string) => this.#ops.replace(val);
   delete = () => this.#ops.delete();
+  replace = (val: string) => this.#ops.replace(val);
+  insertTextAfter = (text: string) => this.#ops.insertTextAfter(text);
   append = (val: string) => this.#ops.append(val);
   joinNext = () => this.#ops.joinNext();
   joinPrevious = () => this.#ops.joinPrevious();

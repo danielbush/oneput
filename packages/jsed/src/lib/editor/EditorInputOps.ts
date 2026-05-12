@@ -42,18 +42,10 @@ export class EditorInputOps {
         return;
 
       case 'insert-after-current':
-        for (const part of intent.insertedParts.reverse()) {
-          const insertedToken = token.createToken(part);
-          token.insertAfter(insertedToken, currentToken);
-          space.ensureSpaceAfter(currentToken);
-          if (!lastToken) {
-            lastToken = insertedToken;
-          }
-        }
+        lastToken = cursor.insertTextAfter(intent.insertedText);
+        cursor.setStateFromInput(intent.inputValue);
+        this.updateInput(cursor);
         if (lastToken) {
-          cursor.place(lastToken);
-          cursor.setStateFromInput(intent.inputValue);
-          this.updateInput(cursor);
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         return;

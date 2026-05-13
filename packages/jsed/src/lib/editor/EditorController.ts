@@ -105,7 +105,7 @@ export class EditorController {
     if (evt.targetType === 'FOCUSABLE') {
       // Second focus puts us into editing mode.
       if (evt.element === currentFocus) {
-        this.state
+        this.state.ops
           .enterEditing(evt.element)
           .mapErr((err) => this.state.eventsEmitter.onError?.(err));
         return false;
@@ -116,7 +116,9 @@ export class EditorController {
 
     if (evt.targetType === 'TOKEN') {
       if (currentFocus?.contains(evt.token)) {
-        this.state.enterEditing(evt.token).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+        this.state.ops
+          .enterEditing(evt.token)
+          .mapErr((err) => this.state.eventsEmitter.onError?.(err));
         return false;
       }
     }
@@ -131,7 +133,7 @@ export class EditorController {
 
     // FOCUS has been set to some FOCUSABLE...
     if (evt.targetType === 'FOCUSABLE') {
-      this.state.exitEditing({ focusElement: evt.element });
+      this.state.ops.exitEditing({ focusElement: evt.element });
       return false;
     }
 
@@ -139,7 +141,7 @@ export class EditorController {
     if (evt.targetType === 'TOKEN') {
       const parent = token.getParent(evt.token);
       if (!this.state.cursor.isSameLine(evt.token)) {
-        this.state.exitEditing({ focusElement: parent });
+        this.state.ops.exitEditing({ focusElement: parent });
         return false;
       }
 

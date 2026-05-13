@@ -30,7 +30,7 @@ export class EditorAnchorOps {
     }
 
     this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+    this.state.ops.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
 
@@ -51,7 +51,7 @@ export class EditorAnchorOps {
     }
 
     this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+    this.state.ops.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
 
@@ -112,7 +112,7 @@ export class EditorAnchorOps {
     }
 
     this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+    this.state.ops.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
 }

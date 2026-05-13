@@ -1,4 +1,3 @@
-import { err, ok, type Result } from 'neverthrow';
 import { Nav } from '../../Nav.js';
 import { Cursor } from '../../Cursor.js';
 import { CursorSelection } from '../cursor/CursorSelection.js';
@@ -14,8 +13,6 @@ import { EditorInputOps } from './EditorInputOps.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from './EditorController.js';
 import { EditorOps } from './EditorOps.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from '../dom/line.js';
-import { isCursorTransparent, isLineSibling } from '../dom/taxonomy.js';
 import type { CursorError } from '../cursor/CursorState.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
@@ -120,31 +117,6 @@ export class EditorState {
     public ops = EditorOps.create(this)
   ) {}
 
-  start(): void {
-    this.nav.connect({
-      onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
-      onFocusChange: (focus) => this.controller.onFocusChange(focus)
-    });
-    this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator);
-    this.cssElementIndicator.showIndicator(this.useElementIndicator);
-    this.nav.FOCUS(
-      findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
-    );
-  }
-
-  suspend(bool: boolean) {
-    this.isSuspended = bool;
-    if (this.isSuspended) {
-      this.userInput.setInputValue('');
-      return;
-    }
-    if (this.mode === 'edit') {
-      this.enterEditing(this.cursor?.getPlace());
-      this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
-      this.cssElementIndicator.showIndicator(this.useElementIndicator && true);
-    }
-  }
-
   getMode(): EditorMode {
     return this.mode;
   }
@@ -167,78 +139,6 @@ export class EditorState {
 
   isEditing(): boolean {
     return this.mode === 'edit';
-  }
-
-  /**
-   * Transition to 'edit' mode.
-   */
-  enterEditing(initial?: HTMLElement): Result<void, EditorError> {
-    this.nav.connect({
-      onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
-      onFocusChange: (focus) => this.controller.onFocusChange(focus)
-    });
-    initial = initial ?? this.nav.getFocus() ?? undefined;
-    if (!initial) {
-      return err({ type: 'no-token-under-focus' });
-    }
-    this.controller.unsubscribeAll();
-    this.controller.subscribeAll();
-
-    // Tokenize LINE at or within `initial` if not already.
-    const line = findNextEditableLine(initial, this.document.root);
-    const firstLineSibling = line && this.tokenizer.tokenizeLineAt(line);
-    const targetLineSibling = isLineSibling(initial)
-      ? initial
-      : isCursorTransparent(initial)
-        ? getFirstLineSibling(initial)
-        : firstLineSibling;
-    if (targetLineSibling) {
-      const line = getLine(targetLineSibling);
-      this.nav.FOCUS(line);
-      this.userInput.focus();
-      if (!this.cursor) {
-        this.cursor = Cursor.create({
-          document: this.document,
-          tokenizer: this.tokenizer,
-          token: targetLineSibling,
-          onCursorChange: this.controller.onCursorChange,
-          onError: this.controller.onCursorError
-        });
-      }
-      this.cursor.place(targetLineSibling); // calls handleCursorChange
-      this.setMode('edit');
-      return ok(undefined);
-    }
-
-    return err({ type: 'no-token-under-focus' });
-  }
-
-  /**
-   * Transition back to 'view' mode.
-   */
-  exitEditing(params?: { softExit?: boolean; focusElement?: HTMLElement }) {
-    // Exit cursor insertion state if present.
-    if (params?.softExit && this.cursor?.isInInsertState()) {
-      this.cursor.reload();
-      return;
-    }
-
-    // Exit the cursor completely
-    const focusElement = params?.focusElement ?? this.nav.getFocus() ?? undefined;
-    this.controller.unsubscribeAll();
-    this.cursor?.destroy();
-    this.cursor = undefined;
-    this.tokenizer.setCursorElement(null);
-    this.userInput.setInputValue('');
-    this.setMode('view');
-
-    if (focusElement) {
-      this.nav.FOCUS(focusElement);
-      const line = findNextEditableLine(focusElement, this.document.root);
-      if (line) {
-        this.tokenizer.tokenizeLineAt(line);
-      }
-    }
   }
 
   getCursor() {

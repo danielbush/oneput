@@ -52,7 +52,7 @@ export class EditorController {
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.state.cursor.place(start, { syncInput: false });
     }
-    this.state.inputOps.processUserInput(change);
+    this.state.ops.processUserInput(change);
   };
 
   /**
@@ -79,7 +79,7 @@ export class EditorController {
    * pre-rewrite value.
    */
   onCursorChange = (tok: HTMLElement, opts?: CursorChangeOpts) => {
-    this.state.inputOps.processCursorChange(tok, opts);
+    this.state.ops.processCursorChange(tok, opts);
   };
 
   /**

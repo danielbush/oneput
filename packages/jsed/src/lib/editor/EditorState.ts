@@ -9,7 +9,6 @@ import { EditorAnchorOps } from './EditorAnchorOps.js';
 import { EditorCursorOps } from './EditorCursorOps.js';
 import { ElementIndicator } from '../dom/ElementIndicator.js';
 import { CSSElementIndicator } from '../dom/CSSElementIndicator.js';
-import { EditorInputOps } from './EditorInputOps.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from './EditorController.js';
 import { EditorOps } from './EditorOps.js';
@@ -113,7 +112,6 @@ export class EditorState {
     public focus = EditorFocusOps.create(this),
     public anchor = EditorAnchorOps.create(this),
     public cursorOps = EditorCursorOps.create(this),
-    public inputOps = EditorInputOps.create(this),
     public ops = EditorOps.create(this)
   ) {}
 

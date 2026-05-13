@@ -51,7 +51,7 @@ export class CursorTextOps {
    *
    * Supports 'insert-after-current' operation (input intent).
    */
-  insertTextAfter(text: string): HTMLElement | null {
+  insertTextAfter(text: string, opts?: CursorChangeOpts): HTMLElement | null {
     const currentToken = this.state.getPlace();
     let lastToken: HTMLElement | null = null;
     const parts = text.split(/\s+/).filter(Boolean);
@@ -64,12 +64,12 @@ export class CursorTextOps {
       }
     }
     if (lastToken) {
-      this.state.place(lastToken);
+      this.state.place(lastToken, opts);
     }
     return lastToken;
   }
 
-  insertTextBefore(text: string): HTMLElement | null {
+  insertTextBefore(text: string, opts?: CursorChangeOpts): HTMLElement | null {
     const currentToken = this.state.getPlace();
     let lastToken: HTMLElement | null = null;
     const parts = text.split(/\s+/).filter(Boolean);
@@ -80,7 +80,7 @@ export class CursorTextOps {
       lastToken = insertedToken;
     }
     if (lastToken) {
-      this.state.place(lastToken);
+      this.state.place(lastToken, opts);
     }
     return lastToken;
   }

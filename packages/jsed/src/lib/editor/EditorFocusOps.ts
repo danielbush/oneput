@@ -95,6 +95,10 @@ export class EditorFocusOps {
   }
 
   insertNewBefore(tagName: string): boolean {
+    if (!this.canInsertBefore()) {
+      return false;
+    }
+
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;

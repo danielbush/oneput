@@ -51,12 +51,12 @@ bugs
   - COMMENT: I think the ::after pseudoelement is being replaced
 - fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
 - fix: backspacing and there are no more words in previous direciton then select-all on the second thing (or the anchor)
-- [.] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
-  - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
+- [x] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
+  - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext
 - [x] fix: typing a word in a paragraph and then immediately hitting enter creates an empty paragraph that is not accessible; hitting enter 2nd time creates a 3rd paragraph with an anchor and moves cursor to the anchor
   - COMMENT: seems to have been fixed with the reworking on input and cursor / edit ops
 - [x] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise

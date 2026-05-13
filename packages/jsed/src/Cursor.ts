@@ -28,8 +28,8 @@ export class Cursor {
 
   constructor(cursorState: CursorState) {
     this.#state = cursorState;
-    this.#motion = CursorMotion.create(cursorState);
-    this.#ops = CursorTextOps.create(cursorState);
+    this.#motion = this.#state.motion;
+    this.#ops = this.#state.ops;
   }
 
   destroy = () => this.#state.destroy();

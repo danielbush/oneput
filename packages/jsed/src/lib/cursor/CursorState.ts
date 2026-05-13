@@ -11,6 +11,8 @@ import { isSameLine } from '../dom/line';
 import { isLineSibling, isToken } from '../dom/taxonomy';
 import type { Tokenizer } from '../../Tokenizer';
 import type { UserInputSelectionState } from '../../UserInput';
+import { CursorMotion } from './CursorMotion';
+import { CursorTextOps } from './CursorTextOps';
 
 /**
  * Options threaded through `place` -> `onCursorChange`.
@@ -80,8 +82,12 @@ export class CursorState {
     this.onError = params.onError;
     this.silent = params.silent ?? false;
     this.tokenizer = params.tokenizer;
+    this.motion = CursorMotion.create(this);
+    this.ops = CursorTextOps.create(this);
   }
 
+  ops: CursorTextOps;
+  motion: CursorMotion;
   token: HTMLElement;
   document: JsedDocument;
   onCursorChange: (token: HTMLElement, opts?: CursorChangeOpts) => void;

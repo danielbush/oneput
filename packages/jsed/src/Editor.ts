@@ -52,6 +52,8 @@ export class Editor {
   enterEditing = (el?: HTMLElement) => this.state.ops.enterEditing(el);
   exitEditing = (params?: { softExit?: boolean; focusElement?: HTMLElement }) =>
     this.state.ops.exitEditing(params);
+
+  // Multi-function
   handleEnter = () => this.state.ops.handleEnter();
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
 

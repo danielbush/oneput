@@ -11,10 +11,10 @@ export class CursorTextOps {
   private constructor(private state: CursorState) {}
 
   /** Delete the current TOKEN. */
-  delete(): void {
+  delete(opts?: CursorChangeOpts): void {
     if (!this.state.isOnToken()) return;
     const { next: nextTok } = token.remove(this.state.getPlace());
-    this.state.place(nextTok);
+    this.state.place(nextTok, opts);
   }
 
   /** Replace the value of the current TOKEN with a new value. */

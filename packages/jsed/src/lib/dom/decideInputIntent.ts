@@ -24,6 +24,7 @@ export type InputIntent =
        */
       type: 'delete-current';
       inputValue: string;
+      deletionType: 'backspace' | 'other';
     }
   | {
       /**
@@ -74,9 +75,11 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   }
 
   if (inputValue === '') {
+    const userIsBackspacingOntoPreviousToken = range[0] === range[1] && range[0] === 0;
     return {
       type: 'delete-current',
-      inputValue
+      inputValue,
+      deletionType: userIsBackspacingOntoPreviousToken ? 'backspace' : 'other'
     };
   }
 

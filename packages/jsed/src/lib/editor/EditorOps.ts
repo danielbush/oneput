@@ -295,7 +295,9 @@ export class EditorOps {
 
       case 'delete-current': {
         const current = cursor.getPlace();
-        cursor.delete();
+        cursor.delete({
+          inputCursorPosition: intent.deletionType === 'backspace' ? 'end' : 'selectall'
+        });
         this.state.notifyTextChange({ type: 'token-text-change', token: current });
         cursor.setStateFromInput(intent.inputValue);
         return;

@@ -55,7 +55,7 @@ export class Cursor {
   movePrevious = () => this.#motion.movePrevious();
 
   // ops
-  delete = () => this.#ops.delete();
+  delete = (opts?: CursorChangeOpts) => this.#ops.delete(opts);
   replace = (val: string) => this.#ops.replace(val);
   replaceWithText = (text: string, opts?: CursorChangeOpts) =>
     this.#ops.replaceWithText(text, opts);

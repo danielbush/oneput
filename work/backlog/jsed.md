@@ -47,9 +47,9 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 bugs
 
+- fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
 - fix: anchor tokens disappear when cursor uses insert markers
   - COMMENT: I think the ::after pseudoelement is being replaced
-- fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
 - fix: backspacing and there are no more words in previous direciton then select-all on the second thing (or the anchor)
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 - fix: getLine can exceed document root

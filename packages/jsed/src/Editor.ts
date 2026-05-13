@@ -41,34 +41,35 @@ export class Editor {
     this.eventsEmitter = this.state.eventsEmitter;
   }
 
-  // Editor Lifecycle
+  // Lifecycle
   start = () => this.state.start(); // initialize
   suspend = (bool: boolean) => this.state.suspend(bool);
   destroy = () => this.state.destroy();
 
-  // modes - view, edit
+  // Modes - view, edit
   enterEditing = (el: HTMLElement) => this.state.enterEditing(el);
   exitEditing = () => this.state.exitEditing();
   getMode = () => this.state.getMode();
   isEditing = () => this.state.isEditing();
-
-  // editing
   handleEnter = () => this.state.ops.handleEnter();
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
-  scrollActiveTargetIntoView = () => this.state.ops.scrollActiveTargetIntoView();
-  getCursor = () => this.state.getCursor();
 
-  // motion
+  // Editing
+  getCursor = () => this.state.getCursor();
+  // Editing is event driven see EditorController.
+
+  // Motion
   moveUp = () => this.state.ops.moveUp();
   moveDown = () => this.state.ops.moveDown();
   moveNext = () => this.state.ops.moveNext();
   movePrevious = () => this.state.ops.movePrevious();
 
-  // selection
+  // Selection
   extendNext = () => this.state.ops.extendNext();
   extendPrevious = () => this.state.ops.extendPrevious();
 
-  // misc
+  // Misc
+  scrollActiveTargetIntoView = () => this.state.ops.scrollActiveTargetIntoView();
   enableElementIndicator = (bool: boolean) => this.state.enableElementIndicator(bool);
   get elementIndicatorEnabled() {
     return this.state.elementIndicatorEnabled;

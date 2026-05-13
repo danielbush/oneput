@@ -277,7 +277,6 @@ export class EditorOps {
    * When user types in the input...
    */
   processUserInput = (change: UserInputChange) => {
-    let lastToken: HTMLElement | null = null;
     const cursor = this.state.cursor;
     if (!cursor) {
       console.error(`'cursor' not set`);
@@ -306,8 +305,8 @@ export class EditorOps {
         cursor.setStateFromInput(intent.inputValue);
         return;
 
-      case 'insert-after-current':
-        lastToken = cursor.insertTextAfter(intent.insertedText);
+      case 'insert-after-current': {
+        const lastToken = cursor.insertTextAfter(intent.insertedText);
         cursor.setStateFromInput(intent.inputValue);
         this.updateInput(cursor).finally(() => {
           this.state.userInput.moveCursorToEnd();
@@ -316,14 +315,15 @@ export class EditorOps {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         return;
+      }
 
       case 'start-insert-before-current':
         this.state.userInput.moveCursorToBeginning();
         cursor.setStateFromInput(intent.inputValue);
         return;
 
-      case 'insert-before-current':
-        lastToken = cursor.insertTextBefore(intent.insertedText);
+      case 'insert-before-current': {
+        const lastToken = cursor.insertTextBefore(intent.insertedText);
         cursor.setStateFromInput(intent.inputValue);
         this.updateInput(cursor).finally(() => {
           this.state.userInput.moveCursorToEnd();
@@ -332,9 +332,10 @@ export class EditorOps {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         return;
+      }
 
-      case 'rewrite-current':
-        lastToken = cursor.replaceWithText(intent.inputValue, {
+      case 'rewrite-current': {
+        const lastToken = cursor.replaceWithText(intent.inputValue, {
           inputCursorPosition: intent.userTypedInteriorSpace ? 'beginning' : 'nochange'
         });
         cursor.setStateFromInput(intent.inputValue);
@@ -342,6 +343,7 @@ export class EditorOps {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
         return;
+      }
     }
   };
 
@@ -358,6 +360,13 @@ export class EditorOps {
       });
   };
 
+  /**
+   * Intended to be triggered when the Cursor moves (.place).
+   *
+   * Cursor motion is complicated, the Editor defers to it to handle the motion.
+   * So it needs a callback mechanism after it has decided on a place to sit.
+   * This function does the related post-processing for the editor.
+   */
   processCursorChange = (cursorElement: HTMLElement, opts?: CursorChangeOpts) => {
     this.state.tokenizer.setCursorElement(cursorElement);
     this.state.nav?.FOCUS(cursorElement);

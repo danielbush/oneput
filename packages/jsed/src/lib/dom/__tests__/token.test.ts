@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import {
   addAnchors,
   canInsertAnchorInLine,
@@ -37,7 +37,7 @@ import {
 import { insertSpaceAfterTag, removeSpaceAfterTag } from '../space.js';
 
 describe('replaceText', () => {
-  it('rewrites an existing TOKEN text node', () => {
+  test('existing TOKEN', () => {
     // arrange
     const token = createToken('foo');
 
@@ -50,7 +50,7 @@ describe('replaceText', () => {
     expect(token.firstChild?.nodeType).toBe(Node.TEXT_NODE);
   });
 
-  it('converts an empty ANCHOR into a TOKEN with a text node', () => {
+  test('empty ANCHOR', () => {
     // arrange
     const anchor = createAnchor();
     expect(anchor.childNodes).toHaveLength(0);
@@ -68,7 +68,7 @@ describe('replaceText', () => {
 
 describe('ANCHOR', () => {
   describe('add ANCHOR', () => {
-    it('in LINE (1) - empty', () => {
+    test('empty LINE', () => {
       // arrange
       const doc = makeRoot(p({ id: 'p1' }));
       const p1 = byId(doc, 'p1');
@@ -84,7 +84,7 @@ describe('ANCHOR', () => {
       expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
     });
 
-    it('in LINE (2) - empty', () => {
+    test('empty LINE with IGNORABLE', () => {
       // arrange
       const doc = makeRoot(
         p(
@@ -105,7 +105,7 @@ describe('ANCHOR', () => {
       expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
     });
 
-    it('before INLINE_FLOW (1)', () => {
+    test('before INLINE_FLOW between tags', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -128,7 +128,7 @@ describe('ANCHOR', () => {
       expect(strong.previousElementSibling).toBe(anchor);
     });
 
-    it('before INLINE_FLOW (2)', () => {
+    test('before first INLINE_FLOW', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -149,7 +149,7 @@ describe('ANCHOR', () => {
       expect(em.previousElementSibling).toBe(anchor);
     });
 
-    it('before INLINE_FLOW (3) - IMPLICIT_LINE', () => {
+    test('before INLINE_FLOW in IMPLICIT_LINE', () => {
       // arrange
       const doc = makeRoot(
         div(
@@ -174,7 +174,7 @@ describe('ANCHOR', () => {
       expect(em.previousElementSibling).toBe(anchor);
     });
 
-    it('before INLINE_FLOW (4) - whitespace', () => {
+    test('before INLINE_FLOW after whitespace', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -199,7 +199,7 @@ describe('ANCHOR', () => {
       expect(strong.previousElementSibling).toBe(anchor);
     });
 
-    it('before INLINE_FLOW (5) - negative', () => {
+    test('before INLINE_FLOW with text gap', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -223,7 +223,7 @@ describe('ANCHOR', () => {
       expect(strong.previousSibling?.textContent).toBe(' gap ');
     });
 
-    it('before LINE (1) - negative', () => {
+    test('before LINE no-op', () => {
       // arrange
       const root = makeRawRoot(
         div(
@@ -245,7 +245,7 @@ describe('ANCHOR', () => {
       expect(p2.previousSibling).toBe(p1);
     });
 
-    it('after LINE - negative', () => {
+    test('after LINE no-op', () => {
       // arrange
       const root = makeRawRoot(
         div(
@@ -267,7 +267,7 @@ describe('ANCHOR', () => {
       expect(p1.nextSibling).toBe(p2);
     });
 
-    it('after INLINE_FLOW (1)', () => {
+    test('after INLINE_FLOW between tags', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -291,7 +291,7 @@ describe('ANCHOR', () => {
       expect(strong.previousElementSibling).toBe(anchor);
     });
 
-    it('after INLINE_FLOW (2)', () => {
+    test('after last INLINE_FLOW', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -312,7 +312,7 @@ describe('ANCHOR', () => {
       expect(em.nextElementSibling).toBe(anchor);
     });
 
-    it('after INLINE_FLOW (3) - IMPLICIT_LINE', () => {
+    test('after INLINE_FLOW in IMPLICIT_LINE', () => {
       // arrange
       const doc = makeRoot(
         div(
@@ -337,7 +337,7 @@ describe('ANCHOR', () => {
       expect(em.nextElementSibling).toBe(anchor);
     });
 
-    it('after INLINE_FLOW (4) - whitespace', () => {
+    test('after INLINE_FLOW before whitespace', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -363,7 +363,7 @@ describe('ANCHOR', () => {
       expect(anchor?.nextSibling?.textContent).toBe(' ');
     });
 
-    it('after INLINE_FLOW (5) - negative', () => {
+    test('after INLINE_FLOW with text gap', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -389,7 +389,7 @@ describe('ANCHOR', () => {
   });
 
   describe('remove ANCHOR', () => {
-    it('before INLINE_FLOW', () => {
+    test('before INLINE_FLOW', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -413,7 +413,7 @@ describe('ANCHOR', () => {
       expect(strong.previousSibling).toBe(em);
     });
 
-    it('before INLINE_FLOW (2)', () => {
+    test('before INLINE_FLOW with trailing space', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -440,7 +440,7 @@ describe('ANCHOR', () => {
       expect(strong.previousSibling?.textContent).toBe(' ');
     });
 
-    it('after INLINE_FLOW', () => {
+    test('after INLINE_FLOW', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -464,7 +464,7 @@ describe('ANCHOR', () => {
       expect(strong.previousSibling).toBe(em);
     });
 
-    it('after INLINE_FLOW (2)', () => {
+    test('after INLINE_FLOW with leading space', () => {
       // arrange
       const root = makeRawRoot(
         p(
@@ -888,7 +888,7 @@ function buildParent(...children: Node[]): HTMLElement {
 }
 
 describe('remove', () => {
-  it('returns the previous TOKEN sibling when one exists', () => {
+  test('middle TOKEN', () => {
     // arrange
     const foo = createToken('foo');
     const bar = createToken('bar');
@@ -903,7 +903,7 @@ describe('remove', () => {
     expect(bar.isConnected).toBe(false);
   });
 
-  it('falls back to the previous TOKEN sibling when no next exists', () => {
+  test('last TOKEN', () => {
     // arrange
     const foo = createToken('foo');
     const bar = createToken('bar');
@@ -916,7 +916,7 @@ describe('remove', () => {
     expect(next).toBe(foo);
   });
 
-  it('inserts a new ANCHOR adjacent to the removed TOKEN when there is a non-token next sibling but no token siblings', () => {
+  test('ANCHOR before next element', () => {
     // Regression: bug fixed where prev/nextElementSibling were read AFTER
     // detaching the token, causing the ANCHOR to be appended at the parent's
     // end instead of placed at the removed token's actual position.
@@ -936,7 +936,7 @@ describe('remove', () => {
     expect(next.nextElementSibling).toBe(p1);
   });
 
-  it('inserts a new ANCHOR adjacent to a non-token previous sibling when no token siblings exist on either side', () => {
+  test('ANCHOR after previous element', () => {
     // arrange
     const p1 = document.createElement('p');
     p1.textContent = 'stuff';
@@ -952,7 +952,7 @@ describe('remove', () => {
     expect(next.previousElementSibling).toBe(p1);
   });
 
-  it('removes the associated separator when the removed TOKEN is at the end of a segment', () => {
+  test('end-of-segment separators', () => {
     // arrange — `[prev, ' ', removed, ' ']`. After removing `removed`, both
     // separators associated with the removed TOKEN are dropped.
     const prev = createToken('prev');
@@ -970,7 +970,7 @@ describe('remove', () => {
     expect(sepAfter.parentNode).toBeNull();
   });
 
-  it('removes the associated separator when the removed TOKEN is at the start of a segment', () => {
+  test('start-of-segment separators', () => {
     // arrange — `[' ', removed, ' ', next]`. After removing `removed`, both
     // separators associated with the removed TOKEN are dropped.
     const removed = createToken('removed');
@@ -988,7 +988,7 @@ describe('remove', () => {
     expect(sepAfter.parentNode).toBeNull();
   });
 
-  test('removes separator before closing INLINE_FLOW boundary', () => {
+  test('closing INLINE_FLOW separator', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -1014,7 +1014,7 @@ describe('remove', () => {
     expect(insertedSpace?.nextSibling).toBe(baz);
   });
 
-  it('appends a new ANCHOR to the parent when the removed TOKEN had no element siblings', () => {
+  test('only TOKEN', () => {
     // arrange
     const only = createToken('only');
     const parent = buildParent(only);

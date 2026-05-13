@@ -2,17 +2,17 @@
 
 This document builds up from jsed's foundation to its orchestration layer. Each section depends only on what came before. For domain terms (FOCUSABLE, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
 
-Jsed is a headless library — it contains all the navigation and editing logic but does not run on its own. `apps/jsed-demo` is the canonical example of wiring jsed up in the browser with Oneput, and is used for active development.
+Jsed is a headless library — it contains all the navigation and editing logic but does not run on its own. The browser demo is the canonical example of wiring jsed up with Oneput, and is used for active development.
 
-## The foundation: JsedDocument
+## The foundation: document and input
 
-Everything starts with `JsedDocument` — a thin wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other module takes a JsedDocument (or its root) as input.
+Everything starts with a thin document wrapper around an HTML root element. It tags IMPLICIT_LINEs in the DOM and exposes the root, the owning document, and a set of SIB_HIGHLIGHT elements. That's it. Every other layer takes the wrapped document, or its root, as input.
 
-Alongside it, `UserInput` is the contract for the host input control. It covers setting values, selecting text, moving the input cursor, and subscribing to input and selection changes. Input change subscriptions carry before/after value and range snapshots so editing logic can reason about the user transition rather than only the final input string. Jsed stays headless by depending on this contract instead of owning a concrete `<input>` element.
+Alongside it, the host input contract describes how jsed talks to an external input control. It covers setting values, selecting text, moving the input cursor, and subscribing to input and selection changes. Input change subscriptions carry before/after value and range snapshots so editing logic can reason about the user transition rather than only the final input string. Jsed stays headless by depending on this contract instead of owning a concrete input element.
 
-## Navigation: Nav
+## Navigation: FOCUS
 
-`Nav` takes a JsedDocument and provides structural navigation across the document's FOCUSABLE's. It manages FOCUS — which FOCUSABLE the user is currently on — and provides actions to move it:
+Navigation manages the user's structural position in the hypertext tree. It owns FOCUS — which FOCUSABLE the user is currently on — and provides the actions that move that FOCUS:
 
 - **REC_NEXT / REC_PREV** — depth-first walk to the next/previous FOCUSABLE
 - **SIB_NEXT / SIB_PREV** — move to the next/previous sibling FOCUSABLE
@@ -20,71 +20,73 @@ Alongside it, `UserInput` is the contract for the host input control. It covers 
 - **REQUEST_FOCUS** — focus a specific element (e.g. from a click or touch)
 - **FOCUS** — set focus directly and update SIB_HIGHLIGHT
 
-Nav also creates an `ElementIndicator` — a visual tag-name badge that follows the focused element, handling scroll and visibility changes.
+Navigation also owns the visual tag-name badge that follows the focused element, handling scroll and visibility changes.
 
-Nav doesn't know about TOKENs. It only sees the FOCUSABLE tree.
+Navigation does not know about TOKEN's. It only sees the FOCUSABLE tree. When the user tries to navigate, navigation reports that intent back to the editing session. The editing session decides whether to keep moving structurally, enter editing, leave editing, or treat the request as a focus change inside the active CURSOR_LINE.
 
-## Tokenization: Tokenizer.tokenizeLineAt
+## Tokenization: SHALLOW_TOKENIZATION
 
-Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. The entry point is `Tokenizer.tokenizeLineAt(el)`: given a FOCUSABLE, it resolves the candidate LINE under `el` (`findLineCandidateAt` in `lib/sibwalk.ts`), tokenizes that LINE (`tokenizeLine` in `lib/tokenize.ts`), records the LINE for background detokenization, and returns the first reachable LINE_SIBLING ("first seat") for the CURSOR. If no candidate LINE exists, it returns null.
+Tokenizing the whole document upfront would be expensive, so instead we tokenize FOCUSABLE's on demand. Given a FOCUSABLE, the tokenizer resolves the candidate LINE under it, tokenizes that LINE, records the LINE for background detokenization, and returns the first reachable LINE_SIBLING ("first seat") for the CURSOR. If no candidate LINE exists, it returns null.
 
-The DOM-mutation primitives (`tokenizeLine`, `detokenizeLine` and their `Rec` helpers) live in `lib/tokenize.ts`. `Tokenizer` is the orchestration boundary above them — it owns the `Detokenizer` and is the only place that knows how the candidate-find / tokenize / first-seat steps compose.
+The tokenizer is an orchestration boundary above the low-level DOM mutation rules. It is the place that knows how candidate LINE resolution, TOKEN creation, first-seat selection, and background cleanup compose.
 
-`detokenizeLine(...)` removes `TOKEN` wrappers from a `LINE` and its CURSOR-transparent descendants and normalizes text nodes back together. The `Tokenizer` service uses it opportunistically: once the number of recorded tokenized `LINE`s passes a small limit, it schedules a background cleanup pass that detokenizes one old `LINE` at a time while skipping any `LINE` that currently contains the active `CURSOR`.
+Detokenization removes TOKEN wrappers from a LINE and its CURSOR-transparent descendants and normalizes text nodes back together. The tokenizer uses it opportunistically: once the number of recorded tokenized LINE's passes a small limit, it schedules a background cleanup pass that detokenizes one old LINE at a time while skipping any LINE that currently contains the active CURSOR.
 
 ### INTERSTITIAL_TEXT and IMPLICIT_LINEs
 
-An outer LINE can contain text and inline content between, before, or after NESTED_LINEs. That content looks like a line to the user, but without a wrapper it is just INTERSTITIAL_TEXT sitting beside real LINE elements. Jsed establishes the INTERSTITIAL_INVARIANT when a `JsedDocument` is created: `tagImplicitLines` wraps each INTERSTITIAL_TEXT run in an inline `span` marked as an IMPLICIT_LINE.
+An outer LINE can contain text and inline content between, before, or after NESTED_LINEs. That content looks like a line to the user, but without a wrapper it is just INTERSTITIAL_TEXT sitting beside real LINE elements. Jsed establishes the INTERSTITIAL_INVARIANT when the document wrapper is created: each INTERSTITIAL_TEXT run is wrapped in an inline element marked as an IMPLICIT_LINE.
 
-After that startup pass, tokenization no longer has to discover loose interstitial runs opportunistically. IMPLICIT_LINEs are normal LINEs for navigation and tokenization, so `Tokenizer.tokenizeLineAt` can stay focused on the candidate LINE it was given. Editing operations that split or insert around IMPLICIT_LINE content preserve that wrapper so the editor does not create new INTERSTITIAL_TEXT during the session.
+After that startup pass, tokenization no longer has to discover loose interstitial runs opportunistically. IMPLICIT_LINEs are normal LINEs for navigation and tokenization, so tokenization can stay focused on the candidate LINE it was given. Editing operations that split or insert around IMPLICIT_LINE content preserve that wrapper so the editor does not create new INTERSTITIAL_TEXT during the session.
 
 ## Token editing
 
-`Cursor` holds the current TOKEN reference, manages the JSED_CURSOR_CLASS, and provides protected focus-class management. It is the foundation layer.
+The cursor owns the current CURSOR target and its visual marker. It is responsible for moving the CURSOR around editable content, where "editable content" means LINE_SIBLING's within the active hypertext tree.
 
-`Cursor` owns cursor motion + editing + CURSOR_STATE once a FOCUSABLE has been focused and tokenized. Motion is the full job in one place: intra-LINE LINE_SIBLING steps plus cross-LINE walking with tokenize-on-arrival — callers don't get back an `exhausted` signal, `Cursor` resolves it internally via `Tokenizer.tokenizeLineAt`:
+The cursor owns cursor motion, TOKEN editing, and CURSOR_STATE once a FOCUSABLE has been focused and tokenized. Motion is the full job in one place: intra-LINE LINE_SIBLING steps plus cross-LINE walking with tokenize-on-arrival. Callers do not have to detect when a LINE is exhausted and then separately ask for the next LINE to be tokenized; cursor motion resolves that internally as part of moving through the document:
 
 - **CURSOR_STATE** — manages the visual markers (CURSOR_APPEND, CURSOR_PREPEND, CURSOR_INSERT_AFTER, CURSOR_INSERT_BEFORE) that indicate what the user's next edit will do. See vocabulary.md for details.
-- **moveNext / movePrevious** — step to the next/previous CURSOR target. First tries the next LINE_SIBLING within the current LINE; if the LINE is exhausted, consults the cross-LINE walk (`findNextLineCandidate` / `findPreviousLineCandidate` in `lib/sibwalk.ts`) and tokenizes the new LINE on arrival. Backward motion uses a private `findLastCursorTarget` to resolve the last reachable seat in the previous LINE. Gated by CURSOR_STATE: moveNext from CURSOR_INSERT_BEFORE cancels the insertion; movePrevious from CURSOR_INSERT_AFTER cancels.
-- **replace / delete / append** — edit TOKEN content
-- **joinNext / joinPrevious** — JOIN adjacent TOKENs
-- **splitBefore / splitAfter** — SPLIT_BY_TOKEN at the cursor position
+- **next / previous motion** — step to the next/previous CURSOR target. Motion first tries the next LINE_SIBLING within the current LINE; if the LINE is exhausted, it walks to the next candidate LINE and tokenizes that LINE on arrival. Backward motion resolves the last reachable seat in the previous LINE. Motion is gated by CURSOR_STATE: moving away from an insert-before or insert-after marker first cancels that insertion state.
+- **TOKEN content edits** — rewrite, delete, insert before, insert after, and append text as TOKEN's.
+- **JOIN** — merge adjacent TOKEN's.
+- **SPLIT_BY_TOKEN** — split around the current TOKEN.
 
-`CursorSelection` (for ranged selections) owns its own internal `Cursor` for the selection head; the editing cursor stays pinned at the anchor. Cross-LINE extension reuses the head-cursor's cross-LINE walk.
+When the cursor moves or edits, it reports the resulting CURSOR target back to the editing session. The editing session uses that notification to keep the rest of the interface in sync: FOCUS follows the active TOKEN, the host input value changes to match the selected TOKEN, and consumers can react to cursor changes without reaching into cursor internals.
 
-## Orchestration: Editor
+Ranged selection uses the same cursor concepts but separates the anchor from the moving head. The editing cursor stays pinned at the anchor while the selection head performs the cross-LINE walk.
 
-`Editor` is the top-level mediator. It takes a JsedDocument and UserInput, creates a persistent Nav, and switches between two modes:
+## Orchestration: editing session
 
-- **view** — owns FOCUS only. First FOCUS on a FOCUSABLE runs `Tokenizer.tokenizeLineAt` opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
-- **editing** — owns FOCUS plus Cursor. `Editor` also subscribes to UserInput changes in this mode, translating input text and input selection into CURSOR actions. Structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
+The editing session is the top-level object for editing a hypertext document. It owns the document-level state, the host input contract, persistent structural navigation, and the current editing mode. It switches between two modes:
 
-It wires everything together so that:
+- **view** — owns FOCUS only. First FOCUS on a FOCUSABLE tokenizes opportunistically but does not open the CURSOR. A second click/touch within the already-focused FOCUSABLE enters editing.
+- **editing** — owns FOCUS plus CURSOR. The editing session translates host input text and input selection changes into CURSOR actions. Structural navigation or clicks outside the CURSOR_LINE drop back to view mode.
 
-- Key bindings trigger navigation and editing actions
-- Mouse clicks and touches route through REQUEST_FOCUS with a focus controller that tokenizes on the fly
-- Input changes flow through `Editor.handleInputChange(...)`, which may rewrite the current TOKEN, append new TOKEN's after whitespace splits, or move the CURSOR based on the input contents
-- Input selection changes flow through `Editor.handleSelectionChange(...)` into `Cursor.handleSelectionChange(...)`
-- TOKEN changes flow back to update FOCUS and the input element
+The editing session does not directly perform every response itself. It delegates incoming events to an event controller that receives notifications on behalf of the editing session and routes them to the right part of the system:
 
-A consumer (typically a Oneput AppObject like `EditDocument`) creates an Editor and connects it to Oneput's bindings and input systems.
+- **key bindings** trigger navigation and editing actions.
+- **mouse clicks and touches** become REQUEST_FOCUS events. The focus path can tokenize on the fly when a focused FOCUSABLE is about to become editable.
+- **input changes** become semantic edit intents. Those intents may rewrite the current TOKEN, insert TOKEN's before or after it, append TOKEN's after whitespace splits, delete the current TOKEN, or move the CURSOR based on the input contents.
+- **input selection changes** update CURSOR_STATE so the next edit means overwrite, append, prepend, insert before, or insert after.
+- **cursor updates** flow back through the event controller so the editing session can update FOCUS, update the host input, reset placeholders, and notify consumers.
+- **navigation requests** flow back through the event controller so the editing session can decide whether the user is navigating the FOCUSABLE tree, entering editing, staying inside the current CURSOR_LINE, or leaving editing.
 
-## Utilities (lib/)
+A consumer creates the editing session and connects it to bindings, focus requests, and host input. In the browser demo, Oneput provides that host shell; the editing model stays headless.
 
-The top-level modules above delegate to lower-level utilities in `lib/`:
+## Lower-level mechanics
 
-- **tokenize.ts** — DOM-mutation primitives: `tokenizeLine`, `detokenizeLine` (orchestration lives in `Tokenizer.tokenizeLineAt`)
-- **token.ts** — TOKEN operations, separator management, JOIN, SPLIT, and related editing helpers
-- **taxonomy.ts** — element classification predicates: `isFocusable`, `isInlineFlow`, `isIsland`, `isToken`, `isLine`, `isLineSibling`, etc.
-- **sibwalk.ts** — LINE_SIBLING traversal (`getFirstLineSibling`, `getNextLineSibling`), `getLine`, `isSameLine`
-- **walk.ts** — DOM tree-walking: `findNextNode`, `findPreviousNode`
-- **dom.ts** — DOM manipulation
-- **dom-rules.ts** — HTML element behavior rules (void elements, anchor eligibility)
-- **convert.ts** — converts HTML to jsed-compatible format (also available as a CLI binary via `cli/convert.ts`)
+The narrative above is the public shape of the editor. Beneath it are lower-level mechanics that keep the top-level layers small:
+
+- DOM mutation rules for TOKENIZATION and detokenization.
+- TOKEN operations, separator management, JOIN, SPLIT, and related editing helpers.
+- Element classification rules for FOCUSABLE's, TOKEN's, LINE's, LINE_SIBLING's, ISLAND's, and related taxonomy terms.
+- LINE_SIBLING traversal and cross-LINE walking.
+- General DOM tree-walking and DOM manipulation.
+- HTML behavior rules such as void elements and anchor eligibility.
+- Conversion from ordinary HTML into jsed-compatible HTML.
 
 ## Integration with Oneput
 
-Jsed uses Oneput's `AppObject` system to provide its UI. See `src/ui/oneput/app/` for the reusable package integration:
+Jsed uses Oneput's application object system to provide its UI. The reusable package integration has two main responsibilities:
 
-- `EditDocument` — single AppObject that stays mounted in both view and editing modes and wires bindings to Editor
-- `_bindings.ts` — default bindings combining navigation (menu closed) and menu controls (menu open)
+- Keep the editing surface mounted in both view and editing modes while wiring bindings to the editing session.
+- Provide default bindings that combine document navigation when the menu is closed with menu controls when the menu is open.

@@ -16,7 +16,12 @@ import {
   isLineSibling,
   isWhitespaceTextNode
 } from './taxonomy.js';
-import { getLine, getPreviousTokenSibling, getNextTokenSibling } from './line.js';
+import {
+  getLine,
+  getPreviousTokenSibling,
+  getNextTokenSibling,
+  getPreviousVisibleNodeSibling
+} from './line.js';
 import {
   ensureSeparatorAfter,
   ensureSeparatorBefore,
@@ -360,8 +365,6 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
  * Remove the token and return the nearest token in the same LINE_SEGMENT. If no
  * tokens left we provide just an empty token with an anchor symbol to display
  * it.
- *
- * @param params.keepAnchor If the token has no immediate siblings around it under the same parent element, then insert a ANCHOR .
  */
 export function remove(token: HTMLElement): { next: HTMLElement } {
   const parentNode = token.parentNode;
@@ -394,8 +397,9 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
   const nextEl = token.nextElementSibling;
 
   // Remove associated separator.
-  if (isWhitespaceTextNode(token.previousSibling)) {
-    token.previousSibling.remove();
+  const prevNode = getPreviousVisibleNodeSibling(token);
+  if (isWhitespaceTextNode(prevNode)) {
+    prevNode.remove();
   }
   token.remove();
 

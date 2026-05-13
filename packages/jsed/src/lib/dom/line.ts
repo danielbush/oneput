@@ -17,6 +17,22 @@ import {
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
+export function getPreviousVisibleNodeSibling(el: Node): Node | null {
+  let prev = el.previousSibling;
+  while (prev && isIgnorable(prev)) {
+    prev = prev.previousSibling;
+  }
+  return (prev as HTMLElement) ?? null;
+}
+
+export function getNextVisibleNodeSibling(el: Node): Node | null {
+  let next = el.nextSibling as HTMLElement | null;
+  while (next && isIgnorable(next)) {
+    next = next.nextSibling as HTMLElement | null;
+  }
+  return next ?? null;
+}
+
 /**
  * Get previous visible (non-IGNORABLE) element sibling.
  * Walks backwards skipping IGNORABLE's. Returns null if none found.

@@ -250,55 +250,6 @@ describe('delete', () => {
   });
 });
 
-describe('append', () => {
-  test('new TOKEN after current', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
-
-    // act
-    cursor.append('new');
-
-    // assert
-    expect(getValue(cursor.getPlace())).toBe('hello');
-    cursor.moveNext();
-    expect(getValue(cursor.getPlace())).toBe('new');
-    cursor.moveNext();
-    expect(getValue(cursor.getPlace())).toBe('world');
-  });
-
-  test('separator before appended TOKEN', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
-    const current = cursor.getPlace();
-
-    // act
-    const appended = cursor.append('new');
-
-    // assert
-    expect(appended).not.toBeNull();
-    expect(current.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
-    expect(current.nextSibling?.textContent).toBe(' ');
-    expect(current.nextSibling?.nextSibling).toBe(appended);
-  });
-
-  test('ISLAND no-op', () => {
-    // arrange
-    const doc = makeRoot(
-      p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
-    );
-    const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
-
-    // act
-    const result = cursor.append('oops');
-
-    // assert
-    expect(result).toBeNull();
-  });
-});
-
 describe('joinNext', () => {
   test('next TOKEN', () => {
     // arrange

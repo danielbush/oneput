@@ -63,7 +63,6 @@ export class Cursor {
     this.#ops.insertTextAfter(text, opts);
   insertTextBefore = (text: string, opts?: CursorChangeOpts) =>
     this.#ops.insertTextBefore(text, opts);
-  append = (val: string) => this.#ops.append(val);
   joinNext = () => this.#ops.joinNext();
   joinPrevious = () => this.#ops.joinPrevious();
   splitBefore = () => this.#ops.splitBefore();

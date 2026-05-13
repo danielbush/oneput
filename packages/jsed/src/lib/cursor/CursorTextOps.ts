@@ -85,16 +85,6 @@ export class CursorTextOps {
     return lastToken;
   }
 
-  /** Append a new TOKEN after the current one. */
-  append(val: string): HTMLElement | null {
-    if (!this.state.isOnToken()) return null;
-    const current = this.state.getPlace();
-    const tok = token.createToken(val);
-    token.insertAfter(tok, current);
-    space.ensureSeparatorAfter(current);
-    return tok;
-  }
-
   /** Merge with next adjacent TOKEN if it exists (JOIN). */
   joinNext(): void {
     if (!this.state.isOnToken()) return;

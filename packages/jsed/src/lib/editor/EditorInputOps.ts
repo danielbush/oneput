@@ -92,7 +92,7 @@ export class EditorInputOps {
       });
   };
 
-  udpateWithCursorChange = (el: HTMLElement) => {
+  updateWithCursorChange = (el: HTMLElement) => {
     if (isToken(el)) {
       this.state.userInput.focus();
       this.state.userInput.setInputValue(token.getValue(el)).then(() => {

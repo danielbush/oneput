@@ -85,7 +85,7 @@ export class EditorController {
     if (opts?.syncInput === false) return;
     this.state.userInput.resetPlaceholder();
     this.state.userInput.enable(true);
-    this.state.inputOps.udpateWithCursorChange(tok);
+    this.state.inputOps.updateWithCursorChange(tok);
   };
 
   /**

@@ -47,6 +47,10 @@ export class EditorFocusOps {
   }
 
   insertNewAfter(tagName: string): boolean {
+    if (!this.canInsertAfter()) {
+      return false;
+    }
+
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return false;

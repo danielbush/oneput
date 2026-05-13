@@ -52,7 +52,7 @@ export class CursorMotion {
     // Cancel append or insertAfter states and re-select token.
     if (this.state.isInsertingAfter() || this.state.isAppend()) {
       this.state.clearInsertState();
-      this.state.place(this.state.getPlace()); // causes select-all in input
+      this.state.place(this.state.getPlace());
       return;
     }
 

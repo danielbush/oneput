@@ -75,7 +75,7 @@ export function createAnchor(): HTMLElement {
 }
 
 /**
- * It's easier to replaceText on an ANCHOR (we don't have to call focus and trigger a select-all in jsed-ui).
+ * It's easier to replaceText on an ANCHOR (we don't have to call focus and trigger a selectAll in jsed-ui).
  */
 function anchor2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_ANCHOR_CLASS);

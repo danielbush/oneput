@@ -27,11 +27,11 @@ export type CursorChangeOpts = {
   inputCursorPosition?:
     | 'beginning'
     | 'end'
-    | 'selectall'
+    | 'selectAll'
     /**
      * Leave input caret wherever it currently is.
      */
-    | 'nochange';
+    | 'noChange';
 };
 
 /**
@@ -151,7 +151,7 @@ export class CursorState {
   }
 
   reload() {
-    this.place(this.getPlace()); // does select-all in input
+    this.place(this.getPlace());
   }
 
   private addClasses(...classNames: string[]) {
@@ -252,13 +252,13 @@ export class CursorState {
 
   // #endregion
 
-  // #region caret / select-all
+  // #region caret / selectAll
 
   /**
    * If off, typing will usually overwrite the whole token; if on, typing will
    * insert text in addition (like a normal caret would).
    *
-   * This should map to whether the "user input" is in select-all or not.
+   * This should map to whether the "user input" is in selectAll or not.
    */
   private setCaret(on: boolean): void {
     if (on) {

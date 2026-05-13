@@ -296,7 +296,7 @@ export class EditorOps {
       case 'delete-current': {
         const current = cursor.getPlace();
         cursor.delete({
-          inputCursorPosition: intent.deletionType === 'backspace' ? 'end' : 'selectall'
+          inputCursorPosition: intent.deletionType === 'backspaceChar' ? 'end' : 'selectAll'
         });
         this.state.notifyTextChange({ type: 'token-text-change', token: current });
         cursor.setStateFromInput(intent.inputValue);
@@ -336,7 +336,7 @@ export class EditorOps {
 
       case 'rewrite-current': {
         const lastToken = cursor.replaceWithText(intent.inputValue, {
-          inputCursorPosition: intent.userTypedInteriorSpace ? 'beginning' : 'nochange'
+          inputCursorPosition: intent.userTypedInteriorSpace ? 'beginning' : 'noChange'
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
@@ -368,7 +368,7 @@ export class EditorOps {
       this.state.userInput.focus();
       this.state.userInput.setInputValue(token.getValue(cursorElement)).then(() => {
         switch (opts?.inputCursorPosition) {
-          case 'nochange':
+          case 'noChange':
             break;
           case 'beginning':
             this.state.userInput.moveCursorToBeginning();

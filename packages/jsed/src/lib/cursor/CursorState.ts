@@ -20,7 +20,8 @@ export type CursorChangeOpts = {
    * When false, the cursor-change listener should skip any user-facing
    * input-sync side effects (e.g. overwriting the input value). Internal
    * model updates (tokenizer keep-alive, nav focus) still fire.
-   * Default: true.
+   * Used for mid-typing cursor re-seating so the user's in-flight input value
+   * is not clobbered by the head TOKEN's pre-rewrite value.
    */
   syncInput?: boolean;
 };

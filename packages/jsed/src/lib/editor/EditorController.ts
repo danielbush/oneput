@@ -34,6 +34,9 @@ export class EditorController {
     );
   };
 
+  /**
+   * When user types in the input...
+   */
   onInputChange = (change: UserInputChange) => {
     if (this.state.isSuspended) return;
     if (this.state.mode !== 'edit' || !this.state.cursor || !this.state.cursor.isOnToken()) {
@@ -69,7 +72,7 @@ export class EditorController {
   };
 
   /**
-   * When the cursor changes its token because of some action it has been
+   * When the cursor changes its position because of some action it has been
    * commanded to do usually by the user... (eg due to delete operation).
    *
    * `opts.syncInput === false` skips all `userInput.*` side effects —

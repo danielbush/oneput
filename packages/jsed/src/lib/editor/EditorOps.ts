@@ -358,25 +358,25 @@ export class EditorOps {
       });
   };
 
-  processCursorChange = (el: HTMLElement, opts?: CursorChangeOpts) => {
-    this.state.tokenizer.setCursorElement(el);
-    this.state.nav?.FOCUS(el);
-    this.state.eventsEmitter.onCursorChange?.(el);
+  processCursorChange = (cursorElement: HTMLElement, opts?: CursorChangeOpts) => {
+    this.state.tokenizer.setCursorElement(cursorElement);
+    this.state.nav?.FOCUS(cursorElement);
+    this.state.eventsEmitter.onCursorChange?.(cursorElement);
 
     if (opts?.syncInput === false) return;
 
     // Sync input
     this.state.userInput.resetPlaceholder();
     this.state.userInput.enable(true);
-    if (isToken(el)) {
+    if (isToken(cursorElement)) {
       this.state.userInput.focus();
-      this.state.userInput.setInputValue(token.getValue(el)).then(() => {
+      this.state.userInput.setInputValue(token.getValue(cursorElement)).then(() => {
         this.state.userInput.selectAll();
       });
     } else {
       this.state.userInput.enable(false);
       this.state.userInput.setInputValue('');
-      if (isIsland(el) || isLine(el)) {
+      if (isIsland(cursorElement) || isLine(cursorElement)) {
         // TODO: Handle 'Enter' which may be a different key binding.
         this.state.userInput.setPlaceholder('Hit Enter to edit this element');
       } else {

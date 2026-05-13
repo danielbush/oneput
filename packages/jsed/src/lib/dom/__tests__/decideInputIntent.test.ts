@@ -47,11 +47,12 @@ describe('decideInputIntent', () => {
     // assert
     expect(intent).toEqual({
       type: 'delete-current',
-      inputValue: ''
+      inputValue: '',
+      deletionType: 'other'
     });
   });
 
-  test('"b|foo" => "b |foo" ==> "b|": rewrite-current prefers current-token on leading split commit', () => {
+  test('"b|foo" => "b |foo": rewrite-current detects interior space', () => {
     // arrange
     const change = makeChange({
       previousUserValue: 'foo',
@@ -68,9 +69,7 @@ describe('decideInputIntent', () => {
     expect(intent).toEqual({
       type: 'rewrite-current',
       inputValue: 'b foo',
-      firstPart: 'b',
-      appendedParts: ['foo'],
-      finalTokenPreference: 'current-token'
+      userTypedInteriorSpace: true
     });
   });
 
@@ -114,7 +113,7 @@ describe('decideInputIntent', () => {
     });
   });
 
-  test('"fo|o" => "fo o|" ==> "o|": rewrite-current prefers last-appended on mid-token split', () => {
+  test('"fo|o" => "fo |o": rewrite-current detects interior space', () => {
     // arrange
     const change = makeChange({
       beforeValue: 'foo',
@@ -130,9 +129,7 @@ describe('decideInputIntent', () => {
     expect(intent).toEqual({
       type: 'rewrite-current',
       inputValue: 'fo o',
-      firstPart: 'fo',
-      appendedParts: ['o'],
-      finalTokenPreference: 'last-appended'
+      userTypedInteriorSpace: true
     });
   });
 });

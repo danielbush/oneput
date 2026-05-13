@@ -3,7 +3,7 @@ import {
   CursorState,
   type CursorInsertState,
   type CursorParams,
-  type SetTokenOpts
+  type CursorChangeOpts
 } from './lib/cursor/CursorState.js';
 import { CursorTextOps } from './lib/cursor/CursorTextOps.js';
 import type { UserInputSelectionState } from './UserInput.js';
@@ -34,7 +34,7 @@ export class Cursor {
 
   destroy = () => this.#state.destroy();
   getDocument = () => this.#state.getDocument();
-  place = (el: HTMLElement, opts?: SetTokenOpts) => this.#state.place(el, opts);
+  place = (el: HTMLElement, opts?: CursorChangeOpts) => this.#state.place(el, opts);
   getPlace = () => this.#state.getPlace();
   reload = () => this.#state.reload();
   isSameLine = (tok: HTMLElement) => this.#state.isSameLine(tok);

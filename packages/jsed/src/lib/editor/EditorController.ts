@@ -1,5 +1,5 @@
 import * as token from '../dom/token.js';
-import type { CursorError, SetTokenOpts } from '../cursor/CursorState.js';
+import type { CursorError, CursorChangeOpts } from '../cursor/CursorState.js';
 import type { EditorState } from './EditorState.js';
 import { isToken } from '../dom/taxonomy.js';
 import type { UserInputChange, UserInputSelectionState } from '../../UserInput.js';
@@ -78,7 +78,7 @@ export class EditorController {
    * the user's in-flight input value is not clobbered by the head TOKEN's
    * pre-rewrite value.
    */
-  onCursorChange = (tok: HTMLElement, opts?: SetTokenOpts) => {
+  onCursorChange = (tok: HTMLElement, opts?: CursorChangeOpts) => {
     this.state.tokenizer.setCursorElement(tok);
     this.state.nav?.FOCUS(tok);
     this.state.eventsEmitter.onCursorChange?.(tok);

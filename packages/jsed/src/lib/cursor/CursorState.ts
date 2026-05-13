@@ -15,7 +15,7 @@ import type { UserInputSelectionState } from '../../UserInput';
 /**
  * Options threaded through `place` -> `onCursorChange`.
  */
-export type SetTokenOpts = {
+export type CursorChangeOpts = {
   /**
    * When false, the cursor-change listener should skip any user-facing
    * input-sync side effects (e.g. overwriting the input value). Internal
@@ -54,7 +54,7 @@ export type CursorParams = {
   document: JsedDocument;
   tokenizer: Tokenizer;
   token: HTMLElement;
-  onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
+  onCursorChange: (token: HTMLElement, opts?: CursorChangeOpts) => void;
   onError: (err: CursorError) => void;
   /**
    * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
@@ -75,7 +75,7 @@ export class CursorState {
 
   token: HTMLElement;
   document: JsedDocument;
-  onCursorChange: (token: HTMLElement, opts?: SetTokenOpts) => void;
+  onCursorChange: (token: HTMLElement, opts?: CursorChangeOpts) => void;
   silent: boolean;
   classes: string[] = [];
   /**
@@ -118,7 +118,7 @@ export class CursorState {
    * have been updated. `opts` is opaque to this class; it flows through to
    * the callback so callers can attach per-call hints (e.g. `syncInput`).
    */
-  place(el: HTMLElement, opts?: SetTokenOpts) {
+  place(el: HTMLElement, opts?: CursorChangeOpts) {
     if (!isLineSibling(el)) {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);

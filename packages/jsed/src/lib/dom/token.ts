@@ -393,7 +393,11 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
   const prevEl = token.previousElementSibling;
   const nextEl = token.nextElementSibling;
 
-  parentNode.removeChild(token);
+  // Remove associated separator.
+  if (isWhitespaceTextNode(token.previousSibling)) {
+    token.previousSibling.remove();
+  }
+  token.remove();
 
   const nextFocus = prevTok || nextTok;
 

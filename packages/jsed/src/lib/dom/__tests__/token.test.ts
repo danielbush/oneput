@@ -34,6 +34,7 @@ import {
   strong as strongTag,
   t
 } from '../../../test/util.js';
+import { insertSpaceAfterTag, removeSpaceAfterTag } from '../space.js';
 
 describe('replaceText', () => {
   it('rewrites an existing TOKEN text node', () => {
@@ -951,10 +952,9 @@ describe('remove', () => {
     expect(next.previousElementSibling).toBe(p1);
   });
 
-  it('preserves the leading separator when the removed TOKEN is at the end of a segment', () => {
-    // arrange — `[prev, ' ', removed, ' ']`. After removing `removed`, the
-    // leading ' ' should remain as `prev`'s trailing space; only the trailing
-    // separator is dropped.
+  it('removes the associated separator when the removed TOKEN is at the end of a segment', () => {
+    // arrange — `[prev, ' ', removed, ' ']`. After removing `removed`, both
+    // separators associated with the removed TOKEN are dropped.
     const prev = createToken('prev');
     const removed = createToken('removed');
     const sepBefore = document.createTextNode(' ');
@@ -965,15 +965,14 @@ describe('remove', () => {
     remove(removed);
 
     // assert
-    expect(Array.from(parent.childNodes)).toEqual([prev, sepBefore]);
-    expect(sepBefore.parentNode).toBe(parent);
+    expect(Array.from(parent.childNodes)).toEqual([prev]);
+    expect(sepBefore.parentNode).toBeNull();
     expect(sepAfter.parentNode).toBeNull();
   });
 
-  it('preserves the leading separator when the removed TOKEN is at the start of a segment', () => {
-    // arrange — `[' ', removed, ' ', next]`. After removing `removed`, the
-    // leading ' ' should remain as an edge separator; only the trailing
-    // separator (between removed and next) is dropped.
+  it('removes the associated separator when the removed TOKEN is at the start of a segment', () => {
+    // arrange — `[' ', removed, ' ', next]`. After removing `removed`, both
+    // separators associated with the removed TOKEN are dropped.
     const removed = createToken('removed');
     const next = createToken('next');
     const sepBefore = document.createTextNode(' ');
@@ -984,9 +983,35 @@ describe('remove', () => {
     remove(removed);
 
     // assert
-    expect(Array.from(parent.childNodes)).toEqual([sepBefore, next]);
-    expect(sepBefore.parentNode).toBe(parent);
+    expect(Array.from(parent.childNodes)).toEqual([next]);
+    expect(sepBefore.parentNode).toBeNull();
     expect(sepAfter.parentNode).toBeNull();
+  });
+
+  test('removes separator before closing INLINE_FLOW boundary', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        emTag({ id: 'em1', style: 'display:inline;' }, t('foo'), s(), t('bar')),
+        s(),
+        t('baz')
+      )
+    );
+    const em1 = byId(doc, 'em1');
+    const bar = findTokenByText(doc.root, 'bar');
+    const baz = findTokenByText(doc.root, 'baz');
+
+    // act
+    remove(bar);
+    removeSpaceAfterTag(em1);
+    const insertedSpace = insertSpaceAfterTag(em1);
+
+    // assert
+    expect(em1.textContent).toBe('foo');
+    expect(em1.childNodes).toHaveLength(1);
+    expect(insertedSpace?.parentNode).toBe(em1.parentNode);
+    expect(insertedSpace?.previousSibling).toBe(em1);
+    expect(insertedSpace?.nextSibling).toBe(baz);
   });
 
   it('appends a new ANCHOR to the parent when the removed TOKEN had no element siblings', () => {

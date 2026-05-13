@@ -50,9 +50,6 @@ bugs
 - fix: anchor tokens disappear when cursor uses insert markers
   - COMMENT: I think the ::after pseudoelement is being replaced
 - fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
-- [ ] fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it
-  - COMMENT: the issue is the space inside the em-tag at lastChild position; it's not there; then we do insert after, typ char and delete
-  - COMMENT: can't replicate this any more
 - fix: backspacing and there are no more words in previous direciton then select-all on the second thing (or the anchor)
 - [.] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
   - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext
@@ -64,6 +61,10 @@ bugs
   - COMMENT: seems to have been fixed with the reworking on input and cursor / edit ops
 - [x] fix: deleting what you just typed does per-character deletion; but when it carries over to the next token, it suddenly deletes the whole token; also the cursor jumps to the "next" token, not the "previous", so it's a double surprise
   - COMMENT: not fixed, but cursor states will tell you when the change occurs and we now jump to "previous"
+- [x] fix: if you go into insert after, type a letter, then delete, a space is left; if you do this just before a closing tag, the space will sit there and thwart any attempts to toggle add/remove space between the em the the first token after it
+  - COMMENT: the cause is not deleting the associated space when removing the token
+  - COMMENT: the issue is the space inside the em-tag at lastChild position; it's not there; then we do insert after, typ char and delete
+  - COMMENT: can't replicate this any more
 
 feats
 

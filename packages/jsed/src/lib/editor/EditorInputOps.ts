@@ -4,6 +4,7 @@ import * as token from '../dom/token.js';
 import type { UserInputChange } from '../../UserInput.js';
 import type { Cursor } from '../../Cursor.js';
 import { isIsland, isLine, isToken } from '../dom/taxonomy.js';
+import type { CursorChangeOpts } from '../cursor/CursorState.js';
 
 export class EditorInputOps {
   static create(state: EditorState) {
@@ -15,7 +16,7 @@ export class EditorInputOps {
   /**
    * When user types in the input...
    */
-  update = (change: UserInputChange) => {
+  processUserInput = (change: UserInputChange) => {
     let lastToken: HTMLElement | null = null;
     const cursor = this.state.cursor;
     if (!cursor) {
@@ -97,7 +98,16 @@ export class EditorInputOps {
       });
   };
 
-  updateWithCursorChange = (el: HTMLElement) => {
+  processCursorChange = (el: HTMLElement, opts?: CursorChangeOpts) => {
+    this.state.tokenizer.setCursorElement(el);
+    this.state.nav?.FOCUS(el);
+    this.state.eventsEmitter.onCursorChange?.(el);
+
+    if (opts?.syncInput === false) return;
+
+    // Sync input
+    this.state.userInput.resetPlaceholder();
+    this.state.userInput.enable(true);
     if (isToken(el)) {
       this.state.userInput.focus();
       this.state.userInput.setInputValue(token.getValue(el)).then(() => {

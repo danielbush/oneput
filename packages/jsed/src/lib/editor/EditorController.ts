@@ -52,7 +52,7 @@ export class EditorController {
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.state.cursor.place(start, { syncInput: false });
     }
-    this.state.inputOps.update(change);
+    this.state.inputOps.processUserInput(change);
   };
 
   /**
@@ -79,13 +79,7 @@ export class EditorController {
    * pre-rewrite value.
    */
   onCursorChange = (tok: HTMLElement, opts?: CursorChangeOpts) => {
-    this.state.tokenizer.setCursorElement(tok);
-    this.state.nav?.FOCUS(tok);
-    this.state.eventsEmitter.onCursorChange?.(tok);
-    if (opts?.syncInput === false) return;
-    this.state.userInput.resetPlaceholder();
-    this.state.userInput.enable(true);
-    this.state.inputOps.updateWithCursorChange(tok);
+    this.state.inputOps.processCursorChange(tok, opts);
   };
 
   /**

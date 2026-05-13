@@ -47,9 +47,7 @@ export type InputIntent =
        */
       type: 'rewrite-current';
       inputValue: string;
-      firstPart: string;
-      appendedParts: string[];
-      finalTokenPreference: 'current-token' | 'last-appended';
+      userTypedInteriorSpace: boolean;
     }
   | { type: 'start-insert-before-current'; inputValue: string }
   | { type: 'start-insert-after-current'; inputValue: string };
@@ -65,6 +63,8 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   const { value: inputValue, beforeValue, beforeRange, range } = change;
   const [, beforeStop] = beforeRange;
   const [, stop] = range;
+  const userCursorPos = stop ? stop - 1 : null;
+  const userPreviousCursorPos = beforeStop ? beforeStop - 1 : null;
 
   if (/^\s+$/.test(inputValue)) {
     return {
@@ -112,35 +112,26 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     };
   }
 
-  const [firstPart, ...appendedParts] = inputValue.split(/\s+/).filter(Boolean);
-  let finalTokenPreference: 'current-token' | 'last-appended' = 'last-appended';
-
   /**
-   * "b|foo" => "b |foo"
+   * "b|foo" => "ba|foo" - containsSpace = false
+   * "b|foo" => "b |foo" - containsSpace = true, userTypedInteriorSpace = true
    */
   const containsSpace = inputValue.match(/^(\S+)(\s+)\S/);
+  let userTypedInteriorSpace = false;
   if (containsSpace) {
     const firstWord = containsSpace[1];
     const insertedSpace = containsSpace[2];
-    // const isFirstWord = firstWord.length === stop;
-    const isLeadingSplitCommit =
-      beforeStop === firstWord.length &&
-      stop === firstWord.length + insertedSpace.length &&
-      !!change.previousUserValue &&
-      beforeValue.endsWith(change.previousUserValue) &&
-      firstWord === beforeValue.slice(0, beforeValue.length - change.previousUserValue.length);
-
-    // if (isFirstWord || isLeadingSplitCommit) {
-    if (isLeadingSplitCommit) {
-      finalTokenPreference = 'current-token';
-    }
+    userTypedInteriorSpace =
+      userCursorPos === firstWord.length - 1 + insertedSpace.length &&
+      userPreviousCursorPos === firstWord.length - 1;
+    // !!change.previousUserValue &&
+    // beforeValue.endsWith(change.previousUserValue) &&
+    // firstWord === beforeValue.slice(0, beforeValue.length - change.previousUserValue.length);
   }
 
   return {
     type: 'rewrite-current',
     inputValue,
-    firstPart,
-    appendedParts,
-    finalTokenPreference
+    userTypedInteriorSpace
   };
 }

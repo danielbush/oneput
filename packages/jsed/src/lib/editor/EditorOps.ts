@@ -334,9 +334,10 @@ export class EditorOps {
         return;
 
       case 'rewrite-current':
-        lastToken = cursor.replaceWithText(intent.inputValue);
+        lastToken = cursor.replaceWithText(intent.inputValue, {
+          inputCursorPosition: intent.userTypedInteriorSpace ? 'beginning' : 'nochange'
+        });
         cursor.setStateFromInput(intent.inputValue);
-        this.updateInput(cursor);
         if (lastToken) {
           this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
         }
@@ -354,7 +355,6 @@ export class EditorOps {
       })
       .catch((err) => {
         // TODO: close cursor?
-        console.warn('handleInputChange error:', err);
       });
   };
 
@@ -371,7 +371,18 @@ export class EditorOps {
     if (isToken(cursorElement)) {
       this.state.userInput.focus();
       this.state.userInput.setInputValue(token.getValue(cursorElement)).then(() => {
-        this.state.userInput.selectAll();
+        switch (opts?.inputCursorPosition) {
+          case 'nochange':
+            break;
+          case 'beginning':
+            this.state.userInput.moveCursorToBeginning();
+            break;
+          case 'end':
+            this.state.userInput.moveCursorToEnd();
+            break;
+          default:
+            this.state.userInput.selectAll();
+        }
       });
     } else {
       this.state.userInput.enable(false);

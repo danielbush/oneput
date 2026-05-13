@@ -1,7 +1,7 @@
 import * as token from '../dom/token.js';
 import * as space from '../dom/space.js';
 import { isToken } from '../dom/taxonomy.js';
-import type { CursorState } from './CursorState.js';
+import type { CursorChangeOpts, CursorState } from './CursorState.js';
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {
@@ -26,7 +26,7 @@ export class CursorTextOps {
   /**
    * Similar to insertTextAfter.
    */
-  replaceWithText(text: string): HTMLElement | null {
+  replaceWithText(text: string, opts?: CursorChangeOpts): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const currentToken = this.state.getPlace();
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
@@ -42,7 +42,7 @@ export class CursorTextOps {
         lastToken = insertedToken;
       }
     }
-    this.state.place(lastToken, { syncInput: false });
+    this.state.place(lastToken, opts);
     return lastToken;
   }
 

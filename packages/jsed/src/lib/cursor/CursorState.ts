@@ -24,6 +24,14 @@ export type CursorChangeOpts = {
    * is not clobbered by the head TOKEN's pre-rewrite value.
    */
   syncInput?: boolean;
+  inputCursorPosition?:
+    | 'beginning'
+    | 'end'
+    | 'selectall'
+    /**
+     * Leave input caret wherever it currently is.
+     */
+    | 'nochange';
 };
 
 /**

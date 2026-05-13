@@ -13,11 +13,24 @@ export class CursorMotion {
     return new CursorMotion(state);
   }
 
-  static createNull(state: CursorState): CursorMotion {
-    return new CursorMotion(state);
-  }
-
   private constructor(private state: CursorState) {}
+
+  getNext(): HTMLElement | null {
+    const next = getNextLineSibling(this.state.getPlace(), this.state.document.root);
+    if (!next) {
+      return null;
+    }
+
+    // We may get a text node because we do SHALLOW_TOKENIZATION.
+    if (isTokenizableTextNode(next)) {
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(next);
+      if (tokens[0]) {
+        return tokens[0];
+      }
+      return null;
+    }
+    return next as HTMLElement;
+  }
 
   /**
    * Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE).
@@ -28,21 +41,25 @@ export class CursorMotion {
       return;
     }
 
-    const next = getNextLineSibling(this.state.getPlace(), this.state.document.root);
-    if (!next) {
-      return;
+    const next = this.getNext();
+    if (next) this.state.place(next);
+  }
+
+  getPrevious(): HTMLElement | null {
+    const prev = getPreviousLineSibling(this.state.getPlace(), this.state.document.root);
+    if (!prev) {
+      return null;
     }
 
-    // We may get a text node because we do SHALLOW_TOKENIZATION.
-    if (isTokenizableTextNode(next)) {
-      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(next);
-      if (tokens[0]) {
-        this.state.place(tokens[0]);
+    if (isTokenizableTextNode(prev)) {
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(prev);
+      if (tokens.length > 0) {
+        return tokens[tokens.length - 1];
       }
-      return;
+      return null;
     }
 
-    this.state.place(next as HTMLElement);
+    return prev as HTMLElement;
   }
 
   /**
@@ -55,20 +72,7 @@ export class CursorMotion {
       this.state.place(this.state.getPlace());
       return;
     }
-
-    const prev = getPreviousLineSibling(this.state.getPlace(), this.state.document.root);
-    if (!prev) {
-      return;
-    }
-
-    if (isTokenizableTextNode(prev)) {
-      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(prev);
-      if (tokens.length > 0) {
-        this.state.place(tokens[tokens.length - 1]);
-      }
-      return;
-    }
-
-    this.state.place(prev as HTMLElement);
+    const prev = this.getPrevious();
+    if (prev) this.state.place(prev);
   }
 }

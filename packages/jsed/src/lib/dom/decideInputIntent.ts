@@ -75,7 +75,11 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   }
 
   if (inputValue === '') {
-    const userIsBackspacingOntoPreviousToken = range[0] === range[1] && range[0] === 0;
+    const userIsBackspacingSingleChars =
+      range[0] === range[1] &&
+      range[0] === 0 &&
+      beforeRange[0] === beforeRange[1] &&
+      beforeRange[0] === 1;
     return {
       type: 'delete-current',
       inputValue,

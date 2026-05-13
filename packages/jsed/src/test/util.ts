@@ -96,7 +96,8 @@ export function a(): string {
 }
 
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
-export function identify(el: Node): string {
+export function identify(el: Node | undefined | null): string {
+  if (!el) return `${el}`;
   if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el as HTMLElement);
   if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;

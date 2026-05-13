@@ -241,6 +241,10 @@ export class EditorState {
     }
   }
 
+  getCursor() {
+    return this.cursor?.getPlace();
+  }
+
   notifyTextChange(event: EditorTextChangeEvent) {
     this.eventsEmitter.onTextChange?.(event);
   }

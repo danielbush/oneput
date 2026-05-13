@@ -56,9 +56,7 @@ export class Editor {
   handleEnter = () => this.state.ops.handleEnter();
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
   scrollActiveTargetIntoView = () => this.state.ops.scrollActiveTargetIntoView();
-  get cursor() {
-    return this.state.cursor;
-  }
+  getCursor = () => this.state.getCursor();
 
   // motion
   moveUp = () => this.state.ops.moveUp();

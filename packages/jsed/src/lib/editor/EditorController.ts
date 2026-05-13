@@ -52,7 +52,7 @@ export class EditorController {
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.state.cursor.place(start, { syncInput: false });
     }
-    this.state.inputOps.updateWithInputChange(change, this.state.cursor);
+    this.state.inputOps.update(change);
   };
 
   /**

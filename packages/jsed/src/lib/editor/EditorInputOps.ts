@@ -15,8 +15,13 @@ export class EditorInputOps {
   /**
    * When user types in the input...
    */
-  updateWithInputChange = (change: UserInputChange, cursor: Cursor) => {
+  update = (change: UserInputChange) => {
     let lastToken: HTMLElement | null = null;
+    const cursor = this.state.cursor;
+    if (!cursor) {
+      console.error(`'cursor' not set`);
+      return;
+    }
     const currentToken = cursor.getPlace();
     const currentTokenValue = token.getValue(currentToken);
     const intent = decideInputIntent(change, currentTokenValue);

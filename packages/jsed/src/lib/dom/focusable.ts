@@ -1,7 +1,8 @@
 import { JSED_FOCUS_CLASS } from './constants.js';
 import { canCreateWithAnchor } from './dom-rules.js';
 import * as domRules from './dom-rules.js';
-import { isFocusable, isInlineFlow, isIsland } from './taxonomy.js';
+import { getNextVisibleNodeSibling } from './line.js';
+import { isFocusable, isInlineFlow, isIsland, isToken } from './taxonomy.js';
 import * as token from './token.js';
 import { findNextNode, findPreviousNode } from './walk.js';
 
@@ -18,6 +19,19 @@ export function createElement(
 
 export function getAppendCandidates(parent: HTMLElement): string[] {
   return domRules.getAllowableChildTags(parent.tagName);
+}
+
+export function isEmpty(el: Element): boolean {
+  if (!el.firstChild) {
+    return true;
+  }
+  if (isFocusable(el.firstChild)) {
+    return false;
+  }
+  if (isToken(el.firstChild)) {
+    return false;
+  }
+  return !getNextVisibleNodeSibling(el.firstChild);
 }
 
 /**

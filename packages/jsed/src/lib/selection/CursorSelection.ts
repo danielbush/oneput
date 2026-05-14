@@ -1,10 +1,9 @@
-import { JSED_SELECTION_CLASS } from '../dom/constants.js';
-import { deleteEmptyTree } from '../dom/focusable.js';
-import { isInlineFlow } from '../dom/taxonomy.js';
-import * as token from '../dom/token.js';
+import { deleteEmptyTree } from '../focus/focusable.js';
+import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
+import * as token from '../token/token.js';
 import { Cursor } from '../cursor/Cursor.js';
 import type { JsedDocument } from '../../types.js';
-import type { Tokenizer } from '../../Tokenizer.js';
+import type { Tokenizer } from '../token/Tokenizer.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by

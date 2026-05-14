@@ -1,13 +1,13 @@
 import { err, ok, Result } from 'neverthrow';
-import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from '../dom/taxonomy.js';
-import * as token from '../dom/token.js';
+import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from '../core/taxonomy.js';
+import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from '../dom/line.js';
 import { Cursor } from '../cursor/Cursor.js';
 import type { CursorChangeOpts } from '../cursor/CursorState.js';
-import type { UserInputChange } from '../../UserInput.js';
-import { decideInputIntent } from '../dom/decideInputIntent.js';
+import type { UserInputChange } from '../input/UserInput.js';
+import { decideInputIntent } from '../input/decideInputIntent.js';
+import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
 
 /**
  * Manages an edit session for a single document.

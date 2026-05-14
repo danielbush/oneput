@@ -1,10 +1,10 @@
 import type { EditorState } from './EditorState.js';
-import * as focusable from '../dom/focusable.js';
-import { canDelete } from '../dom/dom-rules.js';
-import { convert, unwrap } from '../dom/focusable.js';
-import { isInlineFlow } from '../dom/taxonomy.js';
-import { JSED_MARCHING_ANTS_CLASS } from '../dom/constants.js';
+import * as focusable from '../focus/focusable.js';
+import { canDelete } from '../core/dom-rules.js';
+import { convert, unwrap } from '../focus/focusable.js';
+import { isInlineFlow } from '../core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
+export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
  * High-level FOCUS operations for Editor.

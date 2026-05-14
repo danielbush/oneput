@@ -1,18 +1,27 @@
 import type { JsedDocument } from '../../JsedDocument.js';
-import {
-  CURSOR_APPEND_CLASS,
-  CURSOR_CARET_CLASS,
-  CURSOR_INSERT_AFTER_CLASS,
-  CURSOR_INSERT_BEFORE_CLASS,
-  CURSOR_PREPEND_CLASS,
-  JSED_CURSOR_CLASS
-} from '../dom/constants.js';
-import { isSameLine } from '../dom/line.js';
-import { isLineSibling, isToken } from '../dom/taxonomy.js';
-import type { Tokenizer } from '../../Tokenizer.js';
-import type { UserInputSelectionState } from '../../UserInput.js';
+import { isLineSibling, isToken } from '../core/taxonomy.js';
+import type { Tokenizer } from '../token/Tokenizer.js';
+import type { UserInputSelectionState } from '../input/UserInput.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
+import { isSameLine } from '../core/line.js';
+
+export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
+export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
+export const CURSOR_INSERT_AFTER_CLASS = 'jsed-crs-insert-after';
+export const CURSOR_INSERT_BEFORE_CLASS = 'jsed-crs-insert-before';
+
+/**
+ * Indicates the input has a collapsed caret in its text (CURSOR_AT_BEGINNING /
+ * _MIDDLE / _END), as opposed to a range or empty value. Drives the
+ * underline-vs-background-pulse focus visual on the focused TOKEN.
+ * Independent of the four marker classes above.
+ */
+export const CURSOR_CARET_CLASS = 'jsed-crs-caret';
+/**
+ * The focus CSS class for TOKEN's.
+ */
+export const JSED_CURSOR_CLASS = 'jsed-token-focus';
 
 /**
  * Options threaded through `place` -> `onCursorChange`.

@@ -1,8 +1,8 @@
-import * as token from '../dom/token.js';
-import * as space from '../dom/space.js';
-import { isToken } from '../dom/taxonomy.js';
+import * as token from '../token/token.js';
+import * as space from '../token/space.js';
+import { isToken } from '../core/taxonomy.js';
 import type { CursorChangeOpts, CursorState } from './CursorState.js';
-import { deleteEmptyTree } from '../dom/focusable.js';
+import { deleteEmptyTree } from '../focus/focusable.js';
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {

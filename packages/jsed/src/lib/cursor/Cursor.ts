@@ -6,7 +6,7 @@ import {
   type CursorChangeOpts
 } from './CursorState.js';
 import { CursorTextOps } from './CursorTextOps.js';
-import type { UserInputSelectionState } from '../../UserInput.js';
+import type { UserInputSelectionState } from '../input/UserInput.js';
 
 /**
  * Public CURSOR facade for the editing session.

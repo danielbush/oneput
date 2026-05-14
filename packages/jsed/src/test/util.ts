@@ -1,8 +1,13 @@
 import { JsedDocument } from '../JsedDocument.js';
-import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
-import type { ViewportScrollerNullOptions } from '../lib/dom/ViewportScroller.js';
-import * as token from '../lib/dom/token.js';
-import { isAnchor, isIsland, isToken } from '../lib/dom/taxonomy.js';
+import type { ViewportScrollerNullOptions } from '../lib/utilities/ViewportScroller.js';
+import * as token from '../lib/token/token.js';
+import {
+  isAnchor,
+  isIsland,
+  isToken,
+  JSED_ANCHOR_CLASS,
+  JSED_TOKEN_CLASS
+} from '../lib/core/taxonomy.js';
 
 /**
  * Make a div be the root of the document.

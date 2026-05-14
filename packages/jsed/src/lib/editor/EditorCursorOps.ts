@@ -1,8 +1,8 @@
 import type { EditorState } from './EditorState.js';
-import * as token from '../dom/token.js';
-import * as space from '../dom/space.js';
-import { isLineSibling } from '../dom/taxonomy.js';
-import { getWrapCandidates } from '../dom/dom-rules.js';
+import * as token from '../token/token.js';
+import * as space from '../token/space.js';
+import { isLineSibling } from '../core/taxonomy.js';
+import { getWrapCandidates } from '../core/dom-rules.js';
 
 /**
  * Trailing / Leading space (at cursor)

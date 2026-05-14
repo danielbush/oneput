@@ -1,5 +1,5 @@
 import type { EditorState } from './EditorState.js';
-import * as token from '../dom/token.js';
+import * as token from '../token/token.js';
 
 /**
  * High-level ANCHOR operations for Editor.

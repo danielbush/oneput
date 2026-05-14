@@ -1713,7 +1713,8 @@ describe('Editor', () => {
       expect(isToken(p1.firstChild)).toBe(true);
       expect(identify(p1.firstChild)).toBe('x');
       expect(identify(editor.getCursor())).toBe('x');
-      expect(Array.from(p1.querySelectorAll('em'))).toBeNull();
+      expect(p1.querySelectorAll('*')).toHaveLength(2);
+      expect(tokenValues(p1)).toEqual(['x', 'dd']);
 
       editor.destroy();
     });

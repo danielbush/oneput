@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest';
-import { em, frag, inlineStyleHack, makeRoot, p, s, t } from '../test/util.js';
+import { em, frag, inlineStyleHack, makeRoot, p, s, span, t } from '../test/util.js';
 import { CursorSelection } from '../lib/cursor/CursorSelection.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { getValue } from '../lib/dom/token.js';
-import { JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
+import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
 import type { JsedDocument } from '../types.js';
 
 function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
@@ -210,6 +210,135 @@ describe('CursorSelection', () => {
     expect(strongs.map((el) => el.textContent)).toEqual(['a', 'b c', 'd']);
     expect(doc.root.querySelector('.jsed-selection')).toBeNull();
     expect(doc.root.querySelector('em strong')?.textContent).toBe('b c');
+  });
+
+  test('delete - marker lifting (1) (nested INLINE_FLOW containers)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        em(
+          { ...inlineStyleHack, id: 'outer' }, //
+          span({ ...inlineStyleHack, id: 'inner' }, t('a'))
+        )
+      )
+    );
+    const [a] = tokens(doc);
+    const selection = seed(doc, a);
+
+    // act
+    const marker = selection.delete();
+
+    // assert
+    const line = doc.root.querySelector('p');
+    expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
+    expect(marker.parentElement).toBe(line);
+    expect(doc.root.querySelector('#outer')).toBeNull();
+    expect(doc.root.querySelector('#inner')).toBeNull();
+    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+  });
+
+  test('delete - marker lifting (2)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        em(
+          { ...inlineStyleHack, id: 'outer' }, //
+          span({ ...inlineStyleHack, id: 'inner' }, t('a'))
+        ),
+        s(),
+        t('b'),
+        s(),
+        t('c')
+      )
+    );
+    const [a] = tokens(doc);
+    const selection = seed(doc, a);
+    selection.extendNext();
+    selection.extendNext();
+
+    // act
+    const marker = selection.delete();
+
+    // assert
+    const line = doc.root.querySelector('p');
+    expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
+    expect(marker.parentElement).toBe(line);
+    expect(doc.root.querySelector('#outer')).toBeNull();
+    expect(doc.root.querySelector('#inner')).toBeNull();
+    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(tokens(doc)).toEqual([marker]);
+  });
+
+  test('delete - marker lifting (non-INLINE_FLOW)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        span(
+          { style: 'display:block;', id: 'outer' }, //
+          span({ ...inlineStyleHack, id: 'inner' }, t('a'))
+        )
+      )
+    );
+    const [a] = tokens(doc);
+    const selection = seed(doc, a);
+
+    // act
+    const marker = selection.delete();
+
+    // assert
+    const outer = doc.root.querySelector('#outer');
+    expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
+    expect(marker.parentElement).toBe(outer);
+    expect(outer).not.toBeNull();
+    expect(doc.root.querySelector('#inner')).toBeNull();
+    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+  });
+
+  test('delete - ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p(t('before'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('after'))
+    );
+    const [before] = tokens(doc);
+    const selection = seed(doc, before);
+    selection.extendNext();
+    selection.extendNext();
+
+    // act
+    const marker = selection.delete();
+
+    // assert
+    const line = doc.root.querySelector('p');
+    expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
+    expect(marker.parentElement).toBe(line);
+    expect(doc.root.querySelector('.katex')).toBeNull();
+    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(tokens(doc)).toEqual([marker]);
+  });
+
+  test('delete - leading ISLAND', () => {
+    // arrange
+    const doc = makeRoot(
+      p('<span class="katex" style="display:inline;">x²</span>', s(), t('middle'), s(), t('after'))
+    );
+    const island = doc.root.querySelector('.katex') as HTMLElement;
+    const selection = seed(doc, island);
+    selection.extendNext();
+    selection.extendNext();
+
+    // act
+    const marker = selection.delete();
+
+    // assert
+    const line = doc.root.querySelector('p');
+    expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
+    expect(marker.parentElement).toBe(line);
+    expect(doc.root.querySelector('.katex')).toBeNull();
+    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(tokens(doc)).toEqual([marker]);
   });
 
   test('grow INLINE_FLOW - previous', () => {

@@ -1,5 +1,5 @@
-import { JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from '../dom/constants.js';
-import { getLine } from '../dom/line.js';
+import { JSED_SELECTION_CLASS } from '../dom/constants.js';
+import { deleteEmptyTree } from '../dom/focusable.js';
 import { isInlineFlow } from '../dom/taxonomy.js';
 import * as token from '../dom/token.js';
 import { Cursor } from '../../Cursor.js';
@@ -26,11 +26,13 @@ export class CursorSelection {
 
   private anchor: HTMLElement;
   private headCursor: Cursor;
+  private root: HTMLElement;
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
   constructor(params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }) {
     this.anchor = params.seed;
+    this.root = params.document.root;
     this.headCursor = Cursor.create({
       document: params.document,
       tokenizer: params.tokenizer,
@@ -171,6 +173,13 @@ export class CursorSelection {
     wrapper.replaceWith(...Array.from(wrapper.childNodes));
   }
 
+  private containsOnlyMarker(el: HTMLElement, marker: HTMLElement): boolean {
+    return Array.from(el.childNodes).every((child) => {
+      if (child === marker) return true;
+      return child.nodeType === Node.TEXT_NODE && child.textContent?.trim() === '';
+    });
+  }
+
   private isAfterAnchor(el: HTMLElement): boolean {
     if (el === this.anchor) return false;
     return !!(this.anchor.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
@@ -223,91 +232,47 @@ export class CursorSelection {
 
   /**
    * Reduce the selection to its START (earlier in document order):
-   * unwrap SELECTION_WRAPPER's, remove every selected TOKEN except the
-   * start, clean up any structural containers that were fully consumed
-   * and became empty.
+   * replace selected SELECTION_WRAPPER's with an ANCHOR at the start,
+   * clean up any structural containers that were fully consumed and
+   * became empty.
    *
-   * Returns the surviving start TOKEN so callers can re-seat their CURSOR on
-   * it.
+   * Returns the surviving start ANCHOR so callers can re-seat their CURSOR on
+   * it and rewrite it as normal TOKEN text.
    */
   delete(): HTMLElement {
-    const keeper = this.getBackwardEnd();
-    // Snapshot the selected TOKEN's before unwrapping — the
-    // `.jsed-selection` wrappers go away once we collapse.
-    const selectedTokens = Array.from(
-      this.wrappers.flatMap((w) => Array.from(w.querySelectorAll(`.${JSED_TOKEN_CLASS}`)))
-    ) as HTMLElement[];
-    const selectedSet = new Set(selectedTokens);
+    const start = this.getBackwardEnd();
+    const startWrapper = this.wrappers.find((wrapper) => wrapper.contains(start));
+    if (!startWrapper?.parentElement) {
+      throw new Error('delete: selection start wrapper not found');
+    }
 
-    // LINE's the selection fully consumed (every TOKEN in the LINE is
-    // in the selection).
-    const fullyConsumedLines = new Set<HTMLElement>();
+    const marker = token.createAnchor();
+    startWrapper.before(marker);
+
+    const cleanupParents = new Set<Element>();
     for (const wrapper of this.wrappers) {
-      const line = getLine(wrapper);
-      if (fullyConsumedLines.has(line)) continue;
-      const tokensInLine = Array.from(
-        line.querySelectorAll(`.${JSED_TOKEN_CLASS}`)
-      ) as HTMLElement[];
-      if (tokensInLine.every((t) => selectedSet.has(t))) {
-        fullyConsumedLines.add(line);
+      if (wrapper.parentElement) {
+        cleanupParents.add(wrapper.parentElement);
       }
+      wrapper.remove();
+    }
+    this.wrappers = [];
+    this.headCursor.destroy();
+
+    // If selection consumed an entire INLINE_FLOW branch, the marker is now the
+    // only meaningful child. Lift it out so replacement text does not inherit
+    // formatting that was deleted with the selection.
+    for (let anc = marker.parentElement; anc && isInlineFlow(anc); anc = marker.parentElement) {
+      if (!this.containsOnlyMarker(anc, marker)) break;
+      cleanupParents.add(anc.parentElement ?? anc);
+      anc.replaceWith(marker);
     }
 
-    // INLINE_FLOW containers (em, span) the selection fully consumed —
-    // walk up from each selected TOKEN.
-    const consumedCTContainers = new Set<HTMLElement>();
-    const visitedCT = new Set<HTMLElement>();
-    for (const tok of selectedTokens) {
-      for (let anc = tok.parentElement; anc && isInlineFlow(anc); anc = anc.parentElement) {
-        if (visitedCT.has(anc)) continue;
-        visitedCT.add(anc);
-        const ancTokens = Array.from(anc.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
-        if (ancTokens.every((t) => selectedSet.has(t))) {
-          consumedCTContainers.add(anc);
-        }
-      }
+    for (const parent of cleanupParents) {
+      if (!parent.isConnected) continue;
+      deleteEmptyTree(parent, this.root);
     }
 
-    this.collapse();
-
-    // Lift keeper out of its own consumed INLINE_FLOW ancestors
-    // (innermost → outermost). Done BEFORE pruning so keeper ends up as
-    // a proper token sibling in the surviving LINE context; otherwise
-    // `token.remove` would insert stray ANCHOR's when it can't find a
-    // token sibling at the detached level.
-    let outermostConsumedForKeeper: HTMLElement | null = null;
-    for (let anc = keeper.parentElement; anc && isInlineFlow(anc); anc = anc.parentElement) {
-      if (!consumedCTContainers.has(anc)) break;
-      outermostConsumedForKeeper = anc;
-    }
-    if (outermostConsumedForKeeper) {
-      outermostConsumedForKeeper.replaceWith(keeper);
-    }
-
-    // Prune all other selected TOKEN's. Skip any already-detached TOKEN
-    // (those inside a lifted-away ancestor).
-    for (const tok of selectedTokens) {
-      if (tok === keeper) continue;
-      if (!tok.isConnected) continue;
-      token.remove(tok);
-    }
-
-    // Remove any consumed INLINE_FLOW container still in the DOM
-    // that doesn't host keeper (keeper's lift handled its ancestors).
-    for (const container of consumedCTContainers) {
-      if (!container.isConnected) continue;
-      if (container.contains(keeper)) continue;
-      container.remove();
-    }
-
-    // Remove fully-consumed LINE's except keeper's own — keeper will be
-    // rewritten by the caller and needs its LINE to live in.
-    for (const line of fullyConsumedLines) {
-      if (!line.isConnected) continue;
-      if (line.contains(keeper)) continue;
-      line.remove();
-    }
-
-    return keeper;
+    return marker;
   }
 }

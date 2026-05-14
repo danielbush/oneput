@@ -4,7 +4,7 @@ import * as token from '../dom/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../cursor/CursorSelection.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../dom/line.js';
-import { Cursor } from '../../Cursor.js';
+import { Cursor } from '../cursor/Cursor.js';
 import type { CursorChangeOpts } from '../cursor/CursorState.js';
 import type { UserInputChange } from '../../UserInput.js';
 import { decideInputIntent } from '../dom/decideInputIntent.js';

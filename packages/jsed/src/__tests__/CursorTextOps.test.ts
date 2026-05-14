@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { a, em, identify, makeRoot, p, s, t } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { Cursor } from '../Cursor.js';
+import { Cursor } from '../lib/cursor/Cursor.js';
 import { JSED_TOKEN_CLASS } from '../lib/dom/constants.js';
 import { getValue } from '../lib/dom/token.js';
 

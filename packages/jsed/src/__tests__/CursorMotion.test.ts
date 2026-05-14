@@ -2,7 +2,7 @@ import { describe, expect, it, test } from 'vitest';
 import { div, em, identify, makeRoot, p } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
-import { Cursor } from '../Cursor.js';
+import { Cursor } from '../lib/cursor/Cursor.js';
 import { getValue } from '../lib/dom/token.js';
 import { tagImplicitLines } from '../lib/dom/implicitLine.js';
 

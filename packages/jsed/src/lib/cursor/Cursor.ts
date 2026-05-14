@@ -1,12 +1,12 @@
-import { CursorMotion } from './lib/cursor/CursorMotion.js';
+import { CursorMotion } from './CursorMotion.js';
 import {
   CursorState,
   type CursorInsertState,
   type CursorParams,
   type CursorChangeOpts
-} from './lib/cursor/CursorState.js';
-import { CursorTextOps } from './lib/cursor/CursorTextOps.js';
-import type { UserInputSelectionState } from './UserInput.js';
+} from './CursorState.js';
+import { CursorTextOps } from './CursorTextOps.js';
+import type { UserInputSelectionState } from '../../UserInput.js';
 
 /**
  * Public CURSOR facade for the editing session.

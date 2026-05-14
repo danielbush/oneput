@@ -79,6 +79,20 @@ export function deleteElement(el: HTMLElement): void {
   el.remove();
 }
 
+export function deleteEmptyTree(el: Element, ceiling?: Element) {
+  let p = el;
+  for (; p; p = p.parentNode as HTMLElement) {
+    if (ceiling && p === ceiling) {
+      break;
+    }
+    if (isEmpty(p)) {
+      p.remove();
+      continue;
+    }
+    break;
+  }
+}
+
 export function splitParentBefore(el: HTMLElement): void {
   const parent = el.parentElement;
   if (!parent) {

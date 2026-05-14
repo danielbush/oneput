@@ -2,7 +2,7 @@ import * as token from '../dom/token.js';
 import * as space from '../dom/space.js';
 import { isToken } from '../dom/taxonomy.js';
 import type { CursorChangeOpts, CursorState } from './CursorState.js';
-import { isEmpty } from '../dom/focusable.js';
+import { deleteEmptyTree } from '../dom/focusable.js';
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {
@@ -10,20 +10,6 @@ export class CursorTextOps {
   }
 
   private constructor(private state: CursorState) {}
-
-  deleteEmptyTree(el: Element) {
-    let p = el;
-    for (; p; p = p.parentNode as HTMLElement) {
-      if (p === this.state.document.root) {
-        break;
-      }
-      if (isEmpty(p)) {
-        p.remove();
-        continue;
-      }
-      break;
-    }
-  }
 
   /** Delete the current TOKEN. */
   delete(opts?: CursorChangeOpts): void {
@@ -61,7 +47,7 @@ export class CursorTextOps {
     if (!prevSibling && !nextSibling) {
       let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
       parentNode.remove();
-      this.deleteEmptyTree(p);
+      deleteEmptyTree(p, this.state.document.root);
     }
 
     this.state.place((prevCrs || nextCrs) as HTMLElement, opts);

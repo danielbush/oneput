@@ -70,7 +70,7 @@ bugs
 
 feats
 
-- feat: copy tokens
+- feat: copy tokens, cut selections
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
 - [x] feat: we lost the menu count (MenuStatus) in jsed's oneput layout
   - packages/jsed/src/ui/oneput/app/_layout.ts

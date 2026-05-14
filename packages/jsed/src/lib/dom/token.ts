@@ -365,9 +365,8 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
 }
 
 /**
- * Remove the token and return the nearest token in the same LINE_SEGMENT. If no
- * tokens left we provide just an empty token with an anchor symbol to display
- * it.
+ * Remove the token and return the surroudning sibling elements if present
+ * (these may or may not be tokens).
  */
 export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTMLElement | null] {
   const parentNode = token.parentNode;

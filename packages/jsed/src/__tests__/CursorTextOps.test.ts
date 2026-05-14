@@ -252,15 +252,24 @@ describe('delete', () => {
   test('last TOKEN after ISLAND', () => {
     // arrange
     const doc = makeRoot(
-      p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
+      p(
+        //
+        t('aaa'),
+        s(),
+        '<span class="katex" style="display:inline;">x²</span>',
+        s(),
+        t('bbb')
+      )
     );
+    expect(identify(tokens(doc)[1])).toEqual('bbb');
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
     cursor.delete();
 
     // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
+    expect(cursor.getPlace().nextSibling).toBe(null);
   });
 });
 

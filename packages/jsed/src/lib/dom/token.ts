@@ -369,25 +369,17 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
  * tokens left we provide just an empty token with an anchor symbol to display
  * it.
  */
-export function remove(token: HTMLElement): { next: HTMLElement } {
+export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTMLElement | null] {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
 
-  // An anchor exists once we've exhausted the LINE_SEGMENT of non-empty
-  // TOKEN's. Operations that inject text back in should de-anchor the token.
-
-  if (isAnchor(token)) {
-    return { next: token };
-  }
-
-  const prevTok = getPreviousTokenSibling(token);
-  const nextTok = getNextTokenSibling(token);
+  // Scan space nodes
   const separatorBefore = getSeparatorBefore(token);
   const separatorAfter = getSeparatorAfter(token);
-  // Capture neighbours BEFORE detaching — once `token` is removed,
-  // `previousElementSibling` / `nextElementSibling` return null.
+
+  // Scan elements
   const prevEl = getPreviousVisibleSibling(token);
   const nextEl = getNextVisibleSibling(token);
 
@@ -396,39 +388,20 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
   // Collapse paired separators down to one.
   if (separatorBefore && separatorAfter) {
     separatorAfter.remove();
+  }
+
+  if (separatorBefore) {
     if (!getNextVisibleNodeSibling(separatorBefore)) {
+      // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
       separatorBefore.remove();
     }
     if (!getPreviousVisibleNodeSibling(separatorBefore)) {
       separatorBefore.remove();
     }
-  } else if (separatorBefore) {
-    // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
-    separatorBefore.remove();
   }
 
-  const nextFocus = prevTok || nextTok;
-
-  if (nextFocus) {
-    return { next: nextFocus };
-  }
-
-  // We're out of text, we need to add a ANCHOR to this LINE_SEGMENT .
-
-  const anchor = createAnchor();
-
-  if (prevEl) {
-    insertAfter(anchor, prevEl as HTMLElement);
-    return { next: anchor };
-  }
-
-  if (nextEl) {
-    insertBefore(anchor, nextEl as HTMLElement);
-    return { next: anchor };
-  }
-  parentNode.appendChild(anchor);
-
-  return { next: anchor };
+  // Return surrounding elements if present.
+  return [prevEl, nextEl];
 }
 
 /**

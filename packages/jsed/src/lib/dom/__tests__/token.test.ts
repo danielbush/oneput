@@ -896,10 +896,11 @@ describe('remove', () => {
     buildParent(foo, document.createTextNode(' '), bar, document.createTextNode(' '), baz);
 
     // act
-    const { next } = remove(bar);
+    const [prev, next] = remove(bar);
 
     // assert
-    expect(next).toBe(foo);
+    expect(prev).toBe(foo);
+    expect(next).toBe(baz);
     expect(bar.isConnected).toBe(false);
   });
 
@@ -910,16 +911,14 @@ describe('remove', () => {
     buildParent(foo, document.createTextNode(' '), bar);
 
     // act
-    const { next } = remove(bar);
+    const [prev, next] = remove(bar);
 
     // assert
-    expect(next).toBe(foo);
+    expect(prev).toBe(foo);
+    expect(next).toBeNull();
   });
 
-  test('ANCHOR before next element', () => {
-    // Regression: bug fixed where prev/nextElementSibling were read AFTER
-    // detaching the token, causing the ANCHOR to be appended at the parent's
-    // end instead of placed at the removed token's actual position.
+  test('next element', () => {
     // arrange
     const before = createToken('before');
     const p1 = document.createElement('p');
@@ -927,16 +926,16 @@ describe('remove', () => {
     const parent = buildParent(before, p1);
 
     // act
-    const { next } = remove(before);
+    const [prev, next] = remove(before);
 
-    // assert: anchor lands at the position 'before' occupied — adjacent to
-    // p1, NOT appended at the parent's end.
-    expect(isAnchor(next)).toBe(true);
-    expect(next.parentNode).toBe(parent);
-    expect(next.nextElementSibling).toBe(p1);
+    // assert
+    expect(prev).toBeNull();
+    expect(next).toBe(p1);
+    expect(before.parentNode).toBeNull();
+    expect(Array.from(parent.children)).toEqual([p1]);
   });
 
-  test('ANCHOR after previous element', () => {
+  test('previous element', () => {
     // arrange
     const p1 = document.createElement('p');
     p1.textContent = 'stuff';
@@ -944,12 +943,13 @@ describe('remove', () => {
     const parent = buildParent(p1, only);
 
     // act
-    const { next } = remove(only);
+    const [prev, next] = remove(only);
 
-    // assert: anchor lands after p1.
-    expect(isAnchor(next)).toBe(true);
-    expect(next.parentNode).toBe(parent);
-    expect(next.previousElementSibling).toBe(p1);
+    // assert
+    expect(prev).toBe(p1);
+    expect(next).toBeNull();
+    expect(only.parentNode).toBeNull();
+    expect(Array.from(parent.children)).toEqual([p1]);
   });
 
   test('end-of-segment separators', () => {
@@ -1020,12 +1020,12 @@ describe('remove', () => {
     const parent = buildParent(only);
 
     // act
-    const { next } = remove(only);
+    const [prev, next] = remove(only);
 
     // assert
-    expect(isAnchor(next)).toBe(true);
-    expect(next.parentNode).toBe(parent);
-    expect(parent.children).toHaveLength(1);
-    expect(parent.firstElementChild).toBe(next);
+    expect(prev).toBeNull();
+    expect(next).toBeNull();
+    expect(only.parentNode).toBeNull();
+    expect(parent.children).toHaveLength(0);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { em, identify, makeRoot, p, s, t } from '../test/util.js';
+import { a, em, identify, makeRoot, p, s, t } from '../test/util.js';
 import { JsedDocument } from '../JsedDocument.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { Cursor } from '../Cursor.js';
@@ -211,6 +211,20 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
+  });
+
+  test('ANCHOR no-op', () => {
+    // arrange
+    const doc = makeRoot(p(a()));
+    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(tokens(doc)).toHaveLength(1);
   });
 
   test('TOKEN after ISLAND with next TOKEN', () => {

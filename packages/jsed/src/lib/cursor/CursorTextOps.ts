@@ -1,6 +1,6 @@
 import * as token from '../dom/token.js';
 import * as space from '../dom/space.js';
-import { isToken } from '../dom/taxonomy.js';
+import { isAnchor, isToken } from '../dom/taxonomy.js';
 import type { CursorChangeOpts, CursorState } from './CursorState.js';
 
 export class CursorTextOps {
@@ -13,8 +13,29 @@ export class CursorTextOps {
   /** Delete the current TOKEN. */
   delete(opts?: CursorChangeOpts): void {
     if (!this.state.isOnToken()) return;
-    const { next: nextTok } = token.remove(this.state.getPlace());
-    this.state.place(nextTok, opts);
+    const current = this.state.getPlace();
+    // Suggests we've exhausted the LINE_SEGMENT of TOKEN's
+    if (isAnchor(current)) {
+      return;
+    }
+    const parentNode = current.parentNode;
+    const [prev, next] = token.remove(current);
+    // Favour moving back to previous token
+    const nextToken = (isToken(prev) && prev) || (isToken(next) && next);
+    if (nextToken) {
+      this.state.place(nextToken, opts);
+      return;
+    }
+    // Place an ANCHOR if no tokens
+    const anchor = token.createAnchor();
+    if (prev) {
+      token.insertAfter(anchor, prev);
+    } else if (next) {
+      token.insertBefore(anchor, next);
+    } else {
+      parentNode?.appendChild(anchor);
+    }
+    this.state.place(anchor, opts);
   }
 
   /** Replace the value of the current TOKEN with a new value. */

@@ -20,9 +20,10 @@ import {
   getLine,
   getPreviousTokenSibling,
   getNextTokenSibling,
-  getPreviousVisibleNodeSibling,
   getPreviousVisibleSibling,
-  getNextVisibleSibling
+  getNextVisibleSibling,
+  getNextVisibleNodeSibling,
+  getPreviousVisibleNodeSibling
 } from './line.js';
 import {
   ensureSeparatorAfter,
@@ -385,27 +386,26 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
   const nextTok = getNextTokenSibling(token);
   const separatorBefore = getSeparatorBefore(token);
   const separatorAfter = getSeparatorAfter(token);
-
-  // Collapse paired separators down to one by dropping the trailing one.
-  // The leading separator stays as either the previous TOKEN's trailing
-  // space or as an edge space — both are visually harmless.
-  if (separatorBefore && separatorAfter) {
-    separatorAfter.parentNode?.removeChild(separatorAfter);
-  }
-
   // Capture neighbours BEFORE detaching — once `token` is removed,
   // `previousElementSibling` / `nextElementSibling` return null.
-  // const prevEl = token.previousElementSibling;
-  // const nextEl = token.nextElementSibling;
   const prevEl = getPreviousVisibleSibling(token);
   const nextEl = getNextVisibleSibling(token);
 
-  // Remove associated separator.
-  const prevNode = getPreviousVisibleNodeSibling(token);
-  if (isWhitespaceTextNode(prevNode)) {
-    prevNode.remove();
-  }
   token.remove();
+
+  // Collapse paired separators down to one.
+  if (separatorBefore && separatorAfter) {
+    separatorAfter.remove();
+    if (!getNextVisibleNodeSibling(separatorBefore)) {
+      separatorBefore.remove();
+    }
+    if (!getPreviousVisibleNodeSibling(separatorBefore)) {
+      separatorBefore.remove();
+    }
+  } else if (separatorBefore) {
+    // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
+    separatorBefore.remove();
+  }
 
   const nextFocus = prevTok || nextTok;
 

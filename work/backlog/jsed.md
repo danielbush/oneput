@@ -47,6 +47,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 bugs
 
+- fix: getSeparatorBefore etc should use sibling helpers
 - fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
 - fix: anchor tokens disappear when cursor uses insert markers
   - COMMENT: I think the ::after pseudoelement is being replaced

@@ -22,15 +22,15 @@ export function getPreviousVisibleNodeSibling(el: Node): Node | null {
   while (prev && isIgnorable(prev)) {
     prev = prev.previousSibling;
   }
-  return (prev as HTMLElement) ?? null;
+  return prev;
 }
 
 export function getNextVisibleNodeSibling(el: Node): Node | null {
-  let next = el.nextSibling as HTMLElement | null;
+  let next = el.nextSibling;
   while (next && isIgnorable(next)) {
-    next = next.nextSibling as HTMLElement | null;
+    next = next.nextSibling;
   }
-  return next ?? null;
+  return next;
 }
 
 /**

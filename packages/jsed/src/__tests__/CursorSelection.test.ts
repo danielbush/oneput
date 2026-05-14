@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { em, frag, inlineStyleHack, makeRoot, p, s, span, t } from '../test/util.js';
-import { CursorSelection } from '../lib/cursor/CursorSelection.js';
+import { CursorSelection } from '../lib/selection/CursorSelection.js';
 import { Tokenizer } from '../Tokenizer.js';
 import { getValue } from '../lib/dom/token.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../lib/dom/constants.js';

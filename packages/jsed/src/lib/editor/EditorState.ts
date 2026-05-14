@@ -1,6 +1,6 @@
 import { Nav } from '../../Nav.js';
 import { Cursor } from '../cursor/Cursor.js';
-import { CursorSelection } from '../cursor/CursorSelection.js';
+import { CursorSelection } from '../selection/CursorSelection.js';
 import { Tokenizer } from '../../Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../../UserInput.js';

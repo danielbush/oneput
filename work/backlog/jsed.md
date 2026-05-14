@@ -47,7 +47,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 bugs
 
-- fix: getSeparatorBefore etc should use sibling helpers
 - fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
 - fix: anchor tokens disappear when cursor uses insert markers
   - COMMENT: I think the ::after pseudoelement is being replaced
@@ -56,6 +55,7 @@ bugs
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
+- [x] fix: getSeparatorBefore etc should use sibling helpers
 - [x] fix: remove should not use token.previousElementSibling etc
 - [x] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
   - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext

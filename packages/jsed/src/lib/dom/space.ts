@@ -1,4 +1,9 @@
-import { getNextVisibleSibling, getPreviousVisibleSibling } from './line.js';
+import {
+  getNextVisibleNodeSibling,
+  getNextVisibleSibling,
+  getPreviousVisibleNodeSibling,
+  getPreviousVisibleSibling
+} from './line.js';
 import {
   isIgnorable,
   isImplicitLine,
@@ -11,12 +16,12 @@ import { getNextSiblingNode, getPreviousSiblingNode } from './walk.js';
 
 // #region Separator (Space) utils
 export function getSeparatorBefore(token: HTMLElement): Text | null {
-  const prev = token.previousSibling;
+  const prev = getPreviousVisibleNodeSibling(token);
   return isWhitespaceTextNode(prev) ? prev : null;
 }
 
 export function getSeparatorAfter(token: HTMLElement): Text | null {
-  const next = token.nextSibling;
+  const next = getNextVisibleNodeSibling(token);
   return isWhitespaceTextNode(next) ? next : null;
 }
 

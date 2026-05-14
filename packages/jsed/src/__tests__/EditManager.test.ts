@@ -1708,13 +1708,12 @@ describe('Editor', () => {
       // assert: em emptied and removed; p has single 'x' followed by 'dd'
       expect(Array.from(p1.querySelectorAll(`.${JSED_TOKEN_CLASS}`)).map(identify)).toEqual([
         'x',
-        '[anchor]',
         'dd'
       ]);
       expect(isToken(p1.firstChild)).toBe(true);
       expect(identify(p1.firstChild)).toBe('x');
       expect(identify(editor.getCursor())).toBe('x');
-      expect(Array.from(p1.querySelectorAll('em > *')).map(identify)).toEqual(['[anchor]']);
+      expect(Array.from(p1.querySelectorAll('em'))).toBeNull();
 
       editor.destroy();
     });

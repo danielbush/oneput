@@ -98,6 +98,7 @@ feats
 
 ## refactors
 
+- refactor: line module is really sibling.ts and it should include the sib functions in walk; walk builds on sibling
 - [ ] refactor: merge CursorTextOps.ts into EditorCursorOps.ts
 - [ ] refactor: Editor becomes private state
   - COMMENT: how do we handle event handling; where do the `handle*` functions live?

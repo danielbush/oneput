@@ -1,7 +1,8 @@
 import * as token from '../dom/token.js';
 import * as space from '../dom/space.js';
-import { isAnchor, isToken } from '../dom/taxonomy.js';
+import { isToken } from '../dom/taxonomy.js';
 import type { CursorChangeOpts, CursorState } from './CursorState.js';
+import { isEmpty } from '../dom/focusable.js';
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {
@@ -10,32 +11,60 @@ export class CursorTextOps {
 
   private constructor(private state: CursorState) {}
 
+  deleteEmptyTree(el: Element) {
+    let p = el;
+    for (; p; p = p.parentNode as HTMLElement) {
+      if (p === this.state.document.root) {
+        break;
+      }
+      if (isEmpty(p)) {
+        p.remove();
+        continue;
+      }
+      break;
+    }
+  }
+
   /** Delete the current TOKEN. */
   delete(opts?: CursorChangeOpts): void {
     if (!this.state.isOnToken()) return;
     const current = this.state.getPlace();
-    // Suggests we've exhausted the LINE_SEGMENT of TOKEN's
-    if (isAnchor(current)) {
-      return;
-    }
-    const parentNode = current.parentNode;
-    const [prev, next] = token.remove(current);
+    const prevCrs = this.state.motion.getPrevious();
+    const nextCrs = this.state.motion.getNext();
+    const parentNode = current.parentNode as HTMLElement;
+    const [prevSibling, nextSibling] = token.remove(current);
     // Favour moving back to previous token
-    const nextToken = (isToken(prev) && prev) || (isToken(next) && next);
+    const nextToken =
+      (isToken(prevSibling) && prevSibling) || (isToken(nextSibling) && nextSibling);
     if (nextToken) {
       this.state.place(nextToken, opts);
       return;
     }
-    // Place an ANCHOR if no tokens
-    const anchor = token.createAnchor();
-    if (prev) {
-      token.insertAfter(anchor, prev);
-    } else if (next) {
-      token.insertBefore(anchor, next);
-    } else {
-      parentNode?.appendChild(anchor);
+
+    // prev is NOT a token....
+
+    if (!prevCrs && !nextCrs) {
+      // There's no prevCrs or nextCrs position We'll place the CURSOR on an
+      // anchor so it has somewhere to go.
+      const anchor = token.createAnchor();
+      if (prevSibling) {
+        token.insertAfter(anchor, prevSibling);
+      } else if (nextSibling) {
+        token.insertBefore(anchor, nextSibling);
+      } else {
+        parentNode?.appendChild(anchor);
+      }
+      this.state.place(anchor, opts);
+      return;
     }
-    this.state.place(anchor, opts);
+
+    if (!prevSibling && !nextSibling) {
+      let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
+      parentNode.remove();
+      this.deleteEmptyTree(p);
+    }
+
+    this.state.place((prevCrs || nextCrs) as HTMLElement, opts);
   }
 
   /** Replace the value of the current TOKEN with a new value. */

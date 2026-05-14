@@ -225,22 +225,12 @@ export class CursorSelection {
    * Reduce the selection to its START (earlier in document order):
    * unwrap SELECTION_WRAPPER's, remove every selected TOKEN except the
    * start, clean up any structural containers that were fully consumed
-   * and became empty. Returns the surviving start TOKEN so callers can
-   * re-seat their CURSOR on it.
+   * and became empty.
    *
-   * "Start" = the end of the selection that is earlier in the document:
-   * forward extension → anchor; backward extension → head. This matches
-   * standard text-editor behaviour where typing over a selection lands
-   * the new content at the beginning of what was selected.
-   *
-   * Cleanup rules:
-   * - INLINE_FLOW ancestor (em, span) fully consumed by the selection
-   *   → removed. If it was an ancestor of the start TOKEN, start is
-   *   lifted out first.
-   * - LINE (p, div) fully consumed → removed, EXCEPT when it hosts the
-   *   start TOKEN (which is what the user will type into).
+   * Returns the surviving start TOKEN so callers can re-seat their CURSOR on
+   * it.
    */
-  collapseToStart(): HTMLElement {
+  delete(): HTMLElement {
     const keeper = this.getBackwardEnd();
     // Snapshot the selected TOKEN's before unwrapping — the
     // `.jsed-selection` wrappers go away once we collapse.

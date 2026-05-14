@@ -50,7 +50,7 @@ export class EditorController {
     // "x" into "replace start TOKEN with x", landing the new content
     // where the selection began.
     if (this.state.selection) {
-      const start = this.state.selection.collapseToStart();
+      const start = this.state.selection.delete();
       this.state.selection = undefined;
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.state.cursor.place(start, { syncInput: false });

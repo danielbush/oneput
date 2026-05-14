@@ -55,6 +55,7 @@ bugs
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
+- [x] fix: remove should not use token.previousElementSibling etc
 - [x] fix: don't allow insert before/after when FOCUS is root of doc; it can create elements outside root!
   - COMMENT: shouldn't we call canX within the X function?  eg canInsertNext
 - [x] fix: typing a word in a paragraph and then immediately hitting enter creates an empty paragraph that is not accessible; hitting enter 2nd time creates a 3rd paragraph with an anchor and moves cursor to the anchor

@@ -20,7 +20,9 @@ import {
   getLine,
   getPreviousTokenSibling,
   getNextTokenSibling,
-  getPreviousVisibleNodeSibling
+  getPreviousVisibleNodeSibling,
+  getPreviousVisibleSibling,
+  getNextVisibleSibling
 } from './line.js';
 import {
   ensureSeparatorAfter,
@@ -393,8 +395,10 @@ export function remove(token: HTMLElement): { next: HTMLElement } {
 
   // Capture neighbours BEFORE detaching — once `token` is removed,
   // `previousElementSibling` / `nextElementSibling` return null.
-  const prevEl = token.previousElementSibling;
-  const nextEl = token.nextElementSibling;
+  // const prevEl = token.previousElementSibling;
+  // const nextEl = token.nextElementSibling;
+  const prevEl = getPreviousVisibleSibling(token);
+  const nextEl = getNextVisibleSibling(token);
 
   // Remove associated separator.
   const prevNode = getPreviousVisibleNodeSibling(token);

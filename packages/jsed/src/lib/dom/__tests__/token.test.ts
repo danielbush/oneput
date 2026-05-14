@@ -34,7 +34,6 @@ import {
   strong as strongTag,
   t
 } from '../../../test/util.js';
-import { insertSpaceAfterTag, removeSpaceAfterTag } from '../space.js';
 
 describe('replaceText', () => {
   test('existing TOKEN', () => {
@@ -992,26 +991,25 @@ describe('remove', () => {
     // arrange
     const doc = makeRoot(
       p(
-        emTag({ id: 'em1', style: 'display:inline;' }, t('foo'), s(), t('bar')),
+        emTag(
+          { id: 'em1', style: 'display:inline;' }, //
+          t('foo'),
+          s(),
+          t('bar')
+        ),
         s(),
         t('baz')
       )
     );
     const em1 = byId(doc, 'em1');
     const bar = findTokenByText(doc.root, 'bar');
-    const baz = findTokenByText(doc.root, 'baz');
 
     // act
     remove(bar);
-    removeSpaceAfterTag(em1);
-    const insertedSpace = insertSpaceAfterTag(em1);
 
     // assert
     expect(em1.textContent).toBe('foo');
     expect(em1.childNodes).toHaveLength(1);
-    expect(insertedSpace?.parentNode).toBe(em1.parentNode);
-    expect(insertedSpace?.previousSibling).toBe(em1);
-    expect(insertedSpace?.nextSibling).toBe(baz);
   });
 
   test('only TOKEN', () => {

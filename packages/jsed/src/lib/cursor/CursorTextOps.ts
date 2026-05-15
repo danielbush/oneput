@@ -19,13 +19,6 @@ export class CursorTextOps {
     const nextCrs = this.state.motion.getNext();
     const parentNode = current.parentNode as HTMLElement;
     const [prevSibling, nextSibling] = token.remove(current);
-    // Favour moving back to previous token
-    const nextToken =
-      (isToken(prevSibling) && prevSibling) || (isToken(nextSibling) && nextSibling);
-    if (nextToken) {
-      this.state.place(nextToken, opts);
-      return;
-    }
 
     // prev is NOT a token....
 

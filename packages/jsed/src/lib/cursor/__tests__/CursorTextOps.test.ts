@@ -5,6 +5,7 @@ import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
 import { JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { UndoRecorder } from '../../undo/UndoRecorder.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -173,6 +174,41 @@ describe('insertTextBefore', () => {
 });
 
 describe('delete', () => {
+  test('records undo result from public Cursor.delete', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const undo = UndoRecorder.createNull();
+    const cursor = Cursor.create({
+      document: doc,
+      tokenizer: Tokenizer.createNull(),
+      token: tokens(doc)[0],
+      undo,
+      onCursorChange: () => {},
+      onError: () => {}
+    });
+
+    // act
+    const result = cursor.delete();
+
+    // assert
+    expect(result).toMatchObject({
+      type: 'cursor-delete',
+      undoable: true,
+      deletionType: 'tokenDeletion',
+      inputCursorPosition: 'selectAll',
+      removedToken: {
+        type: 'token-removal',
+        removed: expect.any(HTMLElement)
+      },
+      insertedAnchor: null,
+      removedParent: null,
+      removedEmptyTree: null,
+      cursorBefore: expect.any(HTMLElement),
+      cursorAfter: expect.any(HTMLElement)
+    });
+    expect(undo.getRecords()).toEqual([result]);
+  });
+
   test('middle TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));

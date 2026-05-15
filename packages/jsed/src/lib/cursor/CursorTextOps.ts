@@ -2,8 +2,27 @@ import * as token from '../token/token.js';
 import * as space from '../token/space.js';
 import { isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import { deleteEmptyTree } from '../focus/focusable.js';
+import { deleteEmptyTree, type DeleteEmptyTreeResult } from '../focus/focusable.js';
 import type { UserInputOpts } from '../input/UserInput.js';
+
+export type CursorDeleteResult =
+  | {
+      type: 'cursor-delete-noop';
+      undoable: false;
+      reason: 'not-on-token';
+    }
+  | {
+      type: 'cursor-delete';
+      undoable: true;
+      deletionType: 'charDeletion' | 'tokenDeletion';
+      removedToken: token.TokenRemovalResult;
+      insertedAnchor: token.TokenInsertionResult | null;
+      removedParent: token.TokenParentRemovalResult | null;
+      removedEmptyTree: DeleteEmptyTreeResult | null;
+      cursorBefore: HTMLElement;
+      cursorAfter: HTMLElement;
+      inputCursorPosition: UserInputOpts['inputCursorPosition'];
+    };
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -15,46 +34,79 @@ export class CursorTextOps {
   private constructor(private state: CursorState) {}
 
   /** Delete the current TOKEN. */
-  delete({ type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
-    if (!this.state.isOnToken()) return;
+  delete({ type }: CursorDeleteOpts = { type: 'tokenDeletion' }): CursorDeleteResult {
+    if (!this.state.isOnToken()) {
+      return { type: 'cursor-delete-noop', undoable: false, reason: 'not-on-token' };
+    }
     const current = this.state.getPlace();
     const prevCrs = this.state.motion.getPrevious();
     const nextCrs = this.state.motion.getNext();
     const parentNode = current.parentNode as HTMLElement;
-    const [prevSibling, nextSibling] = token.remove(current);
+    const removal = token.remove(current);
+    const prevSibling = removal.previousVisibleSibling;
+    const nextSibling = removal.nextVisibleSibling;
     let inputCursorPosition: UserInputOpts['inputCursorPosition'] = 'end';
     if (type === 'tokenDeletion' || !prevCrs) {
       // !prevCrs = if we hit the beginning of all editable text, go into
       // selectAll mode; keeping a caret (if we were in one) doesn't make sense.
-      // Other option is to do nothing an let the caret just sit.
       inputCursorPosition = 'selectAll';
     }
     const userInputOpts: UserInputOpts = { inputCursorPosition };
 
     // prev is NOT a token....
 
+    let insertedAnchor: token.TokenInsertionResult | null = null;
+    let removedParent: token.TokenParentRemovalResult | null = null;
+    let removedEmptyTree: DeleteEmptyTreeResult | null = null;
+    let cursorAfter: HTMLElement;
+
     if (!prevCrs && !nextCrs) {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
       const anchor = token.createAnchor();
       if (prevSibling) {
-        token.insertAfter(anchor, prevSibling);
+        insertedAnchor = token.insertAfter(anchor, prevSibling);
       } else if (nextSibling) {
-        token.insertBefore(anchor, nextSibling);
+        insertedAnchor = token.insertBefore(anchor, nextSibling);
       } else {
-        parentNode?.appendChild(anchor);
+        insertedAnchor = token.append(anchor, parentNode);
       }
+      cursorAfter = anchor;
       this.state.place(anchor, userInputOpts);
-      return;
+      return {
+        type: 'cursor-delete',
+        undoable: true,
+        deletionType: type,
+        removedToken: removal,
+        insertedAnchor,
+        removedParent,
+        removedEmptyTree,
+        cursorBefore: current,
+        cursorAfter,
+        inputCursorPosition
+      };
     }
 
     if (!prevSibling && !nextSibling) {
       let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
-      parentNode.remove();
-      deleteEmptyTree(p, this.state.document.root);
+      removedParent = token.removeParent(parentNode);
+      removedEmptyTree = deleteEmptyTree(p, this.state.document.root);
     }
 
-    this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
+    cursorAfter = (prevCrs || nextCrs) as HTMLElement;
+    this.state.place(cursorAfter, userInputOpts);
+    return {
+      type: 'cursor-delete',
+      undoable: true,
+      deletionType: type,
+      removedToken: removal,
+      insertedAnchor,
+      removedParent,
+      removedEmptyTree,
+      cursorBefore: current,
+      cursorAfter,
+      inputCursorPosition
+    };
   }
 
   /** Replace the value of the current TOKEN with a new value. */

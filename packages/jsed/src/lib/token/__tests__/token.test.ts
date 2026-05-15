@@ -894,11 +894,12 @@ describe('remove', () => {
     buildParent(foo, document.createTextNode(' '), bar, document.createTextNode(' '), baz);
 
     // act
-    const [prev, next] = remove(bar);
+    const result = remove(bar);
 
     // assert
-    expect(prev).toBe(foo);
-    expect(next).toBe(baz);
+    expect(result.previousVisibleSibling).toBe(foo);
+    expect(result.nextVisibleSibling).toBe(baz);
+    expect(result.removed).toBe(bar);
     expect(bar.isConnected).toBe(false);
   });
 
@@ -909,11 +910,11 @@ describe('remove', () => {
     buildParent(foo, document.createTextNode(' '), bar);
 
     // act
-    const [prev, next] = remove(bar);
+    const result = remove(bar);
 
     // assert
-    expect(prev).toBe(foo);
-    expect(next).toBeNull();
+    expect(result.previousVisibleSibling).toBe(foo);
+    expect(result.nextVisibleSibling).toBeNull();
   });
 
   test('next element', () => {
@@ -924,11 +925,11 @@ describe('remove', () => {
     const parent = buildParent(before, p1);
 
     // act
-    const [prev, next] = remove(before);
+    const result = remove(before);
 
     // assert
-    expect(prev).toBeNull();
-    expect(next).toBe(p1);
+    expect(result.previousVisibleSibling).toBeNull();
+    expect(result.nextVisibleSibling).toBe(p1);
     expect(before.parentNode).toBeNull();
     expect(Array.from(parent.children)).toEqual([p1]);
   });
@@ -941,11 +942,11 @@ describe('remove', () => {
     const parent = buildParent(p1, only);
 
     // act
-    const [prev, next] = remove(only);
+    const result = remove(only);
 
     // assert
-    expect(prev).toBe(p1);
-    expect(next).toBeNull();
+    expect(result.previousVisibleSibling).toBe(p1);
+    expect(result.nextVisibleSibling).toBeNull();
     expect(only.parentNode).toBeNull();
     expect(Array.from(parent.children)).toEqual([p1]);
   });
@@ -960,12 +961,14 @@ describe('remove', () => {
     const parent = buildParent(prev, sepBefore, removed, sepAfter);
 
     // act
-    remove(removed);
+    const result = remove(removed);
 
     // assert
     expect(Array.from(parent.childNodes)).toEqual([prev]);
     expect(sepBefore.parentNode).toBeNull();
     expect(sepAfter.parentNode).toBeNull();
+    expect(result.removedSeparatorBefore).toBe(sepBefore);
+    expect(result.removedSeparatorAfter).toBe(sepAfter);
   });
 
   test('start-of-segment separators', () => {
@@ -978,12 +981,14 @@ describe('remove', () => {
     const parent = buildParent(sepBefore, removed, sepAfter, next);
 
     // act
-    remove(removed);
+    const result = remove(removed);
 
     // assert
     expect(Array.from(parent.childNodes)).toEqual([next]);
     expect(sepBefore.parentNode).toBeNull();
     expect(sepAfter.parentNode).toBeNull();
+    expect(result.removedSeparatorBefore).toBe(sepBefore);
+    expect(result.removedSeparatorAfter).toBe(sepAfter);
   });
 
   test('closing INLINE_FLOW separator', () => {
@@ -1017,11 +1022,11 @@ describe('remove', () => {
     const parent = buildParent(only);
 
     // act
-    const [prev, next] = remove(only);
+    const result = remove(only);
 
     // assert
-    expect(prev).toBeNull();
-    expect(next).toBeNull();
+    expect(result.previousVisibleSibling).toBeNull();
+    expect(result.nextVisibleSibling).toBeNull();
     expect(only.parentNode).toBeNull();
     expect(parent.children).toHaveLength(0);
   });

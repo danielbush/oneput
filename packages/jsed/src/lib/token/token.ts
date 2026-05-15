@@ -316,11 +316,61 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
 
 // #region Insert / Remove
 
-export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void {
+export type TokenInsertionResult = {
+  type: 'token-insertion';
+  inserted: HTMLElement;
+  parent: Node;
+  previousSibling: Node | null;
+  nextSibling: Node | null;
+};
+
+export type TokenParentRemovalResult = {
+  type: 'token-parent-removal';
+  removed: HTMLElement;
+  parent: Node;
+  previousSibling: Node | null;
+  nextSibling: Node | null;
+};
+
+export type TokenRemovalSite = {
+  parent: Node;
+  previousSibling: Node | null;
+  nextSibling: Node | null;
+};
+
+export type TokenRemovalResult = {
+  type: 'token-removal';
+  removed: HTMLElement;
+  site: TokenRemovalSite;
+  previousVisibleSibling: HTMLElement | null;
+  nextVisibleSibling: HTMLElement | null;
+  removedSeparatorBefore: Text | null;
+  removedSeparatorBeforeSite: TokenRemovalSite | null;
+  removedSeparatorAfter: Text | null;
+  removedSeparatorAfterSite: TokenRemovalSite | null;
+};
+
+function createTokenInsertionResult(inserted: HTMLElement): TokenInsertionResult {
+  const parent = inserted.parentNode;
+  if (!parent) {
+    throw new Error('createTokenInsertionResult: inserted token has no parentNode');
+  }
+
+  return {
+    type: 'token-insertion',
+    inserted,
+    parent,
+    previousSibling: inserted.previousSibling,
+    nextSibling: inserted.nextSibling
+  };
+}
+
+export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): TokenInsertionResult {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
   existing.insertAdjacentElement('afterend', toInsert);
+  return createTokenInsertionResult(toInsert);
 
   // Need to add an anchor?
   // const nexttok = getNextTokenSibling(toInsert);
@@ -330,11 +380,12 @@ export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void 
   // }
 }
 
-export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void {
+export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): TokenInsertionResult {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
   existing.insertAdjacentElement('beforebegin', toInsert);
+  return createTokenInsertionResult(toInsert);
 
   // Need to add an anchor?
   // const prevtok = getPreviousTokenSibling(toInsert);
@@ -342,6 +393,42 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
   //   const anchor = createAnchor();
   //   toInsert.insertAdjacentElement('beforebegin', anchor);
   // }
+}
+
+export function append(toInsert: HTMLElement, parent: HTMLElement): TokenInsertionResult {
+  parent.appendChild(toInsert);
+  return createTokenInsertionResult(toInsert);
+}
+
+export function removeParent(parent: HTMLElement): TokenParentRemovalResult {
+  const grandparent = parent.parentNode;
+  if (!grandparent) {
+    throw new Error('removeParent: parent has no parentNode');
+  }
+
+  const result: TokenParentRemovalResult = {
+    type: 'token-parent-removal',
+    removed: parent,
+    parent: grandparent,
+    previousSibling: parent.previousSibling,
+    nextSibling: parent.nextSibling
+  };
+
+  parent.remove();
+  return result;
+}
+
+function getRemovalSite(node: Node): TokenRemovalSite {
+  const parent = node.parentNode;
+  if (!parent) {
+    throw new Error('getRemovalSite: node has no parentNode');
+  }
+
+  return {
+    parent,
+    previousSibling: node.previousSibling,
+    nextSibling: node.nextSibling
+  };
 }
 
 /**
@@ -363,43 +450,59 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
   return token;
 }
 
-/**
- * Remove the token and return the surroudning sibling elements if present
- * (these may or may not be tokens).
- */
-export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTMLElement | null] {
+/** Remove the TOKEN and report the semantic DOM changes caused by removal. */
+export function remove(token: HTMLElement): TokenRemovalResult {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
 
+  const site = getRemovalSite(token);
+
   // Scan space nodes
   const separatorBefore = getSeparatorBefore(token);
   const separatorAfter = getSeparatorAfter(token);
+  const separatorBeforeSite = separatorBefore ? getRemovalSite(separatorBefore) : null;
+  const separatorAfterSite = separatorAfter ? getRemovalSite(separatorAfter) : null;
 
   // Scan elements
   const prevEl = getPreviousVisibleSibling(token);
   const nextEl = getNextVisibleSibling(token);
+
+  let removedSeparatorBefore: Text | null = null;
+  let removedSeparatorAfter: Text | null = null;
 
   token.remove();
 
   // Collapse paired separators down to one.
   if (separatorBefore && separatorAfter) {
     separatorAfter.remove();
+    removedSeparatorAfter = separatorAfter;
   }
 
   if (separatorBefore) {
     if (!getNextVisibleNodeSibling(separatorBefore)) {
       // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
       separatorBefore.remove();
+      removedSeparatorBefore = separatorBefore;
     }
     if (!getPreviousVisibleNodeSibling(separatorBefore)) {
       separatorBefore.remove();
+      removedSeparatorBefore = separatorBefore;
     }
   }
 
-  // Return surrounding elements if present.
-  return [prevEl, nextEl];
+  return {
+    type: 'token-removal',
+    removed: token,
+    site,
+    previousVisibleSibling: prevEl,
+    nextVisibleSibling: nextEl,
+    removedSeparatorBefore,
+    removedSeparatorBeforeSite: removedSeparatorBefore ? separatorBeforeSite : null,
+    removedSeparatorAfter,
+    removedSeparatorAfterSite: removedSeparatorAfter ? separatorAfterSite : null
+  };
 }
 
 /**

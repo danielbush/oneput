@@ -86,6 +86,7 @@ export class EditorOps {
           document: this.state.document,
           tokenizer: this.state.tokenizer,
           token: targetLineSibling,
+          undo: this.state.undo,
           onCursorChange: this.state.controller.onCursorChange,
           onError: this.state.controller.onCursorError
         });

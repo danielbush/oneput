@@ -84,18 +84,47 @@ export function deleteElement(el: HTMLElement): void {
   el.remove();
 }
 
-export function deleteEmptyTree(el: Element, ceiling?: Element) {
+export type EmptyTreeRemoval = {
+  element: Element;
+  parent: Node;
+  previousSibling: Node | null;
+  nextSibling: Node | null;
+};
+
+export type DeleteEmptyTreeResult = {
+  type: 'delete-empty-tree';
+  removed: EmptyTreeRemoval[];
+};
+
+export function deleteEmptyTree(el: Element, ceiling?: Element): DeleteEmptyTreeResult {
+  const removed: EmptyTreeRemoval[] = [];
   let p = el;
-  for (; p; p = p.parentNode as HTMLElement) {
+  for (; p; ) {
     if (ceiling && p === ceiling) {
       break;
     }
     if (isEmpty(p)) {
+      const parent = p.parentNode;
+      if (!parent) {
+        break;
+      }
+      const nextParent = parent instanceof Element ? parent : null;
+      removed.push({
+        element: p,
+        parent,
+        previousSibling: p.previousSibling,
+        nextSibling: p.nextSibling
+      });
       p.remove();
+      if (!nextParent) {
+        break;
+      }
+      p = nextParent;
       continue;
     }
     break;
   }
+  return { type: 'delete-empty-tree', removed };
 }
 
 export function splitParentBefore(el: HTMLElement): void {

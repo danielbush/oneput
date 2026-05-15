@@ -36,6 +36,9 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [x] converting elements
 - undo
   - undo text changes
+    - undo new tokens
+    - undo deleted tokens
+    - undo split at cursor
   - undo FOCUSABLE changes
 - save/persist changes and load
 - editing islands

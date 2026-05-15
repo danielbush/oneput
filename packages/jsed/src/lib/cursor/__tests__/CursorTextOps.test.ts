@@ -240,13 +240,14 @@ describe('delete', () => {
         t('ccc')
       )
     );
+    expect(identify(tokens(doc)[1])).toEqual('bbb');
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
     cursor.delete();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('ccc');
+    expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 
   test('last TOKEN after ISLAND', () => {

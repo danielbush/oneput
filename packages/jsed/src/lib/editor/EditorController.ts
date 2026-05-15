@@ -1,8 +1,12 @@
 import * as token from '../token/token.js';
-import type { CursorError, CursorChangeOpts } from '../cursor/CursorState.js';
+import type { CursorError } from '../cursor/CursorState.js';
 import type { EditorState } from './EditorState.js';
 import { isToken } from '../core/taxonomy.js';
-import type { UserInputChange, UserInputSelectionState } from '../input/UserInput.js';
+import type {
+  UserInputChange,
+  UserInputOpts,
+  UserInputSelectionState
+} from '../input/UserInput.js';
 import type { JsedFocusRequestEvent } from '../../types.js';
 import { findNextEditableLine } from '../core/line.js';
 
@@ -81,7 +85,7 @@ export class EditorController {
    * the user's in-flight input value is not clobbered by the head TOKEN's
    * pre-rewrite value.
    */
-  onCursorChange = (tok: HTMLElement, opts?: CursorChangeOpts) => {
+  onCursorChange = (tok: HTMLElement, opts?: UserInputOpts) => {
     this.state.ops.processCursorChange(tok, opts);
   };
 

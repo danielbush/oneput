@@ -1,8 +1,9 @@
 import * as token from '../token/token.js';
 import * as space from '../token/space.js';
 import { isToken } from '../core/taxonomy.js';
-import type { CursorChangeOpts, CursorState } from './CursorState.js';
+import type { CursorState } from './CursorState.js';
 import { deleteEmptyTree } from '../focus/focusable.js';
+import type { UserInputOpts } from '../input/UserInput.js';
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {
@@ -12,13 +13,21 @@ export class CursorTextOps {
   private constructor(private state: CursorState) {}
 
   /** Delete the current TOKEN. */
-  delete(opts?: CursorChangeOpts): void {
+  delete({ type }: { type: 'charDeletion' | 'tokenDeletion' } = { type: 'tokenDeletion' }): void {
     if (!this.state.isOnToken()) return;
     const current = this.state.getPlace();
     const prevCrs = this.state.motion.getPrevious();
     const nextCrs = this.state.motion.getNext();
     const parentNode = current.parentNode as HTMLElement;
     const [prevSibling, nextSibling] = token.remove(current);
+    let inputCursorPosition: UserInputOpts['inputCursorPosition'] = 'end';
+    if (type === 'tokenDeletion' || !prevCrs) {
+      // !prevCrs = if we hit the beginning of all editable text, go into
+      // selectAll mode; keeping a caret (if we were in one) doesn't make sense.
+      // Other option is to do nothing an let the caret just sit.
+      inputCursorPosition = 'selectAll';
+    }
+    const userInputOpts: UserInputOpts = { inputCursorPosition };
 
     // prev is NOT a token....
 
@@ -33,7 +42,7 @@ export class CursorTextOps {
       } else {
         parentNode?.appendChild(anchor);
       }
-      this.state.place(anchor, opts);
+      this.state.place(anchor, userInputOpts);
       return;
     }
 
@@ -43,7 +52,7 @@ export class CursorTextOps {
       deleteEmptyTree(p, this.state.document.root);
     }
 
-    this.state.place((prevCrs || nextCrs) as HTMLElement, opts);
+    this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
   }
 
   /** Replace the value of the current TOKEN with a new value. */
@@ -55,7 +64,7 @@ export class CursorTextOps {
   /**
    * Similar to insertTextAfter.
    */
-  replaceWithText(text: string, opts?: CursorChangeOpts): HTMLElement | null {
+  replaceWithText(text: string, opts?: UserInputOpts): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const currentToken = this.state.getPlace();
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
@@ -80,7 +89,7 @@ export class CursorTextOps {
    *
    * Supports 'insert-after-current' operation (input intent).
    */
-  insertTextAfter(text: string, opts?: CursorChangeOpts): HTMLElement | null {
+  insertTextAfter(text: string, opts?: UserInputOpts): HTMLElement | null {
     const currentToken = this.state.getPlace();
     let lastToken: HTMLElement | null = null;
     const parts = text.split(/\s+/).filter(Boolean);
@@ -98,7 +107,7 @@ export class CursorTextOps {
     return lastToken;
   }
 
-  insertTextBefore(text: string, opts?: CursorChangeOpts): HTMLElement | null {
+  insertTextBefore(text: string, opts?: UserInputOpts): HTMLElement | null {
     const currentToken = this.state.getPlace();
     let lastToken: HTMLElement | null = null;
     const parts = text.split(/\s+/).filter(Boolean);

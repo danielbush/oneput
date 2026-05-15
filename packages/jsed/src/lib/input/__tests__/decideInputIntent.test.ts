@@ -48,7 +48,7 @@ describe('decideInputIntent', () => {
     expect(intent).toEqual({
       type: 'delete-current',
       inputValue: '',
-      deletionType: 'other'
+      deletionType: 'tokenDeletion'
     });
   });
 

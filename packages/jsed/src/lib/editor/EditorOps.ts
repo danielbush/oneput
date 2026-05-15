@@ -4,8 +4,7 @@ import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
 import { Cursor } from '../cursor/Cursor.js';
-import type { CursorChangeOpts } from '../cursor/CursorState.js';
-import type { UserInputChange } from '../input/UserInput.js';
+import type { UserInputChange, UserInputOpts } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
 
@@ -295,9 +294,7 @@ export class EditorOps {
 
       case 'delete-current': {
         const current = cursor.getPlace();
-        cursor.delete({
-          inputCursorPosition: intent.deletionType === 'backspaceChar' ? 'end' : 'selectAll'
-        });
+        cursor.delete({ type: intent.deletionType });
         this.state.notifyTextChange({ type: 'token-text-change', token: current });
         cursor.setStateFromInput(intent.inputValue);
         return;
@@ -354,7 +351,7 @@ export class EditorOps {
    * So it needs a callback mechanism after it has decided on a place to sit.
    * This function does the related post-processing for the editor.
    */
-  processCursorChange = (cursorElement: HTMLElement, opts?: CursorChangeOpts) => {
+  processCursorChange = (cursorElement: HTMLElement, opts?: UserInputOpts) => {
     this.state.tokenizer.setCursorElement(cursorElement);
     this.state.nav?.FOCUS(cursorElement);
     this.state.eventsEmitter.onCursorChange?.(cursorElement);

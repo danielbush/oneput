@@ -6,6 +6,28 @@ export type UserInputSelectionState =
   | 'CURSOR_AT_END'
   | 'EMPTY';
 
+/**
+ * Options threaded through `place` -> `onCursorChange`.
+ */
+export type UserInputOpts = {
+  /**
+   * When false, the cursor-change listener should skip any user-facing
+   * input-sync side effects (e.g. overwriting the input value). Internal
+   * model updates (tokenizer keep-alive, nav focus) still fire.
+   * Used for mid-typing cursor re-seating so the user's in-flight input value
+   * is not clobbered by the head TOKEN's pre-rewrite value.
+   */
+  syncInput?: boolean;
+  inputCursorPosition?:
+    | 'beginning'
+    | 'end'
+    | 'selectAll'
+    /**
+     * Leave input caret wherever it currently is.
+     */
+    | 'noChange';
+};
+
 export type UserInputRange = [number | null, number | null];
 
 export type UserInputChangeCause = 'user' | 'programmatic';

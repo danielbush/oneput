@@ -1,12 +1,7 @@
 import { CursorMotion } from './CursorMotion.js';
-import {
-  CursorState,
-  type CursorInsertState,
-  type CursorParams,
-  type CursorChangeOpts
-} from './CursorState.js';
+import { CursorState, type CursorInsertState, type CursorParams } from './CursorState.js';
 import { CursorTextOps } from './CursorTextOps.js';
-import type { UserInputSelectionState } from '../input/UserInput.js';
+import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -34,7 +29,7 @@ export class Cursor {
 
   destroy = () => this.#state.destroy();
   getDocument = () => this.#state.getDocument();
-  place = (el: HTMLElement, opts?: CursorChangeOpts) => this.#state.place(el, opts);
+  place = (el: HTMLElement, opts?: UserInputOpts) => this.#state.place(el, opts);
   getPlace = () => this.#state.getPlace();
   reload = () => this.#state.reload();
   isSameLine = (tok: HTMLElement) => this.#state.isSameLine(tok);
@@ -55,14 +50,11 @@ export class Cursor {
   movePrevious = () => this.#motion.movePrevious();
 
   // ops
-  delete = (opts?: CursorChangeOpts) => this.#ops.delete(opts);
+  delete = (opts?: { type: 'charDeletion' | 'tokenDeletion' }) => this.#ops.delete(opts);
   replace = (val: string) => this.#ops.replace(val);
-  replaceWithText = (text: string, opts?: CursorChangeOpts) =>
-    this.#ops.replaceWithText(text, opts);
-  insertTextAfter = (text: string, opts?: CursorChangeOpts) =>
-    this.#ops.insertTextAfter(text, opts);
-  insertTextBefore = (text: string, opts?: CursorChangeOpts) =>
-    this.#ops.insertTextBefore(text, opts);
+  replaceWithText = (text: string, opts?: UserInputOpts) => this.#ops.replaceWithText(text, opts);
+  insertTextAfter = (text: string, opts?: UserInputOpts) => this.#ops.insertTextAfter(text, opts);
+  insertTextBefore = (text: string, opts?: UserInputOpts) => this.#ops.insertTextBefore(text, opts);
   joinNext = () => this.#ops.joinNext();
   joinPrevious = () => this.#ops.joinPrevious();
   splitBefore = () => this.#ops.splitBefore();

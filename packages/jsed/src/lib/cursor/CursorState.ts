@@ -1,7 +1,7 @@
 import type { JsedDocument } from '../../JsedDocument.js';
 import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { Tokenizer } from '../token/Tokenizer.js';
-import type { UserInputSelectionState } from '../input/UserInput.js';
+import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import { isSameLine } from '../core/line.js';
@@ -22,28 +22,6 @@ export const CURSOR_CARET_CLASS = 'jsed-crs-caret';
  * The focus CSS class for TOKEN's.
  */
 export const JSED_CURSOR_CLASS = 'jsed-token-focus';
-
-/**
- * Options threaded through `place` -> `onCursorChange`.
- */
-export type CursorChangeOpts = {
-  /**
-   * When false, the cursor-change listener should skip any user-facing
-   * input-sync side effects (e.g. overwriting the input value). Internal
-   * model updates (tokenizer keep-alive, nav focus) still fire.
-   * Used for mid-typing cursor re-seating so the user's in-flight input value
-   * is not clobbered by the head TOKEN's pre-rewrite value.
-   */
-  syncInput?: boolean;
-  inputCursorPosition?:
-    | 'beginning'
-    | 'end'
-    | 'selectAll'
-    /**
-     * Leave input caret wherever it currently is.
-     */
-    | 'noChange';
-};
 
 /**
  * The four CURSOR_STATE marker labels. A `null` state means "no marker" —
@@ -74,7 +52,7 @@ export type CursorParams = {
   document: JsedDocument;
   tokenizer: Tokenizer;
   token: HTMLElement;
-  onCursorChange: (token: HTMLElement, opts?: CursorChangeOpts) => void;
+  onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   onError: (err: CursorError) => void;
   /**
    * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
@@ -99,7 +77,7 @@ export class CursorState {
   motion: CursorMotion;
   token: HTMLElement;
   document: JsedDocument;
-  onCursorChange: (token: HTMLElement, opts?: CursorChangeOpts) => void;
+  onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   silent: boolean;
   classes: string[] = [];
   /**
@@ -142,7 +120,7 @@ export class CursorState {
    * have been updated. `opts` is opaque to this class; it flows through to
    * the callback so callers can attach per-call hints (e.g. `syncInput`).
    */
-  place(el: HTMLElement, opts?: CursorChangeOpts) {
+  place(el: HTMLElement, opts?: UserInputOpts) {
     if (!isLineSibling(el)) {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);

@@ -24,7 +24,7 @@ export type InputIntent =
        */
       type: 'delete-current';
       inputValue: string;
-      deletionType: 'backspaceChar' | 'other';
+      deletionType: 'charDeletion' | 'tokenDeletion';
     }
   | {
       /**
@@ -83,7 +83,7 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
     return {
       type: 'delete-current',
       inputValue,
-      deletionType: userIsBackspacingSingleChars ? 'backspaceChar' : 'other'
+      deletionType: userIsBackspacingSingleChars ? 'charDeletion' : 'tokenDeletion'
     };
   }
 

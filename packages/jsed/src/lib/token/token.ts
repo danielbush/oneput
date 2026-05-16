@@ -344,6 +344,14 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
   // }
 }
 
+export function append(toInsert: HTMLElement, parent: HTMLElement): void {
+  parent.appendChild(toInsert);
+}
+
+export function removeParent(parent: HTMLElement): void {
+  parent.remove();
+}
+
 /**
  * Replaces the text of the existing token.
  *

@@ -42,7 +42,7 @@ export class CursorTextOps {
       } else if (nextSibling) {
         token.insertBefore(anchor, nextSibling);
       } else {
-        parentNode?.appendChild(anchor);
+        token.append(anchor, parentNode);
       }
       this.state.place(anchor, userInputOpts);
       return;
@@ -50,7 +50,7 @@ export class CursorTextOps {
 
     if (!prevSibling && !nextSibling) {
       let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
-      parentNode.remove();
+      token.removeParent(parentNode);
       deleteEmptyTree(p, this.state.document.root);
     }
 

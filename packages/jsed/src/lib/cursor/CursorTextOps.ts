@@ -5,6 +5,8 @@ import type { CursorState } from './CursorState.js';
 import { deleteEmptyTree } from '../focus/focusable.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 
+export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
+
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {
     return new CursorTextOps(state);
@@ -13,7 +15,7 @@ export class CursorTextOps {
   private constructor(private state: CursorState) {}
 
   /** Delete the current TOKEN. */
-  delete({ type }: { type: 'charDeletion' | 'tokenDeletion' } = { type: 'tokenDeletion' }): void {
+  delete({ type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
     if (!this.state.isOnToken()) return;
     const current = this.state.getPlace();
     const prevCrs = this.state.motion.getPrevious();

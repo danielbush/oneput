@@ -1,6 +1,6 @@
 import { CursorMotion } from './CursorMotion.js';
 import { CursorState, type CursorInsertState, type CursorParams } from './CursorState.js';
-import { CursorTextOps } from './CursorTextOps.js';
+import { CursorTextOps, type CursorDeleteOpts } from './CursorTextOps.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 
 /**
@@ -50,7 +50,7 @@ export class Cursor {
   movePrevious = () => this.#motion.movePrevious();
 
   // ops
-  delete = (opts?: { type: 'charDeletion' | 'tokenDeletion' }) => this.#ops.delete(opts);
+  delete = (opts?: CursorDeleteOpts) => this.#ops.delete(opts);
   replace = (val: string) => this.#ops.replace(val);
   replaceWithText = (text: string, opts?: UserInputOpts) => this.#ops.replaceWithText(text, opts);
   insertTextAfter = (text: string, opts?: UserInputOpts) => this.#ops.insertTextAfter(text, opts);

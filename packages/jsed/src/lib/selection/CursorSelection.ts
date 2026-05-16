@@ -1,4 +1,4 @@
-import { deleteEmptyTree } from '../focus/focusable.js';
+import { deleteHighestEmptyTree } from '../focus/focusable.js';
 import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import { Cursor } from '../cursor/Cursor.js';
@@ -269,7 +269,7 @@ export class CursorSelection {
 
     for (const parent of cleanupParents) {
       if (!parent.isConnected) continue;
-      deleteEmptyTree(parent, this.root);
+      deleteHighestEmptyTree(parent, this.root);
     }
 
     return marker;

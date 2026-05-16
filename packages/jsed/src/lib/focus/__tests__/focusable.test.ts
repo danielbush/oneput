@@ -3,6 +3,7 @@ import { byId, div, makeRoot, p } from '../../../test/util';
 import {
   copyEmptyNext,
   copyEmptyPrevious,
+  deleteHighestEmptyTree,
   findNextFocusableOutside,
   findPreviousFocusableOutside
 } from '../../focus/focusable';
@@ -57,6 +58,52 @@ describe('findNextFocusableOutside / findPreviousFocusableOutside', () => {
 
     // assert
     expect(previous).toBe(byId(doc, 'outer'));
+  });
+});
+
+describe('deleteHighestEmptyTree', () => {
+  test('removes empty chain', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'middle' }, div({ id: 'inner' }))));
+    const outer = byId(doc, 'outer');
+    const middle = byId(doc, 'middle');
+    const inner = byId(doc, 'inner');
+
+    // act
+    deleteHighestEmptyTree(inner, doc.root);
+
+    // assert
+    expect(outer.isConnected).toBe(false);
+    expect(middle.isConnected).toBe(false);
+    expect(inner.isConnected).toBe(false);
+    expect(doc.root.children).toHaveLength(0);
+  });
+
+  test('stops at ceiling', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' })));
+    const outer = byId(doc, 'outer');
+    const inner = byId(doc, 'inner');
+
+    // act
+    deleteHighestEmptyTree(inner, outer);
+
+    // assert
+    expect(outer.isConnected).toBe(true);
+    expect(inner.isConnected).toBe(false);
+    expect(outer.children).toHaveLength(0);
+  });
+
+  test('keeps non-empty', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, p('text'))));
+    const inner = byId(doc, 'inner');
+
+    // act
+    deleteHighestEmptyTree(inner, doc.root);
+
+    // assert
+    expect(inner.isConnected).toBe(true);
   });
 });
 

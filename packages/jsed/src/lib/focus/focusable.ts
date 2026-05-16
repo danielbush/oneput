@@ -1,6 +1,6 @@
 import { canCreateWithAnchor } from '../core/dom-rules.js';
 import * as domRules from '../core/dom-rules.js';
-import { getNextVisibleNodeSibling } from '../core/sibling.js';
+import { getNextVisibleNodeSibling, getPreviousVisibleNodeSibling } from '../core/sibling.js';
 import {
   isFocusable,
   isInlineFlow,
@@ -84,18 +84,35 @@ export function deleteElement(el: HTMLElement): void {
   el.remove();
 }
 
-export function deleteEmptyTree(el: Element, ceiling?: Element) {
-  let p = el;
-  for (; p; p = p.parentNode as HTMLElement) {
-    if (ceiling && p === ceiling) {
+/**
+ * Delete el and anestors if they have no other content.
+ *
+ * Algorithm:
+ * If isEmpty(el) delete it.
+ * If el's parent is now empty, delete it.
+ * ... etc
+ * However... we only delete once at the very end to keep everything intact.
+ * `highest` is a child of p, and we scan either side to see if the element would have been empty.
+ */
+export function deleteHighestEmptyTree(el: Element, ceiling?: Element) {
+  if (!isEmpty(el)) {
+    return;
+  }
+
+  let highest = el;
+
+  for (let parent = el.parentElement; parent && parent !== ceiling; parent = parent.parentElement) {
+    const wouldBeEmptyWithoutChild =
+      // highest.parentElement === parent &&
+      !getPreviousVisibleNodeSibling(highest) && !getNextVisibleNodeSibling(highest);
+
+    if (!wouldBeEmptyWithoutChild) {
       break;
     }
-    if (isEmpty(p)) {
-      p.remove();
-      continue;
-    }
-    break;
+    highest = parent;
   }
+
+  highest.remove();
 }
 
 export function splitParentBefore(el: HTMLElement): void {

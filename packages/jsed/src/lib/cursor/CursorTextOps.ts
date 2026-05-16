@@ -2,7 +2,7 @@ import * as token from '../token/token.js';
 import * as space from '../token/space.js';
 import { isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import { deleteEmptyTree } from '../focus/focusable.js';
+import { deleteHighestEmptyTree } from '../focus/focusable.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
@@ -51,7 +51,7 @@ export class CursorTextOps {
     if (!prevSibling && !nextSibling) {
       let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
       token.removeParent(parentNode);
-      deleteEmptyTree(p, this.state.document.root);
+      deleteHighestEmptyTree(p, this.state.document.root);
     }
 
     this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);

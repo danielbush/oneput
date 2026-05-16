@@ -1,6 +1,6 @@
 import { canCreateWithAnchor } from '../core/dom-rules.js';
 import * as domRules from '../core/dom-rules.js';
-import { getNextVisibleNodeSibling, getPreviousVisibleNodeSibling } from '../core/sibling.js';
+import { getNextVisibleNodeSibling } from '../core/sibling.js';
 import {
   isFocusable,
   isInlineFlow,
@@ -10,6 +10,7 @@ import {
 } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
+import * as mut from './focusable.mutate.js';
 
 export function createElement(
   tagName: string,
@@ -87,32 +88,15 @@ export function deleteElement(el: HTMLElement): void {
 /**
  * Delete el and anestors if they have no other content.
  *
- * Algorithm:
- * If isEmpty(el) delete it.
- * If el's parent is now empty, delete it.
- * ... etc
- * However... we only delete once at the very end to keep everything intact.
- * `highest` is a child of p, and we scan either side to see if the element would have been empty.
+ * Delete el, and any ancestors that become empty when el is removed.
  */
-export function deleteHighestEmptyTree(el: Element, ceiling?: Element) {
-  if (!isEmpty(el)) {
-    return;
-  }
-
-  let highest = el;
-
-  for (let parent = el.parentElement; parent && parent !== ceiling; parent = parent.parentElement) {
-    const wouldBeEmptyWithoutChild =
-      // highest.parentElement === parent &&
-      !getPreviousVisibleNodeSibling(highest) && !getNextVisibleNodeSibling(highest);
-
-    if (!wouldBeEmptyWithoutChild) {
-      break;
-    }
-    highest = parent;
-  }
-
-  highest.remove();
+export function deleteHighestEmptyTree(
+  el: Element,
+  ceiling?: Element
+): mut.DeleteHighestEmptySubtreePlan {
+  const plan = mut.planDeleteHighestEmptySubtree(el, ceiling);
+  mut.executeDeleteHighestEmptySubtree(plan);
+  return plan;
 }
 
 export function splitParentBefore(el: HTMLElement): void {

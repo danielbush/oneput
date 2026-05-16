@@ -2,6 +2,7 @@ import { CursorMotion } from './CursorMotion.js';
 import { CursorState, type CursorInsertState, type CursorParams } from './CursorState.js';
 import { CursorTextOps, type CursorDeleteOpts } from './CursorTextOps.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
+import { recordUndo, type UndoableOperationResult } from '../undo/index.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -27,6 +28,10 @@ export class Cursor {
     this.#ops = this.#state.ops;
   }
 
+  _recordUndoResult(result: UndoableOperationResult): void {
+    this.#state.undo?.record(result);
+  }
+
   destroy = () => this.#state.destroy();
   getDocument = () => this.#state.getDocument();
   place = (el: HTMLElement, opts?: UserInputOpts) => this.#state.place(el, opts);
@@ -49,17 +54,19 @@ export class Cursor {
   moveNext = () => this.#motion.moveNext();
   movePrevious = () => this.#motion.movePrevious();
 
-  // ops
-  delete = (opts?: CursorDeleteOpts) => this.#ops.delete(opts);
-  replace = (val: string) => this.#ops.replace(val);
+  // edit text
+  @recordUndo
+  delete(opts?: CursorDeleteOpts) {
+    return this.#ops.delete(opts);
+  }
   replaceWithText = (text: string, opts?: UserInputOpts) => this.#ops.replaceWithText(text, opts);
   insertTextAfter = (text: string, opts?: UserInputOpts) => this.#ops.insertTextAfter(text, opts);
   insertTextBefore = (text: string, opts?: UserInputOpts) => this.#ops.insertTextBefore(text, opts);
-  joinNext = () => this.#ops.joinNext();
-  joinPrevious = () => this.#ops.joinPrevious();
-  splitBefore = () => this.#ops.splitBefore();
-  splitAfter = () => this.#ops.splitAfter();
   splitAtToken = () => this.#ops.splitAtToken();
+
+  // TODO: not used - delete or add to editor?
   insertElementAfter = (el: HTMLElement) => this.#ops.insertElementAfter(el);
   insertElementBefore = (el: HTMLElement) => this.#ops.insertElementBefore(el);
+  joinNext = () => this.#ops.joinNext();
+  joinPrevious = () => this.#ops.joinPrevious();
 }

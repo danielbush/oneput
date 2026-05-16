@@ -34,11 +34,12 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [x] unwrap esp for INLINE_FLOW
 - [x] cut/move element
 - [x] converting elements
-- undo
+- [.] undo
   - undo text changes
     - undo new tokens
     - undo deleted tokens
     - undo split at cursor
+  - undo selection changes
   - undo FOCUSABLE changes
 - save/persist changes and load
 - editing islands
@@ -73,6 +74,9 @@ bugs
 
 feats
 
+- feat: when LINE_SEGMENT is empty, we should place an ANCHOR
+- feat: a LINE_SEGMENT that is just an anchor can be deleted if we delete the anchor eg `...<em>A|</em>...`
+- feat: when we delete the last token in an li, show an ANCHOR; if we delete again, then delete the li
 - feat: copy tokens, cut selections
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
 - [x] feat: we lost the menu count (MenuStatus) in jsed's oneput layout

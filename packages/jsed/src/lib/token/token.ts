@@ -16,10 +16,6 @@ import {
 import {
   getPreviousTokenSibling,
   getNextTokenSibling,
-  getPreviousVisibleSibling,
-  getNextVisibleSibling,
-  getNextVisibleNodeSibling,
-  getPreviousVisibleNodeSibling,
   getNextSiblingNode,
   getPreviousSiblingNode
 } from '../core/sibling.js';
@@ -32,6 +28,7 @@ import {
   removeSeparatorBefore
 } from './space.js';
 import { getLine } from '../core/line.js';
+import * as mut from './token.mutate.js';
 
 export function getValue(token: HTMLElement): string {
   validate(token);
@@ -371,43 +368,45 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
   return token;
 }
 
-/**
- * Remove the token and return the surroudning sibling elements if present
- * (these may or may not be tokens).
- */
-export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTMLElement | null] {
-  const parentNode = token.parentNode;
-  if (!parentNode) {
-    throw new Error('remove: token has no parentNode');
-  }
-
-  // Scan space nodes
-  const separatorBefore = getSeparatorBefore(token);
-  const separatorAfter = getSeparatorAfter(token);
-
-  // Scan elements
-  const prevEl = getPreviousVisibleSibling(token);
-  const nextEl = getNextVisibleSibling(token);
-
-  token.remove();
-
-  // Collapse paired separators down to one.
-  if (separatorBefore && separatorAfter) {
-    separatorAfter.remove();
-  }
-
-  if (separatorBefore) {
-    if (!getNextVisibleNodeSibling(separatorBefore)) {
-      // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
-      separatorBefore.remove();
+/** Remove the TOKEN and return the executed remove plan. */
+export function remove(token: HTMLElement): mut.RemoveTokenPlan {
+  /*
+    const parentNode = token.parentNode;
+    if (!parentNode) {
+      throw new Error('remove: token has no parentNode');
     }
-    if (!getPreviousVisibleNodeSibling(separatorBefore)) {
-      separatorBefore.remove();
-    }
-  }
 
-  // Return surrounding elements if present.
-  return [prevEl, nextEl];
+    // Scan space nodes
+    const separatorBefore = getSeparatorBefore(token);
+    const separatorAfter = getSeparatorAfter(token);
+
+    // Scan elements
+    const prevEl = getPreviousVisibleSibling(token);
+    const nextEl = getNextVisibleSibling(token);
+
+    token.remove();
+
+    // Collapse paired separators down to one.
+    if (separatorBefore && separatorAfter) {
+      separatorAfter.remove();
+    }
+
+    if (separatorBefore) {
+      if (!getNextVisibleNodeSibling(separatorBefore)) {
+        // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
+        separatorBefore.remove();
+      }
+      if (!getPreviousVisibleNodeSibling(separatorBefore)) {
+        separatorBefore.remove();
+      }
+    }
+
+    // Return surrounding elements if present.
+    return [prevEl, nextEl];
+  */
+  const plan = mut.planRemove(token);
+  mut.executeRemove(plan);
+  return plan;
 }
 
 /**

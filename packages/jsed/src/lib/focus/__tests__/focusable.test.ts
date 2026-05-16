@@ -7,6 +7,11 @@ import {
   findNextFocusableOutside,
   findPreviousFocusableOutside
 } from '../../focus/focusable';
+import {
+  executeDeleteHighestEmptySubtree,
+  planDeleteHighestEmptySubtree,
+  undoDeleteHighestEmptySubtree
+} from '../focusable.mutate';
 import { JSED_ANCHOR_CLASS, JSED_FOCUS_CLASS } from '../../core/taxonomy';
 
 describe('findNextFocusableOutside / findPreviousFocusableOutside', () => {
@@ -94,16 +99,116 @@ describe('deleteHighestEmptyTree', () => {
     expect(outer.children).toHaveLength(0);
   });
 
-  test('keeps non-empty', () => {
+  test('assumes base is removable', () => {
     // arrange
     const doc = makeRoot(div({ id: 'outer' }, div({ id: 'inner' }, p('text'))));
+    const outer = byId(doc, 'outer');
     const inner = byId(doc, 'inner');
 
     // act
     deleteHighestEmptyTree(inner, doc.root);
 
     // assert
-    expect(inner.isConnected).toBe(true);
+    expect(outer.isConnected).toBe(false);
+    expect(inner.isConnected).toBe(false);
+  });
+});
+
+describe('planDeleteHighestEmptySubtree', () => {
+  test('includes base', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' }, //
+        div(
+          { id: 'inner' }, //
+          p('text')
+        )
+      )
+    );
+    const outer = byId(doc, 'outer');
+    const inner = byId(doc, 'inner');
+
+    // act
+    const plan = planDeleteHighestEmptySubtree(inner, doc.root);
+
+    // assert
+    expect(plan.highest).toBe(outer);
+    expect(plan.insertionSite?.parent).toBe(doc.root);
+    expect(plan.insertionSite?.previousSibling).toBeNull();
+    expect(plan.insertionSite?.nextSibling).toBeNull();
+  });
+
+  test('stops at sibling', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' }, //
+        div({ id: 'inner' }),
+        p({ id: 'sibling' })
+      )
+    );
+    const inner = byId(doc, 'inner');
+
+    // act
+    const plan = planDeleteHighestEmptySubtree(inner, doc.root);
+
+    // assert
+    expect(plan.highest).toBe(inner);
+    expect(plan.insertionSite?.parent).toBe(byId(doc, 'outer'));
+    expect(plan.insertionSite?.previousSibling).toBeNull();
+    expect(plan.insertionSite?.nextSibling).toBe(byId(doc, 'sibling'));
+  });
+
+  test('stops at ceiling', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' }, //
+        div(
+          { id: 'middle' }, //
+          div({ id: 'inner' })
+        )
+      )
+    );
+    const outer = byId(doc, 'outer');
+    const inner = byId(doc, 'inner');
+
+    // act
+    const plan = planDeleteHighestEmptySubtree(inner, outer);
+
+    // assert
+    const middle = byId(doc, 'middle');
+    expect(plan.highest).toBe(middle);
+    expect(plan.insertionSite?.parent).toBe(outer);
+    expect(plan.insertionSite?.previousSibling).toBeNull();
+    expect(plan.insertionSite?.nextSibling).toBeNull();
+  });
+
+  test('undo restores subtree', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'root-child' },
+        p({ id: 'before' }),
+        div({ id: 'outer' }, div({ id: 'inner' })),
+        p({ id: 'after' })
+      )
+    );
+    const rootChild = byId(doc, 'root-child');
+    const outer = byId(doc, 'outer');
+    const plan = planDeleteHighestEmptySubtree(outer, doc.root);
+    executeDeleteHighestEmptySubtree(plan);
+
+    // act
+    undoDeleteHighestEmptySubtree(plan);
+
+    // assert
+    expect(Array.from(rootChild.children).map((child) => child.id)).toEqual([
+      'before',
+      'outer',
+      'after'
+    ]);
   });
 });
 

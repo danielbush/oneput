@@ -24,7 +24,9 @@ export const iconData = {
   ArrowRightToLine: lu.ArrowRightToLine,
   ArrowDownToLine: lu.ArrowDownToLine,
   BetweenHorizonalStart: lu.BetweenHorizonalStart,
-  PencilOff: lu.PencilOff
+  PencilOff: lu.PencilOff,
+  Undo2: lu.Undo2,
+  Redo2: lu.Redo2
 };
 
 Object.entries(iconData).forEach(([name, icon]) => {

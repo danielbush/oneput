@@ -5,6 +5,7 @@ import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.
 import { CursorMotion } from './CursorMotion.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import { isSameLine } from '../core/line.js';
+import type { UndoRecorder } from '../undo/UndoRecorder.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
@@ -52,6 +53,7 @@ export type CursorParams = {
   document: JsedDocument;
   tokenizer: Tokenizer;
   token: HTMLElement;
+  undo?: UndoRecorder;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   onError: (err: CursorError) => void;
   /**
@@ -69,6 +71,7 @@ export class CursorState {
     this.onError = params.onError;
     this.silent = params.silent ?? false;
     this.tokenizer = params.tokenizer;
+    this.undo = params.undo;
     this.motion = CursorMotion.create(this);
     this.ops = CursorTextOps.create(this);
   }
@@ -93,6 +96,7 @@ export class CursorState {
   lastInputValue = '';
   onError: (err: CursorError) => void;
   tokenizer: Tokenizer;
+  undo?: UndoRecorder;
 
   /** Destroy the current edit session. The instance cannot be used after this. */
   destroy() {

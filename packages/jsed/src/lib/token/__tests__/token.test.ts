@@ -33,6 +33,7 @@ import {
   strong as strongTag,
   t
 } from '../../../test/util.js';
+import { undoRemove } from '../token.mutate.js';
 
 describe('replaceText', () => {
   test('existing TOKEN', () => {
@@ -891,15 +892,47 @@ describe('remove', () => {
     const foo = createToken('foo');
     const bar = createToken('bar');
     const baz = createToken('baz');
-    buildParent(foo, document.createTextNode(' '), bar, document.createTextNode(' '), baz);
+    const sepBefore = document.createTextNode(' ');
+    const sepAfter = document.createTextNode(' ');
+    const parent = buildParent(foo, sepBefore, bar, sepAfter, baz);
 
     // act
-    const [prev, next] = remove(bar);
+    const plan = remove(bar);
 
     // assert
-    expect(prev).toBe(foo);
-    expect(next).toBe(baz);
+    expect(plan.insertionSite.parent).toBe(parent);
+    expect(plan.insertionSite.previousSibling).toBe(sepBefore);
+    expect(plan.insertionSite.nextSibling).toBe(sepAfter);
+    expect(plan.previousVisibleSibling).toBe(foo);
+    expect(plan.nextVisibleSibling).toBe(baz);
     expect(bar.isConnected).toBe(false);
+  });
+
+  test('undo middle TOKEN', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    const baz = createToken('baz');
+    const parent = buildParent(
+      foo,
+      document.createTextNode(' '),
+      bar,
+      document.createTextNode(' '),
+      baz
+    );
+    const plan = remove(bar);
+
+    // act
+    undoRemove(plan);
+
+    // assert
+    expect(Array.from(parent.childNodes).map((node) => node.textContent)).toEqual([
+      'foo',
+      ' ',
+      'bar',
+      ' ',
+      'baz'
+    ]);
   });
 
   test('last TOKEN', () => {
@@ -909,11 +942,11 @@ describe('remove', () => {
     buildParent(foo, document.createTextNode(' '), bar);
 
     // act
-    const [prev, next] = remove(bar);
+    const plan = remove(bar);
 
     // assert
-    expect(prev).toBe(foo);
-    expect(next).toBeNull();
+    expect(plan.previousVisibleSibling).toBe(foo);
+    expect(plan.nextVisibleSibling).toBeNull();
   });
 
   test('next element', () => {
@@ -924,11 +957,11 @@ describe('remove', () => {
     const parent = buildParent(before, p1);
 
     // act
-    const [prev, next] = remove(before);
+    const plan = remove(before);
 
     // assert
-    expect(prev).toBeNull();
-    expect(next).toBe(p1);
+    expect(plan.previousVisibleSibling).toBeNull();
+    expect(plan.nextVisibleSibling).toBe(p1);
     expect(before.parentNode).toBeNull();
     expect(Array.from(parent.children)).toEqual([p1]);
   });
@@ -941,11 +974,11 @@ describe('remove', () => {
     const parent = buildParent(p1, only);
 
     // act
-    const [prev, next] = remove(only);
+    const plan = remove(only);
 
     // assert
-    expect(prev).toBe(p1);
-    expect(next).toBeNull();
+    expect(plan.previousVisibleSibling).toBe(p1);
+    expect(plan.nextVisibleSibling).toBeNull();
     expect(only.parentNode).toBeNull();
     expect(Array.from(parent.children)).toEqual([p1]);
   });
@@ -1017,12 +1050,28 @@ describe('remove', () => {
     const parent = buildParent(only);
 
     // act
-    const [prev, next] = remove(only);
+    const plan = remove(only);
 
     // assert
-    expect(prev).toBeNull();
-    expect(next).toBeNull();
+    expect(plan.insertionSite.parent).toBe(parent);
+    expect(plan.insertionSite.previousSibling).toBeNull();
+    expect(plan.insertionSite.nextSibling).toBeNull();
+    expect(plan.previousVisibleSibling).toBeNull();
+    expect(plan.nextVisibleSibling).toBeNull();
     expect(only.parentNode).toBeNull();
     expect(parent.children).toHaveLength(0);
+  });
+
+  test('undo only TOKEN', () => {
+    // arrange
+    const only = createToken('only');
+    const parent = buildParent(only);
+    const plan = remove(only);
+
+    // act
+    undoRemove(plan);
+
+    // assert
+    expect(Array.from(parent.children)).toEqual([only]);
   });
 });

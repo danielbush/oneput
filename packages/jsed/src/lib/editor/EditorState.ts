@@ -13,6 +13,7 @@ import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from './EditorController.js';
 import { EditorOps } from './EditorOps.js';
 import type { CursorError } from '../cursor/CursorState.js';
+import { UndoRecorder } from '../undo/UndoRecorder.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorMode = 'view' | 'edit';
@@ -63,7 +64,8 @@ export class EditorState {
       nav,
       elementIndicator,
       cssElementIndicator,
-      Tokenizer.create()
+      Tokenizer.create(),
+      UndoRecorder.create()
     );
   }
 
@@ -83,7 +85,8 @@ export class EditorState {
       nav,
       elementIndicator,
       cssElementIndicator,
-      Tokenizer.createNull()
+      Tokenizer.createNull(),
+      UndoRecorder.createNull()
     );
   }
 
@@ -107,6 +110,7 @@ export class EditorState {
     public legacyElementIndicator: ElementIndicator,
     public cssElementIndicator: CSSElementIndicator,
     public tokenizer: Tokenizer,
+    public undo: UndoRecorder,
     public eventsEmitter = EditorEventsEmitter.create(),
     public controller = EditorController.create(this),
     public focus = EditorFocusOps.create(this),

@@ -77,6 +77,7 @@ export class OneputEditDocumentAdapter {
       },
       onTextChange: (evt) => {
         switch (evt.type) {
+          case 'token-text-change':
           case 'anchor-change':
           case 'whitespace-change':
             this.onRenderMenuItems();
@@ -254,6 +255,26 @@ export class OneputEditDocumentAdapter {
         description: 'Move to previous token or element'
       }
     },
+    UNDO: {
+      action: () => {
+        this.editor.undo();
+        this.onRenderMenuItems();
+      },
+      binding: {
+        bindings: ['$mod+u'],
+        description: 'Undo'
+      }
+    },
+    REDO: {
+      action: () => {
+        this.editor.redo();
+        this.onRenderMenuItems();
+      },
+      binding: {
+        bindings: ['Shift+$mod+u'],
+        description: 'Redo'
+      }
+    },
     EXTEND_NEXT: {
       action: () => {
         this.editor.extendNext();
@@ -341,6 +362,22 @@ export class OneputEditDocumentAdapter {
           textContent: 'Edit content',
           action: this.actions.ENTER.action,
           left: (b) => [b.icon(icons.Pencil)]
+        }),
+
+      this.editor.canUndo() &&
+        stdMenuItem({
+          id: 'UNDO',
+          textContent: 'Undo',
+          action: this.actions.UNDO.action,
+          left: (b) => [b.icon(icons.Undo2)]
+        }),
+
+      this.editor.canRedo() &&
+        stdMenuItem({
+          id: 'REDO',
+          textContent: 'Redo',
+          action: this.actions.REDO.action,
+          left: (b) => [b.icon(icons.Redo2)]
         }),
 
       // #region focus ops

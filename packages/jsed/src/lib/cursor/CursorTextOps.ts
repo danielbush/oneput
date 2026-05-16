@@ -2,10 +2,31 @@ import * as token from '../token/token.js';
 import * as space from '../token/space.js';
 import { isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import { deleteHighestEmptyTree } from '../focus/focusable.js';
 import type { UserInputOpts } from '../input/UserInput.js';
+import { type RemoveTokenPlan } from '../token/token.mutate.js';
+import { type DeleteHighestEmptySubtreePlan } from '../focus/focusable.mutate.js';
+import { executeDelete, planDelete } from './CursorTextOps.mutate.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
+
+export type CursorDeletePlan =
+  | {
+      type: 'delete-noop';
+      undoable: false;
+    }
+  | {
+      type: 'delete';
+      undoable: true;
+      deletionType: CursorDeleteOpts['type'];
+      current: HTMLElement;
+      prevCrs: HTMLElement | null;
+      nextCrs: HTMLElement | null;
+      parentElement: HTMLElement;
+      removePlan: RemoveTokenPlan;
+      removeParent: boolean;
+      deleteHighestEmptySubtreePlan: DeleteHighestEmptySubtreePlan | null;
+      inputCursorPosition: UserInputOpts['inputCursorPosition'];
+    };
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {
@@ -15,27 +36,23 @@ export class CursorTextOps {
   private constructor(private state: CursorState) {}
 
   /** Delete the current TOKEN. */
-  delete({ type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
+  delete(opts?: CursorDeleteOpts): CursorDeletePlan {
+    /*
     if (!this.state.isOnToken()) return;
     const current = this.state.getPlace();
     const prevCrs = this.state.motion.getPrevious();
     const nextCrs = this.state.motion.getNext();
     const parentNode = current.parentNode as HTMLElement;
-    const [prevSibling, nextSibling] = token.remove(current);
+    const removePlan = token.remove(current);
+    const prevSibling = removePlan.previousVisibleSibling;
+    const nextSibling = removePlan.nextVisibleSibling;
     let inputCursorPosition: UserInputOpts['inputCursorPosition'] = 'end';
     if (type === 'tokenDeletion' || !prevCrs) {
-      // !prevCrs = if we hit the beginning of all editable text, go into
-      // selectAll mode; keeping a caret (if we were in one) doesn't make sense.
-      // Other option is to do nothing an let the caret just sit.
       inputCursorPosition = 'selectAll';
     }
     const userInputOpts: UserInputOpts = { inputCursorPosition };
 
-    // prev is NOT a token....
-
     if (!prevCrs && !nextCrs) {
-      // There's no prevCrs or nextCrs position We'll place the CURSOR on an
-      // anchor so it has somewhere to go.
       const anchor = token.createAnchor();
       if (prevSibling) {
         token.insertAfter(anchor, prevSibling);
@@ -55,12 +72,10 @@ export class CursorTextOps {
     }
 
     this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
-  }
-
-  /** Replace the value of the current TOKEN with a new value. */
-  replace(val: string): void {
-    if (!this.state.isOnToken()) return;
-    token.replaceText(this.state.getPlace(), val);
+    */
+    const plan = planDelete(this.state, opts);
+    executeDelete(this.state, plan);
+    return plan;
   }
 
   /**
@@ -72,7 +87,7 @@ export class CursorTextOps {
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
     if (!firstPart) return null;
 
-    this.replace(firstPart);
+    token.replaceText(currentToken, firstPart);
     let lastToken: HTMLElement = currentToken;
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
@@ -138,7 +153,7 @@ export class CursorTextOps {
   }
 
   /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
-  splitBefore(): HTMLElement | null {
+  private splitBefore(): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const [before] = token.splitBefore(this.state.getPlace());
     // We may end up in a new token, so we need to update the focus.
@@ -147,7 +162,7 @@ export class CursorTextOps {
   }
 
   /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
-  splitAfter(): HTMLElement | null {
+  private splitAfter(): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const [, after] = token.splitAfter(this.state.getPlace());
     const firstTok = this.state.tokenizer.tokenizeLineAt(after);

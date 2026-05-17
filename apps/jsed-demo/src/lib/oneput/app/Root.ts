@@ -30,21 +30,27 @@ export class Root implements AppObject {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
   };
 
+  actions = {
+    EDIT: {
+      action: () => {
+        const docRoot = document.querySelector('#test-doc') as HTMLElement;
+        this.ctl.app.run(
+          this.create.EditDocumentUI({
+            document: this.create.JsedDocument(docRoot)
+          })
+        );
+        this.ctl.menu.closeMenu();
+      }
+    }
+  };
+
   menu = () => ({
     id: 'root',
     items: [
       stdMenuItem({
         id: 'load-doc',
         textContent: 'Start editing...',
-        action: async () => {
-          const docRoot = document.querySelector('#test-doc') as HTMLElement;
-          this.ctl.app.run(
-            this.create.EditDocumentUI({
-              document: this.create.JsedDocument(docRoot)
-            })
-          );
-          this.ctl.menu.closeMenu();
-        },
+        action: this.actions.EDIT.action,
         left: (b) => [b.icon(icons.File)]
       })
     ]

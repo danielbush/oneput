@@ -28,6 +28,8 @@ export class Root implements AppObject {
 
   onStart = () => {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
+    // Edit straight away...
+    this.actions.EDIT.action();
   };
 
   actions = {

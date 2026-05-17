@@ -10,7 +10,7 @@ import {
 import * as token from '../token/token.js';
 import { getParent, findNextNode, findPreviousNode } from '../core/walk.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
-import { getNextSiblingNode, getPreviousSiblingNode } from '../core/sibling.js';
+import { getNextSibling, getPreviousSibling } from '../core/sibling.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
 
@@ -170,14 +170,14 @@ export class Nav {
 
   #sibnext = () =>
     this.#FOCUS
-      ? (getNextSiblingNode(this.#FOCUS, this.doc.root, {
+      ? (getNextSibling(this.#FOCUS, this.doc.root, {
           visit: isFocusable
         }) as HTMLElement)
       : null;
 
   #sibprev = () =>
     this.#FOCUS
-      ? (getPreviousSiblingNode(this.#FOCUS, this.doc.root, {
+      ? (getPreviousSibling(this.#FOCUS, this.doc.root, {
           visit: isFocusable
         }) as HTMLElement)
       : null;

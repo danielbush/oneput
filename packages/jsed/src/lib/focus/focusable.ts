@@ -1,6 +1,6 @@
 import { canCreateWithAnchor } from '../core/dom-rules.js';
 import * as domRules from '../core/dom-rules.js';
-import { getNextVisibleNodeSibling, getPreviousVisibleNodeSibling } from '../core/sibling.js';
+import { getNextNodeSibling, getPreviousNodeSibling } from '../core/sibling.js';
 import {
   isFocusable,
   isInlineFlow,
@@ -36,7 +36,7 @@ export function isEmpty(el: Element): boolean {
   if (isToken(el.firstChild)) {
     return false;
   }
-  return !getNextVisibleNodeSibling(el.firstChild);
+  return !getNextNodeSibling(el.firstChild);
 }
 
 /**
@@ -104,7 +104,7 @@ export function deleteHighestEmptyTree(el: Element, ceiling?: Element) {
   for (let parent = el.parentElement; parent && parent !== ceiling; parent = parent.parentElement) {
     const wouldBeEmptyWithoutChild =
       // highest.parentElement === parent &&
-      !getPreviousVisibleNodeSibling(highest) && !getNextVisibleNodeSibling(highest);
+      !getPreviousNodeSibling(highest) && !getNextNodeSibling(highest);
 
     if (!wouldBeEmptyWithoutChild) {
       break;

@@ -16,12 +16,12 @@ import {
 import {
   getPreviousTokenSibling,
   getNextTokenSibling,
-  getPreviousVisibleSibling,
-  getNextVisibleSibling,
-  getNextVisibleNodeSibling,
-  getPreviousVisibleNodeSibling,
-  getNextSiblingNode,
-  getPreviousSiblingNode
+  getPreviousElementSibling,
+  getNextElementSibling,
+  getNextNodeSibling,
+  getPreviousNodeSibling,
+  getNextSibling,
+  getPreviousSibling
 } from '../core/sibling.js';
 import {
   ensureSeparatorAfter,
@@ -124,7 +124,7 @@ export function getAnchorAfterTagInsertionPoint(
     return null;
   }
 
-  const next = getNextSiblingNode(focus, focus.parentNode, {
+  const next = getNextSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -170,7 +170,7 @@ export function getRemovableAnchorAfterTag(focus: HTMLElement): HTMLElement | nu
     return null;
   }
 
-  const next = getNextSiblingNode(focus, focus.parentNode, {
+  const next = getNextSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -184,7 +184,7 @@ export function getRemovableAnchorAfterTag(focus: HTMLElement): HTMLElement | nu
   }
 
   if (next instanceof Text && isWhitespaceTextNode(next)) {
-    const nextAfterWhitespace = getNextSiblingNode(next, focus.parentNode, {
+    const nextAfterWhitespace = getNextSibling(next, focus.parentNode, {
       visit: (node) => {
         if (node.nodeType === Node.TEXT_NODE) {
           return true;
@@ -227,7 +227,7 @@ export function getAnchorBeforeTagInsertionPoint(
     return null;
   }
 
-  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+  const previous = getPreviousSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -273,7 +273,7 @@ export function getRemovableAnchorBeforeTag(focus: HTMLElement): HTMLElement | n
     return null;
   }
 
-  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+  const previous = getPreviousSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -287,7 +287,7 @@ export function getRemovableAnchorBeforeTag(focus: HTMLElement): HTMLElement | n
   }
 
   if (previous instanceof Text && isWhitespaceTextNode(previous)) {
-    const previousBeforeWhitespace = getPreviousSiblingNode(previous, focus.parentNode, {
+    const previousBeforeWhitespace = getPreviousSibling(previous, focus.parentNode, {
       visit: (node) => {
         if (node.nodeType === Node.TEXT_NODE) {
           return true;
@@ -386,8 +386,8 @@ export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTM
   const separatorAfter = getSeparatorAfter(token);
 
   // Scan elements
-  const prevEl = getPreviousVisibleSibling(token);
-  const nextEl = getNextVisibleSibling(token);
+  const prevEl = getPreviousElementSibling(token);
+  const nextEl = getNextElementSibling(token);
 
   token.remove();
 
@@ -397,11 +397,11 @@ export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTM
   }
 
   if (separatorBefore) {
-    if (!getNextVisibleNodeSibling(separatorBefore)) {
+    if (!getNextNodeSibling(separatorBefore)) {
       // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
       separatorBefore.remove();
     }
-    if (!getPreviousVisibleNodeSibling(separatorBefore)) {
+    if (!getPreviousNodeSibling(separatorBefore)) {
       separatorBefore.remove();
     }
   }

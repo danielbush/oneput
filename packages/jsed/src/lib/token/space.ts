@@ -1,10 +1,10 @@
 import {
-  getNextSiblingNode,
-  getNextVisibleNodeSibling,
-  getNextVisibleSibling,
-  getPreviousSiblingNode,
-  getPreviousVisibleNodeSibling,
-  getPreviousVisibleSibling
+  getNextSibling,
+  getNextNodeSibling,
+  getNextElementSibling,
+  getPreviousSibling,
+  getPreviousNodeSibling,
+  getPreviousElementSibling
 } from '../core/sibling.js';
 import {
   isIgnorable,
@@ -17,12 +17,12 @@ import {
 
 // #region Separator (Space) utils
 export function getSeparatorBefore(token: HTMLElement): Text | null {
-  const prev = getPreviousVisibleNodeSibling(token);
+  const prev = getPreviousNodeSibling(token);
   return isWhitespaceTextNode(prev) ? prev : null;
 }
 
 export function getSeparatorAfter(token: HTMLElement): Text | null {
-  const next = getNextVisibleNodeSibling(token);
+  const next = getNextNodeSibling(token);
   return isWhitespaceTextNode(next) ? next : null;
 }
 
@@ -136,7 +136,7 @@ export function canInsertSpaceBeforeToken(token: HTMLElement): boolean {
     return false;
   }
 
-  const previous = getPreviousVisibleSibling(token);
+  const previous = getPreviousElementSibling(token);
   if (
     !previous ||
     isToken(previous) ||
@@ -168,7 +168,7 @@ export function getRemovableSpaceBeforeToken(token: HTMLElement): Text | null {
     return null;
   }
 
-  const previous = getPreviousVisibleSibling(token);
+  const previous = getPreviousElementSibling(token);
   if (!previous || isToken(previous)) {
     return null;
   }
@@ -190,7 +190,7 @@ export function canInsertSpaceAfterToken(token: HTMLElement): boolean {
     return false;
   }
 
-  const next = getNextVisibleSibling(token);
+  const next = getNextElementSibling(token);
   if (!next || isToken(next) || (isInlineFlow(next) && subtreeStartsWithWhitespace(next))) {
     return false;
   }
@@ -218,7 +218,7 @@ export function getRemovableSpaceAfterToken(token: HTMLElement): Text | null {
     return null;
   }
 
-  const next = getNextVisibleSibling(token);
+  const next = getNextElementSibling(token);
   if (!next || isToken(next)) {
     return null;
   }
@@ -253,7 +253,7 @@ export function canInsertSpaceAfterTag(focus: HTMLElement): boolean {
     return false;
   }
 
-  const next = getNextSiblingNode(focus, focus.parentNode, {
+  const next = getNextSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -283,7 +283,7 @@ export function insertSpaceAfterTag(focus: HTMLElement, value = ' '): Text | nul
     return null;
   }
 
-  const next = getNextSiblingNode(focus, focus.parentNode, {
+  const next = getNextSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -302,7 +302,7 @@ export function getRemovableSpaceAfterTag(focus: HTMLElement): Text | null {
     return null;
   }
 
-  const next = getNextSiblingNode(focus, focus.parentNode, {
+  const next = getNextSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -349,7 +349,7 @@ export function canInsertSpaceBeforeTag(focus: HTMLElement): boolean {
     return false;
   }
 
-  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+  const previous = getPreviousSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;
@@ -389,7 +389,7 @@ export function getRemovableSpaceBeforeTag(focus: HTMLElement): Text | null {
     return null;
   }
 
-  const previous = getPreviousSiblingNode(focus, focus.parentNode, {
+  const previous = getPreviousSibling(focus, focus.parentNode, {
     visit: (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         return true;

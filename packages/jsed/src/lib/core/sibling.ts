@@ -8,7 +8,7 @@
 import { isIgnorable, isToken } from './taxonomy.js';
 import { shouldVisit, type Walk2Params } from './walk.js';
 
-export function getNextSiblingNode(
+export function getNextSibling(
   start: ParentNode | ChildNode,
   ceiling: ParentNode | ChildNode,
   params?: Walk2Params
@@ -29,7 +29,7 @@ export function getNextSiblingNode(
   return null;
 }
 
-export function getPreviousSiblingNode(
+export function getPreviousSibling(
   start: ParentNode | ChildNode,
   ceiling: ParentNode | ChildNode,
   params?: Walk2Params
@@ -50,7 +50,7 @@ export function getPreviousSiblingNode(
   return null;
 }
 
-export function getPreviousVisibleNodeSibling(el: Node): Node | null {
+export function getPreviousNodeSibling(el: Node): Node | null {
   let prev = el.previousSibling;
   while (prev && isIgnorable(prev)) {
     prev = prev.previousSibling;
@@ -58,7 +58,7 @@ export function getPreviousVisibleNodeSibling(el: Node): Node | null {
   return prev;
 }
 
-export function getNextVisibleNodeSibling(el: Node): Node | null {
+export function getNextNodeSibling(el: Node): Node | null {
   let next = el.nextSibling;
   while (next && isIgnorable(next)) {
     next = next.nextSibling;
@@ -70,7 +70,7 @@ export function getNextVisibleNodeSibling(el: Node): Node | null {
  * Get previous visible (non-IGNORABLE) element sibling.
  * Walks backwards skipping IGNORABLE's. Returns null if none found.
  */
-export function getPreviousVisibleSibling(el: HTMLElement): HTMLElement | null {
+export function getPreviousElementSibling(el: HTMLElement): HTMLElement | null {
   let prev = el.previousElementSibling;
   while (prev && isIgnorable(prev)) {
     prev = prev.previousElementSibling;
@@ -82,7 +82,7 @@ export function getPreviousVisibleSibling(el: HTMLElement): HTMLElement | null {
  * Get next visible (non-IGNORABLE) element sibling.
  * Walks forward skipping IGNORABLE's. Returns null if none found.
  */
-export function getNextVisibleSibling(el: HTMLElement): HTMLElement | null {
+export function getNextElementSibling(el: HTMLElement): HTMLElement | null {
   let next = el.nextElementSibling as HTMLElement | null;
   while (next && isIgnorable(next)) {
     next = next.nextElementSibling as HTMLElement | null;
@@ -100,7 +100,7 @@ export function getNextVisibleSibling(el: HTMLElement): HTMLElement | null {
  * stuff, so we use a wrapper here.
  */
 export function getPreviousTokenSibling(el: HTMLElement): HTMLElement | null {
-  const prev = getPreviousVisibleSibling(el);
+  const prev = getPreviousElementSibling(el);
   if (isToken(prev)) {
     return prev;
   }
@@ -111,7 +111,7 @@ export function getPreviousTokenSibling(el: HTMLElement): HTMLElement | null {
  * Similar to getPreviousTokenSibling but for the next SIBLING.
  */
 export function getNextTokenSibling(el: HTMLElement): HTMLElement | null {
-  const next = getNextVisibleSibling(el);
+  const next = getNextElementSibling(el);
   if (isToken(next)) {
     return next;
   }

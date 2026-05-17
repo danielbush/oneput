@@ -8,15 +8,11 @@
 import { isIgnorable, isToken } from './taxonomy.js';
 import { shouldVisit, type Walk2Params } from './walk.js';
 
-export function getNextSibling(
-  start: ParentNode | ChildNode,
-  ceiling: ParentNode | ChildNode,
-  params?: Walk2Params
-): ParentNode | ChildNode | null {
+export function getNextSibling(start: Node, ceiling: Node, params?: Walk2Params): Node | null {
   if (start === ceiling) {
     return null;
   }
-  let next: ParentNode | ChildNode | null | undefined = start;
+  let next: Node | null | undefined = start;
   for (;;) {
     next = next?.nextSibling;
     if (!next) {
@@ -29,15 +25,11 @@ export function getNextSibling(
   return null;
 }
 
-export function getPreviousSibling(
-  start: ParentNode | ChildNode,
-  ceiling: ParentNode | ChildNode,
-  params?: Walk2Params
-): ParentNode | ChildNode | null {
+export function getPreviousSibling(start: Node, ceiling: Node, params?: Walk2Params): Node | null {
   if (start === ceiling) {
     return null;
   }
-  let prev: ParentNode | ChildNode | null | undefined = start;
+  let prev: Node | null | undefined = start;
   for (;;) {
     prev = prev?.previousSibling;
     if (!prev) {

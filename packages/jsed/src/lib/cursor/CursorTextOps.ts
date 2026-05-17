@@ -21,7 +21,6 @@ export class CursorTextOps {
     const prevCrs = this.state.motion.getPrevious();
     const nextCrs = this.state.motion.getNext();
     const parentNode = current.parentNode as HTMLElement;
-    const [prevSibling, nextSibling] = token.remove(current);
     let inputCursorPosition: UserInputOpts['inputCursorPosition'] = 'end';
     if (type === 'tokenDeletion' || !prevCrs) {
       // !prevCrs = if we hit the beginning of all editable text, go into
@@ -31,16 +30,16 @@ export class CursorTextOps {
     }
     const userInputOpts: UserInputOpts = { inputCursorPosition };
 
-    // prev is NOT a token....
+    const [prevElementSib, nextElementSib] = token.remove(current);
 
     if (!prevCrs && !nextCrs) {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
       const anchor = token.createAnchor();
-      if (prevSibling) {
-        token.insertAfter(anchor, prevSibling);
-      } else if (nextSibling) {
-        token.insertBefore(anchor, nextSibling);
+      if (prevElementSib) {
+        token.insertAfter(anchor, prevElementSib);
+      } else if (nextElementSib) {
+        token.insertBefore(anchor, nextElementSib);
       } else {
         token.append(anchor, parentNode);
       }
@@ -48,7 +47,7 @@ export class CursorTextOps {
       return;
     }
 
-    if (!prevSibling && !nextSibling) {
+    if (!prevElementSib && !nextElementSib) {
       let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
       token.removeParent(parentNode);
       deleteHighestEmptyTree(p, this.state.document.root);

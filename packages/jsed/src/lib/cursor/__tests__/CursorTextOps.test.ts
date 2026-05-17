@@ -77,14 +77,14 @@ describe('splitAtToken', () => {
   });
 });
 
-describe('replace', () => {
+describe('replaceWithText', () => {
   test('TOKEN text', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    cursor.replace('goodbye');
+    cursor.replaceWithText('goodbye');
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('goodbye');
@@ -98,7 +98,7 @@ describe('replace', () => {
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
-    cursor.replace('ccc');
+    cursor.replaceWithText('ccc');
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('ccc');
@@ -114,14 +114,12 @@ describe('replace', () => {
     expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
-    cursor.replace('oops');
+    cursor.replaceWithText('oops');
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
-});
 
-describe('replaceWithText', () => {
   test('multiple TOKEN replacement', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));

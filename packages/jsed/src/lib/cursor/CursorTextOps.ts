@@ -2,8 +2,8 @@ import * as token from '../token/token.js';
 import * as space from '../token/space.js';
 import { isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import { deleteHighestEmptyTree } from '../focus/focusable.js';
 import type { UserInputOpts } from '../input/UserInput.js';
+import { deleteHighestEmptyTree } from '../focus/focusable.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -57,12 +57,6 @@ export class CursorTextOps {
     this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
   }
 
-  /** Replace the value of the current TOKEN with a new value. */
-  replace(val: string): void {
-    if (!this.state.isOnToken()) return;
-    token.replaceText(this.state.getPlace(), val);
-  }
-
   /**
    * Similar to insertTextAfter.
    */
@@ -72,7 +66,7 @@ export class CursorTextOps {
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
     if (!firstPart) return null;
 
-    this.replace(firstPart);
+    token.replaceText(currentToken, firstPart);
     let lastToken: HTMLElement = currentToken;
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
@@ -138,7 +132,7 @@ export class CursorTextOps {
   }
 
   /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
-  splitBefore(): HTMLElement | null {
+  private splitBefore(): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const [before] = token.splitBefore(this.state.getPlace());
     // We may end up in a new token, so we need to update the focus.
@@ -147,7 +141,7 @@ export class CursorTextOps {
   }
 
   /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
-  splitAfter(): HTMLElement | null {
+  private splitAfter(): HTMLElement | null {
     if (!this.state.isOnToken()) return null;
     const [, after] = token.splitAfter(this.state.getPlace());
     const firstTok = this.state.tokenizer.tokenizeLineAt(after);

@@ -56,9 +56,7 @@ export class CursorTextOps {
       token.remove(current);
     }
     if (canDeleteAncestors) {
-      let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
-      token.removeParent(parentNode);
-      deleteHighestEmptyTree(p, this.state.document.root);
+      deleteHighestEmptyTree(parentNode, this.state.document.root);
     }
 
     // Anchor and cursor placement....

@@ -51,6 +51,11 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 bugs
 
+- fix: cannot delete ISLAND's using CURSOR;
+  - COMMENT: there is no path to `onInputSelectionChange` (events controller) because we disable the input
+  - ideas
+    - we either have to have backspace key that only triggers if we're editing and cursor is on an island
+    - we allow text in the input eg "[island]" - and deleting it would signify deletion; but we have to make sure partial deletion is a no-op; might get weird
 - fix: backspace deleting hits the beginning of paragraph or even an inline flow eg em-tag and stops there
 - fix: anchor tokens disappear when cursor uses insert markers
   - COMMENT: I think the ::after pseudoelement is being replaced

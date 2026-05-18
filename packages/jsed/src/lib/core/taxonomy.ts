@@ -133,7 +133,10 @@ export function isToken(el: Node | null | undefined): boolean {
   return false;
 }
 
-export function isAnchor(el: Node): boolean {
+export function isAnchor(el: Node | null): boolean {
+  if (!el) {
+    return false;
+  }
   return isToken(el) && (el as HTMLElement).classList.contains(JSED_ANCHOR_CLASS);
 }
 

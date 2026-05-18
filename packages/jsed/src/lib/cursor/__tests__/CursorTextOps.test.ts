@@ -271,7 +271,7 @@ describe('delete', () => {
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
     expect(tokens(doc)).toHaveLength(2);
-    expect(identify(cursor.getPlace().previousSibling)).toBe('d("foo")');
+    expect(identify(cursor.getPlace().nextSibling)).toBe('d("foo")');
   });
 
   test('ANCHOR ∅<em>foo</em>∅', () => {
@@ -291,7 +291,7 @@ describe('delete', () => {
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
     expect(tokens(doc)).toHaveLength(2);
-    expect(identify(cursor.getPlace().previousSibling)).toBe('d("foo")');
+    expect(identify(cursor.getPlace().nextSibling)).toBe('d("foo")');
   });
 
   test('ANCHOR ...<em>bbb</em>...', () => {
@@ -314,7 +314,7 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(identify(cursor.getPlace().previousSibling)).toBe('d("bbb")');
+    expect(identify(cursor.getPlace().nextSibling)).toBe('d("bbb")');
   });
 
   test.todo('ANCHOR ...<em>A</em>...', () => {

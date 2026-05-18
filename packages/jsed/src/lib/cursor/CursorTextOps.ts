@@ -78,7 +78,7 @@ export class CursorTextOps {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
       const anchor = token.createAnchor();
-      token.insertAfter(anchor, current);
+      current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
       return;
     }
@@ -94,7 +94,7 @@ export class CursorTextOps {
     // => ...<em>...</em>[A]</p>
     if (prevElementSib && !isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
       const anchor = token.createAnchor();
-      prevElementSib.insertAdjacentElement('afterend', anchor);
+      current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
       return;
     }
@@ -103,7 +103,7 @@ export class CursorTextOps {
     // => ...<em>[A]</em>...</p>
     if (!isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
       const anchor = token.createAnchor();
-      parentNode.append(anchor);
+      current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
       return;
     }

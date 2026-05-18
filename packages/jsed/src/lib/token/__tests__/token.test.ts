@@ -17,7 +17,13 @@ import {
   splitAfter,
   splitBefore
 } from '../token.js';
-import { isAnchor, isImplicitLine, JSED_IMPLICIT_CLASS } from '../../core/taxonomy.js';
+import {
+  isAnchor,
+  isImplicitLine,
+  JSED_DELETED_CLASS,
+  JSED_IGNORE_CLASS,
+  JSED_IMPLICIT_CLASS
+} from '../../core/taxonomy.js';
 import {
   byId,
   div,
@@ -886,6 +892,51 @@ function buildParent(...children: Node[]): HTMLElement {
 }
 
 describe('remove', () => {
+  test('sets classes, does not remove from DOM', () => {
+    // arrange
+    const bar = createToken('bar');
+    buildParent(
+      //
+      bar
+    );
+
+    // act
+    remove(bar);
+
+    // assert
+    expect(bar.parentNode).toBeDefined();
+    expect(bar.classList).toContain(JSED_DELETED_CLASS);
+    expect(bar.classList).toContain(JSED_IGNORE_CLASS);
+  });
+
+  test('spaces', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    const baz = createToken('baz');
+    const parent = buildParent(
+      //
+      foo,
+      document.createTextNode(' '),
+      bar,
+      document.createTextNode(' '),
+      baz
+    );
+
+    // act
+    remove(bar);
+    console.log(parent.outerHTML);
+
+    // assert
+    expect(bar.parentNode).toBeDefined();
+    expect(bar.classList).toContain(JSED_DELETED_CLASS);
+    expect(bar.classList).toContain(JSED_IGNORE_CLASS);
+  });
+});
+
+// TODO: Remove these once we're happy with flipping rather then detaching tokens.
+/*
+describe('remove (destructive)', () => {
   test('middle TOKEN', () => {
     // arrange
     const foo = createToken('foo');
@@ -1026,3 +1077,4 @@ describe('remove', () => {
     expect(parent.children).toHaveLength(0);
   });
 });
+*/

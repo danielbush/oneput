@@ -1556,7 +1556,7 @@ describe('Editor', () => {
       await userInput.typeText('');
 
       // assert
-      expect(line.querySelectorAll('.jsed-token')).toHaveLength(1);
+      expect(line.querySelectorAll('.jsed-token')).toHaveLength(2);
       expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
     });
 

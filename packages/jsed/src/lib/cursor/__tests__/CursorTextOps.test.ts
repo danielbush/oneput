@@ -4,7 +4,7 @@ import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
-import { JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { JSED_DELETED_CLASS, JSED_IGNORE_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -173,7 +173,16 @@ describe('insertTextBefore', () => {
 describe('delete', () => {
   test('middle TOKEN', () => {
     // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
+    const doc = makeRoot(
+      p(
+        //
+        t('hello'),
+        s(),
+        t('world'),
+        s(),
+        t('foo')
+      )
+    );
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
@@ -185,7 +194,14 @@ describe('delete', () => {
 
   test('last TOKEN', () => {
     // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const doc = makeRoot(
+      p(
+        //
+        t('hello'),
+        s(),
+        t('world')
+      )
+    );
     const { cursor } = createCursor(doc, tokens(doc)[1]);
 
     // act
@@ -198,7 +214,14 @@ describe('delete', () => {
   test('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
-      p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
+      p(
+        //
+        t('aaa'),
+        s(),
+        '<span class="katex" style="display:inline;">x²</span>',
+        s(),
+        t('bbb')
+      )
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
     const { cursor } = createCursor(doc, island);
@@ -213,7 +236,12 @@ describe('delete', () => {
 
   test('ANCHOR no-op', () => {
     // arrange
-    const doc = makeRoot(p(a()));
+    const doc = makeRoot(
+      p(
+        //
+        a()
+      )
+    );
     const { cursor } = createCursor(doc, tokens(doc)[0]);
     expect(identify(cursor.getPlace())).toBe('[anchor]');
 
@@ -268,7 +296,9 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
-    expect(cursor.getPlace().nextSibling).toBe(null);
+    expect(identify(cursor.getPlace().nextSibling)).toBe('bbb'); // it's not removed from dom
+    expect(cursor.getPlace().nextElementSibling?.classList).toContain(JSED_DELETED_CLASS);
+    expect(cursor.getPlace().nextElementSibling?.classList).toContain(JSED_IGNORE_CLASS);
   });
 });
 

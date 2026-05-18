@@ -156,6 +156,9 @@
   content: '\00A4';
 }
 
+/*
+Token pulsing background indicator
+*/
 .jsed-token-focus.jsed-token,
 .jsed-token-focus.jsed-anchor-token {
   position: relative;
@@ -180,10 +183,7 @@
 }
 
 /*
-Caret indicator: when the input has a collapsed caret in the TOKEN's text
-(jsed-crs-caret), the focus indicator collapses from a pulsing background
-to a pulsing underline. Range / empty input states (SELECT_ALL /
-SELECT_PARTIAL / EMPTY) have no caret class and keep the default pulse.
+Caret pulsing underline indicator
 */
 .jsed-token-focus.jsed-crs-caret.jsed-token,
 .jsed-token-focus.jsed-crs-caret.jsed-anchor-token {

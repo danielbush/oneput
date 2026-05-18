@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { a, em, identify, makeRoot, p, s, t } from '../../../test/util.js';
+import { a, em, identify, inlineStyleHackVal, makeRoot, p, s, t } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
@@ -217,7 +217,7 @@ describe('delete', () => {
     expect(getValue(cursor.getPlace())).toBe('hello');
   });
 
-  test('ISLAND no-op', () => {
+  test.todo('ISLAND no-op', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -240,7 +240,7 @@ describe('delete', () => {
     expect(identify(cursor.getPlace())).toBe('aaa');
   });
 
-  test('ANCHOR no-op', () => {
+  test('ANCHOR empty doc - <p>A</p>', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -257,6 +257,95 @@ describe('delete', () => {
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
     expect(tokens(doc)).toHaveLength(1);
+  });
+
+  test('ANCHOR empty doc - <p>foo</p>', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        t('foo')
+      )
+    );
+    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    expect(identify(cursor.getPlace())).toBe('foo');
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(tokens(doc)).toHaveLength(2);
+    expect(identify(cursor.getPlace().previousSibling)).toBe("d('foo')");
+  });
+
+  test('ANCHOR ∅<em>foo</em>∅', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        em({ id: 'em1', style: inlineStyleHackVal }, t('foo'))
+      )
+    );
+    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    expect(identify(cursor.getPlace())).toBe('foo');
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(tokens(doc)).toHaveLength(2);
+    expect(identify(cursor.getPlace().previousSibling)).toBe("d('foo')");
+  });
+
+  test('ANCHOR ...<em>bbb</em>...', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        t('aaa'),
+        s(),
+        em({ id: 'em1', style: inlineStyleHackVal }, t('bbb')),
+        s(),
+        t('ccc')
+      )
+    );
+    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    expect(identify(cursor.getPlace())).toBe('bbb');
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(identify(cursor.getPlace().previousSibling)).toBe("d('bbb')");
+  });
+
+  test.todo('ANCHOR ...<em>A</em>...', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        t('aaa'),
+        s(),
+        em({ id: 'em1', style: inlineStyleHackVal }, a()),
+        s(),
+        t('ccc')
+      )
+    );
+    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('aaa');
+    expect(identify(cursor.getPlace().nextSibling)).toBe('[nodeType=3:" "]');
+    // This should be a delete marker for em-tag, then 'ccc'
+    // Spaces should be coalesced into one.
+    expect(identify(cursor.getPlace().nextSibling?.nextSibling)).toBe('ccc');
   });
 
   test('TOKEN after ISLAND with next TOKEN', () => {

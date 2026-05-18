@@ -76,6 +76,7 @@ export class CursorTextOps {
       return;
     }
 
+    // DONE
     if (willCreateEmptyDocument) {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
@@ -101,6 +102,7 @@ export class CursorTextOps {
       return;
     }
 
+    // DONE
     // ...<em>[T]</em>...</p>
     // => ...<em>[A]</em>...</p>
     if (!isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {

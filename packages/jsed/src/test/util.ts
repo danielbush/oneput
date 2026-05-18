@@ -120,7 +120,7 @@ export function identify(el: Node | undefined | null): string {
   if (el.nodeType === el.ELEMENT_NODE) {
     return `[${(el as HTMLElement).tagName.toLowerCase()}]`;
   }
-  return `[nodeType=${el.nodeType}:{el.nodeValue}]`;
+  return `[nodeType=${el.nodeType}:"${el.nodeValue}"]`;
 }
 
 /**

@@ -130,7 +130,18 @@ export function isIgnorableNode(el: Node): boolean {
 export function isToken(el: Node | null | undefined): boolean {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
+    if (isIgnorableNode(el)) {
+      return false;
+    }
     return el.classList.contains(JSED_TOKEN_CLASS);
+  }
+  return false;
+}
+
+export function isDeletedToken(el: Node | null | undefined): boolean {
+  const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    return el.classList.contains(JSED_TOKEN_CLASS) && el.classList.contains(JSED_DELETED_CLASS);
   }
   return false;
 }

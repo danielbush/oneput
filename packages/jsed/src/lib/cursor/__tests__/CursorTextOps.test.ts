@@ -4,7 +4,12 @@ import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
-import { JSED_DELETED_CLASS, JSED_IGNORE_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import {
+  isDeletedToken,
+  JSED_DELETED_CLASS,
+  JSED_IGNORE_CLASS,
+  JSED_TOKEN_CLASS
+} from '../../core/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -171,7 +176,7 @@ describe('insertTextBefore', () => {
 });
 
 describe('delete', () => {
-  test('middle TOKEN', () => {
+  test('first TOKEN', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -190,6 +195,7 @@ describe('delete', () => {
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('world');
+    expect(identify(tokens(doc)[0])).toBe("d('hello')");
   });
 
   test('last TOKEN', () => {
@@ -231,7 +237,7 @@ describe('delete', () => {
     cursor.delete();
 
     // assert
-    expect(identify(cursor.getPlace())).toBe('[island:span]');
+    expect(identify(cursor.getPlace())).toBe('aaa');
   });
 
   test('ANCHOR no-op', () => {
@@ -296,9 +302,8 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
-    expect(identify(cursor.getPlace().nextSibling)).toBe('bbb'); // it's not removed from dom
-    expect(cursor.getPlace().nextElementSibling?.classList).toContain(JSED_DELETED_CLASS);
-    expect(cursor.getPlace().nextElementSibling?.classList).toContain(JSED_IGNORE_CLASS);
+    expect(identify(cursor.getPlace().nextElementSibling)).toBe("d('bbb')"); // not removed from dom
+    expect(isDeletedToken(cursor.getPlace().nextElementSibling)).toBe(true);
   });
 });
 

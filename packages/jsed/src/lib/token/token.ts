@@ -33,7 +33,7 @@ import {
 } from './space.js';
 import { getLine } from '../core/line.js';
 
-export function getValue(token: HTMLElement): string {
+export function getValue(token: Node): string {
   validate(token);
   if (isAnchor(token)) {
     return JSED_ANCHOR_CHAR;
@@ -92,7 +92,7 @@ function anchor2Token(token: HTMLElement): HTMLElement {
 /**
  * Assumes `isToken` is true, but checks for weird invalid states that might occur
  */
-function validate(token: HTMLElement): void {
+function validate(token: Node): void {
   if (isAnchor(token)) {
     return;
   }

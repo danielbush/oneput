@@ -3,9 +3,12 @@ import type { ViewportScrollerNullOptions } from '../lib/utilities/ViewportScrol
 import * as token from '../lib/token/token.js';
 import {
   isAnchor,
+  isDeletedToken,
   isIsland,
   isToken,
   JSED_ANCHOR_CLASS,
+  JSED_DELETED_CLASS,
+  JSED_IGNORE_CLASS,
   JSED_TOKEN_CLASS
 } from '../lib/core/taxonomy.js';
 
@@ -82,8 +85,15 @@ export const input = makeTag('input');
 /**
  * Create a TOKEN fixture.
  */
-export function t(text: string): string {
-  return span({ class: JSED_TOKEN_CLASS }, text);
+export function t(text: string, { deleted }: { deleted: boolean } = { deleted: false }): string {
+  return span(
+    {
+      class: deleted
+        ? `${JSED_TOKEN_CLASS} ${JSED_DELETED_CLASS} ${JSED_IGNORE_CLASS}`
+        : JSED_TOKEN_CLASS
+    },
+    text
+  );
 }
 
 /**
@@ -104,7 +114,8 @@ export function a(): string {
 export function identify(el: Node | undefined | null): string {
   if (!el) return `${el}`;
   if (isAnchor(el)) return '[anchor]';
-  if (isToken(el)) return token.getValue(el as HTMLElement);
+  if (isToken(el)) return token.getValue(el);
+  if (isDeletedToken(el)) return `d('${token.getValue(el)}')`;
   if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;
   if (el.nodeType === el.ELEMENT_NODE) {
     return `[${(el as HTMLElement).tagName.toLowerCase()}]`;

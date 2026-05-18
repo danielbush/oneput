@@ -1,7 +1,12 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, inlineStyleHack, a } from '../../../test/util.js';
+import { byId, makeRoot, div, p, em, inlineStyleHack, a, t, s } from '../../../test/util.js';
 import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
-import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import {
+  isDeletedToken,
+  isToken,
+  JSED_ANCHOR_CLASS,
+  JSED_TOKEN_CLASS
+} from '../../core/taxonomy.js';
 
 describe('tokenizeLineAt', () => {
   test('simple LINE: <p>foo bar baz</p>', () => {
@@ -272,6 +277,22 @@ describe('tokenizeLineAt', () => {
     expect(byId(doc, 'p1').querySelector('.jsed-token')).not.toBeNull();
     expect(byId(doc, 'p2').querySelector('.jsed-token')).not.toBeNull();
   });
+
+  test('should not over-tokenize deleted tokens', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('foo', { deleted: true }), s(), t('bar')));
+    const p1 = byId(doc, 'p1');
+    let foo = p1.firstElementChild as HTMLElement;
+    expect(isDeletedToken(foo)).toBe(true);
+
+    // act
+    tokenizeLineAt(p1);
+
+    // assert
+    foo = p1.firstElementChild as HTMLElement;
+    expect(isDeletedToken(foo)).toBe(true);
+    expect(foo.firstChild?.nodeValue).toBe('foo');
+  });
 });
 
 describe('detokenizeLine', () => {
@@ -361,5 +382,18 @@ describe('detokenizeLine', () => {
     expect(p1.childNodes[0]?.textContent).toBe('foo ');
     expect(p1.childNodes[1]).toBe(anchor);
     expect(p1.childNodes[2]?.textContent).toBe(' bar');
+  });
+
+  test('it should not touch deleted tokens', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('foo', { deleted: true }), s(), t('bar')));
+    const p1 = byId(doc, 'p1');
+
+    // act
+    detokenizeLine(p1);
+
+    // assert
+    const foo = p1.firstElementChild;
+    expect(isDeletedToken(foo)).toBe(true);
   });
 });

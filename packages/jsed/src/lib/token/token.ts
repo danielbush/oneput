@@ -381,30 +381,32 @@ export function remove(token: HTMLElement) {
     throw new Error('remove: token has no parentNode');
   }
 
-  // Scan space nodes
-  const separatorBefore = getSeparatorBefore(token);
-  const separatorAfter = getSeparatorAfter(token);
-
   token.classList.add(JSED_DELETED_CLASS);
   token.classList.add(JSED_IGNORE_CLASS);
 
+  // Scan space nodes
+  const separatorBefore = getSeparatorBefore(token);
+  const separatorAfter = getSeparatorAfter(token);
+  const removeNextSeparator = !!separatorAfter && separatorAfter;
+  const removePreviousSeparator =
+    !!separatorBefore &&
+    (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore)) &&
+    separatorBefore;
+
   // Collapse paired separators down to one.
-  if (separatorBefore && separatorAfter) {
+  if (removeNextSeparator) {
     separatorAfter.remove();
   }
-
-  if (separatorBefore) {
-    if (!getNextNodeSibling(separatorBefore)) {
-      // <em>... [foo]</em> - if we delete foo, we should delete the space before it:
-      separatorBefore.remove();
-    }
-    if (!getPreviousNodeSibling(separatorBefore)) {
-      separatorBefore.remove();
-    }
+  if (removePreviousSeparator) {
+    separatorBefore.remove();
   }
 
-  // Return surrounding elements if present.
-  return;
+  return {
+    type: 'delete-token',
+    token,
+    removeNextSeparator,
+    removePreviousSeparator
+  };
 }
 
 /**

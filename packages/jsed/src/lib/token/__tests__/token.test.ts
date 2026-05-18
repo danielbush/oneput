@@ -901,12 +901,18 @@ describe('remove', () => {
     );
 
     // act
-    remove(bar);
+    const rec = remove(bar);
 
     // assert
     expect(bar.parentNode).toBeDefined();
     expect(bar.classList).toContain(JSED_DELETED_CLASS);
     expect(bar.classList).toContain(JSED_IGNORE_CLASS);
+    expect(rec).toMatchObject({
+      type: 'delete-token',
+      token: bar,
+      removeNextSeparator: false,
+      removePreviousSeparator: false
+    });
   });
 
   test('spaces', () => {
@@ -914,23 +920,59 @@ describe('remove', () => {
     const foo = createToken('foo');
     const bar = createToken('bar');
     const baz = createToken('baz');
-    const parent = buildParent(
+    const sp1 = document.createTextNode(' ');
+    const sp2 = document.createTextNode(' ');
+    buildParent(
       //
       foo,
-      document.createTextNode(' '),
+      sp1,
       bar,
-      document.createTextNode(' '),
+      sp2,
       baz
     );
 
     // act
-    remove(bar);
-    console.log(parent.outerHTML);
+    const rec = remove(bar);
 
     // assert
     expect(bar.parentNode).toBeDefined();
     expect(bar.classList).toContain(JSED_DELETED_CLASS);
     expect(bar.classList).toContain(JSED_IGNORE_CLASS);
+    expect(rec).toMatchObject({
+      type: 'delete-token',
+      token: bar,
+      removeNextSeparator: sp2,
+      removePreviousSeparator: false
+    });
+  });
+
+  test('spaces 2', () => {
+    // arrange
+    const bar = createToken('bar');
+    const baz = createToken('baz');
+    const sp1 = document.createTextNode(' ');
+    const sp2 = document.createTextNode(' ');
+    buildParent(
+      //
+      sp1, // leading space - may be deliberate
+      bar,
+      sp2,
+      baz
+    );
+
+    // act
+    const rec = remove(bar);
+
+    // assert
+    expect(bar.parentNode).toBeDefined();
+    expect(bar.classList).toContain(JSED_DELETED_CLASS);
+    expect(bar.classList).toContain(JSED_IGNORE_CLASS);
+    expect(rec).toMatchObject({
+      type: 'delete-token',
+      token: bar,
+      removeNextSeparator: sp2,
+      removePreviousSeparator: sp1
+    });
   });
 });
 

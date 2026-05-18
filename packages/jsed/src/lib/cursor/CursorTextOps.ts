@@ -33,12 +33,53 @@ export class CursorTextOps {
     const currIsAnchor = isAnchor(current);
     const prevElementSib = getPreviousElementSibling(current);
     const nextElementSib = getNextElementSibling(current);
+    const willCreateEmptyDocument = !prevCrs && !nextCrs;
+    /**
+     * <p>[A]</p>
+     * ...<em>[A]</em>...
+     * => delete tag around ANCHOR + possibly more
+     */
+    const canDeleteAncestors =
+      !prevElementSib && !nextElementSib && currIsAnchor && !willCreateEmptyDocument;
+    /**
+     * ...<em>...</em>[A]</p>
+     * => ...<em>...[T]</em>[A]</p>
+     */
+    const skipAnchorDelete = currIsAnchor && !canDeleteAncestors;
+    const canDeleteToken = !skipAnchorDelete;
 
-    if (!prevCrs && !nextCrs) {
+    // Situations where we don't remove the token...
+
+    // Perform removals...
+
+    if (canDeleteToken) {
+      token.remove(current);
+    }
+    if (canDeleteAncestors) {
+      let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
+      token.removeParent(parentNode);
+      deleteHighestEmptyTree(p, this.state.document.root);
+    }
+
+    // Anchor and cursor placement....
+
+    if (skipAnchorDelete) {
+      if (prevCrs) {
+        this.state.place(prevCrs, userInputOpts);
+        return;
+      }
+      return;
+    }
+
+    if (canDeleteAncestors) {
+      this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
+      return;
+    }
+
+    if (willCreateEmptyDocument) {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
       const anchor = token.createAnchor();
-      token.remove(current);
       token.insertAfter(anchor, current);
       this.state.place(anchor, userInputOpts);
       return;
@@ -47,34 +88,9 @@ export class CursorTextOps {
     // <p>[T]A</p>
     // => <p>[A]</p>
     if (!prevElementSib && isAnchor(nextElementSib)) {
-      token.remove(current);
       this.state.place(nextElementSib!, userInputOpts);
       return;
     }
-
-    // <p>[A]</p>
-    // ...<em>[A]</em>...
-    // => delete tag around ANCHOR + possibly more
-    if (!prevElementSib && !nextElementSib && currIsAnchor) {
-      token.remove(current);
-      let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
-      token.removeParent(parentNode);
-      deleteHighestEmptyTree(p, this.state.document.root);
-      this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
-      return;
-    }
-
-    // ...<em>...</em>[A]</p>
-    // => ...<em>...[T]</em>[A]</p>
-    if (currIsAnchor) {
-      if (prevCrs) {
-        this.state.place(prevCrs, userInputOpts);
-        return;
-      }
-      return;
-    }
-
-    token.remove(current);
 
     // ...<em>...</em>T|</p>
     // => ...<em>...</em>[A]</p>

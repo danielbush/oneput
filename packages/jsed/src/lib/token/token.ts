@@ -11,13 +11,13 @@ import {
   JSED_ANCHOR_CHAR,
   JSED_TOKEN_CLASS,
   JSED_ANCHOR_CLASS,
-  JSED_TOKEN_COLLAPSED
+  JSED_TOKEN_COLLAPSED,
+  JSED_DELETED_CLASS,
+  JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
 import {
   getPreviousTokenSibling,
   getNextTokenSibling,
-  getPreviousElementSibling,
-  getNextElementSibling,
   getNextNodeSibling,
   getPreviousNodeSibling,
   getNextSibling,
@@ -375,7 +375,7 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
  * Remove the token and return the surroudning sibling elements if present
  * (these may or may not be tokens).
  */
-export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTMLElement | null] {
+export function remove(token: HTMLElement) {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
@@ -385,11 +385,8 @@ export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTM
   const separatorBefore = getSeparatorBefore(token);
   const separatorAfter = getSeparatorAfter(token);
 
-  // Scan elements
-  const prevEl = getPreviousElementSibling(token);
-  const nextEl = getNextElementSibling(token);
-
-  token.remove();
+  token.classList.add(JSED_DELETED_CLASS);
+  token.classList.add(JSED_IGNORE_CLASS);
 
   // Collapse paired separators down to one.
   if (separatorBefore && separatorAfter) {
@@ -407,7 +404,7 @@ export function remove(token: HTMLElement): [prev: HTMLElement | null, next: HTM
   }
 
   // Return surrounding elements if present.
-  return [prevEl, nextEl];
+  return;
 }
 
 /**

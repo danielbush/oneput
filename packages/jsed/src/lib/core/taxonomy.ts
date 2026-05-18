@@ -44,6 +44,8 @@ export const JSED_TOKEN_PADDED = 'jsed-token-padded';
 export const JSED_ANCHOR_CLASS = 'jsed-anchor-token';
 export const JSED_ANCHOR_CHAR = '\u00A4';
 
+export const JSED_DELETED_CLASS = 'jsed-deleted';
+
 /**
  * Where the jsed app mounts and renders.  It should not be part of the document
  * that is being edited.

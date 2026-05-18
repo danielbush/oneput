@@ -152,6 +152,10 @@
   cursor: pointer;
 }
 
+.jsed-token.jsed-deleted {
+  display: none;
+}
+
 .jsed-anchor-token::after {
   content: '\00A4';
 }

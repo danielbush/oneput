@@ -38,13 +38,8 @@ export class CursorTextOps {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
       const anchor = token.createAnchor();
-      if (prevElementSib) {
-        token.insertAfter(anchor, prevElementSib);
-      } else if (nextElementSib) {
-        token.insertBefore(anchor, nextElementSib);
-      } else {
-        token.append(anchor, parentNode);
-      }
+      token.remove(current);
+      token.insertAfter(anchor, current);
       this.state.place(anchor, userInputOpts);
       return;
     }

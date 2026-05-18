@@ -1,9 +1,10 @@
 import * as token from '../token/token.js';
 import * as space from '../token/space.js';
-import { isToken } from '../core/taxonomy.js';
+import { isAnchor, isLineSibling, isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import { deleteHighestEmptyTree } from '../focus/focusable.js';
+import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -29,8 +30,9 @@ export class CursorTextOps {
       inputCursorPosition = 'selectAll';
     }
     const userInputOpts: UserInputOpts = { inputCursorPosition };
-
-    const [prevElementSib, nextElementSib] = token.remove(current);
+    const currIsAnchor = isAnchor(current);
+    const prevElementSib = getPreviousElementSibling(current);
+    const nextElementSib = getNextElementSibling(current);
 
     if (!prevCrs && !nextCrs) {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
@@ -47,10 +49,54 @@ export class CursorTextOps {
       return;
     }
 
-    if (!prevElementSib && !nextElementSib) {
+    // <p>[T]A</p>
+    // => <p>[A]</p>
+    if (!prevElementSib && isAnchor(nextElementSib)) {
+      token.remove(current);
+      this.state.place(nextElementSib!, userInputOpts);
+      return;
+    }
+
+    // <p>[A]</p>
+    // ...<em>[A]</em>...
+    // => delete tag around ANCHOR + possibly more
+    if (!prevElementSib && !nextElementSib && currIsAnchor) {
+      token.remove(current);
       let p: HTMLElement | null = parentNode.parentNode as HTMLElement;
       token.removeParent(parentNode);
       deleteHighestEmptyTree(p, this.state.document.root);
+      this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
+      return;
+    }
+
+    // ...<em>...</em>[A]</p>
+    // => ...<em>...[T]</em>[A]</p>
+    if (currIsAnchor) {
+      if (prevCrs) {
+        this.state.place(prevCrs, userInputOpts);
+        return;
+      }
+      return;
+    }
+
+    token.remove(current);
+
+    // ...<em>...</em>T|</p>
+    // => ...<em>...</em>[A]</p>
+    if (prevElementSib && !isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
+      const anchor = token.createAnchor();
+      prevElementSib.insertAdjacentElement('afterend', anchor);
+      this.state.place(anchor, userInputOpts);
+      return;
+    }
+
+    // ...<em>[T]</em>...</p>
+    // => ...<em>[A]</em>...</p>
+    if (!isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
+      const anchor = token.createAnchor();
+      parentNode.append(anchor);
+      this.state.place(anchor, userInputOpts);
+      return;
     }
 
     this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);

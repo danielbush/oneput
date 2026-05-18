@@ -8,11 +8,13 @@
   <p>This is just a simple paragraph of text. And this is a second sentence.</p>
   <p>Here's a second paragraph with more text in it.</p>
   <p>aaa bbb <em>ccc ddd</em> eee fff</p>
+  <p>aaa bbb <em>ccc <strong>ddd</strong></em> eee fff</p>
 
   <h2 class="jsed-ignore">Bulleted lists</h2>
   <ul>
     <li>no para</li>
     <li>aaa bbb <em>ccc ddd</em> eee fff</li>
+    <li>aaa bbb <em>ccc <strong>ddd</strong></em> eee fff</li>
     <li>
       <p>1st para</p>
       <p>2nd para - try: split parent before this p-tag</p>

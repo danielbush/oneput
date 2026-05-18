@@ -236,7 +236,10 @@ export function isLine(el: Node | null): boolean {
 }
 
 /** Predicate for LINE_SIBLING traversal. */
-export function isLineSibling(el: Node): boolean {
+export function isLineSibling(el: Node | null): boolean {
+  if (!el) {
+    return false;
+  }
   if (isToken(el) || isIsland(el)) {
     return true;
   }

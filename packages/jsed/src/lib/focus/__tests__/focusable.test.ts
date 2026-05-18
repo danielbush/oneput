@@ -3,7 +3,7 @@ import { byId, div, makeRoot, p } from '../../../test/util';
 import {
   copyEmptyNext,
   copyEmptyPrevious,
-  deleteHighestEmptyTree,
+  deleteHighestEmpty,
   findNextFocusableOutside,
   findPreviousFocusableOutside
 } from '../../focus/focusable';
@@ -70,7 +70,7 @@ describe('deleteHighestEmptyTree', () => {
     const inner = byId(doc, 'inner');
 
     // act
-    deleteHighestEmptyTree(inner, doc.root);
+    deleteHighestEmpty(inner, doc.root);
 
     // assert
     expect(outer.isConnected).toBe(false);
@@ -86,7 +86,7 @@ describe('deleteHighestEmptyTree', () => {
     const inner = byId(doc, 'inner');
 
     // act
-    deleteHighestEmptyTree(inner, outer);
+    deleteHighestEmpty(inner, outer);
 
     // assert
     expect(outer.isConnected).toBe(true);
@@ -100,7 +100,7 @@ describe('deleteHighestEmptyTree', () => {
     const inner = byId(doc, 'inner');
 
     // act
-    deleteHighestEmptyTree(inner, doc.root);
+    deleteHighestEmpty(inner, doc.root);
 
     // assert
     expect(inner.isConnected).toBe(true);

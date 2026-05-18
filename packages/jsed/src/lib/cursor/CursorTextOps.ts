@@ -3,7 +3,7 @@ import * as space from '../token/space.js';
 import { isAnchor, isLineSibling, isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
-import { deleteHighestEmptyTree } from '../focus/focusable.js';
+import { deleteHighestEmpty } from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
@@ -56,7 +56,7 @@ export class CursorTextOps {
       token.remove(current);
     }
     if (canDeleteAncestors) {
-      deleteHighestEmptyTree(parentNode, this.state.document.root);
+      deleteHighestEmpty(parentNode, this.state.document.root);
     }
 
     // Anchor and cursor placement....

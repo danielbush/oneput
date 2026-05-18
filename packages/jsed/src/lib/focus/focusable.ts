@@ -80,7 +80,7 @@ export function insertNewBefore(tagName: string, target: HTMLElement): HTMLEleme
   return inserted;
 }
 
-export function deleteElement(el: HTMLElement): void {
+export function deleteElement(el: Element): void {
   el.remove();
 }
 
@@ -94,7 +94,7 @@ export function deleteElement(el: HTMLElement): void {
  * However... we only delete once at the very end to keep everything intact.
  * `highest` is a child of p, and we scan either side to see if the element would have been empty.
  */
-export function deleteHighestEmptyTree(el: Element, ceiling?: Element) {
+export function deleteHighestEmpty(el: Element, ceiling?: Element) {
   if (!isEmpty(el)) {
     return;
   }
@@ -112,7 +112,7 @@ export function deleteHighestEmptyTree(el: Element, ceiling?: Element) {
     highest = parent;
   }
 
-  highest.remove();
+  deleteElement(highest);
 }
 
 export function splitParentBefore(el: HTMLElement): void {

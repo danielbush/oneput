@@ -180,6 +180,20 @@ export function isFocusable(el: EventTarget | Element | null | undefined): el is
 }
 
 /**
+ * Delete marker for deleting FOCUSABLE's.
+ */
+export function isDeletedElement(el: EventTarget | Element | null | undefined): boolean {
+  const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    if (el.tagName.toLowerCase() !== 'template') {
+      return false;
+    }
+    return el.classList.contains(JSED_DELETED_CLASS);
+  }
+  return false;
+}
+
+/**
  * Detect ISLAND's.
  *
  * This can be used to FOCUS on things that may require special treatment such

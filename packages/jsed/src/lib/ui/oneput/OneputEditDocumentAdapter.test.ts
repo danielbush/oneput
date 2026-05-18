@@ -1,6 +1,7 @@
 import { Editor, JsedDocument, type EditorError } from '@oneput/jsed';
 import { Controller, type AppObject } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
+import { isDeletedElement } from '../../core/taxonomy.js';
 import { OneputEditDocumentAdapter } from './OneputEditDocumentAdapter.js';
 
 function makeDocument(
@@ -394,7 +395,9 @@ describe('EditDocument', () => {
     // assert
     expect(deleteItem).toBeDefined();
     expect(document.root.contains(p1)).toBe(false);
-    expect(Array.from(document.root.children)).toHaveLength(1);
+    expect(document.root.children).toHaveLength(2);
+    expect(isDeletedElement(document.root.children[0])).toBe(true);
+    expect(document.root.children[1]).toBe(p2);
     expect(editor.nav.getFocus()).toBe(p2);
   });
 });

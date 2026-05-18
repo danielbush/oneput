@@ -7,7 +7,7 @@ import {
   findNextFocusableOutside,
   findPreviousFocusableOutside
 } from '../../focus/focusable';
-import { JSED_ANCHOR_CLASS, JSED_FOCUS_CLASS } from '../../core/taxonomy';
+import { isDeletedElement, JSED_ANCHOR_CLASS, JSED_FOCUS_CLASS } from '../../core/taxonomy';
 
 describe('findNextFocusableOutside / findPreviousFocusableOutside', () => {
   test('next skips descendants and finds the next outside FOCUSABLE', () => {
@@ -70,13 +70,19 @@ describe('deleteHighestEmptyTree', () => {
     const inner = byId(doc, 'inner');
 
     // act
-    deleteHighestEmpty(inner, doc.root);
+    const deletion = deleteHighestEmpty(inner, doc.root);
 
     // assert
     expect(outer.isConnected).toBe(false);
     expect(middle.isConnected).toBe(false);
     expect(inner.isConnected).toBe(false);
-    expect(doc.root.children).toHaveLength(0);
+    expect(doc.root.children).toHaveLength(1);
+    expect(isDeletedElement(doc.root.firstElementChild)).toBe(true);
+    expect(deletion).toMatchObject({
+      type: 'delete-element',
+      marker: doc.root.firstElementChild,
+      deleted: outer
+    });
   });
 
   test('stops at ceiling', () => {
@@ -86,12 +92,18 @@ describe('deleteHighestEmptyTree', () => {
     const inner = byId(doc, 'inner');
 
     // act
-    deleteHighestEmpty(inner, outer);
+    const deletion = deleteHighestEmpty(inner, outer);
 
     // assert
     expect(outer.isConnected).toBe(true);
     expect(inner.isConnected).toBe(false);
-    expect(outer.children).toHaveLength(0);
+    expect(outer.children).toHaveLength(1);
+    expect(isDeletedElement(outer.firstElementChild)).toBe(true);
+    expect(deletion).toMatchObject({
+      type: 'delete-element',
+      marker: outer.firstElementChild,
+      deleted: inner
+    });
   });
 
   test('keeps non-empty', () => {

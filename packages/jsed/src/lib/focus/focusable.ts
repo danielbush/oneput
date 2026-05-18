@@ -6,7 +6,9 @@ import {
   isInlineFlow,
   isIsland,
   isToken,
-  JSED_FOCUS_CLASS
+  JSED_DELETED_CLASS,
+  JSED_FOCUS_CLASS,
+  JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
@@ -80,8 +82,22 @@ export function insertNewBefore(tagName: string, target: HTMLElement): HTMLEleme
   return inserted;
 }
 
-export function deleteElement(el: Element): void {
-  el.remove();
+export function createElementDeleteMarker() {
+  const container = document.createElement('template');
+  container.classList.add(JSED_DELETED_CLASS);
+  container.classList.add(JSED_IGNORE_CLASS);
+  return container;
+}
+
+export function deleteElement(el: Element) {
+  const container = createElementDeleteMarker();
+  el.insertAdjacentElement('beforebegin', container);
+  container.append(el);
+  return {
+    type: 'delete-element',
+    marker: container,
+    deleted: el
+  };
 }
 
 /**
@@ -112,7 +128,7 @@ export function deleteHighestEmpty(el: Element, ceiling?: Element) {
     highest = parent;
   }
 
-  deleteElement(highest);
+  return deleteElement(highest);
 }
 
 export function splitParentBefore(el: HTMLElement): void {

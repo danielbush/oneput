@@ -17,7 +17,13 @@ import {
 import { getValue } from '../../token/token.js';
 import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
-import { isIsland, isToken, JSED_ANCHOR_CHAR, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import {
+  isDeletedElement,
+  isIsland,
+  isToken,
+  JSED_ANCHOR_CHAR,
+  JSED_TOKEN_CLASS
+} from '../../core/taxonomy.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 
 function createNullEditor(doc: JsedDocument): Editor {
@@ -441,7 +447,9 @@ describe('Editor', () => {
         // assert
         expect(deleted).toBe(true);
         expect(doc.root.contains(p1)).toBe(false);
-        expect(Array.from(doc.root.children)).toHaveLength(1);
+        expect(doc.root.children).toHaveLength(2);
+        expect(isDeletedElement(doc.root.children[0])).toBe(true);
+        expect(doc.root.children[1]).toBe(p2);
         expect(editor.nav.getFocus()).toBe(p2);
 
         editor.destroy();
@@ -462,7 +470,9 @@ describe('Editor', () => {
         // assert
         expect(deleted).toBe(true);
         expect(doc.root.contains(p2)).toBe(false);
-        expect(Array.from(doc.root.children)).toHaveLength(1);
+        expect(doc.root.children).toHaveLength(2);
+        expect(doc.root.children[0]).toBe(p1);
+        expect(isDeletedElement(doc.root.children[1])).toBe(true);
         expect(editor.nav.getFocus()).toBe(p1);
 
         editor.destroy();
@@ -1712,7 +1722,11 @@ describe('Editor', () => {
       expect(isToken(p1.firstChild)).toBe(true);
       expect(identify(p1.firstChild)).toBe('x');
       expect(identify(editor.getCursor())).toBe('x');
-      expect(p1.querySelectorAll('*')).toHaveLength(2);
+      const elements = Array.from(p1.querySelectorAll('*'));
+      expect(elements).toHaveLength(3);
+      expect(identify(elements[0])).toBe('x');
+      expect(isDeletedElement(elements[1])).toBe(true);
+      expect(identify(elements[2])).toBe('dd');
       expect(tokenValues(p1)).toEqual(['x', 'dd']);
 
       editor.destroy();

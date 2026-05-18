@@ -115,7 +115,7 @@ export function identify(el: Node | undefined | null): string {
   if (!el) return `${el}`;
   if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el);
-  if (isDeletedToken(el)) return `d('${token.getValue(el)}')`;
+  if (isDeletedToken(el)) return `d("${token.getValue(el)}")`;
   if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;
   if (el.nodeType === el.ELEMENT_NODE) {
     return `[${(el as HTMLElement).tagName.toLowerCase()}]`;

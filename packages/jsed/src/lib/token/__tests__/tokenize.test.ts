@@ -1,12 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em, inlineStyleHack, a, t, s } from '../../../test/util.js';
 import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
-import {
-  isDeletedToken,
-  isToken,
-  JSED_ANCHOR_CLASS,
-  JSED_TOKEN_CLASS
-} from '../../core/taxonomy.js';
+import { isDeletedToken, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 describe('tokenizeLineAt', () => {
   test('simple LINE: <p>foo bar baz</p>', () => {

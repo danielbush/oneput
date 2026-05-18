@@ -4,12 +4,7 @@ import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
-import {
-  isDeletedToken,
-  JSED_DELETED_CLASS,
-  JSED_IGNORE_CLASS,
-  JSED_TOKEN_CLASS
-} from '../../core/taxonomy.js';
+import { isDeletedToken, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -195,7 +190,7 @@ describe('delete', () => {
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('world');
-    expect(identify(tokens(doc)[0])).toBe("d('hello')");
+    expect(identify(tokens(doc)[0])).toBe('d("hello")');
   });
 
   test('last TOKEN', () => {
@@ -276,7 +271,7 @@ describe('delete', () => {
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
     expect(tokens(doc)).toHaveLength(2);
-    expect(identify(cursor.getPlace().previousSibling)).toBe("d('foo')");
+    expect(identify(cursor.getPlace().previousSibling)).toBe('d("foo")');
   });
 
   test('ANCHOR ∅<em>foo</em>∅', () => {
@@ -296,7 +291,7 @@ describe('delete', () => {
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
     expect(tokens(doc)).toHaveLength(2);
-    expect(identify(cursor.getPlace().previousSibling)).toBe("d('foo')");
+    expect(identify(cursor.getPlace().previousSibling)).toBe('d("foo")');
   });
 
   test('ANCHOR ...<em>bbb</em>...', () => {
@@ -319,7 +314,7 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(identify(cursor.getPlace().previousSibling)).toBe("d('bbb')");
+    expect(identify(cursor.getPlace().previousSibling)).toBe('d("bbb")');
   });
 
   test.todo('ANCHOR ...<em>A</em>...', () => {
@@ -391,7 +386,7 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
-    expect(identify(cursor.getPlace().nextElementSibling)).toBe("d('bbb')"); // not removed from dom
+    expect(identify(cursor.getPlace().nextElementSibling)).toBe('d("bbb")'); // not removed from dom
     expect(isDeletedToken(cursor.getPlace().nextElementSibling)).toBe(true);
   });
 });

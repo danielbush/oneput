@@ -115,6 +115,12 @@ export function isIgnorable(el: Node) {
 }
 
 export function isIgnorableNode(el: Node): boolean {
+  if (el instanceof window.HTMLScriptElement) {
+    return true;
+  }
+  if (el instanceof window.HTMLTemplateElement) {
+    return true;
+  }
   if (el.nodeType === Node.TEXT_NODE) {
     return false;
   }
@@ -157,9 +163,6 @@ export function isAnchor(el: Node | null): boolean {
  * Test if the element is an FOCUSABLE.
  */
 export function isFocusable(el: EventTarget | Element | null | undefined): el is HTMLElement {
-  if (el instanceof window.HTMLScriptElement) {
-    return false;
-  }
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     if (el?.id === JSED_APP_ROOT_ID) {

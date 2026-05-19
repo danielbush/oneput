@@ -2,6 +2,7 @@ import { CursorMotion } from './CursorMotion.js';
 import { CursorState, type CursorInsertState, type CursorParams } from './CursorState.js';
 import { CursorTextOps, type CursorDeleteOpts } from './CursorTextOps.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
+import { type UndoRecord } from '../undo/index.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -27,6 +28,10 @@ export class Cursor {
     this.#ops = this.#state.ops;
   }
 
+  _undo = (result?: UndoRecord) => {
+    this.#state.undo?.record(result);
+  };
+
   destroy = () => this.#state.destroy();
   getDocument = () => this.#state.getDocument();
   place = (el: HTMLElement, opts?: UserInputOpts) => this.#state.place(el, opts);
@@ -50,9 +55,7 @@ export class Cursor {
   movePrevious = () => this.#motion.movePrevious();
 
   // edit text
-  delete(opts?: CursorDeleteOpts) {
-    return this.#ops.delete(opts);
-  }
+  delete = (opts?: CursorDeleteOpts) => this._undo(this.#ops.delete(opts));
   replaceWithText = (text: string, opts?: UserInputOpts) => this.#ops.replaceWithText(text, opts);
   insertTextAfter = (text: string, opts?: UserInputOpts) => this.#ops.insertTextAfter(text, opts);
   insertTextBefore = (text: string, opts?: UserInputOpts) => this.#ops.insertTextBefore(text, opts);

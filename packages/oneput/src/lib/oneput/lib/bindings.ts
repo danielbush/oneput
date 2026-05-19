@@ -48,6 +48,7 @@ export type KeyBinding = {
    * - menuOpen: true = only when menu is open, false = only when closed, undefined = always
    */
   when?: { menuOpen?: boolean };
+  preventDefault?: boolean;
 };
 
 /**
@@ -58,6 +59,7 @@ export type ActionBinding = {
   description: string;
   bindings: string[];
   when?: { menuOpen?: boolean };
+  preventDefault?: boolean;
 };
 
 /**
@@ -75,6 +77,7 @@ export type KeyBindingSerializable = {
    * If action is passed an its is js it will cause an exception in some stores.
    */
   action?: never;
+  preventDefault?: boolean;
 };
 
 export type KeyBindingMapSerializable = {
@@ -113,6 +116,10 @@ export type KeyEventBinding = {
    *  KeyEvent[][].
    */
   bindings: KeyEvent[][];
+  /**
+   * Defaults to true.
+   */
+  preventDefault?: boolean;
   when?: { menuOpen?: boolean };
 };
 
@@ -225,7 +232,8 @@ function keMapToKbMap(keyEventsMap: KeyEventsMap, isMac: boolean): KeyBindingMap
       action: keyEventBinding.action,
       description: keyEventBinding.description,
       bindings: keyEventBinding.bindings.map((ke) => keToBs(ke, isMac)),
-      when: keyEventBinding.when
+      when: keyEventBinding.when,
+      preventDefault: keyEventBinding.preventDefault
     };
     return acc;
   }, {} as KeyBindingMap);
@@ -237,7 +245,8 @@ function kbMaptoKeMap(keyBindingMap: KeyBindingMap, isMac: boolean): KeyEventsMa
       action: keyBinding.action,
       description: keyBinding.description,
       bindings: keyBinding.bindings.map((bs) => bsToKe(bs, isMac)),
-      when: keyBinding.when
+      when: keyBinding.when,
+      preventDefault: keyBinding.preventDefault
     };
     return acc;
   }, {} as KeyEventsMap);
@@ -248,7 +257,8 @@ function kbToSerializable(keyBinding: KeyBinding): KeyBindingSerializable {
     description: keyBinding.description,
     bindings: keyBinding.bindings,
     when: keyBinding.when,
-    action: undefined as never
+    action: undefined as never,
+    preventDefault: keyBinding.preventDefault
   };
 }
 
@@ -260,6 +270,7 @@ function kbFromSerializable(
     description: kbSerializable.description,
     bindings: kbSerializable.bindings,
     when: kbSerializable.when,
+    preventDefault: kbSerializable.preventDefault,
     action
   };
 }
@@ -410,10 +421,16 @@ export class KeyEventBindings {
       actionId: string;
       binding: KeyEvent[];
       when?: { menuOpen?: boolean };
+      preventDefault?: boolean;
     }> = [];
     for (const [actionId, keb] of Object.entries(overrideKeMap)) {
       for (const binding of keb.bindings) {
-        overrideLookup.push({ actionId, binding, when: keb.when });
+        overrideLookup.push({
+          actionId,
+          binding,
+          when: keb.when,
+          preventDefault: keb.preventDefault
+        });
       }
     }
 

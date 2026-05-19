@@ -51,7 +51,9 @@ export class KeysController {
     if (this.keysDisabled) return;
     const match = candidates.find((c) => this.matchesWhen(c.kb.when));
     if (match) {
-      evt.preventDefault();
+      if (match.kb.preventDefault ?? true) {
+        evt.preventDefault();
+      }
       // MENU_OPEN_CLOSE_RACE
       // setTimeout(() => {
       this.ctl.app.handleAction(match.actionId, match.kb.action);

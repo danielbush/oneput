@@ -7,6 +7,7 @@ import { icons } from './icons.js';
 import { PickListUI } from './PickListUI.js';
 import { PasteElementUI } from './PasteElementUI.js';
 import type { EditorError } from '../../editor/EditorState.js';
+import { preventDefault } from 'svelte/legacy';
 
 /**
  * Provides functionality needed to manage the Jsed editor in Oneput when
@@ -210,6 +211,17 @@ export class OneputEditDocumentAdapter {
         bindings: ['Control+[', '$mod+[', 'Escape'],
         description: 'Stop editing',
         when: { menuOpen: false }
+      }
+    },
+    DELETE: {
+      action: (_ctl: Controller, evt: KeyboardEvent) => {
+        this.editor.handleDelete(evt);
+      },
+      binding: {
+        bindings: ['Backspace'],
+        description: 'Delete characters',
+        when: { menuOpen: false },
+        preventDefault: false
       }
     },
 

@@ -175,6 +175,18 @@ export class EditorOps {
     }
   }
 
+  handleDelete(evt?: KeyboardEvent) {
+    if (this.state.cursor) {
+      const curr = this.state.cursor.getPlace();
+      if (isAnchor(curr)) {
+        // The key event coupled with changes maybe bleow by cursor.delete will
+        // trigger an input event if we don't call preventDefault...
+        evt?.preventDefault();
+        this.state.cursor.delete();
+      }
+    }
+  }
+
   /**
    * Collapse any active selection and move the CURSOR to `target`.
    * Returns true if a selection was cancelled. Stays in edit mode.
@@ -286,6 +298,7 @@ export class EditorOps {
    * When user types in the input...
    */
   processUserInput = (change: UserInputChange) => {
+    console.log(JSON.stringify(change, null, 2));
     const cursor = this.state.cursor;
     if (!cursor) {
       console.error(`'cursor' not set`);
@@ -294,6 +307,11 @@ export class EditorOps {
     const currentToken = cursor.getPlace();
     const currentTokenValue = token.getValue(currentToken);
     const intent = decideInputIntent(change, currentTokenValue);
+
+    if (isAnchor(currentToken) && change.value === '') {
+      console.log('stop!');
+      return;
+    }
 
     // console.log('decided intent', JSON.stringify(intent, null, 2));
 

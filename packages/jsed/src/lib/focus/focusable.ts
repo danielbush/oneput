@@ -111,7 +111,7 @@ export function deleteElement(el: HTMLElement): DeleteElement {
  * However... we only delete once at the very end to keep everything intact.
  * `highest` is a child of p, and we scan either side to see if the element would have been empty.
  */
-export function deleteHighestEmpty(el: Element, ceiling?: Element) {
+export function deleteHighestEmpty(el: HTMLElement, ceiling?: Element) {
   if (!isEmpty(el)) {
     return;
   }

@@ -248,7 +248,7 @@ export class CursorSelection {
     const marker = token.createAnchor();
     startWrapper.before(marker);
 
-    const cleanupParents = new Set<Element>();
+    const cleanupParents = new Set<HTMLElement>();
     for (const wrapper of this.wrappers) {
       if (wrapper.parentElement) {
         cleanupParents.add(wrapper.parentElement);

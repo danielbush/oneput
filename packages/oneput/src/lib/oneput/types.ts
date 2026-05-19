@@ -239,7 +239,10 @@ export interface AppObject<R = unknown> {
    * here.
    */
   actions?: {
-    [actionId: string]: { action: (ctl: Controller) => void; binding?: ActionBinding };
+    [actionId: string]: {
+      action: (ctl: Controller, evt?: KeyboardEvent) => void;
+      binding?: ActionBinding;
+    };
   };
   /**
    * A declarative way to set your menu items.

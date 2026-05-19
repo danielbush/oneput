@@ -261,13 +261,17 @@ export class AppController {
    * @param actionId
    * @param defaultAction An action defined outside of any AppObject.
    */
-  handleAction(actionId: string, defaultAction: ((ctl: Controller) => void) | undefined) {
+  handleAction(
+    evt: KeyboardEvent,
+    actionId: string,
+    defaultAction: ((ctl: Controller, evt: KeyboardEvent) => void) | undefined
+  ) {
     if (this.current?.app.actions?.[actionId]) {
-      this.current.app.actions?.[actionId]?.action(this.ctl);
+      this.current.app.actions?.[actionId]?.action(this.ctl, evt);
       return;
     }
     if (defaultAction) {
-      defaultAction(this.ctl);
+      defaultAction(this.ctl, evt);
       return;
     }
 

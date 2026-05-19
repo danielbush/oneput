@@ -148,10 +148,12 @@
 
 /* #region token / cursor */
 
+.jsed-anchor-token,
 .jsed-token {
   cursor: pointer;
 }
 
+.jsed-anchor-token.jsed-deleted,
 .jsed-token.jsed-deleted {
   display: none;
 }

@@ -147,6 +147,9 @@ export function isToken(el: Node | null | undefined): boolean {
     if (isIgnorableNode(el)) {
       return false;
     }
+    if (isAnchor(el)) {
+      return true;
+    }
     return el.classList.contains(JSED_TOKEN_CLASS);
   }
   return false;
@@ -169,10 +172,11 @@ export function isDeletedSpace(el: Node | null | undefined): boolean {
 }
 
 export function isAnchor(el: Node | null): boolean {
-  if (!el) {
-    return false;
+  const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    return el.classList.contains(JSED_ANCHOR_CLASS);
   }
-  return isToken(el) && (el as HTMLElement).classList.contains(JSED_ANCHOR_CLASS);
+  return false;
 }
 
 /**

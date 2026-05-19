@@ -77,8 +77,7 @@ export function createToken(text?: string): HTMLElement {
  * additional class to help detect it.
  */
 export function createAnchor(): HTMLElement {
-  // const el = createToken(JSED_ANCHOR_CHAR);
-  const el = createToken();
+  const el = document.createElement('span');
   el.classList.add(JSED_ANCHOR_CLASS);
   return el;
 }
@@ -88,6 +87,7 @@ export function createAnchor(): HTMLElement {
  */
 function anchor2Token(token: HTMLElement): HTMLElement {
   token.classList.remove(JSED_ANCHOR_CLASS);
+  token.classList.add(JSED_TOKEN_CLASS);
   return token;
 }
 

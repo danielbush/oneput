@@ -51,16 +51,22 @@ export class MenuController {
     if (this.disableOpenClose) {
       return;
     }
-    this.ctl.currentProps.menuOpen = true;
-    this.ctl.events.emit({ type: 'menu-open-change', payload: true });
+    // MENU_OPEN_CLOSE_RACE
+    setTimeout(() => {
+      this.ctl.currentProps.menuOpen = true;
+      this.ctl.events.emit({ type: 'menu-open-change', payload: true });
+    });
   };
 
   closeMenu = () => {
     if (this.disableOpenClose) {
       return;
     }
-    this.ctl.currentProps.menuOpen = false;
-    this.ctl.events.emit({ type: 'menu-open-change', payload: false });
+    // MENU_OPEN_CLOSE_RACE
+    setTimeout(() => {
+      this.ctl.currentProps.menuOpen = false;
+      this.ctl.events.emit({ type: 'menu-open-change', payload: false });
+    });
   };
 
   doMenuAction() {

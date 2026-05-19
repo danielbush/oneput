@@ -53,9 +53,9 @@ export class KeysController {
     if (match) {
       evt.preventDefault();
       // MENU_OPEN_CLOSE_RACE
-      setTimeout(() => {
-        this.ctl.app.handleAction(match.actionId, match.kb.action);
-      });
+      // setTimeout(() => {
+      this.ctl.app.handleAction(match.actionId, match.kb.action);
+      // });
     }
   }
 

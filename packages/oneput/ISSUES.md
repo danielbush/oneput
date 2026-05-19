@@ -7,7 +7,17 @@ How do we use lucide.createIcons but avoid icons flashing into existence when a 
 ## MENU_OPEN_CLOSE_RACE
 
 - what: If we add a global binding to open a menu and then a local binding of the same keys to close the menu, we may observe that when we close the menu, the menu is closed via the local binding but then the global binding which relies on the menu state may execute because the menu state gets updated to closed before it runs.
+- also issues with `enter`: if setTimeout hack is not used, the following will run when you hit `enter` on a menu item when menuOpen is `true` even though it should only run when the menu is closed.
+  ```js
+      binding: {
+        bindings: ['enter'],
+        description: 'Edit first editable token',
+        when: { menuOpen: false }
+      }
+  ```
 - solution: use setTimeout (hack)
+- COMMENT(May-2026): the issue is that menu open state is changing before the binding runs.
+- COMMENT(May-2026): I've moved the setTimeout to the menu open/close functions
 
 ## UNWANTED_AUTOCOMPLETE
 

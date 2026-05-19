@@ -5,6 +5,7 @@ import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import { deleteHighestEmpty } from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
+import type { UndoOperation } from '../undo/UndoRecorder.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -52,26 +53,31 @@ export class CursorTextOps {
 
     // Perform removals...
 
+    const ops: UndoOperation[] = [];
+
     if (canDeleteToken) {
-      token.remove(current);
+      ops.push(token.remove(current));
     }
     if (canDeleteAncestors) {
-      deleteHighestEmpty(parentNode, this.state.document.root);
+      const op = deleteHighestEmpty(parentNode, this.state.document.root);
+      if (op) ops.push(op);
     }
+
+    const undo = { ops };
 
     // Anchor and cursor placement....
 
     if (skipAnchorDelete) {
       if (prevCrs) {
         this.state.place(prevCrs, userInputOpts);
-        return;
+        return undo;
       }
-      return;
+      return undo;
     }
 
     if (canDeleteAncestors) {
       this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
-      return;
+      return undo;
     }
 
     if (willCreateEmptyDocument) {
@@ -80,14 +86,14 @@ export class CursorTextOps {
       const anchor = token.createAnchor();
       current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
-      return;
+      return undo;
     }
 
     // <p>[T]A</p>
     // => <p>[A]</p>
     if (!prevElementSib && isAnchor(nextElementSib)) {
       this.state.place(nextElementSib!, userInputOpts);
-      return;
+      return undo;
     }
 
     // ...<em>...</em>T|</p>
@@ -96,7 +102,7 @@ export class CursorTextOps {
       const anchor = token.createAnchor();
       current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
-      return;
+      return undo;
     }
 
     // ...<em>[T]</em>...</p>
@@ -105,10 +111,11 @@ export class CursorTextOps {
       const anchor = token.createAnchor();
       current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
-      return;
+      return undo;
     }
 
     this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
+    return undo;
   }
 
   /**

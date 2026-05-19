@@ -20,7 +20,6 @@ export class UndoRecorder {
       return;
     }
     this.records.push(result);
-    console.log('records', this.records);
     this.redoRecords = [];
   }
 

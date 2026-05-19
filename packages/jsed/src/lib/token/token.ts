@@ -394,7 +394,7 @@ export function remove(token: HTMLElement) {
   }
 
   return {
-    type: 'delete-token',
+    action: 'delete-token',
     token,
     removeNextSeparator,
     removePreviousSeparator

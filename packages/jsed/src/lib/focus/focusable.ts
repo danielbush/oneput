@@ -94,7 +94,7 @@ export function deleteElement(el: Element) {
   el.insertAdjacentElement('beforebegin', container);
   container.append(el);
   return {
-    type: 'delete-element',
+    action: 'delete-element',
     marker: container,
     deleted: el
   };

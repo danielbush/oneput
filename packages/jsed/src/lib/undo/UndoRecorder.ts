@@ -20,6 +20,9 @@ export class UndoRecorder {
     if (!result) {
       return;
     }
+    if (result.ops.length === 0) {
+      return;
+    }
     this.records.push(result);
     this.redoRecords = [];
   }

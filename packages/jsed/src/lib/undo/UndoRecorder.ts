@@ -1,4 +1,5 @@
-export type UndoOperation = { action: string };
+import type { UndoOperation } from './UndoOperation';
+
 export type UndoRecord = {
   ops: UndoOperation[];
 };

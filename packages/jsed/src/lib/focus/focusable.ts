@@ -12,6 +12,7 @@ import {
 } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
+import type { DeleteElement } from '../undo/UndoOperation.js';
 
 export function createElement(
   tagName: string,
@@ -89,7 +90,7 @@ export function createElementDeleteMarker() {
   return container;
 }
 
-export function deleteElement(el: Element) {
+export function deleteElement(el: Element): DeleteElement {
   const container = createElementDeleteMarker();
   el.insertAdjacentElement('beforebegin', container);
   container.append(el);

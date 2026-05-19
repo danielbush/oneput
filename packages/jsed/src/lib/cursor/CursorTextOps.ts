@@ -5,7 +5,7 @@ import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import { deleteHighestEmpty } from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
-import type { UndoOperation } from '../undo/UndoRecorder.js';
+import type { UndoOperation } from '../undo/UndoOperation.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 

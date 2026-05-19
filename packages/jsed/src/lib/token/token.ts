@@ -32,6 +32,7 @@ import {
   removeSeparatorBefore
 } from './space.js';
 import { getLine } from '../core/line.js';
+import type { DeleteToken } from '../undo/UndoOperation.js';
 
 export function getValue(token: Node): string {
   validate(token);
@@ -367,7 +368,7 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
  * Remove the token and return the surroudning sibling elements if present
  * (these may or may not be tokens).
  */
-export function remove(token: HTMLElement) {
+export function remove(token: HTMLElement): DeleteToken {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');

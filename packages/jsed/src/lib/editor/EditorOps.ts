@@ -1,5 +1,12 @@
 import { err, ok, Result } from 'neverthrow';
-import { isCursorTransparent, isIsland, isLine, isLineSibling, isToken } from '../core/taxonomy.js';
+import {
+  isAnchor,
+  isCursorTransparent,
+  isIsland,
+  isLine,
+  isLineSibling,
+  isToken
+} from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
@@ -7,6 +14,8 @@ import { Cursor } from '../cursor/Cursor.js';
 import type { UserInputChange, UserInputOpts } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
+import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
+import { restoreSeparator } from '../token/space.js';
 
 /**
  * Manages an edit session for a single document.
@@ -391,9 +400,44 @@ export class EditorOps {
   };
 
   undo = () => {
-    const plan = this.state.undo.undo();
-    if (!plan) {
+    const rec = this.state.undo.undo();
+    if (!rec) {
       return null;
     }
+    for (const op of rec.ops.reverse()) {
+      switch (op.action) {
+        case 'delete-token': {
+          token.restore(op.token);
+          if (op.removeNextSeparator) {
+            restoreSeparator(op.removeNextSeparator);
+          }
+          if (op.removePreviousSeparator) {
+            restoreSeparator(op.removePreviousSeparator);
+          }
+          fixAnchors(op.token);
+          this.state.cursor?.place(op.token);
+          break;
+        }
+        case 'delete-element': {
+          op.marker.insertAdjacentElement('beforebegin', op.deleted);
+          op.marker.remove();
+          this.state.nav.FOCUS(op.deleted);
+          break;
+        }
+      }
+    }
   };
+}
+
+function fixAnchors(el: HTMLElement) {
+  if (isToken(el)) {
+    const next = getNextElementSibling(el);
+    const prev = getPreviousElementSibling(el);
+    if (isAnchor(next)) {
+      next?.remove();
+    }
+    if (isAnchor(prev)) {
+      prev?.remove();
+    }
+  }
 }

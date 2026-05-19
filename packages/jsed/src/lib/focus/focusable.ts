@@ -90,10 +90,10 @@ export function createElementDeleteMarker() {
   return container;
 }
 
-export function deleteElement(el: Element): DeleteElement {
+export function deleteElement(el: HTMLElement): DeleteElement {
   const container = createElementDeleteMarker();
   el.insertAdjacentElement('beforebegin', container);
-  container.append(el);
+  el.remove();
   return {
     action: 'delete-element',
     marker: container,

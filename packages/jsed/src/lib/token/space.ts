@@ -12,10 +12,45 @@ import {
   isInlineFlow,
   isLine,
   isToken,
-  isWhitespaceTextNode
+  isWhitespaceTextNode,
+  JSED_DELETED_CLASS,
+  JSED_DELETED_SPACE_CLASS,
+  JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
 
 // #region Separator (Space) utils
+
+/**
+ * Remove separator and record position.
+ *
+ * Separators may be computed so we don't track them in undo directly.
+ * However it's convenient to track them when removing/restoring tokens.
+ */
+export function removeSeparator(node: Text) {
+  const container = node.ownerDocument.createElement('template');
+  container.classList.add(JSED_IGNORE_CLASS);
+  container.classList.add(JSED_DELETED_CLASS);
+  container.classList.add(JSED_DELETED_SPACE_CLASS);
+  node.parentNode?.insertBefore(container, node);
+  container.appendChild(node);
+  return container;
+}
+
+/**
+ * Reverse removeSeparator, restoring the space as normal text.
+ */
+export function restoreSeparator(deletedSpace: HTMLElement) {
+  const spaceNode = deletedSpace.firstChild;
+  if (!(spaceNode instanceof Text)) {
+    console.warn(`No space detected`);
+    spaceNode?.remove();
+    return;
+  }
+  deletedSpace.parentNode?.insertBefore(spaceNode, deletedSpace);
+  deletedSpace.remove();
+  return spaceNode;
+}
+
 export function getSeparatorBefore(token: HTMLElement): Text | null {
   const prev = getPreviousNodeSibling(token);
   return isWhitespaceTextNode(prev) ? prev : null;

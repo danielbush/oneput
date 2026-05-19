@@ -44,7 +44,15 @@ export const JSED_TOKEN_PADDED = 'jsed-token-padded';
 export const JSED_ANCHOR_CLASS = 'jsed-anchor-token';
 export const JSED_ANCHOR_CHAR = '\u00A4';
 
+/**
+ * Flags the DOM node as deleted.  Can be used on tokens and FOCUSABLE's.
+ */
 export const JSED_DELETED_CLASS = 'jsed-deleted';
+/**
+ * Spaces are text nodes when not deleted; when deleted, we use delete marker
+ * (an element) to mark their position.
+ */
+export const JSED_DELETED_SPACE_CLASS = 'jsed-deleted-space';
 
 /**
  * Where the jsed app mounts and renders.  It should not be part of the document
@@ -148,6 +156,14 @@ export function isDeletedToken(el: Node | null | undefined): boolean {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     return el.classList.contains(JSED_TOKEN_CLASS) && el.classList.contains(JSED_DELETED_CLASS);
+  }
+  return false;
+}
+
+export function isDeletedSpace(el: Node | null | undefined): boolean {
+  const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    return el.classList.contains(JSED_DELETED_SPACE_CLASS);
   }
   return false;
 }

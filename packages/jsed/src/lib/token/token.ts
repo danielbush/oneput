@@ -29,7 +29,8 @@ import {
   getSeparatorAfter,
   getSeparatorBefore,
   removeSeparatorAfter,
-  removeSeparatorBefore
+  removeSeparatorBefore,
+  removeSeparator
 } from './space.js';
 import { getLine } from '../core/line.js';
 import type { DeleteToken } from '../undo/UndoOperation.js';
@@ -380,26 +381,26 @@ export function remove(token: HTMLElement): DeleteToken {
   // Scan space nodes
   const separatorBefore = getSeparatorBefore(token);
   const separatorAfter = getSeparatorAfter(token);
-  const removeNextSeparator = !!separatorAfter && separatorAfter;
+  const removeNextSeparator = !!separatorAfter;
   const removePreviousSeparator =
     !!separatorBefore &&
-    (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore)) &&
-    separatorBefore;
+    (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore));
 
   // Collapse paired separators down to one.
-  if (removeNextSeparator) {
-    separatorAfter.remove();
-  }
-  if (removePreviousSeparator) {
-    separatorBefore.remove();
-  }
+  const removedNextSeparator = removeNextSeparator && removeSeparator(separatorAfter);
+  const removedPreviousSeparator = removePreviousSeparator && removeSeparator(separatorBefore);
 
   return {
     action: 'delete-token',
     token,
-    removeNextSeparator,
-    removePreviousSeparator
+    removeNextSeparator: removedNextSeparator,
+    removePreviousSeparator: removedPreviousSeparator
   };
+}
+
+export function restore(token: HTMLElement) {
+  token.classList.remove(JSED_DELETED_CLASS);
+  token.classList.remove(JSED_IGNORE_CLASS);
 }
 
 /**

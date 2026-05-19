@@ -212,6 +212,22 @@ export class OneputEditDocumentAdapter {
         when: { menuOpen: false }
       }
     },
+    DELETE: {
+      action: (_ctl: Controller, evt?: KeyboardEvent) => {
+        this.editor.handleDelete(evt);
+      },
+      binding: {
+        bindings: ['Backspace'],
+        description: 'Delete characters',
+        when: { menuOpen: false },
+        // If preventDefault = true here, input change events caused by the user
+        // deleting text in the input will never occur.  We need to set this to
+        // false to allow input-based edits.  The action we call here can
+        // however call preventDefault if it wants to take control of the delete
+        // action and prevent input-based edits.
+        preventDefault: false
+      }
+    },
 
     // #endregion
 

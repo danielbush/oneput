@@ -175,6 +175,25 @@ export class EditorOps {
     }
   }
 
+  handleDelete(evt?: KeyboardEvent) {
+    if (this.state.cursor) {
+      const curr = this.state.cursor.getPlace();
+      if (isAnchor(curr)) {
+        // If we don't preventDefault...
+        // 1) cursor.delete may move the cursor to a new token
+        // 2) the input will be programmatically updated (which won't normally
+        // trigger an input change event)
+        // 3) this delete key event or related appears to then delete the new
+        // input value in the input element which looks like a user /
+        // non-programmatic edit
+        // 4) which triggers a normal user-based input change event
+        // 5) which deletes an additional token!
+        evt?.preventDefault();
+        this.state.cursor.delete();
+      }
+    }
+  }
+
   /**
    * Collapse any active selection and move the CURSOR to `target`.
    * Returns true if a selection was cancelled. Stays in edit mode.
@@ -286,6 +305,7 @@ export class EditorOps {
    * When user types in the input...
    */
   processUserInput = (change: UserInputChange) => {
+    console.log(JSON.stringify(change, null, 2));
     const cursor = this.state.cursor;
     if (!cursor) {
       console.error(`'cursor' not set`);
@@ -294,6 +314,11 @@ export class EditorOps {
     const currentToken = cursor.getPlace();
     const currentTokenValue = token.getValue(currentToken);
     const intent = decideInputIntent(change, currentTokenValue);
+
+    if (isAnchor(currentToken) && change.value === '') {
+      console.log('stop!');
+      return;
+    }
 
     // console.log('decided intent', JSON.stringify(intent, null, 2));
 

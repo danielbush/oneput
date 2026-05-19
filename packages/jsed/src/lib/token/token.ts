@@ -8,7 +8,6 @@ import {
   isLineSibling,
   isWhitespaceTextNode,
   JSED_TOKEN_PADDED,
-  JSED_ANCHOR_CHAR,
   JSED_TOKEN_CLASS,
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_COLLAPSED,
@@ -38,7 +37,7 @@ import type { DeleteToken } from '../undo/UndoOperation.js';
 export function getValue(token: Node): string {
   validate(token);
   if (isAnchor(token)) {
-    return JSED_ANCHOR_CHAR;
+    return '';
   }
   return token.firstChild!.nodeValue as string;
 }

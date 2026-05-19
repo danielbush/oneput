@@ -59,6 +59,7 @@ export class Editor {
 
   // Editing
   getCursor = () => this.state.getCursor();
+  handleDelete = (evt?: KeyboardEvent) => this.state.ops.handleDelete(evt);
   // Editing is event driven see EditorController.
 
   // Motion

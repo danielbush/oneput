@@ -49,6 +49,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## bugs
 
+- fix: "delete focused element" in menu does something weird when deleting an em-tag
+  - FOCUS moves down; em is not deleted
 - fix: anchor tokens disappear when cursor uses insert markers
   - COMMENT: I think the ::after pseudoelement is being replaced
   - COMMENT: the css is annoying; what if we don't use jsed-token class on anchors; isToken would test for JSED_ANCHOR_CLASS ?  Then we define append/insert-after/et-al css rules for anchors separately

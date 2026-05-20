@@ -49,6 +49,9 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## bugs
 
+- fix: split may be behaving weirdly with undo
+  - try deleting the last word in a p-tag; then split at the second last; I end up with an empty p-tag, no anchor (it containins a template (deleted space) and the deleted token - which is probably correct)
+- fix: if we start typing over an anchor, the cursor stays in "select-all" (pulsing bg) and doesn't go into append mode (pusling underline)
 - fix: "delete focused element" in menu does something weird when deleting an em-tag
   - FOCUS moves down; em is not deleted
 - fix: anchor tokens disappear when cursor uses insert markers

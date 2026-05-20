@@ -204,7 +204,9 @@ export class OneputEditDocumentAdapter {
     },
     EXIT: {
       action: () => {
-        this.editor.handleExit();
+        if (!this.editor.handleExit()) {
+          this.ctl.app.exit();
+        }
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
@@ -371,6 +373,15 @@ export class OneputEditDocumentAdapter {
             this.editor.handleExit({ softExit: false });
           },
           left: (b) => [b.icon(icons.PencilOff)]
+        }),
+      !this.editor.isEditing() &&
+        stdMenuItem({
+          id: 'EXIT',
+          textContent: 'Exit',
+          action: () => {
+            this.ctl.app.exit();
+          },
+          left: (b) => [b.icon(icons.X)]
         }),
       !this.editor.isEditing() &&
         stdMenuItem({

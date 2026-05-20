@@ -163,16 +163,21 @@ export class EditorOps {
     return this.enterEditing(current);
   }
 
+  /**
+   * Returns false if nothing left to exit.
+   */
   handleExit({ softExit }: { softExit: boolean } = { softExit: true }) {
     if (this.state.selection) {
       // Cancel selection: collapse wrappers and land the CURSOR on the head
       // (wherever the selection was extended to). Keeps edit mode.
       this.cancelSelectionAt(this.state.selection.getHead());
-      return;
+      return true;
     }
     if (this.state.mode === 'edit') {
       this.exitEditing({ softExit });
+      return true;
     }
+    return false;
   }
 
   handleDelete(evt?: KeyboardEvent) {

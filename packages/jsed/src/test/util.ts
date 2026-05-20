@@ -6,6 +6,7 @@ import {
   isDeletedElement,
   isDeletedSpace,
   isDeletedToken,
+  isImplicitLine,
   isIsland,
   isToken,
   JSED_ANCHOR_CLASS,
@@ -115,6 +116,7 @@ export function a(): string {
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
 export function identify(el: Node | undefined | null): string {
   if (!el) return `${el}`;
+  if (isImplicitLine(el)) return `[implicit-line]`;
   if (isDeletedSpace(el)) return `[deleted-space]`;
   if (isDeletedToken(el)) return `d("${token.getValue(el)}")`;
   if (isDeletedElement(el)) return `[deleted-element]`;

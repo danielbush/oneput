@@ -908,7 +908,7 @@ describe('remove', () => {
     expect(bar.classList).toContain(JSED_DELETED_CLASS);
     expect(bar.classList).toContain(JSED_IGNORE_CLASS);
     expect(rec).toMatchObject({
-      type: 'delete-token',
+      action: 'delete-token',
       token: bar,
       removeNextSeparator: false,
       removePreviousSeparator: false
@@ -939,7 +939,7 @@ describe('remove', () => {
     expect(bar.classList).toContain(JSED_DELETED_CLASS);
     expect(bar.classList).toContain(JSED_IGNORE_CLASS);
     expect(rec).toMatchObject({
-      type: 'delete-token',
+      action: 'delete-token',
       token: bar,
       removeNextSeparator: sp2,
       removePreviousSeparator: false
@@ -968,7 +968,7 @@ describe('remove', () => {
     expect(bar.classList).toContain(JSED_DELETED_CLASS);
     expect(bar.classList).toContain(JSED_IGNORE_CLASS);
     expect(rec).toMatchObject({
-      type: 'delete-token',
+      action: 'delete-token',
       token: bar,
       removeNextSeparator: sp2,
       removePreviousSeparator: sp1

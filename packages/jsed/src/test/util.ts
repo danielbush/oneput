@@ -3,6 +3,8 @@ import type { ViewportScrollerNullOptions } from '../lib/utilities/ViewportScrol
 import * as token from '../lib/token/token.js';
 import {
   isAnchor,
+  isDeletedElement,
+  isDeletedSpace,
   isDeletedToken,
   isIsland,
   isToken,
@@ -113,14 +115,22 @@ export function a(): string {
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
 export function identify(el: Node | undefined | null): string {
   if (!el) return `${el}`;
+  if (isDeletedSpace(el)) return `[deleted-space]`;
+  if (isDeletedToken(el)) return `d("${token.getValue(el)}")`;
+  if (isDeletedElement(el)) return `[deleted-element]`;
   if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el);
-  if (isDeletedToken(el)) return `d("${token.getValue(el)}")`;
   if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;
   if (el.nodeType === el.ELEMENT_NODE) {
-    return `[${(el as HTMLElement).tagName.toLowerCase()}]`;
+    const id = (el as Element).id;
+    return `[element:${(el as HTMLElement).tagName.toLowerCase()}${id ? '#' + id : ''}]`;
   }
   return `[nodeType=${el.nodeType}:"${el.nodeValue}"]`;
+}
+
+export function identifyChildren(node: Node | undefined | null): string[] {
+  if (!node) return [];
+  return Array.from(node.childNodes).map((node) => identify(node));
 }
 
 /**

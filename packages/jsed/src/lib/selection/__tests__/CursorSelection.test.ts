@@ -23,7 +23,9 @@ function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
  */
 
 function tokens(doc: { root: HTMLElement }): HTMLElement[] {
-  return Array.from(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
+  return Array.from(
+    doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}, .${JSED_ANCHOR_CLASS}`)
+  ) as HTMLElement[];
 }
 
 function headValue(selection: CursorSelection): string {

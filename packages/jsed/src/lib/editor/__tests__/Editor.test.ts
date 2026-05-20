@@ -6,6 +6,7 @@ import {
   em,
   frag,
   identify,
+  identifyChildren,
   inlineStyleHack,
   li,
   makeRoot,
@@ -22,6 +23,7 @@ import {
   isIsland,
   isToken,
   JSED_ANCHOR_CHAR,
+  JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS
 } from '../../core/taxonomy.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
@@ -327,7 +329,7 @@ describe('Editor', () => {
         expect(inserted).toBe(true);
         expect(children).toHaveLength(3);
         expect(children[1]?.tagName.toLowerCase()).toBe('p');
-        expect(children[1]?.querySelector(`.${JSED_TOKEN_CLASS}`)).not.toBeNull();
+        expect(children[1]?.querySelector(`.${JSED_ANCHOR_CLASS}`)).not.toBeNull();
         expect(editor.nav.getFocus()).toBe(children[1]);
 
         editor.destroy();
@@ -389,7 +391,7 @@ describe('Editor', () => {
         const child = p1.lastElementChild;
         expect(inserted).toBe(true);
         expect(child?.tagName.toLowerCase()).toBe('span');
-        expect(child?.querySelector(`.${JSED_TOKEN_CLASS}`)).not.toBeNull();
+        expect(child?.querySelector(`.${JSED_ANCHOR_CLASS}`)).not.toBeNull();
         expect(editor.nav.getFocus()).toBe(child);
 
         editor.destroy();
@@ -1566,8 +1568,8 @@ describe('Editor', () => {
       await userInput.typeText('');
 
       // assert
-      expect(line.querySelectorAll('.jsed-token')).toHaveLength(2);
-      expect(userInput.getInputValue()).toBe(JSED_ANCHOR_CHAR);
+      expect(identifyChildren(line)).toEqual(['[anchor]', 'd("foo")']);
+      expect(userInput.getInputValue()).toBe('');
     });
 
     test('"|foo" => " |foo" ==> "| foo" => "b| foo" ==> "b|": inserts new token before foo with space between', async () => {

@@ -4,7 +4,7 @@ import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
-import { isDeletedToken, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { isDeletedToken, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -27,7 +27,9 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
 }
 
 function tokens(doc: JsedDocument): HTMLElement[] {
-  return Array.from(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`)) as HTMLElement[];
+  return Array.from(
+    doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}, .${JSED_ANCHOR_CLASS}`)
+  ) as HTMLElement[];
 }
 
 function tokenValues(doc: JsedDocument): string[] {
@@ -386,8 +388,8 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
-    expect(identify(cursor.getPlace().nextElementSibling)).toBe('d("bbb")'); // not removed from dom
-    expect(isDeletedToken(cursor.getPlace().nextElementSibling)).toBe(true);
+    expect(identify(cursor.getPlace().nextElementSibling)).toBe('[deleted-space]'); // not removed from dom
+    expect(identify(cursor.getPlace().nextElementSibling?.nextElementSibling)).toBe('d("bbb")'); // not removed from dom
   });
 });
 

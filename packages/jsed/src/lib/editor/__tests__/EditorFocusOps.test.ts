@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import { Editor } from '../Editor.js';
 import type { EditorElementChangeEvent } from '../../../lib/editor/EditorState.js';
-import { byId, frag, makeRoot, p } from '../../../test/util.js';
+import { byId, frag, identify, makeRoot, p } from '../../../test/util.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
-import { JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 function createNullEditor(doc: JsedDocument): Editor {
   return Editor.createNull({
@@ -26,6 +26,7 @@ describe('EditorFocusOps', () => {
       editor.start();
 
       // act
+      expect(identify(editor.nav.getFocus())).toBe('[element:p#p1]');
       const inserted = editor.focus.insertNewAfter('p');
 
       // assert
@@ -33,7 +34,7 @@ describe('EditorFocusOps', () => {
       expect(inserted).toBe(true);
       expect(children).toHaveLength(3);
       expect(children[1]?.tagName.toLowerCase()).toBe('p');
-      expect(children[1]?.querySelector(`.${JSED_TOKEN_CLASS}`)).not.toBeNull();
+      expect(children[1]?.querySelector(`.${JSED_ANCHOR_CLASS}`)).not.toBeNull();
       expect(editor.nav.getFocus()).toBe(children[1]);
       expect(elementChanges).toEqual([
         {
@@ -114,7 +115,7 @@ describe('EditorFocusOps', () => {
       expect(inserted).toBe(true);
       expect(children).toHaveLength(3);
       expect(children[1]?.tagName.toLowerCase()).toBe('p');
-      expect(children[1]?.querySelector(`.${JSED_TOKEN_CLASS}`)).not.toBeNull();
+      expect(children[1]?.querySelector(`.${JSED_ANCHOR_CLASS}`)).not.toBeNull();
       expect(editor.nav.getFocus()).toBe(children[1]);
       expect(elementChanges).toEqual([
         {

@@ -394,7 +394,6 @@ export class InputController {
   }
 
   private handleInputChange = (evt: InputEvent) => {
-    console.log('input change', evt);
     const target = evt.target as HTMLInputElement | null;
     const value = target?.value ?? '';
     const range: [number | null, number | null] = [

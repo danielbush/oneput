@@ -305,7 +305,6 @@ export class EditorOps {
    * When user types in the input...
    */
   processUserInput = (change: UserInputChange) => {
-    console.log(JSON.stringify(change, null, 2));
     const cursor = this.state.cursor;
     if (!cursor) {
       console.error(`'cursor' not set`);
@@ -316,7 +315,6 @@ export class EditorOps {
     const intent = decideInputIntent(change, currentTokenValue);
 
     if (isAnchor(currentToken) && change.value === '') {
-      console.log('stop!');
       return;
     }
 

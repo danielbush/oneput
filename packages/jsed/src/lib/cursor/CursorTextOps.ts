@@ -3,9 +3,15 @@ import * as space from '../token/space.js';
 import { isAnchor, isLineSibling, isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
-import { deleteHighestEmpty } from '../focus/focusable.js';
+import {
+  deleteHighestEmpty,
+  isEmpty,
+  recSplitAfterChild,
+  recSplitBeforeChild
+} from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 import type { UndoOperation } from '../undo/UndoOperation.js';
+import { getFirstLineSibling, getLine } from '../core/line.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -193,27 +199,55 @@ export class CursorTextOps {
   }
 
   /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
-  private splitBefore(): HTMLElement | null {
-    if (!this.state.isOnToken()) return null;
-    const [before] = token.splitBefore(this.state.getPlace());
-    // We may end up in a new token, so we need to update the focus.
-    this.state.place(this.state.getPlace());
-    return before;
+  private splitBefore() {
+    const child = this.state.getPlace();
+    const line = getLine(child); // GOTCHA - always pre-calculate this, don't use in isCeiling below.
+    const result = recSplitBeforeChild(child, (el) => el === line);
+
+    // The original may need an ANCHOR becuase we could split before the first
+    // child.
+    token.addAnchors(result.firstSplit.parent);
+
+    // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
+    // TODO: might need to refine this.
+    const [anchor] = token.addAnchors(result.firstSplit.peer);
+    if (anchor) {
+      this.state.place(anchor);
+    }
+
+    // Try to place the cursor on peer.
+    const sib = getFirstLineSibling(result.finalSplit.peer);
+    if (sib) {
+      this.state.place(sib);
+    }
+
+    return result;
   }
 
   /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
-  private splitAfter(): HTMLElement | null {
-    if (!this.state.isOnToken()) return null;
-    const [, after] = token.splitAfter(this.state.getPlace());
-    const firstTok = this.state.tokenizer.tokenizeLineAt(after);
-    if (firstTok) {
-      this.state.place(firstTok);
+  private splitAfter() {
+    const child = this.state.getPlace();
+    const line = getLine(child); // GOTCHA - always pre-calculate this, don't use in isCeiling below.
+    const result = recSplitAfterChild(child, (el) => el === line);
+
+    // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
+    // TODO: might need to refine this.
+    const [anchor] = token.addAnchors(result.firstSplit.peer);
+    if (anchor) {
+      this.state.place(anchor);
     }
-    return after;
+
+    // Try to place the cursor on peer.
+    const sib = getFirstLineSibling(result.finalSplit.peer);
+    if (sib) {
+      this.state.place(sib);
+    }
+
+    return result;
   }
 
   /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
-  splitAtToken(): HTMLElement | null {
+  splitAtToken() {
     if (this.state.isInsertingBefore() || this.state.isPrepend()) {
       return this.splitBefore();
     }

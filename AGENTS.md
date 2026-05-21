@@ -23,6 +23,12 @@ When working in one of these packages or apps, check if they have an AGENTS.md .
 - `packages/jsed/AGENTS.md`
 - `packages/oneput/AGENTS.md`
 
+## Project management
+
+There is a `work-tracker` skill that manages areas like `work/`.
+
+Also note: `work/active/CURRENT.md` is a space where the user writes down what they're currently doing.  You can refer here to get an idea of what they're trying to do.
+
 ## Reading and writing code
 
 General rules

@@ -648,25 +648,25 @@ function isRootTextLine(line: HTMLElement): boolean {
   return line.tagName === 'DIV' && line.parentElement === line.ownerDocument.body;
 }
 
-function convertImplicitLineToParagraph(line: HTMLElement): HTMLElement {
-  if (!isImplicitLine(line)) {
-    return line;
-  }
+// function convertImplicitLineToParagraph(line: HTMLElement): HTMLElement {
+//   if (!isImplicitLine(line)) {
+//     return line;
+//   }
 
-  const paragraph = document.createElement('p');
-  while (line.firstChild) {
-    paragraph.appendChild(line.firstChild);
-  }
-  line.replaceWith(paragraph);
-  return paragraph;
-}
+//   const paragraph = document.createElement('p');
+//   while (line.firstChild) {
+//     paragraph.appendChild(line.firstChild);
+//   }
+//   line.replaceWith(paragraph);
+//   return paragraph;
+// }
 
 /**
  * Move anything before `token` to a new parent before the current parent (SPLIT_BY_TOKEN).
  */
 export function splitBefore(token: HTMLElement): HTMLElement[] {
-  let par = getParent(token);
-  par = convertImplicitLineToParagraph(par);
+  const par = getParent(token);
+  // par = convertImplicitLineToParagraph(par);
   const line = getLine(token);
 
   if (par === line && isRootTextLine(line)) {
@@ -697,8 +697,8 @@ export function splitBefore(token: HTMLElement): HTMLElement[] {
  * Move anything after `token` to a new parent after the current parent (SPLIT_BY_TOKEN).
  */
 export function splitAfter(token: HTMLElement): HTMLElement[] {
-  let par = getParent(token);
-  par = convertImplicitLineToParagraph(par);
+  const par = getParent(token);
+  // par = convertImplicitLineToParagraph(par);
   const line = getLine(token);
 
   if (par === line && isRootTextLine(line)) {

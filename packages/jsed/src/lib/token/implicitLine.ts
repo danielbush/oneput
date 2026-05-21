@@ -38,11 +38,16 @@ function wrapInterstitials(el: HTMLElement) {
   if (current.length > 0) runs.push(current);
 
   for (const run of runs) {
-    const span = el.ownerDocument.createElement('span');
-    span.className = JSED_IMPLICIT_CLASS;
+    const span = createImplicitLine();
     run[0].before(span);
     for (const node of run) span.appendChild(node);
   }
+}
+
+export function createImplicitLine() {
+  const span = document.createElement('span');
+  span.className = JSED_IMPLICIT_CLASS;
+  return span;
 }
 
 /**

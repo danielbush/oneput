@@ -3,6 +3,7 @@ import * as domRules from '../core/dom-rules.js';
 import { getNextNodeSibling, getPreviousNodeSibling } from '../core/sibling.js';
 import {
   isFocusable,
+  isImplicitLine,
   isInlineFlow,
   isIsland,
   isToken,
@@ -13,6 +14,7 @@ import {
 import * as token from '../token/token.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
 import type { DeleteElement } from '../undo/UndoOperation.js';
+import { createImplicitLine } from '../token/implicitLine.js';
 
 export function createElement(
   tagName: string,
@@ -272,3 +274,151 @@ export function copyEmptyPrevious(target: HTMLElement): HTMLElement | null {
   }
   return empty;
 }
+
+// #region split
+
+function createSplitPeer(parent: HTMLElement): HTMLElement {
+  if (isImplicitLine(parent)) {
+    return createImplicitLine();
+  }
+
+  const peer = parent.cloneNode(false) as HTMLElement;
+  if (peer.id) {
+    peer.removeAttribute('id');
+  }
+  return peer;
+}
+
+export type SplitAfterAction = {
+  action: 'split-after-child';
+  child: HTMLElement;
+  parent: HTMLElement;
+  peer: HTMLElement;
+};
+export type SplitBeforeAction = {
+  action: 'split-before-child';
+  child: HTMLElement;
+  parent: HTMLElement;
+  peer: HTMLElement;
+};
+export type SplitAction = SplitAfterAction | SplitBeforeAction;
+export type RecursiveSplitAfterAction = {
+  action: 'recursive-split-after-child';
+  splits: SplitAction[];
+  /**
+   * The lowest split point which is relevant when we split at a TOKEN via the CURSOR.
+   */
+  firstSplit: SplitAction;
+  finalSplit: SplitAction;
+};
+export type RecursiveSplitBeforeAction = {
+  action: 'recursive-split-before-child';
+  splits: SplitAction[];
+  /**
+   * The lowest split point which is relevant when we split at a TOKEN via the CURSOR.
+   */
+  firstSplit: SplitAction;
+  finalSplit: SplitAction;
+};
+
+/**
+ * Split `child`'s parent at the child boundary, moving the forward run into a
+ * new peer after the parent.
+ *
+ * `includeChild` true moves the child too (before); false leaves it in the
+ * parent (after).
+ */
+function splitAtChild(
+  child: HTMLElement,
+  includeChild: boolean
+): { parent: HTMLElement; peer: HTMLElement } {
+  const parent = child.parentElement;
+  if (!parent) {
+    throw new Error(`child ${child} has no parentElement`);
+  }
+  const peer = createSplitPeer(parent);
+  parent.insertAdjacentElement('afterend', peer);
+  let c: Node | null = includeChild ? child : child.nextSibling;
+  while (c) {
+    const next = c.nextSibling;
+    peer.append(c);
+    c = next;
+  }
+  return { parent, peer };
+}
+
+export function splitAfterChild(child: HTMLElement): SplitAfterAction {
+  const { parent, peer } = splitAtChild(child, false);
+  return {
+    action: 'split-after-child',
+    child,
+    parent,
+    peer
+  };
+}
+
+export function splitBeforeChild(child: HTMLElement): SplitBeforeAction {
+  const { parent, peer } = splitAtChild(child, true);
+  return {
+    action: 'split-before-child',
+    child,
+    parent,
+    peer
+  };
+}
+
+/**
+ * Split at the child and keep climbing, splitting each peer into the level
+ * above until the ceiling (also split).
+ *
+ * `includeChild` sets the child's side at the bottom level: true moves it into
+ * the peer (before), false keeps it (after).
+ */
+function recSplitAtChild(
+  child: HTMLElement,
+  isCeiling: (el: HTMLElement) => boolean,
+  includeChild: boolean
+): SplitAction[] {
+  const splitBottom = includeChild ? splitBeforeChild : splitAfterChild;
+  let p = child.parentElement;
+  let c = child;
+  const results: SplitAction[] = [];
+  while (p) {
+    const result = c === child ? splitBottom(c) : splitBeforeChild(c);
+    results.push(result);
+    if (isCeiling(p)) {
+      break;
+    }
+    p = p.parentElement;
+    c = result.peer;
+  }
+  return results;
+}
+
+export function recSplitAfterChild(
+  child: HTMLElement,
+  isCeiling: (el: HTMLElement) => boolean
+): RecursiveSplitAfterAction {
+  const splits = recSplitAtChild(child, isCeiling, false);
+  return {
+    action: 'recursive-split-after-child',
+    splits,
+    firstSplit: splits[0],
+    finalSplit: splits[splits.length - 1]
+  };
+}
+
+export function recSplitBeforeChild(
+  child: HTMLElement,
+  isCeiling: (el: HTMLElement) => boolean
+): RecursiveSplitBeforeAction {
+  const splits = recSplitAtChild(child, isCeiling, true);
+  return {
+    action: 'recursive-split-before-child',
+    splits,
+    firstSplit: splits[0],
+    finalSplit: splits[splits.length - 1]
+  };
+}
+
+// #endregion

@@ -4,11 +4,14 @@
 
 <div id="test-doc">
   <h1 class="jsed-ignore">Default behaviours</h1>
-  <h2 class="jsed-ignore">Simple paragraphs</h2>
+  <h2 class="jsed-ignore">Simple paragraphs and INLINE_FLOW</h2>
   <p>This is just a simple paragraph of text. And this is a second sentence.</p>
   <p>Here's a second paragraph with more text in it.</p>
   <p>aaa bbb <em>ccc ddd</em> eee fff</p>
   <p>aaa bbb <em>ccc <strong>ddd</strong></em> eee fff</p>
+  <p>aaa bbb <em>em1</em> <em>em2</em> ccc ddd</p>
+  <p><em>aaa <strong>bbb</strong> ccc</em> ddd eee</p>
+  <p><em><strong>aaa</strong></em> bbb ccc</p>
 
   <h2 class="jsed-ignore">Bulleted lists</h2>
   <ul>
@@ -24,14 +27,6 @@
       2nd implied para
     </li>
   </ul>
-
-  <h2 class="jsed-ignore">INLINE_FLOW</h2>
-  <div>before em <em>within em</em> after em</div>
-  <div>before em tags <em>em 1</em> <em>em 2</em> after em tags</div>
-  <div>
-    before
-    <em>em-tag with a <b>nested b-tag</b> back in the em-tag</em> and now we're out again
-  </div>
 
   <h2 class="jsed-ignore">IMPLICIT_LINE's and mixed levels</h2>
   <div>

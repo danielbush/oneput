@@ -1,4 +1,4 @@
-import type { UndoOperation } from './UndoOperation';
+import type { UndoOperation } from './UndoOperation.js';
 
 export type UndoRecord = {
   ops: UndoOperation[];

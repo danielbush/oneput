@@ -1,4 +1,4 @@
-import { JSED_SELECTION_CLASS } from '../core/taxonomy';
+import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 
 /**
  * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's

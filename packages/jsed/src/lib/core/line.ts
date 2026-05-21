@@ -7,8 +7,8 @@ import {
   isLineSibling,
   isToken,
   isTokenizableTextNode
-} from './taxonomy';
-import { findNextNode, findPreviousNode } from './walk';
+} from './taxonomy.js';
+import { findNextNode, findPreviousNode } from './walk.js';
 
 /**
  * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.

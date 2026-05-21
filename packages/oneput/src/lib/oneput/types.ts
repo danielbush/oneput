@@ -189,6 +189,31 @@ export type FChildParams = {
 };
 
 /**
+ * Map of app-event name -> payload.  Oneput ships it empty; host apps augment
+ * it via declaration merging so events are typed end to end:
+ *
+ *   declare module '@oneput/oneput' {
+ *     interface AppEventMap {
+ *       'node-click': { id: string };
+ *     }
+ *   }
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface AppEventMap {}
+
+/**
+ * A host-app event delivered to the currently active AppObject via
+ * ctl.app.emitEvent(...).  When AppEventMap is augmented this is a discriminated
+ * union (so `event.type === 'x'` narrows `payload`); before augmentation it
+ * falls back to a generic shape so Oneput stays usable and domain-agnostic.
+ */
+export type AppEvent = [keyof AppEventMap] extends [never]
+  ? { type: string; payload?: unknown }
+  : {
+      [K in keyof AppEventMap]: { type: K; payload: AppEventMap[K] };
+    }[keyof AppEventMap];
+
+/**
  * Represents a screen or state in the Oneput app stack.
  *
  * AppObjects are managed by AppController which maintains a stack — run() pushes,
@@ -197,13 +222,6 @@ export type FChildParams = {
  *
  * @typeParam R - The type of payload that a child AppObject can return via exit().
  */
-/**
- * A host-app event delivered to the currently active AppObject via
- * ctl.app.emitEvent(...).  Intentionally generic so Oneput stays
- * domain-agnostic; host apps narrow on `type` in their onEvent handlers.
- */
-export type AppEvent = { type: string; payload?: unknown };
-
 export interface AppObject<R = unknown> {
   /**
    * Called when the AppObject has been instantiated and is then given control

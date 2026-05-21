@@ -49,15 +49,16 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## bugs
 
+- non-TOKEN LINE_SIBLING woes
+  - fix: when splitting after TOKEN before an ISLAND (ie a non-TOKEN LINE_SIBLING), we get a new line, an ANCHOR but no space between us and the non-TOKEN LINE_SIBLING; (1) we may not want the ANCHOR - maybe we want the non-TOKEN LINE_SIBLING to lead that LINE, but we can't remove it; (2) we can insert a trailing space after ANCHOR but it should probably be inserted by default when the ANCHOR is created
+  - fix: can't split when cursor is on an island
+  - fix: can't insert before/after when cursor is on an island
+  - fix: island doesn't show cursor focus very well when cursor is on an island
+- fix: space should put us into insert-after then move to next word (atm it moves to next word)
 - fix: if we go into insert-after, then type a word, then delete that word we should go back into insert-after but in fact we end up in append, so typing again will end up gluing letters to the previous word
-- fix: split may be behaving weirdly with undo
-  - try deleting the last word in a p-tag; then split at the second last; I end up with an empty p-tag, no anchor (it containins a template (deleted space) and the deleted token - which is probably correct)
 - fix: if we start typing over an anchor, the cursor stays in "select-all" (pulsing bg) and doesn't go into append mode (pusling underline)
 - fix: "delete focused element" in menu does something weird when deleting an em-tag
   - FOCUS moves down; em is not deleted
-- fix: anchor tokens disappear when cursor uses insert markers
-  - COMMENT: I think the ::after pseudoelement is being replaced
-  - COMMENT: the css is annoying; what if we don't use jsed-token class on anchors; isToken would test for JSED_ANCHOR_CLASS ?  Then we define append/insert-after/et-al css rules for anchors separately
 - fix: review test.todo's
 - fix: put CURSOR on an ISLAND in the middle of a LINE with token's on either side; open menu; close menu; CURSOR is moved to beginning of LINE
 - fix: getLine can exceed document root

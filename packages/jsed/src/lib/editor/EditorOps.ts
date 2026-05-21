@@ -457,6 +457,7 @@ export class EditorOps {
   };
 }
 
+// TODO: put next to addAnchors() or use addAnchors()?
 function fixAnchors(el: HTMLElement) {
   if (isToken(el)) {
     const next = getNextElementSibling(el);

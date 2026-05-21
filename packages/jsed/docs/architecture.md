@@ -1,5 +1,21 @@
 # Jsed Architecture
 
+COMMENT: New notes that need to be incorporated into this document; they supersede the details below.
+
+At the bottom we have lib/core
+
+- taxonomy - identifies key elements/nodes in the DOM
+- walk - general recursive walking functions
+- sibling - worries about elements that share the same parentNode; this is important for things like managing LINE_SEGMENT's etc
+- line - worries about LINE's
+- dom-rules - worries about how elements can be combined
+
+The lib/token/token and lib/token/space modules work below the tokenization and cursor and above the core modules; lib/token/token operations worry about managing tokens and their related separators (white space).
+
+Cursor handles moving around LINE_SIBLING's; it handles tokenization (SHALLOW_TOKENIZATION) in conjunction with Editor and Nav which also tokenize on the fly. It also manages ANCHOR's - adding them during operations like split or delete.
+
+## Intro
+
 This document builds up from jsed's foundation to its orchestration layer. Each section depends only on what came before. For domain terms (FOCUSABLE, TOKEN, LINE, etc.), see [vocabulary.md](vocabulary.md).
 
 Jsed is a headless library — it contains all the navigation and editing logic but does not run on its own. The browser demo is the canonical example of wiring jsed up with Oneput, and is used for active development.

@@ -171,7 +171,10 @@ export class EditorCursorOps {
 
     const inserted = this.state.cursor.splitAtToken();
     if (inserted) {
-      this.state.notifyElementChange({ type: 'focusable-inserted', element: inserted });
+      this.state.notifyElementChange({
+        type: 'focusable-inserted',
+        element: inserted.finalSplit.peer
+      });
     }
   }
 }

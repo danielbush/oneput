@@ -22,7 +22,6 @@ import {
   isDeletedElement,
   isIsland,
   isToken,
-  JSED_ANCHOR_CHAR,
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS
 } from '../../core/taxonomy.js';

@@ -4,7 +4,7 @@ import type { EditorElementChangeEvent } from '../../../lib/editor/EditorState.j
 import { byId, frag, identify, makeRoot, p } from '../../../test/util.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
-import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { JSED_ANCHOR_CLASS } from '../../core/taxonomy.js';
 
 function createNullEditor(doc: JsedDocument): Editor {
   return Editor.createNull({

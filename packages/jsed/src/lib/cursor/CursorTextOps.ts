@@ -3,12 +3,7 @@ import * as space from '../token/space.js';
 import { isAnchor, isLineSibling, isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
-import {
-  deleteHighestEmpty,
-  isEmpty,
-  recSplitAfterChild,
-  recSplitBeforeChild
-} from '../focus/focusable.js';
+import { deleteHighestEmpty, recSplitAfterChild, recSplitBeforeChild } from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 import type { UndoOperation } from '../undo/UndoOperation.js';
 import { getFirstLineSibling, getLine } from '../core/line.js';

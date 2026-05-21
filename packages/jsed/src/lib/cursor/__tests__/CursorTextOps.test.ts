@@ -4,7 +4,7 @@ import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
-import { isDeletedToken, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

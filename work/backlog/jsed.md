@@ -66,6 +66,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## feats
 
+- feat: table editor - eg building a table of companies in a sector of the stock market
 - feat: cannot delete ISLAND's using CURSOR;
   - COMMENT: there is no path to `onInputSelectionChange` (events controller) because we disable the input
   - ideas

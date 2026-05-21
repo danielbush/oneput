@@ -62,6 +62,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix: getLine can exceed document root
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
+- fix: modern css element indicator goes off the left side of viewport for small elements on the left edge (legacy indicator handles this)
 
 ## feats
 
@@ -88,6 +89,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: remember last token position in each LINE (not LINE_SEGMENT)
 - feat: persist last token position in each LINE
 - feat: persist last FOCUS position and FOCUS it when we reload the document
+feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
 
 ## refactors
 

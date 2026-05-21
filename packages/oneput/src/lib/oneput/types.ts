@@ -197,6 +197,13 @@ export type FChildParams = {
  *
  * @typeParam R - The type of payload that a child AppObject can return via exit().
  */
+/**
+ * A host-app event delivered to the currently active AppObject via
+ * ctl.app.emitEvent(...).  Intentionally generic so Oneput stays
+ * domain-agnostic; host apps narrow on `type` in their onEvent handlers.
+ */
+export type AppEvent = { type: string; payload?: unknown };
+
 export interface AppObject<R = unknown> {
   /**
    * Called when the AppObject has been instantiated and is then given control
@@ -230,6 +237,14 @@ export interface AppObject<R = unknown> {
    */
   onExit?: () => void;
   onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
+  /**
+   * Called when an app event is emitted via ctl.app.emitEvent(...) while this
+   * AppObject is the active (current) one.  This is how host-app UI rendered
+   * outside of Oneput (e.g. a node on a canvas) can signal the active AppObject
+   * without subscribing or knowing who handles it.  Only the current AppObject
+   * receives the event.
+   */
+  onEvent?: (event: AppEvent) => void;
   /**
    * If actionId is a binding, the action defined here will take precedence over
    * "default" actions defined against bindings outside of any AppObject.

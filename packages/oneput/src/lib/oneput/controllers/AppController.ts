@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppObject, UIFlags } from '../types.js';
+import type { AppEvent, AppObject, UIFlags } from '../types.js';
 import { AppVal } from './helpers/AppVal.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
@@ -252,6 +252,18 @@ export class AppController {
       exists: !!menuId && this.current?.menuExists(menuId)
     };
   }
+
+  /**
+   * Deliver a host-app event to the currently active AppObject.
+   *
+   * Used by host-app UI rendered outside of Oneput (e.g. a node on a canvas)
+   * to signal the active AppObject without subscribing.  Routes to `current`
+   * the same way handleAction routes actions; no-op if the current AppObject
+   * does not implement onEvent.
+   */
+  emitEvent = (event: AppEvent) => {
+    this.current?.app.onEvent?.(event);
+  };
 
   /**
    * The current AppObject should handle the action.

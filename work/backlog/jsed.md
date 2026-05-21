@@ -96,6 +96,14 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
 
 ## refactors
 
+- refactor: get rid of one of isSpaceNode, isWhitespaceNdoe
+  - isSpaceNode is badly written
+- refactor: should taxonomy handle creation; eg createSplitPeer, createAnchor, createToken etc
+- refactor: fixAnchors (created to do undo) and addAnchors
+  - replace fixAnchors with addAnchors?
+  - or move it alongside?
+- refactor: can we remove anchor logic from focusable module?
+  - EditorFocusOps, EditorTextOps are the main orchestrators, so they can call the token or related to manage the anchors
 - refactor: pass undo as event?
   - `this.state.notifyElementChange({ type: 'focusable-inserted', element: inserted.finalSplit.peer });` is used for this.state.cursor.splitAtToken in packages/jsed/src/lib/editor/EditorCursorOps.ts
 - refactor: OneputEditDocumentAdapter.ts should probably be instantiated as the UI and it provides hooks for us to customise it; 

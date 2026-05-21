@@ -124,12 +124,6 @@ describe('deleteHighestEmptyTree', () => {
 });
 
 describe('splitting', () => {
-  /*
-    TODO
-    - splitting after TOKEN that is before a non-TOKEN LINE_SIBLING eg ISLAND
-      - if TOKEN is first TOKEN on LINE, ANCHOR on new line should have a space after it
-    - splitting when CURSOR is on an non-TOKEN LINE_SIBLING eg ISLAND
-*/
   describe('splitAfterChild', () => {
     test('peer receives all nodes after the child', () => {
       // arrange

@@ -49,6 +49,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## bugs
 
+- fix: if we go into insert-after, then type a word, then delete that word we should go back into insert-after but in fact we end up in append, so typing again will end up gluing letters to the previous word
 - fix: split may be behaving weirdly with undo
   - try deleting the last word in a p-tag; then split at the second last; I end up with an empty p-tag, no anchor (it containins a template (deleted space) and the deleted token - which is probably correct)
 - fix: if we start typing over an anchor, the cursor stays in "select-all" (pulsing bg) and doesn't go into append mode (pusling underline)
@@ -94,6 +95,8 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
 
 ## refactors
 
+- refactor: pass undo as event?
+  - `this.state.notifyElementChange({ type: 'focusable-inserted', element: inserted.finalSplit.peer });` is used for this.state.cursor.splitAtToken in packages/jsed/src/lib/editor/EditorCursorOps.ts
 - refactor: OneputEditDocumentAdapter.ts should probably be instantiated as the UI and it provides hooks for us to customise it; 
 - refactor: OneputEditDocumentAdapter.ts isn't an adapter; it's sort of a manual base class - so maybe OneputEditDocumentBase.ts ?
 - refactor: line module is really sibling.ts and it should include the sib functions in walk; walk builds on sibling

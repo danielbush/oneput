@@ -7,7 +7,7 @@ import { deleteHighestEmpty, recSplitAfterChild, recSplitBeforeChild } from '../
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 import type { UndoOperation } from '../undo/UndoOperation.js';
 import { getFirstLineSibling, getLine } from '../core/line.js';
-import { addAnchors, createAnchor } from '../token/anchor.js';
+import { addAnchorsToTag, createAnchor } from '../token/anchor.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -201,7 +201,7 @@ export class CursorTextOps {
     const result = recSplitBeforeChild(child, (el) => el === line);
     // The original may need an ANCHOR becuase we could split before the first
     // child.
-    addAnchors(result.bottomSplit.parent);
+    addAnchorsToTag(result.bottomSplit.parent);
     return result;
   }
 
@@ -219,7 +219,7 @@ export class CursorTextOps {
     const result = splitBefore ? this.splitBefore() : this.splitAfter();
 
     // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
-    addAnchors(result.bottomSplit.peer);
+    addAnchorsToTag(result.bottomSplit.peer);
 
     // Try to place the cursor on peer.
     const sib = getFirstLineSibling(result.topSplit.peer);

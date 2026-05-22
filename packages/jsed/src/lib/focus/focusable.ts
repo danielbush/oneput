@@ -14,7 +14,7 @@ import {
 import { findNextNode, findPreviousNode } from '../core/walk.js';
 import type { DeleteElement } from '../undo/UndoOperation.js';
 import { createImplicitLine } from '../token/implicitLine.js';
-import { addAnchors } from '../token/anchor.js';
+import { addAnchorsToTag } from '../token/anchor.js';
 
 export function createElement(
   tagName: string,
@@ -22,7 +22,7 @@ export function createElement(
 ): HTMLElement {
   const el = document.createElement(tagName);
   if (options.addAnchors && canCreateWithAnchor(tagName)) {
-    addAnchors(el);
+    addAnchorsToTag(el);
   }
   return el;
 }
@@ -256,7 +256,7 @@ export function copyEmptyNext(target: HTMLElement): HTMLElement | null {
   empty.classList.remove(JSED_FOCUS_CLASS);
   target.insertAdjacentElement('afterend', empty);
   if (canCreateWithAnchor(empty.tagName)) {
-    addAnchors(empty);
+    addAnchorsToTag(empty);
   }
   return empty;
 }
@@ -270,7 +270,7 @@ export function copyEmptyPrevious(target: HTMLElement): HTMLElement | null {
   empty.classList.remove(JSED_FOCUS_CLASS);
   target.insertAdjacentElement('beforebegin', empty);
   if (canCreateWithAnchor(empty.tagName)) {
-    addAnchors(empty);
+    addAnchorsToTag(empty);
   }
   return empty;
 }

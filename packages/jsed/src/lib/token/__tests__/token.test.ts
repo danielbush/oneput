@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { canInsertAnchorInLine, createToken, remove, replaceText } from '../token.js';
 import {
-  addAnchors,
+  addAnchorsToTag,
   createAnchor,
   getAnchorAfterTagInsertionPoint,
   getAnchorBeforeTagInsertionPoint,
@@ -70,7 +70,7 @@ describe('ANCHOR', () => {
 
       // act
       const canInsert = canInsertAnchorInLine(p1);
-      const [anchor] = addAnchors(p1);
+      const [anchor] = addAnchorsToTag(p1);
 
       // assert
       expect(canInsert).toBe(true);
@@ -91,7 +91,7 @@ describe('ANCHOR', () => {
 
       // act
       const canInsert = canInsertAnchorInLine(p1);
-      const [anchor] = addAnchors(p1);
+      const [anchor] = addAnchorsToTag(p1);
 
       // assert
       expect(canInsert).toBe(true);

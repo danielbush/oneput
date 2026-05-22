@@ -236,7 +236,7 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
  *
  * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
  */
-export function addAnchors(el: HTMLElement): HTMLElement[] {
+export function addAnchorsToTag(el: HTMLElement): HTMLElement[] {
   if (el.classList.contains(JSED_TOKEN_CLASS)) {
     throw new Error('addAnchors: expects an FOCUSABLE');
   }

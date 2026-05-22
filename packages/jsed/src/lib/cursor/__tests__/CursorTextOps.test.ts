@@ -1,9 +1,20 @@
 import { describe, expect, test } from 'vitest';
-import { a, em, identify, inlineStyleHackVal, makeRoot, p, s, t } from '../../../test/util.js';
+import {
+  a,
+  em,
+  identify,
+  identifyChildren,
+  inlineStyleHackVal,
+  makeRoot,
+  p,
+  s,
+  t
+} from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
 import { getValue } from '../../../lib/token/token.js';
+import { getSeparatorAfter } from '../../token/space.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 /**
@@ -76,6 +87,39 @@ describe('splitAtToken', () => {
     // assert
     expect(getValue(cursor.getPlace())).toBe('foo');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+  });
+
+  test('ANCHOR_ISLAND_EDGE_CASE - split after first TOKEN that precedes an ISLAND', () => {
+    // arrange — the TOKEN is the only TOKEN on the LINE, followed by an ISLAND
+    const doc = makeRoot(p(t('foo'), s(), '<span class="katex" style="display:inline;">x²</span>'));
+    const { cursor } = createCursor(doc, tokens(doc)[0]); // foo
+    cursor.setInsertState('CURSOR_APPEND');
+
+    // act
+    cursor.splitAtToken();
+
+    // assert — the ISLAND moves to a new LINE, fronted by an ANCHOR with a space between
+    const lines = doc.root.querySelectorAll('p');
+    expect(lines).toHaveLength(2);
+    expect(lines[0].textContent).toContain('foo');
+
+    const newLine = lines[1];
+    expect(identifyChildren(lines[1])).toEqual([
+      '[anchor]',
+      '[nodeType=3:" "]',
+      '[island:span]',
+      '[anchor]'
+    ]);
+    const anchor = newLine.querySelector(`.${JSED_ANCHOR_CLASS}`) as HTMLElement | null;
+    const island = newLine.querySelector('.katex');
+    expect(anchor).not.toBeNull();
+    expect(island).not.toBeNull();
+    // ANCHOR comes before the ISLAND
+    expect(
+      anchor!.compareDocumentPosition(island!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    // a separator space is auto-generated between the ANCHOR and the ISLAND
+    expect(getSeparatorAfter(anchor!)?.nodeValue).toBe(' ');
   });
 });
 

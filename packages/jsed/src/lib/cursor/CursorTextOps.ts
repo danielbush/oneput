@@ -7,6 +7,7 @@ import { deleteHighestEmpty, recSplitAfterChild, recSplitBeforeChild } from '../
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 import type { UndoOperation } from '../undo/UndoOperation.js';
 import { getFirstLineSibling, getLine } from '../core/line.js';
+import { addAnchors, createAnchor } from '../token/anchor.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -84,7 +85,7 @@ export class CursorTextOps {
     if (willCreateEmptyDocument) {
       // There's no prevCrs or nextCrs position We'll place the CURSOR on an
       // anchor so it has somewhere to go.
-      const anchor = token.createAnchor();
+      const anchor = createAnchor();
       current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
       return undo;
@@ -100,7 +101,7 @@ export class CursorTextOps {
     // ...<em>...</em>T|</p>
     // => ...<em>...</em>[A]</p>
     if (prevElementSib && !isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
-      const anchor = token.createAnchor();
+      const anchor = createAnchor();
       current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
       return undo;
@@ -109,7 +110,7 @@ export class CursorTextOps {
     // ...<em>[T]</em>...</p>
     // => ...<em>[A]</em>...</p>
     if (!isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
-      const anchor = token.createAnchor();
+      const anchor = createAnchor();
       current.insertAdjacentElement('beforebegin', anchor);
       this.state.place(anchor, userInputOpts);
       return undo;
@@ -200,7 +201,7 @@ export class CursorTextOps {
     const result = recSplitBeforeChild(child, (el) => el === line);
     // The original may need an ANCHOR becuase we could split before the first
     // child.
-    token.addAnchors(result.firstSplit.parent);
+    addAnchors(result.firstSplit.parent);
     return result;
   }
 
@@ -218,7 +219,7 @@ export class CursorTextOps {
     const result = splitBefore ? this.splitBefore() : this.splitAfter();
 
     // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
-    const [anchor] = token.addAnchors(result.firstSplit.peer);
+    const [anchor] = addAnchors(result.firstSplit.peer);
     if (anchor) {
       this.state.place(anchor);
     }

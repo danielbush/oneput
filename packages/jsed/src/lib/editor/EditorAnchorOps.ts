@@ -1,5 +1,16 @@
 import type { EditorState } from './EditorState.js';
 import * as token from '../token/token.js';
+import {
+  addAnchors,
+  getAnchorAfterTagInsertionPoint,
+  getAnchorBeforeTagInsertionPoint,
+  getRemovableAnchorAfterTag,
+  getRemovableAnchorBeforeTag,
+  insertAnchorAfterTag,
+  insertAnchorBeforeTag,
+  removeAnchorAfterTag,
+  removeAnchorBeforeTag
+} from '../token/anchor.js';
 
 /**
  * High-level ANCHOR operations for Editor.
@@ -15,7 +26,7 @@ export class EditorAnchorOps {
 
   canInsertBeforeFocus(): boolean {
     const focus = this.state.nav.getFocus();
-    return !!(focus && token.getAnchorBeforeTagInsertionPoint(focus));
+    return !!(focus && getAnchorBeforeTagInsertionPoint(focus));
   }
 
   insertBeforeFocus(): boolean {
@@ -24,7 +35,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    const anchor = token.insertAnchorBeforeTag(focus);
+    const anchor = insertAnchorBeforeTag(focus);
     if (!anchor) {
       return false;
     }
@@ -36,7 +47,7 @@ export class EditorAnchorOps {
 
   canInsertAfterFocus(): boolean {
     const focus = this.state.nav.getFocus();
-    return !!(focus && token.getAnchorAfterTagInsertionPoint(focus));
+    return !!(focus && getAnchorAfterTagInsertionPoint(focus));
   }
 
   insertAfterFocus(): boolean {
@@ -45,7 +56,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    const anchor = token.insertAnchorAfterTag(focus);
+    const anchor = insertAnchorAfterTag(focus);
     if (!anchor) {
       return false;
     }
@@ -57,7 +68,7 @@ export class EditorAnchorOps {
 
   canRemoveAfterFocus(): boolean {
     const focus = this.state.nav.getFocus();
-    return !!(focus && token.getRemovableAnchorAfterTag(focus));
+    return !!(focus && getRemovableAnchorAfterTag(focus));
   }
 
   removeAfterFocus(): boolean {
@@ -66,7 +77,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    const anchor = token.removeAnchorAfterTag(focus);
+    const anchor = removeAnchorAfterTag(focus);
     if (!anchor) {
       return false;
     }
@@ -77,7 +88,7 @@ export class EditorAnchorOps {
 
   canRemoveBeforeFocus(): boolean {
     const focus = this.state.nav.getFocus();
-    return !!(focus && token.getRemovableAnchorBeforeTag(focus));
+    return !!(focus && getRemovableAnchorBeforeTag(focus));
   }
 
   removeBeforeFocus(): boolean {
@@ -86,7 +97,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    const anchor = token.removeAnchorBeforeTag(focus);
+    const anchor = removeAnchorBeforeTag(focus);
     if (!anchor) {
       return false;
     }
@@ -106,7 +117,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    const [anchor] = token.addAnchors(focus);
+    const [anchor] = addAnchors(focus);
     if (!anchor) {
       return false;
     }

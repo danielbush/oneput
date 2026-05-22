@@ -4,6 +4,7 @@ import * as token from '../token/token.js';
 import { Cursor } from '../cursor/Cursor.js';
 import type { JsedDocument } from '../../types.js';
 import type { Tokenizer } from '../token/Tokenizer.js';
+import { createAnchor } from '../token/anchor.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -245,7 +246,7 @@ export class CursorSelection {
       throw new Error('delete: selection start wrapper not found');
     }
 
-    const marker = token.createAnchor();
+    const marker = createAnchor();
     startWrapper.before(marker);
 
     const cleanupParents = new Set<HTMLElement>();

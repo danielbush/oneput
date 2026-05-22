@@ -1,20 +1,17 @@
 import { describe, expect, test } from 'vitest';
+import { canInsertAnchorInLine, createToken, remove, replaceText } from '../token.js';
 import {
   addAnchors,
-  canInsertAnchorInLine,
   createAnchor,
-  createToken,
   getAnchorAfterTagInsertionPoint,
   getAnchorBeforeTagInsertionPoint,
   getRemovableAnchorAfterTag,
   getRemovableAnchorBeforeTag,
   insertAnchorAfterTag,
   insertAnchorBeforeTag,
-  remove,
   removeAnchorAfterTag,
-  removeAnchorBeforeTag,
-  replaceText
-} from '../token.js';
+  removeAnchorBeforeTag
+} from '../anchor.js';
 import {
   isAnchor,
   isImplicitLine,

@@ -11,7 +11,7 @@ Terms like "next" / "after" or "previous" / "before" refer to logical order in t
 
 The taxonomy is built from a small set of independent predicates. All other labels (LINE, etc.) are derived from combinations of these. Source of truth: `taxonomy.ts`.
 
-Jsed divides the DOM that up into 3 broad mutually exclusive categories:
+Jsed divides the DOM that up into several broad mutually exclusive categories:
 
 - (1) **FOCUSABLE** (focusable element)
   — an element the user can navigate to and FOCUS on. Cannot be a TOKEN or an IGNORABLE.
@@ -23,7 +23,9 @@ Jsed divides the DOM that up into 3 broad mutually exclusive categories:
     - boundary spacing after a TOKEN: e.g. a sibling text node `' '`
     - boundary spacing before a TOKEN: e.g. a sibling text node `' '` immediately before it
   - Source of truth: search docstrings for TOKEN.
-- (3) **IGNORABLE**
+- (3) **SEPARATOR**
+  - these are whitespace text nodes
+- (4) **IGNORABLE**
   - An element that cannot be FOCUS'ed and is effectively invisible to user navigation and other jsed operations (although it may be very much visible to the user). It is invisible to the CURSOR.
   - Example: temporary markers or nodes generated in the DOM to assist the user or the editing process.
   - Source of truth: `isIgnorable` in `taxonomy.ts`.

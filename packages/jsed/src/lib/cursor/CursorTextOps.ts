@@ -5,9 +5,9 @@ import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import { deleteHighestEmpty, recSplitAfterChild, recSplitBeforeChild } from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
-import type { UndoOperation } from '../undo/UndoOperation.js';
 import { getFirstLineSibling, getLine } from '../core/line.js';
 import { addAnchorsToTag, createAnchor } from '../token/anchor.js';
+import type { UndoRecord } from '../undo/UndoRecorder.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
 
@@ -55,17 +55,15 @@ export class CursorTextOps {
 
     // Perform removals...
 
-    const ops: UndoOperation[] = [];
+    const undo: UndoRecord = { ops: [] };
 
     if (canDeleteToken) {
-      ops.push(token.remove(current));
+      undo.ops.push(token.remove(current));
     }
     if (canDeleteAncestors) {
       const op = deleteHighestEmpty(parentNode, this.state.document.root);
-      if (op) ops.push(op);
+      if (op) undo.ops.push(op);
     }
-
-    const undo = { ops };
 
     // Anchor and cursor placement....
 

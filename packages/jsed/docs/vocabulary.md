@@ -135,7 +135,7 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
   - anything visited by CURSOR in a CURSOR_TRANSPARENT or INLINE_FLOW where either belongs to the LINE;
     - Example: the TOKEN's in an em-tag within a p-tag are LINE_SIBLING's for the p-tag.
   - Source of truth: `isLineSibling` in `taxonomy.ts`.
-- **LINE_SEGMENT** — a set of contiguous TOKEN's in a LINE. Non-LINE_SIBLING LINE_MEMBER's act as separators between LINE_SEGMENT's.
+- **LINE_SEGMENT** — the maximal sequence of LINE_SIBLING's that all share the same parentNode. FOCUSABLE LINE_MEMBER's (eg an em-tag) act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested LINE elements within this line and not confuse them as the current LINE.
 - **SELECTION_WRAPPER**

@@ -201,7 +201,7 @@ export class CursorTextOps {
     const result = recSplitBeforeChild(child, (el) => el === line);
     // The original may need an ANCHOR becuase we could split before the first
     // child.
-    addAnchors(result.firstSplit.parent);
+    addAnchors(result.bottomSplit.parent);
     return result;
   }
 
@@ -219,13 +219,13 @@ export class CursorTextOps {
     const result = splitBefore ? this.splitBefore() : this.splitAfter();
 
     // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
-    const [anchor] = addAnchors(result.firstSplit.peer);
+    const [anchor] = addAnchors(result.bottomSplit.peer);
     if (anchor) {
       this.state.place(anchor);
     }
 
     // Try to place the cursor on peer.
-    const sib = getFirstLineSibling(result.finalSplit.peer);
+    const sib = getFirstLineSibling(result.topSplit.peer);
     if (sib) {
       this.state.place(sib);
     }

@@ -173,7 +173,7 @@ export class EditorCursorOps {
     if (inserted) {
       this.state.notifyElementChange({
         type: 'focusable-inserted',
-        element: inserted.finalSplit.peer
+        element: inserted.topSplit.peer
       });
     }
   }

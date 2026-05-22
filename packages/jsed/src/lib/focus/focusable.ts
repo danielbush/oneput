@@ -308,8 +308,8 @@ export type RecursiveSplitAfterAction = {
   /**
    * The lowest split point which is relevant when we split at a TOKEN via the CURSOR.
    */
-  firstSplit: SplitAction;
-  finalSplit: SplitAction;
+  bottomSplit: SplitAction;
+  topSplit: SplitAction;
 };
 export type RecursiveSplitBeforeAction = {
   action: 'recursive-split-before-child';
@@ -317,8 +317,8 @@ export type RecursiveSplitBeforeAction = {
   /**
    * The lowest split point which is relevant when we split at a TOKEN via the CURSOR.
    */
-  firstSplit: SplitAction;
-  finalSplit: SplitAction;
+  bottomSplit: SplitAction;
+  topSplit: SplitAction;
 };
 
 /**
@@ -403,8 +403,8 @@ export function recSplitAfterChild(
   return {
     action: 'recursive-split-after-child',
     splits,
-    firstSplit: splits[0],
-    finalSplit: splits[splits.length - 1]
+    bottomSplit: splits[0],
+    topSplit: splits[splits.length - 1]
   };
 }
 
@@ -416,8 +416,8 @@ export function recSplitBeforeChild(
   return {
     action: 'recursive-split-before-child',
     splits,
-    firstSplit: splits[0],
-    finalSplit: splits[splits.length - 1]
+    bottomSplit: splits[0],
+    topSplit: splits[splits.length - 1]
   };
 }
 

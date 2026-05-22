@@ -289,12 +289,18 @@ function createSplitPeer(parent: HTMLElement): HTMLElement {
   return peer;
 }
 
+/**
+ * `child` belongs to `parent`.
+ */
 export type SplitAfterAction = {
   action: 'split-after-child';
   child: HTMLElement;
   parent: HTMLElement;
   peer: HTMLElement;
 };
+/**
+ * `child` belongs to `peer`.
+ */
 export type SplitBeforeAction = {
   action: 'split-before-child';
   child: HTMLElement;

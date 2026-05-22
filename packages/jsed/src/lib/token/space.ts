@@ -23,8 +23,7 @@ import {
 /**
  * Remove separator and record position.
  *
- * Separators may be computed so we don't track them in undo directly.
- * However it's convenient to track them when removing/restoring tokens.
+ * It's convenient to track them when removing/restoring tokens.
  */
 export function removeSeparator(node: Text) {
   const container = node.ownerDocument.createElement('template');

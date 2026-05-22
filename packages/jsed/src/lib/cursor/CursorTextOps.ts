@@ -198,24 +198,9 @@ export class CursorTextOps {
     const child = this.state.getPlace();
     const line = getLine(child); // GOTCHA - always pre-calculate this, don't use in isCeiling below.
     const result = recSplitBeforeChild(child, (el) => el === line);
-
     // The original may need an ANCHOR becuase we could split before the first
     // child.
     token.addAnchors(result.firstSplit.parent);
-
-    // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
-    // TODO: might need to refine this.
-    const [anchor] = token.addAnchors(result.firstSplit.peer);
-    if (anchor) {
-      this.state.place(anchor);
-    }
-
-    // Try to place the cursor on peer.
-    const sib = getFirstLineSibling(result.finalSplit.peer);
-    if (sib) {
-      this.state.place(sib);
-    }
-
     return result;
   }
 
@@ -224,9 +209,15 @@ export class CursorTextOps {
     const child = this.state.getPlace();
     const line = getLine(child); // GOTCHA - always pre-calculate this, don't use in isCeiling below.
     const result = recSplitAfterChild(child, (el) => el === line);
+    return result;
+  }
+
+  /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
+  splitAtToken() {
+    const splitBefore = this.state.isInsertingBefore() || this.state.isPrepend();
+    const result = splitBefore ? this.splitBefore() : this.splitAfter();
 
     // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
-    // TODO: might need to refine this.
     const [anchor] = token.addAnchors(result.firstSplit.peer);
     if (anchor) {
       this.state.place(anchor);
@@ -239,15 +230,6 @@ export class CursorTextOps {
     }
 
     return result;
-  }
-
-  /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
-  splitAtToken() {
-    if (this.state.isInsertingBefore() || this.state.isPrepend()) {
-      return this.splitBefore();
-    }
-
-    return this.splitAfter();
   }
 
   insertElementAfter(el: HTMLElement): void {

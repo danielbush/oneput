@@ -1,5 +1,5 @@
 export type Walk2Params = {
-  /** Only yield nodes that pass this check. Does not control descent. */
+  /** Pre-order visit condition.  Only yield nodes that pass this check. Does not control descent. */
   visit?: (node: Node) => boolean;
   /** Controls whether to descend into a node's children. Independent of visit. */
   descend?: (node: Node) => boolean;
@@ -15,24 +15,6 @@ export function shouldVisit(node: Node, params?: Walk2Params): boolean {
 
 function shouldDescend(node: Node, params?: Walk2Params): boolean {
   return !params?.descend || params.descend(node);
-}
-
-/**
- * Get the last node to be pre-order visited.
- */
-export function lastNode(el: ParentNode | ChildNode, params?: Walk2Params): ParentNode | ChildNode {
-  if (!el.lastChild || !shouldDescend(el, params)) {
-    return el;
-  }
-  // Walk backwards from lastChild to find a visitable or descendable node.
-  let candidate: ChildNode | null = el.lastChild;
-  while (candidate) {
-    if (shouldVisit(candidate, params) || shouldDescend(candidate, params)) {
-      return lastNode(candidate, params);
-    }
-    candidate = candidate.previousSibling;
-  }
-  return el;
 }
 
 function* descendIter(root: Node, params?: Walk2Params): IterableIterator<ParentNode | ChildNode> {

@@ -38,7 +38,7 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 }
 
 /**
- * Get previous LINE_SIBLING within `line`.
+ * Get previous LINE_SIBLING in current LINE or in previous LINE.
  */
 export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   for (const prev of findPreviousNode(el, ceiling, {
@@ -58,7 +58,7 @@ export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | n
 }
 
 /**
- * Get next LINE_SIBLING from `el` within `line`.
+ * Get next LINE_SIBLING in current LINE or in next LINE.
  */
 export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   for (const next of findNextNode(el, ceiling, {

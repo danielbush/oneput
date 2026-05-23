@@ -64,13 +64,11 @@ Most of the DOM structure will likely be FOCUSABLE, it breaks down according to 
 ┌─────────────┬───────────────────┬─────────────────────┬───────────────────┬
 │             │ FOCUS_TRANSPARENT │ CURSOR_TRANSPARENT  │ Derived label     │
 ├─────────────┼───────────────────┼─────────────────────┼───────────────────┼
-│             │ ISLAND  (no)      │ no                  │ ISLAND            │
+│             │ no  -  ISLAND     │ no                  │ ISLAND            │
 │ FOCUSABLE   ├───────────────────┼─────────────────────┼───────────────────┼
 │             │                   │                     │                   │
-│             │                   ├ yes                 │ (default)         │
-│             │ !ISLAND (yes)     │                     │                   │
-│             │                   │─────────────────────┼───────────────────┼
-│             │                   │ no                  │ CURSOR_OPAQUE [1] │
+│             │ yes - !ISLAND     ├ yes                 │ (default)         │
+│             │                   │                     │                   │
 └─────────────┴───────────────────┴─────────────────────┴───────────────────┴
 ```
 
@@ -97,15 +95,6 @@ We can define the traversal rules:
   — the CURSOR can DESCEND and navigate the internals
   - effectively defines visit or descend behaviour (because of TRAVERSAL_RULES)
   - Source of truth: `isCursorTransparent` in `taxonomy.ts`
-  - **CURSOR_OPAQUE** = !CURSOR_TRANSPARENT
-
-The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break the world up into
-
-- ## **CURSOR_OPAQUE**
-  - TODO: we don't handle this case; by default everything besides ISLAND's (and IGNORABLE's) can be traversed by the cursor.
-  - Example: a div or p-tag
-  - Example: an inline-block or inline-flow or inline-grid span tag
-  - Example: an INLINE_FLOW
 
 ## TOKENIZATION
 
@@ -127,11 +116,13 @@ The use definition of ISLAND, INLINE_FLOW and TRAVERSAL_RULES allows us to break
 - **LINE_MEMBER**
   - FOCUSABLE's belong to the same LINE and are called LINE_MEMBER's if the first LINE ancestor in their ancestor chain is the same LINE.
   - Example: a TOKEN that either has a LINE as their parent or an INLINE_FLOW as parent that belongs to a LINE (etc).
-- **LINE_SIBLING** — a LINE_MEMBER the CURSOR can VISIT within a LINE; which equates to the following:
-  - it must belong to the LINE
-  - it can be a TOKEN
-  - it can be CURSOR_OPAQUE — CURSOR visits (does not descend)
-  - it is not CURSOR_TRANSPARENT or INLINE_FLOW - CURSOR does not visit (but will descend)
+- **LINE_SIBLING**
+  — a LINE_MEMBER within some LINE that the CURSOR can VISIT (be placed on)
+  - which equates to the following:
+    - it must belong to a LINE
+    - it can be a TOKEN
+    - it can be ISLAND — CURSOR visits (does not descend)
+    - it is not CURSOR_TRANSPARENT or INLINE_FLOW - CURSOR descends (does not visit)
   - anything visited by CURSOR in a CURSOR_TRANSPARENT or INLINE_FLOW where either belongs to the LINE;
     - Example: the TOKEN's in an em-tag within a p-tag are LINE_SIBLING's for the p-tag.
   - Source of truth: `isLineSibling` in `taxonomy.ts`.

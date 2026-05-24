@@ -9,6 +9,7 @@ import {
   isTokenizableTextNode
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
+import { findNextNode as findNextNodeW2 } from './walk2.js';
 
 /**
  * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.
@@ -59,8 +60,11 @@ export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | n
 
 /**
  * Get next LINE_SIBLING in current LINE or in next LINE.
+ *
+ * Original iterator-based implementation, kept for reference. The active
+ * implementation is {@link getNextLineSibling}, built on walk2.
  */
-export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
+export function getNextLineSiblingV1(el: Node, ceiling: HTMLElement): Node | null {
   for (const next of findNextNode(el, ceiling, {
     descend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node)
   })) {
@@ -75,6 +79,27 @@ export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null 
     }
   }
   return null;
+}
+
+/**
+ * Get next LINE_SIBLING in current LINE or in next LINE.
+ *
+ * Walks forward from `el` within `ceiling` in pre-order, descending into
+ * CURSOR-transparent structure but not into ISLAND's, TOKEN's, or IGNORABLE's,
+ * and returns the first reachable seat (a tokenizable text node or LINE_SIBLING),
+ * skipping IGNORABLE nodes.
+ */
+export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
+  return findNextNodeW2(el, {
+    ceiling,
+    shouldDescend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node),
+    pre: (node) => {
+      if (isIgnorableNode(node)) return undefined;
+      if (isTokenizableTextNode(node)) return node;
+      if (isLineSibling(node)) return node;
+      return undefined;
+    }
+  });
 }
 
 /**

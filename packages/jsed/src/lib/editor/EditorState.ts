@@ -97,7 +97,7 @@ export class EditorState {
   /**
    * Uses ElementIndicator.
    */
-  public useLegacyElementIndicator: boolean = false;
+  public useLegacyElementIndicator: boolean = true;
   /**
    * Modern CSS Anchors.
    */

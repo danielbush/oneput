@@ -287,13 +287,11 @@ export function canInsertSpaceAfterTag(focus: HTMLElement): boolean {
     return false;
   }
 
-  const next = getNextSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const next = getNextSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (next?.nodeType === Node.TEXT_NODE) {
@@ -317,13 +315,11 @@ export function insertSpaceAfterTag(focus: HTMLElement, value = ' '): Text | nul
     return null;
   }
 
-  const next = getNextSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const next = getNextSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   const space = document.createTextNode(value);
@@ -336,13 +332,11 @@ export function getRemovableSpaceAfterTag(focus: HTMLElement): Text | null {
     return null;
   }
 
-  const next = getNextSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const next = getNextSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (next instanceof Text) {
@@ -383,13 +377,11 @@ export function canInsertSpaceBeforeTag(focus: HTMLElement): boolean {
     return false;
   }
 
-  const previous = getPreviousSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const previous = getPreviousSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (previous?.nodeType === Node.TEXT_NODE) {
@@ -423,13 +415,11 @@ export function getRemovableSpaceBeforeTag(focus: HTMLElement): Text | null {
     return null;
   }
 
-  const previous = getPreviousSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const previous = getPreviousSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (previous instanceof Text) {

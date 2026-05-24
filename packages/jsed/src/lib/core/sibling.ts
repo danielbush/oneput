@@ -6,36 +6,31 @@
  */
 
 import { isIgnorable, isToken } from './taxonomy.js';
-import { shouldVisit, type Walk2Params } from './walk.js';
 
-export function getNextSibling(start: Node, ceiling: Node, params?: Walk2Params): Node | null {
-  if (start === ceiling) {
-    return null;
-  }
+type Visit = (node: Node) => boolean;
+
+export function getNextSibling(start: Node, visit?: Visit): Node | null {
   let next: Node | null | undefined = start;
   for (;;) {
     next = next?.nextSibling;
     if (!next) {
       break;
     }
-    if (shouldVisit(next, params)) {
+    if (visit?.(next)) {
       return next;
     }
   }
   return null;
 }
 
-export function getPreviousSibling(start: Node, ceiling: Node, params?: Walk2Params): Node | null {
-  if (start === ceiling) {
-    return null;
-  }
+export function getPreviousSibling(start: Node, visit?: Visit): Node | null {
   let prev: Node | null | undefined = start;
   for (;;) {
     prev = prev?.previousSibling;
     if (!prev) {
       break;
     }
-    if (shouldVisit(prev, params)) {
+    if (visit?.(prev)) {
       return prev;
     }
   }

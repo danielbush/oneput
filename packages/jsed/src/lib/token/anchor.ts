@@ -40,13 +40,11 @@ export function getAnchorAfterTagInsertionPoint(
     return null;
   }
 
-  const next = getNextSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const next = getNextSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (next?.nodeType === Node.TEXT_NODE) {
@@ -86,13 +84,11 @@ export function getRemovableAnchorAfterTag(focus: HTMLElement): HTMLElement | nu
     return null;
   }
 
-  const next = getNextSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const next = getNextSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (next instanceof HTMLElement && isAnchor(next)) {
@@ -100,13 +96,11 @@ export function getRemovableAnchorAfterTag(focus: HTMLElement): HTMLElement | nu
   }
 
   if (next instanceof Text && isWhitespaceTextNode(next)) {
-    const nextAfterWhitespace = getNextSibling(next, focus.parentNode, {
-      visit: (node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          return true;
-        }
-        return !(node instanceof Element && isIgnorable(node));
+    const nextAfterWhitespace = getNextSibling(next, (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
       }
+      return !(node instanceof Element && isIgnorable(node));
     });
     return nextAfterWhitespace instanceof HTMLElement && isAnchor(nextAfterWhitespace)
       ? nextAfterWhitespace
@@ -143,13 +137,11 @@ export function getAnchorBeforeTagInsertionPoint(
     return null;
   }
 
-  const previous = getPreviousSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const previous = getPreviousSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (previous?.nodeType === Node.TEXT_NODE) {
@@ -189,13 +181,11 @@ export function getRemovableAnchorBeforeTag(focus: HTMLElement): HTMLElement | n
     return null;
   }
 
-  const previous = getPreviousSibling(focus, focus.parentNode, {
-    visit: (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return true;
-      }
-      return !(node instanceof Element && isIgnorable(node));
+  const previous = getPreviousSibling(focus, (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return true;
     }
+    return !(node instanceof Element && isIgnorable(node));
   });
 
   if (previous instanceof HTMLElement && isAnchor(previous)) {
@@ -203,13 +193,11 @@ export function getRemovableAnchorBeforeTag(focus: HTMLElement): HTMLElement | n
   }
 
   if (previous instanceof Text && isWhitespaceTextNode(previous)) {
-    const previousBeforeWhitespace = getPreviousSibling(previous, focus.parentNode, {
-      visit: (node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          return true;
-        }
-        return !(node instanceof Element && isIgnorable(node));
+    const previousBeforeWhitespace = getPreviousSibling(previous, (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return true;
       }
+      return !(node instanceof Element && isIgnorable(node));
     });
     return previousBeforeWhitespace instanceof HTMLElement && isAnchor(previousBeforeWhitespace)
       ? previousBeforeWhitespace

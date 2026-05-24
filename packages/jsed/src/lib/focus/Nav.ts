@@ -168,19 +168,10 @@ export class Nav {
     return;
   }
 
-  #sibnext = () =>
-    this.#FOCUS
-      ? (getNextSibling(this.#FOCUS, this.doc.root, {
-          visit: isFocusable
-        }) as HTMLElement)
-      : null;
+  #sibnext = () => (this.#FOCUS ? (getNextSibling(this.#FOCUS, isFocusable) as HTMLElement) : null);
 
   #sibprev = () =>
-    this.#FOCUS
-      ? (getPreviousSibling(this.#FOCUS, this.doc.root, {
-          visit: isFocusable
-        }) as HTMLElement)
-      : null;
+    this.#FOCUS ? (getPreviousSibling(this.#FOCUS, isFocusable) as HTMLElement) : null;
 
   /**
    * Find next sibling element if there is one.

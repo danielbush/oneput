@@ -3,10 +3,10 @@ import * as domRules from '../core/dom-rules.js';
 import { getNextNodeSibling, getPreviousNodeSibling } from '../core/sibling.js';
 import {
   isFocusable,
+  isIgnorable,
   isImplicitLine,
   isInlineFlow,
   isIsland,
-  isToken,
   JSED_DELETED_CLASS,
   JSED_FOCUS_CLASS,
   JSED_IGNORE_CLASS
@@ -35,10 +35,7 @@ export function isEmpty(el: Element): boolean {
   if (!el.firstChild) {
     return true;
   }
-  if (isFocusable(el.firstChild)) {
-    return false;
-  }
-  if (isToken(el.firstChild)) {
+  if (!isIgnorable(el.firstChild)) {
     return false;
   }
   return !getNextNodeSibling(el.firstChild);

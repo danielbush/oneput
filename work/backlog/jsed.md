@@ -96,6 +96,9 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
 
 ## refactors
 
+- refactor: convert all users of walk to walk2 and rename back to walk; see walk.md
+- refactor: a LINE FOCUS - so we always see which LINE we're in, even if we have a FOCUS on an interior INLINE_FLOW
+  - COMMENT: one of the motivations for this is automatic anchor generated over the whole line when editing
 - refactor: get rid of one of isSpaceNode, isWhitespaceNdoe
   - isSpaceNode is badly written
 - refactor: should taxonomy handle creation; eg createSplitPeer, createAnchor, createToken etc

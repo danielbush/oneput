@@ -12,6 +12,7 @@
   <p>aaa bbb <em>em1</em> <em>em2</em> ccc ddd</p>
   <p><em>aaa <strong>bbb</strong> ccc</em> ddd eee</p>
   <p><em><strong>aaa</strong></em> bbb ccc</p>
+  <p><em><strong></strong><strong></strong></em></p>
 
   <h2 class="jsed-ignore">Bulleted lists</h2>
   <ul>

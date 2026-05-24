@@ -9,7 +9,7 @@ import {
   isTokenizableTextNode
 } from './taxonomy.js';
 import { findNextNode, findPreviousNode } from './walk.js';
-import { findNextNode as findNextNodeW2 } from './walk2.js';
+import { findNextNode as findNextNodeW2, findPreviousNode as findPreviousNodeW2 } from './walk2.js';
 
 /**
  * Find the LINE associated with `el`. Returns `el` itself if it is a LINE.
@@ -40,8 +40,11 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
 
 /**
  * Get previous LINE_SIBLING in current LINE or in previous LINE.
+ *
+ * Original iterator-based implementation, kept for reference. The active
+ * implementation is {@link getPreviousLineSibling}, built on walk2.
  */
-export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
+export function getPreviousLineSiblingV1(el: Node, ceiling: HTMLElement): Node | null {
   for (const prev of findPreviousNode(el, ceiling, {
     descend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node)
   })) {
@@ -56,6 +59,29 @@ export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | n
     }
   }
   return null;
+}
+
+/**
+ * Get previous LINE_SIBLING in current LINE or in previous LINE.
+ *
+ * Walks backward from `el` within `ceiling`, descending into CURSOR-transparent
+ * structure but not into ISLAND's, TOKEN's, or IGNORABLE's, and returns the first
+ * reachable seat (a tokenizable text node or LINE_SIBLING), skipping IGNORABLE
+ * nodes. Backward enumeration makes that first seat the nearest preceding one;
+ * the pre/post phase is irrelevant for seat-finding (seats are leaves, the
+ * containers walked through are never seats).
+ */
+export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
+  return findPreviousNodeW2(el, {
+    ceiling,
+    shouldDescend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node),
+    pre: (node) => {
+      if (isIgnorableNode(node)) return undefined;
+      if (isTokenizableTextNode(node)) return node;
+      if (isLineSibling(node)) return node;
+      return undefined;
+    }
+  });
 }
 
 /**

@@ -6,6 +6,15 @@ export type UserInputSelectionState =
   | 'CURSOR_AT_END'
   | 'EMPTY';
 
+export type InputCursorPosition =
+  | 'beginning'
+  | 'end'
+  | 'selectAll'
+  /**
+   * Leave input caret wherever it currently is.
+   */
+  | 'noChange';
+
 /**
  * Options threaded through `place` -> `onCursorChange`.
  */
@@ -18,14 +27,7 @@ export type UserInputOpts = {
    * is not clobbered by the head TOKEN's pre-rewrite value.
    */
   syncInput?: boolean;
-  inputCursorPosition?:
-    | 'beginning'
-    | 'end'
-    | 'selectAll'
-    /**
-     * Leave input caret wherever it currently is.
-     */
-    | 'noChange';
+  inputCursorPosition?: InputCursorPosition;
 };
 
 export type UserInputRange = [number | null, number | null];

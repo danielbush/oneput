@@ -11,7 +11,7 @@ import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
 import { Cursor } from '../cursor/Cursor.js';
-import type { UserInputChange, UserInputOpts } from '../input/UserInput.js';
+import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
@@ -389,20 +389,13 @@ export class EditorOps {
    * So it needs a callback mechanism after it has decided on a place to sit.
    * This function does the related post-processing for the editor.
    */
-  processCursorChange = (cursorElement: HTMLElement, opts?: UserInputOpts) => {
-    this.state.tokenizer.setCursorElement(cursorElement);
-    this.state.nav?.FOCUS(cursorElement);
-    this.state.eventsEmitter.onCursorChange?.(cursorElement);
-
-    if (opts?.syncInput === false) return;
-
-    // Sync input
+  syncInput = (cursorElement: HTMLElement, inputCursorPosition?: InputCursorPosition) => {
     this.state.userInput.resetPlaceholder();
     this.state.userInput.enable(true);
     if (isToken(cursorElement)) {
       this.state.userInput.focus();
       this.state.userInput.setInputValue(token.getValue(cursorElement)).then(() => {
-        switch (opts?.inputCursorPosition) {
+        switch (inputCursorPosition) {
           case 'noChange':
             break;
           case 'beginning':

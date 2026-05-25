@@ -86,7 +86,12 @@ export class EditorController {
    * pre-rewrite value.
    */
   onCursorChange = (tok: HTMLElement, opts?: UserInputOpts) => {
-    this.state.ops.processCursorChange(tok, opts);
+    this.state.tokenizer.setCursorElement(tok);
+    this.state.nav?.FOCUS(tok);
+    this.state.eventsEmitter.onCursorChange?.(tok);
+    if (opts?.syncInput !== false) {
+      this.state.ops.syncInput(tok, opts?.inputCursorPosition);
+    }
   };
 
   /**
@@ -162,6 +167,8 @@ export class EditorController {
     if (this.state.useElementIndicator) {
       this.state.cssElementIndicator.showIndicator(!!focus);
     }
+    // Pre-tokenize line
+    // If focus IS a TOKEN, then we handled it in onFocusRequest already.
     if (this.state.mode === 'view' && focus && !isToken(focus)) {
       const line = findNextEditableLine(focus, this.state.document.root);
       if (line) {

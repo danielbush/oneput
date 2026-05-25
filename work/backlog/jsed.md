@@ -93,9 +93,27 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: persist last token position in each LINE
 - feat: persist last FOCUS position and FOCUS it when we reload the document
 feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
+- feat: holes
+  - ability to explicitly mark elements as FOCUS transparent (and by extension CURSOR transparent); the key difference being that everything including text is ignored until we hit an element that turns the transparency off; the "off" subtree is like a editable hole contained within the transparent subtree.
 
 ## refactors
 
+- refactor: lib/token and lib/focus/focusable should be a lower-level ops layer?
+  - lib/ops/focusable.ts
+  - lib/ops/edit/
+    - implicitLine, space, token, anchor
+    - lineSegment
+      - normalizeAt(sib)
+      - normalizeAt('front', parent)
+      - normalizeAt('back', parent)
+    - line
+      - addAnchors
+    - tokenize, Tokenizer, Detokenizer
+- refactor: isFocusable shouldn't assert HTMLElement; it is convenient but that means !isFocusable is a Node
+  - COMMENT: it seems the !isFocusable case is not a hard "not HTMLElement"; if we additionally test for "node instanceof HTMLElement", node becomes an HTMLElement again;  if this is reliable than we could argue for keeping the guard since in most situations isFocusable is being used to find elements from nodes and we never explicitly deal with ignorable elements, they never get landed on; however if we implement "holes", then we will start having non-ignorable elements that are FOCUS-transparent and 
+- refactor: we might want to distinguish between ignorables that we can see (maybe content that we can never focus or edit) and ignorables that are hidden constructs (like undo markers)
+  - COMMENT: motivation for this is that content-based ignorables might be anchorized around, so we need to treat them as "present" unlike a hidden undo marker
+  - COMMENT: we could have a jsed-content-ignore which acts like an ISLAND; or we just use ISLAND's?
 - refactor: convert all users of walk to walk2 and rename back to walk; see walk.md
 - refactor: a LINE FOCUS - so we always see which LINE we're in, even if we have a FOCUS on an interior INLINE_FLOW
   - COMMENT: one of the motivations for this is automatic anchor generated over the whole line when editing

@@ -250,6 +250,13 @@ export function isInlineFlow(el: Node | null): boolean {
   if (styles.display === 'inline flow') return true;
   return false;
 }
+export function isInline(el: Node | null): boolean {
+  if (!isFocusable(el)) return false;
+  const styles = window.getComputedStyle(el);
+  if (!['none', ''].includes(styles.float)) return false;
+  if (styles.display.startsWith('inline')) return true;
+  return false;
+}
 
 /**
  * Detect IMPLICIT_LINE .

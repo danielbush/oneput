@@ -9,8 +9,17 @@ import { isIgnorable, isToken } from './taxonomy.js';
 
 type Visit = (node: Node) => boolean;
 
-export function getNextSibling(start: Node, visit?: Visit): Node | null {
+export function getNextSibling(
+  start: Node | null,
+  visit?: Visit,
+  includeStart = false
+): Node | null {
   let next: Node | null | undefined = start;
+  if (includeStart && start) {
+    if (visit?.(start)) {
+      return start;
+    }
+  }
   for (;;) {
     next = next?.nextSibling;
     if (!next) {
@@ -23,8 +32,17 @@ export function getNextSibling(start: Node, visit?: Visit): Node | null {
   return null;
 }
 
-export function getPreviousSibling(start: Node, visit?: Visit): Node | null {
+export function getPreviousSibling(
+  start: Node | null,
+  visit?: Visit,
+  includeStart = false
+): Node | null {
   let prev: Node | null | undefined = start;
+  if (includeStart && start) {
+    if (visit?.(start)) {
+      return start;
+    }
+  }
   for (;;) {
     prev = prev?.previousSibling;
     if (!prev) {

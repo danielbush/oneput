@@ -1,6 +1,68 @@
-# Splitting LINE's
+# Undo/Redo
 
-## Summary so far...
+## tasks
+
+- [x] cursor delete (first pass)
+  - COMMENT: this worked and pre-dates this file; but after looking at "split at token" we'll have to revisit this
+- [ ] deletion of token / revisit cursor delete using new anchorize
+  - token.remove should handle anchors
+- [ ] split at token
+  - COMMENT: brings in automatic anchorization
+- [ ] deletion of token by character
+- [ ] replace with text
+- [ ] ANCHOR_ISLAND_EDGE_CASE
+  - token.remove and its handling of separators seems very solid to me; if we want consistency we need to do something like this for split; if the child we're splitting at is a LINE_SIBLING we can defer to the token module perhaps?
+  - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
+
+side list
+
+- [ ] remove addAnchorsToTag or replace with anchorize
+- [ ] just remove all anchor remove/add functions + oneput menus?
+- [ ] insert leading / trailing spaces when typing over an ANCHOR
+  - most of the time, we want spaces
+
+
+## Summary
+
+We're implementing undo / redo.  The big idea is to keep the imperative operations but record what happens.  Text (incl whitespace), TOKEN's and elements get "flipped" when removed ie some ignorable marker is left invisibly in the dom.  The initial imperative operation calculates what needs to be done, does it and records it.  Undo and redo simply reverse or re-apply what was recorded - so there is a tripartite structure, which I think we can live with.
+
+Status
+
+- We have delete (CursorTextOps) working.
+- We tried to do splitting at lines but ...
+  - This led to some ugliness about how to manage SEPARATOR's and ANCHOR's when constructing the undo record.
+  - The current approach is to treat SEPARATOR's like other text and elements and flip them (mark TOKEN's as deleted without removing, use a tombstone when deleting elements).  We do this in lib/token/token.ts for instance when removing a TOKEN, we might remove (flip) the surrounding SEPARATOR's.
+  - COMMENT: Flipping separators in token.remove seemed straightforward test for this approach.
+  - That leaves anchors.  The anchor logic is spread across cursor ops and token modules and probably other places.  The big idea is to remove explicit anchors altogether and calculate them automatically.  It makes sense to do this on FOCUS changes; we can get the LINE for the current FOCUS and anchorize it.
+
+So we're shooting for this:
+
+- when removing and recovering elements...
+  - we flip and record FOCUSABLE's
+  - we flip and record TOKEN's
+  - we flip and record SEPARATOR's (usually when flipping TOKEN's)
+  - ANCHOR's are automatically managed, no need to record/flip them
+
+
+## Deletion
+
+### Delete whole tokens
+
+- call token.remove
+  - We flip the token by not displaying it; the text is preserved.
+  - if last token in LINE_SEGMENT, we flip into an ANCHOR
+
+### Delete by character = replace text
+
+- We record the text change as undo
+- If we go from text to no-text
+  - we use token.remove to flip the token with whatever text it had
+
+## Splitting
+
+We split elements.  Then repair the damage in the bottom split.  This motivated the idea of automatic ANCHOR's.
+
+I think we can just call anchorize on parent and peer in the bottom split.
 
 - packages/jsed/src/lib/cursor/CursorTextOps.ts
   - splitAtToken
@@ -8,114 +70,141 @@
   - recSplitAfterChild
   - recSplitBeforeChild
 
-Goal
+## ANCHOR rethink - automatic ANCHOR's version 2
 
-- for undo/redo
-  - we flip and record FOCUSABLE's
-  - we flip and record TOKEN's
-  - we flip and record SEPARATOR's
-  - we flip and record ANCHOR's ?
-    - OR do we compute ANCHOR's - we don't flip or record them
-      - the cursor does this to faciliate user editing the current LINE
+We anchorize the whole document;  anchors are treated as empty TOKEN's and are structural so when we next save, the anchors are saved and the anchorizer won't need to anchorize them again.
 
-## walk2
+Optionally: the anchors don't show unless there is FOCUS'ed ancestor.
 
-Build a new module next to @packages/jsed/src/lib/core/walk.ts  called walk2.ts that does pre- and post-order visits but does not use iterators.
+Visually anchorizng whole document might be a bit jarring to suddenly show all anchors, but most of the time, the user is not selecting the whole document and normal documents won't have a lot of anchors to show anyway.
 
-- pre-order means visit node before its children regardless of walk direction
-- post-order means visit node's children before visitng the node regardless of walk direction
-- walk direction controls only the order children/siblings are enumerated (first→last forward, last→first backward). It does not change when pre/post fire.
+token.remove checks if it is removing the last TOKEN in the LINE_SEGMENT; if so, then it places an ANCHOR instead and doesn't flip any separators.
+
+we record token.remove in undo; if the token is anchorized, we handle the situation obviously slightly differently although it does resemble a flipped token, it's just the flip is now an anchor and is not ignored.
+
+token deletion (token.remove) occurs when we delete whole tokens (input is select-all and we hit backspace) or char-based deletion in which case the token was a single non-whitespace character before it got removed; for this latter case there may be some collapse scenarios which means we end up recording the whole token being deleted anyway rather than recording intermediate deletion states.
+
+anchor deletion
+
+- (1a) user can't delete
+  - simplest
+
+- (1b) user can delete them with the CURSOR
+  - this hides the anchor
+  - but we still allow the CURSOR to sit on it, revealing it temporarily
+  - it will be saved so the system knows not to display an anchor at that point
+  - when anchorizing, the anchorizer should maybe re-assess if hidden anchors should still exist (if the anchorization rules change)
+
+manual anchor insertion
+
+- the user can insert anchors in places the anchorizer doesn't handle; because all anchors are structural these will be recorded and saved
+- the oneput menu can be used
+- we might have relaxed rules to allow people to put anchors where they would normally not go
+- example: an ANCHOR in a div before a nested div where both are natually blocks
+- flag the anchor as manual so we know to handle it differently
+- deletion will properly flip the manual anchor into a deleted state rather than just hiding it
+  - do not allow the CURSOR to walk on it
+  - don't persist when saving
+
+implicit manual anchor insertion
+
+- the user can delete all the text in a LINE_SEGMENT resulting in an ANCHOR
+- if the LINE_SEGMENT is not automatically anchorizable what do we do?
+  - we could run a function to determine if the anchor is automatic
+  - if not, we flag the anchor as manual and it behaves accordingly
+
+how does this simplify cursor delete in CursorTextOps?
+
+We just call token.remove.
+We might want to check if it's an ANCHOR as a result and react to this.
+
+# Archive
+
+## ANCHOR rethink - automatic ANCHOR's version 1
+
+COMMENT: so we don't have to track this when splitting or other operations; this should simplify the logic in cursor delete for instance.
+
+Considerations:
+
+- The solution has to work on mobile with a user touching.
+- remove expicit ANCHOR's because I don't want to deal with them in undo
+- also moving logic about when/where to create anchors out of operations would be ncie
+  - example: CursorTextOps delete is quite complicated
+- When we type over an ANCHOR we replace it with a TOKEN.  If the ANCHOR is managed we may want to replace rather than convert so that the anchor manager doesn't end up managing a TOKEN by accident.
+- When we delete the last token in a LINE_SEGMENT, we insert an ANCHOR; we again, we might want to notify the anchor manager.
+
+### [!] FOCUS-driven anchors (no action)
+
+- anchorize on FOCUS changes
+  - nuance: only do this when there is no CURSOR; when there is a CURSOR, we switch to anchorizing on CURSOR LINE changes
+  - If the user touches an element, it gets the FOCUS.
+  - At that point they may want to touch a word within.
+  - So we have to display the ANCHOR's within the FOCUS.
+  - The only drawback is that the FOCUS could be the whole document and the document could be large.
+    - anchorize only first chain?
+      - anchorizeFirstChain(el)
+        - anchorize any inline content directly within getLine(el) (l1)
+        - find FIRST non-inline CHILD (f) in l1
+        - recurse: call anchorizeFirstChain(f)
+      - say the user wants to look at the 2nd non-inline child (b2), then
+        - they click on it
+        - we call anchorizeFirstChain(b2)
+- anchorize on CURSOR LINE changes
+  - COMMENT: implicit is that the LINE the cursor starts on (l1) was anchorized via "anchorize on FOCUS changes" above.
+  - when the cursor exhausts l1 we need to trigger anchorization on the next/previous LINE (l2) before the cursor looks for candidates
+    - A
+      - getNext calls getNextLineSibling
+      - we modify getNextLineSibling(start, ....) to trigger a callback on LINE changes
+        - getNextLineSibling calls l1 = getLine(start)
+        - when visiting node n, it checks if l1.contains(n)
+          - if not, then we are in a new LINE (l2)
+            - it calls a callback(l2)
+            - it assumes the callback may be desctructive and affect the tree for l2
+            - after callback, it re-enters l2
+              - because l2 may have changed, we can't use the first result we got from l2
+              - we have to walk "into" l2 again
+      - COMMENT: getNext already looks for tokenizable text which under the current system implies we have crossed into a new LINE since we tokenize LINE's when focusing and placing the CURSOR.  We can keep this behaviour.  The anchorizer needs to operate on untokenized trees in a similar fashion; tokenizable text nodes should be treated like tokens.
+    - B
+      - getNext
+        - calls getNextLineSibling with a ceiling of the current LINE (l1)
+        - if we get null
+          - find the next LINE candidate getNextEditableLine(l1)
+            - getNextEditableLine(l1)
+              - n = findNextNode using isFocusable
+              - l2 = getLine(n)
+              - anchorize(l2)
+                - COMMENT: should treat text as if TOKEN
+              - return l2
+              - COMMENT: l2 may be untokenized at this point; we'll let getNext handle that like before
+          - return getNextLineSibling(l2)
+            - COMMENT: this function just needs to use isLineSibling
+      - getPrevious
+        - we'll have to get the last node in l2
 
 
-Make it pass the same tests as walk.test but note that the current walk module actually post-order visits when walking in the previous direction (backwards).
+### [.] Simplified FOCUS-driven anchors
 
-findNextNode({ pre, post, shouldDescend })
-findPreviousNode({ pre, post, shouldDescend })
+A half-way solution:
 
-- if pre or post return a Node, stop walking and return it.
-- if pre or post return void / undefined / null / false, keep walking.  If exhausted return null.
-- if shouldDescend is defined, if false, don't descend the current node
-- retain ceiling
-- retain visitStart 
-- retain visitCeiling
+- do the anchorize on FOCUS changes only and regardless of the presence of a CURSOR
+  - when the FOCUS updates as the CURSOR moves, we simply anchorize in response
+  - the drawback is empty LINE's with no text will get skipped
+    - however, if the user moves the focus to the empty element, it will be anchorized
 
-## ANCHOR rethink - automatic ANCHOR's
+tasks
 
-- We remove functions that add/remove ANCHOR's.
-- Instead, when the cursor moves next/previous, it auto-creates ANCHOR's giving the user the opportunity to type; when we move off the ANCHOR it disappears again.
-  - we use a new walk2 module that lets us explicitly do pre- post-order visiting
-  - getNextLineSibling is rewritten to to use walk2 for cursor walks
-    - it will still stop at existing LINE_SIBLING's
-    - when we visit a focusable,
-      - check if it needs a leading anchor then insert the anchor and return it
-      - check if it's empty, insert and return anchor (which is a leading anchor anyway)
-    - when we post-visit a focusable
-      - create anchor next to it (if applicable) and return it
-- This means no undo needed for ANCHOR's.
-- addAnchorsToTag goes away
-- fixAnchors goes away
-
-## LINE_SEGMENT ops
-
-// segs = lineSegments(el)
-using segs = lineSegment(el);
-segs.first
-segs.last
-segs.interior
-for (const seg of segs) {
-  //
-}
-
-## Refactor lib/token/ and focusable.ts
-
-- lib/ops/focusable.ts
-- lib/ops/edit/
-  - implicitLine, space, token, anchor
-  - lineSegment
-    - normalizeAt(sib)
-    - normalizeAt('front', parent)
-    - normalizeAt('back', parent)
-  - line
-    - addAnchors
-  - tokenize, Tokenizer, Detokenizer
-
-## Undo on split
-
-Perform undo on CursorTextOps splitAtToken.
-
-## Separator handling
-
-CursorTextOps splitAtToken wants to handle spaces; but delete op uses token.remove to do that; I want one layer to handle spaces consistently, which is it?
-
-My thoughts...
-
-- token.remove and its handling of separators seems very solid to me; if we want consistency we need to do something like this for split; if the child we're splitting at is a LINE_SIBLING we can defer to the token module perhaps?
-- we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
-
-## fixSeparators
-
-- remove leading/trailing spaces if we're in a non-INLINE_FLOW
-
-## tests - focusable module - recSplitAfter / recSplitBefore
-
-- splitting after TOKEN that is before a non-TOKEN LINE_SIBLING eg ISLAND
-  - ANCHOR_ISLAND_EDGE_CASE - if TOKEN is first TOKEN on LINE, then after splitting the ISLAND goes to new line with an ANCHOR before it; ideally a space should be auto-generated between the ANCHOR and the ISLAND
-- splitting when CURSOR is on an non-TOKEN LINE_SIBLING eg ISLAND
-
-## tests - CursorTextOps module -  splitAtToken
-
-
-## lib/lineOps/lineSegment.ts
-
-```ts
-  /**
-   * Detect the LINE_SEGMENT that contains sib and fix any ANCHOR or SEPARATOR issues.
-   */
-  normalizeLineSegmentAt(sib: Node) {
-    const [first] = getLineSegmentAt(sib);
-    const n = first;
-    while (n) {
-      n = getNextNodeSibling(n);
-    }
-  }
-```
+- [x] handle implicitLines
+  - we don't want anchors before or after an implicitLine
+  - we do want anchors within an implicitLine
+- [ ] handle cursor delete
+  - [ ] token.remove
+- [ ] handle cursor replaceWithText
+  - [ ] token.replaceText
+- [ ] remove explicit anchor logic
+  - COMMENT: can we get away with this?
+- [ ] test anchorization
+  - [ ] anchorize ops
+    - [ ] implicit lines...
+    - [ ] `inline-*` vs not
+    - [ ] rules for appending to empty element
+- [ ] document the "anchorize on CURSOR LINE changes" logic as an ISSUE and reference getNext / getPrevious; put in backlog as a feature

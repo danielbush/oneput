@@ -1,3 +1,4 @@
+import { anchorize } from './lib/token/anchor.js';
 import { tagImplicitLines } from './lib/token/implicitLine.js';
 import {
   ViewportScroller,
@@ -31,6 +32,7 @@ export class JsedDocument {
   ) {
     this.root = root;
     tagImplicitLines(this.root);
+    anchorize(this.root);
   }
 
   get document(): Document {

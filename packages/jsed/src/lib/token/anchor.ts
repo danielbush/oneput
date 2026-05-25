@@ -1,14 +1,19 @@
 import { getNextSibling, getPreviousSibling } from '../core/sibling';
 import {
   isAnchor,
+  isFocusable,
   isIgnorable,
   isImplicitLine,
+  isInline,
   isLine,
+  isLineSibling,
   isToken,
+  isTokenizableTextNode,
   isWhitespaceTextNode,
   JSED_ANCHOR_CLASS,
   JSED_TOKEN_CLASS
 } from '../core/taxonomy';
+import { findNextNode } from '../core/walk2';
 
 /**
  * Create an ANCHOR
@@ -255,4 +260,86 @@ export function addAnchorsToTag(el: HTMLElement): HTMLElement[] {
     el.appendChild(anchor);
   }
   return anchors;
+}
+
+export function anchorize(el: Node) {
+  findNextNode(el, {
+    ceiling: el,
+    visitStart: true,
+    shouldDescend: (node) => isFocusable(node),
+    pre: (node) => {
+      anchorizeLeadingSegment(node);
+    },
+    post: (node) => {
+      anchorizeAfter(node);
+    }
+  });
+}
+
+/**
+ * Maybe insert ANCHOR at the beginning of the children of node.
+ *
+ * - Covers leading LINE_SEGMENT's for a line.
+ * - Covers the case where the parent is empty, in which case we effectively append an ANCHOR.
+ */
+function anchorizeLeadingSegment(node: Node) {
+  if (isFocusable(node)) {
+    const firstRealSib = getNextSibling(
+      node.firstChild,
+      (sib) => isFocusable(sib) || isTokenizableTextNode(sib) || isLineSibling(sib),
+      true
+    );
+    if (!firstRealSib) {
+      const anchor = createAnchor();
+      // Make anchor the very first thing.
+      node.insertBefore(anchor, node.firstChild);
+      return anchor;
+    }
+    if (isFocusable(firstRealSib) && isInline(firstRealSib)) {
+      if (isImplicitLine(firstRealSib)) {
+        // Don't anchorize before an IMPLICIT_LINE.
+        return null;
+      }
+      const anchor = createAnchor();
+      firstRealSib.before(anchor);
+      return anchor;
+    }
+  }
+  return null;
+}
+
+/**
+ * Maybe insert anchor next to node.
+ *
+ * - covers interstitial LINE_SEGMENT's for a LINE.
+ * - covers trailing LINE_SEGMENT's for a LINE.
+ */
+function anchorizeAfter(node: Node) {
+  if (isFocusable(node) && isInline(node)) {
+    if (isImplicitLine(node)) {
+      // Don't anchorize after an IMPLICIT_LINE.
+      return null;
+    }
+    const nextSib = getNextSibling(
+      node,
+      (sib) => isFocusable(sib) || isTokenizableTextNode(sib) || isLineSibling(sib),
+      false
+    );
+    if (!nextSib) {
+      const anchor = createAnchor();
+      // Make anchor the very last thing.
+      node.parentNode?.lastChild?.after(anchor);
+      return anchor;
+    }
+    if (isFocusable(nextSib)) {
+      if (isImplicitLine(nextSib)) {
+        // Don't anchorize before an IMPLICIT_LINE.
+        return null;
+      }
+      const anchor = createAnchor();
+      nextSib.before(anchor);
+      return anchor;
+    }
+  }
+  return null;
 }

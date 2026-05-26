@@ -1,5 +1,5 @@
 import { getParent } from '../token/token.js';
-import { isToken, JSED_IGNORE_CLASS } from '../core/taxonomy.js';
+import { isToken, JSED_ELEMENT_INDICATOR, JSED_IGNORE_CLASS } from '../core/taxonomy.js';
 
 const ANCHOR_NAME = '--jsed-element-indicator';
 
@@ -71,7 +71,7 @@ export class CSSElementIndicator {
     if (this.#span) return;
     const span = this.deps.createElement('span');
     span.classList.add(JSED_IGNORE_CLASS);
-    span.classList.add('jsed-tag-indicator');
+    span.classList.add(JSED_ELEMENT_INDICATOR);
     span.classList.add('jsed-tag-indicator-css');
     span.style.pointerEvents = 'none';
     this.deps.mount(span);

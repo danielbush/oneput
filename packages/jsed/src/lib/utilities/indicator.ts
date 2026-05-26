@@ -1,4 +1,4 @@
-import { JSED_IGNORE_CLASS } from '../core/taxonomy.js';
+import { JSED_ELEMENT_INDICATOR, JSED_IGNORE_CLASS } from '../core/taxonomy.js';
 
 /**
  * Wraps the indicator span element — creation, positioning, hiding, and removal.
@@ -45,7 +45,7 @@ export class Indicator {
     if (!this.#el) {
       const span = this.createElement('span');
       span.classList.add(JSED_IGNORE_CLASS);
-      span.classList.add('jsed-tag-indicator');
+      span.classList.add(JSED_ELEMENT_INDICATOR);
       span.style.position = 'fixed';
       span.style.top = '0';
       span.style.left = '0';

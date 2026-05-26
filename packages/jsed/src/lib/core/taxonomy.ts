@@ -60,6 +60,8 @@ export const JSED_DELETED_SPACE_CLASS = 'jsed-deleted-space';
  */
 export const JSED_APP_ROOT_ID = 'jsed-app-root';
 
+export const JSED_ELEMENT_INDICATOR = 'jsed-tag-indicator';
+
 // ============================================================================
 // Primitives
 // ============================================================================

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { Editor } from '../Editor.js';
 import type { EditorElementChangeEvent } from '../../../lib/editor/EditorState.js';
-import { byId, frag, identify, makeRoot, p } from '../../../test/util.js';
+import { byId, frag, identify, identifyChildren, makeRoot, p } from '../../../test/util.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
 import { JSED_ANCHOR_CLASS } from '../../core/taxonomy.js';
@@ -79,15 +79,17 @@ describe('EditorFocusOps', () => {
       });
       editor.start();
       editor.nav.FOCUS(doc.root);
-      const rootParent = doc.root.parentElement;
 
       // act
       const inserted = editor.focus.insertNewAfter('p');
 
       // assert
       expect(inserted).toBe(false);
-      expect(Array.from(doc.root.children)).toHaveLength(2);
-      expect(rootParent ? Array.from(rootParent.children) : []).toEqual([doc.root]);
+      expect(identifyChildren(doc.root.parentElement)).toEqual([
+        '[element:div#root]',
+        '[element-indicator]'
+      ]);
+      expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
       expect(editor.nav.getFocus()).toBe(doc.root);
       expect(elementChanges).toEqual([]);
 
@@ -160,15 +162,17 @@ describe('EditorFocusOps', () => {
       });
       editor.start();
       editor.nav.FOCUS(doc.root);
-      const rootParent = doc.root.parentElement;
 
       // act
       const inserted = editor.focus.insertNewBefore('p');
 
       // assert
       expect(inserted).toBe(false);
-      expect(Array.from(doc.root.children)).toHaveLength(2);
-      expect(rootParent ? Array.from(rootParent.children) : []).toEqual([doc.root]);
+      expect(identifyChildren(doc.root.parentElement)).toEqual([
+        '[element:div#root]',
+        '[element-indicator]'
+      ]);
+      expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
       expect(editor.nav.getFocus()).toBe(doc.root);
       expect(elementChanges).toEqual([]);
 

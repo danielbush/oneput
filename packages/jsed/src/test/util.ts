@@ -11,6 +11,7 @@ import {
   isToken,
   JSED_ANCHOR_CLASS,
   JSED_DELETED_CLASS,
+  JSED_ELEMENT_INDICATOR,
   JSED_IGNORE_CLASS,
   JSED_TOKEN_CLASS
 } from '../lib/core/taxonomy.js';
@@ -123,9 +124,12 @@ export function identify(el: Node | undefined | null): string {
   if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el);
   if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;
-  if (el.nodeType === el.ELEMENT_NODE) {
-    const id = (el as Element).id;
-    return `[element:${(el as HTMLElement).tagName.toLowerCase()}${id ? '#' + id : ''}]`;
+  if (el instanceof Element) {
+    if (el.classList.contains(JSED_ELEMENT_INDICATOR)) {
+      return '[element-indicator]';
+    }
+    const id = el.id;
+    return `[element:${el.tagName.toLowerCase()}${id ? '#' + id : ''}]`;
   }
   return `[nodeType=${el.nodeType}:"${el.nodeValue}"]`;
 }

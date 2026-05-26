@@ -28,6 +28,8 @@ import {
   removeSeparator
 } from './space.js';
 import type { DeleteToken } from '../undo/UndoOperation.js';
+import { isLastLineSibling } from '../core/lineSegment.js';
+import { createAnchor } from './anchor.js';
 
 export function getValue(token: Node): string {
   validate(token);
@@ -145,6 +147,17 @@ export function remove(token: HTMLElement): DeleteToken {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
+  }
+
+  if (isLastLineSibling(token)) {
+    const anchor = createAnchor();
+    token.before(anchor);
+    token.remove();
+    return {
+      action: 'anchorize-token',
+      token,
+      anchor
+    };
   }
 
   token.classList.add(JSED_DELETED_CLASS);

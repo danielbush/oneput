@@ -27,7 +27,7 @@ import {
   removeSeparatorBefore,
   removeSeparator
 } from './space.js';
-import type { DeleteToken } from '../undo/UndoOperation.js';
+import type { DeleteToken, DeleteTokenAll } from '../undo/UndoOperation.js';
 import { isLastLineSibling } from '../core/lineSegment.js';
 import { createAnchor } from './anchor.js';
 
@@ -139,11 +139,39 @@ export function replaceText(token: HTMLElement, val: string): HTMLElement {
   return token;
 }
 
+function removeToken(token: HTMLElement, removeSeparators: boolean = true): DeleteToken {
+  token.classList.add(JSED_DELETED_CLASS);
+  token.classList.add(JSED_IGNORE_CLASS);
+  let removedNextSeparator: HTMLElement | false = false;
+  let removedPreviousSeparator: HTMLElement | false = false;
+
+  if (removeSeparators) {
+    // Scan space nodes
+    const separatorBefore = getSeparatorBefore(token);
+    const separatorAfter = getSeparatorAfter(token);
+    const removeNextSeparator = !!separatorAfter;
+    const removePreviousSeparator =
+      !!separatorBefore &&
+      (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore));
+
+    // Collapse paired separators down to one.
+    removedNextSeparator = removeNextSeparator && removeSeparator(separatorAfter);
+    removedPreviousSeparator = removePreviousSeparator && removeSeparator(separatorBefore);
+  }
+
+  return {
+    action: 'delete-token',
+    token,
+    removeNextSeparator: removedNextSeparator,
+    removePreviousSeparator: removedPreviousSeparator
+  };
+}
+
 /**
  * Remove the token and return the surroudning sibling elements if present
  * (these may or may not be tokens).
  */
-export function remove(token: HTMLElement): DeleteToken {
+export function remove(token: HTMLElement): DeleteTokenAll {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
@@ -152,35 +180,15 @@ export function remove(token: HTMLElement): DeleteToken {
   if (isLastLineSibling(token)) {
     const anchor = createAnchor();
     token.before(anchor);
-    token.remove();
+    const result = removeToken(token, false);
     return {
       action: 'anchorize-token',
-      token,
+      deletedToken: result,
       anchor
     };
   }
 
-  token.classList.add(JSED_DELETED_CLASS);
-  token.classList.add(JSED_IGNORE_CLASS);
-
-  // Scan space nodes
-  const separatorBefore = getSeparatorBefore(token);
-  const separatorAfter = getSeparatorAfter(token);
-  const removeNextSeparator = !!separatorAfter;
-  const removePreviousSeparator =
-    !!separatorBefore &&
-    (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore));
-
-  // Collapse paired separators down to one.
-  const removedNextSeparator = removeNextSeparator && removeSeparator(separatorAfter);
-  const removedPreviousSeparator = removePreviousSeparator && removeSeparator(separatorBefore);
-
-  return {
-    action: 'delete-token',
-    token,
-    removeNextSeparator: removedNextSeparator,
-    removePreviousSeparator: removedPreviousSeparator
-  };
+  return removeToken(token, true);
 }
 
 export function restore(token: HTMLElement) {

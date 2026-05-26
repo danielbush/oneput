@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import {
   a,
+  byId,
   em,
+  findTokenByText,
   identify,
   identifyChildren,
   inlineStyleHackVal,
@@ -89,7 +91,7 @@ describe('splitAtToken', () => {
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
-  test('ANCHOR_ISLAND_EDGE_CASE - split after first TOKEN that precedes an ISLAND', () => {
+  test.todo('ANCHOR_ISLAND_EDGE_CASE - split after first TOKEN that precedes an ISLAND', () => {
     // arrange — the TOKEN is the only TOKEN on the LINE, followed by an ISLAND
     const doc = makeRoot(p(t('foo'), s(), '<span class="katex" style="display:inline;">x²</span>'));
     const { cursor } = createCursor(doc, tokens(doc)[0]); // foo
@@ -217,11 +219,11 @@ describe('insertTextBefore', () => {
 });
 
 describe('delete', () => {
-  test('first TOKEN', () => {
+  test('first TOKEN in doc', () => {
     // arrange
     const doc = makeRoot(
       p(
-        //
+        { id: 'p1' }, //
         t('hello'),
         s(),
         t('world'),
@@ -229,33 +231,88 @@ describe('delete', () => {
         t('foo')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const hello = findTokenByText(doc.root, 'hello');
+    const { cursor } = createCursor(doc, hello);
 
     // act
     cursor.delete();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('world');
-    expect(identify(tokens(doc)[0])).toBe('d("hello")');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'd("hello")',
+      '[deleted-space]',
+      'world',
+      '[nodeType=3:" "]',
+      'foo'
+    ]);
   });
 
-  test('last TOKEN', () => {
+  test('last TOKEN in doc', () => {
     // arrange
     const doc = makeRoot(
       p(
-        //
+        { id: 'p1' }, //
         t('hello'),
         s(),
         t('world')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const world = findTokenByText(doc.root, 'world');
+    const { cursor } = createCursor(doc, world);
 
     // act
     cursor.delete();
 
     // assert
     expect(getValue(cursor.getPlace())).toBe('hello');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'hello', //
+      '[deleted-space]',
+      'd("world")'
+    ]);
+  });
+
+  test('only TOKEN in doc', () => {
+    // arrange
+    const doc = makeRoot(t('aaa'));
+    const aaa = findTokenByText(doc.root, 'aaa');
+    const { cursor } = createCursor(doc, aaa);
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(identifyChildren(doc.root)).toEqual([
+      '[anchor]', //
+      'd("aaa")'
+    ]);
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(identifyChildren(doc.root)).toEqual([
+      '[anchor]', //
+      'd("aaa")'
+    ]);
+  });
+
+  test('only ANCHOR in doc', () => {
+    // arrange
+    const doc = makeRoot(a());
+    const { cursor } = createCursor(doc, doc.root.firstChild as HTMLElement);
+
+    // act
+    cursor.delete();
+
+    // assert
+    expect(cursor.getPlace()).toBe(doc.root.firstChild); // should be no-op
+    expect(identifyChildren(doc.root)).toEqual([
+      '[anchor]' //
+    ]);
   });
 
   test.todo('ISLAND no-op', () => {

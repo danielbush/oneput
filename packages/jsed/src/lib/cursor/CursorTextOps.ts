@@ -3,8 +3,12 @@ import * as space from '../token/space.js';
 import { isAnchor, isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
-import { deleteHighestEmpty, recSplitAfterChild, recSplitBeforeChild } from '../focus/focusable.js';
-import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
+import {
+  deleteHighestEmpty,
+  isEmpty,
+  recSplitAfterChild,
+  recSplitBeforeChild
+} from '../focus/focusable.js';
 import { getFirstLineSibling, getLine } from '../core/line.js';
 import { addAnchorsToTag } from '../token/anchor.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
@@ -34,9 +38,6 @@ export class CursorTextOps {
     }
     const userInputOpts: UserInputOpts = { inputCursorPosition };
     const currIsAnchor = isAnchor(current);
-    const prevElementSib = getPreviousElementSibling(current);
-    const nextElementSib = getNextElementSibling(current);
-    const willCreateEmptyDocument = !prevCrs && !nextCrs;
 
     // Perform removals...
 
@@ -53,15 +54,16 @@ export class CursorTextOps {
       }
     }
 
+    const noMoreLineSiblings = !prevCrs && !nextCrs;
+    const emptyParent = isEmpty(current.parentNode!, true);
     /**
      * <p>[A]</p>
      * ...<em>[A]</em>...
      * => delete tag around ANCHOR + possibly more
      */
-    const canDeleteAncestors =
-      currIsAnchor && !prevElementSib && !nextElementSib && !willCreateEmptyDocument;
+    const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
 
-    // Delete ANCHOR and container(s)...
+    // Delete container(s) with the ANCHOR in them...
     if (canDeleteAncestors) {
       const op = deleteHighestEmpty(parentNode, this.state.document.root);
       if (op) undo.ops.push(op);
@@ -70,26 +72,11 @@ export class CursorTextOps {
     }
 
     /**
-     * ...<em>...</em>[A]</p>
-     * => ...<em>...[T]</em>[A]</p>
+     * Move the cursor if we can.
+     * ...<em>...</em>[A]</p> => ...<em>...[T]</em>A</p>
+     * etc
      */
-    const skipAnchorDelete = currIsAnchor && !canDeleteAncestors;
-    if (skipAnchorDelete) {
-      if (prevCrs) {
-        this.state.place(prevCrs, userInputOpts);
-        return undo;
-      }
-      return undo;
-    }
-
-    // <p>[T]A</p>
-    // => <p>[A]</p>
-    if (!prevElementSib && isAnchor(nextElementSib)) {
-      this.state.place(nextElementSib!, userInputOpts);
-      return undo;
-    }
-
-    this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
+    this.state.place((prevCrs || nextCrs || current) as HTMLElement, userInputOpts);
     return undo;
   }
 

@@ -14,8 +14,6 @@ import { Cursor } from '../cursor/Cursor.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
-import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
-import { restoreSeparator } from '../token/space.js';
 
 /**
  * Manages an edit session for a single document.
@@ -427,16 +425,10 @@ export class EditorOps {
     }
     for (const op of rec.ops.reverse()) {
       switch (op.action) {
+        case 'anchorize-token':
         case 'delete-token': {
-          token.restore(op.token);
-          if (op.removeNextSeparator) {
-            restoreSeparator(op.removeNextSeparator);
-          }
-          if (op.removePreviousSeparator) {
-            restoreSeparator(op.removePreviousSeparator);
-          }
-          fixAnchors(op.token);
-          this.state.cursor?.place(op.token);
+          const tok = token.restore(op);
+          this.state.cursor?.place(tok);
           break;
         }
         case 'delete-element': {
@@ -448,17 +440,4 @@ export class EditorOps {
       }
     }
   };
-}
-
-function fixAnchors(el: HTMLElement) {
-  if (isToken(el)) {
-    const next = getNextElementSibling(el);
-    const prev = getPreviousElementSibling(el);
-    if (isAnchor(next)) {
-      next?.remove();
-    }
-    if (isAnchor(prev)) {
-      prev?.remove();
-    }
-  }
 }

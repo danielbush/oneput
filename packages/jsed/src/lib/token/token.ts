@@ -25,7 +25,8 @@ import {
   getSeparatorBefore,
   removeSeparatorAfter,
   removeSeparatorBefore,
-  removeSeparator
+  removeSeparator,
+  restoreSeparator
 } from './space.js';
 import type { DeleteToken, DeleteTokenAll } from '../undo/UndoOperation.js';
 import { isLastLineSibling } from '../core/lineSegment.js';
@@ -191,9 +192,31 @@ export function remove(token: HTMLElement): DeleteTokenAll {
   return removeToken(token, true);
 }
 
-export function restore(token: HTMLElement) {
+/**
+ * Returns the TOKEN we restored.
+ */
+export function restore(op: DeleteTokenAll): HTMLElement {
+  if (op.action === 'anchorize-token') {
+    // Convert anchor back to token.
+    const { anchor, deletedToken } = op;
+    anchor.remove();
+    restoreToken(deletedToken);
+    return deletedToken.token;
+  }
+  restoreToken(op);
+  return op.token;
+}
+
+export function restoreToken(op: DeleteToken) {
+  const { token } = op;
   token.classList.remove(JSED_DELETED_CLASS);
   token.classList.remove(JSED_IGNORE_CLASS);
+  if (op.removeNextSeparator) {
+    restoreSeparator(op.removeNextSeparator);
+  }
+  if (op.removePreviousSeparator) {
+    restoreSeparator(op.removePreviousSeparator);
+  }
 }
 
 function hasNonIgnorableLineContent(node: Node): boolean {

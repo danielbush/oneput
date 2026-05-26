@@ -497,11 +497,39 @@ function buildParent(...children: Node[]): HTMLElement {
 }
 
 describe('remove', () => {
-  test('sets classes, does not remove from DOM', () => {
+  test('last line sibling → anchorize', () => {
     // arrange
     const bar = createToken('bar');
     buildParent(
-      //
+      bar //
+    );
+
+    // act
+    const rec = remove(bar);
+
+    // assert
+    expect(bar.parentNode).toBeDefined();
+    expect(bar.classList).toContain(JSED_DELETED_CLASS);
+    expect(bar.classList).toContain(JSED_IGNORE_CLASS);
+    expect(isAnchor(bar.previousSibling as Node)).toBe(true);
+    expect(rec).toMatchObject({
+      action: 'anchorize-token',
+      anchor: bar.previousSibling,
+      deletedToken: {
+        action: 'delete-token',
+        token: bar,
+        removeNextSeparator: false,
+        removePreviousSeparator: false
+      }
+    });
+  });
+
+  test('has sibling → delete-token', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    buildParent(
+      foo, //
       bar
     );
 
@@ -528,8 +556,7 @@ describe('remove', () => {
     const sp1 = document.createTextNode(' ');
     const sp2 = document.createTextNode(' ');
     buildParent(
-      //
-      foo,
+      foo, //
       sp1,
       bar,
       sp2,
@@ -558,7 +585,6 @@ describe('remove', () => {
     const sp1 = document.createTextNode(' ');
     const sp2 = document.createTextNode(' ');
     buildParent(
-      //
       sp1, // leading space - may be deliberate
       bar,
       sp2,

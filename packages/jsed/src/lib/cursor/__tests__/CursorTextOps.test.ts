@@ -319,8 +319,7 @@ describe('delete', () => {
     // arrange
     const doc = makeRoot(
       p(
-        //
-        t('aaa'),
+        t('aaa'), //
         s(),
         '<span class="katex" style="display:inline;">x²</span>',
         s(),
@@ -420,11 +419,11 @@ describe('delete', () => {
     expect(identify(cursor.getPlace().nextSibling)).toBe('d("bbb")');
   });
 
-  test.todo('ANCHOR ...<em>A</em>...', () => {
+  test('ANCHOR ...<em>A</em>... (deleteHighestEmpty)', () => {
     // arrange
     const doc = makeRoot(
       p(
-        //
+        { id: 'p1' }, //
         t('aaa'),
         s(),
         em({ id: 'em1', style: inlineStyleHackVal }, a()),
@@ -439,11 +438,15 @@ describe('delete', () => {
     cursor.delete();
 
     // assert
+    // The empty <em> is soft-deleted in place; cursor falls back to 'aaa'.
     expect(identify(cursor.getPlace())).toBe('aaa');
-    expect(identify(cursor.getPlace().nextSibling)).toBe('[nodeType=3:" "]');
-    // This should be a delete marker for em-tag, then 'ccc'
-    // Spaces should be coalesced into one.
-    expect(identify(cursor.getPlace().nextSibling?.nextSibling)).toBe('ccc');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'aaa',
+      '[nodeType=3:" "]',
+      '[deleted-element]',
+      '[nodeType=3:" "]',
+      'ccc'
+    ]);
   });
 
   test('TOKEN after ISLAND with next TOKEN', () => {

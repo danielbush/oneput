@@ -4,13 +4,30 @@ Jsed is an HTML editor that lets you edit HTML content using Oneput as the inter
 
 ## Tests
 
-See the `nullables-testing-style` skill which defines the style of unit tests we write. Always write unit tests at the highest level possible. For jsed this is probably `Editor`. We can do this because we inject infrastructure code (code that talks to the outside world) and we encourage sociable unit tests that test through the code. So we can test happy and sad paths and edge cases deterministically and instantly at the highest level. Avoid heavily testing intermediate code because (1) it locks in our design choices and (2) it often duplicates a test we can write at the highest level; there are times where it makes sense if (2) isn't the case and it's easier, but always stop and ask me.
+- use `makeRoot` to create documents
+- for lower-level tests, `buildParent` can be simpler and more convenient
+- use `identify` and `identifyChildren` to assert the state of the DOM
+
+We can do this because we inject infrastructure code (code that talks to the outside world) and we encourage sociable unit tests that test through the code. So we can test happy and sad paths and edge cases deterministically and instantly at the highest level. Avoid heavily testing intermediate code because (1) it locks in our design choices and (2) it often duplicates a test we can write at the highest level; there are times where it makes sense if (2) isn't the case and it's easier, but always stop and ask me.
 
 ## Deep modules structure
 
-The top-level modules in `src/` are the tip of the iceberg — they have simple interfaces and tell you _what_ the system does. The implementation details live in `src/lib/`. A human or agent should be able to understand the whole system by reading the architecture narrative and browsing the top-level source files, without descending into `lib/` unless they need to change how something works internally.
+Top level modules
 
-When adding or restructuring code, preserve this separation: high-level orchestration at the top, low-level mechanics in `lib/`.
+- src/lib/editor/Editor.ts
+- src/lib/editor/EditorController.ts
+- src/lib/cursor/Cursor.ts
+- src/lib/ui/oneput/OneputEditDocumentAdapter.ts
+
+Everything else is either intermediate or lower level operations.
+
+The lowest levels
+
+- src/lib/core
+- src/lib/token
+- src/lib/focus
+
+The top-level modules are the tip of the iceberg — they have simple interfaces and tell you _what_ the system does. The lower level operations should be more heavily tested and perform one specific type of action. A human or agent should be able to understand the whole system by reading the architecture narrative and browsing the top-level source files, without descending unless they need to change how something works internally.
 
 ## Shared vocabulary
 

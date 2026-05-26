@@ -1,5 +1,7 @@
 ## Project overview
 
+When responding be as concise as possible; the more sentences, the harder it is to understand what is going on.
+
 ## Overview
 
 This is a pnpm workspace.
@@ -44,14 +46,21 @@ General rules
 For tests
 
 - Use vitest with AAA pattern (// arrange, // act, // assert with blank lines between)
-- Test intentions, not exhaustively - focus on core behaviors
-- Never ever use mocks
-- Never test interactions, call counts, or spy-based expectations; prefer state-based assertions and tracked outputs
-- Never write production code to accommodate tests; instead use configurable responses and embedded stubs, even when that means configuring a queue of return values in a nullable dependency
-- Use nullables and narrow sociable unit tests as described by the `nullables-testing-style` skill
-- Put the test seam at the environment boundary; use `.createNull()` dependencies, configurable responses, behavior simulation, and tracked outputs instead of patched methods or fake interaction checks
-- Ask what the most important tests are before writing
-- Keep test count small and focused
+- for lower-level operations below the deep module line
+  - use describe/test functions for writing most tests
+  - test descriptions should be short and case-based, rather than decriptive sentences; there may be quite a few and reading lots of sentences doesn't help understanding the test in that case
+  - test edge cases
+- for higher-level operations / orchestrations above the deep module line
+  - these tests require more arrangement and are harder to understand; keep test count small and focused
+  - use describe/it where it describes the higher level behaviour that we're testing
+  - test for integration rather than all cases so test the most obvious happy and unhappy paths
+  - Ask what the most important tests are before writing
+- for all tests
+  - Use nullables and narrow sociable unit tests as described by the `nullables-architecture` skill
+  - Never ever use mocks
+  - Use `.createNull()` dependencies, configurable responses, behavior simulation, and tracked outputs instead of patched methods or fake interaction checks
+  - Never test interactions, call counts, or spy-based expectations; prefer state-based assertions and tracked outputs
+  - Never write production code to accommodate tests; instead use configurable responses and embedded stubs, even when that means configuring a queue of return values in a nullable dependency
 
 ## Building and testing
 

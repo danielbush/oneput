@@ -168,8 +168,8 @@ function removeToken(token: HTMLElement, removeSeparators: boolean = true): Dele
 }
 
 /**
- * Remove the token and return the surroudning sibling elements if present
- * (these may or may not be tokens).
+ * If token is last in LINE_SEGMENT, anchorize it and don't flip any
+ * SEPARATOR's.
  */
 export function remove(token: HTMLElement): DeleteTokenAll {
   const parentNode = token.parentNode;

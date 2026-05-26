@@ -13,7 +13,15 @@ import { getFirstLineSibling, getLine } from '../core/line.js';
 import { addAnchorsToTag } from '../token/anchor.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
 
-export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
+/**
+ * eg User is backspacing single chars.
+ */
+export type CharDeletion = 'charDeletion';
+/**
+ * User is deleteing whole tokens.
+ */
+export type TokenDeletion = 'tokenDeletion';
+export type CursorDeleteOpts = { type: CharDeletion | TokenDeletion };
 
 export class CursorTextOps {
   static create(state: CursorState): CursorTextOps {

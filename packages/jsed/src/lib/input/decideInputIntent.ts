@@ -1,3 +1,4 @@
+import type { CharDeletion, TokenDeletion } from '../cursor/CursorTextOps.js';
 import type { UserInputChange } from './UserInput.js';
 
 /*
@@ -24,7 +25,7 @@ export type InputIntent =
        */
       type: 'delete-current';
       inputValue: string;
-      deletionType: 'charDeletion' | 'tokenDeletion';
+      deletionType: CharDeletion | TokenDeletion;
     }
   | {
       /**

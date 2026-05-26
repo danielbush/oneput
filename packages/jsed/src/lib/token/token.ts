@@ -171,6 +171,10 @@ function removeToken(token: HTMLElement, removeSeparators: boolean = true): Dele
 /**
  * If token is last in LINE_SEGMENT, anchorize it and don't flip any
  * SEPARATOR's.
+ *
+ * Technical note: remove could remove an ANCHOR in which case we're treating
+ * the ANCHOR as content.  At the time of doing this, the CURSOR checks if it's
+ * on an ANCHOR and doesn't call remove.
  */
 export function remove(token: HTMLElement): DeleteTokenAll {
   const parentNode = token.parentNode;

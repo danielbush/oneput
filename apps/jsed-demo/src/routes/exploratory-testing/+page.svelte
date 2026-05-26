@@ -5,6 +5,7 @@
 <div id="test-doc">
   <h1 class="jsed-ignore">Default behaviours</h1>
   <h2 class="jsed-ignore">Simple paragraphs and INLINE_FLOW</h2>
+  <p>aaa</p>
   <p>This is just a simple paragraph of text. And this is a second sentence.</p>
   <p>Here's a second paragraph with more text in it.</p>
   <p>aaa bbb <em>ccc <strong>ddd eee</strong> fff</em> eee fff</p>

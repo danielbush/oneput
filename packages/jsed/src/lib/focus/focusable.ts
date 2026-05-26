@@ -1,9 +1,10 @@
 import { canCreateWithAnchor } from '../core/dom-rules.js';
 import * as domRules from '../core/dom-rules.js';
-import { getNextNodeSibling, getPreviousNodeSibling } from '../core/sibling.js';
+import { getNextNodeSibling, getNextSibling, getPreviousNodeSibling } from '../core/sibling.js';
 import {
+  isAnchor,
   isFocusable,
-  isIgnorable,
+  isIgnorableNode,
   isImplicitLine,
   isInlineFlow,
   isIsland,
@@ -31,14 +32,17 @@ export function getAppendCandidates(parent: HTMLElement): string[] {
   return domRules.getAllowableChildTags(parent.tagName);
 }
 
-export function isEmpty(el: Element): boolean {
-  if (!el.firstChild) {
-    return true;
+export function isEmpty(el: Node, ignoreAnchor = true): boolean {
+  if (ignoreAnchor) {
+    const sib = getNextSibling(
+      el.firstChild,
+      (node) => !isAnchor(node) && !isIgnorableNode(node),
+      true
+    );
+    return !sib;
   }
-  if (!isIgnorable(el.firstChild)) {
-    return false;
-  }
-  return !getNextNodeSibling(el.firstChild);
+  const sib = getNextSibling(el.firstChild, (node) => !isIgnorableNode(node), true);
+  return !sib;
 }
 
 /**
@@ -110,8 +114,8 @@ export function deleteElement(el: HTMLElement): DeleteElement {
  * However... we only delete once at the very end to keep everything intact.
  * `highest` is a child of p, and we scan either side to see if the element would have been empty.
  */
-export function deleteHighestEmpty(el: HTMLElement, ceiling?: Element) {
-  if (!isEmpty(el)) {
+export function deleteHighestEmpty(el: HTMLElement, ceiling?: Element, ignoreAnchor = true) {
+  if (!isEmpty(el, ignoreAnchor)) {
     return;
   }
 

@@ -7,6 +7,7 @@
   <h2 class="jsed-ignore">Simple paragraphs and INLINE_FLOW</h2>
   <p>This is just a simple paragraph of text. And this is a second sentence.</p>
   <p>Here's a second paragraph with more text in it.</p>
+  <p>aaa bbb <em>ccc <strong>ddd eee</strong> fff</em> eee fff</p>
   <p>aaa bbb <em>ccc ddd</em> eee fff</p>
   <p>aaa bbb <em>ccc <strong>ddd</strong></em> eee fff</p>
   <p>aaa bbb <em>em1</em> <em>em2</em> ccc ddd</p>

@@ -95,6 +95,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
 - feat: holes
   - ability to explicitly mark elements as FOCUS transparent (and by extension CURSOR transparent); the key difference being that everything including text is ignored until we hit an element that turns the transparency off; the "off" subtree is like a editable hole contained within the transparent subtree.
+- chore: if cursor text ops or other ops fail, editor should catch the error and go into a safe state
+  - EXAMPLE: cursor delete (CursorTextOps), at time of writing, throws if current.parentElement is null
 
 ## refactors
 

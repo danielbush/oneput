@@ -425,6 +425,13 @@ export class EditorOps {
     }
     for (const op of rec.ops.reverse()) {
       switch (op.action) {
+        case 'place-cursor': {
+          // We'll take this as advisory and do it only if we have a cursor.
+          if (this.state.cursor) {
+            this.state.cursor.place(op.target);
+          }
+          break;
+        }
         case 'anchorize-token':
         case 'delete-token': {
           const tok = token.restore(op);

@@ -71,7 +71,10 @@ export class CursorTextOps {
     const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
     if (canDeleteAncestors) {
       const op = deleteHighestEmpty(parentNode, this.state.document.root);
-      if (op) undo.ops.push(op);
+      if (op) {
+        undo.ops.push({ action: 'place-cursor', target: current });
+        undo.ops.push(op);
+      }
       this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
       return undo;
     }

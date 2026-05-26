@@ -1,4 +1,4 @@
-export type UndoOperation = DeleteTokenAll | DeleteElement;
+export type UndoOperation = DeleteTokenAll | DeleteElement | PlaceCursor;
 
 export type DeleteTokenAll = DeleteToken | AnchorizeToken;
 
@@ -19,4 +19,9 @@ export type DeleteElement = {
   action: 'delete-element';
   marker: HTMLElement;
   deleted: HTMLElement;
+};
+
+export type PlaceCursor = {
+  action: 'place-cursor';
+  target: HTMLElement;
 };

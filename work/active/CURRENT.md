@@ -4,15 +4,24 @@
 
 - [x] cursor delete (first pass)
   - COMMENT: this worked and pre-dates this file; but after looking at "split at token" we'll have to revisit this
-- [ ] deletion of token / revisit cursor delete using new anchorize
+- [x] deletion of token / revisit cursor delete using new anchorize
   - token.remove should handle anchors
-- [ ] split at token
-  - COMMENT: brings in automatic anchorization
 - [ ] deletion of token by character
 - [ ] replace with text
-- [ ] ANCHOR_ISLAND_EDGE_CASE
-  - token.remove and its handling of separators seems very solid to me; if we want consistency we need to do something like this for split; if the child we're splitting at is a LINE_SIBLING we can defer to the token module perhaps?
-  - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
+- [ ] replacing an ANCHOR
+  - A
+    - automatic leading space if we're next of a FOCUSABLE
+    - automatic trailing space if we're next of a FOCUSABLE
+  - B
+    - cursor insert-after mode puts a space in if next is a FOCUSABLE
+    - cursor insert-before mode puts a space in if previous is a FOCUSABLE
+- [ ] split at token (creating new lines)
+  - COMMENT: brings in automatic anchorization
+  - [ ] ANCHOR_ISLAND_EDGE_CASE
+    - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
+- [ ] selection
+  - fix: backspace leaves an ANCHOR
+  - fix: make select.delete undoable
 
 side list
 
@@ -72,51 +81,19 @@ I think we can just call anchorize on parent and peer in the bottom split.
 
 ## ANCHOR rethink - automatic ANCHOR's version 2
 
-We anchorize the whole document;  anchors are treated as empty TOKEN's and are structural so when we next save, the anchors are saved and the anchorizer won't need to anchorize them again.
-
-Optionally: the anchors don't show unless there is FOCUS'ed ancestor.
-
-Visually anchorizng whole document might be a bit jarring to suddenly show all anchors, but most of the time, the user is not selecting the whole document and normal documents won't have a lot of anchors to show anyway.
+- Anchorize the whole document (automatic ANCHOR's).
+- Anchors are displayed.
+- Don't allow automatic anchors to be deleted.
+- Allow user to add anchors but don't mark them as special.
+- All anchors are removed when saving.
 
 token.remove checks if it is removing the last TOKEN in the LINE_SEGMENT; if so, then it places an ANCHOR instead and doesn't flip any separators.
 
-we record token.remove in undo; if the token is anchorized, we handle the situation obviously slightly differently although it does resemble a flipped token, it's just the flip is now an anchor and is not ignored.
+We record token.remove in undo; if the token is anchorized, we handle the situation obviously slightly differently although it does resemble a flipped token, it's just the flip is now an anchor and is not ignored.
 
 token deletion (token.remove) occurs when we delete whole tokens (input is select-all and we hit backspace) or char-based deletion in which case the token was a single non-whitespace character before it got removed; for this latter case there may be some collapse scenarios which means we end up recording the whole token being deleted anyway rather than recording intermediate deletion states.
 
-anchor deletion
 
-- (1a) user can't delete
-  - simplest
-
-- (1b) user can delete them with the CURSOR
-  - this hides the anchor
-  - but we still allow the CURSOR to sit on it, revealing it temporarily
-  - it will be saved so the system knows not to display an anchor at that point
-  - when anchorizing, the anchorizer should maybe re-assess if hidden anchors should still exist (if the anchorization rules change)
-
-manual anchor insertion
-
-- the user can insert anchors in places the anchorizer doesn't handle; because all anchors are structural these will be recorded and saved
-- the oneput menu can be used
-- we might have relaxed rules to allow people to put anchors where they would normally not go
-- example: an ANCHOR in a div before a nested div where both are natually blocks
-- flag the anchor as manual so we know to handle it differently
-- deletion will properly flip the manual anchor into a deleted state rather than just hiding it
-  - do not allow the CURSOR to walk on it
-  - don't persist when saving
-
-implicit manual anchor insertion
-
-- the user can delete all the text in a LINE_SEGMENT resulting in an ANCHOR
-- if the LINE_SEGMENT is not automatically anchorizable what do we do?
-  - we could run a function to determine if the anchor is automatic
-  - if not, we flag the anchor as manual and it behaves accordingly
-
-how does this simplify cursor delete in CursorTextOps?
-
-We just call token.remove.
-We might want to check if it's an ANCHOR as a result and react to this.
 
 # Archive
 

@@ -1,5 +1,18 @@
 import { describe, test, expect } from 'vitest';
-import { em, frag, inlineStyleHack, makeRoot, p, s, span, t } from '../../../test/util.js';
+import {
+  byId,
+  em,
+  frag,
+  identify,
+  identifyChildren,
+  inlineStyleHack,
+  makeRoot,
+  p,
+  s,
+  span,
+  strong,
+  t
+} from '../../../test/util.js';
 import { CursorSelection } from '../CursorSelection.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
@@ -271,6 +284,48 @@ describe('CursorSelection', () => {
     expect(doc.root.querySelector('#inner')).toBeNull();
     expect(doc.root.querySelector('.jsed-selection')).toBeNull();
     expect(tokens(doc)).toEqual([marker]);
+  });
+
+  test('delete - marker lifting (3)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        //
+        em(
+          { ...inlineStyleHack, id: 'em-1' }, //
+          t('a'),
+          strong({ ...inlineStyleHack, id: 'strong-1' }, t('b'), t('b2')),
+          t('c')
+        ),
+        s(),
+        t('d'),
+        s(),
+        t('e')
+      )
+    );
+    const [, , b2] = tokens(doc);
+    expect(identify(b2)).toBe('b2');
+    const selection = seed(doc, b2);
+    selection.extendNext();
+    selection.extendNext();
+    expect(identify(selection.getForwardEnd())).toBe('d');
+
+    // act
+    const marker = selection.delete();
+
+    // assert
+    const line = doc.root.querySelector('p');
+    expect(identifyChildren(line)).toEqual([
+      '[element:em#em-1]',
+      '[nodeType=3:" "]',
+      '[nodeType=3:" "]',
+      'e'
+    ]);
+    const em1 = byId(doc, 'em-1');
+    const strong1 = byId(doc, 'strong-1');
+    expect(identifyChildren(em1)).toEqual(['a', '[element:strong#strong-1]']);
+    expect(identifyChildren(strong1)).toEqual(['b', '[anchor]']);
+    expect(strong1.lastChild).toBe(marker);
   });
 
   test('delete - marker lifting (non-INLINE_FLOW)', () => {

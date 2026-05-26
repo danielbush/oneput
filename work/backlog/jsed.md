@@ -98,6 +98,10 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
 
 ## refactors
 
+- refactor: get rid of walk v1 dependents
+  - getPreviousLineSiblingV1 
+  - getNextLineSiblingV1
+  - what else?
 - refactor: lib/token and lib/focus/focusable should be a lower-level ops layer?
   - lib/ops/focusable.ts
   - lib/ops/edit/

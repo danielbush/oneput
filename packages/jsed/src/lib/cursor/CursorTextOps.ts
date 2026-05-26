@@ -1,12 +1,12 @@
 import * as token from '../token/token.js';
 import * as space from '../token/space.js';
-import { isAnchor, isLineSibling, isToken } from '../core/taxonomy.js';
+import { isAnchor, isToken } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import { deleteHighestEmpty, recSplitAfterChild, recSplitBeforeChild } from '../focus/focusable.js';
 import { getNextElementSibling, getPreviousElementSibling } from '../core/sibling.js';
 import { getFirstLineSibling, getLine } from '../core/line.js';
-import { addAnchorsToTag, createAnchor } from '../token/anchor.js';
+import { addAnchorsToTag } from '../token/anchor.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
 
 export type CursorDeleteOpts = { type: 'charDeletion' | 'tokenDeletion' };
@@ -37,36 +37,43 @@ export class CursorTextOps {
     const prevElementSib = getPreviousElementSibling(current);
     const nextElementSib = getNextElementSibling(current);
     const willCreateEmptyDocument = !prevCrs && !nextCrs;
+
+    // Perform removals...
+
+    const undo: UndoRecord = { ops: [] };
+    let anchor: HTMLElement | null = null;
+
+    if (!currIsAnchor) {
+      const result = token.remove(current);
+      undo.ops.push(result);
+      if (result.action === 'anchorize-token') {
+        anchor = result.anchor;
+        this.state.place(anchor, userInputOpts);
+        return undo;
+      }
+    }
+
     /**
      * <p>[A]</p>
      * ...<em>[A]</em>...
      * => delete tag around ANCHOR + possibly more
      */
     const canDeleteAncestors =
-      !prevElementSib && !nextElementSib && currIsAnchor && !willCreateEmptyDocument;
+      currIsAnchor && !prevElementSib && !nextElementSib && !willCreateEmptyDocument;
+
+    // Delete ANCHOR and container(s)...
+    if (canDeleteAncestors) {
+      const op = deleteHighestEmpty(parentNode, this.state.document.root);
+      if (op) undo.ops.push(op);
+      this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
+      return undo;
+    }
+
     /**
      * ...<em>...</em>[A]</p>
      * => ...<em>...[T]</em>[A]</p>
      */
     const skipAnchorDelete = currIsAnchor && !canDeleteAncestors;
-    const canDeleteToken = !skipAnchorDelete;
-
-    // Situations where we don't remove the token...
-
-    // Perform removals...
-
-    const undo: UndoRecord = { ops: [] };
-
-    if (canDeleteToken) {
-      undo.ops.push(token.remove(current));
-    }
-    if (canDeleteAncestors) {
-      const op = deleteHighestEmpty(parentNode, this.state.document.root);
-      if (op) undo.ops.push(op);
-    }
-
-    // Anchor and cursor placement....
-
     if (skipAnchorDelete) {
       if (prevCrs) {
         this.state.place(prevCrs, userInputOpts);
@@ -75,42 +82,10 @@ export class CursorTextOps {
       return undo;
     }
 
-    if (canDeleteAncestors) {
-      this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
-      return undo;
-    }
-
-    if (willCreateEmptyDocument) {
-      // There's no prevCrs or nextCrs position We'll place the CURSOR on an
-      // anchor so it has somewhere to go.
-      const anchor = createAnchor();
-      current.insertAdjacentElement('beforebegin', anchor);
-      this.state.place(anchor, userInputOpts);
-      return undo;
-    }
-
     // <p>[T]A</p>
     // => <p>[A]</p>
     if (!prevElementSib && isAnchor(nextElementSib)) {
       this.state.place(nextElementSib!, userInputOpts);
-      return undo;
-    }
-
-    // ...<em>...</em>T|</p>
-    // => ...<em>...</em>[A]</p>
-    if (prevElementSib && !isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
-      const anchor = createAnchor();
-      current.insertAdjacentElement('beforebegin', anchor);
-      this.state.place(anchor, userInputOpts);
-      return undo;
-    }
-
-    // ...<em>[T]</em>...</p>
-    // => ...<em>[A]</em>...</p>
-    if (!isLineSibling(prevElementSib) && !isLineSibling(nextElementSib)) {
-      const anchor = createAnchor();
-      current.insertAdjacentElement('beforebegin', anchor);
-      this.state.place(anchor, userInputOpts);
       return undo;
     }
 

@@ -61,16 +61,20 @@ export class CursorTextOps {
 
     // We're trying to delete at an ANCHOR...
 
-    const parentNode = current.parentNode as HTMLElement;
+    if (!current.parentElement) {
+      // TODO: Editor will have to handle this gracefully.
+      throw new Error('deleting LINE_SIBLING that is disconnected');
+    }
+
     const nextCrs = this.state.motion.getNext();
     const noMoreLineSiblings = !prevCrs && !nextCrs;
-    const emptyParent = isEmpty(parentNode!, true);
+    const emptyParent = isEmpty(current.parentElement, true);
 
     // Delete tag around ANCHOR + possibly its ancestors...
 
     const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
     if (canDeleteAncestors) {
-      const op = deleteHighestEmpty(parentNode, this.state.document.root);
+      const op = deleteHighestEmpty(current.parentElement, this.state.document.root);
       if (op) {
         undo.ops.push({ action: 'place-cursor', target: current });
         undo.ops.push(op);

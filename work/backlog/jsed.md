@@ -103,16 +103,16 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
   - getNextLineSiblingV1
   - what else?
 - refactor: lib/token and lib/focus/focusable should be a lower-level ops layer?
-  - lib/ops/focusable.ts
   - lib/ops/edit/
-    - implicitLine, space, token, anchor
+    - implicitLine
+    - space
+    - token
+    - anchor
     - lineSegment
-      - normalizeAt(sib)
-      - normalizeAt('front', parent)
-      - normalizeAt('back', parent)
     - line
       - addAnchors
     - tokenize, Tokenizer, Detokenizer
+    - focusable.ts
 - refactor: isFocusable shouldn't assert HTMLElement; it is convenient but that means !isFocusable is a Node
   - COMMENT: it seems the !isFocusable case is not a hard "not HTMLElement"; if we additionally test for "node instanceof HTMLElement", node becomes an HTMLElement again;  if this is reliable than we could argue for keeping the guard since in most situations isFocusable is being used to find elements from nodes and we never explicitly deal with ignorable elements, they never get landed on; however if we implement "holes", then we will start having non-ignorable elements that are FOCUS-transparent and 
 - refactor: we might want to distinguish between ignorables that we can see (maybe content that we can never focus or edit) and ignorables that are hidden constructs (like undo markers)

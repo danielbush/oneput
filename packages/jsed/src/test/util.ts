@@ -24,10 +24,16 @@ import {
  */
 export function makeRoot(
   html: string,
-  opts?: { viewportScrollerOpts?: ViewportScrollerNullOptions }
+  opts?: { viewportScrollerOpts?: ViewportScrollerNullOptions; anchorize?: boolean }
 ): JsedDocument {
   document.body.innerHTML = `<div id="root">${html}</div>`;
-  return JsedDocument.createNull(document.getElementById('root') as HTMLElement, opts);
+  return JsedDocument.createNull(document.getElementById('root') as HTMLElement, {
+    viewportScrollerOpts: opts?.viewportScrollerOpts,
+    // TODO: Added anchorization of whole documnent late, and a lot of tests
+    // fail.  So default to false.  We can enable progressively in tests and
+    // update.
+    anchorize: opts?.anchorize ?? false
+  });
 }
 
 type Attr = { [key: string]: string };

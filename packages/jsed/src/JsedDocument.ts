@@ -1,4 +1,4 @@
-import { anchorize } from './lib/token/anchor.js';
+import * as anchor from './lib/token/anchor.js';
 import { tagImplicitLines } from './lib/token/implicitLine.js';
 import {
   ViewportScroller,
@@ -15,11 +15,13 @@ export class JsedDocument {
     opts?: {
       viewportScroller?: ViewportScroller;
       viewportScrollerOpts?: ViewportScrollerNullOptions;
+      anchorize: boolean;
     }
   ): JsedDocument {
     return new JsedDocument(
       root,
-      opts?.viewportScroller ?? ViewportScroller.createNull(opts?.viewportScrollerOpts)
+      opts?.viewportScroller ?? ViewportScroller.createNull(opts?.viewportScrollerOpts),
+      opts?.anchorize
     );
   }
 
@@ -28,11 +30,14 @@ export class JsedDocument {
 
   private constructor(
     root: HTMLElement,
-    readonly viewportScroller: ViewportScroller
+    readonly viewportScroller: ViewportScroller,
+    readonly anchorize: boolean = true
   ) {
     this.root = root;
     tagImplicitLines(this.root);
-    anchorize(this.root);
+    if (this.anchorize) {
+      anchor.anchorize(this.root);
+    }
   }
 
   get document(): Document {

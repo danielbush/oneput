@@ -3,14 +3,7 @@ import { Controller, type AppObject } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../core/taxonomy.js';
 import { OneputEditDocumentAdapter } from './OneputEditDocumentAdapter.js';
-
-function makeDocument(
-  html: string,
-  opts?: Parameters<typeof JsedDocument.createNull>[1]
-): JsedDocument {
-  document.body.innerHTML = `<div id="root">${html}</div>`;
-  return JsedDocument.createNull(document.getElementById('root') as HTMLElement, opts);
-}
+import { makeRoot } from '../../../test/util.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);
@@ -81,7 +74,7 @@ export class EditDocument implements AppObject {
 describe('EditDocument', () => {
   it('starts in view mode and quick-descends first focus without going into edit mode', () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
+    const document = makeRoot('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
@@ -100,7 +93,7 @@ describe('EditDocument', () => {
 
   it('uses the same app object to move from view mode into edit mode', () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo bar</p>');
+    const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
@@ -119,7 +112,7 @@ describe('EditDocument', () => {
 
   it('splits the current paragraph when ENTER is pressed in edit mode', async () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo bar</p>');
+    const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
@@ -142,7 +135,7 @@ describe('EditDocument', () => {
 
   it('binds cmd+m to reveal the active token', () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo bar</p>', {
+    const document = makeRoot('<p id="p1">foo bar</p>', {
       viewportScrollerOpts: {
         getElementRect: (el) =>
           el.classList.contains('jsed-token-focus')
@@ -188,7 +181,7 @@ describe('EditDocument', () => {
 
   it('adds a Tag selection menu item that wraps the current cursor token on submit', () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo bar</p>');
+    const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
@@ -219,7 +212,7 @@ describe('EditDocument', () => {
 
   it('runs Tag selection as a child app so an island can use the input prompt', () => {
     // arrange
-    const document = makeDocument(
+    const document = makeRoot(
       '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
     );
     const ctl = Controller.createNull();
@@ -254,7 +247,7 @@ describe('EditDocument', () => {
 
   it('adds an Insert element after tag menu item that defaults to the focused tag name', () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
+    const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const editor = editorUI.editor;
@@ -283,7 +276,7 @@ describe('EditDocument', () => {
 
   it('adds an Insert element before tag menu item that defaults to the focused tag name', () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
+    const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const editor = editorUI.editor;
@@ -314,7 +307,7 @@ describe('EditDocument', () => {
 
   it('adds an Insert element in tag menu item that defaults to the focused tag name', () => {
     // arrange
-    const document = makeDocument('<div id="d1">foo</div>');
+    const document = makeRoot('<div id="d1">foo</div>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const editor = editorUI.editor;
@@ -343,7 +336,7 @@ describe('EditDocument', () => {
 
   it('defaults Insert element in tag to a specific child tag when required', () => {
     // arrange
-    const document = makeDocument('<ul id="list"><li>one</li></ul>');
+    const document = makeRoot('<ul id="list"><li>one</li></ul>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const editor = editorUI.editor;
@@ -373,7 +366,7 @@ describe('EditDocument', () => {
 
   it('adds a Delete focused element menu item that confirms before deleting', async () => {
     // arrange
-    const document = makeDocument('<p id="p1">foo</p><p id="p2">bar</p>');
+    const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
     const editorUI = EditDocument.createNull(ctl, { document });
     const editor = editorUI.editor;

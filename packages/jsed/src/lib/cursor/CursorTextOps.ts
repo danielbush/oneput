@@ -25,24 +25,21 @@ export class CursorTextOps {
   /** Delete the current TOKEN. */
   delete({ type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
     if (!this.state.isOnToken()) return;
+
     const current = this.state.getPlace();
-    const prevCrs = this.state.motion.getPrevious();
-    const nextCrs = this.state.motion.getNext();
-    const parentNode = current.parentNode as HTMLElement;
-    let inputCursorPosition: UserInputOpts['inputCursorPosition'] = 'end';
-    if (type === 'tokenDeletion' || !prevCrs) {
-      // !prevCrs = if we hit the beginning of all editable text, go into
-      // selectAll mode; keeping a caret (if we were in one) doesn't make sense.
-      // Other option is to do nothing an let the caret just sit.
-      inputCursorPosition = 'selectAll';
-    }
-    const userInputOpts: UserInputOpts = { inputCursorPosition };
     const currIsAnchor = isAnchor(current);
-
-    // Perform removals...
-
+    const prevCrs = this.state.motion.getPrevious();
     const undo: UndoRecord = { ops: [] };
     let anchor: HTMLElement | null = null;
+
+    // !prevCrs = we hit the beginning of all editable text
+    // Go into selectAll mode rather than keeping a caret.
+
+    const userInputOpts: UserInputOpts = {
+      inputCursorPosition: type === 'tokenDeletion' || !prevCrs ? 'selectAll' : 'end'
+    };
+
+    // Delete if not an ANCHOR.
 
     if (!currIsAnchor) {
       const result = token.remove(current);
@@ -54,16 +51,16 @@ export class CursorTextOps {
       }
     }
 
-    const noMoreLineSiblings = !prevCrs && !nextCrs;
-    const emptyParent = isEmpty(current.parentNode!, true);
-    /**
-     * <p>[A]</p>
-     * ...<em>[A]</em>...
-     * => delete tag around ANCHOR + possibly more
-     */
-    const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
+    // We're trying to delete at an ANCHOR...
 
-    // Delete container(s) with the ANCHOR in them...
+    const parentNode = current.parentNode as HTMLElement;
+    const nextCrs = this.state.motion.getNext();
+    const noMoreLineSiblings = !prevCrs && !nextCrs;
+    const emptyParent = isEmpty(parentNode!, true);
+
+    // Delete tag around ANCHOR + possibly its ancestors...
+
+    const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
     if (canDeleteAncestors) {
       const op = deleteHighestEmpty(parentNode, this.state.document.root);
       if (op) undo.ops.push(op);
@@ -76,7 +73,7 @@ export class CursorTextOps {
      * ...<em>...</em>[A]</p> => ...<em>...[T]</em>A</p>
      * etc
      */
-    this.state.place((prevCrs || nextCrs || current) as HTMLElement, userInputOpts);
+    this.state.place(prevCrs || nextCrs || current, userInputOpts);
     return undo;
   }
 

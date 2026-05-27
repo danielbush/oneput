@@ -7,6 +7,7 @@ Jsed is an HTML editor that lets you edit HTML content using Oneput as the inter
 - use `makeRoot` to create documents
 - for lower-level tests, `buildParent` can be simpler and more convenient
 - use `identify` and `identifyChildren` to assert the state of the DOM
+- use `findTokenByText` when finding tokens
 
 We can do this because we inject infrastructure code (code that talks to the outside world) and we encourage sociable unit tests that test through the code. So we can test happy and sad paths and edge cases deterministically and instantly at the highest level. Avoid heavily testing intermediate code because (1) it locks in our design choices and (2) it often duplicates a test we can write at the highest level; there are times where it makes sense if (2) isn't the case and it's easier, but always stop and ask me.
 

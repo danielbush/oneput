@@ -14,6 +14,7 @@ import { Cursor } from '../cursor/Cursor.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
+import { undoDeleteElement } from '../focus/focusable.js';
 
 /**
  * Manages an edit session for a single document.
@@ -437,15 +438,13 @@ export class EditorOps {
 
         // Element deletion
         case 'delete-element': {
-          op.marker.insertAdjacentElement('beforebegin', op.deleted);
-          op.marker.remove();
-          this.state.nav.FOCUS(op.deleted);
+          undoDeleteElement(op);
           break;
         }
 
         // Token / separator editing insertion
         case 'replace-text': {
-          token.restoreText(op);
+          token.undoReplaceText(op);
           break;
         }
 
@@ -457,8 +456,7 @@ export class EditorOps {
         // Token deletion
         case 'anchorize-token':
         case 'delete-token': {
-          const tok = token.restore(op);
-          this.state.cursor?.place(tok);
+          token.undoRemove(op);
           break;
         }
       }

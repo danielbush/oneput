@@ -104,6 +104,11 @@ export function deleteElement(el: HTMLElement): DeleteElement {
   };
 }
 
+export function undoDeleteElement(op: DeleteElement) {
+  op.marker.insertAdjacentElement('beforebegin', op.deleted);
+  op.marker.remove();
+}
+
 /**
  * Delete el and anestors if they have no other content.
  *

@@ -50,6 +50,7 @@ export class CursorTextOps {
     // Delete if not an ANCHOR.
 
     if (!currIsAnchor) {
+      undo.ops.push({ action: 'place-cursor', target: current });
       const result = token.remove(current);
       undo.ops.push(result);
       if (result.action === 'anchorize-token') {

@@ -152,7 +152,7 @@ export function replaceText(token: HTMLElement, val: string): ReplaceText {
   };
 }
 
-export function restoreText(op: ReplaceText) {
+export function undoReplaceText(op: ReplaceText) {
   const { before, token } = op;
   token.firstChild!.nodeValue = before;
 }
@@ -216,7 +216,7 @@ export function remove(token: HTMLElement): DeleteTokenAll {
 /**
  * Returns the TOKEN we restored.
  */
-export function restore(op: DeleteTokenAll): HTMLElement {
+export function undoRemove(op: DeleteTokenAll): HTMLElement {
   if (op.action === 'anchorize-token') {
     // Convert anchor back to token.
     const { anchor, deletedToken } = op;

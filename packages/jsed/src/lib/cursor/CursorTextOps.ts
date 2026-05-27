@@ -125,8 +125,6 @@ export class CursorTextOps {
 
   /**
    * Insert string vals after cursor and put cursor on last one.
-   *
-   * Supports 'insert-after-current' operation (input intent).
    */
   insertTextAfter(text: string, opts?: UserInputOpts) {
     const currentToken = this.state.getPlace();

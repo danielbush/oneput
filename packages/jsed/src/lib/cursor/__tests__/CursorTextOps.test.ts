@@ -128,13 +128,14 @@ describe('splitAtToken', () => {
 describe('replaceWithText', () => {
   test('TOKEN text', () => {
     // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'hello'));
 
     // act
     cursor.replaceWithText('goodbye');
 
     // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['goodbye', '[nodeType=3:" "]', 'world']);
     expect(getValue(cursor.getPlace())).toBe('goodbye');
   });
 
@@ -143,7 +144,7 @@ describe('replaceWithText', () => {
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'bbb'));
 
     // act
     cursor.replaceWithText('ccc');
@@ -170,17 +171,42 @@ describe('replaceWithText', () => {
 
   test('multiple TOKEN replacement', () => {
     // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'hello'));
 
     // act
     const result = cursor.replaceWithText('goodbye friend');
 
     // assert
-    expect(tokenValues(doc)).toEqual(['goodbye', 'friend', 'world']);
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'goodbye',
+      '[nodeType=3:" "]',
+      'friend',
+      '[nodeType=3:" "]',
+      'world'
+    ]);
     expect(result).not.toBeNull();
     expect(getValue(result!)).toBe('friend');
     expect(getValue(cursor.getPlace())).toBe('friend');
+  });
+
+  test('multi-word on last TOKEN → no trailing separator', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'world'));
+
+    // act
+    cursor.replaceWithText('aaa bbb');
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'hello',
+      '[nodeType=3:" "]',
+      'aaa',
+      '[nodeType=3:" "]',
+      'bbb'
+    ]);
+    expect(getValue(cursor.getPlace())).toBe('bbb');
   });
 });
 

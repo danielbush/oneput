@@ -98,13 +98,6 @@ export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void 
     throw new Error('parentNode not found');
   }
   existing.insertAdjacentElement('afterend', toInsert);
-
-  // Need to add an anchor?
-  // const nexttok = getNextTokenSibling(toInsert);
-  // if (!nexttok) {
-  //   const anchor = createAnchor();
-  //   toInsert.insertAdjacentElement('afterend', anchor);
-  // }
 }
 
 export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void {
@@ -112,13 +105,6 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
     throw new Error('parentNode not found');
   }
   existing.insertAdjacentElement('beforebegin', toInsert);
-
-  // Need to add an anchor?
-  // const prevtok = getPreviousTokenSibling(toInsert);
-  // if (!prevtok) {
-  //   const anchor = createAnchor();
-  //   toInsert.insertAdjacentElement('beforebegin', anchor);
-  // }
 }
 
 /**

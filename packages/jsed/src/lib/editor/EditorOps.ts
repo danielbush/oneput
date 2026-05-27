@@ -330,9 +330,8 @@ export class EditorOps {
         return;
 
       case 'delete-current': {
-        const current = cursor.getPlace();
         cursor.delete({ type: intent.deletionType });
-        this.state.notifyTextChange({ type: 'token-text-change', token: current });
+        this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
         cursor.setStateFromInput(intent.inputValue);
         return;
       }
@@ -347,7 +346,7 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
+          this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
         }
         return;
       }
@@ -363,7 +362,7 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
+          this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
         }
         return;
       }

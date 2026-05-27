@@ -215,12 +215,19 @@ describe('insertTextAfter', () => {
     const { cursor } = createCursor(doc, tokens(doc)[0]);
 
     // act
-    const result = cursor.insertTextAfter('new words');
+    cursor.insertTextAfter('new words');
 
     // assert
-    expect(tokenValues(doc)).toEqual(['hello', 'new', 'words', 'world']);
-    expect(result).not.toBeNull();
-    expect(identify(result!)).toBe('words');
+    expect(identifyChildren(doc.root)).toEqual(['[element:p]']);
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'hello',
+      '[nodeType=3:" "]',
+      'new',
+      '[nodeType=3:" "]',
+      'words',
+      '[nodeType=3:" "]',
+      'world'
+    ]);
     expect(identify(cursor.getPlace())).toBe('words');
   });
 });

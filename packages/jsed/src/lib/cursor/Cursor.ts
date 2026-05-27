@@ -59,7 +59,8 @@ export class Cursor {
   delete = (opts?: CursorDeleteOpts) => this._undo(this.#ops.delete(opts));
   replaceWithText = (text: string, opts?: UserInputOpts) =>
     this._undo(this.#ops.replaceWithText(text, opts));
-  insertTextAfter = (text: string, opts?: UserInputOpts) => this.#ops.insertTextAfter(text, opts);
+  insertTextAfter = (text: string, opts?: UserInputOpts) =>
+    this._undo(this.#ops.insertTextAfter(text, opts));
   insertTextBefore = (text: string, opts?: UserInputOpts) => this.#ops.insertTextBefore(text, opts);
   splitAtToken = () => this.#ops.splitAtToken();
 

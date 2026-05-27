@@ -128,13 +128,16 @@ export class CursorTextOps {
    *
    * Supports 'insert-after-current' operation (input intent).
    */
-  insertTextAfter(text: string, opts?: UserInputOpts): HTMLElement | null {
+  insertTextAfter(text: string, opts?: UserInputOpts) {
     const currentToken = this.state.getPlace();
+    const undo: UndoRecord = { ops: [] };
     let lastToken: HTMLElement | null = null;
     const parts = text.split(/\s+/).filter(Boolean);
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
-      token.insertAfter(insertedToken, currentToken);
+      undo.ops.push({ action: 'place-cursor', target: currentToken });
+      const result = token.insertAfter(insertedToken, currentToken);
+      undo.ops.push(result);
       if (!lastToken) {
         lastToken = insertedToken;
       }
@@ -142,7 +145,7 @@ export class CursorTextOps {
     if (lastToken) {
       this.state.place(lastToken, opts);
     }
-    return lastToken;
+    return undo;
   }
 
   insertTextBefore(text: string, opts?: UserInputOpts): HTMLElement | null {

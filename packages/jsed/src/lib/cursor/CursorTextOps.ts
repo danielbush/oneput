@@ -97,10 +97,10 @@ export class CursorTextOps {
    * Similar to insertTextAfter.
    */
   replaceWithText(text: string, opts?: UserInputOpts) {
-    if (!this.state.isOnToken()) return null;
+    if (!this.state.isOnToken()) return;
     const currentToken = this.state.getPlace();
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
-    if (!firstPart) return null;
+    if (!firstPart) return;
 
     const undo: UndoRecord = { ops: [] };
     const result = token.replaceText(currentToken, firstPart);

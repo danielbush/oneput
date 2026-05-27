@@ -28,7 +28,7 @@ export class Cursor {
     this.#ops = this.#state.ops;
   }
 
-  _undo = (result?: UndoRecord | null) => {
+  _undo = (result?: UndoRecord) => {
     this.#state.undo?.record(result);
     return result;
   };

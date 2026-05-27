@@ -95,24 +95,31 @@ export class CursorTextOps {
   /**
    * Similar to insertTextAfter.
    */
-  replaceWithText(text: string, opts?: UserInputOpts): HTMLElement | null {
+  replaceWithText(text: string, opts?: UserInputOpts) {
     if (!this.state.isOnToken()) return null;
     const currentToken = this.state.getPlace();
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
     if (!firstPart) return null;
 
-    token.replaceText(currentToken, firstPart);
+    const undo: UndoRecord = { ops: [] };
+    const result = token.replaceText(currentToken, firstPart);
+
+    // Undo ops get played in reverse.
+    // Some of the ops that will be pushed below may also place the cursor.
+    undo.ops.push({ action: 'place-cursor', target: currentToken });
+    undo.ops.push(result);
+
     let lastToken: HTMLElement = currentToken;
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
-      token.insertAfter(insertedToken, currentToken);
-      space.ensureSeparatorAfter(currentToken);
+      const result = token.insertAfter(insertedToken, currentToken);
+      undo.ops.push(result);
       if (lastToken === currentToken) {
         lastToken = insertedToken;
       }
     }
     this.state.place(lastToken, opts);
-    return lastToken;
+    return undo;
   }
 
   /**
@@ -127,7 +134,6 @@ export class CursorTextOps {
     for (const part of parts.reverse()) {
       const insertedToken = token.createToken(part);
       token.insertAfter(insertedToken, currentToken);
-      space.ensureSeparatorAfter(currentToken);
       if (!lastToken) {
         lastToken = insertedToken;
       }

@@ -17,6 +17,7 @@ import {
   JSED_DELETED_SPACE_CLASS,
   JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
+import type { InsertSeparatorAfter } from '../undo/UndoOperation.js';
 
 // #region Separator (Space) utils
 
@@ -78,14 +79,18 @@ export function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
  *
  * Used for default inter-TOKEN spacing.
  */
-export function ensureSeparatorAfter(token: HTMLElement, value = ' '): Text {
+export function ensureSeparatorAfter(token: HTMLElement, value = ' '): InsertSeparatorAfter | null {
   const existing = getSeparatorAfter(token);
   if (existing) {
-    return existing;
+    return null;
   }
   const separator = document.createTextNode(value);
   token.parentNode?.insertBefore(separator, token.nextSibling);
-  return separator;
+  return {
+    action: 'insert-separator-after',
+    after: token,
+    separator
+  };
 }
 
 /**

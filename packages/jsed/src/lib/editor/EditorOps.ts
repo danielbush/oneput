@@ -368,12 +368,12 @@ export class EditorOps {
       }
 
       case 'rewrite-current': {
-        const lastToken = cursor.replaceWithText(intent.inputValue, {
+        const result = cursor.replaceWithText(intent.inputValue, {
           inputCursorPosition: intent.userTypedInteriorSpace ? 'beginning' : 'noChange'
         });
         cursor.setStateFromInput(intent.inputValue);
-        if (lastToken) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: lastToken });
+        if (result) {
+          this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
         }
         return;
       }
@@ -423,7 +423,9 @@ export class EditorOps {
     if (!rec) {
       return null;
     }
+    console.log('-- start undo rec');
     for (const op of rec.ops.reverse()) {
+      console.log(op.action);
       switch (op.action) {
         case 'place-cursor': {
           // We'll take this as advisory and do it only if we have a cursor.
@@ -432,19 +434,35 @@ export class EditorOps {
           }
           break;
         }
-        case 'anchorize-token':
-        case 'delete-token': {
-          const tok = token.restore(op);
-          this.state.cursor?.place(tok);
-          break;
-        }
+
+        // Element deletion
         case 'delete-element': {
           op.marker.insertAdjacentElement('beforebegin', op.deleted);
           op.marker.remove();
           this.state.nav.FOCUS(op.deleted);
           break;
         }
+
+        // Token / separator editing insertion
+        case 'replace-text': {
+          token.restoreText(op);
+          break;
+        }
+
+        case 'insert-token-after': {
+          token.undoInsertAfter(op);
+          break;
+        }
+
+        // Token deletion
+        case 'anchorize-token':
+        case 'delete-token': {
+          const tok = token.restore(op);
+          this.state.cursor?.place(tok);
+          break;
+        }
       }
     }
+    console.log('-- stop undo rec');
   };
 }

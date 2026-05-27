@@ -28,8 +28,9 @@ export class Cursor {
     this.#ops = this.#state.ops;
   }
 
-  _undo = (result?: UndoRecord) => {
+  _undo = (result?: UndoRecord | null) => {
     this.#state.undo?.record(result);
+    return result;
   };
 
   destroy = () => this.#state.destroy();
@@ -56,7 +57,8 @@ export class Cursor {
 
   // edit text
   delete = (opts?: CursorDeleteOpts) => this._undo(this.#ops.delete(opts));
-  replaceWithText = (text: string, opts?: UserInputOpts) => this.#ops.replaceWithText(text, opts);
+  replaceWithText = (text: string, opts?: UserInputOpts) =>
+    this._undo(this.#ops.replaceWithText(text, opts));
   insertTextAfter = (text: string, opts?: UserInputOpts) => this.#ops.insertTextAfter(text, opts);
   insertTextBefore = (text: string, opts?: UserInputOpts) => this.#ops.insertTextBefore(text, opts);
   splitAtToken = () => this.#ops.splitAtToken();

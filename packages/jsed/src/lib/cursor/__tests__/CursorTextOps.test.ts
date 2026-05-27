@@ -15,7 +15,6 @@ import {
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
 import { Cursor } from '../../../lib/cursor/Cursor.js';
-import { getValue } from '../../../lib/token/token.js';
 import { getSeparatorAfter } from '../../token/space.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
@@ -46,7 +45,7 @@ function tokens(doc: JsedDocument): HTMLElement[] {
 }
 
 function tokenValues(doc: JsedDocument): string[] {
-  return tokens(doc).map((token) => getValue(token));
+  return tokens(doc).map((token) => identify(token));
 }
 
 describe('splitAtToken', () => {
@@ -60,7 +59,7 @@ describe('splitAtToken', () => {
     cursor.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('world');
+    expect(identify(cursor.getPlace())).toBe('world');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
@@ -74,7 +73,7 @@ describe('splitAtToken', () => {
     cursor.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('world');
+    expect(identify(cursor.getPlace())).toBe('world');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
@@ -87,7 +86,7 @@ describe('splitAtToken', () => {
     cursor.splitAtToken();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('foo');
+    expect(identify(cursor.getPlace())).toBe('foo');
     expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
   });
 
@@ -136,7 +135,7 @@ describe('replaceWithText', () => {
 
     // assert
     expect(identifyChildren(byId(doc, 'p1'))).toEqual(['goodbye', '[nodeType=3:" "]', 'world']);
-    expect(getValue(cursor.getPlace())).toBe('goodbye');
+    expect(identify(cursor.getPlace())).toBe('goodbye');
   });
 
   test('TOKEN after ISLAND', () => {
@@ -150,7 +149,7 @@ describe('replaceWithText', () => {
     cursor.replaceWithText('ccc');
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('ccc');
+    expect(identify(cursor.getPlace())).toBe('ccc');
   });
 
   test('ISLAND no-op', () => {
@@ -186,8 +185,7 @@ describe('replaceWithText', () => {
       'world'
     ]);
     expect(result).not.toBeNull();
-    expect(getValue(result!)).toBe('friend');
-    expect(getValue(cursor.getPlace())).toBe('friend');
+    expect(identify(cursor.getPlace())).toBe('friend');
   });
 
   test('multi-word on last TOKEN → no trailing separator', () => {
@@ -206,7 +204,7 @@ describe('replaceWithText', () => {
       '[nodeType=3:" "]',
       'bbb'
     ]);
-    expect(getValue(cursor.getPlace())).toBe('bbb');
+    expect(identify(cursor.getPlace())).toBe('bbb');
   });
 });
 
@@ -222,8 +220,8 @@ describe('insertTextAfter', () => {
     // assert
     expect(tokenValues(doc)).toEqual(['hello', 'new', 'words', 'world']);
     expect(result).not.toBeNull();
-    expect(getValue(result!)).toBe('words');
-    expect(getValue(cursor.getPlace())).toBe('words');
+    expect(identify(result!)).toBe('words');
+    expect(identify(cursor.getPlace())).toBe('words');
   });
 });
 
@@ -239,8 +237,8 @@ describe('insertTextBefore', () => {
     // assert
     expect(tokenValues(doc)).toEqual(['hello', 'new', 'words', 'world']);
     expect(result).not.toBeNull();
-    expect(getValue(result!)).toBe('words');
-    expect(getValue(cursor.getPlace())).toBe('words');
+    expect(identify(result!)).toBe('words');
+    expect(identify(cursor.getPlace())).toBe('words');
   });
 });
 
@@ -264,7 +262,7 @@ describe('delete', () => {
     cursor.delete();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('world');
+    expect(identify(cursor.getPlace())).toBe('world');
     expect(identifyChildren(byId(doc, 'p1'))).toEqual([
       'd("hello")',
       '[deleted-space]',
@@ -291,7 +289,7 @@ describe('delete', () => {
     cursor.delete();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('hello');
+    expect(identify(cursor.getPlace())).toBe('hello');
     expect(identifyChildren(byId(doc, 'p1'))).toEqual([
       'hello', //
       '[deleted-space]',
@@ -533,7 +531,7 @@ describe('joinNext', () => {
     cursor.joinNext();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('helloworld');
+    expect(identify(cursor.getPlace())).toBe('helloworld');
   });
 
   test('next TOKEN after ISLAND', () => {
@@ -555,7 +553,7 @@ describe('joinNext', () => {
     cursor.joinNext();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('bbbccc');
+    expect(identify(cursor.getPlace())).toBe('bbbccc');
   });
 
   test('ISLAND no-op', () => {
@@ -582,7 +580,7 @@ describe('joinNext', () => {
     cursor.joinNext();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('aaa');
+    expect(identify(cursor.getPlace())).toBe('aaa');
   });
 });
 
@@ -596,7 +594,7 @@ describe('joinPrevious', () => {
     cursor.joinPrevious();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('helloworld');
+    expect(identify(cursor.getPlace())).toBe('helloworld');
   });
 
   test('previous TOKEN before ISLAND', () => {
@@ -618,7 +616,7 @@ describe('joinPrevious', () => {
     cursor.joinPrevious();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('bbbccc');
+    expect(identify(cursor.getPlace())).toBe('bbbccc');
   });
 
   test('ISLAND no-op', () => {
@@ -645,6 +643,6 @@ describe('joinPrevious', () => {
     cursor.joinPrevious();
 
     // assert
-    expect(getValue(cursor.getPlace())).toBe('bbb');
+    expect(identify(cursor.getPlace())).toBe('bbb');
   });
 });

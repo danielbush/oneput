@@ -28,7 +28,12 @@ import {
   removeSeparator,
   restoreSeparator
 } from './space.js';
-import type { DeleteToken, DeleteTokenAll } from '../undo/UndoOperation.js';
+import type {
+  DeleteToken,
+  DeleteTokenAll,
+  InsertTokenAfter,
+  ReplaceText
+} from '../undo/UndoOperation.js';
 import { isLastLineSibling } from '../core/lineSegment.js';
 import { createAnchor } from './anchor.js';
 
@@ -93,11 +98,25 @@ export function anchor2Token(token: HTMLElement): HTMLElement {
 
 // #region Insert / Remove
 
-export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): void {
+export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): InsertTokenAfter {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
   existing.insertAdjacentElement('afterend', toInsert);
+  const result = ensureSeparatorAfter(existing);
+  return {
+    action: 'insert-token-after',
+    token: toInsert,
+    after: existing,
+    separatorAfter: result
+  };
+}
+
+export function undoInsertAfter(op: InsertTokenAfter) {
+  const { separatorAfter, token } = op;
+  console.log('undoInsertAfter');
+  separatorAfter?.separator.remove();
+  token.remove();
 }
 
 export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void {
@@ -115,15 +134,27 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
  * In the boundary-spacing model this only updates visible TOKEN text. Spacing
  * before / after the TOKEN is managed by adjacent separator text nodes.
  */
-export function replaceText(token: HTMLElement, val: string): HTMLElement {
+export function replaceText(token: HTMLElement, val: string): ReplaceText {
   validate(token);
+  const before = getValue(token);
   anchor2Token(token);
+  const after = val.trim();
   if (token.firstChild) {
-    token.firstChild.nodeValue = val.trim();
+    token.firstChild.nodeValue = after;
   } else {
     token.append(document.createTextNode(val.trim()));
   }
-  return token;
+  return {
+    action: 'replace-text',
+    token,
+    before,
+    after
+  };
+}
+
+export function restoreText(op: ReplaceText) {
+  const { before, token } = op;
+  token.firstChild!.nodeValue = before;
 }
 
 function removeToken(token: HTMLElement, removeSeparators: boolean = true): DeleteToken {

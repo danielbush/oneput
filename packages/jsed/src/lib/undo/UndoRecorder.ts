@@ -16,7 +16,7 @@ export class UndoRecorder {
   private records: UndoRecord[] = [];
   private redoRecords: UndoRecord[] = [];
 
-  record(result?: UndoRecord): void {
+  record(result?: UndoRecord | null): void {
     if (!result) {
       return;
     }

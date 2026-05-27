@@ -6,8 +6,10 @@
   - COMMENT: this worked and pre-dates this file; but after looking at "split at token" we'll have to revisit this
 - [x] deletion of token / revisit cursor delete using new anchorize
   - token.remove should handle anchors
-- [ ] deletion of token by character
-- [ ] replace with text
+- [x] deletion of token by character
+- [x] replace with text
+- [x] insert new token
+- [ ] squash replace text undo records
 - [ ] replacing an ANCHOR
   - A
     - automatic leading space if we're next of a FOCUSABLE
@@ -94,6 +96,19 @@ We record token.remove in undo; if the token is anchorized, we handle the situat
 token deletion (token.remove) occurs when we delete whole tokens (input is select-all and we hit backspace) or char-based deletion in which case the token was a single non-whitespace character before it got removed; for this latter case there may be some collapse scenarios which means we end up recording the whole token being deleted anyway rather than recording intermediate deletion states.
 
 
+## Make Cursor instance permanent
+
+- cursor.unplace
+- cursor.isPlaced
+  - CursorState isPlaced
+- editor create - calls cursor.create without token
+- enterEditing
+  - calls cursor.place(token)
+  - cursor displays itself
+- exitEditing
+  - calls cursor.unplace
+- places that do this.state.cursor?.*
+- places that do !!this.state.cursor
 
 # Archive
 

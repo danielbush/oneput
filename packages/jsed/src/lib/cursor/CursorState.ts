@@ -91,13 +91,6 @@ export class CursorState {
   tokenizer: Tokenizer;
   undo?: UndoRecorder;
 
-  /** Destroy the current edit session. The instance cannot be used after this. */
-  destroy() {
-    this.clearInsertState();
-    this.token.classList.remove(JSED_CURSOR_CLASS);
-    this.removeAllClasses();
-  }
-
   /** Return the JsedDocument that owns this CURSOR session. */
   getDocument() {
     return this.document;
@@ -120,20 +113,19 @@ export class CursorState {
       this.onError({ type: 'invalid-token' });
       throw new Error(`Not a LINE_SIBLING`);
     }
-    // Clear visual classes on the outgoing token but preserve the cached
-    // selection / input value: those mirror the input element's state, which
-    // is global across tokens. Resetting them would leave the new token in
-    // bg-pulse until the next selection-change event arrives — and in flows
-    // that don't fire one (e.g. setStateFromInput called after place during
-    // insert-after-current), we'd miss the underline indefinitely.
     this.removeAllClasses();
-    this.token.classList.remove(JSED_CURSOR_CLASS);
-    el.classList.add(JSED_CURSOR_CLASS);
+    this.token = el;
+    this.addClasses(JSED_CURSOR_CLASS);
     this.document.viewportScroller.scrollIntoViewIfHidden(el, {
       vertical: 'nearest'
     });
-    this.token = el;
     this.onCursorChange(el, opts);
+  }
+
+  /** Destroy the current edit session. The instance cannot be used after this. */
+  destroy() {
+    this.clearInsertState();
+    this.removeAllClasses();
   }
 
   reload() {

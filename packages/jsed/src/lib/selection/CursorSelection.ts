@@ -38,8 +38,7 @@ export class CursorSelection {
       tokenizer: params.tokenizer,
       token: params.seed,
       onCursorChange: () => {},
-      onError: () => {},
-      silent: true
+      onError: () => {}
     });
     this.wrappers.push(this.openWrapper(params.seed));
   }

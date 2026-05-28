@@ -56,11 +56,6 @@ export type CursorParams = {
   undo?: UndoRecorder;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   onError: (err: CursorError) => void;
-  /**
-   * Suppress visible cursor side effects (JSED_CURSOR_CLASS and scroll-into-view).
-   * Used by CursorSelection's head-cursor, which must not render a second caret.
-   */
-  silent?: boolean;
 };
 
 export class CursorState {
@@ -69,7 +64,6 @@ export class CursorState {
     this.document = params.document;
     this.onCursorChange = params.onCursorChange;
     this.onError = params.onError;
-    this.silent = params.silent ?? false;
     this.tokenizer = params.tokenizer;
     this.undo = params.undo;
     this.motion = CursorMotion.create(this);
@@ -81,7 +75,6 @@ export class CursorState {
   token: HTMLElement;
   document: JsedDocument;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
-  silent: boolean;
   classes: string[] = [];
   /**
    * Last input selection state observed via setStateFromSelection. Used as
@@ -101,9 +94,7 @@ export class CursorState {
   /** Destroy the current edit session. The instance cannot be used after this. */
   destroy() {
     this.clearInsertState();
-    if (!this.silent) {
-      this.token.classList.remove(JSED_CURSOR_CLASS);
-    }
+    this.token.classList.remove(JSED_CURSOR_CLASS);
     this.removeAllClasses();
   }
 
@@ -136,13 +127,11 @@ export class CursorState {
     // that don't fire one (e.g. setStateFromInput called after place during
     // insert-after-current), we'd miss the underline indefinitely.
     this.removeAllClasses();
-    if (!this.silent) {
-      this.token.classList.remove(JSED_CURSOR_CLASS);
-      el.classList.add(JSED_CURSOR_CLASS);
-      this.document.viewportScroller.scrollIntoViewIfHidden(el, {
-        vertical: 'nearest'
-      });
-    }
+    this.token.classList.remove(JSED_CURSOR_CLASS);
+    el.classList.add(JSED_CURSOR_CLASS);
+    this.document.viewportScroller.scrollIntoViewIfHidden(el, {
+      vertical: 'nearest'
+    });
     this.token = el;
     this.onCursorChange(el, opts);
   }

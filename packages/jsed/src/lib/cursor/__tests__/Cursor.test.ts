@@ -20,7 +20,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const cursor = Cursor.create({
     document: doc,
     tokenizer,
-    token: tok,
+    seat: tok,
     onCursorChange: (t) => changes.push(getValue(t)),
     onError: (err) => errors.push(err.type)
   });

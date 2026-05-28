@@ -93,7 +93,7 @@ export class EditorOps {
         this.state.cursor = Cursor.create({
           document: this.state.document,
           tokenizer: this.state.tokenizer,
-          token: targetLineSibling,
+          seat: targetLineSibling,
           undo: this.state.undo,
           onCursorChange: this.state.controller.onCursorChange,
           onError: this.state.controller.onCursorError

@@ -52,7 +52,7 @@ export type CursorError =
 export type CursorParams = {
   document: JsedDocument;
   tokenizer: Tokenizer;
-  token: HTMLElement;
+  seat: HTMLElement;
   undo?: UndoRecorder;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   onError: (err: CursorError) => void;
@@ -60,7 +60,7 @@ export type CursorParams = {
 
 export class CursorState {
   constructor(params: CursorParams) {
-    this.token = params.token; // ts needs this before setToken
+    this.seat = params.seat; // ts needs this before setToken
     this.document = params.document;
     this.onCursorChange = params.onCursorChange;
     this.onError = params.onError;
@@ -72,7 +72,10 @@ export class CursorState {
 
   ops: CursorTextOps;
   motion: CursorMotion;
-  token: HTMLElement;
+  /**
+   * The LINE_SIBLING the CURSOR is on.
+   */
+  seat: HTMLElement;
   document: JsedDocument;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   classes: string[] = [];
@@ -98,7 +101,7 @@ export class CursorState {
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {
-    return this.token;
+    return this.seat;
   }
 
   /**
@@ -114,7 +117,7 @@ export class CursorState {
       throw new Error(`Not a LINE_SIBLING`);
     }
     this.removeAllClasses();
-    this.token = el;
+    this.seat = el;
     this.addClasses(JSED_CURSOR_CLASS);
     this.document.viewportScroller.scrollIntoViewIfHidden(el, {
       vertical: 'nearest'
@@ -133,17 +136,17 @@ export class CursorState {
   }
 
   private addClasses(...classNames: string[]) {
-    this.token.classList.add(...classNames);
+    this.seat.classList.add(...classNames);
     this.classes.push(...classNames);
   }
 
   private removeClasses(...classNames: string[]) {
-    this.token.classList.remove(...classNames);
+    this.seat.classList.remove(...classNames);
     this.classes = this.classes.filter((c) => !classNames.includes(c));
   }
 
   private removeAllClasses() {
-    this.token.classList.remove(...this.classes);
+    this.seat.classList.remove(...this.classes);
     this.classes = [];
   }
 

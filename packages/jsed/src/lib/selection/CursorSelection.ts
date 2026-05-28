@@ -36,7 +36,7 @@ export class CursorSelection {
     this.headCursor = Cursor.create({
       document: params.document,
       tokenizer: params.tokenizer,
-      token: params.seed,
+      seat: params.seed,
       onCursorChange: () => {},
       onError: () => {}
     });

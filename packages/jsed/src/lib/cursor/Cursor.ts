@@ -9,19 +9,21 @@ import type { EditorState } from '../editor/EditorState.js';
  */
 export class Cursor {
   static create(seat: HTMLElement, state: EditorState) {
-    const cursorState = new CursorState(seat, {
-      onCursorChange: state.controller.onCursorChange,
-      onError: state.controller.onCursorError
-    });
+    const cursorState = new CursorState(
+      seat,
+      state.controller.onCursorChange,
+      state.controller.onCursorError
+    );
     const ops = CursorTextOps.create(state, cursorState);
     return new Cursor(state, cursorState, ops);
   }
 
   static createNull(seat: HTMLElement, state: EditorState) {
-    const cursorState = new CursorState(seat, {
-      onCursorChange: state.controller.onCursorChange,
-      onError: state.controller.onCursorError
-    });
+    const cursorState = new CursorState(
+      seat,
+      state.controller.onCursorChange,
+      state.controller.onCursorError
+    );
     const ops = CursorTextOps.create(state, cursorState);
     return new Cursor(state, cursorState, ops);
   }

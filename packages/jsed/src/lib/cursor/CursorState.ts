@@ -44,10 +44,7 @@ export type CursorError =
       type: 'expected-non-token';
     };
 
-export type CursorParams = {
-  onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
-  onError: (err: CursorError) => void;
-};
+export type CursorParams = {};
 
 export class CursorState {
   constructor(
@@ -55,13 +52,10 @@ export class CursorState {
      * The LINE_SIBLING the CURSOR is on.
      */
     private seat: HTMLElement,
-    params: CursorParams
-  ) {
-    this.onCursorChange = params.onCursorChange;
-    this.onError = params.onError;
-  }
+    public onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void,
+    public onError: (err: CursorError) => void
+  ) {}
 
-  onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   classes: string[] = [];
   /**
    * Last input selection state observed via setStateFromSelection. Used as
@@ -74,7 +68,6 @@ export class CursorState {
    * `#lastSelection` to derive the marker class.
    */
   lastInputValue = '';
-  onError: (err: CursorError) => void;
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {

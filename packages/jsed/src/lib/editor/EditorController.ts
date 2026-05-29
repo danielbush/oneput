@@ -53,9 +53,10 @@ export class EditorController {
     // executes against the start — e.g. rewrite-current turns typing
     // "x" into "replace start TOKEN with x", landing the new content
     // where the selection began.
-    if (this.state.selection) {
-      const start = this.state.selection.delete();
-      this.state.selection = undefined;
+    const selection = this.state.cursor.getSelection();
+    if (selection) {
+      const start = selection.delete();
+      this.state.cursor.cancelSelection();
       // Suppress input sync — user is mid-typing, we'd clobber their input.
       this.state.cursor.place(start, { syncInput: false });
     }

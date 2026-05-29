@@ -1,6 +1,5 @@
 import { Nav } from '../focus/Nav.js';
 import { Cursor } from '../cursor/Cursor.js';
-import { CursorSelection } from '../selection/CursorSelection.js';
 import { Tokenizer } from '../token/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../input/UserInput.js';
@@ -96,7 +95,6 @@ export class EditorState {
   public mode: EditorMode = 'view';
   public isSuspended: boolean = false;
   public cursor?: Cursor;
-  public selection?: CursorSelection;
   /**
    * Uses ElementIndicator.
    */

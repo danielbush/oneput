@@ -41,6 +41,7 @@ export class Cursor {
   destroy = () => this.state.destroy();
   place = (el: HTMLElement, opts?: UserInputOpts) => this.state.place(el, opts);
   getPlace = () => this.state.getPlace();
+  getSelection = () => this.state.getSelection();
   reload = () => this.state.reload();
   isSameLine = (tok: HTMLElement) => this.state.isSameLine(tok);
   isOnToken = () => this.state.isOnToken();
@@ -58,6 +59,9 @@ export class Cursor {
   // motion
   moveNext = () => this.state.ops.moveNext();
   movePrevious = () => this.state.ops.movePrevious();
+  extendNext = () => this.state.ops.extendNext();
+  extendPrevious = () => this.state.ops.extendPrevious();
+  cancelSelection = () => this.state.cancelSelection();
 
   // edit text
   delete = (opts?: CursorDeleteOpts) => this._undo(this.state.ops.delete(opts));

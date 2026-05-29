@@ -1,7 +1,7 @@
 import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { isSameLine } from '../core/line.js';
-import type { CursorSelection } from '../selection/CursorSelection.js';
+import { CursorSelection } from '../selection/CursorSelection.js';
 import type { EditorState } from '../editor/EditorState.js';
 import { CursorTextOps } from './CursorTextOps.js';
 
@@ -108,6 +108,28 @@ export class CursorState {
 
   reload() {
     this.place(this.getPlace());
+  }
+
+  startSelection() {
+    if (!this.selection) {
+      this.selection = CursorSelection.create({
+        cursor: this,
+        seed: this.seat,
+        root: this.editorState.document.root
+      });
+    }
+    return this.selection;
+  }
+
+  getSelection() {
+    return this.selection;
+  }
+
+  cancelSelection(): boolean {
+    if (!this.selection) return false;
+    this.selection.destroy();
+    this.selection = undefined;
+    return true;
   }
 
   private addClasses(...classNames: string[]) {

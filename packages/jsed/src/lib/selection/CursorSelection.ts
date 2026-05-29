@@ -1,8 +1,8 @@
 import { deleteHighestEmpty, isEmpty } from '../focus/focusable.js';
 import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
-import { Cursor } from '../cursor/Cursor.js';
 import { createAnchor } from '../token/anchor.js';
+import type { CursorState } from '../cursor/CursorState.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -14,7 +14,11 @@ import { createAnchor } from '../token/anchor.js';
  * - `anchor` is initial starting point
  */
 export class CursorSelection {
-  static create(params: { cursor: Cursor; seed: HTMLElement; root: HTMLElement }): CursorSelection {
+  static create(params: {
+    cursor: CursorState;
+    seed: HTMLElement;
+    root: HTMLElement;
+  }): CursorSelection {
     return new CursorSelection(params.cursor, params.seed, params.root);
   }
 
@@ -22,7 +26,7 @@ export class CursorSelection {
   private wrappers: HTMLElement[] = [];
 
   constructor(
-    private headCursor: Cursor,
+    private headCursor: CursorState,
     private anchor: HTMLElement,
     private root: HTMLElement
   ) {
@@ -45,7 +49,7 @@ export class CursorSelection {
   extendNext(): void {
     const before = this.headCursor.getPlace();
     const wasBeforeAnchor = this.isBeforeAnchor(before);
-    this.headCursor.moveNext();
+    this.headCursor.ops.moveNext(true);
     const next = this.headCursor.getPlace();
     if (next === before) return;
     if (wasBeforeAnchor) {
@@ -63,7 +67,7 @@ export class CursorSelection {
   extendPrevious(): void {
     const before = this.headCursor.getPlace();
     const wasAfterAnchor = this.isAfterAnchor(before);
-    this.headCursor.movePrevious();
+    this.headCursor.ops.movePrevious(true);
     const prev = this.headCursor.getPlace();
     if (prev === before) return;
     if (wasAfterAnchor) {
@@ -195,10 +199,9 @@ export class CursorSelection {
    * Unwrap every SELECTION_WRAPPER in place, leaving TOKEN's and
    * spacing text nodes untouched.
    */
-  collapse(): void {
+  destroy(): void {
     for (const wrapper of this.wrappers) this.unwrap(wrapper);
     this.wrappers = [];
-    this.headCursor.destroy();
   }
 
   wrapWithTag(tagName: string): HTMLElement[] | null {
@@ -211,7 +214,6 @@ export class CursorSelection {
       return element ? [element] : [];
     });
     this.wrappers = [];
-    this.headCursor.destroy();
     return wrapped;
   }
 
@@ -242,7 +244,6 @@ export class CursorSelection {
       wrapper.remove();
     }
     this.wrappers = [];
-    this.headCursor.destroy();
 
     // If selection consumed an entire INLINE_FLOW branch, the marker is now the
     // only meaningful child. Lift it out so replacement text does not inherit

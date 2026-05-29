@@ -30,26 +30,25 @@ export class EditorCursorOps {
    * Wrap token at CURSOR in a tag.
    */
   wrap(tagName: string): boolean {
-    if (this.state.mode !== 'edit' || !this.state.cursor) {
+    const cursor = this.state.cursor;
+    if (!cursor) {
       return false;
     }
-
-    if (this.state.selection) {
-      const anchor = this.state.selection.getAnchor();
-      const wrappers = this.state.selection.wrapWithTag(tagName);
+    const selection = cursor.getSelection();
+    if (selection) {
+      const wrappers = selection.wrapWithTag(tagName);
       if (!wrappers) {
         return false;
       }
+      cursor.cancelSelection();
 
-      this.state.selection = undefined;
       for (const wrapper of wrappers) {
         this.state.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
       }
-      this.state.cursor.place(anchor);
       return true;
     }
 
-    const current = this.state.cursor.getPlace();
+    const current = cursor.getPlace();
     if (!isLineSibling(current)) {
       return false;
     }
@@ -60,7 +59,7 @@ export class EditorCursorOps {
     }
 
     this.state.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-    this.state.cursor.place(current);
+    cursor.place(current);
     return true;
   }
 

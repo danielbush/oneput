@@ -2,7 +2,6 @@ import { ok, Result } from 'neverthrow';
 import { isAnchor, isIsland, isLine, isToken } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
-import { CursorSelection } from '../selection/CursorSelection.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { undoDeleteElement } from '../focus/focusable.js';
@@ -58,10 +57,9 @@ export class EditorOps {
    * Returns false if nothing left to exit.
    */
   handleExit({ softExit }: { softExit: boolean } = { softExit: true }) {
-    if (this.state.selection) {
-      // Cancel selection: collapse wrappers and land the CURSOR on the head
-      // (wherever the selection was extended to). Keeps edit mode.
-      this.cancelSelectionAt(this.state.selection.getHead());
+    // Cancel selection: collapse wrappers and land the CURSOR on the head
+    // (wherever the selection was extended to). Keeps edit mode.
+    if (this.state.cursor?.cancelSelection()) {
       return true;
     }
     if (this.state.mode === 'edit') {
@@ -91,18 +89,6 @@ export class EditorOps {
   }
 
   /**
-   * Collapse any active selection and move the CURSOR to `target`.
-   * Returns true if a selection was cancelled. Stays in edit mode.
-   */
-  private cancelSelectionAt(target: HTMLElement): boolean {
-    if (!this.state.selection) return false;
-    this.state.selection.collapse();
-    this.state.selection = undefined;
-    this.state.cursor?.place(target);
-    return true;
-  }
-
-  /**
    * Extend the SELECTION one LINE_SIBLING forward from the current CURSOR.
    *
    * Stub for the selections feature (work/active/20260414.feat.selections.md).
@@ -112,15 +98,8 @@ export class EditorOps {
    */
   extendNext() {
     if (this.state.isSuspended) return;
-    if (this.state.mode !== 'edit' || !this.state.cursor) return;
-    if (!this.state.selection) {
-      this.state.selection = CursorSelection.create({
-        cursor: this.state.cursor,
-        seed: this.state.cursor.getPlace(),
-        root: this.state.document.root
-      });
-    }
-    this.state.selection.extendNext();
+    if (!this.state.cursor) return;
+    this.state.cursor.extendNext();
   }
 
   /**
@@ -130,25 +109,14 @@ export class EditorOps {
    */
   extendPrevious() {
     if (this.state.isSuspended) return;
-    if (this.state.mode !== 'edit' || !this.state.cursor) return;
-    if (!this.state.selection) {
-      this.state.selection = CursorSelection.create({
-        cursor: this.state.cursor,
-        seed: this.state.cursor.getPlace(),
-        root: this.state.document.root
-      });
-    }
-    this.state.selection.extendPrevious();
+    if (!this.state.cursor) return;
+    this.state.cursor.extendPrevious();
   }
 
   movePrevious() {
     if (this.state.isSuspended) return;
-    if (this.state.selection) {
-      this.cancelSelectionAt(this.state.selection.getBackwardEnd());
-      return;
-    }
-    if (this.state.mode === 'edit') {
-      this.state.cursor?.movePrevious();
+    if (this.state.cursor) {
+      this.state.cursor.movePrevious();
       return;
     }
 
@@ -157,12 +125,8 @@ export class EditorOps {
 
   moveNext() {
     if (this.state.isSuspended) return;
-    if (this.state.selection) {
-      this.cancelSelectionAt(this.state.selection.getForwardEnd());
-      return;
-    }
-    if (this.state.mode === 'edit') {
-      this.state.cursor?.moveNext();
+    if (this.state.cursor) {
+      this.state.cursor.moveNext();
       return;
     }
 

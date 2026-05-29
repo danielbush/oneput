@@ -58,7 +58,11 @@ export class CursorTextOps {
   /**
    * Move to next CURSOR target (LINE_SIBLING or first reachable in next LINE).
    */
-  moveNext(): void {
+  moveNext(isSelection = false): void {
+    if (this.state.selection && !isSelection) {
+      this.state.cancelSelection();
+      return;
+    }
     if (this.state.isInsertingBefore()) {
       this.state.clearInsertState();
       return;
@@ -88,7 +92,11 @@ export class CursorTextOps {
   /**
    * Move to previous CURSOR target (LINE_SIBLING or last reachable in previous LINE).
    */
-  movePrevious(): void {
+  movePrevious(isSelection = false): void {
+    if (this.state.selection && !isSelection) {
+      this.state.cancelSelection();
+      return;
+    }
     // Cancel append or insertAfter states and re-select token.
     if (this.state.isInsertingAfter() || this.state.isAppend()) {
       this.state.clearInsertState();
@@ -303,5 +311,28 @@ export class CursorTextOps {
     if (first) {
       this.state.place(first);
     }
+  }
+
+  /**
+   * Extend the SELECTION one LINE_SIBLING forward from the current CURSOR.
+   *
+   * Stub for the selections feature (work/active/20260414.feat.selections.md).
+   * When implemented, this will seed a CursorSelection from the current TOKEN
+   * on first call and grow (or shrink) its head via LINE_SIBLING traversal on
+   * subsequent calls. Noop outside edit mode.
+   */
+  extendNext() {
+    const selection = this.state.startSelection();
+    selection.extendNext();
+  }
+
+  /**
+   * Extend the SELECTION one LINE_SIBLING backward from the current CURSOR.
+   *
+   * See `extendNext` for the full design sketch.
+   */
+  extendPrevious() {
+    const selection = this.state.startSelection();
+    selection.extendPrevious();
   }
 }

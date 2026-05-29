@@ -2,6 +2,8 @@ import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { isSameLine } from '../core/line.js';
 import type { CursorSelection } from '../selection/CursorSelection.js';
+import type { EditorState } from '../editor/EditorState.js';
+import { CursorTextOps } from './CursorTextOps.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
@@ -49,6 +51,7 @@ export type CursorParams = {};
 
 export class CursorState {
   constructor(
+    public editorState: EditorState,
     /**
      * The LINE_SIBLING the CURSOR is on.
      */
@@ -68,7 +71,11 @@ export class CursorState {
      * `#lastSelection` to derive the marker class.
      */
     private lastInputValue = ''
-  ) {}
+  ) {
+    this.ops = CursorTextOps.create(this);
+  }
+
+  public ops: CursorTextOps;
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {

@@ -116,9 +116,8 @@ export class EditorOps {
     if (!this.state.selection) {
       this.state.selection = CursorSelection.create({
         cursor: this.state.cursor,
-        tokenizer: this.state.tokenizer,
         seed: this.state.cursor.getPlace(),
-        document: this.state.document
+        root: this.state.document.root
       });
     }
     this.state.selection.extendNext();
@@ -135,9 +134,8 @@ export class EditorOps {
     if (!this.state.selection) {
       this.state.selection = CursorSelection.create({
         cursor: this.state.cursor,
-        tokenizer: this.state.tokenizer,
         seed: this.state.cursor.getPlace(),
-        document: this.state.document
+        root: this.state.document.root
       });
     }
     this.state.selection.extendPrevious();

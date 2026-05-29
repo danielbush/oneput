@@ -2,8 +2,6 @@ import { deleteHighestEmpty, isEmpty } from '../focus/focusable.js';
 import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import { Cursor } from '../cursor/Cursor.js';
-import type { JsedDocument } from '../../types.js';
-import type { Tokenizer } from '../token/Tokenizer.js';
 import { createAnchor } from '../token/anchor.js';
 
 /**
@@ -16,31 +14,19 @@ import { createAnchor } from '../token/anchor.js';
  * - `anchor` is initial starting point
  */
 export class CursorSelection {
-  static create(params: {
-    cursor: Cursor;
-    seed: HTMLElement;
-    document: JsedDocument;
-    tokenizer: Tokenizer;
-  }): CursorSelection {
-    return new CursorSelection(params);
+  static create(params: { cursor: Cursor; seed: HTMLElement; root: HTMLElement }): CursorSelection {
+    return new CursorSelection(params.cursor, params.seed, params.root);
   }
 
-  private anchor: HTMLElement;
-  private headCursor: Cursor;
-  private root: HTMLElement;
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
-  constructor(params: {
-    cursor: Cursor;
-    seed: HTMLElement;
-    document: JsedDocument;
-    tokenizer: Tokenizer;
-  }) {
-    this.anchor = params.seed;
-    this.root = params.document.root;
-    this.headCursor = params.cursor;
-    this.wrappers.push(this.openWrapper(params.seed));
+  constructor(
+    private headCursor: Cursor,
+    private anchor: HTMLElement,
+    private root: HTMLElement
+  ) {
+    this.wrappers.push(this.openWrapper(anchor));
   }
 
   getAnchor(): HTMLElement {

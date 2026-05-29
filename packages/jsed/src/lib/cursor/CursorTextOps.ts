@@ -1,7 +1,7 @@
 import * as token from '../token/token.js';
 import * as space from '../token/space.js';
 import { isAnchor, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
-import type { CursorState } from './CursorState.js';
+import type { Cursor } from './Cursor.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import {
   deleteHighestEmpty,
@@ -30,13 +30,13 @@ export type TokenDeletion = 'tokenDeletion';
 export type CursorDeleteOpts = { type: CharDeletion | TokenDeletion };
 
 export class CursorTextOps {
-  static create(state: EditorState, cursor: CursorState): CursorTextOps {
+  static create(state: EditorState, cursor: Cursor): CursorTextOps {
     return new CursorTextOps(state, cursor);
   }
 
   private constructor(
     private state: EditorState,
-    private cursor: CursorState
+    private cursor: Cursor
   ) {}
 
   getNext(): HTMLElement | null {

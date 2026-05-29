@@ -2,7 +2,7 @@ import { describe, expect, it, test } from 'vitest';
 import { div, em, identify, makeRoot, p } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
-import { Cursor } from '../../../lib/cursor/Cursor.js';
+import { CursorOps } from '../CursorOps.js';
 import { getValue } from '../../../lib/token/token.js';
 import { tagImplicitLines } from '../../token/implicitLine.js';
 
@@ -15,7 +15,7 @@ function createCursor(tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
-  const cursor = Cursor.create({
+  const cursor = CursorOps.create({
     tokenizer,
     seat: tok,
     onCursorChange: (t) => changes.push(getValue(t)),

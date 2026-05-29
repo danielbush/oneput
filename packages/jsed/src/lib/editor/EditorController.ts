@@ -1,5 +1,5 @@
 import * as token from '../token/token.js';
-import type { CursorError } from '../cursor/CursorState.js';
+import type { CursorError } from '../cursor/Cursor.js';
 import type { EditorState } from './EditorState.js';
 import { isToken } from '../core/taxonomy.js';
 import type {

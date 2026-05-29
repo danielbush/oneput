@@ -1,5 +1,5 @@
 import { Nav } from '../focus/Nav.js';
-import { Cursor } from '../cursor/Cursor.js';
+import { CursorOps } from '../cursor/CursorOps.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
 import { Tokenizer } from '../token/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
@@ -12,7 +12,7 @@ import { CSSElementIndicator } from '../utilities/CSSElementIndicator.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from './EditorController.js';
 import { EditorOps } from './EditorOps.js';
-import type { CursorError } from '../cursor/CursorState.js';
+import type { CursorError } from '../cursor/Cursor.js';
 import { UndoRecorder } from '../undo/UndoRecorder.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
@@ -92,7 +92,7 @@ export class EditorState {
 
   public mode: EditorMode = 'view';
   public isSuspended: boolean = false;
-  public cursor?: Cursor;
+  public cursor?: CursorOps;
   public selection?: CursorSelection;
   /**
    * Uses ElementIndicator.

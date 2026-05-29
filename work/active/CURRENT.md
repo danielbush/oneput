@@ -96,19 +96,19 @@ We record token.remove in undo; if the token is anchorized, we handle the situat
 token deletion (token.remove) occurs when we delete whole tokens (input is select-all and we hit backspace) or char-based deletion in which case the token was a single non-whitespace character before it got removed; for this latter case there may be some collapse scenarios which means we end up recording the whole token being deleted anyway rather than recording intermediate deletion states.
 
 
-## Make Cursor instance permanent
+## Cursor is just a datastructure
 
-- cursor.unplace
-- cursor.isPlaced
-  - CursorState isPlaced
-- editor create - calls cursor.create without token
-- enterEditing
-  - calls cursor.place(token)
-  - cursor displays itself
-- exitEditing
-  - calls cursor.unplace
-- places that do this.state.cursor?.*
-- places that do !!this.state.cursor
+- Cursor is just a datastructure
+- Cursor should only exist when placed.
+- CursorState becomes Cursor
+- Cursor facade goes away?
+- Move ops out, they can be instantiated with Cursor and Editor.
+- Tripartite edit objects
+  - const ita = InsertTextAfter.run(editor, cursor)
+  - ita.undo
+  - ita.redo
+
+
 
 # Archive
 

@@ -1,19 +1,10 @@
-import { err, ok, Result } from 'neverthrow';
-import {
-  isAnchor,
-  isCursorTransparent,
-  isIsland,
-  isLine,
-  isLineSibling,
-  isToken
-} from '../core/taxonomy.js';
+import { ok, Result } from 'neverthrow';
+import { isAnchor, isIsland, isLine, isToken } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
-import { Cursor } from '../cursor/Cursor.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
 import { undoDeleteElement } from '../focus/focusable.js';
 
 /**
@@ -36,98 +27,6 @@ export class EditorOps {
 
   constructor(private state: EditorState) {}
 
-  start(): void {
-    this.state.nav.connect({
-      onRequestFocus: (evt) => this.state.controller.onFocusRequest(evt),
-      onFocusChange: (focus) => this.state.controller.onFocusChange(focus)
-    });
-    this.state.legacyElementIndicator.showIndicator(this.state.useLegacyElementIndicator);
-    this.state.cssElementIndicator.showIndicator(this.state.useElementIndicator);
-    this.state.nav.FOCUS(
-      findNextEditableLine(this.state.document.root, this.state.document.root) ??
-        this.state.document.root
-    );
-  }
-
-  suspend(bool: boolean) {
-    this.state.isSuspended = bool;
-    if (this.state.isSuspended) {
-      this.state.userInput.setInputValue('');
-      return;
-    }
-    if (this.state.mode === 'edit') {
-      this.enterEditing(this.state.cursor?.getPlace());
-      this.state.legacyElementIndicator.showIndicator(this.state.useLegacyElementIndicator && true);
-      this.state.cssElementIndicator.showIndicator(this.state.useElementIndicator && true);
-    }
-  }
-
-  /**
-   * Transition to 'edit' mode.
-   */
-  enterEditing(initial?: HTMLElement): Result<void, EditorError> {
-    this.state.nav.connect({
-      onRequestFocus: (evt) => this.state.controller.onFocusRequest(evt),
-      onFocusChange: (focus) => this.state.controller.onFocusChange(focus)
-    });
-    initial = initial ?? this.state.nav.getFocus() ?? undefined;
-    if (!initial) {
-      return err({ type: 'no-token-under-focus' });
-    }
-    this.state.controller.unsubscribeAll();
-    this.state.controller.subscribeAll();
-
-    // Tokenize LINE at or within `initial` if not already.
-    const line = findNextEditableLine(initial, this.state.document.root);
-    const firstLineSibling = line && this.state.tokenizer.tokenizeLineAt(line);
-    const targetLineSibling = isLineSibling(initial)
-      ? initial
-      : isCursorTransparent(initial)
-        ? getFirstLineSibling(initial)
-        : firstLineSibling;
-    if (targetLineSibling) {
-      const line = getLine(targetLineSibling);
-      this.state.nav.FOCUS(line);
-      this.state.userInput.focus();
-      if (!this.state.cursor) {
-        this.state.cursor = Cursor.create(targetLineSibling, this.state);
-      }
-      this.state.cursor.place(targetLineSibling); // calls handleCursorChange
-      this.state.setMode('edit');
-      return ok(undefined);
-    }
-
-    return err({ type: 'no-token-under-focus' });
-  }
-
-  /**
-   * Transition back to 'view' mode.
-   */
-  exitEditing(params?: { softExit?: boolean; focusElement?: HTMLElement }) {
-    // Exit cursor insertion state if present.
-    if (params?.softExit && this.state.cursor?.isInInsertState()) {
-      this.state.cursor.reload();
-      return;
-    }
-
-    // Exit the cursor completely
-    const focusElement = params?.focusElement ?? this.state.nav.getFocus() ?? undefined;
-    this.state.controller.unsubscribeAll();
-    this.state.cursor?.destroy();
-    this.state.cursor = undefined;
-    this.state.tokenizer.setCursorElement(null);
-    this.state.userInput.setInputValue('');
-    this.state.setMode('view');
-
-    if (focusElement) {
-      this.state.nav.FOCUS(focusElement);
-      const line = findNextEditableLine(focusElement, this.state.document.root);
-      if (line) {
-        this.state.tokenizer.tokenizeLineAt(line);
-      }
-    }
-  }
-
   /**
    * Handle the user pressing Enter based on the current editing context.
    *
@@ -138,11 +37,11 @@ export class EditorOps {
   handleEnter(): Result<void, EditorError> {
     // This allows us to edit via the "Edit..." menu .
     if (this.state.mode === 'view') {
-      return this.enterEditing();
+      return this.state.enterEditing();
     }
 
     if (!this.state.cursor) {
-      return this.enterEditing();
+      return this.state.enterEditing();
     }
 
     if (this.state.isSuspended) return ok(undefined);
@@ -152,7 +51,7 @@ export class EditorOps {
       return ok(undefined);
     }
 
-    return this.enterEditing(current);
+    return this.state.enterEditing(current);
   }
 
   /**
@@ -166,7 +65,7 @@ export class EditorOps {
       return true;
     }
     if (this.state.mode === 'edit') {
-      this.exitEditing({ softExit });
+      this.state.exitEditing({ softExit });
       return true;
     }
     return false;

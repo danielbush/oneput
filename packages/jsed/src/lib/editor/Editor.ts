@@ -42,16 +42,16 @@ export class Editor {
   }
 
   // Lifecycle
-  start = () => this.state.ops.start(); // initialize
-  suspend = (bool: boolean) => this.state.ops.suspend(bool);
+  start = () => this.state.start(); // initialize
+  suspend = (bool: boolean) => this.state.suspend(bool);
   destroy = () => this.state.destroy();
 
   // Modes - view, edit
   getMode = () => this.state.getMode();
   isEditing = () => this.state.isEditing();
-  enterEditing = (el?: HTMLElement) => this.state.ops.enterEditing(el);
+  enterEditing = (el?: HTMLElement) => this.state.enterEditing(el);
   exitEditing = (params?: { softExit?: boolean; focusElement?: HTMLElement }) =>
-    this.state.ops.exitEditing(params);
+    this.state.exitEditing(params);
 
   // Multi-function
   handleEnter = () => this.state.ops.handleEnter();

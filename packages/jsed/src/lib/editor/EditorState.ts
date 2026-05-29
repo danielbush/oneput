@@ -143,10 +143,6 @@ export class EditorState {
     return this.mode === 'edit';
   }
 
-  getCursor() {
-    return this.cursor?.getPlace();
-  }
-
   notifyTextChange(event: EditorTextChangeEvent) {
     this.eventsEmitter.onTextChange?.(event);
   }

@@ -58,7 +58,6 @@ export class Editor {
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
 
   // Editing
-  getCursor = () => this.state.getCursor();
   handleDelete = (evt?: KeyboardEvent) => this.state.ops.handleDelete(evt);
   // Editing is event driven see EditorController.
 

@@ -8,8 +8,14 @@ import type { EditorState } from '../editor/EditorState.js';
  * Public CURSOR facade for the editing session.
  */
 export class Cursor {
-  static create(state: EditorState, params: CursorParams) {
-    const cursorState = new CursorState(params);
+  static create(seat: HTMLElement, state: EditorState) {
+    const cursorState = new CursorState({
+      seat,
+      tokenizer: state.tokenizer,
+      undo: state.undo,
+      onCursorChange: state.controller.onCursorChange,
+      onError: state.controller.onCursorError
+    });
     const ops = CursorTextOps.create(state, cursorState);
     return new Cursor(cursorState, ops);
   }

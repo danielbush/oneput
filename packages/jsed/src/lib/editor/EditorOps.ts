@@ -90,13 +90,7 @@ export class EditorOps {
       this.state.nav.FOCUS(line);
       this.state.userInput.focus();
       if (!this.state.cursor) {
-        this.state.cursor = Cursor.create(this.state, {
-          tokenizer: this.state.tokenizer,
-          seat: targetLineSibling,
-          undo: this.state.undo,
-          onCursorChange: this.state.controller.onCursorChange,
-          onError: this.state.controller.onCursorError
-        });
+        this.state.cursor = Cursor.create(targetLineSibling, this.state);
       }
       this.state.cursor.place(targetLineSibling); // calls handleCursorChange
       this.state.setMode('edit');

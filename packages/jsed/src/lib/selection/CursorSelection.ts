@@ -40,12 +40,7 @@ export class CursorSelection {
   ) {
     this.anchor = params.seed;
     this.root = params.document.root;
-    this.headCursor = Cursor.create(state, {
-      tokenizer: params.tokenizer,
-      seat: params.seed,
-      onCursorChange: () => {},
-      onError: () => {}
-    });
+    this.headCursor = Cursor.create(params.seed, state);
     this.wrappers.push(this.openWrapper(params.seed));
   }
 

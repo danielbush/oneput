@@ -47,7 +47,7 @@ export class CursorTextOps {
 
     // We may get a text node because we do SHALLOW_TOKENIZATION.
     if (isTokenizableTextNode(next)) {
-      const { tokens } = this.cursor.tokenizer.tokenizeLineAtTextNode(next);
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(next);
       if (tokens[0]) {
         return tokens[0];
       }
@@ -76,7 +76,7 @@ export class CursorTextOps {
     }
 
     if (isTokenizableTextNode(prev)) {
-      const { tokens } = this.cursor.tokenizer.tokenizeLineAtTextNode(prev);
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(prev);
       if (tokens.length > 0) {
         return tokens[tokens.length - 1];
       }
@@ -287,7 +287,7 @@ export class CursorTextOps {
     }
     token.insertAfter(el, this.cursor.getPlace());
 
-    const first = this.cursor.tokenizer.tokenizeLineAt(el);
+    const first = this.state.tokenizer.tokenizeLineAt(el);
     if (first) {
       this.cursor.place(first);
     }
@@ -300,7 +300,7 @@ export class CursorTextOps {
     }
     token.insertBefore(el, this.cursor.getPlace());
 
-    const first = this.cursor.tokenizer.tokenizeLineAt(el);
+    const first = this.state.tokenizer.tokenizeLineAt(el);
     if (first) {
       this.cursor.place(first);
     }

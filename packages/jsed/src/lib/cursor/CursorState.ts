@@ -1,8 +1,6 @@
 import { isLineSibling, isToken } from '../core/taxonomy.js';
-import type { Tokenizer } from '../token/Tokenizer.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { isSameLine } from '../core/line.js';
-import type { UndoRecorder } from '../undo/UndoRecorder.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
@@ -47,26 +45,22 @@ export type CursorError =
     };
 
 export type CursorParams = {
-  tokenizer: Tokenizer;
-  seat: HTMLElement;
-  undo?: UndoRecorder;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   onError: (err: CursorError) => void;
 };
 
 export class CursorState {
-  constructor(params: CursorParams) {
-    this.seat = params.seat; // ts needs this before setToken
+  constructor(
+    /**
+     * The LINE_SIBLING the CURSOR is on.
+     */
+    private seat: HTMLElement,
+    params: CursorParams
+  ) {
     this.onCursorChange = params.onCursorChange;
     this.onError = params.onError;
-    this.tokenizer = params.tokenizer;
-    this.undo = params.undo;
   }
 
-  /**
-   * The LINE_SIBLING the CURSOR is on.
-   */
-  seat: HTMLElement;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   classes: string[] = [];
   /**
@@ -81,8 +75,6 @@ export class CursorState {
    */
   lastInputValue = '';
   onError: (err: CursorError) => void;
-  tokenizer: Tokenizer;
-  undo?: UndoRecorder;
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {

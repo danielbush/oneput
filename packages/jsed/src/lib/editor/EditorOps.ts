@@ -114,7 +114,8 @@ export class EditorOps {
     if (this.state.isSuspended) return;
     if (this.state.mode !== 'edit' || !this.state.cursor) return;
     if (!this.state.selection) {
-      this.state.selection = CursorSelection.create(this.state, {
+      this.state.selection = CursorSelection.create({
+        cursor: this.state.cursor,
         tokenizer: this.state.tokenizer,
         seed: this.state.cursor.getPlace(),
         document: this.state.document
@@ -132,7 +133,8 @@ export class EditorOps {
     if (this.state.isSuspended) return;
     if (this.state.mode !== 'edit' || !this.state.cursor) return;
     if (!this.state.selection) {
-      this.state.selection = CursorSelection.create(this.state, {
+      this.state.selection = CursorSelection.create({
+        cursor: this.state.cursor,
         tokenizer: this.state.tokenizer,
         seed: this.state.cursor.getPlace(),
         document: this.state.document

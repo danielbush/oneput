@@ -5,7 +5,6 @@ import { Cursor } from '../cursor/Cursor.js';
 import type { JsedDocument } from '../../types.js';
 import type { Tokenizer } from '../token/Tokenizer.js';
 import { createAnchor } from '../token/anchor.js';
-import type { EditorState } from '../editor/EditorState.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -17,15 +16,13 @@ import type { EditorState } from '../editor/EditorState.js';
  * - `anchor` is initial starting point
  */
 export class CursorSelection {
-  static create(
-    state: EditorState,
-    params: {
-      seed: HTMLElement;
-      document: JsedDocument;
-      tokenizer: Tokenizer;
-    }
-  ): CursorSelection {
-    return new CursorSelection(state, params);
+  static create(params: {
+    cursor: Cursor;
+    seed: HTMLElement;
+    document: JsedDocument;
+    tokenizer: Tokenizer;
+  }): CursorSelection {
+    return new CursorSelection(params);
   }
 
   private anchor: HTMLElement;
@@ -34,13 +31,15 @@ export class CursorSelection {
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
-  constructor(
-    state: EditorState,
-    params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }
-  ) {
+  constructor(params: {
+    cursor: Cursor;
+    seed: HTMLElement;
+    document: JsedDocument;
+    tokenizer: Tokenizer;
+  }) {
     this.anchor = params.seed;
     this.root = params.document.root;
-    this.headCursor = Cursor.create(params.seed, state);
+    this.headCursor = params.cursor;
     this.wrappers.push(this.openWrapper(params.seed));
   }
 

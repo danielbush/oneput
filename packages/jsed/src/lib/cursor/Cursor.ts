@@ -59,9 +59,6 @@ export class Cursor {
   // motion
   moveNext = () => this.state.ops.moveNext();
   movePrevious = () => this.state.ops.movePrevious();
-  extendNext = () => this.state.ops.extendNext();
-  extendPrevious = () => this.state.ops.extendPrevious();
-  cancelSelection = () => this.state.cancelSelection();
 
   // edit text
   delete = (opts?: CursorDeleteOpts) => this._undo(this.state.ops.delete(opts));
@@ -72,6 +69,14 @@ export class Cursor {
   insertTextBefore = (text: string, opts?: UserInputOpts) =>
     this.state.ops.insertTextBefore(text, opts);
   splitAtToken = () => this.state.ops.splitAtToken();
+
+  // selections
+  extendNext = () => this.state.ops.extendNext();
+  extendPrevious = () => this.state.ops.extendPrevious();
+  cancelSelection = () => this.state.cancelSelection();
+  canWrap = () => this.state.ops.canWrap();
+  getWrapCandidates = () => this.state.ops.getWrapCandidates();
+  wrap = (tagName: string) => this.state.ops.wrap(tagName);
 
   // TODO: not used - delete or add to editor?
   insertElementAfter = (el: HTMLElement) => this.state.ops.insertElementAfter(el);

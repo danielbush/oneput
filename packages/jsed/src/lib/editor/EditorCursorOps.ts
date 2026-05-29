@@ -1,8 +1,5 @@
 import type { EditorState } from './EditorState.js';
-import * as token from '../token/token.js';
 import * as space from '../token/space.js';
-import { isLineSibling } from '../core/taxonomy.js';
-import { getWrapCandidates } from '../core/dom-rules.js';
 
 /**
  * Trailing / Leading space (at cursor)
@@ -13,55 +10,6 @@ export class EditorCursorOps {
   }
 
   constructor(private state: EditorState) {}
-
-  canWrap(): boolean {
-    return (
-      this.state.mode === 'edit' &&
-      !!this.state.cursor &&
-      isLineSibling(this.state.cursor.getPlace())
-    );
-  }
-
-  getWrapCandidates(): string[] {
-    return getWrapCandidates();
-  }
-
-  /**
-   * Wrap token at CURSOR in a tag.
-   */
-  wrap(tagName: string): boolean {
-    const cursor = this.state.cursor;
-    if (!cursor) {
-      return false;
-    }
-    const selection = cursor.getSelection();
-    if (selection) {
-      const wrappers = selection.wrapWithTag(tagName);
-      if (!wrappers) {
-        return false;
-      }
-      cursor.cancelSelection();
-
-      for (const wrapper of wrappers) {
-        this.state.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-      }
-      return true;
-    }
-
-    const current = cursor.getPlace();
-    if (!isLineSibling(current)) {
-      return false;
-    }
-
-    const wrapper = token.wrapLineSiblingWithTag(current, tagName);
-    if (!wrapper) {
-      return false;
-    }
-
-    this.state.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
-    cursor.place(current);
-    return true;
-  }
 
   canRemoveSpaceBefore(): boolean {
     return (

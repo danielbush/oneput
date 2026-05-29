@@ -364,6 +364,7 @@ export class OneputEditDocumentAdapter {
   };
 
   getMenuItems = ({ renderMenuItems }: { renderMenuItems: () => void }) => {
+    const cursor = this.editor.cursor;
     return [
       this.editor.isEditing() &&
         stdMenuItem({
@@ -626,20 +627,21 @@ export class OneputEditDocumentAdapter {
 
       // #region cursor ops
 
-      this.editor.cursorOps.canWrap() &&
+      cursor &&
+        cursor.canWrap() &&
         stdMenuItem({
           id: 'WRAP_SELECTION',
           textContent: 'Wrap selection...',
           left: (b) => [b.icon(icons.SquareCode)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = this.editor.cursorOps.getWrapCandidates().map((tagName, index) => {
+            const candidates = cursor.getWrapCandidates().map((tagName, index) => {
               return {
                 id: `${tagName}-${index}`,
                 text: `<${tagName}>`,
                 icon: icons.Plus,
                 action: () => {
-                  const wrapped = this.editor.cursorOps.wrap(tagName);
+                  const wrapped = cursor.wrap(tagName);
                   if (!wrapped) {
                     this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
                   }
@@ -658,7 +660,7 @@ export class OneputEditDocumentAdapter {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    const wrapped = this.editor.cursorOps.wrap(item);
+                    const wrapped = cursor.wrap(item);
                     if (!wrapped) {
                       this.ctl.notify('Could not wrap cursor with that tag', { duration: 3000 });
                     }

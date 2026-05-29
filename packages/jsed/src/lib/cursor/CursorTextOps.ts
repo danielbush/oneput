@@ -1,6 +1,6 @@
 import * as token from '../token/token.js';
 import * as space from '../token/space.js';
-import { isAnchor, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
+import { isAnchor, isLineSibling, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
 import {
@@ -17,6 +17,7 @@ import {
 } from '../core/line.js';
 import { addAnchorsToTag } from '../token/anchor.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
+import { getWrapCandidates } from '../core/dom-rules.js';
 
 /**
  * eg User is backspacing single chars.
@@ -334,5 +335,48 @@ export class CursorTextOps {
   extendPrevious() {
     const selection = this.state.startSelection();
     selection.extendPrevious();
+  }
+
+  canWrap(): boolean {
+    return isLineSibling(this.state.getPlace());
+  }
+
+  getWrapCandidates(): string[] {
+    return getWrapCandidates();
+  }
+
+  /**
+   * Wrap token at CURSOR or selection in a tag.
+   */
+  wrap(tagName: string): boolean {
+    if (!this.canWrap) {
+      return false;
+    }
+    const selection = this.state.getSelection();
+    if (selection) {
+      const wrappers = selection.wrapWithTag(tagName);
+      if (!wrappers) {
+        return false;
+      }
+      this.state.cancelSelection();
+
+      for (const wrapper of wrappers) {
+        this.state.editorState.notifyElementChange({
+          type: 'focusable-inserted',
+          element: wrapper
+        });
+      }
+      return true;
+    }
+
+    const current = this.state.getPlace();
+    const wrapper = token.wrapLineSiblingWithTag(current, tagName);
+    if (!wrapper) {
+      return false;
+    }
+
+    this.state.editorState.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
+    this.state.place(current);
+    return true;
   }
 }

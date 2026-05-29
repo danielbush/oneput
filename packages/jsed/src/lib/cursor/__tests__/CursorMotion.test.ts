@@ -11,12 +11,11 @@ import { tagImplicitLines } from '../../token/implicitLine.js';
  */
 const inlineStyle = { style: 'display:inline;' };
 
-function createCursor(doc: JsedDocument, tok: HTMLElement) {
+function createCursor(tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
   const cursor = Cursor.create({
-    document: doc,
     tokenizer,
     seat: tok,
     onCursorChange: (t) => changes.push(getValue(t)),
@@ -30,7 +29,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
   const firstToken = Tokenizer.createNull().tokenizeLineAt(el)!;
-  return createCursor(doc, firstToken);
+  return createCursor(firstToken);
 }
 
 describe('CursorMotion', () => {
@@ -481,7 +480,7 @@ describe('CursorMotion', () => {
       doc.root.querySelector('#p1') as HTMLElement
     )!;
     const secondToken = firstToken.nextElementSibling as HTMLElement;
-    const { cursor } = createCursor(doc, firstToken);
+    const { cursor } = createCursor(firstToken);
     const scrollRequests = doc.viewportScroller.trackScrollRequests();
     scrollRequests.data.length = 0;
 

@@ -5,6 +5,7 @@ import { Cursor } from '../cursor/Cursor.js';
 import type { JsedDocument } from '../../types.js';
 import type { Tokenizer } from '../token/Tokenizer.js';
 import { createAnchor } from '../token/anchor.js';
+import type { EditorState } from '../editor/EditorState.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
@@ -16,12 +17,15 @@ import { createAnchor } from '../token/anchor.js';
  * - `anchor` is initial starting point
  */
 export class CursorSelection {
-  static create(params: {
-    seed: HTMLElement;
-    document: JsedDocument;
-    tokenizer: Tokenizer;
-  }): CursorSelection {
-    return new CursorSelection(params);
+  static create(
+    state: EditorState,
+    params: {
+      seed: HTMLElement;
+      document: JsedDocument;
+      tokenizer: Tokenizer;
+    }
+  ): CursorSelection {
+    return new CursorSelection(state, params);
   }
 
   private anchor: HTMLElement;
@@ -30,11 +34,13 @@ export class CursorSelection {
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
 
-  constructor(params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }) {
+  constructor(
+    state: EditorState,
+    params: { seed: HTMLElement; document: JsedDocument; tokenizer: Tokenizer }
+  ) {
     this.anchor = params.seed;
     this.root = params.document.root;
-    this.headCursor = Cursor.create({
-      document: params.document,
+    this.headCursor = Cursor.create(state, {
       tokenizer: params.tokenizer,
       seat: params.seed,
       onCursorChange: () => {},

@@ -28,5 +28,6 @@
     "src/**/*.ts",
     "../../apps/jsed-demo/src/lib/oneput/app/Root.ts",
     "../../apps/jsed-demo/src/lib/oneput/app/_layout.ts"
-  ]
+  ],
+  "exclude": ["src/**/*.test.ts"]
 }

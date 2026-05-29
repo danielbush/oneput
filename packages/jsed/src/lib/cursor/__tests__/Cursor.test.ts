@@ -12,13 +12,12 @@ import {
   CURSOR_PREPEND_CLASS
 } from '../../../lib/cursor/CursorState.js';
 
-function createCursor(doc: JsedDocument, tok: HTMLElement) {
+function createCursor(_doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
 
   const cursor = Cursor.create({
-    document: doc,
     tokenizer,
     seat: tok,
     onCursorChange: (t) => changes.push(getValue(t)),

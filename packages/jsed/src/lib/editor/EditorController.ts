@@ -85,12 +85,15 @@ export class EditorController {
    * the user's in-flight input value is not clobbered by the head TOKEN's
    * pre-rewrite value.
    */
-  onCursorChange = (tok: HTMLElement, opts?: UserInputOpts) => {
-    this.state.tokenizer.setCursorElement(tok);
-    this.state.nav?.FOCUS(tok);
-    this.state.eventsEmitter.onCursorChange?.(tok);
+  onCursorChange = (seat: HTMLElement, opts?: UserInputOpts) => {
+    this.state.document.viewportScroller.scrollIntoViewIfHidden(seat, {
+      vertical: 'nearest'
+    });
+    this.state.tokenizer.setCursorElement(seat);
+    this.state.nav?.FOCUS(seat);
+    this.state.eventsEmitter.onCursorChange?.(seat);
     if (opts?.syncInput !== false) {
-      this.state.ops.syncInput(tok, opts?.inputCursorPosition);
+      this.state.ops.syncInput(seat, opts?.inputCursorPosition);
     }
   };
 

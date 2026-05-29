@@ -23,12 +23,11 @@ import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
  */
 const inlineStyle = { style: 'display:inline;' };
 
-function createCursor(doc: JsedDocument, tok: HTMLElement) {
+function createCursor(tok: HTMLElement) {
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
 
   const cursor = Cursor.create({
-    document: doc,
     tokenizer,
     seat: tok,
     onCursorChange: () => {},
@@ -52,7 +51,7 @@ describe('splitAtToken', () => {
   test('CURSOR_APPEND', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
     cursor.setInsertState('CURSOR_APPEND');
 
     // act
@@ -60,13 +59,13 @@ describe('splitAtToken', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('world');
-    expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+    expect(doc.root.querySelectorAll('p')).toHaveLength(2);
   });
 
   test('CURSOR_INSERT_AFTER', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
     cursor.setInsertState('CURSOR_INSERT_AFTER');
 
     // act
@@ -74,26 +73,26 @@ describe('splitAtToken', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('world');
-    expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+    expect(doc.root.querySelectorAll('p')).toHaveLength(2);
   });
 
   test('default split before current TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     cursor.splitAtToken();
 
     // assert
     expect(identify(cursor.getPlace())).toBe('foo');
-    expect(cursor.getDocument().root.querySelectorAll('p')).toHaveLength(2);
+    expect(doc.root.querySelectorAll('p')).toHaveLength(2);
   });
 
   test.todo('ANCHOR_ISLAND_EDGE_CASE - split after first TOKEN that precedes an ISLAND', () => {
     // arrange — the TOKEN is the only TOKEN on the LINE, followed by an ISLAND
     const doc = makeRoot(p(t('foo'), s(), '<span class="katex" style="display:inline;">x²</span>'));
-    const { cursor } = createCursor(doc, tokens(doc)[0]); // foo
+    const { cursor } = createCursor(tokens(doc)[0]); // foo
     cursor.setInsertState('CURSOR_APPEND');
 
     // act
@@ -128,7 +127,7 @@ describe('replaceWithText', () => {
   test('TOKEN text', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'hello'));
+    const { cursor } = createCursor(findTokenByText(doc.root, 'hello'));
 
     // act
     cursor.replaceWithText('goodbye');
@@ -143,7 +142,7 @@ describe('replaceWithText', () => {
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'bbb'));
+    const { cursor } = createCursor(findTokenByText(doc.root, 'bbb'));
 
     // act
     cursor.replaceWithText('ccc');
@@ -158,7 +157,7 @@ describe('replaceWithText', () => {
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
+    const { cursor } = createCursor(island);
     expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
@@ -171,7 +170,7 @@ describe('replaceWithText', () => {
   test('multiple TOKEN replacement', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'hello'));
+    const { cursor } = createCursor(findTokenByText(doc.root, 'hello'));
 
     // act
     const result = cursor.replaceWithText('goodbye friend');
@@ -191,7 +190,7 @@ describe('replaceWithText', () => {
   test('multi-word on last TOKEN → no trailing separator', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'world'));
+    const { cursor } = createCursor(findTokenByText(doc.root, 'world'));
 
     // act
     cursor.replaceWithText('aaa bbb');
@@ -212,7 +211,7 @@ describe('insertTextAfter', () => {
   test('multiple TOKEN insert after', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
 
     // act
     cursor.insertTextAfter('new words');
@@ -236,7 +235,7 @@ describe('insertTextBefore', () => {
   test('multiple TOKEN insert before', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     const result = cursor.insertTextBefore('new words');
@@ -263,7 +262,7 @@ describe('delete', () => {
       )
     );
     const hello = findTokenByText(doc.root, 'hello');
-    const { cursor } = createCursor(doc, hello);
+    const { cursor } = createCursor(hello);
 
     // act
     cursor.delete();
@@ -290,7 +289,7 @@ describe('delete', () => {
       )
     );
     const world = findTokenByText(doc.root, 'world');
-    const { cursor } = createCursor(doc, world);
+    const { cursor } = createCursor(world);
 
     // act
     cursor.delete();
@@ -308,7 +307,7 @@ describe('delete', () => {
     // arrange
     const doc = makeRoot(t('aaa'));
     const aaa = findTokenByText(doc.root, 'aaa');
-    const { cursor } = createCursor(doc, aaa);
+    const { cursor } = createCursor(aaa);
 
     // act
     cursor.delete();
@@ -334,7 +333,7 @@ describe('delete', () => {
   test('only ANCHOR in doc', () => {
     // arrange
     const doc = makeRoot(a());
-    const { cursor } = createCursor(doc, doc.root.firstChild as HTMLElement);
+    const { cursor } = createCursor(doc.root.firstChild as HTMLElement);
 
     // act
     cursor.delete();
@@ -358,7 +357,7 @@ describe('delete', () => {
       )
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
+    const { cursor } = createCursor(island);
     expect(identify(cursor.getPlace())).toBe('[island:span]');
 
     // act
@@ -376,7 +375,7 @@ describe('delete', () => {
         a()
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
     expect(identify(cursor.getPlace())).toBe('[anchor]');
 
     // act
@@ -395,7 +394,7 @@ describe('delete', () => {
         t('foo')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
     expect(identify(cursor.getPlace())).toBe('foo');
 
     // act
@@ -415,7 +414,7 @@ describe('delete', () => {
         em({ id: 'em1', style: inlineStyleHackVal }, t('foo'))
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
     expect(identify(cursor.getPlace())).toBe('foo');
 
     // act
@@ -439,7 +438,7 @@ describe('delete', () => {
         t('ccc')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
     expect(identify(cursor.getPlace())).toBe('bbb');
 
     // act
@@ -462,7 +461,7 @@ describe('delete', () => {
         t('ccc')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
     expect(identify(cursor.getPlace())).toBe('[anchor]');
 
     // act
@@ -494,7 +493,7 @@ describe('delete', () => {
       )
     );
     expect(identify(tokens(doc)[1])).toEqual('bbb');
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     cursor.delete();
@@ -516,7 +515,7 @@ describe('delete', () => {
       )
     );
     expect(identify(tokens(doc)[1])).toEqual('bbb');
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     cursor.delete();
@@ -532,7 +531,7 @@ describe('joinNext', () => {
   test('next TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
 
     // act
     cursor.joinNext();
@@ -554,7 +553,7 @@ describe('joinNext', () => {
         t('ccc')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     cursor.joinNext();
@@ -569,7 +568,7 @@ describe('joinNext', () => {
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
+    const { cursor } = createCursor(island);
 
     // act
     cursor.joinNext();
@@ -581,7 +580,7 @@ describe('joinNext', () => {
   test('next INLINE_FLOW no-op', () => {
     // arrange
     const doc = makeRoot(p(t('aaa'), s(), em(inlineStyle, t('bbb'))));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const { cursor } = createCursor(tokens(doc)[0]);
 
     // act
     cursor.joinNext();
@@ -595,7 +594,7 @@ describe('joinPrevious', () => {
   test('previous TOKEN', () => {
     // arrange
     const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     cursor.joinPrevious();
@@ -617,7 +616,7 @@ describe('joinPrevious', () => {
         t('ccc')
       )
     );
-    const { cursor } = createCursor(doc, tokens(doc)[2]);
+    const { cursor } = createCursor(tokens(doc)[2]);
 
     // act
     cursor.joinPrevious();
@@ -632,7 +631,7 @@ describe('joinPrevious', () => {
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
     const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
+    const { cursor } = createCursor(island);
 
     // act
     cursor.joinPrevious();
@@ -644,7 +643,7 @@ describe('joinPrevious', () => {
   test('previous INLINE_FLOW no-op', () => {
     // arrange
     const doc = makeRoot(p(em(inlineStyle, t('aaa')), s(), t('bbb')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
+    const { cursor } = createCursor(tokens(doc)[1]);
 
     // act
     cursor.joinPrevious();

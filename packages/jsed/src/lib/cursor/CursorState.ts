@@ -1,9 +1,6 @@
-import type { JsedDocument } from '../../JsedDocument.js';
 import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { Tokenizer } from '../token/Tokenizer.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
-import { CursorMotion } from './CursorMotion.js';
-import { CursorTextOps } from './CursorTextOps.js';
 import { isSameLine } from '../core/line.js';
 import type { UndoRecorder } from '../undo/UndoRecorder.js';
 
@@ -50,7 +47,6 @@ export type CursorError =
     };
 
 export type CursorParams = {
-  document: JsedDocument;
   tokenizer: Tokenizer;
   seat: HTMLElement;
   undo?: UndoRecorder;
@@ -61,22 +57,16 @@ export type CursorParams = {
 export class CursorState {
   constructor(params: CursorParams) {
     this.seat = params.seat; // ts needs this before setToken
-    this.document = params.document;
     this.onCursorChange = params.onCursorChange;
     this.onError = params.onError;
     this.tokenizer = params.tokenizer;
     this.undo = params.undo;
-    this.motion = CursorMotion.create(this);
-    this.ops = CursorTextOps.create(this);
   }
 
-  ops: CursorTextOps;
-  motion: CursorMotion;
   /**
    * The LINE_SIBLING the CURSOR is on.
    */
   seat: HTMLElement;
-  document: JsedDocument;
   onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void;
   classes: string[] = [];
   /**
@@ -93,11 +83,6 @@ export class CursorState {
   onError: (err: CursorError) => void;
   tokenizer: Tokenizer;
   undo?: UndoRecorder;
-
-  /** Return the JsedDocument that owns this CURSOR session. */
-  getDocument() {
-    return this.document;
-  }
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {
@@ -119,9 +104,6 @@ export class CursorState {
     this.removeAllClasses();
     this.seat = el;
     this.addClasses(JSED_CURSOR_CLASS);
-    this.document.viewportScroller.scrollIntoViewIfHidden(el, {
-      vertical: 'nearest'
-    });
     this.onCursorChange(el, opts);
   }
 

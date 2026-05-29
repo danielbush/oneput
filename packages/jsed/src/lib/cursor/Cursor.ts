@@ -1,31 +1,31 @@
-import { CursorMotion } from './CursorMotion.js';
 import { CursorState, type CursorInsertState, type CursorParams } from './CursorState.js';
 import { CursorTextOps, type CursorDeleteOpts } from './CursorTextOps.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { type UndoRecord } from '../undo/index.js';
+import type { EditorState } from '../editor/EditorState.js';
 
 /**
  * Public CURSOR facade for the editing session.
  */
 export class Cursor {
-  static create(params: CursorParams) {
+  static create(state: EditorState, params: CursorParams) {
     const cursorState = new CursorState(params);
-    return new Cursor(cursorState);
+    const ops = CursorTextOps.create(state, cursorState);
+    return new Cursor(cursorState, ops);
   }
 
-  static createNull(params: CursorParams) {
+  static createNull(state: EditorState, params: CursorParams) {
     const cursorState = new CursorState(params);
-    return new Cursor(cursorState);
+    const ops = CursorTextOps.create(state, cursorState);
+    return new Cursor(cursorState, ops);
   }
 
   #state: CursorState;
   #ops: CursorTextOps;
-  #motion: CursorMotion;
 
-  constructor(cursorState: CursorState) {
+  constructor(cursorState: CursorState, ops: CursorTextOps) {
     this.#state = cursorState;
-    this.#motion = this.#state.motion;
-    this.#ops = this.#state.ops;
+    this.#ops = ops;
   }
 
   _undo = (result?: UndoRecord) => {
@@ -34,7 +34,6 @@ export class Cursor {
   };
 
   destroy = () => this.#state.destroy();
-  getDocument = () => this.#state.getDocument();
   place = (el: HTMLElement, opts?: UserInputOpts) => this.#state.place(el, opts);
   getPlace = () => this.#state.getPlace();
   reload = () => this.#state.reload();
@@ -52,8 +51,8 @@ export class Cursor {
   isInsertingBefore = () => this.#state.isInsertingBefore();
 
   // motion
-  moveNext = () => this.#motion.moveNext();
-  movePrevious = () => this.#motion.movePrevious();
+  moveNext = () => this.#ops.moveNext();
+  movePrevious = () => this.#ops.movePrevious();
 
   // edit text
   delete = (opts?: CursorDeleteOpts) => this._undo(this.#ops.delete(opts));

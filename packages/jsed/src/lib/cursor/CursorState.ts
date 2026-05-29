@@ -1,6 +1,7 @@
 import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { isSameLine } from '../core/line.js';
+import type { CursorSelection } from '../selection/CursorSelection.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
@@ -53,21 +54,21 @@ export class CursorState {
      */
     private seat: HTMLElement,
     public onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void,
-    public onError: (err: CursorError) => void
+    public onError: (err: CursorError) => void,
+    public selection?: CursorSelection,
+    private classes: string[] = [],
+    /**
+     * Last input selection state observed via setStateFromSelection. Used as
+     * the model for visual derivation; reset on `place()` since a new TOKEN
+     * starts a fresh editing session.
+     */
+    private lastSelection: UserInputSelectionState | null = null,
+    /**
+     * Last input value observed via setStateFromInput. Paired with
+     * `#lastSelection` to derive the marker class.
+     */
+    private lastInputValue = ''
   ) {}
-
-  classes: string[] = [];
-  /**
-   * Last input selection state observed via setStateFromSelection. Used as
-   * the model for visual derivation; reset on `place()` since a new TOKEN
-   * starts a fresh editing session.
-   */
-  lastSelection: UserInputSelectionState | null = null;
-  /**
-   * Last input value observed via setStateFromInput. Paired with
-   * `#lastSelection` to derive the marker class.
-   */
-  lastInputValue = '';
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {

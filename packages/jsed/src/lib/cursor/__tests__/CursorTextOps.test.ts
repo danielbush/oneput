@@ -14,7 +14,7 @@ import {
 } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../token/Tokenizer.js';
-import { CursorOps } from '../CursorOps.js';
+import { Cursor } from '../Cursor.js';
 import { getSeparatorAfter } from '../../token/space.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
@@ -27,7 +27,7 @@ function createCursor(tok: HTMLElement) {
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
 
-  const cursor = CursorOps.create({
+  const cursor = Cursor.create({
     tokenizer,
     seat: tok,
     onCursorChange: () => {},

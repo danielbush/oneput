@@ -10,7 +10,7 @@ import {
 import * as token from '../token/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import { CursorSelection } from '../selection/CursorSelection.js';
-import { CursorOps } from '../cursor/CursorOps.js';
+import { Cursor } from '../cursor/Cursor.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
@@ -90,7 +90,7 @@ export class EditorOps {
       this.state.nav.FOCUS(line);
       this.state.userInput.focus();
       if (!this.state.cursor) {
-        this.state.cursor = CursorOps.create(targetLineSibling, this.state);
+        this.state.cursor = Cursor.create(targetLineSibling, this.state);
       }
       this.state.cursor.place(targetLineSibling); // calls handleCursorChange
       this.state.setMode('edit');

@@ -1,7 +1,7 @@
 import { deleteHighestEmpty, isEmpty } from '../focus/focusable.js';
 import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../token/token.js';
-import { CursorOps } from '../cursor/CursorOps.js';
+import { Cursor } from '../cursor/Cursor.js';
 import type { JsedDocument } from '../../types.js';
 import type { Tokenizer } from '../token/Tokenizer.js';
 import { createAnchor } from '../token/anchor.js';
@@ -29,7 +29,7 @@ export class CursorSelection {
   }
 
   private anchor: HTMLElement;
-  private headCursor: CursorOps;
+  private headCursor: Cursor;
   private root: HTMLElement;
   /** Ordered front → back, one per contiguous same-parent run. */
   private wrappers: HTMLElement[] = [];
@@ -40,7 +40,7 @@ export class CursorSelection {
   ) {
     this.anchor = params.seed;
     this.root = params.document.root;
-    this.headCursor = CursorOps.create(params.seed, state);
+    this.headCursor = Cursor.create(params.seed, state);
     this.wrappers.push(this.openWrapper(params.seed));
   }
 

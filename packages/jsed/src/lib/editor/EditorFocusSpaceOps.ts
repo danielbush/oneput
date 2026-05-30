@@ -39,7 +39,7 @@ export class EditorFocusSpaceOps {
 
     const inserted = space.insertSpaceAfterTag(focus);
     if (inserted) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'trailing-space',
         change: 'inserted'
@@ -57,7 +57,7 @@ export class EditorFocusSpaceOps {
 
     const removed = space.removeSpaceAfterTag(focus);
     if (removed) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'trailing-space',
         change: 'removed'
@@ -75,7 +75,7 @@ export class EditorFocusSpaceOps {
 
     const inserted = space.insertSpaceBeforeTag(focus);
     if (inserted) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'leading-space',
         change: 'inserted'
@@ -93,7 +93,7 @@ export class EditorFocusSpaceOps {
 
     const removed = space.removeSpaceBeforeTag(focus);
     if (removed) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'leading-space',
         change: 'removed'

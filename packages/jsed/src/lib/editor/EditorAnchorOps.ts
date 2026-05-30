@@ -40,7 +40,11 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.eventsEmitter.onTextChange?.({
+      type: 'anchor-change',
+      anchor,
+      change: 'inserted'
+    });
     this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
@@ -61,7 +65,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'inserted' });
     this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }
@@ -82,7 +86,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
@@ -102,7 +106,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'removed' });
+    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
@@ -122,7 +126,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.notifyTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'inserted' });
     this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
     return true;
   }

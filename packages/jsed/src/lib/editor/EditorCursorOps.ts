@@ -36,7 +36,7 @@ export class EditorCursorOps {
 
     const inserted = !!space.insertSpaceBeforeToken(this.state.cursor.getPlace());
     if (inserted) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'leading-space',
         change: 'inserted'
@@ -53,7 +53,7 @@ export class EditorCursorOps {
 
     const inserted = !!space.insertSpaceAfterToken(this.state.cursor.getPlace());
     if (inserted) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'trailing-space',
         change: 'inserted'
@@ -70,7 +70,7 @@ export class EditorCursorOps {
 
     const removed = !!space.removeSpaceBeforeToken(this.state.cursor.getPlace());
     if (removed) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'leading-space',
         change: 'removed'
@@ -87,7 +87,7 @@ export class EditorCursorOps {
 
     const removed = !!space.removeSpaceAfterToken(this.state.cursor.getPlace());
     if (removed) {
-      this.state.notifyTextChange({
+      this.state.eventsEmitter.onTextChange?.({
         type: 'whitespace-change',
         kind: 'trailing-space',
         change: 'removed'
@@ -104,7 +104,7 @@ export class EditorCursorOps {
 
     const inserted = this.state.cursor.splitAtToken();
     if (inserted) {
-      this.state.notifyElementChange({
+      this.state.eventsEmitter.onElementChange?.({
         type: 'focusable-inserted',
         element: inserted.topSplit.peer
       });

@@ -34,20 +34,17 @@ export class CursorTextOps {
     return new CursorTextOps(cursor);
   }
 
-  private constructor(
-    private state: CursorState,
-    private editorState = state.editorState
-  ) {}
+  private constructor(private state: CursorState) {}
 
   getNext(): HTMLElement | null {
-    const next = getNextLineSibling(this.state.getPlace(), this.editorState.document.root);
+    const next = getNextLineSibling(this.state.getPlace(), this.state.document.root);
     if (!next) {
       return null;
     }
 
     // We may get a text node because we do SHALLOW_TOKENIZATION.
     if (isTokenizableTextNode(next)) {
-      const { tokens } = this.editorState.tokenizer.tokenizeLineAtTextNode(next);
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(next);
       if (tokens[0]) {
         return tokens[0];
       }
@@ -74,13 +71,13 @@ export class CursorTextOps {
   }
 
   getPrevious(): HTMLElement | null {
-    const prev = getPreviousLineSibling(this.state.getPlace(), this.editorState.document.root);
+    const prev = getPreviousLineSibling(this.state.getPlace(), this.state.document.root);
     if (!prev) {
       return null;
     }
 
     if (isTokenizableTextNode(prev)) {
-      const { tokens } = this.editorState.tokenizer.tokenizeLineAtTextNode(prev);
+      const { tokens } = this.state.tokenizer.tokenizeLineAtTextNode(prev);
       if (tokens.length > 0) {
         return tokens[tokens.length - 1];
       }
@@ -153,7 +150,7 @@ export class CursorTextOps {
 
     const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
     if (canDeleteAncestors) {
-      const op = deleteHighestEmpty(current.parentElement, this.editorState.document.root);
+      const op = deleteHighestEmpty(current.parentElement, this.state.document.root);
       if (op) {
         undo.ops.push({ action: 'place-cursor', target: current });
         undo.ops.push(op);
@@ -295,7 +292,7 @@ export class CursorTextOps {
     }
     token.insertAfter(el, this.state.getPlace());
 
-    const first = this.editorState.tokenizer.tokenizeLineAt(el);
+    const first = this.state.tokenizer.tokenizeLineAt(el);
     if (first) {
       this.state.place(first);
     }
@@ -308,7 +305,7 @@ export class CursorTextOps {
     }
     token.insertBefore(el, this.state.getPlace());
 
-    const first = this.editorState.tokenizer.tokenizeLineAt(el);
+    const first = this.state.tokenizer.tokenizeLineAt(el);
     if (first) {
       this.state.place(first);
     }
@@ -361,7 +358,7 @@ export class CursorTextOps {
       this.state.cancelSelection();
 
       for (const wrapper of wrappers) {
-        this.state.editorState.notifyElementChange({
+        this.state.eventsEmitter.onElementChange?.({
           type: 'focusable-inserted',
           element: wrapper
         });
@@ -375,7 +372,7 @@ export class CursorTextOps {
       return false;
     }
 
-    this.state.editorState.notifyElementChange({ type: 'focusable-inserted', element: wrapper });
+    this.state.eventsEmitter.onElementChange?.({ type: 'focusable-inserted', element: wrapper });
     this.state.place(current);
     return true;
   }

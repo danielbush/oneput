@@ -2,8 +2,11 @@ import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { isSameLine } from '../core/line.js';
 import { CursorSelection } from './CursorSelection.js';
-import type { EditorState } from '../editor/EditorState.js';
 import { CursorTextOps } from './CursorTextOps.js';
+import type { JsedDocument } from '../../JsedDocument.js';
+import type { Tokenizer } from '../ops/Tokenizer.js';
+import type { UndoRecorder } from '../undo/UndoRecorder.js';
+import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
@@ -51,13 +54,16 @@ export type CursorParams = {};
 
 export class CursorState {
   constructor(
-    public editorState: EditorState,
     /**
      * The LINE_SIBLING the CURSOR is on.
      */
     private seat: HTMLElement,
+    public document: JsedDocument,
+    public tokenizer: Tokenizer,
+    public undo: UndoRecorder,
     public onCursorChange: (token?: HTMLElement, opts?: UserInputOpts) => void,
     public onError: (err: CursorError) => void,
+    public eventsEmitter: EditorEventsEmitter,
     public selection?: CursorSelection,
     private classes: string[] = [],
     /**
@@ -116,7 +122,7 @@ export class CursorState {
       this.selection = CursorSelection.create({
         cursor: this,
         seed: this.seat,
-        root: this.editorState.document.root
+        root: this.document.root
       });
     }
     return this.selection;

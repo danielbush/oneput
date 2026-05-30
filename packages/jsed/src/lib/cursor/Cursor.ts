@@ -1,40 +1,42 @@
-import { CursorState, type CursorInsertState } from './CursorState.js';
+import { CursorState, type CursorError, type CursorInsertState } from './CursorState.js';
 import { type CursorDeleteOpts } from './CursorTextOps.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
-import { type UndoRecord } from '../undo/index.js';
-import type { EditorState } from '../editor/EditorState.js';
+import { UndoRecorder, type UndoRecord } from '../undo/index.js';
+import type { JsedDocument } from '../../JsedDocument.js';
+import type { Tokenizer } from '../ops/Tokenizer.js';
+import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
 
 /**
  * Public CURSOR facade for the editing session.
  */
 export class Cursor {
-  static create(seat: HTMLElement, state: EditorState) {
+  static create(
+    seat: HTMLElement,
+    params: {
+      document: JsedDocument;
+      tokenizer: Tokenizer;
+      onCursorChange: (el?: HTMLElement) => void;
+      onCursorError: (err: CursorError) => void;
+      eventsEmitter: EditorEventsEmitter;
+      undo: UndoRecorder;
+    }
+  ) {
     const cursorState = new CursorState(
-      state,
       seat,
-      state.controller.onCursorChange,
-      state.controller.onCursorError
+      params.document,
+      params.tokenizer,
+      params.undo,
+      params.onCursorChange,
+      params.onCursorError,
+      params.eventsEmitter
     );
-    return new Cursor(state, cursorState);
+    return new Cursor(cursorState);
   }
 
-  static createNull(seat: HTMLElement, state: EditorState) {
-    const cursorState = new CursorState(
-      state,
-      seat,
-      state.controller.onCursorChange,
-      state.controller.onCursorError
-    );
-    return new Cursor(state, cursorState);
-  }
-
-  constructor(
-    private editorState: EditorState,
-    private state: CursorState
-  ) {}
+  constructor(private state: CursorState) {}
 
   _undo = (result?: UndoRecord) => {
-    this.editorState.undo?.record(result);
+    this.state.undo?.record(result);
     return result;
   };
 

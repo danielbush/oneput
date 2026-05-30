@@ -171,7 +171,14 @@ export class EditorState {
       this.nav.FOCUS(line);
       this.userInput.focus();
       if (!this.cursor) {
-        this.cursor = Cursor.create(targetLineSibling, this);
+        this.cursor = Cursor.create(targetLineSibling, {
+          document: this.document,
+          tokenizer: this.tokenizer,
+          undo: this.undo,
+          onCursorChange: this.controller.onCursorChange,
+          onCursorError: this.controller.onCursorError,
+          eventsEmitter: this.eventsEmitter
+        });
       }
       this.cursor.place(targetLineSibling); // calls handleCursorChange
       return ok(undefined);
@@ -220,14 +227,6 @@ export class EditorState {
 
   isEditing(): boolean {
     return !!this.cursor;
-  }
-
-  notifyTextChange(event: EditorTextChangeEvent) {
-    this.eventsEmitter.onTextChange?.(event);
-  }
-
-  notifyElementChange(event: EditorElementChangeEvent) {
-    this.eventsEmitter.onElementChange?.(event);
   }
 
   enableLegacyElementIndicator(bool: boolean) {

@@ -5,7 +5,7 @@ import type {
 } from './EditorState.js';
 
 /**
- * Responsible for emitting events to subscribes outside of Editor.
+ * Responsible for emitting events to subscribers outside of Editor.
  */
 export class EditorEventsEmitter {
   static create() {

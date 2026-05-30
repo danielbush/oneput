@@ -60,7 +60,7 @@ export class EditorFocusOps {
     if (!inserted) {
       return false;
     }
-    this.state.notifyElementChange({
+    this.state.eventsEmitter.onElementChange?.({
       type: 'focusable-inserted',
       element: inserted
     });
@@ -108,7 +108,7 @@ export class EditorFocusOps {
       return false;
     }
 
-    this.state.notifyElementChange({
+    this.state.eventsEmitter.onElementChange?.({
       type: 'focusable-inserted',
       element: inserted
     });
@@ -148,7 +148,7 @@ export class EditorFocusOps {
     if (!inserted) {
       return false;
     }
-    this.state.notifyElementChange({
+    this.state.eventsEmitter.onElementChange?.({
       type: 'focusable-inserted',
       element: inserted
     });
@@ -184,7 +184,7 @@ export class EditorFocusOps {
       parent;
 
     focusable.deleteElement(focus);
-    this.state.notifyElementChange({
+    this.state.eventsEmitter.onElementChange?.({
       type: 'focusable-removed',
       element: focus
     });

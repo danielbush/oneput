@@ -187,7 +187,10 @@ export class EditorOps {
 
       case 'delete-current': {
         cursor.delete({ type: intent.deletionType });
-        this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
+        this.state.eventsEmitter.onTextChange?.({
+          type: 'token-text-change',
+          token: cursor.getPlace()
+        });
         cursor.setStateFromInput(intent.inputValue);
         return;
       }
@@ -202,7 +205,10 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
+          this.state.eventsEmitter.onTextChange?.({
+            type: 'token-text-change',
+            token: cursor.getPlace()
+          });
         }
         return;
       }
@@ -218,7 +224,10 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
+          this.state.eventsEmitter.onTextChange?.({
+            type: 'token-text-change',
+            token: cursor.getPlace()
+          });
         }
         return;
       }
@@ -229,7 +238,10 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (result) {
-          this.state.notifyTextChange({ type: 'token-text-change', token: cursor.getPlace() });
+          this.state.eventsEmitter.onTextChange?.({
+            type: 'token-text-change',
+            token: cursor.getPlace()
+          });
         }
         return;
       }

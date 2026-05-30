@@ -1,7 +1,6 @@
 import type {
   EditorElementChangeEvent,
   EditorError,
-  EditorMode,
   EditorTextChangeEvent
 } from './EditorState.js';
 
@@ -17,22 +16,19 @@ export class EditorEventsEmitter {
    * A callback that Editor or one of its helpers can call with errors.
    */
   onError?: (err: EditorError) => void;
-  onModeChange?: (mode: EditorMode) => void;
   onFocusChange?: (focus: HTMLElement | null) => void;
-  onCursorChange?: (target: HTMLElement) => void;
+  onCursorChange?: (target?: HTMLElement) => void;
   onTextChange?: (event: EditorTextChangeEvent) => void;
   onElementChange?: (event: EditorElementChangeEvent) => void;
 
   subscribe(subscriptions?: {
     onError?: (err: EditorError) => void;
-    onModeChange?: (mode: EditorMode) => void;
     onFocusChange?: (focus: HTMLElement | null) => void;
-    onCursorChange?: (target: HTMLElement) => void;
+    onCursorChange?: (target?: HTMLElement) => void;
     onTextChange?: (event: EditorTextChangeEvent) => void;
     onElementChange?: (event: EditorElementChangeEvent) => void;
   }) {
     this.onError = subscriptions?.onError;
-    this.onModeChange = subscriptions?.onModeChange;
     this.onFocusChange = subscriptions?.onFocusChange;
     this.onCursorChange = subscriptions?.onCursorChange;
     this.onTextChange = subscriptions?.onTextChange;
@@ -41,7 +37,6 @@ export class EditorEventsEmitter {
 
   destroy() {
     this.onError = undefined;
-    this.onModeChange = undefined;
     this.onFocusChange = undefined;
     this.onCursorChange = undefined;
     this.onTextChange = undefined;

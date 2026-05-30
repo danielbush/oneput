@@ -13,38 +13,24 @@ export class EditorCursorOps {
 
   canRemoveSpaceBefore(): boolean {
     return (
-      this.state.mode === 'edit' &&
-      !!this.state.cursor &&
-      !!space.getRemovableSpaceBeforeToken(this.state.cursor.getPlace())
+      !!this.state.cursor && !!space.getRemovableSpaceBeforeToken(this.state.cursor.getPlace())
     );
   }
 
   canRemoveSpaceAfter(): boolean {
-    return (
-      this.state.mode === 'edit' &&
-      !!this.state.cursor &&
-      !!space.getRemovableSpaceAfterToken(this.state.cursor.getPlace())
-    );
+    return !!this.state.cursor && !!space.getRemovableSpaceAfterToken(this.state.cursor.getPlace());
   }
 
   canInsertSpaceBefore(): boolean {
-    return (
-      this.state.mode === 'edit' &&
-      !!this.state.cursor &&
-      space.canInsertSpaceBeforeToken(this.state.cursor.getPlace())
-    );
+    return !!this.state.cursor && space.canInsertSpaceBeforeToken(this.state.cursor.getPlace());
   }
 
   canInsertSpaceAfter(): boolean {
-    return (
-      this.state.mode === 'edit' &&
-      !!this.state.cursor &&
-      space.canInsertSpaceAfterToken(this.state.cursor.getPlace())
-    );
+    return !!this.state.cursor && space.canInsertSpaceAfterToken(this.state.cursor.getPlace());
   }
 
   insertSpaceBefore(): boolean {
-    if (this.state.mode !== 'edit' || !this.state.cursor) {
+    if (!this.state.cursor) {
       return false;
     }
 
@@ -61,7 +47,7 @@ export class EditorCursorOps {
   }
 
   insertSpaceAfter(): boolean {
-    if (this.state.mode !== 'edit' || !this.state.cursor) {
+    if (!this.state.cursor) {
       return false;
     }
 
@@ -78,7 +64,7 @@ export class EditorCursorOps {
   }
 
   removeSpaceBefore(): boolean {
-    if (this.state.mode !== 'edit' || !this.state.cursor) {
+    if (!this.state.cursor) {
       return false;
     }
 
@@ -95,7 +81,7 @@ export class EditorCursorOps {
   }
 
   removeSpaceAfter(): boolean {
-    if (this.state.mode !== 'edit' || !this.state.cursor) {
+    if (!this.state.cursor) {
       return false;
     }
 
@@ -112,7 +98,7 @@ export class EditorCursorOps {
   }
 
   splitAtCursor() {
-    if (this.state.mode !== 'edit' || !this.state.cursor) {
+    if (!this.state.cursor) {
       return false;
     }
 

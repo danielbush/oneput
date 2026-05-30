@@ -43,7 +43,7 @@ export class EditorController {
    */
   onInputChange = (change: UserInputChange) => {
     if (this.state.isSuspended) return;
-    if (this.state.mode !== 'edit' || !this.state.cursor || !this.state.cursor.isOnToken()) {
+    if (!this.state.cursor || !this.state.cursor.isOnToken()) {
       return;
     }
     // If a selection is active, reduce it to the START (earlier end in
@@ -70,7 +70,7 @@ export class EditorController {
    */
   onInputSelectionChange = (selection: UserInputSelectionState) => {
     if (this.state.isSuspended) return;
-    if (this.state.mode !== 'edit' || !this.state.cursor || !this.state.cursor.isOnToken()) {
+    if (!this.state.cursor || !this.state.cursor.isOnToken()) {
       return;
     }
     this.state.cursor?.setStateFromSelection(selection);
@@ -86,15 +86,17 @@ export class EditorController {
    * the user's in-flight input value is not clobbered by the head TOKEN's
    * pre-rewrite value.
    */
-  onCursorChange = (seat: HTMLElement, opts?: UserInputOpts) => {
-    this.state.document.viewportScroller.scrollIntoViewIfHidden(seat, {
-      vertical: 'nearest'
-    });
-    this.state.tokenizer.setCursorElement(seat);
-    this.state.nav?.FOCUS(seat);
+  onCursorChange = (seat?: HTMLElement, opts?: UserInputOpts) => {
     this.state.eventsEmitter.onCursorChange?.(seat);
-    if (opts?.syncInput !== false) {
-      this.state.ops.syncInput(seat, opts?.inputCursorPosition);
+    if (seat) {
+      this.state.document.viewportScroller.scrollIntoViewIfHidden(seat, {
+        vertical: 'nearest'
+      });
+      this.state.tokenizer.setCursorElement(seat);
+      this.state.nav?.FOCUS(seat);
+      if (opts?.syncInput !== false) {
+        this.state.ops.syncInput(seat, opts?.inputCursorPosition);
+      }
     }
   };
 
@@ -102,7 +104,7 @@ export class EditorController {
    * When the user causes a FOCUS change (click, touch, key bindings)...
    */
   onFocusRequest = (evt: JsedFocusRequestEvent) => {
-    if (this.state.mode === 'view') {
+    if (!this.state.cursor) {
       return this.onFocusRequestInViewMode(evt);
     }
 
@@ -171,7 +173,7 @@ export class EditorController {
     }
     // Pre-tokenize line
     // If focus IS a TOKEN, then we handled it in onFocusRequest already.
-    if (this.state.mode === 'view' && focus && !isToken(focus)) {
+    if (!this.state.cursor && focus && !isToken(focus)) {
       const line = findNextEditableLine(focus, this.state.document.root);
       if (line) {
         this.state.tokenizer.tokenizeLineAt(line);

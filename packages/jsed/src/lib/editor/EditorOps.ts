@@ -35,7 +35,7 @@ export class EditorOps {
    */
   handleEnter(): Result<void, EditorError> {
     // This allows us to edit via the "Edit..." menu .
-    if (this.state.mode === 'view') {
+    if (!this.state.cursor) {
       return this.state.enterEditing();
     }
 
@@ -62,7 +62,7 @@ export class EditorOps {
     if (this.state.cursor?.cancelSelection()) {
       return true;
     }
-    if (this.state.mode === 'edit') {
+    if (this.state.cursor) {
       this.state.exitEditing({ softExit });
       return true;
     }

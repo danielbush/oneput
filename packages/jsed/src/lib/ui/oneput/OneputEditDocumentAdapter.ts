@@ -66,9 +66,6 @@ export class OneputEditDocumentAdapter {
   private subscribeEditChanges = () => {
     this.editor.eventsEmitter.subscribe({
       onError: (err) => this.onEditError(err),
-      onModeChange: () => {
-        this.onRenderMenuItems();
-      },
       onFocusChange: () => {
         this.onRenderMenuItems();
       },

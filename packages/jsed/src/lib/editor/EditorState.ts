@@ -18,7 +18,6 @@ import { err, ok, type Result } from 'neverthrow';
 import { isCursorTransparent, isLineSibling } from '../core/taxonomy.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
-export type EditorMode = 'view' | 'edit';
 export type EditorTextChangeEvent =
   | {
       type: 'token-text-change';
@@ -92,7 +91,6 @@ export class EditorState {
     );
   }
 
-  public mode: EditorMode = 'view';
   public isSuspended: boolean = false;
   public cursor?: Cursor;
   /**
@@ -120,15 +118,6 @@ export class EditorState {
     public ops = EditorOps.create(this)
   ) {}
 
-  getMode(): EditorMode {
-    return this.mode;
-  }
-
-  setMode(mode: EditorMode) {
-    this.mode = mode;
-    this.eventsEmitter.onModeChange?.(mode);
-  }
-
   start(): void {
     this.nav.connect({
       onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
@@ -147,7 +136,7 @@ export class EditorState {
       this.userInput.setInputValue('');
       return;
     }
-    if (this.mode === 'edit') {
+    if (this.cursor) {
       this.enterEditing(this.cursor?.getPlace());
       this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
       this.cssElementIndicator.showIndicator(this.useElementIndicator && true);
@@ -155,7 +144,7 @@ export class EditorState {
   }
 
   /**
-   * Transition to 'edit' mode.
+   * Create cursor.
    */
   enterEditing(initial?: HTMLElement): Result<void, EditorError> {
     this.nav.connect({
@@ -185,7 +174,6 @@ export class EditorState {
         this.cursor = Cursor.create(targetLineSibling, this);
       }
       this.cursor.place(targetLineSibling); // calls handleCursorChange
-      this.setMode('edit');
       return ok(undefined);
     }
 
@@ -209,7 +197,6 @@ export class EditorState {
     this.cursor = undefined;
     this.tokenizer.setCursorElement(null);
     this.userInput.setInputValue('');
-    this.setMode('view');
 
     if (focusElement) {
       this.nav.FOCUS(focusElement);
@@ -232,7 +219,7 @@ export class EditorState {
   }
 
   isEditing(): boolean {
-    return this.mode === 'edit';
+    return !!this.cursor;
   }
 
   notifyTextChange(event: EditorTextChangeEvent) {

@@ -56,7 +56,7 @@ export class CursorState {
      * The LINE_SIBLING the CURSOR is on.
      */
     private seat: HTMLElement,
-    public onCursorChange: (token: HTMLElement, opts?: UserInputOpts) => void,
+    public onCursorChange: (token?: HTMLElement, opts?: UserInputOpts) => void,
     public onError: (err: CursorError) => void,
     public selection?: CursorSelection,
     private classes: string[] = [],
@@ -104,6 +104,7 @@ export class CursorState {
   destroy() {
     this.clearInsertState();
     this.removeAllClasses();
+    this.onCursorChange();
   }
 
   reload() {

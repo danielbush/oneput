@@ -47,7 +47,6 @@ export class Editor {
   destroy = () => this.state.destroy();
 
   // Modes - view, edit
-  getMode = () => this.state.getMode();
   isEditing = () => this.state.isEditing();
   enterEditing = (el?: HTMLElement) => this.state.enterEditing(el);
   exitEditing = (params?: { softExit?: boolean; focusElement?: HTMLElement }) =>

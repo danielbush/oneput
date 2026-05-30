@@ -3,6 +3,8 @@ import { makeRoot, p } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
+import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
+import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../../lib/ops/token.js';
 import {
   computeCursorState,
@@ -12,16 +14,18 @@ import {
   CURSOR_PREPEND_CLASS
 } from '../CursorState.js';
 
-function createCursor(_doc: JsedDocument, tok: HTMLElement) {
+function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
 
-  const cursor = Cursor.create({
+  const cursor = Cursor.create(tok, {
+    document: doc,
     tokenizer,
-    seat: tok,
-    onCursorChange: (t) => changes.push(getValue(t)),
-    onError: (err) => errors.push(err.type)
+    onCursorChange: (t) => t && changes.push(getValue(t)),
+    onCursorError: (err) => errors.push(err.type),
+    eventsEmitter: EditorEventsEmitter.create(),
+    undo: UndoRecorder.createNull()
   });
 
   return { cursor, changes, errors };

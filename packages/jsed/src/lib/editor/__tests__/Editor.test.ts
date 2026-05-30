@@ -15,9 +15,9 @@ import {
   t,
   ul
 } from '../../../test/util.js';
-import { getValue } from '../../token/token.js';
+import { getValue } from '../../ops/token.js';
 import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
-import { Tokenizer } from '../../token/Tokenizer.js';
+import { Tokenizer } from '../../ops/Tokenizer.js';
 import {
   isDeletedElement,
   isIsland,
@@ -58,7 +58,7 @@ describe('Editor', () => {
       editor.nav.REQUEST_FOCUS(p2);
 
       // assert
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p2);
       expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
 
@@ -80,7 +80,7 @@ describe('Editor', () => {
       editor.nav.REQUEST_FOCUS(p2);
 
       // assert
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p2);
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
       expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
@@ -107,7 +107,7 @@ describe('Editor', () => {
 
       // assert
       const retokenizedTokens = Array.from(p1.querySelectorAll('.jsed-token'));
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p1);
       expect(retokenizedTokens).toHaveLength(2);
       expect(retokenizedTokens).toEqual(originalTokens);
@@ -141,7 +141,7 @@ describe('Editor', () => {
       editor.nav.REQUEST_FOCUS(ignoredTarget);
 
       // assert
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p1);
       expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
       expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
@@ -174,7 +174,7 @@ describe('Editor', () => {
       await vi.runAllTimersAsync();
 
       // assert
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p4);
       expect(p1.querySelector('.jsed-token')).toBeNull();
       expect(p2.querySelector('.jsed-token')?.textContent).toBe('bbb');
@@ -203,15 +203,15 @@ describe('Editor', () => {
       editor.nav.REQUEST_FOCUS(p1FirstToken);
 
       // assert
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p1);
 
       // act
       editor.nav.REQUEST_FOCUS(p1FirstToken);
 
       // assert
-      expect(editor.getMode()).toBe('edit');
-      expect(editor.getCursor()).toBe(p1FirstToken);
+      expect(editor.isEditing()).toBe(true);
+      expect(editor.getCursor()?.getPlace()).toBe(p1FirstToken);
 
       editor.destroy();
     });
@@ -233,7 +233,7 @@ describe('Editor', () => {
       editor.nav.REQUEST_FOCUS(p2);
 
       // assert
-      expect(editor.getMode()).toBe('view');
+      expect(editor.isEditing()).toBe(false);
       expect(editor.nav.getFocus()).toBe(p2);
       expect(p2.querySelectorAll('.jsed-token')).toHaveLength(2);
 
@@ -255,7 +255,7 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('view');
+        expect(editor.isEditing()).toBe(false);
         expect(editor.nav.getFocus()).toBe(p1);
 
         editor.destroy();
@@ -497,10 +497,10 @@ describe('Editor', () => {
 
         // assert
         expect(result.isOk()).toBe(true);
-        expect(editor.getMode()).toBe('edit');
-        expect(editor.getCursor()).toBeDefined();
-        expect(isIsland(editor.getCursor())).toBe(true);
-        expect(editor.getCursor()?.classList.contains('katex')).toBe(true);
+        expect(editor.isEditing()).toBe(true);
+        expect(editor.getCursor()?.getPlace()).toBeDefined();
+        expect(isIsland(editor.getCursor()?.getPlace())).toBe(true);
+        expect(editor.getCursor()?.getPlace()?.classList.contains('katex')).toBe(true);
 
         editor.destroy();
       });
@@ -514,10 +514,10 @@ describe('Editor', () => {
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editor = createNullEditor(doc);
         editor.enterEditing(byId(doc, 'p1'));
-        const cursorToken = editor.getCursor() as HTMLElement;
+        const cursorToken = editor.getCursor()?.getPlace() as HTMLElement;
 
         // act
-        const wrapped = editor.cursorOps.wrap('em');
+        const wrapped = editor.getCursor()!.wrap('em');
 
         // assert
         const wrapper = byId(doc, 'p1').querySelector('em') as HTMLElement;
@@ -525,7 +525,7 @@ describe('Editor', () => {
         expect(wrapper).not.toBeNull();
         expect(wrapper.textContent).toBe('foo');
         expect(wrapper.firstElementChild).toBe(cursorToken);
-        expect(editor.getCursor()).toBe(cursorToken);
+        expect(editor.getCursor()?.getPlace()).toBe(cursorToken);
         expect(editor.nav.getFocus()).toBe(wrapper);
 
         editor.destroy();
@@ -538,18 +538,18 @@ describe('Editor', () => {
         );
         const editor = createNullEditor(doc);
         editor.enterEditing(byId(doc, 'd1'));
-        const island = editor.getCursor() as HTMLElement;
+        const island = editor.getCursor()?.getPlace() as HTMLElement;
 
         // act
-        const wrapped = editor.cursorOps.wrap('em');
+        const wrapped = editor.getCursor()!.wrap('em');
 
         // assert
         const wrapper = byId(doc, 'd1').querySelector('em') as HTMLElement;
         expect(wrapped).toBe(true);
         expect(wrapper).not.toBeNull();
         expect(wrapper.firstElementChild).toBe(island);
-        expect(isIsland(editor.getCursor())).toBe(true);
-        expect(editor.getCursor()).toBe(island);
+        expect(isIsland(editor.getCursor()?.getPlace())).toBe(true);
+        expect(editor.getCursor()?.getPlace()).toBe(island);
 
         editor.destroy();
       });
@@ -559,11 +559,11 @@ describe('Editor', () => {
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editor = createNullEditor(doc);
         editor.enterEditing(byId(doc, 'p1'));
-        const anchor = editor.getCursor() as HTMLElement;
+        const anchor = editor.getCursor()?.getPlace() as HTMLElement;
         editor.extendNext();
 
         // act
-        const wrapped = editor.cursorOps.wrap('strong');
+        const wrapped = editor.getCursor()!.wrap('strong');
 
         // assert
         const wrapper = byId(doc, 'p1').querySelector('strong') as HTMLElement;
@@ -571,7 +571,7 @@ describe('Editor', () => {
         expect(wrapper).not.toBeNull();
         expect(wrapper.textContent).toBe('foo bar');
         expect(doc.root.querySelector('.jsed-selection')).toBeNull();
-        expect(editor.getCursor()).toBe(anchor);
+        expect(editor.getCursor()?.getPlace()).toBe(anchor);
         expect(editor.nav.getFocus()).toBe(wrapper);
 
         editor.destroy();
@@ -587,7 +587,7 @@ describe('Editor', () => {
         editor.extendNext();
 
         // act
-        const wrapped = editor.cursorOps.wrap('strong');
+        const wrapped = editor.getCursor()!.wrap('strong');
 
         // assert
         const wrapper = byId(doc, 'd1').querySelector('strong') as HTMLElement;
@@ -614,8 +614,8 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(true);
-          expect(editor.getMode()).toBe('edit');
-          expect(editor.getCursor()?.textContent?.trim()).toBe('foo');
+          expect(editor.isEditing()).toBe(true);
+          expect(editor.getCursor()?.getPlace()?.textContent?.trim()).toBe('foo');
 
           editor.destroy();
         });
@@ -633,11 +633,11 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(true);
-          expect(editor.getMode()).toBe('edit');
+          expect(editor.isEditing()).toBe(true);
           expect(
             Array.from(line.querySelectorAll('.jsed-token')).map((token) => token.textContent)
           ).toEqual(['foo', 'bar', 'baz']);
-          expect(identify(editor.getCursor())).toBe('foo');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
 
           editor.destroy();
         });
@@ -665,13 +665,13 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(true);
-          expect(editor.getMode()).toBe('edit');
+          expect(editor.isEditing()).toBe(true);
           expect(div1.querySelectorAll(':scope > .jsed-token')).toHaveLength(0);
           expect(
             Array.from(p1.querySelectorAll('.jsed-token')).map((token) => token.textContent)
           ).toEqual(['foo', 'bar']);
           expect(p2.querySelectorAll('.jsed-token')).toHaveLength(0);
-          expect(identify(editor.getCursor())).toBe('foo');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
 
           editor.destroy();
         });
@@ -697,7 +697,7 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(true);
-          expect(editor.getMode()).toBe('edit');
+          expect(editor.isEditing()).toBe(true);
           expect(emptyLine.querySelectorAll('.jsed-token')).toHaveLength(0);
           expect(
             Array.from(firstEditableLine.querySelectorAll('.jsed-token')).map(
@@ -705,7 +705,7 @@ describe('Editor', () => {
             )
           ).toEqual(['foo', 'bar']);
           expect(laterLine.querySelectorAll('.jsed-token')).toHaveLength(0);
-          expect(identify(editor.getCursor())).toBe('foo');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
 
           editor.destroy();
         });
@@ -728,9 +728,9 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(true);
-          expect(editor.getMode()).toBe('edit');
-          expect(editor.getCursor()).not.toBeNull();
-          expect(editor.getCursor()!.textContent).toEqual('italic');
+          expect(editor.isEditing()).toBe(true);
+          expect(editor.getCursor()?.getPlace()).not.toBeNull();
+          expect(editor.getCursor()?.getPlace()!.textContent).toEqual('italic');
         });
 
         test(`if entering on empty INLINE_FLOW (em-tag), don't add CURSOR`, () => {
@@ -751,7 +751,7 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(false);
-          expect(editor.getMode()).toBe('view');
+          expect(editor.isEditing()).toBe(false);
         });
 
         test('if entering on a TOKEN, CURSOR should be set to this TOKEN', () => {
@@ -777,9 +777,9 @@ describe('Editor', () => {
 
           // assert
           expect(result.isOk()).toBe(true);
-          expect(editor.getMode()).toBe('edit');
-          expect(editor.getCursor()).not.toBeNull();
-          expect(editor.getCursor()!.textContent).toEqual('middle');
+          expect(editor.isEditing()).toBe(true);
+          expect(editor.getCursor()?.getPlace()).not.toBeNull();
+          expect(editor.getCursor()?.getPlace()!.textContent).toEqual('middle');
         });
       });
     });
@@ -795,8 +795,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(editor.getCursor()?.textContent?.trim()).toBe('bar');
+        expect(editor.isEditing()).toBe(true);
+        expect(editor.getCursor()?.getPlace()?.textContent?.trim()).toBe('bar');
 
         editor.destroy();
       });
@@ -816,8 +816,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('bbb');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
         editor.destroy();
       });
@@ -837,8 +837,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor()!)).toBe('[island:span]');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace()!)).toBe('[island:span]');
 
         editor.destroy();
       });
@@ -859,8 +859,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('bbb');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
         editor.destroy();
       });
@@ -885,8 +885,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('bbb');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
         editor.destroy();
       });
@@ -904,8 +904,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(editor.getCursor()?.textContent?.trim()).toBe('foo');
+        expect(editor.isEditing()).toBe(true);
+        expect(editor.getCursor()?.getPlace()?.textContent?.trim()).toBe('foo');
 
         editor.destroy();
       });
@@ -926,8 +926,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('bbb');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
         editor.destroy();
       });
@@ -942,14 +942,14 @@ describe('Editor', () => {
         );
         const editor = createNullEditor(doc);
         editor.enterEditing(byId(doc, 'p2'));
-        expect(identify(editor.getCursor()!)).toBe('bbb');
+        expect(identify(editor.getCursor()?.getPlace()!)).toBe('bbb');
 
         // act
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor()!)).toBe('[island:span]');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace()!)).toBe('[island:span]');
 
         editor.destroy();
       });
@@ -974,8 +974,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('bbb');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
         editor.destroy();
       });
@@ -995,8 +995,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('zzz');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('zzz');
 
         editor.destroy();
       });
@@ -1017,8 +1017,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('aaa');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('aaa');
 
         editor.destroy();
       });
@@ -1039,13 +1039,13 @@ describe('Editor', () => {
 
           // act + assert
           editor.enterEditing(byId(doc, 'p1'));
-          expect(identify(editor.getCursor())).toBe('bbb');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
           editor.movePrevious();
           // This triggers findPreviousLineCandidate to return an untokenized
           // text node 'aaa' but only when tokenizeLooseLinesIn ignored the
           // first LOOSE_LINE ('aaa').
-          expect(identify(editor.getCursor())).toBe('aaa');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('aaa');
 
           editor.destroy();
         });
@@ -1063,23 +1063,23 @@ describe('Editor', () => {
 
           // act + assert
           editor.enterEditing(byId(doc, 'p2'));
-          expect(editor.getMode()).toBe('edit');
-          expect(isToken(editor.getCursor())).toBe(true);
-          expect(identify(editor.getCursor())).toBe('ddd');
+          expect(editor.isEditing()).toBe(true);
+          expect(isToken(editor.getCursor()?.getPlace())).toBe(true);
+          expect(identify(editor.getCursor()?.getPlace())).toBe('ddd');
 
           // Regression here in findPreviousCrossLineTarget.
           // <loose/> never gets tokenized and the current algorithm
           // doesn't detect tokens.
           editor.movePrevious();
-          expect(isToken(editor.getCursor())).toBe(true);
-          expect(identify(editor.getCursor())).toBe('ccc');
+          expect(isToken(editor.getCursor()?.getPlace())).toBe(true);
+          expect(identify(editor.getCursor()?.getPlace())).toBe('ccc');
 
           editor.movePrevious();
-          expect(isToken(editor.getCursor())).toBe(true);
-          expect(identify(editor.getCursor())).toBe('bbb');
+          expect(isToken(editor.getCursor()?.getPlace())).toBe(true);
+          expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
           editor.movePrevious();
-          expect(editor.getCursor()?.innerText).toBe('aaa');
+          expect(editor.getCursor()?.getPlace()?.innerText).toBe('aaa');
 
           editor.destroy();
         });
@@ -1099,17 +1099,17 @@ describe('Editor', () => {
 
           // act + assert
           editor.enterEditing(byId(doc, 'p2'));
-          expect(identify(editor.getCursor())).toBe('ddd');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('ddd');
 
           editor.movePrevious();
-          expect(identify(editor.getCursor())).toBe('ccc');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('ccc');
 
           editor.movePrevious();
-          expect(identify(editor.getCursor())).toBe('bbb');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
           editor.movePrevious();
-          expect(isToken(editor.getCursor())).toBe(true);
-          expect(identify(editor.getCursor())).toBe('aaa');
+          expect(isToken(editor.getCursor()?.getPlace())).toBe(true);
+          expect(identify(editor.getCursor()?.getPlace())).toBe('aaa');
 
           editor.destroy();
         });
@@ -1135,20 +1135,20 @@ describe('Editor', () => {
 
           // act + assert
           editor.enterEditing(byId(doc, 'p2'));
-          expect(identify(editor.getCursor())).toBe('eee');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('eee');
 
           editor.movePrevious();
-          expect(identify(editor.getCursor())).toBe('ddd');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('ddd');
 
           editor.movePrevious();
           // Key regression here - something about the div boundary between div1 and div2.
-          expect(identify(editor.getCursor())).toBe('ccc');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('ccc');
 
           editor.movePrevious();
-          expect(identify(editor.getCursor())).toBe('bbb');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('bbb');
 
           editor.movePrevious();
-          expect(identify(editor.getCursor())).toBe('aaa');
+          expect(identify(editor.getCursor()?.getPlace())).toBe('aaa');
 
           editor.destroy();
         });
@@ -1168,7 +1168,7 @@ describe('Editor', () => {
         editor.handleExit();
 
         // assert
-        expect(editor.getMode()).toBe('view');
+        expect(editor.isEditing()).toBe(false);
         expect(editor.nav.getFocus()).toBe(p1);
 
         editor.destroy();
@@ -1189,8 +1189,8 @@ describe('Editor', () => {
         editor.handleExit();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('baz');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('baz');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editor.destroy();
@@ -1213,8 +1213,8 @@ describe('Editor', () => {
         editor.handleExit();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('foo');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editor.destroy();
@@ -1235,8 +1235,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('baz');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('baz');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editor.destroy();
@@ -1257,8 +1257,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('foo');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editor.destroy();
@@ -1281,8 +1281,8 @@ describe('Editor', () => {
         editor.movePrevious();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('foo');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editor.destroy();
@@ -1305,8 +1305,8 @@ describe('Editor', () => {
         editor.moveNext();
 
         // assert
-        expect(editor.getMode()).toBe('edit');
-        expect(identify(editor.getCursor())).toBe('baz');
+        expect(editor.isEditing()).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('baz');
         expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
         editor.destroy();
@@ -1323,13 +1323,13 @@ describe('Editor', () => {
         editor.enterEditing(p1);
         editor.extendNext();
         editor.handleExit(); // cancels selection
-        expect(editor.getMode()).toBe('edit');
+        expect(editor.isEditing()).toBe(true);
 
         // act — second handleExit now exits editing
         editor.handleExit();
 
         // assert
-        expect(editor.getMode()).toBe('view');
+        expect(editor.isEditing()).toBe(false);
         expect(editor.nav.getFocus()).toBe(p1);
 
         editor.destroy();
@@ -1358,7 +1358,7 @@ describe('Editor', () => {
         });
         const editor = createNullEditor(doc);
         editor.enterEditing(byId(doc, 'p1'));
-        const token = editor.getCursor() as HTMLElement;
+        const token = editor.getCursor()?.getPlace() as HTMLElement;
         const scrollRequests = doc.viewportScroller.trackScrollRequests();
         scrollRequests.data.length = 0;
 
@@ -1372,6 +1372,48 @@ describe('Editor', () => {
             element: token,
             options: {
               block: 'center',
+              inline: 'nearest',
+              behavior: 'smooth'
+            }
+          }
+        ]);
+
+        editor.destroy();
+      });
+    });
+
+    describe('auto-scroll on cursor move (edit mode)', () => {
+      it('scrolls a hidden LINE_SIBLING into view when the CURSOR moves onto it', () => {
+        // arrange
+        const doc = makeRoot(p({ id: 'p1' }, 'hello world'), {
+          viewportScrollerOpts: {
+            getElementRect: (el) =>
+              el.textContent?.trim() === 'world'
+                ? {
+                    top: 0,
+                    left: -10,
+                    bottom: 10,
+                    right: 10,
+                    width: 20,
+                    height: 10
+                  }
+                : undefined
+          }
+        });
+        const editor = createNullEditor(doc);
+        editor.enterEditing(byId(doc, 'p1'));
+        const scrollRequests = doc.viewportScroller.trackScrollRequests();
+        scrollRequests.data.length = 0;
+
+        // act
+        editor.moveNext();
+
+        // assert
+        expect(scrollRequests.data).toEqual([
+          {
+            element: editor.getCursor()?.getPlace(),
+            options: {
+              block: 'nearest',
               inline: 'nearest',
               behavior: 'smooth'
             }
@@ -1468,7 +1510,7 @@ describe('Editor', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['foo', 'b']);
-      expect(identify(editor.getCursor())).toBe('b');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('b');
       expect(userInput.getInputValue()).toBe('b');
     });
 
@@ -1494,7 +1536,7 @@ describe('Editor', () => {
       expect(secondToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(secondToken?.nextSibling?.textContent).toBe(' ');
       expect(secondToken?.nextSibling?.nextSibling).toBe(thirdToken);
-      expect(identify(editor.getCursor())).toBe('c');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('c');
       expect(userInput.getInputValue()).toBe('c');
     });
 
@@ -1510,7 +1552,7 @@ describe('Editor', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['foo', 'bar']);
-      expect(identify(editor.getCursor())).toBe('bar');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('bar');
       expect(userInput.getInputValue()).toBe('bar');
     });
 
@@ -1530,7 +1572,7 @@ describe('Editor', () => {
       expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(firstToken?.nextSibling?.textContent).toBe(' ');
       expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
-      expect(identify(editor.getCursor())).toBe('bar');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('bar');
       expect(userInput.getInputValue()).toBe('bar');
       expect(userInput.getRange()).toEqual([0, 3]);
     });
@@ -1551,7 +1593,7 @@ describe('Editor', () => {
       expect(em?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(em?.nextSibling?.textContent).toBe(' ');
       expect(em?.nextSibling?.nextSibling).toBe(strong);
-      expect(identify(editor.getCursor())).toBe('bar');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('bar');
       expect(userInput.getInputValue()).toBe('bar');
       expect(userInput.getRange()).toEqual([0, 3]);
     });
@@ -1584,7 +1626,7 @@ describe('Editor', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['b', 'foo']);
-      expect(identify(editor.getCursor())).toBe('b');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('b');
       expect(userInput.getInputValue()).toBe('b');
     });
 
@@ -1606,7 +1648,7 @@ describe('Editor', () => {
       expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(firstToken?.nextSibling?.textContent).toBe(' ');
       expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
-      expect(identify(editor.getCursor())).toBe('b');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('b');
       expect(userInput.getInputValue()).toBe('b');
     });
 
@@ -1626,7 +1668,7 @@ describe('Editor', () => {
       expect(firstToken?.nextSibling?.nodeType).toBe(Node.TEXT_NODE);
       expect(firstToken?.nextSibling?.textContent).toBe(' ');
       expect(firstToken?.nextSibling?.nextSibling).toBe(secondToken);
-      expect(identify(editor.getCursor())).toBe('o');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('o');
       expect(userInput.getInputValue()).toBe('o');
     });
   });
@@ -1667,7 +1709,7 @@ describe('Editor', () => {
 
       // assert
       expect(tokenValues(p1)).toEqual(['x']);
-      expect(identify(editor.getCursor())).toBe('x');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
       // Input value reflects what the user typed — handleCursorChange must
       // not clobber it with the head TOKEN's pre-rewrite value.
@@ -1688,7 +1730,7 @@ describe('Editor', () => {
 
       // assert: 'foo' and 'bar' gone, 'x' lands where bar was, 'baz' intact
       expect(tokenValues(p1)).toEqual(['x', 'baz']);
-      expect(identify(editor.getCursor())).toBe('x');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
       editor.destroy();
@@ -1722,7 +1764,7 @@ describe('Editor', () => {
       ]);
       expect(isToken(p1.firstChild)).toBe(true);
       expect(identify(p1.firstChild)).toBe('x');
-      expect(identify(editor.getCursor())).toBe('x');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       const elements = Array.from(p1.querySelectorAll('*'));
       expect(elements).toHaveLength(3);
       expect(identify(elements[0])).toBe('x');
@@ -1757,7 +1799,7 @@ describe('Editor', () => {
       // assert
       expect(tokenValues(p1)).toEqual(['x']);
       expect(tokenValues(p2)).toEqual(['qux']);
-      expect(identify(editor.getCursor())).toBe('x');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       expect(doc.root.querySelector('#p1')).not.toBeNull();
 
       editor.destroy();

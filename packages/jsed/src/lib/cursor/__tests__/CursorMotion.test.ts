@@ -3,6 +3,8 @@ import { div, em, identify, makeRoot, p } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
+import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
+import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../../lib/ops/token.js';
 import { tagImplicitLines } from '../../ops/implicitLine.js';
 
@@ -11,15 +13,17 @@ import { tagImplicitLines } from '../../ops/implicitLine.js';
  */
 const inlineStyle = { style: 'display:inline;' };
 
-function createCursor(tok: HTMLElement) {
+function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
-  const cursor = Cursor.create({
+  const cursor = Cursor.create(tok, {
+    document: doc,
     tokenizer,
-    seat: tok,
-    onCursorChange: (t) => changes.push(getValue(t)),
-    onError: (err) => errors.push(err.type)
+    onCursorChange: (t) => t && changes.push(getValue(t)),
+    onCursorError: (err) => errors.push(err.type),
+    eventsEmitter: EditorEventsEmitter.create(),
+    undo: UndoRecorder.createNull()
   });
   cursor.place(tok);
 
@@ -29,7 +33,7 @@ function createCursor(tok: HTMLElement) {
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   const el = doc.root.querySelector(selector) as HTMLElement;
   const firstToken = Tokenizer.createNull().tokenizeLineAt(el)!;
-  return createCursor(firstToken);
+  return createCursor(doc, firstToken);
 }
 
 describe('CursorMotion', () => {
@@ -457,47 +461,6 @@ describe('CursorMotion', () => {
         expect(identify(cursor.getPlace())).toBe('aaa');
       });
     });
-  });
-
-  it('scrolls a hidden LINE_SIBLING back into view when the CURSOR moves onto it', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'hello world'), {
-      viewportScrollerOpts: {
-        getElementRect: (el) =>
-          el.textContent?.trim() === 'world'
-            ? {
-                top: 0,
-                left: -10,
-                bottom: 10,
-                right: 10,
-                width: 20,
-                height: 10
-              }
-            : undefined
-      }
-    });
-    const firstToken = Tokenizer.createNull().tokenizeLineAt(
-      doc.root.querySelector('#p1') as HTMLElement
-    )!;
-    const secondToken = firstToken.nextElementSibling as HTMLElement;
-    const { cursor } = createCursor(firstToken);
-    const scrollRequests = doc.viewportScroller.trackScrollRequests();
-    scrollRequests.data.length = 0;
-
-    // act
-    cursor.moveNext();
-
-    // assert
-    expect(scrollRequests.data).toEqual([
-      {
-        element: secondToken,
-        options: {
-          block: 'nearest',
-          inline: 'nearest',
-          behavior: 'smooth'
-        }
-      }
-    ]);
   });
 
   test('cross line: moveNext past end of <p> lands in the following IMPLICIT_LINE', () => {

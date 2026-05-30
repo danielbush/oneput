@@ -361,7 +361,7 @@ export class OneputEditDocumentAdapter {
   };
 
   getMenuItems = ({ renderMenuItems }: { renderMenuItems: () => void }) => {
-    const cursor = this.editor.cursor;
+    const cursor = this.editor.getCursor();
     return [
       this.editor.isEditing() &&
         stdMenuItem({

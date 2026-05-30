@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { makeRoot, p } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
-import { Tokenizer } from '../../token/Tokenizer.js';
+import { Tokenizer } from '../../ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { getValue } from '../../../lib/token/token.js';
+import { getValue } from '../../../lib/ops/token.js';
 import {
   computeCursorState,
   CURSOR_APPEND_CLASS,

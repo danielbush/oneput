@@ -1,4 +1,4 @@
-import { getParent } from '../token/token.js';
+import { getParent } from '../ops/token.js';
 import { isToken, JSED_ELEMENT_INDICATOR, JSED_IGNORE_CLASS } from '../core/taxonomy.js';
 
 const ANCHOR_NAME = '--jsed-element-indicator';

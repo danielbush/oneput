@@ -1,7 +1,7 @@
 import { deleteHighestEmpty, isEmpty } from '../focus/focusable.js';
 import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
-import * as token from '../token/token.js';
-import { createAnchor } from '../token/anchor.js';
+import * as token from '../ops/token.js';
+import { createAnchor } from '../ops/anchor.js';
 import type { CursorState } from '../cursor/CursorState.js';
 
 /**

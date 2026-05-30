@@ -15,8 +15,8 @@ import {
 } from '../../../test/util.js';
 import { CursorSelection } from '../CursorSelection.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
-import { Tokenizer } from '../../token/Tokenizer.js';
-import { getValue } from '../../token/token.js';
+import { Tokenizer } from '../../ops/Tokenizer.js';
+import { getValue } from '../../ops/token.js';
 import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {

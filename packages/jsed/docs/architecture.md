@@ -11,10 +11,10 @@ At the bottom we have lib/core
   - line - worries about LINE's
   - dom-rules - worries about how elements can be combined
 
-- lib/token/token
+- lib/ops/token
   - work below the tokenization and cursor and above the core modules;
-  - lib/token/token operations worry about managing tokens and their related separators (whitespace).
-  - lib/token/space modules
+  - lib/ops/token operations worry about managing tokens and their related separators (whitespace).
+  - lib/ops/space modules
 
 - Cursor
   - handles moving around LINE_SIBLING's;

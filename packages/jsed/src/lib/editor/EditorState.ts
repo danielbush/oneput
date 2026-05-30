@@ -1,6 +1,6 @@
 import { Nav } from '../focus/Nav.js';
 import { Cursor } from '../cursor/Cursor.js';
-import { Tokenizer } from '../token/Tokenizer.js';
+import { Tokenizer } from '../ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';

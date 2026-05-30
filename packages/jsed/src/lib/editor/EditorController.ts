@@ -1,4 +1,4 @@
-import * as token from '../token/token.js';
+import * as token from '../ops/token.js';
 import type { CursorError } from '../cursor/CursorState.js';
 import type { EditorState } from './EditorState.js';
 import { isToken } from '../core/taxonomy.js';

@@ -1,6 +1,6 @@
 import { ok, Result } from 'neverthrow';
 import { isAnchor, isIsland, isLine, isToken } from '../core/taxonomy.js';
-import * as token from '../token/token.js';
+import * as token from '../ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';

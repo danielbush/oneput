@@ -1,5 +1,5 @@
 import type { EditorState } from './EditorState.js';
-import * as token from '../token/token.js';
+import * as token from '../ops/token.js';
 import {
   addAnchorsToTag,
   getAnchorAfterTagInsertionPoint,
@@ -10,7 +10,7 @@ import {
   insertAnchorBeforeTag,
   removeAnchorAfterTag,
   removeAnchorBeforeTag
-} from '../token/anchor.js';
+} from '../ops/anchor.js';
 
 /**
  * High-level ANCHOR operations for Editor.

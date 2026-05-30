@@ -1,5 +1,5 @@
-import * as anchor from './lib/token/anchor.js';
-import { tagImplicitLines } from './lib/token/implicitLine.js';
+import * as anchor from './lib/ops/anchor.js';
+import { tagImplicitLines } from './lib/ops/implicitLine.js';
 import {
   ViewportScroller,
   type ViewportScrollerNullOptions

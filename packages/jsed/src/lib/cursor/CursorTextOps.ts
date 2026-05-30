@@ -1,5 +1,5 @@
-import * as token from '../token/token.js';
-import * as space from '../token/space.js';
+import * as token from '../ops/token.js';
+import * as space from '../ops/space.js';
 import { isAnchor, isLineSibling, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import type { UserInputOpts } from '../input/UserInput.js';
@@ -15,7 +15,7 @@ import {
   getNextLineSibling,
   getPreviousLineSibling
 } from '../core/line.js';
-import { addAnchorsToTag } from '../token/anchor.js';
+import { addAnchorsToTag } from '../ops/anchor.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
 import { getWrapCandidates } from '../core/dom-rules.js';
 

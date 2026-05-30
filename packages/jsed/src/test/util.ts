@@ -1,6 +1,6 @@
 import { JsedDocument } from '../JsedDocument.js';
 import type { ViewportScrollerNullOptions } from '../lib/utilities/ViewportScroller.js';
-import * as token from '../lib/token/token.js';
+import * as token from '../lib/ops/token.js';
 import {
   isAnchor,
   isDeletedElement,

@@ -1,4 +1,4 @@
-import { getParent } from '../token/token.js';
+import { getParent } from '../ops/token.js';
 import { isToken } from '../core/taxonomy.js';
 import { Indicator } from './indicator.js';
 

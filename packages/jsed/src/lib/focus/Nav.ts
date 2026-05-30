@@ -7,7 +7,7 @@ import {
   JSED_FOCUS_CLASS,
   JSED_FOCUS_SIBLING
 } from '../core/taxonomy.js';
-import * as token from '../token/token.js';
+import * as token from '../ops/token.js';
 import { getParent, findNextNode, findPreviousNode } from '../core/walk.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
 import { getNextSibling, getPreviousSibling } from '../core/sibling.js';

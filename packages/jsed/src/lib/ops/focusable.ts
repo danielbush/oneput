@@ -14,8 +14,8 @@ import {
 } from '../core/taxonomy.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
 import type { DeleteElement } from '../undo/UndoOperation.js';
-import { createImplicitLine } from '../ops/implicitLine.js';
-import { addAnchorsToTag } from '../ops/anchor.js';
+import { createImplicitLine } from './implicitLine.js';
+import { addAnchorsToTag } from './anchor.js';
 
 export function createElement(
   tagName: string,

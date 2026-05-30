@@ -4,7 +4,7 @@ import * as token from '../ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
-import { undoDeleteElement } from '../focus/focusable.js';
+import { undoDeleteElement } from '../ops/focusable.js';
 
 /**
  * Manages an edit session for a single document.

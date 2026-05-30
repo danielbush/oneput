@@ -8,7 +8,7 @@ import {
   isEmpty,
   recSplitAfterChild,
   recSplitBeforeChild
-} from '../focus/focusable.js';
+} from '../ops/focusable.js';
 import {
   getFirstLineSibling,
   getLine,

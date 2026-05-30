@@ -1,4 +1,4 @@
-import { deleteHighestEmpty, isEmpty } from '../focus/focusable.js';
+import { deleteHighestEmpty, isEmpty } from '../ops/focusable.js';
 import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../ops/token.js';
 import { createAnchor } from '../ops/anchor.js';

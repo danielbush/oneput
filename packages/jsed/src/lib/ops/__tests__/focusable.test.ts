@@ -10,7 +10,7 @@ import {
   recSplitBeforeChild,
   splitAfterChild,
   splitBeforeChild
-} from '../../focus/focusable';
+} from '../focusable';
 import { isDeletedElement, JSED_ANCHOR_CLASS, JSED_FOCUS_CLASS } from '../../core/taxonomy';
 
 describe('findNextFocusableOutside / findPreviousFocusableOutside', () => {

@@ -106,9 +106,6 @@ token deletion (token.remove) occurs when we delete whole tokens (input is selec
 
 ## CursorState, EditorState rethink
 
-- get rid of mode in EditorState
-  - replacement for onModeChange
-
 - Editor facade
   - what oneput or external user sees, that's it
 - EditorState

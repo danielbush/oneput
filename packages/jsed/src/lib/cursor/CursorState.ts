@@ -1,7 +1,7 @@
 import { isLineSibling, isToken } from '../core/taxonomy.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { isSameLine } from '../core/line.js';
-import { CursorSelection } from '../selection/CursorSelection.js';
+import { CursorSelection } from './CursorSelection.js';
 import type { EditorState } from '../editor/EditorState.js';
 import { CursorTextOps } from './CursorTextOps.js';
 

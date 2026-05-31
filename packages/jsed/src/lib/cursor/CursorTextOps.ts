@@ -67,7 +67,9 @@ export class CursorTextOps {
     }
 
     const next = this.getNext();
-    if (next) this.state.place(next);
+    // A selection-head walk must not repaint the input — leave it in the
+    // anchor's state so typing over the SELECTION overwrites the range.
+    if (next) this.state.place(next, isSelection ? { syncInput: false } : undefined);
   }
 
   getPrevious(): HTMLElement | null {
@@ -102,7 +104,8 @@ export class CursorTextOps {
       return;
     }
     const prev = this.getPrevious();
-    if (prev) this.state.place(prev);
+    // See moveNext: keep the input on the anchor during a selection-head walk.
+    if (prev) this.state.place(prev, isSelection ? { syncInput: false } : undefined);
   }
 
   /** Delete the current TOKEN. */

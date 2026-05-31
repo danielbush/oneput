@@ -1,24 +1,11 @@
+import type { RemoveTokenAll } from '../ops/token';
+
 export type UndoOperation =
   | RemoveTokenAll
   | DeleteElement
   | PlaceCursor
   | ReplaceText
   | InsertTokenAfter;
-
-export type RemoveTokenAll = RemoveToken | AnchorizeToken;
-
-export type RemoveToken = {
-  action: 'delete-token';
-  token: HTMLElement;
-  nextSeparator: false | HTMLElement;
-  previousSeparator: false | HTMLElement;
-};
-
-export type AnchorizeToken = {
-  action: 'anchorize-token';
-  token: RemoveToken;
-  anchor: HTMLElement;
-};
 
 export type DeleteElement = {
   action: 'delete-element';

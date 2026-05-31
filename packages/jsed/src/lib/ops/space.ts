@@ -21,34 +21,47 @@ import type { InsertSeparatorAfter } from '../undo/UndoOperation.js';
 
 // #region Separator (Space) utils
 
+export type RemoveSeparator = {
+  op: 'remove-separator';
+  container: HTMLElement;
+  separator: Text;
+};
+
 /**
  * Remove separator and record position.
  *
  * It's convenient to track them when removing/restoring tokens.
  */
-export function removeSeparator(node: Text) {
-  const container = node.ownerDocument.createElement('template');
+export function removeSeparator(separator: Text): RemoveSeparator {
+  const container = separator.ownerDocument.createElement('template');
   container.classList.add(JSED_IGNORE_CLASS);
   container.classList.add(JSED_DELETED_CLASS);
   container.classList.add(JSED_DELETED_SPACE_CLASS);
-  node.parentNode?.insertBefore(container, node);
-  container.appendChild(node);
-  return container;
+  separator.before(container);
+  container.appendChild(separator);
+  return {
+    op: 'remove-separator',
+    container,
+    separator
+  };
 }
 
 /**
  * Reverse removeSeparator, restoring the space as normal text.
  */
-export function restoreSeparator(deletedSpace: HTMLElement) {
-  const spaceNode = deletedSpace.firstChild;
-  if (!(spaceNode instanceof Text)) {
-    console.warn(`No space detected`);
-    spaceNode?.remove();
-    return;
-  }
-  deletedSpace.parentNode?.insertBefore(spaceNode, deletedSpace);
-  deletedSpace.remove();
-  return spaceNode;
+export function undoRemoveSeparator(op: RemoveSeparator) {
+  const { container, separator } = op;
+  container.before(separator);
+  container.remove();
+}
+
+/**
+ * Similar to removeSeparator.
+ */
+export function redoRemoveSeparator(op: RemoveSeparator) {
+  const { container, separator } = op;
+  separator.before(container);
+  container.appendChild(separator);
 }
 
 export function getSeparatorBefore(token: HTMLElement): Text | null {

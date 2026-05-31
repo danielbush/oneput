@@ -26,14 +26,11 @@ import {
   removeSeparatorAfter,
   removeSeparatorBefore,
   removeSeparator,
-  restoreSeparator
+  undoRemoveSeparator,
+  type RemoveSeparator,
+  redoRemoveSeparator
 } from './space.js';
-import type {
-  RemoveToken,
-  RemoveTokenAll,
-  InsertTokenAfter,
-  ReplaceText
-} from '../undo/UndoOperation.js';
+import type { InsertTokenAfter, ReplaceText } from '../undo/UndoOperation.js';
 import { isLastLineSibling } from '../core/lineSegment.js';
 import { createAnchor } from './anchor.js';
 
@@ -157,45 +154,20 @@ export function undoReplaceText(op: ReplaceText) {
   token.firstChild!.nodeValue = before;
 }
 
-function removeToken(token: HTMLElement, removeSeparators: boolean = true): RemoveToken {
-  token.classList.add(JSED_DELETED_CLASS);
-  token.classList.add(JSED_IGNORE_CLASS);
-  let removedNextSeparator: HTMLElement | false = false;
-  let removedPreviousSeparator: HTMLElement | false = false;
+export type RemoveTokenAll = RemoveToken | AnchorizeToken;
 
-  if (removeSeparators) {
-    // Scan space nodes
-    const separatorBefore = getSeparatorBefore(token);
-    const separatorAfter = getSeparatorAfter(token);
-    const removeNextSeparator = !!separatorAfter;
-    const removePreviousSeparator =
-      !!separatorBefore &&
-      (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore));
+export type RemoveToken = {
+  action: 'delete-token';
+  token: HTMLElement;
+  nextSeparator: false | RemoveSeparator;
+  previousSeparator: false | RemoveSeparator;
+};
 
-    // Collapse paired separators down to one.
-    removedNextSeparator = removeNextSeparator && removeSeparator(separatorAfter);
-    removedPreviousSeparator = removePreviousSeparator && removeSeparator(separatorBefore);
-  }
-
-  return {
-    action: 'delete-token',
-    token,
-    nextSeparator: removedNextSeparator,
-    previousSeparator: removedPreviousSeparator
-  };
-}
-
-function undoRemoveToken(op: RemoveToken) {
-  const { token } = op;
-  token.classList.remove(JSED_DELETED_CLASS);
-  token.classList.remove(JSED_IGNORE_CLASS);
-  if (op.nextSeparator) {
-    restoreSeparator(op.nextSeparator);
-  }
-  if (op.previousSeparator) {
-    restoreSeparator(op.previousSeparator);
-  }
-}
+export type AnchorizeToken = {
+  action: 'anchorize-token';
+  removedToken: RemoveToken;
+  anchor: HTMLElement;
+};
 
 /**
  * If token is last in LINE_SEGMENT, anchorize it and don't flip any
@@ -217,7 +189,7 @@ export function remove(token: HTMLElement): RemoveTokenAll {
     const result = removeToken(token, false);
     return {
       action: 'anchorize-token',
-      token: result,
+      removedToken: result,
       anchor
     };
   }
@@ -228,13 +200,80 @@ export function remove(token: HTMLElement): RemoveTokenAll {
 export function undoRemove(op: RemoveTokenAll) {
   if (op.action === 'anchorize-token') {
     // Convert anchor back to token.
-    const { anchor, token } = op;
+    const { anchor, removedToken } = op;
     anchor.remove();
-    undoRemoveToken(token);
+    undoRemoveToken(removedToken);
     return;
   }
   undoRemoveToken(op);
-  return;
+}
+
+/**
+ * Similar to remove.
+ */
+export function redoRemove(op: RemoveTokenAll) {
+  if (op.action === 'anchorize-token') {
+    const { anchor, removedToken } = op;
+    removedToken.token.before(anchor);
+    redoRemoveToken(removedToken);
+    return;
+  }
+  redoRemoveToken(op);
+}
+
+function removeToken(token: HTMLElement, removeSeparators: boolean = true): RemoveToken {
+  token.classList.add(JSED_DELETED_CLASS);
+  token.classList.add(JSED_IGNORE_CLASS);
+  let nextSeparator: RemoveSeparator | false = false;
+  let previousSeparator: RemoveSeparator | false = false;
+
+  if (removeSeparators) {
+    // Scan space nodes
+    const separatorBefore = getSeparatorBefore(token);
+    const separatorAfter = getSeparatorAfter(token);
+    const removeNextSeparator = !!separatorAfter;
+    const removePreviousSeparator =
+      !!separatorBefore &&
+      (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore));
+
+    // Collapse paired separators down to one.
+    nextSeparator = removeNextSeparator && removeSeparator(separatorAfter);
+    previousSeparator = removePreviousSeparator && removeSeparator(separatorBefore);
+  }
+
+  return {
+    action: 'delete-token',
+    token,
+    nextSeparator,
+    previousSeparator
+  };
+}
+
+function undoRemoveToken(op: RemoveToken) {
+  const { token } = op;
+  token.classList.remove(JSED_DELETED_CLASS);
+  token.classList.remove(JSED_IGNORE_CLASS);
+  if (op.nextSeparator) {
+    undoRemoveSeparator(op.nextSeparator);
+  }
+  if (op.previousSeparator) {
+    undoRemoveSeparator(op.previousSeparator);
+  }
+}
+
+/**
+ * Similar to removeToken.
+ */
+function redoRemoveToken(op: RemoveToken) {
+  const { token } = op;
+  token.classList.add(JSED_DELETED_CLASS);
+  token.classList.add(JSED_IGNORE_CLASS);
+  if (op.nextSeparator) {
+    redoRemoveSeparator(op.nextSeparator);
+  }
+  if (op.previousSeparator) {
+    redoRemoveSeparator(op.previousSeparator);
+  }
 }
 
 function hasNonIgnorableLineContent(node: Node): boolean {

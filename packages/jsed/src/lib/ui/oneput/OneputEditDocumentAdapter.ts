@@ -276,7 +276,7 @@ export class OneputEditDocumentAdapter {
         this.onRenderMenuItems();
       },
       binding: {
-        bindings: ['$mod+u'],
+        bindings: ['$mod+z'],
         description: 'Undo'
       }
     },
@@ -286,7 +286,7 @@ export class OneputEditDocumentAdapter {
         this.onRenderMenuItems();
       },
       binding: {
-        bindings: ['Shift+$mod+u'],
+        bindings: ['Shift+$mod+z'],
         description: 'Redo'
       }
     },

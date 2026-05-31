@@ -14,23 +14,6 @@ import type { CursorState } from './CursorState';
 import type { CursorDeleteOpts } from './CursorTextOps';
 
 export class DeleteAtCursor implements UndoRecord {
-  static create(params: {
-    cursorTarget: {
-      undo: HTMLElement;
-      redo: HTMLElement;
-    };
-    anchorizeToken?: token.AnchorizeToken;
-    deleteHighestEmpty?: DeleteElement;
-    removeToken?: token.RemoveToken;
-  }) {
-    return new DeleteAtCursor(
-      params.cursorTarget,
-      params.anchorizeToken,
-      params.deleteHighestEmpty,
-      params.removeToken
-    );
-  }
-
   static run(state: CursorState, { type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
     if (!state.isOnToken()) return;
 
@@ -52,10 +35,12 @@ export class DeleteAtCursor implements UndoRecord {
       if (result.action === 'anchorize-token') {
         anchor = result.anchor;
         state.place(anchor, userInputOpts);
-        return DeleteAtCursor.create({
-          cursorTarget: { undo: current, redo: anchor },
-          anchorizeToken: result
-        });
+        return new DeleteAtCursor(
+          { undo: current, redo: anchor }, //
+          result,
+          undefined,
+          undefined
+        );
       } else {
         // By definition because token.remove didn't anchorize, there is another
         // LINE_SIBLING in the LINE_SEGMENT.  nextCrs/prevCrs don't care about
@@ -63,10 +48,12 @@ export class DeleteAtCursor implements UndoRecord {
         // very least.
         const place = (prevCrs || nextCrs) as HTMLElement;
         state.place(place, userInputOpts);
-        return DeleteAtCursor.create({
-          cursorTarget: { undo: current, redo: place },
-          removeToken: result
-        });
+        return new DeleteAtCursor(
+          { undo: current, redo: place }, //
+          undefined,
+          undefined,
+          result
+        );
       }
     }
 
@@ -84,10 +71,12 @@ export class DeleteAtCursor implements UndoRecord {
     if (canDeleteAncestors) {
       const op = deleteHighestEmpty(current.parentElement, state.document.root);
       state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
-      return DeleteAtCursor.create({
-        cursorTarget: { undo: current, redo: (prevCrs || nextCrs) as HTMLElement },
-        deleteHighestEmpty: op
-      });
+      return new DeleteAtCursor(
+        { undo: current, redo: (prevCrs || nextCrs) as HTMLElement }, //
+        undefined,
+        op,
+        undefined
+      );
     }
 
     /**

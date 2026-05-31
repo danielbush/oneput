@@ -6,6 +6,7 @@ import { UndoRecorder, type UndoRecord } from '../undo/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import type { Tokenizer } from '../ops/Tokenizer.js';
 import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
+import { ReplaceWithText } from './ReplaceWithText.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -66,7 +67,7 @@ export class Cursor {
   // edit text
   delete = (opts?: CursorDeleteOpts) => this._undo(DeleteAtCursor.run(this.state, opts));
   replaceWithText = (text: string, opts?: UserInputOpts) =>
-    this._undo(this.state.ops.replaceWithText(text, opts));
+    this._undo(ReplaceWithText.run(this.state, text, opts));
   insertTextAfter = (text: string, opts?: UserInputOpts) =>
     this._undo(this.state.ops.insertTextAfter(text, opts));
   insertTextBefore = (text: string, opts?: UserInputOpts) =>

@@ -154,6 +154,11 @@ export function undoReplaceText(op: ReplaceText) {
   token.firstChild!.nodeValue = before;
 }
 
+export function redoReplaceText(op: ReplaceText) {
+  const { after, token } = op;
+  token.firstChild!.nodeValue = after;
+}
+
 export type RemoveTokenAll = RemoveToken | AnchorizeToken;
 
 export type RemoveToken = {

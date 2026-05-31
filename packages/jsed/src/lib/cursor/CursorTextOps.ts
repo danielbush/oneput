@@ -104,36 +104,6 @@ export class CursorTextOps {
   }
 
   /**
-   * Similar to insertTextAfter.
-   */
-  replaceWithText(text: string, opts?: UserInputOpts) {
-    if (!this.state.isOnToken()) return;
-    const currentToken = this.state.getPlace();
-    const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
-    if (!firstPart) return;
-
-    const undo: UndoRecord = { ops: [] };
-    const result = token.replaceText(currentToken, firstPart);
-
-    // Undo ops get played in reverse.
-    // Some of the ops that will be pushed below may also place the cursor.
-    undo.ops.push({ action: 'place-cursor', target: currentToken });
-    undo.ops.push(result);
-
-    let lastToken: HTMLElement = currentToken;
-    for (const part of parts.reverse()) {
-      const insertedToken = token.createToken(part);
-      const result = token.insertAfter(insertedToken, currentToken);
-      undo.ops.push(result);
-      if (lastToken === currentToken) {
-        lastToken = insertedToken;
-      }
-    }
-    this.state.place(lastToken, opts);
-    return undo;
-  }
-
-  /**
    * Insert string vals after cursor and put cursor on last one.
    */
   insertTextAfter(text: string, opts?: UserInputOpts) {

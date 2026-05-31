@@ -515,11 +515,11 @@ describe('remove', () => {
     expect(rec).toMatchObject({
       action: 'anchorize-token',
       anchor: bar.previousSibling,
-      deletedToken: {
+      removedToken: {
         action: 'delete-token',
         token: bar,
-        removeNextSeparator: false,
-        removePreviousSeparator: false
+        nextSeparator: false,
+        previousSeparator: false
       }
     });
   });
@@ -543,8 +543,8 @@ describe('remove', () => {
     expect(rec).toMatchObject({
       action: 'delete-token',
       token: bar,
-      removeNextSeparator: false,
-      removePreviousSeparator: false
+      nextSeparator: false,
+      previousSeparator: false
     });
   });
 
@@ -573,8 +573,8 @@ describe('remove', () => {
     expect(rec).toMatchObject({
       action: 'delete-token',
       token: bar,
-      removeNextSeparator: sp2,
-      removePreviousSeparator: false
+      nextSeparator: sp2,
+      previousSeparator: false
     });
   });
 
@@ -601,8 +601,8 @@ describe('remove', () => {
     expect(rec).toMatchObject({
       action: 'delete-token',
       token: bar,
-      removeNextSeparator: sp2,
-      removePreviousSeparator: sp1
+      nextSeparator: sp2,
+      previousSeparator: sp1
     });
   });
 });

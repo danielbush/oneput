@@ -85,7 +85,7 @@ describe('deleteHighestEmptyTree', () => {
     expect(deletion).toMatchObject({
       action: 'delete-element',
       marker: doc.root.firstElementChild,
-      deleted: outer
+      element: outer
     });
   });
 
@@ -106,7 +106,7 @@ describe('deleteHighestEmptyTree', () => {
     expect(deletion).toMatchObject({
       action: 'delete-element',
       marker: outer.firstElementChild,
-      deleted: inner
+      element: inner
     });
   });
 

@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../../test/util.js';
 import { isFocusable, isIgnorable, isInlineFlow, isLine, isToken } from '../taxonomy.js';
-import { tokenizeLineAt } from '../../token/tokenize.js';
+import { tokenizeLineAt } from '../../ops/tokenize.js';
 
 const inlineStyle = { style: 'display:inline;' };
 

@@ -180,9 +180,21 @@ function removeToken(token: HTMLElement, removeSeparators: boolean = true): Remo
   return {
     action: 'delete-token',
     token,
-    removeNextSeparator: removedNextSeparator,
-    removePreviousSeparator: removedPreviousSeparator
+    nextSeparator: removedNextSeparator,
+    previousSeparator: removedPreviousSeparator
   };
+}
+
+function undoRemoveToken(op: RemoveToken) {
+  const { token } = op;
+  token.classList.remove(JSED_DELETED_CLASS);
+  token.classList.remove(JSED_IGNORE_CLASS);
+  if (op.nextSeparator) {
+    restoreSeparator(op.nextSeparator);
+  }
+  if (op.previousSeparator) {
+    restoreSeparator(op.previousSeparator);
+  }
 }
 
 /**
@@ -205,7 +217,7 @@ export function remove(token: HTMLElement): RemoveTokenAll {
     const result = removeToken(token, false);
     return {
       action: 'anchorize-token',
-      deletedToken: result,
+      token: result,
       anchor
     };
   }
@@ -216,25 +228,13 @@ export function remove(token: HTMLElement): RemoveTokenAll {
 export function undoRemove(op: RemoveTokenAll) {
   if (op.action === 'anchorize-token') {
     // Convert anchor back to token.
-    const { anchor, deletedToken } = op;
+    const { anchor, token } = op;
     anchor.remove();
-    restoreToken(deletedToken);
+    undoRemoveToken(token);
     return;
   }
-  restoreToken(op);
+  undoRemoveToken(op);
   return;
-}
-
-export function restoreToken(op: RemoveToken) {
-  const { token } = op;
-  token.classList.remove(JSED_DELETED_CLASS);
-  token.classList.remove(JSED_IGNORE_CLASS);
-  if (op.removeNextSeparator) {
-    restoreSeparator(op.removeNextSeparator);
-  }
-  if (op.removePreviousSeparator) {
-    restoreSeparator(op.removePreviousSeparator);
-  }
 }
 
 function hasNonIgnorableLineContent(node: Node): boolean {

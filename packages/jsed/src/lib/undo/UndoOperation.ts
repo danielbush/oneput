@@ -10,13 +10,13 @@ export type RemoveTokenAll = RemoveToken | AnchorizeToken;
 export type RemoveToken = {
   action: 'delete-token';
   token: HTMLElement;
-  removeNextSeparator: false | HTMLElement;
-  removePreviousSeparator: false | HTMLElement;
+  nextSeparator: false | HTMLElement;
+  previousSeparator: false | HTMLElement;
 };
 
 export type AnchorizeToken = {
   action: 'anchorize-token';
-  deletedToken: RemoveToken;
+  token: RemoveToken;
   anchor: HTMLElement;
 };
 

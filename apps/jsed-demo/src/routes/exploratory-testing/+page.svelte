@@ -8,6 +8,7 @@
   <p>aaa</p>
   <p>aaa bbb</p>
   <p>aaa bbb ccc</p>
+  <p>aaa <em>bbb</em> ccc</p>
   <p>aaa bbb <em>ccc <strong>ddd eee</strong> fff</em> eee fff</p>
   <p>aaa bbb <em>ccc ddd</em> eee fff</p>
   <p>aaa bbb <em>ccc <strong>ddd</strong></em> eee fff</p>

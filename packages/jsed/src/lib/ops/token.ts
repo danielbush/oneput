@@ -29,8 +29,8 @@ import {
   restoreSeparator
 } from './space.js';
 import type {
-  DeleteToken,
-  DeleteTokenAll,
+  RemoveToken,
+  RemoveTokenAll,
   InsertTokenAfter,
   ReplaceText
 } from '../undo/UndoOperation.js';
@@ -157,7 +157,7 @@ export function undoReplaceText(op: ReplaceText) {
   token.firstChild!.nodeValue = before;
 }
 
-function removeToken(token: HTMLElement, removeSeparators: boolean = true): DeleteToken {
+function removeToken(token: HTMLElement, removeSeparators: boolean = true): RemoveToken {
   token.classList.add(JSED_DELETED_CLASS);
   token.classList.add(JSED_IGNORE_CLASS);
   let removedNextSeparator: HTMLElement | false = false;
@@ -193,7 +193,7 @@ function removeToken(token: HTMLElement, removeSeparators: boolean = true): Dele
  * the ANCHOR as content.  At the time of doing this, the CURSOR checks if it's
  * on an ANCHOR and doesn't call remove.
  */
-export function remove(token: HTMLElement): DeleteTokenAll {
+export function remove(token: HTMLElement): RemoveTokenAll {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
@@ -216,7 +216,7 @@ export function remove(token: HTMLElement): DeleteTokenAll {
 /**
  * Returns the TOKEN we restored.
  */
-export function undoRemove(op: DeleteTokenAll): HTMLElement {
+export function undoRemove(op: RemoveTokenAll): HTMLElement {
   if (op.action === 'anchorize-token') {
     // Convert anchor back to token.
     const { anchor, deletedToken } = op;
@@ -228,7 +228,7 @@ export function undoRemove(op: DeleteTokenAll): HTMLElement {
   return op.token;
 }
 
-export function restoreToken(op: DeleteToken) {
+export function restoreToken(op: RemoveToken) {
   const { token } = op;
   token.classList.remove(JSED_DELETED_CLASS);
   token.classList.remove(JSED_IGNORE_CLASS);

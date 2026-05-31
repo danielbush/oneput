@@ -1,13 +1,13 @@
 export type UndoOperation =
-  | DeleteTokenAll
+  | RemoveTokenAll
   | DeleteElement
   | PlaceCursor
   | ReplaceText
   | InsertTokenAfter;
 
-export type DeleteTokenAll = DeleteToken | AnchorizeToken;
+export type RemoveTokenAll = RemoveToken | AnchorizeToken;
 
-export type DeleteToken = {
+export type RemoveToken = {
   action: 'delete-token';
   token: HTMLElement;
   removeNextSeparator: false | HTMLElement;
@@ -16,7 +16,7 @@ export type DeleteToken = {
 
 export type AnchorizeToken = {
   action: 'anchorize-token';
-  deletedToken: DeleteToken;
+  deletedToken: RemoveToken;
   anchor: HTMLElement;
 };
 

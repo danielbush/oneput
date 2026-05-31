@@ -213,19 +213,16 @@ export function remove(token: HTMLElement): RemoveTokenAll {
   return removeToken(token, true);
 }
 
-/**
- * Returns the TOKEN we restored.
- */
-export function undoRemove(op: RemoveTokenAll): HTMLElement {
+export function undoRemove(op: RemoveTokenAll) {
   if (op.action === 'anchorize-token') {
     // Convert anchor back to token.
     const { anchor, deletedToken } = op;
     anchor.remove();
     restoreToken(deletedToken);
-    return deletedToken.token;
+    return;
   }
   restoreToken(op);
-  return op.token;
+  return;
 }
 
 export function restoreToken(op: RemoveToken) {

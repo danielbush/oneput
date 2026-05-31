@@ -134,8 +134,40 @@ export class CursorState {
 
   cancelSelection(): boolean {
     if (!this.selection) return false;
-    this.selection.destroy();
+    this.selection.collapse();
     this.selection = undefined;
+    return true;
+  }
+
+  /**
+   * If we cancel in the direction contrary to the direction of the selection,
+   * we place the cursor back at the anchor rather than using its last position
+   * during selection.
+   *
+   * Assumes:
+   *
+   * - "forward cancel" should be triggered by moveNext
+   * - "backward cancel" should be triggered by movePrevious
+   *
+   * If we think of selection as an anchor with the cursor moving the other end,
+   * then a forward cancellation (moveNext) can happen:
+   *
+   * - when cursor is before anchor
+   *   - we get forward end
+   *   - forward end is the anchor
+   * - when cursor is after anchor
+   *   - we get forward end
+   *   - forward end is the cursor
+   *
+   * Similarly for backward cancellation where the cursor moves previous.
+   *
+   */
+  collapseSelectionTo(end: 'forward' | 'backward'): boolean {
+    if (!this.selection) return false;
+    const target =
+      end === 'forward' ? this.selection.getForwardEnd() : this.selection.getBackwardEnd();
+    this.cancelSelection();
+    this.place(target);
     return true;
   }
 

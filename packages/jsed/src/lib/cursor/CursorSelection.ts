@@ -198,8 +198,10 @@ export class CursorSelection {
   /**
    * Unwrap every SELECTION_WRAPPER in place, leaving TOKEN's and
    * spacing text nodes untouched.
+   *
+   * collapse = collapse the selection range, no effect on the selected elements
    */
-  destroy(): void {
+  collapse(): void {
     for (const wrapper of this.wrappers) this.unwrap(wrapper);
     this.wrappers = [];
   }

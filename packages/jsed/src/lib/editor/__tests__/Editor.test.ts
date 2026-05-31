@@ -1708,7 +1708,7 @@ describe('Editor', () => {
       await userInput.typeText('x');
 
       // assert
-      expect(tokenValues(p1)).toEqual(['x']);
+      expect(identifyChildren(p1)).toEqual(['x']);
       expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
       // Input value reflects what the user typed — handleCursorChange must

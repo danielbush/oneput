@@ -137,6 +137,15 @@ export class InputController {
 
   /**
    * Allows you to set the value in the input programmatically.  Typing by the user will also update it.
+   *
+   * setInputValue writes currentProps.inputValue, a reactive prop bound to
+   * the <input>. In the real app the actual DOM <input>.value doesn't update
+   * until Svelte flushes on the next tick.
+   *
+   * selectAll() (and moveCursorToEnd/Beginning) call
+   * inputElement.setSelectionRange(0, inputElement.value.length) — they depend
+   * on the DOM input already holding the new value. Call them too early and
+   * .value.length is stale, so the selection range is wrong.
    */
   setInputValue(val?: string) {
     this.ctl.currentProps.inputValue = val?.trim() || '';

@@ -58,7 +58,7 @@ export class CursorTextOps {
    */
   moveNext(isSelection = false): void {
     if (this.state.selection && !isSelection) {
-      this.state.cancelSelection();
+      this.state.collapseSelectionTo('forward');
       return;
     }
     if (this.state.isInsertingBefore()) {
@@ -92,7 +92,7 @@ export class CursorTextOps {
    */
   movePrevious(isSelection = false): void {
     if (this.state.selection && !isSelection) {
-      this.state.cancelSelection();
+      this.state.collapseSelectionTo('backward');
       return;
     }
     // Cancel append or insertAfter states and re-select token.

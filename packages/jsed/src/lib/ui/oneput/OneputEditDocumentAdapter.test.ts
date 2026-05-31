@@ -85,7 +85,7 @@ describe('EditDocument', () => {
     const editor = editorUI.editor;
 
     // assert
-    expect(editor.getMode()).toBe('view');
+    expect(editor.isEditing()).toBe(false);
     expect(editor.nav.getFocus()).toBe(p1);
     expect(p1.querySelectorAll('.jsed-token')).toHaveLength(2);
     expect(appChanges.data).toEqual([]);
@@ -105,8 +105,8 @@ describe('EditDocument', () => {
     editor.nav.REQUEST_FOCUS(p1);
 
     // assert
-    expect(editor.getMode()).toBe('edit');
-    expect(editor.getCursor()?.textContent?.trim()).toBe('foo');
+    expect(editor.isEditing()).toBe(true);
+    expect(editor.getCursor()?.getPlace()?.textContent?.trim()).toBe('foo');
     expect(appChanges.data).toEqual([]);
   });
 
@@ -130,7 +130,7 @@ describe('EditDocument', () => {
     expect(paragraphs).toHaveLength(2);
     expect(paragraphs[0]?.textContent?.trim()).toBe('foo bar');
     expect(paragraphs[1]?.textContent?.trim()).toBe('');
-    expect(editor.getCursor()?.textContent?.trim()).toBe('');
+    expect(editor.getCursor()?.getPlace()?.textContent?.trim()).toBe('');
   });
 
   it('binds cmd+m to reveal the active token', () => {
@@ -158,7 +158,7 @@ describe('EditDocument', () => {
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(p1);
 
-    const token = editor.getCursor() as HTMLElement;
+    const token = editor.getCursor()?.getPlace() as HTMLElement;
     const scrollRequests = document.viewportScroller.trackScrollRequests();
     scrollRequests.data.length = 0;
 
@@ -190,7 +190,7 @@ describe('EditDocument', () => {
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(p1);
     editorUI.renderMenuItems();
-    const cursorToken = editor.getCursor() as HTMLElement;
+    const cursorToken = editor.getCursor()?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
 
     // act
@@ -207,7 +207,7 @@ describe('EditDocument', () => {
     expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(cursorToken);
-    expect(editor.getCursor()).toBe(cursorToken);
+    expect(editor.getCursor()?.getPlace()).toBe(cursorToken);
   });
 
   it('runs Tag selection as a child app so an island can use the input prompt', () => {
@@ -223,7 +223,7 @@ describe('EditDocument', () => {
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(d1);
     editorUI.renderMenuItems();
-    const island = editor.getCursor() as HTMLElement;
+    const island = editor.getCursor()?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
 
@@ -241,7 +241,7 @@ describe('EditDocument', () => {
     expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(island);
-    expect(editor.getCursor()).toBe(island);
+    expect(editor.getCursor()?.getPlace()).toBe(island);
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
   });
 

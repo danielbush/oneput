@@ -9,6 +9,7 @@
 - [x] deletion of token by character
 - [x] replace with text
 - [x] insert new token
+- [ ] implement new UndoRecord  with .undo, .redo, .absorb
 - [ ] squash replace text undo records
 - [ ] replacing an ANCHOR
   - A

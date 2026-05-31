@@ -1,5 +1,6 @@
 import { CursorState, type CursorError, type CursorInsertState } from './CursorState.js';
 import { type CursorDeleteOpts } from './CursorTextOps.js';
+import { DeleteAtCursor } from './DeleteAtCursor.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { UndoRecorder, type UndoRecord } from '../undo/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
@@ -63,7 +64,7 @@ export class Cursor {
   movePrevious = () => this.state.ops.movePrevious();
 
   // edit text
-  delete = (opts?: CursorDeleteOpts) => this._undo(this.state.ops.delete(opts));
+  delete = (opts?: CursorDeleteOpts) => this._undo(DeleteAtCursor.run(this.state, opts));
   replaceWithText = (text: string, opts?: UserInputOpts) =>
     this._undo(this.state.ops.replaceWithText(text, opts));
   insertTextAfter = (text: string, opts?: UserInputOpts) =>

@@ -354,6 +354,9 @@ export class CursorTextOps {
     }
     const selection = this.state.getSelection();
     if (selection) {
+      // Re-seat on the SELECTION's document-order start (as delete() does),
+      // so wrapping is deterministic regardless of extension direction.
+      const start = selection.getBackwardEnd();
       const wrappers = selection.wrapWithTag(tagName);
       if (!wrappers) {
         return false;
@@ -366,6 +369,7 @@ export class CursorTextOps {
           element: wrapper
         });
       }
+      this.state.place(start);
       return true;
     }
 

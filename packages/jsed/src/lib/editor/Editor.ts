@@ -75,7 +75,7 @@ export class Editor {
   canUndo = () => this.state.undo.canUndo();
   canRedo = () => this.state.undo.canRedo();
   undo = () => this.state.ops.undo();
-  redo = () => this.state.undo.redo();
+  redo = () => this.state.ops.redo();
   scrollActiveTargetIntoView = () => this.state.ops.scrollActiveTargetIntoView();
   enableElementIndicator = (bool: boolean) => this.state.enableElementIndicator(bool);
   get elementIndicatorEnabled() {

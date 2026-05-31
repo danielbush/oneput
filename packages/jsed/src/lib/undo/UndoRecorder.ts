@@ -1,8 +1,9 @@
-import type { UndoOperation } from './UndoOperation.js';
+import type { EditorState } from '../editor/EditorState.js';
 
-export type UndoRecord = {
-  ops: UndoOperation[];
-};
+export interface UndoRecord {
+  undo(state: EditorState): void;
+  redo(state: EditorState): void;
+}
 
 export class UndoRecorder {
   static create(): UndoRecorder {
@@ -18,9 +19,6 @@ export class UndoRecorder {
 
   record(result?: UndoRecord): void {
     if (!result) {
-      return;
-    }
-    if (result.ops.length === 0) {
       return;
     }
     this.records.push(result);
@@ -39,7 +37,7 @@ export class UndoRecorder {
     return this.redoRecords.length > 0;
   }
 
-  undo(): UndoRecord | null {
+  popUndo(): UndoRecord | null {
     const result = this.records.pop();
     if (!result) {
       return null;
@@ -48,7 +46,7 @@ export class UndoRecorder {
     return result;
   }
 
-  redo(): UndoRecord | null {
+  popRedo(): UndoRecord | null {
     const result = this.redoRecords.pop();
     if (!result) {
       return null;

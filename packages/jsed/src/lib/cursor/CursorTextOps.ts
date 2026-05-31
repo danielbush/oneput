@@ -7,7 +7,10 @@ import {
   deleteHighestEmpty,
   isEmpty,
   recSplitAfterChild,
-  recSplitBeforeChild
+  recSplitBeforeChild,
+  redoDeleteElement,
+  undoDeleteElement,
+  type DeleteElement
 } from '../ops/focusable.js';
 import {
   getFirstLineSibling,
@@ -18,6 +21,7 @@ import {
 import { addAnchorsToTag } from '../ops/anchor.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
 import { getWrapCandidates } from '../core/dom-rules.js';
+import { EditorState } from '../editor/EditorState.js';
 
 /**
  * eg User is backspacing single chars.
@@ -115,6 +119,7 @@ export class CursorTextOps {
     const current = this.state.getPlace();
     const currIsAnchor = isAnchor(current);
     const prevCrs = this.getPrevious();
+    const nextCrs = this.getNext();
     const undo: UndoRecord = { ops: [] };
     let anchor: HTMLElement | null = null;
 
@@ -128,13 +133,25 @@ export class CursorTextOps {
     // Delete if not an ANCHOR.
 
     if (!currIsAnchor) {
-      undo.ops.push({ action: 'place-cursor', target: current });
       const result = token.remove(current);
-      undo.ops.push(result);
       if (result.action === 'anchorize-token') {
         anchor = result.anchor;
         this.state.place(anchor, userInputOpts);
-        return undo;
+        return DeleteUndo.create({
+          cursorTarget: { undo: current, redo: anchor },
+          anchorizeToken: result
+        });
+      } else {
+        // By definition because token.remove didn't anchorize, there is another
+        // LINE_SIBLING in the LINE_SEGMENT.  nextCrs/prevCrs don't care about
+        // the LINE_SEGMENT but they should pick up this LINE_SIBLING at the
+        // very least.
+        const place = (prevCrs || nextCrs) as HTMLElement;
+        this.state.place(place, userInputOpts);
+        return DeleteUndo.create({
+          cursorTarget: { undo: current, redo: place },
+          removeToken: result
+        });
       }
     }
 
@@ -145,7 +162,6 @@ export class CursorTextOps {
       throw new Error('deleting LINE_SIBLING that is disconnected');
     }
 
-    const nextCrs = this.getNext();
     const noMoreLineSiblings = !prevCrs && !nextCrs;
     const emptyParent = isEmpty(current.parentElement, true);
 
@@ -154,12 +170,11 @@ export class CursorTextOps {
     const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;
     if (canDeleteAncestors) {
       const op = deleteHighestEmpty(current.parentElement, this.state.document.root);
-      if (op) {
-        undo.ops.push({ action: 'place-cursor', target: current });
-        undo.ops.push(op);
-      }
       this.state.place((prevCrs || nextCrs) as HTMLElement, userInputOpts);
-      return undo;
+      return DeleteUndo.create({
+        cursorTarget: { undo: current, redo: (prevCrs || nextCrs) as HTMLElement },
+        deleteHighestEmpty: op
+      });
     }
 
     /**
@@ -382,5 +397,60 @@ export class CursorTextOps {
     this.state.eventsEmitter.onElementChange?.({ type: 'focusable-inserted', element: wrapper });
     this.state.place(current);
     return true;
+  }
+}
+
+export class DeleteUndo implements UndoRecord {
+  static create(params: {
+    cursorTarget: {
+      undo: HTMLElement;
+      redo: HTMLElement;
+    };
+    anchorizeToken?: token.AnchorizeToken;
+    deleteHighestEmpty?: DeleteElement;
+    removeToken?: token.RemoveToken;
+  }) {
+    return new DeleteUndo(
+      params.cursorTarget,
+      params.anchorizeToken,
+      params.deleteHighestEmpty,
+      params.removeToken
+    );
+  }
+
+  constructor(
+    public cursorTarget: {
+      undo: HTMLElement;
+      redo: HTMLElement;
+    },
+    public anchorizeToken?: token.AnchorizeToken,
+    public deleteHighestElement?: DeleteElement,
+    public removeToken?: token.RemoveToken
+  ) {}
+
+  undo(state: EditorState) {
+    if (this.anchorizeToken) {
+      token.undoRemove(this.anchorizeToken);
+    }
+    if (this.deleteHighestElement) {
+      undoDeleteElement(this.deleteHighestElement);
+    }
+    if (this.removeToken) {
+      token.undoRemove(this.removeToken);
+    }
+    state.cursor?.place(this.cursorTarget.undo);
+  }
+
+  redo(state: EditorState) {
+    if (this.anchorizeToken) {
+      token.redoRemove(this.anchorizeToken);
+    }
+    if (this.deleteHighestElement) {
+      redoDeleteElement(this.deleteHighestElement);
+    }
+    if (this.removeToken) {
+      token.redoRemove(this.removeToken);
+    }
+    state.cursor?.place(this.cursorTarget.redo);
   }
 }

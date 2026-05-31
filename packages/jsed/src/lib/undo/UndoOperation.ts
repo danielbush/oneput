@@ -1,3 +1,4 @@
+import type { DeleteElement } from '../ops/focusable';
 import type { RemoveTokenAll } from '../ops/token';
 
 export type UndoOperation =
@@ -6,12 +7,6 @@ export type UndoOperation =
   | PlaceCursor
   | ReplaceText
   | InsertTokenAfter;
-
-export type DeleteElement = {
-  action: 'delete-element';
-  marker: HTMLElement;
-  deleted: HTMLElement;
-};
 
 export type PlaceCursor = {
   action: 'place-cursor';

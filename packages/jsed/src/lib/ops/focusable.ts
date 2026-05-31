@@ -13,7 +13,6 @@ import {
   JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
-import type { DeleteElement } from '../undo/UndoOperation.js';
 import { createImplicitLine } from './implicitLine.js';
 import { addAnchorsToTag } from './anchor.js';
 
@@ -93,20 +92,31 @@ export function createElementDeleteMarker() {
   return container;
 }
 
+export type DeleteElement = {
+  action: 'delete-element';
+  marker: HTMLElement;
+  element: HTMLElement;
+};
+
 export function deleteElement(el: HTMLElement): DeleteElement {
-  const container = createElementDeleteMarker();
-  el.insertAdjacentElement('beforebegin', container);
+  const marker = createElementDeleteMarker();
+  el.before(marker);
   el.remove();
   return {
     action: 'delete-element',
-    marker: container,
-    deleted: el
+    marker: marker,
+    element: el
   };
 }
 
 export function undoDeleteElement(op: DeleteElement) {
-  op.marker.insertAdjacentElement('beforebegin', op.deleted);
+  op.marker.before(op.element);
   op.marker.remove();
+}
+
+export function redoDeleteElement(op: DeleteElement) {
+  op.element.before(op.marker);
+  op.element.remove();
 }
 
 /**

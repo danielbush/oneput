@@ -287,10 +287,9 @@ export class EditorOps {
   };
 
   undo = () => {
-    const rec = this.state.undo.undo();
-    if (!rec) {
-      return null;
-    }
+    const rec = this.state.undo.popUndo();
+    rec?.undo(this.state);
+    return;
     console.log('-- start undo rec');
     for (const op of rec.ops.reverse()) {
       console.log(op.action);
@@ -329,5 +328,10 @@ export class EditorOps {
       }
     }
     console.log('-- stop undo rec');
+  };
+
+  redo = () => {
+    const rec = this.state.undo.popRedo();
+    rec?.redo(this.state);
   };
 }

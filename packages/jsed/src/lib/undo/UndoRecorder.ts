@@ -1,9 +1,10 @@
 import type { EditorState } from '../editor/EditorState.js';
 
 export interface UndoRecord {
+  action: string;
   undo(state: EditorState): void;
   redo(state: EditorState): void;
-  merge?(next: this): this | void;
+  merge?(next: UndoRecord): UndoRecord | void;
 }
 
 export class UndoRecorder {

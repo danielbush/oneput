@@ -17,7 +17,6 @@ import {
   JSED_DELETED_SPACE_CLASS,
   JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
-import type { InsertSeparatorAfter } from '../undo/UndoOperation.js';
 
 // #region Separator (Space) utils
 

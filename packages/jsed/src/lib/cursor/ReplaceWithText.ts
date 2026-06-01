@@ -2,6 +2,7 @@ import type { UserInputOpts } from '../input/UserInput';
 import type { CursorState } from './CursorState';
 import type { EditorState } from '../editor/EditorState.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
+import { isTextEdit } from './mergeable.js';
 import {
   createToken,
   insertAfter,
@@ -43,6 +44,8 @@ export class ReplaceWithText implements UndoRecord {
     );
   }
 
+  readonly action = 'ReplaceWithText';
+
   constructor(
     public cursorTarget: {
       undo: HTMLElement;
@@ -75,14 +78,14 @@ export class ReplaceWithText implements UndoRecord {
     state.cursor?.place(this.cursorTarget.redo, this.opts);
   }
 
-  merge(next: this): this | void {
+  merge(next: UndoRecord): UndoRecord | void {
     if (this.insertTokensAfter.length > 0) {
       // Several words replaced the current token.  There is no merging in this
       // situation.
       return;
     }
-    if (this.replaceText.token === next.replaceText.token) {
-      // We won't check anymore than this.
+    if (!isTextEdit(next)) return;
+    if (next.action === 'ReplaceWithText' && this.replaceText.token === next.replaceText.token) {
       // this.replaceText.before - the earliest state of the token
       // next.replaceText.after - the latest state of the token
       this.replaceText.after = next.replaceText.after;

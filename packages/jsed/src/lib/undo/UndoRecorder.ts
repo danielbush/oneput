@@ -3,6 +3,7 @@ import type { EditorState } from '../editor/EditorState.js';
 export interface UndoRecord {
   undo(state: EditorState): void;
   redo(state: EditorState): void;
+  merge?(next: this): this | void;
 }
 
 export class UndoRecorder {
@@ -21,6 +22,12 @@ export class UndoRecorder {
     if (!result) {
       return;
     }
+    const last = this.getLastUndo();
+    const merged = last?.merge?.(result);
+    if (merged) {
+      this.updateLastUndo(merged);
+      return;
+    }
     this.records.push(result);
     this.redoRecords = [];
   }
@@ -35,6 +42,18 @@ export class UndoRecorder {
 
   canRedo(): boolean {
     return this.redoRecords.length > 0;
+  }
+
+  getLastUndo(): UndoRecord | void {
+    return this.records[this.records.length - 1];
+  }
+
+  updateLastUndo(rec: UndoRecord) {
+    if (this.records.length === 0) {
+      this.records.push(rec);
+    } else {
+      this.records[this.records.length - 1] = rec;
+    }
   }
 
   popUndo(): UndoRecord | null {

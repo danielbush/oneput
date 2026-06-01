@@ -3,8 +3,9 @@ import type { UserInputOpts } from '../input/UserInput';
 import type { CursorState } from './CursorState';
 import type { InsertTokenAfter, ReplaceText } from '../undo/UndoOperation.js';
 import type { EditorState } from '../editor/EditorState.js';
+import type { UndoRecord } from '../undo/UndoRecorder.js';
 
-export class ReplaceWithText {
+export class ReplaceWithText implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
     if (!state.isOnToken()) return;
     const currentToken = state.getPlace();
@@ -59,11 +60,28 @@ export class ReplaceWithText {
 
   undo(state: EditorState) {
     token.undoReplaceText(this.replaceText);
+
     state.cursor?.place(this.cursorTarget.undo, this.opts);
   }
 
   redo(state: EditorState) {
     token.redoReplaceText(this.replaceText);
     state.cursor?.place(this.cursorTarget.redo, this.opts);
+  }
+
+  merge(next: this): this | void {
+    if (this.insertTokensAfter.length > 0) {
+      // Several words replaced the current token.  There is no merging in this
+      // situation.
+      return;
+    }
+    if (this.replaceText.token === next.replaceText.token) {
+      // We won't check anymore than this.
+      // this.replaceText.before - the earliest state of the token
+      // next.replaceText.after - the latest state of the token
+      this.replaceText.after = next.replaceText.after;
+      return this;
+    }
+    return;
   }
 }

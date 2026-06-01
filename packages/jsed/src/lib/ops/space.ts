@@ -87,6 +87,12 @@ export function ensureSeparatorBefore(token: HTMLElement, value = ' '): Text {
   return separator;
 }
 
+export type InsertSeparatorAfter = {
+  action: 'insert-separator-after';
+  separator: Text;
+  after: HTMLElement;
+};
+
 /**
  * Ensure there is a whitespace separator immediately after the TOKEN.
  *

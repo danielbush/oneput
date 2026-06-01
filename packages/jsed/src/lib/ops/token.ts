@@ -28,9 +28,9 @@ import {
   removeSeparator,
   undoRemoveSeparator,
   type RemoveSeparator,
-  redoRemoveSeparator
+  redoRemoveSeparator,
+  type InsertSeparatorAfter
 } from './space.js';
-import type { InsertTokenAfter, ReplaceText } from '../undo/UndoOperation.js';
 import { isLastLineSibling } from '../core/lineSegment.js';
 import { createAnchor } from './anchor.js';
 
@@ -95,11 +95,20 @@ export function anchor2Token(token: HTMLElement): HTMLElement {
 
 // #region Insert / Remove
 
+export type InsertTokenAfter = {
+  action: 'insert-token-after';
+  token: HTMLElement;
+  after: HTMLElement;
+  separatorAfter: InsertSeparatorAfter | null;
+  removedToken?: RemoveToken;
+  removedSeparatorAfter?: RemoveSeparator;
+};
+
 export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): InsertTokenAfter {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
-  existing.insertAdjacentElement('afterend', toInsert);
+  existing.after(toInsert);
   const result = ensureSeparatorAfter(existing);
   return {
     action: 'insert-token-after',
@@ -111,9 +120,20 @@ export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): Inser
 
 export function undoInsertAfter(op: InsertTokenAfter) {
   const { separatorAfter, token } = op;
-  console.log('undoInsertAfter');
-  separatorAfter?.separator.remove();
-  token.remove();
+  op.removedToken = removeToken(token, false);
+  if (separatorAfter) {
+    op.removedSeparatorAfter = removeSeparator(separatorAfter?.separator);
+  }
+}
+
+export function redoInsertAfter(op: InsertTokenAfter) {
+  const { removedToken, removedSeparatorAfter } = op;
+  if (removedToken) {
+    undoRemoveToken(removedToken);
+  }
+  if (removedSeparatorAfter) {
+    undoRemoveSeparator(removedSeparatorAfter);
+  }
 }
 
 export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void {
@@ -122,6 +142,13 @@ export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void
   }
   existing.insertAdjacentElement('beforebegin', toInsert);
 }
+
+export type ReplaceText = {
+  action: 'replace-text';
+  token: HTMLElement;
+  before: string;
+  after: string;
+};
 
 /**
  * Replaces the text of the existing token.

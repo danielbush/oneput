@@ -9,18 +9,11 @@
 - [x] deletion of token by character
 - [x] replace with text
 - [x] insert new token
-- [ ] implement new UndoRecord  with .undo, .redo, .absorb
-- [ ] squash replace text undo records
-- [ ] replacing an ANCHOR
-  - A
-    - automatic leading space if we're next of a FOCUSABLE
-    - automatic trailing space if we're next of a FOCUSABLE
-  - B
-    - cursor insert-after mode puts a space in if next is a FOCUSABLE
-    - cursor insert-before mode puts a space in if previous is a FOCUSABLE
+- [x] implement new UndoRecord  with .undo, .redo, .merge
+- [x] squash replace text undo records
 - [ ] split at token (creating new lines)
   - COMMENT: brings in automatic anchorization
-  - [ ] ANCHOR_ISLAND_EDGE_CASE
+  - [x] ANCHOR_ISLAND_EDGE_CASE
     - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
 - [ ] selection
   - fix: backspace leaves an ANCHOR
@@ -58,15 +51,17 @@ So we're shooting for this:
 
 ## Undo
 
-- Delete whole tokens
+COMMENT: cover what is used in Editor and Editor.getCursor (Cursor); mark the rest as todo
+
+- [x] Delete whole tokens
   - call token.remove
     - We flip the token by not displaying it; the text is preserved.
     - if last token in LINE_SEGMENT, we flip into an ANCHOR
-- Delete by character = replace text
+- [x] Delete by character = replace text
   - We record the text change as undo
   - If we go from text to no-text
     - we use token.remove to flip the token with whatever text it had
-- Splitting
+- [x] Splitting
   - COMMENT: We split elements.  Then repair the damage in the bottom split.  This motivated the idea of automatic ANCHOR's.
   - I think we can just call anchorize on parent and peer in the bottom split.
 - selection ops

@@ -443,4 +443,42 @@ export function recSplitBeforeChild(
   };
 }
 
+/** Reverse a single SPLIT_BY_TOKEN: fold `peer`'s children back into `parent`. */
+function undoSplit(split: SplitAction): void {
+  while (split.peer.firstChild) {
+    split.parent.append(split.peer.firstChild);
+  }
+  split.peer.remove();
+}
+
+/** Re-apply a single SPLIT_BY_TOKEN: move the forward run back into `peer`. */
+function redoSplit(split: SplitAction): void {
+  split.parent.insertAdjacentElement('afterend', split.peer);
+  let c: Node | null =
+    split.action === 'split-before-child' ? split.child : split.child.nextSibling;
+  while (c) {
+    const next = c.nextSibling;
+    split.peer.append(c);
+    c = next;
+  }
+}
+
+/**
+ * Undo a recursive SPLIT_BY_TOKEN. Folds each peer back into its parent,
+ * top-down (reverse of how the splits were created) so nested peers collapse
+ * correctly.
+ */
+export function undoRecSplit(result: RecursiveSplitBeforeAction | RecursiveSplitAfterAction): void {
+  for (const split of [...result.splits].reverse()) {
+    undoSplit(split);
+  }
+}
+
+/** Redo a recursive SPLIT_BY_TOKEN, bottom-up, recreating each peer in turn. */
+export function redoRecSplit(result: RecursiveSplitBeforeAction | RecursiveSplitAfterAction): void {
+  for (const split of result.splits) {
+    redoSplit(split);
+  }
+}
+
 // #endregion

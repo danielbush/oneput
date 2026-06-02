@@ -106,7 +106,7 @@ export class EditorCursorOps {
     if (inserted) {
       this.state.eventsEmitter.onElementChange?.({
         type: 'focusable-inserted',
-        element: inserted.topSplit.peer
+        element: inserted.result.topSplit.peer
       });
     }
   }

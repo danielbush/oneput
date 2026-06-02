@@ -9,6 +9,7 @@ import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
 import { InsertTextAfter } from './InsertTextAfter.js';
 import { InsertTextBefore } from './InsertTextBefore.js';
+import { SplitAtToken } from './SplitAtToken.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -39,7 +40,7 @@ export class Cursor {
 
   constructor(private state: CursorState) {}
 
-  _undo = (result?: UndoRecord) => {
+  _undo = <K extends UndoRecord>(result?: K) => {
     this.state.undo?.record(result);
     return result;
   };
@@ -74,7 +75,7 @@ export class Cursor {
     this._undo(InsertTextAfter.run(this.state, text, opts));
   insertTextBefore = (text: string, opts?: UserInputOpts) =>
     this._undo(InsertTextBefore.run(this.state, text, opts));
-  splitAtToken = () => this.state.ops.splitAtToken();
+  splitAtToken = () => this._undo(SplitAtToken.run(this.state));
 
   // selections
   extendNext = () => this.state.ops.extendNext();

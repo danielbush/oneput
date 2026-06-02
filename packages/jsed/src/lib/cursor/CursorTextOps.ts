@@ -1,14 +1,7 @@
 import * as token from '../ops/token.js';
 import { isLineSibling, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import { recSplitAfterChild, recSplitBeforeChild } from '../ops/focusable.js';
-import {
-  getFirstLineSibling,
-  getLine,
-  getNextLineSibling,
-  getPreviousLineSibling
-} from '../core/line.js';
-import { addAnchorsToTag } from '../ops/anchor.js';
+import { getNextLineSibling, getPreviousLineSibling } from '../core/line.js';
 import { getWrapCandidates } from '../core/dom-rules.js';
 
 /**
@@ -110,42 +103,6 @@ export class CursorTextOps {
   joinPrevious(): void {
     if (!this.state.isOnToken()) return;
     token.joinPrevious(this.state.getPlace());
-  }
-
-  /** Perform SPLIT_BY_TOKEN before the current TOKEN. */
-  private splitBefore() {
-    const child = this.state.getPlace();
-    const line = getLine(child); // GOTCHA - always pre-calculate this, don't use in isCeiling below.
-    const result = recSplitBeforeChild(child, (el) => el === line);
-    // The original may need an ANCHOR becuase we could split before the first
-    // child.
-    addAnchorsToTag(result.bottomSplit.parent);
-    return result;
-  }
-
-  /** Perform SPLIT_BY_TOKEN after the current TOKEN. */
-  private splitAfter() {
-    const child = this.state.getPlace();
-    const line = getLine(child); // GOTCHA - always pre-calculate this, don't use in isCeiling below.
-    const result = recSplitAfterChild(child, (el) => el === line);
-    return result;
-  }
-
-  /** Perform SPLIT_BY_TOKEN according to CURSOR_STATE. */
-  splitAtToken() {
-    const splitBefore = this.state.isInsertingBefore() || this.state.isPrepend();
-    const result = splitBefore ? this.splitBefore() : this.splitAfter();
-
-    // We might have empty INLINE_FLOW peer, so let's anchor the lowest level.
-    addAnchorsToTag(result.bottomSplit.peer);
-
-    // Try to place the cursor on peer.
-    const sib = getFirstLineSibling(result.topSplit.peer);
-    if (sib) {
-      this.state.place(sib);
-    }
-
-    return result;
   }
 
   insertElementAfter(el: HTMLElement): void {

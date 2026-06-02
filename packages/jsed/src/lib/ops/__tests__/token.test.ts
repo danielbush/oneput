@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { createToken, remove, replaceText } from '../token.js';
+import { createToken, remove, removeToken, replaceText } from '../token.js';
 import { createAnchor } from '../anchor.js';
-import { isAnchor, JSED_DELETED_CLASS, JSED_IGNORE_CLASS } from '../../core/taxonomy.js';
+import {
+  isAnchor,
+  isDeletedAnchor,
+  JSED_DELETED_CLASS,
+  JSED_IGNORE_CLASS
+} from '../../core/taxonomy.js';
 import { buildParent } from '../../../test/util.js';
 
 describe('replaceText', () => {
@@ -142,5 +147,21 @@ describe('remove', () => {
       nextSeparator: sp2,
       previousSeparator: sp1
     });
+  });
+});
+
+describe('removeToken', () => {
+  test('ANCHOR → soft-deleted, still an ANCHOR', () => {
+    // arrange
+    const anchor = createAnchor();
+    const parent = buildParent(anchor);
+
+    // act
+    removeToken(anchor);
+
+    // assert — node stays put (not detached) and is still an ANCHOR
+    expect(parent.contains(anchor)).toBe(true);
+    expect(isAnchor(anchor)).toBe(true);
+    expect(isDeletedAnchor(anchor)).toBe(true);
   });
 });

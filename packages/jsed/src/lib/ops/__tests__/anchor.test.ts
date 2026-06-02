@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { canInsertAnchorInLine } from '../token.js';
 import {
   addAnchorsToTag,
+  anchorize,
   getAnchorAfterTagInsertionPoint,
   getAnchorBeforeTagInsertionPoint,
   getRemovableAnchorAfterTag,
@@ -16,13 +17,16 @@ import {
   byId,
   div,
   em as emTag,
+  identifyChildren,
+  inlineStyleHack,
   makeRawRoot,
   makeRoot,
   p,
   rawById,
   s,
   span,
-  strong as strongTag
+  strong as strongTag,
+  t
 } from '../../../test/util.js';
 
 describe('addAnchorsToTag', () => {
@@ -61,6 +65,194 @@ describe('addAnchorsToTag', () => {
     expect(anchor).not.toBeUndefined();
     expect(isAnchor(anchor!)).toBe(true);
     expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
+  });
+
+  test('tokens only → none', () => {
+    // arrange
+    const root = makeRawRoot(p({ id: 'p1' }, t('foo'), t('bar')));
+    const p1 = rawById(root, 'p1');
+
+    // act
+    const anchors = addAnchorsToTag(p1);
+
+    // assert
+    expect(anchors).toEqual([]);
+    expect(identifyChildren(p1)).toEqual(['foo', 'bar']);
+  });
+
+  test('INLINE_FLOW only → both sides', () => {
+    // arrange
+    const root = makeRawRoot(p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack }, 'foo')));
+    const p1 = rawById(root, 'p1');
+
+    // act
+    const anchors = addAnchorsToTag(p1);
+
+    // assert
+    expect(anchors).toHaveLength(2);
+    expect(identifyChildren(p1)).toEqual(['[anchor]', '[element:em#em1]', '[anchor]']);
+  });
+
+  test('token then INLINE_FLOW → trailing anchor', () => {
+    // arrange
+    const root = makeRawRoot(
+      p({ id: 'p1' }, t('foo'), emTag({ id: 'em1', ...inlineStyleHack }, 'bar'))
+    );
+    const p1 = rawById(root, 'p1');
+
+    // act
+    const anchors = addAnchorsToTag(p1);
+
+    // assert
+    expect(anchors).toHaveLength(1);
+    expect(identifyChildren(p1)).toEqual(['foo', '[element:em#em1]', '[anchor]']);
+  });
+
+  test('INLINE_FLOW then token → leading anchor', () => {
+    // arrange
+    const root = makeRawRoot(
+      p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack }, 'bar'), t('foo'))
+    );
+    const p1 = rawById(root, 'p1');
+
+    // act
+    const anchors = addAnchorsToTag(p1);
+
+    // assert
+    expect(anchors).toHaveLength(1);
+    expect(identifyChildren(p1)).toEqual(['[anchor]', '[element:em#em1]', 'foo']);
+  });
+
+  test('token INLINE_FLOW token → none', () => {
+    // arrange
+    const root = makeRawRoot(
+      p({ id: 'p1' }, t('a'), emTag({ id: 'em1', ...inlineStyleHack }, 'x'), t('b'))
+    );
+    const p1 = rawById(root, 'p1');
+
+    // act
+    const anchors = addAnchorsToTag(p1);
+
+    // assert
+    expect(anchors).toEqual([]);
+    expect(identifyChildren(p1)).toEqual(['a', '[element:em#em1]', 'b']);
+  });
+});
+
+describe('anchorize', () => {
+  test('empty LINE → leading anchor', () => {
+    // arrange
+    const root = makeRawRoot(p({ id: 'p1' }));
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]']);
+  });
+
+  test('leading INLINE_FLOW → both sides', () => {
+    // arrange
+    const root = makeRawRoot(p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack }, t('foo'))));
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual([
+      '[anchor]',
+      '[element:em#em1]',
+      '[anchor]'
+    ]);
+    expect(identifyChildren(rawById(root, 'em1'))).toEqual(['foo']);
+  });
+
+  test('token then INLINE_FLOW → trailing anchor', () => {
+    // arrange
+    const root = makeRawRoot(
+      p({ id: 'p1' }, t('foo'), emTag({ id: 'em1', ...inlineStyleHack }, t('bar')))
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['foo', '[element:em#em1]', '[anchor]']);
+    expect(identifyChildren(rawById(root, 'em1'))).toEqual(['bar']);
+  });
+
+  test('INLINE_FLOW then token → leading anchor', () => {
+    // arrange
+    const root = makeRawRoot(
+      p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack }, t('bar')), t('foo'))
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[element:em#em1]', 'foo']);
+    expect(identifyChildren(rawById(root, 'em1'))).toEqual(['bar']);
+  });
+
+  test('token INLINE_FLOW token → none', () => {
+    // arrange
+    const root = makeRawRoot(
+      p({ id: 'p1' }, t('a'), emTag({ id: 'em1', ...inlineStyleHack }, t('x')), t('b'))
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['a', '[element:em#em1]', 'b']);
+    expect(identifyChildren(rawById(root, 'em1'))).toEqual(['x']);
+  });
+
+  test('empty nested INLINE_FLOW → interior + surrounding anchors', () => {
+    // arrange
+    const root = makeRawRoot(p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack })));
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual([
+      '[anchor]',
+      '[element:em#em1]',
+      '[anchor]'
+    ]);
+    expect(identifyChildren(rawById(root, 'em1'))).toEqual(['[anchor]']);
+  });
+
+  test('IMPLICIT_LINE → anchored inside, not around', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' },
+        p({ id: 'p1' }, 'aaa'),
+        emTag({ id: 'em1', ...inlineStyleHack }, 'bbb'),
+        p({ id: 'p2' }, 'ccc')
+      )
+    );
+    const em1 = byId(doc, 'em1');
+    const p1 = byId(doc, 'p1');
+    const p2 = byId(doc, 'p2');
+    const implicitLine = em1.parentElement!;
+    const div1 = byId(doc, 'div1');
+
+    // act
+    anchorize(doc.root);
+
+    // assert
+    expect(isImplicitLine(implicitLine)).toBe(true);
+    // anchored inside the IMPLICIT_LINE, around the em
+    expect(identifyChildren(implicitLine)).toEqual(['[anchor]', '[element:em#em1]', '[anchor]']);
+    // not anchored around the IMPLICIT_LINE at the parent level
+    expect(identifyChildren(div1)).toEqual(['[element:p#p1]', '[implicit-line]', '[element:p#p2]']);
+    expect(identifyChildren(p1)).toEqual(['[nodeType=3:"aaa"]']);
+    expect(identifyChildren(p2)).toEqual(['[nodeType=3:"ccc"]']);
+    expect(identifyChildren(em1)).toEqual(['[nodeType=3:"bbb"]']);
   });
 });
 

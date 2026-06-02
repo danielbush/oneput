@@ -263,19 +263,24 @@ export function addAnchorsToTag(el: HTMLElement): HTMLElement[] {
   return anchors;
 }
 
-export function anchorize(el: Node) {
+export function anchorize(el: Node): HTMLElement[] {
+  const anchors: HTMLElement[] = [];
   findNextNode(el, {
     ceiling: el,
     visitStart: true,
     // ISLAND's are OPAQUE: never DESCEND or anchorize their internals.
     shouldDescend: (node) => isFocusable(node) && !isIsland(node),
     pre: (node) => {
-      anchorizeLeadingSegment(node);
+      // Returning void keeps the walk going; a returned Node would stop it.
+      const anchor = anchorizeLeadingSegment(node);
+      if (anchor) anchors.push(anchor);
     },
     post: (node) => {
-      anchorizeAfter(node);
+      const anchor = anchorizeAfter(node);
+      if (anchor) anchors.push(anchor);
     }
   });
+  return anchors;
 }
 
 /**

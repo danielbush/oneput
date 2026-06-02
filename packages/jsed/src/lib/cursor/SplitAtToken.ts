@@ -1,6 +1,6 @@
 import { getFirstLineSibling, getLine } from '../core/line';
 import type { EditorState } from '../editor/EditorState';
-import { addAnchorsToTag } from '../ops/anchor';
+import { anchorize } from '../ops/anchor';
 import {
   recSplitAfterChild,
   recSplitBeforeChild,
@@ -23,10 +23,10 @@ function anchorSplit(result: SplitResult, splitBefore: boolean): HTMLElement[] {
   if (splitBefore) {
     // The original may need an ANCHOR because we could split before the first
     // child.
-    anchors.push(...addAnchorsToTag(result.bottomSplit.parent));
+    anchors.push(...anchorize(result.bottomSplit.parent));
   }
   // We might have an empty INLINE_FLOW peer, so anchor the lowest level.
-  anchors.push(...addAnchorsToTag(result.bottomSplit.peer));
+  anchors.push(...anchorize(result.bottomSplit.peer));
   return anchors;
 }
 

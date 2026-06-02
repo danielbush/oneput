@@ -1,7 +1,7 @@
 import type { EditorState } from './EditorState.js';
 import * as token from '../ops/token.js';
 import {
-  addAnchorsToTag,
+  anchorize,
   getAnchorAfterTagInsertionPoint,
   getAnchorBeforeTagInsertionPoint,
   getRemovableAnchorAfterTag,
@@ -121,7 +121,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    const [anchor] = addAnchorsToTag(focus);
+    const [anchor] = anchorize(focus);
     if (!anchor) {
       return false;
     }

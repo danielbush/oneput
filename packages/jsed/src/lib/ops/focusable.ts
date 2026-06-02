@@ -14,7 +14,7 @@ import {
 } from '../core/taxonomy.js';
 import { findNextNode, findPreviousNode } from '../core/walk.js';
 import { createImplicitLine } from './implicitLine.js';
-import { addAnchorsToTag } from './anchor.js';
+import { anchorize } from './anchor.js';
 
 export function createElement(
   tagName: string,
@@ -22,7 +22,7 @@ export function createElement(
 ): HTMLElement {
   const el = document.createElement(tagName);
   if (options.addAnchors && canCreateWithAnchor(tagName)) {
-    addAnchorsToTag(el);
+    anchorize(el);
   }
   return el;
 }
@@ -272,7 +272,7 @@ export function copyEmptyNext(target: HTMLElement): HTMLElement | null {
   empty.classList.remove(JSED_FOCUS_CLASS);
   target.insertAdjacentElement('afterend', empty);
   if (canCreateWithAnchor(empty.tagName)) {
-    addAnchorsToTag(empty);
+    anchorize(empty);
   }
   return empty;
 }
@@ -286,7 +286,7 @@ export function copyEmptyPrevious(target: HTMLElement): HTMLElement | null {
   empty.classList.remove(JSED_FOCUS_CLASS);
   target.insertAdjacentElement('beforebegin', empty);
   if (canCreateWithAnchor(empty.tagName)) {
-    addAnchorsToTag(empty);
+    anchorize(empty);
   }
   return empty;
 }

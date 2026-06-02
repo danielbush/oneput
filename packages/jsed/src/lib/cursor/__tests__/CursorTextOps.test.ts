@@ -89,7 +89,8 @@ describe('splitAtToken', () => {
     expect(doc.root.querySelectorAll('p')).toHaveLength(2);
   });
 
-  test('ANCHOR_ISLAND_EDGE_CASE - split after first TOKEN that precedes an ISLAND', () => {
+  // ANCHOR_ISLAND_EDGE_CASE
+  test('split after first TOKEN that precedes an ISLAND', () => {
     // arrange — the TOKEN is the only TOKEN on the LINE, followed by an ISLAND
     const doc = makeRoot(p(t('foo'), s(), '<span class="katex" style="display:inline;">x²</span>'));
     const { cursor } = createCursor(doc, tokens(doc)[0]); // foo
@@ -119,6 +120,74 @@ describe('splitAtToken', () => {
     ).toBeTruthy();
     // a separator space is auto-generated between the ANCHOR and the ISLAND
     expect(getSeparatorBefore(anchor!)?.nodeValue).toBe(' ');
+  });
+
+  test('split before first TOKEN → ANCHOR on emptied original LINE', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[0]); // hello
+    cursor.setInsertState('CURSOR_PREPEND');
+
+    // act
+    cursor.splitAtToken();
+
+    // assert
+    const lines = doc.root.querySelectorAll('p');
+    expect(lines).toHaveLength(2);
+    expect(identifyChildren(lines[0])).toEqual(['[anchor]']);
+    expect(identifyChildren(lines[1])).toEqual(['hello', '[nodeType=3:" "]', 'world']);
+    expect(identify(cursor.getPlace())).toBe('hello');
+  });
+
+  test('split after last TOKEN → ANCHOR on new empty LINE', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[1]); // world
+    cursor.setInsertState('CURSOR_APPEND');
+
+    // act
+    cursor.splitAtToken();
+
+    // assert
+    const lines = doc.root.querySelectorAll('p');
+    expect(lines).toHaveLength(2);
+    expect(identifyChildren(lines[0])).toEqual(['hello', '[nodeType=3:" "]', 'world']);
+    expect(identifyChildren(lines[1])).toEqual(['[anchor]']);
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+  });
+
+  test('split with TOKENs both sides → no ANCHOR', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[1]); // world
+    cursor.setInsertState('CURSOR_PREPEND');
+
+    // act
+    cursor.splitAtToken();
+
+    // assert
+    const lines = doc.root.querySelectorAll('p');
+    expect(lines).toHaveLength(2);
+    expect(identifyChildren(lines[0])).toEqual(['hello', '[nodeType=3:" "]']);
+    expect(identifyChildren(lines[1])).toEqual(['world']);
+    expect(doc.root.querySelectorAll(`.${JSED_ANCHOR_CLASS}`)).toHaveLength(0);
+  });
+
+  test('split after TOKEN in nested INLINE_FLOW → ANCHOR in emptied peer', () => {
+    // arrange
+    const doc = makeRoot(p(em(inlineStyle, t('a'))));
+    const { cursor } = createCursor(doc, tokens(doc)[0]); // a
+    cursor.setInsertState('CURSOR_APPEND');
+
+    // act
+    cursor.splitAtToken();
+
+    // assert — anchoring targets the bottom (em) split, not the outer LINE
+    const lines = doc.root.querySelectorAll('p');
+    expect(lines).toHaveLength(2);
+    expect(identifyChildren(lines[0].querySelector('em')!)).toEqual(['a']);
+    expect(identifyChildren(lines[1].querySelector('em')!)).toEqual(['[anchor]']);
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
   });
 });
 

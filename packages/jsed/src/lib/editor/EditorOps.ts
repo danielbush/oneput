@@ -4,7 +4,6 @@ import * as token from '../ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
-import { undoDeleteElement } from '../ops/focusable.js';
 
 /**
  * Manages an edit session for a single document.
@@ -289,45 +288,6 @@ export class EditorOps {
   undo = () => {
     const rec = this.state.undo.popUndo();
     rec?.undo(this.state);
-    return;
-    console.log('-- start undo rec');
-    for (const op of rec.ops.reverse()) {
-      console.log(op.action);
-      switch (op.action) {
-        case 'place-cursor': {
-          // We'll take this as advisory and do it only if we have a cursor.
-          if (this.state.cursor) {
-            this.state.cursor.place(op.target);
-          }
-          break;
-        }
-
-        // Element deletion
-        case 'delete-element': {
-          undoDeleteElement(op);
-          break;
-        }
-
-        // Token / separator editing insertion
-        case 'replace-text': {
-          token.undoReplaceText(op);
-          break;
-        }
-
-        case 'insert-token-after': {
-          token.undoInsertAfter(op);
-          break;
-        }
-
-        // Token deletion
-        case 'anchorize-token':
-        case 'delete-token': {
-          token.undoRemove(op);
-          break;
-        }
-      }
-    }
-    console.log('-- stop undo rec');
   };
 
   redo = () => {

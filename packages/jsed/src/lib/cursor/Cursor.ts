@@ -8,6 +8,7 @@ import type { Tokenizer } from '../ops/Tokenizer.js';
 import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
 import { InsertTextAfter } from './InsertTextAfter.js';
+import { InsertTextBefore } from './InsertTextBefore.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -72,7 +73,7 @@ export class Cursor {
   insertTextAfter = (text: string, opts?: UserInputOpts) =>
     this._undo(InsertTextAfter.run(this.state, text, opts));
   insertTextBefore = (text: string, opts?: UserInputOpts) =>
-    this.state.ops.insertTextBefore(text, opts);
+    this._undo(InsertTextBefore.run(this.state, text, opts));
   splitAtToken = () => this.state.ops.splitAtToken();
 
   // selections

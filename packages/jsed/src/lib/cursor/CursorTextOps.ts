@@ -1,8 +1,6 @@
 import * as token from '../ops/token.js';
-import * as space from '../ops/space.js';
 import { isLineSibling, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import type { UserInputOpts } from '../input/UserInput.js';
 import { recSplitAfterChild, recSplitBeforeChild } from '../ops/focusable.js';
 import {
   getFirstLineSibling,
@@ -100,22 +98,6 @@ export class CursorTextOps {
     const prev = this.getPrevious();
     // See moveNext: keep the input on the anchor during a selection-head walk.
     if (prev) this.state.place(prev, isSelection ? { syncInput: false } : undefined);
-  }
-
-  insertTextBefore(text: string, opts?: UserInputOpts): HTMLElement | null {
-    const currentToken = this.state.getPlace();
-    let lastToken: HTMLElement | null = null;
-    const parts = text.split(/\s+/).filter(Boolean);
-    for (const part of parts) {
-      const insertedToken = token.createToken(part);
-      token.insertBefore(insertedToken, currentToken);
-      space.ensureSeparatorAfter(insertedToken);
-      lastToken = insertedToken;
-    }
-    if (lastToken) {
-      this.state.place(lastToken, opts);
-    }
-    return lastToken;
   }
 
   /** Merge with next adjacent TOKEN if it exists (JOIN). */

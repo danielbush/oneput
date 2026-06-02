@@ -104,6 +104,15 @@ export type InsertTokenAfter = {
   removedSeparatorAfter?: RemoveSeparator;
 };
 
+export type InsertTokenBefore = {
+  action: 'insert-token-before';
+  token: HTMLElement;
+  after: HTMLElement;
+  separatorAfter: InsertSeparatorAfter | null;
+  removedToken?: RemoveToken;
+  removedSeparatorAfter?: RemoveSeparator;
+};
+
 export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): InsertTokenAfter {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
@@ -136,11 +145,36 @@ export function redoInsertAfter(op: InsertTokenAfter) {
   }
 }
 
-export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): void {
+export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): InsertTokenBefore {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
-  existing.insertAdjacentElement('beforebegin', toInsert);
+  existing.before(toInsert);
+  const result = ensureSeparatorAfter(toInsert);
+  return {
+    action: 'insert-token-before',
+    token: toInsert,
+    after: existing,
+    separatorAfter: result
+  };
+}
+
+export function undoInsertBefore(op: InsertTokenBefore) {
+  const { separatorAfter, token } = op;
+  op.removedToken = removeToken(token, false);
+  if (separatorAfter) {
+    op.removedSeparatorAfter = removeSeparator(separatorAfter?.separator);
+  }
+}
+
+export function redoInsertBefore(op: InsertTokenBefore) {
+  const { removedToken, removedSeparatorAfter } = op;
+  if (removedToken) {
+    undoRemoveToken(removedToken);
+  }
+  if (removedSeparatorAfter) {
+    undoRemoveSeparator(removedSeparatorAfter);
+  }
 }
 
 export type ReplaceText = {

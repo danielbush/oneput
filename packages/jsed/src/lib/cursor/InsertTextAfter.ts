@@ -9,6 +9,7 @@ import {
 } from '../ops/token';
 import type { UndoRecord } from '../undo';
 import type { CursorState } from './CursorState';
+import { ReplaceWithText } from './ReplaceWithText';
 
 /**
  * Insert string vals after cursor and put cursor on last one.
@@ -61,5 +62,19 @@ export class InsertTextAfter implements UndoRecord {
       redoInsertAfter(i);
     }
     state.cursor?.place(this.cursorTarget.redo, this.opts);
+  }
+
+  merge(next: UndoRecord): UndoRecord | void {
+    if (this.insertTokensAfter.length !== 1) {
+      return;
+    }
+    const insertAfter = this.insertTokensAfter[0];
+    // Merge subsequent text changes into the inserted token.
+    if (next instanceof ReplaceWithText) {
+      if (next.replaceText.token === insertAfter.token && insertAfter.token.firstChild) {
+        insertAfter.token.firstChild.nodeValue = next.replaceText.after;
+        return this;
+      }
+    }
   }
 }

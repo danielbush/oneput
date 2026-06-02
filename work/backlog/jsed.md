@@ -97,6 +97,7 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
   - ability to explicitly mark elements as FOCUS transparent (and by extension CURSOR transparent); the key difference being that everything including text is ignored until we hit an element that turns the transparency off; the "off" subtree is like a editable hole contained within the transparent subtree.
 - chore: if cursor text ops or other ops fail, editor should catch the error and go into a safe state
   - EXAMPLE: cursor delete (CursorTextOps), at time of writing, throws if current.parentElement is null
+- feat: we should tokenize between chars and non-chars; imagine copying some dense code eg `redoReplaceText(this.replaceText)`
 
 ## refactors
 

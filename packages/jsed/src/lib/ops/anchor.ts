@@ -322,7 +322,10 @@ function anchorizeLeadingSegment(node: Node) {
  * - covers trailing LINE_SEGMENT's for a LINE.
  */
 function anchorizeAfter(node: Node) {
-  if (isFocusable(node) && !isIsland(node) && isInline(node)) {
+  // ISLAND's are allowed here: the ANCHOR lands in the ISLAND's parent (after
+  // it), not inside it. Anchoring inside an ISLAND is prevented by the
+  // !isIsland guards in anchorizeLeadingSegment and shouldDescend.
+  if (isFocusable(node) && isInline(node)) {
     if (isImplicitLine(node)) {
       // Don't anchorize after an IMPLICIT_LINE.
       return null;

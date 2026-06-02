@@ -357,25 +357,36 @@ describe('anchorize', () => {
     expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[nodeType=3:" "]']);
   });
 
-  test('ISLAND → not descended, internals untouched', () => {
-    // arrange
+  test('ISLAND → anchored around, internals untouched', () => {
+    // arrange — a katex-shaped ISLAND with nested rendered internals
     const root = makeRawRoot(
       p(
         { id: 'p1' },
         span(
           { id: 'isl', class: 'katex', ...inlineStyleHack },
-          emTag({ id: 'inner', ...inlineStyleHack })
+          span(
+            { class: 'katex-html' },
+            span(
+              { class: 'base' },
+              span({ class: 'mord mathnormal' }, 'x'),
+              span({ class: 'msupsub' }, span({ class: 'vlist' }, '2'))
+            )
+          )
         )
       )
     );
+    const islandInner = rawById(root, 'isl').innerHTML;
 
     // act
     anchorize(root);
 
-    // assert
-    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[island:span]']);
-    expect(identifyChildren(rawById(root, 'isl'))).toEqual(['[element:em#inner]']);
-    expect(identifyChildren(rawById(root, 'inner'))).toEqual([]);
+    // assert — anchored on both sides (you can type either side), never inside
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual([
+      '[anchor]',
+      '[island:span]',
+      '[anchor]'
+    ]);
+    expect(rawById(root, 'isl').innerHTML).toBe(islandInner);
   });
 });
 

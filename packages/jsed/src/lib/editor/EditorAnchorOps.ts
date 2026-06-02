@@ -1,7 +1,7 @@
 import type { EditorState } from './EditorState.js';
-import * as token from '../ops/token.js';
 import {
   anchorize,
+  canInsertAnchorInLine,
   getAnchorAfterTagInsertionPoint,
   getAnchorBeforeTagInsertionPoint,
   getRemovableAnchorAfterTag,
@@ -112,12 +112,12 @@ export class EditorAnchorOps {
 
   canInsertInFocus(): boolean {
     const focus = this.state.nav.getFocus();
-    return !!(focus && token.canInsertAnchorInLine(focus));
+    return !!(focus && canInsertAnchorInLine(focus));
   }
 
   insertInFocus(): boolean {
     const focus = this.state.nav.getFocus();
-    if (!focus || !token.canInsertAnchorInLine(focus)) {
+    if (!focus || !canInsertAnchorInLine(focus)) {
       return false;
     }
 

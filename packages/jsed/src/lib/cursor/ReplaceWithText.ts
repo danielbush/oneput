@@ -82,15 +82,24 @@ export class ReplaceWithText implements UndoRecord {
       // situation.
       return;
     }
-    if (next instanceof DeleteAtCursor) {
-      // TODO: collapse incremental deletes into a delete of the original token.
-      return;
-    }
+    console.log(JSON.stringify(this.replaceText));
+    // Collapse successive ReplaceWithTexts
     if (next instanceof ReplaceWithText && this.replaceText.token === next.replaceText.token) {
       // this.replaceText.before - the earliest state of the token
       // next.replaceText.after - the latest state of the token
       this.replaceText.after = next.replaceText.after;
       return this;
+    }
+    // Collapse last ReplaceWithText to DeleteAtCursor
+    if (next instanceof DeleteAtCursor) {
+      if (
+        next.removeToken &&
+        next.removeToken.token === this.replaceText.token &&
+        next.removeToken.token.firstChild
+      ) {
+        next.removeToken.token.firstChild.nodeValue = this.replaceText.before;
+        return next;
+      }
     }
     return;
   }

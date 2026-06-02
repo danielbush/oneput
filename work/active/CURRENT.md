@@ -11,7 +11,7 @@
 - [x] insert new token
 - [x] implement new UndoRecord  with .undo, .redo, .merge
 - [x] squash replace text undo records
-- [ ] split at token (creating new lines)
+- [x] split at token (creating new lines)
   - COMMENT: brings in automatic anchorization
   - [x] ANCHOR_ISLAND_EDGE_CASE
     - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.

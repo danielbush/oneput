@@ -17,6 +17,16 @@ import {
 } from '../lib/core/taxonomy.js';
 
 /**
+ * Build a parent with arbitrary children directly — sidesteps `makeRoot`'s
+ * load-time transforms (e.g. implicit-line wrapping)
+ */
+export function buildParent(...children: Node[]): HTMLElement {
+  const parent = document.createElement('div');
+  parent.append(...children);
+  return parent;
+}
+
+/**
  * Make a div be the root of the document.
  *
  * It calls loadDoc which is part of the app we're testing but this is a

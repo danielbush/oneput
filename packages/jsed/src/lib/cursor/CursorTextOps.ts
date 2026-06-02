@@ -11,7 +11,6 @@ import {
   getPreviousLineSibling
 } from '../core/line.js';
 import { addAnchorsToTag } from '../ops/anchor.js';
-import type { UndoRecord } from '../undo/UndoRecorder.js';
 import { getWrapCandidates } from '../core/dom-rules.js';
 
 /**
@@ -101,29 +100,6 @@ export class CursorTextOps {
     const prev = this.getPrevious();
     // See moveNext: keep the input on the anchor during a selection-head walk.
     if (prev) this.state.place(prev, isSelection ? { syncInput: false } : undefined);
-  }
-
-  /**
-   * Insert string vals after cursor and put cursor on last one.
-   */
-  insertTextAfter(text: string, opts?: UserInputOpts) {
-    const currentToken = this.state.getPlace();
-    const undo: UndoRecord = { ops: [] };
-    let lastToken: HTMLElement | null = null;
-    const parts = text.split(/\s+/).filter(Boolean);
-    for (const part of parts.reverse()) {
-      const insertedToken = token.createToken(part);
-      undo.ops.push({ action: 'place-cursor', target: currentToken });
-      const result = token.insertAfter(insertedToken, currentToken);
-      undo.ops.push(result);
-      if (!lastToken) {
-        lastToken = insertedToken;
-      }
-    }
-    if (lastToken) {
-      this.state.place(lastToken, opts);
-    }
-    return undo;
   }
 
   insertTextBefore(text: string, opts?: UserInputOpts): HTMLElement | null {

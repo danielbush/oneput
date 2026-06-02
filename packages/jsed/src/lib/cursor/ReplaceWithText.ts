@@ -82,7 +82,6 @@ export class ReplaceWithText implements UndoRecord {
       // situation.
       return;
     }
-    console.log(JSON.stringify(this.replaceText));
     // Collapse successive ReplaceWithTexts
     if (next instanceof ReplaceWithText && this.replaceText.token === next.replaceText.token) {
       // this.replaceText.before - the earliest state of the token

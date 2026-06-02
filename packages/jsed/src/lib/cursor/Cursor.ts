@@ -7,6 +7,7 @@ import type { JsedDocument } from '../../JsedDocument.js';
 import type { Tokenizer } from '../ops/Tokenizer.js';
 import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
+import { InsertTextAfter } from './InsertTextAfter.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -69,7 +70,7 @@ export class Cursor {
   replaceWithText = (text: string, opts?: UserInputOpts) =>
     this._undo(ReplaceWithText.run(this.state, text, opts));
   insertTextAfter = (text: string, opts?: UserInputOpts) =>
-    this._undo(this.state.ops.insertTextAfter(text, opts));
+    this._undo(InsertTextAfter.run(this.state, text, opts));
   insertTextBefore = (text: string, opts?: UserInputOpts) =>
     this.state.ops.insertTextBefore(text, opts);
   splitAtToken = () => this.state.ops.splitAtToken();

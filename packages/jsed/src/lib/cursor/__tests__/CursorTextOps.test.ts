@@ -215,7 +215,12 @@ describe('splitAtToken', () => {
     // soft-deleted (IGNORABLE) and retained on the LINE so redo can reuse it.
     expect(ps()).toHaveLength(1);
     expect(identify(cursor.getPlace())).toBe('world');
-    expect(identifyChildren(ps()[0])).toEqual(['hello', '[nodeType=3:" "]', 'world', '[anchor]']);
+    expect(identifyChildren(ps()[0])).toEqual([
+      'hello',
+      '[nodeType=3:" "]',
+      'world',
+      '[deleted-anchor]'
+    ]);
 
     // act — redo
     record.redo(state);

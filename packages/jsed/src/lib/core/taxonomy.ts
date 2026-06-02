@@ -157,6 +157,14 @@ export function isToken(el: Node | null | undefined): boolean {
   return false;
 }
 
+export function isDeletedAnchor(el: Node | null | undefined): boolean {
+  const isHTMLElement = el instanceof window.HTMLElement;
+  if (isHTMLElement) {
+    return el.classList.contains(JSED_ANCHOR_CLASS) && el.classList.contains(JSED_DELETED_CLASS);
+  }
+  return false;
+}
+
 export function isDeletedToken(el: Node | null | undefined): boolean {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {

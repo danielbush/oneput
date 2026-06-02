@@ -3,6 +3,7 @@ import type { ViewportScrollerNullOptions } from '../lib/utilities/ViewportScrol
 import * as token from '../lib/ops/token.js';
 import {
   isAnchor,
+  isDeletedAnchor,
   isDeletedElement,
   isDeletedSpace,
   isDeletedToken,
@@ -136,6 +137,7 @@ export function identify(el: Node | undefined | null): string {
   if (isImplicitLine(el)) return `[implicit-line]`;
   if (isDeletedSpace(el)) return `[deleted-space]`;
   if (isDeletedToken(el)) return `d("${token.getValue(el)}")`;
+  if (isDeletedAnchor(el)) return `[deleted-anchor]`;
   if (isDeletedElement(el)) return `[deleted-element]`;
   if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el);

@@ -9,7 +9,7 @@ import {
   type RecursiveSplitAfterAction,
   type RecursiveSplitBeforeAction
 } from '../ops/focusable';
-import { removeToken, undoRemoveToken, type RemoveToken } from '../ops/token';
+import { type RemoveToken } from '../ops/token';
 import type { UndoRecord } from '../undo';
 import type { CursorState } from './CursorState';
 
@@ -53,14 +53,14 @@ export class SplitAtToken implements UndoRecord {
       state.place(sib);
     }
 
-    return new SplitAtToken(result, { undo: child, redo: sib ?? child }, splitBefore, anchors);
+    return new SplitAtToken(result, { undo: child }, splitBefore, anchors);
   }
 
   constructor(
     public result: SplitResult,
     public cursorTarget: {
       undo: HTMLElement;
-      redo: HTMLElement;
+      // We don't set a redo target as it may be an ANCHOR and atm we just remove them here.
     },
     public splitBefore: boolean,
     public anchors: HTMLElement[],
@@ -69,7 +69,7 @@ export class SplitAtToken implements UndoRecord {
 
   undo(state: EditorState) {
     for (const anchor of this.anchors) {
-      this.removedAnchors.push(removeToken(anchor));
+      anchor.remove();
     }
     undoRecSplit(this.result);
     state.cursor?.place(this.cursorTarget.undo);
@@ -77,10 +77,9 @@ export class SplitAtToken implements UndoRecord {
 
   redo(state: EditorState) {
     redoRecSplit(this.result);
-    // this.anchors = anchorSplit(this.result, this.splitBefore);
-    for (const removedAnchor of this.removedAnchors) {
-      undoRemoveToken(removedAnchor);
-    }
-    state.cursor?.place(this.cursorTarget.redo);
+    this.anchors = anchorSplit(this.result, this.splitBefore);
+    // Recompute the cursor place which may be an anchor:
+    const sib = getFirstLineSibling(this.result.topSplit.peer);
+    state.cursor?.place(sib ?? this.cursorTarget.undo);
   }
 }

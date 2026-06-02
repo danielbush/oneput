@@ -288,7 +288,7 @@ export function redoRemove(op: RemoveTokenAll) {
 /**
  * Low-level utility for flipping tokens.
  */
-export function removeToken(token: HTMLElement, removeSeparators: boolean = true): RemoveToken {
+function removeToken(token: HTMLElement, removeSeparators: boolean = true): RemoveToken {
   token.classList.add(JSED_DELETED_CLASS);
   token.classList.add(JSED_IGNORE_CLASS);
   let nextSeparator: RemoveSeparator | false = false;
@@ -316,7 +316,7 @@ export function removeToken(token: HTMLElement, removeSeparators: boolean = true
   };
 }
 
-export function undoRemoveToken(op: RemoveToken) {
+function undoRemoveToken(op: RemoveToken) {
   const { token } = op;
   token.classList.remove(JSED_DELETED_CLASS);
   token.classList.remove(JSED_IGNORE_CLASS);

@@ -149,19 +149,3 @@ describe('remove', () => {
     });
   });
 });
-
-describe('removeToken', () => {
-  test('ANCHOR → soft-deleted, still an ANCHOR', () => {
-    // arrange
-    const anchor = createAnchor();
-    const parent = buildParent(anchor);
-
-    // act
-    removeToken(anchor);
-
-    // assert — node stays put (not detached) and is still an ANCHOR
-    expect(parent.contains(anchor)).toBe(true);
-    expect(isAnchor(anchor)).toBe(true);
-    expect(isDeletedAnchor(anchor)).toBe(true);
-  });
-});

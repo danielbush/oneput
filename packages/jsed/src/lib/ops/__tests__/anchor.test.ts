@@ -254,6 +254,128 @@ describe('anchorize', () => {
     expect(identifyChildren(p2)).toEqual(['[nodeType=3:"ccc"]']);
     expect(identifyChildren(em1)).toEqual(['[nodeType=3:"bbb"]']);
   });
+
+  test('IMPLICIT_LINE as leading child → no anchor before it', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'div1' }, //
+        emTag({ id: 'em1', ...inlineStyleHack }, 'bbb'),
+        p({ id: 'p2' }, 'ccc')
+      )
+    );
+    const implicitLine = byId(doc, 'em1').parentElement!;
+    const div1 = byId(doc, 'div1');
+
+    // act
+    anchorize(doc.root);
+
+    // assert
+    expect(isImplicitLine(implicitLine)).toBe(true);
+    expect(identifyChildren(div1)).toEqual(['[implicit-line]', '[element:p#p2]']);
+    expect(identifyChildren(implicitLine)).toEqual(['[anchor]', '[element:em#em1]', '[anchor]']);
+  });
+
+  test('adjacent INLINE_FLOWs → anchor between', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        { id: 'p1' },
+        emTag({ id: 'em1', ...inlineStyleHack }, t('a')),
+        strongTag({ id: 's1', ...inlineStyleHack }, t('b'))
+      )
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual([
+      '[anchor]',
+      '[element:em#em1]',
+      '[anchor]',
+      '[element:strong#s1]',
+      '[anchor]'
+    ]);
+  });
+
+  test('INLINE_FLOW then block → anchor before block', () => {
+    // arrange
+    const root = makeRawRoot(
+      div(
+        { id: 'd' }, //
+        emTag({ id: 'em1', ...inlineStyleHack }, t('a')),
+        p({ id: 'p2' }, t('b'))
+      )
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'd'))).toEqual([
+      '[anchor]',
+      '[element:em#em1]',
+      '[anchor]',
+      '[element:p#p2]'
+    ]);
+  });
+
+  // CURRENT behaviour of guard #3 (slated to be dropped — see
+  // project_anchorize_implicit_line): no anchor between an inline and a
+  // following IMPLICIT_LINE.
+  test('INLINE_FLOW then IMPLICIT_LINE → no anchor between (guard #3)', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        { id: 'p1' },
+        emTag({ id: 'em1', ...inlineStyleHack }, t('a')),
+        span({ class: 'jsed-implicit-line', ...inlineStyleHack }, t('b'))
+      )
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual([
+      '[anchor]',
+      '[element:em#em1]',
+      '[implicit-line]'
+    ]);
+  });
+
+  test('whitespace-only FOCUSABLE → leading anchor', () => {
+    // arrange
+    const root = makeRawRoot(p({ id: 'p1' }, s(' ')));
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[nodeType=3:" "]']);
+  });
+
+  test('ISLAND → not descended, internals untouched', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        { id: 'p1' },
+        span(
+          { id: 'isl', class: 'katex', ...inlineStyleHack },
+          emTag({ id: 'inner', ...inlineStyleHack })
+        )
+      )
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[island:span]']);
+    expect(identifyChildren(rawById(root, 'isl'))).toEqual(['[element:em#inner]']);
+    expect(identifyChildren(rawById(root, 'inner'))).toEqual([]);
+  });
 });
 
 describe('insertAnchorBeforeTag', () => {

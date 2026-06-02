@@ -5,6 +5,7 @@ import {
   isIgnorable,
   isImplicitLine,
   isInline,
+  isIsland,
   isLine,
   isLineSibling,
   isToken,
@@ -266,7 +267,8 @@ export function anchorize(el: Node) {
   findNextNode(el, {
     ceiling: el,
     visitStart: true,
-    shouldDescend: (node) => isFocusable(node),
+    // ISLAND's are OPAQUE: never DESCEND or anchorize their internals.
+    shouldDescend: (node) => isFocusable(node) && !isIsland(node),
     pre: (node) => {
       anchorizeLeadingSegment(node);
     },
@@ -283,7 +285,7 @@ export function anchorize(el: Node) {
  * - Covers the case where the parent is empty, in which case we effectively append an ANCHOR.
  */
 function anchorizeLeadingSegment(node: Node) {
-  if (isFocusable(node)) {
+  if (isFocusable(node) && !isIsland(node)) {
     const firstRealSib = getNextSibling(
       node.firstChild,
       (sib) => isFocusable(sib) || isTokenizableTextNode(sib) || isLineSibling(sib),
@@ -315,7 +317,7 @@ function anchorizeLeadingSegment(node: Node) {
  * - covers trailing LINE_SEGMENT's for a LINE.
  */
 function anchorizeAfter(node: Node) {
-  if (isFocusable(node) && isInline(node)) {
+  if (isFocusable(node) && !isIsland(node) && isInline(node)) {
     if (isImplicitLine(node)) {
       // Don't anchorize after an IMPLICIT_LINE.
       return null;

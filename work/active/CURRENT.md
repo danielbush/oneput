@@ -16,12 +16,18 @@
   - [x] ANCHOR_ISLAND_EDGE_CASE
     - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
 - [ ] selection
-  - fix: backspace leaves an ANCHOR
-  - fix: make select.delete undoable
+  - [ ] delete
+  - [ ] type over
+  - [ ] paste over
+  - [ ] wrap
+  - don't forget
+    - fix: backspace leaves an ANCHOR
+    - fix: make select.delete undoable
+    - might be an issue with DeleteAtCursor being merged by previous undo ReplaceWithText; if the DeleteAtCursor was a selection, it should not be merged by the previous ReplaceWithText; perhaps we need a `mergeable(last: UndoRecord): boolean`; if DeleteAtCursor instance deleted a selection, it would return false especially if last is instance of ReplaceWithText.
 
 side list
 
-- [ ] remove addAnchorsToTag or replace with anchorize
+- [x] remove addAnchorsToTag or replace with anchorize
 - [ ] just remove all anchor remove/add functions + oneput menus?
 - [ ] insert leading / trailing spaces when typing over an ANCHOR
   - most of the time, we want spaces

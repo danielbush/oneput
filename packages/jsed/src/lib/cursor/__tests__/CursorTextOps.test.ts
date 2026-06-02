@@ -18,7 +18,8 @@ import { Cursor } from '../Cursor.js';
 import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
 import { UndoRecorder } from '../../undo/index.js';
 import { getSeparatorAfter, getSeparatorBefore } from '../../ops/space.js';
-import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import type { EditorState } from '../../editor/EditorState.js';
 
 /**
  * See INLINE_COMPUTED_STYLE
@@ -188,6 +189,41 @@ describe('splitAtToken', () => {
     expect(identifyChildren(lines[0].querySelector('em')!)).toEqual(['a']);
     expect(identifyChildren(lines[1].querySelector('em')!)).toEqual(['[anchor]']);
     expect(identify(cursor.getPlace())).toBe('[anchor]');
+  });
+
+  test('action / undo / redo — generates ANCHOR and places CURSOR on it', () => {
+    // arrange — split after the last TOKEN: the new LINE is empty so it gets an
+    // ANCHOR and the CURSOR lands on it.
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const { cursor } = createCursor(doc, tokens(doc)[1]); // world
+    cursor.setInsertState('CURSOR_APPEND');
+    const state = { cursor } as unknown as EditorState; // record.undo/redo only touch state.cursor
+    const ps = () => doc.root.querySelectorAll('p');
+
+    // act — split
+    const record = cursor.splitAtToken()!;
+
+    // assert — new empty LINE fronted by an ANCHOR, CURSOR on it
+    expect(ps()).toHaveLength(2);
+    expect(identifyChildren(ps()[1])).toEqual(['[anchor]']);
+    expect(isAnchor(cursor.getPlace())).toBe(true);
+
+    // act — undo
+    record.undo(state);
+
+    // assert — one LINE again, CURSOR back on the original TOKEN. The ANCHOR is
+    // soft-deleted (IGNORABLE) and retained on the LINE so redo can reuse it.
+    expect(ps()).toHaveLength(1);
+    expect(identify(cursor.getPlace())).toBe('world');
+    expect(identifyChildren(ps()[0])).toEqual(['hello', '[nodeType=3:" "]', 'world', '[anchor]']);
+
+    // act — redo
+    record.redo(state);
+
+    // assert — split restored, CURSOR back on the same ANCHOR
+    expect(ps()).toHaveLength(2);
+    expect(identifyChildren(ps()[1])).toEqual(['[anchor]']);
+    expect(isAnchor(cursor.getPlace())).toBe(true);
   });
 });
 

@@ -2,7 +2,7 @@ import type { UserInputOpts } from '../input/UserInput';
 import type { CursorState } from './CursorState';
 import type { EditorState } from '../editor/EditorState.js';
 import type { UndoRecord } from '../undo/UndoRecorder.js';
-import { isTextEdit } from './mergeable.js';
+import { DeleteAtCursor } from './DeleteAtCursor.js';
 import {
   createToken,
   insertAfter,
@@ -44,8 +44,6 @@ export class ReplaceWithText implements UndoRecord {
     );
   }
 
-  readonly action = 'ReplaceWithText';
-
   constructor(
     public cursorTarget: {
       undo: HTMLElement;
@@ -84,8 +82,11 @@ export class ReplaceWithText implements UndoRecord {
       // situation.
       return;
     }
-    if (!isTextEdit(next)) return;
-    if (next.action === 'ReplaceWithText' && this.replaceText.token === next.replaceText.token) {
+    if (next instanceof DeleteAtCursor) {
+      // TODO: collapse incremental deletes into a delete of the original token.
+      return;
+    }
+    if (next instanceof ReplaceWithText && this.replaceText.token === next.replaceText.token) {
       // this.replaceText.before - the earliest state of the token
       // next.replaceText.after - the latest state of the token
       this.replaceText.after = next.replaceText.after;

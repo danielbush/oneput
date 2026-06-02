@@ -88,8 +88,6 @@ export class DeleteAtCursor implements UndoRecord {
     return;
   }
 
-  readonly action = 'DeleteAtCursor';
-
   constructor(
     public cursorTarget: {
       undo: HTMLElement;

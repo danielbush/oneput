@@ -1,7 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { canInsertAnchorInLine } from '../token.js';
 import {
-  addAnchorsToTag,
   anchorize,
   getAnchorAfterTagInsertionPoint,
   getAnchorBeforeTagInsertionPoint,
@@ -28,116 +26,6 @@ import {
   strong as strongTag,
   t
 } from '../../../test/util.js';
-
-describe('addAnchorsToTag', () => {
-  test('empty LINE', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }));
-    const p1 = byId(doc, 'p1');
-
-    // act
-    const canInsert = canInsertAnchorInLine(p1);
-    const [anchor] = addAnchorsToTag(p1);
-
-    // assert
-    expect(canInsert).toBe(true);
-    expect(anchor).not.toBeUndefined();
-    expect(isAnchor(anchor!)).toBe(true);
-    expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
-  });
-
-  test('empty LINE with IGNORABLE', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        { id: 'p1' }, //
-        span({ class: 'jsed-ignore' }, 'debug label')
-      )
-    );
-    const p1 = byId(doc, 'p1');
-
-    // act
-    const canInsert = canInsertAnchorInLine(p1);
-    const [anchor] = addAnchorsToTag(p1);
-
-    // assert
-    expect(canInsert).toBe(true);
-    expect(anchor).not.toBeUndefined();
-    expect(isAnchor(anchor!)).toBe(true);
-    expect(p1.querySelector('.jsed-anchor-token')).toBe(anchor);
-  });
-
-  test('tokens only → none', () => {
-    // arrange
-    const root = makeRawRoot(p({ id: 'p1' }, t('foo'), t('bar')));
-    const p1 = rawById(root, 'p1');
-
-    // act
-    const anchors = addAnchorsToTag(p1);
-
-    // assert
-    expect(anchors).toEqual([]);
-    expect(identifyChildren(p1)).toEqual(['foo', 'bar']);
-  });
-
-  test('INLINE_FLOW only → both sides', () => {
-    // arrange
-    const root = makeRawRoot(p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack }, 'foo')));
-    const p1 = rawById(root, 'p1');
-
-    // act
-    const anchors = addAnchorsToTag(p1);
-
-    // assert
-    expect(anchors).toHaveLength(2);
-    expect(identifyChildren(p1)).toEqual(['[anchor]', '[element:em#em1]', '[anchor]']);
-  });
-
-  test('token then INLINE_FLOW → trailing anchor', () => {
-    // arrange
-    const root = makeRawRoot(
-      p({ id: 'p1' }, t('foo'), emTag({ id: 'em1', ...inlineStyleHack }, 'bar'))
-    );
-    const p1 = rawById(root, 'p1');
-
-    // act
-    const anchors = addAnchorsToTag(p1);
-
-    // assert
-    expect(anchors).toHaveLength(1);
-    expect(identifyChildren(p1)).toEqual(['foo', '[element:em#em1]', '[anchor]']);
-  });
-
-  test('INLINE_FLOW then token → leading anchor', () => {
-    // arrange
-    const root = makeRawRoot(
-      p({ id: 'p1' }, emTag({ id: 'em1', ...inlineStyleHack }, 'bar'), t('foo'))
-    );
-    const p1 = rawById(root, 'p1');
-
-    // act
-    const anchors = addAnchorsToTag(p1);
-
-    // assert
-    expect(anchors).toHaveLength(1);
-    expect(identifyChildren(p1)).toEqual(['[anchor]', '[element:em#em1]', 'foo']);
-  });
-
-  test('token INLINE_FLOW token → none', () => {
-    // arrange
-    const root = makeRawRoot(
-      p({ id: 'p1' }, t('a'), emTag({ id: 'em1', ...inlineStyleHack }, 'x'), t('b'))
-    );
-    const p1 = rawById(root, 'p1');
-
-    // act
-    const anchors = addAnchorsToTag(p1);
-
-    // assert
-    expect(anchors).toEqual([]);
-    expect(identifyChildren(p1)).toEqual(['a', '[element:em#em1]', 'b']);
-  });
-});
 
 describe('anchorize', () => {
   test('empty LINE → leading anchor', () => {

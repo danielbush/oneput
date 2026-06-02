@@ -11,8 +11,7 @@ import {
   isToken,
   isTokenizableTextNode,
   isWhitespaceTextNode,
-  JSED_ANCHOR_CLASS,
-  JSED_TOKEN_CLASS
+  JSED_ANCHOR_CLASS
 } from '../core/taxonomy';
 import { findNextNode } from '../core/walk2';
 
@@ -220,47 +219,6 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
   }
   anchor.remove();
   return anchor;
-}
-
-/**
- * Add ANCHOR's where applicable to the FOCUSABLE.
- *
- * Existing ANCHOR's are unchanged.  Only direct descendant ANCHOR's of
- * the FOCUSABLE are inserted (no recursion).
- *
- * If the user has deleted an anchor with the intention of never adding text to the related LINE_SEGMENT, this function will put it back.
- */
-export function addAnchorsToTag(el: HTMLElement): HTMLElement[] {
-  if (el.classList.contains(JSED_TOKEN_CLASS)) {
-    throw new Error('addAnchors: expects an FOCUSABLE');
-  }
-  let segment = { hasTokens: false };
-  const anchors: HTMLElement[] = [];
-  const children = Array.from(el.children); // avoid infinite loops
-  for (const child of children) {
-    if (isIgnorable(child)) {
-      // eg element indicator in jsed-ui
-      continue;
-    }
-    if (isToken(child)) {
-      segment.hasTokens = true;
-      continue;
-    }
-    // We've hit a non-token...
-    if (!segment.hasTokens) {
-      const anchor = createAnchor();
-      anchors.push(anchor);
-      child.insertAdjacentElement('beforebegin', anchor);
-    }
-    // Start new segment...
-    segment = { hasTokens: false };
-  }
-  if (!segment.hasTokens) {
-    const anchor = createAnchor();
-    anchors.push(anchor);
-    el.appendChild(anchor);
-  }
-  return anchors;
 }
 
 export function anchorize(el: Node): HTMLElement[] {

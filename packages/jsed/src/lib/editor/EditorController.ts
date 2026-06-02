@@ -46,20 +46,6 @@ export class EditorController {
     if (!this.state.cursor || !this.state.cursor.isOnToken()) {
       return;
     }
-    // If a selection is active, reduce it to the START (earlier end in
-    // document order): remove all selected TOKEN's except the start,
-    // unwrap SELECTION_WRAPPER's, and re-seat the editing CURSOR on the
-    // start. The intent (decided above against the anchor's value) then
-    // executes against the start — e.g. rewrite-current turns typing
-    // "x" into "replace start TOKEN with x", landing the new content
-    // where the selection began.
-    const selection = this.state.cursor.getSelection();
-    if (selection) {
-      const start = selection.delete();
-      this.state.cursor.cancelSelection();
-      // Suppress input sync — user is mid-typing, we'd clobber their input.
-      this.state.cursor.place(start, { syncInput: false });
-    }
     this.state.ops.processUserInput(change);
   };
 

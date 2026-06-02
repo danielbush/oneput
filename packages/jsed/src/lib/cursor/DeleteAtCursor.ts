@@ -15,6 +15,13 @@ import type { CursorDeleteOpts } from './CursorTextOps';
 
 export class DeleteAtCursor implements UndoRecord {
   static run(state: CursorState, { type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
+    if (state.selection) {
+      const start = state.selection.delete();
+      state.cancelSelection();
+      // Suppress input sync — user is mid-typing, we'd clobber their input.
+      state.place(start, { syncInput: false });
+    }
+
     if (!state.isOnToken()) return;
 
     const current = state.getPlace();

@@ -9,6 +9,7 @@ import {
   type RecursiveSplitAfterAction,
   type RecursiveSplitBeforeAction
 } from '../ops/focusable';
+import { removeToken, undoRemoveToken, type RemoveToken } from '../ops/token';
 import type { UndoRecord } from '../undo';
 import type { CursorState } from './CursorState';
 
@@ -62,12 +63,13 @@ export class SplitAtToken implements UndoRecord {
       redo: HTMLElement;
     },
     public splitBefore: boolean,
-    public anchors: HTMLElement[]
+    public anchors: HTMLElement[],
+    public removedAnchors: RemoveToken[] = []
   ) {}
 
   undo(state: EditorState) {
     for (const anchor of this.anchors) {
-      anchor.remove();
+      this.removedAnchors.push(removeToken(anchor));
     }
     undoRecSplit(this.result);
     state.cursor?.place(this.cursorTarget.undo);
@@ -75,7 +77,10 @@ export class SplitAtToken implements UndoRecord {
 
   redo(state: EditorState) {
     redoRecSplit(this.result);
-    this.anchors = anchorSplit(this.result, this.splitBefore);
+    // this.anchors = anchorSplit(this.result, this.splitBefore);
+    for (const removedAnchor of this.removedAnchors) {
+      undoRemoveToken(removedAnchor);
+    }
     state.cursor?.place(this.cursorTarget.redo);
   }
 }

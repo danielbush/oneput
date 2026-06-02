@@ -334,10 +334,6 @@ function anchorizeAfter(node: Node) {
       return anchor;
     }
     if (isFocusable(nextSib)) {
-      if (isImplicitLine(nextSib)) {
-        // Don't anchorize before an IMPLICIT_LINE.
-        return null;
-      }
       const anchor = createAnchor();
       nextSib.before(anchor);
       return anchor;

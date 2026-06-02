@@ -321,10 +321,10 @@ describe('anchorize', () => {
     ]);
   });
 
-  // CURRENT behaviour of guard #3 (slated to be dropped — see
-  // project_anchorize_implicit_line): no anchor between an inline and a
-  // following IMPLICIT_LINE.
-  test('INLINE_FLOW then IMPLICIT_LINE → no anchor between (guard #3)', () => {
+  // An inline neighbour next to an IMPLICIT_LINE is anchored like any other
+  // neighbour (the old next-sibling guard was dropped — see
+  // project_anchorize_implicit_line).
+  test('INLINE_FLOW then IMPLICIT_LINE → anchor between', () => {
     // arrange
     const root = makeRawRoot(
       p(
@@ -341,6 +341,7 @@ describe('anchorize', () => {
     expect(identifyChildren(rawById(root, 'p1'))).toEqual([
       '[anchor]',
       '[element:em#em1]',
+      '[anchor]',
       '[implicit-line]'
     ]);
   });

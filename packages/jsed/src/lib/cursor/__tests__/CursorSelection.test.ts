@@ -505,6 +505,17 @@ describe('CursorSelection', () => {
         t('f')
       )
     );
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'a',
+      '[nodeType=3:" "]',
+      'b',
+      '[nodeType=3:" "]',
+      '[element:em]',
+      '[nodeType=3:" "]',
+      'e',
+      '[nodeType=3:" "]',
+      'f'
+    ]);
     const all = tokens(doc);
     const f = all[5];
     const selection = seed(doc, f);
@@ -532,6 +543,32 @@ describe('CursorSelection', () => {
     expect(headValue(selection)).toBe('a');
     expect(selectedTokenValues(doc)).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
 
+    // Ok, let's look at what got sucked up and what didn't...
+
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      '[selection]',
+      '[element:em]',
+      '[selection]'
+    ]);
+
+    // ...and let's look at the wrappers...
+
+    const wrappers = doc.root.querySelectorAll(`.${JSED_SELECTION_CLASS}`);
+    expect(wrappers.length).toBe(3);
+    expect(identifyChildren(wrappers[0])).toEqual([
+      'a',
+      '[nodeType=3:" "]',
+      'b',
+      '[nodeType=3:" "]'
+    ]);
+    expect(identifyChildren(wrappers[1])).toEqual(['c', '[nodeType=3:" "]', 'd']);
+    expect(identifyChildren(wrappers[2])).toEqual([
+      '[nodeType=3:" "]',
+      'e',
+      '[nodeType=3:" "]',
+      'f'
+    ]);
+
     // shrink forward back across the em to the anchor
     selection.extendNext();
     expect(headValue(selection)).toBe('b');
@@ -552,6 +589,19 @@ describe('CursorSelection', () => {
     selection.extendNext();
     expect(headValue(selection)).toBe('f');
     expect(selectedTokenValues(doc)).toEqual(['f']);
+
+    // Everything is restored, 'f' is still selected:
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'a',
+      '[nodeType=3:" "]',
+      'b',
+      '[nodeType=3:" "]',
+      '[element:em]',
+      '[nodeType=3:" "]',
+      'e',
+      '[nodeType=3:" "]',
+      '[selection]'
+    ]);
   });
 
   test('grow both ways - next + cross line', () => {

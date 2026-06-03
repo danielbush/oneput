@@ -114,7 +114,7 @@ export class CursorSelection {
         const sepAfter = getSeparatorAfter(next);
         wrapper.appendChild(next);
         if (sepAfter) {
-          wrapper.appendChild(sepAfter);
+          next.after(sepAfter);
         }
       }
     } else {
@@ -134,15 +134,21 @@ export class CursorSelection {
    * `prev` is assumed to be what the cursor has done a movePrevious to.
    */
   private growFront(prev: HTMLElement): void {
-    const front = this.wrappers[0];
-    if (front.parentNode === prev.parentNode) {
-      let node: Node | null = front.previousSibling;
+    const wrapper = this.wrappers[0];
+    if (wrapper.parentNode === prev.parentNode) {
+      let node: Node | null = wrapper.previousSibling;
       while (node && node !== prev) {
         const preceding: Node | null = node.previousSibling;
-        front.insertBefore(node, front.firstChild);
+        wrapper.insertBefore(node, wrapper.firstChild);
         node = preceding;
       }
-      if (node === prev) front.insertBefore(prev, front.firstChild);
+      if (node === prev) {
+        const sepBefore = getSeparatorBefore(prev);
+        wrapper.insertBefore(prev, wrapper.firstChild);
+        if (sepBefore) {
+          prev.before(sepBefore);
+        }
+      }
     } else {
       this.wrappers.unshift(this.openWrapper(prev));
     }

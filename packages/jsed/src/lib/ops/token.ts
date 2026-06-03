@@ -241,13 +241,13 @@ export type AnchorizeToken = {
  * the ANCHOR as content.  At the time of doing this, the CURSOR checks if it's
  * on an ANCHOR and doesn't call remove.
  */
-export function remove(token: HTMLElement): RemoveTokenAll {
+export function remove(token: HTMLElement, anchorize = true): RemoveTokenAll {
   const parentNode = token.parentNode;
   if (!parentNode) {
     throw new Error('remove: token has no parentNode');
   }
 
-  if (isLastLineSibling(token)) {
+  if (anchorize && isLastLineSibling(token)) {
     const anchor = createAnchor();
     token.before(anchor);
     const result = removeToken(token, false);

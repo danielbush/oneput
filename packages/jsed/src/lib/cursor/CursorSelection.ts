@@ -246,6 +246,15 @@ export class CursorSelection {
     this.wrappers = [];
   }
 
+  /**
+   * Cancels selection but the wrappers stay in the DOM and are returned.
+   */
+  convert() {
+    const wrappers = this.wrappers;
+    this.wrappers = [];
+    return wrappers;
+  }
+
   wrapWithTag(tagName: string): HTMLElement[] | null {
     if (!this.wrappers.every((wrapper) => token.canWrapElementChildrenWithTag(wrapper, tagName))) {
       return null;

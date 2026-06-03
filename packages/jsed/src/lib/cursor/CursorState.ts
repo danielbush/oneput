@@ -139,6 +139,13 @@ export class CursorState {
     return true;
   }
 
+  convertSelection(): HTMLElement[] {
+    if (!this.selection) return [];
+    const wrappers = this.selection.convert();
+    this.selection = undefined;
+    return wrappers;
+  }
+
   /**
    * If we cancel in the direction contrary to the direction of the selection,
    * we place the cursor back at the anchor rather than using its last position

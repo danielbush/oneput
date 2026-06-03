@@ -76,6 +76,26 @@ COMMENT: cover what is used in Editor and Editor.getCursor (Cursor); mark the re
       - wrapWithTag
       - delete
 
+## WRAPPERS
+
+Represents the wrapper elements used in a selection after the selection has
+finished.
+
+- Wrappers sit between LINE_SIBLING's (eg TOKEN's) and the rest of the DOM.
+- This means they don't contain FOCUSABLE's.
+- Wrappers should be treated as a set of LINE_SIBLING's and SEPARATOR's.  When
+we peform an operation on a wrapper it is performed on all of live
+LINE_SIBLING's and SEPARATOR's.
+- A single wrapper may occupy some or all of its parent's content.
+  - if partial the only operation will be on the selected LINE_SIBLING's (and SEPARATOR's)
+  - if full we may wish to do an additional deleteHighestEmpty (which means all content is selected "text" content)
+- We can unwrap each wrapper removing it without trace from the DOM.
+
+A wrapper could be (1) just a subset of tokens in an elmeent;  or (2) it could be the whole of an element.
+We have to handle both cases.
+Therefore to handle both, we have to do (1) which is a group deletion of LINE_SIBLING's.
+Then we can decide if we want to do a deleteHighest.
+
 ## ANCHOR rethink - automatic ANCHOR's version 2
 
 - Anchorize the whole document (automatic ANCHOR's).

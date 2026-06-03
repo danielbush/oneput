@@ -71,7 +71,7 @@ export class DeleteAtCursor implements UndoRecord {
     }
 
     const noMoreLineSiblings = !prevCrs && !nextCrs;
-    const emptyParent = isEmpty(current.parentElement, true);
+    const emptyParent = isEmpty(current.parentElement);
 
     // Delete tag around ANCHOR + possibly its ancestors...
     const canDeleteAncestors = currIsAnchor && emptyParent && !noMoreLineSiblings;

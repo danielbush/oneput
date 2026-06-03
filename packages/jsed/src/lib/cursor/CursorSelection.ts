@@ -299,7 +299,7 @@ export class CursorSelection {
     for (const parent of cleanupParents) {
       if (!parent.isConnected) continue;
       if (!isEmpty(parent)) continue;
-      deleteHighestEmpty(parent, this.root, false);
+      deleteHighestEmpty(parent, this.root);
     }
 
     return marker;

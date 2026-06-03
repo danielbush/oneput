@@ -31,17 +31,27 @@ export function getAppendCandidates(parent: HTMLElement): string[] {
   return domRules.getAllowableChildTags(parent.tagName);
 }
 
-export function isEmpty(el: Node, ignoreAnchor = true): boolean {
-  if (ignoreAnchor) {
-    const sib = getNextSibling(
-      el.firstChild,
-      (node) => !isAnchor(node) && !isIgnorableNode(node),
-      true
-    );
-    return !sib;
-  }
-  const sib = getNextSibling(el.firstChild, (node) => !isIgnorableNode(node), true);
+export function isEmpty(el: Node): boolean {
+  // if (ignoreAnchor) {
+  const sib = getNextSibling(
+    el.firstChild,
+    (node) => !isAnchor(node) && !isIgnorableNode(node),
+    true
+  );
   return !sib;
+  // }
+  // const sib = getNextSibling(el.firstChild, (node) => !isIgnorableNode(node), true);
+  // return !sib;
+}
+
+/**
+ * Like isEmpty, but for needle.
+ */
+export function containsOnly(container: Node, needle: Node): boolean {
+  return Array.from(container.childNodes).every((child) => {
+    if (child === needle) return true;
+    return isIgnorableNode(child);
+  });
 }
 
 /**
@@ -120,7 +130,7 @@ export function redoDeleteElement(op: DeleteElement) {
 }
 
 /**
- * Delete el and anestors if they have no other content.
+ * Delete el and anestors if they have no other content up to but excluding ceiling.
  *
  * Algorithm:
  * If isEmpty(el) delete it.
@@ -129,8 +139,8 @@ export function redoDeleteElement(op: DeleteElement) {
  * However... we only delete once at the very end to keep everything intact.
  * `highest` is a child of p, and we scan either side to see if the element would have been empty.
  */
-export function deleteHighestEmpty(el: HTMLElement, ceiling?: Element, ignoreAnchor = true) {
-  if (!isEmpty(el, ignoreAnchor)) {
+export function deleteHighestEmpty(el: HTMLElement, ceiling?: Element, ignore?: HTMLElement) {
+  if (ignore ? !containsOnly(el, ignore) : !isEmpty(el)) {
     return;
   }
 

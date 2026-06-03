@@ -3,15 +3,32 @@ import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../ops/token.js';
 import { createAnchor } from '../ops/anchor.js';
 import type { CursorState } from '../cursor/CursorState.js';
+import { getSeparatorAfter, getSeparatorBefore } from '../ops/space.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by
  * SELECTION_WRAPPER elements inserted as direct parents of contiguous
  * TOKEN runs.
  *
- * - creates new segments (Wrappers) when parentNode changes
+ * - creates new segments (wrappers (isSelectionWrapper)) when parentNode changes
+ * - wrappers suck in what the CURSOR lands on and possibly trailing SEPARATOR's
+ * - this means there could be gaps - things at the edges before or after a
+ * FOCUSABLE boundary that aren't included in the selection, but these thigns
+ * are probably exotic :D
+ * - we use a real CURSOR - this solves finding the next LINE_SIBLING but also ensures things are tokenized
+ *
+ * Terminology
+ *
+ *   (anchor) A|------------->> (head)
+ *   (head)   <<-------------|A (anchor)
+ *
  * - `head` is driven by an internal silent cursor.
- * - `anchor` is initial starting point
+ * - `anchor` is initial starting point (constant)
+ *
+ *   (front) A|------------->> (back)
+ *   (front) <<-------------|A (back)
+ *
+ * - `front`/`back` are always document-order.
  */
 export class CursorSelection {
   static create(params: {
@@ -78,28 +95,44 @@ export class CursorSelection {
   }
 
   /**
-   * Grow at the back. If `next` shares a parent with the current back
-   * wrapper, absorb the intervening nodes + `next`. Otherwise we've
-   * crossed a parent boundary (entering/leaving an INLINE_FLOW, or
-   * spanning LINE's) — open a new wrapper around `next` in its own
-   * parent.
+   * (front) A|------>> (back)
+   *
+   * `next` is assumed to be what the cursor has done a moveNext to.
    */
   private growBack(next: HTMLElement): void {
-    const back = this.wrappers[this.wrappers.length - 1];
-    if (back.parentNode === next.parentNode) {
-      let node: Node | null = back.nextSibling;
+    const wrapper = this.wrappers[this.wrappers.length - 1];
+    if (wrapper.parentNode === next.parentNode) {
+      let node: Node | null = wrapper.nextSibling;
       while (node && node !== next) {
         const following: Node | null = node.nextSibling;
-        back.appendChild(node);
+        wrapper.appendChild(node);
         node = following;
       }
-      if (node === next) back.appendChild(next);
+      if (node === next) {
+        // Pull in SEPARATOR eg just before an em-tag...
+        // GOTCHA: scan for separator BEFORE we appendChild(next)!
+        const sepAfter = getSeparatorAfter(next);
+        wrapper.appendChild(next);
+        if (sepAfter) {
+          wrapper.appendChild(sepAfter);
+        }
+      }
     } else {
-      this.wrappers.push(this.openWrapper(next));
+      // Pull in any SEPARATOR eg just after an em-tag...
+      const sepBefore = getSeparatorBefore(next);
+      const wrapper = this.openWrapper(next);
+      this.wrappers.push(wrapper);
+      if (sepBefore) {
+        next.before(sepBefore);
+      }
     }
   }
 
-  /** Mirror of growBack. */
+  /**
+   * (front) <<-------|A (back)
+   *
+   * `prev` is assumed to be what the cursor has done a movePrevious to.
+   */
   private growFront(prev: HTMLElement): void {
     const front = this.wrappers[0];
     if (front.parentNode === prev.parentNode) {
@@ -116,12 +149,7 @@ export class CursorSelection {
   }
 
   /**
-   * Shrink from the back end toward the anchor. If `prev` is in the
-   * back wrapper, peel its trailing nodes until `prev` is the last
-   * child. Otherwise `prev` lives outside this wrapper (we've stepped
-   * back across a parent boundary), so unwrap the back wrapper whole
-   * and drop it from the list — the new back wrapper already contains
-   * `prev`.
+   * (front) A|--------<< (back)
    */
   private shrinkBack(prev: HTMLElement): void {
     const back = this.wrappers[this.wrappers.length - 1];
@@ -136,7 +164,9 @@ export class CursorSelection {
     }
   }
 
-  /** Mirror of shrinkBack. */
+  /**
+   * (front) >>---------|A (back)
+   */
   private shrinkFront(next: HTMLElement): void {
     const front = this.wrappers[0];
     if (!front) return;
@@ -154,7 +184,11 @@ export class CursorSelection {
     const wrapper = el.ownerDocument.createElement('span');
     wrapper.className = JSED_SELECTION_CLASS;
     el.before(wrapper);
+    const sepAfter = getSeparatorAfter(el);
     wrapper.appendChild(el);
+    if (sepAfter) {
+      el.after(sepAfter);
+    }
     return wrapper;
   }
 

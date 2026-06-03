@@ -20,7 +20,7 @@ import { Tokenizer } from '../../ops/Tokenizer.js';
 import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
 import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../ops/token.js';
-import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { JSED_ANCHOR_CLASS, JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
   const cursorState = new CursorState(
@@ -56,9 +56,11 @@ function headValue(selection: CursorSelection): string {
   return getValue(selection.getHead());
 }
 
-/** Returns the values of every TOKEN currently wrapped in a .jsed-selection. */
+/** Returns the values of every TOKEN currently wrapped in a JSED_SELECTION_CLASS. */
 function selectedTokenValues(doc: { root: HTMLElement }): string[] {
-  const wrappers = Array.from(doc.root.querySelectorAll('.jsed-selection')) as HTMLElement[];
+  const wrappers = Array.from(
+    doc.root.querySelectorAll(`.${JSED_SELECTION_CLASS}`)
+  ) as HTMLElement[];
   return wrappers.flatMap((w) =>
     Array.from(w.querySelectorAll(`.${JSED_TOKEN_CLASS}`)).map((el) => getValue(el as HTMLElement))
   );
@@ -66,7 +68,7 @@ function selectedTokenValues(doc: { root: HTMLElement }): string[] {
 
 /** Count SELECTION_WRAPPER's currently in the document. */
 function wrapperCount(doc: { root: HTMLElement }): number {
-  return doc.root.querySelectorAll('.jsed-selection').length;
+  return doc.root.querySelectorAll(`.${JSED_SELECTION_CLASS}`).length;
 }
 
 describe('CursorSelection', () => {
@@ -83,7 +85,7 @@ describe('CursorSelection', () => {
     expect(selectedTokenValues(doc)).toEqual(['c']);
   });
 
-  test('grow both ways - next', () => {
+  test('grow both ways - next direction', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c'), s(), t('d'), s(), t('e')));
     const [, , c] = tokens(doc);
@@ -119,7 +121,7 @@ describe('CursorSelection', () => {
     expect(selectedTokenValues(doc)).toEqual(['a', 'b', 'c']);
   });
 
-  test('grow both ways - previous', () => {
+  test('grow both ways - previous direction', () => {
     // arrange
     const doc = makeRoot(p(t('a'), s(), t('b'), s(), t('c'), s(), t('d'), s(), t('e')));
     const [, , c] = tokens(doc);
@@ -155,27 +157,38 @@ describe('CursorSelection', () => {
     expect(selectedTokenValues(doc)).toEqual(['c', 'd', 'e']);
   });
 
-  test('grow INLINE_FLOW - next', () => {
+  test('grow INLINE_FLOW - next direction', () => {
     // arrange
     const doc = makeRoot(
       p(
         t('a'),
         s(),
         t('b'),
-        s(),
+        s(), // boudnary space, requires extra logic
         em(inlineStyleHack, t('c'), s(), t('d')),
-        s(),
+        s(), // boundary space, requires extra logic
         t('e'),
         s(),
         t('f')
       )
     );
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'a',
+      '[nodeType=3:" "]',
+      'b',
+      '[nodeType=3:" "]',
+      '[element:em]',
+      '[nodeType=3:" "]',
+      'e',
+      '[nodeType=3:" "]',
+      'f'
+    ]);
     const [a] = tokens(doc);
     const selection = seed(doc, a);
 
     expect(selectedTokenValues(doc)).toEqual(['a']);
 
-    // act + assert — grow across the em and out
+    // act + assert
     selection.extendNext();
     expect(headValue(selection)).toBe('b');
     expect(selectedTokenValues(doc)).toEqual(['a', 'b']);
@@ -195,6 +208,32 @@ describe('CursorSelection', () => {
     selection.extendNext();
     expect(headValue(selection)).toBe('f');
     expect(selectedTokenValues(doc)).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
+
+    // Ok, let's look at what got sucked up and what didn't...
+
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      '[selection]',
+      '[element:em]',
+      '[selection]'
+    ]);
+
+    // ...and let's look at the wrappers...
+
+    const wrappers = doc.root.querySelectorAll(`.${JSED_SELECTION_CLASS}`);
+    expect(wrappers.length).toBe(3);
+    expect(identifyChildren(wrappers[0])).toEqual([
+      'a',
+      '[nodeType=3:" "]',
+      'b',
+      '[nodeType=3:" "]'
+    ]);
+    expect(identifyChildren(wrappers[1])).toEqual(['c', '[nodeType=3:" "]', 'd']);
+    expect(identifyChildren(wrappers[2])).toEqual([
+      '[nodeType=3:" "]',
+      'e',
+      '[nodeType=3:" "]',
+      'f'
+    ]);
 
     // shrink back across the em to the anchor
     selection.extendPrevious();
@@ -216,25 +255,51 @@ describe('CursorSelection', () => {
     selection.extendPrevious();
     expect(headValue(selection)).toBe('a');
     expect(selectedTokenValues(doc)).toEqual(['a']);
+
+    // Everything is restored, 'a' is still selected:
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      '[selection]', // we haven't canceled the selection yet
+      '[nodeType=3:" "]',
+      'b',
+      '[nodeType=3:" "]',
+      '[element:em]',
+      '[nodeType=3:" "]',
+      'e',
+      '[nodeType=3:" "]',
+      'f'
+    ]);
   });
 
   test('wrapWithTag preserves INLINE_FLOW boundaries', () => {
     // arrange
-    const doc = makeRoot(p(t('a'), s(), em(inlineStyleHack, t('b'), s(), t('c')), s(), t('d')));
+    const doc = makeRoot(
+      p(
+        t('a'), //
+        s(),
+        em(inlineStyleHack, t('b'), s(), t('c')),
+        s(),
+        t('d')
+      )
+    );
     const [a] = tokens(doc);
     const selection = seed(doc, a);
     selection.extendNext();
     selection.extendNext();
     selection.extendNext();
+    const wrappers = doc.root.querySelectorAll(`.${JSED_SELECTION_CLASS}`);
+    expect(wrappers.length).toBe(3);
+    expect(identifyChildren(wrappers[0])).toEqual(['a', '[nodeType=3:" "]']);
+    expect(identifyChildren(wrappers[1])).toEqual(['b', '[nodeType=3:" "]', 'c']);
+    expect(identifyChildren(wrappers[2])).toEqual(['[nodeType=3:" "]', 'd']);
 
     // act
-    const wrappers = selection.wrapWithTag('strong');
+    const strongWrappers = selection.wrapWithTag('strong');
 
     // assert
     const strongs: Element[] = Array.from(doc.root.querySelectorAll('strong'));
-    expect(wrappers).toEqual(strongs);
-    expect(strongs.map((el) => el.textContent)).toEqual(['a', 'b c', 'd']);
-    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(strongWrappers).toEqual(strongs);
+    expect(strongs.map((el) => el.textContent)).toEqual(['a ', 'b c', ' d']);
+    expect(doc.root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
     expect(doc.root.querySelector('em strong')?.textContent).toBe('b c');
   });
 
@@ -261,7 +326,7 @@ describe('CursorSelection', () => {
     expect(marker.parentElement).toBe(line);
     expect(doc.root.querySelector('#outer')).toBeNull();
     expect(doc.root.querySelector('#inner')).toBeNull();
-    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(doc.root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
   });
 
   test('delete - marker lifting (2)', () => {
@@ -293,7 +358,7 @@ describe('CursorSelection', () => {
     expect(marker.parentElement).toBe(line);
     expect(doc.root.querySelector('#outer')).toBeNull();
     expect(doc.root.querySelector('#inner')).toBeNull();
-    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(doc.root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
     expect(tokens(doc)).toEqual([marker]);
   });
 
@@ -305,7 +370,11 @@ describe('CursorSelection', () => {
         em(
           { ...inlineStyleHack, id: 'em-1' }, //
           t('a'),
-          strong({ ...inlineStyleHack, id: 'strong-1' }, t('b'), t('b2')),
+          strong(
+            { ...inlineStyleHack, id: 'strong-1' }, //
+            t('b'),
+            t('b2')
+          ),
           t('c')
         ),
         s(),
@@ -319,7 +388,18 @@ describe('CursorSelection', () => {
     const selection = seed(doc, b2);
     selection.extendNext();
     selection.extendNext();
-    expect(identify(selection.getForwardEnd())).toBe('d');
+    // Let's just set out how things should look before we delete...
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      '[element:em#em-1]', //
+      '[selection]',
+      'e'
+    ]);
+    // expect(identify(selection.getForwardEnd())).toBe('d');
+    const wrappers = doc.root.querySelectorAll(`.${JSED_SELECTION_CLASS}`);
+    expect(wrappers.length).toBe(3);
+    expect(identifyChildren(wrappers[0])).toEqual(['b2']);
+    expect(identifyChildren(wrappers[1])).toEqual(['c']);
+    expect(identifyChildren(wrappers[2])).toEqual(['[nodeType=3:" "]', 'd', '[nodeType=3:" "]']);
 
     // act
     const marker = selection.delete();
@@ -327,9 +407,10 @@ describe('CursorSelection', () => {
     // assert
     const line = doc.root.querySelector('p');
     expect(identifyChildren(line)).toEqual([
-      '[element:em#em-1]',
-      '[nodeType=3:" "]',
-      '[nodeType=3:" "]',
+      '[element:em#em-1]', //
+      // TODO: selection sucks the space to ensure trailing spaces are absorbed,
+      // doesn't seem ideal for this case, not sure...
+      // '[nodeType=3:" "]',
       'e'
     ]);
     const em1 = byId(doc, 'em-1');
@@ -362,7 +443,7 @@ describe('CursorSelection', () => {
     expect(marker.parentElement).toBe(outer);
     expect(outer).not.toBeNull();
     expect(doc.root.querySelector('#inner')).toBeNull();
-    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(doc.root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
   });
 
   test('delete - ISLAND', () => {
@@ -383,7 +464,7 @@ describe('CursorSelection', () => {
     expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
     expect(marker.parentElement).toBe(line);
     expect(doc.root.querySelector('.katex')).toBeNull();
-    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(doc.root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
     expect(tokens(doc)).toEqual([marker]);
   });
 
@@ -405,7 +486,7 @@ describe('CursorSelection', () => {
     expect(marker.classList.contains(JSED_ANCHOR_CLASS)).toBe(true);
     expect(marker.parentElement).toBe(line);
     expect(doc.root.querySelector('.katex')).toBeNull();
-    expect(doc.root.querySelector('.jsed-selection')).toBeNull();
+    expect(doc.root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
     expect(tokens(doc)).toEqual([marker]);
   });
 

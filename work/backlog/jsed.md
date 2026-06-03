@@ -155,6 +155,10 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
   - COMMENT: I'm probably going to import my markdown in chunks by pasting into oneput and loading into spaces or linear idables
   - see `dist/`
   - see `bun run build:cli`
+- isIgnorableNode
+  - should indiscriminantly target template or script elements
+  - it should always be JSED_IGNORE_CLASS based
+  - what breaks if we make that change?
 
 ## Discussion
 

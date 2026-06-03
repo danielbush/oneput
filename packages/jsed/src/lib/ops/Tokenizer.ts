@@ -1,5 +1,5 @@
 import { Detokenizer } from './Detokenizer.js';
-import { containsSelection } from '../cursor/selection.js';
+import { containsSelection } from './selection.js';
 import { isFocusable } from '../core/taxonomy.js';
 import { tokenizeLineAt, tokenizeLineAtTextNode } from './tokenize.js';
 

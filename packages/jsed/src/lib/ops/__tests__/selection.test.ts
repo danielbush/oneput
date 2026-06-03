@@ -10,7 +10,7 @@ import {
   sel,
   t
 } from '../../../test/util.js';
-import { removeWrapper } from '../wrappers.js';
+import { removeWrapper } from '../selection.js';
 
 function getWrapper(root: HTMLElement): HTMLElement {
   return root.querySelector(`.${JSED_SELECTION_CLASS}`) as HTMLElement;

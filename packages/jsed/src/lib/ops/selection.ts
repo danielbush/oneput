@@ -1,6 +1,18 @@
+import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import { isToken } from '../core/taxonomy';
 import { containsOnly, deleteHighestEmpty } from '../ops/focusable';
 import { remove, type RemoveTokenAll } from '../ops/token';
+
+/**
+ * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's
+ * keep-alive predicate so LINEs hosting an active selection are not
+ * detokenized underneath CursorSelection's references.
+ *
+ * Lives here for now but may move if it grows a wider audience.
+ */
+export function containsSelection(el: HTMLElement): boolean {
+  return el.querySelector(`.${JSED_SELECTION_CLASS}`) !== null;
+}
 
 export function unwrap(wrapper: HTMLElement): void {
   wrapper.replaceWith(...Array.from(wrapper.childNodes));

@@ -9,11 +9,13 @@ import {
   isDeletedToken,
   isImplicitLine,
   isIsland,
+  isSelectionWrapper,
   isToken,
   JSED_ANCHOR_CLASS,
   JSED_DELETED_CLASS,
   JSED_ELEMENT_INDICATOR,
   JSED_IGNORE_CLASS,
+  JSED_SELECTION_CLASS,
   JSED_TOKEN_CLASS
 } from '../lib/core/taxonomy.js';
 
@@ -131,10 +133,20 @@ export function a(): string {
   return span({ class: `${JSED_TOKEN_CLASS} ${JSED_ANCHOR_CLASS}` }, '');
 }
 
+/**
+ * Create a SELECTION_WRAPPER fixture around a contiguous run of
+ * LINE_SIBLING's — mirrors what `CursorSelection` inserts, so a test can
+ * declare the wrapped state directly instead of driving a real selection.
+ */
+export function sel(...children: string[]): string {
+  return span({ class: JSED_SELECTION_CLASS }, ...children);
+}
+
 /** Get a human-readable identifier for a LINE_SIBLING (TOKEN or non-TOKEN). */
 export function identify(el: Node | undefined | null): string {
   if (!el) return `${el}`;
   if (isImplicitLine(el)) return `[implicit-line]`;
+  if (isSelectionWrapper(el)) return `[selection]`;
   if (isDeletedSpace(el)) return `[deleted-space]`;
   if (isDeletedToken(el)) return `d("${token.getValue(el)}")`;
   if (isDeletedAnchor(el)) return `[deleted-anchor]`;

@@ -1,6 +1,6 @@
 import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import { isToken } from '../core/taxonomy';
-import { containsOnly, deleteHighestEmpty } from '../ops/focusable';
+import { containsOnly, deleteHighestEmpty, type DeleteElement } from '../ops/focusable';
 import { remove, type RemoveTokenAll } from '../ops/token';
 
 /**
@@ -18,10 +18,16 @@ export function unwrap(wrapper: HTMLElement): void {
   wrapper.replaceWith(...Array.from(wrapper.childNodes));
 }
 
+export type RemoveWrapper = {
+  action: 'remove-wrapper';
+  deleteHighestEmpty: undefined | false | DeleteElement;
+  removedTokens: RemoveTokenAll[];
+};
+
 /**
  * Perform remove on all LINE_SIBLING content in `wrapper`.
  */
-export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement) {
+export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement): RemoveWrapper {
   const children = wrapper.childNodes;
   const removedTokens: RemoveTokenAll[] = [];
   for (const child of children) {
@@ -31,7 +37,7 @@ export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement) {
     }
   }
   const deleteHighest =
-    wrapper.parentElement &&
+    !!wrapper.parentElement &&
     containsOnly(wrapper.parentElement, wrapper) &&
     deleteHighestEmpty(wrapper.parentElement, ceiling, wrapper);
 
@@ -39,7 +45,25 @@ export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement) {
 
   return {
     action: 'remove-wrapper',
-    deleteHighest,
+    deleteHighestEmpty: deleteHighest,
     removedTokens
+  };
+}
+
+export type RemoveWrappers = {
+  action: 'remove-wrappers';
+  removedWrappers: RemoveWrapper[];
+};
+
+export function removeWrappers(wrappers: HTMLElement[], ceiling?: HTMLElement): RemoveWrappers {
+  const removedWrappers: RemoveWrapper[] = [];
+  for (const wrapper of wrappers) {
+    const result = removeWrapper(wrapper, ceiling);
+    removedWrappers.push(result);
+  }
+
+  return {
+    action: 'remove-wrappers',
+    removedWrappers
   };
 }

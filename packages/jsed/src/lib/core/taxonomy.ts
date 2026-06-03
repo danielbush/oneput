@@ -132,7 +132,7 @@ export function isIgnorableNode(el: Node): boolean {
     return true;
   }
   if (el.nodeType === Node.TEXT_NODE) {
-    return false;
+    return el.textContent === '';
   }
   if (el instanceof Element && el.classList.contains(JSED_IGNORE_CLASS)) {
     return true;

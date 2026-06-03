@@ -69,7 +69,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 ## feats
 
 - feat: table editor - eg building a table of companies in a sector of the stock market
-- feat: cannot delete ISLAND's using CURSOR;
+- feat: delete ISLAND's; don't forget selections;
   - COMMENT: there is no path to `onInputSelectionChange` (events controller) because we disable the input
   - ideas
     - we either have to have backspace key that only triggers if we're editing and cursor is on an island

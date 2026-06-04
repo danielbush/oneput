@@ -239,6 +239,12 @@ export class CursorSelection {
     return this.isBeforeAnchor(this.getHead()) ? this.getHead() : this.anchor;
   }
 
+  getFrontWrapper(): HTMLElement {
+    return this.isBeforeAnchor(this.getHead())
+      ? this.getHead().parentElement!
+      : this.anchor.parentElement!;
+  }
+
   /**
    * Unwrap every SELECTION_WRAPPER in place, leaving TOKEN's and
    * spacing text nodes untouched.

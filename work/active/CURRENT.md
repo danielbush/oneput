@@ -70,11 +70,9 @@ COMMENT: cover what is used in Editor and Editor.getCursor (Cursor); mark the re
 - [x] Splitting
   - COMMENT: We split elements.  Then repair the damage in the bottom split.  This motivated the idea of automatic ANCHOR's.
   - I think we can just call anchorize on parent and peer in the bottom split.
-- selection ops
-  - move these into CursorTextOps?  how to expose operations on selected thing?
-    - CursorSelection
-      - wrapWithTag
-      - delete
+- [x] selection ops
+  - [x] delete
+  - [x] wrapWithTag
 
 ## WRAPPERS
 
@@ -104,6 +102,7 @@ Then we can decide if we want to do a deleteHighest.
 - Allow user to add anchors but don't mark them as special.
 - All anchors are removed when saving.
 - token.remove checks if it is removing the last TOKEN in the LINE_SEGMENT; if so, then it places an ANCHOR instead and doesn't flip any separators.
+- `anchorize(el)` - re-anchorizes an element
 
 ## CursorState, EditorState rethink
 

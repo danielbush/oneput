@@ -1,7 +1,5 @@
-import { deleteHighestEmpty, isEmpty } from '../ops/focusable.js';
-import { isInlineFlow, JSED_SELECTION_CLASS } from '../core/taxonomy.js';
+import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import * as token from '../ops/token.js';
-import { createAnchor } from '../ops/anchor.js';
 import type { CursorState } from '../cursor/CursorState.js';
 import { getSeparatorAfter, getSeparatorBefore } from '../ops/space.js';
 
@@ -206,13 +204,6 @@ export class CursorSelection {
     wrapper.replaceWith(...Array.from(wrapper.childNodes));
   }
 
-  private containsOnlyMarker(el: HTMLElement, marker: HTMLElement): boolean {
-    return Array.from(el.childNodes).every((child) => {
-      if (child === marker) return true;
-      return child.nodeType === Node.TEXT_NODE && child.textContent?.trim() === '';
-    });
-  }
-
   private isAfterAnchor(el: HTMLElement): boolean {
     if (el === this.anchor) return false;
     return !!(this.anchor.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
@@ -276,51 +267,5 @@ export class CursorSelection {
     });
     this.wrappers = [];
     return wrapped;
-  }
-
-  /**
-   * Reduce the selection to its START (earlier in document order):
-   * replace selected SELECTION_WRAPPER's with an ANCHOR at the start,
-   * clean up any structural containers that were fully consumed and
-   * became empty.
-   *
-   * Returns the surviving start ANCHOR so callers can re-seat their CURSOR on
-   * it and rewrite it as normal TOKEN text.
-   */
-  delete(): HTMLElement {
-    const start = this.getFront();
-    const startWrapper = this.wrappers.find((wrapper) => wrapper.contains(start));
-    if (!startWrapper?.parentElement) {
-      throw new Error('delete: selection start wrapper not found');
-    }
-
-    const marker = createAnchor();
-    startWrapper.before(marker);
-
-    const cleanupParents = new Set<HTMLElement>();
-    for (const wrapper of this.wrappers) {
-      if (wrapper.parentElement) {
-        cleanupParents.add(wrapper.parentElement);
-      }
-      wrapper.remove();
-    }
-    this.wrappers = [];
-
-    // If selection consumed an entire INLINE_FLOW branch, the marker is now the
-    // only meaningful child. Lift it out so replacement text does not inherit
-    // formatting that was deleted with the selection.
-    for (let anc = marker.parentElement; anc && isInlineFlow(anc); anc = marker.parentElement) {
-      if (!this.containsOnlyMarker(anc, marker)) break;
-      cleanupParents.add(anc.parentElement ?? anc);
-      anc.replaceWith(marker);
-    }
-
-    for (const parent of cleanupParents) {
-      if (!parent.isConnected) continue;
-      if (!isEmpty(parent)) continue;
-      deleteHighestEmpty(parent, this.root);
-    }
-
-    return marker;
   }
 }

@@ -14,18 +14,15 @@ import {
   type InsertTokenAfter,
   type ReplaceText
 } from '../ops/token.js';
+import { ReplaceSelectionWithText } from './ReplaceSelectionWithText.js';
 
 export class ReplaceWithText implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
     if (state.selection) {
-      const start = state.selection.delete();
-      state.cancelSelection();
-      // Suppress input sync — user is mid-typing, we'd clobber their input.
-      state.place(start, { syncInput: false });
+      return ReplaceSelectionWithText.run(state, text, opts);
     }
 
     if (!state.isOnToken()) return;
-
     const currentToken = state.getPlace();
     const [firstPart, ...parts] = text.split(/\s+/).filter(Boolean);
     if (!firstPart) return;

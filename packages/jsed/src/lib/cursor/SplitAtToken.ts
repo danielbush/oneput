@@ -45,7 +45,7 @@ export class SplitAtToken implements UndoRecord {
       ? recSplitBeforeChild(child, (el) => el === line)
       : recSplitAfterChild(child, (el) => el === line);
 
-    const anchors = anchorSplit(result, splitBefore);
+    anchorSplit(result, splitBefore);
 
     // Try to place the cursor on peer.
     const sib = getFirstLineSibling(result.topSplit.peer);
@@ -53,7 +53,7 @@ export class SplitAtToken implements UndoRecord {
       state.place(sib);
     }
 
-    return new SplitAtToken(result, { undo: child }, splitBefore, anchors);
+    return new SplitAtToken(result, { undo: child }, splitBefore);
   }
 
   constructor(
@@ -63,21 +63,18 @@ export class SplitAtToken implements UndoRecord {
       // We don't set a redo target as it may be an ANCHOR and atm we just remove them here.
     },
     public splitBefore: boolean,
-    public anchors: HTMLElement[],
     public removedAnchors: RemoveToken[] = []
   ) {}
 
   undo(state: EditorState) {
-    for (const anchor of this.anchors) {
-      anchor.remove();
-    }
     undoRecSplit(this.result);
+    anchorSplit(this.result, this.splitBefore);
     state.cursor?.place(this.cursorTarget.undo);
   }
 
   redo(state: EditorState) {
     redoRecSplit(this.result);
-    this.anchors = anchorSplit(this.result, this.splitBefore);
+    anchorSplit(this.result, this.splitBefore);
     // Recompute the cursor place which may be an anchor:
     const sib = getFirstLineSibling(this.result.topSplit.peer);
     state.cursor?.place(sib ?? this.cursorTarget.undo);

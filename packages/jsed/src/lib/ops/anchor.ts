@@ -261,7 +261,16 @@ export function removeAnchorBeforeTag(focus: HTMLElement): HTMLElement | null {
   return anchor;
 }
 
-export function anchorize(el: Node): HTMLElement[] {
+export function removeAnchors(el: HTMLElement): HTMLElement[] {
+  const anchors = el.querySelectorAll(`.${JSED_ANCHOR_CLASS}`);
+  for (const anchor of anchors) {
+    anchor.remove();
+  }
+  return Array.from(anchors) as HTMLElement[];
+}
+
+export function anchorize(el: HTMLElement): HTMLElement[] {
+  removeAnchors(el);
   const anchors: HTMLElement[] = [];
   findNextNode(el, {
     ceiling: el,

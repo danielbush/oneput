@@ -181,7 +181,7 @@ export class CursorTextOps {
     if (selection) {
       // Re-seat on the SELECTION's document-order start (as delete() does),
       // so wrapping is deterministic regardless of extension direction.
-      const start = selection.getBackwardEnd();
+      const start = selection.getFront();
       const wrappers = selection.wrapWithTag(tagName);
       if (!wrappers) {
         return false;

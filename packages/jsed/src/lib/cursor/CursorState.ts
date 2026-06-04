@@ -171,8 +171,7 @@ export class CursorState {
    */
   collapseSelectionTo(end: 'forward' | 'backward'): boolean {
     if (!this.selection) return false;
-    const target =
-      end === 'forward' ? this.selection.getForwardEnd() : this.selection.getBackwardEnd();
+    const target = end === 'forward' ? this.selection.getBack() : this.selection.getFront();
     this.cancelSelection();
     this.place(target);
     return true;

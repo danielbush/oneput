@@ -227,7 +227,7 @@ export class CursorSelection {
    * Whichever of anchor/head is later in document order. When the
    * selection hasn't been extended, both are the same element.
    */
-  getForwardEnd(): HTMLElement {
+  getBack(): HTMLElement {
     return this.isAfterAnchor(this.getHead()) ? this.getHead() : this.anchor;
   }
 
@@ -235,7 +235,7 @@ export class CursorSelection {
    * Whichever of anchor/head is earlier in document order. When the
    * selection hasn't been extended, both are the same element.
    */
-  getBackwardEnd(): HTMLElement {
+  getFront(): HTMLElement {
     return this.isBeforeAnchor(this.getHead()) ? this.getHead() : this.anchor;
   }
 
@@ -282,7 +282,7 @@ export class CursorSelection {
    * it and rewrite it as normal TOKEN text.
    */
   delete(): HTMLElement {
-    const start = this.getBackwardEnd();
+    const start = this.getFront();
     const startWrapper = this.wrappers.find((wrapper) => wrapper.contains(start));
     if (!startWrapper?.parentElement) {
       throw new Error('delete: selection start wrapper not found');

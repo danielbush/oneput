@@ -10,6 +10,7 @@ import {
 import type { UndoRecord } from '../undo';
 import type { CursorState } from './CursorState';
 import { DeleteSelection } from './DeleteSelection';
+import { ReplaceWithText } from './ReplaceWithText';
 
 export class ReplaceSelectionWithText implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
@@ -72,5 +73,16 @@ export class ReplaceSelectionWithText implements UndoRecord {
     }
     this.deleteSelection.redo(state);
     state.cursor?.place(this.cursorTarget.redo);
+  }
+
+  merge(next: UndoRecord): UndoRecord | void {
+    if (this.insertBefores.length !== 1) {
+      return;
+    }
+    const token = this.insertBefores[0].token;
+    if (next instanceof ReplaceWithText && next.replaceText.token === token) {
+      token.firstChild!.nodeValue = next.replaceText.after;
+      return this;
+    }
   }
 }

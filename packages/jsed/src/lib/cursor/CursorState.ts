@@ -121,8 +121,7 @@ export class CursorState {
     if (!this.selection) {
       this.selection = CursorSelection.create({
         cursor: this,
-        seed: this.seat,
-        root: this.document.root
+        seed: this.seat
       });
     }
     return this.selection;

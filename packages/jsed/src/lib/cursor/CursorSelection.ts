@@ -28,12 +28,8 @@ import { getSeparatorAfter, getSeparatorBefore } from '../ops/space.js';
  * - `front`/`back` are always document-order.
  */
 export class CursorSelection {
-  static create(params: {
-    cursor: CursorState;
-    seed: HTMLElement;
-    root: HTMLElement;
-  }): CursorSelection {
-    return new CursorSelection(params.cursor, params.seed, params.root);
+  static create(params: { cursor: CursorState; seed: HTMLElement }): CursorSelection {
+    return new CursorSelection(params.cursor, params.seed);
   }
 
   /** Ordered front → back, one per contiguous same-parent run. */
@@ -41,8 +37,7 @@ export class CursorSelection {
 
   constructor(
     private headCursor: CursorState,
-    private anchor: HTMLElement,
-    private root: HTMLElement
+    private anchor: HTMLElement
   ) {
     this.wrappers.push(this.openWrapper(anchor));
   }

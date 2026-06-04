@@ -12,14 +12,12 @@ import * as token from '../ops/token';
 import type { UndoRecord } from '../undo';
 import type { CursorState } from './CursorState';
 import type { CursorDeleteOpts } from './CursorTextOps';
+import { DeleteSelection } from './DeleteSelection';
 
 export class DeleteAtCursor implements UndoRecord {
   static run(state: CursorState, { type }: CursorDeleteOpts = { type: 'tokenDeletion' }) {
     if (state.selection) {
-      const start = state.selection.delete();
-      state.cancelSelection();
-      // Suppress input sync — user is mid-typing, we'd clobber their input.
-      state.place(start, { syncInput: false });
+      return DeleteSelection.run(state.selection, state);
     }
 
     if (!state.isOnToken()) return;

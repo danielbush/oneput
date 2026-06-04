@@ -1,7 +1,14 @@
 import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import { isToken } from '../core/taxonomy';
-import { containsOnly, deleteHighestEmpty, type DeleteElement } from '../ops/focusable';
-import { remove, type RemoveTokenAll } from '../ops/token';
+import {
+  containsOnly,
+  deleteHighestEmpty,
+  redoDeleteElement,
+  undoDeleteElement,
+  type DeleteElement
+} from '../ops/focusable';
+import { redoRemove, remove, undoRemove, type RemoveTokenAll } from '../ops/token';
+import { anchorize } from './anchor.js';
 
 /**
  * Does `el` contain any SELECTION_WRAPPER? Used by the detokenizer's
@@ -22,6 +29,11 @@ export type RemoveWrapper = {
   action: 'remove-wrapper';
   deleteHighestEmpty: undefined | false | DeleteElement;
   removedTokens: RemoveTokenAll[];
+  /**
+   * Something connected that can be used to find next or previous LINE_SIBLING
+   * from once the wrapper and its contents are removed..
+   */
+  marker: HTMLElement;
 };
 
 /**
@@ -29,6 +41,10 @@ export type RemoveWrapper = {
  */
 export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement): RemoveWrapper {
   const children = wrapper.childNodes;
+  const parent = wrapper.parentElement;
+  if (!parent) {
+    throw new Error(`removeWrapper: wrapper parentElement does not exist`);
+  }
   const removedTokens: RemoveTokenAll[] = [];
   for (const child of children) {
     if (isToken(child)) {
@@ -36,34 +52,67 @@ export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement): Remo
       removedTokens.push(remove(child as HTMLElement, false));
     }
   }
-  const deleteHighest =
-    !!wrapper.parentElement &&
-    containsOnly(wrapper.parentElement, wrapper) &&
-    deleteHighestEmpty(wrapper.parentElement, ceiling, wrapper);
-
   unwrap(wrapper);
+  // Don't anchorize wrappers as they are temporary elements.  Do it after
+  // unwrap.
+  anchorize(parent);
+
+  // Delete should still work if the only thing left is an anchor...
+  const deleteHighest =
+    containsOnly(parent, wrapper) && deleteHighestEmpty(parent, ceiling, wrapper);
 
   return {
     action: 'remove-wrapper',
     deleteHighestEmpty: deleteHighest,
-    removedTokens
+    removedTokens,
+    marker: (deleteHighest && deleteHighest.marker) || parent
   };
+}
+
+export function undoRemoveWrapper(op: RemoveWrapper) {
+  for (const tok of op.removedTokens) {
+    undoRemove(tok);
+  }
+  if (op.deleteHighestEmpty) {
+    undoDeleteElement(op.deleteHighestEmpty);
+    anchorize(op.deleteHighestEmpty.element);
+  }
+}
+
+export function redoRemoveWrapper(op: RemoveWrapper) {
+  for (const tok of op.removedTokens) {
+    redoRemove(tok);
+  }
+  if (op.deleteHighestEmpty) {
+    redoDeleteElement(op.deleteHighestEmpty);
+    anchorize(op.deleteHighestEmpty.element);
+  }
 }
 
 export type RemoveWrappers = {
   action: 'remove-wrappers';
   removedWrappers: RemoveWrapper[];
+  firstMarker: HTMLElement | null;
+  lastMarker: HTMLElement | null;
 };
 
 export function removeWrappers(wrappers: HTMLElement[], ceiling?: HTMLElement): RemoveWrappers {
   const removedWrappers: RemoveWrapper[] = [];
+  let firstMarker: HTMLElement | null = null;
+  let lastMarker: HTMLElement | null = null;
   for (const wrapper of wrappers) {
     const result = removeWrapper(wrapper, ceiling);
+    if (!firstMarker) {
+      firstMarker = result.marker;
+    }
+    lastMarker = result.marker;
     removedWrappers.push(result);
   }
 
   return {
     action: 'remove-wrappers',
-    removedWrappers
+    removedWrappers,
+    firstMarker,
+    lastMarker
   };
 }

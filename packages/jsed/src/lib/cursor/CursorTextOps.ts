@@ -22,7 +22,11 @@ export class CursorTextOps {
   private constructor(private state: CursorState) {}
 
   getNext(): HTMLElement | null {
-    const next = getNextLineSibling(this.state.getPlace(), this.state.document.root);
+    return this.getNextFrom(this.state.getPlace());
+  }
+
+  getNextFrom(from: HTMLElement): HTMLElement | null {
+    const next = getNextLineSibling(from, this.state.document.root);
     if (!next) {
       return null;
     }
@@ -58,7 +62,11 @@ export class CursorTextOps {
   }
 
   getPrevious(): HTMLElement | null {
-    const prev = getPreviousLineSibling(this.state.getPlace(), this.state.document.root);
+    return this.getPreviousFrom(this.state.getPlace());
+  }
+
+  getPreviousFrom(from: HTMLElement): HTMLElement | null {
+    const prev = getPreviousLineSibling(from, this.state.document.root);
     if (!prev) {
       return null;
     }

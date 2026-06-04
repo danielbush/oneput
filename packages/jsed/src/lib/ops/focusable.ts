@@ -50,7 +50,7 @@ export function isEmpty(el: Node): boolean {
 export function containsOnly(container: Node, needle: Node): boolean {
   return Array.from(container.childNodes).every((child) => {
     if (child === needle) return true;
-    return isIgnorableNode(child);
+    return isAnchor(child) || isIgnorableNode(child);
   });
 }
 

@@ -58,6 +58,10 @@ export class CursorSelection {
     return this.headCursor.getPlace();
   }
 
+  isForwardDirection(): boolean {
+    return this.isAfterAnchor(this.getHead());
+  }
+
   /**
    * Move the head one LINE_SIBLING forward. Grows the forward side of
    * the wrapper when head is at or after the anchor; shrinks the

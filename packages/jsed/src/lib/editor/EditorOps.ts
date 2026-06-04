@@ -4,6 +4,7 @@ import * as token from '../ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../input/UserInput.js';
 import { decideInputIntent } from '../input/decideInputIntent.js';
+import { ensureSeparatorAfter, ensureSeparatorBefore } from '../ops/space.js';
 
 /**
  * Manages an edit session for a single document.
@@ -194,9 +195,12 @@ export class EditorOps {
         return;
       }
 
-      case 'start-insert-after-current':
+      case 'start-insert-after-current': {
         cursor.setStateFromInput(intent.inputValue);
+        const sib = cursor.getPlace();
+        ensureSeparatorAfter(sib);
         return;
+      }
 
       case 'insert-after-current': {
         const lastToken = cursor.insertTextAfter(intent.insertedText, {
@@ -212,10 +216,13 @@ export class EditorOps {
         return;
       }
 
-      case 'start-insert-before-current':
+      case 'start-insert-before-current': {
         this.state.userInput.moveCursorToBeginning();
         cursor.setStateFromInput(intent.inputValue);
+        const sib = cursor.getPlace();
+        ensureSeparatorBefore(sib);
         return;
+      }
 
       case 'insert-before-current': {
         const lastToken = cursor.insertTextBefore(intent.insertedText, {

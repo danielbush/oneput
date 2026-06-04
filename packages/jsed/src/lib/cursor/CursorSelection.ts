@@ -1,5 +1,4 @@
 import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
-import * as token from '../ops/token.js';
 import type { CursorState } from '../cursor/CursorState.js';
 import { getSeparatorAfter, getSeparatorBefore } from '../ops/space.js';
 
@@ -254,18 +253,5 @@ export class CursorSelection {
     const wrappers = this.wrappers;
     this.wrappers = [];
     return wrappers;
-  }
-
-  wrapWithTag(tagName: string): HTMLElement[] | null {
-    if (!this.wrappers.every((wrapper) => token.canWrapElementChildrenWithTag(wrapper, tagName))) {
-      return null;
-    }
-
-    const wrapped = this.wrappers.flatMap((wrapper) => {
-      const element = token.wrapElementChildrenWithTag(wrapper, tagName);
-      return element ? [element] : [];
-    });
-    this.wrappers = [];
-    return wrapped;
   }
 }

@@ -116,3 +116,51 @@ export function removeWrappers(wrappers: HTMLElement[], ceiling?: HTMLElement): 
     lastMarker
   };
 }
+
+export type ConvertWrapper = {
+  action: 'convert-wrapper';
+  tagName: string;
+  container: HTMLElement;
+  childNodes: ChildNode[];
+};
+
+/**
+ * Convert selection WRAPPER into a FOCUSABLE.
+ */
+export function convertWrapper(wrapper: HTMLElement, tagName: string): ConvertWrapper {
+  const childNodes = Array.from(wrapper.childNodes);
+  const container = wrapper.ownerDocument.createElement(tagName);
+  wrapper.before(container);
+  container.append(...childNodes);
+  return {
+    action: 'convert-wrapper',
+    tagName,
+    container,
+    childNodes
+  };
+}
+
+export function undoConvertWrapper(op: ConvertWrapper) {
+  const childNodes = Array.from(op.container.childNodes);
+  op.container.before(...childNodes);
+  op.container.remove();
+  // We'll keep the list of childNodes up to date.
+  op.childNodes = childNodes;
+}
+
+export function redoConvertWrapper(op: ConvertWrapper) {
+  const first = op.childNodes[0];
+  const last = op.childNodes[op.childNodes.length - 1];
+  const childNodes: Node[] = [];
+  // Read all children between first and last inclusive:
+  let n: Node | null = first;
+  while (n) {
+    childNodes.push(n);
+    if (n === last) {
+      break;
+    }
+    n = n.nextSibling;
+  }
+  first.before(op.container);
+  op.container.append(...childNodes);
+}

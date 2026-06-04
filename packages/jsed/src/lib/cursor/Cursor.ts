@@ -10,6 +10,7 @@ import { ReplaceWithText } from './ReplaceWithText.js';
 import { InsertTextAfter } from './InsertTextAfter.js';
 import { InsertTextBefore } from './InsertTextBefore.js';
 import { SplitAtToken } from './SplitAtToken.js';
+import { Wrap } from './Wrap.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -76,6 +77,7 @@ export class Cursor {
   insertTextBefore = (text: string, opts?: UserInputOpts) =>
     this._undo(InsertTextBefore.run(this.state, text, opts));
   splitAtToken = () => this._undo(SplitAtToken.run(this.state));
+  wrap = (tagName: string) => this._undo(Wrap.run(this.state, tagName));
 
   // selections
   extendNext = () => this.state.ops.extendNext();
@@ -83,7 +85,6 @@ export class Cursor {
   cancelSelection = () => this.state.cancelSelection();
   canWrap = () => this.state.ops.canWrap();
   getWrapCandidates = () => this.state.ops.getWrapCandidates();
-  wrap = (tagName: string) => this.state.ops.wrap(tagName);
 
   // TODO: not used - delete or add to editor?
   insertElementAfter = (el: HTMLElement) => this.state.ops.insertElementAfter(el);

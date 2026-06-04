@@ -345,43 +345,7 @@ function redoRemoveToken(op: RemoveToken) {
 
 // #endregion
 
-// #region Wrapping (Selections)
-
-export function canWrapElementChildrenWithTag(container: HTMLElement, tagName: string): boolean {
-  if (!container.parentElement) {
-    return false;
-  }
-
-  const normalized = tagName.toLowerCase();
-  if (!normalized) {
-    return false;
-  }
-
-  const parentAllowsWrapper = getAllowableChildTags(container.parentElement.tagName).includes(
-    normalized
-  );
-  const allowedChildTags = getAllowableChildTags(normalized);
-  const wrapperAllowsChildren = Array.from(container.children).every((child) =>
-    allowedChildTags.includes(child.tagName.toLowerCase())
-  );
-  return parentAllowsWrapper && wrapperAllowsChildren;
-}
-
-export function wrapElementChildrenWithTag(
-  container: HTMLElement,
-  tagName: string
-): HTMLElement | null {
-  const normalized = tagName.toLowerCase();
-  if (!normalized || !canWrapElementChildrenWithTag(container, normalized)) {
-    return null;
-  }
-
-  const wrapper = container.ownerDocument.createElement(normalized);
-  container.before(wrapper);
-  wrapper.append(...Array.from(container.childNodes));
-  container.remove();
-  return wrapper;
-}
+// #region Wrapping
 
 export function canWrapLineSiblingWithTag(lineSibling: HTMLElement, tagName: string): boolean {
   if (!isLineSibling(lineSibling) || !lineSibling.parentElement) {
@@ -402,6 +366,12 @@ export function canWrapLineSiblingWithTag(lineSibling: HTMLElement, tagName: str
   return parentAllowsWrapper && wrapperAllowsLineSibling;
 }
 
+export type WrapLineSibling = {
+  action: 'wrap-line-sibling';
+  lineSibling: HTMLElement;
+  wrapper: HTMLElement;
+};
+
 /**
  * Wrap a LINE_SIBLING in a new FOCUSABLE element while keeping the target itself
  * intact, so the active CURSOR can stay seated on the same LINE_SIBLING.
@@ -409,16 +379,30 @@ export function canWrapLineSiblingWithTag(lineSibling: HTMLElement, tagName: str
 export function wrapLineSiblingWithTag(
   lineSibling: HTMLElement,
   tagName: string
-): HTMLElement | null {
+): WrapLineSibling | void {
   const normalized = tagName.toLowerCase();
   if (!normalized || !canWrapLineSiblingWithTag(lineSibling, normalized)) {
-    return null;
+    return;
   }
 
   const wrapper = lineSibling.ownerDocument.createElement(normalized);
   lineSibling.before(wrapper);
   wrapper.appendChild(lineSibling);
-  return wrapper;
+  return {
+    action: 'wrap-line-sibling',
+    lineSibling,
+    wrapper: wrapper
+  };
+}
+
+export function undoWrapLineSiblingWithTag(op: WrapLineSibling) {
+  op.wrapper.before(op.lineSibling);
+  op.wrapper.remove();
+}
+
+export function redoWrapLineSiblingWithTag(op: WrapLineSibling) {
+  op.lineSibling.after(op.wrapper);
+  op.wrapper.appendChild(op.lineSibling);
 }
 
 // #endregion

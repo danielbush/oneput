@@ -169,43 +169,4 @@ export class CursorTextOps {
   getWrapCandidates(): string[] {
     return getWrapCandidates();
   }
-
-  /**
-   * Wrap token at CURSOR or selection in a tag.
-   */
-  wrap(tagName: string): boolean {
-    if (!this.canWrap) {
-      return false;
-    }
-    const selection = this.state.getSelection();
-    if (selection) {
-      // Re-seat on the SELECTION's document-order start (as delete() does),
-      // so wrapping is deterministic regardless of extension direction.
-      const start = selection.getFront();
-      const wrappers = selection.wrapWithTag(tagName);
-      if (!wrappers) {
-        return false;
-      }
-      this.state.cancelSelection();
-
-      for (const wrapper of wrappers) {
-        this.state.eventsEmitter.onElementChange?.({
-          type: 'focusable-inserted',
-          element: wrapper
-        });
-      }
-      this.state.place(start);
-      return true;
-    }
-
-    const current = this.state.getPlace();
-    const wrapper = token.wrapLineSiblingWithTag(current, tagName);
-    if (!wrapper) {
-      return false;
-    }
-
-    this.state.eventsEmitter.onElementChange?.({ type: 'focusable-inserted', element: wrapper });
-    this.state.place(current);
-    return true;
-  }
 }

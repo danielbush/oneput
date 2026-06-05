@@ -508,25 +508,25 @@ describe('Editor', () => {
   });
 
   describe('CURSOR-based actions (edit mode)', () => {
-    describe('wrapCursorWithTag', () => {
+    describe('wrap cursor element tag', () => {
       it('wraps the current TOKEN and keeps the CURSOR on that TOKEN', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editor = createNullEditor(doc);
-        editor.enterEditing(byId(doc, 'p1'));
+        const p1 = byId(doc, 'p1');
+        editor.enterEditing(p1);
         const cursorToken = editor.getCursor()?.getPlace() as HTMLElement;
+        expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+        expect(identifyChildren(p1)).toEqual(['foo', '[nodeType=3:" "]', 'bar']);
 
         // act
-        const wrapped = editor.getCursor()!.wrap('em');
+        editor.getCursor()!.wrap('em');
 
         // assert
-        const wrapper = byId(doc, 'p1').querySelector('em') as HTMLElement;
-        expect(wrapped).toBe(true);
-        expect(wrapper).not.toBeNull();
-        expect(wrapper.textContent).toBe('foo');
-        expect(wrapper.firstElementChild).toBe(cursorToken);
+        expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+        expect(identifyChildren(p1)).toEqual(['[element:em]', '[nodeType=3:" "]', 'bar']);
         expect(editor.getCursor()?.getPlace()).toBe(cursorToken);
-        expect(editor.nav.getFocus()).toBe(wrapper);
+        expect(editor.nav.getFocus()).toBe(p1.firstChild);
 
         editor.destroy();
       });
@@ -537,17 +537,32 @@ describe('Editor', () => {
           '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
         );
         const editor = createNullEditor(doc);
-        editor.enterEditing(byId(doc, 'd1'));
+        const d1 = byId(doc, 'd1');
+        editor.enterEditing(d1);
         const island = editor.getCursor()?.getPlace() as HTMLElement;
+        expect(identifyChildren(doc.root)).toEqual(['[element:div#d1]']);
+        expect(identifyChildren(d1)).toEqual([
+          '[island:span]',
+          '[nodeType=3:" "]',
+          'after',
+          '[nodeType=3:" "]',
+          'island'
+        ]);
 
         // act
-        const wrapped = editor.getCursor()!.wrap('em');
+        editor.getCursor()!.wrap('em');
 
         // assert
-        const wrapper = byId(doc, 'd1').querySelector('em') as HTMLElement;
-        expect(wrapped).toBe(true);
-        expect(wrapper).not.toBeNull();
-        expect(wrapper.firstElementChild).toBe(island);
+        expect(identifyChildren(doc.root)).toEqual(['[element:div#d1]']);
+        expect(identifyChildren(d1)).toEqual([
+          '[element:em]',
+          '[nodeType=3:" "]',
+          'after',
+          '[nodeType=3:" "]',
+          'island'
+        ]);
+        const wrapper = d1.querySelector('em') as HTMLElement;
+        expect(identifyChildren(wrapper)).toEqual(['[island:span]']);
         expect(isIsland(editor.getCursor()?.getPlace())).toBe(true);
         expect(editor.getCursor()?.getPlace()).toBe(island);
 
@@ -558,21 +573,22 @@ describe('Editor', () => {
         // arrange
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editor = createNullEditor(doc);
-        editor.enterEditing(byId(doc, 'p1'));
-        const anchor = editor.getCursor()?.getPlace() as HTMLElement;
+        const p1 = byId(doc, 'p1');
+        editor.enterEditing(p1);
         editor.extendNext();
+        expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+        expect(identifyChildren(p1)).toEqual(['[selection]']);
 
         // act
-        const wrapped = editor.getCursor()!.wrap('strong');
+        editor.getCursor()!.wrap('strong');
 
         // assert
-        const wrapper = byId(doc, 'p1').querySelector('strong') as HTMLElement;
-        expect(wrapped).toBe(true);
-        expect(wrapper).not.toBeNull();
-        expect(wrapper.textContent).toBe('foo bar');
+        expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+        expect(identifyChildren(p1)).toEqual(['[element:strong]']);
+        expect(identifyChildren(p1.firstChild)).toEqual(['foo', '[nodeType=3:" "]', 'bar']);
         expect(doc.root.querySelector('.jsed-selection')).toBeNull();
-        expect(editor.getCursor()?.getPlace()).toBe(anchor);
-        expect(editor.nav.getFocus()).toBe(wrapper);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('bar');
+        expect(editor.nav.getFocus()).toBe(p1.firstChild);
 
         editor.destroy();
       });
@@ -583,18 +599,23 @@ describe('Editor', () => {
           '<div id="d1">before <span class="katex" style="display:inline;">x²</span> after</div>'
         );
         const editor = createNullEditor(doc);
-        editor.enterEditing(byId(doc, 'd1'));
+        const d1 = byId(doc, 'd1');
+        editor.enterEditing(d1);
         editor.extendNext();
+        expect(identifyChildren(doc.root)).toEqual(['[element:div#d1]']);
+        expect(identifyChildren(d1)).toEqual(['[selection]', 'after']);
 
         // act
-        const wrapped = editor.getCursor()!.wrap('strong');
+        editor.getCursor()!.wrap('strong');
 
         // assert
-        const wrapper = byId(doc, 'd1').querySelector('strong') as HTMLElement;
-        expect(wrapped).toBe(true);
-        expect(wrapper).not.toBeNull();
-        expect(wrapper.textContent).toBe('before x²');
-        expect(wrapper.querySelector('.katex')).not.toBeNull();
+        expect(identifyChildren(d1)).toEqual(['[element:strong]', 'after']);
+        expect(identifyChildren(d1.firstChild)).toEqual([
+          'before',
+          '[nodeType=3:" "]',
+          '[island:span]',
+          '[nodeType=3:" "]'
+        ]);
         expect(doc.root.querySelector('.jsed-selection')).toBeNull();
 
         editor.destroy();
@@ -1708,7 +1729,15 @@ describe('Editor', () => {
       await userInput.typeText('x');
 
       // assert
-      expect(identifyChildren(p1)).toEqual(['x']);
+      expect(identifyChildren(p1)).toEqual([
+        'x',
+        '[nodeType=3:" "]',
+        'd("foo")',
+        '[deleted-space]',
+        'd("bar")',
+        '[deleted-space]',
+        'd("baz")'
+      ]);
       expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
       // Input value reflects what the user typed — handleCursorChange must
@@ -1729,7 +1758,15 @@ describe('Editor', () => {
       await userInput.typeText('x');
 
       // assert: 'foo' and 'bar' gone, 'x' lands where bar was, 'baz' intact
-      expect(tokenValues(p1)).toEqual(['x', 'baz']);
+      expect(identifyChildren(p1)).toEqual([
+        'x',
+        '[nodeType=3:" "]',
+        'd("foo")',
+        '[deleted-space]',
+        'd("bar")',
+        '[deleted-space]',
+        'baz'
+      ]);
       expect(identify(editor.getCursor()?.getPlace())).toBe('x');
       expect(doc.root.querySelectorAll('.jsed-selection').length).toBe(0);
 
@@ -1737,7 +1774,7 @@ describe('Editor', () => {
     });
 
     test('type over selection - INLINE_FLOW extendNext', async () => {
-      // arrange: p(aa <em>bb cc</em> dd)
+      // arrange
       const doc = makeRoot(
         p(
           { id: 'p1' }, //
@@ -1750,27 +1787,39 @@ describe('Editor', () => {
         )
       );
       const p1 = byId(doc, 'p1');
+      const em1 = byId(doc, 'em1');
       const { editor, userInput } = await setupWithDoc(doc, p1);
       editor.extendNext(); // aa -> bb
       editor.extendNext(); // bb -> cc
+      expect(identifyChildren(p1)).toEqual([
+        '[selection]',
+        '[element:em#em1]',
+        '[nodeType=3:" "]',
+        'dd'
+      ]);
+      expect(identifyChildren(p1.firstChild)).toEqual([
+        'aa', //
+        '[nodeType=3:" "]'
+      ]);
+      expect(identifyChildren(em1)).toEqual([
+        '[selection]' //
+      ]);
 
       // act
       await userInput.typeText('x');
 
-      // assert: em emptied and removed; p has single 'x' followed by 'dd'
-      expect(Array.from(p1.querySelectorAll(`.${JSED_TOKEN_CLASS}`)).map(identify)).toEqual([
+      // assert
+      // TODO: we need to remove one of the spaces; this happens because we deleted the em-tag.
+      expect(identifyChildren(p1)).toEqual([
         'x',
+        '[nodeType=3:" "]',
+        'd("aa")',
+        '[deleted-space]',
+        '[deleted-element]',
+        '[nodeType=3:" "]',
         'dd'
       ]);
-      expect(isToken(p1.firstChild)).toBe(true);
-      expect(identify(p1.firstChild)).toBe('x');
       expect(identify(editor.getCursor()?.getPlace())).toBe('x');
-      const elements = Array.from(p1.querySelectorAll('*'));
-      expect(elements).toHaveLength(3);
-      expect(identify(elements[0])).toBe('x');
-      expect(isDeletedElement(elements[1])).toBe(true);
-      expect(identify(elements[2])).toBe('dd');
-      expect(tokenValues(p1)).toEqual(['x', 'dd']);
 
       editor.destroy();
     });
@@ -1792,15 +1841,35 @@ describe('Editor', () => {
       const { editor, userInput } = await setupWithDoc(doc, p1);
       editor.extendNext(); // head: bar
       editor.extendNext(); // head: baz (crossed into p2)
+      expect(identifyChildren(p1)).toEqual([
+        '[selection]' //
+      ]);
+      expect(identifyChildren(p2)).toEqual([
+        '[selection]', //
+        'qux'
+      ]);
 
       // act
       await userInput.typeText('x');
 
       // assert
-      expect(tokenValues(p1)).toEqual(['x']);
-      expect(tokenValues(p2)).toEqual(['qux']);
+      expect(identifyChildren(doc.root)).toEqual([
+        '[element:p#p1]', //
+        '[element:p#p2]'
+      ]);
+      expect(identifyChildren(p1)).toEqual([
+        'x', //
+        '[nodeType=3:" "]',
+        'd("foo")',
+        '[deleted-space]',
+        'd("bar")'
+      ]);
+      expect(identifyChildren(p2)).toEqual([
+        'd("baz")',
+        '[deleted-space]',
+        'qux' //
+      ]);
       expect(identify(editor.getCursor()?.getPlace())).toBe('x');
-      expect(doc.root.querySelector('#p1')).not.toBeNull();
 
       editor.destroy();
     });

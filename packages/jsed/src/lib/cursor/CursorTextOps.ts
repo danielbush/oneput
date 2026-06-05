@@ -1,4 +1,3 @@
-import * as token from '../ops/token.js';
 import { isLineSibling, isTokenizableTextNode } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import { getNextLineSibling, getPreviousLineSibling } from '../core/line.js';
@@ -99,18 +98,6 @@ export class CursorTextOps {
     const prev = this.getPrevious();
     // See moveNext: keep the input on the anchor during a selection-head walk.
     if (prev) this.state.place(prev, isSelection ? { syncInput: false } : undefined);
-  }
-
-  /** Merge with next adjacent TOKEN if it exists (JOIN). */
-  joinNext(): void {
-    if (!this.state.isOnToken()) return;
-    token.joinNext(this.state.getPlace());
-  }
-
-  /** Merge with previous adjacent TOKEN if it exists (JOIN). */
-  joinPrevious(): void {
-    if (!this.state.isOnToken()) return;
-    token.joinPrevious(this.state.getPlace());
   }
 
   /**

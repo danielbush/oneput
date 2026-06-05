@@ -85,8 +85,4 @@ export class Cursor {
   cancelSelection = () => this.state.cancelSelection();
   canWrap = () => this.state.ops.canWrap();
   getWrapCandidates = () => this.state.ops.getWrapCandidates();
-
-  // TODO: not used - delete or add to editor?
-  joinNext = () => this.state.ops.joinNext();
-  joinPrevious = () => this.state.ops.joinPrevious();
 }

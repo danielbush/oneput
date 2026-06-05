@@ -1,24 +1,22 @@
 import { describe, expect, test } from 'vitest';
-import { makeRoot, p } from '../../../test/util.js';
+import { div, em, identify, makeRoot, p } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
 import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
 import { UndoRecorder } from '../../undo/index.js';
-import { getValue } from '../../../lib/ops/token.js';
-import {
-  computeCursorState,
-  CURSOR_APPEND_CLASS,
-  CURSOR_INSERT_AFTER_CLASS,
-  CURSOR_INSERT_BEFORE_CLASS,
-  CURSOR_PREPEND_CLASS
-} from '../CursorState.js';
+import { getValue } from '../../ops/token.js';
+import { tagImplicitLines } from '../../ops/implicitLine.js';
+
+/**
+ * See INLINE_COMPUTED_STYLE
+ */
+const inlineStyle = { style: 'display:inline;' };
 
 function createCursor(doc: JsedDocument, tok: HTMLElement) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
-
   const cursor = Cursor.create(tok, {
     document: doc,
     tokenizer,
@@ -27,6 +25,7 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
     eventsEmitter: EditorEventsEmitter.create(),
     undo: UndoRecorder.createNull()
   });
+  cursor.place(tok);
 
   return { cursor, changes, errors };
 }
@@ -37,130 +36,16 @@ function tokenizeAndCursor(doc: JsedDocument, selector: string) {
   return createCursor(doc, firstToken);
 }
 
-describe('CURSOR_STATE', () => {
-  function setup() {
-    const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));
-    return tokenizeAndCursor(doc, '#p1');
-  }
+describe('moveNext / movePrevious', () => {
+  describe('simple paragraph: <p>hello world foo</p>', () => {
+    function setup() {
+      const doc = makeRoot(p({ id: 'p1' }, 'hello world foo'));
+      return tokenizeAndCursor(doc, '#p1');
+    }
 
-  function markerClasses(token: HTMLElement): string[] {
-    return [
-      CURSOR_APPEND_CLASS,
-      CURSOR_PREPEND_CLASS,
-      CURSOR_INSERT_AFTER_CLASS,
-      CURSOR_INSERT_BEFORE_CLASS
-    ].filter((cls) => token.classList.contains(cls));
-  }
-
-  describe('CURSOR_APPEND', () => {
-    test('setState sets CURSOR_APPEND marker', () => {
+    test('moveNext advances to the next token', () => {
       // arrange
       const { cursor } = setup();
-
-      // act
-      cursor.setInsertState('CURSOR_APPEND');
-
-      // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_APPEND_CLASS]);
-    });
-
-    test('moveNext clears CURSOR_APPEND marker', () => {
-      // arrange
-      const { cursor } = setup();
-      cursor.setInsertState('CURSOR_APPEND');
-
-      // act
-      cursor.moveNext();
-
-      // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([]);
-    });
-  });
-
-  describe('CURSOR_PREPEND', () => {
-    test('setState sets CURSOR_PREPEND marker', () => {
-      // arrange
-      const { cursor } = setup();
-
-      // act
-      cursor.setInsertState('CURSOR_PREPEND');
-
-      // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
-    });
-
-    test('movePrevious clears CURSOR_PREPEND marker', () => {
-      // arrange
-      const { cursor } = setup();
-      cursor.moveNext();
-      cursor.setInsertState('CURSOR_PREPEND');
-
-      // act
-      cursor.movePrevious();
-
-      // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([]);
-    });
-  });
-
-  describe('null state (no marker)', () => {
-    test('setState(null) clears all markers', () => {
-      // arrange
-      const { cursor } = setup();
-      cursor.setInsertState('CURSOR_APPEND');
-
-      // act
-      cursor.setInsertState(null);
-
-      // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([]);
-    });
-
-    test('cycling through states replaces the previous marker', () => {
-      // arrange
-      const { cursor } = setup();
-
-      // act & assert
-      cursor.setInsertState('CURSOR_APPEND');
-      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_APPEND_CLASS]);
-
-      cursor.setInsertState('CURSOR_PREPEND');
-      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_PREPEND_CLASS]);
-
-      cursor.setInsertState(null);
-      expect(markerClasses(cursor.getPlace())).toEqual([]);
-    });
-  });
-
-  describe('CURSOR_INSERT_AFTER', () => {
-    test('setState sets CURSOR_INSERT_AFTER marker', () => {
-      // arrange
-      const { cursor } = setup();
-
-      // act
-      cursor.setInsertState('CURSOR_INSERT_AFTER');
-
-      // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_INSERT_AFTER_CLASS]);
-    });
-
-    test('movePrevious cancels CURSOR_INSERT_AFTER without moving', () => {
-      // arrange
-      const { cursor } = setup();
-      cursor.setInsertState('CURSOR_INSERT_AFTER');
-
-      // act
-      cursor.movePrevious();
-
-      // assert
-      expect(getValue(cursor.getPlace())).toBe('hello');
-      expect(markerClasses(cursor.getPlace())).toEqual([]);
-    });
-
-    test('moveNext still moves forward from CURSOR_INSERT_AFTER', () => {
-      // arrange
-      const { cursor } = setup();
-      cursor.setInsertState('CURSOR_INSERT_AFTER');
 
       // act
       cursor.moveNext();
@@ -168,38 +53,36 @@ describe('CURSOR_STATE', () => {
       // assert
       expect(getValue(cursor.getPlace())).toBe('world');
     });
-  });
 
-  describe('CURSOR_INSERT_BEFORE', () => {
-    test('setState sets CURSOR_INSERT_BEFORE marker', () => {
+    test('moveNext twice reaches the third token', () => {
       // arrange
       const { cursor } = setup();
 
       // act
-      cursor.setInsertState('CURSOR_INSERT_BEFORE');
+      cursor.moveNext();
+      cursor.moveNext();
 
       // assert
-      expect(markerClasses(cursor.getPlace())).toEqual([CURSOR_INSERT_BEFORE_CLASS]);
+      expect(getValue(cursor.getPlace())).toBe('foo');
     });
 
-    test('moveNext cancels CURSOR_INSERT_BEFORE without moving', () => {
+    test('moveNext at the last token stays put', () => {
       // arrange
       const { cursor } = setup();
-      cursor.setInsertState('CURSOR_INSERT_BEFORE');
+      cursor.moveNext();
+      cursor.moveNext();
 
       // act
       cursor.moveNext();
 
       // assert
-      expect(getValue(cursor.getPlace())).toBe('hello');
-      expect(markerClasses(cursor.getPlace())).toEqual([]);
+      expect(getValue(cursor.getPlace())).toBe('foo');
     });
 
-    test('movePrevious still moves backward from CURSOR_INSERT_BEFORE', () => {
+    test('movePrevious from the second token goes back to first', () => {
       // arrange
       const { cursor } = setup();
       cursor.moveNext();
-      cursor.setInsertState('CURSOR_INSERT_BEFORE');
 
       // act
       cursor.movePrevious();
@@ -207,85 +90,393 @@ describe('CURSOR_STATE', () => {
       // assert
       expect(getValue(cursor.getPlace())).toBe('hello');
     });
-  });
-});
 
-describe('deriveCursorVisuals', () => {
-  describe('caret indicator', () => {
-    test.each([
-      ['CURSOR_AT_BEGINNING', true],
-      ['CURSOR_AT_MIDDLE', true],
-      ['CURSOR_AT_END', true],
-      ['SELECT_ALL', false],
-      ['SELECT_PARTIAL', false],
-      ['EMPTY', false]
-    ] as const)('selection %s → caret=%s', (selection, expected) => {
-      // arrange + act
-      const { isCaret: caret } = computeCursorState(selection, 'hello');
+    test('movePrevious at the first token stays put', () => {
+      // arrange
+      const { cursor } = setup();
+
+      // act
+      cursor.movePrevious();
 
       // assert
-      expect(caret).toBe(expected);
+      expect(getValue(cursor.getPlace())).toBe('hello');
     });
 
-    test('null selection → caret=false', () => {
-      // arrange + act
-      const { isCaret: caret } = computeCursorState(null, 'hello');
+    test('onCursorChange fires on each move', () => {
+      // arrange
+      const { cursor, changes } = setup();
 
-      // assert
-      expect(caret).toBe(false);
+      // act
+      cursor.moveNext();
+      cursor.moveNext();
+      cursor.movePrevious();
+
+      // assert - first entry is from construction (#setToken in constructor)
+      expect(changes).toEqual(['hello', 'world', 'foo', 'world']);
     });
   });
 
-  describe('marker', () => {
-    test('AT_BEGINNING with leading space → INSERT_BEFORE', () => {
-      // arrange + act
-      const { insertMarker: marker } = computeCursorState('CURSOR_AT_BEGINNING', ' hello');
+  describe('INLINE_FLOW: <p>aaa <em>bbb</em> ccc</p>', () => {
+    function setup() {
+      const doc = makeRoot(p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'), ' ccc'));
+      return tokenizeAndCursor(doc, '#p1');
+    }
 
-      // assert
-      expect(marker).toBe('CURSOR_INSERT_BEFORE');
+    test('moveNext traverses seamlessly through the INLINE_FLOW', () => {
+      // arrange
+      const { cursor } = setup();
+
+      // act & assert
+      expect(getValue(cursor.getPlace())).toBe('aaa');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('bbb');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('ccc');
     });
 
-    test('AT_BEGINNING with no leading space → PREPEND', () => {
-      // arrange + act
-      const { insertMarker: marker } = computeCursorState('CURSOR_AT_BEGINNING', 'hello');
+    test('movePrevious traverses seamlessly back through the INLINE_FLOW', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.moveNext();
+      cursor.moveNext();
 
-      // assert
-      expect(marker).toBe('CURSOR_PREPEND');
+      // act & assert
+      expect(getValue(cursor.getPlace())).toBe('ccc');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('bbb');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('aaa');
+    });
+  });
+
+  describe('nested INLINE_FLOW: <p>aaa <em>bbb <em>ccc</em> ddd</em> eee</p>', () => {
+    function setup() {
+      const doc = makeRoot(
+        p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb ', em(inlineStyle, 'ccc'), ' ddd'), ' eee')
+      );
+      return tokenizeAndCursor(doc, '#p1');
+    }
+
+    test('moveNext traverses through nested INLINE_FLOW depth', () => {
+      // arrange
+      const { cursor } = setup();
+
+      // act & assert
+      expect(getValue(cursor.getPlace())).toBe('aaa');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('bbb');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('ccc');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('ddd');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('eee');
     });
 
-    test('AT_END with trailing space → INSERT_AFTER', () => {
-      // arrange + act
-      const { insertMarker: marker } = computeCursorState('CURSOR_AT_END', 'hello ');
+    test('movePrevious traverses back through nested INLINE_FLOW depth', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.moveNext();
+      cursor.moveNext();
+      cursor.moveNext();
+      cursor.moveNext();
 
-      // assert
-      expect(marker).toBe('CURSOR_INSERT_AFTER');
+      // act & assert
+      expect(getValue(cursor.getPlace())).toBe('eee');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('ddd');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('ccc');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('bbb');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('aaa');
+    });
+  });
+
+  describe('adjacent INLINEs: <p>aaa <em>bbb</em><em>ccc</em> ddd</p>', () => {
+    function setup() {
+      const doc = makeRoot(
+        p({ id: 'p1' }, 'aaa ', em(inlineStyle, 'bbb'), em(inlineStyle, 'ccc'), ' ddd')
+      );
+      return tokenizeAndCursor(doc, '#p1');
+    }
+
+    test('moveNext crosses from one INLINE_FLOW to the adjacent INLINE_FLOW', () => {
+      // arrange
+      const { cursor } = setup();
+
+      // act & assert
+      expect(getValue(cursor.getPlace())).toBe('aaa');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('bbb');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('ccc');
+      cursor.moveNext();
+      expect(getValue(cursor.getPlace())).toBe('ddd');
     });
 
-    test('AT_END with no trailing space → APPEND', () => {
-      // arrange + act
-      const { insertMarker: marker } = computeCursorState('CURSOR_AT_END', 'hello');
+    test('movePrevious crosses back across adjacent INLINEs', () => {
+      // arrange
+      const { cursor } = setup();
+      cursor.moveNext();
+      cursor.moveNext();
+      cursor.moveNext();
 
-      // assert
-      expect(marker).toBe('CURSOR_APPEND');
+      // act & assert
+      expect(getValue(cursor.getPlace())).toBe('ddd');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('ccc');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('bbb');
+      cursor.movePrevious();
+      expect(getValue(cursor.getPlace())).toBe('aaa');
+    });
+  });
+
+  describe("walks non-TOKEN LINE_SIBLING's", () => {
+    describe('(1) ISLAND: visit=yes, descend=no', () => {
+      test('moveNext visits ISLAND, then continues to next TOKEN', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('bbb');
+      });
+
+      test('movePrevious visits ISLAND in reverse', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.movePrevious();
+        expect(identify(cursor.getPlace())).toBe('aaa');
+      });
+
+      test('ISLAND at start of LINE: cursor starts on the ISLAND', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert - quick-descend now lands on the first LINE_SIBLING
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('aaa');
+      });
+
+      test('ISLAND at end of LINE is the last cursor position', () => {
+        // arrange
+        const doc = makeRoot(
+          p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+      });
+
+      test('ISLAND inside INLINE_FLOW', () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' },
+            'aaa ',
+            em(
+              inlineStyle,
+              'bbb ',
+              '<span class="katex" style="display:inline;">x²</span>',
+              ' ccc'
+            ),
+            ' ddd'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert - CURSOR descends into the INLINE_FLOW, visits the ISLAND within it
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('bbb');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('ccc');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('ddd');
+      });
+
+      test('adjacent ISLANDs', () => {
+        // arrange
+        const doc = makeRoot(
+          p(
+            { id: 'p1' },
+            'aaa ',
+            '<span class="katex" style="display:inline;">x²</span>',
+            '<span class="katex" style="display:inline;">y³</span>',
+            ' bbb'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+        // act & assert - both ISLANDs are visited
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('bbb');
+      });
     });
 
-    test.each(['CURSOR_AT_MIDDLE', 'SELECT_ALL', 'SELECT_PARTIAL', 'EMPTY'] as const)(
-      '%s → no marker (regardless of boundary spaces)',
-      (selection) => {
-        // arrange + act
-        const { insertMarker: marker } = computeCursorState(selection, ' hello ');
+    describe(`(2) non-ISLAND's: visit=no, descend=yes`, () => {
+      const transparent = 'jsed-cursor-transparent';
 
-        // assert
-        expect(marker).toBeNull();
-      }
-    );
+      test('moveNext descends into nested div to visit its TOKEN', () => {
+        // arrange
+        const doc = makeRoot(
+          div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, 'nested'), ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
 
-    test('null selection → no marker', () => {
-      // arrange + act
-      const { insertMarker: marker } = computeCursorState(null, ' hello ');
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('nested');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('bbb');
+      });
 
-      // assert
-      expect(marker).toBeNull();
+      test('movePrevious exits nested div seamlessly', () => {
+        // arrange
+        const doc = makeRoot(
+          div({ id: 'outer' }, 'aaa ', div({ id: 'inner', class: transparent }, 'nested'), ' bbb')
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identify(cursor.getPlace())).toBe('nested');
+        cursor.movePrevious();
+        expect(identify(cursor.getPlace())).toBe('aaa');
+      });
+
+      test('deeply nested blocks: CURSOR descends through multiple levels', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'outer' },
+            'aaa ',
+            div(
+              { id: 'mid', class: transparent },
+              'bbb ',
+              div({ id: 'deep', class: transparent }, 'ccc'),
+              ' ddd'
+            ),
+            ' eee'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('bbb');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('ccc');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('ddd');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('eee');
+      });
+
+      test('empty element nesting: CURSOR recurses through to find TOKEN', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'outer' },
+            'aaa ',
+            div(
+              { id: 'mid', class: transparent },
+              div({ id: 'deep', class: transparent }, 'nested')
+            ),
+            ' bbb'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('aaa');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('nested');
+        cursor.moveNext();
+        expect(identify(cursor.getPlace())).toBe('bbb');
+      });
+
+      test('empty element nesting: movePrevious recurses back out', () => {
+        // arrange
+        const doc = makeRoot(
+          div(
+            { id: 'outer' },
+            'aaa ',
+            div(
+              { id: 'mid', class: transparent },
+              div({ id: 'deep', class: transparent }, 'nested')
+            ),
+            ' bbb'
+          )
+        );
+        const { cursor } = tokenizeAndCursor(doc, '#outer');
+        cursor.moveNext();
+        cursor.moveNext();
+
+        // act & assert
+        expect(identify(cursor.getPlace())).toBe('bbb');
+        cursor.movePrevious();
+        expect(identify(cursor.getPlace())).toBe('nested');
+        cursor.movePrevious();
+        expect(identify(cursor.getPlace())).toBe('aaa');
+      });
     });
+  });
+
+  test('cross line: moveNext past end of <p> lands in the following IMPLICIT_LINE', () => {
+    // arrange
+    const doc = makeRoot(div(p({ id: 'p1' }, 'hello world'), 'trailing text'));
+    tagImplicitLines(doc.root);
+    const { cursor } = tokenizeAndCursor(doc, '#p1');
+
+    expect(identify(cursor.getPlace())).toBe('hello');
+    cursor.moveNext();
+    expect(identify(cursor.getPlace())).toBe('world');
+
+    // act
+    cursor.moveNext();
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('trailing');
   });
 });

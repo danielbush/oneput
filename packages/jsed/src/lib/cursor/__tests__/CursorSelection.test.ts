@@ -1,16 +1,12 @@
 import { describe, test, expect } from 'vitest';
 import {
-  byId,
   em,
   frag,
-  identify,
   identifyChildren,
   inlineStyleHack,
   makeRoot,
   p,
   s,
-  span,
-  strong,
   t
 } from '../../../test/util.js';
 import { CursorSelection } from '../CursorSelection.js';
@@ -34,8 +30,7 @@ function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
   );
   return CursorSelection.create({
     cursor: cursorState,
-    seed: el,
-    root: doc.root
+    seed: el
   });
 }
 

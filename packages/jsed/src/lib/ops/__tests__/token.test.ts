@@ -1,12 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { createToken, remove, removeToken, replaceText } from '../token.js';
+import { createToken, remove, replaceText } from '../token.js';
 import { createAnchor } from '../anchor.js';
-import {
-  isAnchor,
-  isDeletedAnchor,
-  JSED_DELETED_CLASS,
-  JSED_IGNORE_CLASS
-} from '../../core/taxonomy.js';
+import { isAnchor, JSED_DELETED_CLASS, JSED_IGNORE_CLASS } from '../../core/taxonomy.js';
 import { buildParent } from '../../../test/util.js';
 
 describe('replaceText', () => {

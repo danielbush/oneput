@@ -17,7 +17,7 @@ import { Tokenizer } from '../../ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
 import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
 import { UndoRecorder } from '../../undo/index.js';
-import { getSeparatorAfter, getSeparatorBefore } from '../../ops/space.js';
+import { getSeparatorBefore } from '../../ops/space.js';
 import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 import type { EditorState } from '../../editor/EditorState.js';
 

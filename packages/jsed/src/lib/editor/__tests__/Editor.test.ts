@@ -18,13 +18,7 @@ import {
 import { getValue } from '../../ops/token.js';
 import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';
-import {
-  isDeletedElement,
-  isIsland,
-  isToken,
-  JSED_ANCHOR_CLASS,
-  JSED_TOKEN_CLASS
-} from '../../core/taxonomy.js';
+import { isDeletedElement, isIsland, isToken, JSED_ANCHOR_CLASS } from '../../core/taxonomy.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 
 function createNullEditor(doc: JsedDocument): Editor {
@@ -1711,10 +1705,6 @@ describe('Editor', () => {
       const editor = Editor.createNull({ document: doc, userInput });
       editor.enterEditing(seed);
       return { editor, userInput };
-    }
-
-    function tokenValues(el: HTMLElement): string[] {
-      return Array.from(el.querySelectorAll('.jsed-token')).map((t) => t.textContent ?? '');
     }
 
     test('type over selection - replace all / extendNext', async () => {

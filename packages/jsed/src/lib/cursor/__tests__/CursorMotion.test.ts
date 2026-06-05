@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { div, em, identify, makeRoot, p } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';

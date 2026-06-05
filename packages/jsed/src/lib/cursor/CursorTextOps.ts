@@ -1,5 +1,5 @@
 import * as token from '../ops/token.js';
-import { isLineSibling, isToken, isTokenizableTextNode } from '../core/taxonomy.js';
+import { isLineSibling, isTokenizableTextNode } from '../core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
 import { getNextLineSibling, getPreviousLineSibling } from '../core/line.js';
 import { getWrapCandidates } from '../core/dom-rules.js';
@@ -111,32 +111,6 @@ export class CursorTextOps {
   joinPrevious(): void {
     if (!this.state.isOnToken()) return;
     token.joinPrevious(this.state.getPlace());
-  }
-
-  insertElementAfter(el: HTMLElement): void {
-    if (isToken(el)) {
-      this.state.onError({ type: 'expected-non-token' });
-      throw new Error(`Expected non-token element.`);
-    }
-    token.insertAfter(el, this.state.getPlace());
-
-    const first = this.state.tokenizer.tokenizeLineAt(el);
-    if (first) {
-      this.state.place(first);
-    }
-  }
-
-  insertElementBefore(el: HTMLElement): void {
-    if (isToken(el)) {
-      this.state.onError({ type: 'expected-non-token' });
-      throw new Error(`Expected non-token element.`);
-    }
-    token.insertBefore(el, this.state.getPlace());
-
-    const first = this.state.tokenizer.tokenizeLineAt(el);
-    if (first) {
-      this.state.place(first);
-    }
   }
 
   /**

@@ -87,8 +87,6 @@ export class Cursor {
   getWrapCandidates = () => this.state.ops.getWrapCandidates();
 
   // TODO: not used - delete or add to editor?
-  insertElementAfter = (el: HTMLElement) => this.state.ops.insertElementAfter(el);
-  insertElementBefore = (el: HTMLElement) => this.state.ops.insertElementBefore(el);
   joinNext = () => this.state.ops.joinNext();
   joinPrevious = () => this.state.ops.joinPrevious();
 }

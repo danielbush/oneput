@@ -68,7 +68,8 @@ export class SplitAtToken implements UndoRecord {
 
   undo(state: EditorState) {
     undoRecSplit(this.result);
-    anchorSplit(this.result, this.splitBefore);
+    // Effectively anchorizes the original site:
+    anchorize(this.result.topSplit.parent);
     state.cursor?.place(this.cursorTarget.undo);
   }
 

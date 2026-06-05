@@ -194,7 +194,13 @@ describe('splitAtToken', () => {
   test('action / undo / redo — generates ANCHOR and places CURSOR on it', () => {
     // arrange — split after the last TOKEN: the new LINE is empty so it gets an
     // ANCHOR and the CURSOR lands on it.
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const doc = makeRoot(
+      p(
+        t('hello'), //
+        s(),
+        t('world')
+      )
+    );
     const { cursor } = createCursor(doc, tokens(doc)[1]); // world
     cursor.setInsertState('CURSOR_APPEND');
     const state = { cursor } as unknown as EditorState; // record.undo/redo only touch state.cursor

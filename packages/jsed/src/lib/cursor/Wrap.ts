@@ -65,6 +65,7 @@ export class WrapSelection implements UndoRecord {
       return;
     }
     const converted = wrappers.map((wrapper) => convertWrapper(wrapper, tagName));
+    state.reload();
 
     return new WrapSelection(front, converted);
   }

@@ -132,6 +132,7 @@ export function convertWrapper(wrapper: HTMLElement, tagName: string): ConvertWr
   const container = wrapper.ownerDocument.createElement(tagName);
   wrapper.before(container);
   container.append(...childNodes);
+  wrapper.remove();
   return {
     action: 'convert-wrapper',
     tagName,

@@ -21,7 +21,11 @@ describe('removeWrapper', () => {
     // arrange
     const root = makeRawRoot(
       p(
-        em(inlineStyleHack, sel(t('a'), s()), t('b')) //
+        em(
+          inlineStyleHack,
+          sel(t('a'), s()), //
+          t('b')
+        )
       )
     );
     const wrapper = getWrapper(root);
@@ -31,7 +35,7 @@ describe('removeWrapper', () => {
 
     // assert
     expect(result.removedTokens).toHaveLength(1);
-    expect(result.deleteHighest).toBe(false);
+    expect(result.deleteHighestEmpty).toBe(false);
     expect(identifyChildren(root.querySelector('em'))).toEqual([
       'd("a")', //
       '[deleted-space]',
@@ -43,7 +47,10 @@ describe('removeWrapper', () => {
     // arrange
     const root = makeRawRoot(
       p(
-        em(inlineStyleHack, sel(t('a'), s(), t('b'))) //
+        em(
+          inlineStyleHack,
+          sel(t('a'), s(), t('b')) //
+        )
       )
     );
     const wrapper = getWrapper(root);
@@ -57,7 +64,8 @@ describe('removeWrapper', () => {
     // expect(result.deleteHighest).toEqual({});
     expect(root.querySelector('em')).toBeNull();
     expect(identifyChildren(root.querySelector('p'))).toEqual([
-      '[deleted-element]' //
+      '[deleted-element]', //
+      '[anchor]'
     ]);
   });
 });

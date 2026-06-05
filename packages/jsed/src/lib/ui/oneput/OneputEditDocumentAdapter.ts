@@ -153,7 +153,7 @@ export class OneputEditDocumentAdapter {
         });
       },
       binding: {
-        bindings: ['enter'],
+        bindings: ['Enter'],
         description: 'Edit first editable token',
         when: { menuOpen: false }
       }

@@ -16,6 +16,9 @@ import { UndoRecorder } from '../undo/UndoRecorder.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
 import { err, ok, type Result } from 'neverthrow';
 import { isCursorTransparent, isLineSibling } from '../core/taxonomy.js';
+import { anchorize, removeAnchors } from '../ops/anchor.js';
+import { detokenize } from '../ops/tokenize.js';
+import { addImplicitLines, removeImplicitLines } from '../ops/implicitLine.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorTextChangeEvent =
@@ -119,6 +122,7 @@ export class EditorState {
   ) {}
 
   start(): void {
+    this.initializeDocument();
     this.nav.connect({
       onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
       onFocusChange: (focus) => this.controller.onFocusChange(focus)
@@ -215,6 +219,7 @@ export class EditorState {
   }
 
   destroy() {
+    this.unInitializeDocument();
     this.cursor?.destroy();
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
@@ -223,6 +228,18 @@ export class EditorState {
     this.cssElementIndicator.destroy();
     this.controller.unsubscribeAll();
     this.eventsEmitter.destroy();
+  }
+
+  initializeDocument() {
+    addImplicitLines(this.document.root);
+    anchorize(this.document.root);
+  }
+
+  unInitializeDocument() {
+    this.ops.removeArtifacts(this.document.root);
+    removeAnchors(this.document.root);
+    detokenize(this.document.root);
+    removeImplicitLines(this.document.root);
   }
 
   isEditing(): boolean {

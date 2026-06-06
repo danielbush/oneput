@@ -19,7 +19,7 @@ import { Cursor } from '../Cursor.js';
 import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
 import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../ops/token.js';
-import { tagImplicitLines } from '../../ops/implicitLine.js';
+import { addImplicitLines } from '../../ops/implicitLine.js';
 import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 import { getSeparatorBefore } from '../../ops/space.js';
 import type { EditorState } from '../../editor/EditorState.js';
@@ -494,7 +494,7 @@ describe('moveNext / movePrevious', () => {
   test('cross line: moveNext past end of <p> lands in the following IMPLICIT_LINE', () => {
     // arrange
     const doc = makeRoot(div(p({ id: 'p1' }, 'hello world'), 'trailing text'));
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
     const { cursor } = tokenizeAndCursor(doc, '#p1');
 
     expect(identify(cursor.getPlace())).toBe('hello');

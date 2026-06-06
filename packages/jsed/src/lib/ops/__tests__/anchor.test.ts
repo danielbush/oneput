@@ -26,8 +26,20 @@ import {
   strong as strongTag,
   t
 } from '../../../test/util.js';
+import { addImplicitLines } from '../implicitLine.js';
 
 describe('anchorize', () => {
+  test('empty root → leading anchor', () => {
+    // arrange
+    const root = makeRawRoot('');
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(root)).toEqual(['[anchor]']);
+  });
+
   test('empty LINE → leading anchor', () => {
     // arrange
     const root = makeRawRoot(p({ id: 'p1' }));
@@ -123,6 +135,7 @@ describe('anchorize', () => {
         p({ id: 'p2' }, 'ccc')
       )
     );
+    addImplicitLines(doc.root);
     const em1 = byId(doc, 'em1');
     const p1 = byId(doc, 'p1');
     const p2 = byId(doc, 'p2');
@@ -152,6 +165,7 @@ describe('anchorize', () => {
         p({ id: 'p2' }, 'ccc')
       )
     );
+    addImplicitLines(doc.root);
     const implicitLine = byId(doc, 'em1').parentElement!;
     const div1 = byId(doc, 'div1');
 
@@ -333,6 +347,7 @@ describe('insertAnchorBeforeTag', () => {
         p({ id: 'p2' }, 'ccc')
       )
     );
+    addImplicitLines(doc.root);
     const em = byId(doc, 'em1');
     const implicitLine = em.parentElement;
 
@@ -498,6 +513,7 @@ describe('insertAnchorAfterTag', () => {
         p({ id: 'p2' }, 'ccc')
       )
     );
+    addImplicitLines(doc.root);
     const em = byId(doc, 'em1');
     const implicitLine = em.parentElement;
 

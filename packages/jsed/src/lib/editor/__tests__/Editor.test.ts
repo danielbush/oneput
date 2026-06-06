@@ -493,8 +493,7 @@ describe('Editor', () => {
         expect(result.isOk()).toBe(true);
         expect(editor.isEditing()).toBe(true);
         expect(editor.getCursor()?.getPlace()).toBeDefined();
-        expect(isIsland(editor.getCursor()?.getPlace())).toBe(true);
-        expect(editor.getCursor()?.getPlace()?.classList.contains('katex')).toBe(true);
+        expect(identify(editor.getCursor()?.getPlace())).toBe('[anchor]');
 
         editor.destroy();
       });

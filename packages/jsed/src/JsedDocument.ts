@@ -1,5 +1,3 @@
-import * as anchor from './lib/ops/anchor.js';
-import { tagImplicitLines } from './lib/ops/implicitLine.js';
 import {
   ViewportScroller,
   type ViewportScrollerNullOptions
@@ -20,8 +18,7 @@ export class JsedDocument {
   ): JsedDocument {
     return new JsedDocument(
       root,
-      opts?.viewportScroller ?? ViewportScroller.createNull(opts?.viewportScrollerOpts),
-      opts?.anchorize
+      opts?.viewportScroller ?? ViewportScroller.createNull(opts?.viewportScrollerOpts)
     );
   }
 
@@ -34,10 +31,6 @@ export class JsedDocument {
     readonly anchorize: boolean = true
   ) {
     this.root = root;
-    tagImplicitLines(this.root);
-    if (this.anchorize) {
-      anchor.anchorize(this.root);
-    }
   }
 
   get document(): Document {

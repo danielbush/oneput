@@ -223,6 +223,7 @@ describe('EditDocument', () => {
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(d1);
     editorUI.renderMenuItems();
+    editor.getCursor()?.moveNext();
     const island = editor.getCursor()?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);

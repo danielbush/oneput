@@ -83,6 +83,8 @@ export class Nav {
     if (!this.#connected) return;
     this.#connected = false;
     this.doc.root.removeEventListener('mousedown', this.handleElementClick);
+    this.#SIB_HIGHLIGHT_CLEAR();
+    this.clearFocus();
   }
 
   /**

@@ -4,7 +4,8 @@ import {
   isCursorTransparent,
   isToken,
   isLineSibling,
-  isAnchor
+  isAnchor,
+  JSED_TOKEN_CLASS
 } from '../core/taxonomy.js';
 import { createToken } from './token.js';
 
@@ -79,7 +80,7 @@ function tokenizeLineRec(line: Node): HTMLElement | null {
   return first;
 }
 
-function replaceTokenElement(token: HTMLElement): void {
+function detoken(token: HTMLElement): void {
   if (!isToken(token)) {
     throw new Error('replaceTokenElement: called on non-token');
   }
@@ -109,7 +110,7 @@ function detokenizeLineRec(line: Node): void {
 
   for (const child of childNodes) {
     if (isToken(child)) {
-      replaceTokenElement(child as HTMLElement);
+      detoken(child as HTMLElement);
       continue;
     }
 
@@ -162,4 +163,14 @@ export function detokenizeLine(el: HTMLElement): void {
 
   detokenizeLineRec(el);
   el.normalize();
+}
+
+/**
+ * Remove all tokenization from el.
+ */
+export function detokenize(el: HTMLElement) {
+  const tokens = el.querySelectorAll(`.${JSED_TOKEN_CLASS}`);
+  for (const token of tokens) {
+    detoken(token as HTMLElement);
+  }
 }

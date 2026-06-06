@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { byId, div, em, inlineStyleHackVal, makeRoot, p, span, strong } from '../../../test/util';
-import { tagImplicitLines } from '../implicitLine';
+import { addImplicitLines } from '../implicitLine';
 import { JSED_IGNORE_CLASS, JSED_IMPLICIT_CLASS } from '../../core/taxonomy';
 
 describe('inline IMPLICIT_LINE (interstitial)', () => {
@@ -15,7 +15,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -42,7 +42,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -79,7 +79,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -124,7 +124,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -156,7 +156,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -184,7 +184,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -213,7 +213,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const d = byId(doc, 'd');
@@ -242,9 +242,9 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
     const afterFirst = byId(doc, 'd').innerHTML;
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
     const afterSecond = byId(doc, 'd').innerHTML;
 
     // assert
@@ -269,7 +269,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -297,7 +297,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const d = byId(doc, 'd');
@@ -333,7 +333,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -364,7 +364,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -387,7 +387,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
@@ -407,7 +407,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     );
 
     // act
-    tagImplicitLines(doc.root);
+    addImplicitLines(doc.root);
 
     // assert
     const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);

@@ -6,7 +6,7 @@ import { isImplicitLine, isToken, JSED_IMPLICIT_CLASS } from '../core/taxonomy.j
  *
  * Run on the whole document at session start, BEFORE any tokenization.
  */
-export function tagImplicitLines(root: HTMLElement) {
+export function addImplicitLines(root: HTMLElement) {
   const elements: HTMLElement[] = [root];
   // Notes on querySelectorAll
   // 1. Scope: descendants of the receiver only — never the element itself,
@@ -21,6 +21,14 @@ export function tagImplicitLines(root: HTMLElement) {
     if (el instanceof window.HTMLElement) elements.push(el);
   }
   for (const el of elements) wrapInterstitials(el);
+}
+
+export function removeImplicitLines(root: HTMLElement) {
+  const lines = root.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
+  for (const line of lines) {
+    line.before(...line.childNodes);
+    line.remove();
+  }
 }
 
 function wrapInterstitials(el: HTMLElement) {

@@ -81,7 +81,8 @@ export function isTextNode(node: Node): boolean {
   return node.nodeType === Node.TEXT_NODE;
 }
 
-export function isTokenizableTextNode(node: Node): boolean {
+export function isTokenizableTextNode(node: Node | null): boolean {
+  if (!node) return false;
   if (node.nodeType !== Node.TEXT_NODE) return false;
   if (!node.nodeValue) return false;
   return /\S/.test(node.nodeValue);

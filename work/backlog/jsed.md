@@ -49,6 +49,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## bugs
 
+- probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace
+- inserting anchors at places we don't need
+  - what: `<p>aaa <em>bbb</em> ...</p>` - put cursor on bbb; we can get the oneput menu to insert an anchor before the em ie `<p>aaa [A]<em>...` which is unnecessary
+  - fix: `getAnchorBeforeTagInsertionPoint` does `return isWhitespaceTextNode(previous) ? { parent: focus.parentNode, previous } : null;` but this is shortsighted because previous might be preceded by a TOKEN or non-whitespace text node
 - non-TOKEN LINE_SIBLING woes
   - fix: when splitting after TOKEN before an ISLAND (ie a non-TOKEN LINE_SIBLING), we get a new line, an ANCHOR but no space between us and the non-TOKEN LINE_SIBLING; (1) we may not want the ANCHOR - maybe we want the non-TOKEN LINE_SIBLING to lead that LINE, but we can't remove it; (2) we can insert a trailing space after ANCHOR but it should probably be inserted by default when the ANCHOR is created
   - fix: can't split when cursor is on an island

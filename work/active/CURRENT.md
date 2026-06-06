@@ -15,11 +15,11 @@
   - COMMENT: brings in automatic anchorization
   - [x] ANCHOR_ISLAND_EDGE_CASE
     - we can use ANCHOR_ISLAND_EDGE_CASE to explore this, maybe recSplitAfterChild in focusable.ts checks if there's if we're on a LINE_SIBLING and calls token.splitAfterChild ?  Similarly for the before case.
-- [ ] selection
-  - [ ] delete
-  - [ ] type over
+- [.] selection
+  - [x] delete
+  - [x] type over
   - [ ] paste over
-  - [ ] wrap
+  - [x] wrap
   - don't forget
     - fix: backspace leaves an ANCHOR
     - fix: make select.delete undoable

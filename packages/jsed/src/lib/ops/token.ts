@@ -29,7 +29,7 @@ import {
   redoRemoveSeparator,
   type InsertSeparatorAfter
 } from './space.js';
-import { isLastLineSibling } from '../core/lineSegment.js';
+import { isLastText } from '../core/lineSegment.js';
 import { createAnchor } from './anchor.js';
 
 export function getValue(token: Node): string {
@@ -247,7 +247,7 @@ export function remove(token: HTMLElement, anchorize = true): RemoveTokenAll {
     throw new Error('remove: token has no parentNode');
   }
 
-  if (anchorize && isLastLineSibling(token)) {
+  if (anchorize && isLastText(token)) {
     const anchor = createAnchor();
     token.before(anchor);
     const result = removeToken(token, false);

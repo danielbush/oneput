@@ -20,7 +20,9 @@ export function addImplicitLines(root: HTMLElement) {
   for (const el of root.querySelectorAll('*')) {
     if (el instanceof window.HTMLElement) elements.push(el);
   }
-  for (const el of elements) wrapInterstitials(el);
+  for (const el of elements) {
+    wrapInterstitials(el);
+  }
 }
 
 export function removeImplicitLines(root: HTMLElement) {
@@ -37,7 +39,10 @@ function wrapInterstitials(el: HTMLElement) {
   let current: ChildNode[] = [];
   for (let n = el.firstChild; n; n = n.nextSibling) {
     if (isInterstitialChild(n)) {
-      current.push(n);
+      // Weed out things like comment nodes.
+      if (n.nodeType === 3 || n.nodeType === 1) {
+        current.push(n);
+      }
     } else {
       if (current.length > 0) runs.push(current);
       current = [];

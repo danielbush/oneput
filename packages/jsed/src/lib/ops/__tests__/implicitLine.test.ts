@@ -4,6 +4,17 @@ import { addImplicitLines } from '../implicitLine';
 import { JSED_IGNORE_CLASS, JSED_IMPLICIT_CLASS } from '../../core/taxonomy';
 
 describe('inline IMPLICIT_LINE (interstitial)', () => {
+  test('ignores html comments', () => {
+    // arrange
+    const doc = makeRoot('<!-- foo -->' + p({ id: 'p1' }, 'aaa'));
+
+    // act
+    addImplicitLines(doc.root);
+
+    // assert
+    expect(doc.root.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`).length).toBe(0);
+  });
+
   test('leading interstitial', () => {
     // arrange
     const doc = makeRoot(

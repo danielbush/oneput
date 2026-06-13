@@ -22,7 +22,9 @@ A Local Lens is a `SKILL.md` file in a code directory. It is the source of truth
 3. If `SKILL.md` exists, read it completely before reviewing code.
 4. Apply the local `SKILL.md` instructions to the code in that same directory.
 5. If the local instructions name specific files, methods, edge cases, or test strategy, follow those details.
-6. Present findings in normal review style: bugs and risks first, then open questions, then brief summary.
+6. Generate a report of actions needed.
+7. Store the report as `REPORT.YYYYMMDD.md` in the target directory, using the current local date.
+8. Present findings in normal review style: bugs and risks first, then open questions, then brief summary.
 
 ## Discovery Mode
 
@@ -79,6 +81,20 @@ For example, a directory-level `SKILL.md` may say to:
 - test undo/redo behavior only for operations that mutate state
 
 Keep those rules scoped to the target directory unless the local file says otherwise.
+
+## Report Output
+
+When applying a Local Lens, write a report to `REPORT.YYYYMMDD.md` in the same directory as the local `SKILL.md`, unless the human explicitly asks for a different output. Use the current local date for `YYYYMMDD`.
+
+The report should capture:
+
+- the Local Lens target and scope
+- findings, bugs, risks, and unclear expectations
+- actions needed
+- relevant test results if tests were run
+- suggested follow-up tests or implementation work
+
+If a report for the current date already exists, replace it with the current report unless the human asks to append or preserve history.
 
 ## Review Boundaries
 

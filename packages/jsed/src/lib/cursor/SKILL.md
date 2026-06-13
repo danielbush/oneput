@@ -1,13 +1,20 @@
-This is a skill file that is intended to be used for code in the same directory. You can invoke it with the review skill: /review path/to/this/dir
+This is a skill file that is intended to be used for code in the same directory. You can invoke it with the local-lens skill.
 
-- Take each method for Cursor in Cursor.ts or the ones the user wants to focus on...
-  - identify the key operations in lib/ops/ and lib/core; these are the load-bearing operations
-  - identify any missing edge cases for these operations and write tests for them
-  - in addition, if the method mutates the DOM, and implements UndoRecords with a static run method...
-    - test the static run method
-      - don't be exhaustive, rely on the exhaustive testing of the load bearing operations in lib/ops, lib/core
-      - focus on testing key happy and sad paths
-      - focus on testing for integration issues
-    - test we can undo
-    - test we can redo
-- tests for Cursor.ts itself should be even less exhuastive, and should just test integration, such as the management of undo across multiple operations.
+- For each method in Cursor class in Cursor.ts or the one specified by the user
+  - identify which operations in lib/ops/ and lib/core are used; these are the load-bearing operations
+  - look at how well tested each load-bearing operation is and identify any missing cases for these operations and write tests for them (in lib/{ops,core})
+  - if the method mutates the DOM, and implements UndoRecords with a static run method...
+    - check for the following
+      - tests for the static run method of the class
+        - don't be exhaustive, rely on the exhaustive testing of the load bearing operations in lib/ops, lib/core
+        - focus on testing key happy and sad paths
+        - focus on testing for integration issues
+      - test we can undo
+      - test we can redo
+  - the method (in the Cursor class) should be tested but focus on
+    - obvious happy/sad paths and test integration
+      - exhaustive testing should happen on load-bearing operations
+    - integration
+      - such as the management of undo across multiple operations.
+- generate a report of actions needed
+- store the report in REPORT.md in the same directory

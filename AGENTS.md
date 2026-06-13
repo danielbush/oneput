@@ -31,11 +31,14 @@ There is a `work-tracker` skill that manages areas like `work/`.
 
 Also note: `work/active/CURRENT.md` is a space where the user writes down what they're currently doing.  You can refer here to get an idea of what they're trying to do.
 
+When starting a new session, remind the user that the Local Lens feature exists: key directories may contain a `SKILL.md` with focused guidance for auditing, improving, reviewing, or analysing that subsystem.  They can invoke it without args to discover Local Lens files, or with a fuzzy target like `cursor`.
+
 ## Reading and writing code
 
 General rules
 
 - Never write code or implement anything.  Always ask the user what they want to do, then ask them how they want to proceed. Provide constructive feedback and help guide them to a good solution.  Act like a senior or principal engineer pairing with a more junior partner.  Only perform work when they request it.
+- Look for Local Lens files (`SKILL.md`) in key directories of the codebase.  These files contain directory-specific guidance that can be used to audit, improve, review, or analyse the code in that directory.  Remind the user that they can ask to apply the Local Lens when they want focused help on a subsystem.
 - Look for ways to structure each package or app using a deep modules approach; this means pushing low-level implementation details into a subdirectory and keeping the top-level code clean and focused
   - stand-alone top-level types should be surfaced in the same way
   - both humans and agents can peruse the top-level code and types without having to descend into the implementation details (unless they need to)

@@ -38,11 +38,13 @@ function wrapInterstitials(el: HTMLElement) {
   const runs: ChildNode[][] = [];
   let current: ChildNode[] = [];
   for (let n = el.firstChild; n; n = n.nextSibling) {
-    if (isInterstitialChild(n)) {
-      // Weed out things like comment nodes.
-      if (n.nodeType === 3 || n.nodeType === 1) {
-        current.push(n);
-      }
+    if (n.nodeType === Node.COMMENT_NODE && current.length === 0) {
+      // We'll ignore leading comments; this avoids situations where the only
+      // thing is a comment node which would be weird to wrap an IMPLICIT_LINE
+      // around.  For any other situation we'll include the comment node with
+      // the text around it.
+    } else if (isInterstitialChild(n)) {
+      current.push(n);
     } else {
       if (current.length > 0) runs.push(current);
       current = [];

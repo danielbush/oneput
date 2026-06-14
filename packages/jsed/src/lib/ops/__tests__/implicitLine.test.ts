@@ -1,5 +1,15 @@
 import { describe, expect, test } from 'vitest';
-import { byId, div, em, inlineStyleHackVal, makeRoot, p, span, strong } from '../../../test/util';
+import {
+  byId,
+  div,
+  em,
+  identifyChildren,
+  inlineStyleHackVal,
+  makeRoot,
+  p,
+  span,
+  strong
+} from '../../../test/util';
 import { addImplicitLines } from '../implicitLine';
 import { JSED_IGNORE_CLASS, JSED_IMPLICIT_CLASS } from '../../core/taxonomy';
 
@@ -12,7 +22,12 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     addImplicitLines(doc.root);
 
     // assert
-    expect(doc.root.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`).length).toBe(0);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[nodeType=8:" foo "]', //
+      '[element:p#p1]'
+    ]);
+    const implicitLines = doc.root.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicitLines.length).toBe(0);
   });
 
   test('leading interstitial', () => {
@@ -334,7 +349,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     // absorbed into the surrounding implicit line rather than splitting it.
     const doc = makeRoot(
       div(
-        { id: 'd' }, //
+        { id: 'div1' }, //
         p({ id: 'p1' }, 'x'),
         'aaa',
         '<!-- c -->',
@@ -342,20 +357,21 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
         p({ id: 'p2' }, 'y')
       )
     );
+    const div1 = byId(doc, 'div1');
 
     // act
     addImplicitLines(doc.root);
 
     // assert
-    const wrapped = byId(doc, 'd').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
-    expect(wrapped.length).toBe(1);
-    expect(wrapped[0].textContent).toBe('aaabbb');
-    // comment is preserved inside the wrapper
-    const commentNodes = Array.from(wrapped[0].childNodes).filter(
-      (n) => n.nodeType === Node.COMMENT_NODE
-    );
-    expect(commentNodes.length).toBe(1);
-    expect(commentNodes[0].textContent).toBe(' c ');
+    expect(identifyChildren(doc.root)).toEqual(['[element:div#div1]']);
+    expect(identifyChildren(div1)).toEqual(['[element:p#p1]', '[implicit-line]', '[element:p#p2]']);
+    const implicitLines = doc.root.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`);
+    expect(implicitLines.length).toBe(1);
+    expect(identifyChildren(implicitLines[0])).toEqual([
+      '[nodeType=3:"aaa"]',
+      '[nodeType=8:" c "]', // comment not wrapped
+      '[nodeType=3:"bbb"]'
+    ]);
   });
 
   test('<br> splits the run', () => {

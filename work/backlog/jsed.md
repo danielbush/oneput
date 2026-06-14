@@ -72,6 +72,26 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## feats
 
+- delete ISLAND's
+  - COMMENT: currently nothing happens; need to think about the machinery; a general way to handle them, but we can use katex as an example
+- tidy up skills
+  - local-lens
+    - not in .claude
+    - can we install via taskfile?
+  - jsed-test-cases
+    - not in .claude
+    - can we install via taskfile?
+  - jsed skill
+  - I wonder if they should go in the source code and we install them as symlinks?
+    - I think it would be clearer
+    - initially we could put them at the workspace level in skills/
+- style: when cursor is on an island (eg katex island) it needs to still look like a cursor; maybe a throbbing outline/border?
+  - COMMENT: could delete the old cursor-lab; replace it with a simple mockup of different states
+- style: for insert-{before/after}, append/prepend
+  - instead of using the red triangle, wrap the space in a span and highlight the appropriaate edge, maybe with a gentle pulse; this will make it more cursor-like and I'm hopping less jumpy than the red arrows when typing a string of words
+- feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
+  - this allows us to more easily edit parts of complex tokens
+  - it also will isolate parens which might be a first step to semantically handling them
 - feat: table editor - eg building a table of companies in a sector of the stock market
 - feat: delete ISLAND's; don't forget selections;
   - COMMENT: there is no path to `onInputSelectionChange` (events controller) because we disable the input
@@ -106,7 +126,7 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
 ## refactors
 
 - refactor: get rid of walk v1 dependents
-  - getPreviousLineSiblingV1 
+  - getPreviousLineSiblingV1
   - getNextLineSiblingV1
   - what else?
 - refactor: lib/token and lib/focus/focusable should be a lower-level ops layer?
@@ -121,7 +141,7 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
     - tokenize, Tokenizer, Detokenizer
     - focusable.ts
 - refactor: isFocusable shouldn't assert HTMLElement; it is convenient but that means !isFocusable is a Node
-  - COMMENT: it seems the !isFocusable case is not a hard "not HTMLElement"; if we additionally test for "node instanceof HTMLElement", node becomes an HTMLElement again;  if this is reliable than we could argue for keeping the guard since in most situations isFocusable is being used to find elements from nodes and we never explicitly deal with ignorable elements, they never get landed on; however if we implement "holes", then we will start having non-ignorable elements that are FOCUS-transparent and 
+  - COMMENT: it seems the !isFocusable case is not a hard "not HTMLElement"; if we additionally test for "node instanceof HTMLElement", node becomes an HTMLElement again;  if this is reliable than we could argue for keeping the guard since in most situations isFocusable is being used to find elements from nodes and we never explicitly deal with ignorable elements, they never get landed on; however if we implement "holes", then we will start having non-ignorable elements that are FOCUS-transparent and
 - refactor: we might want to distinguish between ignorables that we can see (maybe content that we can never focus or edit) and ignorables that are hidden constructs (like undo markers)
   - COMMENT: motivation for this is that content-based ignorables might be anchorized around, so we need to treat them as "present" unlike a hidden undo marker
   - COMMENT: we could have a jsed-content-ignore which acts like an ISLAND; or we just use ISLAND's?
@@ -138,7 +158,7 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
   - EditorFocusOps, EditorTextOps are the main orchestrators, so they can call the token or related to manage the anchors
 - refactor: pass undo as event?
   - `this.state.notifyElementChange({ type: 'focusable-inserted', element: inserted.finalSplit.peer });` is used for this.state.cursor.splitAtToken in packages/jsed/src/lib/editor/EditorCursorOps.ts
-- refactor: OneputEditDocumentAdapter.ts should probably be instantiated as the UI and it provides hooks for us to customise it; 
+- refactor: OneputEditDocumentAdapter.ts should probably be instantiated as the UI and it provides hooks for us to customise it;
 - refactor: OneputEditDocumentAdapter.ts isn't an adapter; it's sort of a manual base class - so maybe OneputEditDocumentBase.ts ?
 - refactor: line module is really sibling.ts and it should include the sib functions in walk; walk builds on sibling
 - [ ] refactor: merge CursorTextOps.ts into EditorCursorOps.ts

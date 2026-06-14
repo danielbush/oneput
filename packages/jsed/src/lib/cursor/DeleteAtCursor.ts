@@ -89,7 +89,8 @@ export class DeleteAtCursor implements UndoRecord {
      * ...<em>...</em>[A]</p> => ...<em>...[T]</em>A</p>
      * etc
      */
-    state.place(prevCrs || nextCrs || current, userInputOpts);
+    // TODO: prefer to not move the anchor at the moment.
+    // state.place(prevCrs || nextCrs || current, userInputOpts);
     return;
   }
 

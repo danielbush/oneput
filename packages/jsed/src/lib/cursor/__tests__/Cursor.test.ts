@@ -1101,9 +1101,8 @@ describe('delete', () => {
     cursor.delete();
 
     // assert
-    expect(identify(cursor.getPlace())).toBe('[island:span]');
-    expect(identify(cursor.getPlace().nextElementSibling)).toBe('[deleted-space]'); // not removed from dom
-    expect(identify(cursor.getPlace().nextElementSibling?.nextElementSibling)).toBe('d("bbb")'); // not removed from dom
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
+    expect(identify(cursor.getPlace().nextSibling)).toBe('d("bbb")'); // not removed from dom
   });
 });
 

@@ -21,8 +21,6 @@
   - [x] paste over
   - [x] wrap
 - don't forget
-  - fix: backspace leaves an ANCHOR
-  - fix: make select.delete undoable
   - might be an issue with DeleteAtCursor being merged by previous undo ReplaceWithText; if the DeleteAtCursor was a selection, it should not be merged by the previous ReplaceWithText; perhaps we need a `mergeable(last: UndoRecord): boolean`; if DeleteAtCursor instance deleted a selection, it would return false especially if last is instance of ReplaceWithText.
 
 side list

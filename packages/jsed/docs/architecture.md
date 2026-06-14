@@ -8,6 +8,7 @@ At the bottom we have lib/core
   - taxonomy - identifies key elements/nodes in the DOM
   - walk - general recursive walking functions
   - sibling - worries about elements that share the same parentNode; this is important for things like managing LINE_SEGMENT's etc
+  - lineSegment - worries about LINE_SEGMENT's
   - line - worries about LINE's
   - dom-rules - worries about how elements can be combined
 

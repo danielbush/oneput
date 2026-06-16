@@ -35,7 +35,7 @@ import {
  */
 const inlineStyle = { style: 'display:inline;' };
 
-function createCursor(doc: JsedDocument, tok: HTMLElement) {
+function createCursor(doc: JsedDocument, tok: HTMLElement, undo = UndoRecorder.createNull()) {
   const changes: string[] = [];
   const errors: string[] = [];
   const tokenizer = Tokenizer.createNull();
@@ -45,11 +45,11 @@ function createCursor(doc: JsedDocument, tok: HTMLElement) {
     onCursorChange: (t) => t && changes.push(getValue(t)),
     onCursorError: (err) => errors.push(err.type),
     eventsEmitter: EditorEventsEmitter.create(),
-    undo: UndoRecorder.createNull()
+    undo
   });
   cursor.place(tok);
 
-  return { cursor, changes, errors };
+  return { cursor, changes, errors, undo };
 }
 
 function tokenizeAndCursor(doc: JsedDocument, selector: string) {
@@ -829,93 +829,54 @@ describe('insertTextBefore', () => {
 });
 
 describe('delete', () => {
-  test('first TOKEN in doc', () => {
+  test('multiple deletes can be undone and redone', () => {
     // arrange
-    const doc = makeRoot(
-      p(
-        { id: 'p1' }, //
-        t('hello'),
-        s(),
-        t('world'),
-        s(),
-        t('foo')
-      )
-    );
-    const hello = findTokenByText(doc.root, 'hello');
-    const { cursor } = createCursor(doc, hello);
+    const doc = makeRoot(p({ id: 'p1' }, t('one'), s(), t('two'), s(), t('three')));
+    const undo = UndoRecorder.createNull();
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'one'), undo);
+    const state = { cursor } as unknown as EditorState;
 
     // act
     cursor.delete();
+    cursor.delete();
 
     // assert
-    expect(identify(cursor.getPlace())).toBe('world');
+    expect(identify(cursor.getPlace())).toBe('three');
     expect(identifyChildren(byId(doc, 'p1'))).toEqual([
-      'd("hello")',
+      'd("one")',
       '[deleted-space]',
-      'world',
+      'd("two")',
+      '[deleted-space]',
+      'three'
+    ]);
+
+    // act
+    undo.popUndo()?.undo(state);
+    undo.popUndo()?.undo(state);
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('one');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'one',
       '[nodeType=3:" "]',
-      'foo'
+      'two',
+      '[nodeType=3:" "]',
+      'three'
     ]);
-  });
-
-  test('only ANCHOR in doc', () => {
-    // arrange
-    const doc = makeRoot(a());
-    const { cursor } = createCursor(doc, doc.root.firstChild as HTMLElement);
 
     // act
-    cursor.delete();
+    undo.popRedo()?.redo(state);
+    undo.popRedo()?.redo(state);
 
     // assert
-    expect(cursor.getPlace()).toBe(doc.root.firstChild); // should be no-op
-    expect(identifyChildren(doc.root)).toEqual([
-      '[anchor]' //
+    expect(identify(cursor.getPlace())).toBe('three');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'd("one")',
+      '[deleted-space]',
+      'd("two")',
+      '[deleted-space]',
+      'three'
     ]);
-  });
-
-  test.todo('ISLAND no-op', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        t('aaa'), //
-        s(),
-        '<span class="katex" style="display:inline;">x²</span>',
-        s(),
-        t('bbb')
-      )
-    );
-    const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
-    expect(identify(cursor.getPlace())).toBe('[island:span]');
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('aaa');
-  });
-
-  test('TOKEN after ISLAND with next TOKEN', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        t('aaa'),
-        s(),
-        '<span class="katex" style="display:inline;">x²</span>',
-        s(),
-        t('bbb'),
-        s(),
-        t('ccc')
-      )
-    );
-    expect(identify(tokens(doc)[1])).toEqual('bbb');
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[island:span]');
   });
 });
 

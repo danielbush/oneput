@@ -44,7 +44,7 @@ function tokens(doc: JsedDocument): HTMLElement[] {
 }
 
 describe('DeleteAtCursor.run', () => {
-  test('delete non-last TOKEN', () => {
+  test(`delete TOKEN - first of several TOKEN's`, () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world'), s(), t('foo')));
     const hello = tokens(doc)[0];
@@ -90,7 +90,7 @@ describe('DeleteAtCursor.run', () => {
     ]);
   });
 
-  test('delete last TOKEN - document root', () => {
+  test('delete TOKEN - last in document root', () => {
     // arrange
     const doc = makeRoot(t('aaa'));
     const aaa = tokens(doc)[0];
@@ -118,7 +118,69 @@ describe('DeleteAtCursor.run', () => {
     expect(identifyChildren(doc.root)).toEqual(['[anchor]', 'd("aaa")']);
   });
 
-  test('delete last TOKEN - after ISLAND', () => {
+  test('delete TOKEN - after ISLAND / with next TOKEN', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        t('aaa'),
+        s(),
+        '<span class="katex" style="display:inline;">x²</span>',
+        s(),
+        t('bbb'),
+        s(),
+        t('ccc')
+      )
+    );
+    const bbb = tokens(doc)[1];
+    const state = createState(doc, bbb);
+
+    // act
+    const record = DeleteAtCursor.run(state)!;
+
+    // assert
+    expect(identify(state.getPlace())).toBe('[island:span]');
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'aaa',
+      '[nodeType=3:" "]',
+      '[island:span]',
+      '[nodeType=3:" "]',
+      'd("bbb")',
+      '[deleted-space]',
+      'ccc'
+    ]);
+
+    // act
+    record.undo(editorState(state));
+
+    // assert
+    expect(identify(state.getPlace())).toBe('bbb');
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'aaa',
+      '[nodeType=3:" "]',
+      '[island:span]',
+      '[nodeType=3:" "]',
+      'bbb',
+      '[nodeType=3:" "]',
+      'ccc'
+    ]);
+
+    // act
+    record.redo(editorState(state));
+
+    // assert
+    expect(identify(state.getPlace())).toBe('[island:span]');
+    expect(identifyChildren(doc.root.firstChild)).toEqual([
+      'aaa',
+      '[nodeType=3:" "]',
+      '[island:span]',
+      '[nodeType=3:" "]',
+      'd("bbb")',
+      '[deleted-space]',
+      'ccc'
+    ]);
+  });
+
+  test('delete TOKEN - after ISLAND / last', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -147,7 +209,7 @@ describe('DeleteAtCursor.run', () => {
     expect(identify(state.getPlace().nextSibling)).toBe('d("bbb")');
   });
 
-  test('delete last TOKEN - in LINE', () => {
+  test('delete TOKEN - last in LINE', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -200,5 +262,36 @@ describe('DeleteAtCursor.run', () => {
       '[nodeType=3:" "]',
       'ccc'
     ]);
+  });
+
+  test('delete ANCHOR - only text in doc', () => {
+    // arrange
+    const doc = makeRoot(a());
+    const anchor = tokens(doc)[0];
+    const state = createState(doc, anchor);
+
+    // act
+    const record = DeleteAtCursor.run(state);
+
+    // assert
+    expect(record).toBeUndefined();
+    expect(state.getPlace()).toBe(doc.root.firstChild);
+    expect(identifyChildren(doc.root)).toEqual(['[anchor]']);
+  });
+
+  test('delete ISLAND - no-op (TODO)', () => {
+    // arrange
+    const doc = makeRoot(
+      p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
+    );
+    const island = doc.root.querySelector('.katex') as HTMLElement;
+    const state = createState(doc, island);
+
+    // act
+    const record = DeleteAtCursor.run(state);
+
+    // assert
+    expect(record).toBeUndefined();
+    expect(identify(state.getPlace())).toBe('[island:span]');
   });
 });

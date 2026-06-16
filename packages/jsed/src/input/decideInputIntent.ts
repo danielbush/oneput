@@ -1,4 +1,4 @@
-import type { CharDeletion, TokenDeletion } from '../../cursor/lib/CursorTextOps.js';
+import type { CharDeletion, TokenDeletion } from '../cursor/lib/CursorTextOps.js';
 import type { UserInputChange } from './UserInput.js';
 
 /*

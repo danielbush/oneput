@@ -4,14 +4,14 @@ COMMENT: New notes that need to be incorporated into this document; they superse
 
 The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/input, src/ui. Beneath this is src/lib which is the base load-bearing layer of low-level operations used by some of these subsystems.
 
-- `src/editor/`
+- `src/editor`
   - top level
     - `Editor`
     - `EditorController`
   - intermediate level
     - `editor/lib/`
 
-- `src/cursor/`
+- `src/cursor`
   - handles moving around LINE_SIBLING's;
   - it handles tokenization (SHALLOW_TOKENIZATION) in conjunction with Editor and Nav which also tokenize on the fly.
   - It also orchestrates ANCHOR operations - adding them during operations like split or delete.
@@ -21,6 +21,9 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
     - `Cursor`
   - intermediate level
     - `cursor/lib/`
+
+- `src/input`
+  - handles the html input and how it drives editing and the input interface that is required
 
 - `src/lib/ops`
   - load-bearing base operation level, builds on `lib/core/`

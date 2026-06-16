@@ -6,7 +6,7 @@ import type {
   UserInputChange,
   UserInputOpts,
   UserInputSelectionState
-} from '../lib/input/UserInput.js';
+} from '../input/UserInput.js';
 import type { JsedFocusRequestEvent } from '../types.js';
 import { findNextEditableLine } from '../lib/core/line.js';
 

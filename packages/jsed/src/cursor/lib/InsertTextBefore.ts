@@ -1,5 +1,5 @@
 import type { EditorState } from '../../editor/index.js';
-import type { UserInputOpts } from '../../lib/input/UserInput.js';
+import type { UserInputOpts } from '../../input/UserInput.js';
 import {
   createToken,
   insertBefore,

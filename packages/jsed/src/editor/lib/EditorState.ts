@@ -2,7 +2,7 @@ import { Nav } from '../../lib/focus/Nav.js';
 import { Cursor } from '../../cursor/Cursor.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
-import type { UserInput } from '../../lib/input/UserInput.js';
+import type { UserInput } from '../../input/UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';
 import { EditorAnchorOps } from './EditorAnchorOps.js';
 import { EditorCursorOps } from './EditorCursorOps.js';

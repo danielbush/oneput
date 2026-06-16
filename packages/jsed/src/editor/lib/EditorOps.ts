@@ -2,8 +2,8 @@ import { ok, Result } from 'neverthrow';
 import { isAnchor, isIsland, isLine, isToken, JSED_IGNORE_CLASS } from '../../lib/core/taxonomy.js';
 import * as token from '../../lib/ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
-import type { InputCursorPosition, UserInputChange } from '../../lib/input/UserInput.js';
-import { decideInputIntent } from '../../lib/input/decideInputIntent.js';
+import type { InputCursorPosition, UserInputChange } from '../../input/UserInput.js';
+import { decideInputIntent } from '../../input/decideInputIntent.js';
 import { ensureSeparatorAfter, ensureSeparatorBefore } from '../../lib/ops/space.js';
 
 /**

@@ -1,6 +1,6 @@
 import { Nav } from '../lib/focus/Nav.js';
 import type { JsedDocument } from '../types.js';
-import type { UserInput } from '../lib/input/UserInput.js';
+import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './lib/EditorFocusOps.js';
 import { EditorAnchorOps } from './lib/EditorAnchorOps.js';
 import { EditorCursorOps } from './lib/EditorCursorOps.js';

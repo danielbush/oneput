@@ -1,5 +1,5 @@
 import { isLineSibling, isToken } from '../../lib/core/taxonomy.js';
-import type { UserInputOpts, UserInputSelectionState } from '../../lib/input/UserInput.js';
+import type { UserInputOpts, UserInputSelectionState } from '../../input/UserInput.js';
 import { isSameLine } from '../../lib/core/line.js';
 import { CursorSelection } from './CursorSelection.js';
 import { CursorTextOps } from './CursorTextOps.js';

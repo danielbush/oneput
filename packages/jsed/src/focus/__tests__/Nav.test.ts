@@ -1,8 +1,8 @@
 import { describe, it, test, expect } from 'vitest';
-import { byId, div, frag, li, makeRoot, p, script, ul } from '../../../test/util.js';
+import { byId, div, frag, li, makeRoot, p, script, ul } from '../../test/util.js';
 import { Nav, type OnRequestFocus } from '../Nav.js';
-import type { JsedFocusRequestEvent } from '../../../types.js';
-import { JSED_FOCUS_CLASS, JSED_FOCUS_SIBLING } from '../../core/taxonomy.js';
+import type { JsedFocusRequestEvent } from '../../types.js';
+import { JSED_FOCUS_CLASS, JSED_FOCUS_SIBLING } from '../../lib/core/taxonomy.js';
 
 function trackFocusRequests(allow: boolean | ((evt: JsedFocusRequestEvent) => boolean) = true): {
   onFocusRequest: OnRequestFocus;

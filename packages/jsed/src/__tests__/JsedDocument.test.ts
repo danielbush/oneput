@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 import { JsedDocument } from '../JsedDocument.js';
-import { Nav } from '../lib/focus/Nav.js';
+import { Nav } from '../focus/Nav.js';
 
 describe('start', () => {
   describe('SIB_HIGHTLIGHT', () => {

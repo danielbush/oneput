@@ -1,4 +1,4 @@
-import type { JsedDocument, JsedFocusRequestEvent } from '../../types.js';
+import type { JsedDocument, JsedFocusRequestEvent } from '../types.js';
 import {
   isIsland,
   isFocusable,
@@ -6,11 +6,11 @@ import {
   JSED_APP_ROOT_ID,
   JSED_FOCUS_CLASS,
   JSED_FOCUS_SIBLING
-} from '../core/taxonomy.js';
-import * as token from '../ops/token.js';
-import { getParent, findNextNode, findPreviousNode } from '../core/walk.js';
+} from '../lib/core/taxonomy.js';
+import * as token from '../lib/ops/token.js';
+import { getParent, findNextNode, findPreviousNode } from '../lib/core/walk.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
-import { getNextSibling, getPreviousSibling } from '../core/sibling.js';
+import { getNextSibling, getPreviousSibling } from '../lib/core/sibling.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
 

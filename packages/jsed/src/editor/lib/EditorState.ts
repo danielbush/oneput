@@ -1,4 +1,4 @@
-import { Nav } from '../../lib/focus/Nav.js';
+import { Nav } from '../../focus/Nav.js';
 import { Cursor } from '../../cursor/Cursor.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';

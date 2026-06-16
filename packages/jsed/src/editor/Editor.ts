@@ -1,4 +1,4 @@
-import { Nav } from '../lib/focus/Nav.js';
+import { Nav } from '../focus/Nav.js';
 import type { JsedDocument } from '../types.js';
 import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './lib/EditorFocusOps.js';

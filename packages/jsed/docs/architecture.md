@@ -22,6 +22,9 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
   - intermediate level
     - `cursor/lib/`
 
+- `src/focus`
+  - a counterpart to `src/cursor` - represents the user's element FOCUS; the CURSOR usually edits within this FOCUS.
+
 - `src/input`
   - handles the html input and how it drives editing and the input interface that is required
 

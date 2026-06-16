@@ -1,5 +1,5 @@
-import { isFocusable, isIsland } from '../core/taxonomy.js';
-import { findNextNode } from '../core/walk.js';
+import { isFocusable, isIsland } from '../lib/core/taxonomy.js';
+import { findNextNode } from '../lib/core/walk.js';
 import type { Nav } from './Nav.js';
 
 /**

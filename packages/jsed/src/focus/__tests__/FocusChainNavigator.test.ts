@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Nav } from '../Nav.js';
-import { byId, div, em, makeRoot, p, span } from '../../../test/util.js';
+import { byId, div, em, makeRoot, p, span } from '../../test/util.js';
 import { FocusChainNavigator } from '../FocusChainNavigator.js';
 
 describe('FocusChainNavigator', () => {

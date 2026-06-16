@@ -10,7 +10,7 @@ import {
   insertAnchorBeforeTag,
   removeAnchorAfterTag,
   removeAnchorBeforeTag
-} from '../ops/anchor.js';
+} from '../../lib/ops/anchor.js';
 
 /**
  * High-level ANCHOR operations for Editor.

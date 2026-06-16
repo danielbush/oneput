@@ -5,7 +5,7 @@ import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.
 import { UndoRecorder, type UndoRecord } from '../undo/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import type { Tokenizer } from '../ops/Tokenizer.js';
-import type { EditorEventsEmitter } from '../editor/EditorEventsEmitter.js';
+import type { EditorEventsEmitter } from '../../editor/index.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
 import { InsertTextAfter } from './InsertTextAfter.js';
 import { InsertTextBefore } from './InsertTextBefore.js';

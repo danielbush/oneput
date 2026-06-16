@@ -1,24 +1,24 @@
-import { Nav } from '../focus/Nav.js';
-import { Cursor } from '../cursor/Cursor.js';
-import { Tokenizer } from '../ops/Tokenizer.js';
+import { Nav } from '../../lib/focus/Nav.js';
+import { Cursor } from '../../lib/cursor/Cursor.js';
+import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
-import type { UserInput } from '../input/UserInput.js';
+import type { UserInput } from '../../lib/input/UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';
 import { EditorAnchorOps } from './EditorAnchorOps.js';
 import { EditorCursorOps } from './EditorCursorOps.js';
-import { ElementIndicator } from '../utilities/ElementIndicator.js';
-import { CSSElementIndicator } from '../utilities/CSSElementIndicator.js';
+import { ElementIndicator } from '../../lib/utilities/ElementIndicator.js';
+import { CSSElementIndicator } from '../../lib/utilities/CSSElementIndicator.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
-import { EditorController } from './EditorController.js';
+import { EditorController } from '../EditorController.js';
 import { EditorOps } from './EditorOps.js';
-import type { CursorError } from '../cursor/CursorState.js';
-import { UndoRecorder } from '../undo/UndoRecorder.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from '../core/line.js';
+import type { CursorError } from '../../lib/cursor/CursorState.js';
+import { UndoRecorder } from '../../lib/undo/UndoRecorder.js';
+import { findNextEditableLine, getFirstLineSibling, getLine } from '../../lib/core/line.js';
 import { err, ok, type Result } from 'neverthrow';
-import { isCursorTransparent, isLineSibling } from '../core/taxonomy.js';
-import { anchorize, removeAnchors } from '../ops/anchor.js';
-import { detokenize } from '../ops/tokenize.js';
-import { addImplicitLines, removeImplicitLines } from '../ops/implicitLine.js';
+import { isCursorTransparent, isLineSibling } from '../../lib/core/taxonomy.js';
+import { anchorize, removeAnchors } from '../../lib/ops/anchor.js';
+import { detokenize } from '../../lib/ops/tokenize.js';
+import { addImplicitLines, removeImplicitLines } from '../../lib/ops/implicitLine.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorTextChangeEvent =

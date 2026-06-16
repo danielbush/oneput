@@ -14,12 +14,12 @@ import {
   s,
   t,
   ul
-} from '../../../test/util.js';
-import { getValue } from '../../ops/token.js';
-import { Controller } from '../../../../../oneput/src/lib/oneput/controllers/controller.js';
-import { Tokenizer } from '../../ops/Tokenizer.js';
-import { isDeletedElement, isIsland, isToken, JSED_ANCHOR_CLASS } from '../../core/taxonomy.js';
-import type { JsedDocument } from '../../../JsedDocument.js';
+} from '../../test/util.js';
+import { getValue } from '../../lib/ops/token.js';
+import { Controller } from '../../../../oneput/src/lib/oneput/controllers/controller.js';
+import { Tokenizer } from '../../lib/ops/Tokenizer.js';
+import { isDeletedElement, isIsland, isToken, JSED_ANCHOR_CLASS } from '../../lib/core/taxonomy.js';
+import type { JsedDocument } from '../../JsedDocument.js';
 
 function createNullEditor(doc: JsedDocument): Editor {
   return Editor.createNull({

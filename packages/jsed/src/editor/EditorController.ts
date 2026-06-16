@@ -1,14 +1,14 @@
-import * as token from '../ops/token.js';
-import type { CursorError } from '../cursor/CursorState.js';
-import type { EditorState } from './EditorState.js';
-import { isToken } from '../core/taxonomy.js';
+import * as token from '../lib/ops/token.js';
+import type { CursorError } from '../lib/cursor/CursorState.js';
+import type { EditorState } from './lib/EditorState.js';
+import { isToken } from '../lib/core/taxonomy.js';
 import type {
   UserInputChange,
   UserInputOpts,
   UserInputSelectionState
-} from '../input/UserInput.js';
-import type { JsedFocusRequestEvent } from '../../types.js';
-import { findNextEditableLine } from '../core/line.js';
+} from '../lib/input/UserInput.js';
+import type { JsedFocusRequestEvent } from '../types.js';
+import { findNextEditableLine } from '../lib/core/line.js';
 
 /**
  * Handles incoming events for an Editor instance excluding actions fired by the user.

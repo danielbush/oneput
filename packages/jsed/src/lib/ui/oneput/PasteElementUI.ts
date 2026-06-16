@@ -2,7 +2,7 @@ import type { Controller, AppObject } from '@oneput/oneput';
 import type { LayoutSettings } from '../../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './icons.js';
-import type { Editor } from '../../editor/Editor.js';
+import type { Editor } from '../../../editor/Editor.js';
 
 export class PasteElementUI implements AppObject {
   static create(

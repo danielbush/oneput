@@ -1,4 +1,4 @@
-import type { EditorState } from '../editor/EditorState';
+import type { EditorState } from '../../editor/index.js';
 import type { UserInputOpts } from '../input/UserInput';
 import {
   createToken,

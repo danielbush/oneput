@@ -26,9 +26,12 @@ At the bottom we have lib/core
       - these are cloesly related to tokenization and editing text
       - atm, we can add/remove anchors in some situations; for that reason it's not an automatic thing so we can't just subsume them into tokenization
 
-- `lib/editor`
-  - `Editor`
-  - TODO: description
+- `editor/`
+  - top level
+    - `Editor`
+    - `EditorController`
+  - intermediate level
+    - `editor/lib`
 
 ## Intro
 

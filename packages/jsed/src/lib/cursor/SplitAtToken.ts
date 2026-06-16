@@ -1,5 +1,5 @@
 import { getFirstLineSibling, getLine } from '../core/line';
-import type { EditorState } from '../editor/EditorState';
+import type { EditorState } from '../../editor/index.js';
 import { anchorize } from '../ops/anchor';
 import {
   recSplitAfterChild,

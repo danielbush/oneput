@@ -13,7 +13,7 @@ import { CursorSelection } from '../CursorSelection.js';
 import { CursorState } from '../CursorState.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';
-import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
+import { EditorEventsEmitter } from '../../../editor/index.js';
 import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../ops/token.js';
 import { JSED_ANCHOR_CLASS, JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';

@@ -1,4 +1,4 @@
-import type { EditorState } from '../editor/EditorState';
+import type { EditorState } from '../../editor/index.js';
 import {
   convertWrapper,
   redoConvertWrapper,

@@ -16,13 +16,13 @@ import {
 import { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { EditorEventsEmitter } from '../../editor/EditorEventsEmitter.js';
+import { EditorEventsEmitter } from '../../../editor/index.js';
 import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../ops/token.js';
 import { addImplicitLines } from '../../ops/implicitLine.js';
 import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 import { getSeparatorBefore } from '../../ops/space.js';
-import type { EditorState } from '../../editor/EditorState.js';
+import type { EditorState } from '../../../editor/index.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_INSERT_AFTER_CLASS,

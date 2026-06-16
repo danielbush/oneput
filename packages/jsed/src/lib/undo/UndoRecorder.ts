@@ -1,4 +1,4 @@
-import type { EditorState } from '../editor/EditorState.js';
+import type { EditorState } from '../../editor/index.js';
 
 export interface UndoRecord {
   undo(state: EditorState): void;

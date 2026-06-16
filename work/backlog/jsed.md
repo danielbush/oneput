@@ -45,6 +45,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - katex as example of an island
   - code might be another
 - r:JSED_AGENT_COEDIT
+- multi-user edit
 
 ## fix
 
@@ -73,8 +74,22 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - undo on FOCUSABLE ops
   - delete element
   - insert element
-- style: for insert-{before/after}, append/prepend
+- style: for insert-{before,after},append,prepend
   - instead of using the red triangle, wrap the space in a span and highlight the appropriaate edge, maybe with a gentle pulse; this will make it more cursor-like and I'm hopping less jumpy than the red arrows when typing a string of words
+  - processs
+    - delete the old cursor-lab code in jsed-demo (routes/cursor-lab etc)
+    - make a new cursor-lab
+    - the aim is to statically display the current cursor in all states at a TOKEN, at an ISLAND, at an ANCHOR (without using the editor)
+    - use the existing cursor stylesheet
+    - then let's modify the insert-{before,after},append,prepend states
+      - remove the red triangle and double red triangle
+      - wrap the space in question in a new span called jsed-space
+        - append,insert-after this would be the space after the TOKEN
+        - etc
+      - highlight the left or right edge with a slight, slow pulse
+        - append this would be the left edge of the space after the TOKEN
+        - insert-after this would be the right edge of the space after the TOKEN
+        - etc
 - feat: delete ISLAND's; don't forget selections;
   - COMMENT: currently nothing happens; need to think about the machinery; a general way to handle them, but we can use katex as an example
   - COMMENT: there is no path to `onInputSelectionChange` (events controller) because we disable the input

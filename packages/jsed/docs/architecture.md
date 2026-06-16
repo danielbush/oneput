@@ -5,6 +5,7 @@ COMMENT: New notes that need to be incorporated into this document; they superse
 The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/input, src/ui. Beneath this is src/lib which is the base load-bearing layer of low-level operations used by some of these subsystems.
 
 - `src/editor`
+  - represents the whole of jsed; draws on the other subsystems; routes events to the write subsystems etc
   - top level
     - `Editor`
     - `EditorController`

@@ -1,5 +1,5 @@
-import { getParent } from '../ops/token.js';
-import { isToken } from '../core/taxonomy.js';
+import { getParent } from '../../lib/ops/token.js';
+import { isToken } from '../../lib/core/taxonomy.js';
 import { Indicator } from './indicator.js';
 
 interface MinimalObserver {

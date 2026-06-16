@@ -1,7 +1,4 @@
-import {
-  ViewportScroller,
-  type ViewportScrollerNullOptions
-} from './lib/utilities/ViewportScroller.js';
+import { ViewportScroller, type ViewportScrollerNullOptions } from './ui/lib/ViewportScroller.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {

@@ -46,9 +46,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - code might be another
 - r:JSED_AGENT_COEDIT
 
-## bugs
+## fix
 
-- probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace
 - inserting anchors at places we don't need
   - what: `<p>aaa <em>bbb</em> ...</p>` - put cursor on bbb; we can get the oneput menu to insert an anchor before the em ie `<p>aaa [A]<em>...` which is unnecessary
   - fix: `getAnchorBeforeTagInsertionPoint` does `return isWhitespaceTextNode(previous) ? { parent: focus.parentNode, previous } : null;` but this is shortsighted because previous might be preceded by a TOKEN or non-whitespace text node
@@ -129,6 +128,9 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## refactors
 
+- `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/
+  - COMMENT: we shouldn't be importing types from jsed-demo like this
+- probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace
 - /local-lens on cursor
   - exhaustive tests lib/ops
   - exhaustive tests on UndoRecord in lib/cursor/

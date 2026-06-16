@@ -28,6 +28,10 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
 - `src/input`
   - handles the html input and how it drives editing and the input interface that is required
 
+- `src/ui`
+  - subsystem handles how jsed's ui is handled; we rely on oneput
+  - also handles visual elements like indicators
+
 - `src/lib/ops`
   - load-bearing base operation level, builds on `lib/core/`
   - lib/ops/token

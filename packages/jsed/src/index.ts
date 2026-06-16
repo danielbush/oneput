@@ -4,10 +4,6 @@ export { JsedDocument } from './JsedDocument.js';
 export { Editor } from './editor/Editor.js';
 export { type EditorError } from './editor/index.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
-export { OneputEditDocumentAdapter } from './lib/ui/oneput/OneputEditDocumentAdapter.js';
-export { icons, iconData } from './lib/ui/oneput/icons.js';
-export {
-  defaultActions,
-  defaultBindingsSerializable,
-  defaultKeys
-} from './lib/ui/oneput/bindings.js';
+export { OneputEditDocumentAdapter } from './ui/OneputEditDocumentAdapter.js';
+export { icons, iconData } from './ui/lib/icons.js';
+export { defaultActions, defaultBindingsSerializable, defaultKeys } from './ui/lib/bindings.js';

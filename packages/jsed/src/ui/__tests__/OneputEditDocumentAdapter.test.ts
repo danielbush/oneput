@@ -1,9 +1,9 @@
 import { Editor, JsedDocument, type EditorError } from '@oneput/jsed';
 import { Controller, type AppObject } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
-import { isDeletedElement } from '../../core/taxonomy.js';
-import { OneputEditDocumentAdapter } from './OneputEditDocumentAdapter.js';
-import { makeRoot } from '../../../test/util.js';
+import { isDeletedElement } from '../../lib/core/taxonomy.js';
+import { OneputEditDocumentAdapter } from '../OneputEditDocumentAdapter.js';
+import { makeRoot } from '../../test/util.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);

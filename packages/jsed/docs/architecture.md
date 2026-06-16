@@ -4,7 +4,7 @@ COMMENT: New notes that need to be incorporated into this document; they superse
 
 At the bottom we have lib/core
 
-- lib/core
+- `lib/core`
   - taxonomy - identifies key elements/nodes in the DOM
   - walk - general recursive walking functions
   - sibling - worries about elements that share the same parentNode; this is important for things like managing LINE_SEGMENT's etc
@@ -12,17 +12,23 @@ At the bottom we have lib/core
   - line - worries about LINE's
   - dom-rules - worries about how elements can be combined
 
+- `lib/ops`
 - lib/ops/token
   - work below the tokenization and cursor and above the core modules;
   - lib/ops/token operations worry about managing tokens and their related separators (whitespace).
   - lib/ops/space modules
 
-- Cursor
-  - handles moving around LINE_SIBLING's;
-  - it handles tokenization (SHALLOW_TOKENIZATION) in conjunction with Editor and Nav which also tokenize on the fly.
-  - It also orchestrates ANCHOR operations - adding them during operations like split or delete.
-    - these are cloesly related to tokenization and editing text
-    - atm, we can add/remove anchors in some situations; for that reason it's not an automatic thing so we can't just subsume them into tokenization
+- `lib/cursor`
+  - `Cursor`
+    - handles moving around LINE_SIBLING's;
+    - it handles tokenization (SHALLOW_TOKENIZATION) in conjunction with Editor and Nav which also tokenize on the fly.
+    - It also orchestrates ANCHOR operations - adding them during operations like split or delete.
+      - these are cloesly related to tokenization and editing text
+      - atm, we can add/remove anchors in some situations; for that reason it's not an automatic thing so we can't just subsume them into tokenization
+
+- `lib/editor`
+  - `Editor`
+  - TODO: description
 
 ## Intro
 

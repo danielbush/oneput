@@ -23,16 +23,23 @@ Testing strategy:
 Command:
 
 ```sh
-task jsed:test -- src/cursor/__tests__/Cursor.test.ts src/cursor/lib/__tests__/CursorSelection.test.ts src/cursor/lib/__tests__/CursorState.test.ts
+task jsed:test -- src/cursor/__tests__/Cursor.test.ts src/cursor/lib/__tests__/DeleteAtCursor.test.ts src/cursor/lib/__tests__/CursorSelection.test.ts src/cursor/lib/__tests__/CursorState.test.ts
 ```
 
 Result:
 
-- 3 test files passed
-- 86 tests passed
+- 4 focused cursor test files passed when including `src/cursor/lib/__tests__/DeleteAtCursor.test.ts`
+- 82 focused cursor tests passed
 - 1 todo
 
 The previous `delete > last TOKEN after ISLAND` failure appears fixed. The test now expects the CURSOR to land on the generated ANCHOR, matching `DeleteAtCursor.run`.
+
+Full jsed suite also passes:
+
+- 25 test files passed
+- 411 tests passed
+- 3 skipped
+- 2 todo
 
 ## Layer Map
 
@@ -101,26 +108,24 @@ Load-bearing operations:
 
 Coverage:
 
-- Good facade-level action coverage for deleting first, last, and only TOKENs.
-- Good facade-level coverage around ANCHORs, INLINE_FLOW, `deleteHighestEmpty`, and ISLAND adjacency.
+- Facade-level `Cursor.delete` coverage is now intentionally sparse.
+- Focused `DeleteAtCursor.run` tests cover:
+  - normal TOKEN deletion with undo/redo
+  - last TOKEN anchorization with undo/redo
+  - last TOKEN after ISLAND anchorization with undo/redo
+  - ANCHOR-driven `deleteHighestEmpty` with undo/redo
 - Lower-level `token.remove` and `focusable.deleteHighestEmpty` have direct tests.
 - The `last TOKEN after ISLAND` expectation has been updated to ANCHOR placement and now passes.
 
 Gaps:
 
-- No focused `DeleteAtCursor.run` undo/redo tests in `src/cursor/lib/__tests__`.
-- No undo/redo coverage for the three distinct delete records:
-  - normal `removeToken`
-  - `anchorizeToken`
-  - `deleteHighestElement`
 - `ISLAND no-op` is still `test.todo` in the facade test.
+- No focused selection-delete undo/redo test yet.
 
 Actions needed:
 
-- Add `src/cursor/lib` tests for `DeleteAtCursor.run`: normal TOKEN delete, undo, redo.
-- Add `src/cursor/lib` tests for last TOKEN anchorization, undo, redo.
-- Add `src/cursor/lib` tests for ANCHOR-driven `deleteHighestEmpty`, undo, redo.
 - Decide whether the `ISLAND no-op` todo is still desired behavior.
+- Add focused selection-delete undo/redo coverage, likely around `DeleteSelection.run`.
 
 ### `replaceWithText`
 
@@ -289,8 +294,8 @@ Actions needed:
 
 ## Recommended Order
 
-1. Add focused `src/cursor/lib` undo/redo tests for the `DeleteAtCursor` record branches.
-2. Add focused `src/cursor/lib` undo/redo tests for `ReplaceWithText`, `InsertTextAfter`, and `InsertTextBefore`.
+1. Add focused `src/cursor/lib` undo/redo tests for `ReplaceWithText`, `InsertTextAfter`, and `InsertTextBefore`.
+2. Add focused selection-delete undo/redo coverage, likely around `DeleteSelection.run`.
 3. Add sparse facade integration tests for selection-backed delete/replace/wrap.
 4. Add sparse `Cursor.wrap` facade coverage for one TOKEN and one selection.
 5. Add merge tests for text editing records once basic undo/redo coverage is stable.

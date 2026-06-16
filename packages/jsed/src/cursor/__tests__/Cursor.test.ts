@@ -858,58 +858,6 @@ describe('delete', () => {
     ]);
   });
 
-  test('last TOKEN in doc', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        { id: 'p1' }, //
-        t('hello'),
-        s(),
-        t('world')
-      )
-    );
-    const world = findTokenByText(doc.root, 'world');
-    const { cursor } = createCursor(doc, world);
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('hello');
-    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
-      'hello', //
-      '[deleted-space]',
-      'd("world")'
-    ]);
-  });
-
-  test('only TOKEN in doc', () => {
-    // arrange
-    const doc = makeRoot(t('aaa'));
-    const aaa = findTokenByText(doc.root, 'aaa');
-    const { cursor } = createCursor(doc, aaa);
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(identifyChildren(doc.root)).toEqual([
-      '[anchor]', //
-      'd("aaa")'
-    ]);
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(identifyChildren(doc.root)).toEqual([
-      '[anchor]', //
-      'd("aaa")'
-    ]);
-  });
-
   test('only ANCHOR in doc', () => {
     // arrange
     const doc = makeRoot(a());
@@ -947,118 +895,6 @@ describe('delete', () => {
     expect(identify(cursor.getPlace())).toBe('aaa');
   });
 
-  test('ANCHOR empty doc - <p>A</p>', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        //
-        a()
-      )
-    );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(tokens(doc)).toHaveLength(1);
-  });
-
-  test('ANCHOR empty doc - <p>foo</p>', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        //
-        t('foo')
-      )
-    );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
-    expect(identify(cursor.getPlace())).toBe('foo');
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(tokens(doc)).toHaveLength(2);
-    expect(identify(cursor.getPlace().nextSibling)).toBe('d("foo")');
-  });
-
-  test('ANCHOR ∅<em>foo</em>∅', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        //
-        em({ id: 'em1', style: inlineStyleHackVal }, t('foo'))
-      )
-    );
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
-    expect(identify(cursor.getPlace())).toBe('foo');
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(tokens(doc)).toHaveLength(2);
-    expect(identify(cursor.getPlace().nextSibling)).toBe('d("foo")');
-  });
-
-  test('ANCHOR ...<em>bbb</em>...', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        //
-        t('aaa'),
-        s(),
-        em({ id: 'em1', style: inlineStyleHackVal }, t('bbb')),
-        s(),
-        t('ccc')
-      )
-    );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
-    expect(identify(cursor.getPlace())).toBe('bbb');
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(identify(cursor.getPlace().nextSibling)).toBe('d("bbb")');
-  });
-
-  test('ANCHOR ...<em>A</em>... (deleteHighestEmpty)', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        { id: 'p1' }, //
-        t('aaa'),
-        s(),
-        em({ id: 'em1', style: inlineStyleHackVal }, a()),
-        s(),
-        t('ccc')
-      )
-    );
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-
-    // act
-    cursor.delete();
-
-    // assert
-    // The empty <em> is soft-deleted in place; cursor falls back to 'aaa'.
-    expect(identify(cursor.getPlace())).toBe('aaa');
-    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
-      'aaa',
-      '[nodeType=3:" "]',
-      '[deleted-element]',
-      '[nodeType=3:" "]',
-      'ccc'
-    ]);
-  });
-
   test('TOKEN after ISLAND with next TOKEN', () => {
     // arrange
     const doc = makeRoot(
@@ -1080,29 +916,6 @@ describe('delete', () => {
 
     // assert
     expect(identify(cursor.getPlace())).toBe('[island:span]');
-  });
-
-  test('last TOKEN after ISLAND', () => {
-    // arrange
-    const doc = makeRoot(
-      p(
-        //
-        t('aaa'),
-        s(),
-        '<span class="katex" style="display:inline;">x²</span>',
-        s(),
-        t('bbb')
-      )
-    );
-    expect(identify(tokens(doc)[1])).toEqual('bbb');
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
-
-    // act
-    cursor.delete();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-    expect(identify(cursor.getPlace().nextSibling)).toBe('d("bbb")'); // not removed from dom
   });
 });
 

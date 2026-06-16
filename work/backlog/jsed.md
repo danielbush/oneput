@@ -120,6 +120,14 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## chores
 
+- improve identify (in tests)
+  - t('foo') token,
+  - d('foo') deleted token,
+  - d(' ') deleted space
+  - 'foo' text node
+  - ' ' text node (space)
+  - `[comment:...]`
+  - `[attr:...]`
 - document CURRENT.md (undo work) and disband it
 - badges
 - merge to master

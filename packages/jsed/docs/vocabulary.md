@@ -47,31 +47,15 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
 
 - **VISIT**
   - when recursively walking through all FOCUSABLE's in the DOM, "visiting" means a callback will be called and the element passed to the consumer; both the FOCUS and CURSOR have different VISIT behaviours.
-  - Source of truth: `walk.ts` for FOCUS, `sibwalk.ts` for CURSOR
+  - Source of truth: `lib/core`
 - **DESCEND**
-  - when recursively walking through all FOCUSABLE's the DOM, DESCEND means the walk will descend and recurse through the elements children; both the FOCUS and CURSOR have different DESCEND behaviours.
-  - Source of truth: `walk.ts` for FOCUS, `sibwalk.ts` for CURSOR
+  - when recursively walking through all FOCUSABLE's in the DOM, DESCEND means the walk will descend and recurse through the elements children; both the FOCUS and CURSOR have different DESCEND behaviours.
+  - Source of truth: `lib/core`
 - **TRANSPARENT**
-  - we cannot VISIT but we can DESCEND into the FOCUSABLE
-  - only applies to CURSOR: FOCUS can VISIT any FOCUSABLE
-  - **OPAQUE** = !TRANSPARENT = we can VISIT but not DESCEND
-
-## **FOCUSABLE_TAXONOMY**
-
-Most of the DOM structure will likely be FOCUSABLE, it breaks down according to the FOCUSABLE_TAXONOMY table:
-
-```
-┌─────────────┬───────────────────┬─────────────────────┬───────────────────┬
-│             │ FOCUS_TRANSPARENT │ CURSOR_TRANSPARENT  │ Derived label     │
-├─────────────┼───────────────────┼─────────────────────┼───────────────────┼
-│             │ no  -  ISLAND     │ no                  │ ISLAND            │
-│ FOCUSABLE   ├───────────────────┼─────────────────────┼───────────────────┼
-│             │                   │                     │                   │
-│             │ yes - !ISLAND     ├ yes                 │ (default)         │
-│             │                   │                     │                   │
-└─────────────┴───────────────────┴─────────────────────┴───────────────────┴
-```
-
+  - VISIT=no DESCEND=yes
+  - only applies to CURSOR
+- **OPAQUE**
+  - VISIT=yes DESCEND=no
 - **ISLAND**
   - OPAQUE to FOCUS and CURSOR
   - This means we can't edit the internal structure of these elements.
@@ -84,13 +68,15 @@ Most of the DOM structure will likely be FOCUSABLE, it breaks down according to 
   - Example: mark up for one or more TOKEN's — e.g. `<span>`, `<em>`, `<a>`.
   - Source of truth: `isInlineFlow` in `taxonomy.ts`.
 
+## TRAVERSAL_RULES
+
 We can define the traversal rules:
 
 - **TRAVERSAL_RULES**
   - (1) FOCUS can VISIT all FOCUSABLE's
   - (2) FOCUS and CURSOR cannot DESCEND ISLAND's.
   - (3) CURSOR either VISIT's or DESCEND's all FOCUSABLE's but not both.
-
+    - non-LINE_SIBLING LINE_MEMBER's are TRANSPARENT to the CURSOR eg it walks through em-tags to get to the text they hold
 - **CURSOR_TRANSPARENT**
   — the CURSOR can DESCEND and navigate the internals
   - effectively defines visit or descend behaviour (because of TRAVERSAL_RULES)

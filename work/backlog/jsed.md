@@ -34,13 +34,12 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [x] unwrap esp for INLINE_FLOW
 - [x] cut/move element
 - [x] converting elements
-- [.] undo
-  - undo text changes
-    - undo new tokens
-    - undo deleted tokens
-    - undo split at cursor
-  - undo selection changes
-  - undo FOCUSABLE changes
+- [x] undo text changes
+  - undo new tokens
+  - undo deleted tokens
+  - undo split at cursor
+- [x] undo selection changes
+- [ ] undo FOCUSABLE changes
 - save/persist changes and load
 - editing islands
   - katex as example of an island
@@ -72,35 +71,32 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## feats
 
-- delete ISLAND's
-  - COMMENT: currently nothing happens; need to think about the machinery; a general way to handle them, but we can use katex as an example
-- tidy up skills
-  - local-lens
-    - not in .claude
-    - can we install via taskfile?
-  - jsed-test-cases
-    - not in .claude
-    - can we install via taskfile?
-  - jsed skill
-  - I wonder if they should go in the source code and we install them as symlinks?
-    - I think it would be clearer
-    - initially we could put them at the workspace level in skills/
-- style: when cursor is on an island (eg katex island) it needs to still look like a cursor; maybe a throbbing outline/border?
-  - COMMENT: could delete the old cursor-lab; replace it with a simple mockup of different states
+- undo on FOCUSABLE ops
+  - delete element
+  - insert element
 - style: for insert-{before/after}, append/prepend
   - instead of using the red triangle, wrap the space in a span and highlight the appropriaate edge, maybe with a gentle pulse; this will make it more cursor-like and I'm hopping less jumpy than the red arrows when typing a string of words
-- feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
-  - this allows us to more easily edit parts of complex tokens
-  - it also will isolate parens which might be a first step to semantically handling them
-- feat: table editor - eg building a table of companies in a sector of the stock market
 - feat: delete ISLAND's; don't forget selections;
+  - COMMENT: currently nothing happens; need to think about the machinery; a general way to handle them, but we can use katex as an example
   - COMMENT: there is no path to `onInputSelectionChange` (events controller) because we disable the input
   - ideas
     - we either have to have backspace key that only triggers if we're editing and cursor is on an island
     - we allow text in the input eg "[island]" - and deleting it would signify deletion; but we have to make sure partial deletion is a no-op; might get weird
-- [.] feat: when LINE_SEGMENT is empty, we should place an ANCHOR
-- [.] feat: a LINE_SEGMENT that is just an anchor can be deleted if we delete the anchor eg `...<em>A|</em>...`
-- [.] feat: when we delete the last token in an li, show an ANCHOR; if we delete again, then delete the li
+- style: when cursor is on an island (eg katex island) it needs to still look like a cursor; maybe a throbbing outline/border?
+  - COMMENT: could delete the old cursor-lab; replace it with a simple mockup of different states
+- feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
+  - this allows us to more easily edit parts of complex tokens
+  - it also will isolate parens which might be a first step to semantically handling them
+  - COMMENT: how do we handle typing text?
+    - update decideInputIntent to detect punctuation, make it behave similarly to whitespace
+    - I would unit test the crap out of decideInputIntent first
+    - `/\p{P}/u` will distinguish all punctuation (unicode)
+  - COMMENT: can we distinguish all text (other lanugages) from non-text?
+- fix/feat: use unicode mode in regexes (decideInputIntent, tokenization): 
+  - `/\s/u` is unicode mode for detecting ALL whitespace; `\S` (non-whitespace) is a direct inverse of `\s`
+- feat: table editor - eg building a table of companies in a sector of the stock market
+- feat: a LINE_SEGMENT that is just an anchor can be deleted if we delete the anchor eg `...<em>A|</em>...`
+  - COMMENT: atm just letting the anchor stay
 - feat: cut/copy/paste selection and single tokens
   - COMMENT: marching ants just works; should be easy to do
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
@@ -116,15 +112,41 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: remember last token position in each LINE (not LINE_SEGMENT)
 - feat: persist last token position in each LINE
 - feat: persist last FOCUS position and FOCUS it when we reload the document
-feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
+- feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
 - feat: holes
   - ability to explicitly mark elements as FOCUS transparent (and by extension CURSOR transparent); the key difference being that everything including text is ignored until we hit an element that turns the transparency off; the "off" subtree is like a editable hole contained within the transparent subtree.
 - chore: if cursor text ops or other ops fail, editor should catch the error and go into a safe state
   - EXAMPLE: cursor delete (CursorTextOps), at time of writing, throws if current.parentElement is null
 - feat: we should tokenize between chars and non-chars; imagine copying some dense code eg `redoReplaceText(this.replaceText)`
 
+## chores
+
+- document CURRENT.md (undo work) and disband it
+- badges
+- merge to master
+- test badge should be green
+- rename this repo to jsed
+
 ## refactors
 
+- /local-lens on cursor
+  - exhaustive tests lib/ops
+  - exhaustive tests on UndoRecord in lib/cursor/
+- tidy up skills
+  - local-lens
+    - not in .claude
+    - can we install via taskfile?
+  - jsed-test-cases
+    - not in .claude
+    - can we install via taskfile?
+  - jsed skill
+  - I wonder if they should go in the source code and we install them as symlinks?
+    - I think it would be clearer
+    - initially we could put them at the workspace level in skills/
+- chore: remove symbols from architecture; just use vocab and module file names
+- chore: outline new deep modules structure in architecture
+  - COMMENT: ie lib/ops is load-bearing etc
+  - COMMENT: ask agent how to do deep modules to lib/cursor and lib/editor; Curor and Editor are facades
 - refactor: get rid of walk v1 dependents
   - getPreviousLineSiblingV1
   - getNextLineSiblingV1
@@ -170,7 +192,6 @@ feat: a "getLine indicator" in oneput status bar; it will help in situations whe
 - [ ] refactor: revisit implicit lines?
   - [ ] I think we make them p-tags and we include loose text at the very beginning (not just between LINE's)
 - refactor: FocusChainNavigator should be used by Nav; Editor just sees Nav?
-- chore: remove symbols from architecture; just use vocab and module file names
 - chore: move skills/jsed/SKILL.md into jsed/AGENTS.md
 - use el.ownerDocument  eg `el.ownerDocument.createElement(...)`
 - use IMPLICIT_LINE's on all LINE_SEGMENT's that aren't enclosed by an INLINE_FLOW within the line; this makes it easy to navigate all segments with the FOCUS not just trailing IMPLICIT_LINE LINE_SEGMENT's and INLINE_FLOW LINE_SEGMENT's

@@ -1,7 +1,7 @@
-import { isLineSibling, isTokenizableTextNode } from '../core/taxonomy.js';
+import { isLineSibling, isTokenizableTextNode } from '../../lib/core/taxonomy.js';
 import type { CursorState } from './CursorState.js';
-import { getNextLineSibling, getPreviousLineSibling } from '../core/line.js';
-import { getWrapCandidates } from '../core/dom-rules.js';
+import { getNextLineSibling, getPreviousLineSibling } from '../../lib/core/line.js';
+import { getWrapCandidates } from '../../lib/core/dom-rules.js';
 
 /**
  * eg User is backspacing single chars.

@@ -12,23 +12,23 @@ import {
   p,
   s,
   t
-} from '../../../test/util.js';
-import { JsedDocument } from '../../../JsedDocument.js';
-import { Tokenizer } from '../../ops/Tokenizer.js';
+} from '../../test/util.js';
+import { JsedDocument } from '../../JsedDocument.js';
+import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
-import { EditorEventsEmitter } from '../../../editor/index.js';
-import { UndoRecorder } from '../../undo/index.js';
-import { getValue } from '../../ops/token.js';
-import { addImplicitLines } from '../../ops/implicitLine.js';
-import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
-import { getSeparatorBefore } from '../../ops/space.js';
-import type { EditorState } from '../../../editor/index.js';
+import { EditorEventsEmitter } from '../../editor/index.js';
+import { UndoRecorder } from '../../lib/undo/index.js';
+import { getValue } from '../../lib/ops/token.js';
+import { addImplicitLines } from '../../lib/ops/implicitLine.js';
+import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../lib/core/taxonomy.js';
+import { getSeparatorBefore } from '../../lib/ops/space.js';
+import type { EditorState } from '../../editor/index.js';
 import {
   CURSOR_APPEND_CLASS,
   CURSOR_INSERT_AFTER_CLASS,
   CURSOR_INSERT_BEFORE_CLASS,
   CURSOR_PREPEND_CLASS
-} from '../CursorState.js';
+} from '../lib/CursorState.js';
 
 /**
  * See INLINE_COMPUTED_STYLE

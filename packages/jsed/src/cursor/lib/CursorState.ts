@@ -1,11 +1,11 @@
-import { isLineSibling, isToken } from '../core/taxonomy.js';
-import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
-import { isSameLine } from '../core/line.js';
+import { isLineSibling, isToken } from '../../lib/core/taxonomy.js';
+import type { UserInputOpts, UserInputSelectionState } from '../../lib/input/UserInput.js';
+import { isSameLine } from '../../lib/core/line.js';
 import { CursorSelection } from './CursorSelection.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import type { JsedDocument } from '../../JsedDocument.js';
-import type { Tokenizer } from '../ops/Tokenizer.js';
-import type { UndoRecorder } from '../undo/UndoRecorder.js';
+import type { Tokenizer } from '../../lib/ops/Tokenizer.js';
+import type { UndoRecorder } from '../../lib/undo/UndoRecorder.js';
 import type { EditorEventsEmitter } from '../../editor/index.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';

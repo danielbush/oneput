@@ -1,6 +1,6 @@
-import { getFirstLineSibling, getLine } from '../core/line';
+import { getFirstLineSibling, getLine } from '../../lib/core/line.js';
 import type { EditorState } from '../../editor/index.js';
-import { anchorize } from '../ops/anchor';
+import { anchorize } from '../../lib/ops/anchor.js';
 import {
   recSplitAfterChild,
   recSplitBeforeChild,
@@ -8,10 +8,10 @@ import {
   undoRecSplit,
   type RecursiveSplitAfterAction,
   type RecursiveSplitBeforeAction
-} from '../ops/focusable';
-import { type RemoveToken } from '../ops/token';
-import type { UndoRecord } from '../undo';
-import type { CursorState } from './CursorState';
+} from '../../lib/ops/focusable.js';
+import { type RemoveToken } from '../../lib/ops/token.js';
+import type { UndoRecord } from '../../lib/undo/index.js';
+import type { CursorState } from './CursorState.js';
 
 type SplitResult = RecursiveSplitBeforeAction | RecursiveSplitAfterAction;
 

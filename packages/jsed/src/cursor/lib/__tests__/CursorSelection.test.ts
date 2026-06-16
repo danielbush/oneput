@@ -12,11 +12,15 @@ import {
 import { CursorSelection } from '../CursorSelection.js';
 import { CursorState } from '../CursorState.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
-import { Tokenizer } from '../../ops/Tokenizer.js';
+import { Tokenizer } from '../../../lib/ops/Tokenizer.js';
 import { EditorEventsEmitter } from '../../../editor/index.js';
-import { UndoRecorder } from '../../undo/index.js';
-import { getValue } from '../../ops/token.js';
-import { JSED_ANCHOR_CLASS, JSED_SELECTION_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
+import { UndoRecorder } from '../../../lib/undo/index.js';
+import { getValue } from '../../../lib/ops/token.js';
+import {
+  JSED_ANCHOR_CLASS,
+  JSED_SELECTION_CLASS,
+  JSED_TOKEN_CLASS
+} from '../../../lib/core/taxonomy.js';
 
 function seed(doc: JsedDocument, el: HTMLElement): CursorSelection {
   const cursorState = new CursorState(

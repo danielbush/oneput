@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { computeCursorState } from '../CursorState.js';
+import { computeCursorState } from '../../../cursor/lib/CursorState.js';
 
 describe('deriveCursorVisuals', () => {
   describe('caret indicator', () => {

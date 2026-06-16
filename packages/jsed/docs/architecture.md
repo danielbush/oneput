@@ -2,36 +2,41 @@
 
 COMMENT: New notes that need to be incorporated into this document; they supersede the details below.
 
-At the bottom we have lib/core
+The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/input, src/ui. Beneath this is src/lib which is the base load-bearing layer of low-level operations used by some of these subsystems.
 
-- `lib/core`
+- `src/editor/`
+  - top level
+    - `Editor`
+    - `EditorController`
+  - intermediate level
+    - `editor/lib/`
+
+- `src/cursor/`
+  - handles moving around LINE_SIBLING's;
+  - it handles tokenization (SHALLOW_TOKENIZATION) in conjunction with Editor and Nav which also tokenize on the fly.
+  - It also orchestrates ANCHOR operations - adding them during operations like split or delete.
+    - these are cloesly related to tokenization and editing text
+    - atm, we can add/remove anchors in some situations; for that reason it's not an automatic thing so we can't just subsume them into tokenization
+  - top level
+    - `Cursor`
+  - intermediate level
+    - `cursor/lib/`
+
+- `src/lib/ops`
+  - load-bearing base operation level, builds on `lib/core/`
+  - lib/ops/token
+    - work below the tokenization and cursor and above the core modules;
+    - lib/ops/token operations worry about managing tokens and their related separators (whitespace).
+    - lib/ops/space modules
+
+- `src/lib/core`
+  - load-bearing base level
   - taxonomy - identifies key elements/nodes in the DOM
   - walk - general recursive walking functions
   - sibling - worries about elements that share the same parentNode; this is important for things like managing LINE_SEGMENT's etc
   - lineSegment - worries about LINE_SEGMENT's
   - line - worries about LINE's
   - dom-rules - worries about how elements can be combined
-
-- `lib/ops`
-- lib/ops/token
-  - work below the tokenization and cursor and above the core modules;
-  - lib/ops/token operations worry about managing tokens and their related separators (whitespace).
-  - lib/ops/space modules
-
-- `lib/cursor`
-  - `Cursor`
-    - handles moving around LINE_SIBLING's;
-    - it handles tokenization (SHALLOW_TOKENIZATION) in conjunction with Editor and Nav which also tokenize on the fly.
-    - It also orchestrates ANCHOR operations - adding them during operations like split or delete.
-      - these are cloesly related to tokenization and editing text
-      - atm, we can add/remove anchors in some situations; for that reason it's not an automatic thing so we can't just subsume them into tokenization
-
-- `editor/`
-  - top level
-    - `Editor`
-    - `EditorController`
-  - intermediate level
-    - `editor/lib`
 
 ## Intro
 

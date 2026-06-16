@@ -1,6 +1,6 @@
-import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
-import type { CursorState } from '../cursor/CursorState.js';
-import { getSeparatorAfter, getSeparatorBefore } from '../ops/space.js';
+import { JSED_SELECTION_CLASS } from '../../lib/core/taxonomy.js';
+import type { CursorState } from './CursorState.js';
+import { getSeparatorAfter, getSeparatorBefore } from '../../lib/ops/space.js';
 
 /**
  * A growing range of LINE_SIBLING's, visually represented by

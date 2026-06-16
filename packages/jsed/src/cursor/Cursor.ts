@@ -1,16 +1,16 @@
-import { CursorState, type CursorError, type CursorInsertState } from './CursorState.js';
-import { type CursorDeleteOpts } from './CursorTextOps.js';
-import { DeleteAtCursor } from './DeleteAtCursor.js';
-import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
-import { UndoRecorder, type UndoRecord } from '../undo/index.js';
-import type { JsedDocument } from '../../JsedDocument.js';
-import type { Tokenizer } from '../ops/Tokenizer.js';
-import type { EditorEventsEmitter } from '../../editor/index.js';
-import { ReplaceWithText } from './ReplaceWithText.js';
-import { InsertTextAfter } from './InsertTextAfter.js';
-import { InsertTextBefore } from './InsertTextBefore.js';
-import { SplitAtToken } from './SplitAtToken.js';
-import { Wrap } from './Wrap.js';
+import { CursorState, type CursorError, type CursorInsertState } from './lib/CursorState.js';
+import { type CursorDeleteOpts } from './lib/CursorTextOps.js';
+import { DeleteAtCursor } from './lib/DeleteAtCursor.js';
+import type { UserInputOpts, UserInputSelectionState } from '../lib/input/UserInput.js';
+import { UndoRecorder, type UndoRecord } from '../lib/undo/index.js';
+import type { JsedDocument } from '../JsedDocument.js';
+import type { Tokenizer } from '../lib/ops/Tokenizer.js';
+import type { EditorEventsEmitter } from '../editor/index.js';
+import { ReplaceWithText } from './lib/ReplaceWithText.js';
+import { InsertTextAfter } from './lib/InsertTextAfter.js';
+import { InsertTextBefore } from './lib/InsertTextBefore.js';
+import { SplitAtToken } from './lib/SplitAtToken.js';
+import { Wrap } from './lib/Wrap.js';
 
 /**
  * Public CURSOR facade for the editing session.

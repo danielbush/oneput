@@ -4,15 +4,15 @@ import {
   redoConvertWrapper,
   undoConvertWrapper,
   type ConvertWrapper
-} from '../ops/selection';
+} from '../../lib/ops/selection.js';
 import {
   redoWrapLineSiblingWithTag,
   undoWrapLineSiblingWithTag,
   wrapLineSiblingWithTag,
   type WrapLineSibling as WrapLineSiblingOp
-} from '../ops/token';
-import type { UndoRecord } from '../undo';
-import type { CursorState } from './CursorState';
+} from '../../lib/ops/token.js';
+import type { UndoRecord } from '../../lib/undo/index.js';
+import type { CursorState } from './CursorState.js';
 
 export class Wrap {
   static run(state: CursorState, tagName: string) {

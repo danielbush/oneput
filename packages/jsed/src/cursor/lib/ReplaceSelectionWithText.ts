@@ -1,16 +1,16 @@
 import type { EditorState } from '../../editor/index.js';
-import type { UserInputOpts } from '../input/UserInput';
+import type { UserInputOpts } from '../../lib/input/UserInput.js';
 import {
   createToken,
   insertBefore,
   redoInsertBefore,
   undoInsertBefore,
   type InsertTokenBefore
-} from '../ops/token';
-import type { UndoRecord } from '../undo';
-import type { CursorState } from './CursorState';
-import { DeleteSelection } from './DeleteSelection';
-import { ReplaceWithText } from './ReplaceWithText';
+} from '../../lib/ops/token.js';
+import type { UndoRecord } from '../../lib/undo/index.js';
+import type { CursorState } from './CursorState.js';
+import { DeleteSelection } from './DeleteSelection.js';
+import { ReplaceWithText } from './ReplaceWithText.js';
 
 export class ReplaceSelectionWithText implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {

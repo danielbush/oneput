@@ -4,8 +4,8 @@ import {
   removeWrappers,
   undoRemoveWrapper,
   type RemoveWrappers
-} from '../ops/selection.js';
-import type { UndoRecord } from '../undo/UndoRecorder.js';
+} from '../../lib/ops/selection.js';
+import type { UndoRecord } from '../../lib/undo/UndoRecorder.js';
 import type { CursorSelection } from './CursorSelection.js';
 import type { CursorState } from './CursorState.js';
 

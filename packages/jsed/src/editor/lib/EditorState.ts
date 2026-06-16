@@ -1,5 +1,5 @@
 import { Nav } from '../../lib/focus/Nav.js';
-import { Cursor } from '../../lib/cursor/Cursor.js';
+import { Cursor } from '../../cursor/Cursor.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../../lib/input/UserInput.js';
@@ -11,7 +11,7 @@ import { CSSElementIndicator } from '../../lib/utilities/CSSElementIndicator.js'
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from '../EditorController.js';
 import { EditorOps } from './EditorOps.js';
-import type { CursorError } from '../../lib/cursor/CursorState.js';
+import type { CursorError } from '../../cursor/lib/CursorState.js';
 import { UndoRecorder } from '../../lib/undo/UndoRecorder.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../../lib/core/line.js';
 import { err, ok, type Result } from 'neverthrow';

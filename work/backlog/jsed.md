@@ -129,7 +129,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
 - chore: if cursor text ops or other ops fail, editor should catch the error and go into a safe state
   - EXAMPLE: cursor delete (CursorTextOps), at time of writing, throws if current.parentElement is null
-- feat: we should tokenize between chars and non-chars; imagine copying some dense code eg `redoReplaceText(this.replaceText)`
 - FOCUS_TRANSPARENT and nested editable regions
   - COMMENT: this would allow use to have templates; uneditable text with interior regions that are editable
   - rename ISLAND to OPAQUE
@@ -146,9 +145,11 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
     - ISLAND
       - COMMENT: re-defined here
       - informally describes an element that can be visited by FOCUS inside a FOCUS_TRANSPARENT
+      - we either allow CURSOR to walk between ISLAND's or we restrict it; that might be a refinement based on experience when we see it
 
 ## chores
 
+- document CURRENT.md (undo work) and blank it
 - improve identify (in tests)
   - t('foo') token,
   - d('foo') deleted token,
@@ -157,7 +158,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - ' ' text node (space)
   - `[comment:...]`
   - `[attr:...]`
-- document CURRENT.md (undo work) and disband it
 - badges
 - merge to master
 - test badge should be green

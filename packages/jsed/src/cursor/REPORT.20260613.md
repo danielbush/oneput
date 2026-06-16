@@ -2,44 +2,73 @@
 
 ## Scope
 
-Applied the cursor Local Lens to `packages/jsed/src/lib/cursor`.
+Applied the cursor Local Lens to `packages/jsed/src/cursor`.
 
-Focus:
+Current directory shape:
 
-- `Cursor` facade methods in `Cursor.ts`
-- load-bearing operations in `lib/ops` and `lib/core`
-- static `run` operation classes with undo/redo behavior
-- existing tests in `cursor/__tests__`, `ops/__tests__`, and `core/__tests__`
+- `src/cursor/Cursor.ts` is the public CURSOR facade.
+- `src/cursor/lib/` now contains cursor-specific lower-level operations and state.
+- `src/lib/ops/` still contains the lowest shared DOM/token operations.
+- `src/lib/core/` still contains the lowest shared traversal, taxonomy, LINE, and sibling rules.
+
+Testing strategy:
+
+- Put exhaustive edge-case coverage in the lowest module that owns the behavior.
+- Use `src/lib/core` and `src/lib/ops` tests for shared low-level rules.
+- Use `src/cursor/lib` tests for cursor-specific operation records and state.
+- Keep `Cursor.ts` facade tests focused on integration: wiring, orchestration, and multi-operation behavior.
 
 ## Current Test Result
 
 Command:
 
 ```sh
-task jsed:test -- src/lib/cursor/__tests__/Cursor.test.ts
+task jsed:test -- src/cursor/__tests__/Cursor.test.ts src/cursor/lib/__tests__/CursorSelection.test.ts src/cursor/lib/__tests__/CursorState.test.ts
 ```
 
 Result:
 
-- 1 failing test
-- 62 passing tests
+- 3 test files passed
+- 86 tests passed
 - 1 todo
 
-Failure:
+The previous `delete > last TOKEN after ISLAND` failure appears fixed. The test now expects the CURSOR to land on the generated ANCHOR, matching `DeleteAtCursor.run`.
 
-- `delete > last TOKEN after ISLAND`
-- Expected CURSOR place: `[island:span]`
-- Actual CURSOR place: `[anchor]`
+## Layer Map
 
-Relevant code:
+### Facade Layer
 
-- `DeleteAtCursor.run` places on the generated ANCHOR when `token.remove(...)` returns `anchorize-token`.
-- Test expects deletion of the last TOKEN after an ISLAND to fall back to the ISLAND.
+- `src/cursor/Cursor.ts`
 
-Action needed:
+This should stay sparse. Test it for visible integration behavior:
 
-- Decide whether the correct deletion target is the previous ISLAND or the generated ANCHOR.
-- Then either update `DeleteAtCursor.run` or update the test expectation.
+- a facade method records undo where expected
+- multiple operations compose correctly
+- selection state and cursor state are routed correctly
+- external callbacks and events are triggered at the right boundary
+
+### Cursor-Specific Operation Layer
+
+- `src/cursor/lib/DeleteAtCursor.ts`
+- `src/cursor/lib/DeleteSelection.ts`
+- `src/cursor/lib/ReplaceWithText.ts`
+- `src/cursor/lib/ReplaceSelectionWithText.ts`
+- `src/cursor/lib/InsertTextAfter.ts`
+- `src/cursor/lib/InsertTextBefore.ts`
+- `src/cursor/lib/SplitAtToken.ts`
+- `src/cursor/lib/Wrap.ts`
+- `src/cursor/lib/CursorTextOps.ts`
+- `src/cursor/lib/CursorState.ts`
+- `src/cursor/lib/CursorSelection.ts`
+
+This is the right place for focused operation-record tests: static `run`, undo, redo, merge, and cursor placement.
+
+### Shared Low-Level Layer
+
+- `src/lib/ops/*`
+- `src/lib/core/*`
+
+This is the right place for detailed edge-case matrices around TOKEN removal, spacing, anchorization, traversal, LINE_SIBLING discovery, wrapping, and recursive DOM mutation.
 
 ## Cursor Method Map
 
@@ -47,15 +76,15 @@ Action needed:
 
 Load-bearing operations:
 
-- `CursorTextOps.getNext/getPrevious`
-- `core/line.getNextLineSibling/getPreviousLineSibling`
-- `Tokenizer.tokenizeLineAtTextNode`
-- `CursorState.place`
+- `src/cursor/lib/CursorTextOps.getNext/getPrevious`
+- `src/lib/core/line.getNextLineSibling/getPreviousLineSibling`
+- `src/lib/ops/Tokenizer.tokenizeLineAtTextNode`
+- `src/cursor/lib/CursorState.place`
 
 Coverage:
 
-- Strong cursor integration coverage across simple TOKEN runs, INLINE_FLOW, nested INLINE_FLOW, adjacent INLINEs, ISLANDs, nested blocks, empty nesting, and cross-LINE movement.
-- Lower-level LINE traversal coverage exists in `core/__tests__/line.test.ts`.
+- Strong `Cursor.ts` integration coverage across simple TOKEN runs, INLINE_FLOW, nested INLINE_FLOW, adjacent INLINEs, ISLANDs, nested blocks, empty nesting, and cross-LINE movement.
+- Lower-level LINE traversal coverage exists in `src/lib/core/__tests__/line.test.ts`.
 
 Action needed:
 
@@ -65,60 +94,60 @@ Action needed:
 
 Load-bearing operations:
 
-- `DeleteAtCursor.run`
-- `ops/token.remove`, `undoRemove`, `redoRemove`
-- `ops/focusable.deleteHighestEmpty`, `undoDeleteElement`, `redoDeleteElement`
-- `DeleteSelection.run` when a selection exists
+- `src/cursor/lib/DeleteAtCursor.run`
+- `src/cursor/lib/DeleteSelection.run` when a selection exists
+- `src/lib/ops/token.remove`, `undoRemove`, `redoRemove`
+- `src/lib/ops/focusable.deleteHighestEmpty`, `undoDeleteElement`, `redoDeleteElement`
 
 Coverage:
 
-- Good action-level coverage for deleting first, last, and only TOKENs.
-- Good action-level coverage around ANCHORs, INLINE_FLOW, `deleteHighestEmpty`, and ISLAND adjacency.
-- Lower-level `ops/token.remove` and `ops/focusable.deleteHighestEmpty` have direct tests.
+- Good facade-level action coverage for deleting first, last, and only TOKENs.
+- Good facade-level coverage around ANCHORs, INLINE_FLOW, `deleteHighestEmpty`, and ISLAND adjacency.
+- Lower-level `token.remove` and `focusable.deleteHighestEmpty` have direct tests.
+- The `last TOKEN after ISLAND` expectation has been updated to ANCHOR placement and now passes.
 
 Gaps:
 
-- No direct undo/redo tests for `DeleteAtCursor.run`.
+- No focused `DeleteAtCursor.run` undo/redo tests in `src/cursor/lib/__tests__`.
 - No undo/redo coverage for the three distinct delete records:
   - normal `removeToken`
   - `anchorizeToken`
   - `deleteHighestElement`
-- Existing `last TOKEN after ISLAND` test fails.
-- `ISLAND no-op` is still `test.todo`.
+- `ISLAND no-op` is still `test.todo` in the facade test.
 
 Actions needed:
 
-- Add `DeleteAtCursor.run` tests for normal TOKEN delete, undo, redo.
-- Add `DeleteAtCursor.run` tests for last TOKEN anchorization, undo, redo.
-- Add `DeleteAtCursor.run` tests for ANCHOR-driven `deleteHighestEmpty`, undo, redo.
-- Resolve the ISLAND adjacency expectation before adding more coverage there.
+- Add `src/cursor/lib` tests for `DeleteAtCursor.run`: normal TOKEN delete, undo, redo.
+- Add `src/cursor/lib` tests for last TOKEN anchorization, undo, redo.
+- Add `src/cursor/lib` tests for ANCHOR-driven `deleteHighestEmpty`, undo, redo.
+- Decide whether the `ISLAND no-op` todo is still desired behavior.
 
 ### `replaceWithText`
 
 Load-bearing operations:
 
-- `ReplaceWithText.run`
-- `ops/token.replaceText`
-- `ops/token.insertAfter`
-- `ReplaceSelectionWithText.run` when a selection exists
-- `ReplaceWithText.merge`
+- `src/cursor/lib/ReplaceWithText.run`
+- `src/cursor/lib/ReplaceSelectionWithText.run` when a selection exists
+- `src/lib/ops/token.replaceText`
+- `src/lib/ops/token.insertAfter`
+- `src/cursor/lib/ReplaceWithText.merge`
 
 Coverage:
 
-- Cursor integration covers single TOKEN replacement, TOKEN after ISLAND, ISLAND no-op, multi-token replacement, and multi-word replacement on the last TOKEN.
-- Lower-level `ops/token.replaceText` has direct TOKEN and ANCHOR tests.
+- Facade integration covers single TOKEN replacement, TOKEN after ISLAND, ISLAND no-op, multi-token replacement, and multi-word replacement on the last TOKEN.
+- Lower-level `token.replaceText` has direct TOKEN and ANCHOR tests.
 
 Gaps:
 
-- No direct undo/redo tests for `ReplaceWithText.run`.
+- No focused `ReplaceWithText.run` undo/redo tests in `src/cursor/lib/__tests__`.
 - No tests for merge behavior:
   - successive `ReplaceWithText`
   - `ReplaceWithText` followed by `DeleteAtCursor`
-- Selection replacement has implementation but no obvious cursor-level undo/redo coverage.
+- Selection replacement has implementation but no obvious undo/redo coverage.
 
 Actions needed:
 
-- Add focused `ReplaceWithText.run` undo/redo tests for one-word and multi-word replacement.
+- Add `src/cursor/lib` undo/redo tests for one-word and multi-word replacement.
 - Add merge tests for repeated typing into the same TOKEN.
 - Add merge test for replace-then-delete collapse.
 - Add one selection replacement undo/redo test.
@@ -127,27 +156,26 @@ Actions needed:
 
 Load-bearing operations:
 
-- `InsertTextAfter.run`
-- `ops/token.createToken`
-- `ops/token.insertAfter`
-- `ops/token.undoInsertAfter`
-- `ops/token.redoInsertAfter`
-- `InsertTextAfter.merge`
+- `src/cursor/lib/InsertTextAfter.run`
+- `src/lib/ops/token.createToken`
+- `src/lib/ops/token.insertAfter`
+- `src/lib/ops/token.undoInsertAfter`
+- `src/lib/ops/token.redoInsertAfter`
+- `src/cursor/lib/InsertTextAfter.merge`
 
 Coverage:
 
-- Cursor integration covers multiple TOKEN insertion after the current TOKEN.
-- Lower-level token insertion behavior is partly exercised through token operation tests.
+- Facade integration covers multiple TOKEN insertion after the current TOKEN.
 
 Gaps:
 
-- No direct undo/redo tests for `InsertTextAfter.run`.
+- No focused undo/redo tests for `InsertTextAfter.run`.
 - No test for blank/whitespace-only input returning no record.
 - No merge test for insert-then-replace typing into the inserted TOKEN.
 
 Actions needed:
 
-- Add `InsertTextAfter.run` undo/redo test.
+- Add `src/cursor/lib` undo/redo test.
 - Add no-op test for whitespace-only text.
 - Add merge test for single inserted TOKEN followed by `ReplaceWithText`.
 
@@ -155,26 +183,26 @@ Actions needed:
 
 Load-bearing operations:
 
-- `InsertTextBefore.run`
-- `ops/token.createToken`
-- `ops/token.insertBefore`
-- `ops/token.undoInsertBefore`
-- `ops/token.redoInsertBefore`
-- `InsertTextBefore.merge`
+- `src/cursor/lib/InsertTextBefore.run`
+- `src/lib/ops/token.createToken`
+- `src/lib/ops/token.insertBefore`
+- `src/lib/ops/token.undoInsertBefore`
+- `src/lib/ops/token.redoInsertBefore`
+- `src/cursor/lib/InsertTextBefore.merge`
 
 Coverage:
 
-- Cursor integration covers multiple TOKEN insertion before the current TOKEN.
+- Facade integration covers multiple TOKEN insertion before the current TOKEN.
 
 Gaps:
 
-- No direct undo/redo tests for `InsertTextBefore.run`.
+- No focused undo/redo tests for `InsertTextBefore.run`.
 - No test for blank/whitespace-only input returning no record.
 - No merge test for insert-then-replace typing into the inserted TOKEN.
 
 Actions needed:
 
-- Add `InsertTextBefore.run` undo/redo test.
+- Add `src/cursor/lib` undo/redo test.
 - Add no-op test for whitespace-only text.
 - Add merge test for single inserted TOKEN followed by `ReplaceWithText`.
 
@@ -182,16 +210,16 @@ Actions needed:
 
 Load-bearing operations:
 
-- `SplitAtToken.run`
-- `core/line.getLine`, `getFirstLineSibling`
-- `ops/focusable.recSplitBeforeChild/recSplitAfterChild`
-- `ops/focusable.undoRecSplit/redoRecSplit`
-- `ops/anchor.anchorize`
+- `src/cursor/lib/SplitAtToken.run`
+- `src/lib/core/line.getLine`, `getFirstLineSibling`
+- `src/lib/ops/focusable.recSplitBeforeChild/recSplitAfterChild`
+- `src/lib/ops/focusable.undoRecSplit/redoRecSplit`
+- `src/lib/ops/anchor.anchorize`
 
 Coverage:
 
-- Strong cursor integration coverage for append, insert-after, default split-before, ISLAND adjacency, first/last TOKEN anchorization, no-anchor split, nested INLINE_FLOW, and action/undo/redo.
-- Lower-level recursive split operations are covered in `ops/__tests__/focusable.test.ts`.
+- Strong facade integration coverage for append, insert-after, default split-before, ISLAND adjacency, first/last TOKEN anchorization, no-anchor split, nested INLINE_FLOW, and action/undo/redo.
+- Lower-level recursive split operations are covered in `src/lib/ops/__tests__/focusable.test.ts`.
 
 Action needed:
 
@@ -201,33 +229,33 @@ Action needed:
 
 Load-bearing operations:
 
-- `Wrap.run`
-- `WrapLineSibling.run`
-- `WrapSelection.run`
-- `ops/token.wrapLineSiblingWithTag`
-- `ops/selection.convertWrapper`
+- `src/cursor/lib/Wrap.run`
+- `src/cursor/lib/WrapLineSibling.run`
+- `src/cursor/lib/WrapSelection.run`
+- `src/lib/ops/token.wrapLineSiblingWithTag`
+- `src/lib/ops/selection.convertWrapper`
 - undo/redo wrappers for token and selection wrapping
 
 Coverage:
 
-- `CursorSelection` has detailed wrapper growth/shrink coverage.
-- Selection lower-level remove/convert behavior has some `ops/selection` coverage.
+- `src/cursor/lib/__tests__/CursorSelection.test.ts` has detailed wrapper growth/shrink coverage.
+- Lower-level selection remove/convert behavior has some `src/lib/ops/__tests__/selection.test.ts` coverage.
 
 Gaps:
 
-- No obvious cursor-level tests for `Cursor.wrap`.
-- No direct undo/redo tests for `WrapLineSibling.run`.
-- No direct undo/redo tests for `WrapSelection.run`.
+- No obvious facade-level tests for `Cursor.wrap`.
+- No focused undo/redo tests for `WrapLineSibling.run`.
+- No focused undo/redo tests for `WrapSelection.run`.
 - No sad-path tests for invalid wrapper tags.
 
 Actions needed:
 
-- Add a `Cursor.wrap` integration test for one TOKEN.
-- Add `WrapLineSibling.run` undo/redo test.
-- Add `WrapSelection.run` undo/redo test for a small selection.
-- Add one invalid-tag no-op test.
+- Add a sparse `Cursor.wrap` integration test for one TOKEN.
+- Add `src/cursor/lib` undo/redo test for `WrapLineSibling.run`.
+- Add `src/cursor/lib` undo/redo test for `WrapSelection.run`.
+- Add one invalid-tag no-op test at the lowest layer that owns the rule.
 
-### Selection facade methods
+### Selection Facade Methods
 
 Methods:
 
@@ -239,14 +267,14 @@ Methods:
 
 Load-bearing operations:
 
-- `CursorSelection`
-- `CursorTextOps.extendNext/extendPrevious`
-- `CursorState.startSelection/cancelSelection/collapseSelectionTo`
-- `core/line` traversal
+- `src/cursor/lib/CursorSelection`
+- `src/cursor/lib/CursorTextOps.extendNext/extendPrevious`
+- `src/cursor/lib/CursorState.startSelection/cancelSelection/collapseSelectionTo`
+- `src/lib/core/line` traversal
 
 Coverage:
 
-- `CursorSelection.test.ts` gives detailed behavior coverage for growing and shrinking selections across inline and line boundaries.
+- `CursorSelection.test.ts` gives detailed cursor-specific behavior coverage for growing and shrinking selections across inline and line boundaries.
 
 Gaps:
 
@@ -261,9 +289,8 @@ Actions needed:
 
 ## Recommended Order
 
-1. Resolve the failing `delete > last TOKEN after ISLAND` expectation.
-2. Add `DeleteAtCursor.run` undo/redo tests for the three delete record branches.
-3. Add undo/redo tests for `ReplaceWithText`, `InsertTextAfter`, and `InsertTextBefore`.
-4. Add sparse `Cursor.wrap` tests for one TOKEN and one selection.
-5. Add merge tests for text editing records once the basic undo/redo coverage is stable.
-
+1. Add focused `src/cursor/lib` undo/redo tests for the `DeleteAtCursor` record branches.
+2. Add focused `src/cursor/lib` undo/redo tests for `ReplaceWithText`, `InsertTextAfter`, and `InsertTextBefore`.
+3. Add sparse facade integration tests for selection-backed delete/replace/wrap.
+4. Add sparse `Cursor.wrap` facade coverage for one TOKEN and one selection.
+5. Add merge tests for text editing records once basic undo/redo coverage is stable.

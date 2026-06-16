@@ -128,6 +128,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## refactors
 
+- remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
+  - COMMENT: this stops subsystems importing internals of other subsystems
 - `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/
   - COMMENT: we shouldn't be importing types from jsed-demo like this
 - probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace

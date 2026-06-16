@@ -2,7 +2,7 @@ import { CursorState, type CursorError, type CursorInsertState } from './lib/Cur
 import { type CursorDeleteOpts } from './lib/CursorTextOps.js';
 import { DeleteAtCursor } from './lib/DeleteAtCursor.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
-import { UndoRecorder, type UndoRecord } from '../lib/undo/index.js';
+import { UndoRecorder, type UndoRecord } from '../undo/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
 import type { Tokenizer } from '../lib/ops/Tokenizer.js';
 import type { EditorEventsEmitter } from '../editor/index.js';

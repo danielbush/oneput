@@ -10,7 +10,7 @@ import {
   type RecursiveSplitBeforeAction
 } from '../../lib/ops/focusable.js';
 import { type RemoveToken } from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../lib/undo/index.js';
+import type { UndoRecord } from '../../undo/index.js';
 import type { CursorState } from './CursorState.js';
 
 type SplitResult = RecursiveSplitBeforeAction | RecursiveSplitAfterAction;

@@ -9,7 +9,7 @@ import {
   redoDeleteElement
 } from '../../lib/ops/focusable.js';
 import * as token from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../lib/undo/index.js';
+import type { UndoRecord } from '../../undo/index.js';
 import type { CursorState } from './CursorState.js';
 import type { CursorDeleteOpts } from './CursorTextOps.js';
 import { DeleteSelection } from './DeleteSelection.js';

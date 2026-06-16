@@ -11,7 +11,7 @@ import {
   wrapLineSiblingWithTag,
   type WrapLineSibling as WrapLineSiblingOp
 } from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../lib/undo/index.js';
+import type { UndoRecord } from '../../undo/index.js';
 import type { CursorState } from './CursorState.js';
 
 export class Wrap {

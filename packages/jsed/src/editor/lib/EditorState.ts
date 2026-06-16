@@ -12,7 +12,7 @@ import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from '../EditorController.js';
 import { EditorOps } from './EditorOps.js';
 import type { CursorError } from '../../cursor/lib/CursorState.js';
-import { UndoRecorder } from '../../lib/undo/UndoRecorder.js';
+import { UndoRecorder } from '../../undo/UndoRecorder.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../../lib/core/line.js';
 import { err, ok, type Result } from 'neverthrow';
 import { isCursorTransparent, isLineSibling } from '../../lib/core/taxonomy.js';

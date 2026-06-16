@@ -1,7 +1,7 @@
 import type { UserInputOpts } from '../../input/UserInput.js';
 import type { CursorState } from './CursorState.js';
 import type { EditorState } from '../../editor/index.js';
-import type { UndoRecord } from '../../lib/undo/UndoRecorder.js';
+import type { UndoRecord } from '../../undo/UndoRecorder.js';
 import { DeleteAtCursor } from './DeleteAtCursor.js';
 import {
   createToken,

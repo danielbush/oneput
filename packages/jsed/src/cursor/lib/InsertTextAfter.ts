@@ -7,7 +7,7 @@ import {
   undoInsertAfter,
   type InsertTokenAfter
 } from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../lib/undo/index.js';
+import type { UndoRecord } from '../../undo/index.js';
 import type { CursorState } from './CursorState.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
 

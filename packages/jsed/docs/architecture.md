@@ -25,6 +25,10 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
 - `src/focus`
   - a counterpart to `src/cursor` - represents the user's element FOCUS; the CURSOR usually edits within this FOCUS.
 
+- `src/undo`
+  - undo subsystem
+  - may expand or be generalised in future to support operation transform
+
 - `src/input`
   - handles the html input and how it drives editing and the input interface that is required
 

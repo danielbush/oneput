@@ -17,7 +17,7 @@ import { JsedDocument } from '../../JsedDocument.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import { Cursor } from '../Cursor.js';
 import { EditorEventsEmitter } from '../../editor/index.js';
-import { UndoRecorder } from '../../lib/undo/index.js';
+import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../lib/ops/token.js';
 import { addImplicitLines } from '../../lib/ops/implicitLine.js';
 import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../lib/core/taxonomy.js';

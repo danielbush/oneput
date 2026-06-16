@@ -14,7 +14,7 @@ import { CursorState } from '../CursorState.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Tokenizer } from '../../../lib/ops/Tokenizer.js';
 import { EditorEventsEmitter } from '../../../editor/index.js';
-import { UndoRecorder } from '../../../lib/undo/index.js';
+import { UndoRecorder } from '../../../undo/index.js';
 import { getValue } from '../../../lib/ops/token.js';
 import {
   JSED_ANCHOR_CLASS,

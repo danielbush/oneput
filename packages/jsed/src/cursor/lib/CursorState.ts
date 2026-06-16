@@ -5,7 +5,7 @@ import { CursorSelection } from './CursorSelection.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import type { Tokenizer } from '../../lib/ops/Tokenizer.js';
-import type { UndoRecorder } from '../../lib/undo/UndoRecorder.js';
+import type { UndoRecorder } from '../../undo/UndoRecorder.js';
 import type { EditorEventsEmitter } from '../../editor/index.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';

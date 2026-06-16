@@ -44,7 +44,7 @@ function tokens(doc: JsedDocument): HTMLElement[] {
 }
 
 describe('DeleteAtCursor.run', () => {
-  test('TOKEN with sibling', () => {
+  test('delete non-last TOKEN', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world'), s(), t('foo')));
     const hello = tokens(doc)[0];
@@ -90,7 +90,7 @@ describe('DeleteAtCursor.run', () => {
     ]);
   });
 
-  test('last TOKEN anchorizes', () => {
+  test('delete last TOKEN - document root', () => {
     // arrange
     const doc = makeRoot(t('aaa'));
     const aaa = tokens(doc)[0];
@@ -118,7 +118,7 @@ describe('DeleteAtCursor.run', () => {
     expect(identifyChildren(doc.root)).toEqual(['[anchor]', 'd("aaa")']);
   });
 
-  test('last TOKEN after ISLAND anchorizes', () => {
+  test('delete last TOKEN - after ISLAND', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -147,7 +147,7 @@ describe('DeleteAtCursor.run', () => {
     expect(identify(state.getPlace().nextSibling)).toBe('d("bbb")');
   });
 
-  test('ANCHOR in empty wrapper deletes highest empty ancestor', () => {
+  test('delete last TOKEN - in LINE', () => {
     // arrange
     const doc = makeRoot(
       p(

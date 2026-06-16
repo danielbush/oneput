@@ -127,11 +127,25 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - feat: persist last token position in each LINE
 - feat: persist last FOCUS position and FOCUS it when we reload the document
 - feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
-- feat: holes
-  - ability to explicitly mark elements as FOCUS transparent (and by extension CURSOR transparent); the key difference being that everything including text is ignored until we hit an element that turns the transparency off; the "off" subtree is like a editable hole contained within the transparent subtree.
 - chore: if cursor text ops or other ops fail, editor should catch the error and go into a safe state
   - EXAMPLE: cursor delete (CursorTextOps), at time of writing, throws if current.parentElement is null
 - feat: we should tokenize between chars and non-chars; imagine copying some dense code eg `redoReplaceText(this.replaceText)`
+- FOCUS_TRANSPARENT and nested editable regions
+  - COMMENT: this would allow use to have templates; uneditable text with interior regions that are editable
+  - rename ISLAND to OPAQUE
+    - IGNORABLE's
+      - FOCUS  : visit=n, descend=n
+      - CURSOR : same
+    - OPAQUE's are non-descendable (was ISLAND)
+      - FOCUS  : visit=y, descend=n
+      - CURSOR : same - cursor can visit ISLAND if it's a LINE_SIBLING eg katex
+    - FOCUS_TRANSPARENT
+      - COMMENT: this is a new designation, creating something a little like an IGNORABLE because the FOCUS can't visit and a CURSOR probably can't be placed as a result, but because we can DESCEND, we might hit a non-TRANSPARENT within.
+      - FOCUS  : visit=n, descend=y
+      - CURSOR : same, CURSOR already treats non-LINE_SIBLING's in LINE as CURSOR_TRANSPARENT
+    - ISLAND
+      - COMMENT: re-defined here
+      - informally describes an element that can be visited by FOCUS inside a FOCUS_TRANSPARENT
 
 ## chores
 

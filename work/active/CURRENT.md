@@ -28,7 +28,7 @@ The intended feel is closer to a text cursor: highlight the relevant edge of the
    - Use the real jsed stylesheet/classes so the lab previews production styling.
    - Include normal text sizes and inline contexts where spacing is easiest to judge.
 
-2. Introduce a `jsed-space` wrapper concept for visual spacing.
+2. Introduce a reusable `jsed-cursor-marker` for visual spacing.
    - For `append` and `insert-after`, the target space is after the current TOKEN.
    - For `prepend` and `insert-before`, the target space is before the current TOKEN.
    - The marker should indicate an edge of that space:
@@ -36,17 +36,25 @@ The intended feel is closer to a text cursor: highlight the relevant edge of the
      - `insert-after`: right edge of the following space.
      - `prepend`: right edge of the preceding space.
      - `insert-before`: left edge of the preceding space.
+   - Use one marker element per `CursorState` instance.
+   - The marker can remain in the DOM while the user is typing and the cursor stays in `append`, `prepend`, `insert-after`, or `insert-before`.
+   - Move/reinsert that same marker as the cursor state changes.
+   - Remove the marker as soon as the cursor returns to the default whole-token-selected state.
 
-3. Decide where `jsed-space` is produced.
+3. Decide where `jsed-cursor-marker` is produced.
    - First preference: create it as presentation-only structure owned by cursor state rendering, not by core token/space mutation.
    - Avoid changing document semantics or serialized output.
-   - If wrapping actual whitespace text nodes is needed, define explicit cleanup when cursor state clears or moves.
+   - Make it an IGNORABLE element, probably using `jsed-ignore`.
+   - It should not cause text reflow.
+   - Do not wrap real whitespace unless the synthetic marker approach fails.
+   - Define cleanup around default cursor state, cursor movement, reload, and destroy.
 
 4. Replace marker CSS in `jsed-defaults.css`.
    - Remove the red triangle and double-triangle rules.
-   - Add edge-highlight styles for `.jsed-space` in each cursor state.
+   - Add edge-highlight styles for `.jsed-cursor-marker` in each cursor state.
    - Keep animation subtle and slow.
-   - Preserve existing select-all and caret visuals.
+   - Remove the throbbing underline while an insert/append/prepend marker is active.
+   - Preserve existing select-all visuals.
 
 5. Add focused tests around DOM hygiene.
    - `CursorState.setInsertState(...)` should apply and clear visual state cleanly.
@@ -73,3 +81,12 @@ The intended feel is closer to a text cursor: highlight the relevant edge of the
    - so for ANCHOR's keep the CURSOR in its default display mode, don't use `jsed-cursor-marker` (or whatever the final solution is)
 - Should ISLAND cursor styling share this work, or remain a follow-up item from the backlog?
   - separate item; don't worry about CURSOR on ISLAND
+
+## Decisions
+
+- Use `jsed-cursor-marker`, not `jsed-space`, unless implementation proves a synthetic marker cannot work.
+- Use only one marker element per `CursorState`; create it once, then insert, move, or remove it as cursor state changes.
+- Keep the marker while the user remains in `append`, `prepend`, `insert-after`, or `insert-before`.
+- Dispose/remove the marker when returning to the default whole-token-selected state.
+- Do not show the marker for ANCHOR's.
+- Treat ISLAND cursor styling as a separate backlog item.

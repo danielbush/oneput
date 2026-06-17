@@ -45,25 +45,23 @@
   --jsed-tag-indicator--fontsize: 8px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --jsed-focus-outline: #60a5fa;
-    --jsed-focus-bg: rgba(96, 165, 250, 0.18);
-    --jsed-focus-sibling-outline: rgba(134, 239, 172, 0.7);
+[data-jsed-color-scheme='dark'] {
+  --jsed-focus-outline: #60a5fa;
+  --jsed-focus-bg: rgba(96, 165, 250, 0.18);
+  --jsed-focus-sibling-outline: rgba(134, 239, 172, 0.7);
 
-    --jsed-token-focus-text: #f8fafc;
-    --jsed-token-focus-bg: #1d4ed8;
-    --jsed-token-focus-bg-pulse: #2563eb;
-    --jsed-caret-bg: currentColor;
-    --jsed-cursor-marker-bg: #93c5fd;
+  --jsed-token-focus-text: #f8fafc;
+  --jsed-token-focus-bg: #1d4ed8;
+  --jsed-token-focus-bg-pulse: #2563eb;
+  --jsed-caret-bg: currentColor;
+  --jsed-cursor-marker-bg: #93c5fd;
 
-    --jsed-selection-bg: #1d4ed8;
-    --jsed-selection-text: #f8fafc;
+  --jsed-selection-bg: #1d4ed8;
+  --jsed-selection-text: #f8fafc;
 
-    --jsed-tag-indicator-bg: #111827;
-    --jsed-tag-indicator-border: #60a5fa;
-    --jsed-tag-indicator-text: #bfdbfe;
-  }
+  --jsed-tag-indicator-bg: #111827;
+  --jsed-tag-indicator-border: #60a5fa;
+  --jsed-tag-indicator-text: #bfdbfe;
 }
 
 .jsed-tag-indicator {

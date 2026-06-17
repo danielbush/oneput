@@ -150,6 +150,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## chores
 
+- finish src/cursor/REPORT.20260613.md (audit/review)
 - improve identify (in tests)
   - t('foo') token,
   - d('foo') deleted token,

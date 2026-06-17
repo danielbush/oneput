@@ -18,15 +18,13 @@ The intended feel is closer to a text cursor: highlight the relevant edge of the
 - CSS lives in `packages/jsed/src/styles/jsed-defaults.css`.
 - Cursor state class names are defined in `packages/jsed/src/cursor/lib/CursorState.ts`.
 - Current marker CSS uses `::after` triangles on `.jsed-token-focus.jsed-token.jsed-crs-*`.
-- Existing `apps/jsed-demo/src/routes/cursor-lab/+page.svelte` is an older interactive lab that tokenizes sample paragraphs and overlays cursor classes.
+- Existing `apps/jsed-demo/src/routes/cursor-lab/+page.svelte` is an older interactive lab that tokenizes sample paragraphs and overlays cursor classes. We do not need to rebuild it for this work.
 
 ## Plan
 
-1. Rebuild `apps/jsed-demo/src/routes/cursor-lab/+page.svelte` as a static cursor-state matrix.
-   - Show TOKEN, ANCHOR, and ISLAND examples.
-   - Show each relevant state without requiring the editor runtime.
-   - Use the real jsed stylesheet/classes so the lab previews production styling.
-   - Include normal text sizes and inline contexts where spacing is easiest to judge.
+1. Delete the old cursor lab route.
+   - Remove `apps/jsed-demo/src/routes/cursor-lab/+page.svelte`.
+   - Do not replace it with a new lab unless visual comparison becomes hard in the normal demo.
 
 2. Introduce a reusable `jsed-cursor-marker` for visual spacing.
    - For `append` and `insert-after`, the target space is after the current TOKEN.
@@ -58,12 +56,12 @@ The intended feel is closer to a text cursor: highlight the relevant edge of the
 
 5. Add focused tests around DOM hygiene.
    - `CursorState.setInsertState(...)` should apply and clear visual state cleanly.
-   - Moving between states should not leave stale `jsed-space` wrappers.
+   - Moving between states should not leave stale `jsed-cursor-marker` elements.
    - Clearing cursor state should restore the same editable DOM shape.
    - Do not test exact animation details.
 
 6. Verify in the demo and test suite.
-   - Use the cursor lab for visual comparison.
+   - Use the existing jsed demo/editor for visual comparison.
    - Run focused cursor tests.
    - Run `task jsed:test`.
 
@@ -90,3 +88,4 @@ The intended feel is closer to a text cursor: highlight the relevant edge of the
 - Dispose/remove the marker when returning to the default whole-token-selected state.
 - Do not show the marker for ANCHOR's.
 - Treat ISLAND cursor styling as a separate backlog item.
+- Skip rebuilding cursor lab; delete the old route and verify in the normal demo/editor.

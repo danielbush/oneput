@@ -115,8 +115,16 @@ We can define the traversal rules:
 - **LINE_SEGMENT** — the maximal contiguous sequence of LINE_SIBLING's that all share the same parentNode. FOCUSABLE LINE_MEMBER's (eg an em-tag) act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested LINE elements within this line and not confuse them as the current LINE.
-- **SELECTION_WRAPPER**
-  - a transient `<span>` decoration inserted by `CursorSelection` to paint the selection background around a contiguous run of LINE_SIBLING's that share a DOM parent. Purely visual — unwrapped on collapse, never persisted.
+- **SELECTION_WRAPPER** aka wrapper / WRAPPER
+  - a transient `<span>` inserted by `CursorSelection` to around a contiguous run of LINE_SIBLING's that share a DOM parent.
+  - sit between LINE_SIBLING's (eg TOKEN's) and the rest of the DOM.
+  - they don't contain FOCUSABLE's
+  - should be treated as a set of LINE_SIBLING's and SEPARATOR's.
+  - When we peform an operation on a wrapper it is performed on all of live LINE_SIBLING's and SEPARATOR's.
+  - A single wrapper may occupy some or all of its parent's content.
+    - if partial the only operation will be on the selected LINE_SIBLING's (and SEPARATOR's)
+    - if full we may wish to do an additional deleteHighestEmpty (which means all content is selected "text" content)
+  - We can **UNWRAP** each wrapper removing it without trace from the DOM.
   - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
   - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
 - **INTERSTITIAL_TEXT**
@@ -140,6 +148,15 @@ Tokens and Text and whitespace
 
 - **ANCHOR** — a TOKEN which is inserted into a FOCUSABLE (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
   - Source of truth: search docstrings for ANCHOR.
+- **ANCHOR_RULES**
+  - COMMENT: these are close to the simplest rules
+  - Anchorize the whole document (automatic ANCHOR's).
+  - Anchors are displayed.
+  - Don't allow automatic anchors to be deleted.
+  - Allow user to add anchors but don't mark them as special.
+  - All anchors are removed when saving.
+  - token.remove checks if it is removing the last TOKEN in the LINE_SEGMENT; if so, then it places an ANCHOR instead and doesn't flip any separators.
+  - `anchorize(el)` - re-anchorizes an element
 - **LEADING_SPACE**
   - (1) a text node consisting purely of whitespace "^\s$" characters whose previous sibling is a closing tag
   - (2) a text node consisting purely of whitespace "^\s$" characters at the beginning of an INLINE_FLOW, IMPLICIT_LINE

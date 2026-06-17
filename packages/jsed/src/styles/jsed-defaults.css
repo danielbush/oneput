@@ -39,9 +39,8 @@
   --jsed-selection-text: var(--slate-100);
 
   /* The tag indicator that shows on the currently focused tag. */
-  --jsed-tag-indicator-bg: var(--slate-200);
-  --jsed-tag-indicator-border: var(--sky-blue-700);
-  --jsed-tag-indicator-text: var(--sky-blue-700);
+  --jsed-tag-indicator-bg: var(--slate-900);
+  --jsed-tag-indicator-text: white;
   --jsed-tag-indicator--fontsize: 8px;
 }
 
@@ -59,17 +58,13 @@
   --jsed-selection-bg: #1d4ed8;
   --jsed-selection-text: #f8fafc;
 
-  --jsed-tag-indicator-bg: #111827;
-  --jsed-tag-indicator-border: #60a5fa;
-  --jsed-tag-indicator-text: #bfdbfe;
+  --jsed-tag-indicator-bg: white;
+  --jsed-tag-indicator-text: #111827;
 }
 
 .jsed-tag-indicator {
   background-color: var(--jsed-tag-indicator-bg);
   padding: 0.1rem 0.3rem;
-  border-color: var(--jsed-tag-indicator-border);
-  border-width: 1px;
-  border-style: solid;
   font-size: var(--jsed-tag-indicator--fontsize);
   font-weight: 200;
   font-family: Arial, Helvetica, sans-serif;

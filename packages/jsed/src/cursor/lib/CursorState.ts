@@ -1,6 +1,7 @@
-import { isLineSibling, isToken } from '../../lib/core/taxonomy.js';
+import { isAnchor, isLineSibling, isToken, JSED_IGNORE_CLASS } from '../../lib/core/taxonomy.js';
 import type { UserInputOpts, UserInputSelectionState } from '../../input/UserInput.js';
 import { isSameLine } from '../../lib/core/line.js';
+import { getSeparatorAfter, getSeparatorBefore } from '../../lib/ops/space.js';
 import { CursorSelection } from './CursorSelection.js';
 import { CursorTextOps } from './CursorTextOps.js';
 import type { JsedDocument } from '../../JsedDocument.js';
@@ -12,6 +13,7 @@ export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
 export const CURSOR_INSERT_AFTER_CLASS = 'jsed-crs-insert-after';
 export const CURSOR_INSERT_BEFORE_CLASS = 'jsed-crs-insert-before';
+export const JSED_CURSOR_MARKER_CLASS = 'jsed-cursor-marker';
 
 /**
  * Indicates the input has a collapsed caret in its text (CURSOR_AT_BEGINNING /
@@ -82,6 +84,7 @@ export class CursorState {
   }
 
   public ops: CursorTextOps;
+  private cursorMarker?: HTMLElement;
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {
@@ -187,6 +190,7 @@ export class CursorState {
   }
 
   private removeAllClasses() {
+    this.removeCursorMarker();
     this.seat.classList.remove(...this.classes);
     this.classes = [];
   }
@@ -219,6 +223,7 @@ export class CursorState {
   // #region cursor insert state (CURSOR_STATE)
 
   clearInsertState(): void {
+    this.removeCursorMarker();
     this.removeClasses(
       CURSOR_INSERT_AFTER_CLASS,
       CURSOR_INSERT_BEFORE_CLASS,
@@ -233,15 +238,19 @@ export class CursorState {
     switch (state) {
       case 'CURSOR_APPEND':
         this.addClasses(CURSOR_APPEND_CLASS);
+        this.placeCursorMarker(state);
         return;
       case 'CURSOR_PREPEND':
         this.addClasses(CURSOR_PREPEND_CLASS);
+        this.placeCursorMarker(state);
         return;
       case 'CURSOR_INSERT_AFTER':
         this.addClasses(CURSOR_INSERT_AFTER_CLASS);
+        this.placeCursorMarker(state);
         return;
       case 'CURSOR_INSERT_BEFORE':
         this.addClasses(CURSOR_INSERT_BEFORE_CLASS);
+        this.placeCursorMarker(state);
         return;
     }
   }
@@ -270,6 +279,64 @@ export class CursorState {
   /** Whether the CURSOR_STATE is CURSOR_INSERT_BEFORE on the current TOKEN. */
   isInsertingBefore(): boolean {
     return this.getPlace().classList.contains(CURSOR_INSERT_BEFORE_CLASS);
+  }
+
+  private getCursorMarker(): HTMLElement {
+    if (this.cursorMarker) {
+      return this.cursorMarker;
+    }
+
+    const marker = this.seat.ownerDocument.createElement('span');
+    marker.classList.add(JSED_CURSOR_MARKER_CLASS, JSED_IGNORE_CLASS);
+    marker.setAttribute('aria-hidden', 'true');
+    this.cursorMarker = marker;
+    return marker;
+  }
+
+  private removeCursorMarker(): void {
+    this.cursorMarker?.remove();
+  }
+
+  private placeCursorMarker(state: CursorInsertState): void {
+    const current = this.getPlace();
+    if (!isToken(current) || isAnchor(current) || !current.parentNode) {
+      this.removeCursorMarker();
+      return;
+    }
+
+    const marker = this.getCursorMarker();
+    marker.dataset.cursorState = state;
+
+    switch (state) {
+      case 'CURSOR_APPEND': {
+        const separator = getSeparatorAfter(current);
+        current.parentNode.insertBefore(marker, separator ?? current.nextSibling);
+        return;
+      }
+      case 'CURSOR_INSERT_AFTER': {
+        const separator = getSeparatorAfter(current);
+        if (separator) {
+          separator.after(marker);
+        } else {
+          current.after(marker);
+        }
+        return;
+      }
+      case 'CURSOR_PREPEND': {
+        const separator = getSeparatorBefore(current);
+        if (separator) {
+          separator.after(marker);
+        } else {
+          current.before(marker);
+        }
+        return;
+      }
+      case 'CURSOR_INSERT_BEFORE': {
+        const separator = getSeparatorBefore(current);
+        current.parentNode.insertBefore(marker, separator ?? current);
+        return;
+      }
+    }
   }
 
   // #endregion

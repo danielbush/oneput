@@ -1,13 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import {
-  a,
   byId,
   div,
   em,
   findTokenByText,
   identify,
   identifyChildren,
-  inlineStyleHackVal,
   makeRoot,
   p,
   s,

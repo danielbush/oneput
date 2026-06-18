@@ -6,6 +6,9 @@ import type {
 
 /**
  * The callbacks a subscriber can register with EditorEventsEmitter.
+ *
+ * onDocumentChange fires on any text or element change. It is the coalesced
+ * "content changed" signal.
  */
 export interface EditorSubscription {
   onError?: (err: EditorError) => void;
@@ -13,6 +16,7 @@ export interface EditorSubscription {
   onCursorChange?: (target?: HTMLElement) => void;
   onTextChange?: (event: EditorTextChangeEvent) => void;
   onElementChange?: (event: EditorElementChangeEvent) => void;
+  onDocumentChange?: () => void;
 }
 
 /**
@@ -62,12 +66,14 @@ export class EditorEventsEmitter {
   emitTextChange(event: EditorTextChangeEvent) {
     for (const subscriber of this.subscribers) {
       subscriber.onTextChange?.(event);
+      subscriber.onDocumentChange?.();
     }
   }
 
   emitElementChange(event: EditorElementChangeEvent) {
     for (const subscriber of this.subscribers) {
       subscriber.onElementChange?.(event);
+      subscriber.onDocumentChange?.();
     }
   }
 

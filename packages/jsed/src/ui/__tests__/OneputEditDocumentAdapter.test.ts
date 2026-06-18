@@ -18,10 +18,11 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
  */
 export class EditDocument implements AppObject {
   static createNull(ctl: Controller, { document }: { document: JsedDocument }) {
-    const instance = new EditDocument(ctl, {
+    const editor = Editor.createNull({ document, userInput: ctl.input });
+    const instance = new EditDocument(ctl, editor, {
       adapter: (instance: EditDocument) =>
-        OneputEditDocumentAdapter.createNull(ctl, {
-          document,
+        OneputEditDocumentAdapter.create(ctl, {
+          editor,
           onRenderMenuItems: instance.renderMenuItems,
           onEditError: instance.handleEditError
         })
@@ -31,15 +32,14 @@ export class EditDocument implements AppObject {
 
   private adapter: OneputEditDocumentAdapter;
   public actions: AppObject['actions'];
-  public editor: Editor;
 
   constructor(
     private ctl: Controller,
+    public editor: Editor,
     private create: { adapter: (inst: EditDocument) => OneputEditDocumentAdapter }
   ) {
     this.adapter = this.create.adapter(this);
     this.actions = this.adapter.actions;
-    this.editor = this.adapter.editor;
   }
 
   onStart = () => {

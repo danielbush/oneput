@@ -1,8 +1,7 @@
 import type { Controller } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import type { JsedDocument } from '../JsedDocument.js';
-import { Editor } from '../editor/Editor.js';
+import type { Editor } from '../editor/Editor.js';
 import { icons } from './lib/icons.js';
 import { PickListUI } from './lib/PickListUI.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
@@ -18,47 +17,21 @@ export class OneputEditDocumentAdapter {
   static create(
     ctl: Controller,
     {
-      document,
+      editor,
       onEditError,
       onRenderMenuItems
     }: {
-      document: JsedDocument;
+      editor: Editor;
       onEditError: (err: EditorError) => void;
       onRenderMenuItems: () => void;
     }
   ) {
-    const editor = Editor.create({
-      document,
-      userInput: ctl.input
-    });
-    return new OneputEditDocumentAdapter(ctl, editor, onRenderMenuItems, onEditError);
-  }
-
-  static createNull(
-    ctl: Controller,
-    {
-      document,
-      onEditError,
-      onRenderMenuItems
-    }: {
-      document: JsedDocument;
-      onEditError: (err: EditorError) => void;
-      onRenderMenuItems: () => void;
-    }
-  ) {
-    const editor = Editor.createNull({
-      document,
-      userInput: ctl.input
-    });
     return new OneputEditDocumentAdapter(ctl, editor, onRenderMenuItems, onEditError);
   }
 
   constructor(
     private ctl: Controller,
-    /**
-     * Expose editor to the consumer.
-     */
-    public editor: Editor,
+    private editor: Editor,
     private onRenderMenuItems: () => void,
     private onEditError: (err: EditorError) => void
   ) {}

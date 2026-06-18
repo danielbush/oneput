@@ -1,14 +1,15 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import type { LayoutSettings } from './_layout.js';
-import { OneputEditDocumentAdapter } from '@oneput/jsed';
+import { Editor, OneputEditDocumentAdapter } from '@oneput/jsed';
 import type { EditorError, JsedDocument } from '@oneput/jsed';
 
 export class EditDocumentUI implements AppObject {
   static create(ctl: Controller, { document }: { document: JsedDocument }) {
+    const editor = Editor.create({ document, userInput: ctl.input });
     const instance = new EditDocumentUI(ctl, {
       adapter: (instance: EditDocumentUI) =>
         OneputEditDocumentAdapter.create(ctl, {
-          document,
+          editor,
           onRenderMenuItems: instance.renderMenuItems,
           onEditError: instance.handleEditError
         })

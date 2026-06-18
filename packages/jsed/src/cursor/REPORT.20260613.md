@@ -141,23 +141,30 @@ Load-bearing operations:
 
 Coverage:
 
-- Facade integration covers single TOKEN replacement, TOKEN after ISLAND, ISLAND no-op, multi-token replacement, and multi-word replacement on the last TOKEN.
-- Lower-level `token.replaceText` has direct TOKEN and ANCHOR tests.
+- Facade-level `Cursor.replaceWithText` coverage is now intentionally sparse.
+- Facade-level `Cursor.replaceWithText` now covers multiple replacements with multiple undo/redo operations through the real `UndoRecorder`.
+- Focused `ReplaceWithText.run` tests cover:
+  - one-word TOKEN replacement with undo/redo
+  - TOKEN after ISLAND with undo/redo
+  - ISLAND no-op
+  - multi-word replacement with undo/redo
+  - multi-word replacement on the last TOKEN with undo/redo
+  - blank text no-op
+  - selection delegation through `ReplaceSelectionWithText` with undo/redo
+- Focused `ReplaceWithText.merge` tests cover:
+  - successive replacement collapse
+  - multi-word replacement no-merge
+  - replace-then-delete collapse into `DeleteAtCursor`
+- Lower-level `token.replaceText` has direct TOKEN and ANCHOR tests, plus undo/redo coverage.
+- Lower-level `token.insertAfter` has direct insert and undo/redo coverage for multi-word replacement support.
 
 Gaps:
 
-- No focused `ReplaceWithText.run` undo/redo tests in `src/cursor/lib/__tests__`.
-- No tests for merge behavior:
-  - successive `ReplaceWithText`
-  - `ReplaceWithText` followed by `DeleteAtCursor`
-- Selection replacement has implementation but no obvious undo/redo coverage.
+- None for `ReplaceWithText.run` itself.
 
 Actions needed:
 
-- Add `src/cursor/lib` undo/redo tests for one-word and multi-word replacement.
-- Add merge tests for repeated typing into the same TOKEN.
-- Add merge test for replace-then-delete collapse.
-- Add one selection replacement undo/redo test.
+- Done for TOKEN/ISLAND/selection replacement and merge behavior.
 
 ### `insertTextAfter`
 
@@ -296,7 +303,7 @@ Actions needed:
 
 ## Recommended Order
 
-1. Add focused `src/cursor/lib` undo/redo tests for `ReplaceWithText`, `InsertTextAfter`, and `InsertTextBefore`.
+1. Add focused `src/cursor/lib` undo/redo tests for `InsertTextAfter` and `InsertTextBefore`.
 2. Add sparse facade integration tests for selection-backed delete/replace/wrap.
 3. Add sparse `Cursor.wrap` facade coverage for one TOKEN and one selection.
 4. Add merge tests for text editing records once basic undo/redo coverage is stable.

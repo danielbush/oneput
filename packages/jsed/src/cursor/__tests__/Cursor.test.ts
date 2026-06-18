@@ -693,86 +693,55 @@ describe('splitAtToken', () => {
 });
 
 describe('replaceWithText', () => {
-  test('TOKEN text', () => {
+  test('multiple replacements can be undone and redone', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'hello'));
+    const doc = makeRoot(p({ id: 'p1' }, t('one'), s(), t('two'), s(), t('three')));
+    const undo = UndoRecorder.createNull();
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'one'), undo);
+    const state = { cursor } as unknown as EditorState;
 
     // act
-    cursor.replaceWithText('goodbye');
+    cursor.replaceWithText('alpha');
+    cursor.moveNext();
+    cursor.replaceWithText('beta');
 
     // assert
-    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['goodbye', '[nodeType=3:" "]', 'world']);
-    expect(identify(cursor.getPlace())).toBe('goodbye');
-  });
-
-  test('TOKEN after ISLAND', () => {
-    // arrange
-    const doc = makeRoot(
-      p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
-    );
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'bbb'));
-
-    // act
-    cursor.replaceWithText('ccc');
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('ccc');
-  });
-
-  test('ISLAND no-op', () => {
-    // arrange
-    const doc = makeRoot(
-      p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
-    );
-    const island = doc.root.querySelector('.katex') as HTMLElement;
-    const { cursor } = createCursor(doc, island);
-    expect(identify(cursor.getPlace())).toBe('[island:span]');
-
-    // act
-    cursor.replaceWithText('oops');
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('[island:span]');
-  });
-
-  test('multiple TOKEN replacement', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'hello'));
-
-    // act
-    const result = cursor.replaceWithText('goodbye friend');
-
-    // assert
+    expect(identify(cursor.getPlace())).toBe('beta');
     expect(identifyChildren(byId(doc, 'p1'))).toEqual([
-      'goodbye',
+      'alpha',
       '[nodeType=3:" "]',
-      'friend',
+      'beta',
       '[nodeType=3:" "]',
-      'world'
+      'three'
     ]);
-    expect(result).not.toBeNull();
-    expect(identify(cursor.getPlace())).toBe('friend');
-  });
-
-  test('multi-word on last TOKEN → no trailing separator', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'world'));
 
     // act
-    cursor.replaceWithText('aaa bbb');
+    undo.popUndo()?.undo(state);
+    undo.popUndo()?.undo(state);
 
     // assert
+    expect(identify(cursor.getPlace())).toBe('one');
     expect(identifyChildren(byId(doc, 'p1'))).toEqual([
-      'hello',
+      'one',
       '[nodeType=3:" "]',
-      'aaa',
+      'two',
       '[nodeType=3:" "]',
-      'bbb'
+      'three'
     ]);
-    expect(identify(cursor.getPlace())).toBe('bbb');
+
+    // act
+    undo.popRedo()?.redo(state);
+    undo.popRedo()?.redo(state);
+
+    // assert
+    expect(identify(cursor.getPlace())).toBe('beta');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'alpha',
+      '[nodeType=3:" "]',
+      'beta',
+      '[nodeType=3:" "]',
+      'three'
+    ]);
   });
 });
 

@@ -1,8 +1,17 @@
 import { describe, expect, test } from 'vitest';
-import { createToken, remove, replaceText } from '../token.js';
+import {
+  createToken,
+  insertAfter,
+  redoInsertAfter,
+  redoReplaceText,
+  remove,
+  replaceText,
+  undoInsertAfter,
+  undoReplaceText
+} from '../token.js';
 import { createAnchor } from '../anchor.js';
 import { isAnchor, JSED_DELETED_CLASS, JSED_IGNORE_CLASS } from '../../core/taxonomy.js';
-import { buildParent } from '../../../test/util.js';
+import { buildParent, identifyChildren } from '../../../test/util.js';
 
 describe('replaceText', () => {
   test('existing TOKEN', () => {
@@ -18,6 +27,24 @@ describe('replaceText', () => {
     expect(token.firstChild?.nodeType).toBe(Node.TEXT_NODE);
   });
 
+  test('undo / redo', () => {
+    // arrange
+    const token = createToken('foo');
+    const rec = replaceText(token, 'bar');
+
+    // act
+    undoReplaceText(rec);
+
+    // assert
+    expect(token.textContent).toBe('foo');
+
+    // act
+    redoReplaceText(rec);
+
+    // assert
+    expect(token.textContent).toBe('bar');
+  });
+
   test('empty ANCHOR', () => {
     // arrange
     const anchor = createAnchor();
@@ -31,6 +58,41 @@ describe('replaceText', () => {
     expect(anchor.textContent).toBe('bar');
     expect(anchor.childNodes).toHaveLength(1);
     expect(anchor.firstChild?.nodeType).toBe(Node.TEXT_NODE);
+  });
+});
+
+describe('insertAfter', () => {
+  test('inserts TOKEN and separator after existing TOKEN', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    const parent = buildParent(foo);
+
+    // act
+    insertAfter(bar, foo);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', '[nodeType=3:" "]', 'bar']);
+  });
+
+  test('undo / redo', () => {
+    // arrange
+    const foo = createToken('foo');
+    const bar = createToken('bar');
+    const parent = buildParent(foo);
+    const rec = insertAfter(bar, foo);
+
+    // act
+    undoInsertAfter(rec);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', '[deleted-space]', 'd("bar")']);
+
+    // act
+    redoInsertAfter(rec);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', '[nodeType=3:" "]', 'bar']);
   });
 });
 

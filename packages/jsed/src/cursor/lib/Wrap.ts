@@ -32,7 +32,7 @@ export class WrapLineSibling implements UndoRecord {
       return;
     }
 
-    state.eventsEmitter.onElementChange?.({ type: 'focusable-inserted', element: op.wrapper });
+    state.eventsEmitter.emitElementChange({ type: 'focusable-inserted', element: op.wrapper });
     state.place(current);
     return new WrapLineSibling(op);
   }

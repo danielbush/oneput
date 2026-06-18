@@ -40,12 +40,12 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.eventsEmitter.onTextChange?.({
+    this.state.eventsEmitter.emitTextChange({
       type: 'anchor-change',
       anchor,
       change: 'inserted'
     });
-    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.emitError(err));
     return true;
   }
 
@@ -65,8 +65,8 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+    this.state.eventsEmitter.emitTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.emitError(err));
     return true;
   }
 
@@ -86,7 +86,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'removed' });
+    this.state.eventsEmitter.emitTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
@@ -106,7 +106,7 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'removed' });
+    this.state.eventsEmitter.emitTextChange({ type: 'anchor-change', anchor, change: 'removed' });
     return true;
   }
 
@@ -126,8 +126,8 @@ export class EditorAnchorOps {
       return false;
     }
 
-    this.state.eventsEmitter.onTextChange?.({ type: 'anchor-change', anchor, change: 'inserted' });
-    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+    this.state.eventsEmitter.emitTextChange({ type: 'anchor-change', anchor, change: 'inserted' });
+    this.state.enterEditing(anchor).mapErr((err) => this.state.eventsEmitter.emitError(err));
     return true;
   }
 }

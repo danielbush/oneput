@@ -187,7 +187,7 @@ export class EditorOps {
 
       case 'delete-current': {
         cursor.delete({ type: intent.deletionType });
-        this.state.eventsEmitter.onTextChange?.({
+        this.state.eventsEmitter.emitTextChange({
           type: 'token-text-change',
           token: cursor.getPlace()
         });
@@ -208,7 +208,7 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
-          this.state.eventsEmitter.onTextChange?.({
+          this.state.eventsEmitter.emitTextChange({
             type: 'token-text-change',
             token: cursor.getPlace()
           });
@@ -230,7 +230,7 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (lastToken) {
-          this.state.eventsEmitter.onTextChange?.({
+          this.state.eventsEmitter.emitTextChange({
             type: 'token-text-change',
             token: cursor.getPlace()
           });
@@ -244,7 +244,7 @@ export class EditorOps {
         });
         cursor.setStateFromInput(intent.inputValue);
         if (result) {
-          this.state.eventsEmitter.onTextChange?.({
+          this.state.eventsEmitter.emitTextChange({
             type: 'token-text-change',
             token: cursor.getPlace()
           });

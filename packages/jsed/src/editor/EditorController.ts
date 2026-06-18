@@ -73,7 +73,7 @@ export class EditorController {
    * pre-rewrite value.
    */
   onCursorChange = (seat?: HTMLElement, opts?: UserInputOpts) => {
-    this.state.eventsEmitter.onCursorChange?.(seat);
+    this.state.eventsEmitter.emitCursorChange(seat);
     if (seat) {
       this.state.document.viewportScroller.scrollIntoViewIfHidden(seat, {
         vertical: 'nearest'
@@ -105,7 +105,7 @@ export class EditorController {
       if (evt.element === currentFocus) {
         this.state
           .enterEditing(evt.element)
-          .mapErr((err) => this.state.eventsEmitter.onError?.(err));
+          .mapErr((err) => this.state.eventsEmitter.emitError(err));
         return false;
       }
 
@@ -114,7 +114,7 @@ export class EditorController {
 
     if (evt.targetType === 'TOKEN') {
       if (currentFocus?.contains(evt.token)) {
-        this.state.enterEditing(evt.token).mapErr((err) => this.state.eventsEmitter.onError?.(err));
+        this.state.enterEditing(evt.token).mapErr((err) => this.state.eventsEmitter.emitError(err));
         return false;
       }
     }
@@ -165,13 +165,13 @@ export class EditorController {
         this.state.tokenizer.tokenizeLineAt(line);
       }
     }
-    this.state.eventsEmitter.onFocusChange?.(focus);
+    this.state.eventsEmitter.emitFocusChange(focus);
   }
 
   /**
    * If the cursor finds itself in an untenable state...
    */
   onCursorError = (err: CursorError) => {
-    this.state.eventsEmitter.onError?.(err);
+    this.state.eventsEmitter.emitError(err);
   };
 }

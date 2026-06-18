@@ -29,17 +29,16 @@ task jsed:test -- src/cursor/__tests__/Cursor.test.ts src/cursor/lib/__tests__/D
 Result:
 
 - 4 focused cursor test files passed when including `src/cursor/lib/__tests__/DeleteAtCursor.test.ts`
-- 82 focused cursor tests passed
-- 1 todo
+- 81+ focused cursor tests passed in subsequent focused cursor runs as coverage moved between `Cursor.test.ts`, `DeleteAtCursor.test.ts`, and `CursorState.test.ts`
 
 The previous `delete > last TOKEN after ISLAND` failure appears fixed. The test now expects the CURSOR to land on the generated ANCHOR, matching `DeleteAtCursor.run`.
 
 Full jsed suite also passes:
 
 - 25 test files passed
-- 411 tests passed
+- 417 tests passed
 - 3 skipped
-- 2 todo
+- 1 todo
 
 ## Layer Map
 
@@ -109,23 +108,26 @@ Load-bearing operations:
 Coverage:
 
 - Facade-level `Cursor.delete` coverage is now intentionally sparse.
+- Facade-level `Cursor.delete` now covers multi-delete integration with multiple undo/redo operations through the real `UndoRecorder`.
 - Focused `DeleteAtCursor.run` tests cover:
   - normal TOKEN deletion with undo/redo
   - last TOKEN anchorization with undo/redo
+  - TOKEN after ISLAND with a following TOKEN, with undo/redo
   - last TOKEN after ISLAND anchorization with undo/redo
   - ANCHOR-driven `deleteHighestEmpty` with undo/redo
+  - ANCHOR-only no-op
+  - ISLAND no-op
 - Lower-level `token.remove` and `focusable.deleteHighestEmpty` have direct tests.
 - The `last TOKEN after ISLAND` expectation has been updated to ANCHOR placement and now passes.
 
 Gaps:
 
-- `ISLAND no-op` is still `test.todo` in the facade test.
-- No focused selection-delete undo/redo test yet.
+- None for `DeleteAtCursor.run` itself.
+- Selection-backed delete is tracked under Selection Facade Methods below.
 
 Actions needed:
 
-- Decide whether the `ISLAND no-op` todo is still desired behavior.
-- Add focused selection-delete undo/redo coverage, likely around `DeleteSelection.run`.
+- Done for TOKEN/ANCHOR/ISLAND delete-at-cursor behavior.
 
 ### `replaceWithText`
 
@@ -295,7 +297,6 @@ Actions needed:
 ## Recommended Order
 
 1. Add focused `src/cursor/lib` undo/redo tests for `ReplaceWithText`, `InsertTextAfter`, and `InsertTextBefore`.
-2. Add focused selection-delete undo/redo coverage, likely around `DeleteSelection.run`.
-3. Add sparse facade integration tests for selection-backed delete/replace/wrap.
-4. Add sparse `Cursor.wrap` facade coverage for one TOKEN and one selection.
-5. Add merge tests for text editing records once basic undo/redo coverage is stable.
+2. Add sparse facade integration tests for selection-backed delete/replace/wrap.
+3. Add sparse `Cursor.wrap` facade coverage for one TOKEN and one selection.
+4. Add merge tests for text editing records once basic undo/redo coverage is stable.

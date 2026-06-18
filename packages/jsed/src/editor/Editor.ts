@@ -45,6 +45,14 @@ export class Editor {
   start = () => this.state.start(); // initialize
   suspend = (bool: boolean) => this.state.suspend(bool);
   destroy = () => this.state.destroy();
+  /**
+   * Returns html ready to be persisted.
+   *
+   * Can be repeatedly run during the edit session.
+   * Fairly heavy operation (clone, strip, serialize to string), so call it on a
+   * longish debounce.
+   */
+  serialize = () => this.state.serialize();
 
   // Modes - view, edit
   isEditing = () => this.state.isEditing();

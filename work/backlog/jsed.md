@@ -49,7 +49,13 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## fix
 
-- might be an issue with DeleteAtCursor being merged by previous undo ReplaceWithText; if the DeleteAtCursor was a selection, it should not be merged by the previous ReplaceWithText; perhaps we need a `mergeable(last: UndoRecord): boolean`; if DeleteAtCursor instance deleted a selection, it would return false especially if last is instance of ReplaceWithText.
+
+- prevent undo merging in some situations?
+  - COMMENT: need a scenario I can replicate
+  - deleting a selection and then continually typing seems ok
+  - pasting
+  - DeleteAtCursor being merged by previous undo ReplaceWithText;
+    - if the DeleteAtCursor was a selection, it should not be merged by the previous ReplaceWithText; perhaps we need a `mergeable(last: UndoRecord): boolean`; if DeleteAtCursor instance deleted a selection, it would return false especially if last is instance of ReplaceWithText.
 - inserting anchors at places we don't need
   - what: `<p>aaa <em>bbb</em> ...</p>` - put cursor on bbb; we can get the oneput menu to insert an anchor before the em ie `<p>aaa [A]<em>...` which is unnecessary
   - fix: `getAnchorBeforeTagInsertionPoint` does `return isWhitespaceTextNode(previous) ? { parent: focus.parentNode, previous } : null;` but this is shortsighted because previous might be preceded by a TOKEN or non-whitespace text node
@@ -70,8 +76,36 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 - fix: modern css element indicator goes off the left side of viewport for small elements on the left edge (legacy indicator handles this)
 
-## feats
+## feat
 
+- make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
+- breadcrumb
+  - will be useful in mobile to go back up the ancestor chain (which maps to left/right bindings atm) but the difference is we can see what elements are in the acnestor chain, very easy to click on the parent p-tag or parent div tag etc etc; combine with moving between siblings using up/down buttons for button-based movement; probably don't want to do more than that, because touch selection is probably the primary way to move around on mobile
+- moving between visual line segments?
+  - COMMENT: this would make the editor more like notepad, make it friendlier; bear in mind, mobile users can just touch the word;
+  - COMMENT: this means repeat up or down movements, set some kind of horizontal position and we go looking for the nearest token to this position either above or below
+  - prompt: how do you compute the position of an element in html; this computed value should be universally comparable regardless of how the element is displayed / positioned / translated etc; the important thing is we can compare the x or y coordinate, but mostly the x coordinate
+  - "To get a universally comparable position for an HTML element that accounts for scrolling, CSS transforms (like translate), and any layout positioning (absolute, fixed, etc.), the standard and most reliable method is to use getBoundingClientRect() combined with the window's scroll offsets.  By adding the current scroll position to the element's viewport relative position, you get coordinates relative to the entire document (the top-left corner of the HTML page). This makes the values completely absolute and universally comparable across different elements."
+  - ```js
+      function getAbsolutePosition(element) {
+        if (!element) return { x: 0, y: 0 };
+
+        const rect = element.getBoundingClientRect();
+        
+        return {
+          // rect.left handles layout position + CSS translations
+          // window.scrollX handles how far the user has scrolled horizontally
+          x: rect.left + window.scrollX,
+          y: rect.top + window.scrollY
+        };
+      }
+
+      // Example usage:
+      const element = document.querySelector('#my-element');
+      const position = getAbsolutePosition(element);
+    ```
+- edit experience using mobile / soft keyboard
+  - COMMENT: make it easy to switch/toggle cursor states; make it easy to move the cursor between tokens; make it easy to move structurally via buttons
 - undo on FOCUSABLE ops
   - delete element
   - insert element
@@ -94,8 +128,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix/feat: use unicode mode in regexes (decideInputIntent, tokenization): 
   - `/\s/u` is unicode mode for detecting ALL whitespace; `\S` (non-whitespace) is a direct inverse of `\s`
 - feat: table editor - eg building a table of companies in a sector of the stock market
-- feat: a LINE_SEGMENT that is just an anchor can be deleted if we delete the anchor eg `...<em>A|</em>...`
-  - COMMENT: atm just letting the anchor stay
 - feat: cut/copy/paste selection and single tokens
   - COMMENT: marching ants just works; should be easy to do
   - if we're in edit mode and on token, copy/cut still operates on the FOCUS which is the p-tag
@@ -132,7 +164,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
       - informally describes an element that can be visited by FOCUS inside a FOCUS_TRANSPARENT
       - we either allow CURSOR to walk between ISLAND's or we restrict it; that might be a refinement based on experience when we see it
 
-## chores
+## chore
 
 - finish src/cursor/REPORT.20260613.md (audit/review)
 - improve identify (in tests)
@@ -148,7 +180,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - test badge should be green
 - rename this repo to jsed
 
-## refactors
+## refactor
 
 - remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
   - COMMENT: this stops subsystems importing internals of other subsystems
@@ -231,7 +263,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - it should always be JSED_IGNORE_CLASS based
   - what breaks if we make that change?
 
-## Discussion
+## defer
 
 - Invariant maintenance post-edit. Today tokenizeLooseLines* runs opportunistically at tokenize-time, so it catches bare text no matter how it appeared in the DOM. After removal, the "no bare interstitial text" invariant is established once at load and depends on every editing operation preserving it. Things to audit:
   - Either every edit op maintains the invariant, or you need a cheap "re-wrap this subtree" call you fire after suspicious edits.

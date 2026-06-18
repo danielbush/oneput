@@ -1,8 +1,8 @@
 import type { EditorState } from '../../editor/index.js';
 import {
-  redoRemoveWrapper,
+  redoDeleteSelection,
   removeWrappers,
-  undoRemoveWrapper,
+  undoDeleteSelection,
   type RemoveWrappers
 } from '../../lib/ops/selection.js';
 import type { UndoRecord } from '../../undo/UndoRecorder.js';
@@ -45,14 +45,14 @@ export class DeleteSelection implements UndoRecord {
 
   undo(state: EditorState) {
     for (const removedWrapper of this.removedWrappers.removedWrappers) {
-      undoRemoveWrapper(removedWrapper);
+      undoDeleteSelection(removedWrapper);
     }
     state.cursor?.place(this.cursorTarget.undo);
   }
 
   redo(state: EditorState) {
     for (const removedWrapper of this.removedWrappers.removedWrappers) {
-      redoRemoveWrapper(removedWrapper);
+      redoDeleteSelection(removedWrapper);
     }
     state.cursor?.place(this.cursorTarget.redo);
   }

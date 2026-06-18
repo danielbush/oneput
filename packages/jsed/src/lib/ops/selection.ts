@@ -21,7 +21,7 @@ export function containsSelection(el: HTMLElement): boolean {
   return el.querySelector(`.${JSED_SELECTION_CLASS}`) !== null;
 }
 
-export function unwrap(wrapper: HTMLElement): void {
+export function removeSelectionWrapper(wrapper: HTMLElement): void {
   wrapper.replaceWith(...Array.from(wrapper.childNodes));
 }
 
@@ -31,12 +31,12 @@ export function unwrap(wrapper: HTMLElement): void {
 export function removeSelectionWrappers(el: HTMLElement): void {
   const wrappers = el.querySelectorAll<HTMLElement>(`.${JSED_SELECTION_CLASS}`);
   for (const wrapper of wrappers) {
-    unwrap(wrapper);
+    removeSelectionWrapper(wrapper);
   }
 }
 
-export type RemoveWrapper = {
-  action: 'remove-wrapper';
+export type DeleteSelection = {
+  action: 'delete-selection';
   deleteHighestEmpty: undefined | false | DeleteElement;
   removedTokens: RemoveTokenAll[];
   /**
@@ -49,7 +49,7 @@ export type RemoveWrapper = {
 /**
  * Perform remove on all LINE_SIBLING content in `wrapper`.
  */
-export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement): RemoveWrapper {
+export function deleteSelection(wrapper: HTMLElement, ceiling?: HTMLElement): DeleteSelection {
   const children = wrapper.childNodes;
   const parent = wrapper.parentElement;
   if (!parent) {
@@ -62,7 +62,7 @@ export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement): Remo
       removedTokens.push(remove(child as HTMLElement, false));
     }
   }
-  unwrap(wrapper);
+  removeSelectionWrapper(wrapper);
   // Don't anchorize wrappers as they are temporary elements.  Do it after
   // unwrap.
   anchorize(parent);
@@ -72,14 +72,14 @@ export function removeWrapper(wrapper: HTMLElement, ceiling?: HTMLElement): Remo
     containsOnly(parent, wrapper) && deleteHighestEmpty(parent, ceiling, wrapper);
 
   return {
-    action: 'remove-wrapper',
+    action: 'delete-selection',
     deleteHighestEmpty: deleteHighest,
     removedTokens,
     marker: (deleteHighest && deleteHighest.marker) || parent
   };
 }
 
-export function undoRemoveWrapper(op: RemoveWrapper) {
+export function undoDeleteSelection(op: DeleteSelection) {
   for (const tok of op.removedTokens) {
     undoRemove(tok);
   }
@@ -89,7 +89,7 @@ export function undoRemoveWrapper(op: RemoveWrapper) {
   }
 }
 
-export function redoRemoveWrapper(op: RemoveWrapper) {
+export function redoDeleteSelection(op: DeleteSelection) {
   for (const tok of op.removedTokens) {
     redoRemove(tok);
   }
@@ -100,18 +100,18 @@ export function redoRemoveWrapper(op: RemoveWrapper) {
 }
 
 export type RemoveWrappers = {
-  action: 'remove-wrappers';
-  removedWrappers: RemoveWrapper[];
+  action: 'delete-selection';
+  removedWrappers: DeleteSelection[];
   firstMarker: HTMLElement | null;
   lastMarker: HTMLElement | null;
 };
 
 export function removeWrappers(wrappers: HTMLElement[], ceiling?: HTMLElement): RemoveWrappers {
-  const removedWrappers: RemoveWrapper[] = [];
+  const removedWrappers: DeleteSelection[] = [];
   let firstMarker: HTMLElement | null = null;
   let lastMarker: HTMLElement | null = null;
   for (const wrapper of wrappers) {
-    const result = removeWrapper(wrapper, ceiling);
+    const result = deleteSelection(wrapper, ceiling);
     if (!firstMarker) {
       firstMarker = result.marker;
     }
@@ -120,7 +120,7 @@ export function removeWrappers(wrappers: HTMLElement[], ceiling?: HTMLElement): 
   }
 
   return {
-    action: 'remove-wrappers',
+    action: 'delete-selection',
     removedWrappers,
     firstMarker,
     lastMarker

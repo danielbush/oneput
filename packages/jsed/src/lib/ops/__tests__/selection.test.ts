@@ -10,7 +10,7 @@ import {
   sel,
   t
 } from '../../../test/util.js';
-import { removeSelectionWrappers, removeWrapper } from '../selection.js';
+import { removeSelectionWrappers, deleteSelection } from '../selection.js';
 
 function getWrapper(root: HTMLElement): HTMLElement {
   return root.querySelector(`.${JSED_SELECTION_CLASS}`) as HTMLElement;
@@ -31,7 +31,7 @@ describe('removeWrapper', () => {
     const wrapper = getWrapper(root);
 
     // act
-    const result = removeWrapper(wrapper, root);
+    const result = deleteSelection(wrapper, root);
 
     // assert
     expect(result.removedTokens).toHaveLength(1);
@@ -57,7 +57,7 @@ describe('removeWrapper', () => {
     const p1 = root.querySelector('p')!;
 
     // act
-    const result = removeWrapper(wrapper, p1);
+    const result = deleteSelection(wrapper, p1);
 
     // assert
     expect(result.removedTokens).toHaveLength(2);

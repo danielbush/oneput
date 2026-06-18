@@ -1,5 +1,5 @@
 import { ok, Result } from 'neverthrow';
-import { isAnchor, isIsland, isLine, isToken, JSED_IGNORE_CLASS } from '../../lib/core/taxonomy.js';
+import { isAnchor, isIsland, isLine, isToken } from '../../lib/core/taxonomy.js';
 import * as token from '../../lib/ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../../input/UserInput.js';
@@ -301,17 +301,4 @@ export class EditorOps {
     const rec = this.state.undo.popRedo();
     rec?.redo(this.state);
   };
-
-  /**
-   * Most editing artifacts (like deleted tokens or delete placeholdres) are
-   * flagged with jsed-ignore.  So we'll just remove these.
-   *
-   * Other dangling things we might want to consider: jsed-selection
-   */
-  removeArtifacts(el: HTMLElement) {
-    const ignores = el.querySelectorAll(`.${JSED_IGNORE_CLASS}`);
-    for (const i of ignores) {
-      i.remove();
-    }
-  }
 }

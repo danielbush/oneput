@@ -23,6 +23,7 @@ import {
   isIsland,
   isToken,
   JSED_ANCHOR_CLASS,
+  JSED_FOCUS_CLASS,
   JSED_IMPLICIT_CLASS,
   JSED_TOKEN_CLASS
 } from '../../lib/core/taxonomy.js';
@@ -1880,6 +1881,7 @@ describe('Editor', () => {
 
       // starting the editor adds editing artifacts to the live document
       expect(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`).length).toBeGreaterThan(0);
+      expect(doc.root.querySelectorAll(`.${JSED_FOCUS_CLASS}`).length).toBeGreaterThan(0);
 
       // act
       const html = editor.serialize();
@@ -1890,9 +1892,12 @@ describe('Editor', () => {
       expect(html).not.toContain(JSED_TOKEN_CLASS);
       expect(html).not.toContain(JSED_ANCHOR_CLASS);
       expect(html).not.toContain(JSED_IMPLICIT_CLASS);
+      expect(html).not.toContain(JSED_FOCUS_CLASS);
+      expect(html).not.toContain('anchor-name');
 
       // assert: the live document still has its artifacts
       expect(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`).length).toBeGreaterThan(0);
+      expect(doc.root.querySelectorAll(`.${JSED_FOCUS_CLASS}`).length).toBeGreaterThan(0);
 
       editor.destroy();
     });

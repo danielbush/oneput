@@ -19,7 +19,8 @@ import { isCursorTransparent, isLineSibling } from '../../lib/core/taxonomy.js';
 import { anchorize, removeAnchors } from '../../lib/ops/anchor.js';
 import { detokenize } from '../../lib/ops/tokenize.js';
 import { addImplicitLines, removeImplicitLines } from '../../lib/ops/implicitLine.js';
-import { removeIgnored } from '../../lib/ops/document.js';
+import { removeEditingMarkers, removeIgnored } from '../../lib/ops/document.js';
+import { removeSelectionWrappers } from '../../lib/ops/selection.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type EditorTextChangeEvent =
@@ -241,9 +242,11 @@ export class EditorState {
    */
   private stripArtifacts(el: HTMLElement) {
     removeIgnored(el);
+    removeSelectionWrappers(el);
     removeAnchors(el);
     detokenize(el);
     removeImplicitLines(el);
+    removeEditingMarkers(el);
   }
 
   /**

@@ -10,7 +10,7 @@ import {
   sel,
   t
 } from '../../../test/util.js';
-import { removeWrapper } from '../selection.js';
+import { removeSelectionWrappers, removeWrapper } from '../selection.js';
 
 function getWrapper(root: HTMLElement): HTMLElement {
   return root.querySelector(`.${JSED_SELECTION_CLASS}`) as HTMLElement;
@@ -67,5 +67,27 @@ describe('removeWrapper', () => {
       '[deleted-element]', //
       '[anchor]'
     ]);
+  });
+});
+
+describe('removeSelectionWrappers', () => {
+  test('unwraps the selection span and keeps its content in place', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'),
+        s(),
+        sel(t('selected')), //
+        s(),
+        t('after')
+      )
+    );
+
+    // act
+    removeSelectionWrappers(root);
+
+    // assert
+    expect(root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
+    expect(root.querySelector('p')?.textContent).toBe('before selected after');
   });
 });

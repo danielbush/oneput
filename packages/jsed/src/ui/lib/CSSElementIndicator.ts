@@ -1,7 +1,12 @@
 import { getParent } from '../../lib/ops/token.js';
-import { isToken, JSED_ELEMENT_INDICATOR, JSED_IGNORE_CLASS } from '../../lib/core/taxonomy.js';
+import {
+  isToken,
+  JSED_ELEMENT_INDICATOR,
+  JSED_ELEMENT_INDICATOR_ANCHOR,
+  JSED_IGNORE_CLASS
+} from '../../lib/core/taxonomy.js';
 
-const ANCHOR_NAME = '--jsed-element-indicator';
+const ANCHOR_NAME = JSED_ELEMENT_INDICATOR_ANCHOR;
 
 interface Deps {
   createElement: (tag: string) => HTMLElement;

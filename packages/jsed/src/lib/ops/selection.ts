@@ -25,6 +25,16 @@ export function unwrap(wrapper: HTMLElement): void {
   wrapper.replaceWith(...Array.from(wrapper.childNodes));
 }
 
+/**
+ * Unwrap every SELECTION_WRAPPER in el, keeping the wrapped content in place.
+ */
+export function removeSelectionWrappers(el: HTMLElement): void {
+  const wrappers = el.querySelectorAll<HTMLElement>(`.${JSED_SELECTION_CLASS}`);
+  for (const wrapper of wrappers) {
+    unwrap(wrapper);
+  }
+}
+
 export type RemoveWrapper = {
   action: 'remove-wrapper';
   deleteHighestEmpty: undefined | false | DeleteElement;

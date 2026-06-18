@@ -61,6 +61,10 @@ export const JSED_DELETED_SPACE_CLASS = 'jsed-deleted-space';
 export const JSED_APP_ROOT_ID = 'jsed-app-root';
 
 export const JSED_ELEMENT_INDICATOR = 'jsed-tag-indicator';
+/**
+ * The anchor-name value the CSS element indicator sets on the focused element.
+ */
+export const JSED_ELEMENT_INDICATOR_ANCHOR = '--jsed-element-indicator';
 
 // ============================================================================
 // Primitives

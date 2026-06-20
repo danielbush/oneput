@@ -6,6 +6,10 @@ export { type EditorError } from './editor/index.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
 export { OneputEditDocumentAdapter } from './ui/OneputEditDocumentAdapter.js';
 export {
+  createEditDocumentActions,
+  type EditDocumentActions
+} from './ui/createEditDocumentActions.js';
+export {
   createEditDocumentMenuItems,
   type EditDocumentMenuActions
 } from './ui/createEditDocumentMenuItems.js';

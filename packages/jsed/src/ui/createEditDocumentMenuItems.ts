@@ -6,13 +6,13 @@ import { icons } from './lib/icons.js';
 import { PickListUI } from './lib/PickListUI.js';
 
 export type EditDocumentMenuActions = {
-  ENTER: { action: () => void };
-  UNDO: { action: () => void };
-  REDO: { action: () => void };
-  CUT: { action: () => void };
-  COPY: { action: () => void };
-  COPY_EMPTY_PREVIOUS: { action: () => void };
-  COPY_EMPTY_NEXT: { action: () => void };
+  ENTER: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
+  UNDO: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
+  REDO: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
+  CUT: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
+  COPY: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
+  COPY_EMPTY_PREVIOUS: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
+  COPY_EMPTY_NEXT: { action: (ctl: Controller, evt?: KeyboardEvent) => void };
 };
 
 /**

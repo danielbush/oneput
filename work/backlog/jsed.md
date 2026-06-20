@@ -49,7 +49,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## fix
 
-
+- if you delete first word on LINE, don't move back; stay on the LINE.  Let the second token take the CURSOR.
 - prevent undo merging in some situations?
   - COMMENT: need a scenario I can replicate
   - deleting a selection and then continually typing seems ok

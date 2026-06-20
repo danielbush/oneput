@@ -1,7 +1,10 @@
 import type { Controller } from '@oneput/oneput';
 import type { Editor } from '../editor/Editor.js';
 import type { EditorError } from '../editor/index.js';
-import { createEditDocumentActions } from './createEditDocumentActions.js';
+import {
+  createEditDocumentActions,
+  type EditDocumentActions
+} from './createEditDocumentActions.js';
 import { createEditDocumentMenuItems } from './createEditDocumentMenuItems.js';
 
 /**
@@ -31,7 +34,15 @@ export class OneputEditDocumentAdapter {
     private editor: Editor,
     private onRenderMenuItems: () => void,
     private onEditError: (err: EditorError) => void
-  ) {}
+  ) {
+    this.actions = createEditDocumentActions({
+      ctl: this.ctl,
+      editor: this.editor,
+      renderMenuItems: this.onRenderMenuItems
+    });
+  }
+
+  actions: EditDocumentActions;
 
   private unsubscribeEditChanges?: () => void;
 
@@ -87,12 +98,6 @@ export class OneputEditDocumentAdapter {
     this.editor.destroy();
     this.removeSuspendHandler?.();
   };
-
-  actions = createEditDocumentActions({
-    ctl: this.ctl,
-    editor: this.editor,
-    renderMenuItems: this.onRenderMenuItems
-  });
 
   getMenuItems = ({ renderMenuItems }: { renderMenuItems: () => void }) =>
     createEditDocumentMenuItems({

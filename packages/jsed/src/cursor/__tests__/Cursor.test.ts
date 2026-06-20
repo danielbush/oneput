@@ -18,8 +18,7 @@ import { EditorEventsEmitter } from '../../editor/index.js';
 import { UndoRecorder } from '../../undo/index.js';
 import { getValue } from '../../lib/ops/token.js';
 import { addImplicitLines } from '../../lib/ops/implicitLine.js';
-import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../lib/core/taxonomy.js';
-import { getSeparatorBefore } from '../../lib/ops/space.js';
+import { JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../lib/core/taxonomy.js';
 import type { EditorState } from '../../editor/index.js';
 import {
   CURSOR_APPEND_CLASS,
@@ -508,187 +507,63 @@ describe('moveNext / movePrevious', () => {
 });
 
 describe('splitAtToken', () => {
-  test('CURSOR_APPEND', () => {
+  test('multiple splits can be undone and redone', () => {
     // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
+    const doc = makeRoot(p({ id: 'p1' }, t('one'), s(), t('two'), s(), t('three')));
+    const undo = UndoRecorder.createNull();
+    const { cursor } = createCursor(doc, findTokenByText(doc.root, 'two'), undo);
+    const state = { cursor } as unknown as EditorState;
+
+    // act
+    cursor.splitAtToken();
     cursor.setInsertState('CURSOR_APPEND');
-
-    // act
     cursor.splitAtToken();
 
     // assert
-    expect(identify(cursor.getPlace())).toBe('world');
-    expect(doc.root.querySelectorAll('p')).toHaveLength(2);
-  });
-
-  test('CURSOR_INSERT_AFTER', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]);
-    cursor.setInsertState('CURSOR_INSERT_AFTER');
-
-    // act
-    cursor.splitAtToken();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('world');
-    expect(doc.root.querySelectorAll('p')).toHaveLength(2);
-  });
-
-  test('default split before current TOKEN', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world'), s(), t('foo')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]);
-
-    // act
-    cursor.splitAtToken();
-
-    // assert
-    expect(identify(cursor.getPlace())).toBe('foo');
-    expect(doc.root.querySelectorAll('p')).toHaveLength(2);
-  });
-
-  // ANCHOR_ISLAND_EDGE_CASE
-  test('split after first TOKEN that precedes an ISLAND', () => {
-    // arrange — the TOKEN is the only TOKEN on the LINE, followed by an ISLAND
-    const doc = makeRoot(p(t('foo'), s(), '<span class="katex" style="display:inline;">x²</span>'));
-    const { cursor } = createCursor(doc, tokens(doc)[0]); // foo
-    cursor.setInsertState('CURSOR_APPEND');
-
-    // act
-    cursor.splitAtToken();
-
-    // assert — the ISLAND moves to a new LINE, fronted by an ANCHOR with a space between
-    const lines = doc.root.querySelectorAll('p');
-    expect(lines).toHaveLength(2);
-    expect(lines[0].textContent).toContain('foo');
-    const newLine = lines[1];
-    expect(identifyChildren(lines[1])).toEqual([
-      '[nodeType=3:" "]',
-      '[anchor]',
-      '[island:span]',
-      '[anchor]'
-    ]);
-    const anchor = newLine.querySelector(`.${JSED_ANCHOR_CLASS}`) as HTMLElement | null;
-    const island = newLine.querySelector('.katex');
-    expect(anchor).not.toBeNull();
-    expect(island).not.toBeNull();
-    // ANCHOR comes before the ISLAND
+    expect(identify(cursor.getPlace())).toBe('[anchor]');
     expect(
-      anchor!.compareDocumentPosition(island!) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    // a separator space is auto-generated between the ANCHOR and the ISLAND
-    expect(getSeparatorBefore(anchor!)?.nodeValue).toBe(' ');
-  });
-
-  test('split before first TOKEN → ANCHOR on emptied original LINE', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[0]); // hello
-    cursor.setInsertState('CURSOR_PREPEND');
-
-    // act
-    cursor.splitAtToken();
-
-    // assert
-    const lines = doc.root.querySelectorAll('p');
-    expect(lines).toHaveLength(2);
-    expect(identifyChildren(lines[0])).toEqual(['[anchor]']);
-    expect(identifyChildren(lines[1])).toEqual(['hello', '[nodeType=3:" "]', 'world']);
-    expect(identify(cursor.getPlace())).toBe('hello');
-  });
-
-  test('split after last TOKEN → ANCHOR on new empty LINE', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]); // world
-    cursor.setInsertState('CURSOR_APPEND');
+      Array.from(doc.root.querySelectorAll('p')).map((line) => identifyChildren(line))
+    ).toEqual([
+      [
+        'one', //
+        '[nodeType=3:" "]',
+        'two'
+      ],
+      ['[nodeType=3:" "]', 'three'],
+      ['[anchor]']
+    ]);
 
     // act
-    cursor.splitAtToken();
+    undo.popUndo()?.undo(state);
+    undo.popUndo()?.undo(state);
 
     // assert
-    const lines = doc.root.querySelectorAll('p');
-    expect(lines).toHaveLength(2);
-    expect(identifyChildren(lines[0])).toEqual(['hello', '[nodeType=3:" "]', 'world']);
-    expect(identifyChildren(lines[1])).toEqual(['[anchor]']);
+    expect(identify(cursor.getPlace())).toBe('two');
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual([
+      'one', //
+      '[nodeType=3:" "]',
+      'two',
+      '[nodeType=3:" "]',
+      'three'
+    ]);
+
+    // act
+    undo.popRedo()?.redo(state);
+    undo.popRedo()?.redo(state);
+
+    // assert
     expect(identify(cursor.getPlace())).toBe('[anchor]');
-  });
-
-  test('split with TOKENs both sides → no ANCHOR', () => {
-    // arrange
-    const doc = makeRoot(p(t('hello'), s(), t('world')));
-    const { cursor } = createCursor(doc, tokens(doc)[1]); // world
-    cursor.setInsertState('CURSOR_PREPEND');
-
-    // act
-    cursor.splitAtToken();
-
-    // assert
-    const lines = doc.root.querySelectorAll('p');
-    expect(lines).toHaveLength(2);
-    expect(identifyChildren(lines[0])).toEqual(['hello', '[nodeType=3:" "]']);
-    expect(identifyChildren(lines[1])).toEqual(['world']);
-    expect(doc.root.querySelectorAll(`.${JSED_ANCHOR_CLASS}`)).toHaveLength(0);
-  });
-
-  test('split after TOKEN in nested INLINE_FLOW → ANCHOR in emptied peer', () => {
-    // arrange
-    const doc = makeRoot(p(em(inlineStyle, t('a'))));
-    const { cursor } = createCursor(doc, tokens(doc)[0]); // a
-    cursor.setInsertState('CURSOR_APPEND');
-
-    // act
-    cursor.splitAtToken();
-
-    // assert — anchoring targets the bottom (em) split, not the outer LINE
-    const lines = doc.root.querySelectorAll('p');
-    expect(lines).toHaveLength(2);
-    expect(identifyChildren(lines[0].querySelector('em')!)).toEqual(['a']);
-    expect(identifyChildren(lines[1].querySelector('em')!)).toEqual(['[anchor]']);
-    expect(identify(cursor.getPlace())).toBe('[anchor]');
-  });
-
-  test('action / undo / redo — generates ANCHOR and places CURSOR on it', () => {
-    // arrange — split after the last TOKEN: the new LINE is empty so it gets an
-    // ANCHOR and the CURSOR lands on it.
-    const doc = makeRoot(
-      p(
-        t('hello'), //
-        s(),
-        t('world')
-      )
-    );
-    const { cursor } = createCursor(doc, tokens(doc)[1]); // world
-    cursor.setInsertState('CURSOR_APPEND');
-    const state = { cursor } as unknown as EditorState; // record.undo/redo only touch state.cursor
-    const ps = () => doc.root.querySelectorAll('p');
-
-    // act — split
-    const record = cursor.splitAtToken()!;
-
-    // assert — new empty LINE fronted by an ANCHOR, CURSOR on it
-    expect(ps()).toHaveLength(2);
-    expect(identifyChildren(ps()[1])).toEqual(['[anchor]']);
-    expect(isAnchor(cursor.getPlace())).toBe(true);
-
-    // act — undo
-    record.undo(state);
-
-    // assert — one LINE again, CURSOR back on the original TOKEN. The ANCHOR is
-    // soft-deleted (IGNORABLE) and retained on the LINE so redo can reuse it.
-    expect(ps()).toHaveLength(1);
-    expect(identify(cursor.getPlace())).toBe('world');
-    expect(identifyChildren(ps()[0])).toEqual(['hello', '[nodeType=3:" "]', 'world']);
-
-    // act — redo
-    record.redo(state);
-
-    // assert — split restored, CURSOR back on the same ANCHOR
-    expect(ps()).toHaveLength(2);
-    expect(identifyChildren(ps()[1])).toEqual(['[anchor]']);
-    expect(isAnchor(cursor.getPlace())).toBe(true);
+    expect(
+      Array.from(doc.root.querySelectorAll('p')).map((line) => identifyChildren(line))
+    ).toEqual([
+      [
+        'one', //
+        '[nodeType=3:" "]',
+        'two'
+      ],
+      ['[nodeType=3:" "]', 'three'],
+      ['[anchor]']
+    ]);
   });
 });
 

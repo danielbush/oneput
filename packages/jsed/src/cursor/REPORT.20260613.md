@@ -232,12 +232,27 @@ Load-bearing operations:
 
 Coverage:
 
-- Strong facade integration coverage for append, insert-after, default split-before, ISLAND adjacency, first/last TOKEN anchorization, no-anchor split, nested INLINE_FLOW, and action/undo/redo.
+- Facade-level `Cursor.splitAtToken` coverage is now intentionally sparse.
+- Facade-level `Cursor.splitAtToken` now covers multiple splits with multiple undo/redo operations through the real `UndoRecorder`.
+- Focused `SplitAtToken.run` tests cover:
+  - append and insert-after split direction
+  - default split-after direction
+  - prepend before first TOKEN with ANCHOR placement and undo/redo
+  - append after last TOKEN with ANCHOR placement and undo/redo
+  - split with TOKEN's on both sides without ANCHOR insertion
+  - split after a TOKEN before an ISLAND, including separator and ANCHOR placement
+  - split after a TOKEN in a nested INLINE_FLOW, including bottom-peer ANCHOR placement
 - Lower-level recursive split operations are covered in `src/lib/ops/__tests__/focusable.test.ts`.
+- Lower-level LINE lookup and LINE_SIBLING traversal are covered in `src/lib/core/__tests__/line.test.ts`.
+- Lower-level ANCHOR behavior is covered in `src/lib/ops/__tests__/anchor.test.ts`.
 
-Action needed:
+Gaps:
 
-- No immediate additional tests.
+- None for `SplitAtToken.run` itself.
+
+Actions needed:
+
+- Done for SPLIT_BY_TOKEN direction, ANCHOR placement, cursor placement, and undo/redo behavior.
 
 ### `wrap`
 

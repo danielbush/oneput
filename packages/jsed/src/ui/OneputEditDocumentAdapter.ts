@@ -360,7 +360,7 @@ export class OneputEditDocumentAdapter {
       !this.editor.isEditing() &&
         stdMenuItem({
           id: 'EDIT_FIRST',
-          textContent: 'Edit content',
+          textContent: 'Edit text',
           action: this.actions.ENTER.action,
           left: (b) => [b.icon(icons.Pencil)]
         }),

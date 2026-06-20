@@ -40,11 +40,11 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - undo split at cursor
 - [x] undo selection changes
 - [ ] undo FOCUSABLE changes
-- save/persist changes and load
-- editing islands
+- [.] save/persist changes and load
+- [ ] editing islands
   - katex as example of an island
   - code might be another
-- r:JSED_AGENT_COEDIT
+- [ ] r:JSED_AGENT_COEDIT
 - multi-user edit
 
 ## fix
@@ -181,17 +181,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - merge to master
 - test badge should be green
 - rename this repo to jsed
-
-## refactor
-
-- remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
-  - COMMENT: this stops subsystems importing internals of other subsystems
-- `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/
-  - COMMENT: we shouldn't be importing types from jsed-demo like this
-- probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace
-- /local-lens on cursor
-  - exhaustive tests lib/ops
-  - exhaustive tests on UndoRecord in lib/cursor/
+- an upgrade skill?
+  - the skill provides a well trodden path to safely update the code; it might belong to a super-skill in the workspace root
 - tidy up skills
   - local-lens
     - not in .claude
@@ -203,6 +194,17 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - I wonder if they should go in the source code and we install them as symlinks?
     - I think it would be clearer
     - initially we could put them at the workspace level in skills/
+
+## refactor
+
+- remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
+  - COMMENT: this stops subsystems importing internals of other subsystems
+- `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/
+  - COMMENT: we shouldn't be importing types from jsed-demo like this
+- probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace
+- /local-lens on cursor
+  - exhaustive tests lib/ops
+  - exhaustive tests on UndoRecord in lib/cursor/
 - chore: remove symbols from architecture; just use vocab and module file names
 - chore: outline new deep modules structure in architecture
   - COMMENT: ie lib/ops is load-bearing etc

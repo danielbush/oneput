@@ -18,7 +18,8 @@ Top level modules
 - src/lib/editor/Editor.ts
 - src/lib/editor/EditorController.ts
 - src/lib/cursor/Cursor.ts
-- src/lib/ui/oneput/OneputEditDocumentAdapter.ts
+- src/ui/createEditDocumentActions.ts
+- src/ui/createEditDocumentMenuItems.ts
 
 Everything else is either intermediate or lower level operations.
 

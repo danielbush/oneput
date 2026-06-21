@@ -1,9 +1,15 @@
-import { Editor, JsedDocument, type EditorError } from '@oneput/jsed';
 import { Controller, type AppObject } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../lib/core/taxonomy.js';
-import { OneputEditDocumentAdapter } from '../OneputEditDocumentAdapter.js';
 import { makeRoot } from '../../test/util.js';
+import { Editor } from '../../editor/Editor.js';
+import { JsedDocument } from '../../JsedDocument.js';
+import type { EditorError } from '../../editor/index.js';
+import {
+  createEditDocumentActions,
+  type EditDocumentActions
+} from '../createEditDocumentActions.js';
+import { createEditDocumentMenuItems } from '../createEditDocumentMenuItems.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);
@@ -14,55 +20,95 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
 }
 
 /**
- * Simple example of a consumer of OneputEditDocumentAdapter.
+ * Simple example of a Oneput consumer editing a Jsed document.
  */
 export class EditDocument implements AppObject {
   static createNull(ctl: Controller, { document }: { document: JsedDocument }) {
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const instance = new EditDocument(ctl, editor, {
-      adapter: (instance: EditDocument) =>
-        OneputEditDocumentAdapter.create(ctl, {
-          editor,
-          onRenderMenuItems: instance.renderMenuItems,
-          onEditError: instance.handleEditError
-        })
-    });
-    return instance;
+    return new EditDocument(ctl, editor);
   }
 
-  private adapter: OneputEditDocumentAdapter;
-  public actions: AppObject['actions'];
+  public actions: EditDocumentActions;
+
+  private unsubscribeEditChanges?: () => void;
+  private removeSuspendHandler?: () => void;
 
   constructor(
     private ctl: Controller,
-    public editor: Editor,
-    private create: { adapter: (inst: EditDocument) => OneputEditDocumentAdapter }
+    public editor: Editor
   ) {
-    this.adapter = this.create.adapter(this);
-    this.actions = this.adapter.actions;
+    this.actions = createEditDocumentActions({
+      ctl: this.ctl,
+      editor: this.editor,
+      invalidateMenu: this.renderMenuItems
+    });
   }
 
+  /**
+   * Rebuild the menu when editor state changes.
+   */
+  private subscribeEditChanges = () => {
+    this.unsubscribeEditChanges?.();
+    this.unsubscribeEditChanges = this.editor.eventsEmitter.subscribe({
+      onError: (err) => this.handleEditError(err),
+      onFocusChange: () => {
+        this.renderMenuItems();
+      },
+      onCursorChange: () => {
+        this.renderMenuItems();
+      },
+      onTextChange: (evt) => {
+        switch (evt.type) {
+          case 'token-text-change':
+          case 'anchor-change':
+          case 'whitespace-change':
+            this.renderMenuItems();
+        }
+      },
+      onElementChange: () => {
+        this.renderMenuItems();
+      }
+    });
+  };
+
   onStart = () => {
-    this.adapter.start();
+    this.editor.start();
+    this.renderMenuItems();
+    this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
+      this.editor.suspend(isOpen);
+    });
+    this.ctl.input.focus();
+    this.subscribeEditChanges();
   };
 
   onResume = () => {
-    this.adapter.resume();
+    this.editor.suspend(false);
+    this.renderMenuItems();
+    this.ctl.input.focus();
+    this.subscribeEditChanges();
   };
 
   onSuspend = () => {
-    this.adapter.suspend();
+    this.unsubscribeEditChanges?.();
+    this.unsubscribeEditChanges = undefined;
   };
 
   onExit = () => {
-    this.adapter.exit();
+    this.unsubscribeEditChanges?.();
+    this.removeSuspendHandler?.();
+    this.editor.destroy();
   };
 
   renderMenuItems = () => {
     this.ctl.menu.setMenu({
       id: 'EditDocument',
       focusBehaviour: 'last-action,first',
-      items: this.adapter.getMenuItems({ renderMenuItems: this.renderMenuItems })
+      items: createEditDocumentMenuItems({
+        ctl: this.ctl,
+        editor: this.editor,
+        actions: this.actions,
+        invalidateMenu: this.renderMenuItems
+      })
     });
   };
 

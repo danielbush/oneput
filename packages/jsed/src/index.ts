@@ -4,7 +4,6 @@ export { JsedDocument } from './JsedDocument.js';
 export { Editor } from './editor/Editor.js';
 export { type EditorError } from './editor/index.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
-export { OneputEditDocumentAdapter } from './ui/OneputEditDocumentAdapter.js';
 export {
   createEditDocumentActions,
   type EditDocumentActions

@@ -26,8 +26,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
         onLayoutChange: (ctl, { actions, menuTitle }) => { ctl.ui.setLayout(...) }
       })
       ```
-  - COMMENT - we run our own AppObject and it gives us stuff we need
-    - `OneputEditDocumentAdapter` does this
+  - COMMENT - we run our own AppObject and use helper functions for actions and menu items
 - refactor: start should only be called once; make onResume required or just don't call anything
 - fix: oneput-demo menu is closing on actions where it shouldn't
   - I think I altered this when working on jsed-demo; what is the preferred approach?

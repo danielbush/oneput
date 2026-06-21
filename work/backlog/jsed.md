@@ -244,8 +244,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - EditorFocusOps, EditorTextOps are the main orchestrators, so they can call the token or related to manage the anchors
 - refactor: pass undo as event?
   - `this.state.notifyElementChange({ type: 'focusable-inserted', element: inserted.finalSplit.peer });` is used for this.state.cursor.splitAtToken in packages/jsed/src/lib/editor/EditorCursorOps.ts
-- refactor: OneputEditDocumentAdapter.ts should probably be instantiated as the UI and it provides hooks for us to customise it;
-- refactor: OneputEditDocumentAdapter.ts isn't an adapter; it's sort of a manual base class - so maybe OneputEditDocumentBase.ts ?
+- refactor: the Oneput/Jsed integration now uses action and menu helper functions; lifecycle belongs in the host AppObject
 - refactor: line module is really sibling.ts and it should include the sib functions in walk; walk builds on sibling
 - [ ] refactor: merge CursorTextOps.ts into EditorCursorOps.ts
 - [ ] refactor: we shouldn't have to call `.destroy()` in Editor tests

@@ -41,6 +41,7 @@ export function createMenuItems({
         left: (b) => [b.icon(icons.PencilOff)]
       }),
     !editor.isEditing() &&
+      ctl.app.canGoBack() &&
       stdMenuItem({
         id: 'EXIT',
         textContent: 'Exit',

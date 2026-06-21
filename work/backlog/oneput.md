@@ -4,9 +4,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Critical work
 
-- get oneput to be able to chat to hermes
+
+- talk to hermes
   - COMMENT: once 2br/oneput is running on mobile, this mean we could talk to hermes over it rather than telegram; it means we could ask the agent to make modifications to 2br for us (that would require mcp machinery to safely interact with 2br data)
-  - we need a way to store conversations; we're not assuming 2br here, but
+  - how to store conversations?
+    - something "2br adjacent"
 
 ## Details
 

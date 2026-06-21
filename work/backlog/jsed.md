@@ -44,7 +44,9 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - [ ] editing islands
   - katex as example of an island
   - code might be another
-- [ ] r:JSED_AGENT_COEDIT
+- COMMENT: explore r:JSED_AGENT_COEDIT
+- [ ] r:2D_CHAT_1
+- COMMENT: more ambitious
 - multi-user edit
 
 ## fix

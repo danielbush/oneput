@@ -1,12 +1,9 @@
-import { Controller, type AppObject } from '@oneput/oneput';
+import { Controller } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../lib/core/taxonomy.js';
 import { makeRoot } from '../../test/util.js';
-import { Editor } from '../../editor/Editor.js';
 import { JsedDocument } from '../../JsedDocument.js';
-import type { EditorError } from '../../editor/index.js';
-import { createActions, type EditDocumentActions } from '../actions.js';
-import { createMenuItems } from '../menuItems.js';
+import { JsedEditDocumentUI } from '../../oneput/JsedEditDocumentUI.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);
@@ -16,110 +13,12 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
   return el as HTMLElement;
 }
 
-/**
- * Simple example of a Oneput consumer editing a Jsed document.
- */
-export class EditDocument implements AppObject {
-  static createNull(ctl: Controller, { document }: { document: JsedDocument }) {
-    const editor = Editor.createNull({ document, userInput: ctl.input });
-    return new EditDocument(ctl, editor);
-  }
-
-  public actions: EditDocumentActions;
-
-  private unsubscribeEditChanges?: () => void;
-  private removeSuspendHandler?: () => void;
-
-  constructor(
-    private ctl: Controller,
-    public editor: Editor
-  ) {
-    this.actions = createActions({
-      ctl: this.ctl,
-      editor: this.editor,
-      invalidateMenu: this.renderMenuItems
-    });
-  }
-
-  /**
-   * Rebuild the menu when editor state changes.
-   */
-  private subscribeEditChanges = () => {
-    this.unsubscribeEditChanges?.();
-    this.unsubscribeEditChanges = this.editor.eventsEmitter.subscribe({
-      onError: (err) => this.handleEditError(err),
-      onFocusChange: () => {
-        this.renderMenuItems();
-      },
-      onCursorChange: () => {
-        this.renderMenuItems();
-      },
-      onTextChange: (evt) => {
-        switch (evt.type) {
-          case 'token-text-change':
-          case 'anchor-change':
-          case 'whitespace-change':
-            this.renderMenuItems();
-        }
-      },
-      onElementChange: () => {
-        this.renderMenuItems();
-      }
-    });
-  };
-
-  onStart = () => {
-    this.editor.start();
-    this.renderMenuItems();
-    this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
-      this.editor.suspend(isOpen);
-    });
-    this.ctl.input.focus();
-    this.subscribeEditChanges();
-  };
-
-  onResume = () => {
-    this.editor.suspend(false);
-    this.renderMenuItems();
-    this.ctl.input.focus();
-    this.subscribeEditChanges();
-  };
-
-  onSuspend = () => {
-    this.unsubscribeEditChanges?.();
-    this.unsubscribeEditChanges = undefined;
-  };
-
-  onExit = () => {
-    this.unsubscribeEditChanges?.();
-    this.removeSuspendHandler?.();
-    this.editor.destroy();
-  };
-
-  renderMenuItems = () => {
-    this.ctl.menu.setMenu({
-      id: 'EditDocument',
-      focusBehaviour: 'last-action,first',
-      items: createMenuItems({
-        ctl: this.ctl,
-        editor: this.editor,
-        actions: this.actions,
-        invalidateMenu: this.renderMenuItems
-      })
-    });
-  };
-
-  handleEditError = (err: EditorError) => {
-    this.ctl.notify(`There was an error editing the document: ${err.type}`);
-  };
-}
-
-describe('EditDocument', () => {
+describe('JsedEditDocumentUI', () => {
   it('starts in view mode and quick-descends first focus without going into edit mode', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
 
     // act
@@ -138,7 +37,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     ctl.simulateStart(() => editorUI);
     const appChanges = ctl.trackAppChanges();
@@ -157,7 +56,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
     ctl.simulateStart(() => editorUI);
@@ -194,7 +93,7 @@ describe('EditDocument', () => {
       }
     });
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
 
@@ -226,7 +125,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
 
@@ -259,7 +158,7 @@ describe('EditDocument', () => {
       '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
     );
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const d1 = byId(document, 'd1');
     const editor = editorUI.editor;
 
@@ -293,7 +192,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const editor = editorUI.editor;
 
     ctl.simulateStart(() => editorUI);
@@ -322,7 +221,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const p2 = byId(document, 'p2');
 
@@ -353,7 +252,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<div id="d1">foo</div>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const d1 = byId(document, 'd1');
 
@@ -382,7 +281,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<ul id="list"><li>one</li></ul>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const list = byId(document, 'list');
 
@@ -412,7 +311,7 @@ describe('EditDocument', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = EditDocument.createNull(ctl, { document });
+    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const p1 = byId(document, 'p1');
     const p2 = byId(document, 'p2');

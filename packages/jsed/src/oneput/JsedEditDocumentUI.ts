@@ -1,12 +1,48 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import type { LayoutSettings } from './_layout.js';
-import { createActions, createMenuItems, Editor, type EditDocumentActions } from '@oneput/jsed';
-import type { EditorError, JsedDocument } from '@oneput/jsed';
+import { Editor } from '../editor/Editor.js';
+import type { EditorError } from '../editor/index.js';
+import type { JsedDocument } from '../JsedDocument.js';
+import { createActions, type EditDocumentActions } from '../ui/actions.js';
+import { createMenuItems } from '../ui/menuItems.js';
 
-export class EditDocumentUI implements AppObject {
-  static create(ctl: Controller, { document }: { document: JsedDocument }) {
+export type JsedEditDocumentUIHooks = {
+  onActivate?: () => void;
+  onEditError?: (err: EditorError) => void;
+};
+
+/**
+ * Oneput AppObject for editing a Jsed document.
+ *
+ * This is both a usable default and a copyable example for host apps that need
+ * to own lifecycle, layout, saving, or custom editor behavior.
+ */
+export class JsedEditDocumentUI implements AppObject {
+  static create(
+    ctl: Controller,
+    {
+      document,
+      hooks
+    }: {
+      document: JsedDocument;
+      hooks?: JsedEditDocumentUIHooks;
+    }
+  ) {
     const editor = Editor.create({ document, userInput: ctl.input });
-    return new EditDocumentUI(ctl, editor);
+    return new JsedEditDocumentUI(ctl, editor, hooks);
+  }
+
+  static createNull(
+    ctl: Controller,
+    {
+      document,
+      hooks
+    }: {
+      document: JsedDocument;
+      hooks?: JsedEditDocumentUIHooks;
+    }
+  ) {
+    const editor = Editor.createNull({ document, userInput: ctl.input });
+    return new JsedEditDocumentUI(ctl, editor, hooks);
   }
 
   public actions: EditDocumentActions;
@@ -16,7 +52,8 @@ export class EditDocumentUI implements AppObject {
 
   constructor(
     private ctl: Controller,
-    private editor: Editor
+    public editor: Editor,
+    private hooks: JsedEditDocumentUIHooks = {}
   ) {
     this.actions = createActions({
       ctl: this.ctl,
@@ -53,7 +90,7 @@ export class EditDocumentUI implements AppObject {
   };
 
   onStart = () => {
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing' } });
+    this.hooks.onActivate?.();
     this.editor.start();
     this.renderMenuItems();
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
@@ -64,7 +101,7 @@ export class EditDocumentUI implements AppObject {
   };
 
   onResume = () => {
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing' } });
+    this.hooks.onActivate?.();
     this.editor.suspend(false);
     this.renderMenuItems();
     this.ctl.input.focus();
@@ -96,6 +133,11 @@ export class EditDocumentUI implements AppObject {
   };
 
   handleEditError = (err: EditorError) => {
+    if (this.hooks.onEditError) {
+      this.hooks.onEditError(err);
+      return;
+    }
+
     this.ctl.notify(`There was an error editing the document: ${err.type}`);
   };
 }

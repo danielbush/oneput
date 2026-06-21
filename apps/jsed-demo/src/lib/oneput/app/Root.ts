@@ -1,17 +1,23 @@
 import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
-import { JsedDocument } from '@oneput/jsed';
+import { JsedDocument, JsedEditDocumentUI } from '@oneput/jsed';
 import { icons } from '@oneput/jsed';
-import { EditDocumentUI } from './EditDocumentUI.js';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
     return new Root(ctl, {
       Layout: () => Layout.create(ctl),
       JsedDocument: (root) => JsedDocument.create(root),
-      EditDocumentUI: ({ document }: { document: JsedDocument }) =>
-        EditDocumentUI.create(ctl, { document })
+      JsedEditDocumentUI: ({ document }: { document: JsedDocument }) =>
+        JsedEditDocumentUI.create(ctl, {
+          document,
+          hooks: {
+            onActivate: () => {
+              ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Editing' } });
+            }
+          }
+        })
     });
   }
 
@@ -20,7 +26,7 @@ export class Root implements AppObject {
     private create: {
       Layout: () => Layout;
       JsedDocument: (root: HTMLElement) => JsedDocument;
-      EditDocumentUI: (params: { document: JsedDocument }) => EditDocumentUI;
+      JsedEditDocumentUI: (params: { document: JsedDocument }) => JsedEditDocumentUI;
     }
   ) {
     this.ctl.ui.setLayout(this.create.Layout());
@@ -37,7 +43,7 @@ export class Root implements AppObject {
       action: () => {
         const docRoot = document.querySelector('#test-doc') as HTMLElement;
         this.ctl.app.run(
-          this.create.EditDocumentUI({
+          this.create.JsedEditDocumentUI({
             document: this.create.JsedDocument(docRoot)
           })
         );

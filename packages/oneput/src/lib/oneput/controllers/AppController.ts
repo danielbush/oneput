@@ -226,7 +226,7 @@ export class AppController {
     this.onBack = onBack;
   }
 
-  resetOnBack() {
+  private resetOnBack() {
     this.onBack = undefined;
   }
 

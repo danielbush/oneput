@@ -88,6 +88,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - moving between visual line segments?
   - COMMENT: this would make the editor more like notepad, make it friendlier; bear in mind, mobile users can just touch the word;
   - COMMENT: this means repeat up or down movements, set some kind of horizontal position and we go looking for the nearest token to this position either above or below
+  - COMMENT: DOWN, UP do visual line until we exit LINE, then what?  Imagine a series of paragraphs - the user would expect the CURSOR to keep on going.
   - prompt: how do you compute the position of an element in html; this computed value should be universally comparable regardless of how the element is displayed / positioned / translated etc; the important thing is we can compare the x or y coordinate, but mostly the x coordinate
   - "To get a universally comparable position for an HTML element that accounts for scrolling, CSS transforms (like translate), and any layout positioning (absolute, fixed, etc.), the standard and most reliable method is to use getBoundingClientRect() combined with the window's scroll offsets.  By adding the current scroll position to the element's viewport relative position, you get coordinates relative to the entire document (the top-left corner of the HTML page). This makes the values completely absolute and universally comparable across different elements."
   - ```js

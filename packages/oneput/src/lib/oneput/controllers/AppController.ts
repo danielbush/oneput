@@ -231,6 +231,13 @@ export class AppController {
   }
 
   /**
+   * True if there is a parent AppObject and enableGoBack flag is true.
+   */
+  canGoBack() {
+    return this.appParents.length > 0 && !this.disableGoBack;
+  }
+
+  /**
    * Returns details about the menu with menuId including the last action that
    * was fired.  If menuId is not provided, it will return details about the
    * last menu that was set via setMenu.

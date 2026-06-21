@@ -22,12 +22,12 @@ export function createEditDocumentMenuItems({
   ctl,
   editor,
   actions,
-  renderMenuItems
+  invalidateMenu
 }: {
   ctl: Controller;
   editor: Editor;
   actions: EditDocumentMenuActions;
-  renderMenuItems: () => void;
+  invalidateMenu: () => void;
 }): Array<MenuItemAny | undefined | null | '' | false> {
   const cursor = editor.getCursor();
   return [
@@ -452,7 +452,7 @@ export function createEditDocumentMenuItems({
       closeMenuOnAction: false,
       action: (_, bool) => {
         editor.enableLegacyElementIndicator(bool);
-        renderMenuItems();
+        invalidateMenu();
       },
       checked: editor.legacyElementIndicatorEnabled
     }),
@@ -462,7 +462,7 @@ export function createEditDocumentMenuItems({
       closeMenuOnAction: false,
       action: (_, bool) => {
         editor.enableElementIndicator(bool);
-        renderMenuItems();
+        invalidateMenu();
       },
       checked: editor.elementIndicatorEnabled
     })

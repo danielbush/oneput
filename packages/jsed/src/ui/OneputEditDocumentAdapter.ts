@@ -38,7 +38,7 @@ export class OneputEditDocumentAdapter {
     this.actions = createEditDocumentActions({
       ctl: this.ctl,
       editor: this.editor,
-      renderMenuItems: this.onRenderMenuItems
+      invalidateMenu: this.onRenderMenuItems
     });
   }
 
@@ -104,6 +104,6 @@ export class OneputEditDocumentAdapter {
       ctl: this.ctl,
       editor: this.editor,
       actions: this.actions,
-      renderMenuItems
+      invalidateMenu: renderMenuItems
     });
 }

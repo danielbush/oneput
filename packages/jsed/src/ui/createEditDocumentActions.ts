@@ -35,11 +35,11 @@ export type EditDocumentActions = NonNullable<AppObject['actions']> & {
 export function createEditDocumentActions({
   ctl,
   editor,
-  renderMenuItems
+  invalidateMenu
 }: {
   ctl: Controller;
   editor: Editor;
-  renderMenuItems: () => void;
+  invalidateMenu: () => void;
 }): EditDocumentActions {
   return {
     DOWN: {
@@ -185,7 +185,7 @@ export function createEditDocumentActions({
     UNDO: {
       action: () => {
         editor.undo();
-        renderMenuItems();
+        invalidateMenu();
       },
       binding: {
         bindings: ['$mod+z'],
@@ -195,7 +195,7 @@ export function createEditDocumentActions({
     REDO: {
       action: () => {
         editor.redo();
-        renderMenuItems();
+        invalidateMenu();
       },
       binding: {
         bindings: ['Shift+$mod+z'],

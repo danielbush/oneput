@@ -18,7 +18,7 @@ export type EditDocumentMenuActions = {
 /**
  * Builds the Oneput menu items for an active Jsed editor.
  */
-export function createEditDocumentMenuItems({
+export function createMenuItems({
   ctl,
   editor,
   actions,

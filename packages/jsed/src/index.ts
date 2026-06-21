@@ -4,13 +4,7 @@ export { JsedDocument } from './JsedDocument.js';
 export { Editor } from './editor/Editor.js';
 export { type EditorError } from './editor/index.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
-export {
-  createEditDocumentActions,
-  type EditDocumentActions
-} from './ui/createEditDocumentActions.js';
-export {
-  createEditDocumentMenuItems,
-  type EditDocumentMenuActions
-} from './ui/createEditDocumentMenuItems.js';
+export { createActions, type EditDocumentActions } from './ui/index.js';
+export { createMenuItems, type EditDocumentMenuActions } from './ui/index.js';
 export { icons, iconData } from './ui/lib/icons.js';
 export { defaultActions, defaultBindingsSerializable, defaultKeys } from './ui/lib/bindings.js';

@@ -1,11 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import type { LayoutSettings } from './_layout.js';
-import {
-  createEditDocumentActions,
-  createEditDocumentMenuItems,
-  Editor,
-  type EditDocumentActions
-} from '@oneput/jsed';
+import { createActions, createMenuItems, Editor, type EditDocumentActions } from '@oneput/jsed';
 import type { EditorError, JsedDocument } from '@oneput/jsed';
 
 export class EditDocumentUI implements AppObject {
@@ -23,7 +18,7 @@ export class EditDocumentUI implements AppObject {
     private ctl: Controller,
     private editor: Editor
   ) {
-    this.actions = createEditDocumentActions({
+    this.actions = createActions({
       ctl: this.ctl,
       editor: this.editor,
       invalidateMenu: this.renderMenuItems
@@ -91,7 +86,7 @@ export class EditDocumentUI implements AppObject {
     this.ctl.menu.setMenu({
       id: 'EditDocument',
       focusBehaviour: 'last-action,first',
-      items: createEditDocumentMenuItems({
+      items: createMenuItems({
         ctl: this.ctl,
         editor: this.editor,
         actions: this.actions,

@@ -5,11 +5,8 @@ import { makeRoot } from '../../test/util.js';
 import { Editor } from '../../editor/Editor.js';
 import { JsedDocument } from '../../JsedDocument.js';
 import type { EditorError } from '../../editor/index.js';
-import {
-  createEditDocumentActions,
-  type EditDocumentActions
-} from '../createEditDocumentActions.js';
-import { createEditDocumentMenuItems } from '../createEditDocumentMenuItems.js';
+import { createActions, type EditDocumentActions } from '../actions.js';
+import { createMenuItems } from '../menuItems.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);
@@ -37,7 +34,7 @@ export class EditDocument implements AppObject {
     private ctl: Controller,
     public editor: Editor
   ) {
-    this.actions = createEditDocumentActions({
+    this.actions = createActions({
       ctl: this.ctl,
       editor: this.editor,
       invalidateMenu: this.renderMenuItems
@@ -103,7 +100,7 @@ export class EditDocument implements AppObject {
     this.ctl.menu.setMenu({
       id: 'EditDocument',
       focusBehaviour: 'last-action,first',
-      items: createEditDocumentMenuItems({
+      items: createMenuItems({
         ctl: this.ctl,
         editor: this.editor,
         actions: this.actions,

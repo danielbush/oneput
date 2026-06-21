@@ -32,7 +32,7 @@ export type EditDocumentActions = NonNullable<AppObject['actions']> & {
 /**
  * Builds the Oneput actions for an active Jsed editor.
  */
-export function createEditDocumentActions({
+export function createActions({
   ctl,
   editor,
   invalidateMenu

@@ -11,6 +11,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
+  - COMMENT: add visual demos for notification when menu is closed
 - fix: oneput-demo menu is closing on actions where it shouldn't
   - I think I altered this when working on jsed-demo; what is the preferred approach?
   - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
@@ -44,6 +46,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: the issue is how to define "global items"
 - feat: declarative onBack in AppObject
 - feat: implemenet web components
+- feat: notifications should have an optional left icon
+  - COMMENT: example: auto-save fails, we should an error icon; next autosave succeeds, we get a recovery icon
+- feat: should notifications allow for title + text?
+  - COMMENT: example: auto-save, if we fail we might want to say, "Save failed" and then second line, some sort of CTA eg "try saving again"; possible even a link or button to retry
+  - COMMENT: if we allow buttons in messages, we could lean on alert or confirm but allow button labels to be customised
 
 ## refactor
 

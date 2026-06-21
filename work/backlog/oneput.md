@@ -2,16 +2,18 @@
 
 The following are potential work (tickets for work) sorted by priority: earlier tickets take precendence over later ones.  Extract the next ticket from the top, and convert it into a spec, and draft a plan based on the initial proposal.
 
-## Critical work
-
+## Critical path
 
 - talk to hermes
   - COMMENT: once 2br/oneput is running on mobile, this mean we could talk to hermes over it rather than telegram; it means we could ask the agent to make modifications to 2br for us (that would require mcp machinery to safely interact with 2br data)
   - how to store conversations?
     - something "2br adjacent"
 
-## Details
+## fix
 
+- fix: oneput-demo menu is closing on actions where it shouldn't
+  - I think I altered this when working on jsed-demo; what is the preferred approach?
+  - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
 - fix: `$mod+v a` types `a` into input
   - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
   - COMMENT: blur input focus if we detect any key that has a modifier
@@ -19,18 +21,18 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - fix/feat: layouts for things like `PasteElementUI` or  `PickListUI` 
   - fix: search for "jsed-demo" in jsed/src
   - fix: search for "LayoutSettings" in jsed/src
-  - COMMENT - we run it as an AppObject but it provides lots of hooks
+  - COMMENT: we run it as an AppObject but it provides lots of hooks
     - ```
       PasteElementUI.create({
         onRenderMenuItem: (...) => {...} // default to stdMenuItem
         onLayoutChange: (ctl, { actions, menuTitle }) => { ctl.ui.setLayout(...) }
       })
       ```
-  - COMMENT - we run our own AppObject and use helper functions for actions and menu items
-- refactor: start should only be called once; make onResume required or just don't call anything
-- fix: oneput-demo menu is closing on actions where it shouldn't
-  - I think I altered this when working on jsed-demo; what is the preferred approach?
-  - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
+  - COMMENT: we run our own AppObject and use helper functions for actions and menu items
+- fix: In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulted in a significant change to the bindings themselves but the change wasn't visible to the user, making the user think that opening/closing the menu had broken the bindings when this was not the case.  
+
+## feat
+
 - feat: disable individual menu items
   - eg pasteBefore, pasteAfter, pasteIn
 - feat: filter for global items
@@ -40,9 +42,12 @@ The following are potential work (tickets for work) sorted by priority: earlier 
     - COMMENT: seems a bit weak
   - COMMENT: This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
   - COMMENT: the issue is how to define "global items"
-- docs: need to make ai-docs similar to effect v4
-- chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
 - feat: declarative onBack in AppObject
+- feat: implemenet web components
+
+## refactor
+
+- refactor: start should only be called once; make onResume required or just don't call anything
 - refactor: null input controller backed by happy-dom input element
 - refactor: deep modules for packages/oneput 
   - packages/oneput/src/lib/index.ts -> packages/oneput/src/index.ts
@@ -51,5 +56,15 @@ The following are potential work (tickets for work) sorted by priority: earlier 
     - but move helpers/ subdir into packages/oneput/src/lib
   - packages/oneput/src/lib/oneput/types.ts
   - KeyEventBindings class - extract it from packages/oneput/src/lib/oneput/lib/bindings.ts - it's key to understanding bindings
-- feat: implemenet web components
-- fix: In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulted in a significant change to the bindings themselves but the change wasn't visible to the user, making the user think that opening/closing the menu had broken the bindings when this was not the case.  
+
+## chore
+
+- docs: need to make ai-docs similar to effect v4
+- chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+
+## defer
+
+- Convert `createActions` and `createMenuItems` to objects (.create)
+  - have a `ctl.menu.invalidate()`?
+    - menuItems = MenuItems.create(...) could call it
+  - COMMENT: I think we should wait for it to be justified; eg we need more control over the structure of menu items maybe because we're injecting items in addition to the ones in createMenuItems

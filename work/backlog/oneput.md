@@ -11,11 +11,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
-- fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
-  - COMMENT: add visual demos for notification when menu is closed
 - fix: oneput-demo menu is closing on actions where it shouldn't
   - I think I altered this when working on jsed-demo; what is the preferred approach?
   - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
+- fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
+  - COMMENT: add visual demos for notification when menu is closed
 - fix: `$mod+v a` types `a` into input
   - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
   - COMMENT: blur input focus if we detect any key that has a modifier
@@ -54,6 +54,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- proper pull model for declarative AppObject.menu
+  - ctl.menu.invalidate() signals that menu must be pulled again
+  - this only is an issue if the menu is showing, since I think a closed menu will pull from `menu` when opening
+  - this gets rid of `renderMenuItems` - we can just define `menu: () => {...}` and have it render based on AppObject state; we call ctl.menu.invalidate() whenever this state changes
+  - COMMENT: svelte's reactive model would make this even easier (use `$state` for the state that affects menu rendering) but we don't want oneput to be restricted to svelte
 - refactor: start should only be called once; make onResume required or just don't call anything
 - refactor: null input controller backed by happy-dom input element
 - refactor: deep modules for packages/oneput 

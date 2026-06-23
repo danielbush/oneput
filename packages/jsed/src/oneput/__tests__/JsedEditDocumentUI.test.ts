@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../lib/core/taxonomy.js';
 import { makeRoot } from '../../test/util.js';
 import { JsedDocument } from '../../JsedDocument.js';
-import { JsedEditDocumentUI } from '../../oneput/JsedEditDocumentUI.js';
+import { JsedEditDocumentUI } from '../JsedEditDocumentUI.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);

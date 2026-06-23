@@ -20,25 +20,25 @@ export class CurrentMenu {
     return new CurrentMenu(ctl, menuId, menuItems);
   }
 
+  /**
+   * Represents the current list of available menu items which is usually used
+   * to set currentProps.menuItems.
+   *
+   * - setMenu updates this list.
+   * - _setMenu only updates currentProps.menuItems.
+   * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
+   *
+   * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
+   * For dynamic menu item generation, menuItems can be ignored.
+   */
   public allMenuItems: Array<MenuItemAny> = [];
 
   constructor(
     private ctl: Controller,
     private _menuId: string,
-    /**
-     * Represents the current list of available menu items which is usually used
-     * to set currentProps.menuItems.
-     *
-     * - setMenu updates this list.
-     * - _setMenuonly updates currentProps.menuItems.
-     * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
-     *
-     * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
-     * For dynamic menu item generation, menuItems can be ignored.
-     */
-    _allMenuItems: Array<MenuItemAny | undefined | false | null | ''> = []
+    allMenuItems: Array<MenuItemAny | undefined | false | null | ''> = []
   ) {
-    this.allMenuItems = _allMenuItems.filter(Boolean) as Array<MenuItemAny>;
+    this.allMenuItems = allMenuItems.filter(Boolean) as Array<MenuItemAny>;
   }
 
   get focusedMenuItemIndex() {

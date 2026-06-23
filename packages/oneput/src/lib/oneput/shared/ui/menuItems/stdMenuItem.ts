@@ -96,7 +96,7 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
     // action: params.action,
     action: (ctl) => {
       params.action?.(ctl);
-      if (params.closeMenuOnAction ?? true) {
+      if (params.closeMenuOnAction ?? false) {
         ctl.menu.closeMenu();
       }
     },

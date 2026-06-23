@@ -59,6 +59,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - this only is an issue if the menu is showing, since I think a closed menu will pull from `menu` when opening
   - this gets rid of `renderMenuItems` - we can just define `menu: () => {...}` and have it render based on AppObject state; we call ctl.menu.invalidate() whenever this state changes
   - COMMENT: svelte's reactive model would make this even easier (use `$state` for the state that affects menu rendering) but we don't want oneput to be restricted to svelte
+- menuItemsFn takes an optional `whenEmpty`
 - refactor: start should only be called once; make onResume required or just don't call anything
 - refactor: null input controller backed by happy-dom input element
 - refactor: deep modules for packages/oneput 

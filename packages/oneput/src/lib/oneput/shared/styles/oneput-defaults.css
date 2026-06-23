@@ -236,10 +236,10 @@
     --oneput-button-outline-active: var(--oneput-button-outline);
 
     /* notification */
-    --oneput-notification-background: rgb(255 210 0 / 0.2);
+    --oneput-notification-background: rgb(107 85 0 / 1);
 
     /* alert */
-    --oneput-alert-background: rgb(255 210 0 / 0.7);
+    --oneput-alert-background: rgb(107 85 0 / 1);
     --oneput-alert-text-color: #222;
   }
 }

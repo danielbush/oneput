@@ -21,11 +21,7 @@ export class KatexDemo implements AppObject {
   }
 
   private currentResult = '';
-
-  onExit = () => {
-    this.unsubscribeBindingsChange?.();
-  };
-
+  private katexValid = true;
   private unsubscribeBindingsChange?: () => void;
   private helpMessage = 'Type some katex...';
 
@@ -35,11 +31,21 @@ export class KatexDemo implements AppObject {
     private previewDisplayMode: boolean = false
   ) {}
 
-  onStart() {
-    this.run();
-  }
+  /**
+   * Declarative menu: rebuilt from AppObject state whenever ctl.menu.invalidate()
+   * is called (on input change, display-mode toggle, or bindings change).
+   */
+  menu = () => ({
+    id: 'main',
+    focusBehaviour: 'first' as const,
+    items: this.buildMenuItems()
+  });
 
-  run() {
+  onExit = () => {
+    this.unsubscribeBindingsChange?.();
+  };
+
+  onStart() {
     this.unsubscribeBindingsChange?.();
     this.unsubscribeBindingsChange = this.ctl.events.on(
       'bindings-change',
@@ -48,7 +54,7 @@ export class KatexDemo implements AppObject {
         this.helpMessage = binding
           ? `Type some katex and hit ${binding} to insert... `
           : 'Type some katex...';
-        this.renderUI();
+        this.ctl.menu.invalidate();
       }
     );
     this.ctl.ui.update({
@@ -61,20 +67,29 @@ export class KatexDemo implements AppObject {
     });
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
+    // The input is a katex editor, not a menu filter; we use the menuItemsFn
+    // purely as the input-change trigger to recompute state and re-pull menu().
     this.ctl.menu.fn.setMenuItemsFn(() => {
-      this.renderUI();
+      this.recompute();
+      this.ctl.menu.invalidate();
+      return undefined;
     });
     this.ctl.input.setSubmitHandler(() => {
       this.insertKatex();
     });
-    this.renderUI();
+    this.recompute();
+    this.ctl.menu.invalidate();
   }
 
-  private renderUI(focusBehaviour: 'none' | 'first' | 'last' = 'first') {
+  /**
+   * Recompute katex state from the current input and refresh the input UI.
+   * Does NOT touch the menu — call ctl.menu.invalidate() to re-render items.
+   */
+  private recompute() {
     if (this.ctl.input.getInputValue().trim() === '') {
-      this.renderInputUI(true);
-      this.renderMenuItems(true, '', focusBehaviour);
       this.currentResult = '';
+      this.katexValid = true;
+      this.renderInputUI(true);
       return;
     }
     try {
@@ -84,78 +99,69 @@ export class KatexDemo implements AppObject {
         output: 'mathml',
         errorColor: 'red'
       });
+      this.katexValid = true;
       this.ctl.clearNotifications();
       this.renderInputUI(true);
-      this.renderMenuItems(true, this.currentResult, focusBehaviour);
     } catch (err) {
+      this.katexValid = false;
       this.renderInputUI(false);
-      this.renderMenuItems(false, this.currentResult, focusBehaviour);
       this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
     }
   }
 
-  private renderMenuItems(
-    katexIsValid: boolean,
-    katexResult?: string,
-    focusBehaviour?: 'none' | 'first' | 'last'
-  ): void {
-    this.ctl.menu.setMenu({
-      id: 'main',
-      // This will ensure the menuItemFocus index won't change when we hit the
-      // checkbox above or any other action.
-      // { focusBehaviour: focusBehaviour ?? 'first' }
-      focusBehaviour,
-      items: [
-        menuItem({
-          id: 'katex-preview-pane',
-          type: 'vflex',
-          ignored: true,
-          style: {
-            overflow: 'auto',
-            display: 'block',
-            textAlign: 'center'
-          },
-          children: [
-            {
-              id: 'katex-preview',
-              type: 'fchild',
-              style: {
-                padding: '1rem',
-                fontSize: katexResult ? '150%' : '100%',
-                display: 'inline-block'
-              },
-              innerHTMLUnsafe: katexResult || '(preview)'
-            }
-          ]
-        }),
-        infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage, icon: icons.Info }),
-        divider(),
-        stdMenuItem({
-          id: 'insert-katex-btn',
-          left: (b) => [b.icon(icons.Settings)],
-          textContent: 'Insert...',
-          attr: {
-            disabled: !katexIsValid
-          },
-          action: () => {
-            this.insertKatex();
+  /**
+   * Build the menu items from current AppObject state. Pure with respect to the
+   * menu: reads this.currentResult / katexValid / helpMessage / previewDisplayMode.
+   */
+  private buildMenuItems() {
+    return [
+      menuItem({
+        id: 'katex-preview-pane',
+        type: 'vflex',
+        ignored: true,
+        style: {
+          overflow: 'auto',
+          display: 'block',
+          textAlign: 'center'
+        },
+        children: [
+          {
+            id: 'katex-preview',
+            type: 'fchild',
+            style: {
+              padding: '1rem',
+              fontSize: this.currentResult ? '150%' : '100%',
+              display: 'inline-block'
+            },
+            innerHTMLUnsafe: this.currentResult || '(preview)'
           }
-        }),
-        checkboxMenuItem({
-          id: 'katex-display-mode-checkbox',
-          action: (_, checked) => {
-            this.previewDisplayMode = checked;
-            // TODO: a better solution is to mount the katex
-            // previewer with a DOMUpdater or SveltePropInjector we
-            // can trigger here.  See AsyncSearchExample for an
-            // example.
-            this.renderUI('none');
-          },
-          textContent: 'Display mode',
-          checked: this.previewDisplayMode
-        })
-      ]
-    });
+        ]
+      }),
+      infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage, icon: icons.Info }),
+      divider(),
+      stdMenuItem({
+        id: 'insert-katex-btn',
+        left: (b) => [b.icon(icons.Settings)],
+        textContent: 'Insert...',
+        attr: {
+          disabled: !this.katexValid
+        },
+        action: () => {
+          this.insertKatex();
+        }
+      }),
+      checkboxMenuItem({
+        id: 'katex-display-mode-checkbox',
+        action: (_, checked) => {
+          this.previewDisplayMode = checked;
+          this.recompute();
+          // focusBehaviour 'none' keeps the focused index on the checkbox.
+          this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+        },
+        textContent: 'Display mode',
+        checked: this.previewDisplayMode
+      })
+    ];
   }
 
   private renderInputUI(katexIsValid: boolean) {
@@ -192,6 +198,7 @@ export class KatexDemo implements AppObject {
       }
     )}</p>`;
     this.ctl.input.setInputValue('');
-    this.renderUI();
+    this.recompute();
+    this.ctl.menu.invalidate();
   };
 }

@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppEvent, AppObject, UIFlags } from '../types.js';
+import type { AppEvent, AppObject, FocusBehaviour, UIFlags } from '../types.js';
 import { AppVal } from './helpers/AppVal.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
@@ -140,6 +140,24 @@ export class AppController {
     // We don't clear notifications or alerts or confirmations.
 
     return flags;
+  }
+
+  /**
+   * Re-pull the current AppObject's declarative `menu()` and re-seed the menu.
+   *
+   * Guarded: if the current AppObject did not define a declarative `menu()`,
+   * this is a no-op (returns false). Pass `focusBehaviour: 'none'` for state
+   * changes that should not move the focused index (e.g. toggling a checkbox).
+   */
+  invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+    const menu = this.current?.menu();
+    if (!menu) {
+      return false;
+    }
+    this.ctl.menu.setMenu(
+      opts?.focusBehaviour ? { ...menu, focusBehaviour: opts.focusBehaviour } : menu
+    );
+    return true;
   }
 
   /**

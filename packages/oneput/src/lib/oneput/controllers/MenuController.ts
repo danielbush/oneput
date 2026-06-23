@@ -69,6 +69,18 @@ export class MenuController {
     });
   };
 
+  /**
+   * Signal that the declarative `AppObject.menu()` must be pulled again and
+   * re-seed the menu from it.
+   *
+   * Guarded on `menu`: a no-op if the current AppObject has no declarative
+   * `menu()`. Call this whenever AppObject state that affects menu rendering
+   * changes. Pass `focusBehaviour: 'none'` to avoid moving the focused index.
+   */
+  invalidate = (opts?: { focusBehaviour?: FocusBehaviour }) => {
+    this.ctl.app.invalidateMenu(opts);
+  };
+
   doMenuAction() {
     if (this.disableActions) {
       return;

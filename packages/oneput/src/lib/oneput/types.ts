@@ -256,6 +256,15 @@ export interface AppObject<R = unknown> {
   onExit?: () => void;
   onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
   /**
+   * Called whenever the input value changes while this AppObject is current.
+   *
+   * The framework wires/unwires this for you (no manual `ctl.events.on`). Use it
+   * for a sync-rebuild menu where typing should re-derive `menu()`: recompute any
+   * derived state then call `ctl.menu.invalidate()`. Fires regardless of whether
+   * the menu is open (invalidate itself no-ops while closed).
+   */
+  onInputChange?: (data: { value: string }) => void;
+  /**
    * Called when an app event is emitted via ctl.app.emitEvent(...) while this
    * AppObject is the active (current) one.  This is how host-app UI rendered
    * outside of Oneput (e.g. a node on a canvas) can signal the active AppObject

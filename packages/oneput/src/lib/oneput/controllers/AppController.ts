@@ -49,6 +49,7 @@ export class AppController {
     this.ctl.events.emit({ type: 'app-change', payload: change });
   }
   private unsubscribeMenuItemFocus?: () => void;
+  private unsubscribeInputChange?: () => void;
 
   /**
    * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.
@@ -110,6 +111,12 @@ export class AppController {
           this.current?.app.onMenuItemFocus?.({ index, menuItem });
         }
       );
+    }
+    this.unsubscribeInputChange?.();
+    if (this.current?.app.onInputChange) {
+      this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+        this.current?.app.onInputChange?.({ value });
+      });
     }
 
     // Re-enable stuff...

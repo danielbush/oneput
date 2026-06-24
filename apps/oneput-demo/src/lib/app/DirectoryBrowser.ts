@@ -5,7 +5,22 @@ import { icons } from './_icons.js';
 import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/listDir.js';
 
 /**
- * Demonstrates browsing a directory tree through Oneput's AppObject stack.
+ * Browsing a directory tree using the **AppObject-per-folder** nav model — one
+ * of two deliberate explorations of the same task. See {@link DirectoryPicker}
+ * for the **single-AppObject** sibling, and the table below for the contrast.
+ *
+ * | aspect          | DirectoryBrowser (this)        | DirectoryPicker                 |
+ * | --------------- | ------------------------------ | ------------------------------- |
+ * | nav model       | one AppObject per folder       | one AppObject, `path` is state  |
+ * | folder depth    | = stack depth                  | = internal state                |
+ * | "back"          | framework pop (one folder) ✓   | in-band `..` item               |
+ * | return a result | needs N pops to the caller     | single `exit` to the caller ✓   |
+ *
+ * The single-AppObject form (DirectoryPicker) is the **preferred** design: its
+ * navigation is plain state, and it returns a chosen value to its caller in one
+ * `exit`. The per-folder form here gets free one-level "back" from the stack,
+ * but that same stacking is what makes returning a pick awkward (it would pop
+ * only one folder, not unwind to the caller). Kept as the contrasting example.
  *
  * `listDir` is the injected data seam: {@link create} binds the real source
  * (mock today, a remote function later). The browser code never changes — only

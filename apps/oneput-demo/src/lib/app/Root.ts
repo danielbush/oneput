@@ -4,6 +4,7 @@ import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
+import { DirectoryPicker } from './DirectoryPicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
@@ -19,7 +20,8 @@ export class Root implements AppObject {
       TomatoTimer: () => TomatoTimer.create(ctl),
       KatexDemo: () => KatexDemo.create(ctl),
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
-      DirectoryBrowser: () => DirectoryBrowser.create(ctl)
+      DirectoryBrowser: () => DirectoryBrowser.create(ctl),
+      DirectoryPicker: () => DirectoryPicker.create(ctl)
     });
   }
 
@@ -33,6 +35,7 @@ export class Root implements AppObject {
       KatexDemo: () => KatexDemo;
       AsyncSearchExample: () => AsyncSearchExample;
       DirectoryBrowser: () => DirectoryBrowser;
+      DirectoryPicker: () => DirectoryPicker;
     }
   ) {
     ctl.ui.setLayout(this.create.Layout());
@@ -40,6 +43,13 @@ export class Root implements AppObject {
 
   onStart = () => {
     this.run();
+  };
+
+  onResume = (result?: { payload?: unknown }) => {
+    this.run();
+    if (typeof result?.payload === 'string') {
+      this.ctl.notify(`Selected file: ${result.payload}`);
+    }
   };
 
   run = () => {
@@ -95,6 +105,15 @@ export class Root implements AppObject {
           textContent: 'Browse directory...',
           action: () => {
             this.create.DirectoryBrowser().browse('/');
+          },
+          right: (b) => [b.icon(icons.ChevronRight)]
+        }),
+        stdMenuItem({
+          id: 'pick-file',
+          left: (b) => [b.icon(icons.File)],
+          textContent: 'Pick a file...',
+          action: () => {
+            this.create.DirectoryPicker().run('/');
           },
           right: (b) => [b.icon(icons.ChevronRight)]
         }),

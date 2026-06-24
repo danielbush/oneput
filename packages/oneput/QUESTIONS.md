@@ -163,3 +163,16 @@ In short:
 
 - **Declarative** (`menu = () => ...`) → `invalidate()` re-derives it.
 - **Imperative** (`setMenu(...)`) → `invalidate()` is a no-op; call `setMenu(...)` again.
+
+## When to use menuItemsFn (eg setMenuItemsFnAsync)?
+
+setMenuItemsFnAsync gives you four things:
+
+- Input-driven generation — it subscribes to input-change and re-runs your fn with the typed value.
+- Debounce on those changes.
+- Out-of-order discard — late async results get dropped (inFlight tracking).
+- onDebounce / whenEmpty lifecycle hooks.
+
+All four exist for one scenario: the input is an async query to a producer — a search box hitting a server (that's literally AsyncSearchExample). Debounce throttles the server; out-of-order discard handles racing responses.
+
+If you need to dynamically generate menu items but not in response to typing (like a search result) then consider `setMenu` directly. See DirectoryPicker demo.

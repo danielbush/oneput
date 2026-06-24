@@ -25,6 +25,13 @@ export type OneputProps = {
    */
   menuItemFocus?: [number, boolean?];
   menuOpen: boolean;
+  /**
+   * When true, the displayed menu is dimmed + non-interactive (CSS adds the
+   * visual; `disableActions` gates the behaviour). Driven by
+   * `ctl.menu.setDisabled`. Used to freeze the current menu in place during a
+   * transition (e.g. loading the next screen) without re-rendering its items.
+   */
+  menuDisabled?: boolean;
   menuItems?: Array<MenuItemAny>;
   inputElement?: HTMLInputElement | HTMLTextAreaElement;
   inputValue?: string;

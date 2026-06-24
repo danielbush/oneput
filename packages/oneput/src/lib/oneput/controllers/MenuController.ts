@@ -282,10 +282,19 @@ export class MenuController {
   // - mennItemsFn
 
   /**
+   * The single owner of the menu's disabled state: gates actions
+   * (`disableActions`) AND drives the visual dim (`menuDisabled` prop → CSS), so
+   * behaviour and appearance can't drift. Freezes the displayed menu in place
+   * without re-rendering or re-mapping its items — used to hold the current menu
+   * during a transition (e.g. loading the next screen).
+   *
+   * Reset to enabled when a new AppObject starts (AppController.reset).
+   *
    * Prefer ctl.ui.update({ flags: { enableMenuActions: true } }) instead.
    */
   _enableMenuActions(on: boolean = true) {
     this.disableActions = !on;
+    this.ctl.currentProps.menuDisabled = !on;
   }
 
   /**

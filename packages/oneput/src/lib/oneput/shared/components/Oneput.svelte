@@ -69,6 +69,7 @@
   class={[
     'oneput__container',
     props.menuOpen && 'oneput__menu--open',
+    props.menuDisabled && 'oneput__menu--disabled',
     props.replaceMenuUI?.menu && 'oneput__menu--replaced',
     inputLines > 1 && 'oneput--multiline'
   ]}

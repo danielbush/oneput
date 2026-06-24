@@ -380,6 +380,13 @@
     font-style: italic;
   }
 
+  /* Whole-menu freeze (ctl.menu.setDisabled): dim + block mouse without
+     re-rendering items. Behaviour is gated separately via disableActions. */
+  .oneput__menu--disabled .oneput__menu-body {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
   .oneput__menu-item-header {
     margin-left: 0.6em;
     margin-right: 0.6em;

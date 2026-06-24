@@ -3,7 +3,7 @@ import {
   JSED_FOCUS_CLASS,
   JSED_FOCUS_SIBLING,
   JSED_IGNORE_CLASS
-} from '../core/taxonomy';
+} from '../core/taxonomy.js';
 
 /**
  * Most editing artifacts (like deleted tokens or delete placeholdres) are

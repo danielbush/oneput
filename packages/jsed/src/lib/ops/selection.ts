@@ -1,13 +1,13 @@
 import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
-import { isToken } from '../core/taxonomy';
+import { isToken } from '../core/taxonomy.js';
 import {
   containsOnly,
   deleteHighestEmpty,
   redoDeleteElement,
   undoDeleteElement,
   type DeleteElement
-} from '../ops/focusable';
-import { redoRemove, remove, undoRemove, type RemoveTokenAll } from '../ops/token';
+} from '../ops/focusable.js';
+import { redoRemove, remove, undoRemove, type RemoveTokenAll } from '../ops/token.js';
 import { anchorize } from './anchor.js';
 
 /**

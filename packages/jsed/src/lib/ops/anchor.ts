@@ -1,4 +1,4 @@
-import { getNextSibling, getPreviousSibling } from '../core/sibling';
+import { getNextSibling, getPreviousSibling } from '../core/sibling.js';
 import {
   isAnchor,
   isFocusable,
@@ -12,8 +12,8 @@ import {
   isTokenizableTextNode,
   isWhitespaceTextNode,
   JSED_ANCHOR_CLASS
-} from '../core/taxonomy';
-import { findNextNode } from '../core/walk2';
+} from '../core/taxonomy.js';
+import { findNextNode } from '../core/walk2.js';
 
 /**
  * Create an ANCHOR

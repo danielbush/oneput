@@ -1,5 +1,5 @@
-import { getNextSibling, getPreviousSibling } from './sibling';
-import { isIgnorable, isToken, isTokenizableTextNode, isWhitespaceTextNode } from './taxonomy';
+import { getNextSibling, getPreviousSibling } from './sibling.js';
+import { isIgnorable, isToken, isTokenizableTextNode, isWhitespaceTextNode } from './taxonomy.js';
 
 /**
  * Return true if LINE_SEGMENT has no other text-bearing LINE_SIBLING's besides node.

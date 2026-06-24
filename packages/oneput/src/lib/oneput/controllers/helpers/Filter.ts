@@ -92,7 +92,10 @@ export class FilterController {
     if (!items) {
       return false;
     }
-    this.ctl.menu._setMenu({ items, focusBehaviour: opts?.focusBehaviour ?? this.focusBehaviour });
+    this.ctl.menu.setDisplayed({
+      items,
+      focusBehaviour: opts?.focusBehaviour ?? this.focusBehaviour
+    });
     return true;
   }
 
@@ -114,7 +117,7 @@ export class FilterController {
       if (!items) {
         return;
       }
-      this.ctl.menu._setMenu({ items, focusBehaviour: this.focusBehaviour });
+      this.ctl.menu.setDisplayed({ items, focusBehaviour: this.focusBehaviour });
     });
   }
 }

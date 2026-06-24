@@ -65,7 +65,7 @@ export class MenuItemsFnController {
       if (!items) {
         return;
       }
-      this.ctl.menu._setMenu({ items, focusBehaviour: options.focusBehaviour });
+      this.ctl.menu.setDisplayed({ items, focusBehaviour: options.focusBehaviour });
     });
   }
 
@@ -108,7 +108,7 @@ export class MenuItemsFnController {
           return;
         }
         // console.warn(`got ${value}...`);
-        this.ctl.menu._setMenu({ items, focusBehaviour: options.focusBehaviour });
+        this.ctl.menu.setDisplayed({ items, focusBehaviour: options.focusBehaviour });
       },
       500,
       { immediate: false }

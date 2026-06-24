@@ -113,12 +113,19 @@ export class MenuController {
 
   // #region setting menu items
 
-  _setMenu(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
+  /**
+   * Sets what will be displayed.
+   *
+   * If the menu is closed you won't see the changes until it's opened.
+   */
+  setDisplayed(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
     this.ctl.currentProps.menuItems = params.items;
     this.runFocusBehaviour(params.focusBehaviour);
   }
 
   /**
+   * Set the current menu and sets all items to be displayed.
+   *
    * If called with no arguments, the menu will be cleared.
    */
   setMenu(params?: {
@@ -129,7 +136,7 @@ export class MenuController {
     this.currentMenu = params
       ? CurrentMenu.create(this.ctl, params.id, params.items)
       : CurrentMenu.createBlank(this.ctl);
-    this._setMenu({
+    this.setDisplayed({
       focusBehaviour: params?.focusBehaviour ?? this.defaultFocusBehaviour,
       items: this.currentMenu.allMenuItems
     });

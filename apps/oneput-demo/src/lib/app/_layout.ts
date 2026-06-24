@@ -46,7 +46,7 @@ export class Layout implements UILayout {
     private dynamicPlaceholder: DynamicPlaceholder,
     private bindingService: LocalBindingsService
   ) {
-    ctl.menu.fn.setDefaultMenuItemsFn(WordFilter.create().menuItemsFn);
+    ctl.menu.fn.setDefaultFilter(WordFilter.create().menuItemsFn);
     ctl.menu.setDefaultFocusBehaviour('last-action,first');
     this.bindingService
       .getBindings()

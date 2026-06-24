@@ -76,7 +76,98 @@ Signal that the declarative base must be re-pulled.
 - `triggerMenuItemsFn()` = "re-run the deriver now against current input" (re-filter or
   re-fetch). This is the only refresh primitive a generative-from-results menu needs.
 
-### Refactor - filter vs generative menus
+### Refactor - filter vs generative menus - attempt 2
+
+Stepping back. This whole thread keeps circling because of ONE root cause: `MenuItemsFn`
+is **opaque**. A single hook means "do something on type" — filter / refetch /
+rebuild-from-state are all indistinguishable to the system. Every hard question here
+(invalidate, flash, async) is the same wall: the system can't reason about what a menu
+*does*.
+
+Where we landed on invalidate: leave it dumb. `invalidate()` = "base/state changed →
+re-pull `menu()`, paint base." It does NOT try to re-run the typing-step. If the caller
+wants both, they compose `invalidate()` + `triggerMenuItemsFn()`. The flash-free
+re-filter is only a problem if invalidate tries to be smart about the fn — so it doesn't.
+This ships fine; no new work. (Confirms the DEFERRED note above.)
+
+Why NOT do the big split now (the `filter(generate(input), input)` pipeline from
+attempt 1): only ONE stage is ever query-driven at a time —
+- filter menus: base is query-independent, the filter is query-driven.
+- async-search: generate is query-driven, "filter" is identity.
+So it's not a real two-input pipeline; it's "one query-driven deriver over an optional
+base" — which is what `MenuItemsFn` already is. The split risks inventing two boxes when
+the user only ever fills one.
+
+On async filter: a *pure* filter (subset of in-memory base by query) is sync by
+definition. The only async "filter" is semantic/embedding search (needs I/O for the query
+embedding) — and that models cleanly as a **generate** stage. So the load-bearing line is
+the **I/O boundary**, not filter-vs-generate: sync ⇒ one paint; async ⇒
+stale-while-revalidate. If we ever want async filtering as first-class, filter can't live
+on `CurrentMenu` (would need debounce/sequencing) → you'd build ONE shared async-aware
+derive runner instead. Not now.
+
+Foundation verdict: not broken, just **un-typed**. Sound to ship, risky to build on — the
+next feature that needs to reason about a menu (preserve query, partial refresh, optimistic
+update) hits the same wall. The real fix is NOT the big refactor; it's the smaller move of
+**letting a menu declare its kind** so the system branches without guessing.
+
+NEXT (before any code): write the menu **taxonomy** as the domain model — the three
+patterns (filter / generative-from-state / generative-from-results, see Background) — and
+for each, decide what it needs from `invalidate` and from refresh. The API falls out of
+that table. That document IS the foundation.
+
+### Menu taxonomy (the domain model)
+
+The one axis that matters: **does deriving the menu need I/O?** (sync vs async). That single
+line governs which refresh primitive applies AND how the paint happens. The three kinds are
+just that axis crossed with "is there a separate query step":
+
+| kind | item source | query consumed by | sync/async |
+|------|-------------|-------------------|------------|
+| **filter** | static base (`setMenu`/`menu()`) | a filter over the base | sync |
+| **sync-rebuild** (was "generative-from-state") | rebuilt from AppObject state (query is one input) | the builder itself | sync |
+| **async-fetch** (was "generative-from-results") | fetched via I/O, keyed on query | the fetch | async |
+
+Note: **filter** and **sync-rebuild** both read in-memory state and are sync; they differ
+only in *whether the query is a separate step over a base, or folded into one builder*.
+Semantic/embedding search is NOT a fourth kind — it's **async-fetch** (needs I/O for the
+query embedding), even though its output is a subset.
+
+#### The kind is declared by WHICH primitives you call (no enum)
+
+- **filter** → `setMenu`/`menu()` (base) **+** `setFilter(fn)` (sync, `(base, query) → subset`)
+- **sync-rebuild** → `menu = () => buildItems()` reading `getInputValue()`; every
+  trigger (incl. typing) calls `invalidate()`. No filter, no fn.
+- **async-fetch** → `setMenuItemsFnAsync(fn, { whenEmpty })`. No `menu()`, no base.
+
+The win: `setFilter` is a **typed channel**. The system now knows "is a sync filter
+registered?" — the one fact it was missing. The opaque `MenuItemsFn` ambiguity is gone
+because filtering and generation come in through different doors.
+
+#### What each kind needs from invalidate / refresh
+
+| kind | `invalidate()` (base/state changed) | `triggerMenuItemsFn()` (refresh now) |
+|------|--------------------------------------|--------------------------------------|
+| **filter** | re-pull `menu()` → new base, then re-apply registered filter at current query → **one sync paint, no flash** | re-run filter at current query (rarely needed; invalidate covers base change) |
+| **sync-rebuild** | re-pull `menu()` (rebuilds from state); typing is also just an invalidate trigger | same as invalidate |
+| **async-fetch** | guarded no-op (no `menu()`) | refetch at current query (the only refresh it needs) |
+
+#### Why this kills the flash without invalidate "guessing"
+
+invalidate doesn't inspect a fn. It asks one typed question: *was `setFilter` called?*
+- yes → re-seed base, run the sync filter inline, paint once.
+- no → re-seed base / rebuild, paint once.
+Either way: single paint. The flash only ever came from doing it in two steps because the
+fn was opaque. Typed channel ⇒ one step.
+
+#### Smallest path to get here
+1. Add `setFilter(fn)` (sync) — move FuzzyFilter/WordFilter off `setDefaultMenuItemsFn`.
+2. Teach `invalidate` the "re-seed base then run filter inline (one paint)" path.
+3. Leave `setMenuItemsFn*` as purely generative; add `whenEmpty` (Change 2).
+4. Migrate demos: filter menus → `setFilter`; KatexDemo already sync-rebuild;
+   AsyncSearchExample → async-fetch (no `menu()`, `whenEmpty` placeholder).
+
+### Refactor - filter vs generative menus - attempt 1
 
 What the user would see: two registration points instead of one overloaded setMenuItemsFn.
 

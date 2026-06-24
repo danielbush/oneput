@@ -133,6 +133,7 @@ export class AppController {
     this.ctl.input.resetPlaceholder();
     this.ctl.menu.resetFocusBehaviour();
     this.ctl.menu.fn.resetMenuItemsFn();
+    this.ctl.menu.fn.resetFilter();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();
     this.ctl.menu.resetFillHandler();
@@ -157,6 +158,11 @@ export class AppController {
     this.ctl.menu.setMenu(
       opts?.focusBehaviour ? { ...menu, focusBehaviour: opts.focusBehaviour } : menu
     );
+    // If a sync filter is active, re-derive against the current input so the
+    // user's query survives. Runs in the same tick as the base paint above, so
+    // the displayed layer is only assigned twice synchronously -> single render,
+    // no flash of the unfiltered base.
+    this.ctl.menu.fn.runFilter({ focusBehaviour: opts?.focusBehaviour });
     return true;
   }
 

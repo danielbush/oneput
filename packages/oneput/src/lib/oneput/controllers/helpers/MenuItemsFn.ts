@@ -18,6 +18,11 @@ export class MenuItemsFnController {
   private defaultMenuItemsFn?: MenuItemsFn;
   private removeMenuItemsListener?: () => void;
 
+  private filter?: MenuItemsFn;
+  private defaultFilter?: MenuItemsFn;
+  private filterFocusBehaviour?: FocusBehaviour;
+  private removeFilterListener?: () => void;
+
   constructor(private ctl: Controller) {}
 
   /**
@@ -46,6 +51,98 @@ export class MenuItemsFnController {
       });
     }
   }
+
+  // #region filter (sync, base -> subset)
+
+  /**
+   * Register a sync FILTER: `(query, base) => subset` (+highlight via derivedHTML).
+   *
+   * A filter is the typed channel for the "filter" menu kind — unlike a generative
+   * `menuItemsFn`, the system KNOWS a filter is base-derivable and sync, so
+   * `invalidate()` can re-apply it inline against the freshly re-seeded base in the
+   * same tick (no flash). Fires on input-change while the menu is open.
+   *
+   * Returning undefined leaves the displayed layer untouched (same contract as fns).
+   */
+  setFilter(filter: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+    this.filter = filter;
+    this.filterFocusBehaviour = options.focusBehaviour;
+    this.ensureFilterListener();
+  }
+
+  /**
+   * Set the filter restored per-AppObject by resetFilter (called in runBefore).
+   * Use this at app setup (e.g. _layout) for the default filter every menu gets.
+   */
+  setDefaultFilter(filter: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+    this.defaultFilter = filter;
+    this.setFilter(filter, options);
+  }
+
+  resetFilter() {
+    if (this.defaultFilter) {
+      this.setFilter(this.defaultFilter, {
+        focusBehaviour: this.ctl.menu.defaultFocusBehaviour
+      });
+    } else {
+      this.clearFilter();
+    }
+  }
+
+  clearFilter() {
+    this.filter = undefined;
+  }
+
+  /**
+   * Run the active filter NOW against the current base + input, painting once.
+   * Used by invalidate after re-seeding the base so the user's query survives;
+   * runs in the same synchronous tick as the base paint, so there is no flash.
+   * No-op (returns false) if no filter is active or the menu is closed.
+   */
+  runFilter(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+    if (!this.filter) {
+      return false;
+    }
+    if (!this.ctl.menu.isMenuOpen) {
+      return false;
+    }
+    const items = this.filter(
+      this.ctl.input.getInputValue(),
+      this.ctl.menu.currentMenu.allMenuItems
+    );
+    if (!items) {
+      return false;
+    }
+    this.ctl.menu._setMenu({
+      items,
+      focusBehaviour: opts?.focusBehaviour ?? this.filterFocusBehaviour
+    });
+    return true;
+  }
+
+  private ensureFilterListener() {
+    if (this.removeFilterListener) {
+      return;
+    }
+    this.removeFilterListener = this.ctl.events.on('input-change', ({ value }) => {
+      if (this.disableMenuItemsFn) {
+        return;
+      }
+      if (!this.ctl.menu.isMenuOpen) {
+        return;
+      }
+      if (!this.filter) {
+        return;
+      }
+      const items = this.filter(value, this.ctl.menu.currentMenu.allMenuItems);
+      if (!items) {
+        return;
+      }
+      this.ctl.menu._setMenu({ items, focusBehaviour: this.filterFocusBehaviour });
+    });
+  }
+
+  // #endregion
 
   /**
    * Set a function that will be triggered on input change.

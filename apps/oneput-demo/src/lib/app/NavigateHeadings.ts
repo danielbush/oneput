@@ -1,4 +1,4 @@
-import type { Controller } from '@oneput/oneput';
+import type { Controller, MenuItemAny } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { FuzzyFilter } from '@oneput/oneput/shared/filters/FuzzyFilter.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -12,7 +12,7 @@ export class NavigateHeadings implements AppObject {
     return new NavigateHeadings(ctl, document, FuzzyFilter.create());
   }
 
-  private clearInputChangeListener?: () => void;
+  private menuItems: MenuItemAny[] = [];
 
   private constructor(
     private ctl: Controller,
@@ -43,7 +43,7 @@ export class NavigateHeadings implements AppObject {
       this.ctl.menu.setMenu({
         id: 'main',
         focusBehaviour: 'last-action,first',
-        items: menuItems
+        items: this.menuItems
       });
     };
     const menuItem = (heading: HTMLElement) =>
@@ -57,24 +57,17 @@ export class NavigateHeadings implements AppObject {
 
     // Initialize headings and menu items...
     const headings: HTMLElement[] = Array.from(this.document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-    const menuItems = headings.map((h) => menuItem(h));
-    this.ctl.menu.setMenu({ id: 'main', items: menuItems });
-
-    // Normally you should use setMenuItemsFn / setDefaultMenuItemsFn or
-    // related functions.
-    this.clearInputChangeListener = this.ctl.events.on('input-change', ({ value }) => {
-      const sortedMenuItems = this.fuzzyFilter.filter(value, menuItems);
-      if (!sortedMenuItems) {
-        return;
-      }
-      this.ctl.menu.setMenu({ id: 'main', items: sortedMenuItems });
-    });
+    this.menuItems = headings.map((h) => menuItem(h));
+    this.ctl.menu.setMenu({ id: 'main', items: this.menuItems });
   }
 
-  /**
-   * It's important to clean up once we exit this mini-app.
-   */
-  onExit = () => {
-    this.clearInputChangeListener?.();
+  // We filter ourselves (built-in filter channel disabled above) via the
+  // onInputChange hook; the framework wires/unwires it for us — no cleanup needed.
+  onInputChange = ({ value }: { value: string }) => {
+    const sortedMenuItems = this.fuzzyFilter.filter(value, this.menuItems);
+    if (!sortedMenuItems) {
+      return;
+    }
+    this.ctl.menu.setMenu({ id: 'main', items: sortedMenuItems });
   };
 }

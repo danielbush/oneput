@@ -23,6 +23,7 @@ export class KatexDemo implements AppObject {
   private currentResult = '';
   private katexValid = true;
   private unsubscribeBindingsChange?: () => void;
+  private unsubscribeInputChange?: () => void;
   private helpMessage = 'Type some katex...';
 
   constructor(
@@ -43,6 +44,7 @@ export class KatexDemo implements AppObject {
 
   onExit = () => {
     this.unsubscribeBindingsChange?.();
+    this.unsubscribeInputChange?.();
   };
 
   onStart() {
@@ -62,17 +64,21 @@ export class KatexDemo implements AppObject {
         menuTitle: 'Katex Demo'
       },
       flags: {
-        enableMenuOpenClose: false
+        enableMenuOpenClose: false,
+        // The input is a katex editor, not a menu filter — this is a sync-rebuild
+        // menu (menu() + invalidate), so disable the default filter channel.
+        enableFilter: false
       }
     });
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
-    // The input is a katex editor, not a menu filter; we use the menuItemsFn
-    // purely as the input-change trigger to recompute state and re-pull menu().
-    this.ctl.menu.fn.setMenuItemsFn(() => {
+    // The katex preview is part of menu()'s output, so typing is just another
+    // invalidate trigger: recompute state, then re-pull menu(). (No menuItemsFn —
+    // that is the generative channel; this menu is sync-rebuild.)
+    this.unsubscribeInputChange?.();
+    this.unsubscribeInputChange = this.ctl.events.on('input-change', () => {
       this.recompute();
       this.ctl.menu.invalidate();
-      return undefined;
     });
     this.ctl.input.setSubmitHandler(() => {
       this.insertKatex();

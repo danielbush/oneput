@@ -79,6 +79,9 @@ export class FilterController {
    * (returns false) if no filter is active or the menu is closed.
    */
   run(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+    if (this.disabled) {
+      return false;
+    }
     if (!this.filter) {
       return false;
     }

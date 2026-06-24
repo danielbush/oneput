@@ -83,6 +83,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - KeyEventBindings class - extract it from packages/oneput/src/lib/oneput/lib/bindings.ts - it's key to understanding bindings
 - refactor: `bindings-change` event can stay, but ideally we just automatically refresh the layout (UILayout) and re-pull menu() so AppObjects don't need to worry about this event but any binding messages in menu , input placeholder etc will just update;
   - example: KatexDemo seems to be testing this because it has a help message that specifies the binding
+  - COMMENT: packages/oneput/src/lib/oneput/shared/ui/DynamicPlaceholder.ts is the previous attempt to handle this, any good?
 
 ## chore
 

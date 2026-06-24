@@ -1,3 +1,5 @@
+The user will probably only read the first paragraph of your response before asking follow-up questions.  Similar to a verbal conversation style. So keep your answers small and concise.  If you need to show table or and example, it's fine to add that as well.
+
 ## Project overview
 
 Keep responses short and to the point, don't point out more than the most obvious consequence at a time; the more sentences and consequences, the harder it is to understand what is going on.  The user should ask questions which will drive the discovery process.  Encourage them to ask these questions and go into detail if requested.

@@ -27,8 +27,15 @@ export function createMenuItems({
   ctl: Controller;
   editor: Editor;
   actions: EditDocumentMenuActions;
-  invalidateMenu: () => void;
+  /**
+   * Optional override for refreshing the menu after an edit. Defaults to
+   * `ctl.menu.invalidate()` (the declarative pull). Pass your own only if the
+   * consumer populates its menu imperatively (no declarative `menu()`), where
+   * `invalidate()` would be a no-op.
+   */
+  invalidateMenu?: () => void;
 }): Array<MenuItemAny | undefined | null | '' | false> {
+  const invalidate = invalidateMenu ?? (() => ctl.menu.invalidate());
   const cursor = editor.getCursor();
   return [
     editor.isEditing() &&
@@ -453,7 +460,7 @@ export function createMenuItems({
       closeMenuOnAction: false,
       action: (_, bool) => {
         editor.enableLegacyElementIndicator(bool);
-        invalidateMenu();
+        invalidate();
       },
       checked: editor.legacyElementIndicatorEnabled
     }),
@@ -463,7 +470,7 @@ export function createMenuItems({
       closeMenuOnAction: false,
       action: (_, bool) => {
         editor.enableElementIndicator(bool);
-        invalidateMenu();
+        invalidate();
       },
       checked: editor.elementIndicatorEnabled
     })

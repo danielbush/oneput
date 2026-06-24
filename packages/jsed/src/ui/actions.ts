@@ -39,8 +39,15 @@ export function createActions({
 }: {
   ctl: Controller;
   editor: Editor;
-  invalidateMenu: () => void;
+  /**
+   * Optional override for refreshing the menu after an edit. Defaults to
+   * `ctl.menu.invalidate()` (the declarative pull). Pass your own only if the
+   * consumer populates its menu imperatively (no declarative `menu()`), where
+   * `invalidate()` would be a no-op.
+   */
+  invalidateMenu?: () => void;
 }): EditDocumentActions {
+  const invalidate = invalidateMenu ?? (() => ctl.menu.invalidate());
   return {
     DOWN: {
       action: () => {
@@ -185,7 +192,7 @@ export function createActions({
     UNDO: {
       action: () => {
         editor.undo();
-        invalidateMenu();
+        invalidate();
       },
       binding: {
         bindings: ['$mod+z'],
@@ -195,7 +202,7 @@ export function createActions({
     REDO: {
       action: () => {
         editor.redo();
-        invalidateMenu();
+        invalidate();
       },
       binding: {
         bindings: ['Shift+$mod+z'],

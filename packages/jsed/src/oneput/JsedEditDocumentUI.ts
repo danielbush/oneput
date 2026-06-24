@@ -57,10 +57,24 @@ export class JsedEditDocumentUI implements AppObject {
   ) {
     this.actions = createActions({
       ctl: this.ctl,
-      editor: this.editor,
-      invalidateMenu: this.renderMenuItems
+      editor: this.editor
     });
   }
+
+  /**
+   * Declarative menu: rebuilt from editor state whenever it is pulled — on open
+   * (pull-on-open), on AppObject run/resume (runBefore), or via
+   * `ctl.menu.invalidate()` while open.
+   */
+  menu = () => ({
+    id: 'EditDocument',
+    focusBehaviour: 'last-action,first' as const,
+    items: createMenuItems({
+      ctl: this.ctl,
+      editor: this.editor,
+      actions: this.actions
+    })
+  });
 
   /**
    * Rebuild the menu when editor state changes.
@@ -70,21 +84,21 @@ export class JsedEditDocumentUI implements AppObject {
     this.unsubscribeEditChanges = this.editor.eventsEmitter.subscribe({
       onError: (err) => this.handleEditError(err),
       onFocusChange: () => {
-        this.renderMenuItems();
+        this.ctl.menu.invalidate();
       },
       onCursorChange: () => {
-        this.renderMenuItems();
+        this.ctl.menu.invalidate();
       },
       onTextChange: (evt) => {
         switch (evt.type) {
           case 'token-text-change':
           case 'anchor-change':
           case 'whitespace-change':
-            this.renderMenuItems();
+            this.ctl.menu.invalidate();
         }
       },
       onElementChange: () => {
-        this.renderMenuItems();
+        this.ctl.menu.invalidate();
       }
     });
   };
@@ -119,17 +133,14 @@ export class JsedEditDocumentUI implements AppObject {
     this.editor.destroy();
   };
 
+  /**
+   * Force-rebuild and seed the menu now (imperative). Used on start/resume —
+   * where `runBefore` seeded `menu()` *before* `editor.start()` ran, so the menu
+   * needs a rebuild from post-start state. Production triggers during editing use
+   * `ctl.menu.invalidate()` (which no-ops while closed; pull-on-open rebuilds).
+   */
   renderMenuItems = () => {
-    this.ctl.menu.setMenu({
-      id: 'EditDocument',
-      focusBehaviour: 'last-action,first',
-      items: createMenuItems({
-        ctl: this.ctl,
-        editor: this.editor,
-        actions: this.actions,
-        invalidateMenu: this.renderMenuItems
-      })
-    });
+    this.ctl.menu.setMenu(this.menu());
   };
 
   handleEditError = (err: EditorError) => {

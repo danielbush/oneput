@@ -12,82 +12,95 @@ The displayed menu is a function of two inputs:
   by `ctl.menu.setMenu(...)`.
 - **query** — the live input value (`ctl.input.getInputValue()`).
 
-A **menuItemsFn** combines them: `displayed = derive(base, query)`. It runs on every
-input change (while the menu is open), reads the base, and writes only the _displayed_
-list (`currentProps.menuItems`) — it never mutates the base. So `setMenu` owns the base;
-the fn owns the view.
+The **displayed** list is `currentProps.menuItems`, written via `ctl.menu.setDisplayed(...)`.
+So `setMenu` owns the base; whatever derives the displayed list owns the view (and never
+mutates the base).
 
-### Static vs dynamic
+### Two derivation channels (mutually exclusive per menu)
 
-**Static** — call `setMenu({ id, items })` once. With no menuItemsFn, the displayed
-list is just the base. This is the simplest case.
+There are two separate, typed channels that produce the displayed list. A given menu uses
+ONE of them:
 
-**Dynamic** — register a menuItemsFn. Three shapes show up:
+- **filter** (`ctl.menu.filter`, in `helpers/Filter.ts`) — SYNC. Reads the base + query and
+  returns a subset (+ highlighting). Signature `FilterFn = (query, base) => subset`.
+  `FuzzyFilter` / `WordFilter` are filters; register one with `ctl.menu.filter.set(fn)` (or
+  `setDefault` for the app-wide default).
+- **generative** (`ctl.menu.fn`, in `helpers/MenuItemsFn.ts`) — produces items purely from
+  the input, IGNORING the base. Signature `MenuItemsGenFn = (input) => items` (and
+  `MenuItemsGenFnAsync` for fetches). Register with `setMenuItemsFn` / `setMenuItemsFnAsync`.
 
-- **Filter** (`FuzzyFilter` / `WordFilter`) — reads the base, returns a subset (with
-  match highlighting). Set as the default fn, so most menus are filterable for free.
-- **Generative-from-state** (KatexDemo) — items are derived from AppObject state, not
-  filtered from a base. Rebuilds the whole menu when state changes.
-- **Generative-from-results** (AsyncSearchExample) — items come from an external source
-  (e.g. a network search) keyed on input; the base is ignored.
+They can't both drive one menu: registering a generative fn auto-clears the active filter,
+and the `enableFilter` UI flag gates the filter channel independently of `enableMenuItemsFn`.
+
+### Three kinds of menu
+
+- **filter** — a static base (`setMenu`/`menu()`) + a filter over it. Typing narrows the
+  list. The app shell installs a default filter so most menus are filterable for free.
+- **sync-rebuild** (KatexDemo) — declarative `menu()` builds items from AppObject state.
+  Typing/state changes call `invalidate()` (or the `onInputChange` hook) to rebuild. No
+  filter, no generative fn.
+- **async-fetch** (AsyncSearchExample) — `setMenuItemsFnAsync` fetches items keyed on input
+  (debounced, out-of-order results discarded). Uses `whenEmpty` for the pre-typing
+  placeholder; no `menu()`, no `setMenu`.
 
 ### Declarative `menu()` vs imperative `setMenu`
 
-An AppObject can populate its menu two ways:
+- **Imperative** — call `ctl.menu.setMenu(...)` yourself (in `onStart`, on events).
+- **Declarative** — define `menu = () => ({ id, items })`. The framework pulls it for you;
+  the function form re-runs from current state each pull.
 
-- **Imperative** — call `ctl.menu.setMenu(...)` yourself (in `onStart`, on events, etc.).
-  Most AppObjects do this today.
-- **Declarative** — define `menu = () => ({ id, items })`. The system calls `setMenu`
-  for you when the AppObject runs/resumes. The function form means it re-runs from
-  current state each time it's pulled.
+A declarative `menu()` is pulled at exactly three moments, all AFTER the relevant state
+exists:
+
+- **after `onStart`/`onResume`** (`afterRun`) — so it reflects state the hook just set up,
+- **on open** (pull-on-open) — so changes made while the menu was closed are picked up,
+- **on `invalidate()`** — when state changes while the menu is open.
+
+(This ordering is deliberate: pulling before `onStart`/`onResume` would build the menu from
+state that isn't set up yet, or that the hook is about to change.)
 
 ### `invalidate()`
 
 `ctl.menu.invalidate(opts?)` says: _"the state behind `menu()` changed — pull it again."_
-It re-runs the declarative `menu()` and re-seeds the menu. It is **guarded**: if the
-AppObject has no declarative `menu()`, it's a no-op.
+It re-runs `menu()`, re-seeds the base, AND re-applies an active filter against the current
+query in the same synchronous tick (so the user's query survives with no flash of the
+unfiltered base). Guards — it's a no-op when:
 
-This replaces the old pattern of hand-writing a `renderMenuItems()` helper and calling it
-on every state change. Instead: define `menu()` to read state, and call `invalidate()`
-whenever that state changes. Pass `invalidate({ focusBehaviour: 'none' })` for changes
-that shouldn't move the focused item (e.g. toggling a checkbox in place).
+- the AppObject has no declarative `menu()`, or
+- the menu is **closed** (the next open re-pulls anyway, via pull-on-open).
 
-`invalidate()` is for "the base/state moved". Its counterpart, `triggerMenuItemsFn()`, is
-for "re-run the deriver against the current input" (re-filter, or re-fetch for an async
-menu). They're complementary: a generative-from-results menu only ever needs
-`triggerMenuItemsFn()` (its displayed view doesn't depend on a base), so `invalidate()` is
-a no-op there.
+So callers can fire `invalidate()` on any state change without checking whether the menu is
+open. Pass `invalidate({ focusBehaviour: 'none' })` for changes that shouldn't move the
+focused item (e.g. toggling a checkbox in place).
 
-Worked example: KatexDemo uses declarative `menu()` + `invalidate()`. Typing, toggling
-display mode, and rebinding the submit key all just call `invalidate()`; the menu rebuilds
-from state.
+Related primitives:
 
-### Not yet implemented
+- **`onInputChange`** (AppObject hook, framework-wired) — for a sync-rebuild menu where
+  typing should rebuild `menu()`: recompute state, then `invalidate()`. KatexDemo uses this;
+  NavigateHeadings uses it to run its own filtering.
+- **`triggerMenuItemsFn()`** — re-run the generative fn now against the current input
+  (re-fetch). This is the refresh primitive an async-fetch menu needs; `invalidate()` is a
+  no-op there (no `menu()`).
 
-- `invalidate()` does NOT yet re-run an active **filter** menuItemsFn. So if a menu were
-  both declarative AND filtered, invalidating mid-filter would show the unfiltered base
-  until the next keystroke. No menu needs this combination today; it'll be added when one
-  does (re-seed base, then re-run the filter against the current query to preserve it).
-- A **`whenEmpty`** render option on `setMenuItemsFn` / `setMenuItemsFnAsync` (so a
-  generative menu can show a placeholder for empty input without a separate `setMenu`
-  call, and avoid a pointless empty fetch) is designed but not built.
+Worked example: KatexDemo is sync-rebuild — declarative `menu()` reads katex state; typing
+(`onInputChange`), toggling display mode, and rebinding the submit key all call
+`invalidate()`; the menu rebuilds from state.
 
 ## How do I get Oneput to filter a menu using the input?
 
-Oneput does NOT filter out of the box — there is no built-in default filter. You set
-one up **once**, at the app shell level, and then every menu becomes filterable. So it's
-not free, but it's a single line of setup, after which individual AppObjects do nothing.
+Oneput does NOT filter out of the box. You install a default filter **once**, at the app
+shell level, after which every menu becomes filterable; individual AppObjects do nothing.
 
 ### Step 1 — install a default filter (once, in your app shell)
 
 ```ts
-ctl.menu.fn.setDefaultMenuItemsFn(FuzzyFilter.create().menuItemsFn);
+ctl.menu.filter.setDefault(FuzzyFilter.create().filter);
 ```
 
-Pick `WordFilter` (each input word must prefix-match somewhere in the item) or
-`FuzzyFilter` (uFuzzy matching + ranking). In the demos this lives in the app `_layout`;
-`SettingsManager` switches between the two. Without this line, typing does nothing to the
-menu.
+Pick `WordFilter` (each input word must prefix-match somewhere in the item) or `FuzzyFilter`
+(uFuzzy matching + ranking). In the demos this lives in the app `_layout`; `SettingsManager`
+switches between the two with `ctl.menu.filter.setDefault(...)`. Without this line, typing
+does nothing to the menu.
 
 ### Step 2 — set a menu (per AppObject)
 
@@ -98,31 +111,36 @@ ctl.menu.setMenu({
 });
 ```
 
-Now typing narrows the list, with matching text highlighted. The items you passed are
-the **base**; the default filter derives the displayed subset from them on each keystroke.
-(See "The two layers" above.)
+Now typing narrows the list, with matching text highlighted. The items you passed are the
+**base**; the filter derives the displayed subset from them on each keystroke.
 
 ### Overriding the filter for one AppObject
 
-Register your own fn for the current screen. It receives `(input, allMenuItems)` and
+Register your own filter for the current screen. A `FilterFn` receives `(input, base)` and
 returns the items to display (or `undefined` to leave the list unchanged):
 
 ```ts
-ctl.menu.fn.setMenuItemsFn((input, items) => items.filter((i) => matches(i, input)));
+ctl.menu.filter.set((input, items) => items.filter((i) => matches(i, input)));
 ```
 
-Call `setMenuItemsFn()` with no argument to restore the default.
+`ctl.menu.filter.reset()` restores the default. (The default is also restored automatically
+per AppObject, in `runBefore`.)
 
 ### Notes / gotchas
 
-- The fn only runs **while the menu is open** and **on input change**. To filter
-  programmatically (without the user typing), call `ctl.menu.fn.triggerMenuItemsFn()`.
-- The fn reads the **base** (`allMenuItems` from your last `setMenu`) — so re-`setMenu`
+- The filter only runs **while the menu is open** and **on input change**. To re-filter
+  programmatically, `invalidate()` re-applies it; for the generative channel use
+  `ctl.menu.fn.triggerMenuItemsFn()`.
+- The filter reads the **base** (`allMenuItems` from your last `setMenu`) — so re-`setMenu`
   to change what's filtered.
-- For async/remote filtering, use `setMenuItemsFnAsync` (debounced, out-of-order results
-  discarded) instead — see AsyncSearchExample.
-- A `whenEmpty` option (placeholder items shown when the input is empty) is designed but
-  **not yet implemented**; today, empty input shows the full base list.
+- A filter is SYNC by definition. If selecting the displayed items needs I/O (a network
+  fetch, a query embedding), that's the **generative** channel, not a filter — use
+  `setMenuItemsFnAsync` (debounced, out-of-order results discarded); see AsyncSearchExample.
+- To do your own filtering without the built-in channel, disable it (`enableFilter: false`)
+  and derive the menu yourself in the `onInputChange` hook; see NavigateHeadings.
+- A generative menu can show a placeholder for empty input via the `whenEmpty` option on
+  `setMenuItemsFn` / `setMenuItemsFnAsync` (no separate `setMenu`, and clearing the input
+  back to empty avoids a pointless empty fetch).
 
 ## If an AppObject uses setMenu without setting menu(), does ctl.menu.invalidate update it?
 

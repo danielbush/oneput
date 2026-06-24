@@ -35,6 +35,18 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: a lifecycle companion object for your AppObject
+  - COMMENT: I don't know if this is justified; does it also weaken the point of having things like onExit in AppObject?
+  - COMMENT: this would declutter AppObjects and make subscription logic more specific
+  - COMMENT: semantics should avoid ambiguity about where we use it; do we run it in onStart or in constructor or make it nullable and run in static create/createNull ?
+    - i think ctl.app.lifecycle.add is suggestive of doing it before onStart; although maybe we could handle if run in onStart?  Seems messy
+  - ctl.app.lifecycle.add({ onStart, onExit, onSuspend, onResume })
+  - onStart(ctx: Ctx) - add subscription,
+- feat: add onX to AppObject
+  - COMMENT: complements onEvent; onEvent (our stuff), onX (oneput stuff)
+  - it automatically handles start/exit and suspend/resume
+  - katex `bindings-change`
+  - EditDocumentUI in @2br/web - `menu-open-change`
 - feat: disable individual menu items
   - eg pasteBefore, pasteAfter, pasteIn
 - feat: filter for global items

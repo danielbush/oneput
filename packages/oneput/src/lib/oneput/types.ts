@@ -274,6 +274,17 @@ export interface AppObject<R = unknown> {
    * any necessary cleanup tasks.
    */
   onExit?: () => void;
+  /**
+   * Called when the user triggers "back" while this AppObject is current,
+   * instead of the default pop. The declarative counterpart of
+   * `ctl.app.setOnBack(...)`: use this when the handler is fixed for the
+   * AppObject; use `setOnBack` when it changes with state (e.g. a wizard step).
+   *
+   * Precedence: an imperative `setOnBack` handler wins if one has been set
+   * (it is cleared per-AppObject on start, so it only overrides while live).
+   * If neither is present, back falls through to the default pop.
+   */
+  onBack?: () => void;
   onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
   /**
    * Called whenever the input value changes while this AppObject is current.

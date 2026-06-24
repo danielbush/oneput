@@ -284,6 +284,10 @@ export class AppController {
 
   /**
    * Goes back to previous appObject.
+   *
+   * Back handler precedence: an imperative `setOnBack` handler (reset per
+   * AppObject) wins, then the current AppObject's declarative `onBack`, then the
+   * default pop.
    */
   goBack = () => {
     if (this.disableGoBack) {
@@ -291,6 +295,10 @@ export class AppController {
     }
     if (this.onBack) {
       this.onBack();
+      return;
+    }
+    if (this.current?.app.onBack) {
+      this.current.app.onBack();
       return;
     }
     this.pop();

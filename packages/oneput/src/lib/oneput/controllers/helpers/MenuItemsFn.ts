@@ -117,6 +117,7 @@ export class MenuItemsFnController {
     menuItemsFnAsync: MenuItemsGenFnAsync,
     options: {
       onDebounce?: (isDebouncing: boolean) => void;
+      debounceMS?: number;
       focusBehaviour?: FocusBehaviour;
       whenEmpty?: () => MenuItemAny[];
     } = {}
@@ -155,7 +156,7 @@ export class MenuItemsFnController {
         // console.warn(`got ${value}...`);
         this.ctl.menu.setDisplayed({ items, focusBehaviour: options.focusBehaviour });
       },
-      500,
+      options.debounceMS ?? 500,
       { immediate: false }
     );
     this.removeMenuItemsListener = this.ctl.events.on('input-change', (payload) => {

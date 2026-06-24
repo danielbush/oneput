@@ -199,13 +199,12 @@ export class AppController {
    */
   private runBefore() {
     this.reset();
-    // Seed the new AppObject's declarative base. This owns the AppObject ->
-    // AppObject transition: if the menu is already open when we switch, no
-    // openMenu() fires, so pull-on-open can't re-seed and this is the only path
-    // that does. No filter.run() needed here because reset() clears the input
-    // (empty query => full base); it would only be needed if a transition
-    // preserved the input value.
-    this.ctl.menu.setMenu(this.current?.menu());
+    // Clear the previous AppObject's menu. The NEW AppObject's declarative menu()
+    // is pulled AFTER its onStart/onResume runs (see afterRun) so it reflects
+    // post-setup state; imperative AppObjects set their own menu in onStart. This
+    // clear + afterRun pair owns the AppObject->AppObject transition (no openMenu
+    // fires there, so pull-on-open can't).
+    this.ctl.menu.setMenu();
     if (this.current?.app.actions) {
       const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(
         (acc, [actionId, actionWithBinding]) => {
@@ -240,6 +239,23 @@ export class AppController {
     this.current = AppVal.create(appObject as AppObject);
     this.runBefore();
     appObject.onStart();
+    this.afterRun();
+  }
+
+  /**
+   * Pull `menu()` AFTER the AppObject's onStart/onResume has run.
+   *
+   * `menu()` reads the AppObject's state to build its items, and onStart/onResume
+   * is where the AppObject changes that state. Pulling in runBefore (BEFORE the
+   * hook) means those changes aren't reflected: on onStart the state isn't set up
+   * yet (menu built from nothing), and on onResume the hook mutates state so the
+   * earlier pull is now stale. Either way the AppObject would have to re-render
+   * itself once the hook finishes. Pulling here, AFTER the hook, means the menu is
+   * always built from the finished state. Guarded (via reseedMenu): a no-op if
+   * there is no `menu()` (imperative AppObjects set their menu in onStart).
+   */
+  private afterRun() {
+    this.reseedMenu();
   }
 
   /**
@@ -260,6 +276,7 @@ export class AppController {
       } else {
         appVal.app.onStart();
       }
+      this.afterRun();
       return;
     }
     return;

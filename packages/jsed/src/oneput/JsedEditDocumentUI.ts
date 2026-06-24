@@ -106,7 +106,7 @@ export class JsedEditDocumentUI implements AppObject {
   onStart = () => {
     this.hooks.onActivate?.();
     this.editor.start();
-    this.renderMenuItems();
+    // No manual menu render: the framework pulls menu() after onStart (afterRun).
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editor.suspend(isOpen);
     });
@@ -117,7 +117,7 @@ export class JsedEditDocumentUI implements AppObject {
   onResume = () => {
     this.hooks.onActivate?.();
     this.editor.suspend(false);
-    this.renderMenuItems();
+    // No manual menu render: the framework pulls menu() after onResume (afterRun).
     this.ctl.input.focus();
     this.subscribeEditChanges();
   };

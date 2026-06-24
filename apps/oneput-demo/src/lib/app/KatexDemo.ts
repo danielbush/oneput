@@ -83,8 +83,8 @@ export class KatexDemo implements AppObject {
     this.ctl.input.setSubmitHandler(() => {
       this.insertKatex();
     });
+    // Set up katex state; menu() is pulled by the framework after onStart (afterRun).
     this.recompute();
-    this.ctl.menu.invalidate();
   }
 
   /**

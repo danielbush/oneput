@@ -123,3 +123,25 @@ Call `setMenuItemsFn()` with no argument to restore the default.
   discarded) instead — see AsyncSearchExample.
 - A `whenEmpty` option (placeholder items shown when the input is empty) is designed but
   **not yet implemented**; today, empty input shows the full base list.
+
+## If an AppObject uses setMenu without setting menu(), does ctl.menu.invalidate update it?
+
+No. `invalidate()` re-pulls the **declarative `menu()`** and re-seeds from it. It is guarded:
+if the AppObject defined no `menu()`, `invalidate()` is a no-op (returns `false`) — there is
+nothing for it to pull. An imperative `setMenu(...)` call seeds the base directly but leaves
+no recipe to re-run, so `invalidate()` can't "update" it.
+
+To refresh an imperatively-set menu, call `setMenu(...)` again yourself (that's the
+imperative contract: you own the base, so you re-seed it). Note the same guard means the
+**pull-on-open** behaviour also skips a `menu()`-less AppObject — opening the menu does not
+re-seed it either; whatever your last `setMenu` set is what shows.
+
+(Two related guards on `invalidate`, both about _when_ it does nothing: the `menu()` guard
+above, and a no-op when the menu is **closed** — since the next open re-pulls `menu()`
+anyway. Neither applies to a plain `setMenu`-only menu, which is updated only by calling
+`setMenu` again.)
+
+In short:
+
+- **Declarative** (`menu = () => ...`) → `invalidate()` re-derives it.
+- **Imperative** (`setMenu(...)`) → `invalidate()` is a no-op; call `setMenu(...)` again.

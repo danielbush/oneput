@@ -62,8 +62,8 @@ export class JsedEditDocumentUI implements AppObject {
   }
 
   /**
-   * Declarative menu: rebuilt from editor state whenever it is pulled — on open
-   * (pull-on-open), on AppObject run/resume (runBefore), or via
+   * Declarative menu: rebuilt from editor state whenever it is pulled — after
+   * start/resume (afterRun), on open (pull-on-open), or via
    * `ctl.menu.invalidate()` while open.
    */
   menu = () => ({
@@ -131,16 +131,6 @@ export class JsedEditDocumentUI implements AppObject {
     this.unsubscribeEditChanges?.();
     this.removeSuspendHandler?.();
     this.editor.destroy();
-  };
-
-  /**
-   * Force-rebuild and seed the menu now (imperative). Used on start/resume —
-   * where `runBefore` seeded `menu()` *before* `editor.start()` ran, so the menu
-   * needs a rebuild from post-start state. Production triggers during editing use
-   * `ctl.menu.invalidate()` (which no-ops while closed; pull-on-open rebuilds).
-   */
-  renderMenuItems = () => {
-    this.ctl.menu.setMenu(this.menu());
   };
 
   handleEditError = (err: EditorError) => {

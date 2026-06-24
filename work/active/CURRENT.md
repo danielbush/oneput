@@ -36,7 +36,26 @@ re-pull from `menu()` on open. `menu()` is pulled exactly once, in `AppControlle
 (`this.ctl.menu.setMenu(this.current?.menu())`). `openMenu()` only flips `menuOpen` +
 emits; it does not re-pull.
 
-### Change 1 — `ctl.menu.invalidate()` (guarded on `menu`)
+### Change 1 — `ctl.menu.invalidate()` (guarded on `menu`) — DONE
+
+Implemented and migrated KatexDemo. Type-checks + oneput unit tests pass.
+
+- `AppController.invalidateMenu(opts?)` — re-pulls `current?.menu()`, guarded
+  (no-op returning `false` if no declarative `menu()`); spreads optional
+  `focusBehaviour` override onto the re-seeded menu.
+- `MenuController.invalidate(opts?)` — public entry, delegates to AppController.
+- KatexDemo migrated: declarative `menu = () => ({ id, focusBehaviour: 'first',
+  items: buildMenuItems() })`; `renderUI` split into `recompute()` (katex state +
+  input UI) and `buildMenuItems()` (pure items); `renderMenuItems` removed. All
+  triggers call `invalidate()` (input change, `bindings-change`, checkbox uses
+  `invalidate({ focusBehaviour: 'none' })`). `setMenuItemsFn` kept ONLY as the
+  input-change trigger (returns undefined) to preserve the menu-open firing guard.
+- DEFERRED: `invalidate()` does NOT re-run an active filter `menuItemsFn` yet.
+  KatexDemo doesn't need it and there are no declarative+filter menus today. Add
+  fn re-run (preserve query) when a filter menu first needs `invalidate`.
+
+Original spec for reference:
+
 
 Signal that the declarative base must be re-pulled.
 
@@ -56,6 +75,21 @@ Signal that the declarative base must be re-pulled.
 - `invalidate()` = "the base/state behind `menu()` changed" → re-pull base.
 - `triggerMenuItemsFn()` = "re-run the deriver now against current input" (re-filter or
   re-fetch). This is the only refresh primitive a generative-from-results menu needs.
+
+### Refactor - filter vs generative menus
+
+What the user would see: two registration points instead of one overloaded setMenuItemsFn.
+
+- `setFilter(fn)` — sync, (base, query) → subset.
+- `setMenuItemsFn/...Async` — produces the base.
+- Plus `setMenu/menu()` to seed a static base.
+
+Can they switch/use both? Yes. They're orthogonal stages: displayed = filter(generate(input), input). An AppObject can set a base (static or generative) and a filter over it, or just one.
+
+Why can't they filter using generative? They can — a generative fn reading base and returning a subset is a filter. Nothing stops it today. The split doesn't add a capability; it names the two roles so the system knows which is sync-derivable-from-base. **That knowledge is the only thing that lets invalidate re-derive without a flash. Without the distinction, every fn is opaque and invalidate has to guess.**
+
+So the question isn't "what can the user do" — it's "what does the system know about what they did."
+
 
 ### Change 2 — `whenEmpty` render option on `setMenuItemsFn` / `setMenuItemsFnAsync`
 

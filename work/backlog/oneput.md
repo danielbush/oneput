@@ -5,9 +5,15 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## Critical path
 
 - directory browser
+  - DONE (mock-up, apps/oneput-demo): folder navigation via AppObject-per-folder stack;
+    load-before-navigate so transitions are flash-free; `enableMenuActions:false` dims+freezes
+    the current menu during load (single owner: drives behaviour + CSS dim); `restricted` folder
+    demos the error path. Data behind injected `listDir` seam (delayed mock; real fs deferred).
   - as an example, we could set it to the root of the codebase
   - oneput lets us select folders and go into them
   - show files, but maybe we just fire a placeholder "todo: perform action on file"
+  - NEXT: select a file → if text, display it; for markdown, offer an action "convert to html"
+    and when displaying render as html via a markdown renderer
   - possibly could look at update the main window
     - the simplest thing is it could be used to view file content when possible
 - talk to hermes
@@ -18,9 +24,6 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## fix
 
 - fix: is katex display mode working when we insert?
-- fix: oneput-demo menu is closing on actions where it shouldn't
-  - I think I altered this when working on jsed-demo; what is the preferred approach?
-  - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
 - fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
   - COMMENT: add visual demos for notification when menu is closed
 - fix: `$mod+v a` types `a` into input
@@ -42,6 +45,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: declarative onBack in AppObject
+- feat: a mechanism for gettign key bindings
+  - COMMENT: this could just be a design that could be used
+  - COMMENT: how best to show keybindings relevant to a new app object?
+  - COMMENT: how best to show keybindings (global ones) when the menu is closed
 - feat: whenEmpty in MenuItemsFn.ts - should it provide a builder ?
 - feat: a lifecycle companion object for your AppObject
   - COMMENT: I don't know if this is justified; does it also weaken the point of having things like onExit in AppObject?
@@ -50,7 +58,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
     - i think ctl.app.lifecycle.add is suggestive of doing it before onStart; although maybe we could handle if run in onStart?  Seems messy
   - ctl.app.lifecycle.add({ onStart, onExit, onSuspend, onResume })
   - onStart(ctx: Ctx) - add subscription,
-- feat: add onX to AppObject
+- feat: add more onX to AppObject
   - COMMENT: complements onEvent; onEvent (our stuff), onX (oneput stuff)
   - it automatically handles start/exit and suspend/resume
   - katex `bindings-change`
@@ -64,8 +72,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
     - COMMENT: seems a bit weak
   - COMMENT: This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
   - COMMENT: the issue is how to define "global items"
-- feat: declarative onBack in AppObject
-- feat: implemenet web components
+- feat: implement web components
 - feat: notifications should have an optional left icon
   - COMMENT: example: auto-save fails, we should an error icon; next autosave succeeds, we get a recovery icon
 - feat: should notifications allow for title + text?

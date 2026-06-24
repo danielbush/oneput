@@ -38,6 +38,8 @@ export const iconData = {
   Tag: lu.Tag,
   Clock: lu.Clock,
   ChevronsLeftRightEllipsis: lu.ChevronsLeftRightEllipsis,
+  Folder: lu.Folder,
+  File: lu.File,
   // Bindings we should provide for existing appObjects...
   GlobalFilterInputIcon: lu.Globe,
   CloseNotification: lu.X

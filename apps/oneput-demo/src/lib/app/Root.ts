@@ -3,6 +3,7 @@ import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
+import { DirectoryBrowser } from './DirectoryBrowser.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
@@ -17,7 +18,8 @@ export class Root implements AppObject {
       NavigateHeadings: () => NavigateHeadings.create(ctl),
       TomatoTimer: () => TomatoTimer.create(ctl),
       KatexDemo: () => KatexDemo.create(ctl),
-      AsyncSearchExample: () => AsyncSearchExample.create(ctl)
+      AsyncSearchExample: () => AsyncSearchExample.create(ctl),
+      DirectoryBrowser: () => DirectoryBrowser.create(ctl)
     });
   }
 
@@ -30,6 +32,7 @@ export class Root implements AppObject {
       TomatoTimer: () => TomatoTimer;
       KatexDemo: () => KatexDemo;
       AsyncSearchExample: () => AsyncSearchExample;
+      DirectoryBrowser: () => DirectoryBrowser;
     }
   ) {
     ctl.ui.setLayout(this.create.Layout());
@@ -85,6 +88,15 @@ export class Root implements AppObject {
           bottom: {
             textContent: 'A Pomodoro-like timer to demo timer widgets and state management...'
           }
+        }),
+        stdMenuItem({
+          id: 'browse-directory',
+          left: (b) => [b.icon(icons.Folder)],
+          textContent: 'Browse directory...',
+          action: () => {
+            this.ctl.app.run(this.create.DirectoryBrowser());
+          },
+          right: (b) => [b.icon(icons.ChevronRight)]
         }),
         stdMenuItem({
           id: 'insert-katex',

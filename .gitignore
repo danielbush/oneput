@@ -16,3 +16,5 @@ opensrc/
 
 # vitest
 .test-results
+
+SCRATCH.md

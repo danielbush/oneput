@@ -16,7 +16,12 @@ From the top:
   - we can test behaviours like
     - "AppObject menu() is pulled when we resume"
       - we could test it indirectly by contriving things to make the pull significant
+      - or we use state based testing as referred to in nullable-architecture skill.
 
 From the bottom
 
 When possible, we isolate and extract key low-level functionality out of the controllers and other high-level constructs in Oneput and make them functions (call these "operations"). Store them in `src/lib/ops/*`. We test these exhaustively. If it makes sense to extract encapsulated units of code in the form of helper classes, we can do that to and test these heavily like oeprations. The benefit is that we make the high level code leaner as well as more reliable because it leans on well-tests lower level operations.
+
+For consumers:
+
+Provide a test controller that allows the consumer to run and exercise their AppObjects.

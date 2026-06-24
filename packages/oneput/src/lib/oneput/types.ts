@@ -286,10 +286,11 @@ export interface AppObject<R = unknown> {
   onInputChange?: (data: { value: string }) => void;
   /**
    * Called when an app event is emitted via ctl.app.emitEvent(...) while this
-   * AppObject is the active (current) one.  This is how host-app UI rendered
-   * outside of Oneput (e.g. a node on a canvas) can signal the active AppObject
-   * without subscribing or knowing who handles it.  Only the current AppObject
-   * receives the event.
+   * AppObject is the active (current) one.  See {@link AppEvent} - these are
+   * user-created events. This is how host-app UI rendered outside of Oneput
+   * (e.g. a node on a canvas) can signal the active AppObject without
+   * subscribing or knowing who handles it.  Only the current AppObject receives
+   * the event.
    */
   onEvent?: (event: AppEvent) => void;
   /**

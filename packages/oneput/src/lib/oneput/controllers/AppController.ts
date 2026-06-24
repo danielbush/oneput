@@ -87,6 +87,9 @@ export class AppController {
     if ('enableMenuItemsFn' in flags || 'enableModal' in flags) {
       this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
     }
+    if ('enableFilter' in flags || 'enableModal' in flags) {
+      this.ctl.menu.filter._enable(flags.enableFilter ?? !flags.enableModal);
+    }
     if ('enableInputElement' in flags || 'enableModal' in flags) {
       this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
     }
@@ -117,6 +120,7 @@ export class AppController {
       enableKeys: settings?.enableKeys ?? !enableModal,
       enableMenuActions: settings?.enableMenuActions ?? !enableModal,
       enableMenuItemsFn: settings?.enableMenuItemsFn ?? !enableModal,
+      enableFilter: settings?.enableFilter ?? !enableModal,
       enableInputElement: settings?.enableInputElement ?? !enableModal
     };
 
@@ -125,6 +129,7 @@ export class AppController {
     this.ctl.keys._enableKeys(flags.enableKeys);
     this.ctl.menu._enableMenuActions(flags.enableMenuActions);
     this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn);
+    this.ctl.menu.filter._enable(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
 
     // Reset stuff...
@@ -133,7 +138,7 @@ export class AppController {
     this.ctl.input.resetPlaceholder();
     this.ctl.menu.resetFocusBehaviour();
     this.ctl.menu.fn.resetMenuItemsFn();
-    this.ctl.menu.fn.resetFilter();
+    this.ctl.menu.filter.reset();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();
     this.ctl.menu.resetFillHandler();
@@ -162,7 +167,7 @@ export class AppController {
     // user's query survives. Runs in the same tick as the base paint above, so
     // the displayed layer is only assigned twice synchronously -> single render,
     // no flash of the unfiltered base.
-    this.ctl.menu.fn.runFilter({ focusBehaviour: opts?.focusBehaviour });
+    this.ctl.menu.filter.run({ focusBehaviour: opts?.focusBehaviour });
     return true;
   }
 

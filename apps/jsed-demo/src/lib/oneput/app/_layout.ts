@@ -48,7 +48,7 @@ export class Layout implements UILayout {
     private settings: LayoutSettings = {},
     private dynamicPlaceholder: DynamicPlaceholder,
   ) {
-    ctl.menu.fn.setDefaultFilter(WordFilter.create().menuItemsFn);
+    ctl.menu.filter.setDefault(WordFilter.create().menuItemsFn);
     ctl.menu.setDefaultFocusBehaviour("last-action,first");
     ctl.keys.setDefaultBindings(defaultKeys);
     ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);

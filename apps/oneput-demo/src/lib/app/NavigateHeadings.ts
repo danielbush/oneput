@@ -31,8 +31,9 @@ export class NavigateHeadings implements AppObject {
       },
       flags: {
         // Demo how to handle typed input by handling onInputChange directly and
-        // disable menuItemsFn...
-        enableMenuItemsFn: false
+        // disable the built-in generative + filter channels...
+        enableMenuItemsFn: false,
+        enableFilter: false
       }
     });
     const menuAction = (heading: HTMLElement) => {

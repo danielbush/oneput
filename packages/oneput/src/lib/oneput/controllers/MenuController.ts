@@ -2,23 +2,27 @@ import type { FocusBehaviour, MenuItem, MenuItemAny } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
+import { FilterController } from './helpers/Filter.js';
 
 export class MenuController {
   public static create(ctl: Controller) {
     const fn = MenuItemsFnController.create(ctl);
-    return new MenuController(ctl, fn);
+    const filter = FilterController.create(ctl);
+    return new MenuController(ctl, fn, filter);
   }
 
   public static createNull(ctl: Controller) {
     const fn = MenuItemsFnController.createNull(ctl);
-    return new MenuController(ctl, fn);
+    const filter = FilterController.createNull(ctl);
+    return new MenuController(ctl, fn, filter);
   }
 
   public currentMenu: CurrentMenu;
 
   constructor(
     private ctl: Controller,
-    public fn: MenuItemsFnController
+    public fn: MenuItemsFnController,
+    public filter: FilterController
   ) {
     this.currentMenu = CurrentMenu.createBlank(this.ctl);
     this.ctl.currentProps.onMenuAction = () => {

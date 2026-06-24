@@ -298,6 +298,7 @@ export type UIFlags = {
   enableKeys?: boolean;
   enableMenuActions?: boolean;
   enableMenuItemsFn?: boolean;
+  enableFilter?: boolean;
   enableInputElement?: boolean;
   enableModal?: boolean;
 };

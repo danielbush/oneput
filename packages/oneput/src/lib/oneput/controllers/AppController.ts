@@ -149,13 +149,15 @@ export class AppController {
   }
 
   /**
-   * Re-pull the current AppObject's declarative `menu()` and re-seed the menu.
+   * Re-pull the current AppObject's declarative `menu()` and re-seed the menu
+   * (base + re-apply any active filter). Shared by `invalidateMenu` and by
+   * `openMenu` (pull-on-open) — do not call directly, prefer those.
    *
-   * Guarded: if the current AppObject did not define a declarative `menu()`,
-   * this is a no-op (returns false). Pass `focusBehaviour: 'none'` for state
-   * changes that should not move the focused index (e.g. toggling a checkbox).
+   * Guarded: a no-op (returns false) if the current AppObject defined no
+   * declarative `menu()`. Pass `focusBehaviour: 'none'` for state changes that
+   * should not move the focused index (e.g. toggling a checkbox).
    */
-  invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+  reseedMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
     const menu = this.current?.menu();
     if (!menu) {
       return false;
@@ -172,10 +174,30 @@ export class AppController {
   }
 
   /**
+   * Signal that state behind `menu()` changed → re-derive now.
+   *
+   * No-op when the menu is CLOSED: the next open re-pulls anyway (pull-on-open,
+   * see `MenuController.openMenu`), so callers can fire `invalidate()` on any
+   * state change without checking whether the menu is open.
+   */
+  invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+    if (!this.ctl.menu.isMenuOpen) {
+      return false;
+    }
+    return this.reseedMenu(opts);
+  }
+
+  /**
    *  Resets things to sane defaults.  You can then set things in your AppObject.run.
    */
   private runBefore() {
     this.reset();
+    // Seed the new AppObject's declarative base. This owns the AppObject ->
+    // AppObject transition: if the menu is already open when we switch, no
+    // openMenu() fires, so pull-on-open can't re-seed and this is the only path
+    // that does. No filter.run() needed here because reset() clears the input
+    // (empty query => full base); it would only be needed if a transition
+    // preserved the input value.
     this.ctl.menu.setMenu(this.current?.menu());
     if (this.current?.app.actions) {
       const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(

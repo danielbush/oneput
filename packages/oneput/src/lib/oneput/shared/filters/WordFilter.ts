@@ -42,7 +42,7 @@ export class WordFilter {
     return new WordFilter();
   }
 
-  menuItemsFn: FilterFn = (input, menuItems) => {
+  filter: FilterFn = (input, menuItems) => {
     // ALWAYS call haystack because it clears derivedHTML in FChild
     // elements.  Example: user types some text, then deletes all of it
     // using backspace, the last character to be deleted (which is the first

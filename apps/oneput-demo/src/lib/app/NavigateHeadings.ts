@@ -63,7 +63,7 @@ export class NavigateHeadings implements AppObject {
     // Normally you should use setMenuItemsFn / setDefaultMenuItemsFn or
     // related functions.
     this.clearInputChangeListener = this.ctl.events.on('input-change', ({ value }) => {
-      const sortedMenuItems = this.fuzzyFilter.menuItemsFn(value, menuItems);
+      const sortedMenuItems = this.fuzzyFilter.filter(value, menuItems);
       if (!sortedMenuItems) {
         return;
       }

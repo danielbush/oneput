@@ -2,19 +2,15 @@ import type { Controller } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import {
-  mockListDir,
-  nullListDir,
-  type DirEntry,
-  type ListDir
-} from './directoryBrowser/listDir.js';
+import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/listDir.js';
 
 /**
  * Demonstrates browsing a directory tree through Oneput's AppObject stack.
  *
  * `listDir` is the injected data seam: {@link create} binds the real source
- * (mock today, a remote function later); {@link createNull} binds an embedded
- * stub for tests. The browser code never changes — only the injected `listDir`.
+ * (mock today, a remote function later). The browser code never changes — only
+ * the injected `listDir`. (A `createNull` stub can be reintroduced here when we
+ * write a navigation test.)
  *
  * One instance per folder: entering a folder pushes a new DirectoryBrowser for
  * the child path, so going back is just the stack popping.
@@ -28,10 +24,6 @@ import {
 export class DirectoryBrowser implements AppObject {
   static create(ctl: Controller, listDir: ListDir = mockListDir) {
     return new DirectoryBrowser(ctl, listDir);
-  }
-
-  static createNull(ctl: Controller, listing: Record<string, DirEntry[]> = {}) {
-    return new DirectoryBrowser(ctl, nullListDir(listing));
   }
 
   private constructor(

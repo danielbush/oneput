@@ -13,6 +13,16 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
   return el as HTMLElement;
 }
 
+/**
+ * Open the menu the way a user would — `openMenu()` flips `menuOpen` on a timer
+ * (MENU_OPEN_CLOSE_RACE) and pull-on-open builds the items from current state.
+ * Await before reading `currentProps.menuItems`.
+ */
+async function openMenu(ctl: Controller) {
+  ctl.menu.openMenu();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 describe('JsedEditDocumentUI', () => {
   it('starts in view mode and quick-descends first focus without going into edit mode', () => {
     // arrange
@@ -121,7 +131,7 @@ describe('JsedEditDocumentUI', () => {
     ]);
   });
 
-  it('adds a Tag selection menu item that wraps the current cursor token on submit', () => {
+  it('adds a Tag selection menu item that wraps the current cursor token on submit', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
@@ -131,7 +141,7 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(p1);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     const cursorToken = editor.getCursor()?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
 
@@ -152,7 +162,7 @@ describe('JsedEditDocumentUI', () => {
     expect(editor.getCursor()?.getPlace()).toBe(cursorToken);
   });
 
-  it('runs Tag selection as a child app so an island can use the input prompt', () => {
+  it('runs Tag selection as a child app so an island can use the input prompt', async () => {
     // arrange
     const document = makeRoot(
       '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
@@ -164,7 +174,7 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(d1);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     editor.getCursor()?.moveNext();
     const island = editor.getCursor()?.getPlace() as HTMLElement;
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
@@ -188,7 +198,7 @@ describe('JsedEditDocumentUI', () => {
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
   });
 
-  it('adds an Insert element after tag menu item that defaults to the focused tag name', () => {
+  it('adds an Insert element after tag menu item that defaults to the focused tag name', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
@@ -196,7 +206,7 @@ describe('JsedEditDocumentUI', () => {
     const editor = editorUI.editor;
 
     ctl.simulateStart(() => editorUI);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'INSERT_ELEMENT_AFTER_FOCUS'
     );
@@ -217,7 +227,7 @@ describe('JsedEditDocumentUI', () => {
     expect(editor.nav.getFocus()).toBe(children[1]);
   });
 
-  it('adds an Insert element before tag menu item that defaults to the focused tag name', () => {
+  it('adds an Insert element before tag menu item that defaults to the focused tag name', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
@@ -227,7 +237,7 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(p2);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'INSERT_ELEMENT_BEFORE_FOCUS'
     );
@@ -248,7 +258,7 @@ describe('JsedEditDocumentUI', () => {
     expect(editor.nav.getFocus()).toBe(children[1]);
   });
 
-  it('adds an Insert element in tag menu item that defaults to the focused tag name', () => {
+  it('adds an Insert element in tag menu item that defaults to the focused tag name', async () => {
     // arrange
     const document = makeRoot('<div id="d1">foo</div>');
     const ctl = Controller.createNull();
@@ -257,7 +267,7 @@ describe('JsedEditDocumentUI', () => {
     const d1 = byId(document, 'd1');
 
     ctl.simulateStart(() => editorUI);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
     );
@@ -277,7 +287,7 @@ describe('JsedEditDocumentUI', () => {
     expect(editor.nav.getFocus()).toBe(child);
   });
 
-  it('defaults Insert element in tag to a specific child tag when required', () => {
+  it('defaults Insert element in tag to a specific child tag when required', async () => {
     // arrange
     const document = makeRoot('<ul id="list"><li>one</li></ul>');
     const ctl = Controller.createNull();
@@ -287,7 +297,7 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(list);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     const insertItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
     );
@@ -317,7 +327,7 @@ describe('JsedEditDocumentUI', () => {
     const p2 = byId(document, 'p2');
 
     ctl.simulateStart(() => editorUI);
-    editorUI.renderMenuItems();
+    await openMenu(ctl);
     const deleteItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'DELETE_FOCUSED_ELEMENT'
     );

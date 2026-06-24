@@ -71,23 +71,22 @@ export class AsyncSearchExample implements AppObject {
             this.setBusy(isDebouncing);
           }
         },
-        focusBehaviour: 'last'
+        focusBehaviour: 'last',
+        // The fn owns its whole displayed lifecycle: this placeholder shows
+        // pre-typing (and whenever the input is cleared) with no setMenu/menu().
+        whenEmpty: () => [
+          infoMenuItem({
+            id: 'instructions',
+            msg:
+              'Start typing something and inspect the browser console.  ' +
+              'Items are delayed but only latest items should show when debounce times out.  ' +
+              'The service will randomly fail 10% of the time.',
+            icon: icons.Info
+          })
+        ]
       }
     );
     this.ctl.input.setPlaceholder('Start typing something...');
-    this.ctl.menu.setMenu({
-      id: 'main',
-      items: [
-        infoMenuItem({
-          id: 'instructions',
-          msg:
-            'Start typing something and inspect the browser console.  ' +
-            'Items are delayed but only latest items should show when debounce times out.  ' +
-            'The service will randomly fail 10% of the time.',
-          icon: icons.Info
-        })
-      ]
-    });
     this.ctl.input.focusInput();
   }
 

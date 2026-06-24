@@ -63,6 +63,10 @@ export class MenuItemsFnController {
     menuItemsFn: MenuItemsFn,
     options: { focusBehaviour?: FocusBehaviour; whenEmpty?: () => MenuItemAny[] } = {}
   ) {
+    // Generative and filter are mutually exclusive channels: registering a
+    // generative fn turns off any active filter so they don't fight over the
+    // displayed layer. Restored per-AppObject by resetFilter in runBefore.
+    this.ctl.menu.filter.clear();
     this.removeMenuItemsListener?.();
     this.removeMenuItemsListener = this.ctl.events.on('input-change', ({ value }) => {
       if (this.disableMenuItemsFn) {
@@ -112,6 +116,8 @@ export class MenuItemsFnController {
       whenEmpty?: () => MenuItemAny[];
     } = {}
   ) {
+    // Generative and filter are mutually exclusive channels (see setMenuItemsFn).
+    this.ctl.menu.filter.clear();
     this.removeMenuItemsListener?.();
     let inFlight = 0;
     const debouncedHandler = debounce(

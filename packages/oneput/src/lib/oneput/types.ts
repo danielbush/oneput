@@ -90,6 +90,11 @@ export type FlexParams = {
   onMount?: (node: HTMLElement) => void | (() => void);
 };
 
+/**
+ * The FILTER signature: `(query, base) => subset` (+highlight). Reads the base
+ * and returns the items to display. Used by FuzzyFilter / WordFilter and
+ * registered via `ctl.menu.filter.set(...)`.
+ */
 export type MenuItemsFn = (
   input: string,
   items: MenuItemAny[]
@@ -98,6 +103,14 @@ export type MenuItemsFnAsync = (
   input: string,
   items: MenuItemAny[]
 ) => Promise<Array<MenuItemAny> | undefined>;
+
+/**
+ * The GENERATIVE signature: `(input) => items`. Produces items purely from the
+ * input, ignoring any base (`setMenu`/`menu()`) — that is the filter's domain.
+ * Used by `setMenuItemsFn` / `setMenuItemsFnAsync`.
+ */
+export type MenuItemsGenFn = (input: string) => Array<MenuItemAny> | undefined | void;
+export type MenuItemsGenFnAsync = (input: string) => Promise<Array<MenuItemAny> | undefined>;
 
 /**
  * Focus behaviours decide which item to focus on when a menu is displayed.

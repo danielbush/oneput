@@ -1,6 +1,11 @@
 import debounce from 'debounce';
 import type { Controller } from '../controller.js';
-import type { FocusBehaviour, MenuItemAny, MenuItemsFn, MenuItemsFnAsync } from '../../types.js';
+import type {
+  FocusBehaviour,
+  MenuItemAny,
+  MenuItemsGenFn,
+  MenuItemsGenFnAsync
+} from '../../types.js';
 
 const isBlank = (value: string) => !/\S/.test(value);
 
@@ -17,7 +22,7 @@ export class MenuItemsFnController {
   }
 
   private disableMenuItemsFn = false;
-  private defaultMenuItemsFn?: MenuItemsFn;
+  private defaultMenuItemsFn?: MenuItemsGenFn;
   private removeMenuItemsListener?: () => void;
 
   constructor(private ctl: Controller) {}
@@ -37,7 +42,7 @@ export class MenuItemsFnController {
    * different menuItemsFn using setMenuItemsFn and restored by calling
    * setMenuItemsFn with no arguments.
    */
-  setDefaultMenuItemsFn(menuItemsFn: MenuItemsFn) {
+  setDefaultMenuItemsFn(menuItemsFn: MenuItemsGenFn) {
     this.defaultMenuItemsFn = menuItemsFn;
   }
 
@@ -60,7 +65,7 @@ export class MenuItemsFnController {
    * Rendered immediately on registration too, since the input usually starts empty.
    */
   setMenuItemsFn(
-    menuItemsFn: MenuItemsFn,
+    menuItemsFn: MenuItemsGenFn,
     options: { focusBehaviour?: FocusBehaviour; whenEmpty?: () => MenuItemAny[] } = {}
   ) {
     // Generative and filter are mutually exclusive channels: registering a
@@ -82,7 +87,7 @@ export class MenuItemsFnController {
         });
         return;
       }
-      const items = menuItemsFn(value, this.ctl.menu.currentMenu.allMenuItems);
+      const items = menuItemsFn(value);
       if (!items) {
         return;
       }
@@ -109,7 +114,7 @@ export class MenuItemsFnController {
    * on registration too, since the input usually starts empty.
    */
   setMenuItemsFnAsync(
-    menuItemsFnAsync: MenuItemsFnAsync,
+    menuItemsFnAsync: MenuItemsGenFnAsync,
     options: {
       onDebounce?: (isDebouncing: boolean) => void;
       focusBehaviour?: FocusBehaviour;
@@ -126,7 +131,7 @@ export class MenuItemsFnController {
         const thisInFlight = inFlight;
         let items: MenuItemAny[] | undefined;
         try {
-          items = await menuItemsFnAsync(value, this.ctl.menu.currentMenu.allMenuItems);
+          items = await menuItemsFnAsync(value);
         } catch (err) {
           console.error(
             'menuItemsFnAsync rejected - we recommend you catch your errors.  Error:',

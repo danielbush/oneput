@@ -94,7 +94,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.Folder)],
           textContent: 'Browse directory...',
           action: () => {
-            this.ctl.app.run(this.create.DirectoryBrowser());
+            this.create.DirectoryBrowser().browse('/');
           },
           right: (b) => [b.icon(icons.ChevronRight)]
         }),

@@ -20,7 +20,13 @@ type MockNode = { [name: string]: MockNode | null };
 const mockTree: MockNode = {
   packages: {
     oneput: { 'index.ts': null, 'README.md': null },
-    jsed: { 'index.ts': null },
+    jsed: {
+      'index.ts': null,
+      'README.md': null,
+      'TESTING.md': null,
+      'AGENTS.md': null,
+      LICENSE: null
+    },
     'oneput-native-container': {}
   },
   apps: {
@@ -43,6 +49,15 @@ const nodeAt = (path: string): MockNode | null => {
   }
   return node;
 };
+
+/**
+ * Nulled {@link ListDir} for tests / `createNull`: resolves immediately from a
+ * configured `path -> entries` map (embedded stub, no I/O, no delay).
+ */
+export const nullListDir =
+  (listing: Record<string, DirEntry[]> = {}): ListDir =>
+  (path) =>
+    Promise.resolve(listing[path] ?? []);
 
 /** Mock implementation of {@link ListDir}; resolves after a small delay. */
 export const mockListDir: ListDir = (path) =>

@@ -34,9 +34,14 @@ const mockTree: MockNode = {
     'jsed-demo': {}
   },
   work: { backlog: { 'oneput.md': null } },
+  // Renders as a folder, but entering it rejects — drives the error path demo.
+  restricted: {},
   'README.md': null,
   'package.json': null
 };
+
+// Entering this folder simulates a failed listing (e.g. permission denied).
+const RESTRICTED = 'restricted';
 
 const splitPath = (path: string): string[] => path.split('/').filter(Boolean);
 
@@ -63,6 +68,10 @@ export const nullListDir =
 export const mockListDir: ListDir = (path) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
+      if (splitPath(path).at(-1) === RESTRICTED) {
+        reject(new Error('Permission denied (simulated)'));
+        return;
+      }
       const node = nodeAt(path);
       if (node === null) {
         reject(new Error(`Not a directory: ${path}`));

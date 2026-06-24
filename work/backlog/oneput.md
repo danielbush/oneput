@@ -4,6 +4,12 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Critical path
 
+- directory browser
+  - as an example, we could set it to the root of the codebase
+  - oneput lets us select folders and go into them
+  - show files, but maybe we just fire a placeholder "todo: perform action on file"
+  - possibly could look at update the main window
+    - the simplest thing is it could be used to view file content when possible
 - talk to hermes
   - COMMENT: once 2br/oneput is running on mobile, this mean we could talk to hermes over it rather than telegram; it means we could ask the agent to make modifications to 2br for us (that would require mcp machinery to safely interact with 2br data)
   - how to store conversations?
@@ -11,6 +17,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: is katex display mode working when we insert?
 - fix: oneput-demo menu is closing on actions where it shouldn't
   - I think I altered this when working on jsed-demo; what is the preferred approach?
   - COMMENT: starting to think we stay open by default; force users to specify close in stdMenuItem
@@ -35,6 +42,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: whenEmpty in MenuItemsFn.ts - should it provide a builder ?
 - feat: a lifecycle companion object for your AppObject
   - COMMENT: I don't know if this is justified; does it also weaken the point of having things like onExit in AppObject?
   - COMMENT: this would declutter AppObjects and make subscription logic more specific
@@ -66,6 +74,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: the tick hack in reseedMenu - can we avoid that
+  - can we get reseedMenu to pull menu() and apply filter and THEN paint menu items?
 - proper pull model for declarative AppObject.menu
   - ctl.menu.invalidate() signals that menu must be pulled again
   - this only is an issue if the menu is showing, since I think a closed menu will pull from `menu` when opening

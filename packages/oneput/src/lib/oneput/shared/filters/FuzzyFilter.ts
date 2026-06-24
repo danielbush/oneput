@@ -1,6 +1,6 @@
 import uFuzzy from '@leeoniya/ufuzzy';
 import { walk } from '../../lib/utils.js';
-import type { FChildParams, MenuItemAny, MenuItemsFn } from '../../types.js';
+import type { FChildParams, MenuItemAny, FilterFn } from '../../types.js';
 
 export type HaystackData =
   | {
@@ -80,7 +80,7 @@ export class FuzzyFilter {
     this.ufuzzy = new uFuzzy({});
   }
 
-  menuItemsFn: MenuItemsFn = (input, menuItems) => {
+  menuItemsFn: FilterFn = (input, menuItems) => {
     const { haystack, haystackInfo } = getHaystack(menuItems);
     const idxs = this.ufuzzy.filter(haystack, input);
     // See: https://github.com/leeoniya/uFuzzy/issues/79

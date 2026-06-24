@@ -95,11 +95,11 @@ export type FlexParams = {
  * and returns the items to display. Used by FuzzyFilter / WordFilter and
  * registered via `ctl.menu.filter.set(...)`.
  */
-export type MenuItemsFn = (
+export type FilterFn = (
   input: string,
   items: MenuItemAny[]
 ) => Array<MenuItemAny> | undefined | void;
-export type MenuItemsFnAsync = (
+export type FilterFnAsync = (
   input: string,
   items: MenuItemAny[]
 ) => Promise<Array<MenuItemAny> | undefined>;

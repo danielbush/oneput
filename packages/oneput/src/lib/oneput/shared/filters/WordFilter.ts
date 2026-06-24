@@ -1,5 +1,5 @@
 import { walk } from '../../lib/utils.js';
-import type { FChildParams, MenuItemAny, MenuItemsFn } from '../../types.js';
+import type { FChildParams, MenuItemAny, FilterFn } from '../../types.js';
 
 export type MenuItemData = {
   children: FChildParams[];
@@ -42,7 +42,7 @@ export class WordFilter {
     return new WordFilter();
   }
 
-  menuItemsFn: MenuItemsFn = (input, menuItems) => {
+  menuItemsFn: FilterFn = (input, menuItems) => {
     // ALWAYS call haystack because it clears derivedHTML in FChild
     // elements.  Example: user types some text, then deletes all of it
     // using backspace, the last character to be deleted (which is the first

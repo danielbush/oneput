@@ -1,5 +1,5 @@
 import type { Controller } from '../controller.js';
-import type { FocusBehaviour, MenuItemsFn } from '../../types.js';
+import type { FocusBehaviour, FilterFn } from '../../types.js';
 
 /**
  * The FILTER channel — sync derivation of the displayed layer from the base:
@@ -25,8 +25,8 @@ export class FilterController {
   }
 
   private disabled = false;
-  private filter?: MenuItemsFn;
-  private defaultFilter?: MenuItemsFn;
+  private filter?: FilterFn;
+  private defaultFilter?: FilterFn;
   private focusBehaviour?: FocusBehaviour;
   private removeListener?: () => void;
 
@@ -45,7 +45,7 @@ export class FilterController {
    * while the menu is open. Returning undefined leaves the displayed layer
    * untouched (same contract as a menuItemsFn).
    */
-  set(filter: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+  set(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
     this.filter = filter;
     this.focusBehaviour = options.focusBehaviour;
     this.ensureListener();
@@ -55,7 +55,7 @@ export class FilterController {
    * Set the filter restored per-AppObject by {@link reset} (called in runBefore).
    * Use at app setup (e.g. _layout) for the default filter every menu gets.
    */
-  setDefault(filter: MenuItemsFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+  setDefault(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
     this.defaultFilter = filter;
     this.set(filter, options);
   }

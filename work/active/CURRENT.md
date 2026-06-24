@@ -5,6 +5,61 @@
 Design notes from a session exploring backlog item "proper pull model for declarative
 AppObject.menu" (`work/backlog/oneput.md`, refactor section). Two related changes.
 
+### IMPLEMENTED (this session) — all type-checks + oneput unit tests pass; demos NOT runtime-verified
+
+The taxonomy (filter / sync-rebuild / async-fetch — see "Menu taxonomy" below) is now
+realised in code with the channels mutually exclusive. Summary of what shipped:
+
+- **`setFilter` as its own module + channel.** `FilterController` (`helpers/Filter.ts`),
+  exposed as `ctl.menu.filter` with `set`/`setDefault`/`reset`/`clear`/`run`/`_enable`.
+  Filter is the typed sync channel `(query, base) => subset`; generative (`menuItemsFn`)
+  stays in `helpers/MenuItemsFn.ts`. They share nothing but the paint target + enable gate.
+  Separate **`enableFilter`** UIFlag (defaults `!enableModal`). Demos migrated
+  (`setDefaultFilter` in both `_layout.ts`, `SettingsManager`). NavigateHeadings sets
+  `enableFilter:false` (rolls its own listener).
+- **Flash-free `invalidate`.** `AppController.reseedMenu` re-seeds base then `filter.run()`
+  in the SAME synchronous tick → single render, no flash. No `reseedBase` split needed.
+- **Pull-on-open + closed-guard (matched pair).** `openMenu` calls `reseedMenu()` after
+  flipping `menuOpen`; `invalidateMenu` no-ops when the menu is closed. Net: callers fire
+  `invalidate()` on any state change without checking open state. `runBefore`'s
+  `setMenu(menu())` is still load-bearing — it owns the AppObject→AppObject transition
+  (no openMenu fires there); no `filter.run` needed because reset clears the input.
+- **Rename for clarity** (done by user): `_setMenu` → `setDisplayed` (displayed layer);
+  `setMenu` still seeds the base. `run`/listeners use `setDisplayed`.
+- **`whenEmpty`** on `setMenuItemsFn`/`...Async`: when input blank, render items directly
+  (don't call fn); rendered immediately on registration too. Async also cancels pending +
+  in-flight fetch. Shape = plain `() => MenuItemAny[]` (mirrors `setMenu`, not a builder).
+  AsyncSearchExample dropped its `setMenu` placeholder → `whenEmpty`; no `menu()`/`setMenu`.
+- **Generative ⊻ filter enforced two ways.** (a) `setMenuItemsFn`/`...Async` auto-call
+  `filter.clear()` (covers async-fetch + sync-generative — no flag needed); (b)
+  `FilterController.run()` now honours `disabled` so `enableFilter:false` works through
+  invalidate (covers sync-rebuild like KatexDemo, which calls no generative fn).
+  These fixed a real regression: post-split the default WordFilter was clobbering
+  generative menus (AsyncSearch results → empty; Katex preview → filtered).
+- **First-class `onInputChange` AppObject hook.** `onInputChange?: (data:{value}) => void`,
+  wired/unwired by `AppController.reset` like `onMenuItemFocus`. KatexDemo migrated off its
+  manual `ctl.events.on('input-change')` to this hook.
+- **`menu()` pulled AFTER onStart/onResume (no ordering race).** `runBefore` now just
+  CLEARS the menu (`setMenu()`); a new `afterRun()` calls `reseedMenu()` after the hook in
+  both `run()` and `pop()`. So a declarative menu always reflects post-setup state and an
+  AppObject never has to re-render after start/resume. KatexDemo dropped its trailing
+  `onStart` `invalidate()`. `menu()` is now pulled at exactly three post-state moments:
+  afterRun (post-setup), pull-on-open, and `invalidate()` (while open).
+- **jsed migrated to declarative `menu()` + `invalidate()`.** `JsedEditDocumentUI` defines
+  `menu()`; its editor-change subscription calls `invalidate()` (no-op while closed →
+  pull-on-open rebuilds); `onStart`/`onResume` no longer hand-render. `ui/actions.ts` +
+  `ui/menuItems.ts` take an OPTIONAL `invalidateMenu` that defaults to `ctl.menu.invalidate()`
+  (override only for imperative consumers with no `menu()`). `renderMenuItems` kept solely
+  for tests that inspect items while the menu is closed.
+
+Resulting clean shapes: filter = `setMenu`/`menu()` + `setFilter`; sync-rebuild = `menu()` +
+`invalidate()` + `onInputChange` (KatexDemo) / declarative `menu()` + editor subscription
+(jsed); async-fetch = `setMenuItemsFnAsync` + `whenEmpty` (AsyncSearchExample).
+
+OPEN / NOT DONE: runtime verification of demos; the `setMenu`→`seedMenu`/`setBase` rename
+was discussed but only `_setMenu`→`setDisplayed` was applied; deprecating
+`setDefaultMenuItemsFn`/`setMenuItemsFn` (kept for generative-sync) not pursued.
+
 ### Background: how menus are populated today
 
 Displayed menu = `derive(base, query)`:

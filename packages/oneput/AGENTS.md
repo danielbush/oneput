@@ -1,5 +1,11 @@
 # Oneput
 
+## Testing
+
+We need to do more testing.
+See TESTING.md for a high-level testing policy.
+Offer to flesh this out with the user. Look for obvious things to tackle.
+
 ## Key systems (packages/oneput)
 
 For human-readable architecture docs, see `packages/oneput/docs/architecture.md` and `packages/jsed/docs/architecture.md`.

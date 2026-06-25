@@ -80,7 +80,35 @@ export class FuzzyFilter {
     this.ufuzzy = new uFuzzy({});
   }
 
+  /**
+   * Pins (`canFilter === false`) are always shown, never matched/highlighted.
+   * Since fuzzy reorders the middle by score there is no stable slot for a pin
+   * sitting amongst the data, so the layout is:
+   *
+   *   leading pins → fuzzy matches → middle pins → trailing pins
+   *
+   * Contiguous pins at the very top/bottom keep those extremes; any other pin is
+   * collected just above the trailing pins (its original relative order kept).
+   *
+   * (WordFilter differs: order-preserving, so it keeps a mid-list pin in place.)
+   */
   filter: FilterFn = (input, menuItems) => {
+    let i = 0;
+    while (i < menuItems.length && menuItems[i].canFilter === false) i++;
+    let j = menuItems.length - 1;
+    while (j >= i && menuItems[j].canFilter === false) j--;
+    const lead = menuItems.slice(0, i);
+    const trail = menuItems.slice(j + 1);
+    const middle = menuItems.slice(i, j + 1);
+    const middlePins = middle.filter((it) => it.canFilter === false);
+    const matched = this.fuzzyMatch(
+      input,
+      middle.filter((it) => it.canFilter !== false)
+    );
+    return [...lead, ...matched, ...middlePins, ...trail];
+  };
+
+  private fuzzyMatch(input: string, menuItems: MenuItemAny[]): MenuItemAny[] {
     const { haystack, haystackInfo } = getHaystack(menuItems);
     const idxs = this.ufuzzy.filter(haystack, input);
     // See: https://github.com/leeoniya/uFuzzy/issues/79
@@ -112,5 +140,5 @@ export class FuzzyFilter {
       sortedMenuItems.push(item.menuItem);
     }
     return sortedMenuItems;
-  };
+  }
 }

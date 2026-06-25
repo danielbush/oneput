@@ -149,6 +149,15 @@ export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>
    */
   ignored?: boolean;
   /**
+   * canFilter = false pins the item: it is always shown, never matched or
+   * highlighted by the filter (WordFilter/FuzzyFilter). Use for menu "chrome"
+   * such as a `..` / Cancel item that should survive a typed query. Defaults to
+   * true. WordFilter keeps pins in place; FuzzyFilter keeps top/bottom pins at
+   * those extremes and collects any other pin just above the trailing pins
+   * (since it reorders the matched middle by score).
+   */
+  canFilter?: boolean;
+  /**
    * Primary css class.  Defaults to oneput__menu-item.
    */
   class?: string;
@@ -164,6 +173,10 @@ export type MenuItemDivider = FlexParams & {
    * ignored = true means Item is not meant to be interactive with eg a divider.
    */
   ignored: true;
+  /**
+   * false = always shown, never matched by the filter. See {@link MenuItem.canFilter}.
+   */
+  canFilter?: boolean;
   /**
    * Primary css class.  You might want to use oneput__menu-divider etc.
    */

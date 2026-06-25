@@ -56,6 +56,15 @@ export class WordFilter {
     const tokenInfo: Record<string, { tokens: string[]; derived: string[] }> = {};
     const pushed: Record<string, boolean> = {};
     for (const menuItemData of haystack.menuItems) {
+      // Pinned items (canFilter === false) are always shown, in place, and never
+      // matched/highlighted.
+      if (menuItemData.menuItem.canFilter === false) {
+        if (!pushed[menuItemData.menuItem.id]) {
+          matchingItems.push(menuItemData.menuItem);
+          pushed[menuItemData.menuItem.id] = true;
+        }
+        continue;
+      }
       // For the given menu item, check all words match at least somewhere...
       let allWordsMatchSomething = true;
       for (const word of words) {

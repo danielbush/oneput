@@ -57,6 +57,11 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
    * Whether to close the menu after performing the action.  Defaults to true.
    */
   closeMenuOnAction?: boolean;
+  /**
+   * false = always shown, never matched/highlighted by the filter. Defaults
+   * true. See {@link MenuItem.canFilter}.
+   */
+  canFilter?: boolean;
   classes?: Array<string | false | undefined>;
   style?: Partial<CSSStyleDeclaration>;
   htmlContentUnsafe?: string;

@@ -45,6 +45,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: do we demo disabled individual menu items?
+- feat: do we demo disabled menu? (enableMenuActions = false)?
+- feat: disable nav/keys when menu is disabled? - enableMenuActions = false
+  - COMMENT: assuming we don't, but not sure
 - feat: declarative onBack in AppObject
 - feat: a mechanism for gettign key bindings
   - COMMENT: this could just be a design that could be used

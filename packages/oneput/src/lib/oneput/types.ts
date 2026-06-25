@@ -106,10 +106,6 @@ export type FilterFn = (
   input: string,
   items: MenuItemAny[]
 ) => Array<MenuItemAny> | undefined | void;
-export type FilterFnAsync = (
-  input: string,
-  items: MenuItemAny[]
-) => Promise<Array<MenuItemAny> | undefined>;
 
 /**
  * The GENERATIVE signature: `(input) => items`. Produces items purely from the

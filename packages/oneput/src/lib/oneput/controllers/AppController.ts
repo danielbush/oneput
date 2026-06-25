@@ -144,6 +144,11 @@ export class AppController {
     this.ctl.keys.resetBindings();
     this.ctl.input.resetPlaceholder();
     this.ctl.menu.resetFocusBehaviour();
+    // Tear down any generative menuItemsFn from the outgoing AppObject so its
+    // input-change listener can't clobber the next AppObject's menu. The new
+    // AppObject re-registers its own in onStart/onResume if it wants one (the
+    // same rebuild contract as setMenu/filter above).
+    this.ctl.menu.fn.clearMenuItemsFn();
     this.ctl.menu.filter.reset();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();

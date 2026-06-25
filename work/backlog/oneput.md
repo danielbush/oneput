@@ -5,17 +5,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## Critical path
 
 - directory browser
-  - DONE (mock-up, apps/oneput-demo): folder navigation via AppObject-per-folder stack;
-    load-before-navigate so transitions are flash-free; `enableMenuActions:false` dims+freezes
-    the current menu during load (single owner: drives behaviour + CSS dim); `restricted` folder
-    demos the error path. Data behind injected `listDir` seam (delayed mock; real fs deferred).
-  - as an example, we could set it to the root of the codebase
   - oneput lets us select folders and go into them
-  - show files, but maybe we just fire a placeholder "todo: perform action on file"
-  - NEXT: select a file → if text, display it; for markdown, offer an action "convert to html"
-    and when displaying render as html via a markdown renderer
-  - possibly could look at update the main window
-    - the simplest thing is it could be used to view file content when possible
+  - select a file, go into a menu with actions; the actions may be asynchronous, maybe we close the menu and show notifcation: working..., then replace with a new notfication: action completed
 - talk to hermes
   - COMMENT: once 2br/oneput is running on mobile, this mean we could talk to hermes over it rather than telegram; it means we could ask the agent to make modifications to 2br for us (that would require mcp machinery to safely interact with 2br data)
   - how to store conversations?

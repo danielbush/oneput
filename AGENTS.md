@@ -1,4 +1,4 @@
-The user will probably only read the first paragraph of your response before asking follow-up questions.  Similar to a verbal conversation style. So keep your answers small and concise.  If you need to show table or and example, it's fine to add that as well.
+The user will probably only read the first paragraph of your response before asking follow-up questions.  Similar to a verbal conversational style. So keep your answers small and concise.  If you need to show a table or an example, it's fine to add that as well.
 
 ## Project overview
 

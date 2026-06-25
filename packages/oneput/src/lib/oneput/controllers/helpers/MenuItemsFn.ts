@@ -1,11 +1,6 @@
 import debounce from 'debounce';
 import type { Controller } from '../controller.js';
-import type {
-  FocusBehaviour,
-  MenuItemAny,
-  MenuItemsGenFn,
-  MenuItemsGenFnAsync
-} from '../../types.js';
+import type { FocusBehaviour, MenuItemAny, MenuItemsGenFnAsync } from '../../types.js';
 
 const isBlank = (value: string) => !/\S/.test(value);
 
@@ -22,7 +17,6 @@ export class MenuItemsFnController {
   }
 
   private disableMenuItemsFn = false;
-  private defaultMenuItemsFn?: MenuItemsGenFn;
   private removeMenuItemsListener?: () => void;
 
   constructor(private ctl: Controller) {}
@@ -32,73 +26,6 @@ export class MenuItemsFnController {
    */
   _enableMenuItemsFn(on: boolean = true) {
     this.disableMenuItemsFn = !on;
-  }
-
-  /**
-   * Sets a default menuItemsFn - see setMenuItemsFn for more details.
-   *
-   * If set, this is always present.  It can be disabled and re-enabled using
-   * disableAllMenuItemsFn / enableAllMenuItemsFn.  It can be replaced by a
-   * different menuItemsFn using setMenuItemsFn and restored by calling
-   * setMenuItemsFn with no arguments.
-   */
-  setDefaultMenuItemsFn(menuItemsFn: MenuItemsGenFn) {
-    this.defaultMenuItemsFn = menuItemsFn;
-  }
-
-  resetMenuItemsFn() {
-    if (this.defaultMenuItemsFn) {
-      this.setMenuItemsFn(this.defaultMenuItemsFn, {
-        focusBehaviour: this.ctl.menu.defaultFocusBehaviour
-      });
-    }
-  }
-
-  /**
-   * Set a function that will be triggered on input change.
-   *
-   * If this function returns undefined, the menu will not be updated.
-   *
-   * `whenEmpty` lets the fn own its ENTIRE displayed lifecycle: when the input is
-   * empty/whitespace its items are rendered directly and the fn is NOT called (so
-   * a generative menu needs no `setMenu`/`menu()` for its pre-typing placeholder).
-   * Rendered immediately on registration too, since the input usually starts empty.
-   */
-  setMenuItemsFn(
-    menuItemsFn: MenuItemsGenFn,
-    options: { focusBehaviour?: FocusBehaviour; whenEmpty?: () => MenuItemAny[] } = {}
-  ) {
-    // Generative and filter are mutually exclusive channels: registering a
-    // generative fn turns off any active filter so they don't fight over the
-    // displayed layer. Restored per-AppObject by resetFilter in runBefore.
-    this.ctl.menu.filter.clear();
-    this.removeMenuItemsListener?.();
-    this.removeMenuItemsListener = this.ctl.events.on('input-change', ({ value }) => {
-      if (this.disableMenuItemsFn) {
-        return;
-      }
-      if (!this.ctl.menu.isMenuOpen) {
-        return;
-      }
-      if (options.whenEmpty && isBlank(value)) {
-        this.ctl.menu.setDisplayed({
-          items: options.whenEmpty(),
-          focusBehaviour: options.focusBehaviour
-        });
-        return;
-      }
-      const items = menuItemsFn(value);
-      if (!items) {
-        return;
-      }
-      this.ctl.menu.setDisplayed({ items, focusBehaviour: options.focusBehaviour });
-    });
-    if (options.whenEmpty && isBlank(this.ctl.input.getInputValue())) {
-      this.ctl.menu.setDisplayed({
-        items: options.whenEmpty(),
-        focusBehaviour: options.focusBehaviour
-      });
-    }
   }
 
   /**
@@ -122,7 +49,9 @@ export class MenuItemsFnController {
       whenEmpty?: () => MenuItemAny[];
     } = {}
   ) {
-    // Generative and filter are mutually exclusive channels (see setMenuItemsFn).
+    // Generative and filter are mutually exclusive channels: registering a
+    // generative fn turns off any active filter so they don't fight over the
+    // displayed layer. Restored per-AppObject by filter.reset in runBefore.
     this.ctl.menu.filter.clear();
     this.removeMenuItemsListener?.();
     let inFlight = 0;
@@ -190,7 +119,7 @@ export class MenuItemsFnController {
   }
 
   /**
-   * Clear any non-default menu items fn.
+   * Remove the active menu items fn (its input-change listener).
    */
   clearMenuItemsFn() {
     this.removeMenuItemsListener?.();

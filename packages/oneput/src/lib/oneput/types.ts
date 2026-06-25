@@ -114,9 +114,8 @@ export type FilterFnAsync = (
 /**
  * The GENERATIVE signature: `(input) => items`. Produces items purely from the
  * input, ignoring any base (`setMenu`/`menu()`) — that is the filter's domain.
- * Used by `setMenuItemsFn` / `setMenuItemsFnAsync`.
+ * Used by `setMenuItemsFnAsync`.
  */
-export type MenuItemsGenFn = (input: string) => Array<MenuItemAny> | undefined | void;
 export type MenuItemsGenFnAsync = (input: string) => Promise<Array<MenuItemAny> | undefined>;
 
 /**

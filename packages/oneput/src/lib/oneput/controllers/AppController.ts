@@ -144,7 +144,6 @@ export class AppController {
     this.ctl.keys.resetBindings();
     this.ctl.input.resetPlaceholder();
     this.ctl.menu.resetFocusBehaviour();
-    this.ctl.menu.fn.resetMenuItemsFn();
     this.ctl.menu.filter.reset();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();

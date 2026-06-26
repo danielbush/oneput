@@ -6,7 +6,7 @@ We can attach the problem from 2 sides.
 
 From the top:
 
-- playwright / e2e tests could be used on teh demo
+- playwright / e2e tests could be used on oneput-demo and the visual mockups
   - these tests are a pain to write, maintain and diagnose
   - only have a few
   - treat as smoke tests and sanity checks

@@ -5,7 +5,6 @@ export { Editor } from './editor/Editor.js';
 export { type EditorError } from './editor/index.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
 export { JsedEditDocumentUI, type JsedEditDocumentUIHooks } from './oneput/JsedEditDocumentUI.js';
-export { createActions, type EditDocumentActions } from './ui/index.js';
-export { createMenuItems, type EditDocumentMenuActions } from './ui/index.js';
+export { EditDocumentControls, type EditDocumentActions } from './ui/index.js';
 export { icons, iconData } from './ui/lib/icons.js';
 export { defaultActions, defaultBindingsSerializable, defaultKeys } from './ui/lib/bindings.js';

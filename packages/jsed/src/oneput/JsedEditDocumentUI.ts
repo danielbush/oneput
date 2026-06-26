@@ -2,8 +2,7 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { Editor } from '../editor/Editor.js';
 import type { EditorError } from '../editor/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
-import { createActions, type EditDocumentActions } from '../ui/actions.js';
-import { createMenuItems } from '../ui/menuItems.js';
+import { EditDocumentControls, type EditDocumentActions } from '../ui/EditDocumentControls.js';
 
 export type JsedEditDocumentUIHooks = {
   onActivate?: () => void;
@@ -45,7 +44,12 @@ export class JsedEditDocumentUI implements AppObject {
     return new JsedEditDocumentUI(ctl, editor, hooks);
   }
 
-  public actions: EditDocumentActions;
+  private controls: EditDocumentControls;
+
+  /** AppObject keybinding actions (read by the controller). Owned by `controls`. */
+  public get actions(): EditDocumentActions {
+    return this.controls.actions;
+  }
 
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;
@@ -55,10 +59,7 @@ export class JsedEditDocumentUI implements AppObject {
     public editor: Editor,
     private hooks: JsedEditDocumentUIHooks = {}
   ) {
-    this.actions = createActions({
-      ctl: this.ctl,
-      editor: this.editor
-    });
+    this.controls = EditDocumentControls.create(this.ctl, this.editor);
   }
 
   /**
@@ -69,11 +70,7 @@ export class JsedEditDocumentUI implements AppObject {
   menu = () => ({
     id: 'EditDocument',
     focusBehaviour: 'last-action,first' as const,
-    items: createMenuItems({
-      ctl: this.ctl,
-      editor: this.editor,
-      actions: this.actions
-    })
+    items: this.controls.getMenuItems()
   });
 
   /**

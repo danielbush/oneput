@@ -575,6 +575,12 @@ describe('Editor', () => {
         const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
         const editor = createNullEditor(doc);
         const p1 = byId(doc, 'p1');
+        let documentChanges = 0;
+        editor.eventsEmitter.subscribe({
+          onDocumentChange: () => {
+            documentChanges += 1;
+          }
+        });
         editor.enterEditing(p1);
         editor.extendNext();
         expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
@@ -590,6 +596,7 @@ describe('Editor', () => {
         expect(doc.root.querySelector('.jsed-selection')).toBeNull();
         expect(identify(editor.getCursor()?.getPlace())).toBe('bar');
         expect(editor.nav.getFocus()).toBe(p1.firstChild);
+        expect(documentChanges).toBe(1);
 
         editor.destroy();
       });

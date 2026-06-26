@@ -65,6 +65,10 @@ export class WrapSelection implements UndoRecord {
       return;
     }
     const converted = wrappers.map((wrapper) => convertWrapper(wrapper, tagName));
+    state.eventsEmitter.emitElementChange({
+      type: 'focusable-inserted',
+      element: converted[0].container
+    });
     state.reload();
 
     return new WrapSelection(front, converted);

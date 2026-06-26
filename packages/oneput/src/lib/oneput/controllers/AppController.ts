@@ -270,6 +270,10 @@ export class AppController {
   };
 
   private pop = (result?: { payload: unknown }) => {
+    // No more parents, do nothing.
+    if (this.appParents.length === 0) {
+      return;
+    }
     this.runBeforeExit();
     const appVal = this.appParents.pop();
     if (appVal) {

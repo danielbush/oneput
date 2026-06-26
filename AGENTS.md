@@ -1,8 +1,6 @@
+## Session
+
 The user will probably only read the first paragraph of your response before asking follow-up questions.  Similar to a verbal conversational style. So keep your answers small and concise.  If you need to show a table or an example, it's fine to add that as well.
-
-## Project overview
-
-Keep responses short and to the point, don't point out more than the most obvious consequence at a time; the more sentences and consequences, the harder it is to understand what is going on.  The user should ask questions which will drive the discovery process.  Encourage them to ask these questions and go into detail if requested.
 
 When deciding how to do the work, make a decision and implement the first step; then stop and tell the user what you did and let them know of any obvious alternative solutions and how it might affect the next few steps.  Repeat this process throughout the session.  We do this to reduce the amount of up front decisions the user needs to make; it's much easer to get them to react to a real change in the code.
 

@@ -198,17 +198,7 @@ export class AppController {
     return this.reseedMenu(opts);
   }
 
-  /**
-   *  Resets things to sane defaults.  You can then set things in your AppObject.run.
-   */
-  private runBefore() {
-    this.reset();
-    // Clear the previous AppObject's menu. The NEW AppObject's declarative menu()
-    // is pulled AFTER its onStart/onResume runs (see afterRun) so it reflects
-    // post-setup state; imperative AppObjects set their own menu in onStart. This
-    // clear + afterRun pair owns the AppObject->AppObject transition (no openMenu
-    // fires there, so pull-on-open can't).
-    this.ctl.menu.setMenu();
+  invalidateActions() {
     if (this.current?.app.actions) {
       const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(
         (acc, [actionId, actionWithBinding]) => {
@@ -224,6 +214,20 @@ export class AppController {
       );
       this.ctl.keys.setBindings(keyBindingsMap);
     }
+  }
+
+  /**
+   *  Resets things to sane defaults.  You can then set things in your AppObject.run.
+   */
+  private runBefore() {
+    this.reset();
+    // Clear the previous AppObject's menu. The NEW AppObject's declarative menu()
+    // is pulled AFTER its onStart/onResume runs (see afterRun) so it reflects
+    // post-setup state; imperative AppObjects set their own menu in onStart. This
+    // clear + afterRun pair owns the AppObject->AppObject transition (no openMenu
+    // fires there, so pull-on-open can't).
+    this.ctl.menu.setMenu();
+    this.invalidateActions();
   }
 
   private runBeforeExit() {

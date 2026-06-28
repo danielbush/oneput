@@ -115,10 +115,10 @@ describe('JsedEditDocumentUI', () => {
     scrollRequests.data.length = 0;
 
     // act
-    editorUI.actions?.REVEAL.action(ctl);
+    editorUI.actions().REVEAL.action(ctl);
 
     // assert
-    expect(editorUI.actions?.REVEAL.binding?.bindings).toContain('$mod+m');
+    expect(editorUI.actions().REVEAL.binding?.bindings).toContain('$mod+m');
     expect(scrollRequests.data).toEqual([
       {
         element: token,

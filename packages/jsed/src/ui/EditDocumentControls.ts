@@ -1,4 +1,4 @@
-import type { AppObject, Controller, MenuItemAny } from '@oneput/oneput';
+import type { AppActions, Controller, MenuItemAny } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { Editor } from '../editor/Editor.js';
@@ -6,9 +6,9 @@ import { icons } from './lib/icons.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
 import { PickListUI } from './lib/PickListUI.js';
 
-type OneputAction = NonNullable<AppObject['actions']>[string];
+type OneputAction = AppActions[string];
 
-export type EditDocumentActions = NonNullable<AppObject['actions']> & {
+export type EditDocumentActions = AppActions & {
   DOWN: OneputAction;
   UP: OneputAction;
   ENTER: OneputAction;
@@ -39,12 +39,11 @@ type MenuItemList = Array<MenuItemAny | undefined | null | '' | false>;
  * Owns the Oneput controls for an active Jsed editor: the (stable) keybinding
  * actions and the (live) menu items that reuse them.
  *
- * Lifecycle is deliberately asymmetric:
- * - `actions` is built once and cached — bindings are registered with the keys
- *   controller at start and don't change.
- * - `getMenuItems()` recomputes on every call — items read live editor state
- *   (`isEditing()`, `canUndo()`, focus capabilities) and are pulled fresh on
- *   start/resume, on open, and via `ctl.menu.invalidate()`.
+ * Both `getActions()` and `getMenuItems()` recompute on every call — actions are
+ * handed to Oneput in its function form (`ctl.app.invalidateActions()` re-pulls
+ * them), and menu items read live editor state (`isEditing()`, `canUndo()`, focus
+ * capabilities) and are pulled fresh on start/resume, on open, and via
+ * `ctl.menu.invalidate()`.
  */
 export class EditDocumentControls {
   /**
@@ -62,18 +61,14 @@ export class EditDocumentControls {
     return new EditDocumentControls(ctl, editor, invalidate);
   }
 
-  /** Stable keybinding actions. Built once at construction; safe to register with the keys controller. */
-  public readonly actions: EditDocumentActions;
-
   private constructor(
     private ctl: Controller,
     private editor: Editor,
     private invalidate: () => void
-  ) {
-    this.actions = this.buildActions();
-  }
+  ) {}
 
-  private buildActions(): EditDocumentActions {
+  /** Keybinding actions. Pass to Oneput's `actions` in function form so they can be re-pulled. */
+  getActions(): EditDocumentActions {
     const { ctl, editor, invalidate } = this;
     return {
       DOWN: {
@@ -308,7 +303,8 @@ export class EditDocumentControls {
 
   /** Live menu items, rebuilt from current editor state on every call. Do not memoize. */
   getMenuItems(): MenuItemList {
-    const { ctl, editor, actions, invalidate } = this;
+    const { ctl, editor, invalidate } = this;
+    const actions = this.getActions();
     const cursor = editor.getCursor();
     return [
       editor.isEditing() &&

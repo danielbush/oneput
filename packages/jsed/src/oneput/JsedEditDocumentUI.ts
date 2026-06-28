@@ -46,10 +46,8 @@ export class JsedEditDocumentUI implements AppObject {
 
   private controls: EditDocumentControls;
 
-  /** AppObject keybinding actions (read by the controller). Owned by `controls`. */
-  public get actions(): EditDocumentActions {
-    return this.controls.actions;
-  }
+  /** AppObject keybinding actions (re-pulled by the controller). Owned by `controls`. */
+  public actions = (): EditDocumentActions => this.controls.getActions();
 
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;

@@ -77,7 +77,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## refactor
 
 - refactor: the tick hack in reseedMenu - can we avoid that
-  - can we get reseedMenu to pull menu() and apply filter and THEN paint menu items?
+  - can we get reseedMenu to pull menu() and apply filter and THEN paint menu items? (more explicitly)
 - proper pull model for declarative AppObject.menu
   - ctl.menu.invalidate() signals that menu must be pulled again
   - this only is an issue if the menu is showing, since I think a closed menu will pull from `menu` when opening

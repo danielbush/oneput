@@ -245,7 +245,7 @@ export class AppController {
     this.current?.app.onSuspend?.();
   }
 
-  run<R = unknown>(appObject: AppObject<R>) {
+  run<ResumePayload = unknown>(appObject: AppObject<ResumePayload>) {
     // console.warn('run', { appObject });
     this.runBeforeSuspend();
     if (this.current) {

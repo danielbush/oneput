@@ -30,7 +30,7 @@ import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/lis
  *    — that channel is for input-driven async *generation* (a search box), and
  *    would only suppress the filter we want here.
  */
-export class DirectoryPicker implements AppObject<string> {
+export class DirectoryPicker implements AppObject {
   static create(ctl: Controller, listDir: ListDir = mockListDir) {
     return new DirectoryPicker(ctl, listDir);
   }

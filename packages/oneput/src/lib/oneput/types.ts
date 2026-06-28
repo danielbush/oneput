@@ -248,9 +248,10 @@ export type AppEvent = [keyof AppEventMap] extends [never]
  * exit() pops. Each AppObject can declare actions (with optional key bindings)
  * and menu items declaratively.
  *
- * @typeParam R - The type of payload that a child AppObject can return via exit().
+ * @typeParam ResumePayload - The type of payload this AppObject can receive
+ * from a child AppObject when the child exits.
  */
-export interface AppObject<R = unknown> {
+export interface AppObject<ResumePayload = unknown> {
   /**
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.
@@ -273,7 +274,7 @@ export interface AppObject<R = unknown> {
    * passed the result.  So you should implement onResume if you want to pass a
    * result back to this instance.
    */
-  onResume?: (result?: { payload?: R }) => void;
+  onResume?: (result?: { payload?: ResumePayload }) => void;
   /**
    * Called when this AppObject exits.
    *

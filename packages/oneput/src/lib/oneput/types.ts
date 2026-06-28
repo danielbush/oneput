@@ -304,6 +304,14 @@ export interface AppObject<R = unknown> {
    */
   onInputChange?: (data: { value: string }) => void;
   /**
+   * Called whenever the menu opens or closes while this AppObject is current.
+   *
+   * The declarative counterpart of subscribing to the `menu-open-change` event:
+   * the framework wires/unwires this for you (no manual `ctl.events.on`).
+   * `open` is `true` when the menu has just opened, `false` when it has closed.
+   */
+  onMenuOpenChange?: (data: { open: boolean }) => void;
+  /**
    * Called when an app event is emitted via ctl.app.emitEvent(...) while this
    * AppObject is the active (current) one.  See {@link AppEvent} - these are
    * user-created events. This is how host-app UI rendered outside of Oneput

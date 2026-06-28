@@ -4,7 +4,7 @@ import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
 import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
-import { DirectoryPicker } from './DirectoryPicker.js';
+import { FilePicker } from './FilePicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
@@ -21,7 +21,7 @@ export class Root implements AppObject {
       KatexDemo: () => KatexDemo.create(ctl),
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
-      DirectoryPicker: () => DirectoryPicker.create(ctl)
+      DirectoryPicker: () => FilePicker.create(ctl)
     });
   }
 
@@ -35,7 +35,7 @@ export class Root implements AppObject {
       KatexDemo: () => KatexDemo;
       AsyncSearchExample: () => AsyncSearchExample;
       DirectoryBrowser: () => DirectoryBrowser;
-      DirectoryPicker: () => DirectoryPicker;
+      DirectoryPicker: () => FilePicker;
     }
   ) {
     ctl.ui.setLayout(this.create.Layout());

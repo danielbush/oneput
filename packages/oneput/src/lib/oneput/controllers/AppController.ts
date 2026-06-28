@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppEvent, AppObject, FocusBehaviour, UIFlags } from '../types.js';
+import type { AppActions, AppEvent, AppObject, FocusBehaviour, UIFlags } from '../types.js';
 import { AppVal } from './helpers/AppVal.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
@@ -205,9 +205,19 @@ export class AppController {
     return this.reseedMenu(opts);
   }
 
+  /**
+   * Resolve the current AppObject's `actions`, which may be declared directly as
+   * an object or as a function that derives them from state.
+   */
+  private resolveActions(): AppActions | undefined {
+    const actions = this.current?.app.actions;
+    return typeof actions === 'function' ? actions() : actions;
+  }
+
   invalidateActions() {
-    if (this.current?.app.actions) {
-      const keyBindingsMap = Object.entries(this.current.app.actions).reduce<KeyBindingMap>(
+    const resolved = this.resolveActions();
+    if (resolved) {
+      const keyBindingsMap = Object.entries(resolved).reduce<KeyBindingMap>(
         (acc, [actionId, actionWithBinding]) => {
           if (actionWithBinding.binding) {
             acc[actionId] = {
@@ -387,8 +397,9 @@ export class AppController {
     actionId: string,
     defaultAction: ((ctl: Controller, evt: KeyboardEvent) => void) | undefined
   ) {
-    if (this.current?.app.actions?.[actionId]) {
-      this.current.app.actions?.[actionId]?.action(this.ctl, evt);
+    const actions = this.resolveActions();
+    if (actions?.[actionId]) {
+      actions[actionId]?.action(this.ctl, evt);
       return;
     }
     if (defaultAction) {

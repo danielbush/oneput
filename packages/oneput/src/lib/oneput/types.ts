@@ -242,6 +242,17 @@ export type AppEvent = [keyof AppEventMap] extends [never]
     }[keyof AppEventMap];
 
 /**
+ * Map of actionId -> action (with optional key binding) declared by an
+ * AppObject. See {@link AppObject.actions}.
+ */
+export type AppActions = {
+  [actionId: string]: {
+    action: (ctl: Controller, evt?: KeyboardEvent) => void;
+    binding?: ActionBinding;
+  };
+};
+
+/**
  * Represents a screen or state in the Oneput app stack.
  *
  * AppObjects are managed by AppController which maintains a stack — run() pushes,
@@ -329,12 +340,13 @@ export interface AppObject<ResumePayload = unknown> {
    * or you want your AppObject's to handle specific ones which you can set
    * here.
    */
-  actions?: {
-    [actionId: string]: {
-      action: (ctl: Controller, evt?: KeyboardEvent) => void;
-      binding?: ActionBinding;
-    };
-  };
+  /**
+   * Provide the actions object directly for simple AppObjects whose actions are
+   * fixed. For AppObjects whose actions depend on state, provide a function:
+   * `ctl.app.invalidateActions()` re-calls it to re-derive the bindings (no
+   * getter needed).
+   */
+  actions?: AppActions | (() => AppActions);
   /**
    * A declarative way to set your menu items.
    *

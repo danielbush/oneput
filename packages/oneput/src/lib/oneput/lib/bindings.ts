@@ -281,6 +281,11 @@ export type BindingKeyConflict = {
   key: string;
 };
 
+export type BindingActionConflict = {
+  actionIds: string[];
+  key: string;
+};
+
 /**
  * Two `when` conditions overlap (can both be true at the same time).
  *
@@ -348,6 +353,41 @@ export class KeyEventBindings {
     this.isMac = isMac;
     this.keyEventsMap = kbMaptoKeMap(keyBindingMap, isMac);
     this.conflicts = conflicts;
+  }
+
+  /**
+   * Find overlapping bindings within this single binding set.
+   */
+  get actionConflicts(): BindingActionConflict[] {
+    const conflicts: BindingActionConflict[] = [];
+    const seen: Array<{
+      actionId: string;
+      binding: KeyEvent[];
+      key: string;
+      when?: { menuOpen?: boolean };
+    }> = [];
+
+    for (const [actionId, keb] of Object.entries(this.keyEventsMap)) {
+      for (const binding of keb.bindings) {
+        const existing = seen.find(
+          (entry) => isEqual(entry.binding, binding) && whenOverlaps(entry.when, keb.when)
+        );
+        if (existing) {
+          conflicts.push({
+            actionIds: [existing.actionId, actionId],
+            key: existing.key
+          });
+        }
+        seen.push({
+          actionId,
+          binding,
+          key: keToBs(binding, this.isMac),
+          when: keb.when
+        });
+      }
+    }
+
+    return conflicts;
   }
 
   toSerializable() {

@@ -118,6 +118,14 @@ export class KeysController {
    */
   setBindings(bindings: KeyBindingMap) {
     const overrides = KeyEventBindings.create(bindings);
+    for (const c of overrides.actionConflicts) {
+      const [firstActionId, ...otherActionIds] = c.actionIds;
+      console.error(
+        `Binding "${c.key}" on actions "${otherActionIds.join(
+          '", "'
+        )}" overrides non-default action "${firstActionId}"`
+      );
+    }
     const finalBindings = KeyEventBindings.create(this.defaultBindings).merge(overrides);
     for (const c of finalBindings.conflicts) {
       console.warn(

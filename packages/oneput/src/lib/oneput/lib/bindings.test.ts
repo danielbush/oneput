@@ -405,3 +405,47 @@ describe('KeyEventBindings.candidatesByKey', () => {
     expect(candidates.get('$mod+k')!.map((c) => c.actionId)).toContain('sibPrev');
   });
 });
+
+describe('KeyEventBindings.actionConflicts', () => {
+  it('reports overlapping bindings within one binding set', () => {
+    // arrange
+    const bindings = KeyEventBindings.create(
+      createBindingMap({
+        FOCUS: { description: 'Focus input', bindings: ['$mod+g'] },
+        BROWSE_IDABLES: { description: 'Browse idables', bindings: ['$mod+g'] }
+      })
+    );
+
+    // act
+    const conflicts = bindings.actionConflicts;
+
+    // assert
+    expect(conflicts).toEqual([
+      { actionIds: ['FOCUS', 'BROWSE_IDABLES'], key: '$mod+g' }
+    ]);
+  });
+
+  it('ignores same binding when conditions are mutually exclusive', () => {
+    // arrange
+    const bindings = KeyEventBindings.create(
+      createBindingMap({
+        focusPreviousMenuItem: {
+          description: 'Focus previous menu item',
+          bindings: ['$mod+k'],
+          when: { menuOpen: true }
+        },
+        PREVIOUS_TOKEN: {
+          description: 'Previous token',
+          bindings: ['$mod+k'],
+          when: { menuOpen: false }
+        }
+      })
+    );
+
+    // act
+    const conflicts = bindings.actionConflicts;
+
+    // assert
+    expect(conflicts).toEqual([]);
+  });
+});

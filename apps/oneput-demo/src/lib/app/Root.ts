@@ -113,7 +113,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.File)],
           textContent: 'Pick a file...',
           action: () => {
-            this.create.DirectoryPicker().run('/');
+            this.ctl.app.run(this.create.DirectoryPicker());
           },
           right: (b) => [b.icon(icons.ChevronRight)]
         }),

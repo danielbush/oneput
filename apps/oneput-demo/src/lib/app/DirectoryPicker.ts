@@ -20,10 +20,8 @@ import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/lis
  * `path` is internal state rather than one AppObject per folder. The two input
  * channels are kept separate by nature:
  *
- *  - **Navigation** is path-driven and async: dim+freeze the current menu, fetch
- *    the listing, then `setMenu` — one synchronous swap, no cut-down. {@link run}
- *    does this for the caller's menu (load-before-open); {@link navigateTo} does
- *    it for the picker's own menu.
+ *  - **Navigation** is path-driven and async: dim+freeze the menu, fetch the
+ *    listing, then `setMenu` — one synchronous swap, no cut-down.
  *  - **Typing** is handled by the framework's default filter (a *synchronous*
  *    `(query, base) => subset` over the painted items). The picker does nothing:
  *    no re-fetch, no debounce. This is why it does not use `setMenuItemsFnAsync`
@@ -31,36 +29,34 @@ import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/lis
  *    would only suppress the filter we want here.
  */
 export class DirectoryPicker implements AppObject {
-  static create(ctl: Controller, listDir: ListDir = mockListDir) {
-    return new DirectoryPicker(ctl, listDir);
+  static create(ctl: Controller, initialPath = '/', listDir: ListDir = mockListDir) {
+    return new DirectoryPicker(ctl, initialPath, listDir);
   }
 
   private constructor(
     private ctl: Controller,
+    private initialPath: string,
     private listDir: ListDir
   ) {}
 
   private path = '/';
   private entries: DirEntry[] = [];
 
-  /**
-   * Load-before-open: dim+freeze the *caller's* menu, fetch the first listing,
-   * then push the picker (which mounts already-populated — no cut-down). The
-   * dim gives the caller loading feedback during the await; `app.run`'s reset
-   * re-enables it as the picker takes over. On error, un-dim and stay put.
-   */
-  async run(path = '/') {
-    this.ctl.ui.update({ flags: { enableMenuActions: false } });
-    if (!(await this.load(path))) {
-      this.ctl.ui.update({ flags: { enableMenuActions: true } });
-      return;
-    }
-    this.ctl.app.run(this);
-  }
-
   onStart() {
     this.ctl.input.setPlaceholder('Type to filter; select a file to choose it...');
     this.ctl.input.focusInput();
+    void this.start();
+  }
+
+  /** Load the initial directory after Oneput gives the picker control. */
+  private async start() {
+    this.ctl.ui.update({ flags: { enableMenuActions: false } });
+    const ok = await this.load(this.initialPath);
+    this.ctl.ui.update({ flags: { enableMenuActions: true } });
+    if (!ok) {
+      this.ctl.app.exit();
+      return;
+    }
     this.showPath();
     this.paint();
   }

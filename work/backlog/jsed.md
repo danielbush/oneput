@@ -40,10 +40,14 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - undo split at cursor
 - [x] undo selection changes
 - [ ] undo FOCUSABLE changes
-- [.] save/persist changes and load
+- [x] save/persist changes and load
 - [ ] editing islands
   - katex as example of an island
   - code might be another
+- text commands
+  - "? insert new list above my cursor (focus)"
+- voice commands
+  - "insert new list above my cursor (focus)"
 - COMMENT: explore r:JSED_AGENT_COEDIT
 - [ ] r:2D_CHAT_1
 - COMMENT: more ambitious

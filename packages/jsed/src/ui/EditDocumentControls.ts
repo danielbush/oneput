@@ -385,10 +385,10 @@ export class EditDocumentControls {
       editor.focus.canDelete() &&
         stdMenuItem({
           id: 'DELETE_FOCUSED_ELEMENT',
-          textContent: 'Delete focused element...',
+          textContent: 'Remove focused element...',
           action: async () => {
             const confirm = ctl.confirm({
-              message: `Delete element?`
+              message: `Remove element?`
             });
             const yes = await confirm.userChooses();
             if (!yes) {

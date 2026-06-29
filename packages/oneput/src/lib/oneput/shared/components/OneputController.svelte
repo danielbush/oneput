@@ -1,9 +1,4 @@
-<!-- TypeScript infers ResumePayload based on the `run` prop's return type.
-
-This types what the returned AppObject can receive from child AppObjects via
-`onResume`, not what it returns to its parent when it exits.
--->
-<script lang="ts" generics="ResumePayload = unknown">
+<script lang="ts">
   // Wraps Oneput and creates and exposes a controller that lets you
   // programmatically control Oneput.
   import Oneput from './Oneput.svelte';
@@ -20,7 +15,7 @@ This types what the returned AppObject can receive from child AppObjects via
     menuItems: [],
     menuOpen: false
   });
-  const props: { run: (ctl: Controller) => AppObject<ResumePayload> } = $props();
+  const props: { run: (ctl: Controller) => AppObject } = $props();
 
   const controller = Controller.create(currentProps);
 

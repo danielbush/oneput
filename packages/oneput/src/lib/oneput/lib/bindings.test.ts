@@ -420,9 +420,7 @@ describe('KeyEventBindings.actionConflicts', () => {
     const conflicts = bindings.actionConflicts;
 
     // assert
-    expect(conflicts).toEqual([
-      { actionIds: ['FOCUS', 'BROWSE_IDABLES'], key: '$mod+g' }
-    ]);
+    expect(conflicts).toEqual([{ actionIds: ['FOCUS', 'BROWSE_IDABLES'], key: '$mod+g' }]);
   });
 
   it('ignores same binding when conditions are mutually exclusive', () => {

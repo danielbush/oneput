@@ -224,6 +224,13 @@
     --oneput-menu-item-background-active: rgb(200 200 200 / 0.2);
 
     /* button states */
+    /* darkened-yellow family (cf. --oneput-alert-background rgb(107 85 0)),
+       dark enough for #ddd/white text */
+    --oneput-primary-button-background: rgb(124 98 0 / 1);
+    --oneput-primary-button-background-hover: rgb(145 115 8 / 1);
+    --oneput-secondary-button-background: rgb(92 72 0 / 1);
+    --oneput-secondary-button-background-hover: rgb(107 85 0 / 1);
+    --oneput-button-text-color: #ddd;
     --oneput-button-border-focus: none;
     --oneput-button-background-focus: rgb(100 100 100 / 0.1);
     --oneput-button-background-hover: rgb(150 150 150 / 0.2);

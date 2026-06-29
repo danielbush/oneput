@@ -4,13 +4,17 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Critical path
 
-- directory browser
-  - oneput lets us select folders and go into them
-  - select a file, go into a menu with actions; the actions may be asynchronous, maybe we close the menu and show notifcation: working..., then replace with a new notfication: action completed
+- input folding (for jsed)
 - talk to hermes
   - COMMENT: once 2br/oneput is running on mobile, this mean we could talk to hermes over it rather than telegram; it means we could ask the agent to make modifications to 2br for us (that would require mcp machinery to safely interact with 2br data)
   - how to store conversations?
     - something "2br adjacent"
+- agent help / oneput as mcp
+  - ask agent for help via oneput
+  - agent can perform actions provided by oneput
+    - menu actions
+    - binded actions
+    - usually these 2 should coincide
 
 ## fix
 

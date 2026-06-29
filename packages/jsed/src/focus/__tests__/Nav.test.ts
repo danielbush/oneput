@@ -300,6 +300,96 @@ test('SIB_PREV should walk to previous sibling', () => {
   expectSiblingHighlights(doc, ['li2']);
 });
 
+test('SIB_NEXT_OR_UP walks to the next sibling when one exists', () => {
+  // arrange
+  const doc = makeRoot(
+    div(
+      { id: 'outer' },
+      div({ id: 'a' }, p({ id: 'a1' }, 'a1'), p({ id: 'a2' }, 'a2')),
+      div({ id: 'b' }, p({ id: 'b1' }, 'b1'))
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'a1'));
+
+  // act
+  nav.SIB_NEXT_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'a2'));
+});
+
+test('SIB_NEXT_OR_UP climbs to an ancestor sibling without focusing the parent', () => {
+  // arrange
+  const doc = makeRoot(
+    div(
+      { id: 'outer' },
+      div({ id: 'a' }, p({ id: 'a1' }, 'a1'), p({ id: 'a2' }, 'a2')),
+      div({ id: 'b' }, p({ id: 'b1' }, 'b1'))
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'a2'));
+
+  // act — a2 has no next sibling, so climb past parent #a to its sibling #b
+  nav.SIB_NEXT_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'b'));
+});
+
+test('SIB_NEXT_OR_UP stays put when no ancestor has a following sibling', () => {
+  // arrange
+  const doc = makeRoot(div({ id: 'outer' }, div({ id: 'a' }, p({ id: 'a1' }, 'a1'))));
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'a1'));
+
+  // act
+  nav.SIB_NEXT_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'a1'));
+});
+
+test('SIB_PREV_OR_UP walks to the previous sibling when one exists', () => {
+  // arrange
+  const doc = makeRoot(div({ id: 'a' }, p({ id: 'a1' }, 'a1'), p({ id: 'a2' }, 'a2')));
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'a2'));
+
+  // act
+  nav.SIB_PREV_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'a1'));
+});
+
+test('SIB_PREV_OR_UP focuses the parent when previous siblings are exhausted', () => {
+  // arrange
+  const doc = makeRoot(div({ id: 'a' }, p({ id: 'a1' }, 'a1'), p({ id: 'a2' }, 'a2')));
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'a1'));
+
+  // act — a1 has no previous sibling, so visit the parent #a
+  nav.SIB_PREV_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'a'));
+});
+
+test('SIB_PREV_OR_UP stays put at the top of the tree', () => {
+  // arrange
+  const doc = makeRoot(div({ id: 'outer' }, p({ id: 'a1' }, 'a1')));
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'outer'));
+
+  // act — outer's only parent is the root ceiling
+  nav.SIB_PREV_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'outer'));
+});
+
 test('UP can walk up successive parent elements', () => {
   // arrange
   const doc = makeRoot(div({ id: 'id1' }, div({ id: 'id2' }, div({ id: 'id3' }, 'id3'))));

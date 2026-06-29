@@ -135,7 +135,7 @@ export class EditorOps {
 
   moveDown() {
     if (this.state.isSuspended) return;
-    this.state.nav.SIB_NEXT();
+    this.state.nav.SIB_NEXT_OR_UP();
   }
 
   moveUp() {

@@ -1,3 +1,5 @@
+// Deprecated - use walk2.ts instead.
+
 export type Walk2Params = {
   /**
    * Pre-order visit condition wrt to the direction of walking.

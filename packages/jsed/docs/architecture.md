@@ -4,6 +4,22 @@ COMMENT: New notes that need to be incorporated into this document; they superse
 
 The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/input, src/ui. Beneath this is src/lib which is the base load-bearing layer of low-level operations used by some of these subsystems.
 
+- `src/lib/core`
+  - load-bearing base level
+  - taxonomy - identifies key elements/nodes in the DOM
+  - walk - general recursive walking functions
+  - sibling - worries about elements that share the same parentNode; this is important for things like managing LINE_SEGMENT's etc
+  - lineSegment - worries about LINE_SEGMENT's
+  - line - worries about LINE's
+  - dom-rules - worries about how elements can be combined
+
+- `src/lib/ops`
+  - load-bearing base operation level, builds on `lib/core/`
+  - lib/ops/token
+    - work below the tokenization and cursor and above the core modules;
+    - lib/ops/token operations worry about managing tokens and their related separators (whitespace).
+    - lib/ops/space modules
+
 - `src/editor`
   - represents the whole of jsed; draws on the other subsystems; routes events to the write subsystems etc
   - top level
@@ -36,22 +52,6 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
 - `src/ui`
   - subsystem handles how jsed's ui is handled; we rely on oneput
   - also handles visual elements like indicators
-
-- `src/lib/ops`
-  - load-bearing base operation level, builds on `lib/core/`
-  - lib/ops/token
-    - work below the tokenization and cursor and above the core modules;
-    - lib/ops/token operations worry about managing tokens and their related separators (whitespace).
-    - lib/ops/space modules
-
-- `src/lib/core`
-  - load-bearing base level
-  - taxonomy - identifies key elements/nodes in the DOM
-  - walk - general recursive walking functions
-  - sibling - worries about elements that share the same parentNode; this is important for things like managing LINE_SEGMENT's etc
-  - lineSegment - worries about LINE_SEGMENT's
-  - line - worries about LINE's
-  - dom-rules - worries about how elements can be combined
 
 ## Intro
 

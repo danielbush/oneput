@@ -1,8 +1,5 @@
 /**
- * Sibling helpers, LINE detection, and LINE_SIBLING traversal.
- *
- * Classification predicates (`is*`) live in taxonomy.ts. This module
- * imports from taxonomy.ts and adds traversal logic on top.
+ * Sibling helpers - elements share the same parentNode.
  */
 
 import { isIgnorable, isToken } from './taxonomy.js';

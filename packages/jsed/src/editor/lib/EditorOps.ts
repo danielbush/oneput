@@ -140,7 +140,7 @@ export class EditorOps {
 
   moveUp() {
     if (this.state.isSuspended) return;
-    this.state.nav.SIB_PREV();
+    this.state.nav.SIB_PREV_OR_UP();
   }
 
   scrollActiveTargetIntoView(): boolean {

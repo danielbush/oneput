@@ -9,7 +9,10 @@ import {
 } from '../lib/core/taxonomy.js';
 import * as token from '../lib/ops/token.js';
 import { getParent, findNextNode, findPreviousNode } from '../lib/core/walk.js';
-import { findNextNode as findNextNode2 } from '../lib/core/walk2.js';
+import {
+  findNextNode as findNextNode2,
+  findPreviousNode as findPreviousNode2
+} from '../lib/core/walk2.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
 import { getNextSibling, getPreviousSibling } from '../lib/core/sibling.js';
 
@@ -234,6 +237,40 @@ export class Nav {
       return;
     }
     return;
+  }
+
+  /**
+   * Move to the previous sibling FOCUSABLE; if the previous siblings are
+   * exhausted, climb to the parent and FOCUS it. The mirror of
+   * {@link SIB_NEXT_OR_UP}, except parents *are* visited here.
+   *
+   * Same composition: sibling.ts (`getPreviousSibling`) does the flat hop;
+   * walk2 (`findPreviousNode`) does the climb. We start the walk at the parent
+   * with `visitStart` so `pre(parent)` fires first — in reverse pre-order an
+   * ancestor's `pre` is its predecessor, so the parent is the natural next stop.
+   * `shouldDescend: () => false` keeps it "up only, never down".
+   */
+  SIB_PREV_OR_UP() {
+    if (!this.#FOCUS) return;
+
+    const sib = getPreviousSibling(this.#FOCUS, isFocusable) as HTMLElement | null;
+    if (sib) {
+      this.REQUEST_FOCUS(sib);
+      return;
+    }
+
+    const parent = this.#FOCUS.parentNode;
+    if (!parent || parent === this.doc.root) return;
+
+    const up = findPreviousNode2(parent, {
+      ceiling: this.doc.root,
+      shouldDescend: () => false,
+      visitStart: true,
+      pre: (node) => (isFocusable(node) ? node : undefined)
+    });
+    if (up) {
+      this.REQUEST_FOCUS(up as HTMLElement);
+    }
   }
 
   /**

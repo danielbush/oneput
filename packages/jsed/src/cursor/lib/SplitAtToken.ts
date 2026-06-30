@@ -1,6 +1,6 @@
 import { getFirstLineSibling, getLine } from '../../lib/core/line.js';
 import type { EditorState } from '../../editor/index.js';
-import { anchorize } from '../../lib/ops/anchor.js';
+import { normalize } from '../../lib/ops/normalize.js';
 import {
   recSplitAfterChild,
   recSplitBeforeChild,
@@ -52,25 +52,25 @@ export class SplitAtToken implements UndoRecord {
   ) {}
 
   /**
-   * Re-derive ANCHOR's at the two sides of the split site (do/redo direction).
-   * ANCHOR's are derived (ANCHOR_RULES) and `anchorize` is idempotent.
+   * Re-assert derived structure at the two sides of the split site (do/redo
+   * direction). `normalize` is idempotent.
    */
   private normalize() {
     if (this.splitBefore) {
       // The original may need an ANCHOR because we could split before the first
       // child.
-      anchorize(this.result.bottomSplit.parent);
+      normalize(this.result.bottomSplit.parent);
     }
-    // We might have an empty INLINE_FLOW peer, so anchor the lowest level.
-    anchorize(this.result.bottomSplit.peer);
+    // We might have an empty INLINE_FLOW peer, so normalize the lowest level.
+    normalize(this.result.bottomSplit.peer);
   }
 
   /**
-   * Re-derive ANCHOR's after the split is collapsed back into one site (undo
-   * direction).
+   * Re-assert derived structure after the split is collapsed back into one site
+   * (undo direction).
    */
   private normalizeUndo() {
-    anchorize(this.result.topSplit.parent);
+    normalize(this.result.topSplit.parent);
   }
 
   undo(state: EditorState) {

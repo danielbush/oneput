@@ -1,4 +1,4 @@
-import { isImplicitLine, isToken, JSED_IMPLICIT_CLASS } from '../core/taxonomy.js';
+import { isIgnorableNode, isImplicitLine, isToken, JSED_IMPLICIT_CLASS } from '../core/taxonomy.js';
 
 /**
  * Wrap interstitial text runs — bare text that sits alongside NESTED_LINE's
@@ -33,7 +33,7 @@ export function removeImplicitLines(root: HTMLElement) {
   }
 }
 
-function wrapInterstitials(el: HTMLElement) {
+export function wrapInterstitials(el: HTMLElement) {
   if (!hasBlockChild(el)) return;
   const runs: ChildNode[][] = [];
   let current: ChildNode[] = [];
@@ -107,6 +107,7 @@ function isInlineDisplay(el: Element): boolean {
 
 function hasBlockChild(el: HTMLElement): boolean {
   for (const child of el.children) {
+    if (isIgnorableNode(child)) continue;
     if (child.tagName === 'BR') return true;
     if (!isInlineDisplay(child)) return true;
   }

@@ -8,7 +8,8 @@ import {
   makeRoot,
   p,
   span,
-  strong
+  strong,
+  t
 } from '../../../test/util';
 import { addImplicitLines } from '../implicitLine';
 import { JSED_IGNORE_CLASS, JSED_IMPLICIT_CLASS } from '../../core/taxonomy';
@@ -447,5 +448,28 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
     expect(p1.firstChild?.nodeType).toBe(Node.TEXT_NODE);
     expect(p1.textContent).toBe('aaa');
     expect(p1.querySelectorAll(`.${JSED_IMPLICIT_CLASS}`).length).toBe(0);
+  });
+
+  // Regression: a tokenized LINE carrying a transient IGNORABLE cursor marker
+  // has no real block child, so `hasBlockChild` must skip the marker and leave
+  // the TOKENs alone — otherwise `normalize` would wrap each TOKEN run during an
+  // active edit.
+  test('IGNORABLE marker on a tokenized LINE does not trigger wrapping', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' },
+        t('hello'),
+        span({ class: JSED_IGNORE_CLASS }, ''),
+        ' ',
+        t('world')
+      )
+    );
+
+    // act
+    addImplicitLines(doc.root);
+
+    // assert
+    expect(byId(doc, 'p1').querySelectorAll(`.${JSED_IMPLICIT_CLASS}`).length).toBe(0);
   });
 });

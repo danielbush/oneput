@@ -84,6 +84,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## feat
 
+- feat: toggle cursor states without use of timer
 - space should probably put us into append
   - COMMENT: currently it moves us forward
 - make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard

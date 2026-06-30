@@ -5,7 +5,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## Critical path
 
 - input folding (for jsed)
-- talk to hermes
+  - mock up input folding
+- chat interface
+  - mock up chat interface
   - COMMENT: once 2br/oneput is running on mobile, this mean we could talk to hermes over it rather than telegram; it means we could ask the agent to make modifications to 2br for us (that would require mcp machinery to safely interact with 2br data)
   - how to store conversations?
     - something "2br adjacent"

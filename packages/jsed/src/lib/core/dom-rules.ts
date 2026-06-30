@@ -142,8 +142,20 @@ export function canDelete(el: HTMLElement, doc: JsedDocument): boolean {
 }
 
 /**
- * TODO: we could look at parent node to determine what is valid eg ul -> li etc
+ * Some tags are structurally incomplete on their own and need a default child
+ * when freshly created — e.g. a `ul`/`ol` needs an `li` to be editable, a
+ * `table` needs a `tr`. Returns the default child tag name, or null.
  */
+export function getRequiredChildTag(tagName: string): string | null {
+  switch (tagName.toLowerCase()) {
+    case 'ul':
+    case 'ol':
+      return 'li';
+    default:
+      return null;
+  }
+}
+
 export function getConversionCandidates(_el: HTMLElement): string[] {
   return ['p', 'div', 'section'];
 }

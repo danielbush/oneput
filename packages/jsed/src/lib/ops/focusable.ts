@@ -24,6 +24,10 @@ export function createElement(
   if (options.addAnchors && canCreateWithAnchor(tagName)) {
     anchorize(el);
   }
+  const requiredChild = domRules.getRequiredChildTag(tagName);
+  if (requiredChild) {
+    el.appendChild(createElement(requiredChild, options));
+  }
   return el;
 }
 

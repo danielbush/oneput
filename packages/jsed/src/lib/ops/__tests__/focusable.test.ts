@@ -3,6 +3,7 @@ import { byId, div, frag, identifyChildren, makeRoot, p, span } from '../../../t
 import {
   copyEmptyNext,
   copyEmptyPrevious,
+  createElement,
   deleteHighestEmpty,
   findNextFocusableOutside,
   findPreviousFocusableOutside,
@@ -409,5 +410,32 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
     // assert
     expect(op.element).toBe(inserted);
     expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+  });
+});
+
+describe('createElement required children', () => {
+  test('ul seeds an li holding an anchor', () => {
+    // act
+    const el = createElement('ul');
+
+    // assert
+    expect(identifyChildren(el)).toEqual(['[element:li]']);
+    expect(identifyChildren(el.firstElementChild)).toEqual(['[anchor]']);
+  });
+
+  test('ol seeds an li', () => {
+    // act
+    const el = createElement('ol');
+
+    // assert
+    expect(identifyChildren(el)).toEqual(['[element:li]']);
+  });
+
+  test('p has no required child', () => {
+    // act
+    const el = createElement('p');
+
+    // assert
+    expect(identifyChildren(el)).toEqual(['[anchor]']);
   });
 });

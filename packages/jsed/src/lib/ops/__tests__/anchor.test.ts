@@ -12,11 +12,13 @@ import {
 } from '../anchor.js';
 import { isAnchor, isImplicitLine } from '../../core/taxonomy.js';
 import {
+  a,
   byId,
   div,
   em as emTag,
   identifyChildren,
   inlineStyleHack,
+  li,
   makeRawRoot,
   makeRoot,
   p,
@@ -48,6 +50,20 @@ describe('anchorize', () => {
     anchorize(root);
 
     // assert
+    expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]']);
+  });
+
+  // This confirms that if we create a p-tag after an anchor within say an
+  // li-tag, then anchorize will remove the outer anchor - which makes sense.
+  test('INTERSTITIAL_ANCHOR - li with a + p-tag', () => {
+    // arrange
+    const root = makeRawRoot(li({ id: 'li1' }, a(), p({ id: 'p1' }, a())));
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'li1'))).toEqual(['[element:p#p1]']);
     expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]']);
   });
 

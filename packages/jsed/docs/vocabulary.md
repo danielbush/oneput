@@ -134,6 +134,9 @@ We can define the traversal rules:
   - Source of truth: `tagImplicitLines` / `lib/implicitLine.ts`
 - **INTERSTITIAL_INVARIANT**
   - At the beginning of the session, jsed converts all INTERSTITIAL_TEXT to IMPLICIT_LINE's. During the edit session, editing operations must avoid creating new INTERSTITIAL_TEXT. When writing the file, the editor can strip out IMPLICIT_LINE wrappers if needed.
+- **INTERSTITIAL_ANCHOR**
+  - a role/position, not a taxonomy kind: an ordinary ANCHOR occupying an interstitial position — at the LINE-container level, beside block NESTED_LINE's, rather than inside a LINE.
+  - It is the empty-placeholder counterpart to INTERSTITIAL_TEXT: where INTERSTITIAL_TEXT is loose content at that level, an INTERSTITIAL_ANCHOR marks where such a line could begin.
 - **IMPLICIT_LINE**
   — IMPLICIT_LINE's are LINE's created to wrap INTERSTITIAL_TEXT. This promotes better document structure, easier tokenization implementations and better FOCUS navigation.
   - Source of truth: `tagImplicitLines` / `lib/implicitLine.ts`

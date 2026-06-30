@@ -152,6 +152,23 @@ describe('InputController selection-change emission', () => {
     });
   });
 
+  describe('resets dedupe on value load', () => {
+    it('re-emits the first selection state after setInputValue even if it matches the previous seat', async () => {
+      // arrange — end on CURSOR_AT_END, as a previous editing seat would
+      const { ctl, input, emitted } = setup();
+      await ctl.input.setInputValue('hello');
+      setRange(input, 5, 5); // CURSOR_AT_END
+      emitted.length = 0;
+
+      // act — load a new value (a fresh seat), then land on CURSOR_AT_END again
+      await ctl.input.setInputValue('d');
+      setRange(input, 1, 1); // CURSOR_AT_END for "d"
+
+      // assert — not swallowed by the stale CURSOR_AT_END dedupe
+      expect(emitted).toEqual(['CURSOR_AT_END']);
+    });
+  });
+
   describe('cleanup on element swap', () => {
     it('stops listening on the previous element and resets dedupe', async () => {
       // arrange

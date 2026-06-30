@@ -155,6 +155,13 @@ export class InputController {
     this.lastInputValue = this.ctl.currentProps.inputValue;
     const range = this.getRange();
     this.lastInputRange = range;
+    // Loading a value programmatically starts a fresh editing context. Clear the
+    // selection-change dedupe so the next genuine selectionchange is emitted
+    // even if it happens to match the state left over from the previous seat.
+    // Without this, seating a new TOKEN whose first caret state equals the stale
+    // `lastEmittedSelectionState` (e.g. CURSOR_AT_END) swallows the event and
+    // the CURSOR_STATE marker never updates.
+    this.lastEmittedSelectionState = undefined;
     return tick();
   }
 
@@ -183,6 +190,10 @@ export class InputController {
     const len = this.ctl.currentProps.inputValue?.length ?? 0;
     const start = this.inputElement?.selectionStart ?? 0;
     const stop = this.inputElement?.selectionEnd ?? 0;
+    return this.computeSelectionState(len, start, stop);
+  }
+
+  private computeSelectionState(len: number, start: number, stop: number): InputSelectionState {
     if (len === 0) {
       return 'EMPTY';
     }

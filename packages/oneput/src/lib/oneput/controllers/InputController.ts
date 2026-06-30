@@ -62,13 +62,6 @@ export class InputController {
   };
   private removeBeforeInputListener?: () => void;
   private removeSelectionChangeListener?: () => void;
-  /**
-   * Last selection state we emitted, used to dedupe selectionchange events.
-   * The DOM fires `selectionchange` very frequently (on focus, on every
-   * setSelectionRange, sometimes redundantly); we only want to emit when
-   * the discrete state actually transitions.
-   */
-  private lastEmittedSelectionState?: InputSelectionState;
 
   /**
    * Used by Oneput to tell the controller what the input element is.
@@ -76,7 +69,6 @@ export class InputController {
   handleInputElementChange(inputElement: HTMLInputElement | undefined) {
     this.removeBeforeInputListener?.();
     this.removeSelectionChangeListener?.();
-    this.lastEmittedSelectionState = undefined;
     this.inputElement = inputElement;
     this.selectionToggler = new SelectionToggler(this.ctl);
     if (!inputElement) {
@@ -97,13 +89,10 @@ export class InputController {
     // 'selectionchange' is a document-level event that covers user-driven
     // collapses/expansions (clicks, arrow keys, Esc) and selection mutations
     // from setSelectionRange (which our programmatic selectAll / moveCursorTo*
-    // helpers all use). We filter to events for our input only and emit a
-    // selection-change when the discrete state actually transitions.
+    // helpers all use).
     const handleSelectionChange = () => {
       if (document.activeElement !== inputElement) return;
       const current = this.getSelectionState();
-      if (current === this.lastEmittedSelectionState) return;
-      this.lastEmittedSelectionState = current;
       this.ctl.events.emit({
         type: 'selection-change',
         payload: { selection: current }
@@ -155,13 +144,6 @@ export class InputController {
     this.lastInputValue = this.ctl.currentProps.inputValue;
     const range = this.getRange();
     this.lastInputRange = range;
-    // Loading a value programmatically starts a fresh editing context. Clear the
-    // selection-change dedupe so the next genuine selectionchange is emitted
-    // even if it happens to match the state left over from the previous seat.
-    // Without this, seating a new TOKEN whose first caret state equals the stale
-    // `lastEmittedSelectionState` (e.g. CURSOR_AT_END) swallows the event and
-    // the CURSOR_STATE marker never updates.
-    this.lastEmittedSelectionState = undefined;
     return tick();
   }
 

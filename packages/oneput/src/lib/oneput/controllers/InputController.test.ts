@@ -118,24 +118,6 @@ describe('InputController selection-change emission', () => {
     });
   });
 
-  describe('dedupe', () => {
-    it('does not emit again when the discrete state is unchanged', async () => {
-      // arrange
-      const { ctl, input, emitted } = setup();
-      await ctl.input.setInputValue('hello');
-      setRange(input, 5, 5); // CURSOR_AT_END
-      emitted.length = 0;
-
-      // act — moving the cursor to a different mid-text position keeps it CURSOR_AT_MIDDLE,
-      // and a redundant move to the same position emits nothing
-      setRange(input, 2, 2); // CURSOR_AT_MIDDLE — first time
-      setRange(input, 2, 2); // CURSOR_AT_MIDDLE — same state, deduped
-
-      // assert
-      expect(emitted).toEqual(['CURSOR_AT_MIDDLE']);
-    });
-  });
-
   describe('filter by activeElement', () => {
     it('does not emit when the input is not focused', async () => {
       // arrange
@@ -152,30 +134,12 @@ describe('InputController selection-change emission', () => {
     });
   });
 
-  describe('resets dedupe on value load', () => {
-    it('re-emits the first selection state after setInputValue even if it matches the previous seat', async () => {
-      // arrange — end on CURSOR_AT_END, as a previous editing seat would
-      const { ctl, input, emitted } = setup();
-      await ctl.input.setInputValue('hello');
-      setRange(input, 5, 5); // CURSOR_AT_END
-      emitted.length = 0;
-
-      // act — load a new value (a fresh seat), then land on CURSOR_AT_END again
-      await ctl.input.setInputValue('d');
-      setRange(input, 1, 1); // CURSOR_AT_END for "d"
-
-      // assert — not swallowed by the stale CURSOR_AT_END dedupe
-      expect(emitted).toEqual(['CURSOR_AT_END']);
-    });
-  });
-
-  describe('cleanup on element swap', () => {
-    it('stops listening on the previous element and resets dedupe', async () => {
+  describe('element swap', () => {
+    it('rebinds the selection listener to the new element', async () => {
       // arrange
       const { ctl, input, emitted } = setup();
       await ctl.input.setInputValue('hello');
-      setRange(input, 5, 5); // CURSOR_AT_END
-      emitted.length = 0;
+      setRange(input, 5, 5); // CURSOR_AT_END on the original element
 
       // swap to a new input
       const replacement = document.createElement('input');
@@ -183,14 +147,12 @@ describe('InputController selection-change emission', () => {
       replacement.value = 'world';
       replacement.focus();
       ctl.input.handleInputElementChange(replacement);
+      emitted.length = 0;
 
-      // act — a mutation on the old element no longer reaches subscribers
-      setRange(input, 0, 5);
-      // and the first event on the new element re-emits even though the
-      // discrete state matches what the previous element ended on
-      setRange(replacement, 5, 5);
+      // act — a selection on the new element is observed
+      setRange(replacement, 5, 5); // CURSOR_AT_END on the replacement
 
-      // assert
+      // assert — exactly one emit (the old listener was removed, not doubled up)
       expect(emitted).toEqual(['CURSOR_AT_END']);
     });
   });

@@ -370,6 +370,7 @@ export class EditDocumentControls {
         stdMenuItem({
           id: 'COPY_EMPTY_BEFORE',
           textContent: 'Copy to empty element before...',
+          closeMenuOnAction: true,
           action: actions.COPY_EMPTY_PREVIOUS.action,
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
@@ -378,6 +379,7 @@ export class EditDocumentControls {
         stdMenuItem({
           id: 'COPY_EMPTY_AFTER',
           textContent: 'Copy to empty element after...',
+          closeMenuOnAction: true,
           action: actions.COPY_EMPTY_NEXT.action,
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
@@ -405,6 +407,7 @@ export class EditDocumentControls {
         stdMenuItem({
           id: 'UNWRAP_FOCUS',
           textContent: 'Unwrap...',
+          closeMenuOnAction: true,
           action: () => {
             editor.focus.unwrap();
           },

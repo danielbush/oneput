@@ -50,6 +50,15 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
   - The records replay the tripartite (do / undo / redo op-record) shape of the
     low-level `lib/ops` mutations (e.g. `focusable.deleteElement` and its
     `undo*`/`redo*` counterparts).
+  - **ANCHOR normalization convention.** A structural `UndoRecord` re-derives
+    ANCHOR's itself, in each replay direction, on the region that direction just
+    produced. ANCHOR's are derived (ANCHOR_RULES) and `anchorize` is idempotent,
+    so this is safe to repeat. The shape: a private `normalize()` re-anchors the
+    do/redo region (called from `run` and `redo`); when undo collapses to a
+    different region, a `normalizeUndo()` re-anchors that. `InsertAfter` has one
+    stable region across all three; `SplitAtToken` is asymmetric and needs both.
+    The record owns its region — callers never compute it — so adopt this shape
+    when converting the remaining ops.
   - may expand or be generalised in future to support operation transform
 
 - `src/input`

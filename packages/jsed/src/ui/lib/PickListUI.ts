@@ -91,7 +91,7 @@ export class PickListUI implements AppObject {
             textContent: candidate.text,
             action: () => {
               candidate.action();
-              this.ctl.app.exit();
+              this.exit();
             },
             left: (b) => [b.icon(candidate.icon ?? icons.ArrowRight)]
           })

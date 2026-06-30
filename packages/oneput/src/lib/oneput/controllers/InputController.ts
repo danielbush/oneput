@@ -2,7 +2,7 @@ import { DynamicPlaceholderBase } from '../types.js';
 import type { InputSelectionState } from '../types.js';
 import type { Controller } from './controller.js';
 import { tick } from 'svelte';
-import { SelectionToggler } from './helpers/SelectionToggler.js';
+import { TimedSelectionToggler } from './helpers/TimedSelectionToggler.js';
 import type { InputChangeEvent, InputChangePayload } from './InternalEventEmitter.js';
 
 export class InputController {
@@ -36,7 +36,7 @@ export class InputController {
 
   private defaultPlaceholder?: string | DynamicPlaceholderBase;
   private inputElement?: HTMLInputElement;
-  private selectionToggler?: SelectionToggler;
+  private selectionToggler?: TimedSelectionToggler;
   /**
    * The most recent input value the controller knows about, regardless of
    * source.
@@ -70,7 +70,7 @@ export class InputController {
     this.removeBeforeInputListener?.();
     this.removeSelectionChangeListener?.();
     this.inputElement = inputElement;
-    this.selectionToggler = new SelectionToggler(this.ctl);
+    this.selectionToggler = new TimedSelectionToggler(this.ctl);
     if (!inputElement) {
       return;
     }

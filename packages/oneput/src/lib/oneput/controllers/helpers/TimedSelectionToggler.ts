@@ -4,9 +4,9 @@ import type { Controller } from '../controller.js';
  * Should "select all" first; then if we keep clicking within a time limit go
  * to the other states.
  */
-export class SelectionToggler {
+export class TimedSelectionToggler {
   static create(ctl: Controller) {
-    return new SelectionToggler(ctl);
+    return new TimedSelectionToggler(ctl);
   }
 
   #toggleSelectTid: number | undefined = undefined;

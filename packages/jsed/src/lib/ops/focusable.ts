@@ -119,14 +119,29 @@ export function getInsertBeforeCandidates(el: HTMLElement): string[] {
   return domRules.getAllowableInsertBeforeTags(el.tagName);
 }
 
-export function insertNewBefore(tagName: string, target: HTMLElement): HTMLElement | null {
+export type InsertElementBefore = {
+  action: 'insert-element-before';
+  element: HTMLElement; // the newly inserted element
+  target: HTMLElement; // the anchor we insert before
+};
+
+export function insertNewBefore(tagName: string, target: HTMLElement): InsertElementBefore | null {
   if (!domRules.getAllowableInsertBeforeTags(target.tagName).includes(tagName.toLowerCase())) {
     return null;
   }
 
-  const inserted = createElement(tagName);
-  target.insertAdjacentElement('beforebegin', inserted);
-  return inserted;
+  const element = createElement(tagName);
+  target.insertAdjacentElement('beforebegin', element);
+  return { action: 'insert-element-before', element, target };
+}
+
+export function undoInsertElementBefore(op: InsertElementBefore) {
+  // element is freshly created + empty; target stays as the redo anchor.
+  op.element.remove();
+}
+
+export function redoInsertElementBefore(op: InsertElementBefore) {
+  op.target.insertAdjacentElement('beforebegin', op.element);
 }
 
 export function createElementDeleteMarker() {

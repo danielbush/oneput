@@ -6,6 +6,7 @@ import { isInlineFlow } from '../../lib/core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
 import { InsertAfter } from './InsertAfter.js';
 import { AppendNew } from './AppendNew.js';
+import { InsertBefore } from './InsertBefore.js';
 import type { UndoRecord } from '../../undo/index.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
@@ -85,25 +86,7 @@ export class EditorFocusOps {
   }
 
   insertNewBefore(tagName: string): boolean {
-    if (!this.canInsertBefore()) {
-      return false;
-    }
-
-    const focus = this.state.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-    const inserted = focusable.insertNewBefore(tagName, focus);
-    if (!inserted) {
-      return false;
-    }
-
-    this.state.eventsEmitter.emitElementChange({
-      type: 'focusable-inserted',
-      element: inserted
-    });
-    this.state.nav.FOCUS(inserted);
-    return true;
+    return !!this._undo(InsertBefore.run(this.state, tagName));
   }
 
   // #endregion

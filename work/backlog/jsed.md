@@ -39,7 +39,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - undo deleted tokens
   - undo split at cursor
 - [x] undo selection changes
-- [ ] undo FOCUSABLE changes
+- [.] undo FOCUSABLE changes
+  - [x] insertNewAfter (EditorFocusOps)
 - [x] save/persist changes and load
 - [ ] editing islands
   - katex as example of an island
@@ -55,6 +56,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## fix
 
+- fix: emit event on undo/redo?
+  - should undo/redo emit events - is it enough to emit 'undo' / 'redo'  - or do we emit actual events - eg focusable-removed -> undo: focusable-inserted -> redo: focusable-removed
+  - COMMENT: send undo/redo and we can add the action as a property if and when we need the extra info;
+  - COMMENT: the reason this might be a fix is that undo should trigger save, so we need to emit something
 - if you delete first word on LINE, don't move back; stay on the LINE.  Let the second token take the CURSOR.
 - prevent undo merging in some situations?
   - COMMENT: need a scenario I can replicate

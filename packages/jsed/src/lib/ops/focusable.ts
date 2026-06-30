@@ -58,17 +58,32 @@ export function containsOnly(container: Node, needle: Node): boolean {
   });
 }
 
+export type AppendElement = {
+  action: 'append-element';
+  element: HTMLElement; // the newly appended element
+  parent: HTMLElement; // the container we append into
+};
+
 /**
  * Append new child element (tagName) to parent.
  */
-export function appendNew(parent: HTMLElement, tagName: string): HTMLElement | null {
+export function appendNew(parent: HTMLElement, tagName: string): AppendElement | null {
   if (!domRules.getAllowableChildTags(parent.tagName).includes(tagName.toLowerCase())) {
     return null;
   }
 
-  const inserted = createElement(tagName);
-  parent.appendChild(inserted);
-  return inserted;
+  const element = createElement(tagName);
+  parent.appendChild(element);
+  return { action: 'append-element', element, parent };
+}
+
+export function undoAppendElement(op: AppendElement) {
+  // element is freshly created + empty; parent stays as the redo container.
+  op.element.remove();
+}
+
+export function redoAppendElement(op: AppendElement) {
+  op.parent.appendChild(op.element);
 }
 
 export function getInsertAfterCandidates(el: HTMLElement): string[] {

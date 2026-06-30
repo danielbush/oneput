@@ -5,6 +5,7 @@ import { convert, unwrap } from '../../lib/ops/focusable.js';
 import { isInlineFlow } from '../../lib/core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
 import { InsertAfter } from './InsertAfter.js';
+import { AppendNew } from './AppendNew.js';
 import type { UndoRecord } from '../../undo/index.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
@@ -129,20 +130,7 @@ export class EditorFocusOps {
   }
 
   appendNew(tagName: string): boolean {
-    const focus = this.state.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-    const inserted = focusable.appendNew(focus, tagName);
-    if (!inserted) {
-      return false;
-    }
-    this.state.eventsEmitter.emitElementChange({
-      type: 'focusable-inserted',
-      element: inserted
-    });
-    this.state.nav.FOCUS(inserted);
-    return true;
+    return !!this._undo(AppendNew.run(this.state, tagName));
   }
 
   // #endregion

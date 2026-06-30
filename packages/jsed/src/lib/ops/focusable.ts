@@ -86,7 +86,7 @@ export function getInsertBeforeCandidates(el: HTMLElement): string[] {
 }
 
 export function insertNewBefore(tagName: string, target: HTMLElement): HTMLElement | null {
-  if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(tagName.toLowerCase())) {
+  if (!domRules.getAllowableInsertBeforeTags(target.tagName).includes(tagName.toLowerCase())) {
     return null;
   }
 

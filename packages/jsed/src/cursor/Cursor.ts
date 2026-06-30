@@ -41,7 +41,7 @@ export class Cursor {
 
   constructor(private state: CursorState) {}
 
-  _undo = <K extends UndoRecord>(result?: K) => {
+  private _undo = <K extends UndoRecord>(result?: K) => {
     this.state.undo?.record(result);
     return result;
   };

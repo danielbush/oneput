@@ -16,22 +16,6 @@ import type { CursorState } from './CursorState.js';
 type SplitResult = RecursiveSplitBeforeAction | RecursiveSplitAfterAction;
 
 /**
- * Anchor the bottom split point on both sides so each side keeps an ANCHOR
- * where the rules require one. Returns the ANCHOR's that were inserted.
- */
-function anchorSplit(result: SplitResult, splitBefore: boolean): HTMLElement[] {
-  const anchors: HTMLElement[] = [];
-  if (splitBefore) {
-    // The original may need an ANCHOR because we could split before the first
-    // child.
-    anchors.push(...anchorize(result.bottomSplit.parent));
-  }
-  // We might have an empty INLINE_FLOW peer, so anchor the lowest level.
-  anchors.push(...anchorize(result.bottomSplit.peer));
-  return anchors;
-}
-
-/**
  * Perform SPLIT_BY_TOKEN according to CURSOR_STATE and place the CURSOR on the
  * new peer.
  */
@@ -45,7 +29,8 @@ export class SplitAtToken implements UndoRecord {
       ? recSplitBeforeChild(child, (el) => el === line)
       : recSplitAfterChild(child, (el) => el === line);
 
-    anchorSplit(result, splitBefore);
+    const record = new SplitAtToken(result, { undo: child }, splitBefore);
+    record.normalize();
 
     // Try to place the cursor on peer.
     const sib = getFirstLineSibling(result.topSplit.peer);
@@ -53,7 +38,7 @@ export class SplitAtToken implements UndoRecord {
       state.place(sib);
     }
 
-    return new SplitAtToken(result, { undo: child }, splitBefore);
+    return record;
   }
 
   constructor(
@@ -66,16 +51,37 @@ export class SplitAtToken implements UndoRecord {
     public removedAnchors: RemoveToken[] = []
   ) {}
 
+  /**
+   * Re-derive ANCHOR's at the two sides of the split site (do/redo direction).
+   * ANCHOR's are derived (ANCHOR_RULES) and `anchorize` is idempotent.
+   */
+  private normalize() {
+    if (this.splitBefore) {
+      // The original may need an ANCHOR because we could split before the first
+      // child.
+      anchorize(this.result.bottomSplit.parent);
+    }
+    // We might have an empty INLINE_FLOW peer, so anchor the lowest level.
+    anchorize(this.result.bottomSplit.peer);
+  }
+
+  /**
+   * Re-derive ANCHOR's after the split is collapsed back into one site (undo
+   * direction).
+   */
+  private normalizeUndo() {
+    anchorize(this.result.topSplit.parent);
+  }
+
   undo(state: EditorState) {
     undoRecSplit(this.result);
-    // Effectively anchorizes the original site:
-    anchorize(this.result.topSplit.parent);
+    this.normalizeUndo();
     state.cursor?.place(this.cursorTarget.undo);
   }
 
   redo(state: EditorState) {
     redoRecSplit(this.result);
-    anchorSplit(this.result, this.splitBefore);
+    this.normalize();
     // Recompute the cursor place which may be an anchor:
     const sib = getFirstLineSibling(this.result.topSplit.peer);
     state.cursor?.place(sib ?? this.cursorTarget.undo);

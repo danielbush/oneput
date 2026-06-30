@@ -1,5 +1,6 @@
 import type { EditorState } from './EditorState.js';
 import * as focusable from '../../lib/ops/focusable.js';
+import { anchorize } from '../../lib/ops/anchor.js';
 import type { UndoRecord } from '../../undo/index.js';
 
 /**
@@ -25,7 +26,9 @@ export class InsertAfter implements UndoRecord {
     });
     state.nav.FOCUS(op.element);
 
-    return new InsertAfter(op, { undo: focus, redo: op.element });
+    const record = new InsertAfter(op, { undo: focus, redo: op.element });
+    record.normalize();
+    return record;
   }
 
   constructor(
@@ -33,13 +36,27 @@ export class InsertAfter implements UndoRecord {
     private focusTarget: { undo: HTMLElement; redo: HTMLElement }
   ) {}
 
+  /**
+   * Re-derive ANCHOR's in the region this op touched. `op.target` stays put
+   * across do/undo/redo, so its parent is the stable affected container.
+   * ANCHOR's are derived (ANCHOR_RULES) and `anchorize` is idempotent, so this
+   * is safe to run after every replay.
+   */
+  private normalize() {
+    if (this.op.target.parentElement) {
+      anchorize(this.op.target.parentElement);
+    }
+  }
+
   undo(state: EditorState) {
     focusable.undoInsertElementAfter(this.op);
     state.nav.FOCUS(this.focusTarget.undo);
+    this.normalize();
   }
 
   redo(state: EditorState) {
     focusable.redoInsertElementAfter(this.op);
     state.nav.FOCUS(this.focusTarget.redo);
+    this.normalize();
   }
 }

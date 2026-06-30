@@ -71,14 +71,29 @@ export function getInsertAfterCandidates(el: HTMLElement): string[] {
   return domRules.getAllowableInsertAfterTags(el.tagName);
 }
 
-export function insertNewAfter(tagName: string, target: HTMLElement): HTMLElement | null {
+export type InsertElementAfter = {
+  action: 'insert-element-after';
+  element: HTMLElement; // the newly inserted element
+  target: HTMLElement; // the anchor we insert after
+};
+
+export function insertNewAfter(tagName: string, target: HTMLElement): InsertElementAfter | null {
   if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(tagName.toLowerCase())) {
     return null;
   }
 
-  const inserted = createElement(tagName);
-  target.insertAdjacentElement('afterend', inserted);
-  return inserted;
+  const element = createElement(tagName);
+  target.insertAdjacentElement('afterend', element);
+  return { action: 'insert-element-after', element, target };
+}
+
+export function undoInsertElementAfter(op: InsertElementAfter) {
+  // element is freshly created + empty; target stays as the redo anchor.
+  op.element.remove();
+}
+
+export function redoInsertElementAfter(op: InsertElementAfter) {
+  op.target.insertAdjacentElement('afterend', op.element);
 }
 
 export function getInsertBeforeCandidates(el: HTMLElement): string[] {

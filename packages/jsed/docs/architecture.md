@@ -44,6 +44,12 @@ The editor is broken up into subsystems: src/editor , src/cursor, src/undo, src/
 
 - `src/undo`
   - undo subsystem
+  - Both CURSOR text operations (`src/cursor`) and editor-level FOCUS operations
+    (`src/editor/lib`) produce `UndoRecord`s recorded on the shared `UndoRecorder`.
+    A `UndoRecord` knows how to `undo`/`redo` itself against `EditorState`.
+  - The records replay the tripartite (do / undo / redo op-record) shape of the
+    low-level `lib/ops` mutations (e.g. `focusable.deleteElement` and its
+    `undo*`/`redo*` counterparts).
   - may expand or be generalised in future to support operation transform
 
 - `src/input`

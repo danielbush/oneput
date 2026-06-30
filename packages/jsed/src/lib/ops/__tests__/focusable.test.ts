@@ -1,15 +1,18 @@
 import { describe, expect, test } from 'vitest';
-import { byId, div, makeRoot, p, span } from '../../../test/util';
+import { byId, div, frag, identifyChildren, makeRoot, p, span } from '../../../test/util';
 import {
   copyEmptyNext,
   copyEmptyPrevious,
   deleteHighestEmpty,
   findNextFocusableOutside,
   findPreviousFocusableOutside,
+  insertNewAfter,
   recSplitAfterChild,
   recSplitBeforeChild,
+  redoInsertElementAfter,
   splitAfterChild,
-  splitBeforeChild
+  splitBeforeChild,
+  undoInsertElementAfter
 } from '../focusable';
 import { isDeletedElement, JSED_ANCHOR_CLASS, JSED_FOCUS_CLASS } from '../../core/taxonomy';
 
@@ -325,5 +328,86 @@ describe('copyEmptyPrevious', () => {
     expect(empty?.classList.contains(JSED_FOCUS_CLASS)).toBe(false);
     expect(empty?.querySelector(`.${JSED_ANCHOR_CLASS}`)).toBeNull();
     expect(empty?.textContent).toBe('');
+  });
+});
+
+describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () => {
+  test('inserts between siblings', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+
+    // act
+    const op = insertNewAfter('p', byId(doc, 'p1'));
+
+    // assert
+    expect(op?.action).toBe('insert-element-after');
+    expect(op?.target).toBe(byId(doc, 'p1'));
+    expect(op?.element.tagName).toBe('P');
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p]', '[element:p#p2]']);
+  });
+
+  test('inserts at end of parent', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo')));
+
+    // act
+    const op = insertNewAfter('p', byId(doc, 'p1'));
+
+    // assert
+    expect(op?.element.previousElementSibling).toBe(byId(doc, 'p1'));
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p]']);
+  });
+
+  test('disallowed tag returns null', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo')));
+
+    // act
+    const op = insertNewAfter('li', byId(doc, 'p1'));
+
+    // assert
+    expect(op).toBeNull();
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+  });
+
+  test('undo removes the inserted element', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const op = insertNewAfter('p', byId(doc, 'p1'))!;
+
+    // act
+    undoInsertElementAfter(op);
+
+    // assert
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
+  });
+
+  test('redo re-inserts the element after target', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const op = insertNewAfter('p', byId(doc, 'p1'))!;
+    undoInsertElementAfter(op);
+
+    // act
+    redoInsertElementAfter(op);
+
+    // assert
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p]', '[element:p#p2]']);
+  });
+
+  test('undo -> redo -> undo round-trips the same element', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo')));
+    const op = insertNewAfter('p', byId(doc, 'p1'))!;
+    const inserted = op.element;
+
+    // act
+    undoInsertElementAfter(op);
+    redoInsertElementAfter(op);
+    undoInsertElementAfter(op);
+
+    // assert
+    expect(op.element).toBe(inserted);
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
   });
 });

@@ -4,6 +4,8 @@ import { canDelete } from '../../lib/core/dom-rules.js';
 import { convert, unwrap } from '../../lib/ops/focusable.js';
 import { isInlineFlow } from '../../lib/core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
+import { InsertAfter } from './InsertAfter.js';
+import type { UndoRecord } from '../../undo/index.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -21,6 +23,11 @@ export class EditorFocusOps {
   constructor(private state: EditorState) {
     this.space = EditorFocusSpaceOps.create(state);
   }
+
+  private _undo = <K extends UndoRecord>(result?: K) => {
+    this.state.undo.record(result);
+    return result;
+  };
 
   // #region insert after
 
@@ -47,25 +54,7 @@ export class EditorFocusOps {
   }
 
   insertNewAfter(tagName: string): boolean {
-    if (!this.canInsertAfter()) {
-      return false;
-    }
-
-    const focus = this.state.nav.getFocus();
-    if (!focus) {
-      return false;
-    }
-
-    const inserted = focusable.insertNewAfter(tagName, focus);
-    if (!inserted) {
-      return false;
-    }
-    this.state.eventsEmitter.emitElementChange({
-      type: 'focusable-inserted',
-      element: inserted
-    });
-    this.state.nav.FOCUS(inserted);
-    return true;
+    return !!this._undo(InsertAfter.run(this.state, tagName));
   }
 
   // #endregion

@@ -95,6 +95,47 @@ describe('EditorFocusOps', () => {
 
       editor.destroy();
     });
+
+    test('undo then redo round-trips the DOM and FOCUS', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+      const editor = createNullEditor(doc);
+      editor.start();
+      editor.focus.insertNewAfter('p');
+      const inserted = doc.root.children[1];
+
+      // act + assert: undo restores original DOM + FOCUS
+      editor.undo();
+      expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
+      expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
+
+      // act + assert: redo re-inserts + restores FOCUS
+      editor.redo();
+      expect(identifyChildren(doc.root)).toEqual([
+        '[element:p#p1]',
+        '[element:p]',
+        '[element:p#p2]'
+      ]);
+      expect(editor.nav.getFocus()).toBe(inserted);
+
+      editor.destroy();
+    });
+
+    test('no-op records nothing', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+      const editor = createNullEditor(doc);
+      editor.start();
+      editor.enterEditing(byId(doc, 'p1'));
+
+      // act
+      editor.focus.insertNewAfter('p');
+
+      // assert
+      expect(editor.canUndo()).toBe(false);
+
+      editor.destroy();
+    });
   });
 
   describe('insertNewBefore', () => {

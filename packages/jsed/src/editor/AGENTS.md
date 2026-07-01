@@ -38,7 +38,7 @@ levels carry the weight — the shared ops and the record level — mirroring
     `EditorState`, asserting DOM shape and FOCUS placement.
   - Test the record, not the facade (`EditorFocusOps`). Construct an
     `EditorState` (e.g. from the null editor) and call `InsertAfter.run(state,
-    …)` / `record.undo(state)` / `record.redo(state)`, the way
+…)` / `record.undo(state)` / `record.redo(state)`, the way
     `cursor/lib/ops/__tests__` drives `DeleteAtCursor`.
   - Rely on `src/lib/ops` tests for the underlying edge cases.
 
@@ -68,22 +68,24 @@ Latest snapshot. ✅ = covered, ⚠️ = partial, ❌ = missing, — = not appli
 through key/click handlers, not `focusOps.*` calls, so its column is empty
 throughout.)
 
-| Op | Record (`editor/lib/ops`) | Focused record — fwd / undo / redo | Low-level (`focusable.ts`) | Integration (`EditorFocusOps.test` / `Editor.test`) | Gaps / action needed |
-| --- | --- | --- | --- | --- | --- |
-| `InsertAfter`  | `insertNewAfter`  | ❌ / ❌ / ❌ (no `__tests__` dir) | ✅ exhaustive | ✅ fwd + view/edit/root no-ops + undo/redo round-trip + records-nothing; `Editor` ❌ | dedicated `editor/lib/ops` record tests |
-| `InsertBefore` | `insertNewBefore` | ❌ / ❌ / ❌ | ❌ none | ⚠️ fwd + view/edit/root no-ops; ❌ no undo/redo; `Editor` ❌ | low-level trio; undo/redo round-trip |
-| `AppendNew`    | `appendNew`       | ❌ / ❌ / ❌ | ❌ none | ⚠️ fwd + default-child + disallowed; ❌ no no-op modes / undo/redo; `Editor` ❌ | low-level trio; no-op modes; undo/redo |
-| `Delete`       | `delete`          | ❌ / ❌ / ❌ | ❌ none* | ⚠️ fwd (next-focus + previous fallback); ❌ no no-op modes / undo/redo; `Editor` ❌ | low-level `deleteElement` trio; no-op modes; undo/redo |
+| Op             | Record (`editor/lib/ops`) | Focused record — fwd / undo / redo | Low-level (`focusable.ts`)   | Orchestration (`EditorFocusOps.test`) | Gaps / action needed                                  |
+| -------------- | ------------------------- | ---------------------------------- | ---------------------------- | ------------------------------------- | ----------------------------------------------------- |
+| `InsertAfter`  | `insertNewAfter`          | ✅ / ✅ / ✅ (`InsertAfter.test`)  | ✅ exhaustive                | ✅ records + no-op records-nothing    | none                                                  |
+| `InsertBefore` | `insertNewBefore`         | ✅ / ✅ / ✅ (`InsertBefore.test`) | ⚠️ via `insertNewAfter` trio | ✅ records + no-op records-nothing    | dedicated low-level `insertNewBefore` trio (optional) |
+| `AppendNew`    | `appendNew`               | ✅ / ✅ / ✅ (`AppendNew.test`)    | ❌ none                      | ✅ records + canAppend guard          | dedicated low-level `appendNew` trio (optional)       |
+| `Delete`       | `delete`                  | ✅ / ✅ / ✅ (`Delete.test`)       | ❌ none\*                    | ✅ records + canDelete guard          | dedicated low-level `deleteElement` trio (optional)   |
 
 `*deleteElement`/`undoDeleteElement`/`redoDeleteElement` have no direct low-level
 test, even though `DeleteAtCursor` has relied on them for a while.
 
-Two structural gaps stand out. First, the `editor/lib/ops` layer has **no**
-`__tests__` for any record (fwd/undo/redo column is ❌ across the board) — unlike
-`src/cursor/lib/ops`, which is the reference example these should mirror. Second,
-only `InsertAfter` has an undo/redo round-trip anywhere; the other three are
-forward-only at the integration layer, and their low-level tripartite ops in
-`focusable.ts` are untested.
+The `editor/lib/ops` record layer now has `__tests__` for all four FOCUS records
+(the `cursor/lib/ops` pattern: drive each record's `run`/`undo`/`redo` against an
+`EditorState.createNull`, asserting DOM shape and FOCUS placement — including
+required-child focus, e.g. `ul` → `li`). `EditorFocusOps.test` is now
+orchestration-only (records on the `UndoRecorder`, `can*` guards). The remaining
+low-level gap is that `insertNewBefore`/`appendNew`/`deleteElement` lack their own
+`focusable.test.ts` tripartite blocks; they are exercised indirectly through the
+record tests, so these are optional hardening rather than coverage holes.
 
 ## Conversion of EditorFocusOps to UndoRecord
 
@@ -95,33 +97,33 @@ test layers matter per the architecture: heavy low-level
 
 Coverage as of the current slice:
 
-| Op                  | UndoRecord | Low-level op + undo/redo (`focusable.test.ts`) | Editor forward action | Editor undo/redo round-trip |
-| ------------------- | ---------- | ---------------------------------------------- | --------------------- | --------------------------- |
-| `insertNewAfter`    | ✅         | ✅ exhaustive                                  | ✅                    | ✅                          |
-| `insertNewBefore`   | ✅         | ❌ none                                        | ✅ (view/edit/root)   | ❌ none                     |
-| `appendNew`         | ✅         | ❌ none                                        | ✅                    | ❌ none                     |
-| `delete`            | ✅         | ❌ none                                        | ✅                    | ❌ none                     |
-| `convert`           | ❌ not yet | ❌ none                                        | —                     | —                           |
-| `unwrap`            | ❌ not yet | ❌ none                                        | —                     | —                           |
-| `pasteBefore`       | ❌ not yet | ❌ none                                        | —                     | —                           |
-| `pasteAfter`        | ❌ not yet | ❌ none                                        | —                     | —                           |
-| `pasteAppend`       | ❌ not yet | ❌ none                                        | —                     | —                           |
-| `copyEmptyNext`     | ❌ not yet | ❌ none                                        | —                     | —                           |
-| `copyEmptyPrevious` | ❌ not yet | ❌ none                                        | —                     | —                           |
+| Op                  | UndoRecord | Record test (`editor/lib/ops/__tests__`) | Record undo/redo round-trip | Orchestration (`EditorFocusOps.test`) |
+| ------------------- | ---------- | ---------------------------------------- | --------------------------- | ------------------------------------- |
+| `insertNewAfter`    | ✅         | ✅ `InsertAfter.test`                    | ✅                          | ✅                                    |
+| `insertNewBefore`   | ✅         | ✅ `InsertBefore.test`                   | ✅                          | ✅                                    |
+| `appendNew`         | ✅         | ✅ `AppendNew.test`                      | ✅                          | ✅                                    |
+| `delete`            | ✅         | ✅ `Delete.test`                         | ✅                          | ✅                                    |
+| `convert`           | ❌ not yet | ❌ none                                  | —                           | —                                     |
+| `unwrap`            | ❌ not yet | ❌ none                                  | —                           | —                                     |
+| `pasteBefore`       | ❌ not yet | ❌ none                                  | —                           | —                                     |
+| `pasteAfter`        | ❌ not yet | ❌ none                                  | —                           | —                                     |
+| `pasteAppend`       | ❌ not yet | ❌ none                                  | —                           | —                                     |
+| `copyEmptyNext`     | ❌ not yet | ❌ none                                  | —                           | —                                     |
+| `copyEmptyPrevious` | ❌ not yet | ❌ none                                  | —                           | —                                     |
 
 `deleteElement`/`undoDeleteElement`/`redoDeleteElement` have no direct low-level
 test, even though `DeleteAtCursor` has relied on them for a while.
 
-Only `insertNewAfter` has the complete pyramid. The three later conversions have
-forward-action coverage but their undo/redo paths are unexercised. The ops below
-the line still direct-mutate in `EditorFocusOps` and record nothing on the
-`UndoRecorder` — they are the remaining conversion work. (`cut`/`copy` only set
-transient cut-buffer state and don't mutate the document, so they are not
-UndoRecord candidates themselves — their paired `paste*` ops are.)
+All four converted FOCUS ops now have the record pyramid: an `editor/lib/ops`
+record test (fwd/undo/redo, no-op modes, required-child focus) plus orchestration
+coverage in `EditorFocusOps.test`. The ops below the line still direct-mutate in
+`EditorFocusOps` and record nothing on the `UndoRecorder` — they are the
+remaining conversion work. (`cut`/`copy` only set transient cut-buffer state and
+don't mutate the document, so they are not UndoRecord candidates themselves —
+their paired `paste*` ops are.)
 
-Priority per the architecture's weighting: fill the heavy low-level
-`focusable.test.ts` cases first (mirror the `insertNewAfter` block), then one
-integration round-trip each.
+Next priority: convert the ops below the line (`convert`, `unwrap`, the `paste*`
+family), each following the same record + record-test shape.
 
 ## Conversion of EditorFocusAnchorOps to UndoRecord
 

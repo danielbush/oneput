@@ -457,13 +457,7 @@ describe('inline IMPLICIT_LINE (interstitial)', () => {
   test('IGNORABLE marker on a tokenized LINE does not trigger wrapping', () => {
     // arrange
     const doc = makeRoot(
-      p(
-        { id: 'p1' },
-        t('hello'),
-        span({ class: JSED_IGNORE_CLASS }, ''),
-        ' ',
-        t('world')
-      )
+      p({ id: 'p1' }, t('hello'), span({ class: JSED_IGNORE_CLASS }, ''), ' ', t('world'))
     );
 
     // act

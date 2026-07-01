@@ -2,7 +2,7 @@ import type { Controller } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/listDir.js';
+import { mockListDir, type DirEntry, type ListDir } from '../service/listDir.js';
 
 /**
  * Browsing a directory tree using the **AppObject-per-folder** nav model.

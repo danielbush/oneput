@@ -17,7 +17,9 @@ already implement `UndoRecord`.
 ### Testing policy
 
 Same weighting as `src/editor/AGENTS.md` — push exhaustive coverage to the lowest
-module that owns the behaviour:
+module that owns the behaviour. `cursor/lib/ops` and `editor/lib/ops` are peers:
+both are the heavy record level where each `UndoRecord` is driven directly
+(`run`/`undo`/`redo`), not through its facade.
 
 - `src/lib/core` / `src/lib/ops` — exhaustive edge-case matrices (TOKEN removal,
   spacing, anchorization, traversal, LINE_SIBLING discovery, wrapping, recursive split).

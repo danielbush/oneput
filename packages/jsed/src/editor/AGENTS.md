@@ -24,26 +24,34 @@
 
 ### Testing policy
 
-The degree of exhaustive testing should follow the given order below:
+Push exhaustive coverage to the lowest module that owns the behaviour. Two
+levels carry the weight — the shared ops and the record level — mirroring
+`src/cursor/lib/ops`.
 
-- src/lib/ops/
-  - exhaustive, edge-case, thorough testing
-- src/editor/lib/ops
-  - integration concerns
-    - integration: test undo and redo work with the forward operation
-    - integration: test happy path
-    - integration: test sad path
-    - COMMENT: rely on src/lib/ops/ tests for most edge cases
-- src/editor/lib/
-  - for ops objects
-    - integration: new state / logic introduced
-    - integration: undo/redo chains
-  - for state objects and related constructs
-    - look at each method and evaluate based on whether it is using ops or internal logic
-    - if using ops, we are testing more integration
-- src/editor/Editor.ts
-  - integration
-  - least level of testing: some happy/sad path tests, not exhaustive
+- **src/lib/ops/**
+  - exhaustive, edge-case, thorough testing of the shared tripartite DOM
+    operations (TOKEN removal, spacing, anchorization, split, etc.).
+- **src/editor/lib/ops** — the heavy record level; the editor peer of
+  `src/cursor/lib/ops`.
+  - Each `UndoRecord` earns its own thorough coverage **here**: drive the
+    record's static `run`, then `undo` / `redo` directly against a constructed
+    `EditorState`, asserting DOM shape and FOCUS placement.
+  - Test the record, not the facade (`EditorFocusOps`). Construct an
+    `EditorState` (e.g. from the null editor) and call `InsertAfter.run(state,
+    …)` / `record.undo(state)` / `record.redo(state)`, the way
+    `cursor/lib/ops/__tests__` drives `DeleteAtCursor`.
+  - Rely on `src/lib/ops` tests for the underlying edge cases.
+
+The layers above stay light:
+
+- **src/editor/lib/** — orchestration objects (`EditorFocusOps`, …)
+  - sparse integration only: the new state/logic they add (guard/no-op modes,
+    candidate lists) and undo/redo chains that compose multiple records.
+  - do not re-test per-op mechanics here; those belong in `editor/lib/ops`.
+  - for state objects: evaluate each method — if it delegates to a record,
+    lean on the record test; only cover genuinely new internal logic.
+- **src/editor/Editor.ts**
+  - facade integration only: a few happy/sad paths, not exhaustive.
 
 ### Ops Status
 

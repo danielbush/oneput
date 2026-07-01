@@ -35,7 +35,7 @@ export class Editor {
 
   constructor(public state: EditorState) {
     this.nav = this.state.nav;
-    this.focusOps = this.state.focus;
+    this.focusOps = this.state.focusOps;
     this.cursorOps = this.state.cursorOps;
     this.eventsEmitter = this.state.eventsEmitter;
   }

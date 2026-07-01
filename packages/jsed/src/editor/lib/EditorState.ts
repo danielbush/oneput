@@ -117,7 +117,7 @@ export class EditorState {
     public undo: UndoRecorder,
     public eventsEmitter = EditorEventsEmitter.create(),
     public controller = EditorController.create(this),
-    public focus = EditorFocusOps.create(this),
+    public focusOps = EditorFocusOps.create(this),
     public anchor = EditorFocusAnchorOps.create(this),
     public cursorOps = EditorCursorOps.create(this),
     public ops = EditorOps.create(this)

@@ -1,10 +1,10 @@
 import { describe, expect, it, test } from 'vitest';
-import { byId, frag, identify, identifyChildren, li, makeRoot, p, ul } from '../../test/util.js';
-import { Editor } from '../Editor.js';
-import type { JsedDocument } from '../../JsedDocument.js';
+import { byId, frag, identify, identifyChildren, li, makeRoot, p, ul } from '../../../test/util.js';
+import { Editor } from '../../Editor.js';
+import type { JsedDocument } from '../../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
-import { isDeletedElement, JSED_ANCHOR_CLASS } from '../../lib/core/taxonomy.js';
-import type { EditorElementChangeEvent } from '../lib/EditorState.js';
+import { isDeletedElement, JSED_ANCHOR_CLASS } from '../../../lib/core/taxonomy.js';
+import type { EditorElementChangeEvent } from '../../lib/EditorState.js';
 
 function createNullEditor(doc: JsedDocument): Editor {
   return Editor.createNull({

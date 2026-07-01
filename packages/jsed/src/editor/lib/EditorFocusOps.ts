@@ -1,14 +1,14 @@
-import type { EditorState } from './lib/EditorState.js';
-import * as focusable from '../lib/ops/focusable.js';
-import { canDelete } from '../lib/core/dom-rules.js';
-import { convert, unwrap } from '../lib/ops/focusable.js';
-import { isInlineFlow } from '../lib/core/taxonomy.js';
-import { EditorFocusSpaceOps } from './lib/EditorFocusSpaceOps.js';
-import { InsertAfter } from './lib/InsertAfter.js';
-import { AppendNew } from './lib/AppendNew.js';
-import { InsertBefore } from './lib/InsertBefore.js';
-import { Delete } from './lib/Delete.js';
-import type { UndoRecord } from '../undo/index.js';
+import type { EditorState } from './EditorState.js';
+import * as focusable from '../../lib/ops/focusable.js';
+import { canDelete } from '../../lib/core/dom-rules.js';
+import { convert, unwrap } from '../../lib/ops/focusable.js';
+import { isInlineFlow } from '../../lib/core/taxonomy.js';
+import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
+import { InsertAfter } from './InsertAfter.js';
+import { AppendNew } from './AppendNew.js';
+import { InsertBefore } from './InsertBefore.js';
+import { Delete } from './Delete.js';
+import type { UndoRecord } from '../../undo/index.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**

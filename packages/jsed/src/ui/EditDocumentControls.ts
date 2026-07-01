@@ -260,7 +260,7 @@ export class EditDocumentControls {
       },
       CUT: {
         action: () => {
-          if (editor.focus.cut()) {
+          if (editor.focusOps.cut()) {
             ctl.app.run(PasteElementUI.create(ctl, editor, { cut: true }));
           }
         },
@@ -271,7 +271,7 @@ export class EditDocumentControls {
       },
       COPY: {
         action: () => {
-          if (editor.focus.copy()) {
+          if (editor.focusOps.copy()) {
             ctl.app.run(PasteElementUI.create(ctl, editor, { cut: false }));
           }
         },
@@ -282,7 +282,7 @@ export class EditDocumentControls {
       },
       COPY_EMPTY_PREVIOUS: {
         action: () => {
-          editor.focus.copyEmptyPrevious();
+          editor.focusOps.copyEmptyPrevious();
         },
         binding: {
           bindings: ['Control+c b'],
@@ -291,7 +291,7 @@ export class EditDocumentControls {
       },
       COPY_EMPTY_NEXT: {
         action: () => {
-          editor.focus.copyEmptyNext();
+          editor.focusOps.copyEmptyNext();
         },
         binding: {
           bindings: ['Control+c a'],
@@ -350,7 +350,7 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Redo2)]
         }),
 
-      editor.focus.canCut() &&
+      editor.focusOps.canCut() &&
         stdMenuItem({
           id: 'CUT_ELEMENT',
           textContent: 'Cut...',
@@ -358,7 +358,7 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Scissors)]
         }),
 
-      editor.focus.canCopy() &&
+      editor.focusOps.canCopy() &&
         stdMenuItem({
           id: 'COPY_ELEMENT',
           textContent: 'Copy...',
@@ -366,7 +366,7 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Copy)]
         }),
 
-      editor.focus.canCopyEmpty() &&
+      editor.focusOps.canCopyEmpty() &&
         stdMenuItem({
           id: 'COPY_EMPTY_BEFORE',
           textContent: 'Copy to empty element before...',
@@ -375,7 +375,7 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
 
-      editor.focus.canCopyEmpty() &&
+      editor.focusOps.canCopyEmpty() &&
         stdMenuItem({
           id: 'COPY_EMPTY_AFTER',
           textContent: 'Copy to empty element after...',
@@ -384,7 +384,7 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
 
-      editor.focus.canDelete() &&
+      editor.focusOps.canDelete() &&
         stdMenuItem({
           id: 'DELETE_FOCUSED_ELEMENT',
           textContent: 'Remove focused element...',
@@ -397,35 +397,35 @@ export class EditDocumentControls {
               return;
             }
 
-            editor.focus.delete();
+            editor.focusOps.delete();
             ctl.menu.closeMenu();
           },
           left: (b) => [b.icon(icons.X)]
         }),
 
-      editor.focus.canUnwrap() &&
+      editor.focusOps.canUnwrap() &&
         stdMenuItem({
           id: 'UNWRAP_FOCUS',
           textContent: 'Unwrap...',
           closeMenuOnAction: true,
           action: () => {
-            editor.focus.unwrap();
+            editor.focusOps.unwrap();
           },
           left: (b) => [b.icon(icons.CodeXml)]
         }),
 
-      editor.focus.canConvert() &&
+      editor.focusOps.canConvert() &&
         stdMenuItem({
           id: 'CONVERT_FOCUS',
           textContent: 'Convert...',
           action: () => {
-            const candidates = editor.focus.getConversionCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getConversionCandidates().map((tagName, index) => {
               return {
                 id: `${tagName}-${index}`,
                 text: `<${tagName}>`,
                 icon: icons.ArrowLeft,
                 action: () => {
-                  editor.focus.convert(tagName);
+                  editor.focusOps.convert(tagName);
                 }
               };
             });
@@ -441,7 +441,7 @@ export class EditDocumentControls {
                   prompt: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focus.convert(item);
+                    editor.focusOps.convert(item);
                   }
                 }
               })
@@ -451,20 +451,20 @@ export class EditDocumentControls {
           closeMenuOnAction: false
         }),
 
-      editor.focus.canInsertAfter() &&
+      editor.focusOps.canInsertAfter() &&
         stdMenuItem({
           id: 'INSERT_ELEMENT_AFTER_FOCUS',
           textContent: 'Insert element after...',
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focus.getInsertAfterCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getInsertAfterCandidates().map((tagName, index) => {
               return {
                 id: `${tagName}-${index}`,
                 text: `<${tagName}>`,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focus.insertNewAfter(tagName);
+                  editor.focusOps.insertNewAfter(tagName);
                 }
               };
             });
@@ -480,7 +480,7 @@ export class EditDocumentControls {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focus.insertNewAfter(item);
+                    editor.focusOps.insertNewAfter(item);
                   }
                 }
               })
@@ -488,20 +488,20 @@ export class EditDocumentControls {
           }
         }),
 
-      editor.focus.canInsertBefore() &&
+      editor.focusOps.canInsertBefore() &&
         stdMenuItem({
           id: 'INSERT_ELEMENT_BEFORE_FOCUS',
           textContent: 'Insert element before...',
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focus.getInsertBeforeCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getInsertBeforeCandidates().map((tagName, index) => {
               return {
                 id: `${tagName}-${index}`,
                 text: `<${tagName}>`,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focus.insertNewBefore(tagName);
+                  editor.focusOps.insertNewBefore(tagName);
                 }
               };
             });
@@ -517,7 +517,7 @@ export class EditDocumentControls {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focus.insertNewBefore(item);
+                    editor.focusOps.insertNewBefore(item);
                   }
                 }
               })
@@ -525,20 +525,20 @@ export class EditDocumentControls {
           }
         }),
 
-      editor.focus.canAppend() &&
+      editor.focusOps.canAppend() &&
         stdMenuItem({
           id: 'APPEND_NEW_ELEMENT_IN_FOCUS',
           textContent: 'Insert new element within (append)...',
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focus.getAppendCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getAppendCandidates().map((tagName, index) => {
               return {
                 id: `${tagName}-${index}`,
                 text: `<${tagName}>`,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focus.appendNew(tagName);
+                  editor.focusOps.appendNew(tagName);
                 }
               };
             });
@@ -554,7 +554,7 @@ export class EditDocumentControls {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focus.appendNew(item);
+                    editor.focusOps.appendNew(item);
                   }
                 }
               })
@@ -606,39 +606,39 @@ export class EditDocumentControls {
           }
         }),
 
-      editor.focus.space.canInsertSpaceBeforeTag() &&
+      editor.focusOps.space.canInsertSpaceBeforeTag() &&
         stdMenuItem({
           id: 'INSERT_SPACE_BEFORE_TAG',
           textContent: 'Insert space before tag...',
           action: () => {
-            editor.focus.space.insertSpaceBeforeTag();
+            editor.focusOps.space.insertSpaceBeforeTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      editor.focus.space.canRemoveSpaceBeforeTag() &&
+      editor.focusOps.space.canRemoveSpaceBeforeTag() &&
         stdMenuItem({
           id: 'REMOVE_SPACE_BEFORE_TAG',
           textContent: 'Remove space before tag...',
           action: () => {
-            editor.focus.space.removeSpaceBeforeTag();
+            editor.focusOps.space.removeSpaceBeforeTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      editor.focus.space.canInsertSpaceAfterTag() &&
+      editor.focusOps.space.canInsertSpaceAfterTag() &&
         stdMenuItem({
           id: 'INSERT_SPACE_AFTER_TAG',
           textContent: 'Insert space after tag...',
           action: () => {
-            editor.focus.space.insertSpaceAfterTag();
+            editor.focusOps.space.insertSpaceAfterTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),
-      editor.focus.space.canRemoveSpaceAfterTag() &&
+      editor.focusOps.space.canRemoveSpaceAfterTag() &&
         stdMenuItem({
           id: 'REMOVE_SPACE_AFTER_TAG',
           textContent: 'Remove space after tag...',
           action: () => {
-            editor.focus.space.removeSpaceAfterTag();
+            editor.focusOps.space.removeSpaceAfterTag();
           },
           left: (b) => [b.icon(icons.Space)]
         }),

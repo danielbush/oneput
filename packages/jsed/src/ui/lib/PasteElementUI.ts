@@ -47,7 +47,7 @@ export class PasteElementUI implements AppObject {
   };
 
   onExit = () => {
-    this.editor.focus.cancelPaste();
+    this.editor.focusOps.cancelPaste();
   };
 
   actions = {
@@ -109,7 +109,7 @@ export class PasteElementUI implements AppObject {
     },
     PASTE_BEFORE: {
       action: () => {
-        this.editor.focus.pasteBefore();
+        this.editor.focusOps.pasteBefore();
         this.ctl.app.exit();
       },
       binding: {
@@ -119,7 +119,7 @@ export class PasteElementUI implements AppObject {
     },
     PASTE_AFTER: {
       action: () => {
-        this.editor.focus.pasteAfter();
+        this.editor.focusOps.pasteAfter();
         this.ctl.app.exit();
       },
       binding: {
@@ -129,7 +129,7 @@ export class PasteElementUI implements AppObject {
     },
     PASTE_APPEND: {
       action: () => {
-        this.editor.focus.pasteAppend();
+        this.editor.focusOps.pasteAppend();
         this.ctl.app.exit();
       },
       binding: {

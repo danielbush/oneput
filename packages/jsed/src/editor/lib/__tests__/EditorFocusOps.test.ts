@@ -27,7 +27,7 @@ describe('EditorFocusOps', () => {
 
       // act
       expect(identify(editor.nav.getFocus())).toBe('[element:p#p1]');
-      const inserted = editor.focus.insertNewAfter('p');
+      const inserted = editor.focusOps.insertNewAfter('p');
 
       // assert
       const children = Array.from(doc.root.children);
@@ -58,7 +58,7 @@ describe('EditorFocusOps', () => {
       editor.enterEditing(byId(doc, 'p1'));
 
       // act
-      const inserted = editor.focus.insertNewAfter('p');
+      const inserted = editor.focusOps.insertNewAfter('p');
 
       // assert
       expect(inserted).toBe(false);
@@ -81,7 +81,7 @@ describe('EditorFocusOps', () => {
       editor.nav.FOCUS(doc.root);
 
       // act
-      const inserted = editor.focus.insertNewAfter('p');
+      const inserted = editor.focusOps.insertNewAfter('p');
 
       // assert
       expect(inserted).toBe(false);
@@ -101,7 +101,7 @@ describe('EditorFocusOps', () => {
       const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
       const editor = createNullEditor(doc);
       editor.start();
-      editor.focus.insertNewAfter('p');
+      editor.focusOps.insertNewAfter('p');
       const inserted = doc.root.children[1];
 
       // act + assert: undo restores original DOM + FOCUS
@@ -129,7 +129,7 @@ describe('EditorFocusOps', () => {
       editor.enterEditing(byId(doc, 'p1'));
 
       // act
-      editor.focus.insertNewAfter('p');
+      editor.focusOps.insertNewAfter('p');
 
       // assert
       expect(editor.canUndo()).toBe(false);
@@ -151,7 +151,7 @@ describe('EditorFocusOps', () => {
       editor.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
       // act
-      const inserted = editor.focus.insertNewBefore('p');
+      const inserted = editor.focusOps.insertNewBefore('p');
 
       // assert
       const children = Array.from(doc.root.children);
@@ -182,7 +182,7 @@ describe('EditorFocusOps', () => {
       editor.enterEditing(byId(doc, 'p1'));
 
       // act
-      const inserted = editor.focus.insertNewBefore('p');
+      const inserted = editor.focusOps.insertNewBefore('p');
 
       // assert
       expect(inserted).toBe(false);
@@ -205,7 +205,7 @@ describe('EditorFocusOps', () => {
       editor.nav.FOCUS(doc.root);
 
       // act
-      const inserted = editor.focus.insertNewBefore('p');
+      const inserted = editor.focusOps.insertNewBefore('p');
 
       // assert
       expect(inserted).toBe(false);

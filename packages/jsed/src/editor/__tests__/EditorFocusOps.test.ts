@@ -21,7 +21,7 @@ describe('insertElementAfterFocus', () => {
 
     // act
     expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
-    const inserted = editor.focus.insertNewAfter('p');
+    const inserted = editor.focusOps.insertNewAfter('p');
 
     // assert
     const children = Array.from(doc.root.children);
@@ -41,7 +41,7 @@ describe('insertElementAfterFocus', () => {
     editor.start();
 
     // act
-    const inserted = editor.focus.insertNewAfter('h2');
+    const inserted = editor.focusOps.insertNewAfter('h2');
 
     // assert
     const children = Array.from(doc.root.children);
@@ -62,7 +62,7 @@ describe('insertElementBeforeFocus', () => {
     editor.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
     // act
-    const inserted = editor.focus.insertNewBefore('h2');
+    const inserted = editor.focusOps.insertNewBefore('h2');
 
     // assert
     const children = Array.from(doc.root.children);
@@ -84,7 +84,7 @@ describe('insertElementInFocus', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const inserted = editor.focus.appendNew('span');
+    const inserted = editor.focusOps.appendNew('span');
 
     // assert
     const child = p1.lastElementChild;
@@ -105,7 +105,7 @@ describe('insertElementInFocus', () => {
     editor.nav.REQUEST_FOCUS(list);
 
     // act
-    const inserted = editor.focus.appendNew('li');
+    const inserted = editor.focusOps.appendNew('li');
 
     // assert
     const child = list.lastElementChild;
@@ -126,8 +126,8 @@ describe('insertElementInFocus', () => {
     editor.nav.FOCUS(byId(doc, 'break'));
 
     // assert
-    expect(editor.focus.canAppend()).toBe(false);
-    expect(editor.focus.appendNew('span')).toBe(false);
+    expect(editor.focusOps.canAppend()).toBe(false);
+    expect(editor.focusOps.appendNew('span')).toBe(false);
 
     editor.destroy();
   });
@@ -143,7 +143,7 @@ describe('deleteFocus', () => {
     const p2 = byId(doc, 'p2');
 
     // act
-    const deleted = editor.focus.delete();
+    const deleted = editor.focusOps.delete();
 
     // assert
     expect(deleted).toBe(true);
@@ -166,7 +166,7 @@ describe('deleteFocus', () => {
     editor.nav.REQUEST_FOCUS(p2);
 
     // act
-    const deleted = editor.focus.delete();
+    const deleted = editor.focusOps.delete();
 
     // assert
     expect(deleted).toBe(true);

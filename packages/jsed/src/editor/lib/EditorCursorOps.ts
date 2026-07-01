@@ -2,7 +2,7 @@ import type { EditorState } from './EditorState.js';
 import * as space from '../../lib/ops/space.js';
 
 /**
- * Trailing / Leading space (at cursor)
+ * Ops perfomed "at" the CURSOR.
  */
 export class EditorCursorOps {
   static create(state: EditorState) {

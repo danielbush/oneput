@@ -28,9 +28,10 @@ export class Editor {
   }
 
   nav: Nav;
-  focusOps: EditorFocusOps;
-  anchorOps: EditorAnchorOps;
-  cursorOps: EditorCursorOps;
+
+  /**
+   * Broadcast events to non-jsed observers.
+   */
   eventsEmitter: EditorEventsEmitter;
 
   constructor(public state: EditorState) {
@@ -66,6 +67,18 @@ export class Editor {
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
 
   // Editing
+  /**
+   * General operations at FOCUS
+   */
+  focusOps: EditorFocusOps;
+  /**
+   * Anchor operations at FOCUS
+   */
+  anchorOps: EditorAnchorOps;
+  /**
+   * Operations that use the CURSOR (ie its position etc).
+   */
+  cursorOps: EditorCursorOps;
   handleDelete = (evt?: KeyboardEvent) => this.state.ops.handleDelete(evt);
   // Editing is event driven see EditorController.
 

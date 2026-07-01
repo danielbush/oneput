@@ -7,13 +7,7 @@ import { decideInputIntent } from '../../input/decideInputIntent.js';
 import { ensureSeparatorAfter, ensureSeparatorBefore } from '../../lib/ops/space.js';
 
 /**
- * Manages an edit session for a single document.
- *
- * In 'view' mode, user navigates the document and EM will ensure the FOCUS is
- * tokenized so the user can focus the CURSOR at a TOKEN within the FOCUS.  Once
- * the CURSOR is created, EM goes into 'edit' mode and the CURSOR handles
- * tokenizing if it moves past the initial LINE it started on.
- *
+ * Handle certain important editor events: keys, undo/redo, input + motiona and selection.
  */
 export class EditorOps {
   static create(state: EditorState): EditorOps {

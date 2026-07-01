@@ -4,7 +4,7 @@ import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../../input/UserInput.js';
 import { EditorFocusOps } from '../EditorFocusOps.js';
-import { EditorAnchorOps } from './EditorAnchorOps.js';
+import { EditorAnchorOps } from '../EditorAnchorOps.js';
 import { EditorCursorOps } from '../EditorCursorOps.js';
 import { ElementIndicator } from '../../ui/index.js';
 import { CSSElementIndicator } from '../../ui/index.js';

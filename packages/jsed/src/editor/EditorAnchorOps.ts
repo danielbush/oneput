@@ -1,4 +1,4 @@
-import type { EditorState } from './EditorState.js';
+import type { EditorState } from './lib/EditorState.js';
 import {
   anchorize,
   canInsertAnchorInLine,
@@ -10,7 +10,7 @@ import {
   insertAnchorBeforeTag,
   removeAnchorAfterTag,
   removeAnchorBeforeTag
-} from '../../lib/ops/anchor.js';
+} from '../lib/ops/anchor.js';
 
 /**
  * High-level ANCHOR operations for Editor.

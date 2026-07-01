@@ -9,7 +9,7 @@ import { ElementIndicator } from '../../ui/index.js';
 import { CSSElementIndicator } from '../../ui/index.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from '../EditorController.js';
-import { EditorOps } from './EditorOps.js';
+import { EditorEventHandler } from './EditorEventHandler.js';
 import type { CursorError } from '../../cursor/lib/CursorState.js';
 import { UndoRecorder } from '../../undo/UndoRecorder.js';
 import { findNextEditableLine, getFirstLineSibling, getLine } from '../../lib/core/line.js';
@@ -118,7 +118,7 @@ export class EditorState {
     public controller = EditorController.create(this),
     public focusOps = EditorFocusOps.create(this),
     public cursorOps = EditorCursorOps.create(this),
-    public ops = EditorOps.create(this)
+    public ops = EditorEventHandler.create(this)
   ) {}
 
   start(): void {

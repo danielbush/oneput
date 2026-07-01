@@ -9,13 +9,13 @@ import { ensureSeparatorAfter, ensureSeparatorBefore } from '../../lib/ops/space
 /**
  * Handle certain important editor events: keys, undo/redo, input + motiona and selection.
  */
-export class EditorOps {
-  static create(state: EditorState): EditorOps {
-    return new EditorOps(state);
+export class EditorEventHandler {
+  static create(state: EditorState): EditorEventHandler {
+    return new EditorEventHandler(state);
   }
 
-  static createNull(state: EditorState): EditorOps {
-    return new EditorOps(state);
+  static createNull(state: EditorState): EditorEventHandler {
+    return new EditorEventHandler(state);
   }
 
   constructor(private state: EditorState) {}

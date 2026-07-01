@@ -1,5 +1,80 @@
 # Maintaining src/editor subsystem
 
+## Architecture
+
+- src/lib/ops/
+  - these will often be functions that have a tripartite form: `fooBar`,
+    `undoFooBar`, `redoFooBar` where `fooBar()` returns an object representing
+    the forward operation: `{ action: 'foo-bar', ... }`
+- src/editor/lib/ops
+  - operatiosn that mutate the dom and implement UndoRecord
+  - they call into src/lib/ops and the tripartite structure
+- src/editor/lib/
+  - state objects and related constructs
+  - intermediate ops objects that might group src/editor/lib/ops
+  - ops structure
+    - "at FOCUS" ops
+      - EditorFocusOps - operations on FOCUS
+      - EditorFocusSpaceOps - space operations on FOCUS
+      - EditorFocusAnchorOps - Anchor operations on FOCUS
+    - "at CURSOR" ops
+      - EditorCursorOps - operations at CURSOR
+- src/editor/Editor.ts
+  - facade that combines `src/editor/lib/**` into a coherent whole
+
+### Testing policy
+
+The degree of exhaustive testing should follow the given order below:
+
+- src/lib/ops/
+  - exhaustive, edge-case, thorough testing
+- src/editor/lib/ops
+  - integration concerns
+    - integration: test undo and redo work with the forward operation
+    - integration: test happy path
+    - integration: test sad path
+    - COMMENT: rely on src/lib/ops/ tests for most edge cases
+- src/editor/lib/
+  - for ops objects
+    - integration: new state / logic introduced
+    - integration: undo/redo chains
+  - for state objects and related constructs
+    - look at each method and evaluate based on whether it is using ops or internal logic
+    - if using ops, we are testing more integration
+- src/editor/Editor.ts
+  - integration
+  - least level of testing: some happy/sad path tests, not exhaustive
+
+### Ops Status
+
+Review procedure (rerun periodically to refresh the snapshot below):
+
+- For each op in src/editor/lib/ops/
+  - summarise the testing in
+    - src/editor/lib/ops/
+    - src/editor/lib/
+    - src/editor/
+
+Latest snapshot:
+
+Testing per op, across the three layers that can exercise it. (`Editor.test.ts`
+currently drives none of these focus ops directly — it covers editing through
+key/click handlers, not `focusOps.*` calls.)
+
+| Op             | `src/editor/lib/ops/` | `src/editor/lib/` (`EditorFocusOps.test.ts`)                                         | `src/editor/` (`Editor.test.ts`) |
+| -------------- | --------------------- | ------------------------------------------------------------------------------------ | -------------------------------- |
+| `InsertAfter`  | none (no test dir)    | forward + view/edit/root no-ops + undo/redo round-trip + records-nothing             | none                             |
+| `InsertBefore` | none                  | forward + view/edit/root no-ops; **no undo/redo**                                    | none                             |
+| `AppendNew`    | none                  | forward + default-child + disallowed-returns-false; **no no-op modes, no undo/redo** | none                             |
+| `Delete`       | none                  | forward (next-focus + previous fallback); **no no-op modes, no undo/redo**           | none                             |
+
+So `InsertAfter` is the only op with undo/redo coverage. The gap for the other
+three is: their undo/redo paths are unexercised, and there are no dedicated
+`src/editor/lib/ops/` tests for any op (that dir has no `__tests__`).
+Underneath, the low-level `lib/ops/focusable.ts` tripartite ops are only tested
+for `insertNewAfter`; `insertNewBefore`, `appendNew`, and the `deleteElement`
+trio are untested there.
+
 ## Conversion of EditorFocusOps to UndoRecord
 
 Editor-level FOCUS operations are being converted to `UndoRecord`s (in
@@ -85,68 +160,3 @@ editor-level tests for this class.
 | `removeSpaceBefore` | ❌ not yet | fwd ✅, no undo/redo                        | ❌ none               | —                           |
 | `removeSpaceAfter`  | ❌ not yet | fwd ✅, no undo/redo                        | ❌ none               | —                           |
 | `splitAtCursor`     | ❌ not yet | via `Cursor.splitAtToken` (check recording) | ❌ none               | —                           |
-
-## Architecture
-
-- src/lib/ops/
-  - these will often be functions that have a tripartite form: `fooBar`,
-    `undoFooBar`, `redoFooBar` where `fooBar()` returns an object representing
-    the forward operation: `{ action: 'foo-bar', ... }`
-  - testing
-    - operations used by src/editor should be exhaustively tested
-- src/editor/lib/ops
-  - operatiosn that mutate the dom and implement UndoRecord
-  - they call into src/lib/ops and the tripartite structure
-  - testing
-    - rely on src/lib/ops/ tests
-    - reasonably thorough testing of the composite operation
-    - test undo and redo
-- src/editor/lib/
-  - state objects and related constructs
-  - intermediate ops objects that might group src/editor/lib/ops
-  - testing
-    - for ops objects, test integration and any new state / logic introduced
-    - for state objects and related constructs, we should exercise the main
-      pathways
-  - ops structure
-    - "at FOCUS" ops
-      - EditorFocusOps - operations on FOCUS
-      - EditorFocusSpaceOps - space operations on FOCUS
-      - EditorFocusAnchorOps - Anchor operations on FOCUS
-    - "at CURSOR" ops
-      - EditorCursorOps - operations at CURSOR
-- src/editor/Editor.ts
-  - facade that combines `src/editor/lib/**` into a coherent whole
-  - testing
-    - integration
-    - some happy/sad path tests, not exhaustive
-
-### Ops Status
-
-Review procedure (rerun periodically to refresh the snapshot below):
-
-- For each op in src/editor/lib/ops/
-  - summarise the testing in
-    - src/editor/lib/ops/
-    - src/editor/lib/
-    - src/editor/
-
-Latest snapshot:
-
-Testing per op, across the three layers that can exercise it. (`Editor.test.ts`
-currently drives none of these focus ops directly — it covers editing through
-key/click handlers, not `focusOps.*` calls.)
-
-| Op             | `src/editor/lib/ops/` | `src/editor/lib/` (`EditorFocusOps.test.ts`)                                         | `src/editor/` (`Editor.test.ts`) |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------ | -------------------------------- |
-| `InsertAfter`  | none (no test dir)    | forward + view/edit/root no-ops + undo/redo round-trip + records-nothing             | none                             |
-| `InsertBefore` | none                  | forward + view/edit/root no-ops; **no undo/redo**                                    | none                             |
-| `AppendNew`    | none                  | forward + default-child + disallowed-returns-false; **no no-op modes, no undo/redo** | none                             |
-| `Delete`       | none                  | forward (next-focus + previous fallback); **no no-op modes, no undo/redo**           | none                             |
-
-So `InsertAfter` is the only op with undo/redo coverage. The gap for the other
-three is: their undo/redo paths are unexercised, and there are no dedicated
-`src/editor/lib/ops/` tests for any op (that dir has no `__tests__`).
-Underneath, the low-level `lib/ops/focusable.ts` tripartite ops are only tested
-for `insertNewAfter`; `insertNewBefore`, `appendNew`, and the `deleteElement`
-trio are untested there.

@@ -42,6 +42,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: use menu as a calendar where we can select a day or even a range of days
+  - COMMENT: do we use menu items or do we just override that with a custom layout?
+  - COMMENT: menu items are flexible but maybe it's going too far to abuse them like this; instead we allow other things but both these things and menu items respond to the same keys and clicks
+  - COMMENT: start by mocking up the calendar
 - feat: do we demo disabled individual menu items?
 - feat: do we demo disabled menu? (enableMenuActions = false)?
 - feat: disable nav/keys when menu is disabled? - enableMenuActions = false

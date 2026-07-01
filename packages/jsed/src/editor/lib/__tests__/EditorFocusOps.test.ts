@@ -3,7 +3,6 @@ import {
   byId,
   div,
   frag,
-  identify,
   identifyChildren,
   li,
   makeRoot,
@@ -150,149 +149,30 @@ describe('deleteFocus', () => {
   });
 });
 
-describe('insertNewAfter', () => {
-  it('inserts a new element after the focused tag and focuses it', () => {
+// Record behaviour (forward mutation, FOCUS placement, no-op modes, undo/redo)
+// lives in `../ops/__tests__/InsertAfter.test.ts`. Here we only cover the
+// orchestration `EditorFocusOps` adds: recording the record on the shared
+// `UndoRecorder` so `editor.undo()` works, and recording nothing on a no-op.
+describe('insertNewAfter (orchestration)', () => {
+  it('records on the UndoRecorder so undo/redo work through the facade', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const editor = createNullEditor(doc);
     editor.start();
 
     // act
-    expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
     const inserted = editor.focusOps.insertNewAfter('p');
 
     // assert
-    const children = Array.from(doc.root.children);
     expect(inserted).toBe(true);
-    expect(children).toHaveLength(3);
-    expect(children[1]?.tagName.toLowerCase()).toBe('p');
-    expect(children[1]?.querySelector(`.${JSED_ANCHOR_CLASS}`)).not.toBeNull();
-    expect(editor.nav.getFocus()).toBe(children[1]);
-
-    editor.destroy();
-  });
-
-  it('uses a typed element name when the focused tag parent allows it', () => {
-    // arrange
-    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const editor = createNullEditor(doc);
-    editor.start();
-
-    // act
-    const inserted = editor.focusOps.insertNewAfter('h2');
-
-    // assert
-    const children = Array.from(doc.root.children);
-    expect(inserted).toBe(true);
-    expect(children[1]?.tagName.toLowerCase()).toBe('h2');
-    expect(editor.nav.getFocus()).toBe(children[1]);
-
-    editor.destroy();
-  });
-
-  test('view mode', () => {
-    // arrange
-    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const editor = createNullEditor(doc);
-    const elementChanges: EditorElementChangeEvent[] = [];
-    editor.eventsEmitter.subscribe({
-      onElementChange: (event) => elementChanges.push(event)
-    });
-    editor.start();
-
-    // act
-    expect(identify(editor.nav.getFocus())).toBe('[element:p#p1]');
-    const inserted = editor.focusOps.insertNewAfter('p');
-
-    // assert
-    const children = Array.from(doc.root.children);
-    expect(inserted).toBe(true);
-    expect(children).toHaveLength(3);
-    expect(children[1]?.tagName.toLowerCase()).toBe('p');
-    expect(children[1]?.querySelector(`.${JSED_ANCHOR_CLASS}`)).not.toBeNull();
-    expect(editor.nav.getFocus()).toBe(children[1]);
-    expect(elementChanges).toEqual([
-      {
-        type: 'focusable-inserted',
-        element: children[1]
-      }
-    ]);
-
-    editor.destroy();
-  });
-
-  test('edit mode no-op', () => {
-    // arrange
-    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const editor = createNullEditor(doc);
-    const elementChanges: EditorElementChangeEvent[] = [];
-    editor.eventsEmitter.subscribe({
-      onElementChange: (event) => elementChanges.push(event)
-    });
-    editor.start();
-    editor.enterEditing(byId(doc, 'p1'));
-
-    // act
-    const inserted = editor.focusOps.insertNewAfter('p');
-
-    // assert
-    expect(inserted).toBe(false);
-    expect(Array.from(doc.root.children)).toHaveLength(2);
-    expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
-    expect(elementChanges).toEqual([]);
-
-    editor.destroy();
-  });
-
-  test('document root no-op', () => {
-    // arrange
-    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const editor = createNullEditor(doc);
-    const elementChanges: EditorElementChangeEvent[] = [];
-    editor.eventsEmitter.subscribe({
-      onElementChange: (event) => elementChanges.push(event)
-    });
-    editor.start();
-    editor.nav.FOCUS(doc.root);
-
-    // act
-    const inserted = editor.focusOps.insertNewAfter('p');
-
-    // assert
-    expect(inserted).toBe(false);
-    expect(identifyChildren(doc.root.parentElement)).toEqual([
-      '[element:div#root]',
-      '[element-indicator]'
-    ]);
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
-    expect(editor.nav.getFocus()).toBe(doc.root);
-    expect(elementChanges).toEqual([]);
-
-    editor.destroy();
-  });
-
-  test('undo then redo round-trips the DOM and FOCUS', () => {
-    // arrange
-    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const editor = createNullEditor(doc);
-    editor.start();
-    editor.focusOps.insertNewAfter('p');
-    const inserted = doc.root.children[1];
-
-    // act + assert: undo restores original DOM + FOCUS
+    expect(editor.canUndo()).toBe(true);
     editor.undo();
     expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
-    expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
-
-    // act + assert: redo re-inserts + restores FOCUS
-    editor.redo();
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p]', '[element:p#p2]']);
-    expect(editor.nav.getFocus()).toBe(inserted);
 
     editor.destroy();
   });
 
-  test('no-op records nothing', () => {
+  it('records nothing on a no-op', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const editor = createNullEditor(doc);
@@ -300,9 +180,10 @@ describe('insertNewAfter', () => {
     editor.enterEditing(byId(doc, 'p1'));
 
     // act
-    editor.focusOps.insertNewAfter('p');
+    const inserted = editor.focusOps.insertNewAfter('p');
 
     // assert
+    expect(inserted).toBe(false);
     expect(editor.canUndo()).toBe(false);
 
     editor.destroy();
@@ -393,25 +274,8 @@ describe('insertNewBefore', () => {
 });
 
 describe('required-child focus', () => {
-  it('insertNewAfter a ul focuses its li', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo'));
-    const editor = createNullEditor(doc);
-    editor.start();
-
-    // act
-    const inserted = editor.focusOps.insertNewAfter('ul');
-
-    // assert
-    const list = doc.root.children[1];
-    expect(inserted).toBe(true);
-    expect(list?.tagName.toLowerCase()).toBe('ul');
-    expect(editor.nav.getFocus()).toBe(list?.firstElementChild);
-    expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
-
-    editor.destroy();
-  });
-
+  // insertNewAfter's required-child focus (fwd + undo/redo round-trip) is
+  // covered at the record level in `../ops/__tests__/InsertAfter.test.ts`.
   it('insertNewBefore a ul focuses its li', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
@@ -448,27 +312,6 @@ describe('required-child focus', () => {
     expect(inserted).toBe(true);
     expect(list?.tagName.toLowerCase()).toBe('ul');
     expect(editor.nav.getFocus()).toBe(list?.firstElementChild);
-    expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
-
-    editor.destroy();
-  });
-
-  it('undo then redo round-trips FOCUS to the li', () => {
-    // arrange
-    const doc = makeRoot(p({ id: 'p1' }, 'foo'));
-    const editor = createNullEditor(doc);
-    editor.start();
-    editor.focusOps.insertNewAfter('ul');
-    const listItem = doc.root.children[1]?.firstElementChild;
-
-    // act + assert: undo restores original DOM + FOCUS
-    editor.undo();
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
-    expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
-
-    // act + assert: redo re-inserts + focuses the li again
-    editor.redo();
-    expect(editor.nav.getFocus()).toBe(listItem);
     expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
 
     editor.destroy();

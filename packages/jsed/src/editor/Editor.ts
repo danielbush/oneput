@@ -2,7 +2,6 @@ import { Nav } from '../focus/Nav.js';
 import type { JsedDocument } from '../types.js';
 import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './lib/EditorFocusOps.js';
-import { EditorFocusAnchorOps } from './lib/EditorFocusAnchorOps.js';
 import { EditorCursorOps } from './lib/EditorCursorOps.js';
 import { EditorEventsEmitter } from './lib/EditorEventsEmitter.js';
 import { EditorState } from './lib/EditorState.js';
@@ -37,7 +36,6 @@ export class Editor {
   constructor(public state: EditorState) {
     this.nav = this.state.nav;
     this.focusOps = this.state.focus;
-    this.anchorOps = this.state.anchor;
     this.cursorOps = this.state.cursorOps;
     this.eventsEmitter = this.state.eventsEmitter;
   }
@@ -68,15 +66,11 @@ export class Editor {
 
   // Editing
   /**
-   * General operations at FOCUS
+   * "At FOCUS" operations
    */
   focusOps: EditorFocusOps;
   /**
-   * Anchor operations at FOCUS
-   */
-  anchorOps: EditorFocusAnchorOps;
-  /**
-   * Operations that use the CURSOR (ie its position etc).
+   * "At CURSOR" operations
    */
   cursorOps: EditorCursorOps;
   handleDelete = (evt?: KeyboardEvent) => this.state.ops.handleDelete(evt);

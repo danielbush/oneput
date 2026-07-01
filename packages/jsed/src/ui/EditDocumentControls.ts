@@ -680,48 +680,48 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Space)]
         }),
 
-      editor.anchorOps.canInsertInFocus() &&
+      editor.focusOps.anchor.canInsertInFocus() &&
         stdMenuItem({
           id: 'INSERT_ANCHOR_IN_LINE',
           textContent: 'Insert anchor in empty line...',
           action: () => {
-            editor.anchorOps.insertInFocus();
+            editor.focusOps.anchor.insertInFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      editor.anchorOps.canInsertBeforeFocus() &&
+      editor.focusOps.anchor.canInsertBeforeFocus() &&
         stdMenuItem({
           id: 'INSERT_ANCHOR_BEFORE_TAG',
           textContent: 'Insert anchor before tag...',
           action: () => {
-            editor.anchorOps.insertBeforeFocus();
+            editor.focusOps.anchor.insertBeforeFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      editor.anchorOps.canRemoveBeforeFocus() &&
+      editor.focusOps.anchor.canRemoveBeforeFocus() &&
         stdMenuItem({
           id: 'REMOVE_ANCHOR_BEFORE_TAG',
           textContent: 'Remove anchor before tag...',
           action: () => {
-            editor.anchorOps.removeBeforeFocus();
+            editor.focusOps.anchor.removeBeforeFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      editor.anchorOps.canInsertAfterFocus() &&
+      editor.focusOps.anchor.canInsertAfterFocus() &&
         stdMenuItem({
           id: 'INSERT_ANCHOR_AFTER_TAG',
           textContent: 'Insert anchor after tag...',
           action: () => {
-            editor.anchorOps.insertAfterFocus();
+            editor.focusOps.anchor.insertAfterFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),
-      editor.anchorOps.canRemoveAfterFocus() &&
+      editor.focusOps.anchor.canRemoveAfterFocus() &&
         stdMenuItem({
           id: 'REMOVE_ANCHOR_AFTER_TAG',
           textContent: 'Remove anchor after tag...',
           action: () => {
-            editor.anchorOps.removeAfterFocus();
+            editor.focusOps.anchor.removeAfterFocus();
           },
           left: (b) => [b.icon(icons.Anchor)]
         }),

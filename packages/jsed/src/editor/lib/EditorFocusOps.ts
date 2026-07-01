@@ -9,6 +9,7 @@ import { AppendNew } from './ops/AppendNew.js';
 import { InsertBefore } from './ops/InsertBefore.js';
 import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
+import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -22,9 +23,11 @@ export class EditorFocusOps {
   }
 
   space: EditorFocusSpaceOps;
+  anchor: EditorFocusAnchorOps;
 
   constructor(private state: EditorState) {
     this.space = EditorFocusSpaceOps.create(state);
+    this.anchor = EditorFocusAnchorOps.create(state);
   }
 
   private _undo = <K extends UndoRecord>(result?: K) => {

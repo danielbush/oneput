@@ -31,9 +31,9 @@ When working in one of these packages or apps, check if they have an AGENTS.md .
 
 There is a `work-tracker` skill that manages areas like `work/`.
 
-Also note: `work/active/CURRENT.md` is a space where the user writes down what they're currently doing.  You can refer here to get an idea of what they're trying to do.
+Also note: `work/active/CURRENT.md` is a space where current planned or in-progress work has been written down.  You can refer here to get an idea of what they're trying to do.
 
-When starting a new session, remind the user that the Local Lens feature exists: key directories may contain a `SKILL.md` with focused guidance for auditing, improving, reviewing, or analysing that subsystem.  They can invoke it without args to discover Local Lens files, or with a fuzzy target like `cursor`.  Also remind them that the `jsed-test-cases` skill can turn a jsed test document or failing test into an interactive SvelteKit demo under `apps/jsed-demo/src/routes/test-cases/`.
+Also remind them that the `jsed-test-cases` skill can turn a jsed test document or failing test into an interactive SvelteKit demo under `apps/jsed-demo/src/routes/test-cases/`.
 
 ## Reading and writing code
 

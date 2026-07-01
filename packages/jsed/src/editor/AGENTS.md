@@ -55,25 +55,27 @@ Review procedure (rerun periodically to refresh the snapshot below):
     - src/editor/lib/
     - src/editor/
 
-Latest snapshot:
+Latest snapshot. ✅ = covered, ⚠️ = partial, ❌ = missing, — = not applicable.
+(`Editor.test.ts` drives none of these focus ops directly — it covers editing
+through key/click handlers, not `focusOps.*` calls, so its column is empty
+throughout.)
 
-Testing per op, across the three layers that can exercise it. (`Editor.test.ts`
-currently drives none of these focus ops directly — it covers editing through
-key/click handlers, not `focusOps.*` calls.)
+| Op | Record (`editor/lib/ops`) | Focused record — fwd / undo / redo | Low-level (`focusable.ts`) | Integration (`EditorFocusOps.test` / `Editor.test`) | Gaps / action needed |
+| --- | --- | --- | --- | --- | --- |
+| `InsertAfter`  | `insertNewAfter`  | ❌ / ❌ / ❌ (no `__tests__` dir) | ✅ exhaustive | ✅ fwd + view/edit/root no-ops + undo/redo round-trip + records-nothing; `Editor` ❌ | dedicated `editor/lib/ops` record tests |
+| `InsertBefore` | `insertNewBefore` | ❌ / ❌ / ❌ | ❌ none | ⚠️ fwd + view/edit/root no-ops; ❌ no undo/redo; `Editor` ❌ | low-level trio; undo/redo round-trip |
+| `AppendNew`    | `appendNew`       | ❌ / ❌ / ❌ | ❌ none | ⚠️ fwd + default-child + disallowed; ❌ no no-op modes / undo/redo; `Editor` ❌ | low-level trio; no-op modes; undo/redo |
+| `Delete`       | `delete`          | ❌ / ❌ / ❌ | ❌ none* | ⚠️ fwd (next-focus + previous fallback); ❌ no no-op modes / undo/redo; `Editor` ❌ | low-level `deleteElement` trio; no-op modes; undo/redo |
 
-| Op             | `src/editor/lib/ops/` | `src/editor/lib/` (`EditorFocusOps.test.ts`)                                         | `src/editor/` (`Editor.test.ts`) |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------ | -------------------------------- |
-| `InsertAfter`  | none (no test dir)    | forward + view/edit/root no-ops + undo/redo round-trip + records-nothing             | none                             |
-| `InsertBefore` | none                  | forward + view/edit/root no-ops; **no undo/redo**                                    | none                             |
-| `AppendNew`    | none                  | forward + default-child + disallowed-returns-false; **no no-op modes, no undo/redo** | none                             |
-| `Delete`       | none                  | forward (next-focus + previous fallback); **no no-op modes, no undo/redo**           | none                             |
+`*deleteElement`/`undoDeleteElement`/`redoDeleteElement` have no direct low-level
+test, even though `DeleteAtCursor` has relied on them for a while.
 
-So `InsertAfter` is the only op with undo/redo coverage. The gap for the other
-three is: their undo/redo paths are unexercised, and there are no dedicated
-`src/editor/lib/ops/` tests for any op (that dir has no `__tests__`).
-Underneath, the low-level `lib/ops/focusable.ts` tripartite ops are only tested
-for `insertNewAfter`; `insertNewBefore`, `appendNew`, and the `deleteElement`
-trio are untested there.
+Two structural gaps stand out. First, the `editor/lib/ops` layer has **no**
+`__tests__` for any record (fwd/undo/redo column is ❌ across the board) — unlike
+`src/cursor/lib/ops`, which is the reference example these should mirror. Second,
+only `InsertAfter` has an undo/redo round-trip anywhere; the other three are
+forward-only at the integration layer, and their low-level tripartite ops in
+`focusable.ts` are untested.
 
 ## Conversion of EditorFocusOps to UndoRecord
 

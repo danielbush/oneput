@@ -196,9 +196,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - an upgrade skill?
   - the skill provides a well trodden path to safely update the code; it might belong to a super-skill in the workspace root
 - tidy up skills
-  - local-lens
-    - not in .claude
-    - can we install via taskfile?
   - jsed-test-cases
     - not in .claude
     - can we install via taskfile?
@@ -214,9 +211,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/
   - COMMENT: we shouldn't be importing types from jsed-demo like this
 - probably `getPreviousNodeSibling` / `getNextNodeSibling` (in core/sibling.ts) is too weak; look at `isLastText` (in lineSegment.ts), it handles ignorables and whitespace
-- /local-lens on cursor
-  - exhaustive tests lib/ops
-  - exhaustive tests on UndoRecord in lib/cursor/
 - chore: remove symbols from architecture; just use vocab and module file names
 - chore: outline new deep modules structure in architecture
   - COMMENT: ie lib/ops is load-bearing etc

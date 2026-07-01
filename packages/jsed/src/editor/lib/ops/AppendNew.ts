@@ -1,6 +1,7 @@
 import type { EditorState } from '../EditorState.js';
 import * as focusable from '../../../lib/ops/focusable.js';
 import { normalize } from '../../../lib/ops/normalize.js';
+import type { ElementSpec } from '../../../lib/core/dom-rules.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
@@ -12,12 +13,12 @@ import type { UndoRecord } from '../../../undo/index.js';
  * {@link focusable.undoAppendElement} / {@link focusable.redoAppendElement}).
  */
 export class AppendNew implements UndoRecord {
-  static run(state: EditorState, tagName: string): AppendNew | undefined {
+  static run(state: EditorState, spec: ElementSpec): AppendNew | undefined {
     if (state.isEditing()) return;
     const focus = state.nav.getFocus();
     if (!focus) return;
 
-    const op = focusable.appendNew(focus, tagName);
+    const op = focusable.appendNew(focus, spec);
     if (!op) return;
 
     const focusTarget = focusable.getInitialFocusTarget(op.element);

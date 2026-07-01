@@ -10,6 +10,7 @@ import { InsertBefore } from './ops/InsertBefore.js';
 import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
 import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
+import type { ElementSpec, ElementTemplate } from '../../lib/core/dom-rules.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -37,12 +38,12 @@ export class EditorFocusOps {
 
   // #region insert after
 
-  getInsertAfterCandidates(): string[] {
+  getInsertAfterTemplates(): ElementTemplate[] {
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
-    return focusable.getInsertAfterCandidates(focus);
+    return focusable.getInsertAfterTemplates(focus);
   }
 
   canInsertAfter(): boolean {
@@ -56,23 +57,23 @@ export class EditorFocusOps {
     if (focus === this.state.document.root) {
       return false;
     }
-    return focusable.getInsertAfterCandidates(focus).length > 0;
+    return focusable.getInsertAfterTemplates(focus).length > 0;
   }
 
-  insertNewAfter(tagName: string): boolean {
-    return !!this._undo(InsertAfter.run(this.state, tagName));
+  insertNewAfter(spec: ElementSpec): boolean {
+    return !!this._undo(InsertAfter.run(this.state, spec));
   }
 
   // #endregion
 
   // #region insert before
 
-  getInsertBeforeCandidates(): string[] {
+  getInsertBeforeTemplates(): ElementTemplate[] {
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
-    return focusable.getInsertBeforeCandidates(focus);
+    return focusable.getInsertBeforeTemplates(focus);
   }
 
   canInsertBefore(): boolean {
@@ -86,23 +87,23 @@ export class EditorFocusOps {
     if (focus === this.state.document.root) {
       return false;
     }
-    return focusable.getInsertBeforeCandidates(focus).length > 0;
+    return focusable.getInsertBeforeTemplates(focus).length > 0;
   }
 
-  insertNewBefore(tagName: string): boolean {
-    return !!this._undo(InsertBefore.run(this.state, tagName));
+  insertNewBefore(spec: ElementSpec): boolean {
+    return !!this._undo(InsertBefore.run(this.state, spec));
   }
 
   // #endregion
 
   // #region append new
 
-  getAppendCandidates(): string[] {
+  getAppendTemplates(): ElementTemplate[] {
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
-    return focusable.getAppendCandidates(focus);
+    return focusable.getAppendTemplates(focus);
   }
 
   canAppend(): boolean {
@@ -113,11 +114,11 @@ export class EditorFocusOps {
     if (!focus) {
       return false;
     }
-    return focusable.getAppendCandidates(focus).length > 0;
+    return focusable.getAppendTemplates(focus).length > 0;
   }
 
-  appendNew(tagName: string): boolean {
-    return !!this._undo(AppendNew.run(this.state, tagName));
+  appendNew(spec: ElementSpec): boolean {
+    return !!this._undo(AppendNew.run(this.state, spec));
   }
 
   // #endregion

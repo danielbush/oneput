@@ -30,7 +30,7 @@ describe('InsertAfter.run', () => {
     expect(state.nav.getFocus()).toBe(byId(doc, 'p1'));
 
     // act
-    const record = InsertAfter.run(state, 'p');
+    const record = InsertAfter.run(state, { tagName: 'p' });
 
     // assert
     const children = Array.from(doc.root.children);
@@ -49,7 +49,7 @@ describe('InsertAfter.run', () => {
     const state = getEditorState(doc);
 
     // act
-    InsertAfter.run(state, 'h2');
+    InsertAfter.run(state, { tagName: 'h2' });
 
     // assert
     const children = Array.from(doc.root.children);
@@ -69,7 +69,7 @@ describe('InsertAfter.run', () => {
     });
 
     // act
-    InsertAfter.run(state, 'p');
+    InsertAfter.run(state, { tagName: 'p' });
 
     // assert
     const inserted = doc.root.children[1];
@@ -84,7 +84,7 @@ describe('InsertAfter.run', () => {
     const state = getEditorState(doc);
 
     // act
-    InsertAfter.run(state, 'ul');
+    InsertAfter.run(state, { tagName: 'ul', children: [{ tagName: 'li' }] });
 
     // assert
     const list = doc.root.children[1];
@@ -102,7 +102,7 @@ describe('InsertAfter.run', () => {
     state.enterEditing(byId(doc, 'p1'));
 
     // act
-    const record = InsertAfter.run(state, 'p');
+    const record = InsertAfter.run(state, { tagName: 'p' });
 
     // assert
     expect(record).toBeUndefined();
@@ -118,7 +118,7 @@ describe('InsertAfter.run', () => {
     state.nav.FOCUS(doc.root);
 
     // act
-    const record = InsertAfter.run(state, 'p');
+    const record = InsertAfter.run(state, { tagName: 'p' });
 
     // assert
     expect(record).toBeUndefined();
@@ -133,7 +133,7 @@ describe('InsertAfter undo / redo', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const state = getEditorState(doc);
-    const record = InsertAfter.run(state, 'p')!;
+    const record = InsertAfter.run(state, { tagName: 'p' })!;
     const inserted = doc.root.children[1];
 
     // act + assert: undo restores original DOM + FOCUS
@@ -153,7 +153,7 @@ describe('InsertAfter undo / redo', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo'));
     const state = getEditorState(doc);
-    const record = InsertAfter.run(state, 'ul')!;
+    const record = InsertAfter.run(state, { tagName: 'ul', children: [{ tagName: 'li' }] })!;
     const listItem = doc.root.children[1]?.firstElementChild;
 
     // act + assert: undo restores original DOM + FOCUS

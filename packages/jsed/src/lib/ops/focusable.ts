@@ -1,4 +1,4 @@
-import { canCreateWithAnchor } from '../core/dom-rules.js';
+import { canCreateWithAnchor, type ElementSpec } from '../core/dom-rules.js';
 import * as domRules from '../core/dom-rules.js';
 import { getNextNodeSibling, getNextSibling, getPreviousNodeSibling } from '../core/sibling.js';
 import {
@@ -17,46 +17,50 @@ import { createImplicitLine } from './implicitLine.js';
 import { anchorize } from './anchor.js';
 
 export function createElement(
-  tagName: string,
+  spec: ElementSpec,
   options: { addAnchors: boolean } = { addAnchors: true }
 ): HTMLElement {
-  const el = document.createElement(tagName);
-  if (options.addAnchors && canCreateWithAnchor(tagName)) {
+  const el = document.createElement(spec.tagName);
+  const children = spec.children ?? [];
+  if (options.addAnchors && children.length === 0 && canCreateWithAnchor(spec.tagName)) {
     anchorize(el);
   }
-  const requiredChild = domRules.getRequiredChildTag(tagName);
-  if (requiredChild) {
-    el.appendChild(createElement(requiredChild, options));
+  for (const child of children) {
+    el.appendChild(createElement(child, options));
   }
   return el;
 }
 
-function findAnchorableDescendant(el: HTMLElement): HTMLElement | null {
-  if (canCreateWithAnchor(el.tagName)) {
-    return el;
-  }
+function findAnchorableLeaf(el: HTMLElement): HTMLElement | null {
   for (const child of Array.from(el.children)) {
-    const found = findAnchorableDescendant(child as HTMLElement);
+    // Only descend FOCUSABLE structure; skip the TOKEN/ANCHOR text layer so an
+    // empty content leaf resolves to itself, not to its placeholder ANCHOR.
+    if (!isFocusable(child)) {
+      continue;
+    }
+    const found = findAnchorableLeaf(child as HTMLElement);
     if (found) {
       return found;
     }
   }
-  return null;
+  return canCreateWithAnchor(el.tagName) ? el : null;
 }
 
 /**
  * Resolve the descendant of a freshly created element that should receive FOCUS.
  *
- * Returns the first content leaf that can hold text ({@link canCreateWithAnchor}),
- * so `ul` descends to its `li` and `table` to its `td` — containers like
- * `ul`/`tr`/`tbody` are not anchorable. Falls back to `el` itself.
+ * Returns the deepest FOCUSABLE content leaf that can hold text
+ * ({@link canCreateWithAnchor}), descending through non-anchorable containers
+ * (`ul`/`tr`/`tbody`) and anchorable ones alike. So `ul` descends to its `li`,
+ * `ul > li > p` descends past the `li` to the `p`, and `table` to its `td`.
+ * Falls back to `el` itself.
  */
 export function getInitialFocusTarget(el: HTMLElement): HTMLElement {
-  return findAnchorableDescendant(el) ?? el;
+  return findAnchorableLeaf(el) ?? el;
 }
 
-export function getAppendCandidates(parent: HTMLElement): string[] {
-  return domRules.getAllowableChildTags(parent.tagName);
+export function getAppendTemplates(parent: HTMLElement): domRules.ElementTemplate[] {
+  return domRules.getAllowableChildTemplates(parent.tagName);
 }
 
 export function isEmpty(el: Node): boolean {
@@ -89,14 +93,14 @@ export type AppendElement = {
 };
 
 /**
- * Append new child element (tagName) to parent.
+ * Append new child element spec to parent.
  */
-export function appendNew(parent: HTMLElement, tagName: string): AppendElement | null {
-  if (!domRules.getAllowableChildTags(parent.tagName).includes(tagName.toLowerCase())) {
+export function appendNew(parent: HTMLElement, spec: ElementSpec): AppendElement | null {
+  if (!domRules.getAllowableChildTags(parent.tagName).includes(spec.tagName.toLowerCase())) {
     return null;
   }
 
-  const element = createElement(tagName);
+  const element = createElement(spec);
   parent.appendChild(element);
   return { action: 'append-element', element, parent };
 }
@@ -110,8 +114,8 @@ export function redoAppendElement(op: AppendElement) {
   op.parent.appendChild(op.element);
 }
 
-export function getInsertAfterCandidates(el: HTMLElement): string[] {
-  return domRules.getAllowableInsertAfterTags(el.tagName);
+export function getInsertAfterTemplates(el: HTMLElement): domRules.ElementTemplate[] {
+  return domRules.getAllowableInsertAfterTemplates(el.tagName);
 }
 
 export type InsertElementAfter = {
@@ -120,12 +124,12 @@ export type InsertElementAfter = {
   target: HTMLElement; // the anchor we insert after
 };
 
-export function insertNewAfter(tagName: string, target: HTMLElement): InsertElementAfter | null {
-  if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(tagName.toLowerCase())) {
+export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertElementAfter | null {
+  if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(spec.tagName.toLowerCase())) {
     return null;
   }
 
-  const element = createElement(tagName);
+  const element = createElement(spec);
   target.insertAdjacentElement('afterend', element);
   return { action: 'insert-element-after', element, target };
 }
@@ -139,8 +143,8 @@ export function redoInsertElementAfter(op: InsertElementAfter) {
   op.target.insertAdjacentElement('afterend', op.element);
 }
 
-export function getInsertBeforeCandidates(el: HTMLElement): string[] {
-  return domRules.getAllowableInsertBeforeTags(el.tagName);
+export function getInsertBeforeTemplates(el: HTMLElement): domRules.ElementTemplate[] {
+  return domRules.getAllowableInsertBeforeTemplates(el.tagName);
 }
 
 export type InsertElementBefore = {
@@ -149,12 +153,15 @@ export type InsertElementBefore = {
   target: HTMLElement; // the anchor we insert before
 };
 
-export function insertNewBefore(tagName: string, target: HTMLElement): InsertElementBefore | null {
-  if (!domRules.getAllowableInsertBeforeTags(target.tagName).includes(tagName.toLowerCase())) {
+export function insertNewBefore(
+  spec: ElementSpec,
+  target: HTMLElement
+): InsertElementBefore | null {
+  if (!domRules.getAllowableInsertBeforeTags(target.tagName).includes(spec.tagName.toLowerCase())) {
     return null;
   }
 
-  const element = createElement(tagName);
+  const element = createElement(spec);
   target.insertAdjacentElement('beforebegin', element);
   return { action: 'insert-element-before', element, target };
 }
@@ -238,9 +245,12 @@ export function splitParentBefore(el: HTMLElement): void {
   if (!parent) {
     throw new Error('splitParentBefore: Element has no parent');
   }
-  const prevPar = createElement(parent.tagName, {
-    addAnchors: false
-  }) as HTMLElement;
+  const prevPar = createElement(
+    { tagName: parent.tagName.toLowerCase() },
+    {
+      addAnchors: false
+    }
+  ) as HTMLElement;
   parent.insertAdjacentElement('beforebegin', prevPar);
   for (let sib = el.previousSibling; sib; ) {
     const prevSib = sib.previousSibling;

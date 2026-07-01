@@ -38,7 +38,7 @@ describe('AppendNew.run', () => {
     const p1 = byId(doc, 'p1');
 
     // act
-    const record = AppendNew.run(state, 'span');
+    const record = AppendNew.run(state, { tagName: 'span' });
 
     // assert
     const child = p1.lastElementChild;
@@ -60,7 +60,7 @@ describe('AppendNew.run', () => {
     });
 
     // act
-    AppendNew.run(state, 'span');
+    AppendNew.run(state, { tagName: 'span' });
 
     // assert
     const child = byId(doc, 'p1').lastElementChild;
@@ -77,7 +77,7 @@ describe('AppendNew.run', () => {
     state.nav.REQUEST_FOCUS(box);
 
     // act
-    AppendNew.run(state, 'ul');
+    AppendNew.run(state, { tagName: 'ul', children: [{ tagName: 'li' }] });
 
     // assert
     const list = box.lastElementChild;
@@ -95,7 +95,7 @@ describe('AppendNew.run', () => {
     state.nav.REQUEST_FOCUS(byId(doc, 'list'));
 
     // act
-    const record = AppendNew.run(state, 'p');
+    const record = AppendNew.run(state, { tagName: 'p' });
 
     // assert
     expect(record).toBeUndefined();
@@ -111,7 +111,7 @@ describe('AppendNew.run', () => {
     state.enterEditing(byId(doc, 'p1'));
 
     // act
-    const record = AppendNew.run(state, 'span');
+    const record = AppendNew.run(state, { tagName: 'span' });
 
     // assert
     expect(record).toBeUndefined();
@@ -125,7 +125,7 @@ describe('AppendNew undo / redo', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'foo'));
     const state = getEditorState(doc);
-    const record = AppendNew.run(state, 'span')!;
+    const record = AppendNew.run(state, { tagName: 'span' })!;
     const appended = byId(doc, 'p1').lastElementChild;
 
     // act + assert: undo removes the appended element + restores FOCUS
@@ -147,7 +147,7 @@ describe('AppendNew undo / redo', () => {
     const state = getEditorState(doc);
     const box = byId(doc, 'box');
     state.nav.REQUEST_FOCUS(box);
-    const record = AppendNew.run(state, 'ul')!;
+    const record = AppendNew.run(state, { tagName: 'ul', children: [{ tagName: 'li' }] })!;
     const listItem = box.lastElementChild?.firstElementChild;
 
     // act + assert: undo removes the ul + restores FOCUS

@@ -339,7 +339,7 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
 
     // act
-    const op = insertNewAfter('p', byId(doc, 'p1'));
+    const op = insertNewAfter({ tagName: 'p' }, byId(doc, 'p1'));
 
     // assert
     expect(op?.action).toBe('insert-element-after');
@@ -353,7 +353,7 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo')));
 
     // act
-    const op = insertNewAfter('p', byId(doc, 'p1'));
+    const op = insertNewAfter({ tagName: 'p' }, byId(doc, 'p1'));
 
     // assert
     expect(op?.element.previousElementSibling).toBe(byId(doc, 'p1'));
@@ -365,7 +365,7 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo')));
 
     // act
-    const op = insertNewAfter('li', byId(doc, 'p1'));
+    const op = insertNewAfter({ tagName: 'li' }, byId(doc, 'p1'));
 
     // assert
     expect(op).toBeNull();
@@ -375,7 +375,7 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
   test('undo removes the inserted element', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const op = insertNewAfter('p', byId(doc, 'p1'))!;
+    const op = insertNewAfter({ tagName: 'p' }, byId(doc, 'p1'))!;
 
     // act
     undoInsertElementAfter(op);
@@ -387,7 +387,7 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
   test('redo re-inserts the element after target', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
-    const op = insertNewAfter('p', byId(doc, 'p1'))!;
+    const op = insertNewAfter({ tagName: 'p' }, byId(doc, 'p1'))!;
     undoInsertElementAfter(op);
 
     // act
@@ -400,7 +400,7 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
   test('undo -> redo -> undo round-trips the same element', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo')));
-    const op = insertNewAfter('p', byId(doc, 'p1'))!;
+    const op = insertNewAfter({ tagName: 'p' }, byId(doc, 'p1'))!;
     const inserted = op.element;
 
     // act
@@ -414,27 +414,31 @@ describe('insertNewAfter / undoInsertElementAfter / redoInsertElementAfter', () 
   });
 });
 
-describe('createElement required children', () => {
-  test('ul seeds an li holding an anchor', () => {
+describe('createElement', () => {
+  test('builds exactly the requested element', () => {
     // act
-    const el = createElement('ul');
+    const el = createElement({ tagName: 'ul' });
+
+    // assert
+    expect(identifyChildren(el)).toEqual([]);
+  });
+
+  test('builds nested specs', () => {
+    // act
+    const el = createElement({
+      tagName: 'ul',
+      children: [{ tagName: 'li', children: [{ tagName: 'p' }] }]
+    });
 
     // assert
     expect(identifyChildren(el)).toEqual(['[element:li]']);
-    expect(identifyChildren(el.firstElementChild)).toEqual(['[anchor]']);
+    expect(identifyChildren(el.firstElementChild)).toEqual(['[element:p]']);
+    expect(identifyChildren(el.querySelector('p'))).toEqual(['[anchor]']);
   });
 
-  test('ol seeds an li', () => {
+  test('anchorable leaf gets an anchor', () => {
     // act
-    const el = createElement('ol');
-
-    // assert
-    expect(identifyChildren(el)).toEqual(['[element:li]']);
-  });
-
-  test('p has no required child', () => {
-    // act
-    const el = createElement('p');
+    const el = createElement({ tagName: 'p' });
 
     // assert
     expect(identifyChildren(el)).toEqual(['[anchor]']);
@@ -444,7 +448,7 @@ describe('createElement required children', () => {
 describe('getInitialFocusTarget', () => {
   test('ul resolves to its li', () => {
     // arrange
-    const el = createElement('ul');
+    const el = createElement({ tagName: 'ul', children: [{ tagName: 'li' }] });
 
     // act
     const target = getInitialFocusTarget(el);
@@ -455,7 +459,7 @@ describe('getInitialFocusTarget', () => {
 
   test('anchorable element resolves to itself', () => {
     // arrange
-    const el = createElement('p');
+    const el = createElement({ tagName: 'p' });
 
     // act
     const target = getInitialFocusTarget(el);
@@ -466,12 +470,45 @@ describe('getInitialFocusTarget', () => {
 
   test('non-anchorable element with no anchorable descendant falls back to itself', () => {
     // arrange
-    const el = createElement('div');
+    const el = createElement({ tagName: 'div' });
 
     // act
     const target = getInitialFocusTarget(el);
 
     // assert
     expect(target).toBe(el);
+  });
+
+  test('ul with paragraph resolves to the paragraph', () => {
+    // arrange
+    const el = createElement({
+      tagName: 'ul',
+      children: [{ tagName: 'li', children: [{ tagName: 'p' }] }]
+    });
+
+    // act
+    const target = getInitialFocusTarget(el);
+
+    // assert
+    expect(target.tagName).toBe('P');
+  });
+
+  test('table resolves to its first cell', () => {
+    // arrange
+    const el = createElement({
+      tagName: 'table',
+      children: [
+        {
+          tagName: 'tbody',
+          children: [{ tagName: 'tr', children: [{ tagName: 'td' }] }]
+        }
+      ]
+    });
+
+    // act
+    const target = getInitialFocusTarget(el);
+
+    // assert
+    expect(target.tagName).toBe('TD');
   });
 });

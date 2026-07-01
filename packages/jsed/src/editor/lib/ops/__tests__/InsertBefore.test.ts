@@ -29,7 +29,7 @@ describe('InsertBefore.run', () => {
     state.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
     // act
-    const record = InsertBefore.run(state, 'p');
+    const record = InsertBefore.run(state, { tagName: 'p' });
 
     // assert
     const children = Array.from(doc.root.children);
@@ -49,7 +49,7 @@ describe('InsertBefore.run', () => {
     state.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
     // act
-    InsertBefore.run(state, 'h2');
+    InsertBefore.run(state, { tagName: 'h2' });
 
     // assert
     const children = Array.from(doc.root.children);
@@ -70,7 +70,7 @@ describe('InsertBefore.run', () => {
     });
 
     // act
-    InsertBefore.run(state, 'p');
+    InsertBefore.run(state, { tagName: 'p' });
 
     // assert
     const inserted = doc.root.children[1];
@@ -86,7 +86,7 @@ describe('InsertBefore.run', () => {
     state.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
     // act
-    InsertBefore.run(state, 'ul');
+    InsertBefore.run(state, { tagName: 'ul', children: [{ tagName: 'li' }] });
 
     // assert
     const list = doc.root.children[1];
@@ -104,7 +104,7 @@ describe('InsertBefore.run', () => {
     state.enterEditing(byId(doc, 'p1'));
 
     // act
-    const record = InsertBefore.run(state, 'p');
+    const record = InsertBefore.run(state, { tagName: 'p' });
 
     // assert
     expect(record).toBeUndefined();
@@ -120,7 +120,7 @@ describe('InsertBefore.run', () => {
     state.nav.FOCUS(doc.root);
 
     // act
-    const record = InsertBefore.run(state, 'p');
+    const record = InsertBefore.run(state, { tagName: 'p' });
 
     // assert
     expect(record).toBeUndefined();
@@ -136,7 +136,7 @@ describe('InsertBefore undo / redo', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const state = getEditorState(doc);
     state.nav.REQUEST_FOCUS(byId(doc, 'p2'));
-    const record = InsertBefore.run(state, 'p')!;
+    const record = InsertBefore.run(state, { tagName: 'p' })!;
     const inserted = doc.root.children[1];
 
     // act + assert: undo restores original DOM + FOCUS
@@ -157,7 +157,7 @@ describe('InsertBefore undo / redo', () => {
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const state = getEditorState(doc);
     state.nav.REQUEST_FOCUS(byId(doc, 'p2'));
-    const record = InsertBefore.run(state, 'ul')!;
+    const record = InsertBefore.run(state, { tagName: 'ul', children: [{ tagName: 'li' }] })!;
     const listItem = doc.root.children[1]?.firstElementChild;
 
     // act + assert: undo restores original DOM + FOCUS

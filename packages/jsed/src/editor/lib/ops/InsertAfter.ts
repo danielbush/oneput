@@ -1,6 +1,7 @@
 import type { EditorState } from '../EditorState.js';
 import * as focusable from '../../../lib/ops/focusable.js';
 import { normalize } from '../../../lib/ops/normalize.js';
+import type { ElementSpec } from '../../../lib/core/dom-rules.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
@@ -12,12 +13,12 @@ import type { UndoRecord } from '../../../undo/index.js';
  * {@link focusable.undoInsertElementAfter} / {@link focusable.redoInsertElementAfter}).
  */
 export class InsertAfter implements UndoRecord {
-  static run(state: EditorState, tagName: string): InsertAfter | undefined {
+  static run(state: EditorState, spec: ElementSpec): InsertAfter | undefined {
     if (state.isEditing()) return;
     const focus = state.nav.getFocus();
     if (!focus || focus === state.document.root) return;
 
-    const op = focusable.insertNewAfter(tagName, focus);
+    const op = focusable.insertNewAfter(spec, focus);
     if (!op) return;
 
     const focusTarget = focusable.getInitialFocusTarget(op.element);

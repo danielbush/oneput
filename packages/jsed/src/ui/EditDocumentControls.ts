@@ -458,13 +458,13 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focusOps.getInsertAfterCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getInsertAfterTemplates().map((template, index) => {
               return {
-                id: `${tagName}-${index}`,
-                text: `<${tagName}>`,
+                id: `${template.id}-${index}`,
+                text: template.label,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focusOps.insertNewAfter(tagName);
+                  editor.focusOps.insertNewAfter(template.spec);
                 }
               };
             });
@@ -480,7 +480,7 @@ export class EditDocumentControls {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focusOps.insertNewAfter(item);
+                    editor.focusOps.insertNewAfter({ tagName: item });
                   }
                 }
               })
@@ -495,13 +495,13 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focusOps.getInsertBeforeCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getInsertBeforeTemplates().map((template, index) => {
               return {
-                id: `${tagName}-${index}`,
-                text: `<${tagName}>`,
+                id: `${template.id}-${index}`,
+                text: template.label,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focusOps.insertNewBefore(tagName);
+                  editor.focusOps.insertNewBefore(template.spec);
                 }
               };
             });
@@ -517,7 +517,7 @@ export class EditDocumentControls {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focusOps.insertNewBefore(item);
+                    editor.focusOps.insertNewBefore({ tagName: item });
                   }
                 }
               })
@@ -532,13 +532,13 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focusOps.getAppendCandidates().map((tagName, index) => {
+            const candidates = editor.focusOps.getAppendTemplates().map((template, index) => {
               return {
-                id: `${tagName}-${index}`,
-                text: `<${tagName}>`,
+                id: `${template.id}-${index}`,
+                text: template.label,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focusOps.appendNew(tagName);
+                  editor.focusOps.appendNew(template.spec);
                 }
               };
             });
@@ -554,7 +554,7 @@ export class EditDocumentControls {
                   text: 'Type tag name...',
                   icon: icons.Pencil,
                   action: (item: string) => {
-                    editor.focusOps.appendNew(item);
+                    editor.focusOps.appendNew({ tagName: item });
                   }
                 }
               })

@@ -1,6 +1,7 @@
 import type { EditorState } from '../EditorState.js';
 import * as focusable from '../../../lib/ops/focusable.js';
 import { normalize } from '../../../lib/ops/normalize.js';
+import type { ElementSpec } from '../../../lib/core/dom-rules.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
@@ -12,12 +13,12 @@ import type { UndoRecord } from '../../../undo/index.js';
  * {@link focusable.undoInsertElementBefore} / {@link focusable.redoInsertElementBefore}).
  */
 export class InsertBefore implements UndoRecord {
-  static run(state: EditorState, tagName: string): InsertBefore | undefined {
+  static run(state: EditorState, spec: ElementSpec): InsertBefore | undefined {
     if (state.isEditing()) return;
     const focus = state.nav.getFocus();
     if (!focus || focus === state.document.root) return;
 
-    const op = focusable.insertNewBefore(tagName, focus);
+    const op = focusable.insertNewBefore(spec, focus);
     if (!op) return;
 
     const focusTarget = focusable.getInitialFocusTarget(op.element);

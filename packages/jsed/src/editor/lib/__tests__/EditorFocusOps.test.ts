@@ -27,7 +27,7 @@ describe('insertNewAfter (orchestration)', () => {
     editor.start();
 
     // act
-    const inserted = editor.focusOps.insertNewAfter('p');
+    const inserted = editor.focusOps.insertNewAfter({ tagName: 'p' });
 
     // assert
     expect(inserted).toBe(true);
@@ -46,7 +46,7 @@ describe('insertNewAfter (orchestration)', () => {
     editor.enterEditing(byId(doc, 'p1'));
 
     // act
-    const inserted = editor.focusOps.insertNewAfter('p');
+    const inserted = editor.focusOps.insertNewAfter({ tagName: 'p' });
 
     // assert
     expect(inserted).toBe(false);
@@ -65,7 +65,7 @@ describe('insertNewBefore (orchestration)', () => {
     editor.nav.REQUEST_FOCUS(byId(doc, 'p2'));
 
     // act
-    const inserted = editor.focusOps.insertNewBefore('p');
+    const inserted = editor.focusOps.insertNewBefore({ tagName: 'p' });
 
     // assert
     expect(inserted).toBe(true);
@@ -84,7 +84,7 @@ describe('insertNewBefore (orchestration)', () => {
     editor.enterEditing(byId(doc, 'p1'));
 
     // act
-    const inserted = editor.focusOps.insertNewBefore('p');
+    const inserted = editor.focusOps.insertNewBefore({ tagName: 'p' });
 
     // assert
     expect(inserted).toBe(false);
@@ -102,7 +102,7 @@ describe('appendNew (orchestration)', () => {
     editor.start();
 
     // act
-    const inserted = editor.focusOps.appendNew('span');
+    const inserted = editor.focusOps.appendNew({ tagName: 'span' });
     const appended = byId(doc, 'p1').lastElementChild;
 
     // assert
@@ -123,7 +123,7 @@ describe('appendNew (orchestration)', () => {
 
     // act + assert
     expect(editor.focusOps.canAppend()).toBe(false);
-    expect(editor.focusOps.appendNew('span')).toBe(false);
+    expect(editor.focusOps.appendNew({ tagName: 'span' })).toBe(false);
     expect(editor.canUndo()).toBe(false);
 
     editor.destroy();

@@ -20,13 +20,14 @@ export class AppendNew implements UndoRecord {
     const op = focusable.appendNew(focus, tagName);
     if (!op) return;
 
+    const focusTarget = focusable.getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
     });
-    state.nav.FOCUS(op.element);
+    state.nav.FOCUS(focusTarget);
 
-    const record = new AppendNew(op, { undo: focus, redo: op.element });
+    const record = new AppendNew(op, { undo: focus, redo: focusTarget });
     record.normalize();
     return record;
   }

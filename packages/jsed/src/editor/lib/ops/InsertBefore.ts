@@ -20,13 +20,14 @@ export class InsertBefore implements UndoRecord {
     const op = focusable.insertNewBefore(tagName, focus);
     if (!op) return;
 
+    const focusTarget = focusable.getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
     });
-    state.nav.FOCUS(op.element);
+    state.nav.FOCUS(focusTarget);
 
-    const record = new InsertBefore(op, { undo: focus, redo: op.element });
+    const record = new InsertBefore(op, { undo: focus, redo: focusTarget });
     record.normalize();
     return record;
   }

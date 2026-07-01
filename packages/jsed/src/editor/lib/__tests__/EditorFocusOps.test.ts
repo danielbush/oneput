@@ -1,5 +1,15 @@
 import { describe, expect, it, test } from 'vitest';
-import { byId, frag, identify, identifyChildren, li, makeRoot, p, ul } from '../../../test/util.js';
+import {
+  byId,
+  div,
+  frag,
+  identify,
+  identifyChildren,
+  li,
+  makeRoot,
+  p,
+  ul
+} from '../../../test/util.js';
 import { Editor } from '../../Editor.js';
 import type { JsedDocument } from '../../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
@@ -377,6 +387,89 @@ describe('insertNewBefore', () => {
     expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
     expect(editor.nav.getFocus()).toBe(doc.root);
     expect(elementChanges).toEqual([]);
+
+    editor.destroy();
+  });
+});
+
+describe('required-child focus', () => {
+  it('insertNewAfter a ul focuses its li', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'foo'));
+    const editor = createNullEditor(doc);
+    editor.start();
+
+    // act
+    const inserted = editor.focusOps.insertNewAfter('ul');
+
+    // assert
+    const list = doc.root.children[1];
+    expect(inserted).toBe(true);
+    expect(list?.tagName.toLowerCase()).toBe('ul');
+    expect(editor.nav.getFocus()).toBe(list?.firstElementChild);
+    expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
+
+    editor.destroy();
+  });
+
+  it('insertNewBefore a ul focuses its li', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const editor = createNullEditor(doc);
+    editor.start();
+    editor.nav.REQUEST_FOCUS(byId(doc, 'p2'));
+
+    // act
+    const inserted = editor.focusOps.insertNewBefore('ul');
+
+    // assert
+    const list = doc.root.children[1];
+    expect(inserted).toBe(true);
+    expect(list?.tagName.toLowerCase()).toBe('ul');
+    expect(editor.nav.getFocus()).toBe(list?.firstElementChild);
+    expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
+
+    editor.destroy();
+  });
+
+  it('appendNew a ul focuses its li', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'box' }, p('foo')));
+    const editor = createNullEditor(doc);
+    editor.start();
+    const box = byId(doc, 'box');
+    editor.nav.REQUEST_FOCUS(box);
+
+    // act
+    const inserted = editor.focusOps.appendNew('ul');
+
+    // assert
+    const list = box.lastElementChild;
+    expect(inserted).toBe(true);
+    expect(list?.tagName.toLowerCase()).toBe('ul');
+    expect(editor.nav.getFocus()).toBe(list?.firstElementChild);
+    expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
+
+    editor.destroy();
+  });
+
+  it('undo then redo round-trips FOCUS to the li', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'foo'));
+    const editor = createNullEditor(doc);
+    editor.start();
+    editor.focusOps.insertNewAfter('ul');
+    const listItem = doc.root.children[1]?.firstElementChild;
+
+    // act + assert: undo restores original DOM + FOCUS
+    editor.undo();
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+    expect(editor.nav.getFocus()).toBe(byId(doc, 'p1'));
+
+    // act + assert: redo re-inserts + focuses the li again
+    editor.redo();
+    expect(editor.nav.getFocus()).toBe(listItem);
+    expect(editor.nav.getFocus()?.tagName.toLowerCase()).toBe('li');
 
     editor.destroy();
   });

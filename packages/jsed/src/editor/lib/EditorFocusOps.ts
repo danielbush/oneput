@@ -7,6 +7,7 @@ import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
 import { InsertAfter } from './InsertAfter.js';
 import { AppendNew } from './AppendNew.js';
 import { InsertBefore } from './InsertBefore.js';
+import { Delete } from './Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
@@ -129,27 +130,7 @@ export class EditorFocusOps {
   }
 
   delete(): boolean {
-    const focus = this.state.nav.getFocus();
-    if (!focus || !canDelete(focus, this.state.document)) {
-      return false;
-    }
-
-    const parent = focus.parentElement;
-    if (!parent) {
-      return false;
-    }
-    const nextFocus =
-      focusable.findNextFocusableOutside(focus, this.state.document.root) ??
-      focusable.findPreviousFocusableOutside(focus, this.state.document.root) ??
-      parent;
-
-    focusable.deleteElement(focus);
-    this.state.eventsEmitter.emitElementChange({
-      type: 'focusable-removed',
-      element: focus
-    });
-    this.state.nav.FOCUS(nextFocus);
-    return true;
+    return !!this._undo(Delete.run(this.state));
   }
 
   // #endregion

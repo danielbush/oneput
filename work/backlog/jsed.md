@@ -277,6 +277,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - should indiscriminantly target template or script elements
   - it should always be JSED_IGNORE_CLASS based
   - what breaks if we make that change?
+- refactor: make MenuItemsFn purely about debounce; no menu items
 
 ## defer
 

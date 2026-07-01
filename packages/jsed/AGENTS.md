@@ -22,6 +22,11 @@ Top level modules
 - src/ui/actions.ts
 - src/ui/menuItems.ts
 
+Some subsystems have reports or particular instructions:
+
+- [editor AGENTS.md](./src/editor/AGENTS.md)
+- [cursor AGENTS.md](./src/cursor/AGENTS.md)
+
 Everything else is either intermediate or lower level operations.
 
 The lowest levels

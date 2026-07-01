@@ -59,9 +59,6 @@ export class Editor {
   exitEditing = (params?: { softExit?: boolean; focusElement?: HTMLElement }) =>
     this.state.exitEditing(params);
   getCursor = () => this.state.cursor;
-
-  // Multi-function
-  handleEnter = () => this.state.ops.handleEnter();
   handleExit = (params?: { softExit: boolean }) => this.state.ops.handleExit(params);
 
   // Editing
@@ -73,6 +70,7 @@ export class Editor {
    * "At CURSOR" operations
    */
   cursorOps: EditorCursorOps;
+  handleEnter = () => this.state.ops.handleEnter();
   handleDelete = (evt?: KeyboardEvent) => this.state.ops.handleDelete(evt);
   // Editing is event driven see EditorController.
 

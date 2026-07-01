@@ -38,7 +38,7 @@ Priority per the architecture's weighting: fill the heavy low-level
 `focusable.test.ts` cases first (mirror the `insertNewAfter` block), then one
 integration round-trip each.
 
-## Conversion of EditorAnchorOps to UndoRecord
+## Conversion of EditorFocusAnchorOps to UndoRecord
 
 None converted yet — every op direct-mutates and records nothing on the
 `UndoRecorder`. The low-level `lib/ops/anchor.ts` functions are tested
@@ -57,6 +57,19 @@ refactor first. No editor-level tests exist for this class.
 (The `can*` methods are guards, not mutations, so they aren't conversion
 candidates.)
 
+## Conversion of EditorFocusSpaceOps to UndoRecord
+
+None converted yet. Direct-mutates via `lib/ops/space.ts` (`*Tag` variants),
+tested forward-only in `space.test.ts`; no tripartite undo/redo shape yet. No
+editor-level tests for this class.
+
+| Op                     | UndoRecord | Low-level op + undo/redo (`space.test.ts`) | Editor forward action | Editor undo/redo round-trip |
+| ---------------------- | ---------- | ------------------------------------------ | --------------------- | --------------------------- |
+| `insertSpaceAfterTag`  | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
+| `removeSpaceAfterTag`  | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
+| `insertSpaceBeforeTag` | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
+| `removeSpaceBeforeTag` | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
+
 ## Conversion of EditorCursorOps to UndoRecord
 
 None converted yet. Space edits direct-mutate via `lib/ops/space.ts`
@@ -72,19 +85,6 @@ editor-level tests for this class.
 | `removeSpaceBefore` | ❌ not yet | fwd ✅, no undo/redo                        | ❌ none               | —                           |
 | `removeSpaceAfter`  | ❌ not yet | fwd ✅, no undo/redo                        | ❌ none               | —                           |
 | `splitAtCursor`     | ❌ not yet | via `Cursor.splitAtToken` (check recording) | ❌ none               | —                           |
-
-## Conversion of EditorFocusSpaceOps to UndoRecord
-
-None converted yet. Direct-mutates via `lib/ops/space.ts` (`*Tag` variants),
-tested forward-only in `space.test.ts`; no tripartite undo/redo shape yet. No
-editor-level tests for this class.
-
-| Op                     | UndoRecord | Low-level op + undo/redo (`space.test.ts`) | Editor forward action | Editor undo/redo round-trip |
-| ---------------------- | ---------- | ------------------------------------------ | --------------------- | --------------------------- |
-| `insertSpaceAfterTag`  | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
-| `removeSpaceAfterTag`  | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
-| `insertSpaceBeforeTag` | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
-| `removeSpaceBeforeTag` | ❌ not yet | fwd ✅, no undo/redo                       | ❌ none               | —                           |
 
 ## Architecture
 
@@ -108,12 +108,12 @@ editor-level tests for this class.
     - for ops objects, test integration and any new state / logic introduced
     - for state objects and related constructs, we should exercise the main
       pathways
-  - notes
-    - at FOCUS ops
+  - ops structure
+    - "at FOCUS" ops
       - EditorFocusOps - operations on FOCUS
       - EditorFocusSpaceOps - space operations on FOCUS
-      - EditorAnchorOps - Anchor operations on FOCUS
-    - at CUROSR ops
+      - EditorFocusAnchorOps - Anchor operations on FOCUS
+    - "at CURSOR" ops
       - EditorCursorOps - operations at CURSOR
 - src/editor/Editor.ts
   - facade that combines `src/editor/lib/**` into a coherent whole

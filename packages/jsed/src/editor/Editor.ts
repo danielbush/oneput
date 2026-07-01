@@ -2,7 +2,7 @@ import { Nav } from '../focus/Nav.js';
 import type { JsedDocument } from '../types.js';
 import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './lib/EditorFocusOps.js';
-import { EditorAnchorOps } from './lib/EditorAnchorOps.js';
+import { EditorFocusAnchorOps } from './lib/EditorFocusAnchorOps.js';
 import { EditorCursorOps } from './lib/EditorCursorOps.js';
 import { EditorEventsEmitter } from './lib/EditorEventsEmitter.js';
 import { EditorState } from './lib/EditorState.js';
@@ -74,7 +74,7 @@ export class Editor {
   /**
    * Anchor operations at FOCUS
    */
-  anchorOps: EditorAnchorOps;
+  anchorOps: EditorFocusAnchorOps;
   /**
    * Operations that use the CURSOR (ie its position etc).
    */

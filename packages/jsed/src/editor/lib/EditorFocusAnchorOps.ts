@@ -17,9 +17,9 @@ import {
  *
  * This is effectivey an extension of Editor.
  */
-export class EditorAnchorOps {
+export class EditorFocusAnchorOps {
   static create(state: EditorState) {
-    return new EditorAnchorOps(state);
+    return new EditorFocusAnchorOps(state);
   }
 
   constructor(private state: EditorState) {}

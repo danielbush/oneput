@@ -4,7 +4,7 @@ import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../../input/UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';
-import { EditorAnchorOps } from './EditorAnchorOps.js';
+import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
 import { EditorCursorOps } from './EditorCursorOps.js';
 import { ElementIndicator } from '../../ui/index.js';
 import { CSSElementIndicator } from '../../ui/index.js';
@@ -118,7 +118,7 @@ export class EditorState {
     public eventsEmitter = EditorEventsEmitter.create(),
     public controller = EditorController.create(this),
     public focus = EditorFocusOps.create(this),
-    public anchor = EditorAnchorOps.create(this),
+    public anchor = EditorFocusAnchorOps.create(this),
     public cursorOps = EditorCursorOps.create(this),
     public ops = EditorOps.create(this)
   ) {}

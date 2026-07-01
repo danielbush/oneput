@@ -4,10 +4,10 @@ import { canDelete } from '../../lib/core/dom-rules.js';
 import { convert, unwrap } from '../../lib/ops/focusable.js';
 import { isInlineFlow } from '../../lib/core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
-import { InsertAfter } from './InsertAfter.js';
-import { AppendNew } from './AppendNew.js';
-import { InsertBefore } from './InsertBefore.js';
-import { Delete } from './Delete.js';
+import { InsertAfter } from './ops/InsertAfter.js';
+import { AppendNew } from './ops/AppendNew.js';
+import { InsertBefore } from './ops/InsertBefore.js';
+import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 

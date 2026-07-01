@@ -1,7 +1,7 @@
-import type { EditorState } from './EditorState.js';
-import * as focusable from '../../lib/ops/focusable.js';
-import { canDelete } from '../../lib/core/dom-rules.js';
-import type { UndoRecord } from '../../undo/index.js';
+import type { EditorState } from '../EditorState.js';
+import * as focusable from '../../../lib/ops/focusable.js';
+import { canDelete } from '../../../lib/core/dom-rules.js';
+import type { UndoRecord } from '../../../undo/index.js';
 
 /**
  * Editor-level FOCUS operation: delete the focused FOCUSABLE.

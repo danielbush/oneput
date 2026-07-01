@@ -1,7 +1,7 @@
-import type { EditorState } from './EditorState.js';
-import * as focusable from '../../lib/ops/focusable.js';
-import { normalize } from '../../lib/ops/normalize.js';
-import type { UndoRecord } from '../../undo/index.js';
+import type { EditorState } from '../EditorState.js';
+import * as focusable from '../../../lib/ops/focusable.js';
+import { normalize } from '../../../lib/ops/normalize.js';
+import type { UndoRecord } from '../../../undo/index.js';
 
 /**
  * Editor-level FOCUS operation: insert a new FOCUSABLE before the focused one.

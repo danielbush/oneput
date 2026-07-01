@@ -3,7 +3,7 @@ import type { JsedDocument } from '../types.js';
 import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';
 import { EditorAnchorOps } from './lib/EditorAnchorOps.js';
-import { EditorCursorOps } from './lib/EditorCursorOps.js';
+import { EditorCursorOps } from './EditorCursorOps.js';
 import { EditorEventsEmitter } from './lib/EditorEventsEmitter.js';
 import { EditorState } from './lib/EditorState.js';
 

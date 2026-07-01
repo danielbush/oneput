@@ -157,6 +157,8 @@ Tokens and Text and whitespace
   - Anchors are displayed.
   - Don't allow automatic anchors to be deleted.
   - Allow user to add anchors but don't mark them as special.
+    - COMMENT: if they don't convert them to text, then they will get removed
+    - COMMENT: we might however want to allow the user to then remove them again during the same session
   - All anchors are removed when saving.
   - token.remove checks if it is removing the last TOKEN in the LINE_SEGMENT; if so, then it places an ANCHOR instead and doesn't flip any separators.
   - `anchorize(el)` - re-anchorizes an element

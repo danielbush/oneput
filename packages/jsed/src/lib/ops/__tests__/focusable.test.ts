@@ -6,6 +6,7 @@ import {
   createElement,
   deleteHighestEmpty,
   findNextFocusableOutside,
+  getInitialFocusTarget,
   findPreviousFocusableOutside,
   insertNewAfter,
   recSplitAfterChild,
@@ -437,5 +438,40 @@ describe('createElement required children', () => {
 
     // assert
     expect(identifyChildren(el)).toEqual(['[anchor]']);
+  });
+});
+
+describe('getInitialFocusTarget', () => {
+  test('ul resolves to its li', () => {
+    // arrange
+    const el = createElement('ul');
+
+    // act
+    const target = getInitialFocusTarget(el);
+
+    // assert
+    expect(target.tagName).toBe('LI');
+  });
+
+  test('anchorable element resolves to itself', () => {
+    // arrange
+    const el = createElement('p');
+
+    // act
+    const target = getInitialFocusTarget(el);
+
+    // assert
+    expect(target).toBe(el);
+  });
+
+  test('non-anchorable element with no anchorable descendant falls back to itself', () => {
+    // arrange
+    const el = createElement('div');
+
+    // act
+    const target = getInitialFocusTarget(el);
+
+    // assert
+    expect(target).toBe(el);
   });
 });

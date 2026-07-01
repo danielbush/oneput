@@ -31,6 +31,30 @@ export function createElement(
   return el;
 }
 
+function findAnchorableDescendant(el: HTMLElement): HTMLElement | null {
+  if (canCreateWithAnchor(el.tagName)) {
+    return el;
+  }
+  for (const child of Array.from(el.children)) {
+    const found = findAnchorableDescendant(child as HTMLElement);
+    if (found) {
+      return found;
+    }
+  }
+  return null;
+}
+
+/**
+ * Resolve the descendant of a freshly created element that should receive FOCUS.
+ *
+ * Returns the first content leaf that can hold text ({@link canCreateWithAnchor}),
+ * so `ul` descends to its `li` and `table` to its `td` — containers like
+ * `ul`/`tr`/`tbody` are not anchorable. Falls back to `el` itself.
+ */
+export function getInitialFocusTarget(el: HTMLElement): HTMLElement {
+  return findAnchorableDescendant(el) ?? el;
+}
+
 export function getAppendCandidates(parent: HTMLElement): string[] {
   return domRules.getAllowableChildTags(parent.tagName);
 }

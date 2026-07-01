@@ -458,13 +458,13 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focusOps.getInsertAfterTemplates().map((template, index) => {
+            const candidates = editor.focusOps.getInsertAfterOptions().map((option, index) => {
               return {
-                id: `${template.id}-${index}`,
-                text: template.label,
+                id: `${option.id}-${index}`,
+                text: option.label,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focusOps.insertNewAfter(template.spec);
+                  editor.focusOps.insertNewAfter(option.spec);
                 }
               };
             });
@@ -495,13 +495,13 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focusOps.getInsertBeforeTemplates().map((template, index) => {
+            const candidates = editor.focusOps.getInsertBeforeOptions().map((option, index) => {
               return {
-                id: `${template.id}-${index}`,
-                text: template.label,
+                id: `${option.id}-${index}`,
+                text: option.label,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focusOps.insertNewBefore(template.spec);
+                  editor.focusOps.insertNewBefore(option.spec);
                 }
               };
             });
@@ -532,13 +532,13 @@ export class EditDocumentControls {
           left: (b) => [b.icon(icons.Plus)],
           closeMenuOnAction: false,
           action: () => {
-            const candidates = editor.focusOps.getAppendTemplates().map((template, index) => {
+            const candidates = editor.focusOps.getAppendOptions().map((option, index) => {
               return {
-                id: `${template.id}-${index}`,
-                text: template.label,
+                id: `${option.id}-${index}`,
+                text: option.label,
                 icon: icons.Plus,
                 action: () => {
-                  editor.focusOps.appendNew(template.spec);
+                  editor.focusOps.appendNew(option.spec);
                 }
               };
             });

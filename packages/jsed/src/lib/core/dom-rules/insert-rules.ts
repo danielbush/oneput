@@ -1,5 +1,5 @@
 import { FLOW_CONTENT, getAllowableChildTags, PHRASING_CONTENT } from './html-content.js';
-import { getElementTemplatesForTags, type ElementTemplate } from './element-templates.js';
+import { getElementInsertOptionsForTags, type ElementInsertOption } from './element-templates.js';
 
 /**
  * Return the contextless sibling tags for `tagName`.
@@ -16,7 +16,7 @@ import { getElementTemplatesForTags, type ElementTemplate } from './element-temp
  *   `tfoot` require live table-child ordering and are handled by the public
  *   insert-before/after functions.
  */
-export function getAllowableSiblings(tagName: string): string[] {
+function getAllowableSiblings(tagName: string): string[] {
   const normTagName = tagName.toLowerCase();
   if (['li', 'tr', 'td'].includes(normTagName)) return [normTagName];
   if (PHRASING_CONTENT.includes(normTagName)) {
@@ -47,7 +47,7 @@ function getTableChildGroup(tagName: string): TableChildGroup | null {
   }
 }
 
-export function isValidTableChildSequence(tagNames: string[]): boolean {
+function isValidTableChildSequence(tagNames: string[]): boolean {
   let previousGroupIndex = -1;
   let theadCount = 0;
   let tfootCount = 0;
@@ -128,28 +128,28 @@ export function getAllowableInsertAfterTags(target: HTMLElement): string[] {
   return getAllowableSiblings(target.tagName);
 }
 
-export function getAllowableInsertBeforeTemplates(target: HTMLElement): ElementTemplate[] {
+export function getAllowableInsertBeforeOptions(target: HTMLElement): ElementInsertOption[] {
   if (!target.parentElement) {
     return [];
   }
-  return getElementTemplatesForTags(
+  return getElementInsertOptionsForTags(
     getAllowableInsertBeforeTags(target),
     'insertInside',
     target.parentElement.tagName
   );
 }
 
-export function getAllowableInsertAfterTemplates(target: HTMLElement): ElementTemplate[] {
+export function getAllowableInsertAfterOptions(target: HTMLElement): ElementInsertOption[] {
   if (!target.parentElement) {
     return [];
   }
-  return getElementTemplatesForTags(
+  return getElementInsertOptionsForTags(
     getAllowableInsertAfterTags(target),
     'insertInside',
     target.parentElement.tagName
   );
 }
 
-export function getAllowableChildTemplates(tagName: string): ElementTemplate[] {
-  return getElementTemplatesForTags(getAllowableChildTags(tagName), 'appendInside', tagName);
+export function getAllowableChildOptions(tagName: string): ElementInsertOption[] {
+  return getElementInsertOptionsForTags(getAllowableChildTags(tagName), 'appendInside', tagName);
 }

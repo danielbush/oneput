@@ -5,7 +5,7 @@ export type ElementSpec = {
   children?: ElementSpec[];
 };
 
-export type ElementTemplate = {
+export type ElementInsertOption = {
   id: string;
   label: string;
   spec: ElementSpec;
@@ -27,54 +27,54 @@ function isValidElementSpec(spec: ElementSpec): boolean {
   return true;
 }
 
-function defineElementTemplate(template: ElementTemplate): ElementTemplate {
-  if (!isValidElementSpec(template.spec)) {
-    throw new Error(`Invalid element template: ${template.id}`);
+function defineElementInsertOption(option: ElementInsertOption): ElementInsertOption {
+  if (!isValidElementSpec(option.spec)) {
+    throw new Error(`Invalid element insert option: ${option.id}`);
   }
-  return template;
+  return option;
 }
 
-const DEFAULT_TEMPLATES: ElementTemplate[] = [
+const DEFAULT_INSERT_OPTIONS: ElementInsertOption[] = [
   ...FLOW_CONTENT.filter((tagName) => !['ul', 'ol', 'table'].includes(tagName)).map((tagName) =>
-    defineElementTemplate({
+    defineElementInsertOption({
       id: tagName,
       label: `<${tagName}>`,
       spec: { tagName }
     })
   ),
   ...PHRASING_CONTENT.map((tagName) =>
-    defineElementTemplate({
+    defineElementInsertOption({
       id: tagName,
       label: `<${tagName}>`,
       spec: { tagName }
     })
   ),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'ul',
     label: 'List',
     spec: { tagName: 'ul', children: [{ tagName: 'li' }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'ul-paragraph',
     label: 'List with paragraph',
     spec: { tagName: 'ul', children: [{ tagName: 'li', children: [{ tagName: 'p' }] }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'ol',
     label: 'Numbered list',
     spec: { tagName: 'ol', children: [{ tagName: 'li' }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'ol-paragraph',
     label: 'Numbered list with paragraph',
     spec: { tagName: 'ol', children: [{ tagName: 'li', children: [{ tagName: 'p' }] }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'li',
     label: 'list item - <li>',
     spec: { tagName: 'li' }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'table-body-cell',
     label: 'Table with body',
     spec: {
@@ -87,7 +87,7 @@ const DEFAULT_TEMPLATES: ElementTemplate[] = [
       ]
     }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'table-head-body',
     label: 'Table with head and body',
     spec: {
@@ -104,22 +104,22 @@ const DEFAULT_TEMPLATES: ElementTemplate[] = [
       ]
     }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'thead',
     label: 'Table header',
     spec: { tagName: 'thead', children: [{ tagName: 'tr', children: [{ tagName: 'th' }] }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'tbody',
     label: 'Table body',
     spec: { tagName: 'tbody', children: [{ tagName: 'tr', children: [{ tagName: 'td' }] }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'tfoot',
     label: 'Table footer',
     spec: { tagName: 'tfoot', children: [{ tagName: 'tr', children: [{ tagName: 'td' }] }] }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'tr-cell',
     label: 'Table row with cell',
     spec: { tagName: 'tr', children: [{ tagName: 'td' }] },
@@ -128,7 +128,7 @@ const DEFAULT_TEMPLATES: ElementTemplate[] = [
       insertInside: ['table', 'tbody', 'tfoot']
     }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'tr-heading',
     label: 'Table row with heading',
     spec: { tagName: 'tr', children: [{ tagName: 'th' }] },
@@ -137,37 +137,49 @@ const DEFAULT_TEMPLATES: ElementTemplate[] = [
       insertInside: ['thead']
     }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'td',
     label: '<td>',
     spec: { tagName: 'td' }
   }),
-  defineElementTemplate({
+  defineElementInsertOption({
     id: 'th',
     label: '<th>',
     spec: { tagName: 'th' }
   })
 ];
 
-export function getElementTemplates(): ElementTemplate[] {
-  return DEFAULT_TEMPLATES;
+function createBareTagOption(tagName: string): ElementInsertOption {
+  const normalized = tagName.toLowerCase();
+  return {
+    id: normalized,
+    label: `<${normalized}>`,
+    spec: { tagName: normalized }
+  };
 }
 
-export function getElementTemplatesForTags(
+export function getElementInsertOptionsForTags(
   tagNames: string[],
-  placement: keyof NonNullable<ElementTemplate['placement']>,
+  placement: keyof NonNullable<ElementInsertOption['placement']>,
   contextTagName: string
-): ElementTemplate[] {
+): ElementInsertOption[] {
   const allowed = new Set(tagNames.map((tagName) => tagName.toLowerCase()));
   const context = contextTagName.toLowerCase();
-  return DEFAULT_TEMPLATES.filter((template) => {
-    if (!allowed.has(template.spec.tagName.toLowerCase())) {
+  const options = DEFAULT_INSERT_OPTIONS.filter((option) => {
+    if (!allowed.has(option.spec.tagName.toLowerCase())) {
       return false;
     }
-    const allowedContexts = template.placement?.[placement];
+    const allowedContexts = option.placement?.[placement];
     if (!allowedContexts) {
       return true;
     }
     return allowedContexts.includes(context);
   });
+
+  const covered = new Set(options.map((option) => option.spec.tagName.toLowerCase()));
+  const bareTagOptions = Array.from(allowed)
+    .filter((tagName) => !covered.has(tagName))
+    .map(createBareTagOption);
+
+  return [...options, ...bareTagOptions];
 }

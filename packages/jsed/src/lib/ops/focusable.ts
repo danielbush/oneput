@@ -59,8 +59,8 @@ export function getInitialFocusTarget(el: HTMLElement): HTMLElement {
   return findAnchorableLeaf(el) ?? el;
 }
 
-export function getAppendTemplates(parent: HTMLElement): domRules.ElementTemplate[] {
-  return domRules.getAllowableChildTemplates(parent.tagName);
+export function getAppendOptions(parent: HTMLElement): domRules.ElementInsertOption[] {
+  return domRules.getAllowableChildOptions(parent.tagName);
 }
 
 export function isEmpty(el: Node): boolean {
@@ -114,8 +114,8 @@ export function redoAppendElement(op: AppendElement) {
   op.parent.appendChild(op.element);
 }
 
-export function getInsertAfterTemplates(el: HTMLElement): domRules.ElementTemplate[] {
-  return domRules.getAllowableInsertAfterTemplates(el);
+export function getInsertAfterOptions(el: HTMLElement): domRules.ElementInsertOption[] {
+  return domRules.getAllowableInsertAfterOptions(el);
 }
 
 export type InsertElementAfter = {
@@ -143,8 +143,8 @@ export function redoInsertElementAfter(op: InsertElementAfter) {
   op.target.insertAdjacentElement('afterend', op.element);
 }
 
-export function getInsertBeforeTemplates(el: HTMLElement): domRules.ElementTemplate[] {
-  return domRules.getAllowableInsertBeforeTemplates(el);
+export function getInsertBeforeOptions(el: HTMLElement): domRules.ElementInsertOption[] {
+  return domRules.getAllowableInsertBeforeOptions(el);
 }
 
 export type InsertElementBefore = {

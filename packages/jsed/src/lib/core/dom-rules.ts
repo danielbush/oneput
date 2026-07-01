@@ -2,16 +2,13 @@ import type { JsedDocument } from '../../types.js';
 import { PHRASING_CONTENT } from './dom-rules/html-content.js';
 
 export { getAllowableChildTags } from './dom-rules/html-content.js';
-export type { ElementSpec, ElementTemplate } from './dom-rules/element-templates.js';
-export { getElementTemplates, getElementTemplatesForTags } from './dom-rules/element-templates.js';
+export type { ElementInsertOption, ElementSpec } from './dom-rules/element-templates.js';
 export {
-  getAllowableChildTemplates,
+  getAllowableChildOptions,
   getAllowableInsertAfterTags,
-  getAllowableInsertAfterTemplates,
+  getAllowableInsertAfterOptions,
   getAllowableInsertBeforeTags,
-  getAllowableInsertBeforeTemplates,
-  getAllowableSiblings,
-  isValidTableChildSequence
+  getAllowableInsertBeforeOptions
 } from './dom-rules/insert-rules.js';
 
 /**

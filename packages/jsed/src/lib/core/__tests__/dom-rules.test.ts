@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
-  getAllowableChildTemplates,
+  getAllowableChildOptions,
   getAllowableInsertAfterTags,
-  getAllowableInsertAfterTemplates,
+  getAllowableInsertAfterOptions,
   getAllowableInsertBeforeTags
 } from '../dom-rules';
 
@@ -26,36 +26,40 @@ function tableChild(...tagNames: string[]): HTMLElement {
   return children[Math.floor(children.length / 2)];
 }
 
-describe('element templates', () => {
+describe('element insert options', () => {
   test('thead appends heading rows', () => {
-    expect(ids(getAllowableChildTemplates('thead'))).toEqual(['tr-heading']);
+    expect(ids(getAllowableChildOptions('thead'))).toEqual(['tr-heading']);
   });
 
   test('tbody appends cell rows', () => {
-    expect(ids(getAllowableChildTemplates('tbody'))).toEqual(['tr-cell']);
+    expect(ids(getAllowableChildOptions('tbody'))).toEqual(['tr-cell']);
   });
 
   test('tfoot appends cell rows', () => {
-    expect(ids(getAllowableChildTemplates('tfoot'))).toEqual(['tr-cell']);
+    expect(ids(getAllowableChildOptions('tfoot'))).toEqual(['tr-cell']);
+  });
+
+  test('phrasing parent append includes bare leaf options', () => {
+    expect(ids(getAllowableChildOptions('span'))).toContain('br');
   });
 
   test('tr sibling inside thead uses heading rows', () => {
-    expect(ids(getAllowableInsertAfterTemplates(childIn('thead', 'tr')))).toEqual(['tr-heading']);
+    expect(ids(getAllowableInsertAfterOptions(childIn('thead', 'tr')))).toEqual(['tr-heading']);
   });
 
   test('tr sibling inside tbody uses cell rows', () => {
-    expect(ids(getAllowableInsertAfterTemplates(childIn('tbody', 'tr')))).toEqual(['tr-cell']);
+    expect(ids(getAllowableInsertAfterOptions(childIn('tbody', 'tr')))).toEqual(['tr-cell']);
   });
 
-  test('detached target has no sibling templates', () => {
-    expect(ids(getAllowableInsertAfterTemplates(document.createElement('tr')))).toEqual([]);
+  test('detached target has no sibling options', () => {
+    expect(ids(getAllowableInsertAfterOptions(document.createElement('tr')))).toEqual([]);
   });
 
   test('tbody can insert table footer after it', () => {
     const tbody = tableChild('tbody');
 
     expect(getAllowableInsertAfterTags(tbody)).toEqual(['tbody', 'tfoot', 'tr']);
-    expect(ids(getAllowableInsertAfterTemplates(tbody))).toContain('tfoot');
+    expect(ids(getAllowableInsertAfterOptions(tbody))).toContain('tfoot');
   });
 
   test('tbody can insert table header before it when missing', () => {

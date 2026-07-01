@@ -10,7 +10,7 @@ import { InsertBefore } from './ops/InsertBefore.js';
 import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
 import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
-import type { ElementSpec, ElementTemplate } from '../../lib/core/dom-rules.js';
+import type { ElementInsertOption, ElementSpec } from '../../lib/core/dom-rules.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -38,12 +38,12 @@ export class EditorFocusOps {
 
   // #region insert after
 
-  getInsertAfterTemplates(): ElementTemplate[] {
+  getInsertAfterOptions(): ElementInsertOption[] {
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
-    return focusable.getInsertAfterTemplates(focus);
+    return focusable.getInsertAfterOptions(focus);
   }
 
   canInsertAfter(): boolean {
@@ -57,7 +57,7 @@ export class EditorFocusOps {
     if (focus === this.state.document.root) {
       return false;
     }
-    return focusable.getInsertAfterTemplates(focus).length > 0;
+    return focusable.getInsertAfterOptions(focus).length > 0;
   }
 
   insertNewAfter(spec: ElementSpec): boolean {
@@ -68,12 +68,12 @@ export class EditorFocusOps {
 
   // #region insert before
 
-  getInsertBeforeTemplates(): ElementTemplate[] {
+  getInsertBeforeOptions(): ElementInsertOption[] {
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
-    return focusable.getInsertBeforeTemplates(focus);
+    return focusable.getInsertBeforeOptions(focus);
   }
 
   canInsertBefore(): boolean {
@@ -87,7 +87,7 @@ export class EditorFocusOps {
     if (focus === this.state.document.root) {
       return false;
     }
-    return focusable.getInsertBeforeTemplates(focus).length > 0;
+    return focusable.getInsertBeforeOptions(focus).length > 0;
   }
 
   insertNewBefore(spec: ElementSpec): boolean {
@@ -98,12 +98,12 @@ export class EditorFocusOps {
 
   // #region append new
 
-  getAppendTemplates(): ElementTemplate[] {
+  getAppendOptions(): ElementInsertOption[] {
     const focus = this.state.nav.getFocus();
     if (!focus) {
       return [];
     }
-    return focusable.getAppendTemplates(focus);
+    return focusable.getAppendOptions(focus);
   }
 
   canAppend(): boolean {
@@ -114,7 +114,7 @@ export class EditorFocusOps {
     if (!focus) {
       return false;
     }
-    return focusable.getAppendTemplates(focus).length > 0;
+    return focusable.getAppendOptions(focus).length > 0;
   }
 
   appendNew(spec: ElementSpec): boolean {

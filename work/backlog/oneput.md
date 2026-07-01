@@ -118,6 +118,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 - docs: need to make ai-docs similar to effect v4
 - chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+- set up playwright smoke tests on oneput-demo
+  - "open menu should show expected menu items"
+  - etc
+  - run this on PR's
 
 ## defer
 

@@ -5,6 +5,8 @@ import type {
 } from './EditorState.js';
 
 /**
+ * Events sent to outside world (not used internally).
+ *
  * The callbacks a subscriber can register with EditorEventsEmitter.
  *
  * onDocumentChange fires on any text or element change. It is the coalesced

@@ -83,7 +83,11 @@ export class MenuItemsFnController {
           return;
         }
         // console.warn(`got ${value}...`);
-        this.ctl.menu.setDisplayed({ items, focusBehaviour: options.focusBehaviour });
+        this.ctl.menu.setMenu({
+          id: 'menuItemsFnAsync',
+          items,
+          focusBehaviour: options.focusBehaviour
+        });
       },
       options.debounceMS ?? 500,
       { immediate: false }
@@ -101,7 +105,8 @@ export class MenuItemsFnController {
         debouncedHandler.clear();
         inFlight = (inFlight + 1) % 100000;
         options.onDebounce?.(false);
-        this.ctl.menu.setDisplayed({
+        this.ctl.menu.setMenu({
+          id: 'menuItemsFnAsync',
           items: options.whenEmpty(),
           focusBehaviour: options.focusBehaviour
         });
@@ -111,7 +116,8 @@ export class MenuItemsFnController {
       debouncedHandler(payload);
     });
     if (options.whenEmpty && isBlank(this.ctl.input.getInputValue())) {
-      this.ctl.menu.setDisplayed({
+      this.ctl.menu.setMenu({
+        id: 'menuItemsFnAsync',
         items: options.whenEmpty(),
         focusBehaviour: options.focusBehaviour
       });

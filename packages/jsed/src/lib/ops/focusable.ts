@@ -252,27 +252,6 @@ export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HT
   return null;
 }
 
-// export type FocusElementInsertion = {
-//   focus: HTMLElement;
-//   tagName: string;
-// };
-
-// export function getFocusElementInsertion(
-//   focus: HTMLElement | null,
-//   tagName?: string
-// ): FocusElementInsertion | null {
-//   if (!focus || !focus.parentElement) {
-//     return null;
-//   }
-
-//   const normalized = domRules.normalizeTagName(tagName ?? focus.tagName);
-//   if (!normalized || !canContainChildTag(focus.parentElement.tagName, normalized)) {
-//     return null;
-//   }
-
-//   return { focus, tagName: normalized };
-// }
-
 export function unwrap(el: HTMLElement): void {
   el.replaceWith(...Array.from(el.childNodes));
 }

@@ -44,6 +44,14 @@ export class MenuController {
   private disableOpenClose = false;
   public defaultFocusBehaviour: FocusBehaviour = 'last-action,first';
   private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
+  /**
+   * This exists to prevent unwanted flash of menu change which can often occur
+   * when exiting to a parent AppObject AND closing the menu.
+   *
+   * It gets set immediately when openMenu / closeMenu are called.
+   * It tracks currentProps.menuOpen.
+   */
+  private menuOpen: boolean = false;
 
   // #region menu open/close + action
 
@@ -55,6 +63,7 @@ export class MenuController {
     if (this.disableOpenClose) {
       return;
     }
+    this.menuOpen = true;
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
       this.ctl.currentProps.menuOpen = true;
@@ -71,6 +80,7 @@ export class MenuController {
     if (this.disableOpenClose) {
       return;
     }
+    this.menuOpen = false;
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
       this.ctl.currentProps.menuOpen = false;
@@ -119,6 +129,11 @@ export class MenuController {
    * If the menu is closed you won't see the changes until it's opened.
    */
   setDisplayed(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
+    if (!this.menuOpen) {
+      // Prevent menu changes when menu is closing (also when closed by
+      // extension).
+      return;
+    }
     this.ctl.currentProps.menuItems = params.items;
     this.runFocusBehaviour(params.focusBehaviour);
   }

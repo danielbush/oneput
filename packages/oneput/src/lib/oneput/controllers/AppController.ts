@@ -290,6 +290,18 @@ export class AppController {
     this.pop({ payload });
   };
 
+  /**
+   * A convenience function that closes menu and exits the current AppObject.
+   *
+   * We close first to take advantage of the MenuController suppressing unwanted
+   * flashes of changed menu items caused by the exit to the parent AppObject
+   * whilst the menu is closing.
+   */
+  closeAndExit = (payload?: unknown) => {
+    this.ctl.menu.closeMenu();
+    this.pop({ payload });
+  };
+
   private pop = (result?: { payload: unknown }) => {
     // No more parents, do nothing.
     if (this.appParents.length === 0) {

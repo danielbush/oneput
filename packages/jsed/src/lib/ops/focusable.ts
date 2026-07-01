@@ -115,7 +115,7 @@ export function redoAppendElement(op: AppendElement) {
 }
 
 export function getInsertAfterTemplates(el: HTMLElement): domRules.ElementTemplate[] {
-  return domRules.getAllowableInsertAfterTemplates(el.tagName);
+  return domRules.getAllowableInsertAfterTemplates(el);
 }
 
 export type InsertElementAfter = {
@@ -125,7 +125,7 @@ export type InsertElementAfter = {
 };
 
 export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertElementAfter | null {
-  if (!domRules.getAllowableInsertAfterTags(target.tagName).includes(spec.tagName.toLowerCase())) {
+  if (!domRules.getAllowableInsertAfterTags(target).includes(spec.tagName.toLowerCase())) {
     return null;
   }
 
@@ -144,7 +144,7 @@ export function redoInsertElementAfter(op: InsertElementAfter) {
 }
 
 export function getInsertBeforeTemplates(el: HTMLElement): domRules.ElementTemplate[] {
-  return domRules.getAllowableInsertBeforeTemplates(el.tagName);
+  return domRules.getAllowableInsertBeforeTemplates(el);
 }
 
 export type InsertElementBefore = {
@@ -157,7 +157,7 @@ export function insertNewBefore(
   spec: ElementSpec,
   target: HTMLElement
 ): InsertElementBefore | null {
-  if (!domRules.getAllowableInsertBeforeTags(target.tagName).includes(spec.tagName.toLowerCase())) {
+  if (!domRules.getAllowableInsertBeforeTags(target).includes(spec.tagName.toLowerCase())) {
     return null;
   }
 

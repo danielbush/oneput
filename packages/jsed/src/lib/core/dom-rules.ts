@@ -9,6 +9,10 @@ export type ElementTemplate = {
   id: string;
   label: string;
   spec: ElementSpec;
+  placement?: {
+    appendInside?: string[];
+    insertInside?: string[];
+  };
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories
@@ -56,7 +60,7 @@ const FLOW_CONTENT = [
   'table'
 ];
 
-const RULES: { [tagName: string]: string[] } = {
+const ALLOWED_CHILD_TAGS: { [tagName: string]: string[] } = {
   div: [...FLOW_CONTENT, ...PHRASING_CONTENT],
   p: [...PHRASING_CONTENT],
   blockquote: [...PHRASING_CONTENT],
@@ -94,6 +98,52 @@ const RULES: { [tagName: string]: string[] } = {
   td: [...PHRASING_CONTENT, ...FLOW_CONTENT]
 };
 
+/**
+ * Return contextless child tags that can be inserted.
+ *
+ * eg Doesn't take into account if table already has a thead.
+ */
+export function getAllowableChildTags(tagName: string): string[] {
+  const parentTag = tagName.toLowerCase();
+  if (isLeaf(tagName)) {
+    return [];
+  }
+  if (PHRASING_CONTENT.includes(parentTag)) {
+    return [...PHRASING_CONTENT, ...LEAF];
+  }
+  if (parentTag in ALLOWED_CHILD_TAGS) {
+    return ALLOWED_CHILD_TAGS[parentTag];
+  }
+  return [];
+}
+
+/**
+ * Return the contextless sibling tags for `tagName`.
+ *
+ * These are the generic symmetric before/after rules. Live DOM rules that
+ * depend on a specific insertion slot, such as table section ordering, are
+ * applied by `getAllowableInsertBeforeTags` / `getAllowableInsertAfterTags`.
+ *
+ * Examples:
+ * - `tr` returns `['tr']`; a row can sit beside another row inside `thead`,
+ *   `tbody`, `tfoot`, or directly under `table`.
+ * - `td` returns `['td']`; a cell can sit beside another cell inside a row.
+ * - `tbody` returns `[]` here; table section siblings like `thead`/`tbody`/
+ *   `tfoot` require live table-child ordering and are handled by the public
+ *   insert-before/after functions.
+ */
+function getAllowableSiblings(tagName: string): string[] {
+  const normTagName = tagName.toLowerCase();
+  if (['li', 'tr', 'td'].includes(normTagName)) return [normTagName];
+  if (PHRASING_CONTENT.includes(normTagName)) {
+    return PHRASING_CONTENT;
+  }
+  if (FLOW_CONTENT.includes(normTagName)) {
+    return FLOW_CONTENT;
+  }
+  return [];
+}
+
 function isValidElementSpec(spec: ElementSpec): boolean {
   for (const child of spec.children ?? []) {
     if (!getAllowableChildTags(spec.tagName).includes(child.tagName.toLowerCase())) {
@@ -114,16 +164,20 @@ function defineElementTemplate(template: ElementTemplate): ElementTemplate {
 }
 
 const DEFAULT_TEMPLATES: ElementTemplate[] = [
-  ...FLOW_CONTENT.filter((tagName) => !['ul', 'ol', 'table'].includes(tagName)).map((tagName) => ({
-    id: tagName,
-    label: `<${tagName}>`,
-    spec: { tagName }
-  })),
-  ...PHRASING_CONTENT.map((tagName) => ({
-    id: tagName,
-    label: `<${tagName}>`,
-    spec: { tagName }
-  })),
+  ...FLOW_CONTENT.filter((tagName) => !['ul', 'ol', 'table'].includes(tagName)).map((tagName) =>
+    defineElementTemplate({
+      id: tagName,
+      label: `<${tagName}>`,
+      spec: { tagName }
+    })
+  ),
+  ...PHRASING_CONTENT.map((tagName) =>
+    defineElementTemplate({
+      id: tagName,
+      label: `<${tagName}>`,
+      spec: { tagName }
+    })
+  ),
   defineElementTemplate({
     id: 'ul',
     label: 'List',
@@ -144,11 +198,11 @@ const DEFAULT_TEMPLATES: ElementTemplate[] = [
     label: 'Numbered list with paragraph',
     spec: { tagName: 'ol', children: [{ tagName: 'li', children: [{ tagName: 'p' }] }] }
   }),
-  {
+  defineElementTemplate({
     id: 'li',
     label: 'list item - <li>',
     spec: { tagName: 'li' }
-  },
+  }),
   defineElementTemplate({
     id: 'table-body-cell',
     label: 'Table with body',
@@ -197,74 +251,188 @@ const DEFAULT_TEMPLATES: ElementTemplate[] = [
   defineElementTemplate({
     id: 'tr-cell',
     label: 'Table row with cell',
-    spec: { tagName: 'tr', children: [{ tagName: 'td' }] }
+    spec: { tagName: 'tr', children: [{ tagName: 'td' }] },
+    placement: {
+      appendInside: ['table', 'tbody', 'tfoot'],
+      insertInside: ['table', 'tbody', 'tfoot']
+    }
   }),
   defineElementTemplate({
     id: 'tr-heading',
     label: 'Table row with heading',
-    spec: { tagName: 'tr', children: [{ tagName: 'th' }] }
+    spec: { tagName: 'tr', children: [{ tagName: 'th' }] },
+    placement: {
+      appendInside: ['thead'],
+      insertInside: ['thead']
+    }
   }),
-  {
+  defineElementTemplate({
     id: 'td',
     label: '<td>',
     spec: { tagName: 'td' }
-  },
-  {
+  }),
+  defineElementTemplate({
     id: 'th',
     label: '<th>',
     spec: { tagName: 'th' }
-  }
+  })
 ];
 
 function isLeaf(tagName: string): boolean {
   return LEAF.includes(tagName);
 }
 
-export function getAllowableInsertBeforeTags(tagName: string): string[] {
-  const normTagName = tagName.toLowerCase();
-  if (['li', 'tr', 'td'].includes(normTagName)) return [normTagName];
-  if (PHRASING_CONTENT.includes(normTagName)) {
-    return PHRASING_CONTENT;
+type InsertDirection = 'before' | 'after';
+type TableChildGroup = 'head' | 'body' | 'foot';
+
+const TABLE_CHILD_GROUP_ORDER: TableChildGroup[] = ['head', 'body', 'foot'];
+
+function getTableChildGroup(tagName: string): TableChildGroup | null {
+  switch (tagName.toLowerCase()) {
+    case 'thead':
+      return 'head';
+    case 'tbody':
+    case 'tr':
+      return 'body';
+    case 'tfoot':
+      return 'foot';
+    default:
+      return null;
   }
-  if (FLOW_CONTENT.includes(normTagName)) {
-    return FLOW_CONTENT;
-  }
-  return [];
 }
 
-export function getAllowableInsertAfterTags(tagName: string): string[] {
-  return getAllowableInsertBeforeTags(tagName);
+function isValidTableChildSequence(tagNames: string[]): boolean {
+  let previousGroupIndex = -1;
+  let theadCount = 0;
+  let tfootCount = 0;
+
+  for (const tagName of tagNames) {
+    const normalized = tagName.toLowerCase();
+    const group = getTableChildGroup(normalized);
+    if (!group) {
+      return false;
+    }
+    const groupIndex = TABLE_CHILD_GROUP_ORDER.indexOf(group);
+    if (groupIndex < previousGroupIndex) {
+      return false;
+    }
+    previousGroupIndex = groupIndex;
+    if (normalized === 'thead') {
+      theadCount++;
+    }
+    if (normalized === 'tfoot') {
+      tfootCount++;
+    }
+  }
+
+  return theadCount <= 1 && tfootCount <= 1;
 }
 
-export function getAllowableChildTags(tagName: string): string[] {
-  const parentTag = tagName.toLowerCase();
-  if (isLeaf(tagName)) {
+/**
+ * Return table child tags that can be inserted before/after a live table child.
+ *
+ * @param target Existing child of a `<table>` that defines the insertion slot.
+ * @param direction Whether the candidate would be inserted before or after `target`.
+ */
+function getAllowableTableChildInsertTags(
+  target: HTMLElement,
+  direction: InsertDirection
+): string[] {
+  if (target.parentElement?.tagName.toLowerCase() !== 'table') {
     return [];
   }
-  if (PHRASING_CONTENT.includes(parentTag)) {
-    return [...PHRASING_CONTENT, ...LEAF];
+
+  const children = Array.from(target.parentElement.children);
+  const targetIndex = children.indexOf(target);
+
+  // A live table child should appear in parent.children. If it does not, the
+  // insertion slot is inconsistent, so assume no allowable tags.
+
+  if (targetIndex < 0) {
+    return [];
   }
-  if (parentTag in RULES) {
-    return RULES[parentTag];
-  }
-  return [];
+
+  // Simulate inserting the candidate into this slot; keep it only if the
+  // resulting table child order is still valid.
+  //
+  // Example: existingTags=[tbody], candidate=tfoot, insertionIndex=1
+  // produces candidateTags=[tbody, tfoot], which is valid.
+  //
+  // Example: existingTags=[tbody], candidate=thead, insertionIndex=1
+  // produces candidateTags=[tbody, thead], which is invalid.
+
+  const insertionIndex = direction === 'before' ? targetIndex : targetIndex + 1;
+  const existingTags = children.map((child) => child.tagName.toLowerCase());
+  return getAllowableChildTags('table').filter((candidate) => {
+    const candidateTags = [...existingTags];
+    candidateTags.splice(insertionIndex, 0, candidate);
+    return isValidTableChildSequence(candidateTags);
+  });
 }
 
-function getTemplatesForTags(tagNames: string[]): ElementTemplate[] {
+export function getAllowableInsertBeforeTags(target: HTMLElement): string[] {
+  if (!target.parentElement) {
+    return [];
+  }
+  if (target.parentElement.tagName.toLowerCase() === 'table') {
+    return getAllowableTableChildInsertTags(target, 'before');
+  }
+  return getAllowableSiblings(target.tagName);
+}
+
+export function getAllowableInsertAfterTags(target: HTMLElement): string[] {
+  if (!target.parentElement) {
+    return [];
+  }
+  if (target.parentElement.tagName.toLowerCase() === 'table') {
+    return getAllowableTableChildInsertTags(target, 'after');
+  }
+  return getAllowableSiblings(target.tagName);
+}
+
+function getTemplatesForTags(
+  tagNames: string[],
+  placement: keyof NonNullable<ElementTemplate['placement']>,
+  contextTagName: string
+): ElementTemplate[] {
   const allowed = new Set(tagNames.map((tagName) => tagName.toLowerCase()));
-  return DEFAULT_TEMPLATES.filter((template) => allowed.has(template.spec.tagName.toLowerCase()));
+  const context = contextTagName.toLowerCase();
+  return DEFAULT_TEMPLATES.filter((template) => {
+    if (!allowed.has(template.spec.tagName.toLowerCase())) {
+      return false;
+    }
+    const allowedContexts = template.placement?.[placement];
+    if (!allowedContexts) {
+      return true;
+    }
+    return allowedContexts.includes(context);
+  });
 }
 
-export function getAllowableInsertBeforeTemplates(tagName: string): ElementTemplate[] {
-  return getTemplatesForTags(getAllowableInsertBeforeTags(tagName));
+export function getAllowableInsertBeforeTemplates(target: HTMLElement): ElementTemplate[] {
+  if (!target.parentElement) {
+    return [];
+  }
+  return getTemplatesForTags(
+    getAllowableInsertBeforeTags(target),
+    'insertInside',
+    target.parentElement.tagName
+  );
 }
 
-export function getAllowableInsertAfterTemplates(tagName: string): ElementTemplate[] {
-  return getTemplatesForTags(getAllowableInsertAfterTags(tagName));
+export function getAllowableInsertAfterTemplates(target: HTMLElement): ElementTemplate[] {
+  if (!target.parentElement) {
+    return [];
+  }
+  return getTemplatesForTags(
+    getAllowableInsertAfterTags(target),
+    'insertInside',
+    target.parentElement.tagName
+  );
 }
 
 export function getAllowableChildTemplates(tagName: string): ElementTemplate[] {
-  return getTemplatesForTags(getAllowableChildTags(tagName));
+  return getTemplatesForTags(getAllowableChildTags(tagName), 'appendInside', tagName);
 }
 
 /**
@@ -292,21 +460,6 @@ export function canDelete(el: HTMLElement, doc: JsedDocument): boolean {
     return false;
   }
   return true;
-}
-
-/**
- * Some tags are structurally incomplete on their own and need a default child
- * when freshly created — e.g. a `ul`/`ol` needs an `li` to be editable, a
- * `table` needs a `tr`. Returns the default child tag name, or null.
- */
-export function getRequiredChildTag(tagName: string): string | null {
-  switch (tagName.toLowerCase()) {
-    case 'ul':
-    case 'ol':
-      return 'li';
-    default:
-      return null;
-  }
 }
 
 export function getConversionCandidates(_el: HTMLElement): string[] {

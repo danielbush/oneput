@@ -185,6 +185,8 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## chore
 
+- move vocabulary.md to CONCEPTS.md
+- move architecture.md to ARCHITECTURE.md
 - finish src/cursor/REPORT.20260613.md (audit/review)
 - improve identify (in tests)
   - t('foo') token,
@@ -217,13 +219,6 @@ COMMENT: small things that make a difference to user experience, flow of user ac
   - can we just delete the anchor?
   - should we even allow deletion of automatic anchors given they will come back?
   - do we only allow manual anchors to be deleted - in which case we won't bother because that doesn't exist yet
-- refactor: setDisplayed is worrying
-  - it ignores CurrentMenu
-  - it exists for MenuItemsFn and FilterFn
-  - can we expose filter as something that works off CurrentMenu
-  - MenuItemsFn should just call setMenu
-  - remove or make setDisplayed private
-- refactor: make MenuItemsFn purely about debounce; no menu items
 - refactor: remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
   - COMMENT: this stops subsystems importing internals of other subsystems
 - `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/

@@ -86,8 +86,15 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: setDisplayed is worrying
+  - it ignores CurrentMenu
+  - it exists for MenuItemsFn and FilterFn
+  - can we expose filter as something that works off CurrentMenu
+  - MenuItemsFn should just call setMenu
+  - remove or make setDisplayed private
 - refactor: the tick hack in reseedMenu - can we avoid that
   - can we get reseedMenu to pull menu() and apply filter and THEN paint menu items? (more explicitly)
+- refactor: make MenuItemsFn purely about debounce; no menu items
 - proper pull model for declarative AppObject.menu
   - ctl.menu.invalidate() signals that menu must be pulled again
   - this only is an issue if the menu is showing, since I think a closed menu will pull from `menu` when opening

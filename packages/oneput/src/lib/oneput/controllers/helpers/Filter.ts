@@ -10,10 +10,6 @@ import type { FocusBehaviour, FilterFn } from '../../types.js';
  * doors. Because a filter is known to be sync and base-derivable, `invalidate()`
  * can re-apply it inline against a freshly re-seeded base in the same tick (see
  * {@link run}), so the user's query survives a base change with no flash.
- *
- * Filtering and generation share nothing but the menu-level paint target
- * (`_setMenu`) and the enable gate (`enableMenuItemsFn`), both owned by
- * `ctl.menu` — see `_enable`.
  */
 export class FilterController {
   public static create(ctl: Controller) {
@@ -30,7 +26,7 @@ export class FilterController {
   private focusBehaviour?: FocusBehaviour;
   private removeListener?: () => void;
 
-  constructor(private ctl: Controller) {}
+  private constructor(private ctl: Controller) {}
 
   /**
    * Gate filter firing alongside menuItemsFn. Prefer

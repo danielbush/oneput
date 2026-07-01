@@ -87,12 +87,17 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 - fix: modern css element indicator goes off the left side of viewport for small elements on the left edge (legacy indicator handles this)
 
-## feat
+## qol
+
+COMMENT: small things that make a difference to user experience, flow of user actions etc; the focus is on getting the product usable for target audience
 
 - space should probably put us into append
   - COMMENT: currently it moves us forward
+
+## feat
+
 - make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
-- breadcrumb
+- feat: breadcrumb
   - will be useful in mobile to go back up the ancestor chain (which maps to left/right bindings atm) but the difference is we can see what elements are in the acnestor chain, very easy to click on the parent p-tag or parent div tag etc etc; combine with moving between siblings using up/down buttons for button-based movement; probably don't want to do more than that, because touch selection is probably the primary way to move around on mobile
 - moving between visual line segments?
   - COMMENT: this would make the editor more like notepad, make it friendlier; bear in mind, mobile users can just touch the word;
@@ -206,7 +211,14 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## refactor
 
-- remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
+- refactor: setDisplayed is worrying
+  - it ignores CurrentMenu
+  - it exists for MenuItemsFn and FilterFn
+  - can we expose filter as something that works off CurrentMenu
+  - MenuItemsFn should just call setMenu
+  - remove or make setDisplayed private
+- refactor: make MenuItemsFn purely about debounce; no menu items
+- refactor: remove any imports that import a subsystem/lib/ eg cursor/lib, editor/lib, input/lib, ui/lib; instead expose via subsystem/index.ts
   - COMMENT: this stops subsystems importing internals of other subsystems
 - `import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';` in src/ui/
   - COMMENT: we shouldn't be importing types from jsed-demo like this
@@ -271,7 +283,6 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - should indiscriminantly target template or script elements
   - it should always be JSED_IGNORE_CLASS based
   - what breaks if we make that change?
-- refactor: make MenuItemsFn purely about debounce; no menu items
 
 ## defer
 

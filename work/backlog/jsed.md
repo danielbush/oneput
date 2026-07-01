@@ -211,6 +211,12 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
+- refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be
+  - can we drastically simplify it because of ANCHOR_RULES?
+  - why "removable anchor"?
+  - can we just delete the anchor?
+  - should we even allow deletion of automatic anchors given they will come back?
+  - do we only allow manual anchors to be deleted - in which case we won't bother because that doesn't exist yet
 - refactor: setDisplayed is worrying
   - it ignores CurrentMenu
   - it exists for MenuItemsFn and FilterFn

@@ -8,18 +8,7 @@ import { mockListDir, type DirEntry, type ListDir } from './directoryBrowser/lis
  * A directory *picker*: browse the tree, select a file, and exit back to the
  * caller with the chosen path (`ctl.app.exit(path)` → caller's `onResume`).
  *
- * The **single-AppObject** half of a deliberate pair with {@link DirectoryBrowser}
- * (the AppObject-per-folder form) — see its docstring for the side-by-side. This
- * is the **preferred** design of the two: folder depth is plain internal state
- * (`path`), and selecting a file returns to the caller in a single `exit` rather
- * than unwinding a per-folder stack. Because the stack is *not* the nav history,
- * "back" is given meaning by {@link onBack} (go up a folder; cancel at root)
- * rather than by a framework pop.
- *
- * Like DirectoryBrowser it paints with `setMenu`, but it is a *single* AppObject:
- * `path` is internal state rather than one AppObject per folder. The two input
- * channels are kept separate by nature:
- *
+ *  - Single AppObject instance over all folders.
  *  - **Navigation** is path-driven and async: dim+freeze the menu, fetch the
  *    listing, then `setMenu` — one synchronous swap, no cut-down.
  *  - **Typing** is handled by the framework's default filter (a *synchronous*

@@ -29,14 +29,14 @@ export class Editor {
 
   nav: Nav;
   focusOps: EditorFocusOps;
-  anchor: EditorAnchorOps;
+  anchorOps: EditorAnchorOps;
   cursorOps: EditorCursorOps;
   eventsEmitter: EditorEventsEmitter;
 
   constructor(public state: EditorState) {
     this.nav = this.state.nav;
     this.focusOps = this.state.focus;
-    this.anchor = this.state.anchor;
+    this.anchorOps = this.state.anchor;
     this.cursorOps = this.state.cursorOps;
     this.eventsEmitter = this.state.eventsEmitter;
   }

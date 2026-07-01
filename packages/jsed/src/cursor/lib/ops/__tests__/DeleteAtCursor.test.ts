@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { EditorState } from '../../../editor/index.js';
-import type { JsedDocument } from '../../../JsedDocument.js';
-import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../../lib/core/taxonomy.js';
-import { Tokenizer } from '../../../lib/ops/Tokenizer.js';
-import { getValue } from '../../../lib/ops/token.js';
-import { EditorEventsEmitter } from '../../../editor/index.js';
-import { UndoRecorder } from '../../../undo/index.js';
+import type { EditorState } from '../../../../editor/index.js';
+import type { JsedDocument } from '../../../../JsedDocument.js';
+import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../../../lib/core/taxonomy.js';
+import { Tokenizer } from '../../../../lib/ops/Tokenizer.js';
+import { getValue } from '../../../../lib/ops/token.js';
+import { EditorEventsEmitter } from '../../../../editor/index.js';
+import { UndoRecorder } from '../../../../undo/index.js';
 import {
   a,
   byId,
@@ -17,8 +17,8 @@ import {
   p,
   s,
   t
-} from '../../../test/util.js';
-import { CursorState } from '../CursorState.js';
+} from '../../../../test/util.js';
+import { CursorState } from '../../CursorState.js';
 import { DeleteAtCursor } from '../DeleteAtCursor.js';
 
 function createState(doc: JsedDocument, seat: HTMLElement) {

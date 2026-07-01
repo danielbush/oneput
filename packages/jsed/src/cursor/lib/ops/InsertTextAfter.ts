@@ -1,14 +1,14 @@
-import type { EditorState } from '../../editor/index.js';
-import type { UserInputOpts } from '../../input/UserInput.js';
+import type { EditorState } from '../../../editor/index.js';
+import type { UserInputOpts } from '../../../input/UserInput.js';
 import {
   createToken,
   insertAfter,
   redoInsertAfter,
   undoInsertAfter,
   type InsertTokenAfter
-} from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../undo/index.js';
-import type { CursorState } from './CursorState.js';
+} from '../../../lib/ops/token.js';
+import type { UndoRecord } from '../../../undo/index.js';
+import type { CursorState } from '../CursorState.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
 
 /**

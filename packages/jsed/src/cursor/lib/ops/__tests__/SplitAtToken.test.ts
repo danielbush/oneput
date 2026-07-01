@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import type { EditorState } from '../../../editor/index.js';
-import { EditorEventsEmitter } from '../../../editor/index.js';
-import type { JsedDocument } from '../../../JsedDocument.js';
-import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../../lib/core/taxonomy.js';
-import { Tokenizer } from '../../../lib/ops/Tokenizer.js';
-import { getSeparatorBefore } from '../../../lib/ops/space.js';
+import type { EditorState } from '../../../../editor/index.js';
+import { EditorEventsEmitter } from '../../../../editor/index.js';
+import type { JsedDocument } from '../../../../JsedDocument.js';
+import { isAnchor, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../../../lib/core/taxonomy.js';
+import { Tokenizer } from '../../../../lib/ops/Tokenizer.js';
+import { getSeparatorBefore } from '../../../../lib/ops/space.js';
 import {
   byId,
   em,
@@ -15,9 +15,9 @@ import {
   p,
   s,
   t
-} from '../../../test/util.js';
-import { UndoRecorder } from '../../../undo/index.js';
-import { CursorState } from '../CursorState.js';
+} from '../../../../test/util.js';
+import { UndoRecorder } from '../../../../undo/index.js';
+import { CursorState } from '../../CursorState.js';
 import { SplitAtToken } from '../SplitAtToken.js';
 
 function createState(doc: JsedDocument, seat: HTMLElement) {

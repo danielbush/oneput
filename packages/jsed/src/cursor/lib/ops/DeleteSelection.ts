@@ -1,13 +1,13 @@
-import type { EditorState } from '../../editor/index.js';
+import type { EditorState } from '../../../editor/index.js';
 import {
   redoDeleteSelection,
   removeWrappers,
   undoDeleteSelection,
   type RemoveWrappers
-} from '../../lib/ops/selection.js';
-import type { UndoRecord } from '../../undo/UndoRecorder.js';
-import type { CursorSelection } from './CursorSelection.js';
-import type { CursorState } from './CursorState.js';
+} from '../../../lib/ops/selection.js';
+import type { UndoRecord } from '../../../undo/UndoRecorder.js';
+import type { CursorSelection } from '../CursorSelection.js';
+import type { CursorState } from '../CursorState.js';
 
 export class DeleteSelection implements UndoRecord {
   static run(selection: CursorSelection, state: CursorState) {

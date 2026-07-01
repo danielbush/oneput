@@ -1,18 +1,18 @@
-import type { EditorState } from '../../editor/index.js';
+import type { EditorState } from '../../../editor/index.js';
 import {
   convertWrapper,
   redoConvertWrapper,
   undoConvertWrapper,
   type ConvertWrapper
-} from '../../lib/ops/selection.js';
+} from '../../../lib/ops/selection.js';
 import {
   redoWrapLineSiblingWithTag,
   undoWrapLineSiblingWithTag,
   wrapLineSiblingWithTag,
   type WrapLineSibling as WrapLineSiblingOp
-} from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../undo/index.js';
-import type { CursorState } from './CursorState.js';
+} from '../../../lib/ops/token.js';
+import type { UndoRecord } from '../../../undo/index.js';
+import type { CursorState } from '../CursorState.js';
 
 export class Wrap {
   static run(state: CursorState, tagName: string) {

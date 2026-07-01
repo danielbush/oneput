@@ -1,17 +1,17 @@
-import { isAnchor } from '../../lib/core/taxonomy.js';
-import type { EditorState } from '../../editor/index.js';
-import type { UserInputOpts } from '../../input/UserInput.js';
+import { isAnchor } from '../../../lib/core/taxonomy.js';
+import type { EditorState } from '../../../editor/index.js';
+import type { UserInputOpts } from '../../../input/UserInput.js';
 import {
   type DeleteElement,
   isEmpty,
   deleteHighestEmpty,
   undoDeleteElement,
   redoDeleteElement
-} from '../../lib/ops/focusable.js';
-import * as token from '../../lib/ops/token.js';
-import type { UndoRecord } from '../../undo/index.js';
-import type { CursorState } from './CursorState.js';
-import type { CursorDeleteOpts } from './CursorTextOps.js';
+} from '../../../lib/ops/focusable.js';
+import * as token from '../../../lib/ops/token.js';
+import type { UndoRecord } from '../../../undo/index.js';
+import type { CursorState } from '../CursorState.js';
+import type { CursorDeleteOpts } from '../CursorTextOps.js';
 import { DeleteSelection } from './DeleteSelection.js';
 
 export class DeleteAtCursor implements UndoRecord {

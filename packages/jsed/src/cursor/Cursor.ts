@@ -1,16 +1,16 @@
 import { CursorState, type CursorError, type CursorInsertState } from './lib/CursorState.js';
 import { type CursorDeleteOpts } from './lib/CursorTextOps.js';
-import { DeleteAtCursor } from './lib/DeleteAtCursor.js';
+import { DeleteAtCursor } from './lib/ops/DeleteAtCursor.js';
 import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.js';
 import { UndoRecorder, type UndoRecord } from '../undo/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
 import type { Tokenizer } from '../lib/ops/Tokenizer.js';
 import type { EditorEventsEmitter } from '../editor/index.js';
-import { ReplaceWithText } from './lib/ReplaceWithText.js';
-import { InsertTextAfter } from './lib/InsertTextAfter.js';
-import { InsertTextBefore } from './lib/InsertTextBefore.js';
-import { SplitAtToken } from './lib/SplitAtToken.js';
-import { Wrap } from './lib/Wrap.js';
+import { ReplaceWithText } from './lib/ops/ReplaceWithText.js';
+import { InsertTextAfter } from './lib/ops/InsertTextAfter.js';
+import { InsertTextBefore } from './lib/ops/InsertTextBefore.js';
+import { SplitAtToken } from './lib/ops/SplitAtToken.js';
+import { Wrap } from './lib/ops/Wrap.js';
 
 /**
  * Public CURSOR facade for the editing session.

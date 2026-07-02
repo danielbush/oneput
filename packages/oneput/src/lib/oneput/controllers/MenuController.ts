@@ -57,14 +57,10 @@ export class MenuController {
    */
   private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
 
-  // #region menu open/close + action
+  // #region menu open/close
 
   get isMenuOpen() {
     return this.ctl.currentProps.menuOpen;
-  }
-
-  get displayedMenuItemCount() {
-    return this.currentMenu.displayedMenuItemCount;
   }
 
   openMenu = () => {
@@ -94,6 +90,10 @@ export class MenuController {
     });
   };
 
+  // #endregion
+
+  // #region menu items
+
   doMenuAction() {
     if (this.disableActions) {
       return;
@@ -113,9 +113,9 @@ export class MenuController {
     }
   }
 
-  // #endregion
-
-  // #region setting menu items
+  get displayedMenuItemCount() {
+    return this.currentMenu.displayedMenuItemCount;
+  }
 
   /**
    * Re-pull declarative menu (if defined).

@@ -21,9 +21,9 @@ mutates the base).
 There are two separate, typed channels that produce the displayed list. A given menu uses
 ONE of them:
 
-- **filter** (`ctl.menu.filter`, in `helpers/Filter.ts`) — SYNC. Reads the base + query and
+- **filter** (`ctl.menu.setFilter`, implemented by `helpers/Filter.ts`) — SYNC. Reads the base + query and
   returns a subset (+ highlighting). Signature `FilterFn = (query, base) => subset`.
-  `FuzzyFilter` / `WordFilter` are filters; register one with `ctl.menu.filter.set(fn)` (or
+  `FuzzyFilter` / `WordFilter` are filters; register one with `ctl.menu.setFilter(fn)` (or
   `setDefault` for the app-wide default).
 - **generative** (`ctl.menu.fn`, in `helpers/MenuItemsFn.ts`) — produces items purely from
   the input, IGNORING the base. Signature `MenuItemsGenFn = (input) => items` (and
@@ -94,12 +94,12 @@ shell level, after which every menu becomes filterable; individual AppObjects do
 ### Step 1 — install a default filter (once, in your app shell)
 
 ```ts
-ctl.menu.filter.setDefault(FuzzyFilter.create().filter);
+ctl.menu.setDefaultFilter(FuzzyFilter.create().filter);
 ```
 
 Pick `WordFilter` (each input word must prefix-match somewhere in the item) or `FuzzyFilter`
 (uFuzzy matching + ranking). In the demos this lives in the app `_layout`; `SettingsManager`
-switches between the two with `ctl.menu.filter.setDefault(...)`. Without this line, typing
+switches between the two with `ctl.menu.setDefaultFilter(...)`. Without this line, typing
 does nothing to the menu.
 
 ### Step 2 — set a menu (per AppObject)
@@ -120,10 +120,10 @@ Register your own filter for the current screen. A `FilterFn` receives `(input, 
 returns the items to display (or `undefined` to leave the list unchanged):
 
 ```ts
-ctl.menu.filter.set((input, items) => items.filter((i) => matches(i, input)));
+ctl.menu.setFilter((input, items) => items.filter((i) => matches(i, input)));
 ```
 
-`ctl.menu.filter.reset()` restores the default. (The default is also restored automatically
+`ctl.menu.resetFilter()` restores the default. (The default is also restored automatically
 per AppObject, in `runBefore`.)
 
 ### Notes / gotchas

@@ -51,8 +51,8 @@ export class MenuItemsFnController {
   ) {
     // Generative and filter are mutually exclusive channels: registering a
     // generative fn turns off any active filter so they don't fight over the
-    // displayed layer. Restored per-AppObject by filter.reset in runBefore.
-    this.ctl.menu.filter.clear();
+    // displayed layer. Restored per-AppObject by resetFilter in runBefore.
+    this.ctl.menu.clearFilter();
     this.removeMenuItemsListener?.();
     let inFlight = 0;
     const debouncedHandler = debounce(

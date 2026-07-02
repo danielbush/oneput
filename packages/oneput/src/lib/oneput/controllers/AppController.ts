@@ -90,7 +90,7 @@ export class AppController {
       this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
     }
     if ('enableFilter' in flags || 'enableModal' in flags) {
-      this.ctl.menu.filter._enable(flags.enableFilter ?? !flags.enableModal);
+      this.ctl.menu._enableFilter(flags.enableFilter ?? !flags.enableModal);
     }
     if ('enableInputElement' in flags || 'enableModal' in flags) {
       this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
@@ -143,7 +143,7 @@ export class AppController {
     this.ctl.keys._enableKeys(flags.enableKeys);
     this.ctl.menu._enableMenuActions(flags.enableMenuActions);
     this.ctl.menu.fn._enableMenuItemsFn(flags.enableMenuItemsFn);
-    this.ctl.menu.filter._enable(flags.enableFilter);
+    this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
 
     // Reset stuff...
@@ -156,7 +156,7 @@ export class AppController {
     // AppObject re-registers its own in onStart/onResume if it wants one (the
     // same rebuild contract as setMenu/filter above).
     this.ctl.menu.fn.clearMenuItemsFn();
-    this.ctl.menu.filter.reset();
+    this.ctl.menu.resetFilter();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();
     this.ctl.menu.resetFillHandler();

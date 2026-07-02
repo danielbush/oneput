@@ -1,4 +1,5 @@
 import type { FocusBehaviour, MenuItem, MenuItemAny } from '../types.js';
+import type { FilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
@@ -22,7 +23,7 @@ export class MenuController {
   constructor(
     private ctl: Controller,
     public fn: MenuItemsFnController,
-    public filter: FilterController
+    private filter: FilterController
   ) {
     this.currentMenu = CurrentMenu.createBlank(this.ctl);
     this.ctl.currentProps.onMenuAction = () => {
@@ -121,7 +122,7 @@ export class MenuController {
     // user's query survives. Runs in the same tick as the base paint above, so
     // the displayed layer is only assigned twice synchronously -> single render,
     // no flash of the unfiltered base.
-    this.filter.run({ focusBehaviour: opts?.focusBehaviour });
+    this.runFilter({ focusBehaviour: opts?.focusBehaviour });
     return true;
   };
 
@@ -157,6 +158,43 @@ export class MenuController {
       ? CurrentMenu.create(this.ctl, params.id, params.items)
       : CurrentMenu.createBlank(this.ctl);
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: this.currentMenu.menuId } });
+  }
+
+  // #endregion
+
+  // #region menu filter
+
+  /**
+   * Register a sync filter `(query, base) => subset`.
+   */
+  setFilter(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+    this.filter.set(filter, options);
+  }
+
+  /**
+   * Set the filter restored per-AppObject by AppController reset.
+   */
+  setDefaultFilter(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+    this.filter.setDefault(filter, options);
+  }
+
+  clearFilter() {
+    this.filter.clear();
+  }
+
+  resetFilter() {
+    this.filter.reset();
+  }
+
+  runFilter(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+    return this.filter.run(opts);
+  }
+
+  /**
+   * Prefer ctl.ui.update({ flags: { enableFilter: true } }) instead.
+   */
+  _enableFilter(on: boolean = true) {
+    this.filter._enable(on);
   }
 
   // #endregion

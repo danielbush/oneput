@@ -145,13 +145,17 @@ export class MenuController {
     focusBehaviour?: FocusBehaviour;
     items: Array<MenuItemAny | undefined | false | null | ''>;
   }) {
-    this.currentMenu = params
-      ? CurrentMenu.create(this.ctl, params.id, params.items)
-      : CurrentMenu.createBlank(this.ctl);
+    this.setMenuOnly(params);
     this.setDisplayed({
       focusBehaviour: params?.focusBehaviour ?? this.defaultFocusBehaviour,
       items: this.currentMenu.allMenuItems
     });
+  }
+
+  setMenuOnly(params?: { id: string; items: Array<MenuItemAny | undefined | false | null | ''> }) {
+    this.currentMenu = params
+      ? CurrentMenu.create(this.ctl, params.id, params.items)
+      : CurrentMenu.createBlank(this.ctl);
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: this.currentMenu.menuId } });
   }
 

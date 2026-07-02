@@ -18,7 +18,7 @@ export class MenuController {
     return new MenuController(ctl, fn, filter);
   }
 
-  public currentMenu: CurrentMenu;
+  private currentMenu: CurrentMenu;
 
   constructor(
     private ctl: Controller,
@@ -61,6 +61,10 @@ export class MenuController {
 
   get isMenuOpen() {
     return this.ctl.currentProps.menuOpen;
+  }
+
+  get displayedMenuItemCount() {
+    return this.currentMenu.displayedMenuItemCount;
   }
 
   openMenu = () => {

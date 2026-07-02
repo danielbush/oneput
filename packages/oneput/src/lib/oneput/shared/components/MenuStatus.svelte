@@ -3,7 +3,7 @@
 
   const { controller }: { controller: Controller } = $props();
   let label = $derived.by(() => {
-    return `${controller.menu.currentMenu.displayedMenuItemCount} ${controller.menu.currentMenu.displayedMenuItemCount === 1 ? 'item' : 'items'}`;
+    return `${controller.menu.displayedMenuItemCount} ${controller.menu.displayedMenuItemCount === 1 ? 'item' : 'items'}`;
   });
 </script>
 

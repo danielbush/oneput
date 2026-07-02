@@ -36,6 +36,9 @@ export class MenuController {
       this.ctl.currentProps.menuItemFocus = [index, false];
       this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
     };
+    this.ctl.events.on('input-change', () => {
+      this.ctl.menu.setDisplayed({ focusBehaviour: this.focusBehaviour });
+    });
   }
 
   /**
@@ -128,6 +131,9 @@ export class MenuController {
    * If the menu is closed you won't see the changes until it's opened.
    */
   setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
+    if (!this.isMenuOpen) {
+      return;
+    }
     // If a sync filter is active, re-derive against the current input so the
     // user's query survives. Runs in the same tick as the base paint above, so
     // the displayed layer is only assigned twice synchronously -> single render,

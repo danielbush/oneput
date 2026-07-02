@@ -23,8 +23,6 @@ export class FilterController {
   private disabled = false;
   private filter?: FilterFn;
   private defaultFilter?: FilterFn;
-  private focusBehaviour?: FocusBehaviour;
-  private removeListener?: () => void;
 
   private constructor(private ctl: Controller) {}
 
@@ -41,24 +39,22 @@ export class FilterController {
    * while the menu is open. Returning undefined leaves the displayed layer
    * untouched (same contract as a menuItemsFn).
    */
-  set(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+  set(filter: FilterFn) {
     this.filter = filter;
-    this.focusBehaviour = options.focusBehaviour;
-    this.ensureListener();
   }
 
   /**
    * Set the filter restored per-AppObject by {@link reset} (called in runBefore).
    * Use at app setup (e.g. _layout) for the default filter every menu gets.
    */
-  setDefault(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
+  setDefault(filter: FilterFn) {
     this.defaultFilter = filter;
-    this.set(filter, options);
+    this.set(filter);
   }
 
   reset() {
     if (this.defaultFilter) {
-      this.set(this.defaultFilter, { focusBehaviour: this.ctl.menu.defaultFocusBehaviour });
+      this.set(this.defaultFilter);
     } else {
       this.clear();
     }
@@ -80,14 +76,5 @@ export class FilterController {
     }
     const result = this.filter?.(this.ctl.input.getInputValue(), items);
     return result;
-  }
-
-  private ensureListener() {
-    if (this.removeListener) {
-      return;
-    }
-    this.removeListener = this.ctl.events.on('input-change', () => {
-      this.ctl.menu.setDisplayed({ focusBehaviour: this.focusBehaviour });
-    });
   }
 }

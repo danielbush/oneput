@@ -1,5 +1,5 @@
 import type { Controller } from '../controller.js';
-import type { FocusBehaviour, FilterFn, MenuItemAny } from '../../types.js';
+import type { FilterFn, MenuItemAny } from '../../types.js';
 
 /**
  * The FILTER channel — sync derivation of the displayed layer from the base:

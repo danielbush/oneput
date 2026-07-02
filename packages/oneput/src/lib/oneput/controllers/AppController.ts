@@ -167,15 +167,20 @@ export class AppController {
   }
 
   /**
+   * Signal that state behind `menu()` changed → re-derive now.
+   *
+   * No-op when the menu is CLOSED: the next open re-pulls anyway (pull-on-open,
+   * see `MenuController.openMenu`), so callers can fire `invalidate()` on any
+   * state change without checking whether the menu is open.
+   *
    * Re-pull the current AppObject's declarative `menu()` and re-seed the menu
    * (base + re-apply any active filter). Shared by `invalidateMenu` and by
    * `openMenu` (pull-on-open) — do not call directly, prefer those.
-   *
-   * Guarded: a no-op (returns false) if the current AppObject defined no
-   * declarative `menu()`. Pass `focusBehaviour: 'none'` for state changes that
-   * should not move the focused index (e.g. toggling a checkbox).
    */
-  reseedMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+  invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+    if (!this.ctl.menu.isMenuOpen) {
+      return false;
+    }
     const menu = this.current?.menu();
     if (!menu) {
       return false;
@@ -189,20 +194,6 @@ export class AppController {
     // no flash of the unfiltered base.
     this.ctl.menu.filter.run({ focusBehaviour: opts?.focusBehaviour });
     return true;
-  }
-
-  /**
-   * Signal that state behind `menu()` changed → re-derive now.
-   *
-   * No-op when the menu is CLOSED: the next open re-pulls anyway (pull-on-open,
-   * see `MenuController.openMenu`), so callers can fire `invalidate()` on any
-   * state change without checking whether the menu is open.
-   */
-  invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
-    if (!this.ctl.menu.isMenuOpen) {
-      return false;
-    }
-    return this.reseedMenu(opts);
   }
 
   /**
@@ -276,11 +267,11 @@ export class AppController {
    * yet (menu built from nothing), and on onResume the hook mutates state so the
    * earlier pull is now stale. Either way the AppObject would have to re-render
    * itself once the hook finishes. Pulling here, AFTER the hook, means the menu is
-   * always built from the finished state. Guarded (via reseedMenu): a no-op if
+   * always built from the finished state. Guarded (via invalidate): a no-op if
    * there is no `menu()` (imperative AppObjects set their menu in onStart).
    */
   private afterRun() {
-    this.reseedMenu();
+    this.invalidateMenu();
   }
 
   /**

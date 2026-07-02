@@ -63,7 +63,7 @@ export class MenuController {
       // menu reflects current AppObject state without needing an explicit
       // invalidate() for changes made while closed. Guarded no-op if no menu().
       // Runs after menuOpen=true so the filter's open-guard passes.
-      this.ctl.app.reseedMenu();
+      this.ctl.app.invalidateMenu();
     });
   };
 

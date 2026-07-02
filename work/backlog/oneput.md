@@ -86,12 +86,6 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
-- refactor: setDisplayed is worrying
-  - it ignores CurrentMenu
-  - it exists for MenuItemsFn and FilterFn
-  - can we expose filter as something that works off CurrentMenu
-  - MenuItemsFn should just call setMenu
-  - remove or make setDisplayed private
 - refactor: the tick hack in reseedMenu - can we avoid that
   - can we get reseedMenu to pull menu() and apply filter and THEN paint menu items? (more explicitly)
 - refactor: make MenuItemsFn purely about debounce; no menu items

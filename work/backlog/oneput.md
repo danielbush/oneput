@@ -86,8 +86,6 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
-- refactor: the tick hack in reseedMenu - can we avoid that
-  - can we get reseedMenu to pull menu() and apply filter and THEN paint menu items? (more explicitly)
 - refactor: make MenuItemsFn purely about debounce; no menu items
 - proper pull model for declarative AppObject.menu
   - ctl.menu.invalidate() signals that menu must be pulled again

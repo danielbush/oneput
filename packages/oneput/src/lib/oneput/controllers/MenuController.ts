@@ -179,15 +179,15 @@ export class MenuController {
   /**
    * Register a sync filter `(query, base) => subset`.
    */
-  setFilter(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
-    this.filter.set(filter, options);
+  setFilter(filter: FilterFn) {
+    this.filter.set(filter);
   }
 
   /**
    * Set the filter restored per-AppObject by AppController reset.
    */
-  setDefaultFilter(filter: FilterFn, options: { focusBehaviour?: FocusBehaviour } = {}) {
-    this.filter.setDefault(filter, options);
+  setDefaultFilter(filter: FilterFn) {
+    this.filter.setDefault(filter);
   }
 
   clearFilter() {

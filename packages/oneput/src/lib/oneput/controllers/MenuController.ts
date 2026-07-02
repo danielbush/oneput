@@ -287,7 +287,7 @@ export class MenuController {
 
   focusMenuItemById(id: string) {
     const index = this.currentMenu.getIndexFromId(id);
-    if (index) {
+    if (index !== null) {
       this.focusMenuItemByIndex(index, true);
       return true;
     }

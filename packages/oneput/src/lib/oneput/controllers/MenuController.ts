@@ -138,7 +138,7 @@ export class MenuController {
     // user's query survives. Runs in the same tick as the base paint above, so
     // the displayed layer is only assigned twice synchronously -> single render,
     // no flash of the unfiltered base.
-    const items = this.runFilter();
+    const items = this.filter.run(this.currentMenu.allMenuItems);
     if (items === false) {
       this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
     } else if (items === undefined) {
@@ -196,10 +196,6 @@ export class MenuController {
 
   resetFilter() {
     this.filter.reset();
-  }
-
-  runFilter() {
-    return this.filter.run(this.currentMenu.allMenuItems);
   }
 
   /**

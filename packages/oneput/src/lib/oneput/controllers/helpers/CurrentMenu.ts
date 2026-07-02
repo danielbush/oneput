@@ -3,9 +3,15 @@ import type { MenuItemAny } from '../../../oneput/types.js';
 import type { Controller } from '../controller.js';
 
 /**
- * Calculates various things about the current menu.
+ * Wraps the current rendered menu.
  *
- * Does not make any changes to the menu.  Treat as a kind of value object.
+ * CurrentMenu keeps the stable menu id and source item list from the last
+ * `setMenu` call, while its reactive accessors read the displayed menu state
+ * from `ctl.currentProps`. Those reactive accessors can be used from Svelte
+ * reactive contexts.
+ *
+ * Does not make any changes to the menu. Treat as a read-only view over the
+ * current rendered menu.
  */
 export class CurrentMenu {
   static createBlank(ctl: Controller) {
@@ -21,15 +27,7 @@ export class CurrentMenu {
   }
 
   /**
-   * Represents the current list of available menu items which is usually used
-   * to set currentProps.menuItems.
-   *
-   * - setMenu updates this list.
-   * - _setMenu only updates currentProps.menuItems.
-   * - menuItemsFn* and defaultMenuItemsFn only update currentProps.menuItems.
-   *
-   * For filtering, menuItemsFn* are passed all menuItems so they can filter on it.
-   * For dynamic menu item generation, menuItems can be ignored.
+   * Represents the current list of available menu items.
    */
   public allMenuItems: Array<MenuItemAny> = [];
 

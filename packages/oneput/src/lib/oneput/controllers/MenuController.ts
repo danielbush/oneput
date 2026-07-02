@@ -49,11 +49,21 @@ export class MenuController {
 
   /**
    * Baseline focus behaviour restored when AppController switches AppObjects.
+   *
+   * Never used directly.
    */
   public defaultFocusBehaviour: FocusBehaviour = 'last-action,first';
 
   /**
-   * Ambient focus behaviour for redisplays that do not pass a one-shot override.
+   * Ambient focus behaviour for redisplays, defaults to and is reset to defaultFocusBehaviour.
+   *
+   * Levels:
+   *
+   * - (1) defaultFocusBehaviour - Baseline across AppObjects.
+   * - (2) ambient focusBehaviour - Current controller setting for redisplays.
+   * - (3) Menu.focusBehaviour - Per-menu behavior when replacing the menu.
+   * - (4) operation override - A one-shot override passed to a specific refresh operation, like:
+   *   - the only way this happens currently is via invalidate; not sure it's even useful.
    */
   private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
 

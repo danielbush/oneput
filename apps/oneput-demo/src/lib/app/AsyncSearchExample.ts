@@ -37,7 +37,7 @@ export class AsyncSearchExample implements AppObject {
       // No enableFilter:false needed: setMenuItemsFnAsync auto-clears the filter
       // (generative and filter are mutually exclusive).
     });
-    this.ctl.menu.fn.setMenuItemsFnAsync(
+    this.ctl.menu.setMenuItemsFnAsync(
       async (input) => {
         try {
           this.outerRightStatus.withNode((node) => {
@@ -116,7 +116,7 @@ export class AsyncSearchExample implements AppObject {
             attr: {
               onclick: () => {
                 alert.cancel();
-                this.ctl.menu.fn.triggerMenuItemsFn();
+                this.ctl.menu.triggerMenuItemsFn();
               }
             }
           })

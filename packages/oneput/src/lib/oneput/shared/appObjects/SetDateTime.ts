@@ -67,7 +67,7 @@ export class SetDateTime implements AppObject<TimeVal | DateVal> {
         menuTitle: 'Set date and time...'
       }
     });
-    this.ctl.menu.fn.clearMenuItemsFn();
+    this.ctl.menu.clearMenuItemsFn();
     this.ctl.menu.setMenu({
       id: 'main',
       items: [

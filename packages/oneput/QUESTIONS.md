@@ -25,7 +25,7 @@ ONE of them:
   returns a subset (+ highlighting). Signature `FilterFn = (query, base) => subset`.
   `FuzzyFilter` / `WordFilter` are filters; register one with `ctl.menu.setFilter(fn)` (or
   `setDefault` for the app-wide default).
-- **generative** (`ctl.menu.fn`, in `helpers/MenuItemsFn.ts`) — produces items purely from
+- **generative** (`ctl.menu`, backed by `helpers/MenuItemsFn.ts`) — produces items purely from
   the input, IGNORING the base. Signature `MenuItemsGenFn = (input) => items` (and
   `MenuItemsGenFnAsync` for fetches). Register with `setMenuItemsFn` / `setMenuItemsFnAsync`.
 
@@ -130,7 +130,7 @@ per AppObject, in `runBefore`.)
 
 - The filter only runs **while the menu is open** and **on input change**. To re-filter
   programmatically, `invalidate()` re-applies it; for the generative channel use
-  `ctl.menu.fn.triggerMenuItemsFn()`.
+  `ctl.menu.triggerMenuItemsFn()`.
 - The filter reads the **base** (`allMenuItems` from your last `setMenu`) — so re-`setMenu`
   to change what's filtered.
 - A filter is SYNC by definition. If selecting the displayed items needs I/O (a network

@@ -1,4 +1,4 @@
-import type { FocusBehaviour, MenuItem, MenuItemAny } from '../types.js';
+import type { FocusBehaviour, MenuItem, MenuItemAny, MenuItemsGenFnAsync } from '../types.js';
 import type { FilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
@@ -22,7 +22,7 @@ export class MenuController {
 
   constructor(
     private ctl: Controller,
-    public fn: MenuItemsFnController,
+    private menuItemsFn: MenuItemsFnController,
     private filter: FilterManager
   ) {
     this.currentMenu = CurrentMenu.createBlank(this.ctl);
@@ -225,6 +225,37 @@ export class MenuController {
    */
   _enableFilter(on: boolean = true) {
     this.filter._enable(on);
+  }
+
+  // #endregion
+
+  // #region generative menu items
+
+  /**
+   * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
+   */
+  _enableMenuItemsFn(on: boolean = true) {
+    this.menuItemsFn._enableMenuItemsFn(on);
+  }
+
+  setMenuItemsFnAsync(
+    menuItemsFnAsync: MenuItemsGenFnAsync,
+    options: {
+      onDebounce?: (isDebouncing: boolean) => void;
+      debounceMS?: number;
+      focusBehaviour?: FocusBehaviour;
+      whenEmpty?: () => MenuItemAny[];
+    } = {}
+  ) {
+    this.menuItemsFn.setMenuItemsFnAsync(menuItemsFnAsync, options);
+  }
+
+  clearMenuItemsFn() {
+    this.menuItemsFn.clearMenuItemsFn();
+  }
+
+  triggerMenuItemsFn() {
+    this.menuItemsFn.triggerMenuItemsFn();
   }
 
   // #endregion

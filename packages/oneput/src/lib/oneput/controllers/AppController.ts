@@ -164,11 +164,11 @@ export class AppController {
   }
 
   /**
-   * Pull the current declarative menu from AppObject.
+   * Get the current declarative menu from AppObject.
    *
    * Returns undefined if .menu() is not defined on the AppObject.
    */
-  pullMenu() {
+  getMenu() {
     return this.current?.menu();
   }
 

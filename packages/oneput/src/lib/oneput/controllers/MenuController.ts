@@ -137,7 +137,7 @@ export class MenuController {
     if (!this.ctl.menu.isMenuOpen) {
       return false;
     }
-    const menu = this.ctl.app.pullMenu();
+    const menu = this.ctl.app.getMenu();
     if (menu) {
       this.ctl.menu.setMenu({ ...menu, focusBehaviour: opts?.focusBehaviour });
     } else {

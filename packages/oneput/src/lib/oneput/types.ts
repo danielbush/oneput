@@ -99,8 +99,9 @@ export type FlexParams = {
 
 /**
  * The FILTER signature: `(query, base) => subset` (+highlight). Reads the base
- * and returns the items to display. Used by FuzzyFilter / WordFilter and
- * registered via `ctl.menu.setFilter(...)`.
+ * and returns the items to display.
+ *
+ * If undefined/void is returned => "do not update the displayed menu items".
  */
 export type FilterFn = (
   input: string,

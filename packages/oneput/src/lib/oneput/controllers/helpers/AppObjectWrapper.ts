@@ -1,8 +1,8 @@
 import type { AppObject } from '../../types.js';
 
-export class AppVal {
+export class AppObjectWrapper {
   static create(app: AppObject) {
-    return new AppVal(app);
+    return new AppObjectWrapper(app);
   }
 
   constructor(

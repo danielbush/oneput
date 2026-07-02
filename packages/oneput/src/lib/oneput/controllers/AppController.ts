@@ -1,6 +1,6 @@
 import type { Controller } from './controller.js';
 import type { AppActions, AppEvent, AppObject, FocusBehaviour, UIFlags } from '../types.js';
-import { AppVal } from './helpers/AppVal.js';
+import { AppObjectWrapper } from './helpers/AppObjectWrapper.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
 export type AppChange = {
@@ -31,14 +31,14 @@ export class AppController {
     });
   }
 
-  private appParents: AppVal[] = [];
-  private _current: AppVal | null = null;
+  private appParents: AppObjectWrapper[] = [];
+  private _current: AppObjectWrapper | null = null;
   private onBack?: () => void;
   private disableGoBack = false;
   private get current() {
     return this._current || null;
   }
-  private set current(appVal: AppVal | null) {
+  private set current(appVal: AppObjectWrapper | null) {
     const previous = this._current?.app ?? null;
     this._current = appVal;
     const current = appVal?.app ?? null;
@@ -228,7 +228,7 @@ export class AppController {
     if (this.current) {
       this.appParents.push(this.current);
     }
-    this.current = AppVal.create(appObject as AppObject);
+    this.current = AppObjectWrapper.create(appObject as AppObject);
     this.runBefore();
     appObject.onStart();
     this.afterRun();

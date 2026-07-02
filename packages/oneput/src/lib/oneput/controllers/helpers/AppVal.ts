@@ -5,31 +5,20 @@ export class AppVal {
     return new AppVal(app);
   }
 
-  constructor(app: AppObject) {
-    this.app = app;
-  }
-
-  app: AppObject;
-  lastMenuActions: Record<string, string> = {};
-  menuId?: string;
+  constructor(
+    public app: AppObject,
+    private lastMenuActionIds: Record<string, string> = {}
+  ) {}
 
   menu() {
     return this.app.menu?.();
   }
 
   setLastMenuActionId(menuId: string, menuActionId: string) {
-    this.lastMenuActions[menuId] = menuActionId;
-  }
-
-  setMenuId(menuId: string) {
-    this.menuId = menuId;
+    this.lastMenuActionIds[menuId] = menuActionId;
   }
 
   getLastMenuActionId(menuId: string) {
-    return this.lastMenuActions[menuId];
-  }
-
-  menuExists(menuId: string) {
-    return Object.keys(this.lastMenuActions).includes(menuId);
+    return this.lastMenuActionIds[menuId];
   }
 }

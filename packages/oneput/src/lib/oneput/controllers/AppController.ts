@@ -26,9 +26,6 @@ export class AppController {
   }
 
   constructor(private ctl: Controller) {
-    ctl.events.on('set-menu-items', ({ menuId }) => {
-      this.current?.setMenuId(menuId);
-    });
     ctl.events.on('menu-action', ({ menuId, menuActionId }) => {
       this.current?.setLastMenuActionId(menuId, menuActionId);
     });
@@ -332,26 +329,15 @@ export class AppController {
   }
 
   /**
-   * Returns details about the menu with menuId including the last action that
-   * was fired.  If menuId is not provided, it will return details about the
-   * last menu that was set via setMenu.
+   * Returns the last menu action fired for the given menu id in the current
+   * AppObject.
    *
-   * Assumes you have called setMenu within the current appObject with
-   * the given id.
-   *
-   * NOTE: it seems easier to put this in menu controller, but for the fact
-   * that menu id's and actions are scoped by appObjects.   So we implement it
-   * here and return values only for the current appObject.
+   * Menu ids and actions are scoped by AppObject. A single AppObject may render
+   * multiple menus during its lifetime, so we track the last action id
+   * separately for each menu id.
    */
-  getMenu(menuId?: string) {
-    if (!menuId) {
-      menuId = this.current?.menuId;
-    }
-    return {
-      menuId,
-      lastActionId: menuId && this.current?.getLastMenuActionId(menuId),
-      exists: !!menuId && this.current?.menuExists(menuId)
-    };
+  getLastMenuActionId(menuId: string) {
+    return this.current?.getLastMenuActionId(menuId);
   }
 
   /**

@@ -46,7 +46,15 @@ export class MenuController {
    */
   private disableActions = false;
   private disableOpenClose = false;
+
+  /**
+   * Baseline focus behaviour restored when AppController switches AppObjects.
+   */
   public defaultFocusBehaviour: FocusBehaviour = 'last-action,first';
+
+  /**
+   * Ambient focus behaviour for redisplays that do not pass a one-shot override.
+   */
   private focusBehaviour: FocusBehaviour = this.defaultFocusBehaviour;
 
   // #region menu open/close + action
@@ -161,7 +169,7 @@ export class MenuController {
   }) {
     this.setMenuOnly(params);
     this.setDisplayed({
-      focusBehaviour: params?.focusBehaviour ?? this.defaultFocusBehaviour
+      focusBehaviour: params?.focusBehaviour ?? this.focusBehaviour
     });
   }
 

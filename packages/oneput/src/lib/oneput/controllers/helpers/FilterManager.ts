@@ -12,19 +12,19 @@ import type { FilterFn, MenuItemAny } from '../../types.js';
  * {@link run}), so the user's query survives a base change with no flash.
  */
 export class FilterManager {
-  public static create(ctl: Controller) {
-    return new FilterManager(ctl);
+  public static create() {
+    return new FilterManager();
   }
 
-  public static createNull(ctl: Controller) {
-    return new FilterManager(ctl);
+  public static createNull() {
+    return new FilterManager();
   }
 
   private disabled = false;
   private filter?: FilterFn;
   private defaultFilter?: FilterFn;
 
-  private constructor(private ctl: Controller) {}
+  private constructor() {}
 
   /**
    * Gate filter firing alongside menuItemsFn. Prefer
@@ -70,11 +70,11 @@ export class FilterManager {
    * the same synchronous tick as the base paint, so there is no flash. No-op
    * (returns false) if no filter is active or the menu is closed.
    */
-  run(items: MenuItemAny[]) {
+  run(items: MenuItemAny[], inputValue: string) {
     if (this.disabled) {
       return false;
     }
-    const result = this.filter?.(this.ctl.input.getInputValue(), items);
+    const result = this.filter?.(inputValue, items);
     return result;
   }
 }

@@ -8,13 +8,13 @@ import { FilterManager } from './helpers/FilterManager.js';
 export class MenuController {
   public static create(ctl: Controller) {
     const fn = MenuItemsFnController.create(ctl);
-    const filter = FilterManager.create(ctl);
+    const filter = FilterManager.create();
     return new MenuController(ctl, fn, filter);
   }
 
   public static createNull(ctl: Controller) {
     const fn = MenuItemsFnController.createNull(ctl);
-    const filter = FilterManager.createNull(ctl);
+    const filter = FilterManager.createNull();
     return new MenuController(ctl, fn, filter);
   }
 
@@ -160,7 +160,7 @@ export class MenuController {
     // user's query survives. Runs in the same tick as the base paint above, so
     // the displayed layer is only assigned twice synchronously -> single render,
     // no flash of the unfiltered base.
-    const items = this.filter.run(this.currentMenu.allMenuItems);
+    const items = this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue());
     if (items === false) {
       this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
     } else if (items === undefined) {

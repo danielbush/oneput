@@ -3,18 +3,18 @@ import type { FilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
-import { FilterController } from './helpers/Filter.js';
+import { FilterManager } from './helpers/FilterManager.js';
 
 export class MenuController {
   public static create(ctl: Controller) {
     const fn = MenuItemsFnController.create(ctl);
-    const filter = FilterController.create(ctl);
+    const filter = FilterManager.create(ctl);
     return new MenuController(ctl, fn, filter);
   }
 
   public static createNull(ctl: Controller) {
     const fn = MenuItemsFnController.createNull(ctl);
-    const filter = FilterController.createNull(ctl);
+    const filter = FilterManager.createNull(ctl);
     return new MenuController(ctl, fn, filter);
   }
 
@@ -23,7 +23,7 @@ export class MenuController {
   constructor(
     private ctl: Controller,
     public fn: MenuItemsFnController,
-    private filter: FilterController
+    private filter: FilterManager
   ) {
     this.currentMenu = CurrentMenu.createBlank(this.ctl);
     this.ctl.currentProps.onMenuAction = () => {

@@ -11,13 +11,13 @@ import type { FilterFn, MenuItemAny } from '../../types.js';
  * can re-apply it inline against a freshly re-seeded base in the same tick (see
  * {@link run}), so the user's query survives a base change with no flash.
  */
-export class FilterController {
+export class FilterManager {
   public static create(ctl: Controller) {
-    return new FilterController(ctl);
+    return new FilterManager(ctl);
   }
 
   public static createNull(ctl: Controller) {
-    return new FilterController(ctl);
+    return new FilterManager(ctl);
   }
 
   private disabled = false;

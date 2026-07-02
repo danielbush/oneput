@@ -176,21 +176,6 @@ export class AppController {
   }
 
   /**
-   * Signal that state behind `menu()` changed → re-derive now.
-   *
-   * No-op when the menu is CLOSED: the next open re-pulls anyway (pull-on-open,
-   * see `MenuController.openMenu`), so callers can fire `invalidate()` on any
-   * state change without checking whether the menu is open.
-   *
-   * Re-pull the current AppObject's declarative `menu()` and re-seed the menu
-   * (base + re-apply any active filter). Shared by `invalidateMenu` and by
-   * `openMenu` (pull-on-open) — do not call directly, prefer those.
-   */
-  invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
-    return this.ctl.menu.invalidate(opts);
-  }
-
-  /**
    * Resolve the current AppObject's `actions`, which may be declared directly as
    * an object or as a function that derives them from state.
    */
@@ -265,7 +250,7 @@ export class AppController {
    * there is no `menu()` (imperative AppObjects set their menu in onStart).
    */
   private afterRun() {
-    this.invalidateMenu();
+    this.ctl.menu.invalidate();
   }
 
   /**

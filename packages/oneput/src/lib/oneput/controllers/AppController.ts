@@ -167,6 +167,15 @@ export class AppController {
   }
 
   /**
+   * Pull the current declarative menu from AppObject.
+   *
+   * Returns undefined if .menu() is not defined on the AppObject.
+   */
+  pullMenu() {
+    return this.current?.menu();
+  }
+
+  /**
    * Signal that state behind `menu()` changed → re-derive now.
    *
    * No-op when the menu is CLOSED: the next open re-pulls anyway (pull-on-open,
@@ -178,22 +187,7 @@ export class AppController {
    * `openMenu` (pull-on-open) — do not call directly, prefer those.
    */
   invalidateMenu(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
-    if (!this.ctl.menu.isMenuOpen) {
-      return false;
-    }
-    const menu = this.current?.menu();
-    if (!menu) {
-      return false;
-    }
-    this.ctl.menu.setMenu(
-      opts?.focusBehaviour ? { ...menu, focusBehaviour: opts.focusBehaviour } : menu
-    );
-    // If a sync filter is active, re-derive against the current input so the
-    // user's query survives. Runs in the same tick as the base paint above, so
-    // the displayed layer is only assigned twice synchronously -> single render,
-    // no flash of the unfiltered base.
-    this.ctl.menu.filter.run({ focusBehaviour: opts?.focusBehaviour });
-    return true;
+    return this.ctl.menu.invalidate(opts);
   }
 
   /**

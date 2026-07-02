@@ -138,7 +138,7 @@ export class MenuController {
    *
    * If the menu is closed you won't see the changes until it's opened.
    */
-  setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
+  private setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
     if (!this.isMenuOpen) {
       return;
     }

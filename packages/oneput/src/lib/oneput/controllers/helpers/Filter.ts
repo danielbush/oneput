@@ -102,21 +102,8 @@ export class FilterController {
     if (this.removeListener) {
       return;
     }
-    this.removeListener = this.ctl.events.on('input-change', ({ value }) => {
-      if (this.disabled) {
-        return;
-      }
-      if (!this.ctl.menu.isMenuOpen) {
-        return;
-      }
-      if (!this.filter) {
-        return;
-      }
-      const items = this.filter(value, this.ctl.menu.currentMenu.allMenuItems);
-      if (!items) {
-        return;
-      }
-      this.ctl.menu.setDisplayed({ items, focusBehaviour: this.focusBehaviour });
+    this.removeListener = this.ctl.events.on('input-change', () => {
+      this.run();
     });
   }
 }

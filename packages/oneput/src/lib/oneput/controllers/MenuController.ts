@@ -98,7 +98,7 @@ export class MenuController {
     // user's query survives. Runs in the same tick as the base paint above, so
     // the displayed layer is only assigned twice synchronously -> single render,
     // no flash of the unfiltered base.
-    this.ctl.menu.filter.run({ focusBehaviour: opts?.focusBehaviour });
+    this.filter.run({ focusBehaviour: opts?.focusBehaviour });
     return true;
   };
 

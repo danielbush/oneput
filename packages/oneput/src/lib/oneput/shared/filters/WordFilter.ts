@@ -49,10 +49,11 @@ export class WordFilter {
     // one) will remain highlighted.
     const haystack = getHaystack(menuItems);
     if (!input || !/\S/.test(input)) {
-      return menuItems;
+      return { items: menuItems };
     }
     const words = input.split(/\s+/).filter(Boolean);
     const matchingItems: MenuItemAny[] = [];
+    let focusItemId: string | undefined;
     const tokenInfo: Record<string, { tokens: string[]; derived: string[] }> = {};
     const pushed: Record<string, boolean> = {};
     for (const menuItemData of haystack.menuItems) {
@@ -108,10 +109,11 @@ export class WordFilter {
       if (allWordsMatchSomething) {
         if (!pushed[menuItemData.menuItem.id]) {
           matchingItems.push(menuItemData.menuItem);
+          focusItemId ??= menuItemData.menuItem.id;
           pushed[menuItemData.menuItem.id] = true;
         }
       }
     }
-    return matchingItems;
+    return { items: matchingItems, focusItemId };
   };
 }

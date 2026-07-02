@@ -3,7 +3,8 @@ import { Controller } from './controller.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
 
-const item = (id: string, text: string) => stdMenuItem({ id, textContent: text, action: () => {} });
+const item = (id: string, text: string, canFilter?: boolean) =>
+  stdMenuItem({ id, textContent: text, canFilter, action: () => {} });
 
 const inputChangePayload = {
   evt: new InputEvent('input'),
@@ -46,7 +47,7 @@ describe('MenuController', () => {
 
   it('uses ambient focus behaviour when the current menu has none', () => {
     // arrange
-    const ctl = Controller.createNull({ menuOpen: true, inputValue: 'a' });
+    const ctl = Controller.createNull({ menuOpen: true, inputValue: '' });
     ctl.app.run({ onStart: () => {} });
     ctl.menu.setDefaultFilter(WordFilter.create().filter);
     ctl.menu.setFocusBehaviour('last');
@@ -59,6 +60,26 @@ describe('MenuController', () => {
     ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
 
     // assert
+    expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
+  });
+
+  it('focuses the first filter match instead of a pinned visible item', () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true });
+    ctl.app.run({ onStart: () => {} });
+    ctl.currentProps.inputValue = 'app';
+    ctl.menu.setDefaultFilter(WordFilter.create().filter);
+    ctl.menu.setMenu({
+      id: 'main',
+      focusBehaviour: 'first',
+      items: [item('up', '..', false), item('apple', 'Apple'), item('banana', 'Banana')]
+    });
+
+    // act
+    ctl.events.emit({ type: 'input-change', payload: { ...inputChangePayload, value: 'app' } });
+
+    // assert
+    expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['up', 'apple']);
     expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
   });
 });

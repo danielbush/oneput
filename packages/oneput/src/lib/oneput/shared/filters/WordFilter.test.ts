@@ -1,12 +1,14 @@
 import { describe, test, expect } from 'vitest';
 import { WordFilter } from './WordFilter.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import type { MenuItemAny } from '../../types.js';
+import type { FilterResult, MenuItemAny } from '../../types.js';
 
 const item = (id: string, text: string, canFilter?: boolean): MenuItemAny =>
   stdMenuItem({ id, textContent: text, canFilter, action: () => {} });
 
-const ids = (items: MenuItemAny[] | undefined | void) => (items ?? []).map((i) => i.id);
+const ids = (result: FilterResult | undefined | void) => (result?.items ?? []).map((i) => i.id);
+
+const focusItemId = (result: FilterResult | undefined | void) => result?.focusItemId;
 
 const run = (input: string, items: MenuItemAny[]) => WordFilter.create().filter(input, items);
 
@@ -31,6 +33,7 @@ describe('WordFilter', () => {
 
     // assert
     expect(ids(result)).toEqual(['b']);
+    expect(focusItemId(result)).toBe('b');
   });
 
   test('pinned item shown despite non-matching query', () => {
@@ -42,6 +45,7 @@ describe('WordFilter', () => {
 
     // assert
     expect(ids(result)).toEqual(['up', 'b']);
+    expect(focusItemId(result)).toBe('b');
   });
 
   test('pins keep top/bottom position', () => {

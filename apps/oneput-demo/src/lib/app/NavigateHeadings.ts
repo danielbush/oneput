@@ -64,10 +64,10 @@ export class NavigateHeadings implements AppObject {
   // We filter ourselves (built-in filter channel disabled above) via the
   // onInputChange hook; the framework wires/unwires it for us — no cleanup needed.
   onInputChange = ({ value }: { value: string }) => {
-    const sortedMenuItems = this.fuzzyFilter.filter(value, this.menuItems);
-    if (!sortedMenuItems) {
+    const result = this.fuzzyFilter.filter(value, this.menuItems);
+    if (!result) {
       return;
     }
-    this.ctl.menu.setMenu({ id: 'main', items: sortedMenuItems });
+    this.ctl.menu.setMenu({ id: 'main', items: result.items });
   };
 }

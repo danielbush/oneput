@@ -93,6 +93,9 @@ export class FuzzyFilter {
    * (WordFilter differs: order-preserving, so it keeps a mid-list pin in place.)
    */
   filter: FilterFn = (input, menuItems) => {
+    if (!input || !/\S/.test(input)) {
+      return { items: menuItems };
+    }
     let i = 0;
     while (i < menuItems.length && menuItems[i].canFilter === false) i++;
     let j = menuItems.length - 1;
@@ -105,20 +108,27 @@ export class FuzzyFilter {
       input,
       middle.filter((it) => it.canFilter !== false)
     );
-    return [...lead, ...matched, ...middlePins, ...trail];
+    return {
+      items: [...lead, ...matched.items, ...middlePins, ...trail],
+      focusItemId: matched.focusItemId
+    };
   };
 
-  private fuzzyMatch(input: string, menuItems: MenuItemAny[]): MenuItemAny[] {
+  private fuzzyMatch(
+    input: string,
+    menuItems: MenuItemAny[]
+  ): { items: MenuItemAny[]; focusItemId?: string } {
     const { haystack, haystackInfo } = getHaystack(menuItems);
     const idxs = this.ufuzzy.filter(haystack, input);
     // See: https://github.com/leeoniya/uFuzzy/issues/79
     // const [idxs] = this.ufuzzy.search(haystack, input, 1);
     if (!idxs) {
-      return menuItems;
+      return { items: [] };
     }
     const info = this.ufuzzy.info(idxs, haystack, input);
     const order = this.ufuzzy.sort(info, haystack, input);
     const sortedMenuItems: MenuItemAny[] = [];
+    let focusItemId: string | undefined;
     const ids: Record<string, boolean> = {};
     for (let i = 0; i < order.length; i++) {
       const infoIdx = order[i];
@@ -138,7 +148,8 @@ export class FuzzyFilter {
       }
       ids[item.menuItem.id] = true;
       sortedMenuItems.push(item.menuItem);
+      focusItemId ??= item.menuItem.id;
     }
-    return sortedMenuItems;
+    return { items: sortedMenuItems, focusItemId };
   }
 }

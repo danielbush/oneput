@@ -150,13 +150,16 @@ export class MenuController {
     if (!this.isMenuOpen) {
       return;
     }
-    const items = this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue());
-    if (items === false) {
+    const result = this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue());
+    if (result === false) {
       this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
-    } else if (items === undefined) {
+    } else if (result === undefined) {
       //
     } else {
-      this.ctl.currentProps.menuItems = items;
+      this.ctl.currentProps.menuItems = result.items;
+      if (result.focusItemId && this.focusMenuItemById(result.focusItemId)) {
+        return;
+      }
     }
     this.runFocusBehaviour(opts?.focusBehaviour ?? this.currentMenu.focusBehaviour);
   }

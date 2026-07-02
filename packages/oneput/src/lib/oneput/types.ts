@@ -99,14 +99,17 @@ export type FlexParams = {
 
 /**
  * The FILTER signature: `(query, base) => subset` (+highlight). Reads the base
- * and returns the items to display.
+ * and returns the items to display. A filter may also return the id of the item
+ * focus should land on for this filtered result.
  *
  * If undefined/void is returned => "do not update the displayed menu items".
  */
-export type FilterFn = (
-  input: string,
-  items: MenuItemAny[]
-) => Array<MenuItemAny> | undefined | void;
+export type FilterResult = {
+  items: Array<MenuItemAny>;
+  focusItemId?: string;
+};
+
+export type FilterFn = (input: string, items: MenuItemAny[]) => FilterResult | undefined | void;
 
 /**
  * The GENERATIVE signature: `(input) => items`. Produces items purely from the

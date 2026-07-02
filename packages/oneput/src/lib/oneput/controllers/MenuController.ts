@@ -78,6 +78,29 @@ export class MenuController {
     });
   };
 
+  doMenuAction() {
+    if (this.disableActions) {
+      return;
+    }
+    if (this.currentMenu.focusedMenuItem?.action) {
+      // TODO: call this before calling the action.  If the action
+      // runs a new appObject, we'll break the tracking logic in
+      // AppController.
+      this.ctl.events.emit({
+        type: 'menu-action',
+        payload: {
+          menuId: this.currentMenu.menuId,
+          menuActionId: this.currentMenu.focusedMenuItem.id
+        }
+      });
+      this.currentMenu.focusedMenuItem.action(this.ctl);
+    }
+  }
+
+  // #endregion
+
+  // #region setting menu items
+
   /**
    * Re-pull declarative menu (if defined) and re-run filter for both types of menu.
    *
@@ -101,29 +124,6 @@ export class MenuController {
     this.filter.run({ focusBehaviour: opts?.focusBehaviour });
     return true;
   };
-
-  doMenuAction() {
-    if (this.disableActions) {
-      return;
-    }
-    if (this.currentMenu.focusedMenuItem?.action) {
-      // TODO: call this before calling the action.  If the action
-      // runs a new appObject, we'll break the tracking logic in
-      // AppController.
-      this.ctl.events.emit({
-        type: 'menu-action',
-        payload: {
-          menuId: this.currentMenu.menuId,
-          menuActionId: this.currentMenu.focusedMenuItem.id
-        }
-      });
-      this.currentMenu.focusedMenuItem.action(this.ctl);
-    }
-  }
-
-  // #endregion
-
-  // #region setting menu items
 
   /**
    * Sets what will be displayed.

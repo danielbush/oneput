@@ -1,5 +1,5 @@
 import { isFocusable } from '../../lib/utils.js';
-import type { MenuItemAny } from '../../../oneput/types.js';
+import type { FocusBehaviour, MenuItemAny } from '../../../oneput/types.js';
 import type { Controller } from '../controller.js';
 
 /**
@@ -18,12 +18,8 @@ export class CurrentMenu {
     return new CurrentMenu(ctl, '');
   }
 
-  static create(
-    ctl: Controller,
-    menuId: string,
-    menuItems: Array<MenuItemAny | undefined | false | null | ''>
-  ) {
-    return new CurrentMenu(ctl, menuId, menuItems);
+  static create(ctl: Controller, params: CurrentMenuParams) {
+    return new CurrentMenu(ctl, params.id, params.items, params.focusBehaviour);
   }
 
   /**
@@ -34,7 +30,8 @@ export class CurrentMenu {
   constructor(
     private ctl: Controller,
     private _menuId: string,
-    allMenuItems: Array<MenuItemAny | undefined | false | null | ''> = []
+    allMenuItems: Array<MenuItemAny | undefined | false | null | ''> = [],
+    private _focusBehaviour?: FocusBehaviour
   ) {
     this.allMenuItems = allMenuItems.filter(Boolean) as Array<MenuItemAny>;
   }
@@ -72,6 +69,13 @@ export class CurrentMenu {
    */
   get menuId() {
     return this._menuId;
+  }
+
+  /**
+   * Static: the focus behaviour resolved when this menu was set.
+   */
+  get focusBehaviour() {
+    return this._focusBehaviour;
   }
 
   /**
@@ -131,3 +135,9 @@ export class CurrentMenu {
     return null;
   }
 }
+
+export type CurrentMenuParams = {
+  id: string;
+  items: Array<MenuItemAny | undefined | false | null | ''>;
+  focusBehaviour?: FocusBehaviour;
+};

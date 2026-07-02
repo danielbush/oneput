@@ -144,25 +144,29 @@ per AppObject, in `runBefore`.)
 
 ## If an AppObject uses setMenu without setting menu(), does ctl.menu.invalidate update it?
 
-No. `invalidate()` re-pulls the **declarative `menu()`** and re-seeds from it. It is guarded:
-if the AppObject defined no `menu()`, `invalidate()` is a no-op (returns `false`) — there is
-nothing for it to pull. An imperative `setMenu(...)` call seeds the base directly but leaves
-no recipe to re-run, so `invalidate()` can't "update" it.
+It depends what "update" means. `invalidate()` only re-pulls and re-seeds the **base** from
+the declarative `menu()` if one exists. An imperative `setMenu(...)` call already seeded the
+base directly but leaves no recipe to re-run, so `invalidate()` cannot rebuild that base.
 
-To refresh an imperatively-set menu, call `setMenu(...)` again yourself (that's the
-imperative contract: you own the base, so you re-seed it). Note the same guard means the
-**pull-on-open** behaviour also skips a `menu()`-less AppObject — opening the menu does not
-re-seed it either; whatever your last `setMenu` set is what shows.
+If the menu is open and there is no `menu()`, `invalidate()` still redisplays the current
+menu: it re-runs the active filter against the existing base items from the last `setMenu`.
+That is useful when the input/filter display needs to be refreshed, but it will not pick up
+new or changed base items.
 
-(Two related guards on `invalidate`, both about _when_ it does nothing: the `menu()` guard
-above, and a no-op when the menu is **closed** — since the next open re-pulls `menu()`
-anyway. Neither applies to a plain `setMenu`-only menu, which is updated only by calling
-`setMenu` again.)
+To refresh the base of an imperatively-set menu, call `setMenu(...)` again yourself (that's
+the imperative contract: you own the base, so you re-seed it). The **pull-on-open**
+behaviour also cannot rebuild a `menu()`-less AppObject — opening the menu can only show the
+last base you seeded.
+
+The remaining guard is when the menu is **closed**: `invalidate()` returns `false` because
+there is nothing visible to refresh, and a declarative menu will be re-pulled on the next
+open anyway.
 
 In short:
 
-- **Declarative** (`menu = () => ...`) → `invalidate()` re-derives it.
-- **Imperative** (`setMenu(...)`) → `invalidate()` is a no-op; call `setMenu(...)` again.
+- **Declarative** (`menu = () => ...`) → `invalidate()` re-derives the base, then filters.
+- **Imperative** (`setMenu(...)`) → `invalidate()` re-filters the existing base; call
+  `setMenu(...)` again to change the base.
 
 ## When to use menuItemsFn (eg setMenuItemsFnAsync)?
 

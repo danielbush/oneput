@@ -32,7 +32,8 @@ export class MenuController {
      */
     public defaultFocusBehaviour: FocusBehaviour = 'last-action,first',
     /**
-     * Ambient focus behaviour for redisplays, defaults to and is reset to defaultFocusBehaviour.
+     * Ambient focus behaviour used when a menu does not provide its own
+     * focusBehaviour. It defaults to and is reset to defaultFocusBehaviour.
      *
      * Levels:
      *
@@ -55,7 +56,7 @@ export class MenuController {
       this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
     };
     this.ctl.events.on('input-change', () => {
-      this.ctl.menu.setDisplayed({ focusBehaviour: this.focusBehaviour });
+      this.ctl.menu.setDisplayed();
     });
   }
 
@@ -120,7 +121,7 @@ export class MenuController {
   }
 
   /**
-   * Re-pull declarative menu (if defined).
+   * Re-pull declarative menu (if defined); for declarative and non-declarative it will re-run the filter.
    *
    * Call this whenever AppObject state that affects menu rendering changes.
    * Pass `focusBehaviour: 'none'` to avoid moving the focused index.
@@ -131,7 +132,8 @@ export class MenuController {
     }
     const menu = this.ctl.app.getMenu();
     if (menu) {
-      this.ctl.menu.setMenu({ ...menu, focusBehaviour: opts?.focusBehaviour });
+      this.ctl.menu.setMenuOnly(menu);
+      this.ctl.menu.setDisplayed({ focusBehaviour: opts?.focusBehaviour });
     } else {
       // menu undefined => AppObject not using .menu(), just re-display
       this.ctl.menu.setDisplayed({ focusBehaviour: opts?.focusBehaviour });
@@ -148,10 +150,6 @@ export class MenuController {
     if (!this.isMenuOpen) {
       return;
     }
-    // If a sync filter is active, re-derive against the current input so the
-    // user's query survives. Runs in the same tick as the base paint above, so
-    // the displayed layer is only assigned twice synchronously -> single render,
-    // no flash of the unfiltered base.
     const items = this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue());
     if (items === false) {
       this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
@@ -160,7 +158,7 @@ export class MenuController {
     } else {
       this.ctl.currentProps.menuItems = items;
     }
-    this.runFocusBehaviour(opts?.focusBehaviour);
+    this.runFocusBehaviour(opts?.focusBehaviour ?? this.currentMenu.focusBehaviour);
   }
 
   /**
@@ -174,14 +172,16 @@ export class MenuController {
     items: Array<MenuItemAny | undefined | false | null | ''>;
   }) {
     this.setMenuOnly(params);
-    this.setDisplayed({
-      focusBehaviour: params?.focusBehaviour ?? this.focusBehaviour
-    });
+    this.setDisplayed();
   }
 
-  setMenuOnly(params?: { id: string; items: Array<MenuItemAny | undefined | false | null | ''> }) {
+  private setMenuOnly(params?: {
+    id: string;
+    focusBehaviour?: FocusBehaviour;
+    items: Array<MenuItemAny | undefined | false | null | ''>;
+  }) {
     this.currentMenu = params
-      ? CurrentMenu.create(this.ctl, params.id, params.items)
+      ? CurrentMenu.create(this.ctl, params)
       : CurrentMenu.createBlank(this.ctl);
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: this.currentMenu.menuId } });
   }

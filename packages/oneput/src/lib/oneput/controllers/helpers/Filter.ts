@@ -1,5 +1,5 @@
 import type { Controller } from '../controller.js';
-import type { FocusBehaviour, FilterFn } from '../../types.js';
+import type { FocusBehaviour, FilterFn, MenuItemAny } from '../../types.js';
 
 /**
  * The FILTER channel — sync derivation of the displayed layer from the base:
@@ -74,28 +74,12 @@ export class FilterController {
    * the same synchronous tick as the base paint, so there is no flash. No-op
    * (returns false) if no filter is active or the menu is closed.
    */
-  run(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
+  run(items: MenuItemAny[]) {
     if (this.disabled) {
       return false;
     }
-    if (!this.filter) {
-      return false;
-    }
-    if (!this.ctl.menu.isMenuOpen) {
-      return false;
-    }
-    const items = this.filter(
-      this.ctl.input.getInputValue(),
-      this.ctl.menu.currentMenu.allMenuItems
-    );
-    if (!items) {
-      return false;
-    }
-    this.ctl.menu.setDisplayed({
-      items,
-      focusBehaviour: opts?.focusBehaviour ?? this.focusBehaviour
-    });
-    return true;
+    const result = this.filter?.(this.ctl.input.getInputValue(), items);
+    return result;
   }
 
   private ensureListener() {
@@ -103,7 +87,7 @@ export class FilterController {
       return;
     }
     this.removeListener = this.ctl.events.on('input-change', () => {
-      this.run();
+      this.ctl.menu.setDisplayed({ focusBehaviour: this.focusBehaviour });
     });
   }
 }

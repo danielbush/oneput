@@ -103,7 +103,7 @@ export class MenuController {
   // #region setting menu items
 
   /**
-   * Re-pull declarative menu (if defined) and re-run filter for both types of menu.
+   * Re-pull declarative menu (if defined).
    *
    * Call this whenever AppObject state that affects menu rendering changes.
    * Pass `focusBehaviour: 'none'` to avoid moving the focused index.
@@ -114,26 +114,33 @@ export class MenuController {
     }
     const menu = this.ctl.app.pullMenu();
     if (menu) {
-      this.ctl.menu.setMenu(
-        opts?.focusBehaviour ? { ...menu, focusBehaviour: opts.focusBehaviour } : menu
-      );
+      this.ctl.menu.setMenu({ ...menu, focusBehaviour: opts?.focusBehaviour });
+    } else {
+      // menu undefined => AppObject not using .menu(), just re-display
+      this.ctl.menu.setDisplayed({ focusBehaviour: opts?.focusBehaviour });
     }
-    // If a sync filter is active, re-derive against the current input so the
-    // user's query survives. Runs in the same tick as the base paint above, so
-    // the displayed layer is only assigned twice synchronously -> single render,
-    // no flash of the unfiltered base.
-    this.runFilter({ focusBehaviour: opts?.focusBehaviour });
     return true;
   };
 
   /**
-   * Sets what will be displayed.
+   * Sets what will be displayed including re-running the filter.
    *
    * If the menu is closed you won't see the changes until it's opened.
    */
-  setDisplayed(params: { focusBehaviour?: FocusBehaviour; items: Array<MenuItemAny> }) {
-    this.ctl.currentProps.menuItems = params.items;
-    this.runFocusBehaviour(params.focusBehaviour);
+  setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
+    // If a sync filter is active, re-derive against the current input so the
+    // user's query survives. Runs in the same tick as the base paint above, so
+    // the displayed layer is only assigned twice synchronously -> single render,
+    // no flash of the unfiltered base.
+    const items = this.runFilter();
+    if (items === false) {
+      this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
+    } else if (items === undefined) {
+      //
+    } else {
+      this.ctl.currentProps.menuItems = items;
+    }
+    this.runFocusBehaviour(opts?.focusBehaviour);
   }
 
   /**
@@ -148,8 +155,7 @@ export class MenuController {
   }) {
     this.setMenuOnly(params);
     this.setDisplayed({
-      focusBehaviour: params?.focusBehaviour ?? this.defaultFocusBehaviour,
-      items: this.currentMenu.allMenuItems
+      focusBehaviour: params?.focusBehaviour ?? this.defaultFocusBehaviour
     });
   }
 
@@ -186,8 +192,8 @@ export class MenuController {
     this.filter.reset();
   }
 
-  runFilter(opts?: { focusBehaviour?: FocusBehaviour }): boolean {
-    return this.filter.run(opts);
+  runFilter() {
+    return this.filter.run(this.currentMenu.allMenuItems);
   }
 
   /**

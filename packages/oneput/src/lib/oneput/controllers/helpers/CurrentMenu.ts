@@ -41,45 +41,77 @@ export class CurrentMenu {
     this.allMenuItems = allMenuItems.filter(Boolean) as Array<MenuItemAny>;
   }
 
+  /**
+   * Reactive: reads the focused item index from currentProps.
+   */
   get focusedMenuItemIndex() {
     return this.ctl.currentProps.menuItemFocus?.[0] ?? 0;
   }
 
+  /**
+   * Reactive: reads the displayed menu list from currentProps.
+   */
   get displayedMenuItemCount() {
     return this.ctl.currentProps.menuItems?.length ?? 0;
   }
 
+  /**
+   * Reactive: reads the focused item from currentProps.
+   */
   get focusedMenuItem() {
     return this.ctl.currentProps.menuItems?.[this.focusedMenuItemIndex];
   }
 
+  /**
+   * Reactive: reads the displayed menu list from currentProps.
+   */
   get displayedMenuItems() {
     return this.ctl.currentProps.menuItems;
   }
 
+  /**
+   * Static: reads the captured menu id.
+   */
   get menuId() {
     return this._menuId;
   }
 
+  /**
+   * Reactive: clamps against the displayed menu count from currentProps.
+   */
   getSafeIndex(index: number) {
     return Math.max(0, Math.min(index, this.displayedMenuItemCount - 1));
   }
 
+  /**
+   * Reactive: reads the displayed menu list from currentProps.
+   */
   getSafe(index: number) {
     const safeIndex = this.getSafeIndex(index);
     return { index: safeIndex, menuItem: this.ctl.currentProps.menuItems?.[safeIndex] };
   }
 
+  /**
+   * Reactive when no index is provided: defaults from currentProps and wraps
+   * against the displayed menu count.
+   */
   nextMenuItemIndex(index?: number) {
     index = index ?? this.focusedMenuItemIndex;
     return (index + 1 + this.displayedMenuItemCount) % Math.max(1, this.displayedMenuItemCount);
   }
 
+  /**
+   * Reactive when no index is provided: defaults from currentProps and wraps
+   * against the displayed menu count.
+   */
   previousMenuItemIndex(index?: number) {
     index = index ?? this.focusedMenuItemIndex;
     return (index - 1 + this.displayedMenuItemCount) % Math.max(1, this.displayedMenuItemCount);
   }
 
+  /**
+   * Reactive: reads the displayed menu list from currentProps.
+   */
   getFocusable(index: number) {
     const item = this.ctl.currentProps.menuItems?.[index];
     if (isFocusable(item)) {
@@ -88,6 +120,9 @@ export class CurrentMenu {
     return null;
   }
 
+  /**
+   * Reactive: searches the displayed menu list from currentProps.
+   */
   getIndexFromId(id: string) {
     const index = this.ctl.currentProps.menuItems?.findIndex((item) => {
       return item.id === id;

@@ -32,7 +32,7 @@ export class MenuItemsFnController {
    * `fetch('')`). Any pending/in-flight fetch is discarded. Rendered immediately
    * on registration too, since the input usually starts empty.
    */
-  setMenuItemsFnAsync(
+  setAsync(
     menuItemsFnAsync: MenuItemsGenFnAsync,
     options: {
       onDebounce?: (isDebouncing: boolean) => void;
@@ -127,11 +127,11 @@ export class MenuItemsFnController {
   /**
    * Remove the active menu items fn (its input-change listener).
    */
-  clearMenuItemsFn() {
+  clear() {
     this.removeMenuItemsListener?.();
   }
 
-  triggerMenuItemsFn() {
+  trigger() {
     this.ctl.input.triggerInputEvent();
   }
 }

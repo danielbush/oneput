@@ -251,7 +251,7 @@ export class MenuController {
    * Register a sync filter `(query, base) => subset`.
    */
   setFilter(filter: FilterFn) {
-    this.menuItemsFn.clearMenuItemsFn();
+    this.menuItemsFn.clear();
     this.filter.set(filter);
     this.inputChannel.mode = 'filter';
   }
@@ -260,7 +260,7 @@ export class MenuController {
    * Set the filter restored per-AppObject by AppController reset.
    */
   setDefaultFilter(filter: FilterFn) {
-    this.menuItemsFn.clearMenuItemsFn();
+    this.menuItemsFn.clear();
     this.filter.setDefault(filter);
     this.inputChannel.mode = 'filter';
   }
@@ -305,7 +305,7 @@ export class MenuController {
     } = {}
   ) {
     this.inputChannel.mode = 'generative';
-    this.menuItemsFn.setMenuItemsFnAsync(
+    this.menuItemsFn.setAsync(
       menuItemsFnAsync,
       options,
       () => this.inputChannel.mode === 'generative' && this.inputChannel.generativeEnabled
@@ -313,7 +313,7 @@ export class MenuController {
   }
 
   clearMenuItemsFn() {
-    this.menuItemsFn.clearMenuItemsFn();
+    this.menuItemsFn.clear();
     if (this.inputChannel.mode === 'generative') {
       this.inputChannel.mode = 'none';
     }
@@ -321,7 +321,7 @@ export class MenuController {
 
   triggerMenuItemsFn() {
     if (this.inputChannel.mode === 'generative' && this.inputChannel.generativeEnabled) {
-      this.menuItemsFn.triggerMenuItemsFn();
+      this.menuItemsFn.trigger();
     }
   }
 

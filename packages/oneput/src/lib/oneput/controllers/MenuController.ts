@@ -4,6 +4,7 @@ import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
 import { FilterManager } from './helpers/FilterManager.js';
+import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItems.js';
 
 export class MenuController {
   public static create(ctl: Controller) {
@@ -176,6 +177,27 @@ export class MenuController {
   }) {
     this.setMenuOnly(params);
     this.setDisplayed();
+  }
+
+  /**
+   * Show a skeleton placeholder menu.
+   *
+   * Assumes you are using `setMenu`.  If using declarative menu (.menu()) in your AppObject you can do:
+   *
+   * ```ts
+   *
+   *   menu() {
+   *     if (this.isLoading) {
+   *       return { id: 'loading', items: stdSkeletonMenuItems(count) }
+   *     }
+   *     ... render the real thing ...
+   *   }
+   * ```
+   *
+   * @param count number of placeholder rows (default 4)
+   */
+  setMenuLoading(count?: number) {
+    this.setMenu({ id: 'loading', items: stdSkeletonMenuItems(count ?? 10) });
   }
 
   private setMenuOnly(params?: {

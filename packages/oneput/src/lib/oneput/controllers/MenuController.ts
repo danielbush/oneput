@@ -1,5 +1,5 @@
 import type { FocusBehaviour, MenuItem, MenuItemAny, MenuItemsGenFnAsync } from '../types.js';
-import type { FilterFn } from '../types.js';
+import type { MenuItemsFilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { GenerativeMenuManager } from './helpers/GenerativeMenuManager.js';
@@ -250,7 +250,7 @@ export class MenuController {
   /**
    * Register a sync filter `(query, base) => subset`.
    */
-  setFilter(filter: FilterFn) {
+  setFilter(filter: MenuItemsFilterFn) {
     this.generative.clear();
     this.filter.set(filter);
     this.inputChannel.mode = 'filter';
@@ -259,7 +259,7 @@ export class MenuController {
   /**
    * Set the filter restored per-AppObject by AppController reset.
    */
-  setDefaultFilter(filter: FilterFn) {
+  setDefaultFilter(filter: MenuItemsFilterFn) {
     this.generative.clear();
     this.filter.setDefault(filter);
     this.inputChannel.mode = 'filter';

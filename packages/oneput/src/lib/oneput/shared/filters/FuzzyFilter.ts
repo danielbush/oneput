@@ -1,6 +1,6 @@
 import uFuzzy from '@leeoniya/ufuzzy';
 import { walk } from '../../lib/utils.js';
-import type { FChildParams, MenuItemAny, FilterFn } from '../../types.js';
+import type { FChildParams, MenuItemAny, MenuItemsFilterFn } from '../../types.js';
 
 export type HaystackData =
   | {
@@ -92,7 +92,7 @@ export class FuzzyFilter {
    *
    * (WordFilter differs: order-preserving, so it keeps a mid-list pin in place.)
    */
-  filter: FilterFn = (input, menuItems) => {
+  filter: MenuItemsFilterFn = (input, menuItems) => {
     if (!input || !/\S/.test(input)) {
       return { items: menuItems };
     }

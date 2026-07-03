@@ -1,5 +1,5 @@
 import type { Controller } from '../controller.js';
-import type { FilterFn, MenuItemAny } from '../../types.js';
+import type { MenuItemsFilterFn, MenuItemAny } from '../../types.js';
 
 /**
  * The FILTER channel — sync derivation of the displayed layer from the base:
@@ -21,8 +21,8 @@ export class FilterManager {
     return new FilterManager();
   }
 
-  private filter?: FilterFn;
-  private defaultFilter?: FilterFn;
+  private filter?: MenuItemsFilterFn;
+  private defaultFilter?: MenuItemsFilterFn;
 
   private constructor() {}
 
@@ -31,7 +31,7 @@ export class FilterManager {
    * while the menu is open. Returning undefined leaves the displayed layer
    * untouched (same contract as a menuItemsFn).
    */
-  set(filter: FilterFn) {
+  set(filter: MenuItemsFilterFn) {
     this.filter = filter;
   }
 
@@ -39,7 +39,7 @@ export class FilterManager {
    * Set the filter restored per-AppObject by {@link reset} (called in runBefore).
    * Use at app setup (e.g. _layout) for the default filter every menu gets.
    */
-  setDefault(filter: FilterFn) {
+  setDefault(filter: MenuItemsFilterFn) {
     this.defaultFilter = filter;
     this.set(filter);
   }

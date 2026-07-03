@@ -109,12 +109,13 @@ export type FilterResult = {
   focusItemId?: string;
 };
 
-export type FilterFn = (input: string, items: MenuItemAny[]) => FilterResult | undefined | void;
+export type MenuItemsFilterFn = (
+  input: string,
+  items: MenuItemAny[]
+) => FilterResult | undefined | void;
 
 /**
- * The GENERATIVE signature: `(input) => items`. Produces items purely from the
- * input, ignoring any base (`setMenu`/`menu()`) — that is the filter's domain.
- * Used by `setMenuItemsFnAsync`.
+ * Generates items purely from the input.
  */
 export type MenuItemsGenFnAsync = (input: string) => Promise<Array<MenuItemAny> | undefined>;
 

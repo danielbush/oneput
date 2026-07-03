@@ -16,7 +16,7 @@ export class MenuItemsFnController {
     return new MenuItemsFnController(ctl);
   }
 
-  private disableMenuItemsFn = false;
+  private disabled = false;
   private removeMenuItemsListener?: () => void;
 
   constructor(private ctl: Controller) {}
@@ -24,8 +24,8 @@ export class MenuItemsFnController {
   /**
    * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
    */
-  _enableMenuItemsFn(on: boolean = true) {
-    this.disableMenuItemsFn = !on;
+  _enable(on: boolean = true) {
+    this.disabled = !on;
   }
 
   /**
@@ -82,7 +82,7 @@ export class MenuItemsFnController {
         if (!items) {
           return;
         }
-        // console.warn(`got ${value}...`);
+        console.warn(`setMenu for ${value}, items=${items.length}...`);
         this.ctl.menu.setMenu({
           id: 'menuItemsFnAsync',
           items,
@@ -93,7 +93,7 @@ export class MenuItemsFnController {
       { immediate: false }
     );
     this.removeMenuItemsListener = this.ctl.events.on('input-change', (payload) => {
-      if (this.disableMenuItemsFn) {
+      if (this.disabled) {
         return;
       }
       if (!this.ctl.menu.isMenuOpen) {

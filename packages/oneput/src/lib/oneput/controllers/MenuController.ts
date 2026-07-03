@@ -252,7 +252,7 @@ export class MenuController {
    * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
    */
   _enableMenuItemsFn(on: boolean = true) {
-    this.menuItemsFn._enableMenuItemsFn(on);
+    this.menuItemsFn._enable(on);
   }
 
   setMenuItemsFnAsync(

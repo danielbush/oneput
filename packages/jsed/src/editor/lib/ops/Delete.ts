@@ -3,6 +3,8 @@ import * as focusable from '../../../lib/ops/focusable.js';
 import { canDelete } from '../../../lib/core/dom-rules.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import { removeAnchors } from '../../../lib/ops/anchor.js';
+import { isFocusable, isIsland } from '../../../lib/core/taxonomy.js';
+import { findNextNode, findPreviousNode } from '../../../lib/core/walk.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
@@ -22,26 +24,21 @@ export class Delete implements UndoRecord {
     const parent = focus.parentElement;
     if (!parent) return;
 
-    const nextFocus =
-      focusable.findNextFocusableOutside(focus, state.document.root) ??
-      focusable.findPreviousFocusableOutside(focus, state.document.root) ??
-      parent;
-
     const op = focusable.deleteElement(focus);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-removed',
       element: focus
     });
-    state.nav.FOCUS(nextFocus);
 
-    const record = new Delete(op, { undo: focus, redo: nextFocus }, parent);
+    const record = new Delete(op, focus, parent);
     record.normalize();
+    state.nav.FOCUS(record.getRedoFocusTarget());
     return record;
   }
 
   constructor(
     private op: focusable.DeleteElement,
-    private focusTarget: { undo: HTMLElement; redo: HTMLElement },
+    private undoFocusTarget: HTMLElement,
     private parent: HTMLElement
   ) {}
 
@@ -50,6 +47,30 @@ export class Delete implements UndoRecord {
    */
   private normalize() {
     normalize(this.parent);
+  }
+
+  /**
+   * Find the FOCUSABLE that should receive FOCUS after the element is deleted.
+   *
+   * Deletion stays local to the surviving parent: prefer the next FOCUSABLE
+   * within that parent, then the previous one, then the parent itself.
+   */
+  private getRedoFocusTarget(): HTMLElement {
+    for (const next of findNextNode(this.op.marker, this.parent, {
+      visit: isFocusable,
+      descend: (node) => !isIsland(node)
+    })) {
+      return next as HTMLElement;
+    }
+
+    for (const previous of findPreviousNode(this.op.marker, this.parent, {
+      visit: isFocusable,
+      descend: (node) => !isIsland(node)
+    })) {
+      return previous as HTMLElement;
+    }
+
+    return this.parent;
   }
 
   /**
@@ -65,13 +86,13 @@ export class Delete implements UndoRecord {
 
   undo(state: EditorState) {
     focusable.undoDeleteElement(this.op);
-    state.nav.FOCUS(this.focusTarget.undo);
+    state.nav.FOCUS(this.undoFocusTarget);
     this.normalizeUndo();
   }
 
   redo(state: EditorState) {
     focusable.redoDeleteElement(this.op);
-    state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
+    state.nav.FOCUS(this.getRedoFocusTarget());
   }
 }

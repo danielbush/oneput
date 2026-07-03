@@ -43,7 +43,7 @@ describe('Delete.run', () => {
     state.destroy();
   });
 
-  it('falls back to the previous FOCUSABLE when there is no next', () => {
+  it('falls back to the previous FOCUSABLE in the parent when there is no next', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const state = getEditorState(doc);
@@ -100,6 +100,62 @@ describe('Delete.run', () => {
     expect(doc.root.contains(paragraph)).toBe(false);
     expect(identifyChildren(listItem)).toEqual(['[anchor]', '[deleted-element]']);
     expect(state.nav.getFocus()).toBe(listItem);
+
+    state.destroy();
+  });
+
+  it('focuses another FOCUSABLE in the parent after deleting the focused element', () => {
+    // arrange
+    const doc = makeRoot(
+      ul(
+        { id: 'list' },
+        li(
+          { id: 'item' }, //
+          p({ id: 'p1' }, 'first'),
+          p({ id: 'p2' }, 'second')
+        )
+      )
+    );
+    const state = getEditorState(doc);
+    const firstParagraph = byId(doc, 'p1');
+    const secondParagraph = byId(doc, 'p2');
+    state.nav.FOCUS(firstParagraph);
+
+    // act
+    const record = Delete.run(state);
+
+    // assert
+    expect(record).toBeDefined();
+    expect(doc.root.contains(firstParagraph)).toBe(false);
+    expect(state.nav.getFocus()).toBe(secondParagraph);
+
+    state.destroy();
+  });
+
+  it('focuses the parent instead of escaping to the next FOCUSABLE outside the parent', () => {
+    // arrange
+    const doc = makeRoot(
+      ul(
+        { id: 'list' },
+        li({ id: 'item1' }, p({ id: 'p1' }, 'first')),
+        li({ id: 'item2' }, p({ id: 'p2' }, 'second'))
+      )
+    );
+    const state = getEditorState(doc);
+    const firstListItem = byId(doc, 'item1');
+    const secondListItem = byId(doc, 'item2');
+    const firstParagraph = byId(doc, 'p1');
+    state.nav.FOCUS(firstParagraph);
+
+    // act
+    const record = Delete.run(state);
+
+    // assert
+    expect(record).toBeDefined();
+    expect(doc.root.contains(firstParagraph)).toBe(false);
+    expect(identifyChildren(firstListItem)).toEqual(['[anchor]', '[deleted-element]']);
+    expect(state.nav.getFocus()).toBe(firstListItem);
+    expect(state.nav.getFocus()).not.toBe(secondListItem);
 
     state.destroy();
   });

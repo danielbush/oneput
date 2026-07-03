@@ -112,6 +112,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
 - set up playwright smoke tests on oneput-demo
   - "open menu should show expected menu items"
+  - "typing filters menu"
+  - open AsyncSearch demo and test generative works - really simple tests
   - etc
   - run this on PR's
 

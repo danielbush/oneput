@@ -181,6 +181,9 @@ export class AppController {
     return typeof actions === 'function' ? actions() : actions;
   }
 
+  /**
+   * Refresh action bindings defined by the AppObject's `actions`.
+   */
   invalidateActions() {
     const resolved = this.resolveActions();
     if (resolved) {

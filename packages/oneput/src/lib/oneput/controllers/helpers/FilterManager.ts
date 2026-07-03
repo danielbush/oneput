@@ -1,4 +1,3 @@
-import type { Controller } from '../controller.js';
 import type { MenuItemsFilterFn, MenuItemAny } from '../../types.js';
 
 /**

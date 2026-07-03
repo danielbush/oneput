@@ -371,7 +371,7 @@ export type UIFlags = {
   enableMenuOpenClose?: boolean;
   enableKeys?: boolean;
   enableMenuActions?: boolean;
-  enableMenuItemsFn?: boolean;
+  enableGenerative?: boolean;
   enableFilter?: boolean;
   enableInputElement?: boolean;
   enableModal?: boolean;

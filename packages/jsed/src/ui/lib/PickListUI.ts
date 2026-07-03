@@ -128,7 +128,7 @@ class ManualEntryUI implements AppObject {
       params: { menuTitle: this.title },
       flags: {
         enableMenuOpenClose: false,
-        enableMenuItemsFn: false
+        enableGenerative: false
       }
     });
     this.ctl.input.setPlaceholder(this.prompt);

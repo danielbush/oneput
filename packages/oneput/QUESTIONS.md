@@ -32,7 +32,7 @@ ONE of them:
 They can't both drive one menu: `MenuController` keeps one active input channel
 (`none`, `filter`, or `generative`). Registering a generative fn selects the generative
 channel; registering a filter selects the filter channel. The `enableFilter` and
-`enableMenuItemsFn` UI flags temporarily gate those channels without changing which one is active.
+`enableGenerative` UI flags temporarily gate those channels without changing which one is active.
 
 ### Three kinds of menu
 

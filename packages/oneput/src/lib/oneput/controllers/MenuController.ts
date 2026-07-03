@@ -289,7 +289,7 @@ export class MenuController {
   // #region generative menu items
 
   /**
-   * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
+   * Prefer ctl.ui.update({ flags: { enableGenerative: true } }) instead.
    */
   _enableGenerative(on: boolean = true) {
     this.inputChannel.generativeEnabled = on;

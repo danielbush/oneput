@@ -32,7 +32,7 @@ export class NavigateHeadings implements AppObject {
       flags: {
         // Demo how to handle typed input by handling onInputChange directly and
         // disable the built-in generative + filter channels...
-        enableMenuItemsFn: false,
+        enableGenerative: false,
         enableFilter: false
       }
     });

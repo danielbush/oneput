@@ -83,8 +83,8 @@ export class AppController {
     if ('enableMenuActions' in flags || 'enableModal' in flags) {
       this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? !flags.enableModal);
     }
-    if ('enableMenuItemsFn' in flags || 'enableModal' in flags) {
-      this.ctl.menu._enableGenerative(flags.enableMenuItemsFn ?? !flags.enableModal);
+    if ('enableGenerative' in flags || 'enableModal' in flags) {
+      this.ctl.menu._enableGenerative(flags.enableGenerative ?? !flags.enableModal);
     }
     if ('enableFilter' in flags || 'enableModal' in flags) {
       this.ctl.menu._enableFilter(flags.enableFilter ?? !flags.enableModal);
@@ -130,7 +130,7 @@ export class AppController {
       enableMenuOpenClose: settings?.enableMenuOpenClose ?? !enableModal,
       enableKeys: settings?.enableKeys ?? !enableModal,
       enableMenuActions: settings?.enableMenuActions ?? !enableModal,
-      enableMenuItemsFn: settings?.enableMenuItemsFn ?? !enableModal,
+      enableGenerative: settings?.enableGenerative ?? !enableModal,
       enableFilter: settings?.enableFilter ?? !enableModal,
       enableInputElement: settings?.enableInputElement ?? !enableModal
     };
@@ -139,7 +139,7 @@ export class AppController {
     this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
     this.ctl.keys._enableKeys(flags.enableKeys);
     this.ctl.menu._enableMenuActions(flags.enableMenuActions);
-    this.ctl.menu._enableGenerative(flags.enableMenuItemsFn);
+    this.ctl.menu._enableGenerative(flags.enableGenerative);
     this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
 

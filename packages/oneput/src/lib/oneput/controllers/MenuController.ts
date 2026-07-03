@@ -2,7 +2,7 @@ import type { FocusBehaviour, MenuItem, MenuItemAny, MenuItemsGenFnAsync } from 
 import type { FilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
-import { MenuItemsFnController } from './helpers/MenuItemsFn.js';
+import { GenerativeMenuManager } from './helpers/MenuItemsFn.js';
 import { FilterManager } from './helpers/FilterManager.js';
 import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItems.js';
 
@@ -32,20 +32,20 @@ type MenuInputChannelState = {
 
 export class MenuController {
   public static create(ctl: Controller) {
-    const fn = MenuItemsFnController.create(ctl);
+    const fn = GenerativeMenuManager.create(ctl);
     const filter = FilterManager.create();
     return new MenuController(ctl, fn, filter);
   }
 
   public static createNull(ctl: Controller) {
-    const fn = MenuItemsFnController.createNull(ctl);
+    const fn = GenerativeMenuManager.createNull(ctl);
     const filter = FilterManager.createNull();
     return new MenuController(ctl, fn, filter);
   }
 
   constructor(
     private ctl: Controller,
-    private generative: MenuItemsFnController,
+    private generative: GenerativeMenuManager,
     private filter: FilterManager,
     private currentMenu = CurrentMenu.createBlank(ctl),
     private disableActions = false,

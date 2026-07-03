@@ -7,13 +7,13 @@ const isBlank = (value: string) => !/\S/.test(value);
 /**
  * This is like a subcontroller.
  */
-export class MenuItemsFnController {
+export class GenerativeMenuManager {
   public static create(ctl: Controller) {
-    return new MenuItemsFnController(ctl);
+    return new GenerativeMenuManager(ctl);
   }
 
   public static createNull(ctl: Controller) {
-    return new MenuItemsFnController(ctl);
+    return new GenerativeMenuManager(ctl);
   }
 
   private removeMenuItemsListener?: () => void;

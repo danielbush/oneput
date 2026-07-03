@@ -2,7 +2,7 @@ import type { FocusBehaviour, MenuItem, MenuItemAny, MenuItemsGenFnAsync } from 
 import type { FilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
-import { GenerativeMenuManager } from './helpers/MenuItemsFn.js';
+import { GenerativeMenuManager } from './helpers/GenerativeMenuManager.js';
 import { FilterManager } from './helpers/FilterManager.js';
 import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItems.js';
 

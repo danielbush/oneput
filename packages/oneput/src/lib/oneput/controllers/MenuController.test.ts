@@ -94,7 +94,7 @@ describe('MenuController', () => {
     });
 
     // act
-    ctl.menu.setMenuItemsFnAsync(async () => [item('generated', 'Generated')], {
+    ctl.menu.setGenerativeAsync(async () => [item('generated', 'Generated')], {
       whenEmpty: () => [item('generated-empty', 'Generated empty')]
     });
 
@@ -106,7 +106,7 @@ describe('MenuController', () => {
     // arrange
     const ctl = Controller.createNull({ menuOpen: true, inputValue: 'app' });
     ctl.app.run({ onStart: () => {} });
-    ctl.menu.setMenuItemsFnAsync(async () => [item('generated', 'Generated')], {
+    ctl.menu.setGenerativeAsync(async () => [item('generated', 'Generated')], {
       whenEmpty: () => [item('generated-empty', 'Generated empty')]
     });
     ctl.menu.setFilter(WordFilter.create().filter);

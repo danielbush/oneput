@@ -84,7 +84,7 @@ export class AppController {
       this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? !flags.enableModal);
     }
     if ('enableMenuItemsFn' in flags || 'enableModal' in flags) {
-      this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn ?? !flags.enableModal);
+      this.ctl.menu._enableGenerative(flags.enableMenuItemsFn ?? !flags.enableModal);
     }
     if ('enableFilter' in flags || 'enableModal' in flags) {
       this.ctl.menu._enableFilter(flags.enableFilter ?? !flags.enableModal);
@@ -139,7 +139,7 @@ export class AppController {
     this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
     this.ctl.keys._enableKeys(flags.enableKeys);
     this.ctl.menu._enableMenuActions(flags.enableMenuActions);
-    this.ctl.menu._enableMenuItemsFn(flags.enableMenuItemsFn);
+    this.ctl.menu._enableGenerative(flags.enableMenuItemsFn);
     this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
 
@@ -152,7 +152,7 @@ export class AppController {
     // input-change listener can't clobber the next AppObject's menu. The new
     // AppObject re-registers its own in onStart/onResume if it wants one (the
     // same rebuild contract as setMenu/filter above).
-    this.ctl.menu.clearMenuItemsFn();
+    this.ctl.menu.clearGenerative();
     this.ctl.menu.resetFilter();
     this.ctl.input.setInputValue();
     this.ctl.input.resetSubmitHandler();

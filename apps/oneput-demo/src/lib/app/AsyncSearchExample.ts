@@ -37,7 +37,7 @@ export class AsyncSearchExample implements AppObject {
       // No enableFilter:false needed: setMenuItemsFnAsync selects the
       // generative channel instead of the filter channel.
     });
-    this.ctl.menu.setMenuItemsFnAsync(
+    this.ctl.menu.setGenerativeAsync(
       async (input) => {
         try {
           this.outerRightStatus.withNode((node) => {
@@ -116,7 +116,7 @@ export class AsyncSearchExample implements AppObject {
             attr: {
               onclick: () => {
                 alert.cancel();
-                this.ctl.menu.triggerMenuItemsFn();
+                this.ctl.menu.triggerGenerative();
               }
             }
           })

@@ -291,12 +291,12 @@ export class MenuController {
   /**
    * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
    */
-  _enableMenuItemsFn(on: boolean = true) {
+  _enableGenerative(on: boolean = true) {
     this.inputChannel.generativeEnabled = on;
   }
 
-  setMenuItemsFnAsync(
-    menuItemsFnAsync: MenuItemsGenFnAsync,
+  setGenerativeAsync(
+    generateAsync: MenuItemsGenFnAsync,
     options: {
       onDebounce?: (isDebouncing: boolean) => void;
       debounceMS?: number;
@@ -306,20 +306,20 @@ export class MenuController {
   ) {
     this.inputChannel.mode = 'generative';
     this.generative.setAsync(
-      menuItemsFnAsync,
+      generateAsync,
       options,
       () => this.inputChannel.mode === 'generative' && this.inputChannel.generativeEnabled
     );
   }
 
-  clearMenuItemsFn() {
+  clearGenerative() {
     this.generative.clear();
     if (this.inputChannel.mode === 'generative') {
       this.inputChannel.mode = 'none';
     }
   }
 
-  triggerMenuItemsFn() {
+  triggerGenerative() {
     if (this.inputChannel.mode === 'generative' && this.inputChannel.generativeEnabled) {
       this.generative.trigger();
     }

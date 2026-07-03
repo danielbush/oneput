@@ -34,8 +34,8 @@ export class AsyncSearchExample implements AppObject {
             onMount: this.outerRightStatus.onMount
           })
       }
-      // No enableFilter:false needed: setMenuItemsFnAsync auto-clears the filter
-      // (generative and filter are mutually exclusive).
+      // No enableFilter:false needed: setMenuItemsFnAsync selects the
+      // generative channel instead of the filter channel.
     });
     this.ctl.menu.setMenuItemsFnAsync(
       async (input) => {

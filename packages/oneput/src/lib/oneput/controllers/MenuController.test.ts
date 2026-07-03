@@ -82,4 +82,44 @@ describe('MenuController', () => {
     expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['up', 'apple']);
     expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
   });
+
+  it('uses generative mode instead of the base menu', () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true, inputValue: '' });
+    ctl.app.run({ onStart: () => {} });
+    ctl.menu.setDefaultFilter(WordFilter.create().filter);
+    ctl.menu.setMenu({
+      id: 'base',
+      items: [item('apple', 'Apple'), item('banana', 'Banana')]
+    });
+
+    // act
+    ctl.menu.setMenuItemsFnAsync(async () => [item('generated', 'Generated')], {
+      whenEmpty: () => [item('generated-empty', 'Generated empty')]
+    });
+
+    // assert
+    expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['generated-empty']);
+  });
+
+  it('uses filter mode instead of a previous generative listener', () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true, inputValue: 'app' });
+    ctl.app.run({ onStart: () => {} });
+    ctl.menu.setMenuItemsFnAsync(async () => [item('generated', 'Generated')], {
+      whenEmpty: () => [item('generated-empty', 'Generated empty')]
+    });
+    ctl.menu.setFilter(WordFilter.create().filter);
+    ctl.input.setInputValue('app');
+    ctl.menu.setMenu({
+      id: 'base',
+      items: [item('apple', 'Apple'), item('banana', 'Banana')]
+    });
+
+    // act
+    ctl.events.emit({ type: 'input-change', payload: { ...inputChangePayload, value: '' } });
+
+    // assert
+    expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['apple']);
+  });
 });

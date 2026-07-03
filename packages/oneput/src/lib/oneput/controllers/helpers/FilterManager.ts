@@ -7,9 +7,10 @@ import type { FilterFn, MenuItemAny } from '../../types.js';
  *
  * This is deliberately a separate module from {@link MenuItemsFnController}
  * (the generative channel) so the two menu kinds come in through different
- * doors. Because a filter is known to be sync and base-derivable, `invalidate()`
- * can re-apply it inline against a freshly re-seeded base in the same tick (see
- * {@link run}), so the user's query survives a base change with no flash.
+ * doors. {@link MenuController} owns which channel is currently active. Because
+ * a filter is known to be sync and base-derivable, `invalidate()` can re-apply
+ * it inline against a freshly re-seeded base in the same tick (see {@link run}),
+ * so the user's query survives a base change with no flash.
  */
 export class FilterManager {
   public static create() {
@@ -20,19 +21,10 @@ export class FilterManager {
     return new FilterManager();
   }
 
-  private disabled = false;
   private filter?: FilterFn;
   private defaultFilter?: FilterFn;
 
   private constructor() {}
-
-  /**
-   * Gate filter firing alongside menuItemsFn. Prefer
-   * `ctl.ui.update({ flags: { enableMenuItemsFn: true } })`.
-   */
-  _enable(on: boolean = true) {
-    this.disabled = !on;
-  }
 
   /**
    * Register a sync filter `(query, base) => subset`. Fires on input-change
@@ -65,15 +57,22 @@ export class FilterManager {
   }
 
   /**
-   * Run the active filter NOW against the current base + input, painting once.
+   * Explicit non-default filter has been set.
+   *
+   * Not the same as "default filter exists".
+   *
+   */
+  get hasFilter() {
+    return Boolean(this.filter);
+  }
+
+  /**
+   * Run the stored filter NOW against the current base + input, painting once.
    * Used by invalidate after re-seeding the base so the query survives; runs in
-   * the same synchronous tick as the base paint, so there is no flash. No-op
-   * (returns false) if no filter is active or the menu is closed.
+   * the same synchronous tick as the base paint, so there is no flash. The
+   * caller owns whether the filter channel is active for this display.
    */
   run(items: MenuItemAny[], inputValue: string) {
-    if (this.disabled) {
-      return false;
-    }
     const result = this.filter?.(inputValue, items);
     return result;
   }

@@ -29,8 +29,10 @@ ONE of them:
   the input, IGNORING the base. Signature `MenuItemsGenFn = (input) => items` (and
   `MenuItemsGenFnAsync` for fetches). Register with `setMenuItemsFn` / `setMenuItemsFnAsync`.
 
-They can't both drive one menu: registering a generative fn auto-clears the active filter,
-and the `enableFilter` UI flag gates the filter channel independently of `enableMenuItemsFn`.
+They can't both drive one menu: `MenuController` keeps one active input channel
+(`none`, `filter`, or `generative`). Registering a generative fn selects the generative
+channel; registering a filter selects the filter channel. The `enableFilter` and
+`enableMenuItemsFn` UI flags temporarily gate those channels without changing which one is active.
 
 ### Three kinds of menu
 
@@ -180,3 +182,11 @@ setMenuItemsFnAsync gives you four things:
 All four exist for one scenario: the input is an async query to a producer — a search box hitting a server (that's literally AsyncSearchExample). Debounce throttles the server; out-of-order discard handles racing responses.
 
 If you need to dynamically generate menu items but not in response to typing (like a search result) then consider `setMenu` directly. See DirectoryPicker demo.
+
+## Explain how filters and generative menus work
+
+TODO: mutually exclusive
+
+## Explain how focusBehaviour works
+
+TODO: 4 layers; we can override in ctl.menu.invalidate

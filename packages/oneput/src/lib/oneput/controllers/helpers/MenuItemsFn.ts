@@ -16,17 +16,9 @@ export class MenuItemsFnController {
     return new MenuItemsFnController(ctl);
   }
 
-  private disabled = false;
   private removeMenuItemsListener?: () => void;
 
   constructor(private ctl: Controller) {}
-
-  /**
-   * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
-   */
-  _enable(on: boolean = true) {
-    this.disabled = !on;
-  }
 
   /**
    * Calls to menuItemsFnAsync are debounced reducing calls to the function as
@@ -47,16 +39,16 @@ export class MenuItemsFnController {
       debounceMS?: number;
       focusBehaviour?: FocusBehaviour;
       whenEmpty?: () => MenuItemAny[];
-    } = {}
+    } = {},
+    shouldRun: () => boolean = () => true
   ) {
-    // Generative and filter are mutually exclusive channels: registering a
-    // generative fn turns off any active filter so they don't fight over the
-    // displayed layer. Restored per-AppObject by resetFilter in runBefore.
-    this.ctl.menu.clearFilter();
     this.removeMenuItemsListener?.();
     let inFlight = 0;
     const debouncedHandler = debounce(
       async ({ value }: { value: string }) => {
+        if (!shouldRun()) {
+          return;
+        }
         inFlight = (inFlight + 1) % 100000;
         const thisInFlight = inFlight;
         let items: MenuItemAny[] | undefined;
@@ -82,6 +74,9 @@ export class MenuItemsFnController {
         if (!items) {
           return;
         }
+        if (!shouldRun()) {
+          return;
+        }
         console.warn(`setMenu for ${value}, items=${items.length}...`);
         this.ctl.menu.setMenu({
           id: 'menuItemsFnAsync',
@@ -92,8 +87,8 @@ export class MenuItemsFnController {
       options.debounceMS ?? 500,
       { immediate: false }
     );
-    this.removeMenuItemsListener = this.ctl.events.on('input-change', (payload) => {
-      if (this.disabled) {
+    const removeInputChangeListener = this.ctl.events.on('input-change', (payload) => {
+      if (!shouldRun()) {
         return;
       }
       if (!this.ctl.menu.isMenuOpen) {
@@ -115,6 +110,11 @@ export class MenuItemsFnController {
       options.onDebounce?.(true);
       debouncedHandler(payload);
     });
+    this.removeMenuItemsListener = () => {
+      removeInputChangeListener();
+      debouncedHandler.clear();
+      inFlight = (inFlight + 1) % 100000;
+    };
     if (options.whenEmpty && isBlank(this.ctl.input.getInputValue())) {
       this.ctl.menu.setMenu({
         id: 'menuItemsFnAsync',

@@ -1,6 +1,6 @@
 import { describe, expect, it, test } from 'vitest';
 import { Controller } from '@oneput/oneput';
-import { byId, frag, makeRoot, p } from '../../../../test/util.js';
+import { byId, frag, identifyChildren, li, makeRoot, p, ul } from '../../../../test/util.js';
 import { EditorState, type EditorElementChangeEvent } from '../../EditorState.js';
 import type { JsedDocument } from '../../../../JsedDocument.js';
 import { isDeletedElement } from '../../../../lib/core/taxonomy.js';
@@ -84,6 +84,26 @@ describe('Delete.run', () => {
     state.destroy();
   });
 
+  it('normalizes an emptied parent so the user can edit the empty list item', () => {
+    // arrange
+    const doc = makeRoot(ul({ id: 'list' }, li({ id: 'item' }, p({ id: 'p1' }, 'item text'))));
+    const state = getEditorState(doc);
+    const listItem = byId(doc, 'item');
+    const paragraph = byId(doc, 'p1');
+    state.nav.FOCUS(paragraph);
+
+    // act
+    const record = Delete.run(state);
+
+    // assert
+    expect(record).toBeDefined();
+    expect(doc.root.contains(paragraph)).toBe(false);
+    expect(identifyChildren(listItem)).toEqual(['[anchor]', '[deleted-element]']);
+    expect(state.nav.getFocus()).toBe(listItem);
+
+    state.destroy();
+  });
+
   test('edit mode is a no-op', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
@@ -137,6 +157,38 @@ describe('Delete undo / redo', () => {
     expect(doc.root.contains(p1)).toBe(false);
     expect(isDeletedElement(doc.root.children[0])).toBe(true);
     expect(state.nav.getFocus()).toBe(p2);
+
+    state.destroy();
+  });
+
+  test('undo removes the anchor from the deleted state before restoring the element', () => {
+    // arrange
+    const doc = makeRoot(
+      ul(
+        { id: 'list' },
+        li(
+          { id: 'item' }, //
+          p({ id: 'p1' }, 'item text')
+        )
+      )
+    );
+    const state = getEditorState(doc);
+    const listItem = byId(doc, 'item');
+    const paragraph = byId(doc, 'p1');
+    state.nav.FOCUS(paragraph);
+    const record = Delete.run(state)!;
+    expect(identifyChildren(listItem)).toEqual(['[anchor]', '[deleted-element]']);
+
+    // act + assert: undo restores the paragraph and removes the temporary anchor
+    record.undo(state);
+    expect(identifyChildren(listItem)).toEqual(['[element:p#p1]']);
+    expect(paragraph.textContent).toBe('item text');
+    expect(state.nav.getFocus()).toBe(paragraph);
+
+    // act + assert: redo removes the paragraph and re-anchorizes the empty list item
+    record.redo(state);
+    expect(identifyChildren(listItem)).toEqual(['[anchor]', '[deleted-element]']);
+    expect(state.nav.getFocus()).toBe(listItem);
 
     state.destroy();
   });

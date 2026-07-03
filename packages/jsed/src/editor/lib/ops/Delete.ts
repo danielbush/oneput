@@ -1,6 +1,8 @@
 import type { EditorState } from '../EditorState.js';
 import * as focusable from '../../../lib/ops/focusable.js';
 import { canDelete } from '../../../lib/core/dom-rules.js';
+import { normalize } from '../../../lib/ops/normalize.js';
+import { removeAnchors } from '../../../lib/ops/anchor.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
@@ -10,12 +12,6 @@ import type { UndoRecord } from '../../../undo/index.js';
  * emits the element change, moves FOCUS, and returns a {@link UndoRecord} that
  * replays the tripartite low-level op ({@link focusable.deleteElement} /
  * {@link focusable.undoDeleteElement} / {@link focusable.redoDeleteElement}).
- *
- * Unlike the insert records, `Delete` does not `normalize`: removing a
- * FOCUSABLE can empty its parent, and a re-anchorizing pass would then leave a
- * stray ANCHOR that `undoDeleteElement` doesn't clean up when it restores the
- * element. This matches the pre-conversion behaviour, which never anchorized on
- * delete. See architecture.md's note on asymmetric ANCHOR normalization.
  */
 export class Delete implements UndoRecord {
   static run(state: EditorState): Delete | undefined {
@@ -38,21 +34,44 @@ export class Delete implements UndoRecord {
     });
     state.nav.FOCUS(nextFocus);
 
-    return new Delete(op, { undo: focus, redo: nextFocus });
+    const record = new Delete(op, { undo: focus, redo: nextFocus }, parent);
+    record.normalize();
+    return record;
   }
 
   constructor(
     private op: focusable.DeleteElement,
-    private focusTarget: { undo: HTMLElement; redo: HTMLElement }
+    private focusTarget: { undo: HTMLElement; redo: HTMLElement },
+    private parent: HTMLElement
   ) {}
+
+  /**
+   * Re-assert derived structure in the parent this op emptied or reshaped.
+   */
+  private normalize() {
+    normalize(this.parent);
+  }
+
+  /**
+   * Rebuild the restored shape without anchors left by the deleted shape.
+   *
+   * Otherwise `normalize` can treat the temporary ANCHOR as interstitial content
+   * and preserve an empty IMPLICIT_LINE beside the restored element.
+   */
+  private normalizeUndo() {
+    removeAnchors(this.parent);
+    this.normalize();
+  }
 
   undo(state: EditorState) {
     focusable.undoDeleteElement(this.op);
     state.nav.FOCUS(this.focusTarget.undo);
+    this.normalizeUndo();
   }
 
   redo(state: EditorState) {
     focusable.redoDeleteElement(this.op);
     state.nav.FOCUS(this.focusTarget.redo);
+    this.normalize();
   }
 }

@@ -1,5 +1,26 @@
 # Open
 
+## ASYNC_MENU_FLASH
+
+- what:
+  - we transition to a new AppObject eg FilePicker; FilePicker needs to read from the fs to update the menu; whilst updating, the old AppObject's menu is cleared creating a jumpy "cut down" effect just before the async loads in the new results
+  - the menu will get truncated when switching AppObject's as part of clearing out the old data; we can't avoid that
+- solution:
+  - skeleton
+    - when loading, set a skeleton menu
+    - see docstring in ctl.menu.setMenuLoading
+
+## FLASH_OF_NEXT_MENU
+
+- what:
+  - we exit an AppObject and close the menu at the same time
+  - this can cause a weird little jump in the menu as it winds down but updates with items for the new AppObject
+  - particularly noticeable if the old AppObject has few items and the new one has a lot
+- solution:
+  - status:
+    - 3-Jul-2026: I haven't implemented this yet; not sure it's an issue after all the recent changes; let's keep this open
+  - as soon as menu starts to close, we disable any visual menu updates whilst allowing the menu data to be updated; we can reinforce this for consumers by giving them ctl.app.closeAndExit
+
 ## LOAD_LUCIDE
 
 How do we use lucide.createIcons but avoid icons flashing into existence when a menu with items using said icons opens?

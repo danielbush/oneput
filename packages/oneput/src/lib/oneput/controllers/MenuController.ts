@@ -212,7 +212,7 @@ export class MenuController {
   }
 
   /**
-   * Show a skeleton placeholder menu.
+   * Show a skeleton placeholder menu.  Solves ASYNC_MENU_FLASH .
    *
    * Assumes you are using `setMenu`.  If using declarative menu (.menu()) in your AppObject you can do:
    *

@@ -205,13 +205,8 @@ export class AppController {
    */
   private runBefore() {
     this.reset();
-    // Clear the previous AppObject's menu. The NEW AppObject's declarative menu()
-    // is pulled AFTER its onStart/onResume runs (see afterRun) so it reflects
-    // post-setup state; imperative AppObjects set their own menu in onStart. This
-    // clear + afterRun pair owns the AppObject->AppObject transition (no openMenu
-    // fires there, so pull-on-open can't).
+    // Clear the menu.
     this.ctl.menu.setMenu();
-    this.invalidateActions();
   }
 
   private runBeforeExit() {
@@ -231,23 +226,17 @@ export class AppController {
     this.current = AppObjectWrapper.create(appObject as AppObject);
     this.runBefore();
     appObject.onStart();
-    this.afterRun();
+    this.runAfter();
   }
 
   /**
    * Pull `menu()` AFTER the AppObject's onStart/onResume has run.
-   *
-   * `menu()` reads the AppObject's state to build its items, and onStart/onResume
-   * is where the AppObject changes that state. Pulling in runBefore (BEFORE the
-   * hook) means those changes aren't reflected: on onStart the state isn't set up
-   * yet (menu built from nothing), and on onResume the hook mutates state so the
-   * earlier pull is now stale. Either way the AppObject would have to re-render
-   * itself once the hook finishes. Pulling here, AFTER the hook, means the menu is
-   * always built from the finished state. Guarded (via invalidate): a no-op if
-   * there is no `menu()` (imperative AppObjects set their menu in onStart).
    */
-  private afterRun() {
+  private runAfter() {
+    // Load declarative menu/actions after onStart / onResume to allow AppObject
+    // to set any state that might affect the result of .menu()).
     this.ctl.menu.invalidate();
+    this.invalidateActions();
   }
 
   /**
@@ -284,7 +273,7 @@ export class AppController {
       } else {
         appVal.app.onStart();
       }
-      this.afterRun();
+      this.runAfter();
       return;
     }
     return;

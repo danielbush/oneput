@@ -8,6 +8,28 @@ import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItem
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
 
+/**
+ * `filter` and `generative` modes are mutually exclusive.
+ *
+ * If we are in generative mode, typing triggers fetching data (or some async
+ * process), and it should therefore not act as a filter on the current menu
+ * items.
+ */
+type MenuInputChannelState = {
+  /**
+   * The current input mode: filter, generative or none.
+   */
+  mode: MenuInputMode;
+  /**
+   * Can be used to disable filtering (when mode is set to filter).
+   */
+  filterEnabled: boolean;
+  /**
+   * Can be used to disable generative menu items (when mode is set to generative).
+   */
+  generativeEnabled: boolean;
+};
+
 export class MenuController {
   public static create(ctl: Controller) {
     const fn = MenuItemsFnController.create(ctl);
@@ -28,18 +50,11 @@ export class MenuController {
     private currentMenu = CurrentMenu.createBlank(ctl),
     private disableActions = false,
     private disableOpenClose = false,
-    /**
-     * The current input mode: filter, generative or none.
-     */
-    private menuInputMode: MenuInputMode = 'none',
-    /**
-     * Whether filtering is enabled when the user types and menu is open.
-     */
-    private filterEnabled = true,
-    /**
-     * Whether generative menu items is enabled when the user types and menu is open.
-     */
-    private generativeEnabled = true,
+    private inputChannel: MenuInputChannelState = {
+      mode: 'none',
+      filterEnabled: true,
+      generativeEnabled: true
+    },
     /**
      * Baseline focus behaviour restored when AppController switches AppObjects.
      *
@@ -166,7 +181,7 @@ export class MenuController {
       return;
     }
     const result =
-      this.menuInputMode === 'filter' && this.filterEnabled
+      this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
         ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
         : false;
     if (result === false) {
@@ -238,7 +253,7 @@ export class MenuController {
   setFilter(filter: FilterFn) {
     this.menuItemsFn.clearMenuItemsFn();
     this.filter.set(filter);
-    this.menuInputMode = 'filter';
+    this.inputChannel.mode = 'filter';
   }
 
   /**
@@ -247,26 +262,26 @@ export class MenuController {
   setDefaultFilter(filter: FilterFn) {
     this.menuItemsFn.clearMenuItemsFn();
     this.filter.setDefault(filter);
-    this.menuInputMode = 'filter';
+    this.inputChannel.mode = 'filter';
   }
 
   clearFilter() {
     this.filter.clear();
-    if (this.menuInputMode === 'filter') {
-      this.menuInputMode = 'none';
+    if (this.inputChannel.mode === 'filter') {
+      this.inputChannel.mode = 'none';
     }
   }
 
   resetFilter() {
     this.filter.reset();
-    this.menuInputMode = this.filter.hasFilter ? 'filter' : 'none';
+    this.inputChannel.mode = this.filter.hasFilter ? 'filter' : 'none';
   }
 
   /**
    * Prefer ctl.ui.update({ flags: { enableFilter: true } }) instead.
    */
   _enableFilter(on: boolean = true) {
-    this.filterEnabled = on;
+    this.inputChannel.filterEnabled = on;
   }
 
   // #endregion
@@ -277,7 +292,7 @@ export class MenuController {
    * Prefer ctl.ui.update({ flags: { enableMenuItemsFn: true } }) instead.
    */
   _enableMenuItemsFn(on: boolean = true) {
-    this.generativeEnabled = on;
+    this.inputChannel.generativeEnabled = on;
   }
 
   setMenuItemsFnAsync(
@@ -289,23 +304,23 @@ export class MenuController {
       whenEmpty?: () => MenuItemAny[];
     } = {}
   ) {
-    this.menuInputMode = 'generative';
+    this.inputChannel.mode = 'generative';
     this.menuItemsFn.setMenuItemsFnAsync(
       menuItemsFnAsync,
       options,
-      () => this.menuInputMode === 'generative' && this.generativeEnabled
+      () => this.inputChannel.mode === 'generative' && this.inputChannel.generativeEnabled
     );
   }
 
   clearMenuItemsFn() {
     this.menuItemsFn.clearMenuItemsFn();
-    if (this.menuInputMode === 'generative') {
-      this.menuInputMode = 'none';
+    if (this.inputChannel.mode === 'generative') {
+      this.inputChannel.mode = 'none';
     }
   }
 
   triggerMenuItemsFn() {
-    if (this.menuInputMode === 'generative' && this.generativeEnabled) {
+    if (this.inputChannel.mode === 'generative' && this.inputChannel.generativeEnabled) {
       this.menuItemsFn.triggerMenuItemsFn();
     }
   }

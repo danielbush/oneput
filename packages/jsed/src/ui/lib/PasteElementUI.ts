@@ -66,7 +66,7 @@ export class PasteElementUI implements AppObject {
       },
       binding: {
         bindings: ['Escape'],
-        description: 'Navigate to next sibling'
+        description: 'Cancel operation'
       }
     },
     DOWN: {

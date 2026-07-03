@@ -865,6 +865,54 @@
 
   /* #endregion */
 
+  /* #region menu item skeleton loader */
+
+  .oneput__menu-item-skeleton {
+    display: block;
+    border-radius: 4px;
+    background: linear-gradient(
+      90deg,
+      rgba(130, 130, 130, 0.12) 25%,
+      rgba(130, 130, 130, 0.24) 37%,
+      rgba(130, 130, 130, 0.12) 63%
+    );
+    background-size: 400% 100%;
+    animation: oneput-menu-item-skeleton-shimmer 1.4s ease infinite;
+  }
+
+  /* Match the footprint of a real oneput__icon so the left hflex centers it
+     identically; background-clip insets the visible dot by the icon padding
+     like a glyph sits inside its icon box. */
+  .oneput__menu-item-skeleton--circle {
+    flex: 0 0 var(--oneput-icon-width);
+    width: var(--oneput-icon-width);
+    height: var(--oneput-icon-width);
+    padding: var(--oneput-icon-padding);
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+
+  .oneput__menu-item-skeleton--bar {
+    height: 0.8rem;
+  }
+
+  .oneput__menu-item-skeleton--pill {
+    width: 2.5rem;
+    height: 0.8rem;
+    border-radius: 999px;
+  }
+
+  @keyframes oneput-menu-item-skeleton-shimmer {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0 50%;
+    }
+  }
+
+  /* #endregion */
+
   .oneput__icon-button.oneput__icon-accept {
     background-color: rgb(0 128 0 / 0.8);
     color: white;

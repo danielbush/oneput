@@ -9,6 +9,7 @@
   import ForceDarkModeControls from '$lib/oneput/shared/components/ForceDarkMode.svelte';
   import { randomId } from '$lib/oneput/lib/utils.js';
   import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
+  import { stdSkeletonMenuItems } from '$lib/oneput/shared/ui/menuItems/stdSkeletonMenuItems.js';
   import { tinykeys } from 'tinykeys';
 
   const oneputState = $state({
@@ -535,6 +536,16 @@
             }
           })
         ]}
+      />
+    </section>
+    <section class="demo-example">
+      <h2>Skeleton loader (stdMenuItem)</h2>
+      <p>Placeholder rows shown while menu items load.</p>
+      <Oneput
+        menuOpen={true}
+        menuItems={stdSkeletonMenuItems()}
+        placeholder="Loading..."
+        inputValue=""
       />
     </section>
   </section>

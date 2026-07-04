@@ -213,6 +213,7 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
+- refactor: EditorControls is passed to jsed AppObjects (eg PastElementUI); these use EditorControls to set/override/disable editor actions
 - refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be
   - can we drastically simplify it because of ANCHOR_RULES?
   - why "removable anchor"?

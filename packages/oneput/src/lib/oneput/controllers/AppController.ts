@@ -38,7 +38,7 @@ export class AppController {
   private get current() {
     return this._current || null;
   }
-  private set current(appVal: AppObjectWrapper | null) {
+  private setCurrent(appVal: AppObjectWrapper | null) {
     const previous = this._current?.app ?? null;
     this._current = appVal;
     const current = appVal?.app ?? null;
@@ -229,7 +229,7 @@ export class AppController {
     if (this.current) {
       this.appParents.push(this.current);
     }
-    this.current = AppObjectWrapper.create(appObject as AppObject);
+    this.setCurrent(AppObjectWrapper.create(appObject as AppObject));
     this.runBefore();
     appObject.onStart();
     this.runAfter();
@@ -272,7 +272,7 @@ export class AppController {
     this.runBeforeExit();
     const appVal = this.appParents.pop();
     if (appVal) {
-      this.current = appVal;
+      this.setCurrent(appVal);
       this.runBefore();
       if (appVal.app.onResume) {
         appVal.app.onResume(result);

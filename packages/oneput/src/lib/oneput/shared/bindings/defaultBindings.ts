@@ -6,11 +6,14 @@ import type { Controller } from '../../controllers/controller.js';
 import { GlobalFilter } from '../appObjects/GlobalFilter.js';
 
 export const defaultActions: Record<string, (c: Controller) => void> = {
-  openMenu: (c) => {
-    c.menu.openMenu();
+  EXIT: (c) => {
+    c.app.exit();
   },
   focusInput: (c) => {
     c.input.focusInput();
+  },
+  openMenu: (c) => {
+    c.menu.openMenu();
   },
   hideOneput: (c) => {
     c.toggleHide();
@@ -44,14 +47,19 @@ export const defaultActions: Record<string, (c: Controller) => void> = {
 };
 
 export const defaultBindingsSerializable: KeyBindingMapSerializable = {
+  EXIT: {
+    bindings: ['Control+[', '$mod+[', 'Escape'],
+    description: 'Exit',
+    when: { menuOpen: false }
+  },
+  focusInput: {
+    bindings: [`$mod+'`, `Control+'`],
+    description: 'Focus input'
+  },
   openMenu: {
     bindings: ['$mod+Shift+k'],
     description: 'Open Oneput menu...',
     when: { menuOpen: false }
-  },
-  focusInput: {
-    bindings: ['$mod+[', 'Control+['],
-    description: 'Focus input'
   },
   hideOneput: {
     bindings: ['$mod+h'],

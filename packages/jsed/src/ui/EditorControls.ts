@@ -45,7 +45,7 @@ type MenuItemList = Array<MenuItemAny | undefined | null | '' | false>;
  * capabilities) and are pulled fresh on start/resume, on open, and via
  * `ctl.menu.invalidate()`.
  */
-export class EditDocumentControls {
+export class EditorControls {
   /**
    * @param invalidateMenu Optional override for refreshing the menu after an
    * edit. Defaults to `ctl.menu.invalidate()` (the declarative pull). Pass your
@@ -56,9 +56,9 @@ export class EditDocumentControls {
     ctl: Controller,
     editor: Editor,
     opts?: { invalidateMenu?: () => void }
-  ): EditDocumentControls {
+  ): EditorControls {
     const invalidate = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
-    return new EditDocumentControls(ctl, editor, invalidate);
+    return new EditorControls(ctl, editor, invalidate);
   }
 
   private constructor(

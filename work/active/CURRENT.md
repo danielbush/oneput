@@ -97,7 +97,7 @@ Indirect UI/editor flow:
 - `packages/jsed/src/editor/lib/EditorFocusOps.ts`
   - `getAppendTemplates`, `getInsertAfterTemplates`, and `getInsertBeforeTemplates` expose template lists to UI.
   - `canAppend`, `canInsertAfter`, and `canInsertBefore` currently gate the operation by checking whether the relevant template list is non-empty.
-- `packages/jsed/src/ui/EditDocumentControls.ts`
+- `packages/jsed/src/ui/EditorControls.ts`
   - Builds pick-list candidates from the template lists.
   - Also exposes manual tag-name entry inside the same pick lists.
 

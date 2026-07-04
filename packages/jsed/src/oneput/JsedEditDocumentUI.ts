@@ -2,7 +2,7 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { Editor } from '../editor/Editor.js';
 import type { EditorError } from '../editor/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
-import { EditDocumentControls, type EditDocumentActions } from '../ui/EditDocumentControls.js';
+import { EditorControls, type EditDocumentActions } from '../ui/EditorControls.js';
 
 export type JsedEditDocumentUIHooks = {
   onActivate?: () => void;
@@ -44,7 +44,7 @@ export class JsedEditDocumentUI implements AppObject {
     return new JsedEditDocumentUI(ctl, editor, hooks);
   }
 
-  private controls: EditDocumentControls;
+  private controls: EditorControls;
 
   /** AppObject keybinding actions (re-pulled by the controller). Owned by `controls`. */
   public actions = (): EditDocumentActions => this.controls.getActions();
@@ -57,7 +57,7 @@ export class JsedEditDocumentUI implements AppObject {
     public editor: Editor,
     private hooks: JsedEditDocumentUIHooks = {}
   ) {
-    this.controls = EditDocumentControls.create(this.ctl, this.editor);
+    this.controls = EditorControls.create(this.ctl, this.editor);
   }
 
   /**

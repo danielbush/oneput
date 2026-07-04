@@ -1,5 +1,9 @@
 # Oneput
 
+## Changes
+
+This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
+
 ## Testing
 
 We need to do more testing.

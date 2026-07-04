@@ -169,7 +169,7 @@ export class AppController {
    * Returns undefined if .menu() is not defined on the AppObject.
    */
   getMenu() {
-    return this.current?.menu();
+    return this.current?.app.menu?.();
   }
 
   /**

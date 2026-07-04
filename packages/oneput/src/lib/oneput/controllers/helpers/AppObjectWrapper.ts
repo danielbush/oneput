@@ -10,10 +10,6 @@ export class AppObjectWrapper {
     private lastMenuActionIds: Record<string, string> = {}
   ) {}
 
-  menu() {
-    return this.app.menu?.();
-  }
-
   setLastMenuActionId(menuId: string, menuActionId: string) {
     this.lastMenuActionIds[menuId] = menuActionId;
   }

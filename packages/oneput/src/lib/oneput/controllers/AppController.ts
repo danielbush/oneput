@@ -1,6 +1,5 @@
 import type { Controller } from './controller.js';
 import type { AppActions, AppEvent, AppObject, FocusBehaviour, UIFlags } from '../types.js';
-import { AppObjectWrapper } from './helpers/AppObjectWrapper.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
 export type AppChange = {
@@ -11,6 +10,10 @@ export type AppChange = {
 export type AppChangeTracker = {
   data: AppChange[];
   stop: () => void;
+};
+
+type AppObjectState = {
+  lastMenuActionIds: Record<string, string>;
 };
 
 /**
@@ -27,27 +30,43 @@ export class AppController {
 
   constructor(private ctl: Controller) {
     ctl.events.on('menu-action', ({ menuId, menuActionId }) => {
-      this.current?.setLastMenuActionId(menuId, menuActionId);
+      this.setLastMenuActionId(menuId, menuActionId);
     });
   }
 
-  private appParents: AppObjectWrapper[] = [];
-  private _current: AppObjectWrapper | null = null;
+  private appParents: AppObject[] = [];
+  private appStates = new WeakMap<AppObject, AppObjectState>();
+  private current: AppObject | null = null;
   private onBack?: () => void;
   private disableGoBack = false;
-  private get current() {
-    return this._current || null;
-  }
-  private setCurrent(appVal: AppObjectWrapper | null) {
-    const previous = this._current?.app ?? null;
-    this._current = appVal;
-    const current = appVal?.app ?? null;
-    const change = { previous, current };
-    this.ctl.events.emit({ type: 'app-change', payload: change });
-  }
   private unsubscribeMenuItemFocus?: () => void;
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
+
+  private setCurrent(app: AppObject | null) {
+    const previous = this.current;
+    this.current = app;
+    this.ctl.events.emit({
+      type: 'app-change',
+      payload: { previous, current: this.current }
+    });
+  }
+
+  private getAppState(app: AppObject) {
+    let state = this.appStates.get(app);
+    if (!state) {
+      state = { lastMenuActionIds: {} };
+      this.appStates.set(app, state);
+    }
+    return state;
+  }
+
+  private setLastMenuActionId(menuId: string, menuActionId: string) {
+    if (!this.current) {
+      return;
+    }
+    this.getAppState(this.current).lastMenuActionIds[menuId] = menuActionId;
+  }
 
   /**
    * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.
@@ -102,24 +121,24 @@ export class AppController {
   reset(settings?: UIFlags) {
     // Events
     this.unsubscribeMenuItemFocus?.();
-    if (this.current?.app.onMenuItemFocus) {
+    if (this.current?.onMenuItemFocus) {
       this.unsubscribeMenuItemFocus = this.ctl.events.on(
         'menu-item-focus',
         ({ index, menuItem }) => {
-          this.current?.app.onMenuItemFocus?.({ index, menuItem });
+          this.current?.onMenuItemFocus?.({ index, menuItem });
         }
       );
     }
     this.unsubscribeInputChange?.();
-    if (this.current?.app.onInputChange) {
+    if (this.current?.onInputChange) {
       this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-        this.current?.app.onInputChange?.({ value });
+        this.current?.onInputChange?.({ value });
       });
     }
     this.unsubscribeMenuOpenChange?.();
-    if (this.current?.app.onMenuOpenChange) {
+    if (this.current?.onMenuOpenChange) {
       this.unsubscribeMenuOpenChange = this.ctl.events.on('menu-open-change', (open) => {
-        this.current?.app.onMenuOpenChange?.({ open });
+        this.current?.onMenuOpenChange?.({ open });
       });
     }
 
@@ -169,7 +188,7 @@ export class AppController {
    * Returns undefined if .menu() is not defined on the AppObject.
    */
   getMenu() {
-    return this.current?.app.menu?.();
+    return this.current?.menu?.();
   }
 
   /**
@@ -177,7 +196,7 @@ export class AppController {
    * an object or as a function that derives them from state.
    */
   private resolveActions(): AppActions | undefined {
-    const actions = this.current?.app.actions;
+    const actions = this.current?.actions;
     return typeof actions === 'function' ? actions() : actions;
   }
 
@@ -210,17 +229,17 @@ export class AppController {
     this.reset();
     // Clear the menu.
     this.ctl.menu.setMenu();
-    if (this.current?.app.layout) {
-      this.ctl.ui.setLayout(this.current.app.layout());
+    if (this.current?.layout) {
+      this.ctl.ui.setLayout(this.current.layout());
     }
   }
 
   private runBeforeExit() {
-    this.current?.app.onExit?.();
+    this.current?.onExit?.();
   }
 
   private runBeforeSuspend() {
-    this.current?.app.onSuspend?.();
+    this.current?.onSuspend?.();
   }
 
   run<ResumePayload = unknown>(appObject: AppObject<ResumePayload>) {
@@ -229,7 +248,7 @@ export class AppController {
     if (this.current) {
       this.appParents.push(this.current);
     }
-    this.setCurrent(AppObjectWrapper.create(appObject as AppObject));
+    this.setCurrent(appObject as AppObject);
     this.runBefore();
     appObject.onStart();
     this.runAfter();
@@ -274,10 +293,10 @@ export class AppController {
     if (appVal) {
       this.setCurrent(appVal);
       this.runBefore();
-      if (appVal.app.onResume) {
-        appVal.app.onResume(result);
+      if (appVal.onResume) {
+        appVal.onResume(result);
       } else {
-        appVal.app.onStart();
+        appVal.onStart();
       }
       this.runAfter();
       return;
@@ -300,8 +319,8 @@ export class AppController {
       this.onBack();
       return;
     }
-    if (this.current?.app.onBack) {
-      this.current.app.onBack();
+    if (this.current?.onBack) {
+      this.current.onBack();
       return;
     }
     this.pop();
@@ -332,7 +351,10 @@ export class AppController {
    * separately for each menu id.
    */
   getLastMenuActionId(menuId: string) {
-    return this.current?.getLastMenuActionId(menuId);
+    if (!this.current) {
+      return undefined;
+    }
+    return this.getAppState(this.current).lastMenuActionIds[menuId];
   }
 
   /**
@@ -344,7 +366,7 @@ export class AppController {
    * does not implement onEvent.
    */
   emitEvent = (event: AppEvent) => {
-    this.current?.app.onEvent?.(event);
+    this.current?.onEvent?.(event);
   };
 
   /**

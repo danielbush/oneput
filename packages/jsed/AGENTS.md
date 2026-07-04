@@ -2,6 +2,10 @@
 
 Jsed is an HTML editor that lets you edit HTML content using Oneput as the interface. Use the `/jsed` skill to get oriented quickly.
 
+## Changes
+
+This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
+
 ## Tests
 
 - use `makeRoot` to create documents

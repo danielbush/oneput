@@ -37,9 +37,9 @@ export class Root implements AppObject {
       DirectoryBrowser: () => DirectoryBrowser;
       DirectoryPicker: () => FilePicker;
     }
-  ) {
-    ctl.ui.setLayout(this.create.Layout());
-  }
+  ) {}
+
+  layout = () => this.create.Layout();
 
   onStart = () => {
     this.run();

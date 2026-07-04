@@ -269,6 +269,13 @@ export type AppActions = {
  */
 export interface AppObject<ResumePayload = unknown> {
   /**
+   * The layout for this AppObject.
+   *
+   * If not specified, it is inherited from the parent.
+   * It is run just before onStart.
+   */
+  layout?: () => UILayout;
+  /**
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.
    */

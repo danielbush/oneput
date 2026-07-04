@@ -28,9 +28,9 @@ export class Root implements AppObject {
       JsedDocument: (root: HTMLElement) => JsedDocument;
       JsedEditDocumentUI: (params: { document: JsedDocument }) => JsedEditDocumentUI;
     }
-  ) {
-    this.ctl.ui.setLayout(this.create.Layout());
-  }
+  ) {}
+
+  layout = () => this.create.Layout();
 
   onStart = () => {
     this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });

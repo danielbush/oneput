@@ -210,6 +210,9 @@ export class AppController {
     this.reset();
     // Clear the menu.
     this.ctl.menu.setMenu();
+    if (this.current?.app.layout) {
+      this.ctl.ui.setLayout(this.current.app.layout());
+    }
   }
 
   private runBeforeExit() {

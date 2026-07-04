@@ -7,4 +7,3 @@ export { tokenizeLineAt } from './lib/ops/tokenize.js';
 export { JsedEditDocumentUI, type JsedEditDocumentUIHooks } from './oneput/JsedEditDocumentUI.js';
 export { EditorControls, type EditDocumentActions } from './ui/index.js';
 export { icons, iconData } from './ui/lib/icons.js';
-export { defaultActions, defaultBindingsSerializable, defaultKeys } from './ui/lib/bindings.js';

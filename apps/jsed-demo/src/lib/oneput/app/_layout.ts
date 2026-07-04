@@ -10,8 +10,9 @@ import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
-import { defaultKeys, icons } from '@oneput/jsed';
+import { icons } from '@oneput/jsed';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
+import { defaultKeys } from '@oneput/oneput/shared/bindings/defaultBindings.js';
 
 /**
  * Define settings used by your particular layout.

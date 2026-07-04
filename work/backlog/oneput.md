@@ -4,6 +4,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## Critical path
 
+- Oneput media api tells us (reasonably) if we're mobile, tablet or desktop
+- Use oneput media api to hide key-centric ui (like showing keybidnigns in menus) in mobile / tablet view
+  - this can be overridden maybe in localstorage
 - input folding (for jsed)
   - mock up input folding
 - chat interface
@@ -43,8 +46,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## feat
 
 - feat: use menu as a calendar where we can select a day or even a range of days
-  - COMMENT: do we use menu items or do we just override that with a custom layout?
-  - COMMENT: menu items are flexible but maybe it's going too far to abuse them like this; instead we allow other things but both these things and menu items respond to the same keys and clicks
+  - COMMENT: do we use menu items or do we just override that with a custom layout? - no, we have both the grid with headings and days within; it would super hacky to bend menu items to do all of this
+  - COMMENT: menu items maybe is one example of a way to browser a "command structure" using the familiar j,k or arrow keys with enter/mod+enter for submission
   - COMMENT: start by mocking up the calendar
 - feat: do we demo disabled individual menu items?
 - feat: do we demo disabled menu? (enableMenuActions = false)?

@@ -43,15 +43,6 @@ export class AppController {
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
 
-  private setCurrent(app: AppObject | null) {
-    const previous = this.current;
-    this.current = app;
-    this.ctl.events.emit({
-      type: 'app-change',
-      payload: { previous, current: this.current }
-    });
-  }
-
   private getAppState(app: AppObject) {
     let state = this.appStates.get(app);
     if (!state) {
@@ -61,19 +52,7 @@ export class AppController {
     return state;
   }
 
-  private setLastMenuActionId(menuId: string, menuActionId: string) {
-    if (!this.current) {
-      return;
-    }
-    this.getAppState(this.current).lastMenuActionIds[menuId] = menuActionId;
-  }
-
-  /**
-   * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.
-   */
-  _enableGoBack(on: boolean = true) {
-    this.disableGoBack = !on;
-  }
+  // #region ui settings
 
   get flags() {
     return {
@@ -113,35 +92,7 @@ export class AppController {
     }
   }
 
-  /**
-   * Reset ui and related state.
-   *
-   * Used for resetting state when a new appObject is run.
-   */
-  reset(settings?: UIFlags) {
-    // Events
-    this.unsubscribeMenuItemFocus?.();
-    if (this.current?.onMenuItemFocus) {
-      this.unsubscribeMenuItemFocus = this.ctl.events.on(
-        'menu-item-focus',
-        ({ index, menuItem }) => {
-          this.current?.onMenuItemFocus?.({ index, menuItem });
-        }
-      );
-    }
-    this.unsubscribeInputChange?.();
-    if (this.current?.onInputChange) {
-      this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-        this.current?.onInputChange?.({ value });
-      });
-    }
-    this.unsubscribeMenuOpenChange?.();
-    if (this.current?.onMenuOpenChange) {
-      this.unsubscribeMenuOpenChange = this.ctl.events.on('menu-open-change', (open) => {
-        this.current?.onMenuOpenChange?.({ open });
-      });
-    }
-
+  private resetFlags(settings?: UIFlags) {
     // Re-enable stuff...
     const enableModal = settings?.enableModal ?? false;
     const flags: UIFlags = {
@@ -161,35 +112,11 @@ export class AppController {
     this.ctl.menu._enableGenerative(flags.enableGenerative);
     this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
-
-    // Reset stuff...
-    this.resetOnBack();
-    this.ctl.keys.resetBindings();
-    this.ctl.input.resetPlaceholder();
-    this.ctl.menu.resetFocusBehaviour();
-    // Tear down any generative menuItemsFn from the outgoing AppObject so its
-    // input-change listener can't clobber the next AppObject's menu. The new
-    // AppObject re-registers its own in onStart/onResume if it wants one (the
-    // same rebuild contract as setMenu/filter above).
-    this.ctl.menu.clearGenerative();
-    this.ctl.menu.resetFilter();
-    this.ctl.input.setInputValue();
-    this.ctl.input.resetSubmitHandler();
-    this.ctl.menu.resetFillHandler();
-
-    // We don't clear notifications or alerts or confirmations.
-
-    return flags;
   }
 
-  /**
-   * Get the current declarative menu from AppObject.
-   *
-   * Returns undefined if .menu() is not defined on the AppObject.
-   */
-  getMenu() {
-    return this.current?.menu?.();
-  }
+  // #endregion
+
+  // #region actions / menu
 
   /**
    * Resolve the current AppObject's `actions`, which may be declared directly as
@@ -220,6 +147,125 @@ export class AppController {
       );
       this.ctl.keys.setBindings(keyBindingsMap);
     }
+  }
+
+  /**
+   * The current AppObject should handle the action.
+   *
+   * Favour actions defined within the AppObject, fallback to defaultActions.
+   *
+   * @param actionId
+   * @param defaultAction An action defined outside of any AppObject.
+   */
+  handleAction(
+    evt: KeyboardEvent,
+    actionId: string,
+    defaultAction: ((ctl: Controller, evt: KeyboardEvent) => void) | undefined
+  ) {
+    const actions = this.resolveActions();
+    if (actions?.[actionId]) {
+      actions[actionId]?.action(this.ctl, evt);
+      return;
+    }
+    if (defaultAction) {
+      defaultAction(this.ctl, evt);
+      return;
+    }
+
+    this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
+  }
+
+  /**
+   * Get the current declarative menu from AppObject.
+   *
+   * Returns undefined if .menu() is not defined on the AppObject.
+   */
+  getMenu() {
+    return this.current?.menu?.();
+  }
+
+  private setLastMenuActionId(menuId: string, menuActionId: string) {
+    if (!this.current) {
+      return;
+    }
+    this.getAppState(this.current).lastMenuActionIds[menuId] = menuActionId;
+  }
+
+  /**
+   * Returns the last menu action fired for the given menu id in the current
+   * AppObject.
+   *
+   * Menu ids and actions are scoped by AppObject. A single AppObject may render
+   * multiple menus during its lifetime, so we track the last action id
+   * separately for each menu id.
+   */
+  getLastMenuActionId(menuId: string) {
+    if (!this.current) {
+      return undefined;
+    }
+    return this.getAppState(this.current).lastMenuActionIds[menuId];
+  }
+
+  // #endregion
+
+  // #region AppObject lifecycle
+
+  private setCurrent(app: AppObject | null) {
+    const previous = this.current;
+    this.current = app;
+    this.ctl.events.emit({
+      type: 'app-change',
+      payload: { previous, current: this.current }
+    });
+  }
+
+  /**
+   * Reset ui and related state.
+   *
+   * Used for resetting state when a new appObject is run.
+   */
+  reset(settings?: UIFlags) {
+    // Events
+    this.unsubscribeMenuItemFocus?.();
+    if (this.current?.onMenuItemFocus) {
+      this.unsubscribeMenuItemFocus = this.ctl.events.on(
+        'menu-item-focus',
+        ({ index, menuItem }) => {
+          this.current?.onMenuItemFocus?.({ index, menuItem });
+        }
+      );
+    }
+    this.unsubscribeInputChange?.();
+    if (this.current?.onInputChange) {
+      this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+        this.current?.onInputChange?.({ value });
+      });
+    }
+    this.unsubscribeMenuOpenChange?.();
+    if (this.current?.onMenuOpenChange) {
+      this.unsubscribeMenuOpenChange = this.ctl.events.on('menu-open-change', (open) => {
+        this.current?.onMenuOpenChange?.({ open });
+      });
+    }
+
+    this.resetFlags(settings);
+
+    // Reset stuff...
+    this.resetOnBack();
+    this.ctl.keys.resetBindings();
+    this.ctl.input.resetPlaceholder();
+    this.ctl.menu.resetFocusBehaviour();
+    // Tear down any generative menuItemsFn from the outgoing AppObject so its
+    // input-change listener can't clobber the next AppObject's menu. The new
+    // AppObject re-registers its own in onStart/onResume if it wants one (the
+    // same rebuild contract as setMenu/filter above).
+    this.ctl.menu.clearGenerative();
+    this.ctl.menu.resetFilter();
+    this.ctl.input.setInputValue();
+    this.ctl.input.resetSubmitHandler();
+    this.ctl.menu.resetFillHandler();
+
+    // We don't clear notifications or alerts or confirmations.
   }
 
   /**
@@ -304,6 +350,17 @@ export class AppController {
     return;
   };
 
+  // #endregion
+
+  // #region back-handling
+
+  /**
+   * Prefer ctl.ui.update({ flags: { enableGoBack: true } }) instead.
+   */
+  _enableGoBack(on: boolean = true) {
+    this.disableGoBack = !on;
+  }
+
   /**
    * Goes back to previous appObject.
    *
@@ -342,20 +399,9 @@ export class AppController {
     return this.appParents.length > 0 && !this.disableGoBack;
   }
 
-  /**
-   * Returns the last menu action fired for the given menu id in the current
-   * AppObject.
-   *
-   * Menu ids and actions are scoped by AppObject. A single AppObject may render
-   * multiple menus during its lifetime, so we track the last action id
-   * separately for each menu id.
-   */
-  getLastMenuActionId(menuId: string) {
-    if (!this.current) {
-      return undefined;
-    }
-    return this.getAppState(this.current).lastMenuActionIds[menuId];
-  }
+  // #endregion
+
+  // #region user-created events
 
   /**
    * Deliver a host-app event to the currently active AppObject.
@@ -369,29 +415,5 @@ export class AppController {
     this.current?.onEvent?.(event);
   };
 
-  /**
-   * The current AppObject should handle the action.
-   *
-   * Favour actions defined within the AppObject, fallback to defaultActions.
-   *
-   * @param actionId
-   * @param defaultAction An action defined outside of any AppObject.
-   */
-  handleAction(
-    evt: KeyboardEvent,
-    actionId: string,
-    defaultAction: ((ctl: Controller, evt: KeyboardEvent) => void) | undefined
-  ) {
-    const actions = this.resolveActions();
-    if (actions?.[actionId]) {
-      actions[actionId]?.action(this.ctl, evt);
-      return;
-    }
-    if (defaultAction) {
-      defaultAction(this.ctl, evt);
-      return;
-    }
-
-    this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
-  }
+  // #endregion
 }

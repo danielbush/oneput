@@ -57,7 +57,7 @@ export const defaultBindingsSerializable: KeyBindingMapSerializable = {
     description: 'Focus input'
   },
   openMenu: {
-    bindings: ['$mod+Shift+k'],
+    bindings: ['$mod+Shift+b'],
     description: 'Open Oneput menu...',
     when: { menuOpen: false }
   },
@@ -82,12 +82,12 @@ export const defaultBindingsSerializable: KeyBindingMapSerializable = {
   },
   // NOTE: reserve 'Shift+Enter' for newlines in text area input.
   back: {
-    bindings: ['Meta+B'],
+    bindings: ['$mod+b'],
     description: 'Back',
     when: { menuOpen: true }
   },
   closeMenu: {
-    bindings: ['$mod+Shift+k', 'Escape'],
+    bindings: ['$mod+Shift+b', 'Escape'],
     description: 'Close menu',
     when: { menuOpen: true }
   },

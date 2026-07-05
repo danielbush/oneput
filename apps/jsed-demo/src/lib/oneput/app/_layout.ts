@@ -1,5 +1,6 @@
 import { hflex, mountSvelte } from '@oneput/oneput';
 import type {
+  AppLayoutParams,
   Controller,
   DynamicPlaceholderBase,
   FChildParams,
@@ -17,8 +18,7 @@ import { defaultKeys } from '@oneput/oneput/shared/bindings/defaultBindings.js';
 /**
  * Define settings used by your particular layout.
  */
-export type LayoutSettings = {
-  menuTitle?: string;
+export type LayoutSettings = AppLayoutParams & {
   /**
    * Expose the bottom right corner of the layout.
    */
@@ -28,7 +28,7 @@ export type LayoutSettings = {
 /**
  * Defines a standard layout.
  */
-export class Layout implements UILayout {
+export class Layout implements UILayout<LayoutSettings> {
   static create(ctl: Controller, settings: LayoutSettings = {}) {
     const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
       params.menuOpenBinding
@@ -53,7 +53,7 @@ export class Layout implements UILayout {
     ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
   }
 
-  configure(settings: { params?: LayoutSettings }) {
+  configure(settings: { params?: Partial<LayoutSettings> }) {
     this.settings = {
       menuTitle: this.settings.menuTitle || 'Menu',
       ...settings.params

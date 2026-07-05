@@ -4,10 +4,9 @@ import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMen
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { divider, hflex, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppObject, OneputProps, UIFlags } from '@oneput/oneput';
+import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { icons } from './_icons.js';
-import type { LayoutSettings } from './_layout.js';
 
 export class KatexDemo implements AppObject {
   static create(ctl: Controller) {
@@ -35,7 +34,7 @@ export class KatexDemo implements AppObject {
   layout = {
     params: {
       menuTitle: 'Katex Demo'
-    } satisfies LayoutSettings
+    } satisfies AppLayoutParams
   };
 
   settings = {

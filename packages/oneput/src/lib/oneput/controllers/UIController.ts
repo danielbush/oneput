@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { UILayout, FlexParams, OneputProps, UIFlags } from '../types.js';
+import type { AppLayoutParams, UILayout, FlexParams, OneputProps, UIFlags } from '../types.js';
 
 export class UIController {
   static create(ctl: Controller) {
@@ -44,7 +44,7 @@ export class UIController {
   /**
    * Should perform similar reset to beforeRun logic in AppController.
    */
-  update<A extends Record<string, unknown> = Record<string, unknown>>(settings: {
+  update<A extends AppLayoutParams = AppLayoutParams>(settings: {
     /**
      * Does a full reset, similar to what happens in ctl.app.run(appObject)
      * which resets state before running appObject.
@@ -61,7 +61,7 @@ export class UIController {
     /**
      * Your LayoutSettings parameters..
      */
-    params?: A;
+    params?: Partial<A>;
   }) {
     if (settings.reset) {
       this.ctl.app.reset(settings.flags);

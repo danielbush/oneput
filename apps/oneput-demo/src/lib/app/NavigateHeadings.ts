@@ -1,9 +1,8 @@
-import type { Controller, MenuItemAny, UIFlags } from '@oneput/oneput';
+import type { AppLayoutParams, Controller, MenuItemAny, UIFlags } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { FuzzyFilter } from '@oneput/oneput/shared/filters/FuzzyFilter.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import type { LayoutSettings } from './_layout.js';
 
 /**
  * Demonstrates how we navigate the headings in an html document using Oneput.
@@ -27,7 +26,7 @@ export class NavigateHeadings implements AppObject {
   layout = {
     params: {
       menuTitle: 'Navigate Headings'
-    } satisfies LayoutSettings
+    } satisfies AppLayoutParams
   };
 
   settings = {

@@ -258,6 +258,61 @@ export type AppActions = {
 };
 
 /**
+ * Layout parameters that Oneput AppObjects may use as a shared convention.
+ *
+ * Layouts decide whether and how to use these values; AppController only passes
+ * them through. App-specific layouts can extend this type with their own params.
+ *
+ * ```ts
+ * type LayoutSettings = AppLayoutParams & {
+ *   outerRight?: (b: FlexChildBuilder) => FChildParams;
+ * };
+ * ```
+ */
+export type AppLayoutParams = {
+  /**
+   * Preferred title for layouts that render a menu header.
+   */
+  menuTitle?: string;
+};
+
+export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {
+  /**
+   * Create the layout for this AppObject.
+   *
+   * Most apps can pass a layout factory directly:
+   *
+   * ```ts
+   * layout = { layout: Layout.create, params: { menuTitle: 'Home' } };
+   * ```
+   *
+   * Apps that inject nullable/test layouts can pass a wrapper instead:
+   *
+   * ```ts
+   * layout = { layout: (ctl, params) => this.create.Layout(ctl, params), params };
+   * ```
+   */
+  layout: (ctl: Controller, params: LayoutParams) => UILayout<LayoutParams>;
+  params: LayoutParams;
+};
+
+/**
+ * Configure the layout inherited from the parent AppObject.
+ *
+ * Use this when the AppObject should keep the current layout instance but adjust
+ * its params before `onStart`/`onResume` runs, for example to set `menuTitle`.
+ * Params are partial because the inherited layout has already been created.
+ */
+export type ConfigureInheritedLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {
+  layout?: undefined;
+  params?: Partial<LayoutParams>;
+};
+
+export type AppLayoutConfig<LayoutParams extends AppLayoutParams = AppLayoutParams> =
+  | InstallLayout<LayoutParams>
+  | ConfigureInheritedLayout<LayoutParams>;
+
+/**
  * Represents a screen or state in the Oneput app stack.
  *
  * AppObjects are managed by AppController which maintains a stack — run() pushes,
@@ -267,41 +322,9 @@ export type AppActions = {
  * @typeParam ResumePayload - The type of payload this AppObject can receive
  * from a child AppObject when the child exits.
  */
-export type InstallLayout<LayoutParams extends Record<string, unknown> = Record<string, unknown>> =
-  {
-    /**
-     * Create the layout for this AppObject.
-     *
-     * Most apps can pass a layout factory directly:
-     *
-     * ```ts
-     * layout = { layout: Layout.create, params: { menuTitle: 'Home' } };
-     * ```
-     *
-     * Apps that inject nullable/test layouts can pass a wrapper instead:
-     *
-     * ```ts
-     * layout = { layout: (ctl, params) => this.create.Layout(ctl, params), params };
-     * ```
-     */
-    layout: (ctl: Controller, params: LayoutParams) => UILayout;
-    params: LayoutParams;
-  };
-
-export type ConfigureInheritedLayout<
-  LayoutParams extends Record<string, unknown> = Record<string, unknown>
-> = {
-  layout?: undefined;
-  params?: LayoutParams;
-};
-
-export type AppLayoutConfig<
-  LayoutParams extends Record<string, unknown> = Record<string, unknown>
-> = InstallLayout<LayoutParams> | ConfigureInheritedLayout<LayoutParams>;
-
 export interface AppObject<
   ResumePayload = unknown,
-  LayoutParams extends Record<string, unknown> = Record<string, unknown>
+  LayoutParams extends AppLayoutParams = AppLayoutParams
 > {
   /**
    * The layout configuration for this AppObject.
@@ -425,8 +448,8 @@ export type UIFlags = {
   enableModal?: boolean;
 };
 
-export interface UILayout {
-  configure(settings: { params?: Record<string, unknown> }): void;
+export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {
+  configure(settings: { params?: Partial<LayoutParams> }): void;
   inputUI?: OneputProps['inputUI'];
   menuUI?: OneputProps['menuUI'];
   innerUI?: OneputProps['innerUI'];

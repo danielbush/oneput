@@ -1,5 +1,12 @@
 import type { Controller } from './controller.js';
-import type { AppActions, AppEvent, AppObject, UIFlags, UILayout } from '../types.js';
+import type {
+  AppActions,
+  AppEvent,
+  AppLayoutParams,
+  AppObject,
+  UIFlags,
+  UILayout
+} from '../types.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
 export type AppChange = {
@@ -12,10 +19,12 @@ export type AppChangeTracker = {
   stop: () => void;
 };
 
+type AnyAppObject = AppObject<any, any>;
+
 type AppObjectState = {
   lastMenuActionIds: Record<string, string>;
   layout?: UILayout;
-  layoutParams?: Record<string, unknown>;
+  layoutParams?: Partial<AppLayoutParams>;
 };
 
 /**
@@ -36,16 +45,16 @@ export class AppController {
     });
   }
 
-  private appParents: AppObject[] = [];
-  private appStates = new WeakMap<AppObject, AppObjectState>();
-  private current?: AppObject;
+  private appParents: AnyAppObject[] = [];
+  private appStates = new WeakMap<AnyAppObject, AppObjectState>();
+  private current?: AnyAppObject;
   private onBack?: () => void;
   private disableGoBack = false;
   private unsubscribeMenuItemFocus?: () => void;
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
 
-  private getAppState(app: AppObject) {
+  private getAppState(app: AnyAppObject) {
     let state = this.appStates.get(app);
     if (!state) {
       state = { lastMenuActionIds: {} };
@@ -62,7 +71,7 @@ export class AppController {
    * - no layout + no params => inherit active parent layout unchanged
    *
    */
-  private resolveLayout(app: AppObject, inheritedLayout?: UILayout) {
+  private resolveLayout(app: AnyAppObject, inheritedLayout?: UILayout) {
     const declaration = app.layout;
     if (!declaration) {
       return { layout: inheritedLayout, layoutParams: undefined };
@@ -233,7 +242,7 @@ export class AppController {
 
   // #region AppObject lifecycle
 
-  private setCurrent(app: AppObject, fromParent = true) {
+  private setCurrent(app: AnyAppObject, fromParent = true) {
     const previous = this.current;
     this.current = app;
     // If layout not set use parent's (INHERIT_LAYOUT).
@@ -330,16 +339,15 @@ export class AppController {
     this.current?.onSuspend?.();
   }
 
-  run<
-    ResumePayload = unknown,
-    LayoutParams extends Record<string, unknown> = Record<string, unknown>
-  >(appObject: AppObject<ResumePayload, LayoutParams>) {
+  run<ResumePayload = unknown, LayoutParams extends AppLayoutParams = AppLayoutParams>(
+    appObject: AppObject<ResumePayload, LayoutParams>
+  ) {
     // console.warn('run', { appObject });
     this.runBeforeSuspend();
     if (this.current) {
       this.appParents.push(this.current);
     }
-    this.setCurrent(appObject as AppObject);
+    this.setCurrent(appObject);
     this.runBefore();
     appObject.onStart?.();
     this.runAfter();

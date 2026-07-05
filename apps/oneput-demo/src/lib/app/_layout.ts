@@ -1,5 +1,5 @@
 import { mountSvelte } from '@oneput/oneput';
-import type { DynamicPlaceholderBase } from '@oneput/oneput';
+import type { AppLayoutParams, DynamicPlaceholderBase } from '@oneput/oneput';
 import type { FChildParams, UILayout } from '@oneput/oneput';
 import type { Controller } from '@oneput/oneput';
 import { FlexChildBuilder, hflex } from '@oneput/oneput';
@@ -14,8 +14,7 @@ import { icons } from './_icons.js';
 /**
  * Define settings used by your particular layout.
  */
-export type LayoutSettings = {
-  menuTitle?: string;
+export type LayoutSettings = AppLayoutParams & {
   /**
    * Expose the bottom right corner of the layout.
    */
@@ -25,7 +24,7 @@ export type LayoutSettings = {
 /**
  * Defines a standard layout.
  */
-export class Layout implements UILayout {
+export class Layout implements UILayout<LayoutSettings> {
   static create(ctl: Controller, settings: LayoutSettings = {}) {
     const bindingService = LocalBindingsService.create(ctl);
     const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
@@ -62,7 +61,7 @@ export class Layout implements UILayout {
       });
   }
 
-  configure(settings: { params?: LayoutSettings }) {
+  configure(settings: { params?: Partial<LayoutSettings> }) {
     this.settings = {
       menuTitle: this.settings.menuTitle || 'Menu',
       ...settings.params

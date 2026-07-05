@@ -1,5 +1,5 @@
 import type { Controller } from './controller.js';
-import type { AppActions, AppEvent, AppObject, FocusBehaviour, UIFlags } from '../types.js';
+import type { AppActions, AppEvent, AppObject, UIFlags, UILayout } from '../types.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
 export type AppChange = {
@@ -14,6 +14,7 @@ export type AppChangeTracker = {
 
 type AppObjectState = {
   lastMenuActionIds: Record<string, string>;
+  layout?: () => UILayout;
 };
 
 /**
@@ -36,7 +37,7 @@ export class AppController {
 
   private appParents: AppObject[] = [];
   private appStates = new WeakMap<AppObject, AppObjectState>();
-  private current: AppObject | null = null;
+  private current?: AppObject;
   private onBack?: () => void;
   private disableGoBack = false;
   private unsubscribeMenuItemFocus?: () => void;
@@ -210,12 +211,19 @@ export class AppController {
 
   // #region AppObject lifecycle
 
-  private setCurrent(app: AppObject | null) {
+  private setCurrent(app: AppObject, fromParent = true) {
     const previous = this.current;
     this.current = app;
+    // If layout not set use parent's (INHERIT_LAYOUT).
+    // Trivial edge-case: If we never set a layout, then the AppState layout
+    // will always be blank.
+    if (fromParent) {
+      const previousLayout = previous && this.getAppState(previous).layout;
+      this.getAppState(this.current).layout = this.current.layout ?? previousLayout;
+    }
     this.ctl.events.emit({
       type: 'app-change',
-      payload: { previous, current: this.current }
+      payload: { previous: previous ?? null, current: this.current }
     });
   }
 
@@ -275,8 +283,11 @@ export class AppController {
     this.reset();
     // Clear the menu.
     this.ctl.menu.setMenu();
-    if (this.current?.layout) {
-      this.ctl.ui.setLayout(this.current.layout());
+    if (this.current) {
+      const layout = this.getAppState(this.current).layout;
+      if (layout) {
+        this.ctl.ui.setLayout(layout());
+      }
     }
   }
 
@@ -337,7 +348,7 @@ export class AppController {
     this.runBeforeExit();
     const appVal = this.appParents.pop();
     if (appVal) {
-      this.setCurrent(appVal);
+      this.setCurrent(appVal, false);
       this.runBefore();
       if (appVal.onResume) {
         appVal.onResume(result);

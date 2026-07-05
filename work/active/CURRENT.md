@@ -39,7 +39,7 @@
 
 ## Layout and settings management
 
-- LAYOUT_PROBLEM
+- INHERIT_LAYOUT
   - what:
     - we set layout
     - child app object assumes this

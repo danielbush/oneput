@@ -1,5 +1,12 @@
 import type { Controller } from './controller.js';
-import type { AppActions, AppEvent, AppObject, UIFlags, UILayout } from '../types.js';
+import type {
+  AppActions,
+  AppEvent,
+  AppLayoutConfig,
+  AppObject,
+  UIFlags,
+  UILayout
+} from '../types.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
 export type AppChange = {
@@ -14,7 +21,8 @@ export type AppChangeTracker = {
 
 type AppObjectState = {
   lastMenuActionIds: Record<string, string>;
-  layout?: () => UILayout;
+  layout?: UILayout;
+  layoutParams?: Record<string, unknown>;
 };
 
 /**
@@ -51,6 +59,27 @@ export class AppController {
       this.appStates.set(app, state);
     }
     return state;
+  }
+
+  /**
+   * Declaration = Object containing layout + params.
+   *
+   * - layout + params       => create/set active layout, then configure it
+   * - no layout + params    => inherit active parent layout, then configure it
+   * - no layout + no params => inherit active parent layout unchanged
+   *
+   */
+  private resolveLayout(app: AppObject, inheritedLayout?: UILayout) {
+    const declaration = app.layout;
+    if (!declaration) {
+      return { layout: inheritedLayout, layoutParams: undefined };
+    }
+    return {
+      layout: declaration.layout
+        ? declaration.layout(this.ctl, declaration.params)
+        : inheritedLayout,
+      layoutParams: declaration.params
+    };
   }
 
   // #region ui settings
@@ -219,7 +248,10 @@ export class AppController {
     // will always be blank.
     if (fromParent) {
       const previousLayout = previous && this.getAppState(previous).layout;
-      this.getAppState(this.current).layout = this.current.layout ?? previousLayout;
+      Object.assign(
+        this.getAppState(this.current),
+        this.resolveLayout(this.current, previousLayout)
+      );
     }
     this.ctl.events.emit({
       type: 'app-change',
@@ -284,9 +316,12 @@ export class AppController {
     // Clear the menu.
     this.ctl.menu.setMenu();
     if (this.current) {
-      const layout = this.getAppState(this.current).layout;
+      const { layout, layoutParams } = this.getAppState(this.current);
       if (layout) {
-        this.ctl.ui.setLayout(layout());
+        this.ctl.ui.setLayout(layout);
+      }
+      if (layout || layoutParams) {
+        this.ctl.ui.update({ params: layoutParams });
       }
     }
   }
@@ -299,7 +334,10 @@ export class AppController {
     this.current?.onSuspend?.();
   }
 
-  run<ResumePayload = unknown>(appObject: AppObject<ResumePayload>) {
+  run<
+    ResumePayload = unknown,
+    LayoutParams extends Record<string, unknown> = Record<string, unknown>
+  >(appObject: AppObject<ResumePayload, LayoutParams>) {
     // console.warn('run', { appObject });
     this.runBeforeSuspend();
     if (this.current) {

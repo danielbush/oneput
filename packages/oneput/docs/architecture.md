@@ -24,6 +24,7 @@ An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects 
 
 ```
 interface AppObject {
+  layout?                — layout factory and params applied before start/resume
   onStart()              — called when this AppObject takes control
   onResume?(result?)     — called when a child exits back to this one
   onExit?()              — cleanup when this AppObject exits
@@ -31,6 +32,13 @@ interface AppObject {
   menu?                  — declarative menu items
 }
 ```
+
+**Layout** is inherited through the AppObject stack. A root AppObject can provide
+`layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can
+omit `layout.layout` to reuse the active parent layout, and provide `{ params }`
+to configure the inherited layout before `onStart` / `onResume`. Use
+`ctl.ui.update({ params })` for later layout changes during the life of the
+AppObject. Handle UI flags separately with `ctl.ui.update({ flags })`.
 
 **Actions** let an AppObject declare bindings alongside the action handler. The `binding` field uses `ActionBinding` (no `action` callback — the action is the sibling field):
 

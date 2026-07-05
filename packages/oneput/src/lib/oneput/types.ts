@@ -267,14 +267,50 @@ export type AppActions = {
  * @typeParam ResumePayload - The type of payload this AppObject can receive
  * from a child AppObject when the child exits.
  */
-export interface AppObject<ResumePayload = unknown> {
+export type InstallLayout<LayoutParams extends Record<string, unknown> = Record<string, unknown>> =
+  {
+    /**
+     * Create the layout for this AppObject.
+     *
+     * Most apps can pass a layout factory directly:
+     *
+     * ```ts
+     * layout = { layout: Layout.create, params: { menuTitle: 'Home' } };
+     * ```
+     *
+     * Apps that inject nullable/test layouts can pass a wrapper instead:
+     *
+     * ```ts
+     * layout = { layout: (ctl, params) => this.create.Layout(ctl, params), params };
+     * ```
+     */
+    layout: (ctl: Controller, params: LayoutParams) => UILayout;
+    params: LayoutParams;
+  };
+
+export type ConfigureInheritedLayout<
+  LayoutParams extends Record<string, unknown> = Record<string, unknown>
+> = {
+  layout?: undefined;
+  params?: LayoutParams;
+};
+
+export type AppLayoutConfig<
+  LayoutParams extends Record<string, unknown> = Record<string, unknown>
+> = InstallLayout<LayoutParams> | ConfigureInheritedLayout<LayoutParams>;
+
+export interface AppObject<
+  ResumePayload = unknown,
+  LayoutParams extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
-   * The layout for this AppObject.
+   * The layout configuration for this AppObject.
    *
-   * If not specified, it is inherited from the parent.
-   * It is run just before onStart.
+   * Provide a layout factory with its required params to replace the active
+   * layout, or params alone to configure the inherited layout before
+   * onStart/onResume. If no layout is specified, it is inherited from the parent.
    */
-  layout?: () => UILayout;
+  layout?: AppLayoutConfig<LayoutParams>;
   /**
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.

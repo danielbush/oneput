@@ -7,7 +7,6 @@ import { icons } from '@oneput/jsed';
 export class Root implements AppObject {
   static create(ctl: Controller) {
     return new Root(ctl, {
-      Layout: () => Layout.create(ctl),
       JsedDocument: (root) => JsedDocument.create(root),
       JsedEditDocumentUI: ({ document }: { document: JsedDocument }) =>
         JsedEditDocumentUI.create(ctl, {
@@ -24,16 +23,17 @@ export class Root implements AppObject {
   constructor(
     private ctl: Controller,
     private create: {
-      Layout: () => Layout;
       JsedDocument: (root: HTMLElement) => JsedDocument;
       JsedEditDocumentUI: (params: { document: JsedDocument }) => JsedEditDocumentUI;
     }
   ) {}
 
-  layout = () => this.create.Layout();
+  layout = {
+    layout: Layout.create,
+    params: { menuTitle: 'Root' }
+  };
 
   onStart = () => {
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: 'Root' } });
     // Edit straight away...
     this.actions.EDIT.action();
   };

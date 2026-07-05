@@ -21,22 +21,23 @@ export class AsyncSearchExample implements AppObject {
     private outerRightStatus: DOMUpdater
   ) {}
 
+  layout = {
+    params: {
+      menuTitle: 'Async Search Example',
+      outerRight: (b) =>
+        b.fchild({
+          onMount: this.outerRightStatus.onMount
+        })
+    } satisfies LayoutSettings
+  };
+
   onStart() {
     this.run();
   }
 
   run() {
-    this.ctl.ui.update<LayoutSettings>({
-      params: {
-        menuTitle: 'Async Search Example',
-        outerRight: (b) =>
-          b.fchild({
-            onMount: this.outerRightStatus.onMount
-          })
-      }
-      // No enableFilter:false needed: setMenuItemsFnAsync selects the
-      // generative channel instead of the filter channel.
-    });
+    // No enableFilter:false needed: setMenuItemsFnAsync selects the
+    // generative channel instead of the filter channel.
     this.ctl.menu.setGenerativeAsync(
       async (input) => {
         try {

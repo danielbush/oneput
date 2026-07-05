@@ -22,8 +22,8 @@ The main building blocks:
 An AppObject represents a screen. AppObjects form a stack — `ctl.app.run()` pushes, `ctl.app.exit()` pops.
 
 ```typescript
-import type { AppObject, Controller } from '@oneput/oneput';
-import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import type { AppObject, Controller } from "@oneput/oneput";
+import { stdMenuItem } from "@oneput/oneput/shared/ui/menuItems/stdMenuItem.js";
 
 export class MyScreen implements AppObject {
   static create(ctl: Controller) {
@@ -32,9 +32,12 @@ export class MyScreen implements AppObject {
 
   constructor(private ctl: Controller) {}
 
-  onStart = () => {
-    this.ctl.ui.update({ params: { menuTitle: 'My Screen' } });
+  // Initial layout configuration is applied before onStart.
+  layout = {
+    params: { menuTitle: "My Screen" },
   };
+
+  onStart = () => {};
 
   // Optional: called when a child AppObject exits back to this one.
   onResume = (result?: { payload?: unknown }) => {};
@@ -45,27 +48,31 @@ export class MyScreen implements AppObject {
   // Declare actions with optional key bindings.
   actions = {
     DO_THING: {
-      action: (ctl: Controller) => { /* ... */ },
+      action: (ctl: Controller) => {
+        /* ... */
+      },
       binding: {
-        bindings: ['$mod+d'],
-        description: 'Do the thing',
-        when: { menuOpen: false }
-      }
-    }
+        bindings: ["$mod+d"],
+        description: "Do the thing",
+        when: { menuOpen: false },
+      },
+    },
   };
 
   // Declarative menu — the system calls setMenu for you.
-  menu = {
-    id: 'main',
+  menu = () => ({
+    id: "main",
     items: [
       stdMenuItem({
-        id: 'do-thing',
-        textContent: 'Do the thing...',
-        left: (b) => [b.icon('SomeIcon')],
-        action: () => { /* ... */ }
-      })
-    ]
-  };
+        id: "do-thing",
+        textContent: "Do the thing...",
+        left: (b) => [b.icon("SomeIcon")],
+        action: () => {
+          /* ... */
+        },
+      }),
+    ],
+  });
 }
 ```
 
@@ -86,7 +93,9 @@ ctl.app.exit();
 ctl.app.exit({ payload: someData }); // with data
 
 // Override the back action
-ctl.app.setOnBack(() => { /* custom back */ });
+ctl.app.setOnBack(() => {
+  /* custom back */
+});
 
 // Trigger back
 ctl.app.goBack();
@@ -109,7 +118,7 @@ Each binding declares `when` conditions controlling when it fires.
 type KeyBinding = {
   action?: (c: Controller) => void;
   description: string;
-  bindings: string[];       // tinykeys format: "$mod+Shift+k", "Enter"
+  bindings: string[]; // tinykeys format: "$mod+Shift+k", "Enter"
   when?: { menuOpen?: boolean };
 };
 
@@ -152,13 +161,15 @@ The preferred way. Bindings are automatically registered when the AppObject star
 ```typescript
 actions = {
   NAVIGATE_DOWN: {
-    action: (ctl) => { /* ... */ },
+    action: (ctl) => {
+      /* ... */
+    },
     binding: {
-      bindings: ['$mod+j', 'ArrowDown'],
-      description: 'Navigate down',
-      when: { menuOpen: false }
-    }
-  }
+      bindings: ["$mod+j", "ArrowDown"],
+      description: "Navigate down",
+      when: { menuOpen: false },
+    },
+  },
 };
 ```
 
@@ -171,31 +182,33 @@ The same key can be bound to different actions under different `when` conditions
 The main menu item builder. Supports left/right/bottom sections via `FlexChildBuilder`.
 
 ```typescript
-import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { stdMenuItem } from "@oneput/oneput/shared/ui/menuItems/stdMenuItem.js";
 
 stdMenuItem({
-  id: 'my-item',
-  textContent: 'Main label',
+  id: "my-item",
+  textContent: "Main label",
 
   // Left section (usually an icon)
-  left: (b) => [b.icon('IconName')],
+  left: (b) => [b.icon("IconName")],
 
   // Right section (badges, icons, etc.)
   right: (b) => [
     b.fchild({
-      htmlContentUnsafe: '<code><kbd>$mod+S</kbd></code>',
-      classes: ['oneput__kbd']
+      htmlContentUnsafe: "<code><kbd>$mod+S</kbd></code>",
+      classes: ["oneput__kbd"],
     }),
-    b.icon('ChevronRight')
+    b.icon("ChevronRight"),
   ],
 
   // Optional bottom section (secondary text)
   bottom: {
-    textContent: 'Additional info'
+    textContent: "Additional info",
   },
 
   // Action when selected
-  action: () => { /* ... */ }
+  action: () => {
+    /* ... */
+  },
 });
 ```
 
@@ -214,35 +227,39 @@ Pass `false` as an array element to conditionally exclude items:
 ```typescript
 right: (b) => [
   count > 1 && b.fchild({ innerHTMLUnsafe: `(${count})` }),
-  b.icon('ChevronRight')
-]
+  b.icon("ChevronRight"),
+];
 ```
 
 ### Other menu item types
 
 ```typescript
-import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
+import { checkboxMenuItem } from "@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js";
+import { infoMenuItem } from "@oneput/oneput/shared/ui/menuItems/infoMenuItem.js";
 
 // Checkbox with label
 checkboxMenuItem({
-  id: 'toggle',
-  textContent: 'Enable feature',
+  id: "toggle",
+  textContent: "Enable feature",
   checked: false,
-  action: (_, checked) => { /* ... */ }
+  action: (_, checked) => {
+    /* ... */
+  },
 });
 
 // Non-interactive info display
-infoMenuItem({ id: 'info', msg: 'Status message', icon: 'Info' });
+infoMenuItem({ id: "info", msg: "Status message", icon: "Info" });
 ```
 
 ### Setting menus programmatically
 
 ```typescript
 ctl.menu.setMenu({
-  id: 'my-menu',
-  focusBehaviour: 'first',  // 'first' | 'last' | 'none' | 'last-action,first'
-  items: [ /* ... */ ]
+  id: "my-menu",
+  focusBehaviour: "first", // 'first' | 'last' | 'none' | 'last-action,first'
+  items: [
+    /* ... */
+  ],
 });
 
 ctl.menu.openMenu();
@@ -305,14 +322,28 @@ Oneput's visual structure is a flex-based skeleton:
 
 ### Updating layout
 
+Initial layout configuration belongs in the AppObject `layout` field:
+
+```typescript
+layout = {
+  layout: Layout.create,
+  params: { menuTitle: "Title" },
+};
+```
+
+If the AppObject does not provide `layout.layout`, it inherits the active parent
+layout and only applies `params`.
+
+Use `ctl.ui.update` for layout changes during the life of the AppObject:
+
 ```typescript
 ctl.ui.update({
-  params: { menuTitle: 'Title' },
+  params: { menuTitle: "Title" },
   flags: {
-    enableModal: true,        // show modal overlay
-    enableKeys: true,         // enable/disable key dispatch
-    enableMenuOpenClose: true  // enable/disable menu toggle
-  }
+    enableModal: true, // show modal overlay
+    enableKeys: true, // enable/disable key dispatch
+    enableMenuOpenClose: true, // enable/disable menu toggle
+  },
 });
 ```
 
@@ -321,11 +352,15 @@ ctl.ui.update({
 ```typescript
 ctl.ui.setInputUI({
   right: hflex({
-    id: 'input-right',
+    id: "input-right",
     children: (b) => [
-      b.fchild({ onMount: (node) => { /* mount component */ } })
-    ]
-  })
+      b.fchild({
+        onMount: (node) => {
+          /* mount component */
+        },
+      }),
+    ],
+  }),
 });
 ```
 

@@ -1,4 +1,4 @@
-import type { Controller } from '@oneput/oneput';
+import type { Controller, UILayout } from '@oneput/oneput';
 import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
 import { NavigateHeadings } from './NavigateHeadings.js';
@@ -14,7 +14,9 @@ import type { AppObject } from '@oneput/oneput';
 export class Root implements AppObject {
   static create(ctl: Controller) {
     return new Root(ctl, {
-      Layout: () => Layout.create(ctl),
+      // Direct factory form. A nullable/test Root.createNull could inject
+      // `Layout.createNull` here with the same `(ctl, params) => UILayout` shape.
+      Layout: Layout.create,
       SettingsUI: () => Settings.create(ctl),
       NavigateHeadings: () => NavigateHeadings.create(ctl),
       TomatoTimer: () => TomatoTimer.create(ctl),
@@ -28,7 +30,7 @@ export class Root implements AppObject {
   constructor(
     private ctl: Controller,
     private create: {
-      Layout: () => Layout;
+      Layout: (ctl: Controller, params: LayoutSettings) => UILayout;
       SettingsUI: () => Settings;
       NavigateHeadings: () => NavigateHeadings;
       TomatoTimer: () => TomatoTimer;
@@ -39,13 +41,23 @@ export class Root implements AppObject {
     }
   ) {}
 
-  layout = () => this.create.Layout();
+  layout = {
+    // layout: Layout.create,
+    layout: (ctl: Controller, params: LayoutSettings) => {
+      return this.create.Layout(ctl, params);
+    },
+    params: {
+      menuTitle: 'Home'
+    }
+  };
 
   onStart = () => {
+    this.ctl.ui.update({ flags: { enableGoBack: false } });
     this.run();
   };
 
   onResume = (result?: { payload?: unknown }) => {
+    this.ctl.ui.update({ flags: { enableGoBack: false } });
     this.run();
     if (typeof result?.payload === 'string') {
       this.ctl.notify(`Selected file: ${result.payload}`);
@@ -53,14 +65,6 @@ export class Root implements AppObject {
   };
 
   run = () => {
-    this.ctl.ui.update<LayoutSettings>({
-      params: {
-        menuTitle: 'Home'
-      },
-      flags: {
-        enableGoBack: false
-      }
-    });
     const blankItems = [...Array(10)].map((_, i) => {
       return stdMenuItem({
         id: `blank-item-${i}`,

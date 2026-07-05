@@ -1,7 +1,7 @@
 import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { icons } from './icons.js';
+import type { JsedLayoutParams } from './layoutParams.js';
 
 /**
  * Candidates in pick list.
@@ -54,7 +54,7 @@ export class PickListUI implements AppObject {
   ) {}
 
   onStart = () => {
-    this.ctl.ui.update<LayoutSettings>({ params: { menuTitle: this.title } });
+    this.ctl.ui.update<JsedLayoutParams>({ params: { menuTitle: this.title } });
     this.ctl.input.setPlaceholder(this.prompt);
     this.ctl.input.focus();
   };
@@ -124,7 +124,7 @@ class ManualEntryUI implements AppObject {
   ) {}
 
   onStart = () => {
-    this.ctl.ui.update<LayoutSettings>({
+    this.ctl.ui.update<JsedLayoutParams>({
       params: { menuTitle: this.title },
       flags: {
         enableMenuOpenClose: false,

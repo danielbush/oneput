@@ -1,8 +1,8 @@
 import type { Controller, AppObject } from '@oneput/oneput';
-import type { LayoutSettings } from '../../../../../apps/jsed-demo/src/lib/oneput/app/_layout.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './icons.js';
 import type { Editor } from '../../editor/Editor.js';
+import type { JsedLayoutParams } from './layoutParams.js';
 
 export class PasteElementUI implements AppObject {
   static create(
@@ -35,7 +35,7 @@ export class PasteElementUI implements AppObject {
   }
 
   onStart = () => {
-    this.ctl.ui.update<LayoutSettings>({
+    this.ctl.ui.update<JsedLayoutParams>({
       params: { menuTitle: this.title },
       flags: {
         // enableMenuOpenClose: false,

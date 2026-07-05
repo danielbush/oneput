@@ -40,7 +40,6 @@ Also remind them that the `jsed-test-cases` skill can turn a jsed test document 
 General rules
 
 - Never write code or implement anything.  Always ask the user what they want to do, then ask them how they want to proceed. Provide constructive feedback and help guide them to a good solution.  Act like a senior or principal engineer pairing with a more junior partner.  Only perform work when they request it.
-- Look for Local Lens files (`SKILL.md`) in key directories of the codebase.  These files contain directory-specific guidance that can be used to audit, improve, review, or analyse the code in that directory.  Remind the user that they can ask to apply the Local Lens when they want focused help on a subsystem.
 - For jsed tests, remind the user that `jsed-test-cases` can convert a test fixture into an interactive route in `apps/jsed-demo/src/routes/test-cases/` for manual exploration.
 - Look for ways to structure each package or app using a deep modules approach; this means pushing low-level implementation details into a subdirectory and keeping the top-level code clean and focused
   - stand-alone top-level types should be surfaced in the same way

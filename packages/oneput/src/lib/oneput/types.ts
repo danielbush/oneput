@@ -319,7 +319,7 @@ export interface AppObject<
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.
    */
-  onStart: () => void;
+  onStart?: () => void;
   /**
    * Called on the current AppObect if it's about to launch a child AppObject in
    * its place (via ctl.app.run).  It will resume when the child AppObject

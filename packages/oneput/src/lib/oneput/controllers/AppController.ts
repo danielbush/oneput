@@ -1,11 +1,5 @@
 import type { Controller } from './controller.js';
-import type {
-  AppActions,
-  AppEvent,
-  AppObject,
-  UIFlags,
-  UILayout
-} from '../types.js';
+import type { AppActions, AppEvent, AppObject, UIFlags, UILayout } from '../types.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
 
 export type AppChange = {
@@ -347,7 +341,7 @@ export class AppController {
     }
     this.setCurrent(appObject as AppObject);
     this.runBefore();
-    appObject.onStart();
+    appObject.onStart?.();
     this.runAfter();
   }
 
@@ -393,7 +387,7 @@ export class AppController {
       if (appVal.onResume) {
         appVal.onResume(result);
       } else {
-        appVal.onStart();
+        appVal.onStart?.();
       }
       this.runAfter();
       return;

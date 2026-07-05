@@ -67,10 +67,6 @@ export class DirectoryBrowser implements AppObject {
    * first: the cut-down we're avoiding.
    */
   onStart() {
-    this.run();
-  }
-
-  run() {
     this.ctl.ui.update({ params: { menuTitle: this.path } });
     this.ctl.menu.setMenu({
       id: 'main',

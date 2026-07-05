@@ -2,7 +2,6 @@ import type { Controller } from './controller.js';
 import type {
   AppActions,
   AppEvent,
-  AppLayoutConfig,
   AppObject,
   UIFlags,
   UILayout
@@ -312,7 +311,10 @@ export class AppController {
    *  Resets things to sane defaults.  You can then set things in your AppObject.run.
    */
   private runBefore() {
-    this.reset();
+    // Apply the AppObject's declared start-time settings (UIFlags). reset()
+    // fills in defaults for any flag the AppObject doesn't specify. This runs
+    // before onStart/onResume, so any dynamic ui.update({ flags }) still wins.
+    this.reset(this.current?.settings);
     // Clear the menu.
     this.ctl.menu.setMenu();
     if (this.current) {

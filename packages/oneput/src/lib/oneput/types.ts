@@ -312,6 +312,10 @@ export interface AppObject<
    */
   layout?: AppLayoutConfig<LayoutParams>;
   /**
+   * Settings that will be applied when the AppObject starts.
+   */
+  settings?: UIFlags;
+  /**
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.
    */

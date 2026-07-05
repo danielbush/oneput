@@ -4,9 +4,10 @@ import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMen
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { divider, hflex, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppObject, OneputProps } from '@oneput/oneput';
+import type { AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { icons } from './_icons.js';
+import type { LayoutSettings } from './_layout.js';
 
 export class KatexDemo implements AppObject {
   static create(ctl: Controller) {
@@ -30,6 +31,19 @@ export class KatexDemo implements AppObject {
     private dynamicPlaceholder: DynamicPlaceholder,
     private previewDisplayMode: boolean = false
   ) {}
+
+  layout = {
+    params: {
+      menuTitle: 'Katex Demo'
+    } satisfies LayoutSettings
+  };
+
+  settings = {
+    enableMenuOpenClose: false,
+    // The input is a katex editor, not a menu filter — this is a sync-rebuild
+    // menu (menu() + invalidate), so disable the default filter channel.
+    enableFilter: false
+  } satisfies UIFlags;
 
   /**
    * Declarative menu: rebuilt from AppObject state whenever ctl.menu.invalidate()
@@ -67,17 +81,6 @@ export class KatexDemo implements AppObject {
         this.ctl.menu.invalidate();
       }
     );
-    this.ctl.ui.update({
-      params: {
-        menuTitle: 'Katex Demo'
-      },
-      flags: {
-        enableMenuOpenClose: false,
-        // The input is a katex editor, not a menu filter — this is a sync-rebuild
-        // menu (menu() + invalidate), so disable the default filter channel.
-        enableFilter: false
-      }
-    });
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
     this.ctl.input.setSubmitHandler(() => {

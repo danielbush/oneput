@@ -9,7 +9,7 @@ import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { icons } from './_icons.js';
-import type { AppObject } from '@oneput/oneput';
+import type { AppObject, UIFlags } from '@oneput/oneput';
 
 export class Root implements AppObject {
   static create(ctl: Controller) {
@@ -51,13 +51,13 @@ export class Root implements AppObject {
     }
   };
 
+  settings = { enableGoBack: false } satisfies UIFlags;
+
   onStart = () => {
-    this.ctl.ui.update({ flags: { enableGoBack: false } });
     this.run();
   };
 
   onResume = (result?: { payload?: unknown }) => {
-    this.ctl.ui.update({ flags: { enableGoBack: false } });
     this.run();
     if (typeof result?.payload === 'string') {
       this.ctl.notify(`Selected file: ${result.payload}`);

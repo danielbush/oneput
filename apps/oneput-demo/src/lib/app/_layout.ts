@@ -6,9 +6,6 @@ import { FlexChildBuilder, hflex } from '@oneput/oneput';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
-import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';
-import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
-import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { icons } from './_icons.js';
 
 /**
@@ -26,40 +23,15 @@ export type LayoutSettings = AppLayoutParams & {
  */
 export class Layout implements UILayout<LayoutSettings> {
   static create(ctl: Controller, settings: LayoutSettings = {}) {
-    const bindingService = LocalBindingsService.create(ctl);
-    const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
-      params.menuOpenBinding
-        ? params.isMenuOpen
-          ? `Close menu with ${params.menuOpenBinding}...`
-          : `Open menu with ${params.menuOpenBinding}...`
-        : 'Type here...'
-    );
-    return new Layout(ctl, settings, dynamicPlaceholder, bindingService);
+    return new Layout(ctl, settings);
   }
 
   defaultPlaceholder?: DynamicPlaceholderBase;
 
   constructor(
     private ctl: Controller,
-    private settings: LayoutSettings = {},
-    private dynamicPlaceholder: DynamicPlaceholder,
-    private bindingService: LocalBindingsService
-  ) {
-    ctl.menu.setDefaultFilter(WordFilter.create().filter);
-    ctl.menu.setDefaultFocusBehaviour('last-action,first');
-    this.bindingService
-      .getBindings()
-      .andTee((bindings) => {
-        ctl.keys.setDefaultBindings(bindings);
-      })
-      .orTee((err) => {
-        ctl.alert({ message: 'Could not set default bindings!', additional: err.message });
-      })
-      .map(() => {
-        // Wait till default bindings have been set above.
-        ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
-      });
-  }
+    private settings: LayoutSettings = {}
+  ) {}
 
   configure(settings: { params?: Partial<LayoutSettings> }) {
     this.settings = {

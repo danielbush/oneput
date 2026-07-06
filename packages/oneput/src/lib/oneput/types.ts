@@ -490,6 +490,10 @@ export type UIFlags = {
    * leaves the new AppObject's input alone.
    */
   clearInputAfterBack?: boolean;
+  // why not closeMenuAfterAction ?
+  // - individual menu actions may prefer to do their own thing based on the action;
+  // - so leave the menu open and let indiviual actions choose what to do;
+  // - stdMenuItem offers a close mechanism
 };
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {

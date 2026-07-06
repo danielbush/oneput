@@ -1,4 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
+import { OneputAction } from '../bindings/OneputAction.js';
 
 export type DynamicTextParams = {
   isMenuOpen: boolean;
@@ -19,15 +20,15 @@ export class DynamicText {
     const bindings = this.ctl.keys.getCurrentBindings();
     if (isMenuOpen) {
       return {
-        menuOpenBinding: bindings['closeMenu']?.bindings[0],
-        submitBinding: bindings['submit']?.bindings[0],
-        doActionBinding: bindings['doAction']?.bindings[0],
-        fillBinding: bindings['fill']?.bindings[0],
-        backBinding: bindings['back']?.bindings[0]
+        menuOpenBinding: bindings[OneputAction.CLOSE_MENU]?.bindings[0],
+        submitBinding: bindings[OneputAction.SUBMIT]?.bindings[0],
+        doActionBinding: bindings[OneputAction.DO_ACTION]?.bindings[0],
+        fillBinding: bindings[OneputAction.FILL]?.bindings[0],
+        backBinding: bindings[OneputAction.BACK]?.bindings[0]
       };
     }
     return {
-      menuOpenBinding: bindings['openMenu']?.bindings[0]
+      menuOpenBinding: bindings[OneputAction.OPEN_MENU]?.bindings[0]
     };
   }
 

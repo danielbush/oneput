@@ -6,6 +6,7 @@ import { divider, hflex, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
+import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
 import { icons } from './_icons.js';
 
 export class KatexDemo implements AppObject {
@@ -73,7 +74,7 @@ export class KatexDemo implements AppObject {
     this.unsubscribeBindingsChange = this.ctl.events.on(
       'bindings-change',
       ({ bindings: currentBindings }) => {
-        const binding = currentBindings['submit']?.bindings[0];
+        const binding = currentBindings[OneputAction.SUBMIT]?.bindings[0];
         this.helpMessage = binding
           ? `Type some katex and hit ${binding} to insert... `
           : 'Type some katex...';

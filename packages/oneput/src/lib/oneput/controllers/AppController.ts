@@ -60,7 +60,6 @@ export class AppController {
   private focusInputOnStart = true;
   private focusInputOnMenuOpen = true;
   private clearInputAfterAction = true;
-  private menuActionOwner?: AnyAppObject;
 
   private getAppState(app: AnyAppObject) {
     let state = this.appStates.get(app);
@@ -207,23 +206,43 @@ export class AppController {
   /**
    * The current AppObject should handle the action.
    *
-   * Favour actions defined within the AppObject, fallback to defaultActions.
+   * Favour actions defined within the AppObject, fallback to the default action.
+   * Menu actions also update menu-action tracking and run menu-action cleanup.
    *
    * @param actionId
    * @param defaultAction An action defined outside of any AppObject.
    */
   handleAction(actionId: string, context?: AppActionContext, defaultAction?: AppActionHandler) {
     const actions = this.resolveActions();
-    if (actions?.[actionId]) {
-      actions[actionId]?.action(this.ctl, context);
-      return;
-    }
-    if (defaultAction) {
-      defaultAction(this.ctl, context);
+    const action = actions?.[actionId]?.action ?? defaultAction;
+    if (!action) {
+      this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
       return;
     }
 
-    this.ctl.notify(`No action found for ${actionId}`, { duration: 2000 });
+    const actionOwner = this.current;
+    if (context?.source === 'menu') {
+      this.ctl.events.emit({
+        type: 'menu-action',
+        payload: {
+          menuId: context.menuId,
+          menuActionId: context.menuActionId
+        }
+      });
+    }
+
+    try {
+      action(this.ctl, context);
+    } finally {
+      // clearInputAfterAction setting triggered on menu action:
+      if (
+        context?.source === 'menu' &&
+        this.clearInputAfterAction &&
+        this.current === actionOwner
+      ) {
+        this.ctl.input.clearInput();
+      }
+    }
   }
 
   /**
@@ -239,15 +258,7 @@ export class AppController {
     if (!this.current) {
       return;
     }
-    this.menuActionOwner = this.current;
     this.getAppState(this.current).lastMenuActionIds[menuId] = menuActionId;
-  }
-
-  completeMenuAction() {
-    if (this.clearInputAfterAction && this.current === this.menuActionOwner) {
-      this.ctl.input.clearInput();
-    }
-    this.menuActionOwner = undefined;
   }
 
   /**

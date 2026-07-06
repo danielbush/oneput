@@ -133,27 +133,16 @@ export class MenuController {
     }
     const focusedMenuItem = this.currentMenu.focusedMenuItem;
     if (focusedMenuItem?.action) {
-      this.ctl.events.emit({
-        type: 'menu-action',
-        payload: {
+      this.ctl.app.handleAction(
+        focusedMenuItem.id,
+        {
+          source: 'menu',
+          actionId: focusedMenuItem.id,
           menuId: this.currentMenu.menuId,
           menuActionId: focusedMenuItem.id
-        }
-      });
-      try {
-        this.ctl.app.handleAction(
-          focusedMenuItem.id,
-          {
-            source: 'menu',
-            actionId: focusedMenuItem.id,
-            menuId: this.currentMenu.menuId,
-            menuActionId: focusedMenuItem.id
-          },
-          focusedMenuItem.action
-        );
-      } finally {
-        this.ctl.app.completeMenuAction();
-      }
+        },
+        focusedMenuItem.action
+      );
     }
   }
 

@@ -190,7 +190,7 @@ export class AppController {
   /**
    * Refresh action bindings defined by the AppObject's `actions`.
    */
-  invalidateActions() {
+  invalidate() {
     const resolved = this.resolveActions();
     if (resolved) {
       const keyBindingsMap = Object.entries(resolved).reduce<KeyBindingMap>(
@@ -408,7 +408,7 @@ export class AppController {
     // Load declarative menu/actions after onStart / onResume to allow AppObject
     // to set any state that might affect the result of .menu()).
     this.ctl.menu.invalidate();
-    this.invalidateActions();
+    this.invalidate();
     if (this.focusInputOnStart) {
       this.ctl.input.focus();
     }

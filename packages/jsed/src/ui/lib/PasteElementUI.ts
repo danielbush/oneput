@@ -1,4 +1,4 @@
-import type { Controller, AppObject } from '@oneput/oneput';
+import type { Controller, AppObject, Menu } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './icons.js';
 import type { Editor } from '../../editor/Editor.js';
@@ -44,7 +44,6 @@ export class PasteElementUI implements AppObject {
       }
     });
     this.ctl.input.setPlaceholder(this.prompt);
-    this.renderMenuItems();
   };
 
   onExit = () => {
@@ -140,8 +139,8 @@ export class PasteElementUI implements AppObject {
     }
   };
 
-  renderMenuItems = () => {
-    this.ctl.menu.setMenu({
+  menu = () => {
+    return {
       id: 'PasteElementUI',
       focusBehaviour: 'first',
       items: [
@@ -170,6 +169,6 @@ export class PasteElementUI implements AppObject {
           action: this.actions[JsedAction.EXIT].action
         })
       ]
-    });
+    } satisfies Menu;
   };
 }

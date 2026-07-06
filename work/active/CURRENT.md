@@ -1,75 +1,124 @@
 # Current
 
-## Facts
+## Outcomes
 
-- oneput-demo sets keys in _layout.ts but does it from a LocalBindingService
-  - LocalBindingsService just uses packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts
-- jsed-demo sets keys in _layouts.ts but pulls it directly from packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts
+- EditorABM builds off OneputABM
+  - OneputABM
+    - menuItem
+      - hide Oneput
+    - actions
+      - open/close menu
+      - etc
+- getMenuItems need to be coded up statically - see EditorABM.ts
+- I think what I was thinking is that an AppObject can take OneputDefaultABM and just filter and extend it using .filter and .add ;
+- EditorABM provides a bunch of pre-defined actions/bindings and menu items which a child AppObject might want to filter.
+- EditorABM is build off OneputDefaultABM
+- EditorABM.getMenuItems needs to filter by action id
+- rename
+  - EditorControls
+  - OneputControls
+  - ActionSet
+  - CommandSet
+- Oneput default menu items: BACK, HIDE_ONEPUT, SUBMIT and EXIT
+ 
 
-## OneputABM (actions, bindings, menu)
 
-- Don't override things unnecessarily in EditorABM
 
-- `OneputABM` interface
-  - COMMENT: similar to EditorABM; EditorABM will become this
-  - provides api:
-    - .getActions - for use with AppObject.actions
-    - .getMenu() - for use with AppObject.menu()
-    - .add({ ... }) - creates a copy and adds/overrides actions/bindings
-    - .filter(['FOO', ...]) - creates a copy restricted to only the ones specified
-    - COMMENT: any modification (add/filter) creates a copy; so a child AppObject either uses the parent controls or it ends using its own if it modifies them
-    - .keyBindingMap
-      - builds keybindings based on actions
+## ABM (actions, bindings, menu)
 
-- `OneputDefaultABM = OneputABM.create(...).add(...)`
-  - just very basic bindings that open menu etc
-  - replaces packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts
-    - oneput-demo
-    - jsed-demo
-    - 2br apps/web
+Current thinking: rename ABM to something like `Controls`, `ActionSet`, or
+`CommandSet`. "ABM" implies ownership of a whole menu, which is not quite right.
 
-- re-work `apps/oneput-demo/src/lib/app/_layout.ts` and `Root`
-  - bindings service and OneputDefaultControls
-- re-work `apps/jsed-demo/src/lib/oneput/app/_layout.ts` and `Root`
-  - builds off DemoControls
+The cleaner model:
 
-- `EditorABM = OneputDefaultABM.create().add(...)`
+- A controls instance owns the active command set:
+  - actions
+  - bindings
+  - optional static menu item presets keyed by action id
+  - `.filter([...])`
+  - `.add(...)`
+  - `.rebind(...)`
+    - allows user bidning preferences to be used after being loaded from a service eg LocalBindingsService
+- `.filter([...])` creates a new controls instance and filters all action-owned parts:
+  - action disappears
+  - binding disappears
+  - default menu item preset disappears
+- `.add(...)` creates a new controls instance with extra or overridden actions/bindings/menu item presets.
+- AppObjects own their menu composition.
+  - menu items are coded statically where the UI/state decisions live
+  - menu item labels, icons, conditional visibility, confirmation flows, nested pick lists, and state-specific branches stay explicit
+- Menu code reads from the active controls instance.
+  - if an action was filtered out, menu code can omit that row
+  - no generic menu generator tries to infer UI from actions
+  - reusable shell rows can come from static presets, e.g. Oneput BACK, HIDE_ONEPUT, SUBMIT, EXIT
 
-- pass EditorABM to PasteElementUI et al and set actions/bindings this way
+Controls are associated with an AppObject; menus are composed by the AppObject
+from those controls.
 
-## Layout and settings management
+Example shape:
 
-- INHERIT_LAYOUT
-  - what:
-    - we set layout
-    - child app object assumes this
-    - child launches another app object that sets some crazy layout
-    - it exits
-    - what happens to child?
-  - solution:
-    - Oneput sets a Layout for the AppObject if it doesn't set one using the current layout
-    - that way the child will be resumed and the correct layout will also be restored
+```ts
+const controls = EditorControls.create(...)
+  .filter([
+    JsedAction.ENTER,
+    JsedAction.UNDO,
+    JsedAction.REDO,
+    JsedAction.CUT,
+    JsedAction.COPY
+  ]);
 
-- configure AppObject
-  - onStart / onResume are hooks, but we're just formalising certain core things with more specific hooks
-  - layout hook
-    - calls setLayout for us
-    - verify child AppObjects inherit
-    - verify whenw exit, parent's layout is restored (pretty sure)
-  - settings hook
-    - flags that set defaults for your AppObject
-    - things like focusInputOnMenuOpen etc
-- fix input focus in demo
-  - how do we do it in 2br apps/web?
-    - manual in start
-    - what about
-      - focusInputOnStart
-      - focusInputOnMenuOpen
-      - clearInputAfterAction
-      - clearInputAfterBack
-      - where are these set?
-        - AppObject
-          - settings: { focusInputOnStart: true, ... }
-        - or flags?
-          - doesn't feel right
-        
+const actions = controls.getActions();
+
+return [
+  editor.focusOps.canCopy() &&
+    actions[JsedAction.COPY] &&
+    stdMenuItem({
+      id: 'COPY_ELEMENT',
+      textContent: 'Copy...',
+      left: (b) => [b.icon(icons.Copy)],
+      action: actions[JsedAction.COPY].action
+    })
+];
+```
+
+Default menu preset shape:
+
+```ts
+const controls = OneputDefaultControls
+  .filter([OneputAction.BACK, OneputAction.SUBMIT, OneputAction.EXIT])
+  .add({
+    actions: {
+      [JsedAction.COPY]: { action, binding }
+    },
+    menuItems: {
+      [JsedAction.COPY]: ({ action }) =>
+        stdMenuItem({
+          id: 'COPY_ELEMENT',
+          textContent: 'Copy...',
+          action
+        })
+    }
+  });
+
+actions = () => controls.getActions();
+
+menu = () => ({
+  id: 'my-app-object',
+  items: [
+    ...controls.getMenuItems([
+      OneputAction.BACK,
+      OneputAction.SUBMIT,
+      OneputAction.EXIT
+    ]),
+    // hand-authored app rows here
+  ]
+});
+```
+
+Important identity distinction:
+
+- action id = command identity (`JSED__COPY`)
+- menu item id = rendered row identity (`COPY_ELEMENT`, `recent-file-123`, etc.)
+- they may be the same for simple command rows, but controls should not depend on `menuItem.id === actionId`
+
+This keeps `EditorABM.getMenuItems()` mostly as hand-authored menu UI, but makes it possible for child AppObjects to derive a narrower active action set from `EditorABM` and manually populate menus from that set.

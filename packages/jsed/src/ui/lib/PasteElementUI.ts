@@ -1,9 +1,8 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
-import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { icons } from './icons.js';
 import type { Editor } from '../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
 import { JsedAction } from '../JsedAction.js';
+import { EditorActionCatalog } from '../EditorActionCatalog.js';
 
 export class PasteElementUI implements AppObject {
   static create(
@@ -22,7 +21,21 @@ export class PasteElementUI implements AppObject {
     private ctl: Controller,
     private editor: Editor,
     private cut: boolean
-  ) {}
+  ) {
+    this.catalog = EditorActionCatalog.create(ctl, editor).filter([
+      JsedAction.FOCUS,
+      JsedAction.DOWN,
+      JsedAction.UP,
+      JsedAction.NEXT,
+      JsedAction.PREVIOUS,
+      JsedAction.PASTE_BEFORE,
+      JsedAction.PASTE_AFTER,
+      JsedAction.PASTE_APPEND,
+      JsedAction.EXIT
+    ]);
+  }
+
+  private catalog: EditorActionCatalog;
 
   layout = {
     params: {
@@ -49,124 +62,19 @@ export class PasteElementUI implements AppObject {
     this.editor.focusOps.cancelPaste();
   };
 
-  actions = {
-    [JsedAction.FOCUS]: {
-      action: () => {
-        this.ctl.input.focus();
-      },
-      binding: {
-        bindings: ['$mod+g'],
-        description: 'Focus the input'
-      }
-    },
-    [JsedAction.EXIT]: {
-      action: () => {
-        this.ctl.app.exit();
-      },
-      binding: {
-        bindings: ['Escape'],
-        description: 'Cancel operation'
-      }
-    },
-    [JsedAction.DOWN]: {
-      action: () => {
-        this.editor.moveDown();
-      },
-      binding: {
-        bindings: ['$mod+j', 'ArrowDown'],
-        description: 'Navigate to next sibling',
-        when: { menuOpen: false }
-      }
-    },
-    [JsedAction.UP]: {
-      action: () => {
-        this.editor.moveUp();
-      },
-      binding: {
-        bindings: ['$mod+k', 'ArrowUp'],
-        description: 'Navigate to previous sibling',
-        when: { menuOpen: false }
-      }
-    },
-    [JsedAction.NEXT]: {
-      action: () => {
-        this.editor.moveNext();
-      },
-      binding: {
-        bindings: ['$mod+l'],
-        description: 'Move to next token or element'
-      }
-    },
-    [JsedAction.PREVIOUS]: {
-      action: () => {
-        this.editor.movePrevious();
-      },
-      binding: {
-        bindings: ['$mod+h'],
-        description: 'Move to previous token or element'
-      }
-    },
-    [JsedAction.PASTE_BEFORE]: {
-      action: () => {
-        this.editor.focusOps.pasteBefore();
-        this.ctl.app.exit();
-      },
-      binding: {
-        bindings: ['$mod+v b'],
-        description: 'Paste element before'
-      }
-    },
-    [JsedAction.PASTE_AFTER]: {
-      action: () => {
-        this.editor.focusOps.pasteAfter();
-        this.ctl.app.exit();
-      },
-      binding: {
-        bindings: ['$mod+v a'],
-        description: 'Paste element after'
-      }
-    },
-    [JsedAction.PASTE_APPEND]: {
-      action: () => {
-        this.editor.focusOps.pasteAppend();
-        this.ctl.app.exit();
-      },
-      binding: {
-        bindings: ['$mod+v i'],
-        description: 'Paste element at end'
-      }
-    }
-  };
+  actions = () => this.catalog.getActions();
 
   menu = () => {
     return {
       id: 'PasteElementUI',
       focusBehaviour: 'first',
       items: [
-        stdMenuItem({
-          id: 'PASTE_BEFORE',
-          textContent: 'Paste before',
-          left: (b) => [b.icon(icons.ArrowLeftToLine)],
-          action: this.actions[JsedAction.PASTE_BEFORE].action
-        }),
-        stdMenuItem({
-          id: 'PASTE_AFTER',
-          textContent: 'Paste after',
-          left: (b) => [b.icon(icons.ArrowRightToLine)],
-          action: this.actions[JsedAction.PASTE_AFTER].action
-        }),
-        stdMenuItem({
-          id: 'PASTE_WITHIN',
-          textContent: 'Paste within',
-          left: (b) => [b.icon(icons.ArrowDownToLine)],
-          action: this.actions[JsedAction.PASTE_APPEND].action
-        }),
-        stdMenuItem({
-          id: 'EXIT',
-          textContent: 'Cancel',
-          left: (b) => [b.icon(icons.CircleX)],
-          action: this.actions[JsedAction.EXIT].action
-        })
+        ...this.catalog.getMenuItems([
+          JsedAction.PASTE_BEFORE,
+          JsedAction.PASTE_AFTER,
+          JsedAction.PASTE_APPEND,
+          JsedAction.EXIT
+        ])
       ]
     } satisfies Menu;
   };

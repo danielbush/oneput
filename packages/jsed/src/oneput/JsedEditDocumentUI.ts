@@ -2,12 +2,42 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { Editor } from '../editor/Editor.js';
 import type { EditorError } from '../editor/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
-import { EditorABM, type EditDocumentActions } from '../ui/EditorABM.js';
+import { EditorActionCatalog } from '../ui/EditorActionCatalog.js';
+import { JsedAction } from '../ui/JsedAction.js';
+import { PasteElementUI } from '../ui/lib/PasteElementUI.js';
 
 export type JsedEditDocumentUIHooks = {
   onActivate?: () => void;
   onEditError?: (err: EditorError) => void;
 };
+
+/**
+ * Controls what goes into AppObject['actions'] for this AppObject.
+ */
+const actionIds = [
+  JsedAction.DOWN,
+  JsedAction.UP,
+  JsedAction.ENTER,
+  JsedAction.RIGHT_ARROW,
+  JsedAction.LEFT_ARROW,
+  JsedAction.EXTEND_RIGHT_ARROW,
+  JsedAction.EXTEND_LEFT_ARROW,
+  JsedAction.SOFT_EXIT,
+  JsedAction.DELETE,
+  JsedAction.FOCUS,
+  JsedAction.TOGGLE_SELECT,
+  JsedAction.NEXT,
+  JsedAction.PREVIOUS,
+  JsedAction.UNDO,
+  JsedAction.REDO,
+  JsedAction.EXTEND_NEXT,
+  JsedAction.EXTEND_PREVIOUS,
+  JsedAction.REVEAL,
+  JsedAction.CUT,
+  JsedAction.COPY,
+  JsedAction.COPY_EMPTY_PREVIOUS,
+  JsedAction.COPY_EMPTY_NEXT
+];
 
 /**
  * Oneput AppObject for editing a Jsed document.
@@ -44,10 +74,7 @@ export class JsedEditDocumentUI implements AppObject {
     return new JsedEditDocumentUI(ctl, editor, hooks);
   }
 
-  private controls: EditorABM;
-
-  /** AppObject keybinding actions (re-pulled by the controller). Owned by `controls`. */
-  public actions = (): EditDocumentActions => this.controls.getActions();
+  public actions = () => this.createCatalog().filter(actionIds).getActions();
 
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;
@@ -56,20 +83,75 @@ export class JsedEditDocumentUI implements AppObject {
     private ctl: Controller,
     public editor: Editor,
     private hooks: JsedEditDocumentUIHooks = {}
-  ) {
-    this.controls = EditorABM.create(this.ctl, this.editor);
-  }
+  ) {}
+
+  private createCatalog = () =>
+    EditorActionCatalog.create(this.ctl, this.editor, {
+      runPasteElement: (cut) =>
+        this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut }))
+    });
 
   /**
    * Declarative menu: rebuilt from editor state whenever it is pulled — after
    * start/resume (afterRun), on open (pull-on-open), or via
    * `ctl.menu.invalidate()` while open.
    */
-  menu = () => ({
-    id: 'EditDocument',
-    focusBehaviour: 'last-action,first' as const,
-    items: this.controls.getMenuItems()
-  });
+  menu = () => {
+    const catalog = this.createCatalog();
+    return {
+      id: 'EditDocument',
+      focusBehaviour: 'last-action,first' as const,
+      items: [
+        ...catalog.getMenuItems([JsedAction.STOP_EDITING, JsedAction.EXIT_EDITOR]),
+        ...catalog.getMenuItems([JsedAction.ENTER, JsedAction.UNDO, JsedAction.REDO]),
+
+        ...catalog.getMenuItems([
+          JsedAction.CUT,
+          JsedAction.COPY,
+          JsedAction.COPY_EMPTY_PREVIOUS,
+          JsedAction.COPY_EMPTY_NEXT
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedAction.DELETE_FOCUSED_ELEMENT,
+          JsedAction.UNWRAP_FOCUS,
+          JsedAction.CONVERT_FOCUS,
+          JsedAction.INSERT_ELEMENT_AFTER_FOCUS,
+          JsedAction.INSERT_ELEMENT_BEFORE_FOCUS,
+          JsedAction.APPEND_NEW_ELEMENT_IN_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([JsedAction.WRAP_SELECTION]),
+
+        ...catalog.getMenuItems([
+          JsedAction.INSERT_SPACE_BEFORE_FOCUS,
+          JsedAction.REMOVE_SPACE_BEFORE_FOCUS,
+          JsedAction.INSERT_SPACE_AFTER_FOCUS,
+          JsedAction.REMOVE_SPACE_AFTER_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedAction.INSERT_SPACE_AFTER_CURSOR,
+          JsedAction.REMOVE_SPACE_AFTER_CURSOR,
+          JsedAction.INSERT_SPACE_BEFORE_CURSOR,
+          JsedAction.REMOVE_SPACE_BEFORE_CURSOR
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedAction.INSERT_ANCHOR_IN_FOCUS,
+          JsedAction.INSERT_ANCHOR_BEFORE_FOCUS,
+          JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS,
+          JsedAction.INSERT_ANCHOR_AFTER_FOCUS,
+          JsedAction.REMOVE_ANCHOR_AFTER_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedAction.ENABLE_LEGACY_ELEMENT_INDICATOR,
+          JsedAction.ENABLE_ELEMENT_INDICATOR
+        ])
+      ]
+    };
+  };
 
   /**
    * Rebuild the menu when editor state changes.

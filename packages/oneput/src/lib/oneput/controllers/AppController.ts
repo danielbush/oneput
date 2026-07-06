@@ -240,13 +240,14 @@ export class AppController {
     try {
       action(this.ctl, context);
     } finally {
-      // clearInputAfterAction setting triggered on menu action:
+      // clearInputAfterAction triggered only on menu action:
       if (
         context?.source === 'menu' &&
         this.clearInputAfterAction &&
         this.current === actionOwner
       ) {
         this.ctl.input.clearInput();
+        this.ctl.menu.invalidate();
       }
     }
   }

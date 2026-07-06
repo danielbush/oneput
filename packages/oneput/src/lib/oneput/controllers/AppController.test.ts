@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, test } from 'vitest';
 import { Controller } from './controller.js';
 import type { AppObject, UILayout } from '../types.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
+import { WordFilter } from '../shared/filters/WordFilter.js';
 
 function layout(id: string): UILayout {
   return {
@@ -288,6 +289,42 @@ describe('AppController', () => {
 
       // assert
       expect(ctl.input.getInputValue()).toBe('child');
+    });
+
+    test('clearInputAfterAction - refreshes displayed menu after clearing stale filter', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.menu.setDefaultFilter(WordFilter.create().filter);
+      ctl.app.run({
+        menu: () => ({
+          id: 'main',
+          focusBehaviour: 'first',
+          items: [
+            stdMenuItem({
+              id: 'action',
+              textContent: 'Action',
+              action: () => {
+                ctl.menu.invalidate();
+              }
+            }),
+            stdMenuItem({
+              id: 'another',
+              textContent: 'Another',
+              action: () => {}
+            })
+          ]
+        }),
+        onStart: () => {}
+      });
+      ctl.input.setInputValue('zzzz');
+      expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['action', 'another']);
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('');
+      expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['action', 'another']);
     });
 
     test('clearInputAfterBack - default - clears after handled back', async () => {

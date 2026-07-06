@@ -5,32 +5,33 @@ import type { Editor } from '../editor/Editor.js';
 import { icons } from './lib/icons.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
 import { PickListUI } from './lib/PickListUI.js';
+import { JsedAction } from './JsedAction.js';
 
 type OneputAction = AppActions[string];
 
 export type EditDocumentActions = AppActions & {
-  DOWN: OneputAction;
-  UP: OneputAction;
-  ENTER: OneputAction;
-  RIGHT_ARROW: OneputAction;
-  LEFT_ARROW: OneputAction;
-  EXTEND_RIGHT_ARROW: OneputAction;
-  EXTEND_LEFT_ARROW: OneputAction;
-  EXIT: OneputAction;
-  DELETE: OneputAction;
-  FOCUS: OneputAction;
-  TOGGLE_SELECT: OneputAction;
-  NEXT: OneputAction;
-  PREVIOUS: OneputAction;
-  UNDO: OneputAction;
-  REDO: OneputAction;
-  EXTEND_NEXT: OneputAction;
-  EXTEND_PREVIOUS: OneputAction;
-  REVEAL: OneputAction;
-  CUT: OneputAction;
-  COPY: OneputAction;
-  COPY_EMPTY_PREVIOUS: OneputAction;
-  COPY_EMPTY_NEXT: OneputAction;
+  [JsedAction.DOWN]: OneputAction;
+  [JsedAction.UP]: OneputAction;
+  [JsedAction.ENTER]: OneputAction;
+  [JsedAction.RIGHT_ARROW]: OneputAction;
+  [JsedAction.LEFT_ARROW]: OneputAction;
+  [JsedAction.EXTEND_RIGHT_ARROW]: OneputAction;
+  [JsedAction.EXTEND_LEFT_ARROW]: OneputAction;
+  [JsedAction.EXIT]: OneputAction;
+  [JsedAction.DELETE]: OneputAction;
+  [JsedAction.FOCUS]: OneputAction;
+  [JsedAction.TOGGLE_SELECT]: OneputAction;
+  [JsedAction.NEXT]: OneputAction;
+  [JsedAction.PREVIOUS]: OneputAction;
+  [JsedAction.UNDO]: OneputAction;
+  [JsedAction.REDO]: OneputAction;
+  [JsedAction.EXTEND_NEXT]: OneputAction;
+  [JsedAction.EXTEND_PREVIOUS]: OneputAction;
+  [JsedAction.REVEAL]: OneputAction;
+  [JsedAction.CUT]: OneputAction;
+  [JsedAction.COPY]: OneputAction;
+  [JsedAction.COPY_EMPTY_PREVIOUS]: OneputAction;
+  [JsedAction.COPY_EMPTY_NEXT]: OneputAction;
 };
 
 type MenuItemList = Array<MenuItemAny | undefined | null | '' | false>;
@@ -72,7 +73,7 @@ export class EditorABM {
   getActions(): EditDocumentActions {
     const { ctl, editor, invalidate } = this;
     return {
-      DOWN: {
+      [JsedAction.DOWN]: {
         action: () => {
           editor.moveDown();
         },
@@ -82,7 +83,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      UP: {
+      [JsedAction.UP]: {
         action: () => {
           editor.moveUp();
         },
@@ -92,7 +93,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      ENTER: {
+      [JsedAction.ENTER]: {
         action: () => {
           editor.handleEnter().mapErr((err) => {
             switch (err.type) {
@@ -108,7 +109,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      RIGHT_ARROW: {
+      [JsedAction.RIGHT_ARROW]: {
         action: () => {
           editor.moveNext();
         },
@@ -118,7 +119,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      LEFT_ARROW: {
+      [JsedAction.LEFT_ARROW]: {
         action: () => {
           editor.movePrevious();
         },
@@ -128,7 +129,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      EXTEND_RIGHT_ARROW: {
+      [JsedAction.EXTEND_RIGHT_ARROW]: {
         action: () => {
           editor.extendNext();
         },
@@ -138,7 +139,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      EXTEND_LEFT_ARROW: {
+      [JsedAction.EXTEND_LEFT_ARROW]: {
         action: () => {
           editor.extendPrevious();
         },
@@ -148,7 +149,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      EXIT: {
+      [JsedAction.EXIT]: {
         action: () => {
           if (!editor.handleExit()) {
             ctl.app.exit();
@@ -160,7 +161,7 @@ export class EditorABM {
           when: { menuOpen: false }
         }
       },
-      DELETE: {
+      [JsedAction.DELETE]: {
         action: (_ctl, context) => {
           editor.handleDelete(context?.source === 'keyboard' ? context.event : undefined);
         },
@@ -176,7 +177,7 @@ export class EditorABM {
           preventDefault: false
         }
       },
-      FOCUS: {
+      [JsedAction.FOCUS]: {
         action: () => {
           ctl.input.focus();
         },
@@ -185,7 +186,7 @@ export class EditorABM {
           description: 'Focus the input'
         }
       },
-      TOGGLE_SELECT: {
+      [JsedAction.TOGGLE_SELECT]: {
         action: () => {
           ctl.input.toggleSelect();
         },
@@ -194,7 +195,7 @@ export class EditorABM {
           description: 'Toggle input element cursor state'
         }
       },
-      NEXT: {
+      [JsedAction.NEXT]: {
         action: () => {
           editor.moveNext();
         },
@@ -203,7 +204,7 @@ export class EditorABM {
           description: 'Move to next token or element'
         }
       },
-      PREVIOUS: {
+      [JsedAction.PREVIOUS]: {
         action: () => {
           editor.movePrevious();
         },
@@ -212,7 +213,7 @@ export class EditorABM {
           description: 'Move to previous token or element'
         }
       },
-      UNDO: {
+      [JsedAction.UNDO]: {
         action: () => {
           editor.undo();
           invalidate();
@@ -222,7 +223,7 @@ export class EditorABM {
           description: 'Undo'
         }
       },
-      REDO: {
+      [JsedAction.REDO]: {
         action: () => {
           editor.redo();
           invalidate();
@@ -232,7 +233,7 @@ export class EditorABM {
           description: 'Redo'
         }
       },
-      EXTEND_NEXT: {
+      [JsedAction.EXTEND_NEXT]: {
         action: () => {
           editor.extendNext();
         },
@@ -241,7 +242,7 @@ export class EditorABM {
           description: 'Extend selection to next LINE_SIBLING'
         }
       },
-      EXTEND_PREVIOUS: {
+      [JsedAction.EXTEND_PREVIOUS]: {
         action: () => {
           editor.extendPrevious();
         },
@@ -250,7 +251,7 @@ export class EditorABM {
           description: 'Extend selection to previous LINE_SIBLING'
         }
       },
-      REVEAL: {
+      [JsedAction.REVEAL]: {
         action: () => {
           editor.scrollActiveTargetIntoView();
         },
@@ -259,7 +260,7 @@ export class EditorABM {
           description: 'Center the active token or reveal the focused element'
         }
       },
-      CUT: {
+      [JsedAction.CUT]: {
         action: () => {
           if (editor.focusOps.cut()) {
             ctl.app.run(PasteElementUI.create(ctl, editor, { cut: true }));
@@ -270,7 +271,7 @@ export class EditorABM {
           description: 'Cut element at focus'
         }
       },
-      COPY: {
+      [JsedAction.COPY]: {
         action: () => {
           if (editor.focusOps.copy()) {
             ctl.app.run(PasteElementUI.create(ctl, editor, { cut: false }));
@@ -281,7 +282,7 @@ export class EditorABM {
           description: 'Copy element at focus'
         }
       },
-      COPY_EMPTY_PREVIOUS: {
+      [JsedAction.COPY_EMPTY_PREVIOUS]: {
         action: () => {
           editor.focusOps.copyEmptyPrevious();
         },
@@ -290,7 +291,7 @@ export class EditorABM {
           description: 'Copy to empty element before focus'
         }
       },
-      COPY_EMPTY_NEXT: {
+      [JsedAction.COPY_EMPTY_NEXT]: {
         action: () => {
           editor.focusOps.copyEmptyNext();
         },
@@ -331,7 +332,7 @@ export class EditorABM {
         stdMenuItem({
           id: 'EDIT_FIRST',
           textContent: 'Edit text',
-          action: actions.ENTER.action,
+          action: actions[JsedAction.ENTER].action,
           left: (b) => [b.icon(icons.Pencil)]
         }),
 
@@ -339,7 +340,7 @@ export class EditorABM {
         stdMenuItem({
           id: 'UNDO',
           textContent: 'Undo',
-          action: actions.UNDO.action,
+          action: actions[JsedAction.UNDO].action,
           left: (b) => [b.icon(icons.Undo2)]
         }),
 
@@ -347,7 +348,7 @@ export class EditorABM {
         stdMenuItem({
           id: 'REDO',
           textContent: 'Redo',
-          action: actions.REDO.action,
+          action: actions[JsedAction.REDO].action,
           left: (b) => [b.icon(icons.Redo2)]
         }),
 
@@ -355,7 +356,7 @@ export class EditorABM {
         stdMenuItem({
           id: 'CUT_ELEMENT',
           textContent: 'Cut...',
-          action: actions.CUT.action,
+          action: actions[JsedAction.CUT].action,
           left: (b) => [b.icon(icons.Scissors)]
         }),
 
@@ -363,7 +364,7 @@ export class EditorABM {
         stdMenuItem({
           id: 'COPY_ELEMENT',
           textContent: 'Copy...',
-          action: actions.COPY.action,
+          action: actions[JsedAction.COPY].action,
           left: (b) => [b.icon(icons.Copy)]
         }),
 
@@ -372,7 +373,7 @@ export class EditorABM {
           id: 'COPY_EMPTY_BEFORE',
           textContent: 'Copy to empty element before...',
           closeMenuOnAction: true,
-          action: actions.COPY_EMPTY_PREVIOUS.action,
+          action: actions[JsedAction.COPY_EMPTY_PREVIOUS].action,
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
 
@@ -381,7 +382,7 @@ export class EditorABM {
           id: 'COPY_EMPTY_AFTER',
           textContent: 'Copy to empty element after...',
           closeMenuOnAction: true,
-          action: actions.COPY_EMPTY_NEXT.action,
+          action: actions[JsedAction.COPY_EMPTY_NEXT].action,
           left: (b) => [b.icon(icons.BetweenHorizonalStart)]
         }),
 

@@ -3,6 +3,7 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './icons.js';
 import type { Editor } from '../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
+import { JsedAction } from '../JsedAction.js';
 
 export class PasteElementUI implements AppObject {
   static create(
@@ -51,7 +52,7 @@ export class PasteElementUI implements AppObject {
   };
 
   actions = {
-    FOCUS: {
+    [JsedAction.FOCUS]: {
       action: () => {
         this.ctl.input.focus();
       },
@@ -60,7 +61,7 @@ export class PasteElementUI implements AppObject {
         description: 'Focus the input'
       }
     },
-    EXIT: {
+    [JsedAction.EXIT]: {
       action: () => {
         this.ctl.app.exit();
       },
@@ -69,7 +70,7 @@ export class PasteElementUI implements AppObject {
         description: 'Cancel operation'
       }
     },
-    DOWN: {
+    [JsedAction.DOWN]: {
       action: () => {
         this.editor.moveDown();
       },
@@ -79,7 +80,7 @@ export class PasteElementUI implements AppObject {
         when: { menuOpen: false }
       }
     },
-    UP: {
+    [JsedAction.UP]: {
       action: () => {
         this.editor.moveUp();
       },
@@ -89,7 +90,7 @@ export class PasteElementUI implements AppObject {
         when: { menuOpen: false }
       }
     },
-    NEXT: {
+    [JsedAction.NEXT]: {
       action: () => {
         this.editor.moveNext();
       },
@@ -98,7 +99,7 @@ export class PasteElementUI implements AppObject {
         description: 'Move to next token or element'
       }
     },
-    PREVIOUS: {
+    [JsedAction.PREVIOUS]: {
       action: () => {
         this.editor.movePrevious();
       },
@@ -107,7 +108,7 @@ export class PasteElementUI implements AppObject {
         description: 'Move to previous token or element'
       }
     },
-    PASTE_BEFORE: {
+    [JsedAction.PASTE_BEFORE]: {
       action: () => {
         this.editor.focusOps.pasteBefore();
         this.ctl.app.exit();
@@ -117,7 +118,7 @@ export class PasteElementUI implements AppObject {
         description: 'Paste element before'
       }
     },
-    PASTE_AFTER: {
+    [JsedAction.PASTE_AFTER]: {
       action: () => {
         this.editor.focusOps.pasteAfter();
         this.ctl.app.exit();
@@ -127,7 +128,7 @@ export class PasteElementUI implements AppObject {
         description: 'Paste element after'
       }
     },
-    PASTE_APPEND: {
+    [JsedAction.PASTE_APPEND]: {
       action: () => {
         this.editor.focusOps.pasteAppend();
         this.ctl.app.exit();
@@ -148,25 +149,25 @@ export class PasteElementUI implements AppObject {
           id: 'PASTE_BEFORE',
           textContent: 'Paste before',
           left: (b) => [b.icon(icons.ArrowLeftToLine)],
-          action: this.actions.PASTE_BEFORE.action
+          action: this.actions[JsedAction.PASTE_BEFORE].action
         }),
         stdMenuItem({
           id: 'PASTE_AFTER',
           textContent: 'Paste after',
           left: (b) => [b.icon(icons.ArrowRightToLine)],
-          action: this.actions.PASTE_AFTER.action
+          action: this.actions[JsedAction.PASTE_AFTER].action
         }),
         stdMenuItem({
           id: 'PASTE_WITHIN',
           textContent: 'Paste within',
           left: (b) => [b.icon(icons.ArrowDownToLine)],
-          action: this.actions.PASTE_APPEND.action
+          action: this.actions[JsedAction.PASTE_APPEND].action
         }),
         stdMenuItem({
           id: 'EXIT',
           textContent: 'Cancel',
           left: (b) => [b.icon(icons.CircleX)],
-          action: this.actions.EXIT.action
+          action: this.actions[JsedAction.EXIT].action
         })
       ]
     });

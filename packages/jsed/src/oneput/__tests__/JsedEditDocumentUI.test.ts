@@ -175,11 +175,11 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(d1);
-    await openMenu(ctl);
-    editor.getCursor()?.moveNext();
+    editor.moveNext();
     const island = editor.getCursor()?.getPlace() as HTMLElement;
-    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
+    await openMenu(ctl);
+    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
 
     // act
     tagItem?.action?.(ctl);

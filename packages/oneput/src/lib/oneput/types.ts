@@ -483,6 +483,13 @@ export type UIFlags = {
    * AppObject's input alone.
    */
   clearInputAfterAction?: boolean;
+  /**
+   * Clear the Oneput input after back handling runs.
+   *
+   * Defaults to true. If back navigation changes the current AppObject, Oneput
+   * leaves the new AppObject's input alone.
+   */
+  clearInputAfterBack?: boolean;
 };
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {

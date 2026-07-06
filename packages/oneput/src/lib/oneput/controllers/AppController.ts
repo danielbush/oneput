@@ -60,6 +60,7 @@ export class AppController {
   private focusInputOnStart = true;
   private focusInputOnMenuOpen = true;
   private clearInputAfterAction = true;
+  private clearInputAfterBack = true;
 
   private getAppState(app: AnyAppObject) {
     let state = this.appStates.get(app);
@@ -138,6 +139,9 @@ export class AppController {
     if ('clearInputAfterAction' in flags) {
       this.clearInputAfterAction = flags.clearInputAfterAction ?? true;
     }
+    if ('clearInputAfterBack' in flags) {
+      this.clearInputAfterBack = flags.clearInputAfterBack ?? true;
+    }
   }
 
   private resetFlags(settings?: UIFlags) {
@@ -153,7 +157,8 @@ export class AppController {
       enableInputElement: settings?.enableInputElement ?? !enableModal,
       focusInputOnStart: settings?.focusInputOnStart ?? true,
       focusInputOnMenuOpen: settings?.focusInputOnMenuOpen ?? true,
-      clearInputAfterAction: settings?.clearInputAfterAction ?? true
+      clearInputAfterAction: settings?.clearInputAfterAction ?? true,
+      clearInputAfterBack: settings?.clearInputAfterBack ?? true
     };
 
     this.ctl.app._enableGoBack(flags.enableGoBack);
@@ -166,6 +171,7 @@ export class AppController {
     this.focusInputOnStart = flags.focusInputOnStart ?? true;
     this.focusInputOnMenuOpen = flags.focusInputOnMenuOpen ?? true;
     this.clearInputAfterAction = flags.clearInputAfterAction ?? true;
+    this.clearInputAfterBack = flags.clearInputAfterBack ?? true;
   }
 
   // #endregion
@@ -469,17 +475,27 @@ export class AppController {
     if (this.disableGoBack) {
       return;
     }
+    const backOwner = this.current;
     if (this.onBack) {
       this.onBack();
+      this.clearInputAfterBackIfCurrent(backOwner);
       return;
     }
     if (this.current?.onBack) {
       this.current.onBack();
+      this.clearInputAfterBackIfCurrent(backOwner);
       return;
     }
     this.pop();
+    this.clearInputAfterBackIfCurrent(backOwner);
     return;
   };
+
+  private clearInputAfterBackIfCurrent(backOwner?: AnyAppObject) {
+    if (this.clearInputAfterBack && this.current === backOwner) {
+      this.ctl.input.clearInput();
+    }
+  }
 
   setOnBack(onBack: () => void) {
     this.onBack = onBack;

@@ -289,6 +289,58 @@ describe('AppController', () => {
       // assert
       expect(ctl.input.getInputValue()).toBe('child');
     });
+
+    test('clearInputAfterBack - default - clears after handled back', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.app.run({
+        onBack: () => {},
+        onStart: () => {}
+      });
+      ctl.input.setInputValue('query');
+
+      // act
+      ctl.app.goBack();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('');
+    });
+
+    test('clearInputAfterBack - false', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.app.run({
+        settings: { clearInputAfterBack: false },
+        onBack: () => {},
+        onStart: () => {}
+      });
+      ctl.input.setInputValue('query');
+
+      // act
+      ctl.app.goBack();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('query');
+    });
+
+    test('clearInputAfterBack - parent AppObject keeps its input', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.app.run({
+        onResume: () => {
+          ctl.input.setInputValue('parent');
+        },
+        onStart: () => {}
+      });
+      ctl.app.run({ onStart: () => {} });
+      ctl.input.setInputValue('child');
+
+      // act
+      ctl.app.goBack();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('parent');
+    });
   });
 
   describe('actions', () => {

@@ -80,7 +80,7 @@ export class EditorController {
       });
       this.state.tokenizer.setCursorElement(seat);
       this.state.nav?.FOCUS(seat);
-      if (opts?.syncInput !== false) {
+      if (!this.state.isSuspended && opts?.syncInput !== false) {
         this.state.ops.syncInput(seat, opts?.inputCursorPosition);
       }
     }

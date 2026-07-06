@@ -446,6 +446,13 @@ export type UIFlags = {
   enableFilter?: boolean;
   enableInputElement?: boolean;
   enableModal?: boolean;
+  /**
+   * Focus the Oneput input after an AppObject starts or resumes.
+   *
+   * Defaults to true. Set this to false in `AppObject.settings` for screens
+   * that should leave focus somewhere else.
+   */
+  focusInputOnStart?: boolean;
 };
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {

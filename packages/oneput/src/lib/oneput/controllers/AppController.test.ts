@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, test } from 'vitest';
 import { Controller } from './controller.js';
 import type { AppObject, UILayout } from '../types.js';
 
@@ -41,78 +41,130 @@ function layoutFactory(id: string) {
   };
 }
 
+async function waitForFocus() {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 describe('AppController', () => {
-  it('INHERIT_LAYOUT - restores an inherited parent layout after exiting a child with its own layout', () => {
-    // arrange
-    const ctl = Controller.createNull();
-    const appLayout = layoutFactory('app-layout');
-    const childLayout = layoutFactory('child-layout');
-    const appObject: AppObject = {
-      layout: { layout: appLayout.create, params: {} },
-      onStart: () => {}
-    };
-    const parent: AppObject = {
-      onStart: () => {}
-    };
-    const child: AppObject = {
-      layout: { layout: childLayout.create, params: {} },
-      onStart: () => {}
-    };
-
-    ctl.app.run(appObject);
-    ctl.app.run(parent);
-    ctl.app.run(child);
-
-    // act
-    ctl.app.exit();
-
-    // assert
-    expect(ctl.ui.getLayout()).toBe(appLayout.appLayout);
+  afterEach(() => {
+    document.body.innerHTML = '';
   });
 
-  it('configures an inherited layout before starting an app object', () => {
-    // arrange
-    const ctl = Controller.createNull();
-    const { appLayout, params } = trackedLayout('app-layout');
-    const appObject: AppObject = {
-      layout: {
-        layout: (_ctl, _params) => appLayout,
-        params: {}
-      },
-      onStart: () => {}
-    };
-    const child: AppObject<unknown, { menuTitle: string }> = {
-      layout: { params: { menuTitle: 'Child' } },
-      onStart: () => {}
-    };
+  describe('AppObject.layout', () => {
+    it('INHERIT_LAYOUT - restore inherited parent layout', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const appLayout = layoutFactory('app-layout');
+      const childLayout = layoutFactory('child-layout');
+      // Grandparent.
+      const appObject: AppObject = {
+        layout: { layout: appLayout.create, params: {} },
+        onStart: () => {}
+      };
+      // Parent doesn't define a layout, inherits grandparent
+      const parent: AppObject = {
+        onStart: () => {}
+      };
+      // Child defines its own layout.
+      const child: AppObject = {
+        layout: { layout: childLayout.create, params: {} },
+        onStart: () => {}
+      };
 
-    ctl.app.run(appObject);
+      ctl.app.run(appObject);
+      ctl.app.run(parent);
+      ctl.app.run(child);
 
-    // act
-    ctl.app.run(child);
+      // act
+      ctl.app.exit();
 
-    // assert
-    expect(ctl.ui.getLayout()).toBe(appLayout);
-    expect(params).toContainEqual({ menuTitle: 'Child' });
+      // assert
+      expect(ctl.ui.getLayout()).toBe(appLayout.appLayout);
+    });
+
+    it('configures an inherited layout before starting an app object', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, params } = trackedLayout('app-layout');
+      const appObject: AppObject = {
+        layout: {
+          layout: (_ctl, _params) => appLayout,
+          params: {}
+        },
+        onStart: () => {}
+      };
+      const child: AppObject<unknown, { menuTitle: string }> = {
+        layout: { params: { menuTitle: 'Child' } },
+        onStart: () => {}
+      };
+
+      ctl.app.run(appObject);
+
+      // act
+      ctl.app.run(child);
+
+      // assert
+      expect(ctl.ui.getLayout()).toBe(appLayout);
+      expect(params).toContainEqual({ menuTitle: 'Child' });
+    });
+
+    it('passes params to an installed layout factory', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, params, create } = layoutFactory('app-layout');
+      const appObject: AppObject<unknown, { menuTitle: string }> = {
+        layout: {
+          layout: create,
+          params: { menuTitle: 'Home' }
+        },
+        onStart: () => {}
+      };
+
+      // act
+      ctl.app.run(appObject);
+
+      // assert
+      expect(ctl.ui.getLayout()).toBe(appLayout);
+      expect(params).toEqual([{ menuTitle: 'Home' }]);
+    });
   });
 
-  it('passes params to an installed layout factory', () => {
-    // arrange
-    const ctl = Controller.createNull();
-    const { appLayout, params, create } = layoutFactory('app-layout');
-    const appObject: AppObject<unknown, { menuTitle: string }> = {
-      layout: {
-        layout: create,
-        params: { menuTitle: 'Home' }
-      },
-      onStart: () => {}
-    };
+  describe('AppObject.settings', () => {
+    test('focusInputOnStart - default - focuses', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const input = ctl.currentProps.inputElement as HTMLInputElement;
+      const before = document.createElement('button');
+      document.body.append(before, input);
+      before.focus();
 
-    // act
-    ctl.app.run(appObject);
+      // act
+      ctl.app.run({ onStart: () => {} });
+      await waitForFocus();
 
-    // assert
-    expect(ctl.ui.getLayout()).toBe(appLayout);
-    expect(params).toEqual([{ menuTitle: 'Home' }]);
+      // assert
+      expect(document.activeElement).toBe(input);
+    });
+
+    test('focusInputOnStart  - false', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const input = ctl.currentProps.inputElement as HTMLInputElement;
+      const before = document.createElement('button');
+      document.body.append(before, input);
+      before.focus();
+
+      const appObject: AppObject = {
+        settings: { focusInputOnStart: false },
+        onStart: () => {}
+      };
+
+      // act
+      ctl.app.run(appObject);
+      await waitForFocus();
+
+      // assert
+      expect(document.activeElement).toBe(before);
+    });
   });
 });

@@ -49,10 +49,13 @@ export class AppController {
   private appStates = new WeakMap<AnyAppObject, AppObjectState>();
   private current?: AnyAppObject;
   private onBack?: () => void;
-  private disableGoBack = false;
   private unsubscribeMenuItemFocus?: () => void;
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
+
+  // UI settings
+  private disableGoBack = false;
+  private focusInputOnStart = true;
 
   private getAppState(app: AnyAppObject) {
     let state = this.appStates.get(app);
@@ -122,6 +125,9 @@ export class AppController {
     if ('enableInputElement' in flags || 'enableModal' in flags) {
       this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
     }
+    if ('focusInputOnStart' in flags) {
+      this.focusInputOnStart = flags.focusInputOnStart ?? true;
+    }
   }
 
   private resetFlags(settings?: UIFlags) {
@@ -134,7 +140,8 @@ export class AppController {
       enableMenuActions: settings?.enableMenuActions ?? !enableModal,
       enableGenerative: settings?.enableGenerative ?? !enableModal,
       enableFilter: settings?.enableFilter ?? !enableModal,
-      enableInputElement: settings?.enableInputElement ?? !enableModal
+      enableInputElement: settings?.enableInputElement ?? !enableModal,
+      focusInputOnStart: settings?.focusInputOnStart ?? true
     };
 
     this.ctl.app._enableGoBack(flags.enableGoBack);
@@ -144,6 +151,7 @@ export class AppController {
     this.ctl.menu._enableGenerative(flags.enableGenerative);
     this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
+    this.focusInputOnStart = flags.focusInputOnStart ?? true;
   }
 
   // #endregion
@@ -361,6 +369,9 @@ export class AppController {
     // to set any state that might affect the result of .menu()).
     this.ctl.menu.invalidate();
     this.invalidateActions();
+    if (this.focusInputOnStart) {
+      this.ctl.input.focus();
+    }
   }
 
   /**

@@ -24,6 +24,12 @@ export class PasteElementUI implements AppObject {
     private cut: boolean
   ) {}
 
+  layout = {
+    params: {
+      menuTitle: this.title
+    } satisfies JsedLayoutParams
+  };
+
   get title() {
     if (this.cut) {
       return 'Cut Element';
@@ -36,13 +42,6 @@ export class PasteElementUI implements AppObject {
   }
 
   onStart = () => {
-    this.ctl.ui.update<JsedLayoutParams>({
-      params: { menuTitle: this.title },
-      flags: {
-        // enableMenuOpenClose: false,
-        // enableInputElement: false
-      }
-    });
     this.ctl.input.setPlaceholder(this.prompt);
   };
 

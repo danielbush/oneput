@@ -45,6 +45,11 @@ async function waitForFocus() {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+async function waitForMenuOpenFocus() {
+  await waitForFocus();
+  await waitForFocus();
+}
+
 describe('AppController', () => {
   afterEach(() => {
     document.body.innerHTML = '';
@@ -162,6 +167,54 @@ describe('AppController', () => {
       // act
       ctl.app.run(appObject);
       await waitForFocus();
+
+      // assert
+      expect(document.activeElement).toBe(before);
+    });
+
+    test('focusInputOnMenuOpen - default - focuses', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const input = ctl.currentProps.inputElement as HTMLInputElement;
+      const before = document.createElement('button');
+      document.body.append(before, input);
+
+      ctl.app.run({
+        settings: { focusInputOnStart: false },
+        onStart: () => {}
+      });
+      await waitForFocus();
+      before.focus();
+
+      // act
+      ctl.menu.openMenu();
+      await waitForMenuOpenFocus();
+
+      // assert
+      expect(document.activeElement).toBe(input);
+    });
+
+    test('focusInputOnMenuOpen - false', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const input = ctl.currentProps.inputElement as HTMLInputElement;
+      const before = document.createElement('button');
+      document.body.append(before, input);
+
+      const appObject: AppObject = {
+        settings: {
+          focusInputOnStart: false,
+          focusInputOnMenuOpen: false
+        },
+        onStart: () => {}
+      };
+      ctl.app.run(appObject);
+      await waitForFocus();
+      before.focus();
+
+      // act
+      ctl.menu.openMenu();
+      await waitForMenuOpenFocus();
 
       // assert
       expect(document.activeElement).toBe(before);

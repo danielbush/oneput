@@ -453,6 +453,13 @@ export type UIFlags = {
    * that should leave focus somewhere else.
    */
   focusInputOnStart?: boolean;
+  /**
+   * Focus the Oneput input when the menu opens.
+   *
+   * Defaults to true. Set this to false in `AppObject.settings` for screens
+   * that should keep focus where it is when opening the menu.
+   */
+  focusInputOnMenuOpen?: boolean;
 };
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {

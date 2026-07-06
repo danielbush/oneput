@@ -56,6 +56,7 @@ export class AppController {
   // UI settings
   private disableGoBack = false;
   private focusInputOnStart = true;
+  private focusInputOnMenuOpen = true;
 
   private getAppState(app: AnyAppObject) {
     let state = this.appStates.get(app);
@@ -128,6 +129,9 @@ export class AppController {
     if ('focusInputOnStart' in flags) {
       this.focusInputOnStart = flags.focusInputOnStart ?? true;
     }
+    if ('focusInputOnMenuOpen' in flags) {
+      this.focusInputOnMenuOpen = flags.focusInputOnMenuOpen ?? true;
+    }
   }
 
   private resetFlags(settings?: UIFlags) {
@@ -141,7 +145,8 @@ export class AppController {
       enableGenerative: settings?.enableGenerative ?? !enableModal,
       enableFilter: settings?.enableFilter ?? !enableModal,
       enableInputElement: settings?.enableInputElement ?? !enableModal,
-      focusInputOnStart: settings?.focusInputOnStart ?? true
+      focusInputOnStart: settings?.focusInputOnStart ?? true,
+      focusInputOnMenuOpen: settings?.focusInputOnMenuOpen ?? true
     };
 
     this.ctl.app._enableGoBack(flags.enableGoBack);
@@ -152,6 +157,7 @@ export class AppController {
     this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
     this.focusInputOnStart = flags.focusInputOnStart ?? true;
+    this.focusInputOnMenuOpen = flags.focusInputOnMenuOpen ?? true;
   }
 
   // #endregion
@@ -275,6 +281,8 @@ export class AppController {
    * Used for resetting state when a new appObject is run.
    */
   reset(settings?: UIFlags) {
+    this.resetFlags(settings);
+
     // Events
     this.unsubscribeMenuItemFocus?.();
     if (this.current?.onMenuItemFocus) {
@@ -292,13 +300,14 @@ export class AppController {
       });
     }
     this.unsubscribeMenuOpenChange?.();
-    if (this.current?.onMenuOpenChange) {
+    if (this.current?.onMenuOpenChange || this.focusInputOnMenuOpen) {
       this.unsubscribeMenuOpenChange = this.ctl.events.on('menu-open-change', (open) => {
+        if (open && this.focusInputOnMenuOpen) {
+          this.ctl.input.focus();
+        }
         this.current?.onMenuOpenChange?.({ open });
       });
     }
-
-    this.resetFlags(settings);
 
     // Reset stuff...
     this.resetOnBack();

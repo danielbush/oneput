@@ -59,19 +59,19 @@ export class EditorABM {
     editor: Editor,
     opts?: { invalidateMenu?: () => void }
   ): EditorABM {
-    const invalidate = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
-    return new EditorABM(ctl, editor, invalidate);
+    const invalidateMenu = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
+    return new EditorABM(ctl, editor, invalidateMenu);
   }
 
   private constructor(
     private ctl: Controller,
     private editor: Editor,
-    private invalidate: () => void
+    private invalidateMenu: () => void
   ) {}
 
   /** Keybinding actions. Pass to Oneput's `actions` in function form so they can be re-pulled. */
   getActions(): EditDocumentActions {
-    const { ctl, editor, invalidate } = this;
+    const { ctl, editor, invalidateMenu } = this;
     return {
       [JsedAction.DOWN]: {
         action: () => {
@@ -216,7 +216,7 @@ export class EditorABM {
       [JsedAction.UNDO]: {
         action: () => {
           editor.undo();
-          invalidate();
+          invalidateMenu();
         },
         binding: {
           bindings: ['$mod+z'],
@@ -226,7 +226,7 @@ export class EditorABM {
       [JsedAction.REDO]: {
         action: () => {
           editor.redo();
-          invalidate();
+          invalidateMenu();
         },
         binding: {
           bindings: ['Shift+$mod+z'],
@@ -305,7 +305,7 @@ export class EditorABM {
 
   /** Live menu items, rebuilt from current editor state on every call. Do not memoize. */
   getMenuItems(): MenuItemList {
-    const { ctl, editor, invalidate } = this;
+    const { ctl, editor, invalidateMenu: invalidate } = this;
     const actions = this.getActions();
     const cursor = editor.getCursor();
     return [

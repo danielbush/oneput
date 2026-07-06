@@ -56,7 +56,11 @@ export class KeysController {
       }
       // MENU_OPEN_CLOSE_RACE
       // setTimeout(() => {
-      this.ctl.app.handleAction(evt, match.actionId, match.kb.action);
+      this.ctl.app.handleAction(
+        match.actionId,
+        { source: 'keyboard', event: evt },
+        match.kb.action
+      );
       // });
     }
   }

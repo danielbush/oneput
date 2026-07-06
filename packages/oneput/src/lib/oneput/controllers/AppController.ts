@@ -1,6 +1,8 @@
 import type { Controller } from './controller.js';
 import type {
   AppActions,
+  AppActionContext,
+  AppActionHandler,
   AppEvent,
   AppLayoutParams,
   AppObject,
@@ -210,18 +212,14 @@ export class AppController {
    * @param actionId
    * @param defaultAction An action defined outside of any AppObject.
    */
-  handleAction(
-    evt: KeyboardEvent,
-    actionId: string,
-    defaultAction: ((ctl: Controller, evt: KeyboardEvent) => void) | undefined
-  ) {
+  handleAction(actionId: string, context?: AppActionContext, defaultAction?: AppActionHandler) {
     const actions = this.resolveActions();
     if (actions?.[actionId]) {
-      actions[actionId]?.action(this.ctl, evt);
+      actions[actionId]?.action(this.ctl, context);
       return;
     }
     if (defaultAction) {
-      defaultAction(this.ctl, evt);
+      defaultAction(this.ctl, context);
       return;
     }
 

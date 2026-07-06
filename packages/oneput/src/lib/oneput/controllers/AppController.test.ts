@@ -290,4 +290,93 @@ describe('AppController', () => {
       expect(ctl.input.getInputValue()).toBe('child');
     });
   });
+
+  describe('actions', () => {
+    test('menu action - AppObject action overrides menu item action', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const actions: string[] = [];
+      ctl.app.run({
+        actions: {
+          action: {
+            action: (_ctl, context) => {
+              actions.push(`app:${context?.source}`);
+            }
+          }
+        },
+        onStart: () => {}
+      });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [
+          stdMenuItem({
+            id: 'action',
+            textContent: 'Action',
+            action: () => {
+              actions.push('menu');
+            }
+          })
+        ]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(actions).toEqual(['app:menu']);
+    });
+
+    test('menu action - falls back to menu item action', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const actions: string[] = [];
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [
+          stdMenuItem({
+            id: 'action',
+            textContent: 'Action',
+            action: () => {
+              actions.push('menu');
+            }
+          })
+        ]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(actions).toEqual(['menu']);
+    });
+
+    test('keyboard action - receives keyboard context', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const sources: string[] = [];
+      ctl.app.run({
+        actions: {
+          ENTER: {
+            action: (_ctl, context) => {
+              sources.push(context?.source ?? 'missing');
+            },
+            binding: {
+              bindings: ['Enter'],
+              description: 'Enter'
+            }
+          }
+        },
+        onStart: () => {}
+      });
+
+      // act
+      await ctl.simulateKey('Enter');
+
+      // assert
+      expect(sources).toEqual(['keyboard']);
+    });
+  });
 });

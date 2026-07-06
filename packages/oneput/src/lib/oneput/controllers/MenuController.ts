@@ -131,19 +131,26 @@ export class MenuController {
     if (this.disableActions) {
       return;
     }
-    if (this.currentMenu.focusedMenuItem?.action) {
-      // TODO: call this before calling the action.  If the action
-      // runs a new appObject, we'll break the tracking logic in
-      // AppController.
+    const focusedMenuItem = this.currentMenu.focusedMenuItem;
+    if (focusedMenuItem?.action) {
       this.ctl.events.emit({
         type: 'menu-action',
         payload: {
           menuId: this.currentMenu.menuId,
-          menuActionId: this.currentMenu.focusedMenuItem.id
+          menuActionId: focusedMenuItem.id
         }
       });
       try {
-        this.currentMenu.focusedMenuItem.action(this.ctl);
+        this.ctl.app.handleAction(
+          focusedMenuItem.id,
+          {
+            source: 'menu',
+            actionId: focusedMenuItem.id,
+            menuId: this.currentMenu.menuId,
+            menuActionId: focusedMenuItem.id
+          },
+          focusedMenuItem.action
+        );
       } finally {
         this.ctl.app.completeMenuAction();
       }

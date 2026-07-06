@@ -25,7 +25,10 @@
  */
 import { Result, ok, err } from 'neverthrow';
 import type { Controller } from '../controllers/controller.js';
+import type { AppActionContext } from '../types.js';
 import { isMacOS } from './utils.js';
+
+export type KeyBindingAction = (c: Controller, context?: AppActionContext) => void;
 
 export type DuplicateBindingError = { message: string; details: string };
 
@@ -34,7 +37,7 @@ export type DuplicateBindingError = { message: string; details: string };
  * controller usually in a KeyBindingMap.
  */
 export type KeyBinding = {
-  action?: (c: Controller) => void;
+  action?: KeyBindingAction;
   description: string;
   /**
    * A list of bindings in tinykeys format.  Each binding represents one ore more key presses.
@@ -104,7 +107,7 @@ export type KeyEvent = {
 };
 
 export type KeyEventBinding = {
-  action?: (c: Controller) => void;
+  action?: KeyBindingAction;
   description: string;
   /**
    *  A KeyBinding can be represented as a tinykeys string : "control+y e e t"

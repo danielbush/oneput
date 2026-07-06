@@ -160,8 +160,8 @@ export class EditorControls {
         }
       },
       DELETE: {
-        action: (_ctl: Controller, evt?: KeyboardEvent) => {
-          editor.handleDelete(evt);
+        action: (_ctl, context) => {
+          editor.handleDelete(context?.source === 'keyboard' ? context.event : undefined);
         },
         binding: {
           bindings: ['Backspace'],

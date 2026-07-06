@@ -36,8 +36,9 @@ export type EditDocumentActions = AppActions & {
 type MenuItemList = Array<MenuItemAny | undefined | null | '' | false>;
 
 /**
- * Owns the Oneput controls for an active Jsed editor: the (stable) keybinding
- * actions and the (live) menu items that reuse them.
+ * Owns the Oneput actions, bindings and menu items (ABM) for an active Jsed
+ * editor: the (stable) keybinding actions and the (live) menu items that reuse
+ * them.
  *
  * Both `getActions()` and `getMenuItems()` recompute on every call — actions are
  * handed to Oneput in its function form (`ctl.app.invalidateActions()` re-pulls
@@ -45,7 +46,7 @@ type MenuItemList = Array<MenuItemAny | undefined | null | '' | false>;
  * capabilities) and are pulled fresh on start/resume, on open, and via
  * `ctl.menu.invalidate()`.
  */
-export class EditorControls {
+export class EditorABM {
   /**
    * @param invalidateMenu Optional override for refreshing the menu after an
    * edit. Defaults to `ctl.menu.invalidate()` (the declarative pull). Pass your
@@ -56,9 +57,9 @@ export class EditorControls {
     ctl: Controller,
     editor: Editor,
     opts?: { invalidateMenu?: () => void }
-  ): EditorControls {
+  ): EditorABM {
     const invalidate = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
-    return new EditorControls(ctl, editor, invalidate);
+    return new EditorABM(ctl, editor, invalidate);
   }
 
   private constructor(

@@ -6,12 +6,12 @@
   - LocalBindingsService just uses packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts
 - jsed-demo sets keys in _layouts.ts but pulls it directly from packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts
 
-## OneputControls (actions, bindings, menu)
+## OneputABM (actions, bindings, menu)
 
-- Don't override things unnecessarily in EditorControls
+- Don't override things unnecessarily in EditorABM
 
-- `OneputControls`
-  - COMMENT: similar to EditorControls; EditorControls will become this
+- `OneputABM` interface
+  - COMMENT: similar to EditorABM; EditorABM will become this
   - provides api:
     - .getActions - for use with AppObject.actions
     - .getMenu() - for use with AppObject.menu()
@@ -21,7 +21,7 @@
     - .keyBindingMap
       - builds keybindings based on actions
 
-- `OneputDefaultControls = OneputControls.create(...).add(...)`
+- `OneputDefaultABM = OneputABM.create(...).add(...)`
   - just very basic bindings that open menu etc
   - replaces packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts
     - oneput-demo
@@ -33,9 +33,9 @@
 - re-work `apps/jsed-demo/src/lib/oneput/app/_layout.ts` and `Root`
   - builds off DemoControls
 
-- `EditorControls = OneputDefaultControls.create().add(...)`
+- `EditorABM = OneputDefaultABM.create().add(...)`
 
-- pass EditorControls to PasteElementUI et al and set actions/bindings this way
+- pass EditorABM to PasteElementUI et al and set actions/bindings this way
 
 ## Layout and settings management
 

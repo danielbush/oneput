@@ -92,6 +92,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor(oneput-demo,jsed-demo): uses of .run when .onStart is sufficient
+- refactor(oneput-demo,jsed-demo): use of ctl.ui.update({ params }) at onStart
+- refactor(oneput-demo,jsed-demo): use of ctl.ui.update({ flags }) at onStart
 - refactor: make MenuItemsFn purely about debounce; no menu items
 - proper pull model for declarative AppObject.menu
   - ctl.menu.invalidate() signals that menu must be pulled again

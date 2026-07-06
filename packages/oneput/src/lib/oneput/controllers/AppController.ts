@@ -57,6 +57,8 @@ export class AppController {
   private disableGoBack = false;
   private focusInputOnStart = true;
   private focusInputOnMenuOpen = true;
+  private clearInputAfterAction = true;
+  private menuActionOwner?: AnyAppObject;
 
   private getAppState(app: AnyAppObject) {
     let state = this.appStates.get(app);
@@ -132,6 +134,9 @@ export class AppController {
     if ('focusInputOnMenuOpen' in flags) {
       this.focusInputOnMenuOpen = flags.focusInputOnMenuOpen ?? true;
     }
+    if ('clearInputAfterAction' in flags) {
+      this.clearInputAfterAction = flags.clearInputAfterAction ?? true;
+    }
   }
 
   private resetFlags(settings?: UIFlags) {
@@ -146,7 +151,8 @@ export class AppController {
       enableFilter: settings?.enableFilter ?? !enableModal,
       enableInputElement: settings?.enableInputElement ?? !enableModal,
       focusInputOnStart: settings?.focusInputOnStart ?? true,
-      focusInputOnMenuOpen: settings?.focusInputOnMenuOpen ?? true
+      focusInputOnMenuOpen: settings?.focusInputOnMenuOpen ?? true,
+      clearInputAfterAction: settings?.clearInputAfterAction ?? true
     };
 
     this.ctl.app._enableGoBack(flags.enableGoBack);
@@ -158,6 +164,7 @@ export class AppController {
     this.ctl.input._enableInputElement(flags.enableInputElement);
     this.focusInputOnStart = flags.focusInputOnStart ?? true;
     this.focusInputOnMenuOpen = flags.focusInputOnMenuOpen ?? true;
+    this.clearInputAfterAction = flags.clearInputAfterAction ?? true;
   }
 
   // #endregion
@@ -234,7 +241,15 @@ export class AppController {
     if (!this.current) {
       return;
     }
+    this.menuActionOwner = this.current;
     this.getAppState(this.current).lastMenuActionIds[menuId] = menuActionId;
+  }
+
+  completeMenuAction() {
+    if (this.clearInputAfterAction && this.current === this.menuActionOwner) {
+      this.ctl.input.clearInput();
+    }
+    this.menuActionOwner = undefined;
   }
 
   /**

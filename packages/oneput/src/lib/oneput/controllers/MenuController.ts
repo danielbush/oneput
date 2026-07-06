@@ -142,7 +142,11 @@ export class MenuController {
           menuActionId: this.currentMenu.focusedMenuItem.id
         }
       });
-      this.currentMenu.focusedMenuItem.action(this.ctl);
+      try {
+        this.currentMenu.focusedMenuItem.action(this.ctl);
+      } finally {
+        this.ctl.app.completeMenuAction();
+      }
     }
   }
 

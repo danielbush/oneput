@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, test } from 'vitest';
 import { Controller } from './controller.js';
 import type { AppObject, UILayout } from '../types.js';
+import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 
 function layout(id: string): UILayout {
   return {
@@ -218,6 +219,75 @@ describe('AppController', () => {
 
       // assert
       expect(document.activeElement).toBe(before);
+    });
+
+    test('clearInputAfterAction - default - clears after a menu action', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.input.setInputValue('query');
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [stdMenuItem({ id: 'action', textContent: 'Action', action: () => {} })]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('');
+    });
+
+    test('clearInputAfterAction - false', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        settings: { clearInputAfterAction: false },
+        onStart: () => {}
+      });
+      ctl.input.setInputValue('query');
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [stdMenuItem({ id: 'action', textContent: 'Action', action: () => {} })]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('query');
+    });
+
+    test('clearInputAfterAction - child AppObject keeps its input', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.input.setInputValue('query');
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [
+          stdMenuItem({
+            id: 'run-child',
+            textContent: 'Run child',
+            action: () => {
+              ctl.app.run({
+                onStart: () => {
+                  ctl.input.setInputValue('child');
+                }
+              });
+            }
+          })
+        ]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('child');
     });
   });
 });

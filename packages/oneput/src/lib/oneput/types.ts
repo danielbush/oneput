@@ -460,6 +460,13 @@ export type UIFlags = {
    * that should keep focus where it is when opening the menu.
    */
   focusInputOnMenuOpen?: boolean;
+  /**
+   * Clear the Oneput input after a menu action runs.
+   *
+   * Defaults to true. If the action runs another AppObject, Oneput leaves the new
+   * AppObject's input alone.
+   */
+  clearInputAfterAction?: boolean;
 };
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {

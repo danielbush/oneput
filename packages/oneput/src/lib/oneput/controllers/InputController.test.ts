@@ -134,6 +134,21 @@ describe('InputController selection-change emission', () => {
     });
   });
 
+  describe('input value', () => {
+    it('clears the input value', async () => {
+      // arrange
+      const { ctl, input } = setup();
+      await ctl.input.setInputValue('hello');
+
+      // act
+      await ctl.input.clearInput();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('');
+      expect(input.value).toBe('');
+    });
+  });
+
   describe('element swap', () => {
     it('rebinds the selection listener to the new element', async () => {
       // arrange

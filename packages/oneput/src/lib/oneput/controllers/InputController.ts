@@ -147,6 +147,10 @@ export class InputController {
     return tick();
   }
 
+  clearInput() {
+    return this.setInputValue('');
+  }
+
   selectAll = () => {
     this.inputElement?.setSelectionRange(0, this.inputElement.value.length);
   };

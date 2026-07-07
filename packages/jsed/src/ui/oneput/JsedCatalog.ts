@@ -1,4 +1,11 @@
-import type { AppAction, AppActions, Controller, MenuItemAny } from '@oneput/oneput';
+import {
+  ActionCatalog,
+  type ActionCatalogEntries,
+  type ActionCatalogMenuItem,
+  type AppActionCatalog,
+  type AppActions,
+  type Controller
+} from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { Editor } from '../../editor/Editor.js';
@@ -6,14 +13,7 @@ import { JsedCommand, type JsedActionId } from './JsedCommand.js';
 import { icons } from './lib/icons.js';
 import { PickListUI } from './lib/PickListUI.js';
 
-type MenuItemList = Array<MenuItemAny | undefined | null | '' | false>;
-
-type CatalogEntry = AppAction & {
-  canShowMenuItem?: () => boolean;
-  menuItem?: (entry: AppAction) => MenuItemList[number];
-};
-
-type CatalogEntries = Partial<Record<JsedActionId, CatalogEntry>>;
+type CatalogEntries = ActionCatalogEntries<JsedActionId>;
 
 /**
  * Defines reusable Jsed actions, bindings, and hand-authored menu item rows.
@@ -21,7 +21,7 @@ type CatalogEntries = Partial<Record<JsedActionId, CatalogEntry>>;
  * AppObjects derive a filtered catalog for their mode, expose `getActions()` to
  * Oneput, then explicitly compose menu rows with `getMenuItems([...])`.
  */
-export class JsedCatalog {
+export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   static create(
     ctl: Controller,
     editor: Editor,
@@ -53,42 +53,17 @@ export class JsedCatalog {
   }
 
   getActions(): AppActions {
-    const actions: AppActions = {};
-    for (const [id, entry] of Object.entries(this.getActiveEntries())) {
-      actions[id] = {
-        action: entry.action,
-        binding: entry.binding
-      };
-    }
-    return actions;
+    return this.getCatalog().getActions();
   }
 
-  getMenuItems(ids: JsedActionId[]): MenuItemList {
-    const entries = this.getActiveEntries();
-    return ids.map((id) => {
-      const entry = entries[id];
-      if (!entry?.menuItem) return undefined;
-      if (entry.canShowMenuItem && !entry.canShowMenuItem()) return undefined;
-      return entry.menuItem(entry);
-    });
+  getMenuItems(ids: JsedActionId[]): ActionCatalogMenuItem[] {
+    return this.getCatalog().getMenuItems(ids);
   }
 
-  /**
-   * Return the {@link CatalogEntry}'s available to this catalog instance (controlled by the {@link activeIds} param filter).
-   *
-   * Unfiltered catalogs expose every reusable editor entry. Filtered catalogs
-   * expose only the selected ids, so `getActions()` and `getMenuItems()` share
-   * the same AppObject-specific capability boundary.
-   */
-  private getActiveEntries(): CatalogEntries {
-    const entries = this.getEntries();
-    if (!this.activeIds) return entries;
-
-    const active: CatalogEntries = {};
-    for (const id of this.activeIds) {
-      if (entries[id]) active[id] = entries[id];
-    }
-    return active;
+  private getCatalog() {
+    const catalog = ActionCatalog.create<JsedActionId>(() => this.getEntries());
+    if (!this.activeIds) return catalog;
+    return catalog.filter([...this.activeIds]);
   }
 
   /**

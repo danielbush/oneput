@@ -262,15 +262,17 @@ export type AppActionHandler<Context extends AppActionContext = AppActionContext
   context?: Context
 ) => void;
 
+export type AppAction<Context extends AppActionContext = AppActionContext> = {
+  action: AppActionHandler<Context>;
+  binding?: ActionBinding;
+};
+
 /**
  * Map of actionId -> action (with optional key binding) declared by an
  * AppObject. See {@link AppObject.actions}.
  */
 export type AppActions<Context extends AppActionContext = AppActionContext> = {
-  [actionId: string]: {
-    action: AppActionHandler<Context>;
-    binding?: ActionBinding;
-  };
+  [actionId: string]: AppAction<Context>;
 };
 
 /**

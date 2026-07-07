@@ -96,6 +96,7 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## feat
 
+- setting: typingOpensMenu
 - make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
 - feat: breadcrumb
   - will be useful in mobile to go back up the ancestor chain (which maps to left/right bindings atm) but the difference is we can see what elements are in the acnestor chain, very easy to click on the parent p-tag or parent div tag etc etc; combine with moving between siblings using up/down buttons for button-based movement; probably don't want to do more than that, because touch selection is probably the primary way to move around on mobile
@@ -213,7 +214,7 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
-- refactor: EditorABM is passed to jsed AppObjects (eg PastElementUI); these use EditorABM to set/override/disable editor actions
+- refactor: move likely Oneput-level catalog entries (`EXIT`, `FOCUS`) out of `EditorActionCatalog`
 - refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be
   - can we drastically simplify it because of ANCHOR_RULES?
   - why "removable anchor"?

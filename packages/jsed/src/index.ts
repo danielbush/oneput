@@ -5,8 +5,8 @@ export { Editor } from './editor/Editor.js';
 export { type EditorError } from './editor/index.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
 export {
-  JsedEditDocumentUI,
-  type JsedEditDocumentUIHooks
-} from './ui/oneput/JsedEditDocumentUI.js';
+  JsedUI as JsedEditDocumentUI,
+  type JsedUIHooks as JsedEditDocumentUIHooks
+} from './ui/oneput/JsedUI.js';
 export { EditorCatalog as EditorActionCatalog } from './ui/index.js';
 export { icons, iconData } from './ui/oneput/lib/icons.js';

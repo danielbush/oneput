@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../../lib/core/taxonomy.js';
 import { makeRoot } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
-import { JsedEditDocumentUI } from '../JsedEditDocumentUI.js';
+import { JsedUI } from '../JsedUI.js';
 import { JsedCommand } from '../JsedCommand.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
@@ -29,7 +29,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
 
     // act
@@ -48,7 +48,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     ctl.simulateStart(() => editorUI);
     const appChanges = ctl.trackAppChanges();
@@ -67,7 +67,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
     ctl.simulateStart(() => editorUI);
@@ -104,7 +104,7 @@ describe('JsedEditDocumentUI', () => {
       }
     });
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
 
@@ -136,7 +136,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
 
@@ -169,7 +169,7 @@ describe('JsedEditDocumentUI', () => {
       '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
     );
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const d1 = byId(document, 'd1');
     const editor = editorUI.editor;
 
@@ -203,7 +203,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
 
     ctl.simulateStart(() => editorUI);
@@ -232,7 +232,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const p2 = byId(document, 'p2');
 
@@ -263,7 +263,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<div id="d1">foo</div>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const d1 = byId(document, 'd1');
 
@@ -292,7 +292,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<ul id="list"><li>one</li></ul>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const list = byId(document, 'list');
 
@@ -322,7 +322,7 @@ describe('JsedEditDocumentUI', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
     const ctl = Controller.createNull();
-    const editorUI = JsedEditDocumentUI.createNull(ctl, { document });
+    const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const p1 = byId(document, 'p1');
     const p2 = byId(document, 'p2');

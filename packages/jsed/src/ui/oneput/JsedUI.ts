@@ -6,7 +6,7 @@ import { JsedCatalog } from './JsedCatalog.js';
 import { JsedCommand } from './JsedCommand.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
 
-export type JsedEditDocumentUIHooks = {
+export type JsedUIHooks = {
   onActivate?: () => void;
   onEditError?: (err: EditorError) => void;
 };
@@ -45,7 +45,7 @@ const actionIds = [
  * This is both a usable default and a copyable example for host apps that need
  * to own lifecycle, layout, saving, or custom editor behavior.
  */
-export class JsedEditDocumentUI implements AppObject {
+export class JsedUI implements AppObject {
   static create(
     ctl: Controller,
     {
@@ -53,11 +53,11 @@ export class JsedEditDocumentUI implements AppObject {
       hooks
     }: {
       document: JsedDocument;
-      hooks?: JsedEditDocumentUIHooks;
+      hooks?: JsedUIHooks;
     }
   ) {
     const editor = Editor.create({ document, userInput: ctl.input });
-    return new JsedEditDocumentUI(ctl, editor, hooks);
+    return new JsedUI(ctl, editor, hooks);
   }
 
   static createNull(
@@ -67,11 +67,11 @@ export class JsedEditDocumentUI implements AppObject {
       hooks
     }: {
       document: JsedDocument;
-      hooks?: JsedEditDocumentUIHooks;
+      hooks?: JsedUIHooks;
     }
   ) {
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    return new JsedEditDocumentUI(ctl, editor, hooks);
+    return new JsedUI(ctl, editor, hooks);
   }
 
   public actions = () => this.createCatalog().filter(actionIds).getActions();
@@ -82,7 +82,7 @@ export class JsedEditDocumentUI implements AppObject {
   constructor(
     private ctl: Controller,
     public editor: Editor,
-    private hooks: JsedEditDocumentUIHooks = {}
+    private hooks: JsedUIHooks = {}
   ) {}
 
   private createCatalog = () =>

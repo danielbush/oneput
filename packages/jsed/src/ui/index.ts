@@ -1,3 +1,3 @@
-export { CSSElementIndicator } from './lib/CSSElementIndicator.js';
-export { ElementIndicator } from './lib/ElementIndicator.js';
-export { EditorCatalog } from './EditorCatalog.js';
+export { CSSElementIndicator } from './oneput/lib/CSSElementIndicator.js';
+export { ElementIndicator } from './oneput/lib/ElementIndicator.js';
+export { JsedCatalog as EditorCatalog } from './oneput/JsedCatalog.js';

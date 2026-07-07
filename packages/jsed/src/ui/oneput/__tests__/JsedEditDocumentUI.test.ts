@@ -1,10 +1,10 @@
 import { Controller } from '@oneput/oneput';
 import { describe, expect, it } from 'vitest';
-import { isDeletedElement } from '../../lib/core/taxonomy.js';
-import { makeRoot } from '../../test/util.js';
-import { JsedDocument } from '../../JsedDocument.js';
+import { isDeletedElement } from '../../../lib/core/taxonomy.js';
+import { makeRoot } from '../../../test/util.js';
+import { JsedDocument } from '../../../JsedDocument.js';
 import { JsedEditDocumentUI } from '../JsedEditDocumentUI.js';
-import { JsedAction } from '../../ui/JsedAction.js';
+import { JsedAction } from '../JsedAction.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);

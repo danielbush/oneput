@@ -1,5 +1,5 @@
 import { JsedDocument } from '../JsedDocument.js';
-import type { ViewportScrollerNullOptions } from '../ui/lib/ViewportScroller.js';
+import type { ViewportScrollerNullOptions } from '../ui/oneput/lib/ViewportScroller.js';
 import * as token from '../lib/ops/token.js';
 import {
   isAnchor,

@@ -1,4 +1,7 @@
-import { ViewportScroller, type ViewportScrollerNullOptions } from './ui/lib/ViewportScroller.js';
+import {
+  ViewportScroller,
+  type ViewportScrollerNullOptions
+} from './ui/oneput/lib/ViewportScroller.js';
 
 export class JsedDocument {
   static create(root: HTMLElement): JsedDocument {

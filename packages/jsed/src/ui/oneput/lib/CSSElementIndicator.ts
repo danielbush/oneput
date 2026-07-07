@@ -1,10 +1,10 @@
-import { getParent } from '../../lib/ops/token.js';
+import { getParent } from '../../../lib/ops/token.js';
 import {
   isToken,
   JSED_ELEMENT_INDICATOR,
   JSED_ELEMENT_INDICATOR_ANCHOR,
   JSED_IGNORE_CLASS
-} from '../../lib/core/taxonomy.js';
+} from '../../../lib/core/taxonomy.js';
 
 const ANCHOR_NAME = JSED_ELEMENT_INDICATOR_ANCHOR;
 

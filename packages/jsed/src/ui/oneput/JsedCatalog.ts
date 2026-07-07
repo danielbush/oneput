@@ -1,7 +1,7 @@
 import type { AppAction, AppActions, Controller, MenuItemAny } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import type { Editor } from '../editor/Editor.js';
+import type { Editor } from '../../editor/Editor.js';
 import { JsedAction, type JsedActionId } from './JsedAction.js';
 import { icons } from './lib/icons.js';
 import { PickListUI } from './lib/PickListUI.js';
@@ -21,7 +21,7 @@ type CatalogEntries = Partial<Record<JsedActionId, CatalogEntry>>;
  * AppObjects derive a filtered catalog for their mode, expose `getActions()` to
  * Oneput, then explicitly compose menu rows with `getMenuItems([...])`.
  */
-export class EditorCatalog {
+export class JsedCatalog {
   static create(
     ctl: Controller,
     editor: Editor,
@@ -32,7 +32,7 @@ export class EditorCatalog {
     }
   ) {
     const invalidateMenu = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
-    return new EditorCatalog(ctl, editor, {
+    return new JsedCatalog(ctl, editor, {
       invalidateMenu,
       runPasteElement: opts?.runPasteElement ?? (() => {})
     });
@@ -49,7 +49,7 @@ export class EditorCatalog {
   ) {}
 
   filter(ids: JsedActionId[]) {
-    return new EditorCatalog(this.ctl, this.editor, this.opts, new Set(ids));
+    return new JsedCatalog(this.ctl, this.editor, this.opts, new Set(ids));
   }
 
   getActions(): AppActions {

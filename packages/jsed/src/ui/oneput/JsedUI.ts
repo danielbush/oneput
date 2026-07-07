@@ -1,4 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
+import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
+import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
 import { Editor } from '../../editor/Editor.js';
 import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
@@ -60,6 +62,8 @@ export class JsedUI implements AppObject {
       runPasteElement: (cut) =>
         this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut }))
     });
+
+  private createOneputCatalog = () => OneputCatalog.create(this.ctl);
 
   /**
    * Rebuild the menu when editor state changes.
@@ -127,33 +131,36 @@ export class JsedUI implements AppObject {
     this.ctl.notify(`There was an error editing the document: ${err.type}`);
   };
 
-  public actions = () =>
-    this.createCatalog()
-      .filter([
-        JsedCommand.DOWN,
-        JsedCommand.UP,
-        JsedCommand.ENTER,
-        JsedCommand.RIGHT_ARROW,
-        JsedCommand.LEFT_ARROW,
-        JsedCommand.EXTEND_RIGHT_ARROW,
-        JsedCommand.EXTEND_LEFT_ARROW,
-        JsedCommand.SOFT_EXIT,
-        JsedCommand.DELETE,
-        JsedCommand.FOCUS,
-        JsedCommand.TOGGLE_SELECT,
-        JsedCommand.NEXT,
-        JsedCommand.PREVIOUS,
-        JsedCommand.UNDO,
-        JsedCommand.REDO,
-        JsedCommand.EXTEND_NEXT,
-        JsedCommand.EXTEND_PREVIOUS,
-        JsedCommand.REVEAL,
-        JsedCommand.CUT,
-        JsedCommand.COPY,
-        JsedCommand.COPY_EMPTY_PREVIOUS,
-        JsedCommand.COPY_EMPTY_NEXT
-      ])
-      .getActions();
+  public actions = () => {
+    return {
+      ...this.createOneputCatalog().filter([OneputAction.FOCUS_INPUT]).getActions(),
+      ...this.createCatalog()
+        .filter([
+          JsedCommand.DOWN,
+          JsedCommand.UP,
+          JsedCommand.ENTER,
+          JsedCommand.RIGHT_ARROW,
+          JsedCommand.LEFT_ARROW,
+          JsedCommand.EXTEND_RIGHT_ARROW,
+          JsedCommand.EXTEND_LEFT_ARROW,
+          JsedCommand.SOFT_EXIT,
+          JsedCommand.DELETE,
+          JsedCommand.TOGGLE_SELECT,
+          JsedCommand.NEXT,
+          JsedCommand.PREVIOUS,
+          JsedCommand.UNDO,
+          JsedCommand.REDO,
+          JsedCommand.EXTEND_NEXT,
+          JsedCommand.EXTEND_PREVIOUS,
+          JsedCommand.REVEAL,
+          JsedCommand.CUT,
+          JsedCommand.COPY,
+          JsedCommand.COPY_EMPTY_PREVIOUS,
+          JsedCommand.COPY_EMPTY_NEXT
+        ])
+        .getActions()
+    };
+  };
 
   menu = () => {
     const catalog = this.createCatalog();

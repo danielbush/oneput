@@ -1,4 +1,6 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
+import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
+import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
 import type { Editor } from '../../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
 import { JsedCommand } from '../JsedCommand.js';
@@ -23,7 +25,6 @@ export class PasteElementUI implements AppObject {
     private cut: boolean
   ) {
     this.catalog = JsedCatalog.create(ctl, editor).filter([
-      JsedCommand.FOCUS,
       JsedCommand.DOWN,
       JsedCommand.UP,
       JsedCommand.NEXT,
@@ -33,9 +34,11 @@ export class PasteElementUI implements AppObject {
       JsedCommand.PASTE_APPEND,
       JsedCommand.CANCEL_VIA_EXIT
     ]);
+    this.oneputCatalog = OneputCatalog.create(ctl).filter([OneputAction.FOCUS_INPUT]);
   }
 
   private catalog: JsedCatalog;
+  private oneputCatalog: OneputCatalog;
 
   layout = {
     params: {
@@ -62,7 +65,10 @@ export class PasteElementUI implements AppObject {
     this.editor.focusOps.cancelPaste();
   };
 
-  actions = () => this.catalog.getActions();
+  actions = () => ({
+    ...this.oneputCatalog.getActions(),
+    ...this.catalog.getActions()
+  });
 
   menu = () => {
     return {

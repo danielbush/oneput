@@ -135,17 +135,6 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           })
       },
 
-      // TODO: move to oneput catalog
-      [JsedCommand.FOCUS]: {
-        action: () => {
-          ctl.input.focus();
-        },
-        binding: {
-          bindings: ['$mod+g'],
-          description: 'Focus the input'
-        }
-      },
-
       ...this.navigation(),
       ...this.selection(),
       ...this.editing(),

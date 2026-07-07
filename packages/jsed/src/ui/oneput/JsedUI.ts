@@ -12,34 +12,6 @@ export type JsedUIHooks = {
 };
 
 /**
- * Controls what goes into AppObject['actions'] for this AppObject.
- */
-const actionIds = [
-  JsedCommand.DOWN,
-  JsedCommand.UP,
-  JsedCommand.ENTER,
-  JsedCommand.RIGHT_ARROW,
-  JsedCommand.LEFT_ARROW,
-  JsedCommand.EXTEND_RIGHT_ARROW,
-  JsedCommand.EXTEND_LEFT_ARROW,
-  JsedCommand.SOFT_EXIT,
-  JsedCommand.DELETE,
-  JsedCommand.FOCUS,
-  JsedCommand.TOGGLE_SELECT,
-  JsedCommand.NEXT,
-  JsedCommand.PREVIOUS,
-  JsedCommand.UNDO,
-  JsedCommand.REDO,
-  JsedCommand.EXTEND_NEXT,
-  JsedCommand.EXTEND_PREVIOUS,
-  JsedCommand.REVEAL,
-  JsedCommand.CUT,
-  JsedCommand.COPY,
-  JsedCommand.COPY_EMPTY_PREVIOUS,
-  JsedCommand.COPY_EMPTY_NEXT
-];
-
-/**
  * Oneput AppObject for editing a Jsed document.
  *
  * This is both a usable default and a copyable example for host apps that need
@@ -74,7 +46,33 @@ export class JsedUI implements AppObject {
     return new JsedUI(ctl, editor, hooks);
   }
 
-  public actions = () => this.createCatalog().filter(actionIds).getActions();
+  public actions = () =>
+    this.createCatalog()
+      .filter([
+        JsedCommand.DOWN,
+        JsedCommand.UP,
+        JsedCommand.ENTER,
+        JsedCommand.RIGHT_ARROW,
+        JsedCommand.LEFT_ARROW,
+        JsedCommand.EXTEND_RIGHT_ARROW,
+        JsedCommand.EXTEND_LEFT_ARROW,
+        JsedCommand.SOFT_EXIT,
+        JsedCommand.DELETE,
+        JsedCommand.FOCUS,
+        JsedCommand.TOGGLE_SELECT,
+        JsedCommand.NEXT,
+        JsedCommand.PREVIOUS,
+        JsedCommand.UNDO,
+        JsedCommand.REDO,
+        JsedCommand.EXTEND_NEXT,
+        JsedCommand.EXTEND_PREVIOUS,
+        JsedCommand.REVEAL,
+        JsedCommand.CUT,
+        JsedCommand.COPY,
+        JsedCommand.COPY_EMPTY_PREVIOUS,
+        JsedCommand.COPY_EMPTY_NEXT
+      ])
+      .getActions();
 
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;

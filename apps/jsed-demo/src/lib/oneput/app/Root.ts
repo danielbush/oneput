@@ -1,7 +1,7 @@
 import type { Controller, AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
-import { JsedDocument, JsedEditDocumentUI } from '@oneput/jsed';
+import { JsedDocument, JsedUI } from '@oneput/jsed';
 import { icons } from '@oneput/jsed';
 
 export class Root implements AppObject {
@@ -9,7 +9,7 @@ export class Root implements AppObject {
     return new Root(ctl, {
       JsedDocument: (root) => JsedDocument.create(root),
       JsedEditDocumentUI: ({ document }: { document: JsedDocument }) =>
-        JsedEditDocumentUI.create(ctl, {
+        JsedUI.create(ctl, {
           document,
           hooks: {
             onActivate: () => {
@@ -24,7 +24,7 @@ export class Root implements AppObject {
     private ctl: Controller,
     private create: {
       JsedDocument: (root: HTMLElement) => JsedDocument;
-      JsedEditDocumentUI: (params: { document: JsedDocument }) => JsedEditDocumentUI;
+      JsedEditDocumentUI: (params: { document: JsedDocument }) => JsedUI;
     }
   ) {}
 

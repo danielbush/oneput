@@ -96,6 +96,7 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## feat
 
+- use skeleton shimmer for the cursor default animation
 - setting: typingOpensMenu
 - make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
 - feat: breadcrumb

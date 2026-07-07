@@ -21,7 +21,7 @@ type CatalogEntries = Partial<Record<JsedActionId, CatalogEntry>>;
  * AppObjects derive a filtered catalog for their mode, expose `getActions()` to
  * Oneput, then explicitly compose menu rows with `getMenuItems([...])`.
  */
-export class EditorActionCatalog {
+export class EditorCatalog {
   static create(
     ctl: Controller,
     editor: Editor,
@@ -32,7 +32,7 @@ export class EditorActionCatalog {
     }
   ) {
     const invalidateMenu = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
-    return new EditorActionCatalog(ctl, editor, {
+    return new EditorCatalog(ctl, editor, {
       invalidateMenu,
       runPasteElement: opts?.runPasteElement ?? (() => {})
     });
@@ -49,7 +49,7 @@ export class EditorActionCatalog {
   ) {}
 
   filter(ids: JsedActionId[]) {
-    return new EditorActionCatalog(this.ctl, this.editor, this.opts, new Set(ids));
+    return new EditorCatalog(this.ctl, this.editor, this.opts, new Set(ids));
   }
 
   getActions(): AppActions {

@@ -2,7 +2,7 @@ import { Controller } from '@oneput/oneput';
 import { describe, expect, test } from 'vitest';
 import { Editor } from '../editor/Editor.js';
 import { makeRoot } from '../test/util.js';
-import { EditorActionCatalog } from './EditorActionCatalog.js';
+import { EditorCatalog } from './EditorCatalog.js';
 import { JsedAction } from './JsedAction.js';
 
 describe('EditorActionCatalog', () => {
@@ -11,7 +11,7 @@ describe('EditorActionCatalog', () => {
     const document = makeRoot('<p id="p1">foo</p>');
     const ctl = Controller.createNull();
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const catalog = EditorActionCatalog.create(ctl, editor).filter([JsedAction.PASTE_BEFORE]);
+    const catalog = EditorCatalog.create(ctl, editor).filter([JsedAction.PASTE_BEFORE]);
 
     // act
     const items = catalog.getMenuItems([JsedAction.PASTE_BEFORE, JsedAction.PASTE_AFTER]);
@@ -25,7 +25,7 @@ describe('EditorActionCatalog', () => {
     const document = makeRoot('<p id="p1">foo</p>');
     const ctl = Controller.createNull();
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const catalog = EditorActionCatalog.create(ctl, editor).filter([JsedAction.PASTE_BEFORE]);
+    const catalog = EditorCatalog.create(ctl, editor).filter([JsedAction.PASTE_BEFORE]);
 
     // act
     const actions = catalog.getActions();
@@ -39,7 +39,7 @@ describe('EditorActionCatalog', () => {
     const document = makeRoot('<p id="p1">foo</p>');
     const ctl = Controller.createNull();
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const catalog = EditorActionCatalog.create(ctl, editor).filter([JsedAction.UNDO]);
+    const catalog = EditorCatalog.create(ctl, editor).filter([JsedAction.UNDO]);
 
     // act
     const actions = catalog.getActions();

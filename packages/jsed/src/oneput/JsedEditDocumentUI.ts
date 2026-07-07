@@ -2,7 +2,7 @@ import type { AppObject, Controller } from '@oneput/oneput';
 import { Editor } from '../editor/Editor.js';
 import type { EditorError } from '../editor/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
-import { EditorActionCatalog } from '../ui/EditorActionCatalog.js';
+import { EditorCatalog } from '../ui/EditorCatalog.js';
 import { JsedAction } from '../ui/JsedAction.js';
 import { PasteElementUI } from '../ui/lib/PasteElementUI.js';
 
@@ -86,7 +86,7 @@ export class JsedEditDocumentUI implements AppObject {
   ) {}
 
   private createCatalog = () =>
-    EditorActionCatalog.create(this.ctl, this.editor, {
+    EditorCatalog.create(this.ctl, this.editor, {
       runPasteElement: (cut) =>
         this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut }))
     });

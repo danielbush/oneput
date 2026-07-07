@@ -2,7 +2,7 @@ import type { Controller, AppObject, Menu } from '@oneput/oneput';
 import type { Editor } from '../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
 import { JsedAction } from '../JsedAction.js';
-import { EditorActionCatalog } from '../EditorActionCatalog.js';
+import { EditorCatalog } from '../EditorCatalog.js';
 
 export class PasteElementUI implements AppObject {
   static create(
@@ -22,7 +22,7 @@ export class PasteElementUI implements AppObject {
     private editor: Editor,
     private cut: boolean
   ) {
-    this.catalog = EditorActionCatalog.create(ctl, editor).filter([
+    this.catalog = EditorCatalog.create(ctl, editor).filter([
       JsedAction.FOCUS,
       JsedAction.DOWN,
       JsedAction.UP,
@@ -35,7 +35,7 @@ export class PasteElementUI implements AppObject {
     ]);
   }
 
-  private catalog: EditorActionCatalog;
+  private catalog: EditorCatalog;
 
   layout = {
     params: {

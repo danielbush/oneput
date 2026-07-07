@@ -1,44 +1,34 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
-import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
-import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
+import type { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
 import type { Editor } from '../../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
 import { JsedCommand } from '../JsedCommand.js';
-import { JsedCatalog } from '../JsedCatalog.js';
+import type { JsedCatalog } from '../JsedCatalog.js';
 
 export class PasteElementUI implements AppObject {
   static create(
     ctl: Controller,
     editor: Editor,
     {
-      cut
+      catalog,
+      cut,
+      oneputCatalog
     }: {
+      catalog: JsedCatalog;
       cut: boolean;
+      oneputCatalog: OneputCatalog;
     }
   ) {
-    return new PasteElementUI(ctl, editor, cut);
+    return new PasteElementUI(ctl, editor, catalog, cut, oneputCatalog);
   }
 
   constructor(
     private ctl: Controller,
     private editor: Editor,
-    private cut: boolean
-  ) {
-    this.catalog = JsedCatalog.create(ctl, editor).filter([
-      JsedCommand.DOWN,
-      JsedCommand.UP,
-      JsedCommand.NEXT,
-      JsedCommand.PREVIOUS,
-      JsedCommand.PASTE_BEFORE,
-      JsedCommand.PASTE_AFTER,
-      JsedCommand.PASTE_APPEND,
-      JsedCommand.CANCEL_VIA_EXIT
-    ]);
-    this.oneputCatalog = OneputCatalog.create(ctl).filter([OneputAction.FOCUS_INPUT]);
-  }
-
-  private catalog: JsedCatalog;
-  private oneputCatalog: OneputCatalog;
+    private catalog: JsedCatalog,
+    private cut: boolean,
+    private oneputCatalog: OneputCatalog
+  ) {}
 
   layout = {
     params: {

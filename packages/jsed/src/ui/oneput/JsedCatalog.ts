@@ -8,9 +8,12 @@ import {
 } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
+import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
 import type { Editor } from '../../editor/Editor.js';
 import { JsedCommand, type JsedActionId } from './JsedCommand.js';
 import { icons } from './lib/icons.js';
+import { PasteElementUI } from './lib/PasteElementUI.js';
 import { PickListUI } from './lib/PickListUI.js';
 
 type CatalogEntries = ActionCatalogEntries<JsedActionId>;
@@ -27,14 +30,11 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
     editor: Editor,
     opts?: {
       invalidateMenu?: () => void;
-      // PasteElementUI imports this module atm, so inject it here to avoid circular import.
-      runPasteElement?: (cut: boolean) => void;
     }
   ) {
     const invalidateMenu = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
     return new JsedCatalog(ctl, editor, {
-      invalidateMenu,
-      runPasteElement: opts?.runPasteElement ?? (() => {})
+      invalidateMenu
     });
   }
 
@@ -43,7 +43,6 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
     private editor: Editor,
     private opts: {
       invalidateMenu: () => void;
-      runPasteElement: (cut: boolean) => void;
     },
     private activeIds?: Set<JsedActionId>
   ) {}
@@ -414,16 +413,34 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   }
 
   private copyPaste(): CatalogEntries {
-    const { ctl, opts, editor } = this;
+    const { ctl, editor } = this;
     const pasteAndExit = (paste: () => boolean) => {
       paste();
       ctl.app.exit();
+    };
+    const runPasteElement = (cut: boolean) => {
+      ctl.app.run(
+        PasteElementUI.create(ctl, editor, {
+          catalog: JsedCatalog.create(ctl, editor).filter([
+            JsedCommand.DOWN,
+            JsedCommand.UP,
+            JsedCommand.NEXT,
+            JsedCommand.PREVIOUS,
+            JsedCommand.PASTE_BEFORE,
+            JsedCommand.PASTE_AFTER,
+            JsedCommand.PASTE_APPEND,
+            JsedCommand.CANCEL_VIA_EXIT
+          ]),
+          cut,
+          oneputCatalog: OneputCatalog.create(ctl).filter([OneputAction.FOCUS_INPUT])
+        })
+      );
     };
     return {
       [JsedCommand.CUT]: {
         action: () => {
           if (editor.focusOps.cut()) {
-            opts.runPasteElement(true);
+            runPasteElement(true);
           }
         },
         binding: {
@@ -442,7 +459,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
       [JsedCommand.COPY]: {
         action: () => {
           if (editor.focusOps.copy()) {
-            opts.runPasteElement(false);
+            runPasteElement(false);
           }
         },
         binding: {

@@ -6,7 +6,6 @@ import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import { JsedCatalog } from './JsedCatalog.js';
 import { JsedCommand } from './JsedCommand.js';
-import { PasteElementUI } from './lib/PasteElementUI.js';
 
 export type JsedUIHooks = {
   onActivate?: () => void;
@@ -57,11 +56,7 @@ export class JsedUI implements AppObject {
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;
 
-  private createCatalog = () =>
-    JsedCatalog.create(this.ctl, this.editor, {
-      runPasteElement: (cut) =>
-        this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut }))
-    });
+  private createCatalog = () => JsedCatalog.create(this.ctl, this.editor);
 
   private createOneputCatalog = () => OneputCatalog.create(this.ctl);
 

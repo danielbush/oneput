@@ -23,15 +23,51 @@ export interface AppActionCatalog<
 }
 
 /**
- * Reusable command catalog for AppObjects.
+ * Reusable action catalog for AppObjects.
  *
- * A catalog defines commands once, then lets each AppObject select the active
- * command ids it exposes through `actions()` and hand-authored menu rows.
+ * A catalog defines actions once, then lets each AppObject select the active
+ * action ids it exposes through `actions()` and hand-authored menu rows.
  *
- * The catalog owns the command contract: what action does; when it is
+ * The catalog owns the action contract: what the action does; when it is
  * available; what menu row represents it; what binding, if any, triggers it.
  * But it does not own AppObject lifecycle stuff like menu id, focus behavior,
  * layout title, prompt, or child mode setup.
+ *
+ * `filter([...])` sets the available action set for that catalog instance. It limits both:
+ *
+ * - `getActions()` — only filtered actions become dispatchable actions/bindings
+ * - `getMenuItems([...])` — only filtered actions can render menu row presets
+ *
+ * Then `getMenuItems([...])` asks for menu rows by action id, in the order the AppObject wants them:
+ *
+ * ```ts
+ * const catalog = JsedCatalog.create(ctl, editor).filter([
+ *   JsedAction.PASTE_BEFORE,
+ *   JsedAction.PASTE_AFTER,
+ *   JsedAction.CANCEL_VIA_EXIT
+ * ]);
+ *
+ * actions = () => catalog.getActions();
+ *
+ * menu = () => ({
+ *   items: catalog.getMenuItems([
+ *     JsedAction.PASTE_BEFORE,
+ *     JsedAction.PASTE_AFTER,
+ *     JsedAction.CANCEL_VIA_EXIT
+ *   ])
+ * });
+ * ```
+ *
+ * If you ask for a menu item whose action was filtered out, you get `undefined`. If the action exists but its `canShowMenuItem()` predicate is false, you also get `undefined`.
+ *
+ * Identity distinction:
+ *
+ * - `action id`: stable action identity used for catalog lookup, filtering,
+ *   dispatch, and bindings; see {@link AppActions}
+ * - `menu item id`: rendered row identity, inside the actual menu item object
+ *
+ * `filter()` answers “what is this AppObject allowed to expose?”
+ * `getMenuItems()` answers “which allowed action rows do I want to render here, and in what order?”
  */
 export class ActionCatalog<
   Id extends string,

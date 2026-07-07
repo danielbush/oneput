@@ -18,7 +18,8 @@ export const OneputAction = {
   FOCUS_NEXT_MENU_ITEM: 'ONEPUT__FOCUS_NEXT_MENU_ITEM',
   GLOBAL_FILTER: 'ONEPUT__GLOBAL_FILTER',
   FILL: 'ONEPUT__FILL',
-  SUBMIT: 'ONEPUT__SUBMIT'
+  SUBMIT: 'ONEPUT__SUBMIT',
+  TOGGLE_SELECTION: 'ONEPUT__TOGGLE_SELECTION'
 } as const;
 
 export type OneputActionId = (typeof OneputAction)[keyof typeof OneputAction];

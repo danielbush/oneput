@@ -2,18 +2,14 @@ import { hflex, mountSvelte } from '@oneput/oneput';
 import type {
   AppLayoutParams,
   Controller,
-  DynamicPlaceholderBase,
   FChildParams,
   FlexChildBuilder,
   UILayout
 } from '@oneput/oneput';
-import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
-import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
 import { icons } from '@oneput/jsed';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
-import { defaultKeys } from '@oneput/oneput/shared/bindings/defaultBindings.js';
 
 /**
  * Define settings used by your particular layout.
@@ -30,28 +26,13 @@ export type LayoutSettings = AppLayoutParams & {
  */
 export class Layout implements UILayout<LayoutSettings> {
   static create(ctl: Controller, settings: LayoutSettings = {}) {
-    const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
-      params.menuOpenBinding
-        ? params.isMenuOpen
-          ? `Close menu with ${params.menuOpenBinding}...`
-          : `Open menu with ${params.menuOpenBinding}...`
-        : 'Type here...'
-    );
-    return new Layout(ctl, settings, dynamicPlaceholder);
+    return new Layout(ctl, settings);
   }
-
-  defaultPlaceholder?: DynamicPlaceholderBase;
 
   constructor(
     private ctl: Controller,
-    private settings: LayoutSettings = {},
-    private dynamicPlaceholder: DynamicPlaceholder
-  ) {
-    ctl.menu.setDefaultFilter(WordFilter.create().filter);
-    ctl.menu.setDefaultFocusBehaviour('last-action,first');
-    ctl.keys.setDefaultBindings(defaultKeys);
-    ctl.input.setDefaultPlaceholder(this.dynamicPlaceholder, true);
-  }
+    private settings: LayoutSettings = {}
+  ) {}
 
   configure(settings: { params?: Partial<LayoutSettings> }) {
     this.settings = {

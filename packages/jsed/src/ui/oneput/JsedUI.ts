@@ -129,31 +129,7 @@ export class JsedUI implements AppObject {
   public actions = () => {
     return {
       ...this.createOneputCatalog().filter([OneputAction.FOCUS_INPUT]).getActions(),
-      ...this.createCatalog()
-        .filter([
-          JsedAction.DOWN,
-          JsedAction.UP,
-          JsedAction.ENTER,
-          JsedAction.RIGHT_ARROW,
-          JsedAction.LEFT_ARROW,
-          JsedAction.EXTEND_RIGHT_ARROW,
-          JsedAction.EXTEND_LEFT_ARROW,
-          JsedAction.SOFT_EXIT,
-          JsedAction.DELETE,
-          JsedAction.TOGGLE_SELECT,
-          JsedAction.NEXT,
-          JsedAction.PREVIOUS,
-          JsedAction.UNDO,
-          JsedAction.REDO,
-          JsedAction.EXTEND_NEXT,
-          JsedAction.EXTEND_PREVIOUS,
-          JsedAction.REVEAL,
-          JsedAction.CUT,
-          JsedAction.COPY,
-          JsedAction.COPY_EMPTY_PREVIOUS,
-          JsedAction.COPY_EMPTY_NEXT
-        ])
-        .getActions()
+      ...this.createCatalog().getActions()
     };
   };
 

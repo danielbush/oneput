@@ -11,7 +11,7 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
 import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
 import type { Editor } from '../../editor/Editor.js';
-import { JsedCommand, type JsedActionId } from './JsedCommand.js';
+import { JsedAction, type JsedActionId } from './JsedAction.js';
 import { icons } from './lib/icons.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
 import { PickListUI } from './lib/PickListUI.js';
@@ -80,7 +80,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
     const { ctl, editor } = this;
 
     return {
-      [JsedCommand.STOP_EDITING]: {
+      [JsedAction.STOP_EDITING]: {
         action: () => {
           editor.handleExit({ softExit: false });
         },
@@ -94,7 +94,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           })
       },
 
-      [JsedCommand.SOFT_EXIT]: {
+      [JsedAction.SOFT_EXIT]: {
         action: () => {
           if (!editor.handleExit()) {
             ctl.app.exit();
@@ -107,7 +107,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
         }
       },
 
-      [JsedCommand.EXIT_EDITOR]: {
+      [JsedAction.EXIT_EDITOR]: {
         action: () => {
           ctl.app.exit();
         },
@@ -121,7 +121,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           })
       },
 
-      [JsedCommand.CANCEL_VIA_EXIT]: {
+      [JsedAction.CANCEL_VIA_EXIT]: {
         action: () => {
           ctl.app.exit();
         },
@@ -154,7 +154,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private navigation(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedCommand.DOWN]: {
+      [JsedAction.DOWN]: {
         action: () => {
           editor.moveDown();
         },
@@ -164,7 +164,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           when: { menuOpen: false }
         }
       },
-      [JsedCommand.UP]: {
+      [JsedAction.UP]: {
         action: () => {
           editor.moveUp();
         },
@@ -174,7 +174,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           when: { menuOpen: false }
         }
       },
-      [JsedCommand.NEXT]: {
+      [JsedAction.NEXT]: {
         action: () => {
           editor.moveNext();
         },
@@ -183,7 +183,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           description: 'Move to next token or element'
         }
       },
-      [JsedCommand.PREVIOUS]: {
+      [JsedAction.PREVIOUS]: {
         action: () => {
           editor.movePrevious();
         },
@@ -192,7 +192,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           description: 'Move to previous token or element'
         }
       },
-      [JsedCommand.RIGHT_ARROW]: {
+      [JsedAction.RIGHT_ARROW]: {
         action: () => {
           editor.moveNext();
         },
@@ -202,7 +202,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           when: { menuOpen: false }
         }
       },
-      [JsedCommand.LEFT_ARROW]: {
+      [JsedAction.LEFT_ARROW]: {
         action: () => {
           editor.movePrevious();
         },
@@ -212,7 +212,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           when: { menuOpen: false }
         }
       },
-      [JsedCommand.REVEAL]: {
+      [JsedAction.REVEAL]: {
         action: () => {
           editor.scrollActiveTargetIntoView();
         },
@@ -227,7 +227,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private selection(): CatalogEntries {
     const { ctl, editor } = this;
     return {
-      [JsedCommand.WRAP_SELECTION]: {
+      [JsedAction.WRAP_SELECTION]: {
         action: () => {
           const cursor = editor.getCursor();
           if (!cursor) return;
@@ -279,7 +279,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.EXTEND_NEXT]: {
+      [JsedAction.EXTEND_NEXT]: {
         action: () => {
           editor.extendNext();
         },
@@ -288,7 +288,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           description: 'Extend selection to next LINE_SIBLING'
         }
       },
-      [JsedCommand.EXTEND_PREVIOUS]: {
+      [JsedAction.EXTEND_PREVIOUS]: {
         action: () => {
           editor.extendPrevious();
         },
@@ -297,7 +297,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           description: 'Extend selection to previous LINE_SIBLING'
         }
       },
-      [JsedCommand.EXTEND_RIGHT_ARROW]: {
+      [JsedAction.EXTEND_RIGHT_ARROW]: {
         action: () => {
           editor.extendNext();
         },
@@ -307,7 +307,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           when: { menuOpen: false }
         }
       },
-      [JsedCommand.EXTEND_LEFT_ARROW]: {
+      [JsedAction.EXTEND_LEFT_ARROW]: {
         action: () => {
           editor.extendPrevious();
         },
@@ -323,7 +323,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private editing(): CatalogEntries {
     const { ctl, editor } = this;
     return {
-      [JsedCommand.ENTER]: {
+      [JsedAction.ENTER]: {
         action: () => {
           editor.handleEnter().mapErr((err) => {
             switch (err.type) {
@@ -347,7 +347,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.DELETE]: {
+      [JsedAction.DELETE]: {
         action: (_ctl, context) => {
           editor.handleDelete(context?.source === 'keyboard' ? context.event : undefined);
         },
@@ -362,7 +362,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           preventDefault: false
         }
       },
-      [JsedCommand.TOGGLE_SELECT]: {
+      [JsedAction.TOGGLE_SELECT]: {
         action: () => {
           ctl.input.toggleSelect();
         },
@@ -377,7 +377,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private undo(): CatalogEntries {
     const { opts, editor } = this;
     return {
-      [JsedCommand.UNDO]: {
+      [JsedAction.UNDO]: {
         action: () => {
           editor.undo();
           opts.invalidateMenu();
@@ -395,7 +395,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REDO]: {
+      [JsedAction.REDO]: {
         action: () => {
           editor.redo();
           opts.invalidateMenu();
@@ -426,14 +426,14 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
       ctl.app.run(
         PasteElementUI.create(ctl, editor, {
           catalog: JsedCatalog.create(ctl, editor).filter([
-            JsedCommand.DOWN,
-            JsedCommand.UP,
-            JsedCommand.NEXT,
-            JsedCommand.PREVIOUS,
-            JsedCommand.PASTE_BEFORE,
-            JsedCommand.PASTE_AFTER,
-            JsedCommand.PASTE_APPEND,
-            JsedCommand.CANCEL_VIA_EXIT
+            JsedAction.DOWN,
+            JsedAction.UP,
+            JsedAction.NEXT,
+            JsedAction.PREVIOUS,
+            JsedAction.PASTE_BEFORE,
+            JsedAction.PASTE_AFTER,
+            JsedAction.PASTE_APPEND,
+            JsedAction.CANCEL_VIA_EXIT
           ]),
           cut,
           oneputCatalog: OneputCatalog.create(ctl).filter([OneputAction.FOCUS_INPUT])
@@ -441,7 +441,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
       );
     };
     return {
-      [JsedCommand.CUT]: {
+      [JsedAction.CUT]: {
         action: () => {
           if (editor.focusOps.cut()) {
             runPasteElement(true);
@@ -460,7 +460,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.COPY]: {
+      [JsedAction.COPY]: {
         action: () => {
           if (editor.focusOps.copy()) {
             runPasteElement(false);
@@ -479,7 +479,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.COPY_EMPTY_PREVIOUS]: {
+      [JsedAction.COPY_EMPTY_PREVIOUS]: {
         action: () => {
           editor.focusOps.copyEmptyPrevious();
         },
@@ -497,7 +497,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.COPY_EMPTY_NEXT]: {
+      [JsedAction.COPY_EMPTY_NEXT]: {
         action: () => {
           editor.focusOps.copyEmptyNext();
         },
@@ -515,7 +515,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.PASTE_BEFORE]: {
+      [JsedAction.PASTE_BEFORE]: {
         action: () => {
           pasteAndExit(() => editor.focusOps.pasteBefore());
         },
@@ -531,7 +531,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.PASTE_AFTER]: {
+      [JsedAction.PASTE_AFTER]: {
         action: () => {
           pasteAndExit(() => editor.focusOps.pasteAfter());
         },
@@ -547,7 +547,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.PASTE_APPEND]: {
+      [JsedAction.PASTE_APPEND]: {
         action: () => {
           pasteAndExit(() => editor.focusOps.pasteAppend());
         },
@@ -569,7 +569,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private focusOps(): CatalogEntries {
     const { ctl, editor } = this;
     return {
-      [JsedCommand.DELETE_FOCUSED_ELEMENT]: {
+      [JsedAction.DELETE_FOCUSED_ELEMENT]: {
         action: async () => {
           const confirm = ctl.confirm({
             message: `Remove element?`
@@ -591,7 +591,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.UNWRAP_FOCUS]: {
+      [JsedAction.UNWRAP_FOCUS]: {
         action: () => {
           editor.focusOps.unwrap();
         },
@@ -605,7 +605,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.CONVERT_FOCUS]: {
+      [JsedAction.CONVERT_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getConversionCandidates().map((tagName, index) => {
             return {
@@ -645,7 +645,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.INSERT_ELEMENT_AFTER_FOCUS]: {
+      [JsedAction.INSERT_ELEMENT_AFTER_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getInsertAfterOptions().map((option, index) => {
             return {
@@ -685,7 +685,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.INSERT_ELEMENT_BEFORE_FOCUS]: {
+      [JsedAction.INSERT_ELEMENT_BEFORE_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getInsertBeforeOptions().map((option, index) => {
             return {
@@ -725,7 +725,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.APPEND_NEW_ELEMENT_IN_FOCUS]: {
+      [JsedAction.APPEND_NEW_ELEMENT_IN_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getAppendOptions().map((option, index) => {
             return {
@@ -771,7 +771,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private focusSpaceOps(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedCommand.INSERT_SPACE_BEFORE_FOCUS]: {
+      [JsedAction.INSERT_SPACE_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.space.insertSpaceBeforeTag();
         },
@@ -784,7 +784,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REMOVE_SPACE_BEFORE_FOCUS]: {
+      [JsedAction.REMOVE_SPACE_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.space.removeSpaceBeforeTag();
         },
@@ -797,7 +797,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.INSERT_SPACE_AFTER_FOCUS]: {
+      [JsedAction.INSERT_SPACE_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.space.insertSpaceAfterTag();
         },
@@ -810,7 +810,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REMOVE_SPACE_AFTER_FOCUS]: {
+      [JsedAction.REMOVE_SPACE_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.space.removeSpaceAfterTag();
         },
@@ -829,7 +829,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private focusAnchorOps(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedCommand.INSERT_ANCHOR_IN_FOCUS]: {
+      [JsedAction.INSERT_ANCHOR_IN_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.insertInFocus();
         },
@@ -842,7 +842,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.INSERT_ANCHOR_BEFORE_FOCUS]: {
+      [JsedAction.INSERT_ANCHOR_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.insertBeforeFocus();
         },
@@ -855,7 +855,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REMOVE_ANCHOR_BEFORE_FOCUS]: {
+      [JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.removeBeforeFocus();
         },
@@ -868,7 +868,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.INSERT_ANCHOR_AFTER_FOCUS]: {
+      [JsedAction.INSERT_ANCHOR_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.insertAfterFocus();
         },
@@ -881,7 +881,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REMOVE_ANCHOR_AFTER_FOCUS]: {
+      [JsedAction.REMOVE_ANCHOR_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.removeAfterFocus();
         },
@@ -900,7 +900,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private cursorOps(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedCommand.INSERT_SPACE_AFTER_CURSOR]: {
+      [JsedAction.INSERT_SPACE_AFTER_CURSOR]: {
         action: () => {
           editor.cursorOps.insertSpaceAfter();
         },
@@ -913,7 +913,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REMOVE_SPACE_AFTER_CURSOR]: {
+      [JsedAction.REMOVE_SPACE_AFTER_CURSOR]: {
         action: () => {
           editor.cursorOps.removeSpaceAfter();
         },
@@ -926,7 +926,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.INSERT_SPACE_BEFORE_CURSOR]: {
+      [JsedAction.INSERT_SPACE_BEFORE_CURSOR]: {
         action: () => {
           editor.cursorOps.insertSpaceBefore();
         },
@@ -939,7 +939,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             action
           })
       },
-      [JsedCommand.REMOVE_SPACE_BEFORE_CURSOR]: {
+      [JsedAction.REMOVE_SPACE_BEFORE_CURSOR]: {
         action: () => {
           editor.cursorOps.removeSpaceBefore();
         },
@@ -958,7 +958,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   private misc(): CatalogEntries {
     const { editor, opts } = this;
     return {
-      [JsedCommand.ENABLE_LEGACY_ELEMENT_INDICATOR]: {
+      [JsedAction.ENABLE_LEGACY_ELEMENT_INDICATOR]: {
         action: () => {
           editor.enableLegacyElementIndicator(!editor.legacyElementIndicatorEnabled);
           opts.invalidateMenu();
@@ -975,7 +975,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
             checked: editor.legacyElementIndicatorEnabled
           })
       },
-      [JsedCommand.ENABLE_ELEMENT_INDICATOR]: {
+      [JsedAction.ENABLE_ELEMENT_INDICATOR]: {
         action: () => {
           editor.enableElementIndicator(!editor.elementIndicatorEnabled);
           opts.invalidateMenu();

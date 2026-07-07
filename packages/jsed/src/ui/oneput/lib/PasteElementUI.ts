@@ -2,7 +2,7 @@ import type { Controller, AppObject, Menu } from '@oneput/oneput';
 import type { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
 import type { Editor } from '../../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
-import { JsedCommand } from '../JsedCommand.js';
+import { JsedAction } from '../JsedAction.js';
 import type { JsedCatalog } from '../JsedCatalog.js';
 
 export class PasteElementUI implements AppObject {
@@ -66,10 +66,10 @@ export class PasteElementUI implements AppObject {
       focusBehaviour: 'first',
       items: [
         ...this.catalog.getMenuItems([
-          JsedCommand.PASTE_BEFORE,
-          JsedCommand.PASTE_AFTER,
-          JsedCommand.PASTE_APPEND,
-          JsedCommand.CANCEL_VIA_EXIT
+          JsedAction.PASTE_BEFORE,
+          JsedAction.PASTE_AFTER,
+          JsedAction.PASTE_APPEND,
+          JsedAction.CANCEL_VIA_EXIT
         ])
       ]
     } satisfies Menu;

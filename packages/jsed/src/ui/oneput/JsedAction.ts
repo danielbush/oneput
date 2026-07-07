@@ -5,7 +5,7 @@
  * (`ONEPUT__`) and from a consumer's own actions when their action maps are
  * merged.
  */
-export const JsedCommand = {
+export const JsedAction = {
   /**
    * Cancel out of a operation that is handled by a whole AppObject
    * Eg cancel out of PasteElementUI .
@@ -69,4 +69,4 @@ export const JsedCommand = {
   ENABLE_ELEMENT_INDICATOR: 'JSED__ENABLE_ELEMENT_INDICATOR'
 } as const;
 
-export type JsedActionId = (typeof JsedCommand)[keyof typeof JsedCommand];
+export type JsedActionId = (typeof JsedAction)[keyof typeof JsedAction];

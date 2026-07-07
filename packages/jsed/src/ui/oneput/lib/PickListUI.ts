@@ -77,8 +77,7 @@ export class PickListUI implements AppObject {
   };
 
   private exit = () => {
-    this.ctl.app.exit();
-    this.ctl.menu.closeMenu();
+    this.ctl.app.closeAndExit();
   };
 
   menu = () => {

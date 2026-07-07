@@ -17,9 +17,8 @@
   - this can cause a weird little jump in the menu as it winds down but updates with items for the new AppObject
   - particularly noticeable if the old AppObject has few items and the new one has a lot
 - solution:
-  - status:
-    - 3-Jul-2026: I haven't implemented this yet; not sure it's an issue after all the recent changes; let's keep this open
-  - as soon as menu starts to close, we disable any visual menu updates whilst allowing the menu data to be updated; we can reinforce this for consumers by giving them ctl.app.closeAndExit
+  - as soon as menu starts to close, we disable any visual menu updates whilst allowing the menu data to be updated; we can reinforce this for consumers by giving them ctl.app.closeAndExit.
+  - 8-Jul-2026: confirmed this happens; you just need small child menu that you close and exit from.
 
 ## LOAD_LUCIDE
 

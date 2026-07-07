@@ -96,10 +96,16 @@ export class MenuController {
     return this.ctl.currentProps.menuOpen;
   }
 
+  /**
+   * This exists to solve FLASH_OF_NEXT_MENU .
+   */
+  private isMenuOpenImmediate = false;
+
   openMenu = () => {
     if (this.disableOpenClose) {
       return;
     }
+    this.isMenuOpenImmediate = true;
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
       this.ctl.currentProps.menuOpen = true;
@@ -116,6 +122,7 @@ export class MenuController {
     if (this.disableOpenClose) {
       return;
     }
+    this.isMenuOpenImmediate = false;
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
       this.ctl.currentProps.menuOpen = false;
@@ -168,6 +175,10 @@ export class MenuController {
    * If the menu is closed you won't see the changes until it's opened.
    */
   private setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
+    if (!this.isMenuOpenImmediate) {
+      // FLASH_OF_NEXT_MENU
+      return;
+    }
     if (!this.isMenuOpen) {
       return;
     }

@@ -420,7 +420,7 @@ export class AppController {
    *
    * We close first to take advantage of the MenuController suppressing unwanted
    * flashes of changed menu items caused by the exit to the parent AppObject
-   * whilst the menu is closing.
+   * whilst the menu is closing.  See FLASH_OF_NEXT_MENU .
    */
   closeAndExit = (payload?: unknown) => {
     this.ctl.menu.closeMenu();

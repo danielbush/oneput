@@ -23,6 +23,10 @@ type CatalogEntries = ActionCatalogEntries<JsedActionId>;
  *
  * AppObjects derive a filtered catalog for their mode, expose `getActions()` to
  * Oneput, then explicitly compose menu rows with `getMenuItems([...])`.
+ *
+ * The editor provides predicates so the ui can decide to hide or disable
+ * something; everything else should be encapsulated within an editor action,
+ * the ui shouldn't decide anything for the editor
  */
 export class JsedCatalog implements AppActionCatalog<JsedActionId> {
   static create(

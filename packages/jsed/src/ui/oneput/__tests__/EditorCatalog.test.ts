@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { Editor } from '../../../editor/Editor.js';
 import { makeRoot } from '../../../test/util.js';
 import { JsedCatalog } from '../JsedCatalog.js';
-import { JsedAction } from '../JsedAction.js';
+import { JsedCommand } from '../JsedCommand.js';
 
 describe('EditorActionCatalog', () => {
   test('filtered menu items', () => {
@@ -11,10 +11,10 @@ describe('EditorActionCatalog', () => {
     const document = makeRoot('<p id="p1">foo</p>');
     const ctl = Controller.createNull();
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const catalog = JsedCatalog.create(ctl, editor).filter([JsedAction.PASTE_BEFORE]);
+    const catalog = JsedCatalog.create(ctl, editor).filter([JsedCommand.PASTE_BEFORE]);
 
     // act
-    const items = catalog.getMenuItems([JsedAction.PASTE_BEFORE, JsedAction.PASTE_AFTER]);
+    const items = catalog.getMenuItems([JsedCommand.PASTE_BEFORE, JsedCommand.PASTE_AFTER]);
 
     // assert
     expect(items.map((item) => item && item.id)).toEqual(['PASTE_BEFORE', undefined]);
@@ -25,13 +25,13 @@ describe('EditorActionCatalog', () => {
     const document = makeRoot('<p id="p1">foo</p>');
     const ctl = Controller.createNull();
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const catalog = JsedCatalog.create(ctl, editor).filter([JsedAction.PASTE_BEFORE]);
+    const catalog = JsedCatalog.create(ctl, editor).filter([JsedCommand.PASTE_BEFORE]);
 
     // act
     const actions = catalog.getActions();
 
     // assert
-    expect(Object.keys(actions)).toEqual([JsedAction.PASTE_BEFORE]);
+    expect(Object.keys(actions)).toEqual([JsedCommand.PASTE_BEFORE]);
   });
 
   test('menu item predicates', () => {
@@ -39,14 +39,14 @@ describe('EditorActionCatalog', () => {
     const document = makeRoot('<p id="p1">foo</p>');
     const ctl = Controller.createNull();
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    const catalog = JsedCatalog.create(ctl, editor).filter([JsedAction.UNDO]);
+    const catalog = JsedCatalog.create(ctl, editor).filter([JsedCommand.UNDO]);
 
     // act
     const actions = catalog.getActions();
-    const items = catalog.getMenuItems([JsedAction.UNDO]);
+    const items = catalog.getMenuItems([JsedCommand.UNDO]);
 
     // assert
-    expect(actions[JsedAction.UNDO]).toBeDefined();
+    expect(actions[JsedCommand.UNDO]).toBeDefined();
     expect(items).toEqual([undefined]);
   });
 });

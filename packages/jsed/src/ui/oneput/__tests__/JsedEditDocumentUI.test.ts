@@ -4,7 +4,7 @@ import { isDeletedElement } from '../../../lib/core/taxonomy.js';
 import { makeRoot } from '../../../test/util.js';
 import { JsedDocument } from '../../../JsedDocument.js';
 import { JsedEditDocumentUI } from '../JsedEditDocumentUI.js';
-import { JsedAction } from '../JsedAction.js';
+import { JsedCommand } from '../JsedCommand.js';
 
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);
@@ -116,10 +116,10 @@ describe('JsedEditDocumentUI', () => {
     scrollRequests.data.length = 0;
 
     // act
-    editorUI.actions()[JsedAction.REVEAL].action(ctl);
+    editorUI.actions()[JsedCommand.REVEAL].action(ctl);
 
     // assert
-    expect(editorUI.actions()[JsedAction.REVEAL].binding?.bindings).toContain('$mod+m');
+    expect(editorUI.actions()[JsedCommand.REVEAL].binding?.bindings).toContain('$mod+m');
     expect(scrollRequests.data).toEqual([
       {
         element: token,

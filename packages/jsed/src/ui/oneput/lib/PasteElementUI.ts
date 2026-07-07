@@ -1,7 +1,7 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
 import type { Editor } from '../../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
-import { JsedAction } from '../JsedAction.js';
+import { JsedCommand } from '../JsedCommand.js';
 import { JsedCatalog } from '../JsedCatalog.js';
 
 export class PasteElementUI implements AppObject {
@@ -23,15 +23,15 @@ export class PasteElementUI implements AppObject {
     private cut: boolean
   ) {
     this.catalog = JsedCatalog.create(ctl, editor).filter([
-      JsedAction.FOCUS,
-      JsedAction.DOWN,
-      JsedAction.UP,
-      JsedAction.NEXT,
-      JsedAction.PREVIOUS,
-      JsedAction.PASTE_BEFORE,
-      JsedAction.PASTE_AFTER,
-      JsedAction.PASTE_APPEND,
-      JsedAction.EXIT
+      JsedCommand.FOCUS,
+      JsedCommand.DOWN,
+      JsedCommand.UP,
+      JsedCommand.NEXT,
+      JsedCommand.PREVIOUS,
+      JsedCommand.PASTE_BEFORE,
+      JsedCommand.PASTE_AFTER,
+      JsedCommand.PASTE_APPEND,
+      JsedCommand.EXIT
     ]);
   }
 
@@ -70,10 +70,10 @@ export class PasteElementUI implements AppObject {
       focusBehaviour: 'first',
       items: [
         ...this.catalog.getMenuItems([
-          JsedAction.PASTE_BEFORE,
-          JsedAction.PASTE_AFTER,
-          JsedAction.PASTE_APPEND,
-          JsedAction.EXIT
+          JsedCommand.PASTE_BEFORE,
+          JsedCommand.PASTE_AFTER,
+          JsedCommand.PASTE_APPEND,
+          JsedCommand.EXIT
         ])
       ]
     } satisfies Menu;

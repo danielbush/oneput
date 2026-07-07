@@ -3,7 +3,7 @@ import { Editor } from '../../editor/Editor.js';
 import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import { JsedCatalog } from './JsedCatalog.js';
-import { JsedAction } from './JsedAction.js';
+import { JsedCommand } from './JsedCommand.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
 
 export type JsedEditDocumentUIHooks = {
@@ -15,28 +15,28 @@ export type JsedEditDocumentUIHooks = {
  * Controls what goes into AppObject['actions'] for this AppObject.
  */
 const actionIds = [
-  JsedAction.DOWN,
-  JsedAction.UP,
-  JsedAction.ENTER,
-  JsedAction.RIGHT_ARROW,
-  JsedAction.LEFT_ARROW,
-  JsedAction.EXTEND_RIGHT_ARROW,
-  JsedAction.EXTEND_LEFT_ARROW,
-  JsedAction.SOFT_EXIT,
-  JsedAction.DELETE,
-  JsedAction.FOCUS,
-  JsedAction.TOGGLE_SELECT,
-  JsedAction.NEXT,
-  JsedAction.PREVIOUS,
-  JsedAction.UNDO,
-  JsedAction.REDO,
-  JsedAction.EXTEND_NEXT,
-  JsedAction.EXTEND_PREVIOUS,
-  JsedAction.REVEAL,
-  JsedAction.CUT,
-  JsedAction.COPY,
-  JsedAction.COPY_EMPTY_PREVIOUS,
-  JsedAction.COPY_EMPTY_NEXT
+  JsedCommand.DOWN,
+  JsedCommand.UP,
+  JsedCommand.ENTER,
+  JsedCommand.RIGHT_ARROW,
+  JsedCommand.LEFT_ARROW,
+  JsedCommand.EXTEND_RIGHT_ARROW,
+  JsedCommand.EXTEND_LEFT_ARROW,
+  JsedCommand.SOFT_EXIT,
+  JsedCommand.DELETE,
+  JsedCommand.FOCUS,
+  JsedCommand.TOGGLE_SELECT,
+  JsedCommand.NEXT,
+  JsedCommand.PREVIOUS,
+  JsedCommand.UNDO,
+  JsedCommand.REDO,
+  JsedCommand.EXTEND_NEXT,
+  JsedCommand.EXTEND_PREVIOUS,
+  JsedCommand.REVEAL,
+  JsedCommand.CUT,
+  JsedCommand.COPY,
+  JsedCommand.COPY_EMPTY_PREVIOUS,
+  JsedCommand.COPY_EMPTY_NEXT
 ];
 
 /**
@@ -102,52 +102,52 @@ export class JsedEditDocumentUI implements AppObject {
       id: 'EditDocument',
       focusBehaviour: 'last-action,first' as const,
       items: [
-        ...catalog.getMenuItems([JsedAction.STOP_EDITING, JsedAction.EXIT_EDITOR]),
-        ...catalog.getMenuItems([JsedAction.ENTER, JsedAction.UNDO, JsedAction.REDO]),
+        ...catalog.getMenuItems([JsedCommand.STOP_EDITING, JsedCommand.EXIT_EDITOR]),
+        ...catalog.getMenuItems([JsedCommand.ENTER, JsedCommand.UNDO, JsedCommand.REDO]),
 
         ...catalog.getMenuItems([
-          JsedAction.CUT,
-          JsedAction.COPY,
-          JsedAction.COPY_EMPTY_PREVIOUS,
-          JsedAction.COPY_EMPTY_NEXT
+          JsedCommand.CUT,
+          JsedCommand.COPY,
+          JsedCommand.COPY_EMPTY_PREVIOUS,
+          JsedCommand.COPY_EMPTY_NEXT
         ]),
 
         ...catalog.getMenuItems([
-          JsedAction.DELETE_FOCUSED_ELEMENT,
-          JsedAction.UNWRAP_FOCUS,
-          JsedAction.CONVERT_FOCUS,
-          JsedAction.INSERT_ELEMENT_AFTER_FOCUS,
-          JsedAction.INSERT_ELEMENT_BEFORE_FOCUS,
-          JsedAction.APPEND_NEW_ELEMENT_IN_FOCUS
+          JsedCommand.DELETE_FOCUSED_ELEMENT,
+          JsedCommand.UNWRAP_FOCUS,
+          JsedCommand.CONVERT_FOCUS,
+          JsedCommand.INSERT_ELEMENT_AFTER_FOCUS,
+          JsedCommand.INSERT_ELEMENT_BEFORE_FOCUS,
+          JsedCommand.APPEND_NEW_ELEMENT_IN_FOCUS
         ]),
 
-        ...catalog.getMenuItems([JsedAction.WRAP_SELECTION]),
+        ...catalog.getMenuItems([JsedCommand.WRAP_SELECTION]),
 
         ...catalog.getMenuItems([
-          JsedAction.INSERT_SPACE_BEFORE_FOCUS,
-          JsedAction.REMOVE_SPACE_BEFORE_FOCUS,
-          JsedAction.INSERT_SPACE_AFTER_FOCUS,
-          JsedAction.REMOVE_SPACE_AFTER_FOCUS
-        ]),
-
-        ...catalog.getMenuItems([
-          JsedAction.INSERT_SPACE_AFTER_CURSOR,
-          JsedAction.REMOVE_SPACE_AFTER_CURSOR,
-          JsedAction.INSERT_SPACE_BEFORE_CURSOR,
-          JsedAction.REMOVE_SPACE_BEFORE_CURSOR
+          JsedCommand.INSERT_SPACE_BEFORE_FOCUS,
+          JsedCommand.REMOVE_SPACE_BEFORE_FOCUS,
+          JsedCommand.INSERT_SPACE_AFTER_FOCUS,
+          JsedCommand.REMOVE_SPACE_AFTER_FOCUS
         ]),
 
         ...catalog.getMenuItems([
-          JsedAction.INSERT_ANCHOR_IN_FOCUS,
-          JsedAction.INSERT_ANCHOR_BEFORE_FOCUS,
-          JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS,
-          JsedAction.INSERT_ANCHOR_AFTER_FOCUS,
-          JsedAction.REMOVE_ANCHOR_AFTER_FOCUS
+          JsedCommand.INSERT_SPACE_AFTER_CURSOR,
+          JsedCommand.REMOVE_SPACE_AFTER_CURSOR,
+          JsedCommand.INSERT_SPACE_BEFORE_CURSOR,
+          JsedCommand.REMOVE_SPACE_BEFORE_CURSOR
         ]),
 
         ...catalog.getMenuItems([
-          JsedAction.ENABLE_LEGACY_ELEMENT_INDICATOR,
-          JsedAction.ENABLE_ELEMENT_INDICATOR
+          JsedCommand.INSERT_ANCHOR_IN_FOCUS,
+          JsedCommand.INSERT_ANCHOR_BEFORE_FOCUS,
+          JsedCommand.REMOVE_ANCHOR_BEFORE_FOCUS,
+          JsedCommand.INSERT_ANCHOR_AFTER_FOCUS,
+          JsedCommand.REMOVE_ANCHOR_AFTER_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.ENABLE_LEGACY_ELEMENT_INDICATOR,
+          JsedCommand.ENABLE_ELEMENT_INDICATOR
         ])
       ]
     };

@@ -1,12 +1,11 @@
 /**
- * Namespaced identifiers for jsed's editor actions.
+ * Identifiers for jsed editor actions and menu actions (aka commands).
  *
  * The `JSED__` prefix keeps these distinct from Oneput's core actions
  * (`ONEPUT__`) and from a consumer's own actions when their action maps are
- * merged. Reference these constants rather than raw strings so TypeScript
- * autocompletes them and catches typos at compile time.
+ * merged.
  */
-export const JsedAction = {
+export const JsedCommand = {
   EXIT: 'JSED__EXIT',
   EXIT_EDITOR: 'JSED__EXIT_EDITOR',
   SOFT_EXIT: 'JSED__SOFT_EXIT',
@@ -67,4 +66,4 @@ export const JsedAction = {
   ENABLE_ELEMENT_INDICATOR: 'JSED__ENABLE_ELEMENT_INDICATOR'
 } as const;
 
-export type JsedActionId = (typeof JsedAction)[keyof typeof JsedAction];
+export type JsedActionId = (typeof JsedCommand)[keyof typeof JsedCommand];

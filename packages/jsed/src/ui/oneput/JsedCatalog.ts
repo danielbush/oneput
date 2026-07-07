@@ -2,7 +2,7 @@ import type { AppAction, AppActions, Controller, MenuItemAny } from '@oneput/one
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { Editor } from '../../editor/Editor.js';
-import { JsedAction, type JsedActionId } from './JsedAction.js';
+import { JsedCommand, type JsedActionId } from './JsedCommand.js';
 import { icons } from './lib/icons.js';
 import { PickListUI } from './lib/PickListUI.js';
 
@@ -102,7 +102,7 @@ export class JsedCatalog {
     const { ctl, editor } = this;
 
     return {
-      [JsedAction.STOP_EDITING]: {
+      [JsedCommand.STOP_EDITING]: {
         action: () => {
           editor.handleExit({ softExit: false });
         },
@@ -116,7 +116,7 @@ export class JsedCatalog {
           })
       },
 
-      [JsedAction.SOFT_EXIT]: {
+      [JsedCommand.SOFT_EXIT]: {
         action: () => {
           if (!editor.handleExit()) {
             ctl.app.exit();
@@ -129,7 +129,7 @@ export class JsedCatalog {
         }
       },
 
-      [JsedAction.EXIT_EDITOR]: {
+      [JsedCommand.EXIT_EDITOR]: {
         action: () => {
           ctl.app.exit();
         },
@@ -144,7 +144,7 @@ export class JsedCatalog {
       },
 
       // TODO: move to oneput catalog
-      [JsedAction.EXIT]: {
+      [JsedCommand.EXIT]: {
         action: () => {
           ctl.app.exit();
         },
@@ -162,7 +162,7 @@ export class JsedCatalog {
       },
 
       // TODO: move to oneput catalog
-      [JsedAction.FOCUS]: {
+      [JsedCommand.FOCUS]: {
         action: () => {
           ctl.input.focus();
         },
@@ -188,7 +188,7 @@ export class JsedCatalog {
   private navigation(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedAction.DOWN]: {
+      [JsedCommand.DOWN]: {
         action: () => {
           editor.moveDown();
         },
@@ -198,7 +198,7 @@ export class JsedCatalog {
           when: { menuOpen: false }
         }
       },
-      [JsedAction.UP]: {
+      [JsedCommand.UP]: {
         action: () => {
           editor.moveUp();
         },
@@ -208,7 +208,7 @@ export class JsedCatalog {
           when: { menuOpen: false }
         }
       },
-      [JsedAction.NEXT]: {
+      [JsedCommand.NEXT]: {
         action: () => {
           editor.moveNext();
         },
@@ -217,7 +217,7 @@ export class JsedCatalog {
           description: 'Move to next token or element'
         }
       },
-      [JsedAction.PREVIOUS]: {
+      [JsedCommand.PREVIOUS]: {
         action: () => {
           editor.movePrevious();
         },
@@ -226,7 +226,7 @@ export class JsedCatalog {
           description: 'Move to previous token or element'
         }
       },
-      [JsedAction.RIGHT_ARROW]: {
+      [JsedCommand.RIGHT_ARROW]: {
         action: () => {
           editor.moveNext();
         },
@@ -236,7 +236,7 @@ export class JsedCatalog {
           when: { menuOpen: false }
         }
       },
-      [JsedAction.LEFT_ARROW]: {
+      [JsedCommand.LEFT_ARROW]: {
         action: () => {
           editor.movePrevious();
         },
@@ -246,7 +246,7 @@ export class JsedCatalog {
           when: { menuOpen: false }
         }
       },
-      [JsedAction.REVEAL]: {
+      [JsedCommand.REVEAL]: {
         action: () => {
           editor.scrollActiveTargetIntoView();
         },
@@ -261,7 +261,7 @@ export class JsedCatalog {
   private selection(): CatalogEntries {
     const { ctl, editor } = this;
     return {
-      [JsedAction.WRAP_SELECTION]: {
+      [JsedCommand.WRAP_SELECTION]: {
         action: () => {
           const cursor = editor.getCursor();
           if (!cursor) return;
@@ -313,7 +313,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.EXTEND_NEXT]: {
+      [JsedCommand.EXTEND_NEXT]: {
         action: () => {
           editor.extendNext();
         },
@@ -322,7 +322,7 @@ export class JsedCatalog {
           description: 'Extend selection to next LINE_SIBLING'
         }
       },
-      [JsedAction.EXTEND_PREVIOUS]: {
+      [JsedCommand.EXTEND_PREVIOUS]: {
         action: () => {
           editor.extendPrevious();
         },
@@ -331,7 +331,7 @@ export class JsedCatalog {
           description: 'Extend selection to previous LINE_SIBLING'
         }
       },
-      [JsedAction.EXTEND_RIGHT_ARROW]: {
+      [JsedCommand.EXTEND_RIGHT_ARROW]: {
         action: () => {
           editor.extendNext();
         },
@@ -341,7 +341,7 @@ export class JsedCatalog {
           when: { menuOpen: false }
         }
       },
-      [JsedAction.EXTEND_LEFT_ARROW]: {
+      [JsedCommand.EXTEND_LEFT_ARROW]: {
         action: () => {
           editor.extendPrevious();
         },
@@ -357,7 +357,7 @@ export class JsedCatalog {
   private editing(): CatalogEntries {
     const { ctl, editor } = this;
     return {
-      [JsedAction.ENTER]: {
+      [JsedCommand.ENTER]: {
         action: () => {
           editor.handleEnter().mapErr((err) => {
             switch (err.type) {
@@ -381,7 +381,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.DELETE]: {
+      [JsedCommand.DELETE]: {
         action: (_ctl, context) => {
           editor.handleDelete(context?.source === 'keyboard' ? context.event : undefined);
         },
@@ -396,7 +396,7 @@ export class JsedCatalog {
           preventDefault: false
         }
       },
-      [JsedAction.TOGGLE_SELECT]: {
+      [JsedCommand.TOGGLE_SELECT]: {
         action: () => {
           ctl.input.toggleSelect();
         },
@@ -411,7 +411,7 @@ export class JsedCatalog {
   private undo(): CatalogEntries {
     const { opts, editor } = this;
     return {
-      [JsedAction.UNDO]: {
+      [JsedCommand.UNDO]: {
         action: () => {
           editor.undo();
           opts.invalidateMenu();
@@ -429,7 +429,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REDO]: {
+      [JsedCommand.REDO]: {
         action: () => {
           editor.redo();
           opts.invalidateMenu();
@@ -457,7 +457,7 @@ export class JsedCatalog {
       ctl.app.exit();
     };
     return {
-      [JsedAction.CUT]: {
+      [JsedCommand.CUT]: {
         action: () => {
           if (editor.focusOps.cut()) {
             opts.runPasteElement(true);
@@ -476,7 +476,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.COPY]: {
+      [JsedCommand.COPY]: {
         action: () => {
           if (editor.focusOps.copy()) {
             opts.runPasteElement(false);
@@ -495,7 +495,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.COPY_EMPTY_PREVIOUS]: {
+      [JsedCommand.COPY_EMPTY_PREVIOUS]: {
         action: () => {
           editor.focusOps.copyEmptyPrevious();
         },
@@ -513,7 +513,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.COPY_EMPTY_NEXT]: {
+      [JsedCommand.COPY_EMPTY_NEXT]: {
         action: () => {
           editor.focusOps.copyEmptyNext();
         },
@@ -531,7 +531,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.PASTE_BEFORE]: {
+      [JsedCommand.PASTE_BEFORE]: {
         action: () => {
           pasteAndExit(() => editor.focusOps.pasteBefore());
         },
@@ -547,7 +547,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.PASTE_AFTER]: {
+      [JsedCommand.PASTE_AFTER]: {
         action: () => {
           pasteAndExit(() => editor.focusOps.pasteAfter());
         },
@@ -563,7 +563,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.PASTE_APPEND]: {
+      [JsedCommand.PASTE_APPEND]: {
         action: () => {
           pasteAndExit(() => editor.focusOps.pasteAppend());
         },
@@ -585,7 +585,7 @@ export class JsedCatalog {
   private focusOps(): CatalogEntries {
     const { ctl, editor } = this;
     return {
-      [JsedAction.DELETE_FOCUSED_ELEMENT]: {
+      [JsedCommand.DELETE_FOCUSED_ELEMENT]: {
         action: async () => {
           const confirm = ctl.confirm({
             message: `Remove element?`
@@ -607,7 +607,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.UNWRAP_FOCUS]: {
+      [JsedCommand.UNWRAP_FOCUS]: {
         action: () => {
           editor.focusOps.unwrap();
         },
@@ -621,7 +621,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.CONVERT_FOCUS]: {
+      [JsedCommand.CONVERT_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getConversionCandidates().map((tagName, index) => {
             return {
@@ -661,7 +661,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.INSERT_ELEMENT_AFTER_FOCUS]: {
+      [JsedCommand.INSERT_ELEMENT_AFTER_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getInsertAfterOptions().map((option, index) => {
             return {
@@ -701,7 +701,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.INSERT_ELEMENT_BEFORE_FOCUS]: {
+      [JsedCommand.INSERT_ELEMENT_BEFORE_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getInsertBeforeOptions().map((option, index) => {
             return {
@@ -741,7 +741,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.APPEND_NEW_ELEMENT_IN_FOCUS]: {
+      [JsedCommand.APPEND_NEW_ELEMENT_IN_FOCUS]: {
         action: () => {
           const candidates = editor.focusOps.getAppendOptions().map((option, index) => {
             return {
@@ -787,7 +787,7 @@ export class JsedCatalog {
   private focusSpaceOps(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedAction.INSERT_SPACE_BEFORE_FOCUS]: {
+      [JsedCommand.INSERT_SPACE_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.space.insertSpaceBeforeTag();
         },
@@ -800,7 +800,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REMOVE_SPACE_BEFORE_FOCUS]: {
+      [JsedCommand.REMOVE_SPACE_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.space.removeSpaceBeforeTag();
         },
@@ -813,7 +813,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.INSERT_SPACE_AFTER_FOCUS]: {
+      [JsedCommand.INSERT_SPACE_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.space.insertSpaceAfterTag();
         },
@@ -826,7 +826,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REMOVE_SPACE_AFTER_FOCUS]: {
+      [JsedCommand.REMOVE_SPACE_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.space.removeSpaceAfterTag();
         },
@@ -845,7 +845,7 @@ export class JsedCatalog {
   private focusAnchorOps(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedAction.INSERT_ANCHOR_IN_FOCUS]: {
+      [JsedCommand.INSERT_ANCHOR_IN_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.insertInFocus();
         },
@@ -858,7 +858,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.INSERT_ANCHOR_BEFORE_FOCUS]: {
+      [JsedCommand.INSERT_ANCHOR_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.insertBeforeFocus();
         },
@@ -871,7 +871,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS]: {
+      [JsedCommand.REMOVE_ANCHOR_BEFORE_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.removeBeforeFocus();
         },
@@ -884,7 +884,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.INSERT_ANCHOR_AFTER_FOCUS]: {
+      [JsedCommand.INSERT_ANCHOR_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.insertAfterFocus();
         },
@@ -897,7 +897,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REMOVE_ANCHOR_AFTER_FOCUS]: {
+      [JsedCommand.REMOVE_ANCHOR_AFTER_FOCUS]: {
         action: () => {
           editor.focusOps.anchor.removeAfterFocus();
         },
@@ -916,7 +916,7 @@ export class JsedCatalog {
   private cursorOps(): CatalogEntries {
     const { editor } = this;
     return {
-      [JsedAction.INSERT_SPACE_AFTER_CURSOR]: {
+      [JsedCommand.INSERT_SPACE_AFTER_CURSOR]: {
         action: () => {
           editor.cursorOps.insertSpaceAfter();
         },
@@ -929,7 +929,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REMOVE_SPACE_AFTER_CURSOR]: {
+      [JsedCommand.REMOVE_SPACE_AFTER_CURSOR]: {
         action: () => {
           editor.cursorOps.removeSpaceAfter();
         },
@@ -942,7 +942,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.INSERT_SPACE_BEFORE_CURSOR]: {
+      [JsedCommand.INSERT_SPACE_BEFORE_CURSOR]: {
         action: () => {
           editor.cursorOps.insertSpaceBefore();
         },
@@ -955,7 +955,7 @@ export class JsedCatalog {
             action
           })
       },
-      [JsedAction.REMOVE_SPACE_BEFORE_CURSOR]: {
+      [JsedCommand.REMOVE_SPACE_BEFORE_CURSOR]: {
         action: () => {
           editor.cursorOps.removeSpaceBefore();
         },
@@ -974,7 +974,7 @@ export class JsedCatalog {
   private misc(): CatalogEntries {
     const { editor, opts } = this;
     return {
-      [JsedAction.ENABLE_LEGACY_ELEMENT_INDICATOR]: {
+      [JsedCommand.ENABLE_LEGACY_ELEMENT_INDICATOR]: {
         action: () => {
           editor.enableLegacyElementIndicator(!editor.legacyElementIndicatorEnabled);
           opts.invalidateMenu();
@@ -991,7 +991,7 @@ export class JsedCatalog {
             checked: editor.legacyElementIndicatorEnabled
           })
       },
-      [JsedAction.ENABLE_ELEMENT_INDICATOR]: {
+      [JsedCommand.ENABLE_ELEMENT_INDICATOR]: {
         action: () => {
           editor.enableElementIndicator(!editor.elementIndicatorEnabled);
           opts.invalidateMenu();

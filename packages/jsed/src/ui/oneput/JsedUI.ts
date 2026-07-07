@@ -46,110 +46,20 @@ export class JsedUI implements AppObject {
     return new JsedUI(ctl, editor, hooks);
   }
 
-  public actions = () =>
-    this.createCatalog()
-      .filter([
-        JsedCommand.DOWN,
-        JsedCommand.UP,
-        JsedCommand.ENTER,
-        JsedCommand.RIGHT_ARROW,
-        JsedCommand.LEFT_ARROW,
-        JsedCommand.EXTEND_RIGHT_ARROW,
-        JsedCommand.EXTEND_LEFT_ARROW,
-        JsedCommand.SOFT_EXIT,
-        JsedCommand.DELETE,
-        JsedCommand.FOCUS,
-        JsedCommand.TOGGLE_SELECT,
-        JsedCommand.NEXT,
-        JsedCommand.PREVIOUS,
-        JsedCommand.UNDO,
-        JsedCommand.REDO,
-        JsedCommand.EXTEND_NEXT,
-        JsedCommand.EXTEND_PREVIOUS,
-        JsedCommand.REVEAL,
-        JsedCommand.CUT,
-        JsedCommand.COPY,
-        JsedCommand.COPY_EMPTY_PREVIOUS,
-        JsedCommand.COPY_EMPTY_NEXT
-      ])
-      .getActions();
-
-  private unsubscribeEditChanges?: () => void;
-  private removeSuspendHandler?: () => void;
-
   constructor(
     private ctl: Controller,
     public editor: Editor,
     private hooks: JsedUIHooks = {}
   ) {}
 
+  private unsubscribeEditChanges?: () => void;
+  private removeSuspendHandler?: () => void;
+
   private createCatalog = () =>
     JsedCatalog.create(this.ctl, this.editor, {
       runPasteElement: (cut) =>
         this.ctl.app.run(PasteElementUI.create(this.ctl, this.editor, { cut }))
     });
-
-  /**
-   * Declarative menu: rebuilt from editor state whenever it is pulled — after
-   * start/resume (afterRun), on open (pull-on-open), or via
-   * `ctl.menu.invalidate()` while open.
-   */
-  menu = () => {
-    const catalog = this.createCatalog();
-    return {
-      id: 'EditDocument',
-      focusBehaviour: 'last-action,first' as const,
-      items: [
-        ...catalog.getMenuItems([JsedCommand.STOP_EDITING, JsedCommand.EXIT_EDITOR]),
-        ...catalog.getMenuItems([JsedCommand.ENTER, JsedCommand.UNDO, JsedCommand.REDO]),
-
-        ...catalog.getMenuItems([
-          JsedCommand.CUT,
-          JsedCommand.COPY,
-          JsedCommand.COPY_EMPTY_PREVIOUS,
-          JsedCommand.COPY_EMPTY_NEXT
-        ]),
-
-        ...catalog.getMenuItems([
-          JsedCommand.DELETE_FOCUSED_ELEMENT,
-          JsedCommand.UNWRAP_FOCUS,
-          JsedCommand.CONVERT_FOCUS,
-          JsedCommand.INSERT_ELEMENT_AFTER_FOCUS,
-          JsedCommand.INSERT_ELEMENT_BEFORE_FOCUS,
-          JsedCommand.APPEND_NEW_ELEMENT_IN_FOCUS
-        ]),
-
-        ...catalog.getMenuItems([JsedCommand.WRAP_SELECTION]),
-
-        ...catalog.getMenuItems([
-          JsedCommand.INSERT_SPACE_BEFORE_FOCUS,
-          JsedCommand.REMOVE_SPACE_BEFORE_FOCUS,
-          JsedCommand.INSERT_SPACE_AFTER_FOCUS,
-          JsedCommand.REMOVE_SPACE_AFTER_FOCUS
-        ]),
-
-        ...catalog.getMenuItems([
-          JsedCommand.INSERT_SPACE_AFTER_CURSOR,
-          JsedCommand.REMOVE_SPACE_AFTER_CURSOR,
-          JsedCommand.INSERT_SPACE_BEFORE_CURSOR,
-          JsedCommand.REMOVE_SPACE_BEFORE_CURSOR
-        ]),
-
-        ...catalog.getMenuItems([
-          JsedCommand.INSERT_ANCHOR_IN_FOCUS,
-          JsedCommand.INSERT_ANCHOR_BEFORE_FOCUS,
-          JsedCommand.REMOVE_ANCHOR_BEFORE_FOCUS,
-          JsedCommand.INSERT_ANCHOR_AFTER_FOCUS,
-          JsedCommand.REMOVE_ANCHOR_AFTER_FOCUS
-        ]),
-
-        ...catalog.getMenuItems([
-          JsedCommand.ENABLE_LEGACY_ELEMENT_INDICATOR,
-          JsedCommand.ENABLE_ELEMENT_INDICATOR
-        ])
-      ]
-    };
-  };
 
   /**
    * Rebuild the menu when editor state changes.
@@ -215,5 +125,90 @@ export class JsedUI implements AppObject {
     }
 
     this.ctl.notify(`There was an error editing the document: ${err.type}`);
+  };
+
+  public actions = () =>
+    this.createCatalog()
+      .filter([
+        JsedCommand.DOWN,
+        JsedCommand.UP,
+        JsedCommand.ENTER,
+        JsedCommand.RIGHT_ARROW,
+        JsedCommand.LEFT_ARROW,
+        JsedCommand.EXTEND_RIGHT_ARROW,
+        JsedCommand.EXTEND_LEFT_ARROW,
+        JsedCommand.SOFT_EXIT,
+        JsedCommand.DELETE,
+        JsedCommand.FOCUS,
+        JsedCommand.TOGGLE_SELECT,
+        JsedCommand.NEXT,
+        JsedCommand.PREVIOUS,
+        JsedCommand.UNDO,
+        JsedCommand.REDO,
+        JsedCommand.EXTEND_NEXT,
+        JsedCommand.EXTEND_PREVIOUS,
+        JsedCommand.REVEAL,
+        JsedCommand.CUT,
+        JsedCommand.COPY,
+        JsedCommand.COPY_EMPTY_PREVIOUS,
+        JsedCommand.COPY_EMPTY_NEXT
+      ])
+      .getActions();
+
+  menu = () => {
+    const catalog = this.createCatalog();
+    return {
+      id: 'EditDocument',
+      focusBehaviour: 'last-action,first' as const,
+      items: [
+        ...catalog.getMenuItems([JsedCommand.STOP_EDITING, JsedCommand.EXIT_EDITOR]),
+        ...catalog.getMenuItems([JsedCommand.ENTER, JsedCommand.UNDO, JsedCommand.REDO]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.CUT,
+          JsedCommand.COPY,
+          JsedCommand.COPY_EMPTY_PREVIOUS,
+          JsedCommand.COPY_EMPTY_NEXT
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.DELETE_FOCUSED_ELEMENT,
+          JsedCommand.UNWRAP_FOCUS,
+          JsedCommand.CONVERT_FOCUS,
+          JsedCommand.INSERT_ELEMENT_AFTER_FOCUS,
+          JsedCommand.INSERT_ELEMENT_BEFORE_FOCUS,
+          JsedCommand.APPEND_NEW_ELEMENT_IN_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([JsedCommand.WRAP_SELECTION]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.INSERT_SPACE_BEFORE_FOCUS,
+          JsedCommand.REMOVE_SPACE_BEFORE_FOCUS,
+          JsedCommand.INSERT_SPACE_AFTER_FOCUS,
+          JsedCommand.REMOVE_SPACE_AFTER_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.INSERT_SPACE_AFTER_CURSOR,
+          JsedCommand.REMOVE_SPACE_AFTER_CURSOR,
+          JsedCommand.INSERT_SPACE_BEFORE_CURSOR,
+          JsedCommand.REMOVE_SPACE_BEFORE_CURSOR
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.INSERT_ANCHOR_IN_FOCUS,
+          JsedCommand.INSERT_ANCHOR_BEFORE_FOCUS,
+          JsedCommand.REMOVE_ANCHOR_BEFORE_FOCUS,
+          JsedCommand.INSERT_ANCHOR_AFTER_FOCUS,
+          JsedCommand.REMOVE_ANCHOR_AFTER_FOCUS
+        ]),
+
+        ...catalog.getMenuItems([
+          JsedCommand.ENABLE_LEGACY_ELEMENT_INDICATOR,
+          JsedCommand.ENABLE_ELEMENT_INDICATOR
+        ])
+      ]
+    };
   };
 }

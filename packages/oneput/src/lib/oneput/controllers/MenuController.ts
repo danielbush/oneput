@@ -132,17 +132,8 @@ export class MenuController {
       return;
     }
     const focusedMenuItem = this.currentMenu.focusedMenuItem;
-    if (focusedMenuItem?.action) {
-      this.ctl.app.handleAction(
-        focusedMenuItem.id,
-        {
-          source: 'menu',
-          actionId: focusedMenuItem.id,
-          menuId: this.currentMenu.menuId,
-          menuActionId: focusedMenuItem.id
-        },
-        focusedMenuItem.action
-      );
+    if (focusedMenuItem && !focusedMenuItem.ignored && focusedMenuItem.action) {
+      this.ctl.app.handleMenuAction(focusedMenuItem, this.currentMenu.menuId);
     }
   }
 

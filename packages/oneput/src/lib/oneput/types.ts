@@ -249,13 +249,12 @@ export type AppEvent = [keyof AppEventMap] extends [never]
 /**
  * Context supplied when Oneput dispatches an action.
  *
- * Keyboard actions include the browser event. Menu actions include both the
- * dispatched action id and the menu item that produced it; these ids are usually
- * the same today but may diverge if menu items later point at shared actions.
+ * Keyboard actions include the browser event. Menu actions include the menu
+ * row id that produced it.
  */
 export type AppActionContext =
   | { source: 'keyboard'; event: KeyboardEvent }
-  | { source: 'menu'; actionId: string; menuId: string; menuActionId: string };
+  | { source: 'menu'; menuId: string; menuActionId: string };
 
 export type AppActionHandler<Context extends AppActionContext = AppActionContext> = (
   ctl: Controller,

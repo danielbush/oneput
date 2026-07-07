@@ -26,13 +26,8 @@ describe('MenuController', () => {
       focusBehaviour: 'first',
       items: [item('apple', 'Apple'), item('apricot', 'Apricot')]
     });
-    ctl.events.emit({
-      type: 'menu-action',
-      payload: {
-        menuId: 'main',
-        menuActionId: 'apricot'
-      }
-    });
+    ctl.menu.focusMenuItemById('apricot');
+    ctl.menu.doMenuAction();
 
     // act
     ctl.events.emit({ type: 'input-change', payload: inputChangePayload });

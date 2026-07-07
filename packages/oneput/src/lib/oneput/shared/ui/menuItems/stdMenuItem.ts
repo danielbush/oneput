@@ -98,13 +98,14 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
   const menuItem = vflex({
     ...params,
     id,
-    // action: params.action,
-    action: (ctl) => {
-      params.action?.(ctl);
-      if (params.closeMenuOnAction ?? false) {
-        ctl.menu.closeMenu();
-      }
-    },
+    action: params.action
+      ? (ctl) => {
+          params.action?.(ctl);
+          if (params.closeMenuOnAction ?? false) {
+            ctl.menu.closeMenu();
+          }
+        }
+      : undefined,
     classes: [
       'oneput__std-menu-item',
       params.left === false && 'oneput__std-menu-item--no-left',

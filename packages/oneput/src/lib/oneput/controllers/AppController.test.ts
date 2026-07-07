@@ -381,7 +381,7 @@ describe('AppController', () => {
   });
 
   describe('actions', () => {
-    test('menu action - AppObject action overrides menu item action', async () => {
+    test('menu action - menu item action overrides AppObject action', async () => {
       // arrange
       const ctl = Controller.createNull({ menuOpen: true });
       const actions: string[] = [];
@@ -413,10 +413,10 @@ describe('AppController', () => {
       ctl.menu.doMenuAction();
 
       // assert
-      expect(actions).toEqual(['app:menu']);
+      expect(actions).toEqual(['menu']);
     });
 
-    test('menu action - falls back to menu item action', async () => {
+    test('menu action - runs menu item action', async () => {
       // arrange
       const ctl = Controller.createNull({ menuOpen: true });
       const actions: string[] = [];
@@ -440,6 +440,33 @@ describe('AppController', () => {
 
       // assert
       expect(actions).toEqual(['menu']);
+    });
+
+    test('menu action - no action does nothing', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const actions: string[] = [];
+      ctl.app.run({
+        actions: {
+          action: {
+            action: (_ctl, context) => {
+              actions.push(`app:${context?.source}`);
+            }
+          }
+        },
+        onStart: () => {}
+      });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [stdMenuItem({ id: 'action', textContent: 'Action' })]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(actions).toEqual([]);
     });
 
     test('keyboard action - receives keyboard context', async () => {

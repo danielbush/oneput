@@ -5,6 +5,7 @@ import type {
   AppActionHandler,
   AppEvent,
   AppLayoutParams,
+  MenuItem,
   AppObject,
   UIFlags,
   UILayout
@@ -41,11 +42,7 @@ export class AppController {
     return new AppController(ctl);
   }
 
-  constructor(private ctl: Controller) {
-    ctl.events.on('menu-action', ({ menuId, menuActionId }) => {
-      this.setLastMenuActionId(menuId, menuActionId);
-    });
-  }
+  constructor(private ctl: Controller) {}
 
   private appParents: AnyAppObject[] = [];
   private appStates = new WeakMap<AnyAppObject, AppObjectState>();
@@ -209,16 +206,7 @@ export class AppController {
     }
   }
 
-  /**
-   * The current AppObject should handle the action.
-   *
-   * Favour actions defined within the AppObject, fallback to the default action.
-   * Menu actions also update menu-action tracking and run menu-action cleanup.
-   *
-   * @param actionId
-   * @param defaultAction An action defined outside of any AppObject.
-   */
-  handleAction(actionId: string, context?: AppActionContext, defaultAction?: AppActionHandler) {
+  handleKeyAction(actionId: string, event: KeyboardEvent, defaultAction?: AppActionHandler) {
     const actions = this.resolveActions();
     const action = actions?.[actionId]?.action ?? defaultAction;
     if (!action) {
@@ -226,26 +214,32 @@ export class AppController {
       return;
     }
 
-    const actionOwner = this.current;
-    if (context?.source === 'menu') {
-      this.ctl.events.emit({
-        type: 'menu-action',
-        payload: {
-          menuId: context.menuId,
-          menuActionId: context.menuActionId
-        }
-      });
+    action(this.ctl, { source: 'keyboard', event });
+  }
+
+  handleMenuAction(menuItem: MenuItem, menuId: string) {
+    const menuActionId = menuItem.id;
+
+    this.setLastMenuActionId(menuId, menuActionId);
+    this.ctl.events.emit({
+      type: 'menu-action',
+      payload: {
+        menuId,
+        menuActionId
+      }
+    });
+
+    if (!menuItem.action) {
+      this.ctl.notify(`No action found for ${menuActionId}`, { duration: 2000 });
+      return;
     }
 
+    const actionOwner = this.current;
     try {
-      action(this.ctl, context);
+      menuItem.action(this.ctl);
     } finally {
       // clearInputAfterAction triggered only on menu action:
-      if (
-        context?.source === 'menu' &&
-        this.clearInputAfterAction &&
-        this.current === actionOwner
-      ) {
+      if (this.clearInputAfterAction && this.current === actionOwner) {
         this.ctl.input.clearInput();
         this.ctl.menu.invalidate();
       }

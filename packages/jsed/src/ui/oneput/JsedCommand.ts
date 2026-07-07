@@ -6,7 +6,11 @@
  * merged.
  */
 export const JsedCommand = {
-  EXIT: 'JSED__EXIT',
+  /**
+   * Cancel out of a operation that is handled by a whole AppObject
+   * Eg cancel out of PasteElementUI .
+   */
+  CANCEL_VIA_EXIT: 'JSED__CANCEL_VIA_EXIT',
   EXIT_EDITOR: 'JSED__EXIT_EDITOR',
   SOFT_EXIT: 'JSED__SOFT_EXIT',
   STOP_EDITING: 'JSED__STOP_EDITING',

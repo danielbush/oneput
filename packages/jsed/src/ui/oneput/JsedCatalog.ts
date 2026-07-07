@@ -118,8 +118,7 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
           })
       },
 
-      // TODO: move to oneput catalog
-      [JsedCommand.EXIT]: {
+      [JsedCommand.CANCEL_VIA_EXIT]: {
         action: () => {
           ctl.app.exit();
         },

@@ -31,7 +31,7 @@ export class PasteElementUI implements AppObject {
       JsedCommand.PASTE_BEFORE,
       JsedCommand.PASTE_AFTER,
       JsedCommand.PASTE_APPEND,
-      JsedCommand.EXIT
+      JsedCommand.CANCEL_VIA_EXIT
     ]);
   }
 
@@ -73,7 +73,7 @@ export class PasteElementUI implements AppObject {
           JsedCommand.PASTE_BEFORE,
           JsedCommand.PASTE_AFTER,
           JsedCommand.PASTE_APPEND,
-          JsedCommand.EXIT
+          JsedCommand.CANCEL_VIA_EXIT
         ])
       ]
     } satisfies Menu;

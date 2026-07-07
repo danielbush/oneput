@@ -27,6 +27,11 @@ export interface AppActionCatalog<
  *
  * A catalog defines commands once, then lets each AppObject select the active
  * command ids it exposes through `actions()` and hand-authored menu rows.
+ *
+ * The catalog owns the command contract: what action does; when it is
+ * available; what menu row represents it; what binding, if any, triggers it.
+ * But it does not own AppObject lifecycle stuff like menu id, focus behavior,
+ * layout title, prompt, or child mode setup.
  */
 export class ActionCatalog<
   Id extends string,

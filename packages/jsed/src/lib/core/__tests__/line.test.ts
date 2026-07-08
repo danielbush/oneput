@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, span, t, a, identify } from '../../../test/util.js';
+import { byId, makeRoot, div, p, em, span, t, a, h2, identify } from '../../../test/util.js';
 import { getLine, getNextLineSibling, getPreviousLineSibling } from '../line.js';
 
 // INLINE_COMPUTED_STYLE
@@ -372,5 +372,32 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       expect(collectForward(first, div1)).toHaveLength(3);
       expect(collectForward(first, div1)).toEqual(['aaa', '[anchor]', 'bbb']);
     });
+  });
+});
+
+describe('getNextLineSibling: FOCUS_TRANSPARENT', () => {
+  // SHALLOW_TOKENIZATION regression: a FOCUS_TRANSPARENT header sitting beside
+  // real LINE's (as in the demo doc) must not be descended into and returned as
+  // a seat. If it were, getLine would climb to the whole container and
+  // tokenizeLineAt would tokenize the entire document instead of one LINE.
+  test('skips a FOCUS_TRANSPARENT header, seats in the following LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'container' },
+        p({ id: 'p0' }, 'start'),
+        h2({ 'data-jsed-focus': 'off' }, 'Section header'),
+        p({ id: 'p1' }, 'real line')
+      )
+    );
+    const container = byId(doc, 'container');
+    const p0 = byId(doc, 'p0');
+
+    // act
+    const seat = getNextLineSibling(p0.firstChild!, container);
+
+    // assert — seat is the real LINE's text, and its LINE is p1, not the container
+    expect(seat?.textContent).toBe('real line');
+    expect(getLine(seat!)).toBe(byId(doc, 'p1'));
   });
 });

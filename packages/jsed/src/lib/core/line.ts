@@ -64,17 +64,19 @@ export function getPreviousLineSiblingV1(el: Node, ceiling: HTMLElement): Node |
 /**
  * Get previous LINE_SIBLING in current LINE or in previous LINE.
  *
- * Walks backward from `el` within `ceiling`, descending into CURSOR-transparent
- * structure but not into OPAQUE's, TOKEN's, or IGNORABLE's, and returns the first
+ * Walks backward from `el` within `ceiling`, descending only through
+ * CURSOR_TRANSPARENT structure (FOCUSABLE, non-OPAQUE) and returns the first
  * reachable seat (a tokenizable text node or LINE_SIBLING), skipping IGNORABLE
- * nodes. Backward enumeration makes that first seat the nearest preceding one;
- * the pre/post phase is irrelevant for seat-finding (seats are leaves, the
+ * nodes. Descending through CURSOR_TRANSPARENT excludes TOKEN's, IGNORABLE's,
+ * and FOCUS_TRANSPARENT's (none are FOCUSABLE), so their text is never mistaken
+ * for a seat. Backward enumeration makes that first seat the nearest preceding
+ * one; the pre/post phase is irrelevant for seat-finding (seats are leaves, the
  * containers walked through are never seats).
  */
 export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   return findPreviousNodeW2(el, {
     ceiling,
-    shouldDescend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node),
+    shouldDescend: isCursorTransparent,
     pre: (node) => {
       if (isIgnorableNode(node)) return undefined;
       if (isTokenizableTextNode(node)) return node;
@@ -110,15 +112,17 @@ export function getNextLineSiblingV1(el: Node, ceiling: HTMLElement): Node | nul
 /**
  * Get next LINE_SIBLING in current LINE or in next LINE.
  *
- * Walks forward from `el` within `ceiling` in pre-order, descending into
- * CURSOR-transparent structure but not into OPAQUE's, TOKEN's, or IGNORABLE's,
- * and returns the first reachable seat (a tokenizable text node or LINE_SIBLING),
- * skipping IGNORABLE nodes.
+ * Walks forward from `el` within `ceiling` in pre-order, descending only through
+ * CURSOR_TRANSPARENT structure (FOCUSABLE, non-OPAQUE) and returns the first
+ * reachable seat (a tokenizable text node or LINE_SIBLING), skipping IGNORABLE
+ * nodes. Descending through CURSOR_TRANSPARENT excludes TOKEN's, IGNORABLE's,
+ * and FOCUS_TRANSPARENT's (none are FOCUSABLE), so their text is never mistaken
+ * for a seat.
  */
 export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   return findNextNodeW2(el, {
     ceiling,
-    shouldDescend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node),
+    shouldDescend: isCursorTransparent,
     pre: (node) => {
       if (isIgnorableNode(node)) return undefined;
       if (isTokenizableTextNode(node)) return node;

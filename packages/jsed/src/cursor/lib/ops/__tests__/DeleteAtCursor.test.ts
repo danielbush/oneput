@@ -118,7 +118,7 @@ describe('DeleteAtCursor.run', () => {
     expect(identifyChildren(doc.root)).toEqual(['[anchor]', 'd("aaa")']);
   });
 
-  test('delete TOKEN - after ISLAND / with next TOKEN', () => {
+  test('delete TOKEN - after OPAQUE / with next TOKEN', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -138,11 +138,11 @@ describe('DeleteAtCursor.run', () => {
     const record = DeleteAtCursor.run(state)!;
 
     // assert
-    expect(identify(state.getPlace())).toBe('[island:span]');
+    expect(identify(state.getPlace())).toBe('[opaque:span]');
     expect(identifyChildren(doc.root.firstChild)).toEqual([
       'aaa',
       '[nodeType=3:" "]',
-      '[island:span]',
+      '[opaque:span]',
       '[nodeType=3:" "]',
       'd("bbb")',
       '[deleted-space]',
@@ -157,7 +157,7 @@ describe('DeleteAtCursor.run', () => {
     expect(identifyChildren(doc.root.firstChild)).toEqual([
       'aaa',
       '[nodeType=3:" "]',
-      '[island:span]',
+      '[opaque:span]',
       '[nodeType=3:" "]',
       'bbb',
       '[nodeType=3:" "]',
@@ -168,11 +168,11 @@ describe('DeleteAtCursor.run', () => {
     record.redo(editorState(state));
 
     // assert
-    expect(identify(state.getPlace())).toBe('[island:span]');
+    expect(identify(state.getPlace())).toBe('[opaque:span]');
     expect(identifyChildren(doc.root.firstChild)).toEqual([
       'aaa',
       '[nodeType=3:" "]',
-      '[island:span]',
+      '[opaque:span]',
       '[nodeType=3:" "]',
       'd("bbb")',
       '[deleted-space]',
@@ -180,7 +180,7 @@ describe('DeleteAtCursor.run', () => {
     ]);
   });
 
-  test('delete TOKEN - after ISLAND / last', () => {
+  test('delete TOKEN - after OPAQUE / last', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -279,19 +279,19 @@ describe('DeleteAtCursor.run', () => {
     expect(identifyChildren(doc.root)).toEqual(['[anchor]']);
   });
 
-  test('delete ISLAND - no-op (TODO)', () => {
+  test('delete OPAQUE - no-op (TODO)', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
-    const island = doc.root.querySelector('.katex') as HTMLElement;
-    const state = createState(doc, island);
+    const opaque = doc.root.querySelector('.katex') as HTMLElement;
+    const state = createState(doc, opaque);
 
     // act
     const record = DeleteAtCursor.run(state);
 
     // assert
     expect(record).toBeUndefined();
-    expect(identify(state.getPlace())).toBe('[island:span]');
+    expect(identify(state.getPlace())).toBe('[opaque:span]');
   });
 });

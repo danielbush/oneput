@@ -1,7 +1,7 @@
 import type { JsedDocument, JsedFocusRequestEvent } from '../types.js';
 import {
   isFocusCandidate,
-  isIsland,
+  isOpaque,
   isFocusable,
   isToken,
   JSED_APP_ROOT_ID,
@@ -148,7 +148,7 @@ export class Nav {
     if (!this.#FOCUS) return;
     for (const next of findNextNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
     })) {
       this.REQUEST_FOCUS(next);
       return;
@@ -163,7 +163,7 @@ export class Nav {
     if (!this.#FOCUS) return;
     for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
     })) {
       this.REQUEST_FOCUS(next);
       return;
@@ -178,7 +178,7 @@ export class Nav {
   #firstFocusableDescendant(el: Node): HTMLElement | null {
     for (const next of findNextNode(el, el, {
       visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
     })) {
       return next as HTMLElement;
     }
@@ -189,7 +189,7 @@ export class Nav {
     let last: HTMLElement | null = null;
     for (const next of findNextNode(el, el, {
       visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
     })) {
       last = next as HTMLElement;
     }
@@ -208,7 +208,7 @@ export class Nav {
     let sib: Node | null = start;
     while ((sib = sib.nextSibling)) {
       if (isFocusable(sib)) return sib;
-      if (isFocusCandidate(sib) && !isIsland(sib)) {
+      if (isFocusCandidate(sib) && !isOpaque(sib)) {
         const descendant = this.#firstFocusableDescendant(sib);
         if (descendant) return descendant;
       }
@@ -220,7 +220,7 @@ export class Nav {
     let sib: Node | null = start;
     while ((sib = sib.previousSibling)) {
       if (isFocusable(sib)) return sib;
-      if (isFocusCandidate(sib) && !isIsland(sib)) {
+      if (isFocusCandidate(sib) && !isOpaque(sib)) {
         const descendant = this.#lastFocusableDescendant(sib);
         if (descendant) return descendant;
       }

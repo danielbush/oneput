@@ -1,5 +1,5 @@
 import { ok, Result } from 'neverthrow';
-import { isAnchor, isIsland, isLine, isToken } from '../../lib/core/taxonomy.js';
+import { isAnchor, isOpaque, isLine, isToken } from '../../lib/core/taxonomy.js';
 import * as token from '../../lib/ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../../input/UserInput.js';
@@ -277,7 +277,7 @@ export class EditorEventHandler {
     } else {
       this.state.userInput.enable(false);
       this.state.userInput.setInputValue('');
-      if (isIsland(cursorElement) || isLine(cursorElement)) {
+      if (isOpaque(cursorElement) || isLine(cursorElement)) {
         // TODO: Handle 'Enter' which may be a different key binding.
         this.state.userInput.setPlaceholder('Hit Enter to edit this element');
       } else {

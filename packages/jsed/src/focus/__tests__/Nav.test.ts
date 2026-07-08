@@ -650,8 +650,8 @@ describe('focus controller', () => {
   });
 });
 
-describe('ISLAND', () => {
-  test.todo('KATEX_ISLAND - should ignore katex islands', () => {
+describe('OPAQUE', () => {
+  test.todo('KATEX_OPAQUE - should ignore katex opaques', () => {
     // arrange
     const doc = makeRoot(
       div(

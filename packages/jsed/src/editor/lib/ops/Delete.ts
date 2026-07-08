@@ -3,7 +3,7 @@ import * as focusable from '../../../lib/ops/focusable.js';
 import { canDelete } from '../../../lib/core/dom-rules.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import { removeAnchors } from '../../../lib/ops/anchor.js';
-import { isFocusable, isIsland } from '../../../lib/core/taxonomy.js';
+import { isFocusable, isOpaque } from '../../../lib/core/taxonomy.js';
 import { findNextNode, findPreviousNode } from '../../../lib/core/walk.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
@@ -58,14 +58,14 @@ export class Delete implements UndoRecord {
   private getRedoFocusTarget(): HTMLElement {
     for (const next of findNextNode(this.op.marker, this.parent, {
       visit: isFocusable,
-      descend: (node) => !isIsland(node)
+      descend: (node) => !isOpaque(node)
     })) {
       return next as HTMLElement;
     }
 
     for (const previous of findPreviousNode(this.op.marker, this.parent, {
       visit: isFocusable,
-      descend: (node) => !isIsland(node)
+      descend: (node) => !isOpaque(node)
     })) {
       return previous as HTMLElement;
     }

@@ -2,7 +2,7 @@ import {
   isCursorTransparent,
   isIgnorable,
   isIgnorableNode,
-  isIsland,
+  isOpaque,
   isLine,
   isLineSibling,
   isToken,
@@ -46,7 +46,7 @@ export function isSameLine(tok1: HTMLElement, tok2: HTMLElement): boolean {
  */
 export function getPreviousLineSiblingV1(el: Node, ceiling: HTMLElement): Node | null {
   for (const prev of findPreviousNode(el, ceiling, {
-    descend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node)
+    descend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node)
   })) {
     if (isIgnorableNode(prev)) {
       continue;
@@ -65,7 +65,7 @@ export function getPreviousLineSiblingV1(el: Node, ceiling: HTMLElement): Node |
  * Get previous LINE_SIBLING in current LINE or in previous LINE.
  *
  * Walks backward from `el` within `ceiling`, descending into CURSOR-transparent
- * structure but not into ISLAND's, TOKEN's, or IGNORABLE's, and returns the first
+ * structure but not into OPAQUE's, TOKEN's, or IGNORABLE's, and returns the first
  * reachable seat (a tokenizable text node or LINE_SIBLING), skipping IGNORABLE
  * nodes. Backward enumeration makes that first seat the nearest preceding one;
  * the pre/post phase is irrelevant for seat-finding (seats are leaves, the
@@ -74,7 +74,7 @@ export function getPreviousLineSiblingV1(el: Node, ceiling: HTMLElement): Node |
 export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   return findPreviousNodeW2(el, {
     ceiling,
-    shouldDescend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node),
+    shouldDescend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node),
     pre: (node) => {
       if (isIgnorableNode(node)) return undefined;
       if (isTokenizableTextNode(node)) return node;
@@ -92,7 +92,7 @@ export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | n
  */
 export function getNextLineSiblingV1(el: Node, ceiling: HTMLElement): Node | null {
   for (const next of findNextNode(el, ceiling, {
-    descend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node)
+    descend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node)
   })) {
     if (isIgnorableNode(next)) {
       continue;
@@ -111,14 +111,14 @@ export function getNextLineSiblingV1(el: Node, ceiling: HTMLElement): Node | nul
  * Get next LINE_SIBLING in current LINE or in next LINE.
  *
  * Walks forward from `el` within `ceiling` in pre-order, descending into
- * CURSOR-transparent structure but not into ISLAND's, TOKEN's, or IGNORABLE's,
+ * CURSOR-transparent structure but not into OPAQUE's, TOKEN's, or IGNORABLE's,
  * and returns the first reachable seat (a tokenizable text node or LINE_SIBLING),
  * skipping IGNORABLE nodes.
  */
 export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   return findNextNodeW2(el, {
     ceiling,
-    shouldDescend: (node) => !isIsland(node) && !isToken(node) && !isIgnorable(node),
+    shouldDescend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node),
     pre: (node) => {
       if (isIgnorableNode(node)) return undefined;
       if (isTokenizableTextNode(node)) return node;

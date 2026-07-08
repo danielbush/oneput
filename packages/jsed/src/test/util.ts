@@ -8,7 +8,7 @@ import {
   isDeletedSpace,
   isDeletedToken,
   isImplicitLine,
-  isIsland,
+  isOpaque,
   isSelectionWrapper,
   isToken,
   JSED_ANCHOR_CLASS,
@@ -153,7 +153,7 @@ export function identify(el: Node | undefined | null): string {
   if (isDeletedElement(el)) return `[deleted-element]`;
   if (isAnchor(el)) return '[anchor]';
   if (isToken(el)) return token.getValue(el);
-  if (isIsland(el)) return `[island:${(el as HTMLElement).tagName.toLowerCase()}]`;
+  if (isOpaque(el)) return `[opaque:${(el as HTMLElement).tagName.toLowerCase()}]`;
   if (el instanceof Element) {
     if (el.classList.contains(JSED_ELEMENT_INDICATOR)) {
       return '[element-indicator]';

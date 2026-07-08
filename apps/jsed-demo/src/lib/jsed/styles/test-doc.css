@@ -11,7 +11,7 @@
     }
   }
 
-  :is(p, h1, h2, ul).jsed-ignore:not(.jsed-tag-indicator):not(.notice) {
+  :is(p, h1, h2, ul)[data-jsed-focus='off']:not(.jsed-tag-indicator):not(.notice) {
     padding: 0.5rem;
     margin-left: -0.5rem;
     margin-right: -0.5rem;
@@ -21,7 +21,7 @@
     clear: both;
   }
 
-  h1.jsed-ignore:not(.jsed-tag-indicator) {
+  h1[data-jsed-focus='off']:not(.jsed-tag-indicator) {
     color: rgba(80, 180, 100);
     background-color: rgba(220, 255, 220);
     font-size: 1.2rem;

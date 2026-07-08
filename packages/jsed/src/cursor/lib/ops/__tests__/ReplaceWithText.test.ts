@@ -62,7 +62,7 @@ describe('ReplaceWithText.run', () => {
     expect(identifyChildren(byId(doc, 'p1'))).toEqual(['goodbye', '[nodeType=3:" "]', 'world']);
   });
 
-  test('TOKEN after ISLAND', () => {
+  test('TOKEN after OPAQUE', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
@@ -88,20 +88,20 @@ describe('ReplaceWithText.run', () => {
     expect(identify(state.getPlace())).toBe('ccc');
   });
 
-  test('ISLAND no-op', () => {
+  test('OPAQUE no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))
     );
-    const island = doc.root.querySelector('.katex') as HTMLElement;
-    const state = createState(doc, island);
+    const opaque = doc.root.querySelector('.katex') as HTMLElement;
+    const state = createState(doc, opaque);
 
     // act
     const record = ReplaceWithText.run(state, 'oops');
 
     // assert
     expect(record).toBeUndefined();
-    expect(identify(state.getPlace())).toBe('[island:span]');
+    expect(identify(state.getPlace())).toBe('[opaque:span]');
   });
 
   test(`multiple TOKEN's`, () => {

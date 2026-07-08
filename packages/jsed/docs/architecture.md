@@ -148,7 +148,7 @@ The narrative above is the public shape of the editor. Beneath it are lower-leve
 
 - DOM mutation rules for TOKENIZATION and detokenization.
 - TOKEN operations, separator management, JOIN, SPLIT, and related editing helpers.
-- Element classification rules for FOCUSABLE's, TOKEN's, LINE's, LINE_SIBLING's, ISLAND's, and related taxonomy terms.
+- Element classification rules for FOCUSABLE's, TOKEN's, LINE's, LINE_SIBLING's, OPAQUE's, and related taxonomy terms.
 - LINE_SIBLING traversal and cross-LINE walking.
 - General DOM tree-walking and DOM manipulation.
 - HTML behavior rules such as void elements and anchor eligibility.

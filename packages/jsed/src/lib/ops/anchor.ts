@@ -5,7 +5,7 @@ import {
   isIgnorable,
   isImplicitLine,
   isInline,
-  isIsland,
+  isOpaque,
   isLine,
   isLineSibling,
   isToken,
@@ -275,8 +275,8 @@ export function anchorize(el: HTMLElement): HTMLElement[] {
   findNextNode(el, {
     ceiling: el,
     visitStart: true,
-    // ISLAND's are OPAQUE: never DESCEND or anchorize their internals.
-    shouldDescend: (node) => isFocusable(node) && !isIsland(node),
+    // OPAQUE's are OPAQUE: never DESCEND or anchorize their internals.
+    shouldDescend: (node) => isFocusable(node) && !isOpaque(node),
     pre: (node) => {
       // Returning void keeps the walk going; a returned Node would stop it.
       const anchor = anchorizeLeadingSegment(node);
@@ -297,7 +297,7 @@ export function anchorize(el: HTMLElement): HTMLElement[] {
  * - Covers the case where the parent is empty, in which case we effectively append an ANCHOR.
  */
 function anchorizeLeadingSegment(node: Node) {
-  if (isFocusable(node) && !isIsland(node)) {
+  if (isFocusable(node) && !isOpaque(node)) {
     const firstRealSib = getNextSibling(
       node.firstChild,
       (sib) => isFocusable(sib) || isTokenizableTextNode(sib) || isLineSibling(sib),
@@ -329,9 +329,9 @@ function anchorizeLeadingSegment(node: Node) {
  * - covers trailing LINE_SEGMENT's for a LINE.
  */
 function anchorizeAfter(node: Node) {
-  // ISLAND's are allowed here: the ANCHOR lands in the ISLAND's parent (after
-  // it), not inside it. Anchoring inside an ISLAND is prevented by the
-  // !isIsland guards in anchorizeLeadingSegment and shouldDescend.
+  // OPAQUE's are allowed here: the ANCHOR lands in the OPAQUE's parent (after
+  // it), not inside it. Anchoring inside an OPAQUE is prevented by the
+  // !isOpaque guards in anchorizeLeadingSegment and shouldDescend.
   if (isFocusable(node) && isInline(node)) {
     if (isImplicitLine(node)) {
       // Don't anchorize after an IMPLICIT_LINE.

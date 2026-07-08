@@ -49,7 +49,7 @@ describe('tokenizeLineAt', () => {
     expect(p1.childNodes[3]?.textContent).toBe(' ');
   });
 
-  test('TOKEN after ISLAND', () => {
+  test('TOKEN after OPAQUE', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -64,15 +64,15 @@ describe('tokenizeLineAt', () => {
     // act
     const first = tokenizeLineAt(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
-    const afterIsland = tokens[1] as HTMLElement;
+    const afterOpaque = tokens[1] as HTMLElement;
 
     // assert
     expect(first!.textContent!.trim()).toBe('aaa');
     expect(tokens.length).toBe(2);
-    expect(afterIsland.textContent).toBe('bbb');
+    expect(afterOpaque.textContent).toBe('bbb');
   });
 
-  test('ISLAND as first LINE_SIBLING', () => {
+  test('OPAQUE as first LINE_SIBLING', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' bbb')
@@ -86,7 +86,7 @@ describe('tokenizeLineAt', () => {
     expect(first.textContent).toBe('x²');
   });
 
-  test('em around ISLAND as first LINE_SIBLING', () => {
+  test('em around OPAQUE as first LINE_SIBLING', () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -104,7 +104,7 @@ describe('tokenizeLineAt', () => {
     expect(first.textContent).toBe('x²');
   });
 
-  test('ISLAND at end of LINE: no TOKEN to pad', () => {
+  test('OPAQUE at end of LINE: no TOKEN to pad', () => {
     // arrange
     const doc = makeRoot(
       p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
@@ -119,7 +119,7 @@ describe('tokenizeLineAt', () => {
     expect(tokens.length).toBe(1);
   });
 
-  test('adjacent ISLANDs: TOKEN after second ISLAND is not yet marked padded during tokenizeLine', () => {
+  test("adjacent OPAQUE's: TOKEN after second OPAQUE is not yet marked padded during tokenizeLine", () => {
     // arrange
     const doc = makeRoot(
       p(
@@ -135,10 +135,10 @@ describe('tokenizeLineAt', () => {
     // act
     tokenizeLineAt(p1);
     const tokens = p1.querySelectorAll('.jsed-token');
-    const afterSecondIsland = tokens[tokens.length - 1] as HTMLElement;
+    const afterSecondOpaque = tokens[tokens.length - 1] as HTMLElement;
 
     // assert
-    expect(afterSecondIsland.textContent).toBe('bbb');
+    expect(afterSecondOpaque.textContent).toBe('bbb');
   });
 
   test('NESTED_LINE: <div><div>nested</div>outer</div>', () => {

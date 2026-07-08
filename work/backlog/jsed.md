@@ -167,23 +167,6 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 - feat: a "getLine indicator" in oneput status bar; it will help in situations where the CURSOR is in a nested INLINE_FLOW
 - chore: if cursor text ops or other ops fail, editor should catch the error and go into a safe state
   - EXAMPLE: cursor delete (CursorTextOps), at time of writing, throws if current.parentElement is null
-- FOCUS_TRANSPARENT and nested editable regions
-  - COMMENT: this would allow use to have templates; uneditable text with interior regions that are editable
-  - rename ISLAND to OPAQUE
-    - IGNORABLE's
-      - FOCUS  : visit=n, descend=n
-      - CURSOR : same
-    - OPAQUE's are non-descendable (was ISLAND)
-      - FOCUS  : visit=y, descend=n
-      - CURSOR : same - cursor can visit ISLAND if it's a LINE_SIBLING eg katex
-    - FOCUS_TRANSPARENT
-      - COMMENT: this is a new designation, creating something a little like an IGNORABLE because the FOCUS can't visit and a CURSOR probably can't be placed as a result, but because we can DESCEND, we might hit a non-TRANSPARENT within.
-      - FOCUS  : visit=n, descend=y
-      - CURSOR : same, CURSOR already treats non-LINE_SIBLING's in LINE as CURSOR_TRANSPARENT
-    - ISLAND
-      - COMMENT: re-defined here
-      - informally describes an element that can be visited by FOCUS inside a FOCUS_TRANSPARENT
-      - we either allow CURSOR to walk between ISLAND's or we restrict it; that might be a refinement based on experience when we see it
 
 ## chore
 

@@ -16,7 +16,7 @@ import {
 import { getValue } from '../../lib/ops/token.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import {
-  isIsland,
+  isOpaque,
   isToken,
   JSED_ANCHOR_CLASS,
   JSED_FOCUS_CLASS,
@@ -312,10 +312,10 @@ describe('Editor', () => {
     });
 
     describe('handleEnter - user initiates editing', () => {
-      test('from a focused LINE with a leading ISLAND lands the CURSOR on that ISLAND', () => {
+      test('from a focused LINE with a leading OPAQUE lands the CURSOR on that OPAQUE', () => {
         // arrange
         const doc = makeRoot(
-          '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
+          '<div id="d1"><span class="katex" style="display:inline;">x²</span> after opaque</div>'
         );
         const editor = createNullEditor(doc);
         editor.start();
@@ -361,22 +361,22 @@ describe('Editor', () => {
         editor.destroy();
       });
 
-      it('wraps the current ISLAND and keeps the CURSOR on that ISLAND', () => {
+      it('wraps the current OPAQUE and keeps the CURSOR on that OPAQUE', () => {
         // arrange
         const doc = makeRoot(
-          '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
+          '<div id="d1"><span class="katex" style="display:inline;">x²</span> after opaque</div>'
         );
         const editor = createNullEditor(doc);
         const d1 = byId(doc, 'd1');
         editor.enterEditing(d1);
-        const island = editor.getCursor()?.getPlace() as HTMLElement;
+        const opaque = editor.getCursor()?.getPlace() as HTMLElement;
         expect(identifyChildren(doc.root)).toEqual(['[element:div#d1]']);
         expect(identifyChildren(d1)).toEqual([
-          '[island:span]',
+          '[opaque:span]',
           '[nodeType=3:" "]',
           'after',
           '[nodeType=3:" "]',
-          'island'
+          'opaque'
         ]);
 
         // act
@@ -389,12 +389,12 @@ describe('Editor', () => {
           '[nodeType=3:" "]',
           'after',
           '[nodeType=3:" "]',
-          'island'
+          'opaque'
         ]);
         const wrapper = d1.querySelector('em') as HTMLElement;
-        expect(identifyChildren(wrapper)).toEqual(['[island:span]']);
-        expect(isIsland(editor.getCursor()?.getPlace())).toBe(true);
-        expect(editor.getCursor()?.getPlace()).toBe(island);
+        expect(identifyChildren(wrapper)).toEqual(['[opaque:span]']);
+        expect(isOpaque(editor.getCursor()?.getPlace())).toBe(true);
+        expect(editor.getCursor()?.getPlace()).toBe(opaque);
 
         editor.destroy();
       });
@@ -430,7 +430,7 @@ describe('Editor', () => {
         editor.destroy();
       });
 
-      it('wraps a SELECTION containing an ISLAND', () => {
+      it('wraps a SELECTION containing an OPAQUE', () => {
         // arrange
         const doc = makeRoot(
           '<div id="d1">before <span class="katex" style="display:inline;">x²</span> after</div>'
@@ -450,7 +450,7 @@ describe('Editor', () => {
         expect(identifyChildren(d1.firstChild)).toEqual([
           'before',
           '[nodeType=3:" "]',
-          '[island:span]',
+          '[opaque:span]',
           '[nodeType=3:" "]'
         ]);
         expect(doc.root.querySelector('.jsed-selection')).toBeNull();
@@ -680,7 +680,7 @@ describe('Editor', () => {
         editor.destroy();
       });
 
-      it('from the last LINE_SIBLING of a LINE enters the next LINE that starts with an ISLAND', () => {
+      it('from the last LINE_SIBLING of a LINE enters the next LINE that starts with an OPAQUE', () => {
         // arrange
         const doc = makeRoot(
           frag(
@@ -696,7 +696,7 @@ describe('Editor', () => {
 
         // assert
         expect(editor.isEditing()).toBe(true);
-        expect(identify(editor.getCursor()?.getPlace()!)).toBe('[island:span]');
+        expect(identify(editor.getCursor()?.getPlace()!)).toBe('[opaque:span]');
 
         editor.destroy();
       });
@@ -790,7 +790,7 @@ describe('Editor', () => {
         editor.destroy();
       });
 
-      it('from the first TOKEN of a LINE enters the previous LINE that ends with an ISLAND', () => {
+      it('from the first TOKEN of a LINE enters the previous LINE that ends with an OPAQUE', () => {
         // arrange
         const doc = makeRoot(
           frag(
@@ -807,7 +807,7 @@ describe('Editor', () => {
 
         // assert
         expect(editor.isEditing()).toBe(true);
-        expect(identify(editor.getCursor()?.getPlace()!)).toBe('[island:span]');
+        expect(identify(editor.getCursor()?.getPlace()!)).toBe('[opaque:span]');
 
         editor.destroy();
       });

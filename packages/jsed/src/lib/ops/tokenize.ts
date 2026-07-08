@@ -74,7 +74,7 @@ function tokenizeLineRec(line: Node): HTMLElement | null {
         first = child as HTMLElement;
       }
     }
-    // ISLAND's, and other elements: skip but continue loop
+    // OPAQUE's, and other elements: skip but continue loop
   }
 
   return first;
@@ -102,7 +102,7 @@ function detoken(token: HTMLElement): void {
  *
  * Mirrors tokenizeLineRec by descending only through CURSOR_TRANSPARENT
  * structure.
- * TOKEN wrappers are replaced with plain text nodes; ISLAND's are left
+ * TOKEN wrappers are replaced with plain text nodes; OPAQUE's are left
  * untouched.
  */
 function detokenizeLineRec(line: Node): void {
@@ -121,7 +121,7 @@ function detokenizeLineRec(line: Node): void {
 }
 
 /**
- * Tokenize a LINE — recurses into most elements excluding ISLAND's. Returns the
+ * Tokenize a LINE — recurses into most elements excluding OPAQUE's. Returns the
  * first TOKEN created, or null if there was nothing to tokenize (already
  * tokenized, or no text content).
  *

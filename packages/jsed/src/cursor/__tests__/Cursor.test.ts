@@ -260,8 +260,8 @@ describe('moveNext / movePrevious', () => {
   });
 
   describe("walks non-TOKEN LINE_SIBLING's", () => {
-    describe('(1) ISLAND: visit=yes, descend=no', () => {
-      test('moveNext visits ISLAND, then continues to next TOKEN', () => {
+    describe('(1) OPAQUE: visit=yes, descend=no', () => {
+      test('moveNext visits OPAQUE, then continues to next TOKEN', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
@@ -271,12 +271,12 @@ describe('moveNext / movePrevious', () => {
         // act & assert
         expect(identify(cursor.getPlace())).toBe('aaa');
         cursor.moveNext();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.moveNext();
         expect(identify(cursor.getPlace())).toBe('bbb');
       });
 
-      test('movePrevious visits ISLAND in reverse', () => {
+      test('movePrevious visits OPAQUE in reverse', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>', ' bbb')
@@ -288,12 +288,12 @@ describe('moveNext / movePrevious', () => {
         // act & assert
         expect(identify(cursor.getPlace())).toBe('bbb');
         cursor.movePrevious();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.movePrevious();
         expect(identify(cursor.getPlace())).toBe('aaa');
       });
 
-      test('ISLAND at start of LINE: cursor starts on the ISLAND', () => {
+      test('OPAQUE at start of LINE: cursor starts on the OPAQUE', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
@@ -301,12 +301,12 @@ describe('moveNext / movePrevious', () => {
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
         // act & assert - quick-descend now lands on the first LINE_SIBLING
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.moveNext();
         expect(identify(cursor.getPlace())).toBe('aaa');
       });
 
-      test('ISLAND at end of LINE is the last cursor position', () => {
+      test('OPAQUE at end of LINE is the last cursor position', () => {
         // arrange
         const doc = makeRoot(
           p({ id: 'p1' }, 'aaa ', '<span class="katex" style="display:inline;">x²</span>')
@@ -316,12 +316,12 @@ describe('moveNext / movePrevious', () => {
         // act & assert
         expect(identify(cursor.getPlace())).toBe('aaa');
         cursor.moveNext();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.moveNext();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
       });
 
-      test('ISLAND inside INLINE_FLOW', () => {
+      test('OPAQUE inside INLINE_FLOW', () => {
         // arrange
         const doc = makeRoot(
           p(
@@ -338,19 +338,19 @@ describe('moveNext / movePrevious', () => {
         );
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
-        // act & assert - CURSOR descends into the INLINE_FLOW, visits the ISLAND within it
+        // act & assert - CURSOR descends into the INLINE_FLOW, visits the OPAQUE within it
         expect(identify(cursor.getPlace())).toBe('aaa');
         cursor.moveNext();
         expect(identify(cursor.getPlace())).toBe('bbb');
         cursor.moveNext();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.moveNext();
         expect(identify(cursor.getPlace())).toBe('ccc');
         cursor.moveNext();
         expect(identify(cursor.getPlace())).toBe('ddd');
       });
 
-      test('adjacent ISLANDs', () => {
+      test("adjacent OPAQUE's", () => {
         // arrange
         const doc = makeRoot(
           p(
@@ -363,18 +363,18 @@ describe('moveNext / movePrevious', () => {
         );
         const { cursor } = tokenizeAndCursor(doc, '#p1');
 
-        // act & assert - both ISLANDs are visited
+        // act & assert - both OPAQUE's are visited
         expect(identify(cursor.getPlace())).toBe('aaa');
         cursor.moveNext();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.moveNext();
-        expect(identify(cursor.getPlace())).toBe('[island:span]');
+        expect(identify(cursor.getPlace())).toBe('[opaque:span]');
         cursor.moveNext();
         expect(identify(cursor.getPlace())).toBe('bbb');
       });
     });
 
-    describe(`(2) non-ISLAND's: visit=no, descend=yes`, () => {
+    describe(`(2) non-OPAQUE's: visit=no, descend=yes`, () => {
       const transparent = 'jsed-cursor-transparent';
 
       test('moveNext descends into nested div to visit its TOKEN', () => {

@@ -29,7 +29,8 @@ Jsed divides the DOM that up into several broad mutually exclusive categories:
 - (3) **SEPARATOR**
   - these are whitespace text nodes
 - (4) **IGNORABLE**
-  - An element that cannot be FOCUS'ed and is effectively invisible to user navigation and other jsed operations (although it may be very much visible to the user). It is invisible to the CURSOR.
+  - IGNORABLE's are elements that are non-FOCUSABLE non-editable artifacts of editing a document; they do not belong to the document; an element marked as IGNORABLE will get stripped out at save-time.
+  - If you want to make part of a document invisible make it FOCUS_TRANSPARENT.
   - Example: temporary markers or nodes generated in the DOM to assist the user or the editing process.
   - Source of truth: `isIgnorable` in `taxonomy.ts`.
 
@@ -87,14 +88,13 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
   - VISIT=no DESCEND=yes
   - only applies to CURSOR
 - **OPAQUE**
-  - VISIT=yes DESCEND=no
-- **ISLAND**
-  - OPAQUE to FOCUS and CURSOR
+  - VISIT=yes DESCEND=no — OPAQUE to both FOCUS and CURSOR.
   - This means we can't edit the internal structure of these elements.
-  - Source of truth: `isIsland` in `taxonomy.ts`.
+  - Source of truth: `isOpaque` in `taxonomy.ts`.
   - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
-  - Example: Some leaf nodes that have a special purpose eg `<img>` tags etc may be treated as ISLAND's
+  - Example: Some leaf nodes that have a special purpose eg `<img>` tags etc may be treated as OPAQUE.
   - Example: Also elements that are already natively focusable, e.g. form controls.
+  - Previously called ISLAND.
 - **INLINE_FLOW**
   — a FOCUSABLE with inline-flow display.
   - Example: mark up for one or more TOKEN's — e.g. `<span>`, `<em>`, `<a>`.
@@ -107,8 +107,8 @@ We can define the traversal rules:
 - **TRAVERSAL_RULES**
   - (0) FOCUS prescribes the limits of non-TOKEN elements the CURSOR operates on or within
     - COMMENT: the way to think about this is the CURSOR launches based on where the FOCUS is
-  - (1) FOCUS can DESCEND through FOCUS_CANDIDATE's unless blocked by an ISLAND, but only VISIT FOCUSABLE's.
-  - (2) FOCUS and CURSOR cannot DESCEND ISLAND's.
+  - (1) FOCUS can DESCEND through FOCUS_CANDIDATE's unless blocked by an OPAQUE, but only VISIT FOCUSABLE's.
+  - (2) FOCUS and CURSOR cannot DESCEND OPAQUE's.
   - (3) CURSOR either VISIT's or DESCEND's all FOCUSABLE's but not both.
     - non-LINE_SIBLING LINE_MEMBER's are TRANSPARENT to the CURSOR eg it walks through em-tags to get to the text they hold
     - FOCUS can VISIT and DESCEND the same FOCUSABLE.
@@ -130,7 +130,7 @@ We can define the traversal rules:
   - loosely: an element with descendents a CURSOR can edit
   - more precisely:
     - a FOCUSABLE that is not CURSOR_TRANSPARENT but is FOCUS_TRANSPARENT; CURSOR_TRANSPARENT's are treated as part of some ancestor LINE
-    - by the above, ISLAND's cannot be LINE's
+    - by the above, OPAQUE's cannot be LINE's
   - LINE's can contain other LINE's as descendents - call these a **NESTED_LINE**; because LINE's are not CURSOR_TRANSPARENT, the CURSOR can VISIT but won't DESCEND a NESTED_LINE. We could decide to FOCUS on the NESTED_LINE making it the LINE we want to initate an edit with the CURSOR.
   - Example: a `<div>`, `<p>`, inline-block `<span>`, etc.
   - Source of truth: `isLine` in `taxonomy.ts`.
@@ -142,7 +142,7 @@ We can define the traversal rules:
   - which equates to the following:
     - it must belong to a LINE
     - it can be a TOKEN
-    - it can be ISLAND — CURSOR visits (does not descend)
+    - it can be OPAQUE — CURSOR visits (does not descend)
     - it is not CURSOR_TRANSPARENT or INLINE_FLOW - CURSOR descends (does not visit)
   - anything visited by CURSOR in a CURSOR_TRANSPARENT or INLINE_FLOW where either belongs to the LINE;
     - Example: the TOKEN's in an em-tag within a p-tag are LINE_SIBLING's for the p-tag.

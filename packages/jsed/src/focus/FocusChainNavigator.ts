@@ -1,4 +1,4 @@
-import { isFocusCandidate, isFocusable, isIsland } from '../lib/core/taxonomy.js';
+import { isFocusCandidate, isFocusable, isOpaque } from '../lib/core/taxonomy.js';
 import { findNextNode } from '../lib/core/walk.js';
 import type { Nav } from './Nav.js';
 
@@ -49,7 +49,7 @@ export class FocusChainNavigator {
 
     for (const next of findNextNode(focus, focus, {
       visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
     })) {
       this.nav.REQUEST_FOCUS(next);
       return;

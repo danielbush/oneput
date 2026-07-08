@@ -7,7 +7,7 @@ import {
   isIgnorableNode,
   isImplicitLine,
   isInlineFlow,
-  isIsland,
+  isOpaque,
   JSED_DELETED_CLASS,
   JSED_FOCUS_CLASS,
   JSED_IGNORE_CLASS
@@ -265,7 +265,7 @@ export function splitParentBefore(el: HTMLElement): void {
 export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
   for (const next of findNextNode(el, ceiling, {
     visit: isFocusable,
-    descend: (node) => !isIsland(node) && node !== el
+    descend: (node) => !isOpaque(node) && node !== el
   })) {
     return next as HTMLElement;
   }
@@ -278,7 +278,7 @@ export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLEl
 export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
   for (const previous of findPreviousNode(el, ceiling, {
     visit: isFocusable,
-    descend: (node) => !isIsland(node)
+    descend: (node) => !isOpaque(node)
   })) {
     return previous as HTMLElement;
   }

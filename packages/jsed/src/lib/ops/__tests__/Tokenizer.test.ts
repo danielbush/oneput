@@ -268,7 +268,7 @@ describe('Tokenizer', () => {
       expect(target!.textContent!.trim()).toBe('before');
     });
 
-    test('LINE starting with ISLAND: returns the ISLAND as the first LINE_SIBLING', () => {
+    test('LINE starting with OPAQUE: returns the OPAQUE as the first LINE_SIBLING', () => {
       // arrange
       const doc = makeRoot(
         p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', ' aaa')
@@ -286,7 +286,7 @@ describe('Tokenizer', () => {
       expect(target!.classList.contains('katex')).toBe(true);
     });
 
-    test('CURSOR_TRANSPARENT nested LINE starting with ISLAND: returns the first descendant ISLAND', () => {
+    test('CURSOR_TRANSPARENT nested LINE starting with OPAQUE: returns the first descendant OPAQUE', () => {
       // arrange
       const doc = makeRoot(
         div(

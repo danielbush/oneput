@@ -275,8 +275,8 @@ describe('anchorize', () => {
     expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[nodeType=3:" "]']);
   });
 
-  test('ISLAND → anchored around, internals untouched', () => {
-    // arrange — a katex-shaped ISLAND with nested rendered internals
+  test('OPAQUE → anchored around, internals untouched', () => {
+    // arrange — a katex-shaped OPAQUE with nested rendered internals
     const root = makeRawRoot(
       p(
         { id: 'p1' },
@@ -293,7 +293,7 @@ describe('anchorize', () => {
         )
       )
     );
-    const islandInner = rawById(root, 'isl').innerHTML;
+    const opaqueInner = rawById(root, 'isl').innerHTML;
 
     // act
     anchorize(root);
@@ -301,10 +301,10 @@ describe('anchorize', () => {
     // assert — anchored on both sides (you can type either side), never inside
     expect(identifyChildren(rawById(root, 'p1'))).toEqual([
       '[anchor]',
-      '[island:span]',
+      '[opaque:span]',
       '[anchor]'
     ]);
-    expect(rawById(root, 'isl').innerHTML).toBe(islandInner);
+    expect(rawById(root, 'isl').innerHTML).toBe(opaqueInner);
   });
 });
 

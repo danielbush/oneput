@@ -366,7 +366,7 @@ export class CursorState {
     return isSameLine(this.getPlace(), tok);
   }
 
-  /** Guard: is the CURSOR currently on a TOKEN (not an ISLAND or other non-TOKEN LINE_SIBLING)? */
+  /** Guard: is the CURSOR currently on a TOKEN (not an OPAQUE or other non-TOKEN LINE_SIBLING)? */
   isOnToken(): boolean {
     return isToken(this.getPlace());
   }

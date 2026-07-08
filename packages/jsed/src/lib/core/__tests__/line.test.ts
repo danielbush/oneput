@@ -57,7 +57,7 @@ describe('getLine', () => {
     expect(getLine(emEl)).toBe(line);
   });
 
-  test('ISLAND (katex): returns the containing LINE', () => {
+  test('OPAQUE (katex): returns the containing LINE', () => {
     // arrange
     const doc = makeRoot(
       div({ id: 'line' }, '<span class="katex" style="display:inline;">x²</span>')
@@ -159,42 +159,42 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
     expect(collectBackward(walkToLast(first, div1), div1)).toEqual(['bbb', 'floated', 'aaa']);
   });
 
-  describe('(1) ISLAND: CURSOR visit=yes, descend=no', () => {
-    test('ISLAND at middle of LINE', () => {
+  describe('(1) OPAQUE: CURSOR visit=yes, descend=no', () => {
+    test('OPAQUE at middle of LINE', () => {
       // arrange
       const doc = makeRoot(
         p({ id: 'p1' }, t('aaa'), '<span class="katex" style="display:inline;">x²</span>', t('bbb'))
       );
       const first = byId(doc, 'p1').querySelector('.jsed-token') as HTMLElement;
 
-      // act & assert — CURSOR should visit the ISLAND as an opaque LINE_SIBLING
-      expect(collectForward(first)).toEqual(['aaa', '[island:span]', 'bbb']);
-      expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[island:span]', 'aaa']);
+      // act & assert — CURSOR should visit the OPAQUE as an opaque LINE_SIBLING
+      expect(collectForward(first)).toEqual(['aaa', '[opaque:span]', 'bbb']);
+      expect(collectBackward(walkToLast(first))).toEqual(['bbb', '[opaque:span]', 'aaa']);
     });
 
-    test('ISLAND at start of LINE', () => {
+    test('OPAQUE at start of LINE', () => {
       // arrange
       const doc = makeRoot(
         p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>', t('aaa'), t('bbb'))
       );
       const katex = byId(doc, 'p1').querySelector('.katex') as HTMLElement;
 
-      // act & assert — ISLAND is the first LINE_SIBLING
-      expect(collectForward(katex)).toEqual(['[island:span]', 'aaa', 'bbb']);
+      // act & assert — OPAQUE is the first LINE_SIBLING
+      expect(collectForward(katex)).toEqual(['[opaque:span]', 'aaa', 'bbb']);
     });
 
-    test('ISLAND at end of LINE', () => {
+    test('OPAQUE at end of LINE', () => {
       // arrange
       const doc = makeRoot(
         p({ id: 'p1' }, t('aaa'), t('bbb'), '<span class="katex" style="display:inline;">x²</span>')
       );
       const first = byId(doc, 'p1').querySelector('.jsed-token') as HTMLElement;
 
-      // act & assert — ISLAND is the last LINE_SIBLING
-      expect(collectForward(first)).toEqual(['aaa', 'bbb', '[island:span]']);
+      // act & assert — OPAQUE is the last LINE_SIBLING
+      expect(collectForward(first)).toEqual(['aaa', 'bbb', '[opaque:span]']);
     });
 
-    test('ISLAND inside INLINE_FLOW', () => {
+    test('OPAQUE inside INLINE_FLOW', () => {
       // arrange
       const doc = makeRoot(
         p(
@@ -211,11 +211,11 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       );
       const first = byId(doc, 'p1').querySelector('.jsed-token') as HTMLElement;
 
-      // act & assert — CURSOR descends into the INLINE_FLOW, visits the ISLAND within it
-      expect(collectForward(first)).toEqual(['aaa', 'bbb', '[island:span]', 'ccc', 'ddd']);
+      // act & assert — CURSOR descends into the INLINE_FLOW, visits the OPAQUE within it
+      expect(collectForward(first)).toEqual(['aaa', 'bbb', '[opaque:span]', 'ccc', 'ddd']);
     });
 
-    test('adjacent ISLANDs', () => {
+    test("adjacent OPAQUE's", () => {
       // arrange
       const doc = makeRoot(
         p(
@@ -228,12 +228,12 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
       );
       const first = byId(doc, 'p1').querySelector('.jsed-token') as HTMLElement;
 
-      // act & assert — both ISLANDs are visited
-      expect(collectForward(first)).toEqual(['aaa', '[island:span]', '[island:span]', 'bbb']);
+      // act & assert — both OPAQUE's are visited
+      expect(collectForward(first)).toEqual(['aaa', '[opaque:span]', '[opaque:span]', 'bbb']);
     });
   });
 
-  describe(`(2) non-ISLAND's: CURSOR visit=no, descend=yes`, () => {
+  describe(`(2) non-OPAQUE's: CURSOR visit=no, descend=yes`, () => {
     // Category (2)
     // This includes nested block elements (div inside div) and inline-block spans.
     // The CURSOR descends into them seamlessly, like an INLINE_FLOW.

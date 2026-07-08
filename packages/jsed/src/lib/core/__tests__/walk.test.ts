@@ -253,7 +253,7 @@ describe('findNextNode - visit/descend separation', () => {
       div(
         { id: '1' }, //
         div(
-          { id: 'island' }, //
+          { id: 'opaque' }, //
           div({ id: 'hidden-1' }),
           div({ id: 'hidden-2' })
         ),
@@ -264,15 +264,15 @@ describe('findNextNode - visit/descend separation', () => {
     const start = byId(doc, '1');
     const ceiling = byId(doc, '1');
 
-    // act — visit 'island' but don't descend into it
+    // act — visit 'opaque' but don't descend into it
     for (const el of findNextNode(start, ceiling, {
-      descend: (n) => (n as HTMLElement).id !== 'island'
+      descend: (n) => (n as HTMLElement).id !== 'opaque'
     })) {
       visited.push((el as HTMLElement).id);
     }
 
-    // assert — 'island' visited, its children are not
-    expect(visited).toEqual(['island', '2']);
+    // assert — 'opaque' visited, its children are not
+    expect(visited).toEqual(['opaque', '2']);
   });
 
   test('visit rejects AND descend rejects — node and children skipped', () => {
@@ -656,7 +656,7 @@ describe('findPreviousNode - visit/descend separation', () => {
         { id: '1' }, //
         div({ id: '2' }),
         div(
-          { id: 'island' }, //
+          { id: 'opaque' }, //
           div({ id: 'hidden-1' }),
           div({ id: 'hidden-2' })
         ),
@@ -667,14 +667,14 @@ describe('findPreviousNode - visit/descend separation', () => {
     const start = byId(doc, '3');
     const ceiling = byId(doc, '1');
 
-    // act — visit 'island' but don't descend into it
+    // act — visit 'opaque' but don't descend into it
     for (const el of findPreviousNode(start, ceiling, {
-      descend: (n) => (n as HTMLElement).id !== 'island'
+      descend: (n) => (n as HTMLElement).id !== 'opaque'
     })) {
       visited.push((el as HTMLElement).id);
     }
 
-    // assert — 'island' visited, its children are not
-    expect(visited).toEqual(['island', '2']);
+    // assert — 'opaque' visited, its children are not
+    expect(visited).toEqual(['opaque', '2']);
   });
 });

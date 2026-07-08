@@ -163,10 +163,10 @@ describe('JsedEditDocumentUI', () => {
     expect(editor.getCursor()?.getPlace()).toBe(cursorToken);
   });
 
-  it('runs Tag selection as a child app so an island can use the input prompt', async () => {
+  it('runs Tag selection as a child app so an opaque can use the input prompt', async () => {
     // arrange
     const document = makeRoot(
-      '<div id="d1"><span class="katex" style="display:inline;">x²</span> after island</div>'
+      '<div id="d1"><span class="katex" style="display:inline;">x²</span> after opaque</div>'
     );
     const ctl = Controller.createNull();
     const editorUI = JsedUI.createNull(ctl, { document });
@@ -176,7 +176,7 @@ describe('JsedEditDocumentUI', () => {
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(d1);
     editor.moveNext();
-    const island = editor.getCursor()?.getPlace() as HTMLElement;
+    const opaque = editor.getCursor()?.getPlace() as HTMLElement;
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
     await openMenu(ctl);
     const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
@@ -194,8 +194,8 @@ describe('JsedEditDocumentUI', () => {
     expect(tagItem).toBeDefined();
     expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
-    expect(wrapper.firstElementChild).toBe(island);
-    expect(editor.getCursor()?.getPlace()).toBe(island);
+    expect(wrapper.firstElementChild).toBe(opaque);
+    expect(editor.getCursor()?.getPlace()).toBe(opaque);
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
   });
 

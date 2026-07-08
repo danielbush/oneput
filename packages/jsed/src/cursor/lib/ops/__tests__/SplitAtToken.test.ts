@@ -196,7 +196,7 @@ describe('SplitAtToken.run', () => {
     expect(doc.root.querySelectorAll(`.${JSED_ANCHOR_CLASS}`)).toHaveLength(0);
   });
 
-  test('after TOKEN before ISLAND anchors the peer before the ISLAND', () => {
+  test('after TOKEN before OPAQUE anchors the peer before the OPAQUE', () => {
     // arrange
     const doc = makeRoot(p(t('foo'), s(), '<span class="katex" style="display:inline;">x2</span>'));
     const state = createState(doc, tokens(doc)[0]);
@@ -209,18 +209,18 @@ describe('SplitAtToken.run', () => {
     const lines = doc.root.querySelectorAll('p');
     const newLine = lines[1];
     const anchor = newLine.querySelector(`.${JSED_ANCHOR_CLASS}`) as HTMLElement | null;
-    const island = newLine.querySelector('.katex');
+    const opaque = newLine.querySelector('.katex');
     expect(lines).toHaveLength(2);
     expect(identifyChildren(newLine)).toEqual([
       '[nodeType=3:" "]',
       '[anchor]',
-      '[island:span]',
+      '[opaque:span]',
       '[anchor]'
     ]);
     expect(anchor).not.toBeNull();
-    expect(island).not.toBeNull();
+    expect(opaque).not.toBeNull();
     expect(
-      anchor!.compareDocumentPosition(island!) & Node.DOCUMENT_POSITION_FOLLOWING
+      anchor!.compareDocumentPosition(opaque!) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(getSeparatorBefore(anchor!)?.nodeValue).toBe(' ');
   });

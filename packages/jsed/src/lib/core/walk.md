@@ -179,7 +179,7 @@ relative to its **children**. But for seat-finding that placement is invisible:
   **non-seat container** — a LINE, an INLINE_FLOW, a transparent wrapper, an
   ancestor. The seat predicate returns `undefined` for all of them, so they're
   skipped no matter which phase they'd be announced in.
-- A node that **is** a seat (TOKEN, ISLAND) is always a leaf or opaque — it has no
+- A node that **is** a seat (TOKEN, OPAQUE) is always a leaf or opaque — it has no
   seat-children to be ordered before or after. So "parent before vs after its
   kids" simply never applies to a seat.
 

@@ -3,8 +3,8 @@
 </script>
 
 <div id="test-doc">
-  <h1 class="jsed-ignore">Default behaviours</h1>
-  <h2 class="jsed-ignore">Simple paragraphs and INLINE_FLOW</h2>
+  <h1 data-jsed-focus="off">Default behaviours</h1>
+  <h2 data-jsed-focus="off">Simple paragraphs and INLINE_FLOW</h2>
   <p>aaa</p>
   <p>aaa bbb</p>
   <p>aaa bbb ccc</p>
@@ -18,7 +18,7 @@
   <p><em><strong>aaa</strong><strong>bbb</strong></em></p>
   <p><em><strong></strong><strong></strong></em></p>
 
-  <h2 class="jsed-ignore">Bulleted lists</h2>
+  <h2 data-jsed-focus="off">Bulleted lists</h2>
   <ul>
     <li>no para</li>
     <li>aaa bbb <em>ccc ddd</em> eee fff</li>
@@ -33,7 +33,7 @@
     </li>
   </ul>
 
-  <h2 class="jsed-ignore">IMPLICIT_LINE's and mixed levels</h2>
+  <h2 data-jsed-focus="off">IMPLICIT_LINE's and mixed levels</h2>
   <div>
     aa bb
     <div>
@@ -69,7 +69,7 @@
     <div>cc dd</div>
     ee ff
   </div>
-  <hr class="jsed-ignore" />
+  <hr data-jsed-focus="off" />
   <div>
     <p>aa bb</p>
     cc dd
@@ -83,15 +83,15 @@
     jj kk
     <br />
   </div>
-  <hr class="jsed-ignore" />
-  <p class="jsed-ignore">br tags are inline by default</p>
+  <hr data-jsed-focus="off" />
+  <p data-jsed-focus="off">br tags are inline by default</p>
   <div>
     aa bb <br /> cc dd
   </div>
-  <hr class="jsed-ignore" />
+  <hr data-jsed-focus="off" />
   <div>&nbsp;<em></em>&nbsp;</div>
 
-  <p class="jsed-ignore">inline-block</p>
+  <p data-jsed-focus="off">inline-block</p>
   <div>
     aa bb
     <span style="border: 1px dashed red; padding: 2px; display: inline-block">cc dd</span>
@@ -116,20 +116,20 @@
     <span style="border: 1px dashed red; padding: 2px; display: inline-block">cc dd</span>
   </div>
 
-  <p class="jsed-ignore">ISLAND's</p>
+  <p data-jsed-focus="off">ISLAND's</p>
   <div><span class="katex" style="display: inline">x²</span> aa bb</div>
   <div>cc dd <span class="katex" style="display: inline">x²</span> ee ff</div>
-  <p class="jsed-ignore">inline ISLAND</p>
+  <p data-jsed-focus="off">inline ISLAND</p>
   <div>
     <p>aa bb <span class="katex" style="display: inline">x²</span> cc dd</p>
   </div>
-  <p class="jsed-ignore">block ISLAND</p>
+  <p data-jsed-focus="off">block ISLAND</p>
   <div>
     <p>aa bb</p>
     <span class="katex" style="display: block">x²</span>
     <p>cc dd</p>
   </div>
-  <p class="jsed-ignore">ISLAND (katex) block in p-tag (not really valid but could happen)</p>
+  <p data-jsed-focus="off">ISLAND (katex) block in p-tag (not really valid but could happen)</p>
   <div>
     <p>
       aa bb
@@ -138,7 +138,7 @@
     </p>
   </div>
 
-  <p class="jsed-ignore">Floats</p>
+  <p data-jsed-focus="off">Floats</p>
   <div>
     aa bb
     <img
@@ -148,7 +148,7 @@
     />
     cc dd
   </div>
-  <hr class="jsed-ignore" style="clear:both;" />
+  <hr data-jsed-focus="off" style="clear:both;" />
   <div>
     aa bb
     <figure style="margin: 0; float: right; border: solid black 1px">
@@ -161,7 +161,7 @@
     </figure>
     ee ff
   </div>
-  <hr class="jsed-ignore" style="clear:both;" />
+  <hr data-jsed-focus="off" style="clear:both;" />
   <div>
     <p>aa bb</p>
     <figure style="margin: 0; float: right; border: solid black 1px">
@@ -174,20 +174,20 @@
     </figure>
     <p>ee ff</p>
   </div>
-  <p class="jsed-ignore">Embedded ignores</p>
+  <p data-jsed-focus="off">Embedded ignores</p>
   <div>
     aa bb
-    <div class="jsed-ignore">this is ignored</div>
+    <div data-jsed-focus="off">this is ignored</div>
     cc dd
   </div>
 
-  <h1 class="jsed-ignore">ANCHOR's, TRAILING_SPACE, LEADING_SPACE</h1>
-  <p class="jsed-ignore">
+  <h1 data-jsed-focus="off">ANCHOR's, TRAILING_SPACE, LEADING_SPACE</h1>
+  <p data-jsed-focus="off">
     Try adding/remove LEADING_SPACE's and TRAILING_SPACE's. Try adding and removing ANCHOR's.
   </p>
 
   <p style="border: 1px dashed red; min-height: 1rem; position: relative">
-    <span style="position: absolute; right: 0; top: 0; margin: 0" class="note jsed-ignore"
+    <span style="position: absolute; right: 0; top: 0; margin: 0" class="note" data-jsed-focus="off"
       >(empty p-tag)</span
     >
   </p>
@@ -202,7 +202,7 @@
     aa <em>bb<strong>cc</strong></em>
     <span class="katex" style="display: inline">x²</span>dd ee
   </div>
-  <p class="jsed-ignore">inline-block</p>
+  <p data-jsed-focus="off">inline-block</p>
   <div>
     aa bb
     <div style="display:inline-block;">cc dd</div>
@@ -215,7 +215,7 @@
     <em>can we add ANCHOR before or after this em-tag?</em>
   </div>
 
-  <h2 class="jsed-ignore">Scrollable container</h2>
+  <h2 data-jsed-focus="off">Scrollable container</h2>
   <div style="height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px">
     <p>First paragraph inside the scrollable container.</p>
     <p>Second paragraph with some more text to take up space.</p>
@@ -226,8 +226,8 @@
     <p>Seventh paragraph to guarantee scrolling is needed.</p>
   </div>
 
-  <h2 class="jsed-ignore">SHALLOW_TOKENIZATION</h2>
-  <p class="jsed-ignore">
+  <h2 data-jsed-focus="off">SHALLOW_TOKENIZATION</h2>
+  <p data-jsed-focus="off">
     The following div contains mulltiple paragraph tags. If this div represents a large document we
     would hit performance issues if we tokenized it all.
   </p>
@@ -238,7 +238,7 @@
     <p>line 4</p>
   </div>
 
-  <h2 class="jsed-ignore">FOCUS_TRANSPARENT</h2>
+  <h2 data-jsed-focus="off">FOCUS_TRANSPARENT</h2>
   <div style="background-color: #ddd; padding: 10px;">
     <p>Start here:</p>
     <div data-jsed-focus="off" style="padding: 10px; border: solid 1px black;">

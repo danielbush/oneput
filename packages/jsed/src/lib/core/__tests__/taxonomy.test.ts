@@ -67,12 +67,12 @@ describe('isInlineFlow', () => {
     expect(isInlineFlow(ib)).toBe(false);
   });
 
-  test('ISLAND (katex with display:inline): returns true (pure — no island check)', () => {
+  test('OPAQUE (katex with display:inline): returns true (pure — no opaque check)', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>'));
     const katex = byId(doc, 'p1').querySelector('.katex')!;
 
-    // act & assert — isInlineFlow is pure display, so islands with inline display return true
+    // act & assert — isInlineFlow is pure display, so opaques with inline display return true
     expect(isInlineFlow(katex)).toBe(true);
   });
 
@@ -229,7 +229,7 @@ describe('isFocusTransparent', () => {
 });
 
 describe('isLine', () => {
-  test('ISLAND (katex): returns false', () => {
+  test('OPAQUE (katex): returns false', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, '<span class="katex" style="display:inline;">x²</span>'));
     const katex = byId(doc, 'p1').querySelector('.katex')!;

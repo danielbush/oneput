@@ -239,24 +239,24 @@
   </div>
 
   <h2 data-jsed-focus="off">FOCUS_TRANSPARENT</h2>
-  <div style="background-color: #ddd; padding: 10px;">
+  <div style="border: solid 1px black; padding: 10px;">
     <p>Start here:</p>
-    <div data-jsed-focus="off" style="padding: 10px; border: solid 1px black;">
+    <div data-jsed-focus="off" style="background: #ddd; padding: 10px; border: solid 1px black;">
       <p>the parent div is FOCUS_TRANSPARENT_SIBLING.</p>
-      <p data-jsed-focus="on">But this one should be.</p>
+      <p data-jsed-focus="on" style="background: #fff;">But this one should be.</p>
       <div style="padding: 10px; border: solid 1px black;">
         <p>not reachable</p>
-        <p data-jsed-focus="on">And this one should be.</p>
+        <p data-jsed-focus="on" style="background: #fff;">And this one should be.</p>
         <div data-jsed-focus="off" style="padding: 10px; border: solid 1px black;">
           <p>not reachable</p>
-          <p data-jsed-focus="on">And this one inside a nested "off".</p>
+          <p data-jsed-focus="on" style="background: #fff;">And this one inside a nested "off".</p>
         </div>
       </div>
     </div>
     <p>End here</p>
   </div>
 
-  <div style="height: 400px"></div>
+  <div data-jsed-focus="off" style="height: 400px"></div>
 </div>
 
 <style>

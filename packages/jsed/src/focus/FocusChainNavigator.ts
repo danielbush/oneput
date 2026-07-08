@@ -19,10 +19,22 @@ export class FocusChainNavigator {
     this.updateCurrentMark(focus);
   }
 
+  /**
+   * Move FOCUS to the nearest FOCUSABLE ancestor.
+   *
+   * FOCUS_TRANSPARENT ancestors stay in the chain but are skipped as landing
+   * targets.
+   */
   moveUp() {
     this.nav.UP();
   }
 
+  /**
+   * Move FOCUS back down the remembered chain, or into the current subtree.
+   *
+   * FOCUS_TRANSPARENT nodes are traversed as FOCUS_CANDIDATE's, but DOWN_CHAIN
+   * lands on the next FOCUSABLE below them.
+   */
   moveDown() {
     const focus = this.nav.getFocus();
     if (!focus) {
@@ -68,12 +80,16 @@ export class FocusChainNavigator {
       return null;
     }
 
-    let child = this.currentMark;
-    for (let parent = child.parentElement; parent; parent = parent.parentElement) {
+    // The remembered chain may pass through FOCUS_TRANSPARENT ancestors; keep
+    // the nearest FOCUSABLE below them so DOWN_CHAIN can land past the tunnel.
+    let focusableBelow = isFocusable(this.currentMark) ? this.currentMark : null;
+    for (let parent = this.currentMark.parentElement; parent; parent = parent.parentElement) {
       if (parent === focus) {
-        return child;
+        return focusableBelow;
       }
-      child = parent;
+      if (isFocusable(parent)) {
+        focusableBelow = parent;
+      }
     }
 
     return null;

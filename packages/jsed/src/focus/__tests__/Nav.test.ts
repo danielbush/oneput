@@ -81,6 +81,25 @@ describe('FOCUS', () => {
     expect(nav.getFocus()).toBe(doc.root);
   });
 
+  it('should focus a descendant that opts in under a FOCUS_TRANSPARENT element', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer', 'data-jsed-focus': 'off' },
+        p({ id: 'skipped' }, 'skipped'),
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+      )
+    );
+    const nav = new Nav(doc);
+    nav.FOCUS(doc.root);
+
+    // act
+    nav.REQUEST_FOCUS(byId(doc, 'inner'));
+
+    // assert
+    expectFocusedElement(doc, byId(doc, 'inner'));
+  });
+
   it('scrolls a hidden FOCUSABLE back into view with nearest alignment', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'p1'), {
@@ -331,6 +350,28 @@ test('SIB_NEXT should walk to next sibling', () => {
   expectSiblingHighlights(doc, ['li2']);
 });
 
+test('SIB_NEXT should descend through a FOCUS_TRANSPARENT_SIBLING', () => {
+  // arrange
+  const doc = makeRoot(
+    frag(
+      p({ id: 'before' }, 'before'),
+      div(
+        { id: 'outer', 'data-jsed-focus': 'off' },
+        p({ id: 'skipped' }, 'skipped'),
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+      )
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'before'));
+
+  // act
+  nav.SIB_NEXT();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'inner'));
+});
+
 test('SIB_PREV should walk to previous sibling', () => {
   // arrange
   const doc = makeRoot(
@@ -358,6 +399,28 @@ test('SIB_PREV should walk to previous sibling', () => {
   expectSiblingHighlights(doc, ['li2']);
 });
 
+test('SIB_PREV should descend through a FOCUS_TRANSPARENT_SIBLING', () => {
+  // arrange
+  const doc = makeRoot(
+    frag(
+      div(
+        { id: 'outer', 'data-jsed-focus': 'off' },
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner'),
+        p({ id: 'skipped' }, 'skipped')
+      ),
+      p({ id: 'after' }, 'after')
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'after'));
+
+  // act
+  nav.SIB_PREV();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'inner'));
+});
+
 test('SIB_NEXT_OR_UP walks to the next sibling when one exists', () => {
   // arrange
   const doc = makeRoot(
@@ -375,6 +438,29 @@ test('SIB_NEXT_OR_UP walks to the next sibling when one exists', () => {
 
   // assert
   expectFocusedElement(doc, byId(doc, 'a2'));
+});
+
+test('SIB_NEXT_OR_UP climbs to a FOCUS_TRANSPARENT_SIBLING descendant', () => {
+  // arrange
+  const doc = makeRoot(
+    div(
+      { id: 'root' },
+      div({ id: 'before' }, p({ id: 'current' }, 'current')),
+      div(
+        { id: 'outer', 'data-jsed-focus': 'off' },
+        p({ id: 'skipped' }, 'skipped'),
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+      )
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'current'));
+
+  // act
+  nav.SIB_NEXT_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'inner'));
 });
 
 test('SIB_NEXT_OR_UP climbs to an ancestor sibling without focusing the parent', () => {
@@ -470,6 +556,27 @@ test('UP can walk up successive parent elements', () => {
   nav.UP(); // no wrap around
   expectRootFocused(doc);
   expectSiblingHighlights(doc, []);
+});
+
+test('UP_CHAIN skips FOCUS_TRANSPARENT ancestors', () => {
+  // arrange
+  const doc = makeRoot(
+    div(
+      { id: 'outer' },
+      div(
+        { id: 'transparent', 'data-jsed-focus': 'off' }, //
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+      )
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'inner'));
+
+  // act
+  nav.UP_CHAIN();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'outer'));
 });
 
 describe('focus controller', () => {

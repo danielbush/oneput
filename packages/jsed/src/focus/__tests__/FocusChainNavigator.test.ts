@@ -177,6 +177,36 @@ describe('FocusChainNavigator', () => {
     expect(nav.getFocus()).toBe(second);
   });
 
+  it('re-enters through a FOCUS_TRANSPARENT ancestor after moving back up', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' },
+        div(
+          { id: 'transparent', 'data-jsed-focus': 'off' }, //
+          p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+        )
+      )
+    );
+    let navigator: FocusChainNavigator | undefined;
+    const nav = Nav.createNull(doc);
+    navigator = FocusChainNavigator.create(nav);
+    nav.connect({
+      onFocusChange: (focus) => navigator?.handleFocusChange(focus)
+    });
+    const outer = byId(doc, 'outer');
+    const inner = byId(doc, 'inner');
+
+    nav.REQUEST_FOCUS(inner);
+
+    // act + assert
+    navigator.moveUp();
+    expect(nav.getFocus()).toBe(outer);
+
+    navigator.moveDown();
+    expect(nav.getFocus()).toBe(inner);
+  });
+
   it('does not traverse to a sibling on repeated moveDown', () => {
     // arrange
     const doc = makeRoot(

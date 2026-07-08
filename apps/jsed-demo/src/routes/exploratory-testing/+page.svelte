@@ -239,9 +239,21 @@
   </div>
 
   <h2 class="jsed-ignore">FOCUS_TRANSPARENT</h2>
-  <div data-jsed-focus="off">
-    <p>This paragraph shouldn't be editable.</p>
-    <p data-jsed-focus="on">But this one should be.</p>
+  <div style="background-color: #ddd; padding: 10px;">
+    <p>Start here:</p>
+    <div data-jsed-focus="off" style="padding: 10px; border: solid 1px black;">
+      <p>the parent div is FOCUS_TRANSPARENT_SIBLING.</p>
+      <p data-jsed-focus="on">But this one should be.</p>
+      <div style="padding: 10px; border: solid 1px black;">
+        <p>not reachable</p>
+        <p data-jsed-focus="on">And this one should be.</p>
+        <div data-jsed-focus="off" style="padding: 10px; border: solid 1px black;">
+          <p>not reachable</p>
+          <p data-jsed-focus="on">And this one inside a nested "off".</p>
+        </div>
+      </div>
+    </div>
+    <p>End here</p>
   </div>
 
   <div style="height: 400px"></div>

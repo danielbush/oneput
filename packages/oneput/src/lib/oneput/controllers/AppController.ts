@@ -1,7 +1,6 @@
 import type { Controller } from './controller.js';
 import type {
   AppActions,
-  AppActionContext,
   AppActionHandler,
   AppEvent,
   AppLayoutParams,

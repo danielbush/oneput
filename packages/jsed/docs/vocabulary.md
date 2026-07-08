@@ -58,6 +58,31 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
   - VISIT=no DESCEND=yes for FOCUS;
   - Set with `data-jsed-focus="off"`. The nearest `data-jsed-focus="on|off"` in the ancestor chain wins, so a descendant can opt back in with `data-jsed-focus="on"`.
   - Source of truth: `isFocusTransparent` in `taxonomy.ts`.
+- **FOCUS_TRANSPARENT_SIBLING**
+  - A FOCUS_TRANSPARENT FOCUS_CANDIDATE occupying a sibling position to a FOCUSABLE.
+  - Suppose you are on a FOCUSABLE (M) and the next sibling (N) is FOCUS_TRANSPARENT and contains FOCUSABLE descendants (D)
+    - we can use recursive traversal eg REC_NEXT to reach D from M but we don't use that for FOCUS navigation at the moment (for ux reasons)
+    - N can't be reached by strict sibling traversal from M because it is FOCUS_TRANSPARENT, so it and D will be skipped
+    - we can't use DOWN_CHAIN (in Nav) to descend into N to get to D because we can't get onto N
+      - we could descend through N from its FOCUSABLE parent, but to get to that point is tricky
+    - So the way we handle this is by bending `SIB_*` traversal to DESCEND into N in order to reach D easily.
+
+    Example:
+
+    ```html
+    <p id="a">a</p>
+    <div data-jsed-focus="off">
+      <p id="b" data-jsed-focus="on">b</p>
+    </div>
+    ```
+
+    From `a`, `SIB_NEXT` no longer treats the transparent `div` as “no
+    focusable sibling here”; it treats it as a tunnel and lands on `b`.
+
+    Sibling purity only bends at FOCUS_TRANSPARENT boundaries. That
+    seems consistent with the concept: the wrapper is structurally present in
+    traversal but not a valid FOCUS destination.
+
 - **TRANSPARENT**
   - VISIT=no DESCEND=yes
   - only applies to CURSOR

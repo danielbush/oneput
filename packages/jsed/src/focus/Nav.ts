@@ -10,12 +10,8 @@ import {
 } from '../lib/core/taxonomy.js';
 import * as token from '../lib/ops/token.js';
 import { getParent, findNextNode, findPreviousNode } from '../lib/core/walk.js';
-import {
-  findNextNode as findNextNode2,
-  findPreviousNode as findPreviousNode2
-} from '../lib/core/walk2.js';
+import { findPreviousNode as findPreviousNode2 } from '../lib/core/walk2.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
-import { getNextSibling, getPreviousSibling } from '../lib/core/sibling.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
 
@@ -175,16 +171,71 @@ export class Nav {
     return;
   }
 
-  #sibnext = () => (this.#FOCUS ? (getNextSibling(this.#FOCUS, isFocusable) as HTMLElement) : null);
+  #sibnext = () => (this.#FOCUS ? this.#nextSiblingFocusTarget(this.#FOCUS) : null);
 
-  #sibprev = () =>
-    this.#FOCUS ? (getPreviousSibling(this.#FOCUS, isFocusable) as HTMLElement) : null;
+  #sibprev = () => (this.#FOCUS ? this.#previousSiblingFocusTarget(this.#FOCUS) : null);
+
+  #firstFocusableDescendant(el: Node): HTMLElement | null {
+    for (const next of findNextNode(el, el, {
+      visit: isFocusable,
+      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+    })) {
+      return next as HTMLElement;
+    }
+    return null;
+  }
+
+  #lastFocusableDescendant(el: Node): HTMLElement | null {
+    let last: HTMLElement | null = null;
+    for (const next of findNextNode(el, el, {
+      visit: isFocusable,
+      descend: (node) => isFocusCandidate(node) && !isIsland(node)
+    })) {
+      last = next as HTMLElement;
+    }
+    return last;
+  }
+
+  /**
+   * Find the next same-parent FOCUS target.
+   *
+   * If the next sibling is FOCUS_TRANSPARENT, treat it as a tunnel and return
+   * the first FOCUSABLE descendant inside that sibling's FOCUS_CANDIDATE
+   * subtree. This keeps sibling navigation useful for sections that are not
+   * themselves FOCUSABLE but contain descendants that have opted back in.
+   */
+  #nextSiblingFocusTarget(start: Node): HTMLElement | null {
+    let sib: Node | null = start;
+    while ((sib = sib.nextSibling)) {
+      if (isFocusable(sib)) return sib;
+      if (isFocusCandidate(sib) && !isIsland(sib)) {
+        const descendant = this.#firstFocusableDescendant(sib);
+        if (descendant) return descendant;
+      }
+    }
+    return null;
+  }
+
+  #previousSiblingFocusTarget(start: Node): HTMLElement | null {
+    let sib: Node | null = start;
+    while ((sib = sib.previousSibling)) {
+      if (isFocusable(sib)) return sib;
+      if (isFocusCandidate(sib) && !isIsland(sib)) {
+        const descendant = this.#lastFocusableDescendant(sib);
+        if (descendant) return descendant;
+      }
+    }
+    return null;
+  }
 
   /**
    * Find next sibling element if there is one.
+   *
+   * For ordinary FOCUSABLE siblings, `SIB_NEXT` / `SIB_PREV` traverse only same-parent siblings.
+   * Supports DESCEND'ing FOCUS_TRANSPARENT's -- see FOCUS_TRANSPARENT_SIBLING.
    */
   SIB_NEXT() {
-    const next = this.#sibnext();
+    const next = this.#FOCUS ? this.#nextSiblingFocusTarget(this.#FOCUS) : null;
     if (next) {
       this.REQUEST_FOCUS(next);
       return;
@@ -196,43 +247,37 @@ export class Nav {
    * Move to the next sibling FOCUSABLE; if the siblings are exhausted, climb to
    * the nearest ancestor that has a following FOCUSABLE and FOCUS that.
    *
-   * Composes two layers, each keeping its charter:
-   * - sibling.ts (`getNextSibling`) does the flat, same-parentNode hop.
-   * - walk2 (`findNextNode`) does the cross-parent climb. We start the walk at
-   *   the parent (not #FOCUS) and disable descent, so we never re-scan #FOCUS's
-   *   siblings and never descend — it is strictly "next sibling, otherwise up".
-   *
-   * Because only `pre` is supplied, ancestors themselves are never matched
-   * (going forward only their `post` fires on exit), matching pre-order: parents
-   * were already visited on the way down.
+   * Supports DESCEND'ing FOCUS_TRANSPARENT's -- see FOCUS_TRANSPARENT_SIBLING and {@link SIB_NEXT} and
    */
   SIB_NEXT_OR_UP() {
     if (!this.#FOCUS) return;
 
-    const sib = getNextSibling(this.#FOCUS, isFocusable) as HTMLElement | null;
+    const sib = this.#nextSiblingFocusTarget(this.#FOCUS);
     if (sib) {
       this.REQUEST_FOCUS(sib);
       return;
     }
 
-    const parent = this.#FOCUS.parentNode;
-    if (!parent || parent === this.doc.root) return;
-
-    const up = findNextNode2(parent, {
-      ceiling: this.doc.root,
-      shouldDescend: () => false,
-      pre: (node) => (isFocusable(node) ? node : undefined)
-    });
-    if (up) {
-      this.REQUEST_FOCUS(up as HTMLElement);
+    for (
+      let ancestor = this.#FOCUS.parentNode;
+      ancestor && ancestor !== this.doc.root;
+      ancestor = ancestor.parentNode
+    ) {
+      const up = this.#nextSiblingFocusTarget(ancestor);
+      if (up) {
+        this.REQUEST_FOCUS(up);
+        return;
+      }
     }
   }
 
   /**
    * Find previous sibling element if there is one.
+   *
+   * See {@link SIB_NEXT}
    */
   SIB_PREV() {
-    const next = this.#sibprev();
+    const next = this.#FOCUS ? this.#previousSiblingFocusTarget(this.#FOCUS) : null;
     if (next) {
       this.REQUEST_FOCUS(next);
       return;
@@ -245,16 +290,14 @@ export class Nav {
    * exhausted, climb to the parent and FOCUS it. The mirror of
    * {@link SIB_NEXT_OR_UP}, except parents *are* visited here.
    *
-   * Same composition: sibling.ts (`getPreviousSibling`) does the flat hop;
-   * walk2 (`findPreviousNode`) does the climb. We start the walk at the parent
-   * with `visitStart` so `pre(parent)` fires first — in reverse pre-order an
-   * ancestor's `pre` is its predecessor, so the parent is the natural next stop.
-   * `shouldDescend: () => false` keeps it "up only, never down".
+   * Same-parent hops can tunnel through a FOCUS_TRANSPARENT sibling to its last
+   * FOCUSABLE descendant. If previous siblings are exhausted, parents are
+   * visited in reverse pre-order, so the parent is the natural next stop.
    */
   SIB_PREV_OR_UP() {
     if (!this.#FOCUS) return;
 
-    const sib = getPreviousSibling(this.#FOCUS, isFocusable) as HTMLElement | null;
+    const sib = this.#previousSiblingFocusTarget(this.#FOCUS);
     if (sib) {
       this.REQUEST_FOCUS(sib);
       return;
@@ -275,13 +318,23 @@ export class Nav {
   }
 
   /**
-   * Find next parent.
+   * Find the next FOCUSABLE parent.
+   *
+   * FOCUS_TRANSPARENT ancestors are FOCUS_CANDIDATE's, so they remain part of
+   * the FOCUS tree, but they are not valid places to land. UP skips past them
+   * and lands on the first non-transparent FOCUSABLE ancestor.
    */
   UP(): void {
     if (!this.#FOCUS) return;
-    const next = getParent(this.#FOCUS, this.doc.root);
-    if (next) {
-      this.REQUEST_FOCUS(next);
+    for (
+      let next = getParent(this.#FOCUS, this.doc.root);
+      next;
+      next = getParent(next, this.doc.root)
+    ) {
+      if (isFocusable(next)) {
+        this.REQUEST_FOCUS(next);
+        return;
+      }
     }
     return;
   }

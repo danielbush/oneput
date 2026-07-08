@@ -1,6 +1,14 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em } from '../../../test/util.js';
-import { isFocusable, isIgnorable, isInlineFlow, isLine, isToken } from '../taxonomy.js';
+import {
+  isFocusCandidate,
+  isFocusable,
+  isFocusTransparent,
+  isIgnorable,
+  isInlineFlow,
+  isLine,
+  isToken
+} from '../taxonomy.js';
 import { tokenizeLineAt } from '../../ops/tokenize.js';
 
 const inlineStyle = { style: 'display:inline;' };
@@ -145,6 +153,78 @@ describe('isFocusable', () => {
 
     // act & assert
     expect(isFocusable(inner)).toBe(false);
+  });
+
+  test('FOCUS_TRANSPARENT element: returns false', () => {
+    // arrange
+    const doc = makeRoot('<div id="outer" data-jsed-focus="off"><p id="inner">text</p></div>');
+
+    // act & assert
+    expect(isFocusable(byId(doc, 'outer'))).toBe(false);
+  });
+
+  test('inherited FOCUS_TRANSPARENT: returns false', () => {
+    // arrange
+    const doc = makeRoot('<div data-jsed-focus="off"><p id="inner">text</p></div>');
+
+    // act & assert
+    expect(isFocusable(byId(doc, 'inner'))).toBe(false);
+  });
+
+  test('descendant on overrides ancestor off: returns true', () => {
+    // arrange
+    const doc = makeRoot(
+      '<div data-jsed-focus="off"><p id="inner" data-jsed-focus="on">text</p></div>'
+    );
+
+    // act & assert
+    expect(isFocusable(byId(doc, 'inner'))).toBe(true);
+  });
+});
+
+describe('isFocusCandidate', () => {
+  test('FOCUS_TRANSPARENT element: returns true', () => {
+    // arrange
+    const doc = makeRoot('<div id="outer" data-jsed-focus="off"><p id="inner">text</p></div>');
+
+    // act & assert
+    expect(isFocusCandidate(byId(doc, 'outer'))).toBe(true);
+  });
+
+  test('descendant in inherited FOCUS_TRANSPARENT subtree: returns true', () => {
+    // arrange
+    const doc = makeRoot('<div data-jsed-focus="off"><p id="inner">text</p></div>');
+
+    // act & assert
+    expect(isFocusCandidate(byId(doc, 'inner'))).toBe(true);
+  });
+});
+
+describe('isFocusTransparent', () => {
+  test('directly flagged off: returns true', () => {
+    // arrange
+    const doc = makeRoot('<div id="outer" data-jsed-focus="off"><p id="inner">text</p></div>');
+
+    // act & assert
+    expect(isFocusTransparent(byId(doc, 'outer'))).toBe(true);
+  });
+
+  test('inherited off: returns true', () => {
+    // arrange
+    const doc = makeRoot('<div data-jsed-focus="off"><p id="inner">text</p></div>');
+
+    // act & assert
+    expect(isFocusTransparent(byId(doc, 'inner'))).toBe(true);
+  });
+
+  test('descendant on overrides ancestor off: returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      '<div data-jsed-focus="off"><p id="inner" data-jsed-focus="on">text</p></div>'
+    );
+
+    // act & assert
+    expect(isFocusTransparent(byId(doc, 'inner'))).toBe(false);
   });
 });
 

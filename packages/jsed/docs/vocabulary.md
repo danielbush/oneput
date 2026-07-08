@@ -16,6 +16,9 @@ Jsed divides the DOM that up into several broad mutually exclusive categories:
 - (1) **FOCUSABLE** (focusable element)
   — an element the user can navigate to and FOCUS on. Cannot be a TOKEN or an IGNORABLE.
   - Source of truth: `isFocusable` in `taxonomy.ts`.
+- **FOCUS_CANDIDATE**
+  — all elements that are either FOCUSABLE or FOCUS_TRANSPARENT; the key difference being if the element has been flagged as FOCUS_TRANSPARENT;
+  - Source of truth: `isFocusCandidate` in `taxonomy.ts`.
 - (2) **TOKEN** (jsed token)
   — a span wrapping consecutive non-whitespace text. The CURSOR operates on TOKEN's, not individual characters. In the DOM, a TOKEN now holds only its visible text. Spacing in NEGATIVE_SPACE is represented by whitespace text nodes at TOKEN boundaries rather than being stored inside the TOKEN text node.
   - This means jsed distinguishes between:
@@ -51,6 +54,10 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
 - **DESCEND**
   - when recursively walking through all FOCUSABLE's in the DOM, DESCEND means the walk will descend and recurse through the elements children; both the FOCUS and CURSOR have different DESCEND behaviours.
   - Source of truth: `lib/core`
+- **FOCUS_TRANSPARENT**
+  - VISIT=no DESCEND=yes for FOCUS;
+  - Set with `data-jsed-focus="off"`. The nearest `data-jsed-focus="on|off"` in the ancestor chain wins, so a descendant can opt back in with `data-jsed-focus="on"`.
+  - Source of truth: `isFocusTransparent` in `taxonomy.ts`.
 - **TRANSPARENT**
   - VISIT=no DESCEND=yes
   - only applies to CURSOR
@@ -73,10 +80,13 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
 We can define the traversal rules:
 
 - **TRAVERSAL_RULES**
-  - (1) FOCUS can VISIT all FOCUSABLE's
+  - (0) FOCUS prescribes the limits of non-TOKEN elements the CURSOR operates on or within
+    - COMMENT: the way to think about this is the CURSOR launches based on where the FOCUS is
+  - (1) FOCUS can DESCEND through FOCUS_CANDIDATE's unless blocked by an ISLAND, but only VISIT FOCUSABLE's.
   - (2) FOCUS and CURSOR cannot DESCEND ISLAND's.
   - (3) CURSOR either VISIT's or DESCEND's all FOCUSABLE's but not both.
     - non-LINE_SIBLING LINE_MEMBER's are TRANSPARENT to the CURSOR eg it walks through em-tags to get to the text they hold
+    - FOCUS can VISIT and DESCEND the same FOCUSABLE.
 - **CURSOR_TRANSPARENT**
   — the CURSOR can DESCEND and navigate the internals
   - effectively defines visit or descend behaviour (because of TRAVERSAL_RULES)

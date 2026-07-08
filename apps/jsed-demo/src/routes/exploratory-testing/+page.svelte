@@ -238,6 +238,12 @@
     <p>line 4</p>
   </div>
 
+  <h2 class="jsed-ignore">FOCUS_TRANSPARENT</h2>
+  <div data-jsed-focus="off">
+    <p>This paragraph shouldn't be editable.</p>
+    <p data-jsed-focus="on">But this one should be.</p>
+  </div>
+
   <div style="height: 400px"></div>
 </div>
 

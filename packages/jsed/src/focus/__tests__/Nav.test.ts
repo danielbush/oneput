@@ -66,6 +66,21 @@ describe('FOCUS', () => {
     expect(nav.getFocus()).toBe(doc.root);
   });
 
+  it('should not focus a FOCUS_TRANSPARENT element', () => {
+    // arrange
+    const doc = makeRoot(
+      div({ id: 'outer', 'data-jsed-focus': 'off' }, p({ id: 'inner' }, 'text'))
+    );
+    const nav = new Nav(doc);
+    nav.FOCUS(doc.root);
+
+    // act
+    nav.REQUEST_FOCUS(byId(doc, 'outer'));
+
+    // assert
+    expect(nav.getFocus()).toBe(doc.root);
+  });
+
   it('scrolls a hidden FOCUSABLE back into view with nearest alignment', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, 'p1'), {
@@ -216,6 +231,49 @@ test('REC_NEXT should recurse down', () => {
   nav.REC_NEXT();
   expectFocusedElement(doc, byId(doc, 'p2'));
   expectSiblingHighlights(doc, ['p1']);
+});
+
+test('REC_NEXT should descend through FOCUS_TRANSPARENT elements', () => {
+  // arrange
+  const doc = makeRoot(
+    frag(
+      p({ id: 'before' }, 'before'),
+      div(
+        { id: 'outer', 'data-jsed-focus': 'off' },
+        p({ id: 'skipped' }, 'skipped'),
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+      )
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'before'));
+
+  // act
+  nav.REC_NEXT();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'inner'));
+  expectSiblingHighlights(doc, []);
+});
+
+test('DOWN_CHAIN should descend through FOCUS_TRANSPARENT elements', () => {
+  // arrange
+  const doc = makeRoot(
+    div(
+      { id: 'outer', 'data-jsed-focus': 'off' },
+      p({ id: 'skipped' }, 'skipped'),
+      p({ id: 'inner', 'data-jsed-focus': 'on' }, 'inner')
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(doc.root);
+
+  // act
+  nav.DOWN_CHAIN();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'inner'));
+  expectSiblingHighlights(doc, []);
 });
 
 test('REC_PREV should recurse up', () => {

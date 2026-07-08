@@ -1,5 +1,6 @@
 import type { JsedDocument, JsedFocusRequestEvent } from '../types.js';
 import {
+  isFocusCandidate,
   isIsland,
   isFocusable,
   isToken,
@@ -151,7 +152,7 @@ export class Nav {
     if (!this.#FOCUS) return;
     for (const next of findNextNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable,
-      descend: (node) => !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isIsland(node)
     })) {
       this.REQUEST_FOCUS(next);
       return;
@@ -166,7 +167,7 @@ export class Nav {
     if (!this.#FOCUS) return;
     for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
       visit: isFocusable,
-      descend: (node) => !isIsland(node)
+      descend: (node) => isFocusCandidate(node) && !isIsland(node)
     })) {
       this.REQUEST_FOCUS(next);
       return;

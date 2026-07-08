@@ -65,6 +65,7 @@ export const JSED_ELEMENT_INDICATOR = 'jsed-tag-indicator';
  * The anchor-name value the CSS element indicator sets on the focused element.
  */
 export const JSED_ELEMENT_INDICATOR_ANCHOR = '--jsed-element-indicator';
+export const JSED_FOCUS_ATTR = 'data-jsed-focus';
 
 // ============================================================================
 // Primitives
@@ -195,9 +196,13 @@ export function isAnchor(el: Node | null): boolean {
 }
 
 /**
- * Test if the element is an FOCUSABLE.
+ * Test if the element can participate in FOCUS traversal.
+ *
+ * A FOCUS_CANDIDATE is either a FOCUSABLE or a potential FOCUSABLE hidden by
+ * FOCUS_TRANSPARENT. FOCUS can DESCEND through candidates but only VISIT
+ * FOCUSABLE's.
  */
-export function isFocusable(el: EventTarget | Element | null | undefined): el is HTMLElement {
+export function isFocusCandidate(el: EventTarget | Element | null | undefined): el is HTMLElement {
   const isHTMLElement = el instanceof window.HTMLElement;
   if (isHTMLElement) {
     if (el?.id === JSED_APP_ROOT_ID) {
@@ -212,6 +217,38 @@ export function isFocusable(el: EventTarget | Element | null | undefined): el is
     }
   }
   return isHTMLElement;
+}
+
+/**
+ * Test if the element is a FOCUSABLE.
+ */
+export function isFocusable(el: EventTarget | Element | null | undefined): el is HTMLElement {
+  return isFocusCandidate(el) && !isFocusTransparent(el);
+}
+
+type FocusAttrValue = 'on' | 'off';
+
+function getNearestFocusAttrValue(el: Node | null | undefined): FocusAttrValue | null {
+  for (let p: Node | null | undefined = el; p; p = p.parentNode) {
+    if (p instanceof window.HTMLElement) {
+      const value = p.dataset.jsedFocus;
+      if (value === 'on' || value === 'off') {
+        return value;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Detect FOCUS_TRANSPARENT's.
+ *
+ * FOCUS_TRANSPARENT means FOCUS should not VISIT the element, but traversal can
+ * still DESCEND into it. The nearest `data-jsed-focus="on|off"` in the ancestor
+ * chain wins, so descendants can opt back in under an opted-out ancestor.
+ */
+export function isFocusTransparent(el: Node | null | undefined): boolean {
+  return el instanceof window.HTMLElement && getNearestFocusAttrValue(el) === 'off';
 }
 
 /**

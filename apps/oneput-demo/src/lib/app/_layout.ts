@@ -26,8 +26,6 @@ export class Layout implements UILayout<LayoutSettings> {
     return new Layout(ctl, settings);
   }
 
-  defaultPlaceholder?: DynamicPlaceholderBase;
-
   constructor(
     private ctl: Controller,
     private settings: LayoutSettings = {}

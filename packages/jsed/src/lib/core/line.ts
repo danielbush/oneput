@@ -1,5 +1,6 @@
 import {
   isCursorTransparent,
+  isFocusTransparentNode,
   isIgnorable,
   isIgnorableNode,
   isOpaque,
@@ -64,25 +65,21 @@ export function getPreviousLineSiblingV1(el: Node, ceiling: HTMLElement): Node |
 /**
  * Get previous LINE_SIBLING in current LINE or in previous LINE.
  *
- * Walks backward from `el` within `ceiling`, descending only through
- * CURSOR_TRANSPARENT structure (FOCUSABLE, non-OPAQUE) and returns the first
- * reachable seat (a tokenizable text node or LINE_SIBLING), skipping IGNORABLE
- * nodes. Descending through CURSOR_TRANSPARENT excludes TOKEN's, IGNORABLE's,
- * and FOCUS_TRANSPARENT's (none are FOCUSABLE), so their text is never mistaken
- * for a seat. Backward enumeration makes that first seat the nearest preceding
- * one; the pre/post phase is irrelevant for seat-finding (seats are leaves, the
+ * Walks backward from `el` within `ceiling`, descending into any non-OPAQUE,
+ * non-TOKEN, non-IGNORABLE structure — including FOCUS_TRANSPARENT wrappers, so
+ * a re-opened FOCUSABLE (`data-jsed-focus="on"`) nested inside one is still
+ * reachable (FOCUS_TRANSPARENT_SIBLING). The seat check rejects FOCUS_TRANSPARENT
+ * nodes, so a transparent element's own text is never mistaken for a seat.
+ * Returns the first reachable seat (a tokenizable text node or LINE_SIBLING).
+ * Backward enumeration makes that first seat the nearest preceding one; the
+ * pre/post phase is irrelevant for seat-finding (seats are leaves, the
  * containers walked through are never seats).
  */
 export function getPreviousLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   return findPreviousNodeW2(el, {
     ceiling,
-    shouldDescend: isCursorTransparent,
-    pre: (node) => {
-      if (isIgnorableNode(node)) return undefined;
-      if (isTokenizableTextNode(node)) return node;
-      if (isLineSibling(node)) return node;
-      return undefined;
-    }
+    shouldDescend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node),
+    pre: seat
   });
 }
 
@@ -112,24 +109,36 @@ export function getNextLineSiblingV1(el: Node, ceiling: HTMLElement): Node | nul
 /**
  * Get next LINE_SIBLING in current LINE or in next LINE.
  *
- * Walks forward from `el` within `ceiling` in pre-order, descending only through
- * CURSOR_TRANSPARENT structure (FOCUSABLE, non-OPAQUE) and returns the first
- * reachable seat (a tokenizable text node or LINE_SIBLING), skipping IGNORABLE
- * nodes. Descending through CURSOR_TRANSPARENT excludes TOKEN's, IGNORABLE's,
- * and FOCUS_TRANSPARENT's (none are FOCUSABLE), so their text is never mistaken
- * for a seat.
+ * Walks forward from `el` within `ceiling` in pre-order, descending into any
+ * non-OPAQUE, non-TOKEN, non-IGNORABLE structure — including FOCUS_TRANSPARENT
+ * wrappers, so a re-opened FOCUSABLE (`data-jsed-focus="on"`) nested inside one
+ * is still reachable (FOCUS_TRANSPARENT_SIBLING). The seat check rejects
+ * FOCUS_TRANSPARENT nodes, so a transparent element's own text is never mistaken
+ * for a seat. Returns the first reachable seat (a tokenizable text node or
+ * LINE_SIBLING).
  */
 export function getNextLineSibling(el: Node, ceiling: HTMLElement): Node | null {
   return findNextNodeW2(el, {
     ceiling,
-    shouldDescend: isCursorTransparent,
-    pre: (node) => {
-      if (isIgnorableNode(node)) return undefined;
-      if (isTokenizableTextNode(node)) return node;
-      if (isLineSibling(node)) return node;
-      return undefined;
-    }
+    shouldDescend: (node) => !isOpaque(node) && !isToken(node) && !isIgnorable(node),
+    pre: seat
   });
+}
+
+/**
+ * Seat predicate for the LINE_SIBLING walks.
+ *
+ * A node is a seat if it is a tokenizable text node or a LINE_SIBLING, and not
+ * IGNORABLE or FOCUS_TRANSPARENT.  Rejecting FOCUS_TRANSPARENT keeps a
+ * transparent element's own text from being treated as an editable seat while
+ * still allowing the walk to tunnel past it to re-opened FOCUSABLE descendants.
+ */
+function seat(node: Node): Node | undefined {
+  if (isIgnorableNode(node)) return undefined;
+  if (isFocusTransparentNode(node)) return undefined;
+  if (isTokenizableTextNode(node)) return node;
+  if (isLineSibling(node)) return node;
+  return undefined;
 }
 
 /**

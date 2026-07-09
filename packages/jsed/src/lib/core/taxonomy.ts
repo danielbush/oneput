@@ -241,14 +241,25 @@ function getNearestFocusAttrValue(el: Node | null | undefined): FocusAttrValue |
 }
 
 /**
- * Detect FOCUS_TRANSPARENT's.
+ * Detect all elements whose nearest data-jsed-focus ancestor is "off".
  *
- * FOCUS_TRANSPARENT means FOCUS should not VISIT the element, but traversal can
- * still DESCEND into it. The nearest `data-jsed-focus="on|off"` in the ancestor
- * chain wins, so descendants can opt back in under an opted-out ancestor.
+ * Beware, this is a superset of FOCUS_TRANSPARENT's as it does not account for
+ * predicates used for FOCUSABLE's.  Use with {@link isFocusCandidate} to detect
+ * FOCUS_TRANSPARENT's as defined in the vocabulary.
  */
 export function isFocusTransparent(el: Node | null | undefined): boolean {
   return el instanceof window.HTMLElement && getNearestFocusAttrValue(el) === 'off';
+}
+
+/**
+ * Like {@link isFocusTransparent} but answers for any node, not just elements.
+ *
+ * A text (or other non-element) node has no `data-jsed-focus` of its own; it
+ * inherits transparency from its nearest element ancestor. Use this when the
+ * node in hand may be a text node, e.g. deciding whether a seat is transparent.
+ */
+export function isFocusTransparentNode(node: Node | null | undefined): boolean {
+  return !!node && getNearestFocusAttrValue(node) === 'off';
 }
 
 /**

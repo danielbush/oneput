@@ -375,11 +375,11 @@ describe('getNextLineSibling / getPreviousLineSibling', () => {
   });
 });
 
-describe('getNextLineSibling: FOCUS_TRANSPARENT', () => {
+describe('LINE_SIBLING walks: FOCUS_TRANSPARENT', () => {
   // SHALLOW_TOKENIZATION regression: a FOCUS_TRANSPARENT header sitting beside
-  // real LINE's (as in the demo doc) must not be descended into and returned as
-  // a seat. If it were, getLine would climb to the whole container and
-  // tokenizeLineAt would tokenize the entire document instead of one LINE.
+  // real LINE's (as in the demo doc) must not be treated as a seat. If it were,
+  // getLine would climb to the whole container and tokenizeLineAt would tokenize
+  // the entire document instead of one LINE.
   test('skips a FOCUS_TRANSPARENT header, seats in the following LINE', () => {
     // arrange
     const doc = makeRoot(
@@ -399,5 +399,49 @@ describe('getNextLineSibling: FOCUS_TRANSPARENT', () => {
     // assert — seat is the real LINE's text, and its LINE is p1, not the container
     expect(seat?.textContent).toBe('real line');
     expect(getLine(seat!)).toBe(byId(doc, 'p1'));
+  });
+
+  // FOCUS_TRANSPARENT_SIBLING regression: the walk must tunnel THROUGH a
+  // FOCUS_TRANSPARENT wrapper to reach a re-opened FOCUSABLE
+  // (data-jsed-focus="on") inside it, while still skipping the wrapper's own
+  // transparent content. Forward and backward must behave symmetrically.
+  const tunnelDoc = () =>
+    makeRoot(
+      div(
+        { id: 'outer' },
+        p({ id: 'start' }, 'Start'),
+        div(
+          { 'data-jsed-focus': 'off', id: 'wrap' },
+          p({ id: 'a' }, 'transparent'),
+          p({ 'data-jsed-focus': 'on', id: 'b' }, 'reopened')
+        ),
+        p({ id: 'end' }, 'End')
+      )
+    );
+
+  test('forward tunnels into a re-opened FOCUSABLE, skips the transparent one', () => {
+    // arrange
+    const doc = tunnelDoc();
+    const outer = byId(doc, 'outer');
+
+    // act
+    const seat = getNextLineSibling(byId(doc, 'start').firstChild!, outer);
+
+    // assert
+    expect(seat?.textContent).toBe('reopened');
+    expect(getLine(seat!)).toBe(byId(doc, 'b'));
+  });
+
+  test('backward tunnels into a re-opened FOCUSABLE, skips the transparent one', () => {
+    // arrange
+    const doc = tunnelDoc();
+    const outer = byId(doc, 'outer');
+
+    // act
+    const seat = getPreviousLineSibling(byId(doc, 'end').firstChild!, outer);
+
+    // assert
+    expect(seat?.textContent).toBe('reopened');
+    expect(getLine(seat!)).toBe(byId(doc, 'b'));
   });
 });

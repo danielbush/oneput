@@ -1,5 +1,6 @@
 import type { Controller } from './controllers/controller.js';
 import type { ActionBinding } from './lib/bindings.js';
+import type { KeysController } from './controllers/KeysController.js';
 
 declare global {
   interface Window {
@@ -425,18 +426,13 @@ export interface AppObject<
    */
   onEvent?: (event: AppEvent) => void;
   /**
-   * If actionId is a binding, the action defined here will take precedence over
-   * "default" actions defined against bindings outside of any AppObject.
-   *
-   * You may prefer to define your bindings in one spot outside of AppObject's
-   * or you want your AppObject's to handle specific ones which you can set
-   * here.
-   */
-  /**
    * Provide the actions object directly for simple AppObjects whose actions are
    * fixed. For AppObjects whose actions depend on state, provide a function:
    * `ctl.app.invalidateActions()` re-calls it to re-derive the bindings (no
    * getter needed).
+   *
+   * You can also define actions defined against default bindings outside of any
+   * AppObject, see {@link KeysController.setDefaultBindings}.
    */
   actions?: AppActions | (() => AppActions);
   /**

@@ -87,9 +87,9 @@ export class KeysController {
   /**
    * Stores default bindings and applies them immediately.
    *
-   * Called at startup (layout) and by BindingsEditor when the user edits
-   * bindings. Safe to call while an AppObject is active only if that
-   * AppObject has no actions (e.g. BindingsEditor itself).
+   * Called at startup  and by BindingsEditor when the user edits bindings. Safe
+   * to call while an AppObject is active only if that AppObject has no actions
+   * (e.g. BindingsEditor itself).
    */
   setDefaultBindings(bindings: KeyBindingMap) {
     this.defaultBindings = bindings;

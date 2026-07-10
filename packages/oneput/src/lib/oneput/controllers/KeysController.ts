@@ -1,6 +1,7 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
 import { KeyEventBindings, type KeyEventBinding, type KeyBindingMap } from '../lib/bindings.js';
+import { OneputCatalog } from '../shared/actions/OneputCatalog.js';
 
 /**
  * Manages key bindings — registration, dispatch, and default/override lifecycle.
@@ -36,8 +37,12 @@ export class KeysController {
 
   constructor(
     private ctl: Controller,
-    private unsubscribe: () => void = () => {}
+    private defaultBindings: KeyBindingMap = OneputCatalog.create(ctl).getBindings()
   ) {}
+
+  private currentBindings: KeyBindingMap = {};
+  private unsubscribe: () => void = () => {};
+  private keysDisabled = false;
 
   private matchesWhen(when?: { menuOpen?: boolean }): boolean {
     if (when?.menuOpen !== undefined && when.menuOpen !== this.ctl.menu.isMenuOpen) return false;
@@ -75,8 +80,6 @@ export class KeysController {
     }
   }
 
-  private keysDisabled = false;
-
   /**
    * Prefer ctl.ui.update({ flags: { enableKeys: true } }) instead.
    */
@@ -103,9 +106,6 @@ export class KeysController {
   getCurrentBindings() {
     return this.currentBindings;
   }
-
-  private defaultBindings: KeyBindingMap = {};
-  private currentBindings: KeyBindingMap = {};
 
   /**
    * Merges the given bindings with the defaults. Use this for AppObject

@@ -9,8 +9,8 @@ import {
 } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
-import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
+import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
+import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 import type { Editor } from '../../editor/Editor.js';
 import { JsedAction, type JsedActionId } from './JsedAction.js';
 import { icons } from './lib/icons.js';

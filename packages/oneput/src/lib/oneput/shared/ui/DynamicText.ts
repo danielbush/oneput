@@ -1,5 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
-import { OneputAction } from '../bindings/OneputAction.js';
+import { OneputAction } from '../actions/OneputAction.js';
 
 export type DynamicTextParams = {
   isMenuOpen: boolean;

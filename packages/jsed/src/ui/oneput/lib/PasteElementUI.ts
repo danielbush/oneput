@@ -1,5 +1,5 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
-import type { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
+import type { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 import type { Editor } from '../../../editor/Editor.js';
 import type { JsedLayoutParams } from './layoutParams.js';
 import { JsedAction } from '../JsedAction.js';

@@ -1,6 +1,6 @@
 import type { AppObject, Controller } from '@oneput/oneput';
-import { OneputAction } from '@oneput/oneput/shared/bindings/OneputAction.js';
-import { OneputCatalog } from '@oneput/oneput/shared/bindings/OneputCatalog.js';
+import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
+import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 import { Editor } from '../../editor/Editor.js';
 import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';

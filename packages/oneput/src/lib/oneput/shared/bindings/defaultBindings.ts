@@ -4,7 +4,7 @@
 import { KeyEventBindings, type KeyBindingMapSerializable } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
 import { GlobalFilter } from '../appObjects/GlobalFilter.js';
-import { OneputAction } from './OneputAction.js';
+import { OneputAction } from '../actions/OneputAction.js';
 
 export const defaultActions: Record<string, (c: Controller) => void> = {
   [OneputAction.EXIT]: (c) => {

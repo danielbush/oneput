@@ -375,5 +375,5 @@ For deeper detail, read the source:
 - **AppController**: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
 - **stdMenuItem**: `packages/oneput/src/lib/oneput/shared/ui/menuItems/stdMenuItem.ts`
 - **Builder**: `packages/oneput/src/lib/oneput/lib/builder.ts` — `FlexChildBuilder`, `hflex`, `vflex`
-- **Default bindings**: `packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts`
+- **Default actions and bindings**: `packages/oneput/src/lib/oneput/shared/actions/OneputCatalog.ts`
 - **Architecture**: `packages/oneput/docs/architecture.md`

@@ -22,7 +22,7 @@ Key bindings map keyboard shortcuts to actions. Each binding declares `when` con
 
 - Types: `packages/oneput/src/lib/oneput/lib/bindings.ts` — `KeyBinding`, `ActionBinding`, `KeyBindingMap`
 - Controller: `packages/oneput/src/lib/oneput/controllers/KeysController.ts`
-- Defaults: `packages/oneput/src/lib/oneput/shared/bindings/defaultBindings.ts`
+- Defaults: `packages/oneput/src/lib/oneput/shared/actions/OneputCatalog.ts`
 - Persistence: `packages/oneput/src/lib/oneput/shared/bindings/BindingsIDB.ts`
 
 ### AppObject

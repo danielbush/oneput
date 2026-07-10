@@ -91,10 +91,10 @@ To add more `when` flags in future, extend `matchesWhen()` and validate at regis
 ### Persistence (`shared/bindings/`)
 
 - **`BindingsIDB`** — stores serialized bindings in IndexedDB
-- **`LocalBindingsService`** — merges stored bindings with default actions and sets them on the controller
+- **`LocalBindingsService`** — applies stored binding overrides to the Oneput action catalog and sets them on the controller
 - **`BindingsEditor`** — AppObject that lets users add/remove bindings via the Oneput menu interface
 
-### Default bindings (`shared/bindings/defaultBindings.ts`)
+### Default bindings (`shared/actions/OneputCatalog.ts`)
 
 Provides the standard set of bindings: open/close menu, navigate items, submit, fill, back, etc. Each declares its `when.menuOpen` condition.
 

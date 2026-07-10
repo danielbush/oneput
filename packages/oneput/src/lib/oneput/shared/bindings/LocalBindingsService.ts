@@ -1,8 +1,8 @@
 import { KeyEventBindings, type KeyBindingMapSerializable } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
 import { BindingsIDB } from './BindingsIDB.js';
-import { defaultBindingsSerializable, defaultActions } from './defaultBindings.js';
 import { BindingsStoreError, type BindingsEditorStore } from './BindingsEditorStore.js';
+import { OneputCatalog } from '../actions/OneputCatalog.js';
 
 /**
  * Persists bindings in IndexedDB.
@@ -23,9 +23,10 @@ export class LocalBindingsService implements BindingsEditorStore {
 
   getBindings() {
     return this.bindingsStore
-      .getBindings(defaultBindingsSerializable)
-      .map((kbMapSerializable) => {
-        return KeyEventBindings.fromSerializable(kbMapSerializable, defaultActions).keyBindingMap;
+      .getBindings()
+      .map((userBindings) => {
+        const bindings = KeyEventBindings.create(OneputCatalog.create(this.ctl).getBindings());
+        return bindings.applyBindings(userBindings).keyBindingMap;
       })
       .orTee((err) => this.ctl.notify(`Error getting keys: ${err.message}`));
   }

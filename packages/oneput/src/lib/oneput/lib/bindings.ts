@@ -401,6 +401,29 @@ export class KeyEventBindings {
   }
 
   /**
+   * Apply serializable binding preferences to this temporary binding set.
+   *
+   * Runtime actions are preserved from the existing bindings. Unknown action ids
+   * in the serializable map are ignored because they cannot be dispatched.
+   */
+  applyBindings(kbMapSerializable: KeyBindingMapSerializable): this {
+    const currentKeyBindingMap = this.keyBindingMap;
+    const appliedKeyBindingMap = Object.entries(currentKeyBindingMap).reduce(
+      (acc, [actionId, keyBinding]) => {
+        const kbSerializable = kbMapSerializable[actionId];
+        acc[actionId] = kbSerializable
+          ? kbFromSerializable(kbSerializable, keyBinding.action)
+          : keyBinding;
+        return acc;
+      },
+      {} as KeyBindingMap
+    );
+
+    this.keyEventsMap = kbMaptoKeMap(appliedKeyBindingMap, this.isMac);
+    return this;
+  }
+
+  /**
    * Add a binding to an existing action within this set.
    *
    * This checks for **duplicates** — the same key already bound to any action

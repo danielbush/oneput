@@ -284,6 +284,66 @@ describe('KeyEventBindings', () => {
       expect(restored.keyBindingMap['save'].description).toBe('Save file');
     });
   });
+
+  describe('applyBindings', () => {
+    it('overrides serializable fields while preserving runtime actions', () => {
+      // arrange
+      const saveAction = () => {};
+      const bindings = KeyEventBindings.create(
+        {
+          save: {
+            action: saveAction,
+            description: 'Save',
+            bindings: ['$mod+s'],
+            when: { menuOpen: false }
+          }
+        },
+        false
+      );
+
+      // act
+      const result = bindings.applyBindings({
+        save: {
+          description: 'Persisted save',
+          bindings: ['$mod+Shift+s'],
+          when: { menuOpen: true },
+          preventDefault: false
+        }
+      });
+
+      // assert
+      expect(result).toBe(bindings);
+      expect(bindings.keyBindingMap['save']).toEqual({
+        action: saveAction,
+        description: 'Persisted save',
+        bindings: ['$mod+Shift+s'],
+        when: { menuOpen: true },
+        preventDefault: false
+      });
+    });
+
+    it('keeps current actions when user bindings are missing or stale', () => {
+      // arrange
+      const bindings = KeyEventBindings.create(
+        createBindingMap({
+          save: { description: 'Save', bindings: ['$mod+s'] },
+          open: { description: 'Open', bindings: ['$mod+o'] }
+        }),
+        false
+      );
+
+      // act
+      bindings.applyBindings({
+        save: { description: 'Persisted save', bindings: ['$mod+Shift+s'] },
+        stale: { description: 'Stale', bindings: ['$mod+x'] }
+      });
+
+      // assert
+      expect(bindings.keyBindingMap['save'].bindings).toEqual(['$mod+Shift+s']);
+      expect(bindings.keyBindingMap['open'].bindings).toEqual(['$mod+o']);
+      expect(bindings.keyBindingMap['stale']).toBeUndefined();
+    });
+  });
 });
 
 describe('KeyEventBindings.merge', () => {

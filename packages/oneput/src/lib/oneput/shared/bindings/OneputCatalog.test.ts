@@ -25,6 +25,24 @@ describe('OneputCatalog', () => {
     });
   });
 
+  test('filtered bindings', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const catalog = OneputCatalog.create(ctl).filter([
+      OneputAction.FOCUS_INPUT,
+      OneputAction.GLOBAL_FILTER
+    ]);
+
+    // act
+    const bindings = catalog.getBindings();
+
+    // assert
+    expect(Object.keys(bindings)).toEqual([OneputAction.FOCUS_INPUT, OneputAction.GLOBAL_FILTER]);
+    expect(bindings[OneputAction.FOCUS_INPUT].bindings).toEqual([`$mod+'`, `Control+'`]);
+    expect(bindings[OneputAction.GLOBAL_FILTER].when).toEqual({ menuOpen: true });
+    expect(bindings[OneputAction.FOCUS_INPUT].action).toBeDefined();
+  });
+
   test('menu items come from selected catalog entries', () => {
     // arrange
     const ctl = Controller.createNull();

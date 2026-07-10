@@ -4,6 +4,7 @@ import {
   type ActionCatalogMenuItem,
   type AppActionCatalog
 } from '../../lib/ActionCatalog.js';
+import type { KeyBindingMap } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
 import type { AppActions } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
@@ -27,6 +28,10 @@ export class OneputCatalog implements AppActionCatalog<OneputActionId> {
 
   filter(ids: OneputActionId[]) {
     return new OneputCatalog(this.catalog.filter(ids));
+  }
+
+  getBindings(): KeyBindingMap {
+    return this.catalog.getBindings();
   }
 
   getActions(): AppActions {

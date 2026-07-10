@@ -1,4 +1,5 @@
 import type { AppAction, AppActionContext, AppActions, MenuItemAny } from '../types.js';
+import type { KeyBindingAction, KeyBindingMap } from './bindings.js';
 
 export type ActionCatalogMenuItem = MenuItemAny | undefined | null | '' | false;
 
@@ -18,7 +19,19 @@ export interface AppActionCatalog<
   Context extends AppActionContext = AppActionContext
 > {
   filter(ids: Id[]): AppActionCatalog<Id, Context>;
+  /**
+   * Key bindings with actions attached, suitable for KeysController.
+   */
+  getBindings(): KeyBindingMap;
+  /**
+   * Actions + bindings as used by an AppObject.
+   */
   getActions(): AppActions<Context>;
+  /**
+   * Menu items as used by .menu in AppObject's and setMenu.
+   *
+   * @param ids Use this to select one or more menu items when creating groups of items in a menu.
+   */
   getMenuItems(ids: Id[]): ActionCatalogMenuItem[];
 }
 
@@ -86,6 +99,20 @@ export class ActionCatalog<
 
   filter(ids: Id[]) {
     return new ActionCatalog(this.entries, new Set(ids));
+  }
+
+  getBindings(): KeyBindingMap {
+    const bindings: KeyBindingMap = {};
+    const entries = this.getActiveEntries();
+    for (const id of Object.keys(entries) as Id[]) {
+      const entry = entries[id];
+      if (!entry?.binding) continue;
+      bindings[id] = {
+        ...entry.binding,
+        action: entry.action as KeyBindingAction
+      };
+    }
+    return bindings;
   }
 
   getActions(): AppActions<Context> {

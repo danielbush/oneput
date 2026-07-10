@@ -4,7 +4,8 @@ import {
   type ActionCatalogMenuItem,
   type AppActionCatalog,
   type AppActions,
-  type Controller
+  type Controller,
+  type KeyBindingMap
 } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -60,6 +61,10 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
 
   filter(ids: JsedActionId[]) {
     return new JsedCatalog(this.catalog.filter(ids));
+  }
+
+  getBindings(): KeyBindingMap {
+    return this.catalog.getBindings();
   }
 
   getActions(): AppActions {

@@ -49,11 +49,15 @@ describe('ActionCatalog', () => {
 
     // act
     const actions = catalog.getActions();
+    const bindings = catalog.getBindings();
     const menuItems = catalog.getMenuItems([Command.SAVE, Command.DELETE]);
 
     // assert
     expect(Object.keys(actions)).toEqual([Command.SAVE]);
     expect(actions[Command.SAVE].binding?.bindings).toEqual(['$mod+s']);
+    expect(Object.keys(bindings)).toEqual([Command.SAVE]);
+    expect(bindings[Command.SAVE].bindings).toEqual(['$mod+s']);
+    expect(bindings[Command.SAVE].action).toBe(actions[Command.SAVE].action);
     expect(menuItems.map((item) => item && item.id)).toEqual(['SAVE_ROW', undefined]);
   });
 

@@ -131,13 +131,7 @@ export class OneputCatalog implements AppActionCatalog<OneputActionId> {
           bindings: ['$mod+Shift+b'],
           description: 'Open Oneput menu...',
           when: { menuOpen: false }
-        },
-        menuItem: ({ action }) =>
-          stdMenuItem({
-            id: 'OPEN_MENU',
-            textContent: 'Open menu...',
-            action
-          })
+        }
       },
 
       [OneputAction.CLOSE_MENU]: {
@@ -148,13 +142,7 @@ export class OneputCatalog implements AppActionCatalog<OneputActionId> {
           bindings: ['$mod+Shift+b', 'Escape'],
           description: 'Close menu',
           when: { menuOpen: true }
-        },
-        menuItem: ({ action }) =>
-          stdMenuItem({
-            id: 'CLOSE_MENU',
-            textContent: 'Close menu',
-            action
-          })
+        }
       },
 
       [OneputAction.FOCUS_PREVIOUS_MENU_ITEM]: {
@@ -202,13 +190,7 @@ export class OneputCatalog implements AppActionCatalog<OneputActionId> {
         binding: {
           bindings: [`$mod+'`, `Control+'`],
           description: 'Focus input'
-        },
-        menuItem: ({ action }) =>
-          stdMenuItem({
-            id: 'FOCUS_INPUT',
-            textContent: 'Focus input',
-            action
-          })
+        }
       },
 
       [OneputAction.FILL]: {

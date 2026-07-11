@@ -1,8 +1,9 @@
-import type { Controller } from '@oneput/oneput';
+import { KeyEventBindings, type Controller } from '@oneput/oneput';
 import { Root } from './Root.js';
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
-import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';
+import { BindingsIDB } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
+import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 
 export function init(ctl: Controller) {
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
@@ -24,10 +25,12 @@ export function init(ctl: Controller) {
   //   (err) => Promise.reject(err)
   // );
   //
-  LocalBindingsService.create(ctl)
+  BindingsIDB.create()
     .getBindings()
-    .andTee((bindings) => {
-      ctl.keys.setDefaultBindings(bindings); // user's preferred bindings
+    .map((userBindings) => {
+      const bindings = KeyEventBindings.create(OneputCatalog.create(ctl).getBindings());
+      bindings.applyBindings(userBindings);
+      ctl.keys.setDefaultBindings(bindings.keyBindingMap);
     })
     .orTee((err) => {
       ctl.alert({ message: 'Could not set default bindings!', additional: err.message });

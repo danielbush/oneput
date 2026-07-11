@@ -3,14 +3,14 @@ import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMen
 import { BindingsEditor } from '@oneput/oneput/shared/appObjects/BindingsEditor.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { FiltersUI } from './FiltersUI.js';
-import { LocalBindingsService } from '@oneput/oneput/shared/bindings/LocalBindingsService.js';
 import { TestBindingsService } from '@oneput/oneput/shared/bindings/TestBindingsService.js';
 import { icons } from './_icons.js';
 import type { AppObject } from '@oneput/oneput';
+import { BindingsIDB } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
 
 export class Settings implements AppObject {
   static create(ctl: Controller) {
-    const localStore = LocalBindingsService.create(ctl);
+    const localStore = BindingsIDB.create();
     const testStore = TestBindingsService.create();
     return new Settings(ctl, {
       BindingsEditor: ({ useTestService }: { useTestService: boolean }) => {

@@ -8,24 +8,22 @@ import {
 } from '../../lib/bindings.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { toggleMenuItem } from '../ui/menuItems/toggleMenuItem.js';
-import type { BindingsEditorStore } from '../bindings/BindingsEditorStore.js';
 import { hflex } from '../../lib/builder.js';
 import { mountSvelte } from '../../lib/utils.js';
 import type { AppObject } from '../../types.js';
 import AcceptButton from '../components/AcceptButton.svelte';
 import CancelButton from '../components/CancelButton.svelte';
+import type { BindingsStore } from '../bindings/BindingsStore.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
- *
- * Pass a {@link BindingsEditorStore} to persist changes.
  */
 export class BindingsEditor implements AppObject {
   static create(
     ctl: Controller,
     values: {
       keyBindingMap: KeyBindingMap;
-      store: BindingsEditorStore;
+      store: BindingsStore;
       icons: {
         Keyboard: string;
         Close: string;
@@ -43,7 +41,7 @@ export class BindingsEditor implements AppObject {
   constructor(
     private ctl: Controller,
     private keyBindingMap: KeyBindingMap,
-    private store: BindingsEditorStore,
+    private store: BindingsStore,
     private icons: {
       Keyboard: string;
       Close: string;

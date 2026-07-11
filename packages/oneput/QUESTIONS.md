@@ -185,8 +185,15 @@ If you need to dynamically generate menu items but not in response to typing (li
 
 ## Explain how filters and generative menus work
 
-TODO: mutually exclusive
+TODO: mutually exclusive, you can either use a filter or use generative.
 
 ## Explain how focusBehaviour works
 
 TODO: 4 layers; we can override in ctl.menu.invalidate
+
+## What are actions?
+
+TODO:
+
+- OneputAction id's all actions
+- in a catatog each OneputAction can have bindings and memu items associated with them

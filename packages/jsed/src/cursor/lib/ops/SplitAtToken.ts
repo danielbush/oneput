@@ -31,6 +31,10 @@ export class SplitAtToken implements UndoRecord {
 
     const record = new SplitAtToken(result, { undo: child }, splitBefore);
     record.normalize();
+    state.eventsEmitter.emitElementChange({
+      type: 'focusable-inserted',
+      element: result.topSplit.peer
+    });
 
     // Try to place the cursor on peer.
     const sib = getFirstLineSibling(result.topSplit.peer);

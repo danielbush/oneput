@@ -40,7 +40,7 @@ export class EditorEventHandler {
     if (this.state.isSuspended) return ok(undefined);
     const current = this.state.cursor.getPlace();
     if (isToken(current)) {
-      this.state.cursorOps.splitAtCursor();
+      this.state.cursor.splitAtToken();
       return ok(undefined);
     }
 

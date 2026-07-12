@@ -43,6 +43,31 @@ function tokens(doc: JsedDocument): HTMLElement[] {
 }
 
 describe('SplitAtToken.run', () => {
+  test('emits a focusable-inserted element change for the split peer', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world')));
+    const elementChanges: unknown[] = [];
+    const eventsEmitter = EditorEventsEmitter.create();
+    eventsEmitter.subscribe({
+      onElementChange: (event) => elementChanges.push(event)
+    });
+    const state = new CursorState(
+      tokens(doc)[0],
+      doc,
+      Tokenizer.createNull(),
+      UndoRecorder.createNull(),
+      () => {},
+      () => {},
+      eventsEmitter
+    );
+
+    // act
+    SplitAtToken.run(state);
+
+    // assert
+    expect(elementChanges).toEqual([{ type: 'focusable-inserted', element: doc.root.children[1] }]);
+  });
+
   test('append splits after current TOKEN', () => {
     // arrange
     const doc = makeRoot(p({ id: 'p1' }, t('hello'), s(), t('world'), s(), t('foo')));

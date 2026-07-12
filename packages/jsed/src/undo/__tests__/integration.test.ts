@@ -38,7 +38,9 @@ describe('undo / redo integration', () => {
     editor.enterEditing(findTokenByText(doc.root, 'two'));
 
     // act
-    editor.cursorOps.splitAtCursor();
+    const cursor = editor.getCursor();
+    expect(cursor).toBeDefined();
+    cursor?.splitAtToken();
     editor.exitEditing({ focusElement: byId(doc, 'p1') });
     editor.focusOps.insertNewAfter({ tagName: 'ul', children: [{ tagName: 'li' }] });
 

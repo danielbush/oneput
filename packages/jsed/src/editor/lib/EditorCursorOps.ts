@@ -96,18 +96,4 @@ export class EditorCursorOps {
     }
     return false;
   }
-
-  splitAtCursor() {
-    if (!this.state.cursor) {
-      return false;
-    }
-
-    const inserted = this.state.cursor.splitAtToken();
-    if (inserted) {
-      this.state.eventsEmitter.emitElementChange({
-        type: 'focusable-inserted',
-        element: inserted.result.topSplit.peer
-      });
-    }
-  }
 }

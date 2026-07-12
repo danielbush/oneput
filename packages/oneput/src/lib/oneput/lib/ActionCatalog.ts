@@ -1,13 +1,23 @@
 import type { AppAction, AppActionContext, AppActions, MenuItemAny } from '../types.js';
-import type { KeyBindingAction, KeyBindingMap } from './bindings.js';
+import type { ActionBinding, KeyBindingAction, KeyBindingMap } from './bindings.js';
 
 export type ActionCatalogMenuItem = MenuItemAny | undefined | null | '' | false;
 
-export type ActionCatalogEntry<Context extends AppActionContext = AppActionContext> =
+export type ActionCatalogBinding = Omit<ActionBinding, 'description'>;
+export type ActionCatalogMenuItemEntry<Context extends AppActionContext = AppActionContext> =
   AppAction<Context> & {
-    canShowMenuItem?: () => boolean;
-    menuItem?: (entry: AppAction<Context>) => ActionCatalogMenuItem;
+    description: string;
   };
+
+export type ActionCatalogEntry<Context extends AppActionContext = AppActionContext> = Omit<
+  AppAction<Context>,
+  'binding'
+> & {
+  description: string;
+  binding?: ActionCatalogBinding;
+  canShowMenuItem?: () => boolean;
+  menuItem?: (entry: ActionCatalogMenuItemEntry<Context>) => ActionCatalogMenuItem;
+};
 
 export type ActionCatalogEntries<
   Id extends string,
@@ -108,7 +118,7 @@ export class ActionCatalog<
       const entry = entries[id];
       if (!entry?.binding) continue;
       bindings[id] = {
-        ...entry.binding,
+        ...this.toActionBinding(entry),
         action: entry.action as KeyBindingAction
       };
     }
@@ -123,7 +133,7 @@ export class ActionCatalog<
       if (!entry) continue;
       actions[id] = {
         action: entry.action,
-        binding: entry.binding
+        binding: entry.binding ? this.toActionBinding(entry) : undefined
       };
     }
     return actions;
@@ -135,8 +145,23 @@ export class ActionCatalog<
       const entry = entries[id];
       if (!entry?.menuItem) return undefined;
       if (entry.canShowMenuItem && !entry.canShowMenuItem()) return undefined;
-      return entry.menuItem(entry);
+      return entry.menuItem({
+        description: entry.description,
+        action: entry.action,
+        binding: entry.binding ? this.toActionBinding(entry) : undefined
+      });
     });
+  }
+
+  private toActionBinding(entry: ActionCatalogEntry<Context>): ActionBinding {
+    if (!entry.binding) {
+      throw new Error('ActionCatalog entry has no binding');
+    }
+
+    return {
+      ...entry.binding,
+      description: entry.description
+    };
   }
 
   private getActiveEntries(): ActionCatalogEntries<Id, Context> {

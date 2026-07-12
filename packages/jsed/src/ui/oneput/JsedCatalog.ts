@@ -88,6 +88,7 @@ function getEntries(ctx: JsedCatalogContext): CatalogEntries {
 
   return {
     [JsedAction.STOP_EDITING]: {
+      description: 'Stop editing',
       action: () => {
         editor.handleExit({ softExit: false });
       },
@@ -102,6 +103,7 @@ function getEntries(ctx: JsedCatalogContext): CatalogEntries {
     },
 
     [JsedAction.SOFT_EXIT]: {
+      description: 'Progressively exit',
       action: () => {
         if (!editor.handleExit()) {
           ctl.app.exit();
@@ -109,12 +111,12 @@ function getEntries(ctx: JsedCatalogContext): CatalogEntries {
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Progressively exit',
         when: { menuOpen: false }
       }
     },
 
     [JsedAction.EXIT_EDITOR]: {
+      description: 'Exit',
       action: () => {
         ctl.app.exit();
       },
@@ -129,12 +131,12 @@ function getEntries(ctx: JsedCatalogContext): CatalogEntries {
     },
 
     [JsedAction.CANCEL_VIA_EXIT]: {
+      description: 'Cancel operation',
       action: () => {
         ctl.app.exit();
       },
       binding: {
-        bindings: ['Escape'],
-        description: 'Cancel operation'
+        bindings: ['Escape']
       },
       menuItem: ({ action }) =>
         stdMenuItem({
@@ -162,70 +164,70 @@ function navigation(ctx: JsedCatalogContext): CatalogEntries {
   const { editor } = ctx;
   return {
     [JsedAction.DOWN]: {
+      description: 'Navigate to next sibling',
       action: () => {
         editor.moveDown();
       },
       binding: {
         bindings: ['$mod+j', 'ArrowDown'],
-        description: 'Navigate to next sibling',
         when: { menuOpen: false }
       }
     },
     [JsedAction.UP]: {
+      description: 'Navigate to previous sibling',
       action: () => {
         editor.moveUp();
       },
       binding: {
         bindings: ['$mod+k', 'ArrowUp'],
-        description: 'Navigate to previous sibling',
         when: { menuOpen: false }
       }
     },
     [JsedAction.NEXT]: {
+      description: 'Move to next token or element',
       action: () => {
         editor.moveNext();
       },
       binding: {
-        bindings: ['$mod+l'],
-        description: 'Move to next token or element'
+        bindings: ['$mod+l']
       }
     },
     [JsedAction.PREVIOUS]: {
+      description: 'Move to previous token or element',
       action: () => {
         editor.movePrevious();
       },
       binding: {
-        bindings: ['$mod+h'],
-        description: 'Move to previous token or element'
+        bindings: ['$mod+h']
       }
     },
     [JsedAction.RIGHT_ARROW]: {
+      description: 'Move to next token or element',
       action: () => {
         editor.moveNext();
       },
       binding: {
         bindings: ['ArrowRight'],
-        description: 'Move to next token or element',
         when: { menuOpen: false }
       }
     },
     [JsedAction.LEFT_ARROW]: {
+      description: 'Move to previous token or element',
       action: () => {
         editor.movePrevious();
       },
       binding: {
         bindings: ['ArrowLeft'],
-        description: 'Move to previous token or element',
         when: { menuOpen: false }
       }
     },
     [JsedAction.REVEAL]: {
+      description: 'Center the active token or reveal the focused element',
       action: () => {
         editor.scrollActiveTargetIntoView();
       },
       binding: {
-        bindings: ['$mod+m'],
-        description: 'Center the active token or reveal the focused element'
+        bindings: ['$mod+m']
       }
     }
   };
@@ -235,6 +237,7 @@ function selection(ctx: JsedCatalogContext): CatalogEntries {
   const { ctl, editor } = ctx;
   return {
     [JsedAction.WRAP_SELECTION]: {
+      description: 'Wrap selection...',
       action: () => {
         const cursor = editor.getCursor();
         if (!cursor) return;
@@ -287,40 +290,40 @@ function selection(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.EXTEND_NEXT]: {
+      description: 'Extend selection to next LINE_SIBLING',
       action: () => {
         editor.extendNext();
       },
       binding: {
-        bindings: ['Shift+$mod+l'],
-        description: 'Extend selection to next LINE_SIBLING'
+        bindings: ['Shift+$mod+l']
       }
     },
     [JsedAction.EXTEND_PREVIOUS]: {
+      description: 'Extend selection to previous LINE_SIBLING',
       action: () => {
         editor.extendPrevious();
       },
       binding: {
-        bindings: ['Shift+$mod+h'],
-        description: 'Extend selection to previous LINE_SIBLING'
+        bindings: ['Shift+$mod+h']
       }
     },
     [JsedAction.EXTEND_RIGHT_ARROW]: {
+      description: 'Extend selection to next LINE_SIBLING',
       action: () => {
         editor.extendNext();
       },
       binding: {
         bindings: ['Shift+ArrowRight'],
-        description: 'Extend selection to next LINE_SIBLING',
         when: { menuOpen: false }
       }
     },
     [JsedAction.EXTEND_LEFT_ARROW]: {
+      description: 'Extend selection to next LINE_SIBLING',
       action: () => {
         editor.extendPrevious();
       },
       binding: {
         bindings: ['Shift+ArrowLeft'],
-        description: 'Extend selection to next LINE_SIBLING',
         when: { menuOpen: false }
       }
     }
@@ -331,6 +334,7 @@ function editing(ctx: JsedCatalogContext): CatalogEntries {
   const { ctl, editor } = ctx;
   return {
     [JsedAction.ENTER]: {
+      description: 'Edit first editable token',
       action: () => {
         editor.handleEnter().mapErr((err) => {
           switch (err.type) {
@@ -342,7 +346,6 @@ function editing(ctx: JsedCatalogContext): CatalogEntries {
       },
       binding: {
         bindings: ['Enter'],
-        description: 'Edit first editable token',
         when: { menuOpen: false }
       },
       canShowMenuItem: () => !editor.isEditing(),
@@ -355,12 +358,12 @@ function editing(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.DELETE]: {
+      description: 'Delete characters',
       action: (_ctl, context) => {
         editor.handleDelete(context?.source === 'keyboard' ? context.event : undefined);
       },
       binding: {
         bindings: ['Backspace'],
-        description: 'Delete characters',
         when: { menuOpen: false },
         // If preventDefault = true here, input change events caused by the user
         // deleting text in the input will never occur. We need to set this to
@@ -370,12 +373,12 @@ function editing(ctx: JsedCatalogContext): CatalogEntries {
       }
     },
     [JsedAction.TOGGLE_SELECT]: {
+      description: 'Toggle input element cursor state',
       action: () => {
         ctl.input.toggleSelect();
       },
       binding: {
-        bindings: ['$mod+e'],
-        description: 'Toggle input element cursor state'
+        bindings: ['$mod+e']
       }
     }
   };
@@ -385,13 +388,13 @@ function undo(ctx: JsedCatalogContext): CatalogEntries {
   const { opts, editor } = ctx;
   return {
     [JsedAction.UNDO]: {
+      description: 'Undo',
       action: () => {
         editor.undo();
         opts.invalidateMenu();
       },
       binding: {
-        bindings: ['$mod+z'],
-        description: 'Undo'
+        bindings: ['$mod+z']
       },
       canShowMenuItem: () => editor.canUndo(),
       menuItem: ({ action }) =>
@@ -403,13 +406,13 @@ function undo(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REDO]: {
+      description: 'Redo',
       action: () => {
         editor.redo();
         opts.invalidateMenu();
       },
       binding: {
-        bindings: ['Shift+$mod+z'],
-        description: 'Redo'
+        bindings: ['Shift+$mod+z']
       },
       canShowMenuItem: () => editor.canRedo(),
       menuItem: ({ action }) =>
@@ -449,14 +452,14 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
   };
   return {
     [JsedAction.CUT]: {
+      description: 'Cut element at focus',
       action: () => {
         if (editor.focusOps.cut()) {
           runPasteElement(true);
         }
       },
       binding: {
-        bindings: ['$mod+x'],
-        description: 'Cut element at focus'
+        bindings: ['$mod+x']
       },
       canShowMenuItem: () => editor.focusOps.canCut(),
       menuItem: ({ action }) =>
@@ -468,14 +471,14 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.COPY]: {
+      description: 'Copy element at focus',
       action: () => {
         if (editor.focusOps.copy()) {
           runPasteElement(false);
         }
       },
       binding: {
-        bindings: ['$mod+c'],
-        description: 'Copy element at focus'
+        bindings: ['$mod+c']
       },
       canShowMenuItem: () => editor.focusOps.canCopy(),
       menuItem: ({ action }) =>
@@ -487,12 +490,12 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.COPY_EMPTY_PREVIOUS]: {
+      description: 'Copy to empty element before focus',
       action: () => {
         editor.focusOps.copyEmptyPrevious();
       },
       binding: {
-        bindings: ['Control+c b'],
-        description: 'Copy to empty element before focus'
+        bindings: ['Control+c b']
       },
       canShowMenuItem: () => editor.focusOps.canCopyEmpty(),
       menuItem: ({ action }) =>
@@ -505,12 +508,12 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.COPY_EMPTY_NEXT]: {
+      description: 'Copy to empty element after focus',
       action: () => {
         editor.focusOps.copyEmptyNext();
       },
       binding: {
-        bindings: ['Control+c a'],
-        description: 'Copy to empty element after focus'
+        bindings: ['Control+c a']
       },
       canShowMenuItem: () => editor.focusOps.canCopyEmpty(),
       menuItem: ({ action }) =>
@@ -523,12 +526,12 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.PASTE_BEFORE]: {
+      description: 'Paste element before',
       action: () => {
         pasteAndExit(() => editor.focusOps.pasteBefore());
       },
       binding: {
-        bindings: ['$mod+v b'],
-        description: 'Paste element before'
+        bindings: ['$mod+v b']
       },
       menuItem: ({ action }) =>
         stdMenuItem({
@@ -539,12 +542,12 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.PASTE_AFTER]: {
+      description: 'Paste element after',
       action: () => {
         pasteAndExit(() => editor.focusOps.pasteAfter());
       },
       binding: {
-        bindings: ['$mod+v a'],
-        description: 'Paste element after'
+        bindings: ['$mod+v a']
       },
       menuItem: ({ action }) =>
         stdMenuItem({
@@ -555,12 +558,12 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.PASTE_APPEND]: {
+      description: 'Paste element at end',
       action: () => {
         pasteAndExit(() => editor.focusOps.pasteAppend());
       },
       binding: {
-        bindings: ['$mod+v i'],
-        description: 'Paste element at end'
+        bindings: ['$mod+v i']
       },
       menuItem: ({ action }) =>
         stdMenuItem({
@@ -577,6 +580,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
   const { ctl, editor } = ctx;
   return {
     [JsedAction.DELETE_FOCUSED_ELEMENT]: {
+      description: 'Remove focused element...',
       action: async () => {
         const confirm = ctl.confirm({
           message: `Remove element?`
@@ -599,6 +603,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.UNWRAP_FOCUS]: {
+      description: 'Unwrap...',
       action: () => {
         editor.focusOps.unwrap();
       },
@@ -613,6 +618,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.CONVERT_FOCUS]: {
+      description: 'Convert...',
       action: () => {
         const candidates = editor.focusOps.getConversionCandidates().map((tagName, index) => {
           return {
@@ -653,6 +659,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.INSERT_ELEMENT_AFTER_FOCUS]: {
+      description: 'Insert element after...',
       action: () => {
         const candidates = editor.focusOps.getInsertAfterOptions().map((option, index) => {
           return {
@@ -693,6 +700,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.INSERT_ELEMENT_BEFORE_FOCUS]: {
+      description: 'Insert element before...',
       action: () => {
         const candidates = editor.focusOps.getInsertBeforeOptions().map((option, index) => {
           return {
@@ -733,6 +741,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.APPEND_NEW_ELEMENT_IN_FOCUS]: {
+      description: 'Insert new element within (append)...',
       action: () => {
         const candidates = editor.focusOps.getAppendOptions().map((option, index) => {
           return {
@@ -779,6 +788,7 @@ function focusSpaceOps(ctx: JsedCatalogContext): CatalogEntries {
   const { editor } = ctx;
   return {
     [JsedAction.INSERT_SPACE_BEFORE_FOCUS]: {
+      description: 'Insert space before tag...',
       action: () => {
         editor.focusOps.space.insertSpaceBeforeTag();
       },
@@ -792,6 +802,7 @@ function focusSpaceOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REMOVE_SPACE_BEFORE_FOCUS]: {
+      description: 'Remove space before tag...',
       action: () => {
         editor.focusOps.space.removeSpaceBeforeTag();
       },
@@ -805,6 +816,7 @@ function focusSpaceOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.INSERT_SPACE_AFTER_FOCUS]: {
+      description: 'Insert space after tag...',
       action: () => {
         editor.focusOps.space.insertSpaceAfterTag();
       },
@@ -818,6 +830,7 @@ function focusSpaceOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REMOVE_SPACE_AFTER_FOCUS]: {
+      description: 'Remove space after tag...',
       action: () => {
         editor.focusOps.space.removeSpaceAfterTag();
       },
@@ -837,6 +850,7 @@ function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
   const { editor } = ctx;
   return {
     [JsedAction.INSERT_ANCHOR_IN_FOCUS]: {
+      description: 'Insert anchor in empty line...',
       action: () => {
         editor.focusOps.anchor.insertInFocus();
       },
@@ -850,6 +864,7 @@ function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.INSERT_ANCHOR_BEFORE_FOCUS]: {
+      description: 'Insert anchor before tag...',
       action: () => {
         editor.focusOps.anchor.insertBeforeFocus();
       },
@@ -863,6 +878,7 @@ function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS]: {
+      description: 'Remove anchor before tag...',
       action: () => {
         editor.focusOps.anchor.removeBeforeFocus();
       },
@@ -876,6 +892,7 @@ function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.INSERT_ANCHOR_AFTER_FOCUS]: {
+      description: 'Insert anchor after tag...',
       action: () => {
         editor.focusOps.anchor.insertAfterFocus();
       },
@@ -889,6 +906,7 @@ function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REMOVE_ANCHOR_AFTER_FOCUS]: {
+      description: 'Remove anchor after tag...',
       action: () => {
         editor.focusOps.anchor.removeAfterFocus();
       },
@@ -908,6 +926,7 @@ function cursorOps(ctx: JsedCatalogContext): CatalogEntries {
   const { editor } = ctx;
   return {
     [JsedAction.INSERT_SPACE_AFTER_CURSOR]: {
+      description: 'Insert trailing space after cursor...',
       action: () => {
         editor.cursorOps.insertSpaceAfter();
       },
@@ -921,6 +940,7 @@ function cursorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REMOVE_SPACE_AFTER_CURSOR]: {
+      description: 'Remove trailing space after cursor...',
       action: () => {
         editor.cursorOps.removeSpaceAfter();
       },
@@ -934,6 +954,7 @@ function cursorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.INSERT_SPACE_BEFORE_CURSOR]: {
+      description: 'Insert leading space before cursor...',
       action: () => {
         editor.cursorOps.insertSpaceBefore();
       },
@@ -947,6 +968,7 @@ function cursorOps(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.REMOVE_SPACE_BEFORE_CURSOR]: {
+      description: 'Remove leading space before cursor...',
       action: () => {
         editor.cursorOps.removeSpaceBefore();
       },
@@ -966,6 +988,7 @@ function misc(ctx: JsedCatalogContext): CatalogEntries {
   const { editor, opts } = ctx;
   return {
     [JsedAction.ENABLE_LEGACY_ELEMENT_INDICATOR]: {
+      description: 'Use legacy element indicator',
       action: () => {
         editor.enableLegacyElementIndicator(!editor.legacyElementIndicatorEnabled);
         opts.invalidateMenu();
@@ -983,6 +1006,7 @@ function misc(ctx: JsedCatalogContext): CatalogEntries {
         })
     },
     [JsedAction.ENABLE_ELEMENT_INDICATOR]: {
+      description: 'Use modern element indicator',
       action: () => {
         editor.enableElementIndicator(!editor.elementIndicatorEnabled);
         opts.invalidateMenu();

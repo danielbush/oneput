@@ -46,12 +46,12 @@ export class OneputCatalog implements AppActionCatalog<OneputActionId> {
 function getEntries(ctl: Controller): OneputCatalogEntries {
   return {
     [OneputAction.EXIT]: {
+      description: 'Exit',
       action: () => {
         ctl.app.exit();
       },
       binding: {
         bindings: ['Control+[', '$mod+[', 'Escape'],
-        description: 'Exit',
         when: { menuOpen: false }
       },
       menuItem: ({ action }) =>
@@ -63,12 +63,12 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
     },
 
     [OneputAction.BACK]: {
+      description: 'Back',
       action: () => {
         ctl.app.goBack();
       },
       binding: {
         bindings: ['$mod+b'],
-        description: 'Back',
         when: { menuOpen: true }
       },
       canShowMenuItem: () => ctl.app.canGoBack(),
@@ -82,12 +82,12 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
     },
 
     [OneputAction.HIDE_ONEPUT]: {
+      description: 'Hide Oneput',
       action: () => {
         ctl.toggleHide();
       },
       binding: {
-        bindings: ['$mod+h'],
-        description: 'Hide Oneput'
+        bindings: ['$mod+h']
       },
       menuItem: ({ action }) =>
         stdMenuItem({
@@ -98,6 +98,7 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
     },
 
     [OneputAction.GLOBAL_FILTER]: {
+      description: 'Global filter',
       action: () => {
         // If you don't supply an icon mapping for GlobalFilterInputIcon you'll
         // see the "Missing Icon" icon.
@@ -105,7 +106,6 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
       },
       binding: {
         bindings: ['$mod+e'],
-        description: 'Global filter',
         when: { menuOpen: true }
       }
     },
@@ -118,56 +118,56 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
 function getMenuEntries(ctl: Controller): OneputCatalogEntries {
   return {
     [OneputAction.OPEN_MENU]: {
+      description: 'Open Oneput menu...',
       action: () => {
         ctl.menu.openMenu();
       },
       binding: {
         bindings: ['$mod+Shift+b'],
-        description: 'Open Oneput menu...',
         when: { menuOpen: false }
       }
     },
 
     [OneputAction.CLOSE_MENU]: {
+      description: 'Close menu',
       action: () => {
         ctl.menu.closeMenu();
       },
       binding: {
         bindings: ['$mod+Shift+b', 'Escape'],
-        description: 'Close menu',
         when: { menuOpen: true }
       }
     },
 
     [OneputAction.FOCUS_PREVIOUS_MENU_ITEM]: {
+      description: 'Focus previous menu item',
       action: () => {
         ctl.menu.focusPreviousMenuItem();
       },
       binding: {
         bindings: ['$mod+k'],
-        description: 'Focus previous menu item',
         when: { menuOpen: true }
       }
     },
 
     [OneputAction.FOCUS_NEXT_MENU_ITEM]: {
+      description: 'Focus next menu item',
       action: () => {
         ctl.menu.focusNextMenuItem();
       },
       binding: {
         bindings: ['$mod+j'],
-        description: 'Focus next menu item',
         when: { menuOpen: true }
       }
     },
 
     [OneputAction.DO_ACTION]: {
+      description: 'Do action',
       action: () => {
         ctl.menu.doMenuAction();
       },
       binding: {
         bindings: ['Enter'],
-        description: 'Do action',
         when: { menuOpen: true }
       }
     }
@@ -177,33 +177,33 @@ function getMenuEntries(ctl: Controller): OneputCatalogEntries {
 function getInputEntries(ctl: Controller): OneputCatalogEntries {
   return {
     [OneputAction.FOCUS_INPUT]: {
+      description: 'Focus input',
       action: () => {
         ctl.input.focusInput();
       },
       binding: {
-        bindings: [`$mod+'`, `Control+'`],
-        description: 'Focus input'
+        bindings: [`$mod+'`, `Control+'`]
       }
     },
 
     [OneputAction.FILL]: {
+      description: 'Fill input using current menu item',
       action: () => {
         ctl.menu.runFillHandler();
       },
       binding: {
         bindings: ['Tab'],
-        description: 'Fill input using current menu item',
         when: { menuOpen: true }
       }
     },
 
     [OneputAction.SUBMIT]: {
+      description: 'Submit input',
       action: () => {
         ctl.input.runSubmitHandler();
       },
       binding: {
         bindings: ['$mod+Enter'],
-        description: 'Submit input',
         when: { menuOpen: true }
       },
       menuItem: ({ action }) =>
@@ -216,12 +216,12 @@ function getInputEntries(ctl: Controller): OneputCatalogEntries {
     },
 
     [OneputAction.TOGGLE_SELECTION]: {
+      description: 'Toggle input selection',
       action: () => {
         ctl.input.toggleSelect();
       },
       binding: {
         bindings: ['$mod+e'],
-        description: 'Toggle input selection',
         when: { menuOpen: false }
       },
       menuItem: ({ action }) =>

@@ -12,6 +12,7 @@ describe('ActionCatalog', () => {
     // arrange
     const catalog: AppActionCatalog<(typeof Command)[keyof typeof Command]> = ActionCatalog.create({
       [Command.SAVE]: {
+        description: 'Save',
         action: () => {}
       }
     });
@@ -27,8 +28,9 @@ describe('ActionCatalog', () => {
     // arrange
     const catalog = ActionCatalog.create({
       [Command.SAVE]: {
+        description: 'Save',
         action: () => {},
-        binding: { bindings: ['$mod+s'], description: 'Save' },
+        binding: { bindings: ['$mod+s'] },
         menuItem: ({ action }) =>
           stdMenuItem({
             id: 'SAVE_ROW',
@@ -37,6 +39,7 @@ describe('ActionCatalog', () => {
           })
       },
       [Command.DELETE]: {
+        description: 'Delete',
         action: () => {},
         menuItem: ({ action }) =>
           stdMenuItem({
@@ -55,8 +58,10 @@ describe('ActionCatalog', () => {
     // assert
     expect(Object.keys(actions)).toEqual([Command.SAVE]);
     expect(actions[Command.SAVE].binding?.bindings).toEqual(['$mod+s']);
+    expect(actions[Command.SAVE].binding?.description).toEqual('Save');
     expect(Object.keys(bindings)).toEqual([Command.SAVE]);
     expect(bindings[Command.SAVE].bindings).toEqual(['$mod+s']);
+    expect(bindings[Command.SAVE].description).toEqual('Save');
     expect(bindings[Command.SAVE].action).toBe(actions[Command.SAVE].action);
     expect(menuItems.map((item) => item && item.id)).toEqual(['SAVE_ROW', undefined]);
   });
@@ -65,6 +70,7 @@ describe('ActionCatalog', () => {
     // arrange
     const catalog = ActionCatalog.create({
       [Command.DELETE]: {
+        description: 'Delete',
         action: () => {},
         canShowMenuItem: () => false,
         menuItem: ({ action }) =>

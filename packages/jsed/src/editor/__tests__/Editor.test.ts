@@ -1398,12 +1398,32 @@ describe('Editor', () => {
       expect(userInput.getInputValue()).toBe('c');
     });
 
-    test('"[foo]" => " |": moves next token', async () => {
+    test('"[foo]" => "foo|" => "foo |" => "[bar]": space cycles append, insert-after, next token', async () => {
       // arrange
       const { editor, line, userInput } = await createEditorFixture({
         html: p({ id: 'p1' }, 'foo bar')
       });
       await userInput.selectRange(0, 3);
+
+      // act
+      await userInput.typeText(' ');
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['foo', 'bar']);
+      expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
+      expect(editor.getCursor()?.isAppend()).toBe(true);
+      expect(userInput.getInputValue()).toBe('foo');
+      expect(userInput.getRange()).toEqual([3, 3]);
+
+      // act
+      await userInput.typeText(' ');
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['foo', 'bar']);
+      expect(identify(editor.getCursor()?.getPlace())).toBe('foo');
+      expect(editor.getCursor()?.isInsertingAfter()).toBe(true);
+      expect(userInput.getInputValue()).toBe('foo ');
+      expect(userInput.getRange()).toEqual([4, 4]);
 
       // act
       await userInput.typeText(' ');

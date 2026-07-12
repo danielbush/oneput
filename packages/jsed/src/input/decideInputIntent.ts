@@ -14,6 +14,13 @@ Notation
 export type InputIntent =
   | {
       /**
+       * "[foo]" => " " ==> "foo|"
+       */
+      type: 'start-append-current';
+      inputValue: string;
+    }
+  | {
+      /**
        * "[foo]" => " " ==> "[bar]"
        */
       type: 'move-next-on-space';
@@ -29,7 +36,7 @@ export type InputIntent =
     }
   | {
       /**
-       * "foo|" => "foo |" => "foo b|" ==> "b|"
+       * ("foo|" => )"foo |" => "foo b|" ==> "b|"
        */
       type: 'insert-after-current';
       inputValue: string;
@@ -37,7 +44,7 @@ export type InputIntent =
     }
   | {
       /**
-       * "|foo" => " |foo" ==> "| foo" => "b| foo" ==> "b|"
+       * ("|foo" => " |foo" ==> )"| foo" => "b| foo" ==> "b|"
        */
       type: 'insert-before-current';
       inputValue: string;
@@ -51,8 +58,20 @@ export type InputIntent =
       inputValue: string;
       userTypedInteriorSpace: boolean;
     }
-  | { type: 'start-insert-before-current'; inputValue: string }
-  | { type: 'start-insert-after-current'; inputValue: string };
+  | {
+      /**
+       * "|foo" => " |foo" ==> "| foo"
+       */
+      type: 'start-insert-before-current';
+      inputValue: string;
+    }
+  | {
+      /**
+       * "foo|" => "foo |"
+       */
+      type: 'start-insert-after-current';
+      inputValue: string;
+    };
 
 /**
  * Interpret a user input transition as a higher-level edit intent.
@@ -63,12 +82,23 @@ export type InputIntent =
  */
 export function decideInputIntent(change: UserInputChange, currentTokenValue: string): InputIntent {
   const { value: inputValue, beforeValue, beforeRange, range } = change;
-  const [, beforeStop] = beforeRange;
+  const [beforeStart, beforeStop] = beforeRange;
   const [, stop] = range;
   const userCursorPos = stop ? stop - 1 : null;
   const userPreviousCursorPos = beforeStop ? beforeStop - 1 : null;
 
   if (/^\s+$/.test(inputValue)) {
+    const selectedCurrentToken =
+      beforeValue === currentTokenValue &&
+      beforeStart === 0 &&
+      beforeStop === currentTokenValue.length;
+    if (selectedCurrentToken) {
+      return {
+        type: 'start-append-current',
+        inputValue
+      };
+    }
+
     return {
       type: 'move-next-on-space',
       inputValue
@@ -97,6 +127,13 @@ export function decideInputIntent(change: UserInputChange, currentTokenValue: st
   }
   if (beforeValue === insertAfterPrefix && inputValue.startsWith(insertAfterPrefix)) {
     const insertedText = inputValue.slice(insertAfterPrefix.length);
+    if (/^\s+$/.test(insertedText)) {
+      return {
+        type: 'move-next-on-space',
+        inputValue
+      };
+    }
+
     return {
       type: 'insert-after-current',
       inputValue,

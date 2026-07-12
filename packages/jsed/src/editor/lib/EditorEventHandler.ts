@@ -175,6 +175,13 @@ export class EditorEventHandler {
     // console.log('decided intent', JSON.stringify(intent, null, 2));
 
     switch (intent.type) {
+      case 'start-append-current':
+        void this.state.userInput.setInputValue(currentTokenValue);
+        this.state.userInput.moveCursorToEnd();
+        cursor.setStateFromSelection('CURSOR_AT_END');
+        cursor.setStateFromInput(currentTokenValue);
+        return;
+
       case 'move-next-on-space':
         cursor.moveNext();
         return;
@@ -190,6 +197,7 @@ export class EditorEventHandler {
       }
 
       case 'start-insert-after-current': {
+        cursor.setStateFromSelection('CURSOR_AT_END');
         cursor.setStateFromInput(intent.inputValue);
         const sib = cursor.getPlace();
         ensureSeparatorAfter(sib);
@@ -212,6 +220,7 @@ export class EditorEventHandler {
 
       case 'start-insert-before-current': {
         this.state.userInput.moveCursorToBeginning();
+        cursor.setStateFromSelection('CURSOR_AT_BEGINNING');
         cursor.setStateFromInput(intent.inputValue);
         const sib = cursor.getPlace();
         ensureSeparatorBefore(sib);

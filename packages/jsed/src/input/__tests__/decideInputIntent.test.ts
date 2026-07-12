@@ -14,9 +14,10 @@ function makeChange(overrides: Partial<UserInputChange>): UserInputChange {
 }
 
 describe('decideInputIntent', () => {
-  test('"[foo]" => " " ==> "[bar]": move-next-on-space', () => {
+  test('"[foo]" => " " ==> "foo|": start-append-current', () => {
     // arrange
     const change = makeChange({
+      beforeValue: 'foo',
       value: ' ',
       beforeRange: [0, 3],
       range: [1, 1]
@@ -27,8 +28,27 @@ describe('decideInputIntent', () => {
 
     // assert
     expect(intent).toEqual({
-      type: 'move-next-on-space',
+      type: 'start-append-current',
       inputValue: ' '
+    });
+  });
+
+  test('"foo |" => "foo  |" ==> "[bar]": move-next-on-space', () => {
+    // arrange
+    const change = makeChange({
+      beforeValue: 'foo ',
+      value: 'foo  ',
+      beforeRange: [4, 4],
+      range: [5, 5]
+    });
+
+    // act
+    const intent = decideInputIntent(change, 'foo');
+
+    // assert
+    expect(intent).toEqual({
+      type: 'move-next-on-space',
+      inputValue: 'foo  '
     });
   });
 

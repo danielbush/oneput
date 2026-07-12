@@ -37,6 +37,18 @@ function expectSiblingHighlights(doc: ReturnType<typeof makeRoot>, ids: string[]
   expect(highlighted).toEqual(ids);
 }
 
+function addRootSiblings(doc: ReturnType<typeof makeRoot>) {
+  const before = doc.document.createElement('p');
+  before.id = 'outside-before';
+  before.textContent = 'before';
+  const after = doc.document.createElement('p');
+  after.id = 'outside-after';
+  after.textContent = 'after';
+  doc.root.before(before);
+  doc.root.after(after);
+  return { before, after };
+}
+
 describe('FOCUS', () => {
   it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
     // arrange
@@ -372,6 +384,22 @@ test('SIB_NEXT should descend through a FOCUS_TRANSPARENT_SIBLING', () => {
   expectFocusedElement(doc, byId(doc, 'inner'));
 });
 
+test('SIB_NEXT stays inside the document root when root is focused', () => {
+  // arrange
+  const doc = makeRoot(p({ id: 'inside' }, 'inside'));
+  const { after } = addRootSiblings(doc);
+  const nav = new Nav(doc);
+  nav.FOCUS(doc.root);
+
+  // act
+  nav.SIB_NEXT();
+
+  // assert
+  expectRootFocused(doc);
+  expect(after.classList.contains(JSED_FOCUS_CLASS)).toBe(false);
+  expect(after.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
+});
+
 test('SIB_PREV should walk to previous sibling', () => {
   // arrange
   const doc = makeRoot(
@@ -419,6 +447,22 @@ test('SIB_PREV should descend through a FOCUS_TRANSPARENT_SIBLING', () => {
 
   // assert
   expectFocusedElement(doc, byId(doc, 'inner'));
+});
+
+test('SIB_PREV stays inside the document root when root is focused', () => {
+  // arrange
+  const doc = makeRoot(p({ id: 'inside' }, 'inside'));
+  const { before } = addRootSiblings(doc);
+  const nav = new Nav(doc);
+  nav.FOCUS(doc.root);
+
+  // act
+  nav.SIB_PREV();
+
+  // assert
+  expectRootFocused(doc);
+  expect(before.classList.contains(JSED_FOCUS_CLASS)).toBe(false);
+  expect(before.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
 });
 
 test('SIB_NEXT_OR_UP walks to the next sibling when one exists', () => {
@@ -495,6 +539,22 @@ test('SIB_NEXT_OR_UP stays put when no ancestor has a following sibling', () => 
   expectFocusedElement(doc, byId(doc, 'a1'));
 });
 
+test('SIB_NEXT_OR_UP stays inside the document root when root is focused', () => {
+  // arrange
+  const doc = makeRoot(p({ id: 'inside' }, 'inside'));
+  const { after } = addRootSiblings(doc);
+  const nav = new Nav(doc);
+  nav.FOCUS(doc.root);
+
+  // act
+  nav.SIB_NEXT_OR_UP();
+
+  // assert
+  expectRootFocused(doc);
+  expect(after.classList.contains(JSED_FOCUS_CLASS)).toBe(false);
+  expect(after.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
+});
+
 test('SIB_PREV_OR_UP walks to the previous sibling when one exists', () => {
   // arrange
   const doc = makeRoot(div({ id: 'a' }, p({ id: 'a1' }, 'a1'), p({ id: 'a2' }, 'a2')));
@@ -532,6 +592,38 @@ test('SIB_PREV_OR_UP stays put at the top of the tree', () => {
 
   // assert
   expectFocusedElement(doc, byId(doc, 'outer'));
+});
+
+test('SIB_PREV_OR_UP stays inside the document root when root is focused', () => {
+  // arrange
+  const doc = makeRoot(p({ id: 'inside' }, 'inside'));
+  const { before } = addRootSiblings(doc);
+  const nav = new Nav(doc);
+  nav.FOCUS(doc.root);
+
+  // act
+  nav.SIB_PREV_OR_UP();
+
+  // assert
+  expectRootFocused(doc);
+  expect(before.classList.contains(JSED_FOCUS_CLASS)).toBe(false);
+  expect(before.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
+});
+
+test('SIB_HIGHLIGHT does not mark document root siblings', () => {
+  // arrange
+  const doc = makeRoot(p({ id: 'inside' }, 'inside'));
+  const { before, after } = addRootSiblings(doc);
+  const nav = new Nav(doc);
+
+  // act
+  nav.FOCUS(doc.root);
+
+  // assert
+  expectRootFocused(doc);
+  expect(before.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
+  expect(after.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
+  expect(doc.SIB_HIGHLIGHT.size).toBe(0);
 });
 
 test('UP can walk up successive parent elements', () => {

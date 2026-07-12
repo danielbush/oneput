@@ -171,9 +171,13 @@ export class Nav {
     return;
   }
 
-  #sibnext = () => (this.#FOCUS ? this.#nextSiblingFocusTarget(this.#FOCUS) : null);
+  #sibnext = () =>
+    this.#FOCUS && this.#FOCUS !== this.doc.root ? this.#nextSiblingFocusTarget(this.#FOCUS) : null;
 
-  #sibprev = () => (this.#FOCUS ? this.#previousSiblingFocusTarget(this.#FOCUS) : null);
+  #sibprev = () =>
+    this.#FOCUS && this.#FOCUS !== this.doc.root
+      ? this.#previousSiblingFocusTarget(this.#FOCUS)
+      : null;
 
   #firstFocusableDescendant(el: Node): HTMLElement | null {
     for (const next of findNextNode(el, el, {
@@ -235,7 +239,7 @@ export class Nav {
    * Supports DESCEND'ing FOCUS_TRANSPARENT's -- see FOCUS_TRANSPARENT_SIBLING.
    */
   SIB_NEXT() {
-    const next = this.#FOCUS ? this.#nextSiblingFocusTarget(this.#FOCUS) : null;
+    const next = this.#sibnext();
     if (next) {
       this.REQUEST_FOCUS(next);
       return;
@@ -251,6 +255,9 @@ export class Nav {
    */
   SIB_NEXT_OR_UP() {
     if (!this.#FOCUS) return;
+    if (this.#FOCUS === this.doc.root) {
+      return;
+    }
 
     const sib = this.#nextSiblingFocusTarget(this.#FOCUS);
     if (sib) {
@@ -277,7 +284,7 @@ export class Nav {
    * See {@link SIB_NEXT}
    */
   SIB_PREV() {
-    const next = this.#FOCUS ? this.#previousSiblingFocusTarget(this.#FOCUS) : null;
+    const next = this.#sibprev();
     if (next) {
       this.REQUEST_FOCUS(next);
       return;
@@ -296,6 +303,9 @@ export class Nav {
    */
   SIB_PREV_OR_UP() {
     if (!this.#FOCUS) return;
+    if (this.#FOCUS === this.doc.root) {
+      return;
+    }
 
     const sib = this.#previousSiblingFocusTarget(this.#FOCUS);
     if (sib) {

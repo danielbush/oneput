@@ -185,15 +185,61 @@ If you need to dynamically generate menu items but not in response to typing (li
 
 ## Explain how filters and generative menus work
 
-TODO: mutually exclusive, you can either use a filter or use generative.
+Filters and generative menus are mutually exclusive input modes. Typing into the input either:
+
+- filters an existing base menu, or
+- generates a new menu from the input.
+
+A filter is sync and base-derived. You seed the base menu with `menu()` or `setMenu(...)`,
+then `setFilter(...)` derives the displayed rows from `current input + base menu items`. This is
+why `invalidate()` can re-pull a declarative `menu()` and re-apply the current filter in the same
+refresh.
+
+A generative menu is producer-derived. `setGenerativeAsync(...)` listens to input changes and
+asks your async function for the next full set of menu items. It debounces input, discards late
+out-of-order results, and can render a `whenEmpty` menu without calling the async producer.
+
+Use a filter when the menu already has a meaningful local base list. Use generative when the
+input is the query itself, such as server search or any async producer.
 
 ## Explain how focusBehaviour works
 
-TODO: 4 layers; we can override in ctl.menu.invalidate
+`focusBehaviour` decides where focus should land after a menu is displayed or redisplayed.
+
+There are four layers:
+
+- `defaultFocusBehaviour` — the baseline for the app, set with `setDefaultFocusBehaviour(...)`.
+- ambient `focusBehaviour` — the current controller setting, set with `setFocusBehaviour(...)`
+  and reset by AppController between AppObjects.
+- menu `focusBehaviour` — a per-menu preference passed to `setMenu({ focusBehaviour })`.
+- operation override — a one-shot override, currently used by `invalidate({ focusBehaviour })`.
+
+The behavior values are:
+
+- `last-action,first` — focus the last selected action for this menu id, or the first focusable row.
+- `first` — focus the first focusable row.
+- `last` — focus the last focusable row.
+- `none` — leave focus alone.
+
+The most specific available layer wins for that refresh. For example, call
+`ctl.menu.invalidate({ focusBehaviour: 'none' })` when you want to redraw a menu without moving
+the user's current focus.
 
 ## What are actions?
 
-TODO:
+Actions are stable command identities plus executable behavior. They let the same command be
+triggered from a key binding, a menu item, or direct controller code without duplicating the
+implementation.
 
-- OneputAction id's all actions
-- in a catatog each OneputAction can have bindings and memu items associated with them
+`OneputAction` names the built-in Oneput commands. `OneputCatalog` maps those ids to:
+
+- an `action` callback,
+- optional key binding metadata,
+- optional menu item metadata.
+
+`ActionCatalog` is the reusable pattern underneath that. An AppObject can filter a catalog to
+the actions it wants to expose, return `catalog.getActions()` from `actions()`, and compose menu
+rows with `catalog.getMenuItems([...])`.
+
+The action id is the stable dispatch identity used by bindings and AppObject action lookup. The
+menu item id is the rendered row identity inside a particular menu.

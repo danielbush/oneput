@@ -10,7 +10,13 @@ import {
   sel,
   t
 } from '../../../test/util.js';
-import { removeSelectionWrappers, deleteSelection } from '../selection.js';
+import {
+  convertWrapper,
+  deleteSelection,
+  redoConvertWrapper,
+  removeSelectionWrappers,
+  undoConvertWrapper
+} from '../selection.js';
 
 function getWrapper(root: HTMLElement): HTMLElement {
   return root.querySelector(`.${JSED_SELECTION_CLASS}`) as HTMLElement;
@@ -89,5 +95,178 @@ describe('removeSelectionWrappers', () => {
     // assert
     expect(root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
     expect(root.querySelector('p')?.textContent).toBe('before selected after');
+  });
+});
+
+describe('convertWrapper', () => {
+  test('multiple children', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'), //
+        s(),
+        sel(t('x'), s(), t('y')),
+        s(),
+        t('after')
+      )
+    );
+    const parent = root.querySelector('p')!;
+    const wrapper = getWrapper(root);
+
+    // act
+    const op = convertWrapper(wrapper, 'em');
+
+    // assert
+    expect(op).toMatchObject({ action: 'convert-wrapper', tagName: 'em' });
+    expect(root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
+    expect(identifyChildren(parent)).toEqual([
+      'before',
+      '[nodeType=3:" "]',
+      '[element:em]',
+      '[nodeType=3:" "]',
+      'after'
+    ]);
+    expect(identifyChildren(op.container)).toEqual(['x', '[nodeType=3:" "]', 'y']);
+  });
+
+  test('single child', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'), //
+        s(),
+        sel(t('x'))
+      )
+    );
+    const parent = root.querySelector('p')!;
+    const wrapper = getWrapper(root);
+
+    // act
+    const op = convertWrapper(wrapper, 'strong');
+
+    // assert
+    expect(identifyChildren(parent)).toEqual([
+      'before', //
+      '[nodeType=3:" "]',
+      '[element:strong]'
+    ]);
+    expect(identifyChildren(op.container)).toEqual(['x']);
+  });
+
+  test('undo - multiple children', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'), //
+        s(),
+        sel(t('x'), s(), t('y')),
+        s(),
+        t('after')
+      )
+    );
+    const parent = root.querySelector('p')!;
+    const op = convertWrapper(getWrapper(root), 'em');
+
+    // act
+    undoConvertWrapper(op);
+
+    // assert
+    expect(root.querySelector('em')).toBeNull();
+    expect(root.querySelector(`.${JSED_SELECTION_CLASS}`)).toBeNull();
+    expect(identifyChildren(parent)).toEqual([
+      'before',
+      '[nodeType=3:" "]',
+      'x',
+      '[nodeType=3:" "]',
+      'y',
+      '[nodeType=3:" "]',
+      'after'
+    ]);
+  });
+
+  test('redo - multiple children', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'), //
+        s(),
+        sel(t('x'), s(), t('y')),
+        s(),
+        t('after')
+      )
+    );
+    const parent = root.querySelector('p')!;
+    const op = convertWrapper(getWrapper(root), 'em');
+    undoConvertWrapper(op);
+
+    // act
+    redoConvertWrapper(op);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual([
+      'before',
+      '[nodeType=3:" "]',
+      '[element:em]',
+      '[nodeType=3:" "]',
+      'after'
+    ]);
+    expect(identifyChildren(op.container)).toEqual(['x', '[nodeType=3:" "]', 'y']);
+  });
+
+  test('undo / redo / undo round trip', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'), //
+        s(),
+        sel(t('x'), s(), t('y'))
+      )
+    );
+    const parent = root.querySelector('p')!;
+    const op = convertWrapper(getWrapper(root), 'em');
+    const converted = identifyChildren(parent);
+
+    // act
+    undoConvertWrapper(op);
+    redoConvertWrapper(op);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(converted);
+
+    // act
+    undoConvertWrapper(op);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual([
+      'before',
+      '[nodeType=3:" "]',
+      'x',
+      '[nodeType=3:" "]',
+      'y'
+    ]);
+  });
+
+  test('empty WRAPPER', () => {
+    // arrange
+    const root = makeRawRoot(
+      p(
+        t('before'), //
+        s(),
+        sel()
+      )
+    );
+    const parent = root.querySelector('p')!;
+    const op = convertWrapper(getWrapper(root), 'em');
+    undoConvertWrapper(op);
+
+    // act
+    redoConvertWrapper(op);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual([
+      'before', //
+      '[nodeType=3:" "]',
+      '[element:em]'
+    ]);
   });
 });

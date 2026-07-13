@@ -198,6 +198,7 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
+- refactor: oneput-demo filepicker uses paint() + setMenu
 - refactor: move likely Oneput-level catalog entries (`EXIT`, `FOCUS`) out of `EditorActionCatalog`
 - refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be
   - can we drastically simplify it because of ANCHOR_RULES?

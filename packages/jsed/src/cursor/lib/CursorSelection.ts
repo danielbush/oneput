@@ -16,16 +16,21 @@ import { getSeparatorAfter, getSeparatorBefore } from '../../lib/ops/space.js';
  *
  * Terminology
  *
- *   (anchor) A|------------->> (head)
- *   (head)   <<-------------|A (anchor)
- *
- * - `head` is driven by an internal silent cursor.
+ * - `head` is driven by the cursor.
  * - `anchor` is initial starting point (constant)
  *
+ * ```
+ *   (anchor) A|------------->> (head)
+ *   (head)   <<-------------|A (anchor)
+ * ```
+ *
+ * - `front`/`back` are always document-order:
+ *
+ * ```
  *   (front) A|------------->> (back)
  *   (front) <<-------------|A (back)
+ * ```
  *
- * - `front`/`back` are always document-order.
  */
 export class CursorSelection {
   static create(params: { cursor: CursorState; seed: HTMLElement }): CursorSelection {

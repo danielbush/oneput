@@ -68,6 +68,10 @@ tasks:
       - task: jsed:test
       - task: oneput:test
 
+  todo:
+    cmds:
+      - rg --color=ansi -ni "TODO|\<FIX\>" -g '*.{ts,js,tsx,jsx,svelte}' | less -R
+
   build:
     desc: run build across all important packages
     deps:

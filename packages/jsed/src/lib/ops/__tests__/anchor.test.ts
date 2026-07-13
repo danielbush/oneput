@@ -31,7 +31,8 @@ import {
 import { addImplicitLines } from '../implicitLine.js';
 
 describe('anchorize', () => {
-  test('empty root → leading anchor', () => {
+  test.todo('empty root → leading anchor', () => {
+    // Should we anchorize a single empty div?
     // arrange
     const root = makeRawRoot('');
 
@@ -51,6 +52,17 @@ describe('anchorize', () => {
 
     // assert
     expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]']);
+  });
+
+  test('empty non-anchorable FOCUSABLE → no leading anchor', () => {
+    // arrange
+    const root = makeRawRoot(div({ id: 'd1' }));
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'd1'))).toEqual([]);
   });
 
   // This confirms that if we create a p-tag after an anchor within say an

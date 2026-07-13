@@ -59,6 +59,22 @@ describe('InsertAfter.run', () => {
     state.destroy();
   });
 
+  it('does not anchorize an inserted empty div', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const state = getEditorState(doc);
+
+    // act
+    InsertAfter.run(state, { tagName: 'div' });
+
+    // assert
+    const inserted = doc.root.children[1];
+    expect(inserted?.tagName.toLowerCase()).toBe('div');
+    expect(inserted?.querySelector(`.${JSED_ANCHOR_CLASS}`)).toBeNull();
+
+    state.destroy();
+  });
+
   it('emits a focusable-inserted element change for the inserted container', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));

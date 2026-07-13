@@ -1,4 +1,5 @@
 import { getNextSibling, getPreviousSibling } from '../core/sibling.js';
+import { canCreateWithAnchor } from '../core/dom-rules.js';
 import {
   isAnchor,
   isFocusable,
@@ -304,6 +305,9 @@ function anchorizeLeadingSegment(node: Node) {
       true
     );
     if (!firstRealSib) {
+      if (node instanceof HTMLElement && !canCreateWithAnchor(node.tagName)) {
+        return null;
+      }
       const anchor = createAnchor();
       // Make anchor the very first thing.
       node.insertBefore(anchor, node.firstChild);

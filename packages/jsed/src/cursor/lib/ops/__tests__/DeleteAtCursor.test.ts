@@ -279,7 +279,7 @@ describe('DeleteAtCursor.run', () => {
     expect(identifyChildren(doc.root)).toEqual(['[anchor]']);
   });
 
-  test('delete OPAQUE - no-op (TODO)', () => {
+  test('delete OPAQUE - no-op', () => {
     // arrange
     const doc = makeRoot(
       p(t('aaa'), s(), '<span class="katex" style="display:inline;">x²</span>', s(), t('bbb'))

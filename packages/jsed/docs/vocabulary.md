@@ -229,3 +229,13 @@ Tokens and Text and whitespace
 - **JOIN** — when a TOKEN (t) is joined with the next or previous (p): p is removed and its text is appended or prepended to t.
 - **SPLIT_BY_TOKEN** — splitting a TOKEN's parent before or after the TOKEN. The split applies to the parent (which may be the LINE or an inline element like `<em>`). LINE is always the highest ancestor we split at.
 - **SPLIT_BY_LINE** — splitting a LINE's parent element before or after the LINE. Can be done with reference to a TOKEN (split at the TOKEN's LINE) or at the FOCUSABLE level (split the focused LINE's parent).
+
+## undo / redo
+
+- DOM_RETENTION
+  - when deleting an existing or removing a newly inserted element, retain the element in the dom using a DELETE_MARKER
+  - similarly for TOKEN's and SEPARATOR's except we don't use DELETE_MARKER, we just convert the TOKEN's to be IGNORABLE
+- DELETE_MARKER
+  - marks where an element was
+  - is marked as an IGNORABLE
+  - uses a template tag because it can be place legally almost anywhere; so if the parent is replaced by a new tag we minimize any legality issues

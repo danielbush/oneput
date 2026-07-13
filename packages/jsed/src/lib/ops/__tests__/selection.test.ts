@@ -176,6 +176,7 @@ describe('convertWrapper', () => {
     expect(identifyChildren(parent)).toEqual([
       'before',
       '[nodeType=3:" "]',
+      '[deleted-element]', // marker holding the container's slot
       'x',
       '[nodeType=3:" "]',
       'y',
@@ -240,6 +241,7 @@ describe('convertWrapper', () => {
     expect(identifyChildren(parent)).toEqual([
       'before',
       '[nodeType=3:" "]',
+      '[deleted-element]', // marker holding the container's slot
       'x',
       '[nodeType=3:" "]',
       'y'

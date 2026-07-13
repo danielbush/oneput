@@ -2,6 +2,7 @@ import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import { isToken } from '../core/taxonomy.js';
 import {
   containsOnly,
+  createElementDeleteMarker,
   deleteHighestEmpty,
   redoDeleteElement,
   undoDeleteElement,
@@ -132,6 +133,8 @@ export type ConvertWrapper = {
   tagName: string;
   container: HTMLElement;
   childNodes: ChildNode[];
+  /** Holds the container's slot while undone. See {@link undoConvertWrapper}. */
+  marker?: HTMLElement;
 };
 
 /**
@@ -151,27 +154,38 @@ export function convertWrapper(wrapper: HTMLElement, tagName: string): ConvertWr
   };
 }
 
+/**
+ * Lift the children back out and detach the container, leaving a marker to hold
+ * the slot — the same technique as {@link deleteElement}. Without it the
+ * container's position would survive only as `childNodes[0]`, which is nothing
+ * at all when the WRAPPER was empty.
+ */
 export function undoConvertWrapper(op: ConvertWrapper) {
   const childNodes = Array.from(op.container.childNodes);
-  op.container.before(...childNodes);
+  const marker = createElementDeleteMarker();
+  op.container.before(marker);
+  marker.after(...childNodes);
   op.container.remove();
   // We'll keep the list of childNodes up to date.
   op.childNodes = childNodes;
+  op.marker = marker;
 }
 
 export function redoConvertWrapper(op: ConvertWrapper) {
-  const first = op.childNodes[0];
-  const last = op.childNodes[op.childNodes.length - 1];
+  const marker = op.marker;
+  if (!marker) {
+    throw new Error('redoConvertWrapper: no marker; undoConvertWrapper has not run');
+  }
+  // Re-collect from the DOM rather than trusting op.childNodes: while undone the
+  // children sit bare in the parent and may have been split or merged.
   const childNodes: Node[] = [];
-  // Read all children between first and last inclusive:
-  let n: Node | null = first;
-  while (n) {
+  let n = marker.nextSibling;
+  for (let i = 0; i < op.childNodes.length && n; i++) {
     childNodes.push(n);
-    if (n === last) {
-      break;
-    }
     n = n.nextSibling;
   }
-  first.before(op.container);
+  marker.before(op.container);
   op.container.append(...childNodes);
+  marker.remove();
+  op.marker = undefined;
 }

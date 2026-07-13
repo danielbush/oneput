@@ -198,12 +198,14 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
-- refactor: make all mutatations retain their position in the DOM?
+- refactor: DOM_RETENTION - make all mutations retain their position in the DOM?
   - COMMENT: the pattern to follow is in `deleteElement` in `focusable.ts`; it uses `createElementDeleteMarker`
   - principle: keep changes in the DOM so we don't have to guess their positions
   - COMMENT: we do this for tokens and some operations
   - items
-    - undoInsertElementAfter removes; redoInsertElementAfter re-inserts using a marker
+    - [x] Wrap, WrapLineSibling, WrapSelection which use convertWrapper, redoConvertWrapper, undoConvertWrapper and   redoWrapLineSiblingWithTag, undoWrapLineSiblingWithTag, wrapLineSiblingWithTag,
+      - 13-Jul-2026 : did this with Opus 4.8
+    - [ ] undoInsertElementAfter removes; redoInsertElementAfter re-inserts using a marker
 - refactor: token.remove op should say 'removedToken', 'removedLeadingSpace', 'removedTrailingSpace' - it's too easy to think they're actually live references
 - refactor: move likely Oneput-level catalog entries (`EXIT`, `FOCUS`) out of `EditorActionCatalog`
 - refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be

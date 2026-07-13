@@ -198,7 +198,13 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
-- refactor: oneput-demo filepicker uses paint() + setMenu
+- refactor: make all mutatations retain their position in the DOM?
+  - COMMENT: the pattern to follow is in `deleteElement` in `focusable.ts`; it uses `createElementDeleteMarker`
+  - principle: keep changes in the DOM so we don't have to guess their positions
+  - COMMENT: we do this for tokens and some operations
+  - items
+    - undoInsertElementAfter removes; redoInsertElementAfter re-inserts using a marker
+- refactor: token.remove op should say 'removedToken', 'removedLeadingSpace', 'removedTrailingSpace' - it's too easy to think they're actually live references
 - refactor: move likely Oneput-level catalog entries (`EXIT`, `FOCUS`) out of `EditorActionCatalog`
 - refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be
   - can we drastically simplify it because of ANCHOR_RULES?

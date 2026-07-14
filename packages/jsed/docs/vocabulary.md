@@ -89,12 +89,15 @@ Both the CURSOR and FOCUS represent 2 different ways of navigating the DOM. We c
   - only applies to CURSOR
 - **OPAQUE**
   - VISIT=yes DESCEND=no — OPAQUE to both FOCUS and CURSOR.
-  - This means we can't edit the internal structure of these elements.
+  - This means we can't edit the internal structure of these elements (or we prefer an external editor to manage their content).
   - Source of truth: `isOpaque` in `taxonomy.ts`.
   - Example: a katex-rendered node. Rather than recurse the katex rendered node, we would load a textarea with the latex content and get katex to update the katex-rendered node for us.
   - Example: Some leaf nodes that have a special purpose eg `<img>` tags etc may be treated as OPAQUE.
   - Example: Also elements that are already natively focusable, e.g. form controls.
   - Previously called ISLAND.
+- **INLINE_OPAQUE**
+  - an OPAQUE that has display `inline*`
+  - there are special because currently they are things the CURSOR can sit on like a special opaque TOKEN.
 - **INLINE_FLOW**
   — a FOCUSABLE with inline-flow display.
   - Example: mark up for one or more TOKEN's — e.g. `<span>`, `<em>`, `<a>`.
@@ -142,8 +145,8 @@ We can define the traversal rules:
   - which equates to the following:
     - it must belong to a LINE
     - it can be a TOKEN
-    - it can be OPAQUE — CURSOR visits (does not descend)
-    - it is not CURSOR_TRANSPARENT or INLINE_FLOW - CURSOR descends (does not visit)
+    - it can be INLINE_OPAQUE — CURSOR visits (does not descend)
+    - it is not CURSOR_TRANSPARENT or INLINE_FLOW - CURSOR descends (does not visit). or a non-inline OPAQUE (eg a block katex formula)
   - anything visited by CURSOR in a CURSOR_TRANSPARENT or INLINE_FLOW where either belongs to the LINE;
     - Example: the TOKEN's in an em-tag within a p-tag are LINE_SIBLING's for the p-tag.
   - Source of truth: `isLineSibling` in `taxonomy.ts`.

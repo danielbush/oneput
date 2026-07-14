@@ -393,7 +393,7 @@ describe('Editor', () => {
         ]);
         const wrapper = d1.querySelector('em') as HTMLElement;
         expect(identifyChildren(wrapper)).toEqual(['[opaque:span]']);
-        expect(isOpaque(editor.getCursor()?.getPlace())).toBe(true);
+        expect(isOpaque(editor.getCursor()?.getPlace() ?? null)).toBe(true);
         expect(editor.getCursor()?.getPlace()).toBe(opaque);
 
         editor.destroy();

@@ -1,131 +1,175 @@
-import type { Controller } from '@oneput/oneput';
+import type { Controller, Menu } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import { mockListDir, type DirEntry, type ListDir } from '../service/listDir.js';
+import { stdSkeletonMenuItems } from '@oneput/oneput/shared/ui/menuItems/stdSkeletonMenuItems.js';
 
-/**
- * A directory *picker*: browse the tree, select a file, and exit back to the
- * caller with the chosen path (`ctl.app.exit(path)` → caller's `onResume`).
- *
- *  - Single AppObject instance over all folders.
- *  - **Navigation** is path-driven and async: dim+freeze the menu, fetch the
- *    listing, then `setMenu` — one synchronous swap, no cut-down.
- *  - **Typing** is handled by the framework's default filter (a *synchronous*
- *    `(query, base) => subset` over the painted items). The picker does nothing:
- *    no re-fetch, no debounce. This is why it does not use `setMenuItemsFnAsync`
- *    — that channel is for input-driven async *generation* (a search box), and
- *    would only suppress the filter we want here.
- */
+type ListDirectory = (path: string) => Promise<DirEntry[]>;
+
+export type FilePickerOptions = {
+  fileFilter?: (entry: DirEntry) => boolean;
+  onFileSelect?: (path: string) => void | Promise<void>;
+  onResume?: AppObject['onResume'];
+  onMenuOpenChange?: AppObject['onMenuOpenChange'];
+  onExit?: AppObject['onExit'];
+  placeholder?: string;
+};
+
 export class FilePicker implements AppObject {
-  static create(ctl: Controller, initialPath = '/', listDir: ListDir = mockListDir) {
-    return new FilePicker(ctl, initialPath, listDir);
+  static create(
+    ctl: Controller,
+    /**
+     * We allow a promise in case you have to fetch or do some command before you
+     * can establish a path.
+     */
+    initialPath: string | Promise<string> = '/',
+    options: FilePickerOptions = {},
+    listDir: ListDirectory = (path) => mockListDir(path)
+  ) {
+    return new FilePicker(ctl, initialPath, options, listDir);
   }
+
+  private isLoading = true;
 
   private constructor(
     private ctl: Controller,
-    private initialPath: string,
-    private listDir: ListDir
+    private initialPath: string | Promise<string>,
+    private options: FilePickerOptions,
+    private listDir: ListDirectory,
+    private path = '/',
+    private entries: DirEntry[] = [],
+    private showDotEntries = false,
+    public onReusme = options.onResume,
+    public onMenuOpenChange = options.onMenuOpenChange,
+    public onExit = options.onExit
   ) {}
 
-  private path = '/';
-  private entries: DirEntry[] = [];
-
-  onStart() {
-    this.ctl.input.setPlaceholder('Type to filter; select a file to choose it...');
+  /**
+   * Load the first directory and render the picker.
+   */
+  onStart = async () => {
+    this.ctl.input.setPlaceholder(this.options.placeholder ?? 'Type to filter; select a file...');
     this.ctl.input.focusInput();
-    void this.start();
-  }
-
-  /** Load the initial directory after Oneput gives the picker control. */
-  private async start() {
-    this.ctl.ui.update({ flags: { enableMenuActions: false } });
-    const ok = await this.load(this.initialPath);
-    this.ctl.ui.update({ flags: { enableMenuActions: true } });
+    // Note the double await in the event we need to wait for the initialPath.
+    // In the meantime, the loader menu will show a skeleton.
+    const ok = await this.loadPath(await this.initialPath);
     if (!ok) {
       this.ctl.app.exit();
       return;
     }
     this.showPath();
-    this.paint();
-  }
+    this.ctl.menu.invalidate();
+  };
 
-  /** Back goes *up a folder*; at the root there's nowhere up, so it cancels. */
-  onBack() {
+  onBack = () => {
     if (this.path === '/') {
       this.ctl.app.exit();
-    } else {
-      this.navigateTo(this.parentPath());
+      return;
     }
-  }
+    this.navigateTo(this.parentPath());
+  };
 
-  /** Enter `path` from within the picker: dim → fetch → re-paint (or stay on error). */
+  actions = {
+    TOGGLE_DOT_ENTRIES: {
+      action: () => {
+        this.showDotEntries = !this.showDotEntries;
+        this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+      },
+      binding: {
+        bindings: ['$mod+.'],
+        description: 'Toggle dot files',
+        when: { menuOpen: true }
+      }
+    }
+  };
+
+  menu = () => {
+    if (this.isLoading) {
+      return {
+        id: 'loading',
+        // || 10 because initial load of AppObject might give us 0 whilst loading this skeleton menu.
+        items: stdSkeletonMenuItems(this.ctl.menu.displayedMenuItemCount || 10)
+      };
+    }
+    return {
+      id: 'FilePicker',
+      focusBehaviour: 'first',
+      items: [
+        ...(this.path === '/'
+          ? []
+          : [
+              stdMenuItem({
+                id: 'up',
+                canFilter: false,
+                left: (b) => [b.icon(icons.ChevronUp)],
+                textContent: '..',
+                action: () => this.navigateTo(this.parentPath())
+              })
+            ]),
+        ...this.entries
+          .filter((entry) => this.canShowEntry(entry))
+          .map((entry) =>
+            entry.kind === 'dir'
+              ? stdMenuItem({
+                  id: `dir-${entry.name}`,
+                  left: (b) => [b.icon(icons.Folder)],
+                  textContent: entry.name,
+                  right: (b) => [b.icon(icons.ChevronRight)],
+                  action: () => this.navigateTo(this.childPath(entry.name))
+                })
+              : stdMenuItem({
+                  id: `file-${entry.name}`,
+                  left: (b) => [b.icon(icons.File)],
+                  textContent: entry.name,
+                  action: () => void this.selectFile(this.childPath(entry.name))
+                })
+          ),
+        stdMenuItem({
+          id: 'toggle-dot-entries',
+          canFilter: false,
+          left: (b) => [b.icon(icons.File)],
+          textContent: this.showDotEntries ? 'Hide dot files' : 'Show dot files',
+          action: () => {
+            this.showDotEntries = !this.showDotEntries;
+            this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+          }
+        }),
+        stdMenuItem({
+          id: 'cancel',
+          canFilter: false,
+          left: (b) => [b.icon(icons.X)],
+          textContent: 'Cancel',
+          action: () => this.ctl.app.exit()
+        })
+      ]
+    } satisfies Menu;
+  };
+
   private async navigateTo(path: string) {
     this.ctl.ui.update({ flags: { enableMenuActions: false } });
-    const ok = await this.load(path);
+    const ok = await this.loadPath(path);
     this.ctl.ui.update({ flags: { enableMenuActions: true } });
     if (!ok) {
       return;
     }
+    this.ctl.input.setInputValue('');
     this.showPath();
-    this.paint();
+    this.ctl.menu.invalidate({ focusBehaviour: 'none' });
   }
 
-  /** Fetch `path` into `entries`; on success commit `path`. Returns success. */
-  private async load(path: string): Promise<boolean> {
+  private async loadPath(path: string): Promise<boolean> {
+    this.isLoading = true;
     try {
       this.entries = await this.listDir(path);
-    } catch (error) {
-      this.ctl.notify(`Could not open "${path}": ${error}`);
+    } catch (err) {
+      this.ctl.notify(`Could not open "${path}": ${err}`);
       return false;
+    } finally {
+      this.isLoading = false;
     }
     this.path = path;
     return true;
-  }
-
-  private paint() {
-    this.ctl.menu.setMenu({ id: 'main', items: this.buildItems() });
-  }
-
-  private buildItems() {
-    return [
-      // Up a folder (clickable peer of the back button); hidden at the root.
-      ...(this.path === '/'
-        ? []
-        : [
-            stdMenuItem({
-              id: 'up',
-              canFilter: false,
-              left: (b) => [b.icon(icons.ChevronUp)],
-              textContent: '..',
-              action: () => this.navigateTo(this.parentPath())
-            })
-          ]),
-      ...this.entries.map((entry) =>
-        entry.kind === 'dir'
-          ? stdMenuItem({
-              id: `dir-${entry.name}`,
-              left: (b) => [b.icon(icons.Folder)],
-              textContent: entry.name,
-              right: (b) => [b.icon(icons.ChevronRight)],
-              action: () => this.navigateTo(this.childPath(entry.name))
-            })
-          : stdMenuItem({
-              id: `file-${entry.name}`,
-              left: (b) => [b.icon(icons.File)],
-              textContent: entry.name,
-              action: () => this.ctl.app.exit(this.childPath(entry.name))
-            })
-      ),
-      // Cancel: exit with no selection (clickable peer of back-at-root).
-      stdMenuItem({
-        id: 'cancel',
-        canFilter: false,
-        left: (b) => [b.icon(icons.X)],
-        textContent: 'Cancel',
-        action: () => this.ctl.app.exit()
-      })
-    ];
   }
 
   private showPath() {
@@ -139,5 +183,26 @@ export class FilePicker implements AppObject {
   private parentPath(): string {
     const parent = this.path.replace(/\/[^/]+$/, '');
     return parent === '' ? '/' : parent;
+  }
+
+  private async selectFile(path: string) {
+    if (this.options.onFileSelect) {
+      await this.options.onFileSelect(path);
+      return;
+    }
+    // this.ctl.app.exit({
+    //   type: 'FilePicker',
+    //   payload: { path }
+    // } satisfies FilePickerExit);
+  }
+
+  private isVisibleEntry(entry: DirEntry) {
+    return this.showDotEntries || !entry.name.startsWith('.');
+  }
+
+  private canShowEntry(entry: DirEntry) {
+    if (!this.isVisibleEntry(entry)) return false;
+    if (entry.kind === 'dir') return true;
+    return this.options.fileFilter?.(entry) ?? true;
   }
 }

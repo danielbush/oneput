@@ -23,7 +23,7 @@ export class Root implements AppObject {
       KatexDemo: () => KatexDemo.create(ctl),
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
-      DirectoryPicker: () => FilePicker.create(ctl)
+      FilePicker: () => FilePicker.create(ctl)
     });
   }
 
@@ -37,7 +37,7 @@ export class Root implements AppObject {
       KatexDemo: () => KatexDemo;
       AsyncSearchExample: () => AsyncSearchExample;
       DirectoryBrowser: () => DirectoryBrowser;
-      DirectoryPicker: () => FilePicker;
+      FilePicker: () => FilePicker;
     }
   ) {}
 
@@ -117,7 +117,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.File)],
           textContent: 'Pick a file...',
           action: () => {
-            this.ctl.app.run(this.create.DirectoryPicker());
+            this.ctl.app.run(this.create.FilePicker());
           },
           right: (b) => [b.icon(icons.ChevronRight)]
         }),

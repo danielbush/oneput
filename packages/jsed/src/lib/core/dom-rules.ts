@@ -42,6 +42,21 @@ export function getConversionCandidates(_el: HTMLElement): string[] {
   return ['p', 'div', 'section'];
 }
 
+/**
+ * Every tag the CURSOR or a SELECTION can be wrapped with. The menu offers
+ * these; {@link canWrapWith} is the same rule as a predicate.
+ */
 export function getWrapCandidates(): string[] {
-  return ['em', 'strong', 'i', 'b'];
+  return [...PHRASING_CONTENT];
+}
+
+/**
+ * Is `tagName` a legal wrapper for LINE_SIBLING's?
+ *
+ * We only ever wrap TOKEN's and INLINE_OPAQUE's, and those already sit in a
+ * phrasing context — so any inline tag is legal wherever they are. The wrap
+ * rule reduces to the tag alone; the surrounding DOM never has to be consulted.
+ */
+export function canWrapWith(tagName: string): boolean {
+  return PHRASING_CONTENT.includes(tagName.toLowerCase());
 }

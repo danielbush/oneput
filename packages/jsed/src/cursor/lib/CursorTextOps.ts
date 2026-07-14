@@ -123,7 +123,17 @@ export class CursorTextOps {
     selection.extendPrevious();
   }
 
+  /**
+   * Is there anything to wrap — a SELECTION, or a LINE_SIBLING under the CURSOR?
+   *
+   * That is the whole question. LINE_SIBLING's are TOKEN's and INLINE_OPAQUE's,
+   * which always sit in a phrasing context, so any wrap tag is legal wherever
+   * they are. The tag is the Wrap op's business (isWrapTag).
+   */
   canWrap(): boolean {
+    if (this.state.getSelection()) {
+      return true;
+    }
     return isLineSibling(this.state.getPlace());
   }
 

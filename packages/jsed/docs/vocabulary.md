@@ -153,18 +153,6 @@ We can define the traversal rules:
 - **LINE_SEGMENT** — the maximal contiguous sequence of LINE_SIBLING's that all share the same parentNode. FOCUSABLE LINE_MEMBER's (eg an em-tag) act as separators between LINE_SEGMENT's.
   - Example: `<div>...<em>...</em>...</div>` has 3 segments. The middle one represents the `<em>`'s text; the outer two are parts of the `<div>`.
 - **CURSOR_LINE** - the CURSOR tracks the LINE it is on; this allows it to traverse arbitrarily nested LINE elements within this line and not confuse them as the current LINE.
-- **SELECTION_WRAPPER** aka wrapper / WRAPPER
-  - a transient `<span>` inserted by `CursorSelection` to around a contiguous run of LINE_SIBLING's that share a DOM parent.
-  - sit between LINE_SIBLING's (eg TOKEN's) and the rest of the DOM.
-  - they don't contain FOCUSABLE's
-  - should be treated as a set of LINE_SIBLING's and SEPARATOR's.
-  - When we peform an operation on a wrapper it is performed on all of live LINE_SIBLING's and SEPARATOR's.
-  - A single wrapper may occupy some or all of its parent's content.
-    - if partial the only operation will be on the selected LINE_SIBLING's (and SEPARATOR's)
-    - if full we may wish to do an additional deleteHighestEmpty (which means all content is selected "text" content)
-  - We can **UNWRAP** each wrapper removing it without trace from the DOM.
-  - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
-  - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
 - **INTERSTITIAL_TEXT**
   - text nodes and related inline content that sit at the same level as a LINE, usually between, before, or after NESTED_LINE's. This makes the content look like a line, but without a wrapper there is no tag around it.
   - At document-load time, jsed converts INTERSTITIAL_TEXT by wrapping each run in an IMPLICIT_LINE. Whitespace-only text nodes are not user-visible INTERSTITIAL_TEXT and stay as boundary whitespace.
@@ -184,6 +172,30 @@ We can define the traversal rules:
     - Here we need to build the IMPLICIT_LINE around both the trailing TOKEN's AND the em-tag
   - Counter Example: `<div><em>this</em> text does not need an implicit LINE</div>`.
     - the TOKEN's after the em-tag obviously form a single LINE with the em-tag; there is NO implicit line here.
+
+Selection
+
+- **SELECTION_RULES**
+  - CURSOR is always on a TOKEN or an INLINE_OPAQUE (isOpaque && isInline);
+  - SELECTION_WRAPPER's always sit above TOKEN's and under other LINE_MEMBER's like em-tags; same as CURSOR just more of the same
+  - wrappers currently only exist as SELETION_WRAPPER's and probably will remain this way
+  - therefore the rules for wrappers simplify to wrapping TOKEN's and INLINE_OPAQUE's (see above)
+  - we define CURSOR and selection wrapper rules as a just a set tags we can wrap TOKEN's with (which we define in dom-rules)
+  - therefore we can always wrap the cursor or a selection with a specific set of inline wrappers
+- **SELECTION_WRAPPER** aka wrapper / WRAPPER
+  - a transient `<span>` inserted by `CursorSelection` to around a contiguous run of LINE_SIBLING's that share a DOM parent.
+  - sit between LINE_SIBLING's (eg TOKEN's) and the rest of the DOM.
+  - they don't contain FOCUSABLE's
+  - should be treated as a set of LINE_SIBLING's and SEPARATOR's.
+  - When we peform an operation on a wrapper it is performed on all of live LINE_SIBLING's and SEPARATOR's.
+  - A single wrapper may occupy some or all of its parent's content.
+    - if partial the only operation will be on the selected LINE_SIBLING's (and SEPARATOR's)
+    - if full we may wish to do an additional deleteHighestEmpty (which means all content is selected "text" content)
+  - We can **UNWRAP** each wrapper removing it without trace from the DOM.
+  - Behaves like CURSOR_TRANSPARENT for sibwalk (descend, don't visit) but is a distinct taxonomy term so other code (serialization, tokenization) can recognise and ignore it rather than confusing it with a user-marked transparent block.
+  - Source of truth: `isSelectionWrapper` in `taxonomy.ts`.
+- **SELECTION**
+  - a set of WRAPPER's generated over all the LINE_SIBLING's traversed by a CURSOR
 
 Tokens and Text and whitespace
 

@@ -1,4 +1,4 @@
-import { getAllowableChildTags } from '../core/dom-rules.js';
+import { canWrapWith } from '../core/dom-rules.js';
 import {
   isToken,
   isAnchor,
@@ -347,23 +347,11 @@ function redoRemoveToken(op: RemoveToken) {
 
 // #region Wrapping
 
-export function canWrapLineSiblingWithTag(lineSibling: HTMLElement, tagName: string): boolean {
+export function canWrapLineSibling(lineSibling: HTMLElement, tagName: string): boolean {
   if (!isLineSibling(lineSibling) || !lineSibling.parentElement) {
     return false;
   }
-
-  const normalized = tagName.toLowerCase();
-  if (!normalized) {
-    return false;
-  }
-
-  const parentAllowsWrapper = getAllowableChildTags(lineSibling.parentElement.tagName).includes(
-    normalized
-  );
-  const wrapperAllowsLineSibling = getAllowableChildTags(normalized).includes(
-    lineSibling.tagName.toLowerCase()
-  );
-  return parentAllowsWrapper && wrapperAllowsLineSibling;
+  return canWrapWith(tagName);
 }
 
 export type WrapLineSibling = {
@@ -381,7 +369,7 @@ export function wrapLineSiblingWithTag(
   tagName: string
 ): WrapLineSibling | void {
   const normalized = tagName.toLowerCase();
-  if (!normalized || !canWrapLineSiblingWithTag(lineSibling, normalized)) {
+  if (!normalized || !canWrapLineSibling(lineSibling, normalized)) {
     return;
   }
 

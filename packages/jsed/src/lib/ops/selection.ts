@@ -1,5 +1,6 @@
 import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import { isToken } from '../core/taxonomy.js';
+import { canWrapWith } from '../core/dom-rules.js';
 import {
   containsOnly,
   createElementDeleteMarker,
@@ -138,9 +139,14 @@ export type ConvertWrapper = {
 };
 
 /**
- * Convert selection WRAPPER into a FOCUSABLE.
+ * Convert selection WRAPPER into a FOCUSABLE. No-op when the tag cannot wrap a
+ * LINE_SIBLING — see {@link canWrapWith}.
  */
-export function convertWrapper(wrapper: HTMLElement, tagName: string): ConvertWrapper {
+export function convertWrapper(wrapper: HTMLElement, tagName: string): ConvertWrapper | void {
+  if (!wrapper.parentElement || !canWrapWith(tagName)) {
+    return;
+  }
+
   const childNodes = Array.from(wrapper.childNodes);
   const container = wrapper.ownerDocument.createElement(tagName);
   wrapper.before(container);

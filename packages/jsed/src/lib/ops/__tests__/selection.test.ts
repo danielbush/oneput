@@ -114,7 +114,7 @@ describe('convertWrapper', () => {
     const wrapper = getWrapper(root);
 
     // act
-    const op = convertWrapper(wrapper, 'em');
+    const op = convertWrapper(wrapper, 'em')!;
 
     // assert
     expect(op).toMatchObject({ action: 'convert-wrapper', tagName: 'em' });
@@ -142,7 +142,7 @@ describe('convertWrapper', () => {
     const wrapper = getWrapper(root);
 
     // act
-    const op = convertWrapper(wrapper, 'strong');
+    const op = convertWrapper(wrapper, 'strong')!;
 
     // assert
     expect(identifyChildren(parent)).toEqual([
@@ -165,7 +165,7 @@ describe('convertWrapper', () => {
       )
     );
     const parent = root.querySelector('p')!;
-    const op = convertWrapper(getWrapper(root), 'em');
+    const op = convertWrapper(getWrapper(root), 'em')!;
 
     // act
     undoConvertWrapper(op);
@@ -197,7 +197,7 @@ describe('convertWrapper', () => {
       )
     );
     const parent = root.querySelector('p')!;
-    const op = convertWrapper(getWrapper(root), 'em');
+    const op = convertWrapper(getWrapper(root), 'em')!;
     undoConvertWrapper(op);
 
     // act
@@ -224,7 +224,7 @@ describe('convertWrapper', () => {
       )
     );
     const parent = root.querySelector('p')!;
-    const op = convertWrapper(getWrapper(root), 'em');
+    const op = convertWrapper(getWrapper(root), 'em')!;
     const converted = identifyChildren(parent);
 
     // act
@@ -258,7 +258,7 @@ describe('convertWrapper', () => {
       )
     );
     const parent = root.querySelector('p')!;
-    const op = convertWrapper(getWrapper(root), 'em');
+    const op = convertWrapper(getWrapper(root), 'em')!;
     undoConvertWrapper(op);
 
     // act

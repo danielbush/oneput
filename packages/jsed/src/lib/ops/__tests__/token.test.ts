@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  canWrapLineSiblingWithTag,
+  canWrapLineSibling,
   createToken,
   insertAfter,
   redoInsertAfter,
@@ -241,7 +241,7 @@ describe('canWrapLineSiblingWithTag', () => {
     const token = findTokenByText(root, 'a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, 'em')).toBe(true);
+    expect(canWrapLineSibling(token, 'em')).toBe(true);
   });
 
   test('tag name is normalized', () => {
@@ -250,7 +250,7 @@ describe('canWrapLineSiblingWithTag', () => {
     const token = findTokenByText(root, 'a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, 'EM')).toBe(true);
+    expect(canWrapLineSibling(token, 'EM')).toBe(true);
   });
 
   test('empty tag name', () => {
@@ -259,7 +259,7 @@ describe('canWrapLineSiblingWithTag', () => {
     const token = findTokenByText(root, 'a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, '')).toBe(false);
+    expect(canWrapLineSibling(token, '')).toBe(false);
   });
 
   test('unknown tag name', () => {
@@ -268,7 +268,7 @@ describe('canWrapLineSiblingWithTag', () => {
     const token = findTokenByText(root, 'a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, 'foo')).toBe(false);
+    expect(canWrapLineSibling(token, 'foo')).toBe(false);
   });
 
   test('detached TOKEN', () => {
@@ -276,7 +276,7 @@ describe('canWrapLineSiblingWithTag', () => {
     const token = createToken('a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, 'em')).toBe(false);
+    expect(canWrapLineSibling(token, 'em')).toBe(false);
   });
 
   test('not a LINE_SIBLING', () => {
@@ -285,25 +285,25 @@ describe('canWrapLineSiblingWithTag', () => {
     const inlineFlow = root.querySelector('em')!;
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(inlineFlow, 'strong')).toBe(false);
+    expect(canWrapLineSibling(inlineFlow, 'strong')).toBe(false);
   });
 
-  test('parent disallows wrapper', () => {
+  test('block tag', () => {
     // arrange
     const root = makeRawRoot(p(t('a')));
     const token = findTokenByText(root, 'a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, 'div')).toBe(false);
+    expect(canWrapLineSibling(token, 'div')).toBe(false);
   });
 
-  test('wrapper disallows LINE_SIBLING', () => {
+  test('block tag - in a permissive parent', () => {
     // arrange
     const root = makeRawRoot(div(t('a')));
     const token = findTokenByText(root, 'a');
 
     // act / assert
-    expect(canWrapLineSiblingWithTag(token, 'ul')).toBe(false);
+    expect(canWrapLineSibling(token, 'ul')).toBe(false);
   });
 });
 

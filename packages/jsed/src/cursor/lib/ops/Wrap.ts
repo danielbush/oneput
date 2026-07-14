@@ -1,4 +1,5 @@
 import type { EditorState } from '../../../editor/index.js';
+import { canWrapWith } from '../../../lib/core/dom-rules.js';
 import {
   convertWrapper,
   redoConvertWrapper,
@@ -52,19 +53,22 @@ export class WrapLineSibling implements UndoRecord {
 
 export class WrapSelection implements UndoRecord {
   static run(state: CursorState, tagName: string) {
-    if (!state.ops.canWrap) {
-      return;
-    }
-    if (!state.selection) {
+    const selection = state.getSelection();
+    if (!selection || !canWrapWith(tagName)) {
       return;
     }
 
-    const front = state.selection?.getFront();
-    const wrappers = state.convertSelection();
-    if (wrappers.length === 0) {
+    const front = selection.getFront();
+    const converted: ConvertWrapper[] = [];
+    for (const wrapper of state.convertSelection()) {
+      const op = convertWrapper(wrapper, tagName);
+      if (op) {
+        converted.push(op);
+      }
+    }
+    if (converted.length === 0) {
       return;
     }
-    const converted = wrappers.map((wrapper) => convertWrapper(wrapper, tagName));
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: converted[0].container

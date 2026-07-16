@@ -56,6 +56,10 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## fix
 
+- what is `insertInside` in `ElementInsertOption`?
+  - how does it differ from `appendInside`?
+  - is it used?
+  - ditto `appendInside`
 - fix: emit event on undo/redo?
   - should undo/redo emit events - is it enough to emit 'undo' / 'redo'  - or do we emit actual events - eg focusable-removed -> undo: focusable-inserted -> redo: focusable-removed
   - COMMENT: send undo/redo and we can add the action as a property if and when we need the extra info;

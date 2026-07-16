@@ -92,6 +92,23 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor/proposal - menu loading / transition
+  - BACKGROUND: because FilePicker sometimes wants to take a promise when instantiating and we need to reoslve that before we can show the menu, we have to nail down menu loading
+  - A
+    - make `resetMenuBeforeStart` options that default to true
+    - additionally have ctl.app disable the menu when we exit and before we start the child AppObject; re-enable after onStart?
+    - if we invalidate during this time do nothing
+    - COMMENT: this gets us so the menu isn't cut down by a reset and it also buys a non-skeleton loader by just disabling the old items
+    - .menu is however going to get called by afterRun after calling onStart synchronously
+      - A.1 - make onStart async
+        - COMMENT: this would work nicely with undisabling the menu only after we async completes and presumably at that point the AppObject can show a menu using .menu
+        - COMMENT: if setMenu is called, ctl.app might have to honour it because it might be the child AppObject calling from within the async onStart; if the parent is somehow callig setMenu after being replaced, you have bigger issues, that's a problem the author should fix, preferably use .menu and the pull system.
+        - COMMENT: is the reset setting and parent menu disabling combined with this enough to avoid the cut-down issues we had before?
+      - A.2 - allow .menu to return void or null to signal not to do anything to the menu
+        - COMMENT: I like this; this is almost equivalent to AppObject's that don't use .menu but the system can be invalidted and will pull .menu again
+        - COMMENT: we use void return to keep the parent showing, but it will be enabled?
+          - ctl.app might have to keep menu disabled if parent menu is still showing and .menu return void
+            - COMMENT: not so great, have to try it to see if this is going too far; this could be an argument for waiting on async onStart
 - refactor: oneput-demo filepicker uses paint() + setMenu
 - refactor(oneput-demo,jsed-demo): uses of .run when .onStart is sufficient
 - refactor(oneput-demo,jsed-demo): use of ctl.ui.update({ params }) at onStart

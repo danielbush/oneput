@@ -181,14 +181,20 @@ export class EditorState {
     this.controller.unsubscribeAll();
     this.controller.subscribeAll();
 
-    // Tokenize the candidate LINE (SHALLOW), then pick the CURSOR seat — see JSDoc.
+    // SHALLOW_TOKENIZATION
     const line = findNextEditableLine(initial, this.document.root);
     const firstLineSibling = line && this.tokenizer.tokenizeLineAt(line);
-    const targetLineSibling = isLineSibling(initial)
-      ? initial
-      : isCursorTransparent(initial)
-        ? getFirstLineSibling(initial)
-        : firstLineSibling;
+
+    // Find CURSOR seat.
+    let targetLineSibling: HTMLElement | null = null;
+    if (isLineSibling(initial)) {
+      targetLineSibling = initial;
+    } else if (isCursorTransparent(initial)) {
+      targetLineSibling = getFirstLineSibling(initial);
+    } else {
+      targetLineSibling = firstLineSibling;
+    }
+
     if (targetLineSibling) {
       const line = getLine(targetLineSibling);
       this.nav.FOCUS(line);

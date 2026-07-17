@@ -21,6 +21,10 @@ export const JSED_FOCUS_CLASS = 'jsed-focus';
  */
 export const JSED_IGNORE_CLASS = 'jsed-ignore';
 /**
+ * CSS class for OPAQUE — VISIT=yes, DESCEND=no for FOCUS and CURSOR.
+ */
+export const JSED_OPAQUE_CLASS = 'jsed-opaque';
+/**
  * CSS class for SELECTION_WRAPPER — a styling-neutral inline span that
  * wraps a contiguous run of LINE_SIBLING's to paint the selection
  * background without disturbing inherited styling.
@@ -284,6 +288,9 @@ export function isDeletedElement(el: EventTarget | Element | null | undefined): 
  */
 export function isOpaque(el: Node | null): boolean {
   if (el instanceof Element) {
+    if (el.classList.contains(JSED_OPAQUE_CLASS)) {
+      return true;
+    }
     if (el.classList.contains('katex')) {
       return true;
     }

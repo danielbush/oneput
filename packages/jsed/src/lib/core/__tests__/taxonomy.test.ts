@@ -7,7 +7,9 @@ import {
   isIgnorable,
   isInlineFlow,
   isLine,
-  isToken
+  isOpaque,
+  isToken,
+  JSED_OPAQUE_CLASS
 } from '../taxonomy.js';
 import { tokenizeLineAt } from '../../ops/tokenize.js';
 
@@ -225,6 +227,26 @@ describe('isFocusTransparent', () => {
 
     // act & assert
     expect(isFocusTransparent(byId(doc, 'inner'))).toBe(false);
+  });
+});
+
+describe('isOpaque', () => {
+  test('jsed-opaque class: returns true', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, `<span id="opaque" class="${JSED_OPAQUE_CLASS}">x</span>`));
+    const opaque = byId(doc, 'opaque');
+
+    // act & assert
+    expect(isOpaque(opaque)).toBe(true);
+  });
+
+  test('unmarked element: returns false', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, em(inlineStyle, 'text')));
+    const emEl = byId(doc, 'p1').querySelector('em')!;
+
+    // act & assert
+    expect(isOpaque(emEl)).toBe(false);
   });
 });
 

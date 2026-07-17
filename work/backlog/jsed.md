@@ -202,6 +202,8 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
+- refactor: write tests for enterEditing (EditorState) in EditorState.test.ts or are they buried in Editor.test?
+  - extend enterEditing to handle initial when it is FOCUS_TRANSPARENT - so we can tunnel into it
 - refactor: DOM_RETENTION - make all mutations retain their position in the DOM?
   - COMMENT: the pattern to follow is in `deleteElement` in `focusable.ts`; it uses `createElementDeleteMarker`
   - principle: keep changes in the DOM so we don't have to guess their positions

@@ -1,6 +1,24 @@
 import { describe, test, expect } from 'vitest';
-import { byId, makeRoot, div, p, em, span, t, a, h2, identify } from '../../../test/util.js';
-import { getLine, getNextLineSibling, getPreviousLineSibling } from '../line.js';
+import {
+  byId,
+  makeRoot,
+  div,
+  p,
+  em,
+  span,
+  t,
+  a,
+  h2,
+  ul,
+  li,
+  identify
+} from '../../../test/util.js';
+import {
+  getFirstLineSibling,
+  getLine,
+  getNextLineSibling,
+  getPreviousLineSibling
+} from '../line.js';
 
 // INLINE_COMPUTED_STYLE
 const inlineStyle = { style: 'display:inline;' };
@@ -443,5 +461,135 @@ describe('LINE_SIBLING walks: FOCUS_TRANSPARENT', () => {
     // assert
     expect(seat?.textContent).toBe('reopened');
     expect(getLine(seat!)).toBe(byId(doc, 'b'));
+  });
+});
+
+describe('getFirstLineSibling', () => {
+  test('pre-tokenized LINE: first TOKEN', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' }, //
+        t('foo'),
+        t('bar')
+      )
+    );
+    const line = byId(doc, 'p1');
+
+    // act
+    const first = getFirstLineSibling(line);
+
+    // assert
+    expect(identify(first)).toBe('foo');
+  });
+
+  test('descends into INLINE_FLOW', () => {
+    // arrange
+    const doc = makeRoot(
+      p(
+        { id: 'p1' }, //
+        'before ',
+        em(inlineStyle, t('italic')),
+        ' after'
+      )
+    );
+    const line = byId(doc, 'p1');
+
+    // act
+    const first = getFirstLineSibling(line);
+
+    // assert
+    expect(identify(first)).toBe('italic');
+  });
+
+  test('leading INLINE_OPAQUE', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'line' }, //
+        '<span class="katex" style="display:inline;">x²</span>',
+        t('after')
+      )
+    );
+    const line = byId(doc, 'line');
+    const katex = line.querySelector('.katex') as HTMLElement;
+
+    // act
+    const first = getFirstLineSibling(line);
+
+    // assert
+    expect(first).toBe(katex);
+  });
+
+  test('ANCHOR-only LINE', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, a()));
+    const line = byId(doc, 'p1');
+
+    // act
+    const first = getFirstLineSibling(line);
+
+    // assert
+    expect(identify(first)).toBe('[anchor]');
+  });
+
+  test('empty LINE: null', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }));
+    const line = byId(doc, 'p1');
+
+    // act
+    const first = getFirstLineSibling(line);
+
+    // assert
+    expect(first).toBeNull();
+  });
+
+  test('nested LINE: first TOKEN in child LINE', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' }, //
+        p({ id: 'inner' }, t('nested'))
+      )
+    );
+    const outer = byId(doc, 'outer');
+
+    // act
+    const first = getFirstLineSibling(outer);
+
+    // assert
+    expect(identify(first)).toBe('nested');
+  });
+
+  // FOCUS_TRANSPARENT tunnel regression: getNextLineSibling already tunnels
+  // through wrappers to reach a re-opened FOCUSABLE; getFirstLineSibling must
+  // do the same when searching within a container (e.g. ul with li[focus=off]).
+  test('regression: tunnels through FOCUS_TRANSPARENT wrappers to first TOKEN in subtree', () => {
+    // arrange
+    const doc = makeRoot(
+      ul(
+        { id: 'list' },
+        li(
+          { 'data-jsed-focus': 'off' },
+          div(
+            p('<button class="jsed-opaque"></button>'),
+            div(
+              p(
+                { id: 'title', 'data-jsed-focus': 'on' }, //
+                t('New'),
+                t('task')
+              )
+            )
+          )
+        )
+      )
+    );
+
+    // act
+    const first = getFirstLineSibling(byId(doc, 'list'));
+
+    // assert
+    expect(identify(first)).toBe('New');
   });
 });

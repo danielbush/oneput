@@ -1,5 +1,4 @@
 import {
-  isCursorTransparent,
   isFocusTransparentNode,
   isIgnorable,
   isIgnorableNode,
@@ -143,12 +142,17 @@ function seat(node: Node): Node | undefined {
 
 /**
  * Get the first LINE_SIBLING in a LINE.
+ *
+ * Tunnels through FOCUS_TRANSPARENT wrappers (like {@link getNextLineSibling})
+ * but skips FOCUS_TRANSPARENT nodes as seats — so a re-opened FOCUSABLE
+ * (`data-jsed-focus="on"`) nested inside one is reachable without treating the
+ * wrapper's own content as editable.
  */
 export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   for (const node of findNextNode(line, line, {
-    visit: isLineSibling,
-    // Descend `line`.
-    descend: (n) => n === line || isCursorTransparent(n)
+    visit: (n) =>
+      isLineSibling(n) && !isIgnorableNode(n) && !isFocusTransparentNode(n),
+    descend: (n) => n === line || (!isOpaque(n) && !isToken(n) && !isIgnorable(n))
   })) {
     return node as HTMLElement;
   }

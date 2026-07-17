@@ -31,10 +31,17 @@ export function createElement(
   return el;
 }
 
+/**
+ * Deepest FOCUSABLE content leaf that can hold text ({@link canCreateWithAnchor}).
+ *
+ * Descends through FOCUSABLE children only, skipping the TOKEN/ANCHOR text layer so
+ * an empty content leaf resolves to itself, not to its placeholder ANCHOR.
+ * Non-anchorable containers (`ul`/`tr`/`tbody`) and anchorable ones alike:
+ * `ul` → `li`, `ul > li > p` → `p`, `table` → `td`.
+ * Returns `null` when no matching leaf exists under `el`.
+ */
 function findAnchorableLeaf(el: HTMLElement): HTMLElement | null {
   for (const child of Array.from(el.children)) {
-    // Only descend FOCUSABLE structure; skip the TOKEN/ANCHOR text layer so an
-    // empty content leaf resolves to itself, not to its placeholder ANCHOR.
     if (!isFocusable(child)) {
       continue;
     }
@@ -47,13 +54,9 @@ function findAnchorableLeaf(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Resolve the descendant of a freshly created element that should receive FOCUS.
+ * Initial FOCUS target for a freshly created element.
  *
- * Returns the deepest FOCUSABLE content leaf that can hold text
- * ({@link canCreateWithAnchor}), descending through non-anchorable containers
- * (`ul`/`tr`/`tbody`) and anchorable ones alike. So `ul` descends to its `li`,
- * `ul > li > p` descends past the `li` to the `p`, and `table` to its `td`.
- * Falls back to `el` itself.
+ * {@link findAnchorableLeaf} when one exists; otherwise `el` itself.
  */
 export function getInitialFocusTarget(el: HTMLElement): HTMLElement {
   return findAnchorableLeaf(el) ?? el;

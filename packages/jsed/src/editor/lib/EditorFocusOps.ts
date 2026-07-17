@@ -5,7 +5,9 @@ import { convert, unwrap } from '../../lib/ops/focusable.js';
 import { isInlineFlow } from '../../lib/core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
 import { InsertAfter } from './ops/InsertAfter.js';
+import { InsertElementAfter } from './ops/InsertElementAfter.js';
 import { AppendNew } from './ops/AppendNew.js';
+import { AppendElement } from './ops/AppendElement.js';
 import { InsertBefore } from './ops/InsertBefore.js';
 import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
@@ -64,6 +66,13 @@ export class EditorFocusOps {
     return !!this._undo(InsertAfter.run(this.state, spec));
   }
 
+  /**
+   * Insert an existing element after the focused FOCUSABLE.
+   */
+  insertElementAfter(element: HTMLElement): boolean {
+    return !!this._undo(InsertElementAfter.run(this.state, element));
+  }
+
   // #endregion
 
   // #region insert before
@@ -119,6 +128,13 @@ export class EditorFocusOps {
 
   appendNew(spec: ElementSpec): boolean {
     return !!this._undo(AppendNew.run(this.state, spec));
+  }
+
+  /**
+   * Append an existing element inside the focused FOCUSABLE.
+   */
+  appendElement(element: HTMLElement): boolean {
+    return !!this._undo(AppendElement.run(this.state, element));
   }
 
   // #endregion

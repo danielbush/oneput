@@ -105,6 +105,17 @@ export function appendNew(parent: HTMLElement, spec: ElementSpec): AppendElement
   return { action: 'append-element', element, parent };
 }
 
+/**
+ * Append an existing element as the last child of parent.
+ *
+ * Unlike {@link appendNew}, this does not consult child allow-lists — the caller
+ * already owns the element (e.g. a library specimen).
+ */
+export function appendElement(element: HTMLElement, parent: HTMLElement): AppendElement {
+  parent.appendChild(element);
+  return { action: 'append-element', element, parent };
+}
+
 export function undoAppendElement(op: AppendElement) {
   // element is freshly created + empty; parent stays as the redo container.
   op.element.remove();
@@ -130,6 +141,17 @@ export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertEl
   }
 
   const element = createElement(spec);
+  target.insertAdjacentElement('afterend', element);
+  return { action: 'insert-element-after', element, target };
+}
+
+/**
+ * Insert an existing element after the target.
+ *
+ * Unlike {@link insertNewAfter}, this does not consult insert-after allow-lists —
+ * the caller already owns the element (e.g. a library specimen).
+ */
+export function insertElementAfter(element: HTMLElement, target: HTMLElement): InsertElementAfter {
   target.insertAdjacentElement('afterend', element);
   return { action: 'insert-element-after', element, target };
 }

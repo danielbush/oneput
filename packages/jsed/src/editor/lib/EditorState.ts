@@ -148,7 +148,26 @@ export class EditorState {
   }
 
   /**
-   * Create cursor.
+   * Enter edit mode: tokenize the candidate LINE and place the CURSOR on a
+   * LINE_SIBLING under the current FOCUS (or `initial`).
+   *
+   * **Resolving the CURSOR seat** — three cases; do not collapse these:
+   *
+   * 1. `initial` is already a LINE_SIBLING (TOKEN or INLINE_OPAQUE) → use it.
+   * 2. `initial` is CURSOR_TRANSPARENT (a FOCUSABLE, non-OPAQUE container) →
+   *    {@link getFirstLineSibling} within `initial` only. Empty INLINE_FLOW
+   *    (e.g. an empty `em`) correctly yields no seat — do not fall back to
+   *    `firstLineSibling`, which searches forward in the document and would
+   *    land on a sibling TOKEN outside the container.
+   * 3. Otherwise (`initial` is OPAQUE) → `firstLineSibling` from
+   *    {@link findNextEditableLine}, which walks forward from `initial`.
+   *
+   * Case 2 must tunnel through FOCUS_TRANSPARENT wrappers (e.g. task-list
+   * `li[data-jsed-focus="off"]` containing a re-opened title `p`) — that
+   * behaviour lives in {@link getFirstLineSibling}, not here.
+   *
+   * Tokenization uses {@link findNextEditableLine} first (SHALLOW: one LINE at
+   * a time), then the seat pick above decides where the CURSOR lands.
    */
   enterEditing(initial?: HTMLElement): Result<void, EditorError> {
     this.nav.connect({
@@ -162,7 +181,7 @@ export class EditorState {
     this.controller.unsubscribeAll();
     this.controller.subscribeAll();
 
-    // Tokenize LINE at or within `initial` if not already.
+    // Tokenize the candidate LINE (SHALLOW), then pick the CURSOR seat — see JSDoc.
     const line = findNextEditableLine(initial, this.document.root);
     const firstLineSibling = line && this.tokenizer.tokenizeLineAt(line);
     const targetLineSibling = isLineSibling(initial)

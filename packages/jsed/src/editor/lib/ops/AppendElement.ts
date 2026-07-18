@@ -4,18 +4,27 @@ import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
- * Editor-level FOCUS operation: append an existing element inside the focused one.
+ * Editor-level FOCUS operation: append an existing element inside a parent.
  *
  * Same lifecycle as {@link AppendNew} (emit, FOCUS, normalize, undo/redo), but
  * the caller supplies the element instead of an {@link ElementSpec}.
+ *
+ * `parent` defaults to the current FOCUS. Pass an explicit parent when the
+ * append host is not FOCUSABLE (e.g. `data-jsed-focus="off"`); undo restores
+ * the prior FOCUS rather than that host.
  */
 export class AppendElement implements UndoRecord {
-  static run(state: EditorState, element: HTMLElement): AppendElement | undefined {
+  static run(
+    state: EditorState,
+    element: HTMLElement,
+    parent?: HTMLElement
+  ): AppendElement | undefined {
     if (state.isEditing()) return;
     const focus = state.nav.getFocus();
-    if (!focus) return;
+    const appendParent = parent ?? focus;
+    if (!appendParent) return;
 
-    const op = focusable.appendElement(element, focus);
+    const op = focusable.appendElement(element, appendParent);
     const focusTarget = focusable.getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
@@ -23,7 +32,8 @@ export class AppendElement implements UndoRecord {
     });
     state.nav.FOCUS(focusTarget);
 
-    const record = new AppendElement(op, { undo: focus, redo: focusTarget });
+    const undoFocus = focus ?? focusTarget;
+    const record = new AppendElement(op, { undo: undoFocus, redo: focusTarget });
     record.normalize();
     return record;
   }

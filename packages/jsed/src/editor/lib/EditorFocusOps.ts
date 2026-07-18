@@ -131,10 +131,13 @@ export class EditorFocusOps {
   }
 
   /**
-   * Append an existing element inside the focused FOCUSABLE.
+   * Append an existing element inside `parent`, or inside the focused FOCUSABLE.
+   *
+   * Pass `parent` when the append host is not FOCUSABLE (e.g. a
+   * `data-jsed-focus="off"` task item). Undo restores the prior FOCUS.
    */
-  appendElement(element: HTMLElement): boolean {
-    return !!this._undo(AppendElement.run(this.state, element));
+  appendElement(element: HTMLElement, parent?: HTMLElement): boolean {
+    return !!this._undo(AppendElement.run(this.state, element, parent));
   }
 
   // #endregion

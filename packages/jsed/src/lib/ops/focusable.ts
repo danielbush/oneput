@@ -4,6 +4,7 @@ import { getNextNodeSibling, getNextSibling, getPreviousNodeSibling } from '../c
 import {
   isAnchor,
   isFocusable,
+  isFocusCandidate,
   isIgnorableNode,
   isImplicitLine,
   isInlineFlow,
@@ -34,7 +35,9 @@ export function createElement(
 /**
  * Deepest FOCUSABLE content leaf that can hold text ({@link canCreateWithAnchor}).
  *
- * Descends through FOCUSABLE children only, skipping the TOKEN/ANCHOR text layer so
+ * Descends through FOCUSABLE children, and also through FOCUS_TRANSPARENT
+ * wrappers so a re-opened FOCUSABLE (`data-jsed-focus="on"`) nested inside a
+ * focus-off container is still found. Skipping the TOKEN/ANCHOR text layer so
  * an empty content leaf resolves to itself, not to its placeholder ANCHOR.
  * Non-anchorable containers (`ul`/`tr`/`tbody`) and anchorable ones alike:
  * `ul` → `li`, `ul > li > p` → `p`, `table` → `td`.
@@ -42,13 +45,17 @@ export function createElement(
  */
 function findAnchorableLeaf(el: HTMLElement): HTMLElement | null {
   for (const child of Array.from(el.children)) {
-    if (!isFocusable(child)) {
+    if (!(child instanceof HTMLElement) || !isFocusCandidate(child)) {
       continue;
     }
-    const found = findAnchorableLeaf(child as HTMLElement);
-    if (found) {
+    const found = findAnchorableLeaf(child);
+    // Descend through transparent wrappers; only return FOCUSABLE leaves.
+    if (found && isFocusable(found)) {
       return found;
     }
+  }
+  if (!isFocusable(el)) {
+    return null;
   }
   return canCreateWithAnchor(el.tagName) ? el : null;
 }

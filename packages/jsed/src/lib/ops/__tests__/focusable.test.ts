@@ -511,4 +511,43 @@ describe('getInitialFocusTarget', () => {
     // assert
     expect(target.tagName).toBe('TD');
   });
+
+  test('finds re-opened focus-on leaf inside a focus-off ancestor', () => {
+    // arrange — focus-off container, transparent wrappers, nested focus-on leaf
+    const doc = makeRoot(
+      div(
+        { id: 'outer' },
+        div(
+          { id: 'off', 'data-jsed-focus': 'off' },
+          div(div(p({ id: 'leaf', 'data-jsed-focus': 'on' }, 'editable')))
+        )
+      )
+    );
+
+    // act
+    const fromOff = getInitialFocusTarget(byId(doc, 'off'));
+    const fromOuter = getInitialFocusTarget(byId(doc, 'outer'));
+
+    // assert
+    expect(fromOff).toBe(byId(doc, 'leaf'));
+    expect(fromOuter).toBe(byId(doc, 'leaf'));
+  });
+
+  test('focus-off ancestor with no re-opened leaf is not chosen as the target', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' },
+        div({ id: 'off', 'data-jsed-focus': 'off' }, div(p('plain')))
+      )
+    );
+
+    // act
+    const fromOff = getInitialFocusTarget(byId(doc, 'off'));
+    const fromOuter = getInitialFocusTarget(byId(doc, 'outer'));
+
+    // assert — no FOCUSABLE leaf under off; fall back to the element passed in
+    expect(fromOff).toBe(byId(doc, 'off'));
+    expect(fromOuter).toBe(byId(doc, 'outer'));
+  });
 });

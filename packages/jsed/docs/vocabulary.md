@@ -248,8 +248,8 @@ Tokens and Text and whitespace
 ## undo / redo
 
 - DOM_RETENTION
-  - when deleting an existing or removing a newly inserted element, retain the element in the dom using a DELETE_MARKER
-  - similarly for TOKEN's and SEPARATOR's except we don't use DELETE_MARKER, we just convert the TOKEN's to be IGNORABLE
+  - when deleting an existing or removing a newly inserted element, retain the element's position in the dom using a DELETE_MARKER
+  - applies to TOKEN's and SEPARATOR's except we don't use DELETE_MARKER, we just convert the TOKEN's to be IGNORABLE
 - DELETE_MARKER
   - marks where an element was
   - is marked as an IGNORABLE

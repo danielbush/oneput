@@ -33,7 +33,11 @@ describe('insertNewAfter (orchestration)', () => {
     expect(inserted).toBe(true);
     expect(editor.canUndo()).toBe(true);
     editor.undo();
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
 
     editor.destroy();
   });
@@ -71,7 +75,11 @@ describe('insertNewBefore (orchestration)', () => {
     expect(inserted).toBe(true);
     expect(editor.canUndo()).toBe(true);
     editor.undo();
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
 
     editor.destroy();
   });

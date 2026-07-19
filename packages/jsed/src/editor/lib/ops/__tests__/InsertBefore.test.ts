@@ -141,7 +141,11 @@ describe('InsertBefore undo / redo', () => {
 
     // act + assert: undo restores original DOM + FOCUS
     record.undo(state);
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
     expect(state.nav.getFocus()).toBe(byId(doc, 'p2'));
 
     // act + assert: redo re-inserts + restores FOCUS
@@ -162,7 +166,11 @@ describe('InsertBefore undo / redo', () => {
 
     // act + assert: undo restores original DOM + FOCUS
     record.undo(state);
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p#p2]']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
     expect(state.nav.getFocus()).toBe(byId(doc, 'p2'));
 
     // act + assert: redo re-focuses the li

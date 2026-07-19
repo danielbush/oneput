@@ -55,7 +55,11 @@ describe('undo / redo integration', () => {
     editor.undo();
 
     // assert
-    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[deleted-element]'
+    ]);
     expect(identifyChildren(byId(doc, 'p1'))).toEqual([
       'one',
       '[nodeType=3:" "]',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Controller } from '@oneput/oneput';
-import { byId, frag, makeRoot, p } from '../../../../test/util.js';
+import { byId, frag, identifyChildren, makeRoot, p } from '../../../../test/util.js';
 import { EditorState } from '../../EditorState.js';
 import type { JsedDocument } from '../../../../JsedDocument.js';
 import { MoveElement } from '../MoveElement.js';
@@ -29,7 +29,12 @@ describe('MoveElement.run', () => {
     });
 
     expect(record).toBeDefined();
-    expect(Array.from(doc.root.children).map((el) => el.id)).toEqual(['p2', 'p1', 'p3']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[deleted-element]',
+      '[element:p#p2]',
+      '[element:p#p1]',
+      '[element:p#p3]'
+    ]);
     expect(state.nav.getFocus()).toBe(byId(doc, 'p1'));
 
     state.destroy();
@@ -41,7 +46,11 @@ describe('MoveElement.run', () => {
 
     MoveElement.run(state, byId(doc, 'p2'), { type: 'before', ref: byId(doc, 'p1') });
 
-    expect(Array.from(doc.root.children).map((el) => el.id)).toEqual(['p2', 'p1']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p2]',
+      '[element:p#p1]',
+      '[deleted-element]'
+    ]);
 
     state.destroy();
   });
@@ -54,7 +63,7 @@ describe('MoveElement.run', () => {
     MoveElement.run(state, byId(doc, 'p1'), { type: 'append', parent: host });
 
     expect(host.contains(byId(doc, 'p1'))).toBe(true);
-    expect(doc.root.children).toHaveLength(1);
+    expect(identifyChildren(doc.root)).toEqual(['[deleted-element]', '[element:p#host]']);
 
     state.destroy();
   });
@@ -85,10 +94,20 @@ describe('MoveElement undo / redo', () => {
     })!;
 
     record.undo(state);
-    expect(Array.from(doc.root.children).map((el) => el.id)).toEqual(['p1', 'p2', 'p3']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[deleted-element]',
+      '[element:p#p1]',
+      '[element:p#p2]',
+      '[element:p#p3]'
+    ]);
 
     record.redo(state);
-    expect(Array.from(doc.root.children).map((el) => el.id)).toEqual(['p3', 'p1', 'p2']);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p3]',
+      '[element:p#p1]',
+      '[element:p#p2]',
+      '[deleted-element]'
+    ]);
 
     state.destroy();
   });

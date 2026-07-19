@@ -1,6 +1,11 @@
 import { canCreateWithAnchor, type ElementSpec } from '../core/dom-rules.js';
 import * as domRules from '../core/dom-rules.js';
-import { getNextNodeSibling, getNextSibling, getPreviousNodeSibling } from '../core/sibling.js';
+import {
+  getNextElementSibling,
+  getNextNodeSibling,
+  getNextSibling,
+  getPreviousNodeSibling
+} from '../core/sibling.js';
 import {
   isAnchor,
   isFocusable,
@@ -100,6 +105,7 @@ export type AppendElement = {
   action: 'append-element';
   element: HTMLElement; // the newly appended element
   parent: HTMLElement; // the container we append into
+  marker: HTMLElement;
 };
 
 /**
@@ -112,7 +118,12 @@ export function appendNew(parent: HTMLElement, spec: ElementSpec): AppendElement
 
   const element = createElement(spec);
   parent.appendChild(element);
-  return { action: 'append-element', element, parent };
+  return {
+    action: 'append-element',
+    element,
+    parent,
+    marker: createElementDeleteMarker(element.ownerDocument)
+  };
 }
 
 /**
@@ -123,16 +134,20 @@ export function appendNew(parent: HTMLElement, spec: ElementSpec): AppendElement
  */
 export function appendElement(element: HTMLElement, parent: HTMLElement): AppendElement {
   parent.appendChild(element);
-  return { action: 'append-element', element, parent };
+  return {
+    action: 'append-element',
+    element,
+    parent,
+    marker: createElementDeleteMarker(element.ownerDocument)
+  };
 }
 
 export function undoAppendElement(op: AppendElement) {
-  // element is freshly created + empty; parent stays as the redo container.
-  op.element.remove();
+  retainElementPosition(op.element, op.marker);
 }
 
 export function redoAppendElement(op: AppendElement) {
-  op.parent.appendChild(op.element);
+  restoreRetainedElement(op.element, op.marker);
 }
 
 export function getInsertAfterOptions(el: HTMLElement): domRules.ElementInsertOption[] {
@@ -143,6 +158,7 @@ export type InsertElementAfter = {
   action: 'insert-element-after';
   element: HTMLElement; // the newly inserted element
   target: HTMLElement; // the anchor we insert after
+  marker: HTMLElement;
 };
 
 export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertElementAfter | null {
@@ -152,7 +168,12 @@ export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertEl
 
   const element = createElement(spec);
   target.insertAdjacentElement('afterend', element);
-  return { action: 'insert-element-after', element, target };
+  return {
+    action: 'insert-element-after',
+    element,
+    target,
+    marker: createElementDeleteMarker(element.ownerDocument)
+  };
 }
 
 /**
@@ -163,16 +184,20 @@ export function insertNewAfter(spec: ElementSpec, target: HTMLElement): InsertEl
  */
 export function insertElementAfter(element: HTMLElement, target: HTMLElement): InsertElementAfter {
   target.insertAdjacentElement('afterend', element);
-  return { action: 'insert-element-after', element, target };
+  return {
+    action: 'insert-element-after',
+    element,
+    target,
+    marker: createElementDeleteMarker(element.ownerDocument)
+  };
 }
 
 export function undoInsertElementAfter(op: InsertElementAfter) {
-  // element is freshly created + empty; target stays as the redo anchor.
-  op.element.remove();
+  retainElementPosition(op.element, op.marker);
 }
 
 export function redoInsertElementAfter(op: InsertElementAfter) {
-  op.target.insertAdjacentElement('afterend', op.element);
+  restoreRetainedElement(op.element, op.marker);
 }
 
 export function getInsertBeforeOptions(el: HTMLElement): domRules.ElementInsertOption[] {
@@ -183,6 +208,7 @@ export type InsertElementBefore = {
   action: 'insert-element-before';
   element: HTMLElement; // the newly inserted element
   target: HTMLElement; // the anchor we insert before
+  marker: HTMLElement;
 };
 
 export function insertNewBefore(
@@ -195,16 +221,20 @@ export function insertNewBefore(
 
   const element = createElement(spec);
   target.insertAdjacentElement('beforebegin', element);
-  return { action: 'insert-element-before', element, target };
+  return {
+    action: 'insert-element-before',
+    element,
+    target,
+    marker: createElementDeleteMarker(element.ownerDocument)
+  };
 }
 
 export function undoInsertElementBefore(op: InsertElementBefore) {
-  // element is freshly created + empty; target stays as the redo anchor.
-  op.element.remove();
+  retainElementPosition(op.element, op.marker);
 }
 
 export function redoInsertElementBefore(op: InsertElementBefore) {
-  op.target.insertAdjacentElement('beforebegin', op.element);
+  restoreRetainedElement(op.element, op.marker);
 }
 
 /**
@@ -222,8 +252,8 @@ export type MoveElement = {
   action: 'move-element';
   element: HTMLElement;
   fromParent: HTMLElement;
-  /** Next sibling before the move; null if the element was last. */
-  fromNextSibling: HTMLElement | null;
+  fromMarker: HTMLElement;
+  toMarker: HTMLElement;
   placement: MovePlacement;
 };
 
@@ -239,34 +269,36 @@ export function moveElement(element: HTMLElement, placement: MovePlacement): Mov
     return null;
   }
 
-  const dest =
-    placement.type === 'append' ? placement.parent : placement.ref;
+  const dest = placement.type === 'append' ? placement.parent : placement.ref;
   if (element === dest || element.contains(dest)) {
     return null;
   }
 
-  if (placement.type === 'before' && element.nextElementSibling === placement.ref) {
+  if (placement.type === 'before' && getNextElementSibling(element) === placement.ref) {
     return null;
   }
-  if (placement.type === 'after' && placement.ref.nextElementSibling === element) {
+  if (placement.type === 'after' && getNextElementSibling(placement.ref) === element) {
     return null;
   }
   if (
     placement.type === 'append' &&
     element.parentElement === placement.parent &&
-    placement.parent.lastElementChild === element
+    !getNextElementSibling(element)
   ) {
     return null;
   }
 
-  const fromNextSibling = element.nextElementSibling as HTMLElement | null;
+  const fromMarker = createElementDeleteMarker(element.ownerDocument);
+  const toMarker = createElementDeleteMarker(element.ownerDocument);
+  retainElementPosition(element, fromMarker);
   applyMovePlacement(element, placement);
 
   return {
     action: 'move-element',
     element,
     fromParent,
-    fromNextSibling,
+    fromMarker,
+    toMarker,
     placement
   };
 }
@@ -275,18 +307,16 @@ export function moveElement(element: HTMLElement, placement: MovePlacement): Mov
  * Restore an element to its position before {@link moveElement}.
  */
 export function undoMoveElement(op: MoveElement) {
-  if (op.fromNextSibling && op.fromNextSibling.parentElement === op.fromParent) {
-    op.fromParent.insertBefore(op.element, op.fromNextSibling);
-    return;
-  }
-  op.fromParent.appendChild(op.element);
+  retainElementPosition(op.element, op.toMarker);
+  restoreRetainedElement(op.element, op.fromMarker);
 }
 
 /**
  * Re-apply a {@link moveElement} placement.
  */
 export function redoMoveElement(op: MoveElement) {
-  applyMovePlacement(op.element, op.placement);
+  retainElementPosition(op.element, op.fromMarker);
+  restoreRetainedElement(op.element, op.toMarker);
 }
 
 /**
@@ -309,9 +339,9 @@ function applyMovePlacement(element: HTMLElement, placement: MovePlacement) {
  */
 export type RemoveElement = {
   action: 'remove-element';
+  marker: HTMLElement;
   element: HTMLElement;
   fromParent: HTMLElement;
-  fromNextSibling: HTMLElement | null;
 };
 
 /**
@@ -322,34 +352,49 @@ export function removeElement(element: HTMLElement): RemoveElement | null {
   if (!fromParent) {
     return null;
   }
-  const fromNextSibling = element.nextElementSibling as HTMLElement | null;
-  element.remove();
-  return { action: 'remove-element', element, fromParent, fromNextSibling };
+  const marker = createElementDeleteMarker(element.ownerDocument);
+  retainElementPosition(element, marker);
+  return { action: 'remove-element', marker, element, fromParent };
 }
 
 /**
  * Restore an element removed by {@link removeElement}.
  */
 export function undoRemoveElement(op: RemoveElement) {
-  if (op.fromNextSibling && op.fromNextSibling.parentElement === op.fromParent) {
-    op.fromParent.insertBefore(op.element, op.fromNextSibling);
-    return;
-  }
-  op.fromParent.appendChild(op.element);
+  restoreRetainedElement(op.element, op.marker);
 }
 
 /**
  * Re-remove after {@link undoRemoveElement}.
  */
 export function redoRemoveElement(op: RemoveElement) {
-  op.element.remove();
+  retainElementPosition(op.element, op.marker);
 }
 
-export function createElementDeleteMarker() {
-  const container = document.createElement('template');
+/**
+ * Create the DELETE_MARKER used for DOM_RETENTION.
+ */
+export function createElementDeleteMarker(ownerDocument: Document = document) {
+  const container = ownerDocument.createElement('template');
   container.classList.add(JSED_DELETED_CLASS);
   container.classList.add(JSED_IGNORE_CLASS);
   return container;
+}
+
+/**
+ * Remove an element while preserving its exact DOM position with a DELETE_MARKER.
+ */
+function retainElementPosition(element: HTMLElement, marker: HTMLElement) {
+  element.before(marker);
+  element.remove();
+}
+
+/**
+ * Restore an element to its DOM_RETENTION marker.
+ */
+function restoreRetainedElement(element: HTMLElement, marker: HTMLElement) {
+  marker.before(element);
+  marker.remove();
 }
 
 export type DeleteElement = {
@@ -359,9 +404,8 @@ export type DeleteElement = {
 };
 
 export function deleteElement(el: HTMLElement): DeleteElement {
-  const marker = createElementDeleteMarker();
-  el.before(marker);
-  el.remove();
+  const marker = createElementDeleteMarker(el.ownerDocument);
+  retainElementPosition(el, marker);
   return {
     action: 'delete-element',
     marker: marker,
@@ -370,13 +414,11 @@ export function deleteElement(el: HTMLElement): DeleteElement {
 }
 
 export function undoDeleteElement(op: DeleteElement) {
-  op.marker.before(op.element);
-  op.marker.remove();
+  restoreRetainedElement(op.element, op.marker);
 }
 
 export function redoDeleteElement(op: DeleteElement) {
-  op.element.before(op.marker);
-  op.element.remove();
+  retainElementPosition(op.element, op.marker);
 }
 
 /**
@@ -555,6 +597,7 @@ export type SplitAfterAction = {
   child: HTMLElement;
   parent: HTMLElement;
   peer: HTMLElement;
+  marker: HTMLElement;
 };
 /**
  * `child` belongs to `peer`.
@@ -564,6 +607,7 @@ export type SplitBeforeAction = {
   child: HTMLElement;
   parent: HTMLElement;
   peer: HTMLElement;
+  marker: HTMLElement;
 };
 export type SplitAction = SplitAfterAction | SplitBeforeAction;
 export type RecursiveSplitAfterAction = {
@@ -617,7 +661,8 @@ export function splitAfterChild(child: HTMLElement): SplitAfterAction {
     action: 'split-after-child',
     child,
     parent,
-    peer
+    peer,
+    marker: createElementDeleteMarker(peer.ownerDocument)
   };
 }
 
@@ -627,7 +672,8 @@ export function splitBeforeChild(child: HTMLElement): SplitBeforeAction {
     action: 'split-before-child',
     child,
     parent,
-    peer
+    peer,
+    marker: createElementDeleteMarker(peer.ownerDocument)
   };
 }
 
@@ -690,12 +736,12 @@ function undoSplit(split: SplitAction): void {
   while (split.peer.firstChild) {
     split.parent.append(split.peer.firstChild);
   }
-  split.peer.remove();
+  retainElementPosition(split.peer, split.marker);
 }
 
 /** Re-apply a single SPLIT_BY_TOKEN: move the forward run back into `peer`. */
 function redoSplit(split: SplitAction): void {
-  split.parent.insertAdjacentElement('afterend', split.peer);
+  restoreRetainedElement(split.peer, split.marker);
   let c: Node | null =
     split.action === 'split-before-child' ? split.child : split.child.nextSibling;
   while (c) {

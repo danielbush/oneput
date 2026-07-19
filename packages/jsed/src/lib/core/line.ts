@@ -150,8 +150,7 @@ function seat(node: Node): Node | undefined {
  */
 export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   for (const node of findNextNode(line, line, {
-    visit: (n) =>
-      isLineSibling(n) && !isIgnorableNode(n) && !isFocusTransparentNode(n),
+    visit: (n) => isLineSibling(n) && !isIgnorableNode(n) && !isFocusTransparentNode(n),
     descend: (n) => n === line || (!isOpaque(n) && !isToken(n) && !isIgnorable(n))
   })) {
     return node as HTMLElement;

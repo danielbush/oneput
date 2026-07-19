@@ -536,10 +536,7 @@ describe('getInitialFocusTarget', () => {
   test('focus-off ancestor with no re-opened leaf is not chosen as the target', () => {
     // arrange
     const doc = makeRoot(
-      div(
-        { id: 'outer' },
-        div({ id: 'off', 'data-jsed-focus': 'off' }, div(p('plain')))
-      )
+      div({ id: 'outer' }, div({ id: 'off', 'data-jsed-focus': 'off' }, div(p('plain'))))
     );
 
     // act

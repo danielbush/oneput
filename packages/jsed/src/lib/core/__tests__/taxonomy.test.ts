@@ -233,7 +233,9 @@ describe('isFocusTransparent', () => {
 describe('isOpaque', () => {
   test('jsed-opaque class: returns true', () => {
     // arrange
-    const doc = makeRoot(p({ id: 'p1' }, `<span id="opaque" class="${JSED_OPAQUE_CLASS}">x</span>`));
+    const doc = makeRoot(
+      p({ id: 'p1' }, `<span id="opaque" class="${JSED_OPAQUE_CLASS}">x</span>`)
+    );
     const opaque = byId(doc, 'opaque');
 
     // act & assert

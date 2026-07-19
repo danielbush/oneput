@@ -4,18 +4,28 @@ import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
- * Editor-level FOCUS operation: insert an existing element after the focused one.
+ * Editor-level FOCUS operation: insert an existing element after an anchor.
  *
  * Same lifecycle as {@link InsertAfter} (emit, FOCUS, normalize, undo/redo), but
  * the caller supplies the element instead of an {@link ElementSpec}.
+ *
+ * `after` defaults to the current FOCUS. Pass an explicit anchor when the
+ * insert host is not the FOCUSABLE leaf (e.g. insert a task-item after a
+ * focus-off `[data-task]` while FOCUS is on its title).
  */
 export class InsertElementAfter implements UndoRecord {
-  static run(state: EditorState, element: HTMLElement): InsertElementAfter | undefined {
+  static run(
+    state: EditorState,
+    element: HTMLElement,
+    after?: HTMLElement
+  ): InsertElementAfter | undefined {
     if (state.isEditing()) return;
     const focus = state.nav.getFocus();
-    if (!focus || focus === state.document.root) return;
+    const target = after ?? focus;
+    if (!target || target === state.document.root) return;
 
-    const op = focusable.insertElementAfter(element, focus);
+    const undoFocus = focus ?? target;
+    const op = focusable.insertElementAfter(element, target);
     const focusTarget = focusable.getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
@@ -23,7 +33,7 @@ export class InsertElementAfter implements UndoRecord {
     });
     state.nav.FOCUS(focusTarget);
 
-    const record = new InsertElementAfter(op, { undo: focus, redo: focusTarget });
+    const record = new InsertElementAfter(op, { undo: undoFocus, redo: focusTarget });
     record.normalize();
     return record;
   }

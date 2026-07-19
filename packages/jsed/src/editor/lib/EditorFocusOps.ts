@@ -9,10 +9,13 @@ import { InsertElementAfter } from './ops/InsertElementAfter.js';
 import { AppendNew } from './ops/AppendNew.js';
 import { AppendElement } from './ops/AppendElement.js';
 import { InsertBefore } from './ops/InsertBefore.js';
+import { MoveElement } from './ops/MoveElement.js';
+import { RemoveElement } from './ops/RemoveElement.js';
 import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
 import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
 import type { ElementInsertOption, ElementSpec } from '../../lib/core/dom-rules.js';
+import type { MovePlacement } from '../../lib/ops/focusable.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -67,10 +70,13 @@ export class EditorFocusOps {
   }
 
   /**
-   * Insert an existing element after the focused FOCUSABLE.
+   * Insert an existing element after `after`, or after the focused FOCUSABLE.
+   *
+   * Pass `after` when the anchor is not the current FOCUS (e.g. a focus-off
+   * task item while FOCUS is on its title). Undo restores the prior FOCUS.
    */
-  insertElementAfter(element: HTMLElement): boolean {
-    return !!this._undo(InsertElementAfter.run(this.state, element));
+  insertElementAfter(element: HTMLElement, after?: HTMLElement): boolean {
+    return !!this._undo(InsertElementAfter.run(this.state, element, after));
   }
 
   // #endregion
@@ -138,6 +144,27 @@ export class EditorFocusOps {
    */
   appendElement(element: HTMLElement, parent?: HTMLElement): boolean {
     return !!this._undo(AppendElement.run(this.state, element, parent));
+  }
+
+  // #endregion
+
+  // #region move
+
+  /**
+   * Move an existing element to a new location (undoable).
+   *
+   * Used by protocol recipes for reorder / promote / demote. Does not consult
+   * HTML content-model allow-lists — callers own validity.
+   */
+  moveElement(element: HTMLElement, placement: MovePlacement): boolean {
+    return !!this._undo(MoveElement.run(this.state, element, placement));
+  }
+
+  /**
+   * Remove an existing element from the document (undoable).
+   */
+  removeElement(element: HTMLElement): boolean {
+    return !!this._undo(RemoveElement.run(this.state, element));
   }
 
   // #endregion

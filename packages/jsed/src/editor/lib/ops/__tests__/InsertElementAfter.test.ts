@@ -77,6 +77,25 @@ describe('InsertElementAfter.run', () => {
 
     state.destroy();
   });
+
+  it('inserts after an explicit anchor that is not the current FOCUS', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const state = getEditorState(doc);
+    state.nav.FOCUS(byId(doc, 'p2'));
+    const inserted = doc.root.ownerDocument.createElement('p');
+    inserted.id = 'p-new';
+
+    // act
+    const record = InsertElementAfter.run(state, inserted, byId(doc, 'p1'));
+
+    // assert
+    expect(record).toBeDefined();
+    expect(Array.from(doc.root.children).map((el) => el.id)).toEqual(['p1', 'p-new', 'p2']);
+    expect(state.nav.getFocus()).toBe(inserted);
+
+    state.destroy();
+  });
 });
 
 describe('InsertElementAfter undo / redo', () => {

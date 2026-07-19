@@ -207,6 +207,144 @@ export function redoInsertElementBefore(op: InsertElementBefore) {
   op.target.insertAdjacentElement('beforebegin', op.element);
 }
 
+/**
+ * Where to place an element during {@link moveElement}.
+ */
+export type MovePlacement =
+  | { type: 'before'; ref: HTMLElement }
+  | { type: 'after'; ref: HTMLElement }
+  | { type: 'append'; parent: HTMLElement };
+
+/**
+ * Record for moving an existing element to a new location.
+ */
+export type MoveElement = {
+  action: 'move-element';
+  element: HTMLElement;
+  fromParent: HTMLElement;
+  /** Next sibling before the move; null if the element was last. */
+  fromNextSibling: HTMLElement | null;
+  placement: MovePlacement;
+};
+
+/**
+ * Move an existing element to a new location in the tree.
+ *
+ * Returns null when the move is a no-op or would place the element inside itself.
+ * `parent` for `append` may be detached (e.g. compose then place the parent).
+ */
+export function moveElement(element: HTMLElement, placement: MovePlacement): MoveElement | null {
+  const fromParent = element.parentElement;
+  if (!fromParent) {
+    return null;
+  }
+
+  const dest =
+    placement.type === 'append' ? placement.parent : placement.ref;
+  if (element === dest || element.contains(dest)) {
+    return null;
+  }
+
+  if (placement.type === 'before' && element.nextElementSibling === placement.ref) {
+    return null;
+  }
+  if (placement.type === 'after' && placement.ref.nextElementSibling === element) {
+    return null;
+  }
+  if (
+    placement.type === 'append' &&
+    element.parentElement === placement.parent &&
+    placement.parent.lastElementChild === element
+  ) {
+    return null;
+  }
+
+  const fromNextSibling = element.nextElementSibling as HTMLElement | null;
+  applyMovePlacement(element, placement);
+
+  return {
+    action: 'move-element',
+    element,
+    fromParent,
+    fromNextSibling,
+    placement
+  };
+}
+
+/**
+ * Restore an element to its position before {@link moveElement}.
+ */
+export function undoMoveElement(op: MoveElement) {
+  if (op.fromNextSibling && op.fromNextSibling.parentElement === op.fromParent) {
+    op.fromParent.insertBefore(op.element, op.fromNextSibling);
+    return;
+  }
+  op.fromParent.appendChild(op.element);
+}
+
+/**
+ * Re-apply a {@link moveElement} placement.
+ */
+export function redoMoveElement(op: MoveElement) {
+  applyMovePlacement(op.element, op.placement);
+}
+
+/**
+ * Apply a move placement to `element`.
+ */
+function applyMovePlacement(element: HTMLElement, placement: MovePlacement) {
+  if (placement.type === 'before') {
+    placement.ref.insertAdjacentElement('beforebegin', element);
+    return;
+  }
+  if (placement.type === 'after') {
+    placement.ref.insertAdjacentElement('afterend', element);
+    return;
+  }
+  placement.parent.appendChild(element);
+}
+
+/**
+ * Record for removing an existing element (restorable).
+ */
+export type RemoveElement = {
+  action: 'remove-element';
+  element: HTMLElement;
+  fromParent: HTMLElement;
+  fromNextSibling: HTMLElement | null;
+};
+
+/**
+ * Remove an existing element from the tree (caller may undo via {@link undoRemoveElement}).
+ */
+export function removeElement(element: HTMLElement): RemoveElement | null {
+  const fromParent = element.parentElement;
+  if (!fromParent) {
+    return null;
+  }
+  const fromNextSibling = element.nextElementSibling as HTMLElement | null;
+  element.remove();
+  return { action: 'remove-element', element, fromParent, fromNextSibling };
+}
+
+/**
+ * Restore an element removed by {@link removeElement}.
+ */
+export function undoRemoveElement(op: RemoveElement) {
+  if (op.fromNextSibling && op.fromNextSibling.parentElement === op.fromParent) {
+    op.fromParent.insertBefore(op.element, op.fromNextSibling);
+    return;
+  }
+  op.fromParent.appendChild(op.element);
+}
+
+/**
+ * Re-remove after {@link undoRemoveElement}.
+ */
+export function redoRemoveElement(op: RemoveElement) {
+  op.element.remove();
+}
+
 export function createElementDeleteMarker() {
   const container = document.createElement('template');
   container.classList.add(JSED_DELETED_CLASS);

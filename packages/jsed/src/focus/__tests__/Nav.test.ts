@@ -610,6 +610,59 @@ test('SIB_PREV_OR_UP stays inside the document root when root is focused', () =>
   expect(before.classList.contains(JSED_FOCUS_SIBLING)).toBe(false);
 });
 
+test('SIB_PREV_OR_UP tunnels into a FOCUS_TRANSPARENT previous sibling when climbing', () => {
+  // arrange — title nested in a row wrapper; children slot is the row's sibling
+  // (task-list shape). DOWN tunnels row→children→p2; UP must reverse to p1,
+  // not skip the opaque-to-descent walk and land on #outer.
+  const doc = makeRoot(
+    ul(
+      { id: 'outer' },
+      li(
+        { 'data-jsed-focus': 'off' },
+        div({ id: 'row' }, p({ id: 'p1', 'data-jsed-focus': 'on' }, 'p1')),
+        div(
+          { id: 'children' },
+          ul(li({ 'data-jsed-focus': 'off' }, div(p({ id: 'p2', 'data-jsed-focus': 'on' }, 'p2'))))
+        )
+      )
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'p1'));
+  nav.SIB_NEXT_OR_UP();
+  expectFocusedElement(doc, byId(doc, 'p2'));
+
+  // act
+  nav.SIB_PREV_OR_UP();
+
+  // assert
+  expectFocusedElement(doc, byId(doc, 'p1'));
+});
+
+test('SIB_PREV_OR_UP visits the containing FOCUSABLE before its previous sibling', () => {
+  // arrange — first title under a transparent item; peer sits before the list
+  const doc = makeRoot(
+    frag(
+      p({ id: 'before' }, 'before'),
+      ul(
+        { id: 'list' },
+        li(
+          { 'data-jsed-focus': 'off' },
+          div({ id: 'row' }, p({ id: 'title', 'data-jsed-focus': 'on' }, 'title'))
+        )
+      )
+    )
+  );
+  const nav = new Nav(doc);
+  nav.FOCUS(byId(doc, 'title'));
+
+  // act
+  nav.SIB_PREV_OR_UP();
+
+  // assert — parent list first; another UP would reach #before
+  expectFocusedElement(doc, byId(doc, 'list'));
+});
+
 test('SIB_HIGHLIGHT does not mark document root siblings', () => {
   // arrange
   const doc = makeRoot(p({ id: 'inside' }, 'inside'));

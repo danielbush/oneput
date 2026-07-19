@@ -10,7 +10,6 @@ import {
 } from '../lib/core/taxonomy.js';
 import * as token from '../lib/ops/token.js';
 import { getParent, findNextNode, findPreviousNode } from '../lib/core/walk.js';
-import { findPreviousNode as findPreviousNode2 } from '../lib/core/walk2.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
@@ -294,12 +293,15 @@ export class Nav {
 
   /**
    * Move to the previous sibling FOCUSABLE; if the previous siblings are
-   * exhausted, climb to the parent and FOCUS it. The mirror of
+   * exhausted, climb to the nearest FOCUSABLE ancestor. The mirror of
    * {@link SIB_NEXT_OR_UP}, except parents *are* visited here.
    *
-   * Same-parent hops can tunnel through a FOCUS_TRANSPARENT sibling to its last
-   * FOCUSABLE descendant. If previous siblings are exhausted, parents are
-   * visited in reverse pre-order, so the parent is the natural next stop.
+   * Climb order: land on a FOCUSABLE ancestor before considering that
+   * ancestor's previous siblings (so the containing parent is visited). While
+   * crossing FOCUS_TRANSPARENT ancestors, tunnel into a previous
+   * FOCUS_TRANSPARENT sibling's last FOCUSABLE descendant (see
+   * FOCUS_TRANSPARENT_SIBLING) so nested titles can step back to a parent
+   * title without skipping to a distant FOCUSABLE.
    */
   SIB_PREV_OR_UP() {
     if (!this.#FOCUS) return;
@@ -313,17 +315,20 @@ export class Nav {
       return;
     }
 
-    const parent = this.#FOCUS.parentNode;
-    if (!parent || parent === this.doc.root) return;
-
-    const up = findPreviousNode2(parent, {
-      ceiling: this.doc.root,
-      shouldDescend: () => false,
-      visitStart: true,
-      pre: (node) => (isFocusable(node) ? node : undefined)
-    });
-    if (up) {
-      this.REQUEST_FOCUS(up as HTMLElement);
+    for (
+      let ancestor = this.#FOCUS.parentNode;
+      ancestor && ancestor !== this.doc.root;
+      ancestor = ancestor.parentNode
+    ) {
+      if (isFocusable(ancestor)) {
+        this.REQUEST_FOCUS(ancestor);
+        return;
+      }
+      const prev = this.#previousSiblingFocusTarget(ancestor);
+      if (prev) {
+        this.REQUEST_FOCUS(prev);
+        return;
+      }
     }
   }
 

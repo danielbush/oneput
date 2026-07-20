@@ -10,7 +10,7 @@ import type {
  * The callbacks a subscriber can register with EditorEventsEmitter.
  *
  * onDocumentChange fires on any text or element change. It is the coalesced
- * "content changed" signal.
+ * "content changed" signal (including `history-applied` from undo/redo).
  */
 export interface EditorSubscription {
   onError?: (err: EditorError) => void;

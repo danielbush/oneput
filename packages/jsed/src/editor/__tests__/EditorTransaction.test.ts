@@ -108,4 +108,88 @@ describe('Editor.transaction', () => {
 
     editor.destroy();
   });
+
+  test('undo and redo each emit one history-applied element change', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const editor = Editor.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    editor.start();
+    editor.transaction(() => {
+      return editor.focusOps.insertNewAfter({ tagName: 'p' });
+    });
+
+    let documentChanges = 0;
+    const elementChanges: Array<{ type: string; direction?: string }> = [];
+    editor.eventsEmitter.subscribe({
+      onDocumentChange: () => {
+        documentChanges += 1;
+      },
+      onElementChange: (event) => {
+        elementChanges.push(event);
+      }
+    });
+
+    // act
+    editor.undo();
+
+    // assert
+    expect(documentChanges).toBe(1);
+    expect(elementChanges).toEqual([{ type: 'history-applied', direction: 'undo' }]);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
+
+    // act
+    editor.redo();
+
+    // assert
+    expect(documentChanges).toBe(2);
+    expect(elementChanges).toEqual([
+      { type: 'history-applied', direction: 'undo' },
+      { type: 'history-applied', direction: 'redo' }
+    ]);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[element:p]',
+      '[element:p#p2]'
+    ]);
+
+    editor.destroy();
+  });
+
+  test('empty undo and redo do not emit history-applied', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'one'));
+    const editor = Editor.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    editor.start();
+
+    let documentChanges = 0;
+    const elementChanges: Array<{ type: string }> = [];
+    editor.eventsEmitter.subscribe({
+      onDocumentChange: () => {
+        documentChanges += 1;
+      },
+      onElementChange: (event) => {
+        elementChanges.push(event);
+      }
+    });
+
+    // act
+    editor.undo();
+    editor.redo();
+
+    // assert
+    expect(documentChanges).toBe(0);
+    expect(elementChanges).toEqual([]);
+
+    editor.destroy();
+  });
 });

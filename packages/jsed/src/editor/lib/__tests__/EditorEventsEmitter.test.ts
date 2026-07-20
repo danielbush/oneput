@@ -98,5 +98,27 @@ describe('EditorEventsEmitter', () => {
       expect(menuChanges).toBe(1);
       expect(saveChanges).toBe(1);
     });
+
+    test('fires from a history-applied element change', () => {
+      // arrange
+      const emitter = EditorEventsEmitter.create();
+      let documentChanges = 0;
+      const elementChanges: Array<{ type: string; direction?: string }> = [];
+      emitter.subscribe({
+        onDocumentChange: () => {
+          documentChanges += 1;
+        },
+        onElementChange: (event) => {
+          elementChanges.push(event);
+        }
+      });
+
+      // act
+      emitter.emitElementChange({ type: 'history-applied', direction: 'undo' });
+
+      // assert
+      expect(documentChanges).toBe(1);
+      expect(elementChanges).toEqual([{ type: 'history-applied', direction: 'undo' }]);
+    });
   });
 });

@@ -297,11 +297,25 @@ export class EditorEventHandler {
 
   undo = () => {
     const rec = this.state.undo.popUndo();
-    rec?.undo(this.state);
+    if (!rec) {
+      return;
+    }
+    rec.undo(this.state);
+    this.state.eventsEmitter.emitElementChange({
+      type: 'history-applied',
+      direction: 'undo'
+    });
   };
 
   redo = () => {
     const rec = this.state.undo.popRedo();
-    rec?.redo(this.state);
+    if (!rec) {
+      return;
+    }
+    rec.redo(this.state);
+    this.state.eventsEmitter.emitElementChange({
+      type: 'history-applied',
+      direction: 'redo'
+    });
   };
 }

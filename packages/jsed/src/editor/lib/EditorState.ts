@@ -50,6 +50,10 @@ export type EditorElementChangeEvent =
       type: 'focusable-replaced';
       previous: HTMLElement;
       element: HTMLElement;
+    }
+  | {
+      type: 'history-applied';
+      direction: 'undo' | 'redo';
     };
 
 export class EditorState {

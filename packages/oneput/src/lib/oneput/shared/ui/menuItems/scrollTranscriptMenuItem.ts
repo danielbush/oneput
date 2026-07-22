@@ -17,8 +17,7 @@ export function transcriptPaneId(itemId: string) {
 }
 
 /**
- * Scroll a transcript pane to the latest message. Call after
- * `await ctl.menu.invalidate()` so the DOM has the new turns.
+ * Scroll a transcript pane to the latest message.
  */
 export function scrollTranscriptPaneToBottom(paneId: string) {
   const el = document.getElementById(paneId);
@@ -29,10 +28,14 @@ export function scrollTranscriptPaneToBottom(paneId: string) {
 /**
  * One compound menu item: a scrollable transcript with an optional absolute
  * jump-to-latest control. Nest beside ordinary suggestion / action rows.
+ *
+ * Stick-to-bottom is internal: a length-keyed FChild sentinel remounts when
+ * `turns.length` changes and scrolls the pane from `onMount`.
  */
 export function scrollTranscriptMenuItem(params: ScrollTranscriptMenuItemParams): MenuItem {
   const id = params.id ?? randomId();
   const paneId = transcriptPaneId(id);
+  const turnCount = params.turns.length;
 
   return {
     id,
@@ -44,22 +47,34 @@ export function scrollTranscriptMenuItem(params: ScrollTranscriptMenuItemParams)
         id: paneId,
         type: 'vflex',
         classes: ['oneput__transcript-pane'],
-        children: params.turns.map((turn, index) => ({
-          id: `${id}-msg-${index}`,
-          type: 'hflex' as const,
-          classes: ['oneput__transcript-row'],
-          children: [
-            {
-              id: `${id}-msg-${index}-bubble`,
-              type: 'fchild' as const,
-              classes: [
-                'oneput__transcript-bubble',
-                `oneput__transcript-bubble--${turn.role}`
-              ],
-              textContent: turn.text
+        children: [
+          ...params.turns.map((turn, index) => ({
+            id: `${id}-msg-${index}`,
+            type: 'hflex' as const,
+            classes: ['oneput__transcript-row'],
+            children: [
+              {
+                id: `${id}-msg-${index}-bubble`,
+                type: 'fchild' as const,
+                classes: ['oneput__transcript-bubble', `oneput__transcript-bubble--${turn.role}`],
+                textContent: turn.text
+              }
+            ]
+          })),
+          // Sentinel: will be recreated on any change and trigger a scroll:
+          {
+            id: `${id}-stick-${turnCount}`,
+            type: 'fchild' as const,
+            classes: ['oneput__transcript-stick'],
+            attr: {
+              'aria-hidden': true
+            },
+            onMount: () => {
+              console.log('onMount', paneId);
+              scrollTranscriptPaneToBottom(paneId);
             }
-          ]
-        }))
+          }
+        ]
       },
       params.jumpIcon && {
         id: `${id}-jump`,

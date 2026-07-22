@@ -1,8 +1,6 @@
 import type { AppLayoutParams, AppObject, Controller, OneputProps, UIFlags } from '@oneput/oneput';
 import {
   scrollTranscriptMenuItem,
-  scrollTranscriptPaneToBottom,
-  transcriptPaneId,
   type TranscriptTurn
 } from '@oneput/oneput/shared/ui/menuItems/scrollTranscriptMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -54,7 +52,7 @@ export class ElizaChat implements AppObject {
         textContent: 'Clear chat',
         left: (b) => [b.icon(icons.CircleX)],
         action: () => {
-          void this.clear();
+          this.clear();
         }
       })
     ]
@@ -71,19 +69,18 @@ export class ElizaChat implements AppObject {
     this.ctl.input.setPlaceholder('Talk to ELIZA…');
     this.ctl.input.setInputValue('');
     this.ctl.input.setSubmitHandler((text) => {
-      void this.send(text);
+      this.send(text);
     });
     this.ctl.input.focusInput();
-    void this.refreshTranscript();
   }
 
-  private async clear() {
+  private clear() {
     this.eliza.reset();
     this.turns = [{ role: 'agent', text: this.eliza.getInitial() }];
-    await this.refreshTranscript();
+    this.ctl.menu.invalidate();
   }
 
-  private async send(text: string) {
+  private send(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
 
@@ -91,16 +88,10 @@ export class ElizaChat implements AppObject {
     const reply = this.eliza.transform(trimmed);
     this.turns = [...this.turns, { role: 'agent', text: reply }];
     this.ctl.input.setInputValue('');
-    await this.refreshTranscript();
+    this.ctl.menu.invalidate();
 
     if (this.eliza.quit) {
       this.ctl.notify('ELIZA ended the session', { duration: 3000 });
-    }
-  }
-
-  private async refreshTranscript() {
-    if (await this.ctl.menu.invalidate()) {
-      scrollTranscriptPaneToBottom(transcriptPaneId(TRANSCRIPT_ID));
     }
   }
 }

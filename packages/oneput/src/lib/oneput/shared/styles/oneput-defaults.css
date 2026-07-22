@@ -1013,6 +1013,15 @@
     align-items: flex-start;
   }
 
+  /* Zero-size remount sentinel used to stick the pane to the latest turn. */
+  .oneput__transcript-stick {
+    flex: 0 0 0;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
   .oneput__transcript-bubble {
     display: block;
     max-width: 80%;

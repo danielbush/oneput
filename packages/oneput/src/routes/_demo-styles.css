@@ -85,8 +85,3 @@ fieldset.demo {
     }
   }
 }
-
-.demo-buttons .oneput__container,
-.demo-buttons .oneput__menu-area {
-  border-radius: 0 !important;
-}

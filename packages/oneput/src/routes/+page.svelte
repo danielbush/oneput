@@ -1,5 +1,6 @@
 <script lang="ts">
   import './_demo-styles.css';
+  import './_mockup-styles.css';
   import '$lib/oneput/shared/styles/oneput-defaults.css';
   import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
   import * as data from './_state.js';
@@ -10,6 +11,7 @@
   import { randomId } from '$lib/oneput/lib/utils.js';
   import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
   import { stdSkeletonMenuItems } from '$lib/oneput/shared/ui/menuItems/stdSkeletonMenuItems.js';
+  import * as mockups from './_mockups.js';
   import { tinykeys } from 'tinykeys';
 
   const oneputState = $state({
@@ -545,6 +547,59 @@
         menuOpen={true}
         menuItems={stdSkeletonMenuItems()}
         placeholder="Loading..."
+        inputValue=""
+      />
+    </section>
+  </section>
+
+  <hr />
+
+  <h2>Mockups</h2>
+  <p>
+    Exploratory shapes built only from existing primitives, to see where the current constructs run
+    out.
+  </p>
+
+  <section class="demo-grid">
+    <section class="demo-example">
+      <h2>Calendar (week = menu item)</h2>
+      <p>
+        Each week is one top-level menu item holding seven day cells. It renders as a grid, but
+        focus is still 1D — Up/Down moves a whole week and a single day can only be picked with the
+        pointer. Per-day keyboard focus would need a 2D cursor, which
+        <code>menuItemFocus</code> does not have.
+      </p>
+      <Oneput
+        menuOpen={true}
+        menuItems={mockups.calendarMenuItems(2026, 6, 22)}
+        menuUI={{ header: mockups.calendarHeader(2026, 6) }}
+        inputUI={{
+          left: ui.inputLeft1,
+          right: ui.inputRight1
+        }}
+        placeholder="Jump to a date..."
+        inputValue=""
+      />
+    </section>
+
+    <section class="demo-example">
+      <h2>Chat transcript</h2>
+      <p>
+        Messages are <code>ignored</code> blocks alternating alignment via <code>alignSelf</code> — no
+        new focus machinery needed. The trailing suggestion is actionable, so Up/Down skips the prose
+        and lands straight on it. What is missing is scroll anchoring: the menu body only scrolls when
+        focus moves, so an appended message will not stick to the bottom.
+      </p>
+      <Oneput
+        menuOpen={true}
+        menuItems={mockups.chatMenuItems()}
+        menuUI={{ header: mockups.chatHeader }}
+        inputUI={{
+          textArea: { rows: 2 },
+          left: ui.inputLeft1,
+          right: ui.inputRight1
+        }}
+        placeholder="Reply..."
         inputValue=""
       />
     </section>

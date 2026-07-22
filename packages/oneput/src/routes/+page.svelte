@@ -41,6 +41,8 @@
   let toggleConfirm = $state(true);
   let toggleAlert = $state(true);
   let toggleNotification = $state(true);
+  let richCalSelected = $state(22);
+  let richCalInput = $state('2026-07-22');
 </script>
 
 <svelte:head>
@@ -593,6 +595,80 @@
       <Oneput
         menuOpen={true}
         menuItems={mockups.chatMenuItems()}
+        menuUI={{ header: mockups.chatHeader }}
+        inputUI={{
+          textArea: { rows: 2 },
+          left: ui.inputLeft1,
+          right: ui.inputRight1
+        }}
+        placeholder="Reply..."
+        inputValue=""
+      />
+    </section>
+  </section>
+
+  <hr />
+
+  <h2>Rich menu items (spike)</h2>
+  <p>
+    Alternative to MenuLike: keep the list shell; embed calendar/chat as compound items. See
+    <code>work/active/20260722.spike.rich-menu-item-widgets.md</code>. Key stealing not wired yet —
+    pointer + list focus only.
+  </p>
+
+  <section class="demo-grid">
+    <section class="demo-example">
+      <h2>Calendar (one widget item)</h2>
+      <p>
+        Ordinary rows above/below a single month widget. Day cells use a tap helper (down/up +
+        slop) so scrolling the menu should not select a day — try on a phone.
+        <code>$mod+j/k</code> still moves by menu item.
+      </p>
+      <Oneput
+        menuOpen={true}
+        menuItems={mockups.richCalendarMenuItems(2026, 6, richCalSelected, (day) => {
+          richCalSelected = day;
+          richCalInput = `2026-07-${String(day).padStart(2, '0')}`;
+        })}
+        menuUI={{ header: mockups.calendarHeader(2026, 6) }}
+        inputUI={{
+          left: ui.inputLeft1,
+          right: ui.inputRight1
+        }}
+        placeholder="Jump to a date..."
+        bind:inputValue={richCalInput}
+      />
+    </section>
+
+    <section class="demo-example">
+      <h2>Chat (grow-only transcript)</h2>
+      <p>
+        Messages stay <code>ignored</code>; suggestions and Clear are normal items. No inner focus —
+        chat likely needs none of the calendar key machinery.
+      </p>
+      <Oneput
+        menuOpen={true}
+        menuItems={mockups.richChatMenuItems()}
+        menuUI={{ header: mockups.chatHeader }}
+        inputUI={{
+          textArea: { rows: 2 },
+          left: ui.inputLeft1,
+          right: ui.inputRight1
+        }}
+        placeholder="Reply..."
+        inputValue=""
+      />
+    </section>
+
+    <section class="demo-example">
+      <h2>Chat (scrollable item)</h2>
+      <p>
+        Transcript is one rich item with a top-right jump button and its own
+        <code>overflow-y</code> pane; extra sibling rows force the menu body to scroll too.
+      </p>
+      <Oneput
+        menuOpen={true}
+        menuItems={mockups.richChatScrollMenuItems()}
         menuUI={{ header: mockups.chatHeader }}
         inputUI={{
           textArea: { rows: 2 },

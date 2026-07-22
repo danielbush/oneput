@@ -19,5 +19,6 @@
       "@oneput/oneput": ["../../packages/oneput/src/lib/index.ts"],
       "@oneput/oneput/shared/*": ["../../packages/oneput/src/lib/oneput/shared/*"]
     }
-  }
+  },
+  "exclude": ["src/lib/eliza/elizabot.js", "src/lib/eliza/elizadata.js"]
 }

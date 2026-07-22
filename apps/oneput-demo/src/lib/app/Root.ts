@@ -6,6 +6,8 @@ import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
 import { FilePicker } from './FilePicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
+import { PickDate } from './PickDate.js';
+import { ElizaChat } from './ElizaChat.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { icons } from './_icons.js';
@@ -23,7 +25,9 @@ export class Root implements AppObject {
       KatexDemo: () => KatexDemo.create(ctl),
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
-      FilePicker: () => FilePicker.create(ctl)
+      FilePicker: () => FilePicker.create(ctl),
+      PickDate: () => PickDate.create(ctl),
+      ElizaChat: () => ElizaChat.create(ctl)
     });
   }
 
@@ -38,6 +42,8 @@ export class Root implements AppObject {
       AsyncSearchExample: () => AsyncSearchExample;
       DirectoryBrowser: () => DirectoryBrowser;
       FilePicker: () => FilePicker;
+      PickDate: () => PickDate;
+      ElizaChat: () => ElizaChat;
     }
   ) {}
 
@@ -60,7 +66,7 @@ export class Root implements AppObject {
   onResume = (result?: { payload?: unknown }) => {
     this.run();
     if (typeof result?.payload === 'string') {
-      this.ctl.notify(`Selected file: ${result.payload}`);
+      this.ctl.notify(`Selected: ${result.payload}`);
     }
   };
 
@@ -128,6 +134,31 @@ export class Root implements AppObject {
           action: () => {
             this.ctl.app.run(this.create.KatexDemo());
           }
+        }),
+        stdMenuItem({
+          id: 'pick-date',
+          left: (b) => [b.icon(icons.CalendarCheck)],
+          textContent: 'Pick a date...',
+          bottom: {
+            textContent: 'Rich calendar menu item — day grid between ordinary actions'
+          },
+          action: () => {
+            this.ctl.app.run(this.create.PickDate());
+          },
+          right: (b) => [b.icon(icons.ChevronRight)]
+        }),
+        stdMenuItem({
+          id: 'eliza-chat',
+          left: (b) => [b.icon(icons.NotebookPen)],
+          textContent: 'Chat with ELIZA...',
+          bottom: {
+            textContent:
+              'Scrollable transcript + Landsteiner elizabot.js (mass:werk / VU sample)'
+          },
+          action: () => {
+            this.ctl.app.run(this.create.ElizaChat());
+          },
+          right: (b) => [b.icon(icons.ChevronRight)]
         }),
         window.ReactNativeWebView &&
           stdMenuItem({

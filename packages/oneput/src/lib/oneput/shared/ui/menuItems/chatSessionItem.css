@@ -1,0 +1,101 @@
+/**
+ * Styles for {@link chatSessionItem}.
+ * Included when the host imports `oneput-defaults.css` (via `@import`).
+ * `@layer oneput.shared` is ordered after `oneput.elements`, so these rules
+ * beat shell chrome even though the `@import` is inlined at the top of defaults.
+ */
+@layer oneput.shared {
+  .oneput__chat-session-item {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .oneput__chat-session-pane {
+    gap: 0.5em;
+    max-height: 14rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.35em 0.5em;
+    padding-right: 2.5em;
+  }
+
+  .oneput__chat-session-row {
+    align-items: flex-start;
+  }
+
+  /* Zero-size remount sentinel used to stick the pane to the latest turn. */
+  .oneput__chat-session-stick {
+    flex: 0 0 0;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .oneput__chat-session-bubble {
+    display: block;
+    max-width: 80%;
+    padding: 0.5em 0.75em;
+    border-radius: 10px;
+    line-height: 1.35;
+    white-space: normal;
+  }
+
+  .oneput__chat-session-bubble--user {
+    margin-left: auto;
+    border-bottom-right-radius: 2px;
+    background: rgb(100 100 100 / 0.22);
+
+    html.dark-mode & {
+      background: rgb(200 200 200 / 0.18);
+    }
+  }
+
+  .oneput__chat-session-bubble--agent {
+    margin-right: auto;
+    border-bottom-left-radius: 2px;
+    background: rgb(100 100 100 / 0.1);
+
+    html.dark-mode & {
+      background: rgb(200 200 200 / 0.07);
+    }
+  }
+
+  .oneput__chat-session-jump {
+    position: absolute;
+    top: 0.35em;
+    right: 0.35em;
+    z-index: 1;
+    /* Override `.oneput__icon-button` size tokens from `oneput.elements`
+     * (unrelated properties still apply from that layer unless restated). */
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+    max-width: 2rem;
+    max-height: 2rem;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    background: #7a7a7a;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+
+    html.dark-mode & {
+      color: #111;
+      background: rgb(240 240 240 / 0.9);
+    }
+  }
+
+  .oneput__chat-session-jump:hover {
+    background: #3a3a3a;
+
+    html.dark-mode & {
+      background: rgb(255 255 255 / 0.95);
+    }
+  }
+}

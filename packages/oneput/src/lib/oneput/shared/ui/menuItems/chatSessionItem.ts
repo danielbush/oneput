@@ -1,77 +1,82 @@
 import { randomId } from '../../../lib/utils.js';
 import type { MenuItem } from '../../../types.js';
 
-export type TranscriptTurn = { role: 'user' | 'agent'; text: string };
+export type ChatSessionTurn = { role: 'user' | 'agent'; text: string };
 
-export type ScrollTranscriptMenuItemParams = {
+export type ChatSessionItemParams = {
   id?: string;
-  turns: TranscriptTurn[];
+  turns: ChatSessionTurn[];
   /** Icon name registered with Oneput (e.g. ChevronDown). */
   jumpIcon?: string;
   jumpTitle?: string;
 };
 
-/** Stable pane element id for a transcript menu item root id. */
-export function transcriptPaneId(itemId: string) {
+/** Stable pane element id for a chat session item root id. */
+export function chatSessionPaneId(itemId: string) {
   return `${itemId}-pane`;
 }
 
 /**
- * Scroll a transcript pane to the latest message.
+ * Scroll a chat session pane to the latest message.
  */
-export function scrollTranscriptPaneToBottom(paneId: string) {
+export function scrollChatSessionPaneToBottom(paneId: string) {
   const el = document.getElementById(paneId);
   if (!el) return;
   el.scrollTop = el.scrollHeight;
 }
 
 /**
- * One compound menu item: a scrollable transcript with an optional absolute
+ * One compound menu item: a scrollable chat session with an optional absolute
  * jump-to-latest control. Nest beside ordinary suggestion / action rows.
  *
  * Stick-to-bottom is internal: a length-keyed FChild sentinel remounts when
  * `turns.length` changes and scrolls the pane from `onMount`.
+ *
+ * Styles live in `chatSessionItem.css` and are included when the host imports
+ * `oneput-defaults.css`.
  */
-export function scrollTranscriptMenuItem(params: ScrollTranscriptMenuItemParams): MenuItem {
+export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
   const id = params.id ?? randomId();
-  const paneId = transcriptPaneId(id);
+  const paneId = chatSessionPaneId(id);
   const turnCount = params.turns.length;
 
   return {
     id,
     type: 'vflex',
-    classes: ['oneput__transcript-menu-item'],
+    classes: ['oneput__chat-session-item'],
     canFilter: false,
     children: [
       {
         id: paneId,
         type: 'vflex',
-        classes: ['oneput__transcript-pane'],
+        classes: ['oneput__chat-session-pane'],
         children: [
           ...params.turns.map((turn, index) => ({
             id: `${id}-msg-${index}`,
             type: 'hflex' as const,
-            classes: ['oneput__transcript-row'],
+            classes: ['oneput__chat-session-row'],
             children: [
               {
                 id: `${id}-msg-${index}-bubble`,
                 type: 'fchild' as const,
-                classes: ['oneput__transcript-bubble', `oneput__transcript-bubble--${turn.role}`],
+                classes: [
+                  'oneput__chat-session-bubble',
+                  `oneput__chat-session-bubble--${turn.role}`
+                ],
                 textContent: turn.text
               }
             ]
           })),
-          // Sentinel: will be recreated on any change and trigger a scroll:
+          // Sentinel: remounts when turn count changes and scrolls to bottom.
           {
             id: `${id}-stick-${turnCount}`,
             type: 'fchild' as const,
-            classes: ['oneput__transcript-stick'],
+            classes: ['oneput__chat-session-stick'],
             attr: {
               'aria-hidden': true
             },
             onMount: () => {
-              console.log('onMount', paneId);
-              scrollTranscriptPaneToBottom(paneId);
+              scrollChatSessionPaneToBottom(paneId);
             }
           }
         ]
@@ -80,7 +85,7 @@ export function scrollTranscriptMenuItem(params: ScrollTranscriptMenuItemParams)
         id: `${id}-jump`,
         type: 'fchild' as const,
         tag: 'button',
-        classes: ['oneput__transcript-jump', 'oneput__icon-button'],
+        classes: ['oneput__chat-session-jump', 'oneput__icon-button'],
         icon: params.jumpIcon,
         attr: {
           type: 'button',
@@ -90,7 +95,7 @@ export function scrollTranscriptMenuItem(params: ScrollTranscriptMenuItemParams)
             event.stopPropagation();
           },
           onclick: () => {
-            scrollTranscriptPaneToBottom(paneId);
+            scrollChatSessionPaneToBottom(paneId);
           }
         }
       }

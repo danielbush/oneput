@@ -1,25 +1,25 @@
 import type { AppLayoutParams, AppObject, Controller, OneputProps, UIFlags } from '@oneput/oneput';
 import {
-  scrollTranscriptMenuItem,
-  type TranscriptTurn
-} from '@oneput/oneput/shared/ui/menuItems/scrollTranscriptMenuItem.js';
+  chatSessionItem,
+  type ChatSessionTurn
+} from '@oneput/oneput/shared/ui/menuItems/chatSessionItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { ElizaBot } from '$lib/eliza/elizabot.js';
 import { icons } from './_icons.js';
 
-const TRANSCRIPT_ID = 'eliza-transcript';
+const SESSION_ID = 'eliza-chat-session';
 
 /**
  * Demo AppObject: chat via Norbert Landsteiner’s elizabot.js (mass:werk 2005),
  * as documented at https://www.cs.vu.nl/~eliens/demo/sample-js-eliza-bot.htm
- * — rendered with {@link scrollTranscriptMenuItem}.
+ * — rendered with {@link chatSessionItem}.
  */
 export class ElizaChat implements AppObject {
   static create(ctl: Controller) {
     return new ElizaChat(ctl, new ElizaBot());
   }
 
-  private turns: TranscriptTurn[] = [];
+  private turns: ChatSessionTurn[] = [];
 
   private constructor(
     private ctl: Controller,
@@ -41,8 +41,8 @@ export class ElizaChat implements AppObject {
     id: 'eliza-chat',
     focusBehaviour: 'none' as const,
     items: [
-      scrollTranscriptMenuItem({
-        id: TRANSCRIPT_ID,
+      chatSessionItem({
+        id: SESSION_ID,
         turns: this.turns,
         jumpIcon: icons.ChevronDown,
         jumpTitle: 'Jump to latest'

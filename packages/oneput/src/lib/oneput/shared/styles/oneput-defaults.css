@@ -5,11 +5,23 @@
  * Override them in a separate file after this one.
  */
 
-@layer reset, oneput.defaults, oneput.elements;
+/*
+ * oneput.shared @layer must @import before other rules (Vite/postcss-import).
+ */
+@import url('../ui/menuItems/chatSessionItem.css');
+
+/*
+ * We have to import above because of css rules, so oneput.shared rules have
+ * lower precedence (by source order) but `oneput.shared` comes after
+ * `oneput.elements` in @layer so it still beats `onput.elements` etc without
+ * specificity hacks.
+ */
+@layer reset, oneput.defaults, oneput.elements, oneput.shared;
 
 /* #region resets */
 
 @layer reset {
+
   .oneput__container hr,
   .oneput__container fieldset,
   .oneput__container button {
@@ -533,6 +545,7 @@
   }
 
   .oneput--multiline {
+
     /* For multiline textarea, align widges around it to the top. */
     .oneput__input-inner {
       align-items: start;
@@ -874,12 +887,10 @@
   .oneput__menu-item-skeleton {
     display: block;
     border-radius: 4px;
-    background: linear-gradient(
-      90deg,
-      rgba(130, 130, 130, 0.12) 25%,
-      rgba(130, 130, 130, 0.24) 37%,
-      rgba(130, 130, 130, 0.12) 63%
-    );
+    background: linear-gradient(90deg,
+        rgba(130, 130, 130, 0.12) 25%,
+        rgba(130, 130, 130, 0.24) 37%,
+        rgba(130, 130, 130, 0.12) 63%);
     background-size: 400% 100%;
     animation: oneput-menu-item-skeleton-shimmer 1.4s ease infinite;
   }
@@ -910,6 +921,7 @@
     0% {
       background-position: 100% 50%;
     }
+
     100% {
       background-position: 0 50%;
     }
@@ -940,7 +952,7 @@
     background-color: rgb(188 188 188);
   }
 
-  /* #region rich menu items (calendar / transcript widgets) */
+  /* #region rich menu items (calendar widget; chat session via @import) */
 
   .oneput__calendar-menu-item {
     gap: 0.15em;
@@ -992,93 +1004,6 @@
 
     html.dark-mode & {
       background: rgb(200 200 200 / 0.12);
-    }
-  }
-
-  .oneput__transcript-menu-item {
-    position: relative;
-    flex: 0 0 auto;
-  }
-
-  .oneput__transcript-pane {
-    gap: 0.5em;
-    max-height: 14rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 0.35em 0.5em;
-    padding-right: 2.5em;
-  }
-
-  .oneput__transcript-row {
-    align-items: flex-start;
-  }
-
-  /* Zero-size remount sentinel used to stick the pane to the latest turn. */
-  .oneput__transcript-stick {
-    flex: 0 0 0;
-    height: 0;
-    width: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  .oneput__transcript-bubble {
-    display: block;
-    max-width: 80%;
-    padding: 0.5em 0.75em;
-    border-radius: 10px;
-    line-height: 1.35;
-    white-space: normal;
-  }
-
-  .oneput__transcript-bubble--user {
-    margin-left: auto;
-    border-bottom-right-radius: 2px;
-    background: rgb(100 100 100 / 0.22);
-
-    html.dark-mode & {
-      background: rgb(200 200 200 / 0.18);
-    }
-  }
-
-  .oneput__transcript-bubble--agent {
-    margin-right: auto;
-    border-bottom-left-radius: 2px;
-    background: rgb(100 100 100 / 0.1);
-
-    html.dark-mode & {
-      background: rgb(200 200 200 / 0.07);
-    }
-  }
-
-  .oneput__transcript-jump {
-    position: absolute;
-    top: 0.35em;
-    right: 0.35em;
-    z-index: 1;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #fff;
-    background: #7a7a7a;
-    box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
-
-    html.dark-mode & {
-      color: #111;
-      background: rgb(240 240 240 / 0.9);
-    }
-  }
-
-  .oneput__transcript-jump:hover {
-    background: #3a3a3a;
-
-    html.dark-mode & {
-      background: rgb(255 255 255 / 0.95);
     }
   }
 

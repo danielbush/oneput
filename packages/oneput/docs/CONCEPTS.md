@@ -25,8 +25,6 @@ owns the menu area should honour this MenuLike contract:
 - a focus that can be moved (calendar: up/down and left/right; list: next/prev)
 - ability to filter/search, or turn it off
 - an action that fires on the focused thing (may load a new menu / AppObject)
-- ability to go back to the previous menu
-  - may pop the AppObject stack, or stay within one AppObject
 - identity
   - item id + last-action tracking (where it applies)
 - filter / generative

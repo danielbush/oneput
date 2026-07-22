@@ -198,7 +198,11 @@
     --oneput-alert-text-color: #222;
   }
 
-  :root.oneput--multiline.oneput__container {
+  /* Both classes sit on the container div, so this must not be qualified with
+     :root — the textarea needs vertical padding that the single-line input
+     does not, so its first line clears the top edge and its line-box centre
+     lines up with the icon buttons beside it. */
+  .oneput--multiline.oneput__container {
     --oneput-input-padding-y: 6px;
   }
 

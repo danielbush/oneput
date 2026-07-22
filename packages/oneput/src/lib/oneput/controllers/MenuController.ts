@@ -5,6 +5,7 @@ import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { GenerativeMenuManager } from './helpers/GenerativeMenuManager.js';
 import { FilterManager } from './helpers/FilterManager.js';
 import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItems.js';
+import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
 
@@ -153,10 +154,14 @@ export class MenuController {
    *
    * Call this whenever AppObject state that affects menu rendering changes.
    * Pass `focusBehaviour: 'none'` to avoid moving the focused index.
+   *
+   * Returns a promise that resolves after Svelte has flushed the DOM (same as
+   * {@link InputController.setInputValue} / `tick()`), or `false` if the menu
+   * was closed and nothing was updated. Await before reading layout (e.g. scroll).
    */
-  invalidate = (opts?: { focusBehaviour?: FocusBehaviour }): boolean => {
+  invalidate = (opts?: { focusBehaviour?: FocusBehaviour }): Promise<boolean> => {
     if (!this.ctl.menu.isMenuOpen) {
-      return false;
+      return Promise.resolve(false);
     }
     const menu = this.ctl.app.getMenu();
     if (menu) {
@@ -166,7 +171,7 @@ export class MenuController {
       // menu undefined => AppObject not using .menu(), just re-display
       this.ctl.menu.setDisplayed({ focusBehaviour: opts?.focusBehaviour });
     }
-    return true;
+    return tick().then(() => true);
   };
 
   /**

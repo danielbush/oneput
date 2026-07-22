@@ -113,6 +113,8 @@ Oneput's visual structure is a flex-based skeleton with named areas:
 Content is injected via `FlexParams` and `FChildParams` data structures that describe flex layouts declaratively. The `UILayout` interface lets you define the layout for all areas.
 
 `replaceMenuUI` temporarily replaces the menu area (used by Alert, Confirm).
+It swaps view only — it is not **MenuLike** (no focus / filter / activate
+contract). See `docs/CONCEPTS.md`.
 
 ## Event System
 

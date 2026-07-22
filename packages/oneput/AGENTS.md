@@ -6,13 +6,17 @@ This codebase is new. Avoid preserving old apis or features, do not keep legacy 
 
 ## Testing
 
-We need to do more testing.
-See TESTING.md for a high-level testing policy.
+See `TESTING.md` for a high-level testing policy.
 Offer to flesh this out with the user. Look for obvious things to tackle.
 
-## Key systems (packages/oneput)
+## Architecture and concepts / design choices and philosophy
 
-For human-readable architecture docs, see `packages/oneput/docs/architecture.md` and `packages/jsed/docs/architecture.md`.
+- `packages/oneput/docs/architecture.md`.
+- `packages/oneput/docs/CONCEPTS.md`
+  - shared concepts and vocabulary
+  - design choices and justifications
+
+## Key systems (packages/oneput)
 
 Below are pointers for agents — read the source files for full detail via JSDoc.
 

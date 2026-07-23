@@ -48,6 +48,7 @@ export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
     type: 'vflex',
     classes: ['oneput__chat-session-item'],
     canFilter: false,
+    ignored: true,
     children: [
       {
         id: paneId,

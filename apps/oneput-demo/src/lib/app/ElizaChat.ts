@@ -52,6 +52,14 @@ export class ElizaChat implements AppObject {
         jumpTitle: 'Jump to latest'
       }),
       stdMenuItem({
+        id: 'eliza-back',
+        textContent: 'Back',
+        left: (b) => [b.icon(icons.ArrowLeft)],
+        action: () => {
+          this.ctl.app.exit();
+        }
+      }),
+      stdMenuItem({
         id: 'eliza-clear',
         textContent: 'Clear chat',
         left: (b) => [b.icon(icons.CircleX)],
@@ -79,6 +87,13 @@ export class ElizaChat implements AppObject {
   }
 
   private async clear() {
+    const confirm = this.ctl.confirm({
+      message: 'Clear chat?',
+      additional: 'This will reset the conversation with ELIZA.'
+    });
+    const yes = await confirm.userChooses();
+    if (!yes) return;
+
     this.eliza.reset();
     this.turns = [{ role: 'agent', text: this.eliza.getInitial() }];
     this.busy = false;

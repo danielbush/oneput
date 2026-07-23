@@ -61,6 +61,45 @@
     }
   }
 
+  .oneput__chat-session-bubble--busy {
+    display: flex;
+    gap: 0.35em;
+    min-width: 3.25rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .oneput__chat-session-dot {
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.35;
+    animation: oneput-chat-session-dot 1.2s ease-in-out infinite;
+  }
+
+  .oneput__chat-session-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .oneput__chat-session-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes oneput-chat-session-dot {
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    40% {
+      opacity: 1;
+      transform: translateY(-0.15em);
+    }
+  }
+
   .oneput__chat-session-jump {
     position: absolute;
     top: 0.35em;

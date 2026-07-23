@@ -47,6 +47,7 @@ export class ElizaChat implements AppObject {
       chatSessionItem({
         id: SESSION_ID,
         turns: this.turns,
+        busy: this.busy,
         jumpIcon: icons.ChevronDown,
         jumpTitle: 'Jump to latest'
       }),
@@ -96,13 +97,13 @@ export class ElizaChat implements AppObject {
     try {
       const reply = await this.eliza.transform(trimmed);
       this.turns = [...this.turns, { role: 'agent', text: reply }];
-      this.ctl.menu.invalidate();
 
       if (this.eliza.quit) {
         this.ctl.notify('ELIZA ended the session', { duration: 3000 });
       }
     } finally {
       this.busy = false;
+      this.ctl.menu.invalidate();
     }
   }
 }

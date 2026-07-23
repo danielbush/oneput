@@ -1,6 +1,6 @@
 import { ElizaBot } from './elizabot.js';
 
-const DEFAULT_DELAY_MS = 700;
+const DEFAULT_DELAY_MS = 1600;
 
 function wait(ms: number) {
   return new Promise<void>((resolve) => {

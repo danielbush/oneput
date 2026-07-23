@@ -6,6 +6,8 @@ export type ChatSessionTurn = { role: 'user' | 'agent'; text: string };
 export type ChatSessionItemParams = {
   id?: string;
   turns: ChatSessionTurn[];
+  /** Show an agent-side “thinking” indicator at the end of the transcript. */
+  busy?: boolean;
   /** Icon name registered with Oneput (e.g. ChevronDown). */
   jumpIcon?: string;
   jumpTitle?: string;
@@ -30,7 +32,7 @@ export function scrollChatSessionPaneToBottom(paneId: string) {
  * jump-to-latest control. Nest beside ordinary suggestion / action rows.
  *
  * Stick-to-bottom is internal: a length-keyed FChild sentinel remounts when
- * `turns.length` changes and scrolls the pane from `onMount`.
+ * `turns.length` / `busy` changes and scrolls the pane from `onMount`.
  *
  * Styles live in `chatSessionItem.css` and are included when the host imports
  * `oneput-defaults.css`.
@@ -39,6 +41,7 @@ export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
   const id = params.id ?? randomId();
   const paneId = chatSessionPaneId(id);
   const turnCount = params.turns.length;
+  const busy = params.busy === true;
 
   return {
     id,
@@ -67,9 +70,34 @@ export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
               }
             ]
           })),
-          // Sentinel: remounts when turn count changes and scrolls to bottom.
+          busy && {
+            id: `${id}-busy`,
+            type: 'hflex' as const,
+            classes: ['oneput__chat-session-row', 'oneput__chat-session-row--busy'],
+            children: [
+              {
+                id: `${id}-busy-bubble`,
+                type: 'fchild' as const,
+                classes: [
+                  'oneput__chat-session-bubble',
+                  'oneput__chat-session-bubble--agent',
+                  'oneput__chat-session-bubble--busy'
+                ],
+                attr: {
+                  role: 'status',
+                  'aria-live': 'polite',
+                  'aria-label': 'Thinking'
+                },
+                htmlContentUnsafe:
+                  '<span class="oneput__chat-session-dot"></span>' +
+                  '<span class="oneput__chat-session-dot"></span>' +
+                  '<span class="oneput__chat-session-dot"></span>'
+              }
+            ]
+          },
+          // Sentinel: remounts when turn count / busy changes and keeps panel scrolled to bottom.
           {
-            id: `${id}-stick-${turnCount}`,
+            id: `${id}-stick-${turnCount}-${busy ? 1 : 0}`,
             type: 'fchild' as const,
             classes: ['oneput__chat-session-stick'],
             attr: {

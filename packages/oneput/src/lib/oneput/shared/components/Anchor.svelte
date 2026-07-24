@@ -4,15 +4,18 @@
 
   let { children, id = 'oneput__command-bar' } = $props();
 
+  /** Small inset so the menu top isn’t flush with the visual viewport edge. */
+  const MENU_VIEWPORT_PAD_PX = 8;
+
   /**
    * VISUAL_VIEWPORT_ZOOM
    */
-  const ensureScaleInvariance: Attachment<HTMLElement> = (fixed) => {
+  const ensureScaleInvariance: Attachment<HTMLElement> = (commandBar) => {
     const fn = () => {
       const vv = window.visualViewport;
       if (!vv) return;
-      fixed.style.transform = `scale(${1 / vv!.scale})`;
-      fixed.style.transformOrigin = 'bottom left';
+      commandBar.style.transform = `scale(${1 / vv!.scale})`;
+      commandBar.style.transformOrigin = 'bottom left';
     };
     document.addEventListener('touchend', fn);
     document.addEventListener('scroll', fn);
@@ -25,9 +28,29 @@
   };
 
   /**
+   * Feed CSS menu-height formula: measured non-menu chrome + visual viewport
+   * height. See MENU_VISUAL_VIEWPORT_HEIGHT / --oneput-menu-max-height.
+   */
+  function updateMenuViewportVars(commandBar: HTMLElement, vv: VisualViewport) {
+    commandBar.style.setProperty(
+      '--oneput-visual-viewport-height',
+      `${Math.floor(vv.height - MENU_VIEWPORT_PAD_PX)}px`
+    );
+
+    const container = commandBar.querySelector('.oneput__container') as HTMLElement | null;
+    if (!container) return;
+
+    const menuArea = container.querySelector('.oneput__menu-area') as HTMLElement | null;
+    // Chrome below the menu (input / outer / etc.). Exclude the menu itself so
+    // the measurement isn’t circular when the menu is already open.
+    const chromePx = container.offsetHeight - (menuArea?.offsetHeight ?? 0);
+    commandBar.style.setProperty('--oneput-non-menu-chrome', `${chromePx}px`);
+  }
+
+  /**
    * OSK_VISUAL_VIEWPORT
    */
-  const adjustPosition: Attachment<HTMLElement> = (fixed) => {
+  const adjustPosition: Attachment<HTMLElement> = (commandBar) => {
     const vv = window.visualViewport;
     if (!vv) return;
 
@@ -46,7 +69,9 @@
 
       // You could also do this by setting style.left and style.top if you
       // use width: 100% instead.
-      fixed.style.transform = 'translate(' + offsetX + 'px,' + offsetY + 'px) ';
+      commandBar.style.transform = 'translate(' + offsetX + 'px,' + offsetY + 'px) ';
+      ensureContainerObserved();
+      updateMenuViewportVars(commandBar, vv!);
     }
 
     vv.addEventListener('resize', viewportHandler);
@@ -56,11 +81,35 @@
     window.addEventListener('scroll', viewportHandler);
     // onscrollend = ...
 
+    // Menu open/close / multiline input change chrome height without a vv event.
+    const ro = new ResizeObserver(() => {
+      ensureContainerObserved();
+      updateMenuViewportVars(commandBar, vv!);
+    });
+    const inner = commandBar.querySelector('.oneput__command-bar-inner');
+    if (inner) ro.observe(inner);
+
+    let observedContainer: Element | null = null;
+    function ensureContainerObserved() {
+      const c = commandBar.querySelector('.oneput__container');
+      if (c && c !== observedContainer) {
+        if (observedContainer) ro.unobserve(observedContainer);
+        ro.observe(c);
+        observedContainer = c;
+      }
+    }
+
+    viewportHandler();
+
     return () => {
       vv.removeEventListener('resize', viewportHandler);
       vv.removeEventListener('scroll', viewportHandler);
       window.removeEventListener('resize', viewportHandler);
       window.removeEventListener('scroll', viewportHandler);
+      ro.disconnect();
+      layoutViewport.remove();
+      commandBar.style.removeProperty('--oneput-visual-viewport-height');
+      commandBar.style.removeProperty('--oneput-non-menu-chrome');
     };
   };
 </script>

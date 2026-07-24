@@ -142,7 +142,23 @@
     /* Container */
     --oneput-min-width: 320px;
     --oneput-max-width: 500px;
-    --oneput-menu-max-height: 300px;
+    /*
+     * Menu panel sizing (applied to .oneput__menu-area via --oneput-menu-max-height).
+     *
+     * --oneput-non-menu-chrome: height of Oneput below the menu (input, outer,
+     *   padding, …). Starts as a CSS estimate; Anchor.svelte replaces it with a
+     *   measured value (container height minus .oneput__menu-area).
+     *
+     * --oneput-visual-viewport-height: optional; Anchor sets this from
+     *   visualViewport.height so the formula tracks the soft keyboard. Falls
+     *   back to 100svh when unset (before JS / without Anchor).
+     *
+     * Formula: min(28rem desktop cap, viewport − chrome), floored at 7.5rem.
+     * See MENU_VISUAL_VIEWPORT_HEIGHT in ISSUES.md.
+     */
+    --oneput-non-menu-chrome: 6.5rem;
+    --oneput-menu-max-height: max(7.5rem,
+        min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome))));
     --oneput-background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
     --oneput-border-radius: 5px;
     --oneput-border: rgb(0 0 0 / 0.3) solid 0.5px;

@@ -87,6 +87,13 @@ How do we use lucide.createIcons but avoid icons flashing into existence when a 
 - solution: we listen to both the window and the visual viewport for resize and scroll events and adjust the position of the fixed element taking into account the weird things that happen to the visual viewport relative to the layout viewport when the OSK is present; see <https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport#simulating_position_device-fixed> . This correction can be a bit janky although it seems to have improved even in IOS safari (as at Sep-2025).
 - possible future solution: https://developer.mozilla.org/en-US/docs/Web/API/VirtualKeyboard_API - does not appear to be well enough supported yet
 
+## MENU_VISUAL_VIEWPORT_HEIGHT
+
+- what: a fixed menu max-height (or even `100svh`-based CSS alone) can clip the open menu at the top when the OSK shrinks the visual viewport, or on short/landscape viewports. Layout viewport units don't track the keyboard.
+- solution: CSS owns the formula —
+  `max(7.5rem, min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome))))`.
+  `--oneput-non-menu-chrome` starts as a CSS estimate (`6.5rem`); `Anchor.svelte` replaces it with a measured value (container − menu) and sets `--oneput-visual-viewport-height` from `visualViewport.height`. Recomputed on vv resize/scroll and via ResizeObserver when the menu opens/closes.
+
 ## IOS_SAFARI_OSK_DEAD_SPACE
 
 - what: when the OSK is up in IOS safari, scrolling past the bottom of the layout viewport results in a bunch of dead space outside of the layout viewport; nothing can occupy this space or be positioned there, it's a void.

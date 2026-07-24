@@ -276,6 +276,20 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
 };
 
 /**
+ * Signal that the current AppObject can exit carrying a result.
+ *
+ * Sent via `ctl.ui.update({ params: { exitWithResult } })`. Layouts may surface
+ * this (e.g. a tick in the menu header); they are not required to. Cancel /
+ * discard remains a bare `ctl.app.exit()`.
+ */
+export type ExitWithResult = {
+  /** Typically `() => ctl.app.exit(taggedResult)`. */
+  run: () => void;
+  /** When false, hosts should show the affordance disabled. Defaults to true. */
+  enabled?: boolean;
+};
+
+/**
  * Layout parameters that Oneput AppObjects may use as a shared convention.
  *
  * Layouts decide whether and how to use these values; AppController only passes
@@ -292,6 +306,10 @@ export type AppLayoutParams = {
    * Preferred title for layouts that render a menu header.
    */
   menuTitle?: string;
+  /**
+   * Optional “exit with result” signal for host layouts (e.g. menu header tick).
+   */
+  exitWithResult?: ExitWithResult;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

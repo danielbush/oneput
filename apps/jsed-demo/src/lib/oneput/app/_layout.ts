@@ -40,7 +40,14 @@ export class Layout implements UILayout<LayoutSettings> {
     private settings: LayoutSettings = {}
   ) {}
 
-  configure(settings: { params?: Partial<LayoutSettings> }) {
+  configure(settings: { params?: Partial<LayoutSettings>; replace?: boolean }) {
+    if (settings.replace) {
+      this.settings = {
+        ...settings.params,
+        menuTitle: settings.params?.menuTitle ?? 'Menu'
+      };
+      return;
+    }
     this.settings = {
       ...this.settings,
       ...settings.params,

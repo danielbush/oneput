@@ -53,6 +53,11 @@ export type CalendarMenuItemParams = {
 export function calendarMenuItem(params: CalendarMenuItemParams): MenuItem {
   const id = params.id ?? randomId();
   const weeks = monthGrid(params.year, params.month);
+  const now = new Date();
+  const todayDay =
+    now.getFullYear() === params.year && now.getMonth() === params.month
+      ? now.getDate()
+      : undefined;
 
   return {
     id,
@@ -78,6 +83,7 @@ export function calendarMenuItem(params: CalendarMenuItemParams): MenuItem {
         classes: ['oneput__calendar-row'],
         children: week.map((cell, d) => {
           const isSelected = cell.inMonth && cell.day === params.selected;
+          const isToday = cell.inMonth && cell.day === todayDay;
           if (!cell.inMonth) {
             return {
               id: `${id}-week-${w}-day-${d}`,
@@ -96,7 +102,8 @@ export function calendarMenuItem(params: CalendarMenuItemParams): MenuItem {
             classes: [
               'oneput__calendar-cell',
               'oneput__calendar-cell--button',
-              isSelected && 'oneput__calendar-cell--selected'
+              isSelected && 'oneput__calendar-cell--selected',
+              isToday && 'oneput__calendar-cell--today'
             ],
             textContent: String(cell.day)
           };

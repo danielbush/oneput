@@ -1,7 +1,8 @@
-import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/oneput';
+import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { calendarMenuItem } from '@oneput/oneput/shared/ui/menuItems/calendarMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
+import type { LayoutSettings } from './_layout.js';
 
 const MONTH_LABELS = [
   'January',
@@ -27,8 +28,9 @@ function isoDate(year: number, month: number, day: number) {
 }
 
 /**
- * Demo AppObject: pick a date via a reusable {@link calendarMenuItem} rich row
- * sitting between ordinary Today / Accept actions.
+ * Demo AppObject: pick a date via a reusable {@link calendarMenuItem} rich row.
+ * Month navigation + Today live in the pinned menu footer; month/year is the
+ * menu header title.
  */
 export class PickDate implements AppObject {
   static create(ctl: Controller) {
@@ -46,7 +48,7 @@ export class PickDate implements AppObject {
   layout = {
     params: {
       menuTitle: 'Pick a date'
-    } satisfies AppLayoutParams
+    } satisfies LayoutSettings
   };
 
   settings = {
@@ -70,51 +72,6 @@ export class PickDate implements AppObject {
         }
       }),
       stdMenuItem({
-        id: 'pick-date-today',
-        textContent: 'Today',
-        left: (b) => [b.icon(icons.CalendarCheck)],
-        action: () => {
-          const now = new Date();
-          this.year = now.getFullYear();
-          this.month = now.getMonth();
-          this.day = now.getDate();
-          this.syncInput();
-          this.ctl.menu.invalidate();
-        }
-      }),
-      stdMenuItem({
-        id: 'pick-date-prev',
-        textContent: 'Previous month',
-        left: (b) => [b.icon(icons.ArrowLeft)],
-        action: () => {
-          const d = new Date(this.year, this.month - 1, 1);
-          this.year = d.getFullYear();
-          this.month = d.getMonth();
-          this.clampDay();
-          this.syncInput();
-          this.ctl.ui.update({
-            params: { menuTitle: `${MONTH_LABELS[this.month]} ${this.year}` }
-          });
-          this.ctl.menu.invalidate();
-        }
-      }),
-      stdMenuItem({
-        id: 'pick-date-next',
-        textContent: 'Next month',
-        left: (b) => [b.icon(icons.ChevronRight)],
-        action: () => {
-          const d = new Date(this.year, this.month + 1, 1);
-          this.year = d.getFullYear();
-          this.month = d.getMonth();
-          this.clampDay();
-          this.syncInput();
-          this.ctl.ui.update({
-            params: { menuTitle: `${MONTH_LABELS[this.month]} ${this.year}` }
-          });
-          this.ctl.menu.invalidate();
-        }
-      }),
-      stdMenuItem({
         id: 'pick-date-accept',
         textContent: 'Accept',
         left: (b) => [b.icon(icons.Check)],
@@ -128,12 +85,72 @@ export class PickDate implements AppObject {
   });
 
   onStart() {
-    this.ctl.ui.update({
-      params: { menuTitle: `${MONTH_LABELS[this.month]} ${this.year}` }
-    });
+    this.syncChrome();
     this.ctl.input.setPlaceholder('Selected date…');
     this.syncInput();
     this.ctl.input.focusInput();
+  }
+
+  private syncChrome() {
+    this.ctl.ui.update({
+      params: {
+        menuTitle: `${MONTH_LABELS[this.month]} ${this.year}`,
+        menuFooter: (b) => [
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__icon-button'],
+            icon: icons.ChevronLeft,
+            attr: {
+              type: 'button',
+              title: 'Previous month',
+              'aria-label': 'Previous month',
+              onclick: () => this.shiftMonth(-1)
+            }
+          }),
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__secondary-button'],
+            textContent: 'Today',
+            attr: {
+              type: 'button',
+              title: 'Today',
+              onclick: () => this.goToday()
+            }
+          }),
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__icon-button'],
+            icon: icons.ChevronRight,
+            attr: {
+              type: 'button',
+              title: 'Next month',
+              'aria-label': 'Next month',
+              onclick: () => this.shiftMonth(1)
+            }
+          })
+        ]
+      } satisfies Partial<LayoutSettings>
+    });
+  }
+
+  private shiftMonth(delta: number) {
+    const d = new Date(this.year, this.month + delta, 1);
+    this.year = d.getFullYear();
+    this.month = d.getMonth();
+    this.clampDay();
+    this.syncInput();
+    this.syncChrome();
+    this.ctl.menu.invalidate();
+  }
+
+  private goToday() {
+    const now = new Date();
+    this.year = now.getFullYear();
+    this.month = now.getMonth();
+    this.day = now.getDate();
+    this.syncInput();
+    this.syncChrome();
+    this.ctl.menu.invalidate();
   }
 
   private clampDay() {

@@ -1,10 +1,9 @@
 import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { calendarMenuItem } from '@oneput/oneput/shared/ui/menuItems/calendarMenuItem.js';
-import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import type { LayoutSettings } from './_layout.js';
 
-/** Tagged resume payload: confirm exits with this; cancel exits with no payload. */
+/** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
 export type PickDateResult = {
   type: 'pick-date';
   value: string;
@@ -45,7 +44,8 @@ function isoDate(year: number, month: number, day: number) {
 /**
  * Demo AppObject: pick a date via a reusable {@link calendarMenuItem} rich row.
  * Month navigation + Today live in the pinned menu footer; month/year is the
- * menu header title.
+ * menu header title. Exit-with-result is advertised via `exitWithResult` for
+ * host layouts (tick); cancel remains bare exit (X).
  */
 export class PickDate implements AppObject {
   static create(ctl: Controller) {
@@ -85,17 +85,6 @@ export class PickDate implements AppObject {
           this.syncInput();
           this.ctl.menu.invalidate();
         }
-      }),
-      stdMenuItem({
-        id: 'pick-date-accept',
-        textContent: 'Accept',
-        left: (b) => [b.icon(icons.Check)],
-        action: () => {
-          this.ctl.app.exit({
-            type: 'pick-date',
-            value: isoDate(this.year, this.month, this.day)
-          } satisfies PickDateResult);
-        }
       })
     ]
   });
@@ -107,10 +96,20 @@ export class PickDate implements AppObject {
     this.ctl.input.focusInput();
   }
 
+  private result(): PickDateResult {
+    return {
+      type: 'pick-date',
+      value: isoDate(this.year, this.month, this.day)
+    };
+  }
+
   private syncChrome() {
     this.ctl.ui.update({
       params: {
         menuTitle: `${MONTH_LABELS[this.month]} ${this.year}`,
+        exitWithResult: {
+          run: () => this.ctl.app.exit(this.result())
+        },
         menuFooter: (b) => [
           b.fchild({
             tag: 'button',

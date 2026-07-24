@@ -61,6 +61,59 @@ export class Layout implements UILayout<LayoutSettings> {
     return;
   }
 
+  /**
+   * Right header: optional exit-with-result (tick) then cancel (X).
+   * Tick only when `exitWithResult` was set via `ctl.ui.update`.
+   */
+  private headerRight(b: FlexChildBuilder) {
+    const exitWithResult = this.settings.exitWithResult;
+    const exitAction = this.exitAction;
+    const children: ReturnType<FlexChildBuilder['fchild']>[] = [];
+
+    if (exitWithResult) {
+      const enabled = exitWithResult.enabled !== false;
+      children.push(
+        b.fchild({
+          tag: 'button',
+          classes: [
+            'oneput__icon-button',
+            ...(enabled ? [] : ['oneput__icon-disabled'])
+          ],
+          icon: icons.Check,
+          attr: {
+            type: 'button',
+            title: 'Done',
+            'aria-label': 'Done',
+            disabled: !enabled,
+            ...(enabled ? { onclick: () => exitWithResult.run() } : {})
+          }
+        })
+      );
+    }
+
+    if (exitAction) {
+      children.push(
+        b.fchild({
+          tag: 'button',
+          classes: ['oneput__icon-button'],
+          attr: { type: 'button', title: 'Exit', onclick: exitAction },
+          icon: icons.X
+        })
+      );
+    }
+
+    if (children.length === 0) {
+      return b.spacer();
+    }
+    if (children.length === 1) {
+      return children[0];
+    }
+    return hflex({
+      id: 'menu-header-right',
+      children: () => children
+    });
+  }
+
   get inputUI() {
     return {
       outerRight: hflex({
@@ -106,14 +159,7 @@ export class Layout implements UILayout<LayoutSettings> {
             classes: ['oneput__menu-item-header'],
             textContent: this.settings.menuTitle || 'Menu'
           }),
-          this.exitAction
-            ? b.fchild({
-                tag: 'button',
-                classes: ['oneput__icon-button'],
-                attr: { type: 'button', title: 'Exit', onclick: this.exitAction },
-                icon: icons.X
-              })
-            : b.spacer()
+          this.headerRight(b)
         ]
       }),
       ...(this.settings.menuFooter

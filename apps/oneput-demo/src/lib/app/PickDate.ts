@@ -4,6 +4,21 @@ import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
 import type { LayoutSettings } from './_layout.js';
 
+/** Tagged resume payload: confirm exits with this; cancel exits with no payload. */
+export type PickDateResult = {
+  type: 'pick-date';
+  value: string;
+};
+
+export function isPickDateResult(payload: unknown): payload is PickDateResult {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    (payload as PickDateResult).type === 'pick-date' &&
+    typeof (payload as PickDateResult).value === 'string'
+  );
+}
+
 const MONTH_LABELS = [
   'January',
   'February',
@@ -76,9 +91,10 @@ export class PickDate implements AppObject {
         textContent: 'Accept',
         left: (b) => [b.icon(icons.Check)],
         action: () => {
-          const value = isoDate(this.year, this.month, this.day);
-          this.ctl.notify(`Picked ${value}`, { duration: 3000 });
-          this.ctl.app.exit({ payload: value });
+          this.ctl.app.exit({
+            type: 'pick-date',
+            value: isoDate(this.year, this.month, this.day)
+          } satisfies PickDateResult);
         }
       })
     ]

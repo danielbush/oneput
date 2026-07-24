@@ -6,7 +6,7 @@ import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
 import { FilePicker } from './FilePicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
-import { PickDate } from './PickDate.js';
+import { isPickDateResult, PickDate } from './PickDate.js';
 import { ElizaChat } from './ElizaChat.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
@@ -65,9 +65,10 @@ export class Root implements AppObject {
 
   onResume = (result?: { payload?: unknown }) => {
     this.run();
-    if (typeof result?.payload === 'string') {
-      this.ctl.notify(`Selected: ${result.payload}`);
+    if (isPickDateResult(result?.payload)) {
+      this.ctl.notify(`Picked ${result.payload.value}`, { duration: 3000 });
     }
+    // Cancel / other children: no payload match → nothing extra
   };
 
   run = () => {

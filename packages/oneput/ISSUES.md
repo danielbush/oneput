@@ -1,4 +1,22 @@
-# Open
+# Issues
+
+## IMPORT_CSS_GOTCHA
+
+- what:
+  - CSS `@import` inside `oneput-defaults.css` (e.g. co-located widget CSS like `chatSessionItem.css`) breaks when a consumer stylesheet itself `@import`s defaults.
+  - COMMENT: ie "don't use @import for modular css"
+  - Vite/PostCSS error: `@import must precede all other statements (besides @charset or empty @layer)` — the nested `@import` lands mid-bundle after other rules.
+- when:
+  - Direct JS import of defaults often works (`import '@oneput/oneput/shared/styles/oneput-defaults.css'`).
+  - Fails when another CSS file wraps defaults, e.g. jsed-demo’s `apps/jsed-demo/src/lib/jsed/styles/oneput-defaults.css` which only contains `@import '@oneput/oneput/shared/styles/oneput-defaults.css'`.
+- why:
+  - CSS requires `@import` at the top of a stylesheet. Nested `@import`s are not reliably hoisted to the top of the _final_ concatenated CSS graph, so they become invalid mid-file.
+- solution:
+  - Do **not** CSS-`@import` widget styles from defaults.
+  - Co-locate widget CSS next to the builder and load it with a JS side-effect import from that module (e.g. `import './chatSessionItem.css'` in `chatSessionItem.ts`).
+  - Keep declaring `@layer …, oneput.shared` in defaults so widget rules in that layer still beat `oneput.elements` shell chrome.
+  - Hosts that use the builder get the CSS automatically; hosts that only import defaults do not pull unused widget CSS.
+- see: README “Styles” under Usage; `shared/ui/menuItems/chatSessionItem.ts`
 
 ## ASYNC_MENU_FLASH
 

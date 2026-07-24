@@ -1,8 +1,8 @@
 /**
  * Styles for {@link chatSessionItem}.
- * Included when the host imports `oneput-defaults.css` (via `@import`).
- * `@layer oneput.shared` is ordered after `oneput.elements`, so these rules
- * beat shell chrome even though the `@import` is inlined at the top of defaults.
+ * Loaded via `import './chatSessionItem.css'` from the builder module.
+ * `@layer oneput.shared` is ordered after `oneput.elements` in defaults, so
+ * these rules beat shell chrome without specificity hacks.
  */
 @layer oneput.shared {
   .oneput__chat-session-item {

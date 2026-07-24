@@ -32,7 +32,7 @@ That file is the single entry for Oneput chrome. Cascade layers are ordered:
 
 `reset` → `oneput.defaults` → `oneput.elements` (shell) → `oneput.shared` (optional widgets).
 
-Shared rich menu item widgets keep their CSS co-located (e.g. `shared/ui/menuItems/chatSessionItem.css`) under `@layer oneput.shared`, and are pulled in via a leading `@import` in defaults — consumers do not need a second stylesheet. `svelte-package` copies both files into `dist/`; the consumer bundler inlines the `@import` at build time. The `@import` must stay at the top of the file (CSS/Vite), but because `oneput.shared` is declared after `oneput.elements`, early-inlined widget rules still beat shell chrome.
+Shared rich menu item widgets keep CSS co-located (e.g. `shared/ui/menuItems/chatSessionItem.css`) under `@layer oneput.shared`. That CSS is pulled in by a JS side-effect import from the builder module — not by a CSS `@import` inside defaults — so composing defaults from another stylesheet (common in jsed) does not hit “`@import` must precede all other statements”. Using the builder is enough; hosts do not need a second stylesheet import for those widgets.
 
 ## Development
 

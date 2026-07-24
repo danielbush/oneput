@@ -1,3 +1,4 @@
+import './chatSessionItem.css'; // IMPORT_CSS_GOTCHA
 import { randomId } from '../../../lib/utils.js';
 import type { MenuItem } from '../../../types.js';
 
@@ -34,8 +35,9 @@ export function scrollChatSessionPaneToBottom(paneId: string) {
  * Stick-to-bottom is internal: a length-keyed FChild sentinel remounts when
  * `turns.length` / `busy` changes and scrolls the pane from `onMount`.
  *
- * Styles live in `chatSessionItem.css` and are included when the host imports
- * `oneput-defaults.css`.
+ * Styles live in `chatSessionItem.css`, loaded as a side-effect import from
+ * this module (so hosts that only `@import` defaults do not hit nested CSS
+ * `@import` violations).
  */
 export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
   const id = params.id ?? randomId();

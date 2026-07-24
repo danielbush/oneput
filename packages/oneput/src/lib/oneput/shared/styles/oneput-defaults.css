@@ -3,18 +3,11 @@
  *
  * Unlayered styles always beat layered styles on specificity.
  * Override them in a separate file after this one.
- */
-
-/*
- * oneput.shared @layer must @import before other rules (Vite/postcss-import).
- */
-@import url('../ui/menuItems/chatSessionItem.css');
-
-/*
- * We have to import above because of css rules, so oneput.shared rules have
- * lower precedence (by source order) but `oneput.shared` comes after
- * `oneput.elements` in @layer so it still beats `onput.elements` etc without
- * specificity hacks.
+ *
+ * Layer order: later names beat earlier. `oneput.shared` is for optional
+ * widget CSS (co-located next to builders; loaded via JS side-effect import
+ * from those modules — not via CSS `@import`, which breaks when this file is
+ * itself `@import`ed by a consumer stylesheet).
  */
 @layer reset, oneput.defaults, oneput.elements, oneput.shared;
 

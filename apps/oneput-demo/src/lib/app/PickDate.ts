@@ -58,6 +58,17 @@ export class PickDate implements AppObject {
     id: 'pick-date',
     focusBehaviour: 'first' as const,
     items: [
+      calendarMenuItem({
+        id: 'pick-date-grid',
+        year: this.year,
+        month: this.month,
+        selected: this.day,
+        onSelect: (day) => {
+          this.day = day;
+          this.syncInput();
+          this.ctl.menu.invalidate();
+        }
+      }),
       stdMenuItem({
         id: 'pick-date-today',
         textContent: 'Today',
@@ -67,17 +78,6 @@ export class PickDate implements AppObject {
           this.year = now.getFullYear();
           this.month = now.getMonth();
           this.day = now.getDate();
-          this.syncInput();
-          this.ctl.menu.invalidate();
-        }
-      }),
-      calendarMenuItem({
-        id: 'pick-date-grid',
-        year: this.year,
-        month: this.month,
-        selected: this.day,
-        onSelect: (day) => {
-          this.day = day;
           this.syncInput();
           this.ctl.menu.invalidate();
         }

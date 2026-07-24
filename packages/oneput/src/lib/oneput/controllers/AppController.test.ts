@@ -16,9 +16,17 @@ function layout(id: string): UILayout {
 
 function trackedLayout(id: string) {
   const params: Array<Record<string, unknown> | undefined> = [];
+  const replaces: boolean[] = [];
+  let settings: Record<string, unknown> = {};
   const appLayout: UILayout = {
-    configure: ({ params: nextParams }) => {
+    configure: ({ params: nextParams, replace }) => {
       params.push(nextParams);
+      replaces.push(!!replace);
+      if (replace) {
+        settings = { ...(nextParams ?? {}) };
+      } else {
+        settings = { ...settings, ...(nextParams ?? {}) };
+      }
     },
     innerUI: {
       id,
@@ -26,7 +34,7 @@ function trackedLayout(id: string) {
     }
   };
 
-  return { appLayout, params };
+  return { appLayout, params, replaces, getSettings: () => settings };
 }
 
 function layoutFactory(id: string) {
@@ -92,7 +100,7 @@ describe('AppController', () => {
     it('configures an inherited layout before starting an app object', () => {
       // arrange
       const ctl = Controller.createNull();
-      const { appLayout, params } = trackedLayout('app-layout');
+      const { appLayout, params, replaces } = trackedLayout('app-layout');
       const appObject: AppObject = {
         layout: {
           layout: (_ctl, _params) => appLayout,
@@ -113,6 +121,43 @@ describe('AppController', () => {
       // assert
       expect(ctl.ui.getLayout()).toBe(appLayout);
       expect(params).toContainEqual({ menuTitle: 'Child' });
+      expect(replaces.at(-1)).toBe(true);
+    });
+
+    it('replaces layout params when resuming parent after child mid-flight update', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { appLayout, getSettings } = trackedLayout('app-layout');
+      const parent: AppObject<unknown, { menuTitle: string }> = {
+        layout: {
+          layout: (_ctl, _params) => appLayout,
+          params: { menuTitle: 'Home' }
+        },
+        onStart: () => {},
+        onResume: () => {}
+      };
+      const child: AppObject<unknown, { menuTitle: string; exitWithResult?: { run: () => void } }> =
+        {
+          layout: { params: { menuTitle: 'Child' } },
+          onStart: () => {
+            ctl.ui.update({
+              params: {
+                menuTitle: 'Child',
+                exitWithResult: { run: () => {} }
+              }
+            });
+          }
+        };
+
+      ctl.app.run(parent);
+      ctl.app.run(child);
+      expect(getSettings().exitWithResult).toBeTruthy();
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(getSettings()).toEqual({ menuTitle: 'Home' });
     });
 
     it('passes params to an installed layout factory', () => {

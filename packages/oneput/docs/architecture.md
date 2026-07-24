@@ -38,7 +38,10 @@ interface AppObject {
 omit `layout.layout` to reuse the active parent layout, and provide `{ params }`
 to configure the inherited layout before `onStart` / `onResume`. Use
 `ctl.ui.update({ params })` for later layout changes during the life of the
-AppObject. Handle UI flags separately with `ctl.ui.update({ flags })`.
+AppObject (merged into current settings). When an AppObject becomes current,
+`runBefore` applies its declared params with `replace: true` so mid-flight
+child params (e.g. menu footer) do not stick on resume. Handle UI flags
+separately with `ctl.ui.update({ flags })`.
 
 **Actions** let an AppObject declare bindings alongside the action handler. The `binding` field uses `ActionBinding` (no `action` callback — the action is the sibling field):
 

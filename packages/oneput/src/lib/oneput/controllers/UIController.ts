@@ -59,16 +59,21 @@ export class UIController {
      */
     flags?: UIFlags;
     /**
-     * Your LayoutSettings parameters..
+     * Your LayoutSettings parameters.
      */
     params?: Partial<A>;
+    /**
+     * When true, layout settings are replaced by `params` (baseline for the
+     * current AppObject). Default false merges (mid-flight patches).
+     */
+    replace?: boolean;
   }) {
     if (settings.reset) {
       this.ctl.app.reset(settings.flags);
     } else {
       this.ctl.app.applyFlags(settings.flags);
     }
-    this.layout?.configure({ params: settings.params });
+    this.layout?.configure({ params: settings.params, replace: settings.replace });
     this.ctl.currentProps.inputUI = this.layout?.inputUI;
     this.ctl.currentProps.menuUI = this.layout?.menuUI;
     this.ctl.currentProps.innerUI = this.layout?.innerUI;

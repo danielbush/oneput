@@ -512,7 +512,12 @@ export type UIFlags = {
 };
 
 export interface UILayout<LayoutParams extends AppLayoutParams = AppLayoutParams> {
-  configure(settings: { params?: Partial<LayoutParams> }): void;
+  /**
+   * Apply layout params. Default merges into current settings (mid-flight
+   * patches). Pass `replace: true` to treat `params` as the new baseline
+   * (used when an AppObject becomes current).
+   */
+  configure(settings: { params?: Partial<LayoutParams>; replace?: boolean }): void;
   inputUI?: OneputProps['inputUI'];
   menuUI?: OneputProps['menuUI'];
   innerUI?: OneputProps['innerUI'];

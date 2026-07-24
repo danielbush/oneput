@@ -367,7 +367,9 @@ export class AppController {
         this.ctl.ui.setLayout(layout);
       }
       if (layout || layoutParams) {
-        this.ctl.ui.update({ params: layoutParams });
+        // Baseline for this AppObject: replace so child mid-flight params
+        // (e.g. menuFooter, exitWithResult) don't stick on resume.
+        this.ctl.ui.update({ params: layoutParams, replace: true });
       }
     }
   }

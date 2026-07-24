@@ -1,6 +1,6 @@
 import { mountSvelte } from '@oneput/oneput';
-import type { AppLayoutParams, DynamicPlaceholderBase } from '@oneput/oneput';
-import type { FChildParams, UILayout } from '@oneput/oneput';
+import type { AppLayoutParams } from '@oneput/oneput';
+import type { FChildParams, FlexChildren, UILayout } from '@oneput/oneput';
 import type { Controller } from '@oneput/oneput';
 import { FlexChildBuilder, hflex } from '@oneput/oneput';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
@@ -16,6 +16,11 @@ export type LayoutSettings = AppLayoutParams & {
    * Expose the bottom right corner of the layout.
    */
   outerRight?: (b: FlexChildBuilder) => FChildParams;
+  /**
+   * Optional pinned menu footer (below the scrollable menu body).
+   * AppObjects set this via `ctl.ui.update({ params: { menuFooter } })`.
+   */
+  menuFooter?: (b: FlexChildBuilder) => FlexChildren;
 };
 
 /**
@@ -33,14 +38,18 @@ export class Layout implements UILayout<LayoutSettings> {
 
   configure(settings: { params?: Partial<LayoutSettings> }) {
     this.settings = {
-      menuTitle: this.settings.menuTitle || 'Menu',
-      ...settings.params
+      ...this.settings,
+      ...settings.params,
+      menuTitle: settings.params?.menuTitle ?? this.settings.menuTitle ?? 'Menu'
     };
   }
 
   private get exitAction() {
-    if (this.ctl.app.flags.enableMenuOpenClose) {
-      return this.ctl.menu.closeMenu;
+    // Dismiss the AppObject (not close the menu). Menu open/close stays on the
+    // input chevron via enableMenuOpenClose. Hidden when go-back is disabled
+    // (e.g. Root), since exit is a no-op with no parent.
+    if (this.ctl.app.flags.enableGoBack) {
+      return () => this.ctl.app.exit();
     }
     return;
   }
@@ -106,7 +115,15 @@ export class Layout implements UILayout<LayoutSettings> {
               })
             : b.spacer()
         ]
-      })
+      }),
+      ...(this.settings.menuFooter
+        ? {
+            footer: hflex({
+              id: 'menu-footer',
+              children: this.settings.menuFooter
+            })
+          }
+        : {})
     };
   }
 

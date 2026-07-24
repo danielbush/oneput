@@ -7,6 +7,7 @@ export const iconData = {
   Settings: lu.Settings,
   Keyboard: lu.Keyboard,
   ChevronRight: lu.ChevronRight,
+  ChevronLeft: lu.ChevronLeft,
   Check: lu.Check,
   SquareFunction: lu.SquareFunction,
   ArrowLeft: lu.ArrowLeft,

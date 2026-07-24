@@ -6,6 +6,7 @@ export const iconData = {
   ArrowLeft: lu.ArrowLeft,
   ArrowRight: lu.ArrowRight,
   X: lu.X,
+  Check: lu.Check,
   Command: lu.Command,
   File: lu.Files,
   GlobalFilterInputIcon: lu.Globe,

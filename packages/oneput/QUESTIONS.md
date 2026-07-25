@@ -243,3 +243,28 @@ rows with `catalog.getMenuItems([...])`.
 
 The action id is the stable dispatch identity used by bindings and AppObject action lookup. The
 menu item id is the rendered row identity inside a particular menu.
+
+## How do `flags` and `params` reach the layout via `ctl.ui.update`?
+
+Broadly two channels: (1) **UI flags** — controller behaviour; (2) **layout params** — data for the active layout. Layout may _read_ flags when building chrome; it only _owns_ params.
+
+Both can ride the same `update()` call (`applyFlags` → `configure` → reassign layout getters onto `currentProps`).
+
+**Start-time baselines** (in `runBefore`, before `onStart` / `onResume`):
+
+- `AppObject.settings` → `reset(settings)` — declared `UIFlags`; defaults fill anything unset
+- `AppObject.layout` params → `ui.update({ params, replace: true })` — declared layout params as the new baseline
+
+Mid-flight `ctl.ui.update({ flags })` / `{ params }` still wins after that.
+
+**`flags`** (`UIFlags`) — Oneput UI behaviour on the controllers. Applied first via `applyFlags` / `reset`. Not stored as layout settings. Layout may _read_ them when building chrome (e.g. show X from `ctl.app.flags.enableGoBack`), so getters see the new flags on the same call.
+
+- enable: `enableGoBack`, `enableMenuOpenClose`, `enableKeys`, `enableMenuActions`, `enableGenerative`, `enableFilter`, `enableInputElement`, `enableModal`
+- focus / clear: `focusInputOnStart`, `focusInputOnMenuOpen`, `clearInputAfterAction`, `clearInputAfterBack`
+
+**`params`** — data for the active `UILayout`. Then passed to `layout.configure`, then `menuUI` / `inputUI` / etc. are re-read onto `currentProps`.
+
+- shared (`AppLayoutParams`): `menuTitle`, `exitWithResult` (`{ run, enabled? }`), `menuHeader` (`'standard' | 'cancel-done'` — disliked; open)
+- demo layout extras (`LayoutSettings`): `menuFooter`, `outerRight`
+
+Note: demo `LayoutSettings` is the layout’s *params* type — not `AppObject.settings` (which is `UIFlags`).

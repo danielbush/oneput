@@ -89,6 +89,9 @@
           {#if props.menuUI?.layoutHeader}
             <Flex class="oneput__menu-layout-header" {...props.menuUI.layoutHeader} />
           {/if}
+          {#if props.menuUI?.header}
+            <Flex class="oneput__menu-header" {...props.menuUI.header} />
+          {/if}
           <div class="oneput__menu-body">
             {#each props.menuItems || [] as item, index (item.id)}
               {#if item.ignored}
@@ -124,6 +127,9 @@
               {/if}
             {/each}
           </div>
+          {#if props.menuUI?.footer}
+            <Flex class="oneput__menu-footer" {...props.menuUI.footer} />
+          {/if}
           {#if props.menuUI?.layoutFooter}
             <Flex class="oneput__menu-layout-footer" {...props.menuUI.layoutFooter} />
           {/if}

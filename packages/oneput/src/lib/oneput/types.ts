@@ -49,17 +49,23 @@ export type OneputProps = {
   };
   menuUI?: {
     /**
-     * The header for the open menu that is controlled by the layout.
-     *
-     * Note there is a separate header controlled by the AppObject and the menu's it runs.
+     * Chrome above the menu owned by the host layout (back / title / close / tick).
      */
     layoutHeader?: FlexParams;
     /**
-     * The footer for the open menu that is controlled by the layout.
-     *
-     * Note there is a separate header controlled by the AppObject and the menu's it runs.
+     * Chrome below the menu owned by the host layout.
      */
     layoutFooter?: FlexParams;
+    /**
+     * Header owned by the current {@link Menu} (via `setMenu` / `menu()`).
+     * Rendered as `.oneput__menu-header`, between layout header and the item list.
+     */
+    header?: FlexParams;
+    /**
+     * Footer owned by the current {@link Menu} (via `setMenu` / `menu()`).
+     * Rendered as `.oneput__menu-footer`, between the item list and layout footer.
+     */
+    footer?: FlexParams;
   };
   innerUI?: FlexParams;
   outerUI?: FlexParams;
@@ -147,6 +153,16 @@ export type Menu = {
   id: string;
   focusBehaviour?: FocusBehaviour;
   items: Array<MenuItemAny | undefined | null | '' | false>;
+  /**
+   * Optional pinned header for this menu (AppObject-owned). Written to
+   * `menuUI.header` by `setMenu` / declarative `menu()`.
+   */
+  header?: FlexParams;
+  /**
+   * Optional pinned footer for this menu (AppObject-owned). Written to
+   * `menuUI.footer` by `setMenu` / declarative `menu()`.
+   */
+  footer?: FlexParams;
 };
 
 export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>> = FlexParams & {
@@ -320,11 +336,6 @@ export type AppLayoutParams = {
    * Optional “exit with result” signal for host layouts (e.g. menu header tick).
    */
   exitWithResult?: ExitWithResult;
-  /**
-   * Optional pinned menu footer (below the scrollable menu body).
-   * Host layouts may honour this (e.g. month nav under a calendar).
-   */
-  menuFooter?: (b: import('./lib/builder.js').FlexChildBuilder) => FlexChildren;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

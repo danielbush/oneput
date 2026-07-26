@@ -1,7 +1,8 @@
 import type { Controller } from '../../controllers/controller.js';
+import { hflex } from '../../lib/builder.js';
 import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
-import { calendarMenuItem } from '../ui/menuItems/calendarMenuItem.js';
 import { DateVal } from '../lib/time/DateVal.js';
+import { calendarMenuItem } from '../ui/menuItems/calendarMenuItem.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
 export type PickDateResult = {
@@ -107,7 +108,44 @@ export class PickDate implements AppObject {
           this.ctl.menu.invalidate();
         }
       })
-    ]
+    ],
+    footer: hflex({
+      id: 'pick-date-footer',
+      children: (b) => [
+        b.fchild({
+          tag: 'button',
+          classes: ['oneput__icon-button'],
+          icon: this.icons.PreviousMonth,
+          attr: {
+            type: 'button',
+            title: 'Previous month',
+            'aria-label': 'Previous month',
+            onclick: () => this.shiftMonth(-1)
+          }
+        }),
+        b.fchild({
+          tag: 'button',
+          classes: ['oneput__secondary-button'],
+          textContent: 'Today',
+          attr: {
+            type: 'button',
+            title: 'Today',
+            onclick: () => this.goToday()
+          }
+        }),
+        b.fchild({
+          tag: 'button',
+          classes: ['oneput__icon-button'],
+          icon: this.icons.NextMonth,
+          attr: {
+            type: 'button',
+            title: 'Next month',
+            'aria-label': 'Next month',
+            onclick: () => this.shiftMonth(1)
+          }
+        })
+      ]
+    })
   });
 
   onStart() {
@@ -129,41 +167,7 @@ export class PickDate implements AppObject {
         menuTitle: `${MONTH_LABELS[this.month]} ${this.year}`,
         exitWithResult: {
           run: () => this.ctl.app.exit(this.result())
-        },
-        menuFooter: (b) => [
-          b.fchild({
-            tag: 'button',
-            classes: ['oneput__icon-button'],
-            icon: this.icons.PreviousMonth,
-            attr: {
-              type: 'button',
-              title: 'Previous month',
-              'aria-label': 'Previous month',
-              onclick: () => this.shiftMonth(-1)
-            }
-          }),
-          b.fchild({
-            tag: 'button',
-            classes: ['oneput__secondary-button'],
-            textContent: 'Today',
-            attr: {
-              type: 'button',
-              title: 'Today',
-              onclick: () => this.goToday()
-            }
-          }),
-          b.fchild({
-            tag: 'button',
-            classes: ['oneput__icon-button'],
-            icon: this.icons.NextMonth,
-            attr: {
-              type: 'button',
-              title: 'Next month',
-              'aria-label': 'Next month',
-              onclick: () => this.shiftMonth(1)
-            }
-          })
-        ]
+        }
       } satisfies AppLayoutParams
     });
   }

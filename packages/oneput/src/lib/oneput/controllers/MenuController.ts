@@ -1,4 +1,10 @@
-import type { FocusBehaviour, MenuItem, MenuItemAny, MenuItemsGenFnAsync } from '../types.js';
+import type {
+  FlexParams,
+  FocusBehaviour,
+  MenuItem,
+  MenuItemAny,
+  MenuItemsGenFnAsync
+} from '../types.js';
 import type { MenuItemsFilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
@@ -213,6 +219,8 @@ export class MenuController {
     id: string;
     focusBehaviour?: FocusBehaviour;
     items: Array<MenuItemAny | undefined | false | null | ''>;
+    header?: FlexParams;
+    footer?: FlexParams;
   }) {
     this.setMenuOnly(params);
     this.setDisplayed();
@@ -243,10 +251,16 @@ export class MenuController {
     id: string;
     focusBehaviour?: FocusBehaviour;
     items: Array<MenuItemAny | undefined | false | null | ''>;
+    header?: FlexParams;
+    footer?: FlexParams;
   }) {
     this.currentMenu = params
       ? CurrentMenu.create(this.ctl, params)
       : CurrentMenu.createBlank(this.ctl);
+    this.ctl.ui.setMenuUI({
+      header: this.currentMenu.header,
+      footer: this.currentMenu.footer
+    });
     this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: this.currentMenu.menuId } });
   }
 

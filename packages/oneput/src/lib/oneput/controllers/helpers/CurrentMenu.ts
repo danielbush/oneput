@@ -1,14 +1,14 @@
 import { isFocusable } from '../../lib/utils.js';
-import type { FocusBehaviour, MenuItemAny } from '../../../oneput/types.js';
+import type { FlexParams, FocusBehaviour, MenuItemAny } from '../../../oneput/types.js';
 import type { Controller } from '../controller.js';
 
 /**
  * Wraps the current rendered menu.
  *
- * CurrentMenu keeps the stable menu id and source item list from the last
- * `setMenu` call, while its reactive accessors read the displayed menu state
- * from `ctl.currentProps`. Those reactive accessors can be used from Svelte
- * reactive contexts.
+ * CurrentMenu keeps the stable menu id, source item list, and optional header /
+ * footer chrome from the last `setMenu` call, while its reactive accessors read
+ * the displayed menu state from `ctl.currentProps`. Those reactive accessors can
+ * be used from Svelte reactive contexts.
  *
  * Does not make any changes to the menu. Treat as a read-only view over the
  * current rendered menu.
@@ -19,7 +19,14 @@ export class CurrentMenu {
   }
 
   static create(ctl: Controller, params: CurrentMenuParams) {
-    return new CurrentMenu(ctl, params.id, params.items, params.focusBehaviour);
+    return new CurrentMenu(
+      ctl,
+      params.id,
+      params.items,
+      params.focusBehaviour,
+      params.header,
+      params.footer
+    );
   }
 
   /**
@@ -31,7 +38,9 @@ export class CurrentMenu {
     private ctl: Controller,
     private _menuId: string,
     allMenuItems: Array<MenuItemAny | undefined | false | null | ''> = [],
-    private _focusBehaviour?: FocusBehaviour
+    private _focusBehaviour?: FocusBehaviour,
+    private _header?: FlexParams,
+    private _footer?: FlexParams
   ) {
     this.allMenuItems = allMenuItems.filter(Boolean) as Array<MenuItemAny>;
   }
@@ -76,6 +85,20 @@ export class CurrentMenu {
    */
   get focusBehaviour() {
     return this._focusBehaviour;
+  }
+
+  /**
+   * Static: optional AppObject-owned menu header from the last setMenu.
+   */
+  get header() {
+    return this._header;
+  }
+
+  /**
+   * Static: optional AppObject-owned menu footer from the last setMenu.
+   */
+  get footer() {
+    return this._footer;
   }
 
   /**
@@ -140,4 +163,6 @@ export type CurrentMenuParams = {
   id: string;
   items: Array<MenuItemAny | undefined | false | null | ''>;
   focusBehaviour?: FocusBehaviour;
+  header?: FlexParams;
+  footer?: FlexParams;
 };

@@ -1,6 +1,15 @@
 import type { Controller } from './controller.js';
 import type { AppLayoutParams, UILayout, FlexParams, OneputProps, UIFlags } from '../types.js';
 
+/** Layout-owned slots on `menuUI` (back / title / close / tick, etc.). */
+export type MenuLayoutUI = Pick<
+  NonNullable<OneputProps['menuUI']>,
+  'layoutHeader' | 'layoutFooter'
+>;
+
+/** Menu-owned slots on `menuUI` (from `setMenu` / `menu()`). */
+export type MenuOwnedUI = Pick<NonNullable<OneputProps['menuUI']>, 'header' | 'footer'>;
+
 export class UIController {
   static create(ctl: Controller) {
     return new UIController(ctl);
@@ -12,8 +21,30 @@ export class UIController {
 
   constructor(private ctl: Controller) {}
 
-  setMenuUI(menuUI?: { layoutHeader?: FlexParams; layoutFooter?: FlexParams }) {
-    this.ctl.currentProps.menuUI = menuUI;
+  /**
+   * Set layout-owned menu chrome (`layoutHeader` / `layoutFooter`).
+   * Preserves menu-owned `header` / `footer`.
+   */
+  setMenuLayoutUI(menuLayoutUI?: MenuLayoutUI) {
+    this.ctl.currentProps.menuUI = {
+      header: this.ctl.currentProps.menuUI?.header,
+      footer: this.ctl.currentProps.menuUI?.footer,
+      layoutHeader: menuLayoutUI?.layoutHeader,
+      layoutFooter: menuLayoutUI?.layoutFooter
+    };
+  }
+
+  /**
+   * Set menu-owned chrome (`header` / `footer` from {@link Menu}).
+   * Preserves layout-owned `layoutHeader` / `layoutFooter`.
+   */
+  setMenuUI(menuUI?: MenuOwnedUI) {
+    this.ctl.currentProps.menuUI = {
+      layoutHeader: this.ctl.currentProps.menuUI?.layoutHeader,
+      layoutFooter: this.ctl.currentProps.menuUI?.layoutFooter,
+      header: menuUI?.header,
+      footer: menuUI?.footer
+    };
   }
 
   setInputUI(
@@ -75,7 +106,7 @@ export class UIController {
     }
     this.layout?.configure({ params: settings.params, replace: settings.replace });
     this.ctl.currentProps.inputUI = this.layout?.inputUI;
-    this.ctl.currentProps.menuUI = this.layout?.menuUI;
+    this.setMenuLayoutUI(this.layout?.menuUI);
     this.ctl.currentProps.innerUI = this.layout?.innerUI;
     this.ctl.currentProps.outerUI = this.layout?.outerUI;
   }

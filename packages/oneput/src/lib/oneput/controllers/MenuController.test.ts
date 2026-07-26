@@ -117,4 +117,70 @@ describe('MenuController', () => {
     // assert
     expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['apple']);
   });
+
+  describe('menu chrome', () => {
+    it('writes header/footer onto menuUI from setMenu', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+
+      // act
+      ctl.menu.setMenu({
+        id: 'main',
+        items: [item('a', 'A')],
+        header: { id: 'h', type: 'hflex', children: [] },
+        footer: { id: 'f', type: 'hflex', children: [] }
+      });
+
+      // assert
+      expect(ctl.currentProps.menuUI?.header?.id).toBe('h');
+      expect(ctl.currentProps.menuUI?.footer?.id).toBe('f');
+    });
+
+    it('preserves menu chrome across ui.update layout rebuild', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        layout: {
+          layout: () => ({
+            configure() {},
+            get menuUI() {
+              return { layoutHeader: { id: 'lh', type: 'hflex' as const, children: [] } };
+            }
+          }),
+          params: { menuTitle: 'T' }
+        },
+        onStart: () => {}
+      });
+      ctl.menu.setMenu({
+        id: 'main',
+        items: [item('a', 'A')],
+        footer: { id: 'f', type: 'hflex', children: [] }
+      });
+
+      // act
+      ctl.ui.update({ params: { menuTitle: 'T2' } });
+
+      // assert
+      expect(ctl.currentProps.menuUI?.layoutHeader?.id).toBe('lh');
+      expect(ctl.currentProps.menuUI?.footer?.id).toBe('f');
+    });
+
+    it('clears menu chrome when setMenu() clears', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setMenu({
+        id: 'main',
+        items: [item('a', 'A')],
+        footer: { id: 'f', type: 'hflex', children: [] }
+      });
+
+      // act
+      ctl.menu.setMenu();
+
+      // assert
+      expect(ctl.currentProps.menuUI?.footer).toBeUndefined();
+    });
+  });
 });

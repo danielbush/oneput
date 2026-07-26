@@ -1,4 +1,8 @@
 import type { AppObject, Controller, MenuItem, OneputProps, UIFlags } from '@oneput/oneput';
+import {
+  isPickDurationResult,
+  SetDuration
+} from '@oneput/oneput/shared/appObjects/SetDuration.js';
 import { SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
@@ -42,6 +46,13 @@ export class AddEntry implements AppObject {
     this.unsubscribeInputChange?.();
   };
 
+  onResume = (result?: { payload?: unknown }) => {
+    if (isPickDurationResult(result?.payload)) {
+      this.session.duration = result.payload.value;
+    }
+    this.run();
+  };
+
   onMenuItemFocus = ({ menuItem }: { menuItem: MenuItem | undefined }) => {
     const item = menuItem;
     if (!item) {
@@ -80,22 +91,9 @@ export class AddEntry implements AppObject {
         });
         break;
       case 'add-duration':
-        this.ctl.input.setPlaceholder('Enter duration in hh:mm...');
-        if (this.session.duration) {
-          this.ctl.input.setInputValue(TimeVal.createFromSeconds(this.session.duration).timeString);
-        } else {
-          this.ctl.input.setInputValue('');
-        }
-        this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-          this.ctl.clearNotifications();
-          this.session.duration =
-            value === '' ? undefined : TimeVal.createFromTimeString(value, /[: ]/).totalSeconds;
-          if (this.session.duration !== undefined && isNaN(this.session.duration)) {
-            this.ctl.notify('Could not parse a number for duration', { duration: 1500 });
-            return;
-          }
-          this.ctl.menu.setMenu({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
-        });
+        this.ctl.input.setPlaceholder('Set duration…');
+        this.ctl.ui.update({ flags: { enableInputElement: false } });
+        this.ctl.input.setInputValue();
         break;
       case 'add-startTime':
         this.ctl.input.setPlaceholder('Set start time and date...');
@@ -160,8 +158,16 @@ export class AddEntry implements AppObject {
           ? `Set Duration: ${TimeVal.createFromSeconds(this.session.duration).longTimeString}`
           : 'Set Duration...',
         left: (b) => [b.icon(icons.Timer)],
+        right: (b) => [b.icon(icons.ChevronRight)],
         action: () => {
-          this.ctl.input.focusInput();
+          this.ctl.app.run(
+            SetDuration.create(this.ctl, {
+              duration:
+                this.session.duration === undefined
+                  ? undefined
+                  : TimeVal.createFromSeconds(this.session.duration)
+            })
+          );
         }
       }),
       stdMenuItem({

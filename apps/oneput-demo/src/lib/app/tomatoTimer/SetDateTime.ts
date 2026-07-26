@@ -1,4 +1,4 @@
-import type { AppObject, Controller } from '@oneput/oneput';
+import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { DateVal } from '@oneput/oneput/shared/values/DateVal.js';
 import { TimeVal } from '@oneput/oneput/shared/values/TimeVal.js';
@@ -8,7 +8,11 @@ import {
   type PickDateIcons,
   type PickDateResult
 } from '@oneput/oneput/shared/appObjects/PickDate.js';
-import { SetTime } from './SetTime.js';
+import {
+  isPickTimeResult,
+  SetTime,
+  type PickTimeResult
+} from '@oneput/oneput/shared/appObjects/SetTime.js';
 
 type SetDateTimeIcons = {
   Right: string;
@@ -16,7 +20,7 @@ type SetDateTimeIcons = {
   SetTimeIcon: string;
 } & PickDateIcons;
 
-export class SetDateTime implements AppObject<TimeVal | PickDateResult> {
+export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
   static create(
     ctl: Controller,
     params: {
@@ -35,11 +39,15 @@ export class SetDateTime implements AppObject<TimeVal | PickDateResult> {
     private time?: TimeVal
   ) {}
 
+  settings = {
+    enableFilter: false
+  } satisfies UIFlags;
+
   onStart() {
     this.run();
   }
 
-  onResume = (result?: { payload?: TimeVal | PickDateResult }) => {
+  onResume = (result?: { payload?: PickDateResult | PickTimeResult }) => {
     if (result?.payload) {
       if (isPickDateResult(result.payload)) {
         const [y, m, d] = result.payload.value.split('-').map(Number);
@@ -48,8 +56,9 @@ export class SetDateTime implements AppObject<TimeVal | PickDateResult> {
         this.run();
         return;
       }
-      if (result.payload instanceof TimeVal) {
-        this.time = result.payload;
+      if (isPickTimeResult(result.payload)) {
+        const [h, min] = result.payload.value.split(':').map(Number);
+        this.time = TimeVal.create(h, min);
         this.ctl.menu.focusNextMenuItem();
         this.run();
         return;

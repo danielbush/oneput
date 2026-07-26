@@ -1,5 +1,4 @@
-import type { Controller } from '@oneput/oneput';
-import type { AppObject, MenuItem, OneputProps } from '@oneput/oneput';
+import type { AppObject, Controller, MenuItem, OneputProps, UIFlags } from '@oneput/oneput';
 import { SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
@@ -34,6 +33,10 @@ export class AddEntry implements AppObject {
     private session: Partial<FinishedSession>,
     private setDateTime: SetDateTime
   ) {}
+
+  settings = {
+    enableFilter: false
+  } satisfies UIFlags;
 
   onExit = () => {
     this.unsubscribeInputChange?.();
@@ -154,8 +157,8 @@ export class AddEntry implements AppObject {
       stdMenuItem({
         id: 'add-duration',
         textContent: this.session.duration
-          ? `Duration: ${TimeVal.createFromSeconds(this.session.duration).longTimeString}`
-          : 'Duration...',
+          ? `Set Duration: ${TimeVal.createFromSeconds(this.session.duration).longTimeString}`
+          : 'Set Duration...',
         left: (b) => [b.icon(icons.Timer)],
         action: () => {
           this.ctl.input.focusInput();
@@ -164,7 +167,7 @@ export class AddEntry implements AppObject {
       stdMenuItem({
         id: 'add-startTime',
         textContent: this.session.startTime
-          ? 'Start: ' +
+          ? 'Set time: ' +
             DateTimeVal.createFromUnixTime(this.session.startTime).dateTimeString +
             '...'
           : 'Start time...',

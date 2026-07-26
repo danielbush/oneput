@@ -72,17 +72,14 @@ export class Layout implements UILayout<LayoutSettings> {
   private headerRight(b: FlexChildBuilder) {
     const exitWithResult = this.settings.exitWithResult;
     const exitAction = this.exitAction;
-    const children = [];
+    const children: FChildParams[] = [];
 
     if (exitWithResult) {
       const enabled = exitWithResult.enabled !== false;
       children.push(
         b.fchild({
           tag: 'button',
-          classes: [
-            'oneput__icon-button',
-            ...(enabled ? [] : ['oneput__icon-disabled'])
-          ],
+          classes: ['oneput__icon-button', ...(enabled ? [] : ['oneput__icon-disabled'])],
           icon: icons.Check,
           attr: {
             type: 'button',
@@ -148,7 +145,7 @@ export class Layout implements UILayout<LayoutSettings> {
 
   get menuUI() {
     return {
-      header: hflex({
+      layoutHeader: hflex({
         id: 'menu-header',
         children: (b) => [
           this.backAction
@@ -168,7 +165,7 @@ export class Layout implements UILayout<LayoutSettings> {
       }),
       ...(this.settings.menuFooter
         ? {
-            footer: hflex({
+            layoutFooter: hflex({
               id: 'menu-footer',
               children: this.settings.menuFooter
             })

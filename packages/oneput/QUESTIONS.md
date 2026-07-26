@@ -264,7 +264,7 @@ Mid-flight `ctl.ui.update({ flags })` / `{ params }` still wins after that.
 
 **`params`** — data for the active `UILayout`. Then passed to `layout.configure`, then `menuUI` / `inputUI` / etc. are re-read onto `currentProps`.
 
-- shared (`AppLayoutParams`): `menuTitle`, `exitWithResult` (`{ run, enabled? }`), `menuHeader` (`'standard' | 'cancel-done'` — disliked; open)
-- demo layout extras (`LayoutSettings`): `menuFooter`, `outerRight`
+- shared (`AppLayoutParams`): `menuTitle`, `exitWithResult` (`{ run, enabled? }`), `menuFooter`
+- demo layout extras (`LayoutSettings`): `outerRight`
 
 Note: demo `LayoutSettings` is the layout’s *params* type — not `AppObject.settings` (which is `UIFlags`).

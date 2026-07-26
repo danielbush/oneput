@@ -8,40 +8,43 @@
   .oneput__set-time-menu-item {
     align-items: stretch;
     justify-content: center;
-    gap: 0.75em;
+    gap: 0.35em;
     padding: 0.5em 0.75em;
   }
 
   .oneput__set-time-col {
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    gap: 0.35em;
-    min-width: 3.75em;
+    gap: 0.2em;
   }
 
   .oneput__set-time-col--ampm {
     justify-content: center;
-    min-width: 4em;
-  }
-
-  .oneput__set-time-col--mm {
-    min-width: 7em;
+    margin-inline-end: 0.65em;
   }
 
   .oneput__set-time-mm-row {
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    gap: 0.35em;
+    gap: 0.2em;
   }
 
   .oneput__set-time-value {
+    flex: 0 0 auto;
     justify-content: center;
+    align-items: center;
     min-width: 1.75em;
-    font: 600 1.35em / 1.2 ui-monospace, monospace;
+    min-height: 2.75em;
+    font: 500 1.35em / 1 ui-monospace, monospace;
     font-variant-numeric: tabular-nums;
+    /* Visual pop without growing row/column metrics. */
+    transform: scale(2.00);
   }
 
   .oneput__set-time-btn {
+    flex: 0 0 auto;
     appearance: none;
     border: none;
     background: transparent;

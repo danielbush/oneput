@@ -21,6 +21,10 @@
 
 import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
+import {
+  setTimeMenuItem,
+  type SetTimeValue
+} from '$lib/oneput/shared/ui/menuItems/setTimeMenuItem.js';
 import { icons } from './_state.svelte.js';
 
 // #region calendar
@@ -281,6 +285,61 @@ export const richCalendarMenuItems = (
     }
   ];
 };
+
+// #endregion
+
+// #region set-time (rich item)
+
+export const setTimeHeader: FlexParams = {
+  id: 'set-time-header',
+  type: 'hflex',
+  children: [
+    {
+      id: randomId(),
+      type: 'fchild',
+      classes: ['oneput__menu-item-header'],
+      textContent: 'Set time'
+    }
+  ]
+};
+
+/**
+ * Ordinary rows above/below a single set-time widget (am/pm | hh | mm).
+ */
+export const richSetTimeMenuItems = (
+  hour: number,
+  minute: number,
+  onChange?: (next: SetTimeValue) => void
+): MenuItemAny[] => [
+  {
+    id: 'set-time-above',
+    type: 'hflex',
+    children: [
+      {
+        id: 'set-time-above-label',
+        type: 'fchild',
+        textContent: 'Above the time widget'
+      }
+    ]
+  },
+  setTimeMenuItem({
+    id: 'rich-set-time-widget',
+    hour,
+    minute,
+    onChange
+  }),
+  {
+    id: 'set-time-below',
+    type: 'hflex',
+    children: [
+      {
+        id: 'set-time-below-label',
+        type: 'fchild',
+        textContent: 'Below the time widget'
+      }
+    ]
+  }
+];
 
 // #endregion
 

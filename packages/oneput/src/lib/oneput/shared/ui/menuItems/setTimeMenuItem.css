@@ -1,0 +1,109 @@
+/**
+ * Styles for {@link setTimeMenuItem}.
+ * Loaded via `import './setTimeMenuItem.css'` from the builder module.
+ * `@layer oneput.shared` is ordered after `oneput.elements` in defaults, so
+ * these rules beat shell chrome without specificity hacks.
+ */
+@layer oneput.shared {
+  .oneput__set-time-menu-item {
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.75em;
+    padding: 0.5em 0.75em;
+  }
+
+  .oneput__set-time-col {
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+    min-width: 3.75em;
+  }
+
+  .oneput__set-time-col--ampm {
+    justify-content: center;
+    min-width: 4em;
+  }
+
+  .oneput__set-time-col--mm {
+    min-width: 7em;
+  }
+
+  .oneput__set-time-mm-row {
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+  }
+
+  .oneput__set-time-value {
+    justify-content: center;
+    min-width: 1.75em;
+    font: 600 1.35em / 1.2 ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .oneput__set-time-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0.55em 0.65em;
+    min-width: 2.75em;
+    min-height: 2.75em;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .oneput__set-time-btn:hover {
+    background: rgb(100 100 100 / 0.15);
+
+    html.dark-mode & {
+      background: rgb(200 200 200 / 0.12);
+    }
+  }
+
+  .oneput__set-time-ampm {
+    font: 600 1em / 1 sans-serif;
+    letter-spacing: 0.04em;
+    min-width: 3.25em;
+    min-height: 3em;
+    padding: 0.7em 0.75em;
+    background: rgb(100 100 100 / 0.12);
+
+    html.dark-mode & {
+      background: rgb(200 200 200 / 0.1);
+    }
+  }
+
+  .oneput__set-time-step {
+    font: 700 1.15em / 1 sans-serif;
+    color: var(--oneput-text-muted, inherit);
+    min-width: 2.75em;
+    min-height: 2.75em;
+  }
+
+  .oneput__set-time-arrow {
+    width: 2.75em;
+    height: 2.75em;
+    padding: 0.45em;
+  }
+
+  .oneput__set-time-arrow::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 0.55em solid transparent;
+    border-right: 0.55em solid transparent;
+  }
+
+  .oneput__set-time-arrow--up::before {
+    border-bottom: 0.7em solid currentColor;
+  }
+
+  .oneput__set-time-arrow--down::before {
+    border-top: 0.7em solid currentColor;
+  }
+}

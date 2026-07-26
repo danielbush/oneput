@@ -1,3 +1,4 @@
+import './calendarMenuItem.css'; // IMPORT_CSS_GOTCHA
 import { randomId } from '../../../lib/utils.js';
 import type { MenuItem } from '../../../types.js';
 import { tapSelect } from './tapSelect.js';
@@ -49,6 +50,10 @@ export type CalendarMenuItemParams = {
  * One compound menu item: a month day-grid. Day cells use {@link tapSelect}
  * so scrolling the menu does not pick a day. Sit beside ordinary items via
  * `setMenu` / `menu()`.
+ *
+ * Styles live in `calendarMenuItem.css`, loaded as a side-effect import from
+ * this module (so hosts that only `@import` defaults do not hit nested CSS
+ * `@import` violations). See IMPORT_CSS_GOTCHA.
  */
 export function calendarMenuItem(params: CalendarMenuItemParams): MenuItem {
   const id = params.id ?? randomId();

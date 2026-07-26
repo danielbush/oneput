@@ -1,0 +1,69 @@
+/**
+ * Styles for {@link calendarMenuItem}.
+ * Loaded via `import './calendarMenuItem.css'` from the builder module.
+ * `@layer oneput.shared` is ordered after `oneput.elements` in defaults, so
+ * these rules beat shell chrome without specificity hacks.
+ */
+@layer oneput.shared {
+  .oneput__calendar-menu-item {
+    gap: 0.15em;
+    padding: 0.35em 0.5em;
+  }
+
+  .oneput__calendar-row {
+    justify-content: stretch;
+  }
+
+  .oneput__calendar-cell {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    padding: 0.35em 0;
+    border-radius: 4px;
+  }
+
+  .oneput__calendar-cell--label {
+    font: 600 0.75em sans-serif;
+    color: var(--oneput-text-muted);
+    text-transform: uppercase;
+  }
+
+  .oneput__calendar-cell--outside {
+    opacity: 0.35;
+  }
+
+  .oneput__calendar-cell--selected {
+    background: rgb(100 100 100 / 0.35);
+    font-weight: 600;
+
+    html.dark-mode & {
+      background: rgb(200 200 200 / 0.25);
+    }
+  }
+
+  .oneput__calendar-cell--today {
+    box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.55);
+    font-weight: 600;
+
+    html.dark-mode & {
+      box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.65);
+    }
+  }
+
+  .oneput__calendar-cell--button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .oneput__calendar-cell--button:hover {
+    background: rgb(100 100 100 / 0.15);
+
+    html.dark-mode & {
+      background: rgb(200 200 200 / 0.12);
+    }
+  }
+}

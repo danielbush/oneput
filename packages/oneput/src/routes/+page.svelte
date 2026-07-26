@@ -43,6 +43,8 @@
   let toggleNotification = $state(true);
   let richCalSelected = $state(22);
   let richCalInput = $state('2026-07-22');
+  let richTimeHour = $state(14);
+  let richTimeMinute = $state(30);
 </script>
 
 <svelte:head>
@@ -637,6 +639,28 @@
         }}
         placeholder="Jump to a date..."
         bind:inputValue={richCalInput}
+      />
+    </section>
+
+    <section class="demo-example">
+      <h2>Set time (one widget item)</h2>
+      <p>
+        Single rich item: AM/PM toggle, hour ▲/▼, minutes ±1 flanking and ▲/▼ for ±15.
+        Parent owns 24h state and rebuilds the item on change.
+      </p>
+      <Oneput
+        menuOpen={true}
+        menuItems={mockups.richSetTimeMenuItems(richTimeHour, richTimeMinute, (next) => {
+          richTimeHour = next.hour;
+          richTimeMinute = next.minute;
+        })}
+        menuUI={{ header: mockups.setTimeHeader }}
+        inputUI={{
+          left: ui.inputLeft1,
+          right: ui.inputRight1
+        }}
+        placeholder="Selected time…"
+        inputValue={`${String(richTimeHour).padStart(2, '0')}:${String(richTimeMinute).padStart(2, '0')}`}
       />
     </section>
 

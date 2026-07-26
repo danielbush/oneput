@@ -1,5 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
-import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '../../types.js';
 import {
   adjustHour24,
   adjustMinute,
@@ -72,6 +72,76 @@ export class SetTime implements AppObject {
     focusInputOnStart: false
   } satisfies UIFlags;
 
+  actions = {
+    TOGGLE_AM_PM: {
+      action: () => {
+        this.hour = toggleAmPm(this.hour);
+        this.refresh();
+      },
+      binding: {
+        bindings: ['$mod+Shift+a'],
+        description: 'Toggle AM/PM',
+        when: { menuOpen: true }
+      }
+    },
+    HOUR_UP: {
+      action: () => this.applyHour(1),
+      binding: {
+        bindings: ['$mod+Shift+k'],
+        description: 'Hour up',
+        when: { menuOpen: true }
+      }
+    },
+    HOUR_DOWN: {
+      action: () => this.applyHour(-1),
+      binding: {
+        bindings: ['$mod+Shift+j'],
+        description: 'Hour down',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_MINUS_15: {
+      action: () => this.applyQuarter(-1),
+      binding: {
+        bindings: ['$mod+Shift+h'],
+        description: '−15 minutes',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_PLUS_15: {
+      action: () => this.applyQuarter(1),
+      binding: {
+        bindings: ['$mod+Shift+l'],
+        description: '+15 minutes',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_MINUS_1: {
+      action: () => this.applyMinute(-1),
+      binding: {
+        bindings: ['$mod+['],
+        description: '−1 minute',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_PLUS_1: {
+      action: () => this.applyMinute(1),
+      binding: {
+        bindings: ['$mod+]'],
+        description: '+1 minute',
+        when: { menuOpen: true }
+      }
+    },
+    ACCEPT: {
+      action: () => this.ctl.app.exit(this.result()),
+      binding: {
+        bindings: ['Enter'],
+        description: 'Accept selected time',
+        when: { menuOpen: true }
+      }
+    }
+  } satisfies AppActions;
+
   menu = () => {
     const { hour12, isPM } = to12Hour(this.hour);
     return {
@@ -116,6 +186,28 @@ export class SetTime implements AppObject {
       type: 'pick-time',
       value: hhmm(this.hour, this.minute)
     };
+  }
+
+  private refresh() {
+    this.syncInput();
+    this.ctl.menu.invalidate();
+  }
+
+  private applyHour(delta: number) {
+    this.hour = adjustHour24(this.hour, delta);
+    this.refresh();
+  }
+
+  private applyMinute(delta: number) {
+    this.minute = adjustMinute(this.minute, delta);
+    this.refresh();
+  }
+
+  private applyQuarter(direction: 1 | -1) {
+    const next = stepQuarterClock(this.hour, this.minute, direction);
+    this.hour = next.hour;
+    this.minute = next.minute;
+    this.refresh();
   }
 
   private syncChrome() {

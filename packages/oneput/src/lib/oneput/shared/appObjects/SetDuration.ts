@@ -1,5 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
-import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '../../types.js';
 import {
   adjustHourClamped,
   adjustMinute,
@@ -63,6 +63,65 @@ export class SetDuration implements AppObject {
     focusInputOnStart: false
   } satisfies UIFlags;
 
+  actions = {
+    HOUR_UP: {
+      action: () => this.applyHour(1),
+      binding: {
+        bindings: ['$mod+Shift+k'],
+        description: 'Hour up',
+        when: { menuOpen: true }
+      }
+    },
+    HOUR_DOWN: {
+      action: () => this.applyHour(-1),
+      binding: {
+        bindings: ['$mod+Shift+j'],
+        description: 'Hour down',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_MINUS_15: {
+      action: () => this.applyQuarter(-1),
+      binding: {
+        bindings: ['$mod+Shift+h'],
+        description: '−15 minutes',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_PLUS_15: {
+      action: () => this.applyQuarter(1),
+      binding: {
+        bindings: ['$mod+Shift+l'],
+        description: '+15 minutes',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_MINUS_1: {
+      action: () => this.applyMinute(-1),
+      binding: {
+        bindings: ['$mod+['],
+        description: '−1 minute',
+        when: { menuOpen: true }
+      }
+    },
+    MINUTE_PLUS_1: {
+      action: () => this.applyMinute(1),
+      binding: {
+        bindings: ['$mod+]'],
+        description: '+1 minute',
+        when: { menuOpen: true }
+      }
+    },
+    ACCEPT: {
+      action: () => this.ctl.app.exit(this.result()),
+      binding: {
+        bindings: ['Enter'],
+        description: 'Accept duration',
+        when: { menuOpen: true }
+      }
+    }
+  } satisfies AppActions;
+
   menu = () => ({
     id: 'set-duration',
     focusBehaviour: 'first' as const,
@@ -96,6 +155,28 @@ export class SetDuration implements AppObject {
       type: 'pick-duration',
       value: TimeVal.create(this.hour, this.minute).totalSeconds
     };
+  }
+
+  private refresh() {
+    this.syncInput();
+    this.ctl.menu.invalidate();
+  }
+
+  private applyHour(delta: number) {
+    this.hour = adjustHourClamped(this.hour, delta);
+    this.refresh();
+  }
+
+  private applyMinute(delta: number) {
+    this.minute = adjustMinute(this.minute, delta);
+    this.refresh();
+  }
+
+  private applyQuarter(direction: 1 | -1) {
+    const next = stepQuarterClamped(this.hour, this.minute, direction);
+    this.hour = next.hour;
+    this.minute = next.minute;
+    this.refresh();
   }
 
   private syncChrome() {

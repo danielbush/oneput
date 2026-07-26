@@ -1,8 +1,8 @@
-import type { Controller, Menu } from '@oneput/oneput';
+import type { Controller, Menu, UIFlags } from '@oneput/oneput';
 import type { AppObject } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from './_icons.js';
-import { mockListDir, type DirEntry, type ListDir } from '../service/listDir.js';
+import { mockListDir, type DirEntry } from '../service/listDir.js';
 import { stdSkeletonMenuItems } from '@oneput/oneput/shared/ui/menuItems/stdSkeletonMenuItems.js';
 
 type ListDirectory = (path: string) => Promise<DirEntry[]>;
@@ -11,7 +11,6 @@ export type FilePickerOptions = {
   fileFilter?: (entry: DirEntry) => boolean;
   onFileSelect?: (path: string) => void | Promise<void>;
   onResume?: AppObject['onResume'];
-  onMenuOpenChange?: AppObject['onMenuOpenChange'];
   onExit?: AppObject['onExit'];
   placeholder?: string;
 };
@@ -41,9 +40,19 @@ export class FilePicker implements AppObject {
     private entries: DirEntry[] = [],
     private showDotEntries = false,
     public onReusme = options.onResume,
-    public onMenuOpenChange = options.onMenuOpenChange,
     public onExit = options.onExit
   ) {}
+
+  /** Header X / chevron / Escape close the menu; closing dismisses the picker. */
+  settings = {
+    enableMenuOpenClose: true
+  } satisfies UIFlags;
+
+  onMenuOpenChange = ({ open }: { open: boolean }) => {
+    if (!open) {
+      this.ctl.app.exit();
+    }
+  };
 
   /**
    * Load the first directory and render the picker.

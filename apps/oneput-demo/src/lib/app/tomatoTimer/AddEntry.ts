@@ -1,6 +1,6 @@
 import type { Controller } from '@oneput/oneput';
 import type { AppObject, MenuItem, OneputProps } from '@oneput/oneput';
-import { SetDateTime } from '@oneput/oneput/shared/appObjects/SetDateTime.js';
+import { SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
@@ -15,7 +15,9 @@ export class AddEntry implements AppObject {
       icons: {
         SetDateIcon: icons.CalendarCheck,
         SetTimeIcon: icons.Clock,
-        Right: icons.ChevronRight
+        Right: icons.ChevronRight,
+        PreviousMonth: icons.ChevronLeft,
+        NextMonth: icons.ChevronRight
       },
       date:
         session.startTime === undefined ? undefined : DateVal.createFromUnixTime(session.startTime),

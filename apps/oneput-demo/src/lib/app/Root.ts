@@ -6,7 +6,7 @@ import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
 import { FilePicker } from './FilePicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
-import { isPickDateResult, PickDate } from './PickDate.js';
+import { isPickDateResult, PickDate } from '@oneput/oneput/shared/appObjects/PickDate.js';
 import { ElizaChat } from './ElizaChat.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
@@ -26,7 +26,13 @@ export class Root implements AppObject {
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
       FilePicker: () => FilePicker.create(ctl),
-      PickDate: () => PickDate.create(ctl),
+      PickDate: () =>
+        PickDate.create(ctl, {
+          icons: {
+            PreviousMonth: icons.ChevronLeft,
+            NextMonth: icons.ChevronRight
+          }
+        }),
       ElizaChat: () => ElizaChat.create(ctl)
     });
   }
@@ -153,8 +159,7 @@ export class Root implements AppObject {
           left: (b) => [b.icon(icons.NotebookPen)],
           textContent: 'Chat with ELIZA...',
           bottom: {
-            textContent:
-              'Scrollable transcript + Landsteiner elizabot.js (mass:werk / VU sample)'
+            textContent: 'Scrollable transcript + Landsteiner elizabot.js (mass:werk / VU sample)'
           },
           action: () => {
             this.ctl.app.run(this.create.ElizaChat());

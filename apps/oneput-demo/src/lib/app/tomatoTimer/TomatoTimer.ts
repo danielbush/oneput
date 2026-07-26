@@ -1,4 +1,4 @@
-import type { Controller } from '@oneput/oneput';
+import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { hflex, menuItem } from '@oneput/oneput';
 import {
@@ -6,7 +6,6 @@ import {
   type FinishedSession,
   type UnfinishedSession
 } from './TomatoTimerValue.js';
-import { type AppObject } from '@oneput/oneput';
 import Timer from './Timer.svelte';
 import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
@@ -45,6 +44,17 @@ export class TomatoTimer implements AppObject {
     private dynamicPlaceholder: DynamicPlaceholder,
     private addEntry: AddEntry
   ) {}
+
+  /** Header X / chevron / Escape close the menu; closing dismisses the timer. */
+  settings = {
+    enableMenuOpenClose: true
+  } satisfies UIFlags;
+
+  onMenuOpenChange = ({ open }: { open: boolean }) => {
+    if (!open) {
+      this.ctl.app.exit();
+    }
+  };
 
   onExit = () => {
     if (this.timerValue && !this.timerValue.isFinished) {

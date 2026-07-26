@@ -4,7 +4,6 @@ import type {
   Controller,
   FChildParams,
   FlexChildBuilder,
-  FlexChildren,
   UILayout
 } from '@oneput/oneput';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
@@ -20,11 +19,6 @@ export type LayoutSettings = AppLayoutParams & {
    * Expose the bottom right corner of the layout.
    */
   outerRight?: (b: FlexChildBuilder) => FChildParams;
-  /**
-   * Optional pinned menu footer (below the scrollable menu body).
-   * AppObjects set this via `ctl.ui.update({ params: { menuFooter } })`.
-   */
-  menuFooter?: (b: FlexChildBuilder) => FlexChildren;
 };
 
 /**
@@ -56,11 +50,10 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   private get exitAction() {
-    // Dismiss the AppObject (not close the menu). Menu open/close stays on the
-    // input chevron via enableMenuOpenClose. Hidden when go-back is disabled
-    // (e.g. Root), since exit is a no-op with no parent.
-    if (this.ctl.app.flags.enableGoBack) {
-      return () => this.ctl.app.exit();
+    // Close the menu (not exit the AppObject). Exit remains an AppObject
+    // decision (e.g. onBack / goBack default pop / exitWithResult).
+    if (this.ctl.app.flags.enableMenuOpenClose) {
+      return this.ctl.menu.closeMenu;
     }
     return;
   }
@@ -73,7 +66,7 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   /**
-   * Right header: optional exit-with-result (tick) then cancel (X).
+   * Right header: optional exit-with-result (tick) then close-menu (X).
    * Tick only when `exitWithResult` was set via `ctl.ui.update`.
    */
   private headerRight(b: FlexChildBuilder) {
@@ -107,7 +100,7 @@ export class Layout implements UILayout<LayoutSettings> {
         b.fchild({
           tag: 'button',
           classes: ['oneput__icon-button'],
-          attr: { type: 'button', title: 'Exit', onclick: exitAction },
+          attr: { type: 'button', title: 'Close menu', onclick: exitAction },
           icon: icons.X
         })
       );

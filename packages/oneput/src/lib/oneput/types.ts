@@ -310,6 +310,11 @@ export type AppLayoutParams = {
    * Optional “exit with result” signal for host layouts (e.g. menu header tick).
    */
   exitWithResult?: ExitWithResult;
+  /**
+   * Optional pinned menu footer (below the scrollable menu body).
+   * Host layouts may honour this (e.g. month nav under a calendar).
+   */
+  menuFooter?: (b: import('./lib/builder.js').FlexChildBuilder) => FlexChildren;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

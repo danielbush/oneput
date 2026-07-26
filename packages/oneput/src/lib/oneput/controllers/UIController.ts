@@ -12,7 +12,7 @@ export class UIController {
 
   constructor(private ctl: Controller) {}
 
-  setMenuUI(menuUI?: { header?: FlexParams; footer?: FlexParams }) {
+  setMenuUI(menuUI?: { layoutHeader?: FlexParams; layoutFooter?: FlexParams }) {
     this.ctl.currentProps.menuUI = menuUI;
   }
 

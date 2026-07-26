@@ -48,8 +48,18 @@ export type OneputProps = {
     inner?: FlexParams;
   };
   menuUI?: {
-    header?: FlexParams;
-    footer?: FlexParams;
+    /**
+     * The header for the open menu that is controlled by the layout.
+     *
+     * Note there is a separate header controlled by the AppObject and the menu's it runs.
+     */
+    layoutHeader?: FlexParams;
+    /**
+     * The footer for the open menu that is controlled by the layout.
+     *
+     * Note there is a separate header controlled by the AppObject and the menu's it runs.
+     */
+    layoutFooter?: FlexParams;
   };
   innerUI?: FlexParams;
   outerUI?: FlexParams;

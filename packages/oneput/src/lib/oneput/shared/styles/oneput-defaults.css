@@ -432,13 +432,13 @@
     margin-bottom: 0.4em;
   }
 
-  .oneput__menu-header {
+  .oneput__menu-layout-header {
     background: var(--oneput-menu-header-background);
     box-shadow: var(--oneput-menu-header-box-shadow);
     clip-path: var(--oneput-menu-header-clip-path);
   }
 
-  .oneput__menu-footer {
+  .oneput__menu-layout-footer {
     background: var(--oneput-menu-footer-background);
     box-shadow: var(--oneput-menu-footer-box-shadow);
     clip-path: var(--oneput-menu-footer-clip-path);

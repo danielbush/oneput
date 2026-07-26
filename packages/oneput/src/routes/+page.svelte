@@ -68,8 +68,8 @@
           {menuOpen}
           menuItems={ui.menuItems1()}
           menuUI={{
-            header: ui.menuHeader1,
-            footer: ui.menuFooter1(data.appState.zap)
+            layoutHeader: ui.menuHeader1,
+            layoutFooter: ui.menuFooter1(data.appState.zap)
           }}
           innerUI={ui.inner1}
           outerUI={ui.outer1(data.appState.zap)}
@@ -576,7 +576,7 @@
       <Oneput
         menuOpen={true}
         menuItems={mockups.calendarMenuItems(2026, 6, 22)}
-        menuUI={{ header: mockups.calendarHeader(2026, 6) }}
+        menuUI={{ layoutHeader: mockups.calendarHeader(2026, 6) }}
         inputUI={{
           left: ui.inputLeft1,
           right: ui.inputRight1
@@ -597,7 +597,7 @@
       <Oneput
         menuOpen={true}
         menuItems={mockups.chatMenuItems()}
-        menuUI={{ header: mockups.chatHeader }}
+        menuUI={{ layoutHeader: mockups.chatHeader }}
         inputUI={{
           textArea: { rows: 2 },
           left: ui.inputLeft1,
@@ -622,8 +622,8 @@
     <section class="demo-example">
       <h2>Calendar (one widget item)</h2>
       <p>
-        Ordinary rows above/below a single month widget. Day cells use a tap helper (down/up +
-        slop) so scrolling the menu should not select a day — try on a phone.
+        Ordinary rows above/below a single month widget. Day cells use a tap helper (down/up + slop)
+        so scrolling the menu should not select a day — try on a phone.
         <code>$mod+j/k</code> still moves by menu item.
       </p>
       <Oneput
@@ -632,7 +632,7 @@
           richCalSelected = day;
           richCalInput = `2026-07-${String(day).padStart(2, '0')}`;
         })}
-        menuUI={{ header: mockups.calendarHeader(2026, 6) }}
+        menuUI={{ layoutHeader: mockups.calendarHeader(2026, 6) }}
         inputUI={{
           left: ui.inputLeft1,
           right: ui.inputRight1
@@ -645,8 +645,8 @@
     <section class="demo-example">
       <h2>Set time (one widget item)</h2>
       <p>
-        Single rich item: AM/PM toggle, hour ▲/▼, minutes ±1 flanking and ▲/▼ for ±15.
-        Parent owns 24h state and rebuilds the item on change.
+        Single rich item: AM/PM toggle, hour ▲/▼, minutes ±1 flanking and ▲/▼ for ±15. Parent owns
+        24h state and rebuilds the item on change.
       </p>
       <Oneput
         menuOpen={true}
@@ -654,7 +654,7 @@
           richTimeHour = next.hour;
           richTimeMinute = next.minute;
         })}
-        menuUI={{ header: mockups.setTimeHeader }}
+        menuUI={{ layoutHeader: mockups.setTimeHeader }}
         inputUI={{
           left: ui.inputLeft1,
           right: ui.inputRight1
@@ -673,7 +673,7 @@
       <Oneput
         menuOpen={true}
         menuItems={mockups.richChatMenuItems()}
-        menuUI={{ header: mockups.chatHeader }}
+        menuUI={{ layoutHeader: mockups.chatHeader }}
         inputUI={{
           textArea: { rows: 2 },
           left: ui.inputLeft1,
@@ -693,7 +693,7 @@
       <Oneput
         menuOpen={true}
         menuItems={mockups.richChatScrollMenuItems()}
-        menuUI={{ header: mockups.chatHeader }}
+        menuUI={{ layoutHeader: mockups.chatHeader }}
         inputUI={{
           textArea: { rows: 2 },
           left: ui.inputLeft1,

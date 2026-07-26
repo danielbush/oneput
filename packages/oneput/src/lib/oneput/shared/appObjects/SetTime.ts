@@ -66,7 +66,9 @@ export class SetTime implements AppObject {
 
   settings = {
     enableMenuOpenClose: false,
-    enableFilter: false
+    enableFilter: false,
+    enableInputElement: false,
+    focusInputOnStart: false
   } satisfies UIFlags;
 
   menu = () => {
@@ -105,7 +107,6 @@ export class SetTime implements AppObject {
     this.syncChrome();
     this.ctl.input.setPlaceholder('Selected time…');
     this.syncInput();
-    this.ctl.input.focusInput();
   }
 
   private result(): PickTimeResult {

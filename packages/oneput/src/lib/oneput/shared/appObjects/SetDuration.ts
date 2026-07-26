@@ -60,7 +60,9 @@ export class SetDuration implements AppObject {
 
   settings = {
     enableMenuOpenClose: false,
-    enableFilter: false
+    enableFilter: false,
+    enableInputElement: false,
+    focusInputOnStart: false
   } satisfies UIFlags;
 
   menu = () => ({
@@ -88,7 +90,6 @@ export class SetDuration implements AppObject {
     this.syncChrome();
     this.ctl.input.setPlaceholder('Duration (hh:mm)…');
     this.syncInput();
-    this.ctl.input.focusInput();
   }
 
   private result(): PickDurationResult {

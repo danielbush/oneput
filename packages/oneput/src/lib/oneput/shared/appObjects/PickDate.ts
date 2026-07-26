@@ -87,7 +87,9 @@ export class PickDate implements AppObject {
 
   settings = {
     enableMenuOpenClose: false,
-    enableFilter: false
+    enableFilter: false,
+    enableInputElement: false,
+    focusInputOnStart: false
   } satisfies UIFlags;
 
   menu = () => ({
@@ -112,7 +114,6 @@ export class PickDate implements AppObject {
     this.syncChrome();
     this.ctl.input.setPlaceholder('Selected date…');
     this.syncInput();
-    this.ctl.input.focusInput();
   }
 
   private result(): PickDateResult {

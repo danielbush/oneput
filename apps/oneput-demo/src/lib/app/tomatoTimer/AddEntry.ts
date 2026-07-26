@@ -7,9 +7,9 @@ import { SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
-import { TimeVal } from '@oneput/oneput/shared/values/TimeVal.js';
-import { DateTimeVal } from '@oneput/oneput/shared/values/DateTimeVal.js';
-import { DateVal } from '@oneput/oneput/shared/values/DateVal.js';
+import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
+import { DateTimeVal } from '@oneput/oneput/shared/lib/time/DateTimeVal.js';
+import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
 import { icons } from '../_icons.js';
 
 export class AddEntry implements AppObject {

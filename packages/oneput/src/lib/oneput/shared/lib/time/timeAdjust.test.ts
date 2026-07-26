@@ -9,7 +9,7 @@ import {
   to12Hour,
   to24Hour,
   toggleAmPm
-} from './setTimeMenuItem.js';
+} from './timeAdjust.js';
 
 describe('to12Hour / to24Hour', () => {
   test.each([

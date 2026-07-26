@@ -1,7 +1,7 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
 import { calendarMenuItem } from '../ui/menuItems/calendarMenuItem.js';
-import { DateVal } from '../values/DateVal.js';
+import { DateVal } from '../lib/time/DateVal.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
 export type PickDateResult = {

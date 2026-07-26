@@ -24,12 +24,12 @@ import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
 import {
   adjustHour24,
   adjustMinute,
-  setTimeMenuItem,
   stepQuarterClock,
   to12Hour,
   toggleAmPm,
   type SetTimeValue
-} from '$lib/oneput/shared/ui/menuItems/setTimeMenuItem.js';
+} from '$lib/oneput/shared/lib/time/timeAdjust.js';
+import { setTimeMenuItem } from '$lib/oneput/shared/ui/menuItems/setTimeMenuItem.js';
 import { icons } from './_state.svelte.js';
 
 // #region calendar

@@ -1,7 +1,7 @@
 import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { DateVal } from '@oneput/oneput/shared/values/DateVal.js';
-import { TimeVal } from '@oneput/oneput/shared/values/TimeVal.js';
+import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
+import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import {
   isPickDateResult,
   PickDate,

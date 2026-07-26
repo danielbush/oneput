@@ -3,12 +3,12 @@ import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
 import {
   adjustHour24,
   adjustMinute,
-  setTimeMenuItem,
   stepQuarterClock,
   to12Hour,
   toggleAmPm
-} from '../ui/menuItems/setTimeMenuItem.js';
-import { TimeVal } from '../values/TimeVal.js';
+} from '../lib/time/timeAdjust.js';
+import { TimeVal } from '../lib/time/TimeVal.js';
+import { setTimeMenuItem } from '../ui/menuItems/setTimeMenuItem.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
 export type PickTimeResult = {

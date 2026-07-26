@@ -25,8 +25,13 @@ export type SetTimeMenuItemParams = {
   };
   /** Hour step policy (clock wrap, duration clamp, …). */
   adjustHour: (hour: number, delta: number) => number;
-  /** Minute step policy (usually wrap 0–59). */
+  /** Minute ±1 policy (usually wrap 0–59). */
   adjustMinute: (minute: number, delta: number) => number;
+  /**
+   * Minute ▲/▼ (±15) policy — typically snap to 0/15/30/45 with hour carry.
+   * `direction` is `1` (next quarter) or `-1` (previous quarter).
+   */
+  stepQuarter: (hour: number, minute: number, direction: 1 | -1) => SetTimeValue;
   onChange?: (next: SetTimeValue) => void;
   /** List-row action (e.g. enter inner focus). Optional. */
   action?: () => void;
@@ -59,10 +64,59 @@ export function toggleAmPm(hour24: number): number {
   return adjustHour24(hour24, 12);
 }
 
-/** Duration helpers — used by {@link SetDuration}. */
+/**
+ * Next/previous quarter-hour minute (0, 15, 30, 45).
+ * Does not carry hours — see {@link stepQuarterClock} / {@link stepQuarterClamped}.
+ */
+export function stepMinuteQuarter(minute: number, direction: 1 | -1): number {
+  const m = ((minute % 60) + 60) % 60;
+  if (direction > 0) {
+    if (m < 15) return 15;
+    if (m < 30) return 30;
+    if (m < 45) return 45;
+    return 0;
+  }
+  if (m > 45) return 45;
+  if (m > 30) return 30;
+  if (m > 15) return 15;
+  if (m > 0) return 0;
+  return 45;
+}
 
-export function adjustHourDuration(hour: number, delta: number, maxHour = 99): number {
+/** Clock: snap ±15 to quarters; wrap hour at day boundary. */
+export function stepQuarterClock(hour: number, minute: number, direction: 1 | -1): SetTimeValue {
+  const nextMinute = stepMinuteQuarter(minute, direction);
+  if (direction > 0 && nextMinute === 0 && minute >= 45) {
+    return { hour: adjustHour24(hour, 1), minute: 0 };
+  }
+  if (direction < 0 && nextMinute === 45 && minute === 0) {
+    return { hour: adjustHour24(hour, -1), minute: 45 };
+  }
+  return { hour, minute: nextMinute };
+}
+
+/** Hour ±1 clamped to `[0, maxHour]` (elapsed duration, not clock wrap). */
+export function adjustHourClamped(hour: number, delta: number, maxHour = 100): number {
   return Math.min(maxHour, Math.max(0, hour + delta));
+}
+
+/** Snap ±15 to quarters; clamp hour at 0 / maxHour (no day wrap). */
+export function stepQuarterClamped(
+  hour: number,
+  minute: number,
+  direction: 1 | -1,
+  maxHour = 100
+): SetTimeValue {
+  const nextMinute = stepMinuteQuarter(minute, direction);
+  if (direction > 0 && nextMinute === 0 && minute >= 45) {
+    if (hour >= maxHour) return { hour: maxHour, minute: 45 };
+    return { hour: hour + 1, minute: 0 };
+  }
+  if (direction < 0 && nextMinute === 45 && minute === 0) {
+    if (hour <= 0) return { hour: 0, minute: 0 };
+    return { hour: hour - 1, minute: 45 };
+  }
+  return { hour, minute: nextMinute };
 }
 
 function pad2(n: number) {
@@ -87,8 +141,8 @@ function btn(
 
 /**
  * Compound menu item: optional am/pm | hh | mm controls.
- * Policy (12h clock vs duration, wrap/clamp) lives in the caller via
- * `hourLabel`, `amPm`, `adjustHour`, and `adjustMinute`.
+ * Policy (12h clock vs duration, wrap/clamp, quarter snap) lives in the caller
+ * via `hourLabel`, `amPm`, `adjustHour`, `adjustMinute`, and `stepQuarter`.
  *
  * Layout:
  * ```
@@ -119,12 +173,9 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
       type: 'vflex' as const,
       classes: ['oneput__set-time-col', 'oneput__set-time-col--ampm'],
       children: [
-        btn(
-          `${id}-ampm-toggle`,
-          ['oneput__set-time-ampm'],
-          () => amPm.onToggle(),
-          { textContent: amPm.label }
-        )
+        btn(`${id}-ampm-toggle`, ['oneput__set-time-ampm'], () => amPm.onToggle(), {
+          textContent: amPm.label
+        })
       ]
     });
   }
@@ -155,15 +206,17 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
       classes: ['oneput__set-time-col', 'oneput__set-time-col--mm'],
       children: [
         btn(`${id}-mm-plus15`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--up'], () =>
-          emit({ hour, minute: params.adjustMinute(minute, 15) })
+          emit(params.stepQuarter(hour, minute, 1))
         ),
         {
           id: `${id}-mm-row`,
           type: 'hflex' as const,
           classes: ['oneput__set-time-mm-row'],
           children: [
-            btn(`${id}-mm-minus1`, ['oneput__set-time-step'], () =>
-              emit({ hour, minute: params.adjustMinute(minute, -1) }),
+            btn(
+              `${id}-mm-minus1`,
+              ['oneput__set-time-step'],
+              () => emit({ hour, minute: params.adjustMinute(minute, -1) }),
               { textContent: '−' }
             ),
             {
@@ -172,14 +225,16 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
               classes: ['oneput__set-time-value'],
               textContent: minuteLabel
             },
-            btn(`${id}-mm-plus1`, ['oneput__set-time-step'], () =>
-              emit({ hour, minute: params.adjustMinute(minute, 1) }),
+            btn(
+              `${id}-mm-plus1`,
+              ['oneput__set-time-step'],
+              () => emit({ hour, minute: params.adjustMinute(minute, 1) }),
               { textContent: '+' }
             )
           ]
         },
         btn(`${id}-mm-minus15`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--down'], () =>
-          emit({ hour, minute: params.adjustMinute(minute, -15) })
+          emit(params.stepQuarter(hour, minute, -1))
         )
       ]
     }

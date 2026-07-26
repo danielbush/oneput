@@ -25,6 +25,7 @@ import {
   adjustHour24,
   adjustMinute,
   setTimeMenuItem,
+  stepQuarterClock,
   to12Hour,
   toggleAmPm,
   type SetTimeValue
@@ -340,6 +341,7 @@ export const richSetTimeMenuItems = (
       },
       adjustHour: adjustHour24,
       adjustMinute,
+      stepQuarter: stepQuarterClock,
       onChange
     }),
     {

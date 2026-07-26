@@ -1,9 +1,10 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
 import {
-  adjustHourDuration,
+  adjustHourClamped,
   adjustMinute,
-  setTimeMenuItem
+  setTimeMenuItem,
+  stepQuarterClamped
 } from '../ui/menuItems/setTimeMenuItem.js';
 import { TimeVal } from '../values/TimeVal.js';
 
@@ -30,26 +31,23 @@ function pad2(n: number) {
 export type SetDurationParams = {
   /** Initial duration; defaults to 30 minutes. */
   duration?: TimeVal;
-  /** Max hours (inclusive). Defaults to 99. */
-  maxHour?: number;
 };
 
 /**
- * Pick an elapsed duration via {@link setTimeMenuItem} (no AM/PM; hours clamp).
+ * Pick an elapsed duration via {@link setTimeMenuItem} (no AM/PM; hours clamp at 100).
  * Exit-with-result is advertised via `exitWithResult` for host layouts (tick);
  * cancel remains bare exit / goBack.
  */
 export class SetDuration implements AppObject {
   static create(ctl: Controller, params: SetDurationParams = {}) {
     const initial = params.duration ?? TimeVal.create(0, 30);
-    return new SetDuration(ctl, initial.hour, initial.minute, params.maxHour ?? 99);
+    return new SetDuration(ctl, initial.hour, initial.minute);
   }
 
   private constructor(
     private ctl: Controller,
     private hour: number,
-    private minute: number,
-    private maxHour: number
+    private minute: number
   ) {}
 
   layout = {
@@ -74,8 +72,9 @@ export class SetDuration implements AppObject {
         hour: this.hour,
         minute: this.minute,
         hourLabel: String(this.hour),
-        adjustHour: (hour, delta) => adjustHourDuration(hour, delta, this.maxHour),
+        adjustHour: adjustHourClamped,
         adjustMinute,
+        stepQuarter: stepQuarterClamped,
         onChange: ({ hour, minute }) => {
           this.hour = hour;
           this.minute = minute;

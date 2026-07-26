@@ -4,6 +4,7 @@ import {
   adjustHour24,
   adjustMinute,
   setTimeMenuItem,
+  stepQuarterClock,
   to12Hour,
   toggleAmPm
 } from '../ui/menuItems/setTimeMenuItem.js';
@@ -92,6 +93,7 @@ export class SetTime implements AppObject {
           },
           adjustHour: adjustHour24,
           adjustMinute,
+          stepQuarter: stepQuarterClock,
           onChange: ({ hour, minute }) => {
             this.hour = hour;
             this.minute = minute;

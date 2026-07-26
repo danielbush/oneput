@@ -76,10 +76,7 @@ export class Layout implements UILayout<LayoutSettings> {
       children.push(
         b.fchild({
           tag: 'button',
-          classes: [
-            'oneput__icon-button',
-            ...(enabled ? [] : ['oneput__icon-disabled'])
-          ],
+          classes: ['oneput__icon-button', ...(enabled ? [] : ['oneput__icon-disabled'])],
           icon: icons.Check,
           attr: {
             type: 'button',
@@ -145,8 +142,8 @@ export class Layout implements UILayout<LayoutSettings> {
 
   get menuUI() {
     return {
-      header: hflex({
-        id: 'menu-header',
+      layoutHeader: hflex({
+        id: 'layout-menu-header',
         children: (b) => [
           this.backAction
             ? b.fchild({
@@ -165,8 +162,8 @@ export class Layout implements UILayout<LayoutSettings> {
       }),
       ...(this.settings.menuFooter
         ? {
-            footer: hflex({
-              id: 'menu-footer',
+            layoutFooter: hflex({
+              id: 'layout-menu-footer',
               children: this.settings.menuFooter
             })
           }

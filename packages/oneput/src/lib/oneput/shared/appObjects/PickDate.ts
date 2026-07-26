@@ -97,6 +97,14 @@ export class PickDate implements AppObject {
   } satisfies UIFlags;
 
   actions = {
+    ACCEPT: {
+      action: () => this.ctl.app.exit(this.result()),
+      binding: {
+        bindings: ['Enter'],
+        description: 'Accept selected date',
+        when: { menuOpen: true }
+      }
+    },
     PREV_MONTH: {
       action: () => this.shiftMonth(-1),
       binding: {

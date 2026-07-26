@@ -20,7 +20,9 @@ export class AddEntry implements AppObject {
         SetTimeIcon: icons.Clock,
         Right: icons.ChevronRight,
         PreviousMonth: icons.ChevronLeft,
-        NextMonth: icons.ChevronRight
+        NextMonth: icons.ChevronRight,
+        PreviousYear: icons.ChevronsLeft,
+        NextYear: icons.ChevronsRight
       },
       date:
         session.startTime === undefined ? undefined : DateVal.createFromUnixTime(session.startTime),

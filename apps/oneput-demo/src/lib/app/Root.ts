@@ -30,7 +30,9 @@ export class Root implements AppObject {
         PickDate.create(ctl, {
           icons: {
             PreviousMonth: icons.ChevronLeft,
-            NextMonth: icons.ChevronRight
+            NextMonth: icons.ChevronRight,
+            PreviousYear: icons.ChevronsLeft,
+            NextYear: icons.ChevronsRight
           }
         }),
       ElizaChat: () => ElizaChat.create(ctl)

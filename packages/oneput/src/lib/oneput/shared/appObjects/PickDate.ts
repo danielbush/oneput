@@ -1,6 +1,6 @@
 import type { Controller } from '../../controllers/controller.js';
 import { hflex } from '../../lib/builder.js';
-import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '../../types.js';
 import { DateVal } from '../lib/time/DateVal.js';
 import { calendarMenuItem } from '../ui/menuItems/calendarMenuItem.js';
 
@@ -45,6 +45,8 @@ function isoDate(year: number, month: number, day: number) {
 export type PickDateIcons = {
   PreviousMonth: string;
   NextMonth: string;
+  PreviousYear: string;
+  NextYear: string;
 };
 
 export type PickDateParams = {
@@ -55,9 +57,10 @@ export type PickDateParams = {
 
 /**
  * Pick a date via a reusable {@link calendarMenuItem} rich row.
- * Month navigation + Today live in the pinned menu footer; month/year is the
- * menu header title. Exit-with-result is advertised via `exitWithResult` for
- * host layouts (tick); cancel remains bare exit / goBack.
+ * Month/year navigation + Today live in the pinned menu footer
+ * (`< << Today >> >`); month/year is the menu header title.
+ * Exit-with-result is advertised via `exitWithResult` for host layouts (tick);
+ * cancel remains bare exit / goBack.
  */
 export class PickDate implements AppObject {
   static create(ctl: Controller, params: PickDateParams) {
@@ -93,6 +96,73 @@ export class PickDate implements AppObject {
     focusInputOnStart: false
   } satisfies UIFlags;
 
+  actions = {
+    PREV_MONTH: {
+      action: () => this.shiftMonth(-1),
+      binding: {
+        bindings: ['$mod+['],
+        description: 'Previous month',
+        when: { menuOpen: true }
+      }
+    },
+    NEXT_MONTH: {
+      action: () => this.shiftMonth(1),
+      binding: {
+        bindings: ['$mod+]'],
+        description: 'Next month',
+        when: { menuOpen: true }
+      }
+    },
+    PREV_YEAR: {
+      action: () => this.shiftYear(-1),
+      binding: {
+        bindings: ['Alt+BracketLeft'],
+        description: 'Previous year',
+        when: { menuOpen: true }
+      }
+    },
+    NEXT_YEAR: {
+      action: () => this.shiftYear(1),
+      binding: {
+        bindings: ['Alt+BracketRight'],
+        description: 'Next year',
+        when: { menuOpen: true }
+      }
+    },
+    DAY_LEFT: {
+      action: () => this.shiftDay(-1),
+      binding: {
+        bindings: ['$mod+Shift+h'],
+        description: 'Previous day',
+        when: { menuOpen: true }
+      }
+    },
+    DAY_RIGHT: {
+      action: () => this.shiftDay(1),
+      binding: {
+        bindings: ['$mod+Shift+l'],
+        description: 'Next day',
+        when: { menuOpen: true }
+      }
+    },
+    DAY_UP: {
+      action: () => this.shiftDay(-7),
+      binding: {
+        bindings: ['$mod+Shift+k'],
+        description: 'Previous week',
+        when: { menuOpen: true }
+      }
+    },
+    DAY_DOWN: {
+      action: () => this.shiftDay(7),
+      binding: {
+        bindings: ['$mod+Shift+j'],
+        description: 'Next week',
+        when: { menuOpen: true }
+      }
+    }
+  } satisfies AppActions;
+
   menu = () => ({
     id: 'pick-date',
     focusBehaviour: 'first' as const,
@@ -109,6 +179,7 @@ export class PickDate implements AppObject {
         }
       })
     ],
+    // `< << Today >> >` — month outside, year (double chevron) within
     footer: hflex({
       id: 'pick-date-footer',
       children: (b) => [
@@ -125,12 +196,34 @@ export class PickDate implements AppObject {
         }),
         b.fchild({
           tag: 'button',
+          classes: ['oneput__icon-button'],
+          icon: this.icons.PreviousYear,
+          attr: {
+            type: 'button',
+            title: 'Previous year',
+            'aria-label': 'Previous year',
+            onclick: () => this.shiftYear(-1)
+          }
+        }),
+        b.fchild({
+          tag: 'button',
           classes: ['oneput__secondary-button'],
           textContent: 'Today',
           attr: {
             type: 'button',
             title: 'Today',
             onclick: () => this.goToday()
+          }
+        }),
+        b.fchild({
+          tag: 'button',
+          classes: ['oneput__icon-button'],
+          icon: this.icons.NextYear,
+          attr: {
+            type: 'button',
+            title: 'Next year',
+            'aria-label': 'Next year',
+            onclick: () => this.shiftYear(1)
           }
         }),
         b.fchild({
@@ -172,14 +265,33 @@ export class PickDate implements AppObject {
     });
   }
 
+  private refresh() {
+    this.syncInput();
+    this.syncChrome();
+    this.ctl.menu.invalidate();
+  }
+
   private shiftMonth(delta: number) {
     const d = new Date(this.year, this.month + delta, 1);
     this.year = d.getFullYear();
     this.month = d.getMonth();
     this.clampDay();
-    this.syncInput();
-    this.syncChrome();
-    this.ctl.menu.invalidate();
+    this.refresh();
+  }
+
+  private shiftYear(delta: number) {
+    this.year += delta;
+    this.clampDay();
+    this.refresh();
+  }
+
+  /** Move selection by calendar days (crosses month/year). */
+  private shiftDay(delta: number) {
+    const d = new Date(this.year, this.month, this.day + delta);
+    this.year = d.getFullYear();
+    this.month = d.getMonth();
+    this.day = d.getDate();
+    this.refresh();
   }
 
   private goToday() {
@@ -187,9 +299,7 @@ export class PickDate implements AppObject {
     this.year = now.getFullYear();
     this.month = now.getMonth();
     this.day = now.getDate();
-    this.syncInput();
-    this.syncChrome();
-    this.ctl.menu.invalidate();
+    this.refresh();
   }
 
   private clampDay() {

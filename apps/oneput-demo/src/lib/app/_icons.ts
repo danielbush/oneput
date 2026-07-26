@@ -8,6 +8,8 @@ export const iconData = {
   Keyboard: lu.Keyboard,
   ChevronRight: lu.ChevronRight,
   ChevronLeft: lu.ChevronLeft,
+  ChevronsLeft: lu.ChevronsLeft,
+  ChevronsRight: lu.ChevronsRight,
   Check: lu.Check,
   SquareFunction: lu.SquareFunction,
   ArrowLeft: lu.ArrowLeft,

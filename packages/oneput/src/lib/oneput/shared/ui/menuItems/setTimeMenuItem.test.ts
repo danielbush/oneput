@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   adjustHour24,
+  adjustHourDuration,
   adjustMinute,
   to12Hour,
   to24Hour,
@@ -25,6 +26,15 @@ describe('adjustHour24', () => {
   test('wrap', () => {
     expect(adjustHour24(23, 1)).toBe(0);
     expect(adjustHour24(0, -1)).toBe(23);
+  });
+});
+
+describe('adjustHourDuration', () => {
+  test('clamp', () => {
+    expect(adjustHourDuration(0, -1)).toBe(0);
+    expect(adjustHourDuration(99, 1)).toBe(99);
+    expect(adjustHourDuration(5, 1, 10)).toBe(6);
+    expect(adjustHourDuration(10, 1, 10)).toBe(10);
   });
 });
 

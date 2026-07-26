@@ -1,6 +1,12 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { AppLayoutParams, AppObject, UIFlags } from '../../types.js';
-import { setTimeMenuItem } from '../ui/menuItems/setTimeMenuItem.js';
+import {
+  adjustHour24,
+  adjustMinute,
+  setTimeMenuItem,
+  to12Hour,
+  toggleAmPm
+} from '../ui/menuItems/setTimeMenuItem.js';
 import { TimeVal } from '../values/TimeVal.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
@@ -32,7 +38,7 @@ export type SetTimeParams = {
 };
 
 /**
- * Pick a time via a reusable {@link setTimeMenuItem} rich row.
+ * Pick a clock time via {@link setTimeMenuItem} (12h + AM/PM, wrap 24h).
  * Exit-with-result is advertised via `exitWithResult` for host layouts (tick);
  * cancel remains bare exit / goBack.
  */
@@ -63,23 +69,37 @@ export class SetTime implements AppObject {
     enableFilter: false
   } satisfies UIFlags;
 
-  menu = () => ({
-    id: 'set-time',
-    focusBehaviour: 'first' as const,
-    items: [
-      setTimeMenuItem({
-        id: 'set-time-widget',
-        hour: this.hour,
-        minute: this.minute,
-        onChange: ({ hour, minute }) => {
-          this.hour = hour;
-          this.minute = minute;
-          this.syncInput();
-          this.ctl.menu.invalidate();
-        }
-      })
-    ]
-  });
+  menu = () => {
+    const { hour12, isPM } = to12Hour(this.hour);
+    return {
+      id: 'set-time',
+      focusBehaviour: 'first' as const,
+      items: [
+        setTimeMenuItem({
+          id: 'set-time-widget',
+          hour: this.hour,
+          minute: this.minute,
+          hourLabel: String(hour12),
+          amPm: {
+            label: isPM ? 'PM' : 'AM',
+            onToggle: () => {
+              this.hour = toggleAmPm(this.hour);
+              this.syncInput();
+              this.ctl.menu.invalidate();
+            }
+          },
+          adjustHour: adjustHour24,
+          adjustMinute,
+          onChange: ({ hour, minute }) => {
+            this.hour = hour;
+            this.minute = minute;
+            this.syncInput();
+            this.ctl.menu.invalidate();
+          }
+        })
+      ]
+    };
+  };
 
   onStart() {
     this.syncChrome();

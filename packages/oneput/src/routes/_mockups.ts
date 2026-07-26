@@ -22,7 +22,11 @@
 import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
 import {
+  adjustHour24,
+  adjustMinute,
   setTimeMenuItem,
+  to12Hour,
+  toggleAmPm,
   type SetTimeValue
 } from '$lib/oneput/shared/ui/menuItems/setTimeMenuItem.js';
 import { icons } from './_state.svelte.js';
@@ -305,41 +309,52 @@ export const setTimeHeader: FlexParams = {
 
 /**
  * Ordinary rows above/below a single set-time widget (am/pm | hh | mm).
+ * Uses clock policy (12h + AM/PM, wrap 24h) like {@link SetTime}.
  */
 export const richSetTimeMenuItems = (
   hour: number,
   minute: number,
   onChange?: (next: SetTimeValue) => void
-): MenuItemAny[] => [
-  {
-    id: 'set-time-above',
-    type: 'hflex',
-    children: [
-      {
-        id: 'set-time-above-label',
-        type: 'fchild',
-        textContent: 'Above the time widget'
-      }
-    ]
-  },
-  setTimeMenuItem({
-    id: 'rich-set-time-widget',
-    hour,
-    minute,
-    onChange
-  }),
-  {
-    id: 'set-time-below',
-    type: 'hflex',
-    children: [
-      {
-        id: 'set-time-below-label',
-        type: 'fchild',
-        textContent: 'Below the time widget'
-      }
-    ]
-  }
-];
+): MenuItemAny[] => {
+  const { hour12, isPM } = to12Hour(hour);
+  return [
+    {
+      id: 'set-time-above',
+      type: 'hflex',
+      children: [
+        {
+          id: 'set-time-above-label',
+          type: 'fchild',
+          textContent: 'Above the time widget'
+        }
+      ]
+    },
+    setTimeMenuItem({
+      id: 'rich-set-time-widget',
+      hour,
+      minute,
+      hourLabel: String(hour12),
+      amPm: {
+        label: isPM ? 'PM' : 'AM',
+        onToggle: () => onChange?.({ hour: toggleAmPm(hour), minute })
+      },
+      adjustHour: adjustHour24,
+      adjustMinute,
+      onChange
+    }),
+    {
+      id: 'set-time-below',
+      type: 'hflex',
+      children: [
+        {
+          id: 'set-time-below-label',
+          type: 'fchild',
+          textContent: 'Below the time widget'
+        }
+      ]
+    }
+  ];
+};
 
 // #endregion
 

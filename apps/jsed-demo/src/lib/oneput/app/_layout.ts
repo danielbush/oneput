@@ -162,15 +162,7 @@ export class Layout implements UILayout<LayoutSettings> {
           }),
           this.headerRight(b)
         ]
-      }),
-      ...(this.settings.menuFooter
-        ? {
-            layoutFooter: hflex({
-              id: 'menu-footer',
-              children: this.settings.menuFooter
-            })
-          }
-        : {})
+      })
     };
   }
 

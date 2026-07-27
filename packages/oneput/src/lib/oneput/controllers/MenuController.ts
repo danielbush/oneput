@@ -478,8 +478,14 @@ export class MenuController {
       case 'last':
         this.focusLastMenuItem();
         return;
-      case 'none':
+      case 'none': {
+        // Don't reshuffle focus, but never leave it on an ignored/disabled row
+        // (e.g. chat transcript above Back/Clear).
+        if (!this.currentMenu.getFocusable(this.currentMenu.focusedMenuItemIndex)) {
+          this.focusFirstMenuItem();
+        }
         return;
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { Controller } from './controller.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
@@ -16,66 +16,120 @@ const inputChangePayload = {
 };
 
 describe('MenuController', () => {
-  it('keeps menu focus behaviour when filtering redisplays the current menu', () => {
-    // arrange
-    const ctl = Controller.createNull({ menuOpen: true, inputValue: 'a' });
-    ctl.app.run({ onStart: () => {} });
-    ctl.menu.setDefaultFilter(WordFilter.create().filter);
-    ctl.menu.setMenu({
-      id: 'main',
-      focusBehaviour: 'first',
-      items: [item('apple', 'Apple'), item('apricot', 'Apricot')]
-    });
-    ctl.menu.focusMenuItemById('apricot');
-    ctl.menu.doMenuAction();
+  describe('focusBehaviour', () => {
+    test('(first) filtering / redisplay - keeps menu focus behaviour when filtering redisplays the current menu', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true, inputValue: 'a' });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setDefaultFilter(WordFilter.create().filter);
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [item('apple', 'Apple'), item('apricot', 'Apricot')]
+      });
+      ctl.menu.focusMenuItemById('apricot');
+      ctl.menu.doMenuAction();
 
-    // act
-    ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
+      // act
+      ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
 
-    // assert
-    expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual([
-      'apple',
-      'apricot'
-    ]);
-    expect(ctl.currentProps.menuItemFocus).toEqual([0, true]);
-  });
-
-  it('uses ambient focus behaviour when the current menu has none', () => {
-    // arrange
-    const ctl = Controller.createNull({ menuOpen: true, inputValue: '' });
-    ctl.app.run({ onStart: () => {} });
-    ctl.menu.setDefaultFilter(WordFilter.create().filter);
-    ctl.menu.setFocusBehaviour('last');
-    ctl.menu.setMenu({
-      id: 'main',
-      items: [item('apple', 'Apple'), item('apricot', 'Apricot')]
+      // assert
+      expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual([
+        'apple',
+        'apricot'
+      ]);
+      expect(ctl.currentProps.menuItemFocus).toEqual([0, true]);
     });
 
-    // act
-    ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
+    test('(last) filtering / filtered out - uses ambient focus behaviour when the current menu has none', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true, inputValue: '' });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setDefaultFilter(WordFilter.create().filter);
+      ctl.menu.setFocusBehaviour('last');
+      ctl.menu.setMenu({
+        id: 'main',
+        items: [item('apple', 'Apple'), item('apricot', 'Apricot')]
+      });
 
-    // assert
-    expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
-  });
+      // act
+      ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
 
-  it('focuses the first filter match instead of a pinned visible item', () => {
-    // arrange
-    const ctl = Controller.createNull({ menuOpen: true });
-    ctl.app.run({ onStart: () => {} });
-    ctl.currentProps.inputValue = 'app';
-    ctl.menu.setDefaultFilter(WordFilter.create().filter);
-    ctl.menu.setMenu({
-      id: 'main',
-      focusBehaviour: 'first',
-      items: [item('up', '..', false), item('apple', 'Apple'), item('banana', 'Banana')]
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
     });
 
-    // act
-    ctl.events.emit({ type: 'input-change', payload: { ...inputChangePayload, value: 'app' } });
+    test('(first) filtering / pinning - focuses the first filter match instead of a pinned visible item', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.currentProps.inputValue = 'app';
+      ctl.menu.setDefaultFilter(WordFilter.create().filter);
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [item('up', '..', false), item('apple', 'Apple'), item('banana', 'Banana')]
+      });
 
-    // assert
-    expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['up', 'apple']);
-    expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
+      // act
+      ctl.events.emit({ type: 'input-change', payload: { ...inputChangePayload, value: 'app' } });
+
+      // assert
+      expect(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id)).toEqual(['up', 'apple']);
+      expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
+    });
+
+    test('(none) ignored items / leading - moves off a leading ignored item', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.openMenu();
+
+      // act
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'none',
+        items: [
+          { ...item('chat', 'Chat'), ignored: true },
+          item('back', 'Back'),
+          item('clear', 'Clear')
+        ]
+      });
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
+    });
+
+    test('(none) ignored items - keeps focus on a focusable item', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.openMenu();
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'none',
+        items: [
+          { ...item('chat', 'Chat'), ignored: true },
+          item('back', 'Back'),
+          item('clear', 'Clear')
+        ]
+      });
+      ctl.menu.focusMenuItemById('clear');
+
+      // act
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'none',
+        items: [
+          { ...item('chat', 'Chat'), ignored: true },
+          item('back', 'Back'),
+          item('clear', 'Clear')
+        ]
+      });
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([2, true]);
+    });
   });
 
   it('uses generative mode instead of the base menu', () => {

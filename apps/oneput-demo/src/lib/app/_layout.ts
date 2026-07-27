@@ -48,7 +48,7 @@ export class Layout implements UILayout<LayoutSettings> {
 
   private get exitAction() {
     // Close the menu (not exit the AppObject). Exit remains an AppObject
-    // decision (e.g. onBack / goBack default pop / exitWithResult).
+    // decision (e.g. onBack / goBack default pop / submitAndExit).
     if (this.ctl.app.flags.enableMenuOpenClose) {
       return this.ctl.menu.closeMenu;
     }
@@ -79,14 +79,14 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   /**
-   * Done from `exitWithResult` on the inner input right (not menu header).
+   * Done from `submitAndExit` on the inner input right (not menu header).
    */
   private inputRightDone() {
-    const exitWithResult = this.settings.exitWithResult;
-    if (!exitWithResult) {
+    const submitAndExit = this.settings.submitAndExit;
+    if (!submitAndExit) {
       return;
     }
-    const enabled = exitWithResult.enabled !== false;
+    const enabled = submitAndExit.enabled !== false;
     return hflex({
       id: 'layout-input-right-done',
       children: (b) => [
@@ -99,7 +99,7 @@ export class Layout implements UILayout<LayoutSettings> {
             title: 'Done',
             'aria-label': 'Done',
             disabled: !enabled,
-            ...(enabled ? { onclick: () => exitWithResult.run() } : {})
+            ...(enabled ? { onclick: () => submitAndExit.run() } : {})
           }
         })
       ]

@@ -72,18 +72,48 @@ export class ElizaChat implements AppObject {
 
   onStart() {
     this.turns = [{ role: 'agent', text: this.eliza.getInitial() }];
+    this.ctl.input.setPlaceholder('Talk to ELIZA…');
+    this.ctl.input.setInputValue('');
+    this.ctl.input.setSubmitHandler((text) => {
+      void this.send(text);
+    });
+    this.syncSendChrome();
+    this.ctl.input.focusInput();
+  }
+
+  /**
+   * Keep layout `submit` / `reject` in sync with draft + busy. `ui.update`
+   * rebuilds layout `inputUI`, so re-apply the textarea afterward.
+   */
+  onInputChange = ({ value }: { value: string }) => {
+    this.syncSendChrome(value);
+  };
+
+  private syncSendChrome(value = this.ctl.input.getInputValue()) {
+    const enabled = Boolean(value.trim()) && !this.busy;
+    this.ctl.ui.update({
+      params: {
+        submit: {
+          run: () => {
+            void this.send(this.ctl.input.getInputValue());
+          },
+          enabled
+        },
+        reject: {
+          run: () => {
+            void this.ctl.input.clearInput();
+            this.syncSendChrome('');
+          },
+          enabled
+        }
+      } satisfies AppLayoutParams
+    });
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
         textArea: { rows: 2 }
       } satisfies OneputProps['inputUI'];
     });
-    this.ctl.input.setPlaceholder('Talk to ELIZA…');
-    this.ctl.input.setInputValue('');
-    this.ctl.input.setSubmitHandler((text) => {
-      void this.send(text);
-    });
-    this.ctl.input.focusInput();
   }
 
   private async clear() {
@@ -107,6 +137,7 @@ export class ElizaChat implements AppObject {
     this.busy = true;
     this.turns = [...this.turns, { role: 'user', text: trimmed }];
     this.ctl.input.setInputValue('');
+    this.syncSendChrome('');
     this.ctl.menu.invalidate();
 
     try {
@@ -118,6 +149,7 @@ export class ElizaChat implements AppObject {
       }
     } finally {
       this.busy = false;
+      this.syncSendChrome();
       this.ctl.menu.invalidate();
     }
   }

@@ -8,7 +8,6 @@ import type { KeyBindingMap } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
 import type { AppActions } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import { GlobalFilter } from '../appObjects/GlobalFilter.js';
 import { OneputAction, type OneputActionId } from './OneputAction.js';
 
 type OneputCatalogEntries = ActionCatalogEntries<OneputActionId>;
@@ -95,19 +94,6 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
           textContent: 'Hide Oneput',
           action
         })
-    },
-
-    [OneputAction.GLOBAL_FILTER]: {
-      description: 'Global filter',
-      action: () => {
-        // If you don't supply an icon mapping for GlobalFilterInputIcon you'll
-        // see the "Missing Icon" icon.
-        GlobalFilter.create(ctl, { icons: { InputIcon: 'GlobalFilterInputIcon' } }).onStart();
-      },
-      binding: {
-        bindings: ['$mod+e'],
-        when: { menuOpen: true }
-      }
     },
 
     ...getMenuEntries(ctl),

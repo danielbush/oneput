@@ -30,16 +30,19 @@ describe('OneputCatalog', () => {
     const ctl = Controller.createNull();
     const catalog = OneputCatalog.create(ctl).filter([
       OneputAction.FOCUS_INPUT,
-      OneputAction.GLOBAL_FILTER
+      OneputAction.TOGGLE_SELECTION
     ]);
 
     // act
     const bindings = catalog.getBindings();
 
     // assert
-    expect(Object.keys(bindings)).toEqual([OneputAction.FOCUS_INPUT, OneputAction.GLOBAL_FILTER]);
+    expect(Object.keys(bindings)).toEqual([
+      OneputAction.FOCUS_INPUT,
+      OneputAction.TOGGLE_SELECTION
+    ]);
     expect(bindings[OneputAction.FOCUS_INPUT].bindings).toEqual([`$mod+'`, `Control+'`]);
-    expect(bindings[OneputAction.GLOBAL_FILTER].when).toEqual({ menuOpen: true });
+    expect(bindings[OneputAction.TOGGLE_SELECTION].when).toEqual({ menuOpen: false });
     expect(bindings[OneputAction.FOCUS_INPUT].action).toBeDefined();
   });
 

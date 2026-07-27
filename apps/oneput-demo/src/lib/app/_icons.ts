@@ -44,7 +44,6 @@ export const iconData = {
   Folder: lu.Folder,
   File: lu.File,
   // Bindings we should provide for existing appObjects...
-  GlobalFilterInputIcon: lu.Globe,
   CloseNotification: lu.X
 };
 

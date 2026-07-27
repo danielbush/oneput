@@ -9,7 +9,6 @@ export const iconData = {
   Check: lu.Check,
   Command: lu.Command,
   File: lu.Files,
-  GlobalFilterInputIcon: lu.Globe,
   CloseNotification: lu.X,
   Pencil: lu.Pencil,
   Anchor: lu.Anchor,

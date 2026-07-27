@@ -63,17 +63,33 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   /**
-   * Right header: optional exit-with-result (tick) then close-menu (X).
-   * Tick only when `exitWithResult` was set via `ctl.ui.update`.
+   * Menu header right: close-menu (X) when enableMenuOpenClose.
    */
   private headerRight(b: FlexChildBuilder) {
-    const exitWithResult = this.settings.exitWithResult;
     const exitAction = this.exitAction;
-    const children: ReturnType<FlexChildBuilder['fchild']>[] = [];
+    if (!exitAction) {
+      return b.spacer();
+    }
+    return b.fchild({
+      tag: 'button',
+      classes: ['oneput__icon-button'],
+      attr: { type: 'button', title: 'Close menu', onclick: exitAction },
+      icon: icons.X
+    });
+  }
 
-    if (exitWithResult) {
-      const enabled = exitWithResult.enabled !== false;
-      children.push(
+  /**
+   * Done from `exitWithResult` on the inner input right (not menu header).
+   */
+  private inputRightDone() {
+    const exitWithResult = this.settings.exitWithResult;
+    if (!exitWithResult) {
+      return;
+    }
+    const enabled = exitWithResult.enabled !== false;
+    return hflex({
+      id: 'layout-input-right-done',
+      children: (b) => [
         b.fchild({
           tag: 'button',
           classes: ['oneput__icon-button', ...(enabled ? [] : ['oneput__icon-disabled'])],
@@ -86,34 +102,13 @@ export class Layout implements UILayout<LayoutSettings> {
             ...(enabled ? { onclick: () => exitWithResult.run() } : {})
           }
         })
-      );
-    }
-
-    if (exitAction) {
-      children.push(
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__icon-button'],
-          attr: { type: 'button', title: 'Close menu', onclick: exitAction },
-          icon: icons.X
-        })
-      );
-    }
-
-    if (children.length === 0) {
-      return b.spacer();
-    }
-    if (children.length === 1) {
-      return children[0];
-    }
-    return hflex({
-      id: 'menu-header-right',
-      children: () => children
+      ]
     });
   }
 
   get inputUI() {
     return {
+      right: this.inputRightDone(),
       outerRight: hflex({
         id: 'root-input-right',
         children: (b) => [

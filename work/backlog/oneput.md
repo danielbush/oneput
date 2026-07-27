@@ -76,12 +76,21 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - EditDocumentUI in @2br/web - `menu-open-change`
 - feat: disable individual menu items
   - eg pasteBefore, pasteAfter, pasteIn
-- feat: filter for global items
+- [?] feat: filter for global items
+  - COMMENT
+    - this could be implemented with what we have currently?
+    - take any example where you think you need "global" for some definition of global, ask yourself, how would we implement it with existing constructs?  (make sure to include mobile which doesn't have key bindings)
+  - COMMENT
+    - items that belong to the AppObject but we don't want to render all of them; I don't think vscode does this; it shows everything
+    - surface deep items
+    - surface global items
+      - the ability to jump to something from anywhere
+      - but do we want to limit it in some situations?
   - example?
   - scenario: you have nested menus, you only see the outer entry but you want to filter on the items within as well as the ones showing in the current menu
   - scenario: you have a lot of items, not all necessarily in a menu; you want to bring them up when typing
-    - COMMENT: seems a bit weak
-  - COMMENT: This could just be an extension of menuItemsFn; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
+  - COMMENT: like vscode
+  - COMMENT: This could just be an extension of generative; possibly we trigger it or we use a default one that just does it; it could be configured to filter on global but show only local entries
   - COMMENT: the issue is how to define "global items"
 - feat: implement web components
 - feat: notifications should have an optional left icon

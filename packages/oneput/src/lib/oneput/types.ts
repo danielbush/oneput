@@ -306,13 +306,13 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
 };
 
 /**
- * Signal that the current AppObject can exit carrying a result.
+ * Signal that the current AppObject can submit and exit carrying a result.
  *
- * Sent via `ctl.ui.update({ params: { exitWithResult } })`. Layouts may surface
+ * Sent via `ctl.ui.update({ params: { submitAndExit } })`. Layouts may surface
  * this (e.g. Done on `inputUI.right`); they are not required to. Cancel /
  * discard remains a bare `ctl.app.exit()`.
  */
-export type ExitWithResult = {
+export type SubmitAndExit = {
   /** Typically `() => ctl.app.exit(taggedResult)`. */
   run: () => void;
   /** When false, hosts should show the affordance disabled. Defaults to true. */
@@ -326,7 +326,7 @@ export type ExitWithResult = {
  * Hosts still pass a full {@link Controller}. Shared AppObject `create` /
  * constructors take `SharedCtl` so they cannot call layout-direct APIs
  * (`setInputUI`, `setOuterUI`, `replaceMenuUI`, …). Prefer layout params /
- * flags (e.g. {@link ExitWithResult}) and `menu()` / `setMenu` instead.
+ * flags (e.g. {@link SubmitAndExit}) and `menu()` / `setMenu` instead.
  *
  * See `docs/CONCEPTS.md` (Composition / Signals vs direct UI).
  */
@@ -371,9 +371,9 @@ export type AppLayoutParams = {
    */
   menuTitle?: string;
   /**
-   * Optional “exit with result” signal for host layouts (e.g. Done on input right).
+   * Optional submit-and-exit signal for host layouts (e.g. Done on input right).
    */
-  exitWithResult?: ExitWithResult;
+  submitAndExit?: SubmitAndExit;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

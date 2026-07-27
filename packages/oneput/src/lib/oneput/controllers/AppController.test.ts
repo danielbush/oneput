@@ -136,14 +136,14 @@ describe('AppController', () => {
         onStart: () => {},
         onResume: () => {}
       };
-      const child: AppObject<unknown, { menuTitle: string; exitWithResult?: { run: () => void } }> =
+      const child: AppObject<unknown, { menuTitle: string; submitAndExit?: { run: () => void } }> =
         {
           layout: { params: { menuTitle: 'Child' } },
           onStart: () => {
             ctl.ui.update({
               params: {
                 menuTitle: 'Child',
-                exitWithResult: { run: () => {} }
+                submitAndExit: { run: () => {} }
               }
             });
           }
@@ -151,7 +151,7 @@ describe('AppController', () => {
 
       ctl.app.run(parent);
       ctl.app.run(child);
-      expect(getSettings().exitWithResult).toBeTruthy();
+      expect(getSettings().submitAndExit).toBeTruthy();
 
       // act
       ctl.app.exit();

@@ -54,7 +54,7 @@ To create and compose reusable "components" including 3rd party components we ha
   - 3rd party providers should provide RICH_MENU_ITEM's, shared AppObjects, and any business logic formatting functions as 3 separate things maximising consumer options
 - create a shared AppObject (`SharedCtl` in `create` / ctor)
   - particularly useful for 3rd party but may also be good for internally reusable AppObject's
-  - limited access to layout to avoid creating chaos; instead can send signal to the host UI like "exitWithResult" etc
+  - limited access to layout to avoid creating chaos; instead can send signal to the host UI like "submitAndExit" etc
   - may incorporate RICH_MENU_ITEM's to achieve a desired result
 - create an AppObject
   - AppObject's are created for the Oneput application; they have full access to the UI/layout because it is also owned by the Oneput application
@@ -64,10 +64,10 @@ To create and compose reusable "components" including 3rd party components we ha
 - TODO
   - what we haven't covered is a 3rd party shared AppObject that might want to set or influence 3rd party chrome
 
-### Signals vs direct UI (`exitWithResult` and friends)
+### Signals vs direct UI (`submitAndExit` and friends)
 
 Shared AppObjects should not assume where host chrome lives. They advertise
-intent with layout params (e.g. `exitWithResult`: “I can accept and exit with a
+intent with layout params (e.g. `submitAndExit`: “I can accept and exit with a
 result”). The host layout decides how to surface that — a common choice is a
 submit/Done control on the inner right of the input (`inputUI.right`), even when
 the input field itself is disabled.
@@ -78,17 +78,17 @@ constructor is typed narrower so it cannot call layout-direct APIs like
 `setInputUI`.
 
 Host-owned AppObjects retain full `setInputUI`. If the layout also maps
-`exitWithResult` onto `inputUI.right`, those can clash (`ui.update` replaces
+`submitAndExit` onto `inputUI.right`, those can clash (`ui.update` replaces
 `inputUI` from the layout; `setInputUI` patches it). That is an acceptable
 first-party footgun:
 
-> Host layouts may surface `exitWithResult` (e.g. on `inputUI.right`). If your
+> Host layouts may surface `submitAndExit` (e.g. on `inputUI.right`). If your
 > own AppObjects also call `setInputUI`, those can clash — coordinate them.
 > Shared AppObjects use `SharedCtl` and cannot set input UI, so they don’t have
 > this risk.
 
 “Coordinate” can mean composing in the layout (e.g. adornments from the
-AppObject plus Done from `exitWithResult` in one `right` flex), not only
+AppObject plus Done from `submitAndExit` in one `right` flex), not only
 “use one or the other.”
 
 ## RICH_MENU_ITEM's

@@ -58,7 +58,7 @@ export type PickDateParams = {
  * Pick a date via a reusable {@link calendarMenuItem} rich row.
  * Month/year navigation + Today live in the pinned menu footer
  * (`< << Today >> >`); month/year is the menu header title.
- * Exit-with-result is advertised via `exitWithResult` for host layouts;
+ * Accept is advertised via `submitAndExit` for host layouts;
  * cancel remains bare exit / goBack.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
@@ -267,7 +267,7 @@ export class PickDate implements AppObject {
     this.ctl.ui.update({
       params: {
         menuTitle: `${MONTH_LABELS[this.month]} ${this.year}`,
-        exitWithResult: {
+        submitAndExit: {
           run: () => this.ctl.app.exit(this.result())
         }
       } satisfies AppLayoutParams

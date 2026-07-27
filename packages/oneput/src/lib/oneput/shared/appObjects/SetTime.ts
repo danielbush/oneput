@@ -39,7 +39,7 @@ export type SetTimeParams = {
 
 /**
  * Pick a clock time via {@link setTimeMenuItem} (12h + AM/PM, wrap 24h).
- * Exit-with-result is advertised via `exitWithResult` for host layouts;
+ * Accept is advertised via `submitAndExit` for host layouts;
  * cancel remains bare exit / goBack.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
@@ -215,7 +215,7 @@ export class SetTime implements AppObject {
     this.ctl.ui.update({
       params: {
         menuTitle: 'Set a time',
-        exitWithResult: {
+        submitAndExit: {
           run: () => this.ctl.app.exit(this.result())
         }
       } satisfies AppLayoutParams

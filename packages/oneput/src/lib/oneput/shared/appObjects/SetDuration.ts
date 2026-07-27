@@ -34,7 +34,7 @@ export type SetDurationParams = {
 
 /**
  * Pick an elapsed duration via {@link setTimeMenuItem} (no AM/PM; hours clamp at 100).
- * Exit-with-result is advertised via `exitWithResult` for host layouts;
+ * Accept is advertised via `submitAndExit` for host layouts;
  * cancel remains bare exit / goBack.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
@@ -184,7 +184,7 @@ export class SetDuration implements AppObject {
     this.ctl.ui.update({
       params: {
         menuTitle: 'Set duration',
-        exitWithResult: {
+        submitAndExit: {
           run: () => this.ctl.app.exit(this.result())
         }
       } satisfies AppLayoutParams

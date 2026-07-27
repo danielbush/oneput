@@ -82,36 +82,71 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   /**
-   * Done from `submitAndExit` on the inner input right (not menu header).
+   * Input-right affordances from layout params: `submit`, `reject`, then
+   * `submitAndExit` (Done). Prefer not setting submit/reject together with
+   * submitAndExit from the same AppObject.
    */
-  private inputRightDone() {
-    const submitAndExit = this.settings.submitAndExit;
-    if (!submitAndExit) {
+  private inputRight() {
+    const { submit, reject, submitAndExit } = this.settings;
+    if (!submit && !reject && !submitAndExit) {
       return;
     }
-    const enabled = submitAndExit.enabled !== false;
     return hflex({
-      id: 'layout-input-right-done',
-      children: (b) => [
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__icon-button', ...(enabled ? [] : ['oneput__icon-disabled'])],
-          icon: icons.Check,
-          attr: {
-            type: 'button',
+      id: 'layout-input-right',
+      children: (b) => {
+        const children: FChildParams[] = [];
+        const push = (
+          affordance: { run: () => void; enabled?: boolean },
+          opts: { title: string; icon: string; classes?: string[] }
+        ) => {
+          const enabled = affordance.enabled !== false;
+          children.push(
+            b.fchild({
+              tag: 'button',
+              classes: [
+                'oneput__icon-button',
+                ...(opts.classes ?? []),
+                ...(enabled ? [] : ['oneput__icon-disabled'])
+              ],
+              icon: opts.icon,
+              attr: {
+                type: 'button',
+                title: opts.title,
+                'aria-label': opts.title,
+                disabled: !enabled,
+                ...(enabled
+                  ? {
+                      onclick: (e: Event) => {
+                        e.preventDefault();
+                        affordance.run();
+                      }
+                    }
+                  : {})
+              }
+            })
+          );
+        };
+        if (submit) {
+          push(submit, { title: 'Submit', icon: icons.Check });
+        }
+        if (reject) {
+          push(reject, { title: 'Reject', icon: icons.X });
+        }
+        if (submitAndExit) {
+          push(submitAndExit, {
             title: 'Done',
-            'aria-label': 'Done',
-            disabled: !enabled,
-            ...(enabled ? { onclick: () => submitAndExit.run() } : {})
-          }
-        })
-      ]
+            icon: icons.ArrowUp,
+            classes: ['oneput__icon-submit-and-exit']
+          });
+        }
+        return children;
+      }
     });
   }
 
   get inputUI() {
     return {
-      right: this.inputRightDone(),
+      right: this.inputRight(),
       outerRight: hflex({
         id: 'root-input-right',
         children: (b) => [

@@ -57,12 +57,15 @@ tasks:
     desc: |
       Run unit tests; but avoid triggering browser tests.
       See vite.config.js
+    summary: |
+      task oneput:test -- src/lib/oneput/controllers/AppController.test.ts
+      task oneput:test -- -t "enableModal"
     cmds:
-      - ./node_modules/.bin/vitest run --project=server
+      - ./node_modules/.bin/vitest run --project=server {{.CLI_ARGS}}
   test:coverage:
     desc: Like `test` but prints coverage at the end
     cmds:
-      - ./node_modules/.bin/vitest run --project=server --coverage
+      - ./node_modules/.bin/vitest run --project=server --coverage {{.CLI_ARGS}}
   test:browser:
     desc: |
       Test using browser mode, defaults to watch mode

@@ -95,6 +95,10 @@ export class MenuController {
     this.ctl.events.on('input-change', () => {
       this.ctl.menu.setDisplayed();
     });
+    // Seeded from currentProps.menuOpen so createNull({ menuOpen: true }) can
+    // setDisplayed without an explicit openMenu(). openMenu/closeMenu still
+    // flip this ahead of the async menuOpen prop (FLASH_OF_NEXT_MENU).
+    this.isMenuOpenImmediate = Boolean(this.ctl.currentProps.menuOpen);
   }
 
   // #region menu open/close

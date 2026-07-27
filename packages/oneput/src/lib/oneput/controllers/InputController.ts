@@ -74,6 +74,7 @@ export class InputController {
     if (!inputElement) {
       return;
     }
+    inputElement.disabled = this.inputDisabled;
     const handleBeforeInput = () => {
       this.beforeInputSnapshot = {
         value: inputElement.value,
@@ -294,13 +295,26 @@ export class InputController {
   }
 
   /**
+   * Authoritative enable/disable for the input — not just `inputElement.disabled`.
+   *
+   * Needed so modal flag snapshots can read {@link enableInputElement} when the
+   * element is not mounted yet, and so a disable set before attach still applies
+   * when {@link handleInputElementChange} binds the element.
+   */
+  private inputDisabled = false;
+
+  /**
    * Prefer ctl.ui.update({ flags: { enableInputElement: true } }) instead.
    */
   _enableInputElement(on: boolean = true) {
-    if (!this.inputElement) {
-      return;
+    this.inputDisabled = !on;
+    if (this.inputElement) {
+      this.inputElement.disabled = this.inputDisabled;
     }
-    this.inputElement.disabled = !on;
+  }
+
+  get enableInputElement() {
+    return !this.inputDisabled;
   }
 
   /**

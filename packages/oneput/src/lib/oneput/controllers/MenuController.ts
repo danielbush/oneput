@@ -305,6 +305,10 @@ export class MenuController {
     this.inputChannel.filterEnabled = on;
   }
 
+  get enableFilter() {
+    return this.inputChannel.filterEnabled;
+  }
+
   // #endregion
 
   // #region generative menu items
@@ -314,6 +318,10 @@ export class MenuController {
    */
   _enableGenerative(on: boolean = true) {
     this.inputChannel.generativeEnabled = on;
+  }
+
+  get enableGenerative() {
+    return this.inputChannel.generativeEnabled;
   }
 
   setGenerativeAsync(
@@ -498,6 +506,10 @@ export class MenuController {
   _enableMenuActions(on: boolean = true) {
     this.disableActions = !on;
     this.ctl.currentProps.menuDisabled = !on;
+  }
+
+  get enableMenuActions() {
+    return !this.disableActions;
   }
 
   /**

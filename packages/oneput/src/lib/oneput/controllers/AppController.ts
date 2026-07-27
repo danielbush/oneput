@@ -53,6 +53,12 @@ export class AppController {
 
   // UI settings
   private disableGoBack = false;
+  /**
+   * Modal-tied flags captured on the first `enableModal: true`, restored on
+   * `enableModal: false`. Prevents Confirm/Alert/BindingsEditor from wiping
+   * AppObject settings like `enableFilter: false`.
+   */
+  private flagsBeforeModal?: UIFlags;
   private focusInputOnStart = true;
   private focusInputOnMenuOpen = true;
   private clearInputAfterAction = true;
@@ -90,41 +96,99 @@ export class AppController {
 
   // #region ui settings
 
-  get flags() {
+  get flags(): UIFlags {
     return {
       enableGoBack: !this.disableGoBack,
-      enableMenuOpenClose: this.ctl.menu.enableMenuOpenClose
-      // TODO: add other flags?
+      enableMenuOpenClose: this.ctl.menu.enableMenuOpenClose,
+      enableKeys: this.ctl.keys.enableKeys,
+      enableMenuActions: this.ctl.menu.enableMenuActions,
+      enableGenerative: this.ctl.menu.enableGenerative,
+      enableFilter: this.ctl.menu.enableFilter,
+      enableInputElement: this.ctl.input.enableInputElement
     };
   }
 
   /**
+   * Flags that should be turned off when modal is present.
+   */
+  private applyModalFlags(flags: {
+    enableGoBack: boolean;
+    enableMenuOpenClose: boolean;
+    enableKeys: boolean;
+    enableMenuActions: boolean;
+    enableGenerative: boolean;
+    enableFilter: boolean;
+    enableInputElement: boolean;
+  }) {
+    this.ctl.app._enableGoBack(flags.enableGoBack);
+    this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose);
+    this.ctl.keys._enableKeys(flags.enableKeys);
+    this.ctl.menu._enableMenuActions(flags.enableMenuActions);
+    this.ctl.menu._enableGenerative(flags.enableGenerative);
+    this.ctl.menu._enableFilter(flags.enableFilter);
+    this.ctl.input._enableInputElement(flags.enableInputElement);
+  }
+
+  /**
    * Apply only the given flags.
+   *
+   * `enableModal: true` snapshots the current modal-tied flags (once) then
+   * disables them unless explicitly overridden (e.g. Confirm keeps keys on).
+   * `enableModal: false` restores the snapshot so AppObject settings survive.
    */
   applyFlags(flags?: Partial<UIFlags>) {
     if (!flags) {
       return;
     }
-    if ('enableGoBack' in flags || 'enableModal' in flags) {
-      this.ctl.app._enableGoBack(flags.enableGoBack ?? !flags.enableModal);
-    }
-    if ('enableMenuOpenClose' in flags || 'enableModal' in flags) {
-      this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose ?? !flags.enableModal);
-    }
-    if ('enableKeys' in flags || 'enableModal' in flags) {
-      this.ctl.keys._enableKeys(flags.enableKeys ?? !flags.enableModal);
-    }
-    if ('enableMenuActions' in flags || 'enableModal' in flags) {
-      this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? !flags.enableModal);
-    }
-    if ('enableGenerative' in flags || 'enableModal' in flags) {
-      this.ctl.menu._enableGenerative(flags.enableGenerative ?? !flags.enableModal);
-    }
-    if ('enableFilter' in flags || 'enableModal' in flags) {
-      this.ctl.menu._enableFilter(flags.enableFilter ?? !flags.enableModal);
-    }
-    if ('enableInputElement' in flags || 'enableModal' in flags) {
-      this.ctl.input._enableInputElement(flags.enableInputElement ?? !flags.enableModal);
+    if ('enableModal' in flags) {
+      if (flags.enableModal) {
+        if (!this.flagsBeforeModal) {
+          this.flagsBeforeModal = this.flags;
+        }
+        this.applyModalFlags({
+          enableGoBack: flags.enableGoBack ?? false,
+          enableMenuOpenClose: flags.enableMenuOpenClose ?? false,
+          enableKeys: flags.enableKeys ?? false,
+          enableMenuActions: flags.enableMenuActions ?? false,
+          enableGenerative: flags.enableGenerative ?? false,
+          enableFilter: flags.enableFilter ?? false,
+          enableInputElement: flags.enableInputElement ?? false
+        });
+      } else {
+        const restore = this.flagsBeforeModal;
+        this.flagsBeforeModal = undefined;
+        this.applyModalFlags({
+          enableGoBack: flags.enableGoBack ?? restore?.enableGoBack ?? true,
+          enableMenuOpenClose: flags.enableMenuOpenClose ?? restore?.enableMenuOpenClose ?? true,
+          enableKeys: flags.enableKeys ?? restore?.enableKeys ?? true,
+          enableMenuActions: flags.enableMenuActions ?? restore?.enableMenuActions ?? true,
+          enableGenerative: flags.enableGenerative ?? restore?.enableGenerative ?? true,
+          enableFilter: flags.enableFilter ?? restore?.enableFilter ?? true,
+          enableInputElement: flags.enableInputElement ?? restore?.enableInputElement ?? true
+        });
+      }
+    } else {
+      if ('enableGoBack' in flags) {
+        this.ctl.app._enableGoBack(flags.enableGoBack ?? true);
+      }
+      if ('enableMenuOpenClose' in flags) {
+        this.ctl.menu._enableMenuOpenClose(flags.enableMenuOpenClose ?? true);
+      }
+      if ('enableKeys' in flags) {
+        this.ctl.keys._enableKeys(flags.enableKeys ?? true);
+      }
+      if ('enableMenuActions' in flags) {
+        this.ctl.menu._enableMenuActions(flags.enableMenuActions ?? true);
+      }
+      if ('enableGenerative' in flags) {
+        this.ctl.menu._enableGenerative(flags.enableGenerative ?? true);
+      }
+      if ('enableFilter' in flags) {
+        this.ctl.menu._enableFilter(flags.enableFilter ?? true);
+      }
+      if ('enableInputElement' in flags) {
+        this.ctl.input._enableInputElement(flags.enableInputElement ?? true);
+      }
     }
     if ('focusInputOnStart' in flags) {
       this.focusInputOnStart = flags.focusInputOnStart ?? true;
@@ -305,6 +369,7 @@ export class AppController {
    * Used for resetting state when a new appObject is run.
    */
   reset(settings?: UIFlags) {
+    this.flagsBeforeModal = undefined;
     this.resetFlags(settings);
 
     // Events

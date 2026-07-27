@@ -87,6 +87,10 @@ export class KeysController {
     this.keysDisabled = !on;
   }
 
+  get enableKeys() {
+    return !this.keysDisabled;
+  }
+
   /**
    * Stores default bindings and applies them immediately.
    *

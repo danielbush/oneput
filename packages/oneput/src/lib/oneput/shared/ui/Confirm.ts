@@ -30,6 +30,7 @@ export class Confirm {
   }
 
   private start = () => {
+    // enableModal snapshots/restores AppObject flags in AppController.
     this.ctl.ui.update({
       flags: {
         enableModal: true,

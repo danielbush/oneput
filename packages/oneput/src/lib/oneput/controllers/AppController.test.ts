@@ -540,4 +540,24 @@ describe('AppController', () => {
       expect(sources).toEqual(['keyboard']);
     });
   });
+
+  describe('enableModal', () => {
+    it('restores AppObject enableFilter after modal closes', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        settings: { enableFilter: false, enableMenuOpenClose: false },
+        onStart: () => {}
+      });
+
+      // act — same flag pattern as Confirm / Alert
+      ctl.ui.update({ flags: { enableModal: true, enableKeys: true } });
+      ctl.ui.update({ flags: { enableModal: false } });
+
+      // assert
+      expect(ctl.app.flags.enableFilter).toBe(false);
+      expect(ctl.app.flags.enableMenuOpenClose).toBe(false);
+      expect(ctl.app.flags.enableKeys).toBe(true);
+    });
+  });
 });

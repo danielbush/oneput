@@ -1,9 +1,9 @@
 import type { AppLayoutParams, AppObject, Controller, OneputProps, UIFlags } from '@oneput/oneput';
+import { hflex } from '@oneput/oneput';
 import {
   chatSessionItem,
   type ChatSessionTurn
 } from '@oneput/oneput/shared/ui/menuItems/chatSessionItem.js';
-import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { AsyncEliza } from '$lib/eliza/AsyncEliza.js';
 import { icons } from './_icons.js';
 
@@ -15,6 +15,7 @@ const SESSION_ID = 'eliza-chat-session';
  * — rendered with {@link chatSessionItem}.
  *
  * ELIZA is wrapped in {@link AsyncEliza} so replies are awaited (simulated latency).
+ * Exit via layout back; Clear chat lives in the menu footer.
  */
 export class ElizaChat implements AppObject {
   static create(ctl: Controller) {
@@ -50,24 +51,29 @@ export class ElizaChat implements AppObject {
         busy: this.busy,
         jumpIcon: icons.ChevronDown,
         jumpTitle: 'Jump to latest'
-      }),
-      stdMenuItem({
-        id: 'eliza-back',
-        textContent: 'Back',
-        left: (b) => [b.icon(icons.ArrowLeft)],
-        action: () => {
-          this.ctl.app.exit();
-        }
-      }),
-      stdMenuItem({
-        id: 'eliza-clear',
-        textContent: 'Clear chat',
-        left: (b) => [b.icon(icons.CircleX)],
-        action: () => {
-          void this.clear();
-        }
       })
-    ]
+    ],
+    footer: hflex({
+      id: 'eliza-footer',
+      children: (b) => [
+        // FChild is icon XOR text — compose both as children of a button hflex.
+        b.hflex({
+          tag: 'button',
+          classes: ['oneput__secondary-button'],
+          attr: {
+            type: 'button',
+            title: 'Clear chat',
+            onclick: () => {
+              void this.clear();
+            }
+          },
+          children: (bb) => [
+            bb.icon(icons.CircleX),
+            bb.fchild({ textContent: 'Clear chat' })
+          ]
+        })
+      ]
+    })
   });
 
   onStart() {

@@ -72,7 +72,7 @@ Shared AppObjects should not assume where host chrome lives. They advertise
 intent with layout params:
 
 - `submitAndExit` — accept AppObject result and pop (e.g. Done on PickDate)
-- `submit` / `reject` — in-flow accept/dismiss (e.g. key capture in BindingsEditor)
+- `submit` / `reject` — in-flow accept/dismiss (e.g. key capture in BindingsEditor; Eliza send / clear draft)
 - exit without a result — not a layout param
   - AppObject calls bare `ctl.app.exit()` (no payload)
   - typically from `onBack` / goBack, or `onMenuOpenChange` when the menu closes

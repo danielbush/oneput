@@ -1,6 +1,10 @@
+import type { AppController } from './controllers/AppController.js';
 import type { Controller } from './controllers/controller.js';
-import type { ActionBinding } from './lib/bindings.js';
+import type { InputController } from './controllers/InputController.js';
 import type { KeysController } from './controllers/KeysController.js';
+import type { MenuController } from './controllers/MenuController.js';
+import type { UIController } from './controllers/UIController.js';
+import type { ActionBinding } from './lib/bindings.js';
 
 declare global {
   interface Window {
@@ -305,7 +309,7 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
  * Signal that the current AppObject can exit carrying a result.
  *
  * Sent via `ctl.ui.update({ params: { exitWithResult } })`. Layouts may surface
- * this (e.g. a tick in the menu header); they are not required to. Cancel /
+ * this (e.g. Done on `inputUI.right`); they are not required to. Cancel /
  * discard remains a bare `ctl.app.exit()`.
  */
 export type ExitWithResult = {
@@ -313,6 +317,40 @@ export type ExitWithResult = {
   run: () => void;
   /** When false, hosts should show the affordance disabled. Defaults to true. */
   enabled?: boolean;
+};
+
+/**
+ * Narrow controller surface for reusable / 3rd-party AppObjects (type-only
+ * allowlist).
+ *
+ * Hosts still pass a full {@link Controller}. Shared AppObject `create` /
+ * constructors take `SharedCtl` so they cannot call layout-direct APIs
+ * (`setInputUI`, `setOuterUI`, `replaceMenuUI`, …). Prefer layout params /
+ * flags (e.g. {@link ExitWithResult}) and `menu()` / `setMenu` instead.
+ *
+ * See `docs/CONCEPTS.md` (Composition / Signals vs direct UI).
+ */
+export type SharedCtl = {
+  app: Pick<
+    AppController,
+    'exit' | 'closeAndExit' | 'goBack' | 'setOnBack' | 'canGoBack' | 'run' | 'flags'
+  >;
+  menu: Pick<MenuController, 'setMenu' | 'invalidate' | 'isMenuOpen' | 'openMenu' | 'closeMenu'>;
+  input: Pick<
+    InputController,
+    | 'setInputValue'
+    | 'getInputValue'
+    | 'clearInput'
+    | 'setPlaceholder'
+    | 'getPlaceholder'
+    | 'setSubmitHandler'
+    | 'setSubmitHandlerOnce'
+    | 'resetSubmitHandler'
+    | 'enable'
+    | 'focus'
+  >;
+  /** Params / flags only — no direct `OneputProps` chrome writers. */
+  ui: Pick<UIController, 'update'>;
 };
 
 /**
@@ -333,7 +371,7 @@ export type AppLayoutParams = {
    */
   menuTitle?: string;
   /**
-   * Optional “exit with result” signal for host layouts (e.g. menu header tick).
+   * Optional “exit with result” signal for host layouts (e.g. Done on input right).
    */
   exitWithResult?: ExitWithResult;
 };

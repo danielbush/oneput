@@ -1,5 +1,4 @@
-import type { Controller } from '../../controllers/controller.js';
-import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, SharedCtl, UIFlags } from '../../types.js';
 import {
   adjustHourClamped,
   adjustMinute,
@@ -35,17 +34,19 @@ export type SetDurationParams = {
 
 /**
  * Pick an elapsed duration via {@link setTimeMenuItem} (no AM/PM; hours clamp at 100).
- * Exit-with-result is advertised via `exitWithResult` for host layouts (tick);
+ * Exit-with-result is advertised via `exitWithResult` for host layouts;
  * cancel remains bare exit / goBack.
+ *
+ * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
 export class SetDuration implements AppObject {
-  static create(ctl: Controller, params: SetDurationParams = {}) {
+  static create(ctl: SharedCtl, params: SetDurationParams = {}) {
     const initial = params.duration ?? TimeVal.create(0, 30);
     return new SetDuration(ctl, initial.hour, initial.minute);
   }
 
   private constructor(
-    private ctl: Controller,
+    private ctl: SharedCtl,
     private hour: number,
     private minute: number
   ) {}

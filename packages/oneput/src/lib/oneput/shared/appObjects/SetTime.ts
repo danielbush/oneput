@@ -1,5 +1,4 @@
-import type { Controller } from '../../controllers/controller.js';
-import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, SharedCtl, UIFlags } from '../../types.js';
 import {
   adjustHour24,
   adjustMinute,
@@ -40,11 +39,13 @@ export type SetTimeParams = {
 
 /**
  * Pick a clock time via {@link setTimeMenuItem} (12h + AM/PM, wrap 24h).
- * Exit-with-result is advertised via `exitWithResult` for host layouts (tick);
+ * Exit-with-result is advertised via `exitWithResult` for host layouts;
  * cancel remains bare exit / goBack.
+ *
+ * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
 export class SetTime implements AppObject {
-  static create(ctl: Controller, params: SetTimeParams = {}) {
+  static create(ctl: SharedCtl, params: SetTimeParams = {}) {
     const now = new Date();
     return new SetTime(
       ctl,
@@ -54,7 +55,7 @@ export class SetTime implements AppObject {
   }
 
   private constructor(
-    private ctl: Controller,
+    private ctl: SharedCtl,
     private hour: number,
     private minute: number
   ) {}

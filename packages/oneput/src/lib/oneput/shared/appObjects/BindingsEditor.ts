@@ -17,6 +17,9 @@ import type { BindingsStore } from '../bindings/BindingsStore.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
+ *
+ * Still uses `setInputUI` (and keys/notify) — keep full Controller until those
+ * move off direct UI writes; then switch the ctor to SharedCtl.
  */
 export class BindingsEditor implements AppObject {
   static create(

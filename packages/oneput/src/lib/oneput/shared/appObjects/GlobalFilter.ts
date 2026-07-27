@@ -3,6 +3,7 @@ import type { Controller } from '../../controllers/controller.js';
 import type { OneputProps, AppObject } from '../../types.js';
 
 // TODO: implement a global items / filter mechanism.
+// Still uses setInputUI — keep full Controller until that moves to a signal / host layout.
 
 export class GlobalFilter implements AppObject {
   static create(ctl: Controller, params: { icons: { InputIcon: string } }) {

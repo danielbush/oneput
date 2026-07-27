@@ -1,8 +1,7 @@
-import type { Controller } from '../../controllers/controller.js';
-import { hflex } from '../../lib/builder.js';
-import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '../../types.js';
+import type { AppActions, AppLayoutParams, AppObject, SharedCtl, UIFlags } from '../../types.js';
 import { DateVal } from '../lib/time/DateVal.js';
 import { calendarMenuItem } from '../ui/menuItems/calendarMenuItem.js';
+import { hflex } from '../../lib/builder.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
 export type PickDateResult = {
@@ -59,11 +58,13 @@ export type PickDateParams = {
  * Pick a date via a reusable {@link calendarMenuItem} rich row.
  * Month/year navigation + Today live in the pinned menu footer
  * (`< << Today >> >`); month/year is the menu header title.
- * Exit-with-result is advertised via `exitWithResult` for host layouts (tick);
+ * Exit-with-result is advertised via `exitWithResult` for host layouts;
  * cancel remains bare exit / goBack.
+ *
+ * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
 export class PickDate implements AppObject {
-  static create(ctl: Controller, params: PickDateParams) {
+  static create(ctl: SharedCtl, params: PickDateParams) {
     const initial = params.date;
     const now = new Date();
     return new PickDate(
@@ -76,7 +77,7 @@ export class PickDate implements AppObject {
   }
 
   private constructor(
-    private ctl: Controller,
+    private ctl: SharedCtl,
     private icons: PickDateIcons,
     private year: number,
     private month: number,

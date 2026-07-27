@@ -111,7 +111,7 @@ export class ElizaChat implements AppObject {
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
-        textArea: { rows: 2 }
+        textArea: { rows: 3 }
       } satisfies OneputProps['inputUI'];
     });
   }

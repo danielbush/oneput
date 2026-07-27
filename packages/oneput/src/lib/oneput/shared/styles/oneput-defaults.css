@@ -949,6 +949,20 @@
     background-color: rgb(0 128 0 / 1);
   }
 
+  /* submitAndExit: white glyph on green (same idea as filled accept). */
+  .oneput__icon-button.oneput__icon-submit-and-exit {
+    background-color: rgb(0 128 0 / 0.8);
+    color: white;
+  }
+
+  .oneput__icon-button.oneput__icon-submit-and-exit svg {
+    stroke-width: 2.75;
+  }
+
+  .oneput__icon-button.oneput__icon-submit-and-exit:hover {
+    background-color: rgb(0 128 0 / 1);
+  }
+
   .oneput__icon-button.oneput__icon-cancel {
     background-color: rgb(128 0 0 / 0.8);
     color: white;
@@ -959,8 +973,8 @@
   }
 
   .oneput__icon-button.oneput__icon-disabled {
-    color: rgb(228 228 228);
-    background-color: rgb(188 188 188);
+    color: rgb(255 255 255);
+    background-color: rgb(208 208 208);
   }
 
 }

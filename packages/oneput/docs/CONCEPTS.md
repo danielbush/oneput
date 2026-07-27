@@ -47,11 +47,13 @@ SUMMARY: we start with who "owns" what. We have the host application which autho
 
 To create and compose reusable "components" including 3rd party components we have several strategies:
 
+- 3rd party providers an can call signals (which the hosting ui should handle eg `submitAndExit`, etc.) and set flags (`enableGoBack` etc) and use AppObject lifecycle (imperatively or declaratively: onMenuOpenClose, onBack etc). These don't give much control over the ui but they do handle very common situations.
 - create a RICH_MENU_ITEM
   - for bespoke ui that you want to show in the menu area which acts as the central display area of oneput
   - eg a calendar
   - it might be that the host application builds its own AppObject or even a shared AppObject (`SharedCtl`) around a 3rd party RICH_MENU_ITEM giving it the most freedom to do things
   - 3rd party providers should provide RICH_MENU_ITEM's, shared AppObjects, and any business logic formatting functions as 3 separate things maximising consumer options
+- signal
 - create a shared AppObject (`SharedCtl` in `create` / ctor)
   - particularly useful for 3rd party but may also be good for internally reusable AppObject's
   - limited access to layout to avoid creating chaos; instead can send signal to the host UI like "submitAndExit" etc
@@ -62,30 +64,38 @@ To create and compose reusable "components" including 3rd party components we ha
   - examples are the "menu item count" widget, or a widget that shows the time
   - the host application
 - TODO
-  - what we haven't covered is a 3rd party shared AppObject that might want to set or influence 3rd party chrome
+  - what we haven't covered is a 3rd party shared AppObject that might want to set or influence 3rd party chrome when its active
 
-### Signals vs direct UI (`submitAndExit` and friends)
+## Signals vs direct UI (`submitAndExit`, `submit`, `reject`)
 
 Shared AppObjects should not assume where host chrome lives. They advertise
-intent with layout params (e.g. `submitAndExit`: “I can accept and exit with a
-result”). The host layout decides how to surface that — a common choice is a
-submit/Done control on the inner right of the input (`inputUI.right`), even when
-the input field itself is disabled.
+intent with layout params:
+
+- `submitAndExit` — accept AppObject result and pop (e.g. Done on PickDate)
+- `submit` / `reject` — in-flow accept/dismiss (e.g. key capture in BindingsEditor)
+- exit without a result — not a layout param
+  - AppObject calls bare `ctl.app.exit()` (no payload)
+  - typically from `onBack` / goBack, or `onMenuOpenChange` when the menu closes
+  - opt in with flags `enableGoBack` and `enableMenuOpenClose`
+  - host layout surfaces ← and X from those flags
+
+The host layout decides how to surface these — commonly on `inputUI.right`, even
+when the input field itself is disabled.
 
 `SharedCtl` (type-only allowlist) is what reusable / 3rd-party AppObjects take in
 `create` / the constructor — hosts still pass the real `Controller`; the
 constructor is typed narrower so it cannot call layout-direct APIs like
 `setInputUI`.
 
-Host-owned AppObjects retain full `setInputUI`. If the layout also maps
-`submitAndExit` onto `inputUI.right`, those can clash (`ui.update` replaces
-`inputUI` from the layout; `setInputUI` patches it). That is an acceptable
-first-party footgun:
+Host-owned AppObjects retain full `setInputUI`. If the layout also maps these
+signals onto `inputUI.right`, those can clash (`ui.update` replaces `inputUI`
+from the layout; `setInputUI` patches it). That is an acceptable first-party
+footgun:
 
-> Host layouts may surface `submitAndExit` (e.g. on `inputUI.right`). If your
-> own AppObjects also call `setInputUI`, those can clash — coordinate them.
-> Shared AppObjects use `SharedCtl` and cannot set input UI, so they don’t have
-> this risk.
+> Host layouts may surface `submitAndExit` / `submit` / `reject` (e.g. on
+> `inputUI.right`). If your own AppObjects also call `setInputUI`, those can
+> clash — coordinate them. Shared AppObjects use `SharedCtl` and cannot set
+> input UI, so they don’t have this risk.
 
 “Coordinate” can mean composing in the layout (e.g. adornments from the
 AppObject plus Done from `submitAndExit` in one `right` flex), not only

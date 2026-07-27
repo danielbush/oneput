@@ -11,6 +11,7 @@ export const iconData = {
   ChevronsLeft: lu.ChevronsLeft,
   ChevronsRight: lu.ChevronsRight,
   Check: lu.Check,
+  ArrowUp: lu.ArrowUp,
   SquareFunction: lu.SquareFunction,
   ArrowLeft: lu.ArrowLeft,
   Sigma: lu.Sigma,

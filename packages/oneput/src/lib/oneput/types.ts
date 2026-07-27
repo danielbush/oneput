@@ -306,18 +306,24 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
 };
 
 /**
+ * Host-layout affordance: an action the layout may surface (button, etc.).
+ *
+ * Used by {@link AppLayoutParams.submitAndExit}, `.submit`, and `.reject`.
+ */
+export type LayoutAffordance = {
+  run: () => void;
+  /** When false, hosts should show the affordance disabled. Defaults to true. */
+  enabled?: boolean;
+};
+
+/**
  * Signal that the current AppObject can submit and exit carrying a result.
  *
  * Sent via `ctl.ui.update({ params: { submitAndExit } })`. Layouts may surface
  * this (e.g. Done on `inputUI.right`); they are not required to. Cancel /
  * discard remains a bare `ctl.app.exit()`.
  */
-export type SubmitAndExit = {
-  /** Typically `() => ctl.app.exit(taggedResult)`. */
-  run: () => void;
-  /** When false, hosts should show the affordance disabled. Defaults to true. */
-  enabled?: boolean;
-};
+export type SubmitAndExit = LayoutAffordance;
 
 /**
  * Narrow controller surface for reusable / 3rd-party AppObjects (type-only
@@ -351,6 +357,10 @@ export type SharedCtl = {
   >;
   /** Params / flags only — no direct `OneputProps` chrome writers. */
   ui: Pick<UIController, 'update'>;
+  keys: Pick<KeysController, 'setDefaultBindings'>;
+  notify: Controller['notify'];
+  alert: Controller['alert'];
+  confirm: Controller['confirm'];
 };
 
 /**
@@ -374,6 +384,14 @@ export type AppLayoutParams = {
    * Optional submit-and-exit signal for host layouts (e.g. Done on input right).
    */
   submitAndExit?: SubmitAndExit;
+  /**
+   * In-flow accept (does not exit the AppObject). e.g. confirm key capture.
+   */
+  submit?: LayoutAffordance;
+  /**
+   * In-flow reject / dismiss (does not exit the AppObject). e.g. abort capture.
+   */
+  reject?: LayoutAffordance;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

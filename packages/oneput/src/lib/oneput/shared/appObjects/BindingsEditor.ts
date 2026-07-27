@@ -1,4 +1,3 @@
-import type { Controller } from '../../controllers/controller.js';
 import {
   KeyEventBindings,
   toDisplayString,
@@ -6,32 +5,31 @@ import {
   type KeyBindingMap,
   type KeyEvent
 } from '../../lib/bindings.js';
+import type { AppObject, SharedCtl } from '../../types.js';
+import type { BindingsStore } from '../bindings/BindingsStore.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { toggleMenuItem } from '../ui/menuItems/toggleMenuItem.js';
-import { hflex } from '../../lib/builder.js';
-import { mountSvelte } from '../../lib/utils.js';
-import type { AppObject } from '../../types.js';
-import AcceptButton from '../components/AcceptButton.svelte';
-import CancelButton from '../components/CancelButton.svelte';
-import type { BindingsStore } from '../bindings/BindingsStore.js';
 
 /**
  * Let's you add / remove bindings to actions via the Oneput interface.
  *
- * Still uses `setInputUI` (and keys/notify) — keep full Controller until those
- * move off direct UI writes; then switch the ctor to SharedCtl.
+ * Takes {@link SharedCtl}. Capture Accept/Cancel are signaled via layout params
+ * `submit` / `reject` (not `setInputUI`).
  */
 export class BindingsEditor implements AppObject {
   static create(
-    ctl: Controller,
+    ctl: SharedCtl,
     values: {
       keyBindingMap: KeyBindingMap;
       store: BindingsStore;
       icons: {
         Keyboard: string;
-        Close: string;
-        OK: string;
-        Cancel: string;
+        /** Icon for remove-binding rows. */
+        Remove: string;
+        /** Icon for confirm “when” / save binding. */
+        Confirm: string;
+        /** Icon for discard “when” without saving. */
+        Discard: string;
         WhenFlag: string;
         Right: string;
         Action: string;
@@ -42,14 +40,14 @@ export class BindingsEditor implements AppObject {
   }
 
   constructor(
-    private ctl: Controller,
+    private ctl: SharedCtl,
     private keyBindingMap: KeyBindingMap,
     private store: BindingsStore,
     private icons: {
       Keyboard: string;
-      Close: string;
-      OK: string;
-      Cancel: string;
+      Remove: string;
+      Confirm: string;
+      Discard: string;
       WhenFlag: string;
       Right: string;
       Action: string;
@@ -79,7 +77,9 @@ export class BindingsEditor implements AppObject {
    */
   private actionsUI = () => {
     const title = 'Manage key bindings';
-    this.ctl.ui.update({ params: { menuTitle: title } });
+    this.ctl.ui.update({
+      params: { menuTitle: title, submit: undefined, reject: undefined }
+    });
     this.ctl.app.setOnBack(() => {
       this.ctl.app.exit();
     });
@@ -119,7 +119,9 @@ export class BindingsEditor implements AppObject {
     const { description, bindings, when } = this.keyBindingMap[actionId];
     this.ctl.ui.update({
       params: {
-        menuTitle: `Key bindings for "${description}"`
+        menuTitle: `Key bindings for "${description}"`,
+        submit: undefined,
+        reject: undefined
       }
     });
     this.ctl.app.setOnBack(() => {
@@ -148,7 +150,7 @@ export class BindingsEditor implements AppObject {
                 htmlContentUnsafe: this.whenBadge(when),
                 classes: ['oneput__kbd']
               }),
-              b.icon(this.icons.Close)
+              b.icon(this.icons.Remove)
             ],
             action: () => {
               this.removeBinding(actionId, binding);
@@ -163,61 +165,40 @@ export class BindingsEditor implements AppObject {
    * Triggered by actionUI when a new binding is being created for a given action.
    */
   private async captureBindingUI(actionId: string) {
-    this.ctl.ui.update({
-      params: {
-        menuTitle: `Capturing...`
-      },
-      flags: {
-        enableModal: true
-      }
-    });
     this.ctl.app.setOnBack(() => {
       this.actionUI(actionId);
     });
-    const { accept, reject, capturingKeys } = this.startKeyCapture();
-    this.ctl.ui.setInputUI({
-      right: hflex({
-        id: 'input-right-1',
-        children: (b) => [
-          // Here we mount a svelte component and rely on the reactivity
-          // of controller.currentProps which is reactive; also see
-          // OneputController.svelte .  We can't pass
-          // controller.currentProps.inputValue directly (even though
-          // we're not destructuring), probably because onMount is not in
-          // a reactive context.   Alternatively, we could also listen to
-          // input value changes via ctl.input and call setInputUI again
-          // if we didn't want to use svelte.
-          b.fchild({
-            onMount: (node) =>
-              mountSvelte(AcceptButton, {
-                target: node,
-                props: {
-                  onClick: accept,
-                  isHidden: () => !this.ctl.input.getInputValue()
-                }
-              })
-          }),
-          b.fchild({
-            onMount: (node) =>
-              mountSvelte(CancelButton, {
-                target: node,
-                props: {
-                  onClick: reject,
-                  isDisabled: () => false
-                }
-              })
-          })
-        ]
-      })
-    });
-
+    const capture = this.startKeyCapture();
+    this.paintCaptureChrome(capture);
     this.ctl.input.setPlaceholder('Type the keys...');
-    const capturedKeys = await capturingKeys;
+    const capturedKeys = await capture.capturingKeys;
     if (capturedKeys) {
       this.whenFlagUI(actionId, capturedKeys);
     } else {
       this.ctl.app.goBack();
     }
+  }
+
+  private paintCaptureChrome(capture: {
+    accept: () => void;
+    reject: () => void;
+    keyCount: () => number;
+  }) {
+    this.ctl.ui.update({
+      params: {
+        menuTitle: 'Capturing...',
+        submit: {
+          run: capture.accept,
+          enabled: capture.keyCount() > 0
+        },
+        reject: {
+          run: capture.reject
+        }
+      },
+      flags: {
+        enableModal: true
+      }
+    });
   }
 
   private static readonly whenValues = ['menu closed', 'menu open', 'always'] as const;
@@ -248,7 +229,11 @@ export class BindingsEditor implements AppObject {
     });
 
     this.ctl.ui.update({
-      params: { menuTitle: 'Set when condition' }
+      params: {
+        menuTitle: 'Set when condition',
+        submit: undefined,
+        reject: undefined
+      }
     });
 
     this.ctl.menu.setMenu({
@@ -268,7 +253,7 @@ export class BindingsEditor implements AppObject {
         stdMenuItem({
           id: 'ok',
           textContent: 'OK',
-          left: (b) => [b.icon(this.icons.OK)],
+          left: (b) => [b.icon(this.icons.Confirm)],
           action: () => {
             this.addBinding(actionId, capturedKeys, BindingsEditor.whenValueToFlag(whenIndex));
             this.ctl.app.goBack();
@@ -277,7 +262,7 @@ export class BindingsEditor implements AppObject {
         stdMenuItem({
           id: 'cancel',
           textContent: 'Cancel',
-          left: (b) => [b.icon(this.icons.Cancel)],
+          left: (b) => [b.icon(this.icons.Discard)],
           action: () => {
             this.ctl.app.goBack();
           }
@@ -292,6 +277,30 @@ export class BindingsEditor implements AppObject {
       resolve = _resolve;
     });
     const capturedKeys: KeyEvent[] = [];
+
+    const end = () => {
+      window.removeEventListener('keydown', keyListener);
+      this.ctl.ui.update({
+        flags: { enableModal: false },
+        params: { submit: undefined, reject: undefined }
+      });
+    };
+
+    const capture = {
+      accept: () => {
+        if (capturedKeys.length > 0) {
+          resolve(capturedKeys);
+        }
+        end();
+      },
+      reject: () => {
+        resolve(null);
+        end();
+      },
+      keyCount: () => capturedKeys.length,
+      capturingKeys
+    };
+
     const keyListener = (evt: KeyboardEvent) => {
       // Ignore modifier only key presses.
       if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(evt.key)) {
@@ -301,33 +310,14 @@ export class BindingsEditor implements AppObject {
       evt.stopPropagation();
       capturedKeys.push(toKeyEvent(evt));
       this.ctl.input.setInputValue(capturedKeys.map(toDisplayString).join(' + '));
+      this.paintCaptureChrome(capture);
     };
 
     setTimeout(() => {
       window.addEventListener('keydown', keyListener);
     });
-    const exit = () => {
-      window.removeEventListener('keydown', keyListener);
-      this.ctl.ui.update({ flags: { enableModal: false } });
-    };
 
-    return {
-      accept: (evt: Event) => {
-        // If this is a button in input.right then preventDefault stops
-        // the input from being focused.
-        evt.preventDefault();
-        if (capturedKeys.length > 0) {
-          resolve(capturedKeys);
-        }
-        exit();
-      },
-      reject: (evt: Event) => {
-        evt.preventDefault();
-        resolve(null);
-        exit();
-      },
-      capturingKeys
-    };
+    return capture;
   };
 
   private removeBinding = async (actionId: string, binding: string) => {

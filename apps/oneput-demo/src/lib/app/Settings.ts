@@ -20,9 +20,9 @@ export class Settings implements AppObject {
           store,
           icons: {
             Keyboard: icons.Keyboard,
-            Close: icons.X,
-            OK: icons.Check,
-            Cancel: icons.X,
+            Remove: icons.X,
+            Confirm: icons.Check,
+            Discard: icons.X,
             WhenFlag: icons.Flag,
             Action: icons.SquareFunction,
             Right: icons.ChevronRight

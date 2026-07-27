@@ -6,7 +6,6 @@ export type DynamicTextParams = {
   menuOpenBinding?: string;
   submitBinding?: string;
   doActionBinding?: string;
-  fillBinding?: string;
   backBinding?: string;
 };
 
@@ -23,7 +22,6 @@ export class DynamicText {
         menuOpenBinding: bindings[OneputAction.CLOSE_MENU]?.bindings[0],
         submitBinding: bindings[OneputAction.SUBMIT]?.bindings[0],
         doActionBinding: bindings[OneputAction.DO_ACTION]?.bindings[0],
-        fillBinding: bindings[OneputAction.FILL]?.bindings[0],
         backBinding: bindings[OneputAction.BACK]?.bindings[0]
       };
     }

@@ -172,17 +172,6 @@ function getInputEntries(ctl: Controller): OneputCatalogEntries {
       }
     },
 
-    [OneputAction.FILL]: {
-      description: 'Fill input using current menu item',
-      action: () => {
-        ctl.menu.runFillHandler();
-      },
-      binding: {
-        bindings: ['Tab'],
-        when: { menuOpen: true }
-      }
-    },
-
     [OneputAction.SUBMIT]: {
       description: 'Submit input',
       action: () => {

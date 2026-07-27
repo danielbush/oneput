@@ -220,11 +220,10 @@
   }
 
   /* Both classes sit on the container div, so this must not be qualified with
-     :root — the textarea needs vertical padding that the single-line input
-     does not, so its first line clears the top edge and its line-box centre
-     lines up with the icon buttons beside it. */
+     :root. Multiline moves this inset onto `.oneput__input-inner` (see below)
+     so left/right adornments share the same top clearance as the textarea. */
   .oneput--multiline.oneput__container {
-    --oneput-input-padding-y: 6px;
+    --oneput-input-padding-y: 4px;
   }
 
   :root.dark-mode .oneput__container {
@@ -557,9 +556,15 @@
 
   .oneput--multiline {
 
-    /* For multiline textarea, align widges around it to the top. */
+    /* Top-align adornments with the first text line; vertical inset lives on
+       the inner (not the textarea) so left/right buttons clear the border too. */
     .oneput__input-inner {
       align-items: start;
+      padding-block: var(--oneput-input-padding-y);
+    }
+
+    .oneput__input {
+      padding-block: 0;
     }
 
     .oneput__input-outer {

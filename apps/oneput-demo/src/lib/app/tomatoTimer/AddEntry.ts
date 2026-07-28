@@ -1,9 +1,6 @@
 import type { AppObject, Controller, MenuItem, OneputProps, UIFlags } from '@oneput/oneput';
-import {
-  isPickDurationResult,
-  SetDuration
-} from '@oneput/oneput/shared/appObjects/SetDuration.js';
-import { SetDateTime } from './SetDateTime.js';
+import { isPickDurationResult, SetDuration } from '@oneput/oneput/shared/appObjects/SetDuration.js';
+import { isPickDateTimeResult, SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
@@ -51,6 +48,9 @@ export class AddEntry implements AppObject {
   onResume = (result?: { payload?: unknown }) => {
     if (isPickDurationResult(result?.payload)) {
       this.session.duration = result.payload.value;
+    }
+    if (isPickDateTimeResult(result?.payload)) {
+      this.session.startTime = result.payload.value;
     }
     this.run();
   };

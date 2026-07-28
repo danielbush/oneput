@@ -24,11 +24,11 @@
     margin-inline-end: 0.65em;
   }
 
-  .oneput__set-time-mm-row {
+  .oneput__set-time-mm-steps {
     flex: 0 0 auto;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
-    gap: 0.2em;
+    gap: 0.15em;
   }
 
   .oneput__set-time-value {
@@ -97,11 +97,13 @@
     }
   }
 
+  /* Fat enough for reliable mobile taps (~44px+). */
   .oneput__set-time-step {
     font: 700 1.15em / 1 sans-serif;
     color: var(--oneput-text-muted, inherit);
-    min-width: 2.75em;
+    min-width: 3em;
     min-height: 2.75em;
+    padding-inline: 0.85em;
   }
 
   .oneput__set-time-arrow {

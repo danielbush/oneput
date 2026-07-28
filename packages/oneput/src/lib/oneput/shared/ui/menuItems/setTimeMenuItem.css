@@ -43,6 +43,21 @@
     transform: scale(2.00);
   }
 
+  .oneput__set-time-col--sep {
+    justify-content: center;
+  }
+
+  .oneput__set-time-sep {
+    flex: 0 0 auto;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.75em;
+    font: 500 1.35em / 1 ui-monospace, monospace;
+    color: var(--oneput-text-muted, inherit);
+    /* Match value scale so `:` sits between hh/mm. */
+    transform: scale(2);
+  }
+
   .oneput__set-time-btn {
     flex: 0 0 auto;
     appearance: none;

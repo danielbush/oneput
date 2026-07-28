@@ -15,6 +15,11 @@ export type SetTimeMenuItemParams = {
   /** Displayed minute; defaults to zero-padded `minute`. */
   minuteLabel?: string;
   /**
+   * Text between hour and minute columns. Defaults to `':'`.
+   * Pass `''` to omit.
+   */
+  separator?: string;
+  /**
    * When set, show an AM/PM column. Omitted for duration-style pickers.
    */
   amPm?: {
@@ -62,9 +67,9 @@ function btn(
  *
  * Layout:
  * ```
- *          ▲           ▲
- *  [AM]   10     −    30    +
- *          ▼           ▼
+ *          ▲       ▲
+ *  [AM]   10  :  − 30 +
+ *          ▼       ▼
  * ```
  *
  * Styles live in `setTimeMenuItem.css`, loaded as a side-effect import from
@@ -75,6 +80,7 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
   const hour = params.hour;
   const minute = params.minute;
   const minuteLabel = params.minuteLabel ?? pad2(minute);
+  const separator = params.separator ?? ':';
 
   const emit = (next: SetTimeValue) => {
     params.onChange?.(next);
@@ -96,65 +102,80 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
     });
   }
 
-  columns.push(
-    {
-      id: `${id}-hh`,
+  columns.push({
+    id: `${id}-hh`,
+    type: 'vflex' as const,
+    classes: ['oneput__set-time-col', 'oneput__set-time-col--hh'],
+    children: [
+      btn(`${id}-hh-up`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--up'], () =>
+        emit({ hour: params.adjustHour(hour, 1), minute })
+      ),
+      {
+        id: `${id}-hh-value`,
+        type: 'fchild' as const,
+        classes: ['oneput__set-time-value'],
+        textContent: params.hourLabel
+      },
+      btn(`${id}-hh-down`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--down'], () =>
+        emit({ hour: params.adjustHour(hour, -1), minute })
+      )
+    ]
+  });
+
+  if (separator) {
+    columns.push({
+      id: `${id}-sep`,
       type: 'vflex' as const,
-      classes: ['oneput__set-time-col', 'oneput__set-time-col--hh'],
+      classes: ['oneput__set-time-col', 'oneput__set-time-col--sep'],
       children: [
-        btn(`${id}-hh-up`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--up'], () =>
-          emit({ hour: params.adjustHour(hour, 1), minute })
-        ),
         {
-          id: `${id}-hh-value`,
+          id: `${id}-sep-value`,
           type: 'fchild' as const,
-          classes: ['oneput__set-time-value'],
-          textContent: params.hourLabel
-        },
-        btn(`${id}-hh-down`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--down'], () =>
-          emit({ hour: params.adjustHour(hour, -1), minute })
-        )
+          classes: ['oneput__set-time-sep'],
+          textContent: separator
+        }
       ]
-    },
-    {
-      id: `${id}-mm`,
-      type: 'vflex' as const,
-      classes: ['oneput__set-time-col', 'oneput__set-time-col--mm'],
-      children: [
-        btn(`${id}-mm-plus15`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--up'], () =>
-          emit(params.stepQuarter(hour, minute, 1))
-        ),
-        {
-          id: `${id}-mm-row`,
-          type: 'hflex' as const,
-          classes: ['oneput__set-time-mm-row'],
-          children: [
-            btn(
-              `${id}-mm-minus1`,
-              ['oneput__set-time-step'],
-              () => emit({ hour, minute: params.adjustMinute(minute, -1) }),
-              { textContent: '−' }
-            ),
-            {
-              id: `${id}-mm-value`,
-              type: 'fchild' as const,
-              classes: ['oneput__set-time-value'],
-              textContent: minuteLabel
-            },
-            btn(
-              `${id}-mm-plus1`,
-              ['oneput__set-time-step'],
-              () => emit({ hour, minute: params.adjustMinute(minute, 1) }),
-              { textContent: '+' }
-            )
-          ]
-        },
-        btn(`${id}-mm-minus15`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--down'], () =>
-          emit(params.stepQuarter(hour, minute, -1))
-        )
-      ]
-    }
-  );
+    });
+  }
+
+  columns.push({
+    id: `${id}-mm`,
+    type: 'vflex' as const,
+    classes: ['oneput__set-time-col', 'oneput__set-time-col--mm'],
+    children: [
+      btn(`${id}-mm-plus15`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--up'], () =>
+        emit(params.stepQuarter(hour, minute, 1))
+      ),
+      {
+        id: `${id}-mm-row`,
+        type: 'hflex' as const,
+        classes: ['oneput__set-time-mm-row'],
+        children: [
+          btn(
+            `${id}-mm-minus1`,
+            ['oneput__set-time-step'],
+            () => emit({ hour, minute: params.adjustMinute(minute, -1) }),
+            { textContent: '−' }
+          ),
+          {
+            id: `${id}-mm-value`,
+            type: 'fchild' as const,
+            classes: ['oneput__set-time-value'],
+            textContent: minuteLabel
+          },
+          btn(
+            `${id}-mm-plus1`,
+            ['oneput__set-time-step'],
+            () => emit({ hour, minute: params.adjustMinute(minute, 1) }),
+            { textContent: '+' }
+          )
+        ]
+      },
+      btn(`${id}-mm-minus15`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--down'], () =>
+        emit(params.stepQuarter(hour, minute, -1))
+      )
+    ]
+  });
 
   return {
     id,

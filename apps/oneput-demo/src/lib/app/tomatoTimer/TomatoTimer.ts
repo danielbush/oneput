@@ -73,7 +73,6 @@ export class TomatoTimer implements AppObject {
         menuTitle: 'Tomato Timer'
       }
     });
-    this.ctl.menu.clearGenerative();
     // TODO: check if there is an active timer...
     this.store
       .getCurrentSession()

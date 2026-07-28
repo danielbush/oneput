@@ -11,13 +11,15 @@ import { IDBStore } from './IDBStore.js';
 import type { Store } from './Store.js';
 import type { FinishedSessionRecord } from './idb.js';
 import { SveltePropInjector } from '@oneput/oneput/shared/components/SveltePropInjector.js';
-import { formatSecondsToHHMMSS } from './utils.js';
+import { formatSecondsToHHMMSS, parseTimerDuration } from './utils.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry } from './AddEntry.js';
 import { icons } from '../_icons.js';
+import { TomatoTimerDiagnostics } from './TomatoTimerDiagnostics.js';
 
 export class TomatoTimer implements AppObject {
   static create(ctl: Controller) {
+    const diagnostics = TomatoTimerDiagnostics.create();
     const timerDisplay: SveltePropInjector = SveltePropInjector.create();
     const entry: FinishedSession = {
       label: null,
@@ -34,7 +36,14 @@ export class TomatoTimer implements AppObject {
         : 'Enter value and submit...';
     });
     const addEntry = AddEntry.create(ctl, entry);
-    return new TomatoTimer(ctl, IDBStore.create(), timerDisplay, dynamicPlaceholder, addEntry);
+    return new TomatoTimer(
+      ctl,
+      IDBStore.create(diagnostics),
+      timerDisplay,
+      dynamicPlaceholder,
+      addEntry,
+      diagnostics
+    );
   }
 
   constructor(
@@ -42,7 +51,8 @@ export class TomatoTimer implements AppObject {
     private store: Store,
     private timerDisplay: SveltePropInjector,
     private dynamicPlaceholder: DynamicPlaceholder,
-    private addEntry: AddEntry
+    private addEntry: AddEntry,
+    private diagnostics: TomatoTimerDiagnostics
   ) {}
 
   /** Header X / chevron / Escape close the menu; closing dismisses the timer. */
@@ -84,12 +94,31 @@ export class TomatoTimer implements AppObject {
           this.runMainNoTimer();
           return;
         }
-        this.timerValue = TomatoTimerValue.create(rec);
-        if (this.timerValue.isFinished) {
-          this.runMainNoTimer();
-          return;
-        }
-        this.runMainWithTimer(this.timerValue);
+        TomatoTimerValue.fromRecord(rec).match(
+          (timerValue) => {
+            this.timerValue = timerValue;
+            if (timerValue.isFinished) {
+              this.runMainNoTimer();
+              return;
+            }
+            this.runMainWithTimer(timerValue);
+          },
+          (err) => {
+            this.diagnostics.invalidSession('read', err, rec);
+            this.timerValue = null;
+            this.ctl.alert({
+              message: 'Invalid current session',
+              additional: `${err.message}; removing the stored session`
+            });
+            this.store.deleteCurrentSession().orTee((deleteErr) => {
+              this.ctl.alert({
+                message: 'Error deleting invalid current session',
+                additional: deleteErr.message
+              });
+            });
+            this.runMainNoTimer();
+          }
+        );
       });
   }
 
@@ -148,8 +177,15 @@ export class TomatoTimer implements AppObject {
         ? `Enter time in minutes and hit ${params.submitBinding}...`
         : 'Enter value and submit...';
     });
-    this.ctl.input.setSubmitHandlerOnce((duration) => {
-      this.runCreateTimer({ duration: parseFloat(duration) * 60 });
+    this.ctl.input.setSubmitHandler((duration) => {
+      parseTimerDuration(duration).match(
+        (parsedDuration) => {
+          this.runCreateTimer({ duration: parsedDuration });
+        },
+        (err) => {
+          this.ctl.alert({ message: 'Invalid timer duration', additional: err.message });
+        }
+      );
     });
   }
 

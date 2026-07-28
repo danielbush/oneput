@@ -1,3 +1,19 @@
+import { err, ok, type Result } from 'neverthrow';
+
+export class InvalidTimerDurationError extends Error {
+  constructor() {
+    super('Enter a duration greater than zero');
+    this.name = 'InvalidTimerDurationError';
+  }
+}
+
+export function parseTimerDuration(input: string): Result<number, InvalidTimerDurationError> {
+  const duration = Number(input) * 60;
+  return Number.isFinite(duration) && duration > 0
+    ? ok(duration)
+    : err(new InvalidTimerDurationError());
+}
+
 export function parseDuration(totalSeconds: number): {
   hours: number;
   minutes: number;

@@ -1,3 +1,5 @@
+import { err, ok, type Result } from 'neverthrow';
+
 /**
  * We have to be able to compute time left and know if the timer is paused or
  * not then feed this into a timer display.
@@ -52,6 +54,17 @@ export type TomatoTimerData = {
 export type UnfinishedSession = TomatoTimerData & { endTime: null };
 export type FinishedSession = TomatoTimerData & { endTime: number };
 
+export class InvalidTomatoTimerDataError extends Error {
+  constructor(field: string) {
+    super(`Invalid tomato timer ${field}`);
+    this.name = 'InvalidTomatoTimerDataError';
+  }
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
 /**
  * A mutable value object for timer data.
  *
@@ -59,6 +72,59 @@ export type FinishedSession = TomatoTimerData & { endTime: number };
  * rather than several logic functions generating immutable values.
  */
 export class TomatoTimerValue {
+  /**
+   * Decode data read from persistent storage.
+   *
+   * IndexedDB values are untyped at runtime, so stored data must not enter the
+   * timer calculations until its numeric fields have been checked.
+   */
+  static fromRecord(record: unknown): Result<TomatoTimerValue, InvalidTomatoTimerDataError> {
+    if (!record || typeof record !== 'object') {
+      return err(new InvalidTomatoTimerDataError('record'));
+    }
+
+    const data = record as Record<string, unknown>;
+    const label = data.label ?? null;
+    const note = data.note ?? null;
+    const pauseDuration = data.pauseDuration ?? 0;
+    const endTime = data.endTime ?? null;
+    const pauseStartTime = data.pauseStartTime ?? null;
+
+    if (label !== null && typeof label !== 'string') {
+      return err(new InvalidTomatoTimerDataError('label'));
+    }
+    if (note !== null && typeof note !== 'string') {
+      return err(new InvalidTomatoTimerDataError('note'));
+    }
+    if (!isFiniteNumber(data.startTime)) {
+      return err(new InvalidTomatoTimerDataError('start time'));
+    }
+    if (!isFiniteNumber(data.duration) || data.duration <= 0) {
+      return err(new InvalidTomatoTimerDataError('duration'));
+    }
+    if (!isFiniteNumber(pauseDuration) || pauseDuration < 0) {
+      return err(new InvalidTomatoTimerDataError('pause duration'));
+    }
+    if (endTime !== null && !isFiniteNumber(endTime)) {
+      return err(new InvalidTomatoTimerDataError('end time'));
+    }
+    if (pauseStartTime !== null && !isFiniteNumber(pauseStartTime)) {
+      return err(new InvalidTomatoTimerDataError('pause start time'));
+    }
+
+    return ok(
+      TomatoTimerValue.create({
+        label,
+        note,
+        startTime: data.startTime,
+        duration: data.duration,
+        pauseDuration,
+        endTime,
+        pauseStartTime
+      })
+    );
+  }
+
   static create({
     startTime,
     duration,

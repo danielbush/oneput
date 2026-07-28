@@ -1,5 +1,5 @@
-import { ResultAsync } from 'neverthrow';
-import { type UnfinishedSession } from './TomatoTimerValue.js';
+import { errAsync, ResultAsync } from 'neverthrow';
+import { InvalidTomatoTimerDataError, TomatoTimerValue } from './TomatoTimerValue.js';
 import { IDBStoreError } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
 import {
   COMPLETED_SESSIONS_STORE,
@@ -12,9 +12,10 @@ import {
 import { IDBError, openIDB } from '@oneput/oneput/shared/idb.js';
 import type { IDBPDatabase } from 'idb';
 import type { Store } from './Store.js';
+import { TomatoTimerDiagnostics } from './TomatoTimerDiagnostics.js';
 
 export class IDBStore implements Store {
-  static create() {
+  static create(diagnostics: TomatoTimerDiagnostics) {
     const db = openIDB<TomatoTimerDB>(
       DB_NAME,
       1,
@@ -26,18 +27,35 @@ export class IDBStore implements Store {
       },
       false
     );
-    return new IDBStore(db);
+    return new IDBStore(db, diagnostics);
   }
 
-  constructor(private db: ResultAsync<IDBPDatabase<TomatoTimerDB>, IDBError>) {}
+  constructor(
+    private db: ResultAsync<IDBPDatabase<TomatoTimerDB>, IDBError>,
+    private diagnostics: TomatoTimerDiagnostics
+  ) {}
 
-  putCurrentSession = (session: UnfinishedSession) =>
-    this.db.andThen((db) =>
+  putCurrentSession = (session: unknown) => {
+    const timerResult = TomatoTimerValue.fromRecord(session);
+    if (timerResult.isErr()) {
+      this.diagnostics.invalidSession('write', timerResult.error, session);
+      return errAsync(new IDBStoreError('putCurrentSession', timerResult.error));
+    }
+
+    const record = timerResult.value.record;
+    if (record.endTime !== null) {
+      const error = new InvalidTomatoTimerDataError('current session end time');
+      this.diagnostics.invalidSession('write', error, session);
+      return errAsync(new IDBStoreError('putCurrentSession', error));
+    }
+
+    return this.db.andThen((db) =>
       ResultAsync.fromPromise(
-        db.put(CURRENT_SESSION_STORE, session, CURRENT_SESSION_KEY),
+        db.put(CURRENT_SESSION_STORE, record, CURRENT_SESSION_KEY),
         (err) => new IDBStoreError('putCurrentSession', err as Error)
       ).map(() => undefined)
     );
+  };
 
   getCurrentSession = () =>
     this.db.andThen((db) =>

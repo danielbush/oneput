@@ -98,6 +98,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - feat: should notifications allow for title + text?
   - COMMENT: example: auto-save, if we fail we might want to say, "Save failed" and then second line, some sort of CTA eg "try saving again"; possible even a link or button to retry
   - COMMENT: if we allow buttons in messages, we could lean on alert or confirm but allow button labels to be customised
+- feat: an AppObject that allows an agent to create any AppObject
+  - COMMENT: allow agents to create standard rich widgets and menu entries
+  - COMMENT: so it can be created with all the configurations in place
+  - COMMENT: if we're doing this on the fly (live in the browser), we don't want an agent injecting arbitary js, so do we need a dsl?
 
 ## refactor
 

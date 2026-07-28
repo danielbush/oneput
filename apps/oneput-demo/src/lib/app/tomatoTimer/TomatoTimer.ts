@@ -1,6 +1,6 @@
 import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { hflex, menuItem } from '@oneput/oneput';
+import { menuItem } from '@oneput/oneput';
 import {
   TomatoTimerValue,
   type FinishedSession,
@@ -318,20 +318,6 @@ export class TomatoTimer implements AppObject {
 
     this.ctl.input.setSubmitHandlerOnce((label) => {
       startTimer(label);
-    });
-
-    this.ctl.ui.setInputUI((inputUI) => {
-      return {
-        ...inputUI,
-        right: hflex({
-          children: (b) => [
-            b.iconButton(icons.Check, {
-              title: 'Add'
-            }),
-            b.iconButton(icons.X, { title: 'Cancel' })
-          ]
-        })
-      };
     });
   }
 

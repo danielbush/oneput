@@ -317,7 +317,7 @@ export const richSetTimeMenuItems = (
   minute: number,
   onChange?: (next: SetTimeValue) => void
 ): MenuItemAny[] => {
-  const { hour12, isPM } = to12Hour(hour);
+  const { isPM } = to12Hour(hour);
   return [
     {
       id: 'set-time-above',
@@ -334,7 +334,6 @@ export const richSetTimeMenuItems = (
       id: 'rich-set-time-widget',
       hour,
       minute,
-      hourLabel: String(hour12),
       amPm: {
         label: isPM ? 'PM' : 'AM',
         onToggle: () => onChange?.({ hour: toggleAmPm(hour), minute })

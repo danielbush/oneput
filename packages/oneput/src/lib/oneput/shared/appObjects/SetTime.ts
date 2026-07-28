@@ -144,7 +144,7 @@ export class SetTime implements AppObject {
   } satisfies AppActions;
 
   menu = () => {
-    const { hour12, isPM } = to12Hour(this.hour);
+    const { isPM } = to12Hour(this.hour);
     return {
       id: 'set-time',
       focusBehaviour: 'first' as const,
@@ -153,7 +153,6 @@ export class SetTime implements AppObject {
           id: 'set-time-widget',
           hour: this.hour,
           minute: this.minute,
-          hourLabel: String(hour12),
           amPm: {
             label: isPM ? 'PM' : 'AM',
             onToggle: () => {

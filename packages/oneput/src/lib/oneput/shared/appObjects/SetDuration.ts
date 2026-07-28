@@ -131,7 +131,7 @@ export class SetDuration implements AppObject {
         id: 'set-duration-widget',
         hour: this.hour,
         minute: this.minute,
-        hourLabel: String(this.hour),
+        hourLabel: 'h',
         adjustHour: adjustHourClamped,
         adjustMinute,
         stepQuarter: stepQuarterClamped,

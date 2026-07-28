@@ -1,7 +1,7 @@
 import './setTimeMenuItem.css'; // IMPORT_CSS_GOTCHA
 import { randomId } from '../../../lib/utils.js';
 import type { FChildParams, MenuItem } from '../../../types.js';
-import type { SetTimeValue } from '../../lib/time/timeAdjust.js';
+import { to12Hour, type SetTimeValue } from '../../lib/time/timeAdjust.js';
 import { tapSelect } from './tapSelect.js';
 
 export type { SetTimeValue };
@@ -10,17 +10,18 @@ export type SetTimeMenuItemParams = {
   id?: string;
   hour: number;
   minute: number;
-  /** Displayed hour (caller formats — 12h clock face or elapsed hours). */
-  hourLabel: string;
-  /** Displayed minute; defaults to zero-padded `minute`. */
-  minuteLabel?: string;
+  /**
+   * Optional unit/caption after the hour digits (e.g. `'h'` for duration).
+   */
+  hourLabel?: string;
   /**
    * Text between hour and minute columns. Defaults to `':'`.
    * Pass `''` to omit.
    */
   separator?: string;
   /**
-   * When set, show an AM/PM column. Omitted for duration-style pickers.
+   * When set, show an AM/PM column and display `hour` on a 12h face.
+   * Omitted for duration-style pickers.
    */
   amPm?: {
     label: string;
@@ -68,19 +69,25 @@ function btn(
  * Layout:
  * ```
  *          ▲       ▲
- *  [AM]   10  :  − 30 +
+ *  [AM]   10h :  − 30 +
  *          ▼       ▼
  * ```
  *
  * Styles live in `setTimeMenuItem.css`, loaded as a side-effect import from
  * this module. See IMPORT_CSS_GOTCHA.
+ *
+ * @param params.hour With `amPm`: 24h wall-clock `0–23` (face shows 12h via
+ *   {@link to12Hour}). Without `amPm`: elapsed hours (`String(hour)`; range is
+ *   caller policy).
+ * @param params.minute Minute `0–59` (display is zero-padded).
  */
 export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
   const id = params.id ?? randomId();
   const hour = params.hour;
   const minute = params.minute;
-  const minuteLabel = params.minuteLabel ?? pad2(minute);
+  const hourDigits = params.amPm ? String(to12Hour(hour).hour12) : String(hour);
   const separator = params.separator ?? ':';
+  const hourLabel = params.hourLabel ?? '';
 
   const emit = (next: SetTimeValue) => {
     params.onChange?.(next);
@@ -110,12 +117,21 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
       btn(`${id}-hh-up`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--up'], () =>
         emit({ hour: params.adjustHour(hour, 1), minute })
       ),
-      {
-        id: `${id}-hh-value`,
-        type: 'fchild' as const,
-        classes: ['oneput__set-time-value'],
-        textContent: params.hourLabel
-      },
+      hourLabel
+        ? {
+            id: `${id}-hh-value`,
+            type: 'fchild' as const,
+            classes: ['oneput__set-time-value'],
+            // One inline run so the label shares the digit baseline; outer
+            // fchild flex centering is unchanged.
+            htmlContentUnsafe: `<span class="oneput__set-time-value-text">${hourDigits}<span class="oneput__set-time-hour-label">${hourLabel}</span></span>`
+          }
+        : {
+            id: `${id}-hh-value`,
+            type: 'fchild' as const,
+            classes: ['oneput__set-time-value'],
+            textContent: hourDigits
+          },
       btn(`${id}-hh-down`, ['oneput__set-time-arrow', 'oneput__set-time-arrow--down'], () =>
         emit({ hour: params.adjustHour(hour, -1), minute })
       )
@@ -161,7 +177,7 @@ export function setTimeMenuItem(params: SetTimeMenuItemParams): MenuItem {
             id: `${id}-mm-value`,
             type: 'fchild' as const,
             classes: ['oneput__set-time-value'],
-            textContent: minuteLabel
+            textContent: pad2(minute)
           },
           btn(
             `${id}-mm-plus1`,

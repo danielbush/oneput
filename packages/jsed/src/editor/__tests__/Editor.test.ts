@@ -34,6 +34,57 @@ function createNullEditor(doc: JsedDocument): Editor {
 }
 
 describe('Editor', () => {
+  describe('transaction', () => {
+    it('commits several operations as one undo and redo', () => {
+      // arrange
+      const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+      const editor = createNullEditor(doc);
+      editor.start();
+
+      // act
+      const succeeded = editor.transaction(() => {
+        const first = editor.focusOps.insertNewAfter({ tagName: 'p' });
+        const second = editor.focusOps.insertNewAfter({ tagName: 'p' });
+        return first && second;
+      });
+
+      // assert
+      expect(succeeded).toBe(true);
+      expect(identifyChildren(doc.root)).toEqual([
+        '[element:p#p1]',
+        '[element:p]',
+        '[element:p]',
+        '[element:p#p2]'
+      ]);
+
+      // act
+      editor.undo();
+
+      // assert
+      expect(identifyChildren(doc.root)).toEqual([
+        '[element:p#p1]',
+        '[deleted-element]',
+        '[deleted-element]',
+        '[element:p#p2]'
+      ]);
+      expect(editor.canUndo()).toBe(false);
+      expect(editor.canRedo()).toBe(true);
+
+      // act
+      editor.redo();
+
+      // assert
+      expect(identifyChildren(doc.root)).toEqual([
+        '[element:p#p1]',
+        '[element:p]',
+        '[element:p]',
+        '[element:p#p2]'
+      ]);
+
+      editor.destroy();
+    });
+  });
+
   describe('REQUEST_FOCUS (view mode): User clicks/touches', () => {
     it('first REQUEST_FOCUS in view mode tokenizes the focused LINE but stays in view mode', () => {
       // arrange

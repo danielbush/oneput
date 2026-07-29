@@ -5,6 +5,7 @@ import { EditorFocusOps } from './lib/EditorFocusOps.js';
 import { EditorCursorOps } from './lib/EditorCursorOps.js';
 import { EditorEventsEmitter } from './lib/EditorEventsEmitter.js';
 import { EditorState } from './lib/EditorState.js';
+import { transaction } from '../undo/transaction.js';
 
 /**
  * Facade that represents an editor instance for a single "document".
@@ -85,37 +86,7 @@ export class Editor {
   extendPrevious = () => this.state.ops.extendPrevious();
 
   // Misc
-  /**
-   * Run several editor operations as one atomic undo/redo change.
-   *
-   * A false result or thrown error rolls captured operations back immediately
-   * and leaves the existing undo/redo history unchanged.
-   */
-  transaction = (run: () => boolean): boolean => {
-    this.state.undo.beginGroup();
-    try {
-      const succeeded = run();
-      if (succeeded) {
-        this.state.undo.commitGroup();
-        return true;
-      }
-      this.rollbackTransaction();
-      return false;
-    } catch (error) {
-      this.rollbackTransaction();
-      throw error;
-    }
-  };
-
-  /**
-   * Roll an active transaction back in reverse operation order.
-   */
-  private rollbackTransaction(): void {
-    const records = this.state.undo.cancelGroup();
-    for (let index = records.length - 1; index >= 0; index -= 1) {
-      records[index]?.undo(this.state);
-    }
-  }
+  transaction = (run: () => boolean): boolean => transaction(this.state, run);
 
   canUndo = () => this.state.undo.canUndo();
   canRedo = () => this.state.undo.canRedo();

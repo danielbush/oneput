@@ -47,8 +47,7 @@ export type EditorElementChangeEvent =
       element: HTMLElement;
     }
   | {
-      type: 'focusable-replaced';
-      previous: HTMLElement;
+      type: 'focusable-patched';
       element: HTMLElement;
     }
   | {
@@ -221,9 +220,11 @@ export class EditorState {
   }
 
   /**
-   * Transition back to 'view' mode.
+   * Cancel any active selection and transition back to view mode.
    */
   exitEditing(params?: { softExit?: boolean; focusElement?: HTMLElement }) {
+    this.cursor?.cancelSelection();
+
     // Exit cursor insertion state if present.
     if (params?.softExit && this.cursor?.isInInsertState()) {
       this.cursor.reload();

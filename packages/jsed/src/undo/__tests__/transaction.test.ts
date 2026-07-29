@@ -1,7 +1,7 @@
 import { Controller } from '@oneput/oneput';
 import { describe, expect, test } from 'vitest';
 import { EditorState } from '../../editor/lib/EditorState.js';
-import { frag, identifyChildren, makeRoot, p } from '../../test/util.js';
+import { byId, frag, identifyChildren, makeRoot, p } from '../../test/util.js';
 import { transaction } from '../transaction.js';
 
 describe('transaction', () => {
@@ -276,6 +276,44 @@ describe('transaction', () => {
       '[deleted-element]',
       '[element:p#p2]'
     ]);
+
+    state.destroy();
+  });
+
+  test('rollback: element patch', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+    const target = byId(doc, 'p2');
+    const elementChanges: Array<{ type: string }> = [];
+    let documentChanges = 0;
+    state.eventsEmitter.subscribe({
+      onElementChange: (event) => elementChanges.push(event),
+      onDocumentChange: () => {
+        documentChanges += 1;
+      }
+    });
+
+    // act
+    const succeeded = transaction(state, { undoable: true }, () => {
+      state.focusOps.patchElement(target, {
+        attributes: { 'aria-label': 'Complete' },
+        classes: { add: ['complete'] }
+      });
+      return false;
+    });
+
+    // assert
+    expect(succeeded).toBe(false);
+    expect(target.hasAttribute('aria-label')).toBe(false);
+    expect(target.classList.contains('complete')).toBe(false);
+    expect(state.undo.canUndo()).toBe(false);
+    expect(elementChanges).toEqual([{ type: 'focusable-patched', element: target }]);
+    expect(documentChanges).toBe(1);
 
     state.destroy();
   });

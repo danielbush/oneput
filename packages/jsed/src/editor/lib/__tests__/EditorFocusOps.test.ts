@@ -173,3 +173,37 @@ describe('delete (orchestration)', () => {
     editor.destroy();
   });
 });
+
+describe('patchElement (orchestration)', () => {
+  it('records on the UndoRecorder so undo works through the facade', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const editor = createNullEditor(doc);
+    editor.start();
+    const target = byId(doc, 'p2');
+
+    // act
+    const patched = editor.focusOps.patchElement(target, {
+      attributes: { 'aria-label': 'Complete' }
+    });
+
+    // assert
+    expect(patched).toBe(true);
+    expect(target.getAttribute('aria-label')).toBe('Complete');
+    expect(editor.canUndo()).toBe(true);
+
+    // act
+    editor.undo();
+
+    // assert
+    expect(target.hasAttribute('aria-label')).toBe(false);
+
+    // act
+    editor.redo();
+
+    // assert
+    expect(target.getAttribute('aria-label')).toBe('Complete');
+
+    editor.destroy();
+  });
+});

@@ -16,6 +16,8 @@ import type { UndoRecord } from '../../undo/index.js';
 import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
 import type { ElementInsertOption, ElementSpec } from '../../lib/core/dom-rules.js';
 import type { MovePlacement } from '../../lib/ops/focusable.js';
+import { PatchElement } from './ops/PatchElement.js';
+import type { ElementPatch } from '../../lib/ops/elementPatch.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -165,6 +167,13 @@ export class EditorFocusOps {
    */
   removeElement(element: HTMLElement): boolean {
     return !!this._undo(RemoveElement.run(this.state, element));
+  }
+
+  /**
+   * Apply an undoable declarative patch to an existing element.
+   */
+  patchElement(element: HTMLElement, patch: ElementPatch): boolean {
+    return !!this._undo(PatchElement.run(this.state, element, patch));
   }
 
   // #endregion

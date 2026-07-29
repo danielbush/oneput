@@ -7,7 +7,7 @@ import {
   type PatchElementOperation
 } from '../../../lib/ops/elementPatch.js';
 import type { UndoRecord } from '../../../undo/index.js';
-import { isFocusable } from '../../../lib/core/taxonomy.js';
+import { findClosestFocusableAncestor } from '../../../lib/ops/focus.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import { detokenize } from '../../../lib/ops/tokenize.js';
 
@@ -76,13 +76,6 @@ function moveAffectedFocus(state: EditorState, element: HTMLElement): void {
     return;
   }
 
-  let target: Element | null = element;
-  while (target) {
-    if (isFocusable(target)) {
-      state.nav.FOCUS(target);
-      return;
-    }
-    target = target.parentElement;
-  }
-  state.nav.FOCUS(state.document.root);
+  const target = findClosestFocusableAncestor(element, state.document.root);
+  state.nav.FOCUS(target ?? state.document.root);
 }

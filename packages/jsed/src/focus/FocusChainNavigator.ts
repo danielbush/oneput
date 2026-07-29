@@ -1,5 +1,4 @@
-import { isFocusCandidate, isFocusable, isOpaque } from '../lib/core/taxonomy.js';
-import { findNextNode } from '../lib/core/walk.js';
+import { findNextFocusable, findNextFocusableOnAncestorPath } from '../lib/ops/focus.js';
 import type { Nav } from './Nav.js';
 
 /**
@@ -41,57 +40,18 @@ export class FocusChainNavigator {
       return;
     }
 
-    const nextDown = this.getNextFocusDownCurrentChain(focus);
-    if (nextDown) {
-      this.nav.REQUEST_FOCUS(nextDown);
-      return;
-    }
-
-    for (const next of findNextNode(focus, focus, {
-      visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
-    })) {
+    const next = this.currentMark
+      ? (findNextFocusableOnAncestorPath(focus, this.currentMark) ??
+        findNextFocusable(focus, focus))
+      : findNextFocusable(focus, focus);
+    if (next) {
       this.nav.REQUEST_FOCUS(next);
-      return;
     }
   }
 
   private updateCurrentMark(focus: HTMLElement) {
-    if (!this.currentMark) {
+    if (!this.currentMark || !focus.contains(this.currentMark)) {
       this.currentMark = focus;
-      return;
     }
-
-    for (
-      let current: HTMLElement | null = this.currentMark;
-      current;
-      current = current.parentElement
-    ) {
-      if (current === focus) {
-        return;
-      }
-    }
-
-    this.currentMark = focus;
-  }
-
-  private getNextFocusDownCurrentChain(focus: HTMLElement): HTMLElement | null {
-    if (!this.currentMark) {
-      return null;
-    }
-
-    // The remembered chain may pass through FOCUS_TRANSPARENT ancestors; keep
-    // the nearest FOCUSABLE below them so DOWN_CHAIN can land past the tunnel.
-    let focusableBelow = isFocusable(this.currentMark) ? this.currentMark : null;
-    for (let parent = this.currentMark.parentElement; parent; parent = parent.parentElement) {
-      if (parent === focus) {
-        return focusableBelow;
-      }
-      if (isFocusable(parent)) {
-        focusableBelow = parent;
-      }
-    }
-
-    return null;
   }
 }

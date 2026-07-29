@@ -1,7 +1,5 @@
 import type { JsedDocument, JsedFocusRequestEvent } from '../types.js';
 import {
-  isFocusCandidate,
-  isOpaque,
   isFocusable,
   isToken,
   JSED_APP_ROOT_ID,
@@ -9,7 +7,15 @@ import {
   JSED_FOCUS_SIBLING
 } from '../lib/core/taxonomy.js';
 import * as token from '../lib/ops/token.js';
-import { getParent, findNextNode, findPreviousNode } from '../lib/core/walk.js';
+import {
+  findClosestFocusableAncestor,
+  findNextFocusable,
+  findNextSiblingFocusable,
+  findNextSiblingOrAncestorFocusable,
+  findPreviousFocusable,
+  findPreviousSiblingFocusable,
+  findPreviousSiblingOrAncestorFocusable
+} from '../lib/ops/focus.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
@@ -145,14 +151,10 @@ export class Nav {
    */
   REC_NEXT() {
     if (!this.#FOCUS) return;
-    for (const next of findNextNode(this.#FOCUS, this.doc.root, {
-      visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
-    })) {
+    const next = findNextFocusable(this.#FOCUS, this.doc.root);
+    if (next) {
       this.REQUEST_FOCUS(next);
-      return;
     }
-    return;
   }
 
   /**
@@ -160,75 +162,10 @@ export class Nav {
    */
   REC_PREV() {
     if (!this.#FOCUS) return;
-    for (const next of findPreviousNode(this.#FOCUS, this.doc.root, {
-      visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
-    })) {
-      this.REQUEST_FOCUS(next);
-      return;
+    const previous = findPreviousFocusable(this.#FOCUS, this.doc.root);
+    if (previous) {
+      this.REQUEST_FOCUS(previous);
     }
-    return;
-  }
-
-  #sibnext = () =>
-    this.#FOCUS && this.#FOCUS !== this.doc.root ? this.#nextSiblingFocusTarget(this.#FOCUS) : null;
-
-  #sibprev = () =>
-    this.#FOCUS && this.#FOCUS !== this.doc.root
-      ? this.#previousSiblingFocusTarget(this.#FOCUS)
-      : null;
-
-  #firstFocusableDescendant(el: Node): HTMLElement | null {
-    for (const next of findNextNode(el, el, {
-      visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
-    })) {
-      return next as HTMLElement;
-    }
-    return null;
-  }
-
-  #lastFocusableDescendant(el: Node): HTMLElement | null {
-    let last: HTMLElement | null = null;
-    for (const next of findNextNode(el, el, {
-      visit: isFocusable,
-      descend: (node) => isFocusCandidate(node) && !isOpaque(node)
-    })) {
-      last = next as HTMLElement;
-    }
-    return last;
-  }
-
-  /**
-   * Find the next same-parent FOCUS target.
-   *
-   * If the next sibling is FOCUS_TRANSPARENT, treat it as a tunnel and return
-   * the first FOCUSABLE descendant inside that sibling's FOCUS_CANDIDATE
-   * subtree. This keeps sibling navigation useful for sections that are not
-   * themselves FOCUSABLE but contain descendants that have opted back in.
-   */
-  #nextSiblingFocusTarget(start: Node): HTMLElement | null {
-    let sib: Node | null = start;
-    while ((sib = sib.nextSibling)) {
-      if (isFocusable(sib)) return sib;
-      if (isFocusCandidate(sib) && !isOpaque(sib)) {
-        const descendant = this.#firstFocusableDescendant(sib);
-        if (descendant) return descendant;
-      }
-    }
-    return null;
-  }
-
-  #previousSiblingFocusTarget(start: Node): HTMLElement | null {
-    let sib: Node | null = start;
-    while ((sib = sib.previousSibling)) {
-      if (isFocusable(sib)) return sib;
-      if (isFocusCandidate(sib) && !isOpaque(sib)) {
-        const descendant = this.#lastFocusableDescendant(sib);
-        if (descendant) return descendant;
-      }
-    }
-    return null;
   }
 
   /**
@@ -238,7 +175,8 @@ export class Nav {
    * Supports DESCEND'ing FOCUS_TRANSPARENT's -- see FOCUS_TRANSPARENT_SIBLING.
    */
   SIB_NEXT() {
-    const next = this.#sibnext();
+    if (!this.#FOCUS || this.#FOCUS === this.doc.root) return;
+    const next = findNextSiblingFocusable(this.#FOCUS);
     if (next) {
       this.REQUEST_FOCUS(next);
       return;
@@ -258,22 +196,9 @@ export class Nav {
       return;
     }
 
-    const sib = this.#nextSiblingFocusTarget(this.#FOCUS);
-    if (sib) {
-      this.REQUEST_FOCUS(sib);
-      return;
-    }
-
-    for (
-      let ancestor = this.#FOCUS.parentNode;
-      ancestor && ancestor !== this.doc.root;
-      ancestor = ancestor.parentNode
-    ) {
-      const up = this.#nextSiblingFocusTarget(ancestor);
-      if (up) {
-        this.REQUEST_FOCUS(up);
-        return;
-      }
+    const next = findNextSiblingOrAncestorFocusable(this.#FOCUS, this.doc.root);
+    if (next) {
+      this.REQUEST_FOCUS(next);
     }
   }
 
@@ -283,9 +208,10 @@ export class Nav {
    * See {@link SIB_NEXT}
    */
   SIB_PREV() {
-    const next = this.#sibprev();
-    if (next) {
-      this.REQUEST_FOCUS(next);
+    if (!this.#FOCUS || this.#FOCUS === this.doc.root) return;
+    const previous = findPreviousSiblingFocusable(this.#FOCUS);
+    if (previous) {
+      this.REQUEST_FOCUS(previous);
       return;
     }
     return;
@@ -309,26 +235,9 @@ export class Nav {
       return;
     }
 
-    const sib = this.#previousSiblingFocusTarget(this.#FOCUS);
-    if (sib) {
-      this.REQUEST_FOCUS(sib);
-      return;
-    }
-
-    for (
-      let ancestor = this.#FOCUS.parentNode;
-      ancestor && ancestor !== this.doc.root;
-      ancestor = ancestor.parentNode
-    ) {
-      if (isFocusable(ancestor)) {
-        this.REQUEST_FOCUS(ancestor);
-        return;
-      }
-      const prev = this.#previousSiblingFocusTarget(ancestor);
-      if (prev) {
-        this.REQUEST_FOCUS(prev);
-        return;
-      }
+    const previous = findPreviousSiblingOrAncestorFocusable(this.#FOCUS, this.doc.root);
+    if (previous) {
+      this.REQUEST_FOCUS(previous);
     }
   }
 
@@ -341,17 +250,11 @@ export class Nav {
    */
   UP(): void {
     if (!this.#FOCUS) return;
-    for (
-      let next = getParent(this.#FOCUS, this.doc.root);
-      next;
-      next = getParent(next, this.doc.root)
-    ) {
-      if (isFocusable(next)) {
-        this.REQUEST_FOCUS(next);
-        return;
-      }
+    const start = this.#FOCUS === this.doc.root ? null : this.#FOCUS.parentNode;
+    const ancestor = findClosestFocusableAncestor(start, this.doc.root);
+    if (ancestor) {
+      this.REQUEST_FOCUS(ancestor);
     }
-    return;
   }
 
   UP_CHAIN(): void {
@@ -420,9 +323,9 @@ export class Nav {
   SIB_HIGHLIGHT(): void {
     this.#SIB_HIGHLIGHT_CLEAR();
     const active = this.#FOCUS;
-    if (!active) return;
-    const next = this.#sibnext();
-    const prev = this.#sibprev();
+    if (!active || active === this.doc.root) return;
+    const next = findNextSiblingFocusable(active);
+    const prev = findPreviousSiblingFocusable(active);
     if (next) {
       next.classList.add(JSED_FOCUS_SIBLING);
       this.doc.SIB_HIGHLIGHT.add(next);

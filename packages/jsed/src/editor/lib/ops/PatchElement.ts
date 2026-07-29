@@ -5,9 +5,9 @@ import {
   undoPatchElement,
   type ElementPatch,
   type PatchElementOperation
-} from '../../../lib/ops/elementPatch.js';
+} from '../../../lib/ops/focusable/elementPatch.js';
 import type { UndoRecord } from '../../../undo/index.js';
-import { findClosestFocusableAncestor } from '../../../lib/ops/focus.js';
+import { findClosestFocusableAncestor } from '../../../lib/ops/focusable/find.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import { detokenize } from '../../../lib/ops/tokenize.js';
 

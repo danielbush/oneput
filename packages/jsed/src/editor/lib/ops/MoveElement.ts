@@ -1,5 +1,6 @@
 import type { EditorState } from '../EditorState.js';
-import * as focusable from '../../../lib/ops/focusable.js';
+import * as move from '../../../lib/ops/focusable/move.js';
+import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
@@ -13,15 +14,15 @@ export class MoveElement implements UndoRecord {
   static run(
     state: EditorState,
     element: HTMLElement,
-    placement: focusable.MovePlacement
+    placement: move.MovePlacement
   ): MoveElement | undefined {
     if (state.isEditing()) return;
 
     const focus = state.nav.getFocus();
-    const op = focusable.moveElement(element, placement);
+    const op = move.moveElement(element, placement);
     if (!op) return;
 
-    const focusTarget = focusable.getInitialFocusTarget(op.element);
+    const focusTarget = getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
@@ -35,7 +36,7 @@ export class MoveElement implements UndoRecord {
   }
 
   constructor(
-    private op: focusable.MoveElement,
+    private op: move.MoveElement,
     private focusTarget: { undo: HTMLElement; redo: HTMLElement }
   ) {}
 
@@ -56,13 +57,13 @@ export class MoveElement implements UndoRecord {
   }
 
   undo(state: EditorState) {
-    focusable.undoMoveElement(this.op);
+    move.undoMoveElement(this.op);
     state.nav.FOCUS(this.focusTarget.undo);
     this.normalize();
   }
 
   redo(state: EditorState) {
-    focusable.redoMoveElement(this.op);
+    move.redoMoveElement(this.op);
     state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
   }

@@ -1,5 +1,5 @@
 import type { EditorState } from '../EditorState.js';
-import * as focusable from '../../../lib/ops/focusable.js';
+import * as remove from '../../../lib/ops/focusable/remove.js';
 import { canDelete } from '../../../lib/core/dom-rules.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import { removeAnchors } from '../../../lib/ops/anchor.js';
@@ -12,8 +12,8 @@ import type { UndoRecord } from '../../../undo/index.js';
  *
  * Mirrors the CURSOR's `DeleteAtCursor` pattern — `run` performs the mutation,
  * emits the element change, moves FOCUS, and returns a {@link UndoRecord} that
- * replays the tripartite low-level op ({@link focusable.deleteElement} /
- * {@link focusable.undoDeleteElement} / {@link focusable.redoDeleteElement}).
+ * replays the tripartite low-level op ({@link remove.deleteElement} /
+ * {@link remove.undoDeleteElement} / {@link remove.redoDeleteElement}).
  */
 export class Delete implements UndoRecord {
   static run(state: EditorState): Delete | undefined {
@@ -24,7 +24,7 @@ export class Delete implements UndoRecord {
     const parent = focus.parentElement;
     if (!parent) return;
 
-    const op = focusable.deleteElement(focus);
+    const op = remove.deleteElement(focus);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-removed',
       element: focus
@@ -37,7 +37,7 @@ export class Delete implements UndoRecord {
   }
 
   constructor(
-    private op: focusable.DeleteElement,
+    private op: remove.DeleteElement,
     private undoFocusTarget: HTMLElement,
     private parent: HTMLElement
   ) {}
@@ -85,13 +85,13 @@ export class Delete implements UndoRecord {
   }
 
   undo(state: EditorState) {
-    focusable.undoDeleteElement(this.op);
+    remove.undoDeleteElement(this.op);
     state.nav.FOCUS(this.undoFocusTarget);
     this.normalizeUndo();
   }
 
   redo(state: EditorState) {
-    focusable.redoDeleteElement(this.op);
+    remove.redoDeleteElement(this.op);
     this.normalize();
     state.nav.FOCUS(this.getRedoFocusTarget());
   }

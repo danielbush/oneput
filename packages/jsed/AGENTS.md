@@ -35,9 +35,10 @@ Everything else is either intermediate or lower level operations.
 
 The lowest levels
 
-- src/lib/core
-- src/lib/token
-- src/lib/focus
+- src/lib/core — taxonomy, DOM rules, node walking, siblings
+- src/lib/ops — one module per kind of operation on a document
+  - src/lib/ops/focusable — element-level ops (create, insert, move, remove, split, paste, convert) plus FOCUSABLE lookup in `find.ts`
+  - src/lib/ops/token.ts, space.ts, anchor.ts — the TOKEN/text layer
 
 The top-level modules are the tip of the iceberg — they have simple interfaces and tell you _what_ the system does. The lower level operations should be more heavily tested and perform one specific type of action. A human or agent should be able to understand the whole system by reading the architecture narrative and browsing the top-level source files, without descending unless they need to change how something works internally.
 

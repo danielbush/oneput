@@ -15,7 +15,7 @@ import {
   findPreviousFocusable,
   findPreviousSiblingFocusable,
   findPreviousSiblingOrAncestorFocusable
-} from '../lib/ops/focus.js';
+} from '../lib/ops/focusable/find.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;

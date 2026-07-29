@@ -1,5 +1,6 @@
 import type { EditorState } from '../EditorState.js';
-import * as focusable from '../../../lib/ops/focusable.js';
+import * as insert from '../../../lib/ops/focusable/insert.js';
+import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { ElementSpec } from '../../../lib/core/dom-rules.js';
 import type { UndoRecord } from '../../../undo/index.js';
@@ -9,8 +10,8 @@ import type { UndoRecord } from '../../../undo/index.js';
  *
  * Mirrors the CURSOR's `DeleteAtCursor` pattern — `run` performs the mutation,
  * emits the element change, moves FOCUS, and returns a {@link UndoRecord} that
- * replays the tripartite low-level op ({@link focusable.insertNewBefore} /
- * {@link focusable.undoInsertElementBefore} / {@link focusable.redoInsertElementBefore}).
+ * replays the tripartite low-level op ({@link insert.insertNewBefore} /
+ * {@link insert.undoInsertElementBefore} / {@link insert.redoInsertElementBefore}).
  */
 export class InsertBefore implements UndoRecord {
   static run(state: EditorState, spec: ElementSpec): InsertBefore | undefined {
@@ -18,10 +19,10 @@ export class InsertBefore implements UndoRecord {
     const focus = state.nav.getFocus();
     if (!focus || focus === state.document.root) return;
 
-    const op = focusable.insertNewBefore(spec, focus);
+    const op = insert.insertNewBefore(spec, focus);
     if (!op) return;
 
-    const focusTarget = focusable.getInitialFocusTarget(op.element);
+    const focusTarget = getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
@@ -34,7 +35,7 @@ export class InsertBefore implements UndoRecord {
   }
 
   constructor(
-    private op: focusable.InsertElementBefore,
+    private op: insert.InsertElementBefore,
     private focusTarget: { undo: HTMLElement; redo: HTMLElement }
   ) {}
 
@@ -50,13 +51,13 @@ export class InsertBefore implements UndoRecord {
   }
 
   undo(state: EditorState) {
-    focusable.undoInsertElementBefore(this.op);
+    insert.undoInsertElementBefore(this.op);
     state.nav.FOCUS(this.focusTarget.undo);
     this.normalize();
   }
 
   redo(state: EditorState) {
-    focusable.redoInsertElementBefore(this.op);
+    insert.redoInsertElementBefore(this.op);
     state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
   }

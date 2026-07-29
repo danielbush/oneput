@@ -1,5 +1,6 @@
 import type { EditorState } from '../EditorState.js';
-import * as focusable from '../../../lib/ops/focusable.js';
+import * as insert from '../../../lib/ops/focusable/insert.js';
+import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
@@ -24,8 +25,8 @@ export class AppendElement implements UndoRecord {
     const appendParent = parent ?? focus;
     if (!appendParent) return;
 
-    const op = focusable.appendElement(element, appendParent);
-    const focusTarget = focusable.getInitialFocusTarget(op.element);
+    const op = insert.appendElement(element, appendParent);
+    const focusTarget = getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
@@ -39,7 +40,7 @@ export class AppendElement implements UndoRecord {
   }
 
   constructor(
-    private op: focusable.AppendElement,
+    private op: insert.AppendElement,
     private focusTarget: { undo: HTMLElement; redo: HTMLElement }
   ) {}
 
@@ -53,13 +54,13 @@ export class AppendElement implements UndoRecord {
   }
 
   undo(state: EditorState) {
-    focusable.undoAppendElement(this.op);
+    insert.undoAppendElement(this.op);
     state.nav.FOCUS(this.focusTarget.undo);
     this.normalize();
   }
 
   redo(state: EditorState) {
-    focusable.redoAppendElement(this.op);
+    insert.redoAppendElement(this.op);
     state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
   }

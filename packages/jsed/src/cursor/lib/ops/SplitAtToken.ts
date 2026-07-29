@@ -8,7 +8,7 @@ import {
   undoRecSplit,
   type RecursiveSplitAfterAction,
   type RecursiveSplitBeforeAction
-} from '../../../lib/ops/focusable.js';
+} from '../../../lib/ops/focusable/split.js';
 import { type RemoveToken } from '../../../lib/ops/token.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';

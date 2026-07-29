@@ -1,7 +1,8 @@
 import type { EditorState } from './EditorState.js';
-import * as focusable from '../../lib/ops/focusable.js';
+import * as insert from '../../lib/ops/focusable/insert.js';
+import * as paste from '../../lib/ops/focusable/paste.js';
 import { canDelete } from '../../lib/core/dom-rules.js';
-import { convert, unwrap } from '../../lib/ops/focusable.js';
+import { convert, getConversionCandidates, unwrap } from '../../lib/ops/focusable/convert.js';
 import { isInlineFlow } from '../../lib/core/taxonomy.js';
 import { EditorFocusSpaceOps } from './EditorFocusSpaceOps.js';
 import { InsertAfter } from './ops/InsertAfter.js';
@@ -15,9 +16,9 @@ import { Delete } from './ops/Delete.js';
 import type { UndoRecord } from '../../undo/index.js';
 import { EditorFocusAnchorOps } from './EditorFocusAnchorOps.js';
 import type { ElementInsertOption, ElementSpec } from '../../lib/core/dom-rules.js';
-import type { MovePlacement } from '../../lib/ops/focusable.js';
+import type { MovePlacement } from '../../lib/ops/focusable/move.js';
 import { PatchElement } from './ops/PatchElement.js';
-import type { ElementPatch } from '../../lib/ops/elementPatch.js';
+import type { ElementPatch } from '../../lib/ops/focusable/elementPatch.js';
 export const JSED_MARCHING_ANTS_CLASS = 'jsed-marching-ants';
 
 /**
@@ -50,7 +51,7 @@ export class EditorFocusOps {
     if (!focus) {
       return [];
     }
-    return focusable.getInsertAfterOptions(focus);
+    return insert.getInsertAfterOptions(focus);
   }
 
   canInsertAfter(): boolean {
@@ -64,7 +65,7 @@ export class EditorFocusOps {
     if (focus === this.state.document.root) {
       return false;
     }
-    return focusable.getInsertAfterOptions(focus).length > 0;
+    return insert.getInsertAfterOptions(focus).length > 0;
   }
 
   insertNewAfter(spec: ElementSpec): boolean {
@@ -90,7 +91,7 @@ export class EditorFocusOps {
     if (!focus) {
       return [];
     }
-    return focusable.getInsertBeforeOptions(focus);
+    return insert.getInsertBeforeOptions(focus);
   }
 
   canInsertBefore(): boolean {
@@ -104,7 +105,7 @@ export class EditorFocusOps {
     if (focus === this.state.document.root) {
       return false;
     }
-    return focusable.getInsertBeforeOptions(focus).length > 0;
+    return insert.getInsertBeforeOptions(focus).length > 0;
   }
 
   insertNewBefore(spec: ElementSpec): boolean {
@@ -120,7 +121,7 @@ export class EditorFocusOps {
     if (!focus) {
       return [];
     }
-    return focusable.getAppendOptions(focus);
+    return insert.getAppendOptions(focus);
   }
 
   canAppend(): boolean {
@@ -131,7 +132,7 @@ export class EditorFocusOps {
     if (!focus) {
       return false;
     }
-    return focusable.getAppendOptions(focus).length > 0;
+    return insert.getAppendOptions(focus).length > 0;
   }
 
   appendNew(spec: ElementSpec): boolean {
@@ -219,7 +220,7 @@ export class EditorFocusOps {
 
   getConversionCandidates(): string[] {
     const focus = this.state.nav.getFocus();
-    return focusable.getConversionCandidates(focus, this.state.document.root);
+    return getConversionCandidates(focus, this.state.document.root);
   }
 
   canConvert(): boolean {
@@ -285,8 +286,8 @@ export class EditorFocusOps {
       return false;
     }
     const result = this.isCopy
-      ? focusable.pasteCopyBefore(cutElement, focus)
-      : focusable.pasteBefore(cutElement, focus);
+      ? paste.pasteCopyBefore(cutElement, focus)
+      : paste.pasteBefore(cutElement, focus);
     if (result) {
       this.state.nav.FOCUS(result);
     }
@@ -299,8 +300,8 @@ export class EditorFocusOps {
       return false;
     }
     const result = this.isCopy
-      ? focusable.pasteCopyAfter(cutElement, focus)
-      : focusable.pasteAfter(cutElement, focus);
+      ? paste.pasteCopyAfter(cutElement, focus)
+      : paste.pasteAfter(cutElement, focus);
     if (result) {
       this.state.nav.FOCUS(result);
     }
@@ -313,8 +314,8 @@ export class EditorFocusOps {
       return false;
     }
     const result = this.isCopy
-      ? focusable.pasteCopyWithin(cutElement, focus)
-      : focusable.pasteWithin(cutElement, focus);
+      ? paste.pasteCopyWithin(cutElement, focus)
+      : paste.pasteWithin(cutElement, focus);
     if (result) {
       this.state.nav.FOCUS(result);
     }
@@ -331,7 +332,7 @@ export class EditorFocusOps {
     if (!focus) {
       return false;
     }
-    const empty = focusable.copyEmptyNext(focus);
+    const empty = paste.copyEmptyNext(focus);
     if (empty) {
       this.state.nav.FOCUS(empty);
     }
@@ -343,7 +344,7 @@ export class EditorFocusOps {
     if (!focus) {
       return false;
     }
-    const empty = focusable.copyEmptyPrevious(focus);
+    const empty = paste.copyEmptyPrevious(focus);
     if (empty) {
       this.state.nav.FOCUS(empty);
     }

@@ -1,14 +1,14 @@
 import { JSED_SELECTION_CLASS } from '../core/taxonomy.js';
 import { isToken } from '../core/taxonomy.js';
 import { canWrapWith } from '../core/dom-rules.js';
+import { containsOnly } from './focusable/empty.js';
+import { createElementDeleteMarker } from './focusable/retention.js';
 import {
-  containsOnly,
-  createElementDeleteMarker,
   deleteHighestEmpty,
   redoDeleteElement,
   undoDeleteElement,
   type DeleteElement
-} from '../ops/focusable.js';
+} from './focusable/remove.js';
 import { redoRemove, remove, undoRemove, type RemoveTokenAll } from '../ops/token.js';
 import { anchorize } from './anchor.js';
 

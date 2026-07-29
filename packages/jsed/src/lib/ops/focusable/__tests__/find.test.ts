@@ -1,15 +1,17 @@
 import { describe, expect, test } from 'vitest';
-import { byId, div, frag, makeRoot, p } from '../../../test/util.js';
+import { byId, div, frag, makeRoot, p } from '../../../../test/util.js';
 import {
   findClosestFocusableAncestor,
   findNextFocusable,
   findNextFocusableOnAncestorPath,
+  findNextFocusableOutside,
   findNextSiblingFocusable,
   findNextSiblingOrAncestorFocusable,
   findPreviousFocusable,
+  findPreviousFocusableOutside,
   findPreviousSiblingFocusable,
   findPreviousSiblingOrAncestorFocusable
-} from '../focus.js';
+} from '../find.js';
 
 describe('findClosestFocusableAncestor', () => {
   test('self / transparent / ceiling', () => {
@@ -123,5 +125,57 @@ describe('siblings', () => {
     expect(findPreviousSiblingOrAncestorFocusable(byId(doc, 'current'), doc.root)).toBe(
       byId(doc, 'left')
     );
+  });
+});
+
+describe('findNextFocusableOutside / findPreviousFocusableOutside', () => {
+  test('next skips descendants and finds the next outside FOCUSABLE', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer' },
+        div({ id: 'inner' }, 'inside') //
+      ) + p({ id: 'next' }, 'after')
+    );
+
+    // act
+    const next = findNextFocusableOutside(byId(doc, 'outer'), doc.root);
+
+    // assert
+    expect(next).toBe(byId(doc, 'next'));
+  });
+
+  test('previous from the outer element', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'previous' }, 'before') +
+        div(
+          { id: 'outer' },
+          div({ id: 'inner' }, 'inside') //
+        )
+    );
+
+    // act
+    const previous = findPreviousFocusableOutside(byId(doc, 'outer'), doc.root);
+
+    // assert
+    expect(previous).toBe(byId(doc, 'previous'));
+  });
+
+  test('previous from a nested element lands on its parent', () => {
+    // arrange
+    const doc = makeRoot(
+      p({ id: 'previous' }, 'before') +
+        div(
+          { id: 'outer' },
+          div({ id: 'inner' }, 'inside') //
+        )
+    );
+
+    // act
+    const previous = findPreviousFocusableOutside(byId(doc, 'inner'), doc.root);
+
+    // assert
+    expect(previous).toBe(byId(doc, 'outer'));
   });
 });

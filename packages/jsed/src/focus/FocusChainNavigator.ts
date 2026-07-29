@@ -1,4 +1,4 @@
-import { findNextFocusable, findNextFocusableOnAncestorPath } from '../lib/ops/focus.js';
+import { findNextFocusable, findNextFocusableOnAncestorPath } from '../lib/ops/focusable/find.js';
 import type { Nav } from './Nav.js';
 
 /**

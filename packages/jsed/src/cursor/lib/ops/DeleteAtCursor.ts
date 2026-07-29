@@ -1,13 +1,13 @@
 import { isAnchor } from '../../../lib/core/taxonomy.js';
 import type { EditorState } from '../../../editor/index.js';
 import type { UserInputOpts } from '../../../input/UserInput.js';
+import { isEmpty } from '../../../lib/ops/focusable/empty.js';
 import {
   type DeleteElement,
-  isEmpty,
   deleteHighestEmpty,
   undoDeleteElement,
   redoDeleteElement
-} from '../../../lib/ops/focusable.js';
+} from '../../../lib/ops/focusable/remove.js';
 import * as token from '../../../lib/ops/token.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';

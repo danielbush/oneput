@@ -1,5 +1,23 @@
-import { isFocusCandidate, isFocusable, isOpaque } from '../core/taxonomy.js';
-import { findNextNode, findPreviousNode, getParent } from '../core/walk.js';
+/**
+ * Locate a FOCUSABLE relative to a node — the read-only query layer beneath the
+ * stateful FOCUS owner in `src/focus/Nav.ts`.
+ *
+ * Every function here is a walk over the DOM parameterised by VISIT and DESCEND
+ * (see `docs/vocabulary.md`). They differ only in where they start, which
+ * direction they run, and how far they are allowed to descend or climb:
+ *
+ * - `findNext`/`findPreviousFocusable` — plain document order.
+ * - `...Outside` — the same, but treating the start element as opaque, for when
+ *   an op is about to consume or leave that element.
+ * - `...SiblingFocusable` — same-parent only, tunnelling through
+ *   FOCUS_TRANSPARENT siblings to the FOCUSABLE inside them.
+ * - `...SiblingOrAncestorFocusable` — sibling first, then climb.
+ * - `findClosestFocusableAncestor` / `findNextFocusableOnAncestorPath` — climb.
+ *
+ * Nothing here mutates the DOM.
+ */
+import { isFocusCandidate, isFocusable, isOpaque } from '../../core/taxonomy.js';
+import { findNextNode, findPreviousNode, getParent } from '../../core/walk.js';
 
 const focusWalk = {
   visit: isFocusable,
@@ -27,6 +45,41 @@ export function findPreviousFocusable(start: Node, ceiling: Node): HTMLElement |
       return node;
     }
   }
+  return null;
+}
+
+/**
+ * Find the next FOCUSABLE after `el`, skipping everything inside `el`.
+ *
+ * Note the DESCEND rule is deliberately looser than {@link focusWalk}: it omits
+ * the isFocusCandidate test, so this walk descends into FOCUS_TRANSPARENT
+ * subtrees that plain focus navigation would step over.
+ */
+export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
+  for (const next of findNextNode(el, ceiling, {
+    visit: isFocusable,
+    descend: (node) => !isOpaque(node) && node !== el
+  })) {
+    return next as HTMLElement;
+  }
+  return null;
+}
+
+/**
+ * Find the previous FOCUSABLE before `el`, skipping everything inside `el`.
+ *
+ * A backwards walk reaches `el`'s descendants only by descending into `el`
+ * itself, which findPreviousNode does not do from a start inside it — so unlike
+ * {@link findNextFocusableOutside} no explicit `node !== el` guard is needed.
+ */
+export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
+  for (const previous of findPreviousNode(el, ceiling, {
+    visit: isFocusable,
+    descend: (node) => !isOpaque(node)
+  })) {
+    return previous as HTMLElement;
+  }
+
   return null;
 }
 

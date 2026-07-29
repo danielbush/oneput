@@ -43,11 +43,12 @@ export class UndoRecorder {
   /**
    * Commit the active group into its parent or the undo history.
    *
-   * Nested groups flatten into the outer group. An outer group always commits
-   * as a composite, even with one child, so records cannot merge across its
-   * transaction boundary.
+   * Nested groups flatten into the outer group and inherit its history policy.
+   * A tracked outer group always commits as a composite, even with one child,
+   * so records cannot merge across its transaction boundary. An untracked
+   * outer group discards its records without changing existing history.
    */
-  commitGroup(): CompositeUndoRecord | undefined {
+  commitGroup({ undoable }: { undoable: boolean }): CompositeUndoRecord | undefined {
     const records = this.popGroup('commit');
     if (records.length === 0) {
       return;
@@ -57,6 +58,10 @@ export class UndoRecorder {
     const parent = this.groups[this.groups.length - 1];
     if (parent) {
       parent.push(...records);
+      return composite;
+    }
+
+    if (!undoable) {
       return composite;
     }
 

@@ -42,7 +42,7 @@ describe('Editor', () => {
       editor.start();
 
       // act
-      const succeeded = editor.transaction(() => {
+      const succeeded = editor.transaction({ undoable: true }, () => {
         const first = editor.focusOps.insertNewAfter({ tagName: 'p' });
         const second = editor.focusOps.insertNewAfter({ tagName: 'p' });
         return first && second;

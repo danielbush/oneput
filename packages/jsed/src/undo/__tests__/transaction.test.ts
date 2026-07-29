@@ -5,7 +5,7 @@ import { frag, identifyChildren, makeRoot, p } from '../../test/util.js';
 import { transaction } from '../transaction.js';
 
 describe('transaction', () => {
-  test('commits several operations as one undo and redo', () => {
+  test('commit: several operations as one undo and redo', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
     const state = EditorState.createNull({
@@ -15,7 +15,7 @@ describe('transaction', () => {
     state.start();
 
     // act
-    const succeeded = transaction(state, () => {
+    const succeeded = transaction(state, { undoable: true }, () => {
       const first = state.focusOps.insertNewAfter({ tagName: 'p' });
       const second = state.focusOps.insertNewAfter({ tagName: 'p' });
       return first && second;
@@ -62,7 +62,7 @@ describe('transaction', () => {
     state.destroy();
   });
 
-  test('rolls captured operations back when the callback returns false', () => {
+  test('rollback: return false', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
     const state = EditorState.createNull({
@@ -72,7 +72,7 @@ describe('transaction', () => {
     state.start();
 
     // act
-    const succeeded = transaction(state, () => {
+    const succeeded = transaction(state, { undoable: true }, () => {
       state.focusOps.insertNewAfter({ tagName: 'p' });
       return false;
     });
@@ -89,7 +89,7 @@ describe('transaction', () => {
     state.destroy();
   });
 
-  test('rolls captured operations back and rethrows callback errors', () => {
+  test('rollback: thrown error', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
     const state = EditorState.createNull({
@@ -100,7 +100,7 @@ describe('transaction', () => {
 
     // act & assert
     expect(() =>
-      transaction(state, () => {
+      transaction(state, { undoable: true }, () => {
         state.focusOps.insertNewAfter({ tagName: 'p' });
         throw new Error('recipe failed');
       })
@@ -111,6 +111,171 @@ describe('transaction', () => {
       '[element:p#p2]'
     ]);
     expect(state.undo.canUndo()).toBe(false);
+
+    state.destroy();
+  });
+
+  test('untracked (undoable=false) : rolls back', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+
+    // act
+    const succeeded = transaction(state, { undoable: false }, () => {
+      state.focusOps.insertNewAfter({ tagName: 'p' });
+      return false;
+    });
+
+    // assert
+    expect(succeeded).toBe(false);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
+    expect(state.undo.canUndo()).toBe(false);
+
+    state.destroy();
+  });
+
+  test('untracked (undoable=false) : does not add history', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+
+    // act
+    const succeeded = transaction(state, { undoable: false }, () => {
+      return state.focusOps.insertNewAfter({ tagName: 'p' });
+    });
+
+    // assert
+    expect(succeeded).toBe(true);
+    expect(identifyChildren(doc.root)).toEqual(['[element:p#p1]', '[element:p]', '[element:p#p2]']);
+    expect(state.undo.canUndo()).toBe(false);
+
+    state.destroy();
+  });
+
+  test('nested / policy: ignore nested policy (untracked)', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+
+    // act
+    const succeeded = transaction(state, { undoable: true }, () => {
+      const first = state.focusOps.insertNewAfter({ tagName: 'p' });
+      const nested = transaction(state, { undoable: false }, () => {
+        return state.focusOps.insertNewAfter({ tagName: 'p' });
+      });
+      return first && nested;
+    });
+
+    // assert
+    expect(succeeded).toBe(true);
+    expect(state.undo.getRecords()).toHaveLength(1);
+
+    const undoRecord = state.undo.popUndo();
+    undoRecord?.undo(state);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
+
+    state.destroy();
+  });
+
+  // A nested transaction’s undoable value is ignored for history retention; the
+  // outermost transaction owns that policy.  The nested transaction still
+  // creates a temporary boundary so it can roll back its own work on failure.
+  // On success, its records flatten into the parent.
+  test('nested / policy: ignore nested policy (tracked)', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+
+    // act
+    const succeeded = transaction(state, { undoable: false }, () => {
+      const first = state.focusOps.insertNewAfter({ tagName: 'p' });
+      const nested = transaction(state, { undoable: true }, () => {
+        return state.focusOps.insertNewAfter({ tagName: 'p' });
+      });
+      return first && nested;
+    });
+
+    // assert
+    expect(succeeded).toBe(true);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[element:p]',
+      '[element:p]',
+      '[element:p#p2]'
+    ]);
+    expect(state.undo.canUndo()).toBe(false);
+
+    state.destroy();
+  });
+
+  // “A failed nested change rolls itself back; callers propagate false when the
+  // outer change must also fail.” It allows an outer operation to recover, try
+  // an alternative, or ignore an optional nested attempt.
+  test('nested / rollback: failed nested transaction can be discarded', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+
+    // act
+    const succeeded = transaction(state, { undoable: true }, () => {
+      const first = state.focusOps.insertNewAfter({ tagName: 'p' });
+      const nested = transaction(state, { undoable: true }, () => {
+        state.focusOps.insertNewAfter({ tagName: 'p' });
+        return false;
+      });
+      const third = state.focusOps.insertNewAfter({ tagName: 'p' });
+      return first && !nested && third;
+    });
+
+    // assert
+    expect(succeeded).toBe(true);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[element:p]',
+      '[element:p]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
+    expect(state.undo.getRecords()).toHaveLength(1);
+
+    const undoRecord = state.undo.popUndo();
+    undoRecord?.undo(state);
+    expect(identifyChildren(doc.root)).toEqual([
+      '[element:p#p1]',
+      '[deleted-element]',
+      '[deleted-element]',
+      '[deleted-element]',
+      '[element:p#p2]'
+    ]);
 
     state.destroy();
   });

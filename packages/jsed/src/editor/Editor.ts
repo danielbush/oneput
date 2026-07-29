@@ -5,7 +5,7 @@ import { EditorFocusOps } from './lib/EditorFocusOps.js';
 import { EditorCursorOps } from './lib/EditorCursorOps.js';
 import { EditorEventsEmitter } from './lib/EditorEventsEmitter.js';
 import { EditorState } from './lib/EditorState.js';
-import { transaction } from '../undo/transaction.js';
+import { transaction, type TransactionOptions } from '../undo/transaction.js';
 
 /**
  * Facade that represents an editor instance for a single "document".
@@ -86,7 +86,9 @@ export class Editor {
   extendPrevious = () => this.state.ops.extendPrevious();
 
   // Misc
-  transaction = (run: () => boolean): boolean => transaction(this.state, run);
+  /** Run editor operations as one atomic change. */
+  transaction = (options: TransactionOptions, run: () => boolean): boolean =>
+    transaction(this.state, options, run);
 
   canUndo = () => this.state.undo.canUndo();
   canRedo = () => this.state.undo.canRedo();

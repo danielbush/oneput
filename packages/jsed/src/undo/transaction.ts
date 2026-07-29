@@ -1,17 +1,28 @@
 import type { EditorState } from '../editor/lib/EditorState.js';
 
 /**
+ * History policy for one atomic editor transaction.
+ */
+export type TransactionOptions = {
+  undoable: boolean;
+};
+
+/**
  * Run several editor operations as one atomic undo/redo change.
  *
  * A false result or thrown error rolls captured operations back immediately
  * and leaves the existing undo/redo history unchanged.
  */
-export function transaction(state: EditorState, run: () => boolean): boolean {
+export function transaction(
+  state: EditorState,
+  options: TransactionOptions,
+  run: () => boolean
+): boolean {
   state.undo.beginGroup();
   try {
     const succeeded = run();
     if (succeeded) {
-      state.undo.commitGroup();
+      state.undo.commitGroup(options);
       return true;
     }
     rollbackTransaction(state);

@@ -77,7 +77,7 @@ describe('UndoRecorder groups', () => {
     recorder.beginGroup();
     recorder.record(first);
     recorder.record(second);
-    const composite = recorder.commitGroup();
+    const composite = recorder.commitGroup({ undoable: true });
 
     // assert
     expect(composite?.records).toEqual([first, second]);
@@ -96,9 +96,9 @@ describe('UndoRecorder groups', () => {
     recorder.record(first);
     recorder.beginGroup();
     recorder.record(second);
-    recorder.commitGroup();
+    recorder.commitGroup({ undoable: false });
     recorder.record(third);
-    const composite = recorder.commitGroup();
+    const composite = recorder.commitGroup({ undoable: true });
 
     // assert
     expect(composite?.records).toEqual([first, second, third]);
@@ -132,12 +132,12 @@ describe('UndoRecorder groups', () => {
 
     // act & assert
     recorder.beginGroup();
-    recorder.commitGroup();
+    recorder.commitGroup({ undoable: true });
     expect(recorder.canRedo()).toBe(true);
 
     recorder.beginGroup();
     recorder.record(new ValueRecord('one', 'two'));
-    recorder.commitGroup();
+    recorder.commitGroup({ undoable: true });
     expect(recorder.canRedo()).toBe(false);
   });
 
@@ -151,7 +151,7 @@ describe('UndoRecorder groups', () => {
     recorder.beginGroup();
     recorder.record(new ValueRecord('zero', 'one', true));
     recorder.record(new ValueRecord('one', 'two', true));
-    const composite = recorder.commitGroup();
+    const composite = recorder.commitGroup({ undoable: true });
 
     // assert
     expect(recorder.getRecords()).toEqual([previous, composite]);
@@ -163,11 +163,30 @@ describe('UndoRecorder groups', () => {
     const recorder = UndoRecorder.createNull();
 
     // act & assert
-    expect(() => recorder.commitGroup()).toThrow(
+    expect(() => recorder.commitGroup({ undoable: true })).toThrow(
       'Cannot commit an undo group when no group is active'
     );
     expect(() => recorder.cancelGroup()).toThrow(
       'Cannot cancel an undo group when no group is active'
     );
+  });
+
+  test('discards a successful outer group without changing history or redo', () => {
+    // arrange
+    const recorder = UndoRecorder.createNull();
+    const previous = new ValueRecord('zero', 'one');
+    const discarded = new ValueRecord('one', 'two');
+    recorder.record(previous);
+    recorder.popUndo();
+
+    // act
+    recorder.beginGroup();
+    recorder.record(discarded);
+    const composite = recorder.commitGroup({ undoable: false });
+
+    // assert
+    expect(composite?.records).toEqual([discarded]);
+    expect(recorder.getRecords()).toEqual([]);
+    expect(recorder.canRedo()).toBe(true);
   });
 });

@@ -3,6 +3,7 @@ export type { JsedFocusRequestEvent, JsedFocusEvent } from './types.js';
 export { JsedDocument } from './JsedDocument.js';
 export { Editor } from './editor/Editor.js';
 export { type EditorError } from './editor/index.js';
+export type { TransactionOptions } from './undo/transaction.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
 export { JsedUI, type JsedUIHooks } from './ui/oneput/JsedUI.js';
 export { JsedCatalog, type JsedActionId, JsedAction } from './ui/index.js';

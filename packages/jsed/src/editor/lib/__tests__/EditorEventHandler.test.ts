@@ -15,7 +15,7 @@ describe('EditorEventHandler', () => {
     });
     const handler = new EditorEventHandler(state);
     state.start();
-    transaction(state, () => {
+    transaction(state, { undoable: true }, () => {
       return state.focusOps.insertNewAfter({ tagName: 'p' });
     });
 

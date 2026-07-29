@@ -1,10 +1,4 @@
-import type {
-  FlexParams,
-  FocusBehaviour,
-  MenuItem,
-  MenuItemAny,
-  MenuItemsGenFnAsync
-} from '../types.js';
+import type { FlexParams, FocusBehaviour, MenuItemAny, MenuItemsGenFnAsync } from '../types.js';
 import type { MenuItemsFilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';

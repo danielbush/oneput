@@ -1,9 +1,5 @@
 import type { AppActions, AppLayoutParams, AppObject, SharedCtl, UIFlags } from '../../types.js';
-import {
-  adjustHourClamped,
-  adjustMinute,
-  stepQuarterClamped
-} from '../lib/time/timeAdjust.js';
+import { adjustHourClamped, adjustMinute, stepQuarterClamped } from '../lib/time/timeAdjust.js';
 import { TimeVal } from '../lib/time/TimeVal.js';
 import { setTimeMenuItem } from '../ui/menuItems/setTimeMenuItem.js';
 

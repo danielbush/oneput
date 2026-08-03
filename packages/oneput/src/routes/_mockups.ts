@@ -166,10 +166,9 @@ type TapPending = { x: number; y: number; pointerId: number };
  * (down→up under slop). Stops propagation on up so the parent menu row's
  * onMenuAction does not also fire. Spike helper — may graduate or die.
  */
-function tapSelect(onSelect: () => void): Record<
-  string,
-  string | boolean | ((event: Event) => void)
-> {
+function tapSelect(
+  onSelect: () => void
+): Record<string, string | boolean | ((event: Event) => void)> {
   let pending: TapPending | null = null;
 
   return {
@@ -630,7 +629,12 @@ export const richChatScrollMenuItems = (): MenuItemAny[] => [
     children: [
       { id: randomId(), type: 'fchild' as const, classes: ['oneput__icon'], icon: icons.Search },
       { id: randomId(), type: 'fchild' as const, textContent: label },
-      { id: randomId(), type: 'fchild' as const, classes: ['oneput__icon'], icon: icons.ChevronRight }
+      {
+        id: randomId(),
+        type: 'fchild' as const,
+        classes: ['oneput__icon'],
+        icon: icons.ChevronRight
+      }
     ],
     action: () => {
       console.log(label);

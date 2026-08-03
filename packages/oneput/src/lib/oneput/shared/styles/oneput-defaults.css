@@ -14,7 +14,6 @@
 /* #region resets */
 
 @layer reset {
-
   .oneput__container hr,
   .oneput__container fieldset,
   .oneput__container button {
@@ -157,8 +156,10 @@
      * See MENU_VISUAL_VIEWPORT_HEIGHT in ISSUES.md.
      */
     --oneput-non-menu-chrome: 6.5rem;
-    --oneput-menu-max-height: max(7.5rem,
-        min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome))));
+    --oneput-menu-max-height: max(
+      7.5rem,
+      min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome)))
+    );
     --oneput-background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
     --oneput-border-radius: 5px;
     --oneput-border: rgb(0 0 0 / 0.3) solid 0.5px;
@@ -555,7 +556,6 @@
   }
 
   .oneput--multiline {
-
     /* Top-align adornments with the first text line; vertical inset lives on
        the inner (not the textarea) so left/right buttons clear the border too. */
     .oneput__input-inner {
@@ -903,10 +903,12 @@
   .oneput__menu-item-skeleton {
     display: block;
     border-radius: 4px;
-    background: linear-gradient(90deg,
-        rgba(130, 130, 130, 0.12) 25%,
-        rgba(130, 130, 130, 0.24) 37%,
-        rgba(130, 130, 130, 0.12) 63%);
+    background: linear-gradient(
+      90deg,
+      rgba(130, 130, 130, 0.12) 25%,
+      rgba(130, 130, 130, 0.24) 37%,
+      rgba(130, 130, 130, 0.12) 63%
+    );
     background-size: 400% 100%;
     animation: oneput-menu-item-skeleton-shimmer 1.4s ease infinite;
   }
@@ -981,5 +983,4 @@
     color: rgb(255 255 255);
     background-color: rgb(208 208 208);
   }
-
 }

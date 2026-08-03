@@ -118,6 +118,8 @@ export class AddEntry implements AppObject {
     this.ctl.menu.clearGenerative();
     this.ctl.menu.setMenu({
       id: 'main',
+      // 'first' for onStart.
+      // 'last-action' for onResume.
       focusBehaviour: 'last-action,first',
       items: this.menuItems
     });

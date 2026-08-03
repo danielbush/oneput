@@ -67,10 +67,7 @@ export class ElizaChat implements AppObject {
               void this.clear();
             }
           },
-          children: (bb) => [
-            bb.icon(icons.CircleX),
-            bb.fchild({ textContent: 'Clear chat' })
-          ]
+          children: (bb) => [bb.icon(icons.CircleX), bb.fchild({ textContent: 'Clear chat' })]
         })
       ]
     })

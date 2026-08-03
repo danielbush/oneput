@@ -13,7 +13,7 @@ import type { FinishedSessionRecord } from './idb.js';
 import { SveltePropInjector } from '@oneput/oneput/shared/components/SveltePropInjector.js';
 import { formatSecondsToHHMMSS, parseTimerDuration } from './utils.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
-import { AddEntry } from './AddEntry.js';
+import { AddEntry, isAddEntryResult } from './AddEntry.js';
 import { icons } from '../_icons.js';
 import { TomatoTimerDiagnostics } from './TomatoTimerDiagnostics.js';
 
@@ -21,27 +21,16 @@ export class TomatoTimer implements AppObject {
   static create(ctl: Controller) {
     const diagnostics = TomatoTimerDiagnostics.create();
     const timerDisplay: SveltePropInjector = SveltePropInjector.create();
-    const entry: FinishedSession = {
-      label: null,
-      note: null,
-      startTime: Date.now() / 1000,
-      duration: 30 * 60,
-      endTime: Date.now() / 1000 + 30 * 60,
-      pauseStartTime: null,
-      pauseDuration: 0
-    };
     const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) => {
       return params.submitBinding
         ? `Hit ${params.submitBinding} to submit...`
         : 'Enter value and submit...';
     });
-    const addEntry = AddEntry.create(ctl, entry);
     return new TomatoTimer(
       ctl,
       IDBStore.create(diagnostics),
       timerDisplay,
       dynamicPlaceholder,
-      addEntry,
       diagnostics
     );
   }
@@ -51,7 +40,6 @@ export class TomatoTimer implements AppObject {
     private store: Store,
     private timerDisplay: SveltePropInjector,
     private dynamicPlaceholder: DynamicPlaceholder,
-    private addEntry: AddEntry,
     private diagnostics: TomatoTimerDiagnostics
   ) {}
 
@@ -75,7 +63,38 @@ export class TomatoTimer implements AppObject {
     }
   };
 
+  onResume = (result?: { payload?: unknown }) => {
+    if (isAddEntryResult(result?.payload)) {
+      this.store
+        .putSession(result.payload.value as FinishedSessionRecord)
+        .andTee(() => {
+          this.ctl.notify('Entry saved', { duration: 3000 });
+          this.runMain();
+        })
+        .orTee((err) => {
+          this.ctl.alert({ message: 'Error saving entry', additional: err.message });
+          this.runMain();
+        });
+      return;
+    }
+    this.runMain();
+  };
+
   private timerValue: TomatoTimerValue | null = null;
+
+  private newBlankEntry(): FinishedSession {
+    const startTime = Date.now() / 1000;
+    const duration = 30 * 60;
+    return {
+      label: null,
+      note: null,
+      startTime,
+      duration,
+      endTime: startTime + duration,
+      pauseStartTime: null,
+      pauseDuration: 0
+    };
+  }
 
   onStart() {
     this.ctl.ui.update({
@@ -158,7 +177,7 @@ export class TomatoTimer implements AppObject {
           textContent: 'Add entry...',
           left: (b) => [b.icon(icons.Plus)],
           action: () => {
-            this.ctl.app.run(this.addEntry);
+            this.ctl.app.run(AddEntry.create(this.ctl, this.newBlankEntry()));
           }
         }),
         stdMenuItem({

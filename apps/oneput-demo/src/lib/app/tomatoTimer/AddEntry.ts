@@ -1,4 +1,5 @@
 import type { AppObject, Controller, MenuItem, OneputProps, UIFlags } from '@oneput/oneput';
+import { hflex } from '@oneput/oneput';
 import { isPickDurationResult, SetDuration } from '@oneput/oneput/shared/appObjects/SetDuration.js';
 import { isPickDateTimeResult, SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -8,6 +9,22 @@ import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { DateTimeVal } from '@oneput/oneput/shared/lib/time/DateTimeVal.js';
 import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
 import { icons } from '../_icons.js';
+
+/** Tagged resume payload when Add Entry submits. */
+export type AddEntryResult = {
+  type: 'add-entry';
+  value: FinishedSession;
+};
+
+export function isAddEntryResult(payload: unknown): payload is AddEntryResult {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    (payload as AddEntryResult).type === 'add-entry' &&
+    typeof (payload as AddEntryResult).value === 'object' &&
+    (payload as AddEntryResult).value !== null
+  );
+}
 
 export class AddEntry implements AppObject {
   static create(ctl: Controller, session: Partial<FinishedSession>) {
@@ -103,6 +120,8 @@ export class AddEntry implements AppObject {
         this.ctl.input.setInputValue();
         break;
     }
+    // ui.update replaces inputUI from the layout; re-apply Done after that.
+    this.ensureDoneButton();
   };
 
   onStart() {
@@ -115,6 +134,8 @@ export class AddEntry implements AppObject {
         menuTitle: 'Add entry...'
       }
     });
+    this.ctl.input.setSubmitHandler(() => this.submit());
+    this.ensureDoneButton();
     this.ctl.menu.clearGenerative();
     this.ctl.menu.setMenu({
       id: 'main',
@@ -123,6 +144,50 @@ export class AddEntry implements AppObject {
       focusBehaviour: 'last-action,first',
       items: this.menuItems
     });
+  }
+
+  private submit() {
+    this.ctl.app.exit(this.result());
+  }
+
+  private result(): AddEntryResult {
+    const startTime = this.session.startTime ?? Date.now() / 1000;
+    const duration = this.session.duration ?? 30 * 60;
+    return {
+      type: 'add-entry',
+      value: {
+        label: this.session.label ?? null,
+        note: this.session.note ?? null,
+        startTime,
+        duration,
+        endTime: this.session.endTime ?? startTime + duration,
+        pauseStartTime: this.session.pauseStartTime ?? null,
+        pauseDuration: this.session.pauseDuration ?? 0
+      }
+    };
+  }
+
+  /**
+   * Host layout may wipe inputUI on ui.update; Done lives on input right via
+   * setInputUI (same affordance submitAndExit would paint).
+   */
+  private ensureDoneButton() {
+    this.ctl.ui.setInputUI((current) => ({
+      ...current,
+      right: hflex({
+        id: 'add-entry-done',
+        children: (b) => [
+          b.iconButton(icons.ArrowUp, {
+            title: 'Done',
+            classes: ['oneput__icon-submit-and-exit'],
+            onClick: (e) => {
+              e.preventDefault();
+              this.submit();
+            }
+          })
+        ]
+      })
+    }));
   }
 
   get menuItems() {
@@ -148,6 +213,7 @@ export class AddEntry implements AppObject {
               textArea: { rows: 3 }
             } satisfies OneputProps['inputUI'];
           });
+          this.ensureDoneButton();
           this.ctl.input.focusInput();
         },
         bottom: {

@@ -112,9 +112,7 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
           left: (b) => [b.icon(this.icons.SetDateIcon)],
           right: (b) => [b.icon(this.icons.Right)],
           action: () => {
-            this.ctl.app.run(
-              PickDate.create(this.ctl, { date: this.date, icons: this.icons })
-            );
+            this.ctl.app.run(PickDate.create(this.ctl, { date: this.date, icons: this.icons }));
           }
         }),
         stdMenuItem({

@@ -178,6 +178,11 @@ export class TomatoTimer implements AppObject {
         : 'Enter value and submit...';
     });
     this.ctl.input.setSubmitHandler((duration) => {
+      if (!this.timerValue) {
+        // TODO: Stray submit caused sometimes when entering TomatoTimer.
+        console.error('Invalid timer duration');
+        return;
+      }
       parseTimerDuration(duration).match(
         (parsedDuration) => {
           this.runCreateTimer({ duration: parsedDuration });

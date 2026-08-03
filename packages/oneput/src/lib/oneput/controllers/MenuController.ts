@@ -87,6 +87,9 @@ export class MenuController {
       this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
     };
     this.ctl.events.on('input-change', () => {
+      if (this.inputChannel.mode === 'filter' && !this.inputChannel.filterEnabled) {
+        return;
+      }
       this.ctl.menu.setDisplayed();
     });
     // Seeded from currentProps.menuOpen so createNull({ menuOpen: true }) can

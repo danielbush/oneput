@@ -130,6 +130,45 @@ describe('MenuController', () => {
       // assert
       expect(ctl.currentProps.menuItemFocus).toEqual([2, true]);
     });
+
+    // AddEntry-style: filter channel present but disabled; onMenuItemFocus syncs
+    // the input from app state. Without the input-change guard, setDisplayed
+    // re-runs last-action,first and clears the just-typed character.
+    test('filter disabled - typing does not re-run menu focus / clear input', () => {
+      // arrange
+      let label = '';
+      const ctl = Controller.createNull({ menuOpen: true, inputValue: '' });
+      ctl.menu.setDefaultFilter(WordFilter.create().filter);
+      ctl.app.run({
+        settings: { enableFilter: false },
+        onMenuItemFocus: ({ menuItem }) => {
+          if (menuItem?.id === 'label') {
+            ctl.input.setInputValue(label);
+          }
+        },
+        onStart: () => {
+          ctl.menu.setMenu({
+            id: 'main',
+            focusBehaviour: 'last-action,first',
+            items: [item('label', 'Label...'), item('other', 'Other')]
+          });
+        }
+      });
+      ctl.events.on('input-change', ({ value }) => {
+        label = value;
+      });
+
+      // act
+      ctl.input.setInputValue('a');
+      ctl.events.emit({
+        type: 'input-change',
+        payload: { ...inputChangePayload, value: 'a' }
+      });
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('a');
+      expect(label).toBe('a');
+    });
   });
 
   it('uses generative mode instead of the base menu', () => {

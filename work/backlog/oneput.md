@@ -24,6 +24,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: katex: replace "Insert..." with input right submit
+- fix: katex: is display mode inserting katex into html using display mode?
 - fix: in elizachat if I tab to the send button (one tab from the input) and hit "enter", nothing happens
   - COMMENT: does it work if we add type="submit" to the button?
   - COMMENT: is "enter" bound to anything? 
@@ -48,9 +50,24 @@ The following are potential work (tickets for work) sorted by priority: earlier 
       ```
   - COMMENT: we run our own AppObject and use helper functions for actions and menu items
 - fix: In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulted in a significant change to the bindings themselves but the change wasn't visible to the user, making the user think that opening/closing the menu had broken the bindings when this was not the case.  
+- fix: disable window scrolling when menu open
+  - example: Pick a file in oneput-demo;
+  - COMMENT: I'm fine just to target the default document scroll on documents that exceed the browser viewport; let's not worry about other scrollable elements for now (these might have to respond to a class set by oneput when the menu is open)
 
 ## feat
 
+- feat: show submit binding to user
+  - we tend to use $mod+enter because enter tends to trigger menu actions
+  - we want users to be gently reminded when they can sumbit with $mod+enter (or whatever is set)
+  - idea: use the bottom right chrome in _layout; it shows the number of menu items; could we have it periodically display the submit binding for several seconds before going back to number of menu items; what does this entail
+- feat: use checkbox for "Show dot files" in File Picker / Directory Browser
+  - apply this to the one in apps/app
+- feat: put notifications into top corner of screen
+  - stack multiple notifications?
+  - clicking stack should expand it
+- feat: mod+? does replaceMenuUI to show keybindings; we don't need a button becaue this is not useful in mobile / soft keyboards; docs should say: type mod+?
+  - COMMENT: later we can extend mod+? to be a general help, maybe agent driven; in this situation we might have a "?" button on the left outside of the input
+  - COMMENT: or we make it a general help / settings page; I think we need a quick way to check bindings, no other navigation; maybe `$mod+backtick` ?
 - feat: how would an agent dynamically create a new AppObject and is this a useful idea?
   - COMMENT: a DynamicAppObject that acts like a DSL?  Could an agent recreate various things in oneput-demo given this DSL?
 - feat: Oneput media api tells us (reasonably) if we're mobile, tablet or desktop
@@ -113,9 +130,19 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: allow agents to create standard rich widgets and menu entries
   - COMMENT: so it can be created with all the configurations in place
   - COMMENT: if we're doing this on the fly (live in the browser), we don't want an agent injecting arbitary js, so do we need a dsl?
+- feat: global action to switch to chat sessions
+  - COMMENT: be able to dial up a chat session from any AppObject?
+  - COMMENT: is this an argument to use replaceUI
+    - but we lose the ability to have other menu items at all or we have to create the idea of one again; if we do want menu items below the chat, better to stick with the menu system
+  - COMMENT: really need a concrete use case so we're not building in the air
+  - COMMENT: this could be an AppObject question - how do we allow a global AppObject to subsume things temporarily?
+    - we run it; have a keybinding to trigger it; that binding could be maintained globally; some context could be passed if the global AppObject needs it; probably we instantiate, but it could be possible to have a long-lived object that goes into suspend when we exit it
 
 ## refactor
 
+- refactor: why do we have both Directory Browser and File Picker; can we just use one?
+  - COMMENT: or put the canonical example in shared/ and keep the other in demo if you must
+  - COMMENT: I think we were showcasing nested AppObjects in one; I think we can get rid of that one
 - refactor: wording: prefer "layout params" instead of "signals"
 - refactor: move TimeDisplay and DateDisplay into oneput/shared/ui/widgets or similar?
 - refactor/proposal - menu loading / transition

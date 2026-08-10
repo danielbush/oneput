@@ -1,0 +1,101 @@
+/**
+ * Nav-crumbs trail styles (from oneput breadcrumb mockup).
+ * Loaded via jsed-defaults.css. May move into oneput defaults later.
+ */
+
+.jsed-nav-crumbs-row {
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.jsed-nav-crumbs {
+  --jsed-nav-crumb-fade: 1.25em;
+
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.15em;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.15em 0;
+  font-size: 0.85em;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+
+  --jsed-nav-crumb-fade-start: var(--jsed-nav-crumb-fade);
+  --jsed-nav-crumb-fade-end: var(--jsed-nav-crumb-fade);
+
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--jsed-nav-crumb-fade-start),
+    #000 calc(100% - var(--jsed-nav-crumb-fade-end)),
+    transparent 100%
+  );
+}
+
+.jsed-nav-crumbs[data-at-start='true'] {
+  --jsed-nav-crumb-fade-start: 0px;
+}
+
+.jsed-nav-crumbs[data-at-end='true'] {
+  --jsed-nav-crumb-fade-end: 0px;
+}
+
+.jsed-nav-crumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.jsed-nav-crumb {
+  appearance: none;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.15em 0.4em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.jsed-nav-crumb:hover:not(:disabled) {
+  background: var(--oneput-button-background-hover);
+}
+
+.jsed-nav-crumb:active:not(:disabled) {
+  background: var(--oneput-button-background-active);
+}
+
+.jsed-nav-crumb:focus-visible {
+  outline: var(--oneput-button-outline);
+}
+
+.jsed-nav-crumb--current {
+  font-weight: 600;
+  cursor: default;
+  opacity: 1;
+}
+
+.jsed-nav-crumb-sep {
+  flex: 0 0 auto;
+  opacity: 0.5;
+  user-select: none;
+}
+
+.jsed-nav-crumbs--code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78em;
+}
+
+.jsed-nav-crumbs--code .jsed-nav-crumb {
+  padding: 0.15em 0.3em;
+}
+
+.jsed-nav-crumb-qual {
+  opacity: 0.55;
+  padding-left: 0.15em;
+}

@@ -49,6 +49,61 @@ function addRootSiblings(doc: ReturnType<typeof makeRoot>) {
   return { before, after };
 }
 
+describe('getAncestors', () => {
+  test('empty when no FOCUS', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'p1'));
+    const nav = new Nav(doc);
+
+    // act
+    const ancestors = nav.getAncestors();
+
+    // assert
+    expect(ancestors).toEqual([]);
+  });
+
+  test('FOCUS-first through root', () => {
+    // arrange
+    const doc = makeRoot(ul({ id: 'list' }, li({ id: 'item' }, p({ id: 'p1' }, 'p1'))));
+    const nav = new Nav(doc);
+    nav.FOCUS(byId(doc, 'p1'));
+
+    // act
+    const ancestors = nav.getAncestors();
+
+    // assert
+    expect(ancestors.map((el) => el.id || el.tagName.toLowerCase())).toEqual([
+      'p1',
+      'item',
+      'list',
+      'root'
+    ]);
+    expect(ancestors[ancestors.length - 1]).toBe(doc.root);
+  });
+
+  test('includes FOCUS_TRANSPARENT ancestors', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'outer', 'data-jsed-focus': 'off' },
+        p({ id: 'inner', 'data-jsed-focus': 'on' }, 'text')
+      )
+    );
+    const nav = new Nav(doc);
+    nav.FOCUS(byId(doc, 'inner'));
+
+    // act
+    const ancestors = nav.getAncestors();
+
+    // assert
+    expect(ancestors.map((el) => el.id || el.tagName.toLowerCase())).toEqual([
+      'inner',
+      'outer',
+      'root'
+    ]);
+  });
+});
+
 describe('FOCUS', () => {
   it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
     // arrange

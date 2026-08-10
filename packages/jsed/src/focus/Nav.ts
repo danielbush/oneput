@@ -16,6 +16,7 @@ import {
   findPreviousSiblingFocusable,
   findPreviousSiblingOrAncestorFocusable
 } from '../lib/ops/focusable/find.js';
+import { getParent } from '../lib/core/walk.js';
 import { FocusChainNavigator } from './FocusChainNavigator.js';
 
 export type OnRequestFocus = (evt: JsedFocusRequestEvent) => boolean;
@@ -118,6 +119,27 @@ export class Nav {
 
   getFocus(): HTMLElement | null {
     return this.#FOCUS ?? null;
+  }
+
+  /**
+   * HTMLElement ancestors from FOCUS up through the document root (inclusive).
+   *
+   * Order is FOCUS-first, root-last. Empty when there is no FOCUS.
+   */
+  getAncestors(): HTMLElement[] {
+    const focus = this.getFocus();
+    const root = this.doc.root;
+    if (!focus || !root.contains(focus)) {
+      return [];
+    }
+
+    const ancestors: HTMLElement[] = [];
+    for (let node: Node | null = focus; node; node = getParent(node, root)) {
+      if (node instanceof HTMLElement) {
+        ancestors.push(node);
+      }
+    }
+    return ancestors;
   }
 
   clearFocus(): void {

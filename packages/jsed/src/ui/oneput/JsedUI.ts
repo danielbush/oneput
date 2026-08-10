@@ -4,6 +4,8 @@ import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 import { Editor } from '../../editor/Editor.js';
 import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
+import { JsedUILayout } from './lib/JsedUILayout.js';
+import type { JsedLayoutParams } from './lib/layoutParams.js';
 import { JsedCatalog } from './JsedCatalog.js';
 import { JsedAction } from './JsedAction.js';
 
@@ -18,7 +20,7 @@ export type JsedUIHooks = {
  * This is both a usable default and a copyable example for host apps that need
  * to own lifecycle, layout, saving, or custom editor behavior.
  */
-export class JsedUI implements AppObject {
+export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
   static create(
     ctl: Controller,
     {
@@ -53,6 +55,23 @@ export class JsedUI implements AppObject {
     private hooks: JsedUIHooks = {}
   ) {}
 
+  /**
+   * Install {@link JsedUILayout} (host chrome + FOCUS nav crumbs).
+   *
+   * FOCUS changes call {@link refreshNavCrumbs} (`ui.update`) so `innerUI`
+   * runs again. A clearer `ui.invalidate` can replace that later.
+   */
+  layout = {
+    layout: (ctl: Controller, params: JsedLayoutParams) =>
+      JsedUILayout.create(ctl, params, {
+        getAncestors: () => this.editor.nav.getAncestors(),
+        requestFocus: (element) => {
+          this.editor.nav.REQUEST_FOCUS(element);
+        }
+      }),
+    params: { menuTitle: 'Editing' } satisfies JsedLayoutParams
+  };
+
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;
 
@@ -68,6 +87,7 @@ export class JsedUI implements AppObject {
     this.unsubscribeEditChanges = this.editor.eventsEmitter.subscribe({
       onError: (err) => this.handleEditError(err),
       onFocusChange: () => {
+        this.refreshNavCrumbs();
         this.ctl.menu.invalidate();
       },
       onCursorChange: () => {
@@ -87,9 +107,15 @@ export class JsedUI implements AppObject {
     });
   };
 
+  /** Re-apply layout slots so `innerUI` tracks FOCUS. */
+  private refreshNavCrumbs = () => {
+    this.ctl.ui.update({});
+  };
+
   onStart = () => {
     this.hooks.onActivate?.();
     this.editor.start();
+    this.refreshNavCrumbs();
     // No manual menu render: the framework pulls menu() after onStart (afterRun).
     this.removeSuspendHandler = this.ctl.events.on('menu-open-change', (isOpen) => {
       this.editor.suspend(isOpen);
@@ -101,6 +127,7 @@ export class JsedUI implements AppObject {
   onResume = () => {
     this.hooks.onActivate?.();
     this.editor.suspend(false);
+    this.refreshNavCrumbs();
     // No manual menu render: the framework pulls menu() after onResume (afterRun).
     this.ctl.input.focus();
     this.subscribeEditChanges();

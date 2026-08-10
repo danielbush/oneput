@@ -61,6 +61,7 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## fix
 
+- make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
 - what is `insertInside` in `ElementInsertOption`?
   - how does it differ from `appendInside`?
   - is it used?
@@ -102,14 +103,24 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 - space should probably put us into append
   - COMMENT: currently it moves us forward
+- in cursor mode, when we hit "up chain" key, it should first cancel and focus the element
+- use skeleton shimmer for the cursor default animation
 
 ## feat
 
-- use skeleton shimmer for the cursor default animation
-- setting: typingOpensMenu
-- make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
 - feat: breadcrumb
   - will be useful in mobile to go back up the ancestor chain (which maps to left/right bindings atm) but the difference is we can see what elements are in the acnestor chain, very easy to click on the parent p-tag or parent div tag etc etc; combine with moving between siblings using up/down buttons for button-based movement; probably don't want to do more than that, because touch selection is probably the primary way to move around on mobile
+- feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
+  - this allows us to more easily edit parts of complex tokens
+  - it also will isolate parens which might be a first step to semantically handling them
+  - COMMENT: how do we handle typing text?
+    - update decideInputIntent to detect punctuation, make it behave similarly to whitespace
+    - I would unit test the crap out of decideInputIntent first
+    - `/\p{P}/u` will distinguish all punctuation (unicode)
+  - COMMENT: can we distinguish all text (other lanugages) from non-text?
+- feat: auto-parens, auto-quotes; when CURSOR is on a token or several via a SELECTION, hitting quotes or brackets will surround with quotes and brackets; if the user wants to replace with these, they will have to delete and then type the new token
+  - COMMENT: just want to make sure the "type over with `(`" path isn't too hard or surprising; if we hit backspace, space and `(` we replace effectively have typed over with `(` ?
+- setting: typingOpensMenu
 - moving between visual line segments?
   - COMMENT: this would make the editor more like notepad, make it friendlier; bear in mind, mobile users can just touch the word;
   - COMMENT: this means repeat up or down movements, set some kind of horizontal position and we go looking for the nearest token to this position either above or below
@@ -147,14 +158,6 @@ COMMENT: small things that make a difference to user experience, flow of user ac
     - we allow text in the input eg "[island]" - and deleting it would signify deletion; but we have to make sure partial deletion is a no-op; might get weird
 - style: when cursor is on an island (eg katex island) it needs to still look like a cursor; maybe a throbbing outline/border?
   - COMMENT: could delete the old cursor-lab; replace it with a simple mockup of different states
-- feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
-  - this allows us to more easily edit parts of complex tokens
-  - it also will isolate parens which might be a first step to semantically handling them
-  - COMMENT: how do we handle typing text?
-    - update decideInputIntent to detect punctuation, make it behave similarly to whitespace
-    - I would unit test the crap out of decideInputIntent first
-    - `/\p{P}/u` will distinguish all punctuation (unicode)
-  - COMMENT: can we distinguish all text (other lanugages) from non-text?
 - fix/feat: use unicode mode in regexes (decideInputIntent, tokenization): 
   - `/\s/u` is unicode mode for detecting ALL whitespace; `\S` (non-whitespace) is a direct inverse of `\s`
 - feat: table editor - eg building a table of companies in a sector of the stock market

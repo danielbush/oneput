@@ -1,4 +1,4 @@
-import type { AppObject, Controller, UIFlags } from '@oneput/oneput';
+import type { AppObject, Controller, MenuItem, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { menuItem } from '@oneput/oneput';
 import {
@@ -14,6 +14,11 @@ import { SveltePropInjector } from '@oneput/oneput/shared/components/SveltePropI
 import { formatSecondsToHHMMSS, parseTimerDuration } from './utils.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry, isAddEntryResult } from './AddEntry.js';
+import {
+  isPickDurationResult,
+  SetDuration
+} from '@oneput/oneput/shared/appObjects/SetDuration.js';
+import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { icons } from '../_icons.js';
 import { TomatoTimerDiagnostics } from './TomatoTimerDiagnostics.js';
 
@@ -56,6 +61,7 @@ export class TomatoTimer implements AppObject {
   };
 
   onExit = () => {
+    this.clearCreateDraft();
     if (this.timerValue && !this.timerValue.isFinished) {
       this.store.putCurrentSession(this.timerValue.record as UnfinishedSession).orTee((err) => {
         this.ctl.alert({ message: 'Error saving timer', additional: err.message });
@@ -77,10 +83,55 @@ export class TomatoTimer implements AppObject {
         });
       return;
     }
+    if (this.createDraft) {
+      if (isPickDurationResult(result?.payload)) {
+        this.createDraft.duration = result.payload.value;
+      }
+      this.runCreateTimer();
+      return;
+    }
     this.runMain();
   };
 
+  onMenuItemFocus = ({ menuItem }: { menuItem: MenuItem | undefined }) => {
+    if (!this.createDraft || !menuItem) {
+      return;
+    }
+    this.unsubscribeCreateInput?.();
+    this.ctl.input.focusInput();
+    switch (menuItem.id) {
+      case 'create-label':
+        this.ctl.ui.update({ flags: { enableInputElement: true } });
+        this.ctl.input.setPlaceholder('Enter label...');
+        this.ctl.input.setInputValue(this.createDraft.label);
+        this.unsubscribeCreateInput = this.ctl.events.on('input-change', ({ value }) => {
+          if (!this.createDraft) {
+            return;
+          }
+          this.createDraft.label = value;
+          this.ctl.menu.setMenu({
+            id: 'runCreateTimer',
+            focusBehaviour: 'none',
+            items: this.createTimerMenuItems
+          });
+        });
+        break;
+      case 'create-duration':
+      case 'create-start':
+        this.ctl.ui.update({ flags: { enableInputElement: false } });
+        this.ctl.input.setInputValue();
+        this.ctl.input.setPlaceholder(
+          menuItem.id === 'create-duration' ? 'Set duration…' : 'Start the timer…'
+        );
+        break;
+    }
+  };
+
   private timerValue: TomatoTimerValue | null = null;
+
+  /** Draft while composing a new timer (survives SetDuration child). */
+  private createDraft: { duration: number; label: string } | null = null;
+  private unsubscribeCreateInput?: () => void;
 
   private newBlankEntry(): FinishedSession {
     const startTime = Date.now() / 1000;
@@ -166,7 +217,7 @@ export class TomatoTimer implements AppObject {
       items: [
         stdMenuItem({
           id: 'tomato-start',
-          textContent: '30 Minutes',
+          textContent: 'Start timer...',
           left: (b) => [b.icon(icons.Play)],
           action: () => {
             this.runCreateTimer({ duration: 30 * 60 });
@@ -330,54 +381,98 @@ export class TomatoTimer implements AppObject {
     });
   }
 
-  private runCreateTimer({ duration }: { duration: number }) {
+  private runCreateTimer(initial?: { duration: number }) {
+    if (!this.createDraft) {
+      this.createDraft = {
+        duration: initial?.duration ?? 30 * 60,
+        label: ''
+      };
+    } else if (initial?.duration !== undefined) {
+      this.createDraft.duration = initial.duration;
+    }
+
     this.ctl.ui.update({
       params: {
-        menuTitle: `Create timer: ${Math.round(duration / 60)} minutes`
-      }
+        menuTitle: 'Start timer'
+      },
+      flags: { enableInputElement: true }
     });
     this.ctl.app.setOnBack(() => {
+      this.clearCreateDraft();
       this.runMain();
     });
-    this.dynamicPlaceholder.setPlaceholder((params) => {
-      return params.submitBinding
-        ? `Enter a label and hit ${params.submitBinding}...`
-        : 'Enter value and submit...';
-    });
-
-    const startTimer = (label?: string) => {
-      const timerValue = TomatoTimerValue.start({
-        duration,
-        label
-      });
-      this.store
-        .putCurrentSession(timerValue.record as UnfinishedSession)
-        .andTee(() => {
-          this.runMainWithTimer(timerValue);
-        })
-        .orTee((err) => {
-          this.ctl.alert({ message: 'Error saving timer', additional: err.message });
-          this.runMainNoTimer();
-        });
-    };
-
+    this.ctl.input.resetSubmitHandler();
     this.ctl.menu.setMenu({
       id: 'runCreateTimer',
-      items: [
-        stdMenuItem({
-          id: 'tomato-timer-no-label',
-          textContent: 'Start with no label',
-          left: (b) => [b.icon(icons.Play)],
-          action: () => {
-            startTimer();
-          }
-        })
-      ]
+      focusBehaviour: 'last-action,first',
+      items: this.createTimerMenuItems
     });
+  }
 
-    this.ctl.input.setSubmitHandlerOnce((label) => {
-      startTimer(label);
+  private get createTimerMenuItems() {
+    const draft = this.createDraft;
+    if (!draft) {
+      return [];
+    }
+    return [
+      stdMenuItem({
+        id: 'create-duration',
+        textContent: `Duration: ${TimeVal.createFromSeconds(draft.duration).longTimeString}`,
+        left: (b) => [b.icon(icons.Timer)],
+        right: (b) => [b.icon(icons.ChevronRight)],
+        action: () => {
+          this.ctl.app.run(
+            SetDuration.create(this.ctl, {
+              duration: TimeVal.createFromSeconds(draft.duration)
+            })
+          );
+        }
+      }),
+      stdMenuItem({
+        id: 'create-label',
+        textContent: draft.label ? `Label: ${draft.label}` : 'Label...',
+        left: (b) => [b.icon(icons.Tag)],
+        action: () => {
+          this.ctl.input.focusInput();
+        }
+      }),
+      stdMenuItem({
+        id: 'create-start',
+        textContent: 'Start',
+        left: (b) => [b.icon(icons.Play)],
+        action: () => {
+          this.startFromDraft();
+        }
+      })
+    ];
+  }
+
+  private startFromDraft() {
+    const draft = this.createDraft;
+    if (!draft) {
+      return;
+    }
+    const label = draft.label.trim() || undefined;
+    const timerValue = TomatoTimerValue.start({
+      duration: draft.duration,
+      label
     });
+    this.clearCreateDraft();
+    this.store
+      .putCurrentSession(timerValue.record as UnfinishedSession)
+      .andTee(() => {
+        this.runMainWithTimer(timerValue);
+      })
+      .orTee((err) => {
+        this.ctl.alert({ message: 'Error saving timer', additional: err.message });
+        this.runMainNoTimer();
+      });
+  }
+
+  private clearCreateDraft() {
+    this.unsubscribeCreateInput?.();
+    this.unsubscribeCreateInput = undefined;
+    this.createDraft = null;
   }
 
   private runPreviousSessions() {

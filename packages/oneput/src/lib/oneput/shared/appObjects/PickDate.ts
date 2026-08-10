@@ -58,8 +58,8 @@ export type PickDateParams = {
  * Pick a date via a reusable {@link calendarMenuItem} rich row.
  * Month/year navigation + Today live in the pinned menu footer
  * (`< << Today >> >`); month/year is the menu header title.
- * Accept is advertised via `inputAccept` for host layouts;
- * cancel remains bare exit / goBack.
+ * Accept / reject are advertised via `inputAccept` / `inputReject` for host
+ * layouts; reject exits with no payload (same as goBack cancel).
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
@@ -269,6 +269,9 @@ export class PickDate implements AppObject {
         menuTitle: `${MONTH_LABELS[this.month]} ${this.year}`,
         inputAccept: {
           run: () => this.ctl.app.exit(this.result())
+        },
+        inputReject: {
+          run: () => this.ctl.app.exit()
         }
       } satisfies AppLayoutParams
     });

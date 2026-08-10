@@ -72,7 +72,7 @@ chrome roles with layout params (not lifecycle):
 
 - `inputAccept` — accept the current choice (e.g. Done on PickDate; confirm key capture). Exit stays in the AppObject’s `run` when needed.
 - `inputSend` — send / submit a message (e.g. Eliza chat)
-- `inputReject` — dismiss in place (e.g. abort key capture)
+- `inputReject` — dismiss (e.g. abort key capture; cancel PickDate with no result)
 - exit without a result — not a layout param
   - AppObject calls bare `ctl.app.exit()` (no payload)
   - typically from `onBack` / goBack, or `onMenuOpenChange` when the menu closes

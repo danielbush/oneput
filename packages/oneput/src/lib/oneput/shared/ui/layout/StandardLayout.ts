@@ -2,9 +2,8 @@ import { hflex, type FlexChildBuilder } from '../../../lib/builder.js';
 import { mountSvelte } from '../../../lib/utils.js';
 import type { Controller } from '../../../controllers/controller.js';
 import type { AppLayoutParams, FChildParams, UILayout } from '../../../types.js';
-import { DateDisplay } from '../../components/DateDisplay.js';
+import { DateTimeToggle } from '../../components/DateTimeToggle.js';
 import MenuStatus from '../../components/MenuStatus.svelte';
-import { TimeDisplay } from '../../components/TimeDisplay.js';
 import { acceptButton, rejectButton, sendButton } from '../buttons.js';
 
 /**
@@ -25,7 +24,8 @@ export type StandardLayoutIcons = {
  */
 export type StandardLayoutParams = AppLayoutParams & {
   /**
-   * Bottom-right outer chrome. When omitted, shows {@link DateDisplay}.
+   * Bottom-right outer chrome. When omitted, shows {@link DateTimeToggle}
+   * (date by default; click switches to time).
    */
   outerRight?: (b: FlexChildBuilder) => FChildParams;
 };
@@ -33,7 +33,7 @@ export type StandardLayoutParams = AppLayoutParams & {
 /**
  * Standard host layout: menu header (back / title / close), input-right
  * Accept / Reject / Send from {@link AppLayoutParams}, menu toggle, and
- * outer/inner status chrome.
+ * outer status chrome (date/time toggle bottom-right by default).
  *
  * Chrome only — hosts set defaults (filter, bindings, placeholder) in their
  * own init. Close over host icon names when installing so AppObject `params`
@@ -200,24 +200,6 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     };
   }
 
-  get innerUI() {
-    return hflex({
-      id: 'root-inner',
-      children: (b) => [
-        b.fchild({
-          style: { flex: '1' }
-        }),
-        b.fchild({
-          style: { justifyContent: 'center' },
-          onMount: TimeDisplay.onMount
-        }),
-        b.fchild({
-          style: { flex: '1' }
-        })
-      ]
-    });
-  }
-
   get outerUI() {
     return hflex({
       id: 'root-outer',
@@ -234,10 +216,21 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             }
           : b.fchild({
               // Keep a distinct id so swapping in outerRight does not skip
-              // onMount teardown for the default DateDisplay slot.
+              // onMount teardown for the default date/time toggle.
               id: 'root-outer-right-default',
-              style: { flex: '1', justifyContent: 'flex-end' },
-              onMount: DateDisplay.onMount
+              tag: 'button',
+              attr: { type: 'button' },
+              style: {
+                flex: '1',
+                justifyContent: 'flex-end',
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                padding: '0',
+                font: 'inherit',
+                color: 'inherit'
+              },
+              onMount: DateTimeToggle.onMount
             })
       ]
     });

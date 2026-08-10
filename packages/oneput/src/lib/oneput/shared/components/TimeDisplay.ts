@@ -15,10 +15,12 @@ export class TimeDisplay {
   }
   private updateTime = () => {
     const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
-    this.node.innerText = `${hours}:${minutes}:${seconds}`;
+    const hour24 = now.getHours();
+    const meridiem = hour24 >= 12 ? 'PM' : 'AM';
+    const hour12 = hour24 % 12 || 12;
+    this.node.innerText = `${hour12}:${minutes}:${seconds} ${meridiem}`;
   };
   destroy = () => {
     clearInterval(this.tid);

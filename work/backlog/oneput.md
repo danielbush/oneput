@@ -18,6 +18,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
     - binded actions
     - usually these 2 should coincide
 
+## security
+
+- flesh out packages/oneput/docs/SECURITY.md
+
 ## fix
 
 - fix: is katex display mode working when we insert?

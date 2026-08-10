@@ -5,6 +5,7 @@ import { isPickDateTimeResult, SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
+import { doneButton } from '@oneput/oneput/shared/ui/buttons.js';
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { DateTimeVal } from '@oneput/oneput/shared/lib/time/DateTimeVal.js';
 import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
@@ -169,21 +170,17 @@ export class AddEntry implements AppObject {
 
   /**
    * Host layout may wipe inputUI on ui.update; Done lives on input right via
-   * setInputUI (same affordance submitAndExit would paint).
+   * setInputUI using the shared done button.
    */
   private ensureDoneButton() {
     this.ctl.ui.setInputUI((current) => ({
       ...current,
       right: hflex({
         id: 'add-entry-done',
-        children: (b) => [
-          b.iconButton(icons.ArrowUp, {
-            title: 'Done',
-            classes: ['oneput__icon-submit-and-exit'],
-            onClick: (e) => {
-              e.preventDefault();
-              this.submit();
-            }
+        children: () => [
+          doneButton({
+            icon: icons.SendHorizontal,
+            onClick: () => this.submit()
           })
         ]
       })

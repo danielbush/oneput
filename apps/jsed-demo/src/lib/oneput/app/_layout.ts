@@ -8,6 +8,7 @@ import type {
 } from '@oneput/oneput';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
+import { doneButton, rejectButton, submitButton } from '@oneput/oneput/shared/ui/buttons.js';
 import { icons } from '@oneput/jsed';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 
@@ -82,7 +83,7 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   /**
-   * Input-right affordances from layout params: `submit`, `reject`, then
+   * Input-right buttons from layout params: `submit`, `reject`, then
    * `submitAndExit` (Done). Prefer not setting submit/reject together with
    * submitAndExit from the same AppObject.
    */
@@ -93,51 +94,34 @@ export class Layout implements UILayout<LayoutSettings> {
     }
     return hflex({
       id: 'layout-input-right',
-      children: (b) => {
+      children: () => {
         const children: FChildParams[] = [];
-        const push = (
-          affordance: { run: () => void; enabled?: boolean },
-          opts: { title: string; icon: string; classes?: string[] }
-        ) => {
-          const enabled = affordance.enabled !== false;
+        if (submit) {
           children.push(
-            b.fchild({
-              tag: 'button',
-              classes: [
-                'oneput__icon-button',
-                ...(opts.classes ?? []),
-                ...(enabled ? [] : ['oneput__icon-disabled'])
-              ],
-              icon: opts.icon,
-              attr: {
-                type: 'button',
-                title: opts.title,
-                'aria-label': opts.title,
-                disabled: !enabled,
-                ...(enabled
-                  ? {
-                      onclick: (e: Event) => {
-                        e.preventDefault();
-                        affordance.run();
-                      }
-                    }
-                  : {})
-              }
+            submitButton({
+              icon: icons.Check,
+              onClick: () => submit.run(),
+              enabled: submit.enabled
             })
           );
-        };
-        if (submit) {
-          push(submit, { title: 'Submit', icon: icons.Check });
         }
         if (reject) {
-          push(reject, { title: 'Reject', icon: icons.X });
+          children.push(
+            rejectButton({
+              icon: icons.X,
+              onClick: () => reject.run(),
+              enabled: reject.enabled
+            })
+          );
         }
         if (submitAndExit) {
-          push(submitAndExit, {
-            title: 'Done',
-            icon: icons.ArrowUp,
-            classes: ['oneput__icon-submit-and-exit']
-          });
+          children.push(
+            doneButton({
+              icon: icons.SendHorizontal,
+              onClick: () => submitAndExit.run(),
+              enabled: submitAndExit.enabled
+            })
+          );
         }
         return children;
       }

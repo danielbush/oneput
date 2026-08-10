@@ -8,6 +8,7 @@ export const iconData = {
   X: lu.X,
   Check: lu.Check,
   ArrowUp: lu.ArrowUp,
+  SendHorizontal: lu.SendHorizontal,
   Command: lu.Command,
   File: lu.Files,
   CloseNotification: lu.X,

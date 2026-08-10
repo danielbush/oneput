@@ -54,6 +54,11 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 - COMMENT: more ambitious
 - multi-user edit
 
+## security
+
+- flesh out packages/jsed/docs/SECURITY.md
+
+
 ## fix
 
 - what is `insertInside` in `ElementInsertOption`?

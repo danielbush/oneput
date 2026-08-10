@@ -164,6 +164,14 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - etc
   - run this on PR's
 
+## style
+
+- style: in oneput internal demo (not oneput-demo), the divider text has an additional indent (margin-left by the looks) that breaks alignment with the main text in the menu items
+- style: the radius of the input border box (which gets the focus ring) is more pronounced than the border radius of the oneput container
+  - COMMENT: it's more noticeable when there is no chrome above the input
+- style: the gap between input and top of oneput container is different to the gap to the left/right sides of the container
+  - COMMENT: it's more noticeable when there is no chrome above the input
+
 ## defer
 
 - Convert `createActions` and `createMenuItems` to objects (.create)

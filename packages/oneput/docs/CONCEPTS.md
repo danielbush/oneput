@@ -47,7 +47,7 @@ SUMMARY: we start with who "owns" what. We have the host application which autho
 
 To create and compose reusable "components" including 3rd party components we have several strategies:
 
-- 3rd party providers can call signals (which the hosting ui should handle eg `submitAndExit`, etc.) and set flags (`enableGoBack` etc) and use AppObject lifecycle (imperatively or declaratively: onMenuOpenClose, onBack etc). These don't give much control over the ui but they do handle very common situations.
+- 3rd party providers can call signals (which the hosting ui should handle eg `inputAccept`, `inputSend`, etc.) and set flags (`enableGoBack` etc) and use AppObject lifecycle (imperatively or declaratively: onMenuOpenClose, onBack etc). These don't give much control over the ui but they do handle very common situations.
 - create a RICH_MENU_ITEM
   - for bespoke ui that you want to show in the menu area which acts as the central display area of oneput
   - eg a calendar
@@ -55,7 +55,7 @@ To create and compose reusable "components" including 3rd party components we ha
   - 3rd party providers should provide RICH_MENU_ITEM's, shared AppObjects, and any business logic formatting functions as 3 separate things maximising consumer options
 - create a shared AppObject (`SharedCtl` in `create` / ctor)
   - particularly useful for 3rd party but may also be good for internally reusable AppObject's
-  - limited access to layout to avoid creating chaos; instead can send signal to the host UI like "submitAndExit" etc
+  - limited access to layout to avoid creating chaos; instead can send signal to the host UI like "inputAccept" etc
   - may incorporate RICH_MENU_ITEM's to achieve a desired result
 - create an AppObject
   - AppObject's are created for the Oneput application; they have full access to the UI/layout because it is also owned by the Oneput application
@@ -65,13 +65,14 @@ To create and compose reusable "components" including 3rd party components we ha
 - TODO
   - what we haven't covered is a 3rd party shared AppObject that might want to set or influence 3rd party chrome when its active
 
-## Signals vs direct UI (`submitAndExit`, `submit`, `reject`)
+## Signals vs direct UI (`inputSend`, `inputAccept`, `inputReject`)
 
 Shared AppObjects should not assume where host chrome lives. They advertise
-intent with layout params:
+chrome roles with layout params (not lifecycle):
 
-- `submitAndExit` — accept AppObject result and pop (e.g. Done on PickDate)
-- `submit` / `reject` — in-flow accept/dismiss (e.g. key capture in BindingsEditor; Eliza send / clear draft)
+- `inputAccept` — accept the current choice (e.g. Done on PickDate; confirm key capture). Exit stays in the AppObject’s `run` when needed.
+- `inputSend` — send / submit a message (e.g. Eliza chat)
+- `inputReject` — dismiss in place (e.g. abort key capture)
 - exit without a result — not a layout param
   - AppObject calls bare `ctl.app.exit()` (no payload)
   - typically from `onBack` / goBack, or `onMenuOpenChange` when the menu closes
@@ -80,7 +81,7 @@ intent with layout params:
 
 The host layout decides how to surface these — commonly on `inputUI.right`, even
 when the input field itself is disabled. Shared button chrome lives in
-`shared/ui/buttons.ts` (`doneButton`, `submitButton`, `rejectButton`) —
+`shared/ui/buttons.ts` (`acceptButton`, `sendButton`, `rejectButton`) —
 plain plug-in controls. Layouts and AppObjects place them where they need
 (e.g. in an `inputUI.right` hflex).
 
@@ -94,13 +95,13 @@ signals onto `inputUI.right`, those can clash (`ui.update` replaces `inputUI`
 from the layout; `setInputUI` patches it). That is an acceptable first-party
 footgun:
 
-> Host layouts may surface `submitAndExit` / `submit` / `reject` (e.g. on
+> Host layouts may surface `inputAccept` / `inputSend` / `inputReject` (e.g. on
 > `inputUI.right`). If your own AppObjects also call `setInputUI`, those can
 > clash — coordinate them. Shared AppObjects use `SharedCtl` and cannot set
 > input UI, so they don’t have this risk.
 
 “Coordinate” can mean composing in the layout (e.g. adornments from the
-AppObject plus Done from `submitAndExit` in one `right` flex), not only
+AppObject plus Accept from `inputAccept` in one `right` flex), not only
 “use one or the other.”
 
 ## RICH_MENU_ITEM's

@@ -85,8 +85,8 @@ export class ElizaChat implements AppObject {
   }
 
   /**
-   * Keep layout `submit` / `reject` in sync with draft + busy. `ui.update`
-   * rebuilds layout `inputUI`, so re-apply the textarea afterward.
+   * Keep layout `inputSend` in sync with draft + busy. `ui.update` rebuilds
+   * layout `inputUI`, so re-apply the textarea afterward.
    */
   onInputChange = ({ value }: { value: string }) => {
     this.syncSendChrome(value);
@@ -96,16 +96,9 @@ export class ElizaChat implements AppObject {
     const enabled = Boolean(value.trim()) && !this.busy;
     this.ctl.ui.update({
       params: {
-        submit: {
+        inputSend: {
           run: () => {
             void this.send(this.ctl.input.getInputValue());
-          },
-          enabled
-        },
-        reject: {
-          run: () => {
-            void this.ctl.input.clearInput();
-            this.syncSendChrome('');
           },
           enabled
         }

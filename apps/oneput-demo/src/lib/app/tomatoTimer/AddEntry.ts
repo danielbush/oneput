@@ -1,11 +1,16 @@
-import type { AppObject, Controller, MenuItem, OneputProps, UIFlags } from '@oneput/oneput';
-import { hflex } from '@oneput/oneput';
+import type {
+  AppLayoutParams,
+  AppObject,
+  Controller,
+  MenuItem,
+  OneputProps,
+  UIFlags
+} from '@oneput/oneput';
 import { isPickDurationResult, SetDuration } from '@oneput/oneput/shared/appObjects/SetDuration.js';
 import { isPickDateTimeResult, SetDateTime } from './SetDateTime.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
-import { doneButton } from '@oneput/oneput/shared/ui/buttons.js';
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { DateTimeVal } from '@oneput/oneput/shared/lib/time/DateTimeVal.js';
 import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
@@ -121,8 +126,6 @@ export class AddEntry implements AppObject {
         this.ctl.input.setInputValue();
         break;
     }
-    // ui.update replaces inputUI from the layout; re-apply Done after that.
-    this.ensureDoneButton();
   };
 
   onStart() {
@@ -132,11 +135,13 @@ export class AddEntry implements AppObject {
   run() {
     this.ctl.ui.update({
       params: {
-        menuTitle: 'Add entry...'
-      }
+        menuTitle: 'Add entry...',
+        inputAccept: {
+          run: () => this.submit()
+        }
+      } satisfies AppLayoutParams
     });
     this.ctl.input.setSubmitHandler(() => this.submit());
-    this.ensureDoneButton();
     this.ctl.menu.clearGenerative();
     this.ctl.menu.setMenu({
       id: 'main',
@@ -168,25 +173,6 @@ export class AddEntry implements AppObject {
     };
   }
 
-  /**
-   * Host layout may wipe inputUI on ui.update; Done lives on input right via
-   * setInputUI using the shared done button.
-   */
-  private ensureDoneButton() {
-    this.ctl.ui.setInputUI((current) => ({
-      ...current,
-      right: hflex({
-        id: 'add-entry-done',
-        children: () => [
-          doneButton({
-            icon: icons.SendHorizontal,
-            onClick: () => this.submit()
-          })
-        ]
-      })
-    }));
-  }
-
   get menuItems() {
     return [
       stdMenuItem({
@@ -210,7 +196,6 @@ export class AddEntry implements AppObject {
               textArea: { rows: 3 }
             } satisfies OneputProps['inputUI'];
           });
-          this.ensureDoneButton();
           this.ctl.input.focusInput();
         },
         bottom: {

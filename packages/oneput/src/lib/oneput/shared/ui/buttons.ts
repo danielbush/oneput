@@ -6,6 +6,9 @@ import type { FChildParams } from '../../types.js';
  *
  * Callers pass `onClick` / `enabled` / registered icon names.
  * Hosts register icons; Oneput does not.
+ *
+ * Pair with {@link AppLayoutParams} slots: `inputSend`, `inputAccept`,
+ * `inputReject`.
  */
 
 export type IconButtonOpts = {
@@ -55,29 +58,29 @@ export function iconActionButton(opts: {
   });
 }
 
-/** Done / send control — same chrome as submit/reject. */
-export function doneButton(opts: IconButtonOpts): FChildParams {
+/** Send / message control — typically `inputSend` + SendHorizontal. */
+export function sendButton(opts: IconButtonOpts): FChildParams {
   return iconActionButton({
     id: opts.id,
     icon: opts.icon,
-    title: opts.title ?? 'Done',
+    title: opts.title ?? 'Send',
     onClick: opts.onClick,
     enabled: opts.enabled
   });
 }
 
-/** In-flow submit control. */
-export function submitButton(opts: IconButtonOpts): FChildParams {
+/** Accept / Done control — typically `inputAccept` + Check. */
+export function acceptButton(opts: IconButtonOpts): FChildParams {
   return iconActionButton({
     id: opts.id,
     icon: opts.icon,
-    title: opts.title ?? 'Submit',
+    title: opts.title ?? 'Accept',
     onClick: opts.onClick,
     enabled: opts.enabled
   });
 }
 
-/** In-flow reject / dismiss control. */
+/** Reject / dismiss control — typically `inputReject` + X. */
 export function rejectButton(opts: IconButtonOpts): FChildParams {
   return iconActionButton({
     id: opts.id,

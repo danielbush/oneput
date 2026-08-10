@@ -14,7 +14,7 @@ import { toggleMenuItem } from '../ui/menuItems/toggleMenuItem.js';
  * Let's you add / remove bindings to actions via the Oneput interface.
  *
  * Takes {@link SharedCtl}. Capture Accept/Cancel are signaled via layout params
- * `submit` / `reject` (not `setInputUI`).
+ * `inputAccept` / `inputReject` (not `setInputUI`).
  */
 export class BindingsEditor implements AppObject {
   static create(
@@ -78,7 +78,7 @@ export class BindingsEditor implements AppObject {
   private actionsUI = () => {
     const title = 'Manage key bindings';
     this.ctl.ui.update({
-      params: { menuTitle: title, submit: undefined, reject: undefined }
+      params: { menuTitle: title, inputAccept: undefined, inputReject: undefined }
     });
     this.ctl.app.setOnBack(() => {
       this.ctl.app.exit();
@@ -120,8 +120,8 @@ export class BindingsEditor implements AppObject {
     this.ctl.ui.update({
       params: {
         menuTitle: `Key bindings for "${description}"`,
-        submit: undefined,
-        reject: undefined
+        inputAccept: undefined,
+        inputReject: undefined
       }
     });
     this.ctl.app.setOnBack(() => {
@@ -187,11 +187,11 @@ export class BindingsEditor implements AppObject {
     this.ctl.ui.update({
       params: {
         menuTitle: 'Capturing...',
-        submit: {
+        inputAccept: {
           run: capture.accept,
           enabled: capture.keyCount() > 0
         },
-        reject: {
+        inputReject: {
           run: capture.reject
         }
       },
@@ -231,8 +231,8 @@ export class BindingsEditor implements AppObject {
     this.ctl.ui.update({
       params: {
         menuTitle: 'Set when condition',
-        submit: undefined,
-        reject: undefined
+        inputAccept: undefined,
+        inputReject: undefined
       }
     });
 
@@ -282,7 +282,7 @@ export class BindingsEditor implements AppObject {
       window.removeEventListener('keydown', keyListener);
       this.ctl.ui.update({
         flags: { enableModal: false },
-        params: { submit: undefined, reject: undefined }
+        params: { inputAccept: undefined, inputReject: undefined }
       });
     };
 

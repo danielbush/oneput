@@ -432,7 +432,7 @@ export class AppController {
       }
       if (layout || layoutParams) {
         // Baseline for this AppObject: replace so child mid-flight params
-        // (e.g. submitAndExit) don't stick on resume.
+        // (e.g. inputAccept) don't stick on resume.
         this.ctl.ui.update({ params: layoutParams, replace: true });
       }
     }

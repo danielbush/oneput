@@ -264,7 +264,7 @@ Mid-flight `ctl.ui.update({ flags })` / `{ params }` still wins after that.
 
 **`params`** — data for the active `UILayout`. Then passed to `layout.configure`, then `menuUI` / `inputUI` / etc. are re-read onto `currentProps`.
 
-- shared (`AppLayoutParams`): `menuTitle`, `submitAndExit`, `submit`, `reject` (`{ run, enabled? }`)
+- shared (`AppLayoutParams`): `menuTitle`, `inputSend`, `inputAccept`, `inputReject` (`{ run, enabled? }`)
 - menu-owned chrome (via `setMenu` / `menu()` → `menuUI.header` / `menuUI.footer`): AppObject pins above/below the item list; not layout params
 - demo layout extras (`LayoutSettings`): `outerRight`
 
@@ -272,6 +272,6 @@ Note: demo `LayoutSettings` is the layout’s _params_ type — not `AppObject.s
 
 ---
 
-Oneput defines enableGoBack, enableMenuOpenClose and submitAndExit / submit / reject, menuTitle as standard flags or parameters.
+Oneput defines enableGoBack, enableMenuOpenClose and inputSend / inputAccept / inputReject, menuTitle as standard flags or parameters.
 A oneput application's layout should handle these flags and parameters.
 oneput-demo's layout (\_layout) maps those signals to `inputUI.right`, and the menu header to back / title / close (X).

@@ -146,7 +146,7 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
     this.ctl.ui.update({
       params: {
         menuTitle: 'Set date and time...',
-        submitAndExit: {
+        inputAccept: {
           run: () => this.submit(),
           enabled: canSubmit
         }

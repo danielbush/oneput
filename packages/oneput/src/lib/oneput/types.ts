@@ -308,7 +308,9 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
 /**
  * Host-layout affordance: an action the layout may surface (button, etc.).
  *
- * Used by {@link AppLayoutParams.submitAndExit}, `.submit`, and `.reject`.
+ * Used by {@link AppLayoutParams.inputSend}, `.inputAccept`, and `.inputReject`.
+ * These are chrome roles, not lifecycle — the AppObject’s `run` decides whether
+ * to exit, stay, send a message, etc.
  */
 export type LayoutAffordance = {
   run: () => void;
@@ -317,22 +319,13 @@ export type LayoutAffordance = {
 };
 
 /**
- * Signal that the current AppObject can submit and exit carrying a result.
- *
- * Sent via `ctl.ui.update({ params: { submitAndExit } })`. Layouts may surface
- * this (e.g. Done on `inputUI.right`); they are not required to. Cancel /
- * discard remains a bare `ctl.app.exit()`.
- */
-export type SubmitAndExit = LayoutAffordance;
-
-/**
  * Narrow controller surface for reusable / 3rd-party AppObjects (type-only
  * allowlist).
  *
  * Hosts still pass a full {@link Controller}. Shared AppObject `create` /
  * constructors take `SharedCtl` so they cannot call layout-direct APIs
  * (`setInputUI`, `setOuterUI`, `replaceMenuUI`, …). Prefer layout params /
- * flags (e.g. {@link SubmitAndExit}) and `menu()` / `setMenu` instead.
+ * flags (e.g. `inputAccept`) and `menu()` / `setMenu` instead.
  *
  * See `docs/CONCEPTS.md` (Composition / Signals vs direct UI).
  */
@@ -381,17 +374,19 @@ export type AppLayoutParams = {
    */
   menuTitle?: string;
   /**
-   * Optional submit-and-exit signal for host layouts (e.g. Done on input right).
+   * Send a message / submit text (e.g. chat). Hosts often paint SendHorizontal.
    */
-  submitAndExit?: SubmitAndExit;
+  inputSend?: LayoutAffordance;
   /**
-   * In-flow accept (does not exit the AppObject). e.g. confirm key capture.
+   * Accept the current choice (e.g. Done on a picker, confirm key capture).
+   * Hosts often paint a check. Exit stays in the AppObject’s `run` if needed.
    */
-  submit?: LayoutAffordance;
+  inputAccept?: LayoutAffordance;
   /**
-   * In-flow reject / dismiss (does not exit the AppObject). e.g. abort capture.
+   * Reject / dismiss in place (e.g. clear draft, abort capture).
+   * Hosts often paint an X.
    */
-  reject?: LayoutAffordance;
+  inputReject?: LayoutAffordance;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

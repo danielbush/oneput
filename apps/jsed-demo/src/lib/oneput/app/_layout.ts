@@ -8,7 +8,7 @@ import type {
 } from '@oneput/oneput';
 import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
 import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
-import { doneButton, rejectButton, submitButton } from '@oneput/oneput/shared/ui/buttons.js';
+import { acceptButton, rejectButton, sendButton } from '@oneput/oneput/shared/ui/buttons.js';
 import { icons } from '@oneput/jsed';
 import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 
@@ -52,7 +52,7 @@ export class Layout implements UILayout<LayoutSettings> {
 
   private get exitAction() {
     // Close the menu (not exit the AppObject). Exit remains an AppObject
-    // decision (e.g. onBack / goBack default pop / submitAndExit).
+    // decision (e.g. onBack / goBack default pop / inputAccept.run).
     if (this.ctl.app.flags.enableMenuOpenClose) {
       return this.ctl.menu.closeMenu;
     }
@@ -83,43 +83,42 @@ export class Layout implements UILayout<LayoutSettings> {
   }
 
   /**
-   * Input-right buttons from layout params: `submit`, `reject`, then
-   * `submitAndExit` (Done). Prefer not setting submit/reject together with
-   * submitAndExit from the same AppObject.
+   * Input-right buttons from layout params: `inputAccept`, `inputReject`,
+   * then `inputSend`. Chrome roles — exit/stay stays in each affordance’s `run`.
    */
   private inputRight() {
-    const { submit, reject, submitAndExit } = this.settings;
-    if (!submit && !reject && !submitAndExit) {
+    const { inputAccept, inputReject, inputSend } = this.settings;
+    if (!inputAccept && !inputReject && !inputSend) {
       return;
     }
     return hflex({
       id: 'layout-input-right',
       children: () => {
         const children: FChildParams[] = [];
-        if (submit) {
+        if (inputAccept) {
           children.push(
-            submitButton({
+            acceptButton({
               icon: icons.Check,
-              onClick: () => submit.run(),
-              enabled: submit.enabled
+              onClick: () => inputAccept.run(),
+              enabled: inputAccept.enabled
             })
           );
         }
-        if (reject) {
+        if (inputReject) {
           children.push(
             rejectButton({
               icon: icons.X,
-              onClick: () => reject.run(),
-              enabled: reject.enabled
+              onClick: () => inputReject.run(),
+              enabled: inputReject.enabled
             })
           );
         }
-        if (submitAndExit) {
+        if (inputSend) {
           children.push(
-            doneButton({
+            sendButton({
               icon: icons.SendHorizontal,
-              onClick: () => submitAndExit.run(),
-              enabled: submitAndExit.enabled
+              onClick: () => inputSend.run(),
+              enabled: inputSend.enabled
             })
           );
         }

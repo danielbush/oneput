@@ -1,0 +1,138 @@
+/**
+ * Styling for the breadcrumb mockups in _breadcrumbs.ts.
+ *
+ * Kept separate from _mockup-styles.css and from oneput-defaults.css for the
+ * same reason: this is a shape we are still deciding about. If it graduates
+ * into a real construct, these styles move into the defaults and lose the
+ * `demo-` prefix.
+ */
+
+/* The trail plus anything pinned beside it (here, a trailing icon button). */
+.demo-crumbs-row {
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.demo-crumbs {
+  --demo-crumb-fade: 1.25em;
+
+  align-items: center;
+  /* .oneput__hflex spreads its children; a trail must stay packed left. */
+  justify-content: flex-start;
+  gap: 0.15em;
+  /* Take the space the icon button does not, and be allowed to scroll. */
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.15em 0;
+  font-size: 0.85em;
+}
+
+/* #region crumbs */
+
+.demo-crumb {
+  appearance: none;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.15em 0.4em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.demo-crumb:hover:not(:disabled) {
+  background: var(--oneput-button-background-hover);
+}
+
+.demo-crumb:active:not(:disabled) {
+  background: var(--oneput-button-background-active);
+}
+
+.demo-crumb:focus-visible {
+  outline: var(--oneput-button-outline);
+}
+
+/* The current location: shown, but there is nowhere to navigate to. */
+.demo-crumb--current {
+  font-weight: 600;
+  cursor: default;
+  opacity: 1;
+}
+
+.demo-crumb-sep {
+  flex: 0 0 auto;
+  opacity: 0.5;
+  user-select: none;
+}
+
+/* #endregion */
+
+/* #region element trails */
+
+/*
+ * Element names are identifiers, so set them as code. They are also short, so
+ * the trail gets tighter — more crumbs fit before it has to scroll.
+ */
+.demo-crumbs--code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78em;
+}
+
+.demo-crumbs--code .demo-crumb {
+  padding: 0.15em 0.3em;
+}
+
+/*
+ * The qualifier tells sibling elements apart, but the tag name is what you
+ * scan for. Keep it legible and clearly secondary.
+ */
+.demo-crumb-qual {
+  opacity: 0.55;
+  padding-left: 0.15em;
+}
+
+/* #endregion */
+
+/* #region scroll */
+
+.demo-crumbs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+
+  /*
+   * Fade an edge only while something is hidden behind it. `trackScrollEdges`
+   * sets the data attributes below; at an end its fade collapses to 0, so a
+   * trail that fits (or is scrolled hard against one side) shows no fade there
+   * — a fade with nothing behind it just reads as truncation.
+   */
+  --demo-crumb-fade-start: var(--demo-crumb-fade);
+  --demo-crumb-fade-end: var(--demo-crumb-fade);
+
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--demo-crumb-fade-start),
+    #000 calc(100% - var(--demo-crumb-fade-end)),
+    transparent 100%
+  );
+}
+
+.demo-crumbs[data-at-start='true'] {
+  --demo-crumb-fade-start: 0px;
+}
+
+.demo-crumbs[data-at-end='true'] {
+  --demo-crumb-fade-end: 0px;
+}
+
+.demo-crumbs::-webkit-scrollbar {
+  display: none;
+}
+
+/* #endregion */

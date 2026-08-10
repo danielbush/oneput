@@ -1,11 +1,10 @@
 <script lang="ts">
   import '../../_demo-styles.css';
-  import '../../_mockup-styles.css';
   import '$lib/oneput/shared/styles/oneput-defaults.css';
   import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
   import * as ui from '../../_ui.js';
   import { resolve } from '$app/paths';
-  import * as mockups from '../../_mockups.js';
+  import * as mockups from './_set-time.js';
   import VisualDebugControls from '$lib/oneput/shared/components/VisualDebugControls.svelte';
   import ForceDarkModeControls from '$lib/oneput/shared/components/ForceDarkMode.svelte';
 

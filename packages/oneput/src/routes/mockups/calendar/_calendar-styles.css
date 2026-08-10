@@ -1,0 +1,63 @@
+/**
+ * Styling for the calendar mockups in _calendar.ts.
+ *
+ * Deliberately kept out of both _demo-styles.css (which is page chrome: the
+ * grid the examples sit in, headings, buttons) and oneput-defaults.css (which
+ * is the blessed Oneput vocabulary). These are shapes we are still deciding
+ * about; if one graduates into a real construct, its styles move into the
+ * defaults and lose the `demo-` prefix.
+ */
+
+.demo-calendar-row {
+  justify-content: stretch;
+}
+
+.demo-calendar-cell {
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.35em 0;
+  border-radius: 4px;
+}
+
+.demo-calendar-cell--label {
+  font: 600 0.75em sans-serif;
+  color: var(--oneput-text-muted);
+  text-transform: uppercase;
+}
+
+.demo-calendar-cell--outside {
+  opacity: 0.35;
+}
+
+.demo-calendar-cell--selected {
+  background: rgb(100 100 100 / 0.35);
+  font-weight: 600;
+
+  html.dark-mode & {
+    background: rgb(200 200 200 / 0.25);
+  }
+}
+
+/* Rich-item calendar: whole month is one menu row; days are nested buttons. */
+.demo-calendar-widget {
+  gap: 0.15em;
+  padding: 0.35em 0.5em;
+}
+
+.demo-calendar-cell--button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo-calendar-cell--button:hover {
+  background: rgb(100 100 100 / 0.15);
+
+  html.dark-mode & {
+    background: rgb(200 200 200 / 0.12);
+  }
+}

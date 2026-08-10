@@ -55,6 +55,7 @@
       <li><a href={resolve('/mockups/calendar')}>Mockup: calendar (two ways)</a></li>
       <li><a href={resolve('/mockups/time')}>Mockup: time</a></li>
       <li><a href={resolve('/mockups/chat')}>Mockup: chat</a></li>
+      <li><a href={resolve('/mockups/breadcrumb')}>Mockup: breadcrumb</a></li>
     </ul>
   </nav>
   <VisualDebugControls />

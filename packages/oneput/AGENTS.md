@@ -48,6 +48,15 @@ Decoupled pub-sub communication between controllers.
 
 - Types and emitter: `packages/oneput/src/lib/oneput/controllers/InternalEventEmitter.ts`
 
+### Standard host layout
+
+Reusable menu/input chrome that maps `AppLayoutParams` (`inputAccept` /
+`inputReject` / `inputSend`) onto `inputUI.right`. Hosts close over registered
+icon names in the install factory.
+
+- `packages/oneput/src/lib/oneput/shared/ui/layout/StandardLayout.ts`
+- Buttons: `packages/oneput/src/lib/oneput/shared/ui/buttons.ts`
+
 ## Oneput skill (`packages/oneput-skill/SKILL.md`)
 
 There is also an agent skill at `.agents/skills/oneput` (symlinked from `packages/oneput-skill/`). This is a fourth layer that sits alongside the others but serves a different purpose:

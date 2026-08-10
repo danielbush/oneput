@@ -1,231 +1,27 @@
-import { hflex, mountSvelte } from '@oneput/oneput';
-import type {
-  AppLayoutParams,
-  Controller,
-  FChildParams,
-  FlexChildBuilder,
-  UILayout
-} from '@oneput/oneput';
-import { TimeDisplay } from '@oneput/oneput/shared/components/TimeDisplay.js';
-import { DateDisplay } from '@oneput/oneput/shared/components/DateDisplay.js';
-import { acceptButton, rejectButton, sendButton } from '@oneput/oneput/shared/ui/buttons.js';
+import type { Controller } from '@oneput/oneput';
+import {
+  StandardLayout,
+  type StandardLayoutParams
+} from '@oneput/oneput/shared/ui/layout/StandardLayout.js';
 import { icons } from '@oneput/jsed';
-import MenuStatus from '@oneput/oneput/shared/components/MenuStatus.svelte';
 
 /**
- * Define settings used by your particular layout.
+ * Host layout params (shared {@link StandardLayout} + jsed icons).
  */
-export type LayoutSettings = AppLayoutParams & {
-  /**
-   * Expose the bottom right corner of the layout.
-   */
-  outerRight?: (b: FlexChildBuilder) => FChildParams;
+export type LayoutSettings = StandardLayoutParams;
+
+const layoutIcons = {
+  X: icons.X,
+  Check: icons.Check,
+  SendHorizontal: icons.SendHorizontal,
+  ArrowLeft: icons.ArrowLeft,
+  ChevronDown: icons.ChevronDown
 };
 
 /**
- * Defines a standard layout.
+ * Demo host layout — {@link StandardLayout} with jsed’s registered icons.
  */
-export class Layout implements UILayout<LayoutSettings> {
-  static create(ctl: Controller, settings: LayoutSettings = {}) {
-    return new Layout(ctl, settings);
-  }
-
-  constructor(
-    private ctl: Controller,
-    private settings: LayoutSettings = {}
-  ) {}
-
-  configure(settings: { params?: Partial<LayoutSettings>; replace?: boolean }) {
-    if (settings.replace) {
-      this.settings = {
-        ...settings.params,
-        menuTitle: settings.params?.menuTitle ?? 'Menu'
-      };
-      return;
-    }
-    this.settings = {
-      ...this.settings,
-      ...settings.params,
-      menuTitle: settings.params?.menuTitle ?? this.settings.menuTitle ?? 'Menu'
-    };
-  }
-
-  private get exitAction() {
-    // Close the menu (not exit the AppObject). Exit remains an AppObject
-    // decision (e.g. onBack / goBack default pop / inputAccept.run).
-    if (this.ctl.app.flags.enableMenuOpenClose) {
-      return this.ctl.menu.closeMenu;
-    }
-    return;
-  }
-
-  private get backAction() {
-    if (this.ctl.app.flags.enableGoBack) {
-      return this.ctl.app.goBack;
-    }
-    return;
-  }
-
-  /**
-   * Menu header right: close-menu (X) when enableMenuOpenClose.
-   */
-  private headerRight(b: FlexChildBuilder) {
-    const exitAction = this.exitAction;
-    if (!exitAction) {
-      return b.spacer();
-    }
-    return b.fchild({
-      tag: 'button',
-      classes: ['oneput__icon-button'],
-      attr: { type: 'button', title: 'Close menu', onclick: exitAction },
-      icon: icons.X
-    });
-  }
-
-  /**
-   * Input-right buttons from layout params: `inputAccept`, `inputReject`,
-   * then `inputSend`. Chrome roles — exit/stay stays in each affordance’s `run`.
-   */
-  private inputRight() {
-    const { inputAccept, inputReject, inputSend } = this.settings;
-    if (!inputAccept && !inputReject && !inputSend) {
-      return;
-    }
-    return hflex({
-      id: 'layout-input-right',
-      children: () => {
-        const children: FChildParams[] = [];
-        if (inputAccept) {
-          children.push(
-            acceptButton({
-              icon: icons.Check,
-              onClick: () => inputAccept.run(),
-              enabled: inputAccept.enabled
-            })
-          );
-        }
-        if (inputReject) {
-          children.push(
-            rejectButton({
-              icon: icons.X,
-              onClick: () => inputReject.run(),
-              enabled: inputReject.enabled
-            })
-          );
-        }
-        if (inputSend) {
-          children.push(
-            sendButton({
-              icon: icons.SendHorizontal,
-              onClick: () => inputSend.run(),
-              enabled: inputSend.enabled
-            })
-          );
-        }
-        return children;
-      }
-    });
-  }
-
-  get inputUI() {
-    return {
-      right: this.inputRight(),
-      outerRight: hflex({
-        id: 'root-input-right',
-        children: (b) => [
-          b.fchild({
-            tag: 'button',
-            attr: {
-              type: 'button',
-              title: 'Options',
-              onclick: () => {
-                if (this.ctl.menu.isMenuOpen) {
-                  this.ctl.menu.closeMenu();
-                } else {
-                  this.ctl.menu.openMenu();
-                }
-              }
-            },
-            classes: ['oneput__icon-button', 'oneput__menu-button'],
-            // We use css to rotate the chevron which relies on
-            // Oneput to set a class depending on the menu state.
-            icon: icons.ChevronDown
-          })
-        ]
-      })
-    };
-  }
-
-  get menuUI() {
-    return {
-      layoutHeader: hflex({
-        id: 'menu-header',
-        children: (b) => [
-          this.backAction
-            ? b.fchild({
-                tag: 'button',
-                attr: { type: 'button', title: 'Back', onclick: this.backAction },
-                classes: ['oneput__icon-button'],
-                icon: icons.ArrowLeft
-              })
-            : b.spacer(),
-          b.fchild({
-            classes: ['oneput__menu-item-header'],
-            textContent: this.settings.menuTitle || 'Menu'
-          }),
-          this.headerRight(b)
-        ]
-      })
-    };
-  }
-
-  get innerUI() {
-    return hflex({
-      id: 'root-inner',
-      children: (b) => [
-        b.fchild({
-          style: { flex: '1' }
-        }),
-        b.fchild({
-          style: { justifyContent: 'center' },
-          onMount: TimeDisplay.onMount
-        }),
-        b.fchild({
-          style: { flex: '1' }
-        })
-      ]
-    });
-  }
-
-  get outerUI() {
-    return hflex({
-      id: 'root-outer',
-      children: (b) => [
-        b.fchild({
-          style: { flex: '1', position: 'relative' },
-          // Example of a svelte-based ui widget:
-          onMount: (node) =>
-            mountSvelte(MenuStatus, {
-              target: node,
-              props: { controller: this.ctl }
-            })
-        }),
-        this.settings.outerRight
-          ? {
-              style: { flex: '1', justifyContent: 'flex-end' },
-              ...this.settings.outerRight(b)
-            }
-          : b.fchild({
-              // TODO: if outerRight is invoked above but has the same id
-              // then any onMount destructor callback will not get called!
-              // If we use a random id here, there is practically
-              // no way for outerRight to re-use the same it.
-              // id: 'root-outer-default-right',
-              id: 'root-outer-right-default',
-              style: { flex: '1', justifyContent: 'flex-end' },
-              onMount: DateDisplay.onMount
-            })
-      ]
-    });
-  }
-}
+export const Layout = {
+  create: (ctl: Controller, params: LayoutSettings = {}) =>
+    StandardLayout.create(ctl, params, layoutIcons)
+};

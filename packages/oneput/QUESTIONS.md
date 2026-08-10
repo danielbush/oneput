@@ -266,7 +266,7 @@ Mid-flight `ctl.ui.update({ flags })` / `{ params }` still wins after that.
 
 - shared (`AppLayoutParams`): `menuTitle`, `inputSend`, `inputAccept`, `inputReject` (`{ run, enabled? }`)
 - menu-owned chrome (via `setMenu` / `menu()` → `menuUI.header` / `menuUI.footer`): AppObject pins above/below the item list; not layout params
-- demo layout extras (`LayoutSettings`): `outerRight`
+- standard host layout extras (`StandardLayoutParams`): `outerRight`
 
 Note: demo `LayoutSettings` is the layout’s _params_ type — not `AppObject.settings` (which is `UIFlags`).
 

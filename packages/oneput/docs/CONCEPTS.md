@@ -81,9 +81,9 @@ chrome roles with layout params (not lifecycle):
 
 The host layout decides how to surface these — commonly on `inputUI.right`, even
 when the input field itself is disabled. Shared button chrome lives in
-`shared/ui/buttons.ts` (`acceptButton`, `sendButton`, `rejectButton`) —
-plain plug-in controls. Layouts and AppObjects place them where they need
-(e.g. in an `inputUI.right` hflex).
+`shared/ui/buttons.ts` (`acceptButton`, `sendButton`, `rejectButton`).
+A reusable host shell is `shared/ui/layout/StandardLayout.ts` — close over host
+icons in the install factory (`(ctl, params) => StandardLayout.create(...)`).
 
 `SharedCtl` (type-only allowlist) is what reusable / 3rd-party AppObjects take in
 `create` / the constructor — hosts still pass the real `Controller`; the

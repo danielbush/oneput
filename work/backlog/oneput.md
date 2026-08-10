@@ -24,6 +24,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: in elizachat if I tab to the send button (one tab from the input) and hit "enter", nothing happens
+  - COMMENT: does it work if we add type="submit" to the button?
+  - COMMENT: is "enter" bound to anything? 
+  - COMMENT: should eliza use enter for newline in textarea or submit? 
+    - I'd say newline and let tab+submit work?
 - fix: is katex display mode working when we insert?
 - fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
   - COMMENT: add visual demos for notification when menu is closed
@@ -46,6 +51,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: how would an agent dynamically create a new AppObject and is this a useful idea?
+  - COMMENT: a DynamicAppObject that acts like a DSL?  Could an agent recreate various things in oneput-demo given this DSL?
 - feat: Oneput media api tells us (reasonably) if we're mobile, tablet or desktop
   - COMMENT: to what extend is this reactive?
   - COMMENT: Should we lean heavily on responsive css for appearance?

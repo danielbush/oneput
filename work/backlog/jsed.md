@@ -110,6 +110,8 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 - feat: breadcrumb
   - will be useful in mobile to go back up the ancestor chain (which maps to left/right bindings atm) but the difference is we can see what elements are in the acnestor chain, very easy to click on the parent p-tag or parent div tag etc etc; combine with moving between siblings using up/down buttons for button-based movement; probably don't want to do more than that, because touch selection is probably the primary way to move around on mobile
+  - use breadcrum design here as a starting point: `packages/oneput/src/routes/mockups/breadcrumb/+page.svelte`
+- chore: mothball tag element indicator; keep the element indicator logic; also note that the css-based modern indicator doesn't reposition when scrolling or resizing
 - feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
   - this allows us to more easily edit parts of complex tokens
   - it also will isolate parens which might be a first step to semantically handling them

@@ -116,6 +116,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: wording: prefer "layout params" instead of "signals"
 - refactor: move TimeDisplay and DateDisplay into oneput/shared/ui/widgets or similar?
 - refactor/proposal - menu loading / transition
   - BACKGROUND: because FilePicker sometimes wants to take a promise when instantiating and we need to reoslve that before we can show the menu, we have to nail down menu loading

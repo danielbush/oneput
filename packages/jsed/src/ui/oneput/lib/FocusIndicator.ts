@@ -18,8 +18,10 @@ export type FocusIndicatorMode = 'none' | 'legacy' | 'css';
  * which {@link FloatingTagIndicator} renders it. The renderers know nothing about
  * FOCUS or the jsed taxonomy — they just glue a label to an element.
  *
- * NOTE: the tag name is now also shown by the FOCUS nav crumbs, so this badge is
- * largely redundant. See `mode` below.
+ * MOTHBALLED. The FOCUS nav crumbs now show the tag name, and `.jsed-focus`
+ * already outlines the focused element, so the badge has no job left. The mode
+ * defaults to `none` and the menu toggles are gone. Everything still works —
+ * call {@link setMode} to bring it back, or give it a label worth showing.
  */
 export class FocusIndicator {
   static create() {
@@ -39,7 +41,8 @@ export class FocusIndicator {
   /** The FOCUSABLE we're indicating on. */
   #element: HTMLElement | null = null;
   #showIndicator = false;
-  #mode: FocusIndicatorMode = 'legacy';
+  /** `none` while mothballed — see the class doc. */
+  #mode: FocusIndicatorMode = 'none';
 
   constructor(
     private legacy: FloatingTagIndicator,

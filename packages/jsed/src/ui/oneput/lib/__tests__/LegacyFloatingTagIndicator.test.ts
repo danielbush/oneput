@@ -1,5 +1,27 @@
 import { describe, it, expect } from 'vitest';
-import { Indicator } from '../indicator.js';
+import { LegacyFloatingTagIndicator } from '../LegacyFloatingTagIndicator.js';
+
+class NullObserver {
+  observe() {}
+  disconnect() {}
+}
+
+/**
+ * Builds an indicator with a label already set, ready to be pointed at a
+ * target. The label drives the measured size, so it must precede the target.
+ */
+function makeIndicator(
+  label: string,
+  opts: { offsetHeight?: number; offsetWidth?: number }
+): LegacyFloatingTagIndicator {
+  const indicator = new LegacyFloatingTagIndicator(
+    { getHeight: () => 768 },
+    patchedCreateElement(opts),
+    () => new NullObserver()
+  );
+  indicator.setLabel(label);
+  return indicator;
+}
 
 /**
  * Creates a fake FOCUSABLE element with a configurable bounding rect.
@@ -44,7 +66,7 @@ function patchedCreateElement(opts?: { offsetHeight?: number; offsetWidth?: numb
 /**
  * Parses the indicator's `transform` style into anchor coordinates and
  * directional modifiers, so tests can assert intent rather than the exact
- * string layout. The Indicator writes `translate(<x>px, <y>px) [extras]`.
+ * string layout. The indicator writes `translate(<x>px, <y>px) [extras]`.
  */
 function parseTransform(transform: string | undefined): {
   x: number;
@@ -64,18 +86,16 @@ function parseTransform(transform: string | undefined): {
   };
 }
 
-describe('Indicator', () => {
+describe('LegacyFloatingTagIndicator', () => {
   describe('positioning', () => {
     it('sits above and right-aligned to a small element with space above', () => {
       // arrange
       const target = fakeElement('DIV', { top: 200, bottom: 300, left: 50, right: 400 });
-      const indicator = new Indicator(
-        { getHeight: () => 768 },
-        patchedCreateElement({ offsetHeight: 20 })
-      );
+      const indicator = makeIndicator(target.tagName, { offsetHeight: 20 });
 
       // act
-      indicator.show(target);
+      indicator.setTarget(target);
+      indicator.showIndicator(true);
 
       // assert
       const t = parseTransform(indicator.element?.style?.transform);
@@ -88,13 +108,11 @@ describe('Indicator', () => {
     it('drops below the element when there is no space above', () => {
       // arrange
       const target = fakeElement('P', { top: 10, bottom: 60, left: 50, right: 400 });
-      const indicator = new Indicator(
-        { getHeight: () => 768 },
-        patchedCreateElement({ offsetHeight: 20 })
-      );
+      const indicator = makeIndicator(target.tagName, { offsetHeight: 20 });
 
       // act
-      indicator.show(target);
+      indicator.setTarget(target);
+      indicator.showIndicator(true);
 
       // assert
       const t = parseTransform(indicator.element?.style?.transform);
@@ -107,13 +125,11 @@ describe('Indicator', () => {
     it('anchors inside the top-right corner of a tall element with top visible', () => {
       // arrange
       const target = fakeElement('SECTION', { top: 100, bottom: 2000, left: 50, right: 800 });
-      const indicator = new Indicator(
-        { getHeight: () => 768 },
-        patchedCreateElement({ offsetHeight: 20 })
-      );
+      const indicator = makeIndicator(target.tagName, { offsetHeight: 20 });
 
       // act
-      indicator.show(target);
+      indicator.setTarget(target);
+      indicator.showIndicator(true);
 
       // assert
       const t = parseTransform(indicator.element?.style?.transform);
@@ -127,13 +143,11 @@ describe('Indicator', () => {
     it('pins to the viewport top when the element top has scrolled past', () => {
       // arrange
       const target = fakeElement('DIV', { top: -200, bottom: 1500, left: 50, right: 800 });
-      const indicator = new Indicator(
-        { getHeight: () => 768 },
-        patchedCreateElement({ offsetHeight: 20 })
-      );
+      const indicator = makeIndicator(target.tagName, { offsetHeight: 20 });
 
       // act
-      indicator.show(target);
+      indicator.setTarget(target);
+      indicator.showIndicator(true);
 
       // assert
       const t = parseTransform(indicator.element?.style?.transform);
@@ -146,13 +160,11 @@ describe('Indicator', () => {
     it('flips to left-aligned when the element is too narrow for a right anchor', () => {
       // arrange
       const target = fakeElement('SPAN', { top: 200, bottom: 300, left: 5, right: 20 });
-      const indicator = new Indicator(
-        { getHeight: () => 768 },
-        patchedCreateElement({ offsetHeight: 20, offsetWidth: 40 })
-      );
+      const indicator = makeIndicator(target.tagName, { offsetHeight: 20, offsetWidth: 40 });
 
       // act
-      indicator.show(target);
+      indicator.setTarget(target);
+      indicator.showIndicator(true);
 
       // assert
       const t = parseTransform(indicator.element?.style?.transform);

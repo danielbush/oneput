@@ -1,10 +1,23 @@
-import { getParent } from '../../../lib/ops/token.js';
+/**
+ * CSS Anchor Positioning {@link FloatingTagIndicator}.
+ *
+ * The browser keeps the badge glued to the target through scrolls, transforms
+ * (pan/zoom), and animations — no JS in the loop, so unlike
+ * {@link LegacyFloatingTagIndicator} there is no observer or scroll handling
+ * here. Position-only: the span stays at its intrinsic CSS pixel size regardless
+ * of any scaled ancestor on the target.
+ *
+ * KNOWN ISSUE: the badge does not currently track scroll or resize. Anchor
+ * positioning should handle both with no JS, so this is a bug rather than a
+ * missing feature.
+ */
+
 import {
-  isToken,
   JSED_ELEMENT_INDICATOR,
   JSED_ELEMENT_INDICATOR_ANCHOR,
   JSED_IGNORE_CLASS
 } from '../../../lib/core/taxonomy.js';
+import type { FloatingTagIndicator } from './FloatingTagIndicator.js';
 
 const ANCHOR_NAME = JSED_ELEMENT_INDICATOR_ANCHOR;
 
@@ -13,24 +26,16 @@ interface Deps {
   mount: (el: HTMLElement) => void;
 }
 
-/**
- * Indicator that uses CSS Anchor Positioning to track the focused element.
- *
- * The browser keeps the indicator span glued to the target through scrolls,
- * transforms (pan/zoom), and animations — no JS in the loop. Position-only:
- * the span stays at its intrinsic CSS pixel size regardless of any scaled
- * ancestor on the target.
- */
-export class CSSElementIndicator {
+export class CSSFloatingTagIndicator implements FloatingTagIndicator {
   static create() {
-    return new CSSElementIndicator({
+    return new CSSFloatingTagIndicator({
       createElement: (tag) => document.createElement(tag),
       mount: (el) => document.body.appendChild(el)
     });
   }
 
   static createNull() {
-    return new CSSElementIndicator({
+    return new CSSFloatingTagIndicator({
       createElement: (tag) => document.createElement(tag),
       mount: () => {}
     });
@@ -38,30 +43,36 @@ export class CSSElementIndicator {
 
   #element: HTMLElement | null = null;
   #span: HTMLElement | null = null;
+  #label = '';
   #showIndicator = false;
-  #cachedTag: string | null = null;
+  #cachedLabel: string | null = null;
 
   constructor(private deps: Deps) {}
 
-  destroy() {
+  destroy(): void {
     this.#clearAnchor(this.#element);
     this.#element = null;
     this.#span?.remove();
     this.#span = null;
-    this.#cachedTag = null;
+    this.#cachedLabel = null;
     this.#showIndicator = false;
   }
 
   setTarget(el: HTMLElement | null): void {
-    const next = el ? (isToken(el) ? getParent(el) : el) : null;
-    if (next === this.#element) return;
+    if (el === this.#element) return;
     this.#clearAnchor(this.#element);
-    this.#element = next;
-    if (next) this.#applyAnchor(next);
+    this.#element = el;
+    if (el) this.#applyAnchor(el);
     if (this.#showIndicator) this.#refreshLabel();
   }
 
-  showIndicator(bool: boolean) {
+  setLabel(label: string): void {
+    if (label === this.#label) return;
+    this.#label = label;
+    if (this.#showIndicator) this.#refreshLabel();
+  }
+
+  showIndicator(bool: boolean): void {
     this.#showIndicator = bool;
     if (bool) {
       this.#ensureSpan();
@@ -85,10 +96,9 @@ export class CSSElementIndicator {
 
   #refreshLabel() {
     if (!this.#span || !this.#element) return;
-    const tag = this.#element.tagName;
-    if (this.#cachedTag !== tag) {
-      this.#span.innerText = tag;
-      this.#cachedTag = tag;
+    if (this.#cachedLabel !== this.#label) {
+      this.#span.innerText = this.#label;
+      this.#cachedLabel = this.#label;
     }
   }
 

@@ -5,8 +5,7 @@ import type { JsedDocument } from '../../types.js';
 import type { UserInput } from '../../input/UserInput.js';
 import { EditorFocusOps } from './EditorFocusOps.js';
 import { EditorCursorOps } from './EditorCursorOps.js';
-import { ElementIndicator } from '../../ui/index.js';
-import { CSSElementIndicator } from '../../ui/index.js';
+import { FocusIndicator } from '../../ui/index.js';
 import { EditorEventsEmitter } from './EditorEventsEmitter.js';
 import { EditorController } from '../EditorController.js';
 import { EditorEventHandler } from './EditorEventHandler.js';
@@ -64,14 +63,11 @@ export class EditorState {
     userInput: UserInput;
   }): EditorState {
     const nav = Nav.create(document);
-    const elementIndicator = ElementIndicator.create();
-    const cssElementIndicator = CSSElementIndicator.create();
     return new EditorState(
       document,
       userInput,
       nav,
-      elementIndicator,
-      cssElementIndicator,
+      FocusIndicator.create(),
       Tokenizer.create(),
       UndoRecorder.create()
     );
@@ -85,14 +81,11 @@ export class EditorState {
     userInput: UserInput;
   }): EditorState {
     const nav = Nav.createNull(document);
-    const elementIndicator = ElementIndicator.createNull();
-    const cssElementIndicator = CSSElementIndicator.createNull();
     return new EditorState(
       document,
       userInput,
       nav,
-      elementIndicator,
-      cssElementIndicator,
+      FocusIndicator.createNull(),
       Tokenizer.createNull(),
       UndoRecorder.createNull()
     );
@@ -100,21 +93,12 @@ export class EditorState {
 
   public isSuspended: boolean = false;
   public cursor?: Cursor;
-  /**
-   * Uses ElementIndicator.
-   */
-  public useLegacyElementIndicator: boolean = true;
-  /**
-   * Modern CSS Anchors.
-   */
-  public useElementIndicator: boolean = false;
 
   constructor(
     public document: JsedDocument,
     public userInput: UserInput,
     public nav: Nav,
-    public legacyElementIndicator: ElementIndicator,
-    public cssElementIndicator: CSSElementIndicator,
+    public focusIndicator: FocusIndicator,
     public tokenizer: Tokenizer,
     public undo: UndoRecorder,
     public eventsEmitter = EditorEventsEmitter.create(),
@@ -130,8 +114,7 @@ export class EditorState {
       onRequestFocus: (evt) => this.controller.onFocusRequest(evt),
       onFocusChange: (focus) => this.controller.onFocusChange(focus)
     });
-    this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator);
-    this.cssElementIndicator.showIndicator(this.useElementIndicator);
+    this.focusIndicator.showIndicator(true);
     this.nav.FOCUS(
       findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
     );
@@ -145,8 +128,7 @@ export class EditorState {
     }
     if (this.cursor) {
       this.enterEditing(this.cursor?.getPlace());
-      this.legacyElementIndicator.showIndicator(this.useLegacyElementIndicator && true);
-      this.cssElementIndicator.showIndicator(this.useElementIndicator && true);
+      this.focusIndicator.showIndicator(true);
     }
   }
 
@@ -254,8 +236,7 @@ export class EditorState {
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
     this.tokenizer.destroy();
-    this.legacyElementIndicator.destroy();
-    this.cssElementIndicator.destroy();
+    this.focusIndicator.destroy();
     this.controller.unsubscribeAll();
     this.eventsEmitter.destroy();
   }
@@ -293,37 +274,20 @@ export class EditorState {
   }
 
   enableLegacyElementIndicator(bool: boolean) {
-    const focus = this.nav.getFocus();
-
-    this.useElementIndicator = false;
-    this.cssElementIndicator.showIndicator(false);
-
-    this.useLegacyElementIndicator = bool;
-    if (focus) {
-      this.legacyElementIndicator.showIndicator(bool);
-    } else {
-      this.legacyElementIndicator.showIndicator(false);
-    }
+    this.focusIndicator.setMode(bool ? 'legacy' : 'none');
+    this.focusIndicator.showIndicator(!!this.nav.getFocus());
   }
+
   enableElementIndicator(bool: boolean) {
-    const focus = this.nav.getFocus();
-
-    this.useLegacyElementIndicator = false;
-    this.legacyElementIndicator.showIndicator(false);
-
-    this.useElementIndicator = bool;
-    if (focus) {
-      this.cssElementIndicator.showIndicator(bool);
-    } else {
-      this.cssElementIndicator.showIndicator(false);
-    }
+    this.focusIndicator.setMode(bool ? 'css' : 'none');
+    this.focusIndicator.showIndicator(!!this.nav.getFocus());
   }
 
   get legacyElementIndicatorEnabled() {
-    return this.useLegacyElementIndicator;
+    return this.focusIndicator.mode === 'legacy';
   }
 
   get elementIndicatorEnabled() {
-    return this.useElementIndicator;
+    return this.focusIndicator.mode === 'css';
   }
 }

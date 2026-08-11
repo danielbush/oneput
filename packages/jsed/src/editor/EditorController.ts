@@ -149,14 +149,8 @@ export class EditorController {
   };
 
   onFocusChange(focus: HTMLElement | null) {
-    if (focus) this.state.legacyElementIndicator.setTarget(focus);
-    if (this.state.useLegacyElementIndicator) {
-      this.state.legacyElementIndicator.showIndicator(!!focus);
-    }
-    this.state.cssElementIndicator.setTarget(focus);
-    if (this.state.useElementIndicator) {
-      this.state.cssElementIndicator.showIndicator(!!focus);
-    }
+    this.state.focusIndicator.setTarget(focus);
+    this.state.focusIndicator.showIndicator(!!focus);
     // Pre-tokenize line
     // If focus IS a TOKEN, then we handled it in onFocusRequest already.
     if (!this.state.cursor && focus && !isToken(focus)) {

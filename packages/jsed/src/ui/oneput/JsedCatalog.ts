@@ -353,6 +353,10 @@ function editing(ctx: JsedCatalogContext): CatalogEntries {
         stdMenuItem({
           id: 'EDIT_FIRST',
           textContent: 'Edit text',
+          // Must close: an open menu suspends the editor, and a suspended
+          // editor skips the input sync. Closing fires `suspend(false)`, which
+          // re-enters editing on the CURSOR seat and fills the input.
+          closeMenuOnAction: true,
           left: (b) => [b.icon(icons.Pencil)],
           action
         })

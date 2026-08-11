@@ -128,18 +128,42 @@ export class Nav {
    */
   getAncestors(): HTMLElement[] {
     const focus = this.getFocus();
+    if (!focus) {
+      return [];
+    }
+    return this.#walkToRoot(focus);
+  }
+
+  /**
+   * Focus chain from CURRENT_MARK up through the document root (inclusive).
+   *
+   * When FOCUS has moved up, CURRENT_MARK stays at the deepest remembered
+   * descendant, so this path is longer than {@link getAncestors}. Order is
+   * mark-first, root-last. Empty when there is no FOCUS.
+   */
+  getChain(): HTMLElement[] {
+    const focus = this.getFocus();
+    if (!focus) {
+      return [];
+    }
+    const mark = this.#focusChainNavigator.getCurrentMark();
+    const start = mark && focus.contains(mark) ? mark : focus;
+    return this.#walkToRoot(start);
+  }
+
+  #walkToRoot(start: HTMLElement): HTMLElement[] {
     const root = this.doc.root;
-    if (!focus || !root.contains(focus)) {
+    if (!root.contains(start)) {
       return [];
     }
 
-    const ancestors: HTMLElement[] = [];
-    for (let node: Node | null = focus; node; node = getParent(node, root)) {
+    const chain: HTMLElement[] = [];
+    for (let node: Node | null = start; node; node = getParent(node, root)) {
       if (node instanceof HTMLElement) {
-        ancestors.push(node);
+        chain.push(node);
       }
     }
-    return ancestors;
+    return chain;
   }
 
   clearFocus(): void {

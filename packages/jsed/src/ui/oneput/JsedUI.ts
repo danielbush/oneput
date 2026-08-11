@@ -64,7 +64,8 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
   layout = {
     layout: (ctl: Controller, params: JsedLayoutParams) =>
       JsedUILayout.create(ctl, params, {
-        getAncestors: () => this.editor.nav.getAncestors(),
+        getChain: () => this.editor.nav.getChain(),
+        getFocus: () => this.editor.nav.getFocus(),
         requestFocus: (element) => {
           this.editor.nav.REQUEST_FOCUS(element);
         }

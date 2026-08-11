@@ -18,6 +18,11 @@ export class FocusChainNavigator {
     this.updateCurrentMark(focus);
   }
 
+  /** Deepest remembered node on the focus chain (CURRENT_MARK). */
+  getCurrentMark(): HTMLElement | undefined {
+    return this.currentMark;
+  }
+
   /**
    * Move FOCUS to the nearest FOCUSABLE ancestor.
    *

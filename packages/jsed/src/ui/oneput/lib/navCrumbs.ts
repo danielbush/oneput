@@ -64,7 +64,7 @@ const navCrumb = (c: NavCrumb, index: number): FChildParams => ({
 });
 
 /**
- * Scroll to the current nav crumb; fade only edges that still hide content.
+ * Scroll the live-FOCUS crumb into view; fade only edges that still hide content.
  */
 const trackScrollEdges = (node: HTMLElement) => {
   const update = () => {
@@ -73,7 +73,13 @@ const trackScrollEdges = (node: HTMLElement) => {
     node.dataset.atEnd = String(node.scrollLeft >= max - 1);
   };
 
-  node.scrollLeft = node.scrollWidth;
+  const current = node.querySelector('.jsed-nav-crumb--current') as HTMLElement | null;
+  if (current) {
+    const center = current.offsetLeft + current.offsetWidth / 2 - node.clientWidth / 2;
+    node.scrollLeft = Math.max(0, Math.min(center, node.scrollWidth - node.clientWidth));
+  } else {
+    node.scrollLeft = node.scrollWidth;
+  }
   update();
 
   node.addEventListener('scroll', update, { passive: true });

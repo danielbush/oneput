@@ -19,10 +19,11 @@ const emptyHostLayout: UILayout = {
 /**
  * Extra inputs for {@link JsedUILayout.create} (beyond ctl + params).
  *
- * Today this holds FOCUS ancestor crumbs; more layout-only deps can land here.
+ * Today this holds FOCUS chain crumbs; more layout-only deps can land here.
  */
 export type JsedUILayoutDeps = {
-  getAncestors: () => HTMLElement[];
+  getChain: () => HTMLElement[];
+  getFocus: () => HTMLElement | null;
   requestFocus: (element: HTMLElement) => void;
 };
 
@@ -61,7 +62,7 @@ export class JsedUILayout implements UILayout<JsedLayoutParams> {
   }
 
   get innerUI() {
-    return navCrumbsInner(focusAncestorPath(this.deps.getAncestors()), {
+    return navCrumbsInner(focusAncestorPath(this.deps.getChain(), this.deps.getFocus()), {
       onSelect: (element) => {
         this.deps.requestFocus(element);
       }

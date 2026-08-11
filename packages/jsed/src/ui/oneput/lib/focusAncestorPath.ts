@@ -1,7 +1,9 @@
 /**
- * Map {@link Nav.getAncestors} into the view model {@link navCrumbsInner} needs.
+ * Map a FOCUS chain into the view model {@link navCrumbsInner} needs.
  *
- * Input order is FOCUS-first (as Nav returns). Output is root-first for the trail.
+ * Input order is mark-first / FOCUS-first (as Nav returns). Output is
+ * root-first for the trail. `current` marks the live FOCUS, which may sit
+ * mid-chain when CURRENT_MARK is below FOCUS.
  */
 
 import { isFocusable } from '../../../lib/core/taxonomy.js';
@@ -11,25 +13,30 @@ export type FocusAncestorStep = {
   tag: string;
   id?: string;
   focusable: boolean;
-  /** True for the current FOCUS (last step when a path exists). */
+  /** True for the live FOCUS (may be mid-trail when the chain remembers below). */
   current: boolean;
 };
 
 /**
- * @param ancestors FOCUS-first chain from {@link Nav.getAncestors}.
+ * Return breadcrumb-list path of FOCUS to doc root.
+ *
+ * @param chain Mark-first (or FOCUS-first) chain from {@link Nav.getChain}.
+ * @param focus Live FOCUS; used to set `current` on the matching step.
  * @returns Root-first steps for the nav-crumbs trail.
  */
-export function focusAncestorPath(ancestors: HTMLElement[]): FocusAncestorStep[] {
-  if (ancestors.length === 0) {
+export function focusAncestorPath(
+  chain: HTMLElement[],
+  focus: HTMLElement | null
+): FocusAncestorStep[] {
+  if (chain.length === 0) {
     return [];
   }
 
-  const focus = ancestors[0];
-  return [...ancestors].reverse().map((element) => ({
+  return [...chain].map((element) => ({
     element,
     tag: element.tagName.toLowerCase(),
     id: element.id || undefined,
     focusable: isFocusable(element),
-    current: element === focus
+    current: focus != null && element === focus
   }));
 }

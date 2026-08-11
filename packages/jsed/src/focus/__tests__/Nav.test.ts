@@ -104,6 +104,52 @@ describe('getAncestors', () => {
   });
 });
 
+describe('getChain', () => {
+  test('empty when no FOCUS', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'p1'));
+    const nav = new Nav(doc);
+
+    // act
+    const chain = nav.getChain();
+
+    // assert
+    expect(chain).toEqual([]);
+  });
+
+  test('matches getAncestors when FOCUS is CURRENT_MARK', () => {
+    // arrange
+    const doc = makeRoot(ul({ id: 'list' }, li({ id: 'item' }, p({ id: 'p1' }, 'p1'))));
+    const nav = new Nav(doc);
+    nav.FOCUS(byId(doc, 'p1'));
+
+    // act
+    const chain = nav.getChain();
+
+    // assert
+    expect(chain).toEqual(nav.getAncestors());
+  });
+
+  test('keeps CURRENT_MARK tip after UP_CHAIN', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'section' }, p({ id: 'target' }, 'foo')));
+    const nav = new Nav(doc);
+    nav.FOCUS(byId(doc, 'target'));
+    nav.UP_CHAIN();
+
+    // act
+    const chain = nav.getChain();
+
+    // assert
+    expect(nav.getFocus()?.id).toBe('section');
+    expect(chain.map((el) => el.id || el.tagName.toLowerCase())).toEqual([
+      'target',
+      'section',
+      'root'
+    ]);
+  });
+});
+
 describe('FOCUS', () => {
   it('should focus an FOCUSABLE (SIB_HIGHLIGHT)', () => {
     // arrange

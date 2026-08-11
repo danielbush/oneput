@@ -1,15 +1,13 @@
 /**
- * Editing layout for {@link JsedUI}: host chrome plus FOCUS nav crumbs in
- * `innerUI`.
+ * Editing layout for {@link JsedUI}: host chrome plus widgets in layout slots.
  *
- * Wraps the host {@link UILayout} so `ui.update` re-applies crumbs from this
+ * Wraps the host {@link UILayout} so `ui.update` re-applies widgets from this
  * layout instead of clearing them.
  */
 
 import type { Controller, UILayout } from '@oneput/oneput';
-import { focusAncestorPath } from './focusAncestorPath.js';
 import type { JsedLayoutParams } from './layoutParams.js';
-import { navCrumbsInner } from './navCrumbs.js';
+import type { NavCrumbs } from './NavCrumbs.js';
 
 /** Used when tests (or a host) start JsedUI with no layout installed yet. */
 const emptyHostLayout: UILayout = {
@@ -19,12 +17,10 @@ const emptyHostLayout: UILayout = {
 /**
  * Extra inputs for {@link JsedUILayout.create} (beyond ctl + params).
  *
- * Today this holds FOCUS chain crumbs; more layout-only deps can land here.
+ * Widgets the layout places into chrome slots. More slots can land here later.
  */
 export type JsedUILayoutDeps = {
-  getChain: () => HTMLElement[];
-  getFocus: () => HTMLElement | null;
-  requestFocus: (element: HTMLElement) => void;
+  navCrumbs: NavCrumbs;
 };
 
 export class JsedUILayout implements UILayout<JsedLayoutParams> {
@@ -62,10 +58,6 @@ export class JsedUILayout implements UILayout<JsedLayoutParams> {
   }
 
   get innerUI() {
-    return navCrumbsInner(focusAncestorPath(this.deps.getChain(), this.deps.getFocus()), {
-      onSelect: (element) => {
-        this.deps.requestFocus(element);
-      }
-    });
+    return this.deps.navCrumbs.getUI();
   }
 }

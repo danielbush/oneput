@@ -6,6 +6,7 @@ import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import { JsedUILayout } from './lib/JsedUILayout.js';
 import type { JsedLayoutParams } from './lib/layoutParams.js';
+import { NavCrumbs } from './lib/NavCrumbs.js';
 import { JsedCatalog } from './JsedCatalog.js';
 import { JsedAction } from './JsedAction.js';
 
@@ -64,11 +65,7 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
   layout = {
     layout: (ctl: Controller, params: JsedLayoutParams) =>
       JsedUILayout.create(ctl, params, {
-        getChain: () => this.editor.nav.getChain(),
-        getFocus: () => this.editor.nav.getFocus(),
-        requestFocus: (element) => {
-          this.editor.nav.REQUEST_FOCUS(element);
-        }
+        navCrumbs: NavCrumbs.create(this.editor.nav)
       }),
     params: { menuTitle: 'Editing' } satisfies JsedLayoutParams
   };

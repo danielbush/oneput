@@ -1,12 +1,13 @@
 /**
- * FOCUS ancestor trail for Oneput `innerUI`.
+ * FOCUS-chain nav crumbs: widget for the layout plus pure FlexParams builder.
  *
- * {@link JsedUI} installs this via `ctl.ui.setInnerUI` while editing.
- * Consumes {@link FocusAncestorStep} from {@link focusAncestorPath}.
+ * {@link NavCrumbs} owns nav wiring; {@link JsedUILayout} places {@link NavCrumbs.getUI}
+ * in `innerUI`. {@link navCrumbsInner} stays a pure view builder.
  */
 
 import type { FChildParams, FlexChildren, FlexParams } from '@oneput/oneput';
-import type { FocusAncestorStep } from './focusAncestorPath.js';
+import type { Nav } from '../../../focus/Nav.js';
+import { focusAncestorPath, type FocusAncestorStep } from './focusAncestorPath.js';
 
 type NavCrumb = {
   label: string;
@@ -20,6 +21,26 @@ export type NavCrumbsOptions = {
   /** Called when a FOCUSABLE ancestor crumb is chosen. */
   onSelect?: (element: HTMLElement) => void;
 };
+
+/**
+ * Breadcrumb widget for editing UI. Owns nav wiring; the layout only renders it.
+ */
+export class NavCrumbs {
+  static create(nav: Nav) {
+    return new NavCrumbs(nav);
+  }
+
+  constructor(private nav: Nav) {}
+
+  /** Fresh FlexParams for the current FOCUS chain (safe to re-read on `ui.update`). */
+  getUI(): FlexParams {
+    return navCrumbsInner(focusAncestorPath(this.nav.getChain(), this.nav.getFocus()), {
+      onSelect: (element) => {
+        this.nav.REQUEST_FOCUS(element);
+      }
+    });
+  }
+}
 
 const escapeHTML = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -92,8 +113,8 @@ const trackScrollEdges = (node: HTMLElement) => {
   };
 };
 
-/** Build `innerUI` for the FOCUS ancestor trail. */
-export function navCrumbsInner(
+/** Build `innerUI` for the FOCUS-chain trail. */
+function navCrumbsInner(
   steps: FocusAncestorStep[],
   options: NavCrumbsOptions = {}
 ): FlexParams {

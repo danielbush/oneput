@@ -108,7 +108,6 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## feat
 
-- chore: mothball tag element indicator; keep the element indicator logic; also note that the css-based modern indicator doesn't reposition when scrolling or resizing
 - feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
   - this allows us to more easily edit parts of complex tokens
   - it also will isolate parens which might be a first step to semantically handling them

@@ -114,10 +114,7 @@ const trackScrollEdges = (node: HTMLElement) => {
 };
 
 /** Build `innerUI` for the FOCUS-chain trail. */
-function navCrumbsInner(
-  steps: FocusAncestorStep[],
-  options: NavCrumbsOptions = {}
-): FlexParams {
+function navCrumbsInner(steps: FocusAncestorStep[], options: NavCrumbsOptions = {}): FlexParams {
   const crumbs = steps.map((step) => toNavCrumb(step, options.onSelect));
   const children: FlexChildren = [];
 

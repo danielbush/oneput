@@ -204,13 +204,12 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
           JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS,
           JsedAction.INSERT_ANCHOR_AFTER_FOCUS,
           JsedAction.REMOVE_ANCHOR_AFTER_FOCUS
-        ]),
+        ])
 
         // FocusIndicator is mothballed, so its two toggles are off the menu.
         // The catalog entries survive — add them back here to switch it on.
         // - ENABLE_LEGACY_ELEMENT_INDICATOR
         // - ENABLE_ELEMENT_INDICATOR
-
       ]
     };
   };

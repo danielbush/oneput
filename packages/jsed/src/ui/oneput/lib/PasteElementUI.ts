@@ -1,9 +1,9 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
 import type { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 import type { Editor } from '../../../editor/Editor.js';
-import type { JsedLayoutParams } from './layoutParams.js';
 import { JsedAction } from '../JsedAction.js';
 import type { JsedCatalog } from '../JsedCatalog.js';
+import type { JsedLayoutParams } from './JsedUILayout.js';
 
 export class PasteElementUI implements AppObject {
   static create(

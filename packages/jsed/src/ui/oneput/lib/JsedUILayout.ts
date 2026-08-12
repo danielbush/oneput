@@ -5,14 +5,15 @@
  * layout instead of clearing them.
  */
 
-import type { Controller, UILayout } from '@oneput/oneput';
-import type { JsedLayoutParams } from './layoutParams.js';
-import type { NavCrumbs } from './NavCrumbs.js';
+import type { AppLayoutParams, Controller, UILayout } from '@oneput/oneput';
+import type { NavCrumbs } from './navcrumb/NavCrumbs.js';
 
 /** Used when tests (or a host) start JsedUI with no layout installed yet. */
 const emptyHostLayout: UILayout = {
   configure: () => {}
 };
+
+export type JsedLayoutParams = AppLayoutParams;
 
 /**
  * Extra inputs for {@link JsedUILayout.create} (beyond ctl + params).

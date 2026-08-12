@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LegacyFloatingTagIndicator } from '../LegacyFloatingTagIndicator.js';
+import { LegacyFloatingTagIndicator } from '../indicators/LegacyFloatingTagIndicator.js';
 
 class NullObserver {
   observe() {}

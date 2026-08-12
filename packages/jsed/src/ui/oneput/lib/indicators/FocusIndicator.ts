@@ -1,5 +1,5 @@
-import { getParent } from '../../../lib/ops/token.js';
-import { isToken } from '../../../lib/core/taxonomy.js';
+import { getParent } from '../../../../lib/ops/token.js';
+import { isToken } from '../../../../lib/core/taxonomy.js';
 import type { FloatingTagIndicator } from './FloatingTagIndicator.js';
 import { CSSFloatingTagIndicator } from './CSSFloatingTagIndicator.js';
 import { LegacyFloatingTagIndicator } from './LegacyFloatingTagIndicator.js';

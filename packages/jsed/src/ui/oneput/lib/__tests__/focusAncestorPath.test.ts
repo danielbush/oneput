@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { byId, div, makeRoot, p } from '../../../../test/util.js';
-import { focusAncestorPath } from '../focusAncestorPath.js';
+import { focusAncestorPath } from '../navcrumb/focusAncestorPath.js';
 
 describe('focusAncestorPath', () => {
   test('empty chain', () => {

@@ -11,7 +11,7 @@
  * rather than in {@link FocusIndicator}.
  */
 
-import { JSED_ELEMENT_INDICATOR, JSED_IGNORE_CLASS } from '../../../lib/core/taxonomy.js';
+import { JSED_ELEMENT_INDICATOR, JSED_IGNORE_CLASS } from '../../../../lib/core/taxonomy.js';
 import type { FloatingTagIndicator } from './FloatingTagIndicator.js';
 
 interface MinimalObserver {

@@ -6,7 +6,7 @@
  */
 
 import type { FChildParams, FlexChildren, FlexParams } from '@oneput/oneput';
-import type { Nav } from '../../../focus/Nav.js';
+import type { Nav } from '../../../../focus/Nav.js';
 import { focusAncestorPath, type FocusAncestorStep } from './focusAncestorPath.js';
 
 type NavCrumb = {

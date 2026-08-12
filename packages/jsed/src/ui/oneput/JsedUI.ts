@@ -4,9 +4,8 @@ import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
 import { Editor } from '../../editor/Editor.js';
 import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
-import { JsedUILayout } from './lib/JsedUILayout.js';
-import type { JsedLayoutParams } from './lib/layoutParams.js';
-import { NavCrumbs } from './lib/NavCrumbs.js';
+import { JsedUILayout, type JsedLayoutParams } from './lib/JsedUILayout.js';
+import { NavCrumbs } from './lib/navcrumb/NavCrumbs.js';
 import { JsedCatalog } from './JsedCatalog.js';
 import { JsedAction } from './JsedAction.js';
 

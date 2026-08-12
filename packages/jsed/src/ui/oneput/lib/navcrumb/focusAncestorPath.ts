@@ -6,7 +6,7 @@
  * mid-chain when CURRENT_MARK is below FOCUS.
  */
 
-import { isFocusable } from '../../../lib/core/taxonomy.js';
+import { isFocusable } from '../../../../lib/core/taxonomy.js';
 
 export type FocusAncestorStep = {
   element: HTMLElement;

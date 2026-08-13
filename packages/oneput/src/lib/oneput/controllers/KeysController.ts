@@ -167,11 +167,11 @@ export class KeysController {
       );
     }
     const finalBindings = KeyEventBindings.create(this.defaultBindings).merge(overrides);
-    for (const c of finalBindings.conflicts) {
-      console.warn(
-        `Binding "${c.key}" on action "${c.overrideActionId}" overrides default action "${c.defaultActionId}"`
-      );
-    }
+    // for (const c of finalBindings.conflicts) {
+    //   console.warn(
+    //     `Binding "${c.key}" on action "${c.overrideActionId}" overrides default action "${c.defaultActionId}"`
+    //   );
+    // }
     this.currentBindings = finalBindings.keyBindingMap;
     this.registerKeys(this.currentBindings);
     this.ctl.events.emit({ type: 'bindings-change', payload: { bindings: this.currentBindings } });

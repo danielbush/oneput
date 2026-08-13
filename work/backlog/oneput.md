@@ -164,6 +164,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: one agent remarked that `ctl.ui.update({ params: ..., ui: ... })` is a bit much
 - refactor: the eliza scroll and clear buttons could do with some love
   - COMMENT: should they be both in inner ui?
+- refactor: console warn: `Binding "Control+[" on action "JSED__SOFT_EXIT" overrides default action "ONEPUT__EXIT" warn @ client.js?v=dda90c6a:3209` - too many , clutters the console;
+  - COMMENT: log it into oneput itself so we can view it?
+- refactor: console error: `Binding "Escape" on actions "JSED__CANCEL_VIA_EXIT" overrides non-default action "JSED__SOFT_EXIT"`
+  - keep these as console.error's?
+  - why are we getting any at all??
 - refactor: why do we have both Directory Browser and File Picker; can we just use one?
   - COMMENT: or put the canonical example in shared/ and keep the other in demo if you must
   - COMMENT: I think we were showcasing nested AppObjects in one; I think we can get rid of that one

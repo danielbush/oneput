@@ -102,6 +102,44 @@ describe('syntacticSplitter whitespace', () => {
   });
 });
 
+/**
+ * A user-perceived character is often several code points, and some of those
+ * are neither Punctuation nor Symbol. Classifying them one at a time would tear
+ * the glyph apart — see the note on grapheme clusters in `syntacticSplit.ts`.
+ */
+describe('syntacticSplitter grapheme clusters', () => {
+  test.each([
+    ['family with ZWJ', '\u{1F468}‍\u{1F469}‍\u{1F467}'],
+    ['skin tone modifier', '\u{1F44D}\u{1F3FD}'],
+    ['variation selector', '❤️'],
+    ['flag as regional indicators', '\u{1F1E6}\u{1F1FA}'],
+    ['combining acute', 'café'],
+    ['keycap', '1️⃣']
+  ])('%s stays one TOKEN', (_name, text) => {
+    // arrange, act
+    const parts = syntacticSplitter(text);
+
+    // assert
+    expect(parts).toEqual([text]);
+  });
+
+  test('distinct emoji are separate TOKENs', () => {
+    // arrange, act
+    const parts = syntacticSplitter('\u{1F389}\u{1F38A}');
+
+    // assert
+    expect(parts).toEqual(['\u{1F389}', '\u{1F38A}']);
+  });
+
+  test('punctuation still splits around a cluster', () => {
+    // arrange, act
+    const parts = syntacticSplitter('\u{1F44D}\u{1F3FD}!');
+
+    // assert
+    expect(parts).toEqual(['\u{1F44D}\u{1F3FD}', '!']);
+  });
+});
+
 describe('tokenParts', () => {
   test('marks a SEPARATOR only where whitespace was', () => {
     // arrange, act

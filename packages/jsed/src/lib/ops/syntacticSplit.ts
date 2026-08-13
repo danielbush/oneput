@@ -51,6 +51,35 @@ const APOSTROPHE = new Set([
 ]);
 
 /**
+ * Built once — constructing a segmenter is far more expensive than using it,
+ * and `splitRun` runs on every keystroke.
+ *
+ * `undefined` locale so it follows the host, and `Intl.Segmenter` is only read
+ * if it exists: grapheme segmentation is the correctness fix, not a hard
+ * requirement, so an environment without it degrades to code points rather than
+ * throwing.
+ */
+const GRAPHEMES =
+  typeof Intl !== 'undefined' && 'Segmenter' in Intl
+    ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+    : null;
+
+/**
+ * Iterate user-perceived characters. Falls back to code points, which is what
+ * `for...of` over a string already gives.
+ */
+function clusters(text: string): Iterable<string> {
+  if (!GRAPHEMES) {
+    return text;
+  }
+  return (function* () {
+    for (const { segment } of GRAPHEMES.segment(text)) {
+      yield segment;
+    }
+  })();
+}
+
+/**
  * Split one run of non-whitespace wherever the character class changes,
  * grouping consecutive characters of the same class.
  *
@@ -61,6 +90,30 @@ const APOSTROPHE = new Set([
  * (x)       ->  [(][x][)]
  * a+b       ->  [a][+][b]
  * ```
+ *
+ * The unit is a **grapheme cluster**, not a code point. A user-perceived
+ * character is often several code points, and some of those code points are not
+ * Punctuation or Symbol, so classifying them one at a time tears the character
+ * in half:
+ *
+ * ```
+ * 👨‍👩‍👧    ZWJ is \p{Cf}   -> would give [👨][ZWJ][👩][ZWJ][👧]
+ * 👍🏽      skin tone is \p{Sk} -> would give [👍][🏽]
+ * ❤️      VS16 is \p{Mn}   -> would give [❤][VS16]
+ * 🇦🇺      two regional indicators -> would give [🇦][🇺]
+ * ```
+ *
+ * Splitting a TOKEN there breaks the glyph on screen, because a browser cannot
+ * shape one cluster across element boundaries. (The document text survives: the
+ * parts carry no SEPARATOR, so detokenizing rejoins them and save output is
+ * unchanged. It renders wrong, it does not save wrong.) Clustering also makes
+ * combining marks correct by design rather than by accident — `café` written
+ * with a combining acute used to hold together only because `\p{Mn}` happens to
+ * classify like a letter.
+ *
+ * A cluster is classified by its **first** code point, which is its base
+ * character. ASCII clusters are single code points, so the punctuation rules
+ * above are unaffected.
  *
  * An APOSTROPHE never splits, wherever it sits. The same character marks a
  * contraction, a possessive, an elision, and a quotation, and nothing in the
@@ -82,26 +135,28 @@ const APOSTROPHE = new Set([
 function splitRun(text: string): string[] {
   const parts: string[] = [];
   let current = '';
-  let previousChar = '';
+  let previousCluster = '';
   let currentIsPunctuation: boolean | null = null;
 
-  for (const char of text) {
-    const isPunctuation = PUNCTUATION.test(char) && !APOSTROPHE.has(char);
+  for (const cluster of clusters(text)) {
+    // The base character decides the class for the whole cluster.
+    const base = String.fromCodePoint(cluster.codePointAt(0)!);
+    const isPunctuation = PUNCTUATION.test(base) && !APOSTROPHE.has(base);
     // Word characters group freely, so `foo123` stays whole. Punctuation groups
     // only with itself: a repeat is one mark the user thinks of as a unit
     // (`...`), whereas neighbouring *different* marks are separate things they
     // may want to edit apart — `,"` closing a quotation is the common case.
     const startsNewPart =
       currentIsPunctuation !== null &&
-      (isPunctuation !== currentIsPunctuation || (isPunctuation && char !== previousChar));
+      (isPunctuation !== currentIsPunctuation || (isPunctuation && cluster !== previousCluster));
 
     if (startsNewPart) {
       parts.push(current);
       current = '';
     }
-    current += char;
+    current += cluster;
     currentIsPunctuation = isPunctuation;
-    previousChar = char;
+    previousCluster = cluster;
   }
 
   if (current !== '') {

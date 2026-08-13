@@ -17,7 +17,9 @@
     // "Not" required:
     "skipLibCheck": true,
     "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    // ES2022.Intl is types only - it declares Intl.Segmenter, used by
+    // SYNTACTIC_SPLIT to iterate grapheme clusters. Target stays ES2020.
+    "lib": ["ES2020", "ES2022.Intl", "DOM", "DOM.Iterable"],
     "strict": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,

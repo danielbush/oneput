@@ -61,6 +61,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## fix
 
+- fix: type over a token; move down to next line; hit undo; undo works but we don't FOCUS on the undone token
+  - COMMENT: I think the issue is that because we moved down, the CURSOR exited; so maybe we want to bring the CURSOR back on text changes
 - make sure mobile touch selection to set FOCUS and on second touch the CURSOR works; make sure we're not scrolled off the screen because of the soft keyboard
 - what is `insertInside` in `ElementInsertOption`?
   - how does it differ from `appendInside`?

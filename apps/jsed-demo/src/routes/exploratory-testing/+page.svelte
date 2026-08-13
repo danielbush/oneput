@@ -226,6 +226,38 @@
     <p>Seventh paragraph to guarantee scrolling is needed.</p>
   </div>
 
+  <h1 data-jsed-focus="off">SYNTACTIC_SPLIT</h1>
+  <p data-jsed-focus="off">
+    Punctuation forms its own TOKEN, so <code>foo-bar</code> is three CURSOR stops that still render as
+    one word — there is no SEPARATOR between them. Click a line and step through with the arrow keys to
+    see the stops.
+  </p>
+  <p>foo-bar well-known a+b c=d (x) what?!</p>
+  <p data-jsed-focus="off">
+    A repeated mark is one unit; two different marks are not. Compare <code>...</code> with
+    <code>,"</code> below.
+  </p>
+  <p>wait... really? she said "lie," and left.</p>
+  <p data-jsed-focus="off">
+    Apostrophes never split, wherever they sit. The accepted cost is that single-quoted text does
+    not split either — <code>'quoted'</code> stays one TOKEN.
+  </p>
+  <p>don't dogs' it’s dell’Aquila 'tis rock 'n' roll 'quoted' "quoted"</p>
+  <p data-jsed-focus="off">
+    Typing behaves the same as reading. Type <code>foo-bar</code> into the empty line below — the
+    input should switch to <code>-</code> then <code>bar</code> as you go, the same way a space already
+    moves you on. Then undo: the whole word goes in one step, and a space starts a new one.
+  </p>
+  <p>type here</p>
+  <p data-jsed-focus="off">
+    Known gap: deleting the <code>-</code> from <code>foo-bar</code> leaves two adjacent TOKEN's
+    reading <code>foobar</code>. They merge when the LINE is detokenized and read again.
+  </p>
+  <p data-jsed-focus="off">
+    Known gap: ZWJ emoji tear apart, because the joiner is neither Punctuation nor Symbol.
+  </p>
+  <p>👨‍👩‍👧 and 🎉🎊</p>
+
   <h2 data-jsed-focus="off">SHALLOW_TOKENIZATION</h2>
   <p data-jsed-focus="off">
     The following div contains mulltiple paragraph tags. If this div represents a large document we

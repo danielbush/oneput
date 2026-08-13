@@ -11,6 +11,7 @@ import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
 import { DeleteSelection } from './DeleteSelection.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
+import { tokenParts } from '../../../lib/ops/splitter.js';
 
 export class ReplaceSelectionWithText implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
@@ -24,10 +25,14 @@ export class ReplaceSelectionWithText implements UndoRecord {
     const frontWrapper = state.selection.getFrontWrapper();
     let lastToken: HTMLElement | null = null;
     let insertBefores: InsertTokenBefore[] = [];
-    const parts = text.split(/\s+/).filter(Boolean);
-    for (const part of parts) {
-      const insertedToken = createToken(part);
-      const result = insertBefore(insertedToken, frontWrapper);
+    const parts = tokenParts(state.splitter, text);
+    for (const [index, part] of parts.entries()) {
+      // See InsertTextBefore: the SEPARATOR created is the gap *after* this part.
+      const next = parts[index + 1];
+      const insertedToken = createToken(part.text);
+      const result = insertBefore(insertedToken, frontWrapper, {
+        separator: next ? next.separatorBefore : true
+      });
       insertBefores.push(result);
       lastToken = insertedToken;
     }

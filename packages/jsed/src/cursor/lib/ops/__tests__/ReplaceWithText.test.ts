@@ -294,6 +294,36 @@ describe('ReplaceWithText.merge', () => {
     expect(identify(state.getPlace())).toBe('goodbye');
   });
 
+  test('merging keeps TOKENs inserted by the later replacement', () => {
+    // arrange: `second` rewrites the same TOKEN *and* inserts another one.
+    // Merging used to copy only the text, stranding the inserted TOKEN with no
+    // record to undo it. Reachable without SYNTACTIC_SPLIT — this state uses the
+    // whitespace-only splitter.
+    const doc = makeRoot(p({ id: 'p1' }, t('hello')));
+    const state = createState(doc, tokens(doc)[0]);
+    const first = ReplaceWithText.run(state, 'good')!;
+    const second = ReplaceWithText.run(state, 'good bye')!;
+
+    // act
+    const merged = first.merge(second);
+
+    // assert
+    expect(merged).toBe(first);
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['good', '[nodeType=3:" "]', 'bye']);
+
+    // act
+    first.undo(editorState(state));
+
+    // assert: `bye` is a tombstone, not left behind as live text
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['hello', '[deleted-space]', 'd("bye")']);
+
+    // act
+    first.redo(editorState(state));
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['good', '[nodeType=3:" "]', 'bye']);
+  });
+
   test('multi-word replacement does not merge', () => {
     // arrange
     const doc = makeRoot(p(t('hello')));

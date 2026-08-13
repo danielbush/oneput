@@ -1603,6 +1603,189 @@ describe('Editor', () => {
   });
 
   /**
+   * SYNTACTIC_SPLIT — punctuation becomes its own TOKEN as the user types, the
+   * same way whitespace already does. The difference is that no SEPARATOR goes
+   * between the resulting TOKEN's, so `foo-bar` still renders as one word.
+   */
+  describe('User types punctuation - SYNTACTIC_SPLIT', () => {
+    async function createEditorFixture(params?: { html?: string }) {
+      const doc = makeRoot(params?.html ?? p({ id: 'p1' }, 'foo'));
+      const line = byId(doc, 'p1');
+      const userInput = Controller.createNull().input;
+      const editor = Editor.createNull({ document: doc, userInput });
+      editor.enterEditing(line);
+      return { doc, editor, line, userInput };
+    }
+
+    function getTokenValues(line: HTMLElement) {
+      return Array.from(line.querySelectorAll('.jsed-token')).map((token) => token.textContent);
+    }
+
+    function lineText(line: HTMLElement) {
+      return line.textContent;
+    }
+
+    /** `enterEditing` syncs the input asynchronously. */
+    function settle() {
+      return new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    it('splits at a hyphen as the user types, with no SEPARATOR between', async () => {
+      // arrange
+      const { editor, line, userInput } = await createEditorFixture();
+      await userInput.setCaret(3);
+
+      // act
+      await userInput.typeText('-');
+      await userInput.typeText('b');
+      await userInput.typeText('a');
+      await userInput.typeText('r');
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['foo', '-', 'bar']);
+      expect(lineText(line)).toBe('foo-bar');
+      expect(identify(editor.getCursor()?.getPlace())).toBe('bar');
+      expect(userInput.getInputValue()).toBe('bar');
+    });
+
+    it('reads existing text the same way it types it', async () => {
+      // arrange, act
+      const { line } = await createEditorFixture({ html: p({ id: 'p1' }, 'foo-bar') });
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['foo', '-', 'bar']);
+      expect(lineText(line)).toBe('foo-bar');
+    });
+
+    it('keeps a SEPARATOR where the user typed a space', async () => {
+      // arrange
+      const { line } = await createEditorFixture({ html: p({ id: 'p1' }, 'lie, he said') });
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['lie', ',', 'he', 'said']);
+      expect(lineText(line)).toBe('lie, he said');
+    });
+
+    it('does not split an apostrophe', async () => {
+      // arrange
+      const { line } = await createEditorFixture({ html: p({ id: 'p1' }, "don't stop") });
+
+      // assert
+      expect(getTokenValues(line)).toEqual(["don't", 'stop']);
+    });
+
+    it('splits when punctuation is typed into the middle of a TOKEN', async () => {
+      // arrange
+      const { line, userInput } = await createEditorFixture({
+        html: p({ id: 'p1' }, 'foobar')
+      });
+      await settle();
+      await userInput.setCaret(3);
+
+      // act
+      await userInput.typeText('-');
+
+      // assert: no `decideInputIntent` case needed — this is `rewrite-current`
+      expect(getTokenValues(line)).toEqual(['foo', '-', 'bar']);
+      expect(lineText(line)).toBe('foo-bar');
+    });
+
+    it('splits when punctuation is typed at the start of a TOKEN', async () => {
+      // arrange
+      const { line, userInput } = await createEditorFixture({
+        html: p({ id: 'p1' }, 'foobar')
+      });
+      await settle();
+      await userInput.setCaret(0);
+
+      // act
+      await userInput.typeText('-');
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['-', 'foobar']);
+      expect(lineText(line)).toBe('-foobar');
+    });
+
+    it('undoes an uninterrupted typing burst in one step, across the split', async () => {
+      // arrange
+      const { editor, line, userInput } = await createEditorFixture({
+        html: p({ id: 'p1' }, 'X')
+      });
+      await settle();
+
+      // act: type over the TOKEN, then a space, then another word
+      for (const ch of 'foo-bar') await userInput.typeText(ch);
+      await userInput.typeText(' ');
+      for (const ch of 'baz') await userInput.typeText(ch);
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['foo', '-', 'bar', 'baz']);
+
+      // act
+      editor.undo();
+
+      // assert: the second burst goes as one step
+      expect(identifyChildren(line)).toEqual([
+        'foo',
+        '-',
+        'bar',
+        '[deleted-space]',
+        'd("baz")',
+        '[nodeType=3:" "]'
+      ]);
+
+      // act
+      editor.undo();
+
+      // assert: so does the first, and every TOKEN it created is a tombstone —
+      // nothing is stranded without a record.
+      expect(identifyChildren(line)).toEqual([
+        'X',
+        'd("-")',
+        'd("bar")',
+        '[deleted-space]',
+        'd("baz")',
+        '[nodeType=3:" "]'
+      ]);
+      expect(editor.canUndo()).toBe(false);
+
+      // act
+      editor.redo();
+      editor.redo();
+
+      // assert
+      expect(getTokenValues(line)).toEqual(['foo', '-', 'bar', 'baz']);
+    });
+
+    it('undo after a split restores the original TOKEN', async () => {
+      // arrange
+      const { editor, line, userInput } = await createEditorFixture();
+      await userInput.setCaret(3);
+
+      // act
+      await userInput.typeText('-');
+
+      // assert
+      expect(identifyChildren(line)).toEqual(['foo', '-']);
+
+      // act
+      editor.undo();
+
+      // assert: the split TOKEN becomes a tombstone, so the LINE reads `foo`
+      // again. It stays in the DOM to be resurrected by redo, and `serialize`
+      // strips it.
+      expect(identifyChildren(line)).toEqual(['foo', 'd("-")']);
+      expect(editor.serialize()).not.toContain('-');
+
+      // act
+      editor.redo();
+
+      // assert
+      expect(identifyChildren(line)).toEqual(['foo', '-']);
+    });
+  });
+
+  /**
    * Typing while a selection is active should replace the whole selection
    * with a single new TOKEN positioned where the head was. Tiered from
    * easy to hard:

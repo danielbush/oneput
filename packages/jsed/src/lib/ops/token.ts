@@ -111,12 +111,23 @@ export type InsertTokenBefore = {
   removedSeparatorAfter?: RemoveSeparator;
 };
 
-export function insertAfter(toInsert: HTMLElement, existing: HTMLElement): InsertTokenAfter {
+/**
+ * Insert a TOKEN immediately after `existing`.
+ *
+ * `separator` controls the gap between the two. Pass false for a
+ * SYNTACTIC_SPLIT boundary — `foo-bar` is three TOKEN's that must still render
+ * as one word. Defaults to true, the whitespace case.
+ */
+export function insertAfter(
+  toInsert: HTMLElement,
+  existing: HTMLElement,
+  { separator = true }: { separator?: boolean } = {}
+): InsertTokenAfter {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
   existing.after(toInsert);
-  const result = ensureSeparatorAfter(existing);
+  const result = separator ? ensureSeparatorAfter(existing) : null;
   return {
     action: 'insert-token-after',
     token: toInsert,
@@ -143,12 +154,21 @@ export function redoInsertAfter(op: InsertTokenAfter) {
   }
 }
 
-export function insertBefore(toInsert: HTMLElement, existing: HTMLElement): InsertTokenBefore {
+/**
+ * Insert a TOKEN immediately before `existing`.
+ *
+ * `separator` controls the gap between the two — see {@link insertAfter}.
+ */
+export function insertBefore(
+  toInsert: HTMLElement,
+  existing: HTMLElement,
+  { separator = true }: { separator?: boolean } = {}
+): InsertTokenBefore {
   if (!existing.parentNode) {
     throw new Error('parentNode not found');
   }
   existing.before(toInsert);
-  const result = ensureSeparatorAfter(toInsert);
+  const result = separator ? ensureSeparatorAfter(toInsert) : null;
   return {
     action: 'insert-token-before',
     token: toInsert,

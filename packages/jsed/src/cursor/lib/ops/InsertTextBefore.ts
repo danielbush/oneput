@@ -10,16 +10,23 @@ import {
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
+import { tokenParts } from '../../../lib/ops/splitter.js';
 
 export class InsertTextBefore implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
     const currentToken = state.getPlace();
     let lastToken: HTMLElement | null = null;
     let insertBefores: InsertTokenBefore[] = [];
-    const parts = text.split(/\s+/).filter(Boolean);
-    for (const part of parts) {
-      const insertedToken = createToken(part);
-      const result = insertBefore(insertedToken, currentToken);
+    const parts = tokenParts(state.splitter, text);
+    for (const [index, part] of parts.entries()) {
+      // Each insert lands directly before `currentToken`, so the SEPARATOR it
+      // creates is the gap *after* that part — to the next part, or to
+      // `currentToken` for the last one.
+      const next = parts[index + 1];
+      const insertedToken = createToken(part.text);
+      const result = insertBefore(insertedToken, currentToken, {
+        separator: next ? next.separatorBefore : true
+      });
       insertBefores.push(result);
       lastToken = insertedToken;
     }

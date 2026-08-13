@@ -10,6 +10,7 @@ import {
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
 import { ReplaceWithText } from './ReplaceWithText.js';
+import { tokenParts } from '../../../lib/ops/splitter.js';
 
 /**
  * Insert string vals after cursor and put cursor on last one.
@@ -19,10 +20,17 @@ export class InsertTextAfter implements UndoRecord {
     const currentToken = state.getPlace();
     let lastToken: HTMLElement | null = null;
     let insertAfters: InsertTokenAfter[] = [];
-    const parts = text.split(/\s+/).filter(Boolean);
-    for (const part of parts.reverse()) {
-      const insertedToken = createToken(part);
-      const result = insertAfter(insertedToken, currentToken);
+    const parts = tokenParts(state.splitter, text);
+    for (const [index, part] of [...parts].reverse().entries()) {
+      // Each insert lands directly after `currentToken`, so the SEPARATOR it
+      // creates is the gap *before* that part. The first part's gap is to
+      // `currentToken` itself, which the CURSOR_INSERT_AFTER state has already
+      // decided is a space.
+      const isFirstPart = index === parts.length - 1;
+      const insertedToken = createToken(part.text);
+      const result = insertAfter(insertedToken, currentToken, {
+        separator: isFirstPart || part.separatorBefore
+      });
       insertAfters.push(result);
       if (!lastToken) {
         lastToken = insertedToken;

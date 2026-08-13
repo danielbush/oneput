@@ -2,6 +2,7 @@ import { Detokenizer } from './Detokenizer.js';
 import { containsSelection } from './selection.js';
 import { isFocusable } from '../core/taxonomy.js';
 import { tokenizeLineAt, tokenizeLineAtTextNode } from './tokenize.js';
+import { nullSplitter, type Splitter } from './splitter.js';
 
 /**
  * Tokenize-and-seat service for the CURSOR.
@@ -19,15 +20,22 @@ import { tokenizeLineAt, tokenizeLineAtTextNode } from './tokenize.js';
 export class Tokenizer {
   #cursorElement: HTMLElement | null = null;
 
-  static create() {
-    return new Tokenizer(Detokenizer.create());
+  static create(splitter: Splitter = nullSplitter) {
+    return new Tokenizer(Detokenizer.create(), splitter);
   }
 
-  static createNull() {
-    return new Tokenizer(Detokenizer.createNull());
+  static createNull(splitter: Splitter = nullSplitter) {
+    return new Tokenizer(Detokenizer.createNull(), splitter);
   }
 
-  constructor(private detokenizer: Detokenizer = Detokenizer.create()) {}
+  constructor(
+    private detokenizer: Detokenizer = Detokenizer.create(),
+    /**
+     * SYNTACTIC_SPLIT rule. Must be the same one the text ops use, or text that
+     * was read and text that was typed tokenize differently.
+     */
+    private splitter: Splitter = nullSplitter
+  ) {}
 
   /**
    * Resolve a candidate LINE under `el`, tokenize it, and return the first
@@ -43,7 +51,7 @@ export class Tokenizer {
     if (!isFocusable(el)) {
       return null;
     }
-    const firstLineSibling = tokenizeLineAt(el);
+    const firstLineSibling = tokenizeLineAt(el, this.splitter);
     if (firstLineSibling) {
       this.detokenizer.recordTokenizedLine(el);
     }
@@ -56,7 +64,7 @@ export class Tokenizer {
     tokens: HTMLElement[];
     line: HTMLElement;
   } {
-    const { first, tokens, line } = tokenizeLineAtTextNode(node);
+    const { first, tokens, line } = tokenizeLineAtTextNode(node, this.splitter);
     if (first) {
       this.detokenizer.recordTokenizedLine(line);
     }

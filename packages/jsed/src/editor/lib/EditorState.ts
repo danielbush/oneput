@@ -16,6 +16,8 @@ import { err, ok, type Result } from 'neverthrow';
 import { isCursorTransparent, isLineSibling } from '../../lib/core/taxonomy.js';
 import { anchorize, removeAnchors } from '../../lib/ops/anchor.js';
 import { detokenize } from '../../lib/ops/tokenize.js';
+import type { Splitter } from '../../lib/ops/splitter.js';
+import { syntacticSplitter } from '../../lib/ops/syntacticSplit.js';
 import { addImplicitLines, removeImplicitLines } from '../../lib/ops/implicitLine.js';
 import { removeEditingMarkers, removeIgnored } from '../../lib/ops/document.js';
 import { removeSelectionWrappers } from '../../lib/ops/selection.js';
@@ -57,10 +59,12 @@ export type EditorElementChangeEvent =
 export class EditorState {
   static create({
     document,
-    userInput
+    userInput,
+    splitter = syntacticSplitter
   }: {
     document: JsedDocument;
     userInput: UserInput;
+    splitter?: Splitter;
   }): EditorState {
     const nav = Nav.create(document);
     return new EditorState(
@@ -68,17 +72,20 @@ export class EditorState {
       userInput,
       nav,
       FocusIndicator.create(),
-      Tokenizer.create(),
-      UndoRecorder.create()
+      Tokenizer.create(splitter),
+      UndoRecorder.create(),
+      splitter
     );
   }
 
   static createNull({
     document,
-    userInput
+    userInput,
+    splitter = syntacticSplitter
   }: {
     document: JsedDocument;
     userInput: UserInput;
+    splitter?: Splitter;
   }): EditorState {
     const nav = Nav.createNull(document);
     return new EditorState(
@@ -86,8 +93,9 @@ export class EditorState {
       userInput,
       nav,
       FocusIndicator.createNull(),
-      Tokenizer.createNull(),
-      UndoRecorder.createNull()
+      Tokenizer.createNull(splitter),
+      UndoRecorder.createNull(),
+      splitter
     );
   }
 
@@ -101,6 +109,11 @@ export class EditorState {
     public focusIndicator: FocusIndicator,
     public tokenizer: Tokenizer,
     public undo: UndoRecorder,
+    /**
+     * SYNTACTIC_SPLIT rule, shared with `tokenizer` and handed to the CURSOR so
+     * the read path and the type path agree.
+     */
+    public splitter: Splitter = syntacticSplitter,
     public eventsEmitter = EditorEventsEmitter.create(),
     public controller = EditorController.create(this),
     public focusOps = EditorFocusOps.create(this),
@@ -191,7 +204,8 @@ export class EditorState {
           undo: this.undo,
           onCursorChange: this.controller.onCursorChange,
           onCursorError: this.controller.onCursorError,
-          eventsEmitter: this.eventsEmitter
+          eventsEmitter: this.eventsEmitter,
+          splitter: this.splitter
         });
       }
       this.cursor.place(targetLineSibling); // calls handleCursorChange

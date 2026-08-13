@@ -8,6 +8,7 @@ import type { JsedDocument } from '../../JsedDocument.js';
 import type { Tokenizer } from '../../lib/ops/Tokenizer.js';
 import type { UndoRecorder } from '../../undo/UndoRecorder.js';
 import type { EditorEventsEmitter } from '../../editor/index.js';
+import { nullSplitter, type Splitter } from '../../lib/ops/splitter.js';
 
 export const CURSOR_APPEND_CLASS = 'jsed-crs-append';
 export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
@@ -66,6 +67,11 @@ export class CursorState {
     public onCursorChange: (token?: HTMLElement, opts?: UserInputOpts) => void,
     public onError: (err: CursorError) => void,
     public eventsEmitter: EditorEventsEmitter,
+    /**
+     * SYNTACTIC_SPLIT rule used by the text ops. Must be the same one the
+     * Tokenizer holds, or typed text and read text tokenize differently.
+     */
+    public splitter: Splitter = nullSplitter,
     public selection?: CursorSelection,
     private classes: string[] = [],
     /**

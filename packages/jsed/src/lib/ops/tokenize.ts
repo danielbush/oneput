@@ -8,12 +8,17 @@ import {
   JSED_TOKEN_CLASS
 } from '../core/taxonomy.js';
 import { createToken } from './token.js';
+import { isSeparatorPart, nullSplitter, type Splitter } from './splitter.js';
 
 /**
  * Used by tokenizer to convert text nodes to TOKEN's.
  * Returns the first TOKEN created, or null if the child was not a text node.
+ *
+ * `splitter` decides how one text node becomes TOKEN's and SEPARATOR's. It is
+ * the same rule the text ops use, so text that was read and text that was typed
+ * tokenize identically.
  */
-export function replaceTextNode(child: Node): HTMLElement[] {
+export function replaceTextNode(child: Node, splitter: Splitter = nullSplitter): HTMLElement[] {
   const el = child.parentNode;
   if (isToken(el)) {
     throw new Error(
@@ -22,12 +27,12 @@ export function replaceTextNode(child: Node): HTMLElement[] {
   }
   if (child.nodeType === Node.TEXT_NODE) {
     const text = child.nodeValue!;
-    const parts = text.match(/\s+|\S+/g) ?? [];
+    const parts = splitter(text);
     const frag = document.createDocumentFragment();
     const tokens: HTMLElement[] = [];
 
     for (const part of parts) {
-      if (/^\s+$/.test(part)) {
+      if (isSeparatorPart(part)) {
         // Boundary-spacing model: preserve inter-token whitespace as its own
         // text node rather than baking it into TOKEN content.
         frag.appendChild(document.createTextNode(part));
@@ -52,7 +57,7 @@ export function replaceTextNode(child: Node): HTMLElement[] {
  * Recurses into CURSOR_TRANSPARENT structure — everything the CURSOR would
  * descend through.
  */
-function tokenizeLineRec(line: Node): HTMLElement | null {
+function tokenizeLineRec(line: Node, splitter: Splitter): HTMLElement | null {
   if (isToken(line)) {
     return null;
   }
@@ -63,10 +68,10 @@ function tokenizeLineRec(line: Node): HTMLElement | null {
   let first: HTMLElement | null = null;
   for (const child of childNodes) {
     if (isCursorTransparent(child)) {
-      const nestedFirst = tokenizeLineRec(child);
+      const nestedFirst = tokenizeLineRec(child, splitter);
       if (!first) first = nestedFirst;
     } else if (child.nodeType === Node.TEXT_NODE) {
-      const tokens = replaceTextNode(child);
+      const tokens = replaceTextNode(child, splitter);
       const token = tokens[0];
       if (token && !first) first = token;
     } else {
@@ -127,25 +132,31 @@ function detokenizeLineRec(line: Node): void {
  *
  * Part of SHALLOW_TOKENIZATION strategy.
  */
-export function tokenizeLineAt(el: HTMLElement): HTMLElement | null {
+export function tokenizeLineAt(
+  el: HTMLElement,
+  splitter: Splitter = nullSplitter
+): HTMLElement | null {
   const line = getLine(el);
   if (!isFocusable(line)) {
     return null;
   }
   line.normalize();
-  return tokenizeLineRec(line);
+  return tokenizeLineRec(line, splitter);
 }
 
-export function tokenizeLineAtTextNode(node: Node): {
+export function tokenizeLineAtTextNode(
+  node: Node,
+  splitter: Splitter = nullSplitter
+): {
   first: HTMLElement | null;
   tokens: HTMLElement[];
   line: HTMLElement;
 } {
   const line = getLine(node); // this must come before replaceTextNode
   // Get the associated tokens...
-  const tokens = replaceTextNode(node);
+  const tokens = replaceTextNode(node, splitter);
   // Now tokenize anything else in the line...
-  const first = tokenizeLineAt(line);
+  const first = tokenizeLineAt(line, splitter);
   return { first, tokens, line };
 }
 

@@ -129,6 +129,15 @@ We can define the traversal rules:
   — tokenization scoped to a single LINE, without recursing into NESTED_LINE's. In a large document, tokenizing everything would insert many DOM nodes, which degrades browser performance (layout, paint, memory). Instead we tokenize one LINE at a time, on demand.
   - in practice this means is that although the utilities that tokenize may fully tokenize whatever element they're given, we walk the DOM until we find a text node or other valid LINE_SIBLING and then only tokenize that immediate LINE. The cursor uses a similar logic once it has exhausted the current LINE to find the next or previous LINE.
   - Source of truth: search docstrings for SHALLOW_TOKENIZATION.
+- **SYNTACTIC_SPLIT**
+  — a TOKEN breaks at punctuation as well as at whitespace, so `foo-bar.` is `[foo][-][bar][.]`. This lets the user edit part of a compound word and gives parens TOKEN's of their own.
+  - the resulting TOKEN's carry **no SEPARATOR** between them, so `foo-bar` still renders as one word. What changes is CURSOR granularity: four stops where there was one. The document text, rendering and save output are unaffected.
+  - the split happens **as the user types**, the same way a space already creates a new TOKEN. This is only sound because the rule uses **left context only** — it may look at characters before the current one, never after. That is what makes the incremental result and the whole-string result identical, so TOKENIZATION and typing agree by construction.
+  - the rule is one injected `Splitter`, shared by `replaceTextNode` (the read path) and the text ops (the type path). `nullSplitter` is the whitespace-only behaviour jsed had before, and swapping it back turns the feature off.
+  - Source of truth: `splitter.ts` (the seam) and `syntacticSplit.ts` (the rule).
+- **SEPARATOR**
+  — the whitespace text node between two TOKEN's. Its absence is meaningful: adjacent TOKEN's with no SEPARATOR are one word to the user, which is what a SYNTACTIC_SPLIT produces.
+  - Source of truth: `space.ts`, and `TokenPart.separatorBefore` in `splitter.ts`.
 - **LINE**
   - loosely: an element with descendents a CURSOR can edit
   - more precisely:

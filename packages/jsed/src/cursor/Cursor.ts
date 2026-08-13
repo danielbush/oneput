@@ -5,6 +5,7 @@ import type { UserInputOpts, UserInputSelectionState } from '../input/UserInput.
 import { UndoRecorder, type UndoRecord } from '../undo/index.js';
 import type { JsedDocument } from '../JsedDocument.js';
 import type { Tokenizer } from '../lib/ops/Tokenizer.js';
+import type { Splitter } from '../lib/ops/splitter.js';
 import type { EditorEventsEmitter } from '../editor/index.js';
 import { ReplaceWithText } from './lib/ops/ReplaceWithText.js';
 import { InsertTextAfter } from './lib/ops/InsertTextAfter.js';
@@ -25,6 +26,10 @@ export class Cursor {
       onCursorError: (err: CursorError) => void;
       eventsEmitter: EditorEventsEmitter;
       undo: UndoRecorder;
+      /**
+       * SYNTACTIC_SPLIT rule. Pass the same one the Tokenizer holds.
+       */
+      splitter?: Splitter;
     }
   ) {
     const cursorState = new CursorState(
@@ -34,7 +39,8 @@ export class Cursor {
       params.undo,
       params.onCursorChange,
       params.onCursorError,
-      params.eventsEmitter
+      params.eventsEmitter,
+      params.splitter
     );
     return new Cursor(cursorState);
   }

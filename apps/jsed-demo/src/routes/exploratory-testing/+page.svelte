@@ -256,11 +256,93 @@
     <p>End here</p>
   </div>
 
+  <h1 data-jsed-focus="off">SYNTACTIC_SPLIT</h1>
+
+  <h2 data-jsed-focus="off">1. Tokenizing — click on foo-bar</h2>
+  <p data-jsed-focus="off">
+    Start here. Click the line below to FOCUS it, which tokenizes it, then look at the TOKEN
+    outlines. <code>foo-bar</code> is <strong>three</strong> TOKEN's, not one. Move the CURSOR
+    across it and you stop three times. The text still reads <code>foo-bar</code> — no SEPARATOR goes
+    between the TOKEN's, so nothing about the rendering changes.
+  </p>
+  <p>foo-bar</p>
+  <p>one foo-bar two</p>
+
+  <h2 data-jsed-focus="off">2. Grouping and boundaries</h2>
+  <p data-jsed-focus="off">
+    The rule splits wherever the character class changes, and groups runs of the same class — so
+    <code>foo...</code> is two TOKEN's, not four. Symbols count as punctuation, which is why
+    <code>a+b</code> splits.
+  </p>
+  <p>foo... bar!? baz.</p>
+  <p>a+b c=d e&lt;f</p>
+  <p>(parens) [brackets] &#123;braces&#125;</p>
+  <p>https://example.com/a/b?c=d</p>
+
+  <h2 data-jsed-focus="off">3. Apostrophes</h2>
+  <p data-jsed-focus="off">
+    A single quote never splits, wherever it sits, so contractions, possessives and elisions all
+    stay whole — <code>don't</code>, <code>dogs'</code> and <code>'tis</code> are each one TOKEN. This
+    covers the typographic apostrophe (U+2019) as well as the ASCII one, since word processors produce
+    the former.
+  </p>
+  <p>don't dogs' it’s dell’Aquila 'tis rock 'n' roll</p>
+  <p>well-known state-of-the-art re-entry</p>
+  <p data-jsed-focus="off">
+    The accepted cost: single-quoted text does not split either — <code>'quoted'</code> is one TOKEN.
+    Nothing in the text tells a quotation apart from an elision, and apostrophes are far more common in
+    prose than single-quoted text, so the whole class reads as word characters. Double quotes are unambiguous
+    and do split.
+  </p>
+  <p>'quoted' and "double quoted"</p>
+
+  <h2 data-jsed-focus="off">4. Typing — splitting happens at rest</h2>
+  <p data-jsed-focus="off">
+    Nothing splits while you type. Select a TOKEN below, type <code>foo-bar</code> over it, then press
+    next. It stays one TOKEN until you leave it, and only then is it re-derived.
+  </p>
+  <p>alpha bravo charlie</p>
+
+  <h2 data-jsed-focus="off">5. Motion and commit</h2>
+  <p data-jsed-focus="off">
+    The awkward case is moving <em>backward</em>. Edit a TOKEN into <code>foo-bar</code> and press
+    previous. Commit turns one TOKEN into three, so the CURSOR has to land on the <em>first</em> of them
+    — otherwise the backward step walks into the run it just made.
+  </p>
+  <p>one two three four</p>
+
+  <h2 data-jsed-focus="off">6. Unsplit — the merge direction</h2>
+  <p data-jsed-focus="off">
+    Re-derivation merges as well as splits. Delete the <code>-</code> from <code>foo-bar</code>
+    below and the neighbours collapse back into a single TOKEN.
+  </p>
+  <p>foo-bar baz</p>
+
+  <div data-jsed-focus="off" class="note-block">
+    <p>
+      <strong>Known gaps</strong> — undo/redo across a commit is wrong, because the split is not yet
+      part of the undo record. Clicking onto another TOKEN in the same LINE skips the commit. See
+      <code>work/active/20260812.feat.syntactic-tokenization.md</code>.
+    </p>
+  </div>
+
   <div data-jsed-focus="off" style="height: 400px"></div>
 </div>
 
 <style>
   :global(.jsed-token) {
     outline: 0.5px solid rgba(0, 0, 0, 0.4);
+  }
+
+  .note-block {
+    border-left: 3px solid #c00;
+    background: #fff8f8;
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+  }
+
+  .note-block code {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 0 0.2em;
   }
 </style>

@@ -4,6 +4,9 @@
   import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
   import '@oneput/oneput/demo/styles.css';
   import '@oneput/oneput/shared/styles/oneput-defaults.css';
+  // KatexDemo uses katex's default output (html + mathml), which needs these
+  // styles and the katex fonts.
+  import 'katex/dist/katex.css';
   import { icons } from '$lib/app/_icons.js';
   import { init } from '$lib/app/_init.js';
 

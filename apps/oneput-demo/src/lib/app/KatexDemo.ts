@@ -109,7 +109,6 @@ export class KatexDemo implements AppObject {
       this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
         displayMode: this.displayMode,
         throwOnError: true,
-        output: 'mathml',
         errorColor: 'red'
       });
       this.katexValid = true;
@@ -153,8 +152,8 @@ export class KatexDemo implements AppObject {
   private buildMenuItems() {
     return [
       // The preview shows one isolated formula, thus it stays centered in both
-      // modes. Display mode changes the katex itself: block layout, larger
-      // fractions, and sum limits above and below the operator.
+      // modes. Display mode changes the katex itself: larger fractions, and sum
+      // limits above and below the operator.
       menuItem({
         id: 'katex-preview-pane',
         type: 'vflex',
@@ -209,15 +208,15 @@ export class KatexDemo implements AppObject {
   /**
    * Insert the formula in the demo document.
    *
-   * Display mode gives a block formula, which the browser puts on its own line
-   * and centers. Thus we do not put it in a paragraph. Inline mode gives a
-   * formula that flows with text, so a paragraph is correct.
+   * Display mode gives a block formula in a `.katex-display` wrapper, which
+   * katex.css puts on its own line and centers. Thus we do not put it in a
+   * paragraph. Inline mode gives a formula that flows with text, so a
+   * paragraph is correct.
    */
   private insertKatex = () => {
     const rendered = katex.renderToString(this.ctl.input.getInputValue(), {
       displayMode: this.displayMode,
       throwOnError: true,
-      output: 'mathml',
       errorColor: 'red'
     });
     document.getElementById('katex-demo')!.innerHTML += this.displayMode

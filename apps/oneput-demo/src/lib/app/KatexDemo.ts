@@ -41,7 +41,8 @@ export class KatexDemo implements AppObject {
     enableMenuOpenClose: false,
     // The input is a katex editor, not a menu filter — this is a sync-rebuild
     // menu (menu() + invalidate), so disable the default filter channel.
-    enableFilter: false
+    enableFilter: false,
+    clearInputAfterAction: false,
   } satisfies UIFlags;
 
   /**

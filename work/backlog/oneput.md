@@ -146,6 +146,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: the eliza scroll and clear buttons could do with some love
+  - COMMENT: should they be both in inner ui?
 - refactor: why do we have both Directory Browser and File Picker; can we just use one?
   - COMMENT: or put the canonical example in shared/ and keep the other in demo if you must
   - COMMENT: I think we were showcasing nested AppObjects in one; I think we can get rid of that one

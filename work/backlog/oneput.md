@@ -60,6 +60,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: mod+? does replaceMenuUI to show keybindings for desktop users; this is not useful for soft-keyboard users though, so we should try to reasonably distinguish the two and only make it available to desktop (worse case we can have a setting to force desktop-isms to be be shown but that is a separate ticket); we don't need a button to trigger this either because this is not useful in mobile / soft keyboards; docs should say: type mod+?; there should be a menu action we can include in menus: "Show bindings"
+  - COMMENT: I'm not sure if we should use replaceUI or just show a new menu; if we use a menu, we could add the ability to not just view bindings but to go into one and edit it; so this makes me think we want to load an AppObject that shows bindings in a nice easy way for the user to see and then optionally allow them to trigger additional actions if the consumer apps wants it
+  - COMMENT: later we can extend mod+? to be a general help, maybe agent driven; in this situation we might have a "?" button on the left outside of the input
+  - COMMENT: or we make it a general help / settings page; I think we need a quick way to check bindings, no other navigation; maybe `$mod+backtick` ?
 - feat: show submit binding to user
   - we tend to use $mod+enter because enter tends to trigger menu actions
   - we want users to be gently reminded when they can sumbit with $mod+enter (or whatever is set)
@@ -69,9 +73,6 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - feat: put notifications into top corner of screen
   - stack multiple notifications?
   - clicking stack should expand it
-- feat: mod+? does replaceMenuUI to show keybindings; we don't need a button becaue this is not useful in mobile / soft keyboards; docs should say: type mod+?
-  - COMMENT: later we can extend mod+? to be a general help, maybe agent driven; in this situation we might have a "?" button on the left outside of the input
-  - COMMENT: or we make it a general help / settings page; I think we need a quick way to check bindings, no other navigation; maybe `$mod+backtick` ?
 - feat: how would an agent dynamically create a new AppObject and is this a useful idea?
   - COMMENT: a DynamicAppObject that acts like a DSL?  Could an agent recreate various things in oneput-demo given this DSL?
 - feat: Oneput media api tells us (reasonably) if we're mobile, tablet or desktop

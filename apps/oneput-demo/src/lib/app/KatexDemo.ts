@@ -1,8 +1,7 @@
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
-import { divider, hflex, menuItem } from '@oneput/oneput';
+import { divider, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
@@ -98,7 +97,7 @@ export class KatexDemo implements AppObject {
     if (this.ctl.input.getInputValue().trim() === '') {
       this.currentResult = '';
       this.katexValid = true;
-      this.renderInputUI(true);
+      this.syncChrome();
       return;
     }
     try {
@@ -110,12 +109,36 @@ export class KatexDemo implements AppObject {
       });
       this.katexValid = true;
       this.ctl.clearNotifications();
-      this.renderInputUI(true);
+      this.syncChrome();
     } catch (err) {
       this.katexValid = false;
-      this.renderInputUI(false);
+      this.syncChrome();
       this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
     }
+  }
+
+  /**
+   * Give insert to the layout as its `inputSend` affordance. Then set the
+   * app's own input chrome again.
+   *
+   * Order matters: `ctl.ui.update` rebuilds `inputUI` from the layout, so
+   * `renderInputUI` must run after it.
+   */
+  private syncChrome() {
+    this.ctl.ui.update({
+      params: {
+        inputSend: {
+          run: () => this.insertKatex(),
+          enabled: this.canInsert()
+        }
+      } satisfies AppLayoutParams
+    });
+    this.renderInputUI();
+  }
+
+  /** Insert needs valid katex and something to insert. */
+  private canInsert() {
+    return this.katexValid && this.ctl.input.getInputValue().trim() !== '';
   }
 
   /**
@@ -148,17 +171,6 @@ export class KatexDemo implements AppObject {
       }),
       infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage, icon: icons.Info }),
       divider(),
-      stdMenuItem({
-        id: 'insert-katex-btn',
-        left: (b) => [b.icon(icons.Settings)],
-        textContent: 'Insert...',
-        attr: {
-          disabled: !this.katexValid
-        },
-        action: () => {
-          this.insertKatex();
-        }
-      }),
       checkboxMenuItem({
         id: 'katex-display-mode-checkbox',
         action: (_, checked) => {
@@ -173,25 +185,15 @@ export class KatexDemo implements AppObject {
     ];
   }
 
-  private renderInputUI(katexIsValid: boolean) {
+  /**
+   * App-owned input chrome. `right` belongs to the layout (the send button),
+   * so it stays untouched here — invalid katex shows as a disabled send.
+   */
+  private renderInputUI() {
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
-        textArea: { rows: 5 },
-        right: katexIsValid
-          ? undefined
-          : hflex({
-              id: 'katex-indicator',
-              children: (b) => [
-                b.fchild({
-                  classes: ['oneput__icon'],
-                  style: {
-                    color: '#c44'
-                  },
-                  icon: icons.CircleAlert
-                })
-              ]
-            })
+        textArea: { rows: 5 }
       } satisfies OneputProps['inputUI'];
     });
   }

@@ -81,10 +81,6 @@ ElizaBot.prototype._init = function () {
     for (var i in elizaData.elizaSynons)
       synPatterns[i] = '(' + i + '|' + elizaData.elizaSynons[i].join('|') + ')';
   }
-  // check for keywords or install empty structure to prevent any errors
-  if (!elizaData.elizaKeywords || typeof elizaData.elizaKeywords.length == 'undefined') {
-    elizaData.elizaKeywords = [['###', 0, [['###', []]]]];
-  }
   // 1st convert rules to regexps
   // expand synonyms and insert asterisk expressions for backtracking
   var sre = /@(\S+)/;
@@ -179,10 +175,6 @@ ElizaBot.prototype._init = function () {
     // default (should not match)
     ElizaBot.prototype.postExp = /####/;
     ElizaBot.prototype.posts['####'] = '####';
-  }
-  // check for elizaQuits and install default if missing
-  if (!elizaData.elizaQuits || typeof elizaData.elizaQuits.length == 'undefined') {
-    elizaData.elizaQuits = [];
   }
   // done
   ElizaBot.prototype._dataParsed = true;

@@ -110,7 +110,7 @@ export class MenuController {
   private isMenuOpenImmediate = false;
 
   openMenu = () => {
-    if (this.disableOpenClose) {
+    if (this.disableOpenClose || this.isMenuOpenImmediate) {
       return;
     }
     this.isMenuOpenImmediate = true;
@@ -127,7 +127,7 @@ export class MenuController {
   };
 
   closeMenu = () => {
-    if (this.disableOpenClose) {
+    if (this.disableOpenClose || !this.isMenuOpenImmediate) {
       return;
     }
     this.isMenuOpenImmediate = false;

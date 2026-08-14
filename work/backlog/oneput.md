@@ -24,6 +24,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: katex demo: display mode clears input, we lose what we typed
+- fix: katex demo uncovers the tension between Enter and mod+Enter
+  - "display mode" checkbox menu item responds to enter
+  - if the user tabs to the submit button and hits enter it really runs the menu item
+  - mod+enter is in the placeholder but that disappears once we write text
 - fix: oneput is scaling when I press cmd+`+`/cmd+`-`
 - style: disabled send button has a background, looks a bit weird
 - style: prefer play for send button rather then the "dart" thingy

@@ -1,5 +1,29 @@
 # Issues
 
+## INVALIDATION_REBUILD_FEEDBACK_LOOP
+
+This affected invalidation of the menu in MenuController in a consumer but could be applied in other places potentially.
+
+- when: Aug-2026
+- what:
+  - Several invalidation requests in one reactive turn can each rebuild the same menu.
+  - A rebuild writes new menu state. Reactive consumers can respond to that state and request another invalidation before the UI settles.
+  - The repeated rebuilds can form a feedback loop that keeps the browser main thread busy and makes the page unresponsive.
+- observed sequence:
+  1. The Frame demo app used `Command+B` for graph navigation and Oneput used `Command+Shift+B` to open its menu.
+  2. Frame did not reject the extra Shift modifier, so one key press started both actions.
+  3. Frame navigation changed the selected graph node (in svelteflow). Its selection callback requested a Oneput menu invalidation.
+  4. Oneput opened the menu and requested its normal pull-on-open invalidation.
+  5. Both invalidations arrived in the same reactive turn. Before coalescing, each request rebuilt the declarative menu and wrote new menu state.
+  6. The related reactive updates could request more invalidations before the previous UI work settled. The page then became unresponsive.
+- confirmation:
+  - Restoring both original Frame conditions reproduced two invalidation requests from one shortcut.
+  - With invalidation coalescing enabled, Oneput logged `Coalesced 2 menu invalidations`, performed one rebuild, and did not freeze.
+- solution:
+  - Match host shortcuts exactly. The consumer app now rejects Shift and Alt for its `Command+B` shortcut.
+  - Use `coalesce` for menu invalidation. It merges requests made before the next microtask and performs one rebuild.
+  - Release the current batch before the rebuild starts. An invalidation requested while a rebuild runs must create a trailing batch instead of being lost.
+
 ## IMPORT_CSS_GOTCHA
 
 - what:

@@ -1,6 +1,7 @@
 import type { FlexParams, FocusBehaviour, MenuItemAny, MenuItemsGenFnAsync } from '../types.js';
 import type { MenuItemsFilterFn } from '../types.js';
 import type { Controller } from './controller.js';
+import { coalesce } from './helpers/coalesce.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { GenerativeMenuManager } from './helpers/GenerativeMenuManager.js';
 import { FilterManager } from './helpers/FilterManager.js';
@@ -8,6 +9,7 @@ import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItem
 import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
+type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
 
 /**
  * `filter` and `generative` modes are mutually exclusive.
@@ -166,19 +168,43 @@ export class MenuController {
    * {@link InputController.setInputValue} / `tick()`), or `false` if the menu
    * was closed and nothing was updated. Await before reading layout (e.g. scroll).
    */
-  invalidate = (opts?: { focusBehaviour?: FocusBehaviour }): Promise<boolean> => {
-    if (!this.ctl.menu.isMenuOpen) {
-      return Promise.resolve(false);
+  private invalidateNow = async ({ focusBehaviour }: InvalidateOptions): Promise<boolean> => {
+    if (!this.isMenuOpenImmediate || !this.ctl.menu.isMenuOpen) {
+      return false;
     }
     const menu = this.ctl.app.getMenu();
     if (menu) {
       this.ctl.menu.setMenuOnly(menu);
-      this.ctl.menu.setDisplayed({ focusBehaviour: opts?.focusBehaviour });
+      this.ctl.menu.setDisplayed({ focusBehaviour });
     } else {
       // menu undefined => AppObject not using .menu(), just re-display
-      this.ctl.menu.setDisplayed({ focusBehaviour: opts?.focusBehaviour });
+      this.ctl.menu.setDisplayed({ focusBehaviour });
     }
-    return tick().then(() => true);
+    await tick();
+    return true;
+  };
+
+  /**
+   * See {@link coalesce}.
+   */
+  private invalidateCoalesced = coalesce<InvalidateOptions, boolean>(
+    {
+      merge: (current, next) => ({
+        focusBehaviour: next.focusBehaviour ?? current.focusBehaviour
+      }),
+      onBatch: ({ requestCount, input }) => {
+        console.debug(`Coalesced ${requestCount} menu invalidations`, input);
+      }
+    },
+    this.invalidateNow
+  );
+
+  /** Rebuild the current menu and wait for Svelte to update its DOM. */
+  invalidate = (opts: InvalidateOptions = {}): Promise<boolean> => {
+    if (!this.ctl.menu.isMenuOpen) {
+      return Promise.resolve(false);
+    }
+    return this.invalidateCoalesced(opts);
   };
 
   /**

@@ -16,6 +16,85 @@ const inputChangePayload = {
 };
 
 describe('MenuController', () => {
+  describe('menu updates', () => {
+    it('rebuilds a declarative menu once for several invalidations', async () => {
+      // arrange
+      let menuBuildCount = 0;
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        onStart: () => {},
+        menu: () => {
+          menuBuildCount += 1;
+          return { id: 'main', items: [item('action', 'Action')] };
+        }
+      });
+
+      // act
+      const results = await Promise.all([
+        ctl.menu.invalidate(),
+        ctl.menu.invalidate(),
+        ctl.menu.invalidate({ focusBehaviour: 'none' })
+      ]);
+
+      // assert
+      expect(results).toEqual([true, true, true]);
+      expect(menuBuildCount).toBe(1);
+    });
+
+    it('does not rebuild when closing is requested before an invalidation runs', async () => {
+      // arrange
+      let menuBuildCount = 0;
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        onStart: () => {},
+        menu: () => {
+          menuBuildCount += 1;
+          return { id: 'main', items: [item('action', 'Action')] };
+        }
+      });
+
+      // act
+      const result = ctl.menu.invalidate();
+      ctl.menu.closeMenu();
+
+      // assert
+      await expect(result).resolves.toBe(false);
+      expect(menuBuildCount).toBe(0);
+    });
+
+    it('emits one open event for repeated open requests', async () => {
+      // arrange
+      const menuOpenChanges: boolean[] = [];
+      const ctl = Controller.createNull();
+      ctl.app.run({ onStart: () => {} });
+      ctl.events.on('menu-open-change', (open) => menuOpenChanges.push(open));
+
+      // act
+      ctl.menu.openMenu();
+      ctl.menu.openMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(menuOpenChanges).toEqual([true]);
+    });
+
+    it('emits one close event for repeated close requests', async () => {
+      // arrange
+      const menuOpenChanges: boolean[] = [];
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.events.on('menu-open-change', (open) => menuOpenChanges.push(open));
+
+      // act
+      ctl.menu.closeMenu();
+      ctl.menu.closeMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(menuOpenChanges).toEqual([false]);
+    });
+  });
+
   describe('focusBehaviour', () => {
     test('(first) filtering / redisplay - keeps menu focus behaviour when filtering redisplays the current menu', () => {
       // arrange

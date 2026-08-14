@@ -24,6 +24,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: oneput is scaling when I press cmd+`+`/cmd+`-`
 - style: disabled send button has a background, looks a bit weird
 - style: prefer play for send button rather then the "dart" thingy
 - fix: after typing in elize, clearing chat, getting a confirmation and cancelling (or clearing), the input is not focused again

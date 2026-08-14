@@ -66,6 +66,22 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: layout / update / ui unification
+  - ctl.ui.update should take `params` and `ui`
+  - AppObject.layout should also take `params` and `ui`
+    ```
+    layout = {
+      params: () => ({
+        menuTitle: 'Katex Demo',
+        inputSend: { run: () => this.insertKatex(), enabled: this.canInsert() }
+      }),
+      inputUI: (current) => ({ ...current, textArea: { rows: 5 } })
+    };
+    ```
+  - COMMENT:
+    - what triggers the re-pull. Today ctl.menu.invalidate() re-pulls menu(); params/chrome would need either their own ctl.ui.invalidate() — and then this demo calls two invalidates per keystroke — or one ctl.invalidate() that re-pulls everything the current AppObject declares. I'd want the latter, but it merges two things that are currently separate, and menu invalidate carries options (focusBehaviour) that make no sense for chrome.
+    - Also the same rule as menu() applies: the thunk gets called on every rebuild, so it must be cheap and free of side effects. Worth stating in the type's JSDoc.
+    - ctl.ui.update still earns its place for imperative mid-flight patches (BindingsEditor does this), it just stops being the only way to have dynamic params.
 - feat: mod+? does replaceMenuUI to show keybindings for desktop users; this is not useful for soft-keyboard users though, so we should try to reasonably distinguish the two and only make it available to desktop (worse case we can have a setting to force desktop-isms to be be shown but that is a separate ticket); we don't need a button to trigger this either because this is not useful in mobile / soft keyboards; docs should say: type mod+?; there should be a menu action we can include in menus: "Show bindings"
   - COMMENT: I'm not sure if we should use replaceUI or just show a new menu; if we use a menu, we could add the ability to not just view bindings but to go into one and edit it; so this makes me think we want to load an AppObject that shows bindings in a nice easy way for the user to see and then optionally allow them to trigger additional actions if the consumer apps wants it
   - COMMENT: later we can extend mod+? to be a general help, maybe agent driven; in this situation we might have a "?" button on the left outside of the input
@@ -151,6 +167,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: rename all things "ui" to "chrome"
+  - COMMENT: one agent remarked that `ctl.ui.update({ params: ..., ui: ... })` is a bit much
 - refactor: the eliza scroll and clear buttons could do with some love
   - COMMENT: should they be both in inner ui?
 - refactor: why do we have both Directory Browser and File Picker; can we just use one?

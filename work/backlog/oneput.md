@@ -28,6 +28,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - fix: katex demo uncovers the tension between Enter and mod+Enter
   - "display mode" checkbox menu item responds to enter
   - if the user tabs to the submit button and hits enter it really runs the menu item
+    - COMMENT: do look at the active element? do we only handle enter when input is focused -- or is that too broad?
   - mod+enter is in the placeholder but that disappears once we write text
 - fix: oneput is scaling when I press cmd+`+`/cmd+`-`
 - style: disabled send button has a background, looks a bit weird

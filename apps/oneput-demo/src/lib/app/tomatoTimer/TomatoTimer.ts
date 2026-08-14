@@ -14,10 +14,7 @@ import { SveltePropInjector } from '@oneput/oneput/shared/components/SveltePropI
 import { formatSecondsToHHMMSS, parseTimerDuration } from './utils.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { AddEntry, isAddEntryResult } from './AddEntry.js';
-import {
-  isPickDurationResult,
-  SetDuration
-} from '@oneput/oneput/shared/appObjects/SetDuration.js';
+import { isPickDurationResult, SetDuration } from '@oneput/oneput/shared/appObjects/SetDuration.js';
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { icons } from '../_icons.js';
 import { TomatoTimerDiagnostics } from './TomatoTimerDiagnostics.js';

@@ -24,6 +24,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- style: disabled send button has a background, looks a bit weird
+- style: prefer play for send button rather then the "dart" thingy
+- fix: after typing in elize, clearing chat, getting a confirmation and cancelling (or clearing), the input is not focused again
+  - COMMENT: the issue is, is there a deeper thing we can sure up here or is it just a setting in the elize app
 - fix: katex: replace "Insert..." with input right submit
 - fix: katex: is display mode inserting katex into html using display mode?
 - fix: in elizachat if I tab to the send button (one tab from the input) and hit "enter", nothing happens

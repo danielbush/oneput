@@ -28,7 +28,11 @@ export class KatexDemo implements AppObject {
   constructor(
     private ctl: Controller,
     private dynamicPlaceholder: DynamicPlaceholder,
-    private previewDisplayMode: boolean = false
+    /**
+     * Katex display mode. It controls what we insert: a block formula, or an
+     * inline one in a paragraph. The preview shows the same mode.
+     */
+    private displayMode: boolean = false
   ) {}
 
   layout = {
@@ -42,7 +46,7 @@ export class KatexDemo implements AppObject {
     // The input is a katex editor, not a menu filter — this is a sync-rebuild
     // menu (menu() + invalidate), so disable the default filter channel.
     enableFilter: false,
-    clearInputAfterAction: false,
+    clearInputAfterAction: false
   } satisfies UIFlags;
 
   /**
@@ -103,7 +107,7 @@ export class KatexDemo implements AppObject {
     }
     try {
       this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
-        displayMode: this.previewDisplayMode,
+        displayMode: this.displayMode,
         throwOnError: true,
         output: 'mathml',
         errorColor: 'red'
@@ -144,10 +148,13 @@ export class KatexDemo implements AppObject {
 
   /**
    * Build the menu items from current AppObject state. Pure with respect to the
-   * menu: reads this.currentResult / katexValid / helpMessage / previewDisplayMode.
+   * menu: reads this.currentResult / katexValid / helpMessage / displayMode.
    */
   private buildMenuItems() {
     return [
+      // The preview shows one isolated formula, thus it stays centered in both
+      // modes. Display mode changes the katex itself: block layout, larger
+      // fractions, and sum limits above and below the operator.
       menuItem({
         id: 'katex-preview-pane',
         type: 'vflex',
@@ -175,13 +182,13 @@ export class KatexDemo implements AppObject {
       checkboxMenuItem({
         id: 'katex-display-mode-checkbox',
         action: (_, checked) => {
-          this.previewDisplayMode = checked;
+          this.displayMode = checked;
           this.recompute();
           // focusBehaviour 'none' keeps the focused index on the checkbox.
           this.ctl.menu.invalidate({ focusBehaviour: 'none' });
         },
         textContent: 'Display mode',
-        checked: this.previewDisplayMode
+        checked: this.displayMode
       })
     ];
   }
@@ -199,16 +206,23 @@ export class KatexDemo implements AppObject {
     });
   }
 
+  /**
+   * Insert the formula in the demo document.
+   *
+   * Display mode gives a block formula, which the browser puts on its own line
+   * and centers. Thus we do not put it in a paragraph. Inline mode gives a
+   * formula that flows with text, so a paragraph is correct.
+   */
   private insertKatex = () => {
-    document.getElementById('katex-demo')!.innerHTML += `<p>${katex.renderToString(
-      this.ctl.input.getInputValue(),
-      {
-        displayMode: false,
-        throwOnError: true,
-        output: 'mathml',
-        errorColor: 'red'
-      }
-    )}</p>`;
+    const rendered = katex.renderToString(this.ctl.input.getInputValue(), {
+      displayMode: this.displayMode,
+      throwOnError: true,
+      output: 'mathml',
+      errorColor: 'red'
+    });
+    document.getElementById('katex-demo')!.innerHTML += this.displayMode
+      ? rendered
+      : `<p>${rendered}</p>`;
     this.ctl.input.setInputValue('');
     this.recompute();
     this.ctl.menu.invalidate();

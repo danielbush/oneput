@@ -171,4 +171,38 @@ describe('InputController selection-change emission', () => {
       expect(emitted).toEqual(['CURSOR_AT_END']);
     });
   });
+
+  describe('isMultiline', () => {
+    const withTextArea = (textArea: boolean | { rows: number } | undefined) => {
+      const ctl = Controller.createNull();
+      ctl.ui.setInputUI({ textArea });
+      return ctl.input.isMultiline;
+    };
+
+    it('rows > 1', () => {
+      expect(withTextArea({ rows: 5 })).toBe(true);
+    });
+
+    it('rows 1 - still a textarea, thus still takes newlines', () => {
+      expect(withTextArea({ rows: 1 })).toBe(true);
+    });
+
+    it('textArea true', () => {
+      expect(withTextArea(true)).toBe(true);
+    });
+
+    it('textArea false', () => {
+      expect(withTextArea(false)).toBe(false);
+    });
+
+    it('no textArea', () => {
+      expect(withTextArea(undefined)).toBe(false);
+    });
+
+    it('no inputUI', () => {
+      const ctl = Controller.createNull();
+
+      expect(ctl.input.isMultiline).toBe(false);
+    });
+  });
 });

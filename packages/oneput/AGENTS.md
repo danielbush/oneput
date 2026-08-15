@@ -22,7 +22,7 @@ Below are pointers for agents — read the source files for full detail via JSDo
 
 ### Bindings
 
-Key bindings map keyboard shortcuts to actions. Each binding declares `when` conditions (e.g. `menuOpen: true`) controlling when it fires.
+Key bindings map keyboard shortcuts to actions. Each binding declares `when` conditions (`menuOpen`, `multiline`) controlling when it fires. Dispatch also leaves unmodified Enter/Space alone when the browser already activates the focused control (`lib/nativeActivation.ts`) - see ENTER_SEMANTICS.
 
 - Types: `packages/oneput/src/lib/oneput/lib/bindings.ts` — `KeyBinding`, `ActionBinding`, `KeyBindingMap`
 - Controller: `packages/oneput/src/lib/oneput/controllers/KeysController.ts`

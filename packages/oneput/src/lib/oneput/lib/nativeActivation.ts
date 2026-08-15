@@ -6,7 +6,7 @@
  * by itself: if the user tabs to the submit button and presses Enter, they
  * expect a click on that button, not a menu action.
  *
- * See INPUT_SUBMIT_SCHEME in `docs/CONCEPTS.md`.
+ * See ENTER_SEMANTICS.
  */
 
 /** Keys that activate a focused control. Space is `' '` in `KeyboardEvent.key`. */

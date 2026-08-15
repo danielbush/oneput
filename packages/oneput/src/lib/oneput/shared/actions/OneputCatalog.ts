@@ -127,9 +127,7 @@ function getMenuEntries(ctl: Controller): OneputCatalogEntries {
 
     [OneputAction.FOCUS_PREVIOUS_MENU_ITEM]: {
       description: 'Focus previous menu item',
-      action: () => {
-        ctl.menu.focusPreviousMenuItem();
-      },
+      action: () => ctl.menu.focusPreviousMenuItem(),
       binding: {
         bindings: ['$mod+k'],
         when: { menuOpen: true }
@@ -138,9 +136,7 @@ function getMenuEntries(ctl: Controller): OneputCatalogEntries {
 
     [OneputAction.FOCUS_NEXT_MENU_ITEM]: {
       description: 'Focus next menu item',
-      action: () => {
-        ctl.menu.focusNextMenuItem();
-      },
+      action: () => ctl.menu.focusNextMenuItem(),
       binding: {
         bindings: ['$mod+j'],
         when: { menuOpen: true }
@@ -149,9 +145,10 @@ function getMenuEntries(ctl: Controller): OneputCatalogEntries {
 
     [OneputAction.DO_ACTION]: {
       description: 'Do action',
-      action: () => {
-        ctl.menu.doMenuAction();
-      },
+      // Returns false when there is no focused menu item (e.g.
+      // `enableMenuItemFocus: false`), thus Enter falls through to the browser
+      // and a textarea writes a newline. See ENTER_SEMANTICS in docs/CONCEPTS.md.
+      action: () => ctl.menu.doMenuAction(),
       binding: {
         bindings: ['Enter'],
         when: { menuOpen: true }

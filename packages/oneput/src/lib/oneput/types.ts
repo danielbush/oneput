@@ -287,10 +287,19 @@ export type AppActionContext =
   | { source: 'keyboard'; event: KeyboardEvent }
   | { source: 'menu'; menuId: string; menuActionId: string };
 
+/**
+ * Return `false` to decline the action: the key was not handled, thus
+ * KeysController does not call `preventDefault` and the browser does its usual
+ * work (e.g. `Enter` writes a newline in a textarea).
+ *
+ * Any other return value (including `undefined` and a promise) means handled.
+ * Thus only a synchronous decision can decline, because `preventDefault` must
+ * run inside the key event. See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+ */
 export type AppActionHandler<Context extends AppActionContext = AppActionContext> = (
   ctl: Controller,
   context?: Context
-) => void;
+) => void | boolean | Promise<unknown>;
 
 export type AppAction<Context extends AppActionContext = AppActionContext> = {
   action: AppActionHandler<Context>;
@@ -553,6 +562,33 @@ export type UIFlags = {
   enableFilter?: boolean;
   enableInputElement?: boolean;
   enableModal?: boolean;
+  /**
+   * Oneput's own (synthetic) menu item focus: the roving index that `--focused`
+   * paints and that `DO_ACTION` acts on.
+   *
+   * Defaults to true. Set it to false for a menu that is not a keyboard
+   * chooser — e.g. a display with one incidental control, or a textarea
+   * AppObject that wants `Enter` for newlines. Bindings that declare
+   * `when.menuItemFocus` stop matching, thus `Enter` is free. Menu item actions
+   * still run from a click, a dedicated binding, or native Tab focus.
+   *
+   * Compare `enableMenuActions`, which stops actions running but keeps the
+   * focus and the appearance.
+   *
+   * See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+   */
+  enableMenuItemFocus?: boolean;
+  /**
+   * Let the browser activate the focused control: unmodified `Enter` / `Space`
+   * on a button (or a link, or a checkbox) does not run an Oneput binding.
+   *
+   * Defaults to true. Set it to false for capture screens (e.g. BindingsEditor)
+   * that must see every key. Bindings with a modifier (`$mod+Enter`) fire
+   * either way.
+   *
+   * See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+   */
+  enableNativeActivation?: boolean;
   /**
    * Focus the Oneput input after an AppObject starts or resumes.
    *

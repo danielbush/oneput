@@ -295,6 +295,20 @@ export class InputController {
   }
 
   /**
+   * True when the input is a textarea (`inputUI.textArea`), thus `Enter` can
+   * write a newline in it.
+   *
+   * `rows` sizes the textarea, it does not decide this: a one-row textarea
+   * still takes newlines and scrolls. See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+   *
+   * This value does not change the key semantics by itself. The AppObject
+   * decides those with `enableMenuItemFocus` and `enableNativeActivation`.
+   */
+  get isMultiline() {
+    return Boolean(this.ctl.currentProps.inputUI?.textArea);
+  }
+
+  /**
    * Authoritative enable/disable for the input — not just `inputElement.disabled`.
    *
    * Needed so modal flag snapshots can read {@link enableInputElement} when the

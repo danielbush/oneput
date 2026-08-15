@@ -110,34 +110,32 @@ AppObject plus Accept from `inputAccept` in one `right` flex), not only
   - set date
   - set time
 
-## INPUT_SUBMIT_SCHEME
+## ENTER_SEMANTICS - enter key semantics
 
-There are 2 INPUT_MODE's.
+Recall we have `DO_ACTION` which triggers a menu action for the currently focused menu item; and we have `SUBMIT` action which submits the input. It's common for both of these to be the `Enter` key. The AppObject author (consumer) can of course use a different key.
 
-- SINGLE_INPUT_MODE
-- MULTILINE_INPUT_MODE
+Factors (ENTER_SEMANTICS_FACTORS)
 
-The big idea is that enter key triggers menu actions when in SINGLE_INPUT_MODE.  If the user tabs the focus off the input to a button however, the system checks the target and may trigger a button action instead.  In MULTILINE_INPUT_MODE, the enter key loses the menu action behaviour, allowing users to type newlines (The dispatcher in KeysController reads the event target, and if it's a `<button>` it lets unmodified `Enter`/`Space` through while modifier bindings still fire). The sacrifice is that they can no longer trigger menu actions using `Enter` + menu item focus.  They can still click the menu items or add dedicated key bindings (and display these on the menu item); tabbing to button-based menu items would also work.
+- tabbing from browser native input focus to a button focus (eg a submit/send button or even the menu open/close button etc) and hitting `Enter` should trigger that button using native browser functionality
+- similarly for `Space` should also trigger the button under focus using native browser functionality
+- a focused menu item (using oneput synthetic menu item focus) implies `DO_ACTION` should trigger; it's common to bind `Enter` to `DO_ACTION`; so we want to allow for this binding
+- sometimes we need `Enter` even when natively focused on a button - eg key capture in a bindings editor that has to intercept everything
+- the consumer may want `Enter` to generate a newline when the input is a textarea
+- there is no value in `Enter` generating a newline when the input is a single line; `Enter` is more free for use elsewhere in this scenario; this is also often the more common scenario; switching to a multiline input suggests the user has been put into a temporary dedicated authoring mode in order to write something more substantial.
+- mobile users don't care about `Tab` or `Enter` as ux is driven by touch and soft-keyboard
+- `$mod+Enter` might be a common binding choice for `SUBMIT`
 
-|                                | SINGLE_INPUT_MODE (input element)          | MULTILINE_INPUT_MODE (textarea)     |
-| ------------------------------ | ------------------------------------------ | ----------------------------------- |
-| `Enter`, native focus = input  | Menu action on the focused menu item       | Newline                             |
-| `Enter`, native focus = button | Clicks the button                          | Clicks the button                   |
-| `Shift+Enter`                  | nothing                                    | Newline                             |
-| `$mod+Enter`                   | Submit                                     | Submit                              |
-| Menu item focus                | Enabled                                    | Disabled                            |
-| Reach a menu item              | Use menu item focus + `Enter`, click       | click, set a binding, Tab + `Enter` |
+Example: see KatexDemo. Here we have a multiline input where we type latex; we have a checkbox-based menu item that toggles display mode. We have a submit button.
 
-**MULTILINE_INPUT_MODE**
+We have 3 settings that we can vary to achieve a satisfactory outcome based on these factors.
 
-Triggered when setting rows `>1` eg `inputUI.textArea: { rows: 5 }`:
+- (1) `rows` in `setInputUI`
+  - just sets if we're multiline or not; if multiline the consumer then needs to decide what ENTER_SEMANTICS they want
+  - `InputController.isMultiline` detects multiline textarea; single line textarea counts as a multiline because native `Enter` will still generate a newline
+- (2) `enableMenuItemFocus` (default true)
+  - if `false` removes menu item focus and related actions that change it, gates the `DO_ACTION` binding associated with this focus but does not disable the menu item action itself; it signals to the user that keyboard menu selection/activation semantics are no longer present but that doesn't prevent them from activating the present menu items by other means: dedicated key binding, touch/click, native tab focus
+  - by contrast: `enableMenuActions` disables the action but does not change the appearance or disable menu item focus; it's used to temporarily freeze interactivity; the 2 could be combined along with styling to disable the menu (TODO: we might set a disable flag on the input so CSS styling can reflect the change)
+- (3) `enableNativeActivation` (default true)
+  - if native browser focus is on a button, this will take precedence over any declared oneput binding for `Enter` and `Space`; (a modifier on `Enter` or `Space` or any key is considered a different binding)
 
-1. `Oneput.svelte` renders a `<textarea>` in place of the `<input>`.
-2. The controller derives the mode from the same prop
-  (`ctl.input.isMultiline`).
-3. The keys read that mode: `DO_ACTION`'s `when` fails, thus `Enter` matches
-  no binding, thus nothing calls `preventDefault` and the textarea writes a
-  newline.
-4. The focus mode reads that mode: menu focus goes off, `menuItemFocus` is
-  cleared, no row shows `--focused`, and `$mod+j` / `$mod+k` stop.
-5. `$mod+Enter` (submit) and Tab do not change.
+COMMENT: dead combination: `enableMenuItemFocus: false` + `enableNativeActivation: false` leaves `Enter` doing nothing anywhere except a newline in a textarea.

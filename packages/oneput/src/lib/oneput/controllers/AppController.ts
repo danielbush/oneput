@@ -189,6 +189,12 @@ export class AppController {
       if ('enableInputElement' in flags) {
         this.ctl.input._enableInputElement(flags.enableInputElement ?? true);
       }
+      if ('enableMenuItemFocus' in flags) {
+        this.ctl.menu._enableMenuItemFocus(flags.enableMenuItemFocus ?? true);
+      }
+      if ('enableNativeActivation' in flags) {
+        this.ctl.keys._enableNativeActivation(flags.enableNativeActivation ?? true);
+      }
     }
     if ('focusInputOnStart' in flags) {
       this.focusInputOnStart = flags.focusInputOnStart ?? true;
@@ -215,6 +221,10 @@ export class AppController {
       enableGenerative: settings?.enableGenerative ?? !enableModal,
       enableFilter: settings?.enableFilter ?? !enableModal,
       enableInputElement: settings?.enableInputElement ?? !enableModal,
+      // Not modal-tied: a modal (Alert / Confirm) is a chooser, thus it keeps
+      // menu item focus and native activation.
+      enableMenuItemFocus: settings?.enableMenuItemFocus ?? true,
+      enableNativeActivation: settings?.enableNativeActivation ?? true,
       focusInputOnStart: settings?.focusInputOnStart ?? true,
       focusInputOnMenuOpen: settings?.focusInputOnMenuOpen ?? true,
       clearInputAfterAction: settings?.clearInputAfterAction ?? true,
@@ -228,6 +238,8 @@ export class AppController {
     this.ctl.menu._enableGenerative(flags.enableGenerative);
     this.ctl.menu._enableFilter(flags.enableFilter);
     this.ctl.input._enableInputElement(flags.enableInputElement);
+    this.ctl.menu._enableMenuItemFocus(flags.enableMenuItemFocus);
+    this.ctl.keys._enableNativeActivation(flags.enableNativeActivation);
     this.focusInputOnStart = flags.focusInputOnStart ?? true;
     this.focusInputOnMenuOpen = flags.focusInputOnMenuOpen ?? true;
     this.clearInputAfterAction = flags.clearInputAfterAction ?? true;
@@ -277,7 +289,9 @@ export class AppController {
       return;
     }
 
-    action(this.ctl, { source: 'keyboard', event });
+    // Returning false means the action declined; KeysController then leaves the
+    // browser default alone. See AppActionHandler.
+    return action(this.ctl, { source: 'keyboard', event });
   }
 
   handleMenuAction(menuItem: MenuItem, menuId: string) {

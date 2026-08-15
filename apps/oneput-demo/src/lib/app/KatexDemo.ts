@@ -46,7 +46,11 @@ export class KatexDemo implements AppObject {
     // The input is a katex editor, not a menu filter — this is a sync-rebuild
     // menu (menu() + invalidate), so disable the default filter channel.
     enableFilter: false,
-    clearInputAfterAction: false
+    clearInputAfterAction: false,
+    // The menu is a preview pane with one incidental control, not a chooser.
+    // Turning the synthetic focus off frees Enter for newlines in the textarea
+    // and tells the user that the checkbox needs a click. See ENTER_SEMANTICS.
+    enableMenuItemFocus: false
   } satisfies UIFlags;
 
   /**

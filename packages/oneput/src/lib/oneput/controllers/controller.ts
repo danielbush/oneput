@@ -126,5 +126,7 @@ export class Controller {
     // true (DOM) focus (e.g. Tab to the submit button, then Enter).
     target.dispatchEvent(event);
     await new Promise((resolve) => setTimeout(resolve, 0));
+    // Read `defaultPrevented` to check whether Oneput took the key.
+    return event;
   }
 }

@@ -28,9 +28,28 @@ import type { Controller } from '../controllers/controller.js';
 import type { AppActionContext } from '../types.js';
 import { isMacOS } from './utils.js';
 
-export type KeyBindingAction = (c: Controller, context?: AppActionContext) => void;
+export type KeyBindingAction = (
+  c: Controller,
+  context?: AppActionContext
+) => void | boolean | Promise<unknown>;
 
 export type DuplicateBindingError = { message: string; details: string };
+
+/**
+ * Conditions for when a binding is active. `undefined` on a key means "always".
+ *
+ * - `menuOpen` — true = only when the menu is open, false = only when closed.
+ *
+ * KeysController evaluates these at dispatch time. Two bindings on the same key
+ * must not have overlapping conditions, or the first candidate wins.
+ *
+ * A binding does not declare what its action needs (e.g. a focused menu item).
+ * The action itself returns `false` when it cannot act, thus the key falls
+ * through to the browser. See {@link AppActionHandler}.
+ */
+export type WhenCondition = {
+  menuOpen?: boolean;
+};
 
 /**
  * The primary representation of a key binding that is passed to the keys
@@ -46,11 +65,8 @@ export type KeyBinding = {
    * the pluses separate modifiers.
    */
   bindings: string[];
-  /**
-   * Conditions for when the binding is active.
-   * - menuOpen: true = only when menu is open, false = only when closed, undefined = always
-   */
-  when?: { menuOpen?: boolean };
+  /** See {@link WhenCondition}. */
+  when?: WhenCondition;
   preventDefault?: boolean;
 };
 
@@ -61,7 +77,7 @@ export type KeyBinding = {
 export type ActionBinding = {
   description: string;
   bindings: string[];
-  when?: { menuOpen?: boolean };
+  when?: WhenCondition;
   preventDefault?: boolean;
 };
 
@@ -75,7 +91,7 @@ export type KeyBindingMap = {
 export type KeyBindingSerializable = {
   description: string;
   bindings: string[];
-  when?: { menuOpen?: boolean };
+  when?: WhenCondition;
   /**
    * If action is passed an its is js it will cause an exception in some stores.
    */
@@ -123,7 +139,7 @@ export type KeyEventBinding = {
    * Defaults to true.
    */
   preventDefault?: boolean;
-  when?: { menuOpen?: boolean };
+  when?: WhenCondition;
 };
 
 export type KeyEventsMap = { [actionId: string]: KeyEventBinding };
@@ -297,9 +313,17 @@ export type BindingActionConflict = {
  * - Same menuOpen value → overlap
  * - menuOpen: true vs menuOpen: false → mutually exclusive, no overlap
  */
-function whenOverlaps(a?: { menuOpen?: boolean }, b?: { menuOpen?: boolean }): boolean {
-  if (a?.menuOpen === undefined || b?.menuOpen === undefined) return true;
-  return a.menuOpen === b.menuOpen;
+/**
+ * True if two `when` conditions can be satisfied at the same time, thus two
+ * bindings on the same key would both be candidates.
+ *
+ * A key that is undefined on either side means "always", thus it overlaps. Two
+ * conditions are separate only if some key is defined on both sides and differs
+ * (e.g. `{ multiline: true }` and `{ multiline: false }`).
+ */
+function whenOverlaps(a?: WhenCondition, b?: WhenCondition): boolean {
+  const keys: Array<keyof WhenCondition> = ['menuOpen'];
+  return keys.every((key) => a?.[key] === undefined || b?.[key] === undefined || a[key] === b[key]);
 }
 
 /**
@@ -367,7 +391,7 @@ export class KeyEventBindings {
       actionId: string;
       binding: KeyEvent[];
       key: string;
-      when?: { menuOpen?: boolean };
+      when?: WhenCondition;
     }> = [];
 
     for (const [actionId, keb] of Object.entries(this.keyEventsMap)) {
@@ -486,7 +510,7 @@ export class KeyEventBindings {
     const overrideLookup: Array<{
       actionId: string;
       binding: KeyEvent[];
-      when?: { menuOpen?: boolean };
+      when?: WhenCondition;
       preventDefault?: boolean;
     }> = [];
     for (const [actionId, keb] of Object.entries(overrideKeMap)) {

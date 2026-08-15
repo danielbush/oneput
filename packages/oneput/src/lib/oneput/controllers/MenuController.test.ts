@@ -355,4 +355,108 @@ describe('MenuController', () => {
       expect(ctl.currentProps.menuUI?.footer).toBeUndefined();
     });
   });
+
+  /**
+   * `enableMenuItemFocus: false` turns the synthetic menu focus off. See
+   * ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+   */
+  describe('enableMenuItemFocus', () => {
+    const focuslessMenu = () => {
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {}, settings: { enableMenuItemFocus: false } });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [item('a', 'A'), item('b', 'B')]
+      });
+      return ctl;
+    };
+
+    test('off - focus behaviour leaves no focused item', () => {
+      // arrange / act
+      const ctl = focuslessMenu();
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([-1, false]);
+    });
+
+    test('off - focusNextMenuItem does nothing', () => {
+      // arrange
+      const ctl = focuslessMenu();
+
+      // act
+      ctl.menu.focusNextMenuItem();
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([-1, false]);
+    });
+
+    test('off - doMenuAction finds no item', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const actioned: string[] = [];
+      ctl.app.run({ onStart: () => {}, settings: { enableMenuItemFocus: false } });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [stdMenuItem({ id: 'a', textContent: 'A', action: () => actioned.push('a') })]
+      });
+
+      // act
+      ctl.menu.doMenuAction();
+
+      // assert
+      expect(actioned).toEqual([]);
+    });
+
+    test('off - a click still runs the clicked item', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const actioned: string[] = [];
+      ctl.app.run({ onStart: () => {}, settings: { enableMenuItemFocus: false } });
+      ctl.menu.setMenu({
+        id: 'main',
+        items: [
+          stdMenuItem({ id: 'a', textContent: 'A', action: () => actioned.push('a') }),
+          stdMenuItem({ id: 'b', textContent: 'B', action: () => actioned.push('b') })
+        ]
+      });
+      const clicked = ctl.currentProps.menuItems![1];
+
+      // act
+      ctl.currentProps.onMenuAction?.(new Event('pointerup'), clicked, 1);
+
+      // assert
+      expect(actioned).toEqual(['b']);
+    });
+
+    test('turned back on - focus returns', () => {
+      // arrange
+      const ctl = focuslessMenu();
+
+      // act
+      ctl.ui.update({ flags: { enableMenuItemFocus: true } });
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([0, true]);
+    });
+
+    test('on - a textarea does not change the focus', () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [item('a', 'A'), item('b', 'B')]
+      });
+      ctl.menu.focusMenuItemById('b');
+
+      // act
+      ctl.ui.setInputUI({ textArea: { rows: 5 } });
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
+    });
+  });
 });

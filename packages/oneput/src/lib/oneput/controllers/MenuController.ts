@@ -78,13 +78,16 @@ export class MenuController {
      */
     private focusBehaviour: FocusBehaviour = defaultFocusBehaviour
   ) {
-    this.ctl.currentProps.onMenuAction = () => {
-      if (this.disableActions) {
-        return;
-      }
-      this.doMenuAction();
+    // A click acts on the item under the pointer, not on the focused item.
+    // Menu item focus can be off (`enableMenuItemFocus: false`), and a click
+    // must still work. See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+    this.ctl.currentProps.onMenuAction = (_evt, menuItem) => {
+      this.runMenuItemAction(menuItem);
     };
     this.ctl.currentProps.onMenuItemEnter = (_, item, index) => {
+      if (!this.enableMenuItemFocus) {
+        return;
+      }
       this.ctl.currentProps.menuItemFocus = [index, false];
       this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
     };
@@ -144,14 +147,30 @@ export class MenuController {
 
   // #region menu items
 
-  doMenuAction() {
+  /**
+   * Run the action of the focused menu item.
+   *
+   * Returns false when nothing ran — actions are disabled, or no item has the
+   * focus (e.g. `enableMenuItemFocus: false`). A key binding that returns this
+   * value leaves the browser default alone. See ENTER_SEMANTICS in
+   * `docs/CONCEPTS.md`.
+   */
+  doMenuAction(): boolean {
+    return this.runMenuItemAction(this.currentMenu.focusedMenuItem);
+  }
+
+  /**
+   * Run one menu item's action. Returns false when nothing ran.
+   */
+  private runMenuItemAction(menuItem?: MenuItemAny): boolean {
     if (this.disableActions) {
-      return;
+      return false;
     }
-    const focusedMenuItem = this.currentMenu.focusedMenuItem;
-    if (focusedMenuItem && !focusedMenuItem.ignored && focusedMenuItem.action) {
-      this.ctl.app.handleMenuAction(focusedMenuItem, this.currentMenu.menuId);
+    if (menuItem && !menuItem.ignored && menuItem.action) {
+      this.ctl.app.handleMenuAction(menuItem, this.currentMenu.menuId);
+      return true;
     }
+    return false;
   }
 
   get displayedMenuItemCount() {
@@ -385,7 +404,47 @@ export class MenuController {
 
   // #region menu item focus
 
+  private menuItemFocusDisabled = false;
+
+  /**
+   * Menu item focus is Oneput's own (synthetic) focus: a roving index that
+   * `--focused` paints and that `DO_ACTION` acts on.
+   *
+   * Turn it off (`enableMenuItemFocus: false`) for a menu that is not a
+   * keyboard chooser — e.g. a display with one incidental control, or a
+   * textarea AppObject that wants `Enter` for newlines. Menu item actions still
+   * run from a click, a dedicated binding, or native Tab focus. See
+   * ENTER_SEMANTICS in `docs/CONCEPTS.md`.
+   */
+  get enableMenuItemFocus() {
+    return !this.menuItemFocusDisabled;
+  }
+
+  /**
+   * Prefer ctl.ui.update({ flags: { enableMenuItemFocus: false } }) instead.
+   */
+  _enableMenuItemFocus(on: boolean = true) {
+    if (on === this.enableMenuItemFocus) {
+      return;
+    }
+    this.menuItemFocusDisabled = !on;
+    if (on) {
+      this.runFocusBehaviour();
+    } else {
+      this.clearMenuItemFocus();
+    }
+  }
+
+  /**
+   * Take the focus off every item. Index -1 matches no item, thus no row shows
+   * `--focused` and doMenuAction() finds nothing.
+   */
+  clearMenuItemFocus() {
+    this.ctl.currentProps.menuItemFocus = [-1, false];
+  }
+
   focusMenuItemByIndex(index: number, focus: boolean) {
+    if (!this.enableMenuItemFocus) return;
     const { index: safeIndex, menuItem } = this.currentMenu.getSafe(index);
     this.ctl.currentProps.menuItemFocus = [safeIndex, focus];
     this.ctl.events.emit({
@@ -397,7 +456,8 @@ export class MenuController {
     });
   }
 
-  focusNextMenuItem() {
+  focusNextMenuItem(): boolean {
+    if (!this.enableMenuItemFocus) return false;
     for (
       let i = this.currentMenu.nextMenuItemIndex(), c = 0;
       c < this.currentMenu.displayedMenuItemCount;
@@ -410,12 +470,14 @@ export class MenuController {
           type: 'menu-item-focus',
           payload: { index: i, menuItem }
         });
-        break;
+        return true;
       }
     }
+    return false;
   }
 
-  focusPreviousMenuItem() {
+  focusPreviousMenuItem(): boolean {
+    if (!this.enableMenuItemFocus) return false;
     for (
       let i = this.currentMenu.previousMenuItemIndex(), c = 0;
       c < this.currentMenu.displayedMenuItemCount;
@@ -428,12 +490,14 @@ export class MenuController {
           type: 'menu-item-focus',
           payload: { index: i, menuItem }
         });
-        break;
+        return true;
       }
     }
+    return false;
   }
 
-  focusFirstMenuItem() {
+  focusFirstMenuItem(): boolean {
+    if (!this.enableMenuItemFocus) return false;
     for (let i = 0; i < this.currentMenu.displayedMenuItemCount; i++) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
@@ -442,12 +506,14 @@ export class MenuController {
           type: 'menu-item-focus',
           payload: { index: i, menuItem }
         });
-        break;
+        return true;
       }
     }
+    return false;
   }
 
-  focusLastMenuItem() {
+  focusLastMenuItem(): boolean {
+    if (!this.enableMenuItemFocus) return false;
     for (let i = this.currentMenu.displayedMenuItemCount - 1; i >= 0; i--) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
@@ -456,12 +522,14 @@ export class MenuController {
           type: 'menu-item-focus',
           payload: { index: i, menuItem }
         });
-        break;
+        return true;
       }
     }
+    return false;
   }
 
   focusMenuItemById(id: string) {
+    if (!this.enableMenuItemFocus) return false;
     const index = this.currentMenu.getIndexFromId(id);
     if (index !== null) {
       this.focusMenuItemByIndex(index, true);
@@ -487,6 +555,10 @@ export class MenuController {
   }
 
   private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
+    if (!this.enableMenuItemFocus) {
+      this.clearMenuItemFocus();
+      return;
+    }
     const behaviour = focusBehaviour ?? this.focusBehaviour;
     switch (behaviour) {
       case 'last-action,first': {

@@ -1,16 +1,18 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
-import { KeyEventBindings, type KeyEventBinding, type KeyBindingMap } from '../lib/bindings.js';
+import {
+  KeyEventBindings,
+  type KeyEventBinding,
+  type KeyBindingMap,
+  type WhenCondition
+} from '../lib/bindings.js';
 import { isNativeActivation } from '../lib/nativeActivation.js';
 import { OneputCatalog } from '../shared/actions/OneputCatalog.js';
 
 /**
  * Manages key bindings — registration, dispatch, and default/override lifecycle.
  *
- * Bindings declare when they apply via `when.menuOpen`:
- * - true = only when menu is open
- * - false = only when menu is closed
- * - undefined = always active
+ * Bindings declare when they apply via `when` ({@link WhenCondition}).
  *
  * Dispatch strategy: all bindings are registered on a single target (window)
  * via one tinykeys call. When the same key string is bound to multiple actions
@@ -19,7 +21,13 @@ import { OneputCatalog } from '../shared/actions/OneputCatalog.js';
  *
  * Because the target is window, a binding would also fire while a button has
  * the true (DOM) focus. isNativeActivation() prevents this: unmodified Enter /
- * Space on a control that the browser activates is left alone.
+ * Space on a control that the browser activates is left alone, unless
+ * `enableNativeActivation: false` (capture screens).
+ *
+ * An action can also decline: it returns false when it could not act (e.g.
+ * DO_ACTION with no focused menu item), thus dispatch skips preventDefault and
+ * the browser does its usual work. This is why the action runs before
+ * preventDefault. See ENTER_SEMANTICS in `docs/CONCEPTS.md`.
  *
  * To add more `when` flags in future, extend matchesWhen() and validate at
  * registration time that no two candidates for the same key have overlapping
@@ -49,7 +57,7 @@ export class KeysController {
   private unsubscribe: () => void = () => {};
   private keysDisabled = false;
 
-  private matchesWhen(when?: { menuOpen?: boolean }): boolean {
+  private matchesWhen(when?: WhenCondition): boolean {
     if (when?.menuOpen !== undefined && when.menuOpen !== this.ctl.menu.isMenuOpen) return false;
     return true;
   }
@@ -60,17 +68,21 @@ export class KeysController {
   ) {
     if (this.keysDisabled) return;
     // The browser activates the focused control (e.g. Tab to the submit button,
-    // then Enter). Leave that key alone.
-    if (isNativeActivation(evt)) return;
+    // then Enter). Leave that key alone unless the AppObject captures everything.
+    if (this.nativeActivationEnabled && isNativeActivation(evt)) return;
     const match = candidates.find((c) => this.matchesWhen(c.kb.when));
     if (match) {
-      if (match.kb.preventDefault ?? true) {
-        evt.preventDefault();
-      }
       // MENU_OPEN_CLOSE_RACE
       // setTimeout(() => {
-      this.ctl.app.handleKeyAction(match.actionId, evt, match.kb.action);
+
+      // The action runs first so that it can decline: an action that returns
+      // false did not handle the key, thus we leave the default alone (e.g.
+      // DO_ACTION with no focused menu item lets a textarea write a newline).
+      const handled = this.ctl.app.handleKeyAction(match.actionId, evt, match.kb.action);
       // });
+      if (handled !== false && (match.kb.preventDefault ?? true)) {
+        evt.preventDefault();
+      }
     }
   }
 
@@ -97,6 +109,22 @@ export class KeysController {
 
   get enableKeys() {
     return !this.keysDisabled;
+  }
+
+  private nativeActivationEnabled = true;
+
+  /**
+   * Prefer ctl.ui.update({ flags: { enableNativeActivation: false } }) instead.
+   *
+   * Set it off for capture screens (e.g. BindingsEditor) that must see every
+   * key, even while a button has the true (DOM) focus.
+   */
+  _enableNativeActivation(on: boolean = true) {
+    this.nativeActivationEnabled = on;
+  }
+
+  get enableNativeActivation() {
+    return this.nativeActivationEnabled;
   }
 
   /**

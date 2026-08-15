@@ -24,15 +24,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
-- fix: katex demo: display mode clears input, we lose what we typed
-- fix: katex demo uncovers the tension between Enter and mod+Enter
-  - "display mode" checkbox menu item responds to enter
-  - if the user tabs to the submit button and hits enter it really runs the menu item
-    - COMMENT: do look at the active element? do we only handle enter when input is focused -- or is that too broad?
-  - mod+enter is in the placeholder but that disappears once we write text
 - fix: oneput is scaling when I press cmd+`+`/cmd+`-`
-- style: disabled send button has a background, looks a bit weird
-- style: prefer play for send button rather then the "dart" thingy
 - fix: after typing in elize, clearing chat, getting a confirmation and cancelling (or clearing), the input is not focused again
   - COMMENT: the issue is, is there a deeper thing we can sure up here or is it just a setting in the elize app
 - fix: katex: replace "Insert..." with input right submit
@@ -234,6 +226,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## style
 
+- style: prefer play for send button rather then the "dart" thingy
 - style: in oneput internal demo (not oneput-demo), the divider text has an additional indent (margin-left by the looks) that breaks alignment with the main text in the menu items
 - style: the radius of the input border box (which gets the focus ring) is more pronounced than the border radius of the oneput container
   - COMMENT: it's more noticeable when there is no chrome above the input

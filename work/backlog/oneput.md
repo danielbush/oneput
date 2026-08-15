@@ -220,6 +220,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## chore
 
+- chore: run knip - dead exports / code etc
 - chore: test importing the built package, make sure all expoected exports work and test files etc are not include
   - COMMENT: publishConfig looks out date cmopared to exports in package.json -
 - docs: need to make ai-docs similar to effect v4

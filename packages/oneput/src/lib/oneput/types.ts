@@ -308,9 +308,8 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
 /**
  * Host-layout affordance: an action the layout may surface (button, etc.).
  *
- * Used by {@link AppLayoutParams.inputSend}, `.inputAccept`, and `.inputReject`.
- * These are chrome roles, not lifecycle — the AppObject’s `run` decides whether
- * to exit, stay, send a message, etc.
+ * Allows shared or 3rd party AppObjects to set the layout to certain common
+ * things like a submit button.
  */
 export type LayoutAffordance = {
   run: () => void;

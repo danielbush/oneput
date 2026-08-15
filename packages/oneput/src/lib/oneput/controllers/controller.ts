@@ -115,14 +115,16 @@ export class Controller {
    * KeysController dispatches actions through a setTimeout to avoid menu-open
    * races, so tests should await this helper before asserting.
    */
-  async simulateKey(key: string, init: KeyboardEventInit = {}) {
+  async simulateKey(key: string, init: KeyboardEventInit = {}, target: EventTarget = window) {
     const event = new KeyboardEvent('keydown', {
       key,
       bubbles: true,
       cancelable: true,
       ...init
     });
-    window.dispatchEvent(event);
+    // Pass an element as `target` to simulate a key while that element has the
+    // true (DOM) focus (e.g. Tab to the submit button, then Enter).
+    target.dispatchEvent(event);
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
 }

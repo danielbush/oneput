@@ -1,6 +1,7 @@
 import { tinykeys } from 'tinykeys';
 import type { Controller } from './controller.js';
 import { KeyEventBindings, type KeyEventBinding, type KeyBindingMap } from '../lib/bindings.js';
+import { isNativeActivation } from '../lib/nativeActivation.js';
 import { OneputCatalog } from '../shared/actions/OneputCatalog.js';
 
 /**
@@ -15,6 +16,10 @@ import { OneputCatalog } from '../shared/actions/OneputCatalog.js';
  * via one tinykeys call. When the same key string is bound to multiple actions
  * under different `when` conditions, candidates are collected per key and
  * matchesWhen() selects the right one at dispatch time.
+ *
+ * Because the target is window, a binding would also fire while a button has
+ * the true (DOM) focus. isNativeActivation() prevents this: unmodified Enter /
+ * Space on a control that the browser activates is left alone.
  *
  * To add more `when` flags in future, extend matchesWhen() and validate at
  * registration time that no two candidates for the same key have overlapping
@@ -54,6 +59,9 @@ export class KeysController {
     candidates: Array<{ actionId: string; kb: KeyEventBinding }>
   ) {
     if (this.keysDisabled) return;
+    // The browser activates the focused control (e.g. Tab to the submit button,
+    // then Enter). Leave that key alone.
+    if (isNativeActivation(evt)) return;
     const match = candidates.find((c) => this.matchesWhen(c.kb.when));
     if (match) {
       if (match.kb.preventDefault ?? true) {

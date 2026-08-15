@@ -109,3 +109,35 @@ AppObject plus Accept from `inputAccept` in one `right` flex), not only
 - examples
   - set date
   - set time
+
+## INPUT_SUBMIT_SCHEME
+
+There are 2 INPUT_MODE's.
+
+- SINGLE_INPUT_MODE
+- MULTILINE_INPUT_MODE
+
+The big idea is that enter key triggers menu actions when in SINGLE_INPUT_MODE.  If the user tabs the focus off the input to a button however, the system checks the target and may trigger a button action instead.  In MULTILINE_INPUT_MODE, the enter key loses the menu action behaviour, allowing users to type newlines (The dispatcher in KeysController reads the event target, and if it's a `<button>` it lets unmodified `Enter`/`Space` through while modifier bindings still fire). The sacrifice is that they can no longer trigger menu actions using `Enter` + menu item focus.  They can still click the menu items or add dedicated key bindings (and display these on the menu item); tabbing to button-based menu items would also work.
+
+|                                | SINGLE_INPUT_MODE (input element)          | MULTILINE_INPUT_MODE (textarea)     |
+| ------------------------------ | ------------------------------------------ | ----------------------------------- |
+| `Enter`, native focus = input  | Menu action on the focused menu item       | Newline                             |
+| `Enter`, native focus = button | Clicks the button                          | Clicks the button                   |
+| `Shift+Enter`                  | nothing                                    | Newline                             |
+| `$mod+Enter`                   | Submit                                     | Submit                              |
+| Menu item focus                | Enabled                                    | Disabled                            |
+| Reach a menu item              | Use menu item focus + `Enter`, click       | click, set a binding, Tab + `Enter` |
+
+**MULTILINE_INPUT_MODE**
+
+Triggered when setting rows `>1` eg `inputUI.textArea: { rows: 5 }`:
+
+1. `Oneput.svelte` renders a `<textarea>` in place of the `<input>`.
+2. The controller derives the mode from the same prop
+  (`ctl.input.isMultiline`).
+3. The keys read that mode: `DO_ACTION`'s `when` fails, thus `Enter` matches
+  no binding, thus nothing calls `preventDefault` and the textarea writes a
+  newline.
+4. The focus mode reads that mode: menu focus goes off, `menuItemFocus` is
+  cleared, no row shows `--focused`, and `$mod+j` / `$mod+k` stop.
+5. `$mod+Enter` (submit) and Tab do not change.

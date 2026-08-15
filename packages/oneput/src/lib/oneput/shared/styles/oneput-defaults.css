@@ -173,7 +173,10 @@
     --oneput-font: 14px sans-serif;
     --oneput-text-color: #222;
     --oneput-button-text-color: #222;
-    --oneput-text-muted: color: rgb(0 0 0 / 0.7);
+    --oneput-text-muted: rgb(0 0 0 / 0.7);
+
+    /* Chrome icon buttons: the glyph carries the state, not a filled box. */
+    --oneput-icon-disabled-color: rgb(0 0 0 / 0.3);
 
     /* Menu */
     /* These apply when the menu item is a button */
@@ -240,6 +243,9 @@
     --oneput-button-text-color: #222;
     --oneput-placeholder-text-color: #bbb;
     --oneput-text-muted: rgb(255 255 255 / 0.7);
+
+    /* Chrome icon buttons: the glyph carries the state, not a filled box. */
+    --oneput-icon-disabled-color: rgb(255 255 255 / 0.3);
 
     /* divider color */
     --oneput-divider-border: 1px solid rgb(255 255 255 / 0.2);
@@ -981,40 +987,17 @@
 
   /* #endregion */
 
-  .oneput__icon-button.oneput__icon-accept {
-    background-color: rgb(0 128 0 / 0.8);
-    color: white;
-  }
-
-  .oneput__icon-button.oneput__icon-accept:hover {
-    background-color: rgb(0 128 0 / 1);
-  }
-
-  /* submitAndExit: white glyph on green (same idea as filled accept). */
-  .oneput__icon-button.oneput__icon-submit-and-exit {
-    background-color: rgb(0 128 0 / 0.8);
-    color: white;
-  }
-
-  .oneput__icon-button.oneput__icon-submit-and-exit svg {
-    stroke-width: 2.75;
-  }
-
-  .oneput__icon-button.oneput__icon-submit-and-exit:hover {
-    background-color: rgb(0 128 0 / 1);
-  }
-
-  .oneput__icon-button.oneput__icon-cancel {
-    background-color: rgb(128 0 0 / 0.8);
-    color: white;
-  }
-
-  .oneput__icon-button.oneput__icon-cancel:hover {
-    background-color: rgb(128 0 0 / 1);
-  }
-
-  .oneput__icon-button.oneput__icon-disabled {
-    color: rgb(255 255 255);
-    background-color: rgb(208 208 208);
+  /*
+   * Disabled reads as a lighter glyph, not a grey box. The state rules must be
+   * cancelled too: a disabled button still matches `:hover`.
+   */
+  .oneput__icon-button.oneput__icon-disabled,
+  .oneput__icon-button.oneput__icon-disabled:hover,
+  .oneput__icon-button.oneput__icon-disabled:focus,
+  .oneput__icon-button.oneput__icon-disabled:active {
+    color: var(--oneput-icon-disabled-color);
+    background: none;
+    outline: none;
+    cursor: default;
   }
 }

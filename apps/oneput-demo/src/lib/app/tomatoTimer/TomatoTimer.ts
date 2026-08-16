@@ -421,7 +421,8 @@ export class TomatoTimer implements AppObject {
         action: () => {
           this.ctl.app.run(
             SetDuration.create(this.ctl, {
-              duration: TimeVal.createFromSeconds(draft.duration)
+              duration: TimeVal.createFromSeconds(draft.duration),
+              icons: { Cancel: icons.CircleX }
             })
           );
         }

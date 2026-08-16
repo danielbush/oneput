@@ -8,9 +8,12 @@ import type {
 } from '@oneput/oneput';
 import { isPickDurationResult, SetDuration } from '@oneput/oneput/shared/appObjects/SetDuration.js';
 import { isPickDateTimeResult, SetDateTime } from './SetDateTime.js';
+import { isSetNoteResult, SetNote } from './SetNote.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
+import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import type { FinishedSession } from './TomatoTimerValue.js';
 import { DynamicText } from '@oneput/oneput/shared/ui/DynamicText.js';
+import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import { DateTimeVal } from '@oneput/oneput/shared/lib/time/DateTimeVal.js';
 import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
@@ -34,22 +37,15 @@ export function isAddEntryResult(payload: unknown): payload is AddEntryResult {
 
 export class AddEntry implements AppObject {
   static create(ctl: Controller, session: Partial<FinishedSession>) {
-    const setDateTime = SetDateTime.create(ctl, {
-      icons: {
-        SetDateIcon: icons.CalendarCheck,
-        SetTimeIcon: icons.Clock,
-        Right: icons.ChevronRight,
-        PreviousMonth: icons.ChevronLeft,
-        NextMonth: icons.ChevronRight,
-        PreviousYear: icons.ChevronsLeft,
-        NextYear: icons.ChevronsRight
-      },
-      date:
-        session.startTime === undefined ? undefined : DateVal.createFromUnixTime(session.startTime),
-      time:
-        session.startTime === undefined ? undefined : TimeVal.createFromUnixTime(session.startTime)
-    });
-    return new AddEntry(ctl, session, setDateTime);
+    return new AddEntry(
+      ctl,
+      session,
+      DynamicPlaceholder.create(ctl, (params) =>
+        params.doActionBinding
+          ? `Press ${params.doActionBinding} to edit note…`
+          : 'Open Note to edit…'
+      )
+    );
   }
 
   private unsubscribeInputChange?: () => void;
@@ -57,16 +53,22 @@ export class AddEntry implements AppObject {
   constructor(
     private ctl: Controller,
     private session: Partial<FinishedSession>,
-    private setDateTime: SetDateTime
+    private multilineNotePlaceholder: DynamicPlaceholder
   ) {}
 
   settings = {
     enableFilter: false,
-    clearInputAfterAction: false
+    clearInputAfterAction: false,
+    clearInputAfterBack: false
   } satisfies UIFlags;
 
+  /** Back discards (same as Cancel). Always confirm: a blank entry is still valid. */
+  onBack = () => {
+    void this.discard();
+  };
+
   onExit = () => {
-    this.unsubscribeInputChange?.();
+    this.stopFieldInput();
   };
 
   onResume = (result?: { payload?: unknown }) => {
@@ -76,6 +78,9 @@ export class AddEntry implements AppObject {
     if (isPickDateTimeResult(result?.payload)) {
       this.session.startTime = result.payload.value;
     }
+    if (isSetNoteResult(result?.payload)) {
+      this.session.note = result.payload.value;
+    }
     this.run();
   };
 
@@ -84,7 +89,7 @@ export class AddEntry implements AppObject {
     if (!item) {
       return;
     }
-    this.unsubscribeInputChange?.();
+    this.stopFieldInput();
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
@@ -102,20 +107,22 @@ export class AddEntry implements AppObject {
           this.ctl.menu.setMenu({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
         });
         break;
-      case 'add-note':
-        this.ctl.ui.setInputUI((current) => {
-          return {
-            ...current,
-            textArea: { rows: 1 }
-          } satisfies OneputProps['inputUI'];
-        });
-        this.ctl.input.setInputValue(this.session.note ?? '');
+      case 'add-note': {
+        const note = this.session.note ?? '';
+        if (note.includes('\n')) {
+          this.ctl.ui.update({ flags: { enableInputElement: false } });
+          this.ctl.input.setPlaceholder(this.multilineNotePlaceholder);
+          this.ctl.input.setInputValue();
+          break;
+        }
         this.ctl.input.setPlaceholder('Enter note...');
+        this.ctl.input.setInputValue(note);
         this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
           this.session.note = value;
           this.ctl.menu.setMenu({ id: 'main', focusBehaviour: 'none', items: this.menuItems });
         });
         break;
+      }
       case 'add-duration':
         this.ctl.input.setPlaceholder('Set duration…');
         this.ctl.ui.update({ flags: { enableInputElement: false } });
@@ -123,6 +130,11 @@ export class AddEntry implements AppObject {
         break;
       case 'add-startTime':
         this.ctl.input.setPlaceholder('Set start time and date...');
+        this.ctl.ui.update({ flags: { enableInputElement: false } });
+        this.ctl.input.setInputValue();
+        break;
+      case 'add-cancel':
+        this.ctl.input.setPlaceholder('Cancel…');
         this.ctl.ui.update({ flags: { enableInputElement: false } });
         this.ctl.input.setInputValue();
         break;
@@ -138,7 +150,8 @@ export class AddEntry implements AppObject {
       params: {
         menuTitle: 'Add entry...',
         inputAccept: {
-          run: () => this.submit()
+          run: () => this.submit(),
+          label: this.ctl.keys.getCurrentBindings()[OneputAction.SUBMIT]?.bindings[0]
         }
       } satisfies AppLayoutParams
     });
@@ -153,8 +166,24 @@ export class AddEntry implements AppObject {
     });
   }
 
+  private stopFieldInput() {
+    this.unsubscribeInputChange?.();
+    this.unsubscribeInputChange = undefined;
+  }
+
   private submit() {
     this.ctl.app.exit(this.result());
+  }
+
+  private async discard() {
+    const confirm = this.ctl.confirm({
+      message: 'Discard this entry?'
+    });
+    const yes = await confirm.userChooses();
+    if (!yes) {
+      return;
+    }
+    this.ctl.app.exit();
   }
 
   private result(): AddEntryResult {
@@ -187,21 +216,19 @@ export class AddEntry implements AppObject {
       stdMenuItem({
         id: 'add-note',
         textContent: this.session.note
-          ? `Note: ${this.session.note.replace(/\n/g, ' ').substring(0, 10)}...`
+          ? `Note: ${this.session.note.replace(/\n/g, ' ').substring(0, 40)}${this.session.note.length > 40 ? '…' : ''}`
           : 'Note...',
         left: (b) => [b.icon(icons.NotebookPen)],
+        right: (b) => [b.icon(icons.ChevronRight)],
         action: () => {
-          this.ctl.ui.setInputUI((current) => {
-            return {
-              ...current,
-              textArea: { rows: 3 }
-            } satisfies OneputProps['inputUI'];
-          });
-          this.ctl.input.focusInput();
+          this.stopFieldInput();
+          this.ctl.app.run(SetNote.create(this.ctl, { note: this.session.note ?? '' }));
         },
         bottom: {
-          textContent: DynamicText.create(this.ctl).text(
-            (t) => `Press ${t.doActionBinding} to expand the input...`
+          textContent: DynamicText.create(this.ctl).text((t) =>
+            (this.session.note ?? '').includes('\n')
+              ? `Press ${t.doActionBinding} to edit note...`
+              : `Press ${t.doActionBinding} to write a longer note...`
           )
         }
       }),
@@ -213,12 +240,14 @@ export class AddEntry implements AppObject {
         left: (b) => [b.icon(icons.Timer)],
         right: (b) => [b.icon(icons.ChevronRight)],
         action: () => {
+          this.stopFieldInput();
           this.ctl.app.run(
             SetDuration.create(this.ctl, {
               duration:
                 this.session.duration === undefined
                   ? undefined
-                  : TimeVal.createFromSeconds(this.session.duration)
+                  : TimeVal.createFromSeconds(this.session.duration),
+              icons: { Cancel: icons.CircleX }
             })
           );
         }
@@ -233,7 +262,38 @@ export class AddEntry implements AppObject {
         left: (b) => [b.icon(icons.CalendarCheck)],
         right: (b) => [b.icon(icons.ChevronRight)],
         action: () => {
-          this.ctl.app.run(this.setDateTime);
+          this.stopFieldInput();
+          this.ctl.app.run(
+            SetDateTime.create(this.ctl, {
+              icons: {
+                SetDateIcon: icons.CalendarCheck,
+                SetTimeIcon: icons.Clock,
+                Right: icons.ChevronRight,
+                PreviousMonth: icons.ChevronLeft,
+                NextMonth: icons.ChevronRight,
+                PreviousYear: icons.ChevronsLeft,
+                NextYear: icons.ChevronsRight,
+                Cancel: icons.CircleX
+              },
+              date:
+                this.session.startTime === undefined
+                  ? undefined
+                  : DateVal.createFromUnixTime(this.session.startTime),
+              time:
+                this.session.startTime === undefined
+                  ? undefined
+                  : TimeVal.createFromUnixTime(this.session.startTime)
+            })
+          );
+        }
+      }),
+      stdMenuItem({
+        id: 'add-cancel',
+        textContent: 'Cancel',
+        left: (b) => [b.icon(icons.CircleX)],
+        bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.BACK]?.bindings[0],
+        action: () => {
+          this.ctl.app.goBack();
         }
       })
     ];

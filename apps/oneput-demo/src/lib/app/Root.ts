@@ -32,7 +32,8 @@ export class Root implements AppObject {
             PreviousMonth: icons.ChevronLeft,
             NextMonth: icons.ChevronRight,
             PreviousYear: icons.ChevronsLeft,
-            NextYear: icons.ChevronsRight
+            NextYear: icons.ChevronsRight,
+            Cancel: icons.CircleX
           }
         }),
       ElizaChat: () => ElizaChat.create(ctl)

@@ -18,6 +18,7 @@ type SetDateTimeIcons = {
   Right: string;
   SetDateIcon: string;
   SetTimeIcon: string;
+  Cancel: string;
 } & PickDateIcons;
 
 /** Tagged resume payload for Add Entry start-time. */
@@ -48,32 +49,42 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
     return new SetDateTime(ctl, params.icons, params.date, params.time);
   }
 
+  private initialDate?: DateVal;
+  private initialTime?: TimeVal;
+
   private constructor(
     private ctl: Controller,
     private icons: SetDateTimeIcons,
     private date?: DateVal,
     private time?: TimeVal
-  ) {}
+  ) {
+    this.initialDate = date;
+    this.initialTime = time;
+  }
+
+  layout = {
+    params: {
+      menuTitle: 'Set date and time...'
+    } satisfies AppLayoutParams
+  };
 
   settings = {
-    enableFilter: false
+    enableFilter: false,
+    enableMenuOpenClose: false,
+    clearInputAfterBack: false
   } satisfies UIFlags;
 
   /**
-   * $mod+Enter submits when both date and time are set (same as Done).
+   * Back keeps the current date+time when both are set.
+   * Cancel discards; confirm if they changed from open.
    * Plain Enter stays catalog DO_ACTION (open focused date/time row).
    */
-  actions = {
-    ACCEPT: {
-      action: () => {
-        this.submit();
-      },
-      binding: {
-        bindings: ['$mod+Enter'],
-        description: 'Accept date and time',
-        when: { menuOpen: true }
-      }
+  onBack = () => {
+    if (this.date && this.time) {
+      this.submit();
+      return;
     }
+    this.ctl.app.exit();
   };
 
   onStart() {
@@ -101,6 +112,7 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
   };
 
   run() {
+    this.ctl.input.setSubmitHandler(() => this.submit());
     this.syncChrome();
     this.ctl.menu.clearGenerative();
     this.ctl.menu.setMenu({
@@ -121,7 +133,15 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
           left: (b) => [b.icon(this.icons.SetTimeIcon)],
           right: (b) => [b.icon(this.icons.Right)],
           action: () => {
-            this.ctl.app.run(SetTime.create(this.ctl, { time: this.time }));
+            this.ctl.app.run(SetTime.create(this.ctl, { time: this.time, icons: this.icons }));
+          }
+        }),
+        stdMenuItem({
+          id: 'set-date-time-cancel',
+          textContent: 'Cancel',
+          left: (b) => [b.icon(this.icons.Cancel)],
+          action: () => {
+            void this.discard();
           }
         })
       ]
@@ -141,15 +161,34 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
     this.ctl.app.exit(this.result());
   }
 
+  private async discard() {
+    if (this.isDirty()) {
+      const confirm = this.ctl.confirm({
+        message: 'Discard date and time changes?'
+      });
+      const yes = await confirm.userChooses();
+      if (!yes) {
+        return;
+      }
+    }
+    this.ctl.app.exit();
+  }
+
+  private isDirty() {
+    return (
+      this.date?.year !== this.initialDate?.year ||
+      this.date?.month !== this.initialDate?.month ||
+      this.date?.day !== this.initialDate?.day ||
+      this.time?.hour !== this.initialTime?.hour ||
+      this.time?.minute !== this.initialTime?.minute
+    );
+  }
+
   private syncChrome() {
-    const canSubmit = Boolean(this.date && this.time);
     this.ctl.ui.update({
       params: {
         menuTitle: 'Set date and time...',
-        inputAccept: {
-          run: () => this.submit(),
-          enabled: canSubmit
-        }
+        inputAccept: undefined
       } satisfies AppLayoutParams
     });
   }

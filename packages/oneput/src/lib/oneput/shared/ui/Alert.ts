@@ -13,8 +13,8 @@ export class Alert {
   }
 
   private okPromise: Promise<void> | null = null;
-  private previousActiveElement: HTMLElement | null = null;
   private previousPlaceholder: string;
+  private previousActiveElement: HTMLElement | null = null;
   private restoreBindings: (() => void) | undefined;
 
   constructor(
@@ -38,8 +38,17 @@ export class Alert {
     this.ctl.ui.replaceMenuUI();
     this.ctl.input.setPlaceholder(this.previousPlaceholder);
     this.resolve?.();
-    this.previousActiveElement?.focus();
+    this.restoreFocus();
   };
+
+  /** Prefer the pre-modal node; if it was remounted, fall back to the input. */
+  private restoreFocus() {
+    if (this.previousActiveElement?.isConnected) {
+      this.previousActiveElement.focus();
+      return;
+    }
+    this.ctl.input.focus();
+  }
 
   private start = () => {
     // enableModal snapshots/restores AppObject flags in AppController.

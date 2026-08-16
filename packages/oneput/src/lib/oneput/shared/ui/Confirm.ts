@@ -120,8 +120,17 @@ export class Confirm {
     this.ctl.ui.replaceMenuUI();
     this.ctl.input.setPlaceholder(this.previousPlaceholder);
     this.resolve?.(ok);
-    this.previousActiveElement?.focus();
+    this.restoreFocus();
   };
+
+  /** Prefer the pre-modal node; if it was remounted, fall back to the input. */
+  private restoreFocus() {
+    if (this.previousActiveElement?.isConnected) {
+      this.previousActiveElement.focus();
+      return;
+    }
+    this.ctl.input.focus();
+  }
 
   async userChooses() {
     return this.promise;

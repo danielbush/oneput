@@ -122,12 +122,9 @@ export class MenuController {
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
       this.ctl.currentProps.menuOpen = true;
+      // Refresh before the open event so stale closed-menu rows cannot become visible.
+      void this.invalidateNow({});
       this.ctl.events.emit({ type: 'menu-open-change', payload: true });
-      // Pull-on-open: re-seed the declarative base (+ re-apply any filter) so the
-      // menu reflects current AppObject state without needing an explicit
-      // invalidate() for changes made while closed. Guarded no-op if no menu().
-      // Runs after menuOpen=true so the filter's open-guard passes.
-      this.invalidate();
     });
   };
 

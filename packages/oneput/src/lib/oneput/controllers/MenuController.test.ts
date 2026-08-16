@@ -78,6 +78,38 @@ describe('MenuController', () => {
       expect(menuOpenChanges).toEqual([true]);
     });
 
+    it('refreshes declarative rows before the menu opens', async () => {
+      // arrange
+      let maximized = false;
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        onStart: () => {},
+        menu: () => ({
+          id: 'frame-actions',
+          items: maximized
+            ? [item('unmaximize', 'Unmaximize node')]
+            : [item('zoom-in', 'Zoom in'), item('fit-view', 'Fit graph in view')]
+        })
+      });
+      await ctl.menu.invalidate();
+      ctl.menu.closeMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+      maximized = true;
+
+      const rowsWhenOpened: string[][] = [];
+      ctl.events.on('menu-open-change', (open) => {
+        if (!open) return;
+        rowsWhenOpened.push(ctl.currentProps.menuItems?.map((menuItem) => menuItem.id) ?? []);
+      });
+
+      // act
+      ctl.menu.openMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(rowsWhenOpened).toEqual([['unmaximize']]);
+    });
+
     it('emits one close event for repeated close requests', async () => {
       // arrange
       const menuOpenChanges: boolean[] = [];

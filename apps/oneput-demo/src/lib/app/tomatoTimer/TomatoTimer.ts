@@ -48,7 +48,7 @@ export class TomatoTimer implements AppObject {
   /** Header X / chevron / Escape close the menu; closing dismisses the timer. */
   settings = {
     enableMenuOpenClose: true,
-    enableFilter: false,
+    enableFilter: true,
     clearInputAfterAction: false
   } satisfies UIFlags;
 

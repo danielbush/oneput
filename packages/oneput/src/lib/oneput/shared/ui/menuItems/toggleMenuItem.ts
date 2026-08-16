@@ -9,9 +9,11 @@ export type ToggleMenuItemParams = {
   index: number;
   onToggle: (index: number) => void;
   left?: (b: FlexChildBuilder) => FlexChildren;
-  bottom?: {
-    textContent?: string;
-  };
+  bottom?:
+    | false
+    | {
+        textContent?: string;
+      };
 };
 
 export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
@@ -25,9 +27,12 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
     attr: { type: 'button' },
     textContent: getText(),
     left: params.left,
-    bottom: {
-      textContent: params.bottom?.textContent ?? 'Click or press enter to toggle'
-    },
+    bottom:
+      params.bottom === false
+        ? undefined
+        : {
+            textContent: params.bottom?.textContent ?? 'Click or press enter to toggle'
+          },
     action: () => {
       const titleElement = document.getElementById(item.ids.title) as HTMLElement;
       index = (index + 1) % params.values.length;

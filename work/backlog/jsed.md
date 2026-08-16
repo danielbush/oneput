@@ -56,6 +56,8 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
 
 ## security
 
+- sec: review elementPatch and why we need it to set innerHTML
+  - COMMENT: packages/jsed/src/lib/ops/focusable/elementPatch.ts ; it was brought in I think for toggle checkbox state in task-list structures (separate project)
 - flesh out packages/jsed/docs/SECURITY.md
 
 

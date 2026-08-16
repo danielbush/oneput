@@ -101,6 +101,11 @@ export class Controller {
     return { data, stop };
   }
 
+  /** Release controller resources that can outlive the mounted Oneput UI. */
+  destroy() {
+    this.keys.destroy();
+  }
+
   /**
    * Simulates the current app starting.  Usually this happens when Oneput is
    * mounted into the DOM.

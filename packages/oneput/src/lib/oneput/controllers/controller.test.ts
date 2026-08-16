@@ -2,16 +2,11 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { Controller } from './controller.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 
-/**
- * Every Controller registers its bindings on `window` and stays registered.
- * Without this teardown a controller from an earlier test also dispatches (and
- * calls preventDefault) for the next test's key events.
- */
 const controllers: Controller[] = [];
 
 afterEach(() => {
   for (const ctl of controllers) {
-    ctl.keys._enableKeys(false);
+    ctl.destroy();
   }
   controllers.length = 0;
 });
@@ -126,6 +121,34 @@ describe('Controller', () => {
 
       // assert
       expect(count).toBe(1);
+    });
+  });
+
+  describe('destroy', () => {
+    it('stops handling registered key bindings', async () => {
+      // arrange
+      const ctl = createNull();
+      let count = 0;
+      ctl.simulateStart(() => ({
+        actions: {
+          ENTER: {
+            action: () => {
+              count += 1;
+            },
+            binding: {
+              bindings: ['Enter'],
+              description: 'Run enter action'
+            }
+          }
+        }
+      }));
+
+      // act
+      ctl.destroy();
+      await ctl.simulateKey('Enter');
+
+      // assert
+      expect(count).toBe(0);
     });
   });
 

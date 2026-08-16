@@ -3,7 +3,7 @@
   // programmatically control Oneput.
   import Oneput from './Oneput.svelte';
   import { Controller } from '../../controllers/controller.js';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import type { AppObject, OneputProps } from '../../types.js';
 
   let inputElement: HTMLInputElement | undefined = $state(undefined);
@@ -25,6 +25,10 @@
 
   onMount(() => {
     controller.app.run(props.run(controller));
+  });
+
+  onDestroy(() => {
+    controller.destroy();
   });
 </script>
 

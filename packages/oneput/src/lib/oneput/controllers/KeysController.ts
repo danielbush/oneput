@@ -147,6 +147,13 @@ export class KeysController {
     return this.currentBindings;
   }
 
+  /** Remove the window handlers registered by this controller. */
+  destroy() {
+    this.unsubscribe();
+    this.unsubscribe = () => {};
+    this.currentBindings = {};
+  }
+
   /**
    * Merges the given bindings with the defaults. Use this for AppObject
    * actions that should coexist with default bindings (menu nav, etc.).

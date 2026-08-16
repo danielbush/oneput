@@ -122,7 +122,8 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             acceptButton({
               icon: this.icons.Check,
               onClick: () => inputAccept.run(),
-              enabled: inputAccept.enabled
+              enabled: inputAccept.enabled,
+              title: inputAccept.label
             })
           );
         }
@@ -131,7 +132,8 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             rejectButton({
               icon: this.icons.X,
               onClick: () => inputReject.run(),
-              enabled: inputReject.enabled
+              enabled: inputReject.enabled,
+              title: inputReject.label
             })
           );
         }
@@ -140,7 +142,8 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             sendButton({
               icon: this.icons.SendHorizontal,
               onClick: () => inputSend.run(),
-              enabled: inputSend.enabled
+              enabled: inputSend.enabled,
+              title: inputSend.label
             })
           );
         }

@@ -324,6 +324,11 @@ export type LayoutAffordance = {
   run: () => void;
   /** When false, hosts should show the affordance disabled. Defaults to true. */
   enabled?: boolean;
+  /**
+   * Accessible name for the chrome control (`title` and `aria-label`).
+   * Defaults to Accept / Reject / Send.
+   */
+  label?: string;
 };
 
 /**

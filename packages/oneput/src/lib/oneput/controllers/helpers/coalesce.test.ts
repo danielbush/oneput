@@ -44,14 +44,11 @@ describe('coalesce', () => {
     const firstTaskCanFinish = new Promise<void>((resolve) => {
       finishFirstTask = resolve;
     });
-    const run = coalesce<string, string>(
-      { merge: (_current, next) => next },
-      async (input) => {
-        inputs.push(input);
-        if (input === 'first') await firstTaskCanFinish;
-        return input;
-      }
-    );
+    const run = coalesce<string, string>({ merge: (_current, next) => next }, async (input) => {
+      inputs.push(input);
+      if (input === 'first') await firstTaskCanFinish;
+      return input;
+    });
 
     const firstResult = run('first');
     await Promise.resolve();

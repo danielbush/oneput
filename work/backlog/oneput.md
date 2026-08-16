@@ -20,6 +20,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## security
 
+- sec: consider a whitelist svelte icon renderer similar to what packages/frame does
+  - COMMENT: packages/frame/src/lib/FrameIcons.ts whitelists svg internals (in /Users/danb/projects/@2br )
+  - COMMENT: could we do something similar for innerHTMLUnsafe, htmlContentUnsafe ?
 - flesh out packages/oneput/docs/SECURITY.md
 
 ## fix

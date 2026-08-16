@@ -61,7 +61,8 @@ export class AddEntry implements AppObject {
   ) {}
 
   settings = {
-    enableFilter: false
+    enableFilter: false,
+    clearInputAfterAction: false
   } satisfies UIFlags;
 
   onExit = () => {

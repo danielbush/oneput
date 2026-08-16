@@ -112,6 +112,9 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## feat
 
+- feat: view keyboard shortcuts
+  - make this a keybinding and a global menu item
+  - we don't see the global menu item unless we type something like "help keys" or "help shortcuts" etc
 - feat: tokenize non-characters foo-bar. -> `[foo][-][bar][.]`
   - this allows us to more easily edit parts of complex tokens
   - it also will isolate parens which might be a first step to semantically handling them

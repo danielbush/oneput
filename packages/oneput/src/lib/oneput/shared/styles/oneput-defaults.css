@@ -14,6 +14,7 @@
 /* #region resets */
 
 @layer reset {
+
   .oneput__container hr,
   .oneput__container fieldset,
   .oneput__container button {
@@ -158,10 +159,8 @@
      * See MENU_VISUAL_VIEWPORT_HEIGHT in ISSUES.md.
      */
     --oneput-non-menu-chrome: 6.5rem;
-    --oneput-menu-max-height: max(
-      7.5rem,
-      min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome)))
-    );
+    --oneput-menu-max-height: max(7.5rem,
+        min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome))));
     --oneput-background: linear-gradient(to bottom, #e8e9e9, #e3e3e3);
     --oneput-border-radius: 5px;
     --oneput-border: rgb(0 0 0 / 0.3) solid 0.5px;
@@ -571,6 +570,7 @@
   }
 
   .oneput--multiline {
+
     /* Top-align adornments with the first text line; vertical inset lives on
        the inner (not the textarea) so left/right buttons clear the border too. */
     .oneput__input-inner {
@@ -639,9 +639,9 @@
    * height, so they render squashed and overflow the box. Size them to the
    * content box instead, which keeps them square at any icon width.
    */
-  .oneput__icon-toggle-button > svg,
-  .oneput__icon-button > svg,
-  .oneput__icon > svg {
+  .oneput__icon-toggle-button>svg,
+  .oneput__icon-button>svg,
+  .oneput__icon>svg {
     flex: 0 0 auto;
     width: 100%;
     height: 100%;
@@ -786,7 +786,7 @@
 
   .oneput__kbd code {
     display: flex;
-    gap: 6px;
+    gap: 3px;
     border-radius: 2px;
     padding: 4px;
     background-color: rgb(0 0 0 / 0.2);
@@ -797,13 +797,19 @@
   }
 
   .oneput__kbd kbd {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 2px;
     border-color: rgb(0 0 0 / 0.1);
     border-style: solid;
     border-width: 0.5px;
-    min-width: 1rem;
-    padding: 2px;
-    font-size: 0.6rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 2px;
+    font-size: 0.95rem;
+    line-height: 1;
     text-align: center;
     background-color: #eee;
   }
@@ -943,12 +949,10 @@
   .oneput__menu-item-skeleton {
     display: block;
     border-radius: 4px;
-    background: linear-gradient(
-      90deg,
-      rgba(130, 130, 130, 0.12) 25%,
-      rgba(130, 130, 130, 0.24) 37%,
-      rgba(130, 130, 130, 0.12) 63%
-    );
+    background: linear-gradient(90deg,
+        rgba(130, 130, 130, 0.12) 25%,
+        rgba(130, 130, 130, 0.24) 37%,
+        rgba(130, 130, 130, 0.12) 63%);
     background-size: 400% 100%;
     animation: oneput-menu-item-skeleton-shimmer 1.4s ease infinite;
   }

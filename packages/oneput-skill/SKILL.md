@@ -192,13 +192,10 @@ stdMenuItem({
   left: (b) => [b.icon("IconName")],
 
   // Right section (badges, icons, etc.)
-  right: (b) => [
-    b.fchild({
-      htmlContentUnsafe: "<code><kbd>$mod+S</kbd></code>",
-      classes: ["oneput__kbd"],
-    }),
-    b.icon("ChevronRight"),
-  ],
+  right: (b) => [b.icon("ChevronRight")],
+
+  // Optional key chord in the right section (`oneput__kbd`)
+  bindingHint: "$mod+Enter",
 
   // Optional bottom section (secondary text)
   bottom: {

@@ -97,6 +97,16 @@
         menuItems={[
           stdMenuItem({
             left: (b) => [b.icon(icons.Search)],
+            textContent: 'bindingHint ($mod+Enter)...',
+            bindingHint: '$mod+Enter'
+          })
+        ]}
+      />
+      <Oneput
+        menuOpen={true}
+        menuItems={[
+          stdMenuItem({
+            left: (b) => [b.icon(icons.Search)],
             textContent: 'Left + right (kbd) ...',
             right: (b) => [
               b.fchild({

@@ -2,6 +2,7 @@ import type { Controller } from '../../../controllers/controller.js';
 import { vflex, type FlexChildBuilder } from '../../../lib/builder.js';
 import { randomId } from '../../../lib/utils.js';
 import type { FlexChildren, MenuItem } from '../../../types.js';
+import { bindingToKbdHtml } from '../kbd.js';
 
 /**
  * Value object mapping a root ID to the deterministic IDs of each structural
@@ -40,6 +41,9 @@ export class StdMenuItemIds {
   get bottomRight() {
     return this.root + '-bottom-right';
   }
+  get bindingHint() {
+    return this.root + '-binding-hint';
+  }
 }
 
 export type StdMenuItem = MenuItem & { ids: StdMenuItemIds };
@@ -68,6 +72,11 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
   textContent?: string;
   left?: false | ((b: FlexChildBuilder) => FlexChildren);
   right?: false | ((b: FlexChildBuilder) => FlexChildren);
+  /**
+   * Tinykeys chord shown as `oneput__kbd` in the right section
+   * (e.g. `$mod+Enter`). Rendered before any `right` children.
+   */
+  bindingHint?: string;
   bottom?: {
     left?: false | ((b: FlexChildBuilder) => FlexChildren);
     right?: false | ((b: FlexChildBuilder) => FlexChildren);
@@ -86,32 +95,37 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
  * See src/routes/ for examples.
  */
 export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
-  const id = params.id ?? randomId();
+  const { bindingHint, ...itemParams } = params;
+  const id = itemParams.id ?? randomId();
   const ids = new StdMenuItemIds(id);
-  if (params.action) {
-    params.tag = params.tag ?? 'button';
-    params.attr = {
+  if (itemParams.action) {
+    itemParams.tag = itemParams.tag ?? 'button';
+    itemParams.attr = {
       type: 'button',
-      ...params.attr
+      ...itemParams.attr
     };
   }
+  const hint = bindingHint?.trim();
+  const hasHint = Boolean(hint);
+  const hasRight = typeof itemParams.right === 'function';
+  const hideRight = itemParams.right === false && !hasHint;
   const menuItem = vflex({
-    ...params,
+    ...itemParams,
     id,
-    action: params.action
+    action: itemParams.action
       ? (ctl) => {
-          params.action?.(ctl);
-          if (params.closeMenuOnAction ?? false) {
+          itemParams.action?.(ctl);
+          if (itemParams.closeMenuOnAction ?? false) {
             ctl.menu.closeMenu();
           }
         }
       : undefined,
     classes: [
       'oneput__std-menu-item',
-      params.left === false && 'oneput__std-menu-item--no-left',
-      params.right === false && 'oneput__std-menu-item--no-right',
-      params.bottom?.left === false && 'oneput__std-menu-item--no-bottom-left',
-      params.bottom?.right === false && 'oneput__std-menu-item--no-bottom-right'
+      itemParams.left === false && 'oneput__std-menu-item--no-left',
+      hideRight && 'oneput__std-menu-item--no-right',
+      itemParams.bottom?.left === false && 'oneput__std-menu-item--no-bottom-left',
+      itemParams.bottom?.right === false && 'oneput__std-menu-item--no-bottom-right'
     ],
     children: (b) => [
       b.hflex({
@@ -119,13 +133,13 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
         classes: ['oneput__std-menu-item-top'],
         children: (b) => [
           // left
-          params.left
+          itemParams.left
             ? b.hflex({
                 id: ids.left,
                 classes: ['oneput__std-menu-item-left'],
-                children: (b) => (params.left ? params.left(b) : [])
+                children: (b) => (itemParams.left ? itemParams.left(b) : [])
               })
-            : params.left === false
+            : itemParams.left === false
               ? null
               : b.spacer(),
 
@@ -137,25 +151,37 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
               b.fchild({
                 id: ids.title,
                 classes: ['oneput__std-menu-item-title'],
-                textContent: params.textContent,
-                htmlContentUnsafe: params.htmlContentUnsafe
+                textContent: itemParams.textContent,
+                htmlContentUnsafe: itemParams.htmlContentUnsafe
               })
             ]
           }),
 
           // right
-          params.right
+          hasRight || hasHint
             ? b.hflex({
                 id: ids.right,
                 classes: ['oneput__std-menu-item-right'],
-                children: (b) => (params.right ? params.right?.(b) || [] : [])
+                children: (b) => [
+                  ...(hint
+                    ? [
+                        b.fchild({
+                          id: ids.bindingHint,
+                          style: { flex: '0' },
+                          innerHTMLUnsafe: bindingToKbdHtml(hint),
+                          classes: ['oneput__kbd']
+                        })
+                      ]
+                    : []),
+                  ...(hasRight && itemParams.right ? itemParams.right(b) : [])
+                ]
               })
-            : params.right === false
+            : itemParams.right === false
               ? null
               : b.spacer()
         ]
       }),
-      ...(params.bottom
+      ...(itemParams.bottom
         ? [
             // divider
             b.fchild({
@@ -169,32 +195,32 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
               classes: ['oneput__std-menu-item-bottom'],
               children: (b) => [
                 // left
-                params.bottom?.left
+                itemParams.bottom?.left
                   ? b.hflex({
                       id: ids.bottomLeft,
                       classes: ['oneput__std-menu-item-bottom-left'],
-                      children: (b) => (params.bottom?.left ? params.bottom.left(b) : [])
+                      children: (b) => (itemParams.bottom?.left ? itemParams.bottom.left(b) : [])
                     })
-                  : params.bottom?.left === false
+                  : itemParams.bottom?.left === false
                     ? null
                     : b.spacer(true, false),
 
                 // center
                 b.fchild({
                   id: ids.bottomCenter,
-                  textContent: params.bottom?.textContent,
-                  htmlContentUnsafe: params.bottom?.htmlContentUnsafe,
+                  textContent: itemParams.bottom?.textContent,
+                  htmlContentUnsafe: itemParams.bottom?.htmlContentUnsafe,
                   classes: ['oneput__std-menu-item-bottom']
                 }),
 
                 // right
-                params.bottom?.right
+                itemParams.bottom?.right
                   ? b.hflex({
                       id: ids.bottomRight,
                       classes: ['oneput__std-menu-item-bottom-right'],
-                      children: (b) => (params.bottom?.right ? params.bottom.right(b) : [])
+                      children: (b) => (itemParams.bottom?.right ? itemParams.bottom.right(b) : [])
                     })
-                  : params.bottom?.right === false
+                  : itemParams.bottom?.right === false
                     ? null
                     : b.spacer(true, false)
               ]

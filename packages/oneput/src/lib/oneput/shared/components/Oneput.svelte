@@ -64,6 +64,8 @@
   }
 </script>
 
+<svelte:window onpointermove={props.onPointerMove} />
+
 <div
   id="oneput__container"
   class={[

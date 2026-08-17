@@ -5,6 +5,7 @@ import { coalesce } from './helpers/coalesce.js';
 import { CurrentMenu } from './helpers/CurrentMenu.js';
 import { GenerativeMenuManager } from './helpers/GenerativeMenuManager.js';
 import { FilterManager } from './helpers/FilterManager.js';
+import { PointerFocusGuard } from './helpers/PointerFocusGuard.js';
 import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItems.js';
 import { tick } from 'svelte';
 
@@ -84,10 +85,18 @@ export class MenuController {
     this.ctl.currentProps.onMenuAction = (_evt, menuItem) => {
       this.runMenuItemAction(menuItem);
     };
-    this.ctl.currentProps.onMenuItemEnter = (_, item, index) => {
+    this.ctl.currentProps.onPointerMove = (evt) => {
+      this.pointerFocusGuard.onPointerMove(evt);
+    };
+    this.ctl.currentProps.onMenuItemEnter = (evt, item, index) => {
       if (!this.enableMenuItemFocus) {
         return;
       }
+      const pointer = evt as PointerEvent;
+      if (this.pointerFocusGuard.shouldIgnoreEnter(pointer)) {
+        return;
+      }
+      this.pointerFocusGuard.acceptEnter(pointer);
       this.ctl.currentProps.menuItemFocus = [index, false];
       this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
     };
@@ -402,6 +411,7 @@ export class MenuController {
   // #region menu item focus
 
   private menuItemFocusDisabled = false;
+  private pointerFocusGuard = PointerFocusGuard.create();
 
   /**
    * Menu item focus is Oneput's own (synthetic) focus: a roving index that
@@ -443,12 +453,27 @@ export class MenuController {
   focusMenuItemByIndex(index: number, focus: boolean) {
     if (!this.enableMenuItemFocus) return;
     const { index: safeIndex, menuItem } = this.currentMenu.getSafe(index);
-    this.ctl.currentProps.menuItemFocus = [safeIndex, focus];
+    this.setMenuItemFocus(safeIndex, menuItem, focus);
+  }
+
+  /**
+   * Set synthetic focus. `scrollIntoView` is true for keyboard / programmatic
+   * moves and arms the pointerenter guard.
+   */
+  private setMenuItemFocus(
+    index: number,
+    menuItem: MenuItemAny | undefined,
+    scrollIntoView: boolean
+  ) {
+    if (scrollIntoView) {
+      this.pointerFocusGuard.arm();
+    }
+    this.ctl.currentProps.menuItemFocus = [index, scrollIntoView];
     this.ctl.events.emit({
       type: 'menu-item-focus',
       payload: {
-        index: safeIndex,
-        menuItem: menuItem
+        index,
+        menuItem
       }
     });
   }
@@ -462,11 +487,7 @@ export class MenuController {
     ) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.ctl.currentProps.menuItemFocus = [i, true];
-        this.ctl.events.emit({
-          type: 'menu-item-focus',
-          payload: { index: i, menuItem }
-        });
+        this.setMenuItemFocus(i, menuItem, true);
         return true;
       }
     }
@@ -482,11 +503,7 @@ export class MenuController {
     ) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.ctl.currentProps.menuItemFocus = [i, true];
-        this.ctl.events.emit({
-          type: 'menu-item-focus',
-          payload: { index: i, menuItem }
-        });
+        this.setMenuItemFocus(i, menuItem, true);
         return true;
       }
     }
@@ -498,11 +515,7 @@ export class MenuController {
     for (let i = 0; i < this.currentMenu.displayedMenuItemCount; i++) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.ctl.currentProps.menuItemFocus = [i, true];
-        this.ctl.events.emit({
-          type: 'menu-item-focus',
-          payload: { index: i, menuItem }
-        });
+        this.setMenuItemFocus(i, menuItem, true);
         return true;
       }
     }
@@ -514,11 +527,7 @@ export class MenuController {
     for (let i = this.currentMenu.displayedMenuItemCount - 1; i >= 0; i--) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.ctl.currentProps.menuItemFocus = [i, true];
-        this.ctl.events.emit({
-          type: 'menu-item-focus',
-          payload: { index: i, menuItem }
-        });
+        this.setMenuItemFocus(i, menuItem, true);
         return true;
       }
     }

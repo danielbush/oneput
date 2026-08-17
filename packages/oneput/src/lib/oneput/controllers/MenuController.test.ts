@@ -491,4 +491,59 @@ describe('MenuController', () => {
       expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
     });
   });
+
+  describe('pointerenter after keyboard focus', () => {
+    function menuWithThreeItems() {
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'first',
+        items: [item('a', 'A'), item('b', 'B'), item('c', 'C')]
+      });
+      return ctl;
+    }
+
+    function pointerMove(ctl: Controller, x: number, y: number) {
+      ctl.currentProps.onPointerMove?.(new PointerEvent('pointermove', { clientX: x, clientY: y }));
+    }
+
+    function pointerEnter(ctl: Controller, index: number, x: number, y: number) {
+      const menuItem = ctl.currentProps.menuItems![index];
+      ctl.currentProps.onMenuItemEnter?.(
+        new PointerEvent('pointerenter', { clientX: x, clientY: y }),
+        menuItem,
+        index
+      );
+    }
+
+    test('ignores pointerenter at the same coordinates after keyboard next', () => {
+      // arrange
+      const ctl = menuWithThreeItems();
+      pointerMove(ctl, 40, 80);
+      pointerEnter(ctl, 0, 40, 80);
+      ctl.menu.focusNextMenuItem();
+
+      // act
+      pointerEnter(ctl, 2, 40, 80);
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);
+    });
+
+    test('applies pointerenter after the pointer moves', () => {
+      // arrange
+      const ctl = menuWithThreeItems();
+      pointerMove(ctl, 40, 80);
+      pointerEnter(ctl, 0, 40, 80);
+      ctl.menu.focusNextMenuItem();
+
+      // act
+      pointerMove(ctl, 40, 120);
+      pointerEnter(ctl, 2, 40, 120);
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus).toEqual([2, false]);
+    });
+  });
 });

@@ -45,6 +45,11 @@ export type OneputProps = {
   onMenuOpenChange?: (menuOpen: boolean) => void;
   onMenuAction?: (evt: Event, item: MenuItem, index: number) => void;
   onMenuItemEnter?: (evt: Event, item: MenuItem, index: number) => void;
+  /**
+   * Window pointer movement. MenuController uses this to allow hover focus
+   * after keyboard navigation.
+   */
+  onPointerMove?: (evt: PointerEvent) => void;
   replaceMenuUI?: {
     menu?: FlexParams;
   };

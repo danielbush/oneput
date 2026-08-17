@@ -1,7 +1,9 @@
 import type { AppActions, AppLayoutParams, AppObject, SharedCtl, UIFlags } from '../../types.js';
+import { OneputAction } from '../actions/OneputAction.js';
 import { adjustHourClamped, adjustMinute, stepQuarterClamped } from '../lib/time/timeAdjust.js';
 import { TimeVal } from '../lib/time/TimeVal.js';
 import { setTimeMenuItem } from '../ui/menuItems/setTimeMenuItem.js';
+import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
 export type PickDurationResult = {
@@ -23,29 +25,41 @@ function pad2(n: number) {
   return String(n).padStart(2, '0');
 }
 
+export type SetDurationIcons = {
+  Cancel: string;
+};
+
 export type SetDurationParams = {
   /** Initial duration; defaults to 30 minutes. */
   duration?: TimeVal;
+  icons?: SetDurationIcons;
 };
 
 /**
  * Pick an elapsed duration via {@link setTimeMenuItem} (no AM/PM; hours clamp at 100).
- * Accept is advertised via `inputAccept` for host layouts;
- * cancel remains bare exit / goBack.
+ * Tick / catalog SUBMIT keep the duration. Back / Cancel discard; confirm if
+ * the duration changed from the value at open.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
 export class SetDuration implements AppObject {
   static create(ctl: SharedCtl, params: SetDurationParams = {}) {
     const initial = params.duration ?? TimeVal.create(0, 30);
-    return new SetDuration(ctl, initial.hour, initial.minute);
+    return new SetDuration(ctl, initial.hour, initial.minute, params.icons);
   }
 
   private constructor(
     private ctl: SharedCtl,
     private hour: number,
-    private minute: number
-  ) {}
+    private minute: number,
+    private icons?: SetDurationIcons
+  ) {
+    this.initialHour = hour;
+    this.initialMinute = minute;
+  }
+
+  private initialHour: number;
+  private initialMinute: number;
 
   layout = {
     params: {
@@ -57,8 +71,14 @@ export class SetDuration implements AppObject {
     enableMenuOpenClose: false,
     enableFilter: false,
     enableInputElement: false,
-    focusInputOnStart: false
+    focusInputOnStart: false,
+    clearInputAfterBack: false
   } satisfies UIFlags;
+
+  /** Back discards (same as Cancel). Confirm if the duration changed. */
+  onBack = () => {
+    void this.discard();
+  };
 
   actions = {
     HOUR_UP: {
@@ -108,43 +128,65 @@ export class SetDuration implements AppObject {
         description: '+1 minute',
         when: { menuOpen: true }
       }
-    },
-    ACCEPT: {
-      action: () => this.ctl.app.exit(this.result()),
-      binding: {
-        bindings: ['Enter'],
-        description: 'Accept duration',
-        when: { menuOpen: true }
-      }
     }
   } satisfies AppActions;
 
-  menu = () => ({
-    id: 'set-duration',
-    focusBehaviour: 'first' as const,
-    items: [
-      setTimeMenuItem({
-        id: 'set-duration-widget',
-        hour: this.hour,
-        minute: this.minute,
-        hourLabel: 'h',
-        adjustHour: adjustHourClamped,
-        adjustMinute,
-        stepQuarter: stepQuarterClamped,
-        onChange: ({ hour, minute }) => {
-          this.hour = hour;
-          this.minute = minute;
-          this.syncInput();
-          this.ctl.menu.invalidate();
-        }
-      })
-    ]
-  });
+  menu = () => {
+    const cancelIcon = this.icons?.Cancel;
+    return {
+      id: 'set-duration',
+      focusBehaviour: 'first' as const,
+      items: [
+        setTimeMenuItem({
+          id: 'set-duration-widget',
+          hour: this.hour,
+          minute: this.minute,
+          hourLabel: 'h',
+          adjustHour: adjustHourClamped,
+          adjustMinute,
+          stepQuarter: stepQuarterClamped,
+          onChange: ({ hour, minute }) => {
+            this.hour = hour;
+            this.minute = minute;
+            this.syncInput();
+            this.ctl.menu.invalidate();
+          }
+        }),
+        stdMenuItem({
+          id: 'set-duration-cancel',
+          textContent: 'Cancel',
+          left: cancelIcon ? (b) => [b.icon(cancelIcon)] : false,
+          bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.BACK]?.bindings[0],
+          action: () => {
+            this.ctl.app.goBack();
+          }
+        })
+      ]
+    };
+  };
 
   onStart() {
+    this.ctl.input.setSubmitHandler(() => this.submit());
     this.syncChrome();
     this.ctl.input.setPlaceholder('Duration (hh:mm)…');
     this.syncInput();
+  }
+
+  private submit() {
+    this.ctl.app.exit(this.result());
+  }
+
+  private async discard() {
+    if (this.hour !== this.initialHour || this.minute !== this.initialMinute) {
+      const confirm = this.ctl.confirm({
+        message: 'Discard duration changes?'
+      });
+      const yes = await confirm.userChooses();
+      if (!yes) {
+        return;
+      }
+    }
+    this.ctl.app.exit();
   }
 
   private result(): PickDurationResult {
@@ -181,7 +223,8 @@ export class SetDuration implements AppObject {
       params: {
         menuTitle: 'Set duration',
         inputAccept: {
-          run: () => this.ctl.app.exit(this.result())
+          run: () => this.submit(),
+          label: this.ctl.keys.getCurrentBindings()[OneputAction.SUBMIT]?.bindings[0]
         }
       } satisfies AppLayoutParams
     });

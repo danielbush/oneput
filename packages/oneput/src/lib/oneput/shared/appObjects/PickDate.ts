@@ -1,6 +1,8 @@
 import type { AppActions, AppLayoutParams, AppObject, SharedCtl, UIFlags } from '../../types.js';
+import { OneputAction } from '../actions/OneputAction.js';
 import { DateVal } from '../lib/time/DateVal.js';
 import { calendarMenuItem } from '../ui/menuItems/calendarMenuItem.js';
+import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { hflex } from '../../lib/builder.js';
 
 /** Tagged resume payload: exit-with-result uses this; cancel exits with no payload. */
@@ -46,6 +48,7 @@ export type PickDateIcons = {
   NextMonth: string;
   PreviousYear: string;
   NextYear: string;
+  Cancel?: string;
 };
 
 export type PickDateParams = {
@@ -58,8 +61,8 @@ export type PickDateParams = {
  * Pick a date via a reusable {@link calendarMenuItem} rich row.
  * Month/year navigation + Today live in the pinned menu footer
  * (`< << Today >> >`); month/year is the menu header title.
- * Accept / reject are advertised via `inputAccept` / `inputReject` for host
- * layouts; reject exits with no payload (same as goBack cancel).
+ * Tick / catalog SUBMIT keep the date. Back / Cancel discard; confirm if the
+ * date changed from the value at open.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
@@ -82,7 +85,15 @@ export class PickDate implements AppObject {
     private year: number,
     private month: number,
     private day: number
-  ) {}
+  ) {
+    this.initialYear = year;
+    this.initialMonth = month;
+    this.initialDay = day;
+  }
+
+  private initialYear: number;
+  private initialMonth: number;
+  private initialDay: number;
 
   layout = {
     params: {
@@ -94,18 +105,16 @@ export class PickDate implements AppObject {
     enableMenuOpenClose: false,
     enableFilter: false,
     enableInputElement: false,
-    focusInputOnStart: false
+    focusInputOnStart: false,
+    clearInputAfterBack: false
   } satisfies UIFlags;
 
+  /** Back discards (same as Cancel). Confirm if the date changed. */
+  onBack = () => {
+    void this.discard();
+  };
+
   actions = {
-    ACCEPT: {
-      action: () => this.ctl.app.exit(this.result()),
-      binding: {
-        bindings: ['Enter'],
-        description: 'Accept selected date',
-        when: { menuOpen: true }
-      }
-    },
     PREV_MONTH: {
       action: () => this.shiftMonth(-1),
       binding: {
@@ -172,88 +181,122 @@ export class PickDate implements AppObject {
     }
   } satisfies AppActions;
 
-  menu = () => ({
-    id: 'pick-date',
-    focusBehaviour: 'first' as const,
-    items: [
-      calendarMenuItem({
-        id: 'pick-date-grid',
-        year: this.year,
-        month: this.month,
-        selected: this.day,
-        onSelect: (day) => {
-          this.day = day;
-          this.syncInput();
-          this.ctl.menu.invalidate();
-        }
-      })
-    ],
-    // `< << Today >> >` — month outside, year (double chevron) within
-    footer: hflex({
-      id: 'pick-date-footer',
-      children: (b) => [
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__icon-button'],
-          icon: this.icons.PreviousMonth,
-          attr: {
-            type: 'button',
-            title: 'Previous month',
-            'aria-label': 'Previous month',
-            onclick: () => this.shiftMonth(-1)
+  menu = () => {
+    const cancelIcon = this.icons.Cancel;
+    return {
+      id: 'pick-date',
+      focusBehaviour: 'first' as const,
+      items: [
+        calendarMenuItem({
+          id: 'pick-date-grid',
+          year: this.year,
+          month: this.month,
+          selected: this.day,
+          onSelect: (day) => {
+            this.day = day;
+            this.syncInput();
+            this.ctl.menu.invalidate();
           }
         }),
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__icon-button'],
-          icon: this.icons.PreviousYear,
-          attr: {
-            type: 'button',
-            title: 'Previous year',
-            'aria-label': 'Previous year',
-            onclick: () => this.shiftYear(-1)
-          }
-        }),
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__secondary-button'],
-          textContent: 'Today',
-          attr: {
-            type: 'button',
-            title: 'Today',
-            onclick: () => this.goToday()
-          }
-        }),
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__icon-button'],
-          icon: this.icons.NextYear,
-          attr: {
-            type: 'button',
-            title: 'Next year',
-            'aria-label': 'Next year',
-            onclick: () => this.shiftYear(1)
-          }
-        }),
-        b.fchild({
-          tag: 'button',
-          classes: ['oneput__icon-button'],
-          icon: this.icons.NextMonth,
-          attr: {
-            type: 'button',
-            title: 'Next month',
-            'aria-label': 'Next month',
-            onclick: () => this.shiftMonth(1)
+        stdMenuItem({
+          id: 'pick-date-cancel',
+          textContent: 'Cancel',
+          left: cancelIcon ? (b) => [b.icon(cancelIcon)] : false,
+          bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.BACK]?.bindings[0],
+          action: () => {
+            this.ctl.app.goBack();
           }
         })
-      ]
-    })
-  });
+      ],
+      // `< << Today >> >` — month outside, year (double chevron) within
+      footer: hflex({
+        id: 'pick-date-footer',
+        children: (b) => [
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__icon-button'],
+            icon: this.icons.PreviousMonth,
+            attr: {
+              type: 'button',
+              title: 'Previous month',
+              'aria-label': 'Previous month',
+              onclick: () => this.shiftMonth(-1)
+            }
+          }),
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__icon-button'],
+            icon: this.icons.PreviousYear,
+            attr: {
+              type: 'button',
+              title: 'Previous year',
+              'aria-label': 'Previous year',
+              onclick: () => this.shiftYear(-1)
+            }
+          }),
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__secondary-button'],
+            textContent: 'Today',
+            attr: {
+              type: 'button',
+              title: 'Today',
+              onclick: () => this.goToday()
+            }
+          }),
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__icon-button'],
+            icon: this.icons.NextYear,
+            attr: {
+              type: 'button',
+              title: 'Next year',
+              'aria-label': 'Next year',
+              onclick: () => this.shiftYear(1)
+            }
+          }),
+          b.fchild({
+            tag: 'button',
+            classes: ['oneput__icon-button'],
+            icon: this.icons.NextMonth,
+            attr: {
+              type: 'button',
+              title: 'Next month',
+              'aria-label': 'Next month',
+              onclick: () => this.shiftMonth(1)
+            }
+          })
+        ]
+      })
+    };
+  };
 
   onStart() {
+    this.ctl.input.setSubmitHandler(() => this.submit());
     this.syncChrome();
     this.ctl.input.setPlaceholder('Selected date…');
     this.syncInput();
+  }
+
+  private submit() {
+    this.ctl.app.exit(this.result());
+  }
+
+  private async discard() {
+    if (
+      this.year !== this.initialYear ||
+      this.month !== this.initialMonth ||
+      this.day !== this.initialDay
+    ) {
+      const confirm = this.ctl.confirm({
+        message: 'Discard date changes?'
+      });
+      const yes = await confirm.userChooses();
+      if (!yes) {
+        return;
+      }
+    }
+    this.ctl.app.exit();
   }
 
   private result(): PickDateResult {
@@ -268,10 +311,8 @@ export class PickDate implements AppObject {
       params: {
         menuTitle: `${MONTH_LABELS[this.month]} ${this.year}`,
         inputAccept: {
-          run: () => this.ctl.app.exit(this.result())
-        },
-        inputReject: {
-          run: () => this.ctl.app.exit()
+          run: () => this.submit(),
+          label: this.ctl.keys.getCurrentBindings()[OneputAction.SUBMIT]?.bindings[0]
         }
       } satisfies AppLayoutParams
     });

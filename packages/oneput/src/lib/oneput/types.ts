@@ -363,7 +363,7 @@ export type SharedCtl = {
   >;
   /** Params / flags only — no direct `OneputProps` chrome writers. */
   ui: Pick<UIController, 'update'>;
-  keys: Pick<KeysController, 'setDefaultBindings'>;
+  keys: Pick<KeysController, 'setDefaultBindings' | 'getCurrentBindings'>;
   notify: Controller['notify'];
   alert: Controller['alert'];
   confirm: Controller['confirm'];

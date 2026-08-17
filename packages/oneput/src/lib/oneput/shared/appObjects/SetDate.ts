@@ -43,7 +43,7 @@ function isoDate(year: number, month: number, day: number) {
   return `${year}-${pad2(month + 1)}-${pad2(day)}`;
 }
 
-export type PickDateIcons = {
+export type SetDateIcons = {
   PreviousMonth: string;
   NextMonth: string;
   PreviousYear: string;
@@ -51,14 +51,14 @@ export type PickDateIcons = {
   Cancel?: string;
 };
 
-export type PickDateParams = {
-  icons: PickDateIcons;
+export type SetDateParams = {
+  icons: SetDateIcons;
   /** Initial selection; defaults to today. */
   date?: DateVal;
 };
 
 /**
- * Pick a date via a reusable {@link calendarMenuItem} rich row.
+ * Set a date via a reusable {@link calendarMenuItem} rich row.
  * Month/year navigation + Today live in the pinned menu footer
  * (`< << Today >> >`); month/year is the menu header title.
  * Tick / catalog SUBMIT keep the date. Back / Cancel discard; confirm if the
@@ -66,11 +66,11 @@ export type PickDateParams = {
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).
  */
-export class PickDate implements AppObject {
-  static create(ctl: SharedCtl, params: PickDateParams) {
+export class SetDate implements AppObject {
+  static create(ctl: SharedCtl, params: SetDateParams) {
     const initial = params.date;
     const now = new Date();
-    return new PickDate(
+    return new SetDate(
       ctl,
       params.icons,
       initial?.year ?? now.getFullYear(),
@@ -81,7 +81,7 @@ export class PickDate implements AppObject {
 
   private constructor(
     private ctl: SharedCtl,
-    private icons: PickDateIcons,
+    private icons: SetDateIcons,
     private year: number,
     private month: number,
     private day: number
@@ -97,7 +97,7 @@ export class PickDate implements AppObject {
 
   layout = {
     params: {
-      menuTitle: 'Pick a date'
+      menuTitle: 'Set a date'
     } satisfies AppLayoutParams
   };
 
@@ -184,11 +184,11 @@ export class PickDate implements AppObject {
   menu = () => {
     const cancelIcon = this.icons.Cancel;
     return {
-      id: 'pick-date',
+      id: 'set-date',
       focusBehaviour: 'first' as const,
       items: [
         calendarMenuItem({
-          id: 'pick-date-grid',
+          id: 'set-date-grid',
           year: this.year,
           month: this.month,
           selected: this.day,
@@ -199,7 +199,7 @@ export class PickDate implements AppObject {
           }
         }),
         stdMenuItem({
-          id: 'pick-date-cancel',
+          id: 'set-date-cancel',
           textContent: 'Cancel',
           left: cancelIcon ? (b) => [b.icon(cancelIcon)] : false,
           bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.BACK]?.bindings[0],
@@ -210,7 +210,7 @@ export class PickDate implements AppObject {
       ],
       // `< << Today >> >` — month outside, year (double chevron) within
       footer: hflex({
-        id: 'pick-date-footer',
+        id: 'set-date-footer',
         children: (b) => [
           b.fchild({
             tag: 'button',

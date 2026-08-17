@@ -70,7 +70,7 @@ To create and compose reusable "components" including 3rd party components we ha
 Shared AppObjects should not assume where host chrome lives. They advertise
 chrome roles with layout params (not lifecycle):
 
-- `inputAccept` — accept the current choice (e.g. Done on PickDate; confirm key capture). Exit stays in the AppObject’s `run` when needed.
+- `inputAccept` — accept the current choice (e.g. Done on SetDate; confirm key capture). Exit stays in the AppObject’s `run` when needed.
 - `inputSend` — send / submit a message (e.g. Eliza chat)
 - `inputReject` — dismiss (e.g. abort key capture in BindingsEditor)
 - exit without a result — not a layout param

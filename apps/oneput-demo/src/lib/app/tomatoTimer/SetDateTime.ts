@@ -4,10 +4,10 @@ import { DateVal } from '@oneput/oneput/shared/lib/time/DateVal.js';
 import { TimeVal } from '@oneput/oneput/shared/lib/time/TimeVal.js';
 import {
   isPickDateResult,
-  PickDate,
-  type PickDateIcons,
+  SetDate,
+  type SetDateIcons,
   type PickDateResult
-} from '@oneput/oneput/shared/appObjects/PickDate.js';
+} from '@oneput/oneput/shared/appObjects/SetDate.js';
 import {
   isPickTimeResult,
   SetTime,
@@ -19,7 +19,7 @@ type SetDateTimeIcons = {
   SetDateIcon: string;
   SetTimeIcon: string;
   Cancel: string;
-} & PickDateIcons;
+} & SetDateIcons;
 
 /** Tagged resume payload for Add Entry start-time. */
 export type PickDateTimeResult = {
@@ -124,7 +124,7 @@ export class SetDateTime implements AppObject<PickDateResult | PickTimeResult> {
           left: (b) => [b.icon(this.icons.SetDateIcon)],
           right: (b) => [b.icon(this.icons.Right)],
           action: () => {
-            this.ctl.app.run(PickDate.create(this.ctl, { date: this.date, icons: this.icons }));
+            this.ctl.app.run(SetDate.create(this.ctl, { date: this.date, icons: this.icons }));
           }
         }),
         stdMenuItem({

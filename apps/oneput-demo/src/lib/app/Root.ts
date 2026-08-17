@@ -6,7 +6,7 @@ import { KatexDemo } from './KatexDemo.js';
 import { DirectoryBrowser } from './DirectoryBrowser.js';
 import { FilePicker } from './FilePicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
-import { isPickDateResult, PickDate } from '@oneput/oneput/shared/appObjects/PickDate.js';
+import { isPickDateResult, SetDate } from '@oneput/oneput/shared/appObjects/SetDate.js';
 import { ElizaChat } from './ElizaChat.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
@@ -26,8 +26,8 @@ export class Root implements AppObject {
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
       FilePicker: () => FilePicker.create(ctl),
-      PickDate: () =>
-        PickDate.create(ctl, {
+      SetDate: () =>
+        SetDate.create(ctl, {
           icons: {
             PreviousMonth: icons.ChevronLeft,
             NextMonth: icons.ChevronRight,
@@ -51,7 +51,7 @@ export class Root implements AppObject {
       AsyncSearchExample: () => AsyncSearchExample;
       DirectoryBrowser: () => DirectoryBrowser;
       FilePicker: () => FilePicker;
-      PickDate: () => PickDate;
+      SetDate: () => SetDate;
       ElizaChat: () => ElizaChat;
     }
   ) {}
@@ -146,14 +146,14 @@ export class Root implements AppObject {
           }
         }),
         stdMenuItem({
-          id: 'pick-date',
+          id: 'set-date',
           left: (b) => [b.icon(icons.CalendarCheck)],
-          textContent: 'Pick a date...',
+          textContent: 'Set a date...',
           bottom: {
             textContent: 'Rich calendar menu item — day grid between ordinary actions'
           },
           action: () => {
-            this.ctl.app.run(this.create.PickDate());
+            this.ctl.app.run(this.create.SetDate());
           },
           right: (b) => [b.icon(icons.ChevronRight)]
         }),

@@ -62,6 +62,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: view keyboard shortcuts
+  - make this a keybinding and a global menu item
+  - we don't see the global menu item unless we type something like "help keys" or "help shortcuts" etc
+  - COMMENT: global menu item won't work with setTime or setDate; these are AppObject's that use the menu area in a non-filtering way; the keybinding would still work;
+  - COMMENT: what about typing "?" in oneput launches help global menu appobject from anywhere; for mobile we show a "?" button; th emenu would include item to show keyboard bindings; for mobile we perhpas filter it out although probably not worth the effort
 - feat: layout / update / ui unification
   - ctl.ui.update should take `params` and `ui`
   - AppObject.layout should also take `params` and `ui`

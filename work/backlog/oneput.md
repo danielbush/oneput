@@ -62,6 +62,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- refactor: AddEntry to use menu() instead of setMenu;
+  - COMMENT: this is interesting because we do interesting thins with onMenuItemFocus; we may need to look into menu invalidation
 - feat: view keyboard shortcuts
   - make this a keybinding and a global menu item
   - we don't see the global menu item unless we type something like "help keys" or "help shortcuts" etc

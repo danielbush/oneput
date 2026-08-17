@@ -258,29 +258,39 @@ export type FChildParams = {
 };
 
 /**
- * Map of app-event name -> payload.  Oneput ships it empty; host apps augment
+ * Map of app-event name -> payload. Oneput ships it empty; host apps augment
  * it via declaration merging so events are typed end to end:
  *
  *   declare module '@oneput/oneput' {
  *     interface AppEventMap {
  *       'node-click': { id: string };
+ *       'frame-selection-change': void;
  *     }
  *   }
+ *
+ * Use `void` when the event has no payload. Then emit with `{ type }` only.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AppEventMap {}
 
 /**
+ * One map entry as an emit/onEvent object.
+ *
+ * `void` payloads omit `payload`. Other payloads require it.
+ */
+type AppEventFromMap<K extends keyof AppEventMap> = [AppEventMap[K]] extends [void]
+  ? { type: K; payload?: undefined }
+  : { type: K; payload: AppEventMap[K] };
+
+/**
  * A host-app event delivered to the currently active AppObject via
- * ctl.app.emitEvent(...).  When AppEventMap is augmented this is a discriminated
+ * ctl.app.emitEvent(...). When AppEventMap is augmented this is a discriminated
  * union (so `event.type === 'x'` narrows `payload`); before augmentation it
  * falls back to a generic shape so Oneput stays usable and domain-agnostic.
  */
 export type AppEvent = [keyof AppEventMap] extends [never]
   ? { type: string; payload?: unknown }
-  : {
-      [K in keyof AppEventMap]: { type: K; payload: AppEventMap[K] };
-    }[keyof AppEventMap];
+  : { [K in keyof AppEventMap]: AppEventFromMap<K> }[keyof AppEventMap];
 
 /**
  * Context supplied when Oneput dispatches an action.

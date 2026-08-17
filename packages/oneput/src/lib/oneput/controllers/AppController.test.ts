@@ -540,6 +540,54 @@ describe('AppController', () => {
     });
   });
 
+  describe('emitEvent', () => {
+    test('delivers the event to the current AppObject', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const received: unknown[] = [];
+      ctl.app.run({
+        onStart: () => {},
+        onEvent: (event) => {
+          received.push(event);
+        }
+      });
+
+      // act
+      ctl.app.emitEvent({ type: 'host-event', payload: { id: 'n1' } });
+
+      // assert
+      expect(received).toEqual([{ type: 'host-event', payload: { id: 'n1' } }]);
+    });
+
+    test('does not deliver the event to a suspended AppObject', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const received: unknown[] = [];
+      ctl.app.run({
+        onStart: () => {},
+        onEvent: (event) => {
+          received.push(event);
+        }
+      });
+      ctl.app.run({ onStart: () => {} });
+
+      // act
+      ctl.app.emitEvent({ type: 'host-event' });
+
+      // assert
+      expect(received).toEqual([]);
+    });
+
+    test('does nothing when the current AppObject has no onEvent', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.app.run({ onStart: () => {} });
+
+      // act / assert
+      expect(() => ctl.app.emitEvent({ type: 'host-event' })).not.toThrow();
+    });
+  });
+
   describe('enableModal', () => {
     it('restores AppObject enableFilter after modal closes', () => {
       // arrange

@@ -588,6 +588,113 @@ describe('AppController', () => {
     });
   });
 
+  describe('exit during menu close', () => {
+    it('pops immediately when the menu is already closed', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      let parentResumed = false;
+      const parent: AppObject = {
+        onStart: () => {},
+        onResume: () => {
+          parentResumed = true;
+        }
+      };
+      const child: AppObject = { onStart: () => {} };
+      ctl.app.run(parent);
+      ctl.app.run(child);
+
+      // act
+      ctl.app.closeAndExit();
+
+      // assert
+      expect(parentResumed).toBe(true);
+    });
+
+    it('does not resume the parent until the menu outro ends after closeAndExit', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let parentResumed = false;
+      const parent: AppObject = {
+        onStart: () => {},
+        onResume: () => {
+          parentResumed = true;
+        }
+      };
+      const child: AppObject = { onStart: () => {} };
+      ctl.app.run(parent);
+      ctl.app.run(child);
+
+      // act
+      ctl.app.closeAndExit();
+
+      // assert
+      expect(parentResumed).toBe(false);
+
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(parentResumed).toBe(true);
+    });
+
+    it('does not resume the parent from onMenuOpenChange until the menu outro ends', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let parentResumed = false;
+      let parentHadResumedDuringClose = true;
+      const parent: AppObject = {
+        onStart: () => {},
+        onResume: () => {
+          parentResumed = true;
+        }
+      };
+      const child: AppObject = {
+        onStart: () => {},
+        onMenuOpenChange: ({ open }) => {
+          if (open) return;
+          parentHadResumedDuringClose = parentResumed;
+          ctl.app.exit();
+        }
+      };
+      ctl.app.run(parent);
+      ctl.app.run(child);
+
+      // act
+      ctl.menu.closeMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(parentHadResumedDuringClose).toBe(false);
+      expect(parentResumed).toBe(true);
+    });
+
+    it('does not run onMenuOpenChange on the exiting AppObject after closeAndExit', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let closeHookCount = 0;
+      let parentResumed = false;
+      const parent: AppObject = {
+        onStart: () => {},
+        onResume: () => {
+          parentResumed = true;
+        }
+      };
+      const child: AppObject = {
+        onStart: () => {},
+        onMenuOpenChange: ({ open }) => {
+          if (!open) closeHookCount += 1;
+        }
+      };
+      ctl.app.run(parent);
+      ctl.app.run(child);
+
+      // act
+      ctl.app.closeAndExit();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(closeHookCount).toBe(0);
+      expect(parentResumed).toBe(true);
+    });
+  });
+
   describe('enableModal', () => {
     it('restores AppObject enableFilter after modal closes', () => {
       // arrange

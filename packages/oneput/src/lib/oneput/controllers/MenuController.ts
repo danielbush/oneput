@@ -38,19 +38,25 @@ export class MenuController {
   public static create(ctl: Controller) {
     const fn = GenerativeMenuManager.create(ctl);
     const filter = FilterManager.create();
-    return new MenuController(ctl, fn, filter);
+    return new MenuController(ctl, fn, filter, true);
   }
 
   public static createNull(ctl: Controller) {
     const fn = GenerativeMenuManager.createNull(ctl);
     const filter = FilterManager.createNull();
-    return new MenuController(ctl, fn, filter);
+    return new MenuController(ctl, fn, filter, false);
   }
 
   constructor(
     private ctl: Controller,
     private generative: GenerativeMenuManager,
     private filter: FilterManager,
+    /**
+     * When true, {@link completeMenuOutro} waits for Svelte `onoutroend`.
+     *
+     * `createNull` has no view, so it completes the outro in the close timeout.
+     */
+    private readonly viewOwnsOutro = false,
     private currentMenu = CurrentMenu.createBlank(ctl),
     private disableActions = false,
     private disableOpenClose = false,
@@ -100,6 +106,9 @@ export class MenuController {
       this.ctl.currentProps.menuItemFocus = [index, false];
       this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
     };
+    this.ctl.currentProps.onMenuOutroEnd = () => {
+      this.completeMenuOutro();
+    };
     this.ctl.events.on('input-change', () => {
       if (this.inputChannel.mode === 'filter' && !this.inputChannel.filterEnabled) {
         return;
@@ -119,11 +128,30 @@ export class MenuController {
   }
 
   /**
-   * This exists to solve FLASH_OF_NEXT_MENU .
+   * Covers MENU_OPEN_CLOSE_RACE .
+   *
+   * menuOpen flips in a setTimeout. isMenuOpenImmediate flips now, so openMenu
+   * / closeMenu stay idempotent before that timeout. Without it, two quick
+   * openMenu calls would schedule two opens.
+   *
+   * Was originally created for FLASH_OF_NEXT_MENU but this is handed by QUEUE_POP_ON_OUTRO.
    */
   private isMenuOpenImmediate = false;
+  private outroPending = false;
+
+  /**
+   * True from {@link closeMenu} until {@link completeMenuOutro}.
+   *
+   * `exit()` uses this to delay pop until the close animation has finished.
+   */
+  get isOutroPending() {
+    return this.outroPending;
+  }
 
   openMenu = () => {
+    if (this.outroPending) {
+      this.completeMenuOutro();
+    }
     if (this.disableOpenClose || this.isMenuOpenImmediate) {
       return;
     }
@@ -142,11 +170,29 @@ export class MenuController {
       return;
     }
     this.isMenuOpenImmediate = false;
+    this.outroPending = true;
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
       this.ctl.currentProps.menuOpen = false;
       this.ctl.events.emit({ type: 'menu-open-change', payload: false });
+      if (!this.viewOwnsOutro) {
+        this.completeMenuOutro();
+      }
     });
+  };
+
+  /**
+   * Finish a pending menu close.
+   *
+   * The view calls this from Svelte `onoutroend`. `createNull` calls it in the
+   * close timeout because there is no animation.
+   */
+  completeMenuOutro = () => {
+    if (!this.outroPending) {
+      return;
+    }
+    this.outroPending = false;
+    this.ctl.events.emit({ type: 'menu-outro-end', payload: undefined });
   };
 
   // #endregion
@@ -239,7 +285,6 @@ export class MenuController {
    */
   private setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
     if (!this.isMenuOpenImmediate) {
-      // FLASH_OF_NEXT_MENU
       return;
     }
     if (!this.isMenuOpen) {

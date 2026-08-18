@@ -19,6 +19,7 @@ export type InternalEvent =
   | AppChangeEvent
   | BindingsChangeEvent
   | MenuOpenChangeEvent
+  | MenuOutroEndEvent
   | MenuItemFocusEvent
   | MenuActionEvent
   | MenuSetItemsEvent
@@ -39,6 +40,10 @@ export type BindingsChangeEvent = {
 export type MenuOpenChangeEvent = {
   type: 'menu-open-change';
   payload: boolean;
+};
+export type MenuOutroEndEvent = {
+  type: 'menu-outro-end';
+  payload: undefined;
 };
 export type MenuItemFocusEvent = {
   type: 'menu-item-focus';

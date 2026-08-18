@@ -78,6 +78,7 @@ chrome roles with layout params (not lifecycle):
   - typically from `onBack` / goBack, or `onMenuOpenChange` when the menu closes
   - opt in with flags `enableGoBack` and `enableMenuOpenClose`
   - host layout surfaces ← and X from those flags
+  - when the menu is closing, `exit` / `closeAndExit` wait for the close outro before pop; when the menu is already closed, pop is immediate
 
 The host layout decides how to surface these — commonly on `inputUI.right`, even
 when the input field itself is disabled. Shared button chrome lives in

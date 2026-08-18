@@ -41,7 +41,9 @@ export class AppController {
     return new AppController(ctl);
   }
 
-  constructor(private ctl: Controller) {}
+  constructor(private ctl: Controller) {
+    this.ctl.events.on('menu-outro-end', this.flushPendingPop);
+  }
 
   private appParents: AnyAppObject[] = [];
   private appStates = new WeakMap<AnyAppObject, AppObjectState>();
@@ -50,6 +52,8 @@ export class AppController {
   private unsubscribeMenuItemFocus?: () => void;
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
+  private unsubscribeMenuOpenFocus?: () => void;
+  private pendingPop?: { payload: unknown };
 
   // UI settings
   private disableGoBack = false;
@@ -403,12 +407,17 @@ export class AppController {
       });
     }
     this.unsubscribeMenuOpenChange?.();
-    if (this.current?.onMenuOpenChange || this.focusInputOnMenuOpen) {
+    if (this.current?.onMenuOpenChange) {
       this.unsubscribeMenuOpenChange = this.ctl.events.on('menu-open-change', (open) => {
-        if (open && this.focusInputOnMenuOpen) {
+        this.current?.onMenuOpenChange?.({ open });
+      });
+    }
+    this.unsubscribeMenuOpenFocus?.();
+    if (this.focusInputOnMenuOpen) {
+      this.unsubscribeMenuOpenFocus = this.ctl.events.on('menu-open-change', (open) => {
+        if (open) {
           this.ctl.input.focus();
         }
-        this.current?.onMenuOpenChange?.({ open });
       });
     }
 
@@ -489,21 +498,56 @@ export class AppController {
 
   /**
    * The running AppObject can call this to exit itself.
+   *
+   * When a menu close outro is in progress, pop waits for that outro. When the
+   * menu is already closed, pop is immediate.
    */
   exit = (payload?: unknown) => {
+    if (this.ctl.menu.isOutroPending) {
+      // QUEUE_POP_ON_OUTRO
+      this.queuePop(payload);
+      return;
+    }
     this.pop({ payload });
   };
 
   /**
-   * A convenience function that closes menu and exits the current AppObject.
+   * Close the menu and exit the current AppObject.
    *
-   * We close first to take advantage of the MenuController suppressing unwanted
-   * flashes of changed menu items caused by the exit to the parent AppObject
-   * whilst the menu is closing.  See FLASH_OF_NEXT_MENU .
+   * When the menu is open, pop waits for the close outro so parent chrome does
+   * not change while the panel is still visible. When the menu is already
+   * closed, pop is immediate.
    */
   closeAndExit = (payload?: unknown) => {
     this.ctl.menu.closeMenu();
-    this.pop({ payload });
+    this.exit(payload);
+  };
+
+  /**
+   * Hold the pop until the menu outro ends.  (QUEUE_POP_ON_OUTRO)
+   *
+   * Drop the leaving AppObject's `onMenuOpenChange` so the close it already
+   * requested does not run the hook again.
+   */
+  private queuePop(payload?: unknown) {
+    if (this.pendingPop !== undefined) {
+      return;
+    }
+    this.pendingPop = { payload };
+    this.unsubscribeMenuOpenChange?.();
+    this.unsubscribeMenuOpenChange = undefined;
+  }
+
+  /**
+   * See {@link queuePop}.
+   */
+  private flushPendingPop = () => {
+    if (this.pendingPop === undefined) {
+      return;
+    }
+    const result = this.pendingPop;
+    this.pendingPop = undefined;
+    this.pop(result);
   };
 
   private pop = (result?: { payload: unknown }) => {

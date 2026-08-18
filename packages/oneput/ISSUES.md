@@ -1,5 +1,32 @@
 # Issues
 
+## QUEUE_POP_ON_OUTRO
+
+- when: Aug-2026
+- what:
+  - Exit an AppObject while its menu is closing.
+  - `pop` restores parent chrome (title, tick, `innerUI`) before Svelte `whoosh` measures height.
+  - The panel is shoved, then animates down from the wrong height (~192px).
+  - This is not the item-list flash in FLASH_OF_NEXT_MENU. Items were already frozen. Chrome was not.
+- observed sequence:
+  1. Close (X or `closeAndExit`) sets `menuOpen=false` and emits `menu-open-change`.
+  2. Same turn used to `exit` → `pop` → `runBefore` → parent `onResume` (`installFrameControls` in frame-harness).
+  3. Then `whoosh` starts and measures the already-shifted panel.
+- confirmation:
+  - Frame node/edge metadata: close the menu and watch title / tick / Home-zoom bar change before the panel finishes leaving.
+  - `exit` with the menu already closed must still pop at once (no outro).
+- solution:
+  - `exit()` queues `pop` when a menu outro is in progress; otherwise it pops now.
+  - `closeAndExit` is `closeMenu()` then `exit()`. A close that starts an outro queues; a no-op close pops now.
+  - `closeMenu` does not start an outro when the menu is already closed or open/close is disabled.
+  - Real UI: `Oneput.svelte` `onoutroend` completes the outro (`menu-outro-end`), then the queued pop runs.
+  - `createNull` has no component: it completes the outro in the close timeout.
+  - `queuePop` unwires the leaving AppObject’s `onMenuOpenChange` so that close does not run the hook again (`closeAndExit` would otherwise `submit` twice). `reset` after pop subscribes the parent.
+  - Do not freeze more chrome slots. Do not `setTimeout(200)` in AppObjects.
+- note:
+  - `isMenuOpenImmediate` remains. It is the sync latch for MENU_OPEN_CLOSE_RACE (`menuOpen` still flips in a timeout), not the outro flag.
+
+
 ## INVALIDATION_REBUILD_FEEDBACK_LOOP
 
 This affected invalidation of the menu in MenuController in a consumer but could be applied in other places potentially.
@@ -61,6 +88,7 @@ This affected invalidation of the menu in MenuController in a consumer but could
 - solution:
   - as soon as menu starts to close, we disable any visual menu updates whilst allowing the menu data to be updated; we can reinforce this for consumers by giving them ctl.app.closeAndExit.
   - 8-Jul-2026: confirmed this happens; you just need small child menu that you close and exit from.
+- see: QUEUE_POP_ON_OUTRO for parent chrome jumping during the same close (title, tick, innerUI). Deferred pop is the fix there; item freeze does not cover chrome.
 
 ## LOAD_LUCIDE
 

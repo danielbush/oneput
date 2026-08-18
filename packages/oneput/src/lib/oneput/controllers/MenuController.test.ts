@@ -110,6 +110,22 @@ describe('MenuController', () => {
       expect(rowsWhenOpened).toEqual([['unmaximize']]);
     });
 
+    it('emits menu-outro-end after close when there is no view', async () => {
+      // arrange
+      const outros: undefined[] = [];
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({ onStart: () => {} });
+      ctl.events.on('menu-outro-end', (payload) => outros.push(payload));
+
+      // act
+      ctl.menu.closeMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(outros).toEqual([undefined]);
+      expect(ctl.menu.isOutroPending).toBe(false);
+    });
+
     it('emits one close event for repeated close requests', async () => {
       // arrange
       const menuOpenChanges: boolean[] = [];

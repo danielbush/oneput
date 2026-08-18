@@ -20,7 +20,7 @@ The `Controller` is created by `<OneputController>` (a Svelte component) which m
 
 ## AppObject
 
-An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects form a stack managed by `AppController` — you `run()` a new one to push it, `exit()` to pop back.
+An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects form a stack managed by `AppController` — you `run()` a new one to push it, `exit()` to pop back. If `exit` / `closeAndExit` runs while the menu is closing, pop waits for the menu outro (`onoutroend`) so parent chrome does not change while the panel is still visible. If the menu is already closed, pop is immediate.
 
 ```
 interface AppObject {

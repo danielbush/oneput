@@ -81,6 +81,7 @@
       <section
         in:whoosh={{ duration: menuAnimationDuration, easing: linear }}
         out:whoosh={{ duration: menuAnimationDuration, easing: linear }}
+        onoutroend={() => props.onMenuOutroEnd?.()}
         class="oneput__menu-area"
       >
         {#if props.replaceMenuUI?.menu}

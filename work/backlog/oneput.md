@@ -241,6 +241,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## style
 
+- style: don't define a small icon width / height; instead, define one setting height or width; the consumer can create compact or loose variants by setting a class on the appropriate part of the ui eg innerUI triggering different CSS custom property values
 - style: prefer play for send button rather then the "dart" thingy
 - style: in oneput internal demo (not oneput-demo), the divider text has an additional indent (margin-left by the looks) that breaks alignment with the main text in the menu items
 - style: the radius of the input border box (which gets the focus ring) is more pronounced than the border radius of the oneput container

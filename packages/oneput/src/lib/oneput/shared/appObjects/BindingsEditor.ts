@@ -7,6 +7,7 @@ import {
 } from '../../lib/bindings.js';
 import type { AppObject, SharedCtl } from '../../types.js';
 import type { BindingsStore } from '../bindings/BindingsStore.js';
+import { bindingToKbdHtml } from '../ui/kbd.js';
 import { pullToggleMenuItem } from '../ui/menuItems/pullToggleMenuItem.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 
@@ -100,9 +101,7 @@ export class BindingsEditor implements AppObject {
               }),
             b.fchild({
               htmlContentUnsafe:
-                bindings.length === 0
-                  ? '<code><kbd>-</kbd></code>'
-                  : '<code><kbd>' + bindings[0] + '</kbd></code>',
+                bindings.length === 0 ? '<code><kbd>-</kbd></code>' : bindingToKbdHtml(bindings[0]),
               classes: ['oneput__kbd']
             }),
             b.icon(this.icons.Right)
@@ -143,7 +142,10 @@ export class BindingsEditor implements AppObject {
         ...bindings.map((binding) => {
           return stdMenuItem({
             id: binding,
-            textContent: binding,
+            // The row is the binding, thus it shows key badges, not the raw
+            // tinykeys chord.
+            htmlContentUnsafe: bindingToKbdHtml(binding),
+            classes: ['oneput__kbd'],
             left: (b) => [b.icon(this.icons.Keyboard)],
             right: (b) => [
               b.fchild({

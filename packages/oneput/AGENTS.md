@@ -48,6 +48,16 @@ Decoupled pub-sub communication between controllers.
 
 - Types and emitter: `packages/oneput/src/lib/oneput/controllers/InternalEventEmitter.ts`
 
+### Pull rows (menu rows that paint themselves)
+
+Rows that must change without a menu rebuild mount a widget that reads a live
+`Pull<T>` source. See PULL_ROWS in `docs/CONCEPTS.md`.
+
+- Type + helpers: `packages/oneput/src/lib/oneput/lib/pull.ts` — `Pull`, `cell`, `notifier`
+- Rows: `shared/ui/menuItems/checkboxMenuItem.ts`, `shared/ui/menuItems/pullToggleMenuItem.ts`
+- Widgets: `shared/ui/menuItems/pull/`
+- Snapshot alternative: `shared/ui/menuItems/toggleMenuItem.ts` (caller rebuilds)
+
 ### Standard host layout
 
 Reusable menu/input chrome that maps `AppLayoutParams` (`inputAccept` /

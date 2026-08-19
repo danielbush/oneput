@@ -14,6 +14,7 @@ export { KeyEventBindings } from './oneput/lib/bindings.js';
 export { mountSvelte, randomId } from './oneput/lib/utils.js';
 export { registerIcon, registerIcons, element, unsafeHTML } from './oneput/lib/icons.js';
 export { DOMUpdater } from './oneput/lib/DOMUpdater.js';
+export { cell, notifier, type Cell, type Notifier, type Pull } from './oneput/lib/pull.js';
 export {
   ActionCatalog,
   type ActionCatalogEntries,

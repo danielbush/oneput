@@ -26,7 +26,6 @@
 - note:
   - `isMenuOpenImmediate` remains. It is the sync latch for MENU_OPEN_CLOSE_RACE (`menuOpen` still flips in a timeout), not the outro flag.
 
-
 ## INVALIDATION_REBUILD_FEEDBACK_LOOP
 
 This affected invalidation of the menu in MenuController in a consumer but could be applied in other places potentially.

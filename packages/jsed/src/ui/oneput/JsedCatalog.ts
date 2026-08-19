@@ -4,8 +4,10 @@ import {
   type ActionCatalogMenuItem,
   type AppActionCatalog,
   type AppActions,
+  notifier,
   type Controller,
-  type KeyBindingMap
+  type KeyBindingMap,
+  type Notifier
 } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -20,6 +22,12 @@ import { PickListUI } from './lib/PickListUI.js';
 type CatalogEntries = ActionCatalogEntries<JsedActionId>;
 type CatalogOptions = {
   invalidateMenu: () => void;
+  /**
+   * Fires on every `invalidateMenu`. Mounted pull widgets (checkbox rows)
+   * subscribe to it, because a rebuild reuses their node and does not remount
+   * them.
+   */
+  menuChanges: Notifier;
 };
 type JsedCatalogContext = {
   ctl: Controller;
@@ -45,13 +53,18 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
       invalidateMenu?: () => void;
     }
   ) {
-    const invalidateMenu = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
+    const rebuild = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
+    const menuChanges = notifier();
+    const invalidateMenu = () => {
+      rebuild();
+      menuChanges.notify();
+    };
     return new JsedCatalog(
       ActionCatalog.create<JsedActionId>(() =>
         getEntries({
           ctl,
           editor,
-          opts: { invalidateMenu }
+          opts: { invalidateMenu, menuChanges }
         })
       )
     );
@@ -1006,7 +1019,10 @@ function misc(ctx: JsedCatalogContext): CatalogEntries {
             editor.enableLegacyElementIndicator(bool);
             opts.invalidateMenu();
           },
-          checked: editor.legacyElementIndicatorEnabled
+          source: {
+            get: () => editor.legacyElementIndicatorEnabled,
+            subscribe: opts.menuChanges.subscribe
+          }
         })
     },
     [JsedAction.ENABLE_ELEMENT_INDICATOR]: {
@@ -1024,7 +1040,10 @@ function misc(ctx: JsedCatalogContext): CatalogEntries {
             editor.enableElementIndicator(bool);
             opts.invalidateMenu();
           },
-          checked: editor.elementIndicatorEnabled
+          source: {
+            get: () => editor.elementIndicatorEnabled,
+            subscribe: opts.menuChanges.subscribe
+          }
         })
     }
   };

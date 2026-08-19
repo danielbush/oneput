@@ -53,7 +53,7 @@ export class Settings implements AppObject {
       checkboxMenuItem({
         id: 'simulate-error',
         textContent: 'Use test bindings service (always errors)',
-        checked: this.useTestService,
+        source: { get: () => this.useTestService },
         action: (_, checked) => {
           this.useTestService = checked;
         }

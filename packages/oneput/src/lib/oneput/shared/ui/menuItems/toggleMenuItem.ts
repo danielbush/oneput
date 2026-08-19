@@ -21,6 +21,9 @@ export type ToggleMenuItemParams = {
  *
  * The label uses `index` at construct time. After `onToggle`, rebuild the item
  * (`menu()` + `invalidate`, or `setMenu`) so the new index can paint.
+ *
+ * Use `pullToggleMenuItem` instead when the menu must not rebuild: that row
+ * reads a live source and paints itself.
  */
 export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
   return stdMenuItem({

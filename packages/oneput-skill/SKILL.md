@@ -234,14 +234,15 @@ right: (b) => [
 import { checkboxMenuItem } from "@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js";
 import { infoMenuItem } from "@oneput/oneput/shared/ui/menuItems/infoMenuItem.js";
 import { toggleMenuItem } from "@oneput/oneput/shared/ui/menuItems/toggleMenuItem.js";
+import { pullToggleMenuItem } from "@oneput/oneput/shared/ui/menuItems/pullToggleMenuItem.js";
 
-// Checkbox with label
+// Checkbox with label. The box paints itself from `source`.
 checkboxMenuItem({
   id: "toggle",
   textContent: "Enable feature",
-  checked: false,
+  source: { get: () => this.enabled },
   action: (_, checked) => {
-    /* ... */
+    this.enabled = checked;
   },
 });
 
@@ -259,7 +260,49 @@ toggleMenuItem({
     /* update state, then invalidate or setMenu */
   },
 });
+
+// Same row, but it paints itself. Use when the menu must not rebuild.
+pullToggleMenuItem({
+  id: "visibility",
+  label: "Neighbors",
+  values: ["Hidden", "Shown"],
+  source: { get: () => this.visibilityIndex },
+  onToggle: (index) => {
+    this.visibilityIndex = index;
+  },
+});
 ```
+
+### Pull rows: display without a rebuild
+
+`checkboxMenuItem` and `pullToggleMenuItem` mount a widget that owns its part
+of the row. The widget reads `source.get()` on mount and again after each
+click, so the tick or the label moves without `invalidate` or `setMenu`.
+
+```typescript
+type Pull<T> = {
+  get: () => T;
+  subscribe?: (onChange: () => void) => () => void;
+};
+```
+
+Rules:
+
+- `get` must read live state. A menu row keeps its id, so a rebuild reuses the
+  mounted widget and does not remount it. A value copied at `menu()` time goes
+  stale.
+- Your `action` / `onToggle` must make the write visible to `get()` before it
+  returns.
+- Add `subscribe` when a write must move this row after the click has painted:
+  a keyboard action bound to the same flag, a second row on the same state, or
+  an `invalidate` in your own action. `invalidate` returns a promise — notify
+  once the rebuild lands.
+  `cell(initial)` from `@oneput/oneput` gives you `get` / `set` / `subscribe`;
+  `notifier()` gives you the change signal alone.
+- Keep `invalidate` for what a rebuild is for: which rows exist, preview
+  content, filter results.
+- A `pullToggleMenuItem` row is pinned (`canFilter: false`) because the widget
+  owns the title node.
 
 ### Setting menus programmatically
 

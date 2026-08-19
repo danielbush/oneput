@@ -1,7 +1,7 @@
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { divider, menuItem } from '@oneput/oneput';
+import { divider, menuItem, notifier } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
@@ -24,6 +24,11 @@ export class KatexDemo implements AppObject {
   private katexValid = true;
   private unsubscribeBindingsChange?: () => void;
   private helpMessage = 'Type some katex...';
+  /**
+   * Fires after every menu rebuild. Lives as long as the screen, so the
+   * mounted checkbox keeps listening across rebuilds — see `refresh`.
+   */
+  private menuChanges = notifier();
 
   constructor(
     private ctl: Controller,
@@ -54,8 +59,8 @@ export class KatexDemo implements AppObject {
   } satisfies UIFlags;
 
   /**
-   * Declarative menu: rebuilt from AppObject state whenever ctl.menu.invalidate()
-   * is called (on input change, display-mode toggle, or bindings change).
+   * Declarative menu: rebuilt from AppObject state whenever `refresh()` is
+   * called (on input change, display-mode toggle, or bindings change).
    */
   menu = () => ({
     id: 'main',
@@ -68,13 +73,27 @@ export class KatexDemo implements AppObject {
   };
 
   /**
+   * Rebuild the menu, then tell the mounted pull widgets to paint.
+   *
+   * Every rebuild goes through here. A rebuild reuses the checkbox node, so
+   * the widget on it is the one from the first build: only `menuChanges`
+   * reaches it. Notifying after the rebuild lands also means the box cannot be
+   * left showing a value that the rebuild wrote over.
+   */
+  private refresh = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
+    void this.ctl.menu.invalidate(opts).then(() => {
+      this.menuChanges.notify();
+    });
+  };
+
+  /**
    * The katex preview is part of menu()'s output, so typing is just another
    * invalidate trigger: recompute state, then re-pull menu(). Wired by the
    * framework (sync-rebuild menu — no menuItemsFn, which is the generative channel).
    */
   onInputChange = () => {
     this.recompute();
-    this.ctl.menu.invalidate();
+    this.refresh();
   };
 
   onStart() {
@@ -86,7 +105,7 @@ export class KatexDemo implements AppObject {
         this.helpMessage = binding
           ? `Type some katex and hit ${binding} to insert... `
           : 'Type some katex...';
-        this.ctl.menu.invalidate();
+        this.refresh();
       }
     );
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
@@ -100,7 +119,7 @@ export class KatexDemo implements AppObject {
 
   /**
    * Recompute katex state from the current input and refresh the input UI.
-   * Does NOT touch the menu — call ctl.menu.invalidate() to re-render items.
+   * Does NOT touch the menu — call `refresh()` to re-render items.
    */
   private recompute() {
     if (this.ctl.input.getInputValue().trim() === '') {
@@ -187,11 +206,15 @@ export class KatexDemo implements AppObject {
         action: (_, checked) => {
           this.displayMode = checked;
           this.recompute();
+          // The box paints itself. This rebuild is for the preview pane.
           // focusBehaviour 'none' keeps the focused index on the checkbox.
-          this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+          this.refresh({ focusBehaviour: 'none' });
         },
         textContent: 'Display mode',
-        checked: this.displayMode
+        source: {
+          get: () => this.displayMode,
+          subscribe: this.menuChanges.subscribe
+        }
       })
     ];
   }
@@ -228,6 +251,6 @@ export class KatexDemo implements AppObject {
       : `<p>${rendered}</p>`;
     this.ctl.input.setInputValue('');
     this.recompute();
-    this.ctl.menu.invalidate();
+    this.refresh();
   };
 }

@@ -15,6 +15,34 @@
   - we still provide the ability to imperatively set the menu using setMenu for maximum freedom
 - actions have been declarative for some time
 
+## PULL_ROWS - mounted widgets that read live state
+
+Invalidation re-pulls the **shape** of the menu: which rows exist, preview
+content, filter results. It is not how a single label or a checkbox tick moves,
+because rows keep stable ids: a rebuild reuses the mounted node and does not
+run `onMount` again. A value copied into the row at build time then goes stale.
+
+For that, a row mounts a small widget on an `FChild` host it owns. The widget
+reads a `Pull<T>` source (`lib/pull.ts`) on mount and again after each click.
+It never writes a Svelte-managed text node.
+
+- `checkboxMenuItem` — the widget owns the `checked` property of the input.
+- `pullToggleMenuItem` — the widget owns the title node, so the row is pinned
+  (`canFilter: false`).
+- `toggleMenuItem` stays snapshot-based, for callers that already rebuild.
+
+A rebuilt row does not hold the widget the user can see: only the first build
+mounted. So a row paints by **host id**, through a registry private to
+`pull/`, and reaches the widget that is on that node now.
+
+`subscribe` on the source is needed when a write must move the row _after_ the
+click has painted: a keyboard action, a second row on the same state, or your
+own `invalidate` — the rebuild lands later, so notify once it has. `cell()` and
+`notifier()` provide it.
+
+Use `FChild` `onMount`, not the Flex mount map: Flex runs `onMount` once, on
+the parent Flex instance.
+
 ## MenuLike (menu and menu-like contract)
 
 Working name: **MenuLike** (rename later if a better term lands).

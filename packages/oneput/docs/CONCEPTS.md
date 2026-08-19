@@ -27,9 +27,11 @@ reads a `Pull<T>` source (`lib/pull.ts`) on mount and again after each click.
 It never writes a Svelte-managed text node.
 
 - `checkboxMenuItem` — the widget owns the `checked` property of the input.
-- `pullToggleMenuItem` — the widget owns the title node, so the row is pinned
-  (`canFilter: false`).
-- `toggleMenuItem` stays snapshot-based, for callers that already rebuild.
+- `pullToggleMenuItem` — the title stays the label, and the widget owns an
+  fchild on the right that shows the value. So the row still filters on its
+  label, and Svelte keeps the text node it owns.
+- `toggleMenuItem` stays snapshot-based, for callers that already rebuild. It
+  renders the same way: label in the title, value on the right.
 
 A rebuilt row does not hold the widget the user can see: only the first build
 mounted. So a row paints by **host id**, through a registry private to

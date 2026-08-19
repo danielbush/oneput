@@ -84,13 +84,6 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
     textContent?: string;
   };
   onMount?: (node: HTMLElement) => void | (() => void);
-  /**
-   * Mount a widget on the title node. The widget owns that node's content, so
-   * do not also set `textContent` / `htmlContentUnsafe`, and set
-   * `canFilter: false` because the filter writes to text nodes it expects to
-   * own. See `pullToggleMenuItem`.
-   */
-  titleOnMount?: (node: HTMLElement) => void | (() => void);
   data?: D;
 };
 
@@ -102,7 +95,7 @@ export type StdMenuItemParams<D extends Record<string, unknown> = Record<string,
  * See src/routes/ for examples.
  */
 export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
-  const { bindingHint, titleOnMount, ...itemParams } = params;
+  const { bindingHint, ...itemParams } = params;
   const id = itemParams.id ?? randomId();
   const ids = new StdMenuItemIds(id);
   if (itemParams.action) {
@@ -159,8 +152,7 @@ export function stdMenuItem(params: StdMenuItemParams): StdMenuItem {
                 id: ids.title,
                 classes: ['oneput__std-menu-item-title'],
                 textContent: itemParams.textContent,
-                htmlContentUnsafe: itemParams.htmlContentUnsafe,
-                onMount: titleOnMount
+                htmlContentUnsafe: itemParams.htmlContentUnsafe
               })
             ]
           }),

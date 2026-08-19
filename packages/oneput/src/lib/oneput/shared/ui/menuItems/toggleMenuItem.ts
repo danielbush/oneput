@@ -19,8 +19,9 @@ export type ToggleMenuItemParams = {
 /**
  * Build a menu row that cycles through named values.
  *
- * The label uses `index` at construct time. After `onToggle`, rebuild the item
- * (`menu()` + `invalidate`, or `setMenu`) so the new index can paint.
+ * The title stays `label`; the value sits on the right. That value is a
+ * snapshot of `index` at construct time, so after `onToggle` you must rebuild
+ * the item (`menu()` + `invalidate`, or `setMenu`) for it to paint.
  *
  * Use `pullToggleMenuItem` instead when the menu must not rebuild: that row
  * reads a live source and paints itself.
@@ -30,8 +31,14 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
     id: params.id,
     tag: 'button',
     attr: { type: 'button' },
-    textContent: `${params.label}: ${params.values[params.index]}`,
+    textContent: params.label,
     left: params.left,
+    right: (b) => [
+      b.fchild({
+        classes: ['oneput__toggle-value'],
+        textContent: params.values[params.index]
+      })
+    ],
     bottom:
       params.bottom === false
         ? undefined

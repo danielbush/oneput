@@ -301,8 +301,9 @@ Rules:
   `notifier()` gives you the change signal alone.
 - Keep `invalidate` for what a rebuild is for: which rows exist, preview
   content, filter results.
-- A `pullToggleMenuItem` row is pinned (`canFilter: false`) because the widget
-  owns the title node.
+- Both toggle rows render as label in the title, value on the right
+  (`oneput__toggle-value`). The widget owns only that right-hand node, so the
+  title stays filterable.
 
 ### Setting menus programmatically
 

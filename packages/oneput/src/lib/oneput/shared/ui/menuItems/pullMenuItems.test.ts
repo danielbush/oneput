@@ -46,7 +46,7 @@ function mountChild(item: MenuItem, id: string, tag: string) {
 }
 
 function mountToggle(item: MenuItem, id: string) {
-  return mountChild(item, `${id}-title`, 'div');
+  return mountChild(item, `${id}-value`, 'div');
 }
 
 function mountCheckbox(item: MenuItem, id: string) {
@@ -72,7 +72,7 @@ describe('pullToggleMenuItem', () => {
     const { node } = mountToggle(item, 'when');
 
     // assert
-    expect(node.textContent).toBe('Menu open: open');
+    expect(node.textContent).toBe('open');
   });
 
   test('click cycles the value and repaints', () => {
@@ -92,7 +92,7 @@ describe('pullToggleMenuItem', () => {
 
     // assert
     expect(index.get()).toBe(1);
-    expect(node.textContent).toBe('Menu open: open');
+    expect(node.textContent).toBe('open');
   });
 
   test('click wraps at the last value', () => {
@@ -111,7 +111,7 @@ describe('pullToggleMenuItem', () => {
     item.action?.(createNull());
 
     // assert
-    expect(node.textContent).toBe('Menu open: closed');
+    expect(node.textContent).toBe('closed');
   });
 
   test('a second row with the same source moves without a rebuild', () => {
@@ -139,10 +139,10 @@ describe('pullToggleMenuItem', () => {
     clicked.action?.(createNull());
 
     // assert
-    expect(node.textContent).toBe('B: open');
+    expect(node.textContent).toBe('open');
   });
 
-  test('unmount removes the label and stops listening', () => {
+  test('unmount removes the value and stops listening', () => {
     // arrange
     const index = cell(0);
     const item = pullToggleMenuItem({
@@ -181,7 +181,7 @@ describe('pullToggleMenuItem', () => {
     rebuilt.action?.(createNull());
 
     // assert
-    expect(node.textContent).toBe('Menu open: open');
+    expect(node.textContent).toBe('open');
   });
 
   test('a rebuilt row does nothing once the host is unmounted', () => {
@@ -207,11 +207,9 @@ describe('pullToggleMenuItem', () => {
     expect(node.textContent).toBe('');
   });
 
-  test('is pinned so the filter cannot write to the title', () => {
+  test('leaves the title to Svelte so the row still filters', () => {
     // arrange
     const index = cell(0);
-
-    // act
     const item = pullToggleMenuItem({
       id: 'when',
       label: 'Menu open',
@@ -220,8 +218,12 @@ describe('pullToggleMenuItem', () => {
       onToggle: index.set
     });
 
+    // act
+    const title = findChild(item, 'when-title');
+
     // assert
-    expect(item.canFilter).toBe(false);
+    expect(title.textContent).toBe('Menu open');
+    expect(item.canFilter).toBeUndefined();
   });
 });
 

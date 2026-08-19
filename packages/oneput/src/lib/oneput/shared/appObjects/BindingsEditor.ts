@@ -228,13 +228,20 @@ export class BindingsEditor implements AppObject {
       this.actionUI(actionId);
     });
 
+    const keys = capturedKeys.map(toDisplayString).join(' + ');
+
     this.ctl.ui.update({
       params: {
-        menuTitle: 'Set when condition',
+        menuTitle: `Set when condition for "${keys}"`,
         inputAccept: undefined,
         inputReject: undefined
       }
     });
+
+    // Key capture leaves the captured keys in the input, where they act as a
+    // filter that no row here matches. The title carries them instead.
+    this.ctl.input.setPlaceholder();
+    this.ctl.input.setInputValue('');
 
     this.ctl.menu.setMenu({
       id: `whenFlagUI-${actionId}`,

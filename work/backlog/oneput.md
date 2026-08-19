@@ -62,6 +62,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: make toggleMenuItem prettier
+  - the toggle values could be an array of text, icons or elements
+  - display the current value on the rhs
+  - the value on RHS signals to the user that this item is a toggle
 - feat: clearInputAfterAction on indiviudal menu items
   - example: we set clearInputAfterAction setting for the AppObject to true; but we have a toggle item that toggles on and off; the user types to filter that item, then hits enter to toggle; in this situation, if the input clears after they hit enter, it feels a little jarring; the focus is retained on the correct item however (which is good).  What to do?
 - refactor: AddEntry to use menu() instead of setMenu;

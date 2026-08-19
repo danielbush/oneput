@@ -251,7 +251,7 @@ export class BindingsEditor implements AppObject {
       items: [
         pullToggleMenuItem({
           id: 'menuOpen',
-          label: 'Menu open',
+          label: 'Menu state',
           values: [...BindingsEditor.whenValues],
           source: { get: () => whenIndex },
           onToggle: (nextIndex) => {

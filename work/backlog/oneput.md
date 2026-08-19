@@ -37,14 +37,14 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - fix: katex: is display mode inserting katex into html using display mode?
 - fix: in elizachat if I tab to the send button (one tab from the input) and hit "enter", nothing happens
   - COMMENT: does it work if we add type="submit" to the button?
-  - COMMENT: is "enter" bound to anything? 
-  - COMMENT: should eliza use enter for newline in textarea or submit? 
+  - COMMENT: is "enter" bound to anything?
+  - COMMENT: should eliza use enter for newline in textarea or submit?
     - I'd say newline and let tab+submit work?
 - fix: is katex display mode working when we insert?
 - fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
   - COMMENT: add visual demos for notification when menu is closed
 - fix: `$mod+v` pastes into input
-- fix/feat: layouts for things like `PasteElementUI` or  `PickListUI` 
+- fix/feat: layouts for things like `PasteElementUI` or  `PickListUI`
   - fix: search for "jsed-demo" in jsed/src
   - fix: search for "LayoutSettings" in jsed/src
   - COMMENT: we run it as an AppObject but it provides lots of hooks
@@ -55,7 +55,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
       })
       ```
   - COMMENT: we run our own AppObject and use helper functions for actions and menu items
-- fix: In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulted in a significant change to the bindings themselves but the change wasn't visible to the user, making the user think that opening/closing the menu had broken the bindings when this was not the case.  
+- fix: In apps/jsed-demo we had a situation where the open/close menu binding used "$mod+b" and the "go back" binding used "Meta+B".  On a mac, this resulted in both actions happening.  This was particularly confusing because the back binding resulted in a significant change to the bindings themselves but the change wasn't visible to the user, making the user think that opening/closing the menu had broken the bindings when this was not the case.
 - fix: disable window scrolling when menu open
   - example: Pick a file in oneput-demo;
   - COMMENT: I'm fine just to target the default document scroll on documents that exceed the browser viewport; let's not worry about other scrollable elements for now (these might have to respond to a class set by oneput when the menu is open)
@@ -176,6 +176,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: BindingsEditor - split up the AppObjects; use `menu()`;
+  - COMMENT: tricy part myabe defining the shared data that gets pass around?
+  - COMMENT: are there any places were we jump the stack (not just simply push/pop app stack)?
 - refactor: rename all things "ui" to "chrome"
   - COMMENT: one agent remarked that `ctl.ui.update({ params: ..., ui: ... })` is a bit much
 - refactor: the eliza scroll and clear buttons could do with some love
@@ -220,7 +223,7 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - menuItemsFn takes an optional `whenEmpty`
 - refactor: start should only be called once; make onResume required or just don't call anything
 - refactor: null input controller backed by happy-dom input element
-- refactor: deep modules for packages/oneput 
+- refactor: deep modules for packages/oneput
   - packages/oneput/src/lib/index.ts -> packages/oneput/src/index.ts
   - packages/oneput/src/lib/oneput should go away, it's a redundant (the directory); it's contents should be distributed to either
   - packages/oneput/src/lib/oneput/controllers

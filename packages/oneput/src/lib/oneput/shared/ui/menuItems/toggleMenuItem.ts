@@ -16,16 +16,18 @@ export type ToggleMenuItemParams = {
       };
 };
 
+/**
+ * Build a menu row that cycles through named values.
+ *
+ * The label uses `index` at construct time. After `onToggle`, rebuild the item
+ * (`menu()` + `invalidate`, or `setMenu`) so the new index can paint.
+ */
 export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
-  let index = params.index;
-
-  const getText = () => `${params.label}: ${params.values[index]}`;
-
-  const item = stdMenuItem({
+  return stdMenuItem({
     id: params.id,
     tag: 'button',
     attr: { type: 'button' },
-    textContent: getText(),
+    textContent: `${params.label}: ${params.values[params.index]}`,
     left: params.left,
     bottom:
       params.bottom === false
@@ -34,13 +36,8 @@ export function toggleMenuItem(params: ToggleMenuItemParams): MenuItem {
             textContent: params.bottom?.textContent ?? 'Click or press enter to toggle'
           },
     action: () => {
-      const titleElement = document.getElementById(item.ids.title) as HTMLElement;
-      index = (index + 1) % params.values.length;
-      if (titleElement) {
-        titleElement.textContent = getText();
-      }
-      params.onToggle(index);
+      const nextIndex = (params.index + 1) % params.values.length;
+      params.onToggle(nextIndex);
     }
   });
-  return item;
 }

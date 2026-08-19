@@ -233,6 +233,7 @@ right: (b) => [
 ```typescript
 import { checkboxMenuItem } from "@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js";
 import { infoMenuItem } from "@oneput/oneput/shared/ui/menuItems/infoMenuItem.js";
+import { toggleMenuItem } from "@oneput/oneput/shared/ui/menuItems/toggleMenuItem.js";
 
 // Checkbox with label
 checkboxMenuItem({
@@ -246,6 +247,18 @@ checkboxMenuItem({
 
 // Non-interactive info display
 infoMenuItem({ id: "info", msg: "Status message", icon: "Info" });
+
+// Cycle named values. Rebuild after onToggle so the label can paint
+// (`menu()` + `invalidate`, or `setMenu`).
+toggleMenuItem({
+  id: "visibility",
+  label: "Neighbors",
+  values: ["Hidden", "Shown"],
+  index: 1,
+  onToggle: () => {
+    /* update state, then invalidate or setMenu */
+  },
+});
 ```
 
 ### Setting menus programmatically

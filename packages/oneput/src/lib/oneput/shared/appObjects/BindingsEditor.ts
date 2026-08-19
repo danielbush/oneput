@@ -236,39 +236,43 @@ export class BindingsEditor implements AppObject {
       }
     });
 
-    this.ctl.menu.setMenu({
-      id: `whenFlagUI-${actionId}`,
-      focusBehaviour: 'first',
-      items: [
-        toggleMenuItem({
-          id: 'menuOpen',
-          label: 'Menu open',
-          values: [...BindingsEditor.whenValues],
-          index: whenIndex,
-          onToggle: (nextIndex) => {
-            whenIndex = nextIndex;
-          },
-          left: (b) => [b.icon(this.icons.WhenFlag)]
-        }),
-        stdMenuItem({
-          id: 'ok',
-          textContent: 'OK',
-          left: (b) => [b.icon(this.icons.Confirm)],
-          action: () => {
-            this.addBinding(actionId, capturedKeys, BindingsEditor.whenValueToFlag(whenIndex));
-            this.ctl.app.goBack();
-          }
-        }),
-        stdMenuItem({
-          id: 'cancel',
-          textContent: 'Cancel',
-          left: (b) => [b.icon(this.icons.Discard)],
-          action: () => {
-            this.ctl.app.goBack();
-          }
-        })
-      ]
-    });
+    const paint = (focusBehaviour: 'first' | 'none') => {
+      this.ctl.menu.setMenu({
+        id: `whenFlagUI-${actionId}`,
+        focusBehaviour,
+        items: [
+          toggleMenuItem({
+            id: 'menuOpen',
+            label: 'Menu open',
+            values: [...BindingsEditor.whenValues],
+            index: whenIndex,
+            onToggle: (nextIndex) => {
+              whenIndex = nextIndex;
+              paint('none');
+            },
+            left: (b) => [b.icon(this.icons.WhenFlag)]
+          }),
+          stdMenuItem({
+            id: 'ok',
+            textContent: 'OK',
+            left: (b) => [b.icon(this.icons.Confirm)],
+            action: () => {
+              this.addBinding(actionId, capturedKeys, BindingsEditor.whenValueToFlag(whenIndex));
+              this.ctl.app.goBack();
+            }
+          }),
+          stdMenuItem({
+            id: 'cancel',
+            textContent: 'Cancel',
+            left: (b) => [b.icon(this.icons.Discard)],
+            action: () => {
+              this.ctl.app.goBack();
+            }
+          })
+        ]
+      });
+    };
+    paint('first');
   }
 
   private startKeyCapture = () => {

@@ -130,6 +130,19 @@
     --oneput-kbd-font-size: 0.72rem;
     --oneput-kbd-symbol-font-size: 0.95rem;
 
+    /* Toggle rows (toggleMenuItem / pullToggleMenuItem)
+	 *
+	 * The value is data the row carries, not chrome, so it reads as a quiet
+	 * chip rather than as more label text. The inset keeps it off the menu
+	 * item's right edge, where rows with a trailing icon have icon padding. */
+
+    --oneput-toggle-value-background: rgb(0 0 0 / 0.07);
+    --oneput-toggle-value-color: var(--oneput-text-muted);
+    --oneput-toggle-value-radius: 3px;
+    --oneput-toggle-value-font-size: 0.85em;
+    --oneput-toggle-value-padding: 1px 6px;
+    --oneput-toggle-value-inset: 6px;
+
     /* Primary / secondary buttons eg alets, confirmations */
 
     --oneput-primary-button-background: rgb(255 255 255 / 0.6);
@@ -260,6 +273,9 @@
     /* divider color */
     --oneput-divider-border: 1px solid rgb(255 255 255 / 0.2);
     --oneput-divider-text-color: #ddd;
+
+    /* toggle value chip */
+    --oneput-toggle-value-background: rgb(255 255 255 / 0.12);
 
     /* menu item states */
     --oneput-menu-item-background: none;
@@ -826,6 +842,23 @@
 
   .oneput__kbd kbd.oneput__kbd-symbol {
     font-size: var(--oneput-kbd-symbol-font-size);
+  }
+
+  /* #endregion */
+
+  /* #region toggle value */
+
+  /* Compound selector: .oneput__fchild sets flex: 1 1 auto, and the chip must
+     hug its text. */
+  .oneput__fchild.oneput__toggle-value {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    margin-right: var(--oneput-toggle-value-inset);
+    padding: var(--oneput-toggle-value-padding);
+    border-radius: var(--oneput-toggle-value-radius);
+    font-size: var(--oneput-toggle-value-font-size);
+    color: var(--oneput-toggle-value-color);
+    background-color: var(--oneput-toggle-value-background);
   }
 
   /* #endregion */

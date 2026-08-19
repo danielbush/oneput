@@ -28,6 +28,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 ## fix
 
 - fix: oneput is scaling when I press cmd+`+`/cmd+`-`
+- fix: `$mod+v a` types `a` into input
+  - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
+  - COMMENT: blur input focus if we detect any key that has a modifier; too hacky?
 - fix: after typing in elize, clearing chat, getting a confirmation and cancelling (or clearing), the input is not focused again
   - COMMENT: the issue is, is there a deeper thing we can sure up here or is it just a setting in the elize app
 - fix: katex: replace "Insert..." with input right submit
@@ -40,9 +43,6 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - fix: is katex display mode working when we insert?
 - fix: notifications (and probably alerts, confirms) bottom edge has square corners and oneput container has rounded (when the oneput menu is closed)
   - COMMENT: add visual demos for notification when menu is closed
-- fix: `$mod+v a` types `a` into input
-  - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?
-  - COMMENT: blur input focus if we detect any key that has a modifier
 - fix: `$mod+v` pastes into input
 - fix/feat: layouts for things like `PasteElementUI` or  `PickListUI` 
   - fix: search for "jsed-demo" in jsed/src

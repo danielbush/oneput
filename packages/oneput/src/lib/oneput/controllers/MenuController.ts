@@ -71,6 +71,7 @@ export class MenuController {
     private currentMenu = CurrentMenu.createBlank(ctl),
     private disableActions = false,
     private disableOpenClose = false,
+    /** Routes shared input changes to filtering, generation, or neither. */
     private inputChannel: MenuInputChannelState = {
       mode: 'none',
       filterEnabled: true,
@@ -313,21 +314,28 @@ export class MenuController {
     if (!this.isMenuOpen) {
       return;
     }
+    // Hold callbacks until rows and focus agree.
     this.batchMenuNotifications(() => {
+      // Filter only when the input channel owns filtering.
       const result =
         this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
           ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
           : false;
       if (result === false) {
+        // No active filter: show every row.
         this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
       } else if (result !== undefined) {
+        // Apply a defined result; undefined keeps the current rows.
         this.ctl.currentProps.menuItems = result.items;
+        // Prefer the focus supplied by the filter.
         if (result.focusItemId && this.focusMenuItemById(result.focusItemId)) {
           this.publishMenuUpdate(cause);
           return;
         }
       }
+      // Otherwise, use the requested or menu focus rule.
       this.runFocusBehaviour(focusBehaviour ?? this.currentMenu.focusBehaviour);
+      // Publish after rows and focus are stable.
       this.publishMenuUpdate(cause);
     });
   }

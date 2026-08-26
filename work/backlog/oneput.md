@@ -65,6 +65,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: find a solid mechanism to hide binding hint in stdMenuItem for touch-screen devices that only have soft-keyboards
+  - COMMENT: the simple solution is to target device width; but how wide before we are in laptop/hard-desktop territory?  Is there a better way to assess and fallback to device-width?  Since we may end up running in electron (desktop) and capacitor (native), could we use a flag for the environment
+  - COMMENT: some sort of "media controller" ?
 - feat: make toggleMenuItem prettier
   - the toggle values could be an array of text, icons or elements
   - display the current value on the rhs

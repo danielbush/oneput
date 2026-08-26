@@ -1,4 +1,5 @@
 import type { AppLayoutParams, AppObject, Controller, MenuItem, UIFlags } from '@oneput/oneput';
+import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../_icons.js';
 import {
@@ -48,6 +49,7 @@ export class LiveEditMixedMenu implements AppObject {
           id: this.menuItemId(field.id),
           left: (b) => [b.icon(icons.Pencil)],
           textContent: `${field.label}: ${this.values[field.id] || '—'}`,
+          bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0],
           bottom: {
             textContent:
               this.state.type === 'editing' && this.state.fieldId === field.id

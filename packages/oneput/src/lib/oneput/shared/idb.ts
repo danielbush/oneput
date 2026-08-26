@@ -1,6 +1,7 @@
 import { openDB, type DBSchema, deleteDB, type IDBPDatabase } from 'idb';
 import { ResultAsync } from 'neverthrow';
 import type { KeyBindingMapSerializable } from '../lib/bindings.js';
+import { CURRENT_BINDINGS_DB_VERSION, migrateBindings } from './bindings/migrateBindings.js';
 
 /*
 The best practice for modular applications is to define your entire database
@@ -34,9 +35,23 @@ export function getOneputIDB(params: { remove?: boolean } = {}) {
     (err) => new IDBError('maybeDeleteDB', err as Error)
   ).andThen(() =>
     ResultAsync.fromPromise(
-      openDB<OneputDBSchema>(ONEPUT_DB_NAME, undefined, {
-        upgrade(db) {
-          db.createObjectStore('bindings');
+      openDB<OneputDBSchema>(ONEPUT_DB_NAME, CURRENT_BINDINGS_DB_VERSION, {
+        upgrade(db, oldVersion, _newVersion, transaction) {
+          if (oldVersion === 0) {
+            db.createObjectStore('bindings');
+          }
+
+          if (oldVersion < CURRENT_BINDINGS_DB_VERSION) {
+            const store = transaction.objectStore('bindings');
+            void store.get('all').then((bindings) => {
+              if (!bindings) return;
+
+              const migrated = migrateBindings(bindings, oldVersion);
+              if (migrated !== bindings) {
+                void store.put(migrated, 'all');
+              }
+            });
+          }
         }
       }),
       (err) => new IDBError('getOneputIDB', err as Error)

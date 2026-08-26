@@ -20,8 +20,7 @@ describe('OneputCatalog', () => {
     expect(actions[OneputAction.FOCUS_INPUT].binding?.bindings).toEqual([`$mod+'`, `Control+'`]);
     expect(actions[OneputAction.TOGGLE_SELECTION].binding).toEqual({
       bindings: ['$mod+e'],
-      description: 'Toggle input selection',
-      when: { menuOpen: false }
+      description: 'Toggle input selection'
     });
   });
 
@@ -42,7 +41,7 @@ describe('OneputCatalog', () => {
       OneputAction.TOGGLE_SELECTION
     ]);
     expect(bindings[OneputAction.FOCUS_INPUT].bindings).toEqual([`$mod+'`, `Control+'`]);
-    expect(bindings[OneputAction.TOGGLE_SELECTION].when).toEqual({ menuOpen: false });
+    expect(bindings[OneputAction.TOGGLE_SELECTION].when).toBeUndefined();
     expect(bindings[OneputAction.FOCUS_INPUT].action).toBeDefined();
   });
 

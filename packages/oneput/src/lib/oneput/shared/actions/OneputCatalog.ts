@@ -193,8 +193,7 @@ function getInputEntries(ctl: Controller): OneputCatalogEntries {
         ctl.input.toggleSelect();
       },
       binding: {
-        bindings: ['$mod+e'],
-        when: { menuOpen: false }
+        bindings: ['$mod+e']
       },
       menuItem: ({ action }) =>
         stdMenuItem({

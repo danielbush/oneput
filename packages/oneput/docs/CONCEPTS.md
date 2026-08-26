@@ -170,3 +170,22 @@ We have 3 settings that we can vary to achieve a satisfactory outcome based on t
   - if native browser focus is on a button, this will take precedence over any declared oneput binding for `Enter` and `Space`; (a modifier on `Enter` or `Space` or any key is considered a different binding)
 
 COMMENT: dead combination: `enableMenuItemFocus: false` + `enableNativeActivation: false` leaves `Enter` doing nothing anywhere except a newline in a textarea.
+
+## MENU_LIFECYCLE
+
+Menu callbacks observe a fully resolved menu snapshot. When a closed menu opens,
+Oneput rebuilds its rows, resolves synthetic focus, and applies that state before
+it calls any AppObject menu callback.
+
+Callbacks then run in this order:
+
+1. `onMenuOpenChange({ open: true })`
+2. `onMenuUpdate({ menuId, menuItem, index })`
+3. `onMenuItemFocus({ menuId, menuItem, index })` when focus was resolved or changed
+
+`onMenuUpdate` also runs after `setMenu()` and filtered redisplays while the menu
+is open. Use it when code must react to a replaced item even if the focused
+index stays the same. `onMenuItemFocus` is for focus changes only.
+
+`onMenuUpdate` does not run when `setMenu()` only stores rows for a closed menu.
+It runs when those rows become the displayed snapshot during open.

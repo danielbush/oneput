@@ -50,6 +50,7 @@ export class AppController {
   private current?: AnyAppObject;
   private onBack?: () => void;
   private unsubscribeMenuItemFocus?: () => void;
+  private unsubscribeMenuUpdate?: () => void;
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
   private unsubscribeMenuOpenFocus?: () => void;
@@ -395,11 +396,13 @@ export class AppController {
     if (this.current?.onMenuItemFocus) {
       this.unsubscribeMenuItemFocus = this.ctl.events.on(
         'menu-item-focus',
-        ({ index, menuItem }) => {
-          this.current?.onMenuItemFocus?.({ index, menuItem });
+        ({ menuId, index, menuItem }) => {
+          this.current?.onMenuItemFocus?.({ menuId, index, menuItem });
         }
       );
     }
+    this.unsubscribeMenuUpdate?.();
+    this.unsubscribeMenuUpdate = undefined;
     this.unsubscribeInputChange?.();
     if (this.current?.onInputChange) {
       this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
@@ -448,6 +451,15 @@ export class AppController {
     this.reset(this.current?.settings);
     // Clear the menu.
     this.ctl.menu.setMenu();
+    // Do not report the internal clear above as the AppObject's first update.
+    if (this.current?.onMenuUpdate) {
+      this.unsubscribeMenuUpdate = this.ctl.events.on(
+        'set-menu-items',
+        ({ menuId, index, menuItem }) => {
+          this.current?.onMenuUpdate?.({ menuId, index, menuItem });
+        }
+      );
+    }
     if (this.current) {
       const { layout, layoutParams } = this.getAppState(this.current);
       if (layout) {

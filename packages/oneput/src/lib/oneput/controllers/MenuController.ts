@@ -1,4 +1,10 @@
-import type { FlexParams, FocusBehaviour, MenuItemAny, MenuItemsGenFnAsync } from '../types.js';
+import type {
+  FlexParams,
+  FocusBehaviour,
+  MenuItem,
+  MenuItemAny,
+  MenuItemsGenFnAsync
+} from '../types.js';
 import type { MenuItemsFilterFn } from '../types.js';
 import type { Controller } from './controller.js';
 import { coalesce } from './helpers/coalesce.js';
@@ -11,6 +17,9 @@ import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
 type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
+type FocusedMenuItemPayload = { index: number; menuItem: MenuItem | undefined };
+type MenuItemFocusPayload = FocusedMenuItemPayload & { menuId: string };
+type MenuUpdatePayload = FocusedMenuItemPayload & { menuId: string };
 
 /**
  * `filter` and `generative` modes are mutually exclusive.
@@ -104,7 +113,7 @@ export class MenuController {
       }
       this.pointerFocusGuard.acceptEnter(pointer);
       this.ctl.currentProps.menuItemFocus = [index, false];
-      this.ctl.events.emit({ type: 'menu-item-focus', payload: { index, menuItem: item } });
+      this.publishMenuItemFocus({ index, menuItem: item });
     };
     this.ctl.currentProps.onMenuOutroEnd = () => {
       this.completeMenuOutro();
@@ -138,6 +147,9 @@ export class MenuController {
    */
   private isMenuOpenImmediate = false;
   private outroPending = false;
+  private menuNotificationDepth = 0;
+  private pendingMenuUpdate?: MenuUpdatePayload;
+  private pendingMenuItemFocus?: MenuItemFocusPayload;
 
   /**
    * True from {@link closeMenu} until {@link completeMenuOutro}.
@@ -158,10 +170,12 @@ export class MenuController {
     this.isMenuOpenImmediate = true;
     // MENU_OPEN_CLOSE_RACE
     setTimeout(() => {
-      this.ctl.currentProps.menuOpen = true;
-      // Refresh before the open event so stale closed-menu rows cannot become visible.
-      void this.invalidateNow({});
-      this.ctl.events.emit({ type: 'menu-open-change', payload: true });
+      this.batchMenuNotifications(() => {
+        this.ctl.currentProps.menuOpen = true;
+        // Resolve the rows and focus before callbacks can observe the open menu.
+        this.refreshMenu({});
+        this.ctl.events.emit({ type: 'menu-open-change', payload: true });
+      });
     });
   };
 
@@ -239,7 +253,7 @@ export class MenuController {
    * {@link InputController.setInputValue} / `tick()`), or `false` if the menu
    * was closed and nothing was updated. Await before reading layout (e.g. scroll).
    */
-  private invalidateNow = async ({ focusBehaviour }: InvalidateOptions): Promise<boolean> => {
+  private refreshMenu({ focusBehaviour }: InvalidateOptions): boolean {
     if (!this.isMenuOpenImmediate || !this.ctl.menu.isMenuOpen) {
       return false;
     }
@@ -250,6 +264,13 @@ export class MenuController {
     } else {
       // menu undefined => AppObject not using .menu(), just re-display
       this.ctl.menu.setDisplayed({ focusBehaviour });
+    }
+    return true;
+  }
+
+  private invalidateNow = async (opts: InvalidateOptions): Promise<boolean> => {
+    if (!this.refreshMenu(opts)) {
+      return false;
     }
     await tick();
     return true;
@@ -290,21 +311,23 @@ export class MenuController {
     if (!this.isMenuOpen) {
       return;
     }
-    const result =
-      this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
-        ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
-        : false;
-    if (result === false) {
-      this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
-    } else if (result === undefined) {
-      //
-    } else {
-      this.ctl.currentProps.menuItems = result.items;
-      if (result.focusItemId && this.focusMenuItemById(result.focusItemId)) {
-        return;
+    this.batchMenuNotifications(() => {
+      const result =
+        this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
+          ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
+          : false;
+      if (result === false) {
+        this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
+      } else if (result !== undefined) {
+        this.ctl.currentProps.menuItems = result.items;
+        if (result.focusItemId && this.focusMenuItemById(result.focusItemId)) {
+          this.publishMenuUpdate();
+          return;
+        }
       }
-    }
-    this.runFocusBehaviour(opts?.focusBehaviour ?? this.currentMenu.focusBehaviour);
+      this.runFocusBehaviour(opts?.focusBehaviour ?? this.currentMenu.focusBehaviour);
+      this.publishMenuUpdate();
+    });
   }
 
   /**
@@ -358,7 +381,54 @@ export class MenuController {
       header: this.currentMenu.header,
       footer: this.currentMenu.footer
     });
-    this.ctl.events.emit({ type: 'set-menu-items', payload: { menuId: this.currentMenu.menuId } });
+  }
+
+  /** Publish lifecycle events after the menu snapshot and focus are both resolved. */
+  private batchMenuNotifications(run: () => void) {
+    this.menuNotificationDepth += 1;
+    try {
+      run();
+    } finally {
+      this.menuNotificationDepth -= 1;
+      if (this.menuNotificationDepth === 0) {
+        this.flushMenuNotifications();
+      }
+    }
+  }
+
+  private publishMenuUpdate() {
+    const payload = {
+      menuId: this.currentMenu.menuId,
+      index: this.currentMenu.focusedMenuItemIndex,
+      menuItem: this.currentMenu.focusedMenuItem
+    };
+    if (this.menuNotificationDepth > 0) {
+      this.pendingMenuUpdate = payload;
+      return;
+    }
+    this.ctl.events.emit({ type: 'set-menu-items', payload });
+  }
+
+  private publishMenuItemFocus(focus: FocusedMenuItemPayload) {
+    const payload = { menuId: this.currentMenu.menuId, ...focus };
+    if (this.menuNotificationDepth > 0) {
+      this.pendingMenuItemFocus = payload;
+      return;
+    }
+    this.ctl.events.emit({ type: 'menu-item-focus', payload });
+  }
+
+  private flushMenuNotifications() {
+    const menuUpdate = this.pendingMenuUpdate;
+    const menuItemFocus = this.pendingMenuItemFocus;
+    this.pendingMenuUpdate = undefined;
+    this.pendingMenuItemFocus = undefined;
+    if (menuUpdate) {
+      this.ctl.events.emit({ type: 'set-menu-items', payload: menuUpdate });
+    }
+    if (menuItemFocus) {
+      this.ctl.events.emit({ type: 'menu-item-focus', payload: menuItemFocus });
+    }
   }
 
   // #endregion
@@ -514,13 +584,7 @@ export class MenuController {
       this.pointerFocusGuard.arm();
     }
     this.ctl.currentProps.menuItemFocus = [index, scrollIntoView];
-    this.ctl.events.emit({
-      type: 'menu-item-focus',
-      payload: {
-        index,
-        menuItem
-      }
-    });
+    this.publishMenuItemFocus({ index, menuItem });
   }
 
   focusNextMenuItem(): boolean {

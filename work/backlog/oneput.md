@@ -27,6 +27,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix: onMenuOpenChange fires AFTER onMenuItemFocus ; also if we invalidate the menu, the menu items could change and we may want to repsond to this (eg to sync a live-edit field), so we need a onMenuInvalidate or maybe more generally we need onMenuUpdate that fires whenever setMenu is called
+  - COMMENT: we should test this order and that when we open the menu, onMenuItemFocus is called with the new menu item focus
+  - COMMENT: onMenuUpdate (or onMenuInvalidate) should be passed the current menu item
 - fix: oneput is scaling when I press cmd+`+`/cmd+`-`
 - fix: `$mod+v a` types `a` into input
   - COMMENT: detect if we're in a tinykeys intermediate state and disable the input?

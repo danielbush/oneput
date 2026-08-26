@@ -526,7 +526,20 @@ export interface AppObject<
    * If neither is present, back falls through to the default pop.
    */
   onBack?: () => void;
-  onMenuItemFocus?: (data: { menuItem: MenuItem | undefined; index: number }) => void;
+  /** Called when synthetic focus moves to an item in the current menu. */
+  onMenuItemFocus?: (data: {
+    menuId: string;
+    menuItem: MenuItem | undefined;
+    index: number;
+  }) => void;
+  /**
+   * Called after the displayed menu rows and synthetic focus are resolved.
+   *
+   * This runs after `setMenu`, a filter redisplay, or the first refresh when
+   * the menu opens. On open, `onMenuOpenChange` runs before this callback and
+   * `onMenuItemFocus` runs after it.
+   */
+  onMenuUpdate?: (data: { menuId: string; menuItem: MenuItem | undefined; index: number }) => void;
   /**
    * Called whenever the input value changes while this AppObject is current.
    *

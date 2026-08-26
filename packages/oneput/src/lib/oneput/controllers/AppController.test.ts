@@ -360,6 +360,7 @@ describe('AppController', () => {
         }),
         onStart: () => {}
       });
+      await ctl.menu.invalidate();
       ctl.input.setInputValue('zzzz');
       expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['action', 'another']);
 

@@ -82,6 +82,14 @@ export class MyScreen implements AppObject {
 2. `onResume(result?)` — called when a child exits back to this one; if not implemented, `onStart` is called instead
 3. `onExit()` — cleanup when this AppObject exits
 
+Menu lifecycle hooks receive resolved menu state:
+
+- `onMenuOpenChange({ open })` — the menu opened or closed
+- `onMenuUpdate({ menuId, menuItem, index })` — displayed rows or the current item changed
+- `onMenuItemFocus({ menuId, menuItem, index })` — synthetic focus changed
+
+When the menu opens, these hooks run in the order shown above.
+
 ### Navigation
 
 ```typescript

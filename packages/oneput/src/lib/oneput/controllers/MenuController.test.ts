@@ -110,6 +110,58 @@ describe('MenuController', () => {
       expect(rowsWhenOpened).toEqual([['unmaximize']]);
     });
 
+    it('reports open, update, then focus with the refreshed menu item', async () => {
+      // arrange
+      const lifecycle: string[] = [];
+      const ctl = Controller.createNull();
+      ctl.app.run({
+        menu: () => ({
+          id: 'main',
+          focusBehaviour: 'first',
+          items: [item('new-item', 'New item')]
+        }),
+        onStart: () => {},
+        onMenuOpenChange: ({ open }) => lifecycle.push(open ? 'open' : 'closed'),
+        onMenuUpdate: ({ menuItem }) => lifecycle.push(`update:${menuItem?.id}`),
+        onMenuItemFocus: ({ menuId, menuItem }) => lifecycle.push(`focus:${menuId}:${menuItem?.id}`)
+      });
+
+      // act
+      ctl.menu.openMenu();
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(lifecycle).toEqual(['open', 'update:new-item', 'focus:main:new-item']);
+    });
+
+    it('reports a replaced item when the focus index does not change', () => {
+      // arrange
+      const updates: string[] = [];
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        onStart: () => {
+          ctl.menu.setMenu({
+            id: 'main',
+            focusBehaviour: 'first',
+            items: [item('original', 'Original')]
+          });
+        },
+        onMenuUpdate: ({ menuItem }) => updates.push(menuItem?.id ?? 'none')
+      });
+      updates.length = 0;
+
+      // act
+      ctl.menu.setMenu({
+        id: 'main',
+        focusBehaviour: 'none',
+        items: [item('replacement', 'Replacement')]
+      });
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus?.[0]).toBe(0);
+      expect(updates).toEqual(['replacement']);
+    });
+
     it('emits menu-outro-end after close when there is no view', async () => {
       // arrange
       const outros: undefined[] = [];

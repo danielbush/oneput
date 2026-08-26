@@ -126,7 +126,7 @@ contract). See `docs/CONCEPTS.md`.
 - `bindings-change` — when key bindings are updated
 - `input-change` — when the input value changes, carrying before/after value and range snapshots so consumers can reason about the edit transition
 - `menu-open-change` — when menu opens/closes
-- `menu-item-focus` — when focused menu item changes
+- `menu-item-focus` — when focused menu item changes, with its menu id
 - `menu-action` — when a menu action fires
-- `set-menu-items` — when menu items are set
+- `set-menu-items` — after displayed menu rows and synthetic focus are resolved
 - `selection-change` — when input selection state changes

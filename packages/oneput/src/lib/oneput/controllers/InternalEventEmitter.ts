@@ -52,7 +52,7 @@ export type MenuItemFocusEvent = {
    * But we require the key to exist to help type emit logic, so use "|
    * undefined" instead of "?".
    */
-  payload: { index: number; menuItem: MenuItem | undefined };
+  payload: { menuId: string; index: number; menuItem: MenuItem | undefined };
 };
 export type MenuActionEvent = {
   type: 'menu-action';
@@ -60,7 +60,7 @@ export type MenuActionEvent = {
 };
 export type MenuSetItemsEvent = {
   type: 'set-menu-items';
-  payload: { menuId: string };
+  payload: { menuId: string; index: number; menuItem: MenuItem | undefined };
 };
 export type SelectionChangeEvent = {
   type: 'selection-change';

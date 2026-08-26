@@ -196,3 +196,46 @@ It runs when those rows become the displayed snapshot during open.
 - `invalidate` — `invalidate()` rebuilt or redisplayed the menu
 - `input-change` — an input event redisplayed the menu
 - `open` — opening refreshed a previously closed menu
+
+## PATTERN: LIVE_EDIT
+
+`LIVE_EDIT` lets the shared Oneput input edit the value represented by a menu
+row. The row is the selected edit target; it does not become a native form
+field. The menu must have one clear owner for the input at a time.
+
+There are two patterns.
+
+### Whole-menu editing
+
+Use this when all relevant rows are editable:
+
+- Disable filtering for the AppObject.
+- `onMenuItemFocus` transfers input ownership to the focused row.
+- `onInputChange` writes the draft and invalidates the menu preview.
+- `onMenuUpdate` handles replacement of the item at the same focus index. Ignore
+  `cause: 'input-change'` so the callback does not overwrite what the user just
+  typed.
+
+`AddEntry` in TomatoTimer is a larger example. `LiveEditWholeMenu` in
+`oneput-demo` is the minimal example.
+
+### Mixed-menu editing
+
+Use this when typing normally filters a menu that contains some editable rows.
+Focusing an editable row is not enough to edit it. The user must activate the
+row to transfer input ownership.
+
+```text
+filtering
+  └─ activate editable row → editing(menuId, itemId)
+       ├─ activate again → filtering
+       ├─ move menu focus → filtering
+       └─ back → filtering
+```
+
+While editing, disable filtering and let `onInputChange` update the active
+field. When editing stops, enable filtering and clear the input. Back exits the
+AppObject only when it is already in filtering mode.
+
+For multiline input, validation, or commit/cancel workflows, launch a dedicated
+editor AppObject instead of adding more modes to the current AppObject.

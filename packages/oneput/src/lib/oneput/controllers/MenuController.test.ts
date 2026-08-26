@@ -122,7 +122,7 @@ describe('MenuController', () => {
         }),
         onStart: () => {},
         onMenuOpenChange: ({ open }) => lifecycle.push(open ? 'open' : 'closed'),
-        onMenuUpdate: ({ menuItem }) => lifecycle.push(`update:${menuItem?.id}`),
+        onMenuUpdate: ({ cause, menuItem }) => lifecycle.push(`update:${cause}:${menuItem?.id}`),
         onMenuItemFocus: ({ menuId, menuItem }) => lifecycle.push(`focus:${menuId}:${menuItem?.id}`)
       });
 
@@ -131,7 +131,7 @@ describe('MenuController', () => {
       await new Promise((resolve) => setTimeout(resolve));
 
       // assert
-      expect(lifecycle).toEqual(['open', 'update:new-item', 'focus:main:new-item']);
+      expect(lifecycle).toEqual(['open', 'update:open:new-item', 'focus:main:new-item']);
     });
 
     it('reports a replaced item when the focus index does not change', () => {
@@ -146,7 +146,7 @@ describe('MenuController', () => {
             items: [item('original', 'Original')]
           });
         },
-        onMenuUpdate: ({ menuItem }) => updates.push(menuItem?.id ?? 'none')
+        onMenuUpdate: ({ cause, menuItem }) => updates.push(`${cause}:${menuItem?.id ?? 'none'}`)
       });
       updates.length = 0;
 
@@ -159,7 +159,27 @@ describe('MenuController', () => {
 
       // assert
       expect(ctl.currentProps.menuItemFocus?.[0]).toBe(0);
-      expect(updates).toEqual(['replacement']);
+      expect(updates).toEqual(['set-menu:replacement']);
+    });
+
+    it('reports invalidation and input-change causes', async () => {
+      // arrange
+      const causes: string[] = [];
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        menu: () => ({ id: 'main', items: [item('action', 'Action')] }),
+        onStart: () => {},
+        onMenuUpdate: ({ cause }) => causes.push(cause)
+      });
+      await ctl.menu.invalidate();
+      causes.length = 0;
+
+      // act
+      await ctl.menu.invalidate();
+      ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
+
+      // assert
+      expect(causes).toEqual(['invalidate', 'input-change']);
     });
 
     it('emits menu-outro-end after close when there is no view', async () => {

@@ -85,7 +85,7 @@ export class MyScreen implements AppObject {
 Menu lifecycle hooks receive resolved menu state:
 
 - `onMenuOpenChange({ open })` — the menu opened or closed
-- `onMenuUpdate({ menuId, menuItem, index })` — displayed rows or the current item changed
+- `onMenuUpdate({ cause, menuId, menuItem, index })` — displayed rows or the current item changed; `cause` is `set-menu`, `invalidate`, `input-change`, or `open`
 - `onMenuItemFocus({ menuId, menuItem, index })` — synthetic focus changed
 
 When the menu opens, these hooks run in the order shown above.

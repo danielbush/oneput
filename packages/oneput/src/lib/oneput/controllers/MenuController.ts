@@ -3,7 +3,8 @@ import type {
   FocusBehaviour,
   MenuItem,
   MenuItemAny,
-  MenuItemsGenFnAsync
+  MenuItemsGenFnAsync,
+  MenuUpdateCause
 } from '../types.js';
 import type { MenuItemsFilterFn } from '../types.js';
 import type { Controller } from './controller.js';
@@ -17,9 +18,10 @@ import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
 type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
+type SetDisplayedOptions = InvalidateOptions & { cause: MenuUpdateCause };
 type FocusedMenuItemPayload = { index: number; menuItem: MenuItem | undefined };
 type MenuItemFocusPayload = FocusedMenuItemPayload & { menuId: string };
-type MenuUpdatePayload = FocusedMenuItemPayload & { menuId: string };
+type MenuUpdatePayload = FocusedMenuItemPayload & { cause: MenuUpdateCause; menuId: string };
 
 /**
  * `filter` and `generative` modes are mutually exclusive.
@@ -122,7 +124,7 @@ export class MenuController {
       if (this.inputChannel.mode === 'filter' && !this.inputChannel.filterEnabled) {
         return;
       }
-      this.ctl.menu.setDisplayed();
+      this.ctl.menu.setDisplayed({ cause: 'input-change' });
     });
     // Seeded from currentProps.menuOpen so createNull({ menuOpen: true }) can
     // setDisplayed without an explicit openMenu(). openMenu/closeMenu still
@@ -173,7 +175,7 @@ export class MenuController {
       this.batchMenuNotifications(() => {
         this.ctl.currentProps.menuOpen = true;
         // Resolve the rows and focus before callbacks can observe the open menu.
-        this.refreshMenu({});
+        this.refreshMenu({}, 'open');
         this.ctl.events.emit({ type: 'menu-open-change', payload: true });
       });
     });
@@ -253,23 +255,23 @@ export class MenuController {
    * {@link InputController.setInputValue} / `tick()`), or `false` if the menu
    * was closed and nothing was updated. Await before reading layout (e.g. scroll).
    */
-  private refreshMenu({ focusBehaviour }: InvalidateOptions): boolean {
+  private refreshMenu({ focusBehaviour }: InvalidateOptions, cause: MenuUpdateCause): boolean {
     if (!this.isMenuOpenImmediate || !this.ctl.menu.isMenuOpen) {
       return false;
     }
     const menu = this.ctl.app.getMenu();
     if (menu) {
       this.ctl.menu.setMenuOnly(menu);
-      this.ctl.menu.setDisplayed({ focusBehaviour });
+      this.ctl.menu.setDisplayed({ cause, focusBehaviour });
     } else {
       // menu undefined => AppObject not using .menu(), just re-display
-      this.ctl.menu.setDisplayed({ focusBehaviour });
+      this.ctl.menu.setDisplayed({ cause, focusBehaviour });
     }
     return true;
   }
 
   private invalidateNow = async (opts: InvalidateOptions): Promise<boolean> => {
-    if (!this.refreshMenu(opts)) {
+    if (!this.refreshMenu(opts, 'invalidate')) {
       return false;
     }
     await tick();
@@ -304,7 +306,7 @@ export class MenuController {
    *
    * If the menu is closed you won't see the changes until it's opened.
    */
-  private setDisplayed(opts?: { focusBehaviour?: FocusBehaviour }) {
+  private setDisplayed({ cause, focusBehaviour }: SetDisplayedOptions) {
     if (!this.isMenuOpenImmediate) {
       return;
     }
@@ -321,12 +323,12 @@ export class MenuController {
       } else if (result !== undefined) {
         this.ctl.currentProps.menuItems = result.items;
         if (result.focusItemId && this.focusMenuItemById(result.focusItemId)) {
-          this.publishMenuUpdate();
+          this.publishMenuUpdate(cause);
           return;
         }
       }
-      this.runFocusBehaviour(opts?.focusBehaviour ?? this.currentMenu.focusBehaviour);
-      this.publishMenuUpdate();
+      this.runFocusBehaviour(focusBehaviour ?? this.currentMenu.focusBehaviour);
+      this.publishMenuUpdate(cause);
     });
   }
 
@@ -343,7 +345,7 @@ export class MenuController {
     footer?: FlexParams;
   }) {
     this.setMenuOnly(params);
-    this.setDisplayed();
+    this.setDisplayed({ cause: 'set-menu' });
   }
 
   /**
@@ -396,8 +398,9 @@ export class MenuController {
     }
   }
 
-  private publishMenuUpdate() {
+  private publishMenuUpdate(cause: MenuUpdateCause) {
     const payload = {
+      cause,
       menuId: this.currentMenu.menuId,
       index: this.currentMenu.focusedMenuItemIndex,
       menuItem: this.currentMenu.focusedMenuItem

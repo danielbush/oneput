@@ -1,5 +1,5 @@
 import type { KeyBindingMap } from '../lib/bindings.js';
-import type { InputSelectionState, MenuItem } from '../types.js';
+import type { InputSelectionState, MenuItem, MenuUpdateCause } from '../types.js';
 import type { AppChange } from './AppController.js';
 
 export type InputChangePayload = {
@@ -60,7 +60,12 @@ export type MenuActionEvent = {
 };
 export type MenuSetItemsEvent = {
   type: 'set-menu-items';
-  payload: { menuId: string; index: number; menuItem: MenuItem | undefined };
+  payload: {
+    cause: MenuUpdateCause;
+    menuId: string;
+    index: number;
+    menuItem: MenuItem | undefined;
+  };
 };
 export type SelectionChangeEvent = {
   type: 'selection-change';

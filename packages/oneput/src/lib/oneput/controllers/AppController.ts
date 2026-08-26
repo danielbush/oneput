@@ -455,8 +455,8 @@ export class AppController {
     if (this.current?.onMenuUpdate) {
       this.unsubscribeMenuUpdate = this.ctl.events.on(
         'set-menu-items',
-        ({ menuId, index, menuItem }) => {
-          this.current?.onMenuUpdate?.({ menuId, index, menuItem });
+        ({ cause, menuId, index, menuItem }) => {
+          this.current?.onMenuUpdate?.({ cause, menuId, index, menuItem });
         }
       );
     }

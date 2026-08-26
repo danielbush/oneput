@@ -226,6 +226,9 @@ export type MenuItemDivider = FlexParams & {
 
 export type MenuItemAny = MenuItem | MenuItemDivider;
 
+/** The outer operation that produced a displayed menu snapshot. */
+export type MenuUpdateCause = 'set-menu' | 'invalidate' | 'input-change' | 'open';
+
 export type FChildParams = {
   id: string;
   tag?: string;
@@ -539,7 +542,12 @@ export interface AppObject<
    * the menu opens. On open, `onMenuOpenChange` runs before this callback and
    * `onMenuItemFocus` runs after it.
    */
-  onMenuUpdate?: (data: { menuId: string; menuItem: MenuItem | undefined; index: number }) => void;
+  onMenuUpdate?: (data: {
+    cause: MenuUpdateCause;
+    menuId: string;
+    menuItem: MenuItem | undefined;
+    index: number;
+  }) => void;
   /**
    * Called whenever the input value changes while this AppObject is current.
    *

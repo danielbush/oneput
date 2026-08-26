@@ -128,5 +128,5 @@ contract). See `docs/CONCEPTS.md`.
 - `menu-open-change` — when menu opens/closes
 - `menu-item-focus` — when focused menu item changes, with its menu id
 - `menu-action` — when a menu action fires
-- `set-menu-items` — after displayed menu rows and synthetic focus are resolved
+- `set-menu-items` — after displayed menu rows and synthetic focus are resolved, with the outer update cause
 - `selection-change` — when input selection state changes

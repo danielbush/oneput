@@ -180,7 +180,7 @@ it calls any AppObject menu callback.
 Callbacks then run in this order:
 
 1. `onMenuOpenChange({ open: true })`
-2. `onMenuUpdate({ menuId, menuItem, index })`
+2. `onMenuUpdate({ cause, menuId, menuItem, index })`
 3. `onMenuItemFocus({ menuId, menuItem, index })` when focus was resolved or changed
 
 `onMenuUpdate` also runs after `setMenu()` and filtered redisplays while the menu
@@ -189,3 +189,10 @@ index stays the same. `onMenuItemFocus` is for focus changes only.
 
 `onMenuUpdate` does not run when `setMenu()` only stores rows for a closed menu.
 It runs when those rows become the displayed snapshot during open.
+
+`cause` identifies the outer operation that produced the snapshot:
+
+- `set-menu` — `setMenu()` replaced the displayed menu
+- `invalidate` — `invalidate()` rebuilt or redisplayed the menu
+- `input-change` — an input event redisplayed the menu
+- `open` — opening refreshed a previously closed menu

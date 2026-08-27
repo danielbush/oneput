@@ -69,6 +69,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: a DSL is one way
   - COMMENT: AppObjects could just be objects but injecting arbitrary code into their properties is probably not a great thing
   - COMMENT: this might be an opportunity to rethink Oneput; state machines, logic sandwich / "compute decision before execution" pattern
+- feat: created safeicon in frame2; can we use that to register lucide and hand-rolled icons;
+  - COMMENT: packages/frame2/src/routes/03/icons.ts shows icons lucide-only being registered for oneput and both types being registered in frame's chrome
 - feat: find a solid mechanism to hide binding hint in stdMenuItem for touch-screen devices that only have soft-keyboards
   - COMMENT: the simple solution is to target device width; but how wide before we are in laptop/hard-desktop territory?  Is there a better way to assess and fallback to device-width?  Since we may end up running in electron (desktop) and capacitor (native), could we use a flag for the environment
   - COMMENT: some sort of "media controller" ?

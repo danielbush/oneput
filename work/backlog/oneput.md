@@ -155,7 +155,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - EditDocumentUI in @2br/web - `menu-open-change`
 - feat: disable individual menu items
   - eg pasteBefore, pasteAfter, pasteIn
-- [?] feat: filter for global items
+- [ ] feat: filter for global items
+  - COMMENT
+    - might work well with catalogs since this is the tidy way to represent a bunch of menus and actions along with conditions
+    - so a global mechanism would ask the catalog for global items
   - COMMENT
     - this could be implemented with what we have currently?
     - take any example where you think you need "global" for some definition of global, ask yourself, how would we implement it with existing constructs?  (make sure to include mobile which doesn't have key bindings)

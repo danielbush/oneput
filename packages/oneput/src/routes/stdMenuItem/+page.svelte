@@ -3,7 +3,7 @@
   import '$lib/oneput/shared/styles/oneput-defaults.css';
   import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
   import { resolve } from '$app/paths';
-  import { icons } from '../_state.svelte.js';
+  import { icons } from '../_icons.js';
   import { stdMenuItem } from '$lib/oneput/shared/ui/menuItems/stdMenuItem.js';
   import { stdSkeletonMenuItems } from '$lib/oneput/shared/ui/menuItems/stdSkeletonMenuItems.js';
   import VisualDebugControls from '$lib/oneput/shared/components/VisualDebugControls.svelte';

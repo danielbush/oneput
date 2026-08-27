@@ -4,7 +4,7 @@
   import Oneput from '$lib/oneput/shared/components/Oneput.svelte';
   import * as data from './_state.js';
   import * as ui from './_ui.js';
-  import { icons } from './_state.svelte.js';
+  import { icons } from './_icons.js';
   import VisualDebugControls from '$lib/oneput/shared/components/VisualDebugControls.svelte';
   import ForceDarkModeControls from '$lib/oneput/shared/components/ForceDarkMode.svelte';
   import { randomId } from '$lib/oneput/lib/utils.js';

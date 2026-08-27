@@ -10,18 +10,10 @@ import { icons } from '@oneput/jsed';
  */
 export type LayoutSettings = StandardLayoutParams;
 
-const layoutIcons = {
-  X: icons.X,
-  Check: icons.Check,
-  SendHorizontal: icons.SendHorizontal,
-  ArrowLeft: icons.ArrowLeft,
-  ChevronDown: icons.ChevronDown
-};
-
 /**
  * Demo host layout — {@link StandardLayout} with jsed’s registered icons.
  */
 export const Layout = {
   create: (ctl: Controller, params: LayoutSettings = {}) =>
-    StandardLayout.create(ctl, params, layoutIcons)
+    StandardLayout.create(ctl, params, icons)
 };

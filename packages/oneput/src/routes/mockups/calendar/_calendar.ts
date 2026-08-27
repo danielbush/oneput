@@ -16,7 +16,7 @@
 
 import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
-import { icons } from '../../_state.svelte.js';
+import { icons } from '../../_icons.js';
 
 const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 

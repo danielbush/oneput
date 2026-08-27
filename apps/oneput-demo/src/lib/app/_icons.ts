@@ -1,4 +1,4 @@
-import { element, registerIcon } from '@oneput/oneput';
+import { element, registerIcons } from '@oneput/oneput';
 import * as lu from 'lucide';
 
 export const iconData = {
@@ -49,13 +49,4 @@ export const iconData = {
   CloseNotification: lu.X
 };
 
-Object.entries(iconData).forEach(([name, icon]) => {
-  registerIcon(
-    name,
-    element(() => lu.createElement(icon))
-  );
-});
-
-export const icons = Object.fromEntries(
-  Object.keys(iconData).map((name) => [name, name])
-) as Record<keyof typeof iconData, string>;
+export const icons = registerIcons(iconData, (icon) => element(() => lu.createElement(icon)));

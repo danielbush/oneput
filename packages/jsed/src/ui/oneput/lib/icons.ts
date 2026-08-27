@@ -1,4 +1,4 @@
-import { element, registerIcon } from '@oneput/oneput';
+import { element, registerIcons } from '@oneput/oneput';
 import * as lu from 'lucide';
 
 export const iconData = {
@@ -31,16 +31,4 @@ export const iconData = {
   Redo2: lu.Redo2
 };
 
-Object.entries(iconData).forEach(([name, icon]) => {
-  registerIcon(
-    name,
-    element(() => lu.createElement(icon))
-  );
-});
-
-/**
- * Create a lookup that returns the name of the icon.
- */
-export const icons = Object.fromEntries(
-  Object.keys(iconData).map((name) => [name, name])
-) as Record<keyof typeof iconData, string>;
+export const icons = registerIcons(iconData, (icon) => element(() => lu.createElement(icon)));

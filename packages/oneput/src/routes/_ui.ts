@@ -5,7 +5,7 @@
 import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
 import type { appState } from './_state.js';
-import { icons } from './_state.svelte.js';
+import { icons } from './_icons.js';
 
 export const menuHeader1: FlexParams = {
   id: 'menu-header-1',

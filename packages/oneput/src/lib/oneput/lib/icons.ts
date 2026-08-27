@@ -8,6 +8,11 @@
 // Strategy: a function that renders an icon into a target element
 export type IconRenderer = (target: HTMLElement) => void;
 
+/** Registered icon names keyed by their source names. */
+export type RegisteredIconNames<Icons extends Record<string, unknown>> = {
+  readonly [Name in keyof Icons]: Name;
+};
+
 // Registry for icons - webapp registers icons upfront
 const iconRegistry = new Map<string, IconRenderer>();
 
@@ -21,10 +26,14 @@ export function registerIcon(name: string, renderer: IconRenderer): void {
 /**
  * Register multiple icons at once.
  */
-export function registerIcons(icons: Record<string, IconRenderer>): void {
-  for (const [name, renderer] of Object.entries(icons)) {
-    iconRegistry.set(name, renderer);
+export function registerIcons<const Icons extends Record<string, unknown>>(
+  icons: Icons,
+  rendererFor: (icon: Icons[keyof Icons]) => IconRenderer
+): RegisteredIconNames<Icons> {
+  for (const name of Object.keys(icons) as Array<Extract<keyof Icons, string>>) {
+    iconRegistry.set(name, rendererFor(icons[name]));
   }
+  return registeredIconNames(icons);
 }
 
 /**
@@ -77,6 +86,15 @@ export function element(create: () => Element): IconRenderer {
   return (target) => {
     target.appendChild(create());
   };
+}
+
+/** Return each registered icon key as its runtime name. */
+function registeredIconNames<const Icons extends Record<string, unknown>>(
+  icons: Icons
+): RegisteredIconNames<Icons> {
+  return Object.fromEntries(
+    Object.keys(icons).map((name) => [name, name])
+  ) as RegisteredIconNames<Icons>;
 }
 
 /**

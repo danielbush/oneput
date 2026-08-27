@@ -191,6 +191,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: remove any reliance on "lucide" in packages/oneput/src/lib/oneput/lib/icons.ts
+  - COMMENT: I think it's just class names for missing icon
 - refactor: BindingsEditor - split up the AppObjects; use `menu()`;
   - COMMENT: tricy part myabe defining the shared data that gets pass around?
   - COMMENT: are there any places were we jump the stack (not just simply push/pop app stack)?

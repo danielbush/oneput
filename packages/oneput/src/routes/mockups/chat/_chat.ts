@@ -12,7 +12,7 @@
 
 import { randomId } from '$lib/oneput/lib/utils.js';
 import type { FlexParams, MenuItemAny } from '$lib/oneput/types.js';
-import { icons } from '../../_state.svelte.js';
+import { icons } from '../../_icons.js';
 
 export const chatHeader: FlexParams = {
   id: 'chat-header',

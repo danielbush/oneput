@@ -69,6 +69,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: a DSL is one way
   - COMMENT: AppObjects could just be objects but injecting arbitrary code into their properties is probably not a great thing
   - COMMENT: this might be an opportunity to rethink Oneput; state machines, logic sandwich / "compute decision before execution" pattern
+- feat: dynamic theming
+  - can we change preset themes on the fly?
+  - can we get an agent to create a new theme and apply it on the fly?
 - feat: created safeicon in frame2; can we use that to register lucide and hand-rolled icons;
   - COMMENT: packages/frame2/src/routes/03/icons.ts shows icons lucide-only being registered for oneput and both types being registered in frame's chrome
 - feat: find a solid mechanism to hide binding hint in stdMenuItem for touch-screen devices that only have soft-keyboards

@@ -1,13 +1,8 @@
-import type { AppLayoutParams, AppObject, Controller, MenuItem, UIFlags } from '@oneput/oneput';
+import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/oneput';
+import { MixedMenuLiveEdit } from '@oneput/oneput/shared/behaviors/MixedMenuLiveEdit.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../_icons.js';
-import {
-  decideMixedLiveEdit,
-  type MixedLiveEditEvent,
-  type MixedLiveEditIntent,
-  type MixedLiveEditState
-} from './mixedLiveEdit.js';
 
 type FieldId = 'name' | 'role';
 
@@ -22,13 +17,18 @@ export class LiveEditMixedMenu implements AppObject {
     return new LiveEditMixedMenu(ctl);
   }
 
-  private state: MixedLiveEditState<FieldId> = { type: 'filtering' };
+  private readonly liveEdit: MixedMenuLiveEdit;
   private values: Record<FieldId, string> = {
     name: 'Grace Hopper',
     role: 'Computer scientist'
   };
 
-  private constructor(private ctl: Controller) {}
+  behaviors: MixedMenuLiveEdit[];
+
+  private constructor(private ctl: Controller) {
+    this.liveEdit = MixedMenuLiveEdit.create(ctl);
+    this.behaviors = [this.liveEdit];
+  }
 
   layout = {
     params: { menuTitle: 'Live edit — mixed menu' } satisfies AppLayoutParams
@@ -45,18 +45,27 @@ export class LiveEditMixedMenu implements AppObject {
     focusBehaviour: 'last-action,first' as const,
     items: [
       ...fields.map((field) =>
-        stdMenuItem({
+        this.liveEdit.item({
           id: this.menuItemId(field.id),
-          left: (b) => [b.icon(icons.Pencil)],
-          textContent: `${field.label}: ${this.values[field.id] || '—'}`,
-          bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0],
-          bottom: {
-            textContent:
-              this.state.type === 'editing' && this.state.fieldId === field.id
-                ? 'Editing. Activate again, move focus, or go back to return to filtering.'
-                : 'Activate to edit this value.'
+          value: {
+            read: () => this.values[field.id],
+            write: (value) => {
+              this.values[field.id] = value;
+            }
           },
-          action: () => this.handle({ type: 'activate-field', fieldId: field.id })
+          placeholder: `Edit ${field.label.toLowerCase()}...`,
+          render: ({ value, editing }) =>
+            stdMenuItem({
+              id: this.menuItemId(field.id),
+              left: (b) => [b.icon(icons.Pencil)],
+              textContent: `${field.label}: ${value || '—'}`,
+              bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.DO_ACTION]?.bindings[0],
+              bottom: {
+                textContent: editing
+                  ? 'Editing. Activate again, move focus, or go back to return to filtering.'
+                  : 'Activate to edit this value.'
+              }
+            })
         })
       ),
       stdMenuItem({
@@ -77,74 +86,10 @@ export class LiveEditMixedMenu implements AppObject {
   });
 
   onStart = () => {
-    this.showFilterInput();
-  };
-
-  onBack = () => {
-    this.handle({ type: 'back' });
-  };
-
-  onMenuItemFocus = ({ menuItem }: { menuItem: MenuItem | undefined }) => {
-    this.handle({ type: 'focus-field', fieldId: this.fieldIdFromMenuItem(menuItem) });
-  };
-
-  onInputChange = ({ value }: { value: string }) => {
-    if (this.state.type !== 'editing') {
-      return;
-    }
-    this.values[this.state.fieldId] = value;
-    void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
-  };
-
-  private handle(event: MixedLiveEditEvent<FieldId>) {
-    const intent = decideMixedLiveEdit(this.state, event);
-    this.apply(intent);
-  }
-
-  private apply(intent: MixedLiveEditIntent<FieldId>) {
-    switch (intent.type) {
-      case 'none':
-        return;
-      case 'start-editing':
-        this.startEditing(intent.fieldId);
-        return;
-      case 'stop-editing':
-        this.stopEditing();
-        return;
-      case 'exit':
-        this.ctl.app.exit();
-    }
-  }
-
-  private startEditing(fieldId: FieldId) {
-    this.state = { type: 'editing', fieldId };
-    this.ctl.ui.update({ flags: { enableFilter: false } });
-    const label = fields.find((field) => field.id === fieldId)?.label ?? 'value';
-    this.ctl.input.setPlaceholder(`Edit ${label.toLowerCase()}...`);
-    const inputReady = this.ctl.input.setInputValue(this.values[fieldId]);
-    this.ctl.input.focusInput();
-    void inputReady.then(() => this.ctl.input.selectAll());
-    void this.ctl.menu.invalidate({ focusBehaviour: 'none' }).then(() => {
-      this.ctl.menu.focusMenuItemById(this.menuItemId(fieldId));
-    });
-  }
-
-  private stopEditing() {
-    this.state = { type: 'filtering' };
-    this.ctl.ui.update({ flags: { enableFilter: true } });
-    this.showFilterInput();
-    void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
-  }
-
-  private showFilterInput() {
     this.ctl.input.setPlaceholder('Filter menu, then activate a field to edit...');
     void this.ctl.input.setInputValue('');
     this.ctl.input.focusInput();
-  }
-
-  private fieldIdFromMenuItem(menuItem: MenuItem | undefined): FieldId | undefined {
-    return fields.find((field) => this.menuItemId(field.id) === menuItem?.id)?.id;
-  }
+  };
 
   private menuItemId(fieldId: FieldId) {
     return `live-edit-mixed-${fieldId}`;

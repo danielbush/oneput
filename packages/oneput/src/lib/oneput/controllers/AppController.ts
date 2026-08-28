@@ -4,6 +4,8 @@ import type {
   AppActionHandler,
   AppEvent,
   AppLayoutParams,
+  AppObjectBehavior,
+  InputScope,
   MenuItem,
   AppObject,
   UIFlags,
@@ -55,6 +57,8 @@ export class AppController {
   private unsubscribeMenuOpenChange?: () => void;
   private unsubscribeMenuOpenFocus?: () => void;
   private pendingPop?: { payload: unknown };
+  private currentInputScope?: InputScope;
+  private attachedBehaviors: AppObjectBehavior[] = [];
 
   // UI settings
   private disableGoBack = false;
@@ -321,7 +325,12 @@ export class AppController {
       menuItem.action(this.ctl);
     } finally {
       // clearInputAfterAction triggered only on menu action:
-      if (this.clearInputAfterAction && this.current === actionOwner) {
+      // Skip when a claim took ownership during the action (live-edit activate).
+      if (
+        this.clearInputAfterAction &&
+        this.current === actionOwner &&
+        !this.ctl.input.hasActiveClaim
+      ) {
         this.ctl.input.clearInput();
         this.ctl.menu.invalidate();
       }
@@ -393,22 +402,24 @@ export class AppController {
 
     // Events
     this.unsubscribeMenuItemFocus?.();
-    if (this.current?.onMenuItemFocus) {
-      this.unsubscribeMenuItemFocus = this.ctl.events.on(
-        'menu-item-focus',
-        ({ menuId, index, menuItem }) => {
-          this.current?.onMenuItemFocus?.({ menuId, index, menuItem });
+    this.unsubscribeMenuItemFocus = this.ctl.events.on(
+      'menu-item-focus',
+      ({ menuId, index, menuItem }) => {
+        for (const behavior of this.attachedBehaviors) {
+          behavior.onMenuItemFocus?.({ menuId, index, menuItem });
         }
-      );
-    }
+        this.current?.onMenuItemFocus?.({ menuId, index, menuItem });
+      }
+    );
     this.unsubscribeMenuUpdate?.();
     this.unsubscribeMenuUpdate = undefined;
     this.unsubscribeInputChange?.();
-    if (this.current?.onInputChange) {
-      this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
-        this.current?.onInputChange?.({ value });
-      });
-    }
+    this.unsubscribeInputChange = this.ctl.events.on('input-change', ({ value }) => {
+      if (this.ctl.input.hasActiveClaim) {
+        return;
+      }
+      this.current?.onInputChange?.({ value });
+    });
     this.unsubscribeMenuOpenChange?.();
     if (this.current?.onMenuOpenChange) {
       this.unsubscribeMenuOpenChange = this.ctl.events.on('menu-open-change', (open) => {
@@ -448,6 +459,7 @@ export class AppController {
     // Apply the AppObject's declared start-time settings (UIFlags). reset()
     // fills in defaults for any flag the AppObject doesn't specify. This runs
     // before onStart/onResume, so any dynamic ui.update({ flags }) still wins.
+    this.teardownBehaviors();
     this.reset(this.current?.settings);
     // Clear the menu.
     this.ctl.menu.setMenu();
@@ -471,14 +483,43 @@ export class AppController {
         this.ctl.ui.update({ params: layoutParams, replace: true });
       }
     }
+    this.installBehaviors();
   }
 
   private runBeforeExit() {
+    this.teardownBehaviors();
     this.current?.onExit?.();
   }
 
   private runBeforeSuspend() {
+    this.teardownBehaviors();
     this.current?.onSuspend?.();
+  }
+
+  private teardownBehaviors() {
+    for (const behavior of this.attachedBehaviors) {
+      behavior.detach();
+    }
+    this.attachedBehaviors = [];
+    this.currentInputScope?.close();
+    this.currentInputScope = undefined;
+  }
+
+  private installBehaviors() {
+    this.teardownBehaviors();
+    if (!this.current) {
+      return;
+    }
+    this.currentInputScope = this.ctl.input.openScope();
+    const context = {
+      input: this.currentInputScope,
+      menu: this.ctl.menu
+    };
+    const behaviors = this.current.behaviors ?? [];
+    for (const behavior of behaviors) {
+      behavior.attach(context);
+      this.attachedBehaviors.push(behavior);
+    }
   }
 
   run<ResumePayload = unknown, LayoutParams extends AppLayoutParams = AppLayoutParams>(
@@ -593,15 +634,20 @@ export class AppController {
   /**
    * Goes back to previous appObject.
    *
-   * Back handler precedence: an imperative `setOnBack` handler (reset per
-   * AppObject) wins, then the current AppObject's declarative `onBack`, then the
-   * default pop.
+   * Back handler precedence: attached behaviors (first `'handled'` wins), then
+   * an imperative `setOnBack` handler (reset per AppObject), then the current
+   * AppObject's declarative `onBack`, then the default pop.
    */
   goBack = () => {
     if (this.disableGoBack) {
       return;
     }
     const backOwner = this.current;
+    for (const behavior of this.attachedBehaviors) {
+      if (behavior.onBack?.() === 'handled') {
+        return;
+      }
+    }
     if (this.onBack) {
       this.onBack();
       this.clearInputAfterBackIfCurrent(backOwner);

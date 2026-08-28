@@ -1,9 +1,10 @@
 import { DynamicPlaceholderBase } from '../types.js';
-import type { InputSelectionState } from '../types.js';
+import type { InputScope, InputSelectionState } from '../types.js';
 import type { Controller } from './controller.js';
 import { tick } from 'svelte';
 import { SelectionToggler } from './helpers/SelectionToggler.js';
 import type { InputChangeEvent, InputChangePayload } from './InternalEventEmitter.js';
+import { InputClaims } from './helpers/InputClaims.js';
 
 export class InputController {
   public static create(ctl: Controller) {
@@ -22,8 +23,26 @@ export class InputController {
     return controller;
   }
 
+  private readonly claims: InputClaims;
+
   constructor(private ctl: Controller) {
+    this.claims = InputClaims.create(ctl);
     this.ctl.currentProps.onInputChange = this.handleInputChange;
+  }
+
+  /**
+   * Open an AppObject-scoped claim factory. Closing the scope releases any
+   * claim it still owns.
+   */
+  openScope(): InputScope {
+    return this.claims.openScope();
+  }
+
+  /**
+   * True when a claim currently owns the semantic input route.
+   */
+  get hasActiveClaim() {
+    return this.claims.hasActiveClaim;
   }
 
   triggerInputEvent() {
@@ -425,6 +444,7 @@ export class InputController {
     this.previousUserInputRange = this.lastInputRange;
     this.lastInputValue = target.value;
     this.lastInputRange = range;
+    this.claims.deliverSemanticChange(target.value);
   }
 
   private handleInputChange = (evt: InputEvent) => {
@@ -456,6 +476,7 @@ export class InputController {
     this.lastInputValue = value;
     this.lastInputRange = range;
     this.beforeInputSnapshot = undefined;
+    this.claims.deliverSemanticChange(value);
   };
 
   /**

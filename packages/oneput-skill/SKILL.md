@@ -287,15 +287,17 @@ pullToggleMenuItem({
 ### Live-edit rows
 
 A live-edit row uses the shared Oneput input to edit the value represented by
-the row. Give the input one owner at a time:
+the row. Give the input one owner at a time via an **input claim**:
 
 - If the whole menu is editable, set `enableFilter: false`. Use
   `onMenuItemFocus` to select the field and `onInputChange` to update state and
   invalidate its preview.
-- In a mixed menu, keep filtering on until the user activates an editable row.
-  Enter an explicit editing mode, disable filtering, and load the field value.
-  Return to filtering when the user activates again, moves menu focus, or goes
-  back.
+- In a mixed menu, install `MixedMenuLiveEdit` as an `AppObjectBehavior`. Use
+  `liveEdit.item()` / `liveEdit.bind()` on opted-in rows. Activate acquires a
+  claim; activate again, move focus, or back releases it and restores the
+  previous filter query by default (`resumePrevious: 'restore'`).
+- Set `clearInputAfterAction: false` so activate does not clear the claimed
+  value.
 - Use `onMenuUpdate` when a rebuild can replace the focused item without moving
   its index. Do not copy the input back for `cause: "input-change"`; that would
   overwrite the user's latest edit.

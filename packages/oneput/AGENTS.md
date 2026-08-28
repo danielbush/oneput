@@ -33,8 +33,17 @@ Key bindings map keyboard shortcuts to actions. Each binding declares `when` con
 
 AppObjects represent screens/states in the app stack with actions, menu, and lifecycle hooks.
 
-- Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
+- Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`, `AppObjectBehavior`
 - Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
+
+### Input claims
+
+Exclusive semantic ownership of typed input for live-edit and similar behaviors.
+`InputScope` is AppObject-scoped; closing it on suspend/exit releases claims.
+
+- Helper: `packages/oneput/src/lib/oneput/controllers/helpers/InputClaims.ts`
+- API: `InputController.openScope()` / `hasActiveClaim`
+- Behavior: `packages/oneput/src/lib/oneput/shared/behaviors/MixedMenuLiveEdit.ts`
 
 ### Controller
 

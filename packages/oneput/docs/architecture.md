@@ -25,6 +25,8 @@ An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects 
 ```
 interface AppObject {
   layout?                — layout factory and params applied before start/resume
+  settings?              — UIFlags applied on start
+  behaviors?             — AppObjectBehavior list (attach InputScope; back/focus hooks)
   onStart()              — called when this AppObject takes control
   onResume?(result?)     — called when a child exits back to this one
   onExit?()              — cleanup when this AppObject exits
@@ -32,6 +34,14 @@ interface AppObject {
   menu?                  — declarative menu items
 }
 ```
+
+**Input claims.** `InputController.openScope()` returns an AppObject-scoped
+`InputScope`. `claim()` suspends the previous input owner (filter / generative /
+value / placeholder), routes semantic typing to `write`, and restores on
+`release` (default `resumePrevious: 'restore'`). `AppController` opens a scope
+when installing behaviors and closes it on suspend / exit. Raw `input-change`
+still broadcasts; AppObject `onInputChange` is skipped while a claim is active.
+`MixedMenuLiveEdit` is the mixed-menu LIVE_EDIT behavior on top of claims.
 
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can

@@ -203,6 +203,11 @@ It runs when those rows become the displayed snapshot during open.
 row. The row is the selected edit target; it does not become a native form
 field. The menu must have one clear owner for the input at a time.
 
+Input ownership is a first-class **input claim** (`InputScope.claim`). An active
+claim routes typed text to `claim.write`. Raw `input-change` still broadcasts
+for diagnostics and history; only the semantic route is exclusive. Closing the
+AppObject's `InputScope` (suspend / exit) releases any remaining claim.
+
 There are two patterns.
 
 ### Whole-menu editing
@@ -225,17 +230,23 @@ Use this when typing normally filters a menu that contains some editable rows.
 Focusing an editable row is not enough to edit it. The user must activate the
 row to transfer input ownership.
 
+Prefer `MixedMenuLiveEdit` (`shared/behaviors/MixedMenuLiveEdit.ts`) as an
+`AppObjectBehavior`:
+
+- `liveEdit.item()` / `liveEdit.bind()` wrap opted-in rows.
+- Activate acquires an input claim (suspends filter / generative).
+- Activate again, move menu focus, or back releases the claim.
+- Default `resumePrevious: 'restore'` puts the previous filter query back.
+
 ```text
 filtering
-  └─ activate editable row → editing(menuId, itemId)
-       ├─ activate again → filtering
-       ├─ move menu focus → filtering
-       └─ back → filtering
+  └─ activate editable row → claim (editing)
+       ├─ activate again → release → filtering
+       ├─ move menu focus → release → filtering
+       └─ back → release → filtering (back does not exit)
 ```
 
-While editing, disable filtering and let `onInputChange` update the active
-field. When editing stops, enable filtering and clear the input. Back exits the
-AppObject only when it is already in filtering mode.
+Set `clearInputAfterAction: false` so activate does not clear the claimed value.
 
 For multiline input, validation, or commit/cancel workflows, launch a dedicated
 editor AppObject instead of adding more modes to the current AppObject.

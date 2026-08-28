@@ -22,6 +22,71 @@ declare global {
 
 export type InputChangeListener = (evt: InputEvent) => void;
 
+/** Why an input claim stopped owning the shared input. */
+export type InputClaimReleaseReason = string;
+
+/**
+ * Exclusive semantic owner of typed input for one field / row.
+ *
+ * Raw `input-change` still broadcasts; only the semantic route is exclusive.
+ */
+export type InputClaimOptions = {
+  owner: { type: string; itemId?: string; [key: string]: unknown };
+  value: {
+    read: () => string;
+    write: (value: string) => void;
+  };
+  placeholder?: string;
+  textArea?: boolean | { rows: number };
+  /** Default `'all'`. */
+  select?: 'all' | 'none';
+  /** Default `'restore'` — put the previous owner's value back. */
+  resumePrevious?: 'restore' | 'clear';
+  onRelease?: (reason: InputClaimReleaseReason) => void;
+};
+
+export type InputClaimHandle = {
+  readonly released: boolean;
+  release: (reason?: InputClaimReleaseReason) => void;
+};
+
+/**
+ * AppObject-scoped claim factory. Closing the scope releases any claim it
+ * still owns (suspend / exit).
+ */
+export type InputScope = {
+  readonly closed: boolean;
+  claim: (options: InputClaimOptions) => InputClaimHandle;
+  close: () => void;
+};
+
+export type AppObjectBehaviorContext = {
+  input: InputScope;
+  menu: MenuController;
+};
+
+/**
+ * Optional interceptor installed while an AppObject is current.
+ *
+ * `AppController` calls `attach` with an AppObject-scoped context and
+ * `detach` on suspend / exit. Behaviors may handle back and menu focus
+ * before the AppObject hooks.
+ */
+export interface AppObjectBehavior {
+  attach(context: AppObjectBehaviorContext): void;
+  detach(): void;
+  /**
+   * Return `'handled'` to stop back propagation (e.g. release a claim).
+   * Return `'continue'` or omit to let AppObject / default pop run.
+   */
+  onBack?: () => 'handled' | 'continue';
+  onMenuItemFocus?: (data: {
+    menuId: string;
+    menuItem: MenuItem | undefined;
+    index: number;
+  }) => void;
+}
+
 export type OneputProps = {
   /**
    * The index of the menu item that is focused.
@@ -487,6 +552,13 @@ export interface AppObject<
    * Settings that will be applied when the AppObject starts.
    */
   settings?: UIFlags;
+  /**
+   * Optional behaviors installed while this AppObject is current.
+   *
+   * Each behavior receives an AppObject-scoped {@link InputScope} and can
+   * intercept back / menu focus. See {@link AppObjectBehavior}.
+   */
+  behaviors?: AppObjectBehavior[];
   /**
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.

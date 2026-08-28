@@ -19,9 +19,19 @@ export type LiveEditBinding = {
   resumePrevious?: 'restore' | 'clear';
 };
 
+export type LiveEditRender = (state: { value: string; editing: boolean }) => MenuItem;
+
 export type LiveEditItemParams = LiveEditBinding & {
   id: string;
-  render: (state: { value: string; editing: boolean }) => MenuItem;
+  render: LiveEditRender;
+};
+
+/**
+ * Stable field identity shared by a catalog action and its menu row.
+ */
+export type LiveEditField = {
+  activate: () => void;
+  menuItem: (options: { action: () => void; render: LiveEditRender }) => MenuItem;
 };
 
 /**
@@ -29,8 +39,10 @@ export type LiveEditItemParams = LiveEditBinding & {
  * activated. Activation acquires an input claim; focus change, re-activate, or
  * back releases it.
  *
- * Install as an {@link AppObjectBehavior}. Prefer `clearInputAfterAction: false`
- * so activate does not wipe the claimed value.
+ * Prefer carrying this behavior via menu-item `requires` (`item()` / `bind()` /
+ * `field().menuItem()`). Do not list it on `AppObject.behaviors` unless you
+ * need it during `onStart`. Prefer `clearInputAfterAction: false` so activate
+ * does not wipe the claimed value.
  */
 export class MixedMenuLiveEdit implements AppObjectBehavior {
   static create(ctl: Controller) {
@@ -55,8 +67,9 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
   }
 
   detach() {
-    this.context = undefined;
+    this.active?.claim.release('behavior-detached');
     this.active = undefined;
+    this.context = undefined;
   }
 
   onBack = () => {
@@ -74,6 +87,36 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
   };
 
   /**
+   * Stable field for catalog actions and menu rows that share one claim toggle.
+   */
+  field(params: { id: string } & LiveEditBinding): LiveEditField {
+    const binding: LiveEditBinding = {
+      value: params.value,
+      placeholder: params.placeholder,
+      textArea: params.textArea,
+      resumePrevious: params.resumePrevious
+    };
+    return {
+      activate: () => this.toggle(params.id, binding),
+      menuItem: ({ action, render }) => {
+        const editing = this.active?.itemId === params.id;
+        const value = params.value.read();
+        const rendered = render({ value, editing });
+        return this.withRequirement({
+          ...rendered,
+          id: params.id,
+          tag: rendered.tag ?? 'button',
+          attr: {
+            type: 'button',
+            ...rendered.attr
+          },
+          action
+        });
+      }
+    };
+  }
+
+  /**
    * Wrap an existing menu item so activate toggles an input claim for `binding`.
    *
    * Also promotes the row to a `button` when needed: focused styling is
@@ -82,7 +125,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
    */
   bind(item: MenuItem, binding: LiveEditBinding): MenuItem {
     const itemId = item.id;
-    return {
+    return this.withRequirement({
       ...item,
       tag: item.tag ?? 'button',
       attr: {
@@ -90,7 +133,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
         ...item.attr
       },
       action: () => this.toggle(itemId, binding)
-    };
+    });
   }
 
   /**
@@ -98,21 +141,18 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
    * row holds the claim.
    */
   item(params: LiveEditItemParams): MenuItem {
-    const editing = this.active?.itemId === params.id;
-    const value = params.value.read();
-    const rendered = params.render({ value, editing });
-    return this.bind(
-      {
-        ...rendered,
-        id: params.id
-      },
-      {
-        value: params.value,
-        placeholder: params.placeholder,
-        textArea: params.textArea,
-        resumePrevious: params.resumePrevious
-      }
-    );
+    const field = this.field(params);
+    return field.menuItem({
+      action: field.activate,
+      render: params.render
+    });
+  }
+
+  private withRequirement(item: MenuItem): MenuItem {
+    return {
+      ...item,
+      requires: [...(item.requires ?? []), this]
+    };
   }
 
   private toggle(itemId: string, binding: LiveEditBinding) {

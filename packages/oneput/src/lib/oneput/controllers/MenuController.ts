@@ -391,6 +391,16 @@ export class MenuController {
       header: this.currentMenu.header,
       footer: this.currentMenu.footer
     });
+    // Base menu changed — reconcile item-required behaviors (not the filtered
+    // display). Filtering a row out must not detach its behavior.
+    this.ctl.app?.reconcileBehaviors();
+  }
+
+  /**
+   * Source rows from the last `setMenu` / declarative `menu()`, before filter.
+   */
+  get baseMenuItems() {
+    return this.currentMenu.allMenuItems;
   }
 
   /** Publish lifecycle events after the menu snapshot and focus are both resolved. */

@@ -230,10 +230,11 @@ Use this when typing normally filters a menu that contains some editable rows.
 Focusing an editable row is not enough to edit it. The user must activate the
 row to transfer input ownership.
 
-Prefer `MixedMenuLiveEdit` (`shared/behaviors/MixedMenuLiveEdit.ts`) as an
-`AppObjectBehavior`:
+Prefer `MixedMenuLiveEdit` (`shared/behaviors/MixedMenuLiveEdit.ts`). Opted-in
+rows from `liveEdit.item()` / `bind()` / `field()` carry `requires: [liveEdit]`;
+`AppController` installs that behavior from the base menu. Do not list it on
+`AppObject.behaviors` unless you need it during `onStart`.
 
-- `liveEdit.item()` / `liveEdit.bind()` wrap opted-in rows.
 - Activate acquires an input claim (suspends filter / generative).
 - Activate again, move menu focus, or back releases the claim.
 - Default `resumePrevious: 'restore'` puts the previous filter query back.

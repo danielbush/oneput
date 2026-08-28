@@ -264,6 +264,13 @@ export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>
    */
   canFilter?: boolean;
   /**
+   * Behaviors this row needs while it is in the base menu.
+   *
+   * Collected from the base menu (not the filtered display). Filtering a row
+   * out does not detach its behavior. See {@link AppObjectBehavior}.
+   */
+  requires?: readonly AppObjectBehavior[];
+  /**
    * Primary css class.  Defaults to oneput__menu-item.
    */
   class?: string;
@@ -392,6 +399,14 @@ export type AppActionHandler<Context extends AppActionContext = AppActionContext
 export type AppAction<Context extends AppActionContext = AppActionContext> = {
   action: AppActionHandler<Context>;
   binding?: ActionBinding;
+  /**
+   * Behaviors this action needs while the AppObject is current.
+   *
+   * `AppController` installs the union of these with {@link AppObject.behaviors}
+   * and menu-item `requires`. Prefer declaring menu-bound behaviors on the
+   * menu item; use action `requires` when the action must work without its row.
+   */
+  requires?: readonly AppObjectBehavior[];
 };
 
 /**
@@ -553,10 +568,15 @@ export interface AppObject<
    */
   settings?: UIFlags;
   /**
-   * Optional behaviors installed while this AppObject is current.
+   * App-wide behaviors installed while this AppObject is current.
    *
-   * Each behavior receives an AppObject-scoped {@link InputScope} and can
-   * intercept back / menu focus. See {@link AppObjectBehavior}.
+   * For menu-bound behaviors such as MixedMenuLiveEdit, prefer `requires` on
+   * the menu item (or catalog action) so the row carries its dependency. Keep
+   * this list for behaviors that apply to the whole AppObject, especially
+   * those needed during `onStart`.
+   *
+   * `AppController` deduplicates by object identity with item/action
+   * `requires`.
    */
   behaviors?: AppObjectBehavior[];
   /**

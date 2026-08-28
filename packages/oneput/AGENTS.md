@@ -40,6 +40,8 @@ AppObjects represent screens/states in the app stack with actions, menu, and lif
 
 Exclusive semantic ownership of typed input for live-edit and similar behaviors.
 `InputScope` is AppObject-scoped; closing it on suspend/exit releases claims.
+`AppController` installs behaviors from `AppObject.behaviors`, action `requires`,
+and base-menu item `requires` (identity union).
 
 - Helper: `packages/oneput/src/lib/oneput/controllers/helpers/InputClaims.ts`
 - API: `InputController.openScope()` / `hasActiveClaim`

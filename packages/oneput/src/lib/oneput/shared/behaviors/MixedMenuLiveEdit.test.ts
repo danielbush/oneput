@@ -10,7 +10,7 @@ describe('MixedMenuLiveEdit', () => {
   });
 
   it('acquires a claim on activate and restores filter query on back', async () => {
-    // arrange
+    // arrange — item `requires` installs the behavior (no AppObject.behaviors)
     const ctl = Controller.createNull({ menuOpen: true });
     const input = ctl.currentProps.inputElement as HTMLInputElement;
     document.body.appendChild(input);
@@ -18,7 +18,6 @@ describe('MixedMenuLiveEdit', () => {
     let title = 'Ada';
     const liveEdit = MixedMenuLiveEdit.create(ctl);
     const app: AppObject = {
-      behaviors: [liveEdit],
       settings: {
         enableFilter: true,
         clearInputAfterAction: false,
@@ -54,13 +53,16 @@ describe('MixedMenuLiveEdit', () => {
     await ctl.input.setInputValue('lab');
     expect(ctl.menu.enableFilter).toBe(true);
 
-    // act — activate editable row
-    const items = app.menu?.().items ?? [];
-    const item = items[0];
-    if (!item || typeof item === 'string' || !('action' in item)) {
+    // act — activate editable row from the installed base menu
+    const item = ctl.menu.baseMenuItems[0];
+    if (!item || !('action' in item) || !item.action) {
       throw new Error('expected live-edit menu item');
     }
-    item.action?.(ctl);
+    if (!('requires' in item)) {
+      throw new Error('expected requires on live-edit item');
+    }
+    expect(item.requires).toContain(liveEdit);
+    item.action(ctl);
     await ctl.input.typeText(' Lovelace');
 
     // assert — claimed
@@ -75,5 +77,46 @@ describe('MixedMenuLiveEdit', () => {
     expect(liveEdit.editingItemId).toBeUndefined();
     expect(ctl.input.getInputValue()).toBe('lab');
     expect(ctl.menu.enableFilter).toBe(true);
+  });
+
+  it('releases the claim when the behavior is detached', async () => {
+    // arrange
+    const ctl = Controller.createNull({ menuOpen: true });
+    const input = ctl.currentProps.inputElement as HTMLInputElement;
+    document.body.appendChild(input);
+
+    const liveEdit = MixedMenuLiveEdit.create(ctl);
+    const row = liveEdit.item({
+      id: 'node-label',
+      value: {
+        read: () => 'Ada',
+        write: () => {}
+      },
+      render: ({ value }) =>
+        stdMenuItem({
+          id: 'node-label',
+          textContent: value
+        })
+    });
+    ctl.app.run({
+      settings: { clearInputAfterAction: false },
+      menu: () => ({
+        id: 'mixed',
+        items: [row]
+      })
+    });
+    await ctl.menu.invalidate();
+
+    // act — activate (behavior attached via item requires on the base menu)
+    row.action?.(ctl);
+    expect(liveEdit.editing).toBe(true);
+    expect(ctl.input.hasActiveClaim).toBe(true);
+
+    // act — leave the AppObject (detaches behavior / closes scope)
+    ctl.app.run({ onStart: () => {} });
+
+    // assert
+    expect(liveEdit.editing).toBe(false);
+    expect(ctl.input.hasActiveClaim).toBe(false);
   });
 });

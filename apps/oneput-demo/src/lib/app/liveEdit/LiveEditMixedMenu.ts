@@ -23,11 +23,8 @@ export class LiveEditMixedMenu implements AppObject {
     role: 'Computer scientist'
   };
 
-  behaviors: MixedMenuLiveEdit[];
-
   private constructor(private ctl: Controller) {
     this.liveEdit = MixedMenuLiveEdit.create(ctl);
-    this.behaviors = [this.liveEdit];
   }
 
   layout = {

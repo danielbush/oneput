@@ -26,12 +26,12 @@ An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects 
 interface AppObject {
   layout?                — layout factory and params applied before start/resume
   settings?              — UIFlags applied on start
-  behaviors?             — AppObjectBehavior list (attach InputScope; back/focus hooks)
+  behaviors?             — app-wide AppObjectBehavior list (needed in onStart, etc.)
   onStart()              — called when this AppObject takes control
   onResume?(result?)     — called when a child exits back to this one
   onExit?()              — cleanup when this AppObject exits
-  actions?               — actions with optional key bindings
-  menu?                  — declarative menu items
+  actions?               — actions with optional key bindings and `requires`
+  menu?                  — declarative menu items (rows may declare `requires`)
 }
 ```
 
@@ -39,9 +39,12 @@ interface AppObject {
 `InputScope`. `claim()` suspends the previous input owner (filter / generative /
 value / placeholder), routes semantic typing to `write`, and restores on
 `release` (default `resumePrevious: 'restore'`). `AppController` opens a scope
-when installing behaviors and closes it on suspend / exit. Raw `input-change`
-still broadcasts; AppObject `onInputChange` is skipped while a claim is active.
-`MixedMenuLiveEdit` is the mixed-menu LIVE_EDIT behavior on top of claims.
+per AppObject and closes it on suspend / exit. It installs the union of
+`AppObject.behaviors`, action `requires`, and base-menu item `requires`
+(deduped by identity). Raw `input-change` still broadcasts; AppObject
+`onInputChange` is skipped while a claim is active. `MixedMenuLiveEdit` is the
+mixed-menu LIVE_EDIT behavior; its rows carry `requires` so the AppObject need
+not list the behavior explicitly.
 
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can

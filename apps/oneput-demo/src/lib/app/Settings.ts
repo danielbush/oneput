@@ -43,8 +43,10 @@ export class Settings implements AppObject {
     }
   ) {}
 
-  onStart = () => {
-    this.run();
+  layout = {
+    params: {
+      menuTitle: 'Settings'
+    }
   };
 
   menu = () => ({
@@ -76,12 +78,4 @@ export class Settings implements AppObject {
       })
     ]
   });
-
-  run = () => {
-    this.ctl.ui.update({
-      params: {
-        menuTitle: 'Settings'
-      }
-    });
-  };
 }

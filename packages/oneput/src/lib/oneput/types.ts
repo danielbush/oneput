@@ -505,9 +505,8 @@ export interface AppObject<
    * The child can return a payload via ctl.app.exit({ payload }) which will be
    * passed to this method.
    *
-   * If not implemented, onStart will be called instead.  onStart will not be
-   * passed the result.  So you should implement onResume if you want to pass a
-   * result back to this instance.
+   * If this hook is not defined, no lifecycle hook runs. The controller still
+   * restores declared settings, layout, menu, and actions.
    */
   onResume?: (result?: { payload?: ResumePayload }) => void;
   /**

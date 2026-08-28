@@ -43,6 +43,10 @@ AppObject (merged into current settings). When an AppObject becomes current,
 child params (e.g. menu footer) do not stick on resume. Handle UI flags
 separately with `ctl.ui.update({ flags })`.
 
+When a child exits, `onResume` runs only if the parent defines it. There is no
+fallback to `onStart`. Declared settings, layout, menu, and actions are still
+restored by the controller.
+
 **Actions** let an AppObject declare bindings alongside the action handler. The `binding` field uses `ActionBinding` (no `action` callback — the action is the sibling field):
 
 ```ts

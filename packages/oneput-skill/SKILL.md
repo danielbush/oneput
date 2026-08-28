@@ -79,8 +79,11 @@ export class MyScreen implements AppObject {
 ### Lifecycle
 
 1. `onStart()` — called when the AppObject takes control
-2. `onResume(result?)` — called when a child exits back to this one; if not implemented, `onStart` is called instead
+2. `onResume(result?)` — optionally called when a child exits back to this one
 3. `onExit()` — cleanup when this AppObject exits
+
+If `onResume` is not defined, no lifecycle hook runs when a child exits. The
+controller still restores declared settings, layout, menu, and actions.
 
 Menu lifecycle hooks receive resolved menu state:
 

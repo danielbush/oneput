@@ -180,6 +180,27 @@ describe('AppController', () => {
     });
   });
 
+  describe('AppObject lifecycle', () => {
+    it('keeps parent state when onResume is not defined', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      let parentState = 'initial';
+      ctl.app.run({
+        onStart: () => {
+          parentState = 'started';
+        }
+      });
+      parentState = 'changed';
+      ctl.app.run({ onStart: () => {} });
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(parentState).toBe('changed');
+    });
+  });
+
   describe('AppObject.settings', () => {
     test('focusInputOnStart - default - focuses', async () => {
       // arrange

@@ -572,11 +572,7 @@ export class AppController {
     if (appVal) {
       this.setCurrent(appVal, false);
       this.runBefore();
-      if (appVal.onResume) {
-        appVal.onResume(result);
-      } else {
-        appVal.onStart?.();
-      }
+      appVal.onResume?.(result);
       this.runAfter();
       return;
     }

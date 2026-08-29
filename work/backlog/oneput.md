@@ -203,7 +203,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - refactor: UI_PATTERN
   - put all your AppObjects, layouts in a dir eg ui/
   - as much as possible extract out business logic so it doesn't go in ui/
-  - I would put catalogs outside
+  - I would put catalogs inside too ui/_catalog.ts
+    - and then all the actions in the catalog live outside but the catalog pulls them in and defines when they show
   - the ui init can stay in ui/; it gets passed to sveltekit in the page.svelte
   - so ui/ is just the coordination of events and rendering of content
   - we could even extract styling and themeing

@@ -41,12 +41,17 @@ AppObjects represent screens/states in the app stack with actions, menu, and lif
 Exclusive semantic ownership of typed input for live-edit and similar flows.
 `InputScope` is AppObject-scoped; closing it on suspend/exit releases claims.
 Claims declare their own termination via `release` (Back, focus leave, owner
-removed). `AppController` routes those events to `InputController`.
+removed). `AppController` routes those events to `InputController`, then runs
+`MenuItem.onFocus` (for claim-on-focus rows), then `AppObject.onMenuItemFocus`.
 
 - Helper: `packages/oneput/src/lib/oneput/controllers/helpers/InputClaims.ts`
 - API: `InputController.openScope()` / `claim()` / `handleBack()` /
   `handleMenuItemFocus()` / `notifyBaseMenuChanged()`
-- Coordinator: `packages/oneput/src/lib/oneput/shared/behaviors/MixedMenuLiveEdit.ts`
+- Coordinators:
+  - `shared/behaviors/MixedMenuLiveEdit.ts` — claim on activate (mixed/filtered)
+  - `shared/behaviors/FocusedMenuLiveEdit.ts` — claim on focus (whole editable menu)
+- Shared claim builder: `shared/behaviors/liveEditClaim.ts`
+- Per-row focus hook: `MenuItem.onFocus` + `MenuItemFocusCause` in `types.ts`
 
 ### Controller
 

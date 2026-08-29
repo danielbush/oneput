@@ -212,21 +212,9 @@ AppObject's `InputScope` (suspend / exit) releases any remaining claim.
 
 There are two patterns.
 
-### Whole-menu editing
+### GATED_LIVE_EDIT aka Mixed-menu editing
 
-Use this when all relevant rows are editable:
-
-- Disable filtering for the AppObject.
-- `onMenuItemFocus` transfers input ownership to the focused row.
-- `onInputChange` writes the draft and invalidates the menu preview.
-- `onMenuUpdate` handles replacement of the item at the same focus index. Ignore
-  `cause: 'input-change'` so the callback does not overwrite what the user just
-  typed.
-
-`AddEntry` in TomatoTimer is a larger example. `LiveEditWholeMenu` in
-`oneput-demo` is the minimal example.
-
-### MIXED_LIVE_EDIT - Mixed-menu editing
+COMMENT: "gated" means you have to activate the menu item to do the LIVE_EDIT; "mixed" means you might have a normal menu that you can filter on but you want to add a LIVE_EDIT item to it; this is where we have to be careful because the menu may want to filter and that can cause issues if LIVE_EDIT is activated on focus (ungated) rather than menu item activation...
 
 Use this when typing normally filters a menu that contains some editable rows.
 Focusing an editable row is not enough to edit it. The user must activate the
@@ -252,6 +240,48 @@ Set `clearInputAfterAction: false` so activate does not clear the claimed value.
 
 For multiline input, validation, or commit/cancel workflows, launch a dedicated
 editor AppObject instead of adding more modes to the current AppObject.
+
+### FOCUSED_LIVE_EDIT (ungated)
+
+A row claims the input when it receives menu focus. It does not claim during
+`menu()` construction, and it does not need an action.
+
+Use this only when filtering is off and most or all focusable rows are editable:
+
+```typescript
+settings = { enableFilter: false };
+```
+
+Prefer `FocusedMenuLiveEdit` (`shared/behaviors/FocusedMenuLiveEdit.ts`). Rows
+from `liveEdit.item()` / `bind()` attach `MenuItem.onFocus`, which claims the
+shared input. Moving focus hands over: previous claim releases, then the new
+row claims. Claiming the same row again is idempotent (safe under invalidate).
+
+Claim-on-focus in a filtered mixed menu is hazardous:
+
+- Opening the menu can focus an editable row and immediately replace the filter input.
+- Filtering can move focus onto an editable row while the user is typing.
+- Pointer hover can unexpectedly start editing.
+- An invalidation can appear to re-enter editing.
+
+For mixed filtered menus, prefer `MixedMenuLiveEdit` (claim on activate).
+
+If you need claim-on-focus in a mixed menu anyway, filter by
+`MenuItemFocusCause` and accept only deliberate keyboard navigation:
+
+```typescript
+onFocus: (_ctl, { cause }) => {
+  if (cause === 'keyboard') {
+    this.claim(id, binding);
+  }
+};
+```
+
+Do not claim on `open`, `filter`, or `invalidate` in that case. Pointer
+activation can still use the action path.
+
+`LiveEditWholeMenu` in `oneput-demo` is the minimal whole-menu example.
+`AddEntry` in TomatoTimer is a larger example of the same idea.
 
 ## INPUT_CLAIM's
 

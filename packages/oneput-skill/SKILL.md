@@ -289,18 +289,19 @@ pullToggleMenuItem({
 A live-edit row uses the shared Oneput input to edit the value represented by
 the row. Give the input one owner at a time via an **input claim**:
 
-- If the whole menu is editable, set `enableFilter: false`. Use
-  `onMenuItemFocus` to select the field and `onInputChange` to update state and
-  invalidate its preview.
-- In a mixed menu, use `MixedMenuLiveEdit`. `liveEdit.item()` / `bind()` /
-  `field()` claim the shared input with a release policy (Back, focus leave,
-  owner removed). Activate again, move focus, or back releases the claim and
-  restores the previous filter query by default (`resumePrevious: 'restore'`).
+- If the whole menu is editable, set `enableFilter: false` and use
+  `FocusedMenuLiveEdit`. Rows claim on menu focus via `MenuItem.onFocus` (no
+  activate action). Safe only when filtering is off.
+- In a mixed filtered menu, use `MixedMenuLiveEdit`. `liveEdit.item()` /
+  `bind()` / `field()` claim on activate with a release policy (Back, focus
+  leave, owner removed). Activate again, move focus, or back releases the
+  claim and restores the previous filter query by default
+  (`resumePrevious: 'restore'`).
 - Set `clearInputAfterAction: false` so activate does not clear the claimed
   value.
-- Use `onMenuUpdate` when a rebuild can replace the focused item without moving
-  its index. Do not copy the input back for `cause: "input-change"`; that would
-  overwrite the user's latest edit.
+- Do not use claim-on-focus in a filtered mixed menu: open, filter, pointer
+  hover, and invalidate can steal the input. If you must, filter
+  `MenuItemFocusCause` and claim only on `keyboard`.
 - Use a child editor AppObject when the field needs multiline input,
   validation, or explicit commit and cancel behavior.
 

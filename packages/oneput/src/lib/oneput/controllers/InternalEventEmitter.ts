@@ -1,5 +1,10 @@
 import type { KeyBindingMap } from '../lib/bindings.js';
-import type { InputSelectionState, MenuItem, MenuUpdateCause } from '../types.js';
+import type {
+  InputSelectionState,
+  MenuItem,
+  MenuItemFocusCause,
+  MenuUpdateCause
+} from '../types.js';
 import type { AppChange } from './AppController.js';
 
 export type InputChangePayload = {
@@ -52,7 +57,12 @@ export type MenuItemFocusEvent = {
    * But we require the key to exist to help type emit logic, so use "|
    * undefined" instead of "?".
    */
-  payload: { menuId: string; index: number; menuItem: MenuItem | undefined };
+  payload: {
+    menuId: string;
+    index: number;
+    menuItem: MenuItem | undefined;
+    cause: MenuItemFocusCause;
+  };
 };
 export type MenuActionEvent = {
   type: 'menu-action';

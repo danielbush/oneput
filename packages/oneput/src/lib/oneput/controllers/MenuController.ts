@@ -3,6 +3,7 @@ import type {
   FocusBehaviour,
   MenuItem,
   MenuItemAny,
+  MenuItemFocusCause,
   MenuItemsGenFnAsync,
   MenuUpdateCause
 } from '../types.js';
@@ -19,9 +20,31 @@ import { tick } from 'svelte';
 type MenuInputMode = 'none' | 'filter' | 'generative';
 type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
 type SetDisplayedOptions = InvalidateOptions & { cause: MenuUpdateCause };
-type FocusedMenuItemPayload = { index: number; menuItem: MenuItem | undefined };
+type FocusedMenuItemPayload = {
+  index: number;
+  menuItem: MenuItem | undefined;
+  cause: MenuItemFocusCause;
+};
 type MenuItemFocusPayload = FocusedMenuItemPayload & { menuId: string };
-type MenuUpdatePayload = FocusedMenuItemPayload & { cause: MenuUpdateCause; menuId: string };
+type MenuUpdatePayload = {
+  index: number;
+  menuItem: MenuItem | undefined;
+  cause: MenuUpdateCause;
+  menuId: string;
+};
+
+function focusCauseFromMenuUpdate(cause: MenuUpdateCause): MenuItemFocusCause {
+  switch (cause) {
+    case 'open':
+      return 'open';
+    case 'input-change':
+      return 'filter';
+    case 'invalidate':
+      return 'invalidate';
+    case 'set-menu':
+      return 'programmatic';
+  }
+}
 
 /**
  * `filter` and `generative` modes are mutually exclusive.
@@ -116,7 +139,7 @@ export class MenuController {
       }
       this.pointerFocusGuard.acceptEnter(pointer);
       this.ctl.currentProps.menuItemFocus = [index, false];
-      this.publishMenuItemFocus({ index, menuItem: item });
+      this.publishMenuItemFocus({ index, menuItem: item, cause: 'pointer' });
     };
     this.ctl.currentProps.onMenuOutroEnd = () => {
       this.completeMenuOutro();
@@ -316,6 +339,7 @@ export class MenuController {
     }
     // Hold callbacks until rows and focus agree.
     this.batchMenuNotifications(() => {
+      const focusCause = focusCauseFromMenuUpdate(cause);
       // Filter only when the input channel owns filtering.
       const result =
         this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
@@ -328,13 +352,13 @@ export class MenuController {
         // Apply a defined result; undefined keeps the current rows.
         this.ctl.currentProps.menuItems = result.items;
         // Prefer the focus supplied by the filter.
-        if (result.focusItemId && this.focusMenuItemById(result.focusItemId)) {
+        if (result.focusItemId && this.focusMenuItemById(result.focusItemId, focusCause)) {
           this.publishMenuUpdate(cause);
           return;
         }
       }
       // Otherwise, use the requested or menu focus rule.
-      this.runFocusBehaviour(focusBehaviour ?? this.currentMenu.focusBehaviour);
+      this.runFocusBehaviour(focusBehaviour ?? this.currentMenu.focusBehaviour, focusCause);
       // Publish after rows and focus are stable.
       this.publishMenuUpdate(cause);
     });
@@ -571,7 +595,7 @@ export class MenuController {
     }
     this.menuItemFocusDisabled = !on;
     if (on) {
-      this.runFocusBehaviour();
+      this.runFocusBehaviour(undefined, 'programmatic');
     } else {
       this.clearMenuItemFocus();
     }
@@ -585,10 +609,14 @@ export class MenuController {
     this.ctl.currentProps.menuItemFocus = [-1, false];
   }
 
-  focusMenuItemByIndex(index: number, focus: boolean) {
+  focusMenuItemByIndex(
+    index: number,
+    scrollIntoView: boolean,
+    cause: MenuItemFocusCause = 'programmatic'
+  ) {
     if (!this.enableMenuItemFocus) return;
     const { index: safeIndex, menuItem } = this.currentMenu.getSafe(index);
-    this.setMenuItemFocus(safeIndex, menuItem, focus);
+    this.setMenuItemFocus(safeIndex, menuItem, scrollIntoView, cause);
   }
 
   /**
@@ -598,13 +626,14 @@ export class MenuController {
   private setMenuItemFocus(
     index: number,
     menuItem: MenuItemAny | undefined,
-    scrollIntoView: boolean
+    scrollIntoView: boolean,
+    cause: MenuItemFocusCause
   ) {
     if (scrollIntoView) {
       this.pointerFocusGuard.arm();
     }
     this.ctl.currentProps.menuItemFocus = [index, scrollIntoView];
-    this.publishMenuItemFocus({ index, menuItem });
+    this.publishMenuItemFocus({ index, menuItem, cause });
   }
 
   focusNextMenuItem(): boolean {
@@ -616,7 +645,7 @@ export class MenuController {
     ) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.setMenuItemFocus(i, menuItem, true);
+        this.setMenuItemFocus(i, menuItem, true, 'keyboard');
         return true;
       }
     }
@@ -632,42 +661,42 @@ export class MenuController {
     ) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.setMenuItemFocus(i, menuItem, true);
+        this.setMenuItemFocus(i, menuItem, true, 'keyboard');
         return true;
       }
     }
     return false;
   }
 
-  focusFirstMenuItem(): boolean {
+  focusFirstMenuItem(cause: MenuItemFocusCause = 'programmatic'): boolean {
     if (!this.enableMenuItemFocus) return false;
     for (let i = 0; i < this.currentMenu.displayedMenuItemCount; i++) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.setMenuItemFocus(i, menuItem, true);
+        this.setMenuItemFocus(i, menuItem, true, cause);
         return true;
       }
     }
     return false;
   }
 
-  focusLastMenuItem(): boolean {
+  focusLastMenuItem(cause: MenuItemFocusCause = 'programmatic'): boolean {
     if (!this.enableMenuItemFocus) return false;
     for (let i = this.currentMenu.displayedMenuItemCount - 1; i >= 0; i--) {
       const menuItem = this.currentMenu.getFocusable(i);
       if (menuItem) {
-        this.setMenuItemFocus(i, menuItem, true);
+        this.setMenuItemFocus(i, menuItem, true, cause);
         return true;
       }
     }
     return false;
   }
 
-  focusMenuItemById(id: string) {
+  focusMenuItemById(id: string, cause: MenuItemFocusCause = 'programmatic') {
     if (!this.enableMenuItemFocus) return false;
     const index = this.currentMenu.getIndexFromId(id);
     if (index !== null) {
-      this.focusMenuItemByIndex(index, true);
+      this.focusMenuItemByIndex(index, true, cause);
       return true;
     }
     return false;
@@ -689,7 +718,10 @@ export class MenuController {
     this.focusBehaviour = this.defaultFocusBehaviour;
   }
 
-  private runFocusBehaviour(focusBehaviour?: FocusBehaviour) {
+  private runFocusBehaviour(
+    focusBehaviour: FocusBehaviour | undefined,
+    cause: MenuItemFocusCause
+  ) {
     if (!this.enableMenuItemFocus) {
       this.clearMenuItemFocus();
       return;
@@ -699,24 +731,24 @@ export class MenuController {
       case 'last-action,first': {
         const lastActionId = this.ctl.app.getLastMenuActionId(this.currentMenu.menuId);
         if (lastActionId) {
-          if (this.focusMenuItemById(lastActionId)) {
+          if (this.focusMenuItemById(lastActionId, cause)) {
             return;
           }
         }
-        this.focusFirstMenuItem();
+        this.focusFirstMenuItem(cause);
         return;
       }
       case 'first':
-        this.focusFirstMenuItem();
+        this.focusFirstMenuItem(cause);
         return;
       case 'last':
-        this.focusLastMenuItem();
+        this.focusLastMenuItem(cause);
         return;
       case 'none': {
         // Don't reshuffle focus, but never leave it on an ignored/disabled row
         // (e.g. chat transcript above Back/Clear).
         if (!this.currentMenu.getFocusable(this.currentMenu.focusedMenuItemIndex)) {
-          this.focusFirstMenuItem();
+          this.focusFirstMenuItem(cause);
         }
         return;
       }

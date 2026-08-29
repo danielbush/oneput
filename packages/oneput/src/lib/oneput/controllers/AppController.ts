@@ -402,9 +402,11 @@ export class AppController {
     this.unsubscribeMenuItemFocus?.();
     this.unsubscribeMenuItemFocus = this.ctl.events.on(
       'menu-item-focus',
-      ({ menuId, index, menuItem }) => {
+      ({ menuId, index, menuItem, cause }) => {
+        // Release previous claim first, then let the new row claim, then AppObject.
         this.ctl.input.handleMenuItemFocus({ menuItem });
-        this.current?.onMenuItemFocus?.({ menuId, index, menuItem });
+        menuItem?.onFocus?.(this.ctl, { cause });
+        this.current?.onMenuItemFocus?.({ menuId, index, menuItem, cause });
       }
     );
     this.unsubscribeMenuUpdate?.();

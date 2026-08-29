@@ -37,11 +37,12 @@ interface AppObject {
 **Input claims.** `InputController.openScope()` / `claim()` give exclusive
 semantic ownership of typed input. `claim({ release })` declares when the claim
 ends (Back, menu focus leave, owner row removed); closing the AppObject scope
-always releases. `AppController` opens a scope per AppObject and routes Back /
-menu focus to the input system before AppObject hooks. Raw `input-change` still
-broadcasts; AppObject `onInputChange` is skipped while a claim is active.
-`MixedMenuLiveEdit` is a thin LIVE_EDIT coordinator that claims with that
-release policy.
+always releases. On menu focus, `AppController` releases claims that leave their
+owner, then runs `MenuItem.onFocus`, then `AppObject.onMenuItemFocus`. Raw
+`input-change` still broadcasts; AppObject `onInputChange` is skipped while a
+claim is active. Two LIVE_EDIT coordinators share `liveEditClaim.ts`:
+`MixedMenuLiveEdit` (claim on activate) and `FocusedMenuLiveEdit` (claim on
+focus).
 
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can
@@ -140,7 +141,9 @@ contract). See `docs/CONCEPTS.md`.
 - `bindings-change` — when key bindings are updated
 - `input-change` — when the input value changes, carrying before/after value and range snapshots so consumers can reason about the edit transition
 - `menu-open-change` — when menu opens/closes
-- `menu-item-focus` — when focused menu item changes, with its menu id
+- `menu-item-focus` — when focused menu item changes, with menu id and
+  `MenuItemFocusCause` (`keyboard` | `pointer` | `open` | `filter` |
+  `invalidate` | `programmatic`)
 - `menu-action` — when a menu action fires
 - `set-menu-items` — after displayed menu rows and synthetic focus are resolved, with the outer update cause
 - `selection-change` — when input selection state changes

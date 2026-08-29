@@ -62,6 +62,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - fix: disable window scrolling when menu open
   - example: Pick a file in oneput-demo;
   - COMMENT: I'm fine just to target the default document scroll on documents that exceed the browser viewport; let's not worry about other scrollable elements for now (these might have to respond to a class set by oneput when the menu is open)
+- fix: if menu items can receive the native focus (because they're buttons), should we set a focusin to update the synthetic menu item focus?  Or do we just prevent tab focus altogether?
+  - COMMENT: we might be preventing, but not sure.  That would be the simplest.
 
 ## feat
 
@@ -194,6 +196,17 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md
+  - COMMENT: I'd move the architecture out of AGENTS and merge into architecture.md; the hard question is architecture.md vs CONCEPTS.md - CONCEPT's is more general and is how I keep my head wrapped around the "why" as well as the "what"; maybe we can ditch architecture.md in favour of a combination of good CONCEPTS.md and using DEEP_MODULE's (surfacing key constructs and interfaces that represent the skeleton of the system or subsystem).
+- refactor: DEEP_MODULES + interfaces
+  - COMMENT: idea is to push detail in to subdirs, expose the main load-bearing skeleton delineated mostly in interfaces; that leaves a complex core, still, in the form of the core controllers (AppController, etc); these feel like they need more than just this approach; we can try to extract things out like INPUT_CLAIM's, that helps; but I'm wondering if this core becomes like a kernel in an operating system
+- refactor: UI_PATTERN
+  - put all your AppObjects, layouts in a dir eg ui/
+  - as much as possible extract out business logic so it doesn't go in ui/
+  - I would put catalogs outside
+  - the ui init can stay in ui/; it gets passed to sveltekit in the page.svelte
+  - so ui/ is just the coordination of events and rendering of content
+  - we could even extract styling and themeing
 - refactor: remove any reliance on "lucide" in packages/oneput/src/lib/oneput/lib/icons.ts
   - COMMENT: I think it's just class names for missing icon
 - refactor: BindingsEditor - split up the AppObjects; use `menu()`;

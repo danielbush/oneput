@@ -236,12 +236,31 @@ export type Menu = {
   footer?: FlexParams;
 };
 
+/**
+ * Why synthetic menu focus moved to an item.
+ *
+ * Use this in {@link MenuItem.onFocus} when claim-on-focus must ignore open,
+ * filter, invalidate, or pointer hover.
+ */
+export type MenuItemFocusCause =
+  | 'keyboard'
+  | 'pointer'
+  | 'open'
+  | 'filter'
+  | 'invalidate'
+  | 'programmatic';
+
 export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>> = FlexParams & {
   /**
    * Instructs Oneput renderer to add a pointerdown handler to run this action
    * on top-level menu items.
    */
   action?: (c: Controller) => void;
+  /**
+   * Runs after claim release-on-focus-leave, before AppObject `onMenuItemFocus`.
+   * Prefer for per-row claim-on-focus (see FocusedMenuLiveEdit).
+   */
+  onFocus?: (ctl: Controller, context: { cause: MenuItemFocusCause }) => void;
   /**
    * ignored = false means menu item can be focused and selected and triggered.
    */
@@ -590,6 +609,7 @@ export interface AppObject<
     menuId: string;
     menuItem: MenuItem | undefined;
     index: number;
+    cause: MenuItemFocusCause;
   }) => void;
   /**
    * Called after the displayed menu rows and synthetic focus are resolved.

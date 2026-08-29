@@ -1,25 +1,14 @@
 import type { Controller } from '../../controllers/controller.js';
 import type { InputClaimHandle, MenuItem } from '../../types.js';
+import {
+  claimLiveEdit,
+  type LiveEditBinding,
+  type LiveEditItemParams,
+  type LiveEditRender,
+  type LiveEditValue
+} from './liveEditClaim.js';
 
-export type LiveEditValue = {
-  read: () => string;
-  write: (value: string) => void;
-};
-
-export type LiveEditBinding = {
-  value: LiveEditValue;
-  placeholder?: string;
-  textArea?: boolean | { rows: number };
-  /** Default `'restore'`. */
-  resumePrevious?: 'restore' | 'clear';
-};
-
-export type LiveEditRender = (state: { value: string; editing: boolean }) => MenuItem;
-
-export type LiveEditItemParams = LiveEditBinding & {
-  id: string;
-  render: LiveEditRender;
-};
+export type { LiveEditBinding, LiveEditItemParams, LiveEditRender, LiveEditValue };
 
 /**
  * Stable field identity shared by a catalog action and its menu row.
@@ -36,6 +25,8 @@ export type LiveEditField = {
  *
  * Prefer `clearInputAfterAction: false` so activate does not wipe the claimed
  * value.
+ *
+ * For whole editable menus with filtering off, use {@link FocusedMenuLiveEdit}.
  */
 export class MixedMenuLiveEdit {
   static create(ctl: Controller) {
@@ -124,26 +115,11 @@ export class MixedMenuLiveEdit {
 
     this.active?.claim.release('replaced');
 
-    const claim = this.ctl.input.claim({
-      owner: { type: 'menu-item', itemId },
-      value: {
-        read: binding.value.read,
-        write: (next) => {
-          binding.value.write(next);
-          void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
-        }
-      },
-      placeholder: binding.placeholder,
-      textArea: binding.textArea,
-      select: 'all',
-      resumePrevious: binding.resumePrevious ?? 'restore',
-      release: {
-        back: 'release-and-handle',
-        menuFocusLeavesOwner: true,
-        ownerRemoved: true
-      },
-      onRelease: () => {
-        if (this.active?.claim !== claim) {
+    const claim = claimLiveEdit(this.ctl, {
+      itemId,
+      binding,
+      onRelease: (released) => {
+        if (this.active?.claim !== released) {
           return;
         }
         this.active = undefined;

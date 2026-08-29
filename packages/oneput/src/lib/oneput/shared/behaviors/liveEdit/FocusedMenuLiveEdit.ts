@@ -1,5 +1,5 @@
-import type { Controller } from '../../controllers/controller.js';
-import type { InputClaimHandle, MenuItem } from '../../types.js';
+import type { Controller } from '../../../controllers/controller.js';
+import type { InputClaimHandle, MenuItem } from '../../../types.js';
 import {
   claimLiveEdit,
   type LiveEditBinding,
@@ -16,7 +16,7 @@ export type { LiveEditBinding, LiveEditItemParams, LiveEditRender, LiveEditValue
  *
  * Use when filtering is off and most or all focusable rows are editable.
  * Claim-on-focus in a filtered mixed menu is hazardous (open/filter/pointer
- * can steal the input). Prefer {@link MixedMenuLiveEdit} there.
+ * can steal the input). Prefer {@link MenuLiveEdit} there.
  *
  * Claiming the current row is idempotent so invalidate can re-report focus.
  */

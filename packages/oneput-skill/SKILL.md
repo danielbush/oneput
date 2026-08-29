@@ -290,13 +290,13 @@ A live-edit row uses the shared Oneput input to edit the value represented by
 the row. Give the input one owner at a time via an **input claim**:
 
 - If the whole menu is editable, set `enableFilter: false` and use
-  `FocusedMenuLiveEdit`. Rows claim on menu focus via `MenuItem.onFocus` (no
-  activate action). Safe only when filtering is off.
-- In a mixed filtered menu, use `MixedMenuLiveEdit`. `liveEdit.item()` /
-  `bind()` / `field()` claim on activate with a release policy (Back, focus
-  leave, owner removed). Activate again, move focus, or back releases the
-  claim and restores the previous filter query by default
-  (`resumePrevious: 'restore'`).
+  `FocusedMenuLiveEdit` (`shared/behaviors/liveEdit/`). Rows claim on menu
+  focus via `MenuItem.onFocus` (no activate action). Safe only when filtering
+  is off.
+- In a mixed filtered menu, use `MenuLiveEdit`. `liveEdit.item()` / `bind()` /
+  `field()` claim on activate with a release policy (Back, focus leave, owner
+  removed). Activate again, move focus, or back releases the claim and
+  restores the previous filter query by default (`resumePrevious: 'restore'`).
 - Set `clearInputAfterAction: false` so activate does not clear the claimed
   value.
 - Do not use claim-on-focus in a filtered mixed menu: open, filter, pointer

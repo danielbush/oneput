@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { Controller } from '../../controllers/controller.js';
+import { Controller } from '../../../controllers/controller.js';
 import { FocusedMenuLiveEdit } from './FocusedMenuLiveEdit.js';
-import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import type { AppObject } from '../../types.js';
+import { stdMenuItem } from '../../ui/menuItems/stdMenuItem.js';
+import type { AppObject } from '../../../types.js';
 
 describe('FocusedMenuLiveEdit', () => {
   afterEach(() => {

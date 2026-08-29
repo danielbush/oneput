@@ -40,9 +40,9 @@ ends (Back, menu focus leave, owner row removed); closing the AppObject scope
 always releases. On menu focus, `AppController` releases claims that leave their
 owner, then runs `MenuItem.onFocus`, then `AppObject.onMenuItemFocus`. Raw
 `input-change` still broadcasts; AppObject `onInputChange` is skipped while a
-claim is active. Two LIVE_EDIT coordinators share `liveEditClaim.ts`:
-`MixedMenuLiveEdit` (claim on activate) and `FocusedMenuLiveEdit` (claim on
-focus).
+claim is active. Two LIVE_EDIT coordinators in `shared/behaviors/liveEdit/`
+share `liveEditClaim.ts`: `MenuLiveEdit` (claim on activate) and
+`FocusedMenuLiveEdit` (claim on focus).
 
 **Layout** is inherited through the AppObject stack. A root AppObject can provide
 `layout: { layout: (ctl, params) => UILayout, params }`; child AppObjects can

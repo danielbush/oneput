@@ -1,5 +1,5 @@
 import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/oneput';
-import { FocusedMenuLiveEdit } from '@oneput/oneput/shared/behaviors/FocusedMenuLiveEdit.js';
+import { FocusedMenuLiveEdit } from '@oneput/oneput/shared/behaviors/liveEdit/FocusedMenuLiveEdit.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../_icons.js';
 
@@ -11,10 +11,12 @@ const fields: Array<{ id: FieldId; label: string }> = [
   { id: 'location', label: 'Location' }
 ];
 
-/** Every row is editable: focus claims the shared input (FOCUSED_LIVE_EDIT). */
-export class LiveEditWholeMenu implements AppObject {
+/**
+ * Demonstrates FOCUSED_MENU_LIVE_EDIT - better for special purpose menus with filtering turned off.
+ */
+export class FocusedMenuLiveEditExample implements AppObject {
   static create(ctl: Controller) {
-    return new LiveEditWholeMenu(ctl);
+    return new FocusedMenuLiveEditExample(ctl);
   }
 
   private readonly liveEdit: FocusedMenuLiveEdit;

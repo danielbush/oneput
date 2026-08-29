@@ -220,7 +220,7 @@ Use this when typing normally filters a menu that contains some editable rows.
 Focusing an editable row is not enough to edit it. The user must activate the
 row to transfer input ownership.
 
-Prefer `MixedMenuLiveEdit` (`shared/behaviors/MixedMenuLiveEdit.ts`). Opted-in
+Prefer `MenuLiveEdit` (`shared/behaviors/liveEdit/MenuLiveEdit.ts`). Opted-in
 rows from `liveEdit.item()` / `bind()` / `field()` claim the shared input with
 a release policy (Back, focus leave, owner removed, AppObject exit).
 
@@ -252,10 +252,11 @@ Use this only when filtering is off and most or all focusable rows are editable:
 settings = { enableFilter: false };
 ```
 
-Prefer `FocusedMenuLiveEdit` (`shared/behaviors/FocusedMenuLiveEdit.ts`). Rows
-from `liveEdit.item()` / `bind()` attach `MenuItem.onFocus`, which claims the
-shared input. Moving focus hands over: previous claim releases, then the new
-row claims. Claiming the same row again is idempotent (safe under invalidate).
+Prefer `FocusedMenuLiveEdit` (`shared/behaviors/liveEdit/FocusedMenuLiveEdit.ts`).
+Rows from `liveEdit.item()` / `bind()` attach `MenuItem.onFocus`, which claims
+the shared input. Moving focus hands over: previous claim releases, then the
+new row claims. Claiming the same row again is idempotent (safe under
+invalidate).
 
 Claim-on-focus in a filtered mixed menu is hazardous:
 
@@ -264,7 +265,7 @@ Claim-on-focus in a filtered mixed menu is hazardous:
 - Pointer hover can unexpectedly start editing.
 - An invalidation can appear to re-enter editing.
 
-For mixed filtered menus, prefer `MixedMenuLiveEdit` (claim on activate).
+For mixed filtered menus, prefer `MenuLiveEdit` (claim on activate).
 
 If you need claim-on-focus in a mixed menu anyway, filter by
 `MenuItemFocusCause` and accept only deliberate keyboard navigation:
@@ -280,7 +281,7 @@ onFocus: (_ctl, { cause }) => {
 Do not claim on `open`, `filter`, or `invalidate` in that case. Pointer
 activation can still use the action path.
 
-`LiveEditWholeMenu` in `oneput-demo` is the minimal whole-menu example.
+`FocusedMenuLiveEditExample` in `oneput-demo` is the minimal whole-menu example.
 `AddEntry` in TomatoTimer is a larger example of the same idea.
 
 ## INPUT_CLAIM's

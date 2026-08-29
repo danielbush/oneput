@@ -47,10 +47,10 @@ removed). `AppController` routes those events to `InputController`, then runs
 - Helper: `packages/oneput/src/lib/oneput/controllers/helpers/InputClaims.ts`
 - API: `InputController.openScope()` / `claim()` / `handleBack()` /
   `handleMenuItemFocus()` / `notifyBaseMenuChanged()`
-- Coordinators:
-  - `shared/behaviors/MixedMenuLiveEdit.ts` — claim on activate (mixed/filtered)
-  - `shared/behaviors/FocusedMenuLiveEdit.ts` — claim on focus (whole editable menu)
-- Shared claim builder: `shared/behaviors/liveEditClaim.ts`
+- Coordinators (`shared/behaviors/liveEdit/`):
+  - `MenuLiveEdit.ts` — claim on activate (mixed/filtered)
+  - `FocusedMenuLiveEdit.ts` — claim on focus (whole editable menu)
+- Shared claim builder: `shared/behaviors/liveEdit/liveEditClaim.ts`
 - Per-row focus hook: `MenuItem.onFocus` + `MenuItemFocusCause` in `types.ts`
 
 ### Controller

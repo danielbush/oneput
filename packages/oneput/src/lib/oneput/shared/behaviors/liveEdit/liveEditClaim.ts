@@ -1,5 +1,5 @@
-import type { Controller } from '../../controllers/controller.js';
-import type { InputClaimHandle, MenuItem } from '../../types.js';
+import type { Controller } from '../../../controllers/controller.js';
+import type { InputClaimHandle, MenuItem } from '../../../types.js';
 
 export type LiveEditValue = {
   read: () => string;

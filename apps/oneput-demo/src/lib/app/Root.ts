@@ -8,8 +8,8 @@ import { FilePicker } from './FilePicker.js';
 import { TomatoTimer } from './tomatoTimer/TomatoTimer.js';
 import { isPickDateResult, SetDate } from '@oneput/oneput/shared/appObjects/SetDate.js';
 import { ElizaChat } from './ElizaChat.js';
-import { LiveEditWholeMenu } from './liveEdit/LiveEditWholeMenu.js';
-import { LiveEditMixedMenu } from './liveEdit/LiveEditMixedMenu.js';
+import { FocusedMenuLiveEditExample } from './liveEdit/FocusedMenuLiveEditExample.js';
+import { MenuLiveEditExample } from './liveEdit/MenuLiveEditExample.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { Layout, type LayoutSettings } from './_layout.js';
 import { icons } from './_icons.js';
@@ -28,8 +28,8 @@ export class Root implements AppObject {
       AsyncSearchExample: () => AsyncSearchExample.create(ctl),
       DirectoryBrowser: () => DirectoryBrowser.create(ctl),
       FilePicker: () => FilePicker.create(ctl),
-      LiveEditWholeMenu: () => LiveEditWholeMenu.create(ctl),
-      LiveEditMixedMenu: () => LiveEditMixedMenu.create(ctl),
+      FocusedMenuLiveEditExample: () => FocusedMenuLiveEditExample.create(ctl),
+      MenuLiveEditExample: () => MenuLiveEditExample.create(ctl),
       SetDate: () =>
         SetDate.create(ctl, {
           icons: {
@@ -55,8 +55,8 @@ export class Root implements AppObject {
       AsyncSearchExample: () => AsyncSearchExample;
       DirectoryBrowser: () => DirectoryBrowser;
       FilePicker: () => FilePicker;
-      LiveEditWholeMenu: () => LiveEditWholeMenu;
-      LiveEditMixedMenu: () => LiveEditMixedMenu;
+      FocusedMenuLiveEditExample: () => FocusedMenuLiveEditExample;
+      MenuLiveEditExample: () => MenuLiveEditExample;
       SetDate: () => SetDate;
       ElizaChat: () => ElizaChat;
     }
@@ -128,24 +128,24 @@ export class Root implements AppObject {
         stdMenuItem({
           id: 'live-edit-whole-menu',
           left: (b) => [b.icon(icons.Pencil)],
-          textContent: 'Live edit - whole menu',
+          textContent: 'FOCUSED_LIVE_EDIT example',
           bottom: {
             textContent: 'Every focused row owns the shared input; filtering is disabled.'
           },
           action: () => {
-            this.ctl.app.run(this.create.LiveEditWholeMenu());
+            this.ctl.app.run(this.create.FocusedMenuLiveEditExample());
           }
         }),
         stdMenuItem({
           id: 'live-edit-mixed-menu',
           left: (b) => [b.icon(icons.ListFilter)],
-          textContent: 'Live edit - mixed menu',
+          textContent: 'GATED_LIVE_EDIT example',
           bottom: {
             textContent:
               'Filter normally, then activate an editable row to transfer input ownership.'
           },
           action: () => {
-            this.ctl.app.run(this.create.LiveEditMixedMenu());
+            this.ctl.app.run(this.create.MenuLiveEditExample());
           }
         }),
         stdMenuItem({

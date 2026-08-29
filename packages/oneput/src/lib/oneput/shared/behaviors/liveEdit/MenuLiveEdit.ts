@@ -1,5 +1,5 @@
-import type { Controller } from '../../controllers/controller.js';
-import type { InputClaimHandle, MenuItem } from '../../types.js';
+import type { Controller } from '../../../controllers/controller.js';
+import type { InputClaimHandle, MenuItem } from '../../../types.js';
 import {
   claimLiveEdit,
   type LiveEditBinding,
@@ -19,18 +19,19 @@ export type LiveEditField = {
 };
 
 /**
- * Mixed-menu LIVE_EDIT coordinator: filtering owns the input until an opted-in
- * row is activated. Activation claims the shared input; the claim's release
- * policy ends editing on Back, focus leave, owner removal, or AppObject exit.
+ * LIVE_EDIT coordinator for mixed menus: filtering owns the input until an
+ * opted-in row is activated. Activation claims the shared input; the claim's
+ * release policy ends editing on Back, focus leave, owner removal, or
+ * AppObject exit.
  *
  * Prefer `clearInputAfterAction: false` so activate does not wipe the claimed
  * value.
  *
  * For whole editable menus with filtering off, use {@link FocusedMenuLiveEdit}.
  */
-export class MixedMenuLiveEdit {
+export class MenuLiveEdit {
   static create(ctl: Controller) {
-    return new MixedMenuLiveEdit(ctl);
+    return new MenuLiveEdit(ctl);
   }
 
   private active?: { itemId: string; claim: InputClaimHandle };

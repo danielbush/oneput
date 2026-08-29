@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { Controller } from '../../controllers/controller.js';
-import { MixedMenuLiveEdit } from './MixedMenuLiveEdit.js';
-import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
-import type { AppObject } from '../../types.js';
+import { Controller } from '../../../controllers/controller.js';
+import { MenuLiveEdit } from './MenuLiveEdit.js';
+import { stdMenuItem } from '../../ui/menuItems/stdMenuItem.js';
+import type { AppObject } from '../../../types.js';
 
-describe('MixedMenuLiveEdit', () => {
+describe('MenuLiveEdit', () => {
   afterEach(() => {
     document.body.innerHTML = '';
   });
@@ -16,7 +16,7 @@ describe('MixedMenuLiveEdit', () => {
     document.body.appendChild(input);
 
     let title = 'Ada';
-    const liveEdit = MixedMenuLiveEdit.create(ctl);
+    const liveEdit = MenuLiveEdit.create(ctl);
     const app: AppObject = {
       settings: {
         enableFilter: true,
@@ -81,7 +81,7 @@ describe('MixedMenuLiveEdit', () => {
     const input = ctl.currentProps.inputElement as HTMLInputElement;
     document.body.appendChild(input);
 
-    const liveEdit = MixedMenuLiveEdit.create(ctl);
+    const liveEdit = MenuLiveEdit.create(ctl);
     const row = liveEdit.item({
       id: 'node-label',
       value: {

@@ -1,5 +1,5 @@
 import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/oneput';
-import { MixedMenuLiveEdit } from '@oneput/oneput/shared/behaviors/MixedMenuLiveEdit.js';
+import { MenuLiveEdit } from '@oneput/oneput/shared/behaviors/liveEdit/MenuLiveEdit.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { icons } from '../_icons.js';
@@ -11,20 +11,22 @@ const fields: Array<{ id: FieldId; label: string }> = [
   { id: 'role', label: 'Role' }
 ];
 
-/** Filtering owns the input until an editable row is activated. */
-export class LiveEditMixedMenu implements AppObject {
+/**
+ * Demonstrates GATED_MENU_LIVE_EDIT - which is the safest option esp for mixed menus.
+ */
+export class MenuLiveEditExample implements AppObject {
   static create(ctl: Controller) {
-    return new LiveEditMixedMenu(ctl);
+    return new MenuLiveEditExample(ctl);
   }
 
-  private readonly liveEdit: MixedMenuLiveEdit;
+  private readonly liveEdit: MenuLiveEdit;
   private values: Record<FieldId, string> = {
     name: 'Grace Hopper',
     role: 'Computer scientist'
   };
 
   private constructor(private ctl: Controller) {
-    this.liveEdit = MixedMenuLiveEdit.create(ctl);
+    this.liveEdit = MenuLiveEdit.create(ctl);
   }
 
   layout = {

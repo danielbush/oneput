@@ -258,7 +258,7 @@ export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>
   action?: (c: Controller) => void;
   /**
    * Runs after claim release-on-focus-leave, before AppObject `onMenuItemFocus`.
-   * Prefer for per-row claim-on-focus (see FocusedMenuLiveEdit).
+   * Prefer for per-row claim-on-focus (see `FocusedMenuLiveEdit`).
    */
   onFocus?: (ctl: Controller, context: { cause: MenuItemFocusCause }) => void;
   /**

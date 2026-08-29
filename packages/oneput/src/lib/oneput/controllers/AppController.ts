@@ -4,7 +4,6 @@ import type {
   AppActionHandler,
   AppEvent,
   AppLayoutParams,
-  AppObjectBehavior,
   InputScope,
   MenuItem,
   AppObject,
@@ -58,7 +57,6 @@ export class AppController {
   private unsubscribeMenuOpenFocus?: () => void;
   private pendingPop?: { payload: unknown };
   private currentInputScope?: InputScope;
-  private attachedBehaviors: AppObjectBehavior[] = [];
 
   // UI settings
   private disableGoBack = false;
@@ -288,7 +286,6 @@ export class AppController {
       );
       this.ctl.keys.setBindings(keyBindingsMap);
     }
-    this.reconcileBehaviors();
   }
 
   handleKeyAction(actionId: string, event: KeyboardEvent, defaultAction?: AppActionHandler) {
@@ -406,9 +403,7 @@ export class AppController {
     this.unsubscribeMenuItemFocus = this.ctl.events.on(
       'menu-item-focus',
       ({ menuId, index, menuItem }) => {
-        for (const behavior of this.attachedBehaviors) {
-          behavior.onMenuItemFocus?.({ menuId, index, menuItem });
-        }
+        this.ctl.input.handleMenuItemFocus({ menuItem });
         this.current?.onMenuItemFocus?.({ menuId, index, menuItem });
       }
     );
@@ -460,7 +455,7 @@ export class AppController {
     // Apply the AppObject's declared start-time settings (UIFlags). reset()
     // fills in defaults for any flag the AppObject doesn't specify. This runs
     // before onStart/onResume, so any dynamic ui.update({ flags }) still wins.
-    this.teardownBehaviors();
+    this.teardownInputScope();
     this.reset(this.current?.settings);
     // Clear the menu.
     this.ctl.menu.setMenu();
@@ -484,107 +479,34 @@ export class AppController {
         this.ctl.ui.update({ params: layoutParams, replace: true });
       }
     }
-    this.installBehaviors();
+    this.installInputScope();
   }
 
   private runBeforeExit() {
-    this.teardownBehaviors();
+    this.teardownInputScope();
     this.current?.onExit?.();
   }
 
   private runBeforeSuspend() {
-    this.teardownBehaviors();
+    this.teardownInputScope();
     this.current?.onSuspend?.();
   }
 
-  private teardownBehaviors() {
-    for (const behavior of this.attachedBehaviors) {
-      behavior.detach();
-    }
-    this.attachedBehaviors = [];
+  private teardownInputScope() {
     this.currentInputScope?.close();
     this.currentInputScope = undefined;
   }
 
   /**
-   * Open a fresh InputScope and attach AppObject-wide behaviors.
-   *
-   * Menu/action `requires` are attached later via {@link reconcileBehaviors}
-   * when the base menu or actions are set.
+   * Open a fresh AppObject-scoped {@link InputScope}. Closing it on suspend /
+   * exit releases any active claim.
    */
-  private installBehaviors() {
-    this.teardownBehaviors();
+  private installInputScope() {
+    this.teardownInputScope();
     if (!this.current) {
       return;
     }
     this.currentInputScope = this.ctl.input.openScope();
-    this.reconcileBehaviors();
-  }
-
-  /**
-   * Attach the union of AppObject.behaviors, action `requires`, and base-menu
-   * item `requires`. Deduplicates by object identity. Detaches behaviors that
-   * are no longer required (their `detach` should release any claim).
-   */
-  reconcileBehaviors() {
-    if (!this.current) {
-      return;
-    }
-    if (!this.currentInputScope || this.currentInputScope.closed) {
-      this.currentInputScope = this.ctl.input.openScope();
-    }
-
-    const required = this.collectRequiredBehaviors();
-    const requiredSet = new Set(required);
-    const attachedSet = new Set(this.attachedBehaviors);
-
-    for (const behavior of this.attachedBehaviors) {
-      if (!requiredSet.has(behavior)) {
-        behavior.detach();
-      }
-    }
-
-    const context = {
-      input: this.currentInputScope,
-      menu: this.ctl.menu
-    };
-    const next: AppObjectBehavior[] = [];
-    for (const behavior of required) {
-      if (!attachedSet.has(behavior)) {
-        behavior.attach(context);
-      }
-      next.push(behavior);
-    }
-    this.attachedBehaviors = next;
-  }
-
-  private collectRequiredBehaviors(): AppObjectBehavior[] {
-    const seen = new Set<AppObjectBehavior>();
-    const add = (list?: readonly AppObjectBehavior[]) => {
-      for (const behavior of list ?? []) {
-        seen.add(behavior);
-      }
-    };
-
-    add(this.current?.behaviors);
-
-    const actions = this.resolveActions();
-    if (actions) {
-      for (const action of Object.values(actions)) {
-        add(action.requires);
-      }
-    }
-
-    // Base menu only — not the filtered display, and not a fresh menu() pull
-    // (that would rebuild during reconcile). Declarative menus are seeded into
-    // the base list in runAfter / setMenu before this runs for item requires.
-    for (const item of this.ctl.menu.baseMenuItems) {
-      if (item && 'requires' in item) {
-        add(item.requires);
-      }
-    }
-
-    return [...seen];
   }
 
   run<ResumePayload = unknown, LayoutParams extends AppLayoutParams = AppLayoutParams>(
@@ -607,8 +529,8 @@ export class AppController {
   private runAfter() {
     // Load declarative menu/actions after onStart / onResume so AppObject state
     // can affect .menu(). When the panel is open, invalidate coalesces with
-    // later rebuilds. When closed, seed the base menu so item `requires` still
-    // attach (setDisplayed no-ops while closed).
+    // later rebuilds. When closed, seed the base menu so claim owner-removed
+    // checks see the rows (setDisplayed no-ops while closed).
     if (this.ctl.menu.isMenuOpen) {
       this.ctl.menu.invalidate();
     } else {
@@ -708,20 +630,20 @@ export class AppController {
   /**
    * Goes back to previous appObject.
    *
-   * Back handler precedence: attached behaviors (first `'handled'` wins), then
-   * an imperative `setOnBack` handler (reset per AppObject), then the current
-   * AppObject's declarative `onBack`, then the default pop.
+   * Precedence: active input claim (`release.back`) before `enableGoBack`,
+   * then an imperative `setOnBack` handler, then the AppObject's declarative
+   * `onBack`, then the default pop.
    */
   goBack = () => {
+    // Claim cancellation is not AppObject navigation — honour it even when
+    // enableGoBack is false.
+    if (this.ctl.input.handleBack() === 'handled') {
+      return;
+    }
     if (this.disableGoBack) {
       return;
     }
     const backOwner = this.current;
-    for (const behavior of this.attachedBehaviors) {
-      if (behavior.onBack?.() === 'handled') {
-        return;
-      }
-    }
     if (this.onBack) {
       this.onBack();
       this.clearInputAfterBackIfCurrent(backOwner);

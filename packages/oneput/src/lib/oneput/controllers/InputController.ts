@@ -1,5 +1,12 @@
 import { DynamicPlaceholderBase } from '../types.js';
-import type { InputScope, InputSelectionState } from '../types.js';
+import type {
+  InputClaimHandle,
+  InputClaimOptions,
+  InputScope,
+  InputSelectionState,
+  MenuItem,
+  MenuItemAny
+} from '../types.js';
 import type { Controller } from './controller.js';
 import { tick } from 'svelte';
 import { SelectionToggler } from './helpers/SelectionToggler.js';
@@ -39,10 +46,38 @@ export class InputController {
   }
 
   /**
+   * Claim the shared input on the current AppObject scope.
+   */
+  claim(options: InputClaimOptions): InputClaimHandle {
+    return this.claims.claim(options);
+  }
+
+  /**
    * True when a claim currently owns the semantic input route.
    */
   get hasActiveClaim() {
     return this.claims.hasActiveClaim;
+  }
+
+  /**
+   * Claim Back policy. Runs before AppObject navigation / `enableGoBack`.
+   */
+  handleBack(): 'handled' | 'continue' {
+    return this.claims.handleBack();
+  }
+
+  /**
+   * Claim menu-focus policy (e.g. release when focus leaves the owner row).
+   */
+  handleMenuItemFocus(data: { menuItem: MenuItem | undefined }) {
+    this.claims.handleMenuItemFocus(data);
+  }
+
+  /**
+   * Claim owner-removed policy against the base menu (not the filtered display).
+   */
+  notifyBaseMenuChanged(items: readonly MenuItemAny[]) {
+    this.claims.notifyBaseMenuChanged(items);
   }
 
   triggerInputEvent() {

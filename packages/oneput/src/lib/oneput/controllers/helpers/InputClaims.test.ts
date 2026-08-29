@@ -140,9 +140,8 @@ describe('InputClaims', () => {
         semantic.push(value);
       }
     });
-    const scope = ctl.input.openScope();
     const claimed: string[] = [];
-    scope.claim({
+    ctl.input.claim({
       owner: { type: 'menu-item', itemId: 'label' },
       value: {
         read: () => '',
@@ -158,5 +157,61 @@ describe('InputClaims', () => {
     // assert
     expect(claimed).toEqual(['hi']);
     expect(semantic).toEqual([]);
+  });
+
+  test('handleBack releases with release-and-handle', async () => {
+    // arrange
+    const { ctl } = setup();
+    ctl.app.run({ onStart: () => {} });
+    await ctl.input.setInputValue('lab');
+    ctl.input.claim({
+      owner: { type: 'menu-item', itemId: 'label' },
+      value: { read: () => 'field', write: () => {} },
+      release: { back: 'release-and-handle' }
+    });
+
+    // act
+    const result = ctl.input.handleBack();
+
+    // assert
+    expect(result).toBe('handled');
+    expect(ctl.input.hasActiveClaim).toBe(false);
+    expect(ctl.input.getInputValue()).toBe('lab');
+  });
+
+  test('menu focus leave releases when configured', async () => {
+    // arrange
+    const { ctl } = setup();
+    ctl.app.run({ onStart: () => {} });
+    ctl.input.claim({
+      owner: { type: 'menu-item', itemId: 'label' },
+      value: { read: () => 'field', write: () => {} },
+      release: { menuFocusLeavesOwner: true }
+    });
+
+    // act
+    ctl.input.handleMenuItemFocus({
+      menuItem: { id: 'other', type: 'vflex', children: [] }
+    });
+
+    // assert
+    expect(ctl.input.hasActiveClaim).toBe(false);
+  });
+
+  test('owner removed from base menu releases when configured', async () => {
+    // arrange
+    const { ctl } = setup();
+    ctl.app.run({ onStart: () => {} });
+    ctl.input.claim({
+      owner: { type: 'menu-item', itemId: 'label' },
+      value: { read: () => 'field', write: () => {} },
+      release: { ownerRemoved: true }
+    });
+
+    // act
+    ctl.input.notifyBaseMenuChanged([{ id: 'other', type: 'vflex', children: [] }]);
+
+    // assert
+    expect(ctl.input.hasActiveClaim).toBe(false);
   });
 });

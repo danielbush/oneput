@@ -1,5 +1,12 @@
 import type { Controller } from '../controller.js';
-import type { InputClaimHandle, InputClaimOptions, InputScope, OneputProps } from '../../types.js';
+import type {
+  InputClaimHandle,
+  InputClaimOptions,
+  InputScope,
+  MenuItem,
+  MenuItemAny,
+  OneputProps
+} from '../../types.js';
 
 type InputTextArea = NonNullable<OneputProps['inputUI']>['textArea'];
 
@@ -23,7 +30,9 @@ type ActiveClaim = {
  * Exclusive semantic ownership of the shared input.
  *
  * Raw `input-change` events still broadcast. Only the semantic route
- * (AppObject `onInputChange` vs claim `write`) is exclusive.
+ * (AppObject `onInputChange` vs claim `write`) is exclusive. Termination
+ * rules live on the claim (`release` policy); closing the AppObject scope
+ * always releases.
  */
 export class InputClaims {
   static create(ctl: Controller) {
@@ -35,6 +44,7 @@ export class InputClaims {
   }
 
   private active?: ActiveClaim;
+  private currentScope?: InputScope;
   private nextClaimId = 1;
   private nextScopeId = 1;
 
@@ -57,6 +67,17 @@ export class InputClaims {
     return true;
   }
 
+  /**
+   * Claim on the current AppObject scope. Throws if no scope is open.
+   */
+  claim(options: InputClaimOptions): InputClaimHandle {
+    const scope = this.currentScope;
+    if (!scope || scope.closed) {
+      throw new Error('No open InputScope');
+    }
+    return scope.claim(options);
+  }
+
   openScope(): InputScope {
     const scopeId = this.nextScopeId++;
     let closed = false;
@@ -76,13 +97,68 @@ export class InputClaims {
           return;
         }
         closed = true;
+        if (this.currentScope === scope) {
+          this.currentScope = undefined;
+        }
         if (this.active && !this.active.released && this.active.scopeId === scopeId) {
           this.releaseClaim(this.active, 'scope-closed');
         }
       }
     };
 
+    this.currentScope = scope;
     return scope;
+  }
+
+  /**
+   * Back before AppObject navigation. Honours `release.back`.
+   */
+  handleBack(): 'handled' | 'continue' {
+    if (!this.active || this.active.released) {
+      return 'continue';
+    }
+    if (this.active.options.release?.back !== 'release-and-handle') {
+      return 'continue';
+    }
+    this.releaseClaim(this.active, 'back');
+    return 'handled';
+  }
+
+  /**
+   * Release when focus leaves the owning menu item, if configured.
+   */
+  handleMenuItemFocus(data: { menuItem: MenuItem | undefined }) {
+    if (!this.active || this.active.released) {
+      return;
+    }
+    if (!this.active.options.release?.menuFocusLeavesOwner) {
+      return;
+    }
+    const ownerId = this.active.options.owner.itemId;
+    if (!ownerId || data.menuItem?.id === ownerId) {
+      return;
+    }
+    this.releaseClaim(this.active, 'focus-changed');
+  }
+
+  /**
+   * Release when the owning row leaves the base menu, if configured.
+   */
+  notifyBaseMenuChanged(items: readonly MenuItemAny[]) {
+    if (!this.active || this.active.released) {
+      return;
+    }
+    if (!this.active.options.release?.ownerRemoved) {
+      return;
+    }
+    const ownerId = this.active.options.owner.itemId;
+    if (!ownerId) {
+      return;
+    }
+    const stillPresent = items.some((item) => item.id === ownerId);
+    if (!stillPresent) {
+      this.releaseClaim(this.active, 'owner-removed');
+    }
   }
 
   private acquire(scopeId: number, options: InputClaimOptions): InputClaimHandle {

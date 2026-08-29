@@ -1,10 +1,5 @@
 import type { Controller } from '../../controllers/controller.js';
-import type {
-  AppObjectBehavior,
-  AppObjectBehaviorContext,
-  InputClaimHandle,
-  MenuItem
-} from '../../types.js';
+import type { InputClaimHandle, MenuItem } from '../../types.js';
 
 export type LiveEditValue = {
   read: () => string;
@@ -35,21 +30,18 @@ export type LiveEditField = {
 };
 
 /**
- * Mixed-menu LIVE_EDIT: filtering owns the input until an opted-in row is
- * activated. Activation acquires an input claim; focus change, re-activate, or
- * back releases it.
+ * Mixed-menu LIVE_EDIT coordinator: filtering owns the input until an opted-in
+ * row is activated. Activation claims the shared input; the claim's release
+ * policy ends editing on Back, focus leave, owner removal, or AppObject exit.
  *
- * Prefer carrying this behavior via menu-item `requires` (`item()` / `bind()` /
- * `field().menuItem()`). Do not list it on `AppObject.behaviors` unless you
- * need it during `onStart`. Prefer `clearInputAfterAction: false` so activate
- * does not wipe the claimed value.
+ * Prefer `clearInputAfterAction: false` so activate does not wipe the claimed
+ * value.
  */
-export class MixedMenuLiveEdit implements AppObjectBehavior {
+export class MixedMenuLiveEdit {
   static create(ctl: Controller) {
     return new MixedMenuLiveEdit(ctl);
   }
 
-  private context?: AppObjectBehaviorContext;
   private active?: { itemId: string; claim: InputClaimHandle };
 
   private constructor(private ctl: Controller) {}
@@ -61,30 +53,6 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
   get editing() {
     return Boolean(this.active);
   }
-
-  attach(context: AppObjectBehaviorContext) {
-    this.context = context;
-  }
-
-  detach() {
-    this.active?.claim.release('behavior-detached');
-    this.active = undefined;
-    this.context = undefined;
-  }
-
-  onBack = () => {
-    if (!this.active) {
-      return 'continue' as const;
-    }
-    this.active.claim.release('back');
-    return 'handled' as const;
-  };
-
-  onMenuItemFocus = ({ menuItem }: { menuItem: MenuItem | undefined }) => {
-    if (this.active && menuItem?.id !== this.active.itemId) {
-      this.active.claim.release('focus-changed');
-    }
-  };
 
   /**
    * Stable field for catalog actions and menu rows that share one claim toggle.
@@ -102,7 +70,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
         const editing = this.active?.itemId === params.id;
         const value = params.value.read();
         const rendered = render({ value, editing });
-        return this.withRequirement({
+        return {
           ...rendered,
           id: params.id,
           tag: rendered.tag ?? 'button',
@@ -111,7 +79,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
             ...rendered.attr
           },
           action
-        });
+        };
       }
     };
   }
@@ -125,7 +93,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
    */
   bind(item: MenuItem, binding: LiveEditBinding): MenuItem {
     const itemId = item.id;
-    return this.withRequirement({
+    return {
       ...item,
       tag: item.tag ?? 'button',
       attr: {
@@ -133,7 +101,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
         ...item.attr
       },
       action: () => this.toggle(itemId, binding)
-    });
+    };
   }
 
   /**
@@ -148,19 +116,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
     });
   }
 
-  private withRequirement(item: MenuItem): MenuItem {
-    return {
-      ...item,
-      requires: [...(item.requires ?? []), this]
-    };
-  }
-
   private toggle(itemId: string, binding: LiveEditBinding) {
-    const input = this.context?.input;
-    if (!input || input.closed) {
-      return;
-    }
-
     if (this.active?.itemId === itemId) {
       this.active.claim.release('activated-again');
       return;
@@ -168,7 +124,7 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
 
     this.active?.claim.release('replaced');
 
-    const claim = input.claim({
+    const claim = this.ctl.input.claim({
       owner: { type: 'menu-item', itemId },
       value: {
         read: binding.value.read,
@@ -181,6 +137,11 @@ export class MixedMenuLiveEdit implements AppObjectBehavior {
       textArea: binding.textArea,
       select: 'all',
       resumePrevious: binding.resumePrevious ?? 'restore',
+      release: {
+        back: 'release-and-handle',
+        menuFocusLeavesOwner: true,
+        ownerRemoved: true
+      },
       onRelease: () => {
         if (this.active?.claim !== claim) {
           return;

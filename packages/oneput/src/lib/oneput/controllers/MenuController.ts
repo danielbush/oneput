@@ -391,9 +391,8 @@ export class MenuController {
       header: this.currentMenu.header,
       footer: this.currentMenu.footer
     });
-    // Base menu changed — reconcile item-required behaviors (not the filtered
-    // display). Filtering a row out must not detach its behavior.
-    this.ctl.app?.reconcileBehaviors();
+    // Base menu changed — claims with ownerRemoved may release.
+    this.ctl.input.notifyBaseMenuChanged(this.currentMenu.allMenuItems);
   }
 
   /**

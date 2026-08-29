@@ -203,6 +203,8 @@ It runs when those rows become the displayed snapshot during open.
 row. The row is the selected edit target; it does not become a native form
 field. The menu must have one clear owner for the input at a time.
 
+LIVE_EDIT is the first example of INPUT_CLAIM usage.
+
 Input ownership is a first-class **input claim** (`InputScope.claim`). An active
 claim routes typed text to `claim.write`. Raw `input-change` still broadcasts
 for diagnostics and history; only the semantic route is exclusive. Closing the
@@ -224,16 +226,15 @@ Use this when all relevant rows are editable:
 `AddEntry` in TomatoTimer is a larger example. `LiveEditWholeMenu` in
 `oneput-demo` is the minimal example.
 
-### Mixed-menu editing
+### MIXED_LIVE_EDIT - Mixed-menu editing
 
 Use this when typing normally filters a menu that contains some editable rows.
 Focusing an editable row is not enough to edit it. The user must activate the
 row to transfer input ownership.
 
 Prefer `MixedMenuLiveEdit` (`shared/behaviors/MixedMenuLiveEdit.ts`). Opted-in
-rows from `liveEdit.item()` / `bind()` / `field()` carry `requires: [liveEdit]`;
-`AppController` installs that behavior from the base menu. Do not list it on
-`AppObject.behaviors` unless you need it during `onStart`.
+rows from `liveEdit.item()` / `bind()` / `field()` claim the shared input with
+a release policy (Back, focus leave, owner removed, AppObject exit).
 
 - Activate acquires an input claim (suspends filter / generative).
 - Activate again, move menu focus, or back releases the claim.
@@ -251,3 +252,99 @@ Set `clearInputAfterAction: false` so activate does not clear the claimed value.
 
 For multiline input, validation, or commit/cancel workflows, launch a dedicated
 editor AppObject instead of adding more modes to the current AppObject.
+
+## INPUT_CLAIM's
+
+A claim is useful when an existing `AppObject` temporarily changes what typing means.
+
+An input claim makes input ownership a first-class controller concept. It separates two questions:
+
+1. Who currently owns typed text?
+2. What causes that ownership to change?
+
+Today, ownership is implicit. `input-change` is broadcast. The menu filter, generative menu, and current `AppObject` can all react. `MixedLiveEdit` must disable one listener path, update UI flags, replace the input value, and restore everything later.
+
+With claims, input events have one semantic destination:
+
+```text
+No claim
+  → current AppObject input policy
+  → filter, generative menu, or ordinary onInputChange
+
+Active claim
+  → claim.onChange
+```
+
+Raw input events can still be broadcast for diagnostics and input history. Only the semantic input route becomes exclusive.
+
+While the lease exists:
+
+- Input changes go to the lease.
+- Filtering is suspended.
+- Back releases the lease.
+- A focus change releases the lease.
+- The owning row can show its editing state.
+
+When released, the input returns to its previous owner: the menu filter.
+
+### Other input-claim cases
+
+#### Search within the current screen
+
+Suppose typing normally filters the action menu. The user activates “Find in document”.
+
+```text
+menu filtering
+  → Find claims input
+  → typing updates document matches
+  → Back releases Find
+  → previous menu query returns
+```
+
+The search owner supplies:
+
+```typescript
+value: {
+  read: () => searchQuery,
+  write: (value) => {
+    searchQuery = value;
+    highlightMatches(value);
+  }
+}
+```
+
+A dedicated search `AppObject` does not need a claim. The claim is useful when search is a temporary mode inside the current screen.
+
+#### Command or action arguments
+
+The user selects “Move to workspace…”. The input changes from menu filtering to destination entry:
+
+```text
+menu filtering
+  → Move claims input
+  → typing derives destination candidates
+  → Enter performs the move
+  → Back cancels
+```
+
+This needs more than the current claim API because it needs submit handling. A later claim contract could include `onSubmit`.
+
+#### Inline date, number, or tag entry
+
+A row can claim the input for an immediate draft:
+
+```text
+Date: 29 August 2026
+  → activate
+  → type “next Friday”
+  → preview parsed value
+  → leave row
+```
+
+The current claim supports simple live writes. It does not yet support validation, commit, and rollback. A transactional date editor should still use a child `AppObject`, unless claims gain explicit draft, submit, and cancel semantics.
+
+#### Rename, label, URL, and metadata fields
+
+This is the present LIVE_EDIT case. The input writes directly to one field while its claim exists.
+
+Therefore, my earlier wording was too broad: claims can support these modes, but the current API fully supports only exclusive live input and restoration. Search is close. Command arguments and transactional date entry need additional lifecycle events.

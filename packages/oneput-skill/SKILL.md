@@ -293,11 +293,9 @@ the row. Give the input one owner at a time via an **input claim**:
   `onMenuItemFocus` to select the field and `onInputChange` to update state and
   invalidate its preview.
 - In a mixed menu, use `MixedMenuLiveEdit`. `liveEdit.item()` / `bind()` /
-  `field()` put `requires: [liveEdit]` on the row; `AppController` installs it
-  from the base menu. Activate acquires a claim; activate again, move focus, or
-  back releases it and restores the previous filter query by default
-  (`resumePrevious: 'restore'`). Do not list `liveEdit` on `AppObject.behaviors`
-  unless you need it during `onStart`.
+  `field()` claim the shared input with a release policy (Back, focus leave,
+  owner removed). Activate again, move focus, or back releases the claim and
+  restores the previous filter query by default (`resumePrevious: 'restore'`).
 - Set `clearInputAfterAction: false` so activate does not clear the claimed
   value.
 - Use `onMenuUpdate` when a rebuild can replace the focused item without moving

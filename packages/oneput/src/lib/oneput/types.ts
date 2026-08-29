@@ -26,6 +26,22 @@ export type InputChangeListener = (evt: InputEvent) => void;
 export type InputClaimReleaseReason = string;
 
 /**
+ * When the claim should release itself. Closing the AppObject input scope
+ * always releases, regardless of this policy.
+ */
+export type InputClaimReleasePolicy = {
+  /**
+   * On Back: release the claim and stop AppObject navigation.
+   * Claim Back runs before `enableGoBack` is checked.
+   */
+  back?: 'release-and-handle';
+  /** Release when menu focus moves to a different item. */
+  menuFocusLeavesOwner?: boolean;
+  /** Release when the owner row leaves the base menu. */
+  ownerRemoved?: boolean;
+};
+
+/**
  * Exclusive semantic owner of typed input for one field / row.
  *
  * Raw `input-change` still broadcasts; only the semantic route is exclusive.
@@ -42,6 +58,8 @@ export type InputClaimOptions = {
   select?: 'all' | 'none';
   /** Default `'restore'` — put the previous owner's value back. */
   resumePrevious?: 'restore' | 'clear';
+  /** Automatic release rules. Scope close always releases. */
+  release?: InputClaimReleasePolicy;
   onRelease?: (reason: InputClaimReleaseReason) => void;
 };
 
@@ -52,40 +70,14 @@ export type InputClaimHandle = {
 
 /**
  * AppObject-scoped claim factory. Closing the scope releases any claim it
- * still owns (suspend / exit).
+ * still owns (suspend / exit). Prefer {@link InputController.claim} while an
+ * AppObject is current.
  */
 export type InputScope = {
   readonly closed: boolean;
   claim: (options: InputClaimOptions) => InputClaimHandle;
   close: () => void;
 };
-
-export type AppObjectBehaviorContext = {
-  input: InputScope;
-  menu: MenuController;
-};
-
-/**
- * Optional interceptor installed while an AppObject is current.
- *
- * `AppController` calls `attach` with an AppObject-scoped context and
- * `detach` on suspend / exit. Behaviors may handle back and menu focus
- * before the AppObject hooks.
- */
-export interface AppObjectBehavior {
-  attach(context: AppObjectBehaviorContext): void;
-  detach(): void;
-  /**
-   * Return `'handled'` to stop back propagation (e.g. release a claim).
-   * Return `'continue'` or omit to let AppObject / default pop run.
-   */
-  onBack?: () => 'handled' | 'continue';
-  onMenuItemFocus?: (data: {
-    menuId: string;
-    menuItem: MenuItem | undefined;
-    index: number;
-  }) => void;
-}
 
 export type OneputProps = {
   /**
@@ -264,13 +256,6 @@ export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>
    */
   canFilter?: boolean;
   /**
-   * Behaviors this row needs while it is in the base menu.
-   *
-   * Collected from the base menu (not the filtered display). Filtering a row
-   * out does not detach its behavior. See {@link AppObjectBehavior}.
-   */
-  requires?: readonly AppObjectBehavior[];
-  /**
    * Primary css class.  Defaults to oneput__menu-item.
    */
   class?: string;
@@ -399,14 +384,6 @@ export type AppActionHandler<Context extends AppActionContext = AppActionContext
 export type AppAction<Context extends AppActionContext = AppActionContext> = {
   action: AppActionHandler<Context>;
   binding?: ActionBinding;
-  /**
-   * Behaviors this action needs while the AppObject is current.
-   *
-   * `AppController` installs the union of these with {@link AppObject.behaviors}
-   * and menu-item `requires`. Prefer declaring menu-bound behaviors on the
-   * menu item; use action `requires` when the action must work without its row.
-   */
-  requires?: readonly AppObjectBehavior[];
 };
 
 /**
@@ -567,18 +544,6 @@ export interface AppObject<
    * Settings that will be applied when the AppObject starts.
    */
   settings?: UIFlags;
-  /**
-   * App-wide behaviors installed while this AppObject is current.
-   *
-   * For menu-bound behaviors such as MixedMenuLiveEdit, prefer `requires` on
-   * the menu item (or catalog action) so the row carries its dependency. Keep
-   * this list for behaviors that apply to the whole AppObject, especially
-   * those needed during `onStart`.
-   *
-   * `AppController` deduplicates by object identity with item/action
-   * `requires`.
-   */
-  behaviors?: AppObjectBehavior[];
   /**
    * Called when the AppObject has been instantiated and is then given control
    * of Oneput.

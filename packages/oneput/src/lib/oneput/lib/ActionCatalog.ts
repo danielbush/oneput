@@ -133,8 +133,7 @@ export class ActionCatalog<
       if (!entry) continue;
       actions[id] = {
         action: entry.action,
-        binding: entry.binding ? this.toActionBinding(entry) : undefined,
-        requires: entry.requires
+        binding: entry.binding ? this.toActionBinding(entry) : undefined
       };
     }
     return actions;
@@ -146,24 +145,11 @@ export class ActionCatalog<
       const entry = entries[id];
       if (!entry?.menuItem) return undefined;
       if (entry.canShowMenuItem && !entry.canShowMenuItem()) return undefined;
-      const item = entry.menuItem({
+      return entry.menuItem({
         description: entry.description,
         action: entry.action,
-        binding: entry.binding ? this.toActionBinding(entry) : undefined,
-        requires: entry.requires
+        binding: entry.binding ? this.toActionBinding(entry) : undefined
       });
-      if (!item || typeof item !== 'object' || !entry.requires?.length) {
-        return item;
-      }
-      if (!('action' in item) && !('ignored' in item)) {
-        return item;
-      }
-      const existing =
-        'requires' in item && Array.isArray(item.requires) ? item.requires : undefined;
-      return {
-        ...item,
-        requires: [...(existing ?? []), ...entry.requires]
-      };
     });
   }
 

@@ -95,6 +95,59 @@ To create and compose reusable "components" including 3rd party components we ha
 - TODO
   - what we haven't covered is a 3rd party shared AppObject that might want to set or influence 3rd party chrome when its active
 
+## ONEPUT_FILE_LAYOUT
+
+An application can wire the same behavior into more than one UI system. Keep
+each UI system in its own surface directory under `ui/`. For example, Frame
+chrome and Oneput AppObjects are separate wiring systems even when they use the
+same application actions.
+
+```text
+ui/
+  frame/
+    Chrome.ts
+    icons.ts
+  oneput/
+    init.ts
+    Catalog.ts
+    icons.ts
+    apps/
+      ChromeStatusApp.ts
+```
+
+Use `ui/oneput/apps/` for all AppObjects, including applications that currently
+have only one AppObject. This gives every Oneput integration one stable place
+to grow.
+
+- Use a named file such as `ChromeStatusApp.ts` while an AppObject has no
+  private support files.
+- When an AppObject grows, move it into a named directory and use `App.ts` as
+  its entry point:
+
+  ```text
+  ui/oneput/apps/
+    RootApp.ts
+    node-metadata/
+      App.ts
+      Fields.ts
+      App.test.ts
+  ```
+
+- Put files shared by several AppObjects in `ui/oneput/shared/`. Do not create
+  `shared/` for code that has only one owner.
+- Put surface-wide Oneput wiring, such as initialization, catalogs, layouts,
+  and icon registration, beside `apps/` in `ui/oneput/`.
+- Put AppObject-private wiring inside that AppObject's directory.
+- Do not use `ui/lib/` for top-level wiring. Reserve `lib/` for reusable,
+  lower-level implementation primitives.
+- Do not use filename underscores for support files after the directory gives
+  them a clear namespace. Prefer `ui/oneput/Catalog.ts` to `_catalog.ts`.
+
+Keep application behavior outside the UI surface directories. Inject the same
+behavior objects into each surface adapter that needs them. For example,
+`ui/frame/Chrome.ts` and a Oneput AppObject can both receive `Actions`; Frame
+chrome must not depend on a Oneput catalog only to reach those actions.
+
 ## Signals vs direct UI (`inputSend`, `inputAccept`, `inputReject`)
 
 Shared AppObjects should not assume where host chrome lives. They advertise

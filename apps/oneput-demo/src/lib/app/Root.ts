@@ -80,7 +80,7 @@ export class Root implements AppObject {
 
   onResume = (result?: { payload?: unknown }) => {
     this.run();
-    if (isPickDateResult(result?.payload)) {
+    if (result && isPickDateResult(result.payload)) {
       this.ctl.notify(`Picked ${result.payload.value}`, { duration: 3000 });
     }
     // Cancel / other children: no payload match → nothing extra

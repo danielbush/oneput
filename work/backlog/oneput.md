@@ -20,6 +20,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## security
 
+- sec: investigate <https://developer.mozilla.org/en-US/docs/Web/API/HTML_Sanitizer_API> for client side sanitation in oneput for innerHTMLUnsafe and friends
+  - safari does not support it yet
+  - we could create a fallback to <https://github.com/cure53/dompurify>
+  - since this does svg we can use it instead of the safeicon approach - which is either in here or the 2br repo
 - sec: consider a whitelist svelte icon renderer similar to what packages/frame does
   - COMMENT: packages/frame/src/lib/FrameIcons.ts whitelists svg internals (in /Users/danb/projects/@2br )
   - COMMENT: could we do something similar for innerHTMLUnsafe, htmlContentUnsafe ?

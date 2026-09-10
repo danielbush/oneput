@@ -2,6 +2,7 @@ import { getNextSibling, getPreviousSibling } from '../core/sibling.js';
 import { canCreateWithAnchor } from '../core/dom-rules.js';
 import {
   isAnchor,
+  isFocusCandidate,
   isFocusable,
   isIgnorable,
   isImplicitLine,
@@ -277,7 +278,7 @@ export function anchorize(el: HTMLElement): HTMLElement[] {
     ceiling: el,
     visitStart: true,
     // OPAQUE's are OPAQUE: never DESCEND or anchorize their internals.
-    shouldDescend: (node) => isFocusable(node) && !isOpaque(node),
+    shouldDescend: (node) => isFocusCandidate(node) && !isOpaque(node),
     pre: (node) => {
       // Returning void keeps the walk going; a returned Node would stop it.
       const anchor = anchorizeLeadingSegment(node);

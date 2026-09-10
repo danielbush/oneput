@@ -287,6 +287,20 @@ describe('anchorize', () => {
     expect(identifyChildren(rawById(root, 'p1'))).toEqual(['[anchor]', '[nodeType=3:" "]']);
   });
 
+  test('reopened FOCUSABLE under FOCUS_TRANSPARENT → leading anchor', () => {
+    // arrange
+    const root = makeRawRoot(
+      div({ id: 'wrapper', 'data-jsed-focus': 'off' }, p({ id: 'draft', 'data-jsed-focus': 'on' }))
+    );
+
+    // act
+    anchorize(root);
+
+    // assert
+    expect(identifyChildren(rawById(root, 'wrapper'))).toEqual(['[element:p#draft]']);
+    expect(identifyChildren(rawById(root, 'draft'))).toEqual(['[anchor]']);
+  });
+
   test('OPAQUE → anchored around, internals untouched', () => {
     // arrange — a katex-shaped OPAQUE with nested rendered internals
     const root = makeRawRoot(

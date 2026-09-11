@@ -230,6 +230,48 @@ export function isFocusable(el: EventTarget | Element | null | undefined): el is
   return isFocusCandidate(el) && !isFocusTransparent(el);
 }
 
+/**
+ * Test if a FOCUS_CANDIDATE is visible for FOCUS navigation.
+ *
+ * Keep this separate from structural focusability. Hidden document content
+ * still needs tokenization and anchoring, but the user must not navigate into
+ * content that the browser does not render.
+ */
+export function isNavigableFocusCandidate(
+  el: EventTarget | Element | null | undefined
+): el is HTMLElement {
+  return isFocusCandidate(el) && isRendered(el);
+}
+
+/** Test if an element is a visible FOCUSABLE for FOCUS navigation. */
+export function isNavigableFocusable(
+  el: EventTarget | Element | null | undefined
+): el is HTMLElement {
+  return isFocusable(el) && isRendered(el);
+}
+
+/** Test whether browser rendering state exposes an element. */
+export function isRendered(element: HTMLElement): boolean {
+  const view = element.ownerDocument.defaultView;
+  if (!view) {
+    return true;
+  }
+
+  const visibility = view.getComputedStyle(element).visibility;
+  if (visibility === 'hidden' || visibility === 'collapse') {
+    return false;
+  }
+
+  for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+    const style = view.getComputedStyle(current);
+    if (current.hidden || style.display === 'none') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 type FocusAttrValue = 'on' | 'off';
 
 function getNearestFocusAttrValue(el: Node | null | undefined): FocusAttrValue | null {

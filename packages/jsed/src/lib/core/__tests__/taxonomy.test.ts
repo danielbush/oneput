@@ -7,7 +7,10 @@ import {
   isIgnorable,
   isInlineFlow,
   isLine,
+  isNavigableFocusCandidate,
+  isNavigableFocusable,
   isOpaque,
+  isRendered,
   isToken,
   JSED_OPAQUE_CLASS
 } from '../taxonomy.js';
@@ -181,6 +184,51 @@ describe('isFocusable', () => {
 
     // act & assert
     expect(isFocusable(byId(doc, 'inner'))).toBe(true);
+  });
+});
+
+describe('isRendered', () => {
+  test('render-hidden states: returns false', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'visible' },
+        p({ id: 'display-none', style: 'display:none;' }, 'display none'),
+        div({ id: 'hidden-parent', hidden: '' }, p({ id: 'hidden-child' }, 'hidden child')),
+        div(
+          { id: 'visibility-parent', style: 'visibility:hidden;' },
+          p({ id: 'visibility-child' }, 'visibility child'),
+          p({ id: 'visibility-override', style: 'visibility:visible;' }, 'visible override')
+        )
+      )
+    );
+
+    // act & assert
+    expect(isRendered(byId(doc, 'visible'))).toBe(true);
+    expect(isRendered(byId(doc, 'display-none'))).toBe(false);
+    expect(isRendered(byId(doc, 'hidden-child'))).toBe(false);
+    expect(isRendered(byId(doc, 'visibility-child'))).toBe(false);
+    expect(isRendered(byId(doc, 'visibility-override'))).toBe(true);
+  });
+});
+
+describe('focus navigation predicates', () => {
+  test('hidden FOCUSABLE: structural only', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'hidden-parent', style: 'display:none;', 'data-jsed-focus': 'off' },
+        p({ id: 'focus', 'data-jsed-focus': 'on' }, 'focus')
+      )
+    );
+    const hiddenParent = byId(doc, 'hidden-parent');
+    const focus = byId(doc, 'focus');
+
+    // act & assert
+    expect(isFocusCandidate(hiddenParent)).toBe(true);
+    expect(isNavigableFocusCandidate(hiddenParent)).toBe(false);
+    expect(isFocusable(focus)).toBe(true);
+    expect(isNavigableFocusable(focus)).toBe(false);
   });
 });
 

@@ -65,6 +65,25 @@ describe('findNextFocusableOnAncestorPath', () => {
       findNextFocusableOnAncestorPath(byId(doc, 'ancestor'), byId(doc, 'unrelated'))
     ).toBeNull();
   });
+
+  test('hidden remembered path: returns null', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'ancestor' },
+        div(
+          { id: 'hidden', style: 'display:none;', 'data-jsed-focus': 'off' },
+          p({ id: 'descendant', 'data-jsed-focus': 'on' }, 'descendant')
+        )
+      )
+    );
+
+    // act
+    const result = findNextFocusableOnAncestorPath(byId(doc, 'ancestor'), byId(doc, 'descendant'));
+
+    // assert
+    expect(result).toBeNull();
+  });
 });
 
 describe('recursive', () => {
@@ -85,6 +104,21 @@ describe('recursive', () => {
     // act & assert
     expect(findNextFocusable(byId(doc, 'before'), doc.root)).toBe(byId(doc, 'inner'));
     expect(findPreviousFocusable(byId(doc, 'after'), doc.root)).toBe(byId(doc, 'inner'));
+  });
+
+  test('hidden subtree: skips descendants', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(
+        p({ id: 'before' }, 'before'),
+        div({ id: 'hidden', style: 'display:none;' }, p({ id: 'hidden-child' }, 'hidden child')),
+        p({ id: 'after' }, 'after')
+      )
+    );
+
+    // act & assert
+    expect(findNextFocusable(byId(doc, 'before'), doc.root)).toBe(byId(doc, 'after'));
+    expect(findPreviousFocusable(byId(doc, 'after'), doc.root)).toBe(byId(doc, 'before'));
   });
 });
 

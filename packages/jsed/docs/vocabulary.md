@@ -14,8 +14,14 @@ The taxonomy is built from a small set of independent predicates. All other labe
 Jsed divides the DOM that up into several broad mutually exclusive categories:
 
 - (1) **FOCUSABLE** (focusable element)
-  — an element the user can navigate to and FOCUS on. Cannot be a TOKEN or an IGNORABLE.
+  — an element that can participate structurally in FOCUS. Cannot be a TOKEN or an IGNORABLE. A FOCUSABLE can be hidden temporarily so document initialization can still process it; FOCUS traversal only visits it when it is also a NAVIGABLE_FOCUSABLE.
   - Source of truth: `isFocusable` in `taxonomy.ts`.
+- **RENDERED**
+  — an element that browser rendering state does not hide. Elements under `display: none`, the HTML `hidden` attribute, or effective `visibility: hidden|collapse` are not RENDERED.
+  - Source of truth: `isRendered` in `taxonomy.ts`.
+- **NAVIGABLE_FOCUSABLE**
+  — a RENDERED FOCUSABLE that the user can navigate to and FOCUS on.
+  - Source of truth: `isNavigableFocusable` in `taxonomy.ts`.
 - **FOCUS_CANDIDATE**
   — all elements that are either FOCUSABLE or FOCUS_TRANSPARENT; the key difference being if the element has been flagged as FOCUS_TRANSPARENT;
   - Source of truth: `isFocusCandidate` in `taxonomy.ts`.

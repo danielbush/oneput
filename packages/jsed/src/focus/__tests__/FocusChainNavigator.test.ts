@@ -207,6 +207,36 @@ describe('FocusChainNavigator', () => {
     expect(nav.getFocus()).toBe(inner);
   });
 
+  it('does not re-enter a remembered chain after it becomes hidden', () => {
+    // arrange
+    const doc = makeRoot(
+      div(
+        { id: 'chat' },
+        div(
+          { id: 'header', 'data-jsed-focus': 'off' },
+          p({ id: 'title', 'data-jsed-focus': 'on' }, 'Title')
+        ),
+        div(
+          { id: 'composer', 'data-jsed-focus': 'off' },
+          p({ id: 'draft', 'data-jsed-focus': 'on' }, 'Draft')
+        )
+      )
+    );
+    const nav = Nav.createNull(doc);
+    nav.connect();
+    const chat = byId(doc, 'chat');
+    const composer = byId(doc, 'composer');
+    nav.REQUEST_FOCUS(byId(doc, 'draft'));
+    composer.style.display = 'none';
+    nav.REQUEST_FOCUS(chat);
+
+    // act
+    nav.DOWN_CHAIN();
+
+    // assert
+    expect(nav.getFocus()).toBe(byId(doc, 'title'));
+  });
+
   it('does not traverse to a sibling on repeated moveDown', () => {
     // arrange
     const doc = makeRoot(

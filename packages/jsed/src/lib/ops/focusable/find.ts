@@ -16,12 +16,17 @@
  *
  * Nothing here mutates the DOM.
  */
-import { isFocusCandidate, isFocusable, isOpaque } from '../../core/taxonomy.js';
+import {
+  isNavigableFocusCandidate,
+  isNavigableFocusable,
+  isOpaque,
+  isRendered
+} from '../../core/taxonomy.js';
 import { findNextNode, findPreviousNode, getParent } from '../../core/walk.js';
 
 const focusWalk = {
-  visit: isFocusable,
-  descend: (node: Node) => isFocusCandidate(node) && !isOpaque(node)
+  visit: isNavigableFocusable,
+  descend: (node: Node) => isNavigableFocusCandidate(node) && !isOpaque(node)
 };
 
 /**
@@ -29,7 +34,7 @@ const focusWalk = {
  */
 export function findNextFocusable(start: Node, ceiling: Node): HTMLElement | null {
   for (const node of findNextNode(start, ceiling, focusWalk)) {
-    if (isFocusable(node)) {
+    if (isNavigableFocusable(node)) {
       return node;
     }
   }
@@ -41,7 +46,7 @@ export function findNextFocusable(start: Node, ceiling: Node): HTMLElement | nul
  */
 export function findPreviousFocusable(start: Node, ceiling: Node): HTMLElement | null {
   for (const node of findPreviousNode(start, ceiling, focusWalk)) {
-    if (isFocusable(node)) {
+    if (isNavigableFocusable(node)) {
       return node;
     }
   }
@@ -57,8 +62,8 @@ export function findPreviousFocusable(start: Node, ceiling: Node): HTMLElement |
  */
 export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
   for (const next of findNextNode(el, ceiling, {
-    visit: isFocusable,
-    descend: (node) => !isOpaque(node) && node !== el
+    visit: isNavigableFocusable,
+    descend: (node) => isRenderedNodeForFocus(node) && !isOpaque(node) && node !== el
   })) {
     return next as HTMLElement;
   }
@@ -74,13 +79,18 @@ export function findNextFocusableOutside(el: Node, ceiling: HTMLElement): HTMLEl
  */
 export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HTMLElement | null {
   for (const previous of findPreviousNode(el, ceiling, {
-    visit: isFocusable,
-    descend: (node) => !isOpaque(node)
+    visit: isNavigableFocusable,
+    descend: (node) => isRenderedNodeForFocus(node) && !isOpaque(node)
   })) {
     return previous as HTMLElement;
   }
 
   return null;
+}
+
+/** Test if a traversal node is outside a subtree removed from rendering. */
+function isRenderedNodeForFocus(node: Node): boolean {
+  return !(node instanceof window.HTMLElement) || isRendered(node);
 }
 
 /**
@@ -95,7 +105,7 @@ export function findClosestFocusableAncestor(
   }
 
   for (let node = start; node; node = getParent(node, ceiling)) {
-    if (isFocusable(node)) {
+    if (isNavigableFocusable(node)) {
       return node;
     }
   }
@@ -113,12 +123,12 @@ export function findNextFocusableOnAncestorPath(
     return null;
   }
 
-  let focusableBelow = isFocusable(descendant) ? descendant : null;
+  let focusableBelow = isNavigableFocusable(descendant) ? descendant : null;
   for (let parent = descendant.parentElement; parent; parent = parent.parentElement) {
     if (parent === ancestor) {
       return focusableBelow;
     }
-    if (isFocusable(parent)) {
+    if (isNavigableFocusable(parent)) {
       focusableBelow = parent;
     }
   }
@@ -130,7 +140,7 @@ export function findNextFocusableOnAncestorPath(
  */
 function findFirstFocusableDescendant(element: Node): HTMLElement | null {
   for (const node of findNextNode(element, element, focusWalk)) {
-    if (isFocusable(node)) {
+    if (isNavigableFocusable(node)) {
       return node;
     }
   }
@@ -143,7 +153,7 @@ function findFirstFocusableDescendant(element: Node): HTMLElement | null {
 function findLastFocusableDescendant(element: Node): HTMLElement | null {
   let last: HTMLElement | null = null;
   for (const node of findNextNode(element, element, focusWalk)) {
-    if (isFocusable(node)) {
+    if (isNavigableFocusable(node)) {
       last = node;
     }
   }
@@ -155,10 +165,10 @@ function findLastFocusableDescendant(element: Node): HTMLElement | null {
  */
 export function findNextSiblingFocusable(start: Node): HTMLElement | null {
   for (let sibling = start.nextSibling; sibling; sibling = sibling.nextSibling) {
-    if (isFocusable(sibling)) {
+    if (isNavigableFocusable(sibling)) {
       return sibling;
     }
-    if (isFocusCandidate(sibling) && !isOpaque(sibling)) {
+    if (isNavigableFocusCandidate(sibling) && !isOpaque(sibling)) {
       const descendant = findFirstFocusableDescendant(sibling);
       if (descendant) {
         return descendant;
@@ -173,10 +183,10 @@ export function findNextSiblingFocusable(start: Node): HTMLElement | null {
  */
 export function findPreviousSiblingFocusable(start: Node): HTMLElement | null {
   for (let sibling = start.previousSibling; sibling; sibling = sibling.previousSibling) {
-    if (isFocusable(sibling)) {
+    if (isNavigableFocusable(sibling)) {
       return sibling;
     }
-    if (isFocusCandidate(sibling) && !isOpaque(sibling)) {
+    if (isNavigableFocusCandidate(sibling) && !isOpaque(sibling)) {
       const descendant = findLastFocusableDescendant(sibling);
       if (descendant) {
         return descendant;
@@ -225,7 +235,7 @@ export function findPreviousSiblingOrAncestorFocusable(
     ancestor && ancestor !== ceiling;
     ancestor = ancestor.parentNode
   ) {
-    if (isFocusable(ancestor)) {
+    if (isNavigableFocusable(ancestor)) {
       return ancestor;
     }
     const previous = findPreviousSiblingFocusable(ancestor);

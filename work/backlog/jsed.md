@@ -100,6 +100,12 @@ Treat each item (h2 section) as an initial proposal that may require discussion 
   - probably enough if we set some marker like a class or data attribute for the root and stop if we exceed it
 - fix: isFocusable shouldn't assert HTMLElement; there are HTMLElements that are not focusable eg ignorable's; doesn't seem to cause a problem though
 - fix: modern css element indicator goes off the left side of viewport for small elements on the left edge (legacy indicator handles this)
+- fix: .jsed-focus uses outline; if the box we're outlining is a descendent of a container that has rounded corners, the outline for the box within will still have square corners and will look cut off at those corners
+  - COMMENT: I don't see an easy solution for this
+  - opus suggested
+    - (1) — opt-in radius marker (CSS only, opus's pick for you). The author marks the rounded wrapper with data-jsed-focus-radius and sets --jsed-focus-radius: 12px; jsed adds one rule so a .jsed-focus inside it takes that radius. Small, explicit, no behavior change. Trade-offs: while focused, the element's radius changes (can clip a rounded child img), and it can't match a sibling's shape.
+    - (2) — overlay box. Draw FOCUS as a positioned overlay (jsed already does this pattern for .jsed-tag-indicator-css), copying the radius from a named "shape" element. Never touches document styles and can match a parent or sibling — but it's the most work, depends on CSS anchor positioning, and still needs a marker to name the shape element.
+    - (3) — JS auto-mirror (borderline). #updateFocus finds an ancestor with the same border box and a radius, copies it to a custom property. Automatic, but heuristic, writes into the document's style attribute, and the save-cleanup in document.ts must strip it without eating authored styles.
 
 ## qol
 

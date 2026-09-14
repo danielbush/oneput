@@ -11,7 +11,12 @@ import { EditorController } from '../EditorController.js';
 import { EditorEventHandler } from './EditorEventHandler.js';
 import type { CursorError } from '../../cursor/lib/CursorState.js';
 import { UndoRecorder } from '../../undo/UndoRecorder.js';
-import { findNextEditableLine, getFirstLineSibling, getLine } from '../../lib/core/line.js';
+import {
+  findNextEditableLine,
+  findNextRenderedEditableLine,
+  getFirstLineSibling,
+  getLine
+} from '../../lib/core/line.js';
 import { err, ok, type Result } from 'neverthrow';
 import { isCursorTransparent, isLineSibling } from '../../lib/core/taxonomy.js';
 import { anchorize, removeAnchors } from '../../lib/ops/anchor.js';
@@ -121,6 +126,7 @@ export class EditorState {
     public ops = EditorEventHandler.create(this)
   ) {}
 
+  /** Start with FOCUS on the first RENDERED editable LINE, or the document root. */
   start(): void {
     this.initializeDocument();
     this.nav.connect({
@@ -129,7 +135,7 @@ export class EditorState {
     });
     this.focusIndicator.showIndicator(true);
     this.nav.FOCUS(
-      findNextEditableLine(this.document.root, this.document.root) ?? this.document.root
+      findNextRenderedEditableLine(this.document.root, this.document.root) ?? this.document.root
     );
   }
 

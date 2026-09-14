@@ -16,15 +16,15 @@ Jsed divides the DOM that up into several broad mutually exclusive categories:
 - (1) **FOCUSABLE** (focusable element)
   — an element that can participate structurally in FOCUS. Cannot be a TOKEN or an IGNORABLE. A FOCUSABLE can be hidden temporarily so document initialization can still process it; FOCUS traversal only visits it when it is also a NAVIGABLE_FOCUSABLE.
   - Source of truth: `isFocusable` in `taxonomy.ts`.
-- **RENDERED**
-  — an element that browser rendering state does not hide. Elements under `display: none`, the HTML `hidden` attribute, or effective `visibility: hidden|collapse` are not RENDERED.
-  - Source of truth: `isRendered` in `taxonomy.ts`.
-- **NAVIGABLE_FOCUSABLE**
-  — a RENDERED FOCUSABLE that the user can navigate to and FOCUS on.
-  - Source of truth: `isNavigableFocusable` in `taxonomy.ts`.
-- **FOCUS_CANDIDATE**
-  — all elements that are either FOCUSABLE or FOCUS_TRANSPARENT; the key difference being if the element has been flagged as FOCUS_TRANSPARENT;
-  - Source of truth: `isFocusCandidate` in `taxonomy.ts`.
+  - **RENDERED**
+    — an element that browser rendering state does not hide. Elements under `display: none`, the HTML `hidden` attribute, or effective `visibility: hidden|collapse` are not RENDERED.
+    - Source of truth: `isRendered` in `taxonomy.ts`.
+  - **NAVIGABLE_FOCUSABLE**
+    — a RENDERED FOCUSABLE that the user can navigate to and FOCUS on.
+    - Source of truth: `isNavigableFocusable` in `taxonomy.ts`.
+  - **FOCUS_CANDIDATE**
+    — all elements that are either FOCUSABLE or FOCUS_TRANSPARENT; the key difference being if the element has been flagged as FOCUS_TRANSPARENT;
+    - Source of truth: `isFocusCandidate` in `taxonomy.ts`.
 - (2) **TOKEN** (jsed token)
   — a span wrapping consecutive non-whitespace text. The CURSOR operates on TOKEN's, not individual characters. In the DOM, a TOKEN now holds only its visible text. Spacing in NEGATIVE_SPACE is represented by whitespace text nodes at TOKEN boundaries rather than being stored inside the TOKEN text node.
   - This means jsed distinguishes between:

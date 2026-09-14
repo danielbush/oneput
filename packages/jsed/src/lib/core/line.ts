@@ -5,6 +5,7 @@ import {
   isOpaque,
   isLine,
   isLineSibling,
+  isRendered,
   isToken,
   isTokenizableTextNode
 } from './taxonomy.js';
@@ -158,8 +159,26 @@ export function getFirstLineSibling(line: HTMLElement): HTMLElement | null {
   return null;
 }
 
+/**
+ * Find the next editable LINE by document structure, including hidden elements.
+ * Editing and tokenization also use this search to process hidden document content.
+ * Callers that select user-visible FOCUS must check rendering separately.
+ */
 export function findNextEditableLine(from: Node, ceiling: HTMLElement): HTMLElement | null {
   const nextToken = getNextLineSibling(from, ceiling);
   const line = nextToken ? getLine(nextToken) : null;
   return line;
+}
+
+/** Find the next RENDERED editable LINE, or null when none exists within the ceiling. */
+export function findNextRenderedEditableLine(from: Node, ceiling: HTMLElement): HTMLElement | null {
+  let seat = getNextLineSibling(from, ceiling);
+  while (seat) {
+    const line = getLine(seat);
+    if (isRendered(line)) {
+      return line;
+    }
+    seat = getNextLineSibling(seat, ceiling);
+  }
+  return null;
 }

@@ -233,7 +233,7 @@ COMMENT: small things that make a difference to user experience, flow of user ac
     - [x] 20-Jul-2026
       - converted a whole bunch
 - refactor: token.remove op should say 'removedToken', 'removedLeadingSpace', 'removedTrailingSpace' - it's too easy to think they're actually live references
-- refactor: move likely Oneput-level catalog entries (`EXIT`, `FOCUS`) out of `EditorActionCatalog`
+- refactor: move likely Oneput-level provider entries (`EXIT`, `FOCUS`) out of `JsedActionProvider`
 - refactor: getRemovableAnchorBeforeTag looks more complicated than it needs to be
   - can we drastically simplify it because of ANCHOR_RULES?
   - why "removable anchor"?

@@ -1,8 +1,8 @@
 import {
-  ActionCatalog,
-  type ActionCatalogEntries,
-  type ActionCatalogMenuItem,
-  type AppActionCatalog,
+  ActionProvider,
+  type ActionProviderEntries,
+  type ActionProviderMenuItem,
+  type AppActionProvider,
   type AppActions,
   notifier,
   type Controller,
@@ -12,15 +12,15 @@ import {
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
-import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
+import { OneputActionProvider } from '@oneput/oneput/shared/actions/OneputActionProvider.js';
 import type { Editor } from '../../editor/Editor.js';
 import { JsedAction, type JsedActionId } from './JsedAction.js';
 import { icons } from './lib/icons.js';
 import { PasteElementUI } from './lib/PasteElementUI.js';
 import { PickListUI } from './lib/PickListUI.js';
 
-type CatalogEntries = ActionCatalogEntries<JsedActionId>;
-type CatalogOptions = {
+type ProviderEntries = ActionProviderEntries<JsedActionId>;
+type ProviderOptions = {
   invalidateMenu: () => void;
   /**
    * Fires on every `invalidateMenu`. Mounted pull widgets (checkbox rows)
@@ -29,23 +29,23 @@ type CatalogOptions = {
    */
   menuChanges: Notifier;
 };
-type JsedCatalogContext = {
+type JsedActionProviderContext = {
   ctl: Controller;
   editor: Editor;
-  opts: CatalogOptions;
+  opts: ProviderOptions;
 };
 
 /**
  * Defines reusable Jsed actions, bindings, and hand-authored menu item rows.
  *
- * AppObjects derive a filtered catalog for their mode, expose `getActions()` to
+ * AppObjects derive a filtered provider for their mode, expose `getActions()` to
  * Oneput, then explicitly compose menu rows with `getMenuItems([...])`.
  *
  * The editor provides predicates so the ui can decide to hide or disable
  * something; everything else should be encapsulated within an editor action,
  * the ui shouldn't decide anything for the editor
  */
-export class JsedCatalog implements AppActionCatalog<JsedActionId> {
+export class JsedActionProvider implements AppActionProvider<JsedActionId> {
   static create(
     ctl: Controller,
     editor: Editor,
@@ -59,8 +59,8 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
       rebuild();
       menuChanges.notify();
     };
-    return new JsedCatalog(
-      ActionCatalog.create<JsedActionId>(() =>
+    return new JsedActionProvider(
+      ActionProvider.create<JsedActionId>(() =>
         getEntries({
           ctl,
           editor,
@@ -70,33 +70,33 @@ export class JsedCatalog implements AppActionCatalog<JsedActionId> {
     );
   }
 
-  private constructor(private catalog: AppActionCatalog<JsedActionId>) {}
+  private constructor(private provider: AppActionProvider<JsedActionId>) {}
 
   filter(ids: JsedActionId[]) {
-    return new JsedCatalog(this.catalog.filter(ids));
+    return new JsedActionProvider(this.provider.filter(ids));
   }
 
   getBindings(): KeyBindingMap {
-    return this.catalog.getBindings();
+    return this.provider.getBindings();
   }
 
   getActions(): AppActions {
-    return this.catalog.getActions();
+    return this.provider.getActions();
   }
 
-  getMenuItems(ids: JsedActionId[]): ActionCatalogMenuItem[] {
-    return this.catalog.getMenuItems(ids);
+  getMenuItems(ids: JsedActionId[]): ActionProviderMenuItem[] {
+    return this.provider.getMenuItems(ids);
   }
 }
 
 /**
- * Define every reusable editor catalog entry.
+ * Define every reusable editor action provider entry.
  *
- * This is the unfiltered catalog: each entry is keyed by `JsedAction` id and
+ * This is the unfiltered provider: each entry is keyed by `JsedAction` id and
  * may include an action handler, key binding, menu row preset, and menu
  * visibility predicate. AppObjects select from these entries with `filter()`.
  */
-function getEntries(ctx: JsedCatalogContext): CatalogEntries {
+function getEntries(ctx: JsedActionProviderContext): ProviderEntries {
   const { ctl, editor } = ctx;
 
   return {
@@ -173,7 +173,7 @@ function getEntries(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function navigation(ctx: JsedCatalogContext): CatalogEntries {
+function navigation(ctx: JsedActionProviderContext): ProviderEntries {
   const { editor } = ctx;
   return {
     [JsedAction.DOWN]: {
@@ -246,7 +246,7 @@ function navigation(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function selection(ctx: JsedCatalogContext): CatalogEntries {
+function selection(ctx: JsedActionProviderContext): ProviderEntries {
   const { ctl, editor } = ctx;
   return {
     [JsedAction.WRAP_SELECTION]: {
@@ -343,7 +343,7 @@ function selection(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function editing(ctx: JsedCatalogContext): CatalogEntries {
+function editing(ctx: JsedActionProviderContext): ProviderEntries {
   const { ctl, editor } = ctx;
   return {
     [JsedAction.ENTER]: {
@@ -401,7 +401,7 @@ function editing(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function undo(ctx: JsedCatalogContext): CatalogEntries {
+function undo(ctx: JsedActionProviderContext): ProviderEntries {
   const { opts, editor } = ctx;
   return {
     [JsedAction.UNDO]: {
@@ -443,7 +443,7 @@ function undo(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
+function copyPaste(ctx: JsedActionProviderContext): ProviderEntries {
   const { ctl, editor } = ctx;
   const pasteAndExit = (paste: () => boolean) => {
     paste();
@@ -452,7 +452,7 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
   const runPasteElement = (cut: boolean) => {
     ctl.app.run(
       PasteElementUI.create(ctl, editor, {
-        catalog: JsedCatalog.create(ctl, editor).filter([
+        provider: JsedActionProvider.create(ctl, editor).filter([
           JsedAction.DOWN,
           JsedAction.UP,
           JsedAction.NEXT,
@@ -463,7 +463,7 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
           JsedAction.CANCEL_VIA_EXIT
         ]),
         cut,
-        oneputCatalog: OneputCatalog.create(ctl).filter([OneputAction.FOCUS_INPUT])
+        oneputProvider: OneputActionProvider.create(ctl).filter([OneputAction.FOCUS_INPUT])
       })
     );
   };
@@ -593,7 +593,7 @@ function copyPaste(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function focusOps(ctx: JsedCatalogContext): CatalogEntries {
+function focusOps(ctx: JsedActionProviderContext): ProviderEntries {
   const { ctl, editor } = ctx;
   return {
     [JsedAction.DELETE_FOCUSED_ELEMENT]: {
@@ -801,7 +801,7 @@ function focusOps(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function focusSpaceOps(ctx: JsedCatalogContext): CatalogEntries {
+function focusSpaceOps(ctx: JsedActionProviderContext): ProviderEntries {
   const { editor } = ctx;
   return {
     [JsedAction.INSERT_SPACE_BEFORE_FOCUS]: {
@@ -863,7 +863,7 @@ function focusSpaceOps(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
+function focusAnchorOps(ctx: JsedActionProviderContext): ProviderEntries {
   const { editor } = ctx;
   return {
     [JsedAction.INSERT_ANCHOR_IN_FOCUS]: {
@@ -939,7 +939,7 @@ function focusAnchorOps(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function cursorOps(ctx: JsedCatalogContext): CatalogEntries {
+function cursorOps(ctx: JsedActionProviderContext): ProviderEntries {
   const { editor } = ctx;
   return {
     [JsedAction.INSERT_SPACE_AFTER_CURSOR]: {
@@ -1001,7 +1001,7 @@ function cursorOps(ctx: JsedCatalogContext): CatalogEntries {
   };
 }
 
-function misc(ctx: JsedCatalogContext): CatalogEntries {
+function misc(ctx: JsedActionProviderContext): ProviderEntries {
   const { editor, opts } = ctx;
   return {
     [JsedAction.ENABLE_LEGACY_ELEMENT_INDICATOR]: {

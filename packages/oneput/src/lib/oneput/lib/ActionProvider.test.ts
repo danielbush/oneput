@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ActionCatalog, type AppActionCatalog } from './ActionCatalog.js';
+import { ActionProvider, type AppActionProvider } from './ActionProvider.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 
 const Command = {
@@ -7,18 +7,19 @@ const Command = {
   DELETE: 'DELETE'
 } as const;
 
-describe('ActionCatalog', () => {
-  test('implements catalog interface', () => {
+describe('ActionProvider', () => {
+  test('implements provider interface', () => {
     // arrange
-    const catalog: AppActionCatalog<(typeof Command)[keyof typeof Command]> = ActionCatalog.create({
-      [Command.SAVE]: {
-        description: 'Save',
-        action: () => {}
-      }
-    });
+    const provider: AppActionProvider<(typeof Command)[keyof typeof Command]> =
+      ActionProvider.create({
+        [Command.SAVE]: {
+          description: 'Save',
+          action: () => {}
+        }
+      });
 
     // act
-    const actions = catalog.filter([Command.SAVE]).getActions();
+    const actions = provider.filter([Command.SAVE]).getActions();
 
     // assert
     expect(Object.keys(actions)).toEqual([Command.SAVE]);
@@ -26,7 +27,7 @@ describe('ActionCatalog', () => {
 
   test('filtered actions and menu items', () => {
     // arrange
-    const catalog = ActionCatalog.create({
+    const provider = ActionProvider.create({
       [Command.SAVE]: {
         description: 'Save',
         action: () => {},
@@ -51,9 +52,9 @@ describe('ActionCatalog', () => {
     }).filter([Command.SAVE]);
 
     // act
-    const actions = catalog.getActions();
-    const bindings = catalog.getBindings();
-    const menuItems = catalog.getMenuItems([Command.SAVE, Command.DELETE]);
+    const actions = provider.getActions();
+    const bindings = provider.getBindings();
+    const menuItems = provider.getMenuItems([Command.SAVE, Command.DELETE]);
 
     // assert
     expect(Object.keys(actions)).toEqual([Command.SAVE]);
@@ -68,7 +69,7 @@ describe('ActionCatalog', () => {
 
   test('menu item predicates', () => {
     // arrange
-    const catalog = ActionCatalog.create({
+    const provider = ActionProvider.create({
       [Command.DELETE]: {
         description: 'Delete',
         action: () => {},
@@ -83,8 +84,8 @@ describe('ActionCatalog', () => {
     });
 
     // act
-    const actions = catalog.getActions();
-    const menuItems = catalog.getMenuItems([Command.DELETE]);
+    const actions = provider.getActions();
+    const menuItems = provider.getMenuItems([Command.DELETE]);
 
     // assert
     expect(actions[Command.DELETE]).toBeDefined();

@@ -61,7 +61,7 @@ export type SetDateParams = {
  * Set a date via a reusable {@link calendarMenuItem} rich row.
  * Month/year navigation + Today live in the pinned menu footer
  * (`< << Today >> >`); month/year is the menu header title.
- * Tick / catalog SUBMIT keep the date. Back / Cancel discard; confirm if the
+ * Tick / provider SUBMIT keep the date. Back / Cancel discard; confirm if the
  * date changed from the value at open.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).

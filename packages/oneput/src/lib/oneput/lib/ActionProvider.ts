@@ -1,34 +1,34 @@
 import type { AppAction, AppActionContext, AppActions, MenuItemAny } from '../types.js';
 import type { ActionBinding, KeyBindingAction, KeyBindingMap } from './bindings.js';
 
-export type ActionCatalogMenuItem = MenuItemAny | undefined | null | '' | false;
+export type ActionProviderMenuItem = MenuItemAny | undefined | null | '' | false;
 
-export type ActionCatalogBinding = Omit<ActionBinding, 'description'>;
-export type ActionCatalogMenuItemEntry<Context extends AppActionContext = AppActionContext> =
+export type ActionProviderBinding = Omit<ActionBinding, 'description'>;
+export type ActionProviderMenuItemEntry<Context extends AppActionContext = AppActionContext> =
   AppAction<Context> & {
     description: string;
   };
 
-export type ActionCatalogEntry<Context extends AppActionContext = AppActionContext> = Omit<
+export type ActionProviderEntry<Context extends AppActionContext = AppActionContext> = Omit<
   AppAction<Context>,
   'binding'
 > & {
   description: string;
-  binding?: ActionCatalogBinding;
+  binding?: ActionProviderBinding;
   canShowMenuItem?: () => boolean;
-  menuItem?: (entry: ActionCatalogMenuItemEntry<Context>) => ActionCatalogMenuItem;
+  menuItem?: (entry: ActionProviderMenuItemEntry<Context>) => ActionProviderMenuItem;
 };
 
-export type ActionCatalogEntries<
+export type ActionProviderEntries<
   Id extends string,
   Context extends AppActionContext = AppActionContext
-> = Partial<Record<Id, ActionCatalogEntry<Context>>>;
+> = Partial<Record<Id, ActionProviderEntry<Context>>>;
 
-export interface AppActionCatalog<
+export interface AppActionProvider<
   Id extends string,
   Context extends AppActionContext = AppActionContext
 > {
-  filter(ids: Id[]): AppActionCatalog<Id, Context>;
+  filter(ids: Id[]): AppActionProvider<Id, Context>;
   /**
    * Key bindings with actions attached, suitable for KeysController.
    */
@@ -42,21 +42,21 @@ export interface AppActionCatalog<
    *
    * @param ids Use this to select one or more menu items when creating groups of items in a menu.
    */
-  getMenuItems(ids: Id[]): ActionCatalogMenuItem[];
+  getMenuItems(ids: Id[]): ActionProviderMenuItem[];
 }
 
 /**
- * Reusable action catalog for AppObjects.
+ * Reusable action provider for AppObjects.
  *
- * A catalog defines actions once, then lets each AppObject select the active
+ * A provider defines actions once, then lets each AppObject select the active
  * action ids it exposes through `actions()` and hand-authored menu rows.
  *
- * The catalog owns the action contract: what the action does; when it is
+ * The provider owns the action contract: what the action does; when it is
  * available; what menu row represents it; what binding, if any, triggers it.
  * But it does not own AppObject lifecycle stuff like menu id, focus behavior,
  * layout title, prompt, or child mode setup.
  *
- * `filter([...])` sets the available action set for that catalog instance. It limits both:
+ * `filter([...])` sets the available action set for that provider instance. It limits both:
  *
  * - `getActions()` — only filtered actions become dispatchable actions/bindings
  * - `getMenuItems([...])` — only filtered actions can render menu row presets
@@ -64,16 +64,16 @@ export interface AppActionCatalog<
  * Then `getMenuItems([...])` asks for menu rows by action id, in the order the AppObject wants them:
  *
  * ```ts
- * const catalog = JsedCatalog.create(ctl, editor).filter([
+ * const provider = JsedActionProvider.create(ctl, editor).filter([
  *   JsedAction.PASTE_BEFORE,
  *   JsedAction.PASTE_AFTER,
  *   JsedAction.CANCEL_VIA_EXIT
  * ]);
  *
- * actions = () => catalog.getActions();
+ * actions = () => provider.getActions();
  *
  * menu = () => ({
- *   items: catalog.getMenuItems([
+ *   items: provider.getMenuItems([
  *     JsedAction.PASTE_BEFORE,
  *     JsedAction.PASTE_AFTER,
  *     JsedAction.CANCEL_VIA_EXIT
@@ -85,30 +85,32 @@ export interface AppActionCatalog<
  *
  * Identity distinction:
  *
- * - `action id`: stable action identity used for catalog lookup, filtering,
+ * - `action id`: stable action identity used for provider lookup, filtering,
  *   dispatch, and bindings; see {@link AppActions}
  * - `menu item id`: rendered row identity, inside the actual menu item object
  *
  * `filter()` answers “what is this AppObject allowed to expose?”
  * `getMenuItems()` answers “which allowed action rows do I want to render here, and in what order?”
  */
-export class ActionCatalog<
+export class ActionProvider<
   Id extends string,
   Context extends AppActionContext = AppActionContext
-> implements AppActionCatalog<Id, Context> {
+> implements AppActionProvider<Id, Context> {
   static create<Id extends string, Context extends AppActionContext = AppActionContext>(
-    entries: ActionCatalogEntries<Id, Context> | (() => ActionCatalogEntries<Id, Context>)
+    entries: ActionProviderEntries<Id, Context> | (() => ActionProviderEntries<Id, Context>)
   ) {
-    return new ActionCatalog(entries);
+    return new ActionProvider(entries);
   }
 
   private constructor(
-    private entries: ActionCatalogEntries<Id, Context> | (() => ActionCatalogEntries<Id, Context>),
+    private entries:
+      | ActionProviderEntries<Id, Context>
+      | (() => ActionProviderEntries<Id, Context>),
     private activeIds?: Set<Id>
   ) {}
 
   filter(ids: Id[]) {
-    return new ActionCatalog(this.entries, new Set(ids));
+    return new ActionProvider(this.entries, new Set(ids));
   }
 
   getBindings(): KeyBindingMap {
@@ -139,7 +141,7 @@ export class ActionCatalog<
     return actions;
   }
 
-  getMenuItems(ids: Id[]): ActionCatalogMenuItem[] {
+  getMenuItems(ids: Id[]): ActionProviderMenuItem[] {
     const entries = this.getActiveEntries();
     return ids.map((id) => {
       const entry = entries[id];
@@ -153,9 +155,9 @@ export class ActionCatalog<
     });
   }
 
-  private toActionBinding(entry: ActionCatalogEntry<Context>): ActionBinding {
+  private toActionBinding(entry: ActionProviderEntry<Context>): ActionBinding {
     if (!entry.binding) {
-      throw new Error('ActionCatalog entry has no binding');
+      throw new Error('ActionProvider entry has no binding');
     }
 
     return {
@@ -164,11 +166,11 @@ export class ActionCatalog<
     };
   }
 
-  private getActiveEntries(): ActionCatalogEntries<Id, Context> {
+  private getActiveEntries(): ActionProviderEntries<Id, Context> {
     const entries = typeof this.entries === 'function' ? this.entries() : this.entries;
     if (!this.activeIds) return entries;
 
-    const active: ActionCatalogEntries<Id, Context> = {};
+    const active: ActionProviderEntries<Id, Context> = {};
     for (const id of this.activeIds) {
       if (entries[id]) active[id] = entries[id];
     }

@@ -718,10 +718,7 @@ export class MenuController {
     this.focusBehaviour = this.defaultFocusBehaviour;
   }
 
-  private runFocusBehaviour(
-    focusBehaviour: FocusBehaviour | undefined,
-    cause: MenuItemFocusCause
-  ) {
+  private runFocusBehaviour(focusBehaviour: FocusBehaviour | undefined, cause: MenuItemFocusCause) {
     if (!this.enableMenuItemFocus) {
       this.clearMenuItemFocus();
       return;

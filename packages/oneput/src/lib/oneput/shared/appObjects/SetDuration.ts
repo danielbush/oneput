@@ -37,7 +37,7 @@ export type SetDurationParams = {
 
 /**
  * Pick an elapsed duration via {@link setTimeMenuItem} (no AM/PM; hours clamp at 100).
- * Tick / catalog SUBMIT keep the duration. Back / Cancel discard; confirm if
+ * Tick / provider SUBMIT keep the duration. Back / Cancel discard; confirm if
  * the duration changed from the value at open.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).

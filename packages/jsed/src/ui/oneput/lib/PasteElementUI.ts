@@ -1,8 +1,8 @@
 import type { Controller, AppObject, Menu } from '@oneput/oneput';
-import type { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
+import type { OneputActionProvider } from '@oneput/oneput/shared/actions/OneputActionProvider.js';
 import type { Editor } from '../../../editor/Editor.js';
 import { JsedAction } from '../JsedAction.js';
-import type { JsedCatalog } from '../JsedCatalog.js';
+import type { JsedActionProvider } from '../JsedActionProvider.js';
 import type { JsedLayoutParams } from './JsedUILayout.js';
 
 export class PasteElementUI implements AppObject {
@@ -10,24 +10,24 @@ export class PasteElementUI implements AppObject {
     ctl: Controller,
     editor: Editor,
     {
-      catalog,
+      provider,
       cut,
-      oneputCatalog
+      oneputProvider
     }: {
-      catalog: JsedCatalog;
+      provider: JsedActionProvider;
       cut: boolean;
-      oneputCatalog: OneputCatalog;
+      oneputProvider: OneputActionProvider;
     }
   ) {
-    return new PasteElementUI(ctl, editor, catalog, cut, oneputCatalog);
+    return new PasteElementUI(ctl, editor, provider, cut, oneputProvider);
   }
 
   constructor(
     private ctl: Controller,
     private editor: Editor,
-    private catalog: JsedCatalog,
+    private provider: JsedActionProvider,
     private cut: boolean,
-    private oneputCatalog: OneputCatalog
+    private oneputProvider: OneputActionProvider
   ) {}
 
   layout = {
@@ -56,8 +56,8 @@ export class PasteElementUI implements AppObject {
   };
 
   actions = () => ({
-    ...this.oneputCatalog.getActions(),
-    ...this.catalog.getActions()
+    ...this.oneputProvider.getActions(),
+    ...this.provider.getActions()
   });
 
   menu = () => {
@@ -65,7 +65,7 @@ export class PasteElementUI implements AppObject {
       id: 'PasteElementUI',
       focusBehaviour: 'first',
       items: [
-        ...this.catalog.getMenuItems([
+        ...this.provider.getMenuItems([
           JsedAction.PASTE_BEFORE,
           JsedAction.PASTE_AFTER,
           JsedAction.PASTE_APPEND,

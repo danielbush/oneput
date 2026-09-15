@@ -16,12 +16,12 @@ export { registerIcon, registerIcons, element, unsafeHTML } from './oneput/lib/i
 export { DOMUpdater } from './oneput/lib/DOMUpdater.js';
 export { cell, notifier, type Cell, type Notifier, type Pull } from './oneput/lib/pull.js';
 export {
-  ActionCatalog,
-  type ActionCatalogEntries,
-  type ActionCatalogEntry,
-  type ActionCatalogMenuItem,
-  type AppActionCatalog
-} from './oneput/lib/ActionCatalog.js';
+  ActionProvider,
+  type ActionProviderEntries,
+  type ActionProviderEntry,
+  type ActionProviderMenuItem,
+  type AppActionProvider
+} from './oneput/lib/ActionProvider.js';
 export {
   FlexChildBuilder,
   hflex,

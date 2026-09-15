@@ -11,7 +11,7 @@ import {
 export type { LiveEditBinding, LiveEditItemParams, LiveEditRender, LiveEditValue };
 
 /**
- * Stable field identity shared by a catalog action and its menu row.
+ * Stable field identity shared by a provider action and its menu row.
  */
 export type LiveEditField = {
   activate: () => void;
@@ -47,7 +47,7 @@ export class MenuLiveEdit {
   }
 
   /**
-   * Stable field for catalog actions and menu rows that share one claim toggle.
+   * Stable field for provider actions and menu rows that share one claim toggle.
    */
   field(params: { id: string } & LiveEditBinding): LiveEditField {
     const binding: LiveEditBinding = {

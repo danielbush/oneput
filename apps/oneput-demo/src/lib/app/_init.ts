@@ -3,7 +3,7 @@ import { Root } from './Root.js';
 import { WordFilter } from '@oneput/oneput/shared/filters/WordFilter.js';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { BindingsIDB } from '@oneput/oneput/shared/bindings/BindingsIDB.js';
-import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
+import { OneputActionProvider } from '@oneput/oneput/shared/actions/OneputActionProvider.js';
 
 export function init(ctl: Controller) {
   const dynamicPlaceholder = DynamicPlaceholder.create(ctl, (params) =>
@@ -28,7 +28,7 @@ export function init(ctl: Controller) {
   BindingsIDB.create()
     .getBindings()
     .map((userBindings) => {
-      const bindings = KeyEventBindings.create(OneputCatalog.create(ctl).getBindings());
+      const bindings = KeyEventBindings.create(OneputActionProvider.create(ctl).getBindings());
       bindings.applyBindings(userBindings);
       ctl.keys.setDefaultBindings(bindings.keyBindingMap);
     })

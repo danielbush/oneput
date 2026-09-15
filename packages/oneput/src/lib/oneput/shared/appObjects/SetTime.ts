@@ -46,7 +46,7 @@ export type SetTimeParams = {
 
 /**
  * Pick a clock time via {@link setTimeMenuItem} (12h + AM/PM, wrap 24h).
- * Tick / catalog SUBMIT keep the time. Back / Cancel discard; confirm if the
+ * Tick / provider SUBMIT keep the time. Back / Cancel discard; confirm if the
  * time changed from the value at open.
  *
  * Takes {@link SharedCtl} (hosts pass a full Controller).

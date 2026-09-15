@@ -1,48 +1,48 @@
 import {
-  ActionCatalog,
-  type ActionCatalogEntries,
-  type ActionCatalogMenuItem,
-  type AppActionCatalog
-} from '../../lib/ActionCatalog.js';
+  ActionProvider,
+  type ActionProviderEntries,
+  type ActionProviderMenuItem,
+  type AppActionProvider
+} from '../../lib/ActionProvider.js';
 import type { KeyBindingMap } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
 import type { AppActions } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { OneputAction, type OneputActionId } from './OneputAction.js';
 
-type OneputCatalogEntries = ActionCatalogEntries<OneputActionId>;
+type OneputActionProviderEntries = ActionProviderEntries<OneputActionId>;
 
 /**
- * Catalog of reusable Oneput commands.
+ * Provider of reusable Oneput commands.
  *
- * Consumers can filter this catalog per AppObject, expose selected entries via
+ * Consumers can filter this provider per AppObject, expose selected entries via
  * `actions()`, and explicitly compose menu rows with `getMenuItems([...])`.
  */
-export class OneputCatalog implements AppActionCatalog<OneputActionId> {
+export class OneputActionProvider implements AppActionProvider<OneputActionId> {
   static create(ctl: Controller) {
-    return new OneputCatalog(ActionCatalog.create<OneputActionId>(() => getEntries(ctl)));
+    return new OneputActionProvider(ActionProvider.create<OneputActionId>(() => getEntries(ctl)));
   }
 
-  private constructor(private catalog: AppActionCatalog<OneputActionId>) {}
+  private constructor(private provider: AppActionProvider<OneputActionId>) {}
 
   filter(ids: OneputActionId[]) {
-    return new OneputCatalog(this.catalog.filter(ids));
+    return new OneputActionProvider(this.provider.filter(ids));
   }
 
   getBindings(): KeyBindingMap {
-    return this.catalog.getBindings();
+    return this.provider.getBindings();
   }
 
   getActions(): AppActions {
-    return this.catalog.getActions();
+    return this.provider.getActions();
   }
 
-  getMenuItems(ids: OneputActionId[]): ActionCatalogMenuItem[] {
-    return this.catalog.getMenuItems(ids);
+  getMenuItems(ids: OneputActionId[]): ActionProviderMenuItem[] {
+    return this.provider.getMenuItems(ids);
   }
 }
 
-function getEntries(ctl: Controller): OneputCatalogEntries {
+function getEntries(ctl: Controller): OneputActionProviderEntries {
   return {
     [OneputAction.EXIT]: {
       description: 'Exit',
@@ -101,7 +101,7 @@ function getEntries(ctl: Controller): OneputCatalogEntries {
   };
 }
 
-function getMenuEntries(ctl: Controller): OneputCatalogEntries {
+function getMenuEntries(ctl: Controller): OneputActionProviderEntries {
   return {
     [OneputAction.OPEN_MENU]: {
       description: 'Open Oneput menu...',
@@ -157,7 +157,7 @@ function getMenuEntries(ctl: Controller): OneputCatalogEntries {
   };
 }
 
-function getInputEntries(ctl: Controller): OneputCatalogEntries {
+function getInputEntries(ctl: Controller): OneputActionProviderEntries {
   return {
     [OneputAction.FOCUS_INPUT]: {
       description: 'Focus input',

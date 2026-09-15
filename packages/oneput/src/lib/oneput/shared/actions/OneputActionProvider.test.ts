@@ -1,19 +1,19 @@
 import { describe, expect, test } from 'vitest';
 import { Controller } from '../../controllers/controller.js';
 import { OneputAction } from './OneputAction.js';
-import { OneputCatalog } from './OneputCatalog.js';
+import { OneputActionProvider } from './OneputActionProvider.js';
 
-describe('OneputCatalog', () => {
+describe('OneputActionProvider', () => {
   test('filtered actions', () => {
     // arrange
     const ctl = Controller.createNull();
-    const catalog = OneputCatalog.create(ctl).filter([
+    const provider = OneputActionProvider.create(ctl).filter([
       OneputAction.FOCUS_INPUT,
       OneputAction.TOGGLE_SELECTION
     ]);
 
     // act
-    const actions = catalog.getActions();
+    const actions = provider.getActions();
 
     // assert
     expect(Object.keys(actions)).toEqual([OneputAction.FOCUS_INPUT, OneputAction.TOGGLE_SELECTION]);
@@ -27,13 +27,13 @@ describe('OneputCatalog', () => {
   test('filtered bindings', () => {
     // arrange
     const ctl = Controller.createNull();
-    const catalog = OneputCatalog.create(ctl).filter([
+    const provider = OneputActionProvider.create(ctl).filter([
       OneputAction.FOCUS_INPUT,
       OneputAction.TOGGLE_SELECTION
     ]);
 
     // act
-    const bindings = catalog.getBindings();
+    const bindings = provider.getBindings();
 
     // assert
     expect(Object.keys(bindings)).toEqual([
@@ -45,13 +45,13 @@ describe('OneputCatalog', () => {
     expect(bindings[OneputAction.FOCUS_INPUT].action).toBeDefined();
   });
 
-  test('menu items come from selected catalog entries', () => {
+  test('menu items come from selected provider entries', () => {
     // arrange
     const ctl = Controller.createNull();
-    const catalog = OneputCatalog.create(ctl).filter([OneputAction.SUBMIT]);
+    const provider = OneputActionProvider.create(ctl).filter([OneputAction.SUBMIT]);
 
     // act
-    const items = catalog.getMenuItems([OneputAction.SUBMIT, OneputAction.EXIT]);
+    const items = provider.getMenuItems([OneputAction.SUBMIT, OneputAction.EXIT]);
 
     // assert
     expect(items.map((item) => item && item.id)).toEqual(['SUBMIT', undefined]);
@@ -60,8 +60,8 @@ describe('OneputCatalog', () => {
   test('menu actions delegate to oneput controllers', async () => {
     // arrange
     const ctl = Controller.createNull();
-    const catalog = OneputCatalog.create(ctl);
-    const actions = catalog.getActions();
+    const provider = OneputActionProvider.create(ctl);
+    const actions = provider.getActions();
 
     // act
     actions[OneputAction.OPEN_MENU].action(ctl);

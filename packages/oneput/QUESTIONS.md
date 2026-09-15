@@ -231,15 +231,15 @@ Actions are stable command identities plus executable behavior. They let the sam
 triggered from a key binding, a menu item, or direct controller code without duplicating the
 implementation.
 
-`OneputAction` names the built-in Oneput commands. `OneputCatalog` maps those ids to:
+`OneputAction` names the built-in Oneput commands. `OneputActionProvider` maps those ids to:
 
 - an `action` callback,
 - optional key binding metadata,
 - optional menu item metadata.
 
-`ActionCatalog` is the reusable pattern underneath that. An AppObject can filter a catalog to
-the actions it wants to expose, return `catalog.getActions()` from `actions()`, and compose menu
-rows with `catalog.getMenuItems([...])`.
+`ActionProvider` is the reusable pattern underneath that. An AppObject can filter a provider to
+the actions it wants to expose, return `provider.getActions()` from `actions()`, and compose menu
+rows with `provider.getMenuItems([...])`.
 
 The action id is the stable dispatch identity used by bindings and AppObject action lookup. The
 menu item id is the rendered row identity inside a particular menu.

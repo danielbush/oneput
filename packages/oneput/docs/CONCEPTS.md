@@ -1,13 +1,13 @@
 # concepts and vocabulary
 
-## actions and catalogs of actions
+## actions and action providers
 
 - the key idea is that we define actions more generally; then declare what they do, what bindings they have and whether they have a menu item
 - this helps to declutter `.menu` and `.actions` in the AppObject
 - specify whether the menu is available
-  - `ActionCatalogEntry` defines `canShowMenuItem`
+  - `ActionProviderEntry` defines `canShowMenuItem`
 - TBD: specify whether actions are available
-- see OneputCatalog, JsedCatalog as examples
+- see `OneputActionProvider` and `JsedActionProvider` as examples
 
 ## pulling and invalidation vs imperative
 
@@ -109,7 +109,7 @@ ui/
     icons.ts
   oneput/
     init.ts
-    Catalog.ts
+    ActionProvider.ts
     icons.ts
     apps/
       ChromeStatusApp.ts
@@ -135,18 +135,18 @@ to grow.
 
 - Put files shared by several AppObjects in `ui/oneput/shared/`. Do not create
   `shared/` for code that has only one owner.
-- Put surface-wide Oneput wiring, such as initialization, catalogs, layouts,
+- Put surface-wide Oneput wiring, such as initialization, action providers, layouts,
   and icon registration, beside `apps/` in `ui/oneput/`.
 - Put AppObject-private wiring inside that AppObject's directory.
 - Do not use `ui/lib/` for top-level wiring. Reserve `lib/` for reusable,
   lower-level implementation primitives.
 - Do not use filename underscores for support files after the directory gives
-  them a clear namespace. Prefer `ui/oneput/Catalog.ts` to `_catalog.ts`.
+  them a clear namespace. Prefer `ui/oneput/ActionProvider.ts` to `_actionProvider.ts`.
 
 Keep application behavior outside the UI surface directories. Inject the same
 behavior objects into each surface adapter that needs them. For example,
 `ui/frame/Chrome.ts` and a Oneput AppObject can both receive `Actions`; Frame
-chrome must not depend on a Oneput catalog only to reach those actions.
+chrome must not depend on a Oneput action provider only to reach those actions.
 
 ## Signals vs direct UI (`inputSend`, `inputAccept`, `inputReject`)
 

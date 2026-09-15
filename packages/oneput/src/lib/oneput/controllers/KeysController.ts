@@ -7,7 +7,7 @@ import {
   type WhenCondition
 } from '../lib/bindings.js';
 import { isNativeActivation } from '../lib/nativeActivation.js';
-import { OneputCatalog } from '../shared/actions/OneputCatalog.js';
+import { OneputActionProvider } from '../shared/actions/OneputActionProvider.js';
 
 /**
  * Manages key bindings — registration, dispatch, and default/override lifecycle.
@@ -50,7 +50,7 @@ export class KeysController {
 
   constructor(
     private ctl: Controller,
-    private defaultBindings: KeyBindingMap = OneputCatalog.create(ctl).getBindings()
+    private defaultBindings: KeyBindingMap = OneputActionProvider.create(ctl).getBindings()
   ) {}
 
   private currentBindings: KeyBindingMap = {};

@@ -77,7 +77,7 @@ The catalog action and menu action are then the same operation: toggle the field
 Add a general requirement to catalog entries:
 
 ```typescript
-type ActionCatalogEntry = {
+type ActionProviderEntry = {
   description: string;
   action: AppActionHandler;
   menuItem?: ...;

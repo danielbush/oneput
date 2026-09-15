@@ -1,12 +1,12 @@
 import type { AppObject, Controller } from '@oneput/oneput';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
-import { OneputCatalog } from '@oneput/oneput/shared/actions/OneputCatalog.js';
+import { OneputActionProvider } from '@oneput/oneput/shared/actions/OneputActionProvider.js';
 import { Editor } from '../../editor/Editor.js';
 import type { EditorError } from '../../editor/index.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import { JsedUILayout, type JsedLayoutParams } from './lib/JsedUILayout.js';
 import { NavCrumbs } from './lib/navcrumb/NavCrumbs.js';
-import { JsedCatalog } from './JsedCatalog.js';
+import { JsedActionProvider } from './JsedActionProvider.js';
 import { JsedAction } from './JsedAction.js';
 
 export type JsedUIHooks = {
@@ -72,9 +72,9 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
   private unsubscribeEditChanges?: () => void;
   private removeSuspendHandler?: () => void;
 
-  private createCatalog = () => JsedCatalog.create(this.ctl, this.editor);
+  private createProvider = () => JsedActionProvider.create(this.ctl, this.editor);
 
-  private createOneputCatalog = () => OneputCatalog.create(this.ctl);
+  private createOneputProvider = () => OneputActionProvider.create(this.ctl);
 
   /**
    * Rebuild the menu when editor state changes.
@@ -152,28 +152,28 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
 
   public actions = () => {
     return {
-      ...this.createOneputCatalog().filter([OneputAction.FOCUS_INPUT]).getActions(),
-      ...this.createCatalog().getActions()
+      ...this.createOneputProvider().filter([OneputAction.FOCUS_INPUT]).getActions(),
+      ...this.createProvider().getActions()
     };
   };
 
   menu = () => {
-    const catalog = this.createCatalog();
+    const provider = this.createProvider();
     return {
       id: 'EditDocument',
       focusBehaviour: 'last-action,first' as const,
       items: [
-        ...catalog.getMenuItems([JsedAction.STOP_EDITING, JsedAction.EXIT_EDITOR]),
-        ...catalog.getMenuItems([JsedAction.ENTER, JsedAction.UNDO, JsedAction.REDO]),
+        ...provider.getMenuItems([JsedAction.STOP_EDITING, JsedAction.EXIT_EDITOR]),
+        ...provider.getMenuItems([JsedAction.ENTER, JsedAction.UNDO, JsedAction.REDO]),
 
-        ...catalog.getMenuItems([
+        ...provider.getMenuItems([
           JsedAction.CUT,
           JsedAction.COPY,
           JsedAction.COPY_EMPTY_PREVIOUS,
           JsedAction.COPY_EMPTY_NEXT
         ]),
 
-        ...catalog.getMenuItems([
+        ...provider.getMenuItems([
           JsedAction.DELETE_FOCUSED_ELEMENT,
           JsedAction.UNWRAP_FOCUS,
           JsedAction.CONVERT_FOCUS,
@@ -182,23 +182,23 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
           JsedAction.APPEND_NEW_ELEMENT_IN_FOCUS
         ]),
 
-        ...catalog.getMenuItems([JsedAction.WRAP_SELECTION]),
+        ...provider.getMenuItems([JsedAction.WRAP_SELECTION]),
 
-        ...catalog.getMenuItems([
+        ...provider.getMenuItems([
           JsedAction.INSERT_SPACE_BEFORE_FOCUS,
           JsedAction.REMOVE_SPACE_BEFORE_FOCUS,
           JsedAction.INSERT_SPACE_AFTER_FOCUS,
           JsedAction.REMOVE_SPACE_AFTER_FOCUS
         ]),
 
-        ...catalog.getMenuItems([
+        ...provider.getMenuItems([
           JsedAction.INSERT_SPACE_AFTER_CURSOR,
           JsedAction.REMOVE_SPACE_AFTER_CURSOR,
           JsedAction.INSERT_SPACE_BEFORE_CURSOR,
           JsedAction.REMOVE_SPACE_BEFORE_CURSOR
         ]),
 
-        ...catalog.getMenuItems([
+        ...provider.getMenuItems([
           JsedAction.INSERT_ANCHOR_IN_FOCUS,
           JsedAction.INSERT_ANCHOR_BEFORE_FOCUS,
           JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS,
@@ -207,7 +207,7 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
         ])
 
         // FocusIndicator is mothballed, so its two toggles are off the menu.
-        // The catalog entries survive — add them back here to switch it on.
+        // The provider entries survive — add them back here to switch it on.
         // - ENABLE_LEGACY_ELEMENT_INDICATOR
         // - ENABLE_ELEMENT_INDICATOR
       ]

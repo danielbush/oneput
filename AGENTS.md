@@ -10,8 +10,7 @@ This is a pnpm workspace.
   - a UI that can handle a large subset of user inputs and interactions in a compact unified way
 - packages/jsed
   - an editor that lets you edit html using oneput
-- packages/oneput-native-container
-  - a webview-based container that shows how to use oneput within a native context
+- packages/oneput-native-container (deprecated)
   
 There are applications which are used mostly to demo the code in packages/.
 

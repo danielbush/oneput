@@ -2,6 +2,7 @@ packages:
   - packages/*
   - apps/*
   - '!**/test/**'
+  - '!packages/oneput-native-container'
 
 catalog:
   neverthrow: ^8.2.0

@@ -31,53 +31,20 @@ pnpm i
 task # see tasks
 ```
 
-## Setup
-
-- Create a .env using `packages/oneput-native-container/.env.example`
-
-
 ## Packages in this monorepo
 
 - `packages/oneput`
   - the main oneput ui and controller
-- `packages/oneput-native-container`
-  - a react-native container for running oneput in a webview
+- `packages/oneput-native-container` (deprecated)
 - `packages/jsed`
   - a word-based edit that uses oneput
 
 ## Developing
 
-Web
-
 ```sh
 task oneput-demo:dev # to to live/demo and play with oneput
 task jsed-demo:dev
 ```
-
-Expo sandbox
-
-This is relatively easy to run but the environment is limited eg testing file sharing etc
-
-```sh
-task native:expo # runs expo for native-oneput-container
-```
-
-Running android emulator
-
-- install Android Studio
-- opent the virtual device manager
-- create a new device
-- start it
-
-Built oneput-native-container, install into the running android emulator and run it:
-
-```sh
-task native:run:android
-```
-
-Running iOS simulator
-
-TODO
 
 ## Technical notes
 

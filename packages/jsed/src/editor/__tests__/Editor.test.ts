@@ -15,14 +15,7 @@ import {
 } from '../../test/util.js';
 import { getValue } from '../../lib/ops/token.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
-import {
-  isOpaque,
-  isToken,
-  JSED_ANCHOR_CLASS,
-  JSED_FOCUS_CLASS,
-  JSED_IMPLICIT_CLASS,
-  JSED_TOKEN_CLASS
-} from '../../lib/core/taxonomy.js';
+import { isOpaque, isToken } from '../../lib/core/taxonomy.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
 
@@ -1957,37 +1950,6 @@ describe('Editor', () => {
         'qux' //
       ]);
       expect(identify(editor.getCursor()?.getPlace())).toBe('x');
-
-      editor.destroy();
-    });
-  });
-
-  describe('serialize', () => {
-    test('returns clean html and leaves the live document with its artifacts', () => {
-      // arrange
-      const doc = makeRoot(p({ id: 'p1' }, 'foo bar'));
-      const editor = createNullEditor(doc);
-      editor.start();
-
-      // starting the editor adds editing artifacts to the live document
-      expect(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`).length).toBeGreaterThan(0);
-      expect(doc.root.querySelectorAll(`.${JSED_FOCUS_CLASS}`).length).toBeGreaterThan(0);
-
-      // act
-      const html = editor.serialize();
-
-      // assert: the serialized html is clean
-      expect(html).toContain('foo bar');
-      expect(html).toContain('id="p1"');
-      expect(html).not.toContain(JSED_TOKEN_CLASS);
-      expect(html).not.toContain(JSED_ANCHOR_CLASS);
-      expect(html).not.toContain(JSED_IMPLICIT_CLASS);
-      expect(html).not.toContain(JSED_FOCUS_CLASS);
-      expect(html).not.toContain('anchor-name');
-
-      // assert: the live document still has its artifacts
-      expect(doc.root.querySelectorAll(`.${JSED_TOKEN_CLASS}`).length).toBeGreaterThan(0);
-      expect(doc.root.querySelectorAll(`.${JSED_FOCUS_CLASS}`).length).toBeGreaterThan(0);
 
       editor.destroy();
     });

@@ -28,6 +28,7 @@ import { removeEditingMarkers, removeIgnored } from '../../lib/ops/document.js';
 import { removeSelectionWrappers } from '../../lib/ops/selection.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
+export type SerializeElementError = { type: 'element-outside-document' };
 export type EditorTextChangeEvent =
   | {
       type: 'token-text-change';
@@ -287,6 +288,20 @@ export class EditorState {
     const clone = this.document.root.cloneNode(true) as HTMLElement;
     this.stripArtifacts(clone);
     return clone.innerHTML;
+  }
+
+  /**
+   * Clone one element in this document, strip editing artifacts from the
+   * clone, and return its authored inner HTML.
+   */
+  serializeElement(element: HTMLElement): Result<string, SerializeElementError> {
+    if (!this.document.root.contains(element)) {
+      return err({ type: 'element-outside-document' });
+    }
+
+    const clone = element.cloneNode(true) as HTMLElement;
+    this.stripArtifacts(clone);
+    return ok(clone.innerHTML);
   }
 
   isEditing(): boolean {

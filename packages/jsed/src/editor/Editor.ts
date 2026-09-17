@@ -4,8 +4,9 @@ import type { UserInput } from '../input/UserInput.js';
 import { EditorFocusOps } from './lib/EditorFocusOps.js';
 import { EditorCursorOps } from './lib/EditorCursorOps.js';
 import { EditorEventsEmitter } from './lib/EditorEventsEmitter.js';
-import { EditorState } from './lib/EditorState.js';
+import { EditorState, type SerializeElementError } from './lib/EditorState.js';
 import { transaction, type TransactionOptions } from '../undo/transaction.js';
+import type { Result } from 'neverthrow';
 
 /**
  * Facade that represents an editor instance for a single "document".
@@ -53,6 +54,13 @@ export class Editor {
    * longish debounce.
    */
   serialize = () => this.state.serialize();
+
+  /**
+   * Return clean authored inner HTML for one element in this editor document.
+   * The live element keeps its editing artifacts.
+   */
+  serializeElement = (element: HTMLElement): Result<string, SerializeElementError> =>
+    this.state.serializeElement(element);
 
   // Modes - view, edit
   isEditing = () => this.state.isEditing();

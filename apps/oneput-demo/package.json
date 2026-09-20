@@ -17,6 +17,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@oneput/eliza": "workspace:",
     "@oneput/oneput": "workspace:",
     "lucide": "^0.501.0",
     "neverthrow": "catalog:"

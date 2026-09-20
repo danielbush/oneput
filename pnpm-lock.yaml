@@ -167,6 +167,9 @@ importers:
 
   apps/oneput-demo:
     dependencies:
+      '@oneput/eliza':
+        specifier: 'workspace:'
+        version: link:../../packages/eliza
       '@oneput/oneput':
         specifier: 'workspace:'
         version: link:../../packages/oneput
@@ -249,6 +252,8 @@ importers:
       vitest-browser-svelte:
         specifier: 'catalog:'
         version: 0.1.0(@vitest/browser@3.2.4)(svelte@5.49.2)(vitest@3.2.4)
+
+  packages/eliza: {}
 
   packages/jsed:
     dependencies:
@@ -4395,7 +4400,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@24.10.13)(@vitest/browser@3.2.4)(@vitest/ui@3.2.4)(happy-dom@18.0.1)(jiti@2.6.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vitest: 3.2.4(@types/node@25.2.0)(@vitest/browser@3.2.4)(@vitest/ui@3.2.4)(happy-dom@18.0.1)(jiti@2.6.1)(jsdom@20.0.3)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
 
   '@vitest/utils@3.2.4':
     dependencies:

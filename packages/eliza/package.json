@@ -1,0 +1,21 @@
+{
+  "name": "@oneput/eliza",
+  "version": "0.0.1",
+  "description": "ELIZA chatbot (Landsteiner elizabot.js) with an async façade",
+  "main": "./src/index.ts",
+  "type": "module",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "private": false,
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -17,8 +17,8 @@
       "$lib/*": ["./src/lib/*"],
       "$app/types": ["./types/index.d.ts"],
       "@oneput/oneput": ["../../packages/oneput/src/lib/index.ts"],
-      "@oneput/oneput/shared/*": ["../../packages/oneput/src/lib/oneput/shared/*"]
+      "@oneput/oneput/shared/*": ["../../packages/oneput/src/lib/oneput/shared/*"],
+      "@oneput/eliza": ["../../packages/eliza/src/index.ts"]
     }
-  },
-  "exclude": ["src/lib/eliza/elizabot.js", "src/lib/eliza/elizadata.js"]
+  }
 }

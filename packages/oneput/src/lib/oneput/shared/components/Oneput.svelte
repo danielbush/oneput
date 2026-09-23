@@ -116,10 +116,16 @@
                       }
                     },
                     onpointerup: (event: Event) => {
-                      // See POINTER_UP .
-                      props.onMenuAction?.(event, item, index);
                       if (typeof item.attr?.onpointerup === 'function') {
                         item.attr.onpointerup(event);
+                      }
+                    },
+                    onclick: (event: Event) => {
+                      // Keep the menu DOM stable until the pointer sequence becomes a click.
+                      // See POINTER_UP .
+                      props.onMenuAction?.(event, item, index);
+                      if (typeof item.attr?.onclick === 'function') {
+                        item.attr.onclick(event);
                       }
                     }
                   }}

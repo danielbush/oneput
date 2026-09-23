@@ -252,8 +252,8 @@ export type MenuItemFocusCause =
 
 export type MenuItem<D extends Record<string, unknown> = Record<string, unknown>> = FlexParams & {
   /**
-   * Instructs Oneput renderer to add a pointerdown handler to run this action
-   * on top-level menu items.
+   * Instructs the Oneput renderer to run this action when a top-level menu item
+   * receives a click.
    */
   action?: (c: Controller) => void;
   /**

@@ -122,10 +122,8 @@ export function chatSessionItem(params: ChatSessionItemParams): MenuItem {
           type: 'button',
           title: params.jumpTitle ?? 'Jump to latest',
           'aria-label': params.jumpTitle ?? 'Jump to latest',
-          onpointerup: (event: Event) => {
+          onclick: (event: Event) => {
             event.stopPropagation();
-          },
-          onclick: () => {
             scrollChatSessionPaneToBottom(paneId);
           }
         }

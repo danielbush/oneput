@@ -115,8 +115,13 @@ How do we use lucide.createIcons but avoid icons flashing into existence when a 
 
 ## POINTER_UP
 
-- what: On mobile we may want to scroll through the menu items rather than activate the particular item our finger comes into contact with.
-- solution: Use pointer up events for menu item actions as the mobile browser will cancel the pointer up if it detects that you are dragging instead of tapping.
+- what:
+  - On mobile, scrolling through menu items must not activate the item under the finger.
+  - The original solution used `pointerup` for menu actions because the mobile browser cancels the pointer sequence when it detects a drag instead of a tap (introduced around `cb5a283b`, 2025).
+  - This could mutate or close the menu during `pointerup`. The browser could then send the later `click` to an element exposed by the menu change. In frame2 route 02, choosing “Node metadata...” exposed the Svelte Flow pane, which received the click and cleared the node selection.
+- solution:
+  - Run menu actions on `click`. The browser already suppresses `click` after a recognised drag or scroll, so scrolling remains safe and the menu stays stable through `pointerup`.
+  - Keep item-specific pointer handling where touch controls need it, such as `tapSelect` and its movement check.
 
 ## IOS_CLICK_ZOOM
 

@@ -147,7 +147,7 @@ type TapPending = { x: number; y: number; pointerId: number };
 
 /**
  * Nested control inside a scrollable menu: call `onSelect` only for a tap
- * (down→up under slop). Stops propagation on up so the parent menu row's
+ * (down→up under slop). Stops the following click so the parent menu row's
  * onMenuAction does not also fire. Spike helper — may graduate or die.
  */
 function tapSelect(
@@ -171,6 +171,9 @@ function tapSelect(
       const dy = e.clientY - start.y;
       if (dx * dx + dy * dy > TAP_SLOP_PX * TAP_SLOP_PX) return;
       onSelect();
+    },
+    onclick: (event: Event) => {
+      event.stopPropagation();
     },
     onpointercancel: () => {
       pending = null;

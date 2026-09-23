@@ -230,10 +230,8 @@ export const richChatScrollMenuItems = (): MenuItemAny[] => [
           type: 'button',
           title: 'Jump to latest',
           'aria-label': 'Jump to latest',
-          onpointerup: (event: Event) => {
+          onclick: (event: Event) => {
             event.stopPropagation();
-          },
-          onclick: () => {
             const el = richChatScrollEl;
             if (!el) return;
             el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });

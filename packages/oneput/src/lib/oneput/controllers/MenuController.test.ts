@@ -544,7 +544,7 @@ describe('MenuController', () => {
       const clicked = ctl.currentProps.menuItems![1];
 
       // act
-      ctl.currentProps.onMenuAction?.(new Event('pointerup'), clicked, 1);
+      ctl.currentProps.onMenuAction?.(new Event('click'), clicked, 1);
 
       // assert
       expect(actioned).toEqual(['b']);

@@ -562,51 +562,69 @@ describe('AppController', () => {
     });
   });
 
-  describe('emitEvent', () => {
-    test('delivers the event to the current AppObject', () => {
+  describe('app events', () => {
+    test('events map: current AppObject - handler runs', () => {
       // arrange
       const ctl = Controller.createNull();
       const received: unknown[] = [];
       ctl.app.run({
         onStart: () => {},
-        onEvent: (event) => {
-          received.push(event);
-        }
+        events: { 'host-event': (payload) => received.push(payload) }
       });
 
       // act
-      ctl.app.emitEvent({ type: 'host-event', payload: { id: 'n1' } });
+      ctl.appEvents.emit({ type: 'host-event', payload: { id: 'n1' } });
 
       // assert
-      expect(received).toEqual([{ type: 'host-event', payload: { id: 'n1' } }]);
+      expect(received).toEqual([{ id: 'n1' }]);
     });
 
-    test('does not deliver the event to a suspended AppObject', () => {
+    test('events map: suspended AppObject - handler does not run', () => {
       // arrange
       const ctl = Controller.createNull();
       const received: unknown[] = [];
       ctl.app.run({
         onStart: () => {},
-        onEvent: (event) => {
-          received.push(event);
-        }
+        events: { 'host-event': (payload) => received.push(payload) }
       });
       ctl.app.run({ onStart: () => {} });
 
       // act
-      ctl.app.emitEvent({ type: 'host-event' });
+      ctl.appEvents.emit({ type: 'host-event' });
 
       // assert
       expect(received).toEqual([]);
     });
 
-    test('does nothing when the current AppObject has no onEvent', () => {
+    test('events map: another event name - handler does not run', () => {
       // arrange
       const ctl = Controller.createNull();
+      const received: unknown[] = [];
+      ctl.app.run({
+        onStart: () => {},
+        events: { 'host-event': (payload) => received.push(payload) }
+      });
+
+      // act
+      ctl.appEvents.emit({ type: 'other-event' });
+
+      // assert
+      expect(received).toEqual([]);
+    });
+
+    test('subscriber: outside an AppObject - hears the event whichever screen is active', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const received: unknown[] = [];
+      ctl.appEvents.on('host-event', (payload) => received.push(payload));
+      ctl.app.run({ onStart: () => {} });
       ctl.app.run({ onStart: () => {} });
 
-      // act / assert
-      expect(() => ctl.app.emitEvent({ type: 'host-event' })).not.toThrow();
+      // act
+      ctl.appEvents.emit({ type: 'host-event', payload: { id: 'n1' } });
+
+      // assert
+      expect(received).toEqual([{ id: 'n1' }]);
     });
   });
 

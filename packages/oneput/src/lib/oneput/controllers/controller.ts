@@ -1,3 +1,4 @@
+import { AppEventsController } from './AppEventsController.js';
 import { MenuController } from './MenuController.js';
 import { InternalEventEmitter } from './InternalEventEmitter.js';
 import { InputController } from './InputController.js';
@@ -37,6 +38,8 @@ export class Controller {
   }
 
   public events = new InternalEventEmitter();
+  /** Host-app event bus. See {@link AppEventsController}. */
+  public appEvents = new AppEventsController();
   public menu: MenuController;
   public input: InputController;
   public keys: KeysController;

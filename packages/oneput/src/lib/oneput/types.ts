@@ -358,7 +358,7 @@ export type FChildParams = {
 export interface AppEventMap {}
 
 /**
- * One map entry as an emit/onEvent object.
+ * One map entry as an emit/handler object.
  *
  * `void` payloads omit `payload`. Other payloads require it.
  */
@@ -367,14 +367,34 @@ type AppEventFromMap<K extends keyof AppEventMap> = [AppEventMap[K]] extends [vo
   : { type: K; payload: AppEventMap[K] };
 
 /**
- * A host-app event delivered to the currently active AppObject via
- * ctl.app.emitEvent(...). When AppEventMap is augmented this is a discriminated
- * union (so `event.type === 'x'` narrows `payload`); before augmentation it
- * falls back to a generic shape so Oneput stays usable and domain-agnostic.
+ * A host-app event published through ctl.appEvents.emit(...). When AppEventMap
+ * is augmented this is a discriminated union (so `event.type === 'x'` narrows
+ * `payload`); before augmentation it falls back to a generic shape so Oneput
+ * stays usable and domain-agnostic.
  */
 export type AppEvent = [keyof AppEventMap] extends [never]
   ? { type: string; payload?: unknown }
   : { [K in keyof AppEventMap]: AppEventFromMap<K> }[keyof AppEventMap];
+
+/**
+ * One host-app event name. Any string until AppEventMap is augmented.
+ */
+export type AppEventType = [keyof AppEventMap] extends [never] ? string : keyof AppEventMap;
+
+/** The payload that one event name carries. */
+export type AppEventPayload<K extends AppEventType> = K extends keyof AppEventMap
+  ? AppEventMap[K]
+  : unknown;
+
+/**
+ * Handlers an AppObject declares, one per event name it cares about.
+ *
+ * The framework subscribes these while that AppObject is current, and
+ * unsubscribes them when it is not. See {@link AppObject.events}.
+ */
+export type AppEventHandlers = [keyof AppEventMap] extends [never]
+  ? Record<string, (payload: unknown) => void>
+  : { [K in keyof AppEventMap]?: (payload: AppEventMap[K]) => void };
 
 /**
  * Context supplied when Oneput dispatches an action.
@@ -642,14 +662,21 @@ export interface AppObject<
    */
   onMenuOpenChange?: (data: { open: boolean }) => void;
   /**
-   * Called when an app event is emitted via ctl.app.emitEvent(...) while this
-   * AppObject is the active (current) one.  See {@link AppEvent} - these are
-   * user-created events. This is how host-app UI rendered outside of Oneput
-   * (e.g. a node on a canvas) can signal the active AppObject without
-   * subscribing or knowing who handles it.  Only the current AppObject receives
-   * the event.
+   * Host-app event handlers, declared one per event name.
+   *
+   * The framework wires/unwires these for you: a handler runs only while this
+   * AppObject is the active (current) one. This is how host-app UI rendered
+   * outside of Oneput (e.g. a node on a canvas) signals the active AppObject
+   * without knowing who handles it.
+   *
+   * Behaviour that must run whichever AppObject is active does not belong
+   * here. Subscribe it with `ctl.appEvents.on(...)` and own the unsubscribe.
+   *
+   *     events = {
+   *       'node-click': ({ id }) => this.select(id)
+   *     } satisfies AppEventHandlers;
    */
-  onEvent?: (event: AppEvent) => void;
+  events?: AppEventHandlers;
   /**
    * Provide the actions object directly for simple AppObjects whose actions are
    * fixed. For AppObjects whose actions depend on state, provide a function:

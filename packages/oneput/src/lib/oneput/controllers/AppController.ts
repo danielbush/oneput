@@ -44,6 +44,7 @@ export class AppController {
 
   constructor(private ctl: Controller) {
     this.ctl.events.on('menu-outro-end', this.flushPendingPop);
+    this.ctl.appEvents.onAny(this.routeAppEvent);
   }
 
   private appParents: AnyAppObject[] = [];
@@ -687,15 +688,13 @@ export class AppController {
   // #region user-created events
 
   /**
-   * Deliver a host-app event to the currently active AppObject.
-   *
-   * Used by host-app UI rendered outside of Oneput (e.g. a node on a canvas)
-   * to signal the active AppObject without subscribing.  Routes to `current`
-   * the same way handleAction routes actions; no-op if the current AppObject
-   * does not implement onEvent.
+   * Route user / host app events to the current AppObject.
    */
-  emitEvent = (event: AppEvent) => {
-    this.current?.onEvent?.(event);
+  private routeAppEvent = (event: AppEvent) => {
+    const handlers = this.current?.events as
+      | Record<string, ((payload: unknown) => void) | undefined>
+      | undefined;
+    handlers?.[event.type]?.(event.payload);
   };
 
   // #endregion

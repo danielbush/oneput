@@ -200,6 +200,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: the circularity in `OneputActionProvider.create`
+  - COMMENT: we do `new OneputActionProvider(ActionProvider.create<OneputActionId>(() => getEntries(ctl)));`, why can't we just do `OneputActionProvider = ActionProvider.create<OneputActionId>(() => getEntries(ctl))` ?
 - refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md
   - COMMENT: I'd move the architecture out of AGENTS and merge into architecture.md; the hard question is architecture.md vs CONCEPTS.md - CONCEPT's is more general and is how I keep my head wrapped around the "why" as well as the "what"; maybe we can ditch architecture.md in favour of a combination of good CONCEPTS.md and using DEEP_MODULE's (surfacing key constructs and interfaces that represent the skeleton of the system or subsystem).
 - refactor: DEEP_MODULES + interfaces

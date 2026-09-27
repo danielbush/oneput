@@ -215,7 +215,7 @@ Selection
 Tokens and Text and whitespace
 
 - **ANCHOR** — a TOKEN which is inserted into a FOCUSABLE (or LINE_SEGMENT) when it has no tokens. Acts as a visual placeholder showing text can be inserted. Anchors are empty TOKEN's.
-  - Source of truth: search docstrings for ANCHOR.
+  - Source of truth: `createAnchor`; `isToken` tests for `isAnchor`
 - **ANCHOR_RULES**
   - COMMENT: these are close to the simplest rules
   - Anchorize the whole document (automatic ANCHOR's).

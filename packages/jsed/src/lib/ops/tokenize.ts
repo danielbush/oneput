@@ -4,6 +4,7 @@ import {
   isCursorTransparent,
   isToken,
   isLineSibling,
+  isDeletedToken,
   isAnchor,
   JSED_TOKEN_CLASS
 } from '../core/taxonomy.js';
@@ -86,6 +87,9 @@ function tokenizeLineRec(line: Node, splitter: Splitter): HTMLElement | null {
 }
 
 function detoken(token: HTMLElement): void {
+  if (isDeletedToken(token)) {
+    return;
+  }
   if (!isToken(token)) {
     throw new Error('replaceTokenElement: called on non-token');
   }

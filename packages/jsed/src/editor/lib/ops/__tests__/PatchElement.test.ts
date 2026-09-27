@@ -99,6 +99,36 @@ describe('PatchElement.run', () => {
     state.destroy();
   });
 
+  test('html with deleted token: patch / undo preserves deleted token', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'Keep')));
+    const state = EditorState.createNull({
+      document: doc,
+      userInput: Controller.createNull().input
+    });
+    state.start();
+    const target = byId(doc, 'p2');
+    target.innerHTML = 'Keep <span class="jsed-token jsed-deleted jsed-ignore">Delete</span>';
+
+    // act
+    const record = PatchElement.run(state, target, { html: '<strong>After</strong>' });
+
+    // assert
+    expect(record).toBeDefined();
+    expect(target.textContent).toBe('After');
+
+    // act
+    record?.undo(state);
+
+    // assert
+    expect(target.textContent).toBe('Keep Delete');
+    expect(target.querySelector('.jsed-token.jsed-deleted.jsed-ignore')?.textContent).toBe(
+      'Delete'
+    );
+
+    state.destroy();
+  });
+
   test('safe html: undo / redo / preserves FOCUS', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, '<span>before</span>')));

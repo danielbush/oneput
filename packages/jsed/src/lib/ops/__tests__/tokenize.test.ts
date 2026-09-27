@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { byId, makeRoot, div, p, em, inlineStyleHack, a, t, s } from '../../../test/util.js';
-import { detokenizeLine, tokenizeLineAt } from '../tokenize.js';
+import { detokenize, detokenizeLine, tokenizeLineAt } from '../tokenize.js';
 import { isDeletedToken, JSED_ANCHOR_CLASS, JSED_TOKEN_CLASS } from '../../core/taxonomy.js';
 
 describe('tokenizeLineAt', () => {
@@ -287,6 +287,22 @@ describe('tokenizeLineAt', () => {
     foo = p1.firstElementChild as HTMLElement;
     expect(isDeletedToken(foo)).toBe(true);
     expect(foo.firstChild?.nodeValue).toBe('foo');
+  });
+});
+
+describe('detokenize', () => {
+  test('deleted token: remains in the DOM', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('foo', { deleted: true }), s(), t('bar')));
+    const p1 = byId(doc, 'p1');
+
+    // act
+    detokenize(p1);
+
+    // assert
+    expect(isDeletedToken(p1.firstElementChild)).toBe(true);
+    expect(p1.querySelectorAll('.jsed-token')).toHaveLength(1);
+    expect(p1.textContent).toBe('foo bar');
   });
 });
 

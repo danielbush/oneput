@@ -19,13 +19,11 @@ import {
 } from '../../lib/core/line.js';
 import { err, ok, type Result } from 'neverthrow';
 import { isCursorTransparent, isLineSibling } from '../../lib/core/taxonomy.js';
-import { anchorize, removeAnchors } from '../../lib/ops/anchor.js';
-import { detokenize } from '../../lib/ops/tokenize.js';
+import { anchorize } from '../../lib/ops/anchor.js';
 import type { Splitter } from '../../lib/ops/splitter.js';
 import { syntacticSplitter } from '../../lib/ops/syntacticSplit.js';
-import { addImplicitLines, removeImplicitLines } from '../../lib/ops/implicitLine.js';
-import { removeEditingMarkers, removeIgnored } from '../../lib/ops/document.js';
-import { removeSelectionWrappers } from '../../lib/ops/selection.js';
+import { addImplicitLines } from '../../lib/ops/implicitLine.js';
+import { stripArtifacts } from '../../lib/ops/document.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type SerializeElementError = { type: 'element-outside-document' };
@@ -252,7 +250,7 @@ export class EditorState {
   }
 
   destroy() {
-    this.stripArtifacts(this.document.root);
+    stripArtifacts(this.document.root);
     this.cursor?.destroy();
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
@@ -268,25 +266,13 @@ export class EditorState {
   }
 
   /**
-   * Remove all editing artifacts from el, in place.
-   */
-  private stripArtifacts(el: HTMLElement) {
-    removeIgnored(el);
-    removeSelectionWrappers(el);
-    removeAnchors(el);
-    detokenize(el);
-    removeImplicitLines(el);
-    removeEditingMarkers(el);
-  }
-
-  /**
    * Clone the document, strip editing artifacts from the clone, return its html.
    *
    * Works mid-session. The live document keeps its artifacts.
    */
   serialize(): string {
     const clone = this.document.root.cloneNode(true) as HTMLElement;
-    this.stripArtifacts(clone);
+    stripArtifacts(clone);
     return clone.innerHTML;
   }
 
@@ -300,7 +286,7 @@ export class EditorState {
     }
 
     const clone = element.cloneNode(true) as HTMLElement;
-    this.stripArtifacts(clone);
+    stripArtifacts(clone);
     return ok(clone.innerHTML);
   }
 

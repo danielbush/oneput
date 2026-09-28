@@ -4,6 +4,24 @@ import {
   JSED_FOCUS_SIBLING,
   JSED_IGNORE_CLASS
 } from '../core/taxonomy.js';
+import { removeAnchors } from './anchor.js';
+import { removeImplicitLines } from './implicitLine.js';
+import { removeSelectionWrappers } from './selection.js';
+import { detokenize } from './tokenize.js';
+
+/**
+ * Remove editor artifacts from an element in place.
+ *
+ * Use a clone for export, or the live root when an edit session ends.
+ */
+export function stripArtifacts(el: HTMLElement): void {
+  removeIgnored(el);
+  removeSelectionWrappers(el);
+  removeAnchors(el);
+  detokenize(el);
+  removeImplicitLines(el);
+  removeEditingMarkers(el);
+}
 
 /**
  * Most editing artifacts (like deleted tokens or delete placeholdres) are

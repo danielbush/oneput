@@ -24,9 +24,9 @@ describe('focusAncestorPath', () => {
 
     // assert
     expect(steps.map((s) => ({ id: s.element.id || 'root', current: s.current }))).toEqual([
-      { id: 'root', current: false },
+      { id: 'target', current: false },
       { id: 'section', current: true },
-      { id: 'target', current: false }
+      { id: 'root', current: false }
     ]);
   });
 });

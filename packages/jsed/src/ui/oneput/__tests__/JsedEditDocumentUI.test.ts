@@ -1,4 +1,5 @@
 import { Controller } from '@oneput/oneput';
+import { assertMenuId } from '@oneput/oneput/shared/test/index.js';
 import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../../lib/core/taxonomy.js';
 import { makeRoot } from '../../../test/util.js';
@@ -12,16 +13,6 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
     throw new Error(`Missing element with id="${id}"`);
   }
   return el as HTMLElement;
-}
-
-/**
- * Open the menu the way a user would — `openMenu()` flips `menuOpen` on a timer
- * (MENU_OPEN_CLOSE_RACE) and pull-on-open builds the items from current state.
- * Await before reading `currentProps.menuItems`.
- */
-async function openMenu(ctl: Controller) {
-  ctl.menu.openMenu();
-  await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 describe('JsedEditDocumentUI', () => {
@@ -142,22 +133,19 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(p1);
-    await openMenu(ctl);
+    await ctl.simulateOpenMenu();
     const cursorToken = editor.getCursor()?.getPlace() as HTMLElement;
-    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
 
     // act
-    tagItem?.action?.(ctl);
-    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
-    manualEntryItem?.action?.(ctl);
+    ctl.simulateMenuItemClick('WRAP_SELECTION');
+    await assertMenuId(ctl, 'PickCandidate');
+    ctl.simulateMenuItemClick('MANUAL_ENTRY');
     expect(ctl.currentProps.inputElement?.disabled).toBe(false);
     ctl.input.setInputValue('em');
     ctl.input.runSubmitHandler();
 
     // assert
     const wrapper = p1.querySelector('em') as HTMLElement;
-    expect(tagItem).toBeDefined();
-    expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(cursorToken);
     expect(editor.getCursor()?.getPlace()).toBe(cursorToken);
@@ -178,21 +166,22 @@ describe('JsedEditDocumentUI', () => {
     editor.moveNext();
     const opaque = editor.getCursor()?.getPlace() as HTMLElement;
     expect(ctl.currentProps.inputElement?.disabled).toBe(true);
-    await openMenu(ctl);
-    const tagItem = ctl.currentProps.menuItems?.find((item) => item.id === 'WRAP_SELECTION');
+    await ctl.simulateOpenMenu();
 
     // act
-    tagItem?.action?.(ctl);
-    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
-    manualEntryItem?.action?.(ctl);
+    ctl.simulateMenuItemClick('WRAP_SELECTION');
+    await assertMenuId(ctl, 'PickCandidate');
+    ctl.simulateMenuItemClick('MANUAL_ENTRY');
     expect(ctl.currentProps.inputElement?.disabled).toBe(false);
     ctl.input.setInputValue('em');
     ctl.input.runSubmitHandler();
 
+    // Return to the editor before checking its input.
+    ctl.menu.closeMenu();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
     // assert
     const wrapper = d1.querySelector('em') as HTMLElement;
-    expect(tagItem).toBeDefined();
-    expect(manualEntryItem).toBeDefined();
     expect(wrapper).not.toBeNull();
     expect(wrapper.firstElementChild).toBe(opaque);
     expect(editor.getCursor()?.getPlace()).toBe(opaque);
@@ -207,22 +196,17 @@ describe('JsedEditDocumentUI', () => {
     const editor = editorUI.editor;
 
     ctl.simulateStart(() => editorUI);
-    await openMenu(ctl);
-    const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'INSERT_ELEMENT_AFTER_FOCUS'
-    );
+    await ctl.simulateOpenMenu();
 
     // act
-    insertItem?.action?.(ctl);
-    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
-    manualEntryItem?.action?.(ctl);
+    ctl.simulateMenuItemClick('INSERT_ELEMENT_AFTER_FOCUS');
+    await assertMenuId(ctl, 'PickCandidate');
+    ctl.simulateMenuItemClick('MANUAL_ENTRY');
     ctl.input.setInputValue('h2');
     ctl.input.runSubmitHandler();
 
     // assert
     const children = Array.from(document.root.children);
-    expect(insertItem).toBeDefined();
-    expect(manualEntryItem).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
     expect(editor.nav.getFocus()).toBe(children[1]);
@@ -238,22 +222,17 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(p2);
-    await openMenu(ctl);
-    const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'INSERT_ELEMENT_BEFORE_FOCUS'
-    );
+    await ctl.simulateOpenMenu();
 
     // act
-    insertItem?.action?.(ctl);
-    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
-    manualEntryItem?.action?.(ctl);
+    ctl.simulateMenuItemClick('INSERT_ELEMENT_BEFORE_FOCUS');
+    await assertMenuId(ctl, 'PickCandidate');
+    ctl.simulateMenuItemClick('MANUAL_ENTRY');
     ctl.input.setInputValue('h2');
     ctl.input.runSubmitHandler();
 
     // assert
     const children = Array.from(document.root.children);
-    expect(insertItem).toBeDefined();
-    expect(manualEntryItem).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]?.tagName.toLowerCase()).toBe('h2');
     expect(editor.nav.getFocus()).toBe(children[1]);
@@ -268,22 +247,17 @@ describe('JsedEditDocumentUI', () => {
     const d1 = byId(document, 'd1');
 
     ctl.simulateStart(() => editorUI);
-    await openMenu(ctl);
-    const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
-    );
+    await ctl.simulateOpenMenu();
 
     // act
-    insertItem?.action?.(ctl);
-    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
-    manualEntryItem?.action?.(ctl);
+    ctl.simulateMenuItemClick('APPEND_NEW_ELEMENT_IN_FOCUS');
+    await assertMenuId(ctl, 'PickCandidate');
+    ctl.simulateMenuItemClick('MANUAL_ENTRY');
     ctl.input.setInputValue('p');
     ctl.input.runSubmitHandler();
 
     // assert
     const child = d1.lastElementChild;
-    expect(insertItem).toBeDefined();
-    expect(manualEntryItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('p');
     expect(editor.nav.getFocus()).toBe(child);
   });
@@ -298,22 +272,17 @@ describe('JsedEditDocumentUI', () => {
 
     ctl.simulateStart(() => editorUI);
     editor.nav.REQUEST_FOCUS(list);
-    await openMenu(ctl);
-    const insertItem = ctl.currentProps.menuItems?.find(
-      (item) => item.id === 'APPEND_NEW_ELEMENT_IN_FOCUS'
-    );
+    await ctl.simulateOpenMenu();
 
     // act
-    insertItem?.action?.(ctl);
-    const manualEntryItem = ctl.currentProps.menuItems?.find((item) => item.id === 'MANUAL_ENTRY');
-    manualEntryItem?.action?.(ctl);
+    ctl.simulateMenuItemClick('APPEND_NEW_ELEMENT_IN_FOCUS');
+    await assertMenuId(ctl, 'PickCandidate');
+    ctl.simulateMenuItemClick('MANUAL_ENTRY');
     ctl.input.setInputValue('li');
     ctl.input.runSubmitHandler();
 
     // assert
     const child = list.lastElementChild;
-    expect(insertItem).toBeDefined();
-    expect(manualEntryItem).toBeDefined();
     expect(child?.tagName.toLowerCase()).toBe('li');
     expect(editor.nav.getFocus()).toBe(child);
   });
@@ -328,7 +297,7 @@ describe('JsedEditDocumentUI', () => {
     const p2 = byId(document, 'p2');
 
     ctl.simulateStart(() => editorUI);
-    await openMenu(ctl);
+    await ctl.simulateOpenMenu();
     const deleteItem = ctl.currentProps.menuItems?.find(
       (item) => item.id === 'DELETE_FOCUSED_ELEMENT'
     );

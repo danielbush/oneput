@@ -117,6 +117,26 @@ export class Controller {
     this.app.run(run(this));
   }
 
+  /** Open the menu and wait for its items to appear in controller state. */
+  async simulateOpenMenu(): Promise<void> {
+    this.menu.openMenu();
+    // TODO: Wait for menu-open-change instead of using a timer.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  /** Simulate a click on a displayed menu item. */
+  simulateMenuItemClick(itemId: string): void {
+    if (!this.menu.isMenuOpen) throw new Error('Menu is closed');
+    const items = this.currentProps.menuItems ?? [];
+    const index = items.findIndex((item) => item.id === itemId);
+    const item = items[index];
+    if (!item || item.ignored) throw new Error(`Menu item "${itemId}" is not available`);
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    this.currentProps.onMenuAction?.(event, item, index);
+    if (typeof item.attr?.onclick === 'function') item.attr.onclick(event);
+  }
+
   /**
    * Simulates a key press against Oneput's window-level key bindings.
    *

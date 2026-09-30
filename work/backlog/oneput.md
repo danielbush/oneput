@@ -20,6 +20,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## security
 
+- sec: use packages/safe-html for innerHTML
+  - we may need to set a slightly less restrictive policy
 - sec: investigate <https://developer.mozilla.org/en-US/docs/Web/API/HTML_Sanitizer_API> for client side sanitation in oneput for innerHTMLUnsafe and friends
   - safari does not support it yet
   - we could create a fallback to <https://github.com/cure53/dompurify>

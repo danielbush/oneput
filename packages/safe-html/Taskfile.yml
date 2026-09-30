@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+tasks:
+  test:
+    desc: Test safe HTML insertion with jsdom
+    cmds:
+      - pnpm run test
+  test:browser:
+    desc: Test safe HTML insertion in Chromium
+    cmds:
+      - pnpm run test:browser
+  check:
+    desc: Type-check @oneput/safe-html
+    cmds:
+      - pnpm run typecheck
+  format:
+    desc: Format @oneput/safe-html
+    cmds:
+      - pnpm run format
+  format:check:
+    desc: Check @oneput/safe-html formatting
+    cmds:
+      - pnpm run format:check

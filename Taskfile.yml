@@ -20,6 +20,9 @@ includes:
   jsed:
     taskfile: ./packages/jsed/Taskfile.yml
     dir: ./packages/jsed
+  safe-html:
+    taskfile: ./packages/safe-html/Taskfile.yml
+    dir: ./packages/safe-html
 
 tasks:
   default:
@@ -41,6 +44,7 @@ tasks:
     desc: format code
     cmds:
       - task: jsed:format
+      - task: safe-html:format
       - task: oneput:format
       - task: oneput-demo:format
       - task: jsed-demo:format
@@ -48,6 +52,7 @@ tasks:
     desc: check code formatting without modifying files
     deps:
       - task: jsed:format:check
+      - task: safe-html:format:check
       - task: oneput:format:check
       - task: oneput-demo:format:check
       - task: jsed-demo:format:check
@@ -57,12 +62,14 @@ tasks:
       - task: oneput:check
       - task: oneput-demo:check
       - task: jsed:check
+      - task: safe-html:check
       - task: jsed-demo:check
 
   test:
     desc: run unit tests
     cmds:
       - task: jsed:test
+      - task: safe-html:test
       - task: oneput:test
 
   todo:

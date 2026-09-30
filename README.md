@@ -38,6 +38,8 @@ task # see tasks
 - `packages/oneput-native-container` (deprecated)
 - `packages/jsed`
   - a word-based edit that uses oneput
+- `packages/safe-html`
+  - inserts untrusted display HTML with a defined sanitizer policy
 
 ## Developing
 

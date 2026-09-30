@@ -1,12 +1,7 @@
 import type { JsedDocument, JsedFocusRequestEvent } from '../types.js';
-import {
-  isFocusable,
-  isToken,
-  JSED_APP_ROOT_ID,
-  JSED_FOCUS_CLASS,
-  JSED_FOCUS_SIBLING
-} from '../lib/core/taxonomy.js';
+import { isFocusable, isToken, JSED_APP_ROOT_ID } from '../lib/core/taxonomy.js';
 import * as token from '../lib/ops/token.js';
+import { addFocus, addFocusSibling, removeFocus, removeSiblingFocus } from '../lib/ops/focus.js';
 import {
   findClosestFocusableAncestor,
   findNextFocusable,
@@ -168,7 +163,7 @@ export class Nav {
 
   clearFocus(): void {
     if (this.#FOCUS) {
-      this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
+      removeFocus(this.#FOCUS);
       this.#FOCUS = undefined;
     }
   }
@@ -181,10 +176,10 @@ export class Nav {
       throw new Error('#updateFocus: expects a FOCUSABLE');
     }
     if (this.#FOCUS) {
-      this.#FOCUS.classList.remove(JSED_FOCUS_CLASS);
+      removeFocus(this.#FOCUS);
     }
     this.#FOCUS = el;
-    this.#FOCUS.classList.add(JSED_FOCUS_CLASS);
+    addFocus(this.#FOCUS);
     if (el !== this.doc.root) {
       this.doc.viewportScroller.scrollIntoViewIfHidden(el);
     }
@@ -358,7 +353,7 @@ export class Nav {
 
   #SIB_HIGHLIGHT_CLEAR(): void {
     for (const sib of this.doc.SIB_HIGHLIGHT) {
-      sib.classList.remove(JSED_FOCUS_SIBLING);
+      removeSiblingFocus(sib);
     }
     this.doc.SIB_HIGHLIGHT.clear();
   }
@@ -373,11 +368,11 @@ export class Nav {
     const next = findNextSiblingFocusable(active);
     const prev = findPreviousSiblingFocusable(active);
     if (next) {
-      next.classList.add(JSED_FOCUS_SIBLING);
+      addFocusSibling(next);
       this.doc.SIB_HIGHLIGHT.add(next);
     }
     if (prev) {
-      prev.classList.add(JSED_FOCUS_SIBLING);
+      addFocusSibling(prev);
       this.doc.SIB_HIGHLIGHT.add(prev);
     }
   }

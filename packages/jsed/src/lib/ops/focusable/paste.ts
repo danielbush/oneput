@@ -11,8 +11,9 @@
  * immediately editable.
  */
 import { canCreateWithAnchor } from '../../core/dom-rules.js';
-import { isInlineFlow, JSED_FOCUS_CLASS } from '../../core/taxonomy.js';
+import { isInlineFlow } from '../../core/taxonomy.js';
 import { anchorize } from '../anchor.js';
+import { removeFocus } from '../focus.js';
 
 export function pasteBefore(pasted: HTMLElement, before: HTMLElement): HTMLElement | null {
   return before.insertAdjacentElement('beforebegin', pasted) as HTMLElement | null;
@@ -47,7 +48,7 @@ export function copyEmptyNext(target: HTMLElement): HTMLElement | null {
     return null;
   }
   const empty = target.cloneNode(false) as HTMLElement;
-  empty.classList.remove(JSED_FOCUS_CLASS);
+  removeFocus(empty);
   target.insertAdjacentElement('afterend', empty);
   if (canCreateWithAnchor(empty.tagName)) {
     anchorize(empty);
@@ -61,7 +62,7 @@ export function copyEmptyPrevious(target: HTMLElement): HTMLElement | null {
     return null;
   }
   const empty = target.cloneNode(false) as HTMLElement;
-  empty.classList.remove(JSED_FOCUS_CLASS);
+  removeFocus(empty);
   target.insertAdjacentElement('beforebegin', empty);
   if (canCreateWithAnchor(empty.tagName)) {
     anchorize(empty);

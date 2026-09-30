@@ -23,7 +23,7 @@ import { anchorize } from '../../lib/ops/anchor.js';
 import type { Splitter } from '../../lib/ops/splitter.js';
 import { syntacticSplitter } from '../../lib/ops/syntacticSplit.js';
 import { addImplicitLines } from '../../lib/ops/implicitLine.js';
-import { stripArtifacts } from '../../lib/ops/document.js';
+import { removeArtifacts } from '../../lib/ops/document.js';
 
 export type EditorError = { type: 'no-token-under-focus' } | CursorError;
 export type SerializeElementError = { type: 'element-outside-document' };
@@ -250,7 +250,7 @@ export class EditorState {
   }
 
   destroy() {
-    stripArtifacts(this.document.root);
+    removeArtifacts(this.document.root);
     this.cursor?.destroy();
     this.tokenizer.setCursorElement(null);
     this.nav.destroy();
@@ -272,7 +272,7 @@ export class EditorState {
    */
   serialize(): string {
     const clone = this.document.root.cloneNode(true) as HTMLElement;
-    stripArtifacts(clone);
+    removeArtifacts(clone);
     return clone.innerHTML;
   }
 
@@ -286,7 +286,7 @@ export class EditorState {
     }
 
     const clone = element.cloneNode(true) as HTMLElement;
-    stripArtifacts(clone);
+    removeArtifacts(clone);
     return ok(clone.innerHTML);
   }
 

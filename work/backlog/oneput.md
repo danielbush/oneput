@@ -199,6 +199,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: really need a concrete use case so we're not building in the air
   - COMMENT: this could be an AppObject question - how do we allow a global AppObject to subsume things temporarily?
     - we run it; have a keybinding to trigger it; that binding could be maintained globally; some context could be passed if the global AppObject needs it; probably we instantiate, but it could be possible to have a long-lived object that goes into suspend when we exit it
+  - can this.ctl.input.claim fail?
+    - COMMENT: I'm guessing becaue we're single user, it's not an issue?
 
 ## refactor
 

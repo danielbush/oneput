@@ -17,6 +17,12 @@ export type AppChange = {
   current: AppObject | null;
 };
 
+/** The app and payload from an exit with no parent to resume. */
+export type RootAppExit = {
+  app: AppObject;
+  payload: unknown;
+};
+
 export type AppChangeTracker = {
   data: AppChange[];
   stop: () => void;
@@ -51,6 +57,7 @@ export class AppController {
   private appStates = new WeakMap<AnyAppObject, AppObjectState>();
   private current?: AnyAppObject;
   private onBack?: () => void;
+  private onRootExit?: (exit: RootAppExit) => void;
   private unsubscribeMenuItemFocus?: () => void;
   private unsubscribeMenuUpdate?: () => void;
   private unsubscribeInputChange?: () => void;
@@ -371,22 +378,19 @@ export class AppController {
 
   // #region AppObject lifecycle
 
-  private setCurrent(app: AnyAppObject, fromParent = true) {
+  private setCurrent(app: AnyAppObject | undefined, fromParent = true) {
     const previous = this.current;
     this.current = app;
     // If layout not set use parent's (INHERIT_LAYOUT).
     // Trivial edge-case: If we never set a layout, then the AppState layout
     // will always be blank.
-    if (fromParent) {
-      const previousLayout = previous && this.getAppState(previous).layout;
-      Object.assign(
-        this.getAppState(this.current),
-        this.resolveLayout(this.current, previousLayout)
-      );
+    if (app && fromParent) {
+      const previousLayout = previous ? this.getAppState(previous).layout : this.ctl.ui.getLayout();
+      Object.assign(this.getAppState(app), this.resolveLayout(app, previousLayout));
     }
     this.ctl.events.emit({
       type: 'app-change',
-      payload: { previous: previous ?? null, current: this.current }
+      payload: { previous: previous ?? null, current: this.current ?? null }
     });
   }
 
@@ -527,6 +531,42 @@ export class AppController {
   }
 
   /**
+   * Exit the current app and start its replacement without pushing a parent.
+   *
+   * Keep existing parents so replacement also works inside a child flow.
+   * Inherit the outgoing layout unless the replacement declares its own.
+   * Cancel a queued exit and do not report this change through onRootExit.
+   */
+  replace<ResumePayload = unknown, LayoutParams extends AppLayoutParams = AppLayoutParams>(
+    appObject: AppObject<ResumePayload, LayoutParams>
+  ) {
+    this.pendingPop = undefined;
+    this.runBeforeExit();
+    this.setCurrent(appObject);
+    this.runBefore();
+    appObject.onStart?.();
+    this.runAfter();
+  }
+
+  /**
+   * Set the controller-level handler for an exit with no parent to resume.
+   *
+   * exit() with no parent calls this callback after onExit, input cleanup,
+   * and removal of the exiting app. The callback can choose the next screen
+   * and start it with run() or replace().
+   *
+   * replace(nextApp) already specifies the next app, so it starts nextApp
+   * directly without calling this callback.
+   *
+   * The callback stays registered when an app starts, is replaced, or resumes.
+   * Pass undefined to remove it.
+   */
+  setOnRootExit(handler?: (exit: RootAppExit) => void): void {
+    this.onRootExit = handler;
+    this.ctl.menu.invalidate();
+  }
+
+  /**
    * Pull `menu()` AFTER the AppObject's onStart/onResume has run.
    */
   private runAfter() {
@@ -550,6 +590,9 @@ export class AppController {
 
   /**
    * The running AppObject can call this to exit itself.
+   *
+   * Resume its parent, or clear the current app and notify onRootExit when
+   * there is no parent. A direct exit does not consult enableGoBack.
    *
    * When a menu close outro is in progress, pop waits for that outro. When the
    * menu is already closed, pop is immediate.
@@ -603,10 +646,8 @@ export class AppController {
   };
 
   private pop = (result?: { payload: unknown }) => {
-    // No more parents, do nothing.
-    if (this.appParents.length === 0) {
-      return;
-    }
+    const exiting = this.current;
+    if (!exiting) return;
     this.runBeforeExit();
     const appVal = this.appParents.pop();
     if (appVal) {
@@ -616,7 +657,9 @@ export class AppController {
       this.runAfter();
       return;
     }
-    return;
+    this.setCurrent(undefined, false);
+    this.runBefore();
+    this.onRootExit?.({ app: exiting, payload: result?.payload });
   };
 
   // #endregion
@@ -635,7 +678,7 @@ export class AppController {
    *
    * Precedence: active input claim (`release.back`) before `enableGoBack`,
    * then an imperative `setOnBack` handler, then the AppObject's declarative
-   * `onBack`, then the default pop.
+   * `onBack`, then parent resume or the controller-level root exit handler.
    */
   goBack = () => {
     // Claim cancellation is not AppObject navigation — honour it even when
@@ -657,7 +700,9 @@ export class AppController {
       this.clearInputAfterBackIfCurrent(backOwner);
       return;
     }
-    this.pop();
+    if (this.appParents.length > 0 || this.onRootExit !== undefined) {
+      this.pop();
+    }
     this.clearInputAfterBackIfCurrent(backOwner);
     return;
   };
@@ -677,10 +722,14 @@ export class AppController {
   }
 
   /**
-   * True if there is a parent AppObject and enableGoBack flag is true.
+   * True when Back is enabled and there is a parent or a root exit handler.
    */
   canGoBack() {
-    return this.appParents.length > 0 && !this.disableGoBack;
+    return (
+      !!this.current &&
+      !this.disableGoBack &&
+      (this.appParents.length > 0 || this.onRootExit !== undefined)
+    );
   }
 
   // #endregion

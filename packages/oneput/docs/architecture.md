@@ -1,5 +1,7 @@
 # Oneput Architecture
 
+DO NOT EDIT COMMENTS - notify they user if they are incorrect or out of date.
+
 Oneput is a command-bar UI system — an input with a dropdown menu that can be used to build shell-like interfaces for web apps. This document describes its internal architecture.
 
 ## Controller
@@ -19,6 +21,10 @@ The `Controller` (`controllers/controller.ts`) is the central API that consumers
 The `Controller` is created by `<OneputController>` (a Svelte component) which manages reactive state via `OneputProps` and passes the controller to consumers via a `run` callback.
 
 ## AppObject
+
+COMMENT: we initially just had ctl.app.run which pushes the current AppObject onto the stack, making it a parent, and the newly running AppObject the child. ctl.app.replace allows us to launch different AppObject's without using a stack or forcing parent/child relationship. This allows us to route or use a state machine to control what happens. If an AppObject calls ctl.app.run however, we go into "stack mode" and we have to exhaust the stack before we go back to "routed" mode.
+
+`ctl.app.replace(app)` exits the current app and starts its replacement without pushing a parent. Existing parents stay on the stack. `ctl.app.setOnRootExit(handler)` registers a controller-level handler that runs after a parentless app exits. It receives `{ app, payload }` and can select the next main screen. `exit()` with no parent calls this callback to let the controller choose what comes next. `replace(nextApp)` already specifies what comes next, so it starts `nextApp` directly without calling the callback. The callback stays registered when an app starts, is replaced, or resumes. Pass `undefined` to remove it. Back is available at the root when this handler is set and `enableGoBack` is true.
 
 An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects form a stack managed by `AppController` — you `run()` a new one to push it, `exit()` to pop back. If `exit` / `closeAndExit` runs while the menu is closing, pop waits for the menu outro (`onoutroend`) so parent chrome does not change while the panel is still visible. If the menu is already closed, pop is immediate.
 

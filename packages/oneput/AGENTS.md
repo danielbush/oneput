@@ -31,7 +31,7 @@ Key bindings map keyboard shortcuts to actions. Each binding declares `when` con
 
 ### AppObject
 
-AppObjects represent screens/states in the app stack with actions, menu, and lifecycle hooks.
+AppObjects represent screens/states in the app stack with actions, menu, and lifecycle hooks. `run()` pushes; `replace()` exits the current app without pushing. `setOnRootExit()` lets a host choose the next screen after an exit with no parent.
 
 - Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
 - Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`

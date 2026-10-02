@@ -628,6 +628,247 @@ describe('AppController', () => {
     });
   });
 
+  describe('replacement and root exit', () => {
+    test('replace: root - cleanup without root exit', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const exits: unknown[] = [];
+      let oldClosed = false;
+      const original: AppObject = {
+        layout: { layout: () => layout('root-layout'), params: {} },
+        onExit: () => {
+          oldClosed = true;
+        }
+      };
+      const replacement: AppObject = {
+        onStart: () => {
+          ctl.input.setInputValue('replacement');
+        }
+      };
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(original);
+      const claim = ctl.input.claim({
+        owner: { type: 'draft' },
+        value: { read: () => '', write: () => {} }
+      });
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.replace(replacement);
+
+      // assert
+      expect(oldClosed).toBe(true);
+      expect(claim.released).toBe(true);
+      expect(ctl.input.getInputValue()).toBe('replacement');
+      expect(ctl.ui.getLayout()?.innerUI?.id).toBe('root-layout');
+      expect(changes.data).toEqual([{ previous: original, current: replacement }]);
+      expect(exits).toEqual([]);
+    });
+
+    test('replace: root - exit has no old parent to resume', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const exits: unknown[] = [];
+      const original: AppObject = {};
+      const replacement: AppObject = {};
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(original);
+      ctl.app.replace(replacement);
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(changes.data).toEqual([{ previous: replacement, current: null }]);
+      expect(exits).toEqual([{ app: replacement, payload: undefined }]);
+    });
+
+    test('replace: child - resume original parent', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const exits: unknown[] = [];
+      const parent: AppObject = {
+        onResume: () => {
+          ctl.input.setInputValue('parent');
+        }
+      };
+      const child: AppObject = {};
+      const replacement: AppObject = {};
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(parent);
+      ctl.app.run(child);
+      ctl.app.replace(replacement);
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.exit('child result');
+
+      // assert
+      expect(changes.data).toEqual([{ previous: replacement, current: parent }]);
+      expect(ctl.input.getInputValue()).toBe('parent');
+      expect(exits).toEqual([]);
+    });
+
+    test('exit: root - notify after cleanup and start next root', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      let oldClosed = false;
+      let closedWhenNotified = false;
+      const exits: unknown[] = [];
+      const original: AppObject = {
+        layout: { layout: () => layout('root-layout'), params: {} },
+        onExit: () => {
+          oldClosed = true;
+        }
+      };
+      const next: AppObject = {
+        layout: { params: { menuTitle: 'Next' } },
+        onStart: () => {
+          ctl.input.setInputValue('next root');
+        }
+      };
+      ctl.app.setOnRootExit((exit) => {
+        exits.push(exit);
+        closedWhenNotified = oldClosed && !ctl.input.hasActiveClaim && !ctl.app.getMenu();
+        ctl.app.run(next);
+      });
+      ctl.app.run(original);
+      ctl.input.claim({
+        owner: { type: 'draft' },
+        value: { read: () => '', write: () => {} }
+      });
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.exit('root result');
+
+      // assert
+      expect(closedWhenNotified).toBe(true);
+      expect(exits).toEqual([{ app: original, payload: 'root result' }]);
+      expect(changes.data).toEqual([
+        { previous: original, current: null },
+        { previous: null, current: next }
+      ]);
+      expect(ctl.input.getInputValue()).toBe('next root');
+      expect(ctl.ui.getLayout()?.innerUI?.id).toBe('root-layout');
+      expect(ctl.app.canGoBack()).toBe(true);
+    });
+
+    test('exit: root - clear app and notify once', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const exits: unknown[] = [];
+      const root: AppObject = {
+        menu: () => ({ id: 'root', items: [] })
+      };
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(root);
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.exit();
+      ctl.app.exit();
+
+      // assert
+      expect(exits).toEqual([{ app: root, payload: undefined }]);
+      expect(changes.data).toEqual([{ previous: root, current: null }]);
+      expect(ctl.app.getMenu()).toBeUndefined();
+      expect(ctl.app.canGoBack()).toBe(false);
+    });
+
+    test('back: root - handler and enableGoBack', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const exits: unknown[] = [];
+      const root: AppObject = { settings: { enableGoBack: false } };
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(root);
+
+      // act
+      ctl.app.goBack();
+
+      // assert
+      expect(ctl.app.canGoBack()).toBe(false);
+      expect(exits).toEqual([]);
+      ctl.ui.update({ flags: { enableGoBack: true } });
+      expect(ctl.app.canGoBack()).toBe(true);
+      ctl.app.goBack();
+      expect(exits).toEqual([{ app: root, payload: undefined }]);
+    });
+
+    test('back: root - keep app after handler is removed', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const exits: unknown[] = [];
+      const root: AppObject = {};
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(root);
+      ctl.app.setOnRootExit(undefined);
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.goBack();
+
+      // assert
+      expect(ctl.app.canGoBack()).toBe(false);
+      expect(changes.data).toEqual([]);
+      expect(exits).toEqual([]);
+    });
+
+    test('exit: root - clear app without a handler', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const root: AppObject = {};
+      ctl.app.run(root);
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.exit();
+
+      // assert
+      expect(changes.data).toEqual([{ previous: root, current: null }]);
+      expect(ctl.app.canGoBack()).toBe(false);
+    });
+
+    test('exit: root - wait for menu outro', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const exits: unknown[] = [];
+      const root: AppObject = {};
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(root);
+
+      // act
+      ctl.app.closeAndExit('result');
+
+      // assert
+      expect(exits).toEqual([]);
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(exits).toEqual([{ app: root, payload: 'result' }]);
+    });
+
+    test('replace: queued exit - keep replacement after outro', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const exits: unknown[] = [];
+      const root: AppObject = {};
+      const replacement: AppObject = {};
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      ctl.app.run(root);
+      ctl.app.closeAndExit();
+      const changes = ctl.trackAppChanges();
+
+      // act
+      ctl.app.replace(replacement);
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(changes.data).toEqual([{ previous: root, current: replacement }]);
+      expect(exits).toEqual([]);
+    });
+  });
+
   describe('exit during menu close', () => {
     it('pops immediately when the menu is already closed', () => {
       // arrange

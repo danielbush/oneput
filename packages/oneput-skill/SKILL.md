@@ -99,6 +99,18 @@ When the menu opens, these hooks run in the order shown above.
 // Push a new AppObject onto the stack
 ctl.app.run(ChildScreen.create(ctl));
 
+// Replace the current screen without pushing it onto the stack
+ctl.app.replace(NextScreen.create(ctl));
+
+// Choose the next main screen after an exit with no parent
+ctl.app.setOnRootExit(({ app, payload }) => {
+  // Send an event to your navigation coordinator here.
+});
+// exit() with no parent calls this callback to choose the next app.
+// replace(nextApp) starts nextApp directly without calling this callback.
+// The callback stays registered when an app starts, is replaced, or resumes.
+// Pass undefined to remove it.
+
 // Pop back (child returns to parent)
 ctl.app.exit();
 ctl.app.exit({ payload: someData }); // with data
@@ -384,6 +396,8 @@ ctl.ui.setInputUI({ left?, right?, outerLeft?, outerRight? })
 
 // App
 ctl.app.run(appObject)
+ctl.app.replace(appObject)
+ctl.app.setOnRootExit(handler?)
 ctl.app.exit(result?)
 ctl.app.goBack()
 ctl.app.setOnBack(fn)

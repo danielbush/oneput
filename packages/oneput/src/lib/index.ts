@@ -1,5 +1,6 @@
 // Controllers
 export { Controller } from './oneput/controllers/controller.js';
+export type { RootAppExit } from './oneput/controllers/AppController.js';
 
 // Types
 export type * from './oneput/types.js';

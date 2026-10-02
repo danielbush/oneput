@@ -48,12 +48,15 @@ export interface AppActionProvider<
 /**
  * Reusable action provider for AppObjects.
  *
- * A provider defines actions once, then lets each AppObject select the active
- * action ids it exposes through `actions()` and hand-authored menu rows.
- *
- * The provider owns the action contract: what the action does; when it is
- * available; what menu row represents it; what binding, if any, triggers it.
- * But it does not own AppObject lifecycle stuff like menu id, focus behavior,
+ * - A provider collates actions, menu items (often based on actions), bindings
+ * and their availability in one place.
+ * - It may NOT be the right place to DEFINE actions or model your business
+ * logic and its state since these may be the preserve of your app that uses
+ * Oneput for its UI.
+ * - The provider's role is a collator; if you start mixing state and app logic
+ * into it directly, you run the risk of creating less clear code.  Consider
+ * injecting an adapter that exposes required actions.
+ * - The provider does not own AppObject lifecycle stuff like menu id, focus behavior,
  * layout title, prompt, or child mode setup.
  *
  * `filter([...])` sets the available action set for that provider instance. It limits both:

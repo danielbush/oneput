@@ -65,115 +65,7 @@ export class KatexDemo implements AppObject {
   menu = () => ({
     id: 'main',
     focusBehaviour: 'first' as const,
-    items: this.buildMenuItems()
-  });
-
-  onExit = () => {
-    this.unsubscribeBindingsChange?.();
-  };
-
-  /**
-   * Rebuild the menu, then tell the mounted pull widgets to paint.
-   *
-   * Every rebuild goes through here. A rebuild reuses the checkbox node, so
-   * the widget on it is the one from the first build: only `menuChanges`
-   * reaches it. Notifying after the rebuild lands also means the box cannot be
-   * left showing a value that the rebuild wrote over.
-   */
-  private refresh = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
-    void this.ctl.menu.invalidate(opts).then(() => {
-      this.menuChanges.notify();
-    });
-  };
-
-  /**
-   * The katex preview is part of menu()'s output, so typing is just another
-   * invalidate trigger: recompute state, then re-pull menu(). Wired by the
-   * framework (sync-rebuild menu — no menuItemsFn, which is the generative channel).
-   */
-  onInputChange = () => {
-    this.recompute();
-    this.refresh();
-  };
-
-  onStart() {
-    this.unsubscribeBindingsChange?.();
-    this.unsubscribeBindingsChange = this.ctl.events.on(
-      'bindings-change',
-      ({ bindings: currentBindings }) => {
-        const binding = currentBindings[OneputAction.SUBMIT]?.bindings[0];
-        this.helpMessage = binding
-          ? `Type some katex and hit ${binding} to insert... `
-          : 'Type some katex...';
-        this.refresh();
-      }
-    );
-    this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
-    this.ctl.input.focusInput();
-    this.ctl.input.setSubmitHandler(() => {
-      this.insertKatex();
-    });
-    // Set up katex state; menu() is pulled by the framework after onStart (afterRun).
-    this.recompute();
-  }
-
-  /**
-   * Recompute katex state from the current input and refresh the input UI.
-   * Does NOT touch the menu — call `refresh()` to re-render items.
-   */
-  private recompute() {
-    if (this.ctl.input.getInputValue().trim() === '') {
-      this.currentResult = '';
-      this.katexValid = true;
-      this.syncChrome();
-      return;
-    }
-    try {
-      this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
-        displayMode: this.displayMode,
-        throwOnError: true,
-        errorColor: 'red'
-      });
-      this.katexValid = true;
-      this.ctl.clearNotifications();
-      this.syncChrome();
-    } catch (err) {
-      this.katexValid = false;
-      this.syncChrome();
-      this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
-    }
-  }
-
-  /**
-   * Give insert to the layout as its `inputSend` affordance. Then set the
-   * app's own input chrome again.
-   *
-   * Order matters: `ctl.ui.update` rebuilds `inputUI` from the layout, so
-   * `renderInputUI` must run after it.
-   */
-  private syncChrome() {
-    this.ctl.ui.update({
-      params: {
-        inputSend: {
-          run: () => this.insertKatex(),
-          enabled: this.canInsert()
-        }
-      } satisfies AppLayoutParams
-    });
-    this.renderInputUI();
-  }
-
-  /** Insert needs valid katex and something to insert. */
-  private canInsert() {
-    return this.katexValid && this.ctl.input.getInputValue().trim() !== '';
-  }
-
-  /**
-   * Build the menu items from current AppObject state. Pure with respect to the
-   * menu: reads this.currentResult / katexValid / helpMessage / displayMode.
-   */
-  private buildMenuItems() {
-    return [
+    items: [
       // The preview shows one isolated formula, thus it stays centered in both
       // modes. Display mode changes the katex itself: larger fractions, and sum
       // limits above and below the operator.
@@ -216,14 +108,102 @@ export class KatexDemo implements AppObject {
           subscribe: this.menuChanges.subscribe
         }
       })
-    ];
+    ]
+  });
+
+  onExit = () => {
+    this.unsubscribeBindingsChange?.();
+  };
+
+  /**
+   * The katex preview is part of menu()'s output, so typing is just another
+   * invalidate trigger: recompute state, then re-pull menu(). Wired by the
+   * framework (sync-rebuild menu — no menuItemsFn, which is the generative channel).
+   */
+  onInputChange = () => {
+    this.recompute();
+    this.refresh();
+  };
+
+  onStart() {
+    this.unsubscribeBindingsChange?.();
+    this.unsubscribeBindingsChange = this.ctl.events.on(
+      'bindings-change',
+      ({ bindings: currentBindings }) => {
+        const binding = currentBindings[OneputAction.SUBMIT]?.bindings[0];
+        this.helpMessage = binding
+          ? `Type some katex and hit ${binding} to insert... `
+          : 'Type some katex...';
+        this.refresh();
+      }
+    );
+    this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
+    this.ctl.input.focusInput();
+    this.ctl.input.setSubmitHandler(() => {
+      this.insertKatex();
+    });
+    // Set up katex state; menu() is pulled by the framework after onStart (afterRun).
+    this.recompute();
   }
 
   /**
-   * App-owned input chrome. `right` belongs to the layout (the send button),
-   * so it stays untouched here — invalid katex shows as a disabled send.
+   * Rebuild the menu, then tell the mounted pull widgets to paint.
+   *
+   * Every rebuild goes through here. A rebuild reuses the checkbox node, so
+   * the widget on it is the one from the first build: only `menuChanges`
+   * reaches it. Notifying after the rebuild lands also means the box cannot be
+   * left showing a value that the rebuild wrote over.
    */
-  private renderInputUI() {
+  private refresh = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
+    void this.ctl.menu.invalidate(opts).then(() => {
+      this.menuChanges.notify();
+    });
+  };
+
+  /**
+   * Recompute katex state from the current input and refresh the input UI.
+   *
+   * Does NOT touch the menu — call `refresh()` to re-render items.
+   */
+  private recompute() {
+    if (this.ctl.input.getInputValue().trim() === '') {
+      this.currentResult = '';
+      this.katexValid = true;
+      this.syncChrome();
+      return;
+    }
+    try {
+      this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
+        displayMode: this.displayMode,
+        throwOnError: true,
+        errorColor: 'red'
+      });
+      this.katexValid = true;
+      this.ctl.clearNotifications();
+      this.syncChrome();
+    } catch (err) {
+      this.katexValid = false;
+      this.syncChrome();
+      this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
+    }
+  }
+
+  /**
+   * Give insert to the layout as its `inputSend` affordance. Then set the
+   * app's own input chrome again.
+   *
+   * Order matters: `ctl.ui.update` rebuilds `inputUI` from the layout, so
+   * `renderInputUI` must run after it.
+   */
+  private syncChrome() {
+    this.ctl.ui.update({
+      params: {
+        inputSend: {
+          run: () => this.insertKatex(),
+          enabled: this.katexValid && this.ctl.input.getInputValue().trim() !== ''
+        }
+      } satisfies AppLayoutParams
+    });
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,

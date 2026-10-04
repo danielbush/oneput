@@ -337,10 +337,9 @@ Rules:
   stale.
 - Your `action` / `onToggle` must make the write visible to `get()` before it
   returns.
-- Add `subscribe` when a write must move this row after the click has painted:
-  a keyboard action bound to the same flag, a second row on the same state, or
-  an `invalidate` in your own action. `invalidate` returns a promise — notify
-  once the rebuild lands.
+- Add `subscribe` when a write from somewhere else must move this row: a
+  keyboard action bound to the same flag, or a second row on the same state.
+  An `invalidate` in your own action does not need it.
   `cell(initial)` from `@oneput/oneput` gives you `get` / `set` / `subscribe`;
   `notifier()` gives you the change signal alone.
 - Keep `invalidate` for what a rebuild is for: which rows exist, preview

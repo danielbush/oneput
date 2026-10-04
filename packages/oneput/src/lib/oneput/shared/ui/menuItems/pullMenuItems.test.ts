@@ -49,6 +49,11 @@ function mountToggle(item: MenuItem, id: string) {
   return mountChild(item, `${id}-value`, 'div');
 }
 
+/** The checkbox paints in a new task after a click (see checkboxMenuItem). */
+function nextTask() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 function mountCheckbox(item: MenuItem, id: string) {
   return mountChild(item, `${id}-input`, 'input') as {
     node: HTMLInputElement;
@@ -245,7 +250,7 @@ describe('checkboxMenuItem', () => {
     expect(node.checked).toBe(true);
   });
 
-  test('click flips the state and repaints', () => {
+  test('click flips the state and repaints', async () => {
     // arrange
     const checked = cell(false);
     const item = checkboxMenuItem({
@@ -258,6 +263,7 @@ describe('checkboxMenuItem', () => {
 
     // act
     item.action?.(createNull());
+    await nextTask();
 
     // assert
     expect(checked.get()).toBe(true);
@@ -282,7 +288,7 @@ describe('checkboxMenuItem', () => {
     expect(node.checked).toBe(true);
   });
 
-  test('a rebuilt row paints the widget that is mounted', () => {
+  test('a rebuilt row paints the widget that is mounted', async () => {
     // arrange
     const checked = cell(false);
     const build = () =>
@@ -299,6 +305,7 @@ describe('checkboxMenuItem', () => {
 
     // act
     rebuilt.action?.(createNull());
+    await nextTask();
 
     // assert
     expect(node.checked).toBe(true);

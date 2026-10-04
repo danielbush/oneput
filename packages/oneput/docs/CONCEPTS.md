@@ -37,10 +37,15 @@ A rebuilt row does not hold the widget the user can see: only the first build
 mounted. So a row paints by **host id**, through a registry private to
 `pull/`, and reaches the widget that is on that node now.
 
-`subscribe` on the source is needed when a write must move the row _after_ the
-click has painted: a keyboard action, a second row on the same state, or your
-own `invalidate` — the rebuild lands later, so notify once it has. `cell()` and
-`notifier()` provide it.
+`subscribe` on the source is needed when a write from somewhere else must move
+the row: a keyboard action, or a second row on the same state. An `invalidate`
+in your own action does not need it, because a rebuild does not touch the
+widget's node. `cell()` and `notifier()` provide it.
+
+`checkboxMenuItem` is a controlled input, as in React: it calls
+`preventDefault` on the box's click, so only the widget writes `checked`. The
+browser then puts back the old value when the click ends, so the row paints in
+a new task (`setTimeout`), after that restore. A microtask runs too early.
 
 Use `FChild` `onMount`, not the Flex mount map: Flex runs `onMount` once, on
 the parent Flex instance.

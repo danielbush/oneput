@@ -230,6 +230,161 @@ write a third or fourth pull object.
   - we still provide the ability to imperatively set the menu using setMenu for maximum freedom
 - actions have been declarative for some time
 
+### REFRESH_PATTERN - how the UI follows the model at scale
+
+Status: proposed. `watch` and the focus default (ideas 3 and 4) do not exist
+yet. KatexDemo calls `show()` by hand in each action.
+
+The UI is a function of the model's state. Any change to the model re-derives
+all of the UI. This is the part of React that holds at scale, and it does not
+need dependency tracking.
+
+Callers come from many places: actions, async tasks, outer app objects that
+hold `ctl`, and UI controls like the Send button. If each caller must remember
+to refresh the UI, one of them will forget. Thus the model notifies, and one
+refresh runs.
+
+#### 1. MODEL_NOTIFIES - models notify; they do not know who listens
+
+A model has a `subscribe`, the same shape as `Pull`. It calls its listeners
+after each change. It does not know about Oneput.
+
+```ts
+class KatexFormula {
+  private changes = notifier();
+  subscribe = this.changes.subscribe;
+
+  setSource(source) { ...; this.changes.notify(); }
+  setDisplayMode(value) { ...; this.changes.notify(); }
+  insert() { ...; this.changes.notify(); }
+}
+```
+
+Actions, async code and outer objects only change the model. They do not
+refresh the UI.
+
+```ts
+actions = {
+  [OneputAction.SUBMIT]: { action: () => this.formula.insert() },
+  TOGGLE_DISPLAY_MODE: { action: () => this.formula.toggleDisplayMode() }
+};
+```
+
+#### 2. ONE_REFRESH - the AppObject has one refresh, and it is idempotent
+
+A refresh derives all of the UI from state. It never asks what changed.
+Running it twice gives the same UI as running it once.
+
+Oneput already knows how to re-pull the declarative parts, `menu()` and
+`actions()`, so it does that itself. The AppObject gives an optional
+`onRefresh` hook for the imperative parts that Oneput cannot know about:
+input chrome, notifications, the placeholder.
+
+```ts
+// Oneput, on a refresh:
+app.onRefresh?.();
+ctl.menu.invalidate();
+if (typeof app.actions === 'function') ctl.app.invalidateActions();
+
+// KatexDemo
+onRefresh = () => {
+  ctl.ui.update({ inputSend: { enabled: formula.canInsert(), ... } });
+  if (formula.error) ctl.notify('Invalid katex: ' + formula.error);
+  else ctl.clearNotifications();
+};
+```
+
+An AppObject with no imperative parts needs no `onRefresh`.
+
+`onRefresh` only reads the model. If it changes the model, the model notifies
+again and the refresh loops.
+
+The signal is blunt: it says "something changed", and nothing more. This is
+on purpose. If the refresh cannot branch on what changed, it cannot get out of
+step with the state. If each event updates its own part of the UI, N events
+and M UI parts give N × M paths. With one refresh, there is one path.
+
+A notification can carry data (for example a DOM `CustomEvent` with
+`detail`). If Oneput passes it to `onRefresh`, it is a hint for speed only.
+The UI must still be correct when the hint is ignored. Meaning goes in
+DOMAIN_EVENTS.
+
+#### 3. FRAMEWORK_WATCH - the framework wires the subscriptions
+
+The AppObject declares the models it shows in `watch`: a list of things that
+have a `subscribe` method. Oneput does the subscriptions, in the same way as
+for the declarative `events` handlers.
+
+```ts
+class KatexDemo implements AppObject {
+  watch = [this.formula];
+  onRefresh = () => { ... }; // see ONE_REFRESH
+}
+```
+
+Lifecycle:
+
+- Start and resume: Oneput calls `subscribe` on each item in `watch`, and
+  keeps the unsubscribe functions. On resume, it also refreshes once, because
+  the model can change while the AppObject is not current.
+- Suspend (a child AppObject runs on top) and exit: Oneput unsubscribes all.
+  Thus an AppObject that is not current does not repaint.
+
+When a model notifies, its listeners run at once, in the same call. Oneput's
+listener does not refresh at once. It schedules one refresh, and more
+notifies before that refresh do not add more. Thus a model can notify freely:
+`insert()` that also calls `setSource('')` gives one refresh, not two.
+
+No AppObject writes subscribe and unsubscribe code by hand, so none can leak.
+For many models, add each one to `watch`. They share one refresh.
+
+Limit: Oneput reads `watch` when it subscribes. If the AppObject replaces a
+model later (for example, it opens a different document), the new model is
+not watched. A possible fix is the function form that `actions` allows,
+`watch = () => [this.formula]`, with a call that makes Oneput read it again.
+
+#### 4. INTENT_IS_NOT_STATE - transient intent does not go through refresh
+
+Some things are an intent for one moment, not state. Focus is the main
+example: KatexDemo passes `focusBehaviour: 'none'` so that a display mode
+toggle does not move the focus. A refresh cannot know this, because it does
+not ask what changed.
+
+Fix the default, not the refresh: a refresh rebuild keeps the focus where it
+is. Only a new menu (`setMenu`, a new AppObject) moves it. Then the refresh
+needs no arguments.
+
+If an action really needs a one-time intent, the action states it to Oneput
+directly. It does not pass it through the model.
+
+#### 5. DOMAIN_EVENTS - domain events are for meaning, not repaint
+
+Events that say what happened go in `AppEventMap` and `ctl.appEvents`. Other
+listeners use them: save, log, analytics, an outer app object.
+
+```ts
+interface AppEventMap {
+  'katex:inserted': { html: string };
+}
+```
+
+The UI never depends on these events to repaint. The model notification
+(MODEL_NOTIFIES) already does that.
+
+#### How the cases resolve
+
+- Typing: `onInputChange` calls `formula.setSource`, then the model notifies
+  and the UI refreshes.
+- The submit key and the Send button: both run the SUBMIT action, then the
+  model changes, notifies and the UI refreshes.
+- Async: when the work finishes, it changes the model, which notifies. Nothing
+  extra is needed.
+- Outer app objects with `ctl`: they change the model. They do not call the
+  AppObject.
+
+Risk: a model that changes very often refreshes very often. `invalidate`
+coalescing handles the menu. Batching is the framework's job, not the app's.
+
 ## MenuLike (menu and menu-like contract)
 
 Working name: **MenuLike** (rename later if a better term lands).

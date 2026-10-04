@@ -263,16 +263,6 @@ export class KatexDemo implements AppObject {
     this.unsubscribeBindingsChange?.();
   };
 
-  /**
-   * The katex preview is part of menu()'s output, so typing is just another
-   * invalidate trigger. Wired by the framework (sync-rebuild menu — no
-   * menuItemsFn, which is the generative channel).
-   */
-  onInputChange = () => {
-    this.formula.setSource(this.ctl.input.getInputValue());
-    this.show();
-  };
-
   onStart() {
     this.unsubscribeBindingsChange?.();
     this.unsubscribeBindingsChange = this.ctl.events.on(
@@ -291,6 +281,16 @@ export class KatexDemo implements AppObject {
     // menu() is pulled by the framework after onStart (afterRun).
     this.syncChrome();
   }
+
+  /**
+   * The katex preview is part of menu()'s output, so typing is just another
+   * invalidate trigger. Wired by the framework (sync-rebuild menu — no
+   * menuItemsFn, which is the generative channel).
+   */
+  onInputChange = () => {
+    this.formula.setSource(this.ctl.input.getInputValue());
+    this.show();
+  };
 
   /** Show the formula's state: input chrome, error notification and menu. */
   private show(opts?: Parameters<Controller['menu']['invalidate']>[0]) {

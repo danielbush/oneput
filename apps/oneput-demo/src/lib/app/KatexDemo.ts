@@ -95,7 +95,7 @@ export class KatexDemo implements AppObject {
           this.recompute();
           // The box paints itself. This rebuild is for the preview pane.
           // focusBehaviour 'none' keeps the focused index on the checkbox.
-          this.refresh({ focusBehaviour: 'none' });
+          this.invalidate({ focusBehaviour: 'none' });
         },
         textContent: 'Display mode',
         source: { get: () => this.displayMode }
@@ -114,7 +114,7 @@ export class KatexDemo implements AppObject {
    */
   onInputChange = () => {
     this.recompute();
-    this.refresh();
+    this.invalidate();
   };
 
   onStart() {
@@ -126,7 +126,7 @@ export class KatexDemo implements AppObject {
         this.helpMessage = binding
           ? `Type some katex and hit ${binding} to insert... `
           : 'Type some katex...';
-        this.refresh();
+        this.invalidate();
       }
     );
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
@@ -139,7 +139,7 @@ export class KatexDemo implements AppObject {
   }
 
   /** Rebuild the menu from the current state. */
-  private refresh = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
+  private invalidate = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
     void this.ctl.menu.invalidate(opts);
   };
 
@@ -214,6 +214,6 @@ export class KatexDemo implements AppObject {
       : `<p>${rendered}</p>`;
     this.ctl.input.setInputValue('');
     this.recompute();
-    this.refresh();
+    this.invalidate();
   };
 }

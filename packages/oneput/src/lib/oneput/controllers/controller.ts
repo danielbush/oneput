@@ -53,7 +53,7 @@ export class Controller {
    * A pull row calls `notify()` after its own click. The row does not hold
    * the widget: a rebuild makes a new row, but the widget from the first build
    * stays on the node. The widget subscribes here on mount, so the click
-   * reaches it. See PULL_ROWS in `docs/CONCEPTS.md`.
+   * reaches it. See PULL_OBJECT in `docs/CONCEPTS.md`.
    */
   public pull = notifier();
 

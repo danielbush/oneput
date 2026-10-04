@@ -40,6 +40,7 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
           type: 'checkbox',
           title: params.textContent,
           onclick: (event: Event) => {
+            // CONTROLLED_PATTERN
             // Using preventDefault here makes the component "controlled", as in
             // React: only `source` sets the box. Without this, the browser
             // toggles the box itself, even if `action` keeps the old value. The
@@ -54,9 +55,10 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
     action: (ctl: Controller) => {
       const checked = !params.source.get();
       params.action(ctl, checked);
+      // CONTROLLED_PATTERN
       // Update the box in a new task. Because of preventDefault, the browser
-      // puts back the old value when the click ends, after the click
-      // handlers. A microtask is too early.
+      // puts back the old value when the click ends, after the click handlers.
+      // A microtask is too early.
       setTimeout(ctl.pull.notify, 0);
     }
   });

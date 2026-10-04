@@ -8,7 +8,8 @@
     and what that menu item looks like.
   - The provider's role is a collator; if you start mixing state and
     implementation logic into it directly, you run the risk of creating less clear
-    code. Consider injecting an adapter that exposes state and business logic.
+    code. Consider injecting an adapter that exposes the actions and conditions
+    without leaking the business logic for them.
   - The provider does not own AppObject lifecycle stuff like menu id, focus
     behavior, layout title, prompt, or child mode setup.
   - Helps to declutter `.menu` and `.actions` in the AppObject
@@ -17,50 +18,152 @@
   - TBD: specify whether actions are available
   - see `OneputActionProvider` and `JsedActionProvider` as examples
 
-## pulling and invalidation vs imperative
+## state and reactivity in oneput
 
-- favour using declaring menus (AppObject.menu); these are pulled; usine invalidate to re-pull (re-update)
+COMMENT: see INPUT_STATE_TERMS
+
+### CONTROLLED_PATTERN
+
+COMMENT: The checkbox below is controlled, and it also uses a PULL_OBJECT (step 4) to
+update the box. These are two separate ideas; see INPUT_STATE_TERMS.
+
+A controlled input only shows state. It never changes itself, so the input and
+the state cannot disagree. The state is the only truth.
+
+To do this, call `preventDefault` on the input's click. The browser then does
+not change the input. Our code writes the state, then sets the input from it.
+
+Checkbox example (`checkboxMenuItem`). What one click on the box does:
+
+1. The browser starts to toggle the box. `onclick` calls `preventDefault`.
+2. The click goes up to the row. The row reads `source.get()` and calls
+   `action(ctl, !value)`. The app writes its state.
+3. The click ends. Because it was cancelled, the browser puts back the old
+   value.
+4. In a new task, the row calls `ctl.pull.notify()`. `PullCheckbox` sets
+   `input.checked = source.get()`.
+
+Parts:
+
+- `checkboxMenuItem`
+  - returns `MenuItem` built with `stdMenuItem` that is a row description (plain data)
+  - it runs again each time menu() runs, which is on every invalidate.
+  - In this case, we've created one and shared it; but the consumer could create their own using the language of oneput
+- `PullCheckbox` - An object attached to the real `<input>`
+  - one per DOM node, lives as long as the node does (up to a svelte destroy)
+  - stores the node and the pull source - source.get
+  - subscribes to source.subscribe (if present) and to ctl.pull
+  - it is the only code that writes checked.
+    - COMMENT: important link to CONTROLLED_PATTERN
+  - created by `onMount` that `checkboxMenuItem` supplies (FChild (Svelte) calls it when the node mounts)
+    - COMMENT: svelte only does this once per node even though there are multiple invalidations because the id stays the same
+- `Pull`
+  - pull source; it is HOW the row reads the state `({ get, subscribe? })`.
+  - It is NOT the state.
+  - In KatexDemo the state is this.displayMode, and the Pull is just a window onto it.
+    ```js
+    checkboxMenuItem({
+      ...
+      source: { get: () => this.displayMode }
+    })
+    ```
+- `Cell`
+  - A cell is the state and its `Pull` in one object.
+  - We only need it if we need something external to the checkbox that wants to update it
+    - in katexdemo we might have a key binding that toggles display mode
+  - A cell is not the only way to support outside writers.
+    - Any Pull with subscribe works. For example, a notifier() works when the state lives elsewhere (an editor). A cell is just the easiest way when you own the state.
+  - Create the cell once, eg as a field in an AppObject, never inside menu(). Otherwise each rebuild makes a new cell at its initial value, while the mounted PullCheckbox still reads the old one.
+
+### PULL_OBJECT - an object on a node that reads live state
+
+Rows keep stable ids, so a rebuild reuses the mounted node and does not run
+`onMount` again. A value copied into the row at build time then goes stale. So
+a row that must change without a rebuild gives its fchild an `onMount`
+handler. The handler creates a small object on that node. The object reads a
+`Pull<T>` source (`lib/pull.ts`), and it is the only code that writes that part
+of the node.
+
+The row is built again on each rebuild, but the object is not, so the row never
+holds the object. After its own click, the row calls `ctl.pull.notify()`. Each
+object subscribes to `ctl.pull` on mount and unsubscribes when its `FChild` is
+destroyed. `onMount(node, ctx)` gets `ctx.pull` (a `MountContext`), which
+`OneputController.svelte` provides through Svelte context. There is one per
+Oneput instance, so two instances on a page do not update each other.
+
+Rows:
+
+- `checkboxMenuItem` — `PullCheckbox` owns the `checked` property. The box is
+  also controlled (CONTROLLED_PATTERN).
+- `pullToggleMenuItem` — `PullToggleValue` owns an fchild on the right that
+  shows the value. The title stays the label, so the row still filters.
+- `toggleMenuItem` — not a pull object. It is snapshot-based, for callers that
+  rebuild after each toggle. It has the same layout.
+
+Rules:
+
+- Never write a text node that Svelte owns. Give the object its own fchild.
+- Use `FChild` `onMount`, not the Flex mount map: Flex runs `onMount` once, on
+  the parent Flex instance.
+- For the source (`Pull`, `cell()`, `notifier()`), see Parts in
+  CONTROLLED_PATTERN.
+
+### REACTIVE_PROPS - a possible future UPDATE_MECHANISM
+
+Status: Oct-2026 - an idea only. It is not built. We record it here so we can come back
+to it.
+
+The idea: an fchild takes a `Pull` directly as a prop, for example
+`attr: { checked: source }` or `textContent: source`. Inside `FChild`, Svelte's
+`createSubscriber` turns `get` + `subscribe` into a reactive read, and Svelte
+updates only that property when the source notifies. Consumers still write
+plain JS (`{ get }`, `cell()`, `notifier()`) and do not use Svelte.
+
+What it changes, compared with PULL_OBJECT:
+
+- Props flow on every rebuild. Svelte keeps the same `FChild` but gives it the
+  new row's props, including the new source. So the problem "the node still
+  holds the first build's object" does not occur.
+- `PullCheckbox`, `PullToggleValue` and the pull part of `onMount(node, ctx)`
+  go away.
+
+What it does not change:
+
+- The checkbox is still controlled and ONE_WAY. It still needs
+  `preventDefault` and a deferred re-read (CONTROLLED_PATTERN). REACTIVE_PROPS
+  only changes how the DOM is updated.
+- A plain `{ get }` source has no `subscribe`, so something must still say
+  "read again" after a click. That could still be `ctl.pull`, used inside
+  `FChild`.
+
+The main concern is which props get this treatment:
+
+- **Prop by prop** (`checked`, then `value`, then `textContent`, ...) makes a
+  list in `FChild`. Each item has its own rules: DOM property or attribute,
+  who owns the text node, controlled or not. Each new kind of live row means a
+  change to `FChild`.
+  - COMMENT: I'm uneasy about this, as we're having to maintain a list of things
+    that get treated this way and I'm wondering if it has the same generality as
+    the PULL_OBJECT / "general escape hatch" approach we currently have (Oct-2026)
+- **The general form** ("any `attr` value, and `textContent`, can be a `Pull`")
+  removes the list. But every field then becomes "a value or a `Pull` of a
+  value", and `Pull` becomes part of the description language, not a helper in
+  `lib/`. In effect, everything becomes a signal. That is a large choice about
+  Oneput's public model, and we must make it on purpose.
+
+Note: a `Pull` is not a full signal. It has no automatic dependency tracking:
+a source must say when it changed (`subscribe`). Svelte's `$state` tracks
+reads by itself.
+
+For now, keep PULL_OBJECT. `onMount` is a general escape hatch, and `FChild`
+does not need to know about checkboxes. Look at REACTIVE_PROPS again if we
+write a third or fourth pull object.
+
+### DEC_PULL - favour pulling and invalidation vs imperative
+
+- favour using declaring menus (AppObject.menu); these are pulled; using invalidate to re-pull (re-update)
   - we still provide the ability to imperatively set the menu using setMenu for maximum freedom
 - actions have been declarative for some time
-
-## PULL_ROWS - mounted widgets that read live state
-
-Invalidation re-pulls the **shape** of the menu: which rows exist, preview
-content, filter results. It is not how a single label or a checkbox tick moves,
-because rows keep stable ids: a rebuild reuses the mounted node and does not
-run `onMount` again. A value copied into the row at build time then goes stale.
-
-For that, a row mounts a small widget on an `FChild` host it owns. The widget
-reads a `Pull<T>` source (`lib/pull.ts`) on mount and again after each click.
-It never writes a Svelte-managed text node.
-
-- `checkboxMenuItem` — the widget owns the `checked` property of the input.
-- `pullToggleMenuItem` — the title stays the label, and the widget owns an
-  fchild on the right that shows the value. So the row still filters on its
-  label, and Svelte keeps the text node it owns.
-- `toggleMenuItem` stays snapshot-based, for callers that already rebuild. It
-  renders the same way: label in the title, value on the right.
-
-A rebuilt row does not hold the widget the user can see: only the first build
-mounted. So a row does not paint its widget. It calls `ctl.pull.notify()`, and
-each mounted widget repaints, because it subscribed to `ctl.pull` on mount and
-unsubscribes when its `FChild` is destroyed. `onMount(node, ctx)` gets
-`ctx.pull` (a `MountContext`), which `OneputController.svelte` provides through
-Svelte context. There is one per instance, so two Oneputs on a page do not
-paint each other.
-
-`subscribe` on the source is needed when a write from somewhere else must move
-the row: a keyboard action, or a second row on the same state. An `invalidate`
-in your own action does not need it, because a rebuild does not touch the
-widget's node. `cell()` and `notifier()` provide it.
-
-`checkboxMenuItem` is a controlled input, as in React: it calls
-`preventDefault` on the box's click, so only the widget writes `checked`. The
-browser then puts back the old value when the click ends, so the row paints in
-a new task (`setTimeout`), after that restore. A microtask runs too early.
-
-Use `FChild` `onMount`, not the Flex mount map: Flex runs `onMount` once, on
-the parent Flex instance.
 
 ## MenuLike (menu and menu-like contract)
 
@@ -449,3 +552,52 @@ The current claim supports simple live writes. It does not yet support validatio
 This is the present LIVE_EDIT case. The input writes directly to one field while its claim exists.
 
 Therefore, my earlier wording was too broad: claims can support these modes, but the current API fully supports only exclusive live input and restoration. Search is close. Command arguments and transactional date entry need additional lifecycle events.
+
+## Appendix - INPUT_STATE_TERMS - three separate questions
+
+COMMENT: this came from a discussion with opus 5.5 on CONTROLLED_PATTERN vs REACTIVE_PROPS after tidying how checkboxMenuItem was being used in KatexDemo (Oct-2026).
+
+Three terms are easy to mix up. Each one answers a different question. Oneput
+makes one choice for each.
+
+### 1. Controlled vs uncontrolled: who owns the value?
+
+- **Controlled**: the app state owns the value. The input only shows it. See
+  CONTROLLED_PATTERN.
+- **Uncontrolled**: the DOM owns the value. The app reads it when it needs it,
+  for example on submit.
+
+Oneput: **controlled** (`checkboxMenuItem`).
+
+### 2. ONE_WAY One-way vs TWO_WAY two-way: does the input write back to the state by itself?
+
+- **One-way**: data goes from state to input only. A user change comes back as
+  an event, and the app decides what to write. In Oneput that event is the
+  row's `action`.
+- **Two-way**: the browser changes the input, and a binding writes the new value
+  back to the state automatically, such as Svelte's `bind:checked` or Vue's
+  `v-model`. The source must be writable (`get` / `set` / `subscribe`, as in a
+  `Cell`). It needs no `preventDefault` and no deferred paint. But if the app
+  refuses a write, it must set the input back from the state, because the
+  browser has already changed it. Svelte's `bind:` with a setter that refuses
+  has this problem.
+
+Oneput: **one-way**. Controlled is always one-way. Two-way is close to
+uncontrolled, with a write-back step added.
+
+### 3. UPDATE_MECHANISM: how does the DOM follow the state?
+
+This is the question that the other two terms do not cover.
+
+- **REBUILD**: call `invalidate`. `menu()` runs again, and Svelte compares the
+  new rows by id. Use this for the shape of the menu: which rows exist,
+  preview content, filter results. See DEC_PULL.
+- **PULL_OBJECT**: an `onMount` handler creates a small object on one node,
+  such as `PullCheckbox`. The object subscribes to the source and to
+  `ctl.pull`, and it sets the DOM property itself. Use this for one value that
+  must change without a rebuild. This is what Oneput uses now. See
+  PULL_OBJECT.
+- **REACTIVE_PROPS**: not built. See REACTIVE_PROPS.
+
+Questions 1 and 2 are about who may change the value. Question 3 is about how
+the screen catches up. You can combine any answer to 3 with any answer to 1 or 2.

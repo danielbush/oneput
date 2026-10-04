@@ -68,7 +68,7 @@ Decoupled pub-sub communication between controllers.
 ### Pull rows (menu rows that paint themselves)
 
 Rows that must change without a menu rebuild mount a widget that reads a live
-`Pull<T>` source. See PULL_ROWS in `docs/CONCEPTS.md`.
+`Pull<T>` source. See PULL_OBJECT in `docs/CONCEPTS.md`.
 
 - Type + helpers: `packages/oneput/src/lib/oneput/lib/pull.ts` — `Pull`, `cell`, `notifier`
 - Repaint channel: `Controller.pull`, given to `onMount(node, ctx)` as `MountContext` (`shared/components/mountContext.ts`)

@@ -70,6 +70,14 @@ The following are potential work (tickets for work) sorted by priority: earlier 
   - COMMENT: I'm fine just to target the default document scroll on documents that exceed the browser viewport; let's not worry about other scrollable elements for now (these might have to respond to a class set by oneput when the menu is open)
 - fix: if menu items can receive the native focus (because they're buttons), should we set a focusin to update the synthetic menu item focus?  Or do we just prevent tab focus altogether?
   - COMMENT: we might be preventing, but not sure.  That would be the simplest.
+- fix: `onMount` on a nested hflex/vflex runs only once, when the top-level Flex mounts (`Flex.svelte` mount map). `FChild` is not affected: it runs its own `onMount`.
+  - added later: a nested flex that a rebuild adds never gets its `onMount`
+  - removed: a nested flex that a rebuild removes keeps its listeners until the whole top-level Flex is destroyed
+  - replaced: if the tag changes, the new node never gets `onMount`
+  - current users are not affected, because their nested flex exists from the first build: jsed `NavCrumbs` (`nav-crumbs`), mockups `chat` and `breadcrumb`
+  - COMMENT: possible fix: replace the mount map with a Svelte attachment (`{@attach}`) on each flex element; it runs when that element is created and cleans up when it is removed
+  - COMMENT: check first that a rebuild does not run the attachment again (each rebuild gives a new `params.onMount`); probably needs `untrack`; add a test for "rebuild does not re-run onMount"
+  - COMMENT: do this when a flex `onMount` must come and go, or with the multi-instance / web-component work
 
 ## feat
 

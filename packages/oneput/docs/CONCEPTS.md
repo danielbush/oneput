@@ -1,13 +1,21 @@
 # concepts and vocabulary
 
-## actions and action providers
+## actions and action providers (PROVIDER_PATTERN)
 
-- the key idea is that we define actions more generally; then declare what they do, what bindings they have and whether they have a menu item
-- this helps to declutter `.menu` and `.actions` in the AppObject
-- specify whether the menu is available
-  - `ActionProviderEntry` defines `canShowMenuItem`
-- TBD: specify whether actions are available
-- see `OneputActionProvider` and `JsedActionProvider` as examples
+- PROVIDER_PATTERN
+  - the key idea is that we collate actions that we want to expose in oneput in
+    one place, define what bindings they have and whether they have a menu item
+    and what that menu item looks like.
+  - The provider's role is a collator; if you start mixing state and
+    implementation logic into it directly, you run the risk of creating less clear
+    code. Consider injecting an adapter that exposes state and business logic.
+  - The provider does not own AppObject lifecycle stuff like menu id, focus
+    behavior, layout title, prompt, or child mode setup.
+  - Helps to declutter `.menu` and `.actions` in the AppObject
+  - To specify whether the menu is available
+    - `ActionProviderEntry` defines `canShowMenuItem`
+  - TBD: specify whether actions are available
+  - see `OneputActionProvider` and `JsedActionProvider` as examples
 
 ## pulling and invalidation vs imperative
 

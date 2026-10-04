@@ -169,16 +169,34 @@ export class KatexDemo implements AppObject {
     } satisfies AppLayoutParams
   };
 
+  /**
+   * UI controls call these actions, and the actions call the model. Thus the
+   * AppObject needs no method per action.
+   */
   actions = {
     // SUBMIT_PATTERN
     // No binding: this replaces what the default SUBMIT binding ($mod+Enter)
     // does while this app runs. The binding itself stays, so a rebind in the
     // BindingsEditor still works, and the placeholder still shows it.
+    //
+    // From the submit key or the Send button. Returns false when there is
+    // nothing to insert. For the key, that declines it, so the browser keeps
+    // its default.
     [OneputAction.SUBMIT]: {
-      action: () => this.insert()
+      action: () => {
+        if (!this.formula.insert()) return false;
+        this.ctl.input.setInputValue('');
+        this.show();
+        return true;
+      }
     },
+    // From the key binding or the checkbox.
     TOGGLE_DISPLAY_MODE: {
-      action: () => this.setDisplayMode(!this.formula.displayMode.get()),
+      action: () => {
+        this.formula.setDisplayMode(!this.formula.displayMode.get());
+        // focusBehaviour 'none' keeps the focused index where it is.
+        this.show({ focusBehaviour: 'none' });
+      },
       binding: {
         bindings: ['$mod+d'],
         description: 'Toggle katex display mode'
@@ -232,7 +250,8 @@ export class KatexDemo implements AppObject {
       divider(),
       checkboxMenuItem({
         id: 'katex-display-mode-checkbox',
-        action: (_, checked) => this.setDisplayMode(checked),
+        // The checkbox is controlled, so its next value is always the toggle.
+        action: () => this.actions.TOGGLE_DISPLAY_MODE.action(),
         textContent: 'Display mode',
         bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
         source: this.formula.displayMode
@@ -271,26 +290,6 @@ export class KatexDemo implements AppObject {
     this.formula.setSource(this.ctl.input.getInputValue());
     // menu() is pulled by the framework after onStart (afterRun).
     this.syncChrome();
-  }
-
-  /** From the checkbox or the key binding. */
-  private setDisplayMode(value: boolean) {
-    this.formula.setDisplayMode(value);
-    // focusBehaviour 'none' keeps the focused index where it is.
-    this.show({ focusBehaviour: 'none' });
-  }
-
-  /**
-   * The SUBMIT action, from the submit key or the Send button.
-   *
-   * Returns false when there is nothing to insert. For the key, that declines
-   * it, so the browser keeps its default.
-   */
-  private insert() {
-    if (!this.formula.insert()) return false;
-    this.ctl.input.setInputValue('');
-    this.show();
-    return true;
   }
 
   /** Show the formula's state: input chrome, error notification and menu. */

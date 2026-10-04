@@ -191,7 +191,7 @@ export class BindingsEditor implements AppObject {
         menuTitle: 'Capturing...',
         inputAccept: {
           run: capture.accept,
-          enabled: capture.keyCount() > 0
+          enabled: () => capture.keyCount() > 0
         },
         inputReject: {
           run: capture.reject

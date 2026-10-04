@@ -1,7 +1,7 @@
 import { hflex, type FlexChildBuilder } from '../../../lib/builder.js';
 import { mountSvelte } from '../../../lib/utils.js';
 import type { Controller } from '../../../controllers/controller.js';
-import type { AppLayoutParams, FChildParams, UILayout } from '../../../types.js';
+import type { AppLayoutParams, FChildParams, LayoutAffordance, UILayout } from '../../../types.js';
 import { DateTimeToggle } from '../../components/DateTimeToggle.js';
 import MenuStatus from '../../components/MenuStatus.svelte';
 import { acceptButton, rejectButton, sendButton } from '../buttons.js';
@@ -29,6 +29,11 @@ export type StandardLayoutParams = AppLayoutParams & {
    */
   outerRight?: (b: FlexChildBuilder) => FChildParams;
 };
+
+/** Call an affordance's `enabled`. Enabled when it is omitted. */
+function isEnabled(affordance: LayoutAffordance) {
+  return affordance.enabled?.() ?? true;
+}
 
 /**
  * Standard host layout: menu header (back / title / close), input-right
@@ -122,7 +127,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             acceptButton({
               icon: this.icons.Check,
               onClick: () => inputAccept.run(),
-              enabled: inputAccept.enabled,
+              enabled: isEnabled(inputAccept),
               title: inputAccept.label
             })
           );
@@ -132,7 +137,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             rejectButton({
               icon: this.icons.X,
               onClick: () => inputReject.run(),
-              enabled: inputReject.enabled,
+              enabled: isEnabled(inputReject),
               title: inputReject.label
             })
           );
@@ -142,7 +147,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             sendButton({
               icon: this.icons.SendHorizontal,
               onClick: () => inputSend.run(),
-              enabled: inputSend.enabled,
+              enabled: isEnabled(inputSend),
               title: inputSend.label
             })
           );

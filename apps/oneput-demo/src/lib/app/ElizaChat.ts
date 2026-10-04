@@ -32,7 +32,15 @@ export class ElizaChat implements AppObject {
 
   layout = {
     params: {
-      menuTitle: 'ELIZA'
+      menuTitle: 'ELIZA',
+      // `enabled` is read each time the layout builds, so `syncSendChrome`
+      // only needs to rebuild it.
+      inputSend: {
+        run: () => {
+          void this.send(this.ctl.input.getInputValue());
+        },
+        enabled: () => Boolean(this.ctl.input.getInputValue().trim()) && !this.busy
+      }
     } satisfies AppLayoutParams
   };
 
@@ -84,26 +92,18 @@ export class ElizaChat implements AppObject {
     this.ctl.input.focusInput();
   }
 
-  /**
-   * Keep layout `inputSend` in sync with draft + busy. `ui.update` rebuilds
-   * layout `inputUI`, so re-apply the textarea afterward.
-   */
-  onInputChange = ({ value }: { value: string }) => {
-    this.syncSendChrome(value);
+  /** The Send button follows the draft. */
+  onInputChange = () => {
+    this.syncSendChrome();
   };
 
-  private syncSendChrome(value = this.ctl.input.getInputValue()) {
-    const enabled = Boolean(value.trim()) && !this.busy;
-    this.ctl.ui.update({
-      params: {
-        inputSend: {
-          run: () => {
-            void this.send(this.ctl.input.getInputValue());
-          },
-          enabled
-        }
-      } satisfies AppLayoutParams
-    });
+  /**
+   * Rebuild the layout's input chrome, so the Send button shows the current
+   * draft and busy state. `ui.update` rebuilds layout `inputUI`, so re-apply
+   * the textarea afterward.
+   */
+  private syncSendChrome() {
+    this.ctl.ui.update({});
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
@@ -133,7 +133,7 @@ export class ElizaChat implements AppObject {
     this.busy = true;
     this.turns = [...this.turns, { role: 'user', text: trimmed }];
     this.ctl.input.setInputValue('');
-    this.syncSendChrome('');
+    this.syncSendChrome();
     this.ctl.menu.invalidate();
 
     try {

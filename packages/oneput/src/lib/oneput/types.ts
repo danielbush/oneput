@@ -456,8 +456,15 @@ export type AppActions<Context extends AppActionContext = AppActionContext> = {
  */
 export type LayoutAffordance = {
   run: () => void;
-  /** When false, hosts should show the affordance disabled. Defaults to true. */
-  enabled?: boolean;
+  /**
+   * When it returns false, hosts show the affordance disabled. When omitted,
+   * the affordance is enabled.
+   *
+   * The layout calls it each time it builds its UI. Thus an AppObject can
+   * declare it once in `layout.params`, and `ctl.ui.update({})` shows the
+   * current value.
+   */
+  enabled?: () => boolean;
   /**
    * Accessible name for the chrome control (`title` and `aria-label`).
    * Defaults to Accept / Reject / Send.

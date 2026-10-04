@@ -165,7 +165,13 @@ export class KatexDemo implements AppObject {
 
   layout = {
     params: {
-      menuTitle: 'Katex Demo'
+      menuTitle: 'Katex Demo',
+      // The Send button runs the SUBMIT action. `enabled` is read each time
+      // the layout builds, so `syncChrome` only needs to rebuild it.
+      inputSend: {
+        run: () => this.actions[OneputAction.SUBMIT].action(),
+        enabled: () => this.formula.canInsert()
+      }
     } satisfies AppLayoutParams
   };
 
@@ -305,21 +311,14 @@ export class KatexDemo implements AppObject {
   }
 
   /**
-   * Give insert to the layout as its `inputSend` affordance. Then set the
-   * app's own input chrome again.
+   * Rebuild the layout's input chrome, so the Send button shows the current
+   * `canInsert()`. Then set the textarea rows again.
    *
    * Order matters: `ctl.ui.update` rebuilds `inputUI` from the layout, so
    * `setInputUI` must run after it.
    */
   private syncChrome() {
-    this.ctl.ui.update({
-      params: {
-        inputSend: {
-          run: () => this.actions[OneputAction.SUBMIT].action(),
-          enabled: this.formula.canInsert()
-        }
-      } satisfies AppLayoutParams
-    });
+    this.ctl.ui.update({});
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,

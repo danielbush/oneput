@@ -1,7 +1,7 @@
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { divider, menuItem, notifier } from '@oneput/oneput';
+import { divider, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
@@ -24,11 +24,6 @@ export class KatexDemo implements AppObject {
   private katexValid = true;
   private unsubscribeBindingsChange?: () => void;
   private helpMessage = 'Type some katex...';
-  /**
-   * Fires after every menu rebuild. Lives as long as the screen, so the
-   * mounted checkbox keeps listening across rebuilds — see `refresh`.
-   */
-  private menuChanges = notifier();
 
   constructor(
     private ctl: Controller,
@@ -103,10 +98,7 @@ export class KatexDemo implements AppObject {
           this.refresh({ focusBehaviour: 'none' });
         },
         textContent: 'Display mode',
-        source: {
-          get: () => this.displayMode,
-          subscribe: this.menuChanges.subscribe
-        }
+        source: { get: () => this.displayMode }
       })
     ]
   });
@@ -146,18 +138,9 @@ export class KatexDemo implements AppObject {
     this.recompute();
   }
 
-  /**
-   * Rebuild the menu, then tell the mounted pull widgets to paint.
-   *
-   * Every rebuild goes through here. A rebuild reuses the checkbox node, so
-   * the widget on it is the one from the first build: only `menuChanges`
-   * reaches it. Notifying after the rebuild lands also means the box cannot be
-   * left showing a value that the rebuild wrote over.
-   */
+  /** Rebuild the menu from the current state. */
   private refresh = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
-    void this.ctl.menu.invalidate(opts).then(() => {
-      this.menuChanges.notify();
-    });
+    void this.ctl.menu.invalidate(opts);
   };
 
   /**

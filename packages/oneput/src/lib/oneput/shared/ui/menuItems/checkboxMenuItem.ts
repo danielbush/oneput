@@ -11,6 +11,8 @@ export type CheckboxMenuItemParams = {
   source: Pull<boolean>;
   action: (c: Controller, checked: boolean) => void;
   closeMenuOnAction?: StdMenuItemParams['closeMenuOnAction'];
+  /** Key binding shown on the right, e.g. `$mod+d`. See `stdMenuItem`. */
+  bindingHint?: StdMenuItemParams['bindingHint'];
 };
 
 /**
@@ -32,6 +34,7 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
     attr: { type: 'button' },
     textContent: params.textContent,
     closeMenuOnAction: params.closeMenuOnAction,
+    bindingHint: params.bindingHint,
     left: (b) => [
       b.fchild({
         id: inputId,

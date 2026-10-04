@@ -1,7 +1,7 @@
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { divider, menuItem } from '@oneput/oneput';
+import { cell, divider, menuItem, type Cell } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
@@ -31,14 +31,27 @@ export class KatexDemo implements AppObject {
     /**
      * Katex display mode. It controls what we insert: a block formula, or an
      * inline one in a paragraph. The preview shows the same mode.
+     *
+     * A cell, because two things change it: the checkbox and a key binding.
+     * `set` updates the checkbox in both cases.
      */
-    private displayMode: boolean = false
+    private displayMode: Cell<boolean> = cell(false)
   ) {}
 
   layout = {
     params: {
       menuTitle: 'Katex Demo'
     } satisfies AppLayoutParams
+  };
+
+  actions = {
+    TOGGLE_DISPLAY_MODE: {
+      action: () => this.setDisplayMode(!this.displayMode.get()),
+      binding: {
+        bindings: ['$mod+d'],
+        description: 'Toggle katex display mode'
+      }
+    }
   };
 
   settings = {
@@ -90,15 +103,10 @@ export class KatexDemo implements AppObject {
       divider(),
       checkboxMenuItem({
         id: 'katex-display-mode-checkbox',
-        action: (_, checked) => {
-          this.displayMode = checked;
-          this.recompute();
-          // The box paints itself. This rebuild is for the preview pane.
-          // focusBehaviour 'none' keeps the focused index on the checkbox.
-          this.invalidate({ focusBehaviour: 'none' });
-        },
+        action: (_, checked) => this.setDisplayMode(checked),
         textContent: 'Display mode',
-        source: { get: () => this.displayMode }
+        bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
+        source: this.displayMode
       })
     ]
   });
@@ -144,6 +152,17 @@ export class KatexDemo implements AppObject {
   };
 
   /**
+   * Set display mode, from the checkbox or the key binding. `set` updates the
+   * checkbox. The rebuild updates the preview pane.
+   */
+  private setDisplayMode(value: boolean) {
+    this.displayMode.set(value);
+    this.recompute();
+    // focusBehaviour 'none' keeps the focused index where it is.
+    this.invalidate({ focusBehaviour: 'none' });
+  }
+
+  /**
    * Recompute katex state from the current input and refresh the input UI.
    *
    * Does NOT touch the menu — call `refresh()` to re-render items.
@@ -157,7 +176,7 @@ export class KatexDemo implements AppObject {
     }
     try {
       this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
-        displayMode: this.displayMode,
+        displayMode: this.displayMode.get(),
         throwOnError: true,
         errorColor: 'red'
       });
@@ -205,11 +224,11 @@ export class KatexDemo implements AppObject {
    */
   private insertKatex = () => {
     const rendered = katex.renderToString(this.ctl.input.getInputValue(), {
-      displayMode: this.displayMode,
+      displayMode: this.displayMode.get(),
       throwOnError: true,
       errorColor: 'red'
     });
-    document.getElementById('katex-demo')!.innerHTML += this.displayMode
+    document.getElementById('katex-demo')!.innerHTML += this.displayMode.get()
       ? rendered
       : `<p>${rendered}</p>`;
     this.ctl.input.setInputValue('');

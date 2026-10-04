@@ -1,6 +1,9 @@
 # concepts and vocabulary
 
-## actions and action providers (PROVIDER_PATTERN)
+## actions and action providers (PROVIDER) and PROVIDER_PATTERN
+
+- PROVIDER
+  - an ActionProvider or thing that implements the AppActionProvider interface
 
 - PROVIDER_PATTERN
   - the key idea is that we collate actions that we want to expose in oneput in
@@ -17,6 +20,68 @@
     - `ActionProviderEntry` defines `canShowMenuItem`
   - TBD: specify whether actions are available
   - see `OneputActionProvider` and `JsedActionProvider` as examples
+
+### PROVIDER_WHEN - When to add a PROVIDER / use the PROVIDER_PATTERN
+
+An app that uses Oneput has up to three parts. Start with two, and add the
+third only when you need it.
+
+1. **Model**: the app logic. Plain TS that does not know about Oneput. It holds
+   the state and the rules, such as "can we insert now?". Test it with
+   nullables, without Oneput.
+2. **AppObject**: the UI adapter over the model. It knows about the app logic,
+   because it holds the model and calls it. But it does not contain the rules.
+   It turns model state into menu, layout and actions, and it turns user events
+   into model calls.
+3. **PROVIDER** (optional): collates the actions. For each action it declares
+   the binding, the menu row and the predicates (`canShowMenuItem`). It takes
+   the model and points to it. It does not hold rules or state.
+
+Predicates such as `canShowMenuItem` are pointers into the model, for example
+`() => editor.isEditing()`. The same applies to `action`. A predicate never holds
+the rule itself. Thus a PROVIDER stays a collator, even when an action has
+conditions.
+
+Add a PROVIDER when one or more of these is true:
+
+- There are many actions, and they make `AppObject.actions` and `menu()` hard
+  to read.
+- Each action appears in more than one form: a key binding, a menu row, and a
+  condition for when to show it.
+- More than one AppObject or mode shows a different subset of the same actions
+  (`filter()`).
+
+Example where a PROVIDER is justified: `JsedActionProvider`. It has about 50
+editor actions. Most of them have a key binding and a menu row, and many show
+only in some states (`canShowMenuItem: () => editor.isEditing()`). The model is
+`Editor`, and the provider only points into it ("the ui shouldn't decide
+anything for the editor"). `JsedUI` then builds its menu as a list of action
+ids: `provider.getMenuItems([JsedAction.UNDO, JsedAction.REDO])`.
+
+Example where a PROVIDER is not justified: `KatexDemo.ts` (apps/oneput-demo).
+It has two actions and one AppObject, so `AppObject.actions` is enough. It
+still models each thing it exposes to Oneput as an action:
+
+- `TOGGLE_DISPLAY_MODE`, with its own binding.
+- `OneputAction.SUBMIT`, with no binding. An app action with a default action's
+  id replaces what that default does while the app runs, and keeps the default
+  binding. So a rebind still works, and the placeholder still shows the key.
+  The Send button runs the same action.
+
+It still has a model and an AppObject, in one file because the demo is small:
+
+- `KatexFormula` (model) renders the source, knows if it is valid, decides
+  `canInsert()`, and inserts the formula (block or inline). Inserting is app
+  logic, so it is in the model. `insert()` checks `canInsert()` itself, so no
+  caller can skip the check.
+- `DemoDocument` is the infrastructure wrapper for the page that the model
+  writes to (`create()` / `createNull()`, `trackAppends()`).
+- `KatexDemo` (AppObject) shows the model's state (preview, Send button, error
+  notification, checkbox) and calls the model when the user types, toggles or
+  inserts. After an insert it only does UI work: it clears the input.
+
+If an app like this grows, the logic goes into the model. A PROVIDER does not
+help, because the problem is the logic, not the number of actions.
 
 ## state and reactivity in oneput
 

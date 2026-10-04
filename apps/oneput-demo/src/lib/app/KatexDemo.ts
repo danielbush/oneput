@@ -202,7 +202,7 @@ export class KatexDemo implements AppObject {
       params: {
         inputSend: {
           run: () => this.insertKatex(),
-          enabled: this.katexValid && this.ctl.input.getInputValue().trim() !== ''
+          enabled: this.canInsert()
         }
       } satisfies AppLayoutParams
     });
@@ -215,6 +215,14 @@ export class KatexDemo implements AppObject {
   }
 
   /**
+   * True when there is valid katex to insert. The Send button and the submit
+   * key both use this, so they agree.
+   */
+  private canInsert() {
+    return this.katexValid && this.ctl.input.getInputValue().trim() !== '';
+  }
+
+  /**
    * Insert the formula in the demo document.
    *
    * Display mode gives a block formula in a `.katex-display` wrapper, which
@@ -223,6 +231,7 @@ export class KatexDemo implements AppObject {
    * paragraph is correct.
    */
   private insertKatex = () => {
+    if (!this.canInsert()) return;
     const rendered = katex.renderToString(this.ctl.input.getInputValue(), {
       displayMode: this.displayMode.get(),
       throwOnError: true,

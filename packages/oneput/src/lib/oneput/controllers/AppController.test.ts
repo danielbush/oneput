@@ -3,6 +3,7 @@ import { Controller } from './controller.js';
 import type { AppObject, UILayout } from '../types.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
+import { OneputAction } from '../shared/actions/OneputAction.js';
 
 function layout(id: string): UILayout {
   return {
@@ -50,6 +51,9 @@ function layoutFactory(id: string) {
     }
   };
 }
+
+// tinykeys maps $mod to Meta on a mac and to Control elsewhere.
+const mod = /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? { metaKey: true } : { ctrlKey: true };
 
 async function waitForFocus() {
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -559,6 +563,109 @@ describe('AppController', () => {
 
       // assert
       expect(sources).toEqual(['keyboard']);
+    });
+
+    // SUBMIT_PATTERN in docs/CONCEPTS.md. These use the built-in SUBMIT
+    // ($mod+Enter), which only fires while the menu is open.
+
+    test('submit: default path - runs setSubmitHandler', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const ran: string[] = [];
+      ctl.app.run({
+        onStart: () => {
+          ctl.input.setSubmitHandler(() => ran.push('handler'));
+        }
+      });
+
+      // act
+      await ctl.simulateKey('Enter', mod);
+
+      // assert
+      expect(ran).toEqual(['handler']);
+    });
+
+    test('submit: no binding - default key runs app action', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const ran: string[] = [];
+      ctl.app.run({
+        actions: {
+          [OneputAction.SUBMIT]: {
+            action: () => {
+              ran.push('app');
+            }
+          }
+        },
+        onStart: () => {
+          ctl.input.setSubmitHandler(() => ran.push('handler'));
+        }
+      });
+
+      // act
+      await ctl.simulateKey('Enter', mod);
+
+      // assert
+      expect(ran).toEqual(['app']);
+    });
+
+    test('submit: own binding ([OneputAction.SUBMIT]) - replaces default key', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const ran: string[] = [];
+      ctl.app.run({
+        actions: {
+          [OneputAction.SUBMIT]: {
+            action: () => {
+              ran.push('app');
+            },
+            binding: { bindings: ['x'], description: 'Submit' }
+          }
+        },
+        onStart: () => {
+          ctl.input.setSubmitHandler(() => ran.push('handler'));
+        }
+      });
+
+      // act
+      await ctl.simulateKey('x');
+      await ctl.simulateKey('Enter', mod);
+
+      // assert
+      expect(ran).toEqual(['app']);
+    });
+
+    test('submit: own binding ([OneputAction.SUBMIT]) - default key back after exit', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const ran: string[] = [];
+      ctl.app.run({
+        onStart: () => {
+          ctl.input.setSubmitHandler(() => ran.push('parent'));
+        },
+        onResume: () => {
+          ctl.input.setSubmitHandler(() => ran.push('parent'));
+        }
+      });
+      ctl.app.run({
+        actions: {
+          [OneputAction.SUBMIT]: {
+            action: () => {
+              ran.push('child');
+            },
+            binding: { bindings: ['x'], description: 'Submit' }
+          }
+        },
+        onStart: () => {}
+      });
+
+      // act
+      ctl.app.exit();
+      await ctl.simulateKey('x');
+      await ctl.simulateKey('Enter', mod);
+
+      // assert
+      expect(ran).toEqual(['parent']);
     });
   });
 

@@ -170,6 +170,7 @@ export class KatexDemo implements AppObject {
   };
 
   actions = {
+    // SUBMIT_PATTERN
     // No binding: this replaces what the default SUBMIT binding ($mod+Enter)
     // does while this app runs. The binding itself stays, so a rebind in the
     // BindingsEditor still works, and the placeholder still shows it.

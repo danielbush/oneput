@@ -409,6 +409,13 @@ We have 3 settings that we can vary to achieve a satisfactory outcome based on t
 
 COMMENT: dead combination: `enableMenuItemFocus: false` + `enableNativeActivation: false` leaves `Enter` doing nothing anywhere except a newline in a textarea.
 
+## SUBMIT_PATTERN
+
+Oneput has a built-in submit action with a default key, ⌘Enter. On the default path, you keep that built-in action and just tell it what to do with setSubmitHandler. TODO: we could make this declarative by providing a onSubmit handler to `AppObject`.
+
+On the other path, you declare your own action with the same id, `[OneputAction.SUBMIT]`, in AppObject.actions. The same ⌘Enter key then runs your action, and the built-in is skipped.
+Not specifying the binding means "use whatever key submit already has". If we specify a binding against `[OneputAction.SUBMIT]` is equivalent to "in this AppObject, submit is now this key" (when we exit the AppObject the submit binding comes back).
+
 ## MENU_LIFECYCLE
 
 Menu callbacks observe a fully resolved menu snapshot. When a closed menu opens,

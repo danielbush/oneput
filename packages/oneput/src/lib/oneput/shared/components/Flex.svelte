@@ -2,18 +2,28 @@
   import FChild from './FChild.svelte';
   import { createStyleAttribute } from '../../lib/utils.js';
   import { onMount } from 'svelte';
-  import { isFlexRealChild, type FChildParams, type FlexParams } from '../../types.js';
+  import {
+    isFlexRealChild,
+    type FChildParams,
+    type FlexParams,
+    type MountContext
+  } from '../../types.js';
+  import { getMountContext } from './mountContext.js';
 
   type Props = { class: string } & FlexParams;
   let { class: topLevelClass, ...props }: Props = $props();
 
-  type Mountables = Map<string, { node: HTMLElement; onMount?: (node: HTMLElement) => void }>;
+  type Mountables = Map<
+    string,
+    { node: HTMLElement; onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void) }
+  >;
+  const mountContext = getMountContext();
   let mounts = $state<Mountables>(new Map());
   onMount(() => {
     const unmounts: (() => void)[] = [];
     mounts.forEach(({ node, onMount }) => {
       if (onMount) {
-        const cleanup = onMount(node);
+        const cleanup = onMount(node, mountContext);
         if (typeof cleanup === 'function') {
           unmounts.push(cleanup);
         }

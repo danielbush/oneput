@@ -71,6 +71,7 @@ Rows that must change without a menu rebuild mount a widget that reads a live
 `Pull<T>` source. See PULL_ROWS in `docs/CONCEPTS.md`.
 
 - Type + helpers: `packages/oneput/src/lib/oneput/lib/pull.ts` — `Pull`, `cell`, `notifier`
+- Repaint channel: `Controller.pull`, given to `onMount(node, ctx)` as `MountContext` (`shared/components/mountContext.ts`)
 - Rows: `shared/ui/menuItems/checkboxMenuItem.ts`, `shared/ui/menuItems/pullToggleMenuItem.ts`
 - Widgets: `shared/ui/menuItems/pull/`
 - Snapshot alternative: `shared/ui/menuItems/toggleMenuItem.ts` (caller rebuilds)

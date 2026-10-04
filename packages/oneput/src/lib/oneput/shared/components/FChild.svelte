@@ -4,18 +4,20 @@
   import { defaultVoidElements } from '../../lib/defaultVoidElements.js';
   import { renderIcon } from '../../lib/icons.js';
   import type { FChildParams } from '../../types.js';
+  import { getMountContext } from './mountContext.js';
 
   type Props = FChildParams;
   let node: HTMLElement | null = $state(null);
   let { voidElements, ...props }: Props = $props();
   let voidElementsSet = $derived(voidElements || defaultVoidElements);
+  const mountContext = getMountContext();
 
   onMount(() => {
     if (props.style) {
       Object.assign(node!.style, props.style);
     }
     if (props.onMount) {
-      return props.onMount(node!);
+      return props.onMount(node!, mountContext);
     }
   });
 

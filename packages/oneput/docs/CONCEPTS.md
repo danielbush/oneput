@@ -42,8 +42,12 @@ It never writes a Svelte-managed text node.
   renders the same way: label in the title, value on the right.
 
 A rebuilt row does not hold the widget the user can see: only the first build
-mounted. So a row paints by **host id**, through a registry private to
-`pull/`, and reaches the widget that is on that node now.
+mounted. So a row does not paint its widget. It calls `ctl.pull.notify()`, and
+each mounted widget repaints, because it subscribed to `ctl.pull` on mount and
+unsubscribes when its `FChild` is destroyed. `onMount(node, ctx)` gets
+`ctx.pull` (a `MountContext`), which `OneputController.svelte` provides through
+Svelte context. There is one per instance, so two Oneputs on a page do not
+paint each other.
 
 `subscribe` on the source is needed when a write from somewhere else must move
 the row: a keyboard action, or a second row on the same state. An `invalidate`

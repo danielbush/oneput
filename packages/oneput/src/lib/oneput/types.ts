@@ -5,6 +5,21 @@ import type { KeysController } from './controllers/KeysController.js';
 import type { MenuController } from './controllers/MenuController.js';
 import type { UIController } from './controllers/UIController.js';
 import type { ActionBinding } from './lib/bindings.js';
+import type { Notifier } from './lib/pull.js';
+
+/**
+ * What Oneput gives an `onMount` handler, in addition to the node.
+ *
+ * There is one per Oneput instance, so two instances on a page do not share it.
+ */
+export type MountContext = {
+  /**
+   * Tells the mounted pull widgets of this instance to paint again. A widget
+   * subscribes on mount and unsubscribes in the cleanup that `onMount`
+   * returns. Same as `Controller.pull`.
+   */
+  pull: Notifier;
+};
 
 declare global {
   interface Window {
@@ -182,7 +197,7 @@ export type FlexParams = {
   voidElements?: Set<string | undefined>;
   action?: (c: Controller) => void;
   attachments?: Record<symbol, (element: HTMLElement) => void>;
-  onMount?: (node: HTMLElement) => void | (() => void);
+  onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
 };
 
 /**
@@ -336,7 +351,7 @@ export type FChildParams = {
    * highlighted text when user is filtering menu items by typing.
    */
   derivedHTML?: string;
-  onMount?: (node: HTMLElement) => void | (() => void);
+  onMount?: (node: HTMLElement, ctx: MountContext) => void | (() => void);
   /** List of HTML void elements. */
   voidElements?: Set<string | undefined>;
 };

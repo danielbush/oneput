@@ -10,6 +10,7 @@ import { Alert } from '../shared/ui/Alert.js';
 import { Confirm } from '../shared/ui/Confirm.js';
 import { AppController, type AppChange, type AppChangeTracker } from './AppController.js';
 import { NativeController } from './NativeController.js';
+import { notifier } from '../lib/pull.js';
 
 export class Controller {
   static create(currentProps: OneputProps) {
@@ -46,6 +47,15 @@ export class Controller {
   public ui: UIController;
   public app: AppController;
   public native: NativeController;
+  /**
+   * Tells the mounted pull widgets of this instance to paint again.
+   *
+   * A pull row calls `notify()` after its own click. The row does not hold
+   * the widget: a rebuild makes a new row, but the widget from the first build
+   * stays on the node. The widget subscribes here on mount, so the click
+   * reaches it. See PULL_ROWS in `docs/CONCEPTS.md`.
+   */
+  public pull = notifier();
 
   /**
    * @param currentProps Should be reactive eg $state<OneputProps>({...})

@@ -1,5 +1,5 @@
-import type { Pull } from '../../../../lib/pull.js';
-import { paintMounted, registerPainter } from './registry.js';
+import type { Notifier, Pull } from '../../../../lib/pull.js';
+import type { MountContext } from '../../../../types.js';
 
 export type PullToggleValueParams = {
   values: string[];
@@ -13,40 +13,30 @@ export type PullToggleValueParams = {
  * the span, writes to it, and removes it on destroy. Do not put `textContent`
  * on the same host — see `pullToggleMenuItem`, which gives the widget its own
  * fchild on the right and leaves the title to Svelte.
+ *
+ * It paints on mount, when `source` notifies, and when the instance's `pull`
+ * notifier fires (see `PullCheckbox`).
  */
 export class PullToggleValue {
-  /**
-   * Handler for the `onMount` of the `FChild` with id `hostId`, plus a
-   * `paint()` you can call after a click.
-   *
-   * `paint()` goes through `hostId`, not through this call's widget: a rebuilt
-   * row must paint the widget that is on the node now. It does nothing when no
-   * widget is mounted there.
-   */
-  static mount(hostId: string, params: PullToggleValueParams) {
-    return {
-      onMount: (node: HTMLElement) => {
-        const widget = new PullToggleValue(node, params);
-        const release = registerPainter(hostId, widget);
-        return () => {
-          release();
-          widget.destroy();
-        };
-      },
-      paint: () => paintMounted(hostId)
-    };
+  /** `onMount` handler for the host. The cleanup it returns unsubscribes. */
+  static onMount(params: PullToggleValueParams) {
+    return (node: HTMLElement, ctx: MountContext) =>
+      new PullToggleValue(node, params, ctx.pull).destroy;
   }
 
   private host: HTMLSpanElement;
-  private unsubscribe?: () => void;
+  private unsubscribes: (() => void)[] = [];
 
   constructor(
     private node: HTMLElement,
-    private params: PullToggleValueParams
+    private params: PullToggleValueParams,
+    pull: Notifier
   ) {
     this.host = document.createElement('span');
     this.node.appendChild(this.host);
-    this.unsubscribe = this.params.source.subscribe?.(this.paint);
+    this.unsubscribes.push(pull.subscribe(this.paint));
+    const offSource = this.params.source.subscribe?.(this.paint);
+    if (offSource) this.unsubscribes.push(offSource);
     this.paint();
   }
 
@@ -56,8 +46,8 @@ export class PullToggleValue {
   };
 
   destroy = () => {
-    this.unsubscribe?.();
-    this.unsubscribe = undefined;
+    for (const off of this.unsubscribes) off();
+    this.unsubscribes = [];
     this.host.remove();
   };
 }

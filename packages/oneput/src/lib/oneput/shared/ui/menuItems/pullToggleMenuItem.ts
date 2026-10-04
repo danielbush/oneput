@@ -21,31 +21,20 @@ export type PullToggleMenuItemParams = {
 };
 
 /**
- * Build a menu row that cycles through named values and paints itself.
+ * Build a menu row that cycles through named values. The value on the right
+ * shows `values[source.get()]` and updates after each click, without a menu
+ * rebuild. The title is always `label`, so the row filters as usual.
  *
- * The title stays `label` and never changes, so the row filters like any
- * other. The value sits on the right, in an fchild the widget owns: it reads
- * `source.get()` on mount and again after each click.
+ * `onToggle` must write the new index before it returns, so that `get()`
+ * reads it.
  *
- * Use this when the menu must not rebuild. `onToggle` only has to write the
- * new index somewhere `get()` can read it, and the write must be visible
- * before `onToggle` returns.
- *
- * Give `source.subscribe` when a write must move this row after the click has
- * painted: a keyboard action, a second row on the same state, or an
- * `invalidate` in your own `onToggle` (the rebuild lands later, so notify once
- * it has).
- *
- * Use {@link toggleMenuItem} instead when the caller already rebuilds the menu
- * after the toggle.
+ * Give `source.subscribe` only if something else can change the value, such as
+ * a key binding. Use {@link toggleMenuItem} if you rebuild the menu after each
+ * toggle.
  */
 export function pullToggleMenuItem(params: PullToggleMenuItemParams): MenuItem {
   const id = params.id ?? randomId();
   const valueId = `${id}-value`;
-  const widget = PullToggleValue.mount(valueId, {
-    values: params.values,
-    source: params.source
-  });
 
   return stdMenuItem({
     id,
@@ -57,7 +46,7 @@ export function pullToggleMenuItem(params: PullToggleMenuItemParams): MenuItem {
       b.fchild({
         id: valueId,
         classes: ['oneput__toggle-value'],
-        onMount: widget.onMount
+        onMount: PullToggleValue.onMount({ values: params.values, source: params.source })
       })
     ],
     bottom:
@@ -66,10 +55,10 @@ export function pullToggleMenuItem(params: PullToggleMenuItemParams): MenuItem {
         : {
             textContent: params.bottom?.textContent ?? 'Click or press enter to toggle'
           },
-    action: () => {
+    action: (c) => {
       const nextIndex = (params.source.get() + 1) % params.values.length;
       params.onToggle(nextIndex);
-      widget.paint();
+      c.pull.notify();
     }
   });
 }

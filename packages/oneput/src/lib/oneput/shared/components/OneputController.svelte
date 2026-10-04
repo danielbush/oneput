@@ -5,6 +5,7 @@
   import { Controller } from '../../controllers/controller.js';
   import { onDestroy, onMount } from 'svelte';
   import type { AppObject, OneputProps } from '../../types.js';
+  import { setMountContext } from './mountContext.js';
 
   let inputElement: HTMLInputElement | undefined = $state(undefined);
   const currentProps = $state<OneputProps>({
@@ -18,6 +19,7 @@
   const props: { run: (ctl: Controller) => AppObject } = $props();
 
   const controller = Controller.create(currentProps);
+  setMountContext({ pull: controller.pull });
 
   $effect(() => {
     controller.input.handleInputElementChange(inputElement);

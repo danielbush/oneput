@@ -1,42 +1,34 @@
-import type { Pull } from '../../../../lib/pull.js';
-import { paintMounted, registerPainter } from './registry.js';
+import type { Notifier, Pull } from '../../../../lib/pull.js';
+import type { MountContext } from '../../../../types.js';
 
 /**
  * Keeps the `checked` property of an input in step with a pull source.
  *
  * The widget writes the DOM property, not the Svelte `checked` attribute, so a
  * menu rebuild cannot put a stale tick back.
+ *
+ * It paints on mount, when `source` notifies, and when the instance's `pull`
+ * notifier fires. The row never holds the widget: a rebuilt row is a new
+ * object, but the widget from the first build stays on the node, so the row
+ * reaches it through `ctl.pull`.
  */
 export class PullCheckbox {
-  /**
-   * Handler for the `onMount` of the input with id `hostId`, plus a `paint()`
-   * you can call after a click.
-   *
-   * `paint()` goes through `hostId`, not through this call's widget: a rebuilt
-   * row must paint the widget that is on the node now. It does nothing when no
-   * widget is mounted there.
-   */
-  static mount(hostId: string, source: Pull<boolean>) {
-    return {
-      onMount: (node: HTMLElement) => {
-        const widget = new PullCheckbox(node as HTMLInputElement, source);
-        const release = registerPainter(hostId, widget);
-        return () => {
-          release();
-          widget.destroy();
-        };
-      },
-      paint: () => paintMounted(hostId)
-    };
+  /** `onMount` handler for the input. The cleanup it returns unsubscribes. */
+  static onMount(source: Pull<boolean>) {
+    return (node: HTMLElement, ctx: MountContext) =>
+      new PullCheckbox(node as HTMLInputElement, source, ctx.pull).destroy;
   }
 
-  private unsubscribe?: () => void;
+  private unsubscribes: (() => void)[] = [];
 
   constructor(
     private input: HTMLInputElement,
-    private source: Pull<boolean>
+    private source: Pull<boolean>,
+    pull: Notifier
   ) {
-    this.unsubscribe = this.source.subscribe?.(this.paint);
+    this.unsubscribes.push(pull.subscribe(this.paint));
+    const offSource = this.source.subscribe?.(this.paint);
+    if (offSource) this.unsubscribes.push(offSource);
     this.paint();
   }
 
@@ -45,7 +37,7 @@ export class PullCheckbox {
   };
 
   destroy = () => {
-    this.unsubscribe?.();
-    this.unsubscribe = undefined;
+    for (const off of this.unsubscribes) off();
+    this.unsubscribes = [];
   };
 }

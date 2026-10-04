@@ -284,7 +284,13 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 - chore: test importing the built package, make sure all expoected exports work and test files etc are not include
   - COMMENT: publishConfig looks out date cmopared to exports in package.json -
 - docs: need to make ai-docs similar to effect v4
-- chore: move skills/oneput/SKILL.md into oneput/AGENTS.md or delete
+- docs: are all over the place
+  - AGENTS.md looks like its doing architecture
+    - COMMENT: I think it's the `Key systems (packages/oneput)` section that bothers me; at the same time it looks like a tidy summary of the system
+  - CONCEPTS.md - the thing I cling to
+  - architecture.md
+  - SECURITY.md - might be confused with the new convention for that file used in the industry
+  - skills/oneput/SKILL.md 
 - set up playwright smoke tests on oneput-demo
   - "open menu should show expected menu items"
   - "typing filters menu"

@@ -14,24 +14,18 @@ export type CheckboxMenuItemParams = {
 };
 
 /**
- * Build a menu row with a checkbox that paints itself.
+ * Build a menu row with a checkbox. The box shows `source.get()` and updates
+ * after each click, without a menu rebuild.
  *
- * A widget owns the `checked` property of the input: it reads `source.get()`
- * on mount and again after each click, so the box moves without a menu
- * rebuild. `action` must write the new value somewhere `get()` can read it,
- * and the write must be visible before `action` returns.
+ * `action` must write the new value before it returns, so that `get()` reads
+ * it.
  *
- * Give `source.subscribe` when a write from somewhere else must move this row,
- * such as a keyboard action bound to the same flag. An `invalidate` in your own
- * `action` does not need it: a rebuild does not touch `checked`.
- *
- * A rebuild is still the right tool for anything else the flag changes, such as
- * preview content or which rows exist.
+ * Give `source.subscribe` only if something else can change the value, such as
+ * a key binding. Use a rebuild for other things that the value changes, such
+ * as preview content.
  */
 export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
   const inputId = params.id + '-input';
-  const widget = PullCheckbox.mount(inputId, params.source);
-
   return stdMenuItem({
     id: params.id,
     tag: 'button',
@@ -45,27 +39,25 @@ export function checkboxMenuItem(params: CheckboxMenuItemParams): MenuItem {
         attr: {
           type: 'checkbox',
           title: params.textContent,
-          // The box is controlled, as in React: `source` is the only truth
-          // and the widget is the only writer of `checked`. Without this,
-          // a click on the box toggles it before `action` runs. If `action`
-          // keeps the old value, the box then shows a value that is not true.
-          // The click still bubbles to the row, which runs `action`.
           onclick: (event: Event) => {
+            // Using preventDefault here makes the component "controlled", as in
+            // React: only `source` sets the box. Without this, the browser
+            // toggles the box itself, even if `action` keeps the old value. The
+            // click still goes up to the row, which runs `action`.
             event.preventDefault();
           }
         },
         classes: ['oneput__checkbox'],
-        onMount: widget.onMount
+        onMount: PullCheckbox.onMount(params.source)
       })
     ],
-    action: (c: Controller) => {
+    action: (ctl: Controller) => {
       const checked = !params.source.get();
-      params.action(c, checked);
-      // Paint in a new task, not now. Because of the preventDefault above,
-      // the browser puts back the old value when the click ends. That
-      // overwrites a paint made during the click. A microtask is not
-      // sufficient: for a real user click it runs before that restore.
-      setTimeout(widget.paint, 0);
+      params.action(ctl, checked);
+      // Update the box in a new task. Because of preventDefault, the browser
+      // puts back the old value when the click ends, after the click
+      // handlers. A microtask is too early.
+      setTimeout(ctl.pull.notify, 0);
     }
   });
 }

@@ -1,13 +1,146 @@
+/**
+ * Katex demo: type katex, see a preview, insert it in the page.
+ *
+ * This file shows how to structure an app that does not need a PROVIDER (see
+ * PROVIDER_WHEN in `packages/oneput/docs/CONCEPTS.md`):
+ *
+ * - `KatexFormula` is the model: the app logic. It does not know about Oneput.
+ *   It writes to the page only through `DemoDocument`.
+ * - `DemoDocument` is the infrastructure wrapper for the page (nullables).
+ * - `KatexDemo` is the AppObject: the UI adapter. It shows the model's state
+ *   and calls the model on user events. It holds no rules.
+ *
+ * Both are in one file because the demo is small.
+ */
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { cell, divider, menuItem, type Cell } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
+import type { AppActions, AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from './_icons.js';
 
+/**
+ * The page that the demo inserts formulas into.
+ *
+ * Infrastructure wrapper: `create()` appends to `#katex-demo`. `createNull()`
+ * appends to nothing, and `trackAppends()` shows what was appended.
+ */
+export class DemoDocument {
+  static create() {
+    return new DemoDocument((html) => {
+      document.getElementById('katex-demo')!.innerHTML += html;
+    });
+  }
+
+  static createNull() {
+    return new DemoDocument();
+  }
+
+  private appended: string[] = [];
+
+  private constructor(private write?: (html: string) => void) {}
+
+  append(html: string) {
+    this.appended.push(html);
+    this.write?.(html);
+  }
+
+  trackAppends() {
+    return { data: this.appended };
+  }
+}
+
+/** The formula being edited, and inserting it. App logic: no Oneput. */
+export class KatexFormula {
+  /**
+   * Display mode: a block formula, or an inline one in a paragraph. The
+   * preview shows the same mode.
+   *
+   * A cell, because two things change it: the checkbox and a key binding.
+   * `set` updates the checkbox in both cases.
+   */
+  readonly displayMode: Cell<boolean>;
+  private source = '';
+  private rendered = '';
+  private parseError?: string;
+
+  constructor(
+    private doc: DemoDocument,
+    displayMode = false
+  ) {
+    this.displayMode = cell(displayMode);
+  }
+
+  /** Set the katex source, then render it. */
+  setSource(source: string) {
+    this.source = source;
+    this.render();
+  }
+
+  setDisplayMode(value: boolean) {
+    this.displayMode.set(value);
+    this.render();
+  }
+
+  /**
+   * Rendered HTML of the formula. Empty when the source is empty. While the
+   * source is invalid, it is the last valid render, so the preview does not
+   * flicker as you type.
+   */
+  get preview() {
+    return this.rendered;
+  }
+
+  /** The parse error of the current source, if any. */
+  get error() {
+    return this.parseError;
+  }
+
+  /** True when there is valid katex to insert. */
+  canInsert() {
+    return this.parseError === undefined && this.source.trim() !== '';
+  }
+
+  /**
+   * Put the formula in the document, then start a new, empty one.
+   *
+   * Returns false, and does nothing, when `canInsert()` is false.
+   *
+   * Display mode gives a block formula in a `.katex-display` wrapper, which
+   * katex.css puts on its own line and centers. Thus we do not put it in a
+   * paragraph. Inline mode gives a formula that flows with text, so a
+   * paragraph is correct.
+   */
+  insert(): boolean {
+    if (!this.canInsert()) return false;
+    this.doc.append(this.displayMode.get() ? this.rendered : `<p>${this.rendered}</p>`);
+    this.setSource('');
+    return true;
+  }
+
+  private render() {
+    if (this.source.trim() === '') {
+      this.rendered = '';
+      this.parseError = undefined;
+      return;
+    }
+    try {
+      this.rendered = katex.renderToString(this.source, {
+        displayMode: this.displayMode.get(),
+        throwOnError: true
+      });
+      this.parseError = undefined;
+    } catch (err) {
+      // Keep the last valid render as the preview.
+      this.parseError = (err as Error).message;
+    }
+  }
+}
+
+/** The UI adapter over `KatexFormula`. */
 export class KatexDemo implements AppObject {
   static create(ctl: Controller) {
     return new KatexDemo(
@@ -16,26 +149,18 @@ export class KatexDemo implements AppObject {
         params.submitBinding
           ? `Type some katex and hit ${params.submitBinding}...`
           : 'Type some katex...'
-      )
+      ),
+      new KatexFormula(DemoDocument.create())
     );
   }
 
-  private currentResult = '';
-  private katexValid = true;
   private unsubscribeBindingsChange?: () => void;
   private helpMessage = 'Type some katex...';
 
   constructor(
     private ctl: Controller,
     private dynamicPlaceholder: DynamicPlaceholder,
-    /**
-     * Katex display mode. It controls what we insert: a block formula, or an
-     * inline one in a paragraph. The preview shows the same mode.
-     *
-     * A cell, because two things change it: the checkbox and a key binding.
-     * `set` updates the checkbox in both cases.
-     */
-    private displayMode: Cell<boolean> = cell(false)
+    private formula: KatexFormula
   ) {}
 
   layout = {
@@ -45,14 +170,20 @@ export class KatexDemo implements AppObject {
   };
 
   actions = {
+    // No binding: this replaces what the default SUBMIT binding ($mod+Enter)
+    // does while this app runs. The binding itself stays, so a rebind in the
+    // BindingsEditor still works, and the placeholder still shows it.
+    [OneputAction.SUBMIT]: {
+      action: () => this.insert()
+    },
     TOGGLE_DISPLAY_MODE: {
-      action: () => this.setDisplayMode(!this.displayMode.get()),
+      action: () => this.setDisplayMode(!this.formula.displayMode.get()),
       binding: {
         bindings: ['$mod+d'],
         description: 'Toggle katex display mode'
       }
     }
-  };
+  } satisfies AppActions;
 
   settings = {
     enableMenuOpenClose: false,
@@ -66,10 +197,7 @@ export class KatexDemo implements AppObject {
     enableMenuItemFocus: false
   } satisfies UIFlags;
 
-  /**
-   * Declarative menu: rebuilt from AppObject state whenever `refresh()` is
-   * called (on input change, display-mode toggle, or bindings change).
-   */
+  /** Declarative menu: built again from the formula on each invalidate. */
   menu = () => ({
     id: 'main',
     focusBehaviour: 'first' as const,
@@ -92,10 +220,10 @@ export class KatexDemo implements AppObject {
             type: 'fchild',
             style: {
               padding: '1rem',
-              fontSize: this.currentResult ? '150%' : '100%',
+              fontSize: this.formula.preview ? '150%' : '100%',
               display: 'inline-block'
             },
-            innerHTMLUnsafe: this.currentResult || '(preview)'
+            innerHTMLUnsafe: this.formula.preview || '(preview)'
           }
         ]
       }),
@@ -106,7 +234,7 @@ export class KatexDemo implements AppObject {
         action: (_, checked) => this.setDisplayMode(checked),
         textContent: 'Display mode',
         bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
-        source: this.displayMode
+        source: this.formula.displayMode
       })
     ]
   });
@@ -117,12 +245,12 @@ export class KatexDemo implements AppObject {
 
   /**
    * The katex preview is part of menu()'s output, so typing is just another
-   * invalidate trigger: recompute state, then re-pull menu(). Wired by the
-   * framework (sync-rebuild menu — no menuItemsFn, which is the generative channel).
+   * invalidate trigger. Wired by the framework (sync-rebuild menu — no
+   * menuItemsFn, which is the generative channel).
    */
   onInputChange = () => {
-    this.recompute();
-    this.invalidate();
+    this.formula.setSource(this.ctl.input.getInputValue());
+    this.show();
   };
 
   onStart() {
@@ -134,60 +262,46 @@ export class KatexDemo implements AppObject {
         this.helpMessage = binding
           ? `Type some katex and hit ${binding} to insert... `
           : 'Type some katex...';
-        this.invalidate();
+        void this.ctl.menu.invalidate();
       }
     );
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
-    this.ctl.input.setSubmitHandler(() => {
-      this.insertKatex();
-    });
-    // Set up katex state; menu() is pulled by the framework after onStart (afterRun).
-    this.recompute();
+    this.formula.setSource(this.ctl.input.getInputValue());
+    // menu() is pulled by the framework after onStart (afterRun).
+    this.syncChrome();
   }
 
-  /** Rebuild the menu from the current state. */
-  private invalidate = (opts?: Parameters<Controller['menu']['invalidate']>[0]) => {
-    void this.ctl.menu.invalidate(opts);
-  };
-
-  /**
-   * Set display mode, from the checkbox or the key binding. `set` updates the
-   * checkbox. The rebuild updates the preview pane.
-   */
+  /** From the checkbox or the key binding. */
   private setDisplayMode(value: boolean) {
-    this.displayMode.set(value);
-    this.recompute();
+    this.formula.setDisplayMode(value);
     // focusBehaviour 'none' keeps the focused index where it is.
-    this.invalidate({ focusBehaviour: 'none' });
+    this.show({ focusBehaviour: 'none' });
   }
 
   /**
-   * Recompute katex state from the current input and refresh the input UI.
+   * The SUBMIT action, from the submit key or the Send button.
    *
-   * Does NOT touch the menu — call `refresh()` to re-render items.
+   * Returns false when there is nothing to insert. For the key, that declines
+   * it, so the browser keeps its default.
    */
-  private recompute() {
-    if (this.ctl.input.getInputValue().trim() === '') {
-      this.currentResult = '';
-      this.katexValid = true;
-      this.syncChrome();
-      return;
-    }
-    try {
-      this.currentResult = katex.renderToString(this.ctl.input.getInputValue(), {
-        displayMode: this.displayMode.get(),
-        throwOnError: true,
-        errorColor: 'red'
-      });
-      this.katexValid = true;
+  private insert() {
+    if (!this.formula.insert()) return false;
+    this.ctl.input.setInputValue('');
+    this.show();
+    return true;
+  }
+
+  /** Show the formula's state: input chrome, error notification and menu. */
+  private show(opts?: Parameters<Controller['menu']['invalidate']>[0]) {
+    this.syncChrome();
+    const error = this.formula.error;
+    if (error) {
+      this.ctl.notify('Invalid katex: ' + error, { duration: 3000 });
+    } else {
       this.ctl.clearNotifications();
-      this.syncChrome();
-    } catch (err) {
-      this.katexValid = false;
-      this.syncChrome();
-      this.ctl.notify('Invalid katex: ' + (err as Error).message, { duration: 3000 });
     }
+    void this.ctl.menu.invalidate(opts);
   }
 
   /**
@@ -195,14 +309,14 @@ export class KatexDemo implements AppObject {
    * app's own input chrome again.
    *
    * Order matters: `ctl.ui.update` rebuilds `inputUI` from the layout, so
-   * `renderInputUI` must run after it.
+   * `setInputUI` must run after it.
    */
   private syncChrome() {
     this.ctl.ui.update({
       params: {
         inputSend: {
-          run: () => this.insertKatex(),
-          enabled: this.canInsert()
+          run: () => this.actions[OneputAction.SUBMIT].action(),
+          enabled: this.formula.canInsert()
         }
       } satisfies AppLayoutParams
     });
@@ -213,35 +327,4 @@ export class KatexDemo implements AppObject {
       } satisfies OneputProps['inputUI'];
     });
   }
-
-  /**
-   * True when there is valid katex to insert. The Send button and the submit
-   * key both use this, so they agree.
-   */
-  private canInsert() {
-    return this.katexValid && this.ctl.input.getInputValue().trim() !== '';
-  }
-
-  /**
-   * Insert the formula in the demo document.
-   *
-   * Display mode gives a block formula in a `.katex-display` wrapper, which
-   * katex.css puts on its own line and centers. Thus we do not put it in a
-   * paragraph. Inline mode gives a formula that flows with text, so a
-   * paragraph is correct.
-   */
-  private insertKatex = () => {
-    if (!this.canInsert()) return;
-    const rendered = katex.renderToString(this.ctl.input.getInputValue(), {
-      displayMode: this.displayMode.get(),
-      throwOnError: true,
-      errorColor: 'red'
-    });
-    document.getElementById('katex-demo')!.innerHTML += this.displayMode.get()
-      ? rendered
-      : `<p>${rendered}</p>`;
-    this.ctl.input.setInputValue('');
-    this.recompute();
-    this.invalidate();
-  };
 }

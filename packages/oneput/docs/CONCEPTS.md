@@ -70,15 +70,19 @@ still models each thing it exposes to Oneput as an action:
 
 It still has a model and an AppObject, in one file because the demo is small:
 
-- `KatexFormula` (model) renders the source, knows if it is valid, decides
-  `canInsert()`, and inserts the formula (block or inline). Inserting is app
-  logic, so it is in the model. `insert()` checks `canInsert()` itself, so no
-  caller can skip the check.
+- `KatexFormula` (model) compiles the source, knows if it is valid, decides
+  `canInsert`, and inserts the formula (block or inline). Inserting is app
+  logic, so it is in the model. `insert()` checks `canInsert` itself, so no
+  caller can skip the check. Its state is one Svelte store (plain JS, no
+  compiler). It notifies on each change through `subscribe`, and the UI reads
+  `current`.
 - `DemoDocument` is the infrastructure wrapper for the page that the model
   writes to (`create()` / `createNull()`, `trackAppends()`).
 - `KatexDemo` (AppObject) shows the model's state (preview, Send button, error
   notification, checkbox) and calls the model when the user types, toggles or
-  inserts. After an insert it only does UI work: it clears the input.
+  inserts. After an insert it only does UI work: it clears the input. It
+  subscribes to the model in `onStart`, and each change runs one `refresh()`
+  (see REFRESH_PATTERN).
 
 If an app like this grows, the logic goes into the model. A PROVIDER does not
 help, because the problem is the logic, not the number of actions.
@@ -125,11 +129,14 @@ Parts:
 - `Pull`
   - pull source; it is HOW the row reads the state `({ get, subscribe? })`.
   - It is NOT the state.
-  - In KatexDemo the state is this.displayMode, and the Pull is just a window onto it.
+  - In KatexDemo the state is `displayMode` in the model's store, and the Pull is just a window onto it.
     ```js
     checkboxMenuItem({
       ...
-      source: { get: () => this.displayMode }
+      source: {
+        get: () => this.formula.current.displayMode,
+        subscribe: this.formula.subscribe
+      }
     })
     ```
 - `Cell`
@@ -138,6 +145,7 @@ Parts:
     - in katexdemo we might have a key binding that toggles display mode
   - A cell is not the only way to support outside writers.
     - Any Pull with subscribe works. For example, a notifier() works when the state lives elsewhere (an editor). A cell is just the easiest way when you own the state.
+    - KatexDemo now uses its model's Svelte store, not a cell (see the Pull example above).
   - Create the cell once, eg as a field in an AppObject, never inside menu(). Otherwise each rebuild makes a new cell at its initial value, while the mounted PullCheckbox still reads the old one.
 
 ### PULL_OBJECT - an object on a node that reads live state
@@ -233,7 +241,9 @@ write a third or fourth pull object.
 ### REFRESH_PATTERN - how the UI follows the model at scale
 
 Status: proposed. `watch` and the focus default (ideas 3 and 4) do not exist
-yet. KatexDemo calls `show()` by hand in each action.
+yet. KatexDemo does ideas 1 and 2 by hand: its model is a Svelte store
+(MODEL_NOTIFIES), and it subscribes in `onStart` to run one `refresh()`
+(ONE_REFRESH).
 
 The UI is a function of the model's state. Any change to the model re-derives
 all of the UI. This is the part of React that holds at scale, and it does not
@@ -346,8 +356,9 @@ not watched. A possible fix is the function form that `actions` allows,
 #### 4. INTENT_IS_NOT_STATE - transient intent does not go through refresh
 
 Some things are an intent for one moment, not state. Focus is the main
-example: KatexDemo passes `focusBehaviour: 'none'` so that a display mode
-toggle does not move the focus. A refresh cannot know this, because it does
+example: KatexDemo used to pass `focusBehaviour: 'none'` only for the display
+mode toggle, so that it did not move the focus. Its `refresh()` now always
+passes it. A refresh cannot know this, because it does
 not ask what changed.
 
 Fix the default, not the refresh: a refresh rebuild keeps the focus where it

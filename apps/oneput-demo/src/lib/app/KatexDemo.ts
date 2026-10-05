@@ -15,12 +15,13 @@
 import type { Controller } from '@oneput/oneput';
 import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
-import { cell, divider, menuItem, type Cell } from '@oneput/oneput';
+import { divider, menuItem } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
 import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from './_icons.js';
+import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 
 /**
  * The page that the demo inserts formulas into.
@@ -53,61 +54,100 @@ export class DemoDocument {
   }
 }
 
-/** The formula being edited, and inserting it. App logic: no Oneput. */
-export class KatexFormula {
+/** The result of compiling katex source. */
+type RenderResult =
+  | { empty: true } // nothing typed
+  | { html: string } // valid katex
+  | { error: string }; // invalid katex
+
+/**
+ * Turn katex source into HTML. Pure: it sets no fields and does not touch the
+ * page.
+ */
+function renderToString(source: string, displayMode: boolean): RenderResult {
+  if (source.trim() === '') return { empty: true };
+  try {
+    return { html: katex.renderToString(source, { displayMode, throwOnError: true }) };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+type FormulaState = { source: string; displayMode: boolean };
+
+/** What the UI reads from the formula. */
+export type FormulaView = {
+  source: string;
   /**
    * Display mode: a block formula, or an inline one in a paragraph. The
    * preview shows the same mode.
-   *
-   * A cell, because two things change it: the checkbox and a key binding.
-   * `set` updates the checkbox in both cases.
    */
-  readonly displayMode: Cell<boolean>;
-  private source = '';
-  private rendered = '';
-  private parseError?: string;
-
-  constructor(
-    private doc: DemoDocument,
-    displayMode = false
-  ) {
-    this.displayMode = cell(displayMode);
-  }
-
-  /** Set the katex source, then render it. */
-  setSource(source: string) {
-    this.source = source;
-    this.render();
-  }
-
-  setDisplayMode(value: boolean) {
-    this.displayMode.set(value);
-    this.render();
-  }
-
+  displayMode: boolean;
   /**
    * Rendered HTML of the formula. Empty when the source is empty. While the
    * source is invalid, it is the last valid render, so the preview does not
    * flicker as you type.
    */
-  get preview() {
-    return this.rendered;
-  }
-
+  preview: string;
   /** The parse error of the current source, if any. */
-  get error() {
-    return this.parseError;
+  error?: string;
+  /** True when there is valid katex to insert. */
+  canInsert: boolean;
+};
+
+/**
+ * The formula being edited, and inserting it. App logic: no Oneput.
+ *
+ * The state is one Svelte store (plain JS, no Svelte compiler). Every change
+ * notifies `subscribe`, and the listener reads `current`. See REFRESH_PATTERN
+ * in `packages/oneput/docs/CONCEPTS.md`.
+ */
+export class KatexFormula {
+  private state: Writable<FormulaState>;
+  private lastValid = '';
+  private view: Readable<FormulaView>;
+  /** The current view. */
+  get current(): FormulaView {
+    return get(this.view);
   }
 
-  /** True when there is valid katex to insert. */
-  canInsert() {
-    return this.parseError === undefined && this.source.trim() !== '';
+  constructor(
+    private doc: DemoDocument,
+    displayMode = false
+  ) {
+    this.state = writable({ source: '', displayMode });
+    this.view = derived(this.state, ({ source, displayMode }) => {
+      const compiled = renderToString(source, displayMode);
+      if ('empty' in compiled) this.lastValid = '';
+      else if ('html' in compiled) this.lastValid = compiled.html;
+      return {
+        source,
+        displayMode,
+        preview: this.lastValid,
+        error: 'error' in compiled ? compiled.error : undefined,
+        canInsert: 'html' in compiled
+      };
+    });
+  }
+
+  /**
+   * Call `onChange` on each change. Like all Svelte stores, it also calls it
+   * once at once.
+   */
+  subscribe = (onChange: () => void) => this.view.subscribe(() => onChange());
+
+  setSource(source: string) {
+    this.state.update((s) => ({ ...s, source }));
+  }
+
+  toggleDisplayMode() {
+    this.state.update((s) => ({ ...s, displayMode: !s.displayMode }));
   }
 
   /**
    * Put the formula in the document, then start a new, empty one.
    *
-   * Returns false, and does nothing, when `canInsert()` is false.
+   * Returns false, and does nothing, when `canInsert` is false.
    *
    * Display mode gives a block formula in a `.katex-display` wrapper, which
    * katex.css puts on its own line and centers. Thus we do not put it in a
@@ -115,28 +155,11 @@ export class KatexFormula {
    * paragraph is correct.
    */
   insert(): boolean {
-    if (!this.canInsert()) return false;
-    this.doc.append(this.displayMode.get() ? this.rendered : `<p>${this.rendered}</p>`);
+    const { canInsert, displayMode, preview } = this.current;
+    if (!canInsert) return false;
+    this.doc.append(displayMode ? preview : `<p>${preview}</p>`);
     this.setSource('');
     return true;
-  }
-
-  private render() {
-    if (this.source.trim() === '') {
-      this.rendered = '';
-      this.parseError = undefined;
-      return;
-    }
-    try {
-      this.rendered = katex.renderToString(this.source, {
-        displayMode: this.displayMode.get(),
-        throwOnError: true
-      });
-      this.parseError = undefined;
-    } catch (err) {
-      // Keep the last valid render as the preview.
-      this.parseError = (err as Error).message;
-    }
   }
 }
 
@@ -155,6 +178,7 @@ export class KatexDemo implements AppObject {
   }
 
   private unsubscribeBindingsChange?: () => void;
+  private unsubscribeFormula?: () => void;
   private helpMessage = 'Type some katex...';
 
   constructor(
@@ -171,14 +195,15 @@ export class KatexDemo implements AppObject {
       // the layout builds, so a change only needs `ctl.ui.invalidate()`.
       inputSend: {
         run: () => this.actions[OneputAction.SUBMIT].action(),
-        enabled: () => this.formula.canInsert()
+        enabled: () => this.formula.current.canInsert
       }
     } satisfies AppLayoutParams
   };
 
   /**
-   * UI controls call these actions, and the actions call the model. Thus the
-   * AppObject needs no method per action.
+   * UI controls call these actions, and the actions call the model. The model
+   * notifies, and `refresh` updates the UI. Thus the AppObject needs no method
+   * per action, and no action refreshes the UI itself.
    */
   actions = {
     // SUBMIT_PATTERN
@@ -193,17 +218,12 @@ export class KatexDemo implements AppObject {
       action: () => {
         if (!this.formula.insert()) return false;
         this.ctl.input.setInputValue('');
-        this.show();
         return true;
       }
     },
     // From the key binding or the checkbox.
     TOGGLE_DISPLAY_MODE: {
-      action: () => {
-        this.formula.setDisplayMode(!this.formula.displayMode.get());
-        // focusBehaviour 'none' keeps the focused index where it is.
-        this.show({ focusBehaviour: 'none' });
-      },
+      action: () => this.formula.toggleDisplayMode(),
       binding: {
         bindings: ['$mod+d'],
         description: 'Toggle katex display mode'
@@ -224,50 +244,57 @@ export class KatexDemo implements AppObject {
   } satisfies UIFlags;
 
   /** Declarative menu: built again from the formula on each invalidate. */
-  menu = () => ({
-    id: 'main',
-    focusBehaviour: 'first' as const,
-    items: [
-      // The preview shows one isolated formula, thus it stays centered in both
-      // modes. Display mode changes the katex itself: larger fractions, and sum
-      // limits above and below the operator.
-      menuItem({
-        id: 'katex-preview-pane',
-        type: 'vflex',
-        ignored: true,
-        style: {
-          overflow: 'auto',
-          display: 'block',
-          textAlign: 'center'
-        },
-        children: [
-          {
-            id: 'katex-preview',
-            type: 'fchild',
-            style: {
-              padding: '1rem',
-              fontSize: this.formula.preview ? '150%' : '100%',
-              display: 'inline-block'
-            },
-            innerHTMLUnsafe: this.formula.preview || '(preview)'
+  menu = () => {
+    const { preview } = this.formula.current;
+    return {
+      id: 'main',
+      focusBehaviour: 'first' as const,
+      items: [
+        // The preview shows one isolated formula, thus it stays centered in both
+        // modes. Display mode changes the katex itself: larger fractions, and sum
+        // limits above and below the operator.
+        menuItem({
+          id: 'katex-preview-pane',
+          type: 'vflex',
+          ignored: true,
+          style: {
+            overflow: 'auto',
+            display: 'block',
+            textAlign: 'center'
+          },
+          children: [
+            {
+              id: 'katex-preview',
+              type: 'fchild',
+              style: {
+                padding: '1rem',
+                fontSize: preview ? '150%' : '100%',
+                display: 'inline-block'
+              },
+              innerHTMLUnsafe: preview || '(preview)'
+            }
+          ]
+        }),
+        infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage, icon: icons.Info }),
+        divider(),
+        checkboxMenuItem({
+          id: 'katex-display-mode-checkbox',
+          // The checkbox is controlled, so its next value is always the toggle.
+          action: () => this.actions.TOGGLE_DISPLAY_MODE.action(),
+          textContent: 'Display mode',
+          bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
+          source: {
+            get: () => this.formula.current.displayMode,
+            subscribe: this.formula.subscribe
           }
-        ]
-      }),
-      infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage, icon: icons.Info }),
-      divider(),
-      checkboxMenuItem({
-        id: 'katex-display-mode-checkbox',
-        // The checkbox is controlled, so its next value is always the toggle.
-        action: () => this.actions.TOGGLE_DISPLAY_MODE.action(),
-        textContent: 'Display mode',
-        bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
-        source: this.formula.displayMode
-      })
-    ]
-  });
+        })
+      ]
+    };
+  };
 
   onExit = () => {
     this.unsubscribeBindingsChange?.();
+    this.unsubscribeFormula?.();
   };
 
   onStart() {
@@ -285,29 +312,34 @@ export class KatexDemo implements AppObject {
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
     this.formula.setSource(this.ctl.input.getInputValue());
-    // menu() is pulled by the framework after onStart (afterRun).
-    this.ctl.ui.invalidate();
+    // The store calls refresh at once, then on each change.
+    this.unsubscribeFormula?.();
+    this.unsubscribeFormula = this.formula.subscribe(() => this.refresh());
   }
 
   /**
-   * The katex preview is part of menu()'s output, so typing is just another
-   * invalidate trigger. Wired by the framework (sync-rebuild menu — no
-   * menuItemsFn, which is the generative channel).
+   * Typing changes the model, and the model notifies. Wired by the framework
+   * (sync-rebuild menu — no menuItemsFn, which is the generative channel).
    */
   onInputChange = () => {
     this.formula.setSource(this.ctl.input.getInputValue());
-    this.show();
   };
 
-  /** Show the formula's state: input chrome, error notification and menu. */
-  private show(opts?: Parameters<Controller['menu']['invalidate']>[0]) {
-    this.ctl.ui.invalidate();
-    const error = this.formula.error;
+  /**
+   * Show the formula's state: input chrome, error notification and menu.
+   *
+   * Runs on each model change. It is idempotent: it reads the state and never
+   * asks what changed. focusBehaviour 'none' keeps the focused index where it
+   * is (INTENT_IS_NOT_STATE).
+   */
+  private refresh() {
+    const { error } = this.formula.current;
     if (error) {
       this.ctl.notify('Invalid katex: ' + error, { duration: 3000 });
     } else {
       this.ctl.clearNotifications();
     }
-    void this.ctl.menu.invalidate(opts);
+    this.ctl.ui.invalidate();
+    void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
   }
 }

@@ -710,7 +710,7 @@ export interface AppObject<
   /**
    * Provide the actions object directly for simple AppObjects whose actions are
    * fixed. For AppObjects whose actions depend on state, provide a function:
-   * `ctl.app.invalidateActions()` re-calls it to re-derive the bindings (no
+   * `ctl.app.invalidate()` re-calls it to re-derive the bindings (no
    * getter needed).
    *
    * You can also define actions defined against default bindings outside of any

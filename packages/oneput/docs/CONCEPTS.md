@@ -288,7 +288,7 @@ if (typeof app.actions === 'function') ctl.app.invalidateActions();
 
 // KatexDemo
 onRefresh = () => {
-  ctl.ui.update({}); // rebuilds layout chrome; inputSend.enabled calls formula.canInsert()
+  ctl.ui.invalidate(); // reads the layout again; inputSend.enabled calls formula.canInsert()
   if (formula.error) ctl.notify('Invalid katex: ' + formula.error);
   else ctl.clearNotifications();
 };

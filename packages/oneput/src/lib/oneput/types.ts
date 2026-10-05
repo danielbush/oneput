@@ -461,7 +461,7 @@ export type LayoutAffordance = {
    * the affordance is enabled.
    *
    * The layout calls it each time it builds its UI. Thus an AppObject can
-   * declare it once in `layout.params`, and `ctl.ui.update({})` shows the
+   * declare it once in `layout.params`, and `ctl.ui.invalidate()` shows the
    * current value.
    */
   enabled?: () => boolean;
@@ -503,7 +503,7 @@ export type SharedCtl = {
     | 'focus'
   >;
   /** Params / flags only — no direct `OneputProps` chrome writers. */
-  ui: Pick<UIController, 'update'>;
+  ui: Pick<UIController, 'update' | 'invalidate'>;
   keys: Pick<KeysController, 'setDefaultBindings' | 'getCurrentBindings'>;
   notify: Controller['notify'];
   alert: Controller['alert'];

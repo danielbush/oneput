@@ -168,7 +168,7 @@ export class KatexDemo implements AppObject {
       menuTitle: 'Katex Demo',
       inputTextArea: { rows: 5 },
       // The Send button runs the SUBMIT action. `enabled` is read each time
-      // the layout builds, so `syncChrome` only needs to rebuild it.
+      // the layout builds, so a change only needs `ctl.ui.invalidate()`.
       inputSend: {
         run: () => this.actions[OneputAction.SUBMIT].action(),
         enabled: () => this.formula.canInsert()
@@ -286,7 +286,7 @@ export class KatexDemo implements AppObject {
     this.ctl.input.focusInput();
     this.formula.setSource(this.ctl.input.getInputValue());
     // menu() is pulled by the framework after onStart (afterRun).
-    this.syncChrome();
+    this.ctl.ui.invalidate();
   }
 
   /**
@@ -301,7 +301,7 @@ export class KatexDemo implements AppObject {
 
   /** Show the formula's state: input chrome, error notification and menu. */
   private show(opts?: Parameters<Controller['menu']['invalidate']>[0]) {
-    this.syncChrome();
+    this.ctl.ui.invalidate();
     const error = this.formula.error;
     if (error) {
       this.ctl.notify('Invalid katex: ' + error, { duration: 3000 });
@@ -309,13 +309,5 @@ export class KatexDemo implements AppObject {
       this.ctl.clearNotifications();
     }
     void this.ctl.menu.invalidate(opts);
-  }
-
-  /**
-   * Rebuild the layout's input chrome, so the Send button shows the current
-   * `canInsert()`.
-   */
-  private syncChrome() {
-    this.ctl.ui.update({});
   }
 }

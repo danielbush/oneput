@@ -105,6 +105,20 @@ export class UIController {
       this.ctl.app.applyFlags(settings.flags);
     }
     this.layout?.configure({ params: settings.params, replace: settings.replace });
+    this.invalidate();
+  }
+
+  /**
+   * Read the layout's UI again, with no change to its params.
+   *
+   * Call it when something that the layout reads has changed, for example an
+   * affordance's `enabled` function. Like `ctl.menu.invalidate` for `menu()`
+   * and `ctl.app.invalidate` for `actions`.
+   *
+   * It writes over what `setInputUI`, `setInnerUI` and `setOuterUI` set. Use
+   * layout params (for example `inputTextArea`) for things that must stay.
+   */
+  invalidate() {
     this.ctl.currentProps.inputUI = this.layout?.inputUI;
     this.setMenuLayoutUI(this.layout?.menuUI);
     this.ctl.currentProps.innerUI = this.layout?.innerUI;

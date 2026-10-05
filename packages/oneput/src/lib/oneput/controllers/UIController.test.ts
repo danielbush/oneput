@@ -5,11 +5,12 @@ import type { FChildParams, FlexParams } from '../types.js';
 import { StandardLayout } from '../shared/ui/layout/StandardLayout.js';
 
 const icons = {
-  X: 'x',
-  Check: 'check',
-  SendHorizontal: 'send',
-  ArrowLeft: 'left',
-  ChevronDown: 'down'
+  Close: 'x',
+  Accept: 'check',
+  Reject: 'x',
+  Send: 'send',
+  Back: 'left',
+  MenuToggle: 'down'
 };
 
 const controllers: Controller[] = [];

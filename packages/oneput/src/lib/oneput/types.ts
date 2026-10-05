@@ -531,7 +531,7 @@ export type AppLayoutParams = {
    */
   menuTitle?: string;
   /**
-   * Send a message / submit text (e.g. chat). Hosts often paint SendHorizontal.
+   * Send a message / submit text (e.g. chat). Hosts often paint a send arrow.
    */
   inputSend?: LayoutAffordance;
   /**

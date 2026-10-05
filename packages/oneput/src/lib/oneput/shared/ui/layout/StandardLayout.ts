@@ -9,13 +9,25 @@ import { acceptButton, rejectButton, sendButton } from '../buttons.js';
 /**
  * Host-registered icon names for {@link StandardLayout} chrome.
  * Oneput does not ship icon assets — the host registers them.
+ *
+ * Each slot is named after its role, not its glyph. The host chooses the glyph.
  */
 export type StandardLayoutIcons = {
-  X: string;
-  Check: string;
-  SendHorizontal: string;
-  ArrowLeft: string;
-  ChevronDown: string;
+  /** Menu header button that closes the menu or exits. Often an X. */
+  Close: string;
+  /** `inputAccept` button. Often a check mark. */
+  Accept: string;
+  /** `inputReject` button. Often an X. */
+  Reject: string;
+  /** `inputSend` button. Often a send arrow. */
+  Send: string;
+  /** Menu header Back button. Often a left arrow. */
+  Back: string;
+  /**
+   * Menu open / close button. It must point down: CSS rotates it when the
+   * menu opens.
+   */
+  MenuToggle: string;
 };
 
 /**
@@ -105,7 +117,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
       tag: 'button',
       classes: ['oneput__icon-button'],
       attr: { type: 'button', title: 'Close menu', onclick: exitAction },
-      icon: this.icons.X
+      icon: this.icons.Close
     });
   }
 
@@ -125,7 +137,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputAccept) {
           children.push(
             acceptButton({
-              icon: this.icons.Check,
+              icon: this.icons.Accept,
               onClick: () => inputAccept.run(),
               enabled: isEnabled(inputAccept),
               title: inputAccept.label
@@ -135,7 +147,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputReject) {
           children.push(
             rejectButton({
-              icon: this.icons.X,
+              icon: this.icons.Reject,
               onClick: () => inputReject.run(),
               enabled: isEnabled(inputReject),
               title: inputReject.label
@@ -145,7 +157,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
         if (inputSend) {
           children.push(
             sendButton({
-              icon: this.icons.SendHorizontal,
+              icon: this.icons.Send,
               onClick: () => inputSend.run(),
               enabled: isEnabled(inputSend),
               title: inputSend.label
@@ -179,7 +191,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             },
             classes: ['oneput__icon-button', 'oneput__menu-button'],
             // CSS rotates the chevron via a menu-state class from Oneput.
-            icon: this.icons.ChevronDown
+            icon: this.icons.MenuToggle
           })
         ]
       })
@@ -196,7 +208,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
                 tag: 'button',
                 attr: { type: 'button', title: 'Back', onclick: this.backAction },
                 classes: ['oneput__icon-button'],
-                icon: this.icons.ArrowLeft
+                icon: this.icons.Back
               })
             : b.spacer(),
           b.fchild({

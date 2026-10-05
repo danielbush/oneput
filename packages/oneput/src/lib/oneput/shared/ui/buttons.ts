@@ -58,7 +58,7 @@ export function iconActionButton(opts: {
   });
 }
 
-/** Send / message control — typically `inputSend` + SendHorizontal. */
+/** Send / message control — typically `inputSend` + the `Send` layout icon. */
 export function sendButton(opts: IconButtonOpts): FChildParams {
   return iconActionButton({
     id: opts.id,

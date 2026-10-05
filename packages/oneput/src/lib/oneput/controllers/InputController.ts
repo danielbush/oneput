@@ -116,6 +116,7 @@ export class InputController {
   };
   private removeBeforeInputListener?: () => void;
   private removeSelectionChangeListener?: () => void;
+  private removeFocusListeners?: () => void;
 
   /**
    * Used by Oneput to tell the controller what the input element is.
@@ -123,6 +124,7 @@ export class InputController {
   handleInputElementChange(inputElement: HTMLInputElement | undefined) {
     this.removeBeforeInputListener?.();
     this.removeSelectionChangeListener?.();
+    this.removeFocusListeners?.();
     this.inputElement = inputElement;
     this.selectionToggler = new SelectionToggler(this.ctl);
     if (!inputElement) {
@@ -158,6 +160,17 @@ export class InputController {
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
 
+    const handleFocus = () =>
+      this.ctl.events.emit({ type: 'input-focus-change', payload: { focused: true } });
+    const handleBlur = () =>
+      this.ctl.events.emit({ type: 'input-focus-change', payload: { focused: false } });
+    inputElement.addEventListener('focus', handleFocus);
+    inputElement.addEventListener('blur', handleBlur);
+    this.removeFocusListeners = () => {
+      inputElement.removeEventListener('focus', handleFocus);
+      inputElement.removeEventListener('blur', handleBlur);
+    };
+
     this.lastInputValue = inputElement.value;
     this.lastInputRange = [inputElement.selectionStart ?? 0, inputElement.selectionEnd ?? 0];
   }
@@ -178,6 +191,31 @@ export class InputController {
    * TODO: replace focusInput with this.
    */
   focus = this.focusInput;
+
+  /**
+   * Remove native focus from the input.
+   *
+   * Like `focus`, it runs in a new task. Thus `focus()` then `blur()` ends
+   * blurred, in the order of the calls.
+   */
+  blur = () => {
+    setTimeout(() => {
+      this.inputElement?.blur();
+    }, 0);
+  };
+
+  /** True when the input element has native browser focus. */
+  get isFocused() {
+    return Boolean(this.inputElement) && document.activeElement === this.inputElement;
+  }
+
+  /**
+   * Call `handleFocusChange` when the input gets or loses native focus, from
+   * any cause: the user, `focus()` or `blur()`.
+   */
+  subscribeFocusChange = (handleFocusChange: (focused: boolean) => void) => {
+    return this.ctl.events.on('input-focus-change', ({ focused }) => handleFocusChange(focused));
+  };
 
   /**
    * Allows you to set the value in the input programmatically.  Typing by the user will also update it.

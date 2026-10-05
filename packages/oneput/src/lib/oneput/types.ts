@@ -501,6 +501,9 @@ export type SharedCtl = {
     | 'resetSubmitHandler'
     | 'enable'
     | 'focus'
+    | 'blur'
+    | 'isFocused'
+    | 'subscribeFocusChange'
   >;
   /** Params / flags only — no direct `OneputProps` chrome writers. */
   ui: Pick<UIController, 'update' | 'invalidate'>;

@@ -206,3 +206,84 @@ describe('InputController selection-change emission', () => {
     });
   });
 });
+
+describe('focus change', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  function mounted() {
+    const ctl = Controller.createNull();
+    const input = ctl.currentProps.inputElement as HTMLInputElement;
+    document.body.appendChild(input);
+    const changes: boolean[] = [];
+    ctl.input.subscribeFocusChange((focused) => changes.push(focused));
+    return { ctl, input, changes };
+  }
+
+  const nextTask = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('focus - true', async () => {
+    // arrange
+    const { ctl, changes } = mounted();
+
+    // act
+    ctl.input.focus();
+    await nextTask();
+
+    // assert
+    expect(changes).toEqual([true]);
+    expect(ctl.input.isFocused).toBe(true);
+  });
+
+  it('blur - false', async () => {
+    // arrange
+    const { ctl, input, changes } = mounted();
+    input.focus();
+    changes.length = 0;
+
+    // act
+    ctl.input.blur();
+    await nextTask();
+
+    // assert
+    expect(changes).toEqual([false]);
+    expect(ctl.input.isFocused).toBe(false);
+  });
+
+  it('focus then blur - blurred', async () => {
+    // arrange
+    const { ctl } = mounted();
+
+    // act
+    ctl.input.focus();
+    ctl.input.blur();
+    await nextTask();
+
+    // assert
+    expect(ctl.input.isFocused).toBe(false);
+  });
+
+  it('user focus - true', () => {
+    // arrange
+    const { input, changes } = mounted();
+
+    // act
+    input.focus();
+
+    // assert
+    expect(changes).toEqual([true]);
+  });
+
+  it('element replaced - old element is silent', () => {
+    // arrange
+    const { ctl, input, changes } = mounted();
+    ctl.input.handleInputElementChange(document.createElement('input'));
+
+    // act
+    input.focus();
+
+    // assert
+    expect(changes).toEqual([]);
+  });
+});

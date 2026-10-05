@@ -21,6 +21,7 @@ export type InputChangePayload = {
 // Internal event system for decoupled communication
 export type InternalEvent =
   | InputChangeEvent
+  | InputFocusChangeEvent
   | AppChangeEvent
   | BindingsChangeEvent
   | MenuOpenChangeEvent
@@ -33,6 +34,11 @@ export type InternalEvent =
 export type InputChangeEvent = {
   type: 'input-change';
   payload: InputChangePayload;
+};
+/** The input element got or lost native browser focus. */
+export type InputFocusChangeEvent = {
+  type: 'input-focus-change';
+  payload: { focused: boolean };
 };
 export type AppChangeEvent = {
   type: 'app-change';

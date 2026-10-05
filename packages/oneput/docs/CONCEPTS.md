@@ -9,6 +9,7 @@
   - the key idea is that we collate actions that we want to expose in oneput in
     one place, define what bindings they have and whether they have a menu item
     and what that menu item looks like.
+  - `ActionProviderEntry` type represents action, bindings and menu item; conditionals could be defined here eg canShowMenuItem
   - The provider's role is a collator; if you start mixing state and
     implementation logic into it directly, you run the risk of creating less clear
     code. Consider injecting an adapter that exposes the actions and conditions

@@ -346,6 +346,23 @@ the row. Give the input one owner at a time via an **input claim**:
 - Use a child editor AppObject when the field needs multiline input,
   validation, or explicit commit and cancel behavior.
 
+### Focus style for custom rows
+
+Oneput adds `<class>--focused` to the row with menu focus, where `<class>` is
+the row's `class` (default `oneput__menu-item`). The default CSS styles only
+`button.oneput__menu-item--focused`. For a custom row (for example a `div`
+preview pane), set `class: 'my-row'` and style `.my-row--focused` in the app's
+CSS. See CUSTOM_ROW_FOCUS in `docs/CONCEPTS.md`.
+
+### Multiline input next to menu controls (INPUT_ROW)
+
+To keep menu focus on and still let `Enter` write newlines in a textarea, give
+the input its own focusable row with no `action`. `Enter` on that row falls
+through to the textarea. Keep focus in step with `MenuItem.onFocus` (filter
+`cause === 'keyboard'`), `ctl.input.focus()` / `blur()` and
+`ctl.input.subscribeFocusChange`. See INPUT_ROW in `docs/CONCEPTS.md` and
+`KatexDemo`.
+
 ### Pull rows: display without a rebuild
 
 `checkboxMenuItem` and `pullToggleMenuItem` mount a widget that owns its part
@@ -408,6 +425,9 @@ ctl.input.setInputValue(val)
 ctl.input.getInputValue()
 ctl.input.setPlaceholder(msg?)
 ctl.input.focusInput()
+ctl.input.blur()
+ctl.input.isFocused
+ctl.input.subscribeFocusChange((focused) => ...)  // returns unsubscribe
 ctl.input.runSubmitHandler()
 
 // Keys

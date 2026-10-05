@@ -584,7 +584,7 @@ behavior objects into each surface adapter that needs them. For example,
 `ui/frame/Chrome.ts` and a Oneput AppObject can both receive `Actions`; Frame
 chrome must not depend on a Oneput action provider only to reach those actions.
 
-## Signals vs direct UI (`inputSend`, `inputAccept`, `inputReject`)
+## Layout params vs direct UI (`inputSend`, `inputAccept`, `inputReject`)
 
 Shared AppObjects should not assume where host chrome lives. They advertise
 chrome roles with layout params (not lifecycle):
@@ -645,7 +645,7 @@ Factors (ENTER_SEMANTICS_FACTORS)
 - mobile users don't care about `Tab` or `Enter` as ux is driven by touch and soft-keyboard
 - `$mod+Enter` might be a common binding choice for `SUBMIT`
 
-Example: see KatexDemo. Here we have a multiline input where we type latex; we have a checkbox-based menu item that toggles display mode. We have a submit button.
+Example: see KatexDemo. Here we have a multiline input where we type latex; we have a checkbox-based menu item that toggles display mode. We have a submit button. KatexDemo uses INPUT_ROW (below).
 
 We have 3 settings that we can vary to achieve a satisfactory outcome based on these factors.
 
@@ -660,40 +660,40 @@ We have 3 settings that we can vary to achieve a satisfactory outcome based on t
 
 COMMENT: dead combination: `enableMenuItemFocus: false` + `enableNativeActivation: false` leaves `Enter` doing nothing anywhere except a newline in a textarea.
 
-## SUBMIT_PATTERN
+### INPUT_ROW (pattern)
 
-Oneput has a built-in submit action with a default key, ⌘Enter. On the default path, you keep that built-in action and just tell it what to do with setSubmitHandler. TODO: we could make this declarative by providing a onSubmit handler to `AppObject`.
+INPUT_ROW keeps menu item focus on and still gives `Enter` to a textarea. Use it when a menu has a few controls next to a multiline input.
 
-On the other path, you declare your own action with the same id, `[OneputAction.SUBMIT]`, in AppObject.actions. The same ⌘Enter key then runs your action, and the built-in is skipped.
-Not specifying the binding means "use whatever key submit already has". If we specify a binding against `[OneputAction.SUBMIT]` is equivalent to "in this AppObject, submit is now this key" (when we exit the AppObject the submit binding comes back).
+- One row stands for the input (in KatexDemo, the preview). It is focusable (not `ignored`) and has no `action`.
+- When that row has focus, `DO_ACTION` finds no action and returns false. Thus `Enter` falls through and the textarea writes a newline.
+- When a control row has focus, `Enter` runs `DO_ACTION` on it as usual.
 
-## MENU_LIFECYCLE
+Three rules keep native focus and menu focus in step:
 
-Menu callbacks observe a fully resolved menu snapshot. When a closed menu opens,
-Oneput rebuilds its rows, resolves synthetic focus, and applies that state before
-it calls any AppObject menu callback.
+1. Keyboard focus on the input row focuses the input.
+2. Keyboard focus on a control row blurs the input.
+3. When the input gets focus, menu focus moves to the input row.
 
-Callbacks then run in this order:
+```ts
+// rule 1: on the input row
+onFocus: (ctl, { cause }) => {
+  if (cause === 'keyboard' && !ctl.input.isFocused) ctl.input.focus();
+};
+// rule 2: on each control row
+onFocus: (ctl, { cause }) => {
+  if (cause === 'keyboard') ctl.input.blur();
+};
+// rule 3: in onStart (unsubscribe in onExit)
+ctl.input.subscribeFocusChange((focused) => {
+  if (focused) ctl.menu.focusMenuItemById(INPUT_ROW_ID);
+});
+```
 
-1. `onMenuOpenChange({ open: true })`
-2. `onMenuUpdate({ cause, menuId, menuItem, index })`
-3. `onMenuItemFocus({ menuId, menuItem, index })` when focus was resolved or changed
+Rules 1 and 2 respond only to `keyboard`. Pointer hover and invalidate also move menu focus, and they must not take focus away from the input while the user types. Rule 3 moves focus with cause `programmatic`, which rule 1 ignores, thus the rules do not loop.
 
-`onMenuUpdate` also runs after `setMenu()` and filtered redisplays while the menu
-is open. Use it when code must react to a replaced item even if the focused
-index stays the same. `onMenuItemFocus` is for focus changes only.
+Compare setting (2): `enableMenuItemFocus: false` also frees `Enter`, but it removes keyboard menu selection completely.
 
-`onMenuUpdate` does not run when `setMenu()` only stores rows for a closed menu.
-It runs when those rows become the displayed snapshot during open.
-
-`cause` identifies the outer operation that produced the snapshot:
-
-- `set-menu` — `setMenu()` replaced the displayed menu
-- `invalidate` — `invalidate()` rebuilt or redisplayed the menu
-- `input-change` — an input event redisplayed the menu
-- `open` — opening refreshed a previously closed menu
-
-## PATTERN: LIVE_EDIT
+### LIVE_EDIT (pattern)
 
 `LIVE_EDIT` lets the shared Oneput input edit the value represented by a menu
 row. The row is the selected edit target; it does not become a native form
@@ -708,7 +708,7 @@ AppObject's `InputScope` (suspend / exit) releases any remaining claim.
 
 There are two patterns.
 
-### GATED_LIVE_EDIT aka Mixed-menu editing
+#### GATED_LIVE_EDIT aka Mixed-menu editing
 
 COMMENT: "gated" means you have to activate the menu item to do the LIVE_EDIT; "mixed" means you might have a normal menu that you can filter on but you want to add a LIVE_EDIT item to it; this is where we have to be careful because the menu may want to filter and that can cause issues if LIVE_EDIT is activated on focus (ungated) rather than menu item activation...
 
@@ -737,7 +737,7 @@ Set `clearInputAfterAction: false` so activate does not clear the claimed value.
 For multiline input, validation, or commit/cancel workflows, launch a dedicated
 editor AppObject instead of adding more modes to the current AppObject.
 
-### FOCUSED_LIVE_EDIT (ungated)
+#### FOCUSED_LIVE_EDIT (ungated)
 
 A row claims the input when it receives menu focus. It does not claim during
 `menu()` construction, and it does not need an action.
@@ -779,6 +779,39 @@ activation can still use the action path.
 
 `FocusedMenuLiveEditExample` in `oneput-demo` is the minimal whole-menu example.
 `AddEntry` in TomatoTimer is a larger example of the same idea.
+
+## SUBMIT_PATTERN and `[OneputAction.SUBMIT]`
+
+Oneput has a built-in submit action with a default key, ⌘Enter. On the default path, you keep that built-in action and just tell it what to do with setSubmitHandler. TODO: we could make this declarative by providing a onSubmit handler to `AppObject`.
+
+On the other path, you declare your own action with the same id, `[OneputAction.SUBMIT]`, in AppObject.actions. The same ⌘Enter key then runs your action, and the built-in is skipped.
+Not specifying the binding means "use whatever key submit already has". If we specify a binding against `[OneputAction.SUBMIT]` is equivalent to "in this AppObject, submit is now this key" (when we exit the AppObject the submit binding comes back).
+
+## MENU_LIFECYCLE
+
+Menu callbacks observe a fully resolved menu snapshot. When a closed menu opens,
+Oneput rebuilds its rows, resolves synthetic focus, and applies that state before
+it calls any AppObject menu callback.
+
+Callbacks then run in this order:
+
+1. `onMenuOpenChange({ open: true })`
+2. `onMenuUpdate({ cause, menuId, menuItem, index })`
+3. `onMenuItemFocus({ menuId, menuItem, index })` when focus was resolved or changed
+
+`onMenuUpdate` also runs after `setMenu()` and filtered redisplays while the menu
+is open. Use it when code must react to a replaced item even if the focused
+index stays the same. `onMenuItemFocus` is for focus changes only.
+
+`onMenuUpdate` does not run when `setMenu()` only stores rows for a closed menu.
+It runs when those rows become the displayed snapshot during open.
+
+`cause` identifies the outer operation that produced the snapshot:
+
+- `set-menu` — `setMenu()` replaced the displayed menu
+- `invalidate` — `invalidate()` rebuilt or redisplayed the menu
+- `input-change` — an input event redisplayed the menu
+- `open` — opening refreshed a previously closed menu
 
 ## INPUT_CLAIM's
 
@@ -875,6 +908,26 @@ The current claim supports simple live writes. It does not yet support validatio
 This is the present LIVE_EDIT case. The input writes directly to one field while its claim exists.
 
 Therefore, my earlier wording was too broad: claims can support these modes, but the current API fully supports only exclusive live input and restoration. Search is close. Command arguments and transactional date entry need additional lifecycle events.
+
+## Styling
+
+### CUSTOM_ROW_FOCUS
+
+Oneput shows menu focus with a class. The class is the row's `class` plus `--focused`. A row with no `class` gets `oneput__menu-item--focused`, and the default CSS styles that only on a `button`.
+
+A custom row, such as an INPUT_ROW that is a `div`, sets its own `class` and styles its own focus:
+
+```ts
+menuItem({ id: 'katex-preview-pane', type: 'vflex', class: 'katex-preview-pane', ... })
+```
+
+```css
+.katex-preview-pane--focused {
+  outline: 2px dashed color-mix(in srgb, currentColor 40%, transparent);
+}
+```
+
+A custom `class` replaces `oneput__menu-item`, thus the row also loses the default row background.
 
 ## Appendix - INPUT_STATE_TERMS - three separate questions
 

@@ -1,0 +1,9 @@
+/*
+ * The preview row has its own class, thus Oneput adds `katex-preview-pane--focused`
+ * when it has menu focus (CUSTOM_ROW_FOCUS). A dashed outline shows that Enter
+ * writes in the input here (INPUT_ROW).
+ */
+.katex-preview-pane--focused {
+  outline: 2px dashed color-mix(in srgb, currentColor 40%, transparent);
+  outline-offset: -4px;
+}

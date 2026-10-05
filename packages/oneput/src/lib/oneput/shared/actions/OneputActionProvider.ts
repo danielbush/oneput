@@ -1,12 +1,9 @@
 import {
   ActionProvider,
   type ActionProviderEntries,
-  type ActionProviderMenuItem,
   type AppActionProvider
 } from '../../lib/ActionProvider.js';
-import type { KeyBindingMap } from '../../lib/bindings.js';
 import type { Controller } from '../../controllers/controller.js';
-import type { AppActions } from '../../types.js';
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 import { OneputAction, type OneputActionId } from './OneputAction.js';
 
@@ -15,32 +12,18 @@ type OneputActionProviderEntries = ActionProviderEntries<OneputActionId>;
 /**
  * Provider of reusable Oneput commands.
  *
+ * It is an `ActionProvider` with the Oneput entries. It is not a new kind of
+ * provider, thus it is a type alias and a `create` function, not a class.
+ *
  * Consumers can filter this provider per AppObject, expose selected entries via
  * `actions()`, and explicitly compose menu rows with `getMenuItems([...])`.
  */
-export class OneputActionProvider implements AppActionProvider<OneputActionId> {
-  static create(ctl: Controller) {
-    return new OneputActionProvider(ActionProvider.create<OneputActionId>(() => getEntries(ctl)));
-  }
+export type OneputActionProvider = AppActionProvider<OneputActionId>;
 
-  private constructor(private provider: AppActionProvider<OneputActionId>) {}
-
-  filter(ids: OneputActionId[]) {
-    return new OneputActionProvider(this.provider.filter(ids));
-  }
-
-  getBindings(): KeyBindingMap {
-    return this.provider.getBindings();
-  }
-
-  getActions(): AppActions {
-    return this.provider.getActions();
-  }
-
-  getMenuItems(ids: OneputActionId[]): ActionProviderMenuItem[] {
-    return this.provider.getMenuItems(ids);
-  }
-}
+export const OneputActionProvider = {
+  create: (ctl: Controller): OneputActionProvider =>
+    ActionProvider.create<OneputActionId>(() => getEntries(ctl))
+};
 
 function getEntries(ctl: Controller): OneputActionProviderEntries {
   return {

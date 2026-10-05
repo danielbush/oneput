@@ -96,9 +96,10 @@ When the menu opens, these hooks run in the order shown above.
 ### Refresh from a model (`watch` / `onRefresh`)
 
 Declare the models the AppObject shows. A model is anything with
-`subscribe(onChange) => unsubscribe`: `notifier()`, `cell()`, a Svelte store,
-or a one-line adapter. Actions and typing only change the model. Oneput does
-the rest.
+`subscribe(onChange) => unsubscribe`. By default, keep the model's state in a
+private Svelte store (`svelte/store`, plain JS): each `set` / `update` is the
+notification. A hand-written `notifier()` or another library also works.
+Actions and typing only change the model. Oneput does the rest.
 
 ```typescript
 class Editor implements AppObject {

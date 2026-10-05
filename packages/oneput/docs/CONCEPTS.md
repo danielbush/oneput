@@ -89,9 +89,63 @@ help, because the problem is the logic, not the number of actions.
 
 ## state and reactivity in oneput
 
-COMMENT: see INPUT_STATE_TERMS
+### SUBSCRIBABLE and ONEPUT_NOTIFIER, SVELTE_STORE
 
-### CONTROLLED_PATTERN
+- SOURCE
+  - `Pull<T> = { get, subscribe? }`.
+  - must have a `get`
+  - if it has `subscribe` then it is a SUBSCRIBABLE
+- SUBSCRIBABLE
+  - is `Subscribable` interface which is the interface that defines how a reactivity system is consumed in Oneput.
+  - `subscribe(onChange) => unsubscribe` (`Pull.subscribe`, `Subscribable`) as an interface
+  - consumers of reactivity systems like REFRESH_PATTERN are agnostic to reactivity system used and assume `Subscribable = { subscribe }`. `watch` only listens and never reads; `onRefresh` reads through the model.
+- PULL_OBJECT (see further down)
+  - consumes one SOURCE: it calls get() to read the value, and if the source is also SUBSCRIBABLE, it listens on the source's subscribe; and it consumes CTL_PULL, which is also SUBSCRIBABLE (a notifier). It always listens on it.
+  - it does two other things:
+    - it lives on one DOM node (created in onMount and destroyed with the node),
+    - and it is the only code that writes that part of the node. Those two facts are what make it a PULL_OBJECT, not just any consumer.
+
+There's 2 reactivity systems we've used at this point:
+
+- (1) ONEPUT_NOTIFIER
+  - `notifier()` in `lib/pull.ts`; no dependency
+  - manual: you call `notify()` after each change
+  - does not call the listener on subscribe
+  - ONEPUT_CELL
+    - cell() builds on top of ONEPUT_NOTIFIER.
+    - you call `cell.set()` instead of `notify`
+    - It is a value plus a notifier(), and set calls notify().
+- (2) SVELTE_STORE
+  - `writable` / `derived` / `get` from `svelte/store`;
+  - plain JS, no Svelte compiler or components
+  - automatic: each `set` / `update` is the notification
+  - calls the listener once, straight away, when you subscribe
+  - `derived` gives derived state, declared once
+  - default for app models (MODEL_NOTIFIES); e.g. `KatexFormula`
+- REFRESH_PATTERN is a consumer of a reactivity system; my preference is to use SVELTE_STORE
+- KatexDemo's `formula` is in `watch` (REFRESH_PATTERN), and its `subscribe` is the checkbox's Pull source (CONTROLLED_PATTERN / PULL_OBJECT).
+
+### CTL_PULL (ctl.pull)
+
+- is a system built on top of ONEPUT_NOTIFIER
+- ctl.pull is one notifier() held by `Controller` (public pull = notifier()), with two things added on top:
+  - Delivery: OneputController.svelte puts it in MountContext, so each onMount(node, ctx) gets the right instance's channel.
+  - A convention:
+    - a row calls ctl.pull.notify() after its own action, which the checkbox defers to a new task;
+    - pull objects subscribe to it and paint again.
+- designed to help you build widgets like checkboxMenuItem .
+- it exists because
+  - (1) A controlled input's deferred paint. This goes away without CONTROLLED_PATTERN.
+    - A checkbox is controlled, so its click is cancelled. After a cancelled click, the browser puts the old tick back. That happens after our code has run, so a paint at click time gets undone. The row therefore waits a moment with setTimeout, then rings ctl.pull. The checkbox then paints, and this time the paint stays. Without CONTROLLED_PATTERN: the browser toggles the box itself and puts nothing back, so there is nothing to wait for.
+  - (2) A repaint after a row's own action when the source cannot notify. This goes away if every source is SUBSCRIBABLE, for example a store.
+    - An example is the BindingsEditor toggle, whose state is a plain let whenIndex. The click changes the variable, but a plain variable cannot tell anyone it changed. So the row rings ctl.pull itself, and the toggle repaints.
+      - COMMENT: maybe we need to convert BindingsEditor to REFRESH_PATTERN
+    - If the source can notify (a store or a cell): the source tells the toggle directly, so the row does not need to ring.
+- "checkboxMenuItem is controlled (CONTROLLED_PATTERN). It paints through a PULL_OBJECT (PullCheckbox), which listens to CTL_PULL and to the source."
+- PULL_OBJECT is fine-grained. It paints one DOM node with no rebuild, which matters for controls whose DOM state can disagree with the model (checked, focus, caret).
+- REACTIVE_PROP (proposal only) is an alternative to PULL_OBJECT that doesn't use CTL_PULL or ONEPUT_NOTIFIER; it avoids writing a PULL_OBJECT (onMount + paint code) for each kind of control, because FChild props would follow the state by themselves.
+
+### CONTROLLED_PATTERN / ctl.pull
 
 COMMENT: The checkbox below is controlled, and it also uses a PULL_OBJECT (step 4) to
 update the box. These are two separate ideas; see INPUT_STATE_TERMS.
@@ -259,16 +313,41 @@ refresh runs.
 A model has a `subscribe`, the same shape as `Pull`. It calls its listeners
 after each change. It does not know about Oneput.
 
-```ts
-class KatexFormula {
-  private changes = notifier();
-  subscribe = this.changes.subscribe;
+Default: keep the model's state in a Svelte store (`svelte/store`). A store is
+plain JS: it needs no Svelte compiler and no Svelte components. Oneput already
+depends on Svelte, so it adds no dependency. Each `set` or `update` is the
+notification, so the model never calls `notify()` by hand, and no method can
+forget to.
 
-  setSource(source) { ...; this.changes.notify(); }
-  setDisplayMode(value) { ...; this.changes.notify(); }
-  insert() { ...; this.changes.notify(); }
+```ts
+import { writable, derived, get } from 'svelte/store';
+
+class KatexFormula {
+  private state = writable({ source: '', displayMode: false });
+
+  // Derived state, declared once. The UI reads it, never the raw state.
+  private view = derived(this.state, ({ source, displayMode }) => {
+    const c = compile(source, displayMode);
+    return { source, displayMode, preview: ..., error: ..., canInsert: ... };
+  });
+
+  subscribe = (onChange: () => void) => this.view.subscribe(() => onChange());
+  get current() { return get(this.view); }
+
+  // Writes go through methods, so the model keeps its rules.
+  setSource(source: string) { this.state.update((s) => ({ ...s, source })); }
+  toggleDisplayMode() { this.state.update((s) => ({ ...s, displayMode: !s.displayMode })); }
+  insert() { if (!this.current.canInsert) return false; ...; this.setSource(''); return true; }
 }
 ```
+
+Keep the store private. Callers change state only through the model's methods,
+and read it through `current`.
+
+Not the default: a hand-written `notifier()` with a `notify()` call at the end
+of each method. It works, because `watch` only needs `subscribe`, but each new
+method must remember to notify. Another library (valtio, signals) also works
+through a one-line `subscribe` adapter.
 
 Actions, async code and outer objects only change the model. They do not
 refresh the UI.

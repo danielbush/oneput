@@ -81,6 +81,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: use dynamic unocss to create css classes
+  - COMMENT: see /Users/danb/projects/_DELETE/unocss-chat-mockup/STYLE.md - "All CSS is generated in the page, at runtime, by the UnoCSS engine. Nothing is generated at build time, and nothing needs a rebuild or a reload. "
+  - example: katexdemo and the focus styling for the preview pane
 - feat: now that we have watch (REFRESH_PATTERN), could we use something like it to handle declarative key binding changes
   - COMMENT: is this even something we'd declare; can't just run onRefresh (if present) when bindings change; or do we use a declarative event listener?
   - COMMENT: katex demo imperatively subscribes to bindings-change events atm

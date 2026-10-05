@@ -2,9 +2,7 @@ import {
   ActionProvider,
   type ActionProviderEntries,
   type AppActionProvider,
-  notifier,
-  type Controller,
-  type Notifier
+  type Controller
 } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
@@ -19,12 +17,6 @@ import { PickListUI } from './lib/PickListUI.js';
 type ProviderEntries = ActionProviderEntries<JsedActionId>;
 type ProviderOptions = {
   invalidateMenu: () => void;
-  /**
-   * Fires on every `invalidateMenu`. Mounted pull widgets (checkbox rows)
-   * subscribe to it, because a rebuild reuses their node and does not remount
-   * them.
-   */
-  menuChanges: Notifier;
 };
 type JsedActionProviderContext = {
   ctl: Controller;
@@ -55,17 +47,12 @@ export const JsedActionProvider = {
       invalidateMenu?: () => void;
     }
   ): JsedActionProvider => {
-    const rebuild = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
-    const menuChanges = notifier();
-    const invalidateMenu = () => {
-      rebuild();
-      menuChanges.notify();
-    };
+    const invalidateMenu = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
     return ActionProvider.create<JsedActionId>(() =>
       getEntries({
         ctl,
         editor,
-        opts: { invalidateMenu, menuChanges }
+        opts: { invalidateMenu }
       })
     );
   }
@@ -1002,8 +989,7 @@ function misc(ctx: JsedActionProviderContext): ProviderEntries {
             opts.invalidateMenu();
           },
           source: {
-            get: () => editor.legacyElementIndicatorEnabled,
-            subscribe: opts.menuChanges.subscribe
+            get: () => editor.legacyElementIndicatorEnabled
           }
         })
     },
@@ -1023,8 +1009,7 @@ function misc(ctx: JsedActionProviderContext): ProviderEntries {
             opts.invalidateMenu();
           },
           source: {
-            get: () => editor.elementIndicatorEnabled,
-            subscribe: opts.menuChanges.subscribe
+            get: () => editor.elementIndicatorEnabled
           }
         })
     }

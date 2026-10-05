@@ -81,6 +81,9 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## feat
 
+- feat: now that we have watch (REFRESH_PATTERN), could we use something like it to handle declarative key binding changes
+  - COMMENT: is this even something we'd declare; can't just run onRefresh (if present) when bindings change; or do we use a declarative event listener?
+  - COMMENT: katex demo imperatively subscribes to bindings-change events atm
 - epic: how could an agent dynamically construct an AppObject?  Can it add a calendar?  Can it add a LIVE_EDIT field?
   - COMMENT: a DSL is one way
   - COMMENT: AppObjects could just be objects but injecting arbitrary code into their properties is probably not a great thing

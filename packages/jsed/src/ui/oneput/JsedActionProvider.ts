@@ -1,12 +1,9 @@
 import {
   ActionProvider,
   type ActionProviderEntries,
-  type ActionProviderMenuItem,
   type AppActionProvider,
-  type AppActions,
   notifier,
   type Controller,
-  type KeyBindingMap,
   type Notifier
 } from '@oneput/oneput';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
@@ -44,50 +41,35 @@ type JsedActionProviderContext = {
  * The editor provides predicates so the ui can decide to hide or disable
  * something; everything else should be encapsulated within an editor action,
  * the ui shouldn't decide anything for the editor
+ *
+ * It is an `ActionProvider` with the Jsed entries, thus it is a type alias and
+ * a `create` function, not a class. See `OneputActionProvider`.
  */
-export class JsedActionProvider implements AppActionProvider<JsedActionId> {
-  static create(
+export type JsedActionProvider = AppActionProvider<JsedActionId>;
+
+export const JsedActionProvider = {
+  create: (
     ctl: Controller,
     editor: Editor,
     opts?: {
       invalidateMenu?: () => void;
     }
-  ) {
+  ): JsedActionProvider => {
     const rebuild = opts?.invalidateMenu ?? (() => ctl.menu.invalidate());
     const menuChanges = notifier();
     const invalidateMenu = () => {
       rebuild();
       menuChanges.notify();
     };
-    return new JsedActionProvider(
-      ActionProvider.create<JsedActionId>(() =>
-        getEntries({
-          ctl,
-          editor,
-          opts: { invalidateMenu, menuChanges }
-        })
-      )
+    return ActionProvider.create<JsedActionId>(() =>
+      getEntries({
+        ctl,
+        editor,
+        opts: { invalidateMenu, menuChanges }
+      })
     );
   }
-
-  private constructor(private provider: AppActionProvider<JsedActionId>) {}
-
-  filter(ids: JsedActionId[]) {
-    return new JsedActionProvider(this.provider.filter(ids));
-  }
-
-  getBindings(): KeyBindingMap {
-    return this.provider.getBindings();
-  }
-
-  getActions(): AppActions {
-    return this.provider.getActions();
-  }
-
-  getMenuItems(ids: JsedActionId[]): ActionProviderMenuItem[] {
-    return this.provider.getMenuItems(ids);
-  }
-}
+};
 
 /**
  * Define every reusable editor action provider entry.

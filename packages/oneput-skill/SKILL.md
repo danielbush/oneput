@@ -93,6 +93,34 @@ Menu lifecycle hooks receive resolved menu state:
 
 When the menu opens, these hooks run in the order shown above.
 
+### Refresh from a model (`watch` / `onRefresh`)
+
+Declare the models the AppObject shows. A model is anything with
+`subscribe(onChange) => unsubscribe`: `notifier()`, `cell()`, a Svelte store,
+or a one-line adapter. Actions and typing only change the model. Oneput does
+the rest.
+
+```typescript
+class Editor implements AppObject {
+  constructor(private ctl: Controller, private model: Model) {}
+
+  // A function, like `menu`: it runs after the constructor sets `this.model`.
+  watch = () => [this.model];
+
+  // Only imperative UI that Oneput cannot derive. Read the model; do not change it.
+  onRefresh = () => {
+    if (this.model.current.error) this.ctl.notify(this.model.current.error);
+    else this.ctl.clearNotifications();
+  };
+}
+```
+
+Oneput subscribes after `onStart` / `onResume` and unsubscribes on suspend and
+exit. Notifies in one turn give one refresh. A refresh calls `onRefresh`, then
+`ctl.ui.invalidate()`, `ctl.menu.invalidate({ focusBehaviour: 'none' })`, and
+re-reads `actions` when it is a function. It also refreshes once after each
+start and resume.
+
 ### Navigation
 
 ```typescript

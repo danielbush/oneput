@@ -4,6 +4,7 @@ import type { AppObject, UILayout } from '../types.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
 import { OneputAction } from '../shared/actions/OneputAction.js';
+import { notifier } from '../lib/pull.js';
 
 function layout(id: string): UILayout {
   return {
@@ -666,6 +667,101 @@ describe('AppController', () => {
 
       // assert
       expect(ran).toEqual(['parent']);
+    });
+  });
+
+  describe('AppObject.watch', () => {
+    /** A watched AppObject that records each refresh. */
+    function watchedApp(label = () => 'a') {
+      const model = notifier();
+      const refreshes: string[] = [];
+      const app: AppObject = {
+        watch: () => [model],
+        onRefresh: () => refreshes.push(label()),
+        menu: () => ({
+          id: 'main',
+          items: [stdMenuItem({ id: label(), textContent: label() })]
+        }),
+        onStart: () => {}
+      };
+      return { app, model, refreshes };
+    }
+
+    it('notify - onRefresh runs and the menu rebuilds', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      let label = 'a';
+      const { app, model, refreshes } = watchedApp(() => label);
+      ctl.app.run(app);
+      await waitForFocus();
+      refreshes.length = 0;
+
+      // act
+      label = 'b';
+      model.notify();
+      await waitForFocus();
+
+      // assert
+      expect(refreshes).toEqual(['b']);
+      expect(ctl.currentProps.menuItems?.map((item) => item.id)).toEqual(['b']);
+    });
+
+    it('notify several times in one turn - one refresh', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { app, model, refreshes } = watchedApp();
+      ctl.app.run(app);
+      await waitForFocus();
+      refreshes.length = 0;
+
+      // act
+      model.notify();
+      model.notify();
+      model.notify();
+      await waitForFocus();
+
+      // assert
+      expect(refreshes).toHaveLength(1);
+    });
+
+    it('suspended or exited - no refresh', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const suspended = watchedApp();
+      const exited = watchedApp();
+      ctl.app.run(suspended.app);
+      ctl.app.run(exited.app);
+      ctl.app.exit();
+      ctl.app.run({ onStart: () => {} });
+      await waitForFocus();
+      suspended.refreshes.length = 0;
+      exited.refreshes.length = 0;
+
+      // act
+      suspended.model.notify();
+      exited.model.notify();
+      await waitForFocus();
+
+      // assert
+      expect(suspended.refreshes).toEqual([]);
+      expect(exited.refreshes).toEqual([]);
+    });
+
+    it('resume - one refresh with no notify', async () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const { app, refreshes } = watchedApp();
+      ctl.app.run(app);
+      ctl.app.run({ onStart: () => {} });
+      await waitForFocus();
+      refreshes.length = 0;
+
+      // act
+      ctl.app.exit();
+      await waitForFocus();
+
+      // assert
+      expect(refreshes).toHaveLength(1);
     });
   });
 

@@ -21,6 +21,17 @@ export type Pull<T> = {
 };
 
 /**
+ * Anything that says "I changed": a notifier, a cell, a Svelte store, or a
+ * one-line adapter over another library. `subscribe` returns the unsubscribe.
+ *
+ * Listeners must not depend on when or how often they are called. A Svelte
+ * store calls them once at once, and some libraries call them later.
+ */
+export type Subscribable = {
+  subscribe: (onChange: () => void) => () => void;
+};
+
+/**
  * Tells listeners that something they pull from has changed.
  *
  * Use this when the state lives elsewhere (an editor, a store) and you only

@@ -178,7 +178,6 @@ export class KatexDemo implements AppObject {
   }
 
   private unsubscribeBindingsChange?: () => void;
-  private unsubscribeFormula?: () => void;
   private helpMessage = 'Type some katex...';
 
   constructor(
@@ -202,7 +201,7 @@ export class KatexDemo implements AppObject {
 
   /**
    * UI controls call these actions, and the actions call the model. The model
-   * notifies, and `refresh` updates the UI. Thus the AppObject needs no method
+   * notifies, and Oneput refreshes the UI (`watch`). Thus the AppObject needs no method
    * per action, and no action refreshes the UI itself.
    */
   actions = {
@@ -242,6 +241,23 @@ export class KatexDemo implements AppObject {
     // and tells the user that the checkbox needs a click. See ENTER_SEMANTICS.
     enableMenuItemFocus: false
   } satisfies UIFlags;
+
+  /**
+   * Oneput refreshes the UI on each change to the formula: it calls
+   * `onRefresh`, then reads the layout, `menu()` and actions again. See
+   * REFRESH_PATTERN .
+   */
+  watch = () => [this.formula];
+
+  /** The only part of the UI that Oneput cannot derive: the error notification. */
+  onRefresh = () => {
+    const { error } = this.formula.current;
+    if (error) {
+      this.ctl.notify('Invalid katex: ' + error, { duration: 3000 });
+    } else {
+      this.ctl.clearNotifications();
+    }
+  };
 
   /** Declarative menu: built again from the formula on each invalidate. */
   menu = () => {
@@ -294,7 +310,6 @@ export class KatexDemo implements AppObject {
 
   onExit = () => {
     this.unsubscribeBindingsChange?.();
-    this.unsubscribeFormula?.();
   };
 
   onStart() {
@@ -312,9 +327,6 @@ export class KatexDemo implements AppObject {
     this.ctl.input.setPlaceholder(this.dynamicPlaceholder);
     this.ctl.input.focusInput();
     this.formula.setSource(this.ctl.input.getInputValue());
-    // The store calls refresh at once, then on each change.
-    this.unsubscribeFormula?.();
-    this.unsubscribeFormula = this.formula.subscribe(() => this.refresh());
   }
 
   /**
@@ -324,22 +336,4 @@ export class KatexDemo implements AppObject {
   onInputChange = () => {
     this.formula.setSource(this.ctl.input.getInputValue());
   };
-
-  /**
-   * Show the formula's state: input chrome, error notification and menu.
-   *
-   * Runs on each model change. It is idempotent: it reads the state and never
-   * asks what changed. focusBehaviour 'none' keeps the focused index where it
-   * is (INTENT_IS_NOT_STATE).
-   */
-  private refresh() {
-    const { error } = this.formula.current;
-    if (error) {
-      this.ctl.notify('Invalid katex: ' + error, { duration: 3000 });
-    } else {
-      this.ctl.clearNotifications();
-    }
-    this.ctl.ui.invalidate();
-    void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
-  }
 }

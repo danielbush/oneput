@@ -5,7 +5,7 @@ import type { KeysController } from './controllers/KeysController.js';
 import type { MenuController } from './controllers/MenuController.js';
 import type { UIController } from './controllers/UIController.js';
 import type { ActionBinding } from './lib/bindings.js';
-import type { Notifier } from './lib/pull.js';
+import type { Notifier, Subscribable } from './lib/pull.js';
 
 /**
  * What Oneput gives an `onMount` handler, in addition to the node.
@@ -707,6 +707,36 @@ export interface AppObject<
    *     } satisfies AppEventHandlers;
    */
   events?: AppEventHandlers;
+  /**
+   * Models this AppObject shows. See REFRESH_PATTERN in `docs/CONCEPTS.md`.
+   *
+   * Oneput subscribes to each one after `onStart` / `onResume`, and
+   * unsubscribes on suspend and exit. Thus an AppObject that is not current
+   * does not refresh.
+   *
+   * When a model notifies, Oneput schedules one refresh. More notifies before
+   * it runs do not add more. A refresh calls `onRefresh`, then reads the
+   * declarative parts again: the layout (`ctl.ui.invalidate`), `menu()`
+   * (`ctl.menu.invalidate` with `focusBehaviour: 'none'`), and `actions` when it
+   * is a function. Oneput also refreshes once after each start and resume,
+   * because a model can change while the AppObject is not current.
+   *
+   *     watch = () => [this.formula];
+   *
+   * A function, like `menu`, so that it runs after the constructor. A plain
+   * array field (`[this.formula]`) can be built before the constructor sets
+   * `this.formula`.
+   */
+  watch?: () => Subscribable[];
+  /**
+   * Called on each refresh from `watch`, before Oneput reads the layout, the
+   * menu and the actions again.
+   *
+   * Only do the imperative work that Oneput cannot derive, for example a
+   * notification. Read the model, but do not change it: a change notifies
+   * again, and the refresh loops.
+   */
+  onRefresh?: () => void;
   /**
    * Provide the actions object directly for simple AppObjects whose actions are
    * fixed. For AppObjects whose actions depend on state, provide a function:

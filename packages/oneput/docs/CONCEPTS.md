@@ -81,7 +81,7 @@ It still has a model and an AppObject, in one file because the demo is small:
 - `KatexDemo` (AppObject) shows the model's state (preview, Send button, error
   notification, checkbox) and calls the model when the user types, toggles or
   inserts. After an insert it only does UI work: it clears the input. It
-  subscribes to the model in `onStart`, and each change runs one `refresh()`
+  declares the model in `watch`, so Oneput refreshes the UI on each change
   (see REFRESH_PATTERN).
 
 If an app like this grows, the logic goes into the model. A PROVIDER does not
@@ -240,10 +240,10 @@ write a third or fourth pull object.
 
 ### REFRESH_PATTERN - how the UI follows the model at scale
 
-Status: proposed. `watch` and the focus default (ideas 3 and 4) do not exist
-yet. KatexDemo does ideas 1 and 2 by hand: its model is a Svelte store
-(MODEL_NOTIFIES), and it subscribes in `onStart` to run one `refresh()`
-(ONE_REFRESH).
+Status: built. `AppObject.watch` and `AppObject.onRefresh` exist
+(`AppController`), and a refresh rebuilds the menu with `focusBehaviour:
+'none'` (idea 4). KatexDemo uses them: its model is a Svelte store
+(MODEL_NOTIFIES), and `onRefresh` only shows the error notification.
 
 The UI is a function of the model's state. Any change to the model re-derives
 all of the UI. This is the part of React that holds at scale, and it does not
@@ -327,16 +327,21 @@ for the declarative `events` handlers.
 
 ```ts
 class KatexDemo implements AppObject {
-  watch = [this.formula];
+  watch = () => [this.formula];
   onRefresh = () => { ... }; // see ONE_REFRESH
 }
 ```
 
+`watch` is a function, like `menu`. Class field initializers run before the
+constructor body, so a plain array (`watch = [this.formula]`) could hold
+`[undefined]` when `formula` is a constructor parameter property. A function
+runs later, when Oneput calls it.
+
 Lifecycle:
 
-- Start and resume: Oneput calls `subscribe` on each item in `watch`, and
-  keeps the unsubscribe functions. On resume, it also refreshes once, because
-  the model can change while the AppObject is not current.
+- Start and resume: after `onStart` / `onResume`, Oneput calls `subscribe` on
+  each item in `watch`, and keeps the unsubscribe functions. It then refreshes
+  once, because the model can change while the AppObject is not current.
 - Suspend (a child AppObject runs on top) and exit: Oneput unsubscribes all.
   Thus an AppObject that is not current does not repaint.
 
@@ -350,20 +355,21 @@ For many models, add each one to `watch`. They share one refresh.
 
 Limit: Oneput reads `watch` when it subscribes. If the AppObject replaces a
 model later (for example, it opens a different document), the new model is
-not watched. A possible fix is the function form that `actions` allows,
-`watch = () => [this.formula]`, with a call that makes Oneput read it again.
+not watched. Because `watch` is a function, a possible fix is a call that
+makes Oneput call it again and subscribe again, like `ctl.app.invalidate()`
+for `actions`.
 
 #### 4. INTENT_IS_NOT_STATE - transient intent does not go through refresh
 
 Some things are an intent for one moment, not state. Focus is the main
 example: KatexDemo used to pass `focusBehaviour: 'none'` only for the display
-mode toggle, so that it did not move the focus. Its `refresh()` now always
-passes it. A refresh cannot know this, because it does
-not ask what changed.
+mode toggle, so that it did not move the focus. A refresh cannot know this,
+because it does not ask what changed.
 
 Fix the default, not the refresh: a refresh rebuild keeps the focus where it
 is. Only a new menu (`setMenu`, a new AppObject) moves it. Then the refresh
-needs no arguments.
+needs no arguments. Oneput's refresh now always rebuilds the menu with
+`focusBehaviour: 'none'`.
 
 If an action really needs a one-time intent, the action states it to Oneput
 directly. It does not pass it through the model.

@@ -11,6 +11,7 @@ import type {
   UILayout
 } from '../types.js';
 import type { KeyBindingMap } from '../lib/bindings.js';
+import { coalesce } from './helpers/coalesce.js';
 
 export type AppChange = {
   previous: AppObject | null;
@@ -64,6 +65,8 @@ export class AppController {
   private unsubscribeMenuOpenChange?: () => void;
   private unsubscribeMenuOpenFocus?: () => void;
   private pendingPop?: { payload: unknown };
+  /** The AppObject that `watch` is subscribed for, and its unsubscribes. */
+  private watching?: { app: AnyAppObject; unsubscribes: (() => void)[] };
   private currentInputScope?: InputScope;
 
   // UI settings
@@ -490,11 +493,13 @@ export class AppController {
   }
 
   private runBeforeExit() {
+    this.stopWatch();
     this.teardownInputScope();
     this.current?.onExit?.();
   }
 
   private runBeforeSuspend() {
+    this.stopWatch();
     this.teardownInputScope();
     this.current?.onSuspend?.();
   }
@@ -586,7 +591,53 @@ export class AppController {
     if (this.focusInputOnStart) {
       this.ctl.input.focus();
     }
+    this.startWatch();
   }
+
+  /**
+   * Subscribe to the current AppObject's `watch`, then schedule one refresh.
+   * Runs after onStart / onResume, so the first refresh sees their state.
+   */
+  private startWatch() {
+    this.stopWatch();
+    const app = this.current;
+    if (!app?.watch) {
+      return;
+    }
+    const unsubscribes = app
+      .watch()
+      .map((model) => model.subscribe(() => void this.scheduleRefresh(app)));
+    this.watching = { app, unsubscribes };
+    void this.scheduleRefresh(app);
+  }
+
+  private stopWatch() {
+    for (const unsubscribe of this.watching?.unsubscribes ?? []) {
+      unsubscribe();
+    }
+    this.watching = undefined;
+  }
+
+  /**
+   * One refresh per burst of notifies. See {@link coalesce}.
+   *
+   * A refresh scheduled before a suspend or exit does nothing, because that
+   * AppObject is no longer the one being watched.
+   */
+  private scheduleRefresh = coalesce<AnyAppObject, void>(
+    { merge: (_current, next) => next },
+    async (app) => {
+      if (this.watching?.app !== app || this.current !== app) {
+        return;
+      }
+      app.onRefresh?.();
+      this.ctl.ui.invalidate();
+      void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+      if (typeof app.actions === 'function') {
+        this.invalidate();
+      }
+    }
+  );
 
   /**
    * The running AppObject can call this to exit itself.

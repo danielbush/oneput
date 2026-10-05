@@ -676,13 +676,11 @@ Three rules keep native focus and menu focus in step:
 3. When the input gets focus, menu focus moves to the input row.
 
 ```ts
-// rule 1: on the input row
-onFocus: (ctl, { cause }) => {
-  if (cause === 'keyboard' && !ctl.input.isFocused) ctl.input.focus();
-};
-// rule 2: on each control row
-onFocus: (ctl, { cause }) => {
-  if (cause === 'keyboard') ctl.input.blur();
+// rules 1 and 2: one AppObject hook, thus no code on each row
+onMenuItemFocus = ({ menuItem, cause }) => {
+  if (cause !== 'keyboard') return;
+  if (menuItem?.id === INPUT_ROW_ID) ctl.input.focus();
+  else ctl.input.blur();
 };
 // rule 3: in onStart (unsubscribe in onExit)
 ctl.input.subscribeFocusChange((focused) => {
@@ -690,7 +688,7 @@ ctl.input.subscribeFocusChange((focused) => {
 });
 ```
 
-Rules 1 and 2 respond only to `keyboard`. Pointer hover and invalidate also move menu focus, and they must not take focus away from the input while the user types. Rule 3 moves focus with cause `programmatic`, which rule 1 ignores, thus the rules do not loop.
+Rules 1 and 2 respond only to `keyboard`. Pointer hover and invalidate also move menu focus, and they must not take focus away from the input while the user types. Rule 3 moves focus with cause `programmatic`, which `onMenuItemFocus` ignores, thus the rules do not loop. Every row other than the input row blurs the input, thus a new row needs no extra code.
 
 Compare setting (2): `enableMenuItemFocus: false` also frees `Enter`, but it removes keyboard menu selection completely.
 

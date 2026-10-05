@@ -18,7 +18,7 @@ import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMen
 import { divider, menuItem } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppActions, AppLayoutParams, AppObject, MenuItem, UIFlags } from '@oneput/oneput';
+import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from './_icons.js';
@@ -167,16 +167,6 @@ export class KatexFormula {
 
 const PREVIEW_ID = 'katex-preview-pane';
 
-/** INPUT_ROW rule 2: keyboard focus on a control row leaves the input. */
-function blurOnFocus(item: MenuItem): MenuItem {
-  return {
-    ...item,
-    onFocus: (ctl, { cause }) => {
-      if (cause === 'keyboard') ctl.input.blur();
-    }
-  };
-}
-
 /** The UI adapter over `KatexFormula`. */
 export class KatexDemo implements AppObject {
   static create(ctl: Controller) {
@@ -285,16 +275,13 @@ export class KatexDemo implements AppObject {
         // The preview shows one isolated formula, thus it stays centered in both
         // modes. Display mode changes the katex itself: larger fractions, and sum
         // limits above and below the operator.
-        // INPUT_ROW: focusable, with no action. Keyboard focus here moves to
-        // the input. Its own `class` gives it its own focus style
-        // (CUSTOM_ROW_FOCUS, see KatexDemo.css).
+        // INPUT_ROW: focusable, with no action (see onMenuItemFocus). Its own
+        // `class` gives it its own focus style (CUSTOM_ROW_FOCUS, see
+        // KatexDemo.css).
         menuItem({
           id: PREVIEW_ID,
           type: 'vflex',
           class: 'katex-preview-pane',
-          onFocus: (ctl, { cause }) => {
-            if (cause === 'keyboard' && !ctl.input.isFocused) ctl.input.focus();
-          },
           style: {
             overflow: 'auto',
             display: 'block',
@@ -315,38 +302,48 @@ export class KatexDemo implements AppObject {
         }),
         infoMenuItem({ id: 'katex-instructions', msg: this.helpMessage, icon: icons.Info }),
         divider(),
-        blurOnFocus(
-          stdMenuItem({
-            id: 'katex-insert',
-            textContent: 'Insert',
-            left: (b) => [b.icon(icons.ArrowUp)],
-            bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.SUBMIT]?.bindings[0],
-            // Disabled rows cannot get menu focus, and a refresh builds the
-            // row again when `canInsert` changes.
-            attr: { disabled: !canInsert },
-            closeMenuOnAction: false,
-            action: () => {
-              this.actions[OneputAction.SUBMIT].action();
-              // Back to typing: rule 3 then puts menu focus on the preview.
-              this.ctl.input.focus();
-            }
-          })
-        ),
-        blurOnFocus(
-          checkboxMenuItem({
-            id: 'katex-display-mode-checkbox',
-            // The checkbox is controlled, so its next value is always the toggle.
-            action: () => this.actions.TOGGLE_DISPLAY_MODE.action(),
-            textContent: 'Display mode',
-            bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
-            source: {
-              get: () => this.formula.current.displayMode,
-              subscribe: this.formula.subscribe
-            }
-          })
-        )
+        stdMenuItem({
+          id: 'katex-insert',
+          textContent: 'Insert',
+          left: (b) => [b.icon(icons.ArrowUp)],
+          bindingHint: this.ctl.keys.getCurrentBindings()[OneputAction.SUBMIT]?.bindings[0],
+          // Disabled rows cannot get menu focus, and a refresh builds the
+          // row again when `canInsert` changes.
+          attr: { disabled: !canInsert },
+          closeMenuOnAction: false,
+          action: () => {
+            this.actions[OneputAction.SUBMIT].action();
+            // Back to typing: rule 3 then puts menu focus on the preview.
+            this.ctl.input.focus();
+          }
+        }),
+        checkboxMenuItem({
+          id: 'katex-display-mode-checkbox',
+          // The checkbox is controlled, so its next value is always the toggle.
+          action: () => this.actions.TOGGLE_DISPLAY_MODE.action(),
+          textContent: 'Display mode',
+          bindingHint: this.ctl.keys.getCurrentBindings().TOGGLE_DISPLAY_MODE?.bindings[0],
+          source: {
+            get: () => this.formula.current.displayMode,
+            subscribe: this.formula.subscribe
+          }
+        })
       ]
     };
+  };
+
+  /**
+   * INPUT_ROW rules 1 and 2, for keyboard focus only. Pointer hover and
+   * invalidate also move menu focus, and they must not take the input away
+   * while the user types.
+   *
+   * 1. The preview row focuses the input.
+   * 2. Every other row blurs the input.
+   */
+  onMenuItemFocus: AppObject['onMenuItemFocus'] = ({ menuItem, cause }) => {
+    if (cause !== 'keyboard') return;
+    if (menuItem?.id === PREVIEW_ID) this.ctl.input.focus();
+    else this.ctl.input.blur();
   };
 
   onExit = () => {
@@ -366,8 +363,8 @@ export class KatexDemo implements AppObject {
         void this.ctl.menu.invalidate();
       }
     );
-    // INPUT_ROW: focus on the input puts menu focus on the preview. The
-    // preview's onFocus ignores this programmatic cause, thus no loop.
+    // INPUT_ROW rule 3: focus on the input puts menu focus on the preview.
+    // onMenuItemFocus ignores this programmatic cause, thus no loop.
     this.unsubscribeInputFocus?.();
     this.unsubscribeInputFocus = this.ctl.input.subscribeFocusChange((focused) => {
       if (focused) this.ctl.menu.focusMenuItemById(PREVIEW_ID);

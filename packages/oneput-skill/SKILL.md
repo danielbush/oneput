@@ -89,7 +89,7 @@ Menu lifecycle hooks receive resolved menu state:
 
 - `onMenuOpenChange({ open })` — the menu opened or closed
 - `onMenuUpdate({ cause, menuId, menuItem, index })` — displayed rows or the current item changed; `cause` is `set-menu`, `invalidate`, `input-change`, or `open`
-- `onMenuItemFocus({ menuId, menuItem, index })` — synthetic focus changed
+- `onMenuItemFocus({ menuId, menuItem, index, cause })` — synthetic focus changed
 
 When the menu opens, these hooks run in the order shown above.
 
@@ -358,7 +358,7 @@ CSS. See CUSTOM_ROW_FOCUS in `docs/CONCEPTS.md`.
 
 To keep menu focus on and still let `Enter` write newlines in a textarea, give
 the input its own focusable row with no `action`. `Enter` on that row falls
-through to the textarea. Keep focus in step with `MenuItem.onFocus` (filter
+through to the textarea. Keep focus in step with the AppObject `onMenuItemFocus` hook (filter
 `cause === 'keyboard'`), `ctl.input.focus()` / `blur()` and
 `ctl.input.subscribeFocusChange`. See INPUT_ROW in `docs/CONCEPTS.md` and
 `KatexDemo`.

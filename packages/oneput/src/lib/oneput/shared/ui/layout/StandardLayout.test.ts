@@ -87,3 +87,38 @@ describe('inputSend / inputAccept / inputReject: enabled', () => {
     expect(reject.attr?.disabled).toBe(true);
   });
 });
+
+describe('inputTextArea', () => {
+  test('rows - in inputUI', () => {
+    // arrange
+    const layout = createLayout({ inputTextArea: { rows: 5 } });
+
+    // act
+    const { textArea } = layout.inputUI;
+
+    // assert
+    expect(textArea).toEqual({ rows: 5 });
+  });
+
+  test('replace without it - removed', () => {
+    // arrange
+    const layout = createLayout({ inputTextArea: { rows: 5 } });
+
+    // act
+    layout.configure({ params: { menuTitle: 'Next' }, replace: true });
+
+    // assert
+    expect(layout.inputUI.textArea).toBeUndefined();
+  });
+
+  test('merge without it - kept', () => {
+    // arrange
+    const layout = createLayout({ inputTextArea: { rows: 5 } });
+
+    // act
+    layout.configure({ params: { menuTitle: 'Same app' } });
+
+    // assert
+    expect(layout.inputUI.textArea).toEqual({ rows: 5 });
+  });
+});

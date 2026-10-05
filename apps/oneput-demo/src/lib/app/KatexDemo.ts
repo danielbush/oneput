@@ -17,7 +17,7 @@ import katex from 'katex';
 import { checkboxMenuItem } from '@oneput/oneput/shared/ui/menuItems/checkboxMenuItem.js';
 import { cell, divider, menuItem, type Cell } from '@oneput/oneput';
 import { infoMenuItem } from '@oneput/oneput/shared/ui/menuItems/infoMenuItem.js';
-import type { AppActions, AppLayoutParams, AppObject, OneputProps, UIFlags } from '@oneput/oneput';
+import type { AppActions, AppLayoutParams, AppObject, UIFlags } from '@oneput/oneput';
 import { DynamicPlaceholder } from '@oneput/oneput/shared/ui/DynamicPlaceholder.js';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { icons } from './_icons.js';
@@ -166,6 +166,7 @@ export class KatexDemo implements AppObject {
   layout = {
     params: {
       menuTitle: 'Katex Demo',
+      inputTextArea: { rows: 5 },
       // The Send button runs the SUBMIT action. `enabled` is read each time
       // the layout builds, so `syncChrome` only needs to rebuild it.
       inputSend: {
@@ -312,18 +313,9 @@ export class KatexDemo implements AppObject {
 
   /**
    * Rebuild the layout's input chrome, so the Send button shows the current
-   * `canInsert()`. Then set the textarea rows again.
-   *
-   * Order matters: `ctl.ui.update` rebuilds `inputUI` from the layout, so
-   * `setInputUI` must run after it.
+   * `canInsert()`.
    */
   private syncChrome() {
     this.ctl.ui.update({});
-    this.ctl.ui.setInputUI((current) => {
-      return {
-        ...current,
-        textArea: { rows: 5 }
-      } satisfies OneputProps['inputUI'];
-    });
   }
 }

@@ -541,6 +541,14 @@ export type AppLayoutParams = {
    * Hosts often paint an X.
    */
   inputReject?: LayoutAffordance;
+  /**
+   * Input or textarea for this AppObject. Same values as
+   * `OneputProps['inputUI']['textArea']`.
+   *
+   * A layout param, not `setInputUI`, so that it stays when the layout
+   * rebuilds its UI (each `ctl.ui.update`).
+   */
+  inputTextArea?: boolean | { rows: number };
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

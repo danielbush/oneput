@@ -1,4 +1,4 @@
-import type { AppLayoutParams, AppObject, Controller, OneputProps, UIFlags } from '@oneput/oneput';
+import type { AppLayoutParams, AppObject, Controller, UIFlags } from '@oneput/oneput';
 import { hflex } from '@oneput/oneput';
 import {
   chatSessionItem,
@@ -33,6 +33,7 @@ export class ElizaChat implements AppObject {
   layout = {
     params: {
       menuTitle: 'ELIZA',
+      inputTextArea: { rows: 3 },
       // `enabled` is read each time the layout builds, so `syncSendChrome`
       // only needs to rebuild it.
       inputSend: {
@@ -99,17 +100,10 @@ export class ElizaChat implements AppObject {
 
   /**
    * Rebuild the layout's input chrome, so the Send button shows the current
-   * draft and busy state. `ui.update` rebuilds layout `inputUI`, so re-apply
-   * the textarea afterward.
+   * draft and busy state.
    */
   private syncSendChrome() {
     this.ctl.ui.update({});
-    this.ctl.ui.setInputUI((current) => {
-      return {
-        ...current,
-        textArea: { rows: 3 }
-      } satisfies OneputProps['inputUI'];
-    });
   }
 
   private async clear() {

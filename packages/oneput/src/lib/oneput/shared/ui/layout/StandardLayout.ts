@@ -98,8 +98,14 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     return;
   }
 
+  /**
+   * The Back button shows only when Back has somewhere to go
+   * (`ctl.app.canGoBack()`, see BACK_HANDLING). Otherwise a spacer of the same
+   * width takes its place, thus the title does not move. Read on each build: a
+   * change to `hasBackLevel` needs `ctl.ui.invalidate()`.
+   */
   private get backAction() {
-    if (this.ctl.app.flags.enableGoBack) {
+    if (this.ctl.app.canGoBack()) {
       return this.ctl.app.goBack;
     }
     return;

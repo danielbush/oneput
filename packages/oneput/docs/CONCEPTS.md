@@ -865,7 +865,7 @@ onBack = () => {
 
 `setOnBack` and `onBack` mean the same thing to `ctl.app`: the AppObject handles Back itself. Thus the AppObject also decides when to `exit()`. At its top level, the handler must exit (or do something else useful), or Back does nothing there.
 
-`ctl.app.canGoBack()` answers "does Back have somewhere to go?". The Back menu rows (`OneputActionProvider` BACK, jsed's back row) use it to show or hide themselves. Oneput knows the AppObject stack, but it cannot know what a Back handler does. Thus a handler does not count by itself, and the AppObject reports its own levels with `hasBackLevel`:
+`ctl.app.canGoBack()` answers "does Back have somewhere to go?". The layout's Back button and the Back menu rows (`OneputActionProvider` BACK, jsed's back row) use it to show or hide themselves. Oneput knows the AppObject stack, but it cannot know what a Back handler does. Thus a handler does not count by itself, and the AppObject reports its own levels with `hasBackLevel`:
 
 | Case                                                          | `canGoBack()`                              |
 | ------------------------------------------------------------- | ------------------------------------------ |
@@ -884,7 +884,7 @@ onBack = () => (this.path === '/' ? this.ctl.app.exit() : this.navigateTo(this.p
 
 The AppObject keeps `hasBackLevel` correct for its own levels. It never needs to know whether it has a parent, because `ctl.app` adds that part. When `hasBackLevel` is omitted, a root AppObject with levels hides the Back rows, but Back still works.
 
-COMMENT: the layout's Back button (StandardLayout) shows when `enableGoBack` is on and does not read `canGoBack()`. Thus the button and the Back row can disagree.
+StandardLayout's header Back button also uses `canGoBack()`. When Back has nowhere to go, a spacer of the same width takes its place, thus the title does not move. The layout reads `canGoBack()` on each build, like an affordance's `enabled`. Changes to the AppObject stack rebuild the layout, and so does a `watch` refresh. An AppObject that changes `hasBackLevel` imperatively (for example on a folder change) calls `ctl.ui.invalidate()`.
 
 All levels share one set of `actions`, bindings, `settings` and lifecycle hooks. When a level needs its own keys, flags or cleanup, use a child AppObject (`ctl.app.run`) instead.
 

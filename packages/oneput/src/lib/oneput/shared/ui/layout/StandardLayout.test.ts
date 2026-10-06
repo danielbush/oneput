@@ -123,3 +123,57 @@ describe('inputTextArea', () => {
     expect(layout.inputUI.textArea).toEqual({ rows: 5 });
   });
 });
+
+describe('Back button', () => {
+  function backButton(ctl: Controller) {
+    const layout = StandardLayout.create(ctl, {}, icons);
+    let found: FChildParams | undefined;
+    walk(layout.menuUI.layoutHeader as FlexParams, (child) => {
+      if (child.type === 'fchild' && child.attr?.title === 'Back') found = child as FChildParams;
+    });
+    return found;
+  }
+
+  function nullController() {
+    const ctl = Controller.createNull();
+    controllers.push(ctl);
+    return ctl;
+  }
+
+  test('root, no back level - hidden', () => {
+    // arrange
+    const ctl = nullController();
+    ctl.app.run({});
+
+    // act
+    const button = backButton(ctl);
+
+    // assert
+    expect(button).toBeUndefined();
+  });
+
+  test('child - shown', () => {
+    // arrange
+    const ctl = nullController();
+    ctl.app.run({});
+    ctl.app.run({});
+
+    // act
+    const button = backButton(ctl);
+
+    // assert
+    expect(button).toBeDefined();
+  });
+
+  test('root, hasBackLevel - shown', () => {
+    // arrange
+    const ctl = nullController();
+    ctl.app.run({ hasBackLevel: () => true });
+
+    // act
+    const button = backButton(ctl);
+
+    // assert
+    expect(button).toBeDefined();
+  });
+});

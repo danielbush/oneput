@@ -812,6 +812,82 @@ It runs when those rows become the displayed snapshot during open.
 - `input-change` — an input event redisplayed the menu
 - `open` — opening refreshed a previously closed menu
 
+## Nested menus
+
+Oneput has no menu stack. One AppObject can show several menu levels (a list, then one item, then a detail). The AppObject changes the menu itself and tells Oneput what Back does (see BACK_HANDLING). There are two patterns.
+
+### IMPERATIVE_NESTING - `setMenu` + `setOnBack`
+
+Each level is a method. It sets the title, the Back handler and the menu. Back calls the method of the parent level. Example: `BindingsEditor` (actions list → one action → capture keys → "when" flag).
+
+```ts
+private listUI = () => {
+  this.ctl.ui.update({ params: { menuTitle: 'Items' } });
+  this.ctl.app.setOnBack(() => this.ctl.app.exit()); // top level: leave the AppObject
+  this.ctl.menu.setMenu({ id: 'list', items: items.map((i) => row(i, () => this.itemUI(i))) });
+};
+
+private itemUI = (item: Item) => {
+  this.ctl.ui.update({ params: { menuTitle: item.name } });
+  this.ctl.app.setOnBack(() => this.listUI()); // Back goes to the parent level
+  this.ctl.menu.setMenu({ id: `item-${item.id}`, items: [...] });
+};
+```
+
+- Good for a flow of steps, where each step does some setup (key capture, input placeholder, modal flags).
+- Each level must set everything it needs, because the previous level's title, params and Back handler stay until something replaces them.
+
+### DECLARATIVE_NESTING - level state + `menu()` + `onBack`
+
+The current level is state. `menu()` (and `layout.params`, if it is a function of state) build from that state. The declarative `onBack` moves the state up one level. Fits REFRESH_PATTERN: when the level is in the model, `watch` refreshes the UI, and nothing calls `invalidate`.
+
+```ts
+level: { kind: 'list' } | { kind: 'item'; item: Item } = { kind: 'list' };
+
+menu = () =>
+  this.level.kind === 'list'
+    ? { id: 'list', items: items.map((i) => row(i, () => this.open(i))) }
+    : { id: `item-${this.level.item.id}`, items: [...] };
+
+onBack = () => {
+  if (this.level.kind === 'list') return this.ctl.app.exit();
+  this.level = { kind: 'list' };
+  this.ctl.menu.invalidate(); // or: write to the model, and `watch` refreshes
+};
+```
+
+- Good when levels are views of the same data, with no per-level setup.
+- The UI is always a function of the level, thus no level leaves stale state behind.
+
+### BACK_HANDLING - who handles Back, and when Back is available
+
+`ctl.app.goBack()` uses the first of these that applies: an active input claim, `enableGoBack: false` (stop), the `setOnBack` handler, the AppObject's `onBack`, then pop to the parent AppObject (or the root-exit handler). Thus a nested level gets Back before the AppObject stack does. Oneput clears `setOnBack` each time an AppObject starts or resumes (an exit resumes the parent), thus a handler does not leak into another AppObject.
+
+`setOnBack` and `onBack` mean the same thing to `ctl.app`: the AppObject handles Back itself. Thus the AppObject also decides when to `exit()`. At its top level, the handler must exit (or do something else useful), or Back does nothing there.
+
+`ctl.app.canGoBack()` answers "does Back have somewhere to go?". The Back menu rows (`OneputActionProvider` BACK, jsed's back row) use it to show or hide themselves. Oneput knows the AppObject stack, but it cannot know what a Back handler does. Thus a handler does not count by itself, and the AppObject reports its own levels with `hasBackLevel`:
+
+| Case                                                          | `canGoBack()`                              |
+| ------------------------------------------------------------- | ------------------------------------------ |
+| a parent AppObject, or a root-exit handler                    | true (`exit()` always has somewhere to go) |
+| a root AppObject with no Back handler                         | false                                      |
+| a root AppObject that handles Back, with no root-exit handler | `hasBackLevel?.() === true`                |
+| `enableGoBack: false`                                         | false                                      |
+
+COMMENT: `hasBackLevel` only matters in one case: a root AppObject, with no root-exit handler, that handles Back itself (setOnBack or onBack).
+
+```ts
+// FilePicker: a parent folder is a level
+hasBackLevel = () => this.path !== '/';
+onBack = () => (this.path === '/' ? this.ctl.app.exit() : this.navigateTo(this.parentPath()));
+```
+
+The AppObject keeps `hasBackLevel` correct for its own levels. It never needs to know whether it has a parent, because `ctl.app` adds that part. When `hasBackLevel` is omitted, a root AppObject with levels hides the Back rows, but Back still works.
+
+COMMENT: the layout's Back button (StandardLayout) shows when `enableGoBack` is on and does not read `canGoBack()`. Thus the button and the Back row can disagree.
+
+All levels share one set of `actions`, bindings, `settings` and lifecycle hooks. When a level needs its own keys, flags or cleanup, use a child AppObject (`ctl.app.run`) instead.
+
 ## INPUT_CLAIM's
 
 A claim is useful when an existing `AppObject` temporarily changes what typing means.

@@ -773,13 +773,19 @@ export class AppController {
   }
 
   /**
-   * True when Back is enabled and there is a parent or a root exit handler.
+   * True when Back is enabled and Back has somewhere to go: a parent, a root
+   * exit handler, or a level inside the current AppObject (`hasBackLevel`).
+   *
+   * A Back handler (`setOnBack` / `onBack`) does not count by itself: Oneput
+   * cannot know what it does. See BACK_HANDLING in docs/CONCEPTS.md.
    */
   canGoBack() {
     return (
       !!this.current &&
       !this.disableGoBack &&
-      (this.appParents.length > 0 || this.onRootExit !== undefined)
+      (this.appParents.length > 0 ||
+        this.onRootExit !== undefined ||
+        this.current.hasBackLevel?.() === true)
     );
   }
 

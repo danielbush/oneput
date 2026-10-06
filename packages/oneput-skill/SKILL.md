@@ -151,6 +151,12 @@ ctl.app.setOnBack(() => {
 
 // Trigger back
 ctl.app.goBack();
+
+// An AppObject that handles Back (setOnBack / onBack) decides when to exit().
+// Report its own levels so a root AppObject shows the Back row correctly:
+hasBackLevel = () => this.path !== '/';
+// ctl.app.canGoBack(): true with a parent or root-exit handler; otherwise
+// hasBackLevel. See BACK_HANDLING in docs/CONCEPTS.md.
 ```
 
 ## Bindings Pattern

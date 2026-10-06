@@ -1019,6 +1019,61 @@ describe('AppController', () => {
       expect(exits).toEqual([]);
     });
 
+    test('canGoBack: root, onBack, no hasBackLevel - false', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const root: AppObject = { onBack: () => {} };
+
+      // act
+      ctl.app.run(root);
+
+      // assert
+      expect(ctl.app.canGoBack()).toBe(false);
+    });
+
+    test('canGoBack: root, setOnBack, hasBackLevel - follows it', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      let level = true;
+      const root: AppObject = { hasBackLevel: () => level };
+      ctl.app.run(root);
+      ctl.app.setOnBack(() => {});
+
+      // act
+      const atLevel = ctl.app.canGoBack();
+      level = false;
+      const atTop = ctl.app.canGoBack();
+
+      // assert
+      expect(atLevel).toBe(true);
+      expect(atTop).toBe(false);
+    });
+
+    test('canGoBack: child, hasBackLevel false - true', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      ctl.app.run({});
+      const child: AppObject = { hasBackLevel: () => false };
+
+      // act
+      ctl.app.run(child);
+
+      // assert
+      expect(ctl.app.canGoBack()).toBe(true);
+    });
+
+    test('canGoBack: hasBackLevel true, enableGoBack false - false', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const root: AppObject = { hasBackLevel: () => true, settings: { enableGoBack: false } };
+
+      // act
+      ctl.app.run(root);
+
+      // assert
+      expect(ctl.app.canGoBack()).toBe(false);
+    });
+
     test('exit: root - clear app without a handler', () => {
       // arrange
       const ctl = Controller.createNull();

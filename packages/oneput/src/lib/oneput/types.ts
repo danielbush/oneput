@@ -655,8 +655,20 @@ export interface AppObject<
    * Precedence: an imperative `setOnBack` handler wins if one has been set
    * (it is cleared per-AppObject on start, so it only overrides while live).
    * If neither is present, back falls through to the default pop.
+   *
+   * An AppObject that handles Back (this, or `setOnBack`) also decides
+   * whether to `exit()`.
    */
   onBack?: () => void;
+  /**
+   * True when this AppObject has its own level to go back to (e.g. a sub-menu
+   * or a parent folder). See BACK_HANDLING in docs/CONCEPTS.md.
+   *
+   * `ctl.app.canGoBack()` reads it only for a root AppObject with no root-exit
+   * handler. With a parent or a root-exit handler, Back is always available.
+   * Omitted means false.
+   */
+  hasBackLevel?: () => boolean;
   /** Called when synthetic focus moves to an item in the current menu. */
   onMenuItemFocus?: (data: {
     menuId: string;

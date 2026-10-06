@@ -51,6 +51,9 @@ export function setHTML(element: Element, unsafeHTML: string): void {
  * happy-dom). Then DOMPurify leaves unsafe markup after the first node.
  * Sanitize a known input once, and refuse the fallback when the result is
  * wrong.
+ * 
+ * This is mostly useful to avoid mysterious errors in tests but also 
+ * can lead to false results that would be misleading.
  */
 function canUseFallback(): boolean {
   if (!DOMPurify.isSupported) return false;

@@ -1,18 +1,18 @@
 import type { EditorState } from '../EditorState.js';
 import * as insert from '../../../lib/ops/focusable/insert.js';
-import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
+import { refocusIfDisconnected } from './keepFocus.js';
 
 /**
- * Editor-level FOCUS operation: append an existing element inside a parent.
+ * Editor-level operation: append an existing element inside a parent.
  *
- * Same lifecycle as {@link AppendNew} (emit, FOCUS, normalize, undo/redo), but
- * the caller supplies the element instead of an {@link ElementSpec}.
+ * It keeps the current FOCUS: the caller decides whether to move FOCUS to the
+ * new element (for example, a protocol recipe with a `focus-role` step). Undo
+ * moves FOCUS back only when FOCUS was inside the removed element.
  *
  * `parent` defaults to the current FOCUS. Pass an explicit parent when the
- * append host is not FOCUSABLE (e.g. `data-jsed-focus="off"`); undo restores
- * the prior FOCUS rather than that host.
+ * append host is not FOCUSABLE (e.g. `data-jsed-focus="off"`).
  */
 export class AppendElement implements UndoRecord {
   static run(
@@ -26,22 +26,19 @@ export class AppendElement implements UndoRecord {
     if (!appendParent) return;
 
     const op = insert.appendElement(element, appendParent);
-    const focusTarget = getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
     });
-    state.nav.FOCUS(focusTarget);
 
-    const undoFocus = focus ?? focusTarget;
-    const record = new AppendElement(op, { undo: undoFocus, redo: focusTarget });
+    const record = new AppendElement(op, focus ?? undefined);
     record.normalize();
     return record;
   }
 
   constructor(
     private op: insert.AppendElement,
-    private focusTarget: { undo: HTMLElement; redo: HTMLElement }
+    private priorFocus: HTMLElement | undefined
   ) {}
 
   /**
@@ -55,13 +52,12 @@ export class AppendElement implements UndoRecord {
 
   undo(state: EditorState) {
     insert.undoAppendElement(this.op);
-    state.nav.FOCUS(this.focusTarget.undo);
+    refocusIfDisconnected(state, this.priorFocus, this.op.parent);
     this.normalize();
   }
 
-  redo(state: EditorState) {
+  redo(_state: EditorState) {
     insert.redoAppendElement(this.op);
-    state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
   }
 }

@@ -18,7 +18,7 @@ function getEditorState(doc: JsedDocument): EditorState {
 }
 
 describe('InsertElementAfter.run', () => {
-  it('inserts the given element after the focused tag and focuses into it', () => {
+  it('inserts the given element after the focused tag and keeps FOCUS', () => {
     // arrange
     const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
     const state = getEditorState(doc);
@@ -36,7 +36,7 @@ describe('InsertElementAfter.run', () => {
     expect(record).toBeDefined();
     expect(children).toHaveLength(3);
     expect(children[1]).toBe(list);
-    expect(state.nav.getFocus()).toBe(item);
+    expect(state.nav.getFocus()).toBe(byId(doc, 'p1'));
 
     state.destroy();
   });
@@ -92,7 +92,7 @@ describe('InsertElementAfter.run', () => {
     // assert
     expect(record).toBeDefined();
     expect(Array.from(doc.root.children).map((el) => el.id)).toEqual(['p1', 'p-new', 'p2']);
-    expect(state.nav.getFocus()).toBe(inserted);
+    expect(state.nav.getFocus()).toBe(byId(doc, 'p2'));
 
     state.destroy();
   });
@@ -118,7 +118,26 @@ describe('InsertElementAfter undo / redo', () => {
 
     // assert
     expect(doc.root.children[1]).toBe(inserted);
-    expect(state.nav.getFocus()).toBe(inserted);
+    expect(state.nav.getFocus()).toBe(byId(doc, 'p1'));
+
+    state.destroy();
+  });
+
+  it('undo moves FOCUS back when FOCUS is inside the removed element', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'foo'), p({ id: 'p2' }, 'bar')));
+    const state = getEditorState(doc);
+    const inserted = doc.root.ownerDocument.createElement('p');
+    inserted.textContent = 'new';
+    const record = InsertElementAfter.run(state, inserted)!;
+    state.nav.FOCUS(inserted);
+
+    // act
+    record.undo(state);
+
+    // assert
+    expect(doc.root.contains(inserted)).toBe(false);
+    expect(state.nav.getFocus()).toBe(byId(doc, 'p1'));
 
     state.destroy();
   });

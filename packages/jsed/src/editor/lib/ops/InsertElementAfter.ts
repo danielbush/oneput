@@ -1,14 +1,15 @@
 import type { EditorState } from '../EditorState.js';
 import * as insert from '../../../lib/ops/focusable/insert.js';
-import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
+import { refocusIfDisconnected } from './keepFocus.js';
 
 /**
- * Editor-level FOCUS operation: insert an existing element after an anchor.
+ * Editor-level operation: insert an existing element after an anchor.
  *
- * Same lifecycle as {@link InsertAfter} (emit, FOCUS, normalize, undo/redo), but
- * the caller supplies the element instead of an {@link ElementSpec}.
+ * It keeps the current FOCUS: the caller decides whether to move FOCUS to the
+ * new element (for example, a protocol recipe with a `focus-role` step). Undo
+ * moves FOCUS back only when FOCUS was inside the removed element.
  *
  * `after` defaults to the current FOCUS. Pass an explicit anchor when the
  * insert host is not the FOCUSABLE leaf (e.g. insert a task-item after a
@@ -25,23 +26,20 @@ export class InsertElementAfter implements UndoRecord {
     const target = after ?? focus;
     if (!target || target === state.document.root) return;
 
-    const undoFocus = focus ?? target;
     const op = insert.insertElementAfter(element, target);
-    const focusTarget = getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
     });
-    state.nav.FOCUS(focusTarget);
 
-    const record = new InsertElementAfter(op, { undo: undoFocus, redo: focusTarget });
+    const record = new InsertElementAfter(op, focus ?? target);
     record.normalize();
     return record;
   }
 
   constructor(
     private op: insert.InsertElementAfter,
-    private focusTarget: { undo: HTMLElement; redo: HTMLElement }
+    private priorFocus: HTMLElement
   ) {}
 
   /**
@@ -58,13 +56,12 @@ export class InsertElementAfter implements UndoRecord {
 
   undo(state: EditorState) {
     insert.undoInsertElementAfter(this.op);
-    state.nav.FOCUS(this.focusTarget.undo);
+    refocusIfDisconnected(state, this.priorFocus, this.op.target);
     this.normalize();
   }
 
-  redo(state: EditorState) {
+  redo(_state: EditorState) {
     insert.redoInsertElementAfter(this.op);
-    state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
   }
 }

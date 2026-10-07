@@ -1,14 +1,15 @@
 import type { EditorState } from '../EditorState.js';
 import * as move from '../../../lib/ops/focusable/move.js';
-import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
  * Editor-level operation: move an existing element to a new location.
  *
- * Undo restores the prior parent/index and FOCUS. Used by protocol recipes
- * (reorder / promote / demote) rather than freeform HTML editing.
+ * Undo restores the prior parent/index. It keeps the current FOCUS: a moved
+ * element stays in the document, so FOCUS inside it stays valid. Used by
+ * protocol recipes (reorder / promote / demote) rather than freeform HTML
+ * editing.
  */
 export class MoveElement implements UndoRecord {
   static run(
@@ -18,27 +19,20 @@ export class MoveElement implements UndoRecord {
   ): MoveElement | undefined {
     if (state.isEditing()) return;
 
-    const focus = state.nav.getFocus();
     const op = move.moveElement(element, placement);
     if (!op) return;
 
-    const focusTarget = getInitialFocusTarget(op.element);
     state.eventsEmitter.emitElementChange({
       type: 'focusable-inserted',
       element: op.element
     });
-    state.nav.FOCUS(focusTarget);
 
-    const undoFocus = focus && element.contains(focus) ? focusTarget : (focus ?? focusTarget);
-    const record = new MoveElement(op, { undo: undoFocus, redo: focusTarget });
+    const record = new MoveElement(op);
     record.normalize();
     return record;
   }
 
-  constructor(
-    private op: move.MoveElement,
-    private focusTarget: { undo: HTMLElement; redo: HTMLElement }
-  ) {}
+  constructor(private op: move.MoveElement) {}
 
   /**
    * Normalize both the origin and destination containers.
@@ -56,15 +50,13 @@ export class MoveElement implements UndoRecord {
     }
   }
 
-  undo(state: EditorState) {
+  undo(_state: EditorState) {
     move.undoMoveElement(this.op);
-    state.nav.FOCUS(this.focusTarget.undo);
     this.normalize();
   }
 
-  redo(state: EditorState) {
+  redo(_state: EditorState) {
     move.redoMoveElement(this.op);
-    state.nav.FOCUS(this.focusTarget.redo);
     this.normalize();
   }
 }

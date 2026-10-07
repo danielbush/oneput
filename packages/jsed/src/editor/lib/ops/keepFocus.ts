@@ -1,5 +1,5 @@
 import type { EditorState } from '../EditorState.js';
-import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
+import { getInitialFocusTarget } from '../../../lib/ops/focusable/find.js';
 
 /**
  * Move FOCUS out of an element that is no longer in the document.

@@ -1,6 +1,6 @@
 import type { EditorState } from '../EditorState.js';
 import * as insert from '../../../lib/ops/focusable/insert.js';
-import { getInitialFocusTarget } from '../../../lib/ops/focusable/create.js';
+import { getInitialFocusTarget } from '../../../lib/ops/focusable/find.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { ElementSpec } from '../../../lib/core/dom-rules.js';
 import type { UndoRecord } from '../../../undo/index.js';

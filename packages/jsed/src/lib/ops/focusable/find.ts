@@ -15,6 +15,8 @@
  * - `findClosestFocusableAncestor` / `findNextFocusableOnAncestorPath` — climb.
  * - `getInitialFocusTarget` — descend to the first anchorable leaf, for FOCUS
  *   inside a new element.
+ * - `findFocusNear` — sideways, then climb, for FOCUS after its element is
+ *   removed.
  *
  * Nothing here mutates the DOM.
  */
@@ -91,6 +93,25 @@ export function findPreviousFocusableOutside(el: Node, ceiling: HTMLElement): HT
   }
 
   return null;
+}
+
+/**
+ * Find where FOCUS goes when its element is removed.
+ *
+ * Return `near` when it is FOCUSABLE and in the document. Otherwise search
+ * beside it in its parent: the next FOCUSABLE, then the previous one. Last,
+ * climb to the closest FOCUSABLE ancestor within `ceiling`. Pass a
+ * DELETE_MARKER as `near` to search from where a removed element was.
+ */
+export function findFocusNear(near: Node, ceiling: Node): HTMLElement | null {
+  if (!near.isConnected) return null;
+  if (isFocusable(near)) return near;
+  const parent = near.parentElement;
+  if (!parent) return null;
+  const beside = { visit: isFocusable, descend: (node: Node) => !isOpaque(node) };
+  for (const next of findNextNode(near, parent, beside)) return next as HTMLElement;
+  for (const previous of findPreviousNode(near, parent, beside)) return previous as HTMLElement;
+  return findClosestFocusableAncestor(parent, ceiling);
 }
 
 /** Test if a traversal node is outside a subtree removed from rendering. */

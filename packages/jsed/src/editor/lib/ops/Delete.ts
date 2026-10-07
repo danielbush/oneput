@@ -3,8 +3,6 @@ import * as remove from '../../../lib/ops/focusable/remove.js';
 import { canDelete } from '../../../lib/core/dom-rules.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import { removeAnchors } from '../../../lib/ops/anchor.js';
-import { isFocusable, isOpaque } from '../../../lib/core/taxonomy.js';
-import { findNextNode, findPreviousNode } from '../../../lib/core/walk.js';
 import type { UndoRecord } from '../../../undo/index.js';
 
 /**
@@ -32,7 +30,7 @@ export class Delete implements UndoRecord {
 
     const record = new Delete(op, focus, parent);
     record.normalize();
-    state.nav.FOCUS(record.getRedoFocusTarget());
+    state.nav.repairFocus(op.marker);
     return record;
   }
 
@@ -47,30 +45,6 @@ export class Delete implements UndoRecord {
    */
   private normalize() {
     normalize(this.parent);
-  }
-
-  /**
-   * Find the FOCUSABLE that should receive FOCUS after the element is deleted.
-   *
-   * Deletion stays local to the surviving parent: prefer the next FOCUSABLE
-   * within that parent, then the previous one, then the parent itself.
-   */
-  private getRedoFocusTarget(): HTMLElement {
-    for (const next of findNextNode(this.op.marker, this.parent, {
-      visit: isFocusable,
-      descend: (node) => !isOpaque(node)
-    })) {
-      return next as HTMLElement;
-    }
-
-    for (const previous of findPreviousNode(this.op.marker, this.parent, {
-      visit: isFocusable,
-      descend: (node) => !isOpaque(node)
-    })) {
-      return previous as HTMLElement;
-    }
-
-    return this.parent;
   }
 
   /**
@@ -93,6 +67,6 @@ export class Delete implements UndoRecord {
   redo(state: EditorState) {
     remove.redoDeleteElement(this.op);
     this.normalize();
-    state.nav.FOCUS(this.getRedoFocusTarget());
+    state.nav.repairFocus(this.op.marker);
   }
 }

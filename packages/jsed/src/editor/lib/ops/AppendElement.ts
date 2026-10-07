@@ -2,7 +2,6 @@ import type { EditorState } from '../EditorState.js';
 import * as insert from '../../../lib/ops/focusable/insert.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
-import { refocusIfDisconnected } from './keepFocus.js';
 
 /**
  * Editor-level operation: append an existing element inside a parent.
@@ -52,7 +51,7 @@ export class AppendElement implements UndoRecord {
 
   undo(state: EditorState) {
     insert.undoAppendElement(this.op);
-    refocusIfDisconnected(state, this.priorFocus, this.op.parent);
+    state.nav.repairFocus(this.priorFocus ?? this.op.marker);
     this.normalize();
   }
 

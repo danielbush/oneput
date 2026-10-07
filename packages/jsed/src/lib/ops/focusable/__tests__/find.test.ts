@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { byId, div, frag, makeRoot, p } from '../../../../test/util.js';
 import {
   findClosestFocusableAncestor,
+  findFocusNear,
   findNextFocusable,
   findNextFocusableOnAncestorPath,
   findNextFocusableOutside,
@@ -14,6 +15,7 @@ import {
   getInitialFocusTarget
 } from '../find.js';
 import { createElement } from '../create.js';
+import { createElementDeleteMarker, retainElementPosition } from '../retention.js';
 
 describe('findClosestFocusableAncestor', () => {
   test('self / transparent / ceiling', () => {
@@ -317,5 +319,63 @@ describe('getInitialFocusTarget', () => {
     // assert — no FOCUSABLE leaf under off; fall back to the element passed in
     expect(fromOff).toBe(byId(doc, 'off'));
     expect(fromOuter).toBe(byId(doc, 'outer'));
+  });
+});
+
+describe('findFocusNear', () => {
+  test('a FOCUSABLE in the document is its own result', () => {
+    // arrange
+    const doc = makeRoot(frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two')));
+
+    // act
+    const found = findFocusNear(byId(doc, 'p1'), doc.root);
+
+    // assert
+    expect(found).toBe(byId(doc, 'p1'));
+  });
+
+  test('a marker goes to the next FOCUSABLE, then the previous one', () => {
+    // arrange
+    const doc = makeRoot(
+      frag(p({ id: 'p1' }, 'one'), p({ id: 'p2' }, 'two'), p({ id: 'p3' }, 'three'))
+    );
+    const p3 = byId(doc, 'p3');
+    const middle = createElementDeleteMarker();
+    retainElementPosition(byId(doc, 'p2'), middle);
+
+    // act
+    const afterMiddle = findFocusNear(middle, doc.root);
+    const last = createElementDeleteMarker();
+    retainElementPosition(p3, last);
+    const afterLast = findFocusNear(last, doc.root);
+
+    // assert
+    expect(afterMiddle).toBe(p3);
+    expect(afterLast).toBe(byId(doc, 'p1'));
+  });
+
+  test('a marker with no FOCUSABLE beside it climbs to an ancestor', () => {
+    // arrange
+    const doc = makeRoot(div({ id: 'outer' }, p({ id: 'only' }, 'only')));
+    const marker = createElementDeleteMarker();
+    retainElementPosition(byId(doc, 'only'), marker);
+
+    // act
+    const found = findFocusNear(marker, doc.root);
+
+    // assert
+    expect(found).toBe(byId(doc, 'outer'));
+  });
+
+  test('a node that is not in the document has no result', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, 'one'));
+    const detached = document.createElement('p');
+
+    // act
+    const found = findFocusNear(detached, doc.root);
+
+    // assert
+    expect(found).toBeNull();
   });
 });

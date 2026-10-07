@@ -4,6 +4,7 @@ import * as token from '../lib/ops/token.js';
 import { addFocus, addFocusSibling, removeFocus, removeSiblingFocus } from '../lib/ops/focus.js';
 import {
   findClosestFocusableAncestor,
+  findFocusNear,
   findNextFocusable,
   findNextSiblingFocusable,
   findNextSiblingOrAncestorFocusable,
@@ -312,6 +313,19 @@ export class Nav {
   FOCUS(el: HTMLElement): void {
     this.#updateFocus(el);
     this.SIB_HIGHLIGHT();
+  }
+
+  /**
+   * Move FOCUS near `near` when the FOCUS element is no longer in the
+   * document; do nothing while it is. See {@link findFocusNear}.
+   *
+   * Ops that remove an element call this, for example `repairFocus(marker)`
+   * after a delete, or `repairFocus(prior ?? marker)` when undo removes an
+   * inserted element.
+   */
+  repairFocus(near: Node): void {
+    if (this.getFocus()?.isConnected) return;
+    this.FOCUS(findFocusNear(near, this.doc.root) ?? this.doc.root);
   }
 
   /**

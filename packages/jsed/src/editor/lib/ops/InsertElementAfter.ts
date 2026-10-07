@@ -2,7 +2,6 @@ import type { EditorState } from '../EditorState.js';
 import * as insert from '../../../lib/ops/focusable/insert.js';
 import { normalize } from '../../../lib/ops/normalize.js';
 import type { UndoRecord } from '../../../undo/index.js';
-import { refocusIfDisconnected } from './keepFocus.js';
 
 /**
  * Editor-level operation: insert an existing element after an anchor.
@@ -32,14 +31,14 @@ export class InsertElementAfter implements UndoRecord {
       element: op.element
     });
 
-    const record = new InsertElementAfter(op, focus ?? target);
+    const record = new InsertElementAfter(op, focus ?? undefined);
     record.normalize();
     return record;
   }
 
   constructor(
     private op: insert.InsertElementAfter,
-    private priorFocus: HTMLElement
+    private priorFocus: HTMLElement | undefined
   ) {}
 
   /**
@@ -56,7 +55,7 @@ export class InsertElementAfter implements UndoRecord {
 
   undo(state: EditorState) {
     insert.undoInsertElementAfter(this.op);
-    refocusIfDisconnected(state, this.priorFocus, this.op.target);
+    state.nav.repairFocus(this.priorFocus ?? this.op.marker);
     this.normalize();
   }
 

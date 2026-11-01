@@ -1,9 +1,11 @@
+import type { SanitizerPolicy } from "./types.js";
+
 /**
  * Allow common display markup from an untrusted source.
  *
  * Example: use this for chat agents returning html.
  */
-export const untrustedDisplayContentPolicy = {
+export const untrustedDisplayContentPolicy: SanitizerPolicy = {
   elements: [
     "a",
     "b",

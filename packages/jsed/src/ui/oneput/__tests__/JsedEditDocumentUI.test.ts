@@ -7,6 +7,13 @@ import { JsedDocument } from '../../../JsedDocument.js';
 import { JsedUI } from '../JsedUI.js';
 import { JsedAction } from '../JsedAction.js';
 
+/** A null controller with a host layout, as a host app would install one. */
+function hostController(): Controller {
+  const ctl = Controller.createNull();
+  ctl.ui.setLayout({ configure: () => {} });
+  return ctl;
+}
+
 function byId(doc: JsedDocument, id: string): HTMLElement {
   const el = doc.document.getElementById(id);
   if (!el) {
@@ -16,10 +23,20 @@ function byId(doc: JsedDocument, id: string): HTMLElement {
 }
 
 describe('JsedEditDocumentUI', () => {
+  it('needs a host layout', () => {
+    // arrange
+    const document = makeRoot('<p id="p1">foo</p>');
+    const ctl = Controller.createNull();
+    const editorUI = JsedUI.createNull(ctl, { document });
+
+    // act / assert
+    expect(() => ctl.simulateStart(() => editorUI)).toThrow(/needs a host layout/);
+  });
+
   it('starts in view mode and quick-descends first focus without going into edit mode', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p><p id="p2">baz qux</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
 
@@ -38,7 +55,7 @@ describe('JsedEditDocumentUI', () => {
   it('uses the same app object to move from view mode into edit mode', () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     ctl.simulateStart(() => editorUI);
@@ -57,7 +74,7 @@ describe('JsedEditDocumentUI', () => {
   it('splits the current paragraph when ENTER is pressed in edit mode', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
@@ -94,7 +111,7 @@ describe('JsedEditDocumentUI', () => {
             : undefined
       }
     });
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
@@ -126,7 +143,7 @@ describe('JsedEditDocumentUI', () => {
   it('adds a Tag selection menu item that wraps the current cursor token on submit', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo bar</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const p1 = byId(document, 'p1');
     const editor = editorUI.editor;
@@ -156,7 +173,7 @@ describe('JsedEditDocumentUI', () => {
     const document = makeRoot(
       '<div id="d1"><span class="katex" style="display:inline;">x²</span> after opaque</div>'
     );
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const d1 = byId(document, 'd1');
     const editor = editorUI.editor;
@@ -191,7 +208,7 @@ describe('JsedEditDocumentUI', () => {
   it('adds an Insert element after tag menu item that defaults to the focused tag name', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
 
@@ -215,7 +232,7 @@ describe('JsedEditDocumentUI', () => {
   it('adds an Insert element before tag menu item that defaults to the focused tag name', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const p2 = byId(document, 'p2');
@@ -241,7 +258,7 @@ describe('JsedEditDocumentUI', () => {
   it('adds an Insert element in tag menu item that defaults to the focused tag name', async () => {
     // arrange
     const document = makeRoot('<div id="d1">foo</div>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const d1 = byId(document, 'd1');
@@ -265,7 +282,7 @@ describe('JsedEditDocumentUI', () => {
   it('defaults Insert element in tag to a specific child tag when required', async () => {
     // arrange
     const document = makeRoot('<ul id="list"><li>one</li></ul>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const list = byId(document, 'list');
@@ -290,7 +307,7 @@ describe('JsedEditDocumentUI', () => {
   it('adds a Delete focused element menu item that confirms before deleting', async () => {
     // arrange
     const document = makeRoot('<p id="p1">foo</p><p id="p2">bar</p>');
-    const ctl = Controller.createNull();
+    const ctl = hostController();
     const editorUI = JsedUI.createNull(ctl, { document });
     const editor = editorUI.editor;
     const p1 = byId(document, 'p1');

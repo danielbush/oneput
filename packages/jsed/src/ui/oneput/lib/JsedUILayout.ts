@@ -8,11 +8,6 @@
 import type { AppLayoutParams, Controller, UILayout } from '@oneput/oneput';
 import type { NavCrumbs } from './navcrumb/NavCrumbs.js';
 
-/** Used when tests (or a host) start JsedUI with no layout installed yet. */
-const emptyHostLayout: UILayout = {
-  configure: () => {}
-};
-
 export type JsedLayoutParams = AppLayoutParams;
 
 /**
@@ -36,9 +31,15 @@ export class JsedUILayout implements UILayout<JsedLayoutParams> {
     params: JsedLayoutParams = {},
     private deps: JsedUILayoutDeps
   ) {
-    // TODO: getLayout is bad, we're leaning on StandardLayout. Subclass?
-    // Define our own layout?
-    this.host = ctl.ui.getLayout() ?? emptyHostLayout;
+    // The host app owns the layout (for example StandardLayout); jsed only
+    // adds its widgets to it.
+    const host = ctl.ui.getLayout();
+    if (!host) {
+      throw new Error(
+        'JsedUI needs a host layout: run it inside an app that sets one (for example StandardLayout).'
+      );
+    }
+    this.host = host;
     this.host.configure({ params });
   }
 

@@ -773,6 +773,14 @@ export class AppController {
   }
 
   /**
+   * True when `app` is the running AppObject. A host that started an app can
+   * use this before it exits it.
+   */
+  isCurrent(app: AnyAppObject): boolean {
+    return this.current === app;
+  }
+
+  /**
    * True when Back is enabled and Back has somewhere to go: a parent, a root
    * exit handler, or a level inside the current AppObject (`hasBackLevel`).
    *

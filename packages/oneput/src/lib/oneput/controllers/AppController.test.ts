@@ -186,6 +186,21 @@ describe('AppController', () => {
   });
 
   describe('AppObject lifecycle', () => {
+    it('isCurrent is true only for the running AppObject', () => {
+      // arrange
+      const ctl = Controller.createNull();
+      const parent = {};
+      const child = {};
+      ctl.app.run(parent);
+
+      // act
+      ctl.app.run(child);
+
+      // assert
+      expect(ctl.app.isCurrent(child)).toBe(true);
+      expect(ctl.app.isCurrent(parent)).toBe(false);
+    });
+
     it('keeps parent state when onResume is not defined', () => {
       // arrange
       const ctl = Controller.createNull();

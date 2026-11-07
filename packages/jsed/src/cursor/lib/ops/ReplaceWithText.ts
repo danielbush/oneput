@@ -19,12 +19,12 @@ import { ReplaceSelectionWithText } from './ReplaceSelectionWithText.js';
 import { tokenParts } from '../../../lib/ops/splitter.js';
 
 /**
- * Does `next` continue the TYPING_BURST of the word that `inserted` holds?
+ * Does `next` continue the TYPING_RUN of the word that `inserted` holds?
  *
  * `inserted` are the TOKEN inserts of one record. They hold one word when
  * exactly one of them made a SEPARATOR: the others are SYNTACTIC_SPLIT parts
  * of that word. `next` continues the word when it rewrites one of those
- * TOKEN's. A typed space makes a SEPARATOR, so it ends the TYPING_BURST.
+ * TOKEN's. A typed space makes a SEPARATOR, so it ends the TYPING_RUN.
  *
  * Example, after `abc` with a SYNTACTIC_SPLIT on `.`:
  *
@@ -39,9 +39,9 @@ import { tokenParts } from '../../../lib/ops/splitter.js';
  * So the first undo removes `h`, and the second removes `def.g` together.
  *
  * A space inside a rewrite ("abc de f" from "abc def") inserts `f` with a
- * SEPARATOR. The record then holds two words, so the TYPING_BURST ends there too.
+ * SEPARATOR. The record then holds two words, so the TYPING_RUN ends there too.
  */
-export function continuesTypingBurst(
+export function continuesTypingRun(
   inserted: readonly (InsertTokenAfter | InsertTokenBefore)[],
   next: ReplaceWithText
 ): boolean {
@@ -119,15 +119,15 @@ export class ReplaceWithText implements UndoRecord {
   }
 
   /**
-   * Collapse a TYPING_BURST into one undo step.
+   * Collapse a TYPING_RUN into one undo step.
    *
-   * A TYPING_BURST is not confined to one TOKEN. SYNTACTIC_SPLIT means typing
+   * A TYPING_RUN is not confined to one TOKEN. SYNTACTIC_SPLIT means typing
    * `foo-bar` produces three TOKEN's without the user ever pausing, so the
-   * TYPING_BURST continues into TOKEN's this record created. Both cases below carry
+   * TYPING_RUN continues into TOKEN's this record created. Both cases below carry
    * `next.insertTokensAfter` across — dropping them would leave a TOKEN in the
    * document that no record can undo.
    *
-   * If a finer granularity is wanted later (say, ending the TYPING_BURST at a
+   * If a finer granularity is wanted later (say, ending the TYPING_RUN at a
    * punctuation boundary), that is a condition here rather than a redesign.
    */
   merge(next: UndoRecord): UndoRecord | void {
@@ -143,8 +143,8 @@ export class ReplaceWithText implements UndoRecord {
       // The user is typing into a TOKEN this record created, with no SEPARATOR
       // between them — the SYNTACTIC_SPLIT case, where the CURSOR moved on to
       // the part just split off. To the user that is still one word, so it is
-      // still one TYPING_BURST. A SEPARATOR means they typed a space, which is a
-      // deliberate word boundary and ends the TYPING_BURST.
+      // still one TYPING_RUN. A SEPARATOR means they typed a space, which is a
+      // deliberate word boundary and ends the TYPING_RUN.
       //
       // `next.replaceText` is not worth keeping: undo removes that TOKEN
       // outright, and redo re-attaches the same node with its final text.

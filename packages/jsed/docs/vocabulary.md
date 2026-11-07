@@ -270,9 +270,9 @@ Tokens and Text and whitespace
   - marks where an element was
   - is marked as an IGNORABLE
   - uses a template tag because it can be place legally almost anywhere; so if the parent is replaced by a new tag we minimize any legality issues
-- **TYPING_BURST**
+- **TYPING_RUN**
   - the text the user types into one word with no SEPARATOR, which jsed records as one undo step
   - one undo removes the whole word, not one character at a time
-  - the word can be several TOKEN's: a SYNTACTIC_SPLIT does not end the TYPING_BURST, but a typed space does
-  - Example, after `abc`: "abc d", "abc de", "abc def", "abc def." and "abc def.g" are one TYPING_BURST; in "abc def.g h" the space starts a new one for `h`
-  - Source of truth: `continuesTypingBurst` in `cursor/lib/ops/ReplaceWithText.ts`
+  - the word can be several TOKEN's: a SYNTACTIC_SPLIT does not end the TYPING_RUN, but a typed space does
+  - Example, after `abc`: "abc d", "abc de", "abc def", "abc def." and "abc def.g" are one TYPING_RUN; in "abc def.g h" the space starts a new one for `h`
+  - Source of truth: `continuesTypingRun` in `cursor/lib/ops/ReplaceWithText.ts`

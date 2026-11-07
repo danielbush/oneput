@@ -12,7 +12,7 @@ import {
 } from '../../../lib/ops/token.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
-import { continuesTypingBurst, ReplaceWithText } from './ReplaceWithText.js';
+import { continuesTypingRun, ReplaceWithText } from './ReplaceWithText.js';
 import { tokenParts } from '../../../lib/ops/splitter.js';
 
 export class InsertTextBefore implements UndoRecord {
@@ -89,7 +89,7 @@ export class InsertTextBefore implements UndoRecord {
    */
   merge(next: UndoRecord): UndoRecord | void {
     if (!(next instanceof ReplaceWithText)) return;
-    if (!continuesTypingBurst([...this.insertTokensBefore, ...this.insertTokensAfter], next)) {
+    if (!continuesTypingRun([...this.insertTokensBefore, ...this.insertTokensAfter], next)) {
       return;
     }
     this.insertTokensAfter.push(...next.insertTokensAfter);

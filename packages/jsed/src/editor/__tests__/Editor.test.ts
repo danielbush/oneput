@@ -1699,7 +1699,7 @@ describe('Editor', () => {
       expect(lineText(line)).toBe('-foobar');
     });
 
-    it('undoes an uninterrupted typing burst in one step, across the split', async () => {
+    it('undoes a TYPING_RUN in one step, across the split', async () => {
       // arrange
       const { editor, line, userInput } = await createEditorFixture({
         html: p({ id: 'p1' }, 'X')
@@ -1717,7 +1717,7 @@ describe('Editor', () => {
       // act
       editor.undo();
 
-      // assert: the second burst goes as one step
+      // assert: the second TYPING_RUN goes as one step
       expect(identifyChildren(line)).toEqual([
         'foo',
         '-',

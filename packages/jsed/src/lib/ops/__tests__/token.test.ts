@@ -9,6 +9,7 @@ import {
   remove,
   replaceText,
   undoInsertAfter,
+  undoRemove,
   undoReplaceText,
   undoWrapLineSiblingWithTag,
   wrapLineSiblingWithTag
@@ -231,6 +232,90 @@ describe('remove', () => {
       nextSeparator: sp2,
       previousSeparator: sp1
     });
+  });
+});
+
+describe("remove - SEPARATOR's at a SYNTACTIC_SPLIT boundary", () => {
+  test('"foo. bar" without `.` is "foo bar": the SEPARATOR after stays', () => {
+    // arrange
+    const dot = createToken('.');
+    const parent = buildParent(
+      createToken('foo'),
+      dot,
+      document.createTextNode(' '),
+      createToken('bar')
+    );
+
+    // act
+    const rec = remove(dot);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', 'd(".")', '[nodeType=3:" "]', 'bar']);
+    expect(rec).toMatchObject({ nextSeparator: false, previousSeparator: false });
+  });
+
+  test('"foo .bar" without `.` is "foo bar": the SEPARATOR before stays', () => {
+    // arrange
+    const dot = createToken('.');
+    const parent = buildParent(
+      createToken('foo'),
+      document.createTextNode(' '),
+      dot,
+      createToken('bar')
+    );
+
+    // act
+    remove(dot);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', '[nodeType=3:" "]', 'd(".")', 'bar']);
+  });
+
+  test('"foo.bar" without `.` is "foobar": there is no SEPARATOR to remove', () => {
+    // arrange
+    const dot = createToken('.');
+    const parent = buildParent(createToken('foo'), dot, createToken('bar'));
+
+    // act
+    remove(dot);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', 'd(".")', 'bar']);
+  });
+
+  test('"bar baz" without `bar` is "baz": a leading SEPARATOR goes', () => {
+    // arrange
+    const bar = createToken('bar');
+    const parent = buildParent(bar, document.createTextNode(' '), createToken('baz'));
+
+    // act
+    remove(bar);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['d("bar")', '[deleted-space]', 'baz']);
+  });
+
+  test('"foo bar." without `.` is "foo bar", and undo restores it', () => {
+    // arrange
+    const dot = createToken('.');
+    const parent = buildParent(
+      createToken('foo'),
+      document.createTextNode(' '),
+      createToken('bar'),
+      dot
+    );
+
+    // act
+    const rec = remove(dot);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', '[nodeType=3:" "]', 'bar', 'd(".")']);
+
+    // act
+    undoRemove(rec);
+
+    // assert
+    expect(identifyChildren(parent)).toEqual(['foo', '[nodeType=3:" "]', 'bar', '.']);
   });
 });
 

@@ -318,7 +318,13 @@ function removeToken(token: HTMLElement, removeSeparators: boolean = true): Remo
     // Scan space nodes
     const separatorBefore = getSeparatorBefore(token);
     const separatorAfter = getSeparatorAfter(token);
-    const removeNextSeparator = !!separatorAfter;
+    // The SEPARATOR after goes when it would be one of a pair, or leading, or
+    // trailing. With no SEPARATOR before (a SYNTACTIC_SPLIT boundary, such as
+    // `.` in "abc. def") it is the only gap between the neighbours: it stays,
+    // giving "abc def", not "abcdef".
+    const removeNextSeparator =
+      !!separatorAfter &&
+      (!!separatorBefore || !getPreviousNodeSibling(token) || !getNextNodeSibling(separatorAfter));
     const removePreviousSeparator =
       !!separatorBefore &&
       (!getNextNodeSibling(separatorBefore) || !getPreviousNodeSibling(separatorBefore));

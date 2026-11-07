@@ -164,10 +164,11 @@ Each of these 3 structures has a programmatic counterpart which you use to popul
 ### Dark mode
 
 - Your web page should set `color-scheme` to `light dark` to allow dark mode.
-- use `media (prefers-color-scheme: dark) {...}` to theme oneput in dark mode for users that request it via their OS settings
-  - `...` will take the form of: `.oneput__container { --oneput-...: ...; ... }`
+- The class `dark-mode` (`DARK_MODE_CLASS`) on the `html` element turns on dark mode for Oneput and jsed.
+  - To follow the OS setting, call `followSystemColorScheme()` from `@oneput/oneput/shared/lib/colorScheme.js` once at startup. It keeps the class in step with `prefers-color-scheme`.
+  - An app with its own light/dark toggle sets the class itself instead.
+- To change the dark theme, set your own values for the css variables under `html.dark-mode .oneput__container { ... }`.
   - see `src/lib/oneput/shared/styles/oneput-defaults.css` for the available css variable settings.
-- to force dark mode via a toggle, use JavaScript to add a class (e.g., `.dark-mode`) to the html element or a wrapper. Inside the media query for `prefers-color-scheme: dark` (above), target `.dark-mode` to set your dark mode variable values instead of setting them untargeted as above. This allows the class to force dark mode even if the system is set to light.
 
 ## Design
 

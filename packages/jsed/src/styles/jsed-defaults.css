@@ -1,67 +1,73 @@
 @import './nav-crumbs.css';
 
-:root {
-  --slate-100: #f7fafc;
-  --slate-200: #edf2f7;
-  --slate-300: #e2e8f0;
-  --slate-400: #cbd5e0;
-  --slate-500: #a0aec0;
-  --slate-600: #718096;
-  --slate-700: #4a5568;
-  --slate-800: #2d3748;
-  --slate-900: #1a202c;
-
-  --sky-blue-100: #ebf8ff;
-  --sky-blue-200: #bee3f8;
-  --sky-blue-300: #90cdf4;
-  --sky-blue-400: #63b3ed;
-  --sky-blue-500: #4299e1;
-  --sky-blue-600: #3182ce;
-  --sky-blue-700: #2b6cb0;
-  --sky-blue-800: #2c5282;
-  --sky-blue-900: #2a4365;
-
-  --btn-hover: var(--sky-blue-100);
-  --btn-active: var(--slate-400);
-  --btn-focus: var(--sky-blue-200);
-  --btn-focus-active: var(--sky-blue-200);
-  --btn-border: var(--slate-500);
-
-  --jsed-focus-outline-style: solid;
-  --jsed-focus-outline-width: 0.5px;
-  --jsed-focus-outline-offset: calc(-1 * var(--jsed-focus-outline-width));
-  /* The sibling outline is off by default. Set a style such as `solid` to show it. */
-  --jsed-focus-sibling-outline-style: none;
-  --jsed-focus-sibling-outline-width: 0.75px;
-  --jsed-focus-sibling-outline-offset: 0px;
-  --jsed-tag-indicator--fontsize: 8px;
-}
-
 /*
- * Colors, made from the Oneput theme (@oneput/oneput/shared/styles/theme.css),
- * which also has dark mode. Without it, the fallbacks give the light colors.
- * They are declared again on each [data-theme] element, so that a theme on
- * part of the page changes them there.
+ * The variables are defaults: they are in a layer, so a theme or any other
+ * CSS that sets them wins, whatever the load order.
  */
-:root,
-[data-theme] {
-  --jsed-focus-outline-color: var(--theme-selection, #2563eb);
-  --jsed-focus-bg: color-mix(in srgb, var(--theme-selection, #2563eb) 18%, transparent);
-  --jsed-focus-sibling-outline-color: rgba(80, 100, 80, 1);
-  --jsed-focus-sibling-background: rgba(180, 200, 180, 0.4);
+@layer jsed.defaults {
+  :root {
+    --slate-100: #f7fafc;
+    --slate-200: #edf2f7;
+    --slate-300: #e2e8f0;
+    --slate-400: #cbd5e0;
+    --slate-500: #a0aec0;
+    --slate-600: #718096;
+    --slate-700: #4a5568;
+    --slate-800: #2d3748;
+    --slate-900: #1a202c;
 
-  --jsed-token-focus-text: var(--theme-selection-foreground, white);
-  --jsed-token-focus-bg: var(--theme-selection, #2563eb);
-  --jsed-token-focus-bg-pulse: color-mix(in oklab, var(--theme-selection, #2563eb), white 20%);
-  --jsed-caret-bg: currentColor;
-  --jsed-cursor-marker-bg: var(--theme-selection, #2563eb);
+    --sky-blue-100: #ebf8ff;
+    --sky-blue-200: #bee3f8;
+    --sky-blue-300: #90cdf4;
+    --sky-blue-400: #63b3ed;
+    --sky-blue-500: #4299e1;
+    --sky-blue-600: #3182ce;
+    --sky-blue-700: #2b6cb0;
+    --sky-blue-800: #2c5282;
+    --sky-blue-900: #2a4365;
 
-  --jsed-selection-bg: var(--theme-selection, #2563eb);
-  --jsed-selection-text: var(--theme-selection-foreground, white);
+    --btn-hover: var(--sky-blue-100);
+    --btn-active: var(--slate-400);
+    --btn-focus: var(--sky-blue-200);
+    --btn-focus-active: var(--sky-blue-200);
+    --btn-border: var(--slate-500);
 
-  /* The tag indicator that shows on the currently focused tag. */
-  --jsed-tag-indicator-bg: var(--theme-foreground, #1a202c);
-  --jsed-tag-indicator-text: var(--theme-background, white);
+    --jsed-focus-outline-style: solid;
+    --jsed-focus-outline-width: 0.5px;
+    --jsed-focus-outline-offset: calc(-1 * var(--jsed-focus-outline-width));
+    /* The sibling outline is off by default. Set a style such as `solid` to show it. */
+    --jsed-focus-sibling-outline-style: none;
+    --jsed-focus-sibling-outline-width: 0.75px;
+    --jsed-focus-sibling-outline-offset: 0px;
+    --jsed-tag-indicator--fontsize: 8px;
+  }
+
+  /*
+   * Colors, made from the Oneput theme (@oneput/oneput/shared/styles/theme.css),
+   * which also has dark mode. Without it, the fallbacks give the light colors.
+   * They are declared again on each [data-theme] element, so that a theme on
+   * part of the page changes them there.
+   */
+  :root,
+  [data-theme] {
+    --jsed-focus-outline-color: var(--theme-selection, #2563eb);
+    --jsed-focus-bg: color-mix(in srgb, var(--theme-selection, #2563eb) 18%, transparent);
+    --jsed-focus-sibling-outline-color: rgba(80, 100, 80, 1);
+    --jsed-focus-sibling-background: rgba(180, 200, 180, 0.4);
+
+    --jsed-token-focus-text: var(--theme-selection-foreground, white);
+    --jsed-token-focus-bg: var(--theme-selection, #2563eb);
+    --jsed-token-focus-bg-pulse: color-mix(in oklab, var(--theme-selection, #2563eb), white 20%);
+    --jsed-caret-bg: currentColor;
+    --jsed-cursor-marker-bg: var(--theme-selection, #2563eb);
+
+    --jsed-selection-bg: var(--theme-selection, #2563eb);
+    --jsed-selection-text: var(--theme-selection-foreground, white);
+
+    /* The tag indicator that shows on the currently focused tag. */
+    --jsed-tag-indicator-bg: var(--theme-foreground, #1a202c);
+    --jsed-tag-indicator-text: var(--theme-background, white);
+  }
 }
 
 .jsed-tag-indicator {

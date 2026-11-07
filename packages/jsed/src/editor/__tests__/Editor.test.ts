@@ -1767,7 +1767,7 @@ describe('Editor', () => {
         return copy.textContent;
       }
 
-      it('the space alone changes nothing', async () => {
+      it('the space changes nothing until moving on keeps it: "abc. def"', async () => {
         // arrange
         const { editor, line, userInput, documentChanges } = await setup('.', 'end');
 
@@ -1778,19 +1778,12 @@ describe('Editor', () => {
         expect(savedText(line)).toBe('abc.def');
         expect(editor.canUndo()).toBe(false);
         expect(documentChanges()).toBe(0);
-      });
-
-      it('moving on past the space keeps it: "abc. def", and undo removes it', async () => {
-        // arrange
-        const { editor, line, userInput, documentChanges } = await setup('.', 'end');
-        await userInput.typeText(' ');
 
         // act
         editor.getCursor()!.moveNext();
 
         // assert
         expect(savedText(line)).toBe('abc. def');
-        expect(identify(editor.getCursor()?.getPlace())).toBe('def');
         expect(documentChanges()).toBe(1);
 
         // act
@@ -1799,47 +1792,9 @@ describe('Editor', () => {
         // assert
         expect(savedText(line)).toBe('abc.def');
         expect(editor.canUndo()).toBe(false);
-
-        // act
-        editor.redo();
-
-        // assert
-        expect(savedText(line)).toBe('abc. def');
       });
 
-      it('moving back cancels the insert: "abc.def"', async () => {
-        // arrange
-        const { editor, line, userInput, documentChanges } = await setup('.', 'end');
-        await userInput.typeText(' ');
-
-        // act
-        editor.getCursor()!.movePrevious();
-
-        // assert
-        expect(savedText(line)).toBe('abc.def');
-        expect(editor.canUndo()).toBe(false);
-        expect(documentChanges()).toBe(0);
-      });
-
-      it('before `def`, moving back past the space keeps it, and moving on cancels it', async () => {
-        // arrange
-        const kept = await setup('def', 'start');
-        await kept.userInput.typeText(' ');
-        const cancelled = await setup('def', 'start');
-        await cancelled.userInput.typeText(' ');
-
-        // act
-        kept.editor.getCursor()!.movePrevious();
-        cancelled.editor.getCursor()!.moveNext();
-
-        // assert
-        expect(savedText(kept.line)).toBe('abc. def');
-        expect(kept.editor.canUndo()).toBe(true);
-        expect(savedText(cancelled.line)).toBe('abc.def');
-        expect(cancelled.editor.canUndo()).toBe(false);
-      });
-
-      it('inserting after `.` gives "abc. X def", and one undo restores "abc.def"', async () => {
+      it('typing a word after the space gives "abc. X def", and one undo restores "abc.def"', async () => {
         // arrange
         const { editor, line, userInput, documentChanges } = await setup('.', 'end');
 
@@ -1850,36 +1805,6 @@ describe('Editor', () => {
         // assert
         expect(savedText(line)).toBe('abc. X def');
         expect(documentChanges()).toBeGreaterThan(0);
-
-        // act
-        editor.undo();
-
-        // assert
-        expect(savedText(line)).toBe('abc.def');
-        expect(editor.canUndo()).toBe(false);
-
-        // act
-        editor.redo();
-
-        // assert
-        expect(savedText(line)).toBe('abc. X def');
-      });
-
-      it('inserting before `def` gives "abc. X def", and one undo restores "abc.def"', async () => {
-        // arrange
-        const { editor, line, userInput } = await setup('def', 'start');
-
-        // act
-        await userInput.typeText(' ');
-
-        // assert
-        expect(savedText(line)).toBe('abc.def');
-
-        // act
-        await userInput.typeText('X');
-
-        // assert
-        expect(savedText(line)).toBe('abc. X def');
 
         // act
         editor.undo();

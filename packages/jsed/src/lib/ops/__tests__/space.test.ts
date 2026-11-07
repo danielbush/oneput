@@ -9,6 +9,7 @@ import {
   byId,
   t,
   findTokenByText,
+  identifyChildren,
   s,
   div,
   makeRawRoot,
@@ -30,7 +31,11 @@ import {
   removeSpaceAfterTag,
   removeSpaceAfterToken,
   removeSpaceBeforeTag,
-  removeSpaceBeforeToken
+  removeSpaceBeforeToken,
+  insertSeparatorAfter,
+  insertSeparatorBefore,
+  redoInsertSeparator,
+  undoInsertSeparator
 } from '../space';
 
 describe('leading/trailing spaces', () => {
@@ -700,5 +705,70 @@ describe('leading/trailing spaces', () => {
         expect((strong.previousSibling as HTMLElement | null)?.textContent).toBe('bar');
       });
     });
+  });
+});
+
+describe('inserted SEPARATOR', () => {
+  it("insertSeparatorAfter puts a SEPARATOR between two TOKEN's; undo and redo keep its place", () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('abc'), t('def')));
+    const line = byId(doc, 'p1');
+
+    // act
+    const op = insertSeparatorAfter(findTokenByText(line, 'abc'));
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[nodeType=3:" "]', 'def']);
+
+    // act
+    undoInsertSeparator(op);
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[deleted-space]', 'def']);
+
+    // act
+    redoInsertSeparator(op);
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[nodeType=3:" "]', 'def']);
+  });
+
+  it("insertSeparatorBefore puts a SEPARATOR between two TOKEN's; undo and redo keep its place", () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('abc'), t('def')));
+    const line = byId(doc, 'p1');
+
+    // act
+    const op = insertSeparatorBefore(findTokenByText(line, 'def'));
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[nodeType=3:" "]', 'def']);
+
+    // act
+    undoInsertSeparator(op);
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[deleted-space]', 'def']);
+
+    // act
+    redoInsertSeparator(op);
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[nodeType=3:" "]', 'def']);
+  });
+
+  it('redo before undo, and no SEPARATOR at all, change nothing', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('abc'), t('def')));
+    const line = byId(doc, 'p1');
+    const op = insertSeparatorAfter(findTokenByText(line, 'abc'));
+
+    // act
+    redoInsertSeparator(op);
+    undoInsertSeparator(undefined);
+    redoInsertSeparator(undefined);
+
+    // assert
+    expect(identifyChildren(line)).toEqual(['abc', '[nodeType=3:" "]', 'def']);
   });
 });

@@ -1,6 +1,7 @@
 import { JsedDocument } from '../JsedDocument.js';
 import type { ViewportScrollerNullOptions } from '../ui/oneput/lib/ViewportScroller.js';
 import * as token from '../lib/ops/token.js';
+import { JSED_CURSOR_GAP_CLASS, JSED_CURSOR_MARKER_CLASS } from '../cursor/lib/CursorState.js';
 import {
   isAnchor,
   isDeletedAnchor,
@@ -155,6 +156,8 @@ export function identify(el: Node | undefined | null): string {
   if (isToken(el)) return token.getValue(el);
   if (isOpaque(el)) return `[opaque:${(el as HTMLElement).tagName.toLowerCase()}]`;
   if (el instanceof Element) {
+    if (el.classList.contains(JSED_CURSOR_MARKER_CLASS)) return '[cursor-marker]';
+    if (el.classList.contains(JSED_CURSOR_GAP_CLASS)) return '[cursor-gap]';
     if (el.classList.contains(JSED_ELEMENT_INDICATOR)) {
       return '[element-indicator]';
     }

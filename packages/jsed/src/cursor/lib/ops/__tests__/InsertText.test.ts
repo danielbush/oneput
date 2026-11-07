@@ -50,6 +50,87 @@ function merge(record: UndoRecord, next: UndoRecord | undefined): UndoRecord {
   return record;
 }
 
+/** "abc. X def" */
+const SPLIT_AFTER = ['abc', '.', '[nodeType=3:" "]', 'X', '[nodeType=3:" "]', 'def'];
+/** "abc.def" again: both SEPARATOR's and `X` are tombstones (DOM_RETENTION). */
+const SPLIT_UNDONE = ['abc', '.', '[deleted-space]', 'd("X")', '[deleted-space]', 'def'];
+
+describe('InsertTextAfter.run', () => {
+  test('at a SYNTACTIC_SPLIT boundary, a SEPARATOR goes on both sides of the word', () => {
+    // arrange: "abc.def", on `.`
+    const doc = makeRoot(p({ id: 'p1' }, t('abc'), t('.'), t('def')));
+    const state = createState(doc, tokens(doc)[1]);
+
+    // act
+    const record = InsertTextAfter.run(state, 'X')!;
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(SPLIT_AFTER);
+
+    // act
+    record.undo(editorState(state));
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(SPLIT_UNDONE);
+
+    // act
+    record.redo(editorState(state));
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(SPLIT_AFTER);
+  });
+
+  test('at the end of a LINE, no SEPARATOR goes after the word', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('abc')));
+    const state = createState(doc, tokens(doc)[0]);
+
+    // act
+    InsertTextAfter.run(state, 'X');
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['abc', '[nodeType=3:" "]', 'X']);
+  });
+});
+
+describe('InsertTextBefore.run', () => {
+  test('at a SYNTACTIC_SPLIT boundary, a SEPARATOR goes on both sides of the word', () => {
+    // arrange: "abc.def", on `def`
+    const doc = makeRoot(p({ id: 'p1' }, t('abc'), t('.'), t('def')));
+    const state = createState(doc, tokens(doc)[2]);
+
+    // act
+    const record = InsertTextBefore.run(state, 'X')!;
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(SPLIT_AFTER);
+
+    // act
+    record.undo(editorState(state));
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(SPLIT_UNDONE);
+
+    // act
+    record.redo(editorState(state));
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(SPLIT_AFTER);
+  });
+
+  test('at the start of a LINE, no SEPARATOR goes before the word', () => {
+    // arrange
+    const doc = makeRoot(p({ id: 'p1' }, t('def')));
+    const state = createState(doc, tokens(doc)[0]);
+
+    // act
+    InsertTextBefore.run(state, 'X');
+
+    // assert
+    expect(identifyChildren(byId(doc, 'p1'))).toEqual(['X', '[nodeType=3:" "]', 'def']);
+  });
+});
+
 describe('InsertTextAfter.merge', () => {
   test('typing on into a SYNTACTIC_SPLIT keeps the split-off TOKEN in the undo step', () => {
     // arrange: "abc |" => "abc d" => "abc de" => "abc def" => "abc def."

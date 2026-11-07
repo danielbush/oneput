@@ -7,6 +7,14 @@ import {
   undoInsertAfter,
   type InsertTokenAfter
 } from '../../../lib/ops/token.js';
+import {
+  ensureSeparatorAfter,
+  getSeparatorAfter,
+  redoInsertSeparator,
+  undoInsertSeparator,
+  type InsertedSeparator
+} from '../../../lib/ops/space.js';
+import { getNextNodeSibling } from '../../../lib/core/sibling.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
 import { continuesTypingRun, ReplaceWithText } from './ReplaceWithText.js';
@@ -18,6 +26,9 @@ import { tokenParts } from '../../../lib/ops/splitter.js';
 export class InsertTextAfter implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
     const currentToken = state.getPlace();
+    // A SYNTACTIC_SPLIT boundary ("abc.def", on `.`): the new word also needs
+    // a SEPARATOR before what follows, or it joins it ("abc. Xdef").
+    const joinsNext = !getSeparatorAfter(currentToken) && !!getNextNodeSibling(currentToken);
     let lastToken: HTMLElement | null = null;
     let insertAfters: InsertTokenAfter[] = [];
     const parts = tokenParts(state.splitter, text);
@@ -39,13 +50,16 @@ export class InsertTextAfter implements UndoRecord {
     if (!lastToken) {
       return;
     }
+    const separatorAfterLast = joinsNext ? ensureSeparatorAfter(lastToken) : null;
     state.place(lastToken, opts);
     return new InsertTextAfter(
       {
         undo: currentToken,
         redo: lastToken
       },
-      insertAfters
+      insertAfters,
+      opts,
+      separatorAfterLast ? { separator: separatorAfterLast.separator } : undefined
     );
   }
 
@@ -55,7 +69,12 @@ export class InsertTextAfter implements UndoRecord {
       redo: HTMLElement;
     },
     public insertTokensAfter: InsertTokenAfter[],
-    public opts?: UserInputOpts
+    public opts?: UserInputOpts,
+    /**
+     * The SEPARATOR between the inserted word and what follows, when run
+     * made one: see `joinsNext`.
+     */
+    public separatorAfterLast?: InsertedSeparator
   ) {}
 
   /**
@@ -66,10 +85,12 @@ export class InsertTextAfter implements UndoRecord {
     for (const i of [...this.insertTokensAfter].reverse()) {
       undoInsertAfter(i);
     }
+    undoInsertSeparator(this.separatorAfterLast);
     state.cursor?.place(this.cursorTarget.undo, this.opts);
   }
 
   redo(state: EditorState) {
+    redoInsertSeparator(this.separatorAfterLast);
     for (const i of this.insertTokensAfter) {
       redoInsertAfter(i);
     }

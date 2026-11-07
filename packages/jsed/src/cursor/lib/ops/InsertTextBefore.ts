@@ -10,6 +10,14 @@ import {
   type InsertTokenAfter,
   type InsertTokenBefore
 } from '../../../lib/ops/token.js';
+import {
+  getSeparatorBefore,
+  insertSeparatorBefore,
+  redoInsertSeparator,
+  undoInsertSeparator,
+  type InsertedSeparator
+} from '../../../lib/ops/space.js';
+import { getPreviousNodeSibling } from '../../../lib/core/sibling.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
 import { continuesTypingRun, ReplaceWithText } from './ReplaceWithText.js';
@@ -18,6 +26,10 @@ import { tokenParts } from '../../../lib/ops/splitter.js';
 export class InsertTextBefore implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {
     const currentToken = state.getPlace();
+    // See InsertTextAfter: "abc.def", on `def`, would give "abc.X def".
+    const joinsPrevious =
+      !getSeparatorBefore(currentToken) && !!getPreviousNodeSibling(currentToken);
+    let firstToken: HTMLElement | null = null;
     let lastToken: HTMLElement | null = null;
     let insertBefores: InsertTokenBefore[] = [];
     const parts = tokenParts(state.splitter, text);
@@ -31,11 +43,13 @@ export class InsertTextBefore implements UndoRecord {
         separator: next ? next.separatorBefore : true
       });
       insertBefores.push(result);
+      firstToken ??= insertedToken;
       lastToken = insertedToken;
     }
-    if (!lastToken) {
+    if (!lastToken || !firstToken) {
       return;
     }
+    const separatorBeforeFirst = joinsPrevious ? insertSeparatorBefore(firstToken) : undefined;
     state.place(lastToken, opts);
     return new InsertTextBefore(
       {
@@ -43,7 +57,9 @@ export class InsertTextBefore implements UndoRecord {
         redo: lastToken
       },
       insertBefores,
-      opts
+      opts,
+      [],
+      separatorBeforeFirst
     );
   }
 
@@ -57,7 +73,12 @@ export class InsertTextBefore implements UndoRecord {
     /**
      * TOKEN's that merged replacements inserted after the inserted word.
      */
-    public insertTokensAfter: InsertTokenAfter[] = []
+    public insertTokensAfter: InsertTokenAfter[] = [],
+    /**
+     * The SEPARATOR between what precedes and the inserted word, when run
+     * made one: see `joinsPrevious`.
+     */
+    public separatorBeforeFirst?: InsertedSeparator
   ) {}
 
   /**
@@ -70,10 +91,12 @@ export class InsertTextBefore implements UndoRecord {
     for (const i of this.insertTokensBefore) {
       undoInsertBefore(i);
     }
+    undoInsertSeparator(this.separatorBeforeFirst);
     state.cursor?.place(this.cursorTarget.undo, this.opts);
   }
 
   redo(state: EditorState) {
+    redoInsertSeparator(this.separatorBeforeFirst);
     for (const i of this.insertTokensBefore) {
       redoInsertBefore(i);
     }

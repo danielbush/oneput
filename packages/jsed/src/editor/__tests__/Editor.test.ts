@@ -4,6 +4,7 @@ import {
   byId,
   div,
   em,
+  findTokenByText,
   frag,
   identify,
   identifyChildren,
@@ -15,7 +16,7 @@ import {
 } from '../../test/util.js';
 import { getValue } from '../../lib/ops/token.js';
 import { Tokenizer } from '../../lib/ops/Tokenizer.js';
-import { isOpaque, isToken } from '../../lib/core/taxonomy.js';
+import { isOpaque, isToken, JSED_IGNORE_CLASS } from '../../lib/core/taxonomy.js';
 import type { JsedDocument } from '../../JsedDocument.js';
 import { Controller } from '@oneput/oneput';
 
@@ -1718,14 +1719,7 @@ describe('Editor', () => {
       editor.undo();
 
       // assert: the second TYPING_RUN goes as one step
-      expect(identifyChildren(line)).toEqual([
-        'foo',
-        '-',
-        'bar',
-        '[deleted-space]',
-        'd("baz")',
-        '[nodeType=3:" "]'
-      ]);
+      expect(identifyChildren(line)).toEqual(['foo', '-', 'bar', '[deleted-space]', 'd("baz")']);
 
       // act
       editor.undo();
@@ -1737,8 +1731,7 @@ describe('Editor', () => {
         'd("-")',
         'd("bar")',
         '[deleted-space]',
-        'd("baz")',
-        '[nodeType=3:" "]'
+        'd("baz")'
       ]);
       expect(editor.canUndo()).toBe(false);
 
@@ -1748,6 +1741,153 @@ describe('Editor', () => {
 
       // assert
       expect(getTokenValues(line)).toEqual(['foo', '-', 'bar', 'baz']);
+    });
+
+    describe('a space at a SYNTACTIC_SPLIT boundary: "abc.def"', () => {
+      async function setup(on: string, caret: 'start' | 'end') {
+        const fixture = await createEditorFixture({ html: p({ id: 'p1' }, 'abc.def') });
+        await settle();
+        const token = findTokenByText(fixture.line, on);
+        fixture.editor.getCursor()!.place(token);
+        await settle();
+        await fixture.userInput.setCaret(caret === 'start' ? 0 : on.length);
+        let documentChanges = 0;
+        fixture.editor.eventsEmitter.subscribe({
+          onDocumentChange: () => {
+            documentChanges += 1;
+          }
+        });
+        return { ...fixture, documentChanges: () => documentChanges };
+      }
+
+      /** The line's text without IGNORABLE's: what a save would write. */
+      function savedText(line: HTMLElement) {
+        const copy = line.cloneNode(true) as HTMLElement;
+        copy.querySelectorAll(`.${JSED_IGNORE_CLASS}`).forEach((el) => el.remove());
+        return copy.textContent;
+      }
+
+      it('the space alone changes nothing', async () => {
+        // arrange
+        const { editor, line, userInput, documentChanges } = await setup('.', 'end');
+
+        // act
+        await userInput.typeText(' ');
+
+        // assert
+        expect(savedText(line)).toBe('abc.def');
+        expect(editor.canUndo()).toBe(false);
+        expect(documentChanges()).toBe(0);
+      });
+
+      it('moving on past the space keeps it: "abc. def", and undo removes it', async () => {
+        // arrange
+        const { editor, line, userInput, documentChanges } = await setup('.', 'end');
+        await userInput.typeText(' ');
+
+        // act
+        editor.getCursor()!.moveNext();
+
+        // assert
+        expect(savedText(line)).toBe('abc. def');
+        expect(identify(editor.getCursor()?.getPlace())).toBe('def');
+        expect(documentChanges()).toBe(1);
+
+        // act
+        editor.undo();
+
+        // assert
+        expect(savedText(line)).toBe('abc.def');
+        expect(editor.canUndo()).toBe(false);
+
+        // act
+        editor.redo();
+
+        // assert
+        expect(savedText(line)).toBe('abc. def');
+      });
+
+      it('moving back cancels the insert: "abc.def"', async () => {
+        // arrange
+        const { editor, line, userInput, documentChanges } = await setup('.', 'end');
+        await userInput.typeText(' ');
+
+        // act
+        editor.getCursor()!.movePrevious();
+
+        // assert
+        expect(savedText(line)).toBe('abc.def');
+        expect(editor.canUndo()).toBe(false);
+        expect(documentChanges()).toBe(0);
+      });
+
+      it('before `def`, moving back past the space keeps it, and moving on cancels it', async () => {
+        // arrange
+        const kept = await setup('def', 'start');
+        await kept.userInput.typeText(' ');
+        const cancelled = await setup('def', 'start');
+        await cancelled.userInput.typeText(' ');
+
+        // act
+        kept.editor.getCursor()!.movePrevious();
+        cancelled.editor.getCursor()!.moveNext();
+
+        // assert
+        expect(savedText(kept.line)).toBe('abc. def');
+        expect(kept.editor.canUndo()).toBe(true);
+        expect(savedText(cancelled.line)).toBe('abc.def');
+        expect(cancelled.editor.canUndo()).toBe(false);
+      });
+
+      it('inserting after `.` gives "abc. X def", and one undo restores "abc.def"', async () => {
+        // arrange
+        const { editor, line, userInput, documentChanges } = await setup('.', 'end');
+
+        // act
+        await userInput.typeText(' ');
+        await userInput.typeText('X');
+
+        // assert
+        expect(savedText(line)).toBe('abc. X def');
+        expect(documentChanges()).toBeGreaterThan(0);
+
+        // act
+        editor.undo();
+
+        // assert
+        expect(savedText(line)).toBe('abc.def');
+        expect(editor.canUndo()).toBe(false);
+
+        // act
+        editor.redo();
+
+        // assert
+        expect(savedText(line)).toBe('abc. X def');
+      });
+
+      it('inserting before `def` gives "abc. X def", and one undo restores "abc.def"', async () => {
+        // arrange
+        const { editor, line, userInput } = await setup('def', 'start');
+
+        // act
+        await userInput.typeText(' ');
+
+        // assert
+        expect(savedText(line)).toBe('abc.def');
+
+        // act
+        await userInput.typeText('X');
+
+        // assert
+        expect(savedText(line)).toBe('abc. X def');
+
+        // act
+        editor.undo();
+
+        // assert
+        expect(savedText(line)).toBe('abc.def');
+        expect(editor.canUndo()).toBe(false);
+      });
     });
 
     it('undo after a split restores the original TOKEN', async () => {

@@ -41,6 +41,12 @@ export type EditorTextChangeEvent =
       type: 'whitespace-change';
       kind: 'leading-space' | 'trailing-space';
       change: 'inserted' | 'removed';
+    }
+  | {
+      /** A SEPARATOR next to `token`, with no TOKEN change. */
+      type: 'separator-change';
+      token: HTMLElement;
+      change: 'inserted';
     };
 export type EditorElementChangeEvent =
   | {

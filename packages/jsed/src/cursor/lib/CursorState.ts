@@ -15,6 +15,12 @@ export const CURSOR_PREPEND_CLASS = 'jsed-crs-prepend';
 export const CURSOR_INSERT_AFTER_CLASS = 'jsed-crs-insert-after';
 export const CURSOR_INSERT_BEFORE_CLASS = 'jsed-crs-insert-before';
 export const JSED_CURSOR_MARKER_CLASS = 'jsed-cursor-marker';
+/**
+ * A space that the CURSOR_INSERT_AFTER / CURSOR_INSERT_BEFORE marker draws
+ * where the TOKEN has no SEPARATOR yet. The insert makes the real SEPARATOR
+ * when the user types the first character.
+ */
+export const JSED_CURSOR_GAP_CLASS = 'jsed-cursor-gap';
 
 /**
  * Indicates the input has a collapsed caret in its text (CURSOR_AT_BEGINNING /
@@ -91,6 +97,7 @@ export class CursorState {
 
   public ops: CursorTextOps;
   private cursorMarker?: HTMLElement;
+  private cursorGap?: HTMLElement;
 
   /** Return the active LINE_SIBLING that the CURSOR is on. */
   getPlace() {
@@ -299,8 +306,22 @@ export class CursorState {
     return marker;
   }
 
+  private getCursorGap(): HTMLElement {
+    if (this.cursorGap) {
+      return this.cursorGap;
+    }
+
+    const gap = this.seat.ownerDocument.createElement('span');
+    gap.classList.add(JSED_CURSOR_GAP_CLASS, JSED_IGNORE_CLASS);
+    gap.setAttribute('aria-hidden', 'true');
+    gap.textContent = ' ';
+    this.cursorGap = gap;
+    return gap;
+  }
+
   private removeCursorMarker(): void {
     this.cursorMarker?.remove();
+    this.cursorGap?.remove();
   }
 
   private placeCursorMarker(state: CursorInsertState): void {
@@ -324,7 +345,7 @@ export class CursorState {
         if (separator) {
           separator.after(marker);
         } else {
-          current.after(marker);
+          current.after(this.getCursorGap(), marker);
         }
         return;
       }
@@ -339,7 +360,11 @@ export class CursorState {
       }
       case 'CURSOR_INSERT_BEFORE': {
         const separator = getSeparatorBefore(current);
-        current.parentNode.insertBefore(marker, separator ?? current);
+        if (separator) {
+          separator.before(marker);
+        } else {
+          current.before(marker, this.getCursorGap());
+        }
         return;
       }
     }

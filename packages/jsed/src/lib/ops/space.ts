@@ -112,6 +112,43 @@ export function ensureSeparatorAfter(token: HTMLElement, value = ' '): InsertSep
 }
 
 /**
+ * A SEPARATOR that an edit inserted, so that undo can remove it again.
+ */
+export type InsertedSeparator = {
+  separator: Text;
+  removed?: RemoveSeparator;
+};
+
+/**
+ * Insert a SEPARATOR immediately before `token`.
+ */
+export function insertSeparatorBefore(token: HTMLElement, value = ' '): InsertedSeparator {
+  const separator = token.ownerDocument.createTextNode(value);
+  token.before(separator);
+  return { separator };
+}
+
+/**
+ * Insert a SEPARATOR immediately after `token`.
+ */
+export function insertSeparatorAfter(token: HTMLElement, value = ' '): InsertedSeparator {
+  const separator = token.ownerDocument.createTextNode(value);
+  token.after(separator);
+  return { separator };
+}
+
+/**
+ * Remove an inserted SEPARATOR, keeping its place (DOM_RETENTION).
+ */
+export function undoInsertSeparator(op: InsertedSeparator | undefined): void {
+  if (op) op.removed = removeSeparator(op.separator);
+}
+
+export function redoInsertSeparator(op: InsertedSeparator | undefined): void {
+  if (op?.removed) undoRemoveSeparator(op.removed);
+}
+
+/**
  * Remove the whitespace separator immediately before the TOKEN, if present.
  */
 export function removeSeparatorBefore(token: HTMLElement): void {

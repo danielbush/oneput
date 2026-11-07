@@ -8,6 +8,7 @@ import { UndoRecorder } from '../../../undo/index.js';
 import {
   computeCursorState,
   CursorState,
+  JSED_CURSOR_GAP_CLASS,
   JSED_CURSOR_MARKER_CLASS
 } from '../../../cursor/lib/CursorState.js';
 
@@ -146,6 +147,58 @@ describe('CursorState marker', () => {
     expect(cursorMarker.dataset.cursorState).toBe('CURSOR_INSERT_AFTER');
     expect(cursorMarker.previousSibling?.nodeValue).toBe(' ');
     expect(cursorMarker.nextSibling).toBe(tokens(doc)[1]);
+  });
+
+  test('INSERT_AFTER with no SEPARATOR draws a gap before the marker', () => {
+    // arrange: "hello.world", on `hello`
+    const doc = makeRoot(p(t('hello'), t('world')));
+    const state = createState(doc, tokens(doc)[0]);
+
+    // act
+    state.setInsertState('CURSOR_INSERT_AFTER');
+
+    // assert
+    const cursorMarker = marker(doc)!;
+    const gap = cursorMarker.previousSibling as HTMLElement;
+    expect(gap.classList.contains(JSED_CURSOR_GAP_CLASS)).toBe(true);
+    expect(gap.classList.contains(JSED_IGNORE_CLASS)).toBe(true);
+    expect(gap.textContent).toBe(' ');
+    expect(gap.previousSibling).toBe(tokens(doc)[0]);
+    expect(cursorMarker.nextSibling).toBe(tokens(doc)[1]);
+
+    // act
+    state.setInsertState(null);
+
+    // assert
+    expect(doc.root.querySelector(`.${JSED_CURSOR_GAP_CLASS}`)).toBeNull();
+  });
+
+  test('INSERT_BEFORE with no SEPARATOR draws a gap after the marker', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), t('world')));
+    const state = createState(doc, tokens(doc)[1]);
+
+    // act
+    state.setInsertState('CURSOR_INSERT_BEFORE');
+
+    // assert
+    const cursorMarker = marker(doc)!;
+    const gap = cursorMarker.nextSibling as HTMLElement;
+    expect(gap.classList.contains(JSED_CURSOR_GAP_CLASS)).toBe(true);
+    expect(cursorMarker.previousSibling).toBe(tokens(doc)[0]);
+    expect(gap.nextSibling).toBe(tokens(doc)[1]);
+  });
+
+  test('INSERT_AFTER with a SEPARATOR draws no gap', () => {
+    // arrange
+    const doc = makeRoot(p(t('hello'), s(), t('world')));
+    const state = createState(doc, tokens(doc)[0]);
+
+    // act
+    state.setInsertState('CURSOR_INSERT_AFTER');
+
+    // assert
+    expect(doc.root.querySelector(`.${JSED_CURSOR_GAP_CLASS}`)).toBeNull();
   });
 
   test('clearing insert state removes the marker', () => {

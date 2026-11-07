@@ -298,6 +298,13 @@ See:
   animation: jsed-cursor-edge-blink 1.05s steps(1, end) infinite;
 }
 
+/* JSED_CURSOR_GAP_CLASS: the SEPARATOR an insert will make. */
+.jsed-cursor-gap {
+  white-space: pre;
+  pointer-events: none;
+  user-select: none;
+}
+
 .jsed-cursor-marker[data-cursor-state='CURSOR_INSERT_AFTER']::after {
   content: ' ';
   white-space: pre;

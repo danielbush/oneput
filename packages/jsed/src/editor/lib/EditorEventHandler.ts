@@ -4,7 +4,6 @@ import * as token from '../../lib/ops/token.js';
 import type { EditorError, EditorState } from './EditorState.js';
 import type { InputCursorPosition, UserInputChange } from '../../input/UserInput.js';
 import { decideInputIntent } from '../../input/decideInputIntent.js';
-import { ensureSeparatorAfter, ensureSeparatorBefore } from '../../lib/ops/space.js';
 
 /**
  * Handle certain important editor events: keys, undo/redo, input + motiona and selection.
@@ -198,9 +197,9 @@ export class EditorEventHandler {
 
       case 'start-insert-after-current': {
         cursor.setStateFromSelection('CURSOR_AT_END');
+        // No SEPARATOR yet: the insert makes it with the first character, so
+        // a cancelled insert changes nothing. The marker draws the gap.
         cursor.setStateFromInput(intent.inputValue);
-        const sib = cursor.getPlace();
-        ensureSeparatorAfter(sib);
         return;
       }
 
@@ -221,9 +220,8 @@ export class EditorEventHandler {
       case 'start-insert-before-current': {
         this.state.userInput.moveCursorToBeginning();
         cursor.setStateFromSelection('CURSOR_AT_BEGINNING');
+        // See start-insert-after-current.
         cursor.setStateFromInput(intent.inputValue);
-        const sib = cursor.getPlace();
-        ensureSeparatorBefore(sib);
         return;
       }
 

@@ -12,6 +12,7 @@ import { InsertTextAfter } from './lib/ops/InsertTextAfter.js';
 import { InsertTextBefore } from './lib/ops/InsertTextBefore.js';
 import { SplitAtToken } from './lib/ops/SplitAtToken.js';
 import { Wrap } from './lib/ops/Wrap.js';
+import { KeepInsertSpace } from './lib/ops/KeepInsertSpace.js';
 
 /**
  * Public CURSOR facade for the editing session.
@@ -71,8 +72,14 @@ export class Cursor {
   isInsertingBefore = () => this.state.isInsertingBefore();
 
   // motion
-  moveNext = () => this.state.ops.moveNext();
-  movePrevious = () => this.state.ops.movePrevious();
+  moveNext = () => {
+    this._undo(KeepInsertSpace.run(this.state, 'forward'));
+    this.state.ops.moveNext();
+  };
+  movePrevious = () => {
+    this._undo(KeepInsertSpace.run(this.state, 'backward'));
+    this.state.ops.movePrevious();
+  };
 
   // edit text
   delete = (opts?: CursorDeleteOpts) => this._undo(DeleteAtCursor.run(this.state, opts));

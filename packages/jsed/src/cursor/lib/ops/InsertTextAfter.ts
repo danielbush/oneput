@@ -9,7 +9,7 @@ import {
 } from '../../../lib/ops/token.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
-import { ReplaceWithText } from './ReplaceWithText.js';
+import { continuesTypingBurst, ReplaceWithText } from './ReplaceWithText.js';
 import { tokenParts } from '../../../lib/ops/splitter.js';
 
 /**
@@ -58,8 +58,12 @@ export class InsertTextAfter implements UndoRecord {
     public opts?: UserInputOpts
   ) {}
 
+  /**
+   * Later inserts undo first: a TOKEN a merged replacement split off sits
+   * after the TOKEN this record inserted.
+   */
   undo(state: EditorState) {
-    for (const i of this.insertTokensAfter) {
+    for (const i of [...this.insertTokensAfter].reverse()) {
       undoInsertAfter(i);
     }
     state.cursor?.place(this.cursorTarget.undo, this.opts);
@@ -72,17 +76,19 @@ export class InsertTextAfter implements UndoRecord {
     state.cursor?.place(this.cursorTarget.redo, this.opts);
   }
 
+  /**
+   * Collapse typing into the inserted word into this record.
+   *
+   * See {@link continuesTypingBurst}. The merged replacement's own
+   * `replaceText` is not kept: undo removes its TOKEN outright, and redo
+   * re-attaches the same node with its final text. Its inserts are kept, or
+   * undo would leave them in the document.
+   */
   merge(next: UndoRecord): UndoRecord | void {
-    if (this.insertTokensAfter.length !== 1) {
-      return;
-    }
-    const insertAfter = this.insertTokensAfter[0];
-    // Merge subsequent text changes into the inserted token.
-    if (next instanceof ReplaceWithText) {
-      if (next.replaceText.token === insertAfter.token && insertAfter.token.firstChild) {
-        insertAfter.token.firstChild.nodeValue = next.replaceText.after;
-        return this;
-      }
-    }
+    if (!(next instanceof ReplaceWithText)) return;
+    if (!continuesTypingBurst(this.insertTokensAfter, next)) return;
+    this.insertTokensAfter.push(...next.insertTokensAfter);
+    this.cursorTarget.redo = next.cursorTarget.redo;
+    return this;
   }
 }

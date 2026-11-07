@@ -12,10 +12,27 @@ import {
   undoInsertAfter,
   undoReplaceText,
   type InsertTokenAfter,
+  type InsertTokenBefore,
   type ReplaceText
 } from '../../../lib/ops/token.js';
 import { ReplaceSelectionWithText } from './ReplaceSelectionWithText.js';
 import { tokenParts } from '../../../lib/ops/splitter.js';
+
+/**
+ * Is `next` the user still typing the word that `inserted` holds?
+ *
+ * `inserted` are the TOKEN inserts of one record. They hold one word when
+ * exactly one of them made a SEPARATOR: the others are SYNTACTIC_SPLIT parts
+ * of that word. `next` continues the word when it rewrites one of those
+ * TOKEN's. A typed space makes a SEPARATOR, so it ends the burst.
+ */
+export function continuesTypingBurst(
+  inserted: readonly (InsertTokenAfter | InsertTokenBefore)[],
+  next: ReplaceWithText
+): boolean {
+  const words = inserted.filter((insert) => insert.separatorAfter !== null).length;
+  return words === 1 && inserted.some((insert) => insert.token === next.replaceText.token);
+}
 
 export class ReplaceWithText implements UndoRecord {
   static run(state: CursorState, text: string, opts?: UserInputOpts) {

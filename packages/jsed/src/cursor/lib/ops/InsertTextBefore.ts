@@ -3,13 +3,16 @@ import type { UserInputOpts } from '../../../input/UserInput.js';
 import {
   createToken,
   insertBefore,
+  redoInsertAfter,
   redoInsertBefore,
+  undoInsertAfter,
   undoInsertBefore,
+  type InsertTokenAfter,
   type InsertTokenBefore
 } from '../../../lib/ops/token.js';
 import type { UndoRecord } from '../../../undo/index.js';
 import type { CursorState } from '../CursorState.js';
-import { ReplaceWithText } from './ReplaceWithText.js';
+import { continuesTypingBurst, ReplaceWithText } from './ReplaceWithText.js';
 import { tokenParts } from '../../../lib/ops/splitter.js';
 
 export class InsertTextBefore implements UndoRecord {
@@ -50,10 +53,20 @@ export class InsertTextBefore implements UndoRecord {
       redo: HTMLElement;
     },
     public insertTokensBefore: InsertTokenBefore[],
-    public opts?: UserInputOpts
+    public opts?: UserInputOpts,
+    /**
+     * TOKEN's that merged replacements inserted after the inserted word.
+     */
+    public insertTokensAfter: InsertTokenAfter[] = []
   ) {}
 
+  /**
+   * Later inserts undo first: see {@link InsertTextAfter.undo}.
+   */
   undo(state: EditorState) {
+    for (const i of [...this.insertTokensAfter].reverse()) {
+      undoInsertAfter(i);
+    }
     for (const i of this.insertTokensBefore) {
       undoInsertBefore(i);
     }
@@ -64,20 +77,23 @@ export class InsertTextBefore implements UndoRecord {
     for (const i of this.insertTokensBefore) {
       redoInsertBefore(i);
     }
+    for (const i of this.insertTokensAfter) {
+      redoInsertAfter(i);
+    }
     state.cursor?.place(this.cursorTarget.redo, this.opts);
   }
 
+  /**
+   * Collapse typing into the inserted word into this record: see
+   * {@link InsertTextAfter.merge}.
+   */
   merge(next: UndoRecord): UndoRecord | void {
-    if (this.insertTokensBefore.length !== 1) {
+    if (!(next instanceof ReplaceWithText)) return;
+    if (!continuesTypingBurst([...this.insertTokensBefore, ...this.insertTokensAfter], next)) {
       return;
     }
-    const insertBefore = this.insertTokensBefore[0];
-    // Merge subsequent text changes into the inserted token.
-    if (next instanceof ReplaceWithText) {
-      if (next.replaceText.token === insertBefore.token && insertBefore.token.firstChild) {
-        insertBefore.token.firstChild.nodeValue = next.replaceText.after;
-        return this;
-      }
-    }
+    this.insertTokensAfter.push(...next.insertTokensAfter);
+    this.cursorTarget.redo = next.cursorTarget.redo;
+    return this;
   }
 }

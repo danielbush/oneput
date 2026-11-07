@@ -252,9 +252,14 @@ Tokens and Text and whitespace
   - **CURSOR_APPEND** (`CURSOR_AT_END`) — the input cursor is at the end of the TOKEN's text. Visual marker: CURSOR_APPEND_CLASS. The user's next input will append to the TOKEN.
   - **CURSOR_PREPEND** (`CURSOR_AT_BEGINNING`) — the input cursor is at the beginning of the TOKEN's text. Visual marker: CURSOR_PREPEND_CLASS. The user's next input will prepend to the TOKEN.
   - **CURSOR_INSERT_AFTER** — entered from CURSOR_APPEND when the user types a space (input ends with space). Visual marker: CURSOR_INSERT_AFTER_CLASS. The user is now typing into a new TOKEN that will be created after the current one. Moving previous (movePrevious) from this state cancels the insertion and clears the marker without moving.
-    - The space itself changes nothing in the document: the insert makes each SEPARATOR it needs when the user types the first character, so a cancelled insert (movePrevious) leaves the text as it was. Moving on past the space (moveNext) with no word typed keeps it as a SEPARATOR, which undo can remove: "abc.def" gives "abc. def" (`KeepInsertSpace`). Where the TOKEN has no SEPARATOR yet (a SYNTACTIC_SPLIT boundary, such as `.` in "abc.def"), the marker draws one as a CURSOR_GAP (JSED_CURSOR_GAP_CLASS), an IGNORABLE space. Typing `X` there gives "abc. X def".
+    - The space itself changes nothing in the document: the insert makes each SEPARATOR it needs when the user types the first character, so a cancelled insert (movePrevious) leaves the text as it was. Moving on past the space (moveNext) with no word typed keeps it as a SEPARATOR, which undo can remove: "abc.def" gives "abc. def" (`KeepInsertSpace`). Where the TOKEN has no SEPARATOR yet, the marker draws a CURSOR_GAP.
   - **CURSOR_INSERT_BEFORE** — entered from CURSOR_PREPEND when the user types a space (input starts with space). Visual marker: CURSOR_INSERT_BEFORE_CLASS. The input cursor is moved back to the beginning after the space, so further typing goes into a new TOKEN before the current one. Moving next (moveNext) from this state cancels the insertion and clears the marker without moving.
     - As for CURSOR_INSERT_AFTER, the space changes nothing in the document, and the marker draws a CURSOR_GAP where there is no SEPARATOR yet. Here movePrevious moves on past the space and keeps it.
+
+- **CURSOR_GAP**
+  — an IGNORABLE space that the CURSOR_INSERT_AFTER or CURSOR_INSERT_BEFORE marker draws where the TOKEN has no SEPARATOR yet, so the insert looks the same as one next to a SEPARATOR. It is not part of the document: a save strips it, and it goes when the marker goes.
+  - Example: in "abc.def", on `.` (a SYNTACTIC_SPLIT boundary), the user types a space. The line shows "abc. | def", where the space before the caret is the CURSOR_GAP. Typing `X` makes real SEPARATOR's on both sides: "abc. X def".
+  - Source of truth: `JSED_CURSOR_GAP_CLASS` in `cursor/lib/CursorState.ts`.
 
 ### CURSOR operations
 

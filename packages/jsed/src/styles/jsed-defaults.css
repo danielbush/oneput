@@ -17,7 +17,7 @@
   }
 
   /*
-   * Colors, made from the Oneput theme (@oneput/oneput/shared/styles/theme.css),
+   * Colors, fonts, corners and spacing, made from the Oneput theme (@oneput/oneput/shared/styles/theme.css),
    * which also has dark mode. Without it, the fallbacks give the light colors.
    * They are declared again on each [data-theme] element, so that a theme on
    * part of the page changes them there.
@@ -26,8 +26,16 @@
   [data-theme] {
     --jsed-focus-outline-color: var(--theme-selection, #2563eb);
     --jsed-focus-bg: color-mix(in srgb, var(--theme-selection, #2563eb) 18%, transparent);
-    --jsed-focus-sibling-outline-color: rgba(80, 100, 80, 1);
-    --jsed-focus-sibling-background: rgba(180, 200, 180, 0.4);
+    --jsed-focus-sibling-outline-color: color-mix(
+      in srgb,
+      var(--theme-foreground, #222) 50%,
+      transparent
+    );
+    --jsed-focus-sibling-background: color-mix(
+      in srgb,
+      var(--theme-foreground, #222) 8%,
+      transparent
+    );
 
     --jsed-token-focus-text: var(--theme-selection-foreground, white);
     --jsed-token-focus-bg: var(--theme-selection, #2563eb);
@@ -41,18 +49,30 @@
     /* The tag indicator that shows on the currently focused tag. */
     --jsed-tag-indicator-bg: var(--theme-foreground, #1a202c);
     --jsed-tag-indicator-text: var(--theme-background, white);
+    --jsed-tag-indicator-font-family: var(--theme-font-family, sans-serif);
+    --jsed-tag-indicator-radius: var(--theme-radius, 5px);
+    --jsed-tag-indicator-padding: calc(0.1rem * var(--theme-density, 1))
+      calc(0.3rem * var(--theme-density, 1));
+
+    --jsed-token-focus-radius: calc(var(--theme-radius, 5px) * 0.75);
+    --jsed-marching-ants-color: var(--theme-foreground, #333);
+
+    --jsed-nav-crumb-radius: calc(var(--theme-radius, 5px) * 0.8);
+    --jsed-nav-crumb-gap: calc(0.15em * var(--theme-density, 1));
+    --jsed-nav-crumb-padding: calc(0.15em * var(--theme-density, 1))
+      calc(0.4em * var(--theme-density, 1));
   }
 }
 
 .jsed-tag-indicator {
   background-color: var(--jsed-tag-indicator-bg);
-  padding: 0.1rem 0.3rem;
+  padding: var(--jsed-tag-indicator-padding);
   font-size: var(--jsed-tag-indicator--fontsize);
   font-weight: 200;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--jsed-tag-indicator-font-family);
   font-style: normal;
   color: var(--jsed-tag-indicator-text);
-  border-radius: 5px;
+  border-radius: var(--jsed-tag-indicator-radius);
 }
 
 .jsed-tag-indicator-css {
@@ -107,7 +127,7 @@ Token pulsing background indicator
   position: relative;
   background-color: transparent;
   color: var(--jsed-token-focus-text);
-  border-radius: 0.24rem;
+  border-radius: var(--jsed-token-focus-radius);
   isolation: isolate;
 }
 
@@ -120,7 +140,7 @@ Token pulsing background indicator
   bottom: -0.075em;
   left: -0.2em;
   right: -0.2em;
-  border-radius: 0.24rem;
+  border-radius: var(--jsed-token-focus-radius);
   background: var(--jsed-token-focus-bg);
   animation: jsed-cursor-pulse 1.6s ease-in-out infinite;
 }
@@ -271,10 +291,10 @@ See:
 .jsed-marching-ants {
   /* Four repeating dashed strips (top, bottom, left, right) animated independently. */
   background-image:
-    linear-gradient(90deg, #333 50%, transparent 50%),
-    linear-gradient(90deg, #333 50%, transparent 50%),
-    linear-gradient(0deg, #333 50%, transparent 50%),
-    linear-gradient(0deg, #333 50%, transparent 50%);
+    linear-gradient(90deg, var(--jsed-marching-ants-color) 50%, transparent 50%),
+    linear-gradient(90deg, var(--jsed-marching-ants-color) 50%, transparent 50%),
+    linear-gradient(0deg, var(--jsed-marching-ants-color) 50%, transparent 50%),
+    linear-gradient(0deg, var(--jsed-marching-ants-color) 50%, transparent 50%);
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   background-size:
     12px 1px,

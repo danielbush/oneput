@@ -45,6 +45,12 @@ export class SystemColorScheme {
   }
 }
 
+/**
+ * The Null stand-in for `matchMedia('(prefers-color-scheme: dark)')`, used by
+ * `SystemColorScheme.createNull()`. It holds `matches`, and as an `EventTarget`
+ * it sends a `change` event when `simulateChange` calls `simulate`, so tests
+ * need no browser and no mocks.
+ */
 class NullDarkQuery extends EventTarget {
   constructor(public matches: boolean) {
     super();

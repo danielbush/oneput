@@ -92,35 +92,24 @@
     /* For more compact elements. */
     --oneput-std-width-small: 18px;
     --oneput-area-padding: 0px;
-    --oneput-hflex-padding: 5.25px;
-    --oneput-hflex-gap: 8.75px;
     /* Internal gap for separation between horizontally flexed buttons or other
 	 * widgets.  Should be less than --oneput-hflex-padding. */
-    --oneput-hflex-internal-gap: 4px;
-    --oneput-vflex-gap: 6px;
-    --oneput-fchild-padding: 4px;
-    --oneput-input-padding-x: 6px;
     --oneput-input-padding-y: 0px;
 
     /* Borders and dividers*/
 
     /* Separates significant areas like the menubody vs input / status area. */
     /* Separates sections with something eg sections within the menu body */
-    --oneput-divider-font: sans-serif;
     --oneput-divider-margin: 6px 0 2px 0;
 
     /* Icon buttons */
 
-    --oneput-icon-border-radius: 4px;
     --oneput-icon-width: calc(var(--oneput-std-width) - 0px);
     --oneput-icon-width-small: calc(var(--oneput-std-width-small) - 0px);
     /* 22px works well with svg eg lucide and emojis. */
-    --oneput-icon-font: 22px sans-serif;
     /* Esp. important for icon buttons otherwise the icon will be up hard against
 	 * the button border.. */
-    --oneput-icon-padding: 4px;
     /* The default 4px leaves too little room inside a small icon button. */
-    --oneput-icon-padding-small: 2px;
 
     /* Key badges (kbd)
 	 *
@@ -138,9 +127,7 @@
 	 * chip rather than as more label text. The inset keeps it off the menu
 	 * item's right edge, where rows with a trailing icon have icon padding. */
 
-    --oneput-toggle-value-radius: 3px;
     --oneput-toggle-value-font-size: 0.85em;
-    --oneput-toggle-value-padding: 1px 6px;
     --oneput-toggle-value-inset: 6px;
 
     /* Primary / secondary buttons eg alets, confirmations */
@@ -169,13 +156,11 @@
       7.5rem,
       min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome)))
     );
-    --oneput-border-radius: 5px;
     --oneput-border-top: 0.5px;
     --oneput-border-bottom: 0.5px;
     --oneput-border-left: 0.5px;
     --oneput-border-right: 0.5px;
     --oneput-box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 0.3);
-    --oneput-font: 14px sans-serif;
 
     /* Chrome icon buttons: the glyph carries the state, not a filled box. */
 
@@ -192,8 +177,6 @@
     /* Input */
     /* The apparent height of the input or technically oneput__input-inner. */
     --oneput-input-min-height: 36px;
-    --oneput-input-font: 14px sans-serif;
-    --oneput-input-border-radius: 5px;
     --oneput-input-border-top: 0.5px;
     --oneput-input-border-bottom: 0.5px;
     --oneput-input-border-left: 0.5px;
@@ -215,12 +198,40 @@
   }
 
   /*
-   * Colors, made from the theme (theme.css). They are declared again on each
+   * Colors, fonts, corners and spacing, made from the theme (theme.css). They are declared again on each
    * [data-theme] element, so that a theme on part of the page changes them
    * there. Override them on the same selectors.
    */
   :root,
   [data-theme] {
+    /* fonts */
+    --oneput-font: var(--theme-font-size) var(--theme-font-family);
+    --oneput-input-font: var(--theme-font-size) var(--theme-font-family);
+    --oneput-divider-font: var(--theme-font-family);
+    /* 22px works well with svg eg lucide and emojis. */
+    --oneput-icon-font: 22px var(--theme-font-family);
+
+    /* corners */
+    --oneput-border-radius: var(--theme-radius);
+    --oneput-input-border-radius: var(--theme-radius);
+    --oneput-icon-border-radius: calc(var(--theme-radius) * 0.8);
+    --oneput-toggle-value-radius: calc(var(--theme-radius) * 0.6);
+
+    /* paddings and gaps: the density scales them */
+    --oneput-hflex-padding: calc(5.25px * var(--theme-density));
+    --oneput-hflex-gap: calc(8.75px * var(--theme-density));
+    /* Internal gap for separation between horizontally flexed buttons or other
+     * widgets.  Should be less than --oneput-hflex-padding. */
+    --oneput-hflex-internal-gap: calc(4px * var(--theme-density));
+    --oneput-vflex-gap: calc(6px * var(--theme-density));
+    --oneput-fchild-padding: calc(4px * var(--theme-density));
+    --oneput-input-padding-x: calc(6px * var(--theme-density));
+    /* Esp. important for icon buttons otherwise the icon will be up hard against
+     * the button border. The small one leaves room inside a small icon button. */
+    --oneput-icon-padding: calc(4px * var(--theme-density));
+    --oneput-icon-padding-small: calc(2px * var(--theme-density));
+    --oneput-toggle-value-padding: calc(1px * var(--theme-density)) calc(6px * var(--theme-density));
+
     --oneput-background: linear-gradient(
       to bottom,
       var(--theme-surface),
@@ -307,7 +318,7 @@
      :root. Multiline moves this inset onto `.oneput__input-inner` (see below)
      so left/right adornments share the same top clearance as the textarea. */
   .oneput--multiline.oneput__container {
-    --oneput-input-padding-y: 4px;
+    --oneput-input-padding-y: calc(4px * var(--theme-density));
   }
 }
 

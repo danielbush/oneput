@@ -1,0 +1,55 @@
+/*
+ * Oneput theme
+ *
+ * A theme is a set of `--theme-*` colors. Oneput and jsed make their own
+ * colors from them, so a theme changes all of them. Only colors are themed:
+ * sizes, spacing and fonts are not.
+ *
+ *   --theme-background            the page
+ *   --theme-foreground            text; mixed with transparent for borders,
+ *                                 muted text and hover / active states
+ *   --theme-surface               panels, e.g. the Oneput container
+ *   --theme-field                 inputs
+ *   --theme-control               primary buttons
+ *   --theme-accent                notifications and alerts
+ *   --theme-selection             the selection, the focus and the cursor
+ *   --theme-selection-foreground  text on the selection
+ *   --theme-ring                  focus outlines
+ *
+ * These are the defaults. They are in the lowest layer, so a theme in any
+ * other CSS wins. A theme can be for the whole page (`:root`) or for one
+ * part of it (`[data-theme="name"]`):
+ *
+ *   [data-theme='dusk'] {
+ *     --theme-background: oklch(0.2 0.03 280);
+ *     ...
+ *   }
+ *
+ * Dark mode is a theme on the DARK_MODE_CLASS (shared/lib/colorScheme.ts).
+ */
+@layer oneput.theme {
+  :root {
+    color-scheme: light;
+    --theme-background: #fff;
+    --theme-foreground: #222;
+    --theme-surface: #e6e7e7;
+    --theme-field: #fff;
+    --theme-control: rgb(255 255 255 / 0.6);
+    --theme-accent: rgb(255 210 0);
+    --theme-selection: #2563eb;
+    --theme-selection-foreground: #fff;
+    --theme-ring: rgb(255 179 2 / 0.5);
+  }
+
+  .dark-mode {
+    color-scheme: dark;
+    --theme-background: #1e1e1e;
+    --theme-foreground: #ddd;
+    --theme-surface: #444;
+    --theme-field: #333;
+    --theme-control: rgb(124 98 0);
+    --theme-accent: rgb(107 85 0);
+    --theme-selection: #1d4ed8;
+    --theme-selection-foreground: #f8fafc;
+  }
+}

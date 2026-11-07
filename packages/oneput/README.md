@@ -161,14 +161,14 @@ If the above is the skeleton, then the following are the ribs of the skeleton ..
 
 Each of these 3 structures has a programmatic counterpart which you use to populate oneput with content and which you pass as props to oneput. See `src/lib/oneput/examples/demo/index.ts` for an example.
 
-### Dark mode
+### Themes and dark mode
 
-- Your web page should set `color-scheme` to `light dark` to allow dark mode.
-- The class `dark-mode` (`DARK_MODE_CLASS`) on the `html` element turns on dark mode for Oneput and jsed.
+- Oneput and jsed make their colors from a few `--theme-*` variables, for example `--theme-surface`, `--theme-foreground` and `--theme-selection`. See `src/lib/oneput/shared/styles/theme.css` for the list and the defaults. `oneput-defaults.css` imports it.
+- A theme sets these variables, for the whole page (`:root { ... }`) or for one part of it (`[data-theme="dusk"] { ... }`). Only colors are themed.
+- Dark mode is the theme on the class `dark-mode` (`DARK_MODE_CLASS`) on the `html` element.
   - To follow the OS setting, call `followSystemColorScheme()` from `@oneput/oneput/shared/lib/colorScheme.js` once at startup. It keeps the class in step with `prefers-color-scheme`.
   - An app with its own light/dark toggle sets the class itself instead.
-- To change the dark theme, set your own values for the css variables under `html.dark-mode .oneput__container { ... }`.
-  - see `src/lib/oneput/shared/styles/oneput-defaults.css` for the available css variable settings.
+- To change one Oneput color without a theme, set its `--oneput-*` variable on `:root, [data-theme]`. See `src/lib/oneput/shared/styles/oneput-defaults.css`.
 
 ## Design
 

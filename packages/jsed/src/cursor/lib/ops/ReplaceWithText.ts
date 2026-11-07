@@ -25,6 +25,21 @@ import { tokenParts } from '../../../lib/ops/splitter.js';
  * exactly one of them made a SEPARATOR: the others are SYNTACTIC_SPLIT parts
  * of that word. `next` continues the word when it rewrites one of those
  * TOKEN's. A typed space makes a SEPARATOR, so it ends the burst.
+ *
+ * Example, after `abc` with a SYNTACTIC_SPLIT on `.`:
+ *
+ * - "abc d": InsertTextAfter inserts `d`, with a SEPARATOR. That is one word.
+ * - "abc de", "abc def": ReplaceWithText rewrites `d`, so it continues.
+ * - "abc def.": ReplaceWithText rewrites `d` to `def` and inserts `.`, with
+ *   no SEPARATOR. It continues, and the record keeps the `.` insert.
+ * - "abc def.g": ReplaceWithText rewrites `.` and inserts `g`. It continues.
+ * - "abc def.g h": the space starts a new insert, so `h` is a new
+ *   InsertTextAfter record and a new undo step.
+ *
+ * So the first undo removes `h`, and the second removes `def.g` together.
+ *
+ * A space inside a rewrite ("abc de f" from "abc def") inserts `f` with a
+ * SEPARATOR. The record then holds two words, so the burst ends there too.
  */
 export function continuesTypingBurst(
   inserted: readonly (InsertTokenAfter | InsertTokenBefore)[],

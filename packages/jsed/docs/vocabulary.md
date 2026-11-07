@@ -257,7 +257,7 @@ Tokens and Text and whitespace
     - As for CURSOR_INSERT_AFTER, the space changes nothing in the document, and the marker draws a CURSOR_GAP where there is no SEPARATOR yet. Here movePrevious moves on past the space and keeps it.
 
 - **CURSOR_GAP**
-  — an IGNORABLE space that the CURSOR_INSERT_AFTER or CURSOR_INSERT_BEFORE marker draws where the TOKEN has no SEPARATOR yet, so the insert looks the same as one next to a SEPARATOR. It is not part of the document: a save strips it, and it goes when the marker goes.
+  — a space inside a `span` marked as IGNORABLE, which the CURSOR_INSERT_AFTER or CURSOR_INSERT_BEFORE marker draws where the TOKEN has no SEPARATOR yet, so the insert looks the same as one next to a SEPARATOR. Contrast with a SEPARATOR, which is a whitespace text node in the document. A CURSOR_GAP is not part of the document: jsed skips it, a save strips it, undo does not record it, and it goes when the marker goes.
   - Example: in "abc.def", on `.` (a SYNTACTIC_SPLIT boundary), the user types a space. The line shows "abc. | def", where the space before the caret is the CURSOR_GAP. Typing `X` makes real SEPARATOR's on both sides: "abc. X def".
   - Source of truth: `JSED_CURSOR_GAP_CLASS` in `cursor/lib/CursorState.ts`.
 

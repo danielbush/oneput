@@ -26,20 +26,7 @@ import { tokenParts } from '../../../lib/ops/splitter.js';
  * of that word. `next` continues the word when it rewrites one of those
  * TOKEN's. A typed space makes a SEPARATOR, so it ends the TYPING_RUN.
  *
- * Example, after `abc` with a SYNTACTIC_SPLIT on `.`:
- *
- * - "abc d": InsertTextAfter inserts `d`, with a SEPARATOR. That is one word.
- * - "abc de", "abc def": ReplaceWithText rewrites `d`, so it continues.
- * - "abc def.": ReplaceWithText rewrites `d` to `def` and inserts `.`, with
- *   no SEPARATOR. It continues, and the record keeps the `.` insert.
- * - "abc def.g": ReplaceWithText rewrites `.` and inserts `g`. It continues.
- * - "abc def.g h": the space starts a new insert, so `h` is a new
- *   InsertTextAfter record and a new undo step.
- *
- * So the first undo removes `h`, and the second removes `def.g` together.
- *
- * A space inside a rewrite ("abc de f" from "abc def") inserts `f` with a
- * SEPARATOR. The record then holds two words, so the TYPING_RUN ends there too.
+ * See TYPING_RUN in docs/vocabulary.md for an example.
  */
 export function continuesTypingRun(
   inserted: readonly (InsertTokenAfter | InsertTokenBefore)[],

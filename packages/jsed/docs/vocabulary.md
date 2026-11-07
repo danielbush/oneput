@@ -274,5 +274,12 @@ Tokens and Text and whitespace
   - the text the user types into one word with no SEPARATOR, which jsed records as one undo step
   - one undo removes the whole word, not one character at a time
   - the word can be several TOKEN's: a SYNTACTIC_SPLIT does not end the TYPING_RUN, but a typed space does
-  - Example, after `abc`: "abc d", "abc de", "abc def", "abc def." and "abc def.g" are one TYPING_RUN; in "abc def.g h" the space starts a new one for `h`
+  - Example, after `abc` with a SYNTACTIC_SPLIT on `.`:
+    - "abc d": InsertTextAfter inserts `d`, with a SEPARATOR. That is one word.
+    - "abc de", "abc def": ReplaceWithText rewrites `d`, so the TYPING_RUN continues.
+    - "abc def.": ReplaceWithText rewrites `d` to `def` and inserts `.`, with no SEPARATOR. The TYPING_RUN continues, and its record keeps the `.` insert.
+    - "abc def.g": ReplaceWithText rewrites `.` and inserts `g`. The TYPING_RUN continues.
+    - "abc def.g h": the space starts a new insert, so `h` is a new InsertTextAfter record and a new TYPING_RUN.
+    - So the first undo removes `h`, and the second removes `def.g` together.
+  - A space inside a rewrite ("abc de f" from "abc def") inserts `f` with a SEPARATOR. The record then holds two words, so the TYPING_RUN ends there too.
   - Source of truth: `continuesTypingRun` in `cursor/lib/ops/ReplaceWithText.ts`

@@ -6,5 +6,6 @@ export { type EditorError, type SerializeElementError } from './editor/index.js'
 export type { TransactionOptions } from './undo/transaction.js';
 export { tokenizeLineAt } from './lib/ops/tokenize.js';
 export { JsedUI, type JsedUIHooks } from './ui/oneput/JsedUI.js';
+export { NavCrumbs } from './ui/oneput/lib/navcrumb/NavCrumbs.js';
 export { JsedActionProvider, type JsedActionId, JsedAction } from './ui/index.js';
 export { icons, iconData } from './ui/oneput/lib/icons.js';

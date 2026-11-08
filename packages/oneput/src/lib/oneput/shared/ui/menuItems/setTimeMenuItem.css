@@ -81,11 +81,7 @@
   }
 
   .oneput__set-time-btn:hover {
-    background: rgb(100 100 100 / 0.15);
-
-    html.dark-mode & {
-      background: rgb(200 200 200 / 0.12);
-    }
+    background: color-mix(in srgb, var(--theme-foreground) 12%, transparent);
   }
 
   .oneput__set-time-ampm {
@@ -94,11 +90,7 @@
     min-width: 3.25em;
     min-height: 3em;
     padding: 0.7em 0.75em;
-    background: rgb(100 100 100 / 0.12);
-
-    html.dark-mode & {
-      background: rgb(200 200 200 / 0.1);
-    }
+    background: color-mix(in srgb, var(--theme-foreground) 10%, transparent);
   }
 
   /* Fat enough for reliable mobile taps (~44px+). */

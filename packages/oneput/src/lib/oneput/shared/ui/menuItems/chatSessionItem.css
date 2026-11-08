@@ -44,21 +44,13 @@
   .oneput__chat-session-bubble--user {
     margin-left: auto;
     border-bottom-right-radius: 2px;
-    background: rgb(100 100 100 / 0.22);
-
-    html.dark-mode & {
-      background: rgb(200 200 200 / 0.18);
-    }
+    background: color-mix(in srgb, var(--theme-foreground) 18%, transparent);
   }
 
   .oneput__chat-session-bubble--agent {
     margin-right: auto;
     border-bottom-left-radius: 2px;
-    background: rgb(100 100 100 / 0.1);
-
-    html.dark-mode & {
-      background: rgb(200 200 200 / 0.07);
-    }
+    background: color-mix(in srgb, var(--theme-foreground) 8%, transparent);
   }
 
   .oneput__chat-session-bubble--busy {
@@ -120,21 +112,12 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #fff;
-    background: #7a7a7a;
+    color: var(--theme-surface);
+    background: color-mix(in oklab, var(--theme-foreground) 60%, var(--theme-surface));
     box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
-
-    html.dark-mode & {
-      color: #111;
-      background: rgb(240 240 240 / 0.9);
-    }
   }
 
   .oneput__chat-session-jump:hover {
-    background: #3a3a3a;
-
-    html.dark-mode & {
-      background: rgb(255 255 255 / 0.95);
-    }
+    background: color-mix(in oklab, var(--theme-foreground) 85%, var(--theme-surface));
   }
 }

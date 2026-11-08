@@ -1,4 +1,4 @@
-import type { AppObject, Controller } from '@oneput/oneput';
+import type { AppObject, Controller, MenuItem } from '@oneput/oneput';
 import { OneputAction } from '@oneput/oneput/shared/actions/OneputAction.js';
 import { OneputActionProvider } from '@oneput/oneput/shared/actions/OneputActionProvider.js';
 import { Editor } from '../../editor/Editor.js';
@@ -25,34 +25,40 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
     ctl: Controller,
     {
       document,
-      hooks
+      hooks,
+      menuItems
     }: {
       document: JsedDocument;
       hooks?: JsedUIHooks;
+      /** The host's items, at the end of the editor's menu, e.g. app settings. */
+      menuItems?: () => MenuItem[];
     }
   ) {
     const editor = Editor.create({ document, userInput: ctl.input });
-    return new JsedUI(ctl, editor, hooks);
+    return new JsedUI(ctl, editor, hooks, menuItems);
   }
 
   static createNull(
     ctl: Controller,
     {
       document,
-      hooks
+      hooks,
+      menuItems
     }: {
       document: JsedDocument;
       hooks?: JsedUIHooks;
+      menuItems?: () => MenuItem[];
     }
   ) {
     const editor = Editor.createNull({ document, userInput: ctl.input });
-    return new JsedUI(ctl, editor, hooks);
+    return new JsedUI(ctl, editor, hooks, menuItems);
   }
 
   constructor(
     private ctl: Controller,
     public editor: Editor,
-    private hooks: JsedUIHooks = {}
+    private hooks: JsedUIHooks = {},
+    private menuItems: () => MenuItem[] = () => []
   ) {}
 
   /**
@@ -204,7 +210,9 @@ export class JsedUI implements AppObject<unknown, JsedLayoutParams> {
           JsedAction.REMOVE_ANCHOR_BEFORE_FOCUS,
           JsedAction.INSERT_ANCHOR_AFTER_FOCUS,
           JsedAction.REMOVE_ANCHOR_AFTER_FOCUS
-        ])
+        ]),
+
+        ...this.menuItems()
 
         // FocusIndicator is mothballed, so its two toggles are off the menu.
         // The provider entries survive — add them back here to switch it on.

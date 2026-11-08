@@ -1,5 +1,6 @@
 import { Controller } from '@oneput/oneput';
 import { assertMenuId } from '@oneput/oneput/shared/test/index.js';
+import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { describe, expect, it } from 'vitest';
 import { isDeletedElement } from '../../../lib/core/taxonomy.js';
 import { makeRoot } from '../../../test/util.js';
@@ -332,5 +333,23 @@ describe('JsedEditDocumentUI', () => {
     expect(isDeletedElement(document.root.children[0])).toBe(true);
     expect(document.root.children[1]).toBe(p2);
     expect(editor.nav.getFocus()).toBe(p2);
+  });
+
+  it('shows the host menu items at the end of its menu', async () => {
+    // arrange
+    const document = makeRoot('<p id="p1">foo</p>');
+    const ctl = hostController();
+    const editorUI = JsedUI.createNull(ctl, {
+      document,
+      menuItems: () => [stdMenuItem({ id: 'THEMES', textContent: 'Themes' })]
+    });
+
+    // act
+    ctl.simulateStart(() => editorUI);
+    await ctl.simulateOpenMenu();
+
+    // assert
+    const items = ctl.currentProps.menuItems ?? [];
+    expect(items[items.length - 1]?.id).toBe('THEMES');
   });
 });

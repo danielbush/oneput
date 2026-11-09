@@ -13,7 +13,6 @@ catalog:
   svelte-check: "^4.0.0"
   eslint-plugin-svelte: "^3.0.0"
   prettier-plugin-svelte: "^3.3.3"
-  vitest-browser-svelte: "^0.1.0"
 
 ignoredBuiltDependencies:
   - esbuild

@@ -1,6 +1,19 @@
-import { describe, expect, test } from 'vitest';
-import { render } from 'vitest-browser-svelte';
+import { flushSync, mount, unmount } from 'svelte';
+import { afterEach, describe, expect, test } from 'vitest';
+import type { OneputProps } from '../../types.js';
 import Oneput from './Oneput.svelte';
+
+const mounted: Array<Record<string, unknown>> = [];
+afterEach(() => {
+  mounted.splice(0).forEach((component) => unmount(component));
+  document.body.innerHTML = '';
+});
+
+/** Mount `Oneput` with `props` in the document. */
+function render(props: OneputProps) {
+  mounted.push(mount(Oneput, { target: document.body, props }));
+  flushSync();
+}
 import { stdMenuItem } from '../ui/menuItems/stdMenuItem.js';
 
 describe('Oneput menu pointer activation', () => {
@@ -16,7 +29,7 @@ describe('Oneput menu pointer activation', () => {
         onclick: () => events.push('item click')
       }
     });
-    render(Oneput, {
+    render({
       menuOpen: true,
       menuAnimationDuration: 0,
       menuItems: [item],

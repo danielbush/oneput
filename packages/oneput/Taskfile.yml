@@ -55,8 +55,7 @@ tasks:
       - pnpm run dev --host=0.0.0.0
   test:
     desc: |
-      Run unit tests; but avoid triggering browser tests.
-      See vite.config.js
+      Run unit tests.
     summary: |
       task oneput:test -- src/lib/oneput/controllers/AppController.test.ts
       task oneput:test -- -t "enableModal"
@@ -66,17 +65,6 @@ tasks:
     desc: Like `test` but prints coverage at the end
     cmds:
       - ./node_modules/.bin/vitest run --project=server --coverage {{.CLI_ARGS}}
-  test:browser:
-    desc: |
-      Test using browser mode, defaults to watch mode
-      See https://vitest.dev/guide/browser/
-      This was introduced by sveltekit boilerplate in place of jsdom.
-    cmds:
-      - ./node_modules/.bin/vitest run --project=client --watch
-  test:e2e:
-    desc: Run end-to-end tests (headless)
-    cmds:
-      - pnpm run test:e2e
 
   install:
     deps:

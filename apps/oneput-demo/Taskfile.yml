@@ -56,16 +56,6 @@ tasks:
       See vite.config.ts
     cmds:
       - ./node_modules/.bin/vitest run --project=server --passWithNoTests
-  test:browser:
-    desc: |
-      Test using browser mode, defaults to watch mode
-      See https://vitest.dev/guide/browser/
-    cmds:
-      - ./node_modules/.bin/vitest run --project=client --watch
-  test:e2e:
-    desc: Run end-to-end tests (headless)
-    cmds:
-      - pnpm run test:e2e
   build:
     desc: build dist/
     cmds:

@@ -1,9 +1,10 @@
 /**
  * Nav-crumbs trail styles (from oneput breadcrumb mockup).
- * Loaded via jsed-defaults.css. May move into oneput defaults later.
  *
- * The rules are not in a layer, so they beat Oneput's resets (e.g. on
- * buttons) whatever the load order. Every color, size and space comes from a
+ * JSED_CHROME_CSS (see CSS in docs/vocabulary.md). jsed-defaults.css imports
+ * this file into the `jsed.chrome` layer: a consumer can replace any rule with
+ * plain CSS, and the layer comes after Oneput's, so the rules beat Oneput's
+ * resets (e.g. on buttons). Every color, size and space comes from a
  * `--jsed-nav-crumb*` variable in jsed-defaults.css, made from the theme, so
  * a theme changes them by setting variables.
  */

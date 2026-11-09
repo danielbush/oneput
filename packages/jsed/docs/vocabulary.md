@@ -290,3 +290,16 @@ Tokens and Text and whitespace
     - So the first undo removes `h`, and the second removes `def.g` together.
   - A space inside a rewrite ("abc de f" from "abc def") inserts `f` with a SEPARATOR. The record then holds two words, so the TYPING_RUN ends there too.
   - Source of truth: `continuesTypingRun` in `cursor/lib/ops/ReplaceWithText.ts`
+
+## CSS
+
+jsed's CSS is in two groups. A theme changes both of them by setting variables: `--theme-*` from Oneput's theme, or the `--jsed-*` variables made from them (in the `jsed.defaults` layer of `src/styles/jsed-defaults.css`). The groups differ in how a consumer can restyle their rules.
+
+- **JSED_EDIT_CSS**
+  — what jsed draws on or over the document to show what the user edits: the FOCUS outline, the TOKEN focus, the CURSOR_STATE markers, CURSOR_GAP, the selection, the marching ants and the tag indicator. The elements are IGNORABLE's or classes on the document's own elements.
+  - The rules are not in a layer, so a document's own CSS (e.g. `* { outline: none }`) cannot remove them.
+  - Source of truth: the unlayered rules in `src/styles/jsed-defaults.css`.
+- **JSED_CHROME_CSS**
+  — jsed's UI outside the document, which Oneput shows: for now the nav crumbs (`NavCrumbs`).
+  - The rules are in the `jsed.chrome` layer, so a consumer can replace any of them with plain unlayered CSS, with no extra specificity. The layer comes after Oneput's layers (Oneput's `layers.css`), so its rules beat Oneput's resets whatever the load order.
+  - Source of truth: `src/styles/nav-crumbs.css`, which `jsed-defaults.css` imports into the `jsed.chrome` layer.

@@ -1,4 +1,15 @@
-@import './nav-crumbs.css';
+/*
+ * jsed's CSS (see CSS in docs/vocabulary.md):
+ * - the variables, in `jsed.defaults`: a theme sets them;
+ * - JSED_CHROME_CSS, in `jsed.chrome`: nav-crumbs.css;
+ * - JSED_EDIT_CSS, unlayered: the rest of this file.
+ *
+ * Oneput's layer order first, then jsed's after it, so the order is reset,
+ * oneput, jsed whichever sheet loads first. Imports must come first: a
+ * bundler drops an `@import` after another rule.
+ */
+@import '@oneput/oneput/shared/styles/layers.css';
+@import './nav-crumbs.css' layer(jsed.chrome);
 
 /*
  * The variables are defaults: they are in a layer, so a theme or any other
@@ -71,6 +82,12 @@
     --jsed-nav-crumb-qual-padding: calc(0.15em * var(--theme-density, 1));
   }
 }
+
+/*
+ * JSED_EDIT_CSS: the marks on and over the document. Not in a layer, so the
+ * document's own CSS cannot remove them. A theme changes them with the
+ * variables above.
+ */
 
 .jsed-tag-indicator {
   background-color: var(--jsed-tag-indicator-bg);

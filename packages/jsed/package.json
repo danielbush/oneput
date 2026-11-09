@@ -83,7 +83,7 @@
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "commander": "^11.1.0",
-    "lucide": "^0.562.0",
+    "lucide": "^1.70.0",
     "markdown-it": "^13.0.1",
     "neverthrow": "catalog:"
   },

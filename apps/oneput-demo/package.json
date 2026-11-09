@@ -18,7 +18,7 @@
   "dependencies": {
     "@oneput/eliza": "workspace:",
     "@oneput/oneput": "workspace:",
-    "lucide": "^0.501.0",
+    "lucide": "^1.70.0",
     "neverthrow": "catalog:"
   },
   "devDependencies": {

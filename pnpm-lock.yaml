@@ -74,8 +74,8 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
       lucide:
-        specifier: ^0.562.0
-        version: 0.562.0
+        specifier: ^1.70.0
+        version: 1.70.0
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2
@@ -159,8 +159,8 @@ importers:
         specifier: 'workspace:'
         version: link:../../packages/oneput
       lucide:
-        specifier: ^0.501.0
-        version: 0.501.0
+        specifier: ^1.70.0
+        version: 1.70.0
       neverthrow:
         specifier: 'catalog:'
         version: 8.2.0
@@ -237,8 +237,8 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
       lucide:
-        specifier: ^0.562.0
-        version: 0.562.0
+        specifier: ^1.70.0
+        version: 1.70.0
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2
@@ -295,8 +295,8 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0
       lucide:
-        specifier: ^0.501.0
-        version: 0.501.0
+        specifier: ^1.70.0
+        version: 1.70.0
       neverthrow:
         specifier: 'catalog:'
         version: 8.2.0
@@ -2562,11 +2562,8 @@ packages:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
 
-  lucide@0.501.0:
-    resolution: {integrity: sha512-ufrFxsi7s5dcuDgR/z21CqP61jyMshh2BghKaEviz3nrFohrJWZtjvHvlamDaNzeJU1tGTxxPMbWqkmTPBijjA==}
-
-  lucide@0.562.0:
-    resolution: {integrity: sha512-k1Fb8ZMnRQovWRlea7Jr0b9UKA29IM7/cu79+mJrhVohvA2YC/Ti3Sk+G+h/SIu3IlrKT4RAbWMHUBBQd1O6XA==}
+  lucide@1.70.0:
+    resolution: {integrity: sha512-LxPqUjt8e5PT7JuvmnKc8ECAqgkbnLG3hIi/FV2JpqWdPWLbLCoI5P3jje/Lq84uNU2kCpe2webgyFFJJ9zPAA==}
 
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
@@ -5633,9 +5630,7 @@ snapshots:
     dependencies:
       yallist: 4.0.0
 
-  lucide@0.501.0: {}
-
-  lucide@0.562.0: {}
+  lucide@1.70.0: {}
 
   lz-string@1.5.0: {}
 

@@ -1,7 +1,11 @@
 /**
  * Nav-crumbs trail styles (from oneput breadcrumb mockup).
  * Loaded via jsed-defaults.css. May move into oneput defaults later.
- * The variables are in jsed-defaults.css, made from the theme.
+ *
+ * The rules are not in a layer, so they beat Oneput's resets (e.g. on
+ * buttons) whatever the load order. Every color, size and space comes from a
+ * `--jsed-nav-crumb*` variable in jsed-defaults.css, made from the theme, so
+ * a theme changes them by setting variables.
  */
 
 .jsed-nav-crumbs-row {
@@ -19,8 +23,8 @@
   gap: var(--jsed-nav-crumb-gap);
   flex: 1 1 auto;
   min-width: 0;
-  padding: 0.15em 0;
-  font-size: 0.85em;
+  padding: var(--jsed-nav-crumbs-padding);
+  font-size: var(--jsed-nav-crumbs-font-size);
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
@@ -88,15 +92,15 @@
 }
 
 .jsed-nav-crumbs--code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.78em;
+  font-family: var(--jsed-nav-crumbs-code-font-family);
+  font-size: var(--jsed-nav-crumbs-code-font-size);
 }
 
 .jsed-nav-crumbs--code .jsed-nav-crumb {
-  padding: 0.15em 0.3em;
+  padding: var(--jsed-nav-crumb-code-padding);
 }
 
 .jsed-nav-crumb-qual {
   opacity: 0.55;
-  padding-left: 0.15em;
+  padding-left: var(--jsed-nav-crumb-qual-padding);
 }

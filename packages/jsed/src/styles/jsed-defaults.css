@@ -61,6 +61,14 @@
     --jsed-nav-crumb-gap: calc(0.15em * var(--theme-density, 1));
     --jsed-nav-crumb-padding: calc(0.15em * var(--theme-density, 1))
       calc(0.4em * var(--theme-density, 1));
+    --jsed-nav-crumbs-padding: calc(0.15em * var(--theme-density, 1)) 0;
+    --jsed-nav-crumbs-font-size: 0.85em;
+    /* The trail of tag names (NavCrumbs with `code`). */
+    --jsed-nav-crumbs-code-font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --jsed-nav-crumbs-code-font-size: 0.78em;
+    --jsed-nav-crumb-code-padding: calc(0.15em * var(--theme-density, 1))
+      calc(0.3em * var(--theme-density, 1));
+    --jsed-nav-crumb-qual-padding: calc(0.15em * var(--theme-density, 1));
   }
 }
 

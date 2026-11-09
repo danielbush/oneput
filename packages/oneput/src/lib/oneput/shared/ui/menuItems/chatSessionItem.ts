@@ -1,4 +1,5 @@
-import './chatSessionItem.css'; // IMPORT_CSS_GOTCHA
+import '../../styles/layers.css'; // IMPORT_CSS_GOTCHA: the layer order first
+import './chatSessionItem.css';
 import { randomId } from '../../../lib/utils.js';
 import type { MenuItem } from '../../../types.js';
 

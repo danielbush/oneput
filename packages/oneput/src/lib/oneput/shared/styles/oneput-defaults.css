@@ -6,15 +6,13 @@
  *
  * Colors come from the `--theme-*` variables in theme.css.
  *
- * Layer order: later names beat earlier. `oneput.shared` is for optional
+ * Layer order: see layers.css. `oneput.shared` is for optional
  * widget CSS (co-located next to builders; loaded via JS side-effect import
  * from those modules — not via CSS `@import`, which breaks when this file is
  * itself `@import`ed by a consumer stylesheet).
  */
-/* Before the import: `reset` must come before the `oneput` layer, and
-   theme.css makes the `oneput` layer when it makes `oneput.theme`. */
-@layer reset, oneput.theme, oneput.defaults, oneput.elements, oneput.shared;
-
+/* First: theme.css makes the `oneput` layer when it makes `oneput.theme`. */
+@import './layers.css';
 @import './theme.css';
 
 /* #region resets */

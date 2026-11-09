@@ -1,4 +1,5 @@
-import './calendarMenuItem.css'; // IMPORT_CSS_GOTCHA
+import '../../styles/layers.css'; // IMPORT_CSS_GOTCHA: the layer order first
+import './calendarMenuItem.css';
 import { randomId } from '../../../lib/utils.js';
 import type { MenuItem } from '../../../types.js';
 import { tapSelect } from './tapSelect.js';

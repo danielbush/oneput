@@ -1,0 +1,10 @@
+/*
+ * Oneput's layer order. Later names beat earlier.
+ *
+ * The first sheet that names a layer fixes its place, so every sheet that can
+ * load first imports this file before its own rules: oneput-defaults.css with
+ * `@import`, and each widget module (e.g. chatSessionItem.ts) from JS, before
+ * its CSS. Without it, a widget's `@layer oneput.shared` puts `oneput` before
+ * `reset`, and the reset beats all of Oneput.
+ */
+@layer reset, oneput.theme, oneput.defaults, oneput.elements, oneput.shared;

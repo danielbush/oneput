@@ -4,11 +4,6 @@
  * `@layer oneput.shared` is ordered after `oneput.elements` in defaults, so
  * these rules beat shell chrome without specificity hacks.
  */
-/* The same layer order as oneput-defaults.css. This sheet can load before it
-   (JS imports it), and the first sheet sets the order: without this line,
-   `oneput` comes before `reset`, and the reset beats all of Oneput. */
-@layer reset, oneput.theme, oneput.defaults, oneput.elements, oneput.shared;
-
 @layer oneput.shared {
   .oneput__set-time-menu-item {
     align-items: stretch;

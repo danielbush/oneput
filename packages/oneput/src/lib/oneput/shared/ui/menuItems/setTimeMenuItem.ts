@@ -1,4 +1,5 @@
-import './setTimeMenuItem.css'; // IMPORT_CSS_GOTCHA
+import '../../styles/layers.css'; // IMPORT_CSS_GOTCHA: the layer order first
+import './setTimeMenuItem.css';
 import { randomId } from '../../../lib/utils.js';
 import type { FChildParams, MenuItem } from '../../../types.js';
 import { to12Hour, type SetTimeValue } from '../../lib/time/timeAdjust.js';

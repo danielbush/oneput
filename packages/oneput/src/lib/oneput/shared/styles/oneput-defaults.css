@@ -146,13 +146,20 @@
      *   visualViewport.height so the formula tracks the soft keyboard. Falls
      *   back to 100svh when unset (before JS / without Anchor).
      *
-     * Formula: min(28rem desktop cap, viewport − chrome), floored at 7.5rem.
+     * --oneput-menu-max-height-cap: the most the menu can take on a tall
+     *   screen; a share of the viewport, so a big window gives a big menu.
+     *
+     * Formula: min(cap, viewport − chrome), floored at 7.5rem.
      * See MENU_VISUAL_VIEWPORT_HEIGHT in ISSUES.md.
      */
     --oneput-non-menu-chrome: 6.5rem;
+    --oneput-menu-max-height-cap: 75svh;
     --oneput-menu-max-height: max(
       7.5rem,
-      min(28rem, calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome)))
+      min(
+        var(--oneput-menu-max-height-cap),
+        calc(var(--oneput-visual-viewport-height, 100svh) - var(--oneput-non-menu-chrome))
+      )
     );
     --oneput-border-top: 0.5px;
     --oneput-border-bottom: 0.5px;

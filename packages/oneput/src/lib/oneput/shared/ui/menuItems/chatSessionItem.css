@@ -5,14 +5,19 @@
  * these rules beat shell chrome without specificity hacks.
  */
 @layer oneput.shared {
+  /*
+   * The chat fills the menu: the item shrinks to the space the menu has
+   * (--oneput-menu-max-height), and the pane scrolls inside it.
+   */
   .oneput__chat-session-item {
     position: relative;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .oneput__chat-session-pane {
     gap: 0.5em;
-    max-height: 14rem;
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 0.35em 0.5em;

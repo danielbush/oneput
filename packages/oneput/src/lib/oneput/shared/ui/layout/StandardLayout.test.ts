@@ -177,3 +177,28 @@ describe('Back button', () => {
     expect(button).toBeDefined();
   });
 });
+
+describe('menuTitle', () => {
+  function title(layout: StandardLayout) {
+    let found: string | undefined;
+    walk(layout.menuUI.layoutHeader as FlexParams, (child) => {
+      if (child.type === 'fchild' && child.classes?.includes('oneput__menu-item-header')) {
+        found = (child as FChildParams).textContent;
+      }
+    });
+    return found;
+  }
+
+  test('a function is read each time the layout builds', () => {
+    // arrange
+    let name = 'New chat';
+    const layout = createLayout({ menuTitle: () => name });
+    const before = title(layout);
+
+    // act
+    name = 'Plans';
+
+    // assert
+    expect([before, title(layout)]).toEqual(['New chat', 'Plans']);
+  });
+});

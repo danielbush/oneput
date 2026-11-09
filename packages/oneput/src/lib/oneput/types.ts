@@ -528,8 +528,13 @@ export type SharedCtl = {
 export type AppLayoutParams = {
   /**
    * Preferred title for layouts that render a menu header.
+   *
+   * A function is called each time the layout builds its UI, as
+   * `LayoutAffordance.enabled` is. Thus a title that follows state (e.g. the
+   * name of the current chat) only needs `ctl.ui.invalidate()`, or a model in
+   * `watch`.
    */
-  menuTitle?: string;
+  menuTitle?: string | (() => string);
   /**
    * Send a message / submit text (e.g. chat). Hosts often paint a send arrow.
    */

@@ -89,6 +89,12 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
     };
   }
 
+  /** The menu title now: `menuTitle` can be a function. */
+  private menuTitle() {
+    const title = this.settings.menuTitle;
+    return (typeof title === 'function' ? title() : title) || 'Menu';
+  }
+
   private get exitAction() {
     // Close the menu (not exit the AppObject). Exit remains an AppObject
     // decision (e.g. onBack / goBack default pop / inputAccept.run).
@@ -219,7 +225,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
             : b.spacer(),
           b.fchild({
             classes: ['oneput__menu-item-header'],
-            textContent: this.settings.menuTitle || 'Menu'
+            textContent: this.menuTitle()
           }),
           this.headerRight(b)
         ]

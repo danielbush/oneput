@@ -33,7 +33,7 @@ export const iconData = {
   Trash2: lu.Trash2,
   EllipsisVertical: lu.EllipsisVertical,
   Bot: lu.Bot,
-  MessageCircle: lu.MessageCircle,
+  MessagesCircle: lu.MessagesCircle,
   Palette: lu.Palette
 };
 

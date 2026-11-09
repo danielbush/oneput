@@ -29,7 +29,8 @@ export const iconData = {
   PencilOff: lu.PencilOff,
   Undo2: lu.Undo2,
   Redo2: lu.Redo2,
-  RotateCcw: lu.RotateCcw
+  RotateCcw: lu.RotateCcw,
+  Trash2: lu.Trash2
 };
 
 export const icons = registerIcons(iconData, (icon) => element(() => lu.createElement(icon)));

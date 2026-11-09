@@ -745,6 +745,13 @@
     background: var(--oneput-secondary-button-background);
   }
 
+  /* An icon-only primary or secondary button: square, as tall as the text buttons. */
+  .oneput__container .oneput__button--square {
+    flex: 0 0 auto;
+    min-width: 0;
+    aspect-ratio: 1;
+  }
+
   .oneput__container .oneput__secondary-button:hover {
     background: var(--oneput-secondary-button-background-hover);
   }

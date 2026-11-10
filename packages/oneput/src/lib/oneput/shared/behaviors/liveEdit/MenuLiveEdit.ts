@@ -1,5 +1,5 @@
 import type { Controller } from '../../../controllers/controller.js';
-import type { InputClaimHandle, MenuItem } from '../../../types.js';
+import type { InputClaimHandle, InputClaimReleaseReason, MenuItem } from '../../../types.js';
 import {
   claimLiveEdit,
   type LiveEditBinding,
@@ -14,8 +14,8 @@ export type { LiveEditBinding, LiveEditItemParams, LiveEditRender, LiveEditValue
  * Activating the row again submits the edit: the input clears, thus the menu
  * shows all rows. Any other end (e.g. Back) puts the filter text back.
  */
-const clearAfterSubmit = (reason: string) =>
-  reason === 'activated-again' ? ('clear' as const) : ('restore' as const);
+const clearAfterSubmit = (reason: InputClaimReleaseReason) =>
+  reason === 'submit' ? ('clear' as const) : ('restore' as const);
 
 /**
  * Stable field identity shared by a provider action and its menu row.
@@ -121,7 +121,7 @@ export class MenuLiveEdit {
 
   private toggle(itemId: string, binding: LiveEditBinding) {
     if (this.active?.itemId === itemId) {
-      this.active.claim.release('activated-again');
+      this.active.claim.release('submit');
       return;
     }
 
@@ -138,7 +138,7 @@ export class MenuLiveEdit {
         void this.ctl.menu.invalidate({ focusBehaviour: 'none' }).then(() => {
           // Submit (Enter) or Back: focus stays on the row that was edited,
           // though the rows changed. Other ends move focus on purpose.
-          if (reason === 'activated-again' || reason === 'back') {
+          if (reason === 'submit' || reason === 'back') {
             this.ctl.menu.focusMenuItemById(itemId);
           }
         });

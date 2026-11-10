@@ -38,7 +38,26 @@ declare global {
 export type InputChangeListener = (evt: InputEvent) => void;
 
 /** Why an input claim stopped owning the shared input. */
-export type InputClaimReleaseReason = string;
+/**
+ * Why a claim ended. The claim passes it to its owner's `resumePrevious` and
+ * `onRelease`. Each reason has one meaning:
+ *
+ * - `submit`: the owner ended the edit to keep it (e.g. Enter on the editing row).
+ * - `back`: the user pressed Back.
+ * - `focus-changed`: menu focus moved to another row.
+ * - `owner-removed`: the owner's row left the menu.
+ * - `replaced`: another claim started.
+ * - `scope-closed`: the AppObject was suspended or exited.
+ * - `released`: `release()` with no reason.
+ */
+export type InputClaimReleaseReason =
+  | 'submit'
+  | 'back'
+  | 'focus-changed'
+  | 'owner-removed'
+  | 'replaced'
+  | 'scope-closed'
+  | 'released';
 
 /** What the input shows after a claim: the previous value, or nothing. */
 export type InputClaimResume = 'restore' | 'clear';

@@ -95,7 +95,7 @@ describe('InputClaims', () => {
     });
 
     // act
-    first.release('stale');
+    first.release('released');
     await ctl.input.typeText('z');
 
     // assert

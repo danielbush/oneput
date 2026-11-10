@@ -2,6 +2,7 @@ import type { Controller } from '../controller.js';
 import type {
   InputClaimHandle,
   InputClaimOptions,
+  InputClaimReleaseReason,
   InputKind,
   InputScope,
   MenuItem,
@@ -234,7 +235,7 @@ export class InputClaims {
     };
   }
 
-  private releaseClaim(claim: ActiveClaim, reason: string) {
+  private releaseClaim(claim: ActiveClaim, reason: InputClaimReleaseReason) {
     claim.released = true;
     if (this.active?.id === claim.id) {
       this.active = undefined;

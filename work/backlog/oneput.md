@@ -218,6 +218,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: DECLARATIVE_ONEPUT_INTERNAL
+  - COMMENT: make oneput's internals use state machines
+  - COMMENT: do we make each controller a state machine?  Or do we have one big state machine with global states and then create more complex nested machines only when needed?
+  - COMMENT: how does this affect all the `ctl.*` commands we rely on?
 - refactor: DECLARATIVE_ONEPUT - AppObject's becomes data that an agent can build;
   - COMMENT: this might lead into using state machines and signals and other declarative techniques across oneput's implementations
 - refactor: packages/oneput/src/lib/oneput/shared/ui/menuItems/toggleMenuItem.ts vs packages/oneput/src/lib/oneput/shared/ui/menuItems/pullToggleMenuItem.ts

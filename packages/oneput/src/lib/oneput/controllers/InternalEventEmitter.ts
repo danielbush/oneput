@@ -40,6 +40,10 @@ export type InputFocusChangeEvent = {
   type: 'input-focus-change';
   payload: { focused: boolean };
 };
+/**
+ * The current AppObject changed and is ready (or there is none after a root
+ * exit). A listener may run, replace or exit.
+ */
 export type AppChangeEvent = {
   type: 'app-change';
   payload: AppChange;

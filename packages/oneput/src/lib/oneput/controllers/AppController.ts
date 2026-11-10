@@ -57,6 +57,8 @@ export class AppController {
   private appParents: AnyAppObject[] = [];
   private appStates = new WeakMap<AnyAppObject, AppObjectState>();
   private current?: AnyAppObject;
+  /** The current AppObject of the last `app-change`. See {@link announce}. */
+  private announced?: AnyAppObject;
   private onBack?: () => void;
   private onRootExit?: (exit: RootAppExit) => void;
   private unsubscribeMenuItemFocus?: () => void;
@@ -391,6 +393,19 @@ export class AppController {
       const previousLayout = previous ? this.getAppState(previous).layout : this.ctl.ui.getLayout();
       Object.assign(this.getAppState(app), this.resolveLayout(app, previousLayout));
     }
+  }
+
+  /**
+   * Emit `app-change` once the transition has settled: the new AppObject is
+   * current and ready (after onStart / onResume and runAfter), or there is no
+   * AppObject after a root exit. A listener may start another transition.
+   *
+   * `previous` is the AppObject of the last `app-change`, so an AppObject that
+   * a hook replaced before it settled is not reported.
+   */
+  private announce() {
+    const previous = this.announced;
+    this.announced = this.current;
     this.ctl.events.emit({
       type: 'app-change',
       payload: { previous: previous ?? null, current: this.current ?? null }
@@ -572,14 +587,15 @@ export class AppController {
    * then finish it with runAfter.
    *
    * The hook may start another transition (run, replace, exit). That
-   * transition has already prepared and finished the AppObject it made
-   * current, so finish only when `app` is still current.
+   * transition has already prepared, finished and announced the AppObject it
+   * made current, so finish and announce only when `app` is still current.
    */
   private enter(app: AnyAppObject, hook: () => void) {
     this.runBefore();
     hook();
     if (this.current === app) {
       this.runAfter();
+      this.announce();
     }
   }
 
@@ -722,6 +738,7 @@ export class AppController {
     }
     this.setCurrent(undefined, false);
     this.runBefore();
+    this.announce();
     this.onRootExit?.({ app: exiting, payload: result?.payload });
   };
 

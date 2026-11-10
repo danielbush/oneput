@@ -1497,10 +1497,9 @@ describe('AppController', () => {
 
       // assert
       expect(log).toEqual(['Child.onExit', 'B.onResume(done)', 'B.onExit', 'C.onStart']);
-      expect(changes.data).toEqual([
-        { previous: child.app, current: b.app },
-        { previous: b.app, current: c.app }
-      ]);
+      // B was replaced inside onResume before it settled, so app-change
+      // reports Child -> C only.
+      expect(changes.data).toEqual([{ previous: child.app, current: c.app }]);
       expect(ctl.app.isCurrent(c.app)).toBe(true);
       expect(ctl.app.getMenu()?.id).toBe('C');
       expect(shownMenuIds(ctl)).toEqual(['C-row']);
@@ -1573,6 +1572,75 @@ describe('AppController', () => {
       expect(b.watch.active).toBe(0);
       expect(c.watch.active).toBe(1);
       expect(c.watch.subscribes).toBe(1);
+    });
+
+    /**
+     * A router that only routes in routed mode: while a child of the routed
+     * AppObject runs, it keeps the latest state and routes once the routed
+     * AppObject is current again.
+     */
+    function waitingRouter<S extends string>(ctl: Controller, states: Record<S, AppObject>) {
+      let routed: AppObject | undefined;
+      let pending: S | undefined;
+      const go = (state: S) => {
+        pending = undefined;
+        routed = states[state];
+        ctl.app.replace(routed);
+      };
+      ctl.events.on('app-change', () => {
+        if (pending !== undefined && routed && ctl.app.isCurrent(routed)) {
+          go(pending);
+        }
+      });
+      return {
+        send: (state: S) => {
+          if (!routed || ctl.app.isCurrent(routed)) {
+            go(state);
+          } else {
+            pending = state;
+          }
+        }
+      };
+    }
+
+    test('waiting router: a state change in stack mode waits until the routed AppObject resumes', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const exits: unknown[] = [];
+      const b = trackedApp('B', log);
+      const child = trackedApp('Child', log);
+      const c = trackedApp('C', log);
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      const r = waitingRouter(ctl, { b: b.app, c: c.app });
+      r.send('b');
+      ctl.app.run(child.app);
+      log.length = 0;
+
+      // act — a state change while Child is current
+      r.send('c');
+
+      // assert — nothing happens
+      expect(log).toEqual([]);
+      expect(ctl.app.isCurrent(child.app)).toBe(true);
+
+      // act — Child exits, B resumes, then the router routes to C
+      ctl.app.exit('done');
+      await waitForFocus();
+
+      // assert
+      expect(log).toEqual(['Child.onExit', 'B.onResume(done)', 'B.onExit', 'C.onStart']);
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+      expect([b.watch.active, c.watch.active, c.watch.subscribes]).toEqual([0, 1, 1]);
+
+      // act — the stack is empty
+      log.length = 0;
+      ctl.app.exit('c result');
+
+      // assert
+      expect(log).toEqual(['C.onExit']);
+      expect(exits).toEqual([{ app: c.app, payload: 'c result' }]);
     });
   });
 });

@@ -124,6 +124,19 @@ describe('inputTextArea', () => {
   });
 });
 
+describe('inputPassword', () => {
+  test('true - in inputUI', () => {
+    // arrange
+    const layout = createLayout({ inputPassword: true });
+
+    // act
+    const { password } = layout.inputUI;
+
+    // assert
+    expect(password).toBe(true);
+  });
+});
+
 describe('Back button', () => {
   function backButton(ctl: Controller) {
     const layout = StandardLayout.create(ctl, {}, icons);

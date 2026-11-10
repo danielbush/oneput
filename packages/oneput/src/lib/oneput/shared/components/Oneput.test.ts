@@ -50,3 +50,28 @@ describe('Oneput menu pointer activation', () => {
     expect(events).toEqual(['item pointerup', 'menu action', 'item click']);
   });
 });
+
+describe('Oneput password input', () => {
+  test('password - an input of type password, even with textArea', () => {
+    // arrange
+    render({ menuOpen: false, inputUI: { textArea: { rows: 3 }, password: true } });
+
+    // act
+    const input = document.querySelector('#oneput__input')!;
+
+    // assert
+    expect(input.tagName).toBe('INPUT');
+    expect(input.getAttribute('type')).toBe('password');
+  });
+
+  test('no password - a text input', () => {
+    // arrange
+    render({ menuOpen: false, inputUI: {} });
+
+    // act
+    const input = document.querySelector('#oneput__input')!;
+
+    // assert
+    expect(input.getAttribute('type')).toBe('text');
+  });
+});

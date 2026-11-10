@@ -157,6 +157,8 @@ export type OneputProps = {
   outerUI?: FlexParams;
   inputUI?: {
     textArea?: boolean | { rows: number };
+    /** Hide what the user types, e.g. for an API key. A password input is never a textarea. */
+    password?: boolean;
     left?: FlexParams;
     right?: FlexParams;
     outerLeft?: FlexParams;
@@ -557,6 +559,12 @@ export type AppLayoutParams = {
    * rebuilds its UI (each `ctl.ui.update`).
    */
   inputTextArea?: boolean | { rows: number };
+  /**
+   * Hide what the user types, e.g. for an API key. Same as
+   * `OneputProps['inputUI']['password']`, and a layout param for the same reason
+   * as `inputTextArea`.
+   */
+  inputPassword?: boolean;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

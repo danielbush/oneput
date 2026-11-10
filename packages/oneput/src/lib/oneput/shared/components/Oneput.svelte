@@ -15,11 +15,13 @@
     ...props
   }: OneputProps = $props();
 
-  let { inputLines, isTextArea } = $derived.by(() => {
+  let { inputLines, isTextArea, isPassword } = $derived.by(() => {
     const textArea = props.inputUI?.textArea;
+    const isPassword = !!props.inputUI?.password;
     return {
-      inputLines: Math.max(1, typeof textArea === 'object' ? textArea.rows : 1),
-      isTextArea: !!textArea
+      inputLines: isPassword ? 1 : Math.max(1, typeof textArea === 'object' ? textArea.rows : 1),
+      isTextArea: !isPassword && !!textArea,
+      isPassword
     };
   });
 
@@ -178,7 +180,7 @@
               value={inputValue}
               oninput={handleInputChange}
               class="oneput__input"
-              type="text"
+              type={isPassword ? 'password' : 'text'}
               {placeholder}
               autocorrect="off"
               {autocomplete}

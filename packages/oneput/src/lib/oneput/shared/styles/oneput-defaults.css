@@ -285,6 +285,14 @@
     --oneput-button-background-focus: color-mix(in srgb, var(--theme-foreground) 6%, transparent);
     --oneput-button-background-hover: color-mix(in srgb, var(--theme-foreground) 12%, transparent);
     --oneput-button-background-active: color-mix(in srgb, var(--theme-foreground) 18%, transparent);
+    /* An icon button in a menu item (e.g. delete): faint, but it looks like a button. */
+    --oneput-menu-item-button-background: color-mix(
+      in srgb,
+      var(--theme-foreground) 5%,
+      transparent
+    );
+    --oneput-menu-item-button-ring: inset 0 0 0 0.5px
+      color-mix(in srgb, var(--theme-foreground) 25%, transparent);
     --oneput-menu-header-background: color-mix(in srgb, var(--theme-field) 20%, transparent);
     --oneput-menu-footer-background: color-mix(in srgb, var(--theme-field) 20%, transparent);
 
@@ -699,6 +707,15 @@
   .oneput__icon--small {
     --oneput-icon-width: var(--oneput-icon-width-small);
     --oneput-icon-padding: var(--oneput-icon-padding-small);
+  }
+
+  /*
+   * An icon button in a menu item shows faintly that it is a button. The
+   * :focus, :hover and :active rules below come later, so they still win.
+   */
+  .oneput__std-menu-item .oneput__icon-button {
+    background: var(--oneput-menu-item-button-background);
+    box-shadow: var(--oneput-menu-item-button-ring);
   }
 
   .oneput__icon-button:focus {

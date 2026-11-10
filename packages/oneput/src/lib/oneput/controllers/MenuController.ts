@@ -434,6 +434,11 @@ export class MenuController {
     return this.currentMenu.allMenuItems;
   }
 
+  /** The shown row that has menu focus, if any; e.g. for a key that acts on it. */
+  get focusedMenuItem() {
+    return this.currentMenu.focusedMenuItem;
+  }
+
   /** Publish lifecycle events after the menu snapshot and focus are both resolved. */
   private batchMenuNotifications(run: () => void) {
     this.menuNotificationDepth += 1;

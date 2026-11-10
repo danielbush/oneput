@@ -1506,11 +1506,9 @@ describe('AppController', () => {
       expect(shownMenuIds(ctl)).toEqual(['C-row']);
       expect(b.watch.active).toBe(0);
       expect(c.watch.active).toBe(1);
-      // pop() runs runAfter() again after onResume returns, so C's watch is
-      // subscribed, unsubscribed and subscribed again: two subscribes, one
-      // active. Harmless today, but runAfter (menu, bindings, focus, watch)
-      // runs twice for C.
-      expect(c.watch.subscribes).toBe(2);
+      // pop() finishes B only if B is still current after onResume, so C's
+      // watch is subscribed once.
+      expect(c.watch.subscribes).toBe(1);
 
       // act — the stack is empty
       log.length = 0;
@@ -1519,6 +1517,29 @@ describe('AppController', () => {
       // assert
       expect(log).toEqual(['C.onExit']);
       expect(exits).toEqual([{ app: c.app, payload: undefined }]);
+    });
+
+    test('replace from inside onStart: C is watched once, A does not linger', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const c = trackedApp('C', log);
+      const a = trackedApp('A', log, {
+        onStart: () => {
+          log.push('A.onStart');
+          ctl.app.replace(c.app);
+        }
+      });
+
+      // act
+      ctl.app.run(a.app);
+      await waitForFocus();
+
+      // assert
+      expect(log).toEqual(['A.onStart', 'A.onExit', 'C.onStart']);
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+      expect([a.watch.subscribes, c.watch.subscribes, c.watch.active]).toEqual([0, 1, 1]);
     });
 
     test('replace from onResume via queueMicrotask: same result, runAfter once for C', async () => {

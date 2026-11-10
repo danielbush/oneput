@@ -530,9 +530,7 @@ export class AppController {
       this.appParents.push(this.current);
     }
     this.setCurrent(appObject);
-    this.runBefore();
-    appObject.onStart?.();
-    this.runAfter();
+    this.enter(appObject, () => appObject.onStart?.());
   }
 
   /**
@@ -548,9 +546,7 @@ export class AppController {
     this.pendingPop = undefined;
     this.runBeforeExit();
     this.setCurrent(appObject);
-    this.runBefore();
-    appObject.onStart?.();
-    this.runAfter();
+    this.enter(appObject, () => appObject.onStart?.());
   }
 
   /**
@@ -569,6 +565,22 @@ export class AppController {
   setOnRootExit(handler?: (exit: RootAppExit) => void): void {
     this.onRootExit = handler;
     this.ctl.menu.invalidate();
+  }
+
+  /**
+   * Prepare the current AppObject, run its start hook (onStart / onResume),
+   * then finish it with runAfter.
+   *
+   * The hook may start another transition (run, replace, exit). That
+   * transition has already prepared and finished the AppObject it made
+   * current, so finish only when `app` is still current.
+   */
+  private enter(app: AnyAppObject, hook: () => void) {
+    this.runBefore();
+    hook();
+    if (this.current === app) {
+      this.runAfter();
+    }
   }
 
   /**
@@ -705,9 +717,7 @@ export class AppController {
     const appVal = this.appParents.pop();
     if (appVal) {
       this.setCurrent(appVal, false);
-      this.runBefore();
-      appVal.onResume?.(result);
-      this.runAfter();
+      this.enter(appVal, () => appVal.onResume?.(result));
       return;
     }
     this.setCurrent(undefined, false);

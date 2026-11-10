@@ -35,7 +35,8 @@ export const iconData = {
   Bot: lu.Bot,
   MessagesCircle: lu.MessagesCircle,
   Palette: lu.Palette,
-  KeyRound: lu.KeyRound
+  KeyRound: lu.KeyRound,
+  ChevronRight: lu.ChevronRight
 };
 
 export const icons = registerIcons(iconData, (icon) => element(() => lu.createElement(icon)));

@@ -40,6 +40,9 @@ export type InputChangeListener = (evt: InputEvent) => void;
 /** Why an input claim stopped owning the shared input. */
 export type InputClaimReleaseReason = string;
 
+/** What the input shows after a claim: the previous value, or nothing. */
+export type InputClaimResume = 'restore' | 'clear';
+
 /**
  * When the claim should release itself. Closing the AppObject input scope
  * always releases, regardless of this policy.
@@ -85,8 +88,12 @@ export type InputClaimOptions = {
   input?: InputKind;
   /** Default `'all'`. */
   select?: 'all' | 'none';
-  /** Default `'restore'` — put the previous owner's value back. */
-  resumePrevious?: 'restore' | 'clear';
+  /**
+   * Default `'restore'` — put the previous owner's value back. A function
+   * decides from the release reason, e.g. clear after a submit but restore
+   * after Back.
+   */
+  resumePrevious?: InputClaimResume | ((reason: InputClaimReleaseReason) => InputClaimResume);
   /** Automatic release rules. Scope close always releases. */
   release?: InputClaimReleasePolicy;
   onRelease?: (reason: InputClaimReleaseReason) => void;

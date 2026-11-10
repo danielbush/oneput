@@ -178,6 +178,9 @@ export class InputClaims {
     };
     this.active = claim;
 
+    // Keep the filtered rows while the claim edits (does nothing if the menu
+    // is not filtering), then stop typing from filtering.
+    this.ctl.menu.holdFilter();
     this.ctl.ui.update({
       flags: { enableFilter: false, enableGenerative: false }
     });
@@ -238,7 +241,8 @@ export class InputClaims {
     }
 
     const { suspended, options } = claim;
-    const resumePrevious = options.resumePrevious ?? 'restore';
+    const resume = options.resumePrevious ?? 'restore';
+    const resumePrevious = typeof resume === 'function' ? resume(reason) : resume;
 
     this.ctl.ui.update({
       flags: {
@@ -253,6 +257,9 @@ export class InputClaims {
       input: suspended.input
     }));
 
+    // The new input value filters the menu: the filter text after a restore,
+    // all rows after a clear.
+    this.ctl.menu.releaseFilter();
     if (resumePrevious === 'clear') {
       void this.ctl.input.setInputValue('');
     } else {

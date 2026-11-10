@@ -340,11 +340,14 @@ export class MenuController {
     // Hold callbacks until rows and focus agree.
     this.batchMenuNotifications(() => {
       const focusCause = focusCauseFromMenuUpdate(cause);
-      // Filter only when the input channel owns filtering.
+      // A held filter keeps the rows; else filter only when the input
+      // channel owns filtering.
       const result =
-        this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
-          ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
-          : false;
+        this.heldFilter !== undefined
+          ? this.filter.run(this.currentMenu.allMenuItems, this.heldFilter)
+          : this.inputChannel.mode === 'filter' && this.inputChannel.filterEnabled
+            ? this.filter.run(this.currentMenu.allMenuItems, this.ctl.input.getInputValue())
+            : false;
       if (result === false) {
         // No active filter: show every row.
         this.ctl.currentProps.menuItems = this.currentMenu.allMenuItems;
@@ -518,6 +521,30 @@ export class MenuController {
 
   get enableFilter() {
     return this.inputChannel.filterEnabled;
+  }
+
+  /** The filter text that {@link holdFilter} keeps, if any. */
+  private heldFilter?: string;
+
+  /**
+   * Keep the rows that the filter shows now, while the input is used for
+   * something else (e.g. an input claim edits a row's value). If the menu is
+   * not filtering now, this does nothing.
+   */
+  holdFilter() {
+    if (this.inputChannel.mode !== 'filter' || !this.inputChannel.filterEnabled) {
+      return;
+    }
+    this.heldFilter = this.ctl.input.getInputValue();
+  }
+
+  /** Stop {@link holdFilter}: the input's value filters the menu again. */
+  releaseFilter() {
+    this.heldFilter = undefined;
+  }
+
+  get isFilterHeld() {
+    return this.heldFilter !== undefined;
   }
 
   // #endregion

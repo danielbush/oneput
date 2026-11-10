@@ -114,4 +114,96 @@ describe('MenuLiveEdit', () => {
     expect(liveEdit.editing).toBe(false);
     expect(ctl.input.hasActiveClaim).toBe(false);
   });
+
+  describe('a filtered menu', () => {
+    /** Rows `label`, `role` and `notes`; `role` can be edited. The filter matches ids. */
+    async function setup() {
+      const ctl = Controller.createNull({ menuOpen: true });
+      const input = ctl.currentProps.inputElement as HTMLInputElement;
+      document.body.appendChild(input);
+      let role = 'Admin';
+      const liveEdit = MenuLiveEdit.create(ctl);
+      ctl.app.run({
+        settings: { enableFilter: true, clearInputAfterAction: false, clearInputAfterBack: false },
+        menu: () => ({
+          id: 'mixed',
+          items: [
+            stdMenuItem({ id: 'label', textContent: 'Label' }),
+            liveEdit.item({
+              id: 'role',
+              value: {
+                read: () => role,
+                write: (value) => {
+                  role = value;
+                }
+              },
+              render: ({ value }) => stdMenuItem({ id: 'role', textContent: `Role: ${value}` })
+            }),
+            stdMenuItem({ id: 'notes', textContent: 'Notes' })
+          ]
+        })
+      });
+      ctl.menu.setFilter((query, items) => ({
+        items: items.filter((item) => item.id.includes(query))
+      }));
+      await ctl.input.setInputValue('ro');
+      const rows = () => (ctl.currentProps.menuItems ?? []).map((item) => item.id);
+      const activateRole = async () => {
+        const item = ctl.menu.baseMenuItems.find((i) => i.id === 'role');
+        if (!item || !('action' in item) || !item.action) throw new Error('no role row');
+        item.action(ctl);
+        await ctl.menu.invalidate();
+      };
+      return { ctl, rows, activateRole, role: () => role };
+    }
+
+    it('editing keeps the filtered rows; the input shows the value', async () => {
+      // arrange
+      const { ctl, rows, activateRole, role } = await setup();
+      expect(rows()).toEqual(['role']);
+
+      // act
+      await activateRole();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('Admin');
+      expect(rows()).toEqual(['role']);
+
+      // act — the value is selected, thus typing replaces it
+      await ctl.input.typeText('Owner');
+      await ctl.menu.invalidate();
+
+      // assert
+      expect(role()).toBe('Owner');
+      expect(rows()).toEqual(['role']);
+    });
+
+    it('activating the row again submits: the input clears and all rows show', async () => {
+      // arrange
+      const { ctl, rows, activateRole } = await setup();
+      await activateRole();
+
+      // act
+      await activateRole();
+
+      // assert
+      expect(ctl.input.hasActiveClaim).toBe(false);
+      expect(ctl.input.getInputValue()).toBe('');
+      expect(rows()).toEqual(['label', 'role', 'notes']);
+    });
+
+    it('Back ends the edit: the filter text and its rows come back', async () => {
+      // arrange
+      const { ctl, rows, activateRole } = await setup();
+      await activateRole();
+
+      // act
+      ctl.app.goBack();
+      await ctl.menu.invalidate();
+
+      // assert
+      expect(ctl.input.getInputValue()).toBe('ro');
+      expect(rows()).toEqual(['role']);
+    });
+  });
 });

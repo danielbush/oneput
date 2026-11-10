@@ -11,6 +11,13 @@ import {
 export type { LiveEditBinding, LiveEditItemParams, LiveEditRender, LiveEditValue };
 
 /**
+ * Activating the row again submits the edit: the input clears, thus the menu
+ * shows all rows. Any other end (e.g. Back) puts the filter text back.
+ */
+const clearAfterSubmit = (reason: string) =>
+  reason === 'activated-again' ? ('clear' as const) : ('restore' as const);
+
+/**
  * Stable field identity shared by a provider action and its menu row.
  */
 export type LiveEditField = {
@@ -23,6 +30,10 @@ export type LiveEditField = {
  * opted-in row is activated. Activation claims the shared input; the claim's
  * release policy ends editing on Back, focus leave, owner removal, or
  * AppObject exit.
+ *
+ * While a row edits, the menu keeps the rows of the filter.
+ * Activating the row again submits: the input clears and the menu shows all
+ * rows. Back puts the filter text back. `resumePrevious` can change this.
  *
  * Prefer `clearInputAfterAction: false` so activate does not wipe the claimed
  * value.
@@ -54,7 +65,7 @@ export class MenuLiveEdit {
       value: params.value,
       placeholder: params.placeholder,
       input: params.input,
-      resumePrevious: params.resumePrevious
+      resumePrevious: params.resumePrevious ?? clearAfterSubmit
     };
     return {
       activate: () => this.toggle(params.id, binding),

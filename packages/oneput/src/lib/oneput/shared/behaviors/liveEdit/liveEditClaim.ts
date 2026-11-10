@@ -1,5 +1,5 @@
 import type { Controller } from '../../../controllers/controller.js';
-import type { InputClaimHandle, InputKind, MenuItem } from '../../../types.js';
+import type { InputClaimHandle, InputClaimOptions, InputKind, MenuItem } from '../../../types.js';
 
 export type LiveEditValue = {
   read: () => string;
@@ -11,8 +11,8 @@ export type LiveEditBinding = {
   placeholder?: string;
   /** The input while the row edits, e.g. `{ kind: 'password' }`. */
   input?: InputKind;
-  /** Default `'restore'`. */
-  resumePrevious?: 'restore' | 'clear';
+  /** Default `'restore'`. See `InputClaimOptions.resumePrevious`. */
+  resumePrevious?: InputClaimOptions['resumePrevious'];
 };
 
 export type LiveEditRender = (state: { value: string; editing: boolean }) => MenuItem;

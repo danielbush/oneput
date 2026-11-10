@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { Controller } from './controller.js';
-import type { InputSelectionState } from '../types.js';
+import type { InputKind, InputSelectionState } from '../types.js';
 
 /**
  * happy-dom only dispatches a single `selectionchange` per session, not one
@@ -173,30 +173,34 @@ describe('InputController selection-change emission', () => {
   });
 
   describe('isMultiline', () => {
-    const withTextArea = (textArea: boolean | { rows: number } | undefined) => {
+    const withInput = (input: InputKind | undefined) => {
       const ctl = Controller.createNull();
-      ctl.ui.setInputUI({ textArea });
+      ctl.ui.setInputUI({ input });
       return ctl.input.isMultiline;
     };
 
-    it('rows > 1', () => {
-      expect(withTextArea({ rows: 5 })).toBe(true);
+    it('textarea, rows > 1', () => {
+      expect(withInput({ kind: 'textarea', rows: 5 })).toBe(true);
     });
 
-    it('rows 1 - still a textarea, thus still takes newlines', () => {
-      expect(withTextArea({ rows: 1 })).toBe(true);
+    it('textarea, rows 1 - still a textarea, thus still takes newlines', () => {
+      expect(withInput({ kind: 'textarea', rows: 1 })).toBe(true);
     });
 
-    it('textArea true', () => {
-      expect(withTextArea(true)).toBe(true);
+    it('textarea, no rows', () => {
+      expect(withInput({ kind: 'textarea' })).toBe(true);
     });
 
-    it('textArea false', () => {
-      expect(withTextArea(false)).toBe(false);
+    it('text', () => {
+      expect(withInput({ kind: 'text' })).toBe(false);
     });
 
-    it('no textArea', () => {
-      expect(withTextArea(undefined)).toBe(false);
+    it('password', () => {
+      expect(withInput({ kind: 'password' })).toBe(false);
+    });
+
+    it('no input', () => {
+      expect(withInput(undefined)).toBe(false);
     });
 
     it('no inputUI', () => {

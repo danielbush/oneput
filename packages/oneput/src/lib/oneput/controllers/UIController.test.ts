@@ -54,25 +54,25 @@ describe('invalidate', () => {
   test('keeps params', () => {
     // arrange
     const ctl = createNull();
-    ctl.ui.update({ params: { inputTextArea: { rows: 5 } } });
+    ctl.ui.update({ params: { input: { kind: 'textarea', rows: 5 } } });
 
     // act
     ctl.ui.invalidate();
 
     // assert
-    expect(ctl.currentProps.inputUI?.textArea).toEqual({ rows: 5 });
+    expect(ctl.currentProps.inputUI?.input).toEqual({ kind: 'textarea', rows: 5 });
   });
 
   test('writes over setInputUI', () => {
     // arrange
     const ctl = createNull();
     ctl.ui.update({});
-    ctl.ui.setInputUI((current) => ({ ...current, textArea: { rows: 5 } }));
+    ctl.ui.setInputUI((current) => ({ ...current, input: { kind: 'textarea', rows: 5 } }));
 
     // act
     ctl.ui.invalidate();
 
     // assert
-    expect(ctl.currentProps.inputUI?.textArea).toBeUndefined();
+    expect(ctl.currentProps.inputUI?.input).toBeUndefined();
   });
 });

@@ -1,5 +1,5 @@
 import type { Controller } from '../../../controllers/controller.js';
-import type { InputClaimHandle, MenuItem } from '../../../types.js';
+import type { InputClaimHandle, InputKind, MenuItem } from '../../../types.js';
 
 export type LiveEditValue = {
   read: () => string;
@@ -9,7 +9,8 @@ export type LiveEditValue = {
 export type LiveEditBinding = {
   value: LiveEditValue;
   placeholder?: string;
-  textArea?: boolean | { rows: number };
+  /** The input while the row edits, e.g. `{ kind: 'password' }`. */
+  input?: InputKind;
   /** Default `'restore'`. */
   resumePrevious?: 'restore' | 'clear';
 };
@@ -51,7 +52,7 @@ export function claimLiveEdit(
       }
     },
     placeholder: binding.placeholder,
-    textArea: binding.textArea,
+    input: binding.input,
     select: 'all',
     resumePrevious: binding.resumePrevious ?? 'restore',
     release: liveEditReleasePolicy,

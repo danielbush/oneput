@@ -194,7 +194,7 @@ export class KatexDemo implements AppObject {
   layout = {
     params: {
       menuTitle: 'Katex Demo',
-      inputTextArea: { rows: 5 },
+      input: { kind: 'textarea', rows: 5 },
       // The Send button runs the SUBMIT action. `enabled` is read each time
       // the layout builds, so a change only needs `ctl.ui.invalidate()`.
       inputSend: {

@@ -116,7 +116,7 @@ export class UIController {
    * and `ctl.app.invalidate` for `actions`.
    *
    * It writes over what `setInputUI`, `setInnerUI` and `setOuterUI` set. Use
-   * layout params (for example `inputTextArea`) for things that must stay.
+   * layout params (for example `input`) for things that must stay.
    */
   invalidate() {
     this.ctl.currentProps.inputUI = this.layout?.inputUI;

@@ -51,10 +51,10 @@ describe('Oneput menu pointer activation', () => {
   });
 });
 
-describe('Oneput password input', () => {
-  test('password - an input of type password, even with textArea', () => {
+describe('Oneput input kind', () => {
+  test('password - an input of type password', () => {
     // arrange
-    render({ menuOpen: false, inputUI: { textArea: { rows: 3 }, password: true } });
+    render({ menuOpen: false, inputUI: { input: { kind: 'password' } } });
 
     // act
     const input = document.querySelector('#oneput__input')!;
@@ -64,7 +64,19 @@ describe('Oneput password input', () => {
     expect(input.getAttribute('type')).toBe('password');
   });
 
-  test('no password - a text input', () => {
+  test('textarea - a textarea with its rows', () => {
+    // arrange
+    render({ menuOpen: false, inputUI: { input: { kind: 'textarea', rows: 3 } } });
+
+    // act
+    const input = document.querySelector('#oneput__input')!;
+
+    // assert
+    expect(input.tagName).toBe('TEXTAREA');
+    expect(input.getAttribute('rows')).toBe('3');
+  });
+
+  test('no input - a text input', () => {
     // arrange
     render({ menuOpen: false, inputUI: {} });
 

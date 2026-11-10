@@ -2,18 +2,16 @@ import type { Controller } from '../controller.js';
 import type {
   InputClaimHandle,
   InputClaimOptions,
+  InputKind,
   InputScope,
   MenuItem,
-  MenuItemAny,
-  OneputProps
+  MenuItemAny
 } from '../../types.js';
-
-type InputTextArea = NonNullable<OneputProps['inputUI']>['textArea'];
 
 type SuspendedInputOwner = {
   value: string;
   placeholder: string;
-  textArea: InputTextArea;
+  input: InputKind | undefined;
   enableFilter: boolean;
   enableGenerative: boolean;
 };
@@ -188,10 +186,10 @@ export class InputClaims {
       this.ctl.input.setPlaceholder(options.placeholder);
     }
 
-    if (options.textArea !== undefined) {
+    if (options.input !== undefined) {
       this.ctl.ui.setInputUI((current) => ({
         ...current,
-        textArea: options.textArea
+        input: options.input
       }));
     }
 
@@ -227,7 +225,7 @@ export class InputClaims {
     return {
       value: this.ctl.input.getInputValue(),
       placeholder: this.ctl.input.getPlaceholder(),
-      textArea: this.ctl.currentProps.inputUI?.textArea,
+      input: this.ctl.currentProps.inputUI?.input,
       enableFilter: this.ctl.menu.enableFilter,
       enableGenerative: this.ctl.menu.enableGenerative
     };
@@ -252,7 +250,7 @@ export class InputClaims {
     this.ctl.input.setPlaceholder(suspended.placeholder);
     this.ctl.ui.setInputUI((current) => ({
       ...current,
-      textArea: suspended.textArea
+      input: suspended.input
     }));
 
     if (resumePrevious === 'clear') {

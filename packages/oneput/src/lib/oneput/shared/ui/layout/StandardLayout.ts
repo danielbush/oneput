@@ -183,8 +183,7 @@ export class StandardLayout implements UILayout<StandardLayoutParams> {
 
   get inputUI() {
     return {
-      textArea: this.settings.inputTextArea,
-      password: this.settings.inputPassword,
+      input: this.settings.input,
       right: this.inputRight(),
       outerRight: hflex({
         id: 'root-input-right',

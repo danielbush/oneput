@@ -387,7 +387,7 @@ export class InputController {
   }
 
   /**
-   * True when the input is a textarea (`inputUI.textArea`), thus `Enter` can
+   * True when the input is a textarea (`inputUI.input`), thus `Enter` can
    * write a newline in it.
    *
    * `rows` sizes the textarea, it does not decide this: a one-row textarea
@@ -397,7 +397,7 @@ export class InputController {
    * decides those with `enableMenuItemFocus` and `enableNativeActivation`.
    */
   get isMultiline() {
-    return Boolean(this.ctl.currentProps.inputUI?.textArea);
+    return this.ctl.currentProps.inputUI?.input?.kind === 'textarea';
   }
 
   /**

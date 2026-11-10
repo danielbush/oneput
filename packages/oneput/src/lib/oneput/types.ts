@@ -61,6 +61,19 @@ export type InputClaimReleasePolicy = {
  *
  * Raw `input-change` still broadcasts; only the semantic route is exclusive.
  */
+/**
+ * What the shared input is. One field, so a state such as a password textarea
+ * cannot be written. No value is `{ kind: 'text' }`.
+ *
+ * - `text`: one line.
+ * - `password`: one line that hides what the user types, e.g. an API key.
+ * - `textarea`: takes newlines (see ENTER_SEMANTICS); `rows` sizes it, default 1.
+ */
+export type InputKind =
+  | { kind: 'text' }
+  | { kind: 'password' }
+  | { kind: 'textarea'; rows?: number };
+
 export type InputClaimOptions = {
   owner: { type: string; itemId?: string; [key: string]: unknown };
   value: {
@@ -68,7 +81,8 @@ export type InputClaimOptions = {
     write: (value: string) => void;
   };
   placeholder?: string;
-  textArea?: boolean | { rows: number };
+  /** The input while the claim is active; the previous input comes back on release. */
+  input?: InputKind;
   /** Default `'all'`. */
   select?: 'all' | 'none';
   /** Default `'restore'` — put the previous owner's value back. */
@@ -156,9 +170,8 @@ export type OneputProps = {
   innerUI?: FlexParams;
   outerUI?: FlexParams;
   inputUI?: {
-    textArea?: boolean | { rows: number };
-    /** Hide what the user types, e.g. for an API key. A password input is never a textarea. */
-    password?: boolean;
+    /** What the input is; no value is a text input. */
+    input?: InputKind;
     left?: FlexParams;
     right?: FlexParams;
     outerLeft?: FlexParams;
@@ -552,19 +565,13 @@ export type AppLayoutParams = {
    */
   inputReject?: LayoutAffordance;
   /**
-   * Input or textarea for this AppObject. Same values as
-   * `OneputProps['inputUI']['textArea']`.
+   * What the input is for this AppObject: text, password or textarea. Same
+   * values as `OneputProps['inputUI']['input']`.
    *
    * A layout param, not `setInputUI`, so that it stays when the layout
    * rebuilds its UI (each `ctl.ui.update`).
    */
-  inputTextArea?: boolean | { rows: number };
-  /**
-   * Hide what the user types, e.g. for an API key. Same as
-   * `OneputProps['inputUI']['password']`, and a layout param for the same reason
-   * as `inputTextArea`.
-   */
-  inputPassword?: boolean;
+  input?: InputKind;
 };
 
 export type InstallLayout<LayoutParams extends AppLayoutParams = AppLayoutParams> = {

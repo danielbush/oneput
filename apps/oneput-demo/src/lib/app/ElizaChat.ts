@@ -33,7 +33,7 @@ export class ElizaChat implements AppObject {
   layout = {
     params: {
       menuTitle: 'ELIZA',
-      inputTextArea: { rows: 3 },
+      input: { kind: 'textarea', rows: 3 },
       // `enabled` is read each time the layout builds, so a change only
       // needs `ctl.ui.invalidate()`.
       inputSend: {

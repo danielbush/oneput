@@ -93,7 +93,7 @@ export class AddEntry implements AppObject {
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
-        textArea: false
+        input: { kind: 'text' }
       } satisfies OneputProps['inputUI'];
     });
     this.ctl.input.focusInput();

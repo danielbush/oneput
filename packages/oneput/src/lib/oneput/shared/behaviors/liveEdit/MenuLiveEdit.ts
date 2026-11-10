@@ -53,7 +53,7 @@ export class MenuLiveEdit {
     const binding: LiveEditBinding = {
       value: params.value,
       placeholder: params.placeholder,
-      textArea: params.textArea,
+      input: params.input,
       resumePrevious: params.resumePrevious
     };
     return {

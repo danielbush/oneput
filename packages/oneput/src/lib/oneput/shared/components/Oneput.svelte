@@ -16,12 +16,11 @@
   }: OneputProps = $props();
 
   let { inputLines, isTextArea, isPassword } = $derived.by(() => {
-    const textArea = props.inputUI?.textArea;
-    const isPassword = !!props.inputUI?.password;
+    const input = props.inputUI?.input ?? { kind: 'text' };
     return {
-      inputLines: isPassword ? 1 : Math.max(1, typeof textArea === 'object' ? textArea.rows : 1),
-      isTextArea: !isPassword && !!textArea,
-      isPassword
+      inputLines: input.kind === 'textarea' ? Math.max(1, input.rows ?? 1) : 1,
+      isTextArea: input.kind === 'textarea',
+      isPassword: input.kind === 'password'
     };
   });
 

@@ -573,7 +573,7 @@ describe('MenuController', () => {
       ctl.menu.focusMenuItemById('b');
 
       // act
-      ctl.ui.setInputUI({ textArea: { rows: 5 } });
+      ctl.ui.setInputUI({ input: { kind: 'textarea', rows: 5 } });
 
       // assert
       expect(ctl.currentProps.menuItemFocus).toEqual([1, true]);

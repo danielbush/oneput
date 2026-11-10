@@ -105,7 +105,7 @@ export class SetNote implements AppObject {
     this.ctl.ui.setInputUI((current) => {
       return {
         ...current,
-        textArea: { rows: 5 }
+        input: { kind: 'textarea', rows: 5 }
       } satisfies OneputProps['inputUI'];
     });
   }

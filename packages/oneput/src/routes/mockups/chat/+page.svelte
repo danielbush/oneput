@@ -38,7 +38,7 @@
         menuItems={mockups.chatMenuItems()}
         menuUI={{ layoutHeader: mockups.chatHeader }}
         inputUI={{
-          textArea: { rows: 2 },
+          input: { kind: 'textarea', rows: 2 },
           left: ui.inputLeft1,
           right: ui.inputRight1
         }}
@@ -58,7 +58,7 @@
         menuItems={mockups.richChatMenuItems()}
         menuUI={{ layoutHeader: mockups.chatHeader }}
         inputUI={{
-          textArea: { rows: 2 },
+          input: { kind: 'textarea', rows: 2 },
           left: ui.inputLeft1,
           right: ui.inputRight1
         }}
@@ -78,7 +78,7 @@
         menuItems={mockups.richChatScrollMenuItems()}
         menuUI={{ layoutHeader: mockups.chatHeader }}
         inputUI={{
-          textArea: { rows: 2 },
+          input: { kind: 'textarea', rows: 2 },
           left: ui.inputLeft1,
           right: ui.inputRight1
         }}

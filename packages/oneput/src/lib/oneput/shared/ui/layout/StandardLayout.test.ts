@@ -89,51 +89,49 @@ describe('inputSend / inputAccept / inputReject: enabled', () => {
   });
 });
 
-describe('inputTextArea', () => {
-  test('rows - in inputUI', () => {
+describe('input', () => {
+  test('textarea - in inputUI', () => {
     // arrange
-    const layout = createLayout({ inputTextArea: { rows: 5 } });
+    const layout = createLayout({ input: { kind: 'textarea', rows: 5 } });
 
     // act
-    const { textArea } = layout.inputUI;
+    const { input } = layout.inputUI;
 
     // assert
-    expect(textArea).toEqual({ rows: 5 });
+    expect(input).toEqual({ kind: 'textarea', rows: 5 });
+  });
+
+  test('password - in inputUI', () => {
+    // arrange
+    const layout = createLayout({ input: { kind: 'password' } });
+
+    // act
+    const { input } = layout.inputUI;
+
+    // assert
+    expect(input).toEqual({ kind: 'password' });
   });
 
   test('replace without it - removed', () => {
     // arrange
-    const layout = createLayout({ inputTextArea: { rows: 5 } });
+    const layout = createLayout({ input: { kind: 'textarea', rows: 5 } });
 
     // act
     layout.configure({ params: { menuTitle: 'Next' }, replace: true });
 
     // assert
-    expect(layout.inputUI.textArea).toBeUndefined();
+    expect(layout.inputUI.input).toBeUndefined();
   });
 
   test('merge without it - kept', () => {
     // arrange
-    const layout = createLayout({ inputTextArea: { rows: 5 } });
+    const layout = createLayout({ input: { kind: 'textarea', rows: 5 } });
 
     // act
     layout.configure({ params: { menuTitle: 'Same app' } });
 
     // assert
-    expect(layout.inputUI.textArea).toEqual({ rows: 5 });
-  });
-});
-
-describe('inputPassword', () => {
-  test('true - in inputUI', () => {
-    // arrange
-    const layout = createLayout({ inputPassword: true });
-
-    // act
-    const { password } = layout.inputUI;
-
-    // assert
-    expect(password).toBe(true);
+    expect(layout.inputUI.input).toEqual({ kind: 'textarea', rows: 5 });
   });
 });
 

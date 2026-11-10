@@ -218,6 +218,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: DECLARATIVE_ONEPUT - AppObject's becomes data that an agent can build;
+  - COMMENT: this might lead into using state machines and signals and other declarative techniques across oneput's implementations
 - refactor: packages/oneput/src/lib/oneput/shared/ui/menuItems/toggleMenuItem.ts vs packages/oneput/src/lib/oneput/shared/ui/menuItems/pullToggleMenuItem.ts
 - refactor: move core components and mount stuff out of shared/ - wtf are they doing in there?
 - refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md

@@ -34,7 +34,8 @@ export const iconData = {
   EllipsisVertical: lu.EllipsisVertical,
   Bot: lu.Bot,
   MessagesCircle: lu.MessagesCircle,
-  Palette: lu.Palette
+  Palette: lu.Palette,
+  KeyRound: lu.KeyRound
 };
 
 export const icons = registerIcons(iconData, (icon) => element(() => lu.createElement(icon)));

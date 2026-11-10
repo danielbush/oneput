@@ -130,12 +130,18 @@ export class MenuLiveEdit {
     const claim = claimLiveEdit(this.ctl, {
       itemId,
       binding,
-      onRelease: (released) => {
+      onRelease: (released, reason) => {
         if (this.active?.claim !== released) {
           return;
         }
         this.active = undefined;
-        void this.ctl.menu.invalidate({ focusBehaviour: 'none' });
+        void this.ctl.menu.invalidate({ focusBehaviour: 'none' }).then(() => {
+          // Submit (Enter) or Back: focus stays on the row that was edited,
+          // though the rows changed. Other ends move focus on purpose.
+          if (reason === 'activated-again' || reason === 'back') {
+            this.ctl.menu.focusMenuItemById(itemId);
+          }
+        });
       }
     });
 

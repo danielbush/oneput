@@ -148,13 +148,15 @@ describe('MenuLiveEdit', () => {
       }));
       await ctl.input.setInputValue('ro');
       const rows = () => (ctl.currentProps.menuItems ?? []).map((item) => item.id);
+      /** The id of the row that has menu focus. */
+      const focused = () => rows()[ctl.currentProps.menuItemFocus?.[0] ?? -1];
       const activateRole = async () => {
         const item = ctl.menu.baseMenuItems.find((i) => i.id === 'role');
         if (!item || !('action' in item) || !item.action) throw new Error('no role row');
         item.action(ctl);
         await ctl.menu.invalidate();
       };
-      return { ctl, rows, activateRole, role: () => role };
+      return { ctl, rows, focused, activateRole, role: () => role };
     }
 
     it('editing keeps the filtered rows; the input shows the value', async () => {
@@ -180,7 +182,7 @@ describe('MenuLiveEdit', () => {
 
     it('activating the row again submits: the input clears and all rows show', async () => {
       // arrange
-      const { ctl, rows, activateRole } = await setup();
+      const { ctl, rows, focused, activateRole } = await setup();
       await activateRole();
 
       // act
@@ -190,11 +192,12 @@ describe('MenuLiveEdit', () => {
       expect(ctl.input.hasActiveClaim).toBe(false);
       expect(ctl.input.getInputValue()).toBe('');
       expect(rows()).toEqual(['label', 'role', 'notes']);
+      expect(focused()).toBe('role');
     });
 
     it('Back ends the edit: the filter text and its rows come back', async () => {
       // arrange
-      const { ctl, rows, activateRole } = await setup();
+      const { ctl, rows, focused, activateRole } = await setup();
       await activateRole();
 
       // act
@@ -204,6 +207,7 @@ describe('MenuLiveEdit', () => {
       // assert
       expect(ctl.input.getInputValue()).toBe('ro');
       expect(rows()).toEqual(['role']);
+      expect(focused()).toBe('role');
     });
   });
 });

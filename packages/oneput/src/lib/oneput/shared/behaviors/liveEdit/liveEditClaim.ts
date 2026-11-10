@@ -1,5 +1,11 @@
 import type { Controller } from '../../../controllers/controller.js';
-import type { InputClaimHandle, InputClaimOptions, InputKind, MenuItem } from '../../../types.js';
+import type {
+  InputClaimHandle,
+  InputClaimOptions,
+  InputClaimReleaseReason,
+  InputKind,
+  MenuItem
+} from '../../../types.js';
 
 export type LiveEditValue = {
   read: () => string;
@@ -38,7 +44,7 @@ export function claimLiveEdit(
   params: {
     itemId: string;
     binding: LiveEditBinding;
-    onRelease: (claim: InputClaimHandle) => void;
+    onRelease: (claim: InputClaimHandle, reason: InputClaimReleaseReason) => void;
   }
 ): InputClaimHandle {
   const { itemId, binding, onRelease } = params;
@@ -56,7 +62,7 @@ export function claimLiveEdit(
     select: 'all',
     resumePrevious: binding.resumePrevious ?? 'restore',
     release: liveEditReleasePolicy,
-    onRelease: () => onRelease(claim)
+    onRelease: (reason) => onRelease(claim, reason)
   });
   return claim;
 }

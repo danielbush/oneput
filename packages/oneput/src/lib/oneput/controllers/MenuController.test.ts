@@ -182,6 +182,27 @@ describe('MenuController', () => {
       expect(causes).toEqual(['invalidate', 'input-change']);
     });
 
+    it('no filter - typing keeps focus on its row', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      ctl.app.run({
+        menu: () => ({
+          id: 'main',
+          focusBehaviour: 'first',
+          items: [item('a', 'A'), item('b', 'B')]
+        }),
+        onStart: () => {}
+      });
+      await ctl.menu.invalidate();
+      ctl.menu.focusMenuItemById('b');
+
+      // act
+      ctl.events.emit({ type: 'input-change', payload: inputChangePayload });
+
+      // assert
+      expect(ctl.currentProps.menuItemFocus?.[0]).toBe(1);
+    });
+
     it('emits menu-outro-end after close when there is no view', async () => {
       // arrange
       const outros: undefined[] = [];

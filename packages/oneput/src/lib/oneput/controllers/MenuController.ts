@@ -148,7 +148,12 @@ export class MenuController {
       if (this.inputChannel.mode === 'filter' && !this.inputChannel.filterEnabled) {
         return;
       }
-      this.ctl.menu.setDisplayed({ cause: 'input-change' });
+      this.ctl.menu.setDisplayed({
+        cause: 'input-change',
+        // No filter: typing does not change the rows, thus focus stays on its
+        // row (e.g. a FOCUSED_LIVE_EDIT row while you type in it).
+        focusBehaviour: this.inputChannel.mode === 'none' ? 'none' : undefined
+      });
     });
     // Seeded from currentProps.menuOpen so createNull({ menuOpen: true }) can
     // setDisplayed without an explicit openMenu(). openMenu/closeMenu still

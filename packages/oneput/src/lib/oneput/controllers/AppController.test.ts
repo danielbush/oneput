@@ -1297,4 +1297,261 @@ describe('AppController', () => {
       expect(ctl.app.flags.enableKeys).toBe(true);
     });
   });
+
+  describe('routed mode (replace) and stack mode (run)', () => {
+    /**
+     * A test AppObject that records its own lifecycle into `log` and counts
+     * its watch subscriptions. Its menu has one row whose id is its name.
+     */
+    function trackedApp(name: string, log: string[], extra: Partial<AppObject> = {}) {
+      const model = notifier();
+      const watch = { subscribes: 0, active: 0 };
+      const app: AppObject = {
+        menu: () => ({ id: name, items: [stdMenuItem({ id: `${name}-row`, action: () => {} })] }),
+        watch: () => [
+          {
+            subscribe: (onChange: () => void) => {
+              watch.subscribes++;
+              watch.active++;
+              const unsubscribe = model.subscribe(onChange);
+              return () => {
+                watch.active--;
+                unsubscribe();
+              };
+            }
+          }
+        ],
+        onStart: () => log.push(`${name}.onStart`),
+        onResume: (result) => log.push(`${name}.onResume(${String(result?.payload)})`),
+        onSuspend: () => log.push(`${name}.onSuspend`),
+        onExit: () => log.push(`${name}.onExit`),
+        ...extra
+      };
+      return { app, model, watch };
+    }
+
+    /**
+     * A router built only from replace: an outside event names the next
+     * state and the router replaces the current AppObject with that state's
+     * AppObject.
+     */
+    function router<S extends string>(ctl: Controller, states: Record<S, AppObject>) {
+      return {
+        send: (state: S) => ctl.app.replace(states[state])
+      };
+    }
+
+    function shownMenuIds(ctl: Controller) {
+      return ctl.currentProps.menuItems?.map((item) => item.id);
+    }
+
+    test('routed: A -> B -> C at the root; Back from C is a root exit and A, B do not resume', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const exits: unknown[] = [];
+      const a = trackedApp('A', log);
+      const b = trackedApp('B', log);
+      const c = trackedApp('C', log);
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      const r = router(ctl, { a: a.app, b: b.app, c: c.app });
+      r.send('a');
+      r.send('b');
+      r.send('c');
+      await waitForFocus();
+
+      // assert — C is current, its menu is shown
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(ctl.app.getMenu()?.id).toBe('C');
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+      expect([a.watch.active, b.watch.active, c.watch.active]).toEqual([0, 0, 1]);
+
+      // act
+      log.length = 0;
+      ctl.app.goBack();
+
+      // assert
+      expect(log).toEqual(['C.onExit']);
+      expect(exits).toEqual([{ app: c.app, payload: undefined }]);
+      expect(ctl.app.isCurrent(c.app)).toBe(false);
+      expect(ctl.app.getMenu()).toBeUndefined();
+      expect(c.watch.active).toBe(0);
+    });
+
+    test('routed then stack: B runs Child, Child exits to B, then the router replaces B with C at the root', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const exits: unknown[] = [];
+      const b = trackedApp('B', log);
+      const child = trackedApp('Child', log);
+      const c = trackedApp('C', log);
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      const r = router(ctl, { b: b.app, c: c.app });
+      r.send('b');
+
+      // act — stack mode
+      ctl.app.run(child.app);
+      expect(ctl.app.isCurrent(child.app)).toBe(true);
+      ctl.app.exit('done');
+      await waitForFocus();
+
+      // assert — back in routed mode at B
+      expect(log).toEqual([
+        'B.onStart',
+        'B.onSuspend',
+        'Child.onStart',
+        'Child.onExit',
+        'B.onResume(done)'
+      ]);
+      expect(ctl.app.isCurrent(b.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['B-row']);
+      expect(b.watch.active).toBe(1);
+
+      // act — routed again
+      log.length = 0;
+      r.send('c');
+      await waitForFocus();
+
+      // assert
+      expect(log).toEqual(['B.onExit', 'C.onStart']);
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+
+      // act — the stack is empty: exit from C is a root exit
+      log.length = 0;
+      ctl.app.exit('c result');
+
+      // assert
+      expect(log).toEqual(['C.onExit']);
+      expect(exits).toEqual([{ app: c.app, payload: 'c result' }]);
+    });
+
+    // HAZARD (documented, not a bug in replace itself): replace keeps the
+    // parent stack (see AppController.replace "Keep existing parents"). A
+    // router event that arrives while a child is running replaces the child,
+    // not the routed AppObject. B stays suspended as parent, and exit from C
+    // resumes B instead of a root exit. A router has to check it is in
+    // routed mode before it replaces.
+    test('router event in stack mode: replace(C) replaces Child, B stays parent, exit from C resumes B', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const exits: unknown[] = [];
+      const b = trackedApp('B', log);
+      const child = trackedApp('Child', log);
+      const c = trackedApp('C', log);
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      const r = router(ctl, { b: b.app, c: c.app });
+      r.send('b');
+      ctl.app.run(child.app);
+      log.length = 0;
+
+      // act — the router (wrongly) routes while Child is current
+      r.send('c');
+      await waitForFocus();
+
+      // assert — C replaced Child; B was not exited
+      expect(log).toEqual(['Child.onExit', 'C.onStart']);
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+      expect(b.watch.active).toBe(0);
+      expect(ctl.app.canGoBack()).toBe(true);
+
+      // act
+      log.length = 0;
+      ctl.app.exit('c result');
+      await waitForFocus();
+
+      // assert — B resumes with C's payload; no root exit
+      expect(log).toEqual(['C.onExit', 'B.onResume(c result)']);
+      expect(ctl.app.isCurrent(b.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['B-row']);
+      expect(exits).toEqual([]);
+    });
+
+    test('replace from inside onResume (sync): C is current, started once, watched once, nothing of B lingers', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const exits: unknown[] = [];
+      const c = trackedApp('C', log);
+      const b = trackedApp('B', log, {
+        onResume: (result) => {
+          log.push(`B.onResume(${String(result?.payload)})`);
+          ctl.app.replace(c.app);
+        }
+      });
+      const child = trackedApp('Child', log);
+      ctl.app.setOnRootExit((exit) => exits.push(exit));
+      const changes = ctl.trackAppChanges();
+      ctl.app.replace(b.app);
+      ctl.app.run(child.app);
+      await waitForFocus();
+      log.length = 0;
+      changes.data.length = 0;
+
+      // act
+      ctl.app.exit('done');
+      await waitForFocus();
+
+      // assert
+      expect(log).toEqual(['Child.onExit', 'B.onResume(done)', 'B.onExit', 'C.onStart']);
+      expect(changes.data).toEqual([
+        { previous: child.app, current: b.app },
+        { previous: b.app, current: c.app }
+      ]);
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(ctl.app.getMenu()?.id).toBe('C');
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+      expect(b.watch.active).toBe(0);
+      expect(c.watch.active).toBe(1);
+      // pop() runs runAfter() again after onResume returns, so C's watch is
+      // subscribed, unsubscribed and subscribed again: two subscribes, one
+      // active. Harmless today, but runAfter (menu, bindings, focus, watch)
+      // runs twice for C.
+      expect(c.watch.subscribes).toBe(2);
+
+      // act — the stack is empty
+      log.length = 0;
+      ctl.app.exit();
+
+      // assert
+      expect(log).toEqual(['C.onExit']);
+      expect(exits).toEqual([{ app: c.app, payload: undefined }]);
+    });
+
+    test('replace from onResume via queueMicrotask: same result, runAfter once for C', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const c = trackedApp('C', log);
+      const b = trackedApp('B', log, {
+        onResume: (result) => {
+          log.push(`B.onResume(${String(result?.payload)})`);
+          queueMicrotask(() => ctl.app.replace(c.app));
+        }
+      });
+      const child = trackedApp('Child', log);
+      ctl.app.replace(b.app);
+      ctl.app.run(child.app);
+      await waitForFocus();
+      log.length = 0;
+
+      // act
+      ctl.app.exit('done');
+      // Between exit and the microtask, B is current and watched again.
+      expect(ctl.app.isCurrent(b.app)).toBe(true);
+      expect(b.watch.active).toBe(1);
+      await waitForFocus();
+
+      // assert
+      expect(log).toEqual(['Child.onExit', 'B.onResume(done)', 'B.onExit', 'C.onStart']);
+      expect(ctl.app.isCurrent(c.app)).toBe(true);
+      expect(shownMenuIds(ctl)).toEqual(['C-row']);
+      expect(b.watch.active).toBe(0);
+      expect(c.watch.active).toBe(1);
+      expect(c.watch.subscribes).toBe(1);
+    });
+  });
 });

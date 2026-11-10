@@ -847,6 +847,35 @@ describe('AppController', () => {
   });
 
   describe('replacement and root exit', () => {
+    test("replace: the new menu gets its own focus, though the old AppObject asked for a 'none' rebuild", async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const focused: string[] = [];
+      ctl.events.on('menu-item-focus', ({ menuItem }) => focused.push(menuItem?.id ?? ''));
+      ctl.app.run({
+        menu: () => ({
+          id: 'old',
+          items: [stdMenuItem({ id: 'o1', action: () => {} })]
+        })
+      });
+      await ctl.menu.invalidate();
+      focused.length = 0;
+
+      // act — in one tick: the old AppObject's rebuild, then the replacement
+      void ctl.menu.invalidate({ focusBehaviour: 'none' });
+      ctl.app.replace({
+        menu: () => ({
+          id: 'new',
+          focusBehaviour: 'first',
+          items: [stdMenuItem({ id: 'n1', action: () => {} })]
+        })
+      });
+      await ctl.menu.invalidate();
+
+      // assert — the first row of the new menu got focus (e.g. a live-edit row claims on it)
+      expect(focused).toContain('n1');
+    });
+
     test('replace: root - cleanup without root exit', () => {
       // arrange
       const ctl = Controller.createNull();

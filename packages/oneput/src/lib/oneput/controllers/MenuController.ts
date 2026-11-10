@@ -18,8 +18,16 @@ import { stdSkeletonMenuItems } from '../shared/ui/menuItems/stdSkeletonMenuItem
 import { tick } from 'svelte';
 
 type MenuInputMode = 'none' | 'filter' | 'generative';
-type InvalidateOptions = { focusBehaviour?: FocusBehaviour };
-type SetDisplayedOptions = InvalidateOptions & { cause: MenuUpdateCause };
+type InvalidateOptions = {
+  focusBehaviour?: FocusBehaviour;
+  /**
+   * The first build of a new AppObject's menu: use the menu's own focus rule.
+   * A `focusBehaviour` merged into the same batch (e.g. a refresh that the
+   * AppObject before asked for) does not change it.
+   */
+  fresh?: boolean;
+};
+type SetDisplayedOptions = { focusBehaviour?: FocusBehaviour; cause: MenuUpdateCause };
 type FocusedMenuItemPayload = {
   index: number;
   menuItem: MenuItem | undefined;
@@ -284,7 +292,11 @@ export class MenuController {
    * {@link InputController.setInputValue} / `tick()`), or `false` if the menu
    * was closed and nothing was updated. Await before reading layout (e.g. scroll).
    */
-  private refreshMenu({ focusBehaviour }: InvalidateOptions, cause: MenuUpdateCause): boolean {
+  private refreshMenu(
+    { focusBehaviour: requested, fresh }: InvalidateOptions,
+    cause: MenuUpdateCause
+  ): boolean {
+    const focusBehaviour = fresh ? undefined : requested;
     if (!this.isMenuOpenImmediate || !this.ctl.menu.isMenuOpen) {
       return false;
     }
@@ -313,7 +325,8 @@ export class MenuController {
   private invalidateCoalesced = coalesce<InvalidateOptions, boolean>(
     {
       merge: (current, next) => ({
-        focusBehaviour: next.focusBehaviour ?? current.focusBehaviour
+        focusBehaviour: next.focusBehaviour ?? current.focusBehaviour,
+        fresh: next.fresh || current.fresh
       }),
       onBatch: ({ requestCount, input }) => {
         console.debug(`Coalesced ${requestCount} menu invalidations`, input);

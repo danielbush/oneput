@@ -580,7 +580,9 @@ export class AppController {
     // later rebuilds. When closed, seed the base menu so claim owner-removed
     // checks see the rows (setDisplayed no-ops while closed).
     if (this.ctl.menu.isMenuOpen) {
-      this.ctl.menu.invalidate();
+      // `fresh`: this menu's own focus rule, whatever the AppObject before
+      // asked for in the same batch.
+      this.ctl.menu.invalidate({ fresh: true });
     } else {
       const menu = this.getMenu();
       if (menu) {

@@ -29,7 +29,7 @@ export class Form implements AppObject {
         }),
         stdMenuItem({
           id: 'next',
-          textContent: 'Next: finish the form',
+          textContent: 'Next: confirm the form',
           action: () => this.send({ type: 'NEXT' })
         }),
         stdMenuItem({

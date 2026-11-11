@@ -27,7 +27,7 @@ export class Done implements AppObject {
         }),
         stdMenuItem({
           id: 'back',
-          textContent: 'Back: form',
+          textContent: 'Back: confirm',
           action: () => this.send({ type: 'BACK' })
         })
       ]

@@ -19,7 +19,8 @@
     "@oneput/eliza": "workspace:",
     "@oneput/oneput": "workspace:",
     "lucide": "^1.70.0",
-    "neverthrow": "catalog:"
+    "neverthrow": "catalog:",
+    "xstate": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",

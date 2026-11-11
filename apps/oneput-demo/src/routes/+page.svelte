@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import VisualDebugControls from '@oneput/oneput/shared/components/VisualDebugControls.svelte';
   import ForceDarkModeControls from '@oneput/oneput/shared/components/ForceDarkMode.svelte';
   import { generateRandomText } from '$lib/utils.js';
@@ -6,6 +7,7 @@
 
 <main>
   <h1>Oneput Demo</h1>
+  <p><a href={resolve('/routed')}>Open the routed demo</a></p>
   <VisualDebugControls />
   <ForceDarkModeControls />
   <section id="katex-demo"></section>

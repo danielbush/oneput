@@ -227,6 +227,8 @@ COMMENT: small things that make a difference to user experience, flow of user ac
 
 ## refactor
 
+- refactor: DECLARATIVE_JSED - convert core of jsed to state machine
+  - COMMENT: we want well documented states and transitions/events that lock down the editor state and transitions; the aim is to remove lots of if/else and implied/buried behaviour that might be smattered across different parts of teh code, make the core visual, be able to run a simulator on it.
 - refactor: write tests for enterEditing (EditorState) in EditorState.test.ts or are they buried in Editor.test?
   - extend enterEditing to handle initial when it is FOCUS_TRANSPARENT - so we can tunnel into it
 - refactor: DOM_RETENTION - make all mutations retain their position in the DOM?

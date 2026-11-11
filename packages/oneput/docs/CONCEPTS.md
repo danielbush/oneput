@@ -897,38 +897,48 @@ Oneput keeps a stack of AppObjects. The current AppObject is on top, and its par
 
 The two modes can mix. A routed AppObject can start STACK_MODE with `ctl.app.run`. `replace` always acts on the current AppObject, whichever it is. Thus a child can call `replace` to change to a different child, and the parent stays below and gets `onResume` when that child exits. But a router must wait until the stack is back at its AppObject, because a `replace` while a child is current replaces the child, and the routed AppObject stays below it.
 
-Example: `routeApp` with an XState machine (from the `/routed` demo in `apps/oneput-demo`). The machine has the states `welcome`, `form` and `done`. Each AppObject gets a `send` function when it is made (`Welcome.create(ctl, send)`, where `send` calls `actor.send`), and its menu items call it to send the machine an event, for example `action: () => this.send({ type: "NEXT" })`. The AppObjects only send events (NEXT, BACK, RESTART); they do not call `run` or `replace` themselves.
+Example: `routeApp` with an XState machine (from the `/routed` demo in `apps/oneput-demo`). The machine has the states `welcome`, `form` and `done`, and `form` has the child states `editing` and `confirm`. Each AppObject gets a `send` function when it is made (`Welcome.create(ctl, send)`, where `send` calls `actor.send`), and its menu items call it to send the machine an event, for example `action: () => this.send({ type: "NEXT" })`. The AppObjects only send events (NEXT, BACK, RESTART); they do not call `run` or `replace` themselves.
 
 TODO: fix: If a routed AppObject calls `ctl.app.exit`, it leaves the stack as usual: its parent resumes (or, with no parent, Oneput reports a root exit), `routeApp` sees on `app-change` that its AppObject is gone and stops, and the machine is not told.
 
 ```ts
+// The map has the shape of the machine: `form` has the child states
+// `editing` and `confirm`, so its entry is a map of them.
 const apps = {
   welcome: () => Welcome.create(ctl, send),
-  form: () => Form.create(ctl, send),
+  form: {
+    editing: () => Form.create(ctl, send),
+    confirm: () => Confirm.create(ctl, send)
+  },
   done: () => Done.create(ctl, send)
 };
 
+routeMachine(ctl, actor, apps); // shared/routing/xstate/routeMachine.ts
+
+// routeMachine calls routeApp like this:
 routeApp(
   ctl,
   // source
   { get: () => actor.getSnapshot(), subscribe: ... }, // the machine
   // appFor
-  (snapshot) => apps[snapshot.value](), // the AppObject for a state
+  (snapshot) => findApp(snapshot.value, apps).make(snapshot), // the AppObject for a state
   // key
-  (snapshot) => snapshot.value // replace only when the state changes
+  (snapshot) => findApp(snapshot.value, apps).path // for example 'form.confirm'
 );
 ```
 
 - `source` is our xstate machine wrapped as a `Pull`
   - `source.get()` could return a state name, but for xstate, it makes sense to return the `snapshot` - see `key` below
 - `snapshot` comes from `source.get()`
-- `appFor(sourceGetResult)` is passed `source.get()` which in the above example is `snapshot`; it's convenient to pass something like `snapshot` to give us the most options
-  - in xstate, `snapshot.value` can return an object (`{ 'parent': 'child' }`) if the state has child states; in this situation we can use xstate's `snapshot.matches('parent')` or `snapshot.matches('parent.child')` so `apps` in `appFor` has `'parent'` and `'parent.child'` as string keys
-    - small cost: we have to scan through all the state keys rather than use a hash lookup; so `apps` (above) is a hash, but we loop it
-    - GOTCHA: `'parent.child'` must come before `'parent'` in apps, because the scan takes the first match, and `'parent'` matches all of its children.
+- `appFor(sourceGetResult)` is passed `source.get()` which in the above example is `snapshot`; it's convenient to pass something like `snapshot` to give us the most options (for example `snapshot.context`)
+  - in xstate, `snapshot.value` is a string (`'welcome'`) for a state with no children, and an object (`{ form: 'confirm' }`) for a state with child states
+  - each entry in `apps` is either a function (show this AppObject for the state and all its children) or a map (the state has children; look up the child state in it)
+  - `findApp` walks `snapshot.value` and `apps` together, one level at a time (it recurses), until it finds a function. For `{ form: 'confirm' }`: `apps.form` is a map, so it looks up `confirm` in it, and finds `Confirm`
+    - one hash lookup per level of nesting; the order of the entries does not matter
+    - parallel states (more than one active child) and a state that `apps` does not have throw an error
 - `key(sourceGetResult)` is passed `source.get()`;
   - used to determine if `routeApp` should `replace` with a new AppObject or stick with the current one WHEN it syncs.
-    - small cost: like `appFor` it has to loop thru something like `apps` (above example) to do this with the GOTCHA
+    - it is the path that `findApp` walked, for example `'form'` or `'form.confirm'`. If `apps.form` were a function, the key would be `'form'` in both child states, and the AppObject would not be replaced when the machine moves from `editing` to `confirm`
   - `routeApp` internally syncs only if its AppObject is current (if a child is running, it just waits) AND when:
     - `source.subscribe` calls `onChange`
       - eg our xstate machine changes states

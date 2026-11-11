@@ -44,6 +44,10 @@ resumes. Back out of the flow or an external replacement stops its subscriptions
 `stop()` detaches it explicitly. The source has `get()` and `subscribe()`.
 
 - Helper: `packages/oneput/src/lib/oneput/shared/routing/routeApp.ts`
+- XState adapter: `packages/oneput/src/lib/oneput/shared/routing/xstate/routeMachine.ts`.
+  `routeMachine(ctl, actor, apps)` takes a map in the shape of the machine and
+  calls `routeApp`; it declares the XState shapes it reads, so Oneput does not
+  depend on XState.
 - Stack membership: `ctl.app.contains(app)` includes suspended parents.
 
 ### Input claims

@@ -36,6 +36,8 @@ When its route leaves the stack, both subscriptions stop. The returned `stop()`
 can detach the router without changing the stack. No machine or signal library
 is required.
 
+`routeMachine(ctl, actor, apps)` (`shared/routing/xstate/routeMachine.ts`) adapts an XState actor to `routeApp`. `apps` has the shape of the machine: an entry is a function that makes the AppObject for a state and its children, or a map of child states. `findApp` walks the state value and the map together; the path it walked (for example `form.confirm`) is the route key. It declares the XState shapes it reads, so Oneput does not depend on XState.
+
 An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects form a stack managed by `AppController` — you `run()` a new one to push it, `exit()` to pop back. If `exit` / `closeAndExit` runs while the menu is closing, pop waits for the menu outro (`onoutroend`) so parent chrome does not change while the panel is still visible. If the menu is already closed, pop is immediate.
 
 ```

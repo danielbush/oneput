@@ -96,7 +96,10 @@ export class InternalEventEmitter {
   private listeners = new Map<string, ((payload: unknown) => void)[]>();
 
   emit(event: InternalEvent) {
-    this.listeners.get(event.type)?.forEach((fn) => fn(event.payload));
+    // A listener can unsubscribe itself while handling a transition.
+    for (const listener of [...(this.listeners.get(event.type) ?? [])]) {
+      listener(event.payload);
+    }
   }
 
   on<T extends InternalEvent['type']>(

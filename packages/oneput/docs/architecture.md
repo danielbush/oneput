@@ -26,7 +26,7 @@ COMMENT: we initially just had ctl.app.run which pushes the current AppObject on
 
 `ctl.app.replace(app)` exits the current app and starts its replacement without pushing a parent. Existing parents stay on the stack. `ctl.app.setOnRootExit(handler)` registers a controller-level handler that runs after a parentless app exits. It receives `{ app, payload }` and can select the next main screen. `exit()` with no parent calls this callback to let the controller choose what comes next. `replace(nextApp)` already specifies what comes next, so it starts `nextApp` directly without calling the callback. The callback stays registered when an app starts, is replaced, or resumes. Pass `undefined` to remove it. Back is available at the root when this handler is set and `enableGoBack` is true.
 
-`routeApp(ctl, source, appFor, key?)` (`shared/routeApp.ts`) connects any source
+`routeApp(ctl, source, appFor, key?)` (`shared/routing/routeApp.ts`) connects any source
 with `get()` and `subscribe(onChange)` to AppObjects. It uses `run` for the first
 route so Back returns to the caller, then `replace` for changes to the route key
 (default: the source value, compared with `Object.is`). While a child is current,

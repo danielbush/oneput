@@ -1,6 +1,6 @@
-import type { Controller } from '../controllers/controller.js';
-import type { Pull } from '../lib/pull.js';
-import type { AppObject } from '../types.js';
+import type { Controller } from '../../controllers/controller.js';
+import type { Pull } from '../../lib/pull.js';
+import type { AppObject } from '../../types.js';
 
 /**
  * Run the first route above the caller, then replace it when the source changes.

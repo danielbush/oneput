@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { Controller } from '../controllers/controller.js';
-import { cell } from '../lib/pull.js';
-import type { AppObject } from '../types.js';
+import { Controller } from '../../controllers/controller.js';
+import { cell } from '../../lib/pull.js';
+import type { AppObject } from '../../types.js';
 import { routeApp } from './routeApp.js';
-import type { AppChange } from '../controllers/AppController.js';
+import type { AppChange } from '../../controllers/AppController.js';
 
 /** A cell with visible subscription ownership and immediate notifications. */
 function trackedSource<T>(initial: T) {

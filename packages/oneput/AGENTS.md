@@ -43,7 +43,7 @@ replaces it when the source key changes. Children keep control until the route
 resumes. Back out of the flow or an external replacement stops its subscriptions;
 `stop()` detaches it explicitly. The source has `get()` and `subscribe()`.
 
-- Helper: `packages/oneput/src/lib/oneput/shared/routeApp.ts`
+- Helper: `packages/oneput/src/lib/oneput/shared/routing/routeApp.ts`
 - Stack membership: `ctl.app.contains(app)` includes suspended parents.
 
 ### Input claims

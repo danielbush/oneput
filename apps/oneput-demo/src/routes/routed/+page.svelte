@@ -5,6 +5,8 @@
   import type { AppObject, Controller } from '@oneput/oneput';
   import Anchor from '@oneput/oneput/shared/components/Anchor.svelte';
   import OneputController from '@oneput/oneput/shared/components/OneputController.svelte';
+  import OneputCornerButton from '@oneput/oneput/shared/components/OneputCornerButton.svelte';
+  import { icons } from '$lib/app/_icons.js';
   import { flowMachine, routeFlow } from '$lib/app/routed/flowMachine.js';
   import { Layout } from '$lib/app/_layout.js';
 
@@ -21,7 +23,6 @@
       onStart() {
         actor.start();
         routing = routeFlow(ctl, actor);
-        ctl.menu.openMenu();
       }
     };
   }
@@ -40,11 +41,21 @@
 <main>
   <h1>Routed Oneput demo</h1>
   <p><a href={resolve('/')}>Open the main demo</a></p>
-  <p>Use the Oneput menu to move from welcome to form to done.</p>
-  <p>The colour picker opens above the form. Close it to return to the form.</p>
+  <p>
+    Here a small XState state machine (<code>flowMachine.ts</code>) decides which AppObject Oneput
+    shows. It has three states, welcome, form and done, and one AppObject for each. The AppObjects
+    only send events to the machine (Next, Back, Restart); the machine changes state, and
+    <code>routeApp</code> replaces the AppObject with the one for the new state.
+  </p>
+  <p>
+    Open the menu with the button in the corner. In the form, "Pick a colour" opens a child
+    AppObject on top of the form. While it is open, the machine's AppObject is not replaced; close
+    it to return to the form.
+  </p>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>
 </main>
 
 <Anchor>
   <OneputController run={init} />
 </Anchor>
+<OneputCornerButton icon={icons.Command} />

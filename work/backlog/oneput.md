@@ -33,6 +33,8 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## fix
 
+- fix:  A late call can come from an AppObject that is no longer current. For example, a fetch that finishes after you have left the menu could call ctl.app.exit(), and that would exit whatever menu is current then. But nothing in Oneput stops a non-current AppObject from changing the app.
+  - claude: ctl.app.exit() does not know who called it. Every AppObject shares the same ctl, so a late call from an old menu looks the same as a call from the current one. To ignore those calls, Oneput would need to know the caller. One way is for the AppObject to pass itself, for example ctl.app.exit(payload, { from: this }). A stronger way is for Oneput to give each running AppObject its own ctl.app that stops working after that AppObject exits. The second way is safer but a bigger change, because AppObjects get ctl in create, before they run. I'd note it in the Oneput backlog and wait until a real case needs it.
 - fix: onMenuOpenChange fires AFTER onMenuItemFocus ; also if we invalidate the menu, the menu items could change and we may want to repsond to this (eg to sync a live-edit field), so we need a onMenuInvalidate or maybe more generally we need onMenuUpdate that fires whenever setMenu is called
   - COMMENT: we should test this order and that when we open the menu, onMenuItemFocus is called with the new menu item focus
   - COMMENT: onMenuUpdate (or onMenuInvalidate) should be passed the current menu item
@@ -218,12 +220,12 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
+- refactor: DECLARATIVE_ONEPUT - AppObject's becomes data that an agent can build;
+  - COMMENT: this might lead into using state machines and signals and other declarative techniques across oneput's implementations
 - refactor: DECLARATIVE_ONEPUT_INTERNAL
   - COMMENT: make oneput's internals use state machines
   - COMMENT: do we make each controller a state machine?  Or do we have one big state machine with global states and then create more complex nested machines only when needed?
   - COMMENT: how does this affect all the `ctl.*` commands we rely on?
-- refactor: DECLARATIVE_ONEPUT - AppObject's becomes data that an agent can build;
-  - COMMENT: this might lead into using state machines and signals and other declarative techniques across oneput's implementations
 - refactor: packages/oneput/src/lib/oneput/shared/ui/menuItems/toggleMenuItem.ts vs packages/oneput/src/lib/oneput/shared/ui/menuItems/pullToggleMenuItem.ts
 - refactor: move core components and mount stuff out of shared/ - wtf are they doing in there?
 - refactor: packages/oneput/AGENTS.md vs packages/oneput/docs/architecture.md vs packages/oneput/docs/CONCEPTS.md

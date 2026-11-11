@@ -45,3 +45,4 @@ export {
 
 // Shared
 // This is exposed under shared/ as individual paths -- see "exports" in package.json.
+export { routeApp } from './oneput/shared/routeApp.js';

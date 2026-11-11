@@ -809,6 +809,11 @@ export class AppController {
     return this.current === app;
   }
 
+  /** True when `app` is current or suspended below a child in the stack. */
+  contains(app: AnyAppObject): boolean {
+    return this.isCurrent(app) || this.appParents.includes(app);
+  }
+
   /**
    * True when Back is enabled and Back has somewhere to go: a parent, a root
    * exit handler, or a level inside the current AppObject (`hasBackLevel`).

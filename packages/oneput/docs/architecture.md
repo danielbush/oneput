@@ -26,6 +26,16 @@ COMMENT: we initially just had ctl.app.run which pushes the current AppObject on
 
 `ctl.app.replace(app)` exits the current app and starts its replacement without pushing a parent. Existing parents stay on the stack. `ctl.app.setOnRootExit(handler)` registers a controller-level handler that runs after a parentless app exits. It receives `{ app, payload }` and can select the next main screen. `exit()` with no parent calls this callback to let the controller choose what comes next. `replace(nextApp)` already specifies what comes next, so it starts `nextApp` directly without calling the callback. The callback stays registered when an app starts, is replaced, or resumes. Pass `undefined` to remove it. Back is available at the root when this handler is set and `enableGoBack` is true.
 
+`routeApp(ctl, source, appFor, key?)` (`shared/routeApp.ts`) connects any source
+with `get()` and `subscribe(onChange)` to AppObjects. It uses `run` for the first
+route so Back returns to the caller, then `replace` for changes to the route key
+(default: the source value, compared with `Object.is`). While a child is current,
+the latest source value waits until `app-change` reports a resumed route. The
+router checks `isCurrent` before replacement and `contains` for stack membership.
+When its route leaves the stack, both subscriptions stop. The returned `stop()`
+can detach the router without changing the stack. No machine or signal library
+is required.
+
 An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects form a stack managed by `AppController` — you `run()` a new one to push it, `exit()` to pop back. If `exit` / `closeAndExit` runs while the menu is closing, pop waits for the menu outro (`onoutroend`) so parent chrome does not change while the panel is still visible. If the menu is already closed, pop is immediate.
 
 ```

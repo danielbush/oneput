@@ -36,6 +36,16 @@ AppObjects represent screens/states in the app stack with actions, menu, and lif
 - Type: `packages/oneput/src/lib/oneput/types.ts` — `AppObject`
 - Controller: `packages/oneput/src/lib/oneput/controllers/AppController.ts`
 
+### Routing
+
+`routeApp(ctl, source, appFor, key?)` runs the first route above the caller and
+replaces it when the source key changes. Children keep control until the route
+resumes. Back out of the flow or an external replacement stops its subscriptions;
+`stop()` detaches it explicitly. The source has `get()` and `subscribe()`.
+
+- Helper: `packages/oneput/src/lib/oneput/shared/routeApp.ts`
+- Stack membership: `ctl.app.contains(app)` includes suspended parents.
+
 ### Input claims
 
 Exclusive semantic ownership of typed input for live-edit and similar flows.

@@ -46,6 +46,7 @@ export function routeFlow(ctl: Controller, actor: ActorRefFrom<typeof flowMachin
 
   return routeApp(
     ctl,
+    // source: an xstate machine (Actor) wrapped in a get/subscribe (Pull).
     {
       get: () => actor.getSnapshot(),
       subscribe: (onChange) => {
@@ -53,7 +54,9 @@ export function routeFlow(ctl: Controller, actor: ActorRefFrom<typeof flowMachin
         return () => subscription.unsubscribe();
       }
     },
+    // appFor:
     (snapshot) => apps[snapshot.value](),
+    // key:
     (snapshot) => snapshot.value
   );
 }

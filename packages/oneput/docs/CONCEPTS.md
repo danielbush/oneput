@@ -888,6 +888,64 @@ StandardLayout's header Back button also uses `canGoBack()`. When Back has nowhe
 
 All levels share one set of `actions`, bindings, `settings` and lifecycle hooks. When a level needs its own keys, flags or cleanup, use a child AppObject (`ctl.app.run`) instead.
 
+## STACK_MODE and ROUTED_MODE - two ways to move between AppObjects
+
+Oneput keeps a stack of AppObjects. The current AppObject is on top, and its parents are below it.
+
+- STACK_MODE: `ctl.app.run(child)` puts the current AppObject below `child`, as its parent. `ctl.app.exit(payload)` removes `child`, and the parent continues with `onResume({ payload })`. Back follows the stack (see BACK_HANDLING). Use STACK_MODE when the child is a side trip that returns to the parent, for example a picker.
+- ROUTED_MODE: `ctl.app.replace(next)` puts `next` in the place of the current AppObject. The stack below does not change, and `next` has no parent relation with the AppObject that it replaces. Use ROUTED_MODE when something outside the AppObjects decides what comes next, for example a state machine.
+
+The two modes can mix. A routed AppObject can start STACK_MODE with `ctl.app.run`. `replace` always acts on the current AppObject, whichever it is. Thus a child can call `replace` to change to a different child, and the parent stays below and gets `onResume` when that child exits. But a router must wait until the stack is back at its AppObject, because a `replace` while a child is current replaces the child, and the routed AppObject stays below it.
+
+Example: `routeApp` with an XState machine (from the `/routed` demo in `apps/oneput-demo`). The machine has the states `welcome`, `form` and `done`. Each AppObject gets a `send` function when it is made (`Welcome.create(ctl, send)`, where `send` calls `actor.send`), and its menu items call it to send the machine an event, for example `action: () => this.send({ type: "NEXT" })`. The AppObjects only send events (NEXT, BACK, RESTART); they do not call `run` or `replace` themselves.
+
+TODO: fix: If a routed AppObject calls `ctl.app.exit`, it leaves the stack as usual: its parent resumes (or, with no parent, Oneput reports a root exit), `routeApp` sees on `app-change` that its AppObject is gone and stops, and the machine is not told.
+
+```ts
+const apps = {
+  welcome: () => Welcome.create(ctl, send),
+  form: () => Form.create(ctl, send),
+  done: () => Done.create(ctl, send)
+};
+
+routeApp(
+  ctl,
+  // source
+  { get: () => actor.getSnapshot(), subscribe: ... }, // the machine
+  // appFor
+  (snapshot) => apps[snapshot.value](), // the AppObject for a state
+  // key
+  (snapshot) => snapshot.value // replace only when the state changes
+);
+```
+
+- `source` is our xstate machine wrapped as a `Pull`
+  - `source.get()` could return a state name, but for xstate, it makes sense to return the `snapshot` - see `key` below
+- `snapshot` comes from `source.get()`
+- `appFor(sourceGetResult)` is passed `source.get()` which in the above example is `snapshot`; it's convenient to pass something like `snapshot` to give us the most options
+  - in xstate, `snapshot.value` can return an object (`{ 'parent': 'child' }`) if the state has child states; in this situation we can use xstate's `snapshot.matches('parent')` or `snapshot.matches('parent.child')` so `apps` in `appFor` has `'parent'` and `'parent.child'` as string keys
+    - small cost: we have to scan through all the state keys rather than use a hash lookup; so `apps` (above) is a hash, but we loop it
+    - GOTCHA: `'parent.child'` must come before `'parent'` in apps, because the scan takes the first match, and `'parent'` matches all of its children.
+- `key(sourceGetResult)` is passed `source.get()`;
+  - used to determine if `routeApp` should `replace` with a new AppObject or stick with the current one WHEN it syncs.
+    - small cost: like `appFor` it has to loop thru something like `apps` (above example) to do this with the GOTCHA
+  - `routeApp` internally syncs only if its AppObject is current (if a child is running, it just waits) AND when:
+    - `source.subscribe` calls `onChange`
+      - eg our xstate machine changes states
+    - app-change: Oneput fires it after any AppObject has settled.
+    - Once at the start: right after the first run, in case the machine moved during it.
+    - note: if its AppObject has left the stack (for example, after Back), routeApp stops, and does not wait.
+
+---
+
+Oneput has no `send`. The code that sets up ROUTED_MODE decides its own send mechanism (for example `actor.send` for XState), and injects it into each routed AppObject when it makes it. The injection happens in `appFor` (here, in the `apps` map). `routeApp` only calls `appFor` and never sees `send`, so it works with any send mechanism. This has three results:
+
+- An AppObject that gets a `send` knows that it is in ROUTED_MODE and that it can send events. An AppObject without one is not routed. The map of state to AppObject (`apps` above) shows which AppObjects can send.
+- The type of `send` lists the events of that machine, so Oneput does not need to know them.
+- A child in STACK_MODE does not get `send`. It returns its result with `ctl.app.exit(payload)`, and the routed AppObject (its parent) decides in `onResume` which event to send. Thus a child such as a picker stays reusable, and the machine does not move while a child is open.
+
+`replace` (and `exit`) do not check who calls them. An AppObject that is no longer current (for example, after an async step) still acts on the current AppObject. Before such a late call, check `ctl.app.isCurrent(this)`.
+
 ## INPUT_CLAIM's
 
 A claim is useful when an existing `AppObject` temporarily changes what typing means.

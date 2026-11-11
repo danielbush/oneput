@@ -6,7 +6,25 @@ import type { AppObject } from '../types.js';
  * Run the first route above the caller, then replace it when the source changes.
  * A child keeps control until the route resumes. Leaving the route's stack
  * stops both subscriptions; `stop` also detaches without changing the stack.
- * The key defaults to the source value and is compared with Object.is.
+ * See ROUTED_MODE in docs/CONCEPTS.md.
+ *
+ * @param ctl The Oneput controller.
+ * @param source What routeApp follows, as a Pull. `get()` returns the value
+ *   that routeApp gives to `appFor` now (for example, the state of a state
+ *   machine). `subscribe(onChange)` calls `onChange` when that value changes
+ *   and returns a function that unsubscribes. Wrap an XState actor in Pull:
+ *   `get` returns `actor.getSnapshot()` (the value is the snapshot), and
+ *   `subscribe` turns `actor.subscribe(...)` into a function that unsubscribes.
+ * @param appFor Makes the AppObject for a value, for example from a map of
+ *   state name to AppObject.
+ * @param key Optional. Returns the part of `value` (what `source.get()`
+ *   returned) that decides which AppObject to show, for example the state
+ *   name. routeApp replaces the AppObject only when this part changes.
+ *   `appFor` still gets all of `value`. Without `key`, routeApp compares all
+ *   of `value` with Object.is. XState makes a new snapshot object on each
+ *   change, so without `key` a context change in the same state also replaces
+ *   the AppObject.
+ * @returns `{ stop }`, which detaches routeApp without changing the stack.
  */
 export function routeApp<T, K = T>(
   ctl: Controller,

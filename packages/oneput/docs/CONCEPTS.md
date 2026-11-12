@@ -901,7 +901,9 @@ The two modes can mix. A routed AppObject can start STACK_MODE with `ctl.app.run
 
 Example: `routeApp` with an XState machine (from the `/routed` demo in `apps/oneput-demo`). The machine has the states `welcome`, `form` and `done`, and `form` has the child states `editing` and `confirm`. Each AppObject gets a `send` function when it is made (`Welcome.create(ctl, send)`, where `send` calls `actor.send`), and its menu items call it to send the machine an event, for example `action: () => this.send({ type: "NEXT" })`. The AppObjects only send events (NEXT, BACK, RESTART); they do not call `run` or `replace` themselves.
 
-TODO: fix: If a routed AppObject calls `ctl.app.exit`, it leaves the stack as usual: its parent resumes (or, with no parent, Oneput reports a root exit), `routeApp` sees on `app-change` that its AppObject is gone and stops, and the machine is not told.
+`routeApp` replaces the caller with the first routed AppObject. In the demo the page runs a blank AppObject, and `routeApp` replaces it at once, so the stack is `[Welcome]`, then `[Form]`, then `[Form, ColourPicker]` while the picker is open. Each routed AppObject is the root.
+
+Routed AppObjects should not call `ctl.app.exit`; the machine decides the flow. If a routed root exits anyway (or the user goes Back, when it is enabled), it is a root exit: `routeApp` sees on `app-change` that its AppObject is gone and stops, and Oneput calls the handler set with `ctl.app.setOnRootExit`. That handler belongs to the app, so the app can tell its machine there (and route again if it wants). `routeApp` does not tell the machine.
 
 ```ts
 // The map has the shape of the machine: `form` has the child states
@@ -945,8 +947,8 @@ routeApp(
     - `source.subscribe` calls `onChange`
       - eg our xstate machine changes states
     - app-change: Oneput fires it after any AppObject has settled.
-    - Once at the start: right after the first run, in case the machine moved during it.
-    - note: if its AppObject has left the stack (for example, after Back), routeApp stops, and does not wait.
+    - Once at the start: right after the first replace, in case the machine moved during it.
+    - note: if its AppObject has left the stack (for example, after a root exit), routeApp stops, and does not wait.
 
 ---
 

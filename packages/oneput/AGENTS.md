@@ -38,10 +38,14 @@ AppObjects represent screens/states in the app stack with actions, menu, and lif
 
 ### Routing
 
-`routeApp(ctl, source, appFor, key?)` runs the first route above the caller and
-replaces it when the source key changes. Children keep control until the route
-resumes. Back out of the flow or an external replacement stops its subscriptions;
-`stop()` detaches it explicitly. The source has `get()` and `subscribe()`.
+`routeApp(ctl, source, appFor, key?)` replaces the caller (the current
+AppObject) with the first routed AppObject, and replaces that when the source
+key changes. So the routed AppObject is the root when the caller was the root.
+Children keep control until the routed AppObject resumes. When the routed
+AppObject leaves the stack (a root exit or an external replacement), routeApp
+stops its subscriptions; `stop()` detaches it explicitly. A root exit goes to
+`ctl.app.setOnRootExit`, which the app owns; routeApp does not register it.
+The source has `get()` and `subscribe()`.
 
 - Helper: `packages/oneput/src/lib/oneput/shared/routing/routeApp.ts`
 - XState adapter: `packages/oneput/src/lib/oneput/shared/routing/xstate/routeMachine.ts`.

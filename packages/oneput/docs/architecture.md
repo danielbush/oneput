@@ -27,9 +27,14 @@ COMMENT: we initially just had ctl.app.run which pushes the current AppObject on
 `ctl.app.replace(app)` exits the current app and starts its replacement without pushing a parent. Existing parents stay on the stack. `ctl.app.setOnRootExit(handler)` registers a controller-level handler that runs after a parentless app exits. It receives `{ app, payload }` and can select the next main screen. `exit()` with no parent calls this callback to let the controller choose what comes next. `replace(nextApp)` already specifies what comes next, so it starts `nextApp` directly without calling the callback. The callback stays registered when an app starts, is replaced, or resumes. Pass `undefined` to remove it. Back is available at the root when this handler is set and `enableGoBack` is true.
 
 `routeApp(ctl, source, appFor, key?)` (`shared/routing/routeApp.ts`) connects any source
-with `get()` and `subscribe(onChange)` to AppObjects. It uses `run` for the first
-route so Back returns to the caller, then `replace` for changes to the route key
-(default: the source value, compared with `Object.is`). While a child is current,
+with `get()` and `subscribe(onChange)` to AppObjects. The first routed AppObject
+replaces the caller (the current AppObject, if any), so it is the root when the
+caller was the root. Changes to the route key (default: the source value,
+compared with `Object.is`) also use `replace`. Routed AppObjects should not
+call `exit`; the machine decides the flow. An `exit()` (or Back) from a routed
+root is a root exit: routeApp stops, and Oneput calls the `setOnRootExit`
+handler, where the app can tell its machine. routeApp does not register that
+handler. While a child is current,
 the latest source value waits until `app-change` reports a resumed route. The
 router checks `isCurrent` before replacement and `contains` for stack membership.
 When its route leaves the stack, both subscriptions stop. The returned `stop()`

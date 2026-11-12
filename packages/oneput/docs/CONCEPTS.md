@@ -897,6 +897,8 @@ Oneput keeps a stack of AppObjects. The current AppObject is on top, and its par
 
 The two modes can mix. A routed AppObject can start STACK_MODE with `ctl.app.run`. `replace` always acts on the current AppObject, whichever it is. Thus a child can call `replace` to change to a different child, and the parent stays below and gets `onResume` when that child exits. But a router must wait until the stack is back at its AppObject, because a `replace` while a child is current replaces the child, and the routed AppObject stays below it.
 
+`ctl.app.exitToRoot(payload?)` returns to the stack root without a reference to it. Suppose the stack is `[ChatUI, ChatActionsUI, ChatsUI, RenameChatUI]`. After saving, `RenameChatUI` calls `exitToRoot("done")`: the children get `onExit`, top first, and only `ChatUI` gets `onResume({ payload: "done" })`. One `app-change` follows the resume and UI setup, so `routeApp` can route again. The target is the actual stack root, which is the routed AppObject only when routing started there. At the root or with no app, the call does nothing. It keeps the menu state and waits for a close outro already in progress. See `architecture.md` for pending exits and calls during resume.
+
 ### Example ROUTED_MODE
 
 Example: `routeApp` with an XState machine (from the `/routed` demo in `apps/oneput-demo`). The machine has the states `welcome`, `form` and `done`, and `form` has the child states `editing` and `confirm`. Each AppObject gets a `send` function when it is made (`Welcome.create(ctl, send)`, where `send` calls `actor.send`), and its menu items call it to send the machine an event, for example `action: () => this.send({ type: "NEXT" })`. The AppObjects only send events (NEXT, BACK, RESTART); they do not call `run` or `replace` themselves.
@@ -958,7 +960,7 @@ Oneput has no `send`. The code that sets up ROUTED_MODE decides its own send mec
 - The type of `send` lists the events of that machine, so Oneput does not need to know them.
 - A child in STACK_MODE does not get `send`. It returns its result with `ctl.app.exit(payload)`, and the routed AppObject (its parent) decides in `onResume` which event to send. Thus a child such as a picker stays reusable, and the machine does not move while a child is open.
 
-`replace` (and `exit`) do not check who calls them. An AppObject that is no longer current (for example, after an async step) still acts on the current AppObject. Before such a late call, check `ctl.app.isCurrent(this)`.
+`replace`, `exit`, and `exitToRoot` do not check who calls them. An AppObject that is no longer current (for example, after an async step) still acts on the current AppObject. Before such a late call, check `ctl.app.isCurrent(this)`.
 
 ## INPUT_CLAIM's
 

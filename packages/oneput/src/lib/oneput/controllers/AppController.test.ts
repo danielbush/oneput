@@ -4,7 +4,8 @@ import type { AppObject, UILayout } from '../types.js';
 import { stdMenuItem } from '../shared/ui/menuItems/stdMenuItem.js';
 import { WordFilter } from '../shared/filters/WordFilter.js';
 import { OneputAction } from '../shared/actions/OneputAction.js';
-import { notifier } from '../lib/pull.js';
+import { cell, notifier } from '../lib/pull.js';
+import { routeApp } from '../shared/routing/routeApp.js';
 
 function layout(id: string): UILayout {
   return {
@@ -1344,6 +1345,284 @@ describe('AppController', () => {
     function shownMenuIds(ctl: Controller) {
       return ctl.currentProps.menuItems?.map((item) => item.id);
     }
+
+    describe('exitToRoot', () => {
+      it('exits a four-deep stack top first and resumes only the root before announcing', () => {
+        // arrange
+        const ctl = Controller.createNull();
+        const log: string[] = [];
+        const root = trackedApp('Root', log);
+        const first = trackedApp('First', log);
+        const second = trackedApp('Second', log);
+        const last = trackedApp('Last', log);
+        for (const { app } of [root, first, second, last]) ctl.app.run(app);
+        log.length = 0;
+        const changes = ctl.trackAppChanges();
+        ctl.events.on('app-change', () => log.push('change'));
+
+        // act
+        ctl.app.exitToRoot('done');
+
+        // assert
+        expect(log).toEqual([
+          'Last.onExit',
+          'Second.onExit',
+          'First.onExit',
+          'Root.onResume(done)',
+          'change'
+        ]);
+        expect(changes.data).toEqual([{ previous: last.app, current: root.app }]);
+        expect(ctl.app.isCurrent(root.app)).toBe(true);
+        expect([first, second, last].map(({ app }) => ctl.app.contains(app))).toEqual([
+          false,
+          false,
+          false
+        ]);
+        expect([root, first, second, last].map(({ watch }) => watch.active)).toEqual([1, 0, 0, 0]);
+        expect(ctl.app.getMenu()?.id).toBe('Root');
+        expect(ctl.app.canGoBack()).toBe(false);
+      });
+
+      it('lets routeApp see one settled return and replace the route afterwards', () => {
+        // arrange
+        const ctl = Controller.createNull();
+        const log: string[] = [];
+        const root = trackedApp('Root', log);
+        const next = trackedApp('Next', log);
+        const source = cell(false);
+        const routing = routeApp(ctl, source, (value) => (value ? next.app : root.app));
+        ctl.app.run({});
+        ctl.app.run({});
+        const last: AppObject = {};
+        ctl.app.run(last);
+        const changes = ctl.trackAppChanges();
+
+        // act
+        ctl.app.exitToRoot('done');
+
+        // assert
+        expect(changes.data).toEqual([{ previous: last, current: root.app }]);
+        expect(ctl.app.isCurrent(root.app)).toBe(true);
+
+        // act
+        source.set(true);
+
+        // assert
+        expect(changes.data).toEqual([
+          { previous: last, current: root.app },
+          { previous: root.app, current: next.app }
+        ]);
+        expect(ctl.app.isCurrent(next.app)).toBe(true);
+        expect(ctl.app.contains(root.app)).toBe(false);
+        expect(ctl.app.canGoBack()).toBe(false);
+        routing.stop();
+      });
+
+      it('does nothing on an empty stack or at the root, including during resume', () => {
+        // arrange
+        const ctl = Controller.createNull();
+        const exits: unknown[] = [];
+        const results: unknown[] = [];
+        ctl.app.setOnRootExit((exit) => exits.push(exit));
+        const changes = ctl.trackAppChanges();
+        const root: AppObject = {
+          onResume: (result) => {
+            results.push(result);
+            ctl.app.exitToRoot('again');
+          }
+        };
+
+        // act
+        ctl.app.exitToRoot();
+        expect(changes.data).toEqual([]);
+        ctl.app.run(root);
+        ctl.app.exitToRoot();
+        expect(changes.data).toEqual([{ previous: null, current: root }]);
+        const child: AppObject = {};
+        ctl.app.run(child);
+        changes.data.length = 0;
+        ctl.app.exitToRoot();
+
+        // assert
+        expect(results).toEqual([{ payload: undefined }]);
+        expect(exits).toEqual([]);
+        expect(changes.data).toEqual([{ previous: child, current: root }]);
+      });
+
+      it('acts on the current stack when a suspended app calls it and ignores Back settings', () => {
+        // arrange
+        const ctl = Controller.createNull();
+        const log: string[] = [];
+        const root = trackedApp('Root', log);
+        const finish = () => ctl.app.exitToRoot('done');
+        const parent: AppObject = { actions: { done: { action: finish } } };
+        const child: AppObject = {
+          settings: { enableGoBack: false },
+          onBack: () => log.push('back')
+        };
+        ctl.app.run(root.app);
+        ctl.app.run(parent);
+        ctl.app.run(child);
+        log.length = 0;
+        const changes = ctl.trackAppChanges();
+
+        // act
+        finish();
+
+        // assert
+        expect(ctl.app.isCurrent(root.app)).toBe(true);
+        expect(log).toEqual(['Root.onResume(done)']);
+        expect(changes.data).toEqual([{ previous: child, current: root.app }]);
+      });
+
+      it('can return to root from an intermediate onResume without announcing that parent', () => {
+        // arrange
+        const ctl = Controller.createNull();
+        const log: string[] = [];
+        const root = trackedApp('Root', log);
+        const parent = trackedApp('Parent', log, {
+          onResume: () => ctl.app.exitToRoot('done')
+        });
+        const child = trackedApp('Child', log);
+        ctl.app.run(root.app);
+        ctl.app.run(parent.app);
+        ctl.app.run(child.app);
+        log.length = 0;
+        const changes = ctl.trackAppChanges();
+
+        // act
+        ctl.app.exit();
+
+        // assert
+        expect(log).toEqual(['Child.onExit', 'Parent.onExit', 'Root.onResume(done)']);
+        expect(changes.data).toEqual([{ previous: child.app, current: root.app }]);
+        expect([root.watch.active, parent.watch.active, child.watch.active]).toEqual([1, 0, 0]);
+      });
+
+      it('announces only the replacement when the root replaces itself during resume', () => {
+        // arrange
+        const ctl = Controller.createNull();
+        const next: AppObject = {};
+        const root: AppObject = { onResume: () => ctl.app.replace(next) };
+        const child: AppObject = {};
+        ctl.app.run(root);
+        ctl.app.run({});
+        ctl.app.run(child);
+        const changes = ctl.trackAppChanges();
+
+        // act
+        ctl.app.exitToRoot();
+
+        // assert
+        expect(changes.data).toEqual([{ previous: child, current: next }]);
+        expect(ctl.app.isCurrent(next)).toBe(true);
+        expect(ctl.app.contains(root)).toBe(false);
+        expect(ctl.app.canGoBack()).toBe(false);
+      });
+
+      it('queues a return requested by the menu close hook', async () => {
+        // arrange
+        const ctl = Controller.createNull({ menuOpen: true });
+        const log: string[] = [];
+        const root = trackedApp('Root', log);
+        const parent = trackedApp('Parent', log);
+        const child = trackedApp('Child', log, {
+          onMenuOpenChange: ({ open }) => {
+            if (!open) ctl.app.exitToRoot('done');
+          }
+        });
+        ctl.app.run(root.app);
+        ctl.app.run(parent.app);
+        ctl.app.run(child.app);
+        log.length = 0;
+        const changes = ctl.trackAppChanges();
+
+        // act
+        ctl.menu.closeMenu();
+
+        // assert
+        expect(ctl.app.isCurrent(child.app)).toBe(true);
+        expect(log).toEqual([]);
+        expect(changes.data).toEqual([]);
+        await waitForFocus();
+        expect(log).toEqual(['Child.onExit', 'Parent.onExit', 'Root.onResume(done)']);
+        expect(changes.data).toEqual([{ previous: child.app, current: root.app }]);
+      });
+
+      it('keeps the menu open when no close is in progress', () => {
+        // arrange
+        const ctl = Controller.createNull({ menuOpen: true });
+        const root: AppObject = {};
+        ctl.app.run(root);
+        ctl.app.run({});
+
+        // act
+        ctl.app.exitToRoot();
+
+        // assert
+        expect(ctl.app.isCurrent(root)).toBe(true);
+        expect(ctl.menu.isMenuOpen).toBe(true);
+      });
+
+      it('upgrades a queued pop, waits for menu close, and preserves the first root payload', async () => {
+        // arrange
+        const ctl = Controller.createNull({ menuOpen: true });
+        const log: string[] = [];
+        const root = trackedApp('Root', log);
+        const parent = trackedApp('Parent', log);
+        const child = trackedApp('Child', log, {
+          onMenuOpenChange: () => log.push('menu-close'),
+          onBack: () => log.push('back')
+        });
+        ctl.app.run(root.app);
+        ctl.app.run(parent.app);
+        ctl.app.run(child.app);
+        log.length = 0;
+        const changes = ctl.trackAppChanges();
+        ctl.app.closeAndExit('old');
+
+        // act
+        ctl.app.exitToRoot('done');
+        ctl.app.exitToRoot('ignored');
+        ctl.app.exit('ignored');
+        ctl.app.goBack();
+
+        // assert
+        expect(ctl.app.isCurrent(child.app)).toBe(true);
+        expect(changes.data).toEqual([]);
+        expect(log).toEqual([]);
+        await waitForFocus();
+        expect(log).toEqual(['Child.onExit', 'Parent.onExit', 'Root.onResume(done)']);
+        expect(changes.data).toEqual([{ previous: child.app, current: root.app }]);
+        expect(ctl.menu.isMenuOpen).toBe(false);
+      });
+
+      it.each(['run', 'replace'] as const)(
+        'cancels a queued return when %s starts another app',
+        async (transition) => {
+          // arrange
+          const ctl = Controller.createNull({ menuOpen: true });
+          const root: AppObject = {};
+          const child: AppObject = {};
+          const next: AppObject = {};
+          ctl.app.run(root);
+          ctl.app.run(child);
+          ctl.menu.closeMenu();
+          ctl.app.exitToRoot('done');
+          const changes = ctl.trackAppChanges();
+
+          // act
+          ctl.app[transition](next);
+          await waitForFocus();
+
+          // assert
+          expect(ctl.app.isCurrent(next)).toBe(true);
+          expect(changes.data).toEqual([{ previous: child, current: next }]);
+          expect(ctl.app.contains(root)).toBe(true);
+          expect(ctl.app.contains(child)).toBe(transition === 'run');
+        }
+      );
+    });
 
     test('routed: A -> B -> C at the root; Back from C is a root exit and A, B do not resume', async () => {
       // arrange

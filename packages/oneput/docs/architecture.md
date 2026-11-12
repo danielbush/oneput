@@ -45,6 +45,8 @@ is required.
 
 An `AppObject` (`types.ts`) represents a screen or state in the app. AppObjects form a stack managed by `AppController` — you `run()` a new one to push it, `exit()` to pop back. If `exit` / `closeAndExit` runs while the menu is closing, pop waits for the menu outro (`onoutroend`) so parent chrome does not change while the panel is still visible. If the menu is already closed, pop is immediate.
 
+`ctl.app.exitToRoot(payload?)` removes all AppObjects above the actual stack root. Exit hooks run top first; suspended parents do not resume or reinstall watches and input scopes. The root resumes once with `{ payload }`, then `app-change` reports the settled app. A transition inside `onResume` can change that result before announcement. An empty stack or a root-only stack is unchanged. The call acts on the current stack, even if its caller is suspended or has exited; check `isCurrent(this)` after async work. It bypasses Back handlers and settings. At the root, a call from `onResume` does nothing. It does not close the menu. During a close outro it upgrades a queued single exit to a return to root; the first return-to-root payload wins. Back waits while an exit is queued. `run` and `replace` cancel the queue so the outro cannot remove a new app. A routed AppObject is the target only if it is the stack root.
+
 ```
 interface AppObject {
   layout?                — layout factory and params applied before start/resume

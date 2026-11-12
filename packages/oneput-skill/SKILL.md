@@ -19,7 +19,7 @@ The main building blocks:
 
 ## AppObject Pattern
 
-An AppObject represents a screen. AppObjects form a stack — `ctl.app.run()` pushes, `ctl.app.exit()` pops.
+An AppObject represents a screen. AppObjects form a stack — `ctl.app.run()` pushes, `ctl.app.exit()` pops. `ctl.app.exitToRoot(payload?)` exits all children and resumes only the stack root with `{ payload }`. It does nothing at the root. The root is the routed AppObject only when routing started there.
 
 ```typescript
 import type { AppObject, Controller } from "@oneput/oneput";
@@ -103,7 +103,10 @@ Actions and typing only change the model. Oneput does the rest.
 
 ```typescript
 class Editor implements AppObject {
-  constructor(private ctl: Controller, private model: Model) {}
+  constructor(
+    private ctl: Controller,
+    private model: Model,
+  ) {}
 
   // A function, like `menu`: it runs after the constructor sets `this.model`.
   watch = () => [this.model];
@@ -154,7 +157,7 @@ ctl.app.goBack();
 
 // An AppObject that handles Back (setOnBack / onBack) decides when to exit().
 // Report its own levels so a root AppObject shows the Back row correctly:
-hasBackLevel = () => this.path !== '/';
+hasBackLevel = () => this.path !== "/";
 // ctl.app.canGoBack(): true with a parent or root-exit handler; otherwise
 // hasBackLevel. See BACK_HANDLING in docs/CONCEPTS.md.
 ```
@@ -453,6 +456,7 @@ ctl.app.run(appObject)
 ctl.app.replace(appObject)
 ctl.app.setOnRootExit(handler?)
 ctl.app.exit(result?)
+ctl.app.exitToRoot(payload?)
 ctl.app.goBack()
 ctl.app.setOnBack(fn)
 

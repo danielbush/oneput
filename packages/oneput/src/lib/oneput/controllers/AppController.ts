@@ -66,7 +66,7 @@ export class AppController {
   private unsubscribeInputChange?: () => void;
   private unsubscribeMenuOpenChange?: () => void;
   private unsubscribeMenuOpenFocus?: () => void;
-  private pendingPop?: { payload: unknown };
+  private pendingPop?: { payload: unknown; toRoot: boolean };
   /** The AppObject that `watch` is subscribed for, and its unsubscribes. */
   private watching?: { app: AnyAppObject; unsubscribes: (() => void)[] };
   private currentInputScope?: InputScope;
@@ -539,7 +539,7 @@ export class AppController {
   run<ResumePayload = unknown, LayoutParams extends AppLayoutParams = AppLayoutParams>(
     appObject: AppObject<ResumePayload, LayoutParams>
   ) {
-    // console.warn('run', { appObject });
+    this.pendingPop = undefined;
     this.runBeforeSuspend();
     if (this.current) {
       this.appParents.push(this.current);
@@ -679,12 +679,35 @@ export class AppController {
    * menu is already closed, pop is immediate.
    */
   exit = (payload?: unknown) => {
+    if (this.pendingPop?.toRoot) return;
     if (this.ctl.menu.isOutroPending) {
       // QUEUE_POP_ON_OUTRO
       this.queuePop(payload);
       return;
     }
     this.pop({ payload });
+  };
+
+  /**
+   * Exit every AppObject above the stack root, top first. Only the root
+   * resumes, with `{ payload }`; announce once after it has settled.
+   * The root is the routed AppObject only when routing started at the root.
+   * With no parent, do nothing (including inside the root's onResume).
+   *
+   * Like exit(), this acts on the current stack, regardless of the caller.
+   * After async work, check isCurrent(this) before calling it.
+   * It does not consult Back handlers or enableGoBack, or close the menu.
+   * During a close outro it replaces a pending single pop. The first
+   * exitToRoot payload wins; Back and exit wait until the outro ends.
+   * run() and replace() cancel the pending transition.
+   */
+  exitToRoot = (payload?: unknown) => {
+    if (this.appParents.length === 0 || this.pendingPop?.toRoot) return;
+    if (this.ctl.menu.isOutroPending) {
+      this.queuePop(payload, true);
+      return;
+    }
+    this.pop({ payload }, true);
   };
 
   /**
@@ -705,11 +728,11 @@ export class AppController {
    * Drop the leaving AppObject's `onMenuOpenChange` so the close it already
    * requested does not run the hook again.
    */
-  private queuePop(payload?: unknown) {
-    if (this.pendingPop !== undefined) {
+  private queuePop(payload?: unknown, toRoot = false) {
+    if (this.pendingPop !== undefined && (!toRoot || this.pendingPop.toRoot)) {
       return;
     }
-    this.pendingPop = { payload };
+    this.pendingPop = { payload, toRoot };
     this.unsubscribeMenuOpenChange?.();
     this.unsubscribeMenuOpenChange = undefined;
   }
@@ -723,13 +746,19 @@ export class AppController {
     }
     const result = this.pendingPop;
     this.pendingPop = undefined;
-    this.pop(result);
+    this.pop({ payload: result.payload }, result.toRoot);
   };
 
-  private pop = (result?: { payload: unknown }) => {
+  private pop = (result?: { payload: unknown }, toRoot = false) => {
     const exiting = this.current;
     if (!exiting) return;
     this.runBeforeExit();
+    if (toRoot) {
+      // Suspended parents already released their watches and input scopes.
+      while (this.appParents.length > 1) {
+        this.appParents.pop()?.onExit?.();
+      }
+    }
     const appVal = this.appParents.pop();
     if (appVal) {
       this.setCurrent(appVal, false);
@@ -766,6 +795,7 @@ export class AppController {
     if (this.ctl.input.handleBack() === 'handled') {
       return;
     }
+    if (this.pendingPop) return;
     if (this.disableGoBack) {
       return;
     }

@@ -1518,6 +1518,79 @@ describe('AppController', () => {
       expect(exits).toEqual([{ app: c.app, payload: undefined }]);
     });
 
+    test('exit from inside onResume (sync): A resumes once, watched once, nothing of B lingers', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const a = trackedApp('A', log);
+      const b = trackedApp('B', log, {
+        onResume: (result) => {
+          log.push(`B.onResume(${String(result?.payload)})`);
+          if (result?.payload === 'done') ctl.app.exit();
+        }
+      });
+      const child = trackedApp('Child', log);
+      const changes = ctl.trackAppChanges();
+      ctl.app.run(a.app);
+      ctl.app.run(b.app);
+      ctl.app.run(child.app);
+      await waitForFocus();
+      log.length = 0;
+      changes.data.length = 0;
+
+      // act
+      ctl.app.exit('done');
+      await waitForFocus();
+
+      // assert
+      expect(log).toEqual([
+        'Child.onExit',
+        'B.onResume(done)',
+        'B.onExit',
+        'A.onResume(undefined)'
+      ]);
+      // B exited inside onResume before it settled, so app-change reports
+      // Child -> A only.
+      expect(changes.data).toEqual([{ previous: child.app, current: a.app }]);
+      expect(ctl.app.isCurrent(a.app)).toBe(true);
+      expect(ctl.app.contains(b.app)).toBe(false);
+      expect(shownMenuIds(ctl)).toEqual(['A-row']);
+      expect([b.watch.active, a.watch.active, a.watch.subscribes]).toEqual([0, 1, 2]);
+    });
+
+    test('exit from inside onResume after a queued exit (QUEUE_POP_ON_OUTRO): A resumes', async () => {
+      // arrange
+      const ctl = Controller.createNull({ menuOpen: true });
+      const log: string[] = [];
+      const a = trackedApp('A', log);
+      const b = trackedApp('B', log, {
+        onResume: (result) => {
+          log.push(`B.onResume(${String(result?.payload)})`);
+          if (result?.payload === 'done') ctl.app.exit();
+        }
+      });
+      const child = trackedApp('Child', log);
+      ctl.app.run(a.app);
+      ctl.app.run(b.app);
+      ctl.app.run(child.app);
+      await waitForFocus();
+      log.length = 0;
+
+      // act
+      ctl.app.closeAndExit('done');
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // assert
+      expect(log).toEqual([
+        'Child.onExit',
+        'B.onResume(done)',
+        'B.onExit',
+        'A.onResume(undefined)'
+      ]);
+      expect(ctl.app.isCurrent(a.app)).toBe(true);
+      expect([b.watch.active, a.watch.active]).toEqual([0, 1]);
+    });
+
     test('replace from inside onStart: C is watched once, A does not linger', async () => {
       // arrange
       const ctl = Controller.createNull({ menuOpen: true });

@@ -75,11 +75,13 @@ export class Alert {
         classes: ['oneput__menu-body-content', 'oneput__alert'],
         children: (b) => [
           b.fchild({
-            htmlContentUnsafe: `<h2>${this.params.message}</h2>`
+            tag: 'h2',
+            textContent: this.params.message
           }),
           this.params.additional &&
             b.fchild({
-              htmlContentUnsafe: `<p>${this.params.additional}</p>`
+              tag: 'p',
+              textContent: this.params.additional
             }),
           b.button({
             classes: ['oneput__primary-button'],

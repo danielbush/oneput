@@ -1,4 +1,5 @@
-import { stdMenuItem, type StdMenuItem } from './stdMenuItem.js';
+import { menuItem } from '../../../lib/builder.js';
+import type { MenuItem } from '../../../types.js';
 
 /**
  * Placeholder menu rows shown while real menu items load. Useful when
@@ -11,19 +12,18 @@ import { stdMenuItem, type StdMenuItem } from './stdMenuItem.js';
  *
  * @param count number of placeholder rows (default 4)
  */
-export function stdSkeletonMenuItems(count = 4): StdMenuItem[] {
+export function stdSkeletonMenuItems(count = 4): MenuItem[] {
   const widths = ['70%', '55%', '80%', '45%'];
-  const bar = (w: string) =>
-    `<span class="oneput__menu-item-skeleton oneput__menu-item-skeleton--bar" style="width:${w}"></span>`;
   return Array.from({ length: count }, (_, i) =>
-    stdMenuItem({
+    menuItem({
       id: `skeleton-${i}`,
       canFilter: false,
-      left: (b) => [
-        b.fchild({ classes: ['oneput__menu-item-skeleton', 'oneput__menu-item-skeleton--circle'] })
-      ],
-      htmlContentUnsafe: bar(widths[i % widths.length]),
-      right: (b) => [
+      children: (b) => [
+        b.fchild({ classes: ['oneput__menu-item-skeleton', 'oneput__menu-item-skeleton--circle'] }),
+        b.fchild({
+          classes: ['oneput__menu-item-skeleton', 'oneput__menu-item-skeleton--bar'],
+          style: { width: widths[i % widths.length] }
+        }),
         b.fchild({ classes: ['oneput__menu-item-skeleton', 'oneput__menu-item-skeleton--pill'] })
       ]
     })

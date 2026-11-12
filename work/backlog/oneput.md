@@ -20,8 +20,11 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## security
 
-- sec: use packages/safe-html for innerHTML
-  - we may need to set a slightly less restrictive policy
+- sec: SAFE_HTML
+  - use packages/safe-html where oneput is setting innerHTML
+  - are there any other injection mechanisms we need to be wary of?
+  - how do we handle icons/svg?
+  - we may need to create/set a slightly less restrictive policy in safe-html
 - sec: investigate <https://developer.mozilla.org/en-US/docs/Web/API/HTML_Sanitizer_API> for client side sanitation in oneput for innerHTMLUnsafe and friends
   - safari does not support it yet
   - we could create a fallback to <https://github.com/cure53/dompurify>
@@ -220,9 +223,10 @@ The following are potential work (tickets for work) sorted by priority: earlier 
 
 ## refactor
 
-- refactor: DECLARATIVE_ONEPUT - AppObject's becomes data that an agent can build;
-  - COMMENT: this might lead into using state machines and signals and other declarative techniques across oneput's implementations
-- refactor: DECLARATIVE_ONEPUT_INTERNAL
+- refactor: DECLARATIVE_APPOBJECTS - AppObject's becomes data that an agent can build;
+  - this allows for making the glue of AppObject's declarative, data, that can be set and stored reducing if/else logic
+  - it further helps to separate the business logic which can be triggered using the AppObject
+- refactor: DECLARATIVE_ONEPUT
   - COMMENT: make oneput's internals use state machines
   - COMMENT: do we make each controller a state machine?  Or do we have one big state machine with global states and then create more complex nested machines only when needed?
   - COMMENT: how does this affect all the `ctl.*` commands we rely on?

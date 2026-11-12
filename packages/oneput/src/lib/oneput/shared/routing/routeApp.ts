@@ -3,9 +3,20 @@ import type { Pull } from '../../lib/pull.js';
 import type { AppObject } from '../../types.js';
 
 /**
- * Run the first route above the caller, then replace it when the source changes.
- * A child keeps control until the route resumes. Leaving the route's stack
- * stops both subscriptions; `stop` also detaches without changing the stack.
+ * Show the AppObject for the source's value, and replace it when the value
+ * changes.
+ *
+ * The first routed AppObject replaces the current AppObject (the caller), so
+ * it is the root when the caller was the root. It also works with no current
+ * AppObject, and from inside the caller's `onStart`. A routed AppObject can run
+ * children (STACK_MODE). While a child is current, routeApp waits; it routes
+ * the latest value when its AppObject is current again.
+ *
+ * When its AppObject leaves the stack, routeApp stops both subscriptions. For
+ * a routed root, an `exit()` (or Back) is a root exit: Oneput reports it to
+ * `ctl.app.setOnRootExit`, which belongs to the app, not to routeApp. Routed
+ * AppObjects should not call exit; the machine decides the flow. `stop`
+ * detaches routeApp without changing the stack.
  * See ROUTED_MODE in docs/CONCEPTS.md.
  *
  * @param ctl The Oneput controller.
@@ -72,7 +83,7 @@ export function routeApp<T, K = T>(
   const unsubscribeSource = source.subscribe(sync);
   const unsubscribeApp = ctl.events.on('app-change', sync);
   try {
-    ctl.app.run(routed);
+    ctl.app.replace(routed);
   } finally {
     transitioning = false;
     sync();

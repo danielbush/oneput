@@ -3,7 +3,7 @@ import { Controller } from '../../controllers/controller.js';
 import { cell } from '../../lib/pull.js';
 import type { AppObject } from '../../types.js';
 import { routeApp } from './routeApp.js';
-import type { AppChange } from '../../controllers/AppController.js';
+import type { AppChange, RootAppExit } from '../../controllers/AppController.js';
 
 /** A cell with visible subscription ownership and immediate notifications. */
 function trackedSource<T>(initial: T) {
@@ -40,15 +40,84 @@ function screen(name: string, log: string[]): AppObject {
 }
 
 describe('routeApp', () => {
-  it('runs above the caller, replaces only for a new key, and stops on Back', () => {
+  it('replaces the caller, so the routed AppObject is the root', () => {
     // arrange
     const ctl = Controller.createNull();
     const log: string[] = [];
-    const parent = screen('parent', log);
+    const caller = screen('caller', log);
+    const a = screen('a', log);
+    ctl.app.run(caller);
+
+    // act
+    routeApp(ctl, trackedSource('a'), () => a);
+
+    // assert
+    expect(log).toEqual(['caller.start', 'caller.exit', 'a.start']);
+    expect(ctl.app.isCurrent(a)).toBe(true);
+    expect(ctl.app.contains(caller)).toBe(false);
+    expect(ctl.app.canGoBack()).toBe(false);
+  });
+
+  it('starts with no current AppObject', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const changes: AppChange[] = [];
+    ctl.events.on('app-change', (change) => changes.push(change));
+    const a = screen('a', []);
+
+    // act
+    routeApp(ctl, trackedSource('a'), () => a);
+
+    // assert
+    expect(ctl.app.isCurrent(a)).toBe(true);
+    expect(changes).toEqual([{ previous: null, current: a }]);
+  });
+
+  it("starts from the caller's onStart", () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const log: string[] = [];
+    const a = screen('a', log);
+    const b = screen('b', log);
+    const source = trackedSource<'a' | 'b'>('a');
+    const caller: AppObject = {
+      onStart: () => {
+        log.push('caller.start');
+        routeApp(ctl, source, (value) => (value === 'a' ? a : b));
+      },
+      onExit: () => {
+        log.push('caller.exit');
+      }
+    };
+    const changes: AppChange[] = [];
+    ctl.events.on('app-change', (change) => changes.push(change));
+
+    // act
+    ctl.app.run(caller);
+
+    // assert
+    expect(log).toEqual(['caller.start', 'caller.exit', 'a.start']);
+    expect(changes).toEqual([{ previous: null, current: a }]);
+    expect(ctl.app.contains(caller)).toBe(false);
+
+    // act
+    source.set('b');
+
+    // assert
+    expect(ctl.app.isCurrent(b)).toBe(true);
+    expect(changes).toEqual([
+      { previous: null, current: a },
+      { previous: a, current: b }
+    ]);
+  });
+
+  it('replaces only for a new key', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const log: string[] = [];
     const a = screen('a', log);
     const b = screen('b', log);
     const source = trackedSource({ screen: 'a', detail: 1 });
-    ctl.app.run(parent);
     routeApp(
       ctl,
       source,
@@ -59,22 +128,11 @@ describe('routeApp', () => {
     // act
     source.set({ screen: 'a', detail: 2 });
     source.set({ screen: 'b', detail: 3 });
-    ctl.app.goBack();
-    source.set({ screen: 'a', detail: 4 });
 
     // assert
-    expect(log).toEqual([
-      'parent.start',
-      'a.start',
-      'a.exit',
-      'b.start',
-      'b.exit',
-      'parent.resume'
-    ]);
-    expect(ctl.app.isCurrent(parent)).toBe(true);
-    expect(source.active.size).toBe(0);
-    ctl.app.run(b);
+    expect(log).toEqual(['a.start', 'a.exit', 'b.start']);
     expect(ctl.app.isCurrent(b)).toBe(true);
+    expect(ctl.app.contains(a)).toBe(false);
   });
 
   it('waits for nested children and routes the latest value on resume', () => {
@@ -118,32 +176,49 @@ describe('routeApp', () => {
     expect(ctl.app.contains(a)).toBe(false);
   });
 
-  it('stops on root exit and external replacement', () => {
-    for (const leave of ['exit', 'replace'] as const) {
+  it('stops on a root exit, which goes to the onRootExit handler', () => {
+    for (const leave of ['exit', 'back'] as const) {
       // arrange
       const ctl = Controller.createNull();
       const source = trackedSource('a');
       const log: string[] = [];
-      const outside = screen('outside', log);
       const a = screen('a', log);
+      const rootExits: RootAppExit[] = [];
+      ctl.app.setOnRootExit((exit) => rootExits.push(exit));
       routeApp(ctl, source, () => a);
 
-      const changes: AppChange[] = [];
-      ctl.events.on('app-change', (change) => changes.push(change));
-
       // act
-      if (leave === 'exit') ctl.app.exit();
-      else ctl.app.replace(outside);
+      if (leave === 'exit') ctl.app.exit('bye');
+      else ctl.app.goBack();
       source.set('b');
 
       // assert
+      expect(rootExits).toEqual([{ app: a, payload: leave === 'exit' ? 'bye' : undefined }]);
       expect(source.active.size).toBe(0);
-      expect(changes).toEqual([{ previous: a, current: leave === 'exit' ? null : outside }]);
       expect(ctl.app.contains(a)).toBe(false);
-      expect(log).toEqual(
-        leave === 'exit' ? ['a.start', 'a.exit'] : ['a.start', 'a.exit', 'outside.start']
-      );
+      expect(log).toEqual(['a.start', 'a.exit']);
     }
+  });
+
+  it('stops on external replacement', () => {
+    // arrange
+    const ctl = Controller.createNull();
+    const source = trackedSource('a');
+    const log: string[] = [];
+    const outside = screen('outside', log);
+    const a = screen('a', log);
+    routeApp(ctl, source, () => a);
+    const changes: AppChange[] = [];
+    ctl.events.on('app-change', (change) => changes.push(change));
+
+    // act
+    ctl.app.replace(outside);
+    source.set('b');
+
+    // assert
+    expect(source.active.size).toBe(0);
+    expect(changes).toEqual([{ previous: a, current: outside }]);
+    expect(log).toEqual(['a.start', 'a.exit', 'outside.start']);
   });
 
   it('can detach while suspended without changing the stack', () => {

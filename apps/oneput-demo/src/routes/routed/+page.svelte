@@ -32,6 +32,12 @@
       onStart() {
         actor.start();
         routing = routeFlow(ctl, actor);
+        // A routed AppObject exited: the stack is empty and routeApp has
+        // stopped. Tell the machine, then route again from its new state.
+        ctl.app.setOnRootExit(() => {
+          actor.send({ type: 'EXITED' });
+          routing = routeFlow(ctl, actor);
+        });
       }
     };
   }
@@ -61,6 +67,11 @@
     Open the menu with the button in the corner. In the form, "Pick a colour" opens a child
     AppObject on top of the form. While it is open, the machine's AppObject is not replaced; close
     it to return to the form.
+  </p>
+  <p>
+    In done, "Exit anyway" calls <code>ctl.app.exit</code>, which routed AppObjects should not do.
+    It is a root exit: the page's <code>setOnRootExit</code> handler sends EXITED to the machine, which
+    goes back to welcome, and routes again.
   </p>
   <p aria-live="polite"><small>Current state: <strong>{state}</strong></small></p>
 </main>

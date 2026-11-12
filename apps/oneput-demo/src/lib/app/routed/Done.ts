@@ -29,6 +29,13 @@ export class Done implements AppObject {
           id: 'back',
           textContent: 'Back: confirm',
           action: () => this.send({ type: 'BACK' })
+        }),
+        // Routed AppObjects should not call exit. This item does it anyway, to
+        // show what happens: a root exit, which the page handles.
+        stdMenuItem({
+          id: 'exit',
+          textContent: 'Exit anyway (calls ctl.app.exit)',
+          action: () => this.ctl.app.exit()
         })
       ]
     });

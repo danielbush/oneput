@@ -6,8 +6,11 @@ import { Form } from './Form.js';
 import { Confirm } from './Confirm.js';
 import { Done } from './Done.js';
 
-export type FlowEvent = { type: 'NEXT' } | { type: 'BACK' } | { type: 'RESTART' };
-export type Send = (event: FlowEvent) => void;
+/** Events that the routed AppObjects send. */
+export type AppEvent = { type: 'NEXT' } | { type: 'BACK' } | { type: 'RESTART' };
+/** EXITED comes from the page, when a routed AppObject exits (a root exit). */
+export type FlowEvent = AppEvent | { type: 'EXITED' };
+export type Send = (event: AppEvent) => void;
 
 /** Only the AppObjects send events. The machine chooses the screen. */
 export const flowMachine = setup({
@@ -15,6 +18,12 @@ export const flowMachine = setup({
 }).createMachine({
   id: 'routed-demo',
   initial: 'welcome',
+  on: {
+    EXITED: {
+      target: '.welcome',
+      description: 'A routed AppObject exited, which it should not do. Start again.'
+    }
+  },
   states: {
     welcome: {
       description: 'Start the demo.',

@@ -64,8 +64,7 @@ No error path returns the input unchanged.
 
 ## DOM writes
 
-FChild, Flex (also nested Flex) and the NativeController image URL write
-elements through `checkedElement` in `lib/domSafety.ts`. It removes what is
+FChild and Flex (also nested Flex) write elements through `checkedElement` in `lib/domSafety.ts`. It removes what is
 not allowed before Svelte writes the element: on the server, on mount and on
 every update. `checkElement(params)` returns the checked `tag`, `attr` and
 `style`, plus a `refused` list. It does not write to the DOM or warn.

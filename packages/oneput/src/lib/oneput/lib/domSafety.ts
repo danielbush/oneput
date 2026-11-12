@@ -1,5 +1,5 @@
 /**
- * Checks what Oneput's builders (FChild, Flex and NativeController) write to the
+ * Checks what Oneput's builders (FChild and Flex) write to the
  * page. The components call these functions before Svelte writes an element, so
  * the same rules apply on the server, on mount and on every update.
  *

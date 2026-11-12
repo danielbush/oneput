@@ -16,7 +16,7 @@ and use the host app's authority.
 - Rich UI fields require `SafeHtml` from `sanitiseHtml`. Runtime provenance
   and insertion-context checks refuse forged values.
 - FChild and Flex check tags, attributes, URLs and styles before server
-  output, mount and update. NativeController checks image attributes.
+  output, mount and update.
 - UI icons use bounded geometry. Registration stores checked copies;
   rendering checks again. Unknown or invalid icons use a fixed fallback.
 - Builder handlers, hooks and attachments run code by design. They are not

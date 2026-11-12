@@ -10,7 +10,6 @@ import type { AppObject, OneputProps } from '../types.js';
 import { Alert } from '../shared/ui/Alert.js';
 import { Confirm } from '../shared/ui/Confirm.js';
 import { AppController, type AppChange, type AppChangeTracker } from './AppController.js';
-import { NativeController } from './NativeController.js';
 import { notifier } from '../lib/pull.js';
 
 export class Controller {
@@ -20,8 +19,7 @@ export class Controller {
       input: InputController.create(controller),
       keys: KeysController.create(controller),
       ui: UIController.create(controller),
-      app: AppController.create(controller),
-      native: NativeController.create(controller)
+      app: AppController.create(controller)
     });
     return new Controller(currentProps, createControllers);
   }
@@ -33,8 +31,7 @@ export class Controller {
       input: InputController.createNull(controller),
       keys: KeysController.createNull(controller),
       ui: UIController.createNull(controller),
-      app: AppController.createNull(controller),
-      native: NativeController.createNull(controller)
+      app: AppController.createNull(controller)
     });
     return new Controller(currentProps, createControllers);
   }
@@ -47,7 +44,6 @@ export class Controller {
   public keys: KeysController;
   public ui: UIController;
   public app: AppController;
-  public native: NativeController;
   /**
    * Tells the mounted pull widgets of this instance to paint again.
    *
@@ -69,7 +65,6 @@ export class Controller {
       keys: KeysController;
       ui: UIController;
       app: AppController;
-      native: NativeController;
     }
   ) {
     const controllers = createControllers(this);
@@ -78,7 +73,6 @@ export class Controller {
     this.keys = controllers.keys;
     this.ui = controllers.ui;
     this.app = controllers.app;
-    this.native = controllers.native;
   }
 
   toggleHide() {

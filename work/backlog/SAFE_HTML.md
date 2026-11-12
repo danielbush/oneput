@@ -45,28 +45,13 @@ Status: Done — `49074a99`, `8bb850b1`.
 
 ### 3. Enforce writes
 
-Status: Partly done — checked writes in `8bb850b1`; image insertion and native
-message checks remain.
+Status: Done — checked writes in `8bb850b1`; unused native controller removed.
 
 FChild and Flex check tags, attributes, URLs and styles before server output,
 mount and update. `insertSafeHtml` checks the value and HTML `div` context.
 Refusals apply in production. `DomWriteWarnings` only reports them.
 
-Remaining native-controller work:
-
-- Bug: `packages/oneput/src/lib/oneput/controllers/NativeController.ts:30`
-  supplies a `data:` URL as image `src`. The URL checks at
-  `packages/oneput/src/lib/oneput/lib/domSafety/checkElement.ts:92` and
-  `packages/safe-html/src/lib/policies.ts:81` remove it. The guard at
-  `packages/oneput/src/lib/oneput/controllers/NativeController.ts:33` then
-  returns, so no image is inserted.
-- Proposed fix: allow `data:` only for `img` `src`, and only for raster types
-  `image/png`, `image/jpeg`, `image/gif` and `image/webp`. Refuse
-  `image/svg+xml`. Keep `data:` refused on links and other attributes.
-- `packages/oneput/src/lib/oneput/controllers/NativeController.ts:20`:
-  check message origin, source and payload schema before dispatch. The
-  notification at `:22` and image payload read at `:25` trust the sender and
-  payload shape. URL checks alone do not establish sender authority.
+NativeController was removed as unused; a native host channel starts afresh with Capacitor.
 
 ### 4. Migrate icons and documents
 
@@ -135,8 +120,6 @@ Checked or fixed paths excluded from the remaining-sink list:
 - Selection wrappers at `packages/jsed/src/lib/ops/token.ts:402` and
   `packages/jsed/src/lib/ops/selection.ts:151` already check `canWrapWith`.
 - DateTimeToggle and CursorState use fixed attribute names and labels.
-- NativeController's attribute writes pass through `checkedElement`.
-  Its image bug and sender checks are listed in step 3.
 
 ### 5. Add safe declarative data
 
@@ -176,7 +159,6 @@ Remaining checks:
 - Add document, formula, patch → undo → redo, and valid-structure regression
   cases for the step 4 boundaries. Agree on the main orchestration cases
   before writing tests.
-- Test the image exception and native message checks from step 3.
 - Test refusal in a production build. Current warning tests configure
   development on/off; they do not prove a production build's DOM behaviour.
 - Run shared native/fallback policy cases in real browsers. Existing browser

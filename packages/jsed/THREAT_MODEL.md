@@ -4,6 +4,23 @@ Jsed edits HTML documents through editor APIs and a Oneput interface. Host apps 
 
 This source review covers document and UI content paths. It does not prove runtime exploitation. Paths below are relative to `packages/jsed/`. Review date: 2026-11-12.
 
+## Phase 1 status
+
+The breadcrumb UI now uses text segments for document labels and qualifiers.
+It uses Oneput's checked tags, attributes, URLs, and styles. Rich Oneput UI
+fields require package-owned SafeHtml. See
+[Oneput safe content](../oneput/docs/safe-content.md).
+
+Document loading, patches, history, paste, creation, conversion, and export are
+release step 4. They remain unchanged and unsafe for untrusted content in this
+phase. UI SafeHtml does not make an editor document safe.
+
+## Original review evidence
+
+The findings below describe the baseline before phase 1. Line numbers refer
+to that review. Completed controls are stated above; document and SVG findings
+remain open.
+
 ## Still to add
 
 - Full paste handling: moved elements, cloned elements, and host clipboard imports (`src/lib/ops/focusable/paste.ts:18`).

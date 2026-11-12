@@ -1,3 +1,4 @@
+import { sanitiseHtml } from '@oneput/safe-html';
 import type { Controller, UILayout } from '@oneput/oneput';
 import { Settings } from './Settings.js';
 import { AsyncSearchExample } from './AsyncSearchExample.js';
@@ -304,7 +305,7 @@ export class Root implements AppObject {
         }),
         stdMenuItem({
           id: 'blank-html-item',
-          htmlContentUnsafe: '<p>Html <b>item</b></p>',
+          htmlContent: sanitiseHtml('<p>Html <b>item</b></p>', 'ui').unwrapOr(null),
           action: () => {}
         }),
         ...blankItems

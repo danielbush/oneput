@@ -296,7 +296,7 @@ export class KatexDemo implements AppObject {
                 fontSize: preview ? '150%' : '100%',
                 display: 'inline-block'
               },
-              innerHTMLUnsafe: preview || '(preview)'
+              dangerouslySetHtmlWithoutSanitising: preview || '(preview)'
             }
           ]
         }),

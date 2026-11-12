@@ -20,7 +20,8 @@
     "@oneput/oneput": "workspace:",
     "lucide": "^1.70.0",
     "neverthrow": "catalog:",
-    "xstate": "^5.0.0"
+    "xstate": "^5.0.0",
+    "@oneput/safe-html": "workspace:*"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",

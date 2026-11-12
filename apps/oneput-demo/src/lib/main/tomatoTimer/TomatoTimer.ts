@@ -1,3 +1,4 @@
+import { sessionDetailsMenuItem } from './sessionDetailsMenuItem.js';
 import type { AppObject, Controller, MenuItem, UIFlags } from '@oneput/oneput';
 import { stdMenuItem } from '@oneput/oneput/shared/ui/menuItems/stdMenuItem.js';
 import { menuItem } from '@oneput/oneput';
@@ -520,29 +521,7 @@ export class TomatoTimer implements AppObject {
     this.ctl.menu.setMenu({
       id: 'runEditEntry',
       items: [
-        menuItem({
-          id: 'tomato-timer-session-details',
-          ignored: true,
-          style: {
-            justifyContent: 'center'
-          },
-          children: (b) => [
-            b.fchild({
-              style: {
-                justifyContent: 'center',
-                flex: '0 0 100%'
-              },
-              // TODO: We could mount a component here...
-              innerHTMLUnsafe: `<div>
-							<h3>${session.label ? session.label + ' - ' : ''}${formatSecondsToHHMMSS(v.elapsed / 60)}</h3>
-							<table>
-								<tr><td>Start</td> <td>${new Date(session.startTime * 1000).toLocaleString()}</td></tr>
-								<tr><td>End</td> <td>${new Date(session.endTime * 1000).toLocaleString()}</td></tr>
-							</table>
-							</div>`
-            })
-          ]
-        }),
+        sessionDetailsMenuItem(session, v.elapsed),
         stdMenuItem({
           id: 'tomato-edit-session-edit-label',
           textContent: 'Edit label...',

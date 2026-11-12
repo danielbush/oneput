@@ -275,7 +275,10 @@ stdMenuItem({
 The `b` parameter in `left`, `right`, and `bottom` builders:
 
 - `b.icon(name)` — render a registered icon
-- `b.fchild({ textContent, htmlContentUnsafe, classes, ... })` — general flex child
+- `b.fchild({ textContent, htmlContent, classes, ... })` — general flex child
+  Plain strings stay text. `htmlContent` requires `SafeHtml` from
+  `sanitiseHtml(input, 'display' | 'ui')` in `@oneput/safe-html`.
+  Use `.unwrapOr(null)` to show a fixed unavailable state on failure.
 - `b.iconButton(name, { title, onClick })` — clickable icon
 - `b.button({ title, onClick })` — text button
 - `b.spacer()` — invisible spacer
@@ -284,7 +287,7 @@ Pass `false` as an array element to conditionally exclude items:
 
 ```typescript
 right: (b) => [
-  count > 1 && b.fchild({ innerHTMLUnsafe: `(${count})` }),
+  count > 1 && b.fchild({ textContent: `(${count})` }),
   b.icon("ChevronRight"),
 ];
 ```

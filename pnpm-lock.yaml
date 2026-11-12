@@ -158,6 +158,9 @@ importers:
       '@oneput/oneput':
         specifier: 'workspace:'
         version: link:../../packages/oneput
+      '@oneput/safe-html':
+        specifier: workspace:*
+        version: link:../../packages/safe-html
       lucide:
         specifier: ^1.70.0
         version: 1.70.0
@@ -294,6 +297,9 @@ importers:
       '@leeoniya/ufuzzy':
         specifier: ^1.0.19
         version: 1.0.19
+      '@oneput/safe-html':
+        specifier: workspace:*
+        version: link:../safe-html
       debounce:
         specifier: ^2.2.0
         version: 2.2.0
@@ -352,6 +358,9 @@ importers:
       idb:
         specifier: ^8.0.3
         version: 8.0.3
+      jsdom:
+        specifier: ^30.1.1
+        version: 30.1.1
       katex:
         specifier: ^0.16.25
         version: 0.16.28
@@ -396,6 +405,9 @@ importers:
       dompurify:
         specifier: ^3.4.16
         version: 3.4.16
+      neverthrow:
+        specifier: 'catalog:'
+        version: 8.2.0
     devDependencies:
       '@vitest/browser-playwright':
         specifier: ^4.1.10

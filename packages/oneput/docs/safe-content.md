@@ -56,43 +56,74 @@ variables, `calc`, fixed/sticky positioning, or z-index. Classes and IDs remain
 host-controlled. Refusal runs in production; development also emits warnings.
 Only symbol keys can reach the Svelte attachment spread.
 
+## Chrome icons
+
+`registerIcon(name, definition)` and `registerIcons({ Name: definition })` accept
+geometry data. `registerIcons` returns the names for `b.icon(name)` and other
+UI builders. Lucide exports are geometry arrays and register directly:
+
+```ts
+import { ChevronDown } from 'lucide';
+import { registerIcons } from '@oneput/oneput';
+const icons = registerIcons({ ChevronDown });
+```
+
+`IconDefinition` is a list of `[tag, attributes]` pairs, or an object with
+`nodes` and a numeric `viewBox` tuple. `checkIconGeometry(unknown)` returns a
+neverthrow Result with a frozen copy. `registerIcon` returns a Result too;
+failure replaces any previous registration with the fallback. Registration
+stores a private copy. `renderIcon(nameOrGeometry, target)` checks again and
+uses `target.ownerDocument.createElementNS` and `replaceChildren`.
+
+The checker permits only circle, ellipse, line, path, polygon, polyline, and
+rect. Attributes are geometry coordinates, `d`, `points`, `fill`, and `stroke`.
+Numbers must be finite, including numeric tokens in strings. Paint permits
+only none, currentColor, transparent, and hex colours. Links, handlers,
+classes, style, groups, resource elements, and foreignObject are refused.
+View boxes have four finite numbers and positive width and height.
+
+Each icon has at most 32 nodes, 16 attributes per node, 4096 characters per
+value, and 16384 total characters in tags, keys, values, and view box numbers.
+Unknown names and invalid data render one fixed rectangle and diagonal line.
+No SVG text or factory API remains. No chrome icon needs a sanitiser SVG
+policy. General document SVG remains a separate policy decision.
+
 ## Deferred surfaces
 
-SVG icon renderers still use their existing code APIs. KaTeX preview uses the
-explicit `dangerouslySetHtmlWithoutSanitising` field until its formula policy
-is reviewed. The document append, import, patch, history, and export paths are
-also phase 2 work. See [the threat model](../THREAT_MODEL.md) and
-[SAFE_HTML](../../../work/backlog/SAFE_HTML.md). These paths are not safe for
-untrusted input merely because the Oneput UI boundary is checked.
+KaTeX preview uses the explicit `dangerouslySetHtmlWithoutSanitising` field
+until its formula policy is reviewed. Document append, import, patches,
+history, and export remain open. See [the threat model](../THREAT_MODEL.md)
+and [SAFE_HTML](../../../work/backlog/SAFE_HTML.md). These paths are not safe
+for untrusted input merely because the Oneput UI boundary is checked.
 
-## Remaining sink inventory
+## Remaining sink inventory and release work
 
-Paths are relative to the repo root. These surfaces belong to release step 4.
-Fixed test fixtures are excluded.
+Paths are relative to the repo root. Fixed test fixtures are excluded.
+The icon part of release step 4 is complete. The following items remain in
+steps 4–6. This is a source scan, not native/fallback browser parity proof.
 
-| Surface                      | Path:line                                                           | Remaining rule                                                     |
-| ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Raw SVG renderer             | `packages/oneput/src/lib/oneput/lib/icons.ts:77`                    | `unsafeHTML(svgString)` still parses caller SVG                    |
-| Fixed missing icon           | `packages/oneput/src/lib/oneput/lib/icons.ts:103`                   | Calls `unsafeHTML` with package-owned SVG                          |
-| Icon factory                 | `packages/oneput/src/lib/oneput/lib/icons.ts:87`                    | Renderer output is not validated                                   |
-| Bundled jsed icons           | `packages/jsed/src/ui/oneput/lib/icons.ts:42`                       | Lucide factories use the unchecked icon path                       |
-| Bundled demo icons           | `apps/oneput-demo/src/lib/common/_icons.ts:52`                      | Same factory path                                                  |
-| Bundled route icons          | `packages/oneput/src/routes/_icons.ts:26`                           | Same factory path                                                  |
-| Formula preview escape hatch | `packages/oneput/src/lib/oneput/shared/components/FChild.svelte:62` | Explicit raw HTML field                                            |
-| Formula preview caller       | `apps/oneput-demo/src/lib/main/KatexDemo.ts:299`                    | Only repo caller of that field                                     |
-| Formula append               | `apps/oneput-demo/src/lib/main/KatexDemo.ts:37`                     | Raw HTML append reparses prior content                             |
-| Demo document fetch          | `apps/jsed-demo/src/lib/jsed/services/TestDocService.ts:28`         | Raw fetched HTML                                                   |
-| Document root                | `packages/jsed/src/JsedDocument.ts:33`                              | Accepts supplied nodes                                             |
-| Patch attributes/content     | `packages/jsed/src/lib/ops/focusable/elementPatch.ts:138`, `:150`   | Raw attributes and HTML                                            |
-| History attributes/content   | `packages/jsed/src/lib/ops/focusable/elementPatch.ts:162`, `:171`   | Raw replay                                                         |
-| Document creation            | `packages/jsed/src/lib/ops/focusable/create.ts:11`                  | Caller tag names                                                   |
-| Document conversion          | `packages/jsed/src/lib/ops/focusable/convert.ts:14`                 | Caller tag names                                                   |
-| Paste                        | `packages/jsed/src/lib/ops/focusable/paste.ts:19`, `:24`, `:28`     | Supplied or cloned nodes; sibling paste operations share this risk |
-| Markdown and export          | `packages/jsed/src/lib/convert/convert.ts:8`, `:33`, `:40`, `:44`   | Raw markdown HTML, metadata, and body output                       |
-| Document policy              | `packages/safe-html/src/policies/untrustedDocumentPolicy.ts:13`     | Styles and resources remain under the document preservation policy |
+| Surface                                  | Path:line                                                                                                          | Work needed                                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Formula preview escape hatch             | `packages/oneput/src/lib/oneput/shared/components/FChild.svelte:62`; `packages/oneput/src/lib/oneput/types.ts:378` | Replace the raw field with a registered formula widget and reviewed output policy.                                           |
+| Formula preview caller                   | `apps/oneput-demo/src/lib/main/KatexDemo.ts:299`                                                                   | Check source/options, disable trust, and bound expansion and output.                                                         |
+| Formula append                           | `apps/oneput-demo/src/lib/main/KatexDemo.ts:37`                                                                    | Append checked nodes without reparsing prior content.                                                                        |
+| Demo document import                     | `apps/jsed-demo/src/lib/jsed/services/TestDocService.ts:28`                                                        | Check fetched HTML before insertion.                                                                                         |
+| Document root                            | `packages/jsed/src/JsedDocument.ts:33`                                                                             | Require a checked document at entry.                                                                                         |
+| Patch attributes/content                 | `packages/jsed/src/lib/ops/focusable/elementPatch.ts:138`, `:150`                                                  | Validate attributes and HTML before writes and history capture.                                                              |
+| History attributes/content               | `packages/jsed/src/lib/ops/focusable/elementPatch.ts:162`, `:171`                                                  | Keep replay inside the checked document contract.                                                                            |
+| Document creation/conversion             | `packages/jsed/src/lib/ops/focusable/create.ts:11`; `packages/jsed/src/lib/ops/focusable/convert.ts:14`            | Check caller tag names and bound recursive creation.                                                                         |
+| Paste and shell copies                   | `packages/jsed/src/lib/ops/focusable/paste.ts:19`, `:24`, `:28`, `:33`, `:37`, `:42`, `:50`, `:64`                 | Check supplied nodes, deep clones, and copied attributes.                                                                    |
+| Markdown                                 | `packages/jsed/src/lib/convert/convert.ts:8`                                                                       | Disable raw HTML unless required; check final plugin output, including formulas.                                             |
+| Export                                   | `packages/jsed/src/lib/convert/convert.ts:33`, `:40`, `:44`                                                        | Escape description/title by context and check the body.                                                                      |
+| Document preservation policy             | `packages/safe-html/src/policies/untrustedDocumentPolicy.ts:13`; `packages/safe-html/src/setHTML.ts:47`            | Decide CSS, image, SVG, MathML, link, comment, and resource rules; test native/fallback parity.                              |
+| Declarative data schema (step 5)         | `work/backlog/SAFE_HTML.md:155`                                                                                    | Resolve registered actions/widgets; reject functions, hooks, unknown fields, and unbounded trees. Builders remain code APIs. |
+| Refusal and regression coverage (step 6) | `work/backlog/SAFE_HTML.md:158`                                                                                    | Complete document, formula, patch/replay, production refusal, and browser policy tests; preserve document structure.         |
+| Sink scan (step 6)                       | `work/backlog/SAFE_HTML.md:156`                                                                                    | Add an enforced read-only scan with explicit fixture exceptions and visible escape hatches.                                  |
+| Trusted Types (step 6)                   | `work/backlog/SAFE_HTML.md:156`                                                                                    | Test browser CSP compatibility; SafeHtml is not browser TrustedHTML.                                                         |
 
-The empty clear at `packages/oneput/src/lib/oneput/lib/icons.ts:57` has no
-outside content. DateTimeToggle and CursorState attribute writes use fixed
-attribute names and package-owned labels. NativeController attributes and
-styles now pass through the common policy; its message origin and schema
-remain separate open issues.
+Selection wrappers at `packages/jsed/src/lib/ops/token.ts:402` and
+`packages/jsed/src/lib/ops/selection.ts:151` already check `canWrapWith`.
+DateTimeToggle and CursorState use fixed attribute names and labels.
+NativeController writes use the common UI policy; message origin and schema
+checks remain a separate open issue at
+`packages/oneput/src/lib/oneput/controllers/NativeController.ts:19`.

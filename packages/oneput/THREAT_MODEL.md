@@ -4,7 +4,7 @@ Oneput provides a shared input, menus, and controls. Host apps and library integ
 
 This source review covers content rendering. It does not prove runtime exploitation. Paths below are relative to `packages/oneput/`. Review date: 2026-11-12.
 
-## Phase 1 status
+## Completed UI controls
 
 Phase 1 closes the Alert and filter text conversions. Statuses, hour labels,
 skeletons, thinking dots, and timer details use text or fixed elements.
@@ -13,15 +13,21 @@ FChild and Flex use `lib/domSafety.ts` for tags, attributes, URLs, and styles
 on server render, mount, and update. NativeController uses its image URL check.
 See [safe content](docs/safe-content.md) for named policies and limits.
 
-SVG renderers and the explicit KaTeX preview escape hatch remain. Builder
+Chrome icons now use bounded geometry and DOM namespace calls. Registration
+stores checked copies; rendering checks again. Unknown or invalid icons use
+a fixed fallback. SVG strings and executable icon renderers are removed.
+See the icon contract and remaining step 4–6 inventory in
+[safe content](docs/safe-content.md). No chrome SVG markup policy is needed.
+
+The explicit KaTeX preview escape hatch remains. Builder
 callbacks and attachments are code APIs. Native message origin/schema checks
-remain open. Document and declarative data work is deferred to phase 2.
+remain open. Document and declarative data work remains open.
 
 ## Original review evidence
 
 The findings below describe the baseline before phase 1. Line numbers refer
-to that review. Completed controls are stated above; document and SVG findings
-remain open.
+to that review. Completed controls are stated above; document SVG findings remain open.
+The icon row below records the old, removed paths.
 
 ## Still to add
 
@@ -35,11 +41,12 @@ remain open.
 
 ## Trust boundary and current findings
 
-The earlier security notes named three concerns: HTML through FChild and Flex, `innerHTMLUnsafe`, and icons. At that review, all were open. FChild inserted raw HTML. Flex nests FChild and accepts dynamic tags, attributes, styles, and hooks. Icon registration selects a renderer but does not validate its output.
+The earlier security notes named three concerns: HTML through FChild and Flex, `innerHTMLUnsafe`, and icons. At that review, all were open. FChild inserted raw HTML. Flex nests FChild and accepts dynamic tags, attributes, styles, and hooks. The old icon registration selected a renderer without checking its output;
+the geometry contract now closes that path.
 
 Plain `textContent` uses Svelte text interpolation. This protection does not survive all later operations: both filters can convert text to unchecked highlight HTML. Alert also puts caller strings inside HTML. Script injection can read page content and accessible storage, change controls, and use the host app's authority.
 
-Builder callbacks and mount hooks run code by design. They are not a safe data format for agent descriptions. Raw HTML, SVG, links, and styles need separate checks. A registered icon name alone does not make its renderer safe.
+Builder callbacks and mount hooks run code by design. They are not a safe data format for agent descriptions. Raw HTML, SVG, links, and styles need separate checks. Icon names now resolve only to checked geometry.
 
 ## Threats
 

@@ -7,10 +7,10 @@ remaining-sink inventory here.
 
 ## Scope and evidence
 
-Source review: 2026-11-12, branch `sec/safe-html`. Paths are relative to the
+Source review: 2026-11-13, branch `sec/safe-html`. Paths are relative to the
 repo root. Line numbers were checked against the current code. Test fixtures
-are excluded from the remaining-sink inventory. This was a source review;
-no runtime security tests ran for this documentation change.
+are excluded from the remaining-sink inventory. This update includes DOM
+regression tests for patches, formulas and Markdown metadata. It does not include browser policy tests.
 
 Untrusted documents, agent output and config must stay within checked content
 boundaries. Script injection can read page content and accessible storage,
@@ -55,25 +55,45 @@ NativeController was removed as unused; a native host channel starts afresh with
 
 ### 4. Migrate icons and documents
 
-Status: Partly done — icons in `02d044bf`; formulas and document boundaries
-remain.
+Status: Partly done — icons in `02d044bf`; node patches and the bounded KaTeX
+demo are complete in the working tree. Document entry, mutation and export
+contracts remain. No commit was made for this update.
 
 Icons use checked, bounded geometry and DOM namespace calls. Registration
 stores frozen copies. Rendering checks again. Unknown or invalid icons draw
 a fixed fallback. Raw SVG strings and icon factories are removed.
 
-Remaining formula sinks:
+Completed in this update:
 
-- `packages/oneput/src/lib/oneput/shared/components/FChild.svelte:68` and
-  `packages/oneput/src/lib/oneput/types.ts:384`: remove
-  `dangerouslySetHtmlWithoutSanitising` after its caller uses a registered
-  formula widget with a reviewed output policy.
-- `apps/oneput-demo/src/lib/main/KatexDemo.ts:299`: replace raw preview HTML.
-  Check formula source and options. Keep trust disabled. Bound expansion,
-  input size and output size. The display policy removes markup that KaTeX
-  needs, so it cannot replace a formula policy.
-- `apps/oneput-demo/src/lib/main/KatexDemo.ts:37`: replace `innerHTML +=` with
-  checked node append. Do not parse old content again.
+- `packages/jsed/src/lib/ops/focusable/elementPatch.ts`: patches take a
+  caller-built `DocumentFragment`. No strings are parsed. A small presentation
+  policy checks patch attributes, new children and touched undo content before
+  writes. Snapshots are cloned nodes. Each replay inserts fresh clones.
+  Unknown attributes, URLs, inline styles and active nodes are refused.
+  Content is bounded to 10000 nodes, depth 64 and 1000000 text characters.
+  This is not the full document policy.
+- `packages/jsed/src/editor/lib/ops/PatchElement.ts`: checks the patch before
+  changing FOCUS or exiting edit mode. Callers and DOM history tests use nodes.
+- `apps/oneput-demo/src/lib/main/KatexDemo.ts`: `KatexPreview` is the named
+  formula widget. Trust is off. Source is limited to 4096 characters, output
+  to 200000, expansion to 1000 and size to 20 em. A private output store feeds
+  the one visible `unsafeKatexOutputNodes` escape hatch. Append uses nodes and
+  preserves existing page nodes. No `innerHTML +=` remains.
+- `packages/oneput/src/lib/oneput/shared/components/FChild.svelte` and
+  `packages/oneput/src/lib/oneput/types.ts`: removed the general
+  `dangerouslySetHtmlWithoutSanitising` field. The icon comment now says
+  `$effect`.
+- `packages/jsed/src/lib/convert/convert.ts:8`, `:9`, `:33`, `:40`:
+  Markdown raw HTML is off. The formula plugin has trust off and fixed
+  expansion and size limits. Template title and description are escaped.
+  Final plugin output still needs the document policy below.
+
+Remaining formula work:
+
+- `apps/oneput-demo/src/lib/main/KatexDemo.ts:65`: the one formula escape
+  hatch trusts fixed-option KaTeX output. An independent output allow-list
+  needs a reviewed rule set for its MathML, SVG and styles. Keep this visible
+  to the step 6 scan. The demo does not expose caller HTML or options.
 
 Remaining document sinks and boundaries:
 
@@ -82,12 +102,6 @@ Remaining document sinks and boundaries:
   sanitisation.
 - `packages/jsed/src/JsedDocument.ts:33`: require a checked document at entry.
   `packages/jsed/src/editor/lib/EditorState.ts:269` adds structure only.
-- `packages/jsed/src/lib/ops/focusable/elementPatch.ts:138`, `:150`: check
-  patch attributes and HTML before writes and history capture.
-- `packages/jsed/src/lib/ops/focusable/elementPatch.ts:162`, `:171`: keep
-  undo within the checked document contract. Redo uses the same unchecked
-  patch path at `:68`. Do not sanitise the whole live DOM on each keystroke;
-  preserve node identity, focus and history.
 - `packages/jsed/src/lib/ops/focusable/create.ts:11`, `:17` and
   `packages/jsed/src/lib/ops/focusable/convert.ts:14`, `:16`: check caller tag
   names and content. Bound recursive creation.
@@ -95,10 +109,9 @@ Remaining document sinks and boundaries:
   `:37`, `:42`: check supplied nodes and deep clones before insertion.
   Shell copies at `:50`, `:64` retain attributes; insertion at `:52`, `:66`
   needs the same contract.
-- `packages/jsed/src/lib/convert/convert.ts:8`, `:10`: disable raw markdown
-  HTML unless required. Check final plugin output, including formulas.
-- `packages/jsed/src/lib/convert/convert.ts:33`, `:40`, `:44`: escape
-  description and title in their own contexts. Check the exported body.
+- `packages/jsed/src/lib/convert/convert.ts:10`, `:44`: check final plugin
+  output, including formulas, and the exported body. Raw Markdown HTML and
+  metadata escaping are fixed above.
 - `packages/jsed/src/editor/lib/EditorState.ts:280`, `:282`, `:294`, `:296`:
   export clones and removes editor artifacts. This is not sanitisation.
   Define checks for saved content that will be opened again. These HTML
@@ -108,12 +121,16 @@ Remaining document sinks and boundaries:
   SVG, MathML, link, comment and resource rules. Inline CSS, images and SVG
   resources can remain. Test native/fallback parity and valid structure.
 
-Related documentation cleanup:
+Why these document items remain:
 
-- `packages/oneput/src/lib/oneput/shared/components/FChild.svelte:57`:
-  the HTML comment says the icon renders “via onMount”. Change it to
-  `$effect`, which the code uses at `:31`. No component change is part of
-  this documentation tidy.
+The current document policy preserves CSS, images, SVG and comments. It does
+not yet define resource authority or a checked-node contract. Import, paste,
+creation and export must share that contract. Applying the UI or patch policy
+to whole documents would remove supported content. Re-parsing the live root
+would also replace node identity and could break FOCUS and history. Keep these
+items in step 4 until the document rules and checked-node API are defined.
+The CLI conversion path also runs without a browser DOM; it cannot use the
+current DOM-only sanitiser as its final output check.
 
 Checked or fixed paths excluded from the remaining-sink list:
 
@@ -137,8 +154,9 @@ This is a missing entry boundary, not an additional raw HTML sink.
 ### 6. Enforce the contract
 
 Status: Partly done — refusal coverage in `49074a99`, `8bb850b1`,
-`02d044bf`, `91efbc05`; document/formula coverage, the sink scan and browser
-policy checks remain.
+`02d044bf`, `91efbc05`; patch replay, bounded demo formulas and Markdown
+metadata have DOM coverage in this working tree. Full document coverage, the
+sink scan and browser policy checks remain.
 
 Existing coverage:
 
@@ -154,10 +172,19 @@ Existing coverage:
 - Message variants:
   `packages/oneput/src/lib/oneput/shared/ui/Message.test.ts:65`.
 
+- Node patch refusal, isolated snapshots and patch → undo → redo:
+  `packages/jsed/src/lib/ops/focusable/__tests__/elementPatch.test.ts` and
+  `packages/jsed/src/editor/lib/ops/__tests__/PatchElement.test.ts`.
+- Formula preview, append identity, trust and limits:
+  `apps/oneput-demo/src/lib/main/KatexDemo.test.ts`.
+- Markdown raw HTML and metadata contexts:
+  `packages/jsed/src/lib/convert/__tests__/contentSafety.test.ts`.
+
 Remaining checks:
 
-- Add document, formula, patch → undo → redo, and valid-structure regression
-  cases for the step 4 boundaries. Agree on the main orchestration cases
+- Add full document, independent formula-policy and valid-structure regression
+  cases for the remaining step 4 boundaries. Patch → undo → redo and bounded
+  demo formula cases are covered. Agree on the main orchestration cases
   before writing tests.
 - Test refusal in a production build. Current warning tests configure
   development on/off; they do not prove a production build's DOM behaviour.
@@ -181,8 +208,7 @@ review.
 - Which document features must survive: inline CSS, images, SVG references,
   MathML, forms, comments and jsed data attributes?
 - Which resource loads and navigation authority may a document use?
-- What action grants may each declarative description receive?
-- What size limits apply to documents, formulas, SVG paths and data trees?
+- What size limits apply to documents? UI icons and demo formulas now have limits.
 
 Sanitised content is not necessarily private or visually isolated. Keep
 sanitiser dependencies and browser engines current. Source checks alone do

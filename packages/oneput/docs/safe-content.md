@@ -135,3 +135,20 @@ box). An unknown name or invalid data draws a fixed fallback: a square with a
 diagonal line. The icon API accepts geometry or registered names. It does
 not accept SVG strings or icon functions. These checks apply to UI icons; they do not check
 SVG inside editor documents.
+
+## Formula demo
+
+The KaTeX demo uses a named `KatexPreview` mount widget. There is no general
+raw HTML field in FChild. The demo compiles formulas with `trust: false`,
+`strict: 'error'`, `maxExpand: 1000` and `maxSize: 20`. It refuses source over
+4096 characters and output over 200000 characters.
+
+Only compiler output enters a private store. `unsafeKatexOutputNodes` is the
+one raw formula HTML escape hatch. It parses output from that store into a
+new fragment. Preview and insertion use these nodes. Insertion does not parse
+old page content again. KaTeX output needs MathML, SVG and inline styles, so
+it cannot use the display policy. This boundary still trusts KaTeX's output;
+it is not an independent formula sanitiser.
+
+For the remaining document and browser checks, see
+[SAFE_HTML](../../../work/backlog/SAFE_HTML.md#4-migrate-icons-and-documents).

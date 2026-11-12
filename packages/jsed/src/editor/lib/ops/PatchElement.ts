@@ -1,6 +1,7 @@
 import type { EditorState } from '../EditorState.js';
 import {
   patchElement,
+  checkElementPatch,
   redoPatchElement,
   undoPatchElement,
   type ElementPatch,
@@ -23,7 +24,8 @@ export class PatchElement implements UndoRecord {
     element: HTMLElement,
     patch: ElementPatch
   ): PatchElement | undefined {
-    if (patch.html !== undefined) {
+    if (checkElementPatch(element, patch).isErr()) return;
+    if (patch.children !== undefined) {
       if (state.isEditing()) {
         state.exitEditing();
       }
@@ -61,7 +63,7 @@ export class PatchElement implements UndoRecord {
    * Re-assert derived structure after replacing authored child markup.
    */
   private normalize(): void {
-    if (this.operation.patch.html !== undefined) {
+    if (this.operation.patch.children !== undefined) {
       normalize(this.operation.element);
     }
   }

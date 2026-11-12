@@ -4,6 +4,10 @@
 
 This codebase is new. Avoid preserving old apis or features, do not keep legacy code. Always prefer replacing with better implementations and apis. It's paramount that we get the foundations right so that future changes can be added easily and in a modular fashion.
 
+## Demo app
+
+`apps/oneput-demo` shows Oneput. It is not meant to be consumed. Track its issues here, in this package: security findings in `THREAT_MODEL.md`, and other issues in this package's docs and backlog. Do not create separate docs for the demo.
+
 ## Testing
 
 See `TESTING.md` for a high-level testing policy.
